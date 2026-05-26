@@ -6,10 +6,12 @@ A scrolling Pokémon-style world: hero → **The Founder's Quarter** → **The P
 
 ## Stack
 
-- Single static `index.html` — no build step, no dependencies
-- Pixel art rendered as inline SVG (crisp at any size)
-- Chiptune loop generated live in-browser with the Web Audio API (no audio files)
-- Press Start 2P + JetBrains Mono via Google Fonts
+- Single self-contained `index.html` — React + Babel-standalone bundled inline, no build step, no network at runtime
+- Stardew-flavored pixel art (9 building sprites) rendered as crisp inline SVG
+- Parallax scroll engine with day-to-night sky gradient, drifting stars, walking character
+- Press Start 2P + Geist Mono fonts inlined as base64 woff2
+
+A v1 (pure-HTML/CSS prototype with no React) lives at [`index-v1.html`](index-v1.html).
 
 ## Run locally
 
