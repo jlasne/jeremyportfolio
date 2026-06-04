@@ -5,3 +5,4 @@ _unbundled/
 _unbundle.js
 _rebundle.js
 _patch_template_css.js
+_patch_flybird.js

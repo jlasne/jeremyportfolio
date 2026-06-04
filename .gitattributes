@@ -1,0 +1,4 @@
+# index.html embeds the app as JSON-encoded <script> blobs. A stray CR (\r)
+# inside those JSON strings is an illegal control character and breaks the
+# in-page unpacker. Force LF so autocrlf can never corrupt it on checkout.
+index.html text eol=lf
