@@ -5,3 +5,9 @@ _unbundled/
 _unbundle.js
 _rebundle.js
 _patch_template_css.js
+_make_favicon.py
+_make_ogcap.js
+_ogcap.html
+_og_raw.png
+_desktop.png
+_orig_head.html
