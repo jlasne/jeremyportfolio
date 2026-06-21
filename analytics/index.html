@@ -361,16 +361,17 @@
   async function loadData(){
     const demo = makeData();
     try{
-      const ctrl = new AbortController(); const to = setTimeout(()=>ctrl.abort(), 6000);
+      const ctrl = new AbortController(); const to = setTimeout(()=>ctrl.abort(), 12000);
       const r = await fetch((API_BASE || "") + "/api/dashboard",
         { headers: API_TOKEN ? { "x-dashboard-token": API_TOKEN } : {}, signal: ctrl.signal });
       clearTimeout(to);
-      if(!r.ok) return demo;
+      if(!r.ok){ console.warn("[analytics] /api/dashboard HTTP", r.status, "— showing demo"); return demo; }
       const live = await r.json();
-      if(!live || live.error) return demo;
+      if(live && live._diag) console.log("[analytics] live diag:", live._diag);
+      if(!live || live.error){ console.warn("[analytics] api error — showing demo:", live && live.error); return demo; }
       STATE.live = true;
       return mergeLive(demo, live);
-    }catch(e){ return demo; }
+    }catch(e){ console.warn("[analytics] fetch failed — showing demo:", e && e.message); return demo; }
   }
 
   // Overwrite each section with live values where present; keep demo elsewhere so
