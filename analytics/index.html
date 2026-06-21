@@ -118,6 +118,10 @@
     .brand .dot svg{width:15px;height:15px;}
     .brand .sub{color:var(--faint);font-weight:500;}
     .spacer{flex:1;}
+    .boot{padding:90px 20px;text-align:center;color:var(--muted);font-size:14px;}
+    .srcbadge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--muted);
+      background:var(--panel);border:1px solid var(--line);padding:6px 10px;border-radius:999px;letter-spacing:.04em;text-transform:uppercase;}
+    .srcbadge.on{color:var(--accent-ink);background:var(--accent-soft);border-color:var(--accent-bar);}
     .live{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);
       background:var(--panel);border:1px solid var(--line);padding:6px 11px;border-radius:999px;}
     .live .pulse{width:7px;height:7px;border-radius:50%;background:var(--accent);position:relative;}
@@ -325,11 +329,71 @@
   /* ════════════════════════════════════════════════════════════════════════
      APP
      ════════════════════════════════════════════════════════════════════════ */
-  let DATA, STATE = { tab:"overview", range:90, metric:"revenue" };
+  let DATA, STATE = { tab:"overview", range:90, metric:"revenue", live:false };
 
-  function buildApp(){
-    DATA = makeData();
+  // ── Live data ───────────────────────────────────────────────────────────
+  // Served from Vercel, the page calls its own /api/dashboard (same origin) and
+  // shows real Stripe + PostHog numbers. On GitHub Pages there is no API, so the
+  // fetch 404s and we fall back to the demo dataset. To make the GitHub-Pages
+  // copy live too, set API_BASE to your Vercel URL (the API already sends CORS).
+  const API_BASE  = "";  // e.g. "https://jeremyportfolio.vercel.app"
+  const API_TOKEN = "5ed69393b7e7bccf161cd4e6c49e4fda4e621a681649e569d39dd8cbad1287d9";
+  const metricLite = (label, short, tip, fmt, series, dlt) => ({ label, short, tip, fmt, series, dlt });
+  const SRC_COLORS = ["#cc785c","#4285f4","#1d9bf0","#da552f","#7c3aed","#6f8a5b","#c08a2e","#64748b"];
+
+  async function loadData(){
+    const demo = makeData();
+    try{
+      const r = await fetch((API_BASE || "") + "/api/dashboard",
+        { headers: API_TOKEN ? { "x-dashboard-token": API_TOKEN } : {} });
+      if(!r.ok) return demo;
+      const live = await r.json();
+      if(!live || live.error) return demo;
+      STATE.live = true;
+      return mergeLive(demo, live);
+    }catch(e){ return demo; }
+  }
+
+  // Overwrite each section with live values where present; keep demo elsewhere so
+  // the page is always fully shaped (no missing-field crashes).
+  function mergeLive(demo, live){
+    const d = { ...demo };
+    if(live.online != null) d.online = live.online;
+    if(live.kpi) d.kpi = { ...demo.kpi, ...live.kpi };
+    if(live.metricsData){
+      const defs = {
+        revenue:  ["Revenue",       v=>"$"+fmtK(v), v=>fmt$(v), v=>fmt$(v)],
+        visitors: ["Visitors",      v=>fmtK(v),     fmtN,       fmtN],
+        signups:  ["Signups",       v=>fmtK(v),     fmtN,       fmtN],
+        customers:["New customers", v=>fmtK(v),     fmtN,       fmtN],
+      };
+      d.metrics = {};
+      for(const k in defs){
+        const md = live.metricsData[k], base = demo.metrics[k];
+        const series = (md && Array.isArray(md.series) && md.series.length) ? md.series : base.series;
+        const dlt = (md && typeof md.dlt === "number") ? md.dlt : base.dlt;
+        d.metrics[k] = metricLite(defs[k][0], defs[k][1], defs[k][2], defs[k][3], series, dlt);
+      }
+    }
+    for(const key of ["sources","plans","countries","recent","funnelConv","funnelOnb","features","clickmap","scroll","pages","retention"]){
+      if(Array.isArray(live[key]) && live[key].length) d[key] = adaptSection(key, live[key]);
+    }
+    return d;
+  }
+  function adaptSection(key, arr){
+    if(key === "sources") return arr.map((s,i)=>({
+      campaign:"", referrer:"", source:"", visitors:0, signups:0, customers:0, mrr:0, total:0,
+      ...s, name: s.name || s.channel || "—", channel: s.channel || s.name || "—",
+      color: s.color || { bg: SRC_COLORS[i % SRC_COLORS.length], t: String(s.name || "?").trim().charAt(0).toUpperCase() },
+    }));
+    if(key === "recent") return arr.map(r=>({ flag:"", planKey:"scan", source:"—", country:"—", when:"", ...r }));
+    return arr;
+  }
+
+  async function buildApp(){
     const app = document.getElementById("app");
+    app.innerHTML = `<div class="boot">Loading live data…</div>`;
+    DATA = await loadData();
     app.innerHTML = `
       <div class="topbar">
         <div class="brand">
@@ -337,6 +401,7 @@
           tasu.ai <span class="sub">/ analytics</span>
         </div>
         <span class="live"><span class="pulse"></span> ${DATA.online} online now</span>
+        <span class="srcbadge ${STATE.live?'on':''}">${STATE.live?'live data':'demo data'}</span>
         <div class="spacer"></div>
         <div class="seg" id="rangeSeg">
           <button data-r="7">7d</button>
