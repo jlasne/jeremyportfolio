@@ -38,7 +38,7 @@
       --bg:#f4f3ec; --panel:#ffffff; --panel-2:#faf9f4;
       --ink:#1a1813; --ink-2:#3c382f; --muted:#6f6a5d; --faint:#a39d8e;
       --line:#e9e5da; --line-2:#f1ede3;
-      --accent:#cc785c; --accent-ink:#b35c3d; --accent-soft:#f6e9e1; --accent-bar:#e7cab8;
+      --accent:#cc785c; --accent-ink:#b35c3d; --accent-soft:#f6e9e1; --accent-bar:#e7cab8; --chart-line:#4f7088;
       --up:#6f8a5b; --down:#bf5540;
       --red:#bf5540; --red-soft:#f6e3dd; --amber:#c08a2e;
       --radius:16px; --radius-sm:11px;
@@ -52,7 +52,7 @@
       --bg:#1f1e1a; --panel:#272620; --panel-2:#222017;
       --ink:#f0ede2; --ink-2:#d4cfc1; --muted:#a39d8d; --faint:#7a7466;
       --line:#38352c; --line-2:#2c2a22;
-      --accent:#d68a6c; --accent-ink:#e0a184; --accent-soft:#382519; --accent-bar:#5a3a28;
+      --accent:#d68a6c; --accent-ink:#e0a184; --accent-soft:#382519; --accent-bar:#5a3a28; --chart-line:#86a7c2;
       --up:#94ad7f; --down:#e08a72;
       --red:#e08a72; --red-soft:#321d17; --amber:#e0a85a;
       --shadow:0 1px 2px rgba(0,0,0,.35); --shadow-pop:0 14px 36px rgba(0,0,0,.55);
@@ -176,6 +176,19 @@
     .mtab .ml{font-size:12px;color:var(--muted);font-weight:500;}
     .mtab .mv{font-size:21px;font-weight:680;letter-spacing:-.02em;margin-top:3px;}
     .mtab .md{font-size:11.5px;font-weight:600;margin-top:2px;}
+    .kpibar .mswitch{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;}
+    .mtab--static{cursor:default;} .mtab--static:hover{background:transparent;}
+    .onlinedot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--up);margin-left:2px;vertical-align:middle;}
+    .issues-list{padding:8px 8px 10px;display:flex;flex-direction:column;gap:2px;}
+    .issue{display:flex;gap:12px;align-items:flex-start;padding:11px 12px;border-radius:10px;}
+    .issue:hover{background:var(--panel-2);}
+    .issue-ic{width:24px;height:24px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:7px;font-size:13px;font-weight:700;line-height:1;}
+    .issue--warn .issue-ic{background:var(--red-soft);color:var(--down);}
+    .issue--info .issue-ic{background:var(--accent-soft);color:var(--accent-ink);}
+    .issue--good .issue-ic{background:#e8efe2;color:var(--up);}
+    html[data-theme="dark"] .issue--good .issue-ic{background:#1e2a18;}
+    .issue-t{font-size:13px;font-weight:600;color:var(--ink);}
+    .issue-d{font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.5;}
     .chart-wrap{position:relative;padding:14px 8px 4px;}
     .chart-svg{display:block;width:100%;height:auto;overflow:visible;}
     .tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:11.5px;
@@ -318,6 +331,7 @@
   const fmt$  = n => "$"+Math.round(n).toLocaleString("en-US");
   const fmt$2 = n => "$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
   const fmtK  = n => { n=Math.round(n); return Math.abs(n)>=1000 ? (n/1000).toFixed(Math.abs(n)>=10000?0:1).replace(/\.0$/,"")+"k" : ""+n; };
+  const fmtDur = s => { s=Math.round(s); return Math.floor(s/60)+"m "+String(s%60).padStart(2,"0")+"s"; };
   const pct   = n => (n>=10?n.toFixed(0):n.toFixed(1))+"%";
   const esc   = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   function deltaHTML(v){
@@ -329,7 +343,7 @@
   /* ════════════════════════════════════════════════════════════════════════
      APP
      ════════════════════════════════════════════════════════════════════════ */
-  let DATA, STATE = { tab:"overview", range:90, metric:"revenue", live:false };
+  let DATA, STATE = { tab:"overview", range:90, metric:"visitors", live:false };
 
   // ── Live data ───────────────────────────────────────────────────────────
   // Served from Vercel, the page calls its own /api/dashboard (same origin) and
@@ -344,8 +358,10 @@
   async function loadData(){
     const demo = makeData();
     try{
+      const ctrl = new AbortController(); const to = setTimeout(()=>ctrl.abort(), 6000);
       const r = await fetch((API_BASE || "") + "/api/dashboard",
-        { headers: API_TOKEN ? { "x-dashboard-token": API_TOKEN } : {} });
+        { headers: API_TOKEN ? { "x-dashboard-token": API_TOKEN } : {}, signal: ctrl.signal });
+      clearTimeout(to);
       if(!r.ok) return demo;
       const live = await r.json();
       if(!live || live.error) return demo;
@@ -361,19 +377,14 @@
     if(live.online != null) d.online = live.online;
     if(live.kpi) d.kpi = { ...demo.kpi, ...live.kpi };
     if(live.metricsData){
-      const defs = {
-        revenue:  ["Revenue",       v=>"$"+fmtK(v), v=>fmt$(v), v=>fmt$(v)],
-        visitors: ["Visitors",      v=>fmtK(v),     fmtN,       fmtN],
-        signups:  ["Signups",       v=>fmtK(v),     fmtN,       fmtN],
-        customers:["New customers", v=>fmtK(v),     fmtN,       fmtN],
-      };
-      d.metrics = {};
-      for(const k in defs){
-        const md = live.metricsData[k], base = demo.metrics[k];
-        const series = (md && Array.isArray(md.series) && md.series.length) ? md.series : base.series;
-        const dlt = (md && typeof md.dlt === "number") ? md.dlt : base.dlt;
-        d.metrics[k] = metricLite(defs[k][0], defs[k][1], defs[k][2], defs[k][3], series, dlt);
-      }
+      d.metrics = { ...demo.metrics };
+      const mk=(label,fmt,short,tip,series,dlt)=>({label,series,dlt,goodDown:false,fmt,short,tip,agg:()=>sumRange(series)});
+      const mv=live.metricsData.visitors;
+      if(mv && Array.isArray(mv.series) && mv.series.length)
+        d.metrics.visitors = mk("Visitors", fmtN, v=>fmtK(v), fmtN, mv.series, typeof mv.dlt==="number"?mv.dlt:demo.metrics.visitors.dlt);
+      const mr=live.metricsData.revenue;
+      if(mr && Array.isArray(mr.series) && mr.series.length)
+        d.metrics.revenue = mk("Revenue", v=>fmt$(v), v=>"$"+fmtK(v), v=>fmt$(v), mr.series, typeof mr.dlt==="number"?mr.dlt:demo.metrics.revenue.dlt);
     }
     for(const key of ["sources","plans","countries","recent","funnelConv","funnelOnb","features","clickmap","scroll","pages","retention"]){
       if(Array.isArray(live[key]) && live[key].length) d[key] = adaptSection(key, live[key]);
@@ -490,30 +501,16 @@
      OVERVIEW
      ════════════════════════════════════════════════════════════════════════ */
   function viewOverview(){
-    const k=DATA.kpi;
-    const kpiCards = [
-      ["MRR", fmt$(k.mrr), k.mrrDelta],
-      ["ARR", fmt$(k.mrr*12), k.mrrDelta],
-      ["Active subscribers", fmtN(k.subs), k.subsDelta],
-      ["ARPU", fmt$2(k.mrr/k.subs), k.arpuDelta],
-      ["New MRR · 30d", "+"+fmt$(k.newMrr), null,"up"],
-      ["Churned MRR · 30d", "-"+fmt$(k.churnMrr), null,"down"],
-      ["Scan revenue · 30d", fmt$(k.scanRev30), k.scanDelta],
-      ["Trial → paid", pct(k.trial2paid), k.trialDelta],
-    ].map(([l,v,d,force])=>`
-      <div class="card kpi">
-        <div class="label">${l}</div>
-        <div class="val tnum">${v}</div>
-        ${force==="up"?`<span class="delta up">▲ new</span>`:force==="down"?`<span class="delta down">▼ lost</span>`:(d!=null?deltaHTML(d):"")}
-      </div>`).join("");
-
     return `
-      <div class="grid kpis">${kpiCards}</div>
+      <div class="card kpibar"><div class="mswitch" id="mswitch">${metricTabs()}</div></div>
 
       <div class="card" style="margin-top:14px">
-        <div class="mswitch" id="mswitch">${metricTabs()}</div>
         <div class="chart-wrap"><div id="mainChart"></div></div>
       </div>
+
+      ${issuesPanel()}
+
+      <div class="grid kpis" style="margin-top:14px">${saasKpis()}</div>
 
       <div class="grid cols-2" style="margin-top:14px">
         <div class="card">
@@ -543,19 +540,66 @@
       </div>`;
   }
 
+  function saasKpis(){
+    const k=DATA.kpi;
+    return [
+      ["MRR", fmt$(k.mrr), k.mrrDelta],
+      ["ARR", fmt$(k.mrr*12), k.mrrDelta],
+      ["Active subscribers", fmtN(k.subs), k.subsDelta],
+      ["ARPU", fmt$2(k.subs?k.mrr/k.subs:0), k.arpuDelta],
+      ["New MRR · 30d", "+"+fmt$(k.newMrr), null,"up"],
+      ["Churned MRR · 30d", "-"+fmt$(k.churnMrr), null,"down"],
+      ["Scan revenue · 30d", fmt$(k.scanRev30), k.scanDelta],
+      ["Trial → paid", pct(k.trial2paid), k.trialDelta],
+    ].map(([l,v,d,force])=>`
+      <div class="card kpi">
+        <div class="label">${l}</div>
+        <div class="val tnum">${v}</div>
+        ${force==="up"?`<span class="delta up">▲ new</span>`:force==="down"?`<span class="delta down">▼ lost</span>`:(d!=null?deltaHTML(d):"")}
+      </div>`).join("");
+  }
+
+  function computeIssues(){
+    const out=[], m=DATA.metrics;
+    const b=m.bounce.agg(); if(b>=72) out.push(["warn",`High bounce rate — ${Math.round(b)}%`,"Most visitors leave without a second pageview. Tighten the hero message and load speed."]);
+    if(m.conversion.dlt<0) out.push(["warn",`Conversion down ${Math.abs(m.conversion.dlt).toFixed(1)}% vs prev period`,"Fewer visitors are turning into paid — check the paywall and checkout steps."]);
+    const f=DATA.funnelConv||[]; let worst=null;
+    for(let i=1;i<f.length;i++){ const drop=f[i-1].count?1-f[i].count/f[i-1].count:0; if(!worst||drop>worst.d) worst={a:f[i-1].name,b:f[i].name,d:drop}; }
+    if(worst) out.push(["info",`Biggest drop-off: ${worst.a} → ${worst.b}`,`${(worst.d*100).toFixed(0)}% of users fall off at this step — the highest-leverage place to fix.`]);
+    if(m.revenue.dlt<0) out.push(["warn",`Revenue down ${Math.abs(m.revenue.dlt).toFixed(1)}%`,"Revenue is trending down across the selected window."]);
+    else out.push(["good",`Revenue up ${m.revenue.dlt.toFixed(1)}%`,"Revenue is trending up across the selected window."]);
+    const top=(DATA.sources||[]).slice().sort((a,b)=>b.mrr-a.mrr)[0];
+    if(top) out.push(["good",`${top.name} is your top revenue source`,`${fmt$(top.mrr)} MRR from ${fmtN(top.customers)} customers.`]);
+    return out.slice(0,4);
+  }
+  function issuesPanel(){
+    const ic={warn:"!",info:"i",good:"✓"};
+    return `<div class="card" style="margin-top:14px">
+      <div class="card-h"><h3>Needs attention</h3><span class="hint">auto-detected</span></div>
+      <div class="issues-list">${computeIssues().map(([lvl,t,d])=>`
+        <div class="issue issue--${lvl}"><span class="issue-ic">${ic[lvl]}</span>
+        <div><div class="issue-t">${esc(t)}</div><div class="issue-d">${esc(d)}</div></div></div>`).join("")}</div>
+    </div>`;
+  }
+
   function metricTabs(){
-    const ms=DATA.metrics;
-    return Object.entries(ms).map(([key,m])=>`
-      <button class="mtab ${key===STATE.metric?"on":""}" data-m="${key}">
+    return Object.entries(DATA.metrics).map(([key,m])=>{
+      const good = m.goodDown ? m.dlt<0 : m.dlt>0;
+      const arrow = m.dlt===0 ? "—" : (m.dlt>0 ? "▲" : "▼");
+      return `<button class="mtab ${key===STATE.metric?"on":""}" data-m="${key}">
         <div class="ml">${m.label}</div>
-        <div class="mv tnum">${m.fmt(sumRange(m.series))}</div>
-        <div class="md ${m.dlt>=0?"up":"down"}">${m.dlt>=0?"▲":"▼"} ${Math.abs(m.dlt).toFixed(1)}% vs prev</div>
-      </button>`).join("");
+        <div class="mv tnum">${m.fmt(m.agg())}</div>
+        <div class="md ${m.dlt===0?"flat":good?"up":"down"}">${arrow} ${Math.abs(m.dlt).toFixed(0)}%</div>
+      </button>`;
+    }).join("") + `<div class="mtab mtab--static">
+        <div class="ml">Online <span class="onlinedot"></span></div>
+        <div class="mv tnum">${DATA.online}</div>
+        <div class="md flat">now</div></div>`;
   }
   function wireMetricTabs(){
     const sw=document.getElementById("mswitch"); if(!sw) return;
     sw.addEventListener("click", e=>{
-      const b=e.target.closest(".mtab"); if(!b) return;
+      const b=e.target.closest(".mtab"); if(!b||!b.dataset.m) return;
       STATE.metric=b.dataset.m;
       [...sw.children].forEach(c=>c.classList.toggle("on",c===b));
       drawMain();
@@ -778,65 +822,63 @@
   function drawAllCharts(){ if(STATE.tab==="overview") drawMain(); }
   function drawMain(){
     const host=document.getElementById("mainChart"); if(!host) return;
-    const m=DATA.metrics[STATE.metric];
-    drawArea(host, sliceRange(m.series), m);
+    const m=DATA.metrics[STATE.metric]||DATA.metrics.visitors;
+    drawCombo(host, sliceRange(m.series), sliceRange(DATA.metrics.revenue.series), m);
   }
 
-  function drawArea(host, data, meta){
-    const W=Math.max(host.clientWidth||host.parentElement.clientWidth||720, 320), H=270;
-    const pad={l:6,r:48,t:18,b:26};
-    const iw=W-pad.l-pad.r, ih=H-pad.t-pad.b;
-    const vals=data.map(d=>d.v);
-    let max=Math.max(...vals), min=Math.min(...vals,0);
-    max = max + (max-min)*0.12 || 1;
-    const X=i=>pad.l + (data.length<2?iw/2:i*iw/(data.length-1));
-    const Y=v=>pad.t + ih - (v-min)/(max-min||1)*ih;
-
-    const line = data.map((d,i)=>`${i?"L":"M"}${X(i).toFixed(1)} ${Y(d.v).toFixed(1)}`).join(" ");
-    const area = `${line} L${X(data.length-1).toFixed(1)} ${(pad.t+ih).toFixed(1)} L${X(0).toFixed(1)} ${(pad.t+ih).toFixed(1)} Z`;
-
-    // y gridlines (4)
-    let grid="",ylab="";
-    for(let g=0;g<=3;g++){
-      const v=min+(max-min)*g/3, y=Y(v);
-      grid+=`<line x1="${pad.l}" y1="${y.toFixed(1)}" x2="${pad.l+iw}" y2="${y.toFixed(1)}" stroke="var(--line-2)" stroke-width="1"/>`;
-      ylab+=`<text x="${pad.l+iw+8}" y="${(y+4).toFixed(1)}" fill="var(--faint)" font-size="11">${meta.short(v)}</text>`;
+  // Catmull-Rom → cubic bezier for a smooth line.
+  function smoothPath(pts){
+    if(pts.length<2) return pts.length?`M${pts[0].x} ${pts[0].y}`:"";
+    let d=`M${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+    for(let i=0;i<pts.length-1;i++){
+      const p0=pts[i-1]||pts[i], p1=pts[i], p2=pts[i+1], p3=pts[i+2]||p2;
+      const c1x=p1.x+(p2.x-p0.x)/6, c1y=p1.y+(p2.y-p0.y)/6;
+      const c2x=p2.x-(p3.x-p1.x)/6, c2y=p2.y-(p3.y-p1.y)/6;
+      d+=` C${c1x.toFixed(1)} ${c1y.toFixed(1)}, ${c2x.toFixed(1)} ${c2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
     }
-    // x labels (~5)
-    let xlab="";const step=Math.max(1,Math.floor((data.length-1)/4));
-    for(let i=0;i<data.length;i+=step){
-      xlab+=`<text x="${X(i).toFixed(1)}" y="${H-6}" fill="var(--faint)" font-size="11" text-anchor="middle">${data[i].d}</text>`;
+    return d;
+  }
+
+  // Datafast-style combo: revenue bars (right $ axis) + smooth metric line (left axis).
+  function drawCombo(host, lineData, revData, meta){
+    const W=Math.max(host.clientWidth||host.parentElement.clientWidth||720,320), H=300;
+    const pad={l:50,r:54,t:18,b:26}, iw=W-pad.l-pad.r, ih=H-pad.t-pad.b, n=lineData.length;
+    let lmax=Math.max.apply(null,lineData.map(d=>d.v).concat(1)); lmax+=lmax*0.15;
+    let rmax=Math.max.apply(null,revData.map(d=>d.v).concat(1)); rmax+=rmax*0.15;
+    const X=i=> pad.l + (n<2?iw/2:i*iw/(n-1));
+    const Yl=v=> pad.t+ih-(v/lmax)*ih, Yr=v=> pad.t+ih-(v/rmax)*ih;
+    const bw=Math.max(2, iw/n*0.55);
+    let bars=""; revData.forEach((d,i)=>{ const x=X(i)-bw/2, y=Yr(d.v); bars+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(0,pad.t+ih-y).toFixed(1)}" rx="2" fill="var(--accent)" opacity="0.8"/>`; });
+    const lp=smoothPath(lineData.map((d,i)=>({x:X(i),y:Yl(d.v)})));
+    let grid="",lyl="",ryl="";
+    for(let g=0;g<=3;g++){ const t=g/3, y=pad.t+ih-t*ih;
+      grid+=`<line x1="${pad.l}" y1="${y.toFixed(1)}" x2="${(pad.l+iw).toFixed(1)}" y2="${y.toFixed(1)}" stroke="var(--line-2)" stroke-width="1"/>`;
+      lyl+=`<text x="${pad.l-8}" y="${(y+4).toFixed(1)}" fill="var(--faint)" font-size="11" text-anchor="end">${meta.short(lmax*t)}</text>`;
+      ryl+=`<text x="${(pad.l+iw+8).toFixed(1)}" y="${(y+4).toFixed(1)}" fill="var(--faint)" font-size="11">$${fmtK(rmax*t)}</text>`;
     }
-    const gid="grad"+meta.label.replace(/\W/g,"");
+    let xlab="";const step=Math.max(1,Math.floor((n-1)/5));
+    for(let i=0;i<n;i+=step) xlab+=`<text x="${X(i).toFixed(1)}" y="${H-6}" fill="var(--faint)" font-size="11" text-anchor="middle">${lineData[i].d}</text>`;
     host.innerHTML=`
       <svg class="chart-svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">
-        <defs><linearGradient id="${gid}" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0" stop-color="var(--accent)" stop-opacity="0.22"/>
-          <stop offset="1" stop-color="var(--accent)" stop-opacity="0"/>
-        </linearGradient></defs>
-        ${grid}
-        <path d="${area}" fill="url(#${gid})"/>
-        <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
-        ${ylab}${xlab}
+        ${grid}${bars}
+        <path d="${lp}" fill="none" stroke="var(--chart-line)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+        ${lyl}${ryl}${xlab}
         <g id="hoverG" style="opacity:0">
-          <line id="hoverLine" y1="${pad.t}" y2="${pad.t+ih}" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 3"/>
-          <circle id="hoverDot" r="4.5" fill="var(--accent)" stroke="var(--panel)" stroke-width="2.5"/>
+          <line id="hoverLine" y1="${pad.t}" y2="${pad.t+ih}" stroke="var(--chart-line)" stroke-width="1" stroke-dasharray="3 3"/>
+          <circle id="hoverDot" r="4.5" fill="var(--chart-line)" stroke="var(--panel)" stroke-width="2.5"/>
         </g>
         <rect id="hoverHit" x="0" y="0" width="${W}" height="${H}" fill="transparent"/>
       </svg>
       <div class="tip" id="tip"></div>`;
-
-    // hover
     const svg=host.querySelector("svg"), hit=host.querySelector("#hoverHit");
     const g=host.querySelector("#hoverG"), ln=host.querySelector("#hoverLine"), dot=host.querySelector("#hoverDot"), tip=host.querySelector("#tip");
     hit.addEventListener("mousemove",ev=>{
-      const r=svg.getBoundingClientRect();
-      const mx=(ev.clientX-r.left)/r.width*W;
-      let i=Math.round((mx-pad.l)/(iw/(data.length-1))); i=Math.max(0,Math.min(data.length-1,i));
-      const x=X(i),y=Y(data[i].v);
+      const r=svg.getBoundingClientRect(); const mx=(ev.clientX-r.left)/r.width*W;
+      let i=Math.round((mx-pad.l)/(iw/(n-1))); i=Math.max(0,Math.min(n-1,i));
+      const x=X(i),y=Yl(lineData[i].v);
       g.style.opacity=1; ln.setAttribute("x1",x); ln.setAttribute("x2",x); dot.setAttribute("cx",x); dot.setAttribute("cy",y);
       tip.style.opacity=1; tip.style.left=(x/W*r.width)+"px"; tip.style.top=(y/H*r.height)+"px";
-      tip.innerHTML=`<b>${meta.tip(data[i].v)}</b><br>${data[i].full||data[i].d}`;
+      tip.innerHTML=`<b>${meta.tip(lineData[i].v)}</b> · $${fmtN(revData[i].v)}<br>${lineData[i].full||lineData[i].d}`;
     });
     hit.addEventListener("mouseleave",()=>{ g.style.opacity=0; tip.style.opacity=0; });
   }
@@ -874,11 +916,16 @@
     const mrr=sources.reduce((a,s)=>a+s.mrr,0);          // 4630
     const subs=sources.reduce((a,s)=>a+s.customers,0);   // 92
 
-    const metric=(label,short,tip,fmt,series,dlt)=>({label,short,tip,fmt,series,dlt});
     const revSeries=series(95,1.7,.5,.35);
     const visSeries=series(380,3.2,.45,.4);
-    const sigSeries=series(14,.18,.7,.45);
     const cusSeries=series(1.4,.03,1.3,.3);
+    const bounceSeries=series(83,0.01,.05).map(p=>({...p,v:Math.max(60,Math.min(94,p.v))}));
+    const sessSeries=series(132,0.12,.22);
+    const per=(a,b,k)=>a.map((p,i)=>({d:p.d,full:p.full,v: b[i].v ? p.v/b[i].v*k : 0}));
+    const convSeries=per(cusSeries,visSeries,100);
+    const rpvSeries=per(revSeries,visSeries,1);
+    const sum=s=>s.reduce((a,b)=>a+b.v,0), avg=s=>s.length?sum(s)/s.length:0;
+    const M=(label,sr,dlt,goodDown,fmt,short,tip,agg)=>({label,series:sr,dlt,goodDown,fmt,short,tip,agg});
 
     return {
       online: 9 + Math.floor(rnd()*14),
@@ -888,10 +935,12 @@
         newMrr:640, churnMrr:180, scanRev30:1521, trial2paid:24,
       },
       metrics:{
-        revenue:  metric("Revenue",       v=>"$"+fmtK(v), v=>fmt$(v), v=>fmt$(v), revSeries, 14.2),
-        visitors: metric("Visitors",      v=>fmtK(v),     fmtN,       fmtN,       visSeries,  9.6),
-        signups:  metric("Signups",       v=>fmtK(v),     fmtN,       fmtN,       sigSeries, 11.3),
-        customers:metric("New customers", v=>fmtK(v),     fmtN,       fmtN,       cusSeries,  5.8),
+        visitors:     M("Visitors", visSeries, 9.6, false, fmtN, v=>fmtK(v), fmtN, ()=>sum(sliceRange(visSeries))),
+        revenue:      M("Revenue", revSeries, 14.2, false, v=>fmt$(v), v=>"$"+fmtK(v), v=>fmt$(v), ()=>sum(sliceRange(revSeries))),
+        conversion:   M("Conversion rate", convSeries, -1.4, false, v=>v.toFixed(2)+"%", v=>v.toFixed(1)+"%", v=>v.toFixed(2)+"%", ()=>{const vv=sum(sliceRange(visSeries));return vv?sum(sliceRange(cusSeries))/vv*100:0;}),
+        revpervisitor:M("Revenue / visitor", rpvSeries, 6.1, false, v=>fmt$2(v), v=>"$"+v.toFixed(1), v=>fmt$2(v), ()=>{const vv=sum(sliceRange(visSeries));return vv?sum(sliceRange(revSeries))/vv:0;}),
+        bounce:       M("Bounce rate", bounceSeries, -3.2, true, v=>Math.round(v)+"%", v=>Math.round(v)+"%", v=>Math.round(v)+"%", ()=>avg(sliceRange(bounceSeries))),
+        session:      M("Session time", sessSeries, 4.3, false, fmtDur, fmtDur, fmtDur, ()=>avg(sliceRange(sessSeries))),
       },
       sources,
       plans:[
