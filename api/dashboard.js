@@ -141,24 +141,26 @@ async function build() {
   const axis90 = dayAxis(90);
   const since90 = Math.floor((Date.now() - 90 * MS_DAY) / 1000);
 
+  const errs = {};
+  const run = (name, fn) => fn().then((v) => v, (e) => { errs[name] = String((e && e.message) || e).slice(0, 200); return null; });
+
   const [subs, charges, vis, sig, chan, sigChan, feat, clicks, pgs, sd, fc, fo, on] = await Promise.all([
-    safe(() => stripeAll('subscriptions?status=active&expand[]=data.items.data.price')),
-    safe(() => stripeAll('charges?created[gte]=' + since90, 25)),
-    safe(() => hogql("SELECT toDate(timestamp) AS d, uniq(person_id) FROM events WHERE event='$pageview' AND timestamp > now() - INTERVAL 90 DAY GROUP BY d ORDER BY d")),
-    safe(() => hogql("SELECT toDate(timestamp) AS d, uniq(person_id) FROM events WHERE event='signed_in' AND timestamp > now() - INTERVAL 90 DAY GROUP BY d ORDER BY d")),
-    safe(() => hogql("SELECT properties.$channel_type, uniq(person_id), count() FROM events WHERE event='$pageview' AND timestamp > now() - INTERVAL 30 DAY GROUP BY 1 ORDER BY 2 DESC LIMIT 12")),
-    safe(() => hogql("SELECT person.properties.$initial_channel_type, uniq(person_id) FROM events WHERE event='signed_in' AND timestamp > now() - INTERVAL 90 DAY GROUP BY 1 ORDER BY 2 DESC LIMIT 20")),
-    safe(() => hogql("SELECT event, count(), uniq(person_id) FROM events WHERE event IN ('smartlink_created','issue_viewed','issue_fix_clicked','scan_completed','settings_updated') AND timestamp > now() - INTERVAL 30 DAY GROUP BY event ORDER BY 2 DESC")),
-    safe(() => hogql("SELECT properties.$pathname, properties.$el_text, count() FROM events WHERE event='$autocapture' AND properties.$event_type='click' AND timestamp > now() - INTERVAL 7 DAY GROUP BY 1,2 HAVING count() > 2 ORDER BY 3 DESC LIMIT 12")),
-    safe(() => hogql("SELECT properties.$pathname, count(), uniq(person_id) FROM events WHERE event='$pageview' AND timestamp > now() - INTERVAL 30 DAY GROUP BY 1 ORDER BY 2 DESC LIMIT 8")),
-    safe(() => hogql("SELECT properties.depth, uniq(person_id) FROM events WHERE event='scroll_depth_reached' AND timestamp > now() - INTERVAL 30 DAY GROUP BY 1 ORDER BY 1")),
-    safe(() => funnel(['hero_cta_clicked', 'signed_in', 'paywall_viewed', 'checkout_started', 'checkout_completed'], 30)),
-    safe(() => funnel(['onboarding_started', 'app_added', 'paywall_viewed', 'checkout_completed', 'onboarding_completed'], 30)),
-    safe(() => hogql("SELECT uniq(person_id) FROM events WHERE timestamp > now() - INTERVAL 5 MINUTE")),
+    run('subscriptions', () => stripeAll('subscriptions?status=active&expand[]=data.items.data.price')),
+    run('charges', () => stripeAll('charges?created[gte]=' + since90, 25)),
+    run('visitors', () => hogql("SELECT toDate(timestamp) AS d, uniq(person_id) FROM events WHERE event='$pageview' AND timestamp > now() - INTERVAL 90 DAY GROUP BY d ORDER BY d")),
+    run('signups', () => hogql("SELECT toDate(timestamp) AS d, uniq(person_id) FROM events WHERE event='signed_in' AND timestamp > now() - INTERVAL 90 DAY GROUP BY d ORDER BY d")),
+    run('channels', () => hogql("SELECT properties.$channel_type, uniq(person_id), count() FROM events WHERE event='$pageview' AND timestamp > now() - INTERVAL 30 DAY GROUP BY 1 ORDER BY 2 DESC LIMIT 12")),
+    run('signupsByChannel', () => hogql("SELECT person.properties.$initial_channel_type, uniq(person_id) FROM events WHERE event='signed_in' AND timestamp > now() - INTERVAL 90 DAY GROUP BY 1 ORDER BY 2 DESC LIMIT 20")),
+    run('features', () => hogql("SELECT event, count(), uniq(person_id) FROM events WHERE event IN ('smartlink_created','issue_viewed','issue_fix_clicked','scan_completed','settings_updated') AND timestamp > now() - INTERVAL 30 DAY GROUP BY event ORDER BY 2 DESC")),
+    run('clickmap', () => hogql("SELECT properties.$pathname, properties.$el_text, count() FROM events WHERE event='$autocapture' AND properties.$event_type='click' AND timestamp > now() - INTERVAL 7 DAY GROUP BY 1,2 HAVING count() > 2 ORDER BY 3 DESC LIMIT 12")),
+    run('pages', () => hogql("SELECT properties.$pathname, count(), uniq(person_id) FROM events WHERE event='$pageview' AND timestamp > now() - INTERVAL 30 DAY GROUP BY 1 ORDER BY 2 DESC LIMIT 8")),
+    run('scroll', () => hogql("SELECT properties.depth, uniq(person_id) FROM events WHERE event='scroll_depth_reached' AND timestamp > now() - INTERVAL 30 DAY GROUP BY 1 ORDER BY 1")),
+    run('funnelConv', () => funnel(['hero_cta_clicked', 'signed_in', 'paywall_viewed', 'checkout_started', 'checkout_completed'], 30)),
+    run('funnelOnb', () => funnel(['onboarding_started', 'app_added', 'paywall_viewed', 'checkout_completed', 'onboarding_completed'], 30)),
+    run('online', () => hogql("SELECT uniq(person_id) FROM events WHERE timestamp > now() - INTERVAL 5 MINUTE")),
   ]);
-  Object.assign(D, { subscriptions: tag(subs), charges: tag(charges), visitors: tag(vis), signups: tag(sig),
-    channels: tag(chan), features: tag(feat), clickmap: tag(clicks), pages: tag(pgs), scroll: tag(sd),
-    funnelConv: tag(fc), funnelOnb: tag(fo), online: tag(on) });
+  const vals = { subscriptions: subs, charges, visitors: vis, signups: sig, channels: chan, signupsByChannel: sigChan, features: feat, clickmap: clicks, pages: pgs, scroll: sd, funnelConv: fc, funnelOnb: fo, online: on };
+  for (const k in vals) D[k] = errs[k] ? ('ERR: ' + errs[k]) : tag(vals[k]);
 
   const S = subs || [];
   const mrr = S.reduce((a, s) => a + mrrOf(s), 0);
@@ -201,7 +203,7 @@ async function build() {
   if (on && on[0]) out.online = Number(on[0][0]) || 0;
 
   // The headline join: Stripe subs → convexUserId → PostHog $initial_*
-  const sources = await safe(async () => {
+  const sources = await run('sources', async () => {
     const ids = S.map((s) => (s.metadata || {}).convexUserId).filter(Boolean).slice(0, 200);
     const byId = {};
     if (ids.length) {
@@ -220,7 +222,7 @@ async function build() {
     const sigMap = {}; (sigChan || []).forEach((r) => (sigMap[r[0]] = Number(r[1]) || 0));
     return Object.values(agg).map((s) => ({ ...s, visitors: visMap[s.channel] || 0, signups: sigMap[s.channel] || 0, mrr: Math.round(s.mrr), total: Math.round(s.mrr * 12) })).sort((a, b) => b.mrr - a.mrr);
   });
-  D.sources = tag(sources);
+  D.sources = errs.sources ? ('ERR: ' + errs.sources) : tag(sources);
   if (sources && sources.length) out.sources = sources;
 
   // If literally nothing came back, tell the page to stay on demo.
