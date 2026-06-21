@@ -7,7 +7,7 @@
 
   <!-- This page is intentionally private: not linked from the site, and not indexed. -->
   <meta name="robots" content="noindex, nofollow">
-  <meta name="theme-color" content="#0b0f17">
+  <meta name="theme-color" content="#f4f3ec">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="icon" href="../favicon.ico" sizes="any">
 
@@ -35,24 +35,27 @@
   <style>
     *,*::before,*::after { box-sizing: border-box; }
     :root{
-      --bg:#f5f6f8; --panel:#ffffff; --panel-2:#fafbfc;
-      --ink:#0f1729; --ink-2:#334155; --muted:#64748b; --faint:#94a3b8;
-      --line:#e8eaef; --line-2:#eef0f4;
-      --accent:#16a34a; --accent-ink:#15803d; --accent-soft:#e8f7ee; --accent-bar:#bbe9cb;
-      --red:#e1483c; --red-soft:#fdeceb; --amber:#d97706;
+      --bg:#f4f3ec; --panel:#ffffff; --panel-2:#faf9f4;
+      --ink:#1a1813; --ink-2:#3c382f; --muted:#6f6a5d; --faint:#a39d8e;
+      --line:#e9e5da; --line-2:#f1ede3;
+      --accent:#cc785c; --accent-ink:#b35c3d; --accent-soft:#f6e9e1; --accent-bar:#e7cab8;
+      --up:#6f8a5b; --down:#bf5540;
+      --red:#bf5540; --red-soft:#f6e3dd; --amber:#c08a2e;
       --radius:16px; --radius-sm:11px;
-      --shadow:0 1px 2px rgba(16,24,40,.04), 0 1px 3px rgba(16,24,40,.05);
-      --shadow-pop:0 8px 28px rgba(16,24,40,.12);
+      --shadow:0 1px 2px rgba(60,50,30,.05), 0 1px 3px rgba(60,50,30,.06);
+      --shadow-pop:0 10px 30px rgba(60,45,25,.14);
       --font:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      --serif:"Tiempos Text",ui-serif,Georgia,Cambria,"Times New Roman",serif;
       --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
     }
     html[data-theme="dark"]{
-      --bg:#0a0e16; --panel:#111824; --panel-2:#0e151f;
-      --ink:#e8eef6; --ink-2:#c2ccda; --muted:#8a97a8; --faint:#5c6b7e;
-      --line:#1d2733; --line-2:#19222e;
-      --accent:#27c768; --accent-ink:#4ade80; --accent-soft:#11251a; --accent-bar:#1c4a31;
-      --red:#f0635a; --red-soft:#2a1614; --amber:#f0a020;
-      --shadow:0 1px 2px rgba(0,0,0,.3); --shadow-pop:0 12px 34px rgba(0,0,0,.5);
+      --bg:#1f1e1a; --panel:#272620; --panel-2:#222017;
+      --ink:#f0ede2; --ink-2:#d4cfc1; --muted:#a39d8d; --faint:#7a7466;
+      --line:#38352c; --line-2:#2c2a22;
+      --accent:#d68a6c; --accent-ink:#e0a184; --accent-soft:#382519; --accent-bar:#5a3a28;
+      --up:#94ad7f; --down:#e08a72;
+      --red:#e08a72; --red-soft:#321d17; --amber:#e0a85a;
+      --shadow:0 1px 2px rgba(0,0,0,.35); --shadow-pop:0 14px 36px rgba(0,0,0,.55);
     }
     html,body{margin:0;padding:0;}
     body{
@@ -70,7 +73,7 @@
       position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center;
       padding:24px;
       background:
-        radial-gradient(1100px 560px at 50% -8%, rgba(22,163,74,.10), transparent 60%),
+        radial-gradient(1100px 560px at 50% -8%, rgba(204,120,92,.12), transparent 60%),
         var(--bg);
     }
     .gate-card{
@@ -80,12 +83,12 @@
     }
     .gate-logo{
       width:46px;height:46px;border-radius:13px;margin:0 auto 16px;
-      background:linear-gradient(150deg,var(--accent),#0e8f4f);
+      background:linear-gradient(150deg,var(--accent),var(--accent-ink));
       display:flex;align-items:center;justify-content:center;color:#fff;
-      box-shadow:0 6px 16px rgba(22,163,74,.32);
+      box-shadow:0 6px 16px rgba(204,120,92,.32);
     }
     .gate-logo svg{width:24px;height:24px;}
-    .gate-card h1{font-size:18px;margin:0 0 4px;letter-spacing:-.01em;}
+    .gate-card h1{font-family:var(--serif);font-size:21px;font-weight:600;margin:0 0 4px;letter-spacing:-.01em;}
     .gate-card p{color:var(--muted);font-size:13px;margin:0 0 20px;}
     .gate-form{display:flex;flex-direction:column;gap:10px;}
     .gate-input{
@@ -109,9 +112,9 @@
     .topbar{
       display:flex;align-items:center;gap:14px;padding:16px 2px 14px;flex-wrap:wrap;
     }
-    .brand{display:flex;align-items:center;gap:10px;font-weight:650;letter-spacing:-.01em;font-size:15px;}
-    .brand .dot{width:26px;height:26px;border-radius:8px;background:linear-gradient(150deg,var(--accent),#0e8f4f);
-      display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 3px 9px rgba(22,163,74,.3);}
+    .brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-weight:600;letter-spacing:-.01em;font-size:16px;}
+    .brand .dot{width:26px;height:26px;border-radius:8px;background:linear-gradient(150deg,var(--accent),var(--accent-ink));
+      display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 3px 9px rgba(204,120,92,.3);}
     .brand .dot svg{width:15px;height:15px;}
     .brand .sub{color:var(--faint);font-weight:500;}
     .spacer{flex:1;}
@@ -150,7 +153,7 @@
     .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);}
     .card-pad{padding:18px;}
     .card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 18px;border-bottom:1px solid var(--line-2);}
-    .card-h h3{font-size:14px;font-weight:600;margin:0;letter-spacing:-.005em;}
+    .card-h h3{font-family:var(--serif);font-size:15px;font-weight:600;margin:0;letter-spacing:-.005em;}
     .card-h .hint{font-size:12px;color:var(--faint);font-weight:500;}
 
     /* KPI */
@@ -158,7 +161,7 @@
     .kpi .label{font-size:12px;color:var(--muted);font-weight:500;display:flex;align-items:center;gap:6px;}
     .kpi .val{font-size:25px;font-weight:680;letter-spacing:-.02em;margin-top:7px;line-height:1.1;}
     .kpi .delta{font-size:12px;font-weight:600;margin-top:6px;display:inline-flex;align-items:center;gap:3px;}
-    .up{color:var(--accent-ink);} .down{color:var(--red);} .flat{color:var(--faint);}
+    .up{color:var(--up);} .down{color:var(--down);} .flat{color:var(--faint);}
 
     /* metric switch (chart) */
     .mswitch{display:flex;gap:0;flex-wrap:wrap;}
@@ -219,7 +222,7 @@
     .fstep .fcount{color:var(--ink);font-weight:600;}
     .fstep .fcount small{color:var(--faint);font-weight:500;margin-left:6px;}
     .fbar-track{height:30px;background:var(--panel-2);border-radius:8px;overflow:hidden;}
-    .fbar{height:100%;background:linear-gradient(90deg,var(--accent),#22b765);border-radius:8px;display:flex;align-items:center;
+    .fbar{height:100%;background:linear-gradient(90deg,var(--accent-ink),var(--accent));border-radius:8px;display:flex;align-items:center;
       padding-left:11px;color:#fff;font-size:12px;font-weight:600;transition:width .6s cubic-bezier(.2,.7,.2,1);}
     .fdrop{font-size:11px;color:var(--red);text-align:right;margin:3px 2px 8px;font-weight:500;}
     .fdrop.ok{color:var(--accent-ink);}
@@ -236,7 +239,7 @@
     .sd-row{display:flex;align-items:center;gap:12px;margin-bottom:11px;font-size:12.5px;}
     .sd-row .sdl{width:42px;color:var(--muted);}
     .sd-track{flex:1;height:9px;background:var(--panel-2);border-radius:6px;overflow:hidden;}
-    .sd-fill{height:100%;background:linear-gradient(90deg,var(--accent),#46c97e);border-radius:6px;}
+    .sd-fill{height:100%;background:linear-gradient(90deg,var(--accent-ink),var(--accent));border-radius:6px;}
     .sd-row .sdv{width:42px;text-align:right;font-weight:600;color:var(--ink-2);}
 
     .section-note{font-size:12.5px;color:var(--muted);margin:0 2px 14px;display:flex;align-items:flex-start;gap:7px;}
@@ -691,7 +694,7 @@
     const wk=grid[0].vals.length;
     const color=v=>{
       const a=Math.max(.08, v/100);
-      return `background:rgba(22,163,74,${a.toFixed(2)})`;
+      return `background:rgba(204,120,92,${a.toFixed(2)})`;
     };
     return `<div class="ret"><table>
       <thead><tr><th>Cohort</th>${Array.from({length:wk},(_,i)=>`<th>W${i}</th>`).join("")}</tr></thead>
@@ -798,7 +801,7 @@
       {name:"Organic Search",channel:"Organic Search",source:"google",       campaign:"(none)",                  referrer:"google.com",      color:{bg:"#4285f4",t:"G"}, visitors:14800,signups:510, customers:24, mrr:1180, total:18900},
       {name:"Product Hunt", channel:"Referral",        source:"producthunt",  campaign:"launch-day",              referrer:"producthunt.com", color:{bg:"#da552f",t:"P"}, visitors:5100, signups:240, customers:14, mrr:720,  total:9800},
       {name:"Direct",       channel:"Direct",          source:"(direct)",     campaign:"(none)",                  referrer:"(direct)",        color:{bg:"#64748b",t:"↦"}, visitors:6400, signups:190, customers:11, mrr:560,  total:8600},
-      {name:"Newsletter",   channel:"Email",           source:"newsletter",   campaign:"weekly-issue",            referrer:"(email)",         color:{bg:"#16a34a",t:"✉"}, visitors:2300, signups:130, customers:7,  mrr:360,  total:5200},
+      {name:"Newsletter",   channel:"Email",           source:"newsletter",   campaign:"weekly-issue",            referrer:"(email)",         color:{bg:"#6f8a5b",t:"✉"}, visitors:2300, signups:130, customers:7,  mrr:360,  total:5200},
       {name:"Reddit",       channel:"Social",          source:"reddit",       campaign:"r-saas",                  referrer:"reddit.com",      color:{bg:"#ff4500",t:"r"}, visitors:3800, signups:95,  customers:3,  mrr:170,  total:2100},
       {name:"Referral",     channel:"Referral",        source:"referral",     campaign:"affiliate",               referrer:"indiehackers.com",color:{bg:"#7c3aed",t:"↪"}, visitors:1500, signups:60,  customers:2,  mrr:100,  total:1400},
     ];
