@@ -27,11 +27,23 @@ STRIPE_SECRET_KEY=rk_live_xxx           # RESTRICTED key, read-only: Charges, In
 DASHBOARD_TOKEN=<long-random-string>    # shared secret so only your dashboard can call the API
 ```
 
-- **Stripe restricted key:** Stripe Dashboard → Developers → API keys → *Create
+- **Stripe key — yes, read-only.** There is no Stripe *publishable* key that can
+  read revenue (`pk_…` only creates payment tokens). To read it you create a
+  **restricted key** (`rk_live_…`): Stripe → Developers → API keys → *Create
   restricted key* → set everything to **None** except **Read** on Charges,
-  Invoices, Subscriptions, Customers. Use `rk_live_…` (not your `sk_live_…`).
+  Invoices, Subscriptions, Customers. That key can't charge, refund, or change
+  anything — it *is* "reading access". Never use `sk_live_…`.
 - **PostHog personal key:** PostHog → Settings → Personal API keys → scopes
   `query:read`, `person:read`, `insight:read`.
+- **POSTHOG_HOST:** the value above — `https://eu.i.posthog.com` — because your
+  project (140963) is on PostHog **EU** cloud. It's the host you log in to / send
+  events to; confirm under PostHog → Settings → Project. (US cloud would be
+  `https://us.i.posthog.com`.)
+- **DASHBOARD_TOKEN:** you make this one up — it isn't issued by anyone. It's a
+  random string you set as the API's env var and send from the dashboard so only
+  you can call the endpoint. Generate one with
+  `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
+  (or `openssl rand -hex 32`) and use the same value in both places.
 
 ---
 
