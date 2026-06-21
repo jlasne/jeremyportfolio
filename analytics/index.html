@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>tasu.ai · Analytics</title>
+
+  <!-- This page is intentionally private: not linked from the site, and not indexed. -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0b0f17">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="../favicon.ico" sizes="any">
+
+  <!--
+    ============================================================================
+    PASSWORD GATE
+    ----------------------------------------------------------------------------
+    Access is gated client-side by a SHA-256 hash of the password. This keeps the
+    page out of casual / public view (it is a static page on GitHub Pages, which
+    has no server to do real auth). It is access-gating for an illustrative
+    dashboard — not server-grade security.
+
+    Default password:  tasu-analytics-2026
+
+    To change it, compute a new hash and replace PASS_HASH below:
+        printf '%s' 'your-new-password' | shasum -a 256
+
+    For real protection of real revenue numbers, gate at the host level
+    (Cloudflare Access, Vercel password protection, or HTTP basic auth) and
+    serve the data from a server route — never ship live Stripe/PostHog keys to
+    the browser. See DATA() at the bottom for the single swap-in point.
+    ============================================================================
+  -->
+
+  <style>
+    *,*::before,*::after { box-sizing: border-box; }
+    :root{
+      --bg:#f5f6f8; --panel:#ffffff; --panel-2:#fafbfc;
+      --ink:#0f1729; --ink-2:#334155; --muted:#64748b; --faint:#94a3b8;
+      --line:#e8eaef; --line-2:#eef0f4;
+      --accent:#16a34a; --accent-ink:#15803d; --accent-soft:#e8f7ee; --accent-bar:#bbe9cb;
+      --red:#e1483c; --red-soft:#fdeceb; --amber:#d97706;
+      --radius:16px; --radius-sm:11px;
+      --shadow:0 1px 2px rgba(16,24,40,.04), 0 1px 3px rgba(16,24,40,.05);
+      --shadow-pop:0 8px 28px rgba(16,24,40,.12);
+      --font:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    }
+    html[data-theme="dark"]{
+      --bg:#0a0e16; --panel:#111824; --panel-2:#0e151f;
+      --ink:#e8eef6; --ink-2:#c2ccda; --muted:#8a97a8; --faint:#5c6b7e;
+      --line:#1d2733; --line-2:#19222e;
+      --accent:#27c768; --accent-ink:#4ade80; --accent-soft:#11251a; --accent-bar:#1c4a31;
+      --red:#f0635a; --red-soft:#2a1614; --amber:#f0a020;
+      --shadow:0 1px 2px rgba(0,0,0,.3); --shadow-pop:0 12px 34px rgba(0,0,0,.5);
+    }
+    html,body{margin:0;padding:0;}
+    body{
+      background:var(--bg); color:var(--ink); font-family:var(--font);
+      font-size:14px; line-height:1.45; -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+    }
+    a{color:inherit;}
+    button{font-family:inherit;cursor:pointer;}
+    .mono{font-family:var(--mono);font-feature-settings:"tnum" 1;}
+    .tnum{font-variant-numeric:tabular-nums;}
+
+    /* ───────────── Login gate ───────────── */
+    #gate{
+      position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center;
+      padding:24px;
+      background:
+        radial-gradient(1100px 560px at 50% -8%, rgba(22,163,74,.10), transparent 60%),
+        var(--bg);
+    }
+    .gate-card{
+      width:100%; max-width:380px; background:var(--panel); border:1px solid var(--line);
+      border-radius:var(--radius); box-shadow:var(--shadow-pop); padding:30px 28px 26px;
+      text-align:center;
+    }
+    .gate-logo{
+      width:46px;height:46px;border-radius:13px;margin:0 auto 16px;
+      background:linear-gradient(150deg,var(--accent),#0e8f4f);
+      display:flex;align-items:center;justify-content:center;color:#fff;
+      box-shadow:0 6px 16px rgba(22,163,74,.32);
+    }
+    .gate-logo svg{width:24px;height:24px;}
+    .gate-card h1{font-size:18px;margin:0 0 4px;letter-spacing:-.01em;}
+    .gate-card p{color:var(--muted);font-size:13px;margin:0 0 20px;}
+    .gate-form{display:flex;flex-direction:column;gap:10px;}
+    .gate-input{
+      width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;
+      background:var(--panel-2);color:var(--ink);font-size:14px;outline:none;transition:border-color .15s,box-shadow .15s;
+    }
+    .gate-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+    .gate-btn{
+      width:100%;padding:11px 13px;border:none;border-radius:10px;font-size:14px;font-weight:600;
+      background:var(--accent);color:#fff;transition:filter .15s,transform .05s;
+    }
+    .gate-btn:hover{filter:brightness(1.05);}
+    .gate-btn:active{transform:translateY(1px);}
+    .gate-err{color:var(--red);font-size:12.5px;min-height:16px;margin-top:2px;}
+    .gate-foot{margin-top:18px;color:var(--faint);font-size:11.5px;}
+    .shake{animation:shake .4s;}
+    @keyframes shake{10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(2px)}30%,50%,70%{transform:translateX(-4px)}40%,60%{transform:translateX(4px)}}
+
+    /* ───────────── App shell ───────────── */
+    #app{max-width:1180px;margin:0 auto;padding:0 20px 64px;}
+    .topbar{
+      display:flex;align-items:center;gap:14px;padding:16px 2px 14px;flex-wrap:wrap;
+    }
+    .brand{display:flex;align-items:center;gap:10px;font-weight:650;letter-spacing:-.01em;font-size:15px;}
+    .brand .dot{width:26px;height:26px;border-radius:8px;background:linear-gradient(150deg,var(--accent),#0e8f4f);
+      display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 3px 9px rgba(22,163,74,.3);}
+    .brand .dot svg{width:15px;height:15px;}
+    .brand .sub{color:var(--faint);font-weight:500;}
+    .spacer{flex:1;}
+    .live{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);
+      background:var(--panel);border:1px solid var(--line);padding:6px 11px;border-radius:999px;}
+    .live .pulse{width:7px;height:7px;border-radius:50%;background:var(--accent);position:relative;}
+    .live .pulse::after{content:"";position:absolute;inset:-3px;border-radius:50%;background:var(--accent);opacity:.4;animation:ping 1.8s ease-out infinite;}
+    @keyframes ping{0%{transform:scale(1);opacity:.5}80%,100%{transform:scale(2.6);opacity:0}}
+    .seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px;}
+    .seg button{border:none;background:transparent;color:var(--muted);font-size:12.5px;font-weight:500;
+      padding:6px 11px;border-radius:7px;transition:all .12s;}
+    .seg button.on{background:var(--accent-soft);color:var(--accent-ink);font-weight:600;}
+    .icon-btn{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9px;
+      background:var(--panel);border:1px solid var(--line);color:var(--muted);transition:all .12s;}
+    .icon-btn:hover{color:var(--ink);border-color:var(--faint);}
+    .icon-btn svg{width:16px;height:16px;}
+    .icon-btn.spin svg{animation:spin .7s linear;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Tabs */
+    .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:4px 0 22px;position:relative;}
+    .tabs button{border:none;background:transparent;color:var(--muted);font-size:14px;font-weight:550;
+      padding:11px 16px;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .12s;}
+    .tabs button:hover{color:var(--ink-2);}
+    .tabs button.on{color:var(--accent-ink);border-bottom-color:var(--accent);}
+
+    /* Layout helpers */
+    .grid{display:grid;gap:14px;}
+    .kpis{grid-template-columns:repeat(4,1fr);}
+    .cols-2{grid-template-columns:1fr 1fr;}
+    .cols-3{grid-template-columns:repeat(3,1fr);}
+    .span-2{grid-column:span 2;}
+    @media(max-width:880px){.kpis{grid-template-columns:repeat(2,1fr);}.cols-2,.cols-3{grid-template-columns:1fr;}.span-2{grid-column:auto;}}
+
+    /* Card */
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);}
+    .card-pad{padding:18px;}
+    .card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 18px;border-bottom:1px solid var(--line-2);}
+    .card-h h3{font-size:14px;font-weight:600;margin:0;letter-spacing:-.005em;}
+    .card-h .hint{font-size:12px;color:var(--faint);font-weight:500;}
+
+    /* KPI */
+    .kpi{padding:16px 16px 15px;}
+    .kpi .label{font-size:12px;color:var(--muted);font-weight:500;display:flex;align-items:center;gap:6px;}
+    .kpi .val{font-size:25px;font-weight:680;letter-spacing:-.02em;margin-top:7px;line-height:1.1;}
+    .kpi .delta{font-size:12px;font-weight:600;margin-top:6px;display:inline-flex;align-items:center;gap:3px;}
+    .up{color:var(--accent-ink);} .down{color:var(--red);} .flat{color:var(--faint);}
+
+    /* metric switch (chart) */
+    .mswitch{display:flex;gap:0;flex-wrap:wrap;}
+    .mtab{border:none;background:transparent;text-align:left;padding:13px 18px;border-right:1px solid var(--line-2);
+      border-bottom:2px solid transparent;transition:background .12s;min-width:130px;flex:1;}
+    .mtab:hover{background:var(--panel-2);}
+    .mtab.on{border-bottom-color:var(--accent);background:var(--panel-2);}
+    .mtab .ml{font-size:12px;color:var(--muted);font-weight:500;}
+    .mtab .mv{font-size:21px;font-weight:680;letter-spacing:-.02em;margin-top:3px;}
+    .mtab .md{font-size:11.5px;font-weight:600;margin-top:2px;}
+    .chart-wrap{position:relative;padding:14px 8px 4px;}
+    .chart-svg{display:block;width:100%;height:auto;overflow:visible;}
+    .tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:11.5px;
+      padding:6px 9px;border-radius:7px;transform:translate(-50%,-130%);white-space:nowrap;opacity:0;transition:opacity .1s;z-index:5;box-shadow:var(--shadow-pop);}
+    .tip b{font-size:12.5px;}
+    html[data-theme="dark"] .tip{background:#e8eef6;color:#0a0e16;}
+
+    /* bar list */
+    .blist{padding:6px 6px 8px;}
+    .brow{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:8px 12px;border-radius:8px;font-size:13px;overflow:hidden;z-index:0;}
+    .brow:hover{background:var(--panel-2);}
+    .brow .bar{position:absolute;inset:0;background:var(--accent-soft);border-radius:8px;z-index:-1;transition:width .5s cubic-bezier(.2,.7,.2,1);}
+    .brow .lab{display:flex;align-items:center;gap:9px;min-width:0;}
+    .brow .lab .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .brow .flag{font-size:15px;line-height:1;}
+    .brow .v{font-weight:600;white-space:nowrap;color:var(--ink-2);}
+    .brow .v small{color:var(--faint);font-weight:500;margin-left:6px;}
+    .src-ico{width:18px;height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;
+      font-size:10px;font-weight:700;color:#fff;flex:none;}
+
+    /* table */
+    .tbl-scroll{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    th,td{padding:11px 14px;text-align:right;white-space:nowrap;}
+    th:first-child,td:first-child{text-align:left;}
+    thead th{font-size:11.5px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--line);
+      cursor:pointer;user-select:none;position:relative;}
+    thead th:hover{color:var(--ink);}
+    thead th .ar{opacity:.4;font-size:9px;margin-left:3px;}
+    thead th.sorted .ar{opacity:1;color:var(--accent-ink);}
+    tbody tr{border-bottom:1px solid var(--line-2);}
+    tbody tr:last-child{border-bottom:none;}
+    tbody tr:hover{background:var(--panel-2);}
+    td .pill{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--panel-2);border:1px solid var(--line);color:var(--ink-2);}
+    .pill.scan{background:#eef2ff;border-color:#dbe2ff;color:#4f46e5;}
+    .pill.monthly{background:var(--accent-soft);border-color:var(--accent-bar);color:var(--accent-ink);}
+    .pill.annual{background:#fff4e5;border-color:#ffe2bd;color:var(--amber);}
+    html[data-theme="dark"] .pill.scan{background:#1a1d3a;border-color:#2b2f5e;color:#a5b0ff;}
+    html[data-theme="dark"] .pill.annual{background:#2a1f0e;border-color:#4a3818;}
+    td.pos{color:var(--accent-ink);font-weight:600;} td.neg{color:var(--red);font-weight:600;}
+
+    /* funnel */
+    .funnel{padding:16px 18px 18px;display:flex;flex-direction:column;gap:3px;}
+    .fstep{position:relative;}
+    .fstep .fhead{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px;}
+    .fstep .fname{color:var(--ink-2);font-weight:550;}
+    .fstep .fcount{color:var(--ink);font-weight:600;}
+    .fstep .fcount small{color:var(--faint);font-weight:500;margin-left:6px;}
+    .fbar-track{height:30px;background:var(--panel-2);border-radius:8px;overflow:hidden;}
+    .fbar{height:100%;background:linear-gradient(90deg,var(--accent),#22b765);border-radius:8px;display:flex;align-items:center;
+      padding-left:11px;color:#fff;font-size:12px;font-weight:600;transition:width .6s cubic-bezier(.2,.7,.2,1);}
+    .fdrop{font-size:11px;color:var(--red);text-align:right;margin:3px 2px 8px;font-weight:500;}
+    .fdrop.ok{color:var(--accent-ink);}
+
+    /* retention */
+    .ret{padding:14px;overflow-x:auto;}
+    .ret table{font-size:12px;}
+    .ret td,.ret th{text-align:center;padding:7px 6px;border:none;}
+    .ret .cell{border-radius:6px;color:#fff;font-weight:600;min-width:46px;}
+    .ret td:first-child{text-align:left;color:var(--muted);font-weight:500;white-space:nowrap;}
+
+    /* scroll depth */
+    .sd{padding:14px 18px;}
+    .sd-row{display:flex;align-items:center;gap:12px;margin-bottom:11px;font-size:12.5px;}
+    .sd-row .sdl{width:42px;color:var(--muted);}
+    .sd-track{flex:1;height:9px;background:var(--panel-2);border-radius:6px;overflow:hidden;}
+    .sd-fill{height:100%;background:linear-gradient(90deg,var(--accent),#46c97e);border-radius:6px;}
+    .sd-row .sdv{width:42px;text-align:right;font-weight:600;color:var(--ink-2);}
+
+    .section-note{font-size:12.5px;color:var(--muted);margin:0 2px 14px;display:flex;align-items:flex-start;gap:7px;}
+    .section-note svg{width:15px;height:15px;flex:none;margin-top:1px;color:var(--faint);}
+    .foot{margin-top:30px;text-align:center;color:var(--faint);font-size:12px;}
+    .foot a{color:var(--accent-ink);text-decoration:none;}
+    [hidden]{display:none!important;}
+    .view{animation:fade .25s ease;}
+    @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  </style>
+</head>
+<body>
+
+  <!-- ░░░░░░░░░░ LOGIN GATE ░░░░░░░░░░ -->
+  <div id="gate">
+    <div class="gate-card">
+      <div class="gate-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-6"/></svg>
+      </div>
+      <h1>Analytics</h1>
+      <p>This dashboard is private. Enter the password to continue.</p>
+      <form class="gate-form" id="gateForm" autocomplete="off">
+        <input class="gate-input" id="gatePass" type="password" placeholder="Password" autocomplete="current-password" autofocus>
+        <button class="gate-btn" type="submit">Unlock dashboard</button>
+        <div class="gate-err" id="gateErr"></div>
+      </form>
+      <div class="gate-foot">tasu.ai · revenue &amp; product analytics</div>
+    </div>
+  </div>
+
+  <!-- ░░░░░░░░░░ APP ░░░░░░░░░░ -->
+  <div id="app" hidden></div>
+
+  <script>
+  /* ════════════════════════════════════════════════════════════════════════
+     AUTH (client-side gate)
+     ════════════════════════════════════════════════════════════════════════ */
+  const PASS_HASH = "95f5ad6c4f49086ddaf7e773aa556ce5a711d0106d3c90b21c921c529c76b11f"; // sha256("tasu-analytics-2026")
+  const SESSION_KEY = "tasu_analytics_unlocked";
+
+  async function sha256(str){
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+    return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
+  }
+  function unlock(){
+    document.getElementById("gate").hidden = true;
+    const app = document.getElementById("app");
+    app.hidden = false;
+    if(!app.dataset.rendered){ buildApp(); app.dataset.rendered = "1"; }
+  }
+  const gateForm = document.getElementById("gateForm");
+  gateForm.addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    const card = document.querySelector(".gate-card");
+    const err = document.getElementById("gateErr");
+    const val = document.getElementById("gatePass").value;
+    if((await sha256(val)) === PASS_HASH){
+      try{ sessionStorage.setItem(SESSION_KEY,"1"); }catch(_){}
+      unlock();
+    }else{
+      err.textContent = "Incorrect password.";
+      card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
+      document.getElementById("gatePass").select();
+    }
+  });
+  try{ if(sessionStorage.getItem(SESSION_KEY)==="1") unlock(); }catch(_){}
+
+  /* ════════════════════════════════════════════════════════════════════════
+     FORMAT HELPERS
+     ════════════════════════════════════════════════════════════════════════ */
+  const fmtN  = n => n.toLocaleString("en-US");
+  const fmt$  = n => "$"+Math.round(n).toLocaleString("en-US");
+  const fmt$2 = n => "$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+  const fmtK  = n => { n=Math.round(n); return Math.abs(n)>=1000 ? (n/1000).toFixed(Math.abs(n)>=10000?0:1).replace(/\.0$/,"")+"k" : ""+n; };
+  const pct   = n => (n>=10?n.toFixed(0):n.toFixed(1))+"%";
+  const esc   = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  function deltaHTML(v){
+    if(v===0) return `<span class="delta flat">— 0%</span>`;
+    const up=v>0; const a=up?"▲":"▼";
+    return `<span class="delta ${up?"up":"down"}">${a} ${Math.abs(v).toFixed(1)}%</span>`;
+  }
+
+  /* ════════════════════════════════════════════════════════════════════════
+     APP
+     ════════════════════════════════════════════════════════════════════════ */
+  let DATA, STATE = { tab:"overview", range:90, metric:"revenue" };
+
+  function buildApp(){
+    DATA = makeData();
+    const app = document.getElementById("app");
+    app.innerHTML = `
+      <div class="topbar">
+        <div class="brand">
+          <span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>
+          tasu.ai <span class="sub">/ analytics</span>
+        </div>
+        <span class="live"><span class="pulse"></span> ${DATA.online} online now</span>
+        <div class="spacer"></div>
+        <div class="seg" id="rangeSeg">
+          <button data-r="7">7d</button>
+          <button data-r="30">30d</button>
+          <button data-r="90" class="on">90d</button>
+        </div>
+        <button class="icon-btn" id="refreshBtn" title="Refresh">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+        </button>
+        <button class="icon-btn" id="themeBtn" title="Toggle theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        </button>
+        <button class="icon-btn" id="lockBtn" title="Lock">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </button>
+      </div>
+
+      <div class="tabs" id="tabs">
+        <button data-t="overview" class="on">Overview</button>
+        <button data-t="acquisition">Acquisition</button>
+        <button data-t="product">Product</button>
+      </div>
+
+      <div id="view"></div>
+
+      <div class="foot">
+        Self-hosted analytics in the spirit of <a href="https://datafa.st" target="_blank" rel="noopener">Datafast</a> ·
+        revenue attribution via PostHog × Stripe · <span id="updated"></span>
+      </div>
+    `;
+
+    // wire controls
+    document.getElementById("tabs").addEventListener("click", e=>{
+      const b=e.target.closest("button"); if(!b) return;
+      STATE.tab=b.dataset.t;
+      [...e.currentTarget.children].forEach(c=>c.classList.toggle("on",c===b));
+      renderView();
+    });
+    document.getElementById("rangeSeg").addEventListener("click", e=>{
+      const b=e.target.closest("button"); if(!b) return;
+      STATE.range=+b.dataset.r;
+      [...e.currentTarget.children].forEach(c=>c.classList.toggle("on",c===b));
+      renderView();
+    });
+    document.getElementById("themeBtn").addEventListener("click", ()=>{
+      const r=document.documentElement;
+      r.dataset.theme = r.dataset.theme==="dark"?"light":"dark";
+      renderView();
+    });
+    document.getElementById("lockBtn").addEventListener("click", ()=>{
+      try{ sessionStorage.removeItem(SESSION_KEY); }catch(_){}
+      location.reload();
+    });
+    document.getElementById("refreshBtn").addEventListener("click", e=>{
+      const b=e.currentTarget; b.classList.remove("spin"); void b.offsetWidth; b.classList.add("spin");
+      stamp(); renderView();
+    });
+
+    stamp();
+    renderView();
+    window.addEventListener("resize", debounce(()=>drawAllCharts(),150));
+  }
+
+  function stamp(){
+    const el=document.getElementById("updated");
+    if(el) el.textContent = "updated "+new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
+  }
+
+  /* ───────── view router ───────── */
+  function renderView(){
+    const v=document.getElementById("view");
+    v.className="view"; void v.offsetWidth; v.classList.add("view");
+    if(STATE.tab==="overview") v.innerHTML=viewOverview();
+    else if(STATE.tab==="acquisition") v.innerHTML=viewAcquisition();
+    else v.innerHTML=viewProduct();
+    afterRender();
+  }
+  function afterRender(){
+    drawAllCharts();
+    document.querySelectorAll("[data-bar]").forEach(el=>{ requestAnimationFrame(()=>{ el.style.width=el.dataset.bar+"%"; }); });
+    wireMetricTabs();
+    wireSortable();
+  }
+
+  /* ════════════════════════════════════════════════════════════════════════
+     OVERVIEW
+     ════════════════════════════════════════════════════════════════════════ */
+  function viewOverview(){
+    const k=DATA.kpi;
+    const kpiCards = [
+      ["MRR", fmt$(k.mrr), k.mrrDelta],
+      ["ARR", fmt$(k.mrr*12), k.mrrDelta],
+      ["Active subscribers", fmtN(k.subs), k.subsDelta],
+      ["ARPU", fmt$2(k.mrr/k.subs), k.arpuDelta],
+      ["New MRR · 30d", "+"+fmt$(k.newMrr), null,"up"],
+      ["Churned MRR · 30d", "-"+fmt$(k.churnMrr), null,"down"],
+      ["Scan revenue · 30d", fmt$(k.scanRev30), k.scanDelta],
+      ["Trial → paid", pct(k.trial2paid), k.trialDelta],
+    ].map(([l,v,d,force])=>`
+      <div class="card kpi">
+        <div class="label">${l}</div>
+        <div class="val tnum">${v}</div>
+        ${force==="up"?`<span class="delta up">▲ new</span>`:force==="down"?`<span class="delta down">▼ lost</span>`:(d!=null?deltaHTML(d):"")}
+      </div>`).join("");
+
+    return `
+      <div class="grid kpis">${kpiCards}</div>
+
+      <div class="card" style="margin-top:14px">
+        <div class="mswitch" id="mswitch">${metricTabs()}</div>
+        <div class="chart-wrap"><div id="mainChart"></div></div>
+      </div>
+
+      <div class="grid cols-2" style="margin-top:14px">
+        <div class="card">
+          <div class="card-h"><h3>Top sources by revenue</h3><span class="hint">MRR · last ${STATE.range}d</span></div>
+          ${barList(DATA.sources.slice().sort((a,b)=>b.mrr-a.mrr).slice(0,6).map(s=>({
+            label:s.name, icon:s.color, value:s.mrr, display:fmt$(s.mrr), sub:s.customers+" cust."
+          })))}
+        </div>
+        <div class="card">
+          <div class="card-h"><h3>Conversion funnel</h3><span class="hint">visitor → paid</span></div>
+          ${funnel(DATA.funnelConv.slice(0,5),true)}
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <div class="card-h"><h3>Revenue by plan</h3><span class="hint">Stripe · metadata.tier</span></div>
+        <div class="tbl-scroll"><table>
+          <thead><tr><th>Plan</th><th>Price</th><th>Customers</th><th>MRR</th><th>Total billed</th></tr></thead>
+          <tbody>${DATA.plans.map(p=>`<tr>
+            <td><span class="pill ${p.key}">${p.name}</span></td>
+            <td class="mono">${p.price}</td>
+            <td class="tnum">${fmtN(p.customers)}</td>
+            <td class="tnum">${p.mrr?fmt$(p.mrr):"—"}</td>
+            <td class="tnum">${fmt$(p.total)}</td>
+          </tr>`).join("")}</tbody>
+        </table></div>
+      </div>`;
+  }
+
+  function metricTabs(){
+    const ms=DATA.metrics;
+    return Object.entries(ms).map(([key,m])=>`
+      <button class="mtab ${key===STATE.metric?"on":""}" data-m="${key}">
+        <div class="ml">${m.label}</div>
+        <div class="mv tnum">${m.fmt(sumRange(m.series))}</div>
+        <div class="md ${m.dlt>=0?"up":"down"}">${m.dlt>=0?"▲":"▼"} ${Math.abs(m.dlt).toFixed(1)}% vs prev</div>
+      </button>`).join("");
+  }
+  function wireMetricTabs(){
+    const sw=document.getElementById("mswitch"); if(!sw) return;
+    sw.addEventListener("click", e=>{
+      const b=e.target.closest(".mtab"); if(!b) return;
+      STATE.metric=b.dataset.m;
+      [...sw.children].forEach(c=>c.classList.toggle("on",c===b));
+      drawMain();
+    });
+  }
+
+  /* ════════════════════════════════════════════════════════════════════════
+     ACQUISITION
+     ════════════════════════════════════════════════════════════════════════ */
+  function viewAcquisition(){
+    return `
+      <div class="card">
+        <div class="card-h">
+          <h3>Revenue by ${STATE.dim||"channel"}</h3>
+          <div class="seg" id="dimSeg">
+            ${["channel","source","campaign","referrer"].map(d=>`<button data-d="${d}" class="${(STATE.dim||"channel")===d?"on":""}">${d[0].toUpperCase()+d.slice(1)}</button>`).join("")}
+          </div>
+        </div>
+        <div class="section-note" style="padding:12px 18px 0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          The headline join: Stripe payments → <span class="mono">metadata.convexUserId</span> → PostHog <span class="mono">$initial_*</span> first-touch.
+        </div>
+        <div class="tbl-scroll" id="srcTableWrap">${sourceTable()}</div>
+      </div>
+
+      <div class="grid cols-2" style="margin-top:14px">
+        <div class="card">
+          <div class="card-h"><h3>Customers by country</h3><span class="hint">$initial_geoip</span></div>
+          ${barList(DATA.countries.map(c=>({label:c.name,flag:c.flag,value:c.customers,display:fmtN(c.customers),sub:fmt$(c.mrr)+" MRR"})))}
+        </div>
+        <div class="card">
+          <div class="card-h"><h3>Traffic by channel</h3><span class="hint">visitors · last ${STATE.range}d</span></div>
+          ${barList(DATA.sources.slice().sort((a,b)=>b.visitors-a.visitors).map(s=>({label:s.name,icon:s.color,value:s.visitors,display:fmtN(s.visitors),sub:fmtN(s.signups)+" signups"})))}
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <div class="card-h"><h3>Recent paying customers</h3><span class="hint">attributed source</span></div>
+        <div class="tbl-scroll"><table>
+          <thead><tr><th>Customer</th><th>Plan</th><th>Source</th><th>Country</th><th>Amount</th><th>When</th></tr></thead>
+          <tbody>${DATA.recent.map(r=>`<tr>
+            <td class="mono">${esc(r.email)}</td>
+            <td><span class="pill ${r.planKey}">${r.plan}</span></td>
+            <td>${esc(r.source)}</td>
+            <td>${r.flag} ${esc(r.country)}</td>
+            <td class="tnum">${fmt$(r.amount)}</td>
+            <td style="color:var(--faint)">${esc(r.when)}</td>
+          </tr>`).join("")}</tbody>
+        </table></div>
+      </div>`;
+  }
+
+  function sourceTable(){
+    const dim = STATE.dim||"channel";
+    const rows = DATA.sources.slice().map(s=>({
+      name: s[dim]||s.name,
+      visitors:s.visitors, signups:s.signups, customers:s.customers,
+      conv: s.customers/s.visitors*100, mrr:s.mrr, total:s.total,
+      rpv: s.total/s.visitors
+    }));
+    // merge rows that share the same dimension label
+    const merged={};
+    rows.forEach(r=>{
+      const k=r.name;
+      if(!merged[k]) merged[k]={name:k,visitors:0,signups:0,customers:0,mrr:0,total:0};
+      merged[k].visitors+=r.visitors; merged[k].signups+=r.signups; merged[k].customers+=r.customers;
+      merged[k].mrr+=r.mrr; merged[k].total+=r.total;
+    });
+    let list=Object.values(merged).map(r=>({...r,conv:r.customers/r.visitors*100,rpv:r.total/r.visitors}));
+    const sk=STATE.srcSort||"mrr", dir=STATE.srcDir==null?-1:STATE.srcDir;
+    list.sort((a,b)=> (a[sk]<b[sk]?-1:a[sk]>b[sk]?1:0)*dir);
+    const cols=[["name","Source"],["visitors","Visitors"],["signups","Signups"],["customers","Customers"],["conv","Conv %"],["mrr","MRR"],["total","Total"],["rpv","Rev / visitor"]];
+    return `<table id="srcTable">
+      <thead><tr>${cols.map(([k,l])=>`<th data-sort="${k}" class="${k===sk?"sorted":""}">${l}<span class="ar">${k===sk?(dir<0?"▼":"▲"):"▼"}</span></th>`).join("")}</tr></thead>
+      <tbody>${list.map(r=>`<tr>
+        <td>${esc(r.name)}</td>
+        <td class="tnum">${fmtN(r.visitors)}</td>
+        <td class="tnum">${fmtN(r.signups)}</td>
+        <td class="tnum">${fmtN(r.customers)}</td>
+        <td class="tnum">${pct(r.conv)}</td>
+        <td class="tnum">${fmt$(r.mrr)}</td>
+        <td class="tnum">${fmt$(r.total)}</td>
+        <td class="tnum">${fmt$2(r.rpv)}</td>
+      </tr>`).join("")}</tbody></table>`;
+  }
+  function wireSortable(){
+    const seg=document.getElementById("dimSeg");
+    if(seg) seg.addEventListener("click",e=>{
+      const b=e.target.closest("button"); if(!b) return;
+      STATE.dim=b.dataset.d; STATE.srcSort="mrr"; STATE.srcDir=-1;
+      [...seg.children].forEach(c=>c.classList.toggle("on",c===b));
+      document.getElementById("srcTableWrap").innerHTML=sourceTable(); wireSortable();
+    });
+    const t=document.getElementById("srcTable");
+    if(t) t.querySelectorAll("th[data-sort]").forEach(th=>{
+      th.addEventListener("click",()=>{
+        const k=th.dataset.sort;
+        if(STATE.srcSort===k) STATE.srcDir=(STATE.srcDir||-1)*-1; else {STATE.srcSort=k; STATE.srcDir=k==="name"?1:-1;}
+        document.getElementById("srcTableWrap").innerHTML=sourceTable(); wireSortable();
+      });
+    });
+  }
+
+  /* ════════════════════════════════════════════════════════════════════════
+     PRODUCT
+     ════════════════════════════════════════════════════════════════════════ */
+  function viewProduct(){
+    return `
+      <div class="grid cols-2">
+        <div class="card">
+          <div class="card-h"><h3>Conversion funnel</h3><span class="hint">last ${STATE.range}d</span></div>
+          ${funnel(DATA.funnelConv,true)}
+        </div>
+        <div class="card">
+          <div class="card-h"><h3>Onboarding funnel</h3><span class="hint">last ${STATE.range}d</span></div>
+          ${funnel(DATA.funnelOnb,true)}
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <div class="card-h"><h3>Feature usage — what's being used</h3><span class="hint">in-app events · last 30d</span></div>
+        <div class="tbl-scroll"><table>
+          <thead><tr><th>Event</th><th>Events</th><th>Unique users</th><th>Events / user</th></tr></thead>
+          <tbody>${DATA.features.map(f=>`<tr>
+            <td class="mono">${esc(f.event)}</td>
+            <td class="tnum">${fmtN(f.events)}</td>
+            <td class="tnum">${fmtN(f.users)}</td>
+            <td class="tnum">${(f.events/f.users).toFixed(1)}</td>
+          </tr>`).join("")}</tbody>
+        </table></div>
+      </div>
+
+      <div class="grid cols-2" style="margin-top:14px">
+        <div class="card">
+          <div class="card-h"><h3>Click map — top clicked elements</h3><span class="hint">$autocapture</span></div>
+          <div class="tbl-scroll"><table>
+            <thead><tr><th>Page</th><th>Element</th><th>Clicks</th></tr></thead>
+            <tbody>${DATA.clickmap.map(c=>`<tr>
+              <td class="mono">${esc(c.page)}</td>
+              <td>${esc(c.element)}</td>
+              <td class="tnum">${fmtN(c.clicks)}</td>
+            </tr>`).join("")}</tbody>
+          </table></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><h3>Scroll depth · landing</h3><span class="hint">scroll_depth_reached</span></div>
+          <div class="sd">${DATA.scroll.map(s=>`
+            <div class="sd-row"><span class="sdl">${s.depth}%</span>
+              <div class="sd-track"><div class="sd-fill" data-bar="${s.pct}" style="width:0"></div></div>
+              <span class="sdv">${s.pct}%</span></div>`).join("")}
+          </div>
+        </div>
+      </div>
+
+      <div class="grid cols-2" style="margin-top:14px">
+        <div class="card">
+          <div class="card-h"><h3>Top pages</h3><span class="hint">pageviews · last ${STATE.range}d</span></div>
+          ${barList(DATA.pages.map(p=>({label:p.path,value:p.views,display:fmtN(p.views),sub:fmtN(p.visitors)+" visitors"})))}
+        </div>
+        <div class="card">
+          <div class="card-h"><h3>Retention</h3><span class="hint">weekly · signed_in</span></div>
+          ${retention(DATA.retention)}
+        </div>
+      </div>`;
+  }
+
+  /* ════════════════════════════════════════════════════════════════════════
+     COMPONENTS
+     ════════════════════════════════════════════════════════════════════════ */
+  function barList(rows){
+    const max=Math.max(...rows.map(r=>r.value),1);
+    return `<div class="blist">${rows.map(r=>{
+      const w=(r.value/max*100).toFixed(1);
+      const lead = r.flag ? `<span class="flag">${r.flag}</span>`
+                 : r.icon ? `<span class="src-ico" style="background:${r.icon.bg}">${r.icon.t}</span>` : "";
+      return `<div class="brow">
+        <span class="bar" data-bar="${w}" style="width:0"></span>
+        <span class="lab">${lead}<span class="nm">${esc(r.label)}</span></span>
+        <span class="v tnum">${r.display}${r.sub?`<small>${esc(r.sub)}</small>`:""}</span>
+      </div>`;
+    }).join("")}</div>`;
+  }
+
+  function funnel(steps,showDrop){
+    const top=steps[0].count;
+    return `<div class="funnel">${steps.map((s,i)=>{
+      const ofTop=s.count/top*100;
+      const drop = i>0 ? (1 - s.count/steps[i-1].count)*100 : 0;
+      return `<div class="fstep">
+        <div class="fhead"><span class="fname">${esc(s.name)}</span>
+          <span class="fcount tnum">${fmtN(s.count)}<small>${ofTop.toFixed(1)}%</small></span></div>
+        <div class="fbar-track"><div class="fbar" data-bar="${Math.max(ofTop,3).toFixed(1)}" style="width:0"></div></div>
+        ${showDrop&&i>0?`<div class="fdrop">▼ ${drop.toFixed(1)}% drop-off</div>`:`<div style="height:6px"></div>`}
+      </div>`;
+    }).join("")}
+    <div class="fdrop ok" style="text-align:left;margin-top:2px">Overall ${ (steps[steps.length-1].count/top*100).toFixed(1) }% conversion</div>
+    </div>`;
+  }
+
+  function retention(grid){
+    const wk=grid[0].vals.length;
+    const color=v=>{
+      const a=Math.max(.08, v/100);
+      return `background:rgba(22,163,74,${a.toFixed(2)})`;
+    };
+    return `<div class="ret"><table>
+      <thead><tr><th>Cohort</th>${Array.from({length:wk},(_,i)=>`<th>W${i}</th>`).join("")}</tr></thead>
+      <tbody>${grid.map(g=>`<tr><td>${esc(g.cohort)}</td>${g.vals.map((v,i)=>
+        v==null?`<td></td>`:`<td><div class="cell" style="${i===0?"background:var(--accent-ink)":color(v)};color:${v>45||i===0?"#fff":"var(--ink-2)"}">${v}%</div></td>`
+      ).join("")}</tr>`).join("")}</tbody>
+    </table></div>`;
+  }
+
+  /* ════════════════════════════════════════════════════════════════════════
+     CHARTS (hand-built SVG area chart, no deps)
+     ════════════════════════════════════════════════════════════════════════ */
+  function sliceRange(series){ return series.slice(series.length-STATE.range); }
+  function sumRange(series){ return sliceRange(series).reduce((a,b)=>a+b.v,0); }
+
+  function drawAllCharts(){ if(STATE.tab==="overview") drawMain(); }
+  function drawMain(){
+    const host=document.getElementById("mainChart"); if(!host) return;
+    const m=DATA.metrics[STATE.metric];
+    drawArea(host, sliceRange(m.series), m);
+  }
+
+  function drawArea(host, data, meta){
+    const W=Math.max(host.clientWidth||host.parentElement.clientWidth||720, 320), H=270;
+    const pad={l:6,r:48,t:18,b:26};
+    const iw=W-pad.l-pad.r, ih=H-pad.t-pad.b;
+    const vals=data.map(d=>d.v);
+    let max=Math.max(...vals), min=Math.min(...vals,0);
+    max = max + (max-min)*0.12 || 1;
+    const X=i=>pad.l + (data.length<2?iw/2:i*iw/(data.length-1));
+    const Y=v=>pad.t + ih - (v-min)/(max-min||1)*ih;
+
+    const line = data.map((d,i)=>`${i?"L":"M"}${X(i).toFixed(1)} ${Y(d.v).toFixed(1)}`).join(" ");
+    const area = `${line} L${X(data.length-1).toFixed(1)} ${(pad.t+ih).toFixed(1)} L${X(0).toFixed(1)} ${(pad.t+ih).toFixed(1)} Z`;
+
+    // y gridlines (4)
+    let grid="",ylab="";
+    for(let g=0;g<=3;g++){
+      const v=min+(max-min)*g/3, y=Y(v);
+      grid+=`<line x1="${pad.l}" y1="${y.toFixed(1)}" x2="${pad.l+iw}" y2="${y.toFixed(1)}" stroke="var(--line-2)" stroke-width="1"/>`;
+      ylab+=`<text x="${pad.l+iw+8}" y="${(y+4).toFixed(1)}" fill="var(--faint)" font-size="11">${meta.short(v)}</text>`;
+    }
+    // x labels (~5)
+    let xlab="";const step=Math.max(1,Math.floor((data.length-1)/4));
+    for(let i=0;i<data.length;i+=step){
+      xlab+=`<text x="${X(i).toFixed(1)}" y="${H-6}" fill="var(--faint)" font-size="11" text-anchor="middle">${data[i].d}</text>`;
+    }
+    const gid="grad"+meta.label.replace(/\W/g,"");
+    host.innerHTML=`
+      <svg class="chart-svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">
+        <defs><linearGradient id="${gid}" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stop-color="var(--accent)" stop-opacity="0.22"/>
+          <stop offset="1" stop-color="var(--accent)" stop-opacity="0"/>
+        </linearGradient></defs>
+        ${grid}
+        <path d="${area}" fill="url(#${gid})"/>
+        <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+        ${ylab}${xlab}
+        <g id="hoverG" style="opacity:0">
+          <line id="hoverLine" y1="${pad.t}" y2="${pad.t+ih}" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 3"/>
+          <circle id="hoverDot" r="4.5" fill="var(--accent)" stroke="var(--panel)" stroke-width="2.5"/>
+        </g>
+        <rect id="hoverHit" x="0" y="0" width="${W}" height="${H}" fill="transparent"/>
+      </svg>
+      <div class="tip" id="tip"></div>`;
+
+    // hover
+    const svg=host.querySelector("svg"), hit=host.querySelector("#hoverHit");
+    const g=host.querySelector("#hoverG"), ln=host.querySelector("#hoverLine"), dot=host.querySelector("#hoverDot"), tip=host.querySelector("#tip");
+    hit.addEventListener("mousemove",ev=>{
+      const r=svg.getBoundingClientRect();
+      const mx=(ev.clientX-r.left)/r.width*W;
+      let i=Math.round((mx-pad.l)/(iw/(data.length-1))); i=Math.max(0,Math.min(data.length-1,i));
+      const x=X(i),y=Y(data[i].v);
+      g.style.opacity=1; ln.setAttribute("x1",x); ln.setAttribute("x2",x); dot.setAttribute("cx",x); dot.setAttribute("cy",y);
+      tip.style.opacity=1; tip.style.left=(x/W*r.width)+"px"; tip.style.top=(y/H*r.height)+"px";
+      tip.innerHTML=`<b>${meta.tip(data[i].v)}</b><br>${data[i].full||data[i].d}`;
+    });
+    hit.addEventListener("mouseleave",()=>{ g.style.opacity=0; tip.style.opacity=0; });
+  }
+
+  function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
+
+  /* ════════════════════════════════════════════════════════════════════════
+     DEMO DATA  —  swap makeData() for fetch('/api/dashboard') when you have a
+     server route doing the PostHog × Stripe joins (see spec §5 / §8).
+     All numbers below are illustrative.
+     ════════════════════════════════════════════════════════════════════════ */
+  function makeData(){
+    // deterministic pseudo-random so charts look organic but stable
+    let seed=42; const rnd=()=>{seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff;};
+    const days=90, today=new Date(2026,5,21);
+    const dlabel=i=>{const d=new Date(today);d.setDate(d.getDate()-(days-1-i));return d.toLocaleDateString("en-US",{month:"short",day:"numeric"});};
+    const dfull=i=>{const d=new Date(today);d.setDate(d.getDate()-(days-1-i));return d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});};
+    const series=(base,growth,noise,wkndDrop=0)=>Array.from({length:days},(_,i)=>{
+      const d=new Date(today);d.setDate(d.getDate()-(days-1-i));
+      const wknd=(d.getDay()===0||d.getDay()===6)?(1-wkndDrop):1;
+      const v=(base+growth*i)*(1+(rnd()-.5)*noise)*wknd;
+      return {d:dlabel(i),full:dfull(i),v:Math.max(0,Math.round(v))};
+    });
+
+    const sources=[
+      {name:"Twitter / X",  channel:"Social",         source:"twitter",      campaign:"founder-build-in-public", referrer:"t.co",            color:{bg:"#1d9bf0",t:"𝕏"}, visitors:9200, signups:420, customers:31, mrr:1540, total:23400},
+      {name:"Organic Search",channel:"Organic Search",source:"google",       campaign:"(none)",                  referrer:"google.com",      color:{bg:"#4285f4",t:"G"}, visitors:14800,signups:510, customers:24, mrr:1180, total:18900},
+      {name:"Product Hunt", channel:"Referral",        source:"producthunt",  campaign:"launch-day",              referrer:"producthunt.com", color:{bg:"#da552f",t:"P"}, visitors:5100, signups:240, customers:14, mrr:720,  total:9800},
+      {name:"Direct",       channel:"Direct",          source:"(direct)",     campaign:"(none)",                  referrer:"(direct)",        color:{bg:"#64748b",t:"↦"}, visitors:6400, signups:190, customers:11, mrr:560,  total:8600},
+      {name:"Newsletter",   channel:"Email",           source:"newsletter",   campaign:"weekly-issue",            referrer:"(email)",         color:{bg:"#16a34a",t:"✉"}, visitors:2300, signups:130, customers:7,  mrr:360,  total:5200},
+      {name:"Reddit",       channel:"Social",          source:"reddit",       campaign:"r-saas",                  referrer:"reddit.com",      color:{bg:"#ff4500",t:"r"}, visitors:3800, signups:95,  customers:3,  mrr:170,  total:2100},
+      {name:"Referral",     channel:"Referral",        source:"referral",     campaign:"affiliate",               referrer:"indiehackers.com",color:{bg:"#7c3aed",t:"↪"}, visitors:1500, signups:60,  customers:2,  mrr:100,  total:1400},
+    ];
+
+    const mrr=sources.reduce((a,s)=>a+s.mrr,0);          // 4630
+    const subs=sources.reduce((a,s)=>a+s.customers,0);   // 92
+
+    const metric=(label,short,tip,fmt,series,dlt)=>({label,short,tip,fmt,series,dlt});
+    const revSeries=series(95,1.7,.5,.35);
+    const visSeries=series(380,3.2,.45,.4);
+    const sigSeries=series(14,.18,.7,.45);
+    const cusSeries=series(1.4,.03,1.3,.3);
+
+    return {
+      online: 9 + Math.floor(rnd()*14),
+      kpi:{
+        mrr, subs,
+        mrrDelta:8.4, subsDelta:6.1, arpuDelta:2.2, scanDelta:12.7, trialDelta:-1.4,
+        newMrr:640, churnMrr:180, scanRev30:1521, trial2paid:24,
+      },
+      metrics:{
+        revenue:  metric("Revenue",       v=>"$"+fmtK(v), v=>fmt$(v), v=>fmt$(v), revSeries, 14.2),
+        visitors: metric("Visitors",      v=>fmtK(v),     fmtN,       fmtN,       visSeries,  9.6),
+        signups:  metric("Signups",       v=>fmtK(v),     fmtN,       fmtN,       sigSeries, 11.3),
+        customers:metric("New customers", v=>fmtK(v),     fmtN,       fmtN,       cusSeries,  5.8),
+      },
+      sources,
+      plans:[
+        {key:"scan",   name:"Scan",    price:"$39 once", customers:312, mrr:0,    total:12168},
+        {key:"monthly",name:"Monthly", price:"$59 / mo", customers:61,  mrr:3599, total:41200},
+        {key:"annual", name:"Annual",  price:"$399 / yr",customers:31,  mrr:1031, total:14600},
+      ],
+      countries:[
+        {name:"United States", flag:"🇺🇸", customers:38, mrr:2010},
+        {name:"France",        flag:"🇫🇷", customers:14, mrr:690},
+        {name:"United Kingdom",flag:"🇬🇧", customers:11, mrr:560},
+        {name:"Germany",       flag:"🇩🇪", customers:8,  mrr:420},
+        {name:"Canada",        flag:"🇨🇦", customers:7,  mrr:360},
+        {name:"Australia",     flag:"🇦🇺", customers:5,  mrr:260},
+        {name:"Netherlands",   flag:"🇳🇱", customers:4,  mrr:190},
+        {name:"India",         flag:"🇮🇳", customers:5,  mrr:140},
+      ],
+      recent:[
+        {email:"m•••@gmail.com",   plan:"Monthly",planKey:"monthly",source:"Twitter / X",   country:"United States",flag:"🇺🇸",amount:59, when:"2h ago"},
+        {email:"s•••@acme.co",     plan:"Annual", planKey:"annual", source:"Organic Search",country:"United Kingdom",flag:"🇬🇧",amount:399,when:"5h ago"},
+        {email:"j•••@gmail.com",   plan:"Scan",   planKey:"scan",   source:"Product Hunt",  country:"Canada",       flag:"🇨🇦",amount:39, when:"9h ago"},
+        {email:"l•••@outlook.com", plan:"Monthly",planKey:"monthly",source:"Newsletter",    country:"France",       flag:"🇫🇷",amount:59, when:"1d ago"},
+        {email:"k•••@proton.me",   plan:"Monthly",planKey:"monthly",source:"Direct",        country:"Germany",      flag:"🇩🇪",amount:59, when:"1d ago"},
+        {email:"r•••@gmail.com",   plan:"Annual", planKey:"annual", source:"Twitter / X",   country:"Australia",    flag:"🇦🇺",amount:399,when:"2d ago"},
+        {email:"a•••@company.io",  plan:"Scan",   planKey:"scan",   source:"Reddit",        country:"United States",flag:"🇺🇸",amount:39, when:"2d ago"},
+        {email:"t•••@gmail.com",   plan:"Monthly",planKey:"monthly",source:"Organic Search",country:"Netherlands",  flag:"🇳🇱",amount:59, when:"3d ago"},
+      ],
+      funnelConv:[
+        {name:"hero_cta_clicked", count:8420},
+        {name:"signed_in",        count:1980},
+        {name:"paywall_viewed",   count:1240},
+        {name:"checkout_started", count:410},
+        {name:"checkout_completed",count:168},
+      ],
+      funnelOnb:[
+        {name:"onboarding_started",  count:1640},
+        {name:"app_added",           count:1180},
+        {name:"paywall_viewed",      count:760},
+        {name:"checkout_completed",  count:198},
+        {name:"onboarding_completed",count:172},
+      ],
+      features:[
+        {event:"issue_viewed",     events:9850, users:720},
+        {event:"smartlink_created",events:3420, users:540},
+        {event:"issue_fix_clicked",events:2140, users:410},
+        {event:"scan_completed",   events:1290, users:1180},
+        {event:"settings_updated", events:880,  users:360},
+      ],
+      clickmap:[
+        {page:"/",         element:"Scan my links",   clicks:1240},
+        {page:"/",         element:"See pricing",     clicks:680},
+        {page:"/",         element:"Start free",      clicks:540},
+        {page:"/dashboard",element:"View issue",      clicks:980},
+        {page:"/dashboard",element:"Create smartlink",clicks:760},
+        {page:"/dashboard",element:"Fix issue",       clicks:520},
+        {page:"/pricing",  element:"Go monthly",      clicks:410},
+        {page:"/pricing",  element:"Go annual",       clicks:230},
+        {page:"/library",  element:"Read article",    clicks:190},
+      ],
+      scroll:[
+        {depth:25,pct:92},{depth:50,pct:71},{depth:75,pct:44},{depth:90,pct:28},{depth:100,pct:21},
+      ],
+      pages:[
+        {path:"/",          views:42800, visitors:31200},
+        {path:"/pricing",   views:9600,  visitors:7100},
+        {path:"/scan",      views:7400,  visitors:5800},
+        {path:"/library",   views:5200,  visitors:3900},
+        {path:"/dashboard", views:4800,  visitors:1900},
+        {path:"/blog/link-rot", views:3100, visitors:2700},
+      ],
+      retention:[
+        {cohort:"This week",  vals:[100,null,null,null,null,null]},
+        {cohort:"1 wk ago",   vals:[100,52,null,null,null,null]},
+        {cohort:"2 wks ago",  vals:[100,49,38,null,null,null]},
+        {cohort:"3 wks ago",  vals:[100,47,35,29,null,null]},
+        {cohort:"4 wks ago",  vals:[100,44,33,27,24,null]},
+        {cohort:"5 wks ago",  vals:[100,43,31,26,22,20]},
+      ],
+    };
+  }
+  </script>
+</body>
+</html>
