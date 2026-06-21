@@ -23,7 +23,7 @@ the page.
 POSTHOG_PROJECT_ID=140963
 POSTHOG_PERSONAL_API_KEY=phx_xxx        # scopes: query:read, person:read, insight:read
 POSTHOG_HOST=https://eu.i.posthog.com   # API host derived: eu.i.posthog.com -> eu.posthog.com
-STRIPE_SECRET_KEY=rk_live_xxx           # RESTRICTED key, read-only: Charges, Invoices, Subscriptions, Customers
+STRIPE_KEY=rk_live_xxx           # RESTRICTED key, read-only: Charges, Invoices, Subscriptions, Customers
 DASHBOARD_TOKEN=<long-random-string>    # shared secret so only your dashboard can call the API
 ```
 
@@ -70,7 +70,7 @@ tier is fine). It can live in this same repo or a tiny separate one.
 ```js
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe(process.env.STRIPE_KEY);
 const PH_API = process.env.POSTHOG_HOST.replace('://eu.i.posthog.com', '://eu.posthog.com');
 const PROJECT = process.env.POSTHOG_PROJECT_ID;
 
