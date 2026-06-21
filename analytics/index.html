@@ -322,7 +322,10 @@
       document.getElementById("gatePass").select();
     }
   });
-  try{ if(sessionStorage.getItem(SESSION_KEY)==="1") unlock(); }catch(_){}
+  // Defer auto-unlock to a microtask so the whole script (incl. the const
+  // format helpers used by makeData() below) is fully initialized first —
+  // otherwise an already-unlocked session hits a temporal-dead-zone error.
+  queueMicrotask(()=>{ try{ if(sessionStorage.getItem(SESSION_KEY)==="1") unlock(); }catch(_){} });
 
   /* ════════════════════════════════════════════════════════════════════════
      FORMAT HELPERS
