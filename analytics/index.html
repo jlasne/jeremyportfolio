@@ -189,6 +189,8 @@
     html[data-theme="dark"] .issue--good .issue-ic{background:#1e2a18;}
     .issue-t{font-size:13px;font-weight:600;color:var(--ink);}
     .issue-d{font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.5;}
+    .empty-note{padding:26px 18px;text-align:center;color:var(--faint);font-size:13px;line-height:1.5;}
+    .empty-cell{text-align:center;color:var(--faint);padding:22px 12px;font-size:13px;}
     .chart-wrap{position:relative;padding:14px 8px 4px;}
     .chart-svg{display:block;width:100%;height:auto;overflow:visible;}
     .tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:11.5px;
@@ -346,7 +348,7 @@
   /* ════════════════════════════════════════════════════════════════════════
      APP
      ════════════════════════════════════════════════════════════════════════ */
-  let DATA, STATE = { tab:"overview", range:90, metric:"visitors", live:false };
+  let DATA, STATE = { tab:"overview", range:7, metric:"visitors", live:false };
 
   // ── Live data ───────────────────────────────────────────────────────────
   // Served from Vercel, the page calls its own /api/dashboard (same origin) and
@@ -378,20 +380,28 @@
   // the page is always fully shaped (no missing-field crashes).
   function mergeLive(demo, live){
     const d = { ...demo };
-    if(live.online != null) d.online = live.online;
+    d.online = (live.online != null) ? live.online : 0;
     if(live.kpi) d.kpi = { ...demo.kpi, ...live.kpi };
-    if(live.metricsData){
-      d.metrics = { ...demo.metrics };
-      const mk=(label,fmt,short,tip,series,dlt)=>({label,series,dlt,goodDown:false,fmt,short,tip,agg:()=>sumRange(series)});
-      const mv=live.metricsData.visitors;
-      if(mv && Array.isArray(mv.series) && mv.series.length)
-        d.metrics.visitors = mk("Visitors", fmtN, v=>fmtK(v), fmtN, mv.series, typeof mv.dlt==="number"?mv.dlt:demo.metrics.visitors.dlt);
-      const mr=live.metricsData.revenue;
-      if(mr && Array.isArray(mr.series) && mr.series.length)
-        d.metrics.revenue = mk("Revenue", v=>fmt$(v), v=>"$"+fmtK(v), v=>fmt$(v), mr.series, typeof mr.dlt==="number"?mr.dlt:demo.metrics.revenue.dlt);
-    }
+
+    // Only surface metrics we genuinely have from live data (visitor + revenue
+    // series, and revenue/visitor derived from them). Demo-only metrics
+    // (conversion, bounce, session) are dropped so we never show invented
+    // numbers as real ones.
+    const md = live.metricsData || {};
+    const visS = (md.visitors && Array.isArray(md.visitors.series) && md.visitors.series.length) ? md.visitors.series : demo.metrics.visitors.series;
+    const revS = (md.revenue  && Array.isArray(md.revenue.series)  && md.revenue.series.length ) ? md.revenue.series  : demo.metrics.revenue.series;
+    const sum = s => sliceRange(s).reduce((a,b)=>a+b.v,0);
+    const rpvS = revS.map((p,i)=>({ d:p.d, full:p.full, v:(visS[i]&&visS[i].v)?p.v/visS[i].v:0 }));
+    d.metrics = {
+      visitors:      { label:"Visitors", series:visS, dlt:(md.visitors&&typeof md.visitors.dlt==="number")?md.visitors.dlt:0, goodDown:false, fmt:fmtN, short:v=>fmtK(v), tip:fmtN, agg:()=>sum(visS) },
+      revenue:       { label:"Revenue", series:revS, dlt:(md.revenue&&typeof md.revenue.dlt==="number")?md.revenue.dlt:0, goodDown:false, fmt:v=>fmt$(v), short:v=>"$"+fmtK(v), tip:v=>fmt$(v), agg:()=>sum(revS) },
+      revpervisitor: { label:"Revenue / visitor", series:rpvS, dlt:0, goodDown:false, fmt:v=>fmt$2(v), short:v=>"$"+v.toFixed(1), tip:v=>fmt$2(v), agg:()=>{const vv=sum(visS); return vv? sum(revS)/vv : 0;} },
+    };
+    if(!d.metrics[STATE.metric]) STATE.metric="visitors";
+
+    // Sections: live value, or EMPTY (never demo) so nothing fake appears.
     for(const key of ["sources","plans","countries","recent","funnelConv","funnelOnb","features","clickmap","scroll","pages","retention"]){
-      if(Array.isArray(live[key]) && live[key].length) d[key] = adaptSection(key, live[key]);
+      d[key] = (Array.isArray(live[key]) && live[key].length) ? adaptSection(key, live[key]) : [];
     }
     return d;
   }
@@ -419,9 +429,9 @@
         <span class="srcbadge ${STATE.live?'on':''}">${STATE.live?'live data':'demo data'}</span>
         <div class="spacer"></div>
         <div class="seg" id="rangeSeg">
-          <button data-r="7">7d</button>
+          <button data-r="7" class="on">7d</button>
           <button data-r="30">30d</button>
-          <button data-r="90" class="on">90d</button>
+          <button data-r="90">90d</button>
         </div>
         <button class="icon-btn" id="refreshBtn" title="Refresh">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
@@ -564,16 +574,16 @@
   }
 
   function computeIssues(){
-    const out=[], m=DATA.metrics;
-    const b=m.bounce.agg(); if(b>=72) out.push(["warn",`High bounce rate — ${Math.round(b)}%`,"Most visitors leave without a second pageview. Tighten the hero message and load speed."]);
-    if(m.conversion.dlt<0) out.push(["warn",`Conversion down ${Math.abs(m.conversion.dlt).toFixed(1)}% vs prev period`,"Fewer visitors are turning into paid — check the paywall and checkout steps."]);
+    const out=[], m=DATA.metrics||{};
+    if(m.bounce){ const b=m.bounce.agg(); if(b>=72) out.push(["warn",`High bounce rate — ${Math.round(b)}%`,"Most visitors leave without a second pageview. Tighten the hero message and load speed."]); }
+    if(m.conversion && m.conversion.dlt<0) out.push(["warn",`Conversion down ${Math.abs(m.conversion.dlt).toFixed(1)}% vs prev period`,"Fewer visitors are turning into paid — check the paywall and checkout steps."]);
     const f=DATA.funnelConv||[]; let worst=null;
     for(let i=1;i<f.length;i++){ const drop=f[i-1].count?1-f[i].count/f[i-1].count:0; if(!worst||drop>worst.d) worst={a:f[i-1].name,b:f[i].name,d:drop}; }
     if(worst) out.push(["info",`Biggest drop-off: ${worst.a} → ${worst.b}`,`${(worst.d*100).toFixed(0)}% of users fall off at this step — the highest-leverage place to fix.`]);
-    if(m.revenue.dlt<0) out.push(["warn",`Revenue down ${Math.abs(m.revenue.dlt).toFixed(1)}%`,"Revenue is trending down across the selected window."]);
-    else out.push(["good",`Revenue up ${m.revenue.dlt.toFixed(1)}%`,"Revenue is trending up across the selected window."]);
+    if(m.revenue){ if(m.revenue.dlt<0) out.push(["warn",`Revenue down ${Math.abs(m.revenue.dlt).toFixed(1)}%`,"Revenue is trending down across the selected window."]); else if(m.revenue.dlt>0) out.push(["good",`Revenue up ${m.revenue.dlt.toFixed(1)}%`,"Revenue is trending up across the selected window."]); }
     const top=(DATA.sources||[]).slice().sort((a,b)=>b.mrr-a.mrr)[0];
-    if(top) out.push(["good",`${top.name} is your top revenue source`,`${fmt$(top.mrr)} MRR from ${fmtN(top.customers)} customers.`]);
+    if(top && top.mrr>0) out.push(["good",`${top.name} is your top revenue source`,`${fmt$(top.mrr)} MRR from ${fmtN(top.customers)} customers.`]);
+    if(!out.length) out.push(["info","Nothing to flag yet","Not enough data in this range to surface an issue — try a wider range, or check back once more events have come in."]);
     return out.slice(0,4);
   }
   function issuesPanel(){
@@ -644,35 +654,30 @@
         <div class="card-h"><h3>Recent paying customers</h3><span class="hint">attributed source</span></div>
         <div class="tbl-scroll"><table>
           <thead><tr><th>Customer</th><th>Plan</th><th>Source</th><th>Country</th><th>Amount</th><th>When</th></tr></thead>
-          <tbody>${DATA.recent.map(r=>`<tr>
+          <tbody>${DATA.recent.length?DATA.recent.map(r=>`<tr>
             <td class="mono">${esc(r.email)}</td>
             <td><span class="pill ${r.planKey}">${r.plan}</span></td>
             <td>${esc(r.source)}</td>
             <td>${r.flag} ${esc(r.country)}</td>
             <td class="tnum">${fmt$(r.amount)}</td>
             <td style="color:var(--faint)">${esc(r.when)}</td>
-          </tr>`).join("")}</tbody>
+          </tr>`).join(""):`<tr><td colspan="6" class="empty-cell">No recent payments in this range.</td></tr>`}</tbody>
         </table></div>
       </div>`;
   }
 
   function sourceTable(){
     const dim = STATE.dim||"channel";
-    const rows = DATA.sources.slice().map(s=>({
-      name: s[dim]||s.name,
-      visitors:s.visitors, signups:s.signups, customers:s.customers,
-      conv: s.customers/s.visitors*100, mrr:s.mrr, total:s.total,
-      rpv: s.total/s.visitors
-    }));
     // merge rows that share the same dimension label
     const merged={};
-    rows.forEach(r=>{
-      const k=r.name;
+    DATA.sources.forEach(s=>{
+      const k=s[dim]||s.name||"—";
       if(!merged[k]) merged[k]={name:k,visitors:0,signups:0,customers:0,mrr:0,total:0};
-      merged[k].visitors+=r.visitors; merged[k].signups+=r.signups; merged[k].customers+=r.customers;
-      merged[k].mrr+=r.mrr; merged[k].total+=r.total;
+      merged[k].visitors+=s.visitors||0; merged[k].signups+=s.signups||0; merged[k].customers+=s.customers||0;
+      merged[k].mrr+=s.mrr||0; merged[k].total+=s.total||0;
     });
-    let list=Object.values(merged).map(r=>({...r,conv:r.customers/r.visitors*100,rpv:r.total/r.visitors}));
+    let list=Object.values(merged).map(r=>({...r, conv:r.visitors?r.customers/r.visitors*100:0, rpv:r.visitors?r.total/r.visitors:0}));
+    if(!list.length) return `<div class="empty-note">No revenue-by-${esc(dim)} data for this range yet. (Needs Stripe subscriptions tagged with metadata.convexUserId, mapped to PostHog first-touch.)</div>`;
     const sk=STATE.srcSort||"mrr", dir=STATE.srcDir==null?-1:STATE.srcDir;
     list.sort((a,b)=> (a[sk]<b[sk]?-1:a[sk]>b[sk]?1:0)*dir);
     const cols=[["name","Source"],["visitors","Visitors"],["signups","Signups"],["customers","Customers"],["conv","Conv %"],["mrr","MRR"],["total","Total"],["rpv","Rev / visitor"]];
@@ -727,12 +732,12 @@
         <div class="card-h"><h3>Feature usage — what's being used</h3><span class="hint">in-app events · last 30d</span></div>
         <div class="tbl-scroll"><table>
           <thead><tr><th>Event</th><th>Events</th><th>Unique users</th><th>Events / user</th></tr></thead>
-          <tbody>${DATA.features.map(f=>`<tr>
+          <tbody>${DATA.features.length?DATA.features.map(f=>`<tr>
             <td class="mono">${esc(f.event)}</td>
             <td class="tnum">${fmtN(f.events)}</td>
             <td class="tnum">${fmtN(f.users)}</td>
-            <td class="tnum">${(f.events/f.users).toFixed(1)}</td>
-          </tr>`).join("")}</tbody>
+            <td class="tnum">${f.users?(f.events/f.users).toFixed(1):"—"}</td>
+          </tr>`).join(""):`<tr><td colspan="4" class="empty-cell">No in-app feature events for this range yet.</td></tr>`}</tbody>
         </table></div>
       </div>
 
@@ -741,19 +746,19 @@
           <div class="card-h"><h3>Click map — top clicked elements</h3><span class="hint">$autocapture</span></div>
           <div class="tbl-scroll"><table>
             <thead><tr><th>Page</th><th>Element</th><th>Clicks</th></tr></thead>
-            <tbody>${DATA.clickmap.map(c=>`<tr>
+            <tbody>${DATA.clickmap.length?DATA.clickmap.map(c=>`<tr>
               <td class="mono">${esc(c.page)}</td>
               <td>${esc(c.element)}</td>
               <td class="tnum">${fmtN(c.clicks)}</td>
-            </tr>`).join("")}</tbody>
+            </tr>`).join(""):`<tr><td colspan="3" class="empty-cell">No click data for this range yet.</td></tr>`}</tbody>
           </table></div>
         </div>
         <div class="card">
           <div class="card-h"><h3>Scroll depth · landing</h3><span class="hint">scroll_depth_reached</span></div>
-          <div class="sd">${DATA.scroll.map(s=>`
+          <div class="sd">${DATA.scroll.length?DATA.scroll.map(s=>`
             <div class="sd-row"><span class="sdl">${s.depth}%</span>
               <div class="sd-track"><div class="sd-fill" data-bar="${s.pct}" style="width:0"></div></div>
-              <span class="sdv">${s.pct}%</span></div>`).join("")}
+              <span class="sdv">${s.pct}%</span></div>`).join(""):`<div class="empty-note">No scroll-depth data for this range yet.</div>`}
           </div>
         </div>
       </div>
@@ -774,6 +779,7 @@
      COMPONENTS
      ════════════════════════════════════════════════════════════════════════ */
   function barList(rows){
+    if(!rows || !rows.length) return `<div class="blist"><div class="empty-note">No data for this range yet.</div></div>`;
     const max=Math.max(...rows.map(r=>r.value),1);
     return `<div class="blist">${rows.map(r=>{
       const w=(r.value/max*100).toFixed(1);
@@ -788,6 +794,7 @@
   }
 
   function funnel(steps,showDrop){
+    if(!steps || !steps.length || !steps[0].count) return `<div class="funnel"><div class="empty-note">No funnel data for this range yet. (Needs the funnel's events in PostHog.)</div></div>`;
     const top=steps[0].count;
     return `<div class="funnel">${steps.map((s,i)=>{
       const ofTop=s.count/top*100;
@@ -804,6 +811,7 @@
   }
 
   function retention(grid){
+    if(!grid || !grid.length) return `<div class="ret"><div class="empty-note">No retention data yet.</div></div>`;
     const wk=grid[0].vals.length;
     const color=v=>{
       const a=Math.max(.08, v/100);
