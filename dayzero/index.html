@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marketing an app on day zero — Jeremy Lasne</title>
+<meta name="description" content="A build-in-public teardown of a pre-launch marketing plan. Win day zero and you win the launch.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  *{ box-sizing:border-box; }
+  html{ background:#1A1712; }
+  body{ margin:0; font-family:'VT323',monospace; color:#241C13; image-rendering:pixelated; -webkit-font-smoothing:none; }
+  svg{ shape-rendering:crispEdges; }
+  ::selection{ background:#F4E24C; color:#241C13; }
+  @keyframes twinkle{ 0%,100%{ opacity:1; } 50%{ opacity:.25; } }
+  @keyframes glowpulse{ 0%,100%{ opacity:.55; } 50%{ opacity:1; } }
+  @keyframes drift{ 0%{ transform:translateY(-10px); opacity:0; } 20%{ opacity:.8; } 100%{ transform:translateY(120px); opacity:0; } }
+  @keyframes sway{ 0%,100%{ transform:rotate(-4deg); } 50%{ transform:rotate(4deg); } }
+  @keyframes bob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-6px); } }
+  /* scroll-driven depth odometer: rolls the strip down as the page scrolls.
+     Compositor-driven, so it tracks scroll even when JS timers are throttled. */
+  @keyframes depthroll{ from{ transform:translateY(0); } to{ transform:translateY(-260px); } }
+  @media (prefers-reduced-motion: reduce){ *{ animation:none !important; } }
+  @media print{
+    html,body{ background:#fff; }
+    .hud,.deco,.dust{ display:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════ PIXEL NEWSPRINT BACKDROP ════════════ -->
+<div style="position:relative;width:100%;overflow:hidden;background:
+  url('data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%276%27%20height=%276%27%20shape-rendering=%27crispEdges%27%3E%3Crect%20width=%272%27%20height=%272%27%20fill=%27%23241C13%27%20fill-opacity=%270.10%27/%3E%3C/svg%3E') 0 0/6px 6px,
+  linear-gradient(180deg,
+    #ECE4D2 0px, #E7DCC7 1800px,
+    #E0D4BD 3400px, #D8CBB1 5200px);">
+
+  <!-- faint newspaper body-text rules -->
+  <div style="position:absolute;inset:0;pointer-events:none;opacity:.45;background:
+    repeating-linear-gradient(0deg, rgba(36,28,19,.07) 0 2px, transparent 2px 9px);"></div>
+  <!-- vertical column rules -->
+  <div style="position:absolute;inset:0;pointer-events:none;opacity:.5;background:
+    repeating-linear-gradient(90deg, transparent 0 278px, rgba(36,28,19,.14) 278px 280px);"></div>
+
+  <!-- column edge hairlines flanking the content -->
+  <div class="deco" style="position:absolute;top:0;bottom:0;left:max(8px,calc(50% - 462px));width:3px;background:#241C13;opacity:.55;box-shadow:6px 0 0 -1px rgba(36,28,19,.3);"></div>
+  <div class="deco" style="position:absolute;top:0;bottom:0;right:max(8px,calc(50% - 462px));width:3px;background:#241C13;opacity:.55;box-shadow:-6px 0 0 -1px rgba(36,28,19,.3);"></div>
+
+  <!-- ════════════ CONTENT SHAFT ════════════ -->
+  <div style="position:relative;max-width:880px;margin:0 auto;padding:0 60px 140px;">
+
+    <!-- ───── MASTHEAD · title, video, definition ───── -->
+    <div style="padding-top:120px;position:relative;text-align:center;">
+      <div style="display:inline-flex;align-items:center;gap:12px;margin-bottom:26px;">
+        <span style="width:13px;height:13px;background:#E8553A;display:inline-block;"></span>
+        <span style="font-family:'Press Start 2P',monospace;font-size:11px;letter-spacing:.14em;color:#8A7A5E;">BUILD IN PUBLIC</span>
+      </div>
+      <h1 style="font-family:'Press Start 2P',monospace;font-size:clamp(20px,4.4vw,38px);line-height:1.5;letter-spacing:-.01em;color:#211B14;margin:0 0 8px;text-shadow:3px 3px 0 rgba(36,28,19,.14);">MARKETING<br>AN APP ON<br><span style="color:#E8553A;">DAY ZERO</span></h1>
+      <div style="height:4px;width:200px;margin:26px auto 0;background:#241C13;box-shadow:0 6px 0 -1px #241C13;"></div>
+
+      <!-- video card (pixel newspaper photo) -->
+      <a href="https://jeremylasne.com" target="_blank" rel="noopener" style="display:block;max-width:600px;margin:46px auto 0;border:4px solid #241C13;box-shadow:9px 9px 0 #241C13;background:
+        url('data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%276%27%20height=%276%27%20shape-rendering=%27crispEdges%27%3E%3Crect%20width=%272%27%20height=%272%27%20fill=%27%23241C13%27%20fill-opacity=%270.22%27/%3E%3C/svg%3E') 0 0/6px 6px,
+        linear-gradient(180deg,#cfc2a6,#b7a988);text-decoration:none;position:relative;">
+        <div style="aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;position:relative;">
+          <span style="position:absolute;top:12px;left:14px;font-family:'Press Start 2P',monospace;font-size:9px;letter-spacing:.12em;color:#241C13;background:#F4C84B;border:2px solid #241C13;padding:5px 9px;">WATCH</span>
+          <span style="width:0;height:0;border-style:solid;border-width:26px 0 26px 44px;border-color:transparent transparent transparent #F3E9D6;filter:drop-shadow(4px 4px 0 #241C13);"></span>
+        </div>
+        <div style="border-top:4px solid #241C13;background:#F3E9D6;padding:14px 18px;text-align:left;">
+          <div style="font-family:'Press Start 2P',monospace;font-size:11px;color:#211B14;line-height:1.5;">Building in public</div>
+          <div style="font-family:'VT323',monospace;font-size:20px;color:#5C544A;margin-top:4px;">The whole launch, filmed. Watch on X &gt;</div>
+        </div>
+      </a>
+
+      <!-- day zero definition (newspaper dictionary entry) -->
+      <div style="max-width:600px;margin:36px auto 0;text-align:left;border:4px solid #241C13;background:#F3E9D6;box-shadow:9px 9px 0 #241C13;padding:26px 28px;">
+        <div style="font-family:'Press Start 2P',monospace;font-size:9px;letter-spacing:.14em;color:#8A7A5E;margin-bottom:14px;">DEFINITION</div>
+        <div style="font-family:'Press Start 2P',monospace;font-size:15px;color:#211B14;margin-bottom:4px;">day zero</div>
+        <div style="font-family:'VT323',monospace;font-size:21px;color:#7A7060;font-style:italic;margin-bottom:14px;">noun. the day the product ships.</div>
+        <p style="font-family:'VT323',monospace;font-size:22px;line-height:1.5;color:#3D352A;margin:0;">The work you do before it exists. You market the product first, so a crowd is already waiting on the day it launches. Win day zero and you win the launch.</p>
+      </div>
+    </div>
+
+    <!-- ───── CHAMBER · the idea ───── -->
+    <div style="position:relative;margin-top:80px;">
+      <div style="position:absolute;top:-58px;left:50%;transform:translateX(-50%);font-family:'Press Start 2P',monospace;font-size:9px;color:#C9A86B;letter-spacing:.1em;">0m · TOPSOIL</div>
+      <div style="background:#F3E9D6;border:4px solid #241C13;box-shadow:9px 9px 0 #241C13;padding:38px 40px;position:relative;">
+        <span style="position:absolute;top:-3px;right:18px;background:#E8553A;border:3px solid #241C13;padding:5px 11px;font-family:'Press Start 2P',monospace;font-size:9px;color:#fff;transform:translateY(-50%);">START</span>
+        <h2 style="font-family:'Press Start 2P',monospace;font-size:clamp(13px,2.4vw,17px);line-height:1.6;color:#241C13;margin:0 0 22px;">A cold launch is<br>a dead launch.</h2>
+        <p style="font-family:'VT323',monospace;font-size:23px;line-height:1.5;color:#3D352A;margin:0 0 18px;">Most founders treat marketing as something that starts on launch day. You ship, you post once, you wait. Then nothing happens, because nobody was there to hear it.</p>
+        <p style="font-family:'VT323',monospace;font-size:23px;line-height:1.5;color:#3D352A;margin:0;">The whole job before launch is one sentence. <span style="background:linear-gradient(transparent 58%,#F4E24C 58%);padding:0 2px;">Turn strangers into a waitlist that installs on day one.</span> Everything below digs toward that.</p>
+      </div>
+    </div>
+
+    <!-- connector -->
+    <div class="deco" style="width:8px;height:60px;margin:0 auto;background:repeating-linear-gradient(180deg,#5a4630 0 8px,transparent 8px 16px);"></div>
+
+    <!-- ───── LAYER 01 ───── -->
+    <div style="position:relative;margin-top:8px;">
+      <div style="position:absolute;top:-44px;left:50%;transform:translateX(-50%);font-family:'Press Start 2P',monospace;font-size:9px;color:#C9A86B;letter-spacing:.1em;">-15m · ROCK</div>
+      <div style="background:#F3E9D6;border:4px solid #241C13;box-shadow:9px 9px 0 #241C13;padding:38px 40px;position:relative;">
+        <span style="position:absolute;top:-3px;left:18px;background:#241C13;padding:5px 11px;font-family:'Press Start 2P',monospace;font-size:9px;color:#F4C84B;transform:translateY(-50%);">LAYER 01</span>
+        <h2 style="font-family:'Press Start 2P',monospace;font-size:clamp(13px,2.4vw,17px);line-height:1.6;color:#241C13;margin:8px 0 20px;">Build an<br>organic empire.</h2>
+        <p style="font-family:'VT323',monospace;font-size:23px;line-height:1.5;color:#3D352A;margin:0 0 22px;">The landing page is secretly a media company. It publishes like one and it ranks like one. The point is traffic that compounds on its own, so the site is a channel by launch, not a brochure.</p>
+        <ul style="list-style:none;margin:0 0 22px;padding:0;display:flex;flex-direction:column;gap:13px;">
+          <li style="font-family:'VT323',monospace;font-size:22px;line-height:1.35;color:#241C13;display:flex;gap:13px;"><span style="color:#E8553A;flex:none;font-weight:bold;">▸</span><span>5 blog articles a day, built to rank for real search intent</span></li>
+          <li style="font-family:'VT323',monospace;font-size:22px;line-height:1.35;color:#241C13;display:flex;gap:13px;"><span style="color:#E8553A;flex:none;font-weight:bold;">▸</span><span>Daily articles on authority sites for reach and backlinks</span></li>
+          <li style="font-family:'VT323',monospace;font-size:22px;line-height:1.35;color:#241C13;display:flex;gap:13px;"><span style="color:#E8553A;flex:none;font-weight:bold;">▸</span><span>4 directory listings a day. Small links that add up to authority</span></li>
+        </ul>
+        <p style="font-family:'VT323',monospace;font-size:23px;line-height:1.5;color:#3D352A;margin:0;">None of this converts overnight. That is the point. Organic is the ore you mine early so it pays you for free, forever, after the work is done.</p>
+      </div>
+    </div>
+
+    <div class="deco" style="width:8px;height:60px;margin:0 auto;background:repeating-linear-gradient(180deg,#5a4630 0 8px,transparent 8px 16px);"></div>
+
+    <!-- ───── LAYER 02 ───── -->
+    <div style="position:relative;margin-top:8px;">
+      <div style="position:absolute;top:-44px;left:50%;transform:translateX(-50%);font-family:'Press Start 2P',monospace;font-size:9px;color:#B89A60;letter-spacing:.1em;">-22m · DEEP ROCK</div>
+      <div style="background:#F3E9D6;border:4px solid #241C13;box-shadow:9px 9px 0 #241C13;padding:38px 40px;position:relative;">
+        <span style="position:absolute;top:-3px;left:18px;background:#241C13;padding:5px 11px;font-family:'Press Start 2P',monospace;font-size:9px;color:#F4C84B;transform:translateY(-50%);">LAYER 02</span>
+        <h2 style="font-family:'Press Start 2P',monospace;font-size:clamp(13px,2.4vw,17px);line-height:1.6;color:#241C13;margin:8px 0 20px;">Own every<br>potential user.</h2>
+        <p style="font-family:'VT323',monospace;font-size:23px;line-height:1.5;color:#3D352A;margin:0 0 22px;">Traffic you don't capture is traffic you rent. So every visitor has one job: get on the list. <span style="background:linear-gradient(transparent 58%,#F4E24C 58%);padding:0 2px;">An algorithm can change overnight. An email list cannot be taken away.</span></p>
+        <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:13px;">
+          <li style="font-family:'VT323',monospace;font-size:22px;line-height:1.35;color:#241C13;display:flex;gap:13px;"><span style="color:#E8553A;flex:none;font-weight:bold;">▸</span><span>Build the waitlist now, long before the app is live</span></li>
+          <li style="font-family:'VT323',monospace;font-size:22px;line-height:1.35;color:#241C13;display:flex;gap:13px;"><span style="color:#E8553A;flex:none;font-weight:bold;">▸</span><span>The newsletter is fed by the blog as readers subscribe</span></li>
+          <li style="font-family:'VT323',monospace;font-size:22px;line-height:1.35;color:#241C13;display:flex;gap:13px;"><span style="color:#E8553A;flex:none;font-weight:bold;">▸</span><span>And fed by the app, where onboarding captures the email</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="deco" style="width:8px;height:60px;margin:0 auto;background:repeating-linear-gradient(180deg,#4a3826 0 8px,transparent 8px 16px);"></div>
+
+    <!-- ───── LAYER 03 ───── -->
+    <div style="position:relative;margin-top:8px;">
+      <div style="position:absolute;top:-44px;left:50%;transform:translateX(-50%);font-family:'Press Start 2P',monospace;font-size:9px;color:#A98C56;letter-spacing:.1em;">-30m · BASALT</div>
+      <div style="background:#F3E9D6;border:4px solid #241C13;box-shadow:9px 9px 0 #241C13;padding:38px 40px;position:relative;">
+        <span style="position:absolute;top:-3px;left:18px;background:#241C13;padding:5px 11px;font-family:'Press Start 2P',monospace;font-size:9px;color:#F4C84B;transform:translateY(-50%);">LAYER 03</span>
+        <h2 style="font-family:'Press Start 2P',monospace;font-size:clamp(13px,2.4vw,17px);line-height:1.6;color:#241C13;margin:8px 0 20px;">Mass social<br>posting.</h2>
+        <p style="font-family:'VT323',monospace;font-size:23px;line-height:1.5;color:#3D352A;margin:0 0 22px;">Social is not for conversion yet. It is for learning. Before launch I run every account hard to find the hook and the format that travels. Low conversion now buys a loud launch later.</p>
+        <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:13px;">
+          <li style="font-family:'VT323',monospace;font-size:22px;line-height:1.35;color:#241C13;display:flex;gap:13px;"><span style="color:#E8553A;flex:none;font-weight:bold;">▸</span><span>Warm up each account for 5 days, then 3 posts a day</span></li>
+          <li style="font-family:'VT323',monospace;font-size:22px;line-height:1.35;color:#241C13;display:flex;gap:13px;"><span style="color:#E8553A;flex:none;font-weight:bold;">▸</span><span>Test hooks and CTAs until the winners are obvious</span></li>
+          <li style="font-family:'VT323',monospace;font-size:22px;line-height:1.35;color:#241C13;display:flex;gap:13px;"><span style="color:#E8553A;flex:none;font-weight:bold;">▸</span><span>Grow every account and send the traffic to the waitlist</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="deco" style="width:8px;height:60px;margin:0 auto;background:repeating-linear-gradient(180deg,#3a2c1d 0 8px,transparent 8px 16px);"></div>
+
+    <!-- ───── LAYER 04 · micro influencers ───── -->
+    <div style="position:relative;margin-top:8px;">
+      <div style="position:absolute;top:-44px;left:50%;transform:translateX(-50%);font-family:'Press Start 2P',monospace;font-size:9px;color:#9A7E4A;letter-spacing:.1em;">-38m · ORE SEAM</div>
+      <div style="background:#F3E9D6;border:4px solid #241C13;box-shadow:9px 9px 0 #241C13;padding:38px 40px;position:relative;">
+        <span style="position:absolute;top:-3px;left:18px;background:#241C13;padding:5px 11px;font-family:'Press Start 2P',monospace;font-size:9px;color:#F4C84B;transform:translateY(-50%);">LAYER 04</span>
+        <h2 style="font-family:'Press Start 2P',monospace;font-size:clamp(13px,2.4vw,17px);line-height:1.6;color:#241C13;margin:8px 0 20px;">Make friends<br>before launch.</h2>
+        <p style="font-family:'VT323',monospace;font-size:23px;line-height:1.5;color:#3D352A;margin:0 0 22px;">The best launch-day reach is borrowed from people who already have an audience. You don't buy that on day one. You mine it now, quietly, one real relationship at a time.</p>
+        <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:13px;">
+          <li style="font-family:'VT323',monospace;font-size:22px;line-height:1.35;color:#241C13;display:flex;gap:13px;"><span style="color:#E8553A;flex:none;font-weight:bold;">▸</span><span>Reach out to micro influencers in the niche, early</span></li>
+          <li style="font-family:'VT323',monospace;font-size:22px;line-height:1.35;color:#241C13;display:flex;gap:13px;"><span style="color:#E8553A;flex:none;font-weight:bold;">▸</span><span>Build a real relationship, not a one-off ask</span></li>
+          <li style="font-family:'VT323',monospace;font-size:22px;line-height:1.35;color:#241C13;display:flex;gap:13px;"><span style="color:#E8553A;flex:none;font-weight:bold;">▸</span><span>Trust now buys reach on launch day</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="deco" style="width:8px;height:60px;margin:0 auto;background:repeating-linear-gradient(180deg,#33271a 0 8px,transparent 8px 16px);"></div>
+
+    <!-- ───── LAYER 05 · launch day ───── -->
+    <div style="position:relative;margin-top:8px;">
+      <div style="position:absolute;top:-44px;left:50%;transform:translateX(-50%);font-family:'Press Start 2P',monospace;font-size:9px;color:#9A7E4A;letter-spacing:.1em;">-46m · NEAR BEDROCK</div>
+      <div style="background:#F3E9D6;border:4px solid #241C13;box-shadow:9px 9px 0 #241C13;padding:38px 40px;position:relative;">
+        <span style="position:absolute;top:-3px;left:18px;background:#E8553A;border:3px solid #241C13;padding:5px 11px;font-family:'Press Start 2P',monospace;font-size:9px;color:#fff;transform:translateY(-50%);">LAYER 05 · GO LOUD</span>
+        <h2 style="font-family:'Press Start 2P',monospace;font-size:clamp(13px,2.4vw,17px);line-height:1.6;color:#241C13;margin:8px 0 20px;">Launch day.<br>Go loud.</h2>
+        <p style="font-family:'VT323',monospace;font-size:23px;line-height:1.5;color:#3D352A;margin:0 0 22px;">Everything above loads the spring. Launch day releases it all at once. The waitlist becomes installs, the CTAs switch from "join the list" to "get the app", and paid finally turns on behind the content that already proved itself.</p>
+        <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:13px;">
+          <li style="font-family:'VT323',monospace;font-size:22px;line-height:1.35;color:#241C13;display:flex;gap:13px;"><span style="color:#E8553A;flex:none;font-weight:bold;">▸</span><span>Every website and social CTA switches to the app</span></li>
+          <li style="font-family:'VT323',monospace;font-size:22px;line-height:1.35;color:#241C13;display:flex;gap:13px;"><span style="color:#E8553A;flex:none;font-weight:bold;">▸</span><span>Send the whole waitlist to the app</span></li>
+          <li style="font-family:'VT323',monospace;font-size:22px;line-height:1.35;color:#241C13;display:flex;gap:13px;"><span style="color:#E8553A;flex:none;font-weight:bold;">▸</span><span>Apple ads go live</span></li>
+          <li style="font-family:'VT323',monospace;font-size:22px;line-height:1.35;color:#241C13;display:flex;gap:13px;"><span style="color:#E8553A;flex:none;font-weight:bold;">▸</span><span>TikTok and Reddit ads run behind the top tested content</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="deco" style="width:8px;height:70px;margin:0 auto;background:repeating-linear-gradient(180deg,#2a1f14 0 8px,transparent 8px 16px);"></div>
+
+    <!-- ───── BEDROCK · the payoff (glowing ore) ───── -->
+    <div style="position:relative;margin-top:8px;">
+      <div style="position:absolute;top:-46px;left:50%;transform:translateX(-50%);font-family:'Press Start 2P',monospace;font-size:9px;color:#F4C84B;letter-spacing:.1em;animation:glowpulse 4s ease-in-out infinite;">-50m · BEDROCK</div>
+      <div style="background:linear-gradient(180deg,#2A2018,#160E08);border:4px solid #E8553A;box-shadow:9px 9px 0 #0a0604, 0 0 40px rgba(232,99,63,.35);padding:42px 40px;position:relative;color:#F3E9D6;">
+        <div style="font-family:'Press Start 2P',monospace;font-size:10px;letter-spacing:.1em;color:#F4C84B;margin-bottom:20px;"><span style="display:inline-block;width:9px;height:9px;background:#E8553A;margin-right:9px;vertical-align:middle;"></span>THE VEIN YOU KEEP</div>
+        <h2 style="font-family:'Press Start 2P',monospace;font-size:clamp(13px,2.4vw,17px);line-height:1.6;color:#fff;margin:0 0 22px;">The three assets<br>I keep.</h2>
+        <p style="font-family:'VT323',monospace;font-size:23px;line-height:1.5;color:#D8CDBA;margin:0 0 28px;">Step back and the five layers are really building three things I keep for good. Each one feeds the others.</p>
+        <div style="display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;padding:24px 18px;border:3px solid #F4C84B;background:rgba(244,200,75,.08);">
+          <span style="font-family:'Press Start 2P',monospace;font-size:11px;line-height:1.7;color:#7FD4E8;text-align:center;">LANDING PAGE<br>+ BLOG</span>
+          <span style="color:#E8553A;font-size:22px;font-family:'VT323',monospace;">&lt;-&gt;</span>
+          <span style="font-family:'Press Start 2P',monospace;font-size:11px;line-height:1.7;color:#F4C84B;text-align:center;">EMAIL<br>LIST</span>
+          <span style="color:#E8553A;font-size:22px;font-family:'VT323',monospace;">&lt;-&gt;</span>
+          <span style="font-family:'Press Start 2P',monospace;font-size:11px;line-height:1.7;color:#E8633F;text-align:center;">MOBILE<br>APP</span>
+        </div>
+        <p style="font-family:'VT323',monospace;font-size:21px;line-height:1.5;color:#9C9182;margin:24px 0 0;text-align:center;">Powered by organic and social now. Partnerships later.</p>
+      </div>
+    </div>
+
+    <!-- ───── CTA ───── -->
+    <div style="margin-top:50px;text-align:center;">
+      <p style="font-family:'VT323',monospace;font-size:31px;line-height:1.38;color:#211B14;max-width:620px;margin:0 auto 30px;border-top:4px solid #241C13;border-bottom:4px solid #241C13;padding:24px 0;">Don't wait for the product to start. <span style="background:linear-gradient(transparent 58%,#F4E24C 58%);padding:0 3px;">Build the audience that is already waiting.</span> It is the one part of the launch you can begin before there is anything to launch.</p>
+      <a href="https://x.com/jeremylasne" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:12px;padding:16px 26px;background:#E8553A;border:3px solid #241C13;box-shadow:6px 6px 0 #241C13;font-family:'Press Start 2P',monospace;font-size:12px;color:#fff;text-decoration:none;">FOLLOW THE BUILD &gt;</a>
+      <div style="font-family:'VT323',monospace;font-size:20px;color:#7A7060;margin-top:22px;">@jeremylasne on X</div>
+    </div>
+
+  </div>
+
+  <!-- floor of the pit -->
+  <div class="deco" style="position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(180deg,transparent,#0a0604);box-shadow:inset 0 -8px 0 #000;"></div>
+</div>
+
+<!-- ════════════ DEPTH HUD (scroll-driven odometer) ════════════ -->
+<div class="hud" style="position:fixed;right:18px;bottom:18px;z-index:50;display:flex;align-items:center;gap:10px;padding:10px 14px;background:#241C13;border:3px solid #F3E9D6;box-shadow:4px 4px 0 rgba(0,0,0,.4);">
+  <span style="width:14px;height:14px;background:#F4C84B;display:inline-block;box-shadow:0 0 8px rgba(244,200,75,.7);"></span>
+  <span style="font-family:'Press Start 2P',monospace;font-size:10px;color:#F3E9D6;display:inline-flex;align-items:center;">DEPTH&nbsp;
+    <span style="display:inline-block;height:26px;width:34px;overflow:hidden;text-align:right;vertical-align:middle;">
+      <span id="depth-strip" style="display:block;animation-name:depthroll;animation-duration:1s;animation-timing-function:linear;animation-fill-mode:both;animation-timeline:scroll(root block);">
+        <span style="display:block;height:26px;line-height:26px;">0</span>
+        <span style="display:block;height:26px;line-height:26px;">5</span>
+        <span style="display:block;height:26px;line-height:26px;">10</span>
+        <span style="display:block;height:26px;line-height:26px;">15</span>
+        <span style="display:block;height:26px;line-height:26px;">20</span>
+        <span style="display:block;height:26px;line-height:26px;">25</span>
+        <span style="display:block;height:26px;line-height:26px;">30</span>
+        <span style="display:block;height:26px;line-height:26px;">35</span>
+        <span style="display:block;height:26px;line-height:26px;">40</span>
+        <span style="display:block;height:26px;line-height:26px;">45</span>
+        <span style="display:block;height:26px;line-height:26px;">50</span>
+      </span>
+    </span>m</span>
+</div>
+
+<!-- Depth gauge fallback: scroll-driven CSS animation timelines are Chromium-only.
+     Where unsupported, drive the same strip with a scroll listener. -->
+<script>
+(function(){
+  var strip = document.getElementById('depth-strip');
+  if (!strip) return;
+  var supportsScrollTimeline =
+    window.CSS && CSS.supports && CSS.supports('animation-timeline: scroll()');
+  if (supportsScrollTimeline) return;
+  strip.style.animation = 'none';
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function update(){
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+    strip.style.transform = 'translateY(' + (-260 * p) + 'px)';
+  }
+  if (reduce){ strip.style.transform = 'translateY(0)'; return; }
+  update();
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update, { passive: true });
+})();
+</script>
+
+</body>
+</html>
