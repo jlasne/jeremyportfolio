@@ -147,6 +147,24 @@
   .agree div:last-child{ margin-bottom:0; }
   .agree b{ color:#F4C84B; flex:none; font-family:'Press Start 2P',monospace; font-size:9px; padding-top:5px; }
 
+  /* ── one page schema ────────────────────────────── */
+  .schemawrap{ overflow-x:auto; margin:28px 0 4px; border:3px solid #241C13; background:#EFE6D2; padding:16px 14px; }
+  /* 620 is the narrowest the labels stay legible at, and it clears the 646px
+     of inner content width on desktop, so only small screens ever scroll */
+  svg.schema{ display:block; width:100%; min-width:620px; height:auto; }
+  .scrollhint{ font-size:18px; margin-bottom:8px; display:none; }
+  @media (max-width:760px){ .scrollhint{ display:block; } }
+  .nest{ border:4px solid #241C13; background:#F3E9D6; padding:14px 14px 16px; }
+  .nest.n2{ border-color:#7A5A00; background:#F1E4C8; margin-top:14px; }
+  .nest.n3{ border-color:#2C6E8F; background:#E8E5D6; margin-top:14px; }
+  .nest.n4{ border-color:#B23A26; background:#F2E2D6; margin-top:14px; }
+  .nesthead{ font-family:'Press Start 2P',monospace; font-size:9px; line-height:1.7; letter-spacing:.06em; color:#241C13; margin-bottom:10px; }
+  .nest.n2 > .nesthead{ color:#7A5A00; }
+  .nest.n3 > .nesthead{ color:#2C6E8F; }
+  .nest.n4 > .nesthead{ color:#B23A26; }
+  .nestbody{ font-family:'VT323',monospace; font-size:21px; line-height:1.4; color:#3D352A; }
+  @media (max-width:640px){ .nest{ padding:11px 9px 12px; } .nesthead{ font-size:8px; } }
+
   /* ── index + hud ────────────────────────────────── */
   .index{ margin:30px auto 0; max-width:600px; border:4px solid #241C13; background:#F3E9D6; box-shadow:9px 9px 0 #241C13; padding:22px 24px; text-align:left; }
   .index a{ display:flex; gap:12px; font-family:'VT323',monospace; font-size:21px; line-height:1.3; color:#3D352A; text-decoration:none; padding:5px 0; border-bottom:2px dotted #C4B593; }
@@ -174,7 +192,33 @@
   }
 
   @media (prefers-reduced-motion: reduce){ *{ animation:none !important; } html{ scroll-behavior:auto; } }
-  @media print{ html,body{ background:#fff; } .hud,.rules,.cols,.edge{ display:none !important; } }
+  @media print{
+    html,body{ background:#fff; }
+    .hud,.rules,.cols,.edge{ display:none !important; }
+    .card,.lab,.nest,.schemawrap{ box-shadow:none !important; }
+    /* "print this page" hides the lecture so the schema really is one page */
+    body.schema-only .shaft > *:not(#schema){ display:none !important; }
+    body.schema-only .shaft{ padding:0; }
+    body.schema-only .card{ border-width:3px; padding:0 0 12px; }
+    body.schema-only #schema .tag{ position:static; transform:none; display:inline-block; margin-bottom:10px; }
+    body.schema-only .scrollhint,body.schema-only .printrow{ display:none !important; }
+    /* 70% keeps the whole loop above the fold of one A4 sheet; print DPI is high
+       enough that the shrunken labels stay sharp on paper */
+    body.schema-only svg.schema{ min-width:0; width:70%; margin:0 auto; }
+    /* squeeze it onto a single sheet: drop the prose intros, keep the diagram,
+       the four clocks and the closing line */
+    body.schema-only #schema .card > p:not(.closing){ display:none !important; }
+    body.schema-only #schema h2{ font-size:12px; margin:0 0 10px; }
+    body.schema-only #schema h3{ font-size:9px; margin:14px 0 8px; }
+    body.schema-only .schemawrap{ overflow:visible; margin:10px 0 0; padding:6px; border-width:2px; }
+    body.schema-only .nest{ padding:6px 7px 7px; border-width:3px; }
+    body.schema-only .nest.n2,body.schema-only .nest.n3,body.schema-only .nest.n4{ margin-top:6px; }
+    body.schema-only .nesthead{ font-size:7px; margin-bottom:5px; }
+    body.schema-only .nestbody{ font-size:12.5px; line-height:1.2; }
+    body.schema-only .closing{ font-size:14px; line-height:1.3; margin-top:10px !important; }
+    body.schema-only{ margin:0; }
+    @page{ margin:10mm; }
+  }
 </style>
 </head>
 <body>
@@ -216,6 +260,7 @@
         <a href="#l8"><i>08</i><span>Where value moves</span></a>
         <a href="#l9"><i>09</i><span>Nothing chained together</span></a>
         <a href="#end"><i>10</i><span>Build your own compass</span><em>PLAY</em></a>
+        <a href="#schema"><i>11</i><span>The one page schema</span><em>PRINT</em></a>
       </div>
     </div>
 
@@ -575,6 +620,144 @@
       </div>
     </div>
 
+    <div class="connector"></div>
+
+    <!-- ════════ ONE PAGE SCHEMA ════════ -->
+    <div class="sect" id="schema" data-hud="THE SCHEMA">
+      <div class="card">
+        <span class="tag hot">THE ONE PAGE SCHEMA</span>
+        <h2>Every cycle<br>on one page.</h2>
+        <p>This is the whole lecture compressed into one picture. The loop is Dalio's big cycle. The nested frames underneath show the shorter cycles that turn inside it, because they all run at the same time at different speeds, which is the part most people miss.</p>
+
+        <div class="schemawrap">
+          <svg class="schema" viewBox="0 0 760 560" role="img" aria-label="Diagram of the big cycle as a six stage loop, from new order through rise, reserve currency, the top, bust and printing, and conflict, returning to a new order.">
+            <!-- ── connectors ── -->
+            <g stroke="#241C13" stroke-width="4" fill="#241C13">
+              <line x1="226" y1="114" x2="264" y2="114"/><polygon points="264,108 264,120 274,114" stroke="none"/>
+              <line x1="491" y1="114" x2="529" y2="114"/><polygon points="529,108 529,120 539,114" stroke="none"/>
+              <line x1="645" y1="176" x2="645" y2="318"/><polygon points="639,318 651,318 645,330" stroke="none"/>
+              <line x1="536" y1="388" x2="498" y2="388"/><polygon points="498,382 498,394 488,388" stroke="none"/>
+              <line x1="271" y1="388" x2="233" y2="388"/><polygon points="233,382 233,394 223,388" stroke="none"/>
+            </g>
+            <!-- the return leg: the only dashed line, because it is the one nobody plans for -->
+            <g stroke="#E8553A" stroke-width="4" fill="#E8553A">
+              <line x1="115" y1="328" x2="115" y2="184" stroke-dasharray="11 8"/>
+              <polygon points="109,184 121,184 115,172" stroke="none"/>
+            </g>
+            <text x="103" y="251" transform="rotate(-90 103 251)" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="8" fill="#E8553A">AND IT BEGINS AGAIN</text>
+            <text x="663" y="247" transform="rotate(90 663 247)" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="8" fill="#8A7A5E">PRESSURE BUILDS</text>
+
+            <!-- ── centre ── -->
+            <text x="380" y="228" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="14" fill="#241C13">THE BIG CYCLE</text>
+            <text x="380" y="252" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="8" fill="#8A7A5E">ROUGHLY 250 YEARS</text>
+            <text x="380" y="270" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="8" fill="#8A7A5E">10 TO 20 YEAR HANDOVERS</text>
+            <text x="380" y="300" text-anchor="middle" font-family="'VT323',monospace" font-size="19" fill="#5C5344" textLength="216" lengthAdjust="spacingAndGlyphs">The four quadrants rotate</text>
+            <text x="380" y="318" text-anchor="middle" font-family="'VT323',monospace" font-size="19" fill="#5C5344" textLength="225" lengthAdjust="spacingAndGlyphs">many times inside one lap.</text>
+
+            <!-- ── stage boxes ── -->
+            <g font-family="'VT323',monospace" font-size="17" fill="#3D352A">
+
+              <!-- 01 -->
+              <rect x="10" y="56" width="210" height="116" fill="#F3E9D6" stroke="#241C13" stroke-width="4"/>
+              <rect x="10" y="56" width="34" height="22" fill="#241C13"/>
+              <text x="19" y="72" font-family="'Press Start 2P',monospace" font-size="10" fill="#F4C84B">01</text>
+              <text x="20" y="102" font-family="'Press Start 2P',monospace" font-size="11" fill="#241C13">NEW ORDER</text>
+              <text x="20" y="124" textLength="178" lengthAdjust="spacingAndGlyphs">A war ends. The winners</text>
+              <text x="20" y="140" textLength="124" lengthAdjust="spacingAndGlyphs">write the rules.</text>
+              <rect x="14" y="146" width="202" height="22" fill="#CDE8C4"/>
+              <text x="115" y="161" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="8" fill="#1C4E31">FRAGILE PAYS</text>
+
+              <!-- 02 -->
+              <rect x="275" y="56" width="210" height="116" fill="#F3E9D6" stroke="#241C13" stroke-width="4"/>
+              <rect x="275" y="56" width="34" height="22" fill="#241C13"/>
+              <text x="284" y="72" font-family="'Press Start 2P',monospace" font-size="10" fill="#F4C84B">02</text>
+              <text x="285" y="102" font-family="'Press Start 2P',monospace" font-size="11" fill="#241C13">THE RISE</text>
+              <text x="285" y="124" textLength="162" lengthAdjust="spacingAndGlyphs">Education, invention,</text>
+              <text x="285" y="140" textLength="139" lengthAdjust="spacingAndGlyphs">trade, then money.</text>
+              <rect x="279" y="146" width="202" height="22" fill="#CDE8C4"/>
+              <text x="380" y="161" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="8" fill="#1C4E31">FRAGILE PAYS</text>
+
+              <!-- 03 -->
+              <rect x="540" y="56" width="210" height="116" fill="#F3E9D6" stroke="#241C13" stroke-width="4"/>
+              <rect x="540" y="56" width="34" height="22" fill="#241C13"/>
+              <text x="549" y="72" font-family="'Press Start 2P',monospace" font-size="10" fill="#F4C84B">03</text>
+              <text x="550" y="102" font-family="'Press Start 2P',monospace" font-size="11" fill="#241C13">RESERVE MONEY</text>
+              <text x="550" y="124" textLength="178" lengthAdjust="spacingAndGlyphs">The world saves in your</text>
+              <text x="550" y="140" textLength="178" lengthAdjust="spacingAndGlyphs">money. You borrow free.</text>
+              <rect x="544" y="146" width="202" height="22" fill="#CDE8C4"/>
+              <text x="645" y="161" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="8" fill="#1C4E31">FRAGILE STILL PAYS</text>
+
+              <!-- 04 -->
+              <rect x="540" y="330" width="210" height="116" fill="#F3E9D6" stroke="#241C13" stroke-width="4"/>
+              <rect x="540" y="330" width="34" height="22" fill="#241C13"/>
+              <text x="549" y="346" font-family="'Press Start 2P',monospace" font-size="10" fill="#F4C84B">04</text>
+              <text x="550" y="376" font-family="'Press Start 2P',monospace" font-size="11" fill="#241C13">THE TOP</text>
+              <text x="550" y="398" textLength="186" lengthAdjust="spacingAndGlyphs">Costs rise, rivals copy,</text>
+              <text x="550" y="414" textLength="170" lengthAdjust="spacingAndGlyphs">the empire overspends.</text>
+              <rect x="544" y="420" width="202" height="22" fill="#F4D98A"/>
+              <text x="645" y="435" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="8" fill="#7A5A00">THE HANDOVER BEGINS</text>
+
+              <!-- 05 -->
+              <rect x="275" y="330" width="210" height="116" fill="#F3E9D6" stroke="#241C13" stroke-width="4"/>
+              <rect x="275" y="330" width="34" height="22" fill="#241C13"/>
+              <text x="284" y="346" font-family="'Press Start 2P',monospace" font-size="10" fill="#F4C84B">05</text>
+              <text x="285" y="376" font-family="'Press Start 2P',monospace" font-size="11" fill="#241C13">BUST AND PRINT</text>
+              <text x="285" y="398" textLength="155" lengthAdjust="spacingAndGlyphs">Default or print. It</text>
+              <text x="285" y="414" textLength="108" lengthAdjust="spacingAndGlyphs">always prints.</text>
+              <rect x="279" y="420" width="202" height="22" fill="#F2C9C1"/>
+              <text x="380" y="435" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="8" fill="#7A2419">ANTIFRAGILE PAYS</text>
+
+              <!-- 06 -->
+              <rect x="10" y="330" width="210" height="116" fill="#F3E9D6" stroke="#241C13" stroke-width="4"/>
+              <rect x="10" y="330" width="34" height="22" fill="#241C13"/>
+              <text x="19" y="346" font-family="'Press Start 2P',monospace" font-size="10" fill="#F4C84B">06</text>
+              <text x="20" y="376" font-family="'Press Start 2P',monospace" font-size="11" fill="#241C13">CONFLICT</text>
+              <text x="20" y="398" textLength="162" lengthAdjust="spacingAndGlyphs">Populism, then a test</text>
+              <text x="20" y="414" textLength="155" lengthAdjust="spacingAndGlyphs">of power. New rules.</text>
+              <rect x="14" y="420" width="202" height="22" fill="#F2C9C1"/>
+              <text x="115" y="435" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="8" fill="#7A2419">ANTIFRAGILE PAYS</text>
+            </g>
+
+            <!-- ── footnote ── -->
+            <text x="380" y="492" text-anchor="middle" font-family="'VT323',monospace" font-size="19" fill="#7A7060" textLength="648" lengthAdjust="spacingAndGlyphs">Stages 01 to 03 are calm and reward being fragile. Stages 05 and 06 are the</text>
+            <text x="380" y="510" text-anchor="middle" font-family="'VT323',monospace" font-size="19" fill="#7A7060" textLength="622" lengthAdjust="spacingAndGlyphs">avalanche. Stage 04 is where the two swap over, and nobody rings a bell.</text>
+            <text x="380" y="538" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="8" fill="#8A7A5E">LOOP AND STAGES AFTER DALIO. FRAGILITY LABELS AFTER DETENTE.</text>
+          </svg>
+        </div>
+        <div class="scrollhint quiet">Scroll the diagram sideways to see the whole loop.</div>
+
+        <h3>THE FOUR CLOCKS, ALL RUNNING AT ONCE</h3>
+        <p>The loop above is the slowest clock. Three faster ones turn inside it, and every one of them is a different person's life work. Read this from the outside in.</p>
+
+        <div class="nest n1">
+          <div class="nesthead">ROUGHLY 250 YEARS &middot; THE BIG CYCLE &middot; DALIO</div>
+          <div class="nestbody"><b>What turns:</b> which country writes the rules, and whose money the world saves in. <b>What you do:</b> work out which stage you are standing in, and never assume the current order is permanent. Of the 750 currencies since 1700, fewer than a fifth still exist.</div>
+
+          <div class="nest n2">
+            <div class="nesthead">ROUGHLY 80 YEARS &middot; FOUR GENERATIONS &middot; DETENTE</div>
+            <div class="nestbody"><b>What turns:</b> the appetite for risk itself. Hard times make strong people, strong people make good times, good times make comfortable people, and comfortable people make hard times. He lays it over the American interest rate curve, which climbs until about 1980 and falls to zero after. <b>What you do:</b> notice that prudence is a fashion, and that it is most popular just before it stops working.</div>
+
+            <div class="nest n3">
+              <div class="nesthead">3 TO 10 YEARS &middot; THE FOUR QUADRANTS &middot; GAVE</div>
+              <div class="nestbody"><b>What turns:</b> growth and inflation, and nothing else. <b>What you do:</b> read the two dials, cross off the one or two assets that always get hurt in that box, and hold the rest. This is the only clock on this page you can actually check on a given morning.</div>
+
+              <div class="nest n4">
+                <div class="nesthead">DAYS TO WEEKS &middot; THE AVALANCHE &middot; DETENTE</div>
+                <div class="nestbody"><b>What turns:</b> everything, at once. <b>What you do:</b> nothing, because by then it is far too late. This is the layer you prepare for during the other three, and it is the only one that ever actually settles the bill.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="closing" style="margin-top:26px;"><span class="mark">Long cycles set the rules. Generations set the mood. Quadrants set the weather. Avalanches settle the bill.</span> If you remember one line off this page, that is the one, because it tells you which clock any piece of advice you hear is actually talking about.</p>
+
+        <div class="printrow" style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <button class="btn hot" id="printSchema" type="button">PRINT THIS PAGE</button>
+          <span class="quiet" style="font-size:19px;">Prints the schema on its own, without the rest of the lecture.</span>
+        </div>
+      </div>
+    </div>
+
     <!-- ════════ SOURCES ════════ -->
     <div style="margin-top:60px;">
       <div class="card" style="background:#EADFC8;">
@@ -930,6 +1113,17 @@
     answers = [null, null, null, null];
     [].slice.call(quiz.querySelectorAll(".opt")).forEach(function(o){ o.classList.remove("sel"); });
     out.innerHTML = ""; go.disabled = true;
+  });
+
+  /* ══════════ PRINT THE SCHEMA ALONE ══════════ */
+  var printBtn = document.getElementById("printSchema");
+  function unmark(){ document.body.classList.remove("schema-only"); }
+  printBtn.addEventListener("click", function(){
+    document.body.classList.add("schema-only");
+    window.addEventListener("afterprint", unmark, { once:true });
+    // Safari does not always fire afterprint, so clear the class regardless
+    window.setTimeout(unmark, 3000);
+    window.print();
   });
 
   /* ══════════ HUD ══════════ */
