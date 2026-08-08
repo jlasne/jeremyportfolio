@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Four Clocks — an essay on reading the economy you actually live in · Jeremy Lasne</title>
+<meta name="description" content="A long essay in twelve chapters on how economies turn: danger against risk, the four weathers, the two dials, the big cycle, why states always print, fragility, and where value moves. Built from Ray Dalio, Charles Gave and Richard Detente.">
+<meta name="author" content="Jeremy Lasne">
+<link rel="canonical" href="https://jeremylasne.com/economy/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Four Clocks">
+<meta property="og:description" content="An essay on reading the economy you actually live in. Twelve chapters, from what danger really means to why every clock in the system runs at a different speed.">
+<meta property="og:url" content="https://jeremylasne.com/economy/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:creator" content="@jeremylasne">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  /* ═══════════════════════════════════════════════════════════════
+     THE FOUR CLOCKS — a classical setting.
+     Cream paper, Garamond roman, rubric red for the apparatus.
+     One text column with a true margin for sidenotes on wide screens;
+     below 1080px the notes fold into the column and open on click.
+     ═══════════════════════════════════════════════════════════════ */
+
+  :root{
+    --col: 660px;      /* the measure — about 68 characters at 21px */
+    --gut: 260px;      /* the margin where sidenotes live */
+    --gap: 40px;
+    --paper:#FBF7EE;
+    --paper-deep:#F4EEE1;
+    --ink:#221E18;
+    --ink-soft:#4A4238;
+    --ink-faint:#7C7365;
+    --rule:#CFC5B2;
+    --rubric:#8C2F1E;
+    --rubric-pale:#F0E2DC;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; background:var(--paper); }
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'EB Garamond',Garamond,'Times New Roman',serif;
+    font-size:21px;
+    line-height:1.62;
+    font-feature-settings:"onum" 1,"kern" 1,"liga" 1;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  ::selection{ background:var(--rubric-pale); color:var(--ink); }
+
+  /* ── the sheet ───────────────────────────────────────
+     The text block is one measure wide and centred on the viewport at every
+     size. Sidenotes and figures reach out into the right-hand margin, but
+     only from 1300px up, where there is genuinely room for them to do it
+     without pushing the page sideways. Below that they fold into the column. */
+  .sheet{
+    width:100%;
+    max-width:var(--col);
+    margin:0 auto;
+    padding:0 24px 120px;
+  }
+  .col{ width:100%; }
+
+  p{ margin:0 0 1.15em; text-align:justify; hyphens:auto; -webkit-hyphens:auto; text-wrap:pretty; }
+  p:last-child{ margin-bottom:0; }
+  em{ font-style:italic; }
+  strong,b{ font-weight:600; }
+  a{ color:var(--rubric); text-decoration:none; border-bottom:1px solid var(--rubric-pale); }
+  a:hover{ border-bottom-color:var(--rubric); }
+
+  /* the first paragraph of a chapter gets an initial and small caps */
+  .opens{ text-indent:0; }
+  .opens::first-letter{
+    float:left;
+    font-size:4.55em;
+    line-height:.79;
+    padding:.06em .1em 0 0;
+    margin:.02em .04em 0 0;
+    color:var(--rubric);
+    font-weight:500;
+  }
+  .opens .lede{
+    font-variant:small-caps;
+    letter-spacing:.055em;
+    font-weight:500;
+  }
+  /* paragraphs after the first are indented, as in a printed book */
+  .body p + p{ text-indent:1.5em; }
+  .body p + p.noind, .body p.noind{ text-indent:0; }
+
+  /* ── masthead ──────────────────────────────────────── */
+  .masthead{ padding:96px 0 0; text-align:center; }
+  .overline{
+    font-size:12px; letter-spacing:.34em; text-transform:uppercase;
+    color:var(--ink-faint); font-weight:500;
+  }
+  h1{
+    font-weight:500;
+    font-size:clamp(46px,8.6vw,86px);
+    line-height:1.02;
+    letter-spacing:-.012em;
+    margin:26px 0 0;
+  }
+  h1 .amp{ color:var(--rubric); }
+  .subtitle{
+    font-style:italic; font-size:clamp(20px,2.6vw,26px); color:var(--ink-soft);
+    margin:20px auto 0; max-width:30ch; line-height:1.4;
+  }
+  .byline{
+    margin-top:30px; font-size:13px; letter-spacing:.22em; text-transform:uppercase;
+    color:var(--ink-faint);
+  }
+  .thin-rule{ height:1px; background:var(--rule); margin:40px auto; }
+  .diamond{ text-align:center; color:var(--rubric); letter-spacing:1.1em; font-size:15px; margin:52px 0; }
+
+  .epigraph{
+    max-width:min(430px,100%); margin:52px auto 0; text-align:left;
+    font-style:italic; color:var(--ink-soft); font-size:20px; line-height:1.5;
+  }
+  .epigraph .attr{
+    display:block; margin-top:12px; font-style:normal; font-size:12.5px;
+    letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faint);
+  }
+
+  .abstract{
+    padding:30px 0 0;
+    border-top:1px solid var(--rule);
+  }
+  .abstract .lbl{
+    font-size:11.5px; letter-spacing:.3em; text-transform:uppercase;
+    color:var(--rubric); margin-bottom:14px;
+  }
+  .abstract p{ font-size:20px; color:var(--ink-soft); }
+
+  /* ── contents ──────────────────────────────────────── */
+  .contents .lbl{
+    font-size:11.5px; letter-spacing:.3em; text-transform:uppercase;
+    color:var(--rubric); margin-bottom:22px; text-align:center;
+  }
+  .toc-part{
+    font-size:12px; letter-spacing:.26em; text-transform:uppercase;
+    color:var(--ink-faint); margin:26px 0 10px; padding-bottom:6px;
+    border-bottom:1px solid var(--rule);
+  }
+  .toc-part:first-of-type{ margin-top:0; }
+  .toc a{
+    display:flex; align-items:baseline; gap:14px; padding:6px 0;
+    color:var(--ink); border:0; font-size:20px;
+  }
+  .toc a:hover{ color:var(--rubric); }
+  .toc a .num{
+    flex:none; width:44px; font-size:13px; letter-spacing:.1em;
+    color:var(--ink-faint); text-transform:uppercase;
+  }
+  .toc a:hover .num{ color:var(--rubric); }
+  .toc a .fill{ flex:1; border-bottom:1px dotted var(--rule); transform:translateY(-4px); }
+  .toc a .pg{ flex:none; font-size:13px; color:var(--ink-faint); letter-spacing:.08em; }
+
+  /* ── parts & chapters ──────────────────────────────── */
+  .part{ text-align:center; margin:120px auto 0; }
+  .part .pn{
+    font-size:12px; letter-spacing:.34em; text-transform:uppercase; color:var(--rubric);
+  }
+  .part .pt{
+    font-size:clamp(26px,4vw,36px); font-weight:500; margin-top:14px; line-height:1.2;
+  }
+  .part .pd{ font-style:italic; color:var(--ink-faint); margin-top:12px; font-size:19px; }
+  .part::after{
+    content:""; display:block; width:64px; height:1px; background:var(--rubric);
+    margin:26px auto 0;
+  }
+
+  .chapter{ margin-top:86px; }
+  .chapter > .head{ margin-bottom:34px; }
+  .head .cn{
+    font-size:12px; letter-spacing:.3em; text-transform:uppercase; color:var(--rubric);
+    margin-bottom:12px;
+  }
+  h2{
+    font-weight:500; font-size:clamp(30px,4.4vw,40px); line-height:1.14;
+    letter-spacing:-.008em; margin:0;
+  }
+  .head .ct{ font-style:italic; color:var(--ink-faint); margin-top:10px; font-size:19px; }
+  h3{
+    font-weight:500; font-size:15px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--rubric); margin:44px 0 16px;
+  }
+
+  /* a raised, quiet pull-line for the sentences worth keeping */
+  .keep{
+    margin:34px 0; padding:0 0 0 22px; border-left:2px solid var(--rubric);
+    font-size:23px; line-height:1.42; font-style:italic; color:var(--ink);
+  }
+  .keep p{ text-align:left; text-indent:0 !important; margin:0; }
+
+  blockquote{
+    margin:30px 0 30px 26px; padding:0; font-style:italic; color:var(--ink-soft);
+    font-size:20px;
+  }
+  blockquote p{ text-indent:0 !important; }
+  blockquote .attr{
+    display:block; margin-top:10px; font-style:normal; font-size:12px;
+    letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faint);
+  }
+
+  ol.enum, ul.plain{ margin:0 0 1.2em; padding:0 0 0 1.6em; }
+  ol.enum li, ul.plain li{ margin-bottom:.6em; text-align:justify; hyphens:auto; }
+  ul.plain{ list-style:none; padding-left:0; }
+  ul.plain li{ padding-left:1.5em; position:relative; }
+  ul.plain li::before{
+    content:"—"; position:absolute; left:0; color:var(--rubric);
+  }
+  .sc{ font-variant:small-caps; letter-spacing:.05em; }
+
+  /* ── sidenotes ─────────────────────────────────────── */
+  .snref{
+    color:var(--rubric); cursor:pointer; font-size:.68em; vertical-align:super;
+    line-height:0; padding:0 .12em; font-feature-settings:"lnum" 1;
+  }
+  .snref:hover{ text-decoration:underline; }
+  .snbox{ display:none; }
+  /* narrow default: the note folds into the column and opens on click */
+  .sn{
+    display:none;
+    margin:0 0 1.15em;
+    padding:14px 18px;
+    background:var(--paper-deep);
+    border-left:2px solid var(--rubric);
+    font-size:17px; line-height:1.45; color:var(--ink-faint);
+    text-align:left; hyphens:none; text-indent:0 !important;
+  }
+  .snbox:checked + .sn{ display:block; }
+  .sn .n{ color:var(--rubric); margin-right:.4em; font-feature-settings:"lnum" 1; }
+
+  /* ── figures ───────────────────────────────────────── */
+  .figure{ width:100%; margin:54px 0 48px; clear:both; }
+  .figure .fh{
+    font-size:11.5px; letter-spacing:.3em; text-transform:uppercase;
+    color:var(--rubric); margin-bottom:14px;
+    padding-bottom:9px; border-bottom:1px solid var(--rule);
+  }
+  .figure svg{ display:block; width:100%; height:auto; overflow:visible; }
+  .figure .fc{
+    margin-top:16px; padding-top:11px; border-top:1px solid var(--rule);
+    font-size:16.5px; line-height:1.45; color:var(--ink-faint); text-align:left;
+  }
+  .figure .fc b{ color:var(--ink-soft); font-weight:600; }
+  .svgscroll{ overflow-x:auto; }
+  .svgscroll > svg{ min-width:640px; }
+  .fscroll{
+    display:none; margin-top:9px;
+    font-size:11.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faint);
+  }
+  @media (max-width:900px){ .fscroll{ display:block; } }
+
+  /* ── the right-hand margin ───────────────────────────
+     From here up there is room either side of the centred measure for a note
+     to hang in the margin without the page ever scrolling sideways: the far
+     edge of a note sits at col/2 + gap + gut = 630px from centre, and the
+     half-viewport at 1300px is 650px. */
+  @media (min-width:1300px){
+    .snref{ cursor:default; }
+    .sn{
+      display:block; float:right; clear:right;
+      width:var(--gut);
+      margin:.42em calc(-1 * (var(--gut) + var(--gap))) 1.15em 0;
+      padding:0; background:none; border:0;
+      font-size:16.5px;
+    }
+    .figure{ width:calc(var(--col) + var(--gap) + var(--gut)); }
+    .svgscroll{ overflow-x:visible; }
+    .fscroll{ display:none; }
+  }
+
+  /* ── table ─────────────────────────────────────────── */
+  table.tbl{
+    width:100%; border-collapse:collapse; margin:8px 0 0; font-size:17.5px;
+  }
+  table.tbl th{
+    text-align:left; font-weight:500; font-size:11.5px; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--ink-faint);
+    padding:0 16px 9px 0; border-bottom:1px solid var(--ink);
+    vertical-align:bottom;
+  }
+  table.tbl td{
+    padding:13px 16px 13px 0; border-bottom:1px solid var(--rule);
+    vertical-align:top; line-height:1.4; color:var(--ink-soft);
+  }
+  table.tbl td:first-child{ color:var(--ink); width:23%; }
+  table.tbl tr:last-child td{ border-bottom:1px solid var(--ink); }
+
+  /* ── the closing apparatus ─────────────────────────── */
+  .colophon{
+    margin:96px 0 0; padding-top:34px;
+    border-top:1px solid var(--ink);
+  }
+  .colophon .lbl{
+    font-size:11.5px; letter-spacing:.3em; text-transform:uppercase;
+    color:var(--rubric); margin-bottom:20px;
+  }
+  .colophon p, .colophon li{ font-size:18px; color:var(--ink-soft); }
+  .disclaimer{ font-size:16.5px; color:var(--ink-faint); font-style:italic; }
+  .envoi{ text-align:center; padding:56px 0 0; }
+  .envoi .line{
+    text-align:center; text-indent:0 !important;
+    font-size:clamp(24px,3.4vw,31px); line-height:1.34; font-style:italic;
+    border-top:2px solid var(--ink); border-bottom:1px solid var(--ink);
+    padding:30px 0; margin:0;
+  }
+  .signoff{ margin-top:34px; font-size:13px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faint); }
+  .signoff a{ border:0; }
+
+  /* ── running head + progress ───────────────────────── */
+  .runner{
+    position:fixed; top:0; left:0; right:0; z-index:40;
+    display:flex; align-items:center; justify-content:space-between; gap:20px;
+    padding:11px clamp(16px,4vw,38px) 10px;
+    background:rgba(251,247,238,.93);
+    backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px);
+    border-bottom:1px solid var(--rule);
+    font-size:11.5px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--ink-faint);
+    transform:translateY(-102%); transition:transform .28s ease;
+  }
+  .runner.on{ transform:none; }
+  .runner .t{ color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .runner .r{ color:var(--rubric); white-space:nowrap; flex:none; }
+  .progress{
+    position:fixed; top:0; left:0; height:2px; width:0; z-index:41;
+    background:var(--rubric); transition:width .1s linear;
+  }
+  @media (max-width:620px){ .runner .t{ display:none; } }
+
+  @media (max-width:640px){
+    body{ font-size:19.5px; line-height:1.6; }
+    .sheet{ padding:0 20px 90px; }
+    .masthead{ padding-top:68px; }
+    .chapter{ margin-top:64px; }
+    .part{ margin-top:88px; }
+    .opens::first-letter{ font-size:3.9em; }
+    p{ text-align:left; }
+    table.tbl{ font-size:16px; }
+    table.tbl td:first-child{ width:auto; }
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    html{ scroll-behavior:auto; }
+    *{ transition:none !important; }
+  }
+
+  /* ── print: it should behave like an offprint ──────── */
+  @media print{
+    :root{ --col:100%; --gut:0px; --gap:0px; }
+    body{ background:#fff; font-size:11.5pt; line-height:1.42; }
+    .runner,.progress,.contents,.toc,.fscroll{ display:none !important; }
+    .sheet{ max-width:none; padding:0; }
+    .col{ width:100%; }
+    .sn{
+      display:block; float:none; width:100%; margin:8pt 0 10pt;
+      padding-left:10pt; border-left:.5pt solid #999; font-size:9pt;
+    }
+    .part{ page-break-before:always; }
+    /* only things that fit on a page may ask not to be split */
+    .figure,.keep,table.tbl{ page-break-inside:avoid; }
+    h2,h3{ page-break-after:avoid; }
+    a{ color:#000; border:0; }
+    @page{ margin:19mm 20mm; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="prog"></div>
+<div class="runner" id="runner">
+  <span class="t" id="runT">The Four Clocks · Jeremy Lasne</span>
+  <span class="r" id="runR">Prologue</span>
+</div>
+
+<div class="sheet">
+
+  <!-- ══════════════════ MASTHEAD ══════════════════ -->
+  <header class="masthead">
+    <div class="overline">An essay on the economy · in twelve chapters</div>
+    <h1>The Four<br>Clocks</h1>
+    <div class="subtitle">On reading the economy you actually live in, rather than the one you were taught</div>
+    <div class="byline">Jeremy Lasne &nbsp;·&nbsp; after Dalio, Gave &amp; Detente</div>
+
+    <div class="epigraph">
+      To understand what is coming at you, you have to understand what happened before you. Not the last forty years. The last five hundred.
+      <span class="attr">Ray Dalio</span>
+    </div>
+  </header>
+
+  <div class="diamond">❧</div>
+
+  <section class="abstract">
+    <div class="lbl">The argument</div>
+    <p>Almost everything an ordinary person is told about money is a summary of what worked between 1980 and 2020, presented as though it were a law of nature. It was not a law. It was a regime, and regimes end. This essay rebuilds the ground floor. It begins with a single strange morning on the New York Stock Exchange, and by the last page that morning will have explained itself. Along the way it separates two ideas that the word <em>risk</em> has been quietly welding together for a century, hands you a map of the four kinds of weather your money can live in, shows you the only two instruments honest enough to tell you which one you are standing in, and then widens out to the five-hundred-year machine that decides which weather you get at all. The conclusion is not a portfolio. It is a way of noticing that four different clocks are running at once, and that most disagreements about money are really disagreements about which clock is being read.</p>
+  </section>
+
+  <div class="thin-rule"></div>
+
+  <nav class="contents">
+    <div class="lbl">Contents</div>
+    <div class="toc">
+      <div class="toc-part">Prologue</div>
+      <a href="#prologue"><span class="num">—</span><span>A Sunday evening in August</span><span class="fill"></span><span class="pg">1971</span></a>
+
+      <div class="toc-part">Part One · The instruments</div>
+      <a href="#c1"><span class="num">I</span><span>The recipe and the kitchen</span><span class="fill"></span><span class="pg">Detente</span></a>
+      <a href="#c2"><span class="num">II</span><span>Two words that should never have been one</span><span class="fill"></span><span class="pg">Detente</span></a>
+      <a href="#c3"><span class="num">III</span><span>The four weathers</span><span class="fill"></span><span class="pg">Gave</span></a>
+      <a href="#c4"><span class="num">IV</span><span>Two dials nobody can fake</span><span class="fill"></span><span class="pg">Gave</span></a>
+
+      <div class="toc-part">Part Two · The machine</div>
+      <a href="#c5"><span class="num">V</span><span>The art of crossing out</span><span class="fill"></span><span class="pg">Gave</span></a>
+      <a href="#c6"><span class="num">VI</span><span>Five hundred years</span><span class="fill"></span><span class="pg">Dalio</span></a>
+      <a href="#c7"><span class="num">VII</span><span>They always print</span><span class="fill"></span><span class="pg">All three</span></a>
+
+      <div class="toc-part">Part Three · The avalanche</div>
+      <a href="#c8"><span class="num">VIII</span><span>The belly and the tails</span><span class="fill"></span><span class="pg">Detente</span></a>
+      <a href="#c9"><span class="num">IX</span><span>Value is a place, and it moves</span><span class="fill"></span><span class="pg">Detente</span></a>
+      <a href="#c10"><span class="num">X</span><span>Nothing chained together</span><span class="fill"></span><span class="pg">Detente</span></a>
+
+      <div class="toc-part">Part Four · The clocks</div>
+      <a href="#c11"><span class="num">XI</span><span>Four clocks, all running at once</span><span class="fill"></span><span class="pg">Synthesis</span></a>
+      <a href="#c12"><span class="num">XII</span><span>What survives all three</span><span class="fill"></span><span class="pg">Synthesis</span></a>
+
+      <div class="toc-part">Apparatus</div>
+      <a href="#sources"><span class="num">—</span><span>Sources, and what is mine rather than theirs</span><span class="fill"></span><span class="pg">Notes</span></a>
+    </div>
+  </nav>
+
+  <div class="diamond">❧</div>
+
+  <!-- ══════════════════ PROLOGUE ══════════════════ -->
+  <article class="col body chapter" id="prologue" data-run="Prologue">
+    <div class="head">
+      <div class="cn">Prologue</div>
+      <h2>A Sunday evening in August</h2>
+      <div class="ct">In which the market does the opposite of what it should</div>
+    </div>
+
+    <p class="opens"><span class="lede">On the fifteenth</span> of August 1971, a young clerk on the floor of the New York Stock Exchange watched the President of the United States go on television and, in very careful language, break the country's word.</p>
+
+    <p>The clerk was Ray Dalio, twenty-two years old. What Richard Nixon announced that evening was that the dollar would no longer be convertible into gold. Until that moment, gold had been the money used <em>between</em> countries, and paper dollars were cheques written against it. The trouble was that the United States had written far more cheques than it had gold sitting in the vault, and as the rest of the world began queuing up to cash them, the vault was draining. So the cheques were cancelled. Nixon did not use the word default. That is precisely what it was.<label class="snref" for="n1">1</label><input type="checkbox" id="n1" class="snbox"><span class="sn"><span class="n">1</span>The announcement was made on a Sunday evening, deliberately, so that governments and markets would have a night to absorb it before trading opened. The device is still in use. Nothing good is ever announced on a Sunday evening.</span></p>
+
+    <p>Dalio went in early on the Monday expecting carnage. The money had just been broken. Every instinct he had said the market would collapse. It opened in pandemonium — and it went <em>up</em>. It kept going up. Something close to twenty-five per cent.</p>
+
+    <p>He has said since that this was the single most useful morning of his career, because it taught him that his instincts were not knowledge. They were a summary of the small slice of history he had personally lived through, and that slice happened not to contain a currency devaluation. Everything he thought he understood about how the world worked, he had absorbed from about twenty years of weather.</p>
+
+    <div class="keep"><p>The point of this essay is that you are almost certainly in the same position he was in on that Monday morning, and about a much bigger question.</p></div>
+
+    <p class="noind">What follows is a course in why the market went up. Not the mechanical answer, which takes one sentence and teaches you nothing, but the whole answer, which requires knowing what danger actually is, what weather is, what an empire's life cycle looks like from the inside, and why a state that cannot pay its debts has only ever chosen one of the two available doors. By the time we return to that Monday morning — it happens in chapter seven — you should find it obvious. That is the test of whether the intervening chapters have worked.</p>
+
+    <p>Three people do the heavy lifting here, and they are worth introducing, because they have almost nothing in common and they arrive at the same handful of conclusions from completely different directions. <b>Ray Dalio</b> founded and ran one of the largest hedge funds in the world, and after being repeatedly hurt by events that had never happened in his lifetime, he went and read five hundred years of them; he supplies the long arc. <b>Charles Gave</b> is a French portfolio manager who has spent forty years reducing the whole problem to two questions and two measurable ratios; he supplies the map. <b>Richard Detente</b> is an entrepreneur who builds power and computing infrastructure and thinks about money as a physicist thinks about phase changes; he supplies the difference between a bumpy ride and a trapdoor.</p>
+
+    <p>They will disagree in places, and I have kept the disagreements rather than sanding them off. What matters more is the small set of things all three insist on, which arrives in the final chapter, and which is the actual content of this essay. Everything before it is the work of earning the right to state it plainly.</p>
+  </article>
+
+  <!-- ══════════════════ PART ONE ══════════════════ -->
+  <div class="part">
+    <div class="pn">Part One</div>
+    <div class="pt">The instruments</div>
+    <div class="pd">Four chapters on learning to see, before any question of what to own</div>
+  </div>
+
+  <!-- ─────────────── I ─────────────── -->
+  <article class="col body chapter" id="c1" data-run="I · The recipe and the kitchen">
+    <div class="head">
+      <div class="cn">Chapter I</div>
+      <h2>The recipe and<br>the kitchen</h2>
+      <div class="ct">Why the best advice of the last forty years is now a habit</div>
+    </div>
+
+    <p class="opens"><span class="lede">Every piece of</span> beginner advice you have ever been given about money is a compressed history of the years 1980 to 2020. Buy the index. Hold some bonds. Stay calm. Do not touch it. Time in the market beats timing the market. Every one of those sentences is true, and every one of them is true <em>about a particular forty years</em>.</p>
+
+    <p>Those forty years had two features that almost nobody thinks to name, because when a condition holds for your entire adult life it stops looking like a condition and starts looking like the floor. The first: interest rates fell, almost every single year, from a peak of around twenty per cent to something indistinguishable from zero. A falling rate lifts the price of nearly everything that pays out over time — bonds most directly, then property, then shares, then the whole apparatus of finance built on top of them. It is the closest thing to a free lunch that has ever been served in public.<label class="snref" for="n2">2</label><input type="checkbox" id="n2" class="snbox"><span class="sn"><span class="n">2</span>The mechanism is worth holding in your head, because it recurs. A falling discount rate raises the present value of every future payment. When the rate stops falling, that engine does not go into reverse gently — it simply stops, and everything that was quietly being lifted has to stand on its own.</span></p>
+
+    <p>The second: money was broadly trusted. Nobody in the developed world spent the period 1980 to 2020 wondering whether their currency would still be a store of value in ten years. That question, which has occupied most people in most places in most centuries, was simply not live.</p>
+
+    <p>So the recipe was not wrong. A recipe is an answer to a question, and the question was: <em>what should I own while rates fall for forty years and money is trusted?</em> The answer to that question was, correctly, own as much of everything as you can and do not fidget.</p>
+
+    <p>But if the question changes, the answer does not become wisdom. It becomes a habit. Richard Detente has a word for carrying the recipe forward without checking whether the kitchen changed, and he uses it as an insult:</p>
+
+    <div class="keep"><p>Prudence is applying the recipes that worked for the last forty years to the next forty, so that if it fails, nobody can accuse you of having done anything strange.</p></div>
+
+    <p class="noind">That definition does a lot of work, because it identifies what prudence is actually optimising for. Not survival. Not return. <em>Blamelessness.</em> The prudent choice is the one where, if it goes wrong, you were doing what everyone does. It is a social strategy wearing the costume of a financial one, and it is extremely comfortable right up until the moment the environment stops resembling the one the convention was built in.</p>
+
+    <p>This is why the essay has to start where it does. If I began with what to own, you would file it next to everything else you have read and it would change nothing. The instruments have to come first: a way of seeing that is not inherited from the last four decades. There are three of them, and they arrive in order of how deep they go.</p>
+
+    <p>The first is a distinction — between a thing that moves and a thing that can vanish. The second is a map — of the four kinds of weather your money can live in, and the two instruments that tell you which one you are standing in. The third is the long arc — the machine that decides which weather you get in the first place, and which turns so slowly that most people never notice they are inside it.</p>
+
+    <p>We begin with the distinction, because it is the one that costs nothing to adopt and prevents the largest number of disasters.</p>
+  </article>
+
+  <!-- ─────────────── II ─────────────── -->
+  <article class="col body chapter" id="c2" data-run="II · Risk and danger">
+    <div class="head">
+      <div class="cn">Chapter II</div>
+      <h2>Two words that should<br>never have been one</h2>
+      <div class="ct">On the difference between an uncomfortable ride and a missing floor</div>
+    </div>
+
+    <p class="opens"><span class="lede">In finance, the</span> word <em>risk</em> almost always means volatility: how much a price jumps around. An asset that moves two per cent in a day is called risky. An asset that sits perfectly still is called safe. This is not a loose convention at the edges of the field — it is embedded in the mathematics, in the regulation, in the software, and in the questionnaire your bank makes you fill in before it is allowed to sell you anything.</p>
+
+    <p>Detente's objection is that volatility measures comfort, not survival. It tells you how bumpy the ride is. It tells you nothing whatever about whether the vehicle has a floor. So he refuses to let one word do both jobs, and splits it in two.</p>
+
+    <p><b>Risk</b> is how much the price moves. This matters if you might need the money on one specific Tuesday. <b>Danger</b> is the chance the thing becomes worth nothing and never comes back. This matters always.</p>
+
+    <p>Stated that baldly it sounds like a semantic quibble. It is not, and the reason it is not is that the two measures frequently point in <em>opposite</em> directions. This is the whole content of the chapter, and it is best learned through examples rather than argument, so here are five, arranged from the most familiar to the most instructive.</p>
+
+    <h3>Five things, sorted honestly</h3>
+
+    <p class="noind">Start with <b>a salary</b>, which is the purest case and the one everybody owns. The same number arrives on the same day every month, for years. Measured as finance measures things, its volatility is essentially zero; it is the flattest line most people will ever hold. And it can end completely in a single fifteen-minute conversation, after which it is not smaller — it is gone. Perfectly calm. Genuinely lethal. Almost nobody who owns one thinks of it as a position at all, which is precisely the problem: it is usually the largest, most concentrated and most fragile asset a person has, and it does not appear on any statement.</p>
+
+    <p>Now take <b>the bonds of a badly run state</b>. They pay the identical coupon, on the identical date, every single year — right up until the Monday morning a minister goes on television to explain that there will be no more coupons. Volatility near zero for a decade. Danger enormous throughout. Argentina has performed this exact manoeuvre nine times.<label class="snref" for="n3">3</label><input type="checkbox" id="n3" class="snbox"><span class="sn"><span class="n">3</span>Nine sovereign defaults since independence in 1816, the most recent in 2020. In between, each time, the bonds paid beautifully — which is exactly the point. The steady coupon was never evidence of safety. It was the thing that concealed the absence of it.</span></p>
+
+    <p>Against those, put <b>a self-employed driver's income in Paris</b>. It swings violently: fashion week is a windfall, August is a desert, a transport strike is a bonanza and a pandemic is a catastrophe. By the standard measure this is a wildly risky asset. And yet it is extraordinarily hard to take to zero and keep it there, because people do not stop needing to get places. Loud, and very difficult to kill.</p>
+
+    <p>Then <b>a flat in central Paris</b>, which is the rare case where both readings agree and both are low. It moves slowly, it is illiquid, and something is always left standing. To reach zero it takes, quite literally, a bomb.</p>
+
+    <p>And finally <b>one early-stage company with all your money in it</b>, which is the honest box. Loud on the way and entirely capable of zero. Nothing is hidden here. The only real question is what fraction of your total you have put in, and that is a question about sizing rather than about the asset.</p>
+
+    <div class="figure">
+      <div class="fh">Figure I · The two questions, plotted separately</div>
+      <div class="svgscroll">
+      <svg viewBox="0 0 760 470" role="img" aria-label="A scatter plot with volatility on the horizontal axis and danger on the vertical axis. A salary, the bonds of a badly run state and a fund paying ten per cent in a straight line all sit in the top left: low volatility, high danger. A Paris driver's income sits bottom right, high volatility and low danger. A central Paris flat sits bottom left. One early stage company sits top right.">
+        <rect x="90" y="60" width="305" height="165" fill="#8C2F1E" opacity=".055"/>
+        <line x1="90" y1="60" x2="90" y2="390" stroke="#221E18" stroke-width="1.2"/>
+        <line x1="90" y1="390" x2="706" y2="390" stroke="#221E18" stroke-width="1.2"/>
+        <line x1="395" y1="60" x2="395" y2="390" stroke="#CFC5B2" stroke-width="1" stroke-dasharray="3 5"/>
+        <line x1="90" y1="225" x2="706" y2="225" stroke="#CFC5B2" stroke-width="1" stroke-dasharray="3 5"/>
+        <g font-family="'EB Garamond',serif" font-size="13" letter-spacing="2.4" fill="#7C7365">
+          <text x="398" y="425" text-anchor="middle">VOLATILITY →</text>
+          <text x="60" y="225" text-anchor="middle" transform="rotate(-90 60 225)">DANGER →</text>
+          <text x="243" y="212" text-anchor="middle" font-size="12" fill="#8C2F1E">THE CROWDED CORNER</text>
+        </g>
+        <g fill="#8C2F1E">
+          <circle cx="108" cy="72" r="5"/><circle cx="175" cy="100" r="5"/><circle cx="139" cy="133" r="5"/>
+          <circle cx="627" cy="93" r="5"/>
+        </g>
+        <g fill="#4A4238">
+          <circle cx="200" cy="350" r="5"/><circle cx="554" cy="340" r="5"/>
+        </g>
+        <g font-family="'EB Garamond',serif" font-size="19" fill="#221E18">
+          <text x="122" y="68">A fund paying ten per cent</text>
+          <text x="122" y="88">in a perfectly straight line</text>
+          <text x="189" y="106">Bonds of a badly run state</text>
+          <text x="153" y="139">Your salary</text>
+          <text x="613" y="88" text-anchor="end">One early-stage company,</text>
+          <text x="613" y="108" text-anchor="end">all your money in it</text>
+          <text x="214" y="374">A flat in central Paris</text>
+          <text x="542" y="328" text-anchor="end">A Paris driver's income</text>
+        </g>
+      </svg>
+      </div>
+      <div class="fscroll">Scroll the figure sideways →</div>
+      <div class="fc"><b>The habit the plot is for.</b> Before owning anything, answer two separate questions and never let one stand in for the other: <em>how much will this move</em>, and <em>what exactly would have to happen for this to be worth nothing</em>. Notice how crowded the top left is. Nearly everything that <em>feels</em> safe is quiet, and quiet is not the same as safe.</div>
+    </div>
+
+    <h3>The law underneath</h3>
+
+    <p class="noind">One more thing belongs in this chapter, and it is worth carrying for life, because it is not a convention or a rule of thumb. It is closer to a law.</p>
+
+    <p>The link between movement and return is not negotiable. You can absolutely lose money on a violent asset — that happens constantly. What you cannot have is a calm asset that pays a great deal. Return is compensation for bearing something, and if nothing is visibly being borne, then either the compensation is fictitious or the bearing is hidden.</p>
+
+    <p>This is why Bernard Madoff was catchable for years before he was caught. He was not undone by forensic accounting. He was undone by a chart. He claimed roughly ten per cent a year in a nearly straight line, and the universe does not draw that line. Several people worked it out from the shape alone and were ignored, because the shape was exactly what the clients wanted.<label class="snref" for="n4">4</label><input type="checkbox" id="n4" class="snbox"><span class="sn"><span class="n">4</span>Harry Markopolos submitted his analysis to the American regulator in 2000, and again in 2005 under the title <em>The World's Largest Hedge Fund is a Fraud</em>. Madoff was arrested in 2008. The evidence was never the difficulty.</span></p>
+
+    <div class="keep"><p>Anyone offering a lot of return with no movement is either lying, or standing on a trapdoor they have not told you about.</p></div>
+
+    <p class="noind">Hold that alongside the plot above, and you have the first instrument. It is not a strategy and it will not tell you what to buy. It is a filter that removes an entire category of catastrophe — the category in which people are destroyed by things they had classified as safe, using a definition of safety that was never about survival in the first place.</p>
+
+    <p>Which brings the obvious next question. If the calm–violent axis is not the one that matters, what is? What actually determines whether a given thing does well or badly? The answer is the subject of the next chapter, and it is not a property of the thing at all.</p>
+  </article>
+
+  <!-- ─────────────── III ─────────────── -->
+  <article class="col body chapter" id="c3" data-run="III · The four weathers">
+    <div class="head">
+      <div class="cn">Chapter III</div>
+      <h2>The four<br>weathers</h2>
+      <div class="ct">In which the question “is this a good investment?” turns out to be malformed</div>
+    </div>
+
+    <p class="opens"><span class="lede">Charles Gave has</span> spent something like forty years reducing the entire problem to two questions. Everything financial, he argues, reacts mostly to two forces, and only two: <b>is the economy growing</b>, and <b>is money losing its value</b>. Two questions, two possible answers each, four boxes. He calls them the four quadrants, and the reason they matter to a beginner is not that they are a strategy. It is that they kill the most common bad question in investing.</p>
+
+    <p>People ask whether gold is a good investment. Whether bonds are safe. Whether property is a good idea. None of those questions has an answer, because they are missing an argument. It is like asking whether a coat is good clothing.</p>
+
+    <div class="keep"><p>An asset is not good or bad in itself. It is good or bad <em>in a weather</em>.</p></div>
+
+    <p class="noind">Government bonds are the single best thing in the world to own inside one of these four boxes, and a slow, humiliating disaster in another. Gold is almost exactly the reverse. Nothing about the bond or the metal changes when you move between boxes. What changes is the question the world is asking, and therefore what counts as an answer.</p>
+
+    <p>So here are the four, described from the inside — because the useful thing is not the label but what it feels like to be standing in one while it happens.</p>
+
+    <h3>The inflationary bust · no growth, prices rising</h3>
+
+    <p class="noind">The worst room in the house, and the one that produces the ferocious bear markets. Profits fall because energy has become too expensive to transform at a profit, and prices climb anyway. The unbearable part is that everything you own appears to be wrong at the same time: shares fall because earnings fall, bonds fall because inflation is eating the coupon, and cash is being quietly shaved. There is no comfortable corner.</p>
+
+    <p>What holds up is short and physical: cash in a currency run by adults — Gave usually means one where the budget is not a work of fiction, and he usually says the Swiss franc — companies with short duration and real dividends, and energy producers, for the simple reason that the thing hurting everyone else is the thing they sell. What breaks first is long-dated bonds, and what breaks second is long-duration growth shares, as the multiple collapses. Hold on to that word <em>multiple</em>; chapter five is largely about it.</p>
+
+    <p>A fact worth engraving: every truly ferocious bear market since 1945 has begun with a spike in the price of energy. This is where the big ones live.</p>
+
+    <h3>The inflationary boom · growth, prices rising</h3>
+
+    <p class="noind">Business is genuinely good and your money buys a little less every year. Real things run — metals, land, energy, anything scarce and physical — because when the unit of measurement is shrinking, the things that cannot be printed reprice upward against it.</p>
+
+    <p>Gold and shares work together here, which surprises people who have been taught they are opposites. Gave also points at copper, on the grounds that almost no new mines are being opened while electrification needs enormous quantities of it, and at silver to a lesser extent. What you do not want is long-dated bonds: lending at a fixed rate, for a long time, into a currency that is losing value, is close to a formal definition of a bad trade.</p>
+
+    <h3>The deflationary bust · no growth, prices falling</h3>
+
+    <p class="noind">Prices falling, nobody borrowing, nobody hiring, everyone waiting for it to be cheaper next month — which is what makes it self-reinforcing. The 1930s. Cash becomes more valuable simply by sitting still, and debt becomes heavier by the same mechanism, which is why anything financed with borrowing is destroyed here.</p>
+
+    <p>Government bonds are the best thing on earth to hold in this box, and much of the period from 2008 to 2020 was spent in or near it. But note the sentence that makes this box different from the other three, because it is the hinge of the entire essay: <em>central banks have collectively decided that this box is forbidden, and will print money to avoid it.</em> Keep that in your pocket. We come back for it in chapter seven.</p>
+
+    <h3>The deflationary boom · growth, prices flat</h3>
+
+    <p class="noind">The good one. Things get better and cheaper at the same time, nobody discusses the currency at dinner, and optimism is rational rather than manic. Shares work, and particularly the efficiency companies — the ones inventing things that make the same output cost less. Technology usually sits here.</p>
+
+    <p>Gold does nothing and cash does nothing, and holding either is an expensive way to feel careful. This is Gave's favourite quadrant, and his reason for preferring it is characteristic: the rise is <em>broad</em>. Eighty per cent of shares going up ten per cent, rather than ten per cent of shares going up eighty. That distinction will come back with some force in chapter five.</p>
+
+    <div class="figure">
+      <div class="fh">Figure II · The map, and what lives in each room</div>
+      <div class="svgscroll">
+      <svg viewBox="0 0 760 430" role="img" aria-label="A two by two map. The vertical axis is inflation, low at the bottom to high at the top. The horizontal axis is growth, absent on the left and present on the right. Top left is the inflationary bust, where cash and energy hold. Top right is the inflationary boom, where gold and shares hold. Bottom left is the deflationary bust, where government bonds hold. Bottom right is the deflationary boom, where shares hold.">
+        <rect x="120" y="50" width="290" height="150" fill="#8C2F1E" opacity=".05"/>
+        <rect x="410" y="50" width="290" height="150" fill="#B8860B" opacity=".07"/>
+        <rect x="120" y="200" width="290" height="150" fill="#2C6E8F" opacity=".06"/>
+        <rect x="410" y="200" width="290" height="150" fill="#2E7D4F" opacity=".06"/>
+        <g stroke="#221E18" stroke-width="1.2" fill="none">
+          <rect x="120" y="50" width="580" height="300"/>
+          <line x1="410" y1="50" x2="410" y2="350"/>
+          <line x1="120" y1="200" x2="700" y2="200"/>
+        </g>
+        <g font-family="'EB Garamond',serif">
+          <text x="144" y="84" font-size="20" fill="#8C2F1E" letter-spacing="1.6">INFLATIONARY BUST</text>
+          <text x="144" y="110" font-size="18.5" font-style="italic" fill="#4A4238">no growth, prices rising</text>
+          <text x="144" y="146" font-size="18.5" fill="#221E18">Holds: cash, energy, short duration</text>
+          <text x="144" y="170" font-size="18.5" fill="#7C7365">Breaks: long bonds, then growth</text>
+
+          <text x="434" y="84" font-size="20" fill="#8A6508" letter-spacing="1.6">INFLATIONARY BOOM</text>
+          <text x="434" y="110" font-size="18.5" font-style="italic" fill="#4A4238">growth, prices rising</text>
+          <text x="434" y="146" font-size="18.5" fill="#221E18">Holds: gold and shares, copper</text>
+          <text x="434" y="170" font-size="18.5" fill="#7C7365">Breaks: long-dated bonds</text>
+
+          <text x="144" y="234" font-size="20" fill="#2C6E8F" letter-spacing="1.6">DEFLATIONARY BUST</text>
+          <text x="144" y="260" font-size="18.5" font-style="italic" fill="#4A4238">no growth, prices falling</text>
+          <text x="144" y="296" font-size="18.5" fill="#221E18">Holds: government bonds</text>
+          <text x="144" y="320" font-size="18.5" fill="#7C7365">Breaks: anything financed by debt</text>
+
+          <text x="434" y="234" font-size="20" fill="#2E7D4F" letter-spacing="1.6">DEFLATIONARY BOOM</text>
+          <text x="434" y="260" font-size="18.5" font-style="italic" fill="#4A4238">growth, prices flat</text>
+          <text x="434" y="296" font-size="18.5" fill="#221E18">Holds: shares, the efficiency makers</text>
+          <text x="434" y="320" font-size="18.5" fill="#7C7365">Breaks: not much. The good one.</text>
+
+          <text x="88" y="200" font-size="13" letter-spacing="2.4" fill="#7C7365" text-anchor="middle" transform="rotate(-90 88 200)">INFLATION →</text>
+          <text x="410" y="382" font-size="13" letter-spacing="2.4" fill="#7C7365" text-anchor="middle">GROWTH →</text>
+        </g>
+      </svg>
+      </div>
+      <div class="fscroll">Scroll the figure sideways →</div>
+      <div class="fc"><b>How to use it.</b> Not to predict which room you are walking into next — nobody can do that reliably — but to know which one you are standing in now, and therefore which one or two things in your possession are currently being punished. The next chapter is entirely about how you tell.</div>
+    </div>
+
+    <h3>What this does to the word “diversification”</h3>
+
+    <p class="noind">Now look back at the map and consider what most people mean when they say they are diversified. They own ten different shares. Perhaps ten different sectors: pharmaceuticals, technology, banks, industrials, a little energy.</p>
+
+    <p>But every one of those sits in the same half of the map. They are all claims on corporate profit denominated in the same currency. When the weather changes from the right-hand column to the left, they do not diversify each other at all, because they were never four bets.</p>
+
+    <p>Owning ten shares is not four weathers. It is one weather, bought ten times. This point has a second, sharper form which closes the essay in chapter ten, so we will leave it here and pick it up when the rest of the machinery is in place.</p>
+  </article>
+
+  <!-- ─────────────── IV ─────────────── -->
+  <article class="col body chapter" id="c4" data-run="IV · Two dials nobody can fake">
+    <div class="head">
+      <div class="cn">Chapter IV</div>
+      <h2>Two dials<br>nobody can fake</h2>
+      <div class="ct">On the difference between a number and a vote</div>
+    </div>
+
+    <p class="opens"><span class="lede">A map is</span> useless if you cannot tell where you are standing. So: how do you know which of the four rooms you are in?</p>
+
+    <p>The obvious answer is to look it up. Growth is published quarterly; inflation is published monthly; both come with decimal places and a government seal. Gave started there, in 1978, trying to read growth from gross domestic product and industrial production. He gave up, and it took him the better part of forty years to land on something he trusted more.</p>
+
+    <p>He gave up for two reasons. The first is that official figures are revised, often substantially, and always after the moment when a decision had to be made. The second is more uncomfortable: they are produced by institutions that have a preference about the answer. A government that borrows in its own currency has a direct financial interest in a lower reported inflation number, because index-linked spending and the perceived credibility of its debt both depend on it. This does not require anybody to lie. It only requires a long series of small methodological choices, each defensible, all pointing the same way.</p>
+
+    <p>What he moved to instead is <b>prices</b> — and the reason is that a price is not an estimate. It is a vote, cast every second, in public, by millions of people with their own money at stake. Nobody publishes it. Nobody revises it. There is no committee anywhere on earth that sets the price of gold or the price of oil.<label class="snref" for="n5">5</label><input type="checkbox" id="n5" class="snbox"><span class="sn"><span class="n">5</span>Producers can influence the oil price, and central banks hold gold, so neither is a pure state of nature. The claim is narrower and still holds: no single authority can set either number by announcement, and neither can be quietly revised after the fact.</span></p>
+
+    <p>From that he built two ratios. Each answers exactly one of the two questions on the map.</p>
+
+    <h3>Dial one · are we growing?</h3>
+
+    <p class="noind">Divide the S&amp;P 500 by the price of oil, and take a seven-year average.</p>
+
+    <p>The reasoning underneath it fits in one sentence, and it is the sentence to remember from this chapter: <em>the economy is transformed energy.</em> Energy goes in at one end, products and services come out of the other, and listed companies are the machine that does the transforming. If the machine is turning energy into profit efficiently, the ratio climbs. If energy is costing more than the value being created from it, the ratio falls. That single number puts you on the right-hand side of the map or the left.</p>
+
+    <p>It is worth pausing on how much this reframes. Growth stops being an abstract statistic about national output and becomes a physical question about a conversion process — how much useful work are we getting per unit of energy consumed, and is the trend improving. Once you have seen the economy that way it is quite hard to unsee, and it explains why the energy spike keeps turning up at the start of every serious bear market.</p>
+
+    <h3>Dial two · is money losing its value?</h3>
+
+    <p class="noind">Divide the price of gold by the price of long-dated government bonds, and take a seven-year average.</p>
+
+    <p>The logic here is a forced choice. If you want to park value for later, you have exactly two options in the end. One is offered by the state, and that is its bonds: a promise, backed by an institution, that you will be given more later. The other is the one you use when you no longer entirely believe the state, and that is gold: no promise, no counterparty, no interest, just a lump of metal that has been doing this job for four thousand years.</p>
+
+    <p>The ratio between them tells you which of the two the world is currently choosing. Rising means savers are leaving the state's store of value for the one with no counterparty; falling means they are content to hold the state's promise. That puts you in the top half of the map or the bottom.</p>
+
+    <p>Why seven years? Because he tested it against a hundred years of history. Five and six also work; they simply throw more false signals. Seven catches the genuine turns and ignores the noise. And that length is itself the most important warning about how to use these instruments.</p>
+
+    <div class="keep"><p>This is not a trading tool. It moves a handful of times in a working life, and the period 1980 to 2020 was one single unbroken reading.</p></div>
+
+    <p class="noind">Read that last clause next to chapter one and the two halves lock together. The reason the recipe worked for forty years is that the dials did not move for forty years. The advice was not wisdom about markets in general. It was a correct description of one long, unusually stable reading on two instruments, restated so many times that everyone forgot there was an instrument at all.</p>
+
+    <h3>An honest word about the present</h3>
+
+    <p class="noind">There is a temptation, once you have a map and two instruments, to believe you now know what happens next. You do not, and Gave is unusually good about saying so.</p>
+
+    <p>In the conversation this chapter is drawn from, the dials had been sitting in the inflationary boom for roughly three years and had begun sliding toward the border with the inflationary bust. His own summary was that he was not sure; that they were on the frontier; and that transitions are always the hardest moment to read, because the signal and the noise look identical while you are inside one.</p>
+
+    <p>That is the correct posture, and it is worth adopting deliberately, because the alternative is the thing that ruins people. The map does not predict. It tells you which weather you are standing in and what tends to break in it. Everything else is a guess, and the guesses of a man with a map are only better than yours because he knows they are guesses.</p>
+  </article>
+
+  <!-- ══════════════════ PART TWO ══════════════════ -->
+  <div class="part">
+    <div class="pn">Part Two</div>
+    <div class="pt">The machine</div>
+    <div class="pd">What to do with the map, and the five-hundred-year engine that decides which weather you get</div>
+  </div>
+
+  <!-- ─────────────── V ─────────────── -->
+  <article class="col body chapter" id="c5" data-run="V · The art of crossing out">
+    <div class="head">
+      <div class="cn">Chapter V</div>
+      <h2>The art of<br>crossing out</h2>
+      <div class="ct">Building a position by subtraction, and the single most underrated idea in finance</div>
+    </div>
+
+    <p class="opens"><span class="lede">Almost everybody builds</span> a portfolio by inclusion. You collect good things and hope the collection produces a good result. Gave's view is that this is backwards, and his reason is a claim about human capability rather than about markets: you are far worse at guessing what will rise than you are at spotting what is about to be crushed.</p>
+
+    <p>His analogy is the racetrack. You do not need to know which horse wins — that is a very hard problem and the odds are priced by people who have thought about it more than you have. What you need to know is which three or four have <em>no chance at all</em>. Cross those out and spread your money across what remains. Do that consistently and you will beat most of the crowd, not because you are a better forecaster but because you have declined to play the harder game.</p>
+
+    <p>In practice this means four families: shares, bonds, gold, cash. Look at the map from chapter three, work out which room you are in, and notice that in almost any room one or two of the four are obviously going to be hurt. Remove those. Hold the rest.</p>
+
+    <div class="keep"><p>You have not predicted anything. You have removed the way you get hurt.</p></div>
+
+    <p class="noind">Gave's own portfolios typically hold three of the four, sometimes only two. That is worth noting, because it makes the method concrete: management by exclusion is not a mental exercise that ends with owning everything anyway. It ends with genuinely not owning things.</p>
+
+    <table class="tbl">
+      <thead><tr><th>Room</th><th>Cross out</th><th>Keep</th></tr></thead>
+      <tbody>
+        <tr><td>Inflationary bust</td><td>Long bonds; long-duration growth</td><td>Cash in a sound currency, energy, short duration and real dividends</td></tr>
+        <tr><td>Inflationary boom</td><td>Long-dated bonds</td><td>Gold and shares together; scarce physical things</td></tr>
+        <tr><td>Deflationary bust</td><td>Almost everything else, and anything leveraged</td><td>Government bonds; cash</td></tr>
+        <tr><td>Deflationary boom</td><td>Gold and cash, which do nothing</td><td>Shares, especially the efficiency makers</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:16.5px;color:var(--ink-faint);margin-top:12px;text-indent:0;"><b>Table I.</b> The map of chapter three, restated as a subtraction. Read the row you are standing in; the middle column is the work.</p>
+
+    <h3>The idea nobody teaches: duration</h3>
+
+    <p class="noind">The second idea in this chapter is, to my mind, the least understood thing in investing, and once you have it you will see it everywhere.</p>
+
+    <p><b>Duration</b> is how far into the future you are buying. A company priced at twenty times its earnings is, roughly, a claim on twenty years of them. The same company at ten times is a claim on ten. The multiple is not a measure of quality. It is a measure of how far ahead the market currently believes it can see.</p>
+
+    <p>Now watch what inflation does. Inflation is, among other things, an attack on visibility: when prices are moving unpredictably, nobody can forecast a company's costs, revenues or margins five years out with any confidence. So people shorten the claim. Twenty becomes fifteen. Fifteen becomes ten. At the bottom of the genuinely ferocious markets, five.</p>
+
+    <p>Read the consequence slowly, because it is the part that catches people:</p>
+
+    <div class="keep"><p>Nothing about the company has to change for its price to fall by three quarters. Same profits, same product, same staff, same customers. The multiple did all of the damage, because the tunnel of visibility got short.</p></div>
+
+    <p class="noind">This is why so many people are destroyed while being, in a narrow sense, right. They researched the business, the business performed as expected, and the position still lost seventy per cent — because they had bought twenty years of visibility in a world that suddenly could not see past five.</p>
+
+    <p>The practical rule falls straight out of it. <em>When your visibility shortens, shorten your duration.</em> That is the whole reason dull companies paying five per cent dividends become interesting in bad weather. You are being paid <em>now</em> instead of promised <em>later</em>, and in a low-visibility world the difference between now and later is enormous. Gave's own illustration was preferring a Swiss food company yielding five per cent over a rocket company priced at a hundred times its revenue — not because rockets are a bad idea, but because a hundred times revenue is a purchase of an extremely long tunnel.</p>
+
+    <h3>Narrow markets are a warning</h3>
+
+    <p class="noind">The third idea returns to a sentence left hanging in chapter three. Gave would far rather be in a market where eighty per cent of shares rise ten per cent than in one where ten per cent of shares rise eighty per cent, and the reason is not aesthetic.</p>
+
+    <p>A market where everything rises modestly is a market where price discovery is working: thousands of independent judgements about thousands of businesses, producing a broad result. A market where the entire return comes from a handful of names has a different name. It is a bubble, and the defining property of a bubble is not that prices are high. It is that <em>nobody can work out the correct price of anything any more</em>, because the only remaining reason to buy is that everyone else is buying and you cannot bear to be the one who missed it.</p>
+
+    <p>Breadth, in other words, is a measure of whether the market is still a machine for thinking. When it narrows, the machine has stopped, whatever the index level says.</p>
+
+    <p>And to end the chapter on the thing worth holding on to when the crossing-out has been done and the weather has turned anyway — a line Gave borrows from Warren Buffett, and the best possible sentence to have in your head during a crash:</p>
+
+    <blockquote><p>A great bear market is the moment capital returns to its rightful owner.</p><span class="attr">The people who did the work, and had the patience to wait</span></blockquote>
+  </article>
+
+  <!-- ─────────────── VI ─────────────── -->
+  <article class="col body chapter" id="c6" data-run="VI · Five hundred years">
+    <div class="head">
+      <div class="cn">Chapter VI</div>
+      <h2>Five hundred<br>years</h2>
+      <div class="ct">The machine that decides which weather you get</div>
+    </div>
+
+    <p class="opens"><span class="lede">Everything so far</span> has operated on a clock of a few years. The weather turns; you cross things out; it turns again. This chapter changes the clock, and the change is the reason the essay exists at all.</p>
+
+    <p>Ray Dalio has been investing at a global macro level for around fifty years, and his hardest-won lesson is the one from the prologue: the events that hurt him most were always the ones that had never happened <em>in his lifetime</em>. So he trained himself to look for things that were happening for the first time in his experience — and about a decade ago, he noticed three of them at once.</p>
+
+    <ul class="plain">
+      <li><b>Debts so large</b> that even cutting interest rates to zero was not enough, so central banks began printing money to cover them.</li>
+      <li><b>Serious internal conflict</b> from widening gaps in wealth and in values, appearing as populism and polarisation on both the left and the right simultaneously.</li>
+      <li><b>A rising power</b> getting close enough to genuinely challenge the leading one.</li>
+    </ul>
+
+    <p>He had never seen those three together. So he went looking for when they had been, and the search turned into a study of the last five hundred years: the Dutch, British, American and Chinese empires in detail, then Spain, Germany, France, India, Japan, Russia and the Ottomans, and Chinese dynasties back to around the year 600.</p>
+
+    <p>They had all happened together before. Many times. And almost every time, the combination marked the changing of a world order.</p>
+
+    <div class="keep"><p>The last occasion on which this exact combination lined up was 1930 to 1945.</p></div>
+
+    <h3>Eight measures, and why they are better than a date</h3>
+
+    <p class="noind">What lifts this out of pattern-matching is that Dalio measures an empire's power with eight specific things: education; invention and technology; competitiveness in global markets; economic output; share of world trade; military strength; the power of its financial centre; and the strength of its currency as a reserve currency.</p>
+
+    <p>They rise in roughly that order, each pulling the next along behind it, and — this is the part that makes the framework usable — they fall in roughly that order too. Because each is measurable, you can look at a country today and read off which stage it is in, rather than guessing from the mood of the newspapers.</p>
+
+    <p>He is careful about one thing, and so should you be. Like human lives, no two cycles are identical, and age alone is a poor predictor. Knowing that someone is sixty tells you much less than knowing whether they smoke. What you want is the vital signs, not the birthday. The eight measures are the vital signs.</p>
+
+    <h3>The arc, told once through</h3>
+
+    <p class="noind">The full arc lasts around two hundred and fifty years, with handovers of ten to twenty years between them. It runs in six stages, and the best way to absorb it is as a story rather than a list, because each stage is caused by the one before it.</p>
+
+    <p><b>It begins with a new order.</b> A large conflict ends and the winners sit down to write the rules — treaties, institutions, a monetary system. In 1944 that was Bretton Woods, which made the dollar the world's reserve currency; in 1945 it was the institutions built by people who had just lived through two wars and wanted no more of them. Peace follows, not because anybody became kind, but because nobody wishes to fight the country that has just won.</p>
+
+    <p><b>Then the rise.</b> Strong education comes first, and Dalio means character and work ethic quite as much as knowledge. Education produces invention; invention produces competitiveness; competitiveness produces output and a growing share of world trade. Trade routes need protecting, so the military grows. Capital markets develop so that savings can be turned into investment, and the financial centre of the world quietly relocates to wherever this is happening. Amsterdam, then London, then New York. The Dutch invented the listed company and the stock exchange in order to fund their ships, and it made them the richest people alive.<label class="snref" for="n6">6</label><input type="checkbox" id="n6" class="snbox"><span class="sn"><span class="n">6</span>The Dutch East India Company, 1602 — the first company to issue tradeable shares to the public, and the reason Amsterdam had the world's first true stock exchange. The financing technology and the empire are not two separate stories.</span></p>
+
+    <p><b>Then the reserve currency.</b> Once most of the world's trade is settled in your money, everybody wants to save in it, and it becomes the world's reserve currency. This is an enormous privilege: people all over the world are eager to lend your own currency back to you, so you can borrow more than anyone else, and when you run out of money you can simply print more of it. Dalio's phrase for this is the exorbitant privilege. It is also, precisely, where the trouble starts — because it makes borrowing feel free.</p>
+
+    <p><b>Then the top,</b> where the seeds of decline turn out to have been inside the success the whole time. Your people are now expensive, and therefore less competitive than people elsewhere who are willing to work for less. Rivals copy the technology, which is much cheaper than inventing it. The generation that inherited the wealth is not the generation that fought for it, and works less hard for more comfort. And the gains arrive unevenly, so the wealth gap widens, and those at the top use their resources to entrench their position. One sentence contains the whole Dutch decline and the whole British rise: British shipbuilders hired Dutch designers and used cheaper British labour.</p>
+
+    <p><b>Then the bust, and the printing.</b> Debts grow too large, a downturn arrives, the country can no longer borrow enough to repay what it owes, and the bubble bursts. Now there is a choice with exactly two doors: default, or print a great deal of new money. It always chooses to print — gradually at first, then massively. The currency falls, inflation rises, and internal conflict escalates between those who have and those who have not. Taxes on the wealthy rise, so wealth moves to safer places, safer assets and safer currencies, which shrinks the tax base further and forces another turn of the same screw. Dalio calls it a self-reinforcing hollowing out.</p>
+
+    <p><b>Then the fight, and a new order.</b> Populist leaders appear on both sides promising to restore order, and this is the moment at which democracy is most severely tested, because a populace in real economic pain will trade a great deal of process for the promise of a result. The internal fight leaves the country weak — which is exactly when a rising rival is most tempted to test it. There is no court that settles disputes between great powers, so they are settled by tests of power. Out of that come new winners, who sit down to write the rules.</p>
+
+    <p>Which is stage one. The clothes and the technology change. The story does not.</p>
+
+    <div class="figure">
+      <div class="fh">Figure III · The big cycle, with the weather turning inside it</div>
+      <div class="svgscroll">
+      <svg viewBox="0 0 760 640" role="img" aria-label="A six stage loop. Along the top: new order, the rise, the reserve currency. Down the right side pressure builds to the top, then along the bottom: the bust and the printing, then the fight. Then back up the left side to a new order. The four weathers sit inside the loop on a faster clock.">
+        <g font-family="'EB Garamond',serif">
+          <text x="380" y="26" text-anchor="middle" font-size="15" letter-spacing="3" fill="#7C7365">ROUGHLY 250 YEARS</text>
+
+          <g stroke="#221E18" stroke-width="1.2" fill="none">
+            <rect x="16" y="52" width="216" height="118"/>
+            <rect x="272" y="52" width="216" height="118"/>
+            <rect x="528" y="52" width="216" height="118"/>
+            <rect x="528" y="452" width="216" height="118"/>
+            <rect x="272" y="452" width="216" height="118"/>
+            <rect x="16" y="452" width="216" height="118"/>
+          </g>
+          <g stroke="#221E18" stroke-width="1.2" fill="#221E18">
+            <line x1="234" y1="111" x2="262" y2="111"/><polygon points="262,106 262,116 272,111" stroke="none"/>
+            <line x1="490" y1="111" x2="518" y2="111"/><polygon points="518,106 518,116 528,111" stroke="none"/>
+            <line x1="636" y1="172" x2="636" y2="440"/><polygon points="631,440 641,440 636,450" stroke="none"/>
+            <line x1="526" y1="511" x2="498" y2="511"/><polygon points="498,506 498,516 488,511" stroke="none"/>
+            <line x1="270" y1="511" x2="242" y2="511"/><polygon points="242,506 242,516 232,511" stroke="none"/>
+          </g>
+          <g stroke="#8C2F1E" stroke-width="1.2" fill="#8C2F1E">
+            <line x1="124" y1="450" x2="124" y2="182" stroke-dasharray="6 6"/><polygon points="119,182 129,182 124,172" stroke="none"/>
+          </g>
+          <text x="112" y="316" text-anchor="middle" font-size="13" letter-spacing="2.2" fill="#8C2F1E" transform="rotate(-90 112 316)">AND IT BEGINS AGAIN</text>
+          <text x="654" y="306" text-anchor="middle" font-size="13" letter-spacing="2.2" fill="#7C7365" transform="rotate(90 654 306)">PRESSURE BUILDS</text>
+
+          <g font-size="19" fill="#4A4238">
+            <text x="34" y="82" font-size="13" letter-spacing="2" fill="#8C2F1E">I</text>
+            <text x="34" y="112" font-size="22" fill="#221E18">A new order</text>
+            <text x="34" y="140" >A war ends. The winners</text>
+            <text x="34" y="160" >sit down and write rules.</text>
+
+            <text x="290" y="82" font-size="13" letter-spacing="2" fill="#8C2F1E">II</text>
+            <text x="290" y="112" font-size="22" fill="#221E18">The rise</text>
+            <text x="290" y="140" >Education, invention,</text>
+            <text x="290" y="160" >trade — then money.</text>
+
+            <text x="546" y="82" font-size="13" letter-spacing="2" fill="#8C2F1E">III</text>
+            <text x="546" y="112" font-size="22" fill="#221E18">Reserve currency</text>
+            <text x="546" y="140" >The world saves in your</text>
+            <text x="546" y="160" >money. You borrow free.</text>
+
+            <text x="546" y="482" font-size="13" letter-spacing="2" fill="#8C2F1E">IV</text>
+            <text x="546" y="512" font-size="22" fill="#221E18">The top</text>
+            <text x="546" y="540" >Costs rise, rivals copy,</text>
+            <text x="546" y="560" >the empire overspends.</text>
+
+            <text x="290" y="482" font-size="13" letter-spacing="2" fill="#8C2F1E">V</text>
+            <text x="290" y="512" font-size="22" fill="#221E18">Bust, and printing</text>
+            <text x="290" y="540" >Default or print. It has</text>
+            <text x="290" y="560" >always chosen to print.</text>
+
+            <text x="34" y="482" font-size="13" letter-spacing="2" fill="#8C2F1E">VI</text>
+            <text x="34" y="512" font-size="22" fill="#221E18">The fight</text>
+            <text x="34" y="540" >Populism, then a test of</text>
+            <text x="34" y="560" >power. Then new rules.</text>
+          </g>
+
+          <rect x="212" y="210" width="336" height="182" fill="#F4EEE1" stroke="#7C7365" stroke-width="1" stroke-dasharray="5 5"/>
+          <text x="380" y="240" text-anchor="middle" font-size="19" fill="#221E18">The four weathers</text>
+          <text x="380" y="262" text-anchor="middle" font-size="16.5" font-style="italic" fill="#7C7365">a faster clock — many laps per cycle</text>
+          <g stroke="#7C7365" stroke-width="1" fill="none">
+            <rect x="232" y="282" width="296" height="86"/>
+            <line x1="380" y1="282" x2="380" y2="368"/>
+            <line x1="232" y1="325" x2="528" y2="325"/>
+          </g>
+          <g font-size="16" fill="#4A4238">
+            <text x="243" y="308">Infl. bust · cash</text>
+            <text x="391" y="308">Infl. boom · gold</text>
+            <text x="243" y="351">Defl. bust · bonds</text>
+            <text x="391" y="351">Defl. boom · shares</text>
+          </g>
+
+          <text x="380" y="608" text-anchor="middle" font-size="18" font-style="italic" fill="#7C7365">Stages I to III are calm and reward being fragile. Stages V and VI are the avalanche.</text>
+          <text x="380" y="630" text-anchor="middle" font-size="18" font-style="italic" fill="#7C7365">Stage IV is where the two swap over, and nobody rings a bell.</text>
+        </g>
+      </svg>
+      </div>
+      <div class="fscroll">Scroll the figure sideways →</div>
+      <div class="fc"><b>Loop and stages after Dalio; the inner box after Gave; the fragility labels after Detente.</b> The two words in the last line — <em>fragile</em> and <em>antifragile</em> — are not defined yet. They are the subject of chapter eight, and this figure is where the three frameworks turn out to be the same figure seen from three distances.</div>
+    </div>
+
+    <p>One caution before we go on, and it is Dalio's own. None of this is a schedule. It is a set of causal mechanisms that produce a recognisable sequence, and mechanisms can be interrupted, accelerated, or run for decades longer than seems possible. The value of the framework is not that it tells you the date. It is that when three things happen at once that have never happened together in your lifetime, you have somewhere to look them up.</p>
+  </article>
+
+  <!-- ─────────────── VII ─────────────── -->
+  <article class="col body chapter" id="c7" data-run="VII · They always print">
+    <div class="head">
+      <div class="cn">Chapter VII</div>
+      <h2>They always<br>print</h2>
+      <div class="ct">In which the Monday morning finally explains itself</div>
+    </div>
+
+    <p class="opens"><span class="lede">We can now</span> go back and collect the prologue.</p>
+
+    <p>Dalio, confronted with a rising market on the morning after a national default, did what he has done ever since: he went looking for the last time it had happened. He found 1933. Roosevelt, the same underlying problem — more claims on gold than gold — the same broken promise, and the same result. The market rose.</p>
+
+    <p>The mechanism is not subtle once you see it. In both cases, cutting the link to gold allowed the country to carry on spending simply by printing more paper. More paper chasing the same quantity of real wealth means each unit of paper buys less. And if each unit of paper buys less, then anything that is <em>not</em> paper — a share in a business, an ounce of metal, a barrel of oil, a building — is worth more units of paper than it was on Friday.</p>
+
+    <p>The market did not go up because the news was good. The market went up because the ruler had been shortened, and everything measured with it was now numerically larger. Prices are quoted in money; when money is devalued, prices rise, and that arithmetic is indifferent to whether anybody feels optimistic.</p>
+
+    <div class="keep"><p>When central banks print a great deal of money to relieve a crisis, the value of paper falls and the price of shares, gold and commodities rises.</p></div>
+
+    <p class="noind">That is the principle Dalio still uses, and it has been exercised twice more since he formulated it: in 2008 for the mortgage crisis and in 2020 for the pandemic. In both cases the assets rose while the real economy was visibly in trouble, and in both cases a great many people found this offensive rather than explicable.</p>
+
+    <p>And here is the number to carry out of this chapter. Of the roughly 750 currencies that have existed since 1700, fewer than twenty per cent still exist at all. Every single one of the survivors has been devalued. Not most of them. All of them.<label class="snref" for="n7">7</label><input type="checkbox" id="n7" class="snbox"><span class="sn"><span class="n">7</span>Which reframes the question. The interesting question about a currency is not <em>whether</em> it loses value but <em>how fast</em>, and whether the rate is slow enough that you can outrun it with what you own. Chapter seven's last section turns that into a number.</span></p>
+
+    <h3>The same conclusion, reached from policy</h3>
+
+    <p class="noind">Gave arrives at the same place by a completely different road, and the convergence is the reason to trust it.</p>
+
+    <p>His argument is about policy rather than history. After the deflationary depression of the 1930s, central banks concluded — reasonably — that they would never permit that again. The standing instruction became: print at the first hint of it. Which means, in the language of chapter three, that <em>the bottom-left box of the map has been declared forbidden.</em></p>
+
+    <p>But an economy under pressure does not simply stop being under pressure because one exit has been sealed. If the pressure cannot come out as falling prices and defaults, it has to come out somewhere else, and the somewhere else is the top half of the map: rising prices, and a falling currency.</p>
+
+    <p>So Gave's conclusion is that what eventually breaks is not shares. Shares are claims on real businesses that sell real things at whatever prices then prevail; they suffer, they de-rate, they survive. What breaks is <b>bonds and the currency itself</b> — because those are the instruments that are purely promises.</p>
+
+    <p>He separates the two things a bond actually gives you, and the distinction is worth memorising. The <b>return <em>on</em> capital</b> is the rent they pay you for lending — the coupon, the yield, the number everyone discusses. The <b>return <em>of</em> capital</b> is getting your money back at the end, the thing nobody discusses because it is assumed. His worry is not primarily that rates go up and prices go down. It is that a number of governments are simply not in a position to hand the capital back, and that the market has not yet priced the difference between an unpleasant yield and a promise that cannot be kept.</p>
+
+    <h3>The same conclusion, reached by arithmetic</h3>
+
+    <p class="noind">Detente arrives third, and turns it into a number you can feel on your own statement.</p>
+
+    <p>Suppose the money supply grows at something like eight per cent a year. Then anything denominated in that currency returning less than eight per cent a year is being quietly shorn — losing ground against the total quantity of claims on real things — even while your statement shows a perfectly respectable gain. And here is the uncomfortable part: there is almost nothing sold to ordinary savers as <em>prudent</em> that returns more than eight per cent.</p>
+
+    <div class="keep"><p>This is danger by erosion rather than by one bad Monday, which is exactly why nobody notices it. There is no event. There is no headline. There is only a slow subtraction that never appears as a loss.</p></div>
+
+    <p class="noind">Put the three roads together and the conclusion is difficult to escape. Dalio has five hundred years of receipts; Gave has the policy reason it is now structural; Detente has the arithmetic of what it does to a saver in the meantime. Three men, three methods, one answer: when a state cannot pay, it prints, and the cost is distributed across everyone holding its paper, in proportion to how much of it they hold and how long they hold it.</p>
+
+    <p>This is also the moment the essay's two halves join. Chapters two through five gave you a way of reading the weather on a clock of a few years. Chapter six gave you a clock of two hundred and fifty. This chapter is the gearing between them: the reason the long clock produces particular weather is that the end of a long cycle <em>forces</em> the printing, and the printing pushes you into the top half of the map and keeps you there.</p>
+
+    <p>Which leaves one question unanswered, and it is the largest one. If the long clock is turning, what does that do to the ordinary rules — the ones that work perfectly well while it is not turning? For that we need a different distinction, and it is the last of the three instruments.</p>
+  </article>
+
+  <!-- ══════════════════ PART THREE ══════════════════ -->
+  <div class="part">
+    <div class="pn">Part Three</div>
+    <div class="pt">The avalanche</div>
+    <div class="pd">On the short violent intervals that do all of the rearranging, and how to be positioned before one</div>
+  </div>
+
+  <!-- ─────────────── VIII ─────────────── -->
+  <article class="col body chapter" id="c8" data-run="VIII · The belly and the tails">
+    <div class="head">
+      <div class="cn">Chapter VIII</div>
+      <h2>The belly and<br>the tails</h2>
+      <div class="ct">Why the first decision is not which asset, but which world</div>
+    </div>
+
+    <p class="opens"><span class="lede">Systems do not</span> change gradually. They change by avalanche.</p>
+
+    <p>Most of the time it is snowflakes landing gently on a mountain, one after another, for months. Nothing visible happens. The slope accumulates. And what reconfigures the entire mountain is thirty seconds. If you had spent the winter measuring snowfall you would have concluded, correctly and uselessly, that snowfall was gentle and steady.</p>
+
+    <p>So at any given moment you are living in one of two worlds. The <b>belly</b> of the distribution is the ordinary years, where not much happens and the rules hold; this is most of the time, and it is where nearly all financial advice is written. The <b>tails</b> are revolutions, wars and monetary breakdowns. They are very short, very intense, and they do all of the rearranging.</p>
+
+    <p>This is not a mood or a temperament. It gives you a definition you can measure. Plot an asset's return <em>above inflation</em> against how much the world is shaking, and look at the slope of the line.</p>
+
+    <p><b>Fragile:</b> return falls as disturbance rises. It pays you nicely in calm weather and it breaks in a storm. <b>Antifragile:</b> return rises as disturbance rises. It does nothing at all for years, and then does everything at once.</p>
+
+    <div class="figure">
+      <div class="fh">Figure IV · Two assets, both risky, risky at opposite times</div>
+      <div class="svgscroll">
+      <svg viewBox="0 0 760 420" role="img" aria-label="A line chart. The horizontal axis runs from a quiet decade to an avalanche. The vertical axis is real return, with a zero line. The fragile line starts high on the left and falls, crossing zero halfway along. The antifragile line starts below zero on the left and rises, crossing zero earlier. The two lines cross just above zero, a little left of centre.">
+        <g font-family="'EB Garamond',serif">
+          <line x1="90" y1="40" x2="90" y2="330" stroke="#221E18" stroke-width="1.2"/>
+          <line x1="90" y1="200" x2="706" y2="200" stroke="#221E18" stroke-width="1.2"/>
+          <text x="78" y="205" text-anchor="end" font-size="15" fill="#7C7365">0</text>
+          <text x="58" y="185" text-anchor="middle" font-size="13" letter-spacing="2.4" fill="#7C7365" transform="rotate(-90 58 185)">REAL RETURN →</text>
+
+          <line x1="90" y1="100" x2="706" y2="300" stroke="#8C2F1E" stroke-width="1.8"/>
+          <line x1="90" y1="280" x2="706" y2="80" stroke="#2E7D4F" stroke-width="1.8" stroke-dasharray="7 5"/>
+          <circle cx="367" cy="190" r="4.5" fill="#221E18"/>
+          <line x1="367" y1="190" x2="367" y2="330" stroke="#CFC5B2" stroke-width="1" stroke-dasharray="3 5"/>
+          <text x="367" y="352" text-anchor="middle" font-size="17" font-style="italic" fill="#4A4238">the crossing</text>
+
+          <text x="112" y="58" font-size="17" font-style="italic" fill="#7C7365">Everyone calls this prudent,</text>
+          <text x="112" y="80" font-size="17" font-style="italic" fill="#7C7365">and here they are right.</text>
+          <text x="404" y="58" font-size="17" font-style="italic" fill="#7C7365">Years of looking stupid,</text>
+          <text x="404" y="80" font-size="17" font-style="italic" fill="#7C7365">paid back in weeks.</text>
+
+          <text x="700" y="292" text-anchor="end" font-size="19" fill="#8C2F1E">Fragile</text>
+          <text x="700" y="72" text-anchor="end" font-size="19" fill="#2E7D4F">Antifragile</text>
+
+          <text x="98" y="360" font-size="15" letter-spacing="1.6" fill="#7C7365">A QUIET DECADE</text>
+          <text x="700" y="360" text-anchor="end" font-size="15" letter-spacing="1.6" fill="#7C7365">AVALANCHE</text>
+          <text x="398" y="392" text-anchor="middle" font-size="13" letter-spacing="2.4" fill="#7C7365">HOW MUCH THE WORLD IS SHAKING →</text>
+        </g>
+      </svg>
+      </div>
+      <div class="fscroll">Scroll the figure sideways →</div>
+      <div class="fc"><b>Fragile</b> — a salary, long-dated bonds, a leveraged rental, an index of one country's champions. <b>Antifragile</b> — gold, the Japanese yen, property in the hinge countries, and bitcoin on the theory, with its record still being written. Note that neither line is <em>better</em>. They are better at different times, and the decision about which you want is a decision about which end of the axis you expect to be standing at.</div>
+    </div>
+
+    <h3>Why those examples, and what they have in common</h3>
+
+    <p class="noind">Gold is the clean case and needs little explanation: the less people trust, the more it rises, because trust is the only thing it is competing with.</p>
+
+    <p>The Japanese yen is the strange one, and it is worth understanding precisely because it demonstrates that antifragility need not come from innovation or from scarcity. Japanese households save enormously. When the world is calm, that money goes abroad in search of yield, which pushes the yen down. When the world is frightening, it comes home, which pushes the yen up. The mechanism is sociology, not technology. There is nothing intrinsically crisis-proof about the currency; what is crisis-proof is the behaviour of the people who hold it.</p>
+
+    <p>Then the hinge countries. Switzerland and Dubai are places where blocs that are not speaking to each other can nonetheless meet, and where wealthy people go when their own country begins to feel hostile to them. Detente's answer to how long Swiss property keeps rising is blunt to the point of rudeness: until there are no wealthy people left in Europe. Every political shock somewhere else is a bid somewhere hinged. Again the mechanism is not about the asset; it is about a flow that switches on when the world becomes unpleasant.</p>
+
+    <p>And bitcoin, which was designed as an answer to a crisis of confidence in money, and is therefore antifragile by construction rather than by accident. Detente is careful here and I will be too: the theory is clear, the record is still being written, and a thing that has never yet been through a full turn of the long cycle has not been tested against the event it was designed for.</p>
+
+    <h3>The trap runs in both directions</h3>
+
+    <p class="noind">Here is what makes this a genuinely hard decision rather than a clever one, and it is the part that most people skip.</p>
+
+    <p>Holding antifragile assets through a long calm stretch <em>hurts</em>, badly, because nobody needs what you own. You have invented music streaming before the internet exists. You have a brilliant cholera vaccine and there is no cholera. Detente's formulation is that you cannot disrupt a normal universe: innovation only takes hold when something is broken enough that people are actively calling for help. Until then, being right early is operationally identical to being wrong, and it lasts long enough to break most people's conviction.</p>
+
+    <p>And holding fragile assets into a tail event is worse, because that is where the zeros come from — the ones from chapter two, the calm and lethal ones, all of which pay beautifully until the morning they do not.</p>
+
+    <div class="keep"><p>So the first decision is not which asset. It is which world you think you are in. And that is a decision, not a fact. Nobody can make it for you, and nobody can tell you afterwards that you were unreasonable.</p></div>
+
+    <p class="noind">Now look back at Figure III with these two words in hand. Stages one through three of the big cycle — the new order, the rise, the reserve currency — are the belly. They are calm, and they reward being fragile, which is why the whole apparatus of conventional prudence is built in them and works in them. Stages five and six are the avalanche. Stage four, the top, is where the two swap over, and the reason it is so difficult is that no bell rings. The weather on the day of the crossing looks exactly like the weather the day before.</p>
+  </article>
+
+  <!-- ─────────────── IX ─────────────── -->
+  <article class="col body chapter" id="c9" data-run="IX · Value is a place">
+    <div class="head">
+      <div class="cn">Chapter IX</div>
+      <h2>Value is a place,<br>and it moves</h2>
+      <div class="ct">The bet nobody can place on your behalf</div>
+    </div>
+
+    <p class="opens"><span class="lede">There is one</span> more idea, and Detente insists it is the one that cannot be delegated — not to an adviser, not to an index, not to this essay.</p>
+
+    <p>Value is not a substance you store. It is a <em>location</em>, and it moves.</p>
+
+    <p>His definition is refreshingly free of economics: value is what other people want enough to hand over something of their own for. Mow your own lawn and it is a chore. Mow your neighbour's lawn for money and value has been exchanged, because he gave up something real in order to have it done. Nothing about the grass, the mower or the labour changed. What changed is that somebody else wanted it.</p>
+
+    <p>Which means that when the car arrives, the cart does not become slightly less valuable. It goes to zero — slowly, and then completely — and the entire value that used to sit in carts has relocated into something else. If you owned cart factories, being careful with them did not help. Being <em>very</em> careful with them helped even less, because care extends the time you spend holding the thing that is emptying.</p>
+
+    <p>Detente grounds this in physics rather than in economics, and you do not have to accept the whole cosmology to take the practical part. His argument is that the universe has been running an innovation machine since it started: simple structures giving way to more complex ones, each new layer packing more energy through less matter, and — the part that matters — the gap between layers getting shorter every time. Atoms, then molecules, then cells, then organisms, then societies, then machines. The practical residue is a single claim: <em>the interval between disruptions is shrinking.</em> A human life used to contain none. It now contains several.</p>
+
+    <h3>Why prudence was not a trap before, and is one now</h3>
+
+    <p class="noind">This is where the essay's first chapter and its ninth meet, and it is worth being precise, because the argument is not that prudence was always stupid.</p>
+
+    <p>For most of history, change was slower than a human life. A Roman living through the fall of Rome did not experience a fall. He experienced three hundred years of things being a bit rubbish — slightly worse roads, slightly worse coinage, slightly worse security, decade by decade, none of it fast enough to require a decision. In that world you could invest exactly as your grandfather had, and be right. Prudence was not merely respectable; it was <em>correct</em>, because the environment your grandfather's rules were written for was still, substantially, the environment.</p>
+
+    <p>Prudence becomes a trap at precisely the moment the interval between disruptions falls below the length of a working life. Then the rules you inherit were written for an environment that no longer exists, and the fact that they worked for the person who taught them to you is not evidence, it is the trap itself.</p>
+
+    <h3>The parable, and the arithmetic</h3>
+
+    <p class="noind">Detente keeps coming back to an old story. A master gives three servants different amounts of money and leaves on a journey. Two of them put it to work and double it. The third, frightened of losing what he was given, buries it in the ground and hands it back untouched, rather pleased with himself for having kept it safe. He is the one who is punished — and not for losing money, since he lost none. He is punished for refusing to take any risk at all.<label class="snref" for="n8">8</label><input type="checkbox" id="n8" class="snbox"><span class="sn"><span class="n">8</span>The parable of the talents, Matthew 25. Worth noting that a <em>talent</em> was a unit of weight in silver before it was a word for ability; the second meaning descends from this story.</span></p>
+
+    <p>His own version of the same lesson is arithmetic, and bleaker, and more useful. Roughly 99.9 per cent of all species that have ever lived are extinct. Something like eighty per cent of the civilisations that have existed are gone. So if you accept the fight, your odds are poor.</p>
+
+    <div class="keep"><p>But if you refuse the fight in the name of prudence, your odds are zero. Twenty per cent beats nothing.</p></div>
+
+    <p class="noind">He also names the three-generation curse, because it is the same mistake wearing a family name. The grandfather is an eagle, the son is a hawk, and the grandson is a pigeon. The grandfather built the thing by putting his house up as collateral, which everyone at the time considered reckless. The grandson is told to preserve it, hands it to someone who promises prudence, and the prudence quietly kills it over thirty years — not through any single error, but through a steady refusal to be anywhere the value was moving to.</p>
+
+    <h3>The two rules he ends on</h3>
+
+    <p class="noind">The first: hold your convictions strongly, and promise you will change your mind. Both halves are load-bearing. You have to move fast in one direction to get anywhere at all — a portfolio of hedged half-opinions goes nowhere and costs money — and you have to be willing to eat your hat, without complaint, on the day the facts turn. As he says, it might taste fine.</p>
+
+    <p>The second is humility about the <em>shape</em> of failure. Every entrepreneur can list the risks to their project, and the thing that eventually kills them is, essentially always, the one that was not on the list. Someone building a coding services company in 2010 listed labour costs, client concentration, key-person risk, currency. They did not list a chat window arriving in 2022. Most of the world is not merely unknown to you. It is unknown that it is unknown, and no amount of diligence converts the second category into the first.</p>
+
+    <p>Which is precisely why the last chapter of Part Three exists. If you cannot enumerate the thing that kills you, you need a structure that survives things you did not enumerate.</p>
+  </article>
+
+  <!-- ─────────────── X ─────────────── -->
+  <article class="col body chapter" id="c10" data-run="X · Nothing chained together">
+    <div class="head">
+      <div class="cn">Chapter X</div>
+      <h2>Nothing chained<br>together</h2>
+      <div class="ct">The only thing in this essay that improves resilience without costing return</div>
+    </div>
+
+    <p class="opens"><span class="lede">Detente's word is</span> decorrelation, and it means owning things that are not chained to each other. It is the last piece, and it is the one that makes resilience nearly free.</p>
+
+    <p>We touched this at the end of chapter three and left it deliberately. Here is the sharper form. Most people believe they are diversified because they own an index containing pharmaceuticals, technology, banks and industrials. On the day the index breaks, all of it breaks at the same moment — not because the businesses are similar, but because the <em>reason</em> people own them is identical, the currency they are priced in is identical, and the buyer who has to sell sells all of it at once.</p>
+
+    <div class="keep"><p>If a single event can flatten everything you own, you own one thing. It does not matter how many names are on the statement.</p></div>
+
+    <p class="noind">This is the test, and it is worth doing literally rather than notionally. Write down what you own. Then write down one event — a currency crisis, a war, a technological displacement, a change of government — and cross out everything it would damage. If the page is empty, you did not have a portfolio. You had a single position with good manners.</p>
+
+    <p>Detente's own answer, which he is careful to present as his position rather than as a recommendation, is three burrows chosen to be as unlinked as he could make them: bitcoin; high-end property in the hinge countries; and compute and energy infrastructure. Whether those are right is not the interesting question and not one I can answer for you. What is interesting is how the third was arrived at, because it shows what “value moves” looks like when it stops being a slogan and becomes a decision with a bulldozer at the end of it.</p>
+
+    <h3>What a real bet looks like</h3>
+
+    <p class="noind">His reasoning, in 2022, went roughly as follows.</p>
+
+    <p>Artificial intelligence is about to explode electricity demand. That much was becoming visible. But — and this is the step most people did not take — a power grid is a web, and if you push a gigawatt into a single point of a web, you tear it. So the binding constraint will not be total energy generation. It will be <em>density in one place</em>. Meanwhile, permits for new generation take the better part of a decade, and this industry does not have a decade; it has about eighteen months. Therefore the money will eventually have to move toward distributed capacity — even though, at the time, distributed computing of this kind barely existed.</p>
+
+    <p>So he bought land and, more importantly, grid connections, in Texas. And then he paid for the wait with bitcoin mining, because mining is the one load on earth that can be switched on and off in seconds. That flexibility was not a side-effect; it was the point. It made him genuinely useful to the grid operator: consume when there is surplus and prices are near zero, shut down and be <em>paid</em> to shut down when there is a squeeze. Then convert the sites to computing when the computing demand arrived.</p>
+
+    <p>Which it did.</p>
+
+    <p>You do not need to copy any of that, and almost certainly should not. What is worth copying is the shape of it, and the shape has exactly three parts:</p>
+
+    <ol class="enum">
+      <li>He named a change he believed in, specifically enough that it implied a physical constraint rather than a mood.</li>
+      <li>He found a way to be <em>present</em> for that change that paid for itself while he waited — which is what converts being early from a fatal condition into a survivable one.</li>
+      <li>He agreed in advance about what would prove him wrong.</li>
+    </ol>
+
+    <p>The second of those is the one people miss, and it is the practical answer to the trap in chapter eight. Being right early is ruinous mainly because of the carrying cost of the waiting. Remove the carrying cost and earliness becomes cheap.</p>
+
+    <p>One last number from that story, because it teaches something small and permanent. A pure data-centre company trading at eleven times book value means that eleven dollars of your money buys one dollar of actual machines and ten dollars of expectation. Neither is wrong to buy. But knowing which of the two you are buying is most of the work, and it is the same question as duration in chapter five, wearing a different coat.</p>
+  </article>
+
+  <!-- ══════════════════ PART FOUR ══════════════════ -->
+  <div class="part">
+    <div class="pn">Part Four</div>
+    <div class="pt">The clocks</div>
+    <div class="pd">In which the three frameworks turn out to be one framework, read at four different speeds</div>
+  </div>
+
+  <!-- ─────────────── XI ─────────────── -->
+  <article class="col body chapter" id="c11" data-run="XI · Four clocks">
+    <div class="head">
+      <div class="cn">Chapter XI</div>
+      <h2>Four clocks, all<br>running at once</h2>
+      <div class="ct">The single idea this essay is named after</div>
+    </div>
+
+    <p class="opens"><span class="lede">Here is the</span> compression, and if you remember one page of this essay it should be this one.</p>
+
+    <p>Everything in the preceding ten chapters is a description of a cycle. But they are not the same cycle, and they do not run at the same speed, and almost every argument about money that you will ever hear is really two people reading different clocks and assuming they are reading the same one. Read from the outside in.</p>
+
+    <div class="figure">
+      <div class="fh">Figure V · Four clocks, nested</div>
+      <div class="svgscroll">
+      <svg viewBox="0 0 760 556" role="img" aria-label="Four nested rectangles. The outermost is the big cycle of roughly 250 years, after Dalio. Inside it, four generations of roughly 80 years, after Detente. Inside that, the four weathers of three to ten years, after Gave. Innermost, the avalanche, days to weeks, after Detente.">
+        <g font-family="'EB Garamond',serif">
+          <rect x="14" y="30" width="732" height="434" fill="none" stroke="#221E18" stroke-width="1.4"/>
+          <rect x="54" y="104" width="652" height="334" fill="none" stroke="#8C2F1E" stroke-width="1.2"/>
+          <rect x="94" y="178" width="572" height="234" fill="none" stroke="#2C6E8F" stroke-width="1.2"/>
+          <rect x="134" y="252" width="492" height="134" fill="#F4EEE1" stroke="#2E7D4F" stroke-width="1.2"/>
+
+          <text x="34" y="62" font-size="14" letter-spacing="2.4" fill="#221E18">ROUGHLY 250 YEARS · THE BIG CYCLE · DALIO</text>
+          <text x="34" y="88" font-size="18.5" font-style="italic" fill="#4A4238">What turns: which country writes the rules, and whose money the world saves in.</text>
+
+          <text x="74" y="136" font-size="14" letter-spacing="2.4" fill="#8C2F1E">ROUGHLY 80 YEARS · FOUR GENERATIONS · DETENTE</text>
+          <text x="74" y="162" font-size="18.5" font-style="italic" fill="#4A4238">What turns: the appetite for risk itself. Hard times, strong people, good times, soft people.</text>
+
+          <text x="114" y="210" font-size="14" letter-spacing="2.4" fill="#2C6E8F">3 TO 10 YEARS · THE FOUR WEATHERS · GAVE</text>
+          <text x="114" y="236" font-size="18.5" font-style="italic" fill="#4A4238">What turns: growth and inflation, and nothing else at all.</text>
+
+          <text x="154" y="284" font-size="14" letter-spacing="2.4" fill="#2E7D4F">DAYS TO WEEKS · THE AVALANCHE · DETENTE</text>
+          <text x="154" y="310" font-size="18.5" font-style="italic" fill="#4A4238">What turns: everything, at once.</text>
+          <text x="154" y="340" font-size="18.5" fill="#221E18">What you do: nothing — by then it is far too late. This is</text>
+          <text x="154" y="362" font-size="18.5" fill="#221E18">the layer you prepare for during the other three.</text>
+
+          <text x="380" y="506" text-anchor="middle" font-size="21" font-style="italic" fill="#8C2F1E">Long cycles set the rules. Generations set the mood.</text>
+          <text x="380" y="534" text-anchor="middle" font-size="21" font-style="italic" fill="#8C2F1E">Quadrants set the weather. Avalanches settle the bill.</text>
+        </g>
+      </svg>
+      </div>
+      <div class="fscroll">Scroll the figure sideways →</div>
+      <div class="fc"><b>How to use the figure.</b> When you next read a piece of advice about money, find which band it lives in. Almost all of it lives in the third. A surprising amount of the disagreement between intelligent people dissolves the moment you notice that one of them is describing the third band and the other the first.</div>
+    </div>
+
+    <h3>The clocks, one at a time</h3>
+
+    <p class="noind"><b>The outermost, roughly two hundred and fifty years.</b> What turns is which country writes the rules and whose money the world saves in. What you do about it is work out which stage you are standing in, using the eight measures rather than the newspapers, and never assume the current order is permanent. The number to keep: of the 750 currencies since 1700, fewer than a fifth still exist.</p>
+
+    <p><b>The second, roughly eighty years — four generations.</b> What turns is the appetite for risk itself. Hard times make strong people; strong people make good times; good times make comfortable people; and comfortable people make hard times. Detente lays this over the American interest rate curve, which climbs until about 1980 and falls to zero afterwards, and the fit is uncomfortable. What you do about it is notice that prudence is a fashion, and that a fashion is most popular immediately before it stops working.</p>
+
+    <p><b>The third, three to ten years — the four weathers.</b> What turns is growth and inflation, and nothing else. What you do is read the two dials of chapter four, cross out the one or two assets that always get hurt in that box, and hold the rest. This is the only clock on the page that you can actually check on a given morning, which is precisely why almost everything ever written about money is written about this band and pretends the other three do not exist.</p>
+
+    <p><b>The innermost, days to weeks — the avalanche.</b> What turns is everything, at once. What you do is nothing, because by then it is far too late to do anything at all. This is the layer you prepare for during the other three, and it is the only one that ever actually settles the bill.</p>
+
+    <div class="keep"><p>Long cycles set the rules. Generations set the mood. Quadrants set the weather. Avalanches settle the bill.</p></div>
+
+    <p class="noind">If you keep one line from this essay, keep that one — not because it is clever but because it is a sorting instrument. It tells you which clock any piece of advice you hear is actually talking about, and therefore whether the person giving it has answered your question or a different one.</p>
+  </article>
+
+  <!-- ─────────────── XII ─────────────── -->
+  <article class="col body chapter" id="c12" data-run="XII · What survives all three">
+    <div class="head">
+      <div class="cn">Chapter XII</div>
+      <h2>What survives<br>all three</h2>
+      <div class="ct">And the four questions that turn all of it into something you can use today</div>
+    </div>
+
+    <p class="opens"><span class="lede">Three men, three</span> completely different methods. A hedge fund founder reading five hundred years of empires. A portfolio manager who reduced everything to two ratios and a racetrack analogy. An entrepreneur building power stations in Texas. They disagree about a great deal — about bitcoin, about how much of the framework is physics and how much is metaphor, about how close the present moment is to the hinge.</p>
+
+    <p>Here is what survives all three.</p>
+
+    <ol class="enum">
+      <li><b>Volatility is not the thing that kills you.</b> Gave and Detente say it outright. Dalio simply demonstrates it: the most frightening financial headline of 1971 was followed by a twenty-five per cent rally.</li>
+      <li><b>When a state cannot pay, it prints.</b> Every single time. Dalio has five hundred years of receipts, Gave has the policy reason it is now structural, Detente has the arithmetic of what it quietly does to a saver in the meantime.</li>
+      <li><b>The weather matters more than the asset.</b> There is no permanently good investment. There is only an investment that fits the box you are standing in, and the box changes without asking your permission.</li>
+      <li><b>1980 to 2020 was a regime, not a law of nature.</b> Every rule you inherited was written inside it, by people for whom it was simply the shape of the world.</li>
+      <li><b>The one bet nobody can place for you is where value moves next.</b> Refusing to place it is also a bet, and historically a losing one.</li>
+    </ol>
+
+    <h3>Four questions, answerable in a minute</h3>
+
+    <p class="noind">None of this is worth anything as trivia. The point of the four clocks is that they collapse into a small number of questions you can answer today, honestly, with no numbers in front of you. There are no correct answers here. There is only the difference between choosing a position and drifting into one.</p>
+
+    <p><b>First: which world do you think you are in?</b> The belly, where the next twenty years look broadly like the last twenty — or the tails, where things reconfigure by avalanche? Both are respectable positions and the third answer, <em>I genuinely do not know</em>, is the most honest and the most common. But notice what each implies. If you have chosen the belly deliberately, that is a real position and not a lazy one; the only version that is truly dangerous is the one chosen by default. If you have chosen the tails, the weight of the work sits in Part Three. And if you do not know, then the <em>size</em> of your bets matters more than their direction, because you are buying optionality rather than expressing conviction.</p>
+
+    <p><b>Second: if the world shook hard tomorrow, what happens to what you own?</b> If almost all of it would move in the same direction, you have one bet wearing several costumes. That is not a moral failing; it is the default outcome of buying whatever is easiest to buy. And decorrelation remains the only thing in this entire essay that improves resilience without costing return. If several parts of it are genuinely unlinked — good, and now be sceptical about it, because things that look unlinked in calm weather routinely turn out to be linked in a crisis, which is exactly when it matters.</p>
+
+    <p><b>Third: for each thing you own, can you name what would make it worth nothing?</b> If the answer is <em>for none of it</em>, that is the single cheapest thing on this list to fix. Take one hour. Write the list. The gaps in it are where the surprises come from, and chapter nine's second rule says there will always be gaps — which is an argument for structure, not an excuse for skipping the exercise.</p>
+
+    <p><b>Fourth: where do you think value moves over the next ten years?</b> Roughly where it is now? Into energy, computing and physical capacity? Into money no government can print? Or undecided — which is honest, and better than pretending, as long as it stays a decision under review rather than a decision permanently postponed. Postponing it is exactly how the third servant ended up burying his talent in the ground.</p>
+
+    <h3>Three checks that survive whatever you answered</h3>
+
+    <ol class="enum">
+      <li>Never let “it does not move much” stand in for “it cannot go to zero.”</li>
+      <li>Write down which weather you think you are in, and what would prove you wrong.</li>
+      <li>Own things that are not chained together, and be honest about which ones actually are.</li>
+    </ol>
+
+    <p>And then, finally, Dalio's own answer to what an ordinary person should actually do — which is deliberately unglamorous, and which he places at the very end of a fifty-year career, after the eight measures and the five hundred years and the whole apparatus:</p>
+
+    <blockquote><p>Earn more than you spend, and treat each other well.</p></blockquote>
+
+    <p>Everything else — the education, the invention, the competitiveness, the reserve currency, the entire machine of chapter six — is just a long and expensive way of arriving at those two.</p>
+  </article>
+
+  <!-- ══════════════════ ENVOI ══════════════════ -->
+  <div class="envoi">
+    <p class="line">Hold your convictions strongly.<br>And promise you will change your mind.</p>
+  </div>
+
+  <!-- ══════════════════ SOURCES ══════════════════ -->
+  <section class="colophon" id="sources" data-run="Sources">
+    <div class="lbl">Sources, and what is mine rather than theirs</div>
+
+    <ul class="plain">
+      <li><b>Ray Dalio</b>, <em>Principles for Dealing with the Changing World Order</em>, and the filmed summary of the same study. Supplies: the big cycle and its six stages, the eight measures of power, 1933 and 1971, the 750 currencies, and the closing line of chapter twelve.</li>
+      <li><b>Charles Gave</b>, Université de l'Épargne, formerly the Institut des Libertés. Supplies: the four quadrants, the two ratios and the seven-year averages, management by exclusion, duration, breadth, and the argument about the return <em>of</em> capital.</li>
+      <li><b>Richard Detente</b>, Grand Angle, in a long interview on <em>Les Financiers</em>. Supplies: risk against danger, prudence as a definition, fragility and antifragility, the movement of value, the three-generation curse, decorrelation, and the three burrows.</li>
+    </ul>
+
+    <p>Everything above is my reading of their arguments, rebuilt as a single continuous line for someone starting from zero. The ordering, the joins between the three frameworks, the four-clock synthesis of chapter eleven and every figure in this essay are mine, and none of the three has endorsed them. Where they were tentative I have tried hard to keep them tentative — particularly Gave on where the dials currently sit, and Detente on bitcoin. Any place where the compression has flattened a nuance is my fault and not theirs, and all three are worth reading in the original at full length, where they are considerably more careful than any summary can be.</p>
+
+    <p class="disclaimer">This is education, not investment advice. It does not tell you what to buy, it knows nothing whatever about your situation, and nothing in it is a recommendation. Every framework here can be wrong, including all three at once — that possibility is the subject of chapter nine's second rule. Whatever you decide, you own the outcome.</p>
+
+    <div class="signoff">
+      Jeremy Lasne &nbsp;·&nbsp; <a href="https://x.com/jeremylasne" target="_blank" rel="noopener">@jeremylasne</a> &nbsp;·&nbsp; <a href="/">jeremylasne.com</a>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var prog   = document.getElementById("prog");
+  var runner = document.getElementById("runner");
+  var runR   = document.getElementById("runR");
+  var marks  = [].slice.call(document.querySelectorAll("[data-run]"));
+  var ticking = false;
+
+  function paint(){
+    ticking = false;
+    var doc = document.documentElement;
+    var max = doc.scrollHeight - window.innerHeight;
+    var y   = window.pageYOffset || doc.scrollTop;
+
+    prog.style.width = (max > 0 ? Math.min(1, y / max) * 100 : 0) + "%";
+    runner.classList.toggle("on", y > 520);
+
+    /* whichever marked section owns the top third of the viewport,
+       resolved in document order so ties go to the later one */
+    var line = y + window.innerHeight * 0.34, current = marks[0];
+    for (var i = 0; i < marks.length; i++){
+      if (marks[i].offsetTop <= line) current = marks[i];
+    }
+    var label = current.getAttribute("data-run");
+    if (runR.textContent !== label) runR.textContent = label;
+  }
+
+  function onScroll(){
+    if (!ticking){ ticking = true; window.requestAnimationFrame(paint); }
+  }
+
+  window.addEventListener("scroll", onScroll, { passive:true });
+  window.addEventListener("resize", onScroll);
+  paint();
+})();
+</script>
+
+</body>
+</html>
