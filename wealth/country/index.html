@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Country Map · Wealth Architecture · Jeremy Lasne</title>
+<meta name="description" content="Thirty-two countries read three ways — the weather they are in, where they sit on the long arc, and whether they are merely volatile or actually deadly.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..600;1,9..40,300..500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/wealth/style.css">
+<style>
+  /* ── the three questions ──────────────────────────────────────────── */
+  .questions {
+    margin-top: clamp(48px, 7vw, 76px);
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1px;
+    background: var(--rule); border: 1px solid var(--rule);
+  }
+  .question { background: var(--paper); padding: clamp(22px, 3vw, 32px); }
+  .question .qn {
+    font-family: var(--display); font-size: 15px; color: var(--gold);
+    font-variant-numeric: tabular-nums; margin: 0 0 14px;
+  }
+  .question h3 {
+    font-family: var(--display); font-weight: 400; font-size: 25px; line-height: 1.16;
+    color: var(--ink); margin: 0 0 6px;
+  }
+  .question .who {
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--faint); margin: 0 0 16px;
+  }
+  .question p { margin: 0; font-size: 15.5px; line-height: 1.7; color: var(--muted); }
+
+  .updated {
+    margin-top: 34px; font-size: 13px; letter-spacing: 0.04em; color: var(--faint);
+    display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline;
+  }
+  .updated b { color: var(--ink); font-weight: 400; font-variant-numeric: tabular-nums; }
+
+  /* ── numbered chart sections ──────────────────────────────────────── */
+  .reading { margin: clamp(72px, 10vw, 118px) 0 0; padding-top: 28px; border-top: 1px solid var(--ink); }
+  .reading-no { font-size: 11px; letter-spacing: 0.2em; color: var(--gold); font-variant-numeric: tabular-nums; margin: 0 0 10px; }
+  .reading .who { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin: 0 0 8px; }
+  .reading h2 {
+    font-family: var(--display); font-weight: 400; font-size: clamp(32px, 5vw, 46px);
+    line-height: 1.08; color: var(--ink); margin: 0;
+  }
+  .reading > p { margin: 18px 0 0; color: var(--muted); max-width: 62ch; }
+
+  /* ── weather groups ───────────────────────────────────────────────── */
+  .weather { margin: clamp(56px, 8vw, 84px) 0 0; scroll-margin-top: 88px; }
+  .weather-head { padding-bottom: 22px; border-bottom: 1px solid var(--rule-firm); }
+  .weather-cond { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--faint); margin: 0 0 8px; }
+  .weather-head h3 { font-family: var(--display); font-weight: 400; font-size: clamp(28px, 4vw, 38px); line-height: 1.1; margin: 0; }
+  .weather-verdicts {
+    margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px 32px;
+  }
+  .weather-verdicts b {
+    display: block; font-size: 10.5px; font-weight: 400; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--faint); margin-bottom: 5px;
+  }
+  .weather-verdicts div { font-size: 15.5px; line-height: 1.6; color: var(--ink); }
+  .weather-count {
+    margin: 16px 0 0; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--faint); font-variant-numeric: tabular-nums;
+  }
+
+  .cards { margin-top: 26px; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .card { background: var(--paper); padding: 22px 24px 24px; }
+  .card header { display: flex; align-items: baseline; gap: 10px; }
+  .card-flag { font-size: 19px; line-height: 1; }
+  .card-name { font-family: var(--display); font-size: 23px; color: var(--ink); }
+  .card-code { margin-left: auto; font-size: 11px; letter-spacing: 0.16em; color: var(--faint); }
+  .card p { margin: 16px 0 0; font-size: 14.5px; line-height: 1.65; color: var(--muted); }
+
+  .meters { margin-top: 16px; display: grid; gap: 7px; }
+  .meter { display: grid; grid-template-columns: 78px 1fr 40px; gap: 10px; align-items: center; font-size: 11px; }
+  .meter-k { letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }
+  .meter-track { height: 3px; background: var(--rule); display: block; }
+  .meter-fill { display: block; height: 3px; }
+  .meter-v { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  @media (max-width: 420px) {
+    .cards { grid-template-columns: 1fr; }
+    .meter { grid-template-columns: 68px 1fr 30px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="rail">
+  <div class="rail-in">
+    <a class="rail-home" href="/">Jeremy Lasne</a>
+    <div class="rail-nav">
+      <a class="rail-drop" href="/wealth/">Wealth Architecture</a>
+      <a href="/wealth/principles/">Principles</a>
+      <a href="/wealth/country/" aria-current="page">Country Map</a>
+      <a href="/wealth/exercice/">Exercise</a>
+    </div>
+  </div>
+</nav>
+
+<main class="shell">
+
+  <header class="masthead">
+    <p class="eyebrow">Wealth Architecture</p>
+    <h1 class="title">The Country Map</h1>
+    <p class="standfirst">Thirty-two countries, read <em>three ways</em>.</p>
+    <div class="col">
+      <p class="lede">Where you invest matters more than most people expect. A company is not just a company — it sits inside an economy, which has its own weather, its own debts, and its own chance of going badly wrong. This page asks three questions of every country, because no single question is enough.</p>
+    </div>
+
+    <div class="questions wide">
+      <div class="question">
+        <p class="qn">1</p>
+        <h3>What weather is it in?</h3>
+        <p class="who">Charles Gave</p>
+        <p>Is the economy growing? Are prices rising? Those two questions make four combinations, and each one rewards owning something different.</p>
+      </div>
+      <div class="question">
+        <p class="qn">2</p>
+        <h3>Where is it on the long arc?</h3>
+        <p class="who">Ray Dalio</p>
+        <p>Countries rise, peak, decline and reset over centuries. A country early in that arc and one late in it are not the same investment, even if this year's numbers look alike.</p>
+      </div>
+      <div class="question">
+        <p class="qn">3</p>
+        <h3>Volatile, or actually deadly?</h3>
+        <p class="who">Richard Détente</p>
+        <p>A price that jumps around is not the same as money that never comes back. Countries with calm-looking finances have gone to zero. Countries that look alarming have not.</p>
+      </div>
+    </div>
+
+    <p class="updated">Updated <b>2026-06-05</b> <span>·</span> <span>hover any marker for the full reading</span></p>
+  </header>
+
+  <!-- ── 01 ────────────────────────────────────────────────────────── -->
+  <section class="reading">
+    <p class="reading-no">01</p>
+    <p class="who">Charles Gave</p>
+    <h2>The weather</h2>
+    <p>Left to right: are prices rising? Bottom to top: is the economy growing? Where a country lands tells you which of four things is worth owning there. The dot size shows the chance of losing everything; the ring around it shows how much the price moves.</p>
+  </section>
+  <figure class="fig wide">
+    <div class="fig-frame"><svg viewBox="0 0 940 880" role="img" aria-label="Thirty-two countries placed by growth and inflation">
+<rect x="26" y="16" width="894" height="818" fill="none" stroke="#E7E4DC"/>
+<line x1="473.0" y1="16" x2="473.0" y2="834" stroke="#E7E4DC"/>
+<line x1="26" y1="425.0" x2="920" y2="425.0" stroke="#E7E4DC"/>
+<text x="44" y="46" text-anchor="start" class="qlab" fill="#5A7D63" opacity="0.85">Deflationary Boom</text>
+<text x="902" y="46" text-anchor="end" class="qlab" fill="#9A8657" opacity="0.85">Inflationary Boom</text>
+<text x="44" y="816" text-anchor="start" class="qlab" fill="#6A7788" opacity="0.85">Deflationary Bust</text>
+<text x="902" y="816" text-anchor="end" class="qlab" fill="#9A6A68" opacity="0.85">Inflationary Bust</text>
+<g><title>Russia — Inflationary Bust
+War economy. Oil revenue still flowing despite sanctions. 21% rates crush private sector. Uninvestable for Western capital.</title>
+<circle cx="816.7" cy="616.6" r="25.7" fill="none" stroke="#9A6A68" stroke-width="1" opacity="0.22"/>
+<circle cx="816.7" cy="616.6" r="6.7" fill="#9A6A68" opacity="0.62"/>
+<text x="784.0" y="620.6" text-anchor="end" class="dot-l">RU</text></g>
+<g><title>Japan — Inflationary Bust
+BOJ held at 0.75% but inflation surged to 2.8%, growth forecast cut to 0.5%. Yen past 160 — intervention triggered (first since July 2024). Heavy energy importer = Iran war flips the antifragile thesis. Stagflation risk.</title>
+<circle cx="861.7" cy="629.2" r="25.0" fill="none" stroke="#9A6A68" stroke-width="1" opacity="0.22"/>
+<circle cx="861.7" cy="629.2" r="8.0" fill="#9A6A68" opacity="0.62"/>
+<text x="893.7" y="633.2" text-anchor="start" class="dot-l">JP</text></g>
+<g><title>United States — Inflationary Bust
+Fed held at 3.5–3.75% for third consecutive meeting, contentious 8-4 vote. PCE 2.8%, core 3.0%. Middle East energy shock keeping inflation sticky. GDP growing but uncertainty extreme. Fed fully trapped.</title>
+<circle cx="861.7" cy="567.5" r="24.6" fill="none" stroke="#9A6A68" stroke-width="1" opacity="0.22"/>
+<circle cx="861.7" cy="567.5" r="7.5" fill="#9A6A68" opacity="0.62"/>
+<text x="830.1" y="571.5" text-anchor="end" class="dot-l">US</text></g>
+<g><title>France — Inflationary Bust
+Debt 112% GDP, 54% held abroad — foreign holders can flee. 40% rolling at 4%. Rates above nominal growth. Unsustainable.</title>
+<circle cx="861.7" cy="525.6" r="24.0" fill="none" stroke="#9A6A68" stroke-width="1" opacity="0.22"/>
+<circle cx="861.7" cy="525.6" r="8.0" fill="#9A6A68" opacity="0.62"/>
+<text x="892.7" y="529.6" text-anchor="start" class="dot-l">FR</text></g>
+<g><title>South Africa — Inflationary Bust
+Political instability, Eskom crisis. Rich in gold, platinum. ZAR volatility = main factor.</title>
+<circle cx="820.4" cy="497.3" r="22.3" fill="none" stroke="#9A6A68" stroke-width="1" opacity="0.22"/>
+<circle cx="820.4" cy="497.3" r="6.3" fill="#9A6A68" opacity="0.62"/>
+<text x="791.1" y="501.3" text-anchor="end" class="dot-l">ZA</text></g>
+<g><title>Turkey — Inflationary Bust
+Inflation reaccelerated to 32.6% in May. Lira hit record low past 45.5/USD. Policy rate 37%, effective 40%. Iran war adds energy-import inflation. No path below 20% inflation this decade per economists.</title>
+<circle cx="861.7" cy="479.2" r="22.1" fill="none" stroke="#9A6A68" stroke-width="1" opacity="0.22"/>
+<circle cx="861.7" cy="479.2" r="5.0" fill="#9A6A68" opacity="0.62"/>
+<text x="890.7" y="483.2" text-anchor="start" class="dot-l">TR</text></g>
+<g><title>Argentina — Inflationary Bust
+Milei reforms: economy grew 4.4% in 2025, 3-4% forecast 2026. But inflation reaccelerated from 31% to 33%. Approval falling. IMF program ongoing. Vaca Muerta makes Argentina an energy exporter. Reform trade mostly done.</title>
+<circle cx="589.3" cy="496.1" r="21.5" fill="none" stroke="#9A6A68" stroke-width="1" opacity="0.22"/>
+<circle cx="589.3" cy="496.1" r="6.3" fill="#9A6A68" opacity="0.62"/>
+<text x="560.8" y="500.1" text-anchor="end" class="dot-l">AR</text></g>
+<g><title>United Kingdom — Inflationary Bust
+Sticky inflation above target. North Sea declining. Growth near zero, limited fiscal room.</title>
+<circle cx="694.3" cy="499.6" r="20.9" fill="none" stroke="#9A6A68" stroke-width="1" opacity="0.22"/>
+<circle cx="694.3" cy="499.6" r="5.7" fill="#9A6A68" opacity="0.62"/>
+<text x="666.4" y="503.6" text-anchor="end" class="dot-l">UK</text></g>
+<g><title>China — Inflationary Boom
+Deflation ended (Iran war + stimulus). PMI 51.8 for 6th consecutive month. Inflation 1.2% in April — first positive cycle in 33 months. Dominates AI, EVs, robotics. Cheapest major market. Taiwan = key risk, 2028 peak.</title>
+<circle cx="685.7" cy="174.1" r="20.0" fill="none" stroke="#9A8657" stroke-width="1" opacity="0.22"/>
+<circle cx="685.7" cy="174.1" r="6.7" fill="#9A8657" opacity="0.62"/>
+<line x1="685.7" y1="174.1" x2="658.6" y2="192.1" stroke="#9A8657" stroke-width="0.75" opacity="0.3"/>
+<text x="658.6" y="196.1" text-anchor="end" class="dot-l">CN</text></g>
+<g><title>Germany — Deflationary Bust
+Composite PMI collapsed to 48.3 in April — first contraction since May 2025. Manufacturing back below 50 at 49.9. ECB warns of technical recession by end-2026. Four recessions in four years — no post-war precedent.</title>
+<circle cx="260.3" cy="514.5" r="19.6" fill="none" stroke="#6A7788" stroke-width="1" opacity="0.22"/>
+<circle cx="260.3" cy="514.5" r="5.6" fill="#6A7788" opacity="0.62"/>
+<text x="233.7" y="518.5" text-anchor="end" class="dot-l">DE</text></g>
+<g><title>Hong Kong — Deflationary Bust
+USD peg imports Fed rates. Property bust drags economy. Political overhang since National Security Law. Gateway to China shrinking.</title>
+<circle cx="130.9" cy="486.6" r="19.2" fill="none" stroke="#6A7788" stroke-width="1" opacity="0.22"/>
+<circle cx="130.9" cy="486.6" r="4.4" fill="#6A7788" opacity="0.62"/>
+<text x="157.1" y="490.6" text-anchor="start" class="dot-l">HK</text></g>
+<g><title>Brazil — Inflationary Boom
+SELIC cut to 14.5% but growth slowing to 1.7% in 2026. Inflation rising to 4.6%, above 3% target. Real stabilized at 5.10–5.20/USD. Oct 2026 election pivotal. Bond thesis intact at 14.5%, equity momentum gone.</title>
+<circle cx="851.7" cy="103.4" r="18.7" fill="none" stroke="#9A8657" stroke-width="1" opacity="0.22"/>
+<circle cx="851.7" cy="103.4" r="5.7" fill="#9A8657" opacity="0.62"/>
+<text x="826.0" y="107.4" text-anchor="end" class="dot-l">BR</text></g>
+<g><title>India — Inflationary Boom
+Strong demographics, urbanization. Debt mostly domestic. Heavy energy dependency = main risk. Infrastructure booming.</title>
+<circle cx="746.5" cy="147.2" r="18.4" fill="none" stroke="#9A8657" stroke-width="1" opacity="0.22"/>
+<circle cx="746.5" cy="147.2" r="6.2" fill="#9A8657" opacity="0.62"/>
+<text x="772.0" y="151.2" text-anchor="start" class="dot-l">IN</text></g>
+<g><title>Saudi Arabia — Inflationary Boom
+Largest energy exporter, very low debt. SAR pegged USD. Hormuz proximity = risk and leverage.</title>
+<circle cx="646.7" cy="152.0" r="18.3" fill="none" stroke="#9A8657" stroke-width="1" opacity="0.22"/>
+<circle cx="646.7" cy="152.0" r="5.0" fill="#9A8657" opacity="0.62"/>
+<text x="621.4" y="156.0" text-anchor="end" class="dot-l">SA</text></g>
+<g><title>Thailand — Deflationary Bust
+In deflation (-0.7% CPI). Central bank cutting aggressively (1.0%). Domestic debt mostly internal. Tourism recovery ongoing. Manufacturing benefits from China+1 shift. Low valuations = contrarian play.</title>
+<circle cx="358.3" cy="472.9" r="17.5" fill="none" stroke="#6A7788" stroke-width="1" opacity="0.22"/>
+<circle cx="358.3" cy="472.9" r="4.5" fill="#6A7788" opacity="0.62"/>
+<text x="333.8" y="476.9" text-anchor="end" class="dot-l">TH</text></g>
+<g><title>Mexico — Inflationary Boom
+Nearshoring boom. Moderate debt, manufacturing growth, young demographics.</title>
+<circle cx="711.3" cy="123.5" r="17.3" fill="none" stroke="#9A8657" stroke-width="1" opacity="0.22"/>
+<circle cx="711.3" cy="123.5" r="5.1" fill="#9A8657" opacity="0.62"/>
+<line x1="711.3" y1="123.5" x2="687.0" y2="87.5" stroke="#9A8657" stroke-width="0.75" opacity="0.3"/>
+<text x="687.0" y="91.5" text-anchor="end" class="dot-l">MX</text></g>
+<g><title>Malaysia — Inflationary Boom
+AI buildout direct beneficiary — semiconductor and electronics exports booming. ~30% of global AI capex flows through Malaysia/Korea supply chains. China+1 manufacturing winner. LNG exporter. 4.6% GDP growth in 2026.</title>
+<circle cx="668.4" cy="115.1" r="17.3" fill="none" stroke="#9A8657" stroke-width="1" opacity="0.22"/>
+<circle cx="668.4" cy="115.1" r="5.1" fill="#9A8657" opacity="0.62"/>
+<line x1="668.4" y1="115.1" x2="692.7" y2="79.1" stroke="#9A8657" stroke-width="0.75" opacity="0.3"/>
+<text x="692.7" y="83.1" text-anchor="start" class="dot-l">MY</text></g>
+<g><title>Ireland — Inflationary Boom
+PMI 51.9 shows mild expansion but inflation surging to 3.6% on energy costs. 80% energy import dependent — highly exposed to Hormuz disruption. ECB on hold at 2%. Debt/GDP low at 36% but GNI* ratio closer to 63%. MNC-heavy economy masks domestic vulnerabilities.</title>
+<circle cx="757.1" cy="99.8" r="17.3" fill="none" stroke="#9A8657" stroke-width="1" opacity="0.22"/>
+<circle cx="757.1" cy="99.8" r="5.0" fill="#9A8657" opacity="0.62"/>
+<line x1="757.1" y1="99.8" x2="781.4" y2="81.8" stroke="#9A8657" stroke-width="0.75" opacity="0.3"/>
+<text x="781.4" y="85.8" text-anchor="start" class="dot-l">IE</text></g>
+<g><title>Taiwan — Deflationary Boom
+TSMC monopoly — ~30% of global AI capex flows through Taiwan. Very low debt, strong fiscal position. Cheap valuations despite dominant semiconductor position. China invasion risk is the singular tail risk — peak window 2027–2028.</title>
+<circle cx="277.2" cy="187.6" r="17.2" fill="none" stroke="#5A7D63" stroke-width="1" opacity="0.22"/>
+<circle cx="277.2" cy="187.6" r="5.7" fill="#5A7D63" opacity="0.62"/>
+<text x="301.4" y="191.6" text-anchor="start" class="dot-l">TW</text></g>
+<g><title>Indonesia — Inflationary Boom
+Low debt, energy exporter, easing cycle. Commodities exposure is a strength in the current inflationary environment. Domestic market growing fast. South China Sea proximity is the main tail risk.</title>
+<circle cx="579.9" cy="99.8" r="16.7" fill="none" stroke="#9A8657" stroke-width="1" opacity="0.22"/>
+<circle cx="579.9" cy="99.8" r="4.5" fill="#9A8657" opacity="0.62"/>
+<text x="556.2" y="103.8" text-anchor="end" class="dot-l">ID</text></g>
+<g><title>South Korea — Deflationary Boom
+Samsung, SK Hynix = AI hardware monopoly. Cheap valuations. NK geopolitical premium.</title>
+<circle cx="257.9" cy="148.1" r="16.4" fill="none" stroke="#5A7D63" stroke-width="1" opacity="0.22"/>
+<circle cx="257.9" cy="148.1" r="6.1" fill="#5A7D63" opacity="0.62"/>
+<text x="234.5" y="152.1" text-anchor="end" class="dot-l">KR</text></g>
+<g><title>Singapore — Deflationary Boom
+176% debt/GDP looks alarming but virtually all domestic, backed by GIC + Temasek sovereign wealth. Rule of law, stable SGD.</title>
+<circle cx="231.7" cy="182.4" r="16.2" fill="none" stroke="#5A7D63" stroke-width="1" opacity="0.22"/>
+<circle cx="231.7" cy="182.4" r="6.9" fill="#5A7D63" opacity="0.62"/>
+<text x="208.5" y="186.4" text-anchor="end" class="dot-l">SG</text></g>
+<g><title>Vietnam — Inflationary Boom
+Manufacturing powerhouse benefiting from China+1 diversification. Very low debt, young demographics. Energy importer but diversifying with renewables. Strong FDI inflows from Samsung, Apple supply chain shifts.</title>
+<circle cx="625.7" cy="99.8" r="16.1" fill="none" stroke="#9A8657" stroke-width="1" opacity="0.22"/>
+<circle cx="625.7" cy="99.8" r="3.9" fill="#9A8657" opacity="0.62"/>
+<line x1="625.7" y1="99.8" x2="602.6" y2="63.8" stroke="#9A8657" stroke-width="0.75" opacity="0.3"/>
+<text x="602.6" y="67.8" text-anchor="end" class="dot-l">VN</text></g>
+<g><title>Poland — Deflationary Boom
+Strongest EU economy outside the eurozone. Keeps PLN = monetary flexibility. Aggressive defense spending post-Ukraine. Energy diversifying away from Russia. Ukraine border proximity is the key risk.</title>
+<circle cx="361.9" cy="176.4" r="15.9" fill="none" stroke="#5A7D63" stroke-width="1" opacity="0.22"/>
+<circle cx="361.9" cy="176.4" r="5.6" fill="#5A7D63" opacity="0.62"/>
+<text x="384.8" y="180.4" text-anchor="start" class="dot-l">PL</text></g>
+<g><title>Canada — Deflationary Boom
+Energy self-sufficient. Diversifying from US. Pacific energy route to Asia. Rates falling.</title>
+<circle cx="414.8" cy="143.5" r="14.9" fill="none" stroke="#5A7D63" stroke-width="1" opacity="0.22"/>
+<circle cx="414.8" cy="143.5" r="5.7" fill="#5A7D63" opacity="0.62"/>
+<text x="436.7" y="147.5" text-anchor="start" class="dot-l">CA</text></g>
+<g><title>UAE — Deflationary Boom
+Capital magnet. Zero income tax, massive sovereign wealth (ADIA, Mubadala). Oil exporter but aggressively diversifying. Pegged to USD. Regional tensions (Iran/Hormuz) are the tail risk.</title>
+<circle cx="458.2" cy="116.2" r="14.8" fill="none" stroke="#5A7D63" stroke-width="1" opacity="0.22"/>
+<circle cx="458.2" cy="116.2" r="4.5" fill="#5A7D63" opacity="0.62"/>
+<text x="479.9" y="120.2" text-anchor="start" class="dot-l">AE</text></g>
+<g><title>Australia — Deflationary Boom
+Low debt, energy exporter, massive commodity base. Linked to Asian growth. Strongest macro profile.</title>
+<circle cx="347.9" cy="136.5" r="13.7" fill="none" stroke="#5A7D63" stroke-width="1" opacity="0.22"/>
+<circle cx="347.9" cy="136.5" r="4.5" fill="#5A7D63" opacity="0.62"/>
+<line x1="347.9" y1="136.5" x2="327.1" y2="64.5" stroke="#5A7D63" stroke-width="0.75" opacity="0.3"/>
+<text x="327.1" y="68.5" text-anchor="end" class="dot-l">AU</text></g>
+<g><title>Norway — Deflationary Boom
+Sovereign fund $1.7T+, AAA, energy exporter. Strongest fiscal position globally.</title>
+<circle cx="324.3" cy="99.8" r="13.7" fill="none" stroke="#5A7D63" stroke-width="1" opacity="0.22"/>
+<circle cx="324.3" cy="99.8" r="4.5" fill="#5A7D63" opacity="0.62"/>
+<line x1="324.3" y1="99.8" x2="345.1" y2="63.8" stroke="#5A7D63" stroke-width="0.75" opacity="0.3"/>
+<text x="345.1" y="67.8" text-anchor="start" class="dot-l">NO</text></g>
+<g><title>Sweden — Deflationary Boom
+Lowest debt in Europe (35%). Rate cuts underway. Export-dependent on weak EU demand.</title>
+<circle cx="370.2" cy="99.8" r="13.7" fill="none" stroke="#5A7D63" stroke-width="1" opacity="0.22"/>
+<circle cx="370.2" cy="99.8" r="4.5" fill="#5A7D63" opacity="0.62"/>
+<line x1="370.2" y1="99.8" x2="390.9" y2="63.8" stroke="#5A7D63" stroke-width="0.75" opacity="0.3"/>
+<text x="390.9" y="67.8" text-anchor="start" class="dot-l">SE</text></g>
+<g><title>Switzerland — Deflationary Boom
+Safe haven. Low debt, strong franc. Global companies with pricing power.</title>
+<circle cx="278.5" cy="99.8" r="13.7" fill="none" stroke="#5A7D63" stroke-width="1" opacity="0.22"/>
+<circle cx="278.5" cy="99.8" r="4.5" fill="#5A7D63" opacity="0.62"/>
+<text x="257.8" y="103.8" text-anchor="end" class="dot-l">CH</text></g>
+<g><title>Chile — Deflationary Boom
+World's largest copper producer. Disinflation achieved, rates stabilized. Low debt, strong institutions. Benefits from green transition (copper demand for EVs, renewables).</title>
+<circle cx="302.0" cy="136.4" r="13.7" fill="none" stroke="#5A7D63" stroke-width="1" opacity="0.22"/>
+<circle cx="302.0" cy="136.4" r="4.5" fill="#5A7D63" opacity="0.62"/>
+<line x1="302.0" y1="136.4" x2="281.3" y2="64.4" stroke="#5A7D63" stroke-width="0.75" opacity="0.3"/>
+<text x="281.3" y="68.4" text-anchor="end" class="dot-l">CL</text></g>
+<g><title>Peru — Deflationary Boom
+Fastest-growing major EM in 2026. Current account surplus. Inflation at 2.2% — lowest in LatAm. Gold + copper producer at record prices = direct commodity supercycle exposure. Very low debt at 33% GDP. Political noise but strongest macro fundamentals in the region.</title>
+<circle cx="416.0" cy="99.8" r="13.7" fill="none" stroke="#5A7D63" stroke-width="1" opacity="0.22"/>
+<circle cx="416.0" cy="99.8" r="4.5" fill="#5A7D63" opacity="0.62"/>
+<line x1="416.0" y1="99.8" x2="436.7" y2="81.8" stroke="#5A7D63" stroke-width="0.75" opacity="0.3"/>
+<text x="436.7" y="85.8" text-anchor="start" class="dot-l">PE</text></g>
+<text x="473" y="866" text-anchor="middle" class="ax">DEFLATION ← GOLD / LONG BONDS → INFLATION</text>
+<text x="-425" y="12" transform="rotate(-90)" text-anchor="middle" class="ax">BUST ← INDEX / OIL → BOOM</text>
+</svg></div>
+    <div class="key">
+      <div class="key-row"><span class="key-sw" style="background:#5A7D63"></span><span><b>Deflationary Boom</b> — equities, efficiency and technology.</span></div>
+      <div class="key-row"><span class="key-sw" style="background:#9A8657"></span><span><b>Inflationary Boom</b> — gold, silver, copper, and equities alongside.</span></div>
+      <div class="key-row"><span class="key-sw" style="background:#6A7788"></span><span><b>Deflationary Bust</b> — long government bonds. Nothing else.</span></div>
+      <div class="key-row"><span class="key-sw" style="background:#9A6A68"></span><span><b>Inflationary Bust</b> — cash in a serious currency, short duration, energy.</span></div>
+    </div>
+    <figcaption><span class="src">Dot size is danger, the probability the capital does not come back. The halo is risk, how much the price moves.</span></figcaption>
+  </figure>
+
+  <!-- ── 02 ────────────────────────────────────────────────────────── -->
+  <section class="reading">
+    <p class="reading-no">02</p>
+    <p class="who">Ray Dalio</p>
+    <h2>The long arc</h2>
+    <p>Every country is somewhere on the same curve: building strength, at its peak, declining under its debts, or rebuilding after a reset. This is a rough placement, not a schedule — you cannot date it precisely, only read the health.</p>
+  </section>
+  <figure class="fig wide">
+    <div class="fig-frame"><svg viewBox="0 0 940 430" role="img" aria-label="Thirty-two countries placed on the rise-top-decline-reset arc">
+<line x1="12" y1="384" x2="928" y2="384" class="axisline"/>
+<line x1="131" y1="16" x2="131" y2="384" class="gridline" stroke-dasharray="2 5"/>
+<text x="131" y="408" text-anchor="middle" class="ax">RISE</text>
+<line x1="397" y1="16" x2="397" y2="384" class="gridline" stroke-dasharray="2 5"/>
+<text x="397" y="408" text-anchor="middle" class="ax">TOP</text>
+<line x1="672" y1="16" x2="672" y2="384" class="gridline" stroke-dasharray="2 5"/>
+<text x="672" y="408" text-anchor="middle" class="ax">DECLINE</text>
+<line x1="878" y1="16" x2="878" y2="384" class="gridline" stroke-dasharray="2 5"/>
+<text x="878" y="408" text-anchor="middle" class="ax">POST-RESET</text>
+<path d="M 12.0 384.0 L 22.2 382.7 L 32.3 378.9 L 42.5 372.7 L 52.7 364.4 L 62.9 354.2 L 73.1 342.6 L 83.3 330.0 L 93.4 316.8 L 103.6 303.6 L 113.8 290.8 L 123.9 278.9 L 134.1 268.4 L 144.3 259.7 L 154.5 253.0 L 164.7 248.8 L 174.9 247.0 L 185.0 245.8 L 195.2 241.3 L 205.4 233.4 L 215.5 222.7 L 225.7 209.4 L 235.9 194.2 L 246.1 177.7 L 256.3 160.6 L 266.5 143.5 L 276.6 127.3 L 286.8 112.6 L 297.0 100.0 L 307.1 90.1 L 317.3 83.2 L 327.5 79.8 L 337.7 79.2 L 347.9 77.7 L 358.1 75.0 L 368.2 71.0 L 378.4 66.0 L 388.6 60.3 L 398.7 54.2 L 408.9 48.0 L 419.1 42.1 L 429.3 36.8 L 439.5 32.2 L 449.7 28.8 L 459.8 26.7 L 470.0 26.0 L 480.2 26.4 L 490.3 27.6 L 500.5 29.4 L 510.7 31.8 L 520.9 34.4 L 531.1 37.2 L 541.3 39.8 L 551.4 42.1 L 561.6 43.8 L 571.8 44.8 L 581.9 45.1 L 592.1 47.2 L 602.3 52.1 L 612.5 59.8 L 622.7 69.7 L 632.9 81.3 L 643.0 94.3 L 653.2 107.9 L 663.4 121.5 L 673.5 134.4 L 683.7 146.2 L 693.9 156.0 L 704.1 163.6 L 714.3 168.6 L 724.5 170.7 L 734.6 172.8 L 744.8 180.9 L 755.0 194.6 L 765.1 212.7 L 775.3 233.7 L 785.5 255.8 L 795.7 277.1 L 805.9 295.9 L 816.1 310.5 L 826.2 319.9 L 836.4 323.1 L 846.6 327.5 L 856.7 339.2 L 866.9 354.4 L 877.1 368.0 L 887.3 375.7 L 897.5 373.8 L 907.7 360.7 L 917.8 345.1 L 928.0 338.3" fill="none" stroke="#14140F" stroke-width="1.5" stroke-linejoin="round"/>
+<g><title>Germany — Rise</title>
+<line x1="78.7" y1="326.0" x2="78.7" y2="319.0" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="78.7" cy="330.0" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="78.7" y="316.0" text-anchor="middle" class="dot-l">DE</text></g>
+<g><title>China — Rise</title>
+<line x1="90.4" y1="312.8" x2="90.4" y2="290.8" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="90.4" cy="316.8" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="90.4" y="287.8" text-anchor="middle" class="dot-l">CN</text></g>
+<g><title>India — Rise</title>
+<line x1="102.1" y1="299.6" x2="102.1" y2="262.6" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="102.1" cy="303.6" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="102.1" y="259.6" text-anchor="middle" class="dot-l">IN</text></g>
+<g><title>Brazil — Rise</title>
+<line x1="113.8" y1="286.8" x2="113.8" y2="279.8" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="113.8" cy="290.8" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="113.8" y="276.8" text-anchor="middle" class="dot-l">BR</text></g>
+<g><title>Australia — Rise</title>
+<line x1="125.6" y1="274.9" x2="125.6" y2="252.9" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="125.6" cy="278.9" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="125.6" y="249.9" text-anchor="middle" class="dot-l">AU</text></g>
+<g><title>Norway — Rise</title>
+<line x1="137.3" y1="264.4" x2="137.3" y2="227.4" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="137.3" cy="268.4" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="137.3" y="224.4" text-anchor="middle" class="dot-l">NO</text></g>
+<g><title>Sweden — Rise</title>
+<line x1="149.0" y1="255.7" x2="149.0" y2="248.7" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="149.0" cy="259.7" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="149.0" y="245.7" text-anchor="middle" class="dot-l">SE</text></g>
+<g><title>Switzerland — Rise</title>
+<line x1="160.7" y1="244.8" x2="160.7" y2="222.8" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="160.7" cy="248.8" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="160.7" y="219.8" text-anchor="middle" class="dot-l">CH</text></g>
+<g><title>South Korea — Rise</title>
+<line x1="172.4" y1="243.0" x2="172.4" y2="206.0" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="172.4" cy="247.0" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="172.4" y="203.0" text-anchor="middle" class="dot-l">KR</text></g>
+<g><title>Singapore — Rise</title>
+<line x1="184.2" y1="241.8" x2="184.2" y2="234.8" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="184.2" cy="245.8" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="184.2" y="231.8" text-anchor="middle" class="dot-l">SG</text></g>
+<g><title>Mexico — Rise</title>
+<line x1="195.9" y1="237.3" x2="195.9" y2="215.3" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="195.9" cy="241.3" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="195.9" y="212.3" text-anchor="middle" class="dot-l">MX</text></g>
+<g><title>Argentina — Rise</title>
+<line x1="207.6" y1="229.4" x2="207.6" y2="192.4" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="207.6" cy="233.4" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="207.6" y="189.4" text-anchor="middle" class="dot-l">AR</text></g>
+<g><title>Saudi Arabia — Rise</title>
+<line x1="219.3" y1="218.7" x2="219.3" y2="211.7" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="219.3" cy="222.7" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="219.3" y="208.7" text-anchor="middle" class="dot-l">SA</text></g>
+<g><title>Turkey — Rise</title>
+<line x1="231.0" y1="190.2" x2="231.0" y2="168.2" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="231.0" cy="194.2" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="231.0" y="165.2" text-anchor="middle" class="dot-l">TR</text></g>
+<g><title>Indonesia — Rise</title>
+<line x1="242.8" y1="173.7" x2="242.8" y2="136.7" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="242.8" cy="177.7" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="242.8" y="133.7" text-anchor="middle" class="dot-l">ID</text></g>
+<g><title>Vietnam — Rise</title>
+<line x1="254.5" y1="156.6" x2="254.5" y2="149.6" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="254.5" cy="160.6" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="254.5" y="146.6" text-anchor="middle" class="dot-l">VN</text></g>
+<g><title>Chile — Rise</title>
+<line x1="266.2" y1="139.5" x2="266.2" y2="117.5" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="266.2" cy="143.5" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="266.2" y="114.5" text-anchor="middle" class="dot-l">CL</text></g>
+<g><title>Poland — Rise</title>
+<line x1="277.9" y1="123.3" x2="277.9" y2="86.3" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="277.9" cy="127.3" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="277.9" y="83.3" text-anchor="middle" class="dot-l">PL</text></g>
+<g><title>Ireland — Rise</title>
+<line x1="289.6" y1="108.6" x2="289.6" y2="101.6" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="289.6" cy="112.6" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="289.6" y="98.6" text-anchor="middle" class="dot-l">IE</text></g>
+<g><title>UAE — Rise</title>
+<line x1="301.4" y1="96.0" x2="301.4" y2="74.0" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="301.4" cy="100.0" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="301.4" y="71.0" text-anchor="middle" class="dot-l">AE</text></g>
+<g><title>Thailand — Rise</title>
+<line x1="313.1" y1="79.2" x2="313.1" y2="42.2" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="313.1" cy="83.2" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="313.1" y="39.2" text-anchor="middle" class="dot-l">TH</text></g>
+<g><title>Malaysia — Rise</title>
+<line x1="324.8" y1="75.8" x2="324.8" y2="68.8" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="324.8" cy="79.8" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="324.8" y="65.8" text-anchor="middle" class="dot-l">MY</text></g>
+<g><title>Taiwan — Rise</title>
+<line x1="336.5" y1="75.2" x2="336.5" y2="53.2" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="336.5" cy="79.2" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="336.5" y="50.2" text-anchor="middle" class="dot-l">TW</text></g>
+<g><title>Peru — Rise</title>
+<line x1="348.3" y1="73.7" x2="348.3" y2="36.7" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="348.3" cy="77.7" r="3.6" fill="#5A7D63" opacity="0.85"/>
+<text x="348.3" y="33.7" text-anchor="middle" class="dot-l">PE</text></g>
+<g><title>United Kingdom — Top</title>
+<line x1="383.0" y1="62.0" x2="383.0" y2="55.0" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="383.0" cy="66.0" r="3.6" fill="#9A8657" opacity="0.85"/>
+<text x="383.0" y="52.0" text-anchor="middle" class="dot-l">UK</text></g>
+<g><title>Canada — Top</title>
+<line x1="430.9" y1="32.8" x2="430.9" y2="25.8" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="430.9" cy="36.8" r="3.6" fill="#9A8657" opacity="0.85"/>
+<text x="430.9" y="22.8" text-anchor="middle" class="dot-l">CA</text></g>
+<g><title>South Africa — Top</title>
+<line x1="478.7" y1="22.4" x2="478.7" y2="15.4" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="478.7" cy="26.4" r="3.6" fill="#9A8657" opacity="0.85"/>
+<text x="478.7" y="12.4" text-anchor="middle" class="dot-l">ZA</text></g>
+<g><title>Russia — Top</title>
+<line x1="526.5" y1="33.2" x2="526.5" y2="26.2" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="526.5" cy="37.2" r="3.6" fill="#9A8657" opacity="0.85"/>
+<text x="526.5" y="23.2" text-anchor="middle" class="dot-l">RU</text></g>
+<g><title>Hong Kong — Top</title>
+<line x1="574.4" y1="40.8" x2="574.4" y2="33.8" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="574.4" cy="44.8" r="3.6" fill="#9A8657" opacity="0.85"/>
+<text x="574.4" y="30.8" text-anchor="middle" class="dot-l">HK</text></g>
+<g><title>United States — Decline</title>
+<line x1="591.7" y1="43.2" x2="591.7" y2="21.2" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="591.7" cy="47.2" r="3.6" fill="#9A6A68" opacity="0.85"/>
+<text x="591.7" y="18.2" text-anchor="middle" class="dot-l">US</text></g>
+<g><title>France — Decline</title>
+<line x1="696.1" y1="152.0" x2="696.1" y2="145.0" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="696.1" cy="156.0" r="3.6" fill="#9A6A68" opacity="0.85"/>
+<text x="696.1" y="142.0" text-anchor="middle" class="dot-l">FR</text></g>
+<g><title>Japan — Decline</title>
+<line x1="800.5" y1="273.1" x2="800.5" y2="266.1" stroke="#E7E4DC" stroke-width="1"/>
+<circle cx="800.5" cy="277.1" r="3.6" fill="#9A6A68" opacity="0.85"/>
+<text x="800.5" y="263.1" text-anchor="middle" class="dot-l">JP</text></g>
+<text x="12" y="14" class="ax">HOW STRONG THE COUNTRY IS</text>
+</svg></div>
+    <figcaption>A rough shape, not a schedule. Dalio's point is that you cannot date a country's position exactly — you can only read its health and say which part of the arc it is on.</figcaption>
+  </figure>
+
+  <!-- ── 03 ────────────────────────────────────────────────────────── -->
+  <section class="reading">
+    <p class="reading-no">03</p>
+    <p class="who">Richard Détente</p>
+    <h2>Volatile or deadly</h2>
+    <p>Left to right: how much the price moves. Bottom to top: the chance the money never comes back. The top-left corner is the trap — things that look calm and are not safe. Bottom right is what you actually want: movement you get paid for.</p>
+  </section>
+  <figure class="fig wide">
+    <div class="fig-frame"><svg viewBox="0 0 940 700" role="img" aria-label="Thirty-two countries placed by how much they move against their chance of going to zero">
+<rect x="26" y="16" width="894" height="638" fill="none" stroke="#E7E4DC"/>
+<line x1="473.0" y1="16" x2="473.0" y2="654" class="gridline"/>
+<line x1="26" y1="335.0" x2="920" y2="335.0" class="gridline"/>
+<text x="42" y="42" text-anchor="start" class="ax" fill="#9A6A68" opacity="0.9">CALM AND LETHAL</text>
+<text x="904" y="42" text-anchor="end" class="ax" fill="#9A6A68" opacity="0.9">VIOLENT AND LETHAL</text>
+<text x="42" y="638" text-anchor="start" class="ax" fill="#6A7788" opacity="0.9">QUIET AND DURABLE</text>
+<text x="904" y="638" text-anchor="end" class="ax" fill="#5A7D63" opacity="0.9">PAID FOR THE MOVEMENT</text>
+<g><title>United States — moves 87/100, danger 53/100</title>
+<circle cx="811.3" cy="296.5" r="4.2" fill="#9A6A68" opacity="0.62"/>
+<text x="800.3" y="300.5" text-anchor="end" class="dot-l">US</text></g>
+<g><title>United Kingdom — moves 75/100, danger 28/100</title>
+<circle cx="710.9" cy="445.8" r="4.2" fill="#9A6A68" opacity="0.62"/>
+<text x="699.9" y="449.8" text-anchor="end" class="dot-l">UK</text></g>
+<g><title>Germany — moves 67/100, danger 27/100</title>
+<circle cx="644.0" cy="451.7" r="4.2" fill="#6A7788" opacity="0.62"/>
+<text x="633.0" y="455.7" text-anchor="end" class="dot-l">DE</text></g>
+<g><title>France — moves 80/100, danger 60/100</title>
+<circle cx="752.7" cy="254.8" r="4.2" fill="#9A6A68" opacity="0.62"/>
+<text x="741.7" y="258.8" text-anchor="end" class="dot-l">FR</text></g>
+<g><title>Japan — moves 87/100, danger 59/100</title>
+<circle cx="811.3" cy="260.7" r="4.2" fill="#9A6A68" opacity="0.62"/>
+<text x="800.3" y="264.7" text-anchor="end" class="dot-l">JP</text></g>
+<g><title>China — moves 62/100, danger 42/100</title>
+<circle cx="602.2" cy="362.2" r="4.2" fill="#9A8657" opacity="0.62"/>
+<text x="591.2" y="366.2" text-anchor="end" class="dot-l">CN</text></g>
+<g><title>India — moves 55/100, danger 35/100</title>
+<circle cx="543.6" cy="404.0" r="4.2" fill="#9A8657" opacity="0.62"/>
+<text x="532.6" y="408.0" text-anchor="end" class="dot-l">IN</text></g>
+<g><title>Brazil — moves 60/100, danger 28/100</title>
+<circle cx="585.4" cy="445.8" r="4.2" fill="#9A8657" opacity="0.62"/>
+<text x="574.4" y="449.8" text-anchor="end" class="dot-l">BR</text></g>
+<g><title>Canada — moves 35/100, danger 28/100</title>
+<circle cx="376.3" cy="445.8" r="4.2" fill="#5A7D63" opacity="0.62"/>
+<text x="365.3" y="449.8" text-anchor="end" class="dot-l">CA</text></g>
+<g><title>Australia — moves 35/100, danger 12/100</title>
+<circle cx="376.3" cy="575.5" r="4.2" fill="#5A7D63" opacity="0.62"/>
+<text x="365.3" y="579.5" text-anchor="end" class="dot-l">AU</text></g>
+<g><title>Norway — moves 35/100, danger 12/100</title>
+<circle cx="376.3" cy="486.0" r="4.2" fill="#5A7D63" opacity="0.62"/>
+<text x="365.3" y="490.0" text-anchor="end" class="dot-l">NO</text></g>
+<g><title>Sweden — moves 35/100, danger 12/100</title>
+<circle cx="376.3" cy="595.0" r="4.2" fill="#5A7D63" opacity="0.62"/>
+<text x="365.3" y="599.0" text-anchor="end" class="dot-l">SE</text></g>
+<g><title>Switzerland — moves 35/100, danger 12/100</title>
+<circle cx="376.3" cy="528.3" r="4.2" fill="#5A7D63" opacity="0.62"/>
+<text x="365.3" y="532.3" text-anchor="end" class="dot-l">CH</text></g>
+<g><title>South Korea — moves 42/100, danger 34/100</title>
+<circle cx="434.9" cy="409.9" r="4.2" fill="#5A7D63" opacity="0.62"/>
+<text x="423.9" y="413.9" text-anchor="end" class="dot-l">KR</text></g>
+<g><title>Singapore — moves 35/100, danger 45/100</title>
+<circle cx="376.3" cy="344.3" r="4.2" fill="#5A7D63" opacity="0.62"/>
+<text x="365.3" y="348.3" text-anchor="end" class="dot-l">SG</text></g>
+<g><title>Mexico — moves 55/100, danger 20/100</title>
+<circle cx="543.6" cy="462.2" r="4.2" fill="#9A8657" opacity="0.62"/>
+<text x="532.6" y="466.2" text-anchor="end" class="dot-l">MX</text></g>
+<g><title>Argentina — moves 75/100, danger 36/100</title>
+<circle cx="710.9" cy="398.0" r="4.2" fill="#9A6A68" opacity="0.62"/>
+<text x="699.9" y="402.0" text-anchor="end" class="dot-l">AR</text></g>
+<g><title>Saudi Arabia — moves 62/100, danger 19/100</title>
+<circle cx="602.2" cy="499.5" r="4.2" fill="#9A8657" opacity="0.62"/>
+<text x="591.2" y="503.5" text-anchor="end" class="dot-l">SA</text></g>
+<g><title>South Africa — moves 80/100, danger 36/100</title>
+<circle cx="752.7" cy="398.0" r="4.2" fill="#9A6A68" opacity="0.62"/>
+<text x="763.7" y="402.0" text-anchor="start" class="dot-l">ZA</text></g>
+<g><title>Russia — moves 100/100, danger 42/100</title>
+<circle cx="836.4" cy="362.2" r="4.2" fill="#9A6A68" opacity="0.62"/>
+<text x="825.4" y="366.2" text-anchor="end" class="dot-l">RU</text></g>
+<g><title>Turkey — moves 87/100, danger 19/100</title>
+<circle cx="811.3" cy="499.5" r="4.2" fill="#9A6A68" opacity="0.62"/>
+<text x="800.3" y="503.5" text-anchor="end" class="dot-l">TR</text></g>
+<g><title>Hong Kong — moves 72/100, danger 11/100</title>
+<circle cx="685.8" cy="547.2" r="4.2" fill="#6A7788" opacity="0.62"/>
+<text x="674.8" y="551.2" text-anchor="end" class="dot-l">HK</text></g>
+<g><title>Indonesia — moves 55/100, danger 12/100</title>
+<circle cx="543.6" cy="551.7" r="4.2" fill="#9A8657" opacity="0.62"/>
+<text x="532.6" y="555.7" text-anchor="end" class="dot-l">ID</text></g>
+<g><title>Vietnam — moves 55/100, danger 4/100</title>
+<circle cx="543.6" cy="589.0" r="4.2" fill="#9A8657" opacity="0.62"/>
+<text x="532.6" y="593.0" text-anchor="end" class="dot-l">VN</text></g>
+<g><title>Chile — moves 35/100, danger 12/100</title>
+<circle cx="376.3" cy="554.6" r="4.2" fill="#5A7D63" opacity="0.62"/>
+<text x="365.3" y="558.6" text-anchor="end" class="dot-l">CL</text></g>
+<g><title>Poland — moves 42/100, danger 27/100</title>
+<circle cx="434.9" cy="451.7" r="4.2" fill="#5A7D63" opacity="0.62"/>
+<text x="423.9" y="455.7" text-anchor="end" class="dot-l">PL</text></g>
+<g><title>Ireland — moves 55/100, danger 19/100</title>
+<circle cx="543.6" cy="521.9" r="4.2" fill="#9A8657" opacity="0.62"/>
+<text x="532.6" y="525.9" text-anchor="end" class="dot-l">IE</text></g>
+<g><title>UAE — moves 42/100, danger 12/100</title>
+<circle cx="434.9" cy="541.3" r="4.2" fill="#5A7D63" opacity="0.62"/>
+<text x="423.9" y="545.3" text-anchor="end" class="dot-l">AE</text></g>
+<g><title>Thailand — moves 60/100, danger 12/100</title>
+<circle cx="585.4" cy="541.3" r="4.2" fill="#6A7788" opacity="0.62"/>
+<text x="596.4" y="545.3" text-anchor="start" class="dot-l">TH</text></g>
+<g><title>Malaysia — moves 55/100, danger 20/100</title>
+<circle cx="543.6" cy="492.0" r="4.2" fill="#9A8657" opacity="0.62"/>
+<text x="532.6" y="496.0" text-anchor="end" class="dot-l">MY</text></g>
+<g><title>Taiwan — moves 50/100, danger 29/100</title>
+<circle cx="501.8" cy="439.8" r="4.2" fill="#5A7D63" opacity="0.62"/>
+<text x="490.8" y="443.8" text-anchor="end" class="dot-l">TW</text></g>
+<g><title>Peru — moves 35/100, danger 12/100</title>
+<circle cx="376.3" cy="507.4" r="4.2" fill="#5A7D63" opacity="0.62"/>
+<text x="365.3" y="511.4" text-anchor="end" class="dot-l">PE</text></g>
+<text x="473" y="686" text-anchor="middle" class="ax">RISK — HOW MUCH THE PRICE MOVES →</text>
+<text x="-335" y="12" transform="rotate(-90)" text-anchor="middle" class="ax">DANGER — PROBABILITY OF ZERO</text>
+</svg></div>
+    <div class="key">
+      <div class="key-row"><span class="key-sw" style="background:#9A6A68"></span><span><b>Calm and lethal</b> — barely moves, right up until the capital does not come back. Badly run government debt.</span></div>
+      <div class="key-row"><span class="key-sw" style="background:#9A6A68;opacity:.55"></span><span><b>Violent and lethal</b> — only worth holding small, and only against genuinely uncorrelated positions.</span></div>
+      <div class="key-row"><span class="key-sw" style="background:#6A7788"></span><span><b>Quiet and durable</b> — useful ballast. But at 8% annual debasement, quiet is not the same as free.</span></div>
+      <div class="key-row"><span class="key-sw" style="background:#5A7D63"></span><span><b>Paid for the movement</b> — moves hard, unlikely to go to zero. The volatility is the entry fee, not the threat.</span></div>
+    </div>
+  </figure>
+
+  <!-- ── the four weathers, country by country ─────────────────────── -->
+  <section class="reading">
+    <p class="reading-no">04</p>
+    <h2>Country by country</h2>
+    <p>The same thirty-two countries, grouped by the weather they are currently in. Each card carries the government debt load, how much the market moves, and how likely the capital is never to come back.</p>
+  </section>
+
+  <div class="wide">
+<section class="weather" id="deflationary-boom">
+  <div class="weather-head">
+    <p class="weather-cond">Growth, no inflation</p>
+    <h3 style="color:#5A7D63">Deflationary Boom</h3>
+    <div class="weather-verdicts">
+      <div><b>Worth owning here</b>Equities — efficiency and technology</div>
+      <div><b>What this weather punishes</b>Gold and cash — both cost you while capitalism compounds.</div>
+    </div>
+    <p class="weather-count">12 of 32</p>
+  </div>
+  <div class="cards">
+    <article class="card">
+      <header><span class="card-flag">🇦🇺</span><span class="card-name">Australia</span><span class="card-code">AU</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:52%;background:#D6D1C6"></span></span><span class="meter-v">52%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:35%;background:#5A7D63"></span></span><span class="meter-v">35</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:12%;background:#5A7D63"></span></span><span class="meter-v">12</span></div>
+      </div>
+      <p>Low debt, energy exporter, massive commodity base. Linked to Asian growth. Strongest macro profile.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇨🇦</span><span class="card-name">Canada</span><span class="card-code">CA</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:100%;background:#D6D1C6"></span></span><span class="meter-v">105%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:35%;background:#5A7D63"></span></span><span class="meter-v">35</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:28%;background:#5A7D63"></span></span><span class="meter-v">28</span></div>
+      </div>
+      <p>Energy self-sufficient. Diversifying from US. Pacific energy route to Asia. Rates falling.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇨🇱</span><span class="card-name">Chile</span><span class="card-code">CL</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:40%;background:#D6D1C6"></span></span><span class="meter-v">40%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:35%;background:#5A7D63"></span></span><span class="meter-v">35</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:12%;background:#5A7D63"></span></span><span class="meter-v">12</span></div>
+      </div>
+      <p>World's largest copper producer. Disinflation achieved, rates stabilized. Low debt, strong institutions. Benefits from green transition (copper demand for EVs, renewables).</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇳🇴</span><span class="card-name">Norway</span><span class="card-code">NO</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:44%;background:#D6D1C6"></span></span><span class="meter-v">44%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:35%;background:#5A7D63"></span></span><span class="meter-v">35</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:12%;background:#5A7D63"></span></span><span class="meter-v">12</span></div>
+      </div>
+      <p>Sovereign fund $1.7T+, AAA, energy exporter. Strongest fiscal position globally.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇵🇪</span><span class="card-name">Peru</span><span class="card-code">PE</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:33%;background:#D6D1C6"></span></span><span class="meter-v">33%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:35%;background:#5A7D63"></span></span><span class="meter-v">35</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:12%;background:#5A7D63"></span></span><span class="meter-v">12</span></div>
+      </div>
+      <p>Fastest-growing major EM in 2026. Current account surplus. Inflation at 2.2% — lowest in LatAm. Gold + copper producer at record prices = direct commodity supercycle exposure. Very low debt at 33% GDP. Political noise but strongest macro fundamentals in the region.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇵🇱</span><span class="card-name">Poland</span><span class="card-code">PL</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:61%;background:#D6D1C6"></span></span><span class="meter-v">61%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:42%;background:#5A7D63"></span></span><span class="meter-v">42</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:27%;background:#5A7D63"></span></span><span class="meter-v">27</span></div>
+      </div>
+      <p>Strongest EU economy outside the eurozone. Keeps PLN = monetary flexibility. Aggressive defense spending post-Ukraine. Energy diversifying away from Russia. Ukraine border proximity is the key risk.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇸🇬</span><span class="card-name">Singapore</span><span class="card-code">SG</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:100%;background:#D6D1C6"></span></span><span class="meter-v">176%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:35%;background:#5A7D63"></span></span><span class="meter-v">35</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:45%;background:#5A7D63"></span></span><span class="meter-v">45</span></div>
+      </div>
+      <p>176% debt/GDP looks alarming but virtually all domestic, backed by GIC + Temasek sovereign wealth. Rule of law, stable SGD.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇰🇷</span><span class="card-name">South Korea</span><span class="card-code">KR</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:50%;background:#D6D1C6"></span></span><span class="meter-v">50%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:42%;background:#5A7D63"></span></span><span class="meter-v">42</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:34%;background:#5A7D63"></span></span><span class="meter-v">34</span></div>
+      </div>
+      <p>Samsung, SK Hynix = AI hardware monopoly. Cheap valuations. NK geopolitical premium.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇸🇪</span><span class="card-name">Sweden</span><span class="card-code">SE</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:35%;background:#D6D1C6"></span></span><span class="meter-v">35%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:35%;background:#5A7D63"></span></span><span class="meter-v">35</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:12%;background:#5A7D63"></span></span><span class="meter-v">12</span></div>
+      </div>
+      <p>Lowest debt in Europe (35%). Rate cuts underway. Export-dependent on weak EU demand.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇨🇭</span><span class="card-name">Switzerland</span><span class="card-code">CH</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:38%;background:#D6D1C6"></span></span><span class="meter-v">38%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:35%;background:#5A7D63"></span></span><span class="meter-v">35</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:12%;background:#5A7D63"></span></span><span class="meter-v">12</span></div>
+      </div>
+      <p>Safe haven. Low debt, strong franc. Global companies with pricing power.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇹🇼</span><span class="card-name">Taiwan</span><span class="card-code">TW</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:27%;background:#D6D1C6"></span></span><span class="meter-v">27%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:50%;background:#5A7D63"></span></span><span class="meter-v">50</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:29%;background:#5A7D63"></span></span><span class="meter-v">29</span></div>
+      </div>
+      <p>TSMC monopoly — ~30% of global AI capex flows through Taiwan. Very low debt, strong fiscal position. Cheap valuations despite dominant semiconductor position. China invasion risk is the singular tail risk — peak window 2027–2028.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇦🇪</span><span class="card-name">UAE</span><span class="card-code">AE</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:30%;background:#D6D1C6"></span></span><span class="meter-v">30%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:42%;background:#5A7D63"></span></span><span class="meter-v">42</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:12%;background:#5A7D63"></span></span><span class="meter-v">12</span></div>
+      </div>
+      <p>Capital magnet. Zero income tax, massive sovereign wealth (ADIA, Mubadala). Oil exporter but aggressively diversifying. Pegged to USD. Regional tensions (Iran/Hormuz) are the tail risk.</p>
+    </article>
+  </div>
+</section>
+<section class="weather" id="inflationary-boom">
+  <div class="weather-head">
+    <p class="weather-cond">Growth with inflation</p>
+    <h3 style="color:#9A8657">Inflationary Boom</h3>
+    <div class="weather-verdicts">
+      <div><b>Worth owning here</b>Gold, silver, copper — and equities</div>
+      <div><b>What this weather punishes</b>Long bonds — inflation eats the coupon and the principal.</div>
+    </div>
+    <p class="weather-count">9 of 32</p>
+  </div>
+  <div class="cards">
+    <article class="card">
+      <header><span class="card-flag">🇧🇷</span><span class="card-name">Brazil</span><span class="card-code">BR</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:79%;background:#D6D1C6"></span></span><span class="meter-v">79%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:60%;background:#9A8657"></span></span><span class="meter-v">60</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:28%;background:#9A8657"></span></span><span class="meter-v">28</span></div>
+      </div>
+      <p>SELIC cut to 14.5% but growth slowing to 1.7% in 2026. Inflation rising to 4.6%, above 3% target. Real stabilized at 5.10–5.20/USD. Oct 2026 election pivotal. Bond thesis intact at 14.5%, equity momentum gone.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇨🇳</span><span class="card-name">China</span><span class="card-code">CN</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:84%;background:#D6D1C6"></span></span><span class="meter-v">84%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:62%;background:#9A8657"></span></span><span class="meter-v">62</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:42%;background:#9A8657"></span></span><span class="meter-v">42</span></div>
+      </div>
+      <p>Deflation ended (Iran war + stimulus). PMI 51.8 for 6th consecutive month. Inflation 1.2% in April — first positive cycle in 33 months. Dominates AI, EVs, robotics. Cheapest major market. Taiwan = key risk, 2028 peak.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇮🇳</span><span class="card-name">India</span><span class="card-code">IN</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:81%;background:#D6D1C6"></span></span><span class="meter-v">81%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:55%;background:#9A8657"></span></span><span class="meter-v">55</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:35%;background:#9A8657"></span></span><span class="meter-v">35</span></div>
+      </div>
+      <p>Strong demographics, urbanization. Debt mostly domestic. Heavy energy dependency = main risk. Infrastructure booming.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇮🇩</span><span class="card-name">Indonesia</span><span class="card-code">ID</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:39%;background:#D6D1C6"></span></span><span class="meter-v">39%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:55%;background:#9A8657"></span></span><span class="meter-v">55</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:12%;background:#9A8657"></span></span><span class="meter-v">12</span></div>
+      </div>
+      <p>Low debt, energy exporter, easing cycle. Commodities exposure is a strength in the current inflationary environment. Domestic market growing fast. South China Sea proximity is the main tail risk.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇮🇪</span><span class="card-name">Ireland</span><span class="card-code">IE</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:36%;background:#D6D1C6"></span></span><span class="meter-v">36%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:55%;background:#9A8657"></span></span><span class="meter-v">55</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:19%;background:#9A8657"></span></span><span class="meter-v">19</span></div>
+      </div>
+      <p>PMI 51.9 shows mild expansion but inflation surging to 3.6% on energy costs. 80% energy import dependent — highly exposed to Hormuz disruption. ECB on hold at 2%. Debt/GDP low at 36% but GNI* ratio closer to 63%. MNC-heavy economy masks domestic vulnerabilities.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇲🇾</span><span class="card-name">Malaysia</span><span class="card-code">MY</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:64%;background:#D6D1C6"></span></span><span class="meter-v">64%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:55%;background:#9A8657"></span></span><span class="meter-v">55</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:20%;background:#9A8657"></span></span><span class="meter-v">20</span></div>
+      </div>
+      <p>AI buildout direct beneficiary — semiconductor and electronics exports booming. ~30% of global AI capex flows through Malaysia/Korea supply chains. China+1 manufacturing winner. LNG exporter. 4.6% GDP growth in 2026.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇲🇽</span><span class="card-name">Mexico</span><span class="card-code">MX</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:60%;background:#D6D1C6"></span></span><span class="meter-v">60%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:55%;background:#9A8657"></span></span><span class="meter-v">55</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:20%;background:#9A8657"></span></span><span class="meter-v">20</span></div>
+      </div>
+      <p>Nearshoring boom. Moderate debt, manufacturing growth, young demographics.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇸🇦</span><span class="card-name">Saudi Arabia</span><span class="card-code">SA</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:32%;background:#D6D1C6"></span></span><span class="meter-v">32%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:62%;background:#9A8657"></span></span><span class="meter-v">62</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:19%;background:#9A8657"></span></span><span class="meter-v">19</span></div>
+      </div>
+      <p>Largest energy exporter, very low debt. SAR pegged USD. Hormuz proximity = risk and leverage.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇻🇳</span><span class="card-name">Vietnam</span><span class="card-code">VN</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:32%;background:#D6D1C6"></span></span><span class="meter-v">32%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:55%;background:#9A8657"></span></span><span class="meter-v">55</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:4%;background:#9A8657"></span></span><span class="meter-v">4</span></div>
+      </div>
+      <p>Manufacturing powerhouse benefiting from China+1 diversification. Very low debt, young demographics. Energy importer but diversifying with renewables. Strong FDI inflows from Samsung, Apple supply chain shifts.</p>
+    </article>
+  </div>
+</section>
+<section class="weather" id="inflationary-bust">
+  <div class="weather-head">
+    <p class="weather-cond">Recession with inflation</p>
+    <h3 style="color:#9A6A68">Inflationary Bust</h3>
+    <div class="weather-verdicts">
+      <div><b>Worth owning here</b>Cash in a serious currency. Short duration. Energy.</div>
+      <div><b>What this weather punishes</b>Long bonds and long-duration growth equities. Both get destroyed.</div>
+    </div>
+    <p class="weather-count">8 of 32</p>
+  </div>
+  <div class="cards">
+    <article class="card">
+      <header><span class="card-flag">🇦🇷</span><span class="card-name">Argentina</span><span class="card-code">AR</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:73%;background:#D6D1C6"></span></span><span class="meter-v">73%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:75%;background:#9A6A68"></span></span><span class="meter-v">75</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:36%;background:#9A6A68"></span></span><span class="meter-v">36</span></div>
+      </div>
+      <p>Milei reforms: economy grew 4.4% in 2025, 3-4% forecast 2026. But inflation reaccelerated from 31% to 33%. Approval falling. IMF program ongoing. Vaca Muerta makes Argentina an energy exporter. Reform trade mostly done.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇫🇷</span><span class="card-name">France</span><span class="card-code">FR</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:100%;background:#D6D1C6"></span></span><span class="meter-v">112%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:80%;background:#9A6A68"></span></span><span class="meter-v">80</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:60%;background:#9A6A68"></span></span><span class="meter-v">60</span></div>
+      </div>
+      <p>Debt 112% GDP, 54% held abroad — foreign holders can flee. 40% rolling at 4%. Rates above nominal growth. Unsustainable.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇯🇵</span><span class="card-name">Japan</span><span class="card-code">JP</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:100%;background:#D6D1C6"></span></span><span class="meter-v">230%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:87%;background:#9A6A68"></span></span><span class="meter-v">87</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:59%;background:#9A6A68"></span></span><span class="meter-v">59</span></div>
+      </div>
+      <p>BOJ held at 0.75% but inflation surged to 2.8%, growth forecast cut to 0.5%. Yen past 160 — intervention triggered (first since July 2024). Heavy energy importer = Iran war flips the antifragile thesis. Stagflation risk.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇷🇺</span><span class="card-name">Russia</span><span class="card-code">RU</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:18%;background:#D6D1C6"></span></span><span class="meter-v">18%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:100%;background:#9A6A68"></span></span><span class="meter-v">100</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:42%;background:#9A6A68"></span></span><span class="meter-v">42</span></div>
+      </div>
+      <p>War economy. Oil revenue still flowing despite sanctions. 21% rates crush private sector. Uninvestable for Western capital.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇿🇦</span><span class="card-name">South Africa</span><span class="card-code">ZA</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:79%;background:#D6D1C6"></span></span><span class="meter-v">79%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:80%;background:#9A6A68"></span></span><span class="meter-v">80</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:36%;background:#9A6A68"></span></span><span class="meter-v">36</span></div>
+      </div>
+      <p>Political instability, Eskom crisis. Rich in gold, platinum. ZAR volatility = main factor.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇹🇷</span><span class="card-name">Turkey</span><span class="card-code">TR</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:24%;background:#D6D1C6"></span></span><span class="meter-v">24%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:87%;background:#9A6A68"></span></span><span class="meter-v">87</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:19%;background:#9A6A68"></span></span><span class="meter-v">19</span></div>
+      </div>
+      <p>Inflation reaccelerated to 32.6% in May. Lira hit record low past 45.5/USD. Policy rate 37%, effective 40%. Iran war adds energy-import inflation. No path below 20% inflation this decade per economists.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇬🇧</span><span class="card-name">United Kingdom</span><span class="card-code">UK</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:100%;background:#D6D1C6"></span></span><span class="meter-v">100%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:75%;background:#9A6A68"></span></span><span class="meter-v">75</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:28%;background:#9A6A68"></span></span><span class="meter-v">28</span></div>
+      </div>
+      <p>Sticky inflation above target. North Sea declining. Growth near zero, limited fiscal room.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇺🇸</span><span class="card-name">United States</span><span class="card-code">US</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:100%;background:#D6D1C6"></span></span><span class="meter-v">124%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:87%;background:#9A6A68"></span></span><span class="meter-v">87</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:53%;background:#9A6A68"></span></span><span class="meter-v">53</span></div>
+      </div>
+      <p>Fed held at 3.5–3.75% for third consecutive meeting, contentious 8-4 vote. PCE 2.8%, core 3.0%. Middle East energy shock keeping inflation sticky. GDP growing but uncertainty extreme. Fed fully trapped.</p>
+    </article>
+  </div>
+</section>
+<section class="weather" id="deflationary-bust">
+  <div class="weather-head">
+    <p class="weather-cond">Recession, no inflation</p>
+    <h3 style="color:#6A7788">Deflationary Bust</h3>
+    <div class="weather-verdicts">
+      <div><b>Worth owning here</b>Long government bonds. Nothing else.</div>
+      <div><b>What this weather punishes</b>Equities and commodities — earnings and prices fall together.</div>
+    </div>
+    <p class="weather-count">3 of 32</p>
+  </div>
+  <div class="cards">
+    <article class="card">
+      <header><span class="card-flag">🇩🇪</span><span class="card-name">Germany</span><span class="card-code">DE</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:63%;background:#D6D1C6"></span></span><span class="meter-v">63%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:67%;background:#6A7788"></span></span><span class="meter-v">67</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:27%;background:#6A7788"></span></span><span class="meter-v">27</span></div>
+      </div>
+      <p>Composite PMI collapsed to 48.3 in April — first contraction since May 2025. Manufacturing back below 50 at 49.9. ECB warns of technical recession by end-2026. Four recessions in four years — no post-war precedent.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇭🇰</span><span class="card-name">Hong Kong</span><span class="card-code">HK</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:2%;background:#D6D1C6"></span></span><span class="meter-v">2%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:72%;background:#6A7788"></span></span><span class="meter-v">72</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:11%;background:#6A7788"></span></span><span class="meter-v">11</span></div>
+      </div>
+      <p>USD peg imports Fed rates. Property bust drags economy. Political overhang since National Security Law. Gateway to China shrinking.</p>
+    </article>
+    <article class="card">
+      <header><span class="card-flag">🇹🇭</span><span class="card-name">Thailand</span><span class="card-code">TH</span></header>
+      <div class="meters">
+        <div class="meter"><span class="meter-k">Debt / GDP</span><span class="meter-track"><span class="meter-fill" style="width:63%;background:#D6D1C6"></span></span><span class="meter-v">63%</span></div>
+        <div class="meter"><span class="meter-k">Moves</span><span class="meter-track"><span class="meter-fill" style="width:60%;background:#6A7788"></span></span><span class="meter-v">60</span></div>
+        <div class="meter"><span class="meter-k">Danger</span><span class="meter-track"><span class="meter-fill" style="width:12%;background:#6A7788"></span></span><span class="meter-v">12</span></div>
+      </div>
+      <p>In deflation (-0.7% CPI). Central bank cutting aggressively (1.0%). Domestic debt mostly internal. Tourism recovery ongoing. Manufacturing benefits from China+1 shift. Low valuations = contrarian play.</p>
+    </article>
+  </div>
+</section>
+  </div>
+
+  <section class="note col">
+    <p class="disclaimer">None of this is advice, and it is not a recommendation to buy anything in any of these countries. It is a way of looking, published so it can be argued with.</p>
+    <p><a class="next" href="/wealth/principles/">How the three readings work</a></p>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="foot-in">
+    <a href="/wealth/">Wealth Architecture</a>
+    <a href="/wealth/principles/">Principles</a>
+    <a href="/wealth/country/">Country Map</a>
+    <a href="/wealth/exercice/">Exercise</a>
+    <a href="/">jeremylasne.com</a>
+    <span class="fine">Free research on wealth architecture · Not financial advice</span>
+  </div>
+</footer>
+
+</body>
+</html>
