@@ -31,8 +31,9 @@ pinned to the floor of the hero at every window size and the sides crop first.
   deer walks (it stands 131px tall at 34px off the bottom).
 - Keep the **middle third quiet**. The name, tagline and buttons sit there, and
   the two floating newspapers sit at roughly 23–31% from the top, left and right.
-- Drifting clouds and birds still animate over the top. If the art already has
-  busy skies, drop the `Clouds`/`Birds` layers from `Hero()` in the app script.
+- The drawn drifting clouds are dropped when a backdrop is present — the art
+  brings its own. The **birds still fly** over the top, since they read as small
+  dark specks against any sky. Both are gated on `photo` in `Hero()`.
 
 Switching the Tweaks panel to the `dusk` sky warms the image with a CSS filter
 (`.sky--dusk .hero-photo`) so it still reads as evening.
