@@ -13,6 +13,33 @@ A scrolling Pokémon-style world: hero → **The Founder's Quarter** → **The P
 
 A v1 (pure-HTML/CSS prototype with no React) lives at [`index-v1.html`](index-v1.html).
 
+### Editing the landing page
+
+`index.html` is a self-contained bundle: the page HTML lives JSON-encoded in a
+`__bundler/template` script and the JS, fonts and images live gzipped+base64 in
+a `__bundler/manifest` script. Unpack it, edit the asset, pack it back — packing
+leaves untouched assets byte-for-byte alone, so the diff stays small.
+
+## Pages
+
+| Path | What it is |
+| --- | --- |
+| `/` | the pixel-art landing world |
+| `/wealth` | **Wealth Architecture** — the research index and the book behind it |
+| `/wealth/principles` | fourteen principles in four parts, with hairline SVG figures |
+| `/wealth/country` | thirty-two countries read three ways |
+| `/wealth/exercice` | the same three maps as an interactive lecture (was `/investment`) |
+| `/economy` | *The Four Clocks* — the same argument as one classical essay |
+| `/mobileapp` | the revenue-machine playbook |
+| `/dayzero` | the "think bigger" article |
+
+The four `/wealth` pages share one design system in
+[`wealth/style.css`](wealth/style.css) — warm paper, hairline rules, a single
+gold accent, Instrument Serif over DM Sans. It is deliberately unlike the rest
+of the site: that material is long-form and wants to be read, not played.
+
+`/investment` and `/invest` are redirect stubs to their new homes.
+
 ## Run locally
 
 Just open `index.html` in a browser, or:

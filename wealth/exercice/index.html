@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Exercise · Wealth Architecture · Jeremy Lasne</title>
+<meta name="description" content="A beginner's course in reading the economy, built from Ray Dalio, Charles Gave and Richard Detente. Nine lessons, five interactive.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..600;1,9..40,300..500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/wealth/style.css">
+<style>
+  /* ─────────────────────────────────────────────────────────────────────
+     The Three Maps — the interactive half of Wealth Architecture.
+
+     Same design language as /wealth/principles and /wealth/country: warm
+     paper, hairline rules, one gold accent, Instrument Serif over DM Sans.
+     Every class name is inherited from the original pixel-art build so the
+     lab scripts keep working untouched; only the surface changed.
+     ───────────────────────────────────────────────────────────────────── */
+
+  *{ box-sizing:border-box; }
+  html{ background:var(--paper); scroll-behavior:smooth; scroll-padding-top:88px; }
+  body{ margin:0; font-family:var(--body); color:var(--ink-soft); font-size:17px; line-height:1.75;
+        -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+  ::selection{ background:var(--gold-wash); color:var(--ink); }
+  button{ font-family:inherit; cursor:pointer; }
+
+  /* ── layout ─────────────────────────────────────── */
+  .page{ position:relative; width:100%; background:var(--paper); }
+  /* the pixel build's paper texture, column rules and hard page edges have no
+     place in a minimal setting — kept as selectors, drawn as nothing */
+  .rules,.cols,.edge{ display:none; }
+  :root{ --shaft:1240px; --measure:68ch; --rail:250px; }
+  .shaft{ position:relative; max-width:var(--shaft); margin:0 auto; padding:0 clamp(20px,5vw,48px) 120px; }
+  .card > p, .card > h2, .card > h3, .card > ul.bul, .bedrock > p, .bedrock > h2{ max-width:var(--measure); }
+  @media (max-width:700px){ .shaft{ padding:0 20px 90px; } }
+
+  /* ── type ───────────────────────────────────────── */
+  .ps{ font-family:var(--body); }
+  h1{ font-family:var(--display); font-weight:400; font-size:clamp(46px,8.5vw,88px); line-height:1.02;
+      letter-spacing:-.015em; color:var(--ink); margin:0; }
+  h2{ font-family:var(--display); font-weight:400; font-size:clamp(26px,3.6vw,36px); line-height:1.14;
+      letter-spacing:-.01em; color:var(--ink); margin:0 0 22px; }
+  h3{ font-family:var(--body); font-size:11px; line-height:1.7; color:var(--faint); margin:32px 0 12px;
+      letter-spacing:.18em; text-transform:uppercase; }
+  p{ font-family:var(--body); font-size:17px; line-height:1.78; color:var(--ink-soft); margin:0 0 18px; }
+  p:last-child{ margin-bottom:0; }
+  b{ color:var(--ink); font-weight:500; }
+  .mark{ background:linear-gradient(transparent 62%,var(--gold-wash) 62%); padding:0 1px; color:var(--ink); }
+  .quiet{ color:var(--faint); }
+  .src{ font-family:var(--body); font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--faint); }
+
+  /* ── panels ─────────────────────────────────────── */
+  .card{ position:relative; background:var(--paper-card); border:1px solid var(--rule); padding:clamp(28px,4vw,44px); }
+  .tag{ position:absolute; top:-1px; left:clamp(28px,4vw,44px); background:var(--paper-card); padding:0 10px;
+        font-family:var(--body); font-size:10.5px; letter-spacing:.18em; text-transform:uppercase;
+        color:var(--faint); transform:translateY(-50%); white-space:nowrap; }
+  .tag.hot{ color:var(--gold); border:0; }
+  .tag.r{ left:auto; right:clamp(28px,4vw,44px); }
+  .connector{ width:1px; height:56px; margin:0 auto; background:var(--rule-firm); }
+  .sect{ position:relative; margin-top:0; }
+  ul.bul{ list-style:none; margin:0 0 22px; padding:0; display:flex; flex-direction:column; gap:14px; }
+  ul.bul li{ font-family:var(--body); font-size:16.5px; line-height:1.7; color:var(--ink-soft); display:flex; gap:14px; }
+  ul.bul li b{ color:var(--ink); }
+  ul.bul .ar{ color:var(--gold); flex:none; }
+
+  /* ── interactive shell ──────────────────────────── */
+  .lab{ margin:34px 0 6px; border:1px solid var(--rule); background:var(--paper-sunk); padding:26px 24px 28px; }
+  .labhead{ font-family:var(--body); font-size:10.5px; letter-spacing:.2em; text-transform:uppercase;
+            color:var(--faint); margin-bottom:10px; display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+  .labhead .dot{ width:6px; height:6px; border-radius:50%; background:var(--gold); display:inline-block; }
+  .labtitle{ font-family:var(--display); font-size:24px; color:var(--ink); margin:0 0 8px; line-height:1.2; }
+  .labhint{ font-family:var(--body); font-size:15.5px; color:var(--muted); margin:0 0 20px; line-height:1.65; }
+  .btn{ display:inline-flex; align-items:center; gap:8px; padding:10px 18px; background:transparent;
+        border:1px solid var(--rule-firm); font-family:var(--body); font-size:11px; letter-spacing:.14em;
+        text-transform:uppercase; color:var(--ink); text-decoration:none; transition:background .15s, border-color .15s; }
+  .btn:hover{ border-color:var(--ink); }
+  .btn:active{ background:var(--paper-sunk); }
+  .btn.on{ background:var(--ink); border-color:var(--ink); color:var(--paper); }
+  .btn.hot{ border-color:var(--gold); color:var(--ink); background:var(--gold-wash); }
+  .btn.hot:hover{ background:var(--gold); color:#fff; border-color:var(--gold); }
+  .btn[disabled]{ opacity:.35; cursor:not-allowed; }
+
+  /* ── lab 1: sorting board ───────────────────────── */
+  .board{ display:grid; grid-template-columns:30px minmax(0,1fr) minmax(0,1fr); grid-template-rows:1fr 1fr 30px; gap:1px; min-height:340px;
+          background:var(--rule); border:1px solid var(--rule); }
+  .axl{ grid-row:1 / -1; writing-mode:vertical-rl; transform:rotate(180deg); display:flex; align-items:center;
+        justify-content:center; font-family:var(--body); font-size:10px; letter-spacing:.2em; text-transform:uppercase;
+        color:var(--faint); background:var(--paper); }
+  .axb{ grid-column:2 / span 2; display:flex; align-items:center; justify-content:space-between; font-family:var(--body);
+        font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--faint); padding:0 6px; background:var(--paper); }
+  .cell{ min-width:0; background:var(--paper-card); padding:12px; display:flex; flex-direction:column; gap:8px; }
+  .cell.armed{ background:var(--gold-wash); cursor:pointer; box-shadow:inset 0 0 0 1px var(--gold); }
+  .cellname{ font-family:var(--body); font-size:10px; line-height:1.7; color:var(--faint); letter-spacing:.16em; text-transform:uppercase; }
+  .chip{ font-family:var(--body); font-size:14px; line-height:1.35; padding:9px 11px; border:1px solid var(--rule-firm);
+         background:var(--paper-card); text-align:left; color:var(--ink-soft); transition:border-color .15s, background .15s; }
+  .chip:hover{ border-color:var(--ink); }
+  .chip.sel{ background:var(--gold-wash); border-color:var(--gold); color:var(--ink); }
+  .chip.ok{ background:rgba(90,125,99,.10); border-color:#5A7D63; color:var(--ink); cursor:default; }
+  .chip.no{ background:rgba(154,106,104,.10); border-color:#9A6A68; color:var(--ink); cursor:default; }
+  .tray{ display:flex; flex-wrap:wrap; gap:9px; margin-top:18px; }
+  .log{ margin-top:18px; border-top:1px solid var(--rule-firm); padding-top:16px; }
+  .logline{ font-family:var(--body); font-size:15px; line-height:1.65; color:var(--muted); margin-bottom:10px; }
+  .logline b{ color:var(--ink); }
+
+  /* ── lab 2: quadrant machine ────────────────────── */
+  .qgrid{ display:grid; grid-template-columns:26px minmax(0,1fr) minmax(0,1fr); grid-template-rows:1fr 1fr 26px; gap:1px;
+          background:var(--rule); border:1px solid var(--rule); }
+  /* .q is a <button>; without this the UA default border reads as a heavy frame */
+  .q{ border:0; min-width:0; padding:16px 14px; text-align:left; background:var(--paper-card); min-height:112px; transition:background .15s; }
+  .q:hover{ background:var(--paper-sunk); }
+  .q .qn{ font-family:var(--display); font-size:19px; line-height:1.25; color:var(--ink); display:block; margin-bottom:8px; overflow-wrap:break-word; }
+  .q .qa{ font-family:var(--body); font-size:14px; line-height:1.5; color:var(--muted); display:block; }
+  .q.live{ background:var(--gold-wash); box-shadow:inset 0 0 0 1px var(--gold); }
+  .qpanel{ margin-top:18px; border:1px solid var(--rule); background:var(--paper-card); padding:22px 22px 24px; }
+  .qpanel .qt{ font-family:var(--display); font-size:26px; line-height:1.15; margin:0 0 6px; }
+  .qpanel .qs{ font-family:var(--body); font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--faint); margin-bottom:18px; }
+  .qrow{ font-family:var(--body); font-size:15.5px; line-height:1.7; color:var(--muted); margin-bottom:12px; display:flex; gap:14px; }
+  .qrow span.k{ font-family:var(--body); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--faint);
+                flex:none; width:66px; padding-top:5px; }
+  .qrow > span:last-child{ min-width:0; overflow-wrap:break-word; }
+  .dial{ display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-bottom:14px; }
+  .dial .dl{ font-family:var(--body); font-size:15.5px; line-height:1.6; color:var(--muted); flex:1 1 220px; min-width:200px; }
+
+  /* ── lab 3: cycle stepper ───────────────────────── */
+  .stage{ border:1px solid var(--rule); background:var(--paper-card); padding:24px 24px 26px; min-height:230px; }
+  .stagen{ font-family:var(--body); font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--faint); margin-bottom:12px; }
+  .staget{ font-family:var(--display); font-size:27px; line-height:1.14; color:var(--ink); margin:0 0 16px; }
+  .stagep{ font-family:var(--body); font-size:16px; line-height:1.75; color:var(--ink-soft); margin:0 0 14px; }
+  .stagei{ font-family:var(--body); font-size:15px; line-height:1.65; color:var(--muted); border-left:1px solid var(--gold); padding-left:16px; margin:0; }
+  .dots{ display:flex; gap:6px; margin:18px 0 16px; flex-wrap:wrap; }
+  .dots button{ width:30px; height:30px; border:1px solid var(--rule-firm); background:transparent; font-family:var(--body);
+                font-size:11px; color:var(--muted); padding:0; font-variant-numeric:tabular-nums; }
+  .dots button:hover{ border-color:var(--ink); color:var(--ink); }
+  .dots button.on{ background:var(--ink); border-color:var(--ink); color:var(--paper); }
+
+  /* ── lab 4: shake slider ────────────────────────── */
+  .meterwrap{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:20px; }
+  .meter{ border:1px solid var(--rule); background:var(--paper-card); padding:18px 16px; }
+  .metern{ font-family:var(--display); font-size:20px; line-height:1.2; margin-bottom:14px; color:var(--ink); }
+  .barbox{ position:relative; height:190px; }
+  .zero{ position:absolute; left:0; right:0; top:95px; height:1px; background:var(--rule-firm); }
+  .zerolabel{ position:absolute; right:0; top:100px; font-family:var(--body); font-size:10px; letter-spacing:.14em;
+              text-transform:uppercase; color:var(--faint); }
+  .bar{ position:absolute; left:50%; transform:translateX(-50%); width:52px; }
+  .metert{ font-family:var(--body); font-size:14.5px; line-height:1.6; color:var(--muted); margin-top:14px; }
+  .exs{ font-family:var(--body); font-size:14px; line-height:1.6; color:var(--faint); margin-top:10px; }
+  input[type=range]{ width:100%; accent-color:var(--gold); height:26px; }
+  .weather{ font-family:var(--display); font-size:23px; color:var(--ink); margin-top:16px; line-height:1.3; }
+
+  /* ── lab 5: compass ─────────────────────────────── */
+  .qblock{ margin-bottom:24px; }
+  .qq{ font-family:var(--display); font-size:22px; line-height:1.25; color:var(--ink); margin-bottom:14px; }
+  .opts{ display:flex; flex-direction:column; gap:7px; }
+  .opt{ font-family:var(--body); font-size:15.5px; line-height:1.55; padding:11px 14px; border:1px solid var(--rule-firm);
+        background:var(--paper-card); text-align:left; color:var(--ink-soft); transition:border-color .15s, background .15s; }
+  .opt:hover{ border-color:var(--ink); }
+  .opt.sel{ background:var(--gold-wash); border-color:var(--gold); color:var(--ink); }
+  .out{ margin-top:26px; border:1px solid var(--ink); background:var(--ink); color:#EDEAE3; padding:30px 28px; }
+  .out h4{ font-family:var(--body); font-size:11px; color:var(--gold); margin:0 0 18px; letter-spacing:.2em; text-transform:uppercase; font-weight:400; }
+  .out p{ color:#C9C5BB; font-size:16px; }
+  .out b{ color:#fff; }
+  .out .rule{ height:1px; background:rgba(255,255,255,.14); margin:20px 0; }
+  .out ol{ margin:0; padding-left:22px; }
+  .out li{ font-family:var(--body); font-size:16px; line-height:1.7; color:#C9C5BB; margin-bottom:10px; }
+
+  /* ── bedrock ────────────────────────────────────── */
+  .bedrock{ background:var(--ink); border:1px solid var(--ink); padding:clamp(32px,5vw,52px); color:#EDEAE3; }
+  .bedrock h2{ color:#fff; }
+  .bedrock p{ color:#C9C5BB; }
+  .bedrock b{ color:#fff; }
+  .bedrock .mark{ background:linear-gradient(transparent 62%,rgba(176,141,79,.35) 62%); color:#fff; }
+  .bedrock .kick{ font-family:var(--body); font-size:11px; letter-spacing:.22em; text-transform:uppercase;
+                  color:var(--gold); margin-bottom:22px; display:flex; align-items:center; gap:10px; }
+  .bedrock .kick i{ display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--gold); }
+  .agree{ border-left:1px solid var(--gold); padding:4px 0 4px 22px; margin:8px 0 28px; }
+  .agree div{ font-family:var(--body); font-size:16px; line-height:1.7; color:#C9C5BB; display:flex; gap:14px; margin-bottom:16px; }
+  .agree div:last-child{ margin-bottom:0; }
+  .agree b{ color:var(--gold); flex:none; font-family:var(--body); font-size:10.5px; letter-spacing:.16em;
+            text-transform:uppercase; padding-top:6px; font-weight:400; }
+
+  /* ── one page schema ────────────────────────────── */
+  .schemawrap{ overflow-x:auto; margin:30px 0 4px; border:1px solid var(--rule); background:var(--paper-card); padding:20px 18px; }
+  svg.schema{ display:block; width:100%; min-width:620px; height:auto; }
+  .scrollhint{ font-size:14px; margin-bottom:8px; display:none; color:var(--faint); }
+  @media (max-width:760px){ .scrollhint{ display:block; } }
+  .nest{ border:1px solid var(--rule-firm); background:var(--paper-card); padding:18px 18px 20px; }
+  .nest.n2{ border-color:#9A8657; background:rgba(154,134,87,.05); margin-top:14px; }
+  .nest.n3{ border-color:#6A7788; background:rgba(106,119,136,.05); margin-top:14px; }
+  .nest.n4{ border-color:#9A6A68; background:rgba(154,106,104,.05); margin-top:14px; }
+  .nesthead{ font-family:var(--body); font-size:10.5px; line-height:1.7; letter-spacing:.18em; text-transform:uppercase;
+             color:var(--faint); margin-bottom:12px; }
+  .nest.n2 > .nesthead{ color:#9A8657; }
+  .nest.n3 > .nesthead{ color:#6A7788; }
+  .nest.n4 > .nesthead{ color:#9A6A68; }
+  .nestbody{ font-family:var(--body); font-size:15.5px; line-height:1.7; color:var(--muted); }
+  @media (max-width:640px){ .nest{ padding:13px 12px 14px; } }
+
+  /* ── wide screens ───────────────────────────────────
+     Each lesson becomes a sticky heading rail plus a body column at a readable
+     measure; anything interactive breaks out across both columns so the boards,
+     maps and the schema get the whole width. Below 1100px it stacks. */
+  @media (min-width:1100px){
+    .sect > .card{ display:grid; grid-template-columns:var(--rail) minmax(0,1fr); column-gap:52px; align-content:start; }
+    .sect > .card > h2{ grid-column:1; grid-row:1; align-self:start; margin:0; max-width:none;
+                        font-size:clamp(23px,2.1vw,29px); }
+    .sect > .card > *{ grid-column:2; }
+    .sect > .card > .lab,
+    .sect > .card > .schemawrap,
+    .sect > .card > .scrollhint,
+    .sect > .card > .nest{ grid-column:1 / -1; max-width:none; }
+
+    #lab1{ display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); column-gap:30px; align-items:start; }
+    #lab1 > .labhead,#lab1 > .labtitle,#lab1 > .labhint{ grid-column:1 / -1; }
+    #lab1 > .board{ grid-column:1; grid-row:4 / span 3; }
+    #lab1 > .tray{ grid-column:2; grid-row:4; margin-top:0; }
+    #lab1 > .log{ grid-column:2; grid-row:5; }
+    #lab1 > div:last-child{ grid-column:2; grid-row:6; }
+
+    #lab2{ display:grid; grid-template-columns:minmax(0,440px) minmax(0,1fr); column-gap:28px; align-items:start; }
+    #lab2 > .labhead,#lab2 > .labtitle,#lab2 > .labhint{ grid-column:1 / -1; }
+    #lab2 > .qgrid{ grid-column:1; }
+    #lab2 > .qpanel{ grid-column:2; margin-top:0; }
+
+    #lab3{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); column-gap:28px; align-items:start; }
+    #lab3 > .labhead,#lab3 > .labtitle,#lab3 > .labhint{ grid-column:1 / -1; }
+    #lab3 > .dial{ grid-column:1; }
+    #lab3 > .qpanel{ grid-column:2; grid-row:4 / span 2; margin-top:0 !important; }
+
+    #quiz6{ display:grid; grid-template-columns:1fr 1fr; column-gap:34px; }
+    .index{ max-width:840px; }
+    .index .cols2{ columns:2; column-gap:40px; }
+  }
+
+  /* ── masthead ───────────────────────────────────── */
+  .masthead-x{ padding:clamp(64px,11vw,132px) 0 clamp(56px,8vw,96px); }
+  .masthead-x .eyebrow{ max-width:none; }
+  .masthead-x .standfirst{ max-width:24ch; }
+  .definition{ margin-top:clamp(38px,5vw,56px); max-width:640px; border-left:1px solid var(--gold); padding:4px 0 4px 26px; }
+  .definition .src{ display:block; margin-bottom:12px; }
+  .defword{ font-family:var(--display); font-size:30px; line-height:1.1; color:var(--ink); margin-bottom:4px; }
+  .defgloss{ font-family:var(--display); font-style:italic; font-size:19px; line-height:1.4; color:var(--muted); margin-bottom:16px; }
+  .intro{ margin-top:34px; max-width:var(--measure); }
+  .intro p{ color:var(--muted); font-size:17.5px; }
+  .intro a{ color:var(--ink); text-decoration:none; border-bottom:1px solid var(--gold); }
+  .intro a:hover{ background:var(--gold-wash); }
+
+  /* ── send-off ───────────────────────────────────── */
+  .sendoff{ margin-top:40px; padding-top:34px; border-top:1px solid var(--rule-firm); }
+  .sendoff-line{ font-family:var(--display); font-size:clamp(23px,3.2vw,30px); line-height:1.28; color:var(--ink);
+                 max-width:24ch; margin:0 0 28px; }
+
+  /* ── index + hud ────────────────────────────────── */
+  .index{ margin:44px 0 0; max-width:620px; border:1px solid var(--rule); background:var(--paper-card); padding:26px 28px; text-align:left; }
+  .index a{ display:flex; gap:14px; font-family:var(--body); font-size:15.5px; line-height:1.5; color:var(--ink-soft);
+            text-decoration:none; padding:8px 0; border-bottom:1px solid var(--rule); break-inside:avoid; }
+  .index a:last-child{ border-bottom:0; }
+  .index a:hover{ color:var(--gold); }
+  .index a i{ font-style:normal; font-family:var(--body); font-size:11px; color:var(--faint); flex:none; width:26px;
+              padding-top:4px; font-variant-numeric:tabular-nums; }
+  .index a em{ font-style:normal; margin-left:auto; font-family:var(--body); font-size:9.5px; letter-spacing:.16em;
+               color:var(--gold); padding-top:5px; flex:none; }
+  .hud{ position:fixed; right:18px; bottom:18px; z-index:40; display:flex; align-items:center; gap:10px;
+        padding:9px 15px; background:rgba(252,251,249,.92); backdrop-filter:blur(8px); border:1px solid var(--rule-firm); }
+  .hud .lamp{ width:6px; height:6px; border-radius:50%; background:var(--gold); display:inline-block; }
+  .hud .txt{ font-family:var(--body); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+  @media (max-width:520px){ .hud{ right:10px; bottom:10px; padding:7px 11px; } .hud .txt{ font-size:9px; } }
+
+  /* ── narrow screens ─────────────────────────────── */
+  @media (max-width:640px){
+    .meterwrap{ grid-template-columns:1fr; gap:14px; }
+    .board{ grid-template-columns:22px minmax(0,1fr) minmax(0,1fr); }
+    .qgrid{ grid-template-columns:22px minmax(0,1fr) minmax(0,1fr); }
+    .q .qn{ font-size:16px; }
+    .q .qa{ font-size:13px; }
+    .chip{ font-size:13px; padding:8px 9px; }
+    .axb{ font-size:9px; letter-spacing:.1em; gap:6px; }
+    .qrow{ flex-direction:column; gap:2px; }
+    .qrow span.k{ width:auto; padding-top:0; }
+    .q{ padding:13px 11px; min-height:96px; }
+    .lab{ padding:20px 15px 22px; }
+    .out{ padding:24px 18px; }
+  }
+  @media (max-width:480px){
+    /* "INFLATIONARY" is the widest word on the page; shrink it rather than let
+       the browser break it mid-word */
+    .q .qn{ font-size:11px; }
+    .q .qa{ font-size:12px; }
+    .q{ padding:11px 7px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } html{ scroll-behavior:auto; } }
+  @media print{
+    html,body{ background:#fff; }
+    .hud,.rail,.foot{ display:none !important; }
+    /* "print this page" hides the lecture so the schema really is one page */
+    body.schema-only .shaft > *:not(#schema){ display:none !important; }
+    body.schema-only .shaft{ padding:0; }
+    body.schema-only .card{ border-width:1px; padding:0 0 12px; }
+    body.schema-only #schema .tag{ position:static; transform:none; display:inline-block; margin-bottom:10px; padding-left:0; }
+    body.schema-only .scrollhint,body.schema-only .printrow{ display:none !important; }
+    /* 70% keeps the whole loop above the fold of one A4 sheet */
+    body.schema-only svg.schema{ min-width:0; width:70%; margin:0 auto; }
+    body.schema-only #schema .card > p:not(.closing){ display:none !important; }
+    body.schema-only #schema h2{ font-size:20px; margin:0 0 8px; position:static; max-width:none; }
+    body.schema-only #schema h3{ font-size:9px; margin:11px 0 7px; }
+    body.schema-only #schema .card{ display:block !important; }
+    body.schema-only .schemawrap{ overflow:visible; margin:10px 0 0; padding:6px; border-width:1px; }
+    body.schema-only .nest{ padding:6px 7px 7px; }
+    body.schema-only .nest.n2,body.schema-only .nest.n3,body.schema-only .nest.n4{ margin-top:6px; }
+    body.schema-only .nesthead{ font-size:8px; margin-bottom:5px; }
+    body.schema-only .nestbody{ font-size:11px; line-height:1.35; }
+    body.schema-only .closing{ font-size:13px; line-height:1.4; margin-top:8px !important; max-width:none; }
+    body.schema-only{ margin:0; }
+    @page{ margin:10mm; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="rail">
+  <div class="rail-in">
+    <a class="rail-home" href="/">Jeremy Lasne</a>
+    <div class="rail-nav">
+      <a class="rail-drop" href="/wealth/">Wealth Architecture</a>
+      <a href="/wealth/principles/">Principles</a>
+      <a href="/wealth/country/">Country Map</a>
+      <a href="/wealth/exercice/" aria-current="page">Exercise</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+
+  <div class="shaft">
+
+    <!-- ════════ MASTHEAD ════════ -->
+    <div class="masthead-x">
+      <p class="eyebrow">Wealth Architecture · an interactive lecture</p>
+      <h1>The Exercise</h1>
+      <p class="standfirst">Three maps, learned by <em>playing with them</em>.</p>
+
+      <div class="definition">
+        <div class="src">Definition</div>
+        <div class="defword">danger</div>
+        <div class="defgloss">noun. the chance that a thing you own becomes worth nothing.</div>
+        <p style="margin:0;">Not the same as risk. Risk is how much a price moves. Danger is whether the thing survives at all. Almost everybody measures the first one, calls it caution, and then gets killed by the second.</p>
+      </div>
+
+      <div class="intro">
+        <p>This page is a study of three people who spend their own money and have thought unusually hard about why the next twenty years will not reward the habits of the last forty. <b>Ray Dalio</b> gives you the long arc of history. <b>Charles Gave</b> gives you a map of the four weathers your money can live in. <b>Richard Detente</b> gives you the difference between a bumpy ride and a trapdoor.</p>
+        <p>Ten lessons, counting from zero, and then one exercise of your own. Six of them you can play with rather than just read. You need to know nothing at all to start. If you would rather read the same material straight through, it is written out in <a href="/wealth/principles/">the principles</a>.</p>
+      </div>
+
+      <div class="index">
+        <div class="src" style="margin-bottom:14px;">Contents</div>
+        <div class="cols2">
+        <a href="#l0"><i>00</i><span>The trap of the last forty years</span></a>
+        <a href="#l1"><i>01</i><span>Risk is not danger</span><em>PLAY</em></a>
+        <a href="#l2"><i>02</i><span>The map: four weathers</span><em>PLAY</em></a>
+        <a href="#l3"><i>03</i><span>Two dials nobody can fake</span><em>PLAY</em></a>
+        <a href="#l4"><i>04</i><span>Manage by exclusion</span></a>
+        <a href="#l5"><i>05</i><span>The big cycle</span><em>PLAY</em></a>
+        <a href="#l6"><i>06</i><span>They always print</span></a>
+        <a href="#l7"><i>07</i><span>Fragile and antifragile</span><em>PLAY</em></a>
+        <a href="#l8"><i>08</i><span>Where value moves</span></a>
+        <a href="#l9"><i>09</i><span>Nothing chained together</span></a>
+        <a href="#end"><i>10</i><span>Build your own compass</span><em>PLAY</em></a>
+        <a href="#schema"><i>11</i><span>The one page schema</span><em>PRINT</em></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════ LESSON 00 ════════ -->
+    <div class="sect" id="l0" data-hud="LESSON 00 / 09" style="margin-top:80px;">
+      <div class="card">
+        <span class="tag hot r" style="left:auto;right:18px;">START</span>
+        <h2>The trap of the<br>last forty years.</h2>
+        <p>Almost every piece of beginner advice you have ever read is a summary of what worked between 1980 and 2020. Buy the index. Hold some bonds. Stay calm. Do not touch it. For forty years that was very close to a free lunch, because interest rates fell almost every single year, which quietly lifted the price of nearly everything, and because money was broadly trusted.</p>
+        <p>Richard Detente has a word for taking that recipe forward without checking whether the kitchen changed. He calls it prudence, and he means it as an insult. His definition: <span class="mark">prudence is applying the recipes that worked for the last forty years to the next forty, so that if it fails, nobody can accuse you of doing anything strange.</span></p>
+        <p>The recipe was not wrong. A recipe is an answer to a question, and the question was: what should I own while rates fall for forty years and money is trusted? If that stops being the question, the answer is not wisdom anymore. It is a habit.</p>
+        <p>Ray Dalio puts the same point in a sentence worth memorising. To understand what is coming at you, you need to understand what happened before you. Not the last forty years. The last five hundred.</p>
+        <p>So this course does three things, in order. It teaches you to tell a dangerous thing from a merely bumpy one. It gives you a map of which weather you are standing in. And it gives you the long arc that decides which weather you get.</p>
+      </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- ════════ LESSON 01 ════════ -->
+    <div class="sect" id="l1" data-hud="LESSON 01 / 09">
+      <div class="card">
+        <span class="tag">LESSON 01 &middot; DETENTE</span>
+        <h2>Risk is not<br>danger.</h2>
+        <p>In finance, the word risk almost always means volatility: how much a price jumps around. Something that moves two percent in a day is called risky. Something that sits perfectly still is called safe.</p>
+        <p>Detente's objection is that volatility measures comfort, not survival. It tells you how uncomfortable the ride is. It tells you nothing about whether the vehicle has a floor. So he splits the idea in two, and refuses to let one word do both jobs.</p>
+        <ul class="bul">
+          <li><span class="ar">&#9656;</span><span><b>RISK.</b> How much the price moves. This matters if you might need the money on one specific Tuesday.</span></li>
+          <li><span class="ar">&#9656;</span><span><b>DANGER.</b> The chance it goes to zero and never comes back. This matters always.</span></li>
+        </ul>
+        <p>The trap is that the two often point in opposite directions. A government quietly heading for bankruptcy pays you the exact same coupon every year, right up until the Monday morning a minister announces there will be no more coupons. Volatility near zero. Danger enormous. Argentina has done this nine times.</p>
+        <p>A salary is the purest version. Same number, same day, every month, for years, and then it is gone in a single conversation. Meanwhile a self employed driver in Paris has income that swings violently between fashion week and August, and is far less likely to ever reach zero, because people do not stop needing rides.</p>
+        <p>One more thing worth carrying for life. The link between movement and return is not a convention, it is closer to a law. You can absolutely lose money on a violent asset. What you cannot have is a calm asset that pays a lot. That is why Bernie Madoff was catchable long before he was caught. He claimed ten percent a year in a straight line, and the universe does not draw that line. <span class="mark">Anyone offering a lot of return with no movement is either lying or standing on a trapdoor.</span></p>
+
+        <!-- ── LAB 1 ── -->
+        <div class="lab" id="lab1">
+          <div class="labhead"><span class="dot"></span>INTERACTIVE 01</div>
+          <div class="labtitle">The sorting board</div>
+          <div class="labhint">Pick a card, then drop it in the box you think it belongs to. Volatility runs left to right. Danger runs bottom to top. Most people find the top left box surprisingly crowded.</div>
+
+          <div class="board">
+            <div class="axl">DANGER &nbsp;LOW &#8594; HIGH</div>
+            <div class="cell" data-cell="low-high" role="button" tabindex="0"><span class="cellname">CALM AND LETHAL</span></div>
+            <div class="cell" data-cell="high-high" role="button" tabindex="0"><span class="cellname">WILD AND LETHAL</span></div>
+            <div class="cell" data-cell="low-low" role="button" tabindex="0"><span class="cellname">CALM AND SOLID</span></div>
+            <div class="cell" data-cell="high-low" role="button" tabindex="0"><span class="cellname">WILD AND SOLID</span></div>
+            <div class="axb"><span>&#8592; LOW VOLATILITY</span><span>HIGH VOLATILITY &#8594;</span></div>
+          </div>
+
+          <div class="tray" id="tray1"></div>
+          <div class="log" id="log1"><div class="logline quiet">Nothing sorted yet. Pick a card to begin.</div></div>
+          <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+            <button class="btn" id="reset1" type="button">RESET BOARD</button>
+            <span class="ps" id="score1" style="font-size:9px;color:var(--faint);">0 / 6 PLACED</span>
+          </div>
+        </div>
+
+        <p style="margin-top:26px;">The point of the board is not the answers. It is the habit. Before you own anything, ask two separate questions and never let one answer stand in for the other. How much will this move, and what exactly would have to happen for this to be worth nothing.</p>
+      </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- ════════ LESSON 02 ════════ -->
+    <div class="sect" id="l2" data-hud="LESSON 02 / 09">
+      <div class="card">
+        <span class="tag">LESSON 02 &middot; GAVE</span>
+        <h2>The map:<br>four weathers.</h2>
+        <p>Charles Gave has spent forty years reducing the whole problem to two questions. Everything financial reacts mostly to two forces: <b>is the economy growing</b>, and <b>is money losing its value</b>. Two questions, two possible answers each, four boxes. He calls them the four quadrants.</p>
+        <p>The reason this is powerful for a beginner is that it kills the most common bad question in investing. People ask whether gold is a good investment, or whether bonds are safe. Neither question has an answer. <span class="mark">An asset is not good or bad in itself. It is good or bad in a weather.</span> Government bonds are the single best thing to own in one of these boxes and a slow disaster in another. Gold is almost exactly the reverse.</p>
+
+        <!-- ── LAB 2 ── -->
+        <div class="lab" id="lab2">
+          <div class="labhead"><span class="dot"></span>INTERACTIVE 02</div>
+          <div class="labtitle">The four quadrants</div>
+          <div class="labhint">Click any box to open it. Each one tells you what it feels like from the inside, what tends to work, and what tends to get destroyed.</div>
+
+          <div class="qgrid">
+            <div class="axl" style="grid-row:1 / -1;">INFLATION &nbsp;LOW &#8594; HIGH</div>
+            <button class="q" type="button" data-q="tl"><span class="qn">INFLATIONARY<br>BUST</span><span class="qa">no growth, prices rising</span></button>
+            <button class="q" type="button" data-q="tr"><span class="qn">INFLATIONARY<br>BOOM</span><span class="qa">growth, prices rising</span></button>
+            <button class="q" type="button" data-q="bl"><span class="qn">DEFLATIONARY<br>BUST</span><span class="qa">no growth, prices falling</span></button>
+            <button class="q" type="button" data-q="br"><span class="qn">DEFLATIONARY<br>BOOM</span><span class="qa">growth, prices flat</span></button>
+            <div class="axb"><span>&#8592; NO GROWTH</span><span>GROWTH &#8594;</span></div>
+          </div>
+
+          <div class="qpanel" id="qpanel"></div>
+        </div>
+
+        <p style="margin-top:26px;">Notice what the map does to the word diversification. Owning ten different shares is not four weathers. It is one weather bought ten times.</p>
+      </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- ════════ LESSON 03 ════════ -->
+    <div class="sect" id="l3" data-hud="LESSON 03 / 09">
+      <div class="card">
+        <span class="tag">LESSON 03 &middot; GAVE</span>
+        <h2>Two dials<br>nobody can fake.</h2>
+        <p>A map is useless if you cannot tell where you are standing. So how do you know which box you are in?</p>
+        <p>Not from official numbers. Gave started in 1978 by trying to read growth from GDP and industrial production, and gave up, because the figures get revised, and because they are produced by people with an interest in the answer. It took him forty years to land on something better. The something better is <b>prices</b>, because prices are voted on every second, in public, by millions of people with their own money at stake.</p>
+
+        <h3>DIAL ONE &middot; ARE WE GROWING?</h3>
+        <p>Divide the S&amp;P 500 by the price of oil. Take a seven year average. The reasoning underneath it is one sentence: <span class="mark">the economy is transformed energy.</span> Energy goes in, products come out, and listed companies are the machine doing the transforming. If the machine is turning energy into profit, the ratio climbs. If energy is costing more than the value it creates, the ratio falls. That puts you on the right side of the map or the left.</p>
+
+        <h3>DIAL TWO &middot; IS MONEY LOSING VALUE?</h3>
+        <p>Divide the price of gold by the price of long dated government bonds. Take a seven year average. You have exactly two ways to park value for later. One is offered by the state, and that is its bonds. The other is the one you use when you no longer believe the state, and that is gold. This ratio tells you which one the world is currently choosing. That puts you in the top half of the map or the bottom.</p>
+        <p>Why seven years and not five: he tested it against a hundred years of history. Five and six also work, but they throw more false signals. Seven catches the genuine turns and ignores the noise. This is not a trading tool. It moves a handful of times in a working life, and 1980 to 2020 was one single unbroken reading.</p>
+        <p>The reason he trusts these two above everything else is that there is no committee anywhere that sets the price of gold or the price of oil. Compare that to an inflation statistic, which is assembled by people who would prefer a particular number.</p>
+
+        <!-- ── LAB 3 ── -->
+        <div class="lab" id="lab3">
+          <div class="labhead"><span class="dot"></span>INTERACTIVE 03</div>
+          <div class="labtitle">The quadrant machine</div>
+          <div class="labhint">Set the two dials and watch where you land. This is the entire method in one widget.</div>
+
+          <div class="dial">
+            <div class="dl"><b>Dial one.</b> S&amp;P 500 divided by oil, seven year average.</div>
+            <button class="btn on" type="button" data-d="g" data-v="1">RISING</button>
+            <button class="btn" type="button" data-d="g" data-v="0">FALLING</button>
+          </div>
+          <div class="dial">
+            <div class="dl"><b>Dial two.</b> Gold divided by long bonds, seven year average.</div>
+            <button class="btn on" type="button" data-d="i" data-v="1">RISING</button>
+            <button class="btn" type="button" data-d="i" data-v="0">FALLING</button>
+          </div>
+
+          <div class="qpanel" id="dpanel" style="margin-top:20px;"></div>
+        </div>
+
+        <p style="margin-top:26px;">A word on honesty. In the conversation this lesson comes from, the dials had been pinned in the inflationary boom for about three years and had started sliding toward the inflationary bust border, and Gave's own summary was that he was not sure, that they were sitting on the frontier, and that transitions are always the hardest moment. <span class="mark">That is the correct posture.</span> The map does not predict. It tells you which weather you are standing in and what tends to break in it.</p>
+      </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- ════════ LESSON 04 ════════ -->
+    <div class="sect" id="l4" data-hud="LESSON 04 / 09">
+      <div class="card">
+        <span class="tag">LESSON 04 &middot; GAVE</span>
+        <h2>Manage by<br>exclusion.</h2>
+        <p>Most people build a portfolio by inclusion. Collect good things, hope for a good result. Gave says this is backwards, because you are far worse at guessing what will rise than at spotting what is about to be crushed.</p>
+        <p>His analogy is the racetrack. You do not need to know which horse wins. You need to know which three or four have no chance at all, cross them out, and split your money across what is left. Do that and you beat the crowd more often than the people trying to pick the winner.</p>
+        <p>In practice it means four families: shares, bonds, gold, cash. In almost any weather, one or two of them are obviously going to be hurt. Remove those. Hold the other three. <span class="mark">You have not predicted anything. You have removed the way you get hurt.</span> Gave's own portfolios usually hold three of the four, sometimes only two.</p>
+
+        <h3>THE SECOND IDEA &middot; DURATION</h3>
+        <p>Duration is how far into the future you are buying. A company priced at twenty times its earnings is a claim on roughly twenty years of them. The same company at ten times is a claim on ten. When inflation arrives, people stop being able to see far ahead, so they shorten the claim: twenty becomes fifteen, then ten, and at the bottom of the truly ferocious markets, five.</p>
+        <p>Read that again, because it is the least understood thing in investing. <b>Nothing about the company has to change for the price to fall by three quarters.</b> Same profits, same product, same staff. The multiple did all the damage, because the tunnel of visibility got short.</p>
+        <p>So when your visibility shortens, shorten your duration. That is why dull companies paying five percent dividends become interesting in bad weather. You are being paid now instead of promised later. Gave's example was preferring a Swiss food company yielding five percent over a rocket company priced at a hundred times revenue.</p>
+
+        <h3>THE THIRD IDEA &middot; NARROW MARKETS ARE A WARNING</h3>
+        <p>He would far rather be in a market where eighty percent of shares rise ten percent than in one where ten percent of shares rise eighty percent. The second one has a name. It is a bubble, and inside a bubble nobody can work out the correct price of anything, because the only remaining reason to buy is that everyone else is buying and you cannot bear to miss it.</p>
+        <p>And a line he borrows from Warren Buffett, which is the best possible thing to hold on to during a crash: <span class="mark">a great bear market is the moment capital returns to its rightful owner.</span> The people who did the work and had the patience to wait.</p>
+      </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- ════════ LESSON 05 ════════ -->
+    <div class="sect" id="l5" data-hud="LESSON 05 / 09">
+      <div class="card">
+        <span class="tag">LESSON 05 &middot; DALIO</span>
+        <h2>The big<br>cycle.</h2>
+        <p>Ray Dalio has been investing at a global macro level for about fifty years, and his hardest lesson is that the events that hurt him most were the ones that had never happened in his lifetime. So a few years ago he noticed three of them happening at once.</p>
+        <ul class="bul">
+          <li><span class="ar">&#9656;</span><span><b>One.</b> Debts so large that even cutting interest rates to zero was not enough, so central banks started printing money to cover them.</span></li>
+          <li><span class="ar">&#9656;</span><span><b>Two.</b> Serious internal conflict from widening gaps in wealth and values, showing up as populism and polarisation on both the left and the right.</span></li>
+          <li><span class="ar">&#9656;</span><span><b>Three.</b> A rising power getting close enough to challenge the leading one.</span></li>
+        </ul>
+        <p>He had never seen those three together, so he went looking, and studied the last five hundred years: the Dutch, British, American and Chinese empires, plus Spain, Germany, France, India, Japan, Russia and the Ottomans, and Chinese dynasties back to the year 600.</p>
+        <p>They had all happened together before. Many times. And almost every time, they marked the changing of a world order. <span class="mark">The last time this exact combination lined up was 1930 to 1945.</span></p>
+        <p>He measures an empire's power with eight things: education, invention and technology, competitiveness in global markets, economic output, share of world trade, military strength, the power of its financial centre, and the strength of its currency as a reserve currency. They rise in roughly that order, each one pulling the next, and they fall in roughly that order too. Because they are measurable, you can look at a country today and see which stage it is in.</p>
+        <p>The full arc lasts around two hundred and fifty years, with handovers of ten to twenty years in between. The handovers are usually violent, for a simple reason. A leading power does not step aside politely.</p>
+
+        <!-- ── LAB 4 ── -->
+        <div class="lab" id="lab4">
+          <div class="labhead"><span class="dot"></span>INTERACTIVE 04</div>
+          <div class="labtitle">Walk the cycle</div>
+          <div class="labhint">Six stages, in order. Step through them and ask yourself, honestly, which one sounds most like the news you read this morning.</div>
+
+          <div class="dots" id="dots4"></div>
+          <div class="stage" id="stage4"></div>
+          <div style="margin-top:16px;display:flex;gap:10px;">
+            <button class="btn" id="prev4" type="button">&#8592; BACK</button>
+            <button class="btn hot" id="next4" type="button">NEXT &#8594;</button>
+          </div>
+        </div>
+
+        <p style="margin-top:26px;">Dalio is careful about one thing and you should be too. Like human lives, no two cycles are identical, and age alone is a bad predictor. Knowing someone is sixty tells you less than knowing whether they smoke. <span class="mark">What you want is the vital signs, not the birthday.</span> The eight measures are the vital signs.</p>
+      </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- ════════ LESSON 06 ════════ -->
+    <div class="sect" id="l6" data-hud="LESSON 06 / 09">
+      <div class="card">
+        <span class="tag">LESSON 06 &middot; ALL THREE</span>
+        <h2>They<br>always print.</h2>
+        <p>In 1971 Dalio was a young clerk on the floor of the New York Stock Exchange. Back then gold was the money used between countries, and paper dollars were cheques written against it. The United States had written far more cheques than it had gold in the vault. As people queued to cash them, the gold drained away.</p>
+        <p>On a Sunday evening in August, President Nixon went on television and told the world, in very careful language, that the cheques would no longer be honoured. He did not use the word default. That is what it was.</p>
+        <p>Dalio came in early on Monday expecting a crash. The market opened, there was pandemonium, and it went <b>up</b>. It kept going up, nearly twenty five percent.</p>
+        <p>He had never seen a currency devaluation, so he dug into history and found 1933. Roosevelt, same problem, same broken promise, same result. In both cases, cutting the link to gold let the country carry on spending simply by printing more paper. More dollars chasing the same amount of real wealth means each dollar buys less, and the price of nearly everything else goes up.</p>
+        <p>That gave him the principle he still uses. <span class="mark">When central banks print a lot of money to relieve a crisis, the value of paper falls and the price of shares, gold and commodities rises.</span> It happened again in 2008 for the mortgage crisis and in 2020 for the pandemic, and his expectation is that it happens again.</p>
+        <p>Here is the number to carry with you. Of the roughly 750 currencies that have existed since 1700, fewer than twenty percent still exist. And every single one that still exists has been devalued. Not most of them. All of them.</p>
+
+        <h3>THE SAME CONCLUSION FROM A DIFFERENT ROAD</h3>
+        <p>Gave arrives at the same place through policy rather than history. After the deflationary depression of the 1930s, central banks decided they would never allow that again, so the standing instruction became to print at the first hint of trouble. But if the bottom left box on the map is forbidden by policy, the pressure has to escape somewhere. His conclusion is that what eventually breaks is not shares. It is bonds and the currency itself.</p>
+        <p>He separates the two things a bond gives you. The <b>return on</b> capital, which is the rent they pay you for lending. And the <b>return of</b> capital, which is getting your money back at the end. He is not primarily worried about rates going up. He is worried that some governments are simply not able to hand the capital back.</p>
+        <p>Detente turns the same idea into a number you can feel. If the money supply grows around eight percent a year, then anything in that currency returning less than eight percent a year is quietly being shorn, even while the statement shows a gain. And there is almost nothing sold as prudent that returns more than eight percent. <span class="mark">This is danger by erosion rather than by one bad Monday, which is exactly why nobody notices it.</span></p>
+      </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- ════════ LESSON 07 ════════ -->
+    <div class="sect" id="l7" data-hud="LESSON 07 / 09">
+      <div class="card">
+        <span class="tag">LESSON 07 &middot; DETENTE</span>
+        <h2>Fragile and<br>antifragile.</h2>
+        <p>Systems do not change gradually. They change by avalanche. Most of the time it is snowflakes landing gently on a mountain, one after another, for months. What reconfigures the entire mountain is thirty seconds.</p>
+        <p>So at any moment you are living in one of two worlds. The <b>belly</b> of the distribution, which is ordinary years where not much happens and which is most of the time. Or the <b>tails</b>, which are revolutions, wars and monetary breakdowns. The tails are very short, very intense, and they do all of the rearranging.</p>
+        <p>That gives you a definition you can actually measure. Plot an asset's return above inflation against how much the world is shaking, and look at the slope of the line.</p>
+        <ul class="bul">
+          <li><span class="ar">&#9656;</span><span><b>FRAGILE.</b> Return falls as volatility rises. It pays you nicely in calm weather and it breaks in a storm.</span></li>
+          <li><span class="ar">&#9656;</span><span><b>ANTIFRAGILE.</b> Return rises as volatility rises. It does nothing for years, then does everything at once.</span></li>
+        </ul>
+        <p>This is not a mood. It has a slope, and you can compute it.</p>
+
+        <!-- ── LAB 5 ── -->
+        <div class="lab" id="lab5">
+          <div class="labhead"><span class="dot"></span>INTERACTIVE 05</div>
+          <div class="labtitle">Shake the world</div>
+          <div class="labhint">Drag the slider from a quiet decade to an avalanche and watch the two lines cross. Both of these are risky. They are risky at opposite times.</div>
+
+          <input type="range" id="shake" min="0" max="100" value="18" aria-label="How much the world is shaking">
+          <div class="weather" id="weather"></div>
+
+          <div class="meterwrap">
+            <div class="meter">
+              <div class="metern" style="color:#9A6A68;">FRAGILE ASSETS</div>
+              <div class="barbox">
+                <div class="zero"></div><div class="zerolabel">ZERO</div>
+                <div class="bar" id="barF"></div>
+              </div>
+              <div class="metert" id="txtF"></div>
+              <div class="exs">A salary. Long dated bonds. A leveraged rental. An index of one country's champions.</div>
+            </div>
+            <div class="meter">
+              <div class="metern" style="color:#5A7D63;">ANTIFRAGILE ASSETS</div>
+              <div class="barbox">
+                <div class="zero"></div><div class="zerolabel">ZERO</div>
+                <div class="bar" id="barA"></div>
+              </div>
+              <div class="metert" id="txtA"></div>
+              <div class="exs">Gold. The Japanese yen. Property in the hinge countries. Bitcoin, on the theory, still building its record.</div>
+            </div>
+          </div>
+        </div>
+
+        <h3>WHY THOSE EXAMPLES</h3>
+        <p>Gold is the clean case. The less people trust, the more it rises. The Japanese yen is the strange one, and it is worth understanding because it shows that antifragility does not have to come from innovation. Japanese households save enormously. When the world is calm they send that money abroad, which pushes the yen down. When the world is frightening they bring it home, which pushes the yen up. The mechanism is sociology, not technology.</p>
+        <p>Then the hinge countries. Switzerland and Dubai are places where blocs that are not speaking to each other can still meet, and where wealthy people go when their own country starts to feel hostile to them. Detente's answer to how long Swiss property keeps rising is blunt: until there are no wealthy people left in Europe. Every political shock somewhere else is a bid somewhere hinged.</p>
+        <p>And bitcoin, which was designed as an answer to a crisis of confidence in money, so it is antifragile by construction. He is careful to say the theory is clear and the track record is still being written.</p>
+
+        <h3>THE TRAP RUNS BOTH WAYS</h3>
+        <p>Holding antifragile assets through a long calm stretch hurts, badly, because nobody needs what you own. You have invented music streaming before the internet exists. You have a brilliant cholera vaccine and there is no cholera. Detente is blunt about this: you cannot disrupt a normal universe. Innovation only takes hold when something is broken enough that people are calling for help.</p>
+        <p>Holding fragile assets into a tail event is worse, because that is where the zeros come from. <span class="mark">So the first decision is not which asset. It is which world you think you are in.</span> And that is a decision, not a fact. Nobody can make it for you and nobody can tell you afterwards that you were unreasonable.</p>
+      </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- ════════ LESSON 08 ════════ -->
+    <div class="sect" id="l8" data-hud="LESSON 08 / 09">
+      <div class="card">
+        <span class="tag">LESSON 08 &middot; DETENTE</span>
+        <h2>Where value<br>moves.</h2>
+        <p>Here is the third idea, and the one Detente insists nobody can do on your behalf.</p>
+        <p>Value is not a substance you store. It is a location, and it moves. His definition is refreshingly simple: <span class="mark">value is what other people want enough to hand over something of their own for.</span> Mow your own lawn and it is a chore. Mow your neighbour's lawn for money and value has been exchanged, because he gave up something real to have it done.</p>
+        <p>Which means that when the car arrives, the cart does not become slightly less valuable. It goes to zero, slowly and then completely, and the entire value has relocated. If you owned cart factories, being careful with them did not help.</p>
+        <p>He grounds this in physics rather than economics. His argument is that the universe has been running an innovation machine since it started: simple structures giving way to more complex ones, each new layer packing more energy through less matter, and the gap between layers getting shorter every time. You do not have to buy the whole cosmology to take the practical part, which is this: the interval between disruptions is shrinking. A human life used to contain none. It now contains several.</p>
+        <p>That is exactly why prudence is a trap now and was not one before. For most of history, change was slower than a life. A Roman living through the fall of Rome did not experience a fall. He experienced three hundred years of things being a bit rubbish. You could invest exactly like your grandfather and be right.</p>
+
+        <h3>THE PARABLE HE KEEPS COMING BACK TO</h3>
+        <p>A master gives three servants different amounts of money and leaves on a journey. Two of them put it to work and double it. The third, frightened of losing what he was given, buries it in the ground and hands it back untouched, pleased with himself for keeping it safe. He is the one who is punished. Not for losing money, but for refusing to take any risk at all.</p>
+        <p>Detente's version of the same lesson is arithmetic, and bleaker, and more useful. Around 99.9 percent of all species that have ever lived are extinct. Roughly eighty percent of the civilisations that have existed are gone. So if you accept the fight, your odds are poor. <span class="mark">But if you refuse the fight in the name of prudence, your odds are zero. Twenty percent beats nothing.</span></p>
+        <p>He also names the three generation curse, because it is the same mistake wearing a family name. The grandfather is an eagle, the son is a hawk, and the grandson is a pigeon. The grandfather built by putting his house up as collateral. The grandson is told to preserve, hands it to someone who promises prudence, and the prudence quietly kills it.</p>
+
+        <h3>THE TWO RULES HE ENDS ON</h3>
+        <p>The first: hold your convictions strongly and promise you will change your mind. You have to move fast in one direction to get anywhere, and you have to eat your hat without complaining when the facts turn. As he says, it might taste fine.</p>
+        <p>The second is humility about the shape of failure. Every entrepreneur lists the risks to their project, and the thing that eventually kills them is always the one that was not on the list. Someone building a coding services company in 2010 listed labour costs and client concentration. They did not list a chat window arriving in 2022. Most of the world is not merely unknown. It is unknown that it is unknown.</p>
+      </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- ════════ LESSON 09 ════════ -->
+    <div class="sect" id="l9" data-hud="LESSON 09 / 09">
+      <div class="card">
+        <span class="tag">LESSON 09 &middot; DETENTE</span>
+        <h2>Nothing chained<br>together.</h2>
+        <p>The last piece is the one that makes resilience free, or close to it. Detente's word is decorrelation, and it means owning things that are not chained to each other.</p>
+        <p>Most people believe they are diversified because they own an index containing pharma, technology, banks and industrials. On the day the index breaks, all of it breaks at the same moment, because it was never four bets. It was one bet wearing four costumes. <span class="mark">If a single event can flatten everything you own, you own one thing.</span></p>
+        <p>So his own position, which he offers as his position and not as a recommendation, is three burrows chosen to be as unlinked as he could make them: bitcoin, high end property in the hinge countries, and compute and energy infrastructure.</p>
+
+        <h3>WHAT A REAL BET LOOKS LIKE</h3>
+        <p>The third burrow is worth walking through, because it shows what "where value moves" looks like when it stops being a slogan.</p>
+        <p>His reasoning in 2022 went roughly like this. Artificial intelligence is about to explode electricity demand. A power grid is a web, and if you push a gigawatt into one point of a web you tear it, so the constraint will not be total energy, it will be density in one place. Permits for new generation take the better part of a decade, and this industry does not have a decade. Therefore the money will eventually have to move toward distributed capacity, even though distributed computing barely existed at the time.</p>
+        <p>So he bought land and grid connections in Texas and paid for the wait with bitcoin mining, because mining can be switched on and off in seconds. That flexibility made him genuinely useful to the grid: consume when there is surplus and prices are near zero, shut down and get paid to shut down when there is a squeeze. Then convert the sites to computing when the computing demand arrived. Which it did.</p>
+        <p>You do not need to copy any of that, and you almost certainly should not. What is worth copying is the shape. <b>He named a change he believed in. He found a way to be present for it that paid for itself while he waited. And he agreed in advance about what would prove him wrong.</b></p>
+        <p class="quiet">One number from that section, because it teaches something small and permanent. A pure data centre company trading at eleven times book value means that eleven dollars of your money buys one dollar of actual machines and ten dollars of expectation. Knowing which of the two you are buying is most of the work.</p>
+      </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- ════════ BEDROCK ════════ -->
+    <div class="sect" id="agree" data-hud="SYNTHESIS">
+      <div class="bedrock">
+        <div class="kick"><i></i>WHERE ALL THREE AGREE</div>
+        <h2>Five things<br>they all say.</h2>
+        <p>Three men, three completely different methods. A hedge fund founder reading five hundred years of empires. A portfolio manager who reduced everything to two ratios. An entrepreneur building power stations. They disagree about plenty. Here is what survives all three.</p>
+        <div class="agree">
+          <div><b>01</b><span>Volatility is not the thing that kills you. Gave and Detente say it outright. Dalio simply demonstrates it: the most frightening financial headline of 1971 was followed by a twenty five percent rally.</span></div>
+          <div><b>02</b><span>When a state cannot pay, it prints. Every single time. Dalio has five hundred years of receipts, Gave has the policy reason, Detente has the arithmetic of what it quietly does to your savings.</span></div>
+          <div><b>03</b><span>The weather matters more than the asset. There is no permanently good investment. There is only an investment that fits the box you are standing in.</span></div>
+          <div><b>04</b><span>1980 to 2020 was a regime, not a law of nature. Every rule you inherited was written inside it.</span></div>
+          <div><b>05</b><span>The one bet nobody can place for you is where value moves next. Refusing to place it is also a bet, and historically a losing one.</span></div>
+        </div>
+        <p>And Dalio's answer to what an ordinary person should actually do, which is deliberately unglamorous and which he puts at the very end of a fifty year career: <span style="color:var(--gold);">earn more than you spend, and treat each other well.</span> Everything else, the education, the invention, the competitiveness, is just a way of getting to those two.</p>
+      </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- ════════ FINAL ════════ -->
+    <div class="sect" id="end" data-hud="YOUR TURN">
+      <div class="card">
+        <span class="tag hot">FINAL &middot; YOUR TURN</span>
+        <h2>Build your<br>own compass.</h2>
+        <p>None of this is worth anything as trivia. The whole point of the three maps is that they turn into four questions you can answer today, in about a minute, honestly, with no numbers in front of you.</p>
+        <p>Answer them and the page will print your position back to you. There are no correct answers here. There is only the difference between choosing a position and drifting into one.</p>
+
+        <!-- ── LAB 6 ── -->
+        <div class="lab" id="lab6">
+          <div class="labhead"><span class="dot"></span>INTERACTIVE 06</div>
+          <div class="labtitle">Four questions</div>
+          <div class="labhint">Pick one answer per question. Nothing is sent anywhere, nothing is stored, this all runs in your browser.</div>
+          <div id="quiz6"></div>
+          <div style="margin-top:6px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+            <button class="btn hot" id="go6" type="button" disabled>PRINT MY COMPASS</button>
+            <button class="btn" id="clr6" type="button">CLEAR</button>
+          </div>
+          <div id="out6"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- ════════ ONE PAGE SCHEMA ════════ -->
+    <div class="sect" id="schema" data-hud="THE SCHEMA">
+      <div class="card">
+        <span class="tag hot">THE ONE PAGE SCHEMA</span>
+        <h2>Every cycle<br>on one page.</h2>
+        <p>This is the whole lecture compressed into one picture. The outer loop is Dalio's big cycle. Sitting inside it, on its own faster clock, is Gave's four quadrant map, because the weather turns over many times inside a single lap of the loop. The nested frames underneath lay out all four timescales at once, which is the part most people miss.</p>
+
+        <div class="schemawrap">
+          <svg class="schema" viewBox="0 0 760 650" role="img" aria-label="Diagram of the big cycle as a six stage loop, from new order through rise, reserve money, the top, bust and printing, and conflict, returning to a new order. The four quadrants of growth and inflation sit inside the loop, rotating many times per lap.">
+            <text x="380" y="24" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="14" fill="#14140F">THE BIG CYCLE</text>
+            <text x="380" y="44" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="8" fill="#9C988F">ROUGHLY 250 YEARS, WITH 10 TO 20 YEAR HANDOVERS</text>
+            <g stroke="#14140F" stroke-width="1.5" fill="#14140F">
+            <line x1="226" y1="122" x2="264" y2="122"/><polygon points="264,116 264,128 274,122" stroke="none"/>
+            <line x1="491" y1="122" x2="529" y2="122"/><polygon points="529,116 529,128 539,122" stroke="none"/>
+            <line x1="645" y1="184" x2="645" y2="414"/><polygon points="639,414 651,414 645,426" stroke="none"/>
+            <line x1="536" y1="484" x2="498" y2="484"/><polygon points="498,478 498,490 488,484" stroke="none"/>
+            <line x1="271" y1="484" x2="233" y2="484"/><polygon points="233,478 233,490 223,484" stroke="none"/>
+            </g>
+            <g stroke="#B08D4F" stroke-width="1.5" fill="#B08D4F">
+            <line x1="115" y1="422" x2="115" y2="192" stroke-dasharray="5 5"/><polygon points="109,192 121,192 115,180" stroke="none"/>
+            </g>
+            <text x="103" y="303" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="8" fill="#B08D4F" transform="rotate(-90 103 303)">AND IT BEGINS AGAIN</text>
+            <text x="663" y="299" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="8" fill="#9C988F" transform="rotate(90 663 299)">PRESSURE BUILDS</text>
+            <rect x="232" y="206" width="296" height="194" fill="#F5F3EE" stroke="#9C988F" stroke-width="1" stroke-dasharray="4 4"/>
+            <text x="382" y="224" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="9" fill="#14140F">THE FOUR QUADRANTS</text>
+            <text x="382" y="239" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="7" fill="#9C988F">A FASTER CLOCK, MANY LAPS PER CYCLE</text>
+            <rect x="258" y="246" width="133" height="63" fill="rgba(154,106,104,.10)" stroke="#9A6A68" stroke-width="1"/>
+            <text x="267" y="266" font-family="'DM Sans',sans-serif" font-size="7" fill="#9A6A68">INFL. BUST</text>
+            <text x="267" y="289" font-family="'DM Sans',sans-serif" font-size="17" fill="#14140F" textLength="31" lengthAdjust="spacingAndGlyphs">CASH</text>
+            <rect x="395" y="246" width="133" height="63" fill="rgba(154,134,87,.10)" stroke="#9A8657" stroke-width="1"/>
+            <text x="404" y="266" font-family="'DM Sans',sans-serif" font-size="7" fill="#9A8657">INFL. BOOM</text>
+            <text x="404" y="289" font-family="'DM Sans',sans-serif" font-size="17" fill="#14140F" textLength="101" lengthAdjust="spacingAndGlyphs">GOLD + SHARES</text>
+            <rect x="258" y="313" width="133" height="63" fill="rgba(106,119,136,.10)" stroke="#6A7788" stroke-width="1"/>
+            <text x="267" y="333" font-family="'DM Sans',sans-serif" font-size="7" fill="#6A7788">DEFL. BUST</text>
+            <text x="267" y="356" font-family="'DM Sans',sans-serif" font-size="17" fill="#14140F" textLength="39" lengthAdjust="spacingAndGlyphs">BONDS</text>
+            <rect x="395" y="313" width="133" height="63" fill="rgba(90,125,99,.10)" stroke="#5A7D63" stroke-width="1"/>
+            <text x="404" y="333" font-family="'DM Sans',sans-serif" font-size="7" fill="#5A7D63">DEFL. BOOM</text>
+            <text x="404" y="356" font-family="'DM Sans',sans-serif" font-size="17" fill="#14140F" textLength="46" lengthAdjust="spacingAndGlyphs">SHARES</text>
+            <text x="247" y="311" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="7" fill="#9C988F" transform="rotate(-90 247 311)">INFLATION UP</text>
+            <text x="393" y="392" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="7" fill="#9C988F">GROWTH TO THE RIGHT</text>
+            <g font-family="'DM Sans',sans-serif" font-size="17" fill="#3D3B35">
+            <rect x="10" y="64" width="210" height="116" fill="#FFFFFE" stroke="#D6D1C6" stroke-width="1"/>
+            <rect x="10" y="64" width="34" height="22" fill="#F5F3EE"/>
+            <text x="19" y="80" font-family="'DM Sans',sans-serif" font-size="10" fill="#B08D4F">01</text>
+            <text x="20" y="110" font-family="'DM Sans',sans-serif" font-size="11" fill="#14140F">NEW ORDER</text>
+            <text x="20" y="132" font-family="'DM Sans',sans-serif" font-size="17" fill="#3D3B35" textLength="178" lengthAdjust="spacingAndGlyphs">A war ends. The winners</text>
+            <text x="20" y="148" font-family="'DM Sans',sans-serif" font-size="17" fill="#3D3B35" textLength="124" lengthAdjust="spacingAndGlyphs">write the rules.</text>
+            <rect x="14" y="154" width="202" height="22" fill="rgba(90,125,99,.12)"/>
+            <text x="115" y="169" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="8" fill="#3F5A47">FRAGILE PAYS</text>
+            <rect x="275" y="64" width="210" height="116" fill="#FFFFFE" stroke="#D6D1C6" stroke-width="1"/>
+            <rect x="275" y="64" width="34" height="22" fill="#F5F3EE"/>
+            <text x="284" y="80" font-family="'DM Sans',sans-serif" font-size="10" fill="#B08D4F">02</text>
+            <text x="285" y="110" font-family="'DM Sans',sans-serif" font-size="11" fill="#14140F">THE RISE</text>
+            <text x="285" y="132" font-family="'DM Sans',sans-serif" font-size="17" fill="#3D3B35" textLength="162" lengthAdjust="spacingAndGlyphs">Education, invention,</text>
+            <text x="285" y="148" font-family="'DM Sans',sans-serif" font-size="17" fill="#3D3B35" textLength="139" lengthAdjust="spacingAndGlyphs">trade, then money.</text>
+            <rect x="279" y="154" width="202" height="22" fill="rgba(90,125,99,.12)"/>
+            <text x="380" y="169" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="8" fill="#3F5A47">FRAGILE PAYS</text>
+            <rect x="540" y="64" width="210" height="116" fill="#FFFFFE" stroke="#D6D1C6" stroke-width="1"/>
+            <rect x="540" y="64" width="34" height="22" fill="#F5F3EE"/>
+            <text x="549" y="80" font-family="'DM Sans',sans-serif" font-size="10" fill="#B08D4F">03</text>
+            <text x="550" y="110" font-family="'DM Sans',sans-serif" font-size="11" fill="#14140F">RESERVE MONEY</text>
+            <text x="550" y="132" font-family="'DM Sans',sans-serif" font-size="17" fill="#3D3B35" textLength="178" lengthAdjust="spacingAndGlyphs">The world saves in your</text>
+            <text x="550" y="148" font-family="'DM Sans',sans-serif" font-size="17" fill="#3D3B35" textLength="178" lengthAdjust="spacingAndGlyphs">money. You borrow free.</text>
+            <rect x="544" y="154" width="202" height="22" fill="rgba(90,125,99,.12)"/>
+            <text x="645" y="169" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="8" fill="#3F5A47">FRAGILE STILL PAYS</text>
+            <rect x="540" y="426" width="210" height="116" fill="#FFFFFE" stroke="#D6D1C6" stroke-width="1"/>
+            <rect x="540" y="426" width="34" height="22" fill="#F5F3EE"/>
+            <text x="549" y="442" font-family="'DM Sans',sans-serif" font-size="10" fill="#B08D4F">04</text>
+            <text x="550" y="472" font-family="'DM Sans',sans-serif" font-size="11" fill="#14140F">THE TOP</text>
+            <text x="550" y="494" font-family="'DM Sans',sans-serif" font-size="17" fill="#3D3B35" textLength="186" lengthAdjust="spacingAndGlyphs">Costs rise, rivals copy,</text>
+            <text x="550" y="510" font-family="'DM Sans',sans-serif" font-size="17" fill="#3D3B35" textLength="170" lengthAdjust="spacingAndGlyphs">the empire overspends.</text>
+            <rect x="544" y="516" width="202" height="22" fill="rgba(154,134,87,.16)"/>
+            <text x="645" y="531" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="8" fill="#9A8657">THE HANDOVER BEGINS</text>
+            <rect x="275" y="426" width="210" height="116" fill="#FFFFFE" stroke="#D6D1C6" stroke-width="1"/>
+            <rect x="275" y="426" width="34" height="22" fill="#F5F3EE"/>
+            <text x="284" y="442" font-family="'DM Sans',sans-serif" font-size="10" fill="#B08D4F">05</text>
+            <text x="285" y="472" font-family="'DM Sans',sans-serif" font-size="11" fill="#14140F">BUST AND PRINT</text>
+            <text x="285" y="494" font-family="'DM Sans',sans-serif" font-size="17" fill="#3D3B35" textLength="155" lengthAdjust="spacingAndGlyphs">Default or print. It</text>
+            <text x="285" y="510" font-family="'DM Sans',sans-serif" font-size="17" fill="#3D3B35" textLength="108" lengthAdjust="spacingAndGlyphs">always prints.</text>
+            <rect x="279" y="516" width="202" height="22" fill="rgba(154,106,104,.12)"/>
+            <text x="380" y="531" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="8" fill="#7A4A48">ANTIFRAGILE PAYS</text>
+            <rect x="10" y="426" width="210" height="116" fill="#FFFFFE" stroke="#D6D1C6" stroke-width="1"/>
+            <rect x="10" y="426" width="34" height="22" fill="#F5F3EE"/>
+            <text x="19" y="442" font-family="'DM Sans',sans-serif" font-size="10" fill="#B08D4F">06</text>
+            <text x="20" y="472" font-family="'DM Sans',sans-serif" font-size="11" fill="#14140F">CONFLICT</text>
+            <text x="20" y="494" font-family="'DM Sans',sans-serif" font-size="17" fill="#3D3B35" textLength="162" lengthAdjust="spacingAndGlyphs">Populism, then a test</text>
+            <text x="20" y="510" font-family="'DM Sans',sans-serif" font-size="17" fill="#3D3B35" textLength="155" lengthAdjust="spacingAndGlyphs">of power. New rules.</text>
+            <rect x="14" y="516" width="202" height="22" fill="rgba(154,106,104,.12)"/>
+            <text x="115" y="531" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="8" fill="#7A4A48">ANTIFRAGILE PAYS</text>
+            </g>
+            <text x="380" y="580" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="14" fill="#6E6B63" textLength="648" lengthAdjust="spacingAndGlyphs">Stages 01 to 03 are calm and reward being fragile. Stages 05 and 06 are the</text>
+            <text x="380" y="598" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="14" fill="#6E6B63" textLength="622" lengthAdjust="spacingAndGlyphs">avalanche. Stage 04 is where the two swap over, and nobody rings a bell.</text>
+            <text x="380" y="626" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="8" fill="#9C988F">LOOP AND STAGES AFTER DALIO. QUADRANTS AFTER GAVE. FRAGILITY LABELS AFTER DETENTE.</text>
+            </svg>
+        </div>
+        <div class="scrollhint quiet">Scroll the diagram sideways to see the whole loop.</div>
+
+        <h3>THE FOUR CLOCKS, ALL RUNNING AT ONCE</h3>
+        <p>The loop above is the slowest clock. Three faster ones turn inside it, and every one of them is a different person's life work. Read this from the outside in.</p>
+
+        <div class="nest n1">
+          <div class="nesthead">ROUGHLY 250 YEARS &middot; THE BIG CYCLE &middot; DALIO</div>
+          <div class="nestbody"><b>What turns:</b> which country writes the rules, and whose money the world saves in. <b>What you do:</b> work out which stage you are standing in, and never assume the current order is permanent. Of the 750 currencies since 1700, fewer than a fifth still exist.</div>
+
+          <div class="nest n2">
+            <div class="nesthead">ROUGHLY 80 YEARS &middot; FOUR GENERATIONS &middot; DETENTE</div>
+            <div class="nestbody"><b>What turns:</b> the appetite for risk itself. Hard times make strong people, strong people make good times, good times make comfortable people, and comfortable people make hard times. He lays it over the American interest rate curve, which climbs until about 1980 and falls to zero after. <b>What you do:</b> notice that prudence is a fashion, and that it is most popular just before it stops working.</div>
+
+            <div class="nest n3">
+              <div class="nesthead">3 TO 10 YEARS &middot; THE FOUR QUADRANTS &middot; GAVE</div>
+              <div class="nestbody"><b>What turns:</b> growth and inflation, and nothing else. <b>What you do:</b> read the two dials, cross off the one or two assets that always get hurt in that box, and hold the rest. This is the only clock on this page you can actually check on a given morning.</div>
+
+              <div class="nest n4">
+                <div class="nesthead">DAYS TO WEEKS &middot; THE AVALANCHE &middot; DETENTE</div>
+                <div class="nestbody"><b>What turns:</b> everything, at once. <b>What you do:</b> nothing, because by then it is far too late. This is the layer you prepare for during the other three, and it is the only one that ever actually settles the bill.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="closing" style="margin-top:26px;"><span class="mark">Long cycles set the rules. Generations set the mood. Quadrants set the weather. Avalanches settle the bill.</span> If you remember one line off this page, that is the one, because it tells you which clock any piece of advice you hear is actually talking about.</p>
+
+        <div class="printrow" style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <button class="btn hot" id="printSchema" type="button">Print this page</button>
+          <span class="quiet" style="font-size:14.5px;">Prints the schema on its own, without the rest of the lecture.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════ SOURCES ════════ -->
+    <div style="margin-top:60px;">
+      <div class="card" style="background:var(--paper-sunk);">
+        <span class="tag">Sources &amp; small print</span>
+        <h2>Where this<br>came from.</h2>
+        <ul class="bul">
+          <li><span class="ar">&#9656;</span><span><b>Ray Dalio</b>, "Principles for Dealing with the Changing World Order", and the filmed summary of the same study. The big cycle, the eight measures of power, 1933 and 1971, the 750 currencies.</span></li>
+          <li><span class="ar">&#9656;</span><span><b>Charles Gave</b>, Universite de l'Epargne, formerly the Institut des Libertes. The four quadrants, the two ratios, management by exclusion, duration, the bond problem.</span></li>
+          <li><span class="ar">&#9656;</span><span><b>Richard Detente</b>, Grand Angle, in a long interview on Les Financiers. Risk against danger, fragility and antifragility, the movement of value, decorrelation, the three burrows.</span></li>
+        </ul>
+        <p>Everything above is my reading of their arguments, compressed for someone starting from zero. Where they were tentative, I have tried to keep them tentative. Any place where the compression flattened a nuance is my fault and not theirs, and all three are worth reading in the original at full length.</p>
+        <p class="quiet">This page is education, not investment advice. It does not tell you what to buy, it does not know your situation, and nothing on it is a recommendation. Every framework here can be wrong, including all three at once. Whatever you decide, you own the outcome.</p>
+        <div class="sendoff">
+          <p class="sendoff-line">Hold your convictions strongly. <span class="mark">And promise you will change your mind.</span></p>
+          <a href="https://x.com/jeremylasne" target="_blank" rel="noopener" class="btn hot">Follow the build</a>
+          <div class="quiet" style="font-size:14px;margin-top:18px;">@jeremylasne on X</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer class="foot">
+  <div class="foot-in">
+    <a href="/wealth/">Wealth Architecture</a>
+    <a href="/wealth/principles/">Principles</a>
+    <a href="/wealth/country/">Country Map</a>
+    <a href="/wealth/exercice/">Exercise</a>
+    <a href="/">jeremylasne.com</a>
+    <span class="fine">Free research on wealth architecture · Not financial advice</span>
+  </div>
+</footer>
+
+<!-- ════════ HUD ════════ -->
+<div class="hud"><span class="lamp"></span><span class="txt" id="hud">Lesson 00 / 09</span></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ══════════ LAB 1 · SORTING BOARD ══════════ */
+  var CARDS = [
+    { id:"bond",   label:"Bonds of a badly run state", vol:"low",  dan:"high",
+      why:"Correct. The coupon is identical every year until the Monday a minister says there will be no more coupons. Almost no movement, and a real chance of zero." },
+    { id:"salary", label:"Your salary",                vol:"low",  dan:"high",
+      why:"Correct. The flattest line you will ever own, and it can end in a single conversation. Detente's favourite example of hidden danger." },
+    { id:"madoff", label:"A fund paying 10% in a straight line", vol:"low", dan:"high",
+      why:"Correct. The flat line was the tell. Nothing pays that much without moving, which is why the universe refuses to draw that chart. It was Madoff." },
+    { id:"driver", label:"A Paris driver's income",    vol:"high", dan:"low",
+      why:"Correct. Wild between fashion week and August, and yet people never stop needing rides. Loud, and very hard to take to zero." },
+    { id:"flat",   label:"A flat in central Paris",    vol:"low",  dan:"low",
+      why:"Correct. It moves slowly and something is always left standing. It takes a bomb, literally, to reach zero." },
+    { id:"solo",   label:"One early stage company, all your money", vol:"high", dan:"high",
+      why:"Correct. Loud on the way and genuinely capable of zero. This is the honest box, and the only real question is how much of your total you put here." }
+  ];
+  var CELLNOTE = {
+    "low-high":"the crowded box, and the one nobody looks at",
+    "high-high":"the honest box, everyone can see this one",
+    "low-low":"the rare box, slow and durable",
+    "high-low":"the misjudged box, loud but hard to kill"
+  };
+
+  var tray = document.getElementById("tray1");
+  var log  = document.getElementById("log1");
+  var scoreEl = document.getElementById("score1");
+  var cells = [].slice.call(document.querySelectorAll("#lab1 .cell"));
+  var selected = null, placed = 0;
+
+  function buildTray(){
+    tray.innerHTML = "";
+    selected = null; placed = 0;
+    cells.forEach(function(c){
+      c.classList.remove("armed");
+      [].slice.call(c.querySelectorAll(".chip")).forEach(function(n){ n.remove(); });
+    });
+    log.innerHTML = '<div class="logline quiet">Nothing sorted yet. Pick a card to begin.</div>';
+    scoreEl.textContent = "0 / " + CARDS.length + " PLACED";
+    CARDS.forEach(function(c){
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "chip"; b.textContent = c.label; b.dataset.id = c.id;
+      b.addEventListener("click", function(){ pick(b, c); });
+      tray.appendChild(b);
+    });
+  }
+  function pick(btn, card){
+    if (btn.classList.contains("ok") || btn.classList.contains("no")) return;
+    [].slice.call(tray.querySelectorAll(".chip")).forEach(function(n){ n.classList.remove("sel"); });
+    if (selected && selected.card.id === card.id){
+      selected = null; cells.forEach(function(c){ c.classList.remove("armed"); }); return;
+    }
+    btn.classList.add("sel");
+    selected = { btn: btn, card: card };
+    cells.forEach(function(c){ c.classList.add("armed"); });
+  }
+  function place(cell){
+    if (!selected) return;
+    var want = selected.card.vol + "-" + selected.card.dan;
+    var got  = cell.dataset.cell;
+    var right = (want === got);
+    var chip = selected.btn;
+    chip.classList.remove("sel");
+    chip.classList.add(right ? "ok" : "no");
+    cell.appendChild(chip);
+    cells.forEach(function(c){ c.classList.remove("armed"); });
+
+    var line = document.createElement("div");
+    line.className = "logline";
+    if (right){
+      line.innerHTML = "<b>" + selected.card.label + "</b> &#9656; " + selected.card.why;
+    } else {
+      var target = cells.filter(function(c){ return c.dataset.cell === want; })[0];
+      var name = target.querySelector(".cellname").textContent;
+      line.innerHTML = "<b>" + selected.card.label + "</b> &#9656; Not quite. It belongs in <b>" + name +
+        "</b>, " + CELLNOTE[want] + ". " + selected.card.why.replace("Correct. ", "");
+      window.setTimeout(function(){ target.appendChild(chip); }, 900);
+    }
+    if (log.querySelector(".quiet")) log.innerHTML = "";
+    log.appendChild(line);
+    selected = null;
+    placed++;
+    scoreEl.textContent = placed + " / " + CARDS.length + " PLACED";
+    if (placed === CARDS.length){
+      var end = document.createElement("div");
+      end.className = "logline";
+      end.innerHTML = "<b>Board complete.</b> Count how many cards ended up on the left half. Nearly everything that feels safe is quiet, and quiet is not the same as safe.";
+      log.appendChild(end);
+    }
+  }
+  cells.forEach(function(c){
+    c.addEventListener("click", function(){ place(c); });
+    c.addEventListener("keydown", function(e){
+      if (e.key === "Enter" || e.key === " "){ e.preventDefault(); place(c); }
+    });
+  });
+  document.getElementById("reset1").addEventListener("click", buildTray);
+  buildTray();
+
+  /* ══════════ LAB 2 + 3 · QUADRANTS ══════════ */
+  var QUAD = {
+    tl:{ name:"INFLATIONARY BUST", sub:"NO GROWTH &middot; PRICES RISING &middot; TOP LEFT", col:"#9A6A68",
+      feel:"The worst room in the house. Profits fall because energy has become too expensive to transform at a profit, and prices climb anyway. Everything you own seems to be wrong at once.",
+      own:"Cash, in a currency run by adults. Gave means one where the budget is not fiction, and he usually says the Swiss franc. Short duration, high dividend companies. Energy producers, because the thing hurting everyone else is what they sell.",
+      avoid:"Long dated bonds take the first hit, then long duration growth shares take the second as the multiple collapses.",
+      note:"Every truly ferocious bear market since 1945 has started with a spike in the price of energy. This is where the big ones live." },
+    tr:{ name:"INFLATIONARY BOOM", sub:"GROWTH &middot; PRICES RISING &middot; TOP RIGHT", col:"#9A8657",
+      feel:"Business is genuinely good, and your money buys a little less every year. Real things run: metals, land, energy, anything scarce and physical.",
+      own:"Gold and shares together. Gave also points at copper, because almost no new mines are being opened and electrification needs enormous amounts of it, and at silver to a lesser degree.",
+      avoid:"Long dated bonds. You are lending at a fixed rate into a currency that is losing value, which is the definition of a bad trade.",
+      note:"In the conversation this page is drawn from, the dials had been sitting here for about three years and were beginning to slide left." },
+    bl:{ name:"DEFLATIONARY BUST", sub:"NO GROWTH &middot; PRICES FALLING &middot; BOTTOM LEFT", col:"#6A7788",
+      feel:"Prices falling, nobody borrowing, nobody hiring, everyone waiting. The 1930s. Cash gets more valuable simply by sitting still.",
+      own:"Government bonds. This is the one box where they are the best thing in the world to hold, and 2008 to 2020 was largely spent here.",
+      avoid:"Almost everything else, and especially anything financed with debt.",
+      note:"Central banks have decided this box is forbidden and will print to avoid it. Which is precisely why the pressure comes out in the top half instead." },
+    br:{ name:"DEFLATIONARY BOOM", sub:"GROWTH &middot; PRICES FLAT &middot; BOTTOM RIGHT", col:"#5A7D63",
+      feel:"The good one. Things get better and cheaper at the same time, nobody discusses the currency, and optimism is rational rather than manic.",
+      own:"Shares, and particularly efficiency companies. The ones inventing things and making the same output cost less. Technology usually sits here.",
+      avoid:"Gold does nothing, cash does nothing, and holding either one is an expensive way to feel careful.",
+      note:"Gave's favourite, because the rise is broad. Eighty percent of shares going up ten percent, rather than ten percent of shares going up eighty." }
+  };
+  function renderQ(el, key, showNote){
+    var q = QUAD[key];
+    el.innerHTML =
+      '<div class="qt" style="color:'+q.col+'">'+q.name+'</div>'+
+      '<div class="qs">'+q.sub+'</div>'+
+      '<div class="qrow"><span class="k">FEELS<br>LIKE</span><span>'+q.feel+'</span></div>'+
+      '<div class="qrow"><span class="k" style="color:#5A7D63">HOLD</span><span>'+q.own+'</span></div>'+
+      '<div class="qrow"><span class="k" style="color:#9A6A68">AVOID</span><span>'+q.avoid+'</span></div>'+
+      (showNote ? '<div class="qrow" style="border-top:2px dotted var(--rule-firm);padding-top:10px;margin-bottom:0;"><span class="k" style="color:var(--faint)">NOTE</span><span class="quiet">'+q.note+'</span></div>' : '');
+  }
+  var qbtns = [].slice.call(document.querySelectorAll("#lab2 .q"));
+  var qpanel = document.getElementById("qpanel");
+  function selQ(key){
+    qbtns.forEach(function(b){
+      var on = b.dataset.q === key;
+      b.classList.toggle("live", on);
+      b.style.background = on ? "var(--gold-wash)" : "var(--paper-card)";
+      b.style.borderColor = on ? QUAD[b.dataset.q].col : "var(--ink)";
+      b.querySelector(".qn").style.color = on ? QUAD[b.dataset.q].col : "var(--ink)";
+    });
+    renderQ(qpanel, key, true);
+  }
+  qbtns.forEach(function(b){ b.addEventListener("click", function(){ selQ(b.dataset.q); }); });
+  selQ("tr");
+
+  var dials = { g:1, i:1 };
+  var dpanel = document.getElementById("dpanel");
+  function keyFor(){ return (dials.i ? "t" : "b") + (dials.g ? "r" : "l"); }
+  function renderDial(){
+    renderQ(dpanel, keyFor(), false);
+    var head = document.createElement("div");
+    head.className = "qrow";
+    head.style.borderTop = "2px dotted var(--rule-firm)";
+    head.style.paddingTop = "10px";
+    head.style.marginBottom = "0";
+    head.innerHTML = '<span class="k" style="color:var(--faint)">READ</span><span class="quiet">Capitalism is ' +
+      (dials.g ? "turning energy into profit, so we are on the growth side." : "failing to turn energy into profit, so we are on the no growth side.") +
+      " Savers are " + (dials.i ? "leaving the state's store of value for gold, so inflation is the live problem." : "content to hold the state's store of value, so inflation is not the live problem.") + "</span>";
+    dpanel.appendChild(head);
+  }
+  [].slice.call(document.querySelectorAll("#lab3 .btn[data-d]")).forEach(function(b){
+    b.addEventListener("click", function(){
+      var d = b.dataset.d;
+      dials[d] = parseInt(b.dataset.v, 10);
+      [].slice.call(document.querySelectorAll('#lab3 .btn[data-d="'+d+'"]')).forEach(function(o){
+        o.classList.toggle("on", parseInt(o.dataset.v,10) === dials[d]);
+      });
+      renderDial();
+    });
+  });
+  renderDial();
+
+  /* ══════════ LAB 4 · BIG CYCLE ══════════ */
+  var STAGES = [
+    { n:"STAGE 01", t:"A new order", p:"A large conflict ends and the winners sit down to write the rules. Treaties, institutions, a monetary system. In 1944 that was Bretton Woods, which made the dollar the world's reserve currency, and in 1945 it was the institutions built by people who had just lived through two wars and wanted no more of them.", i:"Peace follows, not because everyone became kind, but because nobody wants to fight the country that just won." },
+    { n:"STAGE 02", t:"The rise", p:"Strong education comes first, and Dalio means character and work ethic as much as knowledge. That produces invention, which produces competitiveness, which produces output and a growing share of world trade. Trade routes need protecting, so the military grows. Capital markets develop so savings can turn into investment, and the financial centre of the world moves to wherever this is happening.", i:"Amsterdam, then London, then New York. The Dutch invented the listed company and the stock market to fund their ships, and it made them the richest people alive." },
+    { n:"STAGE 03", t:"The reserve currency", p:"Once most of the world's trade is settled in your money, everyone wants to save in it, and that makes it the world's reserve currency. This is an enormous privilege. People all over the world are eager to lend your own currency back to you, so you can borrow more than anyone else, and when you run out of money you can simply print more.", i:"Dalio's phrase for it is the exorbitant privilege. It is also the beginning of the trouble, because it makes borrowing feel free." },
+    { n:"STAGE 04", t:"The top", p:"The seeds of decline are inside the success. People are now expensive, so they are less competitive than people elsewhere willing to work for less. Rivals copy the technology. The generation that inherited the wealth is not the generation that fought for it, and works less hard for more comfort. Meanwhile the gains arrive unevenly, so the wealth gap widens, and the rich use their resources to entrench it.", i:"British shipbuilders hired Dutch designers and used cheaper British labour. That single sentence is the Dutch decline and the British rise." },
+    { n:"STAGE 05", t:"The bust and the split", p:"Debts get too large, an economic downturn arrives, the country can no longer borrow enough to repay, and the bubble bursts. Now there is a choice: default, or print a lot of new money. It always chooses to print. Gradually at first, then massively. The currency falls, inflation rises, and internal conflict escalates between rich and poor.", i:"Taxes on the wealthy rise, so wealth moves to safer places, assets and currencies. That shrinks tax revenue further. Dalio calls it a self reinforcing hollowing out." },
+    { n:"STAGE 06", t:"The fight, then a new order", p:"Populist leaders appear on both sides promising to restore order, and this is the moment democracy is most tested. The internal fight leaves the country weak, which is exactly when a rising rival is most tempted to test it. There is no court that settles disputes between great powers, so they are settled by tests of power. Out of that come new winners, who sit down to write the rules.", i:"Which is stage one. The clothes and the technology change. The story does not." }
+  ];
+  var stage = document.getElementById("stage4"), dots = document.getElementById("dots4"), si = 0;
+  function drawStage(){
+    var s = STAGES[si];
+    stage.innerHTML = '<div class="stagen">'+s.n+' OF 06</div><div class="staget">'+s.t+'</div><p class="stagep">'+s.p+'</p><p class="stagei">'+s.i+'</p>';
+    [].slice.call(dots.children).forEach(function(d,idx){ d.classList.toggle("on", idx === si); });
+    document.getElementById("prev4").disabled = (si === 0);
+    document.getElementById("next4").disabled = (si === STAGES.length - 1);
+  }
+  STAGES.forEach(function(s, idx){
+    var d = document.createElement("button");
+    d.type = "button"; d.textContent = String(idx + 1);
+    d.addEventListener("click", function(){ si = idx; drawStage(); });
+    dots.appendChild(d);
+  });
+  document.getElementById("prev4").addEventListener("click", function(){ if (si > 0){ si--; drawStage(); } });
+  document.getElementById("next4").addEventListener("click", function(){ if (si < STAGES.length-1){ si++; drawStage(); } });
+  drawStage();
+
+  /* ══════════ LAB 5 · SHAKE SLIDER ══════════ */
+  var shake = document.getElementById("shake");
+  var barF = document.getElementById("barF"), barA = document.getElementById("barA");
+  var txtF = document.getElementById("txtF"), txtA = document.getElementById("txtA");
+  var weather = document.getElementById("weather");
+  function drawBar(el, val){
+    var h = Math.min(90, Math.abs(val) / 100 * 92);
+    var up = val >= 0;
+    el.style.height = h + "px";
+    el.style.top = up ? (95 - h) + "px" : "98px";
+    el.style.background = up ? "#5A7D63" : "#9A6A68";
+    el.style.boxShadow = "3px 3px 0 " + (up ? "#3F5A47" : "#7A4A48");
+  }
+  function drawShake(){
+    var v = parseInt(shake.value, 10);
+    var f = 52 - 1.32 * v;
+    var a = -20 + 1.06 * v;
+    drawBar(barF, f); drawBar(barA, a);
+    txtF.textContent = f >= 0
+      ? "Quietly compounding. This is what everyone calls prudent, and in this weather they are right."
+      : "Breaking. The line was flat for years, which is exactly why nobody saw a floor missing.";
+    txtA.textContent = a >= 0
+      ? "Doing everything at once. Years of looking stupid, paid back in weeks."
+      : "Bleeding. Nobody needs what you own, and holding it feels like a mistake every single morning.";
+    var w = v < 25 ? "A QUIET DECADE" : v < 55 ? "CHOPPY" : v < 80 ? "THE GROUND IS MOVING" : "AVALANCHE";
+    var d = v < 25 ? "The belly of the distribution. Most of history lives here, and prudence genuinely works."
+          : v < 55 ? "Something has cracked and nobody agrees what it means yet."
+          : v < 80 ? "Correlations rise, things that were supposed to be separate move together."
+          : "Thirty seconds that reconfigure the whole mountain. This is where the zeros happen, and where the record is made.";
+    weather.innerHTML = w + '<div style="font-family:\'DM Sans\',sans-serif;font-size:20px;color:var(--muted);line-height:1.3;margin-top:6px;">' + d + "</div>";
+  }
+  shake.addEventListener("input", drawShake);
+  drawShake();
+
+  /* ══════════ LAB 6 · COMPASS ══════════ */
+  var QS = [
+    { q:"Which world do you think you are in?",
+      a:[ { t:"The belly. The next twenty years look broadly like the last twenty.", k:"belly" },
+          { t:"The tails. I think things are about to reconfigure by avalanche.", k:"tails" },
+          { t:"I genuinely do not know yet.", k:"unsure" } ] },
+    { q:"If the world shook hard tomorrow, what happens to what you own?",
+      a:[ { t:"I have honestly never asked the question.", k:"never" },
+          { t:"Almost all of it would move in the same direction.", k:"chained" },
+          { t:"Several parts of it are not chained to each other.", k:"spread" } ] },
+    { q:"For each thing you own, can you name what would make it worth nothing?",
+      a:[ { t:"For none of it.", k:"none" },
+          { t:"For some of it.", k:"some" },
+          { t:"For all of it.", k:"all" } ] },
+    { q:"Where do you think value moves over the next ten years?",
+      a:[ { t:"Roughly where it is now. The current winners keep winning.", k:"same" },
+          { t:"Into energy, computing and physical capacity.", k:"build" },
+          { t:"Into money no government can print.", k:"hard" },
+          { t:"I have not decided, and I know that is itself the decision.", k:"open" } ] }
+  ];
+  var answers = [null, null, null, null];
+  var quiz = document.getElementById("quiz6"), out = document.getElementById("out6"), go = document.getElementById("go6");
+  QS.forEach(function(item, qi){
+    var block = document.createElement("div");
+    block.className = "qblock";
+    var h = document.createElement("div");
+    h.className = "qq"; h.textContent = (qi + 1) + ". " + item.q;
+    block.appendChild(h);
+    var opts = document.createElement("div");
+    opts.className = "opts";
+    item.a.forEach(function(opt){
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "opt"; b.textContent = opt.t;
+      b.addEventListener("click", function(){
+        answers[qi] = opt.k;
+        [].slice.call(opts.children).forEach(function(o){ o.classList.remove("sel"); });
+        b.classList.add("sel");
+        go.disabled = answers.some(function(a){ return a === null; });
+      });
+      opts.appendChild(b);
+    });
+    block.appendChild(opts);
+    quiz.appendChild(block);
+  });
+
+  var WORLD = {
+    belly:"You have chosen prudence deliberately, which is a genuine position and not a lazy one. The only version that is truly dangerous is the one chosen by default. Gave would ask you what your two dials currently say. Detente would ask what happens to you if you are wrong.",
+    tails:"Then the weight of the work sits on the second half of this page. Name what you own that is secretly one bet in several costumes, and work out what you would want to be holding on the day everything moves at once.",
+    unsure:"That is the most honest answer and the most common one. It also means the size of your bets matters more than their direction, because you are buying optionality rather than expressing conviction."
+  };
+  var SHAPE = {
+    never:"You have not yet stress tested anything, which is the single cheapest thing on this list to fix. Take one hour and write down, for each thing you own, what would have to happen for it to be worth nothing.",
+    chained:"You have one bet wearing several costumes. That is not a moral failing, it is the default outcome of buying whatever is easiest to buy. Decorrelation is the only thing in this whole lecture that improves resilience without costing return.",
+    spread:"Good. Now be sceptical about it, because things that look unlinked in calm weather often turn out to be linked in a crisis, which is exactly when it matters."
+  };
+  var VALUE = {
+    same:"A real position, and the one that has been right for most of the last fifteen years. Gave's warning is worth holding next to it: when performance concentrates into very few names, price discovery stops working, because the only remaining reason to buy is that everyone is buying.",
+    build:"That is roughly Detente's own bet, and the useful part is not the conclusion but the method. He found a way to be present for the change that paid for itself while he waited.",
+    hard:"That is the antifragile end of the map. Remember what it costs: in a long calm stretch, nobody needs what you own, and holding it will feel like a mistake every single morning for years.",
+    open:"Honest, and better than pretending. Just make sure it stays a decision under review rather than a decision permanently postponed, because postponing it is how the third servant ended up burying his talent."
+  };
+  var DEPTH = {
+    none:"Start there. Not with what to buy, with what would kill each thing you already have.",
+    some:"Finish the list. The gaps in it are where the surprises come from.",
+    all:"That is genuinely rare, and it is most of the discipline these three have in common."
+  };
+
+  go.addEventListener("click", function(){
+    var w = answers[0], s = answers[1], d = answers[2], v = answers[3];
+    out.innerHTML =
+      '<div class="out">'+
+        '<h4>YOUR COMPASS</h4>'+
+        '<p><b style="color:var(--gold)">On which world.</b> ' + WORLD[w] + '</p>'+
+        '<p><b style="color:var(--gold)">On what you hold.</b> ' + SHAPE[s] + '</p>'+
+        '<p><b style="color:var(--gold)">On what could kill it.</b> ' + DEPTH[d] + '</p>'+
+        '<p><b style="color:var(--gold)">On where value goes.</b> ' + VALUE[v] + '</p>'+
+        '<div class="rule"></div>'+
+        '<p style="color:var(--faint);">Three checks survive all three of these men, whatever you answered above.</p>'+
+        '<ol>'+
+          '<li>Never let "it does not move much" stand in for "it cannot go to zero."</li>'+
+          '<li>Write down which weather you think you are in, and what would prove you wrong.</li>'+
+          '<li>Own things that are not chained together, and be honest about which ones actually are.</li>'+
+        '</ol>'+
+        '<div class="rule"></div>'+
+        '<p style="color:var(--faint);font-size:19px;">This is a reflection of what you just answered. It is not advice, and it does not know anything about your situation.</p>'+
+      '</div>';
+    out.scrollIntoView({ block:"nearest" });
+  });
+  document.getElementById("clr6").addEventListener("click", function(){
+    answers = [null, null, null, null];
+    [].slice.call(quiz.querySelectorAll(".opt")).forEach(function(o){ o.classList.remove("sel"); });
+    out.innerHTML = ""; go.disabled = true;
+  });
+
+  /* ══════════ PRINT THE SCHEMA ALONE ══════════ */
+  var printBtn = document.getElementById("printSchema");
+  function unmark(){ document.body.classList.remove("schema-only"); }
+  printBtn.addEventListener("click", function(){
+    document.body.classList.add("schema-only");
+    window.addEventListener("afterprint", unmark, { once:true });
+    // Safari does not always fire afterprint, so clear the class regardless
+    window.setTimeout(unmark, 3000);
+    window.print();
+  });
+
+  /* ══════════ HUD ══════════ */
+  var hud = document.getElementById("hud");
+  var sects = [].slice.call(document.querySelectorAll("[data-hud]"));
+  function hudFromScroll(){
+    // whichever section owns the middle of the viewport, resolved in document order
+    var mid = window.innerHeight / 2, best = sects[0];
+    sects.forEach(function(s){
+      var r = s.getBoundingClientRect();
+      if (r.top <= mid) best = s;
+    });
+    hud.textContent = best.dataset.hud;
+  }
+  if ("IntersectionObserver" in window){
+    // the observer is only a cheap trigger; the reading itself is always positional,
+    // so callback ordering can never hand us the wrong section
+    var io = new IntersectionObserver(hudFromScroll, { rootMargin:"-45% 0px -45% 0px" });
+    sects.forEach(function(s){ io.observe(s); });
+  } else {
+    window.addEventListener("scroll", hudFromScroll, { passive:true });
+  }
+  hudFromScroll();
+})();
+</script>
+
+</body>
+</html>

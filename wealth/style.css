@@ -1,0 +1,328 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Wealth Architecture — shared design system.
+
+   Deliberately the quiet corner of the site. The rest of jeremylasne.com is
+   pixel art; this section is warm paper, hairline rules and one gold accent,
+   because the material is long-form and wants to be read rather than played.
+
+   Instrument Serif carries the display voice, DM Sans does everything else.
+   Nothing here is coloured for decoration — the four quadrant hues are the
+   only semantic colours, and they are desaturated on purpose.
+   ───────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* surface */
+  --paper:      #FCFBF9;
+  --paper-sunk: #F5F3EE;
+  --paper-card: #FFFFFE;
+
+  /* ink */
+  --ink:        #14140F;
+  --ink-soft:   #3D3B35;
+  --muted:      #6E6B63;
+  --faint:      #9C988F;
+
+  /* rules */
+  --rule:       #E7E4DC;
+  --rule-firm:  #D6D1C6;
+
+  /* the single accent */
+  --gold:       #B08D4F;
+  --gold-wash:  #F3EDDF;
+
+  /* four weathers — desaturated on purpose */
+  --q-defboom:  #5A7D63;
+  --q-infboom:  #9A8657;
+  --q-defbust:  #6A7788;
+  --q-infbust:  #9A6A68;
+
+  /* type */
+  --display: 'Instrument Serif', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  --body:    'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+
+  /* measure */
+  --measure: 68ch;
+  --wide:    1080px;
+  --shell:   1240px;
+  --gutter:  clamp(20px, 5vw, 48px);
+}
+
+* { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  /* the sticky rail is 57px; keep anchored headings clear of it */
+  scroll-padding-top: 88px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink-soft);
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.8;
+  font-feature-settings: 'kern' 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection { background: var(--gold-wash); color: var(--ink); }
+
+img, svg { max-width: 100%; }
+
+/* ── rail ────────────────────────────────────────────────────────────── */
+
+.rail {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(252, 251, 249, 0.86);
+  backdrop-filter: saturate(140%) blur(10px);
+  -webkit-backdrop-filter: saturate(140%) blur(10px);
+  border-bottom: 1px solid var(--rule);
+}
+.rail-in {
+  max-width: var(--shell); margin: 0 auto;
+  padding: 0 var(--gutter);
+  height: 56px; display: flex; align-items: center; gap: 28px;
+}
+.rail-home {
+  font-family: var(--display); font-size: 19px; letter-spacing: 0.01em;
+  color: var(--ink); text-decoration: none; white-space: nowrap;
+}
+.rail-home:hover { color: var(--gold); }
+.rail-nav { margin-left: auto; display: flex; align-items: center; gap: 22px; }
+.rail-nav a {
+  font-size: 13px; letter-spacing: 0.02em; color: var(--muted);
+  text-decoration: none; white-space: nowrap;
+  padding-bottom: 2px; border-bottom: 1px solid transparent;
+}
+.rail-nav a:hover { color: var(--ink); }
+.rail-nav a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--gold); }
+@media (max-width: 640px) {
+  .rail-in { gap: 14px; height: 52px; }
+  .rail-nav { gap: 14px; }
+  .rail-nav a { font-size: 12px; }
+  .rail-home { font-size: 17px; }
+}
+/* the section index collapses first — the two sibling pages matter more */
+@media (max-width: 460px) { .rail-nav a.rail-drop { display: none; } }
+
+/* ── shell ───────────────────────────────────────────────────────────── */
+
+.shell { max-width: var(--shell); margin: 0 auto; padding: 0 var(--gutter); }
+.col   { max-width: var(--measure); }
+.wide  { max-width: var(--wide); }
+
+/* ── masthead ────────────────────────────────────────────────────────── */
+
+.masthead { padding: clamp(64px, 11vw, 132px) 0 0; }
+.eyebrow {
+  font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--faint); margin: 0 0 26px;
+  display: flex; align-items: center; gap: 12px;
+}
+.eyebrow::after { content: ''; flex: 1; height: 1px; background: var(--rule); max-width: 120px; }
+
+h1.title {
+  font-family: var(--display); font-weight: 400;
+  font-size: clamp(46px, 8.5vw, 88px); line-height: 1.02;
+  letter-spacing: -0.015em; color: var(--ink);
+  margin: 0;
+}
+.standfirst {
+  font-family: var(--display); font-weight: 400;
+  font-size: clamp(23px, 3.4vw, 33px); line-height: 1.32;
+  color: var(--ink); margin: 26px 0 0; max-width: 22ch;
+}
+.standfirst em { font-style: italic; color: var(--gold); }
+.masthead .lede { margin-top: 34px; }
+.lede { font-size: 18px; line-height: 1.75; color: var(--muted); }
+.lede + .lede { margin-top: 18px; }
+
+/* ── parts & principles ──────────────────────────────────────────────── */
+
+.part {
+  margin: clamp(80px, 12vw, 140px) 0 0;
+  padding-top: 30px; border-top: 1px solid var(--ink);
+}
+.part-no {
+  font-family: var(--display); font-style: italic;
+  font-size: 15px; letter-spacing: 0.04em; color: var(--gold);
+  text-transform: uppercase;
+}
+.part h2 {
+  font-family: var(--display); font-weight: 400;
+  font-size: clamp(34px, 5.4vw, 52px); line-height: 1.08; letter-spacing: -0.01em;
+  color: var(--ink); margin: 10px 0 0;
+}
+.part p { margin: 16px 0 0; color: var(--muted); font-size: 17px; max-width: 56ch; }
+
+.principle { margin: clamp(56px, 8vw, 92px) 0 0; scroll-margin-top: 88px; }
+.principle-no {
+  font-size: 11px; letter-spacing: 0.2em; color: var(--gold);
+  font-variant-numeric: tabular-nums; margin: 0 0 12px;
+}
+.principle h3 {
+  font-family: var(--display); font-weight: 400;
+  font-size: clamp(28px, 4.4vw, 40px); line-height: 1.14; letter-spacing: -0.01em;
+  color: var(--ink); margin: 0; max-width: 24ch;
+}
+.claim {
+  font-family: var(--display); font-style: italic;
+  font-size: clamp(19px, 2.6vw, 23px); line-height: 1.42;
+  color: var(--ink); margin: 20px 0 0; max-width: 46ch;
+}
+.principle p:not(.claim):not(.principle-no) { margin: 20px 0 0; }
+.principle strong { color: var(--ink); font-weight: 500; }
+
+/* ── pull quote ──────────────────────────────────────────────────────── */
+
+.quote {
+  margin: clamp(40px, 6vw, 64px) 0 0; padding: 0 0 0 26px;
+  border-left: 1px solid var(--gold);
+  font-family: var(--display); font-style: italic;
+  font-size: clamp(21px, 3vw, 27px); line-height: 1.38; color: var(--ink);
+  max-width: 46ch;
+}
+
+/* ── figures ─────────────────────────────────────────────────────────── */
+
+.fig { margin: clamp(40px, 6vw, 60px) 0 0; }
+.fig-frame {
+  border: 1px solid var(--rule); background: var(--paper-card);
+  padding: clamp(18px, 3vw, 30px);
+}
+.fig svg { display: block; width: 100%; height: auto; overflow: visible; }
+.fig figcaption {
+  margin-top: 16px; font-size: 14px; line-height: 1.7; color: var(--muted);
+  max-width: 62ch;
+}
+.fig figcaption .src { display: block; margin-top: 8px; font-size: 12.5px; color: var(--faint); }
+
+/* svg type — kept in one place so every chart matches */
+.ax   { font-family: var(--body); font-size: 11px; letter-spacing: 0.18em; fill: var(--faint); text-transform: uppercase; }
+.qlab { font-family: var(--display); font-size: 19px; }
+.dot-l{ font-family: var(--body); font-size: 11.5px; fill: var(--muted); }
+.val  { font-family: var(--body); font-size: 12px; fill: var(--muted); font-variant-numeric: tabular-nums; }
+.gridline { stroke: var(--rule); stroke-width: 1; }
+.axisline { stroke: var(--rule-firm); stroke-width: 1; }
+
+/* ── key / legend ────────────────────────────────────────────────────── */
+
+.key { margin-top: 22px; display: grid; gap: 12px; }
+.key-row { display: grid; grid-template-columns: 13px 1fr; gap: 12px; align-items: start; font-size: 14px; }
+.key-sw { width: 9px; height: 9px; border-radius: 50%; margin-top: 7px; }
+.key-row b { color: var(--ink); font-weight: 500; }
+.key-row span { color: var(--muted); }
+
+/* ── data tables ─────────────────────────────────────────────────────── */
+
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table.grid {
+  width: 100%; border-collapse: collapse; font-size: 14px;
+  font-variant-numeric: tabular-nums; min-width: 520px;
+}
+table.grid th, table.grid td {
+  padding: 13px 14px; text-align: right; border-bottom: 1px solid var(--rule);
+}
+table.grid th:first-child, table.grid td:first-child { text-align: left; color: var(--ink); }
+table.grid thead th {
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--faint); font-weight: 400; border-bottom-color: var(--rule-firm);
+}
+table.grid td { color: var(--muted); }
+table.grid td.self { color: var(--ink); background: var(--paper-sunk); }
+table.grid tbody tr:last-child td { border-bottom: none; }
+
+/* ── pockets ─────────────────────────────────────────────────────────── */
+
+.pocket {
+  margin-top: 28px; border: 1px solid var(--rule); background: var(--paper-card);
+  padding: clamp(24px, 4vw, 38px);
+}
+.pocket-role {
+  font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--gold); margin: 0 0 10px;
+}
+.pocket h4 {
+  font-family: var(--display); font-weight: 400; font-size: clamp(25px, 3.4vw, 32px);
+  line-height: 1.16; color: var(--ink); margin: 0;
+}
+.pocket .claim { margin-top: 14px; font-size: 19px; }
+.pocket p { margin: 16px 0 0; font-size: 16px; }
+.pocket-stats {
+  margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--rule);
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 22px 18px;
+}
+.stat dt {
+  font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--faint); margin: 0 0 6px;
+}
+.stat dd {
+  margin: 0; font-family: var(--display); font-size: 24px; line-height: 1.1;
+  color: var(--ink); font-variant-numeric: tabular-nums;
+}
+.stat dd small { font-family: var(--body); font-size: 12px; color: var(--faint); letter-spacing: 0.04em; }
+.why {
+  margin-top: 22px; padding: 16px 18px; background: var(--paper-sunk);
+  font-size: 14.5px; line-height: 1.65; color: var(--muted);
+}
+.why b {
+  display: block; font-family: var(--body); font-size: 10.5px; font-weight: 400;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin-bottom: 6px;
+}
+
+/* ── inline links ────────────────────────────────────────────────────── */
+
+.body-link, .principle a, .lede a, .note a, .pocket a {
+  color: var(--ink); text-decoration: none;
+  border-bottom: 1px solid var(--gold); padding-bottom: 1px;
+}
+.body-link:hover, .principle a:hover, .lede a:hover, .note a:hover, .pocket a:hover {
+  background: var(--gold-wash);
+}
+
+.next {
+  display: inline-flex; align-items: center; gap: 10px;
+  margin-top: 18px; font-family: var(--display); font-size: 24px;
+  color: var(--ink); text-decoration: none; border: none;
+}
+.next::after { content: '→'; font-family: var(--body); font-size: 17px; color: var(--gold); transition: transform .18s ease; }
+.next:hover { background: none; }
+.next:hover::after { transform: translateX(4px); }
+
+/* ── closing note ────────────────────────────────────────────────────── */
+
+.note {
+  margin: clamp(72px, 10vw, 120px) 0 0; padding-top: 30px;
+  border-top: 1px solid var(--ink);
+}
+.note h2 {
+  font-family: var(--display); font-weight: 400; font-size: clamp(28px, 4vw, 38px);
+  line-height: 1.14; color: var(--ink); margin: 0 0 20px;
+}
+
+.disclaimer {
+  margin-top: 26px; font-size: 14px; line-height: 1.7; color: var(--faint); max-width: 58ch;
+}
+
+/* ── footer ──────────────────────────────────────────────────────────── */
+
+.foot {
+  margin-top: clamp(80px, 11vw, 130px);
+  border-top: 1px solid var(--rule); background: var(--paper-sunk);
+}
+.foot-in {
+  max-width: var(--shell); margin: 0 auto; padding: 40px var(--gutter) 52px;
+  display: flex; flex-wrap: wrap; gap: 14px 26px; align-items: baseline;
+}
+.foot a { font-size: 14px; color: var(--muted); text-decoration: none; }
+.foot a:hover { color: var(--ink); }
+.foot .fine { margin-left: auto; font-size: 12.5px; color: var(--faint); }
+@media (max-width: 640px) { .foot .fine { margin-left: 0; flex-basis: 100%; } }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; animation: none !important; }
+}
