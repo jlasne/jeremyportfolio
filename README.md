@@ -34,12 +34,15 @@ leaves untouched assets byte-for-byte alone, so the diff stays small.
 | `/dayzero` | the "think bigger" article |
 | `/meet` | **Meet on time** — timezone overlap → best hour → Google Calendar |
 
-`/meet` is a self-contained scheduling tool: a When2Meet-style overlap grid
-built from each person's working hours in their own timezone, ranked candidate
-slots, and a one-tap handoff to a pre-filled Google Calendar event (plus `.ics`
-and a shareable `#hash` link). No backend — state lives in `localStorage` and in
-the link. Its design system is iOS-light: white cards on `#F2F2F7`, hairlines,
-system font, black as the only accent.
+`/meet` is a self-contained scheduling tool. The overlap reads like
+WorldTimeBuddy: one row per person, hours running left to right, every column
+the same instant on a different clock — white where they can meet, black where
+they can't, grey on the summary row where only some can. Under it sit ranked
+slots, each showing the hour in every timezone at once, and a one-tap handoff
+to a pre-filled Google Calendar event (plus `.ics` and a shareable `#hash`
+link). No backend — state lives in `localStorage` and in the link. Its design
+system is iOS-light: white cards on `#F2F2F7`, hairlines, SF/Inter, black as
+the only accent.
 
 The four `/wealth` pages share one design system in
 [`wealth/style.css`](wealth/style.css) — warm paper, hairline rules, a single
