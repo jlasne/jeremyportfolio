@@ -32,6 +32,14 @@ leaves untouched assets byte-for-byte alone, so the diff stays small.
 | `/economy` | *The Four Clocks* — the same argument as one classical essay |
 | `/mobileapp` | the revenue-machine playbook |
 | `/dayzero` | the "think bigger" article |
+| `/meetontime` | **Meet on time** — timezone overlap → best hour → Google Calendar |
+
+`/meetontime` is a self-contained scheduling tool: a When2Meet-style overlap grid
+built from each person's working hours in their own timezone, ranked candidate
+slots, and a one-tap handoff to a pre-filled Google Calendar event (plus `.ics`
+and a shareable `#hash` link). No backend — state lives in `localStorage` and in
+the link. Its design system is iOS-light: white cards on `#F2F2F7`, hairlines,
+system font, black as the only accent.
 
 The four `/wealth` pages share one design system in
 [`wealth/style.css`](wealth/style.css) — warm paper, hairline rules, a single
