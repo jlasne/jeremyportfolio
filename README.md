@@ -32,9 +32,9 @@ leaves untouched assets byte-for-byte alone, so the diff stays small.
 | `/economy` | *The Four Clocks* — the same argument as one classical essay |
 | `/mobileapp` | the revenue-machine playbook |
 | `/dayzero` | the "think bigger" article |
-| `/meetontime` | **Meet on time** — timezone overlap → best hour → Google Calendar |
+| `/meet` | **Meet on time** — timezone overlap → best hour → Google Calendar |
 
-`/meetontime` is a self-contained scheduling tool: a When2Meet-style overlap grid
+`/meet` is a self-contained scheduling tool: a When2Meet-style overlap grid
 built from each person's working hours in their own timezone, ranked candidate
 slots, and a one-tap handoff to a pre-filled Google Calendar event (plus `.ics`
 and a shareable `#hash` link). No backend — state lives in `localStorage` and in
