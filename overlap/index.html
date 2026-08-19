@@ -145,7 +145,14 @@ main.nohero .hero{display:none}
 .hc.sum{box-shadow:inset -1px 0 0 rgba(60,60,67,.10),inset 0 1px 0 var(--sep)}
 .hc.sum.busy{box-shadow:inset -1px 0 0 rgba(255,255,255,.16),inset 0 1px 0 var(--sep)}
 .hc.sum .n{font-size:11px;font-weight:600;opacity:.75}
-.hc.past{opacity:.35}
+.hc.past{color:var(--ink-3);
+  background-image:repeating-linear-gradient(135deg,rgba(60,60,67,.20) 0 2px,transparent 2px 6px)}
+.hc.busy.past{color:rgba(255,255,255,.40);
+  background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.22) 0 2px,transparent 2px 6px)}
+.hc.past .m{opacity:.35}
+.dtab.past{color:var(--ink-3);
+  background-image:repeating-linear-gradient(135deg,rgba(60,60,67,.16) 0 2px,transparent 2px 6px)}
+.dtab.past .wd{color:var(--ink-3)}
 .colmark{position:absolute;top:0;bottom:0;border:2.5px solid var(--ink);border-radius:10px;
   pointer-events:none;z-index:5;box-shadow:0 0 0 2px var(--paper)}
 .legend{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-2);padding:11px 4px 0;
@@ -288,12 +295,7 @@ textarea{font-family:var(--font)}
         <div class="secfoot">Working hours are what the overlap is built from.</div>
       </div>
 
-      <div class="sec">
-        <div class="sechead"><span>Quick add</span></div>
-        <div class="chips" id="quickChips"></div>
-      </div>
-
-      <div class="sec">
+      <div class="sec" id="overlapSec">
         <div class="sechead"><span>Overlap</span><button class="linkbtn" id="editToggle">Edit hours</button></div>
         <div class="daytabs" id="dayTabs"></div>
         <div class="wtb">
@@ -500,7 +502,6 @@ var CITIES = [
 ["Auckland","New Zealand","Pacific/Auckland"],["Honolulu","United States","Pacific/Honolulu"],
 ["UTC","Coordinated","UTC"]
 ];
-var QUICK = ["San Francisco","New York","London","Paris","Berlin","Singapore","Tokyo","Sydney"];
 var DURS = [15,30,45,60];
 var SLOT = 60;                       /* one column = one hour */
 var DAYS = 7;                        /* columns */
@@ -768,12 +769,6 @@ function renderPeople(){
   $("#peopleList").innerHTML=html;
   $("#peopleCount").textContent=S.people.length+(S.people.length===1?" person":" people");
 
-  var used={}; S.people.forEach(function(p){ used[p.tz]=1; });
-  $("#quickChips").innerHTML=QUICK.map(function(c){
-    var row=CITIES.filter(function(x){ return x[0]===c; })[0];
-    return '<button class="chip'+(used[row[2]]?" on":"")+'" data-quick="'+esc(c)+'">'+esc(c)+'</button>';
-  }).join("");
-
   $("#durChips").innerHTML=DURS.map(function(d){
     return '<button class="chip'+(S.dur===d?" on":"")+'" data-dur="'+d+'">'+d+"′</button>";
   }).join("");
@@ -797,8 +792,9 @@ function renderDays(){
   var tz=dispTz(), days=dayStarts(), now=Date.now();
   $("#dayTabs").innerHTML=days.map(function(t,i){
     var z=zp(t,tz), d=dow(t,tz), today=dayKey(t,tz)===dayKey(now,tz);
+    var over=(t+86400000)<=now;
     return '<button class="dtab'+(i===S.day?" on":"")+((d===0||d===6)?" we":"")+
-      '" data-day="'+i+'"><span class="wd">'+(today?"today":WD[d])+
+      (over?" past":"")+'" data-day="'+i+'"><span class="wd">'+(today?"today":WD[d])+
       '</span><span class="dd">'+z.d+"</span></button>";
   }).join("");
 }
@@ -921,14 +917,23 @@ var LIVE = /^https?:\/\//.test(CONVEX);
 var TOKKEY="overlap.token", QKEY="overlap.queue";
 var ME=null;                       /* {user,team,members} once signed in */
 
-/* one endpoint, one shape: {op,args} in, {ok,value} out. See convex/http.ts */
+/* one endpoint, one shape: {op,args} in, {ok,value} out. See convex/http.ts.
+   Ten seconds is the whole patience budget: a hung request must fail loudly
+   rather than leave a button looking like it did nothing. */
 function cx(op,args){
+  var ctl = window.AbortController ? new AbortController() : null;
+  var timer = setTimeout(function(){ if(ctl) ctl.abort(); },10000);
   return fetch(CONVEX+"/overlap",{
     method:"POST",headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({op:op,args:args||{}})
+    body:JSON.stringify({op:op,args:args||{}}),
+    signal: ctl?ctl.signal:undefined
   }).then(function(r){ return r.json(); }).then(function(j){
+    clearTimeout(timer);
     if(j&&j.ok) return j.value;
     throw new Error((j&&j.error)||"Something went wrong");
+  },function(e){
+    clearTimeout(timer);
+    throw new Error(e&&e.name==="AbortError" ? "The server did not answer" : "Can’t reach the server");
   });
 }
 function token(){ try{ return localStorage.getItem(TOKKEY)||""; }catch(e){ return ""; } }
@@ -1119,7 +1124,7 @@ function sendFeedback(){
     $("#fbForm").style.display="none"; $("#fbThanks").style.display="";
     $("#fbText").value=""; S.wants=[]; renderFeedback(); renderDock(); haptic();
   };
-  if(LIVE) cx("feedback.send",rec).then(done).catch(function(e){ queueFeedback(rec); done(); });
+  if(LIVE) cx("feedback.send",rec).then(done).catch(function(){ queueFeedback(rec); done(); });
   else { queueFeedback(rec); done(); }
 }
 
@@ -1129,9 +1134,16 @@ var COPY=[
   ["Plan it","Pick the hour, hand it to the calendar, done."],
   ["What’s missing?","You’ve seen it work. Tell me what would make you keep it."]
 ];
+/* One strip, not two. It follows you from Team to Plan, where it sits at the
+   top so the hour can be changed right next to the times it produces. */
+function placeOverlap(n){
+  var ov=$("#overlapSec"), host=n===1?$("#step1"):$("#step0");
+  if(n===1){ if(host.firstElementChild!==ov) host.insertBefore(ov,host.firstElementChild); }
+  else if(ov.parentNode!==host) host.appendChild(ov);
+}
 function renderAll(){
   renderAcct(); renderPeople(); renderDays();
-  if(S.step===0) renderWTB();
+  if(S.step<2) renderWTB();
   if(S.step===1) renderBest();
   if(S.step===2) renderFeedback();
   renderDock();
@@ -1144,6 +1156,9 @@ function setStep(n){
   $("#segThumb").style.transform="translateX("+(n*100)+"%)";
   $("#bigTitle").textContent=COPY[n][0];
   $("#bigSub").textContent=COPY[n][1];
+  /* on Plan the strip is the first thing, so the title gets out of its way */
+  document.querySelector("main").classList.toggle("nohero",n===1);
+  placeOverlap(n);
   renderAll();
   window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -1308,19 +1323,6 @@ document.addEventListener("click",function(ev){
     afterChange(); haptic(); return;
   }
   if((el=up("data-edit"))){ openSheet(byId(el.getAttribute("data-edit"))); return; }
-  if((el=up("data-quick"))){
-    var name=el.getAttribute("data-quick");
-    var row=CITIES.filter(function(x){ return x[0]===name; })[0];
-    var has=S.people.filter(function(p){ return p.tz===row[2] && !p.you; })[0];
-    if(inTeam()){
-      if(has&&has.mid) mutate("teams.removeMember",{memberId:has.mid});
-      else mutate("teams.addMember",memberArgs(newPerson(name,row[2],false)));
-      haptic(); return;
-    }
-    if(has){ S.people=S.people.filter(function(p){ return p!==has; }); }
-    else S.people.push(newPerson(name,row[2],false));
-    afterChange(); haptic(); return;
-  }
   if((el=up("data-dur"))){ S.dur=+el.getAttribute("data-dur"); afterChange(); return; }
   if((el=up("data-pick"))){
     S.pick=+el.getAttribute("data-pick");
@@ -1447,7 +1449,9 @@ $("#wtb").addEventListener("pointerdown",function(ev){
 $("#wtb").addEventListener("click",function(ev){
   if(editing) return;
   var el=ev.target.closest?ev.target.closest(".hc"):null;
-  if(el) takeSlot(+el.getAttribute("data-ts"));
+  if(!el) return;
+  if(el.classList.contains("past")) return toast("That hour has gone");
+  takeSlot(+el.getAttribute("data-ts"));
 });
 $("#wtb").addEventListener("pointermove",function(ev){
   if(!painting) return;
