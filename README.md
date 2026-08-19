@@ -41,7 +41,7 @@ column the same instant on a different clock. White is possible, black is not,
 grey means only some of them. It runs with no backend at all (team in
 `localStorage`, shared by link); connecting Convex adds accounts, teams and
 invite links. See [`overlap/README.md`](overlap/README.md) for the setup and
-the data model. `/meet` redirects to it.
+the data model.
 
 The four `/wealth` pages share one design system in
 [`wealth/style.css`](wealth/style.css) — warm paper, hairline rules, a single
