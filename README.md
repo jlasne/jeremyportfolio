@@ -32,7 +32,8 @@ leaves untouched assets byte-for-byte alone, so the diff stays small.
 | `/economy` | *The Four Clocks* — the same argument as one classical essay |
 | `/mobileapp` | the revenue-machine playbook |
 | `/dayzero` | the "think bigger" article |
-| `/overlap` | **Overlap** — a team's timezones → the hour that works → Google Calendar |
+| `/overlap` | **Overlap** — landing page and live world clock |
+| `/overlap/team` · `/plan` · `/next` | the app: the team, the meeting, and what to build next |
 
 **Overlap** is the one page here that is a product rather than a piece of
 writing. Three steps — Team, Plan, Next — with the overlap drawn the

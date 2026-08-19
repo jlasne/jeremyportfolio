@@ -78,13 +78,26 @@ touching. There are no passwords and no third-party auth provider.
 
 | Path | What it is |
 | --- | --- |
-| `index.html` | the whole app — markup, styles, logic |
+| `index.html` | the landing page, with the live world clock |
+| `clock.js` | that clock — day/night tones, cities in the URL hash |
+| `team/`, `plan/`, `next/` | the three app pages; each is a shell that mounts the app |
+| `app.js` | the app: markup template, timezone maths, backend calls |
+| `app.css` | the design system both the app and the landing page use |
 | `config.js` | one line: your Convex URL |
 | `convex/schema.ts` | users, sessions, codes, teams, members, meetings, feedback |
 | `convex/auth.ts` | request a code, verify it, mint a session |
 | `convex/teams.ts` | `me`, create, join, add/update/remove member, book |
 | `convex/feedback.ts` | store what people ask for |
-| `convex/http.ts` | the single CORS endpoint the page talks to |
+| `convex/http.ts` | the single CORS endpoint the pages talk to |
+
+The three app pages are real addresses — a link to `/overlap/plan/` opens on
+Plan — but moving between them in the browser is a `pushState`, so nothing
+reloads and the team you are building survives the trip.
+
+Colour means two different things on purpose. On the **landing clock** it is
+the time of day: white is the working day (8am–5pm), black is night
+(10pm–5am), grey the edges. Inside the **app** it is availability: white is
+possible, black is not, grey means only some of the team.
 
 ## Still to build
 
