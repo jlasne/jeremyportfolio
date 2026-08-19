@@ -1192,6 +1192,10 @@ if(cameFromLink){
   save();
 }
 if(sel()!==null){ var _d=dayIndex(sel()); if(_d>=0) S.day=_d; }
+(function(){
+  var tabs=$("#seg").querySelectorAll("a[data-step]"), b=basePath(), i;
+  for(i=0;i<tabs.length;i++) tabs[i].setAttribute("href",b+"/"+PATHS[i]+"/");
+})();
 setStep(typeof OVERLAP_STEP==="number"?OVERLAP_STEP:stepFromPath(),true);
 if(cameFromLink && sel()) setStep(1);
 
