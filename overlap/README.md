@@ -76,19 +76,32 @@ touching. There are no passwords and no third-party auth provider.
 
 ## Files
 
+Every page here is **self-contained** — its CSS and JS live inside the HTML.
+Static hosts only have to serve one file correctly, and there is no window
+where new markup meets a cached old stylesheet. The sources stay single-copy;
+a small script assembles the pages.
+
+```bash
+python3 overlap/build.py     # after editing any source below
+```
+
 | Path | What it is |
 | --- | --- |
-| `index.html` | the landing page, with the live world clock |
-| `clock.js` | that clock — day/night tones, cities in the URL hash |
-| `team/`, `plan/`, `next/` | the three app pages; each is a shell that mounts the app |
-| `app.js` | the app: markup template, timezone maths, backend calls |
-| `app.css` | the design system both the app and the landing page use |
-| `config.js` | one line: your Convex URL |
+| `app.css` | **source** — the design system for the app and the landing page |
+| `app.js` | **source** — the app: markup template, timezone maths, backend calls |
+| `clock.js` | **source** — the landing page's live world clock |
+| `landing.src.html` | **source** — the landing page |
+| `config.js` | **source** — one line: your Convex URL |
+| `build.py` | inlines the four above into the pages below |
+| `index.html` | generated — the landing page |
+| `team/`, `plan/`, `next/` | generated — the three app pages |
 | `convex/schema.ts` | users, sessions, codes, teams, members, meetings, feedback |
 | `convex/auth.ts` | request a code, verify it, mint a session |
-| `convex/teams.ts` | `me`, create, join, add/update/remove member, book |
+| `convex/teams.ts` | `me`, create, join, rename, leave, add/update/remove member |
 | `convex/feedback.ts` | store what people ask for |
 | `convex/http.ts` | the single CORS endpoint the pages talk to |
+
+Do not edit a generated `index.html` by hand — the next build overwrites it.
 
 The three app pages are real addresses — a link to `/overlap/plan/` opens on
 Plan — but moving between them in the browser is a `pushState`, so nothing
