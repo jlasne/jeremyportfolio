@@ -46,6 +46,8 @@ const door = httpAction(async (ctx, request) => {
         return ok(await ctx.runQuery(api.teams.me, args));
       case "auth.requestCode":
         return ok(await ctx.runMutation(api.auth.requestCode, args));
+      case "auth.google":
+        return ok(await ctx.runAction(api.auth.google, args));
       case "auth.verify":
         return ok(await ctx.runMutation(api.auth.verify, args));
       case "auth.signOut":

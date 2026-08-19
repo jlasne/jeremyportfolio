@@ -1,3 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sign in — Overlap</title>
+<meta name="description" content="Sign in to Overlap.">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
 /* ─────────────────────────────────────────────────────────────
    Meet on time — iOS-light design system.
    One ink (black), one paper (white), one ground (#F2F2F7).
@@ -293,3 +309,187 @@ textarea{font-family:var(--font)}
   .app{padding:0 48px}
   main,.dock,.foot{max-width:820px}
 }
+
+.door{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px}
+.door-in{width:100%;max-width:360px;text-align:center}
+.door .mark{width:34px;height:34px;border-radius:11px;background:var(--ink);position:relative;
+  margin:0 auto 20px}
+.door .mark::after{content:"";position:absolute;left:11px;top:11px;width:18px;height:18px;
+  border-radius:6px;background:var(--paper)}
+.door h1{font-size:27px;line-height:1.15;letter-spacing:-.035em;font-weight:700;margin:0 0 8px}
+.door .lede{font-size:15px;line-height:1.5;color:var(--ink-2);margin:0 0 28px;letter-spacing:-.01em}
+#gbtn{display:flex;justify-content:center;min-height:44px}
+.or{display:flex;align-items:center;gap:12px;margin:22px 0;color:var(--ink-3);font-size:12px;
+  font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--sep)}
+.door .card{text-align:left;margin-bottom:12px}
+.door input{font-size:16px;letter-spacing:-.02em}
+.door input:disabled{color:var(--ink-2)}
+.note{font-size:13px;line-height:1.5;color:var(--ink-2);margin:16px 0 0;letter-spacing:-.005em;
+  min-height:20px}
+.note.bad{color:var(--ink)}
+.door .foot{margin-top:30px;font-size:13px;color:var(--ink-3)}
+.door .foot a{color:var(--ink-2);text-decoration:none;border-bottom:1px solid var(--ink-3)}
+</style>
+</head>
+<body>
+<div class="door"><div class="door-in">
+  <div class="mark"></div>
+  <h1>Sign in to Overlap</h1>
+  <p class="lede">Your teams and your hours, on every device you use.</p>
+  <div id="ways">
+    <div id="gwrap"><div id="gbtn"></div></div>
+    <div class="or" id="or">or</div>
+    <form id="loginForm">
+      <div class="card">
+        <div class="field"><label>Email</label>
+          <input id="email" type="email" placeholder="you@company.com"
+            autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="email"></div>
+        <div class="field" id="codewrap" style="display:none"><label>Code</label>
+          <input id="code" inputmode="numeric" maxlength="6" placeholder="6 digits"
+            autocomplete="one-time-code"></div>
+      </div>
+      <button class="btn" id="go" type="submit">Continue</button>
+    </form>
+  </div>
+  <p class="note" id="note"></p>
+  <p class="foot"><a href="/overlap/">Back to Overlap</a></p>
+</div></div>
+<script>
+/* Connect the backend by pasting your Convex HTTP Actions URL here.
+   It is the .convex.site host (not .convex.cloud) — `npx convex dev` prints it.
+
+     window.OVERLAP_CONVEX_URL = "https://tidy-otter-123.convex.site";
+
+   Left empty, Overlap runs entirely in the browser: no accounts, no shared
+   teams, and feedback is queued locally until a backend appears. */
+window.OVERLAP_CONVEX_URL = "https://amicable-chickadee-753.eu-west-1.convex.site";
+
+/* Sign in with Google. Create an OAuth client at
+   https://console.cloud.google.com/apis/credentials → Create credentials →
+   OAuth client ID → Web application, add your site to Authorized JavaScript
+   origins (https://jeremylasne.com and http://localhost:8000 for local work),
+   then paste the client ID below AND set OVERLAP_GOOGLE_CLIENT_ID to the same
+   value in the Convex dashboard.
+
+   Left empty, the login page falls back to a six-digit code by email. */
+window.OVERLAP_GOOGLE_CLIENT_ID = "";
+
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   Overlap — the door.
+
+   Google if a client ID is configured, a six-digit code by email
+   otherwise. Either way it ends with a session token in local
+   storage and a redirect to wherever you were headed.
+   ═══════════════════════════════════════════════════════════ */
+(function(){
+"use strict";
+
+var CONVEX=(window.OVERLAP_CONVEX_URL||"").replace(/\/+$/,"");
+var LIVE=/^https?:\/\//.test(CONVEX);
+var GID=window.OVERLAP_GOOGLE_CLIENT_ID||"";
+var TOKKEY="overlap.token";
+
+function $(s){ return document.querySelector(s); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function base(){ return location.pathname.replace(/\/login\/?$/,"").replace(/\/$/,""); }
+function nextUrl(){
+  var m=location.search.match(/[?&]next=([^&]+)/);
+  var n=m?decodeURIComponent(m[1]):"";
+  return (/^\/[^/]/.test(n)?n:base()+"/team/");
+}
+function cx(op,args){
+  var ctl=window.AbortController?new AbortController():null;
+  var timer=setTimeout(function(){ if(ctl) ctl.abort(); },15000);
+  return fetch(CONVEX+"/overlap",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({op:op,args:args||{}}),
+    signal:ctl?ctl.signal:undefined
+  }).then(function(r){ return r.json(); }).then(function(j){
+    clearTimeout(timer);
+    if(j&&j.ok) return j.value;
+    throw new Error((j&&j.error)||"Something went wrong");
+  },function(e){
+    clearTimeout(timer);
+    throw new Error(e&&e.name==="AbortError"?"The server did not answer":"Can’t reach the server");
+  });
+}
+function say(msg,bad){
+  var n=$("#note");
+  n.textContent=msg||"";
+  n.className="note"+(bad?" bad":"");
+}
+function land(r){
+  try{ localStorage.setItem(TOKKEY,r.token); }catch(e){}
+  location.replace(nextUrl());
+}
+
+/* ── already signed in? straight through ── */
+try{ if(LIVE && localStorage.getItem(TOKKEY)) location.replace(nextUrl()); }catch(e){}
+
+if(!LIVE){
+  $("#ways").innerHTML='<p class="note bad">No backend is connected yet, so there is '+
+    'nothing to sign in to. Overlap still works without an account.</p>'+
+    '<a class="btn" href="'+esc(base())+'/team/">Use it without an account</a>';
+} else {
+  /* ── Google ── */
+  if(GID){
+    var sc=document.createElement("script");
+    sc.src="https://accounts.google.com/gsi/client";
+    sc.async=true; sc.defer=true;
+    sc.onload=function(){
+      try{
+        google.accounts.id.initialize({
+          client_id:GID,
+          callback:function(resp){
+            say("Signing you in…");
+            cx("auth.google",{credential:resp.credential}).then(land)
+              .catch(function(e){ say(e.message,true); });
+          }
+        });
+        google.accounts.id.renderButton($("#gbtn"),
+          {theme:"outline",size:"large",shape:"pill",text:"continue_with",width:320});
+      }catch(e){ say("Google sign-in could not start",true); }
+    };
+    sc.onerror=function(){ say("Google sign-in could not load",true); };
+    document.head.appendChild(sc);
+  } else {
+    $("#gwrap").style.display="none";
+    $("#or").style.display="none";
+  }
+
+  /* ── email code ── */
+  var stage=0, mail="";
+  function step(){
+    var btn=$("#go");
+    if(stage===0){
+      mail=$("#email").value.trim();
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)) return say("That email looks off",true);
+      btn.disabled=true; btn.textContent="…";
+      cx("auth.requestCode",{email:mail}).then(function(r){
+        stage=1; btn.disabled=false; btn.textContent="Sign in";
+        $("#codewrap").style.display="";
+        $("#email").disabled=true;
+        say(r&&r.devCode?("Dev mode — your code is "+r.devCode)
+                        :("A six-digit code is on its way to "+mail+"."));
+        $("#code").focus();
+      }).catch(function(e){ btn.disabled=false; btn.textContent="Continue"; say(e.message,true); });
+      return;
+    }
+    var code=$("#code").value.trim();
+    if(code.length<6) return say("Six digits",true);
+    btn.disabled=true; btn.textContent="…";
+    cx("auth.verify",{email:mail,code:code}).then(land)
+      .catch(function(e){ btn.disabled=false; btn.textContent="Sign in"; say(e.message,true); });
+  }
+  $("#go").addEventListener("click",step);
+  $("#loginForm").addEventListener("submit",function(ev){ ev.preventDefault(); step(); });
+}
+})();
+
+</script>
+</body>
+</html>

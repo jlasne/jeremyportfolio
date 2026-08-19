@@ -3,13 +3,19 @@
 Find the hour that works for a team spread across timezones, then hand it to
 Google Calendar. Three steps, no dashboard:
 
+The three app pages sit behind a sign-in at `/overlap/login`. Without a
+backend connected there is nothing to sign in to, so the app runs locally and
+lets you straight through.
+
 1. **Team** — who's in it, their hours in their own timezone, and the overlap
    drawn the WorldTimeBuddy way: one row per person, hours running left to
    right, every column the same instant on a different clock. White is
    possible, black is not, grey means only some of them.
 2. **Plan** — name, length, days; ranked hours, each showing the time in every
    timezone at once; then Google Calendar, `.ics`, or a copyable list.
-3. **Next** — what would you like to see. That answer decides what gets built.
+3. **Next** — the last look. What is about to be created, in every timezone,
+   and a box for what you wish it did. The box is optional; passing through
+   this screen is not, because **the event is created here**.
 
 The page is one hand-written `index.html`: no framework, no build step. It runs
 completely without a backend — the team lives in `localStorage` and travels in
@@ -64,7 +70,27 @@ Set these in the Convex dashboard (Settings → Environment Variables):
 | `RESEND_API_KEY` | Sends the six-digit sign-in code. Without it the code is only written to the Convex logs. |
 | `OVERLAP_FROM_EMAIL` | Sender for those emails, e.g. `Overlap <hi@yourdomain.com>`. Defaults to Resend's onboarding sender. |
 | `OVERLAP_ALLOW_ORIGIN` | Locks the endpoint to one origin, e.g. `https://jeremylasne.com`. Defaults to `*`. **Set this before launch.** |
+| `OVERLAP_GOOGLE_CLIENT_ID` | Your Google OAuth client ID. Must match the one in `config.js` exactly, or every Google sign-in is refused. |
 | `OVERLAP_DEV_CODES` | `1` returns the sign-in code in the API response so you can log in before wiring email. **Never set this once real people can reach the deployment — it hands anyone a login for any address.** |
+
+## Sign in with Google
+
+1. [Google Cloud console → Credentials](https://console.cloud.google.com/apis/credentials)
+   → **Create credentials** → **OAuth client ID** → **Web application**.
+2. Under *Authorized JavaScript origins* add every origin the page is served
+   from — `https://jeremylasne.com` and, for local work, `http://localhost:8000`.
+   No redirect URIs are needed; this is the Google Identity Services flow,
+   which hands the page an ID token in the browser.
+3. Paste the client ID into `config.js` **and** set `OVERLAP_GOOGLE_CLIENT_ID`
+   to the same value on the Convex deployment. Then `python3 overlap/build.py`.
+
+Leave the client ID empty and the login page quietly falls back to the
+six-digit email code — nothing breaks, the Google button simply is not drawn.
+
+The page never sees a secret. It receives an ID token, posts it to Convex, and
+Convex asks Google whether the token is real and **who it was minted for**: a
+token issued for a different app is refused, which is the check that makes
+this flow safe.
 
 ## How auth works
 

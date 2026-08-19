@@ -24,6 +24,7 @@ def write(n, s):
 CSS   = read("app.css")
 APP   = read("app.js")
 CLOCK = read("clock.js")
+LOGIN = read("login.js")
 
 HEAD = '''<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover%(scale)s">
@@ -71,6 +72,73 @@ def build_app_pages():
         write("%s/index.html" % slug, APP_PAGE % {
             "head": head, "css": CSS, "app": APP, "config": config, "step": step})
 
+LOGIN_PAGE = '''<!DOCTYPE html>
+<html lang="en">
+<head>
+%(head)s
+<style>
+%(css)s
+.door{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px}
+.door-in{width:100%%;max-width:360px;text-align:center}
+.door .mark{width:34px;height:34px;border-radius:11px;background:var(--ink);position:relative;
+  margin:0 auto 20px}
+.door .mark::after{content:"";position:absolute;left:11px;top:11px;width:18px;height:18px;
+  border-radius:6px;background:var(--paper)}
+.door h1{font-size:27px;line-height:1.15;letter-spacing:-.035em;font-weight:700;margin:0 0 8px}
+.door .lede{font-size:15px;line-height:1.5;color:var(--ink-2);margin:0 0 28px;letter-spacing:-.01em}
+#gbtn{display:flex;justify-content:center;min-height:44px}
+.or{display:flex;align-items:center;gap:12px;margin:22px 0;color:var(--ink-3);font-size:12px;
+  font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--sep)}
+.door .card{text-align:left;margin-bottom:12px}
+.door input{font-size:16px;letter-spacing:-.02em}
+.door input:disabled{color:var(--ink-2)}
+.note{font-size:13px;line-height:1.5;color:var(--ink-2);margin:16px 0 0;letter-spacing:-.005em;
+  min-height:20px}
+.note.bad{color:var(--ink)}
+.door .foot{margin-top:30px;font-size:13px;color:var(--ink-3)}
+.door .foot a{color:var(--ink-2);text-decoration:none;border-bottom:1px solid var(--ink-3)}
+</style>
+</head>
+<body>
+<div class="door"><div class="door-in">
+  <div class="mark"></div>
+  <h1>Sign in to Overlap</h1>
+  <p class="lede">Your teams and your hours, on every device you use.</p>
+  <div id="ways">
+    <div id="gwrap"><div id="gbtn"></div></div>
+    <div class="or" id="or">or</div>
+    <form id="loginForm">
+      <div class="card">
+        <div class="field"><label>Email</label>
+          <input id="email" type="email" placeholder="you@company.com"
+            autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="email"></div>
+        <div class="field" id="codewrap" style="display:none"><label>Code</label>
+          <input id="code" inputmode="numeric" maxlength="6" placeholder="6 digits"
+            autocomplete="one-time-code"></div>
+      </div>
+      <button class="btn" id="go" type="submit">Continue</button>
+    </form>
+  </div>
+  <p class="note" id="note"></p>
+  <p class="foot"><a href="/overlap/">Back to Overlap</a></p>
+</div></div>
+<script>
+%(config)s
+</script>
+<script>
+%(login)s
+</script>
+</body>
+</html>
+'''
+
+def build_login():
+    head = HEAD % {"title": "Sign in — Overlap", "theme": "#FFFFFF",
+                   "desc": "Sign in to Overlap.", "scale": ""}
+    write("login/index.html", LOGIN_PAGE % {
+        "head": head, "css": CSS, "login": LOGIN, "config": read("config.js")})
+
 def build_landing():
     src = read("landing.src.html")
     # the shared stylesheet becomes a style block, in place
@@ -85,5 +153,6 @@ def build_landing():
 
 print("overlap: building self-contained pages")
 build_app_pages()
+build_login()
 build_landing()
 print("done")
