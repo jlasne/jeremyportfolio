@@ -186,7 +186,7 @@ h2{font-size:clamp(30px,4vw,44px);line-height:1.08;letter-spacing:-.038em;font-w
   border-radius:13px;background:var(--ink);color:#fff;font-size:15px;font-weight:600;letter-spacing:-.02em}
 
 /* ── steps ── */
-.steps{display:grid;gap:16px;grid-template-columns:1fr;margin-top:40px}
+.steps{display:grid;gap:16px;grid-template-columns:1fr;margin-top:32px}
 @media (min-width:820px){ .steps{grid-template-columns:repeat(3,1fr)} }
 .stepcard{border-radius:16px;padding:26px 24px 26px;box-shadow:inset 0 0 0 1px rgba(60,60,67,.12)}
 .stepcard .num{width:26px;height:26px;border-radius:8px;background:var(--ink);color:#fff;
@@ -221,11 +221,6 @@ footer{padding:56px 0 64px;box-shadow:0 -1px 0 var(--sep);margin-top:96px}
 <header class="top" id="top">
   <div class="wrap">
     <a class="brand" href="/overlap/"><span class="mark"></span>Overlap</a>
-    <nav>
-      <a href="#clock">World clock</a>
-      <a href="#how">How it works</a>
-      <a href="#why">Why Overlap</a>
-    </nav>
     <span class="sp"></span>
     <a class="btn2" href="team/">Open Overlap</a>
   </div>
@@ -233,22 +228,19 @@ footer{padding:56px 0 64px;box-shadow:0 -1px 0 var(--sep);margin-top:96px}
 
 <div class="wrap">
   <div class="hero">
-    <span class="eyebrow-pill"><b>Free</b> · no account needed to try it</span>
     <h1>The hour that works for <span class="hl">everyone</span>.</h1>
-    <p class="lede">Your team is spread across five timezones. Overlap draws the whole day at
-      once, finds the hours nobody has to wake up for, and hands the winner to your calendar.</p>
+    <p class="lede">Your team is spread across five timezones.
+      Seamlessly integrated to your Google Calendar.</p>
     <div class="herobtns">
       <a class="btn2 lg" href="team/">Open Overlap</a>
-      <a class="btn2 lg line" href="#how">See how it works</a>
     </div>
-    <p class="micro">Works in the browser. Nothing to install.</p>
   </div>
 
   <!-- ══════════ live world clock, framed ══════════ -->
   <div class="frame" id="clock">
     <div class="frame-bar">
       <span class="dots"><i></i><i></i><i></i></span>
-      <span class="frame-url">overlap — world clock</span>
+      <span class="frame-url" id="liveNow">—</span>
     </div>
     <div class="clock-bar">
       <span class="ttl">Right now</span>
@@ -273,12 +265,6 @@ footer{padding:56px 0 64px;box-shadow:0 -1px 0 var(--sep);margin-top:96px}
   </div>
   <p class="micro" style="text-align:center">Live. Add your cities and copy the link — the view travels with it.</p>
 
-  <div class="proof">
-    <div><b>Nobody signs up to be scheduled</b><span>Add a colleague by city. They never need an account for the overlap to be right.</span></div>
-    <div><b>Every clock at once</b><span>One row per person. A column is one instant, read on four different clocks.</span></div>
-    <div><b>Ends in a calendar</b><span>One tap opens Google Calendar with the event already filled in.</span></div>
-  </div>
-</div>
 
 <div class="wrap">
   <!-- ══════════ why ══════════ -->
@@ -345,29 +331,24 @@ footer{padding:56px 0 64px;box-shadow:0 -1px 0 var(--sep);margin-top:96px}
   <!-- ══════════ how ══════════ -->
   <section id="how" style="padding-top:0">
     <div class="eyebrow">How it works</div>
-    <h2>Three screens. That's the whole product.</h2>
-    <p class="sub">No dashboard to learn and no availability rules to configure before you get
-      an answer.</p>
+    <h2>Three screens.</h2>
     <div class="steps">
       <div class="stepcard">
         <div class="num">1</div>
         <h3>Team</h3>
-        <p>Add everyone once — their city, their working hours. The overlap redraws itself:
-          white where they can meet, black where they can't, grey where only some can.</p>
+        <p>Add everyone once. Their city, their hours.</p>
         <a href="team/">Build a team →</a>
       </div>
       <div class="stepcard">
         <div class="num">2</div>
         <h3>Plan</h3>
-        <p>Name it, size it, take an hour. Every option shows the time in every timezone at once,
-          so you see the 11pm before you send it, not after.</p>
+        <p>Take the hour that works. It shows every timezone at once.</p>
         <a href="plan/">Plan a meeting →</a>
       </div>
       <div class="stepcard">
         <div class="num">3</div>
         <h3>Next</h3>
-        <p>Tell us what's missing. Client booking, an AI agent that schedules for you, calendar
-          sync — what gets asked for most is what gets built.</p>
+        <p>Tell us what to build. Most-asked wins.</p>
         <a href="next/">Ask for something →</a>
       </div>
     </div>

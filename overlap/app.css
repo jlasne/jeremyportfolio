@@ -155,6 +155,11 @@ main.nohero .hero{display:none}
 .pill{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
   padding:3px 7px;border-radius:5px;background:var(--fill);color:var(--ink-2);flex:none}
 .pill.live{background:var(--ink);color:#fff}
+button.tteam{text-align:left;background:none;padding:0;min-width:0}
+button.tteam .t{display:flex;align-items:center;gap:6px}
+.caret{width:6px;height:6px;border-right:1.8px solid var(--ink-3);border-bottom:1.8px solid var(--ink-3);
+  transform:rotate(45deg) translate(-1px,-1px);flex:none}
+.row .mark{font-weight:700;font-size:15px}
 .acct .act{font-size:15px;font-weight:600;letter-spacing:-.01em;flex:none;padding:8px 14px;
   border-radius:10px;background:var(--fill)}
 .acct .act:active{background:var(--fill-2)}

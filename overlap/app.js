@@ -3,7 +3,7 @@
    team/, plan/ and next/ are real pages so a link lands where it says,
    but moving between them is a pushState, not a reload.
    ═══════════════════════════════════════════════════════════════════ */
-document.getElementById("root").innerHTML = "<div class=\"app\">\n\n  <header class=\"nav\" id=\"nav\">\n    <div class=\"nav-bar\">\n      <span class=\"nav-title\">Overlap</span>\n      <span class=\"nav-sub\">The hour that works for the whole team.</span>\n      <button class=\"nav-act\" id=\"resetBtn\">Reset</button>\n    </div>\n    <div class=\"seg-wrap\">\n      <div class=\"seg\" id=\"seg\">\n        <div class=\"thumb\" id=\"segThumb\"></div>\n        <a href=\"../team/\" data-step=\"0\">Team</a>\n        <a href=\"../plan/\" data-step=\"1\">Plan</a>\n        <a href=\"../next/\" data-step=\"2\">Next</a>\n      </div>\n    </div>\n  </header>\n\n  <main>\n    <div class=\"hero\">\n      <h1 class=\"large-title\" id=\"bigTitle\">Your team</h1>\n      <p class=\"large-sub\" id=\"bigSub\">Everyone's hours, in their own timezone.</p>\n    </div>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 STEP 1 \u2014 TEAM \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"step on\" id=\"step0\">\n      <div class=\"sec\">\n        <div class=\"card\" id=\"acctCard\"></div>\n      </div>\n\n      <div class=\"sec\">\n        <div class=\"sechead\"><span id=\"teamHead\">People</span><b id=\"peopleCount\"></b></div>\n        <div class=\"card\" id=\"peopleList\"></div>\n        <div class=\"secfoot\">Working hours are what the overlap is built from.</div>\n      </div>\n\n      <div class=\"sec\" id=\"overlapSec\">\n        <div class=\"sechead\"><span>Overlap</span><button class=\"linkbtn\" id=\"editToggle\">Edit hours</button></div>\n        <div class=\"daytabs\" id=\"dayTabs\"></div>\n        <div class=\"wtb\">\n          <div class=\"wtblabs\" id=\"wtbLabs\"></div>\n          <div class=\"wtbscroll\" id=\"wtbScroll\"><div class=\"wtbgrid\" id=\"wtb\"></div></div>\n        </div>\n        <div class=\"legend\">\n          <i class=\"lg free\"></i><span>possible</span>\n          <i class=\"lg part\"></i><span>not everyone</span>\n          <i class=\"lg busy\"></i><span>no</span>\n          <span class=\"sp\"></span><span id=\"gridTz\"></span>\n        </div>\n        <div class=\"secfoot\" id=\"editFoot\"></div>\n      </div>\n    </section>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 STEP 2 \u2014 PLAN \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"step\" id=\"step1\">\n      <div class=\"sec\">\n        <div class=\"sechead\"><span>The meeting</span></div>\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Name</div></div>\n            <input id=\"titleInput\" style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\" placeholder=\"Intro call\" maxlength=\"80\">\n          </div>\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Length</div></div>\n            <div class=\"chips\" id=\"durChips\" style=\"padding:0;justify-content:flex-end\"></div>\n          </div>\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Days</div><div class=\"s\" id=\"windowSub\"></div></div>\n            <div class=\"stepper\">\n              <button id=\"winPrev\" aria-label=\"Earlier week\">\u2039</button><span></span><button id=\"winNext\" aria-label=\"Later week\">\u203a</button>\n            </div>\n          </div>\n        </div>\n      </div>\n      <div class=\"sec\">\n        <div class=\"sechead\"><span>Best times</span><b id=\"bestNote\"></b></div>\n        <div class=\"card\" id=\"bestList\"></div>\n        <div class=\"secfoot\" id=\"bestFoot\"></div>\n      </div>\n      <div class=\"sec\" id=\"actionsSec\">\n        <div class=\"btnrow\">\n          <button class=\"btn sec\" id=\"copyBtn\">Copy times</button>\n          <button class=\"btn sec\" id=\"icsBtn\">Apple Calendar</button>\n        </div>\n        <button class=\"btn ghost\" id=\"shareBtn\" style=\"margin-top:6px\">Copy a link to this plan</button>\n      </div>\n    </section>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 STEP 3 \u2014 FEEDBACK \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"step\" id=\"step2\">\n      <div class=\"sec\" id=\"fbForm\">\n        <div class=\"sechead\"><span>What would you like to see?</span></div>\n        <div class=\"chips\" id=\"wantChips\"></div>\n        <div class=\"card\" style=\"margin-top:12px\">\n          <textarea id=\"fbText\" rows=\"4\" maxlength=\"800\" placeholder=\"Anything at all \u2014 what got in your way, what\u2019s missing, what you\u2019d pay for.\"></textarea>\n        </div>\n        <div class=\"card\" style=\"margin-top:12px\" id=\"fbEmailCard\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Email</div><div class=\"s\">If you want a reply.</div></div>\n            <input id=\"fbEmail\" type=\"email\" placeholder=\"Optional\" maxlength=\"80\" autocapitalize=\"off\" autocorrect=\"off\"\n                   style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\">\n          </div>\n        </div>\n        <div class=\"secfoot\" id=\"fbFoot\"></div>\n      </div>\n      <div class=\"sec\" id=\"fbThanks\" style=\"display:none\">\n        <div class=\"card\"><div class=\"empty\"><b>Thank you \u2014 noted.</b>Every line of this gets read. It decides what gets built next.</div></div>\n        <button class=\"btn sec\" id=\"fbAgain\" style=\"margin-top:14px\">Say something else</button>\n      </div>\n    </section>\n\n  </main>\n\n  <div class=\"dock\">\n    <div class=\"dock-hint\" id=\"dockHint\"></div>\n    <button class=\"btn\" id=\"primary\">Continue</button>\n  </div>\n\n  <p class=\"foot\" id=\"foot\"></p>\n</div>\n\n<div class=\"scrim\" id=\"scrim\"></div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u2014 add / edit a person \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"sheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"sheetCancel\">Cancel</button>\n    <span class=\"t\" id=\"sheetTitle\">Add person</span>\n    <button class=\"p\" id=\"sheetDone\">Done</button>\n  </div>\n  <div class=\"sheet-body\">\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>Name</label><input id=\"fName\" placeholder=\"Optional\" maxlength=\"40\"></div>\n        <div class=\"field\"><label>Email</label><input id=\"fEmail\" type=\"email\" placeholder=\"Optional \u2014 invites them\" maxlength=\"80\" autocapitalize=\"off\" autocorrect=\"off\"></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Working hours</span></div>\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"s-\">\u2212</button><span></span><button data-h=\"s+\">+</button></div><div class=\"v\" id=\"fStart\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>To</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"e-\">\u2212</button><span></span><button data-h=\"e+\">+</button></div><div class=\"v\" id=\"fEnd\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label style=\"width:auto;flex:1\">Weekends too</label><div class=\"switch\" id=\"fWeekend\"><i></i></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Timezone</span></div>\n    <div class=\"search\">\n      <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\"><circle cx=\"7\" cy=\"7\" r=\"5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M11 11l3.5 3.5\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n      <input id=\"citySearch\" placeholder=\"City or timezone\" autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\">\n    </div>\n    <div style=\"padding:0 16px\"><div class=\"card\" id=\"cityList\"></div></div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u2014 sign in \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"authSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"authCancel\">Cancel</button>\n    <span class=\"t\" id=\"authTitle\">Sign in</span>\n    <button class=\"p\" id=\"authGo\">Next</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\" id=\"authLede\">One email, one code. No password to forget.</p>\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>Email</label><input id=\"authEmail\" type=\"email\" placeholder=\"you@company.com\"\n          autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\"></div>\n        <div class=\"field\" id=\"authCodeField\" style=\"display:none\"><label>Code</label>\n          <input id=\"authCode\" inputmode=\"numeric\" maxlength=\"6\" placeholder=\"6 digits\"></div>\n      </div>\n    </div>\n    <p class=\"sheet-lede\" id=\"authNote\"></p>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u2014 invite \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"inviteSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"inviteClose\">Done</button>\n    <span class=\"t\">Invite</span>\n    <button class=\"p\" id=\"inviteCopy\">Copy</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">Send this link. They pick their city and hours, and the overlap redraws itself.</p>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\"><div class=\"linkbox\" id=\"inviteLink\"></div></div></div>\n    <div style=\"padding:0 16px\"><button class=\"btn\" id=\"inviteCopyBig\">Copy invite link</button></div>\n  </div>\n</div>\n\n<div class=\"toast\" id=\"toast\"></div>";
+document.getElementById("root").innerHTML = "<div class=\"app\">\n\n  <header class=\"nav\" id=\"nav\">\n    <div class=\"nav-bar\">\n      <span class=\"nav-title\">Overlap</span>\n      <span class=\"nav-sub\">The hour that works for the whole team.</span>\n      <button class=\"nav-act\" id=\"resetBtn\">Reset</button>\n    </div>\n    <div class=\"seg-wrap\">\n      <div class=\"seg\" id=\"seg\">\n        <div class=\"thumb\" id=\"segThumb\"></div>\n        <a href=\"../team/\" data-step=\"0\">Team</a>\n        <a href=\"../plan/\" data-step=\"1\">Plan</a>\n        <a href=\"../next/\" data-step=\"2\">Next</a>\n      </div>\n    </div>\n  </header>\n\n  <main>\n    <div class=\"hero\">\n      <h1 class=\"large-title\" id=\"bigTitle\">Your team</h1>\n      <p class=\"large-sub\" id=\"bigSub\">Everyone's hours, in their own timezone.</p>\n    </div>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 STEP 1 \u2014 TEAM \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"step on\" id=\"step0\">\n      <div class=\"sec\">\n        <div class=\"card\" id=\"acctCard\"></div>\n      </div>\n\n      <div class=\"sec\">\n        <div class=\"sechead\"><span id=\"teamHead\">People</span><b id=\"peopleCount\"></b></div>\n        <div class=\"card\" id=\"peopleList\"></div>\n        <div class=\"secfoot\">Working hours are what the overlap is built from.</div>\n      </div>\n\n      <div class=\"sec\" id=\"overlapSec\">\n        <div class=\"sechead\"><span>Overlap</span><button class=\"linkbtn\" id=\"editToggle\">Edit hours</button></div>\n        <div class=\"daytabs\" id=\"dayTabs\"></div>\n        <div class=\"wtb\">\n          <div class=\"wtblabs\" id=\"wtbLabs\"></div>\n          <div class=\"wtbscroll\" id=\"wtbScroll\"><div class=\"wtbgrid\" id=\"wtb\"></div></div>\n        </div>\n        <div class=\"legend\">\n          <i class=\"lg free\"></i><span>possible</span>\n          <i class=\"lg part\"></i><span>not everyone</span>\n          <i class=\"lg busy\"></i><span>no</span>\n          <span class=\"sp\"></span><span id=\"gridTz\"></span>\n        </div>\n        <div class=\"secfoot\" id=\"editFoot\"></div>\n      </div>\n    </section>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 STEP 2 \u2014 PLAN \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"step\" id=\"step1\">\n      <div class=\"sec\">\n        <div class=\"sechead\"><span>The meeting</span></div>\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Name</div></div>\n            <input id=\"titleInput\" style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\" placeholder=\"Intro call\" maxlength=\"80\">\n          </div>\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Length</div></div>\n            <div class=\"chips\" id=\"durChips\" style=\"padding:0;justify-content:flex-end\"></div>\n          </div>\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Days</div><div class=\"s\" id=\"windowSub\"></div></div>\n            <div class=\"stepper\">\n              <button id=\"winPrev\" aria-label=\"Earlier week\">\u2039</button><span></span><button id=\"winNext\" aria-label=\"Later week\">\u203a</button>\n            </div>\n          </div>\n        </div>\n      </div>\n      <div class=\"sec\">\n        <div class=\"sechead\"><span>Best times</span><b id=\"bestNote\"></b></div>\n        <div class=\"card\" id=\"bestList\"></div>\n        <div class=\"secfoot\" id=\"bestFoot\"></div>\n      </div>\n      <div class=\"sec\" id=\"actionsSec\">\n        <div class=\"btnrow\">\n          <button class=\"btn sec\" id=\"copyBtn\">Copy times</button>\n          <button class=\"btn sec\" id=\"icsBtn\">Apple Calendar</button>\n        </div>\n        <button class=\"btn ghost\" id=\"shareBtn\" style=\"margin-top:6px\">Copy a link to this plan</button>\n      </div>\n    </section>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 STEP 3 \u2014 FEEDBACK \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"step\" id=\"step2\">\n      <div class=\"sec\" id=\"fbForm\">\n        <div class=\"sechead\"><span>What would you like to see?</span></div>\n        <div class=\"chips\" id=\"wantChips\"></div>\n        <div class=\"card\" style=\"margin-top:12px\">\n          <textarea id=\"fbText\" rows=\"4\" maxlength=\"800\" placeholder=\"Anything at all \u2014 what got in your way, what\u2019s missing, what you\u2019d pay for.\"></textarea>\n        </div>\n        <div class=\"card\" style=\"margin-top:12px\" id=\"fbEmailCard\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Email</div><div class=\"s\">If you want a reply.</div></div>\n            <input id=\"fbEmail\" type=\"email\" placeholder=\"Optional\" maxlength=\"80\" autocapitalize=\"off\" autocorrect=\"off\"\n                   style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\">\n          </div>\n        </div>\n        <div class=\"secfoot\" id=\"fbFoot\"></div>\n      </div>\n      <div class=\"sec\" id=\"fbThanks\" style=\"display:none\">\n        <div class=\"card\"><div class=\"empty\"><b>Thank you \u2014 noted.</b>Every line of this gets read. It decides what gets built next.</div></div>\n        <button class=\"btn sec\" id=\"fbAgain\" style=\"margin-top:14px\">Say something else</button>\n      </div>\n    </section>\n\n  </main>\n\n  <div class=\"dock\">\n    <div class=\"dock-hint\" id=\"dockHint\"></div>\n    <button class=\"btn\" id=\"primary\">Continue</button>\n  </div>\n\n  <p class=\"foot\" id=\"foot\"></p>\n</div>\n\n<div class=\"scrim\" id=\"scrim\"></div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u2014 add / edit a person \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"sheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"sheetCancel\">Cancel</button>\n    <span class=\"t\" id=\"sheetTitle\">Add person</span>\n    <button class=\"p\" id=\"sheetDone\">Done</button>\n  </div>\n  <div class=\"sheet-body\">\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>Name</label><input id=\"fName\" placeholder=\"Optional\" maxlength=\"40\"></div>\n        <div class=\"field\"><label>Email</label><input id=\"fEmail\" type=\"email\" placeholder=\"Optional \u2014 invites them\" maxlength=\"80\" autocapitalize=\"off\" autocorrect=\"off\"></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Working hours</span></div>\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"s-\">\u2212</button><span></span><button data-h=\"s+\">+</button></div><div class=\"v\" id=\"fStart\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>To</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"e-\">\u2212</button><span></span><button data-h=\"e+\">+</button></div><div class=\"v\" id=\"fEnd\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label style=\"width:auto;flex:1\">Weekends too</label><div class=\"switch\" id=\"fWeekend\"><i></i></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Timezone</span></div>\n    <div class=\"search\">\n      <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\"><circle cx=\"7\" cy=\"7\" r=\"5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M11 11l3.5 3.5\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n      <input id=\"citySearch\" placeholder=\"City or timezone\" autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\">\n    </div>\n    <div style=\"padding:0 16px\"><div class=\"card\" id=\"cityList\"></div></div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u2014 sign in \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"authSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"authCancel\">Cancel</button>\n    <span class=\"t\" id=\"authTitle\">Sign in</span>\n    <button class=\"p\" id=\"authGo\">Next</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\" id=\"authLede\">One email, one code. No password to forget.</p>\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>Email</label><input id=\"authEmail\" type=\"email\" placeholder=\"you@company.com\"\n          autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\"></div>\n        <div class=\"field\" id=\"authCodeField\" style=\"display:none\"><label>Code</label>\n          <input id=\"authCode\" inputmode=\"numeric\" maxlength=\"6\" placeholder=\"6 digits\"></div>\n      </div>\n    </div>\n    <p class=\"sheet-lede\" id=\"authNote\"></p>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u2014 invite \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"teamSheet\"><div class=\"grab\"></div><div class=\"sheet-nav\"><button id=\"teamClose\">Done</button><span class=\"t\">Teams</span><span style=\"width:44px\"></span></div><div class=\"sheet-body\"><p class=\"sheet-lede\">Keep a team per client, per project, per anything. They all stay put, and you can switch at any time.</p><div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"teamList\"></div></div><div style=\"padding:0 16px\" class=\"btnrow\" id=\"teamActs\"></div></div></div><div class=\"sheet\" id=\"inviteSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"inviteClose\">Done</button>\n    <span class=\"t\">Invite</span>\n    <button class=\"p\" id=\"inviteCopy\">Copy</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">Send this link. They pick their city and hours, and the overlap redraws itself.</p>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\"><div class=\"linkbox\" id=\"inviteLink\"></div></div></div>\n    <div style=\"padding:0 16px\"><button class=\"btn\" id=\"inviteCopyBig\">Copy invite link</button></div>\n  </div>\n</div>\n\n<div class=\"toast\" id=\"toast\"></div>";
 
 (function(){
 "use strict";
@@ -130,7 +130,7 @@ function tzCity(tz){
 
 /* ═══════════════ state ═══════════════ */
 var LOCAL_TZ=(function(){ try{ return Intl.DateTimeFormat().resolvedOptions().timeZone||"UTC"; }catch(e){ return "UTC"; } })();
-var KEY="meetontime.v2";
+var KEY="overlap.v3", OLDKEY="meetontime.v2";
 var uid=0;
 function newPerson(name,tz,you){
   return {id:"p"+(++uid)+"_"+Math.floor(Math.random()*1e6),name:name,tz:tz,email:"",
@@ -140,13 +140,101 @@ function todayStart(tz){ var p=zp(Date.now(),tz); return wall(p.y,p.m,p.d,0,0,tz
 
 var S={
   people:[], title:"", dur:30, offsetDays:0, dispId:null,
-  pick:null, day:0, step:0, wants:[]
+  pick:null, day:0, step:0, wants:[],
+  teams:[], cur:""                 /* every saved team; the one on screen */
 };
 
+function newTeamId(){ return "t"+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36); }
 function freshState(){
   var me=newPerson("You",LOCAL_TZ,true);
   S.people=[me]; S.title=""; S.dur=30; S.offsetDays=0; S.dispId=me.id;
   S.pick=null; S.day=0; S.step=0; S.wants=[];
+  S.cur=newTeamId(); S.teams=[{id:S.cur,name:"My team",p:[]}];
+  stash();
+}
+/* ── several teams, kept side by side ───────────────────────────────
+   S.people is whichever one is on screen; the rest sit packed in
+   S.teams until you switch back to them. */
+function peopleArr(){
+  return S.people.map(function(p){
+    var ov=[],k; for(k in p.ov) if(p.ov.hasOwnProperty(k)) ov.push([+k,p.ov[k]?1:0]);
+    return [p.id,p.name,p.tz,p.email,p.s,p.e,p.wknd?1:0,p.you?1:0,ov];
+  });
+}
+function readPeople(arr){
+  S.people=(arr||[]).map(function(a){
+    var p={id:a[0],name:a[1]||"",tz:a[2],email:a[3]||"",s:+a[4],e:+a[5],
+           wknd:!!a[6],you:!!a[7],ov:{}};
+    (a[8]||[]).forEach(function(pair){ p.ov[pair[0]]=!!pair[1]; });
+    try{ new Intl.DateTimeFormat("en",{timeZone:p.tz}); }catch(e){ p.tz=LOCAL_TZ; }
+    return p;
+  });
+  if(!S.people.length) S.people=[newPerson("You",LOCAL_TZ,true)];
+  S.dispId=(S.people.filter(function(p){ return p.you; })[0]||S.people[0]).id;
+}
+function curTeam(){
+  var i; for(i=0;i<S.teams.length;i++) if(S.teams[i].id===S.cur) return S.teams[i];
+  return null;
+}
+function stash(){ var t=curTeam(); if(t) t.p=peopleArr(); }
+function switchTeam(id){
+  if(id===S.cur) return;
+  if(inTeam()){                       /* the server holds these */
+    S.cur=id; save();
+    refreshMe().then(function(){ S.pick=null; S.day=0; afterChange(); });
+    return;
+  }
+  stash(); S.cur=id;
+  var t=curTeam(); if(!t) return;
+  readPeople(t.p); S.pick=null; S.day=0;
+  afterChange(); toast("Switched to "+t.name);
+}
+function addTeam(name){
+  if(inTeam()){
+    cx("teams.create",{token:token(),name:name||"",tz:LOCAL_TZ,startHour:9,endHour:18})
+      .then(function(r){ S.cur=r.id; save(); return refreshMe(); })
+      .then(function(){ S.pick=null; S.day=0; afterChange(); toast("New team"); })
+      .catch(function(e){ toast(e.message); });
+    return;
+  }
+  stash();
+  var id=newTeamId();
+  S.teams.push({id:id,name:name||("Team "+(S.teams.length+1)),p:[]});
+  S.cur=id; S.people=[newPerson("You",LOCAL_TZ,true)];
+  S.dispId=S.people[0].id; S.pick=null; S.day=0;
+  afterChange(); toast("New team");
+}
+function renameTeam(id,name){
+  name=(name||"").trim().slice(0,60); if(!name) return;
+  if(inTeam()){
+    cx("teams.rename",{token:token(),teamId:id,name:name})
+      .then(refreshMe).then(afterChange).catch(function(e){ toast(e.message); });
+    return;
+  }
+  var i; for(i=0;i<S.teams.length;i++) if(S.teams[i].id===id) S.teams[i].name=name;
+  afterChange();
+}
+function dropTeam(id){
+  if(inTeam()){
+    cx("teams.leave",{token:token(),teamId:id}).then(function(){
+      if(S.cur===id) S.cur="";
+      return refreshMe();
+    }).then(function(){ S.pick=null; afterChange(); toast("Left the team"); })
+      .catch(function(e){ toast(e.message); });
+    return;
+  }
+  if(S.teams.length<2) return toast("That's your only team");
+  S.teams=S.teams.filter(function(t){ return t.id!==id; });
+  if(S.cur===id){ S.cur=S.teams[0].id; readPeople(S.teams[0].p); S.pick=null; S.day=0; }
+  afterChange(); toast("Team deleted");
+}
+function teamName(){
+  if(inTeam()) return ((ME.team||{}).name)||"Your team";
+  var t=curTeam(); return t?t.name:"My team";
+}
+function teamList(){
+  if(inTeam()) return (ME.teams||[]).map(function(t){ return {id:t.id,name:t.name}; });
+  return S.teams.map(function(t){ return {id:t.id,name:t.name}; });
 }
 function disp(){ return byId(S.dispId)||S.people[0]; }
 function byId(id){ for(var i=0;i<S.people.length;i++) if(S.people[i].id===id) return S.people[i]; return null; }
@@ -259,24 +347,20 @@ function haptic(){ if(navigator.vibrate) try{ navigator.vibrate(8); }catch(e){} 
 
 /* ═══════════════ persistence ═══════════════ */
 function packed(freeze){
-  return {v:2,t:S.title,d:S.dur,o:S.offsetDays,x:S.dispId,y:S.day,k:freeze?sel():S.pick,
-    p:S.people.map(function(p){
-      var ov=[],k; for(k in p.ov) if(p.ov.hasOwnProperty(k)) ov.push([+k,p.ov[k]?1:0]);
-      return [p.id,p.name,p.tz,p.email,p.s,p.e,p.wknd?1:0,p.you?1:0,ov];
-    })};
+  stash();
+  return {v:3,t:S.title,d:S.dur,o:S.offsetDays,x:S.dispId,y:S.day,k:freeze?sel():S.pick,
+    cur:S.cur,teams:S.teams,p:peopleArr()};
 }
 function unpack(o){
   if(!o||!o.p||!o.p.length) return false;
-  S.people=o.p.map(function(a){
-    var p={id:a[0],name:a[1]||"",tz:a[2],email:a[3]||"",s:+a[4],e:+a[5],
-           wknd:!!a[6],you:!!a[7],ov:{}};
-    (a[8]||[]).forEach(function(pair){ p.ov[pair[0]]=!!pair[1]; });
-    try{ new Intl.DateTimeFormat("en",{timeZone:p.tz}); }catch(e){ p.tz=LOCAL_TZ; }
-    return p;
-  });
+  readPeople(o.p);
   S.title=o.t||""; S.dur=o.d||30; S.offsetDays=o.o||0; S.day=o.y||0;
-  S.dispId=byId(o.x)?o.x:S.people[0].id;
+  if(byId(o.x)) S.dispId=o.x;
   S.pick=o.k||null;
+  /* a v2 save knew one team; give it a name and carry on */
+  S.teams=(o.teams&&o.teams.length)?o.teams:[{id:newTeamId(),name:"My team",p:[]}];
+  S.cur=(o.cur&&S.teams.some(function(t){ return t.id===o.cur; }))?o.cur:S.teams[0].id;
+  stash();
   return true;
 }
 function save(){
@@ -301,6 +385,11 @@ function load(){
     try{ if(unpack(JSON.parse(unb64(h.slice(3))))) return true; }catch(e){}
   }
   try{ var raw=localStorage.getItem(KEY); if(raw && unpack(JSON.parse(raw))) return true; }catch(e){}
+  /* carry over anything saved under the old name, once */
+  try{
+    var old=localStorage.getItem(OLDKEY);
+    if(old && unpack(JSON.parse(old))){ save(); localStorage.removeItem(OLDKEY); return true; }
+  }catch(e){}
   return false;
 }
 
@@ -503,8 +592,10 @@ function adoptMembers(list){
 }
 function refreshMe(){
   if(!LIVE||!token()) return Promise.resolve(null);
-  return cx("me",{token:token()}).then(function(r){
+  return cx("me",{token:token(),teamId:/^[a-z0-9]{25,}$/i.test(S.cur||"")?S.cur:undefined})
+    .then(function(r){
     ME=r;
+    if(r&&r.team) S.cur=r.team.id;
     if(r&&r.members&&r.members.length) adoptMembers(r.members);
     return r;
   }).catch(function(){ ME=null; setToken(""); return null; });
@@ -516,6 +607,7 @@ function mutate(path,args){
     .then(function(){ afterChange(); });
 }
 function inTeam(){ return !!(LIVE && ME && ME.team && token()); }
+function teamId(){ return inTeam()?ME.team.id:S.cur; }
 function memberArgs(p){
   var ov=[], k;
   for(k in p.ov) if(p.ov.hasOwnProperty(k)) ov.push({ts:+k,free:!!p.ov[k]});
@@ -539,7 +631,7 @@ function ensureTeam(){
     .then(function(){
       return others.reduce(function(chain,q){
         return chain.then(function(){
-          var a=memberArgs(q); a.token=token();
+          var a=memberArgs(q); a.token=token(); a.teamId=teamId();
           return cx("teams.addMember",a);
         });
       },Promise.resolve());
@@ -577,18 +669,49 @@ function renderAcct(){
     c.innerHTML='<div class="acct"><div class="avatar">'+esc(initials(you))+"</div>"+
       '<div class="grow"><div class="t">'+esc(you.name||you.email)+'<span class="pill live">live</span></div>'+
       '<div class="s">'+esc(you.email)+"</div></div>"+
-      '<button class="act" data-signout="1">Sign out</button></div>'+
-      '<div class="acct" style="box-shadow:inset 0 1px 0 var(--sep)">'+
-      '<div class="avatar you">'+esc((((ME.team||{}).name)||"T").slice(0,2).toUpperCase())+"</div>"+
-      '<div class="grow"><div class="t">'+esc((ME.team||{}).name||"Your team")+"</div>"+
-      '<div class="s">'+S.people.length+(S.people.length===1?" person":" people")+"</div></div>"+
-      '<button class="act" data-invite="1">Invite</button></div>';
+      '<button class="act" data-signout="1">Sign out</button></div>';
   }
+  c.innerHTML+=teamRow(!!(LIVE&&you));
   $("#teamHead").textContent=(LIVE&&ME&&ME.team)?"In this team":"People";
   $("#foot").innerHTML=(LIVE
     ? "Accounts and teams run on Convex. Your hours, nothing more."
     : "No account, no server, nothing stored anywhere but this browser.")+
     '<br>Built by <a href="/">Jeremy Lasne</a>.';
+}
+/* the team on screen, and the way through to the others */
+function teamRow(sep){
+  var n=teamList().length;
+  return '<div class="acct"'+(sep?' style="box-shadow:inset 0 1px 0 var(--sep)"':"")+">"+
+    '<div class="avatar you">'+esc(teamName().slice(0,2).toUpperCase())+"</div>"+
+    '<button class="grow tteam" data-teams="1"><div class="t">'+esc(teamName())+
+      '<span class="caret"></span></div>'+
+    '<div class="s">'+S.people.length+(S.people.length===1?" person":" people")+
+      (n>1?" · "+n+" teams":"")+"</div></button>"+
+    '<button class="act" data-invite="1">Invite</button></div>';
+}
+function openTeams(){
+  renderTeams();
+  $("#scrim").classList.add("on"); $("#teamSheet").classList.add("on");
+  document.body.style.overflow="hidden";
+}
+function closeTeams(){
+  $("#teamSheet").classList.remove("on"); $("#scrim").classList.remove("on");
+  document.body.style.overflow="";
+}
+function renderTeams(){
+  var list=teamList(), cur=inTeam()?ME.team.id:S.cur;
+  $("#teamList").innerHTML=list.map(function(t){
+    return '<div class="row tap" data-pickteam="'+esc(t.id)+'">'+
+      '<div class="avatar'+(t.id===cur?"":" you")+'">'+esc(t.name.slice(0,2).toUpperCase())+"</div>"+
+      '<div class="grow"><div class="t">'+esc(t.name)+"</div></div>"+
+      (t.id===cur?'<span class="mark">✓</span>':"")+"</div>";
+  }).join("")+
+    '<div class="row tap" data-newteam="1"><div class="plus">+</div>'+
+    '<div class="grow"><div class="t">New team</div></div></div>';
+  $("#teamActs").innerHTML=
+    '<button class="btn sec" data-renameteam="1">Rename</button>'+
+    ((list.length>1||inTeam())
+      ? '<button class="btn sec" data-dropteam="1">'+(inTeam()?"Leave":"Delete")+"</button>" : "");
 }
 function inviteUrl(){
   if(LIVE&&ME&&ME.team) return location.origin+location.pathname+"#t="+ME.team.invite;
@@ -798,7 +921,7 @@ function commitDraft(){
   p.name=draft.name; p.email=draft.email; p.s=draft.s; p.e=draft.e; p.wknd=draft.wknd;
   closeSheet();
   if(inTeam()){
-    if(draftIsNew) mutate("teams.addMember",memberArgs(p));
+    if(draftIsNew){ var na=memberArgs(p); na.teamId=teamId(); mutate("teams.addMember",na); }
     else syncPerson(p);
     return;
   }
@@ -830,15 +953,15 @@ function gcalUrl(){
   var u="https://calendar.google.com/calendar/render?action=TEMPLATE"+
     "&text="+encodeURIComponent(meetingTitle())+
     "&dates="+icsStamp(t)+"/"+icsStamp(end)+
-    "&details="+encodeURIComponent(localLines().join("\n")+"\n\nPlanned with meetontime");
+    "&details="+encodeURIComponent(localLines().join("\n")+"\n\nPlanned with Overlap");
   if(emails.length) u+="&add="+encodeURIComponent(emails.join(","));
   return u;
 }
 function icsText(){
   var t=sel(), end=t+S.dur*60000;
   function e(s){ return String(s).replace(/[\;,]/g,"\\$&").replace(/\n/g,"\\n"); }
-  return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//meetontime//EN","CALSCALE:GREGORIAN",
-    "BEGIN:VEVENT","UID:"+t+"-meetontime","DTSTAMP:"+icsStamp(Date.now()),
+  return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//overlap//EN","CALSCALE:GREGORIAN",
+    "BEGIN:VEVENT","UID:"+t+"-overlap","DTSTAMP:"+icsStamp(Date.now()),
     "DTSTART:"+icsStamp(t),"DTEND:"+icsStamp(end),
     "SUMMARY:"+e(meetingTitle()),"DESCRIPTION:"+e(localLines().join("\n"))]
     .concat(S.people.filter(function(p){ return p.email; }).map(function(p){
@@ -895,6 +1018,24 @@ document.addEventListener("click",function(ev){
   }
   if((el=up("data-signin"))){ openAuth(); return; }
   if((el=up("data-invite"))){ openInvite(); return; }
+  if((el=up("data-teams"))){ openTeams(); return; }
+  if((el=up("data-pickteam"))){ switchTeam(el.getAttribute("data-pickteam")); closeTeams(); return; }
+  if((el=up("data-newteam"))){
+    var nn=prompt("Name this team","Team "+(teamList().length+1));
+    if(nn!==null){ addTeam(nn.trim()); closeTeams(); }
+    return;
+  }
+  if((el=up("data-renameteam"))){
+    var rn=prompt("Rename team",teamName());
+    if(rn!==null){ renameTeam(inTeam()?ME.team.id:S.cur,rn); renderTeams(); }
+    return;
+  }
+  if((el=up("data-dropteam"))){
+    if(confirm((inTeam()?"Leave ":"Delete ")+teamName()+"?")){
+      dropTeam(inTeam()?ME.team.id:S.cur); closeTeams();
+    }
+    return;
+  }
   if((el=up("data-signout"))){
     var t=token();
     setToken(""); ME=null; afterChange(); toast("Signed out");
@@ -926,6 +1067,7 @@ $("#fWeekend").addEventListener("click",function(){ draft.wknd=!draft.wknd; rend
 $("#authCancel").addEventListener("click",closeAuth);
 $("#authGo").addEventListener("click",authNext);
 $("#authSheet").addEventListener("keydown",function(ev){ if(ev.key==="Enter") authNext(); });
+$("#teamClose").addEventListener("click",closeTeams);
 $("#inviteClose").addEventListener("click",function(){
   $("#inviteSheet").classList.remove("on"); $("#scrim").classList.remove("on");
   document.body.style.overflow="";
@@ -938,7 +1080,7 @@ $("#fbAgain").addEventListener("click",function(){
 $("#sheetCancel").addEventListener("click",closeSheet);
 $("#sheetDone").addEventListener("click",commitDraft);
 $("#scrim").addEventListener("click",function(){
-  closeSheet(); closeAuth();
+  closeSheet(); closeAuth(); closeTeams();
   $("#inviteSheet").classList.remove("on");
   document.body.style.overflow="";
 });

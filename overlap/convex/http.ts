@@ -60,6 +60,10 @@ const door = httpAction(async (ctx, request) => {
         return ok(await ctx.runMutation(api.teams.updateMember, args));
       case "teams.removeMember":
         return ok(await ctx.runMutation(api.teams.removeMember, args));
+      case "teams.rename":
+        return ok(await ctx.runMutation(api.teams.rename, args));
+      case "teams.leave":
+        return ok(await ctx.runMutation(api.teams.leave, args));
       case "teams.book":
         return ok(await ctx.runMutation(api.teams.book, args));
       case "feedback.send":

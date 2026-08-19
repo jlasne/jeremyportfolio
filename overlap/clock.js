@@ -246,7 +246,17 @@ window.addEventListener("hashchange",function(){ readHash(); render(); });
 if(/^#(p|t)=/.test(location.hash)){
   location.replace("team/"+location.hash);
 } else {
-  readHash(); writeHash(true); render();
+/* the window chrome carries a real clock, ticking */
+function tick(){
+  var tz=zones[0]||LOCAL_TZ, el=$("#liveNow");
+  if(!el) return;
+  var p=zp(Date.now(),tz);
+  el.textContent=WD[dow(Date.now(),tz)]+" "+p.d+" "+MO[p.m-1]+" · "+
+    pad(p.H)+":"+pad(p.M)+":"+pad(p.S)+" "+tzCity(tz);
+}
+
+readHash(); writeHash(true); render(); tick();
+setInterval(tick,1000);
 }
 setInterval(function(){ if(!document.hidden) render(); },30000);
 })();

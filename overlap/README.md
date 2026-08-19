@@ -99,9 +99,18 @@ the time of day: white is the working day (8am–5pm), black is night
 (10pm–5am), grey the edges. Inside the **app** it is availability: white is
 possible, black is not, grey means only some of the team.
 
+## Several teams
+
+A person can keep as many teams as they like — one per client, one per
+project — and switch between them from the team row on the Team screen.
+Signed out, they live side by side in `localStorage`; signed in, they are real
+teams on the server and you can be a member of several at once. `me` takes an
+optional `teamId` and answers with every team you are in plus the members of
+the one you asked for.
+
 ## Still to build
 
 - Real calendar sync (read busy times, not just working hours)
 - Recurring meetings
-- Leaving a team, transferring ownership
+- Transferring team ownership
 - Rate limiting on `auth.requestCode`
