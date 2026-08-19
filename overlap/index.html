@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Overlap — the hour that works for everyone</title>
-<meta name="description" content="See your whole team's day at once. Overlap finds the hour that works across every timezone and hands it to your calendar.">
-<meta name="theme-color" content="#F2F2F7">
+<meta name="description" content="Your whole team's day, drawn at once. Overlap finds the hour that works across every timezone and hands it to your calendar.">
+<meta name="theme-color" content="#FFFFFF">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -14,48 +14,80 @@
 <meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="app.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css?v=4">
 <style>
-/* ── the landing page borrows the app's tokens and adds long-form furniture ── */
-body{background:var(--paper)}
-.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
-.top{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.82);
-  backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%)}
-.top .wrap{display:flex;align-items:center;gap:14px;height:60px}
-.brand{font-size:19px;font-weight:700;letter-spacing:-.03em}
+/* ═══════════════════════════════════════════════════════════
+   The landing page. Same tokens as the app, different furniture:
+   wide measure, big type, product shown rather than described.
+   ═══════════════════════════════════════════════════════════ */
+html,body{background:var(--paper)}
+body{font-size:16px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.narrow{max-width:840px}
+
+/* ── nav ── */
+.top{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.75);
+  backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);
+  transition:box-shadow .2s}
+.top.stuck{box-shadow:0 1px 0 var(--sep)}
+.top .wrap{display:flex;align-items:center;gap:8px;height:64px}
+.brand{display:flex;align-items:center;gap:9px;font-size:18px;font-weight:700;letter-spacing:-.035em;
+  text-decoration:none;color:var(--ink)}
+.mark{width:22px;height:22px;border-radius:7px;background:var(--ink);position:relative;flex:none}
+.mark::after{content:"";position:absolute;left:7px;top:7px;width:12px;height:12px;
+  border-radius:4px;background:var(--paper)}
+.top nav{display:none;gap:4px;margin-left:14px;flex:1}
+@media (min-width:760px){ .top nav{display:flex} }
+.top nav a{font-size:14px;font-weight:500;letter-spacing:-.01em;color:var(--ink-2);
+  text-decoration:none;padding:8px 12px;border-radius:9px}
+.top nav a:hover{color:var(--ink);background:var(--fill)}
 .top .sp{flex:1}
-.top a.txt{font-size:15px;color:var(--ink-2);text-decoration:none;letter-spacing:-.01em}
-.top a.txt:hover{color:var(--ink)}
-.cta{display:inline-flex;align-items:center;justify-content:center;height:42px;padding:0 20px;
-  border-radius:12px;background:var(--ink);color:#fff;font-size:15px;font-weight:600;
-  letter-spacing:-.02em;text-decoration:none;transition:transform .12s var(--ease),opacity .12s}
-.cta:active{transform:scale(.97);opacity:.9}
-.cta.big{height:54px;padding:0 26px;font-size:17px;border-radius:15px}
-.cta.ghost{background:var(--fill);color:var(--ink)}
+.btn2{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;
+  border-radius:999px;background:var(--ink);color:#fff;font-size:14px;font-weight:600;
+  letter-spacing:-.015em;text-decoration:none;white-space:nowrap;
+  transition:transform .14s var(--ease),opacity .14s}
+.btn2:hover{opacity:.86}
+.btn2:active{transform:scale(.97)}
+.btn2.lg{height:52px;padding:0 26px;font-size:16px}
+.btn2.line{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px rgba(60,60,67,.22)}
+.btn2.line:hover{background:var(--fill);opacity:1}
+.btn2.inv{background:var(--paper);color:var(--ink)}
 
-.hero{padding:76px 0 44px;text-align:center}
-h1{font-size:clamp(38px,6.6vw,68px);line-height:1.03;letter-spacing:-.04em;font-weight:700;
-  margin:0 0 20px;text-wrap:balance}
-h1 em{font-style:normal;position:relative;white-space:nowrap;z-index:0}
-h1 em::after{content:"";position:absolute;left:-2px;right:-2px;bottom:.06em;height:.34em;
-  background:var(--fill-2);z-index:-1;border-radius:3px}
-h1{position:relative;z-index:0}
-.lede{font-size:clamp(17px,2.2vw,21px);line-height:1.5;color:var(--ink-2);max-width:620px;
-  margin:0 auto 30px;letter-spacing:-.015em;text-wrap:balance}
-.herobtns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-.microcopy{font-size:13px;color:var(--ink-3);margin-top:16px;letter-spacing:-.005em}
+/* ── hero ── */
+.hero{padding:72px 0 0;text-align:center}
+.eyebrow-pill{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 14px;
+  border-radius:999px;background:var(--fill);font-size:13px;font-weight:500;color:var(--ink-2);
+  letter-spacing:-.01em;margin-bottom:26px}
+.eyebrow-pill b{color:var(--ink);font-weight:600}
+h1{font-size:clamp(40px,7vw,76px);line-height:1.02;letter-spacing:-.045em;font-weight:800;
+  margin:0 0 22px;text-wrap:balance;position:relative;z-index:0}
+h1 .hl{position:relative;white-space:nowrap;z-index:0}
+h1 .hl::after{content:"";position:absolute;left:-4px;right:-4px;bottom:.05em;height:.32em;
+  background:var(--fill-2);z-index:-1;border-radius:4px}
+.lede{font-size:clamp(17px,2.1vw,20px);line-height:1.5;color:var(--ink-2);max-width:600px;
+  margin:0 auto 32px;letter-spacing:-.015em;text-wrap:balance}
+.herobtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.micro{font-size:13px;color:var(--ink-3);margin-top:18px;letter-spacing:-.005em}
 
-/* ── the live world clock ── */
-.clock{margin:26px 0 8px;background:var(--paper);border-radius:18px;
-  box-shadow:0 0 0 1px rgba(60,60,67,.10),0 24px 60px -30px rgba(0,0,0,.35);overflow:hidden}
-.clock-bar{display:flex;align-items:center;gap:10px;padding:13px 16px;box-shadow:0 1px 0 var(--sep)}
+/* ── the framed product shot ── */
+.frame{margin:52px 0 0;border-radius:20px;background:var(--paper);
+  box-shadow:0 0 0 1px rgba(60,60,67,.11),0 40px 80px -40px rgba(0,0,0,.42),
+             0 8px 20px -12px rgba(0,0,0,.16);overflow:hidden}
+.frame-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--ground);
+  box-shadow:0 1px 0 var(--sep)}
+.dots{display:flex;gap:6px}
+.dots i{width:10px;height:10px;border-radius:50%;background:var(--fill-2);display:block}
+.frame-url{flex:1;text-align:center;font-size:12px;color:var(--ink-3);letter-spacing:-.005em}
+
+/* ── the live clock inside the frame ── */
+.clock-bar{display:flex;align-items:center;gap:8px;padding:13px 16px;box-shadow:0 1px 0 var(--sep)}
 .clock-bar .ttl{font-size:14px;font-weight:600;letter-spacing:-.02em}
 .clock-bar .sp{flex:1}
 .clock-bar button{font-size:13px;font-weight:500;letter-spacing:-.01em;color:var(--ink-2);
-  padding:6px 11px;border-radius:9px;background:var(--fill)}
-.clock-bar button:hover{color:var(--ink)}
-.clock-body{display:flex}
+  padding:7px 12px;border-radius:9px;background:var(--fill)}
+.clock-bar button:hover{color:var(--ink);background:var(--fill-2)}
+.clock-body{display:flex;text-align:left}
 .clock-labs{flex:none;width:176px;display:grid;background:var(--paper);
   box-shadow:1px 0 0 var(--sep);z-index:2}
 .clock-scroll{flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
@@ -82,7 +114,8 @@ h1{position:relative;z-index:0}
 .zc.now{box-shadow:inset 0 0 0 2px var(--ink),inset -1px 0 0 rgba(60,60,67,.10)}
 .zc.night.now{box-shadow:inset 0 0 0 2px #fff}
 .clock-legend{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-2);
-  padding:11px 16px;box-shadow:0 -1px 0 var(--sep);white-space:nowrap;overflow-x:auto;scrollbar-width:none}
+  padding:11px 16px;box-shadow:0 -1px 0 var(--sep);white-space:nowrap;overflow-x:auto;
+  scrollbar-width:none;text-align:left}
 .clock-legend::-webkit-scrollbar{display:none}
 .clock-legend i{width:12px;height:12px;border-radius:3px;display:block;flex:none}
 .clock-legend i.day{background:var(--paper);box-shadow:inset 0 0 0 1px var(--sep)}
@@ -92,7 +125,8 @@ h1{position:relative;z-index:0}
 .addrow{display:flex;gap:8px;padding:12px 16px;box-shadow:0 -1px 0 var(--sep);align-items:center}
 .addrow input{flex:1;font-size:15px;letter-spacing:-.01em;background:var(--fill);
   border-radius:10px;padding:9px 12px;min-width:0}
-.hits{max-height:210px;overflow-y:auto}
+.addrow button{font-size:13px;font-weight:600;padding:9px 14px;border-radius:9px;background:var(--fill)}
+.hits{max-height:230px;overflow-y:auto;text-align:left}
 .hit{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;
   box-shadow:0 -1px 0 var(--sep)}
 .hit:hover{background:var(--fill)}
@@ -101,66 +135,126 @@ h1{position:relative;z-index:0}
 .hit span{display:block;font-size:12px;color:var(--ink-2)}
 .hit .t{font-size:15px;font-variant-numeric:tabular-nums;color:var(--ink-2)}
 
-/* ── sections ── */
-section{padding:66px 0}
-.eyebrow{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--ink-3);margin-bottom:14px}
-h2{font-size:clamp(27px,3.6vw,38px);line-height:1.12;letter-spacing:-.032em;font-weight:700;
-  margin:0 0 16px;text-wrap:balance}
-.sub{font-size:17px;line-height:1.55;color:var(--ink-2);max-width:600px;margin:0 0 34px;letter-spacing:-.01em}
-.steps{display:grid;gap:18px;grid-template-columns:1fr}
-@media (min-width:780px){ .steps{grid-template-columns:repeat(3,1fr)} }
-.stepcard{background:var(--ground);border-radius:16px;padding:26px 24px 28px}
-.stepcard .num{width:28px;height:28px;border-radius:50%;background:var(--ink);color:#fff;
-  display:grid;place-items:center;font-size:13px;font-weight:700;margin-bottom:16px}
-.stepcard h3{font-size:19px;font-weight:600;letter-spacing:-.025em;margin:0 0 8px}
-.stepcard p{font-size:15px;line-height:1.55;color:var(--ink-2);margin:0;letter-spacing:-.008em}
-.stepcard a{display:inline-block;margin-top:16px;font-size:14px;font-weight:600;
-  color:var(--ink);text-decoration:none;border-bottom:1.5px solid var(--ink-3);padding-bottom:1px}
-.cols{display:grid;gap:20px;grid-template-columns:1fr}
-@media (min-width:780px){ .cols{grid-template-columns:1fr 1fr} }
-.claim{padding:22px 0;box-shadow:0 -1px 0 var(--sep)}
-.claim h4{font-size:17px;font-weight:600;letter-spacing:-.02em;margin:0 0 6px}
-.claim p{font-size:15px;line-height:1.55;color:var(--ink-2);margin:0;letter-spacing:-.008em}
-.band{background:var(--ground);border-radius:20px;padding:52px 32px;text-align:center;margin:0 0 20px}
-.band h2{margin-bottom:12px}
-.band .sub{margin:0 auto 26px}
-footer{padding:38px 0 54px;box-shadow:0 -1px 0 var(--sep);font-size:13px;color:var(--ink-3)}
-footer a{color:var(--ink-2);text-decoration:none;border-bottom:1px solid var(--ink-3)}
-footer .row{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
-footer .sp{flex:1}
+/* ── proof row ── */
+.proof{display:grid;gap:2px;grid-template-columns:1fr;margin:56px 0 0;
+  border-radius:16px;overflow:hidden;background:var(--sep)}
+@media (min-width:700px){ .proof{grid-template-columns:repeat(3,1fr)} }
+.proof div{background:var(--paper);padding:22px 24px}
+.proof b{display:block;font-size:15px;font-weight:600;letter-spacing:-.02em;margin-bottom:5px}
+.proof span{font-size:14px;line-height:1.5;color:var(--ink-2);letter-spacing:-.008em}
+
+/* ── feature rows ── */
+section{padding:96px 0}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-3);margin-bottom:16px}
+h2{font-size:clamp(30px,4vw,44px);line-height:1.08;letter-spacing:-.038em;font-weight:800;
+  margin:0 0 18px;text-wrap:balance}
+.sub{font-size:17px;line-height:1.55;color:var(--ink-2);margin:0;letter-spacing:-.012em;max-width:520px}
+.row2{display:grid;gap:44px;align-items:center;grid-template-columns:1fr}
+@media (min-width:900px){
+  .row2{grid-template-columns:1fr 1fr;gap:64px}
+  .row2.flip .txt{order:2}
+}
+.shot{border-radius:16px;background:var(--paper);overflow:hidden;
+  box-shadow:0 0 0 1px rgba(60,60,67,.11),0 24px 50px -28px rgba(0,0,0,.34)}
+.shot-h{font-size:12px;color:var(--ink-3);padding:11px 16px;box-shadow:0 1px 0 var(--sep);
+  letter-spacing:-.005em;font-weight:500}
+.mini{display:grid;grid-template-columns:82px repeat(8,1fr)}
+.mini .l{display:flex;flex-direction:column;justify-content:center;padding:0 0 0 16px;height:44px}
+.mini .l b{font-size:12px;font-weight:600;letter-spacing:-.01em}
+.mini .l span{font-size:10px;color:var(--ink-2)}
+.mini .c{height:44px;display:grid;place-items:center;font-size:11px;font-variant-numeric:tabular-nums;
+  box-shadow:inset -1px 0 0 rgba(60,60,67,.09)}
+.mini .c.no{background:var(--ink);color:#fff}
+.mini .c.some{background:rgba(0,0,0,.17)}
+.mini .c.pick{box-shadow:inset 0 0 0 2px var(--ink)}
+.mini .l.sum{box-shadow:inset 0 1px 0 var(--sep)}
+.mini .c.sum{box-shadow:inset -1px 0 0 rgba(60,60,67,.09),inset 0 1px 0 var(--sep);font-size:10px;font-weight:600}
+.fake-slot{display:flex;align-items:center;gap:13px;padding:14px 16px;box-shadow:0 1px 0 var(--sep)}
+.fake-slot:last-child{box-shadow:none}
+.fake-slot .r{width:20px;height:20px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--ink-3);flex:none}
+.fake-slot.on .r{background:var(--ink);box-shadow:none;display:grid;place-items:center}
+.fake-slot.on .r::after{content:"";width:6px;height:6px;border-radius:50%;background:#fff}
+.fake-slot .w{flex:1;min-width:0}
+.fake-slot .w,.fake-slot .w1,.fake-slot .w2{display:block}
+.fake-slot .w1{font-size:15px;font-weight:600;letter-spacing:-.02em}
+.fake-slot .w1 em{font-style:normal;font-weight:400;color:var(--ink-2)}
+.fake-slot .w2{font-size:12.5px;color:var(--ink-2);margin-top:3px;letter-spacing:-.005em}
+.fake-slot .w2 b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.fake-slot .w2 .out{opacity:.5}
+.gcal{display:flex;align-items:center;justify-content:center;height:46px;margin:14px 16px 16px;
+  border-radius:13px;background:var(--ink);color:#fff;font-size:15px;font-weight:600;letter-spacing:-.02em}
+
+/* ── steps ── */
+.steps{display:grid;gap:16px;grid-template-columns:1fr;margin-top:40px}
+@media (min-width:820px){ .steps{grid-template-columns:repeat(3,1fr)} }
+.stepcard{border-radius:16px;padding:26px 24px 26px;box-shadow:inset 0 0 0 1px rgba(60,60,67,.12)}
+.stepcard .num{width:26px;height:26px;border-radius:8px;background:var(--ink);color:#fff;
+  display:grid;place-items:center;font-size:12px;font-weight:700;margin-bottom:16px}
+.stepcard h3{font-size:18px;font-weight:600;letter-spacing:-.025em;margin:0 0 8px}
+.stepcard p{font-size:14.5px;line-height:1.55;color:var(--ink-2);margin:0;letter-spacing:-.008em}
+.stepcard a{display:inline-block;margin-top:16px;font-size:14px;font-weight:600;color:var(--ink);
+  text-decoration:none}
+.stepcard a:hover{text-decoration:underline}
+
+/* ── dark band ── */
+.band{background:var(--ink);color:#fff;border-radius:24px;padding:64px 32px;text-align:center}
+.band h2{color:#fff;margin-bottom:14px}
+.band p{font-size:17px;line-height:1.55;color:rgba(255,255,255,.62);max-width:520px;
+  margin:0 auto 30px;letter-spacing:-.012em}
+
+/* ── footer ── */
+footer{padding:56px 0 64px;box-shadow:0 -1px 0 var(--sep);margin-top:96px}
+.fcols{display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start}
+.fcols .b{flex:1;min-width:200px}
+.fcols p{font-size:14px;line-height:1.55;color:var(--ink-2);margin:12px 0 0;max-width:280px}
+.fcol h5{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 12px}
+.fcol a{display:block;font-size:14px;color:var(--ink-2);text-decoration:none;margin-bottom:9px}
+.fcol a:hover{color:var(--ink)}
+.fbot{margin-top:40px;font-size:13px;color:var(--ink-3)}
+.fbot a{color:var(--ink-2)}
 </style>
 </head>
 <body>
 
-<header class="top">
+<header class="top" id="top">
   <div class="wrap">
-    <span class="brand">Overlap</span>
+    <a class="brand" href="/overlap/"><span class="mark"></span>Overlap</a>
+    <nav>
+      <a href="#clock">World clock</a>
+      <a href="#how">How it works</a>
+      <a href="#why">Why Overlap</a>
+    </nav>
     <span class="sp"></span>
-    <a class="txt" href="#how">How it works</a>
-    <a class="cta" href="team/">Open Overlap</a>
+    <a class="btn2" href="team/">Open Overlap</a>
   </div>
 </header>
 
 <div class="wrap">
   <div class="hero">
-    <h1>The hour that works for <em>everyone</em>.</h1>
-    <p class="lede">Your team is in five timezones. Overlap draws the whole day at once,
-      finds the hours nobody has to wake up for, and hands the winner to your calendar.</p>
+    <span class="eyebrow-pill"><b>Free</b> · no account needed to try it</span>
+    <h1>The hour that works for <span class="hl">everyone</span>.</h1>
+    <p class="lede">Your team is spread across five timezones. Overlap draws the whole day at
+      once, finds the hours nobody has to wake up for, and hands the winner to your calendar.</p>
     <div class="herobtns">
-      <a class="cta big" href="team/">Open Overlap</a>
-      <a class="cta big ghost" href="#clock">See the world clock</a>
+      <a class="btn2 lg" href="team/">Open Overlap</a>
+      <a class="btn2 lg line" href="#how">See how it works</a>
     </div>
-    <p class="microcopy">Free. No account needed to try it.</p>
+    <p class="micro">Works in the browser. Nothing to install.</p>
   </div>
 
-  <!-- ══════════ live world clock ══════════ -->
-  <div class="clock" id="clock">
+  <!-- ══════════ live world clock, framed ══════════ -->
+  <div class="frame" id="clock">
+    <div class="frame-bar">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="frame-url">overlap — world clock</span>
+    </div>
     <div class="clock-bar">
-      <span class="ttl">World clock</span>
+      <span class="ttl">Right now</span>
       <span class="sp"></span>
       <button id="addBtn">Add a city</button>
-      <button id="shareBtn">Copy link to this view</button>
+      <button id="shareBtn">Copy link</button>
     </div>
     <div class="clock-body">
       <div class="clock-labs" id="zlabs"></div>
@@ -177,27 +271,96 @@ footer .sp{flex:1}
       <span class="sp"></span><span id="zbase"></span>
     </div>
   </div>
-  <p class="microcopy" style="text-align:center">Live, and it follows the link — send this view to anyone.</p>
+  <p class="micro" style="text-align:center">Live. Add your cities and copy the link — the view travels with it.</p>
+
+  <div class="proof">
+    <div><b>Nobody signs up to be scheduled</b><span>Add a colleague by city. They never need an account for the overlap to be right.</span></div>
+    <div><b>Every clock at once</b><span>One row per person. A column is one instant, read on four different clocks.</span></div>
+    <div><b>Ends in a calendar</b><span>One tap opens Google Calendar with the event already filled in.</span></div>
+  </div>
 </div>
 
 <div class="wrap">
-  <section id="how">
+  <!-- ══════════ why ══════════ -->
+  <section id="why">
+    <div class="row2">
+      <div class="txt">
+        <div class="eyebrow">The problem</div>
+        <h2>Booking links solve the wrong half.</h2>
+        <p class="sub">A link is fine when one person picks from your calendar. It falls apart
+          the moment four people in four timezones need the same hour — and someone always ends
+          up doing the arithmetic in their head at 11pm.</p>
+      </div>
+      <div class="shot">
+        <div class="shot-h">Overlap · Team</div>
+        <div class="mini">
+          <div class="l"><b>You</b><span>Paris</span></div>
+          <div class="c no">05</div><div class="c no">06</div><div class="c">09</div><div class="c">10</div>
+          <div class="c">14</div><div class="c pick">15</div><div class="c">16</div><div class="c no">22</div>
+          <div class="l"><b>New York</b><span>GMT−4</span></div>
+          <div class="c no">23</div><div class="c no">00</div><div class="c">03</div><div class="c">04</div>
+          <div class="c">08</div><div class="c pick">09</div><div class="c">10</div><div class="c no">16</div>
+          <div class="l"><b>Singapore</b><span>GMT+8</span></div>
+          <div class="c">11</div><div class="c">12</div><div class="c">15</div><div class="c">16</div>
+          <div class="c no">20</div><div class="c pick no">21</div><div class="c no">22</div><div class="c no">04</div>
+          <div class="l sum"><b>Everyone</b><span>3 people</span></div>
+          <div class="c sum no"></div><div class="c sum no"></div><div class="c sum">3/3</div><div class="c sum">3/3</div>
+          <div class="c sum some">2/3</div><div class="c sum some pick">2/3</div><div class="c sum some">2/3</div><div class="c sum no"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="row2 flip">
+      <div class="txt">
+        <div class="eyebrow">The answer</div>
+        <h2>It has an opinion about your day.</h2>
+        <p class="sub">Hours are ranked by how many people can make it, then by how civil the
+          hour is for all of them — nights cost more the deeper they go. Overlap won't offer you
+          2:30am when an 8am exists, and it says so out loud when no hour suits everybody.</p>
+      </div>
+      <div class="shot">
+        <div class="shot-h">Overlap · Plan</div>
+        <div class="fake-slot on">
+          <span class="r"></span>
+          <span class="w"><span class="w1">Wed 19 Aug <em>· everyone free</em></span>
+          <span class="w2"><b>15:00</b> Paris · <b>09:00</b> New York · <b>21:00</b> Singapore</span></span>
+        </div>
+        <div class="fake-slot">
+          <span class="r"></span>
+          <span class="w"><span class="w1">Thu 20 Aug <em>· 2 of 3 free</em></span>
+          <span class="w2"><b>16:00</b> Paris · <b>10:00</b> New York · <span class="out"><b>22:00</b> Singapore</span></span></span>
+        </div>
+        <div class="fake-slot">
+          <span class="r"></span>
+          <span class="w"><span class="w1">Fri 21 Aug <em>· everyone free</em></span>
+          <span class="w2"><b>14:00</b> Paris · <b>08:00</b> New York · <b>20:00</b> Singapore</span></span>
+        </div>
+        <div class="gcal">Add to Google Calendar</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ how ══════════ -->
+  <section id="how" style="padding-top:0">
     <div class="eyebrow">How it works</div>
     <h2>Three screens. That's the whole product.</h2>
-    <p class="sub">No dashboard to learn, no availability rules to configure before you get an answer.</p>
+    <p class="sub">No dashboard to learn and no availability rules to configure before you get
+      an answer.</p>
     <div class="steps">
       <div class="stepcard">
         <div class="num">1</div>
         <h3>Team</h3>
-        <p>Add everyone once — their city, their working hours. The overlap strip redraws itself:
-          white where they can meet, black where they can't, grey where only some of them can.</p>
+        <p>Add everyone once — their city, their working hours. The overlap redraws itself:
+          white where they can meet, black where they can't, grey where only some can.</p>
         <a href="team/">Build a team →</a>
       </div>
       <div class="stepcard">
         <div class="num">2</div>
         <h3>Plan</h3>
-        <p>Name it, size it, and take an hour. Every option shows the time in every timezone at
-          once, so you see the 11pm before you send it, not after.</p>
+        <p>Name it, size it, take an hour. Every option shows the time in every timezone at once,
+          so you see the 11pm before you send it, not after.</p>
         <a href="plan/">Plan a meeting →</a>
       </div>
       <div class="stepcard">
@@ -210,49 +373,38 @@ footer .sp{flex:1}
     </div>
   </section>
 
-  <section>
-    <div class="eyebrow">Why not the usual</div>
-    <h2>Booking links solve the wrong half.</h2>
-    <p class="sub">A link is fine when one person picks from your calendar. It falls apart the
-      moment four people in four timezones need the same hour.</p>
-    <div class="cols">
-      <div>
-        <div class="claim"><h4>Every clock at once</h4>
-          <p>One row per person, hours running across. A column is one instant read on four
-            different clocks — no mental arithmetic, no "wait, is that my 3pm or yours?"</p></div>
-        <div class="claim"><h4>It has an opinion</h4>
-          <p>Hours are ranked by how many can make it, then by how civil the hour is for
-            everyone. It won't offer you 2:30am when an 8am exists.</p></div>
-      </div>
-      <div>
-        <div class="claim"><h4>Nobody has to sign up to be scheduled</h4>
-          <p>Add a colleague by city and hours. They never need an account for the overlap to
-            be right — invites are for people who want their own hours to follow them.</p></div>
-        <div class="claim"><h4>Ends in a calendar, not a maybe</h4>
-          <p>One tap opens Google Calendar with the event already filled in — time, title,
-            guests, every local time in the description. Or take the .ics.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <div class="band">
-      <h2>Stop doing timezone maths in your head.</h2>
-      <p class="sub">It takes about thirty seconds to see whether your team has a good hour at all.</p>
-      <a class="cta big" href="team/">Open Overlap</a>
-    </div>
-  </section>
+  <div class="band">
+    <h2>Stop doing timezone maths in your head.</h2>
+    <p>Thirty seconds to see whether your team has a good hour at all.</p>
+    <a class="btn2 lg inv" href="team/">Open Overlap</a>
+  </div>
 
   <footer>
-    <div class="row">
-      <span>Overlap — built by <a href="/">Jeremy Lasne</a>.</span>
-      <span class="sp"></span>
-      <a href="team/">Team</a><a href="plan/">Plan</a><a href="next/">Next</a>
+    <div class="fcols">
+      <div class="b">
+        <a class="brand" href="/overlap/"><span class="mark"></span>Overlap</a>
+        <p>The hour that works for everyone. Built for teams that stopped sharing a building.</p>
+      </div>
+      <div class="fcol">
+        <h5>Product</h5>
+        <a href="team/">Team</a><a href="plan/">Plan</a><a href="next/">What's next</a>
+      </div>
+      <div class="fcol">
+        <h5>More</h5>
+        <a href="#clock">World clock</a><a href="/">Jeremy Lasne</a>
+        <a href="https://github.com/jlasne/jeremyportfolio/tree/main/overlap">Source</a>
+      </div>
     </div>
+    <div class="fbot">Built by <a href="/">Jeremy Lasne</a>. Your hours, nothing more.</div>
   </footer>
 </div>
 
 <div class="toast" id="toast"></div>
-<script src="clock.js"></script>
+<script src="clock.js?v=4"></script>
+<script>
+addEventListener("scroll",function(){
+  document.getElementById("top").classList.toggle("stuck",scrollY>4);
+},{passive:true});
+</script>
 </body>
 </html>
