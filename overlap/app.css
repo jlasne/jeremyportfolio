@@ -120,12 +120,14 @@ main.nohero .hero{display:none}
 .hc .m{font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;opacity:.45;line-height:1.15}
 .hc.busy{background:var(--ink);color:#fff;box-shadow:inset -1px 0 0 rgba(255,255,255,.16)}
 .hc.busy .m{opacity:.5}
-.hc.part{background:rgba(0,0,0,.17)}
+.hc.part,.hc.off{background:rgba(0,0,0,.17)}
+.hc.off{color:var(--ink-2)}
 .hc.date .n{font-size:15px;font-weight:700;letter-spacing:-.02em}
 .hc.date .m{opacity:.75}
 .hc.sum{box-shadow:inset -1px 0 0 rgba(60,60,67,.10),inset 0 1px 0 var(--sep)}
 .hc.sum.busy{box-shadow:inset -1px 0 0 rgba(255,255,255,.16),inset 0 1px 0 var(--sep)}
 .hc.sum .n{font-size:11px;font-weight:600;opacity:.75}
+.hc.off.past{color:var(--ink-3)}
 .hc.past{color:var(--ink-3);
   background-image:repeating-linear-gradient(135deg,rgba(60,60,67,.20) 0 2px,transparent 2px 6px)}
 .hc.busy.past{color:rgba(255,255,255,.40);
@@ -291,3 +293,19 @@ textarea{font-family:var(--font)}
   .app{padding:0 48px}
   main,.dock,.foot{max-width:820px}
 }
+
+/* ── answering an invite: one screen, one question ── */
+.respond-only,.respond-only.on{display:none}
+body.responding .respond-only{display:block}
+body.responding .seg-wrap,
+body.responding .rail,
+body.responding #step0,
+body.responding #step1,
+body.responding #step2,
+body.responding .nav-act{display:none}
+body.responding .app{margin-left:0}
+body.responding #overlapSec{display:block}
+body.responding #editToggle{display:none}
+body.responding main,
+body.responding .dock,
+body.responding .foot{max-width:760px;margin-left:auto;margin-right:auto}

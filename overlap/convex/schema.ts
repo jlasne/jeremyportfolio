@@ -47,8 +47,13 @@ export default defineSchema({
     startHour: v.number(),
     endHour: v.number(),
     weekends: v.boolean(),
+    /* asleep between these hours, in their own clock */
+    sleepStart: v.optional(v.number()),
+    sleepEnd: v.optional(v.number()),
     /* hours carved out or given back by hand, as instants */
     overrides: v.optional(v.array(v.object({ ts: v.number(), free: v.boolean() }))),
+    /* hours their calendar says are already taken */
+    busy: v.optional(v.array(v.number())),
   })
     .index("by_team", ["teamId"])
     .index("by_user", ["userId"]),

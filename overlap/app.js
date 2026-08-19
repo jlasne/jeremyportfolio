@@ -3,7 +3,7 @@
    team/, plan/ and next/ are real pages so a link lands where it says,
    but moving between them is a pushState, not a reload.
    ═══════════════════════════════════════════════════════════════════ */
-document.getElementById("root").innerHTML = "<aside class=\"rail\"><a class=\"rail-brand\" href=\"/overlap/\"><svg class=\"rail-mark\" viewBox=\"0 0 64 56\" aria-hidden=\"true\"><g fill=\"currentColor\"><rect x=\"4\" y=\"13\" width=\"9\" height=\"30\" rx=\"4.5\"/><rect x=\"18\" y=\"4\" width=\"9\" height=\"48\" rx=\"4.5\"/><rect x=\"32\" y=\"17\" width=\"9\" height=\"22\" rx=\"4.5\"/><rect x=\"46\" y=\"9\" width=\"9\" height=\"38\" rx=\"4.5\"/></g><rect x=\"1\" y=\"24\" width=\"61\" height=\"7\" rx=\"3.5\" fill=\"var(--mark-cut,#fff)\"/></svg>Overlap</a><nav class=\"rail-nav\" id=\"railNav\"></nav><div class=\"rail-foot\" id=\"railFoot\"></div></aside><div class=\"app\">\n\n  <header class=\"nav\" id=\"nav\">\n    <div class=\"nav-bar\">\n      <span class=\"nav-title\">Overlap</span>\n      <span class=\"nav-sub\">The hour that works for the whole team.</span>\n      <button class=\"nav-act\" id=\"resetBtn\">Reset</button>\n    </div>\n    <div class=\"seg-wrap\">\n      <div class=\"seg\" id=\"seg\">\n        <div class=\"thumb\" id=\"segThumb\"></div>\n        <a href=\"../team/\" data-step=\"0\">Team</a>\n        <a href=\"../plan/\" data-step=\"1\">Plan</a>\n        <a href=\"../next/\" data-step=\"2\">Next</a>\n      </div>\n    </div>\n  </header>\n\n  <main>\n    <div class=\"hero\">\n      <h1 class=\"large-title\" id=\"bigTitle\">Your team</h1>\n      <p class=\"large-sub\" id=\"bigSub\">Everyone's hours, in their own timezone.</p>\n    </div>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 STEP 1 \u2014 TEAM \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"step on\" id=\"step0\">\n      <div class=\"sec\">\n        <div class=\"card\" id=\"acctCard\"></div>\n      </div>\n\n      <div class=\"sec\">\n        <div class=\"sechead\"><span id=\"teamHead\">People</span><b id=\"peopleCount\"></b></div>\n        <div class=\"card\" id=\"peopleList\"></div>\n        <div class=\"secfoot\">Working hours are what the overlap is built from.</div>\n      </div>\n\n      <div class=\"sec\" id=\"overlapSec\">\n        <div class=\"sechead\"><span>Overlap</span><button class=\"linkbtn\" id=\"editToggle\">Edit hours</button></div>\n        <div class=\"daytabs\" id=\"dayTabs\"></div>\n        <div class=\"wtb\">\n          <div class=\"wtblabs\" id=\"wtbLabs\"></div>\n          <div class=\"wtbscroll\" id=\"wtbScroll\"><div class=\"wtbgrid\" id=\"wtb\"></div></div>\n        </div>\n        <div class=\"legend\">\n          <i class=\"lg free\"></i><span>possible</span>\n          <i class=\"lg part\"></i><span>not everyone</span>\n          <i class=\"lg busy\"></i><span>no</span>\n          <span class=\"sp\"></span><span id=\"gridTz\"></span>\n        </div>\n        <div class=\"secfoot\" id=\"editFoot\"></div>\n      </div>\n    </section>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 STEP 2 \u2014 PLAN \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"step\" id=\"step1\">\n      <div class=\"sec\">\n        <div class=\"sechead\"><span>The meeting</span></div>\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Name</div></div>\n            <input id=\"titleInput\" style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\" placeholder=\"Intro call\" maxlength=\"80\">\n          </div>\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Length</div></div>\n            <div class=\"chips\" id=\"durChips\" style=\"padding:0;justify-content:flex-end\"></div>\n          </div>\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Days</div><div class=\"s\" id=\"windowSub\"></div></div>\n            <div class=\"stepper\">\n              <button id=\"winPrev\" aria-label=\"Earlier week\">\u2039</button><span></span><button id=\"winNext\" aria-label=\"Later week\">\u203a</button>\n            </div>\n          </div>\n        </div>\n      </div>\n      <div class=\"sec\">\n        <div class=\"sechead\"><span>Best times</span><b id=\"bestNote\"></b></div>\n        <div class=\"card\" id=\"bestList\"></div>\n        <div class=\"secfoot\" id=\"bestFoot\"></div>\n      </div>\n      <div class=\"sec\" id=\"actionsSec\">\n        <div class=\"btnrow\">\n          <button class=\"btn sec\" id=\"copyBtn\">Copy times</button>\n          <button class=\"btn sec\" id=\"icsBtn\">Apple Calendar</button>\n        </div>\n        <button class=\"btn ghost\" id=\"shareBtn\" style=\"margin-top:6px\">Copy a link to this plan</button>\n      </div>\n    </section>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 STEP 3 \u2014 FEEDBACK \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"step\" id=\"step2\">\n      <div class=\"sec\" id=\"reviewSec\"></div><div class=\"sec\" id=\"fbForm\">\n        <div class=\"sechead\"><span>What would you like to see?</span></div>\n        <div class=\"chips\" id=\"wantChips\"></div>\n        <div class=\"card\" style=\"margin-top:12px\">\n          <textarea id=\"fbText\" rows=\"4\" maxlength=\"800\" placeholder=\"Anything at all \u2014 what got in your way, what\u2019s missing, what you\u2019d pay for.\"></textarea>\n        </div>\n        <div class=\"card\" style=\"margin-top:12px\" id=\"fbEmailCard\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Email</div><div class=\"s\">If you want a reply.</div></div>\n            <input id=\"fbEmail\" type=\"email\" placeholder=\"Optional\" maxlength=\"80\" autocapitalize=\"off\" autocorrect=\"off\"\n                   style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\">\n          </div>\n        </div>\n        <div class=\"secfoot\" id=\"fbFoot\"></div>\n      </div>\n      <div class=\"sec\" id=\"fbThanks\" style=\"display:none\">\n        <div class=\"card\"><div class=\"empty\"><b>Thank you \u2014 noted.</b>Every line of this gets read. It decides what gets built next.</div></div>\n        <button class=\"btn sec\" id=\"fbAgain\" style=\"margin-top:14px\">Say something else</button>\n      </div>\n    </section>\n\n  </main>\n\n  <div class=\"dock\">\n    <div class=\"dock-hint\" id=\"dockHint\"></div>\n    <button class=\"btn\" id=\"primary\">Continue</button>\n  </div>\n\n  <p class=\"foot\" id=\"foot\"></p>\n</div>\n\n<div class=\"scrim\" id=\"scrim\"></div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u2014 add / edit a person \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"sheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"sheetCancel\">Cancel</button>\n    <span class=\"t\" id=\"sheetTitle\">Add person</span>\n    <button class=\"p\" id=\"sheetDone\">Done</button>\n  </div>\n  <div class=\"sheet-body\">\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>Name</label><input id=\"fName\" placeholder=\"Optional\" maxlength=\"40\"></div>\n        <div class=\"field\"><label>Email</label><input id=\"fEmail\" type=\"email\" placeholder=\"Optional \u2014 invites them\" maxlength=\"80\" autocapitalize=\"off\" autocorrect=\"off\"></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Working hours</span></div>\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"s-\">\u2212</button><span></span><button data-h=\"s+\">+</button></div><div class=\"v\" id=\"fStart\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>To</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"e-\">\u2212</button><span></span><button data-h=\"e+\">+</button></div><div class=\"v\" id=\"fEnd\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label style=\"width:auto;flex:1\">Weekends too</label><div class=\"switch\" id=\"fWeekend\"><i></i></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Timezone</span></div>\n    <div class=\"search\">\n      <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\"><circle cx=\"7\" cy=\"7\" r=\"5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M11 11l3.5 3.5\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n      <input id=\"citySearch\" placeholder=\"City or timezone\" autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\">\n    </div>\n    <div style=\"padding:0 16px\"><div class=\"card\" id=\"cityList\"></div></div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u2014 sign in \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"authSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"authCancel\">Cancel</button>\n    <span class=\"t\" id=\"authTitle\">Sign in</span>\n    <button class=\"p\" id=\"authGo\">Next</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\" id=\"authLede\">One email, one code. No password to forget.</p>\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>Email</label><input id=\"authEmail\" type=\"email\" placeholder=\"you@company.com\"\n          autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\"></div>\n        <div class=\"field\" id=\"authCodeField\" style=\"display:none\"><label>Code</label>\n          <input id=\"authCode\" inputmode=\"numeric\" maxlength=\"6\" placeholder=\"6 digits\"></div>\n      </div>\n    </div>\n    <p class=\"sheet-lede\" id=\"authNote\"></p>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u2014 invite \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"teamSheet\"><div class=\"grab\"></div><div class=\"sheet-nav\"><button id=\"teamClose\">Done</button><span class=\"t\">Teams</span><span style=\"width:44px\"></span></div><div class=\"sheet-body\"><p class=\"sheet-lede\">Keep a team per client, per project, per anything. They all stay put, and you can switch at any time.</p><div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"teamList\"></div></div><div style=\"padding:0 16px\" class=\"btnrow\" id=\"teamActs\"></div></div></div><div class=\"sheet\" id=\"inviteSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"inviteClose\">Done</button>\n    <span class=\"t\">Invite</span>\n    <button class=\"p\" id=\"inviteCopy\">Copy</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">Send this link. They pick their city and hours, and the overlap redraws itself.</p>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\"><div class=\"linkbox\" id=\"inviteLink\"></div></div></div>\n    <div style=\"padding:0 16px\"><button class=\"btn\" id=\"inviteCopyBig\">Copy invite link</button></div>\n  </div>\n</div>\n\n<div class=\"toast\" id=\"toast\"></div>";
+document.getElementById("root").innerHTML = "<aside class=\"rail\"><a class=\"rail-brand\" href=\"/overlap/\"><svg class=\"rail-mark\" viewBox=\"0 0 64 56\" aria-hidden=\"true\"><g fill=\"currentColor\"><rect x=\"4\" y=\"13\" width=\"9\" height=\"30\" rx=\"4.5\"/><rect x=\"18\" y=\"4\" width=\"9\" height=\"48\" rx=\"4.5\"/><rect x=\"32\" y=\"17\" width=\"9\" height=\"22\" rx=\"4.5\"/><rect x=\"46\" y=\"9\" width=\"9\" height=\"38\" rx=\"4.5\"/></g><rect x=\"1\" y=\"24\" width=\"61\" height=\"7\" rx=\"3.5\" fill=\"var(--mark-cut,#fff)\"/></svg>Overlap</a><nav class=\"rail-nav\" id=\"railNav\"></nav><div class=\"rail-foot\" id=\"railFoot\"></div></aside><div class=\"app\">\n\n  <header class=\"nav\" id=\"nav\">\n    <div class=\"nav-bar\">\n      <span class=\"nav-title\">Overlap</span>\n      <span class=\"nav-sub\">The hour that works for the whole team.</span>\n      <button class=\"nav-act\" id=\"resetBtn\">Reset</button>\n    </div>\n    <div class=\"seg-wrap\">\n      <div class=\"seg\" id=\"seg\">\n        <div class=\"thumb\" id=\"segThumb\"></div>\n        <a href=\"../team/\" data-step=\"0\">Team</a>\n        <a href=\"../plan/\" data-step=\"1\">Plan</a>\n        <a href=\"../next/\" data-step=\"2\">Next</a>\n      </div>\n    </div>\n  </header>\n\n  <main>\n    <div class=\"hero\">\n      <h1 class=\"large-title\" id=\"bigTitle\">Your team</h1>\n      <p class=\"large-sub\" id=\"bigSub\">Everyone's hours, in their own timezone.</p>\n    </div>\n\n    <section class=\"step respond-only\" id=\"respondPane\">\n      <div class=\"sec\">\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Your name</div></div>\n            <input id=\"respondName\" placeholder=\"So they know who answered\" maxlength=\"40\"\n                   style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\">\n          </div>\n          <div class=\"row tap\" data-respondcity=\"1\">\n            <div class=\"grow\"><div class=\"t\">You are in</div></div>\n            <div class=\"v\" id=\"respondCity\"></div><div class=\"chev\"></div>\n          </div>\n        </div>\n        <div class=\"secfoot\">Drag along your row below to cross out the hours you cannot do.</div>\n      </div>\n      <div class=\"sec\" id=\"respondDone\" style=\"display:none\">\n        <div class=\"card\"><div class=\"empty\"><b>Sent.</b>Change anything and send again \u2014 it replaces your answer.</div></div>\n      </div>\n    </section>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 STEP 1 \u2014 TEAM \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"step on\" id=\"step0\">\n      <div class=\"sec\">\n        <div class=\"card\" id=\"acctCard\"></div>\n      </div>\n\n      <div class=\"sec\">\n        <div class=\"sechead\"><span id=\"teamHead\">People</span><b id=\"peopleCount\"></b></div>\n        <div class=\"card\" id=\"peopleList\"></div>\n        <div class=\"secfoot\">Working hours are what the overlap is built from.</div>\n      </div>\n\n      <div class=\"sec\" id=\"overlapSec\">\n        <div class=\"sechead\"><span>Overlap</span><button class=\"linkbtn\" id=\"editToggle\">Edit hours</button></div>\n        <div class=\"daytabs\" id=\"dayTabs\"></div>\n        <div class=\"wtb\">\n          <div class=\"wtblabs\" id=\"wtbLabs\"></div>\n          <div class=\"wtbscroll\" id=\"wtbScroll\"><div class=\"wtbgrid\" id=\"wtb\"></div></div>\n        </div>\n        <div class=\"legend\">\n          <i class=\"lg free\"></i><span>can meet</span>\n          <i class=\"lg part\"></i><span>awake, off hours</span>\n          <i class=\"lg busy\"></i><span>asleep or busy</span>\n          <span class=\"sp\"></span><span id=\"gridTz\"></span>\n        </div>\n        <div class=\"secfoot\" id=\"editFoot\"></div>\n      </div>\n    </section>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 STEP 2 \u2014 PLAN \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"step\" id=\"step1\">\n      <div class=\"sec\">\n        <div class=\"sechead\"><span>The meeting</span></div>\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Name</div></div>\n            <input id=\"titleInput\" style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\" placeholder=\"Intro call\" maxlength=\"80\">\n          </div>\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Length</div></div>\n            <div class=\"chips\" id=\"durChips\" style=\"padding:0;justify-content:flex-end\"></div>\n          </div>\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Days</div><div class=\"s\" id=\"windowSub\"></div></div>\n            <div class=\"stepper\">\n              <button id=\"winPrev\" aria-label=\"Earlier week\">\u2039</button><span></span><button id=\"winNext\" aria-label=\"Later week\">\u203a</button>\n            </div>\n          </div>\n        </div>\n      </div>\n      <div class=\"sec\">\n        <div class=\"sechead\"><span>Best times</span><b id=\"bestNote\"></b></div>\n        <div class=\"card\" id=\"bestList\"></div>\n        <div class=\"secfoot\" id=\"bestFoot\"></div>\n      </div>\n      <div class=\"sec\" id=\"actionsSec\">\n        <div class=\"btnrow\">\n          <button class=\"btn sec\" id=\"copyBtn\">Copy times</button>\n          <button class=\"btn sec\" id=\"icsBtn\">Apple Calendar</button>\n        </div>\n        <button class=\"btn ghost\" id=\"shareBtn\" style=\"margin-top:6px\">Copy a link to this plan</button>\n      </div>\n    </section>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 STEP 3 \u2014 FEEDBACK \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"step\" id=\"step2\">\n      <div class=\"sec\" id=\"reviewSec\"></div><div class=\"sec\" id=\"fbForm\">\n        <div class=\"sechead\"><span>What would you like to see?</span></div>\n        <div class=\"chips\" id=\"wantChips\"></div>\n        <div class=\"card\" style=\"margin-top:12px\">\n          <textarea id=\"fbText\" rows=\"4\" maxlength=\"800\" placeholder=\"Anything at all \u2014 what got in your way, what\u2019s missing, what you\u2019d pay for.\"></textarea>\n        </div>\n        <div class=\"card\" style=\"margin-top:12px\" id=\"fbEmailCard\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Email</div><div class=\"s\">If you want a reply.</div></div>\n            <input id=\"fbEmail\" type=\"email\" placeholder=\"Optional\" maxlength=\"80\" autocapitalize=\"off\" autocorrect=\"off\"\n                   style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\">\n          </div>\n        </div>\n        <div class=\"secfoot\" id=\"fbFoot\"></div>\n      </div>\n      <div class=\"sec\" id=\"fbThanks\" style=\"display:none\">\n        <div class=\"card\"><div class=\"empty\"><b>Thank you \u2014 noted.</b>Every line of this gets read. It decides what gets built next.</div></div>\n        <button class=\"btn sec\" id=\"fbAgain\" style=\"margin-top:14px\">Say something else</button>\n      </div>\n    </section>\n\n  </main>\n\n  <div class=\"dock\">\n    <div class=\"dock-hint\" id=\"dockHint\"></div>\n    <button class=\"btn\" id=\"primary\">Continue</button>\n  </div>\n\n  <p class=\"foot\" id=\"foot\"></p>\n</div>\n\n<div class=\"scrim\" id=\"scrim\"></div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u2014 add / edit a person \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"sheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"sheetCancel\">Cancel</button>\n    <span class=\"t\" id=\"sheetTitle\">Add person</span>\n    <button class=\"p\" id=\"sheetDone\">Done</button>\n  </div>\n  <div class=\"sheet-body\">\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>Name</label><input id=\"fName\" placeholder=\"Optional\" maxlength=\"40\"></div>\n        <div class=\"field\"><label>Email</label><input id=\"fEmail\" type=\"email\" placeholder=\"Optional \u2014 invites them\" maxlength=\"80\" autocapitalize=\"off\" autocorrect=\"off\"></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Working hours</span></div>\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"s-\">\u2212</button><span></span><button data-h=\"s+\">+</button></div><div class=\"v\" id=\"fStart\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>To</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"e-\">\u2212</button><span></span><button data-h=\"e+\">+</button></div><div class=\"v\" id=\"fEnd\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label style=\"width:auto;flex:1\">Weekends too</label><div class=\"switch\" id=\"fWeekend\"><i></i></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Asleep</span></div>\n    <div style=\"padding:0 16px 6px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"z-\">\u2212</button><span></span><button data-h=\"z+\">+</button></div><div class=\"v\" id=\"fSleep\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>Until</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"w-\">\u2212</button><span></span><button data-h=\"w+\">+</button></div><div class=\"v\" id=\"fWake\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Calendar</span></div>\n    <div style=\"padding:0 16px 6px\"><div class=\"card\" id=\"gcalCard\"></div></div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Timezone</span></div>\n    <div class=\"search\">\n      <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\"><circle cx=\"7\" cy=\"7\" r=\"5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M11 11l3.5 3.5\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n      <input id=\"citySearch\" placeholder=\"City or timezone\" autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\">\n    </div>\n    <div style=\"padding:0 16px\"><div class=\"card\" id=\"cityList\"></div></div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u2014 sign in \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"authSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"authCancel\">Cancel</button>\n    <span class=\"t\" id=\"authTitle\">Sign in</span>\n    <button class=\"p\" id=\"authGo\">Next</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\" id=\"authLede\">One email, one code. No password to forget.</p>\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>Email</label><input id=\"authEmail\" type=\"email\" placeholder=\"you@company.com\"\n          autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\"></div>\n        <div class=\"field\" id=\"authCodeField\" style=\"display:none\"><label>Code</label>\n          <input id=\"authCode\" inputmode=\"numeric\" maxlength=\"6\" placeholder=\"6 digits\"></div>\n      </div>\n    </div>\n    <p class=\"sheet-lede\" id=\"authNote\"></p>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u2014 invite \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"teamSheet\"><div class=\"grab\"></div><div class=\"sheet-nav\"><button id=\"teamClose\">Done</button><span class=\"t\">Teams</span><span style=\"width:44px\"></span></div><div class=\"sheet-body\"><p class=\"sheet-lede\">Keep a team per client, per project, per anything. They all stay put, and you can switch at any time.</p><div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"teamList\"></div></div><div style=\"padding:0 16px\" class=\"btnrow\" id=\"teamActs\"></div></div></div><div class=\"sheet\" id=\"inviteSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"inviteClose\">Done</button>\n    <span class=\"t\">Invite</span>\n    <button class=\"p\" id=\"inviteCopy\">Copy</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">Two ways in. The first asks one question and needs no account.</p>\n    <div style=\"padding:0 16px 8px\" id=\"askWrap\">\n      <div class=\"sechead\"><span>Ask when they can\u2019t</span></div>\n      <div class=\"card\"><div class=\"linkbox\" id=\"askLink\"></div></div>\n      <button class=\"btn\" id=\"askCopy\" style=\"margin-top:10px\">Copy the question link</button>\n    </div>\n    <div style=\"padding:0 20px\"><div class=\"sechead\"><span>Invite to the team</span></div></div>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\"><div class=\"linkbox\" id=\"inviteLink\"></div></div></div>\n    <div style=\"padding:0 16px\"><button class=\"btn\" id=\"inviteCopyBig\">Copy invite link</button></div>\n  </div>\n</div>\n\n<div class=\"toast\" id=\"toast\"></div>";
 
 (function(){
 "use strict";
@@ -134,7 +134,9 @@ var KEY="overlap.v3", OLDKEY="meetontime.v2";
 var uid=0;
 function newPerson(name,tz,you){
   return {id:"p"+(++uid)+"_"+Math.floor(Math.random()*1e6),name:name,tz:tz,email:"",
-          s:9,e:18,wknd:false,you:!!you,ov:{}};
+          s:9,e:18,wknd:false,you:!!you,ov:{},
+          sl:23,sw:7,          /* asleep from 23:00 to 07:00 */
+          busy:{},gcal:0};     /* hours the calendar says are taken */
 }
 function todayStart(tz){ var p=zp(Date.now(),tz); return wall(p.y,p.m,p.d,0,0,tz); }
 
@@ -158,14 +160,19 @@ function freshState(){
 function peopleArr(){
   return S.people.map(function(p){
     var ov=[],k; for(k in p.ov) if(p.ov.hasOwnProperty(k)) ov.push([+k,p.ov[k]?1:0]);
-    return [p.id,p.name,p.tz,p.email,p.s,p.e,p.wknd?1:0,p.you?1:0,ov];
+    var bz=[],bk;
+    for(bk in p.busy||{}) if(p.busy.hasOwnProperty(bk)) bz.push(+bk);
+    return [p.id,p.name,p.tz,p.email,p.s,p.e,p.wknd?1:0,p.you?1:0,ov,
+            p.sl==null?23:p.sl,p.sw==null?7:p.sw,bz,p.gcal||0];
   });
 }
 function readPeople(arr){
   S.people=(arr||[]).map(function(a){
     var p={id:a[0],name:a[1]||"",tz:a[2],email:a[3]||"",s:+a[4],e:+a[5],
-           wknd:!!a[6],you:!!a[7],ov:{}};
+           wknd:!!a[6],you:!!a[7],ov:{},
+           sl:a[9]==null?23:+a[9],sw:a[10]==null?7:+a[10],busy:{},gcal:+(a[12]||0)};
     (a[8]||[]).forEach(function(pair){ p.ov[pair[0]]=!!pair[1]; });
+    (a[11]||[]).forEach(function(ts){ p.busy[ts]=1; });
     try{ new Intl.DateTimeFormat("en",{timeZone:p.tz}); }catch(e){ p.tz=LOCAL_TZ; }
     return p;
   });
@@ -241,13 +248,26 @@ function byId(id){ for(var i=0;i<S.people.length;i++) if(S.people[i].id===id) re
 function dispTz(){ var d=disp(); return d?d.tz:LOCAL_TZ; }
 
 /* ═══════════════ availability ═══════════════ */
-function isFree(p,ts){
-  var k=""+ts;
-  if(p.ov[k]!==undefined) return !!p.ov[k];
-  var z=zp(ts,p.tz), mins=z.H*60+z.M, d=dow(ts,p.tz);
-  if(!p.wknd && (d===0||d===6)) return false;
-  return mins>=p.s*60 && mins+SLOT<=p.e*60;
+/* ── what an hour is for one person ───────────────────────────────
+   "free"  they can meet
+   "off"   awake, but outside their working hours — askable
+   "sleep" asleep, or their calendar already has them
+   A hand edit wins over everything: if you say you can take a 6am, you can. */
+function asleep(p,ts){
+  var z=zp(ts,p.tz), h=z.H+z.M/60, a=p.sl==null?23:p.sl, b=p.sw==null?7:p.sw;
+  if(a===b) return false;
+  return a<b ? (h>=a&&h<b) : (h>=a||h<b);
 }
+function pstate(p,ts){
+  var k=""+ts;
+  if(p.ov[k]!==undefined) return p.ov[k]?"free":"off";
+  if(p.busy&&p.busy[k]) return "sleep";
+  if(asleep(p,ts)) return "sleep";
+  var z=zp(ts,p.tz), mins=z.H*60+z.M, d=dow(ts,p.tz);
+  if(!p.wknd && (d===0||d===6)) return "off";
+  return (mins>=p.s*60 && mins+SLOT<=p.e*60) ? "free" : "off";
+}
+function isFree(p,ts){ return pstate(p,ts)==="free"; }
 /* free for the whole meeting, not just its first slot */
 function freeFor(p,ts,dur){
   var n=Math.ceil(dur/SLOT), i;
@@ -337,7 +357,7 @@ function initials(p){
   var n=(p.name||(p.tz?tzCity(p.tz):"")||"?").trim().split(/\s+/);
   return ((n[0]||"?")[0]+(n.length>1?n[n.length-1][0]:"")).toUpperCase();
 }
-function pname(p){ return p.name || tzCity(p.tz); }
+function pname(p){ return p.name || (responding&&p.you?"You":tzCity(p.tz)); }
 var toastT;
 function toast(msg){
   var t=$("#toast"); t.textContent=msg; t.classList.add("on");
@@ -462,8 +482,9 @@ function renderWTB(){
     var city=tzCity(p.tz), sub=(pname(p)===city?"":city+" · ")+tzLabel(p.tz,day);
     lhtml+='<div class="rlab"><b>'+esc(pname(p))+"</b><span>"+esc(sub)+"</span></div>";
     for(i=0;i<24;i++){
-      var ts=stamps[i], nd=(i===0)||dayKey(ts,p.tz)!==dayKey(stamps[i-1],p.tz);
-      html+='<div class="hc'+(isFree(p,ts)?"":" busy")+(nd?" date":"")+
+      var ts=stamps[i], nd=(i===0)||dayKey(ts,p.tz)!==dayKey(stamps[i-1],p.tz),
+          st=pstate(p,ts);
+      html+='<div class="hc'+(st==="free"?"":(st==="off"?" off":" busy"))+(nd?" date":"")+
             (ts+3600000<now?" past":"")+'" data-ts="'+ts+'" data-col="'+i+
             '" data-p="'+p.id+'">'+cellLabel(ts,p.tz,nd)+"</div>";
     }
@@ -476,7 +497,7 @@ function renderWTB(){
           (n>0&&n<total?'<span class="n">'+n+"/"+total+"</span>":"")+"</div>";
   }
   g.innerHTML=html; labs.innerHTML=lhtml;
-  g.classList.toggle("edit",editing);
+  g.classList.toggle("edit",editing||responding);
   markColumn(true);
   if(!g.querySelector(".colmark")){
     var bc=8, bn=-1, sc=$("#wtbScroll"), cw=g.firstChild?g.firstChild.offsetWidth:45;
@@ -586,7 +607,10 @@ function adoptMembers(list){
   S.people=list.map(function(m){
     var p=newPerson(m.name,m.tz,!!m.isYou);
     p.mid=m._id; p.email=m.email||""; p.s=m.startHour; p.e=m.endHour; p.wknd=!!m.weekends;
+    if(m.sleepStart!=null) p.sl=m.sleepStart;
+    if(m.sleepEnd!=null) p.sw=m.sleepEnd;
     (m.overrides||[]).forEach(function(o){ p.ov[o.ts]=o.free; });
+    (m.busy||[]).forEach(function(ts){ p.busy[ts]=1; });
     return p;
   });
   if(!byId(S.dispId)) S.dispId=(S.people[0]||{}).id;
@@ -612,8 +636,11 @@ function teamId(){ return inTeam()?ME.team.id:S.cur; }
 function memberArgs(p){
   var ov=[], k;
   for(k in p.ov) if(p.ov.hasOwnProperty(k)) ov.push({ts:+k,free:!!p.ov[k]});
+  var busy=[],b;
+  for(b in p.busy||{}) if(p.busy.hasOwnProperty(b)) busy.push(+b);
   return {name:p.name,tz:p.tz,email:p.email||"",startHour:p.s,endHour:p.e,
-          weekends:!!p.wknd,overrides:ov};
+          weekends:!!p.wknd,overrides:ov,
+          sleepStart:p.sl==null?23:p.sl,sleepEnd:p.sw==null?7:p.sw,busy:busy};
 }
 function syncPerson(p){
   if(!inTeam()||!p.mid) return;
@@ -651,6 +678,153 @@ function flushFeedback(){
   if(!q.length) return;
   Promise.all(q.map(function(r){ return cx("feedback.send",r).catch(function(){}); }))
     .then(function(){ try{ localStorage.removeItem(QKEY); }catch(e){} });
+}
+
+/* ═══════════════ Answering an invite ═══════════════
+   #r=<code> opens the app as the person being asked. They pick their city,
+   mark the hours they cannot do, and it goes back to the team. No account,
+   no email — the same bargain as a shared document. */
+var RKEY="overlap.seat";
+var respondCode=(location.hash.match(/^#r=([A-Za-z0-9_-]+)/)||[])[1]||"";
+var responding=false, mySeat="";
+function seatFor(code){
+  try{ return JSON.parse(localStorage.getItem(RKEY)||"{}")[code]||""; }catch(e){ return ""; }
+}
+function keepSeat(code,id){
+  try{
+    var m=JSON.parse(localStorage.getItem(RKEY)||"{}");
+    m[code]=id; localStorage.setItem(RKEY,JSON.stringify(m));
+  }catch(e){}
+}
+function enterRespond(){
+  responding=true;
+  mySeat=seatFor(respondCode);
+  document.body.classList.add("responding");
+  history.replaceState(null,"",location.pathname);
+  return cx("teams.respondInfo",{invite:respondCode,memberId:mySeat||undefined})
+    .then(function(r){
+      if(!r) throw new Error("That link has expired");
+      S.teams=[{id:"resp",name:r.team.name,p:[]}]; S.cur="resp";
+      adoptMembers(r.members);
+      var me=S.people.filter(function(p){ return p.you; })[0];
+      if(!me){                                  /* first visit: take a seat */
+        me=newPerson("",LOCAL_TZ,true);
+        S.people.push(me);
+      }
+      S.dispId=me.id; S.paint=me.id;
+      renderAll();
+      $("#respondName").value=me.name||"";
+      $("#respondCity").textContent=tzCity(me.tz);
+      $("#respondName").addEventListener("input",function(){
+        var y=S.people.filter(function(q){ return q.you; })[0];
+        if(!y) return;
+        y.name=this.value.trim();
+        renderWTB();
+      });
+    });
+}
+function sendResponse(){
+  var me=S.people.filter(function(p){ return p.you; })[0];
+  if(!me) return;
+  me.name=$("#respondName").value.trim();
+  if(!me.name) return toast("Your name, so they know who answered");
+  var a=memberArgs(me);
+  a.invite=respondCode; a.memberId=mySeat||undefined;
+  $("#primary").disabled=true; $("#primary").textContent="Sending…";
+  cx("teams.respond",a).then(function(id){
+    mySeat=id; keepSeat(respondCode,id);
+    $("#primary").disabled=false; $("#primary").textContent="Send again";
+    $("#respondDone").style.display="";
+    haptic(); toast("Sent — they can see it now");
+  }).catch(function(e){
+    $("#primary").disabled=false; $("#primary").textContent="Send my answer";
+    toast(e.message);
+  });
+}
+
+/* ═══════════════ Google Calendar ═══════════════
+   The page asks Google for a short-lived token with one narrow scope and
+   reads free/busy directly. Nothing is stored, no event titles are ever
+   requested — only the blocks of time that are already taken. */
+var GID=window.OVERLAP_GOOGLE_CLIENT_ID||"";
+var gsiReady=false, gTokenClient=null;
+function loadGsi(){
+  if(!GID||gsiReady) return Promise.resolve(gsiReady);
+  return new Promise(function(res){
+    var sc=document.createElement("script");
+    sc.src="https://accounts.google.com/gsi/client";
+    sc.async=true; sc.defer=true;
+    sc.onload=function(){ gsiReady=true; res(true); };
+    sc.onerror=function(){ res(false); };
+    document.head.appendChild(sc);
+  });
+}
+function gToken(){
+  return loadGsi().then(function(okGsi){
+    if(!okGsi) throw new Error("Google could not be reached");
+    return new Promise(function(res,rej){
+      gTokenClient=google.accounts.oauth2.initTokenClient({
+        client_id:GID,
+        scope:"https://www.googleapis.com/auth/calendar.freebusy",
+        callback:function(r){
+          if(r&&r.access_token) res(r.access_token);
+          else rej(new Error("Calendar access was declined"));
+        },
+        error_callback:function(){ rej(new Error("Calendar access was declined")); }
+      });
+      gTokenClient.requestAccessToken({prompt:""});
+    });
+  });
+}
+/* busy blocks → the hours they cover, in this person's clock */
+function markBusy(p,blocks,from,to){
+  p.busy={};
+  var step=SLOT*60000, ts;
+  blocks.forEach(function(b){
+    var a=Date.parse(b.start), z=Date.parse(b.end);
+    if(isNaN(a)||isNaN(z)) return;
+    for(ts=Math.floor(Math.max(a,from)/step)*step; ts<Math.min(z,to); ts+=step) p.busy[ts]=1;
+  });
+  p.gcal=Date.now();
+}
+function syncCalendar(p){
+  if(!GID) return Promise.reject(new Error("Google is not configured"));
+  var days=dayStarts(), from=days[0], to=days[DAYS-1]+86400000;
+  return gToken().then(function(tok){
+    return fetch("https://www.googleapis.com/calendar/v3/freeBusy",{
+      method:"POST",
+      headers:{Authorization:"Bearer "+tok,"Content-Type":"application/json"},
+      body:JSON.stringify({
+        timeMin:new Date(from).toISOString(),
+        timeMax:new Date(to).toISOString(),
+        timeZone:p.tz,
+        items:[{id:"primary"}]
+      })
+    });
+  }).then(function(r){ return r.json(); }).then(function(j){
+    if(j.error) throw new Error(j.error.message||"Calendar refused");
+    var cal=(j.calendars||{}).primary||{};
+    if(cal.errors&&cal.errors.length) throw new Error("That calendar could not be read");
+    markBusy(p,cal.busy||[],from,to);
+    syncPerson(p);
+    afterChange();
+    var n=(cal.busy||[]).length;
+    toast(n?("Calendar read — "+n+(n===1?" block":" blocks")+" taken"):"Calendar read — nothing booked");
+  });
+}
+function renderGcalCard(){
+  var c=$("#gcalCard");
+  if(!c) return;
+  if(!GID){
+    c.innerHTML='<div class="row"><div class="grow"><div class="t">Not set up</div>'+
+      '<div class="s">Add a Google client ID to read busy times.</div></div></div>';
+    return;
+  }
+  var p=draft&&draft.id?byId(draft.id):null, n=p&&p.busy?Object.keys(p.busy).length:0;
+  c.innerHTML='<div class="row tap" data-gcal="1"><div class="plus">↻</div>'+
+    '<div class="grow"><div class="t">'+(p&&p.gcal?"Read again":"Read my busy times")+"</div>"+
+    '<div class="s">'+(p&&p.gcal?(n+(n===1?" hour":" hours")+" taken this week")
+      :"Google Calendar, free/busy only — never the titles")+"</div></div></div>";
 }
 
 /* ═══════════════ account & team ═══════════════ */
@@ -719,7 +893,15 @@ function inviteUrl(){
   if(LIVE&&ME&&ME.team) return location.origin+location.pathname+"#t="+ME.team.invite;
   return shareUrl();
 }
+/* the seamless one: no account, one question, straight back to the team */
+function askUrl(){
+  if(LIVE&&ME&&ME.team) return location.origin+basePath()+"/team/#r="+ME.team.invite;
+  return "";
+}
 function openInvite(){
+  var ask=askUrl();
+  $("#askWrap").style.display=ask?"":"none";
+  $("#askLink").textContent=ask;
   $("#inviteLink").textContent=inviteUrl();
   $("#scrim").classList.add("on"); $("#inviteSheet").classList.add("on");
   document.body.style.overflow="hidden";
@@ -875,6 +1057,14 @@ function renderRail(){
        (guest()?"Sign in to keep this":"Keep this on every device")+"</span></span></a>");
 }
 function renderAll(){
+  if(responding){
+    var rp=$("#respondPane"), ov=$("#overlapSec");
+    if(ov.parentNode!==rp) rp.appendChild(ov);
+    renderDays(); renderWTB(); renderRespondDock();
+    $("#bigTitle").textContent="When can’t you?";
+    $("#bigSub").textContent="Everyone below is waiting on your row. Cross out what does not work.";
+    return;
+  }
   renderAcct(); renderPeople(); renderDays(); renderRail();
   if(S.step<2) renderWTB();
   if(S.step===1) renderBest();
@@ -885,8 +1075,9 @@ function setStep(n,quiet){
   S.step=n;
   if(!quiet && location.pathname.replace(/\/$/,"")!==basePath()+"/"+PATHS[n])
     history.pushState({step:n},"",basePath()+"/"+PATHS[n]+"/"+location.hash);
-  var i, secs=document.querySelectorAll(".step");
-  for(i=0;i<secs.length;i++) secs[i].classList.toggle("on",i===n);
+  /* only the three numbered steps — #respondPane is a .step too, and it
+     answers to body.responding, never to the tab you are on. */
+  var i; for(i=0;i<3;i++) $("#step"+i).classList.toggle("on",i===n);
   $("#segThumb").style.width="calc((100% - 4px)/3)";
   $("#segThumb").style.transform="translateX("+(n*100)+"%)";
   $("#bigTitle").textContent=COPY[n][0];
@@ -896,6 +1087,13 @@ function setStep(n,quiet){
   placeOverlap(n);
   renderAll();
   window.scrollTo({top:0,behavior:"smooth"});
+}
+function renderRespondDock(){
+  var b=$("#primary"), h=$("#dockHint"), me=S.people.filter(function(p){ return p.you; })[0];
+  var n=me?Object.keys(me.ov).filter(function(k){ return !me.ov[k]; }).length:0;
+  b.disabled=false;
+  b.textContent=mySeat?"Send again":"Send my answer";
+  h.textContent=n?(n+(n===1?" hour":" hours")+" crossed out"):"Cross out what does not work";
 }
 function renderDock(){
   var b=$("#primary"), h=$("#dockHint"), tz=dispTz(), zones={}, n=0, k;
@@ -924,8 +1122,9 @@ function renderDock(){
 var draft=null, draftIsNew=false;
 function openSheet(p){
   draftIsNew=!p;
-  draft=p?{id:p.id,name:p.name,tz:p.tz,email:p.email,s:p.s,e:p.e,wknd:p.wknd}:
-          {id:null,name:"",tz:LOCAL_TZ,email:"",s:9,e:18,wknd:false};
+  draft=p?{id:p.id,name:p.name,tz:p.tz,email:p.email,s:p.s,e:p.e,wknd:p.wknd,
+           sl:p.sl==null?23:p.sl,sw:p.sw==null?7:p.sw}:
+          {id:null,name:"",tz:LOCAL_TZ,email:"",s:9,e:18,wknd:false,sl:23,sw:7};
   $("#sheetTitle").textContent=p?"Edit person":"Add person";
   $("#fName").value=draft.name; $("#fEmail").value=draft.email;
   $("#citySearch").value="";
@@ -940,6 +1139,9 @@ function closeSheet(){
 function renderDraft(){
   $("#fStart").textContent=fmtHour(draft.s);
   $("#fEnd").textContent=fmtHour(draft.e);
+  $("#fSleep").textContent=fmtHour(draft.sl);
+  $("#fWake").textContent=fmtHour(draft.sw);
+  renderGcalCard();
   $("#fWeekend").classList.toggle("on",draft.wknd);
   var all=$("#cityList").querySelectorAll("[data-tzsel]"), i;
   for(i=0;i<all.length;i++) all[i].querySelector(".mark").style.opacity=
@@ -971,6 +1173,7 @@ function commitDraft(){
   if(!p){ closeSheet(); return; }
   if(!draftIsNew) p.tz=draft.tz;
   p.name=draft.name; p.email=draft.email; p.s=draft.s; p.e=draft.e; p.wknd=draft.wknd;
+  p.sl=draft.sl; p.sw=draft.sw;
   closeSheet();
   if(inTeam()){
     if(draftIsNew){ var na=memberArgs(p); na.teamId=teamId(); mutate("teams.addMember",na); }
@@ -1071,6 +1274,19 @@ document.addEventListener("click",function(ev){
   if((el=up("data-signin"))){ openAuth(); return; }
   if((el=up("data-invite"))){ openInvite(); return; }
   if((el=up("data-teams"))){ openTeams(); return; }
+  if((el=up("data-respondcity"))){
+    var me=S.people.filter(function(p){ return p.you; })[0];
+    if(me) openSheet(me);
+    return;
+  }
+  if((el=up("data-gcal"))){
+    var who=draft&&draft.id?byId(draft.id):null;
+    if(!who) return toast("Save this person first");
+    toast("Asking Google…");
+    syncCalendar(who).then(function(){ renderGcalCard(); })
+      .catch(function(e){ toast(e.message); });
+    return;
+  }
   if((el=up("data-pickteam"))){ switchTeam(el.getAttribute("data-pickteam")); closeTeams(); return; }
   if((el=up("data-newteam"))){
     var nn=prompt("Name this team","Team "+(teamList().length+1));
@@ -1114,6 +1330,10 @@ document.addEventListener("click",function(ev){
     if(k==="s+") draft.s=Math.min(draft.e-1,draft.s+1);
     if(k==="e-") draft.e=Math.max(draft.s+1,draft.e-1);
     if(k==="e+") draft.e=Math.min(24,draft.e+1);
+    if(k==="z-") draft.sl=(draft.sl+23)%24;
+    if(k==="z+") draft.sl=(draft.sl+1)%24;
+    if(k==="w-") draft.sw=(draft.sw+23)%24;
+    if(k==="w+") draft.sw=(draft.sw+1)%24;
     renderDraft(); return;
   }
 });
@@ -1128,6 +1348,7 @@ $("#inviteClose").addEventListener("click",function(){
   document.body.style.overflow="";
 });
 $("#inviteCopy").addEventListener("click",function(){ copyText(inviteUrl(),"Invite link copied"); });
+$("#askCopy").addEventListener("click",function(){ copyText(askUrl(),"Question link copied"); });
 $("#inviteCopyBig").addEventListener("click",function(){ copyText(inviteUrl(),"Invite link copied"); });
 $("#fbAgain").addEventListener("click",function(){
   $("#fbThanks").style.display="none"; $("#fbForm").style.display=""; renderDock();
@@ -1150,6 +1371,7 @@ $("#resetBtn").addEventListener("click",function(){
   freshState(); afterChange(); setStep(0);
 });
 $("#primary").addEventListener("click",function(){
+  if(responding) return sendResponse();
   if(S.step===0) return setStep(1);
   if(S.step===1) return setStep(2);
   /* the last step: say something if you want to, then the event gets made */
@@ -1187,7 +1409,9 @@ function applyPaint(el){
   if(isFree(p,ts)===painting.val) return;
   delete p.ov[k];
   if(isFree(p,ts)!==painting.val) p.ov[k]=painting.val;
-  el.classList.toggle("busy",!painting.val);
+  var st=pstate(p,ts);
+  el.classList.toggle("busy",st==="sleep");
+  el.classList.toggle("off",st==="off");
   refreshSum(+el.getAttribute("data-col"),ts);
 }
 function takeSlot(ts){
@@ -1196,11 +1420,15 @@ function takeSlot(ts){
 /* pointerdown paints (edit mode only) — picking waits for a real click, so a
    sideways swipe scrolls the strip instead of booking an hour */
 $("#wtb").addEventListener("pointerdown",function(ev){
-  if(!editing) return;
+  if(!editing && !responding) return;
   var el=ev.target.closest?ev.target.closest(".hc"):null;
   if(!el) return;
   var pid=el.getAttribute("data-p");
   if(!pid) return;
+  if(responding){                         /* only ever your own row */
+    var me=S.people.filter(function(q){ return q.you; })[0];
+    if(!me || pid!==me.id) return;
+  }
   painting={id:pid,val:!isFree(byId(pid),+el.getAttribute("data-ts"))};
   ev.preventDefault();
   if(this.setPointerCapture) this.setPointerCapture(ev.pointerId);
@@ -1221,7 +1449,9 @@ $("#wtb").addEventListener("pointermove",function(ev){
 window.addEventListener("pointerup",function(){
   if(!painting) return;
   var who=byId(painting.id);
-  painting=null; _auto=null; save(); renderBest(); renderDock();
+  painting=null; _auto=null;
+  if(responding){ renderRespondDock(); return; }
+  save(); renderBest(); renderDock();
   if(who) syncPerson(who);
 });
 $("#editToggle").addEventListener("click",function(){
@@ -1243,7 +1473,14 @@ window.addEventListener("scroll",function(){
 /* ═══════════════ boot ═══════════════ */
 /* With a backend connected these pages need an account. Without one there
    is nothing to sign in to, so the app runs locally and lets you through. */
-if(LIVE && !token() && !guest() && location.hash.indexOf("#t=")!==0){
+if(LIVE && respondCode){
+  enterRespond().catch(function(e){
+    document.body.classList.remove("responding");
+    responding=false;
+    toast(e.message||"That link has expired");
+  });
+}
+if(LIVE && !token() && !guest() && !respondCode && location.hash.indexOf("#t=")!==0){
   location.replace(basePath()+"/login/?next="+encodeURIComponent(location.pathname));
 }
 var cameFromLink=location.hash.indexOf("#p=")===0;
@@ -1252,8 +1489,8 @@ if(cameFromLink){
   history.replaceState(null,"",location.pathname);
   save();
 }
-if(sel()!==null){ var _d=dayIndex(sel()); if(_d>=0) S.day=_d; }
-(function(){
+if(!responding && sel()!==null){ var _d=dayIndex(sel()); if(_d>=0) S.day=_d; }
+if(!responding)(function(){
   var tabs=$("#seg").querySelectorAll("a[data-step]"), b=basePath(), i;
   for(i=0;i<tabs.length;i++) tabs[i].setAttribute("href",b+"/"+PATHS[i]+"/");
 })();
@@ -1280,10 +1517,15 @@ if(LIVE){
     }
     flushFeedback();
     if(pendingInvite && token()) acceptInvite().then(afterChange);
-    else {
-      if(pendingInvite){ openAuth(); $("#authLede").textContent="Sign in to join the team you were invited to."; }
+    else if(pendingInvite){
+      openAuth(); $("#authLede").textContent="Sign in to join the team you were invited to.";
       afterChange();
     }
+    /* Signed in on the login page, but never through the sheet that used to
+       make the team. Make it here, once, so the invite and question links
+       exist the moment you land. */
+    else if(token() && ME && !ME.team) ensureTeam().then(afterChange,function(){ afterChange(); });
+    else afterChange();
   });
 }
 /* keep the clocks honest without a heartbeat the phone has to pay for */

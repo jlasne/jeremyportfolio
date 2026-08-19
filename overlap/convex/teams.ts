@@ -3,6 +3,15 @@ import { Doc, Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 
 const overrideShape = v.array(v.object({ ts: v.number(), free: v.boolean() }));
+const hoursShape = {
+  startHour: v.number(),
+  endHour: v.number(),
+  weekends: v.boolean(),
+  sleepStart: v.optional(v.number()),
+  sleepEnd: v.optional(v.number()),
+  overrides: v.optional(overrideShape),
+  busy: v.optional(v.array(v.number())),
+};
 
 /** Resolves a session token to its user, or null. Every call goes through here. */
 async function whoIs(ctx: QueryCtx | MutationCtx, token: string): Promise<Doc<"users"> | null> {
@@ -74,7 +83,10 @@ export const me = query({
         startHour: m.startHour,
         endHour: m.endHour,
         weekends: m.weekends,
+        sleepStart: m.sleepStart ?? 23,
+        sleepEnd: m.sleepEnd ?? 7,
         overrides: m.overrides ?? [],
+        busy: m.busy ?? [],
         isYou: m.userId === user._id,
       })),
     };
@@ -184,10 +196,7 @@ export const addMember = mutation({
     name: v.string(),
     tz: v.string(),
     email: v.optional(v.string()),
-    startHour: v.number(),
-    endHour: v.number(),
-    weekends: v.boolean(),
-    overrides: v.optional(overrideShape),
+    ...hoursShape,
   },
   handler: async (ctx, args) => {
     const user = await mustBe(ctx, args.token);
@@ -200,7 +209,10 @@ export const addMember = mutation({
       startHour: args.startHour,
       endHour: args.endHour,
       weekends: args.weekends,
+      sleepStart: args.sleepStart,
+      sleepEnd: args.sleepEnd,
       overrides: args.overrides ?? [],
+      busy: args.busy ?? [],
     });
   },
 });
@@ -212,10 +224,7 @@ export const updateMember = mutation({
     name: v.string(),
     tz: v.string(),
     email: v.optional(v.string()),
-    startHour: v.number(),
-    endHour: v.number(),
-    weekends: v.boolean(),
-    overrides: v.optional(overrideShape),
+    ...hoursShape,
   },
   handler: async (ctx, args) => {
     const user = await mustBe(ctx, args.token);
@@ -229,7 +238,10 @@ export const updateMember = mutation({
       startHour: args.startHour,
       endHour: args.endHour,
       weekends: args.weekends,
+      sleepStart: args.sleepStart,
+      sleepEnd: args.sleepEnd,
       overrides: args.overrides ?? [],
+      busy: args.busy ?? [],
     });
     return null;
   },
@@ -268,5 +280,97 @@ export const book = mutation({
       createdBy: user._id,
       createdAt: Date.now(),
     });
+  },
+});
+
+
+/* ═══════════════ Answering an invite without an account ═══════════════
+   Knowing the invite code is the credential, the way it is for a shared
+   document. A responder gets one seat and can only ever edit that seat —
+   the id comes back to them and rides in their own browser. */
+export const respondInfo = query({
+  args: { invite: v.string(), memberId: v.optional(v.id("members")) },
+  handler: async (ctx, { invite: code, memberId }) => {
+    const team = await ctx.db
+      .query("teams")
+      .withIndex("by_invite", (q) => q.eq("invite", code))
+      .unique();
+    if (!team) return null;
+    const members = await ctx.db
+      .query("members")
+      .withIndex("by_team", (q) => q.eq("teamId", team._id))
+      .collect();
+    const mine = memberId ? members.find((m) => m._id === memberId) : undefined;
+    return {
+      team: { name: team.name },
+      /* enough to draw the strip, never anybody's email */
+      members: members.map((m) => ({
+        _id: m._id,
+        name: m.name,
+        tz: m.tz,
+        startHour: m.startHour,
+        endHour: m.endHour,
+        weekends: m.weekends,
+        sleepStart: m.sleepStart ?? 23,
+        sleepEnd: m.sleepEnd ?? 7,
+        overrides: m.overrides ?? [],
+        busy: m.busy ?? [],
+        isYou: !!mine && m._id === mine._id,
+      })),
+      you: mine ? mine._id : null,
+    };
+  },
+});
+
+export const respond = mutation({
+  args: {
+    invite: v.string(),
+    memberId: v.optional(v.id("members")),
+    name: v.string(),
+    tz: v.string(),
+    ...hoursShape,
+  },
+  handler: async (ctx, args) => {
+    const team = await ctx.db
+      .query("teams")
+      .withIndex("by_invite", (q) => q.eq("invite", args.invite))
+      .unique();
+    if (!team) throw new Error("That invite has expired");
+
+    const fields = {
+      name: args.name.trim().slice(0, 40) || "Guest",
+      tz: args.tz,
+      startHour: args.startHour,
+      endHour: args.endHour,
+      weekends: args.weekends,
+      sleepStart: args.sleepStart,
+      sleepEnd: args.sleepEnd,
+      overrides: args.overrides ?? [],
+      busy: args.busy ?? [],
+    };
+
+    if (args.memberId) {
+      const m = await ctx.db.get(args.memberId);
+      /* only a seat in this very team, and never one that belongs to an account */
+      if (m && m.teamId === team._id && !m.userId) {
+        await ctx.db.patch(args.memberId, fields);
+        return args.memberId;
+      }
+    }
+    const seats = await ctx.db
+      .query("members")
+      .withIndex("by_team", (q) => q.eq("teamId", team._id))
+      .collect();
+    /* answered before from another device: the same name takes the same seat
+       back rather than showing up twice in the team */
+    const again = seats.find(
+      (m) => !m.userId && m.name.trim().toLowerCase() === fields.name.toLowerCase(),
+    );
+    if (again) {
+      await ctx.db.patch(again._id, fields);
+      return again._id;
+    }
+    if (seats.length >= 24) throw new Error("That team is full");
+    return await ctx.db.insert("members", { teamId: team._id, ...fields });
   },
 });
