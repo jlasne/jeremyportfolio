@@ -3,9 +3,12 @@
 Find the hour that works for a team spread across timezones, then hand it to
 Google Calendar. Three steps, no dashboard:
 
-The three app pages sit behind a sign-in at `/overlap/login`. Without a
-backend connected there is nothing to sign in to, so the app runs locally and
-lets you straight through.
+The three app pages sit behind a sign-in at `/overlap/login`, which also
+offers **Continue as guest** — the whole app works, it simply stays in that
+browser: no shared teams, nothing that follows you to another device. Signing
+in later keeps whatever the guest built. Without a backend connected there is
+nothing to sign in to at all, so the app runs locally and lets everyone
+through.
 
 1. **Team** — who's in it, their hours in their own timezone, and the overlap
    drawn the WorldTimeBuddy way: one row per person, hours running left to

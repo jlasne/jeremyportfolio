@@ -11,7 +11,7 @@
 var CONVEX=(window.OVERLAP_CONVEX_URL||"").replace(/\/+$/,"");
 var LIVE=/^https?:\/\//.test(CONVEX);
 var GID=window.OVERLAP_GOOGLE_CLIENT_ID||"";
-var TOKKEY="overlap.token";
+var TOKKEY="overlap.token", GUESTKEY="overlap.guest";
 
 function $(s){ return document.querySelector(s); }
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){
@@ -44,7 +44,16 @@ function say(msg,bad){
   n.className="note"+(bad?" bad":"");
 }
 function land(r){
-  try{ localStorage.setItem(TOKKEY,r.token); }catch(e){}
+  try{
+    localStorage.setItem(TOKKEY,r.token);
+    localStorage.removeItem(GUESTKEY);     /* no longer a guest */
+  }catch(e){}
+  location.replace(nextUrl());
+}
+/* A look round without an account. Everything works, it just lives in this
+   browser — no shared teams, nothing that follows you to another device. */
+function asGuest(){
+  try{ localStorage.setItem(GUESTKEY,"1"); }catch(e){}
   location.replace(nextUrl());
 }
 
@@ -52,9 +61,10 @@ function land(r){
 try{ if(LIVE && localStorage.getItem(TOKKEY)) location.replace(nextUrl()); }catch(e){}
 
 if(!LIVE){
-  $("#ways").innerHTML='<p class="note bad">No backend is connected yet, so there is '+
-    'nothing to sign in to. Overlap still works without an account.</p>'+
-    '<a class="btn" href="'+esc(base())+'/team/">Use it without an account</a>';
+  $("#ways").innerHTML='<p class="note">No backend is connected yet, so there is '+
+    'nothing to sign in to — Overlap still works without an account.</p>'+
+    '<a class="btn" href="'+esc(base())+'/team/">Continue as guest</a>';
+  $("#guestwrap").style.display="none";
 } else {
   /* ── Google ── */
   if(GID){
@@ -108,5 +118,6 @@ if(!LIVE){
   }
   $("#go").addEventListener("click",step);
   $("#loginForm").addEventListener("submit",function(ev){ ev.preventDefault(); step(); });
+  $("#guest").addEventListener("click",function(ev){ ev.preventDefault(); asGuest(); });
 }
 })();

@@ -6,7 +6,7 @@
 <title>Overlap — the hour that works for everyone</title>
 <meta name="description" content="Your whole team's day, drawn at once. Overlap finds the hour that works across every timezone and hands it to your calendar.">
 <meta name="theme-color" content="#FFFFFF">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/overlap/icon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta property="og:title" content="Overlap — the hour that works for everyone">
@@ -270,9 +270,7 @@ textarea{font-family:var(--font)}
     padding:22px 16px 18px;background:var(--paper);box-shadow:1px 0 0 var(--sep);z-index:45}
   .rail-brand{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:700;
     letter-spacing:-.035em;color:var(--ink);text-decoration:none;padding:0 8px 24px}
-  .rail-mark{width:22px;height:22px;border-radius:7px;background:var(--ink);position:relative;flex:none}
-  .rail-mark::after{content:"";position:absolute;left:7px;top:7px;width:12px;height:12px;
-    border-radius:4px;background:var(--paper)}
+  .rail-mark{width:26px;height:23px;flex:none;color:var(--ink);--mark-cut:var(--paper)}
   .rail-nav{display:flex;flex-direction:column;gap:2px}
   .rail-item{display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:11px;
     text-decoration:none;color:var(--ink);transition:background .14s}
@@ -331,9 +329,7 @@ body{font-size:16px}
 .top .wrap{display:flex;align-items:center;gap:8px;height:64px}
 .brand{display:flex;align-items:center;gap:9px;font-size:18px;font-weight:700;letter-spacing:-.035em;
   text-decoration:none;color:var(--ink)}
-.mark{width:22px;height:22px;border-radius:7px;background:var(--ink);position:relative;flex:none}
-.mark::after{content:"";position:absolute;left:7px;top:7px;width:12px;height:12px;
-  border-radius:4px;background:var(--paper)}
+.mark{width:26px;height:23px;flex:none;color:var(--ink);--mark-cut:var(--paper)}
 .top nav{display:none;gap:4px;margin-left:14px;flex:1}
 @media (min-width:760px){ .top nav{display:flex} }
 .top nav a{font-size:14px;font-weight:500;letter-spacing:-.01em;color:var(--ink-2);
@@ -517,7 +513,7 @@ footer{padding:56px 0 64px;box-shadow:0 -1px 0 var(--sep);margin-top:96px}
 
 <header class="top" id="top">
   <div class="wrap">
-    <a class="brand" href="/overlap/"><span class="mark"></span>Overlap</a>
+    <a class="brand" href="/overlap/"><svg class="mark" viewBox="0 0 64 56" aria-hidden="true"><g fill="currentColor"><rect x="4" y="13" width="9" height="30" rx="4.5"/><rect x="18" y="4" width="9" height="48" rx="4.5"/><rect x="32" y="17" width="9" height="22" rx="4.5"/><rect x="46" y="9" width="9" height="38" rx="4.5"/></g><rect x="1" y="24" width="61" height="7" rx="3.5" fill="var(--mark-cut,#fff)"/></svg>Overlap</a>
     <span class="sp"></span>
     <a class="btn2" href="/overlap/team/">Open Overlap</a>
   </div>
@@ -660,7 +656,7 @@ footer{padding:56px 0 64px;box-shadow:0 -1px 0 var(--sep);margin-top:96px}
   <footer>
     <div class="fcols">
       <div class="b">
-        <a class="brand" href="/overlap/"><span class="mark"></span>Overlap</a>
+        <a class="brand" href="/overlap/"><svg class="mark" viewBox="0 0 64 56" aria-hidden="true"><g fill="currentColor"><rect x="4" y="13" width="9" height="30" rx="4.5"/><rect x="18" y="4" width="9" height="48" rx="4.5"/><rect x="32" y="17" width="9" height="22" rx="4.5"/><rect x="46" y="9" width="9" height="38" rx="4.5"/></g><rect x="1" y="24" width="61" height="7" rx="3.5" fill="var(--mark-cut,#fff)"/></svg>Overlap</a>
         <p>The hour that works for everyone. Built for teams that stopped sharing a building.</p>
       </div>
       <div class="fcol">

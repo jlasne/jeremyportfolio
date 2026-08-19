@@ -252,9 +252,7 @@ textarea{font-family:var(--font)}
     padding:22px 16px 18px;background:var(--paper);box-shadow:1px 0 0 var(--sep);z-index:45}
   .rail-brand{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:700;
     letter-spacing:-.035em;color:var(--ink);text-decoration:none;padding:0 8px 24px}
-  .rail-mark{width:22px;height:22px;border-radius:7px;background:var(--ink);position:relative;flex:none}
-  .rail-mark::after{content:"";position:absolute;left:7px;top:7px;width:12px;height:12px;
-    border-radius:4px;background:var(--paper)}
+  .rail-mark{width:26px;height:23px;flex:none;color:var(--ink);--mark-cut:var(--paper)}
   .rail-nav{display:flex;flex-direction:column;gap:2px}
   .rail-item{display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:11px;
     text-decoration:none;color:var(--ink);transition:background .14s}

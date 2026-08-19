@@ -7,7 +7,7 @@
 <meta name="description" content="Sign in to Overlap.">
 <meta name="theme-color" content="#FFFFFF">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/overlap/icon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -268,9 +268,7 @@ textarea{font-family:var(--font)}
     padding:22px 16px 18px;background:var(--paper);box-shadow:1px 0 0 var(--sep);z-index:45}
   .rail-brand{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:700;
     letter-spacing:-.035em;color:var(--ink);text-decoration:none;padding:0 8px 24px}
-  .rail-mark{width:22px;height:22px;border-radius:7px;background:var(--ink);position:relative;flex:none}
-  .rail-mark::after{content:"";position:absolute;left:7px;top:7px;width:12px;height:12px;
-    border-radius:4px;background:var(--paper)}
+  .rail-mark{width:26px;height:23px;flex:none;color:var(--ink);--mark-cut:var(--paper)}
   .rail-nav{display:flex;flex-direction:column;gap:2px}
   .rail-item{display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:11px;
     text-decoration:none;color:var(--ink);transition:background .14s}
@@ -312,10 +310,8 @@ textarea{font-family:var(--font)}
 
 .door{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px}
 .door-in{width:100%;max-width:360px;text-align:center}
-.door .mark{width:34px;height:34px;border-radius:11px;background:var(--ink);position:relative;
-  margin:0 auto 20px}
-.door .mark::after{content:"";position:absolute;left:11px;top:11px;width:18px;height:18px;
-  border-radius:6px;background:var(--paper)}
+.door .mark{width:56px;height:49px;margin:0 auto 24px;display:block;color:var(--ink);
+  --mark-cut:var(--ground)}
 .door h1{font-size:27px;line-height:1.15;letter-spacing:-.035em;font-weight:700;margin:0 0 8px}
 .door .lede{font-size:15px;line-height:1.5;color:var(--ink-2);margin:0 0 28px;letter-spacing:-.01em}
 #gbtn{display:flex;justify-content:center;min-height:44px}
@@ -328,13 +324,19 @@ textarea{font-family:var(--font)}
 .note{font-size:13px;line-height:1.5;color:var(--ink-2);margin:16px 0 0;letter-spacing:-.005em;
   min-height:20px}
 .note.bad{color:var(--ink)}
+.guest{margin:26px 0 0;padding-top:22px;box-shadow:0 -1px 0 var(--sep)}
+.guest a{display:block;font-size:15px;font-weight:600;letter-spacing:-.015em;color:var(--ink);
+  text-decoration:none}
+.guest a:hover{text-decoration:underline}
+.guest span{display:block;font-size:13px;line-height:1.5;color:var(--ink-2);margin-top:5px;
+  letter-spacing:-.005em}
 .door .foot{margin-top:30px;font-size:13px;color:var(--ink-3)}
 .door .foot a{color:var(--ink-2);text-decoration:none;border-bottom:1px solid var(--ink-3)}
 </style>
 </head>
 <body>
 <div class="door"><div class="door-in">
-  <div class="mark"></div>
+  <svg class="mark" viewBox="0 0 64 56" aria-hidden="true"><g fill="currentColor"><rect x="4" y="13" width="9" height="30" rx="4.5"/><rect x="18" y="4" width="9" height="48" rx="4.5"/><rect x="32" y="17" width="9" height="22" rx="4.5"/><rect x="46" y="9" width="9" height="38" rx="4.5"/></g><rect x="1" y="24" width="61" height="7" rx="3.5" fill="var(--mark-cut,#fff)"/></svg>
   <h1>Sign in to Overlap</h1>
   <p class="lede">Your teams and your hours, on every device you use.</p>
   <div id="ways">
@@ -353,6 +355,8 @@ textarea{font-family:var(--font)}
     </form>
   </div>
   <p class="note" id="note"></p>
+  <p class="guest" id="guestwrap"><a href="#" id="guest">Continue as guest</a>
+    <span>Have a look round first — it all works, it just stays in this browser.</span></p>
   <p class="foot"><a href="/overlap/">Back to Overlap</a></p>
 </div></div>
 <script>
@@ -390,7 +394,7 @@ window.OVERLAP_GOOGLE_CLIENT_ID = "";
 var CONVEX=(window.OVERLAP_CONVEX_URL||"").replace(/\/+$/,"");
 var LIVE=/^https?:\/\//.test(CONVEX);
 var GID=window.OVERLAP_GOOGLE_CLIENT_ID||"";
-var TOKKEY="overlap.token";
+var TOKKEY="overlap.token", GUESTKEY="overlap.guest";
 
 function $(s){ return document.querySelector(s); }
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){
@@ -423,7 +427,16 @@ function say(msg,bad){
   n.className="note"+(bad?" bad":"");
 }
 function land(r){
-  try{ localStorage.setItem(TOKKEY,r.token); }catch(e){}
+  try{
+    localStorage.setItem(TOKKEY,r.token);
+    localStorage.removeItem(GUESTKEY);     /* no longer a guest */
+  }catch(e){}
+  location.replace(nextUrl());
+}
+/* A look round without an account. Everything works, it just lives in this
+   browser — no shared teams, nothing that follows you to another device. */
+function asGuest(){
+  try{ localStorage.setItem(GUESTKEY,"1"); }catch(e){}
   location.replace(nextUrl());
 }
 
@@ -431,9 +444,10 @@ function land(r){
 try{ if(LIVE && localStorage.getItem(TOKKEY)) location.replace(nextUrl()); }catch(e){}
 
 if(!LIVE){
-  $("#ways").innerHTML='<p class="note bad">No backend is connected yet, so there is '+
-    'nothing to sign in to. Overlap still works without an account.</p>'+
-    '<a class="btn" href="'+esc(base())+'/team/">Use it without an account</a>';
+  $("#ways").innerHTML='<p class="note">No backend is connected yet, so there is '+
+    'nothing to sign in to — Overlap still works without an account.</p>'+
+    '<a class="btn" href="'+esc(base())+'/team/">Continue as guest</a>';
+  $("#guestwrap").style.display="none";
 } else {
   /* ── Google ── */
   if(GID){
@@ -487,6 +501,7 @@ if(!LIVE){
   }
   $("#go").addEventListener("click",step);
   $("#loginForm").addEventListener("submit",function(ev){ ev.preventDefault(); step(); });
+  $("#guest").addEventListener("click",function(ev){ ev.preventDefault(); asGuest(); });
 }
 })();
 
