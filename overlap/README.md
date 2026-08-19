@@ -17,11 +17,18 @@ a `#p=` link. Connecting Convex adds accounts, shared teams and invite links.
 
 ## Connecting Convex
 
+There is nothing to create in the dashboard first — the CLI does it:
+
 ```bash
 cd overlap
-npm i convex
-npx convex dev          # creates the deployment, pushes convex/, prints two URLs
+npm install
+npx convex dev
 ```
+
+`convex dev` opens a browser to log in, asks whether to create a new project
+(say yes, name it `overlap`), provisions the deployment, pushes everything in
+`convex/`, and then watches for changes. It writes the deployment name into
+`.env.local` and prints two URLs.
 
 Take the **HTTP Actions** URL — the `.convex.site` one, not `.convex.cloud` —
 and paste it into `config.js`:
@@ -30,7 +37,22 @@ and paste it into `config.js`:
 window.OVERLAP_CONVEX_URL = "https://your-deployment.convex.site";
 ```
 
-Reload. The account card switches from `LOCAL` to a sign-in, and any feedback
+Reload.
+
+### Dev and production are two different deployments
+
+`convex dev` gives you a **dev** deployment — fine for testing, and it stops
+being pushed to the moment you close the terminal. For the version people
+actually use:
+
+```bash
+npx convex deploy
+```
+
+That creates the production deployment, which has its **own** `.convex.site`
+URL and its **own** environment variables. Put the production URL in
+`config.js` before the page goes out, and set the variables below on the
+production deployment too — they do not carry over from dev. The account card switches from `LOCAL` to a sign-in, and any feedback
 queued while offline flushes on the next successful call.
 
 ### Environment variables

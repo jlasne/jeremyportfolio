@@ -1,0 +1,13 @@
+{
+  "name": "overlap",
+  "private": true,
+  "version": "0.1.0",
+  "description": "The hour that works for the whole team.",
+  "scripts": {
+    "dev": "convex dev",
+    "deploy": "convex deploy"
+  },
+  "dependencies": {
+    "convex": "^1.17.0"
+  }
+}
