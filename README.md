@@ -32,17 +32,16 @@ leaves untouched assets byte-for-byte alone, so the diff stays small.
 | `/economy` | *The Four Clocks* — the same argument as one classical essay |
 | `/mobileapp` | the revenue-machine playbook |
 | `/dayzero` | the "think bigger" article |
-| `/meet` | **Meet on time** — timezone overlap → best hour → Google Calendar |
+| `/overlap` | **Overlap** — a team's timezones → the hour that works → Google Calendar |
 
-`/meet` is a self-contained scheduling tool. The overlap reads like
-WorldTimeBuddy: one row per person, hours running left to right, every column
-the same instant on a different clock — white where they can meet, black where
-they can't, grey on the summary row where only some can. Under it sit ranked
-slots, each showing the hour in every timezone at once, and a one-tap handoff
-to a pre-filled Google Calendar event (plus `.ics` and a shareable `#hash`
-link). No backend — state lives in `localStorage` and in the link. Its design
-system is iOS-light: white cards on `#F2F2F7`, hairlines, SF/Inter, black as
-the only accent.
+**Overlap** is the one page here that is a product rather than a piece of
+writing. Three steps — Team, Plan, Next — with the overlap drawn the
+WorldTimeBuddy way: one row per person, hours running left to right, every
+column the same instant on a different clock. White is possible, black is not,
+grey means only some of them. It runs with no backend at all (team in
+`localStorage`, shared by link); connecting Convex adds accounts, teams and
+invite links. See [`overlap/README.md`](overlap/README.md) for the setup and
+the data model. `/meet` redirects to it.
 
 The four `/wealth` pages share one design system in
 [`wealth/style.css`](wealth/style.css) — warm paper, hairline rules, a single
