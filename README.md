@@ -1,59 +1,98 @@
-# jeremyportfolio
+# jeremylasne.com
 
-Pixel-art single-page portfolio for [Jeremy Lasne](https://x.com/jeremylasne) — builder & founder, shipping consumer apps since 2024.
+A landing page with one job: tell someone who has an audience that I will build
+them a mobile app, run it, and split what it earns.
 
-A scrolling Pokémon-style world: hero → **The Founder's Quarter** → **The Projects Village** → **The Outskirts**. Click any building to read more.
+The pitch is the whole page. You bring distribution, I bring the entire build —
+product, design, both stores, subscriptions, analytics, paywall, retention,
+support — and we split the equity. Terms are negotiated per project and stated
+plainly on the page rather than saved for a call.
 
 ## Stack
 
-- Single self-contained `index.html` — React + Babel-standalone bundled inline, no build step, no network at runtime
-- Stardew-flavored pixel art (9 building sprites) rendered as crisp inline SVG
-- Parallax scroll engine with day-to-night sky gradient, drifting stars, walking character
-- Press Start 2P + Geist Mono fonts inlined as base64 woff2
+Single hand-written `index.html`. No build step, no framework, no bundler, no
+network requests at runtime. Open it and edit it.
 
-A v1 (pure-HTML/CSS prototype with no React) lives at [`index-v1.html`](index-v1.html).
+- Type is the system stack, which resolves to SF Pro on the devices this will
+  actually be opened on and costs nothing to download
+- Sections alternate dark and light so each lands on its own
+- Everything interactive degrades: `prefers-reduced-motion` is respected
+  throughout, and the page is readable with JavaScript off apart from the
+  earnings model
 
-### Editing the landing page
+## Editing it
 
-`index.html` is a self-contained bundle: the page HTML lives JSON-encoded in a
-`__bundler/template` script and the JS, fonts and images live gzipped+base64 in
-a `__bundler/manifest` script. Unpack it, edit the asset, pack it back — packing
-leaves untouched assets byte-for-byte alone, so the diff stays small.
+### The Kaught numbers — the one thing that needs real data
+
+`KAUGHT_STATS` at the top of the `<script>` block. Fill in the `v` values and
+they render as a stat strip in the Kaught section:
+
+```js
+var KAUGHT_STATS = [
+  { v: '12k',  k: 'DOWNLOADS' },
+  { v: '$2.4k', k: 'MONTHLY REVENUE' },
+  ...
+];
+```
+
+An empty `v` is skipped. If every one is empty the strip hides itself and a
+qualitative line shows instead, so the page never displays placeholder dashes.
+
+Keep these honest — the people this page is aimed at will ask you to back them
+up on the first call.
+
+### The earnings model
+
+Four sliders in the `.calc` section, wired up at the bottom of the script.
+`STORE_FEE` is 0.15 (Apple's Small Business Program, which applies under
+$1M/yr) and `SPLIT` is 0.5. The audience slider runs on a log curve — 1k to 5M
+— so the low end gets as much of the track as the millions do.
+
+The assumptions are printed on the page on purpose. An influencer will
+interrogate the number, and the defensible one is more persuasive than the
+flattering one.
+
+### The phone mockups
+
+Built in CSS, not screenshots. The viewfinder is a gradient stand-in.
+**Swap these for real Kaught screenshots when you have them** — a premium page
+lives or dies on the device shots, and a real one will always beat a drawn one.
+
+### The social card
+
+`og-image.png` is generated, not hand-drawn. It mirrors the hero. Regenerate it
+by rendering a 1200×630 page and screenshotting — the source used to make the
+current one is not checked in, so redraw it to match if the hero copy changes.
 
 ## Pages
 
 | Path | What it is |
 | --- | --- |
-| `/` | the pixel-art landing world |
+| `/` | the pitch |
 | `/wealth` | **Wealth Architecture** — the research index and the book behind it |
 | `/wealth/principles` | fourteen principles in four parts, with hairline SVG figures |
 | `/wealth/country` | thirty-two countries read three ways |
-| `/wealth/exercice` | the same three maps as an interactive lecture (was `/investment`) |
-| `/economy` | *The Four Clocks* — the same argument as one classical essay |
-| `/mobileapp` | the revenue-machine playbook |
-| `/dayzero` | the "think bigger" article |
+| `/wealth/exercice` | the same three maps as an interactive lecture |
 | `/overlap` | **Overlap** — landing page and live world clock |
 | `/overlap/team` · `/plan` · `/next` | the app: the team, the meeting, and what to build next |
+
+`/investment` and `/invest` are redirect stubs into `/wealth`.
+
+The four `/wealth` pages share one design system in
+[`wealth/style.css`](wealth/style.css) — warm paper, hairline rules, a single
+gold accent, Instrument Serif over DM Sans. It is a different audience and a
+different voice, and it is deliberately not linked from the landing page.
 
 **Overlap** is the one page here that is a product rather than a piece of
 writing. Three steps — Team, Plan, Next — with the overlap drawn the
 WorldTimeBuddy way: one row per person, hours running left to right, every
-column the same instant on a different clock. White is possible, black is not,
-grey means only some of them. It runs with no backend at all (team in
-`localStorage`, shared by link); connecting Convex adds accounts, teams and
-invite links. See [`overlap/README.md`](overlap/README.md) for the setup and
-the data model.
-
-The four `/wealth` pages share one design system in
-[`wealth/style.css`](wealth/style.css) — warm paper, hairline rules, a single
-gold accent, Instrument Serif over DM Sans. It is deliberately unlike the rest
-of the site: that material is long-form and wants to be read, not played.
-
-`/investment` and `/invest` are redirect stubs to their new homes.
+column the same instant on a different clock. It runs with no backend at all
+(team in `localStorage`, shared by link); connecting Convex adds accounts,
+teams and invite links. See [`overlap/README.md`](overlap/README.md).
 
 ## Run locally
 
-Just open `index.html` in a browser, or:
+Open `index.html` in a browser, or:
 
 ```bash
 python -m http.server 8000
@@ -62,8 +101,5 @@ python -m http.server 8000
 
 ## Deploy
 
-Drop the folder on any static host (Vercel, Netlify, GitHub Pages, Cloudflare Pages).
-
-## Design references
-
-Original Claude-design screenshots live in `_check/`.
+Static. Drop the folder on any host — GitHub Pages, Vercel, Netlify, Cloudflare
+Pages.
