@@ -343,13 +343,13 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
 .phone-screen { position: relative; overflow: hidden; width: 100%; height: 100%; border-radius: 42px; background: #05070a; display: flex; flex-direction: column; }
 .phone-notch { position: absolute; top: 9px; left: 50%; transform: translateX(-50%); width: 30%; height: 25px; border-radius: 980px; background: #000; z-index: 9; }
 
-/* A real screenshot, when one has been dropped into media/app/. It covers the
-   drawn mock entirely; if the file is missing the script removes it and the
-   drawing shows through, so the page never has a hole in it. */
+/* A real screenshot from media/app/. Run 7% taller than the frame and anchored
+   to the top, so the phone's own navigation bar falls off the bottom edge and
+   the app fills the screen. The frame clips it. */
 .shot {
-  position: absolute; inset: 0; z-index: 6;
-  width: 100%; height: 100%; object-fit: cover; object-position: top center;
-  border-radius: 42px;
+  position: absolute; top: 0; left: 0; z-index: 6;
+  width: 100%; height: 107%;
+  object-fit: cover; object-position: top center;
 }
 .phone.has-shot .phone-notch { display: none; }
 
@@ -357,59 +357,6 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
 .scr.on { opacity: 1; transform: none; }
 
 /* a stand-in for the camera viewfinder — swap for a real screenshot */
-.viewfinder {
-  position: absolute; inset: 0;
-  background:
-    radial-gradient(58% 40% at 32% 26%, rgba(150,190,120,0.42) 0%, transparent 62%),
-    radial-gradient(48% 38% at 76% 62%, rgba(74,110,66,0.55) 0%, transparent 60%),
-    radial-gradient(70% 50% at 50% 100%, rgba(28,44,26,0.9) 0%, transparent 70%),
-    linear-gradient(168deg, #1b2a1c 0%, #0e1811 46%, #070c08 100%);
-}
-.viewfinder::after {
-  content: ''; position: absolute; inset: 0;
-  background-image:
-    radial-gradient(2px 5px at 18% 22%, rgba(190,220,150,0.30), transparent),
-    radial-gradient(3px 6px at 62% 14%, rgba(160,200,130,0.22), transparent),
-    radial-gradient(2px 4px at 84% 44%, rgba(190,220,150,0.20), transparent),
-    radial-gradient(4px 7px at 28% 66%, rgba(120,170,100,0.22), transparent),
-    radial-gradient(2px 5px at 72% 82%, rgba(150,190,120,0.18), transparent);
-}
-
-.scr-body { position: relative; z-index: 3; flex: 1; display: flex; flex-direction: column; padding: 44px 15px 20px; }
-
-.reticle { position: absolute; top: 30%; left: 50%; width: 148px; height: 148px; margin-left: -74px; border-radius: 22px; box-shadow: 0 0 0 1.5px rgba(255,255,255,0.5); z-index: 4; }
-.reticle::before { content: ''; position: absolute; left: 8px; right: 8px; height: 1.5px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent); top: 0; animation: scan 2.6s var(--ease-soft) infinite; }
-@keyframes scan {
-  0%   { top: 6px; opacity: 0; }
-  14%  { opacity: 1; }
-  86%  { opacity: 1; }
-  100% { top: 140px; opacity: 0; }
-}
-.scan-label { position: absolute; top: calc(30% + 162px); left: 0; right: 0; text-align: center; z-index: 4; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.16em; color: rgba(255,255,255,0.78); text-transform: uppercase; }
-
-.id-card {
-  margin-top: auto; border-radius: 22px; padding: 15px 16px 16px;
-  background: rgba(16,18,16,0.72); border: 1px solid rgba(255,255,255,0.14);
-  backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%);
-}
-.id-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 9px; }
-.tier { font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.14em; padding: 3.5px 8px; border-radius: 980px; background: rgba(255,148,64,0.2); color: #ffbb86; border: 1px solid rgba(255,148,64,0.36); }
-.conf { font-family: var(--mono); font-size: 8.5px; color: rgba(255,255,255,0.5); letter-spacing: 0.08em; }
-.id-name { font-size: 20px; font-weight: 800; letter-spacing: -0.03em; color: #fff; line-height: 1.1; }
-.id-latin { font-size: 11px; font-style: italic; color: rgba(255,255,255,0.46); margin-top: 2px; }
-.id-meta { display: flex; gap: 14px; margin-top: 12px; padding-top: 11px; border-top: 1px solid rgba(255,255,255,0.11); }
-.id-meta div { display: flex; flex-direction: column; gap: 1px; }
-.id-meta .k { font-family: var(--mono); font-size: 7.5px; letter-spacing: 0.12em; color: rgba(255,255,255,0.4); }
-.id-meta .v { font-size: 11.5px; font-weight: 700; color: #fff; }
-
-.scr--grid { background: linear-gradient(180deg, #0c1410 0%, #06090a 100%); }
-.grid-head { padding: 46px 17px 13px; }
-.grid-head h4 { font-size: 17px; font-weight: 800; letter-spacing: -0.03em; color: #fff; }
-.grid-head p { font-size: 10.5px; color: rgba(255,255,255,0.45); margin-top: 2px; }
-.grid-wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; padding: 0 15px; }
-.cell { aspect-ratio: 1; border-radius: 12px; background: linear-gradient(150deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03)); border: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: center; font-size: 17px; }
-.cell.rare { border-color: rgba(255,148,64,0.44); background: linear-gradient(150deg, rgba(255,148,64,0.24), rgba(255,148,64,0.05)); }
-.cell.locked { opacity: 0.3; }
 
 .stage-dots { display: flex; gap: 7px; justify-content: center; margin-top: 24px; }
 .stage-dots button {
@@ -576,52 +523,6 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
 .lb--us  { background: var(--ink); color: var(--bg); --bd: 130ms; }
 .lb--me  { background: var(--bg-sunk); color: var(--ink); --bd: 260ms; }
 @media (prefers-reduced-motion: reduce) { .lb { transform: none; } .lb b { opacity: 1; } }
-
-/* ── the phone home screen ──────────────────────────────────────────────── */
-
-.scr--home {
-  background:
-    radial-gradient(90% 60% at 20% 0%, #3b3f63 0%, transparent 60%),
-    radial-gradient(80% 55% at 90% 30%, #2a4a5e 0%, transparent 62%),
-    linear-gradient(170deg, #171a2e 0%, #0c0e1a 55%, #07080f 100%);
-  padding: 40px 14px 12px;
-  justify-content: flex-start;
-}
-.hs-status {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 0 8px 14px;
-  font-size: 10.5px; font-weight: 800; color: #fff; letter-spacing: -0.01em;
-}
-.hs-right { display: flex; align-items: center; gap: 4px; }
-.hs-sig, .hs-bat { display: block; background: #fff; border-radius: 1.5px; }
-.hs-sig { width: 13px; height: 8px; clip-path: polygon(0 70%,22% 70%,22% 100%,0 100%,0 70%,33% 45%,55% 45%,55% 100%,33% 100%,33% 45%,66% 20%,88% 20%,88% 100%,66% 100%); }
-.hs-bat { width: 16px; height: 8px; border-radius: 2px; opacity: 0.9; }
-
-.hs-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 11px 6px; }
-.ic {
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  /* each icon drifts a touch against the cursor, so the grid has depth */
-  transform: translate3d(calc(var(--ix, 0) * 1px), calc(var(--iy, 0) * 1px), 0);
-  transition: transform .7s var(--ease);
-}
-.ic em {
-  width: 42px; height: 42px; border-radius: 11px;
-  background: linear-gradient(155deg, var(--a), var(--b));
-  display: grid; place-items: center;
-  font-size: 20px; font-style: normal; line-height: 1;
-  box-shadow: 0 2px 6px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.28);
-}
-.ic small { font-size: 7.5px; font-weight: 600; color: rgba(255,255,255,.88); letter-spacing: -0.01em; }
-
-.hs-dock {
-  margin-top: auto; display: flex; justify-content: space-around;
-  padding: 9px 8px; border-radius: 20px;
-  background: rgba(255,255,255,0.13);
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-}
-.ic--dock em { width: 40px; height: 40px; }
-
-@media (prefers-reduced-motion: reduce) { .ic { transform: none; } }
 
 /* ── the niche gets a band to itself ────────────────────────────────────── */
 
@@ -854,80 +755,24 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
           <div class="phone-screen">
             <div class="phone-notch" aria-hidden="true"></div>
 
-            <!-- A home screen full of apps: the work, not one demo of it.
-                 Each icon lifts a little away from the cursor. -->
-            <div class="scr scr--home on">
-              <img class="shot" src="media/app/1.png" alt="" loading="lazy" decoding="async" data-shot>
-              <div class="hs-status"><span>9:41</span><span class="hs-right"><i class="hs-sig"></i><i class="hs-bat"></i></span></div>
-              <div class="hs-grid" id="hs-grid">
-                <span class="ic" style="--a:#ff9a3d;--b:#ff5e3a"><em>&#129418;</em><small>Kaught</small></span>
-                <span class="ic" style="--a:#7c5cff;--b:#4a2fd6"><em>&#127925;</em><small>Riffs</small></span>
-                <span class="ic" style="--a:#20c997;--b:#0d8f6a"><em>&#127807;</em><small>Sprout</small></span>
-                <span class="ic" style="--a:#4dabf7;--b:#1c6fd0"><em>&#127946;</em><small>Lengths</small></span>
-                <span class="ic" style="--a:#ffd43b;--b:#f08c00"><em>&#127838;</em><small>Proof</small></span>
-                <span class="ic" style="--a:#ff6b9d;--b:#c9184a"><em>&#128092;</em><small>Thrift</small></span>
-                <span class="ic" style="--a:#63e6be;--b:#0ca678"><em>&#128506;</em><small>Trails</small></span>
-                <span class="ic" style="--a:#b197fc;--b:#7048e8"><em>&#9814;</em><small>Openings</small></span>
-                <span class="ic" style="--a:#ffa8a8;--b:#e03131"><em>&#128247;</em><small>Grain</small></span>
-                <span class="ic" style="--a:#8ce99a;--b:#2f9e44"><em>&#129301;</em><small>Casts</small></span>
-                <span class="ic" style="--a:#74c0fc;--b:#1971c2"><em>&#128031;</em><small>Reef</small></span>
-                <span class="ic" style="--a:#ffc078;--b:#e8590c"><em>&#9200;</em><small>Movement</small></span>
-              </div>
-              <div class="hs-dock">
-                <span class="ic ic--dock" style="--a:#adb5bd;--b:#495057"><em>&#128172;</em></span>
-                <span class="ic ic--dock" style="--a:#4dabf7;--b:#1864ab"><em>&#128241;</em></span>
-                <span class="ic ic--dock" style="--a:#69db7c;--b:#2b8a3e"><em>&#128222;</em></span>
-                <span class="ic ic--dock" style="--a:#ff922b;--b:#d9480f"><em>&#127916;</em></span>
-              </div>
-            </div>
-
-            <div class="scr">
-              <img class="shot" src="media/app/2.png" alt="" loading="lazy" decoding="async" data-shot>
-              <div class="viewfinder" aria-hidden="true"></div>
-              <div class="reticle" aria-hidden="true"></div>
-              <div class="scan-label">Identifying&hellip;</div>
-              <div class="scr-body">
-              <img class="shot" src="media/app/3.png" alt="" loading="lazy" decoding="async" data-shot></div>
-            </div>
-
-            <div class="scr">
-              <img class="shot" src="media/app/4.png" alt="" loading="lazy" decoding="async" data-shot>
-              <div class="viewfinder" aria-hidden="true"></div>
-              <div class="scr-body">
-                <div class="id-card">
-                  <div class="id-top"><span class="tier">RARE</span><span class="conf">98% MATCH</span></div>
-                  <div class="id-name">Red Fox</div>
-                  <div class="id-latin">Vulpes vulpes</div>
-                  <div class="id-meta">
-                    <div><span class="k">SEEN NEARBY</span><span class="v">12 today</span></div>
-                    <div><span class="k">YOUR NO.</span><span class="v">#47</span></div>
-                    <div><span class="k">STREAK</span><span class="v">6 days</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="scr scr--grid">
-              <div class="grid-head">
-                <h4>Your collection</h4>
-                <p>47 of 312 species &middot; 3 rare</p>
-              </div>
-              <div class="grid-wrap">
-                <div class="cell rare">&#129418;</div><div class="cell">&#129417;</div><div class="cell">&#129433;</div>
-                <div class="cell">&#129445;</div><div class="cell rare">&#129443;</div><div class="cell">&#128007;</div>
-                <div class="cell">&#129426;</div><div class="cell locked">&#128274;</div><div class="cell locked">&#128274;</div>
-              </div>
-            </div>
+            <!-- Real screens from Kaught, in media/app/. Swap a file, the
+                 phone shows the new one; nothing here needs editing. -->
+            <div class="scr on"><img class="shot" src="media/app/1.png" alt="Kaught welcome screen" loading="eager" decoding="async" data-shot></div>
+            <div class="scr"><img class="shot" src="media/app/2.png" alt="Kaught collection of identified species" loading="lazy" decoding="async" data-shot></div>
+            <div class="scr"><img class="shot" src="media/app/3.png" alt="Kaught identifying an animal" loading="lazy" decoding="async" data-shot></div>
+            <div class="scr"><img class="shot" src="media/app/4.png" alt="Kaught showing animals near you" loading="lazy" decoding="async" data-shot></div>
+            <div class="scr"><img class="shot" src="media/app/5.png" alt="Kaught species detail for a red squirrel" loading="lazy" decoding="async" data-shot></div>
 
           </div>
         </div>
       </div>
 
       <div class="stage-dots" id="dots" role="tablist" aria-label="App screens">
-        <button role="tab" aria-selected="true"  aria-label="Home screen"></button>
+        <button role="tab" aria-selected="true"  aria-label="Welcome screen"></button>
+        <button role="tab" aria-selected="false" aria-label="Your collection"></button>
         <button role="tab" aria-selected="false" aria-label="Identifying"></button>
-        <button role="tab" aria-selected="false" aria-label="Species identified"></button>
-        <button role="tab" aria-selected="false" aria-label="Collection"></button>
+        <button role="tab" aria-selected="false" aria-label="Animals near you"></button>
+        <button role="tab" aria-selected="false" aria-label="Species detail"></button>
       </div>
       <p class="stage-note">My latest app, live.<span class="swipe-hint"> Swipe or tap the dots.</span></p>
     </div>
@@ -1401,46 +1246,6 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
     segs.forEach(function (el, n) { bind(el, n); });
     cards.forEach(function (el, n) { bind(el, n); });
   })();
-
-  /* ═══ the home-screen icons drift against the cursor ═════════════════════ */
-
-  (function () {
-    var grid = document.getElementById('hs-grid');
-    if (!grid || reduced || !fine) return;
-    var icons = grid.querySelectorAll('.ic');
-    var phoneEl = document.getElementById('phone');
-    if (!phoneEl) return;
-
-    window.addEventListener('pointermove', function (e) {
-      var r = phoneEl.getBoundingClientRect();
-      var dx = (e.clientX - (r.left + r.width / 2)) / r.width;
-      var dy = (e.clientY - (r.top + r.height / 2)) / r.height;
-      icons.forEach(function (ic, k) {
-        // stagger the depth so the grid parallaxes rather than sliding as one
-        var depth = 1 + (k % 4) * 0.5;
-        ic.style.setProperty('--ix', (-dx * 4 * depth).toFixed(2));
-        ic.style.setProperty('--iy', (-dy * 4 * depth).toFixed(2));
-      });
-    }, { passive: true });
-  })();
-
-  /* ═══ the reason cards lean toward the cursor ═══════════════════════════ */
-
-  if (!reduced && fine) {
-    document.querySelectorAll('.reason').forEach(function (el) {
-      el.addEventListener('pointermove', function (e) {
-        var r = el.getBoundingClientRect();
-        var dx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
-        var dy = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
-        el.style.setProperty('--ry', (dx * 5).toFixed(2) + 'deg');
-        el.style.setProperty('--rx', (-dy * 5).toFixed(2) + 'deg');
-      }, { passive: true });
-      el.addEventListener('pointerleave', function () {
-        el.style.setProperty('--ry', '0deg');
-        el.style.setProperty('--rx', '0deg');
-      });
-    });
-  }
 
   /* ═══ a light that follows the pointer across a card ═════════════════════ */
 

@@ -62,17 +62,15 @@ not on a landing page.
 
 ### The phone screenshots
 
-The hero phone draws its four screens in CSS. To replace any of them with a
-real screenshot, drop a PNG into `media/app/` named `1.png` through `4.png`.
-Nothing in `index.html` needs editing.
+The hero phone shows five real Kaught screens from `media/app/1.png` through
+`5.png`. Replace a file and the page shows the new one; `index.html` needs no
+editing.
 
-A file that is not there removes its own `<img>` and the drawing underneath
-shows, so there is no half-broken state and you can add one screen at a time.
-The drawn notch hides itself as soon as a real screenshot loads, because the
-screenshot brings its own status bar.
+Each image runs 7% taller than the frame and is pinned to the top, so the
+device's own navigation bar falls off the bottom edge. A missing file removes
+its own `<img>` rather than breaking the layout.
 
-See [`media/app/README.md`](media/app/README.md) for sizes and how to shrink
-them.
+See [`media/app/README.md`](media/app/README.md) for formats and sizes.
 
 ### The social card
 

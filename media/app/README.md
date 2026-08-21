@@ -1,42 +1,43 @@
 # App screenshots for the hero phone
 
-Drop real screenshots in here and the phone on the landing page uses them
-automatically. Nothing in `index.html` needs editing.
+The five screens in the hero phone are these files. Replace one and the page
+shows the new one; nothing in `index.html` needs editing.
 
-## What to drop in
-
-| File | Which screen |
+| File | Screen |
 | --- | --- |
-| `1.png` | first screen — currently the drawn home screen |
-| `2.png` | second screen |
-| `3.png` | third screen |
-| `4.png` | fourth screen |
+| `1.png` | Kaught welcome |
+| `2.png` | your collection |
+| `3.png` | identifying |
+| `4.png` | animals near you |
+| `5.png` | species detail |
 
-Any file you leave out keeps its drawn stand-in, so you can add one, or four,
-or start with just `1.png`. There is no half-broken state: a missing file
-removes its own `<img>` and the drawing underneath shows through.
+Add more by adding a `<div class="scr">` and a dot in `index.html`; up to five
+is wired already.
 
 ## Format
 
 | | |
 | --- | --- |
-| **Format** | PNG or WebP |
-| **Ratio** | 9:19.5 — a straight iPhone screenshot is already this |
-| **Size** | 1179×2556 (iPhone 15/16 Pro) is ideal; anything from 750px wide up is fine |
-| **Weight** | keep each under ~400 KB, or the hero gets slow on 4G |
+| **Format** | PNG, JPEG or WebP. The extension does not have to match the real format — browsers sniff it — but matching is tidier |
+| **Ratio** | 9:19.5. A straight phone screenshot already is this |
+| **Size** | 1080×2340 or 1179×2556 both work; anything from 750px wide up is fine |
+| **Weight** | under ~400 KB each, or the hero gets slow on 4G |
 
-The image is drawn `cover`, anchored **top centre**, so the top of the
-screenshot is always pinned and the bottom crops first if the ratio is off.
+## The bottom of the frame
 
-Include the status bar. The drawn notch hides itself as soon as a real
-screenshot loads, because the screenshot brings its own.
+The image is drawn 7% taller than the screen and pinned to the top, so the
+phone's own navigation bar (the back/home/recents strip, ~6% of an Android
+screenshot) falls off the bottom edge and the app fills the frame. The status
+bar at the top is kept, and the drawn notch hides itself whenever a real
+screenshot is present.
 
-## Getting the screenshots
+If you shoot on a device with no bottom bar, that 7% eats a sliver of real UI
+instead. Change `height: 107%` on `.shot` back to `100%` if so.
 
-- **iPhone:** press side button + volume up, then AirDrop them to the Mac
-- **Simulator:** `xcrun simctl io booted screenshot 1.png`
-- **App Store:** the listing images work too, but crop off any marketing
-  frame or text first — this phone draws its own bezel
+## Missing files
+
+A file that is not there removes its own `<img>` and leaves a dark screen
+behind it, so a missing screenshot never breaks the layout.
 
 ## Shrinking them
 
@@ -45,5 +46,3 @@ macOS, no extra tools:
 ```bash
 sips -Z 1179 raw.png --out 1.png
 ```
-
-Then commit and push. That is the whole job.
