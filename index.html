@@ -465,48 +465,53 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
-.tbl-wrap { margin-top: 48px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.tbl {
-  width: 100%; min-width: 620px;
-  border-collapse: separate; border-spacing: 0 8px;
+.tbl-wrap {
+  margin-top: 48px;
+  border: 1px solid var(--rule-firm); border-radius: 20px;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
 }
+.tbl { width: 100%; min-width: 720px; border-collapse: collapse; }
+
 .tbl thead th {
-  text-align: left; padding: 0 22px 12px;
+  padding: 18px 20px;
+  text-align: center; vertical-align: bottom;
   font-family: var(--mono); font-size: 10px; font-weight: 600;
-  letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint);
-  white-space: nowrap;
+  letter-spacing: 0.13em; text-transform: uppercase; color: var(--faint);
+  line-height: 1.5;
+  background: var(--bg-sunk);
+  border-bottom: 1px solid var(--rule-firm);
 }
-.tbl thead th:not(:first-child) { text-align: center; }
-.tbl tbody tr {
-  background: var(--card);
-  transition: opacity .45s var(--ease-soft), transform .5s var(--ease);
-}
-.tbl tbody td, .tbl tbody th {
-  padding: 20px 22px; vertical-align: middle;
-  border-block: 1px solid var(--rule);
+.tbl thead th + th { border-left: 1px solid var(--rule); }
+.tbl th.c-name, .tbl td.c-pay { text-align: left; }
+
+.tbl tbody th, .tbl tbody td {
+  padding: 18px 20px; vertical-align: middle; text-align: center;
+  border-top: 1px solid var(--rule);
   font-weight: 400; font-size: 15px; color: var(--muted);
+  transition: background .35s var(--ease-soft);
 }
-.tbl tbody th { text-align: left; font-weight: 700; font-size: 16.5px; letter-spacing: -0.02em; color: var(--ink); }
-.tbl tbody td:not(:first-of-type) { text-align: center; }
-.tbl tbody td:first-of-type { white-space: nowrap; }
-.tbl tbody th  { border-left: 1px solid var(--rule); border-radius: 14px 0 0 14px; }
-.tbl tbody td:last-child { border-right: 1px solid var(--rule); border-radius: 0 14px 14px 0; }
+.tbl tbody td + td, .tbl tbody th + td { border-left: 1px solid var(--rule); }
+.tbl tbody th.c-name {
+  text-align: left; font-weight: 700; font-size: 16.5px;
+  letter-spacing: -0.02em; color: var(--ink); white-space: nowrap;
+}
+.tbl tbody td.c-pay { white-space: nowrap; }
 
-/* the rest of the table steps back while a row is under the cursor */
-.tbl tbody:hover tr { opacity: 0.45; }
-.tbl tbody:hover tr:hover { opacity: 1; transform: translateX(3px); }
+/* hovering a row lifts just that row out of the grid */
+.tbl tbody tr:hover th, .tbl tbody tr:hover td { background: var(--bg-sunk); }
 
-.tbl-hero { background: var(--ink) !important; }
-/* these have to out-rank `.tbl tbody th/td`, which is one element deeper —
-   otherwise the row keeps the band's ink and goes white on white */
-.tbl tbody tr.tbl-hero th, .tbl tbody tr.tbl-hero td { border-color: transparent; color: var(--bg); opacity: 0.72; }
-.tbl tbody tr.tbl-hero th { opacity: 1; font-size: 18px; font-weight: 800; padding-block: 24px; }
+/* the row the table exists to point at */
+.tbl-hero th, .tbl-hero td { background: var(--ink) !important; border-top-color: var(--ink); }
+.tbl tbody tr.tbl-hero th, .tbl tbody tr.tbl-hero td {
+  color: var(--bg); border-left-color: rgba(128,128,128,0.28);
+  padding-block: 24px;
+}
+.tbl tbody tr.tbl-hero th.c-name { color: var(--bg); }
 .th-tag {
   display: block; font-family: var(--mono); font-size: 9.5px; font-weight: 600;
-  letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.62; margin-bottom: 5px;
+  letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.62; margin-bottom: 4px;
 }
-/* the highlighted row never dims, whatever else is hovered */
-.tbl tbody:hover tr.tbl-hero { opacity: 1; }
+.th-main { display: block; font-size: 19px; font-weight: 800; letter-spacing: -0.03em; }
 
 /* yes / no / partly, drawn rather than written */
 .mk { display: inline-block; width: 22px; height: 22px; border-radius: 50%; position: relative; }
@@ -642,23 +647,53 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
 
 /* ── the three reasons ──────────────────────────────────────────────────── */
 
-.reasons { display: grid; gap: 12px; }
+.reasons { display: grid; gap: 12px; perspective: 900px; }
 @media (min-width: 860px) { .reasons { grid-template-columns: repeat(3, 1fr); } }
+
 .reason {
   position: relative; overflow: hidden;
+  display: block; width: 100%; text-align: left;
   padding: 30px 28px 32px; border-radius: 22px;
   background: var(--card); border: 1px solid var(--rule);
-  transition: transform .6s var(--ease), border-color .45s var(--ease-soft);
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateZ(0);
+  transform-style: preserve-3d;
+  transition: transform .5s var(--ease), border-color .4s var(--ease-soft),
+              box-shadow .4s var(--ease), opacity .4s var(--ease-soft);
 }
-.reason:hover { transform: translateY(-3px); border-color: var(--rule-firm); }
+.reason:hover { border-color: var(--rule-firm); box-shadow: var(--lift-lg); }
+/* the two you are not pointing at step back */
+.reasons:hover .reason { opacity: 0.6; }
+.reasons .reason:hover { opacity: 1; }
+
 /* the numeral is scenery, sat behind the text rather than beside it */
 .r-no {
   position: absolute; top: -18px; right: -6px;
   font-size: 6.4rem; font-weight: 800; letter-spacing: -0.05em;
   color: var(--ink); opacity: 0.08; line-height: 1; pointer-events: none;
+  transition: opacity .4s var(--ease-soft), transform .6s var(--ease);
 }
-.reason h4 { font-size: 1.3rem; margin-bottom: 10px; position: relative; padding-right: 44px; }
-.reason p { font-size: 14.8px; line-height: 1.56; color: var(--muted); position: relative; }
+.reason:hover .r-no { opacity: 0.14; transform: translateY(4px); }
+
+.r-head { display: block; font-size: 1.3rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 10px; padding-right: 44px; position: relative; }
+.r-body { display: block; font-size: 14.8px; line-height: 1.56; color: var(--muted); position: relative; }
+
+/* the example is held back until asked for, so the section reads short */
+.r-eg {
+  display: block; overflow: hidden;
+  max-height: 0; margin-top: 0; opacity: 0;
+  font-size: 14px; line-height: 1.5; font-weight: 700; color: var(--ink);
+  transition: max-height .5s var(--ease), opacity .4s var(--ease-soft), margin-top .5s var(--ease);
+}
+.r-eg i { color: var(--faint); margin-right: 6px; font-style: normal; }
+.reason:hover .r-eg { max-height: 6em; opacity: 1; margin-top: 14px; }
+
+/* no hover on a touch screen, so the examples simply stay open there */
+@media (hover: none) {
+  .r-eg { max-height: 6em; opacity: 1; margin-top: 14px; }
+  .reasons:hover .reason { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) { .reason { transform: none; } }
 
 /* the line that closes the niche argument */
 .niche-close { margin-top: clamp(40px, 6vw, 64px); text-align: center; }
@@ -901,45 +936,54 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
          that answers yes twice, and the columns are chosen so that shows. -->
     <div class="tbl-wrap rise">
       <table class="tbl">
-        <caption class="sr-only">How each revenue stream behaves</caption>
+        <caption class="sr-only">How each revenue stream behaves. Your own app is the only one that pays again, compounds and belongs to you.</caption>
         <thead>
           <tr>
-            <th scope="col">Revenue stream</th>
-            <th scope="col">How it pays</th>
-            <th scope="col">Pays again next month</th>
-            <th scope="col">You own it</th>
+            <th scope="col" class="c-name">Revenue stream</th>
+            <th scope="col" class="c-pay">How it pays</th>
+            <th scope="col">Pays again<br>next month</th>
+            <th scope="col">Grows as your<br>audience grows</th>
+            <th scope="col">You own<br>the asset</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <th scope="row">Sponsored posts</th>
-            <td>Once, per post</td>
-            <td><span class="mk mk--no" aria-label="No"></span></td>
-            <td><span class="mk mk--no" aria-label="No"></span></td>
+            <th scope="row" class="c-name">Sponsored posts</th>
+            <td class="c-pay">Once, per post</td>
+            <td><span class="mk mk--no"></span><span class="sr-only">No</span></td>
+            <td><span class="mk mk--no"></span><span class="sr-only">No</span></td>
+            <td><span class="mk mk--no"></span><span class="sr-only">No</span></td>
           </tr>
           <tr>
-            <th scope="row">Affiliate links</th>
-            <td>A cut, per sale</td>
-            <td><span class="mk mk--no" aria-label="No"></span></td>
-            <td><span class="mk mk--no" aria-label="No"></span></td>
+            <th scope="row" class="c-name">Affiliate links</th>
+            <td class="c-pay">A cut, per sale</td>
+            <td><span class="mk mk--no"></span><span class="sr-only">No</span></td>
+            <td><span class="mk mk--half"></span><span class="sr-only">Partly</span></td>
+            <td><span class="mk mk--no"></span><span class="sr-only">No</span></td>
           </tr>
           <tr>
-            <th scope="row">Merch</th>
-            <td>Margin, per order</td>
-            <td><span class="mk mk--no" aria-label="No"></span></td>
-            <td><span class="mk mk--half" aria-label="Partly"></span></td>
+            <th scope="row" class="c-name">Merch</th>
+            <td class="c-pay">Margin, per order</td>
+            <td><span class="mk mk--no"></span><span class="sr-only">No</span></td>
+            <td><span class="mk mk--half"></span><span class="sr-only">Partly</span></td>
+            <td><span class="mk mk--half"></span><span class="sr-only">Partly</span></td>
           </tr>
           <tr>
-            <th scope="row">Courses</th>
-            <td>A spike at launch</td>
-            <td><span class="mk mk--half" aria-label="Fades"></span></td>
-            <td><span class="mk mk--yes" aria-label="Yes"></span></td>
+            <th scope="row" class="c-name">Courses</th>
+            <td class="c-pay">A spike at launch</td>
+            <td><span class="mk mk--half"></span><span class="sr-only">Fades</span></td>
+            <td><span class="mk mk--no"></span><span class="sr-only">No</span></td>
+            <td><span class="mk mk--yes"></span><span class="sr-only">Yes</span></td>
           </tr>
           <tr class="tbl-hero">
-            <th scope="row"><span class="th-tag">The one you own</span>Your own app</th>
-            <td>Every month, per subscriber</td>
-            <td><span class="mk mk--yes" aria-label="Yes"></span></td>
-            <td><span class="mk mk--yes" aria-label="Yes"></span></td>
+            <th scope="row" class="c-name">
+              <span class="th-tag">Your own app</span>
+              <span class="th-main">A mobile app</span>
+            </th>
+            <td class="c-pay">Every month, per subscriber</td>
+            <td><span class="mk mk--yes"></span><span class="sr-only">Yes</span></td>
+            <td><span class="mk mk--yes"></span><span class="sr-only">Yes</span></td>
+            <td><span class="mk mk--yes"></span><span class="sr-only">Yes</span></td>
           </tr>
         </tbody>
       </table>
@@ -1009,21 +1053,26 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
       <p class="lede">Almost certainly. The narrower your niche, the better it works.</p>
     </div>
 
+    <!-- Each card is focusable and reveals a concrete example on hover or
+         focus, so the section stays three lines long until you ask it not to. -->
     <div class="reasons">
-      <div class="reason sheen rise" style="--d:0ms">
+      <div class="reason rise" style="--d:0ms">
         <span class="r-no" aria-hidden="true">01</span>
-        <h4>Niche beats big</h4>
-        <p>An app for exactly your people competes with nobody.</p>
+        <span class="r-head">Niche beats big</span>
+        <span class="r-body">An app for exactly your people competes with nobody.</span>
+        <span class="r-eg"><i aria-hidden="true">&rarr;</i>A birdwatching app beats "a nature app".</span>
       </div>
-      <div class="reason sheen rise" style="--d:90ms">
+      <div class="reason rise" style="--d:90ms">
         <span class="r-no" aria-hidden="true">02</span>
-        <h4>They already told you</h4>
-        <p>It is the question you keep getting in the comments.</p>
+        <span class="r-head">They already told you</span>
+        <span class="r-body">It is the question you keep getting in the comments.</span>
+        <span class="r-eg"><i aria-hidden="true">&rarr;</i>Read your last fifty replies. It is in there.</span>
       </div>
-      <div class="reason sheen rise" style="--d:180ms">
+      <div class="reason rise" style="--d:180ms">
         <span class="r-no" aria-hidden="true">03</span>
-        <h4>They trust you</h4>
-        <p>No paid ads needed for the first thousand users.</p>
+        <span class="r-head">They trust you</span>
+        <span class="r-body">No paid ads needed for the first thousand users.</span>
+        <span class="r-eg"><i aria-hidden="true">&rarr;</i>The wall that kills most apps, already behind you.</span>
       </div>
     </div>
   </div>
@@ -1346,6 +1395,24 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
       });
     }, { passive: true });
   })();
+
+  /* ═══ the reason cards lean toward the cursor ═══════════════════════════ */
+
+  if (!reduced && fine) {
+    document.querySelectorAll('.reason').forEach(function (el) {
+      el.addEventListener('pointermove', function (e) {
+        var r = el.getBoundingClientRect();
+        var dx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
+        var dy = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
+        el.style.setProperty('--ry', (dx * 5).toFixed(2) + 'deg');
+        el.style.setProperty('--rx', (-dy * 5).toFixed(2) + 'deg');
+      }, { passive: true });
+      el.addEventListener('pointerleave', function () {
+        el.style.setProperty('--ry', '0deg');
+        el.style.setProperty('--rx', '0deg');
+      });
+    });
+  }
 
   /* ═══ a light that follows the pointer across a card ═════════════════════ */
 
