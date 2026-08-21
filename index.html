@@ -353,7 +353,7 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
 }
 .phone.has-shot .phone-notch { display: none; }
 
-.scr { position: absolute; inset: 0; display: flex; flex-direction: column; opacity: 0; transform: scale(1.03); transition: opacity .75s var(--ease), transform .75s var(--ease); pointer-events: none; }
+.scr { position: absolute; inset: 0; display: flex; flex-direction: column; opacity: 0; transform: scale(1.03); transition: opacity .42s var(--ease), transform .42s var(--ease); pointer-events: none; }
 .scr.on { opacity: 1; transform: none; }
 
 /* a stand-in for the camera viewfinder — swap for a real screenshot */
@@ -1137,7 +1137,7 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
     screens.forEach(function (s, n) { s.classList.toggle('on', n === i); });
     dots.forEach(function (d, n) { d.setAttribute('aria-selected', n === i ? 'true' : 'false'); });
   }
-  function play() { if (!reduced && !timer) timer = setInterval(function () { show((current + 1) % screens.length); }, 3200); }
+  function play() { if (!reduced && !timer) timer = setInterval(function () { show((current + 1) % screens.length); }, 1600); }
   function stop() { clearInterval(timer); timer = null; }
 
   dots.forEach(function (d, n) { d.addEventListener('click', function () { stop(); show(n); }); });
