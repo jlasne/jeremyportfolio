@@ -439,22 +439,6 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
   -webkit-backdrop-filter: blur(18px) saturate(150%);
 }
 
-/* ── the claim: one number, counted up when it comes into view ──────────── */
-
-.claim { text-align: center; margin-top: 46px; }
-.claim-up { display: block; font-size: 15px; font-weight: 700; color: var(--muted); letter-spacing: 0.01em; }
-.claim-fig {
-  display: flex; align-items: flex-start; justify-content: center; gap: 2px;
-  margin-top: 6px; line-height: 0.95;
-  font-variant-numeric: tabular-nums;
-}
-.claim-cur { font-size: clamp(2.4rem, 6vw, 4.4rem); font-weight: 800; letter-spacing: -0.04em; margin-top: .22em; }
-.claim-num { font-size: clamp(4.2rem, 15vw, 10rem); font-weight: 800; letter-spacing: -0.055em; }
-.claim-per { font-size: clamp(1.3rem, 3vw, 2.1rem); font-weight: 700; color: var(--muted); align-self: flex-end; margin-bottom: .5em; }
-.claim-sub { font-size: clamp(1.15rem, 2.4vw, 1.6rem); font-weight: 700; letter-spacing: -0.025em; margin-top: 4px; }
-.claim-note { font-size: 15.5px; line-height: 1.6; color: var(--muted); max-width: 44ch; margin: 20px auto 0; }
-.claim .btn-row { justify-content: center; margin-top: 32px; }
-
 /* ── how it works: three lanes ──────────────────────────────────────────── */
 
 .lanes { display: grid; gap: 12px; margin-top: 44px; }
@@ -474,9 +458,62 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
 .lane--mid .lane-k { color: var(--bg); opacity: 0.55; }
 .lane--mid p { color: var(--bg); opacity: 0.68; }
 
+/* ── the income streams ─────────────────────────────────────────────────── */
+
+.streams { display: grid; gap: 10px; margin-top: 48px; max-width: 780px; margin-inline: auto; }
+.stream {
+  display: grid; gap: 4px;
+  padding: 20px 24px; border-radius: 16px;
+  background: var(--card); border: 1px solid var(--rule);
+  transition: opacity .5s var(--ease-soft), transform .6s var(--ease);
+}
+.stream .s-name { font-size: 16.5px; font-weight: 700; letter-spacing: -0.02em; }
+.stream .s-note { font-size: 14.5px; line-height: 1.5; color: var(--muted); }
+/* the four ordinary streams sit back so the fifth can step forward */
+.streams:hover .stream:not(.stream--hero) { opacity: 0.55; }
+.stream:not(.stream--hero):hover { opacity: 1 !important; }
+
+.stream--hero {
+  margin-top: 8px; padding: 28px 28px 30px;
+  background: var(--ink); color: var(--bg);
+  border-color: transparent; border-radius: 20px;
+}
+.stream--hero .s-tag {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.15em; opacity: 0.55; margin-bottom: 6px;
+}
+.stream--hero .s-name { font-size: clamp(1.35rem, 2.6vw, 1.8rem); font-weight: 800; letter-spacing: -0.032em; }
+.stream--hero .s-note { color: var(--bg); opacity: 0.7; font-size: 15px; max-width: 52ch; }
+
+/* ── the workload bar ───────────────────────────────────────────────────── */
+
+.load { max-width: 780px; margin: 44px auto 0; }
+.load-bar { display: flex; gap: 6px; height: 64px; }
+.lb {
+  width: var(--w); min-width: 0;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800; letter-spacing: -0.015em;
+  overflow: hidden; white-space: nowrap;
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 1.1s var(--ease);
+  transition-delay: var(--bd, 0ms);
+}
+.rise.in .lb { transform: none; }
+.lb b { opacity: 0; transition: opacity .5s var(--ease-soft) calc(var(--bd, 0ms) + 500ms); }
+.rise.in .lb b { opacity: 1; }
+.lb--you { background: var(--bg-sunk); color: var(--ink); --bd: 0ms; }
+.lb--us  { background: var(--ink); color: var(--bg); --bd: 130ms; }
+.lb--me  { background: var(--bg-sunk); color: var(--ink); --bd: 260ms; }
+@media (prefers-reduced-motion: reduce) { .lb { transform: none; } .lb b { opacity: 1; } }
+
+/* ── the niche gets a band to itself ────────────────────────────────────── */
+
+.nd-band { padding-block: clamp(96px, 15vw, 200px); }
+
 /* ── the rotating niche ─────────────────────────────────────────────────── */
 
-.nd { text-align: center; margin: clamp(40px, 6vw, 68px) auto clamp(44px, 6vw, 72px); }
+.nd { text-align: center; }
 .nd-pre, .nd-post {
   font-size: clamp(1.05rem, 2.2vw, 1.5rem);
   font-weight: 700; letter-spacing: -0.02em; color: var(--muted);
@@ -486,8 +523,8 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
 .nd-slot {
   position: relative; overflow: hidden;
   height: 1.16em;
-  margin: 2px 0;
-  font-size: clamp(2.1rem, 6.4vw, 4.4rem);
+  margin: 6px 0;
+  font-size: clamp(1.7rem, 7.4vw, 5.6rem);
   font-weight: 800; letter-spacing: -0.04em; line-height: 1.16;
 }
 .nd-word {
@@ -581,7 +618,10 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
 
 .close { text-align: center; padding-block: clamp(88px, 12vw, 168px); }
 .close .panel { padding: 0; background: none; border: 0; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
-.close h2 { margin-bottom: 16px; }
+.close .eyebrow { margin-bottom: 20px; }
+.close h2 { margin-bottom: 20px; }
+.close-turn { margin-top: 18px; font-weight: 700; color: var(--ink); }
+.close-fine { margin-top: 20px; font-size: 13.5px; color: var(--faint); max-width: 46ch; margin-inline: auto; }
 .close .lede { margin-inline: auto; }
 .close .btn-row { justify-content: center; margin-top: 28px; }
 
@@ -724,37 +764,61 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
   <div class="shell">
     <div class="head head--center rise">
       <span class="eyebrow"><i></i>A new revenue stream</span>
-      <h2 class="h-section">Same audience.<br>A second income.</h2>
+      <h2 class="h-section">Keep doing exactly what you do.<br>Add one more stream.</h2>
       <p class="lede">
-        Sponsorships stop the day you stop posting. An app you own keeps
-        billing every month, on top of everything you already earn.
+        Nothing about your work changes. You post what you already post. The
+        difference is where the money comes from while you do it.
       </p>
     </div>
 
-    <div class="claim rise">
-      <span class="claim-up">Up to</span>
-      <div class="claim-fig">
-        <span class="claim-cur">$</span><span class="claim-num" data-count-to="500">0</span><span class="claim-per">/mo</span>
+    <!-- The point is the shape of each stream, not its size, so there are no
+         figures here on purpose: one of these behaves differently from the
+         rest, and that is the whole argument. -->
+    <div class="streams">
+      <div class="stream rise" style="--d:0ms">
+        <span class="s-name">Sponsored posts</span>
+        <span class="s-note">Paid once. Stops the day you stop.</span>
       </div>
-      <p class="claim-sub">more, for every 100,000 views</p>
-      <p class="claim-note">
-        Subscription revenue from an app your people actually use. It compounds
-        with every post instead of resetting to zero, and it keeps paying while
-        you work on other things.
-      </p>
-      <div class="btn-row">
-        <a class="btn magnetic" href="#contact">Know more <span class="arrow">&rarr;</span></a>
+      <div class="stream rise" style="--d:60ms">
+        <span class="s-name">Affiliate links</span>
+        <span class="s-note">Small, and someone else sets the terms.</span>
+      </div>
+      <div class="stream rise" style="--d:120ms">
+        <span class="s-name">Merch</span>
+        <span class="s-note">Inventory, shipping, returns, sizing.</span>
+      </div>
+      <div class="stream rise" style="--d:180ms">
+        <span class="s-name">Courses</span>
+        <span class="s-note">One launch spike, then a long decay.</span>
+      </div>
+      <div class="stream stream--hero rise" style="--d:260ms">
+        <span class="s-tag">The one you own</span>
+        <span class="s-name">Your own app</span>
+        <span class="s-note">
+          Bills every month whether you posted or not. Compounds with each new
+          follower. An asset with your name on it, yours to keep or to sell.
+        </span>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── how it works: yours, ours, mine ──────────────────────────────────── -->
+<!-- ── how it works ─────────────────────────────────────────────────────── -->
 <section class="band" id="how">
   <div class="shell">
     <div class="head head--center rise" style="max-width:none">
       <span class="eyebrow"><i></i>How it works</span>
-      <h2 class="h-section">You do one thing.<br>I do everything else.</h2>
+      <h2 class="h-section">You keep posting.<br>I keep building.</h2>
+    </div>
+
+    <!-- The bar is the argument: the segments are sized to the work, so the
+         split reads before a single label does. -->
+    <div class="load rise">
+      <div class="load-bar" role="img" aria-label="Roughly a tenth of the work is yours, a fifth is shared, and the rest is mine">
+        <span class="lb lb--you" style="--w:11%"><b>You</b></span>
+        <span class="lb lb--us"  style="--w:19%"><b>Us</b></span>
+        <span class="lb lb--me"  style="--w:70%"><b>Me</b></span>
+      </div>
     </div>
 
     <div class="lanes">
@@ -777,16 +841,9 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
   </div>
 </section>
 
-<!-- ── 3 · is there an app in your audience? ───────────────────────────── -->
-<section class="band band--dark" id="audience">
+<!-- ── the niche, on its own ────────────────────────────────────────────── -->
+<section class="band band--dark nd-band">
   <div class="shell">
-    <div class="head head--center rise">
-      <span class="eyebrow"><i></i>Your audience</span>
-      <h2 class="h-section">Is there an app in your audience?</h2>
-    </div>
-
-    <!-- The niche cycles through real examples, so the abstract claim
-         ("narrower is better") gets something concrete to land on. -->
     <div class="nd rise">
       <p class="nd-pre">An audience about</p>
       <div class="nd-slot">
@@ -795,60 +852,62 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
       <p class="nd-post">has an app in it.</p>
       <div class="nd-rule" aria-hidden="true"><span id="nd-bar"></span></div>
     </div>
+  </div>
+</section>
+
+<!-- ── is there an app in your audience ─────────────────────────────────── -->
+<section class="band" id="audience">
+  <div class="shell">
+    <div class="head head--center rise">
+      <span class="eyebrow"><i></i>Your audience</span>
+      <h2 class="h-section">Is there an app in your audience?</h2>
+      <p class="lede">Almost certainly. The narrower your niche, the better it works.</p>
+    </div>
 
     <div class="reasons">
       <div class="reason sheen rise" style="--d:0ms">
         <span class="r-no" aria-hidden="true">01</span>
         <h4>Niche beats big</h4>
-        <p>
-          A broad audience gives you a broad app, competing with everyone. A
-          narrow one gives you an app built for exactly those people, competing
-          with nobody.
-        </p>
+        <p>An app for exactly your people competes with nobody.</p>
       </div>
       <div class="reason sheen rise" style="--d:90ms">
         <span class="r-no" aria-hidden="true">02</span>
         <h4>They already told you</h4>
-        <p>
-          It is the question you keep getting in the comments and the DMs. The
-          thing people ask you to explain again, or assume must already exist.
-        </p>
+        <p>It is the question you keep getting in the comments.</p>
       </div>
       <div class="reason sheen rise" style="--d:180ms">
         <span class="r-no" aria-hidden="true">03</span>
         <h4>They trust you</h4>
-        <p>
-          An app from someone they already follow does not need paid ads to find
-          its first thousand users. That is what kills most apps, and you have
-          already solved it.
-        </p>
-      </div>
-    </div>
-
-    <div class="niche-close rise">
-      <p>So the only real question is which one.</p>
-      <div class="btn-row">
-        <a class="btn magnetic" href="#contact">Let's work it out <span class="arrow">&rarr;</span></a>
+        <p>No paid ads needed for the first thousand users.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── close ────────────────────────────────────────────────────────────── -->
-<section class="band close" id="contact">
+<!-- ── the year ahead, then the ask ───────────────────────────────────── -->
+<section class="band band--dark close" id="contact">
   <div class="narrow">
-    <div class="panel rise">
-      <h2 class="h-section">What do your people keep asking you for?</h2>
+    <div class="rise">
+      <span class="eyebrow"><i></i>A year from now</span>
+      <h2 class="h-section">You could own something.</h2>
       <p class="lede">
-        Email me that, what you make, and roughly how many follow you.
-        If it is not a fit I will say so the same day.
+        Twelve months of posting leaves you with twelve months of posts. The
+        same twelve months, with an app behind them, leaves you something your
+        people open every morning, that earns while you sleep, and that is
+        worth real money the day you decide to sell it.
       </p>
+      <p class="lede close-turn">
+        The audience is already yours. This is just the part where it starts
+        paying you back.
+      </p>
+
       <div class="btn-row">
         <a class="btn magnetic" href="mailto:hey@jeremylasne.com?subject=Building%20an%20app%20together&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A">
           hey@jeremylasne.com <span class="arrow">&rarr;</span>
         </a>
         <a class="btn btn--ghost magnetic" href="https://x.com/jeremylasne" target="_blank" rel="noopener">Or DM me on X</a>
       </div>
+      <p class="close-fine">Tell me what you make and roughly how many follow you. If it is not a fit I will say so the same day.</p>
     </div>
   </div>
 </section>
@@ -1096,27 +1155,6 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
         { threshold: 0.3 }).observe(document.getElementById('audience'));
     } else { start(); }
   })();
-
-  /* ═══ the claim counts up when it arrives ════════════════════════════════ */
-
-  document.querySelectorAll('[data-count-to]').forEach(function (el) {
-    var target = parseInt(el.getAttribute('data-count-to'), 10);
-    if (reduced || !('IntersectionObserver' in window)) { el.textContent = target; return; }
-    var run = new IntersectionObserver(function (entries, obs) {
-      if (!entries[0].isIntersecting) return;
-      obs.disconnect();
-      var t0 = null, DUR = 1500;
-      function step(t) {
-        if (t0 === null) t0 = t;
-        var k = Math.min(1, (t - t0) / DUR);
-        // ease-out cubic, so it decelerates onto the number rather than stopping dead
-        el.textContent = Math.round(target * (1 - Math.pow(1 - k, 3)));
-        if (k < 1) requestAnimationFrame(step);
-      }
-      requestAnimationFrame(step);
-    }, { threshold: 0.5 });
-    run.observe(el);
-  });
 
   /* ═══ a light that follows the pointer across a card ═════════════════════ */
 
