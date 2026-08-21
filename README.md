@@ -13,12 +13,18 @@ plainly on the page rather than saved for a call.
 Single hand-written `index.html`. No build step, no framework, no bundler, no
 network requests at runtime. Open it and edit it.
 
-- Type is the system stack, which resolves to SF Pro on the devices this will
-  actually be opened on and costs nothing to download
-- Sections alternate dark and light so each lands on its own
-- Everything interactive degrades: `prefers-reduced-motion` is respected
-  throughout, and the page is readable with JavaScript off apart from the
-  earnings model
+- **Nunito**, inlined once as a variable woff2 covering weights 400–800. One
+  file, one family, no second voice, and no FOUT because nothing is fetched
+- Black, white, and the greys between. The only colour on the page lives
+  inside the phone, because that is the product
+- Bands alternate white and black. A `.band--dark` section re-points the
+  colour tokens rather than overriding components, so every card, rule, chip
+  and slider inside it inverts on its own
+- Three screens: the offer, the money, the example. Roughly five screens of
+  scroll on desktop
+- Everything degrades: `prefers-reduced-motion` is respected throughout, and
+  the page reads fine with JavaScript off apart from the earnings model
+- Every text node on the page meets WCAG AA contrast in both bands
 
 ## Editing it
 
