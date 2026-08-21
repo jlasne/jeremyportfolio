@@ -343,6 +343,16 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
 .phone-screen { position: relative; overflow: hidden; width: 100%; height: 100%; border-radius: 42px; background: #05070a; display: flex; flex-direction: column; }
 .phone-notch { position: absolute; top: 9px; left: 50%; transform: translateX(-50%); width: 30%; height: 25px; border-radius: 980px; background: #000; z-index: 9; }
 
+/* A real screenshot, when one has been dropped into media/app/. It covers the
+   drawn mock entirely; if the file is missing the script removes it and the
+   drawing shows through, so the page never has a hole in it. */
+.shot {
+  position: absolute; inset: 0; z-index: 6;
+  width: 100%; height: 100%; object-fit: cover; object-position: top center;
+  border-radius: 42px;
+}
+.phone.has-shot .phone-notch { display: none; }
+
 .scr { position: absolute; inset: 0; display: flex; flex-direction: column; opacity: 0; transform: scale(1.03); transition: opacity .75s var(--ease), transform .75s var(--ease); pointer-events: none; }
 .scr.on { opacity: 1; transform: none; }
 
@@ -847,6 +857,7 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
             <!-- A home screen full of apps: the work, not one demo of it.
                  Each icon lifts a little away from the cursor. -->
             <div class="scr scr--home on">
+              <img class="shot" src="media/app/1.png" alt="" loading="lazy" decoding="async" data-shot>
               <div class="hs-status"><span>9:41</span><span class="hs-right"><i class="hs-sig"></i><i class="hs-bat"></i></span></div>
               <div class="hs-grid" id="hs-grid">
                 <span class="ic" style="--a:#ff9a3d;--b:#ff5e3a"><em>&#129418;</em><small>Kaught</small></span>
@@ -871,13 +882,16 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
             </div>
 
             <div class="scr">
+              <img class="shot" src="media/app/2.png" alt="" loading="lazy" decoding="async" data-shot>
               <div class="viewfinder" aria-hidden="true"></div>
               <div class="reticle" aria-hidden="true"></div>
               <div class="scan-label">Identifying&hellip;</div>
-              <div class="scr-body"></div>
+              <div class="scr-body">
+              <img class="shot" src="media/app/3.png" alt="" loading="lazy" decoding="async" data-shot></div>
             </div>
 
             <div class="scr">
+              <img class="shot" src="media/app/4.png" alt="" loading="lazy" decoding="async" data-shot>
               <div class="viewfinder" aria-hidden="true"></div>
               <div class="scr-body">
                 <div class="id-card">
@@ -915,7 +929,7 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
         <button role="tab" aria-selected="false" aria-label="Species identified"></button>
         <button role="tab" aria-selected="false" aria-label="Collection"></button>
       </div>
-      <p class="stage-note">Kaught is live. The rest are what a niche could hold.<span class="swipe-hint"> Swipe or tap the dots.</span></p>
+      <p class="stage-note">My latest app, live.<span class="swipe-hint"> Swipe or tap the dots.</span></p>
     </div>
   </div>
 </section>
@@ -1251,6 +1265,20 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
       }
     }, { passive: true });
   }
+
+  /* ═══ real screenshots, if any have been dropped in ═════════════════════ */
+
+  document.querySelectorAll('[data-shot]').forEach(function (img) {
+    // a missing file is the normal case until Jeremy adds one
+    img.addEventListener('error', function () { img.remove(); });
+    img.addEventListener('load', function () {
+      // a real screenshot brings its own status bar, so drop the drawn notch
+      var ph = img.closest('.phone');
+      if (ph) ph.classList.add('has-shot');
+    });
+    // cached-error case: if it already failed before the listener attached
+    if (img.complete && img.naturalWidth === 0) img.remove();
+  });
 
   /* ═══ the phone's three screens ══════════════════════════════════════════ */
 

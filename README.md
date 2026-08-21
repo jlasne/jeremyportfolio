@@ -60,11 +60,19 @@ There is no simulator and no split shown. Four sliders invited fiddling and let
 a visitor dial the number down to nothing; the terms belong in a conversation,
 not on a landing page.
 
-### The phone mockups
+### The phone screenshots
 
-Built in CSS, not screenshots. The viewfinder is a gradient stand-in.
-**Swap these for real Kaught screenshots when you have them** — a premium page
-lives or dies on the device shots, and a real one will always beat a drawn one.
+The hero phone draws its four screens in CSS. To replace any of them with a
+real screenshot, drop a PNG into `media/app/` named `1.png` through `4.png`.
+Nothing in `index.html` needs editing.
+
+A file that is not there removes its own `<img>` and the drawing underneath
+shows, so there is no half-broken state and you can add one screen at a time.
+The drawn notch hides itself as soon as a real screenshot loads, because the
+screenshot brings its own status bar.
+
+See [`media/app/README.md`](media/app/README.md) for sizes and how to shrink
+them.
 
 ### The social card
 
