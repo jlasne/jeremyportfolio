@@ -474,8 +474,56 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
 .lane--mid .lane-k { color: var(--bg); opacity: 0.55; }
 .lane--mid p { color: var(--bg); opacity: 0.68; }
 
+/* ── the rotating niche ─────────────────────────────────────────────────── */
+
+.nd { text-align: center; margin: clamp(40px, 6vw, 68px) auto clamp(44px, 6vw, 72px); }
+.nd-pre, .nd-post {
+  font-size: clamp(1.05rem, 2.2vw, 1.5rem);
+  font-weight: 700; letter-spacing: -0.02em; color: var(--muted);
+  max-width: 30ch; margin-inline: auto;
+}
+/* the slot is a fixed-height window; the word slides through it */
+.nd-slot {
+  position: relative; overflow: hidden;
+  height: 1.16em;
+  margin: 2px 0;
+  font-size: clamp(2.1rem, 6.4vw, 4.4rem);
+  font-weight: 800; letter-spacing: -0.04em; line-height: 1.16;
+}
+.nd-word {
+  display: block; white-space: nowrap;
+  transition: transform .5s var(--ease), opacity .5s var(--ease);
+}
+.nd-word.out { transform: translateY(-100%); opacity: 0; }
+.nd-word.in  { transform: translateY(100%);  opacity: 0; transition: none; }
+
+/* a hairline that fills as the word holds, so the cycle has a heartbeat */
+.nd-rule { width: min(220px, 60%); height: 2px; margin: 22px auto 0; background: var(--rule); border-radius: 2px; overflow: hidden; }
+.nd-rule span { display: block; height: 100%; width: 0; background: var(--ink); border-radius: 2px; }
+@media (prefers-reduced-motion: reduce) { .nd-rule { display: none; } }
+
+/* ── the three reasons ──────────────────────────────────────────────────── */
+
+.reasons { display: grid; gap: 12px; }
+@media (min-width: 860px) { .reasons { grid-template-columns: repeat(3, 1fr); } }
+.reason {
+  position: relative; overflow: hidden;
+  padding: 30px 28px 32px; border-radius: 22px;
+  background: var(--card); border: 1px solid var(--rule);
+  transition: transform .6s var(--ease), border-color .45s var(--ease-soft);
+}
+.reason:hover { transform: translateY(-3px); border-color: var(--rule-firm); }
+/* the numeral is scenery, sat behind the text rather than beside it */
+.r-no {
+  position: absolute; top: -18px; right: -6px;
+  font-size: 6.4rem; font-weight: 800; letter-spacing: -0.05em;
+  color: var(--ink); opacity: 0.08; line-height: 1; pointer-events: none;
+}
+.reason h4 { font-size: 1.3rem; margin-bottom: 10px; position: relative; padding-right: 44px; }
+.reason p { font-size: 14.8px; line-height: 1.56; color: var(--muted); position: relative; }
+
 /* the line that closes the niche argument */
-.niche-close { margin-top: 40px; text-align: center; }
+.niche-close { margin-top: clamp(40px, 6vw, 64px); text-align: center; }
 .niche-close p { font-size: clamp(1.15rem, 2.2vw, 1.5rem); font-weight: 700; letter-spacing: -0.025em; margin-bottom: 22px; }
 .niche-close .btn-row { justify-content: center; }
 
@@ -604,9 +652,8 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
       </h1>
 
       <p class="lede hero-in" style="--d:560ms">
-        Unlock a new line of revenue from the audience you already have: an app
-        you own, earning predictable recurring income every month instead of
-        one-off fees. I build it and run it. You post about it.
+        An app you own, earning recurring revenue every month.
+        I build it and run it. You post about it.
       </p>
 
       <div class="btn-row hero-in" style="--d:740ms">
@@ -676,8 +723,12 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
 <section class="band band--dark" id="revenue">
   <div class="shell">
     <div class="head head--center rise">
-      <span class="eyebrow"><i></i>More revenue from your audience</span>
-      <h2 class="h-section">Every month. Not just once.</h2>
+      <span class="eyebrow"><i></i>A new revenue stream</span>
+      <h2 class="h-section">Same audience.<br>A second income.</h2>
+      <p class="lede">
+        Sponsorships stop the day you stop posting. An app you own keeps
+        billing every month, on top of everything you already earn.
+      </p>
     </div>
 
     <div class="claim rise">
@@ -687,8 +738,9 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
       </div>
       <p class="claim-sub">more, for every 100,000 views</p>
       <p class="claim-note">
-        Recurring subscription revenue from an app your audience actually uses,
-        not a one-off fee. It keeps paying while you post about other things.
+        Subscription revenue from an app your people actually use. It compounds
+        with every post instead of resetting to zero, and it keeps paying while
+        you work on other things.
       </p>
       <div class="btn-row">
         <a class="btn magnetic" href="#contact">Know more <span class="arrow">&rarr;</span></a>
@@ -700,9 +752,9 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
 <!-- ── how it works: yours, ours, mine ──────────────────────────────────── -->
 <section class="band" id="how">
   <div class="shell">
-    <div class="head head--center rise">
+    <div class="head head--center rise" style="max-width:none">
       <span class="eyebrow"><i></i>How it works</span>
-      <h2 class="h-section">You do one thing. I do the rest.</h2>
+      <h2 class="h-section">You do one thing.<br>I do everything else.</h2>
     </div>
 
     <div class="lanes">
@@ -731,42 +783,52 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
     <div class="head head--center rise">
       <span class="eyebrow"><i></i>Your audience</span>
       <h2 class="h-section">Is there an app in your audience?</h2>
-      <p class="lede">
-        Almost always yes. And the narrower your niche, the better it works.
-      </p>
     </div>
 
-    <div class="vals">
-      <div class="val sheen rise" style="--d:0ms">
+    <!-- The niche cycles through real examples, so the abstract claim
+         ("narrower is better") gets something concrete to land on. -->
+    <div class="nd rise">
+      <p class="nd-pre">An audience about</p>
+      <div class="nd-slot">
+        <span class="nd-word" id="nd-word">fly fishing</span>
+      </div>
+      <p class="nd-post">has an app in it.</p>
+      <div class="nd-rule" aria-hidden="true"><span id="nd-bar"></span></div>
+    </div>
+
+    <div class="reasons">
+      <div class="reason sheen rise" style="--d:0ms">
+        <span class="r-no" aria-hidden="true">01</span>
         <h4>Niche beats big</h4>
         <p>
           A broad audience gives you a broad app, competing with everyone. A
           narrow one gives you an app built for exactly those people, competing
-          with nobody. Small and specific wins here.
+          with nobody.
         </p>
       </div>
-      <div class="val sheen rise" style="--d:80ms">
-        <h4>They have already told you</h4>
+      <div class="reason sheen rise" style="--d:90ms">
+        <span class="r-no" aria-hidden="true">02</span>
+        <h4>They already told you</h4>
         <p>
-          The app is usually the question you keep getting in the comments and
-          the DMs. The thing people ask you to explain again, or want a tool
-          for, or assume must already exist.
+          It is the question you keep getting in the comments and the DMs. The
+          thing people ask you to explain again, or assume must already exist.
         </p>
       </div>
-      <div class="val sheen rise" style="--d:160ms">
+      <div class="reason sheen rise" style="--d:180ms">
+        <span class="r-no" aria-hidden="true">03</span>
         <h4>They trust you</h4>
         <p>
-          An app from someone your audience already follows does not need paid
-          ads to find its first thousand users. That is what kills most apps,
-          and you have already solved it.
+          An app from someone they already follow does not need paid ads to find
+          its first thousand users. That is what kills most apps, and you have
+          already solved it.
         </p>
       </div>
     </div>
 
     <div class="niche-close rise">
-      <p>So the only real question is which one. Let's work that out together.</p>
+      <p>So the only real question is which one.</p>
       <div class="btn-row">
-        <a class="btn magnetic" href="#contact">Let's discuss it <span class="arrow">&rarr;</span></a>
+        <a class="btn magnetic" href="#contact">Let's work it out <span class="arrow">&rarr;</span></a>
       </div>
     </div>
   </div>
@@ -986,6 +1048,54 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
       entries[0].isIntersecting ? play() : stop();
     }, { threshold: 0.25 }).observe(document.getElementById('top'));
   }
+
+  /* ═══ the niche cycles through real examples ═════════════════════════════ */
+
+  (function () {
+    var word = document.getElementById('nd-word');
+    var bar  = document.getElementById('nd-bar');
+    if (!word) return;
+
+    var NICHES = [
+      'fly fishing', 'bouldering', 'home baking', 'vintage watches',
+      'birdwatching', 'van life', 'chess openings', 'urban gardening',
+      'freediving', 'film photography'
+    ];
+    var i = 0, timer = null, HOLD = 2600;
+
+    function swap() {
+      i = (i + 1) % NICHES.length;
+      word.classList.add('out');                 // slide the old one up and out
+      setTimeout(function () {
+        word.textContent = NICHES[i];
+        word.classList.add('in');                // drop below, no transition
+        word.classList.remove('out');
+        // next frame, release it so it eases up into place
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () { word.classList.remove('in'); });
+        });
+        if (bar) { bar.style.transition = 'none'; bar.style.width = '0%';
+          requestAnimationFrame(function () {
+            bar.style.transition = 'width ' + HOLD + 'ms linear';
+            bar.style.width = '100%';
+          });
+        }
+      }, 500);
+    }
+
+    function start() {
+      if (reduced || timer) return;
+      if (bar) { bar.style.transition = 'width ' + HOLD + 'ms linear'; bar.style.width = '100%'; }
+      timer = setInterval(swap, HOLD + 500);
+    }
+    function halt() { clearInterval(timer); timer = null; }
+
+    // only run while the section is actually on screen
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (e) { e[0].isIntersecting ? start() : halt(); },
+        { threshold: 0.3 }).observe(document.getElementById('audience'));
+    } else { start(); }
+  })();
 
   /* ═══ the claim counts up when it arrives ════════════════════════════════ */
 
