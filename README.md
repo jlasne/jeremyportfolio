@@ -20,8 +20,11 @@ network requests at runtime. Open it and edit it.
 - Bands alternate white and black. A `.band--dark` section re-points the
   colour tokens rather than overriding components, so every card, rule, chip
   and slider inside it inverts on its own
-- Three screens: the offer, the money, the example. Roughly five screens of
-  scroll on desktop
+- Project logos are the real icons from each site, resized to 128px and
+  inlined as webp (340 KB of source PNGs down to 14 KB)
+- Interactive without being fussy: the claim counts up on arrival, cards take
+  a pointer-tracked sheen, the phone cycles and swipes, the nav retreats on the
+  way down and returns on the way up
 - Everything degrades: `prefers-reduced-motion` is respected throughout, and
   the page reads fine with JavaScript off apart from the earnings model
 - Every text node on the page meets WCAG AA contrast in both bands
@@ -47,17 +50,15 @@ qualitative line shows instead, so the page never displays placeholder dashes.
 Keep these honest — the people this page is aimed at will ask you to back them
 up on the first call.
 
-### The earnings estimate
+### The revenue claim
 
-A fixed worked example on an audience of 100,000, not a simulator: 2% install,
-5% of those subscribe, $7.99/month, less Apple's 15% Small Business Program fee,
-split in half. It is hard-coded in the markup in the `#revenue` section, so
-changing an assumption means editing those rows and the two figures beside them
-together.
+One number: up to $500/month more per 100,000 views, counted up when it scrolls
+into view. It is hard-coded in the `#revenue` markup with `data-count-to`, so
+changing the figure means editing that attribute.
 
-Every number is the cautious end of its range on purpose. The people this page
-is aimed at will interrogate it, and the defensible number persuades where the
-flattering one does not.
+There is no simulator and no split shown. Four sliders invited fiddling and let
+a visitor dial the number down to nothing; the terms belong in a conversation,
+not on a landing page.
 
 ### The phone mockups
 

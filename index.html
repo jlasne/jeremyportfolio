@@ -242,6 +242,20 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
 .nav-links a.nav-cta:hover { transform: scale(1.04); color: #fff; }
 @media (max-width: 720px) { .nav-links a:not(.nav-cta) { display: none; } }
 
+/* On a phone the nav retreats when you scroll down and comes back the moment
+   you scroll up, so the header never eats a fifth of a short screen. */
+.nav { transform: translateY(0); transition: background .5s var(--ease-soft), border-color .5s var(--ease-soft), transform .45s var(--ease); }
+.nav.away { transform: translateY(-100%); }
+
+/* Comfortable touch targets everywhere a finger has to land. */
+@media (pointer: coarse) {
+  .btn { padding: 16px 28px; min-height: 50px; }
+  .nav-links a.nav-cta { padding: 11px 20px; min-height: 44px; display: inline-flex; align-items: center; }
+  .stage-dots button { height: 5px; width: 34px; }
+  .stage-dots { gap: 10px; padding: 12px 0; }
+  .foot-links a { padding-block: 4px; }
+}
+
 .nav-progress {
   position: absolute; left: 0; bottom: -1px; height: 2px; width: 100%;
   transform: scaleX(var(--p, 0)); transform-origin: left;
@@ -260,8 +274,13 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
   align-items: center;
 }
 @media (max-width: 940px) {
-  .hero { padding-block: 108px 56px; }
-  .hero .shell { grid-template-columns: 1fr; gap: 44px; }
+  .hero { padding-block: 100px 48px; }
+  .hero .shell { grid-template-columns: 1fr; gap: 36px; }
+}
+@media (max-width: 560px) {
+  .phone { width: min(250px, 62vw); }
+  .band { padding-block: clamp(64px, 11vw, 96px); }
+  .lane, .project { padding: 26px 22px 28px; }
 }
 
 .hero h1 { margin-block: 20px 22px; }
@@ -309,7 +328,7 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
 }
 .phone {
   position: relative; z-index: 1;
-  width: min(292px, 72vw); aspect-ratio: 393 / 852;
+  width: min(292px, 66vw); aspect-ratio: 393 / 852;
   border-radius: 52px; padding: 11px;
   background: linear-gradient(148deg, #4a4a54 0%, #1b1b21 26%, #0e0e12 54%, #383840 100%);
   box-shadow:
@@ -383,9 +402,31 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
 .cell.locked { opacity: 0.3; }
 
 .stage-dots { display: flex; gap: 7px; justify-content: center; margin-top: 24px; }
-.stage-dots button { width: 26px; height: 4px; border-radius: 980px; background: var(--rule-firm); transition: background .45s var(--ease-soft), width .45s var(--ease); }
+.stage-dots button {
+  position: relative;
+  width: 26px; height: 4px; border-radius: 980px;
+  background: var(--rule-firm);
+  transition: background .45s var(--ease-soft), width .45s var(--ease);
+}
+/* the bar is 4px tall by design; the thing a finger has to hit is not */
+.stage-dots button::after { content: ''; position: absolute; inset: -14px -6px; }
 .stage-dots button[aria-selected="true"] { background: var(--ink); width: 38px; }
 .stage-note { margin-top: 12px; text-align: center; font-size: 12.5px; font-weight: 600; color: var(--faint); }
+.swipe-hint { display: none; }
+@media (pointer: coarse) { .swipe-hint { display: inline; } }
+
+/* A soft light that follows the pointer across a card. Purely decorative,
+   driven by two custom properties the script updates on pointermove. */
+.sheen { position: relative; overflow: hidden; }
+.sheen::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(220px circle at var(--px, 50%) var(--py, 50%),
+              rgba(0,0,0,0.05), transparent 70%);
+  opacity: 0; transition: opacity .5s var(--ease-soft);
+}
+.band--dark .sheen::after { background: radial-gradient(220px circle at var(--px, 50%) var(--py, 50%), rgba(255,255,255,0.08), transparent 70%); }
+.sheen:hover::after { opacity: 1; }
+@media (hover: none) { .sheen::after { display: none; } }
 
 /* ── the shared card ────────────────────────────────────────────────────── */
 
@@ -398,105 +439,40 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
   -webkit-backdrop-filter: blur(18px) saturate(150%);
 }
 
-/* ── revenue: the calculator ────────────────────────────────────────────── */
+/* ── the claim: one number, counted up when it comes into view ──────────── */
 
-.calc { margin-top: 44px; display: grid; overflow: hidden; }
-@media (min-width: 900px) { .calc { grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr); } }
-
-.calc-inputs { padding: clamp(26px, 3.4vw, 40px); }
-@media (min-width: 900px) { .calc-inputs { border-right: 1px solid var(--rule); } }
-@media (max-width: 899px) { .calc-inputs { border-bottom: 1px solid var(--rule); } }
-
-.calc-out {
-  padding: clamp(26px, 3.4vw, 40px);
-  display: flex; flex-direction: column; justify-content: center;
-  position: relative; overflow: hidden;
-  background: var(--bg-sunk);
-}
-.calc-out > * { position: relative; z-index: 1; }
-
-.field { margin-bottom: 26px; }
-.field:last-child { margin-bottom: 0; }
-.field-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 11px; }
-.field label { font-size: 15px; font-weight: 700; letter-spacing: -0.015em; }
-.field .out { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
-.field .hint { font-size: 12.5px; color: var(--faint); margin-top: 8px; line-height: 1.45; }
-
-input[type="range"] {
-  -webkit-appearance: none; appearance: none;
-  width: 100%; height: 6px; border-radius: 980px;
-  background: linear-gradient(90deg, var(--ink) 0 var(--fill, 50%), var(--rule-firm) var(--fill, 50%) 100%);
-  cursor: pointer; outline: none;
-}
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none; appearance: none;
-  width: 22px; height: 22px; border-radius: 50%;
-  background: #fff; border: 1px solid var(--rule-firm);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.22);
-  transition: transform .35s var(--ease), box-shadow .35s var(--ease);
-}
-input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.14); box-shadow: 0 2px 6px rgba(0,0,0,0.22), 0 0 0 9px var(--bg-sunk); }
-input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; border: 1px solid var(--rule-firm); border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(22,21,28,0.18); cursor: pointer; }
-input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offset: 6px; }
-
-.calc-out .k { font-size: 12.5px; font-weight: 700; letter-spacing: 0.02em; color: var(--muted); }
-.big-money {
-  font-size: clamp(2.9rem, 6.6vw, 4.4rem); font-weight: 800;
-  letter-spacing: -0.045em; line-height: 1; margin-top: 10px;
+.claim { text-align: center; margin-top: 46px; }
+.claim-up { display: block; font-size: 15px; font-weight: 700; color: var(--muted); letter-spacing: 0.01em; }
+.claim-fig {
+  display: flex; align-items: flex-start; justify-content: center; gap: 2px;
+  margin-top: 6px; line-height: 0.95;
   font-variant-numeric: tabular-nums;
-  color: var(--ink);
 }
-.big-money small { font-size: 0.3em; font-weight: 700; letter-spacing: 0; -webkit-text-fill-color: var(--faint); }
-.calc-rows { margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--rule); display: grid; gap: 11px; }
-.calc-row { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; font-size: 14.5px; }
-.calc-row .rk { color: var(--muted); }
-.calc-row .rv { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 13.5px; font-weight: 600; }
-.calc-row--hero { padding-top: 11px; border-top: 1px solid var(--rule); }
-.calc-row--hero .rk { color: var(--ink); font-weight: 800; }
-.calc-row--hero .rv { color: var(--ink); font-size: 16px; font-weight: 800; }
+.claim-cur { font-size: clamp(2.4rem, 6vw, 4.4rem); font-weight: 800; letter-spacing: -0.04em; margin-top: .22em; }
+.claim-num { font-size: clamp(4.2rem, 15vw, 10rem); font-weight: 800; letter-spacing: -0.055em; }
+.claim-per { font-size: clamp(1.3rem, 3vw, 2.1rem); font-weight: 700; color: var(--muted); align-self: flex-end; margin-bottom: .5em; }
+.claim-sub { font-size: clamp(1.15rem, 2.4vw, 1.6rem); font-weight: 700; letter-spacing: -0.025em; margin-top: 4px; }
+.claim-note { font-size: 15.5px; line-height: 1.6; color: var(--muted); max-width: 44ch; margin: 20px auto 0; }
+.claim .btn-row { justify-content: center; margin-top: 32px; }
 
-.disclaimer {
-  margin-top: 22px; padding: 14px 16px; border-radius: 14px;
-  background: var(--bg-sunk); border: 1px solid var(--rule);
-  font-size: 12.5px; line-height: 1.55; color: var(--faint);
+/* ── how it works: three lanes ──────────────────────────────────────────── */
+
+.lanes { display: grid; gap: 12px; margin-top: 44px; }
+@media (min-width: 820px) { .lanes { grid-template-columns: repeat(3, 1fr); } }
+.lane {
+  position: relative; overflow: hidden;
+  padding: 30px 28px 32px; border-radius: 22px;
+  background: var(--card); border: 1px solid var(--rule);
+  transition: transform .6s var(--ease), border-color .45s var(--ease-soft);
 }
-
-/* what they get out of it — three plain facts under the money */
-.vals { display: grid; gap: 12px; margin-top: 24px; }
-@media (min-width: 760px) { .vals { grid-template-columns: repeat(3, 1fr); } }
-.val { padding: 26px 26px 28px; border-radius: 20px; background: var(--card); border: 1px solid var(--rule); }
-.val h4 { font-size: 16.5px; font-weight: 800; margin-bottom: 7px; }
-.val p { font-size: 14px; line-height: 1.5; color: var(--muted); }
-
-/* the labour split, said once and compactly */
-.swap { display: grid; gap: 12px; margin-top: 24px; }
-@media (min-width: 820px) { .swap { grid-template-columns: minmax(0,0.8fr) minmax(0,1.2fr); } }
-.swap-side { padding: 26px 26px 28px; border-radius: 20px; display: flex; flex-direction: column; }
-.swap-side .k { font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; display: block; margin-bottom: 14px; }
-.swap--yours { background: var(--ink); color: var(--bg); justify-content: center; }
-.swap--yours .k { color: var(--bg); opacity: 0.55; }
-.swap--yours p { font-size: clamp(1.2rem, 2.3vw, 1.6rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; }
-.swap--yours small { display: block; margin-top: 11px; font-size: 14px; font-weight: 400; line-height: 1.5; color: var(--bg); opacity: 0.62; }
-.swap--mine { background: var(--card); border: 1px solid var(--rule); }
-.swap--mine .k { color: var(--faint); }
-.chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 8px; }
-.chip { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 11px; background: var(--bg-sunk); font-size: 13.5px; font-weight: 600; letter-spacing: -0.012em; }
-.chip i { flex: none; width: 5px; height: 5px; border-radius: 50%; background: var(--ink); opacity: 0.45; }
-
-/* the worked estimate reuses the calculator's two-panel shell */
-.est-lead { display: block; font-size: 15px; font-weight: 700; letter-spacing: -0.015em; margin-bottom: 16px; }
-.est-rows { margin-top: 0; padding-top: 0; border-top: 0; }
-.est-note { margin-top: 18px; font-size: 14.5px; line-height: 1.55; color: var(--muted); }
-.calc-inputs .hint { margin-top: 18px; }
-
-/* the partnership note */
-.partner {
-  margin-top: 12px; padding: clamp(26px, 3.4vw, 38px);
-  border-radius: 20px; background: var(--card); border: 1px solid var(--rule);
-}
-.partner .k { font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; color: var(--faint); display: block; margin-bottom: 14px; }
-.partner h3 { font-size: clamp(1.25rem, 2.3vw, 1.6rem); margin-bottom: 12px; }
-.partner p { font-size: 15.5px; line-height: 1.6; color: var(--muted); max-width: 62ch; }
+.lane:hover { transform: translateY(-3px); border-color: var(--rule-firm); }
+.lane-k { font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.15em; color: var(--faint); display: block; margin-bottom: 16px; }
+.lane h4 { font-size: 1.32rem; margin-bottom: 10px; }
+.lane p { font-size: 14.8px; line-height: 1.56; color: var(--muted); }
+/* the middle lane is the shared one, so it reads as the join between the two */
+.lane--mid { background: var(--ink); color: var(--bg); border-color: transparent; }
+.lane--mid .lane-k { color: var(--bg); opacity: 0.55; }
+.lane--mid p { color: var(--bg); opacity: 0.68; }
 
 /* the line that closes the niche argument */
 .niche-close { margin-top: 40px; text-align: center; }
@@ -519,6 +495,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offse
   padding: 6px 13px; border-radius: 980px; background: var(--bg-sunk);
   margin-bottom: 16px;
 }
+.p-logo { width: 52px; height: 52px; border-radius: 13px; margin-bottom: 16px; }
 .project h3 { font-size: 1.5rem; margin-bottom: 10px; }
 .project p { font-size: 14.8px; line-height: 1.55; color: var(--muted); }
 .project .stats { margin: 18px 0 0; }
@@ -607,8 +584,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offse
           </svg>
         </span>Jeremy Lasne</a>
     <div class="nav-links">
-      <a href="#revenue">Revenue</a>
-      <a href="#audience">Your audience</a>
       <a href="#projects">Projects</a>
       <a class="nav-cta" href="#contact">Let's talk</a>
     </div>
@@ -622,9 +597,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offse
 <section class="hero" id="top">
   <div class="shell">
     <div>
-      <a class="live hero-in" style="--d:60ms" href="https://kaught.app" target="_blank" rel="noopener">
-        <span class="live-dot"></span> Live now: <b>Kaught</b> on the App Store
-      </a>
 
       <h1 class="h-display">
         <span class="line"><span style="--d:170ms">I build mobile apps</span></span>
@@ -695,7 +667,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offse
         <button role="tab" aria-selected="false" aria-label="Species identified"></button>
         <button role="tab" aria-selected="false" aria-label="Collection"></button>
       </div>
-      <p class="stage-note">Kaught &middot; point, shoot, know</p>
+      <p class="stage-note">Kaught <span class="swipe-hint">&middot; swipe or tap the dots</span></p>
     </div>
   </div>
 </section>
@@ -706,81 +678,55 @@ input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offse
     <div class="head head--center rise">
       <span class="eyebrow"><i></i>More revenue from your audience</span>
       <h2 class="h-section">Every month. Not just once.</h2>
-      <p class="lede">
-        Not a one-off sponsorship fee. A subscription app your people actually
-        use, paying out for as long as it runs. Here is what that looks like on
-        an audience of 100,000.
+    </div>
+
+    <div class="claim rise">
+      <span class="claim-up">Up to</span>
+      <div class="claim-fig">
+        <span class="claim-cur">$</span><span class="claim-num" data-count-to="500">0</span><span class="claim-per">/mo</span>
+      </div>
+      <p class="claim-sub">more, for every 100,000 views</p>
+      <p class="claim-note">
+        Recurring subscription revenue from an app your audience actually uses,
+        not a one-off fee. It keeps paying while you post about other things.
       </p>
-    </div>
-
-    <div class="calc panel rise">
-      <div class="calc-inputs">
-        <span class="est-lead">Take an audience of 100,000.</span>
-        <div class="calc-rows est-rows">
-          <div class="calc-row"><span class="rk">2% install it</span><span class="rv">2,000 installs</span></div>
-          <div class="calc-row"><span class="rk">5% of those subscribe</span><span class="rv">100 subscribers</span></div>
-          <div class="calc-row"><span class="rk">At $7.99 a month</span><span class="rv">$799 gross</span></div>
-          <div class="calc-row"><span class="rk">Less the 15% App Store fee</span><span class="rv">&minus;$120</span></div>
-          <div class="calc-row calc-row--hero"><span class="rk">Net, every month</span><span class="rv">$679</span></div>
-        </div>
-        <p class="hint">
-          Every number here is the cautious end of the range. An app that fits
-          its audience properly does several times this, and it compounds every
-          month you keep posting rather than resetting to zero.
-        </p>
-      </div>
-
-      <div class="calc-out">
-        <span class="k">Your share, every month</span>
-        <div class="big-money">$340<small>/mo</small></div>
-        <p class="est-note">
-          Recurring, not a one-off. That is roughly $4,000 in the first year
-          from one launch, and it keeps running while you post about other
-          things.
-        </p>
-        <p class="disclaimer">
-          An illustration, not a promise. It assumes ongoing promotion and a 15%
-          App Store fee under Apple's Small Business Program.
-        </p>
+      <div class="btn-row">
+        <a class="btn magnetic" href="#contact">Know more <span class="arrow">&rarr;</span></a>
       </div>
     </div>
+  </div>
+</section>
 
-    <div class="partner rise">
-      <span class="k">THE SPLIT</span>
-      <h3>Fifty-fifty is where we start, not where you have to land.</h3>
-      <p>
-        We agree it together before a line of code is written, and you keep a
-        say in what gets built after that. You are a partner in the app, not a
-        channel I am renting. You own a real share of it, you have a voice in
-        where it goes, and if it is ever sold you are on that side of the table.
-      </p>
+<!-- ── how it works: yours, ours, mine ──────────────────────────────────── -->
+<section class="band" id="how">
+  <div class="shell">
+    <div class="head head--center rise">
+      <span class="eyebrow"><i></i>How it works</span>
+      <h2 class="h-section">You do one thing. I do the rest.</h2>
     </div>
 
-    <div class="swap rise">
-      <div class="swap-side swap--yours">
-        <span class="k">YOURS</span>
-        <p>Tell your people it exists.</p>
-        <small>That is the whole job. No brief, no budget, no meetings, and you never pay me anything.</small>
+    <div class="lanes">
+      <div class="lane sheen rise" style="--d:0ms">
+        <span class="lane-k">YOURS</span>
+        <h4>Distribution</h4>
+        <p>You tell your people it exists. That is the whole job, and you already do it every day.</p>
       </div>
-      <div class="swap-side swap--mine">
-        <span class="k">MINE</span>
-        <div class="chips">
-          <span class="chip"><i></i>Product &amp; design</span>
-          <span class="chip"><i></i>iOS &amp; Android</span>
-          <span class="chip"><i></i>App Store submission</span>
-          <span class="chip"><i></i>Subscriptions &amp; payments</span>
-          <span class="chip"><i></i>Analytics</span>
-          <span class="chip"><i></i>Onboarding &amp; paywall</span>
-          <span class="chip"><i></i>Retention</span>
-          <span class="chip"><i></i>Support &amp; updates, forever</span>
-        </div>
+      <div class="lane lane--mid sheen rise" style="--d:90ms">
+        <span class="lane-k">OURS</span>
+        <h4>Product &amp; design</h4>
+        <p>What we actually build, decided together. You know what your audience wants. I know what ships.</p>
+      </div>
+      <div class="lane sheen rise" style="--d:180ms">
+        <span class="lane-k">MINE</span>
+        <h4>Everything technical</h4>
+        <p>Build, both stores, payments, analytics, paywall, retention, support and updates. Forever.</p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ── 3 · is there an app in your audience? ───────────────────────────── -->
-<section class="band" id="audience">
+<section class="band band--dark" id="audience">
   <div class="shell">
     <div class="head head--center rise">
       <span class="eyebrow"><i></i>Your audience</span>
@@ -791,7 +737,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offse
     </div>
 
     <div class="vals">
-      <div class="val rise" style="--d:0ms">
+      <div class="val sheen rise" style="--d:0ms">
         <h4>Niche beats big</h4>
         <p>
           A broad audience gives you a broad app, competing with everyone. A
@@ -799,7 +745,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offse
           with nobody. Small and specific wins here.
         </p>
       </div>
-      <div class="val rise" style="--d:80ms">
+      <div class="val sheen rise" style="--d:80ms">
         <h4>They have already told you</h4>
         <p>
           The app is usually the question you keep getting in the comments and
@@ -807,7 +753,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offse
           for, or assume must already exist.
         </p>
       </div>
-      <div class="val rise" style="--d:160ms">
+      <div class="val sheen rise" style="--d:160ms">
         <h4>They trust you</h4>
         <p>
           An app from someone your audience already follows does not need paid
@@ -827,7 +773,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offse
 </section>
 
 <!-- ── close ────────────────────────────────────────────────────────────── -->
-<section class="band band--dark close" id="contact">
+<section class="band close" id="contact">
   <div class="narrow">
     <div class="panel rise">
       <h2 class="h-section">What do your people keep asking you for?</h2>
@@ -854,8 +800,9 @@ input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offse
     </div>
 
     <div class="projects">
-      <a class="project project--lead rise" href="https://kaught.app" target="_blank" rel="noopener">
+      <a class="project sheen project--lead rise" href="https://kaught.app" target="_blank" rel="noopener">
         <span class="p-tag"><span class="live-dot"></span>Live on the App Store</span>
+        <img class="p-logo" src="data:image/webp;base64,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" alt="" width="52" height="52" loading="lazy" decoding="async">
         <h3>Kaught</h3>
         <p>
           Point your camera at any wild animal and it names the species in
@@ -869,8 +816,9 @@ input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offse
         <span class="p-go">kaught.app <span class="arrow">&rarr;</span></span>
       </a>
 
-      <a class="project rise" style="--d:90ms" href="https://tasu.ai" target="_blank" rel="noopener">
+      <a class="project sheen rise" style="--d:90ms" href="https://tasu.ai" target="_blank" rel="noopener">
         <span class="p-tag">SaaS</span>
+        <img class="p-logo" src="data:image/webp;base64,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" alt="" width="52" height="52" loading="lazy" decoding="async">
         <h3>Tasu</h3>
         <p>
           Analytics for mobile subscription apps: which in-app behaviours make
@@ -879,8 +827,9 @@ input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offse
         <span class="p-go">tasu.ai <span class="arrow">&rarr;</span></span>
       </a>
 
-      <a class="project rise" style="--d:180ms" href="https://trustviews.io" target="_blank" rel="noopener">
+      <a class="project sheen rise" style="--d:180ms" href="https://trustviews.io" target="_blank" rel="noopener">
         <span class="p-tag">Directory</span>
+        <img class="p-logo" src="data:image/webp;base64,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" alt="" width="52" height="52" loading="lazy" decoding="async">
         <h3>Trustviews</h3>
         <p>
           A leaderboard of verified websites and their founders, ranked on real
@@ -1011,12 +960,76 @@ input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offse
 
   dots.forEach(function (d, n) { d.addEventListener('click', function () { stop(); show(n); }); });
 
+  // Swipe on the phone itself. Horizontal intent only, so a vertical drag
+  // still scrolls the page rather than flicking the screen.
+  var phoneEl = document.getElementById('phone');
+  if (phoneEl && screens.length) {
+    var x0 = null, y0 = null;
+    phoneEl.addEventListener('touchstart', function (e) {
+      x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+    }, { passive: true });
+    phoneEl.addEventListener('touchend', function (e) {
+      if (x0 === null) return;
+      var dx = e.changedTouches[0].clientX - x0;
+      var dy = e.changedTouches[0].clientY - y0;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+        stop();
+        show((current + (dx < 0 ? 1 : screens.length - 1)) % screens.length);
+      }
+      x0 = y0 = null;
+    }, { passive: true });
+  }
+
   // only cycle while the hero is actually on screen
   if (!reduced && screens.length && 'IntersectionObserver' in window) {
     new IntersectionObserver(function (entries) {
       entries[0].isIntersecting ? play() : stop();
     }, { threshold: 0.25 }).observe(document.getElementById('top'));
   }
+
+  /* ═══ the claim counts up when it arrives ════════════════════════════════ */
+
+  document.querySelectorAll('[data-count-to]').forEach(function (el) {
+    var target = parseInt(el.getAttribute('data-count-to'), 10);
+    if (reduced || !('IntersectionObserver' in window)) { el.textContent = target; return; }
+    var run = new IntersectionObserver(function (entries, obs) {
+      if (!entries[0].isIntersecting) return;
+      obs.disconnect();
+      var t0 = null, DUR = 1500;
+      function step(t) {
+        if (t0 === null) t0 = t;
+        var k = Math.min(1, (t - t0) / DUR);
+        // ease-out cubic, so it decelerates onto the number rather than stopping dead
+        el.textContent = Math.round(target * (1 - Math.pow(1 - k, 3)));
+        if (k < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }, { threshold: 0.5 });
+    run.observe(el);
+  });
+
+  /* ═══ a light that follows the pointer across a card ═════════════════════ */
+
+  if (!reduced && fine) {
+    document.querySelectorAll('.sheen').forEach(function (el) {
+      el.addEventListener('pointermove', function (e) {
+        var r = el.getBoundingClientRect();
+        el.style.setProperty('--px', (e.clientX - r.left) + 'px');
+        el.style.setProperty('--py', (e.clientY - r.top) + 'px');
+      }, { passive: true });
+    });
+  }
+
+  /* ═══ the nav retreats on the way down, returns on the way up ════════════ */
+
+  var lastY = 0;
+  window.addEventListener('scroll', function () {
+    var y = window.scrollY || window.pageYOffset;
+    // never hide at the very top, and ignore the rubber-band overscroll
+    if (y > 240 && y > lastY + 6) nav.classList.add('away');
+    else if (y < lastY - 6 || y < 240) nav.classList.remove('away');
+    lastY = y < 0 ? 0 : y;
+  }, { passive: true });
 
   /* ═══ magnetic buttons ═══════════════════════════════════════════════════ */
 
