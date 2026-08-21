@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Jeremy Lasne — I build mobile apps for creators</title>
-<meta name="description" content="You bring the audience. I build the app. More revenue from the audience you already have — I build and run the whole thing, you post about it, we split what it earns. Live now: Kaught.">
+<title>Jeremy Lasne</title>
+<meta name="description" content="Unlock a new line of revenue from the audience you already have: an app you own, earning predictable recurring income every month. I build it and run it. You post about it.">
 <link rel="canonical" href="https://www.jeremylasne.com/">
 <meta name="theme-color" content="#fbfaff">
 <link rel="icon" href="favicon.ico" sizes="any">
@@ -13,16 +13,16 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Jeremy Lasne">
 <meta property="og:url" content="https://www.jeremylasne.com/">
-<meta property="og:title" content="You bring the audience. I build the app.">
-<meta property="og:description" content="More revenue from the audience you already have. I build and run the whole app. You post about it. We split what it earns.">
+<meta property="og:title" content="I build mobile apps with influencers.">
+<meta property="og:description" content="Unlock a new line of revenue from the audience you already have: an app you own, earning predictable recurring income every month. I build it and run it. You post about it.">
 <meta property="og:image" content="https://www.jeremylasne.com/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@jeremylasne">
 <meta name="twitter:creator" content="@jeremylasne">
-<meta name="twitter:title" content="You bring the audience. I build the app.">
-<meta name="twitter:description" content="More revenue from the audience you already have. I build and run the whole app. You post about it. We split what it earns.">
+<meta name="twitter:title" content="I build mobile apps with influencers.">
+<meta name="twitter:description" content="Unlock a new line of revenue from the audience you already have: an app you own, earning predictable recurring income every month. I build it and run it. You post about it.">
 <meta name="twitter:image" content="https://www.jeremylasne.com/og-image.png">
 
 <style>
@@ -228,7 +228,8 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
 }
 .nav .shell { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .nav-mark { display: flex; align-items: center; gap: 9px; font-size: 16px; font-weight: 800; letter-spacing: -0.02em; }
-.nav-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink); }
+.nav-logo { width: 28px; height: 28px; flex: none; }
+.nav-logo svg { width: 100%; height: 100%; display: block; }
 .nav-links { display: flex; align-items: center; gap: 24px; }
 .nav-links a { font-size: 14.5px; font-weight: 600; color: var(--muted); transition: color .3s var(--ease-soft); }
 .nav-links a:hover { color: var(--ink); }
@@ -296,22 +297,6 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
   0%, 100% { box-shadow: 0 0 0 0 rgba(33,192,122,0.5); }
   55%      { box-shadow: 0 0 0 6px rgba(33,192,122,0); }
 }
-
-/* the three clauses of the deal, stated once under the fold */
-.deal-strip { margin-top: 34px; display: grid; gap: 9px; }
-@media (min-width: 620px) { .deal-strip { grid-template-columns: repeat(3, 1fr); } }
-.clause {
-  display: flex; flex-direction: column; gap: 3px;
-  padding: 14px 16px; border-radius: 14px;
-  background: var(--card);
-  border: 1px solid var(--rule);
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  transition: background .45s var(--ease-soft), transform .55s var(--ease);
-}
-.clause:hover { background: #fff; transform: translateY(-2px); }
-.clause .n { font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.1em; color: var(--faint); }
-.clause .t { font-size: 14.5px; font-weight: 700; letter-spacing: -0.015em; line-height: 1.3; }
-.clause .t span { font-weight: 400; color: var(--muted); }
 
 /* ── the phone ──────────────────────────────────────────────────────────── */
 
@@ -498,6 +483,49 @@ input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offse
 .chip { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 11px; background: var(--bg-sunk); font-size: 13.5px; font-weight: 600; letter-spacing: -0.012em; }
 .chip i { flex: none; width: 5px; height: 5px; border-radius: 50%; background: var(--ink); opacity: 0.45; }
 
+/* the worked estimate reuses the calculator's two-panel shell */
+.est-lead { display: block; font-size: 15px; font-weight: 700; letter-spacing: -0.015em; margin-bottom: 16px; }
+.est-rows { margin-top: 0; padding-top: 0; border-top: 0; }
+.est-note { margin-top: 18px; font-size: 14.5px; line-height: 1.55; color: var(--muted); }
+.calc-inputs .hint { margin-top: 18px; }
+
+/* the partnership note */
+.partner {
+  margin-top: 12px; padding: clamp(26px, 3.4vw, 38px);
+  border-radius: 20px; background: var(--card); border: 1px solid var(--rule);
+}
+.partner .k { font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; color: var(--faint); display: block; margin-bottom: 14px; }
+.partner h3 { font-size: clamp(1.25rem, 2.3vw, 1.6rem); margin-bottom: 12px; }
+.partner p { font-size: 15.5px; line-height: 1.6; color: var(--muted); max-width: 62ch; }
+
+/* the line that closes the niche argument */
+.niche-close { margin-top: 40px; text-align: center; }
+.niche-close p { font-size: clamp(1.15rem, 2.2vw, 1.5rem); font-weight: 700; letter-spacing: -0.025em; margin-bottom: 22px; }
+.niche-close .btn-row { justify-content: center; }
+
+/* current projects */
+.projects { display: grid; gap: 14px; margin-top: 44px; }
+@media (min-width: 860px) { .projects { grid-template-columns: repeat(3, 1fr); } }
+.project {
+  display: flex; flex-direction: column;
+  padding: 30px 28px 28px; border-radius: 22px;
+  background: var(--card); border: 1px solid var(--rule);
+  transition: transform .6s var(--ease), border-color .45s var(--ease-soft), box-shadow .45s var(--ease);
+}
+.project:hover { transform: translateY(-3px); border-color: var(--rule-firm); box-shadow: var(--lift-lg); }
+.p-tag {
+  display: inline-flex; align-items: center; gap: 8px; align-self: flex-start;
+  font-size: 12px; font-weight: 700; color: var(--muted);
+  padding: 6px 13px; border-radius: 980px; background: var(--bg-sunk);
+  margin-bottom: 16px;
+}
+.project h3 { font-size: 1.5rem; margin-bottom: 10px; }
+.project p { font-size: 14.8px; line-height: 1.55; color: var(--muted); }
+.project .stats { margin: 18px 0 0; }
+.p-go { margin-top: auto; padding-top: 20px; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 7px; }
+.p-go .arrow { transition: transform .45s var(--ease); }
+.project:hover .p-go .arrow { transform: translateX(4px); }
+
 /* ── is there an app in your audience: the Kaught example ───────────────── */
 
 .example { display: grid; gap: clamp(32px, 5vw, 64px); align-items: center; margin-top: 46px; }
@@ -565,11 +593,24 @@ input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offse
 
 <nav class="nav" id="nav">
   <div class="shell">
-    <a class="nav-mark" href="#top"><span class="nav-dot"></span>Jeremy Lasne</a>
+    <a class="nav-mark" href="#top">
+        <span class="nav-logo" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+            <rect width="512" height="512" rx="116" fill="#212121"/>
+            <g fill="#eff0ee">
+              <rect x="185" y="152" width="53" height="146" rx="26"/>
+              <rect x="266" y="152" width="53" height="146" rx="26"/>
+              <rect x="307" y="326" width="113" height="53" rx="26"/>
+              <circle cx="143" cy="297" r="31"/>
+              <circle cx="206" cy="359" r="26"/>
+            </g>
+          </svg>
+        </span>Jeremy Lasne</a>
     <div class="nav-links">
       <a href="#revenue">Revenue</a>
       <a href="#audience">Your audience</a>
-      <a class="nav-cta" href="mailto:hey@jeremylasne.com?subject=Building%20an%20app%20together">Let's talk</a>
+      <a href="#projects">Projects</a>
+      <a class="nav-cta" href="#contact">Let's talk</a>
     </div>
   </div>
   <div class="nav-progress" id="progress"></div>
@@ -582,7 +623,7 @@ input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offse
   <div class="shell">
     <div>
       <a class="live hero-in" style="--d:60ms" href="https://kaught.app" target="_blank" rel="noopener">
-        <span class="live-dot"></span> Live now &mdash; <b>Kaught</b> on the App Store
+        <span class="live-dot"></span> Live now: <b>Kaught</b> on the App Store
       </a>
 
       <h1 class="h-display">
@@ -591,21 +632,16 @@ input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offse
       </h1>
 
       <p class="lede hero-in" style="--d:560ms">
-        You bring the audience. I build the whole app and keep it running &mdash;
-        for free. We split what it earns, and you own a real share of it.
+        Unlock a new line of revenue from the audience you already have: an app
+        you own, earning predictable recurring income every month instead of
+        one-off fees. I build it and run it. You post about it.
       </p>
 
       <div class="btn-row hero-in" style="--d:740ms">
-        <a class="btn magnetic" href="mailto:hey@jeremylasne.com?subject=Building%20an%20app%20together">
+        <a class="btn magnetic" href="#contact">
           Start a conversation <span class="arrow">&rarr;</span>
         </a>
         <a class="btn btn--ghost magnetic" href="#revenue">See what it could earn</a>
-      </div>
-
-      <div class="deal-strip hero-in" style="--d:880ms">
-        <div class="clause"><span class="n">01</span><span class="t">You bring <span>distribution</span></span></div>
-        <div class="clause"><span class="n">02</span><span class="t">I build <span>and run it</span></span></div>
-        <div class="clause"><span class="n">03</span><span class="t">We split <span>the equity</span></span></div>
       </div>
     </div>
 
@@ -671,74 +707,60 @@ input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offse
       <span class="eyebrow"><i></i>More revenue from your audience</span>
       <h2 class="h-section">Every month. Not just once.</h2>
       <p class="lede">
-        Not a one-off sponsorship. A subscription app your people actually use,
-        paying out for as long as it runs. Drag it to your numbers.
+        Not a one-off sponsorship fee. A subscription app your people actually
+        use, paying out for as long as it runs. Here is what that looks like on
+        an audience of 100,000.
       </p>
     </div>
 
     <div class="calc panel rise">
       <div class="calc-inputs">
-        <div class="field">
-          <div class="field-top"><label for="s-aud">Your audience</label><span class="out" id="o-aud">100,000</span></div>
-          <input type="range" id="s-aud" min="0" max="100" value="54" step="1" aria-describedby="h-aud">
-          <p class="hint" id="h-aud">Followers across the platforms where you'd actually post about it.</p>
+        <span class="est-lead">Take an audience of 100,000.</span>
+        <div class="calc-rows est-rows">
+          <div class="calc-row"><span class="rk">2% install it</span><span class="rv">2,000 installs</span></div>
+          <div class="calc-row"><span class="rk">5% of those subscribe</span><span class="rv">100 subscribers</span></div>
+          <div class="calc-row"><span class="rk">At $7.99 a month</span><span class="rv">$799 gross</span></div>
+          <div class="calc-row"><span class="rk">Less the 15% App Store fee</span><span class="rv">&minus;$120</span></div>
+          <div class="calc-row calc-row--hero"><span class="rk">Net, every month</span><span class="rv">$679</span></div>
         </div>
-        <div class="field">
-          <div class="field-top"><label for="s-inst">Who installs it</label><span class="out" id="o-inst">2.0%</span></div>
-          <input type="range" id="s-inst" min="5" max="80" value="20" step="1" aria-describedby="h-inst">
-          <p class="hint" id="h-inst">Share who download over a sustained push, not one post.</p>
-        </div>
-        <div class="field">
-          <div class="field-top"><label for="s-sub">Who subscribes</label><span class="out" id="o-sub">5.0%</span></div>
-          <input type="range" id="s-sub" min="10" max="150" value="50" step="1" aria-describedby="h-sub">
-          <p class="hint" id="h-sub">Share of installs that convert to paid. Industry range is roughly 2&ndash;8%.</p>
-        </div>
-        <div class="field">
-          <div class="field-top"><label for="s-price">Monthly price</label><span class="out" id="o-price">$7.99</span></div>
-          <input type="range" id="s-price" min="299" max="2499" value="799" step="100" aria-describedby="h-price">
-          <p class="hint" id="h-price">What a subscriber pays per month.</p>
-        </div>
+        <p class="hint">
+          Every number here is the cautious end of the range. An app that fits
+          its audience properly does several times this, and it compounds every
+          month you keep posting rather than resetting to zero.
+        </p>
       </div>
 
       <div class="calc-out">
         <span class="k">Your share, every month</span>
-        <div class="big-money" id="o-yours">$0<small>/mo</small></div>
-        <div class="calc-rows">
-          <div class="calc-row"><span class="rk">Installs</span><span class="rv" id="o-installs">0</span></div>
-          <div class="calc-row"><span class="rk">Paying subscribers</span><span class="rv" id="o-subs">0</span></div>
-          <div class="calc-row"><span class="rk">Gross revenue</span><span class="rv" id="o-gross">$0</span></div>
-          <div class="calc-row"><span class="rk">App Store fee (15%)</span><span class="rv" id="o-fee">&minus;$0</span></div>
-          <div class="calc-row"><span class="rk">Net revenue</span><span class="rv" id="o-net">$0</span></div>
-          <div class="calc-row calc-row--hero"><span class="rk">Your half</span><span class="rv" id="o-half">$0</span></div>
-        </div>
+        <div class="big-money">$340<small>/mo</small></div>
+        <p class="est-note">
+          Recurring, not a one-off. That is roughly $4,000 in the first year
+          from one launch, and it keeps running while you post about other
+          things.
+        </p>
         <p class="disclaimer">
-          An illustration, not a promise &mdash; it assumes ongoing promotion, and a
-          15% App Store fee under Apple's Small Business Program. The 50/50 split
-          is a starting point; real terms depend on the app and who's carrying what.
+          An illustration, not a promise. It assumes ongoing promotion and a 15%
+          App Store fee under Apple's Small Business Program.
         </p>
       </div>
     </div>
 
-    <div class="vals">
-      <div class="val rise" style="--d:0ms">
-        <h4>You pay nothing</h4>
-        <p>No fee, no retainer, ever. I carry the build cost and the risk. If it never earns, I ate it.</p>
-      </div>
-      <div class="val rise" style="--d:80ms">
-        <h4>You own equity</h4>
-        <p>A real share of the app itself, not a commission. If it's ever sold, you're on that side of the table.</p>
-      </div>
-      <div class="val rise" style="--d:160ms">
-        <h4>I keep running it</h4>
-        <p>Not a build-and-vanish. Support, updates and new features stay mine for as long as it's live.</p>
-      </div>
+    <div class="partner rise">
+      <span class="k">THE SPLIT</span>
+      <h3>Fifty-fifty is where we start, not where you have to land.</h3>
+      <p>
+        We agree it together before a line of code is written, and you keep a
+        say in what gets built after that. You are a partner in the app, not a
+        channel I am renting. You own a real share of it, you have a voice in
+        where it goes, and if it is ever sold you are on that side of the table.
+      </p>
     </div>
 
     <div class="swap rise">
       <div class="swap-side swap--yours">
         <span class="k">YOURS</span>
         <p>Tell your people it exists.</p>
-        <small>That's the whole job. No brief, no budget, no meetings.</small>
+        <small>That is the whole job. No brief, no budget, no meetings, and you never pay me anything.</small>
       </div>
       <div class="swap-side swap--mine">
         <span class="k">MINE</span>
@@ -757,82 +779,61 @@ input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offse
   </div>
 </section>
 
-<!-- ── 3 · is there an app in your audience? (the Kaught example) ───────── -->
+<!-- ── 3 · is there an app in your audience? ───────────────────────────── -->
 <section class="band" id="audience">
   <div class="shell">
     <div class="head head--center rise">
-      <span class="eyebrow"><i></i>The example</span>
+      <span class="eyebrow"><i></i>Your audience</span>
       <h2 class="h-section">Is there an app in your audience?</h2>
       <p class="lede">
-        There usually is &mdash; it's whatever your people keep asking you for.
-        Here's one that already exists, so you can see the shape of it.
+        Almost always yes. And the narrower your niche, the better it works.
       </p>
     </div>
 
-    <div class="example">
-      <div class="ex rise">
-        <span class="ex-tag"><span class="live-dot"></span>Live on the App Store</span>
-        <h3>Kaught</h3>
-        <p class="lede">
-          For people who are outdoors. Point your camera at any wild animal and it
-          names the species in seconds &mdash; then every sighting joins a collection
-          with rarity tiers, which is the part that brings them back.
+    <div class="vals">
+      <div class="val rise" style="--d:0ms">
+        <h4>Niche beats big</h4>
+        <p>
+          A broad audience gives you a broad app, competing with everyone. A
+          narrow one gives you an app built for exactly those people, competing
+          with nobody. Small and specific wins here.
         </p>
-
-        <!-- Fill KAUGHT_STATS in the script to show real figures here. Empty
-             values are dropped and the strip hides itself entirely, so the page
-             is never a row of placeholder dashes. -->
-        <div class="stats" id="kaught-stats" hidden></div>
-
-        <div class="btn-row">
-          <a class="btn magnetic" href="https://kaught.app" target="_blank" rel="noopener">
-            Open kaught.app <span class="arrow">&rarr;</span>
-          </a>
-        </div>
-
-        <div class="also">
-          <span class="k">ALSO BUILT</span>
-          <a href="https://tasu.ai" target="_blank" rel="noopener"><b>Tasu</b> &mdash; analytics for app revenue</a>
-          <a href="https://trustviews.io" target="_blank" rel="noopener"><b>Trustviews</b> &mdash; a ranked directory</a>
-        </div>
       </div>
+      <div class="val rise" style="--d:80ms">
+        <h4>They have already told you</h4>
+        <p>
+          The app is usually the question you keep getting in the comments and
+          the DMs. The thing people ask you to explain again, or want a tool
+          for, or assume must already exist.
+        </p>
+      </div>
+      <div class="val rise" style="--d:160ms">
+        <h4>They trust you</h4>
+        <p>
+          An app from someone your audience already follows does not need paid
+          ads to find its first thousand users. That is what kills most apps,
+          and you have already solved it.
+        </p>
+      </div>
+    </div>
 
-      <div class="rise" style="--d:140ms">
-        <div class="stage">
-          <div class="phone" style="--ry:10deg;--rx:3deg">
-            <div class="phone-screen">
-              <div class="phone-notch" aria-hidden="true"></div>
-              <div class="scr on">
-                <div class="viewfinder" aria-hidden="true"></div>
-                <div class="scr-body">
-                  <div class="id-card">
-                    <div class="id-top"><span class="tier">UNCOMMON</span><span class="conf">96% MATCH</span></div>
-                    <div class="id-name">European Badger</div>
-                    <div class="id-latin">Meles meles</div>
-                    <div class="id-meta">
-                      <div><span class="k">SEEN NEARBY</span><span class="v">4 today</span></div>
-                      <div><span class="k">YOUR NO.</span><span class="v">#48</span></div>
-                      <div><span class="k">STREAK</span><span class="v">7 days</span></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div class="niche-close rise">
+      <p>So the only real question is which one. Let's work that out together.</p>
+      <div class="btn-row">
+        <a class="btn magnetic" href="#contact">Let's discuss it <span class="arrow">&rarr;</span></a>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ── close ────────────────────────────────────────────────────────────── -->
-<section class="band band--dark close">
+<section class="band band--dark close" id="contact">
   <div class="narrow">
     <div class="panel rise">
-      <h2 class="h-section">So &mdash; what do your people keep asking you for?</h2>
+      <h2 class="h-section">What do your people keep asking you for?</h2>
       <p class="lede">
         Email me that, what you make, and roughly how many follow you.
-        If it's not a fit I'll say so the same day.
+        If it is not a fit I will say so the same day.
       </p>
       <div class="btn-row">
         <a class="btn magnetic" href="mailto:hey@jeremylasne.com?subject=Building%20an%20app%20together&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A">
@@ -840,6 +841,53 @@ input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offse
         </a>
         <a class="btn btn--ghost magnetic" href="https://x.com/jeremylasne" target="_blank" rel="noopener">Or DM me on X</a>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── current projects ─────────────────────────────────────────────────── -->
+<section class="band" id="projects">
+  <div class="shell">
+    <div class="head head--center rise">
+      <span class="eyebrow"><i></i>Current projects</span>
+      <h2 class="h-section">What I am running right now.</h2>
+    </div>
+
+    <div class="projects">
+      <a class="project project--lead rise" href="https://kaught.app" target="_blank" rel="noopener">
+        <span class="p-tag"><span class="live-dot"></span>Live on the App Store</span>
+        <h3>Kaught</h3>
+        <p>
+          Point your camera at any wild animal and it names the species in
+          seconds. Every sighting joins a collection with rarity tiers, which is
+          the part that brings people back.
+        </p>
+        <!-- Fill KAUGHT_STATS in the script to show real figures here. Empty
+             values are dropped and the strip hides itself entirely, so this is
+             never a row of placeholder dashes. -->
+        <div class="stats" id="kaught-stats" hidden></div>
+        <span class="p-go">kaught.app <span class="arrow">&rarr;</span></span>
+      </a>
+
+      <a class="project rise" style="--d:90ms" href="https://tasu.ai" target="_blank" rel="noopener">
+        <span class="p-tag">SaaS</span>
+        <h3>Tasu</h3>
+        <p>
+          Analytics for mobile subscription apps: which in-app behaviours make
+          someone subscribe, and which make them stay.
+        </p>
+        <span class="p-go">tasu.ai <span class="arrow">&rarr;</span></span>
+      </a>
+
+      <a class="project rise" style="--d:180ms" href="https://trustviews.io" target="_blank" rel="noopener">
+        <span class="p-tag">Directory</span>
+        <h3>Trustviews</h3>
+        <p>
+          A leaderboard of verified websites and their founders, ranked on real
+          monthly views rather than on claims.
+        </p>
+        <span class="p-go">trustviews.io <span class="arrow">&rarr;</span></span>
+      </a>
     </div>
   </div>
 </section>
@@ -855,7 +903,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offse
       <a href="https://trustviews.io" target="_blank" rel="noopener">Trustviews</a>
       <a href="https://x.com/jeremylasne" target="_blank" rel="noopener">X</a>
       <a href="https://www.youtube.com/@jeremyfounder" target="_blank" rel="noopener">YouTube</a>
-      <a href="/wealth/">Wealth Architecture</a>
       <a href="mailto:hey@jeremylasne.com">Email</a>
     </div>
   </div>
@@ -984,74 +1031,6 @@ input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offse
       el.addEventListener('pointerleave', function () { el.style.transform = ''; });
     });
   }
-
-  /* ═══ the earnings model ═════════════════════════════════════════════════ */
-
-  var S = {
-    aud:   document.getElementById('s-aud'),
-    inst:  document.getElementById('s-inst'),
-    sub:   document.getElementById('s-sub'),
-    price: document.getElementById('s-price')
-  };
-  var O = {
-    aud: document.getElementById('o-aud'), inst: document.getElementById('o-inst'),
-    sub: document.getElementById('o-sub'), price: document.getElementById('o-price'),
-    installs: document.getElementById('o-installs'), subs: document.getElementById('o-subs'),
-    gross: document.getElementById('o-gross'), fee: document.getElementById('o-fee'),
-    net: document.getElementById('o-net'), half: document.getElementById('o-half'),
-    yours: document.getElementById('o-yours')
-  };
-
-  var STORE_FEE = 0.15;  // Apple Small Business Program — applies under $1M/yr
-  var SPLIT = 0.5;       // the illustrative half; real terms are negotiated
-
-  // Audience runs on a log curve so the low end — where most creators actually
-  // are — gets as much of the track as the millions do.
-  function audienceFor(t) {
-    var v = 1000 * Math.pow(10, (t / 100) * 3.7);   // 1k → ~5M
-    var step = v < 10000 ? 500 : v < 100000 ? 5000 : v < 1000000 ? 25000 : 100000;
-    return Math.round(v / step) * step;
-  }
-
-  var nf = new Intl.NumberFormat('en-US');
-  function money(n) { return '$' + nf.format(Math.round(n)); }
-
-  function fillTrack(el) {
-    var pct = ((el.value - el.min) / (el.max - el.min)) * 100;
-    el.style.setProperty('--fill', pct.toFixed(1) + '%');
-  }
-
-  function recalc() {
-    var audience = audienceFor(+S.aud.value);
-    var instRate = +S.inst.value / 1000;    // 0.5% – 8.0%
-    var subRate  = +S.sub.value / 1000;     // 1.0% – 15.0%
-    var price    = +S.price.value / 100;    // $2.99 – $24.99
-
-    var installs = audience * instRate;
-    var subs     = installs * subRate;
-    var gross    = subs * price;
-    var fee      = gross * STORE_FEE;
-    var net      = gross - fee;
-    var half     = net * SPLIT;
-
-    O.aud.textContent   = nf.format(audience);
-    O.inst.textContent  = (instRate * 100).toFixed(1) + '%';
-    O.sub.textContent   = (subRate * 100).toFixed(1) + '%';
-    O.price.textContent = '$' + price.toFixed(2);
-
-    O.installs.textContent = nf.format(Math.round(installs));
-    O.subs.textContent     = nf.format(Math.round(subs));
-    O.gross.textContent    = money(gross);
-    O.fee.textContent      = '−' + money(fee);
-    O.net.textContent      = money(net);
-    O.half.textContent     = money(half) + '/mo';
-    O.yours.innerHTML      = money(half) + '<small>/mo</small>';
-
-    Object.keys(S).forEach(function (k) { fillTrack(S[k]); });
-  }
-
-  Object.keys(S).forEach(function (k) { S[k].addEventListener('input', recalc); });
-  recalc();
 
 })();
 </script>

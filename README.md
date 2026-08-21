@@ -47,16 +47,17 @@ qualitative line shows instead, so the page never displays placeholder dashes.
 Keep these honest — the people this page is aimed at will ask you to back them
 up on the first call.
 
-### The earnings model
+### The earnings estimate
 
-Four sliders in the `.calc` section, wired up at the bottom of the script.
-`STORE_FEE` is 0.15 (Apple's Small Business Program, which applies under
-$1M/yr) and `SPLIT` is 0.5. The audience slider runs on a log curve — 1k to 5M
-— so the low end gets as much of the track as the millions do.
+A fixed worked example on an audience of 100,000, not a simulator: 2% install,
+5% of those subscribe, $7.99/month, less Apple's 15% Small Business Program fee,
+split in half. It is hard-coded in the markup in the `#revenue` section, so
+changing an assumption means editing those rows and the two figures beside them
+together.
 
-The assumptions are printed on the page on purpose. An influencer will
-interrogate the number, and the defensible one is more persuasive than the
-flattering one.
+Every number is the cautious end of its range on purpose. The people this page
+is aimed at will interrogate it, and the defensible number persuades where the
+flattering one does not.
 
 ### The phone mockups
 
