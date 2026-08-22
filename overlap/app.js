@@ -3,7 +3,7 @@
    team/, plan/ and next/ are real pages so a link lands where it says,
    but moving between them is a pushState, not a reload.
    ═══════════════════════════════════════════════════════════════════ */
-document.getElementById("root").innerHTML = "<div class=\"app\">\n\n  <header class=\"nav\" id=\"nav\">\n    <div class=\"nav-bar\">\n      <a class=\"nav-title\" href=\"/overlap/\"><svg class=\"rail-mark\" viewBox=\"0 0 64 56\" aria-hidden=\"true\"><g fill=\"currentColor\"><rect x=\"4\" y=\"13\" width=\"9\" height=\"30\" rx=\"4.5\"/><rect x=\"18\" y=\"4\" width=\"9\" height=\"48\" rx=\"4.5\"/><rect x=\"32\" y=\"17\" width=\"9\" height=\"22\" rx=\"4.5\"/><rect x=\"46\" y=\"9\" width=\"9\" height=\"38\" rx=\"4.5\"/></g><rect x=\"1\" y=\"24\" width=\"61\" height=\"7\" rx=\"3.5\" fill=\"var(--mark-cut,#fff)\"/></svg>Overlap</a>\n      <span class=\"nav-sub\">The hour that works for the whole team.</span>\n      <button class=\"nav-act\" id=\"resetBtn\">Reset</button>\n    </div>\n  </header>\n\n  <!-- ══════════ the side: everything you set, nothing you read ══════════ -->\n  <aside class=\"rail\" id=\"rail\">\n    <a class=\"rail-brand\" href=\"/overlap/\"><svg class=\"rail-mark\" viewBox=\"0 0 64 56\" aria-hidden=\"true\"><g fill=\"currentColor\"><rect x=\"4\" y=\"13\" width=\"9\" height=\"30\" rx=\"4.5\"/><rect x=\"18\" y=\"4\" width=\"9\" height=\"48\" rx=\"4.5\"/><rect x=\"32\" y=\"17\" width=\"9\" height=\"22\" rx=\"4.5\"/><rect x=\"46\" y=\"9\" width=\"9\" height=\"38\" rx=\"4.5\"/></g><rect x=\"1\" y=\"24\" width=\"61\" height=\"7\" rx=\"3.5\" fill=\"var(--mark-cut,#fff)\"/></svg>Overlap</a>\n\n    <section class=\"rsec\" id=\"peopleSec\">\n      <button class=\"rhead\" data-fold=\"peopleSec\">\n        <span>People</span><b id=\"peopleCount\"></b><i class=\"fold\"></i>\n      </button>\n      <div class=\"rbody\">\n        <div class=\"card\" id=\"peopleList\"></div>\n        <div class=\"secfoot\">Working hours are what the overlap is built from.</div>\n      </div>\n    </section>\n\n    <section class=\"rsec\" id=\"meetSec\">\n      <button class=\"rhead\" data-fold=\"meetSec\">\n        <span>Meeting</span><b id=\"meetSum\"></b><i class=\"fold\"></i>\n      </button>\n      <div class=\"rbody\">\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Name</div></div>\n            <input id=\"titleInput\" placeholder=\"Intro call\" maxlength=\"80\">\n          </div>\n          <div class=\"row stack\">\n            <div class=\"grow\"><div class=\"t\">Length</div></div>\n            <div class=\"chips\" id=\"durChips\" style=\"padding:0\"></div>\n          </div>\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Days</div><div class=\"s\" id=\"windowSub\"></div></div>\n            <div class=\"stepper\">\n              <button id=\"winPrev\" aria-label=\"Earlier week\">‹</button><span></span><button id=\"winNext\" aria-label=\"Later week\">›</button>\n            </div>\n          </div>\n        </div>\n      </div>\n    </section>\n  </aside>\n\n  <main>\n\n    <section class=\"step respond-only\" id=\"respondPane\">\n      <div class=\"sec\">\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Your name</div></div>\n            <input id=\"respondName\" placeholder=\"So they know who answered\" maxlength=\"40\"\n                   style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\">\n          </div>\n          <div class=\"row tap\" data-respondcity=\"1\">\n            <div class=\"grow\"><div class=\"t\">You are in</div></div>\n            <div class=\"v\" id=\"respondCity\"></div><div class=\"chev\"></div>\n          </div>\n        </div>\n        <div class=\"secfoot\">Drag along your row below to cross out the hours you cannot do.</div>\n      </div>\n      <div class=\"sec\" id=\"respondDone\" style=\"display:none\">\n        <div class=\"card\"><div class=\"empty\"><b>Sent.</b>Change anything and send again — it replaces your answer.</div></div>\n      </div>\n    </section>\n\n    <!-- ══════════ the schedule ══════════ -->\n    <section class=\"pane\" id=\"overlapSec\">\n      <div class=\"panehead\">\n        <h2>Schedule</h2>\n        <span class=\"ph-note\" id=\"gridTz\"></span>\n        <button class=\"linkbtn\" id=\"editToggle\">Edit hours</button>\n      </div>\n      <div class=\"daytabs\" id=\"dayTabs\"></div>\n      <div class=\"wtb\">\n        <div class=\"wtblabs\" id=\"wtbLabs\"></div>\n        <div class=\"wtbscroll\" id=\"wtbScroll\"><div class=\"wtbgrid\" id=\"wtb\"></div></div>\n      </div>\n      <div class=\"legend\">\n        <i class=\"lg free\"></i><span>can meet</span>\n        <i class=\"lg part\"></i><span>off hours</span>\n        <i class=\"lg busy\"></i><span>asleep or busy</span>\n      </div>\n      <div class=\"secfoot\" id=\"editFoot\"></div>\n    </section>\n\n    <!-- ══════════ the hours it produces ══════════ -->\n    <section class=\"pane\" id=\"planSec\">\n      <div class=\"panehead\"><h2>Best times</h2><span class=\"ph-note\" id=\"bestNote\"></span></div>\n      <div class=\"card\" id=\"bestList\"></div>\n      <div class=\"secfoot\" id=\"bestFoot\"></div>\n      <div class=\"btnrow\" id=\"actionsSec\">\n        <button class=\"btn sec\" id=\"icsBtn\">Apple Calendar</button>\n        <button class=\"btn sec\" id=\"copyBtn\">Copy times</button>\n      </div>\n      <button class=\"btn ghost\" id=\"shareBtn\" style=\"margin-top:6px\">Copy a link to this plan</button>\n    </section>\n\n    <!-- ══════════ what it should do next ══════════ -->\n    <section class=\"pane\" id=\"nextSec\">\n      <div class=\"panehead\"><h2>What next?</h2></div>\n      <div id=\"fbForm\">\n        <div class=\"secfoot\" style=\"padding:0 4px 12px\">Pick what you are missing, or write it. Every line decides what gets built.</div>\n        <div class=\"chips\" id=\"wantChips\"></div>\n        <div class=\"card\" style=\"margin-top:12px\">\n          <textarea id=\"fbText\" rows=\"4\" maxlength=\"800\" placeholder=\"Anything at all — what got in your way, what’s missing, what you’d pay for.\"></textarea>\n        </div>\n        <div class=\"card\" style=\"margin-top:12px\" id=\"fbEmailCard\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Email</div><div class=\"s\">If you want a reply.</div></div>\n            <input id=\"fbEmail\" type=\"email\" placeholder=\"Optional\" maxlength=\"80\" autocapitalize=\"off\" autocorrect=\"off\"\n                   style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\">\n          </div>\n        </div>\n        <button class=\"btn sec\" id=\"fbSend\" style=\"margin-top:12px\">Send this</button>\n        <div class=\"secfoot\" id=\"fbFoot\"></div>\n      </div>\n      <div id=\"fbThanks\" style=\"display:none\">\n        <div class=\"card\"><div class=\"empty\"><b>Thank you — noted.</b>Every line of this gets read. It decides what gets built next.</div></div>\n        <button class=\"btn sec\" id=\"fbAgain\" style=\"margin-top:14px\">Say something else</button>\n      </div>\n    </section>\n\n  </main>\n\n  <div class=\"dock\">\n    <div class=\"dock-hint\" id=\"dockHint\"></div>\n    <button class=\"btn\" id=\"primary\">Continue</button>\n  </div>\n\n  <div class=\"rail-foot\" id=\"railFoot\"></div>\n\n  <p class=\"foot\" id=\"foot\"></p>\n</div>\n\n<div class=\"scrim\" id=\"scrim\"></div>\n\n<!-- ══════════ SHEET — add / edit a person ══════════ -->\n<div class=\"sheet\" id=\"sheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"sheetCancel\">Cancel</button>\n    <span class=\"t\" id=\"sheetTitle\">Add person</span>\n    <button class=\"p\" id=\"sheetDone\">Done</button>\n  </div>\n  <div class=\"sheet-body\">\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>Name</label><input id=\"fName\" placeholder=\"Optional\" maxlength=\"40\"></div>\n        <div class=\"field\"><label>Email</label><input id=\"fEmail\" type=\"email\" placeholder=\"Optional — invites them\" maxlength=\"80\" autocapitalize=\"off\" autocorrect=\"off\"></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Working hours</span></div>\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"s-\">−</button><span></span><button data-h=\"s+\">+</button></div><div class=\"v\" id=\"fStart\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>To</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"e-\">−</button><span></span><button data-h=\"e+\">+</button></div><div class=\"v\" id=\"fEnd\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label style=\"width:auto;flex:1\">Weekends too</label><div class=\"switch\" id=\"fWeekend\"><i></i></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Asleep</span></div>\n    <div style=\"padding:0 16px 6px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"z-\">−</button><span></span><button data-h=\"z+\">+</button></div><div class=\"v\" id=\"fSleep\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>Until</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"w-\">−</button><span></span><button data-h=\"w+\">+</button></div><div class=\"v\" id=\"fWake\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Calendar</span></div>\n    <div style=\"padding:0 16px 6px\"><div class=\"card\" id=\"gcalCard\"></div></div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Timezone</span></div>\n    <div class=\"search\">\n      <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\"><circle cx=\"7\" cy=\"7\" r=\"5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M11 11l3.5 3.5\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n      <input id=\"citySearch\" placeholder=\"City or timezone\" autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\">\n    </div>\n    <div style=\"padding:0 16px\"><div class=\"card\" id=\"cityList\"></div></div>\n  </div>\n</div>\n\n<!-- ══════════ SHEET — sign in ══════════ -->\n<div class=\"sheet\" id=\"authSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"authCancel\">Cancel</button>\n    <span class=\"t\" id=\"authTitle\">Sign in</span>\n    <button class=\"p\" id=\"authGo\">Next</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\" id=\"authLede\">One email, one code. No password to forget.</p>\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>Email</label><input id=\"authEmail\" type=\"email\" placeholder=\"you@company.com\"\n          autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\"></div>\n        <div class=\"field\" id=\"authCodeField\" style=\"display:none\"><label>Code</label>\n          <input id=\"authCode\" inputmode=\"numeric\" maxlength=\"6\" placeholder=\"6 digits\"></div>\n      </div>\n    </div>\n    <p class=\"sheet-lede\" id=\"authNote\"></p>\n  </div>\n</div>\n\n<!-- ══════════ SHEET — invite ══════════ -->\n<div class=\"sheet\" id=\"teamSheet\"><div class=\"grab\"></div><div class=\"sheet-nav\"><button id=\"teamClose\">Done</button><span class=\"t\">Teams</span><span style=\"width:44px\"></span></div><div class=\"sheet-body\"><p class=\"sheet-lede\">Keep a team per client, per project, per anything. They all stay put, and you can switch at any time.</p><div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"teamList\"></div></div><div style=\"padding:0 16px\" class=\"btnrow\" id=\"teamActs\"></div></div></div><div class=\"sheet\" id=\"inviteSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"inviteClose\">Done</button>\n    <span class=\"t\">Invite</span>\n    <button class=\"p\" id=\"inviteCopy\">Copy</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">Two ways in. The first asks one question and needs no account.</p>\n    <div style=\"padding:0 16px 8px\" id=\"askWrap\">\n      <div class=\"sechead\"><span>Ask when they can’t</span></div>\n      <div class=\"card\"><div class=\"linkbox\" id=\"askLink\"></div></div>\n      <button class=\"btn\" id=\"askCopy\" style=\"margin-top:10px\">Copy the question link</button>\n    </div>\n    <div style=\"padding:0 20px\"><div class=\"sechead\"><span>Invite to the team</span></div></div>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\"><div class=\"linkbox\" id=\"inviteLink\"></div></div></div>\n    <div style=\"padding:0 16px\"><button class=\"btn\" id=\"inviteCopyBig\">Copy invite link</button></div>\n  </div>\n</div>\n\n<div class=\"toast\" id=\"toast\"></div>";
+document.getElementById("root").innerHTML = "<div class=\"app\">\n\n  <header class=\"nav\" id=\"nav\">\n    <div class=\"nav-bar\">\n      <a class=\"nav-title\" href=\"/overlap/\"><svg class=\"rail-mark\" viewBox=\"0 0 64 56\" aria-hidden=\"true\"><g fill=\"currentColor\"><rect x=\"4\" y=\"13\" width=\"9\" height=\"30\" rx=\"4.5\"/><rect x=\"18\" y=\"4\" width=\"9\" height=\"48\" rx=\"4.5\"/><rect x=\"32\" y=\"17\" width=\"9\" height=\"22\" rx=\"4.5\"/><rect x=\"46\" y=\"9\" width=\"9\" height=\"38\" rx=\"4.5\"/></g><rect x=\"1\" y=\"24\" width=\"61\" height=\"7\" rx=\"3.5\" fill=\"var(--mark-cut,#fff)\"/></svg>Overlap</a>\n      <span class=\"nav-sub\">The hour that works for the whole team.</span>\n      <button class=\"nav-act\" id=\"resetBtn\">Reset</button>\n    </div>\n  </header>\n\n  <!-- ══════════ the side: everything you set, nothing you read ══════════ -->\n  <aside class=\"rail\" id=\"rail\">\n    <a class=\"rail-brand\" href=\"/overlap/\"><svg class=\"rail-mark\" viewBox=\"0 0 64 56\" aria-hidden=\"true\"><g fill=\"currentColor\"><rect x=\"4\" y=\"13\" width=\"9\" height=\"30\" rx=\"4.5\"/><rect x=\"18\" y=\"4\" width=\"9\" height=\"48\" rx=\"4.5\"/><rect x=\"32\" y=\"17\" width=\"9\" height=\"22\" rx=\"4.5\"/><rect x=\"46\" y=\"9\" width=\"9\" height=\"38\" rx=\"4.5\"/></g><rect x=\"1\" y=\"24\" width=\"61\" height=\"7\" rx=\"3.5\" fill=\"var(--mark-cut,#fff)\"/></svg>Overlap</a>\n\n    <section class=\"rsec\" id=\"peopleSec\">\n      <button class=\"rhead\" data-fold=\"peopleSec\">\n        <span>People</span><b id=\"peopleCount\"></b><i class=\"fold\"></i>\n      </button>\n      <div class=\"rbody\">\n        <div class=\"card\" id=\"peopleList\"></div>\n        <div class=\"secfoot\">Working hours are what the overlap is built from.</div>\n      </div>\n    </section>\n\n  </aside>\n\n  <main>\n\n    <section class=\"step respond-only\" id=\"respondPane\">\n      <div class=\"sec\">\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Your name</div></div>\n            <input id=\"respondName\" placeholder=\"So they know who answered\" maxlength=\"40\"\n                   style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\">\n          </div>\n          <div class=\"row tap\" data-respondcity=\"1\">\n            <div class=\"grow\"><div class=\"t\">You are in</div></div>\n            <div class=\"v\" id=\"respondCity\"></div><div class=\"chev\"></div>\n          </div>\n        </div>\n        <div class=\"secfoot\">Drag along your row below to cross out the hours you cannot do.</div>\n      </div>\n      <div class=\"sec\" id=\"respondDone\" style=\"display:none\">\n        <div class=\"card\"><div class=\"empty\"><b>Sent.</b>Change anything and send again — it replaces your answer.</div></div>\n      </div>\n    </section>\n\n    <!-- ══════════ the schedule ══════════ -->\n    <section class=\"pane\" id=\"overlapSec\">\n      <div class=\"panehead\">\n        <h2>Calendar</h2>\n        <span class=\"ph-note\" id=\"gridTz\"></span>\n        <button class=\"linkbtn\" id=\"editToggle\">Edit hours</button>\n      </div>\n      <div class=\"weekbar\">\n        <div class=\"daytabs\" id=\"dayTabs\"></div>\n        <div class=\"wsteps\">\n          <button id=\"winPrev\" aria-label=\"Earlier week\">‹</button>\n          <button id=\"winNext\" aria-label=\"Later week\">›</button>\n        </div>\n      </div>\n      <div class=\"weeksub\" id=\"windowSub\"></div>\n      <div class=\"wtb\">\n        <div class=\"wtblabs\" id=\"wtbLabs\"></div>\n        <div class=\"wtbscroll\" id=\"wtbScroll\"><div class=\"wtbgrid\" id=\"wtb\"></div></div>\n      </div>\n      <div class=\"legend\">\n        <i class=\"lg free\"></i><span>can meet</span>\n        <i class=\"lg part\"></i><span>off hours</span>\n        <i class=\"lg busy\"></i><span>asleep or busy</span>\n      </div>\n      <div class=\"secfoot\" id=\"editFoot\"></div>\n    </section>\n\n    <!-- ══════════ the hours it produces ══════════ -->\n    <section class=\"pane\" id=\"planSec\">\n      <div class=\"panehead\"><h2>Best times</h2><span class=\"ph-note\" id=\"bestNote\"></span></div>\n      <div class=\"card\" id=\"bestList\"></div>\n      <div class=\"secfoot\" id=\"bestFoot\"></div>\n    </section>\n\n    <!-- ══════════ what it should do next ══════════ -->\n    <section class=\"pane\" id=\"nextSec\">\n      <div class=\"panehead\"><h2>Next</h2><span class=\"ph-note\" id=\"nextNote\"></span></div>\n\n      <div class=\"sechead\"><span>The meeting</span></div>\n      <div class=\"card\">\n        <div class=\"row\">\n          <div class=\"grow\"><div class=\"t\">Name</div></div>\n          <input id=\"titleInput\" placeholder=\"Intro call\" maxlength=\"80\"\n                 style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\">\n        </div>\n        <div class=\"row\">\n          <div class=\"grow\"><div class=\"t\">Length</div></div>\n          <div class=\"chips\" id=\"durChips\" style=\"padding:0;justify-content:flex-end\"></div>\n        </div>\n      </div>\n\n      <div class=\"sechead gap\"><span>Who is invited</span><b id=\"guestCount\"></b></div>\n      <div class=\"card\" id=\"guestList\"></div>\n      <div class=\"secfoot\" id=\"guestFoot\"></div>\n\n      <div class=\"btnrow\" id=\"actionsSec\">\n        <button class=\"btn sec\" id=\"icsBtn\">Apple Calendar</button>\n        <button class=\"btn sec\" id=\"copyBtn\">Copy times</button>\n      </div>\n      <button class=\"btn ghost\" id=\"shareBtn\" style=\"margin-top:6px\">Copy a link to this plan</button>\n\n      <div class=\"sechead gap\"><span>What next?</span></div>\n      <div id=\"fbForm\">\n        <div class=\"secfoot\" style=\"padding:0 4px 12px\">Pick what you are missing, or write it. Every line decides what gets built.</div>\n        <div class=\"chips\" id=\"wantChips\"></div>\n        <div class=\"card\" style=\"margin-top:12px\">\n          <textarea id=\"fbText\" rows=\"4\" maxlength=\"800\" placeholder=\"Anything at all — what got in your way, what’s missing, what you’d pay for.\"></textarea>\n        </div>\n        <div class=\"card\" style=\"margin-top:12px\" id=\"fbEmailCard\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Email</div><div class=\"s\">If you want a reply.</div></div>\n            <input id=\"fbEmail\" type=\"email\" placeholder=\"Optional\" maxlength=\"80\" autocapitalize=\"off\" autocorrect=\"off\"\n                   style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\">\n          </div>\n        </div>\n        <button class=\"btn sec\" id=\"fbSend\" style=\"margin-top:12px\">Send this</button>\n        <div class=\"secfoot\" id=\"fbFoot\"></div>\n      </div>\n      <div id=\"fbThanks\" style=\"display:none\">\n        <div class=\"card\"><div class=\"empty\"><b>Thank you — noted.</b>Every line of this gets read. It decides what gets built next.</div></div>\n        <button class=\"btn sec\" id=\"fbAgain\" style=\"margin-top:14px\">Say something else</button>\n      </div>\n    </section>\n\n  </main>\n\n  <div class=\"dock\">\n    <div class=\"dock-hint\" id=\"dockHint\"></div>\n    <button class=\"btn\" id=\"primary\">Continue</button>\n  </div>\n\n  <div class=\"rail-foot\" id=\"railFoot\"></div>\n\n  <p class=\"foot\" id=\"foot\"></p>\n</div>\n\n<div class=\"scrim\" id=\"scrim\"></div>\n\n<!-- ══════════ SHEET — add / edit a person ══════════ -->\n<div class=\"sheet\" id=\"sheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"sheetCancel\">Cancel</button>\n    <span class=\"t\" id=\"sheetTitle\">Add person</span>\n    <button class=\"p\" id=\"sheetDone\">Done</button>\n  </div>\n  <div class=\"sheet-body\">\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>Name</label><input id=\"fName\" placeholder=\"Optional\" maxlength=\"40\"></div>\n        <div class=\"field\"><label>Email</label><input id=\"fEmail\" type=\"email\" placeholder=\"Optional — invites them\" maxlength=\"80\" autocapitalize=\"off\" autocorrect=\"off\"></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Working hours</span></div>\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"s-\">−</button><span></span><button data-h=\"s+\">+</button></div><div class=\"v\" id=\"fStart\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>To</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"e-\">−</button><span></span><button data-h=\"e+\">+</button></div><div class=\"v\" id=\"fEnd\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label style=\"width:auto;flex:1\">Weekends too</label><div class=\"switch\" id=\"fWeekend\"><i></i></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Asleep</span></div>\n    <div style=\"padding:0 16px 6px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"z-\">−</button><span></span><button data-h=\"z+\">+</button></div><div class=\"v\" id=\"fSleep\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>Until</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"w-\">−</button><span></span><button data-h=\"w+\">+</button></div><div class=\"v\" id=\"fWake\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Calendar</span></div>\n    <div style=\"padding:0 16px 6px\"><div class=\"card\" id=\"gcalCard\"></div></div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Timezone</span></div>\n    <div class=\"search\">\n      <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\"><circle cx=\"7\" cy=\"7\" r=\"5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M11 11l3.5 3.5\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n      <input id=\"citySearch\" placeholder=\"City or timezone\" autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\">\n    </div>\n    <div style=\"padding:0 16px\"><div class=\"card\" id=\"cityList\"></div></div>\n  </div>\n</div>\n\n<!-- ══════════ SHEET — sign in ══════════ -->\n<div class=\"sheet\" id=\"authSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"authCancel\">Cancel</button>\n    <span class=\"t\" id=\"authTitle\">Sign in</span>\n    <button class=\"p\" id=\"authGo\">Next</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\" id=\"authLede\">One email, one code. No password to forget.</p>\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>Email</label><input id=\"authEmail\" type=\"email\" placeholder=\"you@company.com\"\n          autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\"></div>\n        <div class=\"field\" id=\"authCodeField\" style=\"display:none\"><label>Code</label>\n          <input id=\"authCode\" inputmode=\"numeric\" maxlength=\"6\" placeholder=\"6 digits\"></div>\n      </div>\n    </div>\n    <p class=\"sheet-lede\" id=\"authNote\"></p>\n  </div>\n</div>\n\n<!-- ══════════ SHEET — invite ══════════ -->\n<div class=\"sheet\" id=\"teamSheet\"><div class=\"grab\"></div><div class=\"sheet-nav\"><button id=\"teamClose\">Done</button><span class=\"t\">Teams</span><span style=\"width:44px\"></span></div><div class=\"sheet-body\"><p class=\"sheet-lede\">Keep a team per client, per project, per anything. They all stay put, and you can switch at any time.</p><div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"teamList\"></div></div><div style=\"padding:0 16px\" class=\"btnrow\" id=\"teamActs\"></div></div></div><div class=\"sheet\" id=\"inviteSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"inviteClose\">Done</button>\n    <span class=\"t\">Invite</span>\n    <button class=\"p\" id=\"inviteCopy\">Copy</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">Two ways in. The first asks one question and needs no account.</p>\n    <div style=\"padding:0 16px 8px\" id=\"askWrap\">\n      <div class=\"sechead\"><span>Ask when they can’t</span></div>\n      <div class=\"card\"><div class=\"linkbox\" id=\"askLink\"></div></div>\n      <button class=\"btn\" id=\"askCopy\" style=\"margin-top:10px\">Copy the question link</button>\n    </div>\n    <div style=\"padding:0 20px\"><div class=\"sechead\"><span>Invite to the team</span></div></div>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\"><div class=\"linkbox\" id=\"inviteLink\"></div></div></div>\n    <div style=\"padding:0 16px\"><button class=\"btn\" id=\"inviteCopyBig\">Copy invite link</button></div>\n  </div>\n</div>\n\n<div class=\"toast\" id=\"toast\"></div>";
 
 (function(){
 "use strict";
@@ -142,7 +142,7 @@ function todayStart(tz){ var p=zp(Date.now(),tz); return wall(p.y,p.m,p.d,0,0,tz
 
 var S={
   people:[], title:"", dur:30, offsetDays:0, dispId:null,
-  pick:null, day:0, wants:[],
+  pick:null, day:0, wants:[], nogo:[],
   teams:[], cur:""                 /* every saved team; the one on screen */
 };
 
@@ -150,7 +150,7 @@ function newTeamId(){ return "t"+Date.now().toString(36)+Math.floor(Math.random(
 function freshState(){
   var me=newPerson("You",LOCAL_TZ,true);
   S.people=[me]; S.title=""; S.dur=30; S.offsetDays=0; S.dispId=me.id;
-  S.pick=null; S.day=0; S.wants=[];
+  S.pick=null; S.day=0; S.wants=[]; S.nogo=[];
   S.cur=newTeamId(); S.teams=[{id:S.cur,name:"My team",p:[]}];
   stash();
 }
@@ -268,6 +268,13 @@ function pstate(p,ts){
   return (mins>=p.s*60 && mins+SLOT<=p.e*60) ? "free" : "off";
 }
 function isFree(p,ts){ return pstate(p,ts)==="free"; }
+/* ── the guest list ─────────────────────────────────────────────────
+   The team is who Overlap knows; the guests are who this meeting is
+   for. Leaving someone out takes their hours out of the overlap as
+   well as their name off the invitation — their row stays on the
+   calendar, greyed, so you can see what you are choosing to ignore. */
+function invited(p){ return S.nogo.indexOf(p.id)<0; }
+function guests(){ return S.people.filter(invited); }
 /* free for the whole meeting, not just its first slot */
 function freeFor(p,ts,dur){
   var n=Math.ceil(dur/SLOT), i;
@@ -275,11 +282,13 @@ function freeFor(p,ts,dur){
   return true;
 }
 function countFree(ts){
-  var n=0,i; for(i=0;i<S.people.length;i++) if(isFree(S.people[i],ts)) n++;
+  var g=guests(), n=0, i;
+  for(i=0;i<g.length;i++) if(isFree(g[i],ts)) n++;
   return n;
 }
 function countFor(ts,dur){
-  var n=0,i; for(i=0;i<S.people.length;i++) if(freeFor(S.people[i],ts,dur)) n++;
+  var g=guests(), n=0, i;
+  for(i=0;i<g.length;i++) if(freeFor(g[i],ts,dur)) n++;
   return n;
 }
 
@@ -298,9 +307,9 @@ function dayStarts(){
 /* ═══════════════ the ranking ═══════════════ */
 /* civility: how far a local time sits outside 9–18, in hours, per person */
 function rudeness(ts){
-  var pen=0,i,p,z,h,late;
-  for(i=0;i<S.people.length;i++){
-    p=S.people[i]; z=zp(ts,p.tz); h=z.H+z.M/60; late=h+S.dur/60;
+  var pen=0,i,p,z,h,late, g=guests();
+  for(i=0;i<g.length;i++){
+    p=g[i]; z=zp(ts,p.tz); h=z.H+z.M/60; late=h+S.dur/60;
     if(h<p.s) pen+=(p.s-h);
     else if(late>p.e) pen+=(late-p.e);
     /* asleep costs more the deeper into the night it reaches */
@@ -369,7 +378,7 @@ function haptic(){ if(navigator.vibrate) try{ navigator.vibrate(8); }catch(e){} 
 function packed(freeze){
   stash();
   return {v:3,t:S.title,d:S.dur,o:S.offsetDays,x:S.dispId,y:S.day,k:freeze?sel():S.pick,
-    cur:S.cur,teams:S.teams,p:peopleArr()};
+    ng:S.nogo,cur:S.cur,teams:S.teams,p:peopleArr()};
 }
 function unpack(o){
   if(!o||!o.p||!o.p.length) return false;
@@ -377,6 +386,7 @@ function unpack(o){
   S.title=o.t||""; S.dur=o.d||30; S.offsetDays=o.o||0; S.day=o.y||0;
   if(byId(o.x)) S.dispId=o.x;
   S.pick=o.k||null;
+  S.nogo=(o.ng||[]).slice();
   /* a v2 save knew one team; give it a name and carry on */
   S.teams=(o.teams&&o.teams.length)?o.teams:[{id:newTeamId(),name:"My team",p:[]}];
   S.cur=(o.cur&&S.teams.some(function(t){ return t.id===o.cur; }))?o.cur:S.teams[0].id;
@@ -446,8 +456,6 @@ function renderPeople(){
   var window7=WD[dow(days[0],tz)]+" "+a.d+(a.m!==z.m?" "+MO[a.m-1]:"")+
     " → "+WD[dow(days[DAYS-1],tz)]+" "+z.d+" "+MO[z.m-1];
   $("#windowSub").textContent=window7;
-  $("#meetSum").textContent=foldOpen("meetSec")
-    ? S.dur+" min" : (S.title.trim()||"Meeting")+" · "+S.dur+" min";
   if($("#titleInput")!==document.activeElement) $("#titleInput").value=S.title;
 }
 
@@ -484,9 +492,10 @@ function localHour(ts,tz){
 function renderWTB(){
   var tz=dispTz(), days=dayStarts();
   if(S.day>=DAYS||S.day<0) S.day=0;
-  var day=days[S.day], z=zp(day,tz), total=S.people.length, now=Date.now();
+  var day=days[S.day], z=zp(day,tz), now=Date.now();
+  var total=guests().length;              /* who counts */
   var g=$("#wtb"), labs=$("#wtbLabs"), i, html="", lhtml="", stamps=[];
-  var rows="var(--wruler) var(--wsum) repeat("+total+",var(--wrow))";
+  var rows="var(--wruler) var(--wsum) repeat("+S.people.length+",var(--wrow))";
   g.style.gridTemplateColumns="repeat(24,minmax(var(--cw),1fr))";
   g.style.gridTemplateRows=rows;
   labs.style.gridTemplateRows=rows;
@@ -503,14 +512,15 @@ function renderWTB(){
   }
 
   /* ── the band: the whole team at once. It darkens as fewer can make it ── */
-  lhtml+='<div class="rlab sum"><b>Everyone</b><span>'+total+
-         (total===1?" person":" people")+"</span></div>";
+  lhtml+='<div class="rlab sum"><b>Everyone</b><span>'+
+         (total===S.people.length?total+(total===1?" person":" people")
+                                 :total+" of "+S.people.length+" invited")+"</span></div>";
   for(i=0;i<24;i++) html+=sumCell(stamps[i],i,pick);
 
   /* ── one row per person, drawn as bars, not as a chequerboard ── */
   S.people.forEach(function(p){
-    var city=tzCity(p.tz), rel=relOffset(p,day,tz);
-    lhtml+='<div class="rlab"><b>'+esc(pname(p))+"</b><span><em>"+
+    var city=tzCity(p.tz), rel=relOffset(p,day,tz), out=!invited(p);
+    lhtml+='<div class="rlab'+(out?" notin":"")+'"><b>'+esc(pname(p))+"</b><span><em>"+
            esc(pname(p)===city?tzLabel(p.tz,day):city)+"</em>"+
            (rel?"<i>"+esc(rel)+"</i>":"")+"</span></div>";
     var prev=null;
@@ -520,7 +530,8 @@ function renderWTB(){
           nd=(i>0)&&dayKey(ts,p.tz)!==dayKey(stamps[i-1],p.tz),
           cls="hc"+(st==="free"?"":(st==="off"?" off":" busy"))+
               (st!==prev?" s":"")+(st!==next?" e":"")+
-              (nd?" date":"")+(ts+3600000<now?" past":"")+(i===pick?" pick":"");
+              (nd?" date":"")+(ts+3600000<now?" past":"")+(i===pick?" pick":"")+
+              (out?" notin":"");
       html+='<div class="'+cls+'" data-ts="'+ts+'" data-col="'+i+
             '" data-p="'+p.id+'">'+
             (i===pick?'<span class="n">'+localHour(ts,p.tz)+"</span>":
@@ -556,7 +567,8 @@ function renderWTB(){
   }
   var whole=0;
   for(i=0;i<24;i++) if(countFree(stamps[i])===total) whole++;
-  $("#gridTz").textContent=total<2?fmtDate(day,tz)
+  $("#gridTz").textContent=!total?"nobody is invited"
+    :total<2?fmtDate(day,tz)
     :(whole?whole+(whole===1?" hour suits":" hours suit"):"no hour suits")+" all "+total;
   $("#editToggle").textContent=editing?"Done":"Edit hours";
   $("#editToggle").classList.toggle("on",editing);
@@ -573,7 +585,7 @@ function outWeight(n,total){
 }
 /* one hour of the team band */
 function sumCell(ts,i,pick){
-  var total=S.people.length, n=countFree(ts), k=outWeight(n,total);
+  var total=guests().length, n=countFree(ts), k=outWeight(n,total);
   return '<div class="hc sum'+(n===0?" none":(n===total?" all":""))+
     (ts+3600000<Date.now()?" past":"")+(i===pick?" pick":"")+
     '" data-ts="'+ts+'" data-col="'+i+'" style="--k:'+k.toFixed(3)+'">'+
@@ -598,7 +610,7 @@ function markColumn(scrollTo){
 function refreshSum(col,ts){
   var c=$("#wtb").querySelector('.hc.sum[data-col="'+col+'"]');
   if(!c) return;
-  var total=S.people.length, n=countFree(ts), pick=c.classList.contains("pick");
+  var total=guests().length, n=countFree(ts), pick=c.classList.contains("pick");
   c.className="hc sum"+(n===0?" none":(n===total?" all":""))+
     (ts+3600000<Date.now()?" past":"")+(pick?" pick":"");
   c.style.setProperty("--k",outWeight(n,total).toFixed(3));
@@ -609,10 +621,12 @@ function refreshSum(col,ts){
 var lastBest=[];
 function renderBest(){
   lastBest=bestSlots();
-  var tz=dispTz(), total=S.people.length;
+  var tz=dispTz(), total=guests().length;
   if(!lastBest.length){
     $("#bestList").innerHTML='<div class="empty"><b>No overlap this week</b>'+
-      "Nobody is free at the same time. Widen someone's hours, allow weekends, or step the week forward.</div>";
+      (guests().length
+        ? "Nobody is free at the same time. Widen someone's hours, allow weekends, or step the week forward."
+        : "Nobody is invited yet. Choose who is coming under Next.")+"</div>";
     $("#bestNote").textContent="";
     $("#bestFoot").textContent="";
   } else {
@@ -625,7 +639,7 @@ function renderBest(){
         '<span class="radio"></span><span class="when">'+
         '<span class="w1">'+fmtDate(x.ts,tz)+'<span class="w1s"> · '+
           (x.manual?(cameFromLink?"proposed":"your pick"):(all?"everyone free":x.n+" of "+total+" free"))+"</span></span>"+
-        '<span class="w2">'+S.people.map(function(p){
+        '<span class="w2">'+guests().map(function(p){
             var k=dayKey(x.ts,p.tz)-dayKey(x.ts,tz);
             return '<span class="lt'+(freeFor(p,x.ts,S.dur)?"":" out")+'"><b>'+
                    fmtT(x.ts,p.tz)+(k?'<i class="nd">'+(k>0?"+1":"−1")+"</i>":"")+
@@ -1007,6 +1021,30 @@ function authNext(){
 var WANTS=["Calendar sync","Client booking","AI agent","Recurring meetings",
            "Meeting links","Reminders","Slack","Round robin",
            "Holidays & PTO","Bigger teams","Mobile app","API & webhooks"];
+/* every name in the team, ticked or not, plus what the calendar can do with them */
+function renderGuests(){
+  var n=guests().length, total=S.people.length;
+  $("#guestList").innerHTML=S.people.map(function(p){
+    var on=invited(p);
+    return '<div class="row tap gst'+(on?" on":"")+'" data-guest="'+p.id+'">'+
+      '<div class="avatar'+(p.you?" you":"")+'">'+esc(initials(p))+"</div>"+
+      '<div class="grow"><div class="t">'+esc(pname(p))+"</div>"+
+      '<div class="s">'+esc(p.email||tzCity(p.tz)+" · no email")+"</div></div>"+
+      '<span class="tick"></span></div>';
+  }).join("");
+  $("#guestCount").textContent=n===total
+    ? "all "+total : n+" of "+total;
+  var noMail=guests().filter(function(p){ return !p.email; }).length;
+  $("#guestFoot").textContent=!n
+    ? "Nobody is invited, so there is nothing to look for. Tap a name."
+    : noMail
+      ? noMail+(noMail===1?" of them has":" of them have")+" no email — their time is in the description, but the calendar cannot add them."
+      : "The calendar adds these people as guests.";
+  var t=sel();
+  $("#nextNote").textContent=t
+    ? fmtLongDate(t,dispTz())+", "+fmtT(t,dispTz())
+    : "no hour taken yet";
+}
 function renderFeedback(){
   $("#wantChips").innerHTML=WANTS.map(function(w){
     return '<button class="chip'+(S.wants.indexOf(w)>=0?" on":"")+'" data-want="'+esc(w)+'">'+esc(w)+"</button>";
@@ -1079,7 +1117,7 @@ function renderAll(){
     return;
   }
   renderAcct(); renderRail(); renderPeople(); renderDays(); renderWTB();
-  renderBest(); renderFeedback(); renderDock();
+  renderBest(); renderGuests(); renderFeedback(); renderDock();
 }
 function renderRespondDock(){
   var b=$("#primary"), h=$("#dockHint"), me=S.people.filter(function(p){ return p.you; })[0];
@@ -1090,12 +1128,12 @@ function renderRespondDock(){
 }
 /* one button now, and it is the one that matters */
 function renderDock(){
-  var b=$("#primary"), h=$("#dockHint"), tz=dispTz(), t=sel(), total=S.people.length;
+  var b=$("#primary"), h=$("#dockHint"), tz=dispTz(), t=sel(), total=guests().length;
   b.textContent="Add to Google Calendar";
   b.disabled=!t;
   if(!t){
-    h.textContent=total===1
-      ? "Just you so far — add the other side"
+    h.textContent=!total ? "Nobody is invited yet"
+      : total===1 ? "Just you so far — add the other side"
       : "No hour works yet — widen someone’s hours";
     return;
   }
@@ -1179,7 +1217,7 @@ function icsStamp(ts){
 }
 function localLines(){
   var t=sel(), tz=dispTz(), base=dayKey(t,tz);
-  return S.people.map(function(p){
+  return guests().map(function(p){
     var k=dayKey(t,p.tz), d=k>base?" (+1d)":(k<base?" (−1d)":"");
     return pname(p)+" — "+fmtT(t,p.tz)+d+"  ·  "+tzCity(p.tz);
   });
@@ -1190,7 +1228,7 @@ function inviteText(){
 }
 function gcalUrl(){
   var t=sel(), end=t+S.dur*60000;
-  var emails=S.people.filter(function(p){ return p.email; }).map(function(p){ return p.email; });
+  var emails=guests().filter(function(p){ return p.email; }).map(function(p){ return p.email; });
   var u="https://calendar.google.com/calendar/render?action=TEMPLATE"+
     "&text="+encodeURIComponent(meetingTitle())+
     "&dates="+icsStamp(t)+"/"+icsStamp(end)+
@@ -1205,7 +1243,7 @@ function icsText(){
     "BEGIN:VEVENT","UID:"+t+"-overlap","DTSTAMP:"+icsStamp(Date.now()),
     "DTSTART:"+icsStamp(t),"DTEND:"+icsStamp(end),
     "SUMMARY:"+e(meetingTitle()),"DESCRIPTION:"+e(localLines().join("\n"))]
-    .concat(S.people.filter(function(p){ return p.email; }).map(function(p){
+    .concat(guests().filter(function(p){ return p.email; }).map(function(p){
       return "ATTENDEE;CN="+e(pname(p))+":mailto:"+p.email; }))
     .concat(["END:VEVENT","END:VCALENDAR"]).join("\r\n");
 }
@@ -1239,6 +1277,11 @@ document.addEventListener("click",function(ev){
   function up(attr){ return t.closest?t.closest("["+attr+"]"):null; }
 
   if((el=up("data-step"))){ ev.preventDefault(); goPane(+el.getAttribute("data-step")); return; }
+  if((el=up("data-guest"))){
+    var gid=el.getAttribute("data-guest"), at=S.nogo.indexOf(gid);
+    if(at>=0) S.nogo.splice(at,1); else S.nogo.push(gid);
+    afterChange(); haptic(); return;
+  }
   if((el=up("data-fold"))){
     var sec=$("#"+el.getAttribute("data-fold"));
     sec.classList.toggle("open"); renderPeople(); haptic(); return;
@@ -1249,6 +1292,7 @@ document.addEventListener("click",function(ev){
     var id=el.getAttribute("data-del"), gone=byId(id);
     if(inTeam()&&gone&&gone.mid){ mutate("teams.removeMember",{memberId:gone.mid}); haptic(); return; }
     S.people=S.people.filter(function(p){ return p.id!==id; });
+    S.nogo=S.nogo.filter(function(x){ return x!==id; });
     if(!byId(S.dispId)) S.dispId=S.people[0].id;
     afterChange(); haptic(); return;
   }

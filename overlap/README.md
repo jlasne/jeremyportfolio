@@ -1,35 +1,42 @@
 # Overlap
 
 Find the hour that works for a team spread across timezones, then hand it to
-Google Calendar. One screen, no dashboard.
+Google Calendar. One page, three screens deep, no dashboard.
 
-Everything you **set** lives in a column down the side — who is in the team,
-their city and hours, what the meeting is called and how long it runs, which
-team you are looking at. Everything you **read** is the page itself, in three
-sections:
+The **side** holds the team: who is in it, their city, their working hours,
+and — pinned to the foot of the column — which team you are looking at, the
+invite link and your account. That is everything Overlap remembers between
+meetings.
 
-1. **Schedule** — names down the side, the day across the top, one column per
-   hour. A column is one instant: the ruler reads it on your clock, every row
-   reads the same instant on a different one, and the offset next to each name
-   is the arithmetic you no longer have to do. Under the ruler sits the whole
-   team as one band: paper white where everyone can make it (with an ink tick
-   to say so), darkening as more of them drop out, solid ink where nobody can.
-   Below that, one row each: bars for the hours they can't, hatched for
-   awake-but-off-hours, and the line of the current moment running down
-   through all of it.
+The **page** is the meeting, in three screens you reach by scrolling:
+
+1. **Calendar** — names down the side, the day across the top, one column per
+   hour, and the week you are looking at above it. A column is one instant:
+   the ruler reads it on your clock, every row reads the same instant on a
+   different one, and the offset next to each name is the arithmetic you no
+   longer have to do. Under the ruler sits the whole team as one band: paper
+   white where everyone can make it (with an ink tick to say so), darkening
+   as more of them drop out, solid ink where nobody can. Below that, one row
+   each: bars for the hours they can't, hatched for awake-but-off-hours, and
+   the line of the current moment running down through all of it.
 2. **Best times** — the ranked hours, each showing the time in every timezone
-   at once. Take one and the button at the foot of the page opens Google
-   Calendar with the event already filled in; `.ics` and a copyable list sit
-   next to the list.
-3. **What next?** — a box asking what Overlap should do that it doesn't. It is
-   optional and it is the last thing on the page for a reason.
+   at once, and a `+1` where an hour lands on somebody's tomorrow.
+3. **Next** — what the meeting is called, how long it runs, and **who in the
+   team is invited**; then the calendar buttons; then a box asking what
+   Overlap should do that it doesn't.
+
+Leaving someone off the guest list takes their hours out of the overlap as
+well as their name off the invitation — the two screens above recompute, and
+their row stays on the calendar, greyed, so you can see what you chose to
+ignore.
 
 `/team/`, `/plan/` and `/next/` are still real addresses — they scroll to
-their section rather than swapping the screen.
+their screen rather than swapping the page.
 
-On a phone there is no room for a column, so the two control folds sit shut
-above the schedule and open on a tap; the team, the invite link and the
-account move below everything else.
+On a phone there is no room for a column, so the team folds shut above the
+calendar and opens on a tap; the team switcher, the invite link and the
+account move below everything else. What is on screen when it loads is the
+calendar.
 
 The app pages sit behind a sign-in at `/overlap/login`, which also offers
 **Continue as guest** — the whole app works, it simply stays in that browser:
@@ -151,7 +158,7 @@ Do not edit a generated `index.html` by hand — the next build overwrites it.
 
 The three app pages are real addresses — a link to `/overlap/plan/` lands on
 Best times — but they are one page now, so the link scrolls rather than
-switches, and moving between the sections is a `pushState`.
+switches, and moving between the screens is a `pushState`.
 
 Colour means two different things on purpose. On the **landing clock** it is
 the time of day: white is the working day (8am–5pm), black is night
