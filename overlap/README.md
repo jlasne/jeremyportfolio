@@ -1,30 +1,41 @@
 # Overlap
 
 Find the hour that works for a team spread across timezones, then hand it to
-Google Calendar. Three steps, no dashboard:
+Google Calendar. One screen, no dashboard.
 
-The three app pages sit behind a sign-in at `/overlap/login`, which also
-offers **Continue as guest** — the whole app works, it simply stays in that
-browser: no shared teams, nothing that follows you to another device. Signing
-in later keeps whatever the guest built. Without a backend connected there is
-nothing to sign in to at all, so the app runs locally and lets everyone
-through.
+Everything you **set** lives in a column down the side — who is in the team,
+their city and hours, what the meeting is called and how long it runs, which
+team you are looking at. Everything you **read** is the page itself, in three
+sections:
 
-1. **Team** — who's in it, their hours in their own timezone, and the overlap
-   drawn as a schedule: names down the side, the day across the top, one
-   column per hour. A column is one instant — the ruler reads it on your
-   clock, every row reads the same instant on a different one, and the offset
-   next to each name is the arithmetic you no longer have to do. Under the
-   ruler sits the whole team as one band: paper white where everyone can make
-   it (with an ink tick to say so), darkening as more of them drop out, solid
-   ink where nobody can. Below that, one row each: bars for the hours they
-   can't, hatched for awake-but-off-hours, and the line of the current moment
-   running down through all of it.
-2. **Plan** — name, length, days; ranked hours, each showing the time in every
-   timezone at once; then Google Calendar, `.ics`, or a copyable list.
-3. **Next** — the last look. What is about to be created, in every timezone,
-   and a box for what you wish it did. The box is optional; passing through
-   this screen is not, because **the event is created here**.
+1. **Schedule** — names down the side, the day across the top, one column per
+   hour. A column is one instant: the ruler reads it on your clock, every row
+   reads the same instant on a different one, and the offset next to each name
+   is the arithmetic you no longer have to do. Under the ruler sits the whole
+   team as one band: paper white where everyone can make it (with an ink tick
+   to say so), darkening as more of them drop out, solid ink where nobody can.
+   Below that, one row each: bars for the hours they can't, hatched for
+   awake-but-off-hours, and the line of the current moment running down
+   through all of it.
+2. **Best times** — the ranked hours, each showing the time in every timezone
+   at once. Take one and the button at the foot of the page opens Google
+   Calendar with the event already filled in; `.ics` and a copyable list sit
+   next to the list.
+3. **What next?** — a box asking what Overlap should do that it doesn't. It is
+   optional and it is the last thing on the page for a reason.
+
+`/team/`, `/plan/` and `/next/` are still real addresses — they scroll to
+their section rather than swapping the screen.
+
+On a phone there is no room for a column, so the two control folds sit shut
+above the schedule and open on a tap; the team, the invite link and the
+account move below everything else.
+
+The app pages sit behind a sign-in at `/overlap/login`, which also offers
+**Continue as guest** — the whole app works, it simply stays in that browser:
+no shared teams, nothing that follows you to another device. Signing in later
+keeps whatever the guest built. Without a backend connected there is nothing
+to sign in to at all, so the app runs locally and lets everyone through.
 
 The page is one hand-written `index.html`: no framework, no build step. It runs
 completely without a backend — the team lives in `localStorage` and travels in
@@ -138,9 +149,9 @@ python3 overlap/build.py     # after editing any source below
 
 Do not edit a generated `index.html` by hand — the next build overwrites it.
 
-The three app pages are real addresses — a link to `/overlap/plan/` opens on
-Plan — but moving between them in the browser is a `pushState`, so nothing
-reloads and the team you are building survives the trip.
+The three app pages are real addresses — a link to `/overlap/plan/` lands on
+Best times — but they are one page now, so the link scrolls rather than
+switches, and moving between the sections is a `pushState`.
 
 Colour means two different things on purpose. On the **landing clock** it is
 the time of day: white is the working day (8am–5pm), black is night
