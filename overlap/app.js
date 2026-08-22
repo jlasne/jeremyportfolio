@@ -489,12 +489,28 @@ function localHour(ts,tz){
   var z=zp(ts,tz);
   return fmtHourShort(z.H)+(z.M?":"+pad(z.M):"");
 }
+/* The calendar is the page, so it takes the height the window can spare.
+   Rows grow to fill it and the band grows fastest, because it is the answer;
+   past a big team they stop growing and the page scrolls instead. */
+function sizeGrid(n){
+  var wrap=$(".wtb"), top=wrap.getBoundingClientRect().top;
+  var reserve=window.innerWidth>=900?96:172;   /* legend, footnote, the dock on a phone */
+  var avail=window.innerHeight-top-reserve;
+  var ruler=28;
+  if(!(avail>200)) avail=200;                  /* a short window just scrolls */
+  var band=Math.max(72,Math.min(132,avail*.17));
+  var row=Math.max(40,Math.min(140,(avail-ruler-band)/n));
+  wrap.style.setProperty("--wruler",Math.round(ruler)+"px");
+  wrap.style.setProperty("--wrow",Math.round(row)+"px");
+  wrap.style.setProperty("--wsum",Math.round(band)+"px");
+}
 function renderWTB(){
   var tz=dispTz(), days=dayStarts();
   if(S.day>=DAYS||S.day<0) S.day=0;
   var day=days[S.day], z=zp(day,tz), now=Date.now();
   var total=guests().length;              /* who counts */
   var g=$("#wtb"), labs=$("#wtbLabs"), i, html="", lhtml="", stamps=[];
+  sizeGrid(S.people.length);
   var rows="var(--wruler) var(--wsum) repeat("+S.people.length+",var(--wrow))";
   g.style.gridTemplateColumns="repeat(24,minmax(var(--cw),1fr))";
   g.style.gridTemplateRows=rows;
@@ -586,10 +602,10 @@ function outWeight(n,total){
 /* one hour of the team band */
 function sumCell(ts,i,pick){
   var total=guests().length, n=countFree(ts), k=outWeight(n,total);
-  return '<div class="hc sum'+(n===0?" none":(n===total?" all":""))+
+  return '<div class="hc sum'+(n===0?" none":(n===total?" all":""))+(k>.55?" dk":"")+
     (ts+3600000<Date.now()?" past":"")+(i===pick?" pick":"")+
     '" data-ts="'+ts+'" data-col="'+i+'" style="--k:'+k.toFixed(3)+'">'+
-    (i===pick?'<span class="n">'+n+"</span>":"")+"</div>";
+    (total?'<span class="n">'+n+"</span>":"")+"</div>";
 }
 function markColumn(scrollTo){
   var g=$("#wtb"), old=g.querySelector(".colmark"), t=sel();
@@ -611,10 +627,11 @@ function refreshSum(col,ts){
   var c=$("#wtb").querySelector('.hc.sum[data-col="'+col+'"]');
   if(!c) return;
   var total=guests().length, n=countFree(ts), pick=c.classList.contains("pick");
-  c.className="hc sum"+(n===0?" none":(n===total?" all":""))+
+  var k=outWeight(n,total);
+  c.className="hc sum"+(n===0?" none":(n===total?" all":""))+(k>.55?" dk":"")+
     (ts+3600000<Date.now()?" past":"")+(pick?" pick":"");
-  c.style.setProperty("--k",outWeight(n,total).toFixed(3));
-  c.innerHTML=pick?'<span class="n">'+n+"</span>":"";
+  c.style.setProperty("--k",k.toFixed(3));
+  c.innerHTML=total?'<span class="n">'+n+"</span>":"";
 }
 
 /* ═══════════════ render — best times ═══════════════ */

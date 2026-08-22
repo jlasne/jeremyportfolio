@@ -12,15 +12,21 @@ invite link and your account.
 
 The **page** is what you read, in two screens you reach by scrolling:
 
-1. **Calendar** — names down the side, the day across the top, one column per
-   hour, and the week you are looking at above it. A column is one instant:
-   the ruler reads it on your clock, every row reads the same instant on a
-   different one, and the offset next to each name is the arithmetic you no
-   longer have to do. Under the ruler sits the whole team as one band: paper
-   white where everyone can make it (with an ink tick to say so), darkening
-   as more of them drop out, solid ink where nobody can. Below that, one row
-   each: bars for the hours they can't, hatched for awake-but-off-hours, and
-   the line of the current moment running down through all of it.
+1. **Calendar** — the whole window, near enough. Names down the side, the day
+   across the top, one column per hour, and the week you are looking at above
+   it. A column is one instant: the ruler reads it on your clock, every row
+   reads the same instant on a different one, and the offset next to each name
+   is the arithmetic you no longer have to do. Rows and the band grow to fill
+   the height the window can spare, so the calendar is the page and Best times
+   begins below the fold.
+
+   Under the ruler sits the loudest thing on the screen: **the whole team as
+   one band**, ruled off in ink, with the number who can make each hour
+   written across it. Paper white where all of them can, with a heavy ink bar
+   under it to say so; darkening as more drop out; solid ink where nobody can.
+   Below that, one row each: bars for the hours they can't, hatched for
+   awake-but-off-hours, and the line of the current moment running down
+   through all of it.
 2. **Best times** — the ranked hours, each written out in every timezone at
    once, with a `+1` where an hour lands on somebody's tomorrow.
 

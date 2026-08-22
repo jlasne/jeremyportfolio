@@ -166,10 +166,11 @@ main{flex:1;padding:6px 0 8px}
 .rlab span em{font-style:normal;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rlab span i{font-style:normal;flex:none;font-weight:600;color:var(--ink-3);font-variant-numeric:tabular-nums}
 .rlab+.rlab{box-shadow:inset 0 -1px 0 rgba(60,60,67,.10)}
-.rlab.sum{box-shadow:0 1px 0 var(--sep)}
+.rlab.sum{box-shadow:0 -1px 0 var(--sep),0 1px 0 var(--ink)}
 .rlab.head{justify-content:flex-end;padding-bottom:5px}
 .rlab.head b{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
-.rlab.sum b{font-weight:700}
+.rlab.sum b{font-size:15px;font-weight:700;letter-spacing:-.03em}
+.rlab.sum span{font-size:12px}
 
 /* the hour ruler */
 .tick{display:flex;align-items:flex-end;padding:0 0 5px 4px;font-size:10px;font-weight:600;
@@ -202,12 +203,16 @@ main{flex:1;padding:6px 0 8px}
 /* the team band: paper when everyone can, ink when nobody, and the
    shades between are how many are out */
 .hc.sum{background:rgba(0,0,0,var(--k,0));
-  box-shadow:inset 1px 0 0 rgba(60,60,67,.09),inset 0 -1px 0 var(--sep)}
+  box-shadow:inset 1px 0 0 rgba(60,60,67,.12),inset 0 -1px 0 var(--ink)}
 .hc.sum.none{background:var(--ink)}
-.hc.sum.all::after{content:"";position:absolute;left:2px;right:2px;bottom:3px;height:3px;
+/* an hour the whole team can make gets said out loud */
+.hc.sum.all::after{content:"";position:absolute;left:3px;right:3px;bottom:5px;height:4px;
   border-radius:2px;background:var(--ink)}
-.hc.sum .n{background:var(--paper);color:var(--ink);border-radius:4px;padding:1px 4px;
-  font-size:10px;box-shadow:0 1px 2px rgba(0,0,0,.18)}
+.hc.sum .n{font-size:15px;font-weight:700;letter-spacing:-.02em;color:var(--ink);opacity:.62}
+.hc.sum.dk .n{color:var(--paper);opacity:.85}
+.hc.sum.all .n{opacity:1}
+.hc.sum.none .n{color:var(--paper);opacity:.4}
+.hc.sum.pick .n{opacity:1}
 
 /* now, and everything before it — struck through rather than painted over,
    so what was underneath still reads */
@@ -353,6 +358,7 @@ textarea{font-family:var(--font)}
   /* a column is narrower than a page, so the rows go quieter to fit it */
   .rsec .row{min-height:46px;padding:8px 12px;gap:10px}
   .rsec .row+.row::before{left:12px}
+  .rlab.sum b{font-size:17px;letter-spacing:-.025em}
   .rsec .row .t{font-size:15px}
   .rsec .row .s{font-size:12px}
   .rsec .row input{font-size:15px}
@@ -391,17 +397,15 @@ textarea{font-family:var(--font)}
   .nav{background:rgba(242,242,247,.86)}
   .nav-bar{padding:16px 0 12px}
   .nav-title{display:none}
-  main,.foot{max-width:1000px;margin-left:auto;margin-right:auto;width:100%}
+  main,.foot{max-width:none;width:100%}
+  #planSec{max-width:1080px}          /* a list is not improved by being a metre wide */
   .pane{padding:0;margin:0 0 42px}
   .panehead h2{font-size:26px}
   .panehead{padding-bottom:14px}
   /* a form is not improved by being a metre wide */
   #nextSec{max-width:660px}
 }
-@media (min-width:1280px){
-  .app{padding:0 56px}
-  main,.foot{max-width:1160px}
-}
+@media (min-width:1280px){ .app{padding:0 56px} }
 
 /* the phone keeps the controls in the flow: folded up, above the schedule,
    with the team and the account after everything else */
