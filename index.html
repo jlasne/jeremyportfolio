@@ -99,6 +99,10 @@ html {
   scroll-behavior: smooth;
   scroll-padding-top: 84px;
   -webkit-text-size-adjust: 100%;
+  /* A phone widens its layout viewport around anything that sticks out — and
+     everything fixed, the header first, stretches with it. Clip here so the
+     wide table below can only ever scroll inside its own frame. */
+  overflow-x: clip;
 }
 
 body {
@@ -223,7 +227,11 @@ button.btn { cursor: pointer; font-family: inherit; }
   position: fixed; inset: 0 0 auto 0; z-index: 90;
   height: 64px; display: flex; align-items: center;
   border-bottom: 1px solid transparent;
-  transition: background .5s var(--ease-soft), border-color .5s var(--ease-soft);
+  /* viewport-fit=cover lets the notch sit over the bar in landscape */
+  padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right);
+  /* the retreat below rides the compositor, so the blur never repaints in bands */
+  transform: translate3d(0, 0, 0);
+  transition: background .5s var(--ease-soft), border-color .5s var(--ease-soft), transform .4s var(--ease);
 }
 .nav.stuck {
   background: rgba(255, 255, 255, 0.72);
@@ -231,26 +239,35 @@ button.btn { cursor: pointer; font-family: inherit; }
   backdrop-filter: saturate(180%) blur(18px);
   -webkit-backdrop-filter: saturate(180%) blur(18px);
 }
-.nav .shell { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
-.nav-mark { display: flex; align-items: center; gap: 9px; font-size: 16px; font-weight: 800; letter-spacing: -0.02em; }
+.nav .shell { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-width: 0; }
+.nav-mark { display: flex; align-items: center; gap: 9px; min-width: 0; font-size: 16px; font-weight: 800; letter-spacing: -0.02em; }
+.nav-name { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .nav-logo { width: 28px; height: 28px; flex: none; }
 .nav-logo svg { width: 100%; height: 100%; display: block; }
-.nav-links { display: flex; align-items: center; gap: 24px; }
-.nav-links a { font-size: 14.5px; font-weight: 600; color: var(--muted); transition: color .3s var(--ease-soft); }
-.nav-links a:hover { color: var(--ink); }
+.nav-links { display: flex; align-items: center; gap: 24px; flex: none; }
+.nav-links a { font-size: 14.5px; font-weight: 600; color: var(--muted); white-space: nowrap; -webkit-tap-highlight-color: transparent; transition: color .3s var(--ease-soft); }
 .nav-links a.nav-cta {
   padding: 9px 19px; border-radius: 980px;
   background: var(--ink); color: #fff; font-weight: 700;
   box-shadow: var(--lift);
   transition: transform .4s var(--ease);
 }
-.nav-links a.nav-cta:hover { transform: scale(1.04); color: #fff; }
-@media (max-width: 720px) { .nav-links a:not(.nav-cta) { display: none; } }
+/* Hover only where a pointer can actually hover. On a touchscreen the hover
+   state latches after a tap and stays lit until you touch something else. */
+@media (hover: hover) {
+  .nav-links a:hover { color: var(--ink); }
+  .nav-links a.nav-cta:hover { transform: scale(1.04); color: #fff; }
+}
+.nav-links a:not(.nav-cta):active { color: var(--ink); }
+.nav-links a.nav-cta:active { transform: scale(0.97); color: #fff; }
 
 /* On a phone the nav retreats when you scroll down and comes back the moment
    you scroll up, so the header never eats a fifth of a short screen. */
-.nav { transform: translateY(0); transition: background .5s var(--ease-soft), border-color .5s var(--ease-soft), transform .45s var(--ease); }
-.nav.away { transform: translateY(-100%); }
+.nav.away { transform: translate3d(0, -100%, 0); }
+@media (prefers-reduced-motion: reduce) {
+  .nav { transition: background .5s var(--ease-soft), border-color .5s var(--ease-soft); }
+  .nav.away { transform: translate3d(0, 0, 0); }
+}
 
 /* Comfortable touch targets everywhere a finger has to land. */
 @media (pointer: coarse) {
@@ -259,6 +276,24 @@ button.btn { cursor: pointer; font-family: inherit; }
   .stage-dots button { height: 5px; width: 34px; }
   .stage-dots { gap: 10px; padding: 12px 0; }
   .foot-links a { padding-block: 4px; }
+}
+
+/* Phone: a shorter bar, tighter gutter and smaller type, so every link fits
+   on one line instead of the section link having to be dropped. */
+@media (max-width: 720px) {
+  html { scroll-padding-top: 74px; }   /* matches the shorter bar */
+  .nav { height: 58px; }
+  .nav .shell { --gutter: 18px; gap: 10px; }
+  .nav-mark { font-size: 15px; gap: 8px; }
+  .nav-logo { width: 26px; height: 26px; }
+  .nav-links { gap: 14px; }
+  .nav-links a { font-size: 14px; }
+  .nav-links a:not(.nav-cta) { display: inline-flex; align-items: center; min-height: 40px; }
+  .nav-links a.nav-cta { padding: 0 16px; min-height: 42px; display: inline-flex; align-items: center; }
+}
+/* Below this the wordmark can no longer share the line, so the logo carries it. */
+@media (max-width: 344px) {
+  .nav-name { display: none; }
 }
 
 .nav-progress {
@@ -431,6 +466,10 @@ button.btn { cursor: pointer; font-family: inherit; }
   margin-top: 48px;
   border: 1px solid var(--rule-firm); border-radius: 20px;
   overflow-x: auto; -webkit-overflow-scrolling: touch;
+  /* the table is wider than a phone: keep it to itself, and don't let a swipe
+     that runs off its end turn into the browser's back gesture */
+  contain: paint;
+  overscroll-behavior-x: contain;
 }
 .tbl { width: 100%; min-width: 720px; border-collapse: collapse; }
 
@@ -756,7 +795,7 @@ button.btn { cursor: pointer; font-family: inherit; }
 
 <nav class="nav" id="nav">
   <div class="shell">
-    <a class="nav-mark" href="#top">
+    <a class="nav-mark" href="#top" aria-label="Jeremy Lasne — back to top">
         <span class="nav-logo" aria-hidden="true">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
             <rect width="512" height="512" rx="116" fill="#212121"/>
@@ -768,7 +807,7 @@ button.btn { cursor: pointer; font-family: inherit; }
               <circle cx="206" cy="359" r="26"/>
             </g>
           </svg>
-        </span>Jeremy Lasne</a>
+        </span><span class="nav-name">Jeremy Lasne</span></a>
     <div class="nav-links">
       <a href="#projects">Projects</a>
       <a class="nav-cta" href="#contact">Let's talk</a>
@@ -1172,25 +1211,59 @@ button.btn { cursor: pointer; font-family: inherit; }
     rises.forEach(function (el) { io.observe(el); });
   }
 
-  /* ═══ nav: stick + reading progress ══════════════════════════════════════ */
+  /* ═══ nav: stick + reading progress + retreat ════════════════════════════ */
 
   var nav = document.getElementById('nav');
   var progress = document.getElementById('progress');
   var ticking = false;
+  var lastY = window.scrollY || window.pageYOffset || 0;
+  var holdUntil = 0;   // while a jump to an anchor is in flight, the bar stays
 
   function onScroll() {
-    var y = window.scrollY || window.pageYOffset;
-    nav.classList.toggle('stuck', y > 30);
-    var max = document.documentElement.scrollHeight - window.innerHeight;
-    progress.style.setProperty('--p', max > 0 ? Math.min(1, y / max) : 0);
     ticking = false;
+
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var y = window.scrollY || window.pageYOffset;
+    // iOS reports positions outside the document while rubber-banding; those
+    // are not scrolls, and left raw they flip the bar on every bounce
+    if (y < 0) y = 0;
+    else if (max > 0 && y > max) y = max;
+
+    nav.classList.toggle('stuck', y > 30);
+    progress.style.setProperty('--p', max > 0 ? Math.min(1, y / max) : 0);
+
+    // 10px of slack: below that a phone's collapsing address bar, which moves
+    // the page on its own, is enough to make the header flicker
+    var moved = y - lastY;
+    if (Math.abs(moved) > 10) {
+      var held = Date.now() < holdUntil || nav.contains(document.activeElement);
+      if (moved > 0 && y > 240 && !held && !reduced) nav.classList.add('away');
+      else if (moved < 0) nav.classList.remove('away');
+      lastY = y;
+    }
+    // never hide at the very top of the page
+    if (y <= 240) nav.classList.remove('away');
   }
+
   window.addEventListener('scroll', function () {
     if (ticking) return;
     ticking = true;
     requestAnimationFrame(onScroll);
   }, { passive: true });
   onScroll();
+
+  // A tap on an in-page link starts a smooth scroll. That is the page moving,
+  // not the reader, so the bar shouldn't dive out of the way on the way there.
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    if (t && t.closest && t.closest('a[href^="#"]')) {
+      holdUntil = Date.now() + 900;
+      nav.classList.remove('away');
+    }
+  }, true);
+
+  // and it can't stay hidden while it holds the keyboard focus
+  nav.addEventListener('focusin', function () { nav.classList.remove('away'); });
 
   /* ═══ the phone leans toward the pointer ═════════════════════════════════ */
 
@@ -1354,17 +1427,6 @@ button.btn { cursor: pointer; font-family: inherit; }
       }, { passive: true });
     });
   }
-
-  /* ═══ the nav retreats on the way down, returns on the way up ════════════ */
-
-  var lastY = 0;
-  window.addEventListener('scroll', function () {
-    var y = window.scrollY || window.pageYOffset;
-    // never hide at the very top, and ignore the rubber-band overscroll
-    if (y > 240 && y > lastY + 6) nav.classList.add('away');
-    else if (y < lastY - 6 || y < 240) nav.classList.remove('away');
-    lastY = y < 0 ? 0 : y;
-  }, { passive: true });
 
   /* ═══ copy email ═════════════════════════════════════════════════════════ */
 
