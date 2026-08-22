@@ -11,9 +11,15 @@ nothing to sign in to at all, so the app runs locally and lets everyone
 through.
 
 1. **Team** — who's in it, their hours in their own timezone, and the overlap
-   drawn the WorldTimeBuddy way: one row per person, hours running left to
-   right, every column the same instant on a different clock. White is
-   possible, black is not, grey means only some of them.
+   drawn as a schedule: names down the side, the day across the top, one
+   column per hour. A column is one instant — the ruler reads it on your
+   clock, every row reads the same instant on a different one, and the offset
+   next to each name is the arithmetic you no longer have to do. Under the
+   ruler sits the whole team as one band: paper white where everyone can make
+   it (with an ink tick to say so), darkening as more of them drop out, solid
+   ink where nobody can. Below that, one row each: bars for the hours they
+   can't, hatched for awake-but-off-hours, and the line of the current moment
+   running down through all of it.
 2. **Plan** — name, length, days; ranked hours, each showing the time in every
    timezone at once; then Google Calendar, `.ics`, or a copyable list.
 3. **Next** — the last look. What is about to be created, in every timezone,
@@ -139,7 +145,9 @@ reloads and the team you are building survives the trip.
 Colour means two different things on purpose. On the **landing clock** it is
 the time of day: white is the working day (8am–5pm), black is night
 (10pm–5am), grey the edges. Inside the **app** it is availability: white is
-possible, black is not, grey means only some of the team.
+possible, ink is not, and hatching is the hour someone is awake for but not
+working. On the team band the grey is a quantity — how much of the team is
+out — not a third state.
 
 ## Several teams
 

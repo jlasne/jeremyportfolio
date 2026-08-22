@@ -20,7 +20,7 @@
    Everything else is opacity.
    ───────────────────────────────────────────────────────────── */
 :root{
-  --wrow:46px; --cw:45px; --lab:112px;
+  --wruler:26px; --wsum:34px; --wrow:40px; --cw:34px; --lab:102px;
   --paper:#FFFFFF;
   --ground:#F2F2F7;
   --ink:#000000;
@@ -111,56 +111,106 @@ main.nohero .hero{display:none}
 .dock{position:sticky;bottom:0;z-index:30;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:rgba(242,242,247,.86);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);box-shadow:0 -.5px 0 var(--sep)}
 .dock-hint{font-size:12px;color:var(--ink-2);text-align:center;padding-bottom:8px;letter-spacing:-.005em}
 
-/* ── the overlap strip: one row per person, hours running across ── */
-.daytabs{display:flex;gap:6px;overflow-x:auto;padding:0 2px 12px;scrollbar-width:none}
+/* ── the day being looked at ── */
+.daytabs{display:flex;gap:5px;overflow-x:auto;padding:0 2px 10px;scrollbar-width:none}
 .daytabs::-webkit-scrollbar{display:none}
-.dtab{flex:none;min-width:54px;padding:7px 9px 8px;border-radius:11px;background:var(--fill);text-align:center;transition:background .15s}
+.dtab{flex:none;min-width:46px;padding:5px 9px 6px;border-radius:9px;background:var(--fill);text-align:center;transition:background .15s}
 .dtab .wd{display:block;font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2)}
-.dtab .dd{display:block;font-size:16px;font-weight:600;letter-spacing:-.02em;margin-top:1px;font-variant-numeric:tabular-nums}
+.dtab .dd{display:block;font-size:14px;font-weight:700;letter-spacing:-.02em;margin-top:0;font-variant-numeric:tabular-nums}
 .dtab.we{opacity:.5}
 .dtab.on{background:var(--ink);color:#fff;opacity:1}
 .dtab.on .wd{color:rgba(255,255,255,.55)}
+.dtab.past{color:var(--ink-3);
+  background-image:repeating-linear-gradient(135deg,rgba(60,60,67,.16) 0 2px,transparent 2px 6px)}
+.dtab.past .wd{color:var(--ink-3)}
+/* ── the schedule ───────────────────────────────────────────────
+   Names down the side, the day across the top, one column per hour.
+   A column is one instant: the ruler reads it on the reader's clock,
+   and every row reads the same instant on a different one. Bars, not
+   a chequerboard — contiguous hours join up, the way a calendar draws
+   a meeting.
+   ─────────────────────────────────────────────────────────────── */
 .wtb{display:flex;background:var(--paper);border-radius:var(--radius);overflow:hidden}
 .wtblabs{flex:none;width:var(--lab);display:grid;box-shadow:1px 0 0 var(--sep);z-index:3;background:var(--paper)}
 .wtbscroll{flex:1;min-width:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .wtbscroll::-webkit-scrollbar{display:none}
 .wtbgrid{display:grid;position:relative;min-width:100%}
 .wtbgrid.edit{touch-action:none;user-select:none;-webkit-user-select:none;cursor:crosshair}
+
+/* the name column */
 .rlab{display:flex;flex-direction:column;justify-content:center;padding:0 10px 0 15px;overflow:hidden}
 .rlab b{font-size:14px;font-weight:600;letter-spacing:-.015em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rlab span{font-size:11px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
-.rlab.sum{box-shadow:0 -1px 0 var(--sep)}
-.hc{display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:var(--paper);box-shadow:inset -1px 0 0 rgba(60,60,67,.10);font-variant-numeric:tabular-nums}
-.hc .n{font-size:13px;font-weight:500;letter-spacing:-.02em;line-height:1.15}
-.hc .m{font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;opacity:.45;line-height:1.15}
-.hc.busy{background:var(--ink);color:#fff;box-shadow:inset -1px 0 0 rgba(255,255,255,.16)}
-.hc.busy .m{opacity:.5}
-.hc.part,.hc.off{background:rgba(0,0,0,.17)}
-.hc.off{color:var(--ink-2)}
-.hc.date .n{font-size:15px;font-weight:700;letter-spacing:-.02em}
-.hc.date .m{opacity:.75}
-.hc.sum{box-shadow:inset -1px 0 0 rgba(60,60,67,.10),inset 0 1px 0 var(--sep)}
-.hc.sum.busy{box-shadow:inset -1px 0 0 rgba(255,255,255,.16),inset 0 1px 0 var(--sep)}
-.hc.sum .n{font-size:11px;font-weight:600;opacity:.75}
-.hc.off.past{color:var(--ink-3)}
-.hc.past{color:var(--ink-3);
-  background-image:repeating-linear-gradient(135deg,rgba(60,60,67,.20) 0 2px,transparent 2px 6px)}
-.hc.busy.past{color:rgba(255,255,255,.40);
-  background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.22) 0 2px,transparent 2px 6px)}
-.hc.past .m{opacity:.35}
-.dtab.past{color:var(--ink-3);
-  background-image:repeating-linear-gradient(135deg,rgba(60,60,67,.16) 0 2px,transparent 2px 6px)}
-.dtab.past .wd{color:var(--ink-3)}
+.rlab span{display:flex;align-items:baseline;gap:5px;font-size:11px;color:var(--ink-2);margin-top:1px}
+.rlab span em{font-style:normal;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rlab span i{font-style:normal;flex:none;font-weight:600;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.rlab+.rlab{box-shadow:inset 0 -1px 0 rgba(60,60,67,.10)}
+.rlab.sum{box-shadow:0 1px 0 var(--sep)}
+.rlab.head{justify-content:flex-end;padding-bottom:5px}
+.rlab.head b{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.rlab.sum b{font-weight:700}
+
+/* the hour ruler */
+.tick{display:flex;align-items:flex-end;padding:0 0 5px 4px;font-size:10px;font-weight:600;
+  letter-spacing:.01em;color:var(--ink-3);font-variant-numeric:tabular-nums;
+  box-shadow:inset 1px 0 0 rgba(60,60,67,.08)}
+.tick.q{box-shadow:inset 1px 0 0 rgba(60,60,67,.20)}
+.tick.on{color:var(--ink);font-weight:700}
+
+/* one hour, one person */
+.hc{position:relative;display:flex;align-items:center;justify-content:center;
+  --gl:rgba(60,60,67,.09); --rl:rgba(60,60,67,.10);
+  box-shadow:inset 1px 0 0 var(--gl),inset 0 -1px 0 var(--rl)}
+.hc.busy,.hc.off{--gl:transparent}
+.hc.busy{--rl:rgba(255,255,255,.14)}
+.hc.date{box-shadow:inset 1.5px 0 0 var(--ink-3),inset 0 -1px 0 var(--rl);
+  justify-content:flex-start;padding-left:4px}
+/* the bar itself, inset so a row reads as a track with something laid in it */
+.hc.busy::before,.hc.off::before{content:"";position:absolute;left:0;right:0;top:4px;bottom:4px}
+.hc.busy::before{background:var(--ink)}
+.hc.off::before{background:repeating-linear-gradient(135deg,
+  rgba(0,0,0,.24) 0 2px,rgba(0,0,0,.07) 2px 6px)}
+.hc.s::before{border-top-left-radius:7px;border-bottom-left-radius:7px;left:1px}
+.hc.e::before{border-top-right-radius:7px;border-bottom-right-radius:7px;right:1px}
+.hc .n,.hc .dm{position:relative;z-index:1}
+.hc .n{font-size:11px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.hc .dm{font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
+.hc.busy .n{color:#fff}
+.hc.busy .dm{color:rgba(255,255,255,.55)}
+
+/* the team band: paper when everyone can, ink when nobody, and the
+   shades between are how many are out */
+.hc.sum{background:rgba(0,0,0,var(--k,0));
+  box-shadow:inset 1px 0 0 rgba(60,60,67,.09),inset 0 -1px 0 var(--sep)}
+.hc.sum.none{background:var(--ink)}
+.hc.sum.all::after{content:"";position:absolute;left:2px;right:2px;bottom:3px;height:3px;
+  border-radius:2px;background:var(--ink)}
+.hc.sum .n{background:var(--paper);color:var(--ink);border-radius:4px;padding:1px 4px;
+  font-size:10px;box-shadow:0 1px 2px rgba(0,0,0,.18)}
+
+/* now, and everything before it — struck through rather than painted over,
+   so what was underneath still reads */
+.pastwash{position:absolute;top:var(--wruler);bottom:0;left:0;z-index:2;pointer-events:none;
+  background:repeating-linear-gradient(135deg,
+    rgba(242,242,247,.92) 0 2px,rgba(242,242,247,.22) 2px 6px)}
+.nowline{position:absolute;top:var(--wruler);bottom:0;width:1.5px;margin-left:-.75px;
+  background:var(--ink);z-index:4;pointer-events:none}
+.nowline::before{content:"";position:absolute;top:-3px;left:-2.25px;width:6px;height:6px;
+  border-radius:50%;background:var(--ink)}
 .colmark{position:absolute;top:0;bottom:0;border:2.5px solid var(--ink);border-radius:10px;
   pointer-events:none;z-index:5;box-shadow:0 0 0 2px var(--paper)}
-.legend{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-2);padding:11px 4px 0;
-  letter-spacing:-.005em;white-space:nowrap}
-.legend .sp{flex:1}
+
+.legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px;row-gap:5px;font-size:11px;
+  color:var(--ink-2);padding:11px 4px 0;letter-spacing:-.005em}
+.legend span{white-space:nowrap}
+.legend .sp{flex:1 0 10px}
 .legend .lg{width:12px;height:12px;border-radius:3px;display:block;flex:none}
 .legend .lg.free{background:var(--paper);box-shadow:inset 0 0 0 1px var(--sep)}
-.legend .lg.part{background:rgba(0,0,0,.17)}
+.legend .lg.part{background:repeating-linear-gradient(135deg,
+  rgba(0,0,0,.24) 0 2px,rgba(0,0,0,.07) 2px 6px);box-shadow:inset 0 0 0 1px var(--sep)}
 .legend .lg.busy{background:var(--ink)}
+/* a desk has the width for a wider hour and a longer name */
+@media (min-width:600px){ :root{--cw:38px; --lab:124px} }
+@media (min-width:900px){ :root{--cw:44px; --lab:152px} }
 .linkbtn{font-size:13px;font-weight:500;color:var(--ink);letter-spacing:-.01em;padding:0 2px}
 .linkbtn:active{opacity:.4}
 .linkbtn.on{color:var(--ink);font-weight:600}
@@ -358,7 +408,7 @@ window.OVERLAP_GOOGLE_CLIENT_ID = "";
    team/, plan/ and next/ are real pages so a link lands where it says,
    but moving between them is a pushState, not a reload.
    ═══════════════════════════════════════════════════════════════════ */
-document.getElementById("root").innerHTML = "<aside class=\"rail\"><a class=\"rail-brand\" href=\"/overlap/\"><svg class=\"rail-mark\" viewBox=\"0 0 64 56\" aria-hidden=\"true\"><g fill=\"currentColor\"><rect x=\"4\" y=\"13\" width=\"9\" height=\"30\" rx=\"4.5\"/><rect x=\"18\" y=\"4\" width=\"9\" height=\"48\" rx=\"4.5\"/><rect x=\"32\" y=\"17\" width=\"9\" height=\"22\" rx=\"4.5\"/><rect x=\"46\" y=\"9\" width=\"9\" height=\"38\" rx=\"4.5\"/></g><rect x=\"1\" y=\"24\" width=\"61\" height=\"7\" rx=\"3.5\" fill=\"var(--mark-cut,#fff)\"/></svg>Overlap</a><nav class=\"rail-nav\" id=\"railNav\"></nav><div class=\"rail-foot\" id=\"railFoot\"></div></aside><div class=\"app\">\n\n  <header class=\"nav\" id=\"nav\">\n    <div class=\"nav-bar\">\n      <span class=\"nav-title\">Overlap</span>\n      <span class=\"nav-sub\">The hour that works for the whole team.</span>\n      <button class=\"nav-act\" id=\"resetBtn\">Reset</button>\n    </div>\n    <div class=\"seg-wrap\">\n      <div class=\"seg\" id=\"seg\">\n        <div class=\"thumb\" id=\"segThumb\"></div>\n        <a href=\"../team/\" data-step=\"0\">Team</a>\n        <a href=\"../plan/\" data-step=\"1\">Plan</a>\n        <a href=\"../next/\" data-step=\"2\">Next</a>\n      </div>\n    </div>\n  </header>\n\n  <main>\n    <div class=\"hero\">\n      <h1 class=\"large-title\" id=\"bigTitle\">Your team</h1>\n      <p class=\"large-sub\" id=\"bigSub\">Everyone's hours, in their own timezone.</p>\n    </div>\n\n    <section class=\"step respond-only\" id=\"respondPane\">\n      <div class=\"sec\">\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Your name</div></div>\n            <input id=\"respondName\" placeholder=\"So they know who answered\" maxlength=\"40\"\n                   style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\">\n          </div>\n          <div class=\"row tap\" data-respondcity=\"1\">\n            <div class=\"grow\"><div class=\"t\">You are in</div></div>\n            <div class=\"v\" id=\"respondCity\"></div><div class=\"chev\"></div>\n          </div>\n        </div>\n        <div class=\"secfoot\">Drag along your row below to cross out the hours you cannot do.</div>\n      </div>\n      <div class=\"sec\" id=\"respondDone\" style=\"display:none\">\n        <div class=\"card\"><div class=\"empty\"><b>Sent.</b>Change anything and send again \u2014 it replaces your answer.</div></div>\n      </div>\n    </section>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 STEP 1 \u2014 TEAM \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"step on\" id=\"step0\">\n      <div class=\"sec\">\n        <div class=\"card\" id=\"acctCard\"></div>\n      </div>\n\n      <div class=\"sec\">\n        <div class=\"sechead\"><span id=\"teamHead\">People</span><b id=\"peopleCount\"></b></div>\n        <div class=\"card\" id=\"peopleList\"></div>\n        <div class=\"secfoot\">Working hours are what the overlap is built from.</div>\n      </div>\n\n      <div class=\"sec\" id=\"overlapSec\">\n        <div class=\"sechead\"><span>Overlap</span><button class=\"linkbtn\" id=\"editToggle\">Edit hours</button></div>\n        <div class=\"daytabs\" id=\"dayTabs\"></div>\n        <div class=\"wtb\">\n          <div class=\"wtblabs\" id=\"wtbLabs\"></div>\n          <div class=\"wtbscroll\" id=\"wtbScroll\"><div class=\"wtbgrid\" id=\"wtb\"></div></div>\n        </div>\n        <div class=\"legend\">\n          <i class=\"lg free\"></i><span>can meet</span>\n          <i class=\"lg part\"></i><span>awake, off hours</span>\n          <i class=\"lg busy\"></i><span>asleep or busy</span>\n          <span class=\"sp\"></span><span id=\"gridTz\"></span>\n        </div>\n        <div class=\"secfoot\" id=\"editFoot\"></div>\n      </div>\n    </section>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 STEP 2 \u2014 PLAN \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"step\" id=\"step1\">\n      <div class=\"sec\">\n        <div class=\"sechead\"><span>The meeting</span></div>\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Name</div></div>\n            <input id=\"titleInput\" style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\" placeholder=\"Intro call\" maxlength=\"80\">\n          </div>\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Length</div></div>\n            <div class=\"chips\" id=\"durChips\" style=\"padding:0;justify-content:flex-end\"></div>\n          </div>\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Days</div><div class=\"s\" id=\"windowSub\"></div></div>\n            <div class=\"stepper\">\n              <button id=\"winPrev\" aria-label=\"Earlier week\">\u2039</button><span></span><button id=\"winNext\" aria-label=\"Later week\">\u203a</button>\n            </div>\n          </div>\n        </div>\n      </div>\n      <div class=\"sec\">\n        <div class=\"sechead\"><span>Best times</span><b id=\"bestNote\"></b></div>\n        <div class=\"card\" id=\"bestList\"></div>\n        <div class=\"secfoot\" id=\"bestFoot\"></div>\n      </div>\n      <div class=\"sec\" id=\"actionsSec\">\n        <div class=\"btnrow\">\n          <button class=\"btn sec\" id=\"copyBtn\">Copy times</button>\n          <button class=\"btn sec\" id=\"icsBtn\">Apple Calendar</button>\n        </div>\n        <button class=\"btn ghost\" id=\"shareBtn\" style=\"margin-top:6px\">Copy a link to this plan</button>\n      </div>\n    </section>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 STEP 3 \u2014 FEEDBACK \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"step\" id=\"step2\">\n      <div class=\"sec\" id=\"reviewSec\"></div><div class=\"sec\" id=\"fbForm\">\n        <div class=\"sechead\"><span>What would you like to see?</span></div>\n        <div class=\"chips\" id=\"wantChips\"></div>\n        <div class=\"card\" style=\"margin-top:12px\">\n          <textarea id=\"fbText\" rows=\"4\" maxlength=\"800\" placeholder=\"Anything at all \u2014 what got in your way, what\u2019s missing, what you\u2019d pay for.\"></textarea>\n        </div>\n        <div class=\"card\" style=\"margin-top:12px\" id=\"fbEmailCard\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Email</div><div class=\"s\">If you want a reply.</div></div>\n            <input id=\"fbEmail\" type=\"email\" placeholder=\"Optional\" maxlength=\"80\" autocapitalize=\"off\" autocorrect=\"off\"\n                   style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\">\n          </div>\n        </div>\n        <div class=\"secfoot\" id=\"fbFoot\"></div>\n      </div>\n      <div class=\"sec\" id=\"fbThanks\" style=\"display:none\">\n        <div class=\"card\"><div class=\"empty\"><b>Thank you \u2014 noted.</b>Every line of this gets read. It decides what gets built next.</div></div>\n        <button class=\"btn sec\" id=\"fbAgain\" style=\"margin-top:14px\">Say something else</button>\n      </div>\n    </section>\n\n  </main>\n\n  <div class=\"dock\">\n    <div class=\"dock-hint\" id=\"dockHint\"></div>\n    <button class=\"btn\" id=\"primary\">Continue</button>\n  </div>\n\n  <p class=\"foot\" id=\"foot\"></p>\n</div>\n\n<div class=\"scrim\" id=\"scrim\"></div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u2014 add / edit a person \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"sheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"sheetCancel\">Cancel</button>\n    <span class=\"t\" id=\"sheetTitle\">Add person</span>\n    <button class=\"p\" id=\"sheetDone\">Done</button>\n  </div>\n  <div class=\"sheet-body\">\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>Name</label><input id=\"fName\" placeholder=\"Optional\" maxlength=\"40\"></div>\n        <div class=\"field\"><label>Email</label><input id=\"fEmail\" type=\"email\" placeholder=\"Optional \u2014 invites them\" maxlength=\"80\" autocapitalize=\"off\" autocorrect=\"off\"></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Working hours</span></div>\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"s-\">\u2212</button><span></span><button data-h=\"s+\">+</button></div><div class=\"v\" id=\"fStart\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>To</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"e-\">\u2212</button><span></span><button data-h=\"e+\">+</button></div><div class=\"v\" id=\"fEnd\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label style=\"width:auto;flex:1\">Weekends too</label><div class=\"switch\" id=\"fWeekend\"><i></i></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Asleep</span></div>\n    <div style=\"padding:0 16px 6px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"z-\">\u2212</button><span></span><button data-h=\"z+\">+</button></div><div class=\"v\" id=\"fSleep\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>Until</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"w-\">\u2212</button><span></span><button data-h=\"w+\">+</button></div><div class=\"v\" id=\"fWake\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Calendar</span></div>\n    <div style=\"padding:0 16px 6px\"><div class=\"card\" id=\"gcalCard\"></div></div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Timezone</span></div>\n    <div class=\"search\">\n      <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\"><circle cx=\"7\" cy=\"7\" r=\"5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M11 11l3.5 3.5\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n      <input id=\"citySearch\" placeholder=\"City or timezone\" autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\">\n    </div>\n    <div style=\"padding:0 16px\"><div class=\"card\" id=\"cityList\"></div></div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u2014 sign in \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"authSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"authCancel\">Cancel</button>\n    <span class=\"t\" id=\"authTitle\">Sign in</span>\n    <button class=\"p\" id=\"authGo\">Next</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\" id=\"authLede\">One email, one code. No password to forget.</p>\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>Email</label><input id=\"authEmail\" type=\"email\" placeholder=\"you@company.com\"\n          autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\"></div>\n        <div class=\"field\" id=\"authCodeField\" style=\"display:none\"><label>Code</label>\n          <input id=\"authCode\" inputmode=\"numeric\" maxlength=\"6\" placeholder=\"6 digits\"></div>\n      </div>\n    </div>\n    <p class=\"sheet-lede\" id=\"authNote\"></p>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u2014 invite \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"teamSheet\"><div class=\"grab\"></div><div class=\"sheet-nav\"><button id=\"teamClose\">Done</button><span class=\"t\">Teams</span><span style=\"width:44px\"></span></div><div class=\"sheet-body\"><p class=\"sheet-lede\">Keep a team per client, per project, per anything. They all stay put, and you can switch at any time.</p><div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"teamList\"></div></div><div style=\"padding:0 16px\" class=\"btnrow\" id=\"teamActs\"></div></div></div><div class=\"sheet\" id=\"inviteSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"inviteClose\">Done</button>\n    <span class=\"t\">Invite</span>\n    <button class=\"p\" id=\"inviteCopy\">Copy</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">Two ways in. The first asks one question and needs no account.</p>\n    <div style=\"padding:0 16px 8px\" id=\"askWrap\">\n      <div class=\"sechead\"><span>Ask when they can\u2019t</span></div>\n      <div class=\"card\"><div class=\"linkbox\" id=\"askLink\"></div></div>\n      <button class=\"btn\" id=\"askCopy\" style=\"margin-top:10px\">Copy the question link</button>\n    </div>\n    <div style=\"padding:0 20px\"><div class=\"sechead\"><span>Invite to the team</span></div></div>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\"><div class=\"linkbox\" id=\"inviteLink\"></div></div></div>\n    <div style=\"padding:0 16px\"><button class=\"btn\" id=\"inviteCopyBig\">Copy invite link</button></div>\n  </div>\n</div>\n\n<div class=\"toast\" id=\"toast\"></div>";
+document.getElementById("root").innerHTML = "<aside class=\"rail\"><a class=\"rail-brand\" href=\"/overlap/\"><svg class=\"rail-mark\" viewBox=\"0 0 64 56\" aria-hidden=\"true\"><g fill=\"currentColor\"><rect x=\"4\" y=\"13\" width=\"9\" height=\"30\" rx=\"4.5\"/><rect x=\"18\" y=\"4\" width=\"9\" height=\"48\" rx=\"4.5\"/><rect x=\"32\" y=\"17\" width=\"9\" height=\"22\" rx=\"4.5\"/><rect x=\"46\" y=\"9\" width=\"9\" height=\"38\" rx=\"4.5\"/></g><rect x=\"1\" y=\"24\" width=\"61\" height=\"7\" rx=\"3.5\" fill=\"var(--mark-cut,#fff)\"/></svg>Overlap</a><nav class=\"rail-nav\" id=\"railNav\"></nav><div class=\"rail-foot\" id=\"railFoot\"></div></aside><div class=\"app\">\n\n  <header class=\"nav\" id=\"nav\">\n    <div class=\"nav-bar\">\n      <span class=\"nav-title\">Overlap</span>\n      <span class=\"nav-sub\">The hour that works for the whole team.</span>\n      <button class=\"nav-act\" id=\"resetBtn\">Reset</button>\n    </div>\n    <div class=\"seg-wrap\">\n      <div class=\"seg\" id=\"seg\">\n        <div class=\"thumb\" id=\"segThumb\"></div>\n        <a href=\"../team/\" data-step=\"0\">Team</a>\n        <a href=\"../plan/\" data-step=\"1\">Plan</a>\n        <a href=\"../next/\" data-step=\"2\">Next</a>\n      </div>\n    </div>\n  </header>\n\n  <main>\n    <div class=\"hero\">\n      <h1 class=\"large-title\" id=\"bigTitle\">Your team</h1>\n      <p class=\"large-sub\" id=\"bigSub\">Everyone's hours, in their own timezone.</p>\n    </div>\n\n    <section class=\"step respond-only\" id=\"respondPane\">\n      <div class=\"sec\">\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Your name</div></div>\n            <input id=\"respondName\" placeholder=\"So they know who answered\" maxlength=\"40\"\n                   style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\">\n          </div>\n          <div class=\"row tap\" data-respondcity=\"1\">\n            <div class=\"grow\"><div class=\"t\">You are in</div></div>\n            <div class=\"v\" id=\"respondCity\"></div><div class=\"chev\"></div>\n          </div>\n        </div>\n        <div class=\"secfoot\">Drag along your row below to cross out the hours you cannot do.</div>\n      </div>\n      <div class=\"sec\" id=\"respondDone\" style=\"display:none\">\n        <div class=\"card\"><div class=\"empty\"><b>Sent.</b>Change anything and send again \u2014 it replaces your answer.</div></div>\n      </div>\n    </section>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 STEP 1 \u2014 TEAM \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"step on\" id=\"step0\">\n      <div class=\"sec\">\n        <div class=\"card\" id=\"acctCard\"></div>\n      </div>\n\n      <div class=\"sec\">\n        <div class=\"sechead\"><span id=\"teamHead\">People</span><b id=\"peopleCount\"></b></div>\n        <div class=\"card\" id=\"peopleList\"></div>\n        <div class=\"secfoot\">Working hours are what the overlap is built from.</div>\n      </div>\n\n      <div class=\"sec\" id=\"overlapSec\">\n        <div class=\"sechead\"><span>Overlap</span><button class=\"linkbtn\" id=\"editToggle\">Edit hours</button></div>\n        <div class=\"daytabs\" id=\"dayTabs\"></div>\n        <div class=\"wtb\">\n          <div class=\"wtblabs\" id=\"wtbLabs\"></div>\n          <div class=\"wtbscroll\" id=\"wtbScroll\"><div class=\"wtbgrid\" id=\"wtb\"></div></div>\n        </div>\n        <div class=\"legend\">\n          <i class=\"lg free\"></i><span>can meet</span>\n          <i class=\"lg part\"></i><span>off hours</span>\n          <i class=\"lg busy\"></i><span>asleep or busy</span>\n          <span class=\"sp\"></span><span id=\"gridTz\"></span>\n        </div>\n        <div class=\"secfoot\" id=\"editFoot\"></div>\n      </div>\n    </section>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 STEP 2 \u2014 PLAN \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"step\" id=\"step1\">\n      <div class=\"sec\">\n        <div class=\"sechead\"><span>The meeting</span></div>\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Name</div></div>\n            <input id=\"titleInput\" style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\" placeholder=\"Intro call\" maxlength=\"80\">\n          </div>\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Length</div></div>\n            <div class=\"chips\" id=\"durChips\" style=\"padding:0;justify-content:flex-end\"></div>\n          </div>\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Days</div><div class=\"s\" id=\"windowSub\"></div></div>\n            <div class=\"stepper\">\n              <button id=\"winPrev\" aria-label=\"Earlier week\">\u2039</button><span></span><button id=\"winNext\" aria-label=\"Later week\">\u203a</button>\n            </div>\n          </div>\n        </div>\n      </div>\n      <div class=\"sec\">\n        <div class=\"sechead\"><span>Best times</span><b id=\"bestNote\"></b></div>\n        <div class=\"card\" id=\"bestList\"></div>\n        <div class=\"secfoot\" id=\"bestFoot\"></div>\n      </div>\n      <div class=\"sec\" id=\"actionsSec\">\n        <div class=\"btnrow\">\n          <button class=\"btn sec\" id=\"copyBtn\">Copy times</button>\n          <button class=\"btn sec\" id=\"icsBtn\">Apple Calendar</button>\n        </div>\n        <button class=\"btn ghost\" id=\"shareBtn\" style=\"margin-top:6px\">Copy a link to this plan</button>\n      </div>\n    </section>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 STEP 3 \u2014 FEEDBACK \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"step\" id=\"step2\">\n      <div class=\"sec\" id=\"reviewSec\"></div><div class=\"sec\" id=\"fbForm\">\n        <div class=\"sechead\"><span>What would you like to see?</span></div>\n        <div class=\"chips\" id=\"wantChips\"></div>\n        <div class=\"card\" style=\"margin-top:12px\">\n          <textarea id=\"fbText\" rows=\"4\" maxlength=\"800\" placeholder=\"Anything at all \u2014 what got in your way, what\u2019s missing, what you\u2019d pay for.\"></textarea>\n        </div>\n        <div class=\"card\" style=\"margin-top:12px\" id=\"fbEmailCard\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Email</div><div class=\"s\">If you want a reply.</div></div>\n            <input id=\"fbEmail\" type=\"email\" placeholder=\"Optional\" maxlength=\"80\" autocapitalize=\"off\" autocorrect=\"off\"\n                   style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\">\n          </div>\n        </div>\n        <div class=\"secfoot\" id=\"fbFoot\"></div>\n      </div>\n      <div class=\"sec\" id=\"fbThanks\" style=\"display:none\">\n        <div class=\"card\"><div class=\"empty\"><b>Thank you \u2014 noted.</b>Every line of this gets read. It decides what gets built next.</div></div>\n        <button class=\"btn sec\" id=\"fbAgain\" style=\"margin-top:14px\">Say something else</button>\n      </div>\n    </section>\n\n  </main>\n\n  <div class=\"dock\">\n    <div class=\"dock-hint\" id=\"dockHint\"></div>\n    <button class=\"btn\" id=\"primary\">Continue</button>\n  </div>\n\n  <p class=\"foot\" id=\"foot\"></p>\n</div>\n\n<div class=\"scrim\" id=\"scrim\"></div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u2014 add / edit a person \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"sheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"sheetCancel\">Cancel</button>\n    <span class=\"t\" id=\"sheetTitle\">Add person</span>\n    <button class=\"p\" id=\"sheetDone\">Done</button>\n  </div>\n  <div class=\"sheet-body\">\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>Name</label><input id=\"fName\" placeholder=\"Optional\" maxlength=\"40\"></div>\n        <div class=\"field\"><label>Email</label><input id=\"fEmail\" type=\"email\" placeholder=\"Optional \u2014 invites them\" maxlength=\"80\" autocapitalize=\"off\" autocorrect=\"off\"></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Working hours</span></div>\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"s-\">\u2212</button><span></span><button data-h=\"s+\">+</button></div><div class=\"v\" id=\"fStart\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>To</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"e-\">\u2212</button><span></span><button data-h=\"e+\">+</button></div><div class=\"v\" id=\"fEnd\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label style=\"width:auto;flex:1\">Weekends too</label><div class=\"switch\" id=\"fWeekend\"><i></i></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Asleep</span></div>\n    <div style=\"padding:0 16px 6px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"z-\">\u2212</button><span></span><button data-h=\"z+\">+</button></div><div class=\"v\" id=\"fSleep\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>Until</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"w-\">\u2212</button><span></span><button data-h=\"w+\">+</button></div><div class=\"v\" id=\"fWake\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Calendar</span></div>\n    <div style=\"padding:0 16px 6px\"><div class=\"card\" id=\"gcalCard\"></div></div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Timezone</span></div>\n    <div class=\"search\">\n      <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\"><circle cx=\"7\" cy=\"7\" r=\"5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M11 11l3.5 3.5\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n      <input id=\"citySearch\" placeholder=\"City or timezone\" autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\">\n    </div>\n    <div style=\"padding:0 16px\"><div class=\"card\" id=\"cityList\"></div></div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u2014 sign in \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"authSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"authCancel\">Cancel</button>\n    <span class=\"t\" id=\"authTitle\">Sign in</span>\n    <button class=\"p\" id=\"authGo\">Next</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\" id=\"authLede\">One email, one code. No password to forget.</p>\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>Email</label><input id=\"authEmail\" type=\"email\" placeholder=\"you@company.com\"\n          autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\"></div>\n        <div class=\"field\" id=\"authCodeField\" style=\"display:none\"><label>Code</label>\n          <input id=\"authCode\" inputmode=\"numeric\" maxlength=\"6\" placeholder=\"6 digits\"></div>\n      </div>\n    </div>\n    <p class=\"sheet-lede\" id=\"authNote\"></p>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u2014 invite \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"teamSheet\"><div class=\"grab\"></div><div class=\"sheet-nav\"><button id=\"teamClose\">Done</button><span class=\"t\">Teams</span><span style=\"width:44px\"></span></div><div class=\"sheet-body\"><p class=\"sheet-lede\">Keep a team per client, per project, per anything. They all stay put, and you can switch at any time.</p><div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"teamList\"></div></div><div style=\"padding:0 16px\" class=\"btnrow\" id=\"teamActs\"></div></div></div><div class=\"sheet\" id=\"inviteSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"inviteClose\">Done</button>\n    <span class=\"t\">Invite</span>\n    <button class=\"p\" id=\"inviteCopy\">Copy</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">Two ways in. The first asks one question and needs no account.</p>\n    <div style=\"padding:0 16px 8px\" id=\"askWrap\">\n      <div class=\"sechead\"><span>Ask when they can\u2019t</span></div>\n      <div class=\"card\"><div class=\"linkbox\" id=\"askLink\"></div></div>\n      <button class=\"btn\" id=\"askCopy\" style=\"margin-top:10px\">Copy the question link</button>\n    </div>\n    <div style=\"padding:0 20px\"><div class=\"sechead\"><span>Invite to the team</span></div></div>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\"><div class=\"linkbox\" id=\"inviteLink\"></div></div></div>\n    <div style=\"padding:0 16px\"><button class=\"btn\" id=\"inviteCopyBig\">Copy invite link</button></div>\n  </div>\n</div>\n\n<div class=\"toast\" id=\"toast\"></div>";
 
 (function(){
 "use strict";
@@ -813,58 +863,113 @@ function renderDays(){
       '</span><span class="dd">'+z.d+"</span></button>";
   }).join("");
 }
-function cellLabel(ts,tz,newday){
-  var p=zp(ts,tz);
-  if(newday) return '<span class="n">'+p.d+'</span><span class="m">'+MO[p.m-1]+"</span>";
-  if(HOUR12){
-    var h=p.H%12; if(h===0) h=12;
-    return '<span class="n">'+h+(p.M?":"+pad(p.M):"")+'</span><span class="m">'+(p.H<12?"am":"pm")+"</span>";
-  }
-  return '<span class="n">'+pad(p.H)+(p.M?":"+pad(p.M):"")+"</span>";
+/* how far ahead of the reader someone lives, at this day: "+2h", "−5:30" */
+function relOffset(p,ts,tz){
+  var d=(off(ts,p.tz)-off(ts,tz))/60;
+  if(!d) return "";
+  var s=d<0?"−":"+", a=Math.abs(d), h=Math.floor(a), m=Math.round((a-h)*60);
+  return s+h+(m?":"+pad(m):"")+"h";
 }
-function sumClass(n,total){ return n===0?" busy":(n===total?"":" part"); }
+/* the hour a person reads off their own clock at this instant */
+function localHour(ts,tz){
+  var z=zp(ts,tz);
+  return fmtHourShort(z.H)+(z.M?":"+pad(z.M):"");
+}
 function renderWTB(){
   var tz=dispTz(), days=dayStarts();
   if(S.day>=DAYS||S.day<0) S.day=0;
   var day=days[S.day], z=zp(day,tz), total=S.people.length, now=Date.now();
   var g=$("#wtb"), labs=$("#wtbLabs"), i, html="", lhtml="", stamps=[];
+  var rows="var(--wruler) var(--wsum) repeat("+total+",var(--wrow))";
   g.style.gridTemplateColumns="repeat(24,var(--cw))";
-  g.style.gridTemplateRows="repeat("+(total+1)+",var(--wrow))";
-  labs.style.gridTemplateRows="repeat("+(total+1)+",var(--wrow))";
+  g.style.gridTemplateRows=rows;
+  labs.style.gridTemplateRows=rows;
   for(i=0;i<24;i++) stamps.push(wall(z.y,z.m,z.d,i,0,tz));
+  var picked=sel(), pick=-1;
+  for(i=0;i<24;i++) if(stamps[i]===picked) pick=i;
 
+  /* ── the ruler: the day, once, on the reader's own clock ── */
+  lhtml+='<div class="rlab head"><b>'+esc(tzCity(tz))+"</b></div>";
+  for(i=0;i<24;i++){
+    var rh=zp(stamps[i],tz).H;
+    html+='<div class="tick'+(rh%6===0?" q":"")+(i===pick?" on":"")+'">'+
+          (rh%2===0||i===pick?fmtHourShort(rh):"")+"</div>";
+  }
+
+  /* ── the band: the whole team at once. It darkens as fewer can make it ── */
+  lhtml+='<div class="rlab sum"><b>Everyone</b><span>'+total+
+         (total===1?" person":" people")+"</span></div>";
+  for(i=0;i<24;i++) html+=sumCell(stamps[i],i,pick);
+
+  /* ── one row per person, drawn as bars, not as a chequerboard ── */
   S.people.forEach(function(p){
-    var city=tzCity(p.tz), sub=(pname(p)===city?"":city+" · ")+tzLabel(p.tz,day);
-    lhtml+='<div class="rlab"><b>'+esc(pname(p))+"</b><span>"+esc(sub)+"</span></div>";
+    var city=tzCity(p.tz), rel=relOffset(p,day,tz);
+    lhtml+='<div class="rlab"><b>'+esc(pname(p))+"</b><span><em>"+
+           esc(pname(p)===city?tzLabel(p.tz,day):city)+"</em>"+
+           (rel?"<i>"+esc(rel)+"</i>":"")+"</span></div>";
+    var prev=null;
     for(i=0;i<24;i++){
-      var ts=stamps[i], nd=(i===0)||dayKey(ts,p.tz)!==dayKey(stamps[i-1],p.tz),
-          st=pstate(p,ts);
-      html+='<div class="hc'+(st==="free"?"":(st==="off"?" off":" busy"))+(nd?" date":"")+
-            (ts+3600000<now?" past":"")+'" data-ts="'+ts+'" data-col="'+i+
-            '" data-p="'+p.id+'">'+cellLabel(ts,p.tz,nd)+"</div>";
+      var ts=stamps[i], st=pstate(p,ts),
+          next=(i<23)?pstate(p,stamps[i+1]):null,
+          nd=(i>0)&&dayKey(ts,p.tz)!==dayKey(stamps[i-1],p.tz),
+          cls="hc"+(st==="free"?"":(st==="off"?" off":" busy"))+
+              (st!==prev?" s":"")+(st!==next?" e":"")+
+              (nd?" date":"")+(ts+3600000<now?" past":"")+(i===pick?" pick":"");
+      html+='<div class="'+cls+'" data-ts="'+ts+'" data-col="'+i+
+            '" data-p="'+p.id+'">'+
+            (i===pick?'<span class="n">'+localHour(ts,p.tz)+"</span>":
+             nd?'<span class="dm">'+WD[dow(ts,p.tz)]+"</span>":"")+"</div>";
+      prev=st;
     }
   });
-  lhtml+='<div class="rlab sum"><b>Everyone</b><span>'+total+(total===1?" person":" people")+"</span></div>";
-  for(i=0;i<24;i++){
-    var ts=stamps[i], n=countFree(ts);
-    html+='<div class="hc sum'+sumClass(n,total)+(ts+3600000<now?" past":"")+
-          '" data-ts="'+ts+'" data-col="'+i+'">'+
-          (n>0&&n<total?'<span class="n">'+n+"/"+total+"</span>":"")+"</div>";
-  }
+
   g.innerHTML=html; labs.innerHTML=lhtml;
   g.classList.toggle("edit",editing||responding);
+
+  /* hours already gone, greyed in one stroke rather than cell by cell */
+  if(dayKey(now,tz)===dayKey(day,tz)){
+    var q=zp(now,tz), h=q.H+q.M/60;
+    var wash=document.createElement("div");
+    wash.className="pastwash";
+    wash.style.width="calc("+h.toFixed(3)+" * var(--cw))";
+    g.appendChild(wash);
+    var line=document.createElement("div");
+    line.className="nowline";
+    line.style.left="calc("+h.toFixed(3)+" * var(--cw))";
+    g.appendChild(line);
+  }
+
   markColumn(true);
   if(!g.querySelector(".colmark")){
-    var bc=8, bn=-1, sc=$("#wtbScroll"), cw=g.firstChild?g.firstChild.offsetWidth:45;
+    var bc=8, bn=-1, sc=$("#wtbScroll"), cw=g.firstChild?g.firstChild.offsetWidth:36;
     for(i=0;i<24;i++){ var c=countFor(stamps[i],S.dur); if(c>bn){ bn=c; bc=i; } }
     sc.scrollLeft=Math.max(0,bc*cw-sc.clientWidth/2+cw/2);
   }
-  $("#gridTz").textContent=tzCity(tz)+" time";
+  var whole=0;
+  for(i=0;i<24;i++) if(countFree(stamps[i])===total) whole++;
+  $("#gridTz").textContent=total<2?fmtDate(day,tz)
+    :whole?whole+(whole===1?" hour suits":" hours suit")+" everyone"
+    :"no hour suits everyone";
   $("#editToggle").textContent=editing?"Done":"Edit hours";
   $("#editToggle").classList.toggle("on",editing);
   $("#editFoot").textContent=editing
     ? "Drag along someone's row to take hours away or give them back."
     : "";
+}
+/* how much of the team is out, as ink: 0 is everyone free and paper white,
+   1 is nobody and solid ink. The curve is bent so that losing one of five
+   still reads as a good hour, and losing four does not. */
+function outWeight(n,total){
+  if(!total||!n) return 1;
+  return Math.pow(1-n/total,1.7)*.92;
+}
+/* one hour of the team band */
+function sumCell(ts,i,pick){
+  var total=S.people.length, n=countFree(ts), k=outWeight(n,total);
+  return '<div class="hc sum'+(n===0?" none":(n===total?" all":""))+
+    (ts+3600000<Date.now()?" past":"")+(i===pick?" pick":"")+
+    '" data-ts="'+ts+'" data-col="'+i+'" style="--k:'+k.toFixed(3)+'">'+
+    (i===pick?'<span class="n">'+n+"</span>":"")+"</div>";
 }
 function markColumn(scrollTo){
   var g=$("#wtb"), old=g.querySelector(".colmark"), t=sel();
@@ -884,11 +989,13 @@ function markColumn(scrollTo){
   }
 }
 function refreshSum(col,ts){
-  var c=$("#wtb").querySelector('.hc.sum[data-col="'+col+'"]'), n, total;
+  var c=$("#wtb").querySelector('.hc.sum[data-col="'+col+'"]');
   if(!c) return;
-  n=countFree(ts); total=S.people.length;
-  c.className="hc sum"+sumClass(n,total)+(ts+3600000<Date.now()?" past":"");
-  c.innerHTML=(n>0&&n<total)?'<span class="n">'+n+"/"+total+"</span>":"";
+  var total=S.people.length, n=countFree(ts), pick=c.classList.contains("pick");
+  c.className="hc sum"+(n===0?" none":(n===total?" all":""))+
+    (ts+3600000<Date.now()?" past":"")+(pick?" pick":"");
+  c.style.setProperty("--k",outWeight(n,total).toFixed(3));
+  c.innerHTML=pick?'<span class="n">'+n+"</span>":"";
 }
 
 /* ═══════════════ render — best times ═══════════════ */
@@ -1368,7 +1475,7 @@ function sendFeedback(quiet){
 
 /* ═══════════════ steps ═══════════════ */
 var COPY=[
-  ["Your team","Everyone’s hours, in their own timezone. White is possible, black is not."],
+  ["Your team","Everyone’s hours on one clock. The band up top is the whole team at once."],
   ["Plan it","Pick the hour, hand it to the calendar, done."],
   ["Last look","Check the times, say what's missing if you like, then create it."]
 ];
@@ -1767,7 +1874,23 @@ function applyPaint(el){
   var st=pstate(p,ts);
   el.classList.toggle("busy",st==="sleep");
   el.classList.toggle("off",st==="off");
+  edgeRow(p.id);
   refreshSum(+el.getAttribute("data-col"),ts);
+}
+/* bars run across neighbouring hours, so the rounded ends have to move when
+   an hour in the middle changes. Twenty-four cells — cheap enough to redo. */
+function cellState(el){
+  return el.classList.contains("busy")?"sleep":(el.classList.contains("off")?"off":"free");
+}
+function edgeRow(pid){
+  var cells=$("#wtb").querySelectorAll('.hc[data-p="'+pid+'"]'), i, st, next, prev=null;
+  for(i=0;i<cells.length;i++){
+    st=cellState(cells[i]);
+    next=(i+1<cells.length)?cellState(cells[i+1]):null;
+    cells[i].classList.toggle("s",st!==prev);
+    cells[i].classList.toggle("e",st!==next);
+    prev=st;
+  }
 }
 function takeSlot(ts){
   S.pick=ts; save(); markColumn(); renderDock(); renderBest(); haptic();

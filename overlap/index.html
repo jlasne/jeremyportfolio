@@ -22,7 +22,7 @@
    Everything else is opacity.
    ───────────────────────────────────────────────────────────── */
 :root{
-  --wrow:46px; --cw:45px; --lab:112px;
+  --wruler:26px; --wsum:34px; --wrow:40px; --cw:34px; --lab:102px;
   --paper:#FFFFFF;
   --ground:#F2F2F7;
   --ink:#000000;
@@ -113,56 +113,106 @@ main.nohero .hero{display:none}
 .dock{position:sticky;bottom:0;z-index:30;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:rgba(242,242,247,.86);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);box-shadow:0 -.5px 0 var(--sep)}
 .dock-hint{font-size:12px;color:var(--ink-2);text-align:center;padding-bottom:8px;letter-spacing:-.005em}
 
-/* ── the overlap strip: one row per person, hours running across ── */
-.daytabs{display:flex;gap:6px;overflow-x:auto;padding:0 2px 12px;scrollbar-width:none}
+/* ── the day being looked at ── */
+.daytabs{display:flex;gap:5px;overflow-x:auto;padding:0 2px 10px;scrollbar-width:none}
 .daytabs::-webkit-scrollbar{display:none}
-.dtab{flex:none;min-width:54px;padding:7px 9px 8px;border-radius:11px;background:var(--fill);text-align:center;transition:background .15s}
+.dtab{flex:none;min-width:46px;padding:5px 9px 6px;border-radius:9px;background:var(--fill);text-align:center;transition:background .15s}
 .dtab .wd{display:block;font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2)}
-.dtab .dd{display:block;font-size:16px;font-weight:600;letter-spacing:-.02em;margin-top:1px;font-variant-numeric:tabular-nums}
+.dtab .dd{display:block;font-size:14px;font-weight:700;letter-spacing:-.02em;margin-top:0;font-variant-numeric:tabular-nums}
 .dtab.we{opacity:.5}
 .dtab.on{background:var(--ink);color:#fff;opacity:1}
 .dtab.on .wd{color:rgba(255,255,255,.55)}
+.dtab.past{color:var(--ink-3);
+  background-image:repeating-linear-gradient(135deg,rgba(60,60,67,.16) 0 2px,transparent 2px 6px)}
+.dtab.past .wd{color:var(--ink-3)}
+/* ── the schedule ───────────────────────────────────────────────
+   Names down the side, the day across the top, one column per hour.
+   A column is one instant: the ruler reads it on the reader's clock,
+   and every row reads the same instant on a different one. Bars, not
+   a chequerboard — contiguous hours join up, the way a calendar draws
+   a meeting.
+   ─────────────────────────────────────────────────────────────── */
 .wtb{display:flex;background:var(--paper);border-radius:var(--radius);overflow:hidden}
 .wtblabs{flex:none;width:var(--lab);display:grid;box-shadow:1px 0 0 var(--sep);z-index:3;background:var(--paper)}
 .wtbscroll{flex:1;min-width:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .wtbscroll::-webkit-scrollbar{display:none}
 .wtbgrid{display:grid;position:relative;min-width:100%}
 .wtbgrid.edit{touch-action:none;user-select:none;-webkit-user-select:none;cursor:crosshair}
+
+/* the name column */
 .rlab{display:flex;flex-direction:column;justify-content:center;padding:0 10px 0 15px;overflow:hidden}
 .rlab b{font-size:14px;font-weight:600;letter-spacing:-.015em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rlab span{font-size:11px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
-.rlab.sum{box-shadow:0 -1px 0 var(--sep)}
-.hc{display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:var(--paper);box-shadow:inset -1px 0 0 rgba(60,60,67,.10);font-variant-numeric:tabular-nums}
-.hc .n{font-size:13px;font-weight:500;letter-spacing:-.02em;line-height:1.15}
-.hc .m{font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;opacity:.45;line-height:1.15}
-.hc.busy{background:var(--ink);color:#fff;box-shadow:inset -1px 0 0 rgba(255,255,255,.16)}
-.hc.busy .m{opacity:.5}
-.hc.part,.hc.off{background:rgba(0,0,0,.17)}
-.hc.off{color:var(--ink-2)}
-.hc.date .n{font-size:15px;font-weight:700;letter-spacing:-.02em}
-.hc.date .m{opacity:.75}
-.hc.sum{box-shadow:inset -1px 0 0 rgba(60,60,67,.10),inset 0 1px 0 var(--sep)}
-.hc.sum.busy{box-shadow:inset -1px 0 0 rgba(255,255,255,.16),inset 0 1px 0 var(--sep)}
-.hc.sum .n{font-size:11px;font-weight:600;opacity:.75}
-.hc.off.past{color:var(--ink-3)}
-.hc.past{color:var(--ink-3);
-  background-image:repeating-linear-gradient(135deg,rgba(60,60,67,.20) 0 2px,transparent 2px 6px)}
-.hc.busy.past{color:rgba(255,255,255,.40);
-  background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.22) 0 2px,transparent 2px 6px)}
-.hc.past .m{opacity:.35}
-.dtab.past{color:var(--ink-3);
-  background-image:repeating-linear-gradient(135deg,rgba(60,60,67,.16) 0 2px,transparent 2px 6px)}
-.dtab.past .wd{color:var(--ink-3)}
+.rlab span{display:flex;align-items:baseline;gap:5px;font-size:11px;color:var(--ink-2);margin-top:1px}
+.rlab span em{font-style:normal;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rlab span i{font-style:normal;flex:none;font-weight:600;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.rlab+.rlab{box-shadow:inset 0 -1px 0 rgba(60,60,67,.10)}
+.rlab.sum{box-shadow:0 1px 0 var(--sep)}
+.rlab.head{justify-content:flex-end;padding-bottom:5px}
+.rlab.head b{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.rlab.sum b{font-weight:700}
+
+/* the hour ruler */
+.tick{display:flex;align-items:flex-end;padding:0 0 5px 4px;font-size:10px;font-weight:600;
+  letter-spacing:.01em;color:var(--ink-3);font-variant-numeric:tabular-nums;
+  box-shadow:inset 1px 0 0 rgba(60,60,67,.08)}
+.tick.q{box-shadow:inset 1px 0 0 rgba(60,60,67,.20)}
+.tick.on{color:var(--ink);font-weight:700}
+
+/* one hour, one person */
+.hc{position:relative;display:flex;align-items:center;justify-content:center;
+  --gl:rgba(60,60,67,.09); --rl:rgba(60,60,67,.10);
+  box-shadow:inset 1px 0 0 var(--gl),inset 0 -1px 0 var(--rl)}
+.hc.busy,.hc.off{--gl:transparent}
+.hc.busy{--rl:rgba(255,255,255,.14)}
+.hc.date{box-shadow:inset 1.5px 0 0 var(--ink-3),inset 0 -1px 0 var(--rl);
+  justify-content:flex-start;padding-left:4px}
+/* the bar itself, inset so a row reads as a track with something laid in it */
+.hc.busy::before,.hc.off::before{content:"";position:absolute;left:0;right:0;top:4px;bottom:4px}
+.hc.busy::before{background:var(--ink)}
+.hc.off::before{background:repeating-linear-gradient(135deg,
+  rgba(0,0,0,.24) 0 2px,rgba(0,0,0,.07) 2px 6px)}
+.hc.s::before{border-top-left-radius:7px;border-bottom-left-radius:7px;left:1px}
+.hc.e::before{border-top-right-radius:7px;border-bottom-right-radius:7px;right:1px}
+.hc .n,.hc .dm{position:relative;z-index:1}
+.hc .n{font-size:11px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.hc .dm{font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
+.hc.busy .n{color:#fff}
+.hc.busy .dm{color:rgba(255,255,255,.55)}
+
+/* the team band: paper when everyone can, ink when nobody, and the
+   shades between are how many are out */
+.hc.sum{background:rgba(0,0,0,var(--k,0));
+  box-shadow:inset 1px 0 0 rgba(60,60,67,.09),inset 0 -1px 0 var(--sep)}
+.hc.sum.none{background:var(--ink)}
+.hc.sum.all::after{content:"";position:absolute;left:2px;right:2px;bottom:3px;height:3px;
+  border-radius:2px;background:var(--ink)}
+.hc.sum .n{background:var(--paper);color:var(--ink);border-radius:4px;padding:1px 4px;
+  font-size:10px;box-shadow:0 1px 2px rgba(0,0,0,.18)}
+
+/* now, and everything before it — struck through rather than painted over,
+   so what was underneath still reads */
+.pastwash{position:absolute;top:var(--wruler);bottom:0;left:0;z-index:2;pointer-events:none;
+  background:repeating-linear-gradient(135deg,
+    rgba(242,242,247,.92) 0 2px,rgba(242,242,247,.22) 2px 6px)}
+.nowline{position:absolute;top:var(--wruler);bottom:0;width:1.5px;margin-left:-.75px;
+  background:var(--ink);z-index:4;pointer-events:none}
+.nowline::before{content:"";position:absolute;top:-3px;left:-2.25px;width:6px;height:6px;
+  border-radius:50%;background:var(--ink)}
 .colmark{position:absolute;top:0;bottom:0;border:2.5px solid var(--ink);border-radius:10px;
   pointer-events:none;z-index:5;box-shadow:0 0 0 2px var(--paper)}
-.legend{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-2);padding:11px 4px 0;
-  letter-spacing:-.005em;white-space:nowrap}
-.legend .sp{flex:1}
+
+.legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px;row-gap:5px;font-size:11px;
+  color:var(--ink-2);padding:11px 4px 0;letter-spacing:-.005em}
+.legend span{white-space:nowrap}
+.legend .sp{flex:1 0 10px}
 .legend .lg{width:12px;height:12px;border-radius:3px;display:block;flex:none}
 .legend .lg.free{background:var(--paper);box-shadow:inset 0 0 0 1px var(--sep)}
-.legend .lg.part{background:rgba(0,0,0,.17)}
+.legend .lg.part{background:repeating-linear-gradient(135deg,
+  rgba(0,0,0,.24) 0 2px,rgba(0,0,0,.07) 2px 6px);box-shadow:inset 0 0 0 1px var(--sep)}
 .legend .lg.busy{background:var(--ink)}
+/* a desk has the width for a wider hour and a longer name */
+@media (min-width:600px){ :root{--cw:38px; --lab:124px} }
+@media (min-width:900px){ :root{--cw:44px; --lab:152px} }
 .linkbtn{font-size:13px;font-weight:500;color:var(--ink);letter-spacing:-.01em;padding:0 2px}
 .linkbtn:active{opacity:.4}
 .linkbtn.on{color:var(--ink);font-weight:600}
@@ -470,17 +520,45 @@ h2{font-size:clamp(30px,4vw,44px);line-height:1.08;letter-spacing:-.038em;font-w
   box-shadow:0 0 0 1px rgba(60,60,67,.11),0 24px 50px -28px rgba(0,0,0,.34)}
 .shot-h{font-size:12px;color:var(--ink-3);padding:11px 16px;box-shadow:0 1px 0 var(--sep);
   letter-spacing:-.005em;font-weight:500}
-.mini{display:grid;grid-template-columns:82px repeat(8,1fr)}
-.mini .l{display:flex;flex-direction:column;justify-content:center;padding:0 0 0 16px;height:44px}
+/* the Team screen, in miniature — same language as the app: the hour ruler
+   once along the top, the team as one band, then a row of bars per person */
+.mini{display:grid;grid-template-columns:98px repeat(8,1fr);position:relative}
+.mini .l{display:flex;flex-direction:column;justify-content:center;padding:0 0 0 16px;height:40px}
 .mini .l b{font-size:12px;font-weight:600;letter-spacing:-.01em}
 .mini .l span{font-size:10px;color:var(--ink-2)}
-.mini .c{height:44px;display:grid;place-items:center;font-size:11px;font-variant-numeric:tabular-nums;
-  box-shadow:inset -1px 0 0 rgba(60,60,67,.09)}
-.mini .c.no{background:var(--ink);color:#fff}
-.mini .c.some{background:rgba(0,0,0,.17)}
-.mini .c.pick{box-shadow:inset 0 0 0 2px var(--ink)}
-.mini .l.sum{box-shadow:inset 0 1px 0 var(--sep)}
-.mini .c.sum{box-shadow:inset -1px 0 0 rgba(60,60,67,.09),inset 0 1px 0 var(--sep);font-size:10px;font-weight:600}
+.mini .l span i{font-style:normal;font-weight:600;color:var(--ink-3);margin-left:4px}
+.mini .l+.l{box-shadow:inset 0 -1px 0 rgba(60,60,67,.10)}
+.mini .l.sum{height:34px;box-shadow:0 1px 0 var(--sep)}
+.mini .l.sum b{font-weight:700}
+.mini .r{height:24px;display:flex;align-items:flex-end;padding:0 0 4px 5px;font-size:10px;
+  font-weight:600;color:var(--ink-3);font-variant-numeric:tabular-nums;
+  box-shadow:inset 1px 0 0 rgba(60,60,67,.08)}
+.mini .r.q{box-shadow:inset 1px 0 0 rgba(60,60,67,.20)}
+.mini .r.on{color:var(--ink);font-weight:700}
+.mini .r.h{padding:0 0 5px 16px;font-size:9px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;box-shadow:none}
+.mini .c{position:relative;height:40px;display:grid;place-items:center;font-size:10px;font-weight:700;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums;
+  box-shadow:inset 1px 0 0 rgba(60,60,67,.09),inset 0 -1px 0 rgba(60,60,67,.10)}
+.mini .c.no,.mini .c.off{box-shadow:inset 0 -1px 0 rgba(60,60,67,.10)}
+.mini .c.no{box-shadow:inset 0 -1px 0 rgba(255,255,255,.14)}
+.mini .c.no::before,.mini .c.off::before{content:"";position:absolute;left:0;right:0;
+  top:4px;bottom:4px}
+.mini .c.s::before{left:1px;border-top-left-radius:7px;border-bottom-left-radius:7px}
+.mini .c.e::before{right:1px;border-top-right-radius:7px;border-bottom-right-radius:7px}
+.mini .c.no::before{background:var(--ink)}
+.mini .c.off::before{background:repeating-linear-gradient(135deg,
+  rgba(0,0,0,.24) 0 2px,rgba(0,0,0,.07) 2px 6px)}
+.mini .c b{position:relative;z-index:1;font-weight:700}
+.mini .c.no b{color:#fff}
+.mini .c.sum{height:34px;background:rgba(0,0,0,var(--k,0));
+  box-shadow:inset 1px 0 0 rgba(60,60,67,.09),inset 0 -1px 0 var(--sep)}
+.mini .c.sum.all::after{content:"";position:absolute;left:2px;right:2px;bottom:3px;height:3px;
+  border-radius:2px;background:var(--ink)}
+/* the chosen hour, framed the whole way down */
+.mini .pick{position:absolute;top:0;bottom:0;border:2px solid var(--ink);border-radius:9px;
+  box-shadow:0 0 0 2px var(--paper);z-index:2;pointer-events:none;
+  left:calc(98px + 3 * (100% - 98px) / 8);width:calc((100% - 98px) / 8)}
 .fake-slot{display:flex;align-items:center;gap:13px;padding:14px 16px;box-shadow:0 1px 0 var(--sep)}
 .fake-slot:last-child{box-shadow:none}
 .fake-slot .r{width:20px;height:20px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--ink-3);flex:none}
@@ -591,18 +669,29 @@ footer{padding:56px 0 64px;box-shadow:0 -1px 0 var(--sep);margin-top:96px}
       <div class="shot">
         <div class="shot-h">Overlap · Team</div>
         <div class="mini">
-          <div class="l"><b>You</b><span>Paris</span></div>
-          <div class="c no">05</div><div class="c no">06</div><div class="c">09</div><div class="c">10</div>
-          <div class="c">14</div><div class="c pick">15</div><div class="c">16</div><div class="c no">22</div>
-          <div class="l"><b>New York</b><span>GMT−4</span></div>
-          <div class="c no">23</div><div class="c no">00</div><div class="c">03</div><div class="c">04</div>
-          <div class="c">08</div><div class="c pick">09</div><div class="c">10</div><div class="c no">16</div>
-          <div class="l"><b>Singapore</b><span>GMT+8</span></div>
-          <div class="c">11</div><div class="c">12</div><div class="c">15</div><div class="c">16</div>
-          <div class="c no">20</div><div class="c pick no">21</div><div class="c no">22</div><div class="c no">04</div>
+          <div class="r h">Paris</div>
+          <div class="r q">12</div><div class="r"></div><div class="r">14</div><div class="r on">15</div>
+          <div class="r">16</div><div class="r"></div><div class="r q">18</div><div class="r"></div>
+
           <div class="l sum"><b>Everyone</b><span>3 people</span></div>
-          <div class="c sum no"></div><div class="c sum no"></div><div class="c sum">3/3</div><div class="c sum">3/3</div>
-          <div class="c sum some">2/3</div><div class="c sum some pick">2/3</div><div class="c sum some">2/3</div><div class="c sum no"></div>
+          <div class="c sum" style="--k:.142"></div><div class="c sum" style="--k:.142"></div>
+          <div class="c sum" style="--k:.142"></div><div class="c sum all"></div>
+          <div class="c sum" style="--k:.142"></div><div class="c sum" style="--k:.142"></div>
+          <div class="c sum" style="--k:.462"></div><div class="c sum" style="--k:.462"></div>
+
+          <div class="l"><b>You</b><span>Paris</span></div>
+          <div class="c"></div><div class="c"></div><div class="c"></div><div class="c"><b>15</b></div>
+          <div class="c"></div><div class="c"></div><div class="c off s"></div><div class="c off e"></div>
+
+          <div class="l"><b>Ana</b><span>New York<i>−6h</i></span></div>
+          <div class="c no s e"></div><div class="c off s"></div><div class="c off e"></div><div class="c"><b>9</b></div>
+          <div class="c"></div><div class="c"></div><div class="c"></div><div class="c"></div>
+
+          <div class="l"><b>Omar</b><span>Dubai<i>+2h</i></span></div>
+          <div class="c"></div><div class="c"></div><div class="c"></div><div class="c"><b>17</b></div>
+          <div class="c off s"></div><div class="c off"></div><div class="c off"></div><div class="c off e"></div>
+
+          <div class="pick"></div>
         </div>
       </div>
     </div>
