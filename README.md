@@ -68,11 +68,10 @@ itself is the reason to reply.
 
 ### The phone screenshots
 
-The hero phone shows two real Kaught screens, `media/app/1.png` and `3.png`:
-the welcome screen and the thing the app actually does. Replace a file and the
-page shows the new one; `index.html` needs no editing. `2.png`, `4.png` and
-`5.png` are still in the folder if you want to swap one in — add a matching
-`.scr` div and a dot to `#dots`.
+The hero phone shows five real Kaught screens from `media/app/1.png` through
+`5.png`. Replace a file and the page shows the new one; `index.html` needs no
+editing. Adding or dropping a screen means a matching `.scr` div and a dot in
+`#dots` — the script counts both.
 
 Each image runs 7% taller than the frame and is pinned to the top, so the
 device's own navigation bar falls off the bottom edge. A missing file removes

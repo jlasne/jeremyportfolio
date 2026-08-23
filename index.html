@@ -343,13 +343,6 @@ button.btn { cursor: pointer; font-family: inherit; }
 
 .hero .btn-row { margin-top: 30px; }
 
-/* the one-line summary of the deal, under the proof */
-.hero-claim {
-  margin-top: 20px;
-  font-size: clamp(1.02rem, 1.7vw, 1.2rem); font-weight: 800;
-  letter-spacing: -0.025em; color: var(--ink);
-}
-
 /* what it costs and how fast I reply, beside the button rather than in fine
    print at the bottom of the page */
 .cta-fine {
@@ -822,10 +815,6 @@ button.btn { cursor: pointer; font-family: inherit; }
         only missing piece.
       </p>
 
-      <p class="hero-claim hero-in" style="--d:620ms">
-        You post. I build it and run it. You own it.
-      </p>
-
       <div class="btn-row hero-in" style="--d:720ms">
         <a class="btn magnetic" href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=hey@jeremylasne.com&amp;su=Building%20an%20app%20together&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A" target="_blank" rel="noopener">
           Let&rsquo;s partner <span class="arrow">&rarr;</span>
@@ -841,10 +830,12 @@ button.btn { cursor: pointer; font-family: inherit; }
             <div class="phone-notch" aria-hidden="true"></div>
 
             <!-- Real screens from Kaught, in media/app/. Swap a file, the
-                 phone shows the new one; nothing here needs editing. Two
-                 screens, not five: the welcome and the thing the app does. -->
+                 phone shows the new one; nothing here needs editing. -->
             <div class="scr on"><img class="shot" src="media/app/1.png" alt="Kaught welcome screen" loading="eager" decoding="async" data-shot></div>
+            <div class="scr"><img class="shot" src="media/app/2.png" alt="Kaught collection of identified species" loading="lazy" decoding="async" data-shot></div>
             <div class="scr"><img class="shot" src="media/app/3.png" alt="Kaught identifying an animal" loading="lazy" decoding="async" data-shot></div>
+            <div class="scr"><img class="shot" src="media/app/4.png" alt="Kaught showing animals near you" loading="lazy" decoding="async" data-shot></div>
+            <div class="scr"><img class="shot" src="media/app/5.png" alt="Kaught species detail for a red squirrel" loading="lazy" decoding="async" data-shot></div>
 
           </div>
         </div>
@@ -852,7 +843,10 @@ button.btn { cursor: pointer; font-family: inherit; }
 
       <div class="stage-dots" id="dots" role="tablist" aria-label="App screens">
         <button role="tab" aria-selected="true"  aria-label="Welcome screen"></button>
+        <button role="tab" aria-selected="false" aria-label="Your collection"></button>
         <button role="tab" aria-selected="false" aria-label="Identifying"></button>
+        <button role="tab" aria-selected="false" aria-label="Animals near you"></button>
+        <button role="tab" aria-selected="false" aria-label="Species detail"></button>
       </div>
       <p class="stage-note">My latest app, live.<span class="swipe-hint"> Swipe or tap the dots.</span></p>
     </div>
@@ -890,16 +884,17 @@ button.btn { cursor: pointer; font-family: inherit; }
     <div class="head head--center rise" style="max-width:none">
       <span class="eyebrow"><i></i>How it works</span>
       <h2 class="h-section">You keep posting.<br>I keep building.</h2>
-      <p class="lede">The segments are sized to the actual work.</p>
     </div>
 
-    <!-- Bar and cards are one control: hovering either end highlights both,
-         so the proportion and the explanation are never read separately. -->
+    <!-- Bar and cards are one control: pointing at either end highlights both.
+         The segments are the three parts of the job, not a timesheet — the
+         distribution end is small in hours and the reason the whole thing
+         works, so it is not drawn as a sliver. -->
     <div class="load rise" id="load">
       <div class="load-bar">
-        <button class="lb lb--you" data-lane="0" style="--w:11%" aria-label="Yours: distribution, about a tenth of the work"><b>You</b></button>
-        <button class="lb lb--us"  data-lane="1" style="--w:19%" aria-label="Ours: product and design, about a fifth of the work"><b>Us</b></button>
-        <button class="lb lb--me"  data-lane="2" style="--w:70%" aria-label="Mine: everything technical, the rest of the work"><b>Me</b></button>
+        <button class="lb lb--you" data-lane="0" style="--w:30%" aria-label="Yours: telling your people it exists"><b>You</b></button>
+        <button class="lb lb--us"  data-lane="1" style="--w:22%" aria-label="Ours: deciding what we build"><b>Us</b></button>
+        <button class="lb lb--me"  data-lane="2" style="--w:48%" aria-label="Mine: building it and running it"><b>Me</b></button>
       </div>
     </div>
 
@@ -907,7 +902,7 @@ button.btn { cursor: pointer; font-family: inherit; }
       <div class="lane sheen rise" data-lane="0" style="--d:0ms">
         <span class="lane-k">YOURS</span>
         <h4>Tell your people</h4>
-        <p>You say it exists. That is the whole job, and you already do it every day.</p>
+        <p>You point your people at it. Nothing else brings the first thousand users, and you already do it every day.</p>
       </div>
       <div class="lane lane--mid sheen rise" data-lane="1" style="--d:90ms">
         <span class="lane-k">OURS</span>
@@ -930,13 +925,14 @@ button.btn { cursor: pointer; font-family: inherit; }
     <!-- The rotating niche is the section's headline. It used to run as its
          own band and then a second section asked the same question in words. -->
     <div class="nd rise">
-      <p class="nd-pre">Your audience is about</p>
+      <p class="nd-pre">Any audience. Even one about</p>
       <div class="nd-slot">
         <span class="nd-word" id="nd-word">fly fishing</span>
       </div>
       <p class="nd-post">
-        There&rsquo;s an app in there. You already know what it is &mdash;
-        it&rsquo;s the question you get in your comments every week.
+        You listen to these people every day. You already know what they keep
+        asking for. That is what makes the app fit &mdash; and why nobody
+        outside your comments could build it.
       </p>
       <div class="nd-rule" aria-hidden="true"><span id="nd-bar"></span></div>
     </div>
