@@ -169,6 +169,8 @@ h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
   max-width: 36em;
 }
 
+.lede b, .lede strong { color: var(--ink); font-weight: 800; }
+
 .head { max-width: 62ch; }
 .head .eyebrow { margin-bottom: 20px; }
 .head h2 { margin-bottom: 18px; }
@@ -306,7 +308,9 @@ button.btn { cursor: pointer; font-family: inherit; }
 
 /* ── hero ───────────────────────────────────────────────────────────────── */
 
-.hero { padding-block: clamp(128px, 15vh, 168px) clamp(88px, 11vh, 132px); }
+/* the proof cards close the hero now, so it no longer needs the full
+   bottom step before the next band starts */
+.hero { padding-block: clamp(128px, 15vh, 168px) clamp(52px, 6vh, 76px); }
 .hero .shell {
   display: grid;
   grid-template-columns: minmax(0, 1.14fr) minmax(0, 0.86fr);
@@ -314,7 +318,7 @@ button.btn { cursor: pointer; font-family: inherit; }
   align-items: center;
 }
 @media (max-width: 940px) {
-  .hero { padding-block: 100px 48px; }
+  .hero { padding-block: 100px 40px; }
   .hero .shell { grid-template-columns: 1fr; gap: 36px; }
 }
 @media (max-width: 560px) {
@@ -338,6 +342,31 @@ button.btn { cursor: pointer; font-family: inherit; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 
 .hero .btn-row { margin-top: 30px; }
+
+/* the one-line summary of the deal, under the proof */
+.hero-claim {
+  margin-top: 20px;
+  font-size: clamp(1.02rem, 1.7vw, 1.2rem); font-weight: 800;
+  letter-spacing: -0.025em; color: var(--ink);
+}
+
+/* what it costs and how fast I reply, beside the button rather than in fine
+   print at the bottom of the page */
+.cta-fine {
+  margin-top: 16px; max-width: 48ch;
+  font-size: 13.5px; line-height: 1.6; color: var(--faint);
+}
+.close .cta-fine, .niche-close .cta-fine { margin-inline: auto; }
+
+/* the whole argument the comparison table used to make, in one line */
+.hero-line {
+  margin-top: 26px; max-width: 34ch;
+  font-size: clamp(1.02rem, 1.6vw, 1.16rem); font-weight: 700;
+  letter-spacing: -0.02em; line-height: 1.4; color: var(--ink);
+}
+
+/* the proof cards sit under the hero grid, full width rather than in a column */
+.hero .shell.hero-proof { display: block; }
 
 .live {
   display: inline-flex; align-items: center; gap: 9px;
@@ -462,79 +491,6 @@ button.btn { cursor: pointer; font-family: inherit; }
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
-.tbl-wrap {
-  margin-top: 48px;
-  border: 1px solid var(--rule-firm); border-radius: 20px;
-  overflow-x: auto; -webkit-overflow-scrolling: touch;
-  /* the table is wider than a phone: keep it to itself, and don't let a swipe
-     that runs off its end turn into the browser's back gesture */
-  contain: paint;
-  overscroll-behavior-x: contain;
-}
-.tbl { width: 100%; min-width: 720px; border-collapse: collapse; }
-
-.tbl thead th {
-  padding: 18px 20px;
-  text-align: center; vertical-align: bottom;
-  font-family: var(--mono); font-size: 10px; font-weight: 600;
-  letter-spacing: 0.13em; text-transform: uppercase; color: var(--faint);
-  line-height: 1.5;
-  background: var(--bg-sunk);
-  border-bottom: 1px solid var(--rule-firm);
-}
-.tbl thead th + th { border-left: 1px solid var(--rule); }
-.tbl th.c-name, .tbl td.c-pay { text-align: left; }
-
-.tbl tbody th, .tbl tbody td {
-  padding: 18px 20px; vertical-align: middle; text-align: center;
-  border-top: 1px solid var(--rule);
-  font-weight: 400; font-size: 15px; color: var(--muted);
-  transition: background .35s var(--ease-soft);
-}
-.tbl tbody td + td, .tbl tbody th + td { border-left: 1px solid var(--rule); }
-.tbl tbody th.c-name {
-  text-align: left; font-weight: 700; font-size: 16.5px;
-  letter-spacing: -0.02em; color: var(--ink); white-space: nowrap;
-}
-.tbl tbody td.c-pay { white-space: nowrap; }
-
-/* hovering a row lifts just that row out of the grid */
-.tbl tbody tr:hover th, .tbl tbody tr:hover td { background: var(--bg-sunk); }
-
-/* the row the table exists to point at */
-.tbl-hero th, .tbl-hero td { background: var(--ink) !important; border-top-color: var(--ink); }
-.tbl tbody tr.tbl-hero th, .tbl tbody tr.tbl-hero td {
-  color: var(--bg); border-left-color: rgba(128,128,128,0.28);
-  padding-block: 24px;
-}
-.tbl tbody tr.tbl-hero th.c-name { color: var(--bg); }
-.th-tag {
-  display: block; font-family: var(--mono); font-size: 9.5px; font-weight: 600;
-  letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.62; margin-bottom: 4px;
-}
-.th-main { display: block; font-size: 19px; font-weight: 800; letter-spacing: -0.03em; }
-
-/* yes / no / partly, drawn rather than written */
-.mk { display: inline-block; width: 22px; height: 22px; border-radius: 50%; position: relative; }
-.mk--no  { background: var(--bg-sunk); }
-.mk--no::after {
-  content: ''; position: absolute; inset: 50% 6px auto; height: 2px;
-  background: var(--faint); transform: translateY(-50%); border-radius: 2px;
-}
-.mk--half { background: var(--bg-sunk); }
-.mk--half::after {
-  content: ''; position: absolute; inset: 3px; border-radius: 50%;
-  background: conic-gradient(var(--muted) 0 50%, transparent 0 100%);
-}
-.mk--yes { background: var(--ink); }
-.tbl-hero .mk--yes { background: var(--bg); }
-.mk--yes::after {
-  content: ''; position: absolute; left: 6.5px; top: 5.5px;
-  width: 5px; height: 9px; border: solid var(--bg);
-  border-width: 0 2px 2px 0; transform: rotate(42deg);
-}
-.tbl-hero .mk--yes::after { border-color: var(--ink); }
-
 /* ── proof: two apps, at hero scale ─────────────────────────────────────── */
 
 .cases { display: grid; gap: 16px; margin-top: 52px; }
@@ -569,17 +525,42 @@ button.btn { cursor: pointer; font-family: inherit; }
 .case-go .arrow { transition: transform .45s var(--ease); }
 .case-card:hover .case-go .arrow { transform: translateX(4px); }
 
-/* the turn from their result to the reader's */
-.cases-turn { margin-top: clamp(44px, 6vw, 68px); text-align: center; }
-.cases-turn > p:not(.proof-note) {
-  font-size: clamp(1.2rem, 2.5vw, 1.75rem); font-weight: 800;
-  letter-spacing: -0.03em; line-height: 1.25;
-}
-.cases-turn .btn-row { justify-content: center; margin-top: 26px; }
 .proof-note {
   margin-top: 26px; font-size: 13px; font-weight: 400; letter-spacing: 0;
   line-height: 1.55; color: var(--faint);
   max-width: 62ch; margin-inline: auto;
+}
+
+/* Inside the hero these two are evidence under a headline, not the headline
+   themselves, so the same card runs at a smaller step of the scale and stays
+   two-up on a phone. Nothing here is a new component. */
+.hero-proof .cases { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: clamp(40px, 5vw, 60px); }
+.hero-proof .case-card { padding: clamp(18px, 2.4vw, 28px); border-radius: 20px; }
+.hero-proof .case-icon { width: 44px; height: 44px; border-radius: 12px; margin-bottom: 16px; }
+.hero-proof .case-fig { font-size: clamp(2rem, 4.4vw, 3.1rem); }
+.hero-proof .case-when { margin-top: 10px; padding: 5px 12px; font-size: 12px; }
+.hero-proof .case-app { margin-top: 16px; font-size: 15.5px; }
+.hero-proof .case-by { font-size: 13.5px; }
+.hero-proof .case-go { margin-top: 16px; font-size: 13.5px; }
+
+/* Two-up gets cramped on a narrow phone: every label wraps. One card per row
+   instead, with the icon beside the figure rather than above it. */
+@media (max-width: 560px) {
+  .hero-proof .cases { grid-template-columns: 1fr; }
+  .hero-proof .case-card {
+    display: grid; grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 16px; align-items: center;
+    padding: 20px 22px;
+  }
+  .hero-proof .case-icon { grid-row: 1 / span 5; margin-bottom: 0; align-self: center; }
+  .hero-proof .case-fig,
+  .hero-proof .case-when,
+  .hero-proof .case-app,
+  .hero-proof .case-by,
+  .hero-proof .case-go { grid-column: 2; justify-self: start; }
+  .hero-proof .case-when { margin-top: 8px; }
+  .hero-proof .case-app { margin-top: 12px; }
+  .hero-proof .case-go { margin-top: 12px; }
 }
 
 /* ── the workload bar ───────────────────────────────────────────────────── */
@@ -679,19 +660,16 @@ button.btn { cursor: pointer; font-family: inherit; }
 .r-head { display: block; font-size: 1.3rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 10px; padding-right: 44px; position: relative; }
 .r-body { display: block; font-size: 14.8px; line-height: 1.56; color: var(--muted); position: relative; }
 
-/* the example is held back until asked for, so the section reads short */
+/* the example is plain visible text: it is the best line in the section and
+   used to be reachable only with a pointer */
 .r-eg {
-  display: block; overflow: hidden;
-  max-height: 0; margin-top: 0; opacity: 0;
+  display: block; margin-top: 14px;
   font-size: 14px; line-height: 1.5; font-weight: 700; color: var(--ink);
-  transition: max-height .5s var(--ease), opacity .4s var(--ease-soft), margin-top .5s var(--ease);
+  position: relative;
 }
-.r-eg i { color: var(--faint); margin-right: 6px; font-style: normal; }
-.reason:hover .r-eg { max-height: 6em; opacity: 1; margin-top: 14px; }
 
-/* no hover on a touch screen, so the examples simply stay open there */
+/* no hover on a touch screen, so nothing dims there */
 @media (hover: none) {
-  .r-eg { max-height: 6em; opacity: 1; margin-top: 14px; }
   .reasons:hover .reason { opacity: 1; }
 }
 
@@ -786,6 +764,14 @@ button.btn { cursor: pointer; font-family: inherit; }
   .phone { transform: none; }
 }
 </style>
+
+<noscript><style>
+  /* the scroll reveal is the only thing that needs JS; without it, show
+     everything rather than an empty page */
+  .rise { opacity: 1; transform: none; }
+  .lb { transform: none; }
+  .lb b { opacity: 1; }
+</style></noscript>
 </head>
 <body>
 
@@ -810,7 +796,7 @@ button.btn { cursor: pointer; font-family: inherit; }
         </span><span class="nav-name">Jeremy Lasne</span></a>
     <div class="nav-links">
       <a href="#projects">Projects</a>
-      <a class="nav-cta" href="#contact">Let's talk</a>
+      <a class="nav-cta" href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=hey@jeremylasne.com&amp;su=Building%20an%20app%20together&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A" target="_blank" rel="noopener">Let's talk</a>
     </div>
   </div>
   <div class="nav-progress" id="progress"></div>
@@ -828,16 +814,35 @@ button.btn { cursor: pointer; font-family: inherit; }
         <span class="line"><span class="glow" style="--d:280ms">with influencers.</span></span>
       </h1>
 
-      <p class="lede hero-in" style="--d:560ms">
-        An app you own, earning recurring revenue every month.
-        I build it and run it. You post about it.
+      <!-- The proof is the lede now. Two public numbers before anything else,
+           because the argument for recurring revenue is one the visitor
+           already accepts and the numbers are the part they do not know. -->
+      <p class="lede hero-in" style="--d:520ms">
+        One creator&rsquo;s app hit <b>$340k/month</b> two months after launch.
+        Another hit <b>$80k</b>. They already had the audience. The app was the
+        only missing piece.
       </p>
 
-      <div class="btn-row hero-in" style="--d:740ms">
-        <a class="btn magnetic" href="#contact">
+      <p class="hero-claim hero-in" style="--d:620ms">
+        You post. I build it and run it. You own it.
+      </p>
+
+      <div class="btn-row hero-in" style="--d:720ms">
+        <a class="btn magnetic" href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=hey@jeremylasne.com&amp;su=Building%20an%20app%20together&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A" target="_blank" rel="noopener">
           Start a conversation <span class="arrow">&rarr;</span>
         </a>
       </div>
+
+      <!-- Price and reply time sit beside the CTA rather than in fine print at
+           the bottom: silence about cost reads as a catch, not as intrigue. -->
+      <p class="cta-fine hero-in" style="--d:800ms">
+        Costs you nothing. I take the build risk. We split what it earns.<br>
+        If it is not a fit I will say so the same day.
+      </p>
+
+      <p class="hero-line hero-in" style="--d:860ms">
+        A sponsored post pays once. An app pays every month, to you, forever.
+      </p>
     </div>
 
     <div class="hero-in" style="--d:500ms">
@@ -847,12 +852,10 @@ button.btn { cursor: pointer; font-family: inherit; }
             <div class="phone-notch" aria-hidden="true"></div>
 
             <!-- Real screens from Kaught, in media/app/. Swap a file, the
-                 phone shows the new one; nothing here needs editing. -->
+                 phone shows the new one; nothing here needs editing. Two
+                 screens, not five: the welcome and the thing the app does. -->
             <div class="scr on"><img class="shot" src="media/app/1.png" alt="Kaught welcome screen" loading="eager" decoding="async" data-shot></div>
-            <div class="scr"><img class="shot" src="media/app/2.png" alt="Kaught collection of identified species" loading="lazy" decoding="async" data-shot></div>
             <div class="scr"><img class="shot" src="media/app/3.png" alt="Kaught identifying an animal" loading="lazy" decoding="async" data-shot></div>
-            <div class="scr"><img class="shot" src="media/app/4.png" alt="Kaught showing animals near you" loading="lazy" decoding="async" data-shot></div>
-            <div class="scr"><img class="shot" src="media/app/5.png" alt="Kaught species detail for a red squirrel" loading="lazy" decoding="async" data-shot></div>
 
           </div>
         </div>
@@ -860,33 +863,17 @@ button.btn { cursor: pointer; font-family: inherit; }
 
       <div class="stage-dots" id="dots" role="tablist" aria-label="App screens">
         <button role="tab" aria-selected="true"  aria-label="Welcome screen"></button>
-        <button role="tab" aria-selected="false" aria-label="Your collection"></button>
         <button role="tab" aria-selected="false" aria-label="Identifying"></button>
-        <button role="tab" aria-selected="false" aria-label="Animals near you"></button>
-        <button role="tab" aria-selected="false" aria-label="Species detail"></button>
       </div>
       <p class="stage-note">My latest app, live.<span class="swipe-hint"> Swipe or tap the dots.</span></p>
     </div>
   </div>
-</section>
 
-<!-- ── proof, right under the hero ──────────────────────────────────────── -->
-<section class="band" id="proof">
-  <div class="shell">
-    <div class="head head--center rise" style="max-width:none">
-      <span class="eyebrow"><i></i>Proof</span>
-      <h2 class="h-section">They had an audience.<br>So do you.</h2>
-      <p class="lede">
-        Two creators pointed the people who already follow them at an app they
-        own. This is what happened next.
-      </p>
-    </div>
-
-    <!-- Other people's apps, not mine. The figures are the creators' own
-         public claims, so each is attributed, timed against launch, and
-         linked, rather than stated as fact. -->
-    <div class="cases">
-      <a class="case-card rise" style="--d:0ms" href="https://apps.apple.com/us/app/stella-manifest-anything/id6757347283" target="_blank" rel="noopener">
+  <!-- The two apps the numbers belong to, linked so the claim is checkable.
+       Other people's apps, not mine, so each is attributed and timed. -->
+  <div class="shell hero-proof">
+    <div class="cases hero-in" style="--d:940ms">
+      <a class="case-card" href="https://apps.apple.com/us/app/stella-manifest-anything/id6757347283" target="_blank" rel="noopener">
         <img class="case-icon" src="data:image/webp;base64,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" alt="" width="80" height="80" loading="lazy" decoding="async">
         <span class="case-fig">$340k<small>/mo</small></span>
         <span class="case-when">2 months after launch</span>
@@ -895,7 +882,7 @@ button.btn { cursor: pointer; font-family: inherit; }
         <span class="case-go">See it on the App Store <span class="arrow">&rarr;</span></span>
       </a>
 
-      <a class="case-card rise" style="--d:120ms" href="https://apps.apple.com/us/app/face-harmony-by-clavicular/id6781068829" target="_blank" rel="noopener">
+      <a class="case-card" href="https://apps.apple.com/us/app/face-harmony-by-clavicular/id6781068829" target="_blank" rel="noopener">
         <img class="case-icon" src="data:image/webp;base64,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" alt="" width="80" height="80" loading="lazy" decoding="async">
         <span class="case-fig">$80k<small>/mo</small></span>
         <span class="case-when">1 month after launch</span>
@@ -904,84 +891,7 @@ button.btn { cursor: pointer; font-family: inherit; }
         <span class="case-go">See it on the App Store <span class="arrow">&rarr;</span></span>
       </a>
     </div>
-
-    <div class="cases-turn rise">
-      <p>The only thing they had that you might not is the app itself.<br>That part is mine.</p>
-      <div class="btn-row"><a class="btn magnetic" href="#contact">Let's build yours <span class="arrow">&rarr;</span></a></div>
-      <p class="proof-note">Not my projects. Their numbers, publicly posted. Apps linked so you can check.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ── 2 · more revenue from your audience ──────────────────────────────── -->
-<section class="band band--dark" id="revenue">
-  <div class="shell">
-    <div class="head head--center rise">
-      <span class="eyebrow"><i></i>A new revenue stream</span>
-      <h2 class="h-section">Keep doing exactly what you do.<br>Add one more stream.</h2>
-      <p class="lede">
-        Nothing about your work changes. You post what you already post. The
-        difference is what happens to the money afterwards.
-      </p>
-    </div>
-
-    <!-- A comparison table rather than a pitch: the last row is the only one
-         that answers yes twice, and the columns are chosen so that shows. -->
-    <div class="tbl-wrap rise">
-      <table class="tbl">
-        <caption class="sr-only">How each revenue stream behaves. Your own app is the only one that pays again, compounds and belongs to you.</caption>
-        <thead>
-          <tr>
-            <th scope="col" class="c-name">Revenue stream</th>
-            <th scope="col" class="c-pay">How it pays</th>
-            <th scope="col">Pays again<br>next month</th>
-            <th scope="col">Grows as your<br>audience grows</th>
-            <th scope="col">You own<br>the asset</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="row" class="c-name">Sponsored posts</th>
-            <td class="c-pay">Once, per post</td>
-            <td><span class="mk mk--no"></span><span class="sr-only">No</span></td>
-            <td><span class="mk mk--no"></span><span class="sr-only">No</span></td>
-            <td><span class="mk mk--no"></span><span class="sr-only">No</span></td>
-          </tr>
-          <tr>
-            <th scope="row" class="c-name">Affiliate links</th>
-            <td class="c-pay">A cut, per sale</td>
-            <td><span class="mk mk--no"></span><span class="sr-only">No</span></td>
-            <td><span class="mk mk--half"></span><span class="sr-only">Partly</span></td>
-            <td><span class="mk mk--no"></span><span class="sr-only">No</span></td>
-          </tr>
-          <tr>
-            <th scope="row" class="c-name">Merch</th>
-            <td class="c-pay">Margin, per order</td>
-            <td><span class="mk mk--no"></span><span class="sr-only">No</span></td>
-            <td><span class="mk mk--half"></span><span class="sr-only">Partly</span></td>
-            <td><span class="mk mk--half"></span><span class="sr-only">Partly</span></td>
-          </tr>
-          <tr>
-            <th scope="row" class="c-name">Courses</th>
-            <td class="c-pay">A spike at launch</td>
-            <td><span class="mk mk--half"></span><span class="sr-only">Fades</span></td>
-            <td><span class="mk mk--no"></span><span class="sr-only">No</span></td>
-            <td><span class="mk mk--yes"></span><span class="sr-only">Yes</span></td>
-          </tr>
-          <tr class="tbl-hero">
-            <th scope="row" class="c-name">
-              <span class="th-tag">Your own app</span>
-              <span class="th-main">A mobile app</span>
-            </th>
-            <td class="c-pay">Every month, per subscriber</td>
-            <td><span class="mk mk--yes"></span><span class="sr-only">Yes</span></td>
-            <td><span class="mk mk--yes"></span><span class="sr-only">Yes</span></td>
-            <td><span class="mk mk--yes"></span><span class="sr-only">Yes</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
+    <p class="proof-note hero-in" style="--d:1120ms">Not my projects. Their numbers, publicly posted. Apps linked so you can check.</p>
   </div>
 </section>
 
@@ -991,7 +901,7 @@ button.btn { cursor: pointer; font-family: inherit; }
     <div class="head head--center rise" style="max-width:none">
       <span class="eyebrow"><i></i>How it works</span>
       <h2 class="h-section">You keep posting.<br>I keep building.</h2>
-      <p class="lede">Hover the bar. The segments are sized to the actual work.</p>
+      <p class="lede">The segments are sized to the actual work.</p>
     </div>
 
     <!-- Bar and cards are one control: hovering either end highlights both,
@@ -1007,33 +917,49 @@ button.btn { cursor: pointer; font-family: inherit; }
     <div class="lanes" id="lanes">
       <div class="lane sheen rise" data-lane="0" style="--d:0ms">
         <span class="lane-k">YOURS</span>
-        <h4>Distribution</h4>
-        <p>You tell your people it exists. That is the whole job, and you already do it every day.</p>
+        <h4>Tell your people</h4>
+        <p>You say it exists. That is the whole job, and you already do it every day.</p>
       </div>
       <div class="lane lane--mid sheen rise" data-lane="1" style="--d:90ms">
         <span class="lane-k">OURS</span>
-        <h4>Product &amp; design</h4>
+        <h4>Decide what it is</h4>
         <p>What we actually build, decided together. You know what your audience wants. I know what ships.</p>
       </div>
       <div class="lane sheen rise" data-lane="2" style="--d:180ms">
         <span class="lane-k">MINE</span>
-        <h4>Everything technical</h4>
-        <p>Build, both stores, payments, analytics, paywall, retention, support and updates. Forever.</p>
+        <h4>Build it and run it</h4>
+        <p>Both stores, payments, analytics, paywall, retention, support and updates. Forever.</p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ── the niche, on its own ────────────────────────────────────────────── -->
-<section class="band band--dark nd-band">
+<section class="band band--dark nd-band" id="niche">
   <div class="shell">
     <div class="nd rise">
-      <p class="nd-pre">You have an audience about</p>
+      <p class="nd-pre">Your audience is about</p>
       <div class="nd-slot">
         <span class="nd-word" id="nd-word">fly fishing</span>
       </div>
-      <p class="nd-post">It already has an app for it. Yours is next.</p>
+      <p class="nd-post">
+        There&rsquo;s an app in there. You already know what it is &mdash;
+        it&rsquo;s the question you get in your comments every week.
+      </p>
       <div class="nd-rule" aria-hidden="true"><span id="nd-bar"></span></div>
+    </div>
+
+    <div class="niche-close rise" style="--d:120ms">
+      <p>Costs you nothing to find out.</p>
+      <div class="btn-row">
+        <a class="btn magnetic" href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=hey@jeremylasne.com&amp;su=Building%20an%20app%20together&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A" target="_blank" rel="noopener">
+          hey@jeremylasne.com <span class="arrow">&rarr;</span>
+        </a>
+      </div>
+      <p class="cta-fine">
+        Costs you nothing. I take the build risk. We split what it earns.<br>
+        If it is not a fit I will say so the same day.
+      </p>
     </div>
   </div>
 </section>
@@ -1047,40 +973,39 @@ button.btn { cursor: pointer; font-family: inherit; }
       <p class="lede">Almost certainly. The narrower your niche, the better it works.</p>
     </div>
 
-    <!-- Each card is focusable and reveals a concrete example on hover or
-         focus, so the section stays three lines long until you ask it not to. -->
+    <!-- Both lines are plain static text. The example used to sit behind a
+         hover state, which meant it never appeared on a phone at all. -->
     <div class="reasons">
       <div class="reason rise" style="--d:0ms">
         <span class="r-no" aria-hidden="true">01</span>
         <span class="r-head">Niche beats big</span>
         <span class="r-body">An app for exactly your people competes with nobody.</span>
-        <span class="r-eg"><i aria-hidden="true">&rarr;</i>A birdwatching app beats "a nature app".</span>
+        <span class="r-eg">A birdwatching app beats "a nature app".</span>
       </div>
       <div class="reason rise" style="--d:90ms">
         <span class="r-no" aria-hidden="true">02</span>
         <span class="r-head">They already told you</span>
         <span class="r-body">It is the question you keep getting in the comments.</span>
-        <span class="r-eg"><i aria-hidden="true">&rarr;</i>Read your last fifty replies. It is in there.</span>
+        <span class="r-eg">Read your last fifty replies. It is in there.</span>
       </div>
       <div class="reason rise" style="--d:180ms">
         <span class="r-no" aria-hidden="true">03</span>
         <span class="r-head">They trust you</span>
         <span class="r-body">No paid ads needed for the first thousand users.</span>
-        <span class="r-eg"><i aria-hidden="true">&rarr;</i>The wall that kills most apps, already behind you.</span>
+        <span class="r-eg">The wall that kills most apps, already behind you.</span>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── the year ahead, then the ask ───────────────────────────────────── -->
+<!-- ── the ask ──────────────────────────────────────────────────────────── -->
 <section class="band band--dark close" id="contact">
   <div class="narrow">
     <div class="rise">
-      <span class="eyebrow"><i></i>The outcome</span>
-      <h2 class="h-section">Get a new revenue stream you own.</h2>
+      <h2 class="h-section">Send me one email.</h2>
       <p class="lede">
-        Not another post that disappears. Something with your name on it that
-        pays you every month.
+        What you make, roughly how many follow you, and the thing your people
+        keep asking you for. That last one is usually the app.
       </p>
 
       <div class="btn-row">
@@ -1089,7 +1014,10 @@ button.btn { cursor: pointer; font-family: inherit; }
         </a>
         <button class="btn btn--ghost magnetic" type="button" id="copy-email" data-email="hey@jeremylasne.com">Or copy my email</button>
       </div>
-      <p class="close-fine">Tell me what you make and roughly how many follow you. If it is not a fit I will say so the same day.</p>
+      <p class="cta-fine">
+        Costs you nothing. I take the build risk. We split what it earns.<br>
+        If it is not a fit I will say so the same day.
+      </p>
     </div>
   </div>
 </section>
@@ -1155,7 +1083,7 @@ button.btn { cursor: pointer; font-family: inherit; }
       <a href="https://trustviews.io" target="_blank" rel="noopener">Trustviews</a>
       <a href="https://x.com/jeremylasne" target="_blank" rel="noopener">X</a>
       <a href="https://www.youtube.com/@jeremyfounder" target="_blank" rel="noopener">YouTube</a>
-      <a href="mailto:hey@jeremylasne.com">Email</a>
+      <a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=hey@jeremylasne.com&amp;su=Building%20an%20app%20together&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A" target="_blank" rel="noopener">Email</a>
     </div>
   </div>
 </footer>
@@ -1346,9 +1274,8 @@ button.btn { cursor: pointer; font-family: inherit; }
     if (!word) return;
 
     var NICHES = [
-      'fly fishing', 'bouldering', 'home baking', 'vintage watches',
-      'birdwatching', 'van life', 'chess openings', 'urban gardening',
-      'freediving', 'film photography'
+      'fly fishing', 'birdwatching', 'sourdough', 'crochet',
+      'chess openings', 'vocal warmups', 'van conversions', 'IELTS prep'
     ];
     var i = 0, timer = null, HOLD = 1000, SLIDE = 260;
 

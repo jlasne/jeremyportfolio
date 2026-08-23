@@ -22,11 +22,13 @@ network requests at runtime. Open it and edit it.
   and slider inside it inverts on its own
 - Project logos are the real icons from each site, resized to 128px and
   inlined as webp (340 KB of source PNGs down to 14 KB)
-- Interactive without being fussy: the claim counts up on arrival, cards take
-  a pointer-tracked sheen, the phone cycles and swipes, the nav retreats on the
+- Interactive without being fussy: the niche cycles, cards take a
+  pointer-tracked sheen, the phone cycles and swipes, the nav retreats on the
   way down and returns on the way up
-- Everything degrades: `prefers-reduced-motion` is respected throughout, and
-  the page reads fine with JavaScript off apart from the earnings model
+- Everything degrades: `prefers-reduced-motion` is respected throughout, the
+  whole hero is CSS-only, and a `<noscript>` block reveals the rest, so the
+  page reads in full with JavaScript off
+- Nothing is hidden behind a hover state. Every sentence renders on a phone
 - Every text node on the page meets WCAG AA contrast in both bands
 
 ## Editing it
@@ -50,21 +52,24 @@ qualitative line shows instead, so the page never displays placeholder dashes.
 Keep these honest — the people this page is aimed at will ask you to back them
 up on the first call.
 
-### The revenue claim
+### The niche that rotates
 
-One number: up to $500/month more per 100,000 views, counted up when it scrolls
-into view. It is hard-coded in the `#revenue` markup with `data-count-to`, so
-changing the figure means editing that attribute.
+`NICHES` in the `<script>` block feeds the full-width band after *How it
+works*. Keep the examples narrow and unglamorous — fly fishing, crochet, IELTS
+prep. The narrower the example, the better the argument lands; "fitness" makes
+the section say nothing.
 
-There is no simulator and no split shown. Four sliders invited fiddling and let
-a visitor dial the number down to nothing; the terms belong in a conversation,
-not on a landing page.
+There is no simulator and no split shown. The page says the build costs the
+creator nothing and that we split what it earns, and stops there — the split
+itself is the reason to reply.
 
 ### The phone screenshots
 
-The hero phone shows five real Kaught screens from `media/app/1.png` through
-`5.png`. Replace a file and the page shows the new one; `index.html` needs no
-editing.
+The hero phone shows two real Kaught screens, `media/app/1.png` and `3.png`:
+the welcome screen and the thing the app actually does. Replace a file and the
+page shows the new one; `index.html` needs no editing. `2.png`, `4.png` and
+`5.png` are still in the folder if you want to swap one in — add a matching
+`.scr` div and a dot to `#dots`.
 
 Each image runs 7% taller than the frame and is pinned to the top, so the
 device's own navigation bar falls off the bottom edge. A missing file removes
