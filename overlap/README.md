@@ -122,7 +122,17 @@ npx convex deploy
 That creates the production deployment, which has its **own** `.convex.site`
 URL and its **own** environment variables. Put the production URL in
 `config.js` before the page goes out, and set the variables below on the
-production deployment too — they do not carry over from dev. The account card switches from `LOCAL` to a sign-in, and any feedback
+production deployment too — they do not carry over from dev.
+
+Two ways this bites, both of which look like the app is simply broken:
+
+- **`convex deploy` prints the `.convex.cloud` URL**, which is for the
+  websocket client. `config.js` wants the same subdomain with `.convex.site`
+  — that is where the HTTP endpoint lives.
+- **The dashboard opens on whichever deployment you last used.** Setting
+  `OVERLAP_GOOGLE_CLIENT_ID` on dev does nothing for the site, which talks
+  to prod. Check the deployment name at the top of the page before trusting
+  a variable you just set. The account card switches from `LOCAL` to a sign-in, and any feedback
 queued while offline flushes on the next successful call.
 
 ### Environment variables

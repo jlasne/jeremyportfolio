@@ -5,7 +5,7 @@
 
    Left empty, Overlap runs entirely in the browser: no accounts, no shared
    teams, and feedback is queued locally until a backend appears. */
-window.OVERLAP_CONVEX_URL = "https://amicable-chickadee-753.eu-west-1.convex.site";
+window.OVERLAP_CONVEX_URL = "https://fiery-eel-944.eu-west-1.convex.site";
 
 /* Sign in with Google. Create an OAuth client at
    https://console.cloud.google.com/apis/credentials → Create credentials →
