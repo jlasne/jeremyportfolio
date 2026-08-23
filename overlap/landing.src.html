@@ -62,13 +62,20 @@ h1{font-size:clamp(27px,min(6.4vw,7.4vh),72px);line-height:1.03;letter-spacing:-
 h1 .hl{position:relative;white-space:nowrap;z-index:0}
 h1 .hl::after{content:"";position:absolute;left:-4px;right:-4px;bottom:.34em;height:.26em;
   background:var(--fill-2);z-index:-1;border-radius:4px}
-.lede{font-size:clamp(13.5px,min(3.4vw,2.4vh),20px);line-height:1.45;color:var(--ink-2);
-  max-width:46ch;margin:0 auto clamp(12px,2.4vh,26px);letter-spacing:-.015em;text-wrap:balance}
+.lede{font-size:clamp(14px,min(3.5vw,2.5vh),21px);line-height:1.5;color:var(--ink-2);
+  max-width:38ch;margin:0 auto clamp(14px,2.6vh,28px);letter-spacing:-.016em;text-wrap:pretty}
 @media (min-width:940px){ .lede{margin-left:0} }
 .herobtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 @media (min-width:940px){ .herobtns{justify-content:flex-start} }
-.free{margin:clamp(8px,1.6vh,14px) 0 0;font-size:13px;font-weight:600;letter-spacing:-.01em;
-  color:var(--ink-3)}
+/* Three facts, not a sentence — a price, an objection, an occasion. Reads in
+   one pass at any width, and wraps to two lines rather than shrinking. */
+.facts{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;
+  gap:clamp(6px,1.4vw,10px);margin:clamp(12px,2vh,20px) 0 0;padding:0}
+@media (min-width:940px){ .facts{justify-content:flex-start} }
+.facts li{display:flex;align-items:center;gap:7px;font-size:clamp(11.5px,1.3vw,14px);
+  font-weight:600;letter-spacing:-.01em;color:var(--ink-2);white-space:nowrap}
+.facts li::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--ink);
+  opacity:.28;flex:none}
 
 /* ── the thing itself ─────────────────────────────────────────
    Not a picture of the app — the app's own vocabulary, drawn at
@@ -143,8 +150,8 @@ footer{flex:none;padding:clamp(7px,1.4vh,13px) 0;box-shadow:0 -1px 0 var(--sep)}
   .lede{display:none}
   .shot-foot{display:none}
 }
-@media (max-height:440px){
-  .free{display:none}
+@media (max-height:500px){
+  .facts{display:none}
 }
 </style>
 </head>
@@ -162,12 +169,16 @@ footer{flex:none;padding:clamp(7px,1.4vh,13px) 0;box-shadow:0 -1px 0 var(--sep)}
   <div class="wrap split">
     <div class="pitch">
       <h1>Schedule meetings at hours that work for <span class="hl">everyone</span>.</h1>
-      <p class="lede">One link. Everyone answers for themselves, their Google Calendar
-        included, and the hour that suits the whole group draws itself.</p>
+      <p class="lede">Send one link. Everyone answers for themselves — Google Calendar
+        included — and the hour that works for all of them draws itself.</p>
       <div class="herobtns">
         <a class="btn2 lg" href="/overlap/team/">Open Overlap</a>
       </div>
-      <p class="free">Free.</p>
+      <ul class="facts">
+        <li>Free</li>
+        <li>Nothing to set up</li>
+        <li>Sales calls &amp; internal meetings</li>
+      </ul>
     </div>
 
     <div class="shot" aria-hidden="true">
