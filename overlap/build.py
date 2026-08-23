@@ -135,7 +135,9 @@ def build_landing():
     # the shared stylesheet becomes a style block, in place
     src = re.sub(r'<link rel="stylesheet" href="app\.css[^"]*">',
                  "<style>\n" + CSS + "\n</style>", src, count=1)
-    if "app.css" in src:
+    # an unreplaced <link>/<script>, not merely the word: a comment is free
+    # to name a source file without failing the build over it
+    if re.search(r'(?:href|src)="(?:app\.css|app\.js|login\.js)', src):
         sys.exit("build: landing still references an external asset")
     write("index.html", src)
 

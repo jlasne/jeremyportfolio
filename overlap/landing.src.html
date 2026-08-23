@@ -18,27 +18,23 @@
 <link rel="stylesheet" href="app.css?v=4">
 <style>
 /* ═══════════════════════════════════════════════════════════
-   The landing page. Same tokens as the app, different furniture:
-   wide measure, big type, product shown rather than described.
+   The landing page. Same tokens as the app, different furniture.
+
+   One screen, and it never scrolls: the page is exactly the
+   viewport, split between what Overlap claims and the thing
+   itself doing it. Everything is sized in vh/vw so the whole
+   layout shrinks to fit rather than spilling off the bottom.
    ═══════════════════════════════════════════════════════════ */
-html,body{background:var(--paper)}
-body{font-size:16px}
-.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+html,body{background:var(--paper);height:100%}
+body{font-size:16px;height:100dvh;overflow:hidden;display:flex;flex-direction:column}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,28px);width:100%}
 
 /* ── nav ── */
-.top{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.75);
-  backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);
-  transition:box-shadow .2s}
-.top.stuck{box-shadow:0 1px 0 var(--sep)}
-.top .wrap{display:flex;align-items:center;gap:8px;height:64px}
-.brand{display:flex;align-items:center;gap:9px;font-size:18px;font-weight:700;letter-spacing:-.035em;
-  text-decoration:none;color:var(--ink)}
-.mark{width:26px;height:23px;flex:none;color:var(--ink);--mark-cut:var(--paper)}
-.top nav{display:none;gap:4px;margin-left:14px;flex:1}
-@media (min-width:760px){ .top nav{display:flex} }
-.top nav a{font-size:14px;font-weight:500;letter-spacing:-.01em;color:var(--ink-2);
-  text-decoration:none;padding:8px 12px;border-radius:9px}
-.top nav a:hover{color:var(--ink);background:var(--fill)}
+.top{flex:none;box-shadow:0 1px 0 var(--sep)}
+.top .wrap{display:flex;align-items:center;gap:8px;height:clamp(50px,7vh,62px)}
+.brand{display:flex;align-items:center;gap:9px;font-size:clamp(16px,2.4vw,18px);font-weight:700;
+  letter-spacing:-.035em;text-decoration:none;color:var(--ink)}
+.mark{width:24px;height:21px;flex:none;color:var(--ink);--mark-cut:var(--paper)}
 .top .sp{flex:1}
 .btn2{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;
   border-radius:999px;background:var(--ink);color:#fff;font-size:14px;font-weight:600;
@@ -46,32 +42,115 @@ body{font-size:16px}
   transition:transform .14s var(--ease),opacity .14s}
 .btn2:hover{opacity:.86}
 .btn2:active{transform:scale(.97)}
-.btn2.lg{height:52px;padding:0 26px;font-size:16px}
-.btn2.line{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px rgba(60,60,67,.22)}
-.btn2.line:hover{background:var(--fill);opacity:1}
-.btn2.inv{background:var(--paper);color:var(--ink)}
+.btn2.lg{height:clamp(46px,6.4vh,54px);padding:0 clamp(20px,4vw,28px);font-size:clamp(15px,2vw,17px)}
 
-/* ── hero ── */
-.hero{padding:72px 0 0;text-align:center}
-h1{font-size:clamp(40px,7vw,76px);line-height:1.02;letter-spacing:-.045em;font-weight:800;
-  margin:0 0 22px;text-wrap:balance;position:relative;z-index:0}
+/* ── the one screen ──
+   app.css is shared with the app, where `main` is one item in a mobile
+   running order (nav, rail, main, dock). Here there is no rail and nothing
+   to order, so take the properties back rather than inherit a layout meant
+   for a different page. */
+.stage{flex:1 1 auto;order:0;min-height:0;padding:0;
+  display:flex;align-items:center;overflow:hidden}
+.split{display:grid;gap:clamp(14px,3.2vh,34px);align-items:center;width:100%;min-height:0}
+.pitch{text-align:center;min-width:0}
+@media (min-width:940px){
+  .split{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(28px,4vw,60px)}
+  .pitch{text-align:left}
+}
+h1{font-size:clamp(27px,min(6.4vw,7.4vh),72px);line-height:1.03;letter-spacing:-.045em;
+  font-weight:800;margin:0 0 clamp(8px,1.6vh,16px);text-wrap:balance;position:relative;z-index:0}
 h1 .hl{position:relative;white-space:nowrap;z-index:0}
 h1 .hl::after{content:"";position:absolute;left:-4px;right:-4px;bottom:.34em;height:.26em;
   background:var(--fill-2);z-index:-1;border-radius:4px}
-.lede{font-size:clamp(17px,2.1vw,20px);line-height:1.5;color:var(--ink-2);max-width:600px;
-  margin:0 auto 32px;letter-spacing:-.015em;text-wrap:balance}
+.lede{font-size:clamp(13.5px,min(3.4vw,2.4vh),20px);line-height:1.45;color:var(--ink-2);
+  max-width:46ch;margin:0 auto clamp(12px,2.4vh,26px);letter-spacing:-.015em;text-wrap:balance}
+@media (min-width:940px){ .lede{margin-left:0} }
 .herobtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+@media (min-width:940px){ .herobtns{justify-content:flex-start} }
+.free{margin:clamp(8px,1.6vh,14px) 0 0;font-size:13px;font-weight:600;letter-spacing:-.01em;
+  color:var(--ink-3)}
+
+/* ── the thing itself ─────────────────────────────────────────
+   Not a picture of the app — the app's own vocabulary, drawn at
+   whatever size is left over. White is an hour that works, ink
+   is one that does not, hatching is awake but off the clock,
+   and the band on top is the whole group at once. */
+.shot{background:var(--paper);border-radius:clamp(10px,1.6vw,16px);overflow:hidden;
+  box-shadow:0 0 0 1px var(--sep),0 24px 60px -30px rgba(0,0,0,.4);min-width:0}
+.shot-bar{display:flex;align-items:center;gap:7px;padding:0 clamp(12px,1.6vw,16px);height:clamp(28px,4.4vh,42px);
+  box-shadow:inset 0 -1px 0 var(--sep)}
+.shot-bar i{width:8px;height:8px;border-radius:50%;background:var(--fill-2);flex:none}
+.shot-bar span{margin-left:6px;font-size:clamp(10px,1.1vw,13px);font-weight:600;color:var(--ink-3);
+  letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shot-grid{display:grid;grid-template-columns:clamp(80px,12vw,132px) repeat(7,minmax(0,1fr));
+  --h:clamp(30px,min(4.4vh,6vw),52px)}
+.shot-grid>*{min-width:0}
+.tk{display:flex;align-items:flex-end;justify-content:center;height:calc(var(--h) * .72);
+  padding-bottom:3px;font-size:clamp(8px,1.1vw,12px);font-weight:600;color:var(--ink-3);
+  font-variant-numeric:tabular-nums;box-shadow:inset 1px 0 0 rgba(60,60,67,.08)}
+.lab{display:flex;flex-direction:column;justify-content:center;padding:0 6px 0 clamp(8px,1.6vw,14px);
+  overflow:hidden;height:var(--h)}
+.lab b{font-size:clamp(10px,1.5vw,15px);font-weight:600;letter-spacing:-.015em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lab s{text-decoration:none;font-size:clamp(8px,1.1vw,12px);color:var(--ink-2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lab.head{height:calc(var(--h) * .72)}
+.lab.sum{box-shadow:0 -1px 0 var(--sep),0 1px 0 var(--ink)}
+.lab.sum b{font-size:clamp(11px,1.7vw,18px);font-weight:700;letter-spacing:-.03em}
+.lab+.lab{box-shadow:inset 0 -1px 0 rgba(60,60,67,.10)}
+.cell{position:relative;display:flex;align-items:center;justify-content:center;height:var(--h);
+  box-shadow:inset 1px 0 0 rgba(60,60,67,.09),inset 0 -1px 0 rgba(60,60,67,.10)}
+/* the bar, inset, so a row reads as a track with something laid in it */
+.cell.busy::before,.cell.off::before{content:"";position:absolute;left:0;right:0;top:3px;bottom:3px}
+.cell.busy::before{background:var(--ink)}
+.cell.off::before{background:repeating-linear-gradient(135deg,
+  rgba(0,0,0,.24) 0 2px,rgba(0,0,0,.07) 2px 6px)}
+.cell.s::before{border-top-left-radius:6px;border-bottom-left-radius:6px;left:1px}
+.cell.e::before{border-top-right-radius:6px;border-bottom-right-radius:6px;right:1px}
+/* the band: how many of them, as ink */
+.cell.band{box-shadow:0 -1px 0 var(--sep),0 1px 0 var(--ink),inset 1px 0 0 rgba(60,60,67,.09);
+  font-size:clamp(9px,1.3vw,15px);font-weight:700;font-variant-numeric:tabular-nums}
+.cell.band.n3{background:rgba(118,118,128,.14)}
+.cell.band.n2{background:rgba(118,118,128,.30)}
+.cell.band.n1{background:rgba(60,60,67,.45);color:#fff}
+.cell.band.n0{background:var(--ink);color:#fff}
+/* The hour that won, ruled down the whole column the way the app rules it —
+   side walls on every cell, a lid on the band, a floor on the last row. */
+.cell.pick{box-shadow:inset 2px 0 0 var(--ink),inset -2px 0 0 var(--ink),
+  inset 0 -1px 0 rgba(60,60,67,.10)}
+.cell.band.pick{box-shadow:0 -1px 0 var(--sep),0 1px 0 var(--ink),
+  inset 2px 0 0 var(--ink),inset -2px 0 0 var(--ink),inset 0 2px 0 var(--ink)}
+.cell.pick.last{box-shadow:inset 2px 0 0 var(--ink),inset -2px 0 0 var(--ink),
+  inset 0 -2px 0 var(--ink)}
+.shot-foot{display:flex;align-items:center;gap:clamp(8px,1.6vw,16px);flex-wrap:wrap;
+  padding:clamp(6px,1.4vh,13px) clamp(9px,1.6vw,16px);font-size:clamp(8.5px,1.1vw,12.5px);
+  color:var(--ink-2);box-shadow:inset 0 1px 0 var(--sep)}
+.shot-foot i{width:13px;height:9px;border-radius:3px;flex:none;box-shadow:inset 0 0 0 1px var(--sep)}
+.shot-foot i.free{background:var(--paper)}
+.shot-foot i.off{background:repeating-linear-gradient(135deg,
+  rgba(0,0,0,.24) 0 2px,rgba(0,0,0,.07) 2px 6px)}
+.shot-foot i.busy{background:var(--ink)}
 
 /* ── footer ── */
-footer{padding:30px 0 40px;box-shadow:0 -1px 0 var(--sep);margin-top:80px}
-.fbot{font-size:13px;color:var(--ink-3)}
-.free{margin:20px 0 0;font-size:14px;font-weight:600;letter-spacing:-.01em;color:var(--ink-2)}
+footer{flex:none;padding:clamp(7px,1.4vh,13px) 0;box-shadow:0 -1px 0 var(--sep)}
+.fbot{font-size:11.5px;color:var(--ink-3);text-align:center}
 .fbot a{color:var(--ink-2)}
+
+/* When the screen is too short to hold all of it, drop the sentence before
+   dropping the picture: the grid is the argument, the paragraph only
+   restates it. 620px is set where a 320x568 phone still fits without it. */
+@media (max-height:620px){
+  .lede{display:none}
+  .shot-foot{display:none}
+}
+@media (max-height:440px){
+  .free{display:none}
+}
 </style>
 </head>
 <body>
 
-<header class="top" id="top">
+<header class="top">
   <div class="wrap">
     <a class="brand" href="/overlap/"><svg class="mark" viewBox="0 0 64 56" aria-hidden="true"><g fill="currentColor"><rect x="4" y="13" width="9" height="30" rx="4.5"/><rect x="18" y="4" width="9" height="48" rx="4.5"/><rect x="32" y="17" width="9" height="22" rx="4.5"/><rect x="46" y="9" width="9" height="38" rx="4.5"/></g><rect x="1" y="24" width="61" height="7" rx="3.5" fill="var(--mark-cut,#fff)"/></svg>Overlap</a>
     <span class="sp"></span>
@@ -79,29 +158,35 @@ footer{padding:30px 0 40px;box-shadow:0 -1px 0 var(--sep);margin-top:80px}
   </div>
 </header>
 
-<div class="wrap">
-  <div class="hero">
-    <h1>Schedule meetings at hours that work for <span class="hl">everyone</span>.</h1>
-    <p class="lede">One link. Everyone answers for themselves, their Google Calendar
-      included, and the hour that suits the whole group draws itself.</p>
-    <div class="herobtns">
-      <a class="btn2 lg" href="/overlap/team/">Open Overlap</a>
+<main class="stage">
+  <div class="wrap split">
+    <div class="pitch">
+      <h1>Schedule meetings at hours that work for <span class="hl">everyone</span>.</h1>
+      <p class="lede">One link. Everyone answers for themselves, their Google Calendar
+        included, and the hour that suits the whole group draws itself.</p>
+      <div class="herobtns">
+        <a class="btn2 lg" href="/overlap/team/">Open Overlap</a>
+      </div>
+      <p class="free">Free.</p>
     </div>
-    <p class="free">Free.</p>
-  </div>
 
-  <footer>
-    <div class="fbot">Built by <a href="/">Jeremy Lasne</a> ·
-      <a href="https://github.com/jlasne/jeremyportfolio/tree/main/overlap">Source</a> ·
-      Your hours, nothing more.</div>
-  </footer>
-</div>
+    <div class="shot" aria-hidden="true">
+      <div class="shot-bar"><i></i><i></i><i></i><span>Kickoff · 60 min · 4 people</span></div>
+      <div class="shot-grid"><div class="lab head"></div><div class="tk">8a</div><div class="tk">10a</div><div class="tk">12p</div><div class="tk">2p</div><div class="tk">4p</div><div class="tk">6p</div><div class="tk">8p</div><div class="lab sum"><b>Everyone</b><s>4 invited</s></div><div class="cell band n2">2</div><div class="cell band n2">2</div><div class="cell band n3">3</div><div class="cell band n3 pick">4</div><div class="cell band n3">3</div><div class="cell band n2">2</div><div class="cell band n2">2</div><div class="lab"><b>You</b><s>Paris</s></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell pick"></div><div class="cell"></div><div class="cell busy s"></div><div class="cell busy e"></div><div class="lab"><b>Marta</b><s>New York  −6h</s></div><div class="cell busy s"></div><div class="cell busy e"></div><div class="cell"></div><div class="cell pick"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="lab"><b>Ana</b><s>São Paulo  −4h</s></div><div class="cell busy s e"></div><div class="cell off s e"></div><div class="cell"></div><div class="cell pick"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="lab"><b>Kenji</b><s>Tokyo  +7h</s></div><div class="cell last"></div><div class="cell last"></div><div class="cell off s e last"></div><div class="cell pick last"></div><div class="cell off s e last"></div><div class="cell busy s last"></div><div class="cell busy e last"></div></div>
+      <div class="shot-foot">
+        <i class="free"></i><span>can meet</span>
+        <i class="off"></i><span>off hours</span>
+        <i class="busy"></i><span>asleep or busy</span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap fbot">Built by <a href="/">Jeremy Lasne</a> ·
+    <a href="https://github.com/jlasne/jeremyportfolio/tree/main/overlap">Source</a></div>
+</footer>
 
 <div class="toast" id="toast"></div>
-<script>
-addEventListener("scroll",function(){
-  document.getElementById("top").classList.toggle("stuck",scrollY>4);
-},{passive:true});
-</script>
 </body>
 </html>
