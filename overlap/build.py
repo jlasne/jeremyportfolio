@@ -6,7 +6,7 @@ Every page this writes has its CSS and JS *inside* it. No external app.css,
 no external app.js. A static host only has to serve one file correctly, and
 there is no window where new HTML meets old assets.
 
-Sources stay single-copy — edit app.css / app.js / clock.js / landing.src.html
+Sources stay single-copy — edit app.css / app.js / login.js / landing.src.html
 and run this. Never edit the generated index.html files by hand.
 
     python3 overlap/build.py
@@ -23,7 +23,6 @@ def write(n, s):
 
 CSS   = read("app.css")
 APP   = read("app.js")
-CLOCK = read("clock.js")
 LOGIN = read("login.js")
 
 HEAD = '''<meta charset="utf-8">
@@ -108,25 +107,11 @@ LOGIN_PAGE = '''<!DOCTYPE html>
 <div class="door"><div class="door-in">
   <svg class="mark" viewBox="0 0 64 56" aria-hidden="true"><g fill="currentColor"><rect x="4" y="13" width="9" height="30" rx="4.5"/><rect x="18" y="4" width="9" height="48" rx="4.5"/><rect x="32" y="17" width="9" height="22" rx="4.5"/><rect x="46" y="9" width="9" height="38" rx="4.5"/></g><rect x="1" y="24" width="61" height="7" rx="3.5" fill="var(--mark-cut,#fff)"/></svg>
   <h1>Sign in to Overlap</h1>
-  <p class="lede">Your teams and your hours, on every device you use.</p>
+  <p class="lede">One tap, and your hours follow you to every meeting.</p>
   <div id="ways">
     <div id="gwrap"><div id="gbtn"></div></div>
-    <div class="or" id="or">or</div>
-    <form id="loginForm">
-      <div class="card">
-        <div class="field"><label>Email</label>
-          <input id="email" type="email" placeholder="you@company.com"
-            autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="email"></div>
-        <div class="field" id="codewrap" style="display:none"><label>Code</label>
-          <input id="code" inputmode="numeric" maxlength="6" placeholder="6 digits"
-            autocomplete="one-time-code"></div>
-      </div>
-      <button class="btn" id="go" type="submit">Continue</button>
-    </form>
   </div>
   <p class="note" id="note"></p>
-  <p class="guest" id="guestwrap"><a href="#" id="guest">Continue as guest</a>
-    <span>Have a look round first — it all works, it just stays in this browser.</span></p>
   <p class="foot"><a href="/overlap/">Back to Overlap</a></p>
 </div></div>
 <script>
@@ -150,10 +135,7 @@ def build_landing():
     # the shared stylesheet becomes a style block, in place
     src = re.sub(r'<link rel="stylesheet" href="app\.css[^"]*">',
                  "<style>\n" + CSS + "\n</style>", src, count=1)
-    # so does the clock
-    src = re.sub(r'<script src="clock\.js[^"]*"></script>',
-                 "<script>\n" + CLOCK + "\n</script>", src, count=1)
-    if "app.css" in src or 'src="clock.js' in src:
+    if "app.css" in src:
         sys.exit("build: landing still references an external asset")
     write("index.html", src)
 

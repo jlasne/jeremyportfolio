@@ -1,61 +1,89 @@
 # Overlap
 
-Find the hour that works for a team spread across timezones, then hand it to
-Google Calendar. One page: the meeting down the side, the answer in the
-middle.
+Find the hour that works for a group spread across timezones, then hand it to
+Google Calendar. One meeting, one link, one page.
 
-The **side** is everything you set and the button that acts on it — who is in
-the team and their hours; what the meeting is called, how long it runs, and
-who in the team is coming; then **Add to Google Calendar**, with `.ics`, a
-copyable list of times and a share link under it; then the team switcher, the
-invite link and your account.
+## How it goes
 
-The **page** is what you read, in two screens you reach by scrolling:
+1. **Sign in with Google.** There is no other door and no guest mode — a link
+   that has to survive being sent to someone else needs an account behind it.
+2. **Say what your day looks like — once.** Timezone (already detected),
+   working hours, and when you are asleep, all preselected so the honest
+   answer for most people is to press Save. One tap connects your Google
+   Calendar, which lays your busy hours on top of your working ones.
+   This answer lives on your account: every meeting after this starts with it
+   already filled in.
+3. **Name a meeting and press Create.** You get a link.
+4. **Send the link.** Whoever opens it signs in, gets the same preselected
+   card, and lands on the same calendar you are looking at. They answer for
+   themselves — you never type anybody else's hours again.
+5. **Wait, or book it.** The overlap redraws as each person arrives. When an
+   hour suits, press it and then **Add to Google Calendar** — everyone in the
+   meeting comes along as a guest.
+
+Sending the link again is how you invite more people; there is nothing else to
+press.
+
+## The page
+
+The **side** is everything you set: the meeting's name and length, who is in
+it, and the one button that acts on it. The **page** is what you read, in two
+screens you reach by scrolling:
 
 1. **Calendar** — the whole window, near enough. Names down the side, the day
-   across the top, one column per hour, and the week you are looking at above
-   it. A column is one instant: the ruler reads it on your clock, every row
-   reads the same instant on a different one, and the offset next to each name
-   is the arithmetic you no longer have to do. Rows and the band grow to fill
-   the height the window can spare, so the calendar is the page and Best times
-   begins below the fold.
+   across the top, one column per hour. A column is one instant: the ruler
+   reads it on your clock, every row reads the same instant on a different
+   one, and the offset next to each name is the arithmetic you no longer have
+   to do.
 
-   Under the ruler sits the loudest thing on the screen: **the whole team as
+   Under the ruler sits the loudest thing on the screen: **the whole group as
    one band**, ruled off in ink, with the number who can make each hour
-   written across it. Paper white where all of them can, with a heavy ink bar
-   under it to say so; darkening as more drop out; solid ink where nobody can.
-   Below that, one row each: bars for the hours they can't, hatched for
-   awake-but-off-hours, and the line of the current moment running down
-   through all of it.
+   written across it. Paper white where all of them can, darkening as more
+   drop out, solid ink where nobody can. Below that, one row each: bars for
+   the hours they can't, hatched for awake-but-off-hours, and the line of the
+   current moment running down through all of it.
 2. **Best times** — the ranked hours, each written out in every timezone at
    once, with a `+1` where an hour lands on somebody's tomorrow.
 
+Unticking someone takes their hours out of the overlap as well as their name
+off the invitation — both screens recompute, and their row stays on the
+calendar, greyed, so you can see what you chose to ignore.
+
+Only ever your own row is editable. Everyone answers for themselves.
+
 **What next?** is not a screen. It comes up as a sheet the moment you create
 an event — the one point where the app has done its job and you know what it
-was missing — and it stops coming up once you answer it. `/overlap/next/`
-opens it on demand.
-
-Leaving someone off the guest list takes their hours out of the overlap as
-well as their name off the invitation — both screens recompute, and their row
-stays on the calendar, greyed, so you can see what you chose to ignore.
+was missing — and it stops coming up once you answer it.
 
 `/team/` and `/plan/` are still real addresses — they scroll to their screen
 rather than swapping the page.
 
 On a phone there is no room for a column, so the two control folds sit shut
 above the calendar and open on a tap; the create button becomes the bar at
-the bottom of the screen, and the team switcher and account move below
-everything else. What is on screen when it loads is the calendar.
+the bottom of the screen. What is on screen when it loads is the calendar.
 
-The app pages sit behind a sign-in at `/overlap/login`, which also offers
-**Continue as guest** — the whole app works, it simply stays in that browser:
-no shared teams, nothing that follows you to another device. Signing in later
-keeps whatever the guest built. Without a backend connected there is nothing
-to sign in to at all, so the app runs locally and lets everyone through.
+## There are no teams
 
-The page is one hand-written `index.html`: no framework, no build step. It runs
-completely without a backend — the team lives in `localStorage` and travels in
-a `#p=` link. Connecting Convex adds accounts, shared teams and invite links.
+There used to be. A team was a thing you named, joined, renamed, switched
+between and left — and all it ever meant was *the people I keep meeting*.
+That is a question the meetings can already answer, so the table is gone and
+the Share sheet just shows you who you have met with before.
+
+The page is one hand-written `index.html`: no framework, no build step beyond
+a script that inlines the sources. It needs a Convex backend — without one it
+falls back to running against this browser alone, which is a workbench for
+development, not a product: no accounts, no links, nothing shared.
+
+## People you have met
+
+There is no address book to fill in and nothing to keep tidy. Anyone you have
+shared a meeting with — whoever did the inviting — is in **People**, reachable
+from the rail, with how many meetings you have had and whether they are in the
+one on screen. Tapping one opens a mail to them with the link already in it.
+
+It is derived, not stored: `contacts` reads it back out of the meetings you
+are both in, so it cannot drift from the truth and there is no third table to
+keep in step.
 
 ## Connecting Convex
 
@@ -103,11 +131,8 @@ Set these in the Convex dashboard (Settings → Environment Variables):
 
 | Variable | What it does |
 | --- | --- |
-| `RESEND_API_KEY` | Sends the six-digit sign-in code. Without it the code is only written to the Convex logs. |
-| `OVERLAP_FROM_EMAIL` | Sender for those emails, e.g. `Overlap <hi@yourdomain.com>`. Defaults to Resend's onboarding sender. |
+| `OVERLAP_GOOGLE_CLIENT_ID` | Your Google OAuth client ID. Must match the one in `config.js` exactly, or every sign-in is refused. **Without it nobody can sign in at all**, and since Google is the only door, nobody can use Overlap. |
 | `OVERLAP_ALLOW_ORIGIN` | Locks the endpoint to one origin, e.g. `https://jeremylasne.com`. Defaults to `*`. **Set this before launch.** |
-| `OVERLAP_GOOGLE_CLIENT_ID` | Your Google OAuth client ID. Must match the one in `config.js` exactly, or every Google sign-in is refused. |
-| `OVERLAP_DEV_CODES` | `1` returns the sign-in code in the API response so you can log in before wiring email. **Never set this once real people can reach the deployment — it hands anyone a login for any address.** |
 
 ## Google: sign-in and busy times
 
@@ -172,11 +197,13 @@ that is *Real calendar sync*, still to build.
 
 ## How auth works
 
-Email → six-digit code (ten minutes, five tries, single use) → an opaque
-session token, stored in `localStorage` and passed as an argument on every
-call. Server-side, `whoIs()` resolves that token before anything else happens,
-and every team mutation checks that you share a team with the row you're
-touching. There are no passwords and no third-party auth provider.
+Google ID token → Convex checks it with Google and checks the audience is us →
+an opaque session token, stored in `localStorage` and passed as an argument on
+every call. Server-side, `whoIs()` resolves that token before anything else
+happens, and every mutation checks you actually hold a seat in the meeting you
+are touching. Your own row is the only row you can write.
+
+There are no passwords, no codes, and no second provider to keep working.
 
 ## Files
 
@@ -193,15 +220,16 @@ python3 overlap/build.py     # after editing any source below
 | --- | --- |
 | `app.css` | **source** — the design system for the app and the landing page |
 | `app.js` | **source** — the app: markup template, timezone maths, backend calls |
-| `clock.js` | **source** — the landing page's live world clock |
-| `landing.src.html` | **source** — the landing page |
-| `config.js` | **source** — one line: your Convex URL |
-| `build.py` | inlines the four above into the pages below |
+| `landing.src.html` | **source** — the landing page: one hero, nothing else |
+| `login.js` | **source** — the door: one Google button |
+| `config.js` | **source** — your Convex URL and Google client ID |
+| `build.py` | inlines the sources above into the pages below |
 | `index.html` | generated — the landing page |
 | `team/`, `plan/`, `next/` | generated — the three app pages |
-| `convex/schema.ts` | users, sessions, codes, teams, members, meetings, feedback |
-| `convex/auth.ts` | request a code, verify it, mint a session |
-| `convex/teams.ts` | `me`, create, join, rename, leave, add/update/remove member |
+| `login/` | generated — the sign-in page |
+| `convex/schema.ts` | users (with your saved day), sessions, meetings, participants, feedback |
+| `convex/auth.ts` | verify a Google token, mint a session |
+| `convex/meet.ts` | `me` (you, the meeting, everyone in it, everyone you have met), profile, create, peek, join, hours, rename, leave, book |
 | `convex/feedback.ts` | store what people ask for |
 | `convex/http.ts` | the single CORS endpoint the pages talk to |
 
@@ -211,25 +239,21 @@ The three app addresses still resolve — `/overlap/plan/` lands on Best times,
 `/overlap/next/` opens the question — but they are one page now, so a link
 scrolls rather than switches, and moving between the screens is a `pushState`.
 
-Colour means two different things on purpose. On the **landing clock** it is
-the time of day: white is the working day (8am–5pm), black is night
-(10pm–5am), grey the edges. Inside the **app** it is availability: white is
-possible, ink is not, and hatching is the hour someone is awake for but not
-working. On the team band the grey is a quantity — how much of the team is
-out — not a third state.
+Colour means one thing: availability. White is possible, ink is not, and
+hatching is the hour someone is awake for but not working. On the group band
+the grey is a quantity — how many are out — not a third state.
 
-## Several teams
+## Several meetings
 
-A person can keep as many teams as they like — one per client, one per
-project — and switch between them from the team row on the Team screen.
-Signed out, they live side by side in `localStorage`; signed in, they are real
-teams on the server and you can be a member of several at once. `me` takes an
-optional `teamId` and answers with every team you are in plus the members of
-the one you asked for.
+A person can be in as many meetings as they like, and switches between them
+from the meeting row at the foot of the rail. `me` takes an optional
+`meetingId` and answers with every meeting you are in plus the people in the
+one you asked for. Leaving takes your row with you; the last person out closes
+the meeting.
 
 ## Still to build
 
-- Real calendar sync (read busy times, not just working hours)
+- Re-reading the calendar when the week moves, rather than only on connect
 - Recurring meetings
-- Transferring team ownership
-- Rate limiting on `auth.requestCode`
+- Telling people their meeting got booked, without them having to look
+- Rate limiting on `meet.join`

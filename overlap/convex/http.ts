@@ -43,35 +43,27 @@ const door = httpAction(async (ctx, request) => {
   try {
     switch (op) {
       case "me":
-        return ok(await ctx.runQuery(api.teams.me, args));
-      case "auth.requestCode":
-        return ok(await ctx.runMutation(api.auth.requestCode, args));
+        return ok(await ctx.runQuery(api.meet.me, args));
       case "auth.google":
         return ok(await ctx.runAction(api.auth.google, args));
-      case "auth.verify":
-        return ok(await ctx.runMutation(api.auth.verify, args));
       case "auth.signOut":
         return ok(await ctx.runMutation(api.auth.signOut, args));
-      case "teams.create":
-        return ok(await ctx.runMutation(api.teams.create, args));
-      case "teams.join":
-        return ok(await ctx.runMutation(api.teams.join, args));
-      case "teams.addMember":
-        return ok(await ctx.runMutation(api.teams.addMember, args));
-      case "teams.updateMember":
-        return ok(await ctx.runMutation(api.teams.updateMember, args));
-      case "teams.removeMember":
-        return ok(await ctx.runMutation(api.teams.removeMember, args));
-      case "teams.respondInfo":
-        return ok(await ctx.runQuery(api.teams.respondInfo, args));
-      case "teams.respond":
-        return ok(await ctx.runMutation(api.teams.respond, args));
-      case "teams.rename":
-        return ok(await ctx.runMutation(api.teams.rename, args));
-      case "teams.leave":
-        return ok(await ctx.runMutation(api.teams.leave, args));
-      case "teams.book":
-        return ok(await ctx.runMutation(api.teams.book, args));
+      case "meet.profile":
+        return ok(await ctx.runMutation(api.meet.profile, args));
+      case "meet.create":
+        return ok(await ctx.runMutation(api.meet.create, args));
+      case "meet.peek":
+        return ok(await ctx.runQuery(api.meet.peek, args));
+      case "meet.join":
+        return ok(await ctx.runMutation(api.meet.join, args));
+      case "meet.hours":
+        return ok(await ctx.runMutation(api.meet.hours, args));
+      case "meet.rename":
+        return ok(await ctx.runMutation(api.meet.rename, args));
+      case "meet.leave":
+        return ok(await ctx.runMutation(api.meet.leave, args));
+      case "meet.book":
+        return ok(await ctx.runMutation(api.meet.book, args));
       case "feedback.send":
         return ok(await ctx.runMutation(api.feedback.send, args));
       default:

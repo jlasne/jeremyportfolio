@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Overlap — the hour that works for everyone</title>
-<meta name="description" content="Your whole team's day, drawn at once. Overlap finds the hour that works across every timezone and hands it to your calendar.">
+<title>Overlap — schedule meetings at hours that work for everyone</title>
+<meta name="description" content="Schedule meetings at hours that work for everyone. One link, every timezone, your Google Calendar included. Free.">
 <meta name="theme-color" content="#FFFFFF">
 <link rel="icon" href="/overlap/icon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<meta property="og:title" content="Overlap — the hour that works for everyone">
-<meta property="og:description" content="Your team's day, all at once. Find the hour that works, then hand it to your calendar.">
+<meta property="og:title" content="Overlap — schedule meetings at hours that work for everyone">
+<meta property="og:description" content="One link, every timezone, your Google Calendar included. The hour that suits the whole group draws itself. Free.">
 <meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,6 @@
 html,body{background:var(--paper)}
 body{font-size:16px}
 .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
-.narrow{max-width:840px}
 
 /* ── nav ── */
 .top{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.75);
@@ -54,10 +53,6 @@ body{font-size:16px}
 
 /* ── hero ── */
 .hero{padding:72px 0 0;text-align:center}
-.eyebrow-pill{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 14px;
-  border-radius:999px;background:var(--fill);font-size:13px;font-weight:500;color:var(--ink-2);
-  letter-spacing:-.01em;margin-bottom:26px}
-.eyebrow-pill b{color:var(--ink);font-weight:600}
 h1{font-size:clamp(40px,7vw,76px);line-height:1.02;letter-spacing:-.045em;font-weight:800;
   margin:0 0 22px;text-wrap:balance;position:relative;z-index:0}
 h1 .hl{position:relative;white-space:nowrap;z-index:0}
@@ -66,179 +61,11 @@ h1 .hl::after{content:"";position:absolute;left:-4px;right:-4px;bottom:.34em;hei
 .lede{font-size:clamp(17px,2.1vw,20px);line-height:1.5;color:var(--ink-2);max-width:600px;
   margin:0 auto 32px;letter-spacing:-.015em;text-wrap:balance}
 .herobtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-.micro{font-size:13px;color:var(--ink-3);margin-top:18px;letter-spacing:-.005em}
-
-/* ── the framed product shot ── */
-.frame{margin:52px 0 0;border-radius:20px;background:var(--paper);
-  box-shadow:0 0 0 1px rgba(60,60,67,.11),0 40px 80px -40px rgba(0,0,0,.42),
-             0 8px 20px -12px rgba(0,0,0,.16);overflow:hidden}
-.frame-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--ground);
-  box-shadow:0 1px 0 var(--sep)}
-.dots{display:flex;gap:6px}
-.dots i{width:10px;height:10px;border-radius:50%;background:var(--fill-2);display:block}
-.frame-url{flex:1;text-align:center;font-size:12px;color:var(--ink-3);letter-spacing:-.005em}
-
-/* ── the live clock inside the frame ── */
-.clock-bar{display:flex;align-items:center;gap:8px;padding:13px 16px;box-shadow:0 1px 0 var(--sep)}
-.clock-bar .ttl{font-size:14px;font-weight:600;letter-spacing:-.02em}
-.clock-bar .sp{flex:1}
-.clock-bar button{font-size:13px;font-weight:500;letter-spacing:-.01em;color:var(--ink-2);
-  padding:7px 12px;border-radius:9px;background:var(--fill)}
-.clock-bar button:hover{color:var(--ink);background:var(--fill-2)}
-.clock-body{display:flex;text-align:left}
-.clock-labs{flex:none;width:176px;display:grid;background:var(--paper);
-  box-shadow:1px 0 0 var(--sep);z-index:2}
-.clock-scroll{flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
-.clock-scroll::-webkit-scrollbar{display:none}
-.clock-grid{display:grid;position:relative}
-.zlab{display:flex;align-items:center;gap:9px;padding:0 12px 0 16px;overflow:hidden}
-.zlab .zi{flex:1;min-width:0}
-.zlab b{display:block;font-size:14px;font-weight:600;letter-spacing:-.015em;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.zlab span{display:block;font-size:11px;color:var(--ink-2);white-space:nowrap;
-  overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
-.zlab .x{width:22px;height:22px;border-radius:50%;background:var(--fill);color:var(--ink-2);
-  display:grid;place-items:center;font-size:13px;line-height:1;flex:none;opacity:0;transition:opacity .15s}
-.zlab:hover .x{opacity:1}
-.zc{display:flex;flex-direction:column;align-items:center;justify-content:center;
-  box-shadow:inset -1px 0 0 rgba(60,60,67,.10);font-variant-numeric:tabular-nums}
-.zc .n{font-size:13px;font-weight:500;letter-spacing:-.02em;line-height:1.15}
-.zc .m{font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;opacity:.45;line-height:1.15}
-.zc.night{background:var(--ink);color:#fff;box-shadow:inset -1px 0 0 rgba(255,255,255,.14)}
-.zc.night .m{opacity:.5}
-.zc.edge{background:rgba(0,0,0,.17)}
-.zc.day{background:var(--paper)}
-.zc.date .n{font-size:15px;font-weight:700}
-.zc.now{box-shadow:inset 0 0 0 2px var(--ink),inset -1px 0 0 rgba(60,60,67,.10)}
-.zc.night.now{box-shadow:inset 0 0 0 2px #fff}
-.clock-legend{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-2);
-  padding:11px 16px;box-shadow:0 -1px 0 var(--sep);white-space:nowrap;overflow-x:auto;
-  scrollbar-width:none;text-align:left}
-.clock-legend::-webkit-scrollbar{display:none}
-.clock-legend i{width:12px;height:12px;border-radius:3px;display:block;flex:none}
-.clock-legend i.day{background:var(--paper);box-shadow:inset 0 0 0 1px var(--sep)}
-.clock-legend i.edge{background:rgba(0,0,0,.17)}
-.clock-legend i.night{background:var(--ink)}
-.clock-legend .sp{flex:1;min-width:12px}
-.addrow{display:flex;gap:8px;padding:12px 16px;box-shadow:0 -1px 0 var(--sep);align-items:center}
-.addrow input{flex:1;font-size:15px;letter-spacing:-.01em;background:var(--fill);
-  border-radius:10px;padding:9px 12px;min-width:0}
-.addrow button{font-size:13px;font-weight:600;padding:9px 14px;border-radius:9px;background:var(--fill)}
-.hits{max-height:230px;overflow-y:auto;text-align:left}
-.hit{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;
-  box-shadow:0 -1px 0 var(--sep)}
-.hit:hover{background:var(--fill)}
-.hit .g{flex:1;min-width:0}
-.hit b{display:block;font-size:15px;font-weight:500;letter-spacing:-.01em}
-.hit span{display:block;font-size:12px;color:var(--ink-2)}
-.hit .t{font-size:15px;font-variant-numeric:tabular-nums;color:var(--ink-2)}
-
-/* ── proof row ── */
-.proof{display:grid;gap:2px;grid-template-columns:1fr;margin:56px 0 0;
-  border-radius:16px;overflow:hidden;background:var(--sep)}
-@media (min-width:700px){ .proof{grid-template-columns:repeat(3,1fr)} }
-.proof div{background:var(--paper);padding:22px 24px}
-.proof b{display:block;font-size:15px;font-weight:600;letter-spacing:-.02em;margin-bottom:5px}
-.proof span{font-size:14px;line-height:1.5;color:var(--ink-2);letter-spacing:-.008em}
-
-/* ── feature rows ── */
-section{padding:96px 0}
-.eyebrow{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--ink-3);margin-bottom:16px}
-h2{font-size:clamp(30px,4vw,44px);line-height:1.08;letter-spacing:-.038em;font-weight:800;
-  margin:0 0 18px;text-wrap:balance}
-.sub{font-size:17px;line-height:1.55;color:var(--ink-2);margin:0;letter-spacing:-.012em;max-width:520px}
-.row2{display:grid;gap:44px;align-items:center;grid-template-columns:1fr}
-@media (min-width:900px){
-  .row2{grid-template-columns:1fr 1fr;gap:64px}
-  .row2.flip .txt{order:2}
-}
-.shot{border-radius:16px;background:var(--paper);overflow:hidden;
-  box-shadow:0 0 0 1px rgba(60,60,67,.11),0 24px 50px -28px rgba(0,0,0,.34)}
-.shot-h{font-size:12px;color:var(--ink-3);padding:11px 16px;box-shadow:0 1px 0 var(--sep);
-  letter-spacing:-.005em;font-weight:500}
-/* the Team screen, in miniature — same language as the app: the hour ruler
-   once along the top, the team as one band, then a row of bars per person */
-.mini{display:grid;grid-template-columns:98px repeat(8,1fr);position:relative}
-.mini .l{display:flex;flex-direction:column;justify-content:center;padding:0 0 0 16px;height:40px}
-.mini .l b{font-size:12px;font-weight:600;letter-spacing:-.01em}
-.mini .l span{font-size:10px;color:var(--ink-2)}
-.mini .l span i{font-style:normal;font-weight:600;color:var(--ink-3);margin-left:4px}
-.mini .l+.l{box-shadow:inset 0 -1px 0 rgba(60,60,67,.10)}
-.mini .l.sum{height:34px;box-shadow:0 1px 0 var(--sep)}
-.mini .l.sum b{font-weight:700}
-.mini .r{height:24px;display:flex;align-items:flex-end;padding:0 0 4px 5px;font-size:10px;
-  font-weight:600;color:var(--ink-3);font-variant-numeric:tabular-nums;
-  box-shadow:inset 1px 0 0 rgba(60,60,67,.08)}
-.mini .r.q{box-shadow:inset 1px 0 0 rgba(60,60,67,.20)}
-.mini .r.on{color:var(--ink);font-weight:700}
-.mini .r.h{padding:0 0 5px 16px;font-size:9px;font-weight:700;letter-spacing:.07em;
-  text-transform:uppercase;box-shadow:none}
-.mini .c{position:relative;height:40px;display:grid;place-items:center;font-size:10px;font-weight:700;
-  letter-spacing:-.02em;font-variant-numeric:tabular-nums;
-  box-shadow:inset 1px 0 0 rgba(60,60,67,.09),inset 0 -1px 0 rgba(60,60,67,.10)}
-.mini .c.no,.mini .c.off{box-shadow:inset 0 -1px 0 rgba(60,60,67,.10)}
-.mini .c.no{box-shadow:inset 0 -1px 0 rgba(255,255,255,.14)}
-.mini .c.no::before,.mini .c.off::before{content:"";position:absolute;left:0;right:0;
-  top:4px;bottom:4px}
-.mini .c.s::before{left:1px;border-top-left-radius:7px;border-bottom-left-radius:7px}
-.mini .c.e::before{right:1px;border-top-right-radius:7px;border-bottom-right-radius:7px}
-.mini .c.no::before{background:var(--ink)}
-.mini .c.off::before{background:repeating-linear-gradient(135deg,
-  rgba(0,0,0,.24) 0 2px,rgba(0,0,0,.07) 2px 6px)}
-.mini .c b{position:relative;z-index:1;font-weight:700}
-.mini .c.no b{color:#fff}
-.mini .c.sum{height:34px;background:rgba(0,0,0,var(--k,0));
-  box-shadow:inset 1px 0 0 rgba(60,60,67,.09),inset 0 -1px 0 var(--sep)}
-.mini .c.sum.all::after{content:"";position:absolute;left:2px;right:2px;bottom:3px;height:3px;
-  border-radius:2px;background:var(--ink)}
-/* the chosen hour, framed the whole way down */
-.mini .pick{position:absolute;top:0;bottom:0;border:2px solid var(--ink);border-radius:9px;
-  box-shadow:0 0 0 2px var(--paper);z-index:2;pointer-events:none;
-  left:calc(98px + 3 * (100% - 98px) / 8);width:calc((100% - 98px) / 8)}
-.fake-slot{display:flex;align-items:center;gap:13px;padding:14px 16px;box-shadow:0 1px 0 var(--sep)}
-.fake-slot:last-child{box-shadow:none}
-.fake-slot .r{width:20px;height:20px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--ink-3);flex:none}
-.fake-slot.on .r{background:var(--ink);box-shadow:none;display:grid;place-items:center}
-.fake-slot.on .r::after{content:"";width:6px;height:6px;border-radius:50%;background:#fff}
-.fake-slot .w{flex:1;min-width:0}
-.fake-slot .w,.fake-slot .w1,.fake-slot .w2{display:block}
-.fake-slot .w1{font-size:15px;font-weight:600;letter-spacing:-.02em}
-.fake-slot .w1 em{font-style:normal;font-weight:400;color:var(--ink-2)}
-.fake-slot .w2{font-size:12.5px;color:var(--ink-2);margin-top:3px;letter-spacing:-.005em}
-.fake-slot .w2 b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
-.fake-slot .w2 .out{opacity:.5}
-.gcal{display:flex;align-items:center;justify-content:center;height:46px;margin:14px 16px 16px;
-  border-radius:13px;background:var(--ink);color:#fff;font-size:15px;font-weight:600;letter-spacing:-.02em}
-
-/* ── steps ── */
-.steps{display:grid;gap:16px;grid-template-columns:1fr;margin-top:32px}
-@media (min-width:820px){ .steps{grid-template-columns:repeat(3,1fr)} }
-.stepcard{border-radius:16px;padding:26px 24px 26px;box-shadow:inset 0 0 0 1px rgba(60,60,67,.12)}
-.stepcard .num{width:26px;height:26px;border-radius:8px;background:var(--ink);color:#fff;
-  display:grid;place-items:center;font-size:12px;font-weight:700;margin-bottom:16px}
-.stepcard h3{font-size:18px;font-weight:600;letter-spacing:-.025em;margin:0 0 8px}
-.stepcard p{font-size:14.5px;line-height:1.55;color:var(--ink-2);margin:0;letter-spacing:-.008em}
-.stepcard a{display:inline-block;margin-top:16px;font-size:14px;font-weight:600;color:var(--ink);
-  text-decoration:none}
-.stepcard a:hover{text-decoration:underline}
-
-/* ── dark band ── */
-.band{background:var(--ink);color:#fff;border-radius:24px;padding:64px 32px;text-align:center}
-.band h2{color:#fff;margin-bottom:14px}
-.band p{font-size:17px;line-height:1.55;color:rgba(255,255,255,.62);max-width:520px;
-  margin:0 auto 30px;letter-spacing:-.012em}
 
 /* ── footer ── */
-footer{padding:56px 0 64px;box-shadow:0 -1px 0 var(--sep);margin-top:96px}
-.fcols{display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start}
-.fcols .b{flex:1;min-width:200px}
-.fcols p{font-size:14px;line-height:1.55;color:var(--ink-2);margin:12px 0 0;max-width:280px}
-.fcol h5{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--ink-3);margin:0 0 12px}
-.fcol a{display:block;font-size:14px;color:var(--ink-2);text-decoration:none;margin-bottom:9px}
-.fcol a:hover{color:var(--ink)}
-.fbot{margin-top:40px;font-size:13px;color:var(--ink-3)}
+footer{padding:30px 0 40px;box-shadow:0 -1px 0 var(--sep);margin-top:80px}
+.fbot{font-size:13px;color:var(--ink-3)}
+.free{margin:20px 0 0;font-size:14px;font-weight:600;letter-spacing:-.01em;color:var(--ink-2)}
 .fbot a{color:var(--ink-2)}
 </style>
 </head>
@@ -254,174 +81,23 @@ footer{padding:56px 0 64px;box-shadow:0 -1px 0 var(--sep);margin-top:96px}
 
 <div class="wrap">
   <div class="hero">
-    <h1>The hour that works for <span class="hl">everyone</span>.</h1>
-    <p class="lede">Your team is spread across five timezones.
-      Seamlessly wired to your Google Calendar.</p>
+    <h1>Schedule meetings at hours that work for <span class="hl">everyone</span>.</h1>
+    <p class="lede">One link. Everyone answers for themselves, their Google Calendar
+      included, and the hour that suits the whole group draws itself.</p>
     <div class="herobtns">
       <a class="btn2 lg" href="/overlap/team/">Open Overlap</a>
     </div>
-  </div>
-
-  <!-- ══════════ live world clock, framed ══════════ -->
-  <div class="frame" id="clock">
-    <div class="frame-bar">
-      <span class="dots"><i></i><i></i><i></i></span>
-      <span class="frame-url" id="liveNow">—</span>
-    </div>
-    <div class="clock-bar">
-      <span class="ttl">Right now</span>
-      <span class="sp"></span>
-      <button id="addBtn">Add a city</button>
-      <button id="shareBtn">Copy link</button>
-    </div>
-    <div class="clock-body">
-      <div class="clock-labs" id="zlabs"></div>
-      <div class="clock-scroll" id="zscroll"><div class="clock-grid" id="zgrid"></div></div>
-    </div>
-    <div id="adder" style="display:none">
-      <div class="addrow"><input id="zsearch" placeholder="City or timezone" autocapitalize="off" autocorrect="off" spellcheck="false"><button id="addClose">Done</button></div>
-      <div class="hits" id="zhits"></div>
-    </div>
-    <div class="clock-legend">
-      <i class="day"></i><span>working day · 8am–5pm</span>
-      <i class="edge"></i><span>edges</span>
-      <i class="night"></i><span>night · 10pm–5am</span>
-      <span class="sp"></span><span id="zbase"></span>
-    </div>
-  </div>
-  <p class="micro" style="text-align:center">Live. Add your cities and copy the link — the view travels with it.</p>
-
-
-<div class="wrap">
-  <!-- ══════════ why ══════════ -->
-  <section id="why">
-    <div class="row2">
-      <div class="txt">
-        <div class="eyebrow">The problem</div>
-        <h2>Booking links solve the wrong half.</h2>
-        <p class="sub">A link is fine when one person picks from your calendar. It falls apart
-          the moment four people in four timezones need the same hour — and someone always ends
-          up doing the arithmetic in their head at 11pm.</p>
-      </div>
-      <div class="shot">
-        <div class="shot-h">Overlap · Team</div>
-        <div class="mini">
-          <div class="r h">Paris</div>
-          <div class="r q">12</div><div class="r"></div><div class="r">14</div><div class="r on">15</div>
-          <div class="r">16</div><div class="r"></div><div class="r q">18</div><div class="r"></div>
-
-          <div class="l sum"><b>Everyone</b><span>3 people</span></div>
-          <div class="c sum" style="--k:.142"></div><div class="c sum" style="--k:.142"></div>
-          <div class="c sum" style="--k:.142"></div><div class="c sum all"></div>
-          <div class="c sum" style="--k:.142"></div><div class="c sum" style="--k:.142"></div>
-          <div class="c sum" style="--k:.462"></div><div class="c sum" style="--k:.462"></div>
-
-          <div class="l"><b>You</b><span>Paris</span></div>
-          <div class="c"></div><div class="c"></div><div class="c"></div><div class="c"><b>15</b></div>
-          <div class="c"></div><div class="c"></div><div class="c off s"></div><div class="c off e"></div>
-
-          <div class="l"><b>Ana</b><span>New York<i>−6h</i></span></div>
-          <div class="c no s e"></div><div class="c off s"></div><div class="c off e"></div><div class="c"><b>9</b></div>
-          <div class="c"></div><div class="c"></div><div class="c"></div><div class="c"></div>
-
-          <div class="l"><b>Omar</b><span>Dubai<i>+2h</i></span></div>
-          <div class="c"></div><div class="c"></div><div class="c"></div><div class="c"><b>17</b></div>
-          <div class="c off s"></div><div class="c off"></div><div class="c off"></div><div class="c off e"></div>
-
-          <div class="pick"></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section style="padding-top:0">
-    <div class="row2 flip">
-      <div class="txt">
-        <div class="eyebrow">The answer</div>
-        <h2>It has an opinion about your day.</h2>
-        <p class="sub">Hours are ranked by how many people can make it, then by how civil the
-          hour is for all of them — nights cost more the deeper they go. Overlap won't offer you
-          2:30am when an 8am exists, and it says so out loud when no hour suits everybody.</p>
-      </div>
-      <div class="shot">
-        <div class="shot-h">Overlap · Plan</div>
-        <div class="fake-slot on">
-          <span class="r"></span>
-          <span class="w"><span class="w1">Wed 19 Aug <em>· everyone free</em></span>
-          <span class="w2"><b>15:00</b> Paris · <b>09:00</b> New York · <b>21:00</b> Singapore</span></span>
-        </div>
-        <div class="fake-slot">
-          <span class="r"></span>
-          <span class="w"><span class="w1">Thu 20 Aug <em>· 2 of 3 free</em></span>
-          <span class="w2"><b>16:00</b> Paris · <b>10:00</b> New York · <span class="out"><b>22:00</b> Singapore</span></span></span>
-        </div>
-        <div class="fake-slot">
-          <span class="r"></span>
-          <span class="w"><span class="w1">Fri 21 Aug <em>· everyone free</em></span>
-          <span class="w2"><b>14:00</b> Paris · <b>08:00</b> New York · <b>20:00</b> Singapore</span></span>
-        </div>
-        <div class="gcal">Add to Google Calendar</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════ how ══════════ -->
-  <section id="how" style="padding-top:0">
-    <div class="eyebrow">How it works</div>
-    <h2>One page. The meeting on the side, the answer in the middle.</h2>
-    <div class="steps">
-      <div class="stepcard">
-        <div class="num">1</div>
-        <h3>Set it on the side</h3>
-        <p>Who is in the team and their hours; what the meeting is, how long it
-          runs, who is coming. Then the button that makes it.</p>
-        <a href="/overlap/team/">Build a team →</a>
-      </div>
-      <div class="stepcard">
-        <div class="num">2</div>
-        <h3>Calendar</h3>
-        <p>The whole day, every clock at once, and the team as one band across
-          the top — white where everyone can make it.</p>
-        <a href="/overlap/team/">See the overlap →</a>
-      </div>
-      <div class="stepcard">
-        <div class="num">3</div>
-        <h3>Best times</h3>
-        <p>Scroll on. The hours ranked, each one written out in every timezone,
-          so nobody has to do the maths at 11pm.</p>
-        <a href="/overlap/plan/">Plan a meeting →</a>
-      </div>
-    </div>
-  </section>
-
-  <div class="band">
-    <h2>Stop doing timezone maths in your head.</h2>
-    <p>Thirty seconds to see whether your team has a good hour at all.</p>
-    <a class="btn2 lg inv" href="/overlap/team/">Open Overlap</a>
+    <p class="free">Free.</p>
   </div>
 
   <footer>
-    <div class="fcols">
-      <div class="b">
-        <a class="brand" href="/overlap/"><svg class="mark" viewBox="0 0 64 56" aria-hidden="true"><g fill="currentColor"><rect x="4" y="13" width="9" height="30" rx="4.5"/><rect x="18" y="4" width="9" height="48" rx="4.5"/><rect x="32" y="17" width="9" height="22" rx="4.5"/><rect x="46" y="9" width="9" height="38" rx="4.5"/></g><rect x="1" y="24" width="61" height="7" rx="3.5" fill="var(--mark-cut,#fff)"/></svg>Overlap</a>
-        <p>The hour that works for everyone. Built for teams that stopped sharing a building.</p>
-      </div>
-      <div class="fcol">
-        <h5>Product</h5>
-        <a href="/overlap/team/">Team</a><a href="/overlap/plan/">Plan</a><a href="/overlap/next/">What's next</a>
-      </div>
-      <div class="fcol">
-        <h5>More</h5>
-        <a href="#clock">World clock</a><a href="/">Jeremy Lasne</a>
-        <a href="https://github.com/jlasne/jeremyportfolio/tree/main/overlap">Source</a>
-      </div>
-    </div>
-    <div class="fbot">Built by <a href="/">Jeremy Lasne</a>. Your hours, nothing more.</div>
+    <div class="fbot">Built by <a href="/">Jeremy Lasne</a> ·
+      <a href="https://github.com/jlasne/jeremyportfolio/tree/main/overlap">Source</a> ·
+      Your hours, nothing more.</div>
   </footer>
 </div>
 
 <div class="toast" id="toast"></div>
-<script src="clock.js?v=4"></script>
 <script>
 addEventListener("scroll",function(){
   document.getElementById("top").classList.toggle("stuck",scrollY>4);

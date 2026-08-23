@@ -487,25 +487,11 @@ body.responding .foot{max-width:760px;margin-left:auto;margin-right:auto}
 <div class="door"><div class="door-in">
   <svg class="mark" viewBox="0 0 64 56" aria-hidden="true"><g fill="currentColor"><rect x="4" y="13" width="9" height="30" rx="4.5"/><rect x="18" y="4" width="9" height="48" rx="4.5"/><rect x="32" y="17" width="9" height="22" rx="4.5"/><rect x="46" y="9" width="9" height="38" rx="4.5"/></g><rect x="1" y="24" width="61" height="7" rx="3.5" fill="var(--mark-cut,#fff)"/></svg>
   <h1>Sign in to Overlap</h1>
-  <p class="lede">Your teams and your hours, on every device you use.</p>
+  <p class="lede">One tap, and your hours follow you to every meeting.</p>
   <div id="ways">
     <div id="gwrap"><div id="gbtn"></div></div>
-    <div class="or" id="or">or</div>
-    <form id="loginForm">
-      <div class="card">
-        <div class="field"><label>Email</label>
-          <input id="email" type="email" placeholder="you@company.com"
-            autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="email"></div>
-        <div class="field" id="codewrap" style="display:none"><label>Code</label>
-          <input id="code" inputmode="numeric" maxlength="6" placeholder="6 digits"
-            autocomplete="one-time-code"></div>
-      </div>
-      <button class="btn" id="go" type="submit">Continue</button>
-    </form>
   </div>
   <p class="note" id="note"></p>
-  <p class="guest" id="guestwrap"><a href="#" id="guest">Continue as guest</a>
-    <span>Have a look round first — it all works, it just stays in this browser.</span></p>
   <p class="foot"><a href="/overlap/">Back to Overlap</a></p>
 </div></div>
 <script>
@@ -533,9 +519,12 @@ window.OVERLAP_GOOGLE_CLIENT_ID = "431005215419-uc7v7t0cehr2etha1tar00qm2ujf7fhj
 /* ═══════════════════════════════════════════════════════════
    Overlap — the door.
 
-   Google if a client ID is configured, a six-digit code by email
-   otherwise. Either way it ends with a session token in local
-   storage and a redirect to wherever you were headed.
+   One way through it: Google. The page never sees a secret — it
+   receives an ID token, hands it to Convex, and Convex asks Google
+   whether the token is real and who it was minted for.
+
+   It ends with a session token in local storage and a redirect to
+   wherever you were headed, share link and all.
    ═══════════════════════════════════════════════════════════ */
 (function(){
 "use strict";
@@ -543,14 +532,17 @@ window.OVERLAP_GOOGLE_CLIENT_ID = "431005215419-uc7v7t0cehr2etha1tar00qm2ujf7fhj
 var CONVEX=(window.OVERLAP_CONVEX_URL||"").replace(/\/+$/,"");
 var LIVE=/^https?:\/\//.test(CONVEX);
 var GID=window.OVERLAP_GOOGLE_CLIENT_ID||"";
-var TOKKEY="overlap.token", GUESTKEY="overlap.guest";
+var TOKKEY="overlap.token";
 
 function $(s){ return document.querySelector(s); }
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){
   return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
 function base(){ return location.pathname.replace(/\/login\/?$/,"").replace(/\/$/,""); }
+
+/* next= carries the whole destination, hash included, so a share link
+   survives the round trip through Google. */
 function nextUrl(){
-  var m=location.search.match(/[?&]next=([^&]+)/);
+  var m=location.search.match(/[?&]next=([^&]*)/);
   var n=m?decodeURIComponent(m[1]):"";
   return (/^\/[^/]/.test(n)?n:base()+"/team/");
 }
@@ -576,81 +568,51 @@ function say(msg,bad){
   n.className="note"+(bad?" bad":"");
 }
 function land(r){
-  try{
-    localStorage.setItem(TOKKEY,r.token);
-    localStorage.removeItem(GUESTKEY);     /* no longer a guest */
-  }catch(e){}
-  location.replace(nextUrl());
-}
-/* A look round without an account. Everything works, it just lives in this
-   browser — no shared teams, nothing that follows you to another device. */
-function asGuest(){
-  try{ localStorage.setItem(GUESTKEY,"1"); }catch(e){}
+  try{ localStorage.setItem(TOKKEY,r.token); }catch(e){}
   location.replace(nextUrl());
 }
 
 /* ── already signed in? straight through ── */
 try{ if(LIVE && localStorage.getItem(TOKKEY)) location.replace(nextUrl()); }catch(e){}
 
+/* Somebody followed a share link. Say what they are walking into before
+   asking them to sign in for it. */
+var joining=(nextUrl().match(/#j=([A-Za-z0-9_-]+)/)||[])[1]||"";
+if(LIVE && joining){
+  cx("meet.peek",{invite:joining}).then(function(m){
+    if(!m) return;
+    $(".lede").textContent="“"+m.title+"” — "+
+      (m.count===1?"one person so far":m.count+" people so far")+
+      ". Sign in and your hours land on their calendar.";
+  }).catch(function(){});
+}
+
 if(!LIVE){
   $("#ways").innerHTML='<p class="note">No backend is connected yet, so there is '+
-    'nothing to sign in to — Overlap still works without an account.</p>'+
-    '<a class="btn" href="'+esc(base())+'/team/">Continue as guest</a>';
-  $("#guestwrap").style.display="none";
+    'nothing to sign in to.</p><a class="btn" href="'+esc(base())+'/team/">Open Overlap anyway</a>';
+} else if(!GID){
+  $("#ways").innerHTML='<p class="note">Google sign-in is not configured yet — '+
+    'set a client ID in <code>config.js</code>. See overlap/README.md.</p>';
 } else {
-  /* ── Google ── */
-  if(GID){
-    var sc=document.createElement("script");
-    sc.src="https://accounts.google.com/gsi/client";
-    sc.async=true; sc.defer=true;
-    sc.onload=function(){
-      try{
-        google.accounts.id.initialize({
-          client_id:GID,
-          callback:function(resp){
-            say("Signing you in…");
-            cx("auth.google",{credential:resp.credential}).then(land)
-              .catch(function(e){ say(e.message,true); });
-          }
-        });
-        google.accounts.id.renderButton($("#gbtn"),
-          {theme:"outline",size:"large",shape:"pill",text:"continue_with",width:320});
-      }catch(e){ say("Google sign-in could not start",true); }
-    };
-    sc.onerror=function(){ say("Google sign-in could not load",true); };
-    document.head.appendChild(sc);
-  } else {
-    $("#gwrap").style.display="none";
-    $("#or").style.display="none";
-  }
-
-  /* ── email code ── */
-  var stage=0, mail="";
-  function step(){
-    var btn=$("#go");
-    if(stage===0){
-      mail=$("#email").value.trim();
-      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)) return say("That email looks off",true);
-      btn.disabled=true; btn.textContent="…";
-      cx("auth.requestCode",{email:mail}).then(function(r){
-        stage=1; btn.disabled=false; btn.textContent="Sign in";
-        $("#codewrap").style.display="";
-        $("#email").disabled=true;
-        say(r&&r.devCode?("Dev mode — your code is "+r.devCode)
-                        :("A six-digit code is on its way to "+mail+"."));
-        $("#code").focus();
-      }).catch(function(e){ btn.disabled=false; btn.textContent="Continue"; say(e.message,true); });
-      return;
-    }
-    var code=$("#code").value.trim();
-    if(code.length<6) return say("Six digits",true);
-    btn.disabled=true; btn.textContent="…";
-    cx("auth.verify",{email:mail,code:code}).then(land)
-      .catch(function(e){ btn.disabled=false; btn.textContent="Sign in"; say(e.message,true); });
-  }
-  $("#go").addEventListener("click",step);
-  $("#loginForm").addEventListener("submit",function(ev){ ev.preventDefault(); step(); });
-  $("#guest").addEventListener("click",function(ev){ ev.preventDefault(); asGuest(); });
+  var sc=document.createElement("script");
+  sc.src="https://accounts.google.com/gsi/client";
+  sc.async=true; sc.defer=true;
+  sc.onload=function(){
+    try{
+      google.accounts.id.initialize({
+        client_id:GID,
+        callback:function(resp){
+          say("Signing you in…");
+          cx("auth.google",{credential:resp.credential}).then(land)
+            .catch(function(e){ say(e.message,true); });
+        }
+      });
+      google.accounts.id.renderButton($("#gbtn"),
+        {theme:"outline",size:"large",shape:"pill",text:"continue_with",width:320});
+    }catch(e){ say("Google sign-in could not start",true); }
+  };
+  sc.onerror=function(){ say("Google sign-in could not load",true); };
+  document.head.appendChild(sc);
 }
 })();
 
