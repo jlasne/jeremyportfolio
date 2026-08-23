@@ -23,6 +23,8 @@ def write(n, s):
 
 CSS   = read("app.css")
 APP   = read("app.js")
+TZ    = read("tz.js")
+BOOK  = read("book.js")
 LOGIN = read("login.js")
 
 HEAD = '''<meta charset="utf-8">
@@ -53,6 +55,9 @@ APP_PAGE = '''<!DOCTYPE html>
 %(config)s
 </script>
 <script>
+%(tz)s
+</script>
+<script>
 %(app)s
 </script>
 </body>
@@ -69,7 +74,7 @@ def build_app_pages():
         head = HEAD % {"title": "%s · Overlap" % title, "desc": desc,
                        "theme": "#F2F2F7", "scale": ", maximum-scale=1"}
         write("%s/index.html" % slug, APP_PAGE % {
-            "head": head, "css": CSS, "app": APP, "config": config, "step": step})
+            "head": head, "css": CSS, "app": APP, "tz": TZ, "config": config, "step": step})
 
 LOGIN_PAGE = '''<!DOCTYPE html>
 <html lang="en">
@@ -118,6 +123,80 @@ LOGIN_PAGE = '''<!DOCTYPE html>
 </html>
 '''
 
+BOOK_PAGE = '''<!DOCTYPE html>
+<html lang="en">
+<head>
+%(head)s
+<style>
+%(css)s
+.bk{max-width:560px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;
+  padding:0 16px calc(96px + env(safe-area-inset-bottom))}
+.bk-top{display:flex;align-items:center;gap:9px;padding:18px 4px 6px}
+.bk-top .mark{width:22px;height:19px;color:var(--ink);--mark-cut:var(--ground)}
+.bk-top b{font-size:15px;font-weight:700;letter-spacing:-.03em}
+.bk h1{font-size:clamp(26px,6vw,34px);line-height:1.08;letter-spacing:-.04em;font-weight:800;
+  margin:14px 4px 8px}
+.bk .lede{font-size:14.5px;line-height:1.45;color:var(--ink-2);margin:0 4px 16px;
+  letter-spacing:-.01em}
+.bk .chips{padding:0 0 16px}
+.day{margin-bottom:18px}
+.day h3{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 4px 8px}
+.times{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+.slot{height:44px;border-radius:11px;background:var(--paper);font-size:15px;font-weight:600;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums;box-shadow:inset 0 0 0 1px var(--sep)}
+.slot:active{transform:scale(.97)}
+.slot.on{background:var(--ink);color:var(--paper);box-shadow:none}
+.bk-dock{position:fixed;left:0;right:0;bottom:0;z-index:30;
+  padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+  background:rgba(242,242,247,.9);backdrop-filter:blur(20px) saturate(180%%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%%);box-shadow:0 -.5px 0 var(--sep)}
+.bk-dock .in{max-width:560px;margin:0 auto}
+.bk-dock .note{font-size:12px;color:var(--ink-2);text-align:center;padding-bottom:8px;
+  min-height:17px;letter-spacing:-.005em}
+.done{padding:34px 4px;text-align:center}
+.done h2{font-size:30px;letter-spacing:-.04em;font-weight:800;margin:0 0 10px}
+.done p{font-size:15px;line-height:1.5;color:var(--ink-2);margin:0 0 20px}
+.done .fine{font-size:13px;color:var(--ink-3);margin-top:14px}
+.done .back{display:inline-block;margin-top:18px;font-size:14px;font-weight:600;
+  color:var(--ink-2)}
+</style>
+</head>
+<body>
+<div class="bk" id="pane">
+  <div class="bk-top">
+    <svg class="mark" viewBox="0 0 64 56" aria-hidden="true"><g fill="currentColor"><rect x="4" y="13" width="9" height="30" rx="4.5"/><rect x="18" y="4" width="9" height="48" rx="4.5"/><rect x="32" y="17" width="9" height="22" rx="4.5"/><rect x="46" y="9" width="9" height="38" rx="4.5"/></g><rect x="1" y="24" width="61" height="7" rx="3.5" fill="var(--mark-cut,#fff)"/></svg>
+    <b>Overlap</b>
+  </div>
+  <h1 id="who">Loading</h1>
+  <p class="lede" id="lede"></p>
+  <div class="chips" id="durs"></div>
+  <div id="slots"></div>
+</div>
+<div class="bk-dock"><div class="in">
+  <div class="note" id="note"></div>
+  <button class="btn" id="go" disabled>Pick an hour</button>
+</div></div>
+<script>
+%(config)s
+</script>
+<script>
+%(tz)s
+</script>
+<script>
+%(book)s
+</script>
+</body>
+</html>
+'''
+
+def build_book():
+    head = HEAD % {"title": "Book a call · Overlap", "theme": "#F2F2F7",
+                   "desc": "Take an hour from somebody's free time.", "scale": ""}
+    write("book/index.html", BOOK_PAGE % {
+        "head": head, "css": CSS, "book": BOOK, "tz": TZ, "config": read("config.js")})
+
+
 def build_login():
     head = HEAD % {"title": "Sign in · Overlap", "theme": "#FFFFFF",
                    "desc": "Sign in to Overlap.", "scale": ""}
@@ -138,5 +217,6 @@ def build_landing():
 print("overlap: building self-contained pages")
 build_app_pages()
 build_login()
+build_book()
 build_landing()
 print("done")

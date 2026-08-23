@@ -3,138 +3,12 @@
    steps, the calendar in the middle, and the hour you pick on it.
    team/, plan/ and next/ all resolve; next/ opens the question.
    ═══════════════════════════════════════════════════════════════════ */
-document.getElementById("root").innerHTML = "<div class=\"app\">\n\n  <header class=\"nav\" id=\"nav\">\n    <div class=\"nav-bar\">\n      <a class=\"nav-title\" href=\"/overlap/\"><svg class=\"rail-mark\" viewBox=\"0 0 64 56\" aria-hidden=\"true\"><g fill=\"currentColor\"><rect x=\"4\" y=\"13\" width=\"9\" height=\"30\" rx=\"4.5\"/><rect x=\"18\" y=\"4\" width=\"9\" height=\"48\" rx=\"4.5\"/><rect x=\"32\" y=\"17\" width=\"9\" height=\"22\" rx=\"4.5\"/><rect x=\"46\" y=\"9\" width=\"9\" height=\"38\" rx=\"4.5\"/></g><rect x=\"1\" y=\"24\" width=\"61\" height=\"7\" rx=\"3.5\" fill=\"var(--mark-cut,#fff)\"/></svg>Overlap</a>\n      <span class=\"nav-sub\">The hour that works for everyone.</span>\n      <button class=\"nav-act\" id=\"shareTop\">Share</button>\n    </div>\n  </header>\n\n  <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 the side: everything you set, nothing you read \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n  <aside class=\"rail\" id=\"rail\">\n    <a class=\"rail-brand\" href=\"/overlap/\"><svg class=\"rail-mark\" viewBox=\"0 0 64 56\" aria-hidden=\"true\"><g fill=\"currentColor\"><rect x=\"4\" y=\"13\" width=\"9\" height=\"30\" rx=\"4.5\"/><rect x=\"18\" y=\"4\" width=\"9\" height=\"48\" rx=\"4.5\"/><rect x=\"32\" y=\"17\" width=\"9\" height=\"22\" rx=\"4.5\"/><rect x=\"46\" y=\"9\" width=\"9\" height=\"38\" rx=\"4.5\"/></g><rect x=\"1\" y=\"24\" width=\"61\" height=\"7\" rx=\"3.5\" fill=\"var(--mark-cut,#fff)\"/></svg>Overlap</a>\n    <div class=\"rail-body\">\n\n    <section class=\"rsec\" id=\"meetSec\">\n      <button class=\"rhead\" data-fold=\"meetSec\">\n        <i class=\"stepn\" id=\"s1\">1</i><span>Name it</span><b id=\"meetSum\"></b><i class=\"fold\"></i>\n      </button>\n      <div class=\"rbody\">\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Name</div></div>\n            <input id=\"titleInput\" placeholder=\"Intro call\" maxlength=\"80\">\n          </div>\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Length</div></div>\n            <div class=\"stepper\"><button data-dur=\"-\">\u2212</button><span></span><button data-dur=\"+\">+</button></div>\n            <div class=\"v\" id=\"durVal\" style=\"width:64px;text-align:right;font-variant-numeric:tabular-nums\"></div>\n          </div>\n        </div>\n        <button class=\"btn\" id=\"createBtn\">Create the meeting</button>\n        <div class=\"secfoot\" id=\"meetFoot\"></div>\n      </div>\n    </section>\n\n    <section class=\"rsec\" id=\"peopleSec\">\n      <button class=\"rhead\" data-fold=\"peopleSec\">\n        <i class=\"stepn\" id=\"s2\">2</i><span>Invite them</span><b id=\"peopleCount\"></b><i class=\"fold\"></i>\n      </button>\n      <div class=\"rbody\">\n        <div class=\"card\" id=\"peopleList\"></div>\n        <div class=\"secfoot\" id=\"guestFoot\"></div>\n      </div>\n    </section>\n    </div>\n\n    <div class=\"dock\">\n      <div class=\"dock-step\"><i class=\"stepn\" id=\"dockStep\">3</i><span id=\"dockHint\"></span></div>\n      <button class=\"btn\" id=\"primary\">Continue</button>\n      <div class=\"dock-more\">\n        <button class=\"linkbtn\" id=\"hoursBtn\">My hours</button>\n        <button class=\"linkbtn\" id=\"icsBtn\">Apple Calendar</button>\n      </div>\n    </div>\n\n    <div class=\"rail-foot\" id=\"railFoot\"></div>\n  </aside>\n\n  <main>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 the schedule \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"pane\" id=\"overlapSec\">\n      <div class=\"panehead\">\n        <h2>Calendar</h2>\n        <span class=\"ph-note\" id=\"gridTz\"></span>\n        <button class=\"linkbtn\" id=\"editToggle\">Edit hours</button>\n      </div>\n      <div class=\"weekbar\">\n        <div class=\"daytabs\" id=\"dayTabs\"></div>\n        <div class=\"wsteps\">\n          <button id=\"winPrev\" aria-label=\"Earlier week\">\u2039</button>\n          <button id=\"winNext\" aria-label=\"Later week\">\u203a</button>\n        </div>\n      </div>\n      <div class=\"weeksub\" id=\"windowSub\"></div>\n      <div class=\"wtb\">\n        <div class=\"wtblabs\" id=\"wtbLabs\"></div>\n        <div class=\"wtbscroll\" id=\"wtbScroll\"><div class=\"wtbgrid\" id=\"wtb\"></div></div>\n      </div>\n      <div class=\"legend\">\n        <i class=\"lg free\"></i><span>can meet</span>\n        <i class=\"lg part\"></i><span>off hours</span>\n        <i class=\"lg busy\"></i><span>asleep or busy</span>\n      </div>\n      <div class=\"secfoot\" id=\"editFoot\"></div>\n    </section>\n\n  </main>\n\n  <p class=\"foot\" id=\"foot\"></p>\n</div>\n\n<div class=\"scrim\" id=\"scrim\"></div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 your day, given once \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"sheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"sheetCancel\">Cancel</button>\n    <span class=\"t\" id=\"sheetTitle\">Your day</span>\n    <button class=\"p\" id=\"sheetDone\">Done</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\" id=\"sheetLede\">Answer this once. Every meeting after this starts with it already filled in.</p>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Working hours</span></div>\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"s-\">\u2212</button><span></span><button data-h=\"s+\">+</button></div><div class=\"v\" id=\"fStart\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>To</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"e-\">\u2212</button><span></span><button data-h=\"e+\">+</button></div><div class=\"v\" id=\"fEnd\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label style=\"width:auto;flex:1\">Weekends too</label><div class=\"switch\" id=\"fWeekend\"><i></i></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Asleep</span></div>\n    <div style=\"padding:0 16px 6px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"z-\">\u2212</button><span></span><button data-h=\"z+\">+</button></div><div class=\"v\" id=\"fSleep\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>Until</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"w-\">\u2212</button><span></span><button data-h=\"w+\">+</button></div><div class=\"v\" id=\"fWake\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Calendar</span></div>\n    <div style=\"padding:0 16px 6px\"><div class=\"card\" id=\"gcalCard\"></div></div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Timezone</span></div>\n    <div class=\"search\">\n      <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\"><circle cx=\"7\" cy=\"7\" r=\"5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M11 11l3.5 3.5\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n      <input id=\"citySearch\" placeholder=\"City or timezone\" autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\">\n    </div>\n    <div style=\"padding:0 16px\"><div class=\"card\" id=\"cityList\"></div></div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 your meetings \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"meetSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"meetClose\">Done</button>\n    <span class=\"t\">Your meetings</span>\n    <span style=\"width:44px\"></span>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">Every meeting you started or were invited to.</p>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"meetList\"></div></div>\n    <div style=\"padding:0 16px\" class=\"btnrow\" id=\"meetActs\"></div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 one link \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"shareSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"shareClose\">Done</button>\n    <span class=\"t\">Share</span>\n    <button class=\"p\" id=\"shareCopy\">Copy</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">One link. Whoever opens it signs in, answers for themselves, and lands on this calendar.</p>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\"><div class=\"linkbox\" id=\"shareLink\"></div></div></div>\n    <div style=\"padding:0 16px\"><button class=\"btn\" id=\"shareCopyBig\">Copy the link</button></div>\n    <div id=\"recentWrap\" style=\"display:none\">\n      <div style=\"padding:18px 20px 7px\"><div class=\"sechead\"><span>You have met with</span></div></div>\n      <div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"recentList\"></div></div>\n    </div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 what next \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"fbSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"fbClose\">Close</button>\n    <span class=\"t\">What next?</span>\n    <button class=\"p\" id=\"fbSend\">Send</button>\n  </div>\n  <div class=\"sheet-body\">\n    <div id=\"fbForm\">\n      <p class=\"sheet-lede\" id=\"fbLede\">Your event is open in Google Calendar. Press Save there.\n        While you are here: what should Overlap do that it doesn\u2019t?</p>\n      <div style=\"padding:0 16px 4px\"><div class=\"chips\" id=\"wantChips\"></div></div>\n      <div style=\"padding:12px 16px 0\">\n        <div class=\"card\">\n          <textarea id=\"fbText\" rows=\"4\" maxlength=\"800\" placeholder=\"Anything at all. What got in your way, what is missing, what you would pay for.\"></textarea>\n        </div>\n      </div>\n      <div style=\"padding:12px 16px 0\" id=\"fbEmailCard\">\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Email</div><div class=\"s\">If you want a reply.</div></div>\n            <input id=\"fbEmail\" type=\"email\" placeholder=\"Optional\" maxlength=\"80\" autocapitalize=\"off\" autocorrect=\"off\"\n                   style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\">\n          </div>\n        </div>\n      </div>\n      <p class=\"sheet-lede\" id=\"fbFoot\" style=\"padding-top:14px\"></p>\n    </div>\n    <div id=\"fbThanks\" style=\"display:none\">\n      <div style=\"padding:0 16px 16px\">\n        <div class=\"card\"><div class=\"empty\"><b>Thank you, noted.</b>Every line of this gets read. It decides what gets built next.</div></div>\n      </div>\n      <div style=\"padding:0 16px\"><button class=\"btn sec\" id=\"fbAgain\">Say something else</button></div>\n    </div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 people you have met \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"peepSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"peepClose\">Done</button>\n    <span class=\"t\">People</span>\n    <span style=\"width:44px\"></span>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">Everyone you have shared a meeting with, whoever did the inviting. Nothing to add and nothing to keep tidy: meeting somebody is what puts them here.</p>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"peepList\"></div></div>\n  </div>\n</div>\n\n<div class=\"toast\" id=\"toast\"></div>";
+document.getElementById("root").innerHTML = "<div class=\"app\">\n\n  <header class=\"nav\" id=\"nav\">\n    <div class=\"nav-bar\">\n      <a class=\"nav-title\" href=\"/overlap/\"><svg class=\"rail-mark\" viewBox=\"0 0 64 56\" aria-hidden=\"true\"><g fill=\"currentColor\"><rect x=\"4\" y=\"13\" width=\"9\" height=\"30\" rx=\"4.5\"/><rect x=\"18\" y=\"4\" width=\"9\" height=\"48\" rx=\"4.5\"/><rect x=\"32\" y=\"17\" width=\"9\" height=\"22\" rx=\"4.5\"/><rect x=\"46\" y=\"9\" width=\"9\" height=\"38\" rx=\"4.5\"/></g><rect x=\"1\" y=\"24\" width=\"61\" height=\"7\" rx=\"3.5\" fill=\"var(--mark-cut,#fff)\"/></svg>Overlap</a>\n      <span class=\"nav-sub\">The hour that works for everyone.</span>\n      <button class=\"nav-act\" id=\"shareTop\">Share</button>\n    </div>\n  </header>\n\n  <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 the side: everything you set, nothing you read \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n  <aside class=\"rail\" id=\"rail\">\n    <a class=\"rail-brand\" href=\"/overlap/\"><svg class=\"rail-mark\" viewBox=\"0 0 64 56\" aria-hidden=\"true\"><g fill=\"currentColor\"><rect x=\"4\" y=\"13\" width=\"9\" height=\"30\" rx=\"4.5\"/><rect x=\"18\" y=\"4\" width=\"9\" height=\"48\" rx=\"4.5\"/><rect x=\"32\" y=\"17\" width=\"9\" height=\"22\" rx=\"4.5\"/><rect x=\"46\" y=\"9\" width=\"9\" height=\"38\" rx=\"4.5\"/></g><rect x=\"1\" y=\"24\" width=\"61\" height=\"7\" rx=\"3.5\" fill=\"var(--mark-cut,#fff)\"/></svg>Overlap</a>\n    <div class=\"rail-body\">\n\n    <section class=\"rsec\" id=\"meetSec\">\n      <button class=\"rhead\" data-fold=\"meetSec\">\n        <i class=\"stepn\" id=\"s1\">1</i><span>Name it</span><b id=\"meetSum\"></b><i class=\"fold\"></i>\n      </button>\n      <div class=\"rbody\">\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Name</div></div>\n            <input id=\"titleInput\" placeholder=\"Intro call\" maxlength=\"80\">\n          </div>\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Length</div></div>\n            <div class=\"stepper\"><button data-dur=\"-\">\u2212</button><span></span><button data-dur=\"+\">+</button></div>\n            <div class=\"v\" id=\"durVal\" style=\"width:64px;text-align:right;font-variant-numeric:tabular-nums\"></div>\n          </div>\n        </div>\n        <button class=\"btn\" id=\"createBtn\">Create the meeting</button>\n        <div class=\"secfoot\" id=\"meetFoot\"></div>\n      </div>\n    </section>\n\n    <section class=\"rsec\" id=\"peopleSec\">\n      <button class=\"rhead\" data-fold=\"peopleSec\">\n        <i class=\"stepn\" id=\"s2\">2</i><span>Invite them</span><b id=\"peopleCount\"></b><i class=\"fold\"></i>\n      </button>\n      <div class=\"rbody\">\n        <div class=\"card\" id=\"peopleList\"></div>\n        <div class=\"secfoot\" id=\"guestFoot\"></div>\n      </div>\n    </section>\n    </div>\n\n    <div class=\"dock\">\n      <div class=\"dock-step\"><i class=\"stepn\" id=\"dockStep\">3</i><span id=\"dockHint\"></span></div>\n      <button class=\"btn\" id=\"primary\">Continue</button>\n      <div class=\"dock-more\">\n        <button class=\"linkbtn\" id=\"hoursBtn\">My hours</button>\n        <button class=\"linkbtn\" id=\"icsBtn\">Apple Calendar</button>\n      </div>\n    </div>\n\n    <div class=\"rail-foot\" id=\"railFoot\"></div>\n  </aside>\n\n  <main>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 the schedule \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"pane\" id=\"overlapSec\">\n      <div class=\"panehead\">\n        <h2>Calendar</h2>\n        <span class=\"ph-note\" id=\"gridTz\"></span>\n        <button class=\"linkbtn\" id=\"editToggle\">Edit hours</button>\n      </div>\n      <div class=\"weekbar\">\n        <div class=\"daytabs\" id=\"dayTabs\"></div>\n        <div class=\"wsteps\">\n          <button id=\"winPrev\" aria-label=\"Earlier week\">\u2039</button>\n          <button id=\"winNext\" aria-label=\"Later week\">\u203a</button>\n        </div>\n      </div>\n      <div class=\"weeksub\" id=\"windowSub\"></div>\n      <div class=\"wtb\">\n        <div class=\"wtblabs\" id=\"wtbLabs\"></div>\n        <div class=\"wtbscroll\" id=\"wtbScroll\"><div class=\"wtbgrid\" id=\"wtb\"></div></div>\n      </div>\n      <div class=\"legend\">\n        <i class=\"lg free\"></i><span>can meet</span>\n        <i class=\"lg part\"></i><span>off hours</span>\n        <i class=\"lg busy\"></i><span>asleep or busy</span>\n      </div>\n      <div class=\"secfoot\" id=\"editFoot\"></div>\n    </section>\n\n  </main>\n\n  <p class=\"foot\" id=\"foot\"></p>\n</div>\n\n<div class=\"scrim\" id=\"scrim\"></div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 your day, given once \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"sheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"sheetCancel\">Cancel</button>\n    <span class=\"t\" id=\"sheetTitle\">Your day</span>\n    <button class=\"p\" id=\"sheetDone\">Done</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\" id=\"sheetLede\">Answer this once. Every meeting after this starts with it already filled in.</p>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Working hours</span></div>\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"s-\">\u2212</button><span></span><button data-h=\"s+\">+</button></div><div class=\"v\" id=\"fStart\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>To</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"e-\">\u2212</button><span></span><button data-h=\"e+\">+</button></div><div class=\"v\" id=\"fEnd\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label style=\"width:auto;flex:1\">Weekends too</label><div class=\"switch\" id=\"fWeekend\"><i></i></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Asleep</span></div>\n    <div style=\"padding:0 16px 6px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"z-\">\u2212</button><span></span><button data-h=\"z+\">+</button></div><div class=\"v\" id=\"fSleep\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>Until</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"w-\">\u2212</button><span></span><button data-h=\"w+\">+</button></div><div class=\"v\" id=\"fWake\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Calendar</span></div>\n    <div style=\"padding:0 16px 6px\"><div class=\"card\" id=\"gcalCard\"></div></div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Timezone</span></div>\n    <div class=\"search\">\n      <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\"><circle cx=\"7\" cy=\"7\" r=\"5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M11 11l3.5 3.5\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n      <input id=\"citySearch\" placeholder=\"City or timezone\" autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\">\n    </div>\n    <div style=\"padding:0 16px\"><div class=\"card\" id=\"cityList\"></div></div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 your meetings \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"meetSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"meetClose\">Done</button>\n    <span class=\"t\">Your meetings</span>\n    <span style=\"width:44px\"></span>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">Every meeting you started or were invited to.</p>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"meetList\"></div></div>\n    <div style=\"padding:0 16px\" class=\"btnrow\" id=\"meetActs\"></div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 one link \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"shareSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"shareClose\">Done</button>\n    <span class=\"t\">Share</span>\n    <button class=\"p\" id=\"shareCopy\">Copy</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">One link. Whoever opens it signs in, answers for themselves, and lands on this calendar.</p>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\"><div class=\"linkbox\" id=\"shareLink\"></div></div></div>\n    <div style=\"padding:0 16px\"><button class=\"btn\" id=\"shareCopyBig\">Copy the link</button></div>\n    <div style=\"padding:18px 20px 7px\"><div class=\"sechead\"><span>Your booking link</span></div></div>\n    <div style=\"padding:0 16px 8px\"><div class=\"card\" id=\"bookCard\"></div></div>\n    <div style=\"padding:0 16px 16px\"><div class=\"secfoot\" id=\"bookFoot\" style=\"padding:2px 4px 0\"></div></div>\n    <div id=\"recentWrap\" style=\"display:none\">\n      <div style=\"padding:18px 20px 7px\"><div class=\"sechead\"><span>You have met with</span></div></div>\n      <div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"recentList\"></div></div>\n    </div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 what next \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"fbSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"fbClose\">Close</button>\n    <span class=\"t\">What next?</span>\n    <button class=\"p\" id=\"fbSend\">Send</button>\n  </div>\n  <div class=\"sheet-body\">\n    <div id=\"fbForm\">\n      <p class=\"sheet-lede\" id=\"fbLede\">Your event is open in Google Calendar. Press Save there.\n        While you are here: what should Overlap do that it doesn\u2019t?</p>\n      <div style=\"padding:0 16px 4px\"><div class=\"chips\" id=\"wantChips\"></div></div>\n      <div style=\"padding:12px 16px 0\">\n        <div class=\"card\">\n          <textarea id=\"fbText\" rows=\"4\" maxlength=\"800\" placeholder=\"Anything at all. What got in your way, what is missing, what you would pay for.\"></textarea>\n        </div>\n      </div>\n      <div style=\"padding:12px 16px 0\" id=\"fbEmailCard\">\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Email</div><div class=\"s\">If you want a reply.</div></div>\n            <input id=\"fbEmail\" type=\"email\" placeholder=\"Optional\" maxlength=\"80\" autocapitalize=\"off\" autocorrect=\"off\"\n                   style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\">\n          </div>\n        </div>\n      </div>\n      <p class=\"sheet-lede\" id=\"fbFoot\" style=\"padding-top:14px\"></p>\n    </div>\n    <div id=\"fbThanks\" style=\"display:none\">\n      <div style=\"padding:0 16px 16px\">\n        <div class=\"card\"><div class=\"empty\"><b>Thank you, noted.</b>Every line of this gets read. It decides what gets built next.</div></div>\n      </div>\n      <div style=\"padding:0 16px\"><button class=\"btn sec\" id=\"fbAgain\">Say something else</button></div>\n    </div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 people you have met \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"peepSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"peepClose\">Done</button>\n    <span class=\"t\">People</span>\n    <span style=\"width:44px\"></span>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">Everyone you have shared a meeting with, whoever did the inviting. Nothing to add and nothing to keep tidy: meeting somebody is what puts them here.</p>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"peepList\"></div></div>\n  </div>\n</div>\n\n<div class=\"toast\" id=\"toast\"></div>";
 
 (function(){
 "use strict";
 
-/* ═══════════════ cities ═══════════════ */
-var CITIES = [
-["San Francisco","United States","America/Los_Angeles"],["Los Angeles","United States","America/Los_Angeles"],
-["Seattle","United States","America/Los_Angeles"],["Vancouver","Canada","America/Vancouver"],
-["Denver","United States","America/Denver"],["Phoenix","United States","America/Phoenix"],
-["Mexico City","Mexico","America/Mexico_City"],["Chicago","United States","America/Chicago"],
-["Austin","United States","America/Chicago"],["Toronto","Canada","America/Toronto"],
-["New York","United States","America/New_York"],["Miami","United States","America/New_York"],
-["Boston","United States","America/New_York"],["Bogotá","Colombia","America/Bogota"],
-["Lima","Peru","America/Lima"],["Santiago","Chile","America/Santiago"],
-["Buenos Aires","Argentina","America/Argentina/Buenos_Aires"],["São Paulo","Brazil","America/Sao_Paulo"],
-["Reykjavík","Iceland","Atlantic/Reykjavik"],["Lisbon","Portugal","Europe/Lisbon"],
-["London","United Kingdom","Europe/London"],["Dublin","Ireland","Europe/Dublin"],
-["Paris","France","Europe/Paris"],["Madrid","Spain","Europe/Madrid"],
-["Barcelona","Spain","Europe/Madrid"],["Amsterdam","Netherlands","Europe/Amsterdam"],
-["Brussels","Belgium","Europe/Brussels"],["Berlin","Germany","Europe/Berlin"],
-["Munich","Germany","Europe/Berlin"],["Zurich","Switzerland","Europe/Zurich"],
-["Milan","Italy","Europe/Rome"],["Rome","Italy","Europe/Rome"],
-["Copenhagen","Denmark","Europe/Copenhagen"],["Stockholm","Sweden","Europe/Stockholm"],
-["Oslo","Norway","Europe/Oslo"],["Helsinki","Finland","Europe/Helsinki"],
-["Warsaw","Poland","Europe/Warsaw"],["Prague","Czechia","Europe/Prague"],
-["Vienna","Austria","Europe/Vienna"],["Budapest","Hungary","Europe/Budapest"],
-["Athens","Greece","Europe/Athens"],["Bucharest","Romania","Europe/Bucharest"],
-["Istanbul","Türkiye","Europe/Istanbul"],["Kyiv","Ukraine","Europe/Kyiv"],
-["Moscow","Russia","Europe/Moscow"],["Lagos","Nigeria","Africa/Lagos"],
-["Accra","Ghana","Africa/Accra"],["Casablanca","Morocco","Africa/Casablanca"],
-["Cairo","Egypt","Africa/Cairo"],["Nairobi","Kenya","Africa/Nairobi"],
-["Cape Town","South Africa","Africa/Johannesburg"],["Johannesburg","South Africa","Africa/Johannesburg"],
-["Tel Aviv","Israel","Asia/Tel_Aviv"],["Dubai","UAE","Asia/Dubai"],
-["Riyadh","Saudi Arabia","Asia/Riyadh"],["Karachi","Pakistan","Asia/Karachi"],
-["Bengaluru","India","Asia/Kolkata"],["Mumbai","India","Asia/Kolkata"],
-["Delhi","India","Asia/Kolkata"],["Colombo","Sri Lanka","Asia/Colombo"],
-["Dhaka","Bangladesh","Asia/Dhaka"],["Bangkok","Thailand","Asia/Bangkok"],
-["Jakarta","Indonesia","Asia/Jakarta"],["Ho Chi Minh City","Vietnam","Asia/Ho_Chi_Minh"],
-["Singapore","Singapore","Asia/Singapore"],["Kuala Lumpur","Malaysia","Asia/Kuala_Lumpur"],
-["Hong Kong","Hong Kong","Asia/Hong_Kong"],["Shanghai","China","Asia/Shanghai"],
-["Beijing","China","Asia/Shanghai"],["Shenzhen","China","Asia/Shanghai"],
-["Taipei","Taiwan","Asia/Taipei"],["Manila","Philippines","Asia/Manila"],
-["Seoul","South Korea","Asia/Seoul"],["Tokyo","Japan","Asia/Tokyo"],
-["Osaka","Japan","Asia/Tokyo"],["Perth","Australia","Australia/Perth"],
-["Adelaide","Australia","Australia/Adelaide"],["Brisbane","Australia","Australia/Brisbane"],
-["Melbourne","Australia","Australia/Melbourne"],["Sydney","Australia","Australia/Sydney"],
-["Auckland","New Zealand","Pacific/Auckland"],["Honolulu","United States","Pacific/Honolulu"],
-["UTC","Coordinated","UTC"]
-];
-var DUR_MIN=15, DUR_MAX=480, DUR_STEP=15;
-var SLOT = 60;                       /* one column = one hour */
-var DAYS = 7;                        /* columns */
-
-/* ═══════════════ timezone math ═══════════════ */
-var _dtf = {};
-function dtf(tz){
-  if(!_dtf[tz]) _dtf[tz] = new Intl.DateTimeFormat("en-GB",{timeZone:tz,hourCycle:"h23",
-    year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit"});
-  return _dtf[tz];
-}
-/* wall-clock parts of an instant, in a zone */
-function zp(ts,tz){
-  var o={}, p=dtf(tz).formatToParts(new Date(ts)), i;
-  for(i=0;i<p.length;i++) o[p[i].type]=p[i].value;
-  return {y:+o.year,m:+o.month,d:+o.day,H:+o.hour,M:+o.minute,S:+o.second};
-}
-/* zone offset from UTC, in minutes, at an instant */
-function off(ts,tz){
-  var p=zp(ts,tz);
-  return (Date.UTC(p.y,p.m-1,p.d,p.H,p.M,p.S)-Math.floor(ts/1000)*1000)/60000;
-}
-/* a wall clock in a zone → the instant it names (two passes cover DST) */
-function wall(y,m,d,H,M,tz){
-  var g=Date.UTC(y,m-1,d,H,M), ts=g-off(g,tz)*60000;
-  return g-off(ts,tz)*60000;
-}
-function dow(ts,tz){ var p=zp(ts,tz); return new Date(Date.UTC(p.y,p.m-1,p.d)).getUTCDay(); }
-function dayKey(ts,tz){ var p=zp(ts,tz); return p.y*10000+p.m*100+p.d; }
-
-var HOUR12 = (function(){
-  try{ return !!new Intl.DateTimeFormat(undefined,{hour:"numeric"}).resolvedOptions().hour12; }
-  catch(e){ return false; }
-})();
-function pad(n){ return n<10?"0"+n:""+n; }
-function fmtT(ts,tz){
-  var p=zp(ts,tz);
-  if(!HOUR12) return pad(p.H)+":"+pad(p.M);
-  var h=p.H%12; if(h===0) h=12;
-  return h+":"+pad(p.M)+" "+(p.H<12?"AM":"PM");
-}
-function fmtH(ts,tz){
-  var p=zp(ts,tz);
-  if(!HOUR12) return pad(p.H)+":00";
-  var h=p.H%12; if(h===0) h=12;
-  return h+(p.H<12?"am":"pm");
-}
-function fmtHourShort(h){
-  if(!HOUR12) return ""+h;
-  var x=h%12; if(x===0) x=12;
-  return x+(h<12?"a":"p");
-}
-function fmtDur(m){
-  if(m<60) return m+" min";
-  var h=Math.floor(m/60), r=m%60;
-  return h+"h"+(r?" "+r+"m":"");
-}
-function fmtHour(h){
-  if(!HOUR12) return pad(h)+":00";
-  var x=h%12; if(x===0) x=12;
-  return x+(h<12?" am":" pm");
-}
-var WD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-var MO=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-function fmtDate(ts,tz){ var p=zp(ts,tz); return WD[dow(ts,tz)]+" "+p.d+" "+MO[p.m-1]; }
-function fmtLongDate(ts,tz){
-  var p=zp(ts,tz), wd=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][dow(ts,tz)];
-  return wd+" "+p.d+" "+MO[p.m-1];
-}
-/* +37 → "GMT+9:30" style label */
-function tzLabel(tz,ts){
-  var o=off(ts,tz), s=o<0?"−":"+", a=Math.abs(o);
-  var h=Math.floor(a/60), m=a%60;
-  return "GMT"+(o===0?"":s+h+(m?":"+pad(m):""));
-}
-function tzCity(tz){
-  for(var i=0;i<CITIES.length;i++) if(CITIES[i][2]===tz) return CITIES[i][0];
-  return tz.split("/").pop().replace(/_/g," ");
-}
-
 /* ═══════════════ state ═══════════════ */
-var LOCAL_TZ=(function(){ try{ return Intl.DateTimeFormat().resolvedOptions().timeZone||"UTC"; }catch(e){ return "UTC"; } })();
 var KEY="overlap.v4";
 var uid=0;
 function newPerson(name,tz,you){
@@ -853,7 +727,8 @@ function closeMeetings(){
 function renderMeetings(){
   var list=(ME&&ME.meetings)||[];
   $("#meetList").innerHTML=(list.length?list.map(function(m){
-    var when=m.startsAt?fmtLongDate(m.startsAt,LOCAL_TZ)+" · "+fmtT(m.startsAt,LOCAL_TZ):"not booked yet";
+    var when=m.startsAt?fmtLongDate(m.startsAt,LOCAL_TZ)+" · "+fmtT(m.startsAt,LOCAL_TZ)
+                       :(m.kind==="call"?"a call":"not booked yet");
     return '<div class="row tap" data-pickmeet="'+esc(m.id)+'">'+
       '<div class="avatar'+(m.id===S.mid?" you":"")+'">'+esc((m.title||"M").slice(0,2).toUpperCase())+"</div>"+
       '<div class="grow"><div class="t">'+esc(m.title||"Meeting")+"</div>"+
@@ -870,7 +745,7 @@ function renderMeetings(){
 function openShare(){
   if(!inMeeting()) return toast("Create the meeting first");
   $("#shareLink").textContent=shareUrl();
-  renderRecent();
+  renderRecent(); renderBook();
   $("#scrim").classList.add("on"); $("#shareSheet").classList.add("on");
   document.body.style.overflow="hidden";
 }
@@ -878,6 +753,29 @@ function closeShare(){
   $("#shareSheet").classList.remove("on"); $("#scrim").classList.remove("on");
   document.body.style.overflow="";
 }
+/* Your own link, the one that does not expire and is not about any single
+   meeting. Somebody opens it, sees your free hours and takes one. */
+function bookUrl(h){ return location.origin+basePath()+"/book/#"+h; }
+function renderBook(){
+  var c=$("#bookCard"), f=$("#bookFoot"), h=ME&&ME.profile&&ME.profile.handle;
+  if(!c) return;
+  if(!signedIn()){ c.innerHTML='<div class="empty">Sign in to get one.</div>'; f.textContent=""; return; }
+  if(!h){
+    c.innerHTML='<div class="row tap" data-handle="1"><div class="plus">+</div>'+
+      '<div class="grow"><div class="t">Pick a handle</div>'+
+      '<div class="s">Turns into a link you can send anybody</div></div>'+
+      '<div class="chev"></div></div>';
+    f.textContent="One link, permanent. They pick an hour, you get the invitation.";
+    return;
+  }
+  c.innerHTML='<div class="linkbox">'+esc(bookUrl(h))+"</div>"+
+    '<div class="row tap" data-bookcopy="1"><div class="plus">↗</div>'+
+    '<div class="grow"><div class="t">Copy your booking link</div></div><div class="chev"></div></div>'+
+    '<div class="row tap" data-handle="1"><div class="grow"><div class="t">Change the handle</div>'+
+    '<div class="s">'+esc(h)+'</div></div><div class="chev"></div></div>';
+  f.textContent="Anyone who opens it books straight into your free hours.";
+}
+
 /* In the share sheet it is a reminder of who the link still has to reach,
    so the ones already here are not worth listing. */
 function renderRecent(){
@@ -1262,6 +1160,22 @@ document.addEventListener("click",function(ev){
   if((el=up("data-share"))){ openShare(); return; }
   if((el=up("data-meetings"))){ openMeetings(); return; }
   if((el=up("data-peeps"))){ openPeep(); return; }
+  if((el=up("data-bookcopy"))){
+    copyText(bookUrl(ME.profile.handle),"Booking link copied"); return;
+  }
+  if((el=up("data-handle"))){
+    var now=(ME&&ME.profile&&ME.profile.handle)||"";
+    var want=prompt("Your booking link: letters, numbers and dashes.\n\n"+
+      location.origin+basePath()+"/book/#", now);
+    if(want===null) return;
+    cx("meet.setHandle",{token:token(),handle:want})
+      .then(function(r){
+        if(ME&&ME.profile) ME.profile.handle=r.handle;
+        renderBook(); haptic(); toast("Your link is ready");
+      })
+      .catch(function(e){ toast(e.message); });
+    return;
+  }
   if((el=up("data-peep"))){ inviteContact(el.getAttribute("data-peep")); return; }
   if((el=up("data-hours"))){ openSheet(false); return; }
   if((el=up("data-gcal"))){

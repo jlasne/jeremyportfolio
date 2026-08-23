@@ -112,6 +112,10 @@ export const me = query({
       ready: !!user.setupAt,
       ...defaults(user, "UTC"),
       tz: user.tz ?? null,
+      handle: user.handle ?? null,
+      minNoticeMin: user.minNoticeMin ?? 120,
+      windowDays: user.windowDays ?? 14,
+      bufferMin: user.bufferMin ?? 0,
     };
     const shape = {
       user: { name: user.name, email: user.email },
@@ -121,6 +125,7 @@ export const me = query({
         title: m.title,
         startsAt: m.startsAt ?? null,
         createdAt: m.createdAt,
+        kind: m.kind ?? "team",
       })),
     };
 
@@ -150,6 +155,7 @@ export const me = query({
         invite: meeting.invite,
         startsAt: meeting.startsAt ?? null,
         isOwner: meeting.ownerId === user._id,
+        kind: meeting.kind ?? "team",
       },
       participants: participants.map((p) => shapeSeat(p, user._id)),
       contacts,
@@ -383,6 +389,189 @@ export const book = mutation({
       startsAt,
       bookedBy: user._id,
       bookedAt: Date.now(),
+    });
+    return null;
+  },
+});
+
+/* ═══════════════ the booking link ═══════════════
+   Your handle is a permanent address for your free hours. Anyone can read
+   what shape your week is; only somebody signed in can take an hour out of
+   it, which is the point — the hour lands in a calendar with their email
+   on it, and they turn up in your people afterwards.
+   ═══════════════════════════════════════════════ */
+
+const HANDLE = /^[a-z0-9][a-z0-9-]{1,29}$/;
+
+export const setHandle = mutation({
+  args: { token: v.string(), handle: v.string() },
+  handler: async (ctx, { token, handle }) => {
+    const user = await mustBe(ctx, token);
+    const want = handle.trim().toLowerCase();
+    if (!HANDLE.test(want))
+      throw new Error("Letters, numbers and dashes, two to thirty of them");
+    const taken = await ctx.db
+      .query("users")
+      .withIndex("by_handle", (q) => q.eq("handle", want))
+      .unique();
+    if (taken && taken._id !== user._id) throw new Error("Somebody has that one");
+    await ctx.db.patch(user._id, { handle: want });
+    return { handle: want };
+  },
+});
+
+/**
+ * Everything the booking page needs to draw a week of free hours, and
+ * nothing else about you. Deliberately readable without a session: making
+ * somebody sign in before they can see whether you have a Tuesday is how
+ * you lose them.
+ */
+export const host = query({
+  args: { handle: v.string() },
+  handler: async (ctx, { handle }) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_handle", (q) => q.eq("handle", handle.trim().toLowerCase()))
+      .unique();
+    if (!user || !user.setupAt) return null;
+
+    /* Their own row in their own meetings carries the calendar reading, so
+       take the freshest one rather than asking Google here. */
+    const seats = await ctx.db
+      .query("participants")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+    const freshest = seats
+      .filter((s) => (s.gcal ?? 0) > 0)
+      .sort((a, b) => (b.gcal ?? 0) - (a.gcal ?? 0))[0];
+
+    /* Hours already spoken for: anything booked in a meeting they are in. */
+    const mine = (await Promise.all(seats.map((s) => ctx.db.get(s.meetingId))))
+      .filter((m): m is Doc<"meetings"> => !!m && !!m.startsAt);
+
+    const d = defaults(user, "UTC");
+    return {
+      name: user.name,
+      tz: d.tz,
+      startHour: d.startHour,
+      endHour: d.endHour,
+      weekends: d.weekends,
+      sleepStart: d.sleepStart,
+      sleepEnd: d.sleepEnd,
+      busy: freshest?.busy ?? [],
+      taken: mine.map((m) => ({ at: m.startsAt!, mins: m.durationMin })),
+      minNoticeMin: user.minNoticeMin ?? 120,
+      windowDays: user.windowDays ?? 14,
+      bufferMin: user.bufferMin ?? 0,
+    };
+  },
+});
+
+/**
+ * Take an hour. Signed in, because the whole point is that the event names
+ * you: your email goes on the invitation, and each of you turns up in the
+ * other's people from then on.
+ */
+export const bookWith = mutation({
+  args: {
+    token: v.string(),
+    handle: v.string(),
+    startsAt: v.number(),
+    durationMin: v.optional(v.number()),
+    tz: v.optional(v.string()),
+    note: v.optional(v.string()),
+  },
+  handler: async (ctx, { token, handle, startsAt, durationMin, tz, note }) => {
+    const guest = await mustBe(ctx, token);
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_handle", (q) => q.eq("handle", handle.trim().toLowerCase()))
+      .unique();
+    if (!user) throw new Error("No such booking link");
+    if (user._id === guest._id) throw new Error("That is your own link");
+
+    const mins = durationMin ?? 30;
+    const notice = (user.minNoticeMin ?? 120) * 60000;
+    const window = (user.windowDays ?? 14) * 86400000;
+    if (startsAt < Date.now() + notice) throw new Error("That hour is too soon");
+    if (startsAt > Date.now() + window) throw new Error("That is too far ahead");
+
+    /* Two people cannot have the same hour. Checked here rather than in the
+       page, because two pages can be open at once. */
+    const buffer = (user.bufferMin ?? 0) * 60000;
+    const seats = await ctx.db
+      .query("participants")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+    for (const s of seats) {
+      const m = await ctx.db.get(s.meetingId);
+      if (!m || !m.startsAt) continue;
+      const aStart = m.startsAt - buffer;
+      const aEnd = m.startsAt + m.durationMin * 60000 + buffer;
+      if (startsAt < aEnd && startsAt + mins * 60000 > aStart)
+        throw new Error("Somebody just took that hour");
+    }
+
+    const title = note?.trim().slice(0, 80) || `${guest.name} and ${user.name}`;
+    const meetingId = await ctx.db.insert("meetings", {
+      ownerId: user._id,
+      title,
+      durationMin: mins,
+      invite: inviteCode(),
+      createdAt: Date.now(),
+      startsAt,
+      bookedBy: guest._id,
+      bookedAt: Date.now(),
+      kind: "call",
+    });
+    const now = Date.now();
+    await ctx.db.insert("participants", {
+      meetingId,
+      userId: user._id,
+      name: user.name,
+      email: user.email,
+      ...defaults(user, "UTC"),
+      overrides: [],
+      busy: [],
+      gcal: 0,
+      joinedAt: now,
+    });
+    await ctx.db.insert("participants", {
+      meetingId,
+      userId: guest._id,
+      name: guest.name,
+      email: guest.email,
+      ...defaults(guest, tz ?? "UTC"),
+      overrides: [],
+      busy: [],
+      gcal: 0,
+      joinedAt: now,
+    });
+    return {
+      id: meetingId,
+      title,
+      startsAt,
+      durationMin: mins,
+      host: { name: user.name, email: user.email },
+      guest: { name: guest.name, email: guest.email },
+    };
+  },
+});
+
+/** The three numbers, set from the app. */
+export const limits = mutation({
+  args: {
+    token: v.string(),
+    minNoticeMin: v.number(),
+    windowDays: v.number(),
+    bufferMin: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const user = await mustBe(ctx, args.token);
+    await ctx.db.patch(user._id, {
+      minNoticeMin: Math.max(0, Math.min(60 * 24 * 7, args.minNoticeMin)),
+      windowDays: Math.max(1, Math.min(90, args.windowDays)),
+      bufferMin: Math.max(0, Math.min(120, args.bufferMin)),
     });
     return null;
   },

@@ -62,6 +62,14 @@ const door = httpAction(async (ctx, request) => {
         return ok(await ctx.runMutation(api.meet.rename, args));
       case "meet.leave":
         return ok(await ctx.runMutation(api.meet.leave, args));
+      case "meet.setHandle":
+        return ok(await ctx.runMutation(api.meet.setHandle, args));
+      case "meet.limits":
+        return ok(await ctx.runMutation(api.meet.limits, args));
+      case "meet.host":
+        return ok(await ctx.runQuery(api.meet.host, args));
+      case "meet.bookWith":
+        return ok(await ctx.runMutation(api.meet.bookWith, args));
       case "meet.book":
         return ok(await ctx.runMutation(api.meet.book, args));
       case "feedback.send":

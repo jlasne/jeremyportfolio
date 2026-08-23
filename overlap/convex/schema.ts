@@ -30,7 +30,18 @@ export default defineSchema({
     sleepStart: v.optional(v.number()),
     sleepEnd: v.optional(v.number()),
     setupAt: v.optional(v.number()),
-  }).index("by_email", ["email"]),
+
+    /* Your booking link. One handle, permanent, and the only thing anybody
+       needs to take an hour off you: /overlap/book/#jeremy */
+    handle: v.optional(v.string()),
+    /* The three numbers that make a public link usable rather than a way
+       for strangers to appear in your morning. */
+    minNoticeMin: v.optional(v.number()),
+    windowDays: v.optional(v.number()),
+    bufferMin: v.optional(v.number()),
+  })
+    .index("by_email", ["email"])
+    .index("by_handle", ["handle"]),
 
   /* opaque session tokens, checked on every call */
   sessions: defineTable({
@@ -50,6 +61,9 @@ export default defineSchema({
     startsAt: v.optional(v.number()),
     bookedBy: v.optional(v.id("users")),
     bookedAt: v.optional(v.number()),
+    /* "team" is the one everybody answers; "call" is the one somebody took
+       off your booking link. A call is booked the moment it exists. */
+    kind: v.optional(v.string()),
   })
     .index("by_invite", ["invite"])
     .index("by_owner", ["ownerId"]),
