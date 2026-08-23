@@ -15,4 +15,4 @@ window.OVERLAP_CONVEX_URL = "https://amicable-chickadee-753.eu-west-1.convex.sit
    value in the Convex dashboard.
 
    Left empty, the login page falls back to a six-digit code by email. */
-window.OVERLAP_GOOGLE_CLIENT_ID = "";
+window.OVERLAP_GOOGLE_CLIENT_ID = "431005215419-uc7v7t0cehr2etha1tar00qm2ujf7fhj.apps.googleusercontent.com";

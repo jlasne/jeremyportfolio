@@ -109,24 +109,66 @@ Set these in the Convex dashboard (Settings → Environment Variables):
 | `OVERLAP_GOOGLE_CLIENT_ID` | Your Google OAuth client ID. Must match the one in `config.js` exactly, or every Google sign-in is refused. |
 | `OVERLAP_DEV_CODES` | `1` returns the sign-in code in the API response so you can log in before wiring email. **Never set this once real people can reach the deployment — it hands anyone a login for any address.** |
 
-## Sign in with Google
+## Google: sign-in and busy times
 
-1. [Google Cloud console → Credentials](https://console.cloud.google.com/apis/credentials)
+One OAuth client ID drives two separate things, and each needs something the
+other does not:
+
+| What | Where | Needs |
+| --- | --- | --- |
+| **Add to Google Calendar** | a plain `calendar/render?action=TEMPLATE` URL | nothing — it works with none of this set up |
+| **Sign in with Google** | `login.js` → ID token → Convex `auth.google` | client ID in `config.js` **and** `OVERLAP_GOOGLE_CLIENT_ID` on Convex |
+| **Read my busy times** | the person sheet → `calendar/v3/freeBusy` | client ID in `config.js`, the Calendar API enabled, the `freebusy` scope on the consent screen. Never touches Convex. |
+
+They are two separate consents. Signing in with Google does not grant calendar
+access, and reading busy times works for someone who never signed in at all.
+
+### Setting it up
+
+1. **Enable the API.** [Google Cloud console → Library](https://console.cloud.google.com/apis/library/calendar-json.googleapis.com)
+   → *Google Calendar API* → **Enable**. Skip this and sign-in still works
+   perfectly while `freeBusy` answers `Calendar refused` — the confusing
+   failure, so do it first.
+2. **Consent screen** (*Google Auth Platform*, once *OAuth consent screen*).
+   Under **Data Access** add `https://www.googleapis.com/auth/calendar.freebusy`
+   — the narrowest calendar scope there is: blocks of time, never event titles.
+   Under **Audience**, *Testing* lets up to 100 named test users through with
+   no review; opening it to everyone means Google's verification.
+3. **Create the client.** [Credentials](https://console.cloud.google.com/apis/credentials)
    → **Create credentials** → **OAuth client ID** → **Web application**.
-2. Under *Authorized JavaScript origins* add every origin the page is served
+   Under *Authorized JavaScript origins* add every origin the page is served
    from — `https://jeremylasne.com` and, for local work, `http://localhost:8000`.
-   No redirect URIs are needed; this is the Google Identity Services flow,
-   which hands the page an ID token in the browser.
-3. Paste the client ID into `config.js` **and** set `OVERLAP_GOOGLE_CLIENT_ID`
-   to the same value on the Convex deployment. Then `python3 overlap/build.py`.
+   Origins match exactly: scheme, host and port, no path, no trailing slash,
+   and `http://localhost` is not `http://localhost:8000`. Leave *redirect
+   URIs* empty; both flows are browser-side Google Identity Services, which
+   never redirects.
+4. **Paste it in two places, byte for byte.** The client ID goes into
+   `config.js`, and `OVERLAP_GOOGLE_CLIENT_ID` on the Convex deployment gets
+   the same string. `auth.google` compares the token's audience against it and
+   refuses a mismatch with *"That sign-in was meant for another app"* — a
+   stray space is enough. Dev and production are separate deployments with
+   separate variables; set it on both.
+5. **Rebuild.** `python3 overlap/build.py`. `config.js` is inlined into the
+   generated pages, so editing it alone changes nothing that ships.
+
+The client ID is not a secret — it is served in the page. The page never sees
+one. It receives an ID token, posts it to Convex, and Convex asks Google
+whether the token is real and **who it was minted for**: a token issued for a
+different app is refused, which is the check that makes this flow safe.
 
 Leave the client ID empty and the login page quietly falls back to the
 six-digit email code — nothing breaks, the Google button simply is not drawn.
 
-The page never sees a secret. It receives an ID token, posts it to Convex, and
-Convex asks Google whether the token is real and **who it was minted for**: a
-token issued for a different app is refused, which is the check that makes
-this flow safe.
+### What busy times actually read
+
+`syncCalendar` asks for `items:[{id:"primary"}]` — the primary calendar of
+whoever consents *in that browser*. Editing a colleague's row and tapping
+**Read my busy times** writes your own hours onto their row. It is built for
+each person to open the shared link and do their own.
+
+What comes back is stored: `localStorage`, the `#p=` share link, and the
+member row on the server. So it travels, but it does not refresh itself —
+that is *Real calendar sync*, still to build.
 
 ## How auth works
 
