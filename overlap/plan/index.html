@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
-<title>Plan — Overlap</title>
+<title>Plan · Overlap</title>
 <meta name="description" content="Pick the hour that works and hand it to your calendar.">
 <meta name="theme-color" content="#F2F2F7">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -74,6 +74,13 @@ input{border:0;background:none;outline:none;width:100%}
 .rail-brand{display:none}
 .rsec{margin:0 0 14px}
 .rhead{display:flex;align-items:center;gap:8px;width:100%;padding:6px 4px 8px;text-align:left}
+/* the step you are on, numbered where you do it */
+.stepn{flex:none;width:19px;height:19px;border-radius:50%;background:var(--ink);color:var(--paper);
+  font-size:11px;font-weight:700;font-style:normal;display:grid;place-items:center;
+  letter-spacing:0;font-variant-numeric:tabular-nums}
+.dock-step{display:flex;align-items:center;justify-content:center;gap:8px;padding-bottom:8px}
+.dock-step .stepn{width:18px;height:18px;font-size:10.5px}
+.dock-step span{font-size:12px;color:var(--ink-2);letter-spacing:-.005em;text-align:left}
 .rhead>span{font-size:13px;font-weight:600;color:var(--ink);letter-spacing:-.01em}
 .rhead>b{flex:1;min-width:0;font-size:13px;font-weight:400;color:var(--ink-2);letter-spacing:-.005em;
   text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -136,7 +143,6 @@ main{flex:1;padding:6px 0 8px}
 .chip{padding:8px 15px;border-radius:999px;background:var(--paper);font-size:14px;font-weight:500;letter-spacing:-.01em;box-shadow:inset 0 0 0 1px var(--sep)}
 .chip:active{background:var(--fill)}
 .chip.on{background:var(--ink);color:#fff;box-shadow:none}
-#durChips .chip{padding:8px 11px;font-size:13px;font-variant-numeric:tabular-nums}
 
 /* ── dock ── */
 .dock{position:sticky;bottom:0;z-index:30;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:rgba(242,242,247,.86);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);box-shadow:0 -.5px 0 var(--sep)}
@@ -384,7 +390,6 @@ textarea{font-family:var(--font)}
   .rsec .row.stack{flex-direction:column;align-items:stretch;gap:7px}
   .rsec .row.stack .grow{flex:none}
   .rsec .chips{gap:6px}
-  .rsec #durChips{justify-content:flex-start}
   .rsec .chip{padding:6px 12px;font-size:13px;background:var(--paper)}
   .rsec .chip.on{background:var(--ink);color:#fff}
   .rsec .stepper button{width:32px;height:28px;font-size:16px}
@@ -485,11 +490,11 @@ window.OVERLAP_GOOGLE_CLIENT_ID = "431005215419-uc7v7t0cehr2etha1tar00qm2ujf7fhj
 </script>
 <script>
 /* ═══════════════════════════════════════════════════════════════════
-   Overlap — one app, three addresses.
-   team/, plan/ and next/ are real pages so a link lands where it says,
-   but moving between them is a pushState, not a reload.
+   Overlap. One screen: the meeting down the side in three numbered
+   steps, the calendar in the middle, and the hour you pick on it.
+   team/, plan/ and next/ all resolve; next/ opens the question.
    ═══════════════════════════════════════════════════════════════════ */
-document.getElementById("root").innerHTML = "<div class=\"app\">\n\n  <header class=\"nav\" id=\"nav\">\n    <div class=\"nav-bar\">\n      <a class=\"nav-title\" href=\"/overlap/\"><svg class=\"rail-mark\" viewBox=\"0 0 64 56\" aria-hidden=\"true\"><g fill=\"currentColor\"><rect x=\"4\" y=\"13\" width=\"9\" height=\"30\" rx=\"4.5\"/><rect x=\"18\" y=\"4\" width=\"9\" height=\"48\" rx=\"4.5\"/><rect x=\"32\" y=\"17\" width=\"9\" height=\"22\" rx=\"4.5\"/><rect x=\"46\" y=\"9\" width=\"9\" height=\"38\" rx=\"4.5\"/></g><rect x=\"1\" y=\"24\" width=\"61\" height=\"7\" rx=\"3.5\" fill=\"var(--mark-cut,#fff)\"/></svg>Overlap</a>\n      <span class=\"nav-sub\">The hour that works for everyone.</span>\n      <button class=\"nav-act\" id=\"shareTop\">Share</button>\n    </div>\n  </header>\n\n  <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 the side: everything you set, nothing you read \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n  <aside class=\"rail\" id=\"rail\">\n    <a class=\"rail-brand\" href=\"/overlap/\"><svg class=\"rail-mark\" viewBox=\"0 0 64 56\" aria-hidden=\"true\"><g fill=\"currentColor\"><rect x=\"4\" y=\"13\" width=\"9\" height=\"30\" rx=\"4.5\"/><rect x=\"18\" y=\"4\" width=\"9\" height=\"48\" rx=\"4.5\"/><rect x=\"32\" y=\"17\" width=\"9\" height=\"22\" rx=\"4.5\"/><rect x=\"46\" y=\"9\" width=\"9\" height=\"38\" rx=\"4.5\"/></g><rect x=\"1\" y=\"24\" width=\"61\" height=\"7\" rx=\"3.5\" fill=\"var(--mark-cut,#fff)\"/></svg>Overlap</a>\n    <div class=\"rail-body\">\n\n    <section class=\"rsec\" id=\"meetSec\">\n      <button class=\"rhead\" data-fold=\"meetSec\">\n        <span>Meeting</span><b id=\"meetSum\"></b><i class=\"fold\"></i>\n      </button>\n      <div class=\"rbody\">\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Name</div></div>\n            <input id=\"titleInput\" placeholder=\"Intro call\" maxlength=\"80\">\n          </div>\n          <div class=\"row stack\">\n            <div class=\"grow\"><div class=\"t\">Length</div></div>\n            <div class=\"chips\" id=\"durChips\" style=\"padding:0\"></div>\n          </div>\n        </div>\n        <div class=\"secfoot\" id=\"meetFoot\"></div>\n      </div>\n    </section>\n\n    <section class=\"rsec\" id=\"peopleSec\">\n      <button class=\"rhead\" data-fold=\"peopleSec\">\n        <span>Who is in</span><b id=\"peopleCount\"></b><i class=\"fold\"></i>\n      </button>\n      <div class=\"rbody\">\n        <div class=\"card\" id=\"peopleList\"></div>\n        <div class=\"secfoot\" id=\"guestFoot\"></div>\n      </div>\n    </section>\n    </div>\n\n    <div class=\"dock\">\n      <div class=\"dock-hint\" id=\"dockHint\"></div>\n      <button class=\"btn\" id=\"primary\">Continue</button>\n      <div class=\"dock-more\">\n        <button class=\"linkbtn\" id=\"hoursBtn\">My hours</button>\n        <button class=\"linkbtn\" id=\"shareBtn\">Copy link</button>\n        <button class=\"linkbtn\" id=\"icsBtn\">Apple Calendar</button>\n      </div>\n    </div>\n\n    <div class=\"rail-foot\" id=\"railFoot\"></div>\n  </aside>\n\n  <main>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 the schedule \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"pane\" id=\"overlapSec\">\n      <div class=\"panehead\">\n        <h2>Calendar</h2>\n        <span class=\"ph-note\" id=\"gridTz\"></span>\n        <button class=\"linkbtn\" id=\"editToggle\">Edit hours</button>\n      </div>\n      <div class=\"weekbar\">\n        <div class=\"daytabs\" id=\"dayTabs\"></div>\n        <div class=\"wsteps\">\n          <button id=\"winPrev\" aria-label=\"Earlier week\">\u2039</button>\n          <button id=\"winNext\" aria-label=\"Later week\">\u203a</button>\n        </div>\n      </div>\n      <div class=\"weeksub\" id=\"windowSub\"></div>\n      <div class=\"wtb\">\n        <div class=\"wtblabs\" id=\"wtbLabs\"></div>\n        <div class=\"wtbscroll\" id=\"wtbScroll\"><div class=\"wtbgrid\" id=\"wtb\"></div></div>\n      </div>\n      <div class=\"legend\">\n        <i class=\"lg free\"></i><span>can meet</span>\n        <i class=\"lg part\"></i><span>off hours</span>\n        <i class=\"lg busy\"></i><span>asleep or busy</span>\n      </div>\n      <div class=\"secfoot\" id=\"editFoot\"></div>\n    </section>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 the hours it produces \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"pane\" id=\"planSec\">\n      <div class=\"panehead\"><h2>Best times</h2><span class=\"ph-note\" id=\"bestNote\"></span></div>\n      <div class=\"card\" id=\"bestList\"></div>\n      <div class=\"secfoot\" id=\"bestFoot\"></div>\n    </section>\n\n  </main>\n\n  <p class=\"foot\" id=\"foot\"></p>\n</div>\n\n<div class=\"scrim\" id=\"scrim\"></div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u2014 your day, given once \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"sheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"sheetCancel\">Cancel</button>\n    <span class=\"t\" id=\"sheetTitle\">Your day</span>\n    <button class=\"p\" id=\"sheetDone\">Done</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\" id=\"sheetLede\">Answer this once. Every meeting after this one starts with it already filled in.</p>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Working hours</span></div>\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"s-\">\u2212</button><span></span><button data-h=\"s+\">+</button></div><div class=\"v\" id=\"fStart\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>To</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"e-\">\u2212</button><span></span><button data-h=\"e+\">+</button></div><div class=\"v\" id=\"fEnd\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label style=\"width:auto;flex:1\">Weekends too</label><div class=\"switch\" id=\"fWeekend\"><i></i></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Asleep</span></div>\n    <div style=\"padding:0 16px 6px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"z-\">\u2212</button><span></span><button data-h=\"z+\">+</button></div><div class=\"v\" id=\"fSleep\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>Until</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"w-\">\u2212</button><span></span><button data-h=\"w+\">+</button></div><div class=\"v\" id=\"fWake\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Calendar</span></div>\n    <div style=\"padding:0 16px 6px\"><div class=\"card\" id=\"gcalCard\"></div></div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Timezone</span></div>\n    <div class=\"search\">\n      <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\"><circle cx=\"7\" cy=\"7\" r=\"5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M11 11l3.5 3.5\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n      <input id=\"citySearch\" placeholder=\"City or timezone\" autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\">\n    </div>\n    <div style=\"padding:0 16px\"><div class=\"card\" id=\"cityList\"></div></div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u2014 your meetings \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"meetSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"meetClose\">Done</button>\n    <span class=\"t\">Your meetings</span>\n    <span style=\"width:44px\"></span>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">Every meeting you started or were invited to.</p>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"meetList\"></div></div>\n    <div style=\"padding:0 16px\" class=\"btnrow\" id=\"meetActs\"></div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u2014 one link \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"shareSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"shareClose\">Done</button>\n    <span class=\"t\">Share</span>\n    <button class=\"p\" id=\"shareCopy\">Copy</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">One link. Whoever opens it signs in, answers for themselves, and lands on this calendar.</p>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\"><div class=\"linkbox\" id=\"shareLink\"></div></div></div>\n    <div style=\"padding:0 16px\"><button class=\"btn\" id=\"shareCopyBig\">Copy the link</button></div>\n    <div id=\"recentWrap\" style=\"display:none\">\n      <div style=\"padding:18px 20px 7px\"><div class=\"sechead\"><span>You have met with</span></div></div>\n      <div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"recentList\"></div></div>\n    </div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u2014 what next \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"fbSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"fbClose\">Close</button>\n    <span class=\"t\">What next?</span>\n    <button class=\"p\" id=\"fbSend\">Send</button>\n  </div>\n  <div class=\"sheet-body\">\n    <div id=\"fbForm\">\n      <p class=\"sheet-lede\" id=\"fbLede\">Your event is open in Google Calendar \u2014 press Save there.\n        While you are here: what should Overlap do that it doesn\u2019t?</p>\n      <div style=\"padding:0 16px 4px\"><div class=\"chips\" id=\"wantChips\"></div></div>\n      <div style=\"padding:12px 16px 0\">\n        <div class=\"card\">\n          <textarea id=\"fbText\" rows=\"4\" maxlength=\"800\" placeholder=\"Anything at all \u2014 what got in your way, what\u2019s missing, what you\u2019d pay for.\"></textarea>\n        </div>\n      </div>\n      <div style=\"padding:12px 16px 0\" id=\"fbEmailCard\">\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Email</div><div class=\"s\">If you want a reply.</div></div>\n            <input id=\"fbEmail\" type=\"email\" placeholder=\"Optional\" maxlength=\"80\" autocapitalize=\"off\" autocorrect=\"off\"\n                   style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\">\n          </div>\n        </div>\n      </div>\n      <p class=\"sheet-lede\" id=\"fbFoot\" style=\"padding-top:14px\"></p>\n    </div>\n    <div id=\"fbThanks\" style=\"display:none\">\n      <div style=\"padding:0 16px 16px\">\n        <div class=\"card\"><div class=\"empty\"><b>Thank you \u2014 noted.</b>Every line of this gets read. It decides what gets built next.</div></div>\n      </div>\n      <div style=\"padding:0 16px\"><button class=\"btn sec\" id=\"fbAgain\">Say something else</button></div>\n    </div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u2014 people you have met \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"peepSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"peepClose\">Done</button>\n    <span class=\"t\">People</span>\n    <span style=\"width:44px\"></span>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">Everyone you have shared a meeting with \u2014 whoever did the inviting. Nothing to add and nothing to keep tidy: meeting somebody is what puts them here.</p>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"peepList\"></div></div>\n  </div>\n</div>\n\n<div class=\"toast\" id=\"toast\"></div>";
+document.getElementById("root").innerHTML = "<div class=\"app\">\n\n  <header class=\"nav\" id=\"nav\">\n    <div class=\"nav-bar\">\n      <a class=\"nav-title\" href=\"/overlap/\"><svg class=\"rail-mark\" viewBox=\"0 0 64 56\" aria-hidden=\"true\"><g fill=\"currentColor\"><rect x=\"4\" y=\"13\" width=\"9\" height=\"30\" rx=\"4.5\"/><rect x=\"18\" y=\"4\" width=\"9\" height=\"48\" rx=\"4.5\"/><rect x=\"32\" y=\"17\" width=\"9\" height=\"22\" rx=\"4.5\"/><rect x=\"46\" y=\"9\" width=\"9\" height=\"38\" rx=\"4.5\"/></g><rect x=\"1\" y=\"24\" width=\"61\" height=\"7\" rx=\"3.5\" fill=\"var(--mark-cut,#fff)\"/></svg>Overlap</a>\n      <span class=\"nav-sub\">The hour that works for everyone.</span>\n      <button class=\"nav-act\" id=\"shareTop\">Share</button>\n    </div>\n  </header>\n\n  <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 the side: everything you set, nothing you read \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n  <aside class=\"rail\" id=\"rail\">\n    <a class=\"rail-brand\" href=\"/overlap/\"><svg class=\"rail-mark\" viewBox=\"0 0 64 56\" aria-hidden=\"true\"><g fill=\"currentColor\"><rect x=\"4\" y=\"13\" width=\"9\" height=\"30\" rx=\"4.5\"/><rect x=\"18\" y=\"4\" width=\"9\" height=\"48\" rx=\"4.5\"/><rect x=\"32\" y=\"17\" width=\"9\" height=\"22\" rx=\"4.5\"/><rect x=\"46\" y=\"9\" width=\"9\" height=\"38\" rx=\"4.5\"/></g><rect x=\"1\" y=\"24\" width=\"61\" height=\"7\" rx=\"3.5\" fill=\"var(--mark-cut,#fff)\"/></svg>Overlap</a>\n    <div class=\"rail-body\">\n\n    <section class=\"rsec\" id=\"meetSec\">\n      <button class=\"rhead\" data-fold=\"meetSec\">\n        <i class=\"stepn\">1</i><span>Name the meeting</span><b id=\"meetSum\"></b><i class=\"fold\"></i>\n      </button>\n      <div class=\"rbody\">\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Name</div></div>\n            <input id=\"titleInput\" placeholder=\"Intro call\" maxlength=\"80\">\n          </div>\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Length</div></div>\n            <div class=\"stepper\"><button data-dur=\"-\">\u2212</button><span></span><button data-dur=\"+\">+</button></div>\n            <div class=\"v\" id=\"durVal\" style=\"width:64px;text-align:right;font-variant-numeric:tabular-nums\"></div>\n          </div>\n        </div>\n        <div class=\"secfoot\" id=\"meetFoot\"></div>\n      </div>\n    </section>\n\n    <section class=\"rsec\" id=\"peopleSec\">\n      <button class=\"rhead\" data-fold=\"peopleSec\">\n        <i class=\"stepn\">2</i><span>Add people</span><b id=\"peopleCount\"></b><i class=\"fold\"></i>\n      </button>\n      <div class=\"rbody\">\n        <div class=\"card\" id=\"peopleList\"></div>\n        <div class=\"secfoot\" id=\"guestFoot\"></div>\n      </div>\n    </section>\n    </div>\n\n    <div class=\"dock\">\n      <div class=\"dock-step\"><i class=\"stepn\">3</i><span id=\"dockHint\"></span></div>\n      <button class=\"btn\" id=\"primary\">Continue</button>\n      <div class=\"dock-more\">\n        <button class=\"linkbtn\" id=\"hoursBtn\">My hours</button>\n        <button class=\"linkbtn\" id=\"icsBtn\">Apple Calendar</button>\n      </div>\n    </div>\n\n    <div class=\"rail-foot\" id=\"railFoot\"></div>\n  </aside>\n\n  <main>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 the schedule \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"pane\" id=\"overlapSec\">\n      <div class=\"panehead\">\n        <h2>Calendar</h2>\n        <span class=\"ph-note\" id=\"gridTz\"></span>\n        <button class=\"linkbtn\" id=\"editToggle\">Edit hours</button>\n      </div>\n      <div class=\"weekbar\">\n        <div class=\"daytabs\" id=\"dayTabs\"></div>\n        <div class=\"wsteps\">\n          <button id=\"winPrev\" aria-label=\"Earlier week\">\u2039</button>\n          <button id=\"winNext\" aria-label=\"Later week\">\u203a</button>\n        </div>\n      </div>\n      <div class=\"weeksub\" id=\"windowSub\"></div>\n      <div class=\"wtb\">\n        <div class=\"wtblabs\" id=\"wtbLabs\"></div>\n        <div class=\"wtbscroll\" id=\"wtbScroll\"><div class=\"wtbgrid\" id=\"wtb\"></div></div>\n      </div>\n      <div class=\"legend\">\n        <i class=\"lg free\"></i><span>can meet</span>\n        <i class=\"lg part\"></i><span>off hours</span>\n        <i class=\"lg busy\"></i><span>asleep or busy</span>\n      </div>\n      <div class=\"secfoot\" id=\"editFoot\"></div>\n    </section>\n\n  </main>\n\n  <p class=\"foot\" id=\"foot\"></p>\n</div>\n\n<div class=\"scrim\" id=\"scrim\"></div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 your day, given once \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"sheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"sheetCancel\">Cancel</button>\n    <span class=\"t\" id=\"sheetTitle\">Your day</span>\n    <button class=\"p\" id=\"sheetDone\">Done</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\" id=\"sheetLede\">Answer this once. Every meeting after this starts with it already filled in.</p>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Working hours</span></div>\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"s-\">\u2212</button><span></span><button data-h=\"s+\">+</button></div><div class=\"v\" id=\"fStart\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>To</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"e-\">\u2212</button><span></span><button data-h=\"e+\">+</button></div><div class=\"v\" id=\"fEnd\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label style=\"width:auto;flex:1\">Weekends too</label><div class=\"switch\" id=\"fWeekend\"><i></i></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Asleep</span></div>\n    <div style=\"padding:0 16px 6px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"z-\">\u2212</button><span></span><button data-h=\"z+\">+</button></div><div class=\"v\" id=\"fSleep\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>Until</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"w-\">\u2212</button><span></span><button data-h=\"w+\">+</button></div><div class=\"v\" id=\"fWake\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Calendar</span></div>\n    <div style=\"padding:0 16px 6px\"><div class=\"card\" id=\"gcalCard\"></div></div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Timezone</span></div>\n    <div class=\"search\">\n      <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\"><circle cx=\"7\" cy=\"7\" r=\"5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M11 11l3.5 3.5\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n      <input id=\"citySearch\" placeholder=\"City or timezone\" autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\">\n    </div>\n    <div style=\"padding:0 16px\"><div class=\"card\" id=\"cityList\"></div></div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 your meetings \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"meetSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"meetClose\">Done</button>\n    <span class=\"t\">Your meetings</span>\n    <span style=\"width:44px\"></span>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">Every meeting you started or were invited to.</p>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"meetList\"></div></div>\n    <div style=\"padding:0 16px\" class=\"btnrow\" id=\"meetActs\"></div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 one link \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"shareSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"shareClose\">Done</button>\n    <span class=\"t\">Share</span>\n    <button class=\"p\" id=\"shareCopy\">Copy</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">One link. Whoever opens it signs in, answers for themselves, and lands on this calendar.</p>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\"><div class=\"linkbox\" id=\"shareLink\"></div></div></div>\n    <div style=\"padding:0 16px\"><button class=\"btn\" id=\"shareCopyBig\">Copy the link</button></div>\n    <div id=\"recentWrap\" style=\"display:none\">\n      <div style=\"padding:18px 20px 7px\"><div class=\"sechead\"><span>You have met with</span></div></div>\n      <div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"recentList\"></div></div>\n    </div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 what next \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"fbSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"fbClose\">Close</button>\n    <span class=\"t\">What next?</span>\n    <button class=\"p\" id=\"fbSend\">Send</button>\n  </div>\n  <div class=\"sheet-body\">\n    <div id=\"fbForm\">\n      <p class=\"sheet-lede\" id=\"fbLede\">Your event is open in Google Calendar. Press Save there.\n        While you are here: what should Overlap do that it doesn\u2019t?</p>\n      <div style=\"padding:0 16px 4px\"><div class=\"chips\" id=\"wantChips\"></div></div>\n      <div style=\"padding:12px 16px 0\">\n        <div class=\"card\">\n          <textarea id=\"fbText\" rows=\"4\" maxlength=\"800\" placeholder=\"Anything at all. What got in your way, what is missing, what you would pay for.\"></textarea>\n        </div>\n      </div>\n      <div style=\"padding:12px 16px 0\" id=\"fbEmailCard\">\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Email</div><div class=\"s\">If you want a reply.</div></div>\n            <input id=\"fbEmail\" type=\"email\" placeholder=\"Optional\" maxlength=\"80\" autocapitalize=\"off\" autocorrect=\"off\"\n                   style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\">\n          </div>\n        </div>\n      </div>\n      <p class=\"sheet-lede\" id=\"fbFoot\" style=\"padding-top:14px\"></p>\n    </div>\n    <div id=\"fbThanks\" style=\"display:none\">\n      <div style=\"padding:0 16px 16px\">\n        <div class=\"card\"><div class=\"empty\"><b>Thank you, noted.</b>Every line of this gets read. It decides what gets built next.</div></div>\n      </div>\n      <div style=\"padding:0 16px\"><button class=\"btn sec\" id=\"fbAgain\">Say something else</button></div>\n    </div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 people you have met \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"peepSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"peepClose\">Done</button>\n    <span class=\"t\">People</span>\n    <span style=\"width:44px\"></span>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">Everyone you have shared a meeting with, whoever did the inviting. Nothing to add and nothing to keep tidy: meeting somebody is what puts them here.</p>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"peepList\"></div></div>\n  </div>\n</div>\n\n<div class=\"toast\" id=\"toast\"></div>";
 
 (function(){
 "use strict";
@@ -539,7 +544,7 @@ var CITIES = [
 ["Auckland","New Zealand","Pacific/Auckland"],["Honolulu","United States","Pacific/Honolulu"],
 ["UTC","Coordinated","UTC"]
 ];
-var DURS = [15,30,45,60];
+var DUR_MIN=15, DUR_MAX=480, DUR_STEP=15;
 var SLOT = 60;                       /* one column = one hour */
 var DAYS = 7;                        /* columns */
 
@@ -591,6 +596,11 @@ function fmtHourShort(h){
   var x=h%12; if(x===0) x=12;
   return x+(h<12?"a":"p");
 }
+function fmtDur(m){
+  if(m<60) return m+" min";
+  var h=Math.floor(m/60), r=m%60;
+  return h+"h"+(r?" "+r+"m":"");
+}
 function fmtHour(h){
   if(!HOUR12) return pad(h)+":00";
   var x=h%12; if(x===0) x=12;
@@ -627,14 +637,14 @@ function newPerson(name,tz,you){
 function todayStart(tz){ var p=zp(Date.now(),tz); return wall(p.y,p.m,p.d,0,0,tz); }
 
 var S={
-  people:[], title:"", dur:30, offsetDays:0, dispId:null,
+  people:[], title:"", dur:60, offsetDays:0, dispId:null,
   pick:null, day:0, wants:[], nogo:[],
   mid:""                           /* the meeting on screen, once there is one */
 };
 
 function freshState(){
   var me=newPerson("You",LOCAL_TZ,true);
-  S.people=[me]; S.title=""; S.dur=30; S.offsetDays=0; S.dispId=me.id;
+  S.people=[me]; S.title=""; S.dur=60; S.offsetDays=0; S.dispId=me.id;
   S.pick=null; S.day=0; S.wants=[]; S.nogo=[]; S.mid="";
   save();
 }
@@ -805,7 +815,7 @@ function packed(){
 function unpack(o){
   if(!o||!o.p||!o.p.length) return false;
   readPeople(o.p);
-  S.title=o.t||""; S.dur=o.d||30; S.offsetDays=o.o||0; S.day=o.y||0;
+  S.title=o.t||""; S.dur=o.d||60; S.offsetDays=o.o||0; S.day=o.y||0;
   if(byId(o.x)) S.dispId=o.x;
   S.pick=o.k||null;
   S.nogo=(o.ng||[]).slice();
@@ -845,9 +855,10 @@ function renderPeople(){
       (p.wknd?", 7 days":"")+(p.gcal?" · calendar":"")+"</div></div>"+
       '<span class="tick"></span></div>';
   });
-  html+='<div class="row tap" data-share="1"><div class="plus">↗</div>'+
-        '<div class="grow"><div class="t">Share the link</div>'+
-        '<div class="s">They answer for themselves</div></div><div class="chev"></div></div>';
+  html+='<div class="row tap" data-share="1"><div class="plus">+</div>'+
+        '<div class="grow"><div class="t">Add people</div>'+
+        '<div class="s">Send them the link. They answer for themselves.</div>'+
+        '</div><div class="chev"></div></div>';
   $("#peopleList").innerHTML=html;
 
   var n=guests().length, total=S.people.length;
@@ -860,18 +871,16 @@ function renderPeople(){
       ? "Just you so far. Share the link and their hours land here."
       : "Ticked people count towards the overlap, and get the invitation.";
 
-  $("#durChips").innerHTML=DURS.map(function(d){
-    return '<button class="chip'+(S.dur===d?" on":"")+'" data-dur="'+d+'">'+d+"′</button>";
-  }).join("");
+  $("#durVal").textContent=fmtDur(S.dur);
 
   var days=dayStarts(), tz=dispTz();
   var a=zp(days[0],tz), z=zp(days[DAYS-1],tz);
   $("#windowSub").textContent=WD[dow(days[0],tz)]+" "+a.d+(a.m!==z.m?" "+MO[a.m-1]:"")+
     " → "+WD[dow(days[DAYS-1],tz)]+" "+z.d+" "+MO[z.m-1];
   $("#meetSum").textContent=foldOpen("meetSec")
-    ? S.dur+" min" : (S.title.trim()||"Meeting")+" · "+S.dur+" min";
+    ? fmtDur(S.dur) : (S.title.trim()||"Meeting")+" · "+fmtDur(S.dur);
   $("#meetFoot").textContent=!LIVE
-    ? "No backend connected — this browser only, and no link to share."
+    ? "No backend connected. This browser only, and no link to share."
     : MEET ? "Everyone who opens the link sees this name."
            : "Name it, then press Create meeting to get a link.";
   if($("#titleInput")!==document.activeElement) $("#titleInput").value=S.title;
@@ -1052,42 +1061,6 @@ function refreshSum(col,ts){
   c.innerHTML=total?'<span class="n">'+n+"</span>":"";
 }
 
-/* ═══════════════ render — best times ═══════════════ */
-var lastBest=[];
-function renderBest(){
-  lastBest=bestSlots();
-  var tz=dispTz(), total=guests().length;
-  if(!lastBest.length){
-    $("#bestList").innerHTML='<div class="empty"><b>No overlap this week</b>'+
-      (guests().length
-        ? "Nobody is free at the same time. Widen someone's hours, allow weekends, or step the week forward."
-        : "Nobody is invited yet. Choose who is coming under Next.")+"</div>";
-    $("#bestNote").textContent="";
-    $("#bestFoot").textContent="";
-  } else {
-    var here=sel(), rows=lastBest.slice();
-    if(S.pick!==null && !rows.some(function(x){ return x.ts===S.pick; }))
-      rows.unshift({ts:S.pick,n:countFor(S.pick,S.dur),manual:true});
-    $("#bestList").innerHTML=rows.map(function(x){
-      var all=x.n===total;
-      return '<button class="slot'+(here===x.ts?" on":"")+'" data-pick="'+x.ts+'">'+
-        '<span class="radio"></span><span class="when">'+
-        '<span class="w1">'+fmtDate(x.ts,tz)+'<span class="w1s"> · '+
-          (x.manual?((MEET&&MEET.startsAt===x.ts)?"booked":"your pick"):(all?"everyone free":x.n+" of "+total+" free"))+"</span></span>"+
-        '<span class="w2">'+guests().map(function(p){
-            var k=dayKey(x.ts,p.tz)-dayKey(x.ts,tz);
-            return '<span class="lt'+(freeFor(p,x.ts,S.dur)?"":" out")+'"><b>'+
-                   fmtT(x.ts,p.tz)+(k?'<i class="nd">'+(k>0?"+1":"−1")+"</i>":"")+
-                   "</b> "+esc(tzCity(p.tz))+"</span>";
-          }).join('<i class="sep">·</i>')+"</span></span></button>";
-    }).join("");
-    $("#bestNote").textContent=lastBest[0].n<total
-      ? "the closest this week — no hour suits everyone" : S.dur+" min";
-    $("#bestFoot").textContent="Google opens with the event already filled in — time, title"+
-      (S.people.some(function(p){ return p.email; })?", guests":"")+". You just press Save.";
-  }
-}
-
 /* ═══════════════ backend ═══════════════
    Convex over its HTTP API — plain fetch, no SDK, no build step. Set
    window.OVERLAP_CONVEX_URL (see overlap/README.md) and the app goes live:
@@ -1157,7 +1130,7 @@ function refreshMe(){
     if(MEET){
       S.mid=MEET.id;
       S.title=MEET.title||"";
-      S.dur=MEET.durationMin||30;
+      S.dur=MEET.durationMin||60;
       if(MEET.startsAt) S.pick=MEET.startsAt;
       adoptSeats(r.participants);
     } else {
@@ -1211,7 +1184,7 @@ function createMeeting(){
   if(!signedIn()) return Promise.reject(new Error("Sign in first"));
   return cx("meet.create",{token:token(),title:S.title.trim(),durationMin:S.dur,tz:LOCAL_TZ})
     .then(function(r){ S.mid=r.id; save(); return refreshMe(); })
-    .then(function(){ afterChange(); haptic(); toast("Link ready — share it"); openShare(); });
+    .then(function(){ afterChange(); haptic(); toast("Link ready. Send it to them."); openShare(); });
 }
 function joinMeeting(code){
   return cx("meet.join",{token:token(),invite:code,tz:LOCAL_TZ})
@@ -1324,7 +1297,7 @@ function syncCalendar(p){
     syncPerson(p);
     afterChange();
     var n=(cal.busy||[]).length;
-    toast(n?("Calendar read — "+n+(n===1?" block":" blocks")+" taken"):"Calendar read — nothing booked");
+    toast(n?("Calendar read. "+n+(n===1?" block":" blocks")+" taken."):"Calendar read. Nothing booked.");
   });
 }
 function renderGcalCard(){
@@ -1339,7 +1312,7 @@ function renderGcalCard(){
   c.innerHTML='<div class="row tap" data-gcal="1"><div class="plus">↻</div>'+
     '<div class="grow"><div class="t">'+(p&&p.gcal?"Read again":"Read my busy times")+"</div>"+
     '<div class="s">'+(p&&p.gcal?(n+(n===1?" hour":" hours")+" taken this week")
-      :"Google Calendar, free/busy only — never the titles")+"</div></div></div>";
+      :"Google Calendar, free/busy only. Never the titles.")+"</div></div></div>";
 }
 
 /* ═══════════════ account ═══════════════ */
@@ -1418,7 +1391,7 @@ function closePeep(){
 function renderPeep(){
   if(!PEEP.length){
     $("#peepList").innerHTML='<div class="empty"><b>Nobody yet.</b>'+
-      'Share a meeting link — whoever answers it turns up here for good.</div>';
+      'Share a meeting link. Whoever answers it turns up here for good.</div>';
     return;
   }
   $("#peepList").innerHTML=PEEP.map(function(r){
@@ -1456,7 +1429,7 @@ function alreadyAsked(){ try{ return localStorage.getItem(ASKED)==="1"; }catch(e
 function openFeedback(afterCreate){
   renderFeedback();
   $("#fbLede").textContent=afterCreate
-    ? "Your event is open in Google Calendar — press Save there. While you are here: what should Overlap do that it doesn’t?"
+    ? "Your event is open in Google Calendar. Press Save there. While you are here: what should Overlap do that it doesn’t?"
     : "What should Overlap do that it doesn’t? Every line of this gets read.";
   $("#scrim").classList.add("on"); $("#fbSheet").classList.add("on");
   document.body.style.overflow="hidden";
@@ -1470,7 +1443,7 @@ function renderFeedback(){
     return '<button class="chip'+(S.wants.indexOf(w)>=0?" on":"")+'" data-want="'+esc(w)+'">'+esc(w)+"</button>";
   }).join("");
   $("#fbEmailCard").style.display=(LIVE&&ME&&ME.user)?"none":"";
-  $("#fbFoot").textContent="Nothing here is required — closing this changes nothing about the event.";
+  $("#fbFoot").textContent="Nothing here is required. Closing this changes nothing about the event.";
 }
 function sendFeedback(quiet){
   var text=$("#fbText").value.trim();
@@ -1487,38 +1460,24 @@ function sendFeedback(quiet){
     if(!quiet){
       $("#fbForm").style.display="none"; $("#fbThanks").style.display="";
       haptic();
-    } else toast("Noted — thank you");
+    } else toast("Noted, thank you");
   };
   if(LIVE) cx("feedback.send",rec).then(done).catch(function(){ queueFeedback(rec); done(); });
   else { queueFeedback(rec); done(); }
 }
 
-/* ═══════════════ one page, three sections ═══════════════
-   Everything you set lives in the rail; the page itself is only what you
-   read — the schedule, the hours it produces, and the box that asks what
-   is missing. /team/, /plan/ and /next/ still resolve: they scroll. */
-var PATHS=["team","plan","next"];
-var PANES=["overlapSec","planSec"];
+/* ═══════════════ one screen ═══════════════
+   There is only the calendar now. /team/ and /plan/ both land on it;
+   /next/ still opens the question, because that is a sheet and not a
+   screen. */
 function basePath(){
   return location.pathname.replace(/\/(team|plan|next)\/?$/,"").replace(/\/$/,"");
 }
-function stepFromPath(){
-  var m=location.pathname.match(/\/(team|plan|next)\/?$/);
-  return m?PATHS.indexOf(m[1]):0;
+function isNextPage(){
+  return /\/next\/?$/.test(location.pathname) ||
+         (typeof OVERLAP_STEP==="number" && OVERLAP_STEP===2);
 }
-function goPane(n,quiet){
-  if(n>=PANES.length){                    /* /next/ has no screen; it has a sheet */
-    if(!quiet) history.pushState({step:n},"",basePath()+"/"+PATHS[n]+"/"+location.hash);
-    openFeedback(false);
-    return;
-  }
-  var el=$("#"+PANES[n]);
-  if(!el) return;
-  if(!quiet && location.pathname.replace(/\/$/,"")!==basePath()+"/"+PATHS[n])
-    history.pushState({step:n},"",basePath()+"/"+PATHS[n]+"/"+location.hash);
-  var top=el.getBoundingClientRect().top+window.scrollY-($("#nav").offsetHeight+12);
-  window.scrollTo({top:Math.max(0,n?top:0),behavior:quiet?"auto":"smooth"});
-}
+
 function renderRail(){
   var b=basePath(), you=ME&&ME.user;
   var n=S.people.length;
@@ -1528,9 +1487,6 @@ function renderRail(){
       '<span class="rail-tx"><b>'+esc(S.title.trim()||"Untitled meeting")+"</b><span>"+
       (inMeeting()?n+(n===1?" person":" people"):"not created yet")+"</span></span>"+
       '<span class="caret"></span></button>'+
-    (inMeeting()
-      ?'<button class="rail-team" data-share="1"><span class="plus">↗</span>'+
-       '<span class="rail-tx"><b>Share</b><span>One link, they do the rest</span></span></button>':"")+
     (signedIn()
       ?'<button class="rail-team" data-peeps="1"><span class="plus">☺</span>'+
        '<span class="rail-tx"><b>People</b><span>'+
@@ -1543,7 +1499,7 @@ function renderRail(){
 }
 function renderAll(){
   renderAcct(); renderRail(); renderPeople(); renderDays(); renderWTB();
-  renderBest(); renderDock();
+  renderDock();
 }
 /* One button, and what it says is where you are.
      no meeting  → make one
@@ -1552,7 +1508,6 @@ function renderAll(){
 function renderDock(){
   var b=$("#primary"), h=$("#dockHint"), tz=dispTz(), t=sel(), total=guests().length;
   $("#hoursBtn").style.display=ready()?"":"none";
-  $("#shareBtn").style.display=inMeeting()?"":"none";
   $("#icsBtn").style.display=(t?"":"none");
 
   if(LIVE && !signedIn()){
@@ -1569,19 +1524,19 @@ function renderDock(){
     b.textContent="Create meeting"; b.disabled=false;
     h.textContent=S.title.trim()
       ? "Makes the link you send round."
-      : "Name it first — that is what everyone else will see.";
+      : "Name it first. That is what everyone else will see.";
     return;
   }
   b.textContent=MEET&&MEET.startsAt?"Open in Google Calendar":"Add to Google Calendar";
   b.disabled=!t;
   if(!t){
     h.textContent=total<2
-      ? "Just you so far — share the link"
-      : "No hour works yet — widen someone’s hours or look at next week";
+      ? "Just you so far. Add people in step 2."
+      : "No hour works yet. Widen someone’s hours, or look at next week.";
     return;
   }
   var n=countFor(t,S.dur);
-  h.textContent=fmtLongDate(t,tz)+", "+fmtT(t,tz)+" · "+S.dur+" min · "+
+  h.textContent=fmtLongDate(t,tz)+", "+fmtT(t,tz)+" · "+fmtDur(S.dur)+" · "+
     (n===total?"everyone free":n+" of "+total+" free");
 }
 
@@ -1665,12 +1620,12 @@ function localLines(){
   var t=sel(), tz=dispTz(), base=dayKey(t,tz);
   return guests().map(function(p){
     var k=dayKey(t,p.tz), d=k>base?" (+1d)":(k<base?" (−1d)":"");
-    return pname(p)+" — "+fmtT(t,p.tz)+d+"  ·  "+tzCity(p.tz);
+    return pname(p)+": "+fmtT(t,p.tz)+d+"  ·  "+tzCity(p.tz);
   });
 }
 function inviteText(){
   var t=sel(), tz=dispTz();
-  return meetingTitle()+"\n"+fmtLongDate(t,tz)+" · "+S.dur+" min\n\n"+localLines().join("\n");
+  return meetingTitle()+"\n"+fmtLongDate(t,tz)+" · "+fmtDur(S.dur)+"\n\n"+localLines().join("\n");
 }
 function gcalUrl(){
   var t=sel(), end=t+S.dur*60000;
@@ -1722,7 +1677,6 @@ document.addEventListener("click",function(ev){
   var el, t=ev.target;
   function up(attr){ return t.closest?t.closest("["+attr+"]"):null; }
 
-  if((el=up("data-step"))){ ev.preventDefault(); goPane(+el.getAttribute("data-step")); return; }
   if((el=up("data-guest"))){
     var gid=el.getAttribute("data-guest"), at=S.nogo.indexOf(gid);
     if(at>=0) S.nogo.splice(at,1); else S.nogo.push(gid);
@@ -1733,12 +1687,14 @@ document.addEventListener("click",function(ev){
     sec.classList.toggle("open"); renderPeople(); haptic(); return;
   }
   if((el=up("data-dur"))){
-    S.dur=+el.getAttribute("data-dur"); afterChange(); renameMeeting(); return;
+    var d=el.getAttribute("data-dur")==="+"?DUR_STEP:-DUR_STEP;
+    S.dur=Math.max(DUR_MIN,Math.min(DUR_MAX,S.dur+d));
+    afterChange(); renameMeeting(); haptic(); return;
   }
   if((el=up("data-pick"))){
     S.pick=+el.getAttribute("data-pick");
     var di=dayIndex(S.pick); if(di>=0) S.day=di;
-    renderBest(); renderDock(); save(); haptic();
+    renderDock(); save(); haptic();
     renderDays(); renderWTB();
     return;
   }
@@ -1813,10 +1769,6 @@ $("#shareCopy").addEventListener("click",function(){ copyText(shareUrl(),"Link c
 $("#shareCopyBig").addEventListener("click",function(){ copyText(shareUrl(),"Link copied"); });
 $("#shareTop").addEventListener("click",function(){ openShare(); });
 $("#hoursBtn").addEventListener("click",function(){ openSheet(false); });
-$("#shareBtn").addEventListener("click",function(){
-  if(!inMeeting()) return toast("Create the meeting first");
-  copyText(shareUrl(),"Link copied");
-});
 $("#fbSend").addEventListener("click",function(){ sendFeedback(false); });
 $("#fbClose").addEventListener("click",closeFeedback);
 $("#fbAgain").addEventListener("click",function(){
@@ -1851,7 +1803,7 @@ $("#primary").addEventListener("click",function(){
   bookMeeting(sel());
   window.open(gcalUrl(),"_blank","noopener");
   haptic();
-  if(alreadyAsked()) return toast("Google Calendar opened — press Save");
+  if(alreadyAsked()) return toast("Google Calendar opened. Press Save.");
   setTimeout(function(){ openFeedback(true); },260);
 });
 $("#icsBtn").addEventListener("click",function(){
@@ -1900,7 +1852,7 @@ function edgeRow(pid){
   }
 }
 function takeSlot(ts){
-  S.pick=ts; save(); markColumn(); renderDock(); renderBest(); haptic();
+  S.pick=ts; save(); markColumn(); renderDock(); haptic();
 }
 /* pointerdown paints (edit mode only) — picking waits for a real click, so a
    sideways swipe scrolls the strip instead of booking an hour */
@@ -1933,7 +1885,7 @@ window.addEventListener("pointerup",function(){
   if(!painting) return;
   var who=byId(painting.id);
   painting=null; _auto=null;
-  save(); renderBest(); renderDock();
+  save(); renderDock();
   if(who) syncPerson(who);
 });
 $("#editToggle").addEventListener("click",function(){
@@ -1949,7 +1901,6 @@ window.addEventListener("resize",function(){
     renderAll();
   },120);
 });
-window.addEventListener("popstate",function(){ goPane(stepFromPath(),true); });
 window.addEventListener("scroll",function(){
   $("#nav").classList.toggle("scrolled",window.scrollY>4);
 },{passive:true});
@@ -1977,8 +1928,7 @@ if(window.innerWidth>=900){
   $("#meetSec").classList.add("open");
 }
 renderAll();
-var landOn=(typeof OVERLAP_STEP==="number"?OVERLAP_STEP:stepFromPath());
-if(landOn) requestAnimationFrame(function(){ goPane(landOn,true); });
+if(isNextPage()) requestAnimationFrame(function(){ openFeedback(false); });
 
 if(LIVE){
   refreshMe().then(function(){
@@ -1993,7 +1943,7 @@ if(LIVE){
     if(joinCode){
       var code=joinCode; joinCode="";
       return joinMeeting(code).then(function(){
-        toast("You’re in — " + (MEET?MEET.title:"the meeting"));
+        toast("You are in. " + (MEET?MEET.title:"the meeting"));
       },function(e){ toast(e.message); });
     }
     return null;

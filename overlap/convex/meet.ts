@@ -234,7 +234,7 @@ export const create = mutation({
     const meetingId = await ctx.db.insert("meetings", {
       ownerId: user._id,
       title: title.trim().slice(0, 80) || "Meeting",
-      durationMin: durationMin ?? 30,
+      durationMin: durationMin ?? 60,
       invite: inviteCode(),
       createdAt: Date.now(),
     });

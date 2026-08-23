@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Overlap — schedule meetings at hours that work for everyone</title>
+<title>Overlap · Schedule meetings at hours that work for everyone</title>
 <meta name="description" content="Schedule meetings at hours that work for everyone. One link, every timezone, your Google Calendar included. Free.">
 <meta name="theme-color" content="#FFFFFF">
 <link rel="icon" href="/overlap/icon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<meta property="og:title" content="Overlap — schedule meetings at hours that work for everyone">
+<meta property="og:title" content="Overlap · Schedule meetings at hours that work for everyone">
 <meta property="og:description" content="One link, every timezone, your Google Calendar included. The hour that suits the whole group draws itself. Free.">
 <meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -76,6 +76,13 @@ input{border:0;background:none;outline:none;width:100%}
 .rail-brand{display:none}
 .rsec{margin:0 0 14px}
 .rhead{display:flex;align-items:center;gap:8px;width:100%;padding:6px 4px 8px;text-align:left}
+/* the step you are on, numbered where you do it */
+.stepn{flex:none;width:19px;height:19px;border-radius:50%;background:var(--ink);color:var(--paper);
+  font-size:11px;font-weight:700;font-style:normal;display:grid;place-items:center;
+  letter-spacing:0;font-variant-numeric:tabular-nums}
+.dock-step{display:flex;align-items:center;justify-content:center;gap:8px;padding-bottom:8px}
+.dock-step .stepn{width:18px;height:18px;font-size:10.5px}
+.dock-step span{font-size:12px;color:var(--ink-2);letter-spacing:-.005em;text-align:left}
 .rhead>span{font-size:13px;font-weight:600;color:var(--ink);letter-spacing:-.01em}
 .rhead>b{flex:1;min-width:0;font-size:13px;font-weight:400;color:var(--ink-2);letter-spacing:-.005em;
   text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -138,7 +145,6 @@ main{flex:1;padding:6px 0 8px}
 .chip{padding:8px 15px;border-radius:999px;background:var(--paper);font-size:14px;font-weight:500;letter-spacing:-.01em;box-shadow:inset 0 0 0 1px var(--sep)}
 .chip:active{background:var(--fill)}
 .chip.on{background:var(--ink);color:#fff;box-shadow:none}
-#durChips .chip{padding:8px 11px;font-size:13px;font-variant-numeric:tabular-nums}
 
 /* ── dock ── */
 .dock{position:sticky;bottom:0;z-index:30;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:rgba(242,242,247,.86);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);box-shadow:0 -.5px 0 var(--sep)}
@@ -386,7 +392,6 @@ textarea{font-family:var(--font)}
   .rsec .row.stack{flex-direction:column;align-items:stretch;gap:7px}
   .rsec .row.stack .grow{flex:none}
   .rsec .chips{gap:6px}
-  .rsec #durChips{justify-content:flex-start}
   .rsec .chip{padding:6px 12px;font-size:13px;background:var(--paper)}
   .rsec .chip.on{background:var(--ink);color:#fff}
   .rsec .stepper button{width:32px;height:28px;font-size:16px}
@@ -613,8 +618,8 @@ footer{flex:none;padding:clamp(7px,1.4vh,13px) 0;box-shadow:0 -1px 0 var(--sep)}
   <div class="wrap split">
     <div class="pitch">
       <h1>Schedule meetings at hours that work for <span class="hl">everyone</span>.</h1>
-      <p class="lede">Send one link. Everyone answers for themselves — Google Calendar
-        included — and the hour that works for all of them draws itself.</p>
+      <p class="lede">Send one link. Everyone answers for themselves, Google Calendar
+        included, and the hour that works for all of them draws itself.</p>
       <div class="herobtns">
         <a class="btn2 lg" href="/overlap/team/">Open Overlap</a>
       </div>

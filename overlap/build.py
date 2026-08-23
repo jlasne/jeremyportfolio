@@ -66,7 +66,7 @@ def build_app_pages():
         ("plan", "Plan", "Pick the hour that works and hand it to your calendar."),
         ("next", "Next", "Tell us what Overlap should do next."),
     ]):
-        head = HEAD % {"title": "%s — Overlap" % title, "desc": desc,
+        head = HEAD % {"title": "%s · Overlap" % title, "desc": desc,
                        "theme": "#F2F2F7", "scale": ", maximum-scale=1"}
         write("%s/index.html" % slug, APP_PAGE % {
             "head": head, "css": CSS, "app": APP, "config": config, "step": step})
@@ -119,7 +119,7 @@ LOGIN_PAGE = '''<!DOCTYPE html>
 '''
 
 def build_login():
-    head = HEAD % {"title": "Sign in — Overlap", "theme": "#FFFFFF",
+    head = HEAD % {"title": "Sign in · Overlap", "theme": "#FFFFFF",
                    "desc": "Sign in to Overlap.", "scale": ""}
     write("login/index.html", LOGIN_PAGE % {
         "head": head, "css": CSS, "login": LOGIN, "config": read("config.js")})

@@ -63,8 +63,8 @@ var joining=(nextUrl().match(/#j=([A-Za-z0-9_-]+)/)||[])[1]||"";
 if(LIVE && joining){
   cx("meet.peek",{invite:joining}).then(function(m){
     if(!m) return;
-    $(".lede").textContent="“"+m.title+"” — "+
-      (m.count===1?"one person so far":m.count+" people so far")+
+    $(".lede").textContent="“"+m.title+"”. "+
+      (m.count===1?"One person so far":m.count+" people so far")+
       ". Sign in and your hours land on their calendar.";
   }).catch(function(){});
 }
@@ -73,7 +73,7 @@ if(!LIVE){
   $("#ways").innerHTML='<p class="note">No backend is connected yet, so there is '+
     'nothing to sign in to.</p><a class="btn" href="'+esc(base())+'/team/">Open Overlap anyway</a>';
 } else if(!GID){
-  $("#ways").innerHTML='<p class="note">Google sign-in is not configured yet — '+
+  $("#ways").innerHTML='<p class="note">Google sign-in is not configured yet. '+
     'set a client ID in <code>config.js</code>. See overlap/README.md.</p>';
 } else {
   var sc=document.createElement("script");
