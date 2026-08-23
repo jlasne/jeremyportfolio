@@ -160,6 +160,10 @@ BOOK_PAGE = '''<!DOCTYPE html>
 .done .fine{font-size:13px;color:var(--ink-3);margin-top:14px}
 .done .back{display:inline-block;margin-top:18px;font-size:14px;font-weight:600;
   color:var(--ink-2)}
+.bk .wtb{margin:0 0 12px}
+.bk .hc[data-at]{cursor:pointer}
+.bk .hc.pick{box-shadow:inset 0 0 0 2px var(--ink);border-radius:4px}
+.bk .legend{padding:0 4px 10px}
 </style>
 </head>
 <body>
@@ -171,7 +175,13 @@ BOOK_PAGE = '''<!DOCTYPE html>
   <h1 id="who">Loading</h1>
   <p class="lede" id="lede"></p>
   <div class="chips" id="durs"></div>
-  <div id="slots"></div>
+  <div class="wtb">
+    <div class="wtblabs" id="wtbLabs"></div>
+    <div class="wtbscroll" id="wtbScroll"><div class="wtbgrid" id="wtb"></div></div>
+  </div>
+  <div class="legend"><i class="lg free"></i><span>free</span>
+    <i class="lg busy"></i><span>taken</span></div>
+  <div class="empty" id="none" style="display:none"><b>Nothing free.</b>No open hour in this window. Try a shorter meeting.</div>
 </div>
 <div class="bk-dock"><div class="in">
   <div class="note" id="note"></div>

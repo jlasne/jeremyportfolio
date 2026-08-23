@@ -427,8 +427,8 @@ export const setHandle = mutation({
  * you lose them.
  */
 export const host = query({
-  args: { handle: v.string() },
-  handler: async (ctx, { handle }) => {
+  args: { handle: v.string(), token: v.optional(v.string()) },
+  handler: async (ctx, { handle, token }) => {
     const user = await ctx.db
       .query("users")
       .withIndex("by_handle", (q) => q.eq("handle", handle.trim().toLowerCase()))
@@ -449,8 +449,13 @@ export const host = query({
     const mine = (await Promise.all(seats.map((s) => ctx.db.get(s.meetingId))))
       .filter((m): m is Doc<"meetings"> => !!m && !!m.startsAt);
 
+    /* Opening your own link is the first thing anybody does, so the page
+       should say so before they tap rather than after. */
+    const viewer = token ? await whoIs(ctx, token) : null;
+
     const d = defaults(user, "UTC");
     return {
+      isYou: !!viewer && viewer._id === user._id,
       name: user.name,
       tz: d.tz,
       startHour: d.startHour,

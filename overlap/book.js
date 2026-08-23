@@ -40,7 +40,7 @@ function cx(op,args){
 }
 
 var handle=(location.hash||"").replace(/^#\/?/,"").trim().toLowerCase();
-var HOST=null, PICK=null, MINS=30;
+var HOST=null, PICK=null, MINS=30, SCROLLED=false;
 
 /* ── whether an instant is one they could actually take ──
    Their working day, minus their night, minus what their calendar already
@@ -71,50 +71,97 @@ function freeAt(ts){
   }
   return true;
 }
-/* every free half hour in their window, grouped by their day */
-function days(){
-  var out=[], n, j, ts, p, list;
-  var start=todayStart(HOST.tz);
-  for(n=0;n<HOST.windowDays;n++){
-    p=zp(start+n*86400000+3600000*4,HOST.tz);   /* midday-ish, dodges DST */
-    list=[];
-    for(j=0;j<48;j++){
-      ts=wall(p.y,p.m,p.d,0,j*SLOT,HOST.tz);
-      if(freeAt(ts)) list.push(ts);
-    }
-    if(list.length) out.push({y:p.y,m:p.m,d:p.d,at:list});
-    if(out.length>=10) break;
-  }
+/* The week as rows of days and columns of half hours, which is the shape
+   the app already uses. White is an hour you can take, ink is one you
+   cannot, and the column you picked is ruled off. */
+var DAYS_SHOWN=7, COLS=48;
+function todayStart(tz){ var p=zp(Date.now(),tz); return wall(p.y,p.m,p.d,0,0,tz); }
+function dayStarts(tz){
+  var out=[], base=todayStart(tz), n;
+  for(n=0;n<DAYS_SHOWN;n++) out.push(base+n*86400000);
   return out;
 }
-function todayStart(tz){ var p=zp(Date.now(),tz); return wall(p.y,p.m,p.d,0,0,tz); }
-
+function sizeGrid(rows){
+  var wrap=document.querySelector(".wtb");
+  if(!wrap) return;
+  var avail=Math.max(240,window.innerHeight-wrap.getBoundingClientRect().top-150);
+  var row=Math.max(34,Math.min(64,(avail-26)/rows));
+  wrap.style.setProperty("--wruler","26px");
+  wrap.style.setProperty("--wrow",Math.round(row)+"px");
+  wrap.style.setProperty("--cw","30px");
+  wrap.style.setProperty("--lab","94px");
+}
 function render(){
-  var d=days(), mine=LOCAL_TZ;
+  var tz=LOCAL_TZ, days=dayStarts(tz), i, n, any=false;
   $("#who").textContent=HOST.name;
-  $("#lede").textContent="Pick an hour. Times are shown on your clock in "+
-    tzCity(mine)+", and land on theirs in "+tzCity(HOST.tz)+".";
+  $("#lede").textContent=HOST.isYou
+    ? "This is your own booking link. This is what a client sees when you send it."
+    : (tzCity(tz)===tzCity(HOST.tz)
+        ? "Pick an hour. You are both on the same clock."
+        : "Pick an hour. Shown on your clock in "+tzCity(tz)+
+          ", and it lands on theirs in "+tzCity(HOST.tz)+".");
   $("#durs").innerHTML=[15,30,45,60].map(function(m){
     return '<button class="chip'+(MINS===m?" on":"")+'" data-min="'+m+'">'+m+"′</button>";
   }).join("");
 
-  if(!d.length){
-    $("#slots").innerHTML='<div class="empty"><b>Nothing free.</b>'+
-      "No open hour in the next "+HOST.windowDays+" days. Try a shorter meeting.</div>";
-    return;
-  }
-  $("#slots").innerHTML=d.map(function(day){
-    var first=day.at[0];
-    return '<div class="day"><h3>'+esc(fmtLongDate(first,mine))+"</h3><div class=\"times\">"+
-      day.at.map(function(ts){
-        return '<button class="slot'+(PICK===ts?" on":"")+'" data-at="'+ts+'">'+
-               esc(fmtT(ts,mine))+"</button>";
-      }).join("")+"</div></div>";
-  }).join("");
-}
+  var g=$("#wtb"), labs=$("#wtbLabs"), html="", lhtml="";
+  sizeGrid(DAYS_SHOWN);
+  var rows="var(--wruler) repeat("+DAYS_SHOWN+",var(--wrow))";
+  g.style.gridTemplateColumns="repeat("+COLS+",minmax(var(--cw),1fr))";
+  g.style.gridTemplateRows=rows;
+  labs.style.gridTemplateRows=rows;
 
+  /* the ruler, on the reader's own clock */
+  lhtml+='<div class="rlab head"><b>'+esc(tzCity(tz))+"</b></div>";
+  var z0=zp(days[0],tz);
+  for(i=0;i<COLS;i++){
+    var h=Math.floor(i/2);
+    html+='<div class="tick'+(h%6===0&&i%2===0?" q":"")+'">'+
+          (i%4===0?fmtHourShort(h):"")+"</div>";
+  }
+
+  /* one row per day */
+  for(n=0;n<DAYS_SHOWN;n++){
+    var z=zp(days[n],tz);
+    lhtml+='<div class="rlab"><b>'+esc(WD[dow(days[n],tz)])+" "+z.d+"</b>"+
+           "<span><em>"+esc(MO[z.m-1])+"</em></span></div>";
+    var free=[];
+    for(i=0;i<COLS;i++){
+      var ts=wall(z.y,z.m,z.d,0,i*30,tz);
+      free.push({ts:ts,ok:freeAt(ts)});
+      if(free[i].ok) any=true;
+    }
+    for(i=0;i<COLS;i++){
+      var c=free[i], cls=c.ok?"":"busy";
+      if(!c.ok){
+        if(i===0||free[i-1].ok) cls+=" s";
+        if(i===COLS-1||free[i+1].ok) cls+=" e";
+      }
+      if(PICK===c.ts) cls+=" pick";
+      html+='<div class="hc'+(cls?" "+cls:"")+'"'+
+            (c.ok?' data-at="'+c.ts+'"':"")+"></div>";
+    }
+  }
+  labs.innerHTML=lhtml;
+  g.innerHTML=html;
+  $("#none").style.display=any?"none":"";
+
+  /* Their night is the first thing on the left, and nobody scrolls past a
+     wall of ink to find out there were hours. Start where the hours are. */
+  if(!SCROLLED) requestAnimationFrame(function(){
+    var cell=g.querySelector('.hc[data-at]'), sc=$("#wtbScroll");
+    if(!cell||!sc) return;
+    sc.scrollLeft=Math.max(0,cell.offsetLeft-sc.clientWidth*0.2);
+    SCROLLED=true;
+  });
+}
 function renderDock(){
   var b=$("#go"), h=$("#note");
+  if(HOST&&HOST.isYou){
+    b.disabled=true; b.textContent="Your own link";
+    h.textContent="Send it to somebody else and they can take one of these.";
+    return;
+  }
   if(!PICK){ b.disabled=true; b.textContent="Pick an hour"; h.textContent=""; return; }
   b.disabled=false;
   b.textContent=token()?"Book this hour":"Sign in and book";
@@ -151,7 +198,7 @@ function gcalUrl(r){
 }
 
 function book(){
-  if(!PICK) return;
+  if(!PICK||(HOST&&HOST.isYou)) return;
   if(!token()){
     holdPick();
     location.assign(base()+"/login/?next="+
@@ -181,7 +228,7 @@ function book(){
 }
 
 function start(){
-  return cx("meet.host",{handle:handle}).then(function(h){
+  return cx("meet.host",{handle:handle,token:token()||undefined}).then(function(h){
     if(!h){
       $("#pane").innerHTML='<div class="done"><h2>No such link.</h2>'+
         "<p>That booking link does not belong to anybody.</p></div>";
@@ -202,7 +249,7 @@ function start(){
 document.addEventListener("click",function(ev){
   var el=ev.target.closest?ev.target.closest("[data-at],[data-min]"):null;
   if(!el) return;
-  if(el.hasAttribute("data-min")){ MINS=+el.getAttribute("data-min"); PICK=null; }
+  if(el.hasAttribute("data-min")){ MINS=+el.getAttribute("data-min"); PICK=null; SCROLLED=false; }
   else PICK=+el.getAttribute("data-at");
   render(); renderDock();
 });

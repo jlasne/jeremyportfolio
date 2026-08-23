@@ -745,7 +745,9 @@ function renderMeetings(){
                        :(m.kind==="call"?"a call":"not booked yet");
     return '<div class="row tap" data-pickmeet="'+esc(m.id)+'">'+
       '<div class="avatar'+(m.id===S.mid?" you":"")+'">'+esc((m.title||"M").slice(0,2).toUpperCase())+"</div>"+
-      '<div class="grow"><div class="t">'+esc(m.title||"Meeting")+"</div>"+
+      '<div class="grow"><div class="t">'+esc(m.title||"Meeting")+
+      '<span class="kind'+(m.kind==="call"?" call":"")+'">'+
+      (m.kind==="call"?"client":"team")+"</span></div>"+
       '<div class="s">'+esc(when)+"</div></div>"+
       (m.id===S.mid?'<span class="mark">✓</span>':"")+"</div>";
   }).join(""):'<div class="empty"><b>Nothing yet.</b>Name a meeting and press Create.</div>')+
