@@ -102,6 +102,9 @@ main{flex:1;padding:6px 0 8px}
   .panehead .ph-note{order:3;flex-basis:100%} }
 .sechead{font-size:13px;color:var(--ink-2);letter-spacing:-.005em;padding:0 4px 10px;display:flex;justify-content:space-between;align-items:flex-end}
 .sechead b{font-weight:400}
+/* the name of a mode, so the two halves of the share sheet cannot be
+   mistaken for two spellings of the same thing */
+.sechead .modet{font-size:13px;font-weight:700;color:var(--ink);letter-spacing:-.015em}
 .sechead.gap{padding-top:28px}
 .secfoot{font-size:13px;line-height:1.45;color:var(--ink-2);padding:10px 4px 0}
 /* a step that has its own action carries its own button */
