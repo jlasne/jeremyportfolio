@@ -390,9 +390,11 @@ button.btn { cursor: pointer; font-family: inherit; }
     0 2px 3px rgba(255,255,255,0.2) inset,
     0 40px 80px -26px rgba(22,21,28,0.42),
     0 8px 24px -8px rgba(22,21,28,0.18);
-  transform: rotateY(var(--ry, -12deg)) rotateX(var(--rx, 4deg)) translateZ(0);
+  transform: translate3d(var(--tx, 0), var(--ty, 0), 0)
+             rotateY(var(--ry, -12deg)) rotateX(var(--rx, 4deg));
   transform-style: preserve-3d;
-  transition: transform 1s var(--ease);
+  /* a full second of easing reads as lag once the throw is this wide */
+  transition: transform .5s var(--ease);
   will-change: transform;
 }
 .phone-screen { position: relative; overflow: hidden; width: 100%; height: 100%; border-radius: 42px; background: #05070a; display: flex; flex-direction: column; }
@@ -582,14 +584,10 @@ button.btn { cursor: pointer; font-family: inherit; }
 .lb--me  { background: var(--bg-sunk); color: var(--ink); --bd: 260ms; }
 @media (prefers-reduced-motion: reduce) { .lb { transform: none; } .lb b { opacity: 1; } }
 
-/* ── the niche gets a band to itself ────────────────────────────────────── */
-
-.nd-band { padding-block: clamp(88px, 12vw, 168px) clamp(56px, 7vw, 92px); }
-
 /* ── the rotating niche ─────────────────────────────────────────────────── */
 
 .nd { text-align: center; }
-.nd-pre, .nd-post {
+.nd-pre {
   font-size: clamp(1.05rem, 2.2vw, 1.5rem);
   font-weight: 700; letter-spacing: -0.02em; color: var(--muted);
   max-width: 30ch; margin-inline: auto;
@@ -667,10 +665,6 @@ button.btn { cursor: pointer; font-family: inherit; }
   margin-top: clamp(40px, 6vw, 64px); text-align: center;
   font-size: clamp(1.15rem, 2.2vw, 1.5rem); font-weight: 700; letter-spacing: -0.025em;
 }
-
-/* the niche band hands straight over to the ask, both black: close the seam
-   so the two read as one stretch rather than two padded bands */
-.nd-band + .close { padding-top: clamp(44px, 6vw, 76px); }
 
 /* current projects */
 .projects { display: grid; gap: 14px; margin-top: 44px; }
@@ -879,7 +873,7 @@ button.btn { cursor: pointer; font-family: inherit; }
 </section>
 
 <!-- ── how it works ─────────────────────────────────────────────────────── -->
-<section class="band" id="how">
+<section class="band band--dark" id="how">
   <div class="shell">
     <div class="head head--center rise" style="max-width:none">
       <span class="eyebrow"><i></i>How it works</span>
@@ -919,7 +913,7 @@ button.btn { cursor: pointer; font-family: inherit; }
 </section>
 
 <!-- ── your audience: the niche, then why there is an app in it ─────────── -->
-<section class="band band--dark nd-band" id="audience">
+<section class="band" id="audience">
   <div class="shell">
 
     <!-- The rotating niche is the section's headline. It used to run as its
@@ -929,9 +923,6 @@ button.btn { cursor: pointer; font-family: inherit; }
       <div class="nd-slot">
         <span class="nd-word" id="nd-word">fly fishing</span>
       </div>
-      <!-- One line, not a paragraph: the three cards below already carry the
-           argument, and 02 says the comments part word for word. -->
-      <p class="nd-post">You listen to them every day. That is why it fits.</p>
       <div class="nd-rule" aria-hidden="true"><span id="nd-bar"></span></div>
     </div>
 
@@ -1166,8 +1157,10 @@ button.btn { cursor: pointer; font-family: inherit; }
       var x = (e.clientX / window.innerWidth) * 100;
       var y = (e.clientY / window.innerHeight) * 100;
       if (phone) {
-        phone.style.setProperty('--ry', (-12 + (x - 50) * 0.085).toFixed(2) + 'deg');
-        phone.style.setProperty('--rx', (4 - (y - 50) * 0.045).toFixed(2) + 'deg');
+        phone.style.setProperty('--ry', (-12 + (x - 50) * 0.24).toFixed(2) + 'deg');
+        phone.style.setProperty('--rx', (4 - (y - 50) * 0.14).toFixed(2) + 'deg');
+        phone.style.setProperty('--tx', ((x - 50) * 0.18).toFixed(1) + 'px');
+        phone.style.setProperty('--ty', ((y - 50) * 0.12).toFixed(1) + 'px');
       }
     }, { passive: true });
   }

@@ -17,7 +17,8 @@ network requests at runtime. Open it and edit it.
   file, one family, no second voice, and no FOUT because nothing is fetched
 - Black, white, and the greys between. The only colour on the page lives
   inside the phone, because that is the product
-- Bands alternate white and black. A `.band--dark` section re-points the
+- Bands alternate white and black, strictly: hero, How it works, Your
+  audience, the ask, projects. A `.band--dark` section re-points the
   colour tokens rather than overriding components, so every card, rule, chip
   and slider inside it inverts on its own
 - Project logos are the real icons from each site, resized to 128px and
