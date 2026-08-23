@@ -54,10 +54,13 @@ up on the first call.
 
 ### The niche that rotates
 
-`NICHES` in the `<script>` block feeds the full-width band after *How it
-works*. Keep the examples narrow and unglamorous — fly fishing, crochet, IELTS
-prep. The narrower the example, the better the argument lands; "fitness" makes
-the section say nothing.
+`NICHES` in the `<script>` block is the headline of the *Your audience*
+band — the rotating word is the section's `<h2>` in everything but markup, and
+the three numbered cards under it are the argument for it. Keep the examples
+narrow and unglamorous: fly fishing, crochet, IELTS prep, knife sharpening. The
+narrower the example, the better the argument lands; "fitness" makes the
+section say nothing. Anything much longer than *mechanical keyboards* starts
+crowding the slot on a small phone — the word is set `nowrap` on purpose.
 
 There is no simulator and no split shown. The page says the build costs the
 creator nothing and that we split what it earns, and stops there — the split

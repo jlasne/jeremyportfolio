@@ -358,13 +358,6 @@ button.btn { cursor: pointer; font-family: inherit; }
 }
 .close .cta-fine, .niche-close .cta-fine { margin-inline: auto; }
 
-/* the whole argument the comparison table used to make, in one line */
-.hero-line {
-  margin-top: 26px; max-width: 34ch;
-  font-size: clamp(1.02rem, 1.6vw, 1.16rem); font-weight: 700;
-  letter-spacing: -0.02em; line-height: 1.4; color: var(--ink);
-}
-
 /* the proof cards sit under the hero grid, full width rather than in a column */
 .hero .shell.hero-proof { display: block; }
 
@@ -598,7 +591,7 @@ button.btn { cursor: pointer; font-family: inherit; }
 
 /* ── the niche gets a band to itself ────────────────────────────────────── */
 
-.nd-band { padding-block: clamp(96px, 15vw, 200px); }
+.nd-band { padding-block: clamp(88px, 12vw, 168px) clamp(56px, 7vw, 92px); }
 
 /* ── the rotating niche ─────────────────────────────────────────────────── */
 
@@ -631,6 +624,7 @@ button.btn { cursor: pointer; font-family: inherit; }
 /* ── the three reasons ──────────────────────────────────────────────────── */
 
 .reasons { display: grid; gap: 12px; perspective: 900px; }
+.nd + .reasons { margin-top: clamp(48px, 7vw, 78px); }
 @media (min-width: 860px) { .reasons { grid-template-columns: repeat(3, 1fr); } }
 
 .reason {
@@ -676,9 +670,14 @@ button.btn { cursor: pointer; font-family: inherit; }
 @media (prefers-reduced-motion: reduce) { .reason { transform: none; } }
 
 /* the line that closes the niche argument */
-.niche-close { margin-top: clamp(40px, 6vw, 64px); text-align: center; }
-.niche-close p { font-size: clamp(1.15rem, 2.2vw, 1.5rem); font-weight: 700; letter-spacing: -0.025em; margin-bottom: 22px; }
-.niche-close .btn-row { justify-content: center; }
+.niche-close {
+  margin-top: clamp(40px, 6vw, 64px); text-align: center;
+  font-size: clamp(1.15rem, 2.2vw, 1.5rem); font-weight: 700; letter-spacing: -0.025em;
+}
+
+/* the niche band hands straight over to the ask, both black: close the seam
+   so the two read as one stretch rather than two padded bands */
+.nd-band + .close { padding-top: clamp(44px, 6vw, 76px); }
 
 /* current projects */
 .projects { display: grid; gap: 14px; margin-top: 44px; }
@@ -829,20 +828,10 @@ button.btn { cursor: pointer; font-family: inherit; }
 
       <div class="btn-row hero-in" style="--d:720ms">
         <a class="btn magnetic" href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=hey@jeremylasne.com&amp;su=Building%20an%20app%20together&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A" target="_blank" rel="noopener">
-          Start a conversation <span class="arrow">&rarr;</span>
+          Let&rsquo;s partner <span class="arrow">&rarr;</span>
         </a>
       </div>
 
-      <!-- Price and reply time sit beside the CTA rather than in fine print at
-           the bottom: silence about cost reads as a catch, not as intrigue. -->
-      <p class="cta-fine hero-in" style="--d:800ms">
-        Costs you nothing. I take the build risk. We split what it earns.<br>
-        If it is not a fit I will say so the same day.
-      </p>
-
-      <p class="hero-line hero-in" style="--d:860ms">
-        A sponsored post pays once. An app pays every month, to you, forever.
-      </p>
     </div>
 
     <div class="hero-in" style="--d:500ms">
@@ -934,9 +923,12 @@ button.btn { cursor: pointer; font-family: inherit; }
   </div>
 </section>
 
-<!-- ── the niche, on its own ────────────────────────────────────────────── -->
-<section class="band band--dark nd-band" id="niche">
+<!-- ── your audience: the niche, then why there is an app in it ─────────── -->
+<section class="band band--dark nd-band" id="audience">
   <div class="shell">
+
+    <!-- The rotating niche is the section's headline. It used to run as its
+         own band and then a second section asked the same question in words. -->
     <div class="nd rise">
       <p class="nd-pre">Your audience is about</p>
       <div class="nd-slot">
@@ -947,30 +939,6 @@ button.btn { cursor: pointer; font-family: inherit; }
         it&rsquo;s the question you get in your comments every week.
       </p>
       <div class="nd-rule" aria-hidden="true"><span id="nd-bar"></span></div>
-    </div>
-
-    <div class="niche-close rise" style="--d:120ms">
-      <p>Costs you nothing to find out.</p>
-      <div class="btn-row">
-        <a class="btn magnetic" href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=hey@jeremylasne.com&amp;su=Building%20an%20app%20together&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A" target="_blank" rel="noopener">
-          hey@jeremylasne.com <span class="arrow">&rarr;</span>
-        </a>
-      </div>
-      <p class="cta-fine">
-        Costs you nothing. I take the build risk. We split what it earns.<br>
-        If it is not a fit I will say so the same day.
-      </p>
-    </div>
-  </div>
-</section>
-
-<!-- ── is there an app in your audience ─────────────────────────────────── -->
-<section class="band" id="audience">
-  <div class="shell">
-    <div class="head head--center rise">
-      <span class="eyebrow"><i></i>Your audience</span>
-      <h2 class="h-section">Is there an app in your audience?</h2>
-      <p class="lede">Almost certainly. The narrower your niche, the better it works.</p>
     </div>
 
     <!-- Both lines are plain static text. The example used to sit behind a
@@ -995,6 +963,8 @@ button.btn { cursor: pointer; font-family: inherit; }
         <span class="r-eg">The wall that kills most apps, already behind you.</span>
       </div>
     </div>
+
+    <p class="niche-close rise" style="--d:120ms">Costs you nothing to find out.</p>
   </div>
 </section>
 
@@ -1275,7 +1245,12 @@ button.btn { cursor: pointer; font-family: inherit; }
 
     var NICHES = [
       'fly fishing', 'birdwatching', 'sourdough', 'crochet',
-      'chess openings', 'vocal warmups', 'van conversions', 'IELTS prep'
+      'chess openings', 'vocal warmups', 'van conversions', 'IELTS prep',
+      'bouldering', 'freediving', 'film photography', 'bonsai',
+      'mechanical keyboards', 'latte art', 'disc golf', 'orchid care',
+      'sneaker restoration', 'knife sharpening', 'powerlifting form',
+      'aquascaping', 'beekeeping', 'marathon pacing', 'vintage watches',
+      'drone racing'
     ];
     var i = 0, timer = null, HOLD = 1000, SLIDE = 260;
 
