@@ -27,6 +27,12 @@ function headers(): Record<string, string> {
 }
 const ok = (value: unknown) =>
   new Response(JSON.stringify({ ok: true, value: value ?? null }), { headers: headers() });
+/** The sentence a person should read, out of whatever the runtime threw. */
+function clean(msg: string): string {
+  const first = msg.split("\n")[0].trim();
+  const said = first.replace(/^(Uncaught\s+)?[A-Za-z]*Error:\s*/, "").trim();
+  return said || "Something went wrong";
+}
 const bad = (error: string, status = 400) =>
   new Response(JSON.stringify({ ok: false, error }), { status, headers: headers() });
 
@@ -78,8 +84,11 @@ const door = httpAction(async (ctx, request) => {
         return bad("Unknown operation");
     }
   } catch (e) {
-    /* thrown messages are written to be read by a person, so pass them on */
-    return bad(e instanceof Error ? e.message : "Something went wrong");
+    /* Thrown messages are written to be read by a person, so pass them on.
+       Convex wraps them first: "Uncaught Error: Sign in first\n at mustBe
+       (../convex/meet.ts:34:9)". The person is owed the first line of that
+       and nothing else, and the internet is owed no file paths at all. */
+    return bad(e instanceof Error ? clean(e.message) : "Something went wrong");
   }
 });
 
