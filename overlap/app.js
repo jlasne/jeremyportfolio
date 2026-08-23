@@ -464,6 +464,10 @@ var LIVE = /^https?:\/\//.test(CONVEX);
 var TOKKEY="overlap.token", QKEY="overlap.queue";
 var ME=null;        /* {user,profile,meetings} once signed in */
 var MEET=null;      /* the meeting on screen */
+/* `me` answers with your most recent meeting when you do not name one, which
+   is right on load and wrong the moment you say New meeting. This says which
+   of the two we are doing. */
+var STARTING=false;
 var PEEP=[];        /* people you have met with, whoever invited whom */
 
 /* one endpoint, one shape: {op,args} in, {ok,value} out. See convex/http.ts.
@@ -515,7 +519,7 @@ function refreshMe(){
   return cx("me",{token:token(),meetingId:S.mid||undefined}).then(function(r){
     ME=r;
     if(!r) return null;
-    MEET=r.meeting||null;
+    MEET=STARTING?null:(r.meeting||null);
     PEEP=r.contacts||[];
     if(MEET){
       S.mid=MEET.id;
@@ -570,19 +574,29 @@ function saveProfile(p){
       sleepStart:a.sleepStart,sleepEnd:a.sleepEnd})
     .then(function(){ if(ME&&ME.profile) ME.profile.ready=true; });
 }
+/* A blank one, on screen, before the server knows anything about it. */
+function startFresh(){
+  STARTING=true; MEET=null;
+  S.mid=""; S.pick=null; S.day=0; S.title=""; S.nogo=[];
+  var me=newPerson((ME&&ME.user&&ME.user.name)||"You",
+                   (ME&&ME.profile&&ME.profile.tz)||LOCAL_TZ,true);
+  if(ME){ applyProfile(me,ME.profile); me.email=(ME.user&&ME.user.email)||""; }
+  S.people=[me]; S.dispId=me.id;
+  save(); afterChange();
+}
 function createMeeting(){
   if(!signedIn()) return Promise.reject(new Error("Sign in first"));
   return cx("meet.create",{token:token(),title:S.title.trim(),durationMin:S.dur,tz:LOCAL_TZ})
-    .then(function(r){ S.mid=r.id; save(); return refreshMe(); })
+    .then(function(r){ S.mid=r.id; STARTING=false; save(); return refreshMe(); })
     .then(function(){ afterChange(); haptic(); toast("Link ready. Send it to them."); openShare(); });
 }
 function joinMeeting(code){
   return cx("meet.join",{token:token(),invite:code,tz:LOCAL_TZ})
-    .then(function(r){ S.mid=r.id; save(); return refreshMe(); });
+    .then(function(r){ S.mid=r.id; STARTING=false; save(); return refreshMe(); });
 }
 function switchMeeting(id){
   if(id===S.mid) return;
-  S.mid=id; S.pick=null; S.day=0; save();
+  S.mid=id; S.pick=null; S.day=0; STARTING=false; save();
   refreshMe().then(function(){ afterChange(); toast(MEET?MEET.title:"Switched"); });
 }
 function renameMeeting(){
@@ -1189,8 +1203,9 @@ document.addEventListener("click",function(ev){
   if((el=up("data-pickmeet"))){ switchMeeting(el.getAttribute("data-pickmeet")); closeMeetings(); return; }
   if((el=up("data-newmeet"))){
     closeMeetings();
-    S.mid=""; S.pick=null; S.title=""; save();
-    refreshMe().then(function(){ afterChange(); $("#titleInput").focus(); });
+    startFresh();
+    $("#meetSec").classList.add("open");
+    $("#titleInput").focus();
     return;
   }
   if((el=up("data-leavemeet"))){
@@ -1198,7 +1213,7 @@ document.addEventListener("click",function(ev){
     var gone=S.mid;
     closeMeetings();
     cx("meet.leave",{token:token(),meetingId:gone}).then(function(){
-      S.mid=""; S.pick=null; save(); return refreshMe();
+      S.mid=""; S.pick=null; STARTING=false; save(); return refreshMe();
     }).then(function(){ afterChange(); toast("Left"); })
       .catch(function(e){ toast(e.message); });
     return;
