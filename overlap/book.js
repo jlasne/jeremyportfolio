@@ -227,8 +227,19 @@ function book(){
     });
 }
 
+/* The page is served by a static host and the backend is deployed by hand,
+   so the page is always the newer of the two for a while. Asking whether
+   this link is mine is a nicety; if the deployment has not heard of it yet,
+   ask again without it rather than showing nobody any hours. */
+function askHost(){
+  return cx("meet.host",{handle:handle,token:token()||undefined})
+    .catch(function(e){
+      if(!token() || !/newer than the server|validator/i.test(e.message)) throw e;
+      return cx("meet.host",{handle:handle});
+    });
+}
 function start(){
-  return cx("meet.host",{handle:handle,token:token()||undefined}).then(function(h){
+  return askHost().then(function(h){
     if(!h){
       $("#pane").innerHTML='<div class="done"><h2>No such link.</h2>'+
         "<p>That booking link does not belong to anybody.</p></div>";
@@ -241,7 +252,10 @@ function start(){
     render(); renderDock();
     if(held && PICK && token()) book();
   }).catch(function(e){
-    $("#note").textContent=e.message;
+    /* Nothing drew, so the failure has to be the page rather than a line
+       under a button nobody can press. */
+    $("#pane").innerHTML='<div class="done"><h2>Cannot load this link.</h2>'+
+      "<p>"+esc(e.message)+"</p></div>";
   });
 }
 

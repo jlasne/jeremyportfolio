@@ -27,10 +27,21 @@ function headers(): Record<string, string> {
 }
 const ok = (value: unknown) =>
   new Response(JSON.stringify({ ok: true, value: value ?? null }), { headers: headers() });
-/** The sentence a person should read, out of whatever the runtime threw. */
+/**
+ * The sentence a person should read, out of whatever the runtime threw.
+ *
+ * An argument validation failure is the one case we must not pass on: Convex
+ * echoes the whole argument object back, and the arguments contain the
+ * caller's session token. That has to stay off the screen and out of any
+ * screenshot, so it is answered with a sentence and nothing else. It only
+ * ever means one thing anyway: the page is newer than the deployment.
+ */
 function clean(msg: string): string {
+  if (/ArgumentValidationError|not in the validator/i.test(msg))
+    return "This page is newer than the server. Reload, and deploy if it persists.";
   const first = msg.split("\n")[0].trim();
   const said = first.replace(/^(Uncaught\s+)?[A-Za-z]*Error:\s*/, "").trim();
+  if (/\btoken\b\s*[:=]/i.test(said)) return "Something went wrong";
   return said || "Something went wrong";
 }
 const bad = (error: string, status = 400) =>
