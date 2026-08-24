@@ -351,6 +351,18 @@ button.btn { cursor: pointer; font-family: inherit; }
 }
 .close .cta-fine, .niche-close .cta-fine { margin-inline: auto; }
 
+/* copying the address is a convenience, not a third call to action */
+.copy-inline {
+  margin-top: 14px; padding: 4px 2px;
+  background: none; border: 0; cursor: pointer;
+  font: inherit; font-size: 13.5px; font-weight: 600; color: var(--faint);
+  text-decoration: underline; text-underline-offset: 3px;
+  text-decoration-color: var(--rule-firm);
+  transition: color .3s var(--ease-soft);
+}
+.copy-inline:hover { color: var(--muted); }
+.band--dark .copy-inline:hover { color: var(--white); }
+
 /* the proof cards sit under the hero grid, full width rather than in a column */
 .hero .shell.hero-proof { display: block; }
 
@@ -782,7 +794,7 @@ button.btn { cursor: pointer; font-family: inherit; }
         </span><span class="nav-name">Jeremy Lasne</span></a>
     <div class="nav-links">
       <a href="#projects">Projects</a>
-      <a class="nav-cta" href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=hey@jeremylasne.com&amp;su=Building%20an%20app%20together&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A" target="_blank" rel="noopener">Let's talk</a>
+      <a class="nav-cta" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call</a>
     </div>
   </div>
   <div class="nav-progress" id="progress"></div>
@@ -810,9 +822,10 @@ button.btn { cursor: pointer; font-family: inherit; }
       </p>
 
       <div class="btn-row hero-in" style="--d:720ms">
-        <a class="btn magnetic" href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=hey@jeremylasne.com&amp;su=Building%20an%20app%20together&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A" target="_blank" rel="noopener">
-          Let&rsquo;s partner <span class="arrow">&rarr;</span>
+        <a class="btn magnetic" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">
+          Book a call <span class="arrow">&rarr;</span>
         </a>
+        <a class="btn btn--ghost magnetic" href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=hey@jeremylasne.com&amp;su=Building%20an%20app%20together&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A" target="_blank" rel="noopener">Or email me</a>
       </div>
 
     </div>
@@ -957,21 +970,23 @@ button.btn { cursor: pointer; font-family: inherit; }
 <section class="band band--dark close" id="contact">
   <div class="narrow">
     <div class="rise">
-      <h2 class="h-section">Send me one email.</h2>
+      <h2 class="h-section">Book fifteen minutes.</h2>
       <p class="lede">
-        What you make, roughly how many follow you, and the thing your people
-        keep asking you for. That last one is usually the app.
+        Pick a slot and tell me what you make, roughly how many follow you, and
+        the thing your people keep asking you for. That last one is usually the
+        app. Rather write it down? Email works too.
       </p>
 
       <div class="btn-row">
-        <a class="btn magnetic" href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=hey@jeremylasne.com&amp;su=Building%20an%20app%20together&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A" target="_blank" rel="noopener">
-          hey@jeremylasne.com <span class="arrow">&rarr;</span>
+        <a class="btn magnetic" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">
+          Book a call <span class="arrow">&rarr;</span>
         </a>
-        <button class="btn btn--ghost magnetic" type="button" id="copy-email" data-email="hey@jeremylasne.com">Or copy my email</button>
+        <a class="btn btn--ghost magnetic" href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=hey@jeremylasne.com&amp;su=Building%20an%20app%20together&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A" target="_blank" rel="noopener">hey@jeremylasne.com</a>
       </div>
+      <button class="copy-inline" type="button" id="copy-email" data-email="hey@jeremylasne.com">Copy the address</button>
       <p class="cta-fine">
         Costs you nothing. I take the build risk. We split what it earns.<br>
-        If it is not a fit I will say so the same day.
+        If it is not a fit I will say so on the call.
       </p>
     </div>
   </div>
@@ -1038,6 +1053,7 @@ button.btn { cursor: pointer; font-family: inherit; }
       <a href="https://trustviews.io" target="_blank" rel="noopener">Trustviews</a>
       <a href="https://x.com/jeremylasne" target="_blank" rel="noopener">X</a>
       <a href="https://www.youtube.com/@jeremyfounder" target="_blank" rel="noopener">YouTube</a>
+      <a href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call</a>
       <a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=hey@jeremylasne.com&amp;su=Building%20an%20app%20together&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A" target="_blank" rel="noopener">Email</a>
     </div>
   </div>
