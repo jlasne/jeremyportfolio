@@ -735,22 +735,50 @@ button.btn { cursor: pointer; font-family: inherit; }
    the quote reads as a beat rather than another section. */
 .band--quote { background: var(--bg-sunk); padding-block: clamp(64px, 9vw, 116px); }
 
-.pull { text-align: center; }
-.pull-mark {
-  display: block; margin-bottom: 6px;
-  font-size: clamp(3rem, 7vw, 4.6rem); line-height: 0.72; font-weight: 800;
-  color: var(--rule-firm); user-select: none;
+/* The claim was a sentence with two numbers buried in it. Drawn as the sum
+   it actually is, the reader can check the arithmetic at a glance — and the
+   last figure gets to be the size it deserves. */
+.ladder {
+  display: grid; gap: 10px;
+  margin: clamp(38px, 5vw, 56px) auto 0; max-width: 940px;
 }
-/* The sentence is grey and the two numbers are ink, the same emphasis the
-   hero lede uses — the figures are the whole point of the line. */
-.pull blockquote {
-  font-size: clamp(1.3rem, 3vw, 2.05rem);
-  font-weight: 800; letter-spacing: -0.03em; line-height: 1.2;
-  color: var(--ink-2);
-  text-wrap: balance;
+@media (min-width: 780px) {
+  .ladder { grid-template-columns: 1fr auto 1fr auto 1.35fr; gap: 16px; align-items: stretch; }
 }
-/* the two figures are the line — never let one break across a wrap */
-.pull blockquote b { color: var(--ink); font-weight: 800; white-space: nowrap; }
+
+.rung {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px; padding: clamp(26px, 3.4vw, 38px) 20px;
+  border-radius: 22px; background: var(--card); border: 1px solid var(--rule);
+}
+.rung-v {
+  font-size: clamp(2.1rem, 5.2vw, 3rem); font-weight: 800;
+  letter-spacing: -0.045em; line-height: 1;
+  font-variant-numeric: tabular-nums; color: var(--ink-2);
+}
+.band--quote .head h2 { text-wrap: balance; }
+
+.rung-k { font-size: 12.5px; font-weight: 700; letter-spacing: -0.01em; color: var(--muted); text-align: center; }
+
+/* the last figure is the whole point of the row, so it takes the ink and the
+   size — everything before it is working out how it got there */
+.rung--end { background: var(--ink); border-color: var(--ink); box-shadow: var(--lift-lg); }
+.rung--end .rung-v { color: var(--bg); font-size: clamp(2.9rem, 8vw, 4.4rem); }
+.rung--end .rung-k { color: var(--bg); opacity: 0.6; }
+
+/* the multiplier between two cards, with the arrow that points the reading
+   direction — down when the cards stack, across when they sit in a row */
+.rung-op {
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  padding: 2px 0;
+  font-family: var(--mono); font-size: 12.5px; font-weight: 600;
+  letter-spacing: 0.08em; color: var(--muted);
+}
+.rung-op::after { content: "\2193"; font-size: 17px; line-height: 1; }
+@media (min-width: 780px) {
+  .rung-op { flex-direction: column-reverse; gap: 6px; }
+  .rung-op::after { content: "\2192"; }
+}
 
 /* ── close ──────────────────────────────────────────────────────────────── */
 
@@ -929,17 +957,33 @@ button.btn { cursor: pointer; font-family: inherit; }
 <!-- The one thing the rest of the page implies but never says out loud: a
      post pays once, an app keeps paying and can be sold. It sits here, right
      after the proof and before the mechanics, because it is the reason to
-     read on. One quote and nothing else, so it lands as a thought rather
-     than another pitch. -->
+     read on. Drawn as the sum rather than said as a sentence, so the $360k
+     arrives as arithmetic the reader just watched happen. -->
 <section class="band band--quote" id="asset">
-  <div class="narrow">
-    <figure class="pull rise">
-      <span class="pull-mark" aria-hidden="true">&ldquo;</span>
-      <blockquote>
-        An app you promote that makes <b>$10k a month</b> is worth about
-        <b>$360k</b>. Recurring revenue. An asset that is yours.
-      </blockquote>
-    </figure>
+  <div class="shell">
+    <div class="head head--center rise" style="max-width:none">
+      <span class="eyebrow"><i></i>What you end up owning</span>
+      <h2 class="h-section">Recurring revenue, and an asset that is yours.</h2>
+    </div>
+
+    <!-- The figures carry it, so each card is read as one thing: the screen
+         reader gets "$10k a month", not a number and a caption. -->
+    <div class="ladder rise" style="--d:90ms">
+      <div class="rung">
+        <span class="rung-v">$10k</span>
+        <span class="rung-k">a month</span>
+      </div>
+      <span class="rung-op">&times;12</span>
+      <div class="rung">
+        <span class="rung-v">$120k</span>
+        <span class="rung-k">a year</span>
+      </div>
+      <span class="rung-op">&times;3</span>
+      <div class="rung rung--end">
+        <span class="rung-v">$360k</span>
+        <span class="rung-k">what it sells for</span>
+      </div>
+    </div>
   </div>
 </section>
 
