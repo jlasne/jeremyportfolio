@@ -751,18 +751,16 @@ button.btn { cursor: pointer; font-family: inherit; }
 }
 /* the two figures are the line — never let one break across a wrap */
 .pull blockquote b { color: var(--ink); font-weight: 800; white-space: nowrap; }
-.pull figcaption {
-  margin: clamp(18px, 2.6vw, 26px) auto 0; max-width: 46ch;
-  font-size: 14px; line-height: 1.6; color: var(--faint);
-  text-wrap: balance;
-}
 
 /* ── close ──────────────────────────────────────────────────────────────── */
 
 .close { text-align: center; padding-block: clamp(88px, 12vw, 168px); }
 .close .panel { padding: 0; background: none; border: 0; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
 .close .eyebrow { margin-bottom: 20px; }
-.close h2 { margin-bottom: 20px; }
+.close h2 { margin-bottom: 20px; text-wrap: balance; }
+/* the hyphen in "life-changing" is a break opportunity, and a headline
+   that snaps at it reads as a typo */
+.nb { white-space: nowrap; }
 .close-fine { margin-top: 20px; font-size: 13.5px; color: var(--faint); max-width: 46ch; margin-inline: auto; }
 .close .lede { margin-inline: auto; text-wrap: balance; }
 .close .btn-row { justify-content: center; margin-top: 28px; }
@@ -923,7 +921,25 @@ button.btn { cursor: pointer; font-family: inherit; }
         <span class="case-go">See it on Google Play <span class="arrow">&rarr;</span></span>
       </a>
     </div>
-    <p class="proof-note hero-in" style="--d:1120ms">Not my projects. Their numbers, publicly posted. Apps linked so you can check. ThePanash only just launched, so it shows the audience it starts from and the price it charges, not revenue.</p>
+    <p class="proof-note hero-in" style="--d:1120ms">Not my projects. Their numbers, publicly posted, apps linked so you can check. ThePanash just launched: audience and price, not revenue.</p>
+  </div>
+</section>
+
+<!-- ── the asset ────────────────────────────────────────────────────────── -->
+<!-- The one thing the rest of the page implies but never says out loud: a
+     post pays once, an app keeps paying and can be sold. It sits here, right
+     after the proof and before the mechanics, because it is the reason to
+     read on. One quote and nothing else, so it lands as a thought rather
+     than another pitch. -->
+<section class="band band--quote" id="asset">
+  <div class="narrow">
+    <figure class="pull rise">
+      <span class="pull-mark" aria-hidden="true">&ldquo;</span>
+      <blockquote>
+        An app you promote that makes <b>$10k a month</b> is worth about
+        <b>$360k</b>. Recurring revenue. An asset that is yours.
+      </blockquote>
+    </figure>
   </div>
 </section>
 
@@ -1008,31 +1024,11 @@ button.btn { cursor: pointer; font-family: inherit; }
   </div>
 </section>
 
-<!-- ── the asset ────────────────────────────────────────────────────────── -->
-<!-- The one thing the rest of the page implies but never says out loud: a
-     post pays once, an app keeps paying and can be sold. One quote, no
-     section around it, so it lands as a thought rather than another pitch. -->
-<section class="band band--quote" id="asset">
-  <div class="narrow">
-    <figure class="pull rise">
-      <span class="pull-mark" aria-hidden="true">&ldquo;</span>
-      <blockquote>
-        An app you promote that makes <b>$10k a month</b> is worth about
-        <b>$360k</b>. Recurring revenue. An asset that is yours.
-      </blockquote>
-      <figcaption>
-        $120k a year, and apps that size change hands at roughly 3&times; it.
-        A sponsored post pays you once.
-      </figcaption>
-    </figure>
-  </div>
-</section>
-
 <!-- ── the ask ──────────────────────────────────────────────────────────── -->
 <section class="band band--dark close" id="contact">
   <div class="narrow">
     <div class="rise">
-      <h2 class="h-section">Twenty minutes.<br>Then your life changes.</h2>
+      <h2 class="h-section">Twenty minutes for a <span class="nb">life-changing</span> collab.</h2>
       <p class="lede">
         We find out if we match. Bring what you make and the thing your people
         keep asking you for.
