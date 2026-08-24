@@ -5,11 +5,13 @@ shows the new one; nothing in `index.html` needs editing.
 
 | File | Screen |
 | --- | --- |
-| `1.png` | Kaught welcome |
 | `2.png` | your collection |
 | `3.png` | identifying |
 | `4.png` | animals near you |
 | `5.png` | species detail |
+| `6.png` | snap a species |
+
+`1.png` (the old welcome screen) is kept on disk but no longer shown.
 
 Add more by adding a `<div class="scr">` and a dot in `index.html`; up to five
 is wired already.
