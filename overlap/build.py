@@ -207,6 +207,58 @@ def build_book():
         "head": head, "css": CSS, "book": BOOK, "tz": TZ, "config": read("config.js")})
 
 
+# The one page that must not wait for anything. It exists for the eighty
+# milliseconds between Microsoft handing back a code and this window closing
+# itself, so it carries no shared stylesheet and no webfont: a slow font CDN
+# would sit in front of the script that does the handing over.
+MSAUTH_PAGE = '''<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connecting Outlook · Overlap</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/overlap/icon.svg" type="image/svg+xml">
+<style>
+html{background:#F2F2F7;color:#3C3C43;
+  font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:32px;text-align:center}
+p{margin:0;max-width:28ch;letter-spacing:-.015em}
+</style>
+</head>
+<body>
+<p id="say">Talking to Outlook. This window closes itself.</p>
+<script>
+/* The whole job of this page: catch what Microsoft redirects back, hand it
+   to the window that opened it, and get out of the way. It never sees a
+   calendar and never keeps anything. */
+(function(){
+  var q = new URLSearchParams(location.search);
+  var msg = {code: q.get("code") || "", state: q.get("state") || "",
+             error: q.get("error_description") || q.get("error") || ""};
+  var sent = false;
+  try {
+    if (window.opener && !window.opener.closed) {
+      window.opener.postMessage({overlapMs: msg}, location.origin);
+      sent = true;
+    }
+  } catch (e) {}
+  if (!sent)
+    document.getElementById("say").textContent =
+      "Close this window and try again from the Overlap tab.";
+  else setTimeout(function(){ try { window.close(); } catch (e) {} }, 80);
+})();
+</script>
+</body>
+</html>
+'''
+
+def build_msauth():
+    write("msauth/index.html", MSAUTH_PAGE)
+
+
 def build_login():
     head = HEAD % {"title": "Sign in · Overlap", "theme": "#FFFFFF",
                    "desc": "Sign in to Overlap.", "scale": ""}
@@ -228,5 +280,6 @@ print("overlap: building self-contained pages")
 build_app_pages()
 build_login()
 build_book()
+build_msauth()
 build_landing()
 print("done")

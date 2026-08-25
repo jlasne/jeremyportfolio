@@ -15,6 +15,11 @@ const hoursShape = {
   tz: v.string(),
   startHour: v.number(),
   endHour: v.number(),
+  /* A second stretch of the same day, for the people who work a morning
+     here and an evening that catches somebody else's morning. Left out
+     rather than nulled: absent is how a row says it has only one. */
+  startHour2: v.optional(v.number()),
+  endHour2: v.optional(v.number()),
   weekends: v.boolean(),
   sleepStart: v.number(),
   sleepEnd: v.number(),
@@ -62,6 +67,11 @@ function defaults(user: Doc<"users">, tz: string) {
     tz: user.tz ?? tz,
     startHour: user.startHour ?? 9,
     endHour: user.endHour ?? 18,
+    /* Spread in only when there is one. A row with one working block should
+       not carry two empty fields around to say so. */
+    ...(user.startHour2 != null && user.endHour2 != null
+      ? { startHour2: user.startHour2, endHour2: user.endHour2 }
+      : {}),
     weekends: user.weekends ?? false,
     sleepStart: user.sleepStart ?? 23,
     sleepEnd: user.sleepEnd ?? 7,
@@ -76,12 +86,17 @@ function shapeSeat(p: Doc<"participants">, meId: Id<"users">) {
     tz: p.tz,
     startHour: p.startHour,
     endHour: p.endHour,
+    startHour2: p.startHour2 ?? null,
+    endHour2: p.endHour2 ?? null,
     weekends: p.weekends,
     sleepStart: p.sleepStart,
     sleepEnd: p.sleepEnd,
     overrides: p.overrides ?? [],
     busy: p.busy ?? [],
     gcal: p.gcal ?? 0,
+    cal: p.cal ?? "",
+    calFrom: p.calFrom ?? 0,
+    calTo: p.calTo ?? 0,
     isYou: p.userId === meId,
   };
 }
@@ -112,6 +127,8 @@ export const me = query({
       ready: !!user.setupAt,
       ...defaults(user, "UTC"),
       tz: user.tz ?? null,
+      startHour2: user.startHour2 ?? null,
+      endHour2: user.endHour2 ?? null,
       handle: user.handle ?? null,
       minNoticeMin: user.minNoticeMin ?? 120,
       windowDays: user.windowDays ?? 14,
@@ -219,6 +236,10 @@ export const profile = mutation({
       tz: args.tz,
       startHour: args.startHour,
       endHour: args.endHour,
+      /* undefined clears the field, which is exactly what turning the
+         second block off should do */
+      startHour2: args.startHour2,
+      endHour2: args.endHour2,
       weekends: args.weekends,
       sleepStart: args.sleepStart,
       sleepEnd: args.sleepEnd,
@@ -326,6 +347,9 @@ export const hours = mutation({
     overrides: v.optional(overrideShape),
     busy: v.optional(v.array(v.number())),
     gcal: v.optional(v.number()),
+    cal: v.optional(v.string()),
+    calFrom: v.optional(v.number()),
+    calTo: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const user = await mustBe(ctx, args.token);
@@ -334,12 +358,17 @@ export const hours = mutation({
       tz: args.tz,
       startHour: args.startHour,
       endHour: args.endHour,
+      startHour2: args.startHour2,
+      endHour2: args.endHour2,
       weekends: args.weekends,
       sleepStart: args.sleepStart,
       sleepEnd: args.sleepEnd,
       overrides: args.overrides ?? [],
       busy: args.busy ?? [],
       gcal: args.gcal ?? 0,
+      cal: args.cal ?? "",
+      calFrom: args.calFrom ?? 0,
+      calTo: args.calTo ?? 0,
     });
     return null;
   },
@@ -460,6 +489,8 @@ export const host = query({
       tz: d.tz,
       startHour: d.startHour,
       endHour: d.endHour,
+      startHour2: d.startHour2 ?? null,
+      endHour2: d.endHour2 ?? null,
       weekends: d.weekends,
       sleepStart: d.sleepStart,
       sleepEnd: d.sleepEnd,

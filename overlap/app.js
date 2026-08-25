@@ -3,7 +3,7 @@
    steps, the calendar in the middle, and the hour you pick on it.
    team/, plan/ and next/ all resolve; next/ opens the question.
    ═══════════════════════════════════════════════════════════════════ */
-document.getElementById("root").innerHTML = "<div class=\"app\">\n\n  <header class=\"nav\" id=\"nav\">\n    <div class=\"nav-bar\">\n      <a class=\"nav-title\" href=\"/overlap/\"><svg class=\"rail-mark\" viewBox=\"0 0 64 56\" aria-hidden=\"true\"><g fill=\"currentColor\"><rect x=\"4\" y=\"13\" width=\"9\" height=\"30\" rx=\"4.5\"/><rect x=\"18\" y=\"4\" width=\"9\" height=\"48\" rx=\"4.5\"/><rect x=\"32\" y=\"17\" width=\"9\" height=\"22\" rx=\"4.5\"/><rect x=\"46\" y=\"9\" width=\"9\" height=\"38\" rx=\"4.5\"/></g><rect x=\"1\" y=\"24\" width=\"61\" height=\"7\" rx=\"3.5\" fill=\"var(--mark-cut,#fff)\"/></svg>Overlap</a>\n      <span class=\"nav-sub\">The hour that works for everyone.</span>\n      <button class=\"nav-act\" id=\"shareTop\">Share</button>\n    </div>\n  </header>\n\n  <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 the side: everything you set, nothing you read \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n  <aside class=\"rail\" id=\"rail\">\n    <a class=\"rail-brand\" href=\"/overlap/\"><svg class=\"rail-mark\" viewBox=\"0 0 64 56\" aria-hidden=\"true\"><g fill=\"currentColor\"><rect x=\"4\" y=\"13\" width=\"9\" height=\"30\" rx=\"4.5\"/><rect x=\"18\" y=\"4\" width=\"9\" height=\"48\" rx=\"4.5\"/><rect x=\"32\" y=\"17\" width=\"9\" height=\"22\" rx=\"4.5\"/><rect x=\"46\" y=\"9\" width=\"9\" height=\"38\" rx=\"4.5\"/></g><rect x=\"1\" y=\"24\" width=\"61\" height=\"7\" rx=\"3.5\" fill=\"var(--mark-cut,#fff)\"/></svg>Overlap</a>\n    <div class=\"rail-body\">\n\n    <section class=\"rsec\" id=\"meetSec\">\n      <button class=\"rhead\" data-fold=\"meetSec\">\n        <i class=\"stepn\" id=\"s1\">1</i><span>Name it</span><b id=\"meetSum\"></b><i class=\"fold\"></i>\n      </button>\n      <div class=\"rbody\">\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Name</div></div>\n            <input id=\"titleInput\" placeholder=\"Intro call\" maxlength=\"80\">\n          </div>\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Length</div></div>\n            <div class=\"stepper\"><button data-dur=\"-\">\u2212</button><span></span><button data-dur=\"+\">+</button></div>\n            <div class=\"v\" id=\"durVal\" style=\"width:64px;text-align:right;font-variant-numeric:tabular-nums\"></div>\n          </div>\n        </div>\n        <button class=\"btn\" id=\"createBtn\">Create the meeting</button>\n        <div class=\"secfoot\" id=\"meetFoot\"></div>\n      </div>\n    </section>\n\n    <section class=\"rsec\" id=\"peopleSec\">\n      <button class=\"rhead\" data-fold=\"peopleSec\">\n        <i class=\"stepn\" id=\"s2\">2</i><span>Invite them</span><b id=\"peopleCount\"></b><i class=\"fold\"></i>\n      </button>\n      <div class=\"rbody\">\n        <div class=\"card\" id=\"peopleList\"></div>\n        <div class=\"secfoot\" id=\"guestFoot\"></div>\n      </div>\n    </section>\n    </div>\n\n    <div class=\"dock\">\n      <div class=\"dock-step\"><i class=\"stepn\" id=\"dockStep\">3</i><span id=\"dockHint\"></span></div>\n      <button class=\"btn\" id=\"primary\">Continue</button>\n      <div class=\"dock-more\">\n        <button class=\"linkbtn\" id=\"hoursBtn\">My hours</button>\n        <button class=\"linkbtn\" id=\"icsBtn\">Apple Calendar</button>\n      </div>\n    </div>\n\n    <div class=\"rail-foot\" id=\"railFoot\"></div>\n  </aside>\n\n  <main>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 the schedule \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"pane\" id=\"overlapSec\">\n      <div class=\"panehead\">\n        <h2>Calendar</h2>\n        <span class=\"ph-note\" id=\"gridTz\"></span>\n        <button class=\"linkbtn\" id=\"editToggle\">Edit hours</button>\n      </div>\n      <div class=\"weekbar\">\n        <div class=\"daytabs\" id=\"dayTabs\"></div>\n        <div class=\"wsteps\">\n          <button id=\"winPrev\" aria-label=\"Earlier week\">\u2039</button>\n          <button id=\"winNext\" aria-label=\"Later week\">\u203a</button>\n        </div>\n      </div>\n      <div class=\"weeksub\" id=\"windowSub\"></div>\n      <div class=\"wtb\">\n        <div class=\"wtblabs\" id=\"wtbLabs\"></div>\n        <div class=\"wtbscroll\" id=\"wtbScroll\"><div class=\"wtbgrid\" id=\"wtb\"></div></div>\n      </div>\n      <div class=\"legend\">\n        <i class=\"lg free\"></i><span>can meet</span>\n        <i class=\"lg part\"></i><span>off hours</span>\n        <i class=\"lg busy\"></i><span>asleep or busy</span>\n      </div>\n      <div class=\"secfoot\" id=\"editFoot\"></div>\n    </section>\n\n  </main>\n\n  <p class=\"foot\" id=\"foot\"></p>\n</div>\n\n<div class=\"scrim\" id=\"scrim\"></div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 your day, given once \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"sheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"sheetCancel\">Cancel</button>\n    <span class=\"t\" id=\"sheetTitle\">Your day</span>\n    <button class=\"p\" id=\"sheetDone\">Done</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\" id=\"sheetLede\">Answer this once. Every meeting after this starts with it already filled in.</p>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Working hours</span></div>\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"s-\">\u2212</button><span></span><button data-h=\"s+\">+</button></div><div class=\"v\" id=\"fStart\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>To</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"e-\">\u2212</button><span></span><button data-h=\"e+\">+</button></div><div class=\"v\" id=\"fEnd\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label style=\"width:auto;flex:1\">Weekends too</label><div class=\"switch\" id=\"fWeekend\"><i></i></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Asleep</span></div>\n    <div style=\"padding:0 16px 6px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"z-\">\u2212</button><span></span><button data-h=\"z+\">+</button></div><div class=\"v\" id=\"fSleep\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>Until</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"w-\">\u2212</button><span></span><button data-h=\"w+\">+</button></div><div class=\"v\" id=\"fWake\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Calendar</span></div>\n    <div style=\"padding:0 16px 6px\"><div class=\"card\" id=\"gcalCard\"></div></div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Timezone</span></div>\n    <div class=\"search\">\n      <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\"><circle cx=\"7\" cy=\"7\" r=\"5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M11 11l3.5 3.5\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n      <input id=\"citySearch\" placeholder=\"City or timezone\" autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\">\n    </div>\n    <div style=\"padding:0 16px\"><div class=\"card\" id=\"cityList\"></div></div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 your meetings \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"meetSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"meetClose\">Done</button>\n    <span class=\"t\">Your meetings</span>\n    <span style=\"width:44px\"></span>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">Every meeting you started or were invited to.</p>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"meetList\"></div></div>\n    <div style=\"padding:0 16px\" class=\"btnrow\" id=\"meetActs\"></div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 the two links \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"shareSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"shareClose\">Done</button>\n    <span class=\"t\">Send a link</span>\n    <span style=\"width:44px\"></span>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">Two links that do two different jobs. Send the one that\n      matches what you are actually doing.</p>\n\n    <div style=\"padding:0 20px 7px\"><div class=\"sechead\">\n      <span class=\"modet\">Team meeting</span><b>everyone answers</b></div></div>\n    <div style=\"padding:0 16px 8px\"><div class=\"card\">\n      <div class=\"linkbox\" id=\"shareLink\"></div>\n      <div class=\"row tap\" data-sharecopy=\"1\"><div class=\"plus\">\u2197</div>\n        <div class=\"grow\"><div class=\"t\">Copy the meeting link</div>\n        <div class=\"s\">One meeting. They answer, then you pick the hour.</div></div>\n        <div class=\"chev\"></div></div>\n    </div></div>\n    <div style=\"padding:0 16px 20px\"><div class=\"secfoot\" style=\"padding:2px 4px 0\">\n      For a kickoff or a standup: the hour is still up for debate.</div></div>\n\n    <div style=\"padding:0 20px 7px\"><div class=\"sechead\">\n      <span class=\"modet\">Client booking</span><b>they take an hour</b></div></div>\n    <div style=\"padding:0 16px 8px\"><div class=\"card\" id=\"bookCard\"></div></div>\n    <div style=\"padding:0 16px 20px\"><div class=\"secfoot\" id=\"bookFoot\"\n      style=\"padding:2px 4px 0\"></div></div>\n\n    <div id=\"recentWrap\" style=\"display:none\">\n      <div style=\"padding:0 20px 7px\"><div class=\"sechead\"><span>You have met with</span></div></div>\n      <div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"recentList\"></div></div>\n    </div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 what next \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"fbSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"fbClose\">Close</button>\n    <span class=\"t\">What next?</span>\n    <button class=\"p\" id=\"fbSend\">Send</button>\n  </div>\n  <div class=\"sheet-body\">\n    <div id=\"fbForm\">\n      <p class=\"sheet-lede\" id=\"fbLede\">Your event is open in Google Calendar. Press Save there.\n        While you are here: what should Overlap do that it doesn\u2019t?</p>\n      <div style=\"padding:0 16px 4px\"><div class=\"chips\" id=\"wantChips\"></div></div>\n      <div style=\"padding:12px 16px 0\">\n        <div class=\"card\">\n          <textarea id=\"fbText\" rows=\"4\" maxlength=\"800\" placeholder=\"Anything at all. What got in your way, what is missing, what you would pay for.\"></textarea>\n        </div>\n      </div>\n      <div style=\"padding:12px 16px 0\" id=\"fbEmailCard\">\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Email</div><div class=\"s\">If you want a reply.</div></div>\n            <input id=\"fbEmail\" type=\"email\" placeholder=\"Optional\" maxlength=\"80\" autocapitalize=\"off\" autocorrect=\"off\"\n                   style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\">\n          </div>\n        </div>\n      </div>\n      <p class=\"sheet-lede\" id=\"fbFoot\" style=\"padding-top:14px\"></p>\n    </div>\n    <div id=\"fbThanks\" style=\"display:none\">\n      <div style=\"padding:0 16px 16px\">\n        <div class=\"card\"><div class=\"empty\"><b>Thank you, noted.</b>Every line of this gets read. It decides what gets built next.</div></div>\n      </div>\n      <div style=\"padding:0 16px\"><button class=\"btn sec\" id=\"fbAgain\">Say something else</button></div>\n    </div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 people you have met \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"peepSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"peepClose\">Done</button>\n    <span class=\"t\">People</span>\n    <span style=\"width:44px\"></span>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">Everyone you have shared a meeting with, whoever did the inviting. Nothing to add and nothing to keep tidy: meeting somebody is what puts them here.</p>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"peepList\"></div></div>\n  </div>\n</div>\n\n<div class=\"toast\" id=\"toast\"></div>";
+document.getElementById("root").innerHTML = "<div class=\"app\">\n\n  <header class=\"nav\" id=\"nav\">\n    <div class=\"nav-bar\">\n      <a class=\"nav-title\" href=\"/overlap/\"><svg class=\"rail-mark\" viewBox=\"0 0 64 56\" aria-hidden=\"true\"><g fill=\"currentColor\"><rect x=\"4\" y=\"13\" width=\"9\" height=\"30\" rx=\"4.5\"/><rect x=\"18\" y=\"4\" width=\"9\" height=\"48\" rx=\"4.5\"/><rect x=\"32\" y=\"17\" width=\"9\" height=\"22\" rx=\"4.5\"/><rect x=\"46\" y=\"9\" width=\"9\" height=\"38\" rx=\"4.5\"/></g><rect x=\"1\" y=\"24\" width=\"61\" height=\"7\" rx=\"3.5\" fill=\"var(--mark-cut,#fff)\"/></svg>Overlap</a>\n      <span class=\"nav-sub\">The hour that works for everyone.</span>\n      <button class=\"nav-act\" id=\"shareTop\">Share</button>\n    </div>\n  </header>\n\n  <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 the side: everything you set, nothing you read \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n  <aside class=\"rail\" id=\"rail\">\n    <a class=\"rail-brand\" href=\"/overlap/\"><svg class=\"rail-mark\" viewBox=\"0 0 64 56\" aria-hidden=\"true\"><g fill=\"currentColor\"><rect x=\"4\" y=\"13\" width=\"9\" height=\"30\" rx=\"4.5\"/><rect x=\"18\" y=\"4\" width=\"9\" height=\"48\" rx=\"4.5\"/><rect x=\"32\" y=\"17\" width=\"9\" height=\"22\" rx=\"4.5\"/><rect x=\"46\" y=\"9\" width=\"9\" height=\"38\" rx=\"4.5\"/></g><rect x=\"1\" y=\"24\" width=\"61\" height=\"7\" rx=\"3.5\" fill=\"var(--mark-cut,#fff)\"/></svg>Overlap</a>\n    <div class=\"rail-body\">\n\n    <section class=\"rsec\" id=\"meetSec\">\n      <button class=\"rhead\" data-fold=\"meetSec\">\n        <i class=\"stepn\" id=\"s1\">1</i><span>Name it</span><b id=\"meetSum\"></b><i class=\"fold\"></i>\n      </button>\n      <div class=\"rbody\">\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Name</div></div>\n            <input id=\"titleInput\" placeholder=\"Intro call\" maxlength=\"80\">\n          </div>\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Length</div></div>\n            <div class=\"stepper\"><button data-dur=\"-\">\u2212</button><span></span><button data-dur=\"+\">+</button></div>\n            <div class=\"v\" id=\"durVal\" style=\"width:64px;text-align:right;font-variant-numeric:tabular-nums\"></div>\n          </div>\n        </div>\n        <button class=\"btn\" id=\"createBtn\">Create the meeting</button>\n        <div class=\"secfoot\" id=\"meetFoot\"></div>\n      </div>\n    </section>\n\n    <section class=\"rsec\" id=\"peopleSec\">\n      <button class=\"rhead\" data-fold=\"peopleSec\">\n        <i class=\"stepn\" id=\"s2\">2</i><span>Invite them</span><b id=\"peopleCount\"></b><i class=\"fold\"></i>\n      </button>\n      <div class=\"rbody\">\n        <div class=\"card\" id=\"peopleList\"></div>\n        <div class=\"secfoot\" id=\"guestFoot\"></div>\n      </div>\n    </section>\n    </div>\n\n    <div class=\"dock\">\n      <div class=\"dock-step\"><i class=\"stepn\" id=\"dockStep\">3</i><span id=\"dockHint\"></span></div>\n      <button class=\"btn\" id=\"primary\">Continue</button>\n      <div class=\"dock-more\">\n        <button class=\"linkbtn\" id=\"hoursBtn\">My hours</button>\n        <button class=\"linkbtn\" id=\"icsBtn\">Apple Calendar</button>\n      </div>\n    </div>\n\n    <div class=\"rail-foot\" id=\"railFoot\"></div>\n  </aside>\n\n  <main>\n\n    <!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 the schedule \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n    <section class=\"pane\" id=\"overlapSec\">\n      <div class=\"panehead\">\n        <h2>Calendar</h2>\n        <span class=\"ph-note\" id=\"gridTz\"></span>\n        <button class=\"linkbtn\" id=\"editToggle\">Edit hours</button>\n      </div>\n      <div class=\"weekbar\">\n        <div class=\"daytabs\" id=\"dayTabs\"></div>\n        <div class=\"wsteps\">\n          <button id=\"winPrev\" aria-label=\"Earlier week\">\u2039</button>\n          <button id=\"winNext\" aria-label=\"Later week\">\u203a</button>\n        </div>\n      </div>\n      <div class=\"weeksub\" id=\"windowSub\"></div>\n      <div class=\"wtb\">\n        <div class=\"wtblabs\" id=\"wtbLabs\"></div>\n        <div class=\"wtbscroll\" id=\"wtbScroll\"><div class=\"wtbgrid\" id=\"wtb\"></div></div>\n      </div>\n      <div class=\"legend\">\n        <i class=\"lg free\"></i><span>can meet</span>\n        <i class=\"lg part\"></i><span>off hours</span>\n        <i class=\"lg busy\"></i><span>asleep or busy</span>\n      </div>\n      <div class=\"secfoot\" id=\"editFoot\"></div>\n    </section>\n\n  </main>\n\n  <p class=\"foot\" id=\"foot\"></p>\n</div>\n\n<div class=\"scrim\" id=\"scrim\"></div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 your day, given once \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"sheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"sheetCancel\">Cancel</button>\n    <span class=\"t\" id=\"sheetTitle\">Your day</span>\n    <button class=\"p\" id=\"sheetDone\">Done</button>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\" id=\"sheetLede\">Answer this once. Every meeting after this starts with it already filled in.</p>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Working hours</span></div>\n    <div style=\"padding:0 16px 14px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"s-\">\u2212</button><span></span><button data-h=\"s+\">+</button></div><div class=\"v\" id=\"fStart\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>To</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"e-\">\u2212</button><span></span><button data-h=\"e+\">+</button></div><div class=\"v\" id=\"fEnd\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label style=\"width:auto;flex:1\">A second block</label><div class=\"switch\" id=\"fTwo\"><i></i></div></div>\n        <div class=\"field\" id=\"fRowB1\"><label>Then</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"t-\">\u2212</button><span></span><button data-h=\"t+\">+</button></div><div class=\"v\" id=\"fStart2\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\" id=\"fRowB2\"><label>To</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"u-\">\u2212</button><span></span><button data-h=\"u+\">+</button></div><div class=\"v\" id=\"fEnd2\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label style=\"width:auto;flex:1\">Weekends too</label><div class=\"switch\" id=\"fWeekend\"><i></i></div></div>\n      </div>\n      <div class=\"secfoot\" id=\"hoursFoot\"></div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Asleep</span></div>\n    <div style=\"padding:0 16px 6px\">\n      <div class=\"card\">\n        <div class=\"field\"><label>From</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"z-\">\u2212</button><span></span><button data-h=\"z+\">+</button></div><div class=\"v\" id=\"fSleep\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n        <div class=\"field\"><label>Until</label><div class=\"grow\"></div><div class=\"stepper\"><button data-h=\"w-\">\u2212</button><span></span><button data-h=\"w+\">+</button></div><div class=\"v\" id=\"fWake\" style=\"width:58px;text-align:right;font-variant-numeric:tabular-nums\"></div></div>\n      </div>\n    </div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Calendar</span></div>\n    <div style=\"padding:0 16px 6px\"><div class=\"card\" id=\"calCard\"></div><div class=\"secfoot\" id=\"calFoot\"></div></div>\n    <div class=\"sechead\" style=\"padding:0 20px 7px\"><span>Timezone</span></div>\n    <div class=\"search\">\n      <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\"><circle cx=\"7\" cy=\"7\" r=\"5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M11 11l3.5 3.5\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n      <input id=\"citySearch\" placeholder=\"City or timezone\" autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\">\n    </div>\n    <div style=\"padding:0 16px\"><div class=\"card\" id=\"cityList\"></div></div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 your meetings \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"meetSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"meetClose\">Done</button>\n    <span class=\"t\">Your meetings</span>\n    <span style=\"width:44px\"></span>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">Every meeting you started or were invited to.</p>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"meetList\"></div></div>\n    <div style=\"padding:0 16px\" class=\"btnrow\" id=\"meetActs\"></div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 the two links \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"shareSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"shareClose\">Done</button>\n    <span class=\"t\">Send a link</span>\n    <span style=\"width:44px\"></span>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">Two links that do two different jobs. Send the one that\n      matches what you are actually doing.</p>\n\n    <div style=\"padding:0 20px 7px\"><div class=\"sechead\">\n      <span class=\"modet\">Team meeting</span><b>everyone answers</b></div></div>\n    <div style=\"padding:0 16px 8px\"><div class=\"card\">\n      <div class=\"linkbox\" id=\"shareLink\"></div>\n      <div class=\"row tap\" data-sharecopy=\"1\"><div class=\"plus\">\u2197</div>\n        <div class=\"grow\"><div class=\"t\">Copy the meeting link</div>\n        <div class=\"s\">One meeting. They answer, then you pick the hour.</div></div>\n        <div class=\"chev\"></div></div>\n    </div></div>\n    <div style=\"padding:0 16px 20px\"><div class=\"secfoot\" style=\"padding:2px 4px 0\">\n      For a kickoff or a standup: the hour is still up for debate.</div></div>\n\n    <div style=\"padding:0 20px 7px\"><div class=\"sechead\">\n      <span class=\"modet\">Client booking</span><b>they take an hour</b></div></div>\n    <div style=\"padding:0 16px 8px\"><div class=\"card\" id=\"bookCard\"></div></div>\n    <div style=\"padding:0 16px 20px\"><div class=\"secfoot\" id=\"bookFoot\"\n      style=\"padding:2px 4px 0\"></div></div>\n\n    <div id=\"recentWrap\" style=\"display:none\">\n      <div style=\"padding:0 20px 7px\"><div class=\"sechead\"><span>You have met with</span></div></div>\n      <div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"recentList\"></div></div>\n    </div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 what next \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"fbSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"fbClose\">Close</button>\n    <span class=\"t\">What next?</span>\n    <button class=\"p\" id=\"fbSend\">Send</button>\n  </div>\n  <div class=\"sheet-body\">\n    <div id=\"fbForm\">\n      <p class=\"sheet-lede\" id=\"fbLede\">Your event is open in Google Calendar. Press Save there.\n        While you are here: what should Overlap do that it doesn\u2019t?</p>\n      <div style=\"padding:0 16px 4px\"><div class=\"chips\" id=\"wantChips\"></div></div>\n      <div style=\"padding:12px 16px 0\">\n        <div class=\"card\">\n          <textarea id=\"fbText\" rows=\"4\" maxlength=\"800\" placeholder=\"Anything at all. What got in your way, what is missing, what you would pay for.\"></textarea>\n        </div>\n      </div>\n      <div style=\"padding:12px 16px 0\" id=\"fbEmailCard\">\n        <div class=\"card\">\n          <div class=\"row\">\n            <div class=\"grow\"><div class=\"t\">Email</div><div class=\"s\">If you want a reply.</div></div>\n            <input id=\"fbEmail\" type=\"email\" placeholder=\"Optional\" maxlength=\"80\" autocapitalize=\"off\" autocorrect=\"off\"\n                   style=\"text-align:right;flex:1;font-size:17px;letter-spacing:-.02em\">\n          </div>\n        </div>\n      </div>\n      <p class=\"sheet-lede\" id=\"fbFoot\" style=\"padding-top:14px\"></p>\n    </div>\n    <div id=\"fbThanks\" style=\"display:none\">\n      <div style=\"padding:0 16px 16px\">\n        <div class=\"card\"><div class=\"empty\"><b>Thank you, noted.</b>Every line of this gets read. It decides what gets built next.</div></div>\n      </div>\n      <div style=\"padding:0 16px\"><button class=\"btn sec\" id=\"fbAgain\">Say something else</button></div>\n    </div>\n  </div>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 SHEET \u00b7 people you have met \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"sheet\" id=\"peepSheet\">\n  <div class=\"grab\"></div>\n  <div class=\"sheet-nav\">\n    <button id=\"peepClose\">Done</button>\n    <span class=\"t\">People</span>\n    <span style=\"width:44px\"></span>\n  </div>\n  <div class=\"sheet-body\">\n    <p class=\"sheet-lede\">Everyone you have shared a meeting with, whoever did the inviting. Nothing to add and nothing to keep tidy: meeting somebody is what puts them here.</p>\n    <div style=\"padding:0 16px 16px\"><div class=\"card\" id=\"peepList\"></div></div>\n  </div>\n</div>\n\n<div class=\"toast\" id=\"toast\"></div>";
 
 (function(){
 "use strict";
@@ -13,9 +13,12 @@ var KEY="overlap.v4";
 var uid=0;
 function newPerson(name,tz,you){
   return {id:"p"+(++uid)+"_"+Math.floor(Math.random()*1e6),name:name,tz:tz,email:"",
-          s:9,e:18,wknd:false,you:!!you,ov:{},
+          s:9,e:18,s2:null,e2:null,wknd:false,you:!!you,ov:{},
           sl:23,sw:7,          /* asleep from 23:00 to 07:00 */
-          busy:{},gcal:0};     /* hours the calendar says are taken */
+          busy:{},gcal:0,cal:"",cf:0,ct:0};
+          /* busy: hours the calendar says are taken. cal/cf/ct: which calendar
+             said so, and the stretch of days it was actually asked about —
+             a reading only covers the week it was taken for. */
 }
 function todayStart(tz){ var p=zp(Date.now(),tz); return wall(p.y,p.m,p.d,0,0,tz); }
 
@@ -39,14 +42,17 @@ function peopleArr(){
     var bz=[],bk;
     for(bk in p.busy||{}) if(p.busy.hasOwnProperty(bk)) bz.push(+bk);
     return [p.id,p.name,p.tz,p.email,p.s,p.e,p.wknd?1:0,p.you?1:0,ov,
-            p.sl==null?23:p.sl,p.sw==null?7:p.sw,bz,p.gcal||0];
+            p.sl==null?23:p.sl,p.sw==null?7:p.sw,bz,p.gcal||0,
+            p.s2==null?null:p.s2,p.e2==null?null:p.e2,p.cal||"",p.cf||0,p.ct||0];
   });
 }
 function readPeople(arr){
   S.people=(arr||[]).map(function(a){
     var p={id:a[0],name:a[1]||"",tz:a[2],email:a[3]||"",s:+a[4],e:+a[5],
+           s2:a[13]==null?null:+a[13],e2:a[14]==null?null:+a[14],
            wknd:!!a[6],you:!!a[7],ov:{},
-           sl:a[9]==null?23:+a[9],sw:a[10]==null?7:+a[10],busy:{},gcal:+(a[12]||0)};
+           sl:a[9]==null?23:+a[9],sw:a[10]==null?7:+a[10],busy:{},gcal:+(a[12]||0),
+           cal:a[15]||"",cf:+(a[16]||0),ct:+(a[17]||0)};
     (a[8]||[]).forEach(function(pair){ p.ov[pair[0]]=!!pair[1]; });
     (a[11]||[]).forEach(function(ts){ p.busy[ts]=1; });
     try{ new Intl.DateTimeFormat("en",{timeZone:p.tz}); }catch(e){ p.tz=LOCAL_TZ; }
@@ -74,6 +80,21 @@ function asleep(p,ts){
   if(a===b) return false;
   return a<b ? (h>=a&&h<b) : (h>=a||h<b);
 }
+/* ── the working day, which is allowed to be two of them ─────────────
+   One stretch is what most people have. Two is the morning here and the
+   evening that catches somebody else's morning: they are the same answer
+   given twice, so an hour only has to land inside either one. */
+function hasTwo(p){ return p.s2!=null && p.e2!=null && p.e2>p.s2; }
+function blocks(p){
+  var b=[[p.s,p.e]];
+  if(hasTwo(p)) b.push([p.s2,p.e2]);
+  return b;
+}
+function working(p,mins){
+  var b=blocks(p), i;
+  for(i=0;i<b.length;i++) if(mins>=b[i][0]*60 && mins+SLOT<=b[i][1]*60) return true;
+  return false;
+}
 function pstate(p,ts){
   var k=""+ts;
   if(p.ov[k]!==undefined) return p.ov[k]?"free":"off";
@@ -81,7 +102,7 @@ function pstate(p,ts){
   if(asleep(p,ts)) return "sleep";
   var z=zp(ts,p.tz), mins=z.H*60+z.M, d=dow(ts,p.tz);
   if(!p.wknd && (d===0||d===6)) return "off";
-  return (mins>=p.s*60 && mins+SLOT<=p.e*60) ? "free" : "off";
+  return working(p,mins) ? "free" : "off";
 }
 function isFree(p,ts){ return pstate(p,ts)==="free"; }
 /* ── the guest list ─────────────────────────────────────────────────
@@ -121,13 +142,25 @@ function dayStarts(){
   return out;
 }
 /* ═══════════════ the ranking ═══════════════ */
-/* civility: how far a local time sits outside 9–18, in hours, per person */
+/* civility: how far a local time sits outside somebody's working day, in
+   hours, per person */
+/* how far an hour falls outside one block, in hours; 0 if it fits */
+function blockMiss(b,h,late){
+  if(h<b[0]) return b[0]-h;
+  if(late>b[1]) return late-b[1];
+  return 0;
+}
+/* two blocks means two chances to be civil, so only the nearer one counts */
+function outsideBy(p,h,late){
+  var b=blocks(p), miss=blockMiss(b[0],h,late), j;
+  for(j=1;j<b.length;j++) miss=Math.min(miss,blockMiss(b[j],h,late));
+  return miss;
+}
 function rudeness(ts){
   var pen=0,i,p,z,h,late, g=guests();
   for(i=0;i<g.length;i++){
     p=g[i]; z=zp(ts,p.tz); h=z.H+z.M/60; late=h+S.dur/60;
-    if(h<p.s) pen+=(p.s-h);
-    else if(late>p.e) pen+=(late-p.e);
+    pen+=outsideBy(p,h,late);
     /* asleep costs more the deeper into the night it reaches */
     if(h<7) pen+=6+(7-h)*3;
     else if(late>22) pen+=4+(late-22)*2;
@@ -183,6 +216,18 @@ function initials(p){
   return ((n[0]||"?")[0]+(n.length>1?n[n.length-1][0]:"")).toUpperCase();
 }
 function pname(p){ return p.name || (p.you?"You":tzCity(p.tz)); }
+/* "9a–6p" or, for two blocks, "9a–12p, 6p–9p" */
+function hoursLine(p){
+  return blocks(p).map(function(b){
+    return fmtHourShort(b[0])+"–"+fmtHourShort(b[1]);
+  }).join(", ");
+}
+/* what stands behind a row: a calendar somebody read, or only their word */
+function calWord(p){
+  if(!p.gcal) return "hours only";
+  if(!calFresh(p)) return "calendar, other week";
+  return p.cal==="outlook" ? "Outlook" : "Google";
+}
 var toastT;
 function toast(msg){
   var t=$("#toast"); t.textContent=msg; t.classList.add("on");
@@ -234,8 +279,8 @@ function renderPeople(){
     html+='<div class="row tap gst'+(on?" on":"")+'" data-guest="'+p.id+'">'+
       '<div class="avatar'+(p.you?" you":"")+'">'+esc(initials(p))+'</div>'+
       '<div class="grow"><div class="t">'+esc(pname(p))+(p.you?' <span style="color:rgba(60,60,67,.3);font-size:13px">you</span>':'')+'</div>'+
-      '<div class="s">'+esc(tzCity(p.tz))+" · "+fmtT(now,p.tz)+" · "+fmtHourShort(p.s)+"–"+fmtHourShort(p.e)+
-      (p.wknd?", 7 days":"")+(p.gcal?" · calendar":"")+"</div></div>"+
+      '<div class="s">'+esc(tzCity(p.tz))+" · "+fmtT(now,p.tz)+" · "+hoursLine(p)+
+      (p.wknd?", 7 days":"")+" · "+calWord(p)+"</div></div>"+
       '<span class="tick"></span></div>';
   });
   /* Two ways to invite somebody, and they are not alternatives: the link
@@ -311,7 +356,10 @@ function localHour(ts,tz){
    past a big team they stop growing and the page scrolls instead. */
 function sizeGrid(n){
   var wrap=$(".wtb"), top=wrap.getBoundingClientRect().top;
-  var reserve=window.innerWidth>=900?96:172;   /* legend, footnote, the dock on a phone */
+  var foot=$("#editFoot");
+  /* legend, and the dock on a phone — plus however tall the footnote under
+     the calendar has turned out to be, which is why it is written first */
+  var reserve=(window.innerWidth>=900?96:172)+(foot?foot.offsetHeight:0);
   var avail=window.innerHeight-top-reserve;
   var ruler=28;
   if(!(avail>200)) avail=200;                  /* a short window just scrolls */
@@ -327,6 +375,10 @@ function renderWTB(){
   var day=days[S.day], z=zp(day,tz), now=Date.now();
   var total=guests().length;              /* who counts */
   var g=$("#wtb"), labs=$("#wtbLabs"), i, html="", lhtml="", stamps=[];
+  if(editing)
+    $("#editFoot").textContent="Drag along someone's row to take hours away or give them back.";
+  else
+    $("#editFoot").innerHTML=trustFoot();
   sizeGrid(S.people.length);
   var rows="var(--wruler) var(--wsum) repeat("+S.people.length+",var(--wrow))";
   g.style.gridTemplateColumns="repeat(24,minmax(var(--cw),1fr))";
@@ -405,9 +457,29 @@ function renderWTB(){
     :(whole?whole+(whole===1?" hour suits":" hours suit"):"no hour suits")+" all "+total;
   $("#editToggle").textContent=editing?"Done":"Edit hours";
   $("#editToggle").classList.toggle("on",editing);
-  $("#editFoot").textContent=editing
-    ? "Drag along someone's row to take hours away or give them back."
-    : "";
+}
+/* An hour drawn white because nobody looked is the one way this app can be
+   actively wrong, so it says out loud whose rows are only their word. */
+function nameList(a){
+  if(a.length<3) return a.join(" and ");
+  return a.slice(0,-1).join(", ")+" and "+a[a.length-1];
+}
+function trustFoot(){
+  var g=guests(), mine=meRow();
+  var loose=g.filter(function(p){ return !p.gcal || !calFresh(p); });
+  if(!loose.length) return g.length>1 ? "Every row here was read off a calendar." : "";
+  var line;
+  if(loose.length===1 && loose[0].you)
+    line="Your row is what you typed in, not what your calendar says.";
+  else if(loose.length===1)
+    line=esc(pname(loose[0]))+"\u2019s row is what they typed in, not what their calendar says.";
+  else
+    line="Typed in rather than read off a calendar: "+
+      nameList(loose.map(function(p){ return esc(p.you?"you":pname(p)); }))+".";
+  if(mine && (!mine.gcal || !calFresh(mine)))
+    line+=' <button class="linkbtn" data-readweek="1">'+
+      (mine.cal?"Read mine":"Connect a calendar")+"</button>";
+  return line;
 }
 /* how much of the team is out, as ink: 0 is everyone free and paper white,
    1 is nobody and solid ink. The curve is bent so that losing one of five
@@ -504,9 +576,11 @@ function adoptSeats(list){
   S.people=(list||[]).map(function(m){
     var p=newPerson(m.name,m.tz,!!m.isYou);
     p.pid=m._id; p.email=m.email||""; p.s=m.startHour; p.e=m.endHour; p.wknd=!!m.weekends;
+    p.s2=m.startHour2==null?null:m.startHour2;
+    p.e2=m.endHour2==null?null:m.endHour2;
     if(m.sleepStart!=null) p.sl=m.sleepStart;
     if(m.sleepEnd!=null) p.sw=m.sleepEnd;
-    p.gcal=m.gcal||0;
+    p.gcal=m.gcal||0; p.cal=m.cal||""; p.cf=m.calFrom||0; p.ct=m.calTo||0;
     (m.overrides||[]).forEach(function(o){ p.ov[o.ts]=o.free; });
     (m.busy||[]).forEach(function(ts){ p.busy[ts]=1; });
     return p;
@@ -543,6 +617,8 @@ function applyProfile(p,pr){
   if(pr.tz) p.tz=pr.tz;
   if(pr.startHour!=null) p.s=pr.startHour;
   if(pr.endHour!=null) p.e=pr.endHour;
+  p.s2=pr.startHour2==null?null:pr.startHour2;
+  p.e2=pr.endHour2==null?null:pr.endHour2;
   p.wknd=!!pr.weekends;
   if(pr.sleepStart!=null) p.sl=pr.sleepStart;
   if(pr.sleepEnd!=null) p.sw=pr.sleepEnd;
@@ -553,26 +629,50 @@ function hoursArgs(p){
   for(k in p.ov) if(p.ov.hasOwnProperty(k)) ov.push({ts:+k,free:!!p.ov[k]});
   var busy=[],b;
   for(b in p.busy||{}) if(p.busy.hasOwnProperty(b)) busy.push(+b);
-  return {tz:p.tz,startHour:p.s,endHour:p.e,weekends:!!p.wknd,
-          sleepStart:p.sl==null?23:p.sl,sleepEnd:p.sw==null?7:p.sw,
-          overrides:ov,busy:busy,gcal:p.gcal||0};
+  var a={tz:p.tz,startHour:p.s,endHour:p.e,weekends:!!p.wknd,
+         sleepStart:p.sl==null?23:p.sl,sleepEnd:p.sw==null?7:p.sw,
+         overrides:ov,busy:busy,gcal:p.gcal||0,
+         cal:p.cal||"",calFrom:p.cf||0,calTo:p.ct||0};
+  /* absent rather than null: the second block is a field the row simply
+     does not have when nobody asked for one */
+  if(hasTwo(p)){ a.startHour2=p.s2; a.endHour2=p.e2; }
+  return a;
+}
+/* The page is static and the backend is deployed by hand, so for a while the
+   page knows fields the deployment has never heard of. A save is too
+   important to lose to that: drop the new ones and send it again. */
+var LATELY=["startHour2","endHour2","cal","calFrom","calTo"];
+function cxNew(op,args){
+  return cx(op,args).catch(function(e){
+    if(!/validator|extra field|ArgumentValidation/i.test(e.message||"")) throw e;
+    var lean={},k;
+    for(k in args) if(args.hasOwnProperty(k)&&LATELY.indexOf(k)<0) lean[k]=args[k];
+    return cx(op,lean);
+  });
 }
 /* Your row, and only ever your row. Nobody edits anybody else now. */
 function syncPerson(p){
   if(!inMeeting()||!p||!p.you) return Promise.resolve();
   var a=hoursArgs(p);
   a.token=token(); a.meetingId=S.mid;
-  return cx("meet.hours",a).catch(function(e){ toast(e.message); });
+  return cxNew("meet.hours",a).catch(function(e){ toast(e.message); });
 }
 /* The answer you give once, kept on your account so the next meeting opens
    already filled in. Saved alongside your row in this meeting. */
 function saveProfile(p){
   if(!signedIn()) return Promise.resolve();
-  var a=hoursArgs(p);
-  return cx("meet.profile",{token:token(),tz:a.tz,startHour:a.startHour,
+  var a=hoursArgs(p), args={token:token(),tz:a.tz,startHour:a.startHour,
       endHour:a.endHour,weekends:a.weekends,
-      sleepStart:a.sleepStart,sleepEnd:a.sleepEnd})
-    .then(function(){ if(ME&&ME.profile) ME.profile.ready=true; });
+      sleepStart:a.sleepStart,sleepEnd:a.sleepEnd};
+  if(a.startHour2!=null){ args.startHour2=a.startHour2; args.endHour2=a.endHour2; }
+  return cxNew("meet.profile",args)
+    .then(function(){
+      if(ME&&ME.profile){
+        ME.profile.ready=true;
+        ME.profile.startHour2=a.startHour2==null?null:a.startHour2;
+        ME.profile.endHour2=a.endHour2==null?null:a.endHour2;
+      }
+    });
 }
 /* A blank one, on screen, before the server knows anything about it. */
 function startFresh(){
@@ -634,11 +734,33 @@ function flushFeedback(){
   });
 }
 
-/* ═══════════════ Google Calendar ═══════════════
-   The page asks Google for a short-lived token with one narrow scope and
-   reads free/busy directly. Nothing is stored, no event titles are ever
-   requested — only the blocks of time that are already taken. */
+/* ═══════════════ calendars ═══════════════
+   Two of them, because half the people who try this live in Outlook. Each
+   asks for a short-lived token with the narrowest scope it has, reads the
+   week on screen, and keeps nothing but the blocks of time. No event title
+   is ever requested from either.
+
+   A reading covers the days it was taken for and no others — cf/ct say
+   which — so moving the week forward makes the reading stale rather than
+   silently wrong. Saying so is the whole point: an hour drawn white because
+   nobody looked is worse than no hour at all.
+   ═══════════════════════════════════════════ */
 var GID=window.OVERLAP_GOOGLE_CLIENT_ID||"";
+var MSID=window.OVERLAP_MS_CLIENT_ID||"";
+function calName(w){ return w==="outlook"?"Outlook":"Google Calendar"; }
+/* the days on screen, which is what any reading has to cover */
+function calSpan(){
+  var days=dayStarts();
+  return {from:days[0],to:days[DAYS-1]+86400000};
+}
+function calFresh(p){
+  if(!p||!p.gcal) return false;
+  var w=calSpan();
+  if(!p.cf&&!p.ct) return false;      /* read before we wrote down the week */
+  return p.cf<=w.from && p.ct>=w.to;
+}
+
+/* ── Google: one narrow scope, free/busy only ── */
 var gsiReady=false, gTokenClient=null;
 function loadGsi(){
   if(!GID||gsiReady) return Promise.resolve(gsiReady);
@@ -668,8 +790,80 @@ function gToken(){
     });
   });
 }
+
+/* ── Microsoft: the same job, done the long way ──
+   There is no Google-style token client for Microsoft, so this is the plain
+   OAuth dance: a popup to their consent page, a code back through a page of
+   ours that does nothing but hand it over, and PKCE so the code is worth
+   nothing to anybody who intercepts it. No secret is involved and no token
+   is kept: it is used once, for one read, and dropped. */
+var MSAUTH="https://login.microsoftonline.com/common/oauth2/v2.0/";
+var MS_SCOPE="https://graph.microsoft.com/Calendars.Read";
+function b64url(buf){
+  var b=new Uint8Array(buf), s="", i;
+  for(i=0;i<b.length;i++) s+=String.fromCharCode(b[i]);
+  return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+}
+function nonce(n){ var a=new Uint8Array(n); crypto.getRandomValues(a); return b64url(a); }
+/* the page the popup lands on, which exists only to post the code back */
+function msRedirect(){ return location.origin+basePath()+"/msauth/"; }
+function msCode(verifier){
+  var state=nonce(12), back=msRedirect();
+  return crypto.subtle.digest("SHA-256",new TextEncoder().encode(verifier))
+    .then(function(d){
+      var url=MSAUTH+"authorize?client_id="+encodeURIComponent(MSID)+
+        "&response_type=code&response_mode=query"+
+        "&redirect_uri="+encodeURIComponent(back)+
+        "&scope="+encodeURIComponent(MS_SCOPE)+
+        "&state="+encodeURIComponent(state)+
+        "&code_challenge="+b64url(d)+"&code_challenge_method=S256";
+      var win=window.open(url,"overlap-outlook","width=520,height=680");
+      if(!win) throw new Error("Let the popup through to connect Outlook");
+      return new Promise(function(res,rej){
+        var shut,late;
+        function stop(){ clearInterval(shut); clearTimeout(late);
+                         window.removeEventListener("message",heard); }
+        function heard(ev){
+          if(ev.origin!==location.origin) return;
+          var d2=ev.data&&ev.data.overlapMs;
+          if(!d2||d2.state!==state) return;
+          stop(); try{ win.close(); }catch(e){}
+          if(d2.error) rej(new Error(/denied|cancel/i.test(d2.error)
+            ? "Outlook access was declined" : d2.error));
+          else if(d2.code) res(d2.code);
+          else rej(new Error("Outlook sent nothing back"));
+        }
+        window.addEventListener("message",heard);
+        shut=setInterval(function(){
+          if(win.closed){ stop(); rej(new Error("Outlook sign-in was closed")); }
+        },600);
+        late=setTimeout(function(){ stop(); rej(new Error("Outlook did not answer")); },180000);
+      });
+    });
+}
+function msToken(){
+  if(!MSID) return Promise.reject(new Error("Outlook is not set up"));
+  if(!(window.crypto&&crypto.subtle))
+    return Promise.reject(new Error("This browser cannot do the Outlook handshake"));
+  var verifier=nonce(48), back=msRedirect();
+  return msCode(verifier).then(function(code){
+    return fetch(MSAUTH+"token",{
+      method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},
+      body:"client_id="+encodeURIComponent(MSID)+
+           "&grant_type=authorization_code&code="+encodeURIComponent(code)+
+           "&redirect_uri="+encodeURIComponent(back)+
+           "&code_verifier="+encodeURIComponent(verifier)+
+           "&scope="+encodeURIComponent(MS_SCOPE)
+    }).then(function(r){ return r.json(); });
+  }).then(function(j){
+    if(!j||!j.access_token)
+      throw new Error((j&&(j.error_description||j.error))||"Outlook refused the sign-in");
+    return j.access_token;
+  });
+}
+
 /* busy blocks → the hours they cover, in this person's clock */
-function markBusy(p,blocks,from,to){
+function markBusy(p,blocks,from,to,which){
   p.busy={};
   var step=SLOT*60000, ts;
   blocks.forEach(function(b){
@@ -677,18 +871,26 @@ function markBusy(p,blocks,from,to){
     if(isNaN(a)||isNaN(z)) return;
     for(ts=Math.floor(Math.max(a,from)/step)*step; ts<Math.min(z,to); ts+=step) p.busy[ts]=1;
   });
-  p.gcal=Date.now();
+  p.gcal=Date.now(); p.cal=which||"google"; p.cf=from; p.ct=to;
 }
-function syncCalendar(p){
-  if(!GID) return Promise.reject(new Error("Google is not configured"));
-  var days=dayStarts(), from=days[0], to=days[DAYS-1]+86400000;
+function afterRead(p,blocks,w,which){
+  markBusy(p,blocks,w.from,w.to,which);
+  syncPerson(p);
+  afterChange();
+  var n=Object.keys(p.busy).length;
+  toast(n?(calName(which)+" read. "+n+(n===1?" hour":" hours")+" already taken.")
+         :calName(which)+" read. Nothing booked this week.");
+}
+function syncGoogle(p){
+  if(!GID) return Promise.reject(new Error("Google is not set up"));
+  var w=calSpan();
   return gToken().then(function(tok){
     return fetch("https://www.googleapis.com/calendar/v3/freeBusy",{
       method:"POST",
       headers:{Authorization:"Bearer "+tok,"Content-Type":"application/json"},
       body:JSON.stringify({
-        timeMin:new Date(from).toISOString(),
-        timeMax:new Date(to).toISOString(),
+        timeMin:new Date(w.from).toISOString(),
+        timeMax:new Date(w.to).toISOString(),
         timeZone:p.tz,
         items:[{id:"primary"}]
       })
@@ -697,26 +899,69 @@ function syncCalendar(p){
     if(j.error) throw new Error(j.error.message||"Calendar refused");
     var cal=(j.calendars||{}).primary||{};
     if(cal.errors&&cal.errors.length) throw new Error("That calendar could not be read");
-    markBusy(p,cal.busy||[],from,to);
-    syncPerson(p);
-    afterChange();
-    var n=(cal.busy||[]).length;
-    toast(n?("Calendar read. "+n+(n===1?" block":" blocks")+" taken."):"Calendar read. Nothing booked.");
+    afterRead(p,cal.busy||[],w,"google");
   });
 }
-function renderGcalCard(){
-  var c=$("#gcalCard");
+/* Graph has no free/busy call for your own calendar that asks for less than
+   this, so the request asks for the two ends of each block and nothing else:
+   no subject, no attendees, no body. Anything marked free stays free. */
+function msWhen(x){
+  if(!x||!x.dateTime) return "";
+  return /(Z|[+-]\d\d:?\d\d)$/.test(x.dateTime) ? x.dateTime : x.dateTime+"Z";
+}
+function syncOutlook(p){
+  var w=calSpan();
+  return msToken().then(function(tok){
+    var u="https://graph.microsoft.com/v1.0/me/calendarView"+
+      "?startDateTime="+encodeURIComponent(new Date(w.from).toISOString())+
+      "&endDateTime="+encodeURIComponent(new Date(w.to).toISOString())+
+      "&$select=start,end,showAs,isCancelled&$top=200";
+    return fetch(u,{headers:{Authorization:"Bearer "+tok,
+                             Prefer:'outlook.timezone="UTC"'}});
+  }).then(function(r){ return r.json(); }).then(function(j){
+    if(j.error) throw new Error((j.error&&j.error.message)||"Outlook refused");
+    var blocks=(j.value||[]).filter(function(e){
+      return !e.isCancelled && e.showAs!=="free" && e.showAs!=="workingElsewhere";
+    }).map(function(e){ return {start:msWhen(e.start),end:msWhen(e.end)}; });
+    afterRead(p,blocks,w,"outlook");
+  });
+}
+function syncCalendar(p,which){
+  return which==="outlook" ? syncOutlook(p) : syncGoogle(p);
+}
+/* one row per calendar you could connect, saying plainly what it knows */
+function calRow(which,p){
+  var mine=p&&p.cal===which&&p.gcal, n=mine?Object.keys(p.busy||{}).length:0;
+  var said=!mine ? (which==="outlook"
+        ? "Outlook or Microsoft 365. Times, never titles."
+        : "Google Calendar, free/busy only.")
+    : calFresh(p) ? (n+(n===1?" hour":" hours")+" taken in the week on screen")
+                  : "Read for another week, not this one.";
+  return '<div class="row tap" data-cal="'+which+'"><div class="plus">↻</div>'+
+    '<div class="grow"><div class="t">'+
+      (mine?(calFresh(p)?"Read again":"Read this week")+" · "+calName(which)
+           :"Read my "+(which==="outlook"?"Outlook":"Google Calendar"))+"</div>"+
+    '<div class="s">'+said+"</div></div></div>";
+}
+function renderCalCard(){
+  var c=$("#calCard");
   if(!c) return;
-  if(!GID){
-    c.innerHTML='<div class="row"><div class="grow"><div class="t">Not set up</div>'+
-      '<div class="s">Add a Google client ID to read busy times.</div></div></div>';
-    return;
-  }
-  var p=draft&&draft.id?byId(draft.id):null, n=p&&p.busy?Object.keys(p.busy).length:0;
-  c.innerHTML='<div class="row tap" data-gcal="1"><div class="plus">↻</div>'+
-    '<div class="grow"><div class="t">'+(p&&p.gcal?"Read again":"Read my busy times")+"</div>"+
-    '<div class="s">'+(p&&p.gcal?(n+(n===1?" hour":" hours")+" taken this week")
-      :"Google Calendar, free/busy only. Never the titles.")+"</div></div></div>";
+  var p=draft&&draft.id?byId(draft.id):null, html="";
+  if(GID) html+=calRow("google",p);
+  if(MSID) html+=calRow("outlook",p);
+  if(!html)
+    html='<div class="row"><div class="grow"><div class="t">Not set up</div>'+
+      '<div class="s">Add a Google or Microsoft client ID to read busy times.</div></div></div>';
+  c.innerHTML=html;
+  var f=$("#calFoot");
+  if(!f) return;
+  if(!p||!p.gcal)
+    f.textContent="Until one of these is read, your row is only what you said above — which is the fastest way to be shown free at an hour you are not.";
+  else
+    /* One row, one reading: reading the other calendar replaces this one
+       rather than adding to it, which is worth saying before somebody tries. */
+    f.textContent="A reading covers the week it was taken for. Move the calendar forward and read it again."+
+      (GID&&MSID ? " Your row holds one calendar at a time — reading the other replaces this one." : "");
 }
 
 /* ═══════════════ account ═══════════════ */
@@ -1027,7 +1272,7 @@ function openSheet(setup){
   var p=meRow();
   if(!p) return;
   draftSetup=!!setup;
-  draft={id:p.id,tz:p.tz,s:p.s,e:p.e,wknd:p.wknd,
+  draft={id:p.id,tz:p.tz,s:p.s,e:p.e,s2:p.s2,e2:p.e2,wknd:p.wknd,
          sl:p.sl==null?23:p.sl,sw:p.sw==null?7:p.sw};
   $("#sheetTitle").textContent=setup?"Your day":"My hours";
   $("#sheetCancel").style.visibility=setup?"hidden":"";
@@ -1050,6 +1295,7 @@ function commitDraft(){
   var p=byId(draft.id);
   if(!p){ draftSetup=false; closeSheet(); return; }
   p.tz=draft.tz; p.s=draft.s; p.e=draft.e; p.wknd=draft.wknd;
+  p.s2=draft.s2; p.e2=draft.e2;
   p.sl=draft.sl; p.sw=draft.sw;
   var wasSetup=draftSetup;
   draftSetup=false;
@@ -1059,12 +1305,24 @@ function commitDraft(){
     .then(function(){ afterChange(); if(wasSetup) haptic(); })
     .catch(function(e){ toast(e.message); afterChange(); });
 }
+function twoOn(){ return draft && draft.s2!=null && draft.e2!=null; }
 function renderDraft(){
+  var two=twoOn();
   $("#fStart").textContent=fmtHour(draft.s);
   $("#fEnd").textContent=fmtHour(draft.e);
   $("#fSleep").textContent=fmtHour(draft.sl);
   $("#fWake").textContent=fmtHour(draft.sw);
-  renderGcalCard();
+  $("#fTwo").classList.toggle("on",two);
+  $("#fRowB1").style.display=two?"":"none";
+  $("#fRowB2").style.display=two?"":"none";
+  if(two){
+    $("#fStart2").textContent=fmtHour(draft.s2);
+    $("#fEnd2").textContent=fmtHour(draft.e2);
+  }
+  $("#hoursFoot").textContent=two
+    ? "Two stretches of the same day. Nothing between them is offered."
+    : "One stretch for most people. Turn on a second for the evening that catches somebody else’s morning.";
+  renderCalCard();
   $("#fWeekend").classList.toggle("on",draft.wknd);
   var all=$("#cityList").querySelectorAll("[data-tzsel]"), i;
   for(i=0;i<all.length;i++) all[i].querySelector(".mark").style.opacity=
@@ -1199,12 +1457,21 @@ document.addEventListener("click",function(ev){
   }
   if((el=up("data-peep"))){ inviteContact(el.getAttribute("data-peep")); return; }
   if((el=up("data-hours"))){ openSheet(false); return; }
-  if((el=up("data-gcal"))){
-    var who=meRow();
+  if((el=up("data-cal"))){
+    var which=el.getAttribute("data-cal"), who=meRow();
     if(!who) return;
-    toast("Asking Google…");
-    syncCalendar(who).then(function(){ renderGcalCard(); })
-      .catch(function(e){ toast(e.message); });
+    toast("Asking "+calName(which)+"…");
+    syncCalendar(who,which).then(function(){ renderCalCard(); })
+      .catch(function(e){ toast(e.message); renderCalCard(); });
+    return;
+  }
+  /* the same read, asked for from under the calendar rather than the sheet */
+  if((el=up("data-readweek"))){
+    var mine=meRow();
+    if(!mine) return;
+    if(!mine.cal) return openSheet(false);
+    toast("Asking "+calName(mine.cal)+"…");
+    syncCalendar(mine,mine.cal).catch(function(e){ toast(e.message); });
     return;
   }
   if((el=up("data-pickmeet"))){ switchMeeting(el.getAttribute("data-pickmeet")); closeMeetings(); return; }
@@ -1249,7 +1516,11 @@ document.addEventListener("click",function(ev){
     if(k==="s-") draft.s=Math.max(0,draft.s-1);
     if(k==="s+") draft.s=Math.min(draft.e-1,draft.s+1);
     if(k==="e-") draft.e=Math.max(draft.s+1,draft.e-1);
-    if(k==="e+") draft.e=Math.min(24,draft.e+1);
+    if(k==="e+") draft.e=Math.min(twoOn()?draft.s2:24,draft.e+1);
+    if(k==="t-") draft.s2=Math.max(draft.e,draft.s2-1);
+    if(k==="t+") draft.s2=Math.min(draft.e2-1,draft.s2+1);
+    if(k==="u-") draft.e2=Math.max(draft.s2+1,draft.e2-1);
+    if(k==="u+") draft.e2=Math.min(24,draft.e2+1);
     if(k==="z-") draft.sl=(draft.sl+23)%24;
     if(k==="z+") draft.sl=(draft.sl+1)%24;
     if(k==="w-") draft.sw=(draft.sw+23)%24;
@@ -1259,6 +1530,17 @@ document.addEventListener("click",function(ev){
 });
 
 $("#fWeekend").addEventListener("click",function(){ draft.wknd=!draft.wknd; renderDraft(); });
+/* Turning it on has to land somewhere sensible, and the evening after a
+   nine-to-six is the reason anybody asked for it. */
+$("#fTwo").addEventListener("click",function(){
+  if(twoOn()){ draft.s2=null; draft.e2=null; }
+  else {
+    var st=Math.max(draft.e,20);
+    if(st>=24){ draft.e=23; st=23; }   /* a day that ran to midnight has to give an hour back */
+    draft.s2=st; draft.e2=Math.min(24,st+3);
+  }
+  renderDraft(); haptic();
+});
 $("#meetClose").addEventListener("click",closeMeetings);
 $("#peepClose").addEventListener("click",closePeep);
 $("#shareClose").addEventListener("click",closeShare);

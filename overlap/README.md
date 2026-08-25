@@ -9,10 +9,12 @@ Google Calendar. One meeting, one link, one page.
    that has to survive being sent to someone else needs an account behind it.
 2. **Say what your day looks like — once.** Timezone (already detected),
    working hours, and when you are asleep, all preselected so the honest
-   answer for most people is to press Save. One tap connects your Google
-   Calendar, which lays your busy hours on top of your working ones.
-   This answer lives on your account: every meeting after this starts with it
-   already filled in.
+   answer for most people is to press Save. A working day can be **two
+   blocks** rather than one stretch — a morning here and an evening that
+   catches somebody else's morning — and nothing between them is offered.
+   One tap connects **Google Calendar or Outlook**, which lays your busy
+   hours on top of your working ones. This answer lives on your account:
+   every meeting after this starts with it already filled in.
 3. **Name a meeting and press Create.** You get a link.
 4. **Send the link.** Whoever opens it signs in, gets the same preselected
    card, and lands on the same calendar you are looking at. They answer for
@@ -44,6 +46,11 @@ screens you reach by scrolling:
    current moment running down through all of it.
 2. **Best times** — the ranked hours, each written out in every timezone at
    once, with a `+1` where an hour lands on somebody's tomorrow.
+
+Under the calendar sits one line naming whose rows nobody has read a calendar
+for. An hour drawn white because nobody looked is the one way this app can be
+actively wrong, so it says so rather than letting the grid imply otherwise,
+and it offers you the one tap that fixes your own row.
 
 Unticking someone takes their hours out of the overlap as well as their name
 off the invitation — both screens recompute, and their row stays on the
@@ -196,14 +203,60 @@ six-digit email code — nothing breaks, the Google button simply is not drawn.
 
 ### What busy times actually read
 
-`syncCalendar` asks for `items:[{id:"primary"}]` — the primary calendar of
-whoever consents *in that browser*. Editing a colleague's row and tapping
-**Read my busy times** writes your own hours onto their row. It is built for
-each person to open the shared link and do their own.
+`syncGoogle` asks for `items:[{id:"primary"}]` — the primary calendar of
+whoever consents *in that browser*. It is built for each person to open the
+shared link and read their own.
 
-What comes back is stored: `localStorage`, the `#p=` share link, and the
-member row on the server. So it travels, but it does not refresh itself —
-that is *Real calendar sync*, still to build.
+What comes back is stored: `localStorage` and the member row on the server, as
+the hours it covers rather than the events it came from. So it travels — but
+it does not refresh itself, and it only ever describes **the week that was on
+screen when it was read**. Both of those are why every row says which of the
+two it is, and why moving the week forward turns a reading stale rather than
+quietly reusing it.
+
+## Outlook: the same job, done the long way
+
+Half the people who try this live in Outlook, and until they can read their
+own calendar into it the grid is drawing hours they know are gone.
+
+Microsoft has no equivalent of Google's token client, so the flow is the plain
+OAuth one: a popup to Microsoft's consent page, the code handed back through
+`/overlap/msauth/` — a page whose only job is to `postMessage` it to the window
+that opened it and close itself — and PKCE, so an intercepted code is worth
+nothing. No secret is involved, and no token is kept: it is used once, for one
+read, and dropped.
+
+| What | Where | Needs |
+| --- | --- | --- |
+| **Read my Outlook** | the hours sheet → Graph `me/calendarView` | `OVERLAP_MS_CLIENT_ID` in `config.js`, a SPA redirect URI, the `Calendars.Read` scope. Never touches Convex. |
+
+### Setting it up
+
+1. **Register the app.** [Azure portal](https://portal.azure.com) → *Microsoft
+   Entra ID* → **App registrations** → **New registration**. Under *Supported
+   account types* pick **accounts in any organizational directory and personal
+   Microsoft accounts**, or work accounts alone will get in.
+2. **Add the redirect URI**, and make sure its platform is **Single-page
+   application** — not Web. A Web redirect URI makes Microsoft demand a client
+   secret the page cannot have, and refuses the token call from the browser.
+   The URI is your site plus `/overlap/msauth/`, exactly, with the trailing
+   slash: `https://jeremylasne.com/overlap/msauth/`, and
+   `http://localhost:8000/overlap/msauth/` for local work.
+3. **Add the permission.** *API permissions* → **Microsoft Graph** →
+   *Delegated* → `Calendars.Read`. Each person consents for themselves the
+   first time; an admin can consent once for a whole tenant instead.
+4. **Paste the Application (client) ID** into `OVERLAP_MS_CLIENT_ID` in
+   `config.js` and **rebuild**: `python3 overlap/build.py`.
+
+Leave it empty and the Outlook row is simply not drawn — Google stays the only
+calendar Overlap can read, and nothing else changes.
+
+`Calendars.Read` is broader than what Google's `freebusy` scope grants, because
+Graph has no free/busy call for your own calendar that asks for less. The
+request narrows it back down: `$select=start,end,showAs,isCancelled` and
+nothing else, so no subject, no attendees and no body ever leave Microsoft.
+Anything marked *free* or cancelled is dropped, and what is stored is the same
+list of hours a Google reading produces.
 
 ## How auth works
 
@@ -232,11 +285,12 @@ python3 overlap/build.py     # after editing any source below
 | `app.js` | **source** — the app: markup template, timezone maths, backend calls |
 | `landing.src.html` | **source** — the landing page: one hero, nothing else |
 | `login.js` | **source** — the door: one Google button |
-| `config.js` | **source** — your Convex URL and Google client ID |
+| `config.js` | **source** — your Convex URL and the Google and Microsoft client IDs |
 | `build.py` | inlines the sources above into the pages below |
 | `index.html` | generated — the landing page |
 | `team/`, `plan/`, `next/` | generated — the three app pages |
 | `login/` | generated — the sign-in page |
+| `msauth/` | generated — the page Microsoft redirects back to, which does nothing but hand the code to the window that opened it |
 | `convex/schema.ts` | users (with your saved day), sessions, meetings, participants, feedback |
 | `convex/auth.ts` | verify a Google token, mint a session |
 | `convex/meet.ts` | `me` (you, the meeting, everyone in it, everyone you have met), profile, create, peek, join, hours, rename, leave, book |
@@ -263,7 +317,9 @@ the meeting.
 
 ## Still to build
 
-- Re-reading the calendar when the week moves, rather than only on connect
+- Re-reading the calendar by itself when the week moves. It now *says* when
+  the reading does not cover the week on screen, and reading it again is one
+  tap, but nothing happens without that tap
 - Recurring meetings
 - Telling people their meeting got booked, without them having to look
 - Rate limiting on `meet.join`

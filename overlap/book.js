@@ -46,6 +46,7 @@ var HOST=null, PICK=null, MINS=30, SCROLLED=false;
    Their working day, minus their night, minus what their calendar already
    holds, minus what somebody else has booked, minus the notice they asked
    for. Same rules the app draws, asked one instant at a time. */
+function fits(mins,a,z){ return mins>=a*60 && mins+MINS<=z*60; }
 function freeAt(ts){
   var h=HOST, end=ts+MINS*60000;
   if(ts < Date.now()+h.minNoticeMin*60000) return false;
@@ -53,7 +54,11 @@ function freeAt(ts){
 
   var p=zp(ts,h.tz), mins=p.H*60+p.M, d=dow(ts,h.tz);
   if(!h.weekends && (d===0||d===6)) return false;
-  if(mins < h.startHour*60 || mins+MINS > h.endHour*60) return false;
+  /* their working day, which is allowed to be two stretches: a morning and
+     an evening that catches another timezone. An hour need only fit one. */
+  if(!fits(mins,h.startHour,h.endHour) &&
+     !(h.startHour2!=null && h.endHour2!=null && fits(mins,h.startHour2,h.endHour2)))
+    return false;
 
   /* asleep, which can wrap midnight */
   var sl=h.sleepStart*60, sw=h.sleepEnd*60;

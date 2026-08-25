@@ -16,3 +16,16 @@ window.OVERLAP_CONVEX_URL = "https://fiery-eel-944.eu-west-1.convex.site";
 
    Left empty, the login page falls back to a six-digit code by email. */
 window.OVERLAP_GOOGLE_CLIENT_ID = "431005215419-uc7v7t0cehr2etha1tar00qm2ujf7fhj.apps.googleusercontent.com";
+
+/* Read Outlook and Microsoft 365 busy times. Register an app at
+   https://portal.azure.com → Microsoft Entra ID → App registrations → New,
+   pick "Accounts in any organizational directory and personal Microsoft
+   accounts", and add a redirect URI of type Single-page application (SPA)
+   pointing at https://your-site/overlap/msauth/ — plus
+   http://localhost:8000/overlap/msauth/ for local work. Under API
+   permissions add the delegated Microsoft Graph permission Calendars.Read.
+   Paste the Application (client) ID below.
+
+   Left empty, the Outlook row simply is not drawn and Google is the only
+   calendar Overlap can read. Nothing else changes. */
+window.OVERLAP_MS_CLIENT_ID = "";

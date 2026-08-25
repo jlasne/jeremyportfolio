@@ -26,6 +26,10 @@ export default defineSchema({
     tz: v.optional(v.string()),
     startHour: v.optional(v.number()),
     endHour: v.optional(v.number()),
+    /* A working day is allowed to be two stretches — a morning here and an
+       evening that catches somebody else's morning. Absent means one. */
+    startHour2: v.optional(v.number()),
+    endHour2: v.optional(v.number()),
     weekends: v.optional(v.boolean()),
     sleepStart: v.optional(v.number()),
     sleepEnd: v.optional(v.number()),
@@ -76,6 +80,8 @@ export default defineSchema({
     tz: v.string(),
     startHour: v.number(),
     endHour: v.number(),
+    startHour2: v.optional(v.number()),
+    endHour2: v.optional(v.number()),
     weekends: v.boolean(),
     sleepStart: v.number(),
     sleepEnd: v.number(),
@@ -85,6 +91,13 @@ export default defineSchema({
     busy: v.optional(v.array(v.number())),
     /* when the calendar was last read, 0 for never */
     gcal: v.optional(v.number()),
+    /* which calendar said so — "google" or "outlook" — and the stretch of
+       days it was actually asked about. A reading covers the week it was
+       taken for and no other, and a row nobody read is a row that will
+       happily show free at an hour that is already gone. */
+    cal: v.optional(v.string()),
+    calFrom: v.optional(v.number()),
+    calTo: v.optional(v.number()),
     joinedAt: v.number(),
   })
     .index("by_meeting", ["meetingId"])
