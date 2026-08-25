@@ -18,7 +18,10 @@ read = lambda n: io.open(os.path.join(HERE, n), encoding="utf-8").read()
 def write(n, s):
     path = os.path.join(HERE, n)
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    io.open(path, "w", encoding="utf-8").write(s)
+    # newline="\n" on purpose: without it Python writes CRLF on Windows and
+    # every generated page turns up as a whole-file diff. The build has to
+    # produce the same bytes wherever it is run.
+    io.open(path, "w", encoding="utf-8", newline="\n").write(s)
     print("  %-22s %6.1f KB" % (n, len(s.encode("utf-8")) / 1024.0))
 
 CSS   = read("app.css")
