@@ -1300,11 +1300,15 @@ function hoursArgs(p){
 }
 /* The page is static and the backend is deployed by hand, so for a while the
    page knows fields the deployment has never heard of. A save is too
-   important to lose to that: drop the new ones and send it again. */
+   important to lose to that: drop the new ones and send it again.
+
+   http.ts answers a rejected argument with a sentence rather than the
+   validator's own words, because the arguments carry a session token — so
+   that sentence is what has to be matched here. */
 var LATELY=["startHour2","endHour2","cal","calFrom","calTo"];
 function cxNew(op,args){
   return cx(op,args).catch(function(e){
-    if(!/validator|extra field|ArgumentValidation/i.test(e.message||"")) throw e;
+    if(!/newer than the server|validator|ArgumentValidation/i.test(e.message||"")) throw e;
     var lean={},k;
     for(k in args) if(args.hasOwnProperty(k)&&LATELY.indexOf(k)<0) lean[k]=args[k];
     return cx(op,lean);
