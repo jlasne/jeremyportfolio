@@ -172,4 +172,49 @@ export const DC_SPRITES = [
   ]),
 ];
 
+export const FAN_SPRITES = [
+  P([ // Box fan
+    '............',
+    '............',
+    '..oooooooo..',
+    '..o333333o..',
+    '..o3o22o3o..',
+    '..o322223o..',
+    '..o322223o..',
+    '..o3o22o3o..',
+    '..o333333o..',
+    '..oooooooo..',
+    '...ssssss...',
+    '............',
+  ]),
+  P([ // Blower
+    '............',
+    '.oooooooooo.',
+    '.o33333333o.',
+    '.o3oo22oo3o.',
+    '.o3o2222o3o.',
+    '.o3o2222o3o.',
+    '.o3oo22oo3o.',
+    '.o33333333o.',
+    '.o21111112o.',
+    '.o2y1111y2o.',
+    '.oooooooooo.',
+    '..ssssssss..',
+  ]),
+  P([ // Chiller tower
+    'oooooooooooo',
+    'o4444444444o',
+    'oooooooooooo',
+    'o3333333333o',
+    'o3oo2222oo3o',
+    'o3o222222o3o',
+    'o3o222222o3o',
+    'o3oo2222oo3o',
+    'o3333333333o',
+    'o2c11111c12o',
+    'oooooooooooo',
+    'ssssssssssss',
+  ]),
+];
+
 export const SPRITE_SIZE = 12;

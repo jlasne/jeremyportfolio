@@ -24,21 +24,22 @@ export const TILE = {
 
 /**
  * `cool` is the tile's contribution to the cooling score of anything built on
- * or beside it. Water and rock carry heat away; sand throws it back.
+ * or beside it. Coolant and fins carry heat away. The baked yard throws it
+ * back, and it is the cheapest ground on the site.
  */
 export const TILE_INFO = {
-  [TILE.WATER]:    { name: 'Water',    cool:  2.0, buildable: false },
-  [TILE.GRASS]:    { name: 'Grass',    cool:  0.0, buildable: true  },
-  [TILE.FOREST]:   { name: 'Forest',   cool:  0.5, buildable: false },
-  [TILE.MOUNTAIN]: { name: 'Mountain', cool:  1.5, buildable: false },
-  [TILE.DESERT]:   { name: 'Desert',   cool: -1.0, buildable: true  },
+  [TILE.WATER]:    { name: 'Coolant basin', cool:  2.0, buildable: false },
+  [TILE.GRASS]:    { name: 'Concrete',      cool:  0.0, buildable: true  },
+  [TILE.FOREST]:   { name: 'Pipe rack',     cool:  0.5, buildable: false },
+  [TILE.MOUNTAIN]: { name: 'Heat sink',     cool:  1.5, buildable: false },
+  [TILE.DESERT]:   { name: 'Hot yard',      cool: -1.0, buildable: true  },
 };
 
 // ---------------------------------------------------------------------------
 // Buildings
 // ---------------------------------------------------------------------------
 
-export const KIND = { PLANT: 'plant', DC: 'dc' };
+export const KIND = { PLANT: 'plant', DC: 'dc', FAN: 'fan' };
 
 /**
  * Five levels each. Output triples per level, consumption doubles. So one
@@ -79,6 +80,26 @@ export const DC = {
  * that is the signal to upgrade. `cool` multiplies cooling across the whole
  * island, which is what lets a level 5 datacenter live away from water.
  */
+/**
+ * A fan cools the 8 tiles around it. It moves no power and makes no tokens, it
+ * just costs money every second. That is the deal: cheap ground plus a fan and
+ * its bill, or good ground and no fan.
+ *
+ * A level 3 fan is worth 3.5 tiles of water. Three of them turn the worst sand
+ * on the site into ground a level 5 datacenter survives on.
+ */
+export const FAN = {
+  name: 'Cooling fan',
+  levels: [
+    { label: 'Box fan',      cool: 2, upkeep:  1.5 },
+    { label: 'Blower',       cool: 4, upkeep:  7.0 },
+    { label: 'Chiller tower', cool: 7, upkeep: 32.0 },
+  ],
+  baseCost: 45,
+  costGrowth: 1.24,
+  upgradeCost: [0, 320, 4200],
+};
+
 export const MODEL = {
   name: 'AI model',
   tiers: [
@@ -100,9 +121,9 @@ export const LINK_RANGE = 6;
 export const MAX_LINES = 4;
 /** A line carries everything for 3 tiles. */
 export const FREE_RADIUS = 3;
-/** Past 3 tiles, each tile burns 9% of what passes through. */
-export const LOSS_PER_TILE = 0.09;
-/** So a 6 tile line delivers 73%. */
+/** Past 3 tiles, each tile burns 11.5% of what passes through. */
+export const LOSS_PER_TILE = 0.115;
+/** So a 6 tile line delivers 66%. */
 export const MIN_EFFICIENCY = 0.35;
 
 /** Heat radiated per second at full heat, as a function of cooling score. */
@@ -125,13 +146,16 @@ export const RESTART_BELOW = 60;
 
 const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
 
-export const spec = (kind) => (kind === KIND.PLANT ? PLANT : DC);
+export const spec = (kind) => (kind === KIND.PLANT ? PLANT : kind === KIND.FAN ? FAN : DC);
 
 /** What the nth building of a kind costs, before the land multiplier. */
 export function buildCost(kind, owned) {
   const s = spec(kind);
   return Math.round(s.baseCost * Math.pow(s.costGrowth, owned));
 }
+
+/** How many levels a kind has. */
+export const topLevel = (kind) => spec(kind).levels.length;
 
 /** Cost to take a building from `level` to `level + 1`. Zero if maxed. */
 export function upgradeCost(kind, level) {

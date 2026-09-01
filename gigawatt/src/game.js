@@ -8,8 +8,8 @@
  */
 
 import {
-  KIND, PLANT, DC, MODEL, START_MONEY, GIGAWATT_MW, RESTART_BELOW, LINK_RANGE, MAX_LINES,
-  buildCost, upgradeCost, landMultiplier, transmission, coolingRate, spec,
+  KIND, PLANT, DC, FAN, MODEL, START_MONEY, GIGAWATT_MW, RESTART_BELOW, LINK_RANGE, MAX_LINES,
+  buildCost, upgradeCost, landMultiplier, transmission, coolingRate, spec, topLevel,
 } from './rules.js';
 import { coolScore, distance, isBuildable, buildableTiles } from './world.js';
 
@@ -30,6 +30,22 @@ export function newGame() {
 }
 
 export const at = (g, x, y) => g.buildings.find((b) => b.x === x && b.y === y);
+
+/**
+ * The cooling a tile actually offers: what the ground gives, plus every fan
+ * standing beside it. Land price stays on the ground alone, so a fan buys you
+ * cooling and never a cheaper plot.
+ */
+export function siteCooling(g, x, y) {
+  let sum = coolScore(x, y);
+  for (const b of g.buildings) {
+    if (b.kind !== KIND.FAN) continue;
+    if (Math.abs(b.x - x) <= 1 && Math.abs(b.y - y) <= 1 && !(b.x === x && b.y === y)) {
+      sum += FAN.levels[b.level - 1].cool;
+    }
+  }
+  return sum;
+}
 export const countOf = (g, kind) => g.buildings.filter((b) => b.kind === kind).length;
 
 /** Price of putting the next building of `kind` on a given tile. */
@@ -108,6 +124,7 @@ export function toggleLink(g, plant, dc) {
 
 /** A new building wires itself to the 2 closest partners it can reach. */
 export function autoWire(g, b) {
+  if (b.kind === KIND.FAN) return;
   const want = b.kind === KIND.PLANT ? KIND.DC : KIND.PLANT;
   const partners = g.buildings
     .filter((o) => o.kind === want && distance(o, b) <= LINK_RANGE)
@@ -129,7 +146,28 @@ export function priceToUpgrade(g, b) {
 }
 
 export function canUpgrade(g, b) {
-  return b.level < spec(b.kind).levels.length && g.money >= priceToUpgrade(g, b);
+  return b.level < topLevel(b.kind) && g.money >= priceToUpgrade(g, b);
+}
+
+/**
+ * Moving is free. The clock is the only thing a misplaced building costs you,
+ * which is the currency this game already scores. Lines that no longer reach
+ * are cut, and the panel says so before you let go.
+ */
+export function canMove(g, b, x, y) {
+  return isBuildable(x, y) && !at(g, x, y);
+}
+
+export function move(g, b, x, y) {
+  if (!canMove(g, b, x, y)) return false;
+  b.x = x;
+  b.y = y;
+  g.links = g.links.filter((l) => {
+    if (l.from !== b.id && l.to !== b.id) return true;
+    const other = byId(g, l.from === b.id ? l.to : l.from);
+    return other && distance(b, other) <= LINK_RANGE;
+  });
+  return true;
 }
 
 export function upgrade(g, b) {
@@ -182,6 +220,8 @@ export function snapshot(g) {
     supply += PLANT.levels[p.level - 1].mw;
     upkeep += PLANT.levels[p.level - 1].upkeep;
   }
+  const fans = g.buildings.filter((b) => b.kind === KIND.FAN);
+  for (const f of fans) upkeep += FAN.levels[f.level - 1].upkeep;
 
   let demand = 0;
   const wire = new Map();          // datacenter id -> what its lines bring it
@@ -244,7 +284,7 @@ export function snapshot(g) {
     spare: (supply - routed) + (delivered - grid),
     tokens, tokensUsed: used, tokensDropped: tokens - used,
     income, profit: income - upkeep,
-    live, lines, plants, dcs, tier,
+    live, lines, plants, dcs, fans, tier,
     fraction: grid / GIGAWATT_MW,
   };
 }
@@ -263,7 +303,7 @@ export function tick(g, dt) {
     if (d.dark) g.darkSeconds += dt;
     const w = d.dark ? 0 : (work.get(d.id) ?? 0);
     const gain = DC.levels[d.level - 1].heat * w;
-    const shed = (coolingRate(coolScore(d.x, d.y), g.modelLevel) * d.heat) / 100;
+    const shed = (coolingRate(siteCooling(g, d.x, d.y), g.modelLevel) * d.heat) / 100;
     d.heat = Math.max(0, d.heat + (gain - shed) * dt);
     if (d.heat >= 100) {
       d.heat = 100;

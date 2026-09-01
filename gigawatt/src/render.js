@@ -4,13 +4,13 @@
  * The world is painted into a 448 by 272 buffer at 1 art pixel per pixel, then
  * blown up by a whole number. So every pixel on screen is a hard square.
  *
- * Terrain holds still, so it is baked once. Water, trees, lines, smoke, lights
- * and heat are redrawn each frame.
+ * Terrain holds still, so it is baked once. Coolant, pipe flow, lines, smoke,
+ * fan blades, lights and heat are redrawn each frame.
  */
 
 import { TILE, KIND, DC, RESTART_BELOW, LINK_RANGE } from './rules.js';
 import { WIDTH, HEIGHT, tileAt, isBuildable, buildableTiles } from './world.js';
-import { PALETTE, BLINK, PLANT_SPRITES, DC_SPRITES, SPRITE_SIZE } from './sprites.js';
+import { PALETTE, BLINK, PLANT_SPRITES, DC_SPRITES, FAN_SPRITES, SPRITE_SIZE } from './sprites.js';
 
 export const TILE_PX = 16;
 const ART_W = WIDTH * TILE_PX;
@@ -19,14 +19,20 @@ const INSET = (TILE_PX - SPRITE_SIZE) / 2;
 
 const centre = (b) => ({ x: b.x * TILE_PX + TILE_PX / 2, y: b.y * TILE_PX + TILE_PX / 2 });
 
+/**
+ * The whole world is one factory. Outside the fence is bare steel deck, laid
+ * in plates and darker the further out it goes. Inside is poured concrete,
+ * baked yard, coolant basins, heat sinks and pipe racks.
+ */
 const C = {
-  deep: '#17558f', mid: '#1e6aac', shallow: '#2f86c9', foam: '#7cc0ec',
-  sand: '#edd9a3',
-  grass: '#63ab45', grassDark: '#4c8c33', grassLight: '#84c95e',
-  desert: '#e6cb8b', desertDark: '#d3b16b', desertLight: '#f4dfad',
-  stone: '#78808f', stoneDark: '#5a6270', stoneShadow: '#434a58', stoneLight: '#a2acbb', snow: '#e2e9f3',
-  canopy: '#2f7f42', canopyDark: '#22603a', canopyLight: '#48a552',
-  trunk: '#6b4626',
+  deckFar: '#12141b', deckMid: '#191d26', deckNear: '#222633', seam: '#0d0f15', rivet: '#2e3442',
+  hazard: '#e0a91c', hazardDark: '#23252e',
+  slab: '#98a2ae', slabDark: '#828c99', slabLight: '#b2bcc8', joint: '#6e7885',
+  yard: '#b8a077', yardDark: '#9c8562', yardLight: '#d0ba8e',
+  coolDeep: '#166a77', coolMid: '#1f8b9a', coolShallow: '#2fadbc', coolFoam: '#7fe2ec',
+  rim: '#5b6470',
+  fin: '#8a95a3', finDark: '#69727f', finShadow: '#4c545f', finLight: '#b6c1cd', finTop: '#e4ecf4',
+  pipe: '#4e5a69', pipeDark: '#2c3542', pipeFlange: '#6c7a8b', pipeFlow: '#8fd8e6',
 };
 
 /** Deterministic per-tile noise, so the island looks the same every time. */
@@ -63,6 +69,19 @@ function distanceField(inside) {
 
 const SEA_DEPTH = distanceField((x, y) => !land(x, y));
 
+/** Water inside the pad is a coolant basin. Water outside it is open deck. */
+const BASINS = [];
+const PIPES = [];
+for (let y = 0; y < HEIGHT; y++) {
+  for (let x = 0; x < WIDTH; x++) {
+    if (tileAt(x, y) === TILE.WATER && SEA_DEPTH[y * WIDTH + x] <= 2) BASINS.push({ x, y });
+    if (tileAt(x, y) === TILE.FOREST) {
+      const east = tileAt(x + 1, y) === TILE.FOREST || tileAt(x - 1, y) === TILE.FOREST;
+      PIPES.push({ x, y, across: east || !(tileAt(x, y + 1) === TILE.FOREST || tileAt(x, y - 1) === TILE.FOREST) });
+    }
+  }
+}
+
 /** The same trick for rock: how deep into the range each tile sits. */
 const RIDGE = distanceField((x, y) => tileAt(x, y) === TILE.MOUNTAIN);
 
@@ -87,23 +106,6 @@ export function createRenderer(canvas) {
   bakeTerrain(terrain.getContext('2d'));
 
   let scale = 3;
-
-  /** Trees are drawn every frame so they can lean in the wind. */
-  const trees = [];
-  for (let y = 0; y < HEIGHT; y++) {
-    for (let x = 0; x < WIDTH; x++) {
-      if (tileAt(x, y) !== TILE.FOREST) continue;
-      const n = 2 + Math.floor(hash(x, y, 9) * 2);
-      for (let i = 0; i < n; i++) {
-        trees.push({
-          x: x * TILE_PX + 2 + Math.floor(hash(x, y, i) * 9),
-          y: y * TILE_PX + 2 + Math.floor(hash(x, y, i + 40) * 9),
-          r: hash(x, y, i + 80) < 0.4 ? 2 : 3,
-          phase: hash(x, y, i + 120) * Math.PI * 2,
-        });
-      }
-    }
-  }
 
   function resize() {
     const pad = 24;
@@ -141,7 +143,8 @@ export function createRenderer(canvas) {
     b.clearRect(0, 0, ART_W, ART_H);
     b.drawImage(terrain, 0, 0);
     drawWater(b, t);
-    drawTrees(b, trees, t);
+    drawBasins(b, t);
+    drawPipeFlow(b, t);
     drawLines(b, g, snap, t);
 
     const night = nightness(g.elapsed);
@@ -180,40 +183,133 @@ function bakeTerrain(g) {
     for (let x = 0; x < WIDTH; x++) {
       const px = x * TILE_PX, py = y * TILE_PX;
       const tile = tileAt(x, y);
-      if (tile === TILE.WATER) { paintSea(g, px, py, x, y); continue; }
-
-      // Everything that is not water starts as grass, then gets its own coat.
-      speckle(g, px, py, C.grass, C.grassDark, C.grassLight, x, y);
-      if (tile === TILE.DESERT) speckle(g, px, py, C.desert, C.desertDark, C.desertLight, x, y);
-      if (tile === TILE.MOUNTAIN) { drawRock(g, px, py); continue; }   // cliffs, not beaches
-      if (tile === TILE.FOREST) {
-        g.fillStyle = C.trunk;
-        for (let i = 0; i < 3; i++) {
-          g.fillRect(px + 3 + Math.floor(hash(x, y, i) * 9), py + 8 + Math.floor(hash(x, y, i + 40) * 5), 1, 3);
-        }
+      if (tile === TILE.WATER) {
+        if (SEA_DEPTH[y * WIDTH + x] <= 2) paintBasin(g, px, py, x, y);
+        else paintDeck(g, px, py, x, y);
+        continue;
       }
-      // A surveyed plot: every buildable tile gets its corners pegged and its
-      // edges ruled, so the factory floor reads at a glance.
+
+      if (tile === TILE.MOUNTAIN) { drawHeatSink(g, px, py); continue; }
+      if (tile === TILE.FOREST) { paintSlab(g, px, py, x, y, C.slab); drawPipeBed(g, px, py, x, y); continue; }
+      paintSlab(g, px, py, x, y, tile === TILE.DESERT ? C.yard : C.slab);
+
+      // Every buildable tile is a marked bay: joints ruled, corners pegged.
       if (isBuildable(x, y)) {
-        g.globalAlpha = 0.16;
-        g.fillStyle = '#1d2030';
+        g.globalAlpha = 0.5;
+        g.fillStyle = C.joint;
         if (isBuildable(x, y - 1)) g.fillRect(px, py, TILE_PX, 1);
         if (isBuildable(x - 1, y)) g.fillRect(px, py, 1, TILE_PX);
-        g.globalAlpha = 0.3;
-        g.fillStyle = '#f4f7fb';
+        g.globalAlpha = 0.55;
+        g.fillStyle = '#f2f6fa';
         for (const [cx, cy] of [[0, 0], [TILE_PX - 1, 0], [0, TILE_PX - 1], [TILE_PX - 1, TILE_PX - 1]]) {
           g.fillRect(px + cx, py + cy, 1, 1);
         }
         g.globalAlpha = 1;
       }
 
-      // A pale rim wherever the land meets the sea.
-      g.fillStyle = C.sand;
-      if (!land(x, y - 1)) g.fillRect(px, py, TILE_PX, 2);
-      if (!land(x, y + 1)) g.fillRect(px, py + TILE_PX - 2, TILE_PX, 2);
-      if (!land(x - 1, y)) g.fillRect(px, py, 2, TILE_PX);
-      if (!land(x + 1, y)) g.fillRect(px + TILE_PX - 2, py, 2, TILE_PX);
+      // Hazard stripes wherever the pad meets the deck.
+      paintHazard(g, px, py, x, y);
     }
+  }
+}
+
+/** Poured concrete, or sun-baked yard, with a scatter of wear. */
+function paintSlab(g, px, py, x, y, base) {
+  const dark = base === C.yard ? C.yardDark : C.slabDark;
+  const light = base === C.yard ? C.yardLight : C.slabLight;
+  // Bays were poured on different days.
+  g.fillStyle = hash(x, y, 77) > 0.62 ? dark : hash(x, y, 78) > 0.88 ? light : base;
+  g.fillRect(px, py, TILE_PX, TILE_PX);
+  for (let i = 0; i < 9; i++) {
+    g.fillStyle = hash(x, y, i + 200) < 0.5 ? dark : light;
+    g.fillRect(px + Math.floor(hash(x, y, i + 300) * TILE_PX),
+               py + Math.floor(hash(x, y, i + 400) * TILE_PX), 2, 1);
+  }
+}
+
+/** Diagonal yellow and black, painted on the pad side of the edge. */
+function paintHazard(g, px, py, x, y) {
+  const edges = [
+    [!land(x, y - 1), 0, 0, TILE_PX, 2],
+    [!land(x, y + 1), 0, TILE_PX - 2, TILE_PX, 2],
+    [!land(x - 1, y), 0, 0, 2, TILE_PX],
+    [!land(x + 1, y), TILE_PX - 2, 0, 2, TILE_PX],
+  ];
+  for (const [on, ox, oy, w, h] of edges) {
+    if (!on) continue;
+    for (let i = 0; i < w; i++) {
+      for (let j = 0; j < h; j++) {
+        g.fillStyle = ((px + ox + i + py + oy + j) % 6) < 3 ? C.hazard : C.hazardDark;
+        g.fillRect(px + ox + i, py + oy + j, 1, 1);
+      }
+    }
+  }
+}
+
+/** A basin of coolant, rimmed in steel. */
+function paintBasin(g, px, py, x, y) {
+  for (let j = 0; j < TILE_PX; j++) {
+    for (let i = 0; i < TILE_PX; i++) {
+      const d = sample(SEA_DEPTH, px + i, py + j) + (hash(px + i, py + j, 7) - 0.5) * 0.25;
+      g.fillStyle = d < 0.7 ? C.coolShallow : d < 1.5 ? C.coolMid : C.coolDeep;
+      g.fillRect(px + i, py + j, 1, 1);
+    }
+  }
+  g.fillStyle = C.rim;
+  if (land(x, y - 1)) g.fillRect(px, py, TILE_PX, 1);
+  if (land(x, y + 1)) g.fillRect(px, py + TILE_PX - 1, TILE_PX, 1);
+  if (land(x - 1, y)) g.fillRect(px, py, 1, TILE_PX);
+  if (land(x + 1, y)) g.fillRect(px + TILE_PX - 1, py, 1, TILE_PX);
+}
+
+/** Steel plate, laid in 4 tile sheets, darker the further from the pad. */
+function paintDeck(g, px, py, tx, ty) {
+  for (let y = 0; y < TILE_PX; y++) {
+    for (let x = 0; x < TILE_PX; x++) {
+      const d = sample(SEA_DEPTH, px + x, py + y) + (hash(px + x, py + y, 7) - 0.5) * 0.3;
+      g.fillStyle = d < 1.5 ? C.deckNear : d < 3.2 ? C.deckMid : C.deckFar;
+      g.fillRect(px + x, py + y, 1, 1);
+    }
+  }
+  const gx = (tx % 4 === 0), gy = (ty % 4 === 0);
+  g.fillStyle = C.seam;
+  if (gx) g.fillRect(px, py, 1, TILE_PX);
+  if (gy) g.fillRect(px, py, TILE_PX, 1);
+  g.fillStyle = C.rivet;
+  if (gx && gy) { g.fillRect(px + 2, py + 2, 1, 1); g.fillRect(px + TILE_PX - 3, py + 2, 1, 1); }
+  if (hash(tx, ty, 31) > 0.86) g.fillRect(px + 6, py + 9, 2, 1);
+}
+
+/** Stacked aluminium fins. Light catches the top of every rib. */
+function drawHeatSink(g, px, py) {
+  for (let y = 0; y < TILE_PX; y++) {
+    for (let x = 0; x < TILE_PX; x++) {
+      const h = sample(RIDGE, px + x, py + y) * 1.6 + 0.35 + (hash(px + x, py + y, 21) - 0.5) * 0.25;
+      const rib = y % 3;
+      g.fillStyle = h < 0.7 ? C.finShadow
+        : rib === 0 ? C.finLight
+        : rib === 1 ? (h > 2.6 ? C.finTop : C.fin)
+        : C.finDark;
+      g.fillRect(px + x, py + y, 1, 1);
+    }
+  }
+}
+
+/** The bed a pipe run sits in. The coolant inside is drawn every frame. */
+function drawPipeBed(g, px, py, x, y) {
+  // A run follows its neighbours where it has them, so racks join up.
+  const east = tileAt(x + 1, y) === TILE.FOREST || tileAt(x - 1, y) === TILE.FOREST;
+  const across = east || !(tileAt(x, y + 1) === TILE.FOREST || tileAt(x, y - 1) === TILE.FOREST);
+  g.fillStyle = C.pipeDark;
+  if (across) g.fillRect(px, py + 3, TILE_PX, 10);
+  else g.fillRect(px + 3, py, 10, TILE_PX);
+  g.fillStyle = C.pipe;
+  if (across) g.fillRect(px, py + 5, TILE_PX, 6);
+  else g.fillRect(px + 5, py, 6, TILE_PX);
+  g.fillStyle = C.pipeFlange;
+  for (let i = 1; i < TILE_PX; i += 5) {
+    if (across) g.fillRect(px + i, py + 3, 1, 10);
+    else g.fillRect(px + 3, py + i, 10, 1);
   }
 }
 
@@ -264,29 +360,45 @@ function drawWater(g, t) {
   for (let y = 0; y < HEIGHT; y++) {
     for (let x = 0; x < WIDTH; x++) {
       if (tileAt(x, y) !== TILE.WATER) continue;
+      if (sample(SEA_DEPTH, x * TILE_PX + 8, y * TILE_PX + 8) > 2.4) continue;
       const px = x * TILE_PX, py = y * TILE_PX;
       for (let i = 0; i < 2; i++) {
         const seed = hash(x, y, i + 11);
         const drift = Math.sin(t * 0.9 + seed * 7) * 3;
-        const len = 3 + Math.floor(seed * 4);
-        g.fillStyle = i ? C.foam : C.shallow;
-        g.globalAlpha = 0.35 + 0.25 * Math.sin(t * 1.7 + seed * 9);
-        g.fillRect(px + Math.floor(2 + seed * 8 + drift), py + Math.floor(3 + seed * 10), len, 1);
+        g.fillStyle = i ? C.rivet : C.hazardDark;
+        g.globalAlpha = 0.25 + 0.18 * Math.sin(t * 1.7 + seed * 9);
+        g.fillRect(px + Math.floor(2 + seed * 8 + drift), py + Math.floor(3 + seed * 10), 3, 1);
       }
     }
   }
   g.globalAlpha = 1;
 }
 
-function drawTrees(g, trees, t) {
-  for (const tree of trees) {
-    const lean = Math.round(Math.sin(t * 0.7 + tree.phase) * 0.9);
-    g.fillStyle = C.canopyDark;
-    g.fillRect(tree.x + lean - 1, tree.y, tree.r + 2, tree.r + 2);
-    g.fillStyle = C.canopy;
-    g.fillRect(tree.x + lean, tree.y, tree.r + 1, tree.r + 1);
-    g.fillStyle = C.canopyLight;
-    g.fillRect(tree.x + lean, tree.y, tree.r - 1, 1);
+/** Coolant moving through the basins that sit inside the pad. */
+function drawBasins(g, t) {
+  for (const b of BASINS) {
+    const px = b.x * TILE_PX, py = b.y * TILE_PX;
+    for (let i = 0; i < 3; i++) {
+      const seed = hash(b.x, b.y, i + 60);
+      g.globalAlpha = 0.4 + 0.3 * Math.sin(t * 1.6 + seed * 9);
+      g.fillStyle = i === 2 ? C.coolFoam : C.coolShallow;
+      g.fillRect(px + Math.floor(2 + seed * 9 + Math.sin(t + seed * 7) * 2),
+                 py + Math.floor(2 + seed * 11), 2 + Math.floor(seed * 3), 1);
+    }
+  }
+  g.globalAlpha = 1;
+}
+
+/** A pulse of coolant running along every pipe rack. */
+function drawPipeFlow(g, t) {
+  for (const p of PIPES) {
+    const px = p.x * TILE_PX, py = p.y * TILE_PX;
+    const at = ((t * 0.5 + hash(p.x, p.y, 12)) % 1) * TILE_PX;
+    g.globalAlpha = 0.75;
+    g.fillStyle = C.pipeFlow;
+    if (p.across) g.fillRect(px + Math.round(at), py + 7, 3, 2);
+    else g.fillRect(px + 7, py + Math.round(at), 2, 3);
+    g.globalAlpha = 1;
   }
 }
 
@@ -376,6 +488,9 @@ function plot(g, a, z, w) {
  * palette to keep in step.
  */
 const WARM = { 1: '#6f5c4e', 2: '#a48b71', 3: '#cdc4b4', 4: '#f2eee6' };
+const CHILL = { 1: '#3f5e6d', 2: '#6f9dae', 3: '#b6d6e2', 4: '#e6f5fa' };
+const SKIN = { [KIND.PLANT]: WARM, [KIND.FAN]: CHILL };
+const SET = { [KIND.PLANT]: PLANT_SPRITES, [KIND.DC]: DC_SPRITES, [KIND.FAN]: FAN_SPRITES };
 
 /**
  * Painting a building a pixel at a time costs 144 fills, and a full island
@@ -393,13 +508,13 @@ function stamp(kind, level, dark) {
   cached = document.createElement('canvas');
   cached.width = cached.height = SPRITE_SIZE;
   const c = cached.getContext('2d');
-  const sprite = (kind === KIND.PLANT ? PLANT_SPRITES : DC_SPRITES)[level - 1];
+  const sprite = SET[kind][level - 1];
   for (let y = 0; y < SPRITE_SIZE; y++) {
     for (let x = 0; x < SPRITE_SIZE; x++) {
       const ch = sprite[y][x];
       if (ch === '.') continue;
       if (BLINK.has(ch) && !dark) continue;
-      const paint = (kind === KIND.PLANT && WARM[ch]) || PALETTE[ch];
+      const paint = (SKIN[kind] && SKIN[kind][ch]) || PALETTE[ch];
       c.fillStyle = dark && ch !== 's' ? shade(paint) : paint;
       c.fillRect(x, y, 1, 1);
     }
@@ -425,6 +540,22 @@ function drawBuilding(g, bl, game, t, night) {
   g.drawImage(stamp(bl.kind, bl.level, bl.dark), px, py);
   if (!bl.dark) drawLights(g, bl, t, night);
   if (bl.kind === KIND.DC) drawHeat(g, bl, t);
+  if (bl.kind === KIND.FAN) drawBlades(g, bl, t);
+}
+
+/** The blades turn faster the bigger the fan, so a chiller reads as a chiller. */
+function drawBlades(g, bl, t) {
+  const cx = bl.x * TILE_PX + INSET + 5.5;
+  const cy = bl.y * TILE_PX + INSET + (bl.level === 1 ? 5.5 : bl.level === 2 ? 4.5 : 5.5);
+  const reach = bl.level === 1 ? 1.6 : 2.4;
+  const spin = t * (2.4 + bl.level * 1.6) + bl.id;
+  g.fillStyle = '#dff2fa';
+  for (let i = 0; i < 3; i++) {
+    const a = spin + (i * Math.PI * 2) / 3;
+    g.fillRect(Math.round(cx + Math.cos(a) * reach), Math.round(cy + Math.sin(a) * reach), 2, 2);
+  }
+  g.fillStyle = '#7fa6b8';
+  g.fillRect(Math.round(cx), Math.round(cy), 1, 1);
 }
 
 /** Lights are drawn on top so they can blink and glow after dark. */
@@ -451,7 +582,7 @@ function litPixels(kind, level) {
   let found = LIT.get(key);
   if (found) return found;
   found = [];
-  const sprite = (kind === KIND.PLANT ? PLANT_SPRITES : DC_SPRITES)[level - 1];
+  const sprite = SET[kind][level - 1];
   for (let y = 0; y < SPRITE_SIZE; y++) {
     for (let x = 0; x < SPRITE_SIZE; x++) if (BLINK.has(sprite[y][x])) found.push([x, y, sprite[y][x]]);
   }

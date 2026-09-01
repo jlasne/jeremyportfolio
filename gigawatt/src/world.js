@@ -1,13 +1,16 @@
 /**
- * Gigawatt: the island.
+ * Gigawatt: the site.
  *
  * One hand-drawn map, written as the picture it is. Edit the art, get a new
  * world. 28 tiles across, 17 down, 148 of them buildable.
  *
- * The buildable ground is 1 connected site, so the whole factory reads at a
- * glance. A ridge walls the north, a lake and 2 outcrops sit inside the floor,
- * and 29 tiles of desert fill the east. Cooling runs from +10.5 beside the
- * water to -8 in the sand, and land is priced to match.
+ * The buildable ground is 1 connected pad, so the whole factory reads at a
+ * glance. Fin stacks wall the north, a coolant basin and 2 more sit inside the
+ * floor, and 29 tiles of baked yard fill the east. Cooling runs from +10.5 at
+ * a basin edge to -8 in the middle of the yard, and land is priced to match.
+ *
+ * The characters keep their old names, so the map still reads as a picture:
+ * ~ coolant, . concrete, f pipe rack, ^ heat sink, : hot yard.
  */
 
 import { TILE, TILE_INFO } from './rules.js';

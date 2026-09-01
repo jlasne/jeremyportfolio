@@ -5,7 +5,7 @@
  * state and hands render.js the drawing.
  */
 
-import { KIND, MODEL } from './rules.js';
+import { KIND, MODEL, topLevel } from './rules.js';
 import * as G from './game.js';
 import * as world from './world.js';
 import { createRenderer } from './render.js';
@@ -51,7 +51,7 @@ const seen = new Set();
 const once = (key, fn) => { if (!seen.has(key)) { seen.add(key); fn(); } };
 
 function celebrateUpgrade(b) {
-  if (b.level === 5) once(`max-${b.kind}`, () =>
+  if (b.level === topLevel(b.kind) && b.kind !== KIND.FAN) once(`max-${b.kind}`, () =>
     toast(b.kind === KIND.PLANT
       ? 'A fusion ring. 81 MW, the most one tile carries.'
       : 'A compute mesa. 75 MW in, 81 tokens out.', true));
@@ -105,6 +105,18 @@ $('world').addEventListener('mouseup', (e) => {
     return;
   }
 
+  // Dragged onto bare ground: pick it up and put it down there.
+  if (from && !target && G.canMove(game, from, tile.x, tile.y)) {
+    const before = G.linksOf(game, from).length;
+    G.move(game, from, tile.x, tile.y);
+    from.placedAt = now;
+    const cut = before - G.linksOf(game, from).length;
+    floatText(cut > 0 ? `moved, ${cut} lines cut` : 'moved', '#cfd8e6',
+      renderer.tileRect(tile.x, tile.y));
+    ui.setSelected(from);
+    return;
+  }
+
   if (target) {
     if (G.canRestart(target)) actions.restart(target);
     ui.setSelected(target);
@@ -128,6 +140,7 @@ window.addEventListener('keydown', (e) => {
   if (e.target.tagName === 'INPUT') return;
   if (e.key === '1') actions.arm(KIND.PLANT);
   if (e.key === '2') actions.arm(KIND.DC);
+  if (e.key === '3') actions.arm(KIND.FAN);
   if (e.key === 'Escape') { ui.setArmed(null); ui.setSelected(null); }
   if ((e.key === 'u' || e.key === 'U') && ui.selected) actions.upgrade(ui.selected);
 });

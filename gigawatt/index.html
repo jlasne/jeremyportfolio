@@ -106,6 +106,7 @@
   .tool[aria-pressed="true"] { background: #2a3450; border-color: var(--ink); }
   .tool:disabled { opacity: .42; }
   .tool .n { font-size: 13px; font-weight: 700; }
+  #build .tool { min-width: 124px; }
   .tool .c { font-size: 11px; color: var(--dim); }
   .tool .key { position: absolute; }
 
@@ -238,6 +239,9 @@
   <button class="tool" id="tool-dc" aria-pressed="false">
     <span class="n">2 · Datacenter</span><span class="c">$0</span>
   </button>
+  <button class="tool" id="tool-fan" aria-pressed="false">
+    <span class="n">3 · Cooling fan</span><span class="c">$0</span>
+  </button>
 </div>
 
 <div class="panel" id="inspect"></div>
@@ -254,7 +258,9 @@
       <li>A fed datacenter makes <b>tokens</b> and heats up. Your <b>AI model</b> buys the tokens.</li>
     </ol>
     <p>Running capacity counts the power your datacenters use. Spare power counts for 0, so every plant needs a line to somewhere.</p>
-    <p>Two land rules. A line loses 9% per tile past the third, so build close. Water and rock cool a datacenter, sand heats it.</p>
+    <p>Two land rules. A line loses 11% per tile past the third, so build close. Coolant and heat sinks cool a datacenter, the baked yard heats it.</p>
+    <p>Short of cooling? Put a <b>fan</b> beside a datacenter. It costs money every second and cools the 8 tiles around it.</p>
+    <p><b>Drag a building to empty ground</b> to move it. Moving is free.</p>
     <p>Click a building to upgrade it. Each level triples output and doubles what it eats.</p>
     <p>A full run takes 26 minutes. The <b>10&times;</b> button gives you it back in under 3, and the clock still counts game time.</p>
     <button class="primary" id="start">Start building</button>

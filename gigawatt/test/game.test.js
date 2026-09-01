@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import * as G from '../src/game.js';
-import { KIND, DC, PLANT, MODEL, GIGAWATT_MW, START_MONEY, RESTART_BELOW, MAX_LINES, LINK_RANGE, coolingRate } from '../src/rules.js';
+import { KIND, DC, PLANT, FAN, MODEL, GIGAWATT_MW, START_MONEY, RESTART_BELOW, MAX_LINES, LINK_RANGE, coolingRate } from '../src/rules.js';
 import { coolScore, buildableTiles, distance } from '../src/world.js';
 
 /** A cold coastal tile and a baking desert one, picked off the real map. */
@@ -281,6 +281,97 @@ test('a gigawatt of running capacity wins, and stops the clock', () => {
   const frozen = g.winTime;
   run(g, 30);
   assert.equal(g.winTime, frozen, 'the clock stops when you win');
+});
+
+// ---------------------------------------------------------------------------
+// Fans and moving
+// ---------------------------------------------------------------------------
+
+test('a fan cools the 8 tiles around it, and nothing further', () => {
+  const g = G.newGame();
+  g.money = 1e9;
+  const ground = coolScore(DESERT.x, DESERT.y);
+  G.build(g, KIND.FAN, DESERT.x + 1, DESERT.y);
+  assert.equal(G.siteCooling(g, DESERT.x, DESERT.y), ground + FAN.levels[0].cool);
+  assert.equal(G.siteCooling(g, DESERT.x - 2, DESERT.y), coolScore(DESERT.x - 2, DESERT.y));
+});
+
+test('fans stack, and a bigger fan cools more', () => {
+  const g = G.newGame();
+  g.money = 1e9;
+  const ground = coolScore(DESERT.x, DESERT.y);
+  const a = G.build(g, KIND.FAN, DESERT.x + 1, DESERT.y);
+  G.build(g, KIND.FAN, DESERT.x - 1, DESERT.y);
+  assert.equal(G.siteCooling(g, DESERT.x, DESERT.y), ground + 2 * FAN.levels[0].cool);
+  G.upgrade(g, a);
+  assert.equal(G.siteCooling(g, DESERT.x, DESERT.y), ground + FAN.levels[1].cool + FAN.levels[0].cool);
+});
+
+test('a fan costs money every second and moves no power', () => {
+  const g = G.newGame();
+  g.money = 1e9;
+  G.build(g, KIND.FAN, 7, 8);
+  const s = G.snapshot(g);
+  assert.equal(s.upkeep, FAN.levels[0].upkeep);
+  assert.equal(s.supply, 0);
+  assert.equal(s.demand, 0);
+  assert.equal(g.links.length, 0, 'a fan takes no lines');
+});
+
+test('fans keep a hot datacenter alive', () => {
+  const hot = G.newGame(); hot.money = 1e9;
+  G.build(hot, KIND.PLANT, NEXT_TO_DESERT.x, NEXT_TO_DESERT.y).level = 5;
+  const a = G.build(hot, KIND.DC, DESERT.x, DESERT.y);
+  a.level = 3;
+  assert.ok(runUntil(hot, () => a.dark), 'sand alone kills a level 3');
+
+  const cooled = G.newGame(); cooled.money = 1e9;
+  G.build(cooled, KIND.PLANT, NEXT_TO_DESERT.x, NEXT_TO_DESERT.y).level = 5;
+  const b = G.build(cooled, KIND.DC, DESERT.x, DESERT.y);
+  b.level = 3;
+  for (const [dx, dy] of [[1, 0], [-1, 0], [1, 1]]) {
+    const f = G.build(cooled, KIND.FAN, DESERT.x + dx, DESERT.y + dy);
+    if (f) { f.level = 3; }
+  }
+  run(cooled, 900);
+  assert.equal(b.dark, false, 'three chiller towers hold it');
+});
+
+test('land price ignores fans', () => {
+  const g = G.newGame();
+  g.money = 1e9;
+  const before = G.priceToBuild(g, KIND.DC, DESERT.x, DESERT.y);
+  G.build(g, KIND.FAN, DESERT.x + 1, DESERT.y).level = 3;
+  assert.equal(G.priceToBuild(g, KIND.DC, DESERT.x, DESERT.y), before);
+});
+
+test('a building can be picked up and put down somewhere else', () => {
+  const g = G.newGame();
+  g.money = 1e9;
+  const p = G.build(g, KIND.PLANT, 7, 8);
+  p.level = 3;
+  assert.equal(G.canMove(g, p, 0, 0), false, 'water is still water');
+  assert.ok(G.move(g, p, 6, 8));
+  assert.equal(p.x, 6);
+  assert.equal(p.level, 3, 'it keeps what it was');
+});
+
+test('moving out of reach cuts the lines that no longer reach', () => {
+  const g = G.newGame();
+  g.money = 1e9;
+  const p = G.build(g, KIND.PLANT, 16, 9);
+  const d = G.build(g, KIND.DC, 17, 9);
+  assert.equal(g.links.length, 1);
+  G.move(g, p, 7, 8);
+  assert.equal(g.links.length, 0, 'the line was 10 tiles long by then');
+});
+
+test('a building cannot be moved on top of another', () => {
+  const g = G.newGame();
+  g.money = 1e9;
+  const p = G.build(g, KIND.PLANT, 7, 8);
+  G.build(g, KIND.DC, 8, 8);
+  assert.equal(G.canMove(g, p, 8, 8), false);
 });
 
 test('a new game starts with enough to make the first two moves', () => {

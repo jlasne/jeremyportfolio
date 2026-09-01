@@ -5,7 +5,7 @@
  * toward the truth instead of jumping, so the eye can follow what changed.
  */
 
-import { KIND, MODEL, GIGAWATT_MW, RESTART_BELOW, MAX_LINES, restingHeat, spec } from './rules.js';
+import { KIND, MODEL, GIGAWATT_MW, RESTART_BELOW, MAX_LINES, restingHeat, spec, topLevel } from './rules.js';
 import { coolScore } from './world.js';
 import * as G from './game.js';
 
@@ -71,9 +71,9 @@ export function createUI(game, actions) {
   const tools = {
     [KIND.PLANT]: $('tool-plant'),
     [KIND.DC]: $('tool-dc'),
+    [KIND.FAN]: $('tool-fan'),
   };
-  tools[KIND.PLANT].onclick = () => actions.toggle(KIND.PLANT);
-  tools[KIND.DC].onclick = () => actions.toggle(KIND.DC);
+  for (const [kind, el] of Object.entries(tools)) el.onclick = () => actions.toggle(kind);
   $('upgrade-model').onclick = actions.upgradeModel;
 
   let armed = null;
@@ -113,7 +113,7 @@ export function createUI(game, actions) {
       `<span style="color:#5d6880">·</span> ${money(s.income)}/s in, ${money(s.upkeep)}/s upkeep`);
 
     // Build buttons
-    for (const kind of [KIND.PLANT, KIND.DC]) {
+    for (const kind of [KIND.PLANT, KIND.DC, KIND.FAN]) {
       const el = tools[kind];
       const base = G.buildCostFor(game, kind);
       setText(el.querySelector('.c'), `${money(base.low)}–${money(base.high)}`);
@@ -153,13 +153,14 @@ function drawInspector(game, s, b, actions) {
   const kindSpec = spec(b.kind);
   const lv = kindSpec.levels[b.level - 1];
   const next = kindSpec.levels[b.level];
-  const cool = coolScore(b.x, b.y);
+  const ground = coolScore(b.x, b.y);
+  const cool = G.siteCooling(game, b.x, b.y);
   const cost = G.priceToUpgrade(game, b);
   const canUp = Boolean(next) && game.money >= cost;
 
   // The panel holds live buttons, so it is only rebuilt when something
   // structural changes. Heat moves every frame and is written in place.
-  const key = `${b.id}:${b.level}:${b.dark}:${canUp}`;
+  const key = `${b.id}:${b.level}:${b.dark}:${canUp}:${cool}`;
   if (panel.dataset.key !== key) {
     panel.dataset.key = key;
     const rows = [];
@@ -167,17 +168,23 @@ function drawInspector(game, s, b, actions) {
       rows.push(['Output', `${mw(lv.mw)} MW`, next && `${mw(next.mw)} MW`]);
       rows.push(['Upkeep', `${money(lv.upkeep)}/s`, next && `${money(next.upkeep)}/s`]);
       rows.push(['Sending', '<span data-live="flow">0 MW</span>', null]);
+      rows.push(['Lines', '<span data-live="lines">0</span>', null]);
+    } else if (b.kind === KIND.FAN) {
+      rows.push(['Cools', `+${lv.cool} around it`, next && `+${next.cool}`]);
+      rows.push(['Upkeep', `${money(lv.upkeep)}/s`, next && `${money(next.upkeep)}/s`]);
     } else {
       rows.push(['Draw', `${mw(lv.draw)} MW`, next && `${mw(next.draw)} MW`]);
       rows.push(['Getting', '<span data-live="flow">0 MW</span>', null]);
       rows.push(['Tokens', '<span data-live="tokens">0/s</span>', next && `${mw(next.tokens)}/s`]);
-      rows.push(['Cooling', cool > 0 ? `+${cool}` : `${cool}`, null]);
+      rows.push(['Cooling', cool > ground
+        ? `${cool} <span style="color:var(--compute)">+${(cool - ground).toFixed(0)} fans</span>`
+        : `${cool}`, null]);
+      rows.push(['Lines', '<span data-live="lines">0</span>', null]);
     }
-    rows.push(['Lines', `<span data-live="lines">0</span>`, null]);
     const restNext = b.kind === KIND.DC && next ? restingHeat(b.level + 1, cool, game.modelLevel) : 0;
     panel.innerHTML = `
       <h3>${lv.label}</h3>
-      <div class="sub">${kindSpec.name} · level ${b.level} of 5</div>
+      <div class="sub">${kindSpec.name} · level ${b.level} of ${topLevel(b.kind)}</div>
       <dl>${rows.map(([k, v, n]) =>
         `<dt>${k}</dt><dd>${v}${n ? ` <span style="color:var(--dim)">→ ${n}</span>` : ''}</dd>`).join('')}</dl>
       ${b.kind === KIND.DC ? `
@@ -198,8 +205,8 @@ function drawInspector(game, s, b, actions) {
     const el = panel.querySelector(`[data-live="${name}"]`);
     if (el && el.textContent !== text) el.textContent = text;
   };
-  const used = G.linksOf(game, b).length;
-  put('lines', `${used} of ${MAX_LINES}`);
+  if (b.kind === KIND.FAN) return;
+  put('lines', `${G.linksOf(game, b).length} of ${MAX_LINES}`);
 
   if (b.kind === KIND.PLANT) {
     const sent = s.lines.filter((l) => l.from === b).reduce((n, l) => n + l.got, 0);
@@ -244,6 +251,9 @@ function hint(game, s, armed) {
   if (starved) return `A datacenter is running at ${Math.round(100 * starved.work)}%. Feed it more power.`;
   if (s.tokensDropped > 0.5) return 'Your model is full. Upgrade it to keep the extra tokens.';
   if (s.spare > s.supply * 0.2) return `${Math.round(s.spare)} MW is going spare. Add a datacenter, or a line to one.`;
+  const boxed = s.dcs.find((d) => d.level < 5 && !d.dark &&
+    restingHeat(d.level + 1, G.siteCooling(game, d.x, d.y), game.modelLevel) > 100);
+  if (boxed) return 'A datacenter has no room to grow. Put a fan beside it.';
   if (game.buildings.length < 6) return 'Drag from a plant to a datacenter to wire them together.';
   return '';
 }

@@ -18,7 +18,7 @@
  *   node tools/balance.js --quiet    just the headline
  */
 
-import { KIND, MODEL, DC, PLANT, TILE, LINK_RANGE, restingHeat } from '../src/rules.js';
+import { KIND, MODEL, DC, PLANT, FAN, TILE, LINK_RANGE, restingHeat } from '../src/rules.js';
 import { coolScore, buildableTiles, distance, tileAt } from '../src/world.js';
 import * as G from '../src/game.js';
 
@@ -98,7 +98,7 @@ function addCompute(g, s) {
   for (const l of STYLE.upgrade ? s.live : []) {
     const b = l.b;
     if (b.level >= 5 || l.work < 0.98) continue;
-    if (STYLE.heat && restingHeat(b.level + 1, coolScore(b.x, b.y), g.modelLevel) > HEAT_CEILING) continue;
+    if (STYLE.heat && restingHeat(b.level + 1, G.siteCooling(g, b.x, b.y), g.modelLevel) > HEAT_CEILING) continue;
     options.push({ cost: G.priceToUpgrade(g, b),
       gain: DC.levels[b.level].draw - DC.levels[b.level - 1].draw,
       do: () => G.upgrade(g, b), label: `upgrade dc ${b.x},${b.y}` });
@@ -111,7 +111,7 @@ function addCompute(g, s) {
     desert: (a, b) => coolScore(b.x, b.y) - coolScore(a.x, a.y),
   }[STYLE.place];
   const sites = free(g)
-    .filter((t) => STYLE.heat ? restingHeat(1, coolScore(t.x, t.y), g.modelLevel) <= HEAT_CEILING : true)
+    .filter((t) => STYLE.heat ? restingHeat(1, G.siteCooling(g, t.x, t.y), g.modelLevel) <= HEAT_CEILING : true)
     .filter((t) => STYLE.place !== 'desert' || tileAt(t.x, t.y) === TILE.DESERT)
     .filter((t) => !g.buildings.length || span(t) <= LINK_RANGE)
     .sort(rank)
@@ -136,6 +136,36 @@ function wireUp(g) {
       .sort((a, b) => distance(a, l.b) - distance(b, l.b))[0];
     if (plant) G.toggleLink(g, plant, l.b);
   }
+}
+
+/**
+ * When heat is what stands between a datacenter and its next level, buy air.
+ * A fan beside it, or a bigger fan already there, whichever costs less per
+ * point of cooling.
+ */
+function coolIt(g, s) {
+  const options = [];
+  const blocked = s.live.filter((l) => l.b.level < 5 && l.work >= 0.98 &&
+    restingHeat(l.b.level + 1, G.siteCooling(g, l.b.x, l.b.y), g.modelLevel) > HEAT_CEILING);
+  if (blocked.length < 3) return [];
+
+  for (const l of blocked) {
+    const b = l.b;
+    for (const f of g.buildings) {
+      if (f.kind !== KIND.FAN || f.level >= FAN.levels.length || !STYLE.upgrade) continue;
+      if (distance(f, b) !== 1) continue;
+      options.push({ cost: G.priceToUpgrade(g, f),
+        gain: FAN.levels[f.level].cool - FAN.levels[f.level - 1].cool,
+        do: () => G.upgrade(g, f), label: `upgrade fan ${f.x},${f.y}` });
+    }
+    const spot = free(g).filter((t) => distance(t, b) === 1)
+      .sort((p, q) => coolScore(q.x, q.y) - coolScore(p.x, p.y))[0];
+    if (spot) {
+      options.push({ cost: G.priceToBuild(g, KIND.FAN, spot.x, spot.y), gain: FAN.levels[0].cool,
+        do: () => G.build(g, KIND.FAN, spot.x, spot.y), label: `build fan ${spot.x},${spot.y}` });
+    }
+  }
+  return options;
 }
 
 const cheapestPer = (options, money) => options
@@ -167,6 +197,7 @@ export function play({ log = () => {}, style = PLAYERS.careful } = {}) {
         const starving = s.live.some((l) => l.work < 0.98);
         const opening = s.dcs.length === 0 && s.plants.length === 0;
         move = cheapestPer(opening || starving ? addPower(g, s) : addCompute(g, s), g.money)
+          || cheapestPer(coolIt(g, s), g.money)
           || cheapestPer(addCompute(g, s), g.money);
       }
       if (move) { move.do(); log('buy', g, move); }

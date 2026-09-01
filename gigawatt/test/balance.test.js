@@ -31,27 +31,26 @@ test('the run is a run, not a wait: something to do most minutes', () => {
   assert.ok(perMinute.length > 120, `only ${perMinute.length} decisions in a whole run`);
 });
 
-test('a win takes 56 buildings and 100 lines', () => {
+test('a win takes 78 buildings on a site of 148 tiles', () => {
   const used = runs.careful.buildings.length;
-  assert.ok(used > 40 && used < 80, `${used} buildings`);
-  assert.ok(runs.careful.links.length > used, 'most buildings carry more than one line');
+  assert.ok(used > 50 && used < 110, `${used} buildings`);
+  assert.ok(runs.careful.buildings.some((b) => b.kind === 'fan'), 'and some of them are fans');
 });
 
-test('the desert stops you at 225 MW', () => {
-  // A level 3 datacenter dies on deep sand at every model, so a player who
-  // stays there runs out of road early.
+test('the desert stops you at 300 MW, fans and all', () => {
+  // Fans buy cooling, and on deep sand they still fall short. A player who
+  // stays there runs out of road at less than a third of a gigawatt.
   assert.equal(runs.sunbaked.won, false, `desert only finished in ${runs.sunbaked.winTime}s`);
   assert.ok(runs.sunbaked.peakGrid < 500, `peaked at ${runs.sunbaked.peakGrid} MW`);
-  assert.ok(runs.sunbaked.darkSeconds > 20000, 'and spends its life shut down');
+  assert.ok(runs.sunbaked.darkSeconds > 2000, 'and spends its life shut down');
   assert.equal(runs.careful.darkSeconds, 0, 'careful play stays lit the whole way');
 });
 
-test('long lines stop you at 864 MW', () => {
-  // A line 6 tiles out delivers 73%. Build at arm's length everywhere and the
-  // loss adds up to a wall.
-  assert.equal(runs.sprawler.won, false, `sprawler finished in ${runs.sprawler.winTime}s`);
-  assert.ok(runs.sprawler.peakGrid > 700, 'it gets close');
-  assert.ok(runs.sprawler.peakGrid < 1000, 'and stops there');
+test('long lines cost 16% of the clock', () => {
+  // A line 6 tiles out delivers 66%. Building at arm's length everywhere still
+  // gets there, and pays for it in minutes.
+  assert.ok(runs.sprawler.winTime > runs.careful.winTime * 1.1,
+    `sprawler ${runs.sprawler.winTime}s against careful ${runs.careful.winTime}s`);
 });
 
 test('building wide without ever upgrading stops at 29 MW', () => {
