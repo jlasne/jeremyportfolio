@@ -8,7 +8,7 @@
  */
 
 import { TILE, KIND, DC, RESTART_BELOW } from './rules.js';
-import { ISLAND, WIDTH, HEIGHT, tileAt, coolScore, isBuildable } from './world.js';
+import { WIDTH, HEIGHT, tileAt, isBuildable } from './world.js';
 import { PALETTE, BLINK, PLANT_SPRITES, DC_SPRITES, SPRITE_SIZE } from './sprites.js';
 
 export const TILE_PX = 16;
@@ -280,10 +280,6 @@ function drawTrees(g, trees, t) {
  * palette to keep in step.
  */
 const WARM = { 1: '#6f5c4e', 2: '#a48b71', 3: '#cdc4b4', 4: '#f2eee6' };
-
-function spriteFor(bl) {
-  return (bl.kind === KIND.PLANT ? PLANT_SPRITES : DC_SPRITES)[bl.level - 1];
-}
 
 /**
  * Painting a building a pixel at a time costs 144 fills, and a full island

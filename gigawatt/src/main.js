@@ -5,7 +5,7 @@
  * the game it asks game.js for; everything it draws it hands to render.js.
  */
 
-import { KIND, MODEL, GIGAWATT_MW, RESTART_BELOW } from './rules.js';
+import { KIND, MODEL } from './rules.js';
 import * as G from './game.js';
 import { createRenderer } from './render.js';
 import { createUI, toast, floatText, money, clock } from './ui.js';
@@ -89,7 +89,7 @@ $('world').addEventListener('click', (e) => {
     return;
   }
   if (existing) {
-    if (existing.dark && existing.heat <= RESTART_BELOW) actions.restart(existing);
+    if (G.canRestart(existing)) actions.restart(existing);
     ui.setSelected(existing);
     ui.setArmed(null);
   } else {

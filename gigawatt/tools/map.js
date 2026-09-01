@@ -1,5 +1,5 @@
 /** Prints the island's cooling geography, so the map can be tuned by eye. */
-import { ISLAND, WIDTH, HEIGHT, coolScore, isBuildable, tileAt, buildableTiles } from '../src/world.js';
+import { WIDTH, HEIGHT, coolScore, isBuildable, tileAt, buildableTiles } from '../src/world.js';
 import { restingHeat, MODEL } from '../src/rules.js';
 
 const pad = (s, n) => String(s).padStart(n);
