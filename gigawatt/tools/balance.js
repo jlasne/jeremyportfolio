@@ -27,15 +27,15 @@ const DECIDE_EVERY = 0.5;
 const HEAT_CEILING = 90;      // the robot will not build itself an oven
 
 /**
- * Four players. `careful` obeys both land rules. The other 3 each break one.
- * The gap between their times is the evidence a rule earns its place. A rule
+ * Four players. `careful` follows every rule. The other 3 each break one, and
+ * the gap between their results is the evidence a rule earns its place. A rule
  * that costs 0 to break is decoration.
  */
 export const PLAYERS = {
-  careful:  { heat: true,  place: 'cool'   },
-  reckless: { heat: false, place: 'cheap'  },  // chases cheap land, ignores heat
-  sprawler: { heat: true,  place: 'far'    },  // builds at the end of the line
-  sunbaked: { heat: false, place: 'desert' },  // stays on the sand
+  careful:  { heat: true,  place: 'cool',   upgrade: true  },
+  sprawler: { heat: true,  place: 'far',    upgrade: true  },  // builds at the end of the line
+  sunbaked: { heat: false, place: 'desert', upgrade: true  },  // stays on the sand
+  flat:     { heat: true,  place: 'cool',   upgrade: false },  // builds wide, never taller
 };
 const MAX_SECONDS = 4 * 3600;
 
@@ -58,21 +58,24 @@ function addPower(g, s) {
     return [{ cost: G.priceToBuild(g, KIND.PLANT, t.x, t.y), gain: 1,
       do: () => G.build(g, KIND.PLANT, t.x, t.y), label: `build plant ${t.x},${t.y}` }];
   }
-  const hungry = s.live.filter((l) => l.work < 0.98).sort((a, b) => a.work - b.work)[0];
-  if (!hungry) return [];
-  const d = hungry.b;
-  const short = hungry.draw - hungry.got;
+  // Look at the 6 slowest, since the slowest one may have run out of sockets.
+  const hungry = s.live.filter((l) => l.work < 0.98)
+    .sort((a, b) => a.work - b.work).slice(0, 6);
   const options = [];
 
-  for (const l of G.linksOf(g, d)) {
-    const p = G.byId(g, l.from);
-    if (!p || p.level >= 5) continue;
-    const gain = Math.min(short, PLANT.levels[p.level].mw - PLANT.levels[p.level - 1].mw);
-    options.push({ cost: G.priceToUpgrade(g, p), gain, do: () => G.upgrade(g, p),
-      label: `upgrade plant ${p.x},${p.y}` });
-  }
+  for (const h of hungry) {
+    const d = h.b;
+    const short = h.draw - h.got;
 
-  if (G.linesFree(g, d) > 0) {
+    for (const l of STYLE.upgrade ? G.linksOf(g, d) : []) {
+      const p = G.byId(g, l.from);
+      if (!p || p.level >= 5) continue;
+      const gain = Math.min(short, PLANT.levels[p.level].mw - PLANT.levels[p.level - 1].mw);
+      options.push({ cost: G.priceToUpgrade(g, p), gain, do: () => G.upgrade(g, p),
+        label: `upgrade plant ${p.x},${p.y}` });
+    }
+
+    if (G.linesFree(g, d) === 0) continue;
     const site = free(g)
       .filter((t) => distance(t, d) <= LINK_RANGE)
       .sort((a, b) => (distance(a, d) - distance(b, d)) || (coolScore(a.x, a.y) - coolScore(b.x, b.y)))[0];
@@ -92,7 +95,7 @@ function addPower(g, s) {
  */
 function addCompute(g, s) {
   const options = [];
-  for (const l of s.live) {
+  for (const l of STYLE.upgrade ? s.live : []) {
     const b = l.b;
     if (b.level >= 5 || l.work < 0.98) continue;
     if (STYLE.heat && restingHeat(b.level + 1, coolScore(b.x, b.y), g.modelLevel) > HEAT_CEILING) continue;
@@ -104,7 +107,6 @@ function addCompute(g, s) {
   const span = (t) => Math.min(...reach.map((p) => distance(p, t)), 99);
   const rank = {
     cool:   (a, b) => coolScore(b.x, b.y) - coolScore(a.x, a.y),
-    cheap:  (a, b) => G.priceToBuild(g, KIND.DC, a.x, a.y) - G.priceToBuild(g, KIND.DC, b.x, b.y),
     far:    (a, b) => span(b) - span(a),
     desert: (a, b) => coolScore(b.x, b.y) - coolScore(a.x, a.y),
   }[STYLE.place];

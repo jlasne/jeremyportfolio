@@ -5,10 +5,10 @@ import { KIND, DC, PLANT, MODEL, GIGAWATT_MW, START_MONEY, RESTART_BELOW, MAX_LI
 import { coolScore, buildableTiles, distance } from '../src/world.js';
 
 /** A cold coastal tile and a baking desert one, picked off the real map. */
-const COAST = { x: 13, y: 6 };     // between the lake and the sea, cooling +6
-const NEXT_TO_COAST = { x: 12, y: 6 };
-const DESERT = { x: 21, y: 7 };    // the middle of the sand, cooling -9
-const NEXT_TO_DESERT = { x: 21, y: 8 };
+const COAST = { x: 12, y: 10 };        // beside the lake and the ridge, cooling +10.5
+const NEXT_TO_COAST = { x: 13, y: 10 };
+const DESERT = { x: 22, y: 10 };       // the middle of the sand, cooling -8
+const NEXT_TO_DESERT = { x: 22, y: 9 };
 
 /** n buildable tiles that are all within reach of each other. */
 const cluster = (n) => {
@@ -38,15 +38,15 @@ test('the map tiles the tests rely on are the ones they think they are', () => {
 test('you cannot build on water, on mountains, or on top of yourself', () => {
   const g = G.newGame();
   assert.equal(G.build(g, KIND.PLANT, 0, 0), null, 'water');
-  assert.equal(G.build(g, KIND.PLANT, 6, 1), null, 'mountain');
-  assert.ok(G.build(g, KIND.PLANT, 10, 11));
-  assert.equal(G.build(g, KIND.DC, 10, 11), null, 'occupied');
+  assert.equal(G.build(g, KIND.PLANT, 6, 2), null, 'mountain');
+  assert.ok(G.build(g, KIND.PLANT, 7, 8));
+  assert.equal(G.build(g, KIND.DC, 7, 8), null, 'occupied');
 });
 
 test('you cannot spend money you do not have', () => {
   const g = G.newGame();
   g.money = 0;
-  assert.equal(G.build(g, KIND.PLANT, 10, 11), null);
+  assert.equal(G.build(g, KIND.PLANT, 7, 8), null);
   assert.equal(g.money, 0);
 });
 
@@ -60,7 +60,7 @@ test('the clock does not start until the first building goes down', () => {
   const g = G.newGame();
   run(g, 10);
   assert.equal(g.elapsed, 0);
-  G.build(g, KIND.PLANT, 10, 11);
+  G.build(g, KIND.PLANT, 7, 8);
   run(g, 10);
   assert.ok(g.elapsed >= 9.5);
 });
@@ -68,16 +68,16 @@ test('the clock does not start until the first building goes down', () => {
 test('the grid is what the lines actually deliver', () => {
   const g = G.newGame();
   g.money = 1e9;
-  G.build(g, KIND.PLANT, 10, 11);         // 1 MW of supply
-  G.build(g, KIND.DC, 11, 11);            // 2 MW of demand
+  G.build(g, KIND.PLANT, 7, 8);         // 1 MW of supply
+  G.build(g, KIND.DC, 8, 8);            // 2 MW of demand
   let s = G.snapshot(g);
   assert.equal(s.supply, 1);
   assert.equal(s.demand, 2);
   assert.equal(s.grid, 1, 'one plant feeds half a datacenter');
   assert.equal(s.live[0].work, 0.5, 'so it runs at half speed');
 
-  G.build(g, KIND.PLANT, 11, 12);
-  G.build(g, KIND.PLANT, 10, 10);
+  G.build(g, KIND.PLANT, 7, 9);
+  G.build(g, KIND.PLANT, 6, 8);
   s = G.snapshot(g);
   assert.equal(s.supply, 3);
   assert.equal(s.grid, 2, 'the third megawatt has nowhere to go');
@@ -88,21 +88,21 @@ test('the grid is what the lines actually deliver', () => {
 test('half the power makes half the tokens', () => {
   const g = G.newGame();
   g.money = 1e9;
-  G.build(g, KIND.PLANT, 10, 11);
-  G.build(g, KIND.DC, 11, 11);
+  G.build(g, KIND.PLANT, 7, 8);
+  G.build(g, KIND.DC, 8, 8);
   const half = G.snapshot(g);
-  G.build(g, KIND.PLANT, 11, 12);
+  G.build(g, KIND.PLANT, 7, 9);
   const full = G.snapshot(g);
   assert.ok(Math.abs(full.tokens - 2 * half.tokens) < 1e-9);
 });
 
 test('a long line costs power, a short one costs nothing', () => {
   const near = G.newGame(); near.money = 1e9;
-  G.build(near, KIND.PLANT, 10, 11);
-  G.build(near, KIND.DC, 11, 11);
+  G.build(near, KIND.PLANT, 7, 8);
+  G.build(near, KIND.DC, 8, 8);
   const far = G.newGame(); far.money = 1e9;
-  G.build(far, KIND.PLANT, 10, 11);
-  G.build(far, KIND.DC, 16, 11);          // 6 tiles away
+  G.build(far, KIND.PLANT, 16, 9);
+  G.build(far, KIND.DC, 22, 9);          // 6 tiles away
   assert.equal(far.links.length, 1, 'still in reach');
   assert.ok(G.snapshot(far).grid < G.snapshot(near).grid);
   assert.ok(G.snapshot(far).grid > 0);
@@ -112,8 +112,8 @@ test('a long line costs power, a short one costs nothing', () => {
 test('a datacenter out of reach of every plant stays dark on the meter', () => {
   const g = G.newGame();
   g.money = 1e9;
-  G.build(g, KIND.PLANT, 5, 9);
-  G.build(g, KIND.DC, 17, 9);             // 12 tiles away
+  G.build(g, KIND.PLANT, 7, 8);
+  G.build(g, KIND.DC, 22, 9);             // 15 tiles away
   assert.equal(g.links.length, 0);
   const s = G.snapshot(g);
   assert.equal(s.grid, 0);
@@ -123,16 +123,16 @@ test('a datacenter out of reach of every plant stays dark on the meter', () => {
 test('a new building wires itself to what it can reach', () => {
   const g = G.newGame();
   g.money = 1e9;
-  const p = G.build(g, KIND.PLANT, 10, 11);
-  const d = G.build(g, KIND.DC, 11, 11);
+  const p = G.build(g, KIND.PLANT, 7, 8);
+  const d = G.build(g, KIND.DC, 8, 8);
   assert.ok(G.linked(g, p, d), 'the datacenter finds the plant on its own');
 });
 
 test('a line can be drawn and cut by hand', () => {
   const g = G.newGame();
   g.money = 1e9;
-  const p = G.build(g, KIND.PLANT, 10, 11);
-  const d = G.build(g, KIND.DC, 11, 11);
+  const p = G.build(g, KIND.PLANT, 7, 8);
+  const d = G.build(g, KIND.DC, 8, 8);
   assert.equal(G.toggleLink(g, p, d), 'cut');
   assert.equal(g.links.length, 0);
   assert.equal(G.toggleLink(g, p, d), 'drawn');
@@ -142,9 +142,9 @@ test('a line can be drawn and cut by hand', () => {
 test('a line reaches 6 tiles and stops', () => {
   const g = G.newGame();
   g.money = 1e9;
-  const p = G.build(g, KIND.PLANT, 10, 9);
-  const near = G.build(g, KIND.DC, 16, 9);
-  const away = G.build(g, KIND.DC, 17, 9);
+  const p = G.build(g, KIND.PLANT, 16, 9);
+  const near = G.build(g, KIND.DC, 22, 9);
+  const away = G.build(g, KIND.DC, 23, 9);
   assert.equal(LINK_RANGE, 6);
   assert.ok(G.canLink(g, p, near));
   assert.equal(G.canLink(g, p, away), false);
@@ -153,8 +153,8 @@ test('a line reaches 6 tiles and stops', () => {
 test('a building carries 4 lines', () => {
   const g = G.newGame();
   g.money = 1e9;
-  const p = G.build(g, KIND.PLANT, 10, 9);
-  const dcs = [[10, 8], [11, 9], [11, 8], [12, 9], [12, 8]]
+  const p = G.build(g, KIND.PLANT, 18, 9);
+  const dcs = [[17, 9], [19, 9], [17, 8], [18, 8], [19, 8]]
     .map(([x, y]) => G.build(g, KIND.DC, x, y));
   assert.equal(G.linksOf(g, p).length, MAX_LINES);
   assert.equal(G.linesFree(g, p), 0);
@@ -164,10 +164,10 @@ test('a building carries 4 lines', () => {
 test('a plant fills its closest datacenter first', () => {
   const g = G.newGame();
   g.money = 1e9;
-  const p = G.build(g, KIND.PLANT, 10, 9);
-  p.level = 2;                            // 3 MW
-  const close = G.build(g, KIND.DC, 11, 9);   // draws 2, one tile away
-  const away = G.build(g, KIND.DC, 15, 9);    // draws 2, five tiles away
+  const p = G.build(g, KIND.PLANT, 18, 9);
+  p.level = 2;                              // 3 MW
+  const close = G.build(g, KIND.DC, 19, 9);   // draws 2, one tile away
+  const away = G.build(g, KIND.DC, 18, 4);    // draws 2, five tiles away
   const s = G.snapshot(g);
   const got = (b) => s.live.find((l) => l.b === b).got;
   assert.equal(got(close), 2, 'the near one is filled');
@@ -244,7 +244,7 @@ test('upgrading the model cools every datacenter on the island', () => {
 test('idle plants cost money and earn nothing', () => {
   const g = G.newGame();
   const before = G.snapshot(g).profit;
-  G.build(g, KIND.PLANT, 10, 11);
+  G.build(g, KIND.PLANT, 7, 8);
   const after = G.snapshot(g);
   assert.equal(after.income, 0);
   assert.equal(after.upkeep, PLANT.levels[0].upkeep);
@@ -253,7 +253,7 @@ test('idle plants cost money and earn nothing', () => {
 
 test('money never goes below zero', () => {
   const g = G.newGame();
-  G.build(g, KIND.PLANT, 10, 11);
+  G.build(g, KIND.PLANT, 7, 8);
   run(g, 5000);
   assert.equal(g.money, 0);
 });
@@ -262,8 +262,8 @@ test('a gigawatt of running capacity wins, and stops the clock', () => {
   const g = G.newGame();
   g.money = 1e9;
   g.modelLevel = 5;
-  G.build(g, KIND.PLANT, 10, 11).level = 5;
-  const dc = G.build(g, KIND.DC, 11, 11);
+  G.build(g, KIND.PLANT, 7, 8).level = 5;
+  const dc = G.build(g, KIND.DC, 8, 8);
   dc.level = 5;
   run(g, 1);
   assert.ok(!g.won, 'a big plant alone is not a grid');
@@ -286,6 +286,6 @@ test('a gigawatt of running capacity wins, and stops the clock', () => {
 test('a new game starts with enough to make the first two moves', () => {
   const g = G.newGame();
   assert.equal(g.money, START_MONEY);
-  assert.ok(G.build(g, KIND.PLANT, 10, 11));
-  assert.ok(G.build(g, KIND.DC, 11, 11));
+  assert.ok(G.build(g, KIND.PLANT, 7, 8));
+  assert.ok(G.build(g, KIND.DC, 8, 8));
 });

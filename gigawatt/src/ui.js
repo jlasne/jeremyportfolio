@@ -62,9 +62,10 @@ export function createUI(game, actions) {
   const gridEl = $('grid-value');
   const cMoney = new Counter($('money'), money, 9);
   const cGrid = new Counter({ set textContent(v) { gridEl.innerHTML = `${v} <small>MW</small>`; } }, mw, 5);
-  const cUsed = new Counter($('l-used'), mw, 5);
-  const cLost = new Counter($('l-lost'), mw, 5);
-  const cSpare = new Counter($('l-spare'), mw, 5);
+  const whole = (n) => String(Math.round(n));
+  const cUsed = new Counter($('l-used'), whole, 5);
+  const cLost = new Counter($('l-lost'), whole, 5);
+  const cSpare = new Counter($('l-spare'), whole, 5);
   const ticking = [cMoney, cGrid, cUsed, cLost, cSpare];
 
   const tools = {
@@ -97,7 +98,7 @@ export function createUI(game, actions) {
 
     // Where every megawatt the plants made ends up.
     const made = Math.max(s.supply, 0.001);
-    setText($('made'), `Power made ${mw(s.supply)} MW`);
+    setText($('made'), `${mw(s.supply)} MW`);
     const split = $('split');
     split.querySelector('.used').style.width = `${(s.grid / made) * 100}%`;
     split.querySelector('.lost').style.width = `${(s.lostInLines / made) * 100}%`;
@@ -123,10 +124,12 @@ export function createUI(game, actions) {
     // The model
     const tier = s.tier;
     const next = MODEL.tiers[game.modelLevel];
-    setText($('tier'), tier.label);
+    setText($('tok'), `${mw(s.tokens)} /s`);
+    $('tokbar').style.width = `${Math.min(100, (s.tokensUsed / tier.cap) * 100)}%`;
+    $('tokbar').style.background = s.tokensDropped > 0.5 ? 'var(--heat)' : 'var(--compute)';
     setHTML($('use'), s.tokensDropped > 0.5
-      ? `<span style="color:var(--heat)">full. ${mw(s.tokensDropped)} tokens/s wasted</span>`
-      : `${mw(s.tokensUsed)} of ${tier.cap} tokens/s · ${money(tier.rate)} each`);
+      ? `<span style="color:var(--heat)">${tier.label} is full. ${mw(s.tokensDropped)}/s wasted.</span>`
+      : `${tier.label} buys ${tier.cap} a second at ${money(tier.rate)}`);
     const up = $('upgrade-model');
     up.disabled = !next || game.money < next.cost;
     setHTML(up, next

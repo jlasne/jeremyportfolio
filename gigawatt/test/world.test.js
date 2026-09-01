@@ -27,11 +27,28 @@ test('off the map is open water', () => {
   assert.equal(tileAt(WIDTH + 5, 3), TILE.WATER);
 });
 
-test('the island holds 162 buildable tiles, and a win uses 62', () => {
+test('the site holds 148 buildable tiles, and a win uses 56', () => {
   const tiles = buildableTiles();
-  assert.ok(tiles.length >= 140 && tiles.length <= 190, `${tiles.length} buildable tiles`);
+  assert.ok(tiles.length >= 120 && tiles.length <= 170, `${tiles.length} buildable tiles`);
   assert.ok(tiles.some((p) => tileAt(p.x, p.y) === TILE.DESERT), 'the desert takes buildings');
-  assert.equal(isBuildable(6, 1), false, 'mountains hold rock, not buildings');
+  assert.equal(isBuildable(6, 2), false, 'mountains hold rock, not buildings');
+});
+
+test('the buildable ground is one connected site', () => {
+  // A player reads one factory floor faster than five scattered plots.
+  const tiles = buildableTiles();
+  const key = (p) => `${p.x},${p.y}`;
+  const open = new Set(tiles.map(key));
+  const seen = new Set([key(tiles[0])]);
+  const queue = [tiles[0]];
+  while (queue.length) {
+    const { x, y } = queue.pop();
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const next = { x: x + dx, y: y + dy };
+      if (open.has(key(next)) && !seen.has(key(next))) { seen.add(key(next)); queue.push(next); }
+    }
+  }
+  assert.equal(seen.size, tiles.length, `${tiles.length - seen.size} tiles cut off from the site`);
 });
 
 test('the coast is cold, the deep desert is hot, and both are on the map', () => {

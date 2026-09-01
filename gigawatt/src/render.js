@@ -9,7 +9,7 @@
  */
 
 import { TILE, KIND, DC, RESTART_BELOW, LINK_RANGE } from './rules.js';
-import { WIDTH, HEIGHT, tileAt, isBuildable } from './world.js';
+import { WIDTH, HEIGHT, tileAt, isBuildable, buildableTiles } from './world.js';
 import { PALETTE, BLINK, PLANT_SPRITES, DC_SPRITES, SPRITE_SIZE } from './sprites.js';
 
 export const TILE_PX = 16;
@@ -144,8 +144,9 @@ export function createRenderer(canvas) {
     drawTrees(b, trees, t);
     drawLines(b, g, snap, t);
 
-    const night = nightness(t);
+    const night = nightness(g.elapsed);
     for (const bl of g.buildings) drawBuilding(b, bl, g, t, night);
+    drawTokens(b, snap, t);
     if (night > 0.02) {
       b.globalAlpha = night * 0.5;
       b.fillStyle = '#1b2a5c';
@@ -164,7 +165,7 @@ export function createRenderer(canvas) {
   return { resize, draw, tileFromEvent, tileRect, get scale() { return scale; } };
 }
 
-/** A day is two minutes long, and mostly daylight. */
+/** A day runs 150 game seconds, so it keeps pace with the speed control. */
 export const nightness = (t) => {
   const phase = (t / 150) % 1;
   return Math.max(0, Math.sin(phase * Math.PI * 2 - Math.PI / 2)) ** 2;
@@ -191,6 +192,21 @@ function bakeTerrain(g) {
           g.fillRect(px + 3 + Math.floor(hash(x, y, i) * 9), py + 8 + Math.floor(hash(x, y, i + 40) * 5), 1, 3);
         }
       }
+      // A surveyed plot: every buildable tile gets its corners pegged and its
+      // edges ruled, so the factory floor reads at a glance.
+      if (isBuildable(x, y)) {
+        g.globalAlpha = 0.16;
+        g.fillStyle = '#1d2030';
+        if (isBuildable(x, y - 1)) g.fillRect(px, py, TILE_PX, 1);
+        if (isBuildable(x - 1, y)) g.fillRect(px, py, 1, TILE_PX);
+        g.globalAlpha = 0.3;
+        g.fillStyle = '#f4f7fb';
+        for (const [cx, cy] of [[0, 0], [TILE_PX - 1, 0], [0, TILE_PX - 1], [TILE_PX - 1, TILE_PX - 1]]) {
+          g.fillRect(px + cx, py + cy, 1, 1);
+        }
+        g.globalAlpha = 1;
+      }
+
       // A pale rim wherever the land meets the sea.
       g.fillStyle = C.sand;
       if (!land(x, y - 1)) g.fillRect(px, py, TILE_PX, 2);
@@ -308,6 +324,30 @@ function drawLines(g, game, snap, t) {
       g.fillRect(Math.round(a.x + (z.x - a.x) * at), Math.round(a.y + (z.y - a.y) * at), 2, 2);
     }
   }
+}
+
+/**
+ * Tokens leaving the racks. One mote per 20 tokens a second, capped at 5, so a
+ * busy datacenter visibly steams and an idle one sits still.
+ */
+function drawTokens(g, snap, t) {
+  for (const l of snap.live) {
+    if (l.tokens < 0.2) continue;
+    const motes = Math.min(5, 1 + Math.floor(l.tokens / 18));
+    const cx = l.b.x * TILE_PX + 7;
+    const top = l.b.y * TILE_PX + 3;
+    for (let i = 0; i < motes; i++) {
+      const age = (t * 0.65 + i / motes + l.b.id * 0.31) % 1;
+      const x = Math.round(cx + Math.sin(age * 5 + l.b.id) * 3);
+      const y = Math.round(top - age * 11);
+      g.globalAlpha = 0.9 * (1 - age) ** 0.6;
+      g.fillStyle = '#0d3b38';
+      g.fillRect(x, y, 3, 3);
+      g.fillStyle = '#8bfbec';
+      g.fillRect(x, y, 2, 2);
+    }
+  }
+  g.globalAlpha = 1;
 }
 
 /** Bresenham, so a line is made of whole pixels like everything else. */
@@ -471,6 +511,25 @@ function drawHeat(g, bl, t) {
 
 function drawPointer(g, game, view, t) {
   const { hover, armed, selected } = view;
+
+  // Holding a tool lights every tile it can stand on.
+  if (armed) {
+    const pulse = 0.22 + 0.06 * Math.sin(t * 3);
+    for (const p of buildableTiles()) {
+      if (game.buildings.some((b) => b.x === p.x && b.y === p.y)) continue;
+      const px = p.x * TILE_PX, py = p.y * TILE_PX;
+      g.globalAlpha = pulse;
+      g.fillStyle = '#ffffff';
+      g.fillRect(px + 1, py + 1, TILE_PX - 2, TILE_PX - 2);
+      g.globalAlpha = pulse * 1.7;
+      g.fillStyle = '#fff6d8';
+      g.fillRect(px + 1, py + 1, 3, 1);
+      g.fillRect(px + 1, py + 1, 1, 3);
+      g.fillRect(px + TILE_PX - 4, py + TILE_PX - 2, 3, 1);
+      g.fillRect(px + TILE_PX - 2, py + TILE_PX - 4, 1, 3);
+    }
+    g.globalAlpha = 1;
+  }
 
   const anchor = view.dragFrom || selected;
   if (selected) outline(g, selected.x, selected.y, '#ffffff', 0.9);

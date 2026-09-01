@@ -142,12 +142,33 @@ let now = 0;
 let last = performance.now();
 let running = false;
 
+/**
+ * Speed multiplies real seconds, never game seconds. A 26 minute run stays a
+ * 26 minute run on the clock and the board, and 10x just gives you it back in
+ * under 3 minutes of your own time. The world is stepped in 0.25s slices, so
+ * heat and money behave the same at every speed.
+ */
+let speed = 1;
+const SLICE = 0.25;
+
+for (const button of document.querySelectorAll('#speeds button')) {
+  button.onclick = () => {
+    speed = Number(button.dataset.speed);
+    for (const b of document.querySelectorAll('#speeds button')) {
+      b.setAttribute('aria-pressed', String(Number(b.dataset.speed) === speed));
+    }
+  };
+}
+
 function loop(t) {
   const dt = Math.min(0.1, (t - last) / 1000);
   last = t;
   now = t / 1000;
 
-  if (running && !game.won) G.tick(game, dt);
+  if (running && !game.won) {
+    let left = dt * speed;
+    while (left > 0) { G.tick(game, Math.min(SLICE, left)); left -= SLICE; }
+  }
   const s = G.snapshot(game);
 
   view.armed = ui.armed;

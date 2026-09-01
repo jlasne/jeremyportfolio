@@ -108,7 +108,7 @@ export const MIN_EFFICIENCY = 0.35;
 /** Heat radiated per second at full heat, as a function of cooling score. */
 export const COOL_BASE = 2.6;
 export const COOL_PER_POINT = 0.42;
-export const COOL_FLOOR = 0.6;
+export const COOL_FLOOR = 0.95;
 
 /** Good land costs more to build on. Desert is cheap because desert is bad. */
 export const LAND_PRICE_PER_POINT = 0.11;

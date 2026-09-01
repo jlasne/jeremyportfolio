@@ -2,32 +2,33 @@
  * Gigawatt: the island.
  *
  * One hand-drawn map, written as the picture it is. Edit the art, get a new
- * world. 28 tiles across, 17 down, 162 of them buildable.
+ * world. 28 tiles across, 17 down, 148 of them buildable.
  *
- * The shape is deliberate. A ridge holds the north, 3 lakes and a bay hold the
- * middle, and 43 tiles of desert fill the east. Cooling runs from +10 beside
- * the water to -9 in the sand, and land is priced to match.
+ * The buildable ground is 1 connected site, so the whole factory reads at a
+ * glance. A ridge walls the north, a lake and 2 outcrops sit inside the floor,
+ * and 29 tiles of desert fill the east. Cooling runs from +10.5 beside the
+ * water to -8 in the sand, and land is priced to match.
  */
 
 import { TILE, TILE_INFO } from './rules.js';
 
 export const ISLAND = [
   '~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-  '~~~~ff^^^^ff~~~~~~~~~~~~~~~~',
-  '~~~ff..^^^^..ff~~~ff~~~~~~~~',
-  '~~ff....^^..f.fffff..ff~~~~~',
-  '~~f...~~~~~....f....::ff~~~~',
-  '~~f..~~~~~~~....f..:::ff~~~~',
-  '~~f..~~~~~~...~~....:::f~~~~',
-  '~~ff..~~~~...~~~....:::ff~~~',
-  '~~~f....~.....~.....::::f~~~',
-  '~~~ff....f..........:::ff~~~',
-  '~~~~f...ff..~~.....::::ff~~~',
-  '~~~~ff......~~~....::::f~~~~',
-  '~~~~~ff......~~...::::ff~~~~',
-  '~~~~~~ff...ff....:::::f~~~~~',
-  '~~~~~~~fff..ff..::::fff~~~~~',
-  '~~~~~~~~ffffff.::::ff~~~~~~~',
+  '~~~~~~ff^^^^^^^ff~~~~~~~~~~~',
+  '~~~~ff^^^^^^^^^^^ff~~~~~~~~~',
+  '~~~ff^^...^^^...^^^ff~~~~~~~',
+  '~~~f~~....^^^.......ff~~~~~~',
+  '~~ff~~.....f........:ff~~~~~',
+  '~~~f~~....~~~~......::ff~~~~',
+  '~~~f~....~~~~~~f.....::f~~~~',
+  '~~~ff....~~~~~~......:::ff~~',
+  '~~~~f.....~~~~.f.....::::f~~',
+  '~~~~f..........f......:::f~~',
+  '~~~~ff....f^^^.......:::ff~~',
+  '~~~~~ff....^^^....:::::ff~~~',
+  '~~~~~~ff.........::::::f~~~~',
+  '~~~~~~~fff.....ffffffff~~~~~',
+  '~~~~~~~~~ffffffff~~~~~~~~~~~',
   '~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
 ];
 

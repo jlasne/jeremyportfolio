@@ -55,27 +55,43 @@
   .k { font-size: 10px; letter-spacing: .11em; text-transform: uppercase; color: var(--dim); }
   .v { font-size: 15px; font-weight: 700; }
 
-  #grid-panel { top: 16px; left: 50%; transform: translateX(-50%); min-width: 300px; text-align: center; padding: 12px 18px 14px; }
+  #grid-panel { top: 16px; left: 50%; transform: translateX(-50%); min-width: 290px; text-align: center; padding: 12px 18px 14px; }
   #grid-value { font-size: 32px; font-weight: 800; line-height: 1; letter-spacing: -.02em; }
   #grid-value small { font-size: 15px; font-weight: 600; color: var(--dim); letter-spacing: 0; }
   #bar { height: 7px; background: #212739; margin-top: 9px; overflow: hidden; }
   #bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--power), var(--compute)); transition: width .25s linear; }
-  #made { margin-top: 11px; }
-  #split { display: flex; height: 9px; background: #212739; margin-top: 4px; overflow: hidden; }
+  #split { display: flex; height: 9px; background: #212739; margin-top: 5px; overflow: hidden; }
   #split i { display: block; height: 100%; width: 0; transition: width .3s linear; }
   .used  { background: var(--power); }
   .lost  { background: var(--heat); }
   .spare { background: #4a5470; }
-  #legend { display: flex; gap: 12px; justify-content: center; margin-top: 6px; font-size: 11px; color: var(--dim); }
+  #legend { display: flex; gap: 9px; margin-top: 6px; font-size: 10px; color: var(--dim); }
   #legend b { color: var(--ink); font-weight: 700; }
-  #legend .sw { display: inline-block; width: 7px; height: 7px; margin-right: 5px; }
+  #legend .sw { display: inline-block; width: 7px; height: 7px; margin-right: 4px; }
 
-  #clock-panel { top: 16px; right: 16px; text-align: right; min-width: 104px; }
+  #clock-panel { top: 16px; right: 16px; text-align: right; min-width: 118px; }
   #clock { font-size: 22px; font-weight: 800; letter-spacing: .02em; }
+  #speeds { display: flex; gap: 4px; margin-top: 7px; }
+  #speeds button {
+    flex: 1; padding: 4px 0; font-size: 11px; font-weight: 700;
+    border: 1px solid var(--edge); background: #171b27; color: var(--dim);
+  }
+  #speeds button:hover { background: #232a3d; }
+  #speeds button[aria-pressed="true"] { background: var(--ink); color: #10131b; border-color: var(--ink); }
 
-  #wallet { bottom: 16px; left: 16px; min-width: 172px; }
-  #money { font-size: 22px; font-weight: 800; color: var(--money); }
-  #flow { font-size: 11px; color: var(--dim); margin-top: 3px; }
+  /* the production line, top to bottom, in one column */
+  #line { top: 50%; left: 16px; transform: translateY(-50%); width: 208px; padding: 12px 13px 13px; }
+  #line .stage + .arrow { text-align: center; color: #454f6b; font-size: 13px; line-height: 1; margin: 8px 0 6px; }
+  #line .head { display: flex; justify-content: space-between; align-items: baseline; }
+  #line .head b { font-size: 15px; font-weight: 800; }
+  #made { color: var(--power); }
+  #tok { color: var(--compute); }
+  #money { color: var(--money); }
+  .meter { height: 7px; background: #212739; margin-top: 5px; }
+  .meter i { display: block; height: 100%; width: 0; background: var(--compute); transition: width .25s linear; }
+  .sub2 { font-size: 11px; color: var(--dim); margin-top: 4px; }
+  #line .go { margin-top: 7px; }
+  #flow { font-size: 11px; color: var(--dim); margin-top: 4px; }
   #flow b { font-weight: 700; }
   .up { color: var(--money); } .down { color: var(--heat); }
 
@@ -106,7 +122,7 @@
   .go .cost { float: right; color: var(--dim); font-weight: 700; }
 
   /* ---- the selected building ---------------------------------------- */
-  #inspect { top: 16px; left: 16px; width: 244px; display: none; }
+  #inspect { bottom: 16px; right: 16px; width: 244px; display: none; }
   #inspect.on { display: block; }
   #inspect h3 { font-size: 14px; font-weight: 800; }
   #inspect .sub { font-size: 11px; color: var(--dim); margin-bottom: 8px; }
@@ -124,12 +140,12 @@
   }
   @keyframes rise { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, -26px); } }
 
-  #toasts { position: fixed; top: 92px; right: 16px; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; pointer-events: none; max-width: 250px; text-align: right; }
+  #toasts { position: fixed; top: 16px; left: 50%; margin-left: 170px; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; pointer-events: none; max-width: 240px; }
   .toast {
-    background: var(--panel); border: 1px solid var(--edge); border-right: 3px solid var(--power);
+    background: var(--panel); border: 1px solid var(--edge); border-left: 3px solid var(--power);
     padding: 7px 14px; font-size: 12px; font-weight: 600; animation: pop .3s ease-out, fade .4s ease-in 2.6s forwards;
   }
-  .toast.big { border-right-color: var(--compute); font-size: 14px; font-weight: 800; padding: 10px 18px; }
+  .toast.big { border-left-color: var(--compute); font-size: 14px; font-weight: 800; padding: 10px 18px; }
   @keyframes pop { from { opacity: 0; transform: translateY(-8px) scale(.96); } }
   @keyframes fade { to { opacity: 0; transform: translateY(-6px); } }
 
@@ -161,7 +177,12 @@
   input[type=text]:focus { outline: 2px solid var(--compute); outline-offset: -2px; }
   .fine { font-size: 11px; color: #6d788c; margin-top: 12px; line-height: 1.5; }
   .fine a { color: #8b97ab; }
-  #hintbar { position: fixed; bottom: 86px; left: 50%; transform: translateX(-50%); font-size: 11px; color: var(--dim); pointer-events: none; }
+  #hintbar {
+    position: fixed; bottom: 88px; left: 50%; transform: translateX(-50%);
+    font-size: 11px; color: var(--ink); pointer-events: none; white-space: nowrap;
+    background: var(--panel); border: 1px solid var(--edge); padding: 5px 12px;
+  }
+  #hintbar:empty { display: none; }
   @media (max-height: 720px) { #grid-panel { padding: 8px 16px 10px; } #grid-value { font-size: 26px; } }
 </style>
 </head>
@@ -173,26 +194,41 @@
   <div class="k">Running capacity</div>
   <div id="grid-value">0 <small>MW</small></div>
   <div id="bar"><i></i></div>
-  <div class="k" id="made">Power made 0 MW</div>
-  <div id="split">
-    <i class="used"></i><i class="lost"></i><i class="spare"></i>
-  </div>
-  <div id="legend">
-    <span><b class="sw used"></b>used <b id="l-used">0</b></span>
-    <span><b class="sw lost"></b>lost in lines <b id="l-lost">0</b></span>
-    <span><b class="sw spare"></b>spare <b id="l-spare">0</b></span>
-  </div>
+  <div class="k" style="margin-top:7px">of 1,000 MW</div>
 </div>
 
 <div class="panel" id="clock-panel">
   <div class="k">Time</div>
   <div id="clock">00:00</div>
+  <div id="speeds">
+    <button data-speed="1" aria-pressed="true">1&times;</button>
+    <button data-speed="3" aria-pressed="false">3&times;</button>
+    <button data-speed="10" aria-pressed="false">10&times;</button>
+  </div>
 </div>
 
-<div class="panel" id="wallet">
-  <div class="k">Money</div>
-  <div id="money">$0</div>
-  <div id="flow"></div>
+<div class="panel" id="line">
+  <div class="stage">
+    <div class="head"><span class="k">Power</span><b id="made">0 MW</b></div>
+    <div id="split"><i class="used"></i><i class="lost"></i><i class="spare"></i></div>
+    <div id="legend">
+      <span><b class="sw used"></b>used <b id="l-used">0</b></span>
+      <span><b class="sw lost"></b>lines <b id="l-lost">0</b></span>
+      <span><b class="sw spare"></b>spare <b id="l-spare">0</b></span>
+    </div>
+  </div>
+  <div class="arrow">&darr;</div>
+  <div class="stage">
+    <div class="head"><span class="k">Tokens</span><b id="tok">0 /s</b></div>
+    <div class="meter"><i id="tokbar"></i></div>
+    <div class="sub2" id="use">0 of 6 a second</div>
+    <button class="go" id="upgrade-model">Upgrade<span class="cost">$0</span></button>
+  </div>
+  <div class="arrow">&darr;</div>
+  <div class="stage">
+    <div class="head"><span class="k">Money</span><b id="money">$0</b></div>
+    <div id="flow"></div>
+  </div>
 </div>
 
 <div class="panel" id="build">
@@ -202,13 +238,6 @@
   <button class="tool" id="tool-dc" aria-pressed="false">
     <span class="n">2 · Datacenter</span><span class="c">$0</span>
   </button>
-</div>
-
-<div class="panel" id="model">
-  <div class="k">Your model</div>
-  <div class="tier" id="tier">Ember 0.5</div>
-  <div class="use" id="use">0 of 6 tokens/s</div>
-  <button class="go" id="upgrade-model">Upgrade<span class="cost">$0</span></button>
 </div>
 
 <div class="panel" id="inspect"></div>
@@ -227,6 +256,7 @@
     <p>Running capacity counts the power your datacenters use. Spare power counts for 0, so every plant needs a line to somewhere.</p>
     <p>Two land rules. A line loses 9% per tile past the third, so build close. Water and rock cool a datacenter, sand heats it.</p>
     <p>Click a building to upgrade it. Each level triples output and doubles what it eats.</p>
+    <p>A full run takes 26 minutes. The <b>10&times;</b> button gives you it back in under 3, and the clock still counts game time.</p>
     <button class="primary" id="start">Start building</button>
     <div class="fine">Keys: <b>1</b> and <b>2</b> pick a tool. <b>U</b> upgrades the selected building. <b>Esc</b> puts the tool down. Built for a laptop and a mouse.</div>
   </div>

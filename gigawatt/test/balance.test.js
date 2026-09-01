@@ -31,32 +31,34 @@ test('the run is a run, not a wait: something to do most minutes', () => {
   assert.ok(perMinute.length > 120, `only ${perMinute.length} decisions in a whole run`);
 });
 
-test('a win takes 62 buildings and 116 lines', () => {
+test('a win takes 56 buildings and 100 lines', () => {
   const used = runs.careful.buildings.length;
-  assert.ok(used > 45 && used < 90, `${used} buildings`);
+  assert.ok(used > 40 && used < 80, `${used} buildings`);
   assert.ok(runs.careful.links.length > used, 'most buildings carry more than one line');
 });
 
-test('the desert stops you at 900 MW', () => {
-  // The top tier of datacenter dies on sand at every model, so a player who
-  // stays there runs out of road.
+test('the desert stops you at 225 MW', () => {
+  // A level 3 datacenter dies on deep sand at every model, so a player who
+  // stays there runs out of road early.
   assert.equal(runs.sunbaked.won, false, `desert only finished in ${runs.sunbaked.winTime}s`);
-  assert.ok(runs.sunbaked.darkSeconds > 50000, 'and spends its life shut down');
+  assert.ok(runs.sunbaked.peakGrid < 500, `peaked at ${runs.sunbaked.peakGrid} MW`);
+  assert.ok(runs.sunbaked.darkSeconds > 20000, 'and spends its life shut down');
   assert.equal(runs.careful.darkSeconds, 0, 'careful play stays lit the whole way');
 });
 
-test('chasing cheap land costs 2.7 times the clock', () => {
-  assert.ok(runs.reckless.darkSeconds > 20000, 'cheap land runs hot');
-  assert.ok(runs.reckless.winTime > runs.careful.winTime * 2,
-    'and the downtime shows up on the clock');
-});
-
-test('long lines stop you at 880 MW', () => {
+test('long lines stop you at 864 MW', () => {
   // A line 6 tiles out delivers 73%. Build at arm's length everywhere and the
   // loss adds up to a wall.
   assert.equal(runs.sprawler.won, false, `sprawler finished in ${runs.sprawler.winTime}s`);
   assert.ok(runs.sprawler.peakGrid > 700, 'it gets close');
   assert.ok(runs.sprawler.peakGrid < 1000, 'and stops there');
+});
+
+test('building wide without ever upgrading stops at 29 MW', () => {
+  // Output triples per level. A player who only ever adds tiles gets nowhere.
+  assert.equal(runs.flat.won, false, `flat finished in ${runs.flat.winTime}s`);
+  assert.ok(runs.flat.peakGrid < 200, `peaked at ${runs.flat.peakGrid} MW`);
+  assert.ok(runs.flat.buildings.length > 40, 'even with the site half full');
 });
 
 test('at the finish, both halves of the chain are near a gigawatt', () => {
