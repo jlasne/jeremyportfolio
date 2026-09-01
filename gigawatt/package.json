@@ -1,0 +1,13 @@
+{
+  "name": "gigawatt",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Build an island grid to one gigawatt.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test 'test/*.test.js'",
+    "balance": "node tools/balance.js",
+    "players": "node tools/balance.js --all",
+    "map": "node tools/map.js"
+  }
+}
