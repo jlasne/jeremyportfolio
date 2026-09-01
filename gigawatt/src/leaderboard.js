@@ -1,15 +1,13 @@
 /**
- * Gigawatt — the leaderboard.
+ * Gigawatt: the leaderboard.
  *
- * A browser game keeps its clock in the browser, which means anyone who cares
- * to can hand it whatever number they like. There is no check here that would
- * survive ten minutes of somebody trying, so there isn't one. The board says
- * so out loud instead, and everybody can decide for themselves what it is
- * worth. Times posted from a console are not really the point.
+ * The clock runs in the browser, so a player can hand it any number. Every
+ * check that could sit here would fall in 10 minutes, so the board says the
+ * truth out loud and lets people judge it.
  *
- * With no endpoint configured the board is your own machine, and nothing
- * leaves it. Point ENDPOINT at any host that takes a POST of {name, seconds}
- * and answers GET with a list, and the same board goes public.
+ * Leave ENDPOINT empty and the board stays on the player's machine. Point it
+ * at a host that takes a POST of {name, seconds} and answers GET with a list,
+ * and the same board goes public.
  */
 
 const ENDPOINT = '';

@@ -1,8 +1,8 @@
 /**
- * Gigawatt — wiring.
+ * Gigawatt: wiring.
  *
- * Holds the clock, the pointer and the celebrations. Everything it knows about
- * the game it asks game.js for; everything it draws it hands to render.js.
+ * Holds the clock, the pointer and the celebrations. It asks game.js for the
+ * state and hands render.js the drawing.
  */
 
 import { KIND, MODEL } from './rules.js';
@@ -15,7 +15,7 @@ import * as board from './leaderboard.js';
 const $ = (id) => document.getElementById(id);
 
 const game = G.newGame();
-const view = { hover: null, armed: null, selected: null, affordable: false };
+const view = { hover: null, armed: null, selected: null, affordable: false, reachable: [], wireTo: null };
 const renderer = createRenderer($('world'));
 
 const actions = {
@@ -36,8 +36,8 @@ const actions = {
   upgradeModel: () => {
     const next = MODEL.tiers[game.modelLevel];
     if (!G.upgradeModel(game)) return;
-    toast(`${next.label} is live — every datacenter runs cooler`, true);
-    once('first-model', () => toast('Better models schedule work better. That is what keeps the big machines alive.'));
+    toast(`${next.label} is live. Every datacenter runs ${Math.round((next.cool / MODEL.tiers[game.modelLevel - 2].cool - 1) * 100)}% cooler.`, true);
+    once('first-model', () => toast('A better model cools the whole island. Level 5 datacenters need Ember 4 Ultra.'));
   },
 };
 
@@ -52,7 +52,9 @@ const once = (key, fn) => { if (!seen.has(key)) { seen.add(key); fn(); } };
 
 function celebrateUpgrade(b) {
   if (b.level === 5) once(`max-${b.kind}`, () =>
-    toast(b.kind === KIND.PLANT ? 'A fusion ring. Nothing on this island makes more power.' : 'A compute mesa. The biggest thing you can build.', true));
+    toast(b.kind === KIND.PLANT
+      ? 'A fusion ring. 81 MW, the most one tile carries.'
+      : 'A compute mesa. 75 MW in, 81 tokens out.', true));
 }
 
 function celebrateProgress(s) {
@@ -61,7 +63,7 @@ function celebrateProgress(s) {
   if (hundred >= 100) once(`mw-${hundred}`, () =>
     toast(`${hundred} megawatts`, hundred % 500 === 0));
   if (s.dcs.some((d) => d.dark)) once('first-dark', () =>
-    toast('It overheated and shut down. Let it cool, then click it.', true));
+    toast('It hit 100% heat and shut down. Wait for 60%, then click it.', true));
 }
 
 // ---------------------------------------------------------------------------
@@ -75,12 +77,42 @@ function spend(amount, at) {
 $('world').addEventListener('mousemove', (e) => { view.hover = renderer.tileFromEvent(e); });
 $('world').addEventListener('mouseleave', () => { view.hover = null; });
 
-$('world').addEventListener('click', (e) => {
-  const tile = renderer.tileFromEvent(e);
-  if (!tile) return;
-  const existing = G.at(game, tile.x, tile.y);
+/**
+ * Building is a click. Wiring is a drag: press a plant, pull to a datacenter,
+ * let go. Pressing and releasing on the same building selects it.
+ */
+let dragFrom = null;
 
-  if (ui.armed && !existing) {
+$('world').addEventListener('mousedown', (e) => {
+  const tile = renderer.tileFromEvent(e);
+  dragFrom = tile ? G.at(game, tile.x, tile.y) : null;
+});
+
+$('world').addEventListener('mouseup', (e) => {
+  const tile = renderer.tileFromEvent(e);
+  const from = dragFrom;
+  dragFrom = null;
+  if (!tile) return;
+  const target = G.at(game, tile.x, tile.y);
+
+  if (from && target && target !== from) {
+    const pair = from.kind === KIND.PLANT ? [from, target] : [target, from];
+    if (G.canLink(game, pair[0], pair[1])) {
+      const did = G.toggleLink(game, pair[0], pair[1]);
+      floatText(did === 'drawn' ? 'wired' : 'cut',
+        did === 'drawn' ? '#ffd97a' : '#93a0b4', renderer.tileRect(tile.x, tile.y));
+    }
+    return;
+  }
+
+  if (target) {
+    if (G.canRestart(target)) actions.restart(target);
+    ui.setSelected(target);
+    ui.setArmed(null);
+    return;
+  }
+
+  if (ui.armed) {
     const cost = G.priceToBuild(game, ui.armed, tile.x, tile.y);
     const built = G.build(game, ui.armed, tile.x, tile.y);
     if (!built) return;
@@ -89,13 +121,7 @@ $('world').addEventListener('click', (e) => {
     ui.setSelected(built);
     return;
   }
-  if (existing) {
-    if (G.canRestart(existing)) actions.restart(existing);
-    ui.setSelected(existing);
-    ui.setArmed(null);
-  } else {
-    ui.setSelected(null);
-  }
+  ui.setSelected(null);
 });
 
 window.addEventListener('keydown', (e) => {
@@ -126,11 +152,21 @@ function loop(t) {
 
   view.armed = ui.armed;
   view.selected = ui.selected;
+  view.reachable = ui.selected
+    ? game.buildings.filter((b) => {
+        const pair = ui.selected.kind === KIND.PLANT ? [ui.selected, b] : [b, ui.selected];
+        return b !== ui.selected && G.canLink(game, pair[0], pair[1]);
+      })
+    : [];
+  view.dragFrom = dragFrom;
+  view.wireTo = view.hover && (dragFrom
+    ? G.at(game, view.hover.x, view.hover.y)
+    : view.reachable.find((b) => b.x === view.hover.x && b.y === view.hover.y));
   view.affordable = ui.armed && view.hover
     ? game.money >= G.priceToBuild(game, ui.armed, view.hover.x, view.hover.y)
     : false;
 
-  renderer.draw(game, view, now);
+  renderer.draw(game, s, view, now);
   ui.frame(s, dt);
   if (running) celebrateProgress(s);
   if (game.won && !$('win').classList.contains('on')) showWin();
@@ -160,21 +196,24 @@ async function showWin() {
   $('final').textContent = clock(game.winTime);
   const s = G.snapshot(game);
   $('win-line').innerHTML =
-    `${game.buildings.length} buildings, ${s.plants.length} of them power plants, on ${s.tier.label}.` +
-    (game.darkSeconds > 5 ? ` You lost ${Math.round(game.darkSeconds)} seconds of datacenter time to heat.` : ' Nothing ever overheated.');
+    `${game.buildings.length} buildings, ${s.plants.length} of them power plants, ` +
+    `wired with ${game.links.length} lines, running ${s.tier.label}. ` +
+    (game.darkSeconds > 5
+      ? `Heat cost you ${Math.round(game.darkSeconds)} seconds of datacenter time.`
+      : 'Every datacenter stayed lit the whole way.');
   $('win').classList.add('on');
   $('who').focus();
   paint(await board.load());
   $('board-note').textContent = board.isPublic
-    ? 'The clock runs in your browser, so anyone who wants to can lie to it. There are no checks here, because none of them would work.'
-    : 'This board lives on your machine only — nothing is sent anywhere. Times are as honest as you are.';
+    ? 'The clock runs in your browser. Anyone can edit it. This board trusts you.'
+    : 'This board stays on your machine. Your time is as honest as you are.';
 }
 
 function paint(rows, mine) {
   $('board').innerHTML = rows.length
     ? rows.map((r, i) => `<li${r === mine ? ' class="you"' : ''}>` +
         `<span>${i + 1}. ${escape(r.name)}</span><span class="t">${clock(r.seconds)}</span></li>`).join('')
-    : '<li><span>Nobody yet</span><span class="t">—</span></li>';
+    : '<li><span>Nobody yet</span><span class="t">00:00</span></li>';
 }
 
 const escape = (s) => String(s).replace(/[<>&"]/g, (c) => `&#${c.charCodeAt(0)};`);

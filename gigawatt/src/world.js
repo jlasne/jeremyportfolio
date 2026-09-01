@@ -1,30 +1,34 @@
 /**
- * Gigawatt — the island.
+ * Gigawatt: the island.
  *
  * One hand-drawn map, written as the picture it is. Edit the art, get a new
- * world. The shape is deliberate: a cold bay in the west, a mountain ridge in
- * the north, and a desert filling the south-east. Cooling is cheap in the top
- * left and expensive in the bottom right, and so is land.
+ * world. 28 tiles across, 17 down, 162 of them buildable.
+ *
+ * The shape is deliberate. A ridge holds the north, 3 lakes and a bay hold the
+ * middle, and 43 tiles of desert fill the east. Cooling runs from +10 beside
+ * the water to -9 in the sand, and land is priced to match.
  */
 
 import { TILE, TILE_INFO } from './rules.js';
 
 export const ISLAND = [
-  '~~~~~~~~~~~~~~~~~~~~',
-  '~~~ff^^^^^f~~~~~~~~~',
-  '~~ff.^^^^^..ff~~~~~~',
-  '~ff...^^~^..ff.ff~~~',
-  '~f..~~~~~~..f::fff~~',
-  '~f.f..~~~..f:::~ff~~',
-  '~ff....~~..f:::::f~~',
-  '~~f...~~~.f:::::~ff~',
-  '~~f...~~..:::~::.ff~',
-  '~~ff...f::::~~::ff~~',
-  '~~~f...ff::::f..ff~~',
-  '~~~ff....fff..ff~~~~',
-  '~~~~ffff...ffff~~~~~',
-  '~~~~~~~ffff~~~~~~~~~',
-  '~~~~~~~~~~~~~~~~~~~~',
+  '~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+  '~~~~ff^^^^ff~~~~~~~~~~~~~~~~',
+  '~~~ff..^^^^..ff~~~ff~~~~~~~~',
+  '~~ff....^^..f.fffff..ff~~~~~',
+  '~~f...~~~~~....f....::ff~~~~',
+  '~~f..~~~~~~~....f..:::ff~~~~',
+  '~~f..~~~~~~...~~....:::f~~~~',
+  '~~ff..~~~~...~~~....:::ff~~~',
+  '~~~f....~.....~.....::::f~~~',
+  '~~~ff....f..........:::ff~~~',
+  '~~~~f...ff..~~.....::::ff~~~',
+  '~~~~ff......~~~....::::f~~~~',
+  '~~~~~ff......~~...::::ff~~~~',
+  '~~~~~~ff...ff....:::::f~~~~~',
+  '~~~~~~~fff..ff..::::fff~~~~~',
+  '~~~~~~~~ffffff.::::ff~~~~~~~',
+  '~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
 ];
 
 export const WIDTH = ISLAND[0].length;

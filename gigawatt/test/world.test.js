@@ -27,11 +27,11 @@ test('off the map is open water', () => {
   assert.equal(tileAt(WIDTH + 5, 3), TILE.WATER);
 });
 
-test('there is enough land to win on, and not much more', () => {
+test('the island holds 162 buildable tiles, and a win uses 62', () => {
   const tiles = buildableTiles();
-  assert.ok(tiles.length >= 60 && tiles.length <= 95, `${tiles.length} buildable tiles`);
-  assert.ok(tiles.some((p) => tileAt(p.x, p.y) === TILE.DESERT), 'the desert must be buildable');
-  assert.ok(!isBuildable(6, 1), 'mountains are not buildable');
+  assert.ok(tiles.length >= 140 && tiles.length <= 190, `${tiles.length} buildable tiles`);
+  assert.ok(tiles.some((p) => tileAt(p.x, p.y) === TILE.DESERT), 'the desert takes buildings');
+  assert.equal(isBuildable(6, 1), false, 'mountains hold rock, not buildings');
 });
 
 test('the coast is cold, the deep desert is hot, and both are on the map', () => {

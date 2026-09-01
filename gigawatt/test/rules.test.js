@@ -34,7 +34,7 @@ const perMw = {
                   up: (l) => upgradeCost(KIND.DC, l) / (DC.levels[l].draw - DC.levels[l - 1].draw) },
 };
 
-test('once land runs out, upgrading beats building — at every level', () => {
+test('once land runs out, upgrading beats building at every level', () => {
   // The island holds 78 buildings. By the twenty-fifth of a kind, one more
   // costs more per megawatt than any upgrade does, so a full island is a
   // puzzle rather than a dead end.

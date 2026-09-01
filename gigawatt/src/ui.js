@@ -1,12 +1,11 @@
 /**
- * Gigawatt — the interface.
+ * Gigawatt: the interface.
  *
- * Small panels round the edge, and one rule for all of them: no number ever
- * jumps. Every figure on screen eases toward the truth, so the eye can follow
- * what changed without reading it twice.
+ * Panels sit in the 4 corners. One rule covers all of them: every number eases
+ * toward the truth instead of jumping, so the eye can follow what changed.
  */
 
-import { KIND, PLANT, DC, MODEL, GIGAWATT_MW, RESTART_BELOW, restingHeat, spec } from './rules.js';
+import { KIND, MODEL, GIGAWATT_MW, RESTART_BELOW, MAX_LINES, restingHeat, spec } from './rules.js';
 import { coolScore } from './world.js';
 import * as G from './game.js';
 
@@ -26,7 +25,8 @@ export function money(n) {
   if (a >= 1e6) return `$${(n / 1e6).toFixed(2)}M`;
   if (a >= 1e4) return `$${Math.round(n / 1e3)}k`;
   if (a >= 1e3) return `$${(n / 1e3).toFixed(1)}k`;
-  return `$${Math.round(n)}`;
+  if (a >= 10 || a === 0) return `$${Math.round(n)}`;
+  return `$${n.toFixed(2)}`;          // upkeep starts at $0.22, so show it
 }
 
 export const rate = (n) => `${n >= 0 ? '+' : '−'}${money(Math.abs(n))}/s`;
@@ -62,10 +62,10 @@ export function createUI(game, actions) {
   const gridEl = $('grid-value');
   const cMoney = new Counter($('money'), money, 9);
   const cGrid = new Counter({ set textContent(v) { gridEl.innerHTML = `${v} <small>MW</small>`; } }, mw, 5);
-  const cSupply = new Counter($('c-supply').querySelector('b'), mw, 5);
-  const cDemand = new Counter($('c-demand').querySelector('b'), mw, 5);
-  const cTokens = new Counter($('c-tokens').querySelector('b'), (n) => mw(n), 5);
-  const ticking = [cMoney, cGrid, cSupply, cDemand, cTokens];
+  const cUsed = new Counter($('l-used'), mw, 5);
+  const cLost = new Counter($('l-lost'), mw, 5);
+  const cSpare = new Counter($('l-spare'), mw, 5);
+  const ticking = [cMoney, cGrid, cUsed, cLost, cSpare];
 
   const tools = {
     [KIND.PLANT]: $('tool-plant'),
@@ -90,10 +90,18 @@ export function createUI(game, actions) {
   function frame(s, dt) {
     cMoney.set(game.money);
     cGrid.set(s.grid);
-    cSupply.set(s.supply);
-    cDemand.set(s.demand);
-    cTokens.set(s.tokens);
+    cUsed.set(s.grid);
+    cLost.set(s.lostInLines);
+    cSpare.set(s.spare);
     for (const c of ticking) c.step(dt);
+
+    // Where every megawatt the plants made ends up.
+    const made = Math.max(s.supply, 0.001);
+    setText($('made'), `Power made ${mw(s.supply)} MW`);
+    const split = $('split');
+    split.querySelector('.used').style.width = `${(s.grid / made) * 100}%`;
+    split.querySelector('.lost').style.width = `${(s.lostInLines / made) * 100}%`;
+    split.querySelector('.spare').style.width = `${(s.spare / made) * 100}%`;
 
     $('bar').firstElementChild.style.width = `${Math.min(100, (s.grid / GIGAWATT_MW) * 100)}%`;
     setText($('clock'), clock(game.won ? game.winTime : game.elapsed));
@@ -102,12 +110,6 @@ export function createUI(game, actions) {
     setHTML($('flow'),
       `<b class="${net >= 0 ? 'up' : 'down'}">${rate(net)}</b> ` +
       `<span style="color:#5d6880">·</span> ${money(s.income)}/s in, ${money(s.upkeep)}/s upkeep`);
-
-    // Whichever link is holding the chain back is the one painted red.
-    const short = s.demand > s.supply ? 'supply' : s.supply > s.demand && s.dcs.length ? 'demand' : null;
-    $('c-supply').classList.toggle('limit', short === 'supply');
-    $('c-demand').classList.toggle('limit', short === 'demand');
-    $('c-tokens').classList.toggle('limit', s.tokensDropped > 0.5);
 
     // Build buttons
     for (const kind of [KIND.PLANT, KIND.DC]) {
@@ -123,13 +125,13 @@ export function createUI(game, actions) {
     const next = MODEL.tiers[game.modelLevel];
     setText($('tier'), tier.label);
     setHTML($('use'), s.tokensDropped > 0.5
-      ? `<span style="color:var(--heat)">at capacity — ${mw(s.tokensDropped)} tokens/s wasted</span>`
+      ? `<span style="color:var(--heat)">full. ${mw(s.tokensDropped)} tokens/s wasted</span>`
       : `${mw(s.tokensUsed)} of ${tier.cap} tokens/s · ${money(tier.rate)} each`);
     const up = $('upgrade-model');
     up.disabled = !next || game.money < next.cost;
     setHTML(up, next
       ? `Upgrade to ${next.label}<span class="cost">${money(next.cost)}</span>`
-      : 'Best model there is');
+      : 'Top tier reached');
 
     if (selected && !game.buildings.includes(selected)) setSelected(null);
     if (selected) drawInspector(game, s, selected, actions);
@@ -161,12 +163,14 @@ function drawInspector(game, s, b, actions) {
     if (b.kind === KIND.PLANT) {
       rows.push(['Output', `${mw(lv.mw)} MW`, next && `${mw(next.mw)} MW`]);
       rows.push(['Upkeep', `${money(lv.upkeep)}/s`, next && `${money(next.upkeep)}/s`]);
+      rows.push(['Sending', '<span data-live="flow">0 MW</span>', null]);
     } else {
       rows.push(['Draw', `${mw(lv.draw)} MW`, next && `${mw(next.draw)} MW`]);
-      rows.push(['Tokens', `<span data-live="tokens">—</span>`, next && `${mw(next.tokens)}/s`]);
-      rows.push(['Line loss', `<span data-live="loss">—</span>`, null]);
+      rows.push(['Getting', '<span data-live="flow">0 MW</span>', null]);
+      rows.push(['Tokens', '<span data-live="tokens">0/s</span>', next && `${mw(next.tokens)}/s`]);
       rows.push(['Cooling', cool > 0 ? `+${cool}` : `${cool}`, null]);
     }
+    rows.push(['Lines', `<span data-live="lines">0</span>`, null]);
     const restNext = b.kind === KIND.DC && next ? restingHeat(b.level + 1, cool, game.modelLevel) : 0;
     panel.innerHTML = `
       <h3>${lv.label}</h3>
@@ -181,20 +185,28 @@ function drawInspector(game, s, b, actions) {
         : next
           ? `<button class="go" id="act" ${canUp ? '' : 'disabled'}>Upgrade to ${next.label}<span class="cost">${money(cost)}</span></button>`
           : '<button class="go" disabled>Fully upgraded</button>'}
-      ${restNext >= 100 ? '<div class="note">At the next level this site overheats. Find colder ground, or a better model.</div>' : ''}
+      ${restNext >= 100 ? `<div class="note">Level ${b.level + 1} here settles at ${Math.round(Math.min(restNext, 999))}% and shuts down. Move to colder ground, or upgrade the model.</div>` : ''}
     `;
     const act = $('act');
     if (act) act.onclick = () => (b.dark ? actions.restart(b) : actions.upgrade(b));
   }
 
-  if (b.kind !== KIND.DC) return;
-  const live = s.live.find((l) => l.b === b);
   const put = (name, text) => {
     const el = panel.querySelector(`[data-live="${name}"]`);
     if (el && el.textContent !== text) el.textContent = text;
   };
+  const used = G.linksOf(game, b).length;
+  put('lines', `${used} of ${MAX_LINES}`);
+
+  if (b.kind === KIND.PLANT) {
+    const sent = s.lines.filter((l) => l.from === b).reduce((n, l) => n + l.got, 0);
+    put('flow', `${mw(sent)} MW`);
+    return;
+  }
+
+  const live = s.live.find((l) => l.b === b);
+  put('flow', `${mw(live ? live.got : 0)} of ${mw(lv.draw)} MW`);
   put('tokens', `${mw(lv.tokens * (live ? live.work : 0))}/s`);
-  put('loss', live ? `${Math.round((1 - live.eff) * 100)}%` : '—');
   put('rest', b.dark
     ? 'Heat · shut down'
     : `Heat · settles at ${Math.round(Math.min(restingHeat(b.level, cool, game.modelLevel), 999))}%`);
@@ -220,13 +232,16 @@ const heatColour = (h) => (h > 72 ? 'var(--heat)' : h > 45 ? 'var(--power)' : 'v
 // ---------------------------------------------------------------------------
 
 function hint(game, s, armed) {
-  if (armed) return 'Click a tile to place it · Esc to put it down';
-  if (!game.buildings.length) return 'Start with a power plant, then a datacenter beside it';
-  if (!s.dcs.length) return 'A plant with nothing to feed earns nothing — build a datacenter next to it';
-  if (s.dcs.some((d) => d.dark && d.heat <= RESTART_BELOW)) return 'A datacenter has cooled off — click it to start it again';
-  if (s.demand > s.supply * 1.02) return 'The lights are dim — your datacenters want more power than the plants make';
-  if (s.tokensDropped > 0.5) return 'Your model is at capacity — every token above it is thrown away';
-  if (s.supply > s.demand * 1.15) return 'Spare power is money burning — build or upgrade a datacenter';
+  if (armed) return 'Click a tile to place it. Esc puts the tool down.';
+  if (game.buildings.length === 0) return 'Place a power plant, then a datacenter within 6 tiles of it.';
+  if (s.dcs.length === 0) return 'A plant with nothing to feed earns $0. Build a datacenter beside it.';
+  const cold = s.dcs.find((d) => d.dark && d.heat <= RESTART_BELOW);
+  if (cold) return 'A datacenter has cooled off. Click it to start it again.';
+  const starved = s.live.find((l) => l.got < l.draw * 0.98);
+  if (starved) return `A datacenter is running at ${Math.round(100 * starved.work)}%. Feed it more power.`;
+  if (s.tokensDropped > 0.5) return 'Your model is full. Upgrade it to keep the extra tokens.';
+  if (s.spare > s.supply * 0.2) return `${Math.round(s.spare)} MW is going spare. Add a datacenter, or a line to one.`;
+  if (game.buildings.length < 6) return 'Drag from a plant to a datacenter to wire them together.';
   return '';
 }
 

@@ -1,8 +1,8 @@
 /**
- * Gigawatt — the rulebook.
+ * Gigawatt: the rulebook.
  *
- * Every number the game runs on lives in this file, and nothing in here knows
- * that a screen exists. The chain is:
+ * Every number the game runs on lives here. This file draws nothing. The
+ * chain is:
  *
  *     money -> power plants -> electricity -> datacenters -> tokens -> model -> money
  *
@@ -41,9 +41,8 @@ export const TILE_INFO = {
 export const KIND = { PLANT: 'plant', DC: 'dc' };
 
 /**
- * Five levels each. Output roughly triples per level, consumption roughly
- * doubles, so upgrading is always the better deal per tile — which is what
- * makes a full island a puzzle instead of a dead end.
+ * Five levels each. Output triples per level, consumption doubles. So one
+ * upgraded tile beats two new ones once the good land runs out.
  */
 export const PLANT = {
   name: 'Power plant',
@@ -74,20 +73,20 @@ export const DC = {
 };
 
 /**
- * The player owns exactly one model and upgrades it through five tiers.
- * `cap` is how many tokens per second it can actually digest — tokens beyond
- * it are dropped, which is the signal to upgrade. `cool` is a global cooling
- * bonus: better models schedule work better, and that is the "help" that lets
- * top-tier datacenters live somewhere other than a lake.
+ * The player owns 1 model and upgrades it through 5 tiers.
+ *
+ * `cap` is the tokens per second it buys. Tokens above `cap` are dropped, and
+ * that is the signal to upgrade. `cool` multiplies cooling across the whole
+ * island, which is what lets a level 5 datacenter live away from water.
  */
 export const MODEL = {
   name: 'AI model',
   tiers: [
-    { label: 'Ember 0.5',     cap:    6, rate: 1.50, cool: 1.00, cost:     0 },
-    { label: 'Ember 1',       cap:   26, rate: 1.85, cool: 1.15, cost:   120 },
-    { label: 'Ember 2',       cap:  110, rate: 2.30, cool: 1.35, cost:  1300 },
-    { label: 'Ember 3',       cap:  460, rate: 2.85, cool: 1.60, cost:  7000 },
-    { label: 'Ember 4 Ultra', cap: 1150, rate: 3.60, cool: 1.90, cost: 40000 },
+    { label: 'Ember 0.5',     cap:    6, rate: 1.80, cool: 1.00, cost:     0 },
+    { label: 'Ember 1',       cap:   26, rate: 2.20, cool: 1.15, cost:   120 },
+    { label: 'Ember 2',       cap:  110, rate: 2.75, cool: 1.35, cost:  1300 },
+    { label: 'Ember 3',       cap:  460, rate: 3.40, cool: 1.60, cost:  7000 },
+    { label: 'Ember 4 Ultra', cap: 1150, rate: 4.30, cool: 1.90, cost: 40000 },
   ],
 };
 
@@ -95,16 +94,21 @@ export const MODEL = {
 // The two land rules
 // ---------------------------------------------------------------------------
 
-/** Electricity is free to move this far. */
-export const FREE_RADIUS = 2;
-/** …and costs this fraction of itself for every tile beyond that. */
-export const LOSS_PER_TILE = 0.07;
+/** A power line reaches 6 tiles. */
+export const LINK_RANGE = 6;
+/** Each building carries 4 lines. */
+export const MAX_LINES = 4;
+/** A line carries everything for 3 tiles. */
+export const FREE_RADIUS = 3;
+/** Past 3 tiles, each tile burns 9% of what passes through. */
+export const LOSS_PER_TILE = 0.09;
+/** So a 6 tile line delivers 73%. */
 export const MIN_EFFICIENCY = 0.35;
 
 /** Heat radiated per second at full heat, as a function of cooling score. */
-export const COOL_BASE = 4.0;
+export const COOL_BASE = 2.6;
 export const COOL_PER_POINT = 0.42;
-export const COOL_FLOOR = 0.8;
+export const COOL_FLOOR = 0.6;
 
 /** Good land costs more to build on. Desert is cheap because desert is bad. */
 export const LAND_PRICE_PER_POINT = 0.11;
@@ -158,10 +162,10 @@ export function coolingRate(coolScore, modelLevel) {
 }
 
 /**
- * Heat settles rather than climbs forever: it rises with work and falls in
- * proportion to how hot it already is. The resting temperature is therefore
- * knowable in advance, and the interface shows it before you build. Anything
- * that rests at or above 100 will go dark.
+ * Heat settles instead of climbing forever. It rises with work and falls in
+ * proportion to how hot it already is. So the resting temperature is known
+ * before you build, and the panel prints it. A site that rests at 100 or above
+ * goes dark.
  */
 export function restingHeat(dcLevel, coolScore, modelLevel, work = 1) {
   const gain = DC.levels[dcLevel - 1].heat * work;

@@ -1,13 +1,14 @@
 /**
- * Gigawatt — the drawing.
+ * Gigawatt: the drawing.
  *
- * The world is painted into a small buffer at one art-pixel per pixel and then
- * blown up by a whole number, so every pixel on screen is a hard square. The
- * terrain never changes, so it is baked once; only the things that live —
- * water, trees, smoke, lights, heat — are redrawn each frame.
+ * The world is painted into a 448 by 272 buffer at 1 art pixel per pixel, then
+ * blown up by a whole number. So every pixel on screen is a hard square.
+ *
+ * Terrain holds still, so it is baked once. Water, trees, lines, smoke, lights
+ * and heat are redrawn each frame.
  */
 
-import { TILE, KIND, DC, RESTART_BELOW } from './rules.js';
+import { TILE, KIND, DC, RESTART_BELOW, LINK_RANGE } from './rules.js';
 import { WIDTH, HEIGHT, tileAt, isBuildable } from './world.js';
 import { PALETTE, BLINK, PLANT_SPRITES, DC_SPRITES, SPRITE_SIZE } from './sprites.js';
 
@@ -15,6 +16,8 @@ export const TILE_PX = 16;
 const ART_W = WIDTH * TILE_PX;
 const ART_H = HEIGHT * TILE_PX;
 const INSET = (TILE_PX - SPRITE_SIZE) / 2;
+
+const centre = (b) => ({ x: b.x * TILE_PX + TILE_PX / 2, y: b.y * TILE_PX + TILE_PX / 2 });
 
 const C = {
   deep: '#17558f', mid: '#1e6aac', shallow: '#2f86c9', foam: '#7cc0ec',
@@ -134,11 +137,12 @@ export function createRenderer(canvas) {
     };
   }
 
-  function draw(g, view, t) {
+  function draw(g, snap, view, t) {
     b.clearRect(0, 0, ART_W, ART_H);
     b.drawImage(terrain, 0, 0);
     drawWater(b, t);
     drawTrees(b, trees, t);
+    drawLines(b, g, snap, t);
 
     const night = nightness(t);
     for (const bl of g.buildings) drawBuilding(b, bl, g, t, night);
@@ -267,6 +271,58 @@ function drawTrees(g, trees, t) {
     g.fillRect(tree.x + lean, tree.y, tree.r + 1, tree.r + 1);
     g.fillStyle = C.canopyLight;
     g.fillRect(tree.x + lean, tree.y, tree.r - 1, 1);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Power lines
+// ---------------------------------------------------------------------------
+
+/**
+ * Every line is drawn, and the ones carrying power carry a bead of light along
+ * them. A dim line is one the plant has nothing left to send down, which is
+ * the thing to look at when a datacenter runs slow.
+ */
+function drawLines(g, game, snap, t) {
+  const flow = new Map(snap.lines.map((l) => [`${l.from.id}>${l.to.id}`, l]));
+  for (const link of game.links) {
+    const from = game.buildings.find((b) => b.id === link.from);
+    const to = game.buildings.find((b) => b.id === link.to);
+    if (!from || !to) continue;
+    const a = centre(from), z = centre(to);
+    const carrying = flow.get(`${from.id}>${to.id}`);
+    const power = carrying && carrying.got > 0.01;
+
+    g.globalAlpha = power ? 0.9 : 0.55;
+    g.fillStyle = power ? '#c08f2a' : '#5d6785';
+    plot(g, a, z, 1);
+    g.globalAlpha = 1;
+    if (!power) continue;
+
+    // One bead per 8 tiles of line, so a long line reads as a long line.
+    const span = Math.hypot(z.x - a.x, z.y - a.y);
+    const beads = Math.max(2, Math.round(span / 24));
+    for (let i = 0; i < beads; i++) {
+      const at = ((t * 0.42 + i / beads + from.id * 0.07) % 1);
+      g.fillStyle = '#ffe08c';
+      g.fillRect(Math.round(a.x + (z.x - a.x) * at), Math.round(a.y + (z.y - a.y) * at), 2, 2);
+    }
+  }
+}
+
+/** Bresenham, so a line is made of whole pixels like everything else. */
+function plot(g, a, z, w) {
+  let x = Math.round(a.x), y = Math.round(a.y);
+  const x1 = Math.round(z.x), y1 = Math.round(z.y);
+  const dx = Math.abs(x1 - x), dy = -Math.abs(y1 - y);
+  const sx = x < x1 ? 1 : -1, sy = y < y1 ? 1 : -1;
+  let err = dx + dy;
+  for (let guard = 0; guard < 512; guard++) {
+    g.fillRect(x, y, w, w);
+    if (x === x1 && y === y1) return;
+    const e2 = 2 * err;
+    if (e2 >= dy) { err += dy; x += sx; }
+    if (e2 <= dx) { err += dx; y += sy; }
   }
 }
 
@@ -416,7 +472,19 @@ function drawHeat(g, bl, t) {
 function drawPointer(g, game, view, t) {
   const { hover, armed, selected } = view;
 
+  const anchor = view.dragFrom || selected;
   if (selected) outline(g, selected.x, selected.y, '#ffffff', 0.9);
+  if (anchor) {
+    for (const p of view.reachable || []) outline(g, p.x, p.y, '#ffd97a', 0.55);
+    if (view.dragFrom && hover) {
+      g.globalAlpha = 0.7;
+      g.fillStyle = view.wireTo ? '#ffd97a' : '#5b6580';
+      plot(g, centre(anchor), {
+        x: hover.x * TILE_PX + TILE_PX / 2, y: hover.y * TILE_PX + TILE_PX / 2,
+      }, 1);
+      g.globalAlpha = 1;
+    }
+  }
 
   if (hover && armed) {
     const ok = view.affordable && isBuildable(hover.x, hover.y) &&

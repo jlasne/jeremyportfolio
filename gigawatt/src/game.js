@@ -1,14 +1,14 @@
 /**
- * Gigawatt — the simulation.
+ * Gigawatt: the simulation.
  *
- * Pure state in, pure state out. No canvas, no DOM, no timers. The interface
- * calls `tick` on a clock and `build` / `upgrade` / `restart` on a click, and
- * reads `snapshot` to draw. The balance tool in tools/balance.js drives the
- * exact same functions with a robot instead of a person.
+ * State in, state out. This file uses a canvas, a DOM and a timer for nothing.
+ * The interface calls `tick` on a clock, calls `build`, `upgrade` and
+ * `restart` on a click, and reads `snapshot` to draw. tools/balance.js drives
+ * the same functions with a robot in place of a person.
  */
 
 import {
-  KIND, PLANT, DC, MODEL, START_MONEY, GIGAWATT_MW, RESTART_BELOW,
+  KIND, PLANT, DC, MODEL, START_MONEY, GIGAWATT_MW, RESTART_BELOW, LINK_RANGE, MAX_LINES,
   buildCost, upgradeCost, landMultiplier, transmission, coolingRate, spec,
 } from './rules.js';
 import { coolScore, distance, isBuildable, buildableTiles } from './world.js';
@@ -18,6 +18,7 @@ export function newGame() {
     money: START_MONEY,
     modelLevel: 1,
     buildings: [],       // { id, kind, x, y, level, heat, dark }
+    links: [],           // { from: plantId, to: dcId }
     nextId: 1,
     elapsed: 0,          // seconds since the first building went down
     started: false,
@@ -63,7 +64,64 @@ export function build(g, kind, x, y) {
   const b = { id: g.nextId++, kind, x, y, level: 1, heat: 0, dark: false };
   g.buildings.push(b);
   g.started = true;
+  autoWire(g, b);
   return b;
+}
+
+// ---------------------------------------------------------------------------
+// Power lines
+// ---------------------------------------------------------------------------
+
+/**
+ * A datacenter eats what its lines bring it. A plant splits its output across
+ * the datacenters it feeds, in proportion to what each one draws, so power
+ * goes where the work is. Every tile past the second burns 7% of what the line
+ * carries, which is why a short line beats a long one.
+ *
+ * Lines cost nothing. Distance is the whole price.
+ */
+export const byId = (g, id) => g.buildings.find((b) => b.id === id);
+
+export const linksOf = (g, b) => g.links.filter((l) => l.from === b.id || l.to === b.id);
+
+export const linesFree = (g, b) => MAX_LINES - linksOf(g, b).length;
+
+export const linked = (g, plant, dc) =>
+  g.links.some((l) => l.from === plant.id && l.to === dc.id);
+
+export function canLink(g, plant, dc) {
+  if (!plant || !dc) return false;
+  if (plant.kind !== KIND.PLANT || dc.kind !== KIND.DC) return false;
+  if (distance(plant, dc) > LINK_RANGE) return false;
+  if (linked(g, plant, dc)) return true;           // already drawn, so removable
+  return linesFree(g, plant) > 0 && linesFree(g, dc) > 0;
+}
+
+/** Draws a line, or removes the one already there. Returns what it did. */
+export function toggleLink(g, plant, dc) {
+  if (!canLink(g, plant, dc)) return null;
+  const at = g.links.findIndex((l) => l.from === plant.id && l.to === dc.id);
+  if (at >= 0) { g.links.splice(at, 1); return 'cut'; }
+  g.links.push({ from: plant.id, to: dc.id });
+  return 'drawn';
+}
+
+/** A new building wires itself to the 2 closest partners it can reach. */
+export function autoWire(g, b) {
+  const want = b.kind === KIND.PLANT ? KIND.DC : KIND.PLANT;
+  const partners = g.buildings
+    .filter((o) => o.kind === want && distance(o, b) <= LINK_RANGE)
+    .sort((p, q) => distance(p, b) - distance(q, b));
+  for (const p of partners) {
+    const [plant, dc] = b.kind === KIND.PLANT ? [b, p] : [p, b];
+    if (linked(g, plant, dc) || linesFree(g, b) <= 0) continue;
+    if (canLink(g, plant, dc)) g.links.push({ from: plant.id, to: dc.id });
+  }
+}
+
+/** Removing a building takes its lines with it. */
+export function cutLinks(g, b) {
+  g.links = g.links.filter((l) => l.from !== b.id && l.to !== b.id);
 }
 
 export function priceToUpgrade(g, b) {
@@ -93,10 +151,9 @@ export function upgradeModel(g) {
 }
 
 /**
- * Restarting is free, but you cannot do it until the thing has cooled off —
- * and how long that takes is decided entirely by where you put it. A machine
- * on the coast is back in seconds. One in the desert sits dark for half a
- * minute, every time, which is the whole price of cheap land.
+ * Restarting is free. It waits until heat falls to 60%, and the site decides
+ * how long that takes. A machine on the coast returns in 7 seconds. One in the
+ * sand sits dark for 34 seconds, every time. That is the price of cheap land.
  */
 export const canRestart = (b) => b.kind === KIND.DC && b.dark && b.heat <= RESTART_BELOW;
 
@@ -122,34 +179,59 @@ export function snapshot(g) {
   let supply = 0;
   let upkeep = 0;
   for (const p of plants) {
-    const lv = PLANT.levels[p.level - 1];
-    supply += lv.mw;
-    upkeep += lv.upkeep;
+    supply += PLANT.levels[p.level - 1].mw;
+    upkeep += PLANT.levels[p.level - 1].upkeep;
   }
 
-  // Each datacenter is fed by its nearest plant; the walk there costs power.
-  const live = [];
   let demand = 0;
+  const wire = new Map();          // datacenter id -> what its lines bring it
   for (const d of dcs) {
     if (d.dark) continue;
-    let nearest = Infinity;
-    for (const p of plants) nearest = Math.min(nearest, distance(d, p));
-    const eff = transmission(nearest);
-    if (eff === 0) continue;              // no plant on the island yet
-    const draw = DC.levels[d.level - 1].draw;
-    demand += draw;
-    live.push({ b: d, eff, draw });
+    demand += DC.levels[d.level - 1].draw;
+    wire.set(d.id, 0);
   }
 
-  // Not enough electricity to go round: everyone runs slow, and runs cool.
-  const load = demand > 0 ? Math.min(1, supply / demand) : 0;
-  const grid = Math.min(supply, demand);
+  // A plant fills its closest datacenter first, then the next, and keeps what
+  // nobody needs. So the short line gets served, and the long one gets the
+  // leftovers if there are any.
+  const need = new Map(dcs.filter((d) => !d.dark)
+    .map((d) => [d.id, DC.levels[d.level - 1].draw]));
+  let routed = 0;
+  let delivered = 0;
+  const lines = [];
+  for (const p of plants) {
+    let left = PLANT.levels[p.level - 1].mw;
+    const outs = g.links
+      .filter((l) => l.from === p.id)
+      .map((l) => byId(g, l.to))
+      .filter((d) => d && need.has(d.id))
+      .sort((a, b) => distance(p, a) - distance(p, b));
+    for (const d of outs) {
+      const eff = transmission(distance(p, d));
+      const send = Math.min(left, need.get(d.id) / eff);
+      const got = send * eff;
+      left -= send;
+      routed += send;
+      delivered += got;
+      need.set(d.id, need.get(d.id) - got);
+      wire.set(d.id, wire.get(d.id) + got);
+      lines.push({ from: p, to: d, eff, got });
+    }
+  }
 
+  // What each datacenter can do with what arrived.
+  const live = [];
+  let grid = 0;
   let tokens = 0;
-  for (const l of live) {
-    l.work = load * l.eff;
-    l.tokens = DC.levels[l.b.level - 1].tokens * l.work;
-    tokens += l.tokens;
+  for (const d of dcs) {
+    if (d.dark) continue;
+    const draw = DC.levels[d.level - 1].draw;
+    const got = wire.get(d.id);
+    const work = Math.min(1, got / draw);
+    grid += Math.min(got, draw);
+    const made = DC.levels[d.level - 1].tokens * work;
+    tokens += made;
+    live.push({ b: d, got, draw, work, tokens: made });
   }
 
   const tier = MODEL.tiers[g.modelLevel - 1];
@@ -157,10 +239,12 @@ export function snapshot(g) {
   const income = used * tier.rate;
 
   return {
-    supply, demand, grid, load, upkeep,
+    supply, demand, grid, upkeep,
+    lostInLines: routed - delivered,
+    spare: (supply - routed) + (delivered - grid),
     tokens, tokensUsed: used, tokensDropped: tokens - used,
     income, profit: income - upkeep,
-    live, plants, dcs, tier,
+    live, lines, plants, dcs, tier,
     fraction: grid / GIGAWATT_MW,
   };
 }

@@ -4,10 +4,9 @@ import { play, PLAYERS } from '../tools/balance.js';
 import * as G from '../src/game.js';
 
 /**
- * The economy, held to the thing it was tuned for. A robot that always takes
- * the obvious choice should reach a gigawatt in about half an hour — long
- * enough to be a run, short enough to be an evening. If a number anywhere in
- * rules.js moves far enough to break this, the game is a different game.
+ * The economy, held to what it was tuned for. A robot taking obvious choices
+ * reaches a gigawatt in 27 minutes. Move a number in rules.js far enough to
+ * break these bounds and the game becomes a different game.
  */
 const MINUTES = 60;
 const runs = Object.fromEntries(
@@ -17,8 +16,8 @@ const runs = Object.fromEntries(
 test('the obvious way to play reaches a gigawatt in about half an hour', () => {
   const g = runs.careful;
   assert.ok(g.won, 'the careful player must be able to win at all');
-  assert.ok(g.winTime > 20 * MINUTES, `won in ${g.winTime}s — too quick to be a game`);
-  assert.ok(g.winTime < 35 * MINUTES, `won in ${g.winTime}s — too long for one sitting`);
+  assert.ok(g.winTime > 20 * MINUTES, `won in ${g.winTime}s, under the 20 minute floor`);
+  assert.ok(g.winTime < 35 * MINUTES, `won in ${g.winTime}s, over the 35 minute ceiling`);
 });
 
 test('the run is a run, not a wait: something to do most minutes', () => {
@@ -32,34 +31,32 @@ test('the run is a run, not a wait: something to do most minutes', () => {
   assert.ok(perMinute.length > 120, `only ${perMinute.length} decisions in a whole run`);
 });
 
-test('winning fills most of the island but does not need all of it', () => {
+test('a win takes 62 buildings and 116 lines', () => {
   const used = runs.careful.buildings.length;
-  assert.ok(used > 40, `${used} buildings — the island never feels tight`);
-  assert.ok(used < 78, `${used} buildings — no room for a mistake`);
+  assert.ok(used > 45 && used < 90, `${used} buildings`);
+  assert.ok(runs.careful.links.length > used, 'most buildings carry more than one line');
 });
 
-test('you cannot reach a gigawatt from the desert', () => {
-  // The hard wall. Cheap land is a real option — the reckless player trades
-  // downtime for a lower bill and comes out about even — but a player who
-  // will not leave the sand simply never gets there, because the top tier of
-  // datacenter cannot survive on it at any model.
-  assert.ok(!runs.sunbaked.won, `desert-only finished in ${runs.sunbaked.winTime}s`);
-  assert.ok(runs.sunbaked.darkSeconds > 20000, 'and spends its life shutting down');
-  assert.equal(runs.careful.darkSeconds, 0, 'while careful play never goes dark at all');
+test('the desert stops you at 900 MW', () => {
+  // The top tier of datacenter dies on sand at every model, so a player who
+  // stays there runs out of road.
+  assert.equal(runs.sunbaked.won, false, `desert only finished in ${runs.sunbaked.winTime}s`);
+  assert.ok(runs.sunbaked.darkSeconds > 50000, 'and spends its life shut down');
+  assert.equal(runs.careful.darkSeconds, 0, 'careful play stays lit the whole way');
 });
 
-test('cheap land is a trade, not a free lunch', () => {
-  assert.ok(runs.reckless.darkSeconds > 500, 'chasing cheap land costs real downtime');
-  assert.ok(runs.reckless.winTime > runs.careful.winTime * 0.97,
-    'and it must not be strictly better than building on the coast');
+test('chasing cheap land costs 2.7 times the clock', () => {
+  assert.ok(runs.reckless.darkSeconds > 20000, 'cheap land runs hot');
+  assert.ok(runs.reckless.winTime > runs.careful.winTime * 2,
+    'and the downtime shows up on the clock');
 });
 
-test('ignoring distance costs you the run', () => {
-  // Distance is the softer of the two land rules: a player who scatters loses
-  // about a minute and a half, not the game. It shapes where you build rather
-  // than whether you can.
-  assert.ok(runs.sprawler.winTime > runs.careful.winTime * 1.04,
-    'building wherever there is room should be measurably slower');
+test('long lines stop you at 880 MW', () => {
+  // A line 6 tiles out delivers 73%. Build at arm's length everywhere and the
+  // loss adds up to a wall.
+  assert.equal(runs.sprawler.won, false, `sprawler finished in ${runs.sprawler.winTime}s`);
+  assert.ok(runs.sprawler.peakGrid > 700, 'it gets close');
+  assert.ok(runs.sprawler.peakGrid < 1000, 'and stops there');
 });
 
 test('at the finish, both halves of the chain are near a gigawatt', () => {

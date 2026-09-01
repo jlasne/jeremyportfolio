@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gigawatt — build an island to a thousand megawatts</title>
+<title>Gigawatt</title>
 <meta name="description" content="A small island, three buildings and one rule: every link in the chain is capped by the one before it. Get the grid to a gigawatt as fast as you can.">
 <meta name="color-scheme" content="dark">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
@@ -60,10 +60,15 @@
   #grid-value small { font-size: 15px; font-weight: 600; color: var(--dim); letter-spacing: 0; }
   #bar { height: 7px; background: #212739; margin-top: 9px; overflow: hidden; }
   #bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--power), var(--compute)); transition: width .25s linear; }
-  #chain { display: flex; gap: 14px; justify-content: center; margin-top: 9px; font-size: 11px; color: var(--dim); }
-  #chain b { color: var(--ink); font-weight: 700; }
-  #chain span.limit { color: var(--heat); }
-  #chain span.limit b { color: var(--heat); }
+  #made { margin-top: 11px; }
+  #split { display: flex; height: 9px; background: #212739; margin-top: 4px; overflow: hidden; }
+  #split i { display: block; height: 100%; width: 0; transition: width .3s linear; }
+  .used  { background: var(--power); }
+  .lost  { background: var(--heat); }
+  .spare { background: #4a5470; }
+  #legend { display: flex; gap: 12px; justify-content: center; margin-top: 6px; font-size: 11px; color: var(--dim); }
+  #legend b { color: var(--ink); font-weight: 700; }
+  #legend .sw { display: inline-block; width: 7px; height: 7px; margin-right: 5px; }
 
   #clock-panel { top: 16px; right: 16px; text-align: right; min-width: 104px; }
   #clock { font-size: 22px; font-weight: 800; letter-spacing: .02em; }
@@ -168,10 +173,14 @@
   <div class="k">Running capacity</div>
   <div id="grid-value">0 <small>MW</small></div>
   <div id="bar"><i></i></div>
-  <div id="chain">
-    <span id="c-supply">supply <b>0</b></span>
-    <span id="c-demand">demand <b>0</b></span>
-    <span id="c-tokens">tokens <b>0</b></span>
+  <div class="k" id="made">Power made 0 MW</div>
+  <div id="split">
+    <i class="used"></i><i class="lost"></i><i class="spare"></i>
+  </div>
+  <div id="legend">
+    <span><b class="sw used"></b>used <b id="l-used">0</b></span>
+    <span><b class="sw lost"></b>lost in lines <b id="l-lost">0</b></span>
+    <span><b class="sw spare"></b>spare <b id="l-spare">0</b></span>
   </div>
 </div>
 
@@ -209,17 +218,17 @@
 <div class="veil on" id="intro">
   <div class="card">
     <h1>Gigawatt</h1>
-    <p>An island, a grid, and a clock. Get to <b>1,000 MW of running capacity</b>.</p>
+    <p>Build a grid to <b>1,000 MW</b>. The clock starts on your first building.</p>
     <ol>
-      <li><b>Money</b> buys power plants. Plants make <b>electricity</b>, and cost money every second to run.</li>
-      <li>Electricity runs <b>datacenters</b>. Datacenters make <b>tokens</b>, and get hot doing it.</li>
-      <li>Your <b>AI model</b> turns tokens into money. It can only digest so many, so keep it upgraded.</li>
+      <li><b>Money</b> buys power plants. A plant makes megawatts and costs money every second.</li>
+      <li><b>Drag a line</b> from a plant to a datacenter to feed it. A line reaches 6 tiles.</li>
+      <li>A fed datacenter makes <b>tokens</b> and heats up. Your <b>AI model</b> buys the tokens.</li>
     </ol>
-    <p>Running capacity is whichever side is <b>smaller</b> — plants alone will not do it. Two things about the land:
-      power is wasted travelling, so build close; and water and rock keep datacenters cool, while desert bakes them.</p>
-    <p>Click a building to upgrade it. Levels roughly triple output, so once the island fills up, upgrading is the only way on.</p>
+    <p>Running capacity counts the power your datacenters use. Spare power counts for 0, so every plant needs a line to somewhere.</p>
+    <p>Two land rules. A line loses 9% per tile past the third, so build close. Water and rock cool a datacenter, sand heats it.</p>
+    <p>Click a building to upgrade it. Each level triples output and doubles what it eats.</p>
     <button class="primary" id="start">Start building</button>
-    <div class="fine">Click a tool, then a tile. <b>1</b> and <b>2</b> pick a tool, <b>U</b> upgrades what you have selected, <b>Esc</b> puts the tool down. Laptop, keyboard and mouse.</div>
+    <div class="fine">Keys: <b>1</b> and <b>2</b> pick a tool. <b>U</b> upgrades the selected building. <b>Esc</b> puts the tool down. Built for a laptop and a mouse.</div>
   </div>
 </div>
 

@@ -1,10 +1,10 @@
 /**
- * Gigawatt — the pixel art.
+ * Gigawatt: the pixel art.
  *
- * Every building is twelve by twelve, drawn by hand, one character per pixel.
- * Keep them chunky: if a shape needs more than a couple of pixels to read, it
- * is the wrong shape. The palette is warm and saturated on purpose — this is a
- * toy island, not a control room.
+ * Every building is 12 by 12, drawn by hand, 1 character per pixel. Keep the
+ * shapes chunky. A shape that needs 3 pixels to read is the wrong shape.
+ *
+ * The palette runs warm and saturated. This is a toy island.
  */
 
 export const PALETTE = {

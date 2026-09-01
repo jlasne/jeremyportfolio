@@ -1,13 +1,12 @@
 /**
- * Gigawatt — one file.
+ * Gigawatt: one file.
  *
- * The game runs unbundled: index.html loads src/main.js and the browser does
- * the rest, which is the point of having no build step. But a single file is
- * easier to hand to somebody, so this folds the modules into one page.
+ * The game runs unbundled. index.html loads src/main.js and the browser does
+ * the rest, which is the point of skipping a build step. A single file travels
+ * better, so this folds the 8 modules into one page.
  *
- * It is not a general bundler and does not try to be. It handles the two
- * import forms this project actually uses — named and namespace, relative
- * paths only — and would rather throw than guess.
+ * It handles the 2 import forms this project uses: named and namespace, on
+ * relative paths. It throws on everything else.
  *
  *   node tools/bundle.js out.html
  */
@@ -18,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-/** Depth-first through the import graph, so a module is emitted after its dependencies. */
+/** Walks the import graph so a module lands after the ones it needs. */
 function collect(entry, seen = new Map(), order = []) {
   if (seen.has(entry)) return order;
   const source = fs.readFileSync(path.join(ROOT, 'src', entry), 'utf8');
@@ -61,5 +60,5 @@ if (out) {
     .replace('<script type="module" src="./src/main.js"></script>',
       `<script type="module">\n${bundle()}\n</script>`);
   fs.writeFileSync(out, page);
-  console.log(`${out} — ${(page.length / 1024).toFixed(0)} KB`);
+  console.log(`${out}, ${(page.length / 1024).toFixed(0)} KB`);
 }
