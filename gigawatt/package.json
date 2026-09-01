@@ -8,6 +8,7 @@
     "test": "node --test 'test/*.test.js'",
     "balance": "node tools/balance.js",
     "players": "node tools/balance.js --all",
-    "map": "node tools/map.js"
+    "map": "node tools/map.js",
+    "bundle": "node tools/bundle.js gigawatt.html"
   }
 }

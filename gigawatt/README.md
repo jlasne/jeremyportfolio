@@ -50,7 +50,7 @@ which is what makes the biggest machines possible anywhere at all.
     src/sprites.js  ten buildings, twelve by twelve, one character per pixel
     src/main.js     the loop, the pointer and the celebrations
     test/           44 tests, including one that plays the whole game
-    tools/          the balance harness and a map printer
+    tools/          the balance harness, a map printer and a single-file build
 
 Plain ES modules and no build step. `index.html` is the whole application;
 open it and edit it.
@@ -59,6 +59,12 @@ open it and edit it.
     npm run balance  play a full game with a robot, and print the timeline
     npm run players  four robots, four strategies, side by side
     npm run map      print the island's cooling geography
+    npm run bundle   fold the modules into one page, for handing to somebody
+
+`bundle` is a convenience, not a build step — the game it produces is the same
+game the browser already runs straight from `src/`. It understands the two
+import forms this project uses and throws rather than guesses on anything
+else.
 
 ## Balance
 
@@ -89,8 +95,8 @@ datacenter alive on sand. Cooling is not decoration.
 ## About the leaderboard
 
 The clock runs in your browser. Anyone who wants to can open the console and
-hand it any number they like — in fact the game leaves a handle on
-`window.gigawatt` rather than pretending otherwise. There are no anti-cheat
+hand it any number they like — in fact the game leaves the board, the rules
+and the island on `window.gigawatt` rather than pretending otherwise. There are no anti-cheat
 measures because none of them would work here, and the board says so where you
 post to it. Out of the box it is your own machine only and nothing leaves it;
 point `ENDPOINT` in `src/leaderboard.js` at anything that takes a POST and the

@@ -7,6 +7,7 @@
 
 import { KIND, MODEL } from './rules.js';
 import * as G from './game.js';
+import * as world from './world.js';
 import { createRenderer } from './render.js';
 import { createUI, toast, floatText, money, clock } from './ui.js';
 import * as board from './leaderboard.js';
@@ -142,7 +143,7 @@ requestAnimationFrame(loop);
 
 // The clock and the money live in this tab, so anyone who wants to rewrite
 // them can. Hiding the handle would not change that, only the theatre of it.
-window.gigawatt = { game, api: G };
+window.gigawatt = { game, api: G, world };
 
 $('start').onclick = () => {
   $('intro').classList.remove('on');
