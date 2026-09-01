@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gigawatt — build an island to a thousand megawatts</title>
+<meta name="description" content="A small island, three buildings and one rule: every link in the chain is capped by the one before it. Get the grid to a gigawatt as fast as you can.">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="Gigawatt">
+<meta property="og:description" content="Power plants, datacenters and one AI model on a hand-drawn island. Race the clock to a thousand megawatts.">
+<style>
+  :root {
+    --ink: #eef2f7;
+    --dim: #93a0b4;
+    --panel: rgba(18, 21, 30, 0.9);
+    --edge: #2c3243;
+    --power: #ffd24a;
+    --compute: #4fe0d0;
+    --heat: #ff6a45;
+    --money: #7ee06a;
+    --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: #0b0d14;
+    background-image: radial-gradient(ellipse at 50% 40%, #14203a 0%, #0b0d14 70%);
+    color: var(--ink);
+    font: 500 14px/1.45 var(--font);
+    font-variant-numeric: tabular-nums;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  button:disabled { cursor: default; }
+
+  #stage { position: fixed; inset: 0; display: grid; place-items: center; }
+  canvas {
+    image-rendering: pixelated;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .65), 0 0 0 1px #263049;
+    cursor: crosshair;
+  }
+  #labels { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+
+  /* ---- panels ------------------------------------------------------- */
+  .panel {
+    position: fixed;
+    background: var(--panel);
+    border: 1px solid var(--edge);
+    padding: 10px 12px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 8px 26px rgba(0,0,0,.4);
+  }
+  .k { font-size: 10px; letter-spacing: .11em; text-transform: uppercase; color: var(--dim); }
+  .v { font-size: 15px; font-weight: 700; }
+
+  #grid-panel { top: 16px; left: 50%; transform: translateX(-50%); min-width: 300px; text-align: center; padding: 12px 18px 14px; }
+  #grid-value { font-size: 32px; font-weight: 800; line-height: 1; letter-spacing: -.02em; }
+  #grid-value small { font-size: 15px; font-weight: 600; color: var(--dim); letter-spacing: 0; }
+  #bar { height: 7px; background: #212739; margin-top: 9px; overflow: hidden; }
+  #bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--power), var(--compute)); transition: width .25s linear; }
+  #chain { display: flex; gap: 14px; justify-content: center; margin-top: 9px; font-size: 11px; color: var(--dim); }
+  #chain b { color: var(--ink); font-weight: 700; }
+  #chain span.limit { color: var(--heat); }
+  #chain span.limit b { color: var(--heat); }
+
+  #clock-panel { top: 16px; right: 16px; text-align: right; min-width: 104px; }
+  #clock { font-size: 22px; font-weight: 800; letter-spacing: .02em; }
+
+  #wallet { bottom: 16px; left: 16px; min-width: 172px; }
+  #money { font-size: 22px; font-weight: 800; color: var(--money); }
+  #flow { font-size: 11px; color: var(--dim); margin-top: 3px; }
+  #flow b { font-weight: 700; }
+  .up { color: var(--money); } .down { color: var(--heat); }
+
+  #build { bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; padding: 8px; }
+  .tool {
+    display: flex; flex-direction: column; gap: 2px; align-items: flex-start;
+    padding: 8px 14px; border: 1px solid var(--edge); background: #171b27; min-width: 132px;
+    transition: background .12s, border-color .12s, transform .06s;
+  }
+  .tool:hover:not(:disabled) { background: #1e2434; border-color: #46506b; }
+  .tool:active:not(:disabled) { transform: translateY(1px); }
+  .tool[aria-pressed="true"] { background: #2a3450; border-color: var(--ink); }
+  .tool:disabled { opacity: .42; }
+  .tool .n { font-size: 13px; font-weight: 700; }
+  .tool .c { font-size: 11px; color: var(--dim); }
+  .tool .key { position: absolute; }
+
+  #model { bottom: 16px; right: 16px; width: 218px; }
+  #model .tier { font-size: 15px; font-weight: 800; color: var(--compute); }
+  #model .use { font-size: 11px; color: var(--dim); margin: 4px 0 8px; }
+  .go {
+    display: block; width: 100%; text-align: left; padding: 7px 10px;
+    border: 1px solid var(--edge); background: #171b27; font-size: 12px; font-weight: 600;
+    transition: background .12s, border-color .12s;
+  }
+  .go:hover:not(:disabled) { background: #232a3d; border-color: #46506b; }
+  .go:disabled { opacity: .42; }
+  .go .cost { float: right; color: var(--dim); font-weight: 700; }
+
+  /* ---- the selected building ---------------------------------------- */
+  #inspect { width: 244px; display: none; }
+  #inspect.on { display: block; }
+  #inspect h3 { font-size: 14px; font-weight: 800; }
+  #inspect .sub { font-size: 11px; color: var(--dim); margin-bottom: 8px; }
+  #inspect dl { display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; font-size: 12px; margin-bottom: 9px; }
+  #inspect dt { color: var(--dim); }
+  #inspect dd { font-weight: 700; text-align: right; }
+  #thermo { height: 6px; background: #212739; margin: 2px 0 9px; }
+  #thermo i { display: block; height: 100%; background: var(--money); transition: width .2s linear, background .3s; }
+  #inspect .note { font-size: 11px; color: var(--heat); margin-top: 7px; }
+
+  /* ---- floating feedback -------------------------------------------- */
+  .float {
+    position: absolute; font-size: 12px; font-weight: 800; white-space: nowrap;
+    text-shadow: 0 1px 3px #000; animation: rise 1.05s ease-out forwards;
+  }
+  @keyframes rise { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, -26px); } }
+
+  #toasts { position: fixed; top: 16px; left: 16px; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; pointer-events: none; max-width: 260px; }
+  .toast {
+    background: var(--panel); border: 1px solid var(--edge); border-left: 3px solid var(--power);
+    padding: 7px 14px; font-size: 12px; font-weight: 600; animation: pop .3s ease-out, fade .4s ease-in 2.6s forwards;
+  }
+  .toast.big { border-left-color: var(--compute); font-size: 14px; font-weight: 800; padding: 10px 18px; }
+  @keyframes pop { from { opacity: 0; transform: translateY(-8px) scale(.96); } }
+  @keyframes fade { to { opacity: 0; transform: translateY(-6px); } }
+
+  /* ---- overlays ------------------------------------------------------ */
+  .veil {
+    position: fixed; inset: 0; display: none; place-items: center;
+    background: rgba(6, 8, 14, .82); backdrop-filter: blur(3px); z-index: 20;
+  }
+  .veil.on { display: grid; }
+  .card { width: min(470px, calc(100vw - 32px)); background: #12151e; border: 1px solid var(--edge); padding: 26px 28px; }
+  .card h1 { font-size: 24px; font-weight: 800; letter-spacing: -.01em; }
+  .card h2 { font-size: 15px; font-weight: 800; margin-bottom: 6px; }
+  .card p { color: var(--dim); font-size: 13px; margin: 8px 0; }
+  .card ol { color: var(--dim); font-size: 13px; margin: 10px 0 10px 18px; }
+  .card li { margin: 4px 0; }
+  .card b { color: var(--ink); }
+  .primary { background: var(--ink); color: #10131b; padding: 10px 20px; font-weight: 800; margin-top: 14px; }
+  .primary:hover { background: #fff; }
+  #final { font-size: 44px; font-weight: 800; letter-spacing: -.02em; margin: 4px 0 2px; }
+  #board { list-style: none; margin: 14px 0 0; font-size: 13px; max-height: 190px; overflow-y: auto; }
+  #board li { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; border-bottom: 1px solid #1d2231; }
+  #board li.you { color: var(--power); font-weight: 800; }
+  #board .t { font-weight: 700; }
+  .row { display: flex; gap: 8px; margin-top: 14px; }
+  input[type=text] {
+    flex: 1; background: #0d1017; border: 1px solid var(--edge); color: var(--ink);
+    padding: 10px 12px; font: inherit;
+  }
+  input[type=text]:focus { outline: 2px solid var(--compute); outline-offset: -2px; }
+  .fine { font-size: 11px; color: #6d788c; margin-top: 12px; line-height: 1.5; }
+  .fine a { color: #8b97ab; }
+  #hintbar { position: fixed; bottom: 78px; left: 50%; transform: translateX(-50%); font-size: 11px; color: var(--dim); pointer-events: none; }
+  @media (max-height: 720px) { #grid-panel { padding: 8px 16px 10px; } #grid-value { font-size: 26px; } }
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="world" aria-label="The island"></canvas></div>
+<div id="labels"></div>
+
+<div class="panel" id="grid-panel">
+  <div class="k">Running capacity</div>
+  <div id="grid-value">0 <small>MW</small></div>
+  <div id="bar"><i></i></div>
+  <div id="chain">
+    <span id="c-supply">supply <b>0</b></span>
+    <span id="c-demand">demand <b>0</b></span>
+    <span id="c-tokens">tokens <b>0</b></span>
+  </div>
+</div>
+
+<div class="panel" id="clock-panel">
+  <div class="k">Time</div>
+  <div id="clock">00:00</div>
+</div>
+
+<div class="panel" id="wallet">
+  <div class="k">Money</div>
+  <div id="money">$0</div>
+  <div id="flow"></div>
+</div>
+
+<div class="panel" id="build">
+  <button class="tool" id="tool-plant" aria-pressed="false">
+    <span class="n">1 · Power plant</span><span class="c">$0</span>
+  </button>
+  <button class="tool" id="tool-dc" aria-pressed="false">
+    <span class="n">2 · Datacenter</span><span class="c">$0</span>
+  </button>
+</div>
+
+<div class="panel" id="model">
+  <div class="k">Your model</div>
+  <div class="tier" id="tier">Ember 0.5</div>
+  <div class="use" id="use">0 of 6 tokens/s</div>
+  <button class="go" id="upgrade-model">Upgrade<span class="cost">$0</span></button>
+</div>
+
+<div class="panel" id="inspect"></div>
+<div id="toasts"></div>
+<div id="hintbar"></div>
+
+<div class="veil on" id="intro">
+  <div class="card">
+    <h1>Gigawatt</h1>
+    <p>An island, a grid, and a clock. Get to <b>1,000 MW of running capacity</b>.</p>
+    <ol>
+      <li><b>Money</b> buys power plants. Plants make <b>electricity</b>, and cost money every second to run.</li>
+      <li>Electricity runs <b>datacenters</b>. Datacenters make <b>tokens</b>, and get hot doing it.</li>
+      <li>Your <b>AI model</b> turns tokens into money. It can only digest so many, so keep it upgraded.</li>
+    </ol>
+    <p>Running capacity is whichever side is <b>smaller</b> — plants alone will not do it. Two things about the land:
+      power is wasted travelling, so build close; and water and rock keep datacenters cool, while desert bakes them.</p>
+    <p>Click a building to upgrade it. Levels roughly triple output, so once the island fills up, upgrading is the only way on.</p>
+    <button class="primary" id="start">Start building</button>
+    <div class="fine">Click a tool, then a tile. <b>1</b> and <b>2</b> pick a tool, <b>U</b> upgrades what you have selected, <b>Esc</b> puts the tool down. Laptop, keyboard and mouse.</div>
+  </div>
+</div>
+
+<div class="veil" id="win">
+  <div class="card">
+    <div class="k">One gigawatt</div>
+    <div id="final">00:00</div>
+    <p id="win-line"></p>
+    <div class="row">
+      <input type="text" id="who" maxlength="18" placeholder="Your name" autocomplete="off" spellcheck="false">
+      <button class="primary" id="submit" style="margin:0">Post time</button>
+    </div>
+    <h2 style="margin-top:20px">Leaderboard</h2>
+    <ol id="board"></ol>
+    <p class="fine" id="board-note"></p>
+    <button class="primary" id="again">Play again</button>
+  </div>
+</div>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>

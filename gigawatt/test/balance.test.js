@@ -38,16 +38,28 @@ test('winning fills most of the island but does not need all of it', () => {
   assert.ok(used < 78, `${used} buildings — no room for a mistake`);
 });
 
-test('ignoring cooling costs you the run', () => {
-  assert.ok(runs.reckless.winTime > runs.careful.winTime,
-    'chasing cheap desert land should be slower than building on the coast');
-  assert.ok(runs.reckless.darkSeconds > 500, 'and it should cost real downtime');
+test('you cannot reach a gigawatt from the desert', () => {
+  // The hard wall. Cheap land is a real option — the reckless player trades
+  // downtime for a lower bill and comes out about even — but a player who
+  // will not leave the sand simply never gets there, because the top tier of
+  // datacenter cannot survive on it at any model.
+  assert.ok(!runs.sunbaked.won, `desert-only finished in ${runs.sunbaked.winTime}s`);
+  assert.ok(runs.sunbaked.darkSeconds > 20000, 'and spends its life shutting down');
   assert.equal(runs.careful.darkSeconds, 0, 'while careful play never goes dark at all');
 });
 
+test('cheap land is a trade, not a free lunch', () => {
+  assert.ok(runs.reckless.darkSeconds > 500, 'chasing cheap land costs real downtime');
+  assert.ok(runs.reckless.winTime > runs.careful.winTime * 0.97,
+    'and it must not be strictly better than building on the coast');
+});
+
 test('ignoring distance costs you the run', () => {
-  assert.ok(runs.sprawler.winTime > runs.careful.winTime * 1.08,
-    'building wherever there is room should be meaningfully slower');
+  // Distance is the softer of the two land rules: a player who scatters loses
+  // about a minute and a half, not the game. It shapes where you build rather
+  // than whether you can.
+  assert.ok(runs.sprawler.winTime > runs.careful.winTime * 1.04,
+    'building wherever there is room should be measurably slower');
 });
 
 test('at the finish, both halves of the chain are near a gigawatt', () => {

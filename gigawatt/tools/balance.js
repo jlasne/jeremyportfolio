@@ -13,8 +13,8 @@
  *   node tools/balance.js --quiet    just the headline
  */
 
-import { KIND, MODEL, DC, PLANT, restingHeat } from '../src/rules.js';
-import { coolScore, buildableTiles, distance } from '../src/world.js';
+import { KIND, MODEL, DC, PLANT, TILE, restingHeat } from '../src/rules.js';
+import { coolScore, buildableTiles, distance, tileAt } from '../src/world.js';
 import * as G from '../src/game.js';
 
 const DT = 0.25;
@@ -27,9 +27,10 @@ const HEAT_CEILING = 90;      // the robot will not build itself an oven
  * something. If a rule can be ignored for free, it is decoration.
  */
 export const PLAYERS = {
-  careful:  { heat: true,  place: 'cool'  },
-  reckless: { heat: false, place: 'cheap' },  // chases cheap land, ignores heat
-  sprawler: { heat: true,  place: 'any'   },  // ignores distance
+  careful:  { heat: true,  place: 'cool'   },
+  reckless: { heat: false, place: 'cheap'  },  // chases cheap land, ignores heat
+  sprawler: { heat: true,  place: 'any'    },  // ignores distance
+  sunbaked: { heat: false, place: 'desert' },  // will not leave the sand
 };
 const MAX_SECONDS = 4 * 3600;
 
@@ -75,9 +76,10 @@ function addCompute(g) {
   // the only thing that lets them grow later.
   const sites = free(g)
     .filter((p) => !g.buildings.length || STYLE.place === 'any' || nearestBuilding(g, p, KIND.PLANT) <= 3)
-    .sort((a, b) => (STYLE.place === 'cheap'
-      ? G.priceToBuild(g, KIND.DC, a.x, a.y) - G.priceToBuild(g, KIND.DC, b.x, b.y)
-      : coolScore(b.x, b.y) - coolScore(a.x, a.y)))
+    .filter((p) => STYLE.place !== 'desert' || tileAt(p.x, p.y) === TILE.DESERT)
+    .sort((a, b) => (STYLE.place === 'cool'
+      ? coolScore(b.x, b.y) - coolScore(a.x, a.y)
+      : G.priceToBuild(g, KIND.DC, a.x, a.y) - G.priceToBuild(g, KIND.DC, b.x, b.y)))
     .slice(0, 6);
   for (const p of sites) {
     options.push({ cost: G.priceToBuild(g, KIND.DC, p.x, p.y), gain: DC.levels[0].draw,

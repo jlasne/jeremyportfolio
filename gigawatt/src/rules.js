@@ -98,7 +98,7 @@ export const MODEL = {
 /** Electricity is free to move this far. */
 export const FREE_RADIUS = 2;
 /** …and costs this fraction of itself for every tile beyond that. */
-export const LOSS_PER_TILE = 0.05;
+export const LOSS_PER_TILE = 0.07;
 export const MIN_EFFICIENCY = 0.35;
 
 /** Heat radiated per second at full heat, as a function of cooling score. */

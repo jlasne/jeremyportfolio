@@ -11,7 +11,7 @@ import {
   KIND, PLANT, DC, MODEL, START_MONEY, GIGAWATT_MW, RESTART_BELOW,
   buildCost, upgradeCost, landMultiplier, transmission, coolingRate, spec,
 } from './rules.js';
-import { coolScore, distance, isBuildable } from './world.js';
+import { coolScore, distance, isBuildable, buildableTiles } from './world.js';
 
 export function newGame() {
   return {
@@ -34,6 +34,22 @@ export const countOf = (g, kind) => g.buildings.filter((b) => b.kind === kind).l
 /** Price of putting the next building of `kind` on a given tile. */
 export function priceToBuild(g, kind, x, y) {
   return Math.round(buildCost(kind, countOf(g, kind)) * landMultiplier(coolScore(x, y)));
+}
+
+/**
+ * What the next building of a kind would cost, cheapest tile to dearest. The
+ * spread is the price of good land, and putting both ends on the button is the
+ * shortest way to say so.
+ */
+export function buildCostFor(g, kind) {
+  let low = Infinity, high = 0;
+  for (const t of buildableTiles()) {
+    if (at(g, t.x, t.y)) continue;
+    const p = priceToBuild(g, kind, t.x, t.y);
+    if (p < low) low = p;
+    if (p > high) high = p;
+  }
+  return low === Infinity ? { low: 0, high: 0 } : { low, high };
 }
 
 export function canBuild(g, kind, x, y) {
