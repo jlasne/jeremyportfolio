@@ -17,7 +17,7 @@ gigawatt you have to grow both halves together, and the clock is running.
 Each of the three has five levels. Output roughly triples per level while
 consumption roughly doubles, so a bigger building always beats another
 building once the island runs out of room. It has 81 places to put something.
-A winning run uses about 57 of them.
+A winning run uses about 56 of them.
 
 ## The two land rules
 
@@ -70,9 +70,9 @@ power*, *tokens are going to waste* — and fixes whichever it can afford.
 
     npm run players
 
-    careful   27:07   57 buildings   0 seconds lost to heat
+    careful   27:04   56 buildings   0 seconds lost to heat
     reckless  27:34   57 buildings   1,363 seconds lost to heat
-    sprawler  28:33   62 buildings   0 seconds lost to heat
+    sprawler  28:34   62 buildings   0 seconds lost to heat
     sunbaked  never   41 buildings   88,673 seconds lost to heat
 
 `careful` obeys both land rules and gets there in about twenty-seven minutes,

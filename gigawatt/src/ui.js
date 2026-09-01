@@ -12,6 +12,10 @@ import * as G from './game.js';
 
 const $ = (id) => document.getElementById(id);
 
+/** Writing markup every frame is a parse every frame. Only write on change. */
+const setHTML = (el, html) => { if (el.dataset.h !== html) { el.dataset.h = html; el.innerHTML = html; } };
+const setText = (el, text) => { if (el.textContent !== text) el.textContent = text; };
+
 // ---------------------------------------------------------------------------
 // Numbers
 // ---------------------------------------------------------------------------
@@ -92,12 +96,12 @@ export function createUI(game, actions) {
     for (const c of ticking) c.step(dt);
 
     $('bar').firstElementChild.style.width = `${Math.min(100, (s.grid / GIGAWATT_MW) * 100)}%`;
-    $('clock').textContent = clock(game.won ? game.winTime : game.elapsed);
+    setText($('clock'), clock(game.won ? game.winTime : game.elapsed));
 
     const net = s.profit;
-    $('flow').innerHTML =
+    setHTML($('flow'),
       `<b class="${net >= 0 ? 'up' : 'down'}">${rate(net)}</b> ` +
-      `<span style="color:#5d6880">·</span> ${money(s.income)}/s in, ${money(s.upkeep)}/s upkeep`;
+      `<span style="color:#5d6880">·</span> ${money(s.income)}/s in, ${money(s.upkeep)}/s upkeep`);
 
     // Whichever link is holding the chain back is the one painted red.
     const short = s.demand > s.supply ? 'supply' : s.supply > s.demand && s.dcs.length ? 'demand' : null;
@@ -109,7 +113,7 @@ export function createUI(game, actions) {
     for (const kind of [KIND.PLANT, KIND.DC]) {
       const el = tools[kind];
       const base = G.buildCostFor(game, kind);
-      el.querySelector('.c').textContent = `${money(base.low)}–${money(base.high)}`;
+      setText(el.querySelector('.c'), `${money(base.low)}–${money(base.high)}`);
       el.disabled = game.money < base.low;
       if (el.disabled && armed === kind) setArmed(null);
     }
@@ -117,19 +121,19 @@ export function createUI(game, actions) {
     // The model
     const tier = s.tier;
     const next = MODEL.tiers[game.modelLevel];
-    $('tier').textContent = tier.label;
-    $('use').innerHTML = s.tokensDropped > 0.5
+    setText($('tier'), tier.label);
+    setHTML($('use'), s.tokensDropped > 0.5
       ? `<span style="color:var(--heat)">at capacity — ${mw(s.tokensDropped)} tokens/s wasted</span>`
-      : `${mw(s.tokensUsed)} of ${tier.cap} tokens/s · ${money(tier.rate)} each`;
+      : `${mw(s.tokensUsed)} of ${tier.cap} tokens/s · ${money(tier.rate)} each`);
     const up = $('upgrade-model');
     up.disabled = !next || game.money < next.cost;
-    up.innerHTML = next
+    setHTML(up, next
       ? `Upgrade to ${next.label}<span class="cost">${money(next.cost)}</span>`
-      : 'Best model there is';
+      : 'Best model there is');
 
     if (selected && !game.buildings.includes(selected)) setSelected(null);
     if (selected) drawInspector(game, s, selected, actions);
-    $('hintbar').textContent = hint(game, s, armed);
+    setText($('hintbar'), hint(game, s, armed));
   }
 
   return { frame, setArmed, setSelected, get armed() { return armed; }, get selected() { return selected; } };

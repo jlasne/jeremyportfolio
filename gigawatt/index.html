@@ -101,7 +101,7 @@
   .go .cost { float: right; color: var(--dim); font-weight: 700; }
 
   /* ---- the selected building ---------------------------------------- */
-  #inspect { width: 244px; display: none; }
+  #inspect { top: 16px; left: 16px; width: 244px; display: none; }
   #inspect.on { display: block; }
   #inspect h3 { font-size: 14px; font-weight: 800; }
   #inspect .sub { font-size: 11px; color: var(--dim); margin-bottom: 8px; }
@@ -119,12 +119,12 @@
   }
   @keyframes rise { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, -26px); } }
 
-  #toasts { position: fixed; top: 16px; left: 16px; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; pointer-events: none; max-width: 260px; }
+  #toasts { position: fixed; top: 92px; right: 16px; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; pointer-events: none; max-width: 250px; text-align: right; }
   .toast {
-    background: var(--panel); border: 1px solid var(--edge); border-left: 3px solid var(--power);
+    background: var(--panel); border: 1px solid var(--edge); border-right: 3px solid var(--power);
     padding: 7px 14px; font-size: 12px; font-weight: 600; animation: pop .3s ease-out, fade .4s ease-in 2.6s forwards;
   }
-  .toast.big { border-left-color: var(--compute); font-size: 14px; font-weight: 800; padding: 10px 18px; }
+  .toast.big { border-right-color: var(--compute); font-size: 14px; font-weight: 800; padding: 10px 18px; }
   @keyframes pop { from { opacity: 0; transform: translateY(-8px) scale(.96); } }
   @keyframes fade { to { opacity: 0; transform: translateY(-6px); } }
 
@@ -156,7 +156,7 @@
   input[type=text]:focus { outline: 2px solid var(--compute); outline-offset: -2px; }
   .fine { font-size: 11px; color: #6d788c; margin-top: 12px; line-height: 1.5; }
   .fine a { color: #8b97ab; }
-  #hintbar { position: fixed; bottom: 78px; left: 50%; transform: translateX(-50%); font-size: 11px; color: var(--dim); pointer-events: none; }
+  #hintbar { position: fixed; bottom: 86px; left: 50%; transform: translateX(-50%); font-size: 11px; color: var(--dim); pointer-events: none; }
   @media (max-height: 720px) { #grid-panel { padding: 8px 16px 10px; } #grid-value { font-size: 26px; } }
 </style>
 </head>

@@ -285,10 +285,40 @@ function spriteFor(bl) {
   return (bl.kind === KIND.PLANT ? PLANT_SPRITES : DC_SPRITES)[bl.level - 1];
 }
 
+/**
+ * Painting a building a pixel at a time costs 144 fills, and a full island
+ * costs eleven thousand of them every frame. So each of the twenty sprites is
+ * painted once into its own little canvas and stamped from then on. Lights are
+ * left out and drawn live, because they blink.
+ */
+const STAMPS = new Map();
+
+function stamp(kind, level, dark) {
+  const key = `${kind}${level}${dark ? 'd' : ''}`;
+  let cached = STAMPS.get(key);
+  if (cached) return cached;
+
+  cached = document.createElement('canvas');
+  cached.width = cached.height = SPRITE_SIZE;
+  const c = cached.getContext('2d');
+  const sprite = (kind === KIND.PLANT ? PLANT_SPRITES : DC_SPRITES)[level - 1];
+  for (let y = 0; y < SPRITE_SIZE; y++) {
+    for (let x = 0; x < SPRITE_SIZE; x++) {
+      const ch = sprite[y][x];
+      if (ch === '.') continue;
+      if (BLINK.has(ch) && !dark) continue;
+      const paint = (kind === KIND.PLANT && WARM[ch]) || PALETTE[ch];
+      c.fillStyle = dark && ch !== 's' ? shade(paint) : paint;
+      c.fillRect(x, y, 1, 1);
+    }
+  }
+  STAMPS.set(key, cached);
+  return cached;
+}
+
 function drawBuilding(g, bl, game, t, night) {
   const px = bl.x * TILE_PX + INSET;
   const py = bl.y * TILE_PX + INSET;
-  const sprite = spriteFor(bl);
 
   if (bl.kind === KIND.PLANT) drawSmoke(g, bl, t);
 
@@ -300,16 +330,7 @@ function drawBuilding(g, bl, game, t, night) {
     g.fillRect(px - r, py - r, SPRITE_SIZE + r * 2, SPRITE_SIZE + r * 2);
   }
 
-  for (let y = 0; y < SPRITE_SIZE; y++) {
-    for (let x = 0; x < SPRITE_SIZE; x++) {
-      const ch = sprite[y][x];
-      if (ch === '.') continue;
-      if (BLINK.has(ch) && !bl.dark) continue;      // lights are drawn later
-      const paint = (bl.kind === KIND.PLANT && WARM[ch]) || PALETTE[ch];
-      g.fillStyle = bl.dark && ch !== 's' ? shade(paint) : paint;
-      g.fillRect(px + x, py + y, 1, 1);
-    }
-  }
+  g.drawImage(stamp(bl.kind, bl.level, bl.dark), px, py);
   if (!bl.dark) drawLights(g, bl, t, night);
   if (bl.kind === KIND.DC) drawHeat(g, bl, t);
 }
@@ -319,23 +340,31 @@ function drawLights(g, bl, t, night = 0) {
   if (bl.dark) return;
   const px = bl.x * TILE_PX + INSET;
   const py = bl.y * TILE_PX + INSET;
-  const sprite = spriteFor(bl);
-  for (let y = 0; y < SPRITE_SIZE; y++) {
-    for (let x = 0; x < SPRITE_SIZE; x++) {
-      const ch = sprite[y][x];
-      if (!BLINK.has(ch)) continue;
-      const seed = hash(bl.x * 13 + x, bl.y * 17 + y, bl.id);
-      const on = ch === 'y' ? true : Math.sin(t * (0.6 + seed * 2.4) + seed * 30) > -0.35;
-      if (!on) { g.fillStyle = PALETTE[1]; g.fillRect(px + x, py + y, 1, 1); continue; }
-      g.fillStyle = PALETTE[ch];
-      g.fillRect(px + x, py + y, 1, 1);
-      if (night > 0.15) {
-        g.globalAlpha = night * 0.35;
-        g.fillRect(px + x - 1, py + y - 1, 3, 3);
-        g.globalAlpha = 1;
-      }
+  for (const [x, y, ch] of litPixels(bl.kind, bl.level)) {
+    const seed = hash(bl.x * 13 + x, bl.y * 17 + y, bl.id);
+    const on = ch === 'y' || Math.sin(t * (0.6 + seed * 2.4) + seed * 30) > -0.35;
+    g.fillStyle = on ? PALETTE[ch] : PALETTE[1];
+    g.fillRect(px + x, py + y, 1, 1);
+    if (on && night > 0.15) {
+      g.globalAlpha = night * 0.35;
+      g.fillRect(px + x - 1, py + y - 1, 3, 3);
+      g.globalAlpha = 1;
     }
   }
+}
+
+const LIT = new Map();
+function litPixels(kind, level) {
+  const key = `${kind}${level}`;
+  let found = LIT.get(key);
+  if (found) return found;
+  found = [];
+  const sprite = (kind === KIND.PLANT ? PLANT_SPRITES : DC_SPRITES)[level - 1];
+  for (let y = 0; y < SPRITE_SIZE; y++) {
+    for (let x = 0; x < SPRITE_SIZE; x++) if (BLINK.has(sprite[y][x])) found.push([x, y, sprite[y][x]]);
+  }
+  LIT.set(key, found);
+  return found;
 }
 
 function drawSmoke(g, bl, t) {
