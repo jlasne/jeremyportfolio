@@ -259,6 +259,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 }
 #modal .chk+.chk{margin-top:7px}
 #modal .chk input{width:auto;flex:0 0 auto;margin-top:1px;accent-color:#6b5334}
+#modal label em.req{color:#a33427;opacity:.85}
 #modal label{display:block;font-size:9px;letter-spacing:.11em;text-transform:uppercase;
   font-weight:700;opacity:.55;margin-bottom:5px}
 #modal input{
@@ -388,7 +389,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 
       <h3>Claim your land</h3>
       <div class="field logo">
-        <label for="fLogo">App logo, shown on the map</label>
+        <label for="fLogo">App logo, shown on the map <em>optional</em></label>
         <div class="logorow">
           <canvas id="fLogoPrev" width="16" height="16"></canvas>
           <input type="file" id="fLogo" accept="image/*">
@@ -400,8 +401,8 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
         <input id="fKing" placeholder="Leave empty and the land names itself" autocomplete="off" spellcheck="false">
       </div>
       <div class="field">
-        <label for="fX">Founder handles on X <em>optional</em></label>
-        <input id="fX" placeholder="Leave empty to stay anonymous" autocomplete="off" spellcheck="false">
+        <label for="fX">Founder handles on X <em class="req">required</em></label>
+        <input id="fX" placeholder="jeremylasne, cofounder" autocomplete="off" spellcheck="false">
       </div>
       <div class="field">
         <label for="fIOS">App Store link <em>optional</em></label>
@@ -412,7 +413,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
         <input id="fPlay" placeholder="https://play.google.com/store/apps/..." autocomplete="off" spellcheck="false">
       </div>
       <div class="veil">
-        <label class="chk"><input type="checkbox" id="fAnonF"> 🎭 Hide my handle. The kings walk without a name.</label>
+        <label class="chk"><input type="checkbox" id="fAnonF"> 🎭 Hide my handle on the map. Needs an app named or linked.</label>
         <label class="chk"><input type="checkbox" id="fAnonA"> 🏰 Hide my app. The kingdom takes a name of its own.</label>
       </div>
       <div class="field">
@@ -1088,11 +1089,17 @@ function elevAt(tx, ty) {
   // ragged coast of gulfs and headlands rather than the rim of a coin.
   const ang = Math.atan2(ty, tx);
   const lobe = vnoise(Math.cos(ang) * 5.2 + 11, Math.sin(ang) * 5.2 + 7, s + 909);
-  const start = 0.66 + lobe * 0.26;
-  const rim = 1 - smooth(clamp((d - start) / 0.19, 0, 1));
+  const start = 0.72 + lobe * 0.28;
+  const rim = 1 - smooth(clamp((d - start) / 0.15, 0, 1));
   e = e * (0.42 + 0.58 * rim) - (1 - rim) * 0.34;
   // A coarser field breaks the coast into bays and peninsulas.
-  e += (fbm(wx / 430, wy / 430, s + 401, 2, 0.5, 2) - 0.5) * 0.26 * rim;
+  e += (fbm(wx / 430, wy / 430, s + 401, 2, 0.5, 2) - 0.5) * 0.19 * rim;
+  // The floor rises as you go inland, so the only water away from the coast
+  // is a river. Everything below the floor is compressed into a shallow band
+  // just above it rather than clipped, which keeps the low ground varied.
+  const inside = smooth(clamp((rim - 0.58) / 0.42, 0, 1));
+  const floor = lerp(SEA - 0.26, SEA + 0.048, inside);
+  if (e < floor) e = floor - 0.028 * (1 - Math.exp((e - floor) * 7));
   // Relief is added inland only, faded in over the first tenth above the
   // waterline, so fine detail textures the land without carving new lakes.
   const inland = smooth(clamp((e - SEA) / 0.10, 0, 1));
@@ -1258,9 +1265,9 @@ function placeKingdoms(list) {
     const a0 = rnd() * Math.PI * 2;
     outer:
     for (let ring = 0; ring < 260; ring++) {
-      const dist = i === 0 ? 0 : (k.rMax + 24) + ring * 6;
-      if (dist > WORLD.radius * 0.55) break;
-      const steps = Math.max(1, Math.round(dist / 11));
+      const dist = i === 0 ? 0 : (k.rMax + 16) + ring * 4;
+      if (dist > WORLD.radius * 0.40) break;
+      const steps = Math.max(1, Math.round(dist / 9));
       for (let sIdx = 0; sIdx < steps; sIdx++) {
         const ang = a0 + sIdx * 2.39996;
         const x = Math.round(Math.cos(ang) * dist);
@@ -1268,7 +1275,7 @@ function placeKingdoms(list) {
         let clash = false;
         for (const p of placed) {
           const dx = p.cx - x, dy = p.cy - y;
-          if (Math.sqrt(dx * dx + dy * dy) < p.rMax + k.rMax + 22) { clash = true; break; }
+          if (Math.sqrt(dx * dx + dy * dy) < p.rMax + k.rMax + 14) { clash = true; break; }
         }
         if (clash) continue;
         if (!landEnough(x, y, k.r)) continue;
@@ -1354,6 +1361,11 @@ function layoutVillage(k) {
   if (plan === 'radial') {
     const step = Math.max(9, r / 4);
     for (let d = step; d < r * 0.97; d += step) rings.push(d);
+  } else if (plan === 'organic') {
+    // One or two rings tie the lanes together. Without them every lane is a
+    // dead end at its far tip.
+    rings.push(r * 0.55);
+    if (r > 22) rings.push(r * 0.88);
   }
 
   const onRoad = (x, y) => {
@@ -1373,15 +1385,17 @@ function layoutVillage(k) {
       }
       return false;
     }
-    // Organic: a handful of lanes leaving the square, wobbling as they go.
-    // They start somewhere, which a noise band does not.
+    // Organic: lanes leaving the square, wobbling as they go, tied together
+    // by a ring or two so every lane meets another road at both ends.
     if (d < 2.5) return true;
     const lanes = k.pop < 300 ? 3 : 5;
     const seg = Math.PI * 2 / lanes;
+    const a0 = Math.atan2(v, u) - spokeA;
     const wob = (vnoise(d / 8, k.seed % 11, k.seed + 404) - 0.5) * 0.55;
-    const a = Math.atan2(v, u) - spokeA + wob;
-    const off = Math.abs(((a % seg) + seg) % seg - seg / 2);
-    return off * d < rw * 1.2;
+    const off = Math.abs((((a0 + wob) % seg) + seg) % seg - seg / 2);
+    if (off * d < rw * 1.2) return true;
+    for (const rr of rings) if (Math.abs(d - rr + Math.sin(a0 * 3) * 1.7) < rw) return true;
+    return false;
   };
 
   const dryLand = (tx, ty) => elevAt(tx, ty) > SEA;
@@ -1397,9 +1411,14 @@ function layoutVillage(k) {
       ev[(y + R2) * W + (x + R2)] = elevAt(k.cx + x, k.cy + y);
   const EV = (x, y) => (x < -R2 || x > R2 || y < -R2 || y > R2)
     ? elevAt(k.cx + x, k.cy + y) : ev[(y + R2) * W + (x + R2)];
+  // A river counts as water here, so an inland town still gets an airy
+  // waterfront and a wharf.
+  const wetAt = (x, y) => {
+    const e = EV(x, y);
+    return e <= SEA || riverAt(k.cx + x, k.cy + y, e);
+  };
   const wetNear = (x, y, rad) =>
-    EV(x + rad, y) <= SEA || EV(x - rad, y) <= SEA ||
-    EV(x, y + rad) <= SEA || EV(x, y - rad) <= SEA;
+    wetAt(x + rad, y) || wetAt(x - rad, y) || wetAt(x, y + rad) || wetAt(x, y - rad);
 
   const isRiver = (x, y) => { const e2 = EV(x, y); return e2 > SEA && riverAt(k.cx + x, k.cy + y, e2); };
   const narrowHere = (x, y) => {
@@ -1521,7 +1540,10 @@ function layoutVillage(k) {
     }
     for (let n = 0; n < picks.length; n++) {
       const q = picks[n];
-      push(q.tx - 2, q.ty, n === 0 ? makeHarbor() : makeJetty());
+      // A jetty on a river, a full harbour only where there is open water.
+      const openSea = elevAt(q.tx, q.ty + 2) <= SEA || elevAt(q.tx, q.ty - 2) <= SEA ||
+                      elevAt(q.tx + 2, q.ty) <= SEA || elevAt(q.tx - 2, q.ty) <= SEA;
+      push(q.tx - 2, q.ty, n === 0 && openSea ? makeHarbor() : makeJetty());
       poi.work.push({ x: q.tx * TILE, y: q.ty * TILE });
     }
     k.port = picks.length;
@@ -1588,18 +1610,34 @@ function layoutVillage(k) {
   k.buildings = b; k.roadTiles = pruneStubs(roads, b); k.poi = poi;
 }
 
-/* A street tile with fewer than two street neighbours, no building beside it
-   and no highway touching it, leads nowhere. Cut it and look again: that is
-   what clears a whole stub rather than its last tile. */
+/* No dead ends. A street tile needs a street on two sides, or it needs to be
+   the point where a highway leaves town. Anything else is cut, and the pass
+   runs again, which unravels a whole spur rather than its last tile. Houses
+   do not save a street: they simply front onto the next one over. */
 function pruneStubs(roads, buildings) {
   const set = new Set();
   for (const t of roads) set.add(t.x + ',' + t.y);
-  const anchor = new Set();
-  for (const b of buildings) {
-    for (let dy = -1; dy <= 1; dy++)
-      for (let dx = -1; dx <= 1; dx++) anchor.add((b.tx + dx) + ',' + (b.ty + dy));
+
+  // A bridge crosses a river; it does not run down one. Walk out to the first
+  // dry tile each way and keep the crossing only if the street carries on on
+  // both banks of one axis.
+  for (const key of Array.from(set)) {
+    const c0 = key.indexOf(',');
+    const x = +key.slice(0, c0), y = +key.slice(c0 + 1);
+    if (tileAt(x, y) !== T.RIVER) continue;
+    const carriesOn = (dx, dy) => {
+      for (let d = 1; d <= 6; d++) {
+        const nx = x + dx * d, ny = y + dy * d;
+        if (tileAt(nx, ny) === T.RIVER) continue;
+        return set.has(nx + ',' + ny);
+      }
+      return false;
+    };
+    if ((carriesOn(-1, 0) && carriesOn(1, 0)) || (carriesOn(0, -1) && carriesOn(0, 1))) continue;
+    set.delete(key);
   }
-  for (let pass = 0; pass < 20; pass++) {
+
+  for (let pass = 0; pass < 60; pass++) {
     let cut = 0;
     for (const key of Array.from(set)) {
       const c = key.indexOf(',');
@@ -1609,7 +1647,12 @@ function pruneStubs(roads, buildings) {
       if (set.has((x + 1) + ',' + y)) n++;
       if (set.has(x + ',' + (y - 1))) n++;
       if (set.has(x + ',' + (y + 1))) n++;
-      if (n >= 2 || anchor.has(key) || WORLD.highwaySet.has(key)) continue;
+      if (n >= 2) continue;
+      let onHighway = false;
+      for (let dy = -1; dy <= 1 && !onHighway; dy++)
+        for (let dx = -1; dx <= 1; dx++)
+          if (WORLD.highwaySet.has((x + dx) + ',' + (y + dy))) { onHighway = true; break; }
+      if (onHighway) continue;
       set.delete(key); cut++;
     }
     if (!cut) break;
@@ -2815,12 +2858,26 @@ document.getElementById('mGo').addEventListener('click', () => {
   const anonA = document.getElementById('fAnonA').checked;
   const anonF = document.getElementById('fAnonF').checked;
   const typed = document.getElementById('fKing').value.trim();
-  const handle = document.getElementById('fX').value.trim();
+  const handle = document.getElementById('fX').value.trim().replace(/^@/, '');
+  const store = document.getElementById('fIOS').value.trim() ||
+                document.getElementById('fPlay').value.trim();
   const note = document.getElementById('mNote');
+
+  // The handle is how a kingdom is owned, so it is the one thing we need.
+  if (!handle) {
+    note.textContent = 'A founder handle on X is required. It is how the kingdom is yours.';
+    return;
+  }
+  // Going anonymous is fine, as long as something on the map can be traced
+  // back to a real app.
+  if ((anonF || anonA) && !typed && !store) {
+    note.textContent = 'To stay anonymous, name the app or add a store link.';
+    return;
+  }
   const name = (anonA || !typed) ? veilName(typed.length * 977 + handle.length * 31 + 13) : typed;
-  const noLord = anonF || !handle;
   note.textContent = 'Saved. ' + name + ' joins the map at the next daily refresh'
-    + (noLord ? ', with no handle on it' : '') + (pendingLogo ? ', under its own logo.' : '.');
+    + (anonF ? ', with no handle on it' : ' under @' + handle)
+    + (pendingLogo ? ', with its own logo.' : '.');
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════
