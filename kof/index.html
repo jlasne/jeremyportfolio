@@ -1003,8 +1003,9 @@ const RAMPS = {
 
 function kingdomHue(i) { return 'hsl(' + ((i * 137.508) % 360).toFixed(1) + ',58%,46%)'; }
 
+const HOUSE_CAP = 6000;              // drawn houses, not counted ones
 function derive(k) {
-  const houses   = Math.max(1, Math.floor(k.users / 100));
+  const houses   = clamp(Math.floor(k.users / 100), 1, HOUSE_CAP);
   const farmers  = Math.floor(k.users / 10);
   const archers  = Math.floor(k.trials / 10);
   const knights  = Math.floor(k.subs / 10);
@@ -1063,7 +1064,10 @@ function placeKingdoms(list) {
   const sorted = list.slice().sort((a, b) => b.r - a.r);
   let sq = 0;
   for (const k of sorted) sq += (k.r + 30) * (k.r + 30);
-  WORLD.radius = Math.round(90 + 2.15 * Math.sqrt(sq));
+  // Quantised to 64 tile steps. Terrain inside 70% of the radius does not
+  // depend on it at all, and the rim only moves on real growth, so a kingdom
+  // losing a few hundred users never reshapes the coast.
+  WORLD.radius = Math.ceil((90 + 2.15 * Math.sqrt(sq)) / 64) * 64;
 
   const placed = [];
   for (let i = 0; i < sorted.length; i++) {
