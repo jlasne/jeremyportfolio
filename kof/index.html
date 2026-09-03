@@ -500,7 +500,7 @@ const C = {
 
 const UNIT_ART = {
   farmer: {
-    key: { o: '#2b2016', H: '#d9b45c', h: '#b9944400', k: '#e0a97e', C: '#8a6a3f', c: '#6b5130' },
+    key: { o: '#2b2016', H: '#d9b45c', k: '#e0a97e', C: '#8a6a3f', c: '#6b5130' },
     a: ['..oooo..', '.oHHHHo.', '.oHHHHo.', '..okko..', '.oCCCCo.', '.oCccCo.', '..o..o..', '..o..o..'],
     b: ['..oooo..', '.oHHHHo.', '.oHHHHo.', '..okko..', '.oCCCCo.', '.oCccCo.', '..oo.o..', '..o..oo.'],
   },
@@ -510,7 +510,7 @@ const UNIT_ART = {
     b: ['..oooo..', '.oHHHHo.', '.oHHHHoB', '..okkoB.', '.oCCCCB.', '.oCccoB.', '..oo.oB.', '..o..oo.'],
   },
   knight: {
-    key: { o: '#1f232a', H: '#b9bec7', h: '#8d939d', k: '#d9d5cd', C: '#6b7078', c: '#525861', S: '#e4e8ee' },
+    key: { o: '#1f232a', H: '#b9bec7', h: '#8d939d', C: '#6b7078', c: '#525861', S: '#e4e8ee' },
     a: ['..oooo..', '.oHHHHo.', '.oHhhHo.', '..oHHo.S', '.oCCCCoS', '.oCccCS.', '..o..o..', '..o..o..'],
     b: ['..oooo..', '.oHHHHo.', '.oHhhHo.', '..oHHo.S', '.oCCCCoS', '.oCccCS.', '..oo.o..', '..o..oo.'],
   },
@@ -1413,7 +1413,7 @@ function buildRoads(ks) {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const hiCache = new Map(), loCache = new Map();
-const HI_MAX = 130, LO_MAX = 3400;
+const HI_MAX = 130, LO_MAX = 2200;
 let genBudget = 0;
 
 function ckey(cx, cy) { return cx + ',' + cy; }
