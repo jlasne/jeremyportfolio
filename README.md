@@ -129,8 +129,14 @@ kingdoms extend the rim without moving anything already drawn. Everything static
 bakes into 32×32 tile chunks once, so a frame costs about forty image blits plus
 the villagers: 60fps from one village up to the whole continent.
 
+Founders upload their app logo, which becomes a 16 pixel shield beside the
+kingdom's name; without one the kingdom gets a heraldic shield in a hue spaced
+by the golden angle. Name and handle are both optional: leave either blank and
+the land names itself or the kings walk anonymous.
+
 Demo data lives in `SEED_KINGDOMS` at the top of the file. Replace that array
-with a fetch to wire it to real accounts.
+with a fetch to wire it to real accounts. The RevenueCat key must never reach
+the browser: it needs a server that holds it and serves the six numbers.
 
 ## Run locally
 

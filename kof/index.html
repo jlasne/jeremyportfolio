@@ -88,12 +88,13 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 #clock{
   bottom:14px;right:14px;display:flex;align-items:stretch;gap:0;overflow:hidden;
 }
-#clock .day{
-  padding:9px 12px;font-size:11px;font-weight:700;letter-spacing:.05em;
-  display:flex;flex-direction:column;gap:2px;line-height:1.15;min-width:96px;
-  border-right:2px solid #a98a5c;
+#clock .credit{
+  padding:10px 13px;font-size:10.5px;font-weight:500;letter-spacing:.02em;
+  line-height:1.15;white-space:nowrap;text-decoration:none;color:inherit;
+  border-right:2px solid #a98a5c;opacity:.8;display:flex;align-items:center;
 }
-#clock .day small{font-size:9px;opacity:.6;font-weight:700;letter-spacing:.08em}
+#clock .credit:hover{opacity:1}
+#clock .credit b{font-weight:700;margin-left:4px}
 #clock .z{width:34px;font-size:16px;font-weight:700;line-height:1;
   display:flex;align-items:center;justify-content:center}
 #clock .z+.z{border-left:2px solid #a98a5c}
@@ -184,10 +185,11 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 }
 #card .founders a:hover{background:rgba(107,83,52,.26)}
 #card .stats{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--paper-line)}
-#card .stat{padding:8px 12px;border-bottom:1px solid var(--paper-line)}
+#card .stat{padding:8px 12px 9px;border-bottom:1px solid var(--paper-line)}
 #card .stat:nth-child(odd){border-right:1px solid var(--paper-line)}
 #card .stat .n{font-size:17px;font-weight:700;line-height:1}
 #card .stat .l{font-size:9px;letter-spacing:.08em;text-transform:uppercase;opacity:.55;margin-top:3px}
+#card .stat .w{font-size:9px;line-height:1.35;opacity:.4;margin-top:3px}
 #card .spark{padding:9px 12px 11px}
 #card .spark canvas{width:100%;height:34px;display:block;image-rendering:auto}
 #card .spark .lab{font-size:9px;letter-spacing:.08em;text-transform:uppercase;opacity:.55;
@@ -244,6 +246,15 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   padding:10px 12px;font-size:12px;line-height:1.55;margin-bottom:14px;
 }
 #modal .field{margin-bottom:12px}
+#modal label em{font-style:normal;opacity:.55;font-weight:500;letter-spacing:.04em;text-transform:none}
+#modal .logorow{display:flex;align-items:center;gap:10px}
+#modal .logorow canvas{
+  width:40px;height:40px;flex:0 0 40px;image-rendering:pixelated;
+  background:rgba(255,255,255,.5);border:2px solid #a98a5c;border-radius:2px;
+}
+#modal .logorow input[type=file]{width:auto;flex:1;padding:6px;font-size:11px;background:none;border:0}
+#modal .logorow .hint{font-size:10px;opacity:.55;flex:1 1 100%;margin-top:-2px}
+#modal .logorow{flex-wrap:wrap}
 #modal .veil{
   background:rgba(107,83,52,.10);border:1px solid rgba(107,83,52,.28);
   border-radius:2px;padding:9px 11px;margin-bottom:14px;
@@ -294,7 +305,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   #addBtn{top:auto;bottom:56px;left:14px}
   #rcBadge{top:auto;bottom:14px;left:14px}
   #card{width:calc(100vw - 28px);bottom:104px}
-  #clock .day{min-width:70px}
+  #clock .credit{padding:10px;font-size:9.5px}
   #modal,#modal2{padding:0}
   #modal .sheet,#modal2 .sheet{max-height:100vh;border-radius:0;border-left:0;border-right:0}
 }
@@ -339,7 +350,9 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 </a>
 
 <div class="hud plate" id="clock">
-  <div class="day"><small>Year <span id="yr">1</span></small><span id="dayN">Day 1</span></div>
+  <a class="credit" href="https://x.com/jeremylasne" target="_blank" rel="noopener">
+    made with fun by <b>@jeremylasne</b>
+  </a>
   <button class="z" id="zOut" title="Zoom out">−</button>
   <button class="z" id="zIn" title="Zoom in">+</button>
 </div>
@@ -383,13 +396,21 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
       </div>
 
       <h3>Claim your land</h3>
-      <div class="field">
-        <label for="fKing">Kingdom name</label>
-        <input id="fKing" placeholder="Kaught" autocomplete="off" spellcheck="false">
+      <div class="field logo">
+        <label for="fLogo">App logo, shown on the map</label>
+        <div class="logorow">
+          <canvas id="fLogoPrev" width="16" height="16"></canvas>
+          <input type="file" id="fLogo" accept="image/*">
+          <span class="hint" id="fLogoHint">Square works best. It becomes a 16 pixel shield.</span>
+        </div>
       </div>
       <div class="field">
-        <label for="fX">Founder handles on X, comma separated</label>
-        <input id="fX" placeholder="jeremylasne, cofounder" autocomplete="off" spellcheck="false">
+        <label for="fKing">Kingdom name <em>optional</em></label>
+        <input id="fKing" placeholder="Leave empty and the land names itself" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="field">
+        <label for="fX">Founder handles on X <em>optional</em></label>
+        <input id="fX" placeholder="Leave empty to stay anonymous" autocomplete="off" spellcheck="false">
       </div>
       <div class="veil">
         <label class="chk"><input type="checkbox" id="fAnonF"> 🎭 Hide my handle. The kings walk without a name.</label>
@@ -1044,32 +1065,36 @@ function makeRock(rnd) {
 const TILE = 8;           // world pixels per tile
 const CHUNK = 32;         // tiles per chunk
 const CHUNK_PX = TILE * CHUNK;
-const SEA = 0.420;
+const SEA = 0.405;
 
 const T = { DEEP:0, OCEAN:1, SHALLOW:2, SAND:3, GRASS:4, DRY:5, FOREST:6, HILL:7, ROCK:8, SNOW:9, RIVER:10, ROAD:11 };
 
-const WORLD = { radius: 400, kingdoms: [], buildingsByChunk: new Map(), roads: [], graveSet: new Set() };
+const WORLD = { radius: 400, kingdoms: [], buildingsByChunk: new Map(), roads: [],
+                graveSet: new Set(), highwaySet: new Set() };
 
 function warp(tx, ty, s) {
-  const wx = vnoise(tx * 0.010, ty * 0.010, s + 91) - 0.5;
-  const wy = vnoise(tx * 0.010 + 4.7, ty * 0.010 + 2.3, s + 177) - 0.5;
-  return [tx + wx * 82, ty + wy * 82];
+  const wx = vnoise(tx * 0.0062, ty * 0.0062, s + 91) - 0.5;
+  const wy = vnoise(tx * 0.0062 + 4.7, ty * 0.0062 + 2.3, s + 177) - 0.5;
+  return [tx + wx * 130, ty + wy * 130];
 }
 
 function elevAt(tx, ty) {
   const s = WORLD_SEED;
   const [wx, wy] = warp(tx, ty, s);
-  let e = fbm(wx / 132, wy / 132, s, 5, 0.5, 2.05);
+  let e = fbm(wx / 215, wy / 215, s, 5, 0.5, 2.05);
   const d = Math.sqrt(tx * tx + ty * ty) / WORLD.radius;
-  // Rim falloff: land runs almost to the edge, then drops into ocean over the
-  // outer sixth of the world. The map is a continent, not an archipelago.
-  const rim = 1 - smooth(clamp((d - 0.84) / 0.16, 0, 1));
+  // Where the land gives out depends on the bearing, so the world edge is a
+  // ragged coast of gulfs and headlands rather than the rim of a coin.
+  const ang = Math.atan2(ty, tx);
+  const lobe = vnoise(Math.cos(ang) * 3.4 + 11, Math.sin(ang) * 3.4 + 7, s + 909);
+  const start = 0.66 + lobe * 0.26;
+  const rim = 1 - smooth(clamp((d - start) / 0.19, 0, 1));
   e = e * (0.42 + 0.58 * rim) - (1 - rim) * 0.34;
   // A second, coarser field breaks the coast into bays and peninsulas.
-  e += (fbm(wx / 340, wy / 340, s + 401, 3, 0.5, 2) - 0.5) * 0.22 * rim;
+  e += (fbm(wx / 520, wy / 520, s + 401, 3, 0.5, 2) - 0.5) * 0.30 * rim;
   // Ridged noise, applied only above the treeline, turns high blobs into
   // ranges with spines and passes instead of grey pancakes.
-  if (e > 0.56) e += (e - 0.56) * ridge(wx / 190, wy / 190, s + 77, 4) * 0.85;
+  if (e > 0.56) e += (e - 0.56) * ridge(wx / 300, wy / 300, s + 77, 4) * 0.85;
   return e;
 }
 
@@ -1085,13 +1110,13 @@ function riverAt(tx, ty, e) {
            + (vnoise(tx * 0.075, ty * 0.075, s + 21) - 0.5) * 9;
   const dy = (vnoise(tx * 0.016 + 3.1, ty * 0.016 + 7.7, s + 9) - 0.5) * 34
            + (vnoise(tx * 0.075 + 1.3, ty * 0.075 + 5.1, s + 27) - 0.5) * 9;
-  const n = vnoise((tx + dx) / 88, (ty + dy) / 88, s);
+  const n = vnoise((tx + dx) / 120, (ty + dy) / 120, s);
   const r = 1 - Math.abs(n * 2 - 1);
-  return r > 0.986 - (0.78 - e) * 0.055;
+  return r > 0.988 - (0.78 - e) * 0.050;
 }
 
 function moistAt(tx, ty) {
-  return fbm(tx / 172, ty / 172, WORLD_SEED + 733, 3, 0.55, 2);
+  return fbm(tx / 340, ty / 340, WORLD_SEED + 733, 3, 0.55, 2);
 }
 
 function tileAt(tx, ty) { return tileAtE(tx, ty, elevAt(tx, ty)); }
@@ -1367,6 +1392,16 @@ function layoutVillage(k) {
     EV(x + rad, y) <= SEA || EV(x - rad, y) <= SEA ||
     EV(x, y + rad) <= SEA || EV(x, y - rad) <= SEA;
 
+  const isRiver = (x, y) => { const e2 = EV(x, y); return e2 > SEA && riverAt(k.cx + x, k.cy + y, e2); };
+  const narrowHere = (x, y) => {
+    let h = 1, v = 1;
+    for (let i = 1; i <= 8 && isRiver(x + i, y); i++) h++;
+    for (let i = 1; i <= 8 && isRiver(x - i, y); i++) h++;
+    for (let i = 1; i <= 8 && isRiver(x, y + i); i++) v++;
+    for (let i = 1; i <= 8 && isRiver(x, y - i); i++) v++;
+    return Math.min(h, v) <= 6;
+  };
+
   const plots = [], shores = [];
   for (let y = -R2; y <= R2; y++) {
     for (let x = -R2; x <= R2; x++) {
@@ -1376,7 +1411,8 @@ function layoutVillage(k) {
       const e = EV(x, y);
       if (e <= SEA + 0.016) continue;
       if (e > 0.70) continue;                       // no town on bare rock
-      if (riverAt(tx, ty, e)) continue;
+      // A street that meets a narrow river gets a bridge. A wide one is a bank.
+      if (riverAt(tx, ty, e)) { if (onRoad(x, y) && narrowHere(x, y)) roads.push({ x: tx, y: ty }); continue; }
       if (onRoad(x, y)) { roads.push({ x: tx, y: ty }); continue; }
       if ((x & 1) || (y & 1)) continue;             // plots on a 2 tile lattice
       if (rel > 0.4 && wetNear(x, y, 2)) { shores.push({ tx, ty, x, y }); continue; }
@@ -1615,44 +1651,76 @@ const WALL_CV = buildingCanvas(8, 16, (g) => {
 
 /* ── road network between kingdoms ───────────────────────────────────────── */
 
+/* A spanning tree so every kingdom is reachable from every other, plus one
+   extra edge each so the result reads as a web rather than a branch. Each
+   road tries five sags and takes the one that wets the fewest tiles; what
+   water it still crosses gets bridged. */
 function buildRoads(ks) {
+  WORLD.roads = [];
   const roadSet = new Set();
-  const links = [];
-  for (let i = 0; i < ks.length; i++) {
-    let best = -1, bd = 1e9;
-    for (let j = 0; j < ks.length; j++) {
-      if (i === j) continue;
-      const dx = ks[i].cx - ks[j].cx, dy = ks[i].cy - ks[j].cy;
-      const d = dx * dx + dy * dy;
-      if (d < bd) { bd = d; best = j; }
+  const n = ks.length;
+  WORLD.roadSet = roadSet;
+  if (n < 2) return;
+
+  const gap = (a, b) => Math.hypot(a.cx - b.cx, a.cy - b.cy);
+  const edges = [], seen = new Set();
+  const key = (i, j) => i < j ? i + ':' + j : j + ':' + i;
+
+  const inTree = [0], out = [];
+  for (let i = 1; i < n; i++) out.push(i);
+  while (out.length) {
+    let bi = -1, bj = -1, bd = Infinity;
+    for (const i of inTree) {
+      for (let jj = 0; jj < out.length; jj++) {
+        const d = gap(ks[i], ks[out[jj]]);
+        if (d < bd) { bd = d; bi = i; bj = jj; }
+      }
     }
-    if (best < 0) continue;
-    const key = i < best ? i + ':' + best : best + ':' + i;
-    if (links.some(l => l.key === key)) continue;
-    links.push({ key, a: ks[i], b: ks[best] });
+    edges.push([bi, out[bj]]); seen.add(key(bi, out[bj]));
+    inTree.push(out[bj]); out.splice(bj, 1);
   }
-  for (const l of links) {
-    const ax = l.a.cx, ay = l.a.cy, bx = l.b.cx, by = l.b.cy;
-    const dist = Math.hypot(bx - ax, by - ay);
-    const steps = Math.ceil(dist);
-    let ok = true;
-    const pts = [];
+
+  for (let i = 0; i < n; i++) {
+    const near = [];
+    for (let j = 0; j < n; j++) if (j !== i) near.push([j, gap(ks[i], ks[j])]);
+    near.sort((a, b) => a[1] - b[1]);
+    for (const [j] of near.slice(0, 3)) {
+      if (seen.has(key(i, j))) continue;
+      seen.add(key(i, j)); edges.push([i, j]); break;
+    }
+  }
+
+  for (const [i, j] of edges) layRoad(ks[i], ks[j], roadSet);
+}
+
+function layRoad(a, b, roadSet) {
+  const ax = a.cx, ay = a.cy, bx = b.cx, by = b.cy;
+  const len = Math.hypot(bx - ax, by - ay);
+  if (len < 4) return;
+  const steps = Math.ceil(len);
+  const nx = -(by - ay) / len, ny = (bx - ax) / len;
+  const spread = hash1(a.seed + b.seed, 3) - 0.5;
+  let best = null, bestWet = Infinity;
+  for (let t = 0; t < 5; t++) {
+    const amp = (spread + (t - 2) * 0.22) * len * 0.30;
+    const pts = []; let wet = 0;
     for (let i = 0; i <= steps; i++) {
-      const t = i / steps;
-      // A gentle sag off the straight line so roads look walked, not ruled.
-      const bend = Math.sin(t * Math.PI) * (hash1(l.a.seed + l.b.seed, 3) - 0.5) * dist * 0.22;
-      const nx = -(by - ay) / dist, ny = (bx - ax) / dist;
-      const x = Math.round(lerp(ax, bx, t) + nx * bend);
-      const y = Math.round(lerp(ay, by, t) + ny * bend);
-      if (elevAt(x, y) < SEA) { ok = false; break; }
+      const u = i / steps;
+      const bend = Math.sin(u * Math.PI) * amp;
+      const x = Math.round(lerp(ax, bx, u) + nx * bend);
+      const y = Math.round(lerp(ay, by, u) + ny * bend);
+      if (elevAt(x, y) < SEA) wet++;
       pts.push({ x, y });
     }
-    if (!ok) continue;
-    for (const p of pts) { roadSet.add(p.x + ',' + p.y); roadSet.add((p.x + 1) + ',' + p.y); }
-    l.pts = pts;
-    WORLD.roads.push(l);
+    if (wet < bestWet) { bestWet = wet; best = pts; }
+    if (!wet) break;
   }
-  WORLD.roadSet = roadSet;
+  for (const p of best) {
+    const a1 = p.x + ',' + p.y, a2 = (p.x + 1) + ',' + p.y;
+    roadSet.add(a1); roadSet.add(a2);
+    WORLD.highwaySet.add(a1); WORLD.highwaySet.add(a2);
+  }
+  WORLD.roads.push({ a, b, pts: best });
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1687,7 +1755,9 @@ function tileCode(tx, ty, e) {
   return base;
 }
 function isBridge(tx, ty) {
-  return !!(WORLD.roadSet && WORLD.roadSet.has(tx + ',' + ty) && tileAt(tx, ty) === T.RIVER);
+  if (!WORLD.roadSet || !WORLD.roadSet.has(tx + ',' + ty)) return false;
+  const c = tileAt(tx, ty);
+  return c === T.RIVER || c === T.SHALLOW || c === T.OCEAN;
 }
 /* Lay the deck along the road, not across it. */
 function bridgeCv(tx, ty) {
@@ -1701,7 +1771,7 @@ function tileColor(code, tx, ty, e) {
   const ramp = RAMPS[code];
   // One low frequency field mottles every biome the same way, so the ground
   // reads as terrain rather than as a checkerboard of swatches.
-  const d = vnoise(tx / 11, ty / 11, WORLD_SEED + 88) * 0.72
+  const d = vnoise(tx / 17, ty / 17, WORLD_SEED + 88) * 0.72
           + hash2(tx, ty, WORLD_SEED + 13) * 0.28;
   let i = d < 0.40 ? 0 : d < 0.70 ? 1 : 2;
   // Above the treeline the stop comes from height instead: snow brightens
@@ -1835,24 +1905,12 @@ function renderLo(cx, cy) {
   for (let ty = 0; ty < CHUNK; ty++) {
     for (let tx = 0; tx < CHUNK; tx++) {
       const wx = ox + tx, wy = oy + ty;
-      const code = tileCode(wx, wy);
-      // Water renders flat out here: sub pixel grain on an ocean is shimmer.
+      let code = tileCode(wx, wy);
+      // Only the roads between kingdoms survive out here. A town's own street
+      // grid at two pixels a tile reads as hatching, not as a town.
+      if (code === T.ROAD && !WORLD.highwaySet.has(wx + ',' + wy)) code = tileAt(wx, wy);
+      // Water renders flat: sub pixel grain on an ocean is shimmer.
       g.fillStyle = isWater(code) ? RAMPS[code][1] : tileColor(code, wx, wy);
-      g.fillRect(tx * MIDPX, ty * MIDPX, MIDPX, MIDPX);
-    }
-  }
-  // Settled land reads as a warm patch, so kingdoms are findable from orbit.
-  for (const k of WORLD.kingdoms) {
-    const sh = k.shape;
-    if (!sh) continue;
-    const kr = k.rMax + 2;
-    if (Math.abs(k.cx - (ox + CHUNK / 2)) > kr + CHUNK || Math.abs(k.cy - (oy + CHUNK / 2)) > kr + CHUNK) continue;
-    for (let ty = 0; ty < CHUNK; ty++) for (let tx = 0; tx < CHUNK; tx++) {
-      const dx = ox + tx - k.cx, dy = oy + ty - k.cy;
-      const u = (dx * sh.ct + dy * sh.st) / sh.A, v = (-dx * sh.st + dy * sh.ct) / sh.B;
-      const d2 = u * u + v * v;
-      if (d2 > 1) continue;
-      g.fillStyle = d2 > 0.72 ? 'rgba(168,124,72,0.62)' : 'rgba(186,136,78,0.88)';
       g.fillRect(tx * MIDPX, ty * MIDPX, MIDPX, MIDPX);
     }
   }
@@ -1920,6 +1978,7 @@ const atlasReady = () => atlas && atlasHas.size >= WORLD.atlasNeed;
    Merchants carry goods down the road to the nearest neighbour.
    ═══════════════════════════════════════════════════════════════════════════ */
 
+const UNIT_BUDGET = 700;             // moving sprites drawn in one frame
 const DAY_MS = 240000;
 let clockT = DAY_MS * 0.30;
 
@@ -1929,7 +1988,9 @@ function isNight() { const p = dayPhase(); return p > 0.66 || p < 0.06; }
 function spawnUnits(k) {
   const rnd = mulberry(k.seed * 31 + 5);
   const units = [];
-  const cap = clamp(Math.round(k.pop / 55), 6, 80);
+  // Proportional to the city, sub-linear at the top so a capital of fifty
+  // thousand does not cost forty times a village.
+  const cap = clamp(Math.round(k.pop / 300 + Math.sqrt(k.pop) * 0.7), 6, 150);
   const mix = [
     ['farmer', Math.max(1, Math.round(cap * 0.46))],
     ['archer', Math.round(cap * 0.14)],
@@ -2163,13 +2224,21 @@ function drawNear(z, dt) {
     }
   }
 
-  // Villagers, only for kingdoms actually on screen.
+  // Villagers, only for kingdoms on screen, nearest first, and never more
+  // than the frame budget however many cities are in view.
   const draws = [];
+  const near = [];
   for (const k of WORLD.kingdoms) {
     const kx = k.cx * TILE, ky = k.cy * TILE, kr = Math.max(k.r, k.rBuilt || 0) * TILE + 40;
     if (kx + kr < left || kx - kr > left + bw || ky + kr < top || ky - kr > top + bh) continue;
+    near.push({ k, d: Math.hypot(kx - cam.x, ky - cam.y) });
+  }
+  near.sort((a, b) => a.d - b.d);
+  for (const { k } of near) {
+    if (draws.length >= UNIT_BUDGET) break;
     stepUnits(k, dt);
     for (const u of k.units) {
+      if (draws.length >= UNIT_BUDGET) break;
       const sx = u.x - left, sy = u.y - top;
       if (sx < -12 || sy < -12 || sx > bw + 12 || sy > bh + 12) continue;
       draws.push({ x: sx, y: sy, s: SPRITES[u.kind + (Math.sin(u.ph) > 0 ? '_a' : '_b')] });
@@ -2337,7 +2406,8 @@ function drawLabels(z, tint) {
     if (k === selected || k === hovered) {
       ctx.strokeStyle = '#e8b03a'; ctx.lineWidth = 1.5; ctx.stroke();
     }
-    if (k.flag) ctx.drawImage(k.flag, x + pad, y + (boxH - fh) / 2, fw, fh);
+    const icon = k.logo || k.flag;
+    if (icon) ctx.drawImage(icon, x + pad, y + (boxH - fh) / 2, fw, k.logo ? fw : fh);
     ctx.fillStyle = '#f4e9d0';
     ctx.font = '700 13px ' + UI_FONT;
     ctx.fillText(k.name, x + pad + fw + gap, y + 15);
@@ -2589,10 +2659,14 @@ function openCard(k) {
     : k.founders.map(f =>
         '<a href="https://x.com/' + f + '" target="_blank" rel="noopener">👑 @' + f + '</a>').join('');
   document.getElementById('cStats').innerHTML = [
-    [fmt(k.pop), 'Population'], [fmt(k.houses), 'Houses'],
-    [fmt(k.knights), 'Knights'], [fmt(k.archers), 'Archers'],
-    [fmt(k.horsemen), 'Horsemen'], [fmt(k.churn), 'In the graveyard'],
-  ].map(([n, l]) => '<div class="stat"><div class="n">' + n + '</div><div class="l">' + l + '</div></div>').join('');
+    [fmt(k.pop), 'Population', 'farmers, archers, knights, horsemen'],
+    [fmt(k.houses), 'Houses', '1 per 100 active users'],
+    [fmt(k.knights), 'Knights', '1 per 10 subscriptions'],
+    [fmt(k.archers), 'Archers', '1 per 10 free trials'],
+    [fmt(k.horsemen), 'Horsemen', '1 per $500 of MRR'],
+    [fmt(k.churn), 'Graveyard', 'subscribers lost in 30 days'],
+  ].map(([n, l, w]) => '<div class="stat"><div class="n">' + n + '</div>' +
+    '<div class="l">' + l + '</div><div class="w">' + w + '</div></div>').join('');
 
   const d = weekDelta(k);
   const de = document.getElementById('cDelta');
@@ -2611,7 +2685,8 @@ function drawFlag(k) {
   const g = cv.getContext('2d');
   g.imageSmoothingEnabled = false;
   g.clearRect(0, 0, cv.width, cv.height);
-  if (k.flag) g.drawImage(k.flag, 2, 2);
+  const icon = k.logo || k.flag;
+  if (icon) g.drawImage(icon, 2, 2, k.logo ? 13 : icon.width, k.logo ? 13 : icon.height);
 }
 
 function drawSpark(k) {
@@ -2658,15 +2733,37 @@ rules.addEventListener('click', e => { if (e.target === rules) rules.classList.r
 document.getElementById('addBtn').addEventListener('click', openModal);
 document.getElementById('mClose').addEventListener('click', closeModal);
 modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+/* The logo is read here, downscaled to a sixteen pixel shield with the
+   same nearest-neighbour look as everything else, and previewed at once. */
+let pendingLogo = null;
+document.getElementById('fLogo').addEventListener('change', (e) => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  const img = new Image();
+  img.onload = () => {
+    const cv = document.getElementById('fLogoPrev');
+    const g = cv.getContext('2d');
+    g.imageSmoothingEnabled = true;
+    g.clearRect(0, 0, 16, 16);
+    const side = Math.min(img.width, img.height);
+    g.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, 16, 16);
+    pendingLogo = cv;
+    document.getElementById('fLogoHint').textContent = 'This is how it will sit next to your name.';
+    URL.revokeObjectURL(img.src);
+  };
+  img.src = URL.createObjectURL(f);
+});
+
 document.getElementById('mGo').addEventListener('click', () => {
   const anonA = document.getElementById('fAnonA').checked;
   const anonF = document.getElementById('fAnonF').checked;
   const typed = document.getElementById('fKing').value.trim();
+  const handle = document.getElementById('fX').value.trim();
   const note = document.getElementById('mNote');
-  if (!typed && !anonA) { note.textContent = 'Name the kingdom first, or hide the app.'; return; }
-  const name = anonA ? veilName(typed.length * 977 + 13) : typed;
+  const name = (anonA || !typed) ? veilName(typed.length * 977 + handle.length * 31 + 13) : typed;
+  const noLord = anonF || !handle;
   note.textContent = 'Saved. ' + name + ' joins the map at the next daily refresh'
-    + (anonF ? ', with no handle on it.' : '.');
+    + (noLord ? ', with no handle on it' : '') + (pendingLogo ? ', under its own logo.' : '.');
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -2681,15 +2778,13 @@ function syncZoomBtns() {
   zOut.disabled = cam.zi <= 0;
 }
 
-const dayEl = document.getElementById('dayN'), yrEl = document.getElementById('yr');
+/* The clock still runs the light and the crowds; only the newspaper's issue
+   number shows it. */
 let lastDay = -1;
 function paintClock() {
   const total = Math.floor(clockT / DAY_MS) + 1;
   if (total === lastDay) return;
   lastDay = total;
-  const year = Math.floor((total - 1) / 90) + 1;
-  dayEl.textContent = 'Day ' + (((total - 1) % 90) + 1);
-  yrEl.textContent = year;
   document.getElementById('issue').textContent = 'No. ' + total;
 }
 
