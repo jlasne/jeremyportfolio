@@ -985,6 +985,8 @@ const RAMPS = {
 
 /* ── kingdom maths ───────────────────────────────────────────────────────── */
 
+function kingdomHue(i) { return 'hsl(' + ((i * 137.508) % 360).toFixed(1) + ',58%,46%)'; }
+
 function derive(k) {
   const houses   = Math.max(1, Math.floor(k.users / 100));
   const farmers  = Math.floor(k.users / 10);
@@ -1196,6 +1198,7 @@ function layoutVillage(k) {
   if (!has.has('townHall')) civic.push(makeCampfire());
 
   for (const cv of civic) {
+    lit(cv);
     const p = take(); if (!p) break;
     push(p.tx, p.ty, cv);
     poi.gather.push({ x: p.tx * TILE + TILE / 2, y: p.ty * TILE + TILE / 2 });
@@ -1282,7 +1285,7 @@ function layoutVillage(k) {
   }
 
   if (has.has('keep')) {
-    const hue = ['#a8442f', '#3f5f9c', '#2f7d54', '#7a3f86'][k.seed % 4];
+    const hue = kingdomHue(k.hue);
     for (let i = 0; i < 4; i++) {
       const a = spokeA + i * Math.PI / 2 + 0.4;
       const tx = k.cx + Math.round(Math.cos(a) * 6), ty = k.cy + Math.round(Math.sin(a) * 6);
@@ -1425,9 +1428,11 @@ function renderHi(cx, cy) {
         g.fillRect(X, Y, TILE, TILE);
       }
 
-      // Per tile grain, four speckles, so flat ground never looks like a swatch.
+      // Per tile grain. Sand, snow and road read as smooth sheets, so they
+      // get none: grain on them looks like dirt on the screen.
       const ramp = RAMPS[code];
-      for (let s = 0; s < 4; s++) {
+      const grainy = code !== T.SAND && code !== T.SNOW && code !== T.ROAD;
+      for (let s = 0; grainy && s < 4; s++) {
         const h = hash2(wx * 4 + s, wy * 4 + s * 7, WORLD_SEED + 200 + s);
         if (h > 0.34) continue;
         const px1 = (h * 9973 | 0) % TILE, py1 = (h * 7919 | 0) % TILE;
@@ -1436,25 +1441,27 @@ function renderHi(cx, cy) {
       }
 
       if (isWater(code)) {
-        // Foam where water meets land, one bright lip on the land side.
+        // The one rule that makes land read as raised: a dark band on the
+        // water wherever land sits to its north or west. No foam ring.
         const nUp = tileCode(wx, wy - 1), nDn = tileCode(wx, wy + 1);
         const nL = tileCode(wx - 1, wy), nR = tileCode(wx + 1, wy);
-        if (!isWater(nUp)) { g.fillStyle = C.foam[1]; g.fillRect(X, Y, TILE, 2); }
-        if (!isWater(nDn)) { g.fillStyle = C.foam[0]; g.fillRect(X, Y + TILE - 2, TILE, 2); }
-        if (!isWater(nL)) { g.fillStyle = C.foam[0]; g.fillRect(X, Y, 2, TILE); }
-        if (!isWater(nR)) { g.fillStyle = C.foam[0]; g.fillRect(X + TILE - 2, Y, 2, TILE); }
+        if (!isWater(nUp) || !isWater(nL)) {
+          g.fillStyle = 'rgba(9,26,51,0.42)';
+          g.fillRect(X, Y, TILE, TILE);
+        }
+        if (!isWater(nDn) || !isWater(nR)) {
+          g.fillStyle = C.foam[0];
+          if (!isWater(nDn)) g.fillRect(X, Y + TILE - 1, TILE, 1);
+          if (!isWater(nR)) g.fillRect(X + TILE - 1, Y, 1, TILE);
+        }
         if (code === T.SHALLOW && (!isWater(nUp) || !isWater(nDn) || !isWater(nL) || !isWater(nR)))
           coast.push(X, Y);
       } else {
         // Relief without isometry: a dark lip under anything that rises north.
-        const e = elevAt(wx, wy), eN = elevAt(wx, wy - 1);
-        if (eN - e > 0.016) {
-          g.fillStyle = 'rgba(20,30,18,0.20)';
-          g.fillRect(X, Y, TILE, 3);
-        } else if (e - eN > 0.016) {
-          g.fillStyle = 'rgba(255,246,214,0.13)';
-          g.fillRect(X, Y, TILE, 2);
-        }
+        const e = elevAt(wx, wy), eN = elevAt(wx, wy - 1), eW = elevAt(wx - 1, wy);
+        if (eN - e > 0.016) { g.fillStyle = 'rgba(20,30,18,0.20)'; g.fillRect(X, Y, TILE, 3); }
+        else if (e - eN > 0.016) { g.fillStyle = 'rgba(255,246,214,0.13)'; g.fillRect(X, Y, TILE, 2); }
+        if (eW - e > 0.016) { g.fillStyle = 'rgba(20,30,18,0.16)'; g.fillRect(X, Y, 3, TILE); }
       }
     }
   }
@@ -1659,10 +1666,12 @@ function stepMerchants(dt) {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const POOL = {};
+/* Only places with people in them light up after dark. */
+function lit(cv) { cv.lit = true; return cv; }
 function fillPools() {
   const r = mulberry(90210);
-  POOL.house = []; for (let i = 0; i < 22; i++) POOL.house.push(makeHouse(r, false));
-  POOL.big = [];   for (let i = 0; i < 7; i++)  POOL.big.push(makeHouse(r, true));
+  POOL.house = []; for (let i = 0; i < 22; i++) POOL.house.push(lit(makeHouse(r, false)));
+  POOL.big = [];   for (let i = 0; i < 7; i++)  POOL.big.push(lit(makeHouse(r, true)));
   POOL.farm = [];  for (let i = 0; i < 5; i++)  POOL.farm.push(makeFarm(r));
   POOL.mill = [];  for (let i = 0; i < 3; i++)  POOL.mill.push(makeWindmill(r));
   POOL.tomb = [];  for (let i = 0; i < 5; i++)  POOL.tomb.push(makeTombstone(r));
@@ -1694,6 +1703,7 @@ function resize() {
   cssW = window.innerWidth; cssH = window.innerHeight;
   cvs.width = Math.round(cssW * dpr); cvs.height = Math.round(cssH * dpr);
   ctx.imageSmoothingEnabled = false;
+  bakeVignette();
 }
 window.addEventListener('resize', resize);
 
@@ -1721,10 +1731,12 @@ function clampCam() {
    and the windows come on.
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* Multiply keyframes. White is a no-op, so half the cycle costs nothing.
+   A black rect at low alpha would grey the whole palette out instead. */
 const LIGHT = [
-  [0.00, 26, 34, 78, 0.40], [0.06, 255, 168, 104, 0.20], [0.16, 0, 0, 0, 0.00],
-  [0.58, 0, 0, 0, 0.00],    [0.66, 255, 146, 84, 0.20],  [0.74, 26, 34, 78, 0.40],
-  [1.00, 26, 34, 78, 0.40],
+  [0.00, 72, 86, 150], [0.05, 104, 116, 172], [0.12, 255, 216, 180],
+  [0.22, 255, 255, 255], [0.60, 255, 255, 255], [0.70, 255, 208, 168],
+  [0.80, 112, 126, 182], [0.90, 72, 86, 150], [1.00, 72, 86, 150],
 ];
 function tintNow() {
   const p = dayPhase();
@@ -1732,11 +1744,11 @@ function tintNow() {
     const a = LIGHT[i], b = LIGHT[i + 1];
     if (p >= a[0] && p <= b[0]) {
       const t = (p - a[0]) / (b[0] - a[0] || 1);
-      return { r: lerp(a[1], b[1], t) | 0, g: lerp(a[2], b[2], t) | 0,
-               b: lerp(a[3], b[3], t) | 0, a: lerp(a[4], b[4], t) };
+      const r = lerp(a[1], b[1], t) | 0, g = lerp(a[2], b[2], t) | 0, bl = lerp(a[3], b[3], t) | 0;
+      return { r, g, b: bl, lum: (r * 0.30 + g * 0.59 + bl * 0.11) / 255 };
     }
   }
-  return { r: 0, g: 0, b: 0, a: 0 };
+  return { r: 255, g: 255, b: 255, lum: 1 };
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1744,6 +1756,8 @@ function tintNow() {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 let hovered = null, selected = null;
+const view = { c0x: 0, c1x: 0, c0y: 0, c1y: 0 };
+let VIGNETTE = null;
 
 function draw(dt) {
   const z = zoom();
@@ -1757,10 +1771,14 @@ function draw(dt) {
   if (z >= NEAR_MIN) drawNear(z, dt); else drawFar(z);
 
   const t = tintNow();
-  if (t.a > 0.004) {
-    ctx.fillStyle = 'rgba(' + t.r + ',' + t.g + ',' + t.b + ',' + t.a.toFixed(3) + ')';
+  if (t.lum < 0.999) {
+    ctx.globalCompositeOperation = 'multiply';
+    ctx.fillStyle = 'rgb(' + t.r + ',' + t.g + ',' + t.b + ')';
     ctx.fillRect(0, 0, cvs.width, cvs.height);
+    ctx.globalCompositeOperation = 'source-over';
   }
+  if (t.lum < 0.82 && z >= 1) lampPass(z, 1 - t.lum);
+  if (VIGNETTE) ctx.drawImage(VIGNETTE, 0, 0);
   drawLabels(z, t);
 }
 
@@ -1818,21 +1836,7 @@ function drawNear(z, dt) {
     bctx.drawImage(d.s, Math.round(d.x - d.s.width / 2), Math.round(d.y - d.s.height + 1));
   }
 
-  // Window light after dusk.
-  const t = tintNow();
-  if (t.a > 0.14 && z >= 1) {
-    bctx.fillStyle = 'rgba(255,206,110,0.92)';
-    for (let cy = c0y; cy <= c1y; cy++) for (let cx = c0x; cx <= c1x; cx++) {
-      const list = WORLD.buildingsByChunk.get(ckey(cx, cy));
-      if (!list) continue;
-      for (const b of list) {
-        if (b.cv.width < 9) continue;
-        const bx = b.tx * TILE - left + (b.cv.width >> 1) - 1;
-        const by = b.ty * TILE - top - Math.round(b.cv.height * 0.34);
-        bctx.fillRect(bx, by, 2, 2);
-      }
-    }
-  }
+  view.c0x = c0x; view.c1x = c1x; view.c0y = c0y; view.c1y = c1y;
 
   if (selected) ringKingdom(bctx, selected, left, top, 1);
   else if (hovered) ringKingdom(bctx, hovered, left, top, 1);
@@ -1841,6 +1845,47 @@ function drawNear(z, dt) {
   ctx.imageSmoothingEnabled = z < 1;
   ctx.drawImage(back, 0, 0, bw, bh, 0, 0, Math.round(bw * s), Math.round(bh * s));
   ctx.imageSmoothingEnabled = false;
+}
+
+/* Windows come on after dusk: hard edged pixel light, added not blended,
+   capped so a metropolis at night still costs one pass. */
+function lampPass(z, strength) {
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.globalAlpha = clamp(strength * 2.4, 0.15, 1);
+  ctx.fillStyle = 'rgba(255,190,92,0.92)';
+  let n = 0;
+  for (let cy = view.c0y; cy <= view.c1y && n < 900; cy++) {
+    for (let cx = view.c0x; cx <= view.c1x && n < 900; cx++) {
+      const list = WORLD.buildingsByChunk.get(ckey(cx, cy));
+      if (!list) continue;
+      for (let i = 0; i < list.length && n < 900; i++) {
+        const b = list[i];
+        if (!b.cv.lit) continue;
+        const p = worldToScreen(b.tx * TILE + (b.cv.width >> 1) - 2,
+                                b.ty * TILE + 2 - Math.round(b.cv.height * 0.28));
+        if (p.x < -8 || p.y < -8 || p.x > cssW + 8 || p.y > cssH + 8) continue;
+        const w = Math.max(2, Math.round(z * dpr * 2));
+        ctx.fillRect(Math.round(p.x * dpr), Math.round(p.y * dpr), w, w);
+        n++;
+      }
+    }
+  }
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+/* A large evenly lit map reads as wallpaper without one. Baked on resize. */
+function bakeVignette() {
+  const c = document.createElement('canvas');
+  c.width = cvs.width; c.height = cvs.height;
+  const g = c.getContext('2d');
+  const r = Math.hypot(c.width, c.height) / 2;
+  const grad = g.createRadialGradient(c.width / 2, c.height / 2, r * 0.55,
+                                      c.width / 2, c.height / 2, r);
+  grad.addColorStop(0, 'rgba(8,12,20,0)');
+  grad.addColorStop(1, 'rgba(8,12,20,0.30)');
+  g.fillStyle = grad; g.fillRect(0, 0, c.width, c.height);
+  VIGNETTE = c;
 }
 
 function ringKingdom(g, k, left, top, sc) {
@@ -1882,7 +1927,9 @@ let UI_FONT = 'monospace';
 function drawLabels(z, tint) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.textAlign = 'center';
+  let shown = 0;
   for (const k of WORLD.kingdoms) {
+    if (shown >= 24) break;
     const p = worldToScreen(k.cx * TILE, (k.cy - (k.rTown || k.r)) * TILE - 16);
     if (p.x < -140 || p.x > cssW + 140 || p.y < -40 || p.y > cssH + 40) continue;
     const big = z >= 1;
@@ -1898,6 +1945,7 @@ function drawLabels(z, tint) {
     }
     ctx.fillStyle = '#f2e6cc';
     ctx.fillText(label, p.x, p.y - 1.5);
+    shown++;
     if (z < NEAR_MIN) {
       ctx.font = '700 9px ' + UI_FONT;
       ctx.fillStyle = 'rgba(255,225,160,0.9)';
@@ -2147,7 +2195,7 @@ function drawFlag(k) {
   const cv = document.getElementById('cardFlag');
   const g = cv.getContext('2d');
   g.clearRect(0, 0, cv.width, cv.height);
-  const hue = ['#a8442f', '#3f5f9c', '#2f7d54', '#7a3f86'][k.seed % 4];
+  const hue = kingdomHue(k.hue);
   g.fillStyle = C.wood[0]; g.fillRect(8, 0, 1, 20);
   g.fillStyle = hue; g.fillRect(2, 1, 13, 13);
   g.fillStyle = C.ink;
@@ -2251,6 +2299,7 @@ function boot() {
   progress(0.3);
 
   ks = placeKingdoms(ks);
+  ks.forEach((k, i) => { k.hue = i; });
   WORLD.kingdoms = ks;
   progress(0.5);
 
