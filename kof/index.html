@@ -1,0 +1,2236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>King of Founders</title>
+<meta name="description" content="A living pixel world map. Every kingdom is a real app. Citizens are active users, knights are paying subscribers.">
+<link rel="canonical" href="https://www.jeremylasne.com/kof/">
+<meta name="theme-color" content="#1b3a63">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="King of Founders">
+<meta property="og:url" content="https://www.jeremylasne.com/kof/">
+<meta property="og:title" content="King of Founders">
+<meta property="og:description" content="A living pixel world map. Every kingdom is a real app. Citizens are active users, knights are paying subscribers.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:creator" content="@jeremylasne">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   King of Founders — /kof/
+
+   One world map. One kingdom per app. Population is real product data:
+   100 active users build a house, 10 subscribers arm a knight, 500 MRR
+   mounts a horseman. The land only grows as the population grows.
+
+   One self-contained file. No build step, no framework, no network at
+   runtime. Terrain, buildings, trees and villagers are all drawn from
+   seeded noise into an offscreen pixel buffer, then blitted at integer
+   zoom so every pixel stays square.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#20180f;
+  --paper:#efe4cd;
+  --paper-2:#e3d5b8;
+  --paper-line:#c7b391;
+  --sea:#1b3a63;
+  --gold:#e8b03a;
+  --ui: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  --news: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+}
+html,body{height:100%;overflow:hidden;background:#12233b}
+body{
+  font-family:var(--ui);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color:transparent;
+  overscroll-behavior:none;
+}
+canvas#world{
+  display:block;width:100vw;height:100vh;
+  image-rendering:pixelated;image-rendering:crisp-edges;
+  cursor:grab;touch-action:none;
+}
+canvas#world.dragging{cursor:grabbing}
+
+/* ── shared plate look ─────────────────────────────────────────────────── */
+.plate{
+  background:linear-gradient(#f4ead6,#e6d8ba);
+  border:2px solid #6b5334;
+  box-shadow:0 0 0 2px #a98a5c inset, 0 6px 0 rgba(0,0,0,.28), 0 14px 30px rgba(0,0,0,.35);
+  border-radius:3px;
+}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 14px;font-size:12px;font-weight:700;letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.btn:active{transform:translateY(2px);box-shadow:0 0 0 2px #a98a5c inset,0 3px 0 rgba(0,0,0,.28)}
+.hud{position:fixed;z-index:20}
+
+/* ── top left: add your kingdom ────────────────────────────────────────── */
+#addBtn{top:14px;left:14px}
+#addBtn .crown{width:16px;height:12px;display:block}
+
+/* ── bottom right: zoom + clock ────────────────────────────────────────── */
+#clock{
+  bottom:14px;right:14px;display:flex;align-items:stretch;gap:0;overflow:hidden;
+}
+#clock .day{
+  padding:9px 12px;font-size:11px;font-weight:700;letter-spacing:.05em;
+  display:flex;flex-direction:column;gap:2px;line-height:1.15;min-width:96px;
+  border-right:2px solid #a98a5c;
+}
+#clock .day small{font-size:9px;opacity:.6;font-weight:700;letter-spacing:.08em}
+#clock .z{width:34px;font-size:16px;font-weight:700;line-height:1;
+  display:flex;align-items:center;justify-content:center}
+#clock .z+.z{border-left:2px solid #a98a5c}
+#clock .z:disabled{opacity:.3;cursor:default}
+
+/* ── top right: the newspaper ──────────────────────────────────────────── */
+#paper{
+  top:14px;right:14px;width:min(360px,calc(100vw - 28px));
+  font-family:var(--news);display:flex;flex-direction:column;max-height:calc(100vh - 90px);
+}
+#paper .masthead{
+  display:flex;align-items:center;gap:10px;padding:8px 12px 7px;
+  border-bottom:2px solid var(--ink);cursor:pointer;user-select:none;
+}
+#paper .masthead h1{
+  font-size:17px;letter-spacing:.02em;font-weight:700;flex:1;line-height:1;
+  font-variant:small-caps;
+}
+#paper .masthead .issue{font-family:var(--ui);font-size:9px;opacity:.55;letter-spacing:.06em}
+#paper .masthead .caret{font-family:var(--ui);font-size:11px;opacity:.7}
+#paper .tease{
+  padding:9px 12px 11px;font-size:14px;line-height:1.32;cursor:pointer;
+  border-top:1px solid var(--paper-line);
+}
+#paper .tease b{font-weight:700}
+#paper .body{display:none;overflow-y:auto;border-top:2px solid var(--ink);
+  scrollbar-width:thin;scrollbar-color:#a98a5c transparent}
+#paper.open .body{display:block}
+#paper.open .tease{display:none}
+#paper .body::-webkit-scrollbar{width:8px}
+#paper .body::-webkit-scrollbar-thumb{background:#a98a5c;border-radius:4px}
+#paper section{padding:11px 12px 13px;border-bottom:1px solid var(--paper-line)}
+#paper section:last-child{border-bottom:0}
+#paper h2{
+  font-family:var(--ui);font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  font-weight:700;opacity:.55;margin-bottom:8px;
+}
+#paper .ev{font-size:13px;line-height:1.35;padding:3px 0;display:flex;gap:7px}
+#paper .ev .when{font-family:var(--ui);font-size:9px;opacity:.45;flex:0 0 34px;padding-top:3px;
+  letter-spacing:.03em}
+#paper .row{
+  display:flex;align-items:baseline;gap:8px;padding:4px 0;font-size:13px;cursor:pointer;
+  border-bottom:1px dotted #cbb896;
+}
+#paper .row:last-child{border-bottom:0}
+#paper .row:hover{background:rgba(0,0,0,.05)}
+#paper .row .rank{font-family:var(--ui);font-size:10px;opacity:.5;flex:0 0 20px}
+#paper .row .nm{flex:1;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#paper .row .val{font-family:var(--ui);font-size:11px;font-weight:700}
+#paper .row .mv{font-family:var(--ui);font-size:10px;flex:0 0 26px;text-align:right}
+.up{color:#2f7d32}.down{color:#a33427}.flat{opacity:.35}
+
+/* ── kingdom card ──────────────────────────────────────────────────────── */
+#card{
+  position:fixed;z-index:25;left:14px;bottom:14px;width:min(320px,calc(100vw - 28px));
+  display:none;
+}
+#card.on{display:block}
+#card .top{display:flex;gap:10px;padding:12px 12px 10px;align-items:flex-start}
+#card .flag{width:34px;height:40px;flex:0 0 34px;image-rendering:pixelated}
+#card .ttl{flex:1;min-width:0}
+#card .ttl h3{font-family:var(--news);font-size:19px;line-height:1.05;font-weight:700}
+#card .ttl p{font-size:10px;letter-spacing:.04em;opacity:.6;margin-top:3px}
+#card .x{font-size:16px;line-height:1;opacity:.45;padding:2px 4px}
+#card .x:hover{opacity:1}
+#card .founders{display:flex;flex-wrap:wrap;gap:5px;padding:0 12px 10px}
+#card .founders a{
+  font-size:10px;font-weight:700;text-decoration:none;color:inherit;
+  background:rgba(107,83,52,.14);border:1px solid rgba(107,83,52,.3);
+  padding:3px 7px;border-radius:2px;
+}
+#card .founders a:hover{background:rgba(107,83,52,.26)}
+#card .stats{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--paper-line)}
+#card .stat{padding:8px 12px;border-bottom:1px solid var(--paper-line)}
+#card .stat:nth-child(odd){border-right:1px solid var(--paper-line)}
+#card .stat .n{font-size:17px;font-weight:700;line-height:1}
+#card .stat .l{font-size:9px;letter-spacing:.08em;text-transform:uppercase;opacity:.55;margin-top:3px}
+#card .spark{padding:9px 12px 11px}
+#card .spark canvas{width:100%;height:34px;display:block;image-rendering:auto}
+#card .spark .lab{font-size:9px;letter-spacing:.08em;text-transform:uppercase;opacity:.55;
+  display:flex;justify-content:space-between;margin-bottom:5px}
+
+/* ── modal ─────────────────────────────────────────────────────────────── */
+#modal{
+  position:fixed;inset:0;z-index:40;display:none;
+  background:rgba(10,18,30,.72);backdrop-filter:blur(3px);
+  align-items:center;justify-content:center;padding:20px;
+}
+#modal.on{display:flex}
+#modal .sheet{
+  width:min(560px,100%);max-height:calc(100vh - 40px);overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:#a98a5c transparent;
+}
+#modal .sheet::-webkit-scrollbar{width:9px}
+#modal .sheet::-webkit-scrollbar-thumb{background:#a98a5c;border-radius:4px}
+#modal .hd{
+  display:flex;align-items:center;gap:10px;padding:14px 16px;
+  border-bottom:2px solid var(--ink);position:sticky;top:0;
+  background:linear-gradient(#f4ead6,#efe3c8);
+}
+#modal .hd h2{font-family:var(--news);font-size:21px;flex:1;font-weight:700;line-height:1}
+#modal .bd{padding:16px}
+#modal p{font-size:12.5px;line-height:1.6;margin-bottom:12px}
+#modal ol{margin:0 0 14px;padding-left:0;list-style:none;counter-reset:s}
+#modal ol li{
+  counter-increment:s;position:relative;padding:0 0 11px 30px;font-size:12.5px;line-height:1.55;
+}
+#modal ol li::before{
+  content:counter(s);position:absolute;left:0;top:0;width:20px;height:20px;
+  background:var(--ink);color:var(--paper);border-radius:50%;
+  font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;
+}
+#modal code{
+  font-family:var(--ui);font-size:11px;background:rgba(107,83,52,.16);
+  border:1px solid rgba(107,83,52,.28);padding:1px 5px;border-radius:2px;white-space:nowrap;
+}
+#modal h3{
+  font-size:10px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;
+  opacity:.55;margin:20px 0 9px;
+}
+#modal h3:first-child{margin-top:0}
+#modal table{width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:14px}
+#modal th{
+  text-align:left;font-size:9px;letter-spacing:.1em;text-transform:uppercase;opacity:.5;
+  padding:0 8px 6px 0;font-weight:700;
+}
+#modal td{padding:5px 8px 5px 0;border-top:1px solid var(--paper-line);vertical-align:top}
+#modal td:last-child{font-weight:700}
+#modal .safe{
+  background:rgba(47,125,50,.12);border-left:3px solid #2f7d32;
+  padding:10px 12px;font-size:12px;line-height:1.55;margin-bottom:14px;
+}
+#modal .field{margin-bottom:12px}
+#modal label{display:block;font-size:9px;letter-spacing:.11em;text-transform:uppercase;
+  font-weight:700;opacity:.55;margin-bottom:5px}
+#modal input{
+  width:100%;font-family:var(--ui);font-size:13px;padding:9px 11px;color:var(--ink);
+  background:rgba(255,255,255,.5);border:2px solid #a98a5c;border-radius:2px;
+}
+#modal input:focus{outline:0;border-color:var(--ink);background:#fff}
+#modal .go{
+  width:100%;justify-content:center;margin-top:4px;
+  background:var(--ink);color:var(--paper);border-radius:2px;padding:12px;
+}
+#modal .go:active{transform:translateY(1px)}
+#modal .fine{font-size:10.5px;line-height:1.55;opacity:.6;margin-top:12px;margin-bottom:0}
+
+/* ── hover tip ─────────────────────────────────────────────────────────── */
+#tip{
+  position:fixed;z-index:30;pointer-events:none;display:none;
+  background:#20180f;color:#f0e6d2;font-size:11px;line-height:1.4;
+  padding:6px 9px;border-radius:2px;max-width:220px;
+  box-shadow:0 3px 10px rgba(0,0,0,.4);
+}
+#tip.on{display:block}
+#tip b{color:var(--gold)}
+
+/* ── loader ────────────────────────────────────────────────────────────── */
+#boot{
+  position:fixed;inset:0;z-index:60;background:#12233b;color:#8fb4d8;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;
+  font-size:11px;letter-spacing:.18em;text-transform:uppercase;transition:opacity .5s;
+}
+#boot.gone{opacity:0;pointer-events:none}
+#boot .bar{width:150px;height:6px;background:#1b3a63;border:1px solid #2f5f96;overflow:hidden}
+#boot .bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .2s}
+
+@media (max-width:700px){
+  #paper{width:calc(100vw - 28px)}
+  #card{width:calc(100vw - 28px);bottom:66px}
+  #clock .day{min-width:78px}
+}
+</style>
+</head>
+<body>
+
+<canvas id="world"></canvas>
+
+<button class="hud plate btn" id="addBtn">
+  <svg class="crown" viewBox="0 0 16 12" fill="none" aria-hidden="true">
+    <path d="M1 10V3l3.5 3L8 1l3.5 5L15 3v7z" fill="#e8b03a" stroke="#6b5334" stroke-width="1.4"
+          stroke-linejoin="round"/>
+  </svg>
+  Add your kingdom
+</button>
+
+<div class="hud plate" id="paper">
+  <div class="masthead" id="mast">
+    <h1>The Founders Herald</h1>
+    <span class="issue" id="issue">No. 1</span>
+    <span class="caret" id="caret">▾</span>
+  </div>
+  <div class="tease" id="tease"></div>
+  <div class="body">
+    <section><h2>Today</h2><div id="events"></div></section>
+    <section><h2>Fastest growing</h2><div id="growing"></div></section>
+    <section><h2>Leaderboard</h2><div id="board"></div></section>
+  </div>
+</div>
+
+<div class="hud plate" id="clock">
+  <div class="day"><small>Year <span id="yr">1</span></small><span id="dayN">Day 1</span></div>
+  <button class="z" id="zOut" title="Zoom out">−</button>
+  <button class="z" id="zIn" title="Zoom in">+</button>
+</div>
+
+<div class="plate" id="card">
+  <div class="top">
+    <canvas class="flag" id="cardFlag" width="17" height="20"></canvas>
+    <div class="ttl"><h3 id="cName"></h3><p id="cSub"></p></div>
+    <button class="x" id="cClose">✕</button>
+  </div>
+  <div class="founders" id="cFounders"></div>
+  <div class="stats" id="cStats"></div>
+  <div class="spark">
+    <div class="lab"><span>Population, 30 days</span><span id="cDelta"></span></div>
+    <canvas id="cSpark" width="600" height="120"></canvas>
+  </div>
+</div>
+
+<div id="modal">
+  <div class="plate sheet">
+    <div class="hd">
+      <h2>Add your kingdom</h2>
+      <button class="x btn" id="mClose" style="padding:4px 8px;font-size:15px">✕</button>
+    </div>
+    <div class="bd">
+      <p>Your app becomes a kingdom on the map. It refreshes once a day.</p>
+
+      <h3>What your numbers build</h3>
+      <table>
+        <tr><th>RevenueCat metric</th><th>Becomes</th></tr>
+        <tr><td>Active Users, 28 days</td><td>1 house per 100</td></tr>
+        <tr><td>Active Users, 28 days</td><td>1 farmer per 10</td></tr>
+        <tr><td>Active Trials</td><td>1 archer per 10</td></tr>
+        <tr><td>Active Subscriptions</td><td>1 knight per 10</td></tr>
+        <tr><td>MRR</td><td>1 horseman per 500</td></tr>
+        <tr><td>Subscribers lost</td><td>1 tombstone per 10</td></tr>
+      </table>
+
+      <h3>Make a read-only key</h3>
+      <ol>
+        <li>Open RevenueCat, then <code>Project settings → API keys</code>.</li>
+        <li>Click <code>+ New API key</code> and name it <code>King of Founders</code>.</li>
+        <li>Set API version to <code>V2</code>.</li>
+        <li>Set every permission group to <code>No access</code>.</li>
+        <li>Open <code>Charts metrics permissions</code> and set it to <code>Read</code>.</li>
+        <li>Click <code>Generate</code>, then copy the key once. RevenueCat shows it a single time.</li>
+      </ol>
+
+      <div class="safe">
+        That key reads 6 numbers: active users, active trials, active subscriptions, MRR, revenue and new
+        customers. It cannot read emails, names, customer IDs or purchases, and it cannot write anything.
+      </div>
+
+      <h3>Claim your land</h3>
+      <div class="field">
+        <label for="fKing">Kingdom name</label>
+        <input id="fKing" placeholder="Kaught" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="field">
+        <label for="fX">Founder handles on X, comma separated</label>
+        <input id="fX" placeholder="jeremylasne, cofounder" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="field">
+        <label for="fKey">RevenueCat V2 key, charts metrics read only</label>
+        <input id="fKey" placeholder="sk_..." autocomplete="off" spellcheck="false">
+      </div>
+      <button class="btn go" id="mGo">Found the kingdom</button>
+      <p class="fine" id="mNote">The key goes to the server, never to this page. Stripe support lands next.</p>
+    </div>
+  </div>
+</div>
+
+<div id="tip"></div>
+
+<div id="boot">
+  <span>Raising the land</span>
+  <div class="bar"><i id="bootBar"></i></div>
+</div>
+
+<script>
+"use strict";
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   1. THE KINGDOMS
+   Demo data. Each record is what one RevenueCat pull looks like, plus 30 days
+   of history. Replace this array with a fetch once Convex is wired up.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const SEED_KINGDOMS = [
+  {id:'kaught',   name:'Kaught',      tag:'Fishing log',      founders:['jeremylasne'],
+   seed:1041, users:18400, trials:610,  subs:2240, mrr:15680, curve:'grow'},
+  {id:'plotter',  name:'Plotter',     tag:'Habit tracker',    founders:['annaships'],
+   seed:2277, users:52000, trials:1980, subs:6100, mrr:48800, curve:'grow'},
+  {id:'wanderly', name:'Wanderly',    tag:'Trip planner',     founders:['tomdraws','lu_builds'],
+   seed:3319, users:4100,  trials:130,  subs:410,  mrr:2870,  curve:'flat'},
+  {id:'sunsetdb', name:'Sunset',      tag:'Sleep sounds',     founders:['mira_dev'],
+   seed:4483, users:960,   trials:31,   subs:88,   mrr:530,   curve:'shrink'},
+  {id:'forkful',  name:'Forkful',     tag:'Recipe scanner',   founders:['chefpablo'],
+   seed:5527, users:128000,trials:5400, subs:14900,mrr:119200,curve:'spike'},
+  {id:'lifted',   name:'Lifted',      tag:'Gym logger',       founders:['ben_lifts','kaycodes'],
+   seed:6659, users:31500, trials:1120, subs:3860, mrr:30880, curve:'grow'},
+  {id:'quillo',   name:'Quillo',      tag:'Journal',          founders:['sofiawrites'],
+   seed:7717, users:2300,  trials:74,   subs:190,  mrr:1140,  curve:'grow'},
+  {id:'tidepool', name:'Tidepool',    tag:'Budget app',       founders:['marcusr'],
+   seed:8837, users:390,   trials:12,   subs:34,   mrr:238,   curve:'flat'},
+  {id:'orbitcam', name:'Orbit',       tag:'Camera presets',   founders:['nikolab'],
+   seed:9931, users:74,    trials:3,    subs:6,    mrr:42,    curve:'grow'},
+];
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   2. NUMBERS
+   Deterministic hashing and value noise. No Math.random anywhere in world
+   generation, so the same seed always raises the same land.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const WORLD_SEED = 20260903;
+
+function hash2(x, y, s) {
+  let h = (x | 0) * 374761393 + (y | 0) * 668265263 + (s | 0) * 1274126177;
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+function hash1(i, s) { return hash2(i, i * 31 + 7, s); }
+
+function vnoise(x, y, s) {
+  const xi = Math.floor(x), yi = Math.floor(y);
+  const xf = x - xi, yf = y - yi;
+  const u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+  const a = hash2(xi, yi, s), b = hash2(xi + 1, yi, s);
+  const c = hash2(xi, yi + 1, s), d = hash2(xi + 1, yi + 1, s);
+  return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+}
+
+function fbm(x, y, s, oct, gain, lac) {
+  let amp = 1, freq = 1, sum = 0, norm = 0;
+  for (let i = 0; i < oct; i++) {
+    sum += amp * vnoise(x * freq, y * freq, s + i * 1013);
+    norm += amp; amp *= gain; freq *= lac;
+  }
+  return sum / norm;
+}
+
+/* Ridged noise: peaks where the field crosses zero. Rivers and mountain
+   spines both fall out of this cheaply. */
+function ridge(x, y, s, oct) {
+  let amp = 1, freq = 1, sum = 0, norm = 0;
+  for (let i = 0; i < oct; i++) {
+    const n = 1 - Math.abs(vnoise(x * freq, y * freq, s + i * 977) * 2 - 1);
+    sum += amp * n * n; norm += amp; amp *= 0.5; freq *= 2;
+  }
+  return sum / norm;
+}
+
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const lerp = (a, b, t) => a + (b - a) * t;
+const smooth = t => t * t * (3 - 2 * t);
+
+/* Seeded generator for anything that only needs to be decided once. */
+function mulberry(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   3. COLOR
+   Every ramp runs dark to light. Terrain picks a stop by elevation, so slopes
+   read without any isometric projection.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const C = {
+  deep:    ['#12294a', '#173357', '#1b3a63'],
+  ocean:   ['#1e4472', '#245186', '#2b5e9b'],
+  shallow: ['#3272ac', '#3d84c0', '#4b95d0'],
+  foam:    ['#9fd4ec', '#c6e9f7'],
+  sand:    ['#d2b47c', '#dcc08a', '#e6cd9a'],
+  grass:   ['#548f3f', '#5e9c47', '#69a850'],
+  dry:     ['#8b9a52', '#96a45c', '#a1af66'],
+  forest:  ['#3a7233', '#427d39', '#4b8940'],
+  hill:    ['#7e8757', '#8a9161', '#969d6c'],
+  rock:    ['#6e6b63', '#7d7970', '#8d897f'],
+  snow:    ['#dfe6ea', '#eef3f6', '#ffffff'],
+  river:   ['#2f6fae', '#3b83c4', '#4a95d6'],
+  road:    ['#a98d66', '#b2966f', '#bb9f78'],
+  dirt:    ['#8a6f4b', '#9c7f57'],
+  wood:    ['#6b4a2c', '#825c38', '#98713f'],
+  thatch:  ['#a5813f', '#c09a52', '#d8b468'],
+  stone:   ['#7b7770', '#928d84', '#a9a49a'],
+  tileRed: ['#8c3a2a', '#a8442f', '#c05a3f'],
+  tileBlue:['#33507f', '#3f5f9c', '#4d73b6'],
+  gold:    ['#c08a20', '#e0a832', '#f4c552'],
+  bone:    ['#b8b09c', '#d2cab6', '#e6e0cf'],
+  trunk:   ['#4a3320', '#5d4128'],
+  ink:     '#241a12',
+  shadow:  'rgba(24,16,10,0.22)',
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   4. SPRITES
+   Units are hand-drawn 8x8 grids so each silhouette stays distinct at one
+   screen pixel per art pixel. Buildings and trees are drawn procedurally:
+   one recipe, seeded jitter, so no two houses in a village are identical.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const UNIT_ART = {
+  farmer: {
+    key: { o: '#2b2016', H: '#d9b45c', h: '#b9944400', k: '#e0a97e', C: '#8a6a3f', c: '#6b5130' },
+    a: ['..oooo..', '.oHHHHo.', '.oHHHHo.', '..okko..', '.oCCCCo.', '.oCccCo.', '..o..o..', '..o..o..'],
+    b: ['..oooo..', '.oHHHHo.', '.oHHHHo.', '..okko..', '.oCCCCo.', '.oCccCo.', '..oo.o..', '..o..oo.'],
+  },
+  archer: {
+    key: { o: '#22301e', H: '#3f7a3a', k: '#e0a97e', C: '#5a4a2e', c: '#42351f', B: '#9c7038' },
+    a: ['..oooo..', '.oHHHHo.', '.oHHHHoB', '..okkoB.', '.oCCCCB.', '.oCccoB.', '..o..oB.', '..o..o..'],
+    b: ['..oooo..', '.oHHHHo.', '.oHHHHoB', '..okkoB.', '.oCCCCB.', '.oCccoB.', '..oo.oB.', '..o..oo.'],
+  },
+  knight: {
+    key: { o: '#1f232a', H: '#b9bec7', h: '#8d939d', k: '#d9d5cd', C: '#6b7078', c: '#525861', S: '#e4e8ee' },
+    a: ['..oooo..', '.oHHHHo.', '.oHhhHo.', '..oHHo.S', '.oCCCCoS', '.oCccCS.', '..o..o..', '..o..o..'],
+    b: ['..oooo..', '.oHHHHo.', '.oHhhHo.', '..oHHo.S', '.oCCCCoS', '.oCccCS.', '..oo.o..', '..o..oo.'],
+  },
+  king: {
+    key: { o: '#2a1f14', G: '#f4c552', g: '#c08a20', k: '#e0a97e', C: '#6d3f86', c: '#54306a', E: '#efe6d4' },
+    a: ['.gGgGg..', '.oGGGGo.', '.oEEEEo.', '..okko..', '.oCCCCo.', 'EoCccCoE', '..o..o..', '..o..o..'],
+    b: ['.gGgGg..', '.oGGGGo.', '.oEEEEo.', '..okko..', '.oCCCCo.', 'EoCccCoE', '..oo.o..', '..o..oo.'],
+  },
+  merchant: {
+    key: { o: '#1d2433', H: '#3f5f9c', k: '#e0a97e', C: '#8a6a3f', c: '#6b5130', P: '#8c5a2e' },
+    a: ['..oooo..', '.oHHHHo.', '.oHHHHo.', '..okko..', 'PoCCCCo.', 'PoCccCo.', '..o..o..', '..o..o..'],
+    b: ['..oooo..', '.oHHHHo.', '.oHHHHo.', '..okko..', 'PoCCCCo.', 'PoCccCo.', '..oo.o..', '..o..oo.'],
+  },
+};
+
+/* The horseman is 10x10: rider on a mount, so it reads bigger than the foot
+   units at a glance. */
+const HORSE_ART = {
+  key: { o: '#241a12', M: '#7a5233', m: '#5d3d26', G: '#f4c552', H: '#b9bec7', C: '#8c3a2a', k: '#e0a97e' },
+  a: ['...GG.....', '..oHHo....', '..okko....', '.oCCCCo...', 'ooMMMMMMoo', 'oMMMMMMMMo', 'oMmmmmmmMo', '.oM.oo.Mo.', '.o.o..o.o.', '..........'],
+  b: ['...GG.....', '..oHHo....', '..okko....', '.oCCCCo...', 'ooMMMMMMoo', 'oMMMMMMMMo', 'oMmmmmmmMo', '.oMo..oMo.', '..o.oo.o..', '..........'],
+};
+
+/* Turn a character grid into a canvas once, at load. */
+function bakeGrid(rows, key, scale) {
+  scale = scale || 1;
+  const w = rows[0].length, h = rows.length;
+  const cv = document.createElement('canvas');
+  cv.width = w * scale; cv.height = h * scale;
+  const g = cv.getContext('2d');
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const ch = rows[y][x];
+      if (ch === '.' || !key[ch]) continue;
+      g.fillStyle = key[ch];
+      g.fillRect(x * scale, y * scale, scale, scale);
+    }
+  }
+  return cv;
+}
+
+const SPRITES = {};
+function bakeUnits() {
+  for (const name in UNIT_ART) {
+    const u = UNIT_ART[name];
+    SPRITES[name + '_a'] = bakeGrid(u.a, u.key);
+    SPRITES[name + '_b'] = bakeGrid(u.b, u.key);
+  }
+  SPRITES.horseman_a = bakeGrid(HORSE_ART.a, HORSE_ART.key);
+  SPRITES.horseman_b = bakeGrid(HORSE_ART.b, HORSE_ART.key);
+}
+
+/* ── procedural buildings ─────────────────────────────────────────────────
+   Every building is a footprint, a roof, an outline and one detail. Passing
+   a different seed nudges size, roof colour and door position, so a street
+   of houses looks hand-placed instead of stamped.                          */
+
+function px(g, x, y, w, h, col) { g.fillStyle = col; g.fillRect(x, y, w, h); }
+
+function outlineRect(g, x, y, w, h) {
+  px(g, x, y, w, 1, C.ink); px(g, x, y + h - 1, w, 1, C.ink);
+  px(g, x, y, 1, h, C.ink); px(g, x + w - 1, y, 1, h, C.ink);
+}
+
+/* A pitched roof: a slab that widens from ridge to eaves, lit from above,
+   with a shadow band along the ridge line and a dark eave lip. Taper is how
+   much narrower the ridge is than the overhang. */
+function roofSlab(g, x0, y0, w, h, ramp, taper) {
+  const dark = ramp[0], mid = ramp[1], light = ramp[2] || ramp[1];
+  const cx = x0 + w / 2;
+  for (let i = 0; i < h; i++) {
+    const t = h > 1 ? i / (h - 1) : 0;
+    const rw = Math.max(2, Math.round(w - taper * 2 * (1 - t)));
+    const rx = Math.round(cx - rw / 2);
+    const col = t < 0.42 ? light : t < 0.56 ? dark : mid;
+    px(g, rx, y0 + i, rw, 1, col);
+    px(g, rx, y0 + i, 1, 1, C.ink);
+    px(g, rx + rw - 1, y0 + i, 1, 1, C.ink);
+  }
+  const tw = Math.max(2, w - taper * 2);
+  px(g, Math.round(cx - tw / 2), y0, tw, 1, C.ink);
+  px(g, x0, y0 + h - 1, w, 1, C.ink);
+}
+function pitchedRoof(g, x, y, w, h, ramp) { roofSlab(g, x, y, w, h, ramp, Math.max(1, w >> 3)); }
+
+function buildingCanvas(w, h, draw) {
+  const cv = document.createElement('canvas');
+  cv.width = w; cv.height = h;
+  const g = cv.getContext('2d');
+  draw(g, w, h);
+  return cv;
+}
+
+const HOUSE_ROOFS = [C.tileRed, C.tileBlue, C.thatch, C.thatch, C.wood];
+
+const WALL_RAMPS = [C.wood, C.bone, C.stone, C.bone];
+function makeHouse(rnd, big) {
+  const w = big ? 16 : 11 + ((rnd() * 4) | 0);
+  const wallH = big ? 7 : 5 + ((rnd() * 2) | 0);
+  const roofH = big ? 11 : 8 + ((rnd() * 2) | 0);
+  const H = roofH + wallH + 2;
+  const ramp = HOUSE_ROOFS[(rnd() * HOUSE_ROOFS.length) | 0];
+  const wall = WALL_RAMPS[(rnd() * WALL_RAMPS.length) | 0];
+  const chim = rnd() < 0.5, half = rnd();
+  return buildingCanvas(w, H, (g) => {
+    px(g, 1, H - 3, w - 2, 3, C.shadow);
+    const wy = roofH - 1;
+    px(g, 2, wy, w - 4, wallH, wall[1]);
+    px(g, 2, wy, 1, wallH, wall[2]);
+    outlineRect(g, 2, wy, w - 4, wallH);
+    const dx = ((w / 2) | 0) - 1;
+    px(g, dx, wy + wallH - 4, 3, 4, C.wood[0]);
+    outlineRect(g, dx, wy + wallH - 4, 3, 4);
+    if (w >= 12) {
+      px(g, 3, wy + 2, 2, 2, '#3a2c1c'); px(g, w - 5, wy + 2, 2, 2, '#3a2c1c');
+    }
+    roofSlab(g, 0, 0, w, roofH, ramp, 2);
+    if (chim) {
+      const cxp = 2 + ((half * (w - 6)) | 0);
+      px(g, cxp, 0, 2, 4, C.stone[0]); outlineRect(g, cxp, 0, 2, 4);
+    }
+  });
+}
+
+function makeFarm(rnd) {
+  const w = 16, h = 16;
+  return buildingCanvas(w, h, (g) => {
+    px(g, 0, 0, w, h, C.dirt[1]);
+    for (let i = 1; i < h - 1; i += 3) px(g, 1, i, w - 2, 2, rnd() < 0.5 ? C.dry[1] : C.grass[1]);
+    for (let i = 1; i < h - 1; i += 3) px(g, 1, i + 2, w - 2, 1, C.dirt[0]);
+    outlineRect(g, 0, 0, w, h);
+  });
+}
+
+function makeWindmill(rnd) {
+  return buildingCanvas(16, 22, (g) => {
+    px(g, 3, 19, 12, 3, C.shadow);
+    px(g, 4, 8, 8, 12, C.stone[1]); outlineRect(g, 4, 8, 8, 12);
+    px(g, 5, 10, 2, 8, C.stone[2]);
+    px(g, 3, 4, 10, 5, C.tileRed[1]); outlineRect(g, 3, 4, 10, 5);
+    px(g, 7, 0, 2, 12, C.wood[0]);
+    px(g, 1, 5, 14, 2, C.wood[1]); outlineRect(g, 1, 5, 14, 2);
+    px(g, 7, 0, 2, 14, C.wood[0]);
+  });
+}
+
+function makeWell() {
+  return buildingCanvas(9, 11, (g) => {
+    px(g, 1, 8, 7, 3, C.shadow);
+    px(g, 1, 3, 7, 6, C.stone[1]); outlineRect(g, 1, 3, 7, 6);
+    px(g, 3, 5, 3, 3, '#1d3f66');
+    px(g, 1, 0, 1, 4, C.wood[0]); px(g, 7, 0, 1, 4, C.wood[0]);
+    px(g, 0, 0, 9, 2, C.tileRed[1]); outlineRect(g, 0, 0, 9, 2);
+  });
+}
+
+function makeTownHall() {
+  return buildingCanvas(24, 24, (g) => {
+    px(g, 2, 20, 22, 4, C.shadow);
+    px(g, 0, 5, 24, 17, C.stone[1]); outlineRect(g, 0, 5, 24, 17);
+    pitchedRoof(g, 0, 0, 24, 9, C.tileRed);
+    for (let x = 3; x < 21; x += 5) { px(g, x, 12, 3, 5, C.wood[0]); outlineRect(g, x, 12, 3, 5); }
+    px(g, 10, 17, 4, 5, C.wood[1]); outlineRect(g, 10, 17, 4, 5);
+    px(g, 11, 2, 2, 4, C.gold[2]);
+  });
+}
+
+function makeChurch() {
+  return buildingCanvas(22, 32, (g) => {
+    px(g, 2, 28, 20, 4, C.shadow);
+    px(g, 2, 12, 20, 18, C.stone[2]); outlineRect(g, 2, 12, 20, 18);
+    pitchedRoof(g, 1, 8, 22, 8, C.tileBlue);
+    px(g, 8, 0, 8, 14, C.stone[1]); outlineRect(g, 8, 0, 8, 14);
+    px(g, 10, 4, 4, 4, '#2b2016');
+    px(g, 11, 0, 2, 3, C.gold[2]); px(g, 10, 1, 4, 1, C.gold[2]);
+    px(g, 10, 20, 4, 10, C.wood[0]); outlineRect(g, 10, 20, 4, 10);
+    px(g, 5, 17, 3, 4, C.tileBlue[2]); px(g, 16, 17, 3, 4, C.tileBlue[2]);
+  });
+}
+
+function makeTavern() {
+  return buildingCanvas(16, 15, (g) => {
+    px(g, 1, 12, 15, 3, C.shadow);
+    px(g, 0, 4, 16, 10, C.wood[2]); outlineRect(g, 0, 4, 16, 10);
+    pitchedRoof(g, 0, 0, 16, 7, C.thatch);
+    px(g, 2, 7, 3, 3, C.gold[1]); px(g, 11, 7, 3, 3, C.gold[1]);
+    px(g, 6, 9, 4, 5, C.wood[0]); outlineRect(g, 6, 9, 4, 5);
+    px(g, 13, 5, 3, 3, C.tileRed[1]); outlineRect(g, 13, 5, 3, 3);
+  });
+}
+
+function makeMarket() {
+  return buildingCanvas(20, 14, (g) => {
+    px(g, 1, 11, 19, 3, C.shadow);
+    for (let i = 0; i < 3; i++) {
+      const x = i * 7;
+      px(g, x, 3, 7, 9, C.wood[1]); outlineRect(g, x, 3, 7, 9);
+      px(g, x, 0, 7, 4, i === 1 ? C.tileRed[1] : C.tileBlue[1]);
+      outlineRect(g, x, 0, 7, 4);
+      px(g, x + 1, 6, 5, 2, C.gold[1]);
+    }
+  });
+}
+
+function makeBlacksmith() {
+  return buildingCanvas(16, 15, (g) => {
+    px(g, 1, 12, 15, 3, C.shadow);
+    px(g, 0, 4, 16, 10, C.stone[1]); outlineRect(g, 0, 4, 16, 10);
+    pitchedRoof(g, 0, 0, 16, 7, C.wood);
+    px(g, 12, 0, 3, 5, C.stone[0]); outlineRect(g, 12, 0, 3, 5);
+    px(g, 13, 0, 1, 1, '#e8703a');
+    px(g, 3, 8, 5, 5, '#3a2a1c'); outlineRect(g, 3, 8, 5, 5);
+    px(g, 4, 9, 3, 2, '#e8703a'); px(g, 5, 10, 1, 1, '#f6c04a');
+  });
+}
+
+function makeKeep() {
+  return buildingCanvas(32, 34, (g) => {
+    px(g, 3, 30, 28, 4, C.shadow);
+    px(g, 4, 10, 24, 22, C.stone[2]); outlineRect(g, 4, 10, 24, 22);
+    for (let x = 4; x < 28; x += 5) px(g, x, 6, 3, 5, C.stone[1]);
+    for (let x = 4; x < 28; x += 5) { px(g, x, 6, 3, 5, C.stone[1]); outlineRect(g, x, 6, 3, 5); }
+    px(g, 0, 4, 8, 28, C.stone[1]); outlineRect(g, 0, 4, 8, 28);
+    px(g, 24, 4, 8, 28, C.stone[1]); outlineRect(g, 24, 4, 8, 28);
+    px(g, 0, 0, 8, 5, C.tileRed[1]); outlineRect(g, 0, 0, 8, 5);
+    px(g, 24, 0, 8, 5, C.tileRed[1]); outlineRect(g, 24, 0, 8, 5);
+    px(g, 13, 20, 6, 12, C.wood[0]); outlineRect(g, 13, 20, 6, 12);
+    px(g, 9, 14, 4, 5, '#1d1610'); px(g, 19, 14, 4, 5, '#1d1610');
+  });
+}
+
+function makeCathedral() {
+  return buildingCanvas(30, 42, (g) => {
+    px(g, 3, 38, 26, 4, C.shadow);
+    px(g, 4, 16, 22, 24, C.stone[2]); outlineRect(g, 4, 16, 22, 24);
+    pitchedRoof(g, 3, 12, 24, 8, C.tileBlue);
+    px(g, 1, 2, 8, 22, C.stone[1]); outlineRect(g, 1, 2, 8, 22);
+    px(g, 21, 2, 8, 22, C.stone[1]); outlineRect(g, 21, 2, 8, 22);
+    px(g, 2, 0, 6, 4, C.tileBlue[0]); px(g, 22, 0, 6, 4, C.tileBlue[0]);
+    px(g, 4, 0, 2, 2, C.gold[2]); px(g, 24, 0, 2, 2, C.gold[2]);
+    px(g, 12, 20, 6, 6, C.tileBlue[2]); outlineRect(g, 12, 20, 6, 6);
+    px(g, 14, 22, 2, 2, C.gold[2]);
+    px(g, 12, 30, 6, 10, C.wood[0]); outlineRect(g, 12, 30, 6, 10);
+  });
+}
+
+function makePalace() {
+  return buildingCanvas(42, 40, (g) => {
+    px(g, 4, 36, 34, 4, C.shadow);
+    px(g, 6, 14, 30, 24, C.bone[2]); outlineRect(g, 6, 14, 30, 24);
+    pitchedRoof(g, 4, 8, 34, 9, C.tileBlue);
+    px(g, 0, 6, 10, 32, C.bone[1]); outlineRect(g, 0, 6, 10, 32);
+    px(g, 32, 6, 10, 32, C.bone[1]); outlineRect(g, 32, 6, 10, 32);
+    px(g, 1, 1, 8, 6, C.gold[1]); outlineRect(g, 1, 1, 8, 6);
+    px(g, 33, 1, 8, 6, C.gold[1]); outlineRect(g, 33, 1, 8, 6);
+    px(g, 4, 0, 2, 2, C.gold[2]); px(g, 36, 0, 2, 2, C.gold[2]);
+    px(g, 20, 4, 2, 5, C.gold[2]); px(g, 22, 4, 5, 3, C.tileRed[1]);
+    for (let x = 10; x < 32; x += 5) { px(g, x, 20, 3, 7, C.tileBlue[0]); outlineRect(g, x, 20, 3, 7); }
+    px(g, 17, 28, 8, 10, C.gold[0]); outlineRect(g, 17, 28, 8, 10);
+  });
+}
+
+function makeWatchtower() {
+  return buildingCanvas(12, 22, (g) => {
+    px(g, 1, 19, 11, 3, C.shadow);
+    px(g, 2, 6, 8, 15, C.stone[1]); outlineRect(g, 2, 6, 8, 15);
+    px(g, 0, 2, 12, 6, C.stone[2]); outlineRect(g, 0, 2, 12, 6);
+    for (let x = 0; x < 12; x += 3) px(g, x, 2, 2, 2, C.stone[0]);
+    px(g, 5, 10, 3, 4, '#1d1610');
+  });
+}
+
+function makeGate() {
+  return buildingCanvas(18, 18, (g) => {
+    px(g, 1, 15, 17, 3, C.shadow);
+    px(g, 0, 2, 5, 15, C.stone[1]); outlineRect(g, 0, 2, 5, 15);
+    px(g, 13, 2, 5, 15, C.stone[1]); outlineRect(g, 13, 2, 5, 15);
+    px(g, 5, 4, 8, 13, C.wood[0]); outlineRect(g, 5, 4, 8, 13);
+    for (let x = 6; x < 13; x += 3) px(g, x, 5, 1, 11, C.wood[2]);
+    px(g, 0, 0, 5, 3, C.stone[0]); px(g, 13, 0, 5, 3, C.stone[0]);
+  });
+}
+
+function makeFountain() {
+  return buildingCanvas(16, 14, (g) => {
+    px(g, 1, 11, 14, 3, C.shadow);
+    px(g, 0, 2, 16, 11, C.stone[2]); outlineRect(g, 0, 2, 16, 11);
+    px(g, 2, 4, 12, 7, '#3b83c4');
+    px(g, 3, 5, 4, 2, '#8fd0ef');
+    px(g, 6, 3, 4, 6, C.stone[1]); outlineRect(g, 6, 3, 4, 6);
+    px(g, 7, 0, 2, 4, '#8fd0ef');
+  });
+}
+
+function makeBanner(hue) {
+  return buildingCanvas(7, 16, (g) => {
+    px(g, 3, 0, 1, 16, C.wood[0]);
+    px(g, 0, 1, 3, 9, hue); px(g, 4, 1, 3, 9, hue);
+    outlineRect(g, 0, 1, 7, 9);
+    px(g, 0, 9, 7, 1, hue);
+    px(g, 2, 3, 3, 3, C.gold[2]);
+  });
+}
+
+function makeTombstone(rnd) {
+  const tall = rnd() < 0.4;
+  return buildingCanvas(8, tall ? 11 : 9, (g, w, h) => {
+    px(g, 1, h - 3, 6, 3, C.shadow);
+    px(g, 1, 2, 6, h - 3, C.bone[1]);
+    px(g, 1, 2, 2, h - 3, C.bone[2]);
+    px(g, 2, 0, 4, 3, C.bone[1]);
+    outlineRect(g, 1, 2, 6, h - 3);
+    px(g, 2, 0, 4, 1, C.ink); px(g, 1, 1, 1, 1, C.ink); px(g, 6, 1, 1, 1, C.ink);
+    px(g, 3, 4, 2, 1, C.stone[0]); px(g, 3, 3, 1, 4, C.stone[0]);
+  });
+}
+
+function makeBridge() {
+  return buildingCanvas(10, 10, (g) => {
+    px(g, 0, 4, 10, 6, C.wood[1]);
+    for (let x = 0; x < 10; x += 3) px(g, x, 4, 1, 6, C.wood[0]);
+    px(g, 0, 4, 10, 1, C.wood[2]);
+    px(g, 0, 3, 10, 1, C.ink); px(g, 0, 9, 10, 1, C.ink);
+    px(g, 0, 1, 1, 3, C.wood[0]); px(g, 9, 1, 1, 3, C.wood[0]);
+  });
+}
+
+function makeCampfire() {
+  return buildingCanvas(10, 9, (g) => {
+    px(g, 1, 6, 8, 3, C.shadow);
+    px(g, 1, 5, 8, 2, C.wood[0]); px(g, 3, 4, 4, 2, C.wood[1]);
+    px(g, 4, 2, 3, 3, '#e8703a'); px(g, 5, 0, 1, 3, '#f6c04a');
+  });
+}
+
+function makeTree(kind, rnd) {
+  if (kind === 'pine') {
+    const h = 13 + Math.floor(rnd() * 3);
+    return buildingCanvas(10, h, (g, w, hh) => {
+      px(g, 2, hh - 3, 7, 3, C.shadow);
+      px(g, 4, hh - 5, 2, 5, C.trunk[1]);
+      for (let i = 0; i < 3; i++) {
+        const y = 1 + i * 3, ww = 4 + i * 2, x = 5 - (ww >> 1);
+        px(g, x, y, ww, 5, C.forest[i === 0 ? 2 : 1]);
+        px(g, x, y + 3, ww, 2, C.forest[0]);
+      }
+      px(g, 4, 0, 2, 2, C.forest[2]);
+    });
+  }
+  if (kind === 'dead') {
+    return buildingCanvas(9, 11, (g) => {
+      px(g, 2, 8, 6, 3, C.shadow);
+      px(g, 4, 2, 2, 8, C.trunk[0]);
+      px(g, 2, 3, 2, 1, C.trunk[1]); px(g, 6, 4, 2, 1, C.trunk[1]);
+      px(g, 1, 1, 2, 2, C.trunk[0]); px(g, 6, 1, 2, 2, C.trunk[0]);
+    });
+  }
+  const r = 4 + Math.floor(rnd() * 2);
+  const h = r * 2 + 6;
+  return buildingCanvas(r * 2 + 2, h, (g, w, hh) => {
+    px(g, 2, hh - 3, w - 3, 3, C.shadow);
+    px(g, (w >> 1) - 1, hh - 6, 2, 6, C.trunk[1]);
+    const cy = r + 1;
+    for (let y = -r; y <= r; y++) {
+      const half = Math.floor(Math.sqrt(Math.max(0, r * r - y * y)));
+      if (!half) continue;
+      const shade = y < -1 ? 2 : y > 1 ? 0 : 1;
+      px(g, (w >> 1) - half, cy + y, half * 2, 1, C.forest[shade]);
+    }
+    px(g, (w >> 1) - r + 1, cy - r + 1, 2, 2, '#93cf63');
+  });
+}
+
+function makeRock(rnd) {
+  const w = 7 + ((rnd() * 5) | 0), h = 5 + ((rnd() * 3) | 0);
+  return buildingCanvas(w, h + 2, (g) => {
+    px(g, 1, h, w - 2, 2, C.shadow);
+    // A squat boulder: shoulders pulled in top and bottom so it is not a brick.
+    for (let y = 0; y < h; y++) {
+      const t = y / (h - 1 || 1);
+      const inset = t < 0.25 ? 2 : t > 0.85 ? 1 : 0;
+      const rw = w - inset * 2;
+      const col = t < 0.4 ? C.rock[2] : t < 0.75 ? C.rock[1] : C.rock[0];
+      px(g, inset, y, rw, 1, col);
+      px(g, inset, y, 1, 1, C.ink); px(g, inset + rw - 1, y, 1, 1, C.ink);
+    }
+    px(g, 2, 0, w - 4, 1, C.ink);
+    px(g, 1, h - 1, w - 2, 1, C.ink);
+    px(g, 2, 1, 2, 1, '#a8a49a');
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   5. THE WORLD
+   Terrain is a pure function of tile coordinates, so a chunk generated today
+   looks the same tomorrow. Land only extends to WORLD.radius, which grows
+   with the total population, so new land appears at the rim and nothing
+   already drawn moves.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const TILE = 8;           // world pixels per tile
+const CHUNK = 32;         // tiles per chunk
+const CHUNK_PX = TILE * CHUNK;
+const SEA = 0.455;
+
+const T = { DEEP:0, OCEAN:1, SHALLOW:2, SAND:3, GRASS:4, DRY:5, FOREST:6, HILL:7, ROCK:8, SNOW:9, RIVER:10, ROAD:11 };
+
+const WORLD = { radius: 400, kingdoms: [], buildingsByChunk: new Map(), roads: [] };
+
+function warp(tx, ty, s) {
+  const wx = vnoise(tx * 0.010, ty * 0.010, s + 91) - 0.5;
+  const wy = vnoise(tx * 0.010 + 4.7, ty * 0.010 + 2.3, s + 177) - 0.5;
+  return [tx + wx * 82, ty + wy * 82];
+}
+
+function elevAt(tx, ty) {
+  const s = WORLD_SEED;
+  const [wx, wy] = warp(tx, ty, s);
+  let e = fbm(wx / 132, wy / 132, s, 5, 0.5, 2.05);
+  const d = Math.sqrt(tx * tx + ty * ty) / WORLD.radius;
+  // Rim falloff: land fades into ocean over the outer 30% of the world.
+  const rim = 1 - smooth(clamp((d - 0.70) / 0.30, 0, 1));
+  e = e * (0.42 + 0.58 * rim) - (1 - rim) * 0.30;
+  // A second, coarser field breaks the ring into bays and peninsulas.
+  e += (fbm(wx / 340, wy / 340, s + 401, 3, 0.5, 2) - 0.5) * 0.30 * rim;
+  return e;
+}
+
+function riverAt(tx, ty, e) {
+  if (e <= SEA + 0.008 || e > 0.80) return false;
+  const r = ridge(tx / 210, ty / 210, WORLD_SEED + 555, 3);
+  // Channels widen as they run downhill towards the sea.
+  const thr = 0.972 - (0.80 - e) * 0.055;
+  return r > thr;
+}
+
+function moistAt(tx, ty) {
+  return fbm(tx / 172, ty / 172, WORLD_SEED + 733, 3, 0.55, 2);
+}
+
+function tileAt(tx, ty) {
+  const e = elevAt(tx, ty);
+  if (e < SEA - 0.075) return T.DEEP;
+  if (e < SEA - 0.020) return T.OCEAN;
+  if (e < SEA) return T.SHALLOW;
+  if (riverAt(tx, ty, e)) return T.RIVER;
+  if (e < SEA + 0.022) return T.SAND;
+  if (e > 0.845) return T.SNOW;
+  if (e > 0.745) return T.ROCK;
+  if (e > 0.605) return T.HILL;
+  const m = moistAt(tx, ty);
+  if (m < 0.40) return T.DRY;
+  if (m > 0.585) return T.FOREST;
+  return T.GRASS;
+}
+
+const RAMPS = {
+  [T.DEEP]: C.deep, [T.OCEAN]: C.ocean, [T.SHALLOW]: C.shallow, [T.SAND]: C.sand,
+  [T.GRASS]: C.grass, [T.DRY]: C.dry, [T.FOREST]: C.forest, [T.HILL]: C.hill,
+  [T.ROCK]: C.rock, [T.SNOW]: C.snow, [T.RIVER]: C.river, [T.ROAD]: C.road,
+};
+
+/* ── kingdom maths ───────────────────────────────────────────────────────── */
+
+function derive(k) {
+  const houses   = Math.max(1, Math.floor(k.users / 100));
+  const farmers  = Math.floor(k.users / 10);
+  const archers  = Math.floor(k.trials / 10);
+  const knights  = Math.floor(k.subs / 10);
+  const horsemen = Math.floor(k.mrr / 500);
+  const kings    = k.founders.length;
+  const pop = farmers + archers + knights + horsemen + kings;
+  const rFormula = 6 + Math.sqrt(pop) * 0.42;
+  const specials = 16;
+  const rPlots = Math.sqrt((houses + specials) * 4 / (Math.PI * 0.50));
+  const r = Math.max(8, rFormula, rPlots);
+  return Object.assign({}, k, { houses, farmers, archers, knights, horsemen, kings, pop, r });
+}
+
+/* Thirty days of history, shaped by the kingdom's curve. Organic enough to
+   read as a real chart, deterministic so the sparkline never jumps. */
+function buildHistory(k) {
+  const rnd = mulberry(k.seed * 17 + 3);
+  const days = 30, hist = [];
+  const shape = { grow: 0.0115, flat: 0.0008, shrink: -0.0075, spike: 0.006 }[k.curve];
+  for (let i = 0; i < days; i++) {
+    const t = i - (days - 1);
+    let f = Math.exp(shape * t);
+    if (k.curve === 'spike') f = i < 21 ? Math.exp(0.004 * t) * 0.62 : Math.exp(0.006 * t);
+    const wob = 1 + (rnd() - 0.5) * 0.028;
+    hist.push({
+      users: Math.round(k.users * f * wob),
+      trials: Math.round(k.trials * f * (1 + (rnd() - 0.5) * 0.10)),
+      subs: Math.round(k.subs * f * (1 + (rnd() - 0.5) * 0.020)),
+      mrr: Math.round(k.mrr * f * wob),
+    });
+  }
+  const last = hist[days - 1];
+  last.users = k.users; last.trials = k.trials; last.subs = k.subs; last.mrr = k.mrr;
+  return hist;
+}
+
+function churn30(hist) {
+  let lost = 0;
+  for (let i = 1; i < hist.length; i++) {
+    const d = hist[i - 1].subs - hist[i].subs;
+    if (d > 0) lost += d;
+  }
+  // A flat subscriber count still hides departures. Assume a 3% floor so no
+  // kingdom claims a graveyard of zero.
+  return Math.max(lost, Math.round(hist[hist.length - 1].subs * 0.03));
+}
+
+function popOf(m) {
+  return Math.floor(m.users / 10) + Math.floor(m.trials / 10) +
+         Math.floor(m.subs / 10) + Math.floor(m.mrr / 500) + 1;
+}
+
+/* ── placement ───────────────────────────────────────────────────────────── */
+
+function placeKingdoms(list) {
+  const sorted = list.slice().sort((a, b) => b.r - a.r);
+  let sq = 0;
+  for (const k of sorted) sq += (k.r + 30) * (k.r + 30);
+  WORLD.radius = Math.round(90 + 2.15 * Math.sqrt(sq));
+
+  const placed = [];
+  for (let i = 0; i < sorted.length; i++) {
+    const k = sorted[i];
+    const rnd = mulberry(k.seed);
+    let best = null;
+    const a0 = rnd() * Math.PI * 2;
+    outer:
+    for (let ring = 0; ring < 260; ring++) {
+      const dist = i === 0 ? 0 : (k.r + 46) + ring * 9;
+      if (dist > WORLD.radius * 0.80) break;
+      const steps = Math.max(1, Math.round(dist / 16));
+      for (let sIdx = 0; sIdx < steps; sIdx++) {
+        const ang = a0 + sIdx * 2.39996;
+        const x = Math.round(Math.cos(ang) * dist);
+        const y = Math.round(Math.sin(ang) * dist);
+        let clash = false;
+        for (const p of placed) {
+          const dx = p.cx - x, dy = p.cy - y;
+          if (Math.sqrt(dx * dx + dy * dy) < p.r + k.r + 30) { clash = true; break; }
+        }
+        if (clash) continue;
+        if (!landEnough(x, y, k.r)) continue;
+        best = { x, y }; break outer;
+      }
+    }
+    if (!best) best = { x: Math.round(Math.cos(a0) * WORLD.radius * 0.5),
+                        y: Math.round(Math.sin(a0) * WORLD.radius * 0.5) };
+    k.cx = best.x; k.cy = best.y;
+    placed.push(k);
+  }
+  return sorted;
+}
+
+/* A site works if most of its footprint is dry, gentle ground. */
+function landEnough(cx, cy, r) {
+  let good = 0, total = 0;
+  const step = Math.max(2, Math.round(r / 7));
+  for (let y = -r; y <= r; y += step) {
+    for (let x = -r; x <= r; x += step) {
+      if (x * x + y * y > r * r) continue;
+      total++;
+      const e = elevAt(cx + x, cy + y);
+      if (e > SEA + 0.020 && e < 0.72) good++;
+    }
+  }
+  return total > 0 && good / total > 0.86;
+}
+
+/* ── village layout ──────────────────────────────────────────────────────── */
+
+const LADDER = [
+  { at: 50000, key: 'palace' }, { at: 25000, key: 'cathedral' }, { at: 10000, key: 'keep' },
+  { at: 5000, key: 'walls' },   { at: 2000, key: 'market' },     { at: 1000, key: 'church' },
+  { at: 500, key: 'townHall' }, { at: 300, key: 'farm' },        { at: 100, key: 'well' },
+];
+
+function tierKeys(pop) {
+  const s = new Set();
+  for (const l of LADDER) if (pop >= l.at) s.add(l.key);
+  return s;
+}
+
+function layoutVillage(k) {
+  const rnd = mulberry(k.seed * 7919 + 11);
+  const has = tierKeys(k.pop);
+  const b = [];                       // {x, y, cv, sort}
+  const roads = [];                   // {x, y} tiles painted as road
+  const poi = { homes: [], work: [], gather: [], graves: [], wall: [] };
+  const r = k.r;
+
+  let built = 0;
+  const push = (tx, ty, cv, anchorY) => {
+    b.push({ tx, ty, cv, ay: anchorY === undefined ? cv.height - 2 : anchorY });
+    const d = Math.hypot(tx - k.cx, ty - k.cy);
+    if (d > built) built = d;
+  };
+
+  // Street plan: concentric rings plus radial spokes, only once there is a
+  // town worth planning.
+  const rings = [];
+  if (k.pop >= 300) {
+    for (let f = 0.38; f < 0.95; f += 0.30) rings.push(r * f);
+  }
+  const spokes = k.pop >= 300 ? (k.pop >= 5000 ? 8 : 4) : 0;
+  const spokeA = rnd() * Math.PI * 2;
+
+  const onRoad = (x, y) => {
+    const d = Math.sqrt(x * x + y * y);
+    for (const rr of rings) if (Math.abs(d - rr) < 1.1) return true;
+    if (spokes && d > 2) {
+      const a = Math.atan2(y, x) - spokeA;
+      const seg = Math.PI * 2 / spokes;
+      const off = Math.abs(((a % seg) + seg) % seg - seg / 2);
+      if (off * d < 1.6) return true;
+    }
+    return false;
+  };
+
+  // Collect buildable plots on a 3 tile lattice.
+  const plots = [];
+  for (let y = -r; y <= r; y += 2) {
+    for (let x = -r; x <= r; x += 2) {
+      const d = Math.sqrt(x * x + y * y);
+      if (d > r - 1) continue;
+      const tx = k.cx + x, ty = k.cy + y;
+      const e = elevAt(tx, ty);
+      if (e <= SEA + 0.020 || e > 0.74) continue;
+      if (riverAt(tx, ty, e)) continue;
+      if (onRoad(x, y)) { roads.push({ x: tx, y: ty }); continue; }
+      plots.push({ x, y, tx, ty, d: d + (hash2(tx, ty, 5) - 0.5) * 3.2 });
+    }
+  }
+  plots.sort((a, c) => a.d - c.d);
+
+  // Paint the road tiles themselves.
+  if (rings.length) {
+    for (const rr of rings) {
+      const steps = Math.max(16, Math.round(rr * 8));
+      for (let i = 0; i < steps; i++) {
+        const a = i / steps * Math.PI * 2;
+        const tx = k.cx + Math.round(Math.cos(a) * rr), ty = k.cy + Math.round(Math.sin(a) * rr);
+        if (elevAt(tx, ty) > SEA + 0.015) roads.push({ x: tx, y: ty });
+      }
+    }
+    for (let s = 0; s < spokes; s++) {
+      const a = spokeA + s * Math.PI * 2 / spokes;
+      for (let d = 3; d < r; d += 0.5) {
+        const tx = k.cx + Math.round(Math.cos(a) * d), ty = k.cy + Math.round(Math.sin(a) * d);
+        if (elevAt(tx, ty) > SEA + 0.015) roads.push({ x: tx, y: ty });
+      }
+    }
+  }
+
+  let pi = 0;
+  const take = () => plots[pi++];
+
+  // Civic core, biggest first, so the skyline reads the tier instantly.
+  const civic = [];
+  if (has.has('palace')) civic.push(makePalace());
+  else if (has.has('keep')) civic.push(makeKeep());
+  else if (has.has('townHall')) civic.push(makeTownHall());
+  if (has.has('cathedral')) civic.push(makeCathedral());
+  else if (has.has('church')) civic.push(makeChurch());
+  if (has.has('palace')) civic.push(makeFountain());
+  if (has.has('market')) { civic.push(makeMarket()); civic.push(makeTavern()); civic.push(makeBlacksmith()); }
+  if (has.has('well')) civic.push(makeWell());
+  if (!has.has('townHall')) civic.push(makeCampfire());
+
+  for (const cv of civic) {
+    const p = take(); if (!p) break;
+    push(p.tx, p.ty, cv);
+    poi.gather.push({ x: p.tx * TILE + TILE / 2, y: p.ty * TILE + TILE / 2 });
+  }
+
+  // Houses, densest at the centre and thinning outward.
+  let left = k.houses;
+  const bigUntil = Math.min(left, Math.round(k.houses * 0.12));
+  let made = 0;
+  while (left > 0 && pi < plots.length) {
+    const p = take();
+    const cv = made < bigUntil ? grab(POOL.big, rnd()) : grab(POOL.house, rnd());
+    push(p.tx, p.ty, cv);
+    poi.homes.push({ x: p.tx * TILE + TILE / 2, y: p.ty * TILE + TILE / 2 });
+    left--; made++;
+  }
+
+  // Farms and windmills ring the town on whatever plots are left.
+  if (has.has('farm')) {
+    const farms = clamp(Math.round(k.farmers / 420), 2, 90);
+    for (let i = 0; i < farms && pi < plots.length; i++) {
+      const p = take();
+      push(p.tx, p.ty, i % 9 === 4 ? grab(POOL.mill, rnd()) : grab(POOL.farm, rnd()));
+      poi.work.push({ x: p.tx * TILE + TILE / 2, y: p.ty * TILE + TILE / 2 });
+    }
+  }
+
+  // Graveyard: one plot behind the church, one stone per ten departures,
+  // twenty stones maximum however bad the month was.
+  const stones = clamp(Math.ceil(k.churn / 10), 1, 20);
+  const ga = spokeA + 2.2;
+  const gx = k.cx + Math.round(Math.cos(ga) * r * 0.66);
+  const gy = k.cy + Math.round(Math.sin(ga) * r * 0.66);
+  k.grave = { x: gx, y: gy, stones };
+  for (let i = 0; i < stones; i++) {
+    const col = i % 5, row = (i / 5) | 0;
+    const tx = gx + col - 2, ty = gy + row - 1;
+    if (elevAt(tx, ty) <= SEA + 0.01) continue;
+    push(tx, ty, grab(POOL.tomb, rnd()), 9);
+    poi.graves.push({ x: tx * TILE + TILE / 2, y: ty * TILE + TILE / 2 });
+  }
+
+  // Walls, gates and towers once the town is worth defending.
+  k.rBuilt = Math.max(6, built + 2);
+  if (has.has('walls')) {
+    const wr = Math.min(r * 0.97, k.rBuilt + 2);
+    const steps = Math.round(wr * 3.2);
+    for (let i = 0; i < steps; i++) {
+      const a = i / steps * Math.PI * 2;
+      const tx = k.cx + Math.round(Math.cos(a) * wr), ty = k.cy + Math.round(Math.sin(a) * wr);
+      if (elevAt(tx, ty) <= SEA + 0.010) continue;
+      const gateHere = spokes && Math.abs(((a - spokeA) % (Math.PI * 2 / spokes) + Math.PI * 2) % (Math.PI * 2 / spokes)) < 0.06;
+      if (gateHere) push(tx, ty, makeGate());
+      else if (i % 11 === 0) push(tx, ty, makeWatchtower());
+      else push(tx, ty, WALL_CV);
+      poi.wall.push({ x: tx * TILE + TILE / 2, y: ty * TILE + TILE / 2 });
+    }
+  }
+  if (has.has('keep')) {
+    const hue = ['#a8442f', '#3f5f9c', '#2f7d54', '#7a3f86'][k.seed % 4];
+    for (let i = 0; i < 4; i++) {
+      const a = spokeA + i * Math.PI / 2 + 0.4;
+      const tx = k.cx + Math.round(Math.cos(a) * 6), ty = k.cy + Math.round(Math.sin(a) * 6);
+      push(tx, ty, makeBanner(hue));
+    }
+  }
+
+  if (!poi.homes.length) poi.homes.push({ x: k.cx * TILE, y: k.cy * TILE });
+  if (!poi.gather.length) poi.gather = poi.homes.slice(0, 3);
+  if (!poi.work.length) poi.work = poi.homes.slice(0, 5);
+  if (!poi.wall.length) {
+    for (let i = 0; i < 8; i++) {
+      const a = i * Math.PI / 4;
+      poi.wall.push({ x: (k.cx + Math.cos(a) * r * 0.85) * TILE, y: (k.cy + Math.sin(a) * r * 0.85) * TILE });
+    }
+  }
+
+  k.rBuilt = Math.max(k.rBuilt || 6, built + 2);
+  k.buildings = b; k.roadTiles = roads; k.poi = poi;
+}
+
+const BRIDGE_CV = makeBridge();
+const WALL_CV = buildingCanvas(16, 14, (g) => {
+  px(g, 0, 11, 16, 3, C.shadow);
+  px(g, 0, 3, 16, 9, C.stone[1]); outlineRect(g, 0, 3, 16, 9);
+  px(g, 0, 3, 16, 2, C.stone[2]);
+  for (let x = 0; x < 16; x += 4) { px(g, x, 0, 3, 4, C.stone[1]); outlineRect(g, x, 0, 3, 4); }
+});
+
+/* ── road network between kingdoms ───────────────────────────────────────── */
+
+function buildRoads(ks) {
+  const roadSet = new Set();
+  const links = [];
+  for (let i = 0; i < ks.length; i++) {
+    let best = -1, bd = 1e9;
+    for (let j = 0; j < ks.length; j++) {
+      if (i === j) continue;
+      const dx = ks[i].cx - ks[j].cx, dy = ks[i].cy - ks[j].cy;
+      const d = dx * dx + dy * dy;
+      if (d < bd) { bd = d; best = j; }
+    }
+    if (best < 0) continue;
+    const key = i < best ? i + ':' + best : best + ':' + i;
+    if (links.some(l => l.key === key)) continue;
+    links.push({ key, a: ks[i], b: ks[best] });
+  }
+  for (const l of links) {
+    const ax = l.a.cx, ay = l.a.cy, bx = l.b.cx, by = l.b.cy;
+    const dist = Math.hypot(bx - ax, by - ay);
+    const steps = Math.ceil(dist);
+    let ok = true;
+    const pts = [];
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      // A gentle sag off the straight line so roads look walked, not ruled.
+      const bend = Math.sin(t * Math.PI) * (hash1(l.a.seed + l.b.seed, 3) - 0.5) * dist * 0.22;
+      const nx = -(by - ay) / dist, ny = (bx - ax) / dist;
+      const x = Math.round(lerp(ax, bx, t) + nx * bend);
+      const y = Math.round(lerp(ay, by, t) + ny * bend);
+      if (elevAt(x, y) < SEA) { ok = false; break; }
+      pts.push({ x, y });
+    }
+    if (!ok) continue;
+    for (const p of pts) { roadSet.add(p.x + ',' + p.y); roadSet.add((p.x + 1) + ',' + p.y); }
+    l.pts = pts;
+    WORLD.roads.push(l);
+  }
+  WORLD.roadSet = roadSet;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   6. CHUNKS
+   Terrain, trees and buildings are baked once per 16x16 tile chunk and cached.
+   Nothing static is redrawn per frame, so the only per-frame cost is blitting
+   about forty images and moving the villagers.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const hiCache = new Map(), loCache = new Map();
+const HI_MAX = 130, LO_MAX = 1400;
+let genBudget = 0;
+
+function ckey(cx, cy) { return cx + ',' + cy; }
+
+function tileCode(tx, ty) {
+  const base = tileAt(tx, ty);
+  if (base !== T.RIVER && base <= T.SHALLOW) return base;
+  if (WORLD.roadSet && WORLD.roadSet.has(tx + ',' + ty)) {
+    // A road over water keeps the water and gets a bridge laid on top.
+    if (base !== T.RIVER) return T.ROAD;
+  }
+  return base;
+}
+function isBridge(tx, ty) {
+  return !!(WORLD.roadSet && WORLD.roadSet.has(tx + ',' + ty) && tileAt(tx, ty) === T.RIVER);
+}
+
+function tileColor(code, tx, ty) {
+  const ramp = RAMPS[code];
+  // One low frequency field mottles every biome the same way, so the ground
+  // reads as terrain rather than as a checkerboard of swatches.
+  const d = vnoise(tx / 11, ty / 11, WORLD_SEED + 88) * 0.72
+          + hash2(tx, ty, WORLD_SEED + 13) * 0.28;
+  const i = d < 0.40 ? 0 : d < 0.70 ? 1 : 2;
+  return ramp[Math.min(i, ramp.length - 1)];
+}
+
+function isWater(code) { return code <= T.SHALLOW || code === T.RIVER; }
+
+function renderHi(cx, cy) {
+  const cv = document.createElement('canvas');
+  cv.width = CHUNK_PX; cv.height = CHUNK_PX;
+  const g = cv.getContext('2d');
+  g.imageSmoothingEnabled = false;
+  const ox = cx * CHUNK, oy = cy * CHUNK;
+  const coast = [];
+
+  for (let ty = 0; ty < CHUNK; ty++) {
+    for (let tx = 0; tx < CHUNK; tx++) {
+      const wx = ox + tx, wy = oy + ty;
+      const code = tileCode(wx, wy);
+      const X = tx * TILE, Y = ty * TILE;
+      g.fillStyle = tileColor(code, wx, wy);
+      g.fillRect(X, Y, TILE, TILE);
+
+      // Per tile grain, four speckles, so flat ground never looks like a swatch.
+      const ramp = RAMPS[code];
+      for (let s = 0; s < 4; s++) {
+        const h = hash2(wx * 4 + s, wy * 4 + s * 7, WORLD_SEED + 200 + s);
+        if (h > 0.34) continue;
+        const px1 = (h * 9973 | 0) % TILE, py1 = (h * 7919 | 0) % TILE;
+        g.fillStyle = ramp[h < 0.22 ? 0 : Math.min(2, ramp.length - 1)];
+        g.fillRect(X + px1, Y + py1, 1, 1);
+      }
+
+      if (isWater(code)) {
+        // Foam where water meets land, one bright lip on the land side.
+        const nUp = tileCode(wx, wy - 1), nDn = tileCode(wx, wy + 1);
+        const nL = tileCode(wx - 1, wy), nR = tileCode(wx + 1, wy);
+        if (!isWater(nUp)) { g.fillStyle = C.foam[1]; g.fillRect(X, Y, TILE, 2); }
+        if (!isWater(nDn)) { g.fillStyle = C.foam[0]; g.fillRect(X, Y + TILE - 2, TILE, 2); }
+        if (!isWater(nL)) { g.fillStyle = C.foam[0]; g.fillRect(X, Y, 2, TILE); }
+        if (!isWater(nR)) { g.fillStyle = C.foam[0]; g.fillRect(X + TILE - 2, Y, 2, TILE); }
+        if (code === T.SHALLOW) coast.push([X, Y]);
+      } else {
+        // Relief without isometry: a dark lip under anything that rises north.
+        const e = elevAt(wx, wy), eN = elevAt(wx, wy - 1);
+        if (eN - e > 0.016) {
+          g.fillStyle = 'rgba(20,30,18,0.20)';
+          g.fillRect(X, Y, TILE, 3);
+        } else if (e - eN > 0.016) {
+          g.fillStyle = 'rgba(255,246,214,0.13)';
+          g.fillRect(X, Y, TILE, 2);
+        }
+      }
+    }
+  }
+
+  // Trees and rocks, drawn with a three tile bleed so nothing is cut at seams.
+  const deco = [];
+  for (let ty = -3; ty < CHUNK + 3; ty++) {
+    for (let tx = -3; tx < CHUNK + 3; tx++) {
+      const wx = ox + tx, wy = oy + ty;
+      const code = tileCode(wx, wy);
+      if (isBridge(wx, wy)) { deco.push({ x: tx * TILE - 1, y: ty * TILE, cv: BRIDGE_CV }); continue; }
+      if (code === T.ROAD || isWater(code)) continue;
+      if (nearVillage(wx, wy)) continue;
+      const h = hash2(wx, wy, WORLD_SEED + 909);
+      const m = moistAt(wx, wy);
+      let dens = 0, kind = 'round';
+      if (code === T.FOREST) { dens = 0.34 + m * 0.30; kind = m > 0.63 ? 'pine' : 'round'; }
+      else if (code === T.GRASS) dens = 0.045 + m * 0.05;
+      else if (code === T.DRY) { dens = 0.020; kind = 'dead'; }
+      else if (code === T.HILL) { dens = 0.035; kind = 'pine'; }
+      if (h < dens) {
+        deco.push({ x: tx * TILE + 2 + ((h * 991 | 0) % 6), y: ty * TILE + 2 + ((h * 577 | 0) % 6),
+                    cv: grab(POOL[kind], h * 37 % 1) });
+      } else if (h > 0.9955 && (code === T.ROCK || code === T.HILL || code === T.SNOW)) {
+        deco.push({ x: tx * TILE + 3, y: ty * TILE + 3, cv: grab(POOL.rock, h * 53 % 1) });
+      }
+    }
+  }
+
+  const built = WORLD.buildingsByChunk.get(ckey(cx, cy));
+  if (built) for (const b of built) deco.push({ x: (b.tx - ox) * TILE, y: (b.ty - oy) * TILE, cv: b.cv, ay: b.ay });
+
+  deco.sort((a, b) => a.y - b.y);
+  for (const d of deco) g.drawImage(d.cv, d.x, d.y - d.cv.height + TILE);
+
+  return { cv, coast };
+}
+
+/* Villages clear their own ground: no forest inside the walls. */
+function nearVillage(tx, ty) {
+  for (const k of WORLD.kingdoms) {
+    const dx = tx - k.cx, dy = ty - k.cy;
+    const rb = (k.rBuilt || k.r) + 1;
+    if (dx * dx + dy * dy < rb * rb) return true;
+  }
+  return false;
+}
+
+const MIDPX = 3;                      // pixels per tile in the far view
+function renderLo(cx, cy) {
+  const cv = document.createElement('canvas');
+  cv.width = CHUNK * MIDPX; cv.height = CHUNK * MIDPX;
+  const g = cv.getContext('2d');
+  const ox = cx * CHUNK, oy = cy * CHUNK;
+  for (let ty = 0; ty < CHUNK; ty++) {
+    for (let tx = 0; tx < CHUNK; tx++) {
+      const wx = ox + tx, wy = oy + ty;
+      g.fillStyle = tileColor(tileCode(wx, wy), wx, wy);
+      g.fillRect(tx * MIDPX, ty * MIDPX, MIDPX, MIDPX);
+    }
+  }
+  // Settled land reads as a warm patch, so kingdoms are findable from orbit.
+  for (const k of WORLD.kingdoms) {
+    const kr = (k.rBuilt || k.r) + 1;
+    if (Math.abs(k.cx - (ox + CHUNK / 2)) > kr + CHUNK || Math.abs(k.cy - (oy + CHUNK / 2)) > kr + CHUNK) continue;
+    for (let ty = 0; ty < CHUNK; ty++) for (let tx = 0; tx < CHUNK; tx++) {
+      const dx = ox + tx - k.cx, dy = oy + ty - k.cy;
+      const d2 = dx * dx + dy * dy;
+      if (d2 > kr * kr) continue;
+      g.fillStyle = d2 > kr * kr * 0.78 ? 'rgba(168,124,72,0.62)' : 'rgba(186,136,78,0.88)';
+      g.fillRect(tx * MIDPX, ty * MIDPX, MIDPX, MIDPX);
+    }
+  }
+  return cv;
+}
+
+function getHi(cx, cy) {
+  const key = ckey(cx, cy);
+  let c = hiCache.get(key);
+  if (c) return c;
+  if (genBudget <= 0) return null;
+  genBudget--;
+  c = renderHi(cx, cy);
+  hiCache.set(key, c);
+  if (hiCache.size > HI_MAX) hiCache.delete(hiCache.keys().next().value);
+  return c;
+}
+
+function getLo(cx, cy) {
+  const key = ckey(cx, cy);
+  let c = loCache.get(key);
+  if (c) return c;
+  if (genBudget <= 0) return null;
+  genBudget -= 0.14;
+  c = renderLo(cx, cy);
+  loCache.set(key, c);
+  if (loCache.size > LO_MAX) loCache.delete(loCache.keys().next().value);
+  return c;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   7. THE LIVING PART
+   Villagers walk between the places their kingdom actually has. Farmers work
+   the fields by day and fill the tavern at night. Knights hold the wall.
+   Merchants carry goods down the road to the nearest neighbour.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const DAY_MS = 240000;
+let clockT = DAY_MS * 0.30;
+
+function dayPhase() { return (clockT % DAY_MS) / DAY_MS; }
+function isNight() { const p = dayPhase(); return p > 0.66 || p < 0.06; }
+
+function spawnUnits(k) {
+  const rnd = mulberry(k.seed * 31 + 5);
+  const units = [];
+  const cap = clamp(Math.round(k.pop / 55), 6, 80);
+  const mix = [
+    ['farmer', Math.max(1, Math.round(cap * 0.46))],
+    ['archer', Math.round(cap * 0.14)],
+    ['knight', Math.round(cap * 0.22)],
+    ['horseman', Math.round(cap * 0.08)],
+    ['king', Math.min(k.kings, 3)],
+  ];
+  for (const [kind, n] of mix) {
+    for (let i = 0; i < n; i++) {
+      const home = k.poi.homes[(rnd() * k.poi.homes.length) | 0];
+      units.push({
+        kind, k, x: home.x + (rnd() - 0.5) * 20, y: home.y + (rnd() - 0.5) * 20,
+        tx: home.x, ty: home.y, spd: kind === 'horseman' ? 26 : kind === 'king' ? 9 : 14,
+        wait: rnd() * 3, ph: rnd() * 6.28,
+      });
+    }
+  }
+  k.units = units;
+}
+
+function pick(list, r) { return list[(r * list.length) | 0] || list[0]; }
+
+function retarget(u) {
+  const k = u.k, p = k.poi, r = Math.random();
+  let dst;
+  if (isNight()) {
+    dst = r < 0.62 ? pick(p.gather, Math.random()) : pick(p.homes, Math.random());
+    if (u.kind === 'knight' || u.kind === 'archer') dst = pick(p.wall, Math.random());
+  } else if (u.kind === 'farmer') {
+    dst = r < 0.55 ? pick(p.work, Math.random()) : pick(p.homes, Math.random());
+  } else if (u.kind === 'knight' || u.kind === 'archer' || u.kind === 'horseman') {
+    dst = r < 0.72 ? pick(p.wall, Math.random()) : pick(p.gather, Math.random());
+  } else if (u.kind === 'king') {
+    dst = pick(p.gather, Math.random());
+  } else {
+    dst = pick(p.homes, Math.random());
+  }
+  // Now and then a villager pays respects.
+  if (p.graves.length && Math.random() < 0.035) dst = pick(p.graves, Math.random());
+  u.tx = dst.x + (Math.random() - 0.5) * 14;
+  u.ty = dst.y + (Math.random() - 0.5) * 14;
+}
+
+function stepUnits(k, dt) {
+  if (!k.units) spawnUnits(k);
+  for (const u of k.units) {
+    if (u.wait > 0) { u.wait -= dt; continue; }
+    const dx = u.tx - u.x, dy = u.ty - u.y;
+    const d = Math.hypot(dx, dy);
+    if (d < 2) { u.wait = 0.6 + Math.random() * 3.4; retarget(u); continue; }
+    const v = u.spd * dt;
+    u.x += dx / d * v; u.y += dy / d * v;
+    u.ph += dt * 7;
+  }
+}
+
+function spawnMerchants() {
+  WORLD.merchants = [];
+  for (const l of WORLD.roads) {
+    if (!l.pts || l.pts.length < 8) continue;
+    const n = 1 + (l.pts.length > 90 ? 1 : 0);
+    for (let i = 0; i < n; i++) {
+      WORLD.merchants.push({ l, t: i / n, dir: i % 2 ? -1 : 1, ph: i * 2 });
+    }
+  }
+}
+
+function stepMerchants(dt) {
+  for (const m of WORLD.merchants) {
+    const len = m.l.pts.length;
+    m.t += m.dir * dt * 11 / len;
+    if (m.t > 1) { m.t = 1; m.dir = -1; }
+    if (m.t < 0) { m.t = 0; m.dir = 1; }
+    m.ph += dt * 7;
+    const p = m.l.pts[clamp(Math.round(m.t * (len - 1)), 0, len - 1)];
+    m.x = p.x * TILE + TILE / 2; m.y = p.y * TILE + TILE / 2;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   8. SPRITE POOLS
+   Twenty house variants beat two thousand unique ones: the street still looks
+   hand placed, and the browser allocates twenty canvases instead of a
+   thousand.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const POOL = {};
+function fillPools() {
+  const r = mulberry(90210);
+  POOL.house = []; for (let i = 0; i < 22; i++) POOL.house.push(makeHouse(r, false));
+  POOL.big = [];   for (let i = 0; i < 7; i++)  POOL.big.push(makeHouse(r, true));
+  POOL.farm = [];  for (let i = 0; i < 5; i++)  POOL.farm.push(makeFarm(r));
+  POOL.mill = [];  for (let i = 0; i < 3; i++)  POOL.mill.push(makeWindmill(r));
+  POOL.tomb = [];  for (let i = 0; i < 5; i++)  POOL.tomb.push(makeTombstone(r));
+  POOL.rock = [];  for (let i = 0; i < 7; i++)  POOL.rock.push(makeRock(r));
+  POOL.pine = [];  for (let i = 0; i < 9; i++)  POOL.pine.push(makeTree('pine', r));
+  POOL.round = []; for (let i = 0; i < 9; i++)  POOL.round.push(makeTree('round', r));
+  POOL.dead = [];  for (let i = 0; i < 4; i++)  POOL.dead.push(makeTree('dead', r));
+}
+const grab = (arr, f) => arr[(f * arr.length) | 0] || arr[0];
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   9. CAMERA AND SCREEN
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const cvs = document.getElementById('world');
+const ctx = cvs.getContext('2d', { alpha: false });
+const back = document.createElement('canvas');
+const bctx = back.getContext('2d', { alpha: false });
+
+const ZOOMS = [0.18, 0.32, 0.6, 1, 2, 3, 4];
+const NEAR_MIN = 0.6;
+const cam = { x: 0, y: 0, zi: 4 };
+let dpr = 1, cssW = 0, cssH = 0;
+
+function zoom() { return ZOOMS[cam.zi]; }
+
+function resize() {
+  dpr = Math.min(2, window.devicePixelRatio || 1);
+  cssW = window.innerWidth; cssH = window.innerHeight;
+  cvs.width = Math.round(cssW * dpr); cvs.height = Math.round(cssH * dpr);
+  ctx.imageSmoothingEnabled = false;
+}
+window.addEventListener('resize', resize);
+
+function screenToWorld(sx, sy) {
+  const z = zoom();
+  return { x: cam.x + (sx - cssW / 2) / z, y: cam.y + (sy - cssH / 2) / z };
+}
+
+function setZoom(dir, ax, ay) {
+  const before = screenToWorld(ax === undefined ? cssW / 2 : ax, ay === undefined ? cssH / 2 : ay);
+  cam.zi = clamp(cam.zi + dir, 0, ZOOMS.length - 1);
+  const after = screenToWorld(ax === undefined ? cssW / 2 : ax, ay === undefined ? cssH / 2 : ay);
+  cam.x += before.x - after.x; cam.y += before.y - after.y;
+  clampCam(); syncZoomBtns();
+}
+
+function clampCam() {
+  const lim = WORLD.radius * TILE * 1.25;
+  cam.x = clamp(cam.x, -lim, lim); cam.y = clamp(cam.y, -lim, lim);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   10. LIGHT
+   Four real minutes make a day. Dawn warms the land, night drops a blue veil
+   and the windows come on.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const LIGHT = [
+  [0.00, 26, 34, 78, 0.40], [0.06, 255, 168, 104, 0.20], [0.16, 0, 0, 0, 0.00],
+  [0.58, 0, 0, 0, 0.00],    [0.66, 255, 146, 84, 0.20],  [0.74, 26, 34, 78, 0.40],
+  [1.00, 26, 34, 78, 0.40],
+];
+function tintNow() {
+  const p = dayPhase();
+  for (let i = 0; i < LIGHT.length - 1; i++) {
+    const a = LIGHT[i], b = LIGHT[i + 1];
+    if (p >= a[0] && p <= b[0]) {
+      const t = (p - a[0]) / (b[0] - a[0] || 1);
+      return { r: lerp(a[1], b[1], t) | 0, g: lerp(a[2], b[2], t) | 0,
+               b: lerp(a[3], b[3], t) | 0, a: lerp(a[4], b[4], t) };
+    }
+  }
+  return { r: 0, g: 0, b: 0, a: 0 };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   11. DRAW
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+let hovered = null, selected = null;
+
+function draw(dt) {
+  const z = zoom();
+  genBudget = 7;
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.imageSmoothingEnabled = false;
+  ctx.fillStyle = C.deep[0];
+  ctx.fillRect(0, 0, cvs.width, cvs.height);
+
+  if (z >= NEAR_MIN) drawNear(z, dt); else drawFar(z);
+
+  const t = tintNow();
+  if (t.a > 0.004) {
+    ctx.fillStyle = 'rgba(' + t.r + ',' + t.g + ',' + t.b + ',' + t.a.toFixed(3) + ')';
+    ctx.fillRect(0, 0, cvs.width, cvs.height);
+  }
+  drawLabels(z, t);
+}
+
+function drawNear(z, dt) {
+  const bw = Math.ceil(cssW / z) + 2, bh = Math.ceil(cssH / z) + 2;
+  if (back.width !== bw || back.height !== bh) { back.width = bw; back.height = bh; }
+  bctx.imageSmoothingEnabled = false;
+  bctx.fillStyle = C.deep[0];
+  bctx.fillRect(0, 0, bw, bh);
+
+  const left = Math.round(cam.x - bw / 2), top = Math.round(cam.y - bh / 2);
+  const c0x = Math.floor(left / CHUNK_PX), c1x = Math.floor((left + bw) / CHUNK_PX);
+  const c0y = Math.floor(top / CHUNK_PX), c1y = Math.floor((top + bh) / CHUNK_PX);
+
+  for (let cy = c0y; cy <= c1y; cy++) {
+    for (let cx = c0x; cx <= c1x; cx++) {
+      const c = getHi(cx, cy);
+      if (c) bctx.drawImage(c.cv, cx * CHUNK_PX - left, cy * CHUNK_PX - top);
+    }
+  }
+
+  // Villagers, only for kingdoms actually on screen.
+  const draws = [];
+  for (const k of WORLD.kingdoms) {
+    const kx = k.cx * TILE, ky = k.cy * TILE, kr = k.r * TILE + 40;
+    if (kx + kr < left || kx - kr > left + bw || ky + kr < top || ky - kr > top + bh) continue;
+    stepUnits(k, dt);
+    for (const u of k.units) {
+      const sx = u.x - left, sy = u.y - top;
+      if (sx < -12 || sy < -12 || sx > bw + 12 || sy > bh + 12) continue;
+      draws.push({ x: sx, y: sy, s: SPRITES[u.kind + (Math.sin(u.ph) > 0 ? '_a' : '_b')] });
+    }
+  }
+  for (const m of WORLD.merchants) {
+    const sx = m.x - left, sy = m.y - top;
+    if (sx < -12 || sy < -12 || sx > bw + 12 || sy > bh + 12) continue;
+    draws.push({ x: sx, y: sy, s: SPRITES['merchant' + (Math.sin(m.ph) > 0 ? '_a' : '_b')] });
+  }
+  draws.sort((a, b) => a.y - b.y);
+  for (const d of draws) {
+    if (!d.s) continue;
+    bctx.fillStyle = C.shadow;
+    bctx.fillRect(d.x - 3, d.y - 1, 7, 2);
+    bctx.drawImage(d.s, Math.round(d.x - d.s.width / 2), Math.round(d.y - d.s.height + 1));
+  }
+
+  // Window light after dusk.
+  const t = tintNow();
+  if (t.a > 0.14 && z >= 1) {
+    bctx.fillStyle = 'rgba(255,206,110,0.92)';
+    for (let cy = c0y; cy <= c1y; cy++) for (let cx = c0x; cx <= c1x; cx++) {
+      const list = WORLD.buildingsByChunk.get(ckey(cx, cy));
+      if (!list) continue;
+      for (const b of list) {
+        if (b.cv.width < 9) continue;
+        const bx = b.tx * TILE - left + (b.cv.width >> 1) - 1;
+        const by = b.ty * TILE - top - Math.round(b.cv.height * 0.34);
+        bctx.fillRect(bx, by, 2, 2);
+      }
+    }
+  }
+
+  if (selected) ringKingdom(bctx, selected, left, top, 1);
+  else if (hovered) ringKingdom(bctx, hovered, left, top, 1);
+
+  const s = z * dpr;
+  ctx.imageSmoothingEnabled = z < 1;
+  ctx.drawImage(back, 0, 0, bw, bh, 0, 0, Math.round(bw * s), Math.round(bh * s));
+  ctx.imageSmoothingEnabled = false;
+}
+
+function ringKingdom(g, k, left, top, sc) {
+  g.save();
+  g.strokeStyle = 'rgba(255,226,140,0.85)';
+  g.lineWidth = 1;
+  g.setLineDash([4, 4]);
+  g.beginPath();
+  g.arc(k.cx * TILE - left, k.cy * TILE - top, (k.rBuilt || k.r) * TILE + 6, 0, 6.2832);
+  g.stroke();
+  g.restore();
+}
+
+function drawFar(z) {
+  const px_ = z * TILE * dpr;             // screen pixels per tile
+  const step = CHUNK * px_;               // screen pixels per chunk
+  const wLeft = cam.x - cssW / 2 / z, wTop = cam.y - cssH / 2 / z;
+  const c0x = Math.floor(wLeft / CHUNK_PX), c1x = Math.floor((wLeft + cssW / z) / CHUNK_PX);
+  const c0y = Math.floor(wTop / CHUNK_PX), c1y = Math.floor((wTop + cssH / z) / CHUNK_PX);
+  ctx.imageSmoothingEnabled = step < CHUNK * MIDPX;
+  for (let cy = c0y; cy <= c1y; cy++) {
+    for (let cx = c0x; cx <= c1x; cx++) {
+      const c = getLo(cx, cy);
+      if (!c) continue;
+      const sx = (cx * CHUNK_PX - wLeft) * z * dpr;
+      const sy = (cy * CHUNK_PX - wTop) * z * dpr;
+      ctx.drawImage(c, Math.floor(sx), Math.floor(sy), Math.ceil(step) + 1, Math.ceil(step) + 1);
+    }
+  }
+  ctx.imageSmoothingEnabled = false;
+}
+
+function worldToScreen(wx, wy) {
+  const z = zoom();
+  return { x: (wx - cam.x) * z + cssW / 2, y: (wy - cam.y) * z + cssH / 2 };
+}
+
+let UI_FONT = 'monospace';
+function drawLabels(z, tint) {
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.textAlign = 'center';
+  for (const k of WORLD.kingdoms) {
+    const p = worldToScreen(k.cx * TILE, (k.cy - (k.rBuilt || k.r)) * TILE - 16);
+    if (p.x < -140 || p.x > cssW + 140 || p.y < -40 || p.y > cssH + 40) continue;
+    const big = z >= 1;
+    const scale = big ? 1 : 0.88;
+    ctx.font = '700 ' + (13 * scale).toFixed(0) + 'px ' + UI_FONT;
+    const label = k.name;
+    const w = ctx.measureText(label).width + 16;
+    ctx.fillStyle = 'rgba(24,18,12,0.72)';
+    roundRect(ctx, p.x - w / 2, p.y - 15, w, 19, 3);
+    ctx.fill();
+    if (k === selected || k === hovered) {
+      ctx.strokeStyle = '#e8b03a'; ctx.lineWidth = 1.5; ctx.stroke();
+    }
+    ctx.fillStyle = '#f2e6cc';
+    ctx.fillText(label, p.x, p.y - 1.5);
+    if (z < NEAR_MIN) {
+      ctx.font = '700 9px ' + UI_FONT;
+      ctx.fillStyle = 'rgba(255,225,160,0.9)';
+      ctx.fillText(fmt(k.pop) + ' souls', p.x, p.y + 12);
+    }
+  }
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+
+function roundRect(g, x, y, w, h, r) {
+  g.beginPath();
+  g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r);
+  g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r);
+  g.arcTo(x, y, x + w, y, r); g.closePath();
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   12. INPUT
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+let drag = null, moved = 0, pinch = null;
+
+cvs.addEventListener('pointerdown', (e) => {
+  cvs.setPointerCapture(e.pointerId);
+  drag = { x: e.clientX, y: e.clientY, cx: cam.x, cy: cam.y };
+  moved = 0; cvs.classList.add('dragging');
+});
+cvs.addEventListener('pointermove', (e) => {
+  if (drag) {
+    const z = zoom();
+    cam.x = drag.cx - (e.clientX - drag.x) / z;
+    cam.y = drag.cy - (e.clientY - drag.y) / z;
+    moved += Math.abs(e.movementX || 0) + Math.abs(e.movementY || 0);
+    clampCam();
+  } else {
+    hoverAt(e.clientX, e.clientY);
+  }
+});
+function endDrag(e) {
+  if (drag && moved < 5) clickAt(e.clientX, e.clientY);
+  drag = null; cvs.classList.remove('dragging');
+}
+cvs.addEventListener('pointerup', endDrag);
+cvs.addEventListener('pointercancel', () => { drag = null; cvs.classList.remove('dragging'); });
+cvs.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  setZoom(e.deltaY < 0 ? 1 : -1, e.clientX, e.clientY);
+}, { passive: false });
+
+cvs.addEventListener('touchstart', (e) => {
+  if (e.touches.length === 2) {
+    pinch = Math.hypot(e.touches[0].clientX - e.touches[1].clientX,
+                       e.touches[0].clientY - e.touches[1].clientY);
+  }
+}, { passive: true });
+cvs.addEventListener('touchmove', (e) => {
+  if (e.touches.length === 2 && pinch) {
+    const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX,
+                         e.touches[0].clientY - e.touches[1].clientY);
+    if (d / pinch > 1.4) { setZoom(1); pinch = d; }
+    if (d / pinch < 0.72) { setZoom(-1); pinch = d; }
+  }
+}, { passive: true });
+cvs.addEventListener('touchend', () => { pinch = null; }, { passive: true });
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { closeCard(); closeModal(); }
+  if (e.key === '+' || e.key === '=') setZoom(1);
+  if (e.key === '-') setZoom(-1);
+  const pan = 120 / zoom();
+  if (e.key === 'ArrowLeft') cam.x -= pan;
+  if (e.key === 'ArrowRight') cam.x += pan;
+  if (e.key === 'ArrowUp') cam.y -= pan;
+  if (e.key === 'ArrowDown') cam.y += pan;
+  clampCam();
+});
+
+function kingdomAt(sx, sy) {
+  const w = screenToWorld(sx, sy);
+  let best = null, bd = 1e9;
+  for (const k of WORLD.kingdoms) {
+    const dx = w.x - k.cx * TILE, dy = w.y - k.cy * TILE;
+    const d = Math.hypot(dx, dy);
+    if (d < k.r * TILE + 24 && d < bd) { bd = d; best = k; }
+  }
+  return best;
+}
+
+const tip = document.getElementById('tip');
+function hoverAt(sx, sy) {
+  const k = kingdomAt(sx, sy);
+  hovered = k;
+  if (!k) { tip.classList.remove('on'); cvs.style.cursor = 'grab'; return; }
+  cvs.style.cursor = 'pointer';
+  const w = screenToWorld(sx, sy);
+  const gx = k.grave.x * TILE, gy = k.grave.y * TILE;
+  const onGrave = Math.abs(w.x - gx) < 60 && Math.abs(w.y - gy) < 60;
+  tip.innerHTML = onGrave
+    ? '<b>' + fmt(k.churn) + '</b> subscribers lost in 30 days<br>' + k.grave.stones + ' stones, one per ten'
+    : '<b>' + k.name + '</b><br>' + fmt(k.pop) + ' souls, ' + fmt(k.knights + k.horsemen) + ' under arms';
+  tip.style.left = Math.min(sx + 14, cssW - 232) + 'px';
+  tip.style.top = (sy + 16) + 'px';
+  tip.classList.add('on');
+}
+
+function clickAt(sx, sy) {
+  const k = kingdomAt(sx, sy);
+  if (k) openCard(k); else closeCard();
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   13. THE HERALD
+   Every line comes from a real change between two days of history.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+function fmt(n) {
+  n = Math.round(n);
+  if (n >= 1000000) return (n / 1000000).toFixed(n >= 10000000 ? 0 : 1) + 'M';
+  if (n >= 10000) return (n / 1000).toFixed(0) + 'k';
+  return n.toLocaleString('en-US');
+}
+function money(n) { return '$' + fmt(n); }
+
+function weekDelta(k) {
+  const h = k.hist, a = popOf(h[h.length - 8]), b = popOf(h[h.length - 1]);
+  return { abs: b - a, pct: a ? (b - a) / a : 0 };
+}
+
+function buildNews() {
+  const ev = [];
+  for (const k of WORLD.kingdoms) {
+    const h = k.hist, n = h.length;
+    const d = weekDelta(k);
+    const houses = k.houses - Math.floor(h[n - 8].users / 100);
+    const knights = k.knights - Math.floor(h[n - 8].subs / 10);
+    const mrrD = k.mrr - h[n - 8].mrr;
+
+    if (houses > 0) ev.push({ k, w: houses * 3, t: k.name + ' raises ' + houses + ' new ' + (houses === 1 ? 'house' : 'houses') + '.' });
+    if (houses < 0) ev.push({ k, w: -houses * 3, t: k.name + ' boards up ' + (-houses) + ' ' + (houses === -1 ? 'house' : 'houses') + '.' });
+    if (knights > 0) ev.push({ k, w: knights * 2, t: fmt(knights) + ' knights sworn in at ' + k.name + '.' });
+    if (knights < 0) ev.push({ k, w: -knights * 4, t: k.name + ' loses ' + fmt(-knights) + ' knights this week.' });
+    if (k.horsemen >= 1 && mrrD > 500) ev.push({ k, w: 6, t: k.name + ' mounts a horseman on ' + money(mrrD) + ' new coin.' });
+    if (k.grave.stones >= 12) ev.push({ k, w: 7, t: 'Gravediggers busy at ' + k.name + ': ' + fmt(k.churn) + ' departed.' });
+    if (d.pct > 0.08) ev.push({ k, w: 9, t: k.name + ' swells ' + (d.pct * 100).toFixed(0) + ' percent in seven days.' });
+    if (d.pct < -0.05) ev.push({ k, w: 9, t: k.name + ' thins by ' + (-d.pct * 100).toFixed(0) + ' percent.' });
+    if (k.pop >= 50000) ev.push({ k, w: 5, t: 'The palace at ' + k.name + ' opens its gates.' });
+    else if (k.pop >= 25000) ev.push({ k, w: 4, t: 'Cathedral bells ring over ' + k.name + '.' });
+    else if (k.pop >= 10000) ev.push({ k, w: 4, t: k.name + ' finishes the stone keep.' });
+    else if (k.pop >= 5000) ev.push({ k, w: 3, t: 'Walls go up around ' + k.name + '.' });
+    else if (k.pop < 100) ev.push({ k, w: 2, t: k.name + ' is one hut and a campfire.' });
+    if (k.trials > 0) ev.push({ k, w: 1, t: fmt(k.archers) + ' archers wait outside the walls of ' + k.name + '.' });
+  }
+  ev.sort((a, b) => b.w - a.w);
+  return ev.slice(0, 20);
+}
+
+let news = [], teaseIdx = 0;
+const teaseEl = document.getElementById('tease');
+const paperEl = document.getElementById('paper');
+
+function paintNews() {
+  news = buildNews();
+  const evBox = document.getElementById('events');
+  evBox.innerHTML = news.map((e, i) =>
+    '<div class="ev"><span class="when">' + (i < 4 ? 'now' : i < 10 ? '1d' : '2d') + '</span><span>' + e.t + '</span></div>'
+  ).join('');
+
+  const byGrowth = WORLD.kingdoms.slice().sort((a, b) => weekDelta(b).pct - weekDelta(a).pct).slice(0, 5);
+  document.getElementById('growing').innerHTML = byGrowth.map((k, i) => {
+    const d = weekDelta(k);
+    const cls = d.pct > 0.002 ? 'up' : d.pct < -0.002 ? 'down' : 'flat';
+    return '<div class="row" data-k="' + k.id + '"><span class="rank">' + (i + 1) + '</span>' +
+      '<span class="nm">' + k.name + '</span><span class="val ' + cls + '">' +
+      (d.pct >= 0 ? '+' : '') + (d.pct * 100).toFixed(1) + '%</span></div>';
+  }).join('');
+
+  const now = WORLD.kingdoms.slice().sort((a, b) => b.pop - a.pop);
+  const then = WORLD.kingdoms.slice().sort((a, b) => popOf(b.hist[b.hist.length - 8]) - popOf(a.hist[a.hist.length - 8]));
+  document.getElementById('board').innerHTML = now.slice(0, 10).map((k, i) => {
+    const was = then.indexOf(k);
+    const mv = was - i;
+    const arrow = mv > 0 ? '<span class="mv up">▲' + mv + '</span>'
+                : mv < 0 ? '<span class="mv down">▼' + (-mv) + '</span>'
+                : '<span class="mv flat">–</span>';
+    return '<div class="row" data-k="' + k.id + '"><span class="rank">' + (i + 1) + '</span>' +
+      '<span class="nm">' + k.name + '</span><span class="val">' + fmt(k.pop) + '</span>' + arrow + '</div>';
+  }).join('');
+
+  paperEl.querySelectorAll('.row').forEach(r => r.addEventListener('click', () => {
+    const k = WORLD.kingdoms.find(x => x.id === r.dataset.k);
+    if (k) { flyTo(k); openCard(k); }
+  }));
+
+  rotateTease();
+}
+
+function rotateTease() {
+  if (!news.length) return;
+  const e = news[teaseIdx % news.length];
+  teaseEl.innerHTML = '<b>' + e.t + '</b>';
+  teaseIdx++;
+}
+setInterval(() => { if (!paperEl.classList.contains('open')) rotateTease(); }, 5200);
+
+document.getElementById('mast').addEventListener('click', () => {
+  paperEl.classList.toggle('open');
+  document.getElementById('caret').textContent = paperEl.classList.contains('open') ? '▴' : '▾';
+});
+teaseEl.addEventListener('click', () => {
+  paperEl.classList.add('open');
+  document.getElementById('caret').textContent = '▴';
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   14. THE KINGDOM CARD
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const cardEl = document.getElementById('card');
+
+function openCard(k) {
+  selected = k;
+  document.getElementById('cName').textContent = k.name;
+  document.getElementById('cSub').textContent = k.tag.toUpperCase() + ' · ' + fmt(k.users) + ' ACTIVE USERS';
+  document.getElementById('cFounders').innerHTML = k.founders.map(f =>
+    '<a href="https://x.com/' + f + '" target="_blank" rel="noopener">👑 @' + f + '</a>').join('');
+  document.getElementById('cStats').innerHTML = [
+    [fmt(k.pop), 'Population'], [fmt(k.houses), 'Houses'],
+    [fmt(k.knights), 'Knights'], [fmt(k.archers), 'Archers'],
+    [fmt(k.horsemen), 'Horsemen'], [fmt(k.churn), 'In the graveyard'],
+  ].map(([n, l]) => '<div class="stat"><div class="n">' + n + '</div><div class="l">' + l + '</div></div>').join('');
+
+  const d = weekDelta(k);
+  const de = document.getElementById('cDelta');
+  de.textContent = (d.abs >= 0 ? '+' : '') + fmt(d.abs) + ' in 7 days';
+  de.className = d.abs > 0 ? 'up' : d.abs < 0 ? 'down' : 'flat';
+
+  drawFlag(k);
+  drawSpark(k);
+  cardEl.classList.add('on');
+}
+function closeCard() { selected = null; cardEl.classList.remove('on'); }
+document.getElementById('cClose').addEventListener('click', closeCard);
+
+function drawFlag(k) {
+  const cv = document.getElementById('cardFlag');
+  const g = cv.getContext('2d');
+  g.clearRect(0, 0, cv.width, cv.height);
+  const hue = ['#a8442f', '#3f5f9c', '#2f7d54', '#7a3f86'][k.seed % 4];
+  g.fillStyle = C.wood[0]; g.fillRect(8, 0, 1, 20);
+  g.fillStyle = hue; g.fillRect(2, 1, 13, 13);
+  g.fillStyle = C.ink;
+  g.fillRect(2, 1, 13, 1); g.fillRect(2, 13, 13, 1);
+  g.fillRect(2, 1, 1, 13); g.fillRect(14, 1, 1, 13);
+  g.fillStyle = C.gold[2];
+  g.fillRect(6, 5, 5, 4); g.fillRect(5, 4, 1, 2); g.fillRect(11, 4, 1, 2); g.fillRect(8, 3, 1, 3);
+}
+
+function drawSpark(k) {
+  const cv = document.getElementById('cSpark');
+  const g = cv.getContext('2d');
+  const W = cv.width, H = cv.height, pad = 8;
+  g.clearRect(0, 0, W, H);
+  const vals = k.hist.map(popOf);
+  const lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+  const rng = (hi - lo) || 1;
+  const X = i => pad + i / (vals.length - 1) * (W - pad * 2);
+  const Y = v => H - pad - (v - lo) / rng * (H - pad * 2);
+  g.beginPath(); g.moveTo(X(0), H);
+  vals.forEach((v, i) => g.lineTo(X(i), Y(v)));
+  g.lineTo(X(vals.length - 1), H); g.closePath();
+  const grad = g.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, 'rgba(107,83,52,0.30)'); grad.addColorStop(1, 'rgba(107,83,52,0.02)');
+  g.fillStyle = grad; g.fill();
+  g.beginPath();
+  vals.forEach((v, i) => i ? g.lineTo(X(i), Y(v)) : g.moveTo(X(i), Y(v)));
+  g.strokeStyle = '#4a3a24'; g.lineWidth = 3; g.lineJoin = 'round'; g.stroke();
+  g.beginPath(); g.arc(X(vals.length - 1), Y(vals[vals.length - 1]), 5, 0, 6.2832);
+  g.fillStyle = '#e8b03a'; g.fill();
+  g.strokeStyle = '#4a3a24'; g.lineWidth = 2; g.stroke();
+}
+
+function flyTo(k) {
+  cam.x = k.cx * TILE; cam.y = k.cy * TILE;
+  cam.zi = k.r > 60 ? 3 : k.r > 24 ? 4 : 5;
+  clampCam(); syncZoomBtns();
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   15. ADD YOUR KINGDOM
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const modal = document.getElementById('modal');
+function openModal() { modal.classList.add('on'); }
+function closeModal() { modal.classList.remove('on'); }
+document.getElementById('addBtn').addEventListener('click', openModal);
+document.getElementById('mClose').addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+document.getElementById('mGo').addEventListener('click', () => {
+  const name = document.getElementById('fKing').value.trim();
+  const note = document.getElementById('mNote');
+  if (!name) { note.textContent = 'Name the kingdom first.'; return; }
+  note.textContent = 'Saved. ' + name + ' joins the map at the next daily refresh.';
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   16. CLOCK AND ZOOM CHROME
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const zIn = document.getElementById('zIn'), zOut = document.getElementById('zOut');
+zIn.addEventListener('click', () => setZoom(1));
+zOut.addEventListener('click', () => setZoom(-1));
+function syncZoomBtns() {
+  zIn.disabled = cam.zi >= ZOOMS.length - 1;
+  zOut.disabled = cam.zi <= 0;
+}
+
+const dayEl = document.getElementById('dayN'), yrEl = document.getElementById('yr');
+let lastDay = -1;
+function paintClock() {
+  const total = Math.floor(clockT / DAY_MS) + 1;
+  if (total === lastDay) return;
+  lastDay = total;
+  const year = Math.floor((total - 1) / 90) + 1;
+  dayEl.textContent = 'Day ' + (((total - 1) % 90) + 1);
+  yrEl.textContent = year;
+  document.getElementById('issue').textContent = 'No. ' + total;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   17. BOOT
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const bootEl = document.getElementById('boot'), bootBar = document.getElementById('bootBar');
+function progress(p) { bootBar.style.width = Math.round(p * 100) + '%'; }
+
+function boot() {
+  resize();
+  UI_FONT = getComputedStyle(document.body).fontFamily;
+  bakeUnits();
+  fillPools();
+  progress(0.15);
+
+  let ks = SEED_KINGDOMS.map(k => {
+    const d = derive(k);
+    d.hist = buildHistory(k);
+    d.churn = churn30(d.hist);
+    return d;
+  });
+  progress(0.3);
+
+  ks = placeKingdoms(ks);
+  WORLD.kingdoms = ks;
+  progress(0.5);
+
+  buildRoads(ks);
+  progress(0.6);
+
+  for (const k of ks) layoutVillage(k);
+  progress(0.85);
+
+  // Index every building by the chunks its footprint touches.
+  for (const k of ks) {
+    for (const b of k.buildings) {
+      const x0 = b.tx * TILE, y0 = b.ty * TILE - b.cv.height + TILE;
+      const x1 = x0 + b.cv.width, y1 = b.ty * TILE + TILE;
+      for (let cy = Math.floor(y0 / CHUNK_PX); cy <= Math.floor(y1 / CHUNK_PX); cy++) {
+        for (let cx = Math.floor(x0 / CHUNK_PX); cx <= Math.floor(x1 / CHUNK_PX); cx++) {
+          const key = ckey(cx, cy);
+          let arr = WORLD.buildingsByChunk.get(key);
+          if (!arr) { arr = []; WORLD.buildingsByChunk.set(key, arr); }
+          arr.push(b);
+        }
+      }
+    }
+    for (const t of k.roadTiles) WORLD.roadSet.add(t.x + ',' + t.y);
+  }
+  spawnMerchants();
+  stepMerchants(0);
+  progress(1);
+
+  const me = ks.find(k => k.id === 'kaught') || ks[0];
+  cam.x = me.cx * TILE; cam.y = me.cy * TILE;
+  cam.zi = 4;
+  syncZoomBtns();
+  paintNews();
+  setTimeout(() => bootEl.classList.add('gone'), 320);
+
+  let prev = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - prev) / 1000);
+    prev = now;
+    clockT += dt * 1000;
+    paintClock();
+    draw(dt);
+    stepMerchants(dt);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();
+
+</script>
+</body>
+</html>
