@@ -79,17 +79,36 @@
   --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* A dark band drops from blue-black to true black and re-points the tokens,
-   so every component inside it follows without a single override. */
-.band--dark {
-  background: var(--black);
-  --rule:      rgba(255, 255, 255, 0.13);
-  --rule-firm: rgba(255, 255, 255, 0.22);
-  --card:      rgba(255, 255, 255, 0.05);
-  --bg-sunk:   rgba(255, 255, 255, 0.07);
-  --bg:        #000000;
+/* The page ramps from black at the top to white at the bottom. Past the
+   crossover the ink has to go the other way, so the section re-points the
+   same tokens and every component inside it follows — cards, rules, chips,
+   buttons — without a single override. */
+.tone--light {
+  --ink:       #0d1017;
+  --muted:     #565a68;
+  --faint:     #6b6f7d;
+  --ink-2:     #9aa0ad;
+  --rule:      rgba(0, 0, 0, 0.10);
+  --rule-firm: rgba(0, 0, 0, 0.17);
+  --card:      rgba(255, 255, 255, 0.66);
+  --bg-sunk:   rgba(0, 0, 0, 0.05);
+  --bg:        #f4f5f8;
+  --lift:    0 1px 2px rgba(0,0,0,.04), 0 8px 22px -14px rgba(0,0,0,.12);
+  --lift-lg: 0 1px 2px rgba(0,0,0,.05), 0 24px 56px -26px rgba(0,0,0,.20);
   color: var(--ink);
 }
+
+/* Each band picks its ground up where the band above it stopped, so the
+   whole page reads as one gradient. The crossover from dark to light runs
+   through the bottom padding of #how and the top padding of #audience —
+   exactly the gap between the last dark line and the first light one, so no
+   text ever sits on the mid grey. */
+#asset    { background: linear-gradient(180deg, #0a0e16, #161b25); }
+#how      { background: linear-gradient(180deg, #161b25 0, #262d3a calc(100% - clamp(88px, 12vw, 168px)), #798091 100%); }
+#audience { background: linear-gradient(180deg, #798091 0, #e7e9ef clamp(88px, 12vw, 168px), #f0f1f4 100%); }
+#contact  { background: linear-gradient(180deg, #f0f1f4, #f6f6f8); }
+#projects { background: linear-gradient(180deg, #f6f6f8, #fcfcfd); }
+.foot     { background: linear-gradient(180deg, #fcfcfd, #ffffff); }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -200,9 +219,6 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .btn:hover { box-shadow: var(--lift-lg); }
 .btn:active { transform: scale(0.975) !important; transition-duration: .09s; }
 
-.band--dark .btn { background: var(--white); color: var(--black); }
-.band--dark .btn--ghost { background: transparent; color: var(--white); border-color: var(--rule-firm); }
-.band--dark .btn--ghost:hover { background: rgba(255,255,255,0.08); }
 
 .btn--ghost {
   background: transparent; color: var(--ink);
@@ -241,6 +257,7 @@ button.btn { cursor: pointer; font-family: inherit; }
   transform: translate3d(0, 0, 0);
   transition: background .5s var(--ease-soft), border-color .5s var(--ease-soft), transform .4s var(--ease);
 }
+.nav.tone--light.stuck { background: rgba(250, 250, 252, 0.72); }
 .nav.stuck {
   background: rgba(7, 10, 18, 0.66);
   border-bottom-color: var(--rule);
@@ -321,7 +338,7 @@ button.btn { cursor: pointer; font-family: inherit; }
 .hero {
   padding-block: clamp(128px, 15vh, 168px) clamp(52px, 6vh, 76px);
   background:
-    linear-gradient(180deg, rgba(4, 7, 16, 0.78) 0%, rgba(6, 9, 18, 0.9) 60%, var(--bg) 100%),
+    linear-gradient(180deg, rgba(3, 5, 11, 0.78) 0%, rgba(5, 8, 15, 0.9) 60%, #0a0e16 100%),
     radial-gradient(60% 50% at 80% 0%, rgba(38, 62, 120, 0.42), transparent 70%),
     url(media/hero.jpg) center / cover no-repeat var(--bg);
 }
@@ -338,7 +355,7 @@ button.btn { cursor: pointer; font-family: inherit; }
 @media (max-width: 560px) {
   .phone { width: min(250px, 62vw); }
   .band { padding-block: clamp(64px, 11vw, 96px); }
-  .lane, .project { padding: 26px 22px 28px; }
+  .project { padding: 26px 22px 28px; }
 }
 
 .hero h1 { margin-block: 18px 22px; }
@@ -372,7 +389,7 @@ button.btn { cursor: pointer; font-family: inherit; }
   transition: color .3s var(--ease-soft);
 }
 .copy-inline:hover { color: var(--muted); }
-.band--dark .copy-inline:hover { color: var(--white); }
+.tone--light .copy-inline:hover { color: var(--ink); }
 
 /* the proof cards sit under the hero grid, full width rather than in a column */
 .hero .shell.hero-proof { display: block; }
@@ -461,7 +478,7 @@ button.btn { cursor: pointer; font-family: inherit; }
               rgba(255,255,255,0.06), transparent 70%);
   opacity: 0; transition: opacity .5s var(--ease-soft);
 }
-.band--dark .sheen::after { background: radial-gradient(220px circle at var(--px, 50%) var(--py, 50%), rgba(255,255,255,0.08), transparent 70%); }
+.tone--light .sheen::after { background: radial-gradient(220px circle at var(--px, 50%) var(--py, 50%), rgba(0,0,0,0.05), transparent 70%); }
 .sheen:hover::after { opacity: 1; }
 @media (hover: none) { .sheen::after { display: none; } }
 
@@ -475,25 +492,6 @@ button.btn { cursor: pointer; font-family: inherit; }
   backdrop-filter: blur(18px) saturate(150%);
   -webkit-backdrop-filter: blur(18px) saturate(150%);
 }
-
-/* ── how it works: three lanes ──────────────────────────────────────────── */
-
-.lanes { display: grid; gap: 12px; margin-top: 44px; }
-@media (min-width: 820px) { .lanes { grid-template-columns: repeat(3, 1fr); } }
-.lane {
-  position: relative; overflow: hidden;
-  padding: 30px 28px 32px; border-radius: 22px;
-  background: var(--card); border: 1px solid var(--rule);
-  transition: transform .6s var(--ease), border-color .45s var(--ease-soft);
-}
-.lane:hover { transform: translateY(-3px); border-color: var(--rule-firm); }
-.lane-k { font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.15em; color: var(--faint); display: block; margin-bottom: 16px; }
-.lane h4 { font-size: 1.32rem; margin-bottom: 10px; }
-.lane p { font-size: 14.8px; line-height: 1.56; color: var(--muted); }
-/* the middle lane is the shared one, so it reads as the join between the two */
-.lane--mid { background: var(--ink); color: var(--bg); border-color: transparent; }
-.lane--mid .lane-k { color: var(--bg); opacity: 0.55; }
-.lane--mid p { color: var(--bg); opacity: 0.68; }
 
 /* ── the comparison table ───────────────────────────────────────────────── */
 
@@ -578,35 +576,28 @@ button.btn { cursor: pointer; font-family: inherit; }
 /* ── the workload bar ───────────────────────────────────────────────────── */
 
 .load { max-width: 780px; margin: 44px auto 0; }
-.load-bar { display: flex; gap: 6px; height: 64px; }
+.load-bar { display: flex; gap: 6px; height: clamp(84px, 10vw, 100px); }
 .lb {
-  width: var(--w); min-width: 0;
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px; font-weight: 800; letter-spacing: -0.015em;
+  flex: 0 0 var(--w); min-width: 0;
+  border-radius: 14px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; padding-inline: 8px;
   overflow: hidden; white-space: nowrap;
-  cursor: pointer;
   transform: scaleX(0); transform-origin: left;
-  transition: transform 1.1s var(--ease), width .6s var(--ease),
-              filter .4s var(--ease-soft), opacity .4s var(--ease-soft);
-  transition-delay: var(--bd, 0ms), 0ms, 0ms, 0ms;
+  transition: transform 1.1s var(--ease) var(--bd, 0ms), flex-basis .6s var(--ease);
 }
-/* hovering one segment widens it and dims the others; the matching card lights
-   up at the same time, and hovering a card drives the bar the other way */
-.load-bar:hover .lb { opacity: 0.5; }
-.load-bar .lb.hot, .load-bar:hover .lb:hover { opacity: 1; }
-.load-bar .lb.hot { filter: none; }
-.lane { transition: transform .6s var(--ease), border-color .45s var(--ease-soft), opacity .45s var(--ease-soft); }
-.lanes.dimmed .lane { opacity: 0.45; }
-.lanes.dimmed .lane.hot { opacity: 1; transform: translateY(-3px); }
-.lane.hot { border-color: var(--rule-firm); }
+.lb b { font-size: 15px; font-weight: 800; letter-spacing: -0.015em; }
+.lb span { font-size: 12.5px; font-weight: 600; opacity: 0.62; }
+/* pointing at a segment widens it; the other two lend it the room */
+@media (hover: hover) and (min-width: 620px) {
+  .load-bar:hover .lb { flex-basis: calc(var(--w) - 7%); }
+  .load-bar .lb:hover { flex-basis: calc(var(--w) + 14%); }
+}
 .rise.in .lb { transform: none; }
-.lb b { opacity: 0; transition: opacity .5s var(--ease-soft) calc(var(--bd, 0ms) + 500ms); }
-.rise.in .lb b { opacity: 1; }
 .lb--you { background: var(--bg-sunk); color: var(--ink); --bd: 0ms; }
 .lb--us  { background: var(--ink); color: var(--bg); --bd: 130ms; }
 .lb--me  { background: var(--bg-sunk); color: var(--ink); --bd: 260ms; }
-@media (prefers-reduced-motion: reduce) { .lb { transform: none; } .lb b { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .lb { transform: none; } }
 
 /* ── the rotating niche ─────────────────────────────────────────────────── */
 
@@ -744,7 +735,7 @@ button.btn { cursor: pointer; font-family: inherit; }
 
 /* A grey step between the white argument above and the black ask below, so
    the quote reads as a beat rather than another section. */
-.band--quote { background: var(--bg-sunk); padding-block: clamp(64px, 9vw, 116px); }
+.band--quote { padding-block: clamp(64px, 9vw, 116px); }
 
 /* The claim was a sentence with two numbers buried in it. Drawn as the sum
    it actually is, the reader can check the arithmetic at a glance — and the
@@ -1000,47 +991,27 @@ button.btn { cursor: pointer; font-family: inherit; }
 </section>
 
 <!-- ── how it works ─────────────────────────────────────────────────────── -->
-<section class="band band--dark" id="how">
+<section class="band" id="how">
   <div class="shell">
     <div class="head head--center rise" style="max-width:none">
       <span class="eyebrow"><i></i>How it works</span>
       <h2 class="h-section">You keep posting.<br>I keep building.</h2>
     </div>
 
-    <!-- Bar and cards are one control: pointing at either end highlights both.
-         The segments are the three parts of the job, not a timesheet — the
-         distribution end is small in hours and the reason the whole thing
-         works, so it is not drawn as a sliver. -->
+    <!-- The whole division of labour, in one bar. Each segment says what
+         that part is, so nothing has to be hovered to be read. -->
     <div class="load rise" id="load">
       <div class="load-bar">
-        <button class="lb lb--you" data-lane="0" style="--w:30%" aria-label="Yours: telling your people it exists"><b>You</b></button>
-        <button class="lb lb--us"  data-lane="1" style="--w:22%" aria-label="Ours: deciding what we build"><b>Us</b></button>
-        <button class="lb lb--me"  data-lane="2" style="--w:48%" aria-label="Mine: building it and running it"><b>Me</b></button>
-      </div>
-    </div>
-
-    <div class="lanes" id="lanes">
-      <div class="lane sheen rise" data-lane="0" style="--d:0ms">
-        <span class="lane-k">YOURS</span>
-        <h4>Tell your people</h4>
-        <p>You point your people at it. Nothing else brings the first thousand users, and you already do it every day.</p>
-      </div>
-      <div class="lane lane--mid sheen rise" data-lane="1" style="--d:90ms">
-        <span class="lane-k">OURS</span>
-        <h4>Decide what it is</h4>
-        <p>What we actually build, decided together. You know what your audience wants. I know what ships.</p>
-      </div>
-      <div class="lane sheen rise" data-lane="2" style="--d:180ms">
-        <span class="lane-k">MINE</span>
-        <h4>Build it and run it</h4>
-        <p>Both stores, payments, analytics, paywall, retention, support and updates. Forever.</p>
+        <div class="lb lb--you" style="--w:30%"><b>You</b><span>Content</span></div>
+        <div class="lb lb--us"  style="--w:22%"><b>Us</b><span>Business</span></div>
+        <div class="lb lb--me"  style="--w:48%"><b>Me</b><span>Developer</span></div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ── your audience: the niche, then why there is an app in it ─────────── -->
-<section class="band" id="audience">
+<section class="band tone--light" id="audience">
   <div class="shell">
 
     <!-- The rotating niche is the section's headline. It used to run as its
@@ -1081,7 +1052,7 @@ button.btn { cursor: pointer; font-family: inherit; }
 </section>
 
 <!-- ── the ask ──────────────────────────────────────────────────────────── -->
-<section class="band band--dark close" id="contact">
+<section class="band close tone--light" id="contact">
   <div class="narrow">
     <div class="rise">
       <h2 class="h-section">Twenty minutes for a <span class="nb">life-changing</span> collab.</h2>
@@ -1105,7 +1076,7 @@ button.btn { cursor: pointer; font-family: inherit; }
 </section>
 
 <!-- ── current projects ─────────────────────────────────────────────────── -->
-<section class="band" id="projects">
+<section class="band tone--light" id="projects">
   <div class="shell">
     <div class="head head--center rise">
       <span class="eyebrow"><i></i>Current projects</span>
@@ -1156,7 +1127,7 @@ button.btn { cursor: pointer; font-family: inherit; }
 
 </main>
 
-<footer class="foot">
+<footer class="foot tone--light">
   <div class="shell">
     <span class="copy">&copy; 2024&ndash;2026 Jeremy Lasne</span>
     <div class="foot-links">
@@ -1230,6 +1201,16 @@ button.btn { cursor: pointer; font-family: inherit; }
   var lastY = window.scrollY || window.pageYOffset || 0;
   var holdUntil = 0;   // while a jump to an anchor is in flight, the bar stays
 
+  // where the page ramp has finished turning light, measured rather than
+  // guessed, so it keeps up with a resize
+  var lightAt = null;
+  function measure() {
+    var band = document.getElementById('audience');
+    lightAt = band ? band.offsetTop - nav.offsetHeight : null;
+  }
+  measure();
+  window.addEventListener('resize', function () { measure(); onScroll(); }, { passive: true });
+
   function onScroll() {
     ticking = false;
 
@@ -1241,6 +1222,9 @@ button.btn { cursor: pointer; font-family: inherit; }
     else if (max > 0 && y > max) y = max;
 
     nav.classList.toggle('stuck', y > 30);
+    // the ground under the header turns light at the crossover, so the header
+    // takes the light tokens there — the same class the sections below use
+    if (lightAt !== null) nav.classList.toggle('tone--light', y > lightAt);
     progress.style.setProperty('--p', max > 0 ? Math.min(1, y / max) : 0);
 
     // 10px of slack: below that a phone's collapsing address bar, which moves
@@ -1401,36 +1385,6 @@ button.btn { cursor: pointer; font-family: inherit; }
       new IntersectionObserver(function (e) { e[0].isIntersecting ? start() : halt(); },
         { threshold: 0.3 }).observe(word.closest('section'));
     } else { start(); }
-  })();
-
-  /* ═══ the workload bar and its cards drive each other ════════════════════ */
-
-  (function () {
-    var load  = document.getElementById('load');
-    var lanes = document.getElementById('lanes');
-    if (!load || !lanes) return;
-
-    var segs  = load.querySelectorAll('.lb');
-    var cards = lanes.querySelectorAll('.lane');
-
-    function light(n) {
-      segs.forEach(function (el, k) { el.classList.toggle('hot', k === n); });
-      cards.forEach(function (el, k) { el.classList.toggle('hot', k === n); });
-      lanes.classList.toggle('dimmed', n !== null);
-      // the widened segment borrows room from the other two
-      segs.forEach(function (el, k) {
-        el.style.width = n === null ? '' : (k === n ? 'calc(var(--w) + 14%)' : 'calc(var(--w) - 7%)');
-      });
-    }
-
-    function bind(el, n) {
-      el.addEventListener('pointerenter', function () { light(n); });
-      el.addEventListener('pointerleave', function () { light(null); });
-      el.addEventListener('focus', function () { light(n); });
-      el.addEventListener('blur', function () { light(null); });
-    }
-    segs.forEach(function (el, n) { bind(el, n); });
-    cards.forEach(function (el, n) { bind(el, n); });
   })();
 
   /* ═══ a light that follows the pointer across a card ═════════════════════ */
