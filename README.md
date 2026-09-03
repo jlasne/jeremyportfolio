@@ -97,6 +97,7 @@ current one is not checked in, so redraw it to match if the hero copy changes.
 | `/wealth/exercice` | the same three maps as an interactive lecture |
 | `/overlap` | **Overlap** — landing page and live world clock |
 | `/overlap/team` · `/plan` · `/next` | the app: the team, the meeting, and what to build next |
+| `/kof` | **King of Founders** — a living pixel world map, one kingdom per app |
 
 `/investment` and `/invest` are redirect stubs into `/wealth`.
 
@@ -111,6 +112,25 @@ WorldTimeBuddy way: one row per person, hours running left to right, every
 column the same instant on a different clock. It runs with no backend at all
 (team in `localStorage`, shared by link); connecting Convex adds accounts,
 teams and invite links. See [`overlap/README.md`](overlap/README.md).
+
+**King of Founders** turns product metrics into a map. Every kingdom is one
+founder's app, refreshed once a day from a RevenueCat key scoped to charts
+metrics only. 100 active users raise a house, 10 active trials arm an archer,
+10 subscriptions swear in a knight, 500 MRR mounts a horseman, and 10 departed
+subscribers earn a tombstone, capped at 20 stones. The building ladder runs from
+one hut at 40 souls to a royal palace at 50,000, so the skyline states the tier
+at a glance.
+
+Terrain is a pure function of tile coordinates — seeded value noise with domain
+warp for coastlines, a warped noise band for rivers, ridged noise above the
+treeline for mountain ranges — so a chunk generated today looks the same
+tomorrow. Land reaches only as far as the total population needs, and new
+kingdoms extend the rim without moving anything already drawn. Everything static
+bakes into 32×32 tile chunks once, so a frame costs about forty image blits plus
+the villagers: 60fps from one village up to the whole continent.
+
+Demo data lives in `SEED_KINGDOMS` at the top of the file. Replace that array
+with a fetch to wire it to real accounts.
 
 ## Run locally
 
