@@ -75,6 +75,15 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 #addBtn{top:14px;left:14px}
 #addBtn .crown{width:16px;height:12px;display:block}
 
+/* ── under it: where the numbers come from ─────────────────────────────── */
+#rcBadge{
+  top:56px;left:14px;display:inline-flex;align-items:center;gap:7px;
+  padding:6px 11px;font-size:10px;font-weight:700;letter-spacing:.04em;
+  text-decoration:none;color:var(--ink);opacity:.9;
+}
+#rcBadge:hover{opacity:1}
+#rcBadge svg{width:15px;height:14px;display:block}
+
 /* ── bottom right: zoom + clock ────────────────────────────────────────── */
 #clock{
   bottom:14px;right:14px;display:flex;align-items:stretch;gap:0;overflow:hidden;
@@ -122,8 +131,21 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   font-family:var(--ui);font-size:9px;letter-spacing:.14em;text-transform:uppercase;
   font-weight:700;opacity:.55;margin-bottom:8px;
 }
-#paper .ev{font-size:13px;line-height:1.35;padding:3px 0;display:flex;gap:7px}
-#paper .ev .when{font-family:var(--ui);font-size:9px;opacity:.45;flex:0 0 34px;padding-top:3px;
+#paper .ev{
+  font-size:13px;line-height:1.35;padding:4px 0;display:flex;gap:7px;cursor:pointer;
+  border-bottom:1px dotted #cbb896;
+}
+#paper .ev:last-child{border-bottom:0}
+#paper .ev:hover{background:rgba(0,0,0,.05)}
+#paper .ev .em{flex:0 0 17px;font-size:12px;padding-top:1px}
+#paper .rulebtn{
+  width:100%;text-align:left;font-family:var(--news);font-size:14px;font-weight:600;
+  padding:8px 10px;background:rgba(107,83,52,.12);border:1px solid rgba(107,83,52,.3);
+  border-radius:2px;
+}
+#paper .rulebtn:hover{background:rgba(107,83,52,.22)}
+#paper .who{font-family:var(--ui);font-size:10px;opacity:.6;white-space:nowrap}
+#paper .ev .when{font-family:var(--ui);font-size:9px;opacity:.45;flex:0 0 26px;padding-top:3px;
   letter-spacing:.03em}
 #paper .row{
   display:flex;align-items:baseline;gap:8px;padding:4px 0;font-size:13px;cursor:pointer;
@@ -151,6 +173,10 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 #card .x{font-size:16px;line-height:1;opacity:.45;padding:2px 4px}
 #card .x:hover{opacity:1}
 #card .founders{display:flex;flex-wrap:wrap;gap:5px;padding:0 12px 10px}
+#card .founders .anon{
+  font-size:10px;font-weight:700;background:rgba(107,83,52,.10);
+  border:1px dashed rgba(107,83,52,.45);padding:3px 7px;border-radius:2px;opacity:.8;
+}
 #card .founders a{
   font-size:10px;font-weight:700;text-decoration:none;color:inherit;
   background:rgba(107,83,52,.14);border:1px solid rgba(107,83,52,.3);
@@ -168,26 +194,26 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   display:flex;justify-content:space-between;margin-bottom:5px}
 
 /* ── modal ─────────────────────────────────────────────────────────────── */
-#modal{
+#modal,#modal2{
   position:fixed;inset:0;z-index:40;display:none;
   background:rgba(10,18,30,.72);backdrop-filter:blur(3px);
   align-items:center;justify-content:center;padding:20px;
 }
-#modal.on{display:flex}
-#modal .sheet{
+#modal.on,#modal2.on{display:flex}
+#modal .sheet,#modal2 .sheet{
   width:min(560px,100%);max-height:calc(100vh - 40px);overflow-y:auto;
   scrollbar-width:thin;scrollbar-color:#a98a5c transparent;
 }
-#modal .sheet::-webkit-scrollbar{width:9px}
-#modal .sheet::-webkit-scrollbar-thumb{background:#a98a5c;border-radius:4px}
-#modal .hd{
+#modal .sheet::-webkit-scrollbar,#modal2 .sheet::-webkit-scrollbar{width:9px}
+#modal .sheet::-webkit-scrollbar-thumb,#modal2 .sheet::-webkit-scrollbar-thumb{background:#a98a5c;border-radius:4px}
+#modal .hd,#modal2 .hd{
   display:flex;align-items:center;gap:10px;padding:14px 16px;
   border-bottom:2px solid var(--ink);position:sticky;top:0;
   background:linear-gradient(#f4ead6,#efe3c8);
 }
-#modal .hd h2{font-family:var(--news);font-size:21px;flex:1;font-weight:700;line-height:1}
-#modal .bd{padding:16px}
-#modal p{font-size:12.5px;line-height:1.6;margin-bottom:12px}
+#modal .hd h2,#modal2 .hd h2{font-family:var(--news);font-size:21px;flex:1;font-weight:700;line-height:1}
+#modal .bd,#modal2 .bd{padding:16px}
+#modal p,#modal2 p{font-size:12.5px;line-height:1.6;margin-bottom:12px}
 #modal ol{margin:0 0 14px;padding-left:0;list-style:none;counter-reset:s}
 #modal ol li{
   counter-increment:s;position:relative;padding:0 0 11px 30px;font-size:12.5px;line-height:1.55;
@@ -201,23 +227,33 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   font-family:var(--ui);font-size:11px;background:rgba(107,83,52,.16);
   border:1px solid rgba(107,83,52,.28);padding:1px 5px;border-radius:2px;white-space:nowrap;
 }
-#modal h3{
+#modal h3,#modal2 h3{
   font-size:10px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;
   opacity:.55;margin:20px 0 9px;
 }
-#modal h3:first-child{margin-top:0}
-#modal table{width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:14px}
-#modal th{
+#modal h3:first-child,#modal2 h3:first-child{margin-top:0}
+#modal table,#modal2 table{width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:14px}
+#modal th,#modal2 th{
   text-align:left;font-size:9px;letter-spacing:.1em;text-transform:uppercase;opacity:.5;
   padding:0 8px 6px 0;font-weight:700;
 }
-#modal td{padding:5px 8px 5px 0;border-top:1px solid var(--paper-line);vertical-align:top}
-#modal td:last-child{font-weight:700}
+#modal td,#modal2 td{padding:5px 8px 5px 0;border-top:1px solid var(--paper-line);vertical-align:top}
+#modal td:last-child,#modal2 td:last-child{font-weight:700}
 #modal .safe{
   background:rgba(47,125,50,.12);border-left:3px solid #2f7d32;
   padding:10px 12px;font-size:12px;line-height:1.55;margin-bottom:14px;
 }
 #modal .field{margin-bottom:12px}
+#modal .veil{
+  background:rgba(107,83,52,.10);border:1px solid rgba(107,83,52,.28);
+  border-radius:2px;padding:9px 11px;margin-bottom:14px;
+}
+#modal .chk{
+  display:flex;align-items:flex-start;gap:8px;font-size:11.5px;line-height:1.45;
+  letter-spacing:0;text-transform:none;opacity:1;font-weight:500;cursor:pointer;
+}
+#modal .chk+.chk{margin-top:7px}
+#modal .chk input{width:auto;flex:0 0 auto;margin-top:1px;accent-color:#6b5334}
 #modal label{display:block;font-size:9px;letter-spacing:.11em;text-transform:uppercase;
   font-weight:700;opacity:.55;margin-bottom:5px}
 #modal input{
@@ -230,7 +266,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   background:var(--ink);color:var(--paper);border-radius:2px;padding:12px;
 }
 #modal .go:active{transform:translateY(1px)}
-#modal .fine{font-size:10.5px;line-height:1.55;opacity:.6;margin-top:12px;margin-bottom:0}
+#modal .fine,#modal2 .fine{font-size:10.5px;line-height:1.55;opacity:.6;margin-top:12px;margin-bottom:0}
 
 /* ── hover tip ─────────────────────────────────────────────────────────── */
 #tip{
@@ -255,11 +291,12 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 @media (max-width:700px){
   /* The paper takes the whole top edge, so the button moves out from under it. */
   #paper{width:calc(100vw - 28px);max-height:calc(100vh - 130px)}
-  #addBtn{top:auto;bottom:14px;left:14px}
-  #card{width:calc(100vw - 28px);bottom:62px}
+  #addBtn{top:auto;bottom:56px;left:14px}
+  #rcBadge{top:auto;bottom:14px;left:14px}
+  #card{width:calc(100vw - 28px);bottom:104px}
   #clock .day{min-width:70px}
-  #modal{padding:0}
-  #modal .sheet{max-height:100vh;border-radius:0;border-left:0;border-right:0}
+  #modal,#modal2{padding:0}
+  #modal .sheet,#modal2 .sheet{max-height:100vh;border-radius:0;border-left:0;border-right:0}
 }
 </style>
 </head>
@@ -284,10 +321,22 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   <div class="tease" id="tease"></div>
   <div class="body">
     <section><h2>Today</h2><div id="events"></div></section>
+    <section><h2>New kingdoms</h2><div id="newk"></div></section>
     <section><h2>Fastest growing</h2><div id="growing"></div></section>
     <section><h2>Leaderboard</h2><div id="board"></div></section>
+    <section><h2>Rules</h2><button class="rulebtn" id="rulesBtn">📜 How the map is built</button></section>
   </div>
 </div>
+
+<a class="hud plate rcbadge" id="rcBadge" href="https://www.revenuecat.com" target="_blank" rel="noopener">
+  <svg viewBox="0 0 20 18" aria-hidden="true">
+    <path d="M3 9V2l4.2 3.4h5.6L17 2v7a7 6.6 0 0 1-14 0Z" fill="#f2545b"/>
+    <circle cx="7.4" cy="9" r="1.15" fill="#1f1f47"/>
+    <circle cx="12.6" cy="9" r="1.15" fill="#1f1f47"/>
+    <path d="M9 11.6h2l-1 1.5Z" fill="#1f1f47"/>
+  </svg>
+  Verified by RevenueCat
+</a>
 
 <div class="hud plate" id="clock">
   <div class="day"><small>Year <span id="yr">1</span></small><span id="dayN">Day 1</span></div>
@@ -297,7 +346,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 
 <div class="plate" id="card">
   <div class="top">
-    <canvas class="flag" id="cardFlag" width="17" height="20"></canvas>
+    <canvas class="flag" id="cardFlag" width="17" height="19"></canvas>
     <div class="ttl"><h3 id="cName"></h3><p id="cSub"></p></div>
     <button class="x" id="cClose">✕</button>
   </div>
@@ -317,17 +366,6 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
     </div>
     <div class="bd">
       <p>Your app becomes a kingdom on the map. It refreshes once a day.</p>
-
-      <h3>What your numbers build</h3>
-      <table>
-        <tr><th>RevenueCat metric</th><th>Becomes</th></tr>
-        <tr><td>Active Users, 28 days</td><td>1 house per 100</td></tr>
-        <tr><td>Active Users, 28 days</td><td>1 farmer per 10</td></tr>
-        <tr><td>Active Trials</td><td>1 archer per 10</td></tr>
-        <tr><td>Active Subscriptions</td><td>1 knight per 10</td></tr>
-        <tr><td>MRR</td><td>1 horseman per 500</td></tr>
-        <tr><td>Subscribers lost</td><td>1 tombstone per 10</td></tr>
-      </table>
 
       <h3>Make a read-only key</h3>
       <ol>
@@ -353,12 +391,64 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
         <label for="fX">Founder handles on X, comma separated</label>
         <input id="fX" placeholder="jeremylasne, cofounder" autocomplete="off" spellcheck="false">
       </div>
+      <div class="veil">
+        <label class="chk"><input type="checkbox" id="fAnonF"> 🎭 Hide my handle. The kings walk without a name.</label>
+        <label class="chk"><input type="checkbox" id="fAnonA"> 🏰 Hide my app. The kingdom takes a name of its own.</label>
+      </div>
       <div class="field">
         <label for="fKey">RevenueCat V2 key, charts metrics read only</label>
         <input id="fKey" placeholder="sk_..." autocomplete="off" spellcheck="false">
       </div>
       <button class="btn go" id="mGo">Found the kingdom</button>
       <p class="fine" id="mNote">The key goes to the server, never to this page. Stripe support lands next.</p>
+    </div>
+  </div>
+</div>
+
+<div id="modal2">
+  <div class="plate sheet">
+    <div class="hd">
+      <h2>How the map is built</h2>
+      <button class="x btn" id="r2Close" style="padding:4px 8px;font-size:15px">✕</button>
+    </div>
+    <div class="bd">
+      <p>One kingdom per app. The numbers come from RevenueCat once a day.</p>
+      <h3>What your numbers build</h3>
+      <table>
+        <tr><th>RevenueCat metric</th><th>Becomes</th></tr>
+        <tr><td>🧑‍🌾 Active Users, 28 days</td><td>1 house per 100</td></tr>
+        <tr><td>🧑‍🌾 Active Users, 28 days</td><td>1 farmer per 10</td></tr>
+        <tr><td>🏹 Active Trials</td><td>1 archer per 10</td></tr>
+        <tr><td>⚔️ Active Subscriptions</td><td>1 knight per 10</td></tr>
+        <tr><td>🐎 MRR</td><td>1 horseman per 500</td></tr>
+        <tr><td>👑 Each founder</td><td>1 king, walking</td></tr>
+        <tr><td>🪦 Subscribers lost</td><td>1 tombstone per 10, 20 at most</td></tr>
+      </table>
+      <h3>What population unlocks</h3>
+      <table>
+        <tr><th>Population</th><th>Unlocks</th></tr>
+        <tr><td>1</td><td>🔥 Hut, campfire</td></tr>
+        <tr><td>100</td><td>💧 Well</td></tr>
+        <tr><td>300</td><td>🌾 Farms, windmill, streets</td></tr>
+        <tr><td>500</td><td>🏛️ Town hall</td></tr>
+        <tr><td>1,000</td><td>⛪ Church</td></tr>
+        <tr><td>2,000</td><td>🏪 Market, tavern, blacksmith</td></tr>
+        <tr><td>5,000</td><td>🧱 Walls, gates, towers</td></tr>
+        <tr><td>10,000</td><td>🏰 Stone keep, banners</td></tr>
+        <tr><td>25,000</td><td>⛪ Cathedral, inner curtain</td></tr>
+        <tr><td>50,000</td><td>👑 Royal palace, fountain</td></tr>
+      </table>
+      <h3>Staying anonymous</h3>
+      <p>🎭 Hide the handle and your kings walk without a name. 🏰 Hide the app
+      and the kingdom takes a name drawn from its own seed. The numbers still
+      count toward the leaderboard either way.</p>
+
+      <h3>The land</h3>
+      <p>Land radius is the square root of the population. Any town that reaches
+      the sea builds a harbour. Nothing is built on bare rock or a steep slope.
+      The world grows as the total population grows, and land already drawn
+      never moves.</p>
+      <p class="fine">Refreshed once a day. Active Users lags 1 to 2 hours.</p>
     </div>
   </div>
 </div>
@@ -381,23 +471,23 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 
 const SEED_KINGDOMS = [
   {id:'kaught',   name:'Kaught',      tag:'Fishing log',      founders:['jeremylasne'],
-   seed:1041, users:18400, trials:610,  subs:2240, mrr:15680, curve:'grow'},
+   seed:1041, joined:64, users:18400, trials:610,  subs:2240, mrr:15680, curve:'grow'},
   {id:'plotter',  name:'Plotter',     tag:'Habit tracker',    founders:['annaships'],
-   seed:2277, users:245000,trials:8200, subs:26000,mrr:208000,curve:'grow'},
+   seed:2277, joined:41, users:245000,trials:8200, subs:26000,mrr:208000,curve:'grow'},
   {id:'wanderly', name:'Wanderly',    tag:'Trip planner',     founders:['tomdraws','lu_builds'],
-   seed:3319, users:4100,  trials:130,  subs:410,  mrr:2870,  curve:'flat'},
+   seed:3319, joined:12, users:4100,  trials:130,  subs:410,  mrr:2870,  curve:'flat'},
   {id:'sunsetdb', name:'Sunset',      tag:'Sleep sounds',     founders:['mira_dev'],
-   seed:4483, users:960,   trials:31,   subs:88,   mrr:530,   curve:'shrink'},
+   anonFounder:true, seed:4483, joined:29, users:960,   trials:31,   subs:88,   mrr:530,   curve:'shrink'},
   {id:'forkful',  name:'Forkful',     tag:'Recipe scanner',   founders:['chefpablo'],
-   seed:5527, users:480000,trials:14000,subs:52000,mrr:416000,curve:'spike'},
+   seed:5527, joined:57, users:480000,trials:14000,subs:52000,mrr:416000,curve:'spike'},
   {id:'lifted',   name:'Lifted',      tag:'Gym logger',       founders:['ben_lifts','kaycodes'],
-   seed:6659, users:31500, trials:1120, subs:3860, mrr:30880, curve:'grow'},
+   seed:6659, joined:23, users:31500, trials:1120, subs:3860, mrr:30880, curve:'grow'},
   {id:'quillo',   name:'Quillo',      tag:'Journal',          founders:['sofiawrites'],
-   seed:7717, users:2300,  trials:74,   subs:190,  mrr:1140,  curve:'grow'},
+   seed:7717, joined:6,  users:2300,  trials:74,   subs:190,  mrr:1140,  curve:'grow'},
   {id:'tidepool', name:'Tidepool',    tag:'Budget app',       founders:['marcusr'],
-   seed:8837, users:390,   trials:12,   subs:34,   mrr:238,   curve:'flat'},
+   anonApp:true, seed:8837, joined:3,  users:390,   trials:12,   subs:34,   mrr:238,   curve:'flat'},
   {id:'orbitcam', name:'Orbit',       tag:'Camera presets',   founders:['nikolab'],
-   seed:9931, users:74,    trials:3,    subs:6,    mrr:42,    curve:'grow'},
+   seed:9931, joined:1,  users:74,    trials:3,    subs:6,    mrr:42,    curve:'grow'},
 ];
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -607,14 +697,16 @@ function buildingCanvas(w, h, draw) {
 const HOUSE_ROOFS = [C.tileRed, C.tileBlue, C.thatch, C.thatch, C.wood];
 
 const WALL_RAMPS = [C.wood, C.bone, C.stone, C.bone];
-function makeHouse(rnd, big) {
-  const w = big ? 16 : 11 + ((rnd() * 4) | 0);
-  const wallH = big ? 7 : 5 + ((rnd() * 2) | 0);
-  const roofH = big ? 11 : 8 + ((rnd() * 2) | 0);
+/* tier 0 cottage, 1 townhouse, 2 manor. Big towns put the manors on the
+   square and push the cottages out to the edge. */
+function makeHouse(rnd, tier) {
+  const w = [10, 13, 17][tier] + ((rnd() * [3, 3, 4][tier]) | 0);
+  const wallH = [5, 6, 8][tier] + ((rnd() * 2) | 0);
+  const roofH = [7, 9, 12][tier] + ((rnd() * 2) | 0);
   const H = roofH + wallH + 2;
   const ramp = HOUSE_ROOFS[(rnd() * HOUSE_ROOFS.length) | 0];
   const wall = WALL_RAMPS[(rnd() * WALL_RAMPS.length) | 0];
-  const chim = rnd() < 0.5, half = rnd();
+  const chim = rnd() < 0.5 + tier * 0.2, half = rnd(), wing = tier === 2 && rnd() < 0.6;
   return buildingCanvas(w, H, (g) => {
     px(g, 1, H - 3, w - 2, 3, C.shadow);
     const wy = roofH - 1;
@@ -626,12 +718,15 @@ function makeHouse(rnd, big) {
     outlineRect(g, dx, wy + wallH - 4, 3, 4);
     if (w >= 12) {
       px(g, 3, wy + 2, 2, 2, '#3a2c1c'); px(g, w - 5, wy + 2, 2, 2, '#3a2c1c');
+      if (tier === 2) { px(g, 3, wy + 5, 2, 2, '#3a2c1c'); px(g, w - 5, wy + 5, 2, 2, '#3a2c1c'); }
     }
+    if (wing) { px(g, 1, roofH + 2, 4, 5, ramp[1]); outlineRect(g, 1, roofH + 2, 4, 5); }
     roofSlab(g, 0, 0, w, roofH, ramp, 2);
     if (chim) {
       const cxp = 2 + ((half * (w - 6)) | 0);
       px(g, cxp, 0, 2, 4, C.stone[0]); outlineRect(g, cxp, 0, 2, 4);
     }
+    if (tier === 2) { px(g, (w >> 1) - 1, 0, 2, 3, C.gold[1]); }
   });
 }
 
@@ -784,19 +879,20 @@ function makeWatchtower() {
 }
 
 function makeGate() {
-  return buildingCanvas(18, 18, (g) => {
-    px(g, 1, 15, 17, 3, C.shadow);
-    px(g, 0, 2, 5, 15, C.stone[1]); outlineRect(g, 0, 2, 5, 15);
-    px(g, 13, 2, 5, 15, C.stone[1]); outlineRect(g, 13, 2, 5, 15);
-    px(g, 5, 4, 8, 13, C.wood[0]); outlineRect(g, 5, 4, 8, 13);
-    for (let x = 6; x < 13; x += 3) px(g, x, 5, 1, 11, C.wood[2]);
-    px(g, 0, 0, 5, 3, C.stone[0]); px(g, 13, 0, 5, 3, C.stone[0]);
+  return buildingCanvas(8, 18, (g) => {
+    px(g, 0, 15, 8, 3, C.shadow);
+    px(g, 0, 4, 8, 13, C.stone[1]); outlineRect(g, 0, 4, 8, 13);
+    px(g, 0, 4, 8, 2, C.stone[2]);
+    px(g, 0, 0, 3, 5, C.stone[1]); outlineRect(g, 0, 0, 3, 5);
+    px(g, 5, 0, 3, 5, C.stone[1]); outlineRect(g, 5, 0, 3, 5);
+    px(g, 2, 8, 4, 9, C.wood[0]); outlineRect(g, 2, 8, 4, 9);
+    px(g, 3, 9, 1, 7, C.wood[2]);
   });
 }
 
 function makeHarbor() {
   return buildingCanvas(30, 18, (g) => {
-    // Decking out over the water, two moored boats, a crane arm.
+    // Decking out over the water, a moored boat, a crane arm.
     px(g, 0, 8, 30, 7, C.wood[1]);
     for (let x = 1; x < 30; x += 4) px(g, x, 8, 1, 7, C.wood[0]);
     px(g, 0, 8, 30, 1, C.wood[2]);
@@ -806,6 +902,17 @@ function makeHarbor() {
     px(g, 11, 4, 1, 3, C.ink);
     px(g, 17, 3, 9, 4, C.wood[2]); outlineRect(g, 17, 3, 9, 4);
     px(g, 21, 0, 1, 4, C.wood[0]); px(g, 22, 0, 3, 3, C.bone[2]);
+  });
+}
+
+function makeJetty() {
+  return buildingCanvas(18, 12, (g) => {
+    px(g, 0, 4, 18, 5, C.wood[1]);
+    for (let x = 1; x < 18; x += 3) px(g, x, 4, 1, 5, C.wood[0]);
+    px(g, 0, 4, 18, 1, C.wood[2]);
+    px(g, 0, 3, 18, 1, C.ink); px(g, 0, 9, 18, 1, C.ink);
+    px(g, 2, 9, 2, 3, C.wood[0]); px(g, 14, 9, 2, 3, C.wood[0]);
+    px(g, 6, 0, 1, 4, C.wood[0]); px(g, 7, 0, 4, 3, C.bone[2]);
   });
 }
 
@@ -842,13 +949,22 @@ function makeTombstone(rnd) {
   return bakeGrid(rows, TOMB_ART.key);
 }
 
-function makeBridge() {
-  return buildingCanvas(10, 10, (g) => {
-    px(g, 0, 4, 10, 6, C.wood[1]);
-    for (let x = 0; x < 10; x += 3) px(g, x, 4, 1, 6, C.wood[0]);
-    px(g, 0, 4, 10, 1, C.wood[2]);
-    px(g, 0, 3, 10, 1, C.ink); px(g, 0, 9, 10, 1, C.ink);
-    px(g, 0, 1, 1, 3, C.wood[0]); px(g, 9, 1, 1, 3, C.wood[0]);
+/* Bridges and walls are exactly one tile wide, so consecutive tiles butt
+   together into a continuous deck or curtain instead of a dashed line. */
+function makeBridgeH() {
+  return buildingCanvas(8, 8, (g) => {
+    px(g, 0, 1, 8, 6, C.wood[1]);
+    for (let x = 0; x < 8; x += 2) px(g, x, 2, 1, 4, C.wood[0]);
+    px(g, 0, 1, 8, 1, C.wood[2]);
+    px(g, 0, 0, 8, 1, C.ink); px(g, 0, 7, 8, 1, C.ink);
+  });
+}
+function makeBridgeV() {
+  return buildingCanvas(8, 8, (g) => {
+    px(g, 1, 0, 6, 8, C.wood[1]);
+    for (let y = 0; y < 8; y += 2) px(g, 2, y, 4, 1, C.wood[0]);
+    px(g, 1, 0, 1, 8, C.wood[2]);
+    px(g, 0, 0, 1, 8, C.ink); px(g, 7, 0, 1, 8, C.ink);
   });
 }
 
@@ -928,7 +1044,7 @@ function makeRock(rnd) {
 const TILE = 8;           // world pixels per tile
 const CHUNK = 32;         // tiles per chunk
 const CHUNK_PX = TILE * CHUNK;
-const SEA = 0.455;
+const SEA = 0.420;
 
 const T = { DEEP:0, OCEAN:1, SHALLOW:2, SAND:3, GRASS:4, DRY:5, FOREST:6, HILL:7, ROCK:8, SNOW:9, RIVER:10, ROAD:11 };
 
@@ -945,11 +1061,12 @@ function elevAt(tx, ty) {
   const [wx, wy] = warp(tx, ty, s);
   let e = fbm(wx / 132, wy / 132, s, 5, 0.5, 2.05);
   const d = Math.sqrt(tx * tx + ty * ty) / WORLD.radius;
-  // Rim falloff: land fades into ocean over the outer 30% of the world.
-  const rim = 1 - smooth(clamp((d - 0.70) / 0.30, 0, 1));
-  e = e * (0.42 + 0.58 * rim) - (1 - rim) * 0.30;
-  // A second, coarser field breaks the ring into bays and peninsulas.
-  e += (fbm(wx / 340, wy / 340, s + 401, 3, 0.5, 2) - 0.5) * 0.30 * rim;
+  // Rim falloff: land runs almost to the edge, then drops into ocean over the
+  // outer sixth of the world. The map is a continent, not an archipelago.
+  const rim = 1 - smooth(clamp((d - 0.84) / 0.16, 0, 1));
+  e = e * (0.42 + 0.58 * rim) - (1 - rim) * 0.34;
+  // A second, coarser field breaks the coast into bays and peninsulas.
+  e += (fbm(wx / 340, wy / 340, s + 401, 3, 0.5, 2) - 0.5) * 0.22 * rim;
   // Ridged noise, applied only above the treeline, turns high blobs into
   // ranges with spines and passes instead of grey pancakes.
   if (e > 0.56) e += (e - 0.56) * ridge(wx / 190, wy / 190, s + 77, 4) * 0.85;
@@ -1003,6 +1120,38 @@ const RAMPS = {
 
 function kingdomHue(i) { return 'hsl(' + ((i * 137.508) % 360).toFixed(1) + ',58%,46%)'; }
 
+/* One shield per kingdom. A shield reads at twelve pixels where a pennant
+   does not, so this is what sits next to the name on the map. */
+function makeFlag(hue) {
+  const W = 12, H = 14;
+  return buildingCanvas(W, H, (g) => {
+    for (let y = 0; y < H; y++) {
+      const t = y / (H - 1);
+      const inset = t < 0.62 ? 0 : Math.round((t - 0.62) / 0.38 * (W / 2 - 1));
+      const w = W - inset * 2;
+      px(g, inset, y, w, 1, hue);
+      px(g, inset, y, 1, 1, C.ink); px(g, inset + w - 1, y, 1, 1, C.ink);
+    }
+    px(g, 1, 1, W - 2, 2, 'rgba(255,255,255,0.30)');
+    px(g, 0, 0, W, 1, C.ink);
+    px(g, 2, 5, W - 4, 2, C.gold[2]);
+    px(g, 2, 7, W - 4, 1, 'rgba(0,0,0,0.25)');
+    px(g, W / 2 - 1, 3, 2, 6, 'rgba(255,255,255,0.22)');
+  });
+}
+
+/* Anonymity. A founder can hide the handle, the app, or both. A hidden app
+   still gets a kingdom, under a name drawn from its own seed, so the map
+   never has a blank on it. */
+const VEIL_A = ['Ash', 'Bram', 'Cald', 'Dun', 'Eld', 'Fern', 'Gray', 'Holl', 'Kest',
+                'Mor', 'Nor', 'Oak', 'Pell', 'Quar', 'Rook', 'Stan', 'Thorn', 'Vale', 'Wyn'];
+const VEIL_B = ['bury', 'combe', 'fell', 'ford', 'gate', 'hollow', 'march', 'mere',
+                'reach', 'stead', 'thorpe', 'vale', 'watch', 'wick'];
+function veilName(seed) {
+  return VEIL_A[seed % VEIL_A.length] + VEIL_B[((seed / 7) | 0) % VEIL_B.length];
+}
+const lordOf = k => k.anonFounder ? 'an anonymous founder' : '@' + k.founders[0];
+
 const HOUSE_CAP = 6000;              // drawn houses, not counted ones
 function derive(k) {
   const houses   = clamp(Math.floor(k.users / 100), 1, HOUSE_CAP);
@@ -1012,11 +1161,14 @@ function derive(k) {
   const horsemen = Math.floor(k.mrr / 500);
   const kings    = k.founders.length;
   const pop = farmers + archers + knights + horsemen + kings;
+  const veil = k.anonApp ? { name: veilName(k.seed), tag: 'App kept private' } : {};
+  const aspect = 1 + hash1(k.seed, 77) * 0.6;
   const rFormula = 6 + Math.sqrt(pop) * 0.42;
   const specials = 16;
-  const rPlots = Math.sqrt((houses + specials) * 4 / (Math.PI * 0.50));
+  const rPlots = Math.sqrt((houses + specials) * 4 / (Math.PI * 0.38));
   const r = Math.max(8, rFormula, rPlots);
-  return Object.assign({}, k, { houses, farmers, archers, knights, horsemen, kings, pop, r });
+  const rMax = r * Math.sqrt(aspect);
+  return Object.assign({}, k, { houses, farmers, archers, knights, horsemen, kings, pop, r, aspect, rMax }, veil);
 }
 
 /* Thirty days of history, shaped by the kingdom's curve. Organic enough to
@@ -1063,11 +1215,11 @@ function popOf(m) {
 function placeKingdoms(list) {
   const sorted = list.slice().sort((a, b) => b.r - a.r);
   let sq = 0;
-  for (const k of sorted) sq += (k.r + 30) * (k.r + 30);
+  for (const k of sorted) sq += (k.rMax + 45) * (k.rMax + 45);
   // Quantised to 64 tile steps. Terrain inside 70% of the radius does not
   // depend on it at all, and the rim only moves on real growth, so a kingdom
   // losing a few hundred users never reshapes the coast.
-  WORLD.radius = Math.ceil((90 + 2.15 * Math.sqrt(sq)) / 64) * 64;
+  WORLD.radius = Math.ceil((80 + 1.55 * Math.sqrt(sq)) / 64) * 64;
 
   const placed = [];
   for (let i = 0; i < sorted.length; i++) {
@@ -1077,7 +1229,7 @@ function placeKingdoms(list) {
     const a0 = rnd() * Math.PI * 2;
     outer:
     for (let ring = 0; ring < 260; ring++) {
-      const dist = i === 0 ? 0 : (k.r + 46) + ring * 9;
+      const dist = i === 0 ? 0 : (k.rMax + 55) + ring * 11;
       if (dist > WORLD.radius * 0.80) break;
       const steps = Math.max(1, Math.round(dist / 16));
       for (let sIdx = 0; sIdx < steps; sIdx++) {
@@ -1087,7 +1239,7 @@ function placeKingdoms(list) {
         let clash = false;
         for (const p of placed) {
           const dx = p.cx - x, dy = p.cy - y;
-          if (Math.sqrt(dx * dx + dy * dy) < p.r + k.r + 30) { clash = true; break; }
+          if (Math.sqrt(dx * dx + dy * dy) < p.rMax + k.rMax + 40) { clash = true; break; }
         }
         if (clash) continue;
         if (!landEnough(x, y, k.r)) continue;
@@ -1131,11 +1283,16 @@ function tierKeys(pop) {
   return s;
 }
 
+/* Every town is an ellipse at its own angle with one of three street plans,
+   so no two kingdoms share a silhouette. Coastal towns build a harbour and
+   leave the waterfront airy. Nothing is built on bare rock or a steep slope. */
+const PLANS = ['radial', 'grid', 'organic'];
+
 function layoutVillage(k) {
   const rnd = mulberry(k.seed * 7919 + 11);
   const has = tierKeys(k.pop);
-  const b = [];                       // {x, y, cv, sort}
-  const roads = [];                   // {x, y} tiles painted as road
+  const b = [];                       // {tx, ty, cv}
+  const roads = [];                   // tiles painted as road
   const poi = { homes: [], work: [], gather: [], graves: [], wall: [] };
   const r = k.r;
 
@@ -1146,66 +1303,97 @@ function layoutVillage(k) {
     if (d > built) built = d;
   };
 
-  // Street plan: concentric rings plus radial spokes, only once there is a
-  // town worth planning.
-  const rings = [];
-  if (k.pop >= 300) {
-    for (let f = 0.38; f < 0.95; f += 0.30) rings.push(r * f);
-  }
-  const spokes = k.pop >= 300 ? (k.pop >= 5000 ? 8 : 4) : 0;
+  // Shape: an ellipse of the same area as the circle, tilted by the seed.
+  const aspect = k.aspect;
+  const A = k.rMax, B = r / Math.sqrt(aspect);
+  const tilt = rnd() * Math.PI;
+  const ct = Math.cos(tilt), st = Math.sin(tilt);
+  const shapeD = (x, y) => {
+    const u = (x * ct + y * st) / A, v = (-x * st + y * ct) / B;
+    return Math.hypot(u, v);          // 1 at the town edge
+  };
+  k.shape = { A, B, ct, st };
+
+  const plan = k.pop < 300 ? 'organic' : PLANS[(rnd() * PLANS.length) | 0];
   const spokeA = rnd() * Math.PI * 2;
+  const spokes = plan === 'radial' ? (k.pop >= 5000 ? 8 : 6) : 0;
+  // Half width of a street. A lane in a hamlet, an avenue in a capital, but
+  // never more than about a seventh of the town given over to paving.
+  const rw = k.pop >= 10000 ? 1.1 : k.pop >= 2000 ? 0.8 : 0.6;
+  const gs = 9 + ((rnd() * 5) | 0);
+  const rings = [];
+  if (plan === 'radial') {
+    const step = Math.max(9, r / 4);
+    for (let d = step; d < r * 0.97; d += step) rings.push(d);
+  }
 
   const onRoad = (x, y) => {
-    const d = Math.sqrt(x * x + y * y);
-    for (const rr of rings) if (Math.abs(d - rr) < 1.1) return true;
-    if (spokes && d > 2) {
-      const a = Math.atan2(y, x) - spokeA;
-      const seg = Math.PI * 2 / spokes;
-      const off = Math.abs(((a % seg) + seg) % seg - seg / 2);
-      if (off * d < 1.6) return true;
+    const u = x * ct + y * st, v = -x * st + y * ct;
+    if (plan === 'grid') {
+      return Math.abs(((u % gs) + gs) % gs - gs / 2) > gs / 2 - rw ||
+             Math.abs(((v % gs) + gs) % gs - gs / 2) > gs / 2 - rw;
     }
-    return false;
+    const d = shapeD(x, y) * r;
+    if (plan === 'radial') {
+      for (const rr of rings) if (Math.abs(d - rr) < rw) return true;
+      if (d > 3) {
+        const a = Math.atan2(v, u) - spokeA;
+        const seg = Math.PI * 2 / spokes;
+        const off = Math.abs(((a % seg) + seg) % seg - seg / 2);
+        if (off * d < rw * 1.3) return true;
+      }
+      return false;
+    }
+    // Organic: lanes are the near-zero band of a noise field, so they wander.
+    if (d < 2.5) return true;
+    const w = vnoise((k.cx + x) / 13, (k.cy + y) / 13, k.seed + 404);
+    return Math.abs(w - 0.5) < 0.012 * rw / 0.6;
   };
 
-  // Collect buildable plots on a 3 tile lattice.
-  const plots = [];
-  for (let y = -r; y <= r; y += 2) {
-    for (let x = -r; x <= r; x += 2) {
-      const d = Math.sqrt(x * x + y * y);
-      if (d > r - 1) continue;
+  const dryLand = (tx, ty) => elevAt(tx, ty) > SEA;
+
+  // Elevation for the whole footprint, read once. Everything below reads the
+  // cache: the slope test and the waterfront test would otherwise multiply
+  // the cost of the biggest towns by five.
+  const R2 = Math.ceil(Math.max(A, B)) + 8;
+  const W = R2 * 2 + 1;
+  const ev = new Float32Array(W * W);
+  for (let y = -R2; y <= R2; y++)
+    for (let x = -R2; x <= R2; x++)
+      ev[(y + R2) * W + (x + R2)] = elevAt(k.cx + x, k.cy + y);
+  const EV = (x, y) => (x < -R2 || x > R2 || y < -R2 || y > R2)
+    ? elevAt(k.cx + x, k.cy + y) : ev[(y + R2) * W + (x + R2)];
+  const wetNear = (x, y, rad) =>
+    EV(x + rad, y) <= SEA || EV(x - rad, y) <= SEA ||
+    EV(x, y + rad) <= SEA || EV(x, y - rad) <= SEA;
+
+  const plots = [], shores = [];
+  for (let y = -R2; y <= R2; y++) {
+    for (let x = -R2; x <= R2; x++) {
+      const rel = shapeD(x, y);
+      if (rel > 1) continue;
       const tx = k.cx + x, ty = k.cy + y;
-      const e = elevAt(tx, ty);
-      if (e <= SEA + 0.020 || e > 0.74) continue;
+      const e = EV(x, y);
+      if (e <= SEA + 0.016) continue;
+      if (e > 0.70) continue;                       // no town on bare rock
       if (riverAt(tx, ty, e)) continue;
       if (onRoad(x, y)) { roads.push({ x: tx, y: ty }); continue; }
-      plots.push({ x, y, tx, ty, d: d + (hash2(tx, ty, 5) - 0.5) * 3.2 });
+      if ((x & 1) || (y & 1)) continue;             // plots on a 2 tile lattice
+      if (rel > 0.4 && wetNear(x, y, 2)) { shores.push({ tx, ty, x, y }); continue; }
+      // No houses clinging to a cliff.
+      if (Math.abs(EV(x + 1, y) - e) > 0.020) continue;
+      if (Math.abs(EV(x, y + 1) - e) > 0.020) continue;
+      // The waterfront breathes: two plots in five are left open.
+      if (k.pop >= 300 && wetNear(x, y, 6) && hash2(tx, ty, 61) < 0.42) continue;
+      plots.push({ x, y, tx, ty, rel, d: rel * r + (hash2(tx, ty, 5) - 0.5) * 3.2 });
     }
   }
   plots.sort((a, c) => a.d - c.d);
 
-  // Paint the road tiles themselves.
-  if (rings.length) {
-    for (const rr of rings) {
-      const steps = Math.max(16, Math.round(rr * 8));
-      for (let i = 0; i < steps; i++) {
-        const a = i / steps * Math.PI * 2;
-        const tx = k.cx + Math.round(Math.cos(a) * rr), ty = k.cy + Math.round(Math.sin(a) * rr);
-        if (elevAt(tx, ty) > SEA + 0.015) roads.push({ x: tx, y: ty });
-      }
-    }
-    for (let s = 0; s < spokes; s++) {
-      const a = spokeA + s * Math.PI * 2 / spokes;
-      for (let d = 3; d < r; d += 0.5) {
-        const tx = k.cx + Math.round(Math.cos(a) * d), ty = k.cy + Math.round(Math.sin(a) * d);
-        if (elevAt(tx, ty) > SEA + 0.015) roads.push({ x: tx, y: ty });
-      }
-    }
-  }
-
   let pi = 0;
   const take = () => plots[pi++];
 
-  // Civic core, biggest first, so the skyline reads the tier instantly.
+  // Civic core, biggest first, so the skyline states the tier at a glance.
   const civic = [];
   if (has.has('palace')) civic.push(makePalace());
   else if (has.has('keep')) civic.push(makeKeep());
@@ -1224,19 +1412,17 @@ function layoutVillage(k) {
     poi.gather.push({ x: p.tx * TILE + TILE / 2, y: p.ty * TILE + TILE / 2 });
   }
 
-  // Houses, densest at the centre and thinning outward.
-  let left = k.houses;
-  const bigUntil = Math.min(left, Math.round(k.houses * 0.12));
-  let made = 0;
-  while (left > 0 && pi < plots.length) {
+  // Houses. Manors on the square, townhouses behind them, cottages at the rim.
+  let leftToBuild = k.houses;
+  while (leftToBuild > 0 && pi < plots.length) {
     const p = take();
-    const cv = made < bigUntil ? grab(POOL.big, rnd()) : grab(POOL.house, rnd());
-    push(p.tx, p.ty, cv);
+    const pool = p.rel < 0.26 ? POOL.manor : p.rel < 0.58 ? POOL.big : POOL.house;
+    push(p.tx, p.ty, grab(pool, rnd()));
     poi.homes.push({ x: p.tx * TILE + TILE / 2, y: p.ty * TILE + TILE / 2 });
-    left--; made++;
+    leftToBuild--;
   }
 
-  // Farms and windmills ring the town on whatever plots are left.
+  // Farms and windmills take whatever is left, which is the outer ring.
   if (has.has('farm')) {
     const farms = clamp(Math.round(k.farmers / 110), 4, 200);
     for (let i = 0; i < farms && pi < plots.length; i++) {
@@ -1249,85 +1435,96 @@ function layoutVillage(k) {
   const townR = built;
   k.rTown = Math.max(6, townR + 2);
 
-  // Graveyard: its own ground beyond the last row of houses, behind the
-  // church. One stone per ten departures, twenty stones at most however bad
-  // the month was.
+  // Walls: the ellipse is rasterised, then every gap between consecutive
+  // tiles is filled, so the curtain closes instead of dashing.
+  if (has.has('walls')) {
+    const ring = ellipseRing(A + 3, B + 3, ct, st, k.cx, k.cy);
+    let towerGap = 0;
+    for (let i = 0; i < ring.length; i++) {
+      const t = ring[i];
+      if (!dryLand(t.x, t.y)) continue;
+      const isGate = spokes && i % Math.round(ring.length / spokes) === 0;
+      if (isGate) push(t.x, t.y, GATE_CV);
+      else if (++towerGap >= 16) { towerGap = 0; push(t.x, t.y, TOWER_CV); }
+      else push(t.x, t.y, WALL_CV);
+      poi.wall.push({ x: t.x * TILE + TILE / 2, y: t.y * TILE + TILE / 2 });
+    }
+    // A capital gets an inner curtain around the keep as well.
+    if (has.has('cathedral')) {
+      const inner = ellipseRing(A * 0.3, B * 0.3, ct, st, k.cx, k.cy);
+      for (let i = 0; i < inner.length; i++) {
+        const t = inner[i];
+        if (!dryLand(t.x, t.y)) continue;
+        push(t.x, t.y, i % 14 === 0 ? TOWER_CV : WALL_CV);
+      }
+    }
+  }
+
+  // A harbour wherever the town reaches the sea, plus jetties for a big port.
+  if (shores.length && k.pop >= 300) {
+    const picks = [];
+    const want = k.pop >= 10000 ? 3 : k.pop >= 2000 ? 2 : 1;
+    for (let n = 0; n < want; n++) {
+      let best = null, bd = -1;
+      for (const sIdx of shores) {
+        let far = 1e9;
+        for (const q of picks) far = Math.min(far, Math.hypot(q.tx - sIdx.tx, q.ty - sIdx.ty));
+        if (far > bd) { bd = far; best = sIdx; }
+      }
+      if (!best || (picks.length && bd < 14)) break;
+      picks.push(best);
+    }
+    for (let n = 0; n < picks.length; n++) {
+      const q = picks[n];
+      push(q.tx - 2, q.ty, n === 0 ? makeHarbor() : makeJetty());
+      poi.work.push({ x: q.tx * TILE, y: q.ty * TILE });
+    }
+    k.port = picks.length;
+  }
+
+  // Graveyard: its own fenced ground beyond the last row of houses.
   const stones = clamp(Math.ceil(k.churn / 10), 1, 20);
   const cols = Math.min(5, stones), rows = Math.ceil(stones / 5);
-  // Find dry ground for it: circle the town until the whole plot is on land.
-  const gd = townR + 5 + rows;
+  const gd = townR + 6 + rows;
   const gw = cols * 2 + 2, gh = rows * 2 + 2;
   const dryPlot = (px0, py0) => {
     for (let y = -2; y <= gh; y += 2) for (let x = -2; x <= gw; x += 2)
       if (elevAt(px0 + x, py0 + y) <= SEA + 0.02) return false;
     return true;
   };
-  let ga = spokeA + 2.2, gx = 0, gy = 0;
+  let gx = 0, gy = 0;
   for (let t = 0; t < 24; t++) {
     const a = spokeA + 2.2 + t * 0.34;
     const d = gd + (t > 11 ? 6 : 0);
     const cx2 = k.cx + Math.round(Math.cos(a) * d), cy2 = k.cy + Math.round(Math.sin(a) * d);
     if (t === 0) { gx = cx2; gy = cy2; }
-    if (dryPlot(cx2, cy2)) { ga = a; gx = cx2; gy = cy2; break; }
+    if (dryPlot(cx2, cy2)) { gx = cx2; gy = cy2; break; }
   }
   k.grave = { x: gx, y: gy, stones,
               x0: gx - 2, y0: gy - 2, x1: gx + cols * 2, y1: gy + rows * 2 };
   for (let i = 0; i < stones; i++) {
     const tx = gx + (i % 5) * 2, ty = gy + ((i / 5) | 0) * 2;
-    if (elevAt(tx, ty) <= SEA + 0.01) continue;
+    if (!dryLand(tx, ty)) continue;
     push(tx, ty, grab(POOL.tomb, rnd()));
     poi.graves.push({ x: tx * TILE + TILE / 2, y: ty * TILE + TILE / 2 });
   }
   const gr = k.grave;
-  const dry = (x, y) => elevAt(x, y) > SEA + 0.01;
   for (let x = gr.x0; x <= gr.x1; x += 2) {
-    if (dry(x, gr.y0)) push(x, gr.y0, FENCE_CV);
-    if (dry(x, gr.y1)) push(x, gr.y1, FENCE_CV);
+    if (dryLand(x, gr.y0)) push(x, gr.y0, FENCE_CV);
+    if (dryLand(x, gr.y1)) push(x, gr.y1, FENCE_CV);
   }
   for (let y = gr.y0 + 2; y < gr.y1; y += 2) {
-    if (dry(gr.x0, y)) push(gr.x0, y, POST_CV);
-    if (dry(gr.x1, y)) push(gr.x1, y, POST_CV);
+    if (dryLand(gr.x0, y)) push(gr.x0, y, POST_CV);
+    if (dryLand(gr.x1, y)) push(gr.x1, y, POST_CV);
   }
 
-  // Walls, gates and towers once the town is worth defending.
-  if (has.has('walls')) {
-    const wr = k.rTown + 1;
-    const steps = Math.round(wr * 3.2);
-    const seg = spokes ? Math.PI * 2 / spokes : 0;
-    for (let i = 0; i < steps; i++) {
-      const ang = i / steps * Math.PI * 2;
-      const tx = k.cx + Math.round(Math.cos(ang) * wr), ty = k.cy + Math.round(Math.sin(ang) * wr);
-      if (elevAt(tx, ty) <= SEA + 0.010) continue;
-      const off = seg ? Math.abs((((ang - spokeA) % seg) + seg) % seg) : 9;
-      if (off < 0.05 || off > seg - 0.05) push(tx, ty, GATE_CV);
-      else if (i % 13 === 0) push(tx, ty, TOWER_CV);
-      else push(tx, ty, WALL_CV);
-      poi.wall.push({ x: tx * TILE + TILE / 2, y: ty * TILE + TILE / 2 });
-    }
-  }
-
-  // A town of ten thousand on the coast builds a harbour.
-  if (k.pop >= 8000) {
-    let shore = null, bd = 1e9;
-    for (let a = 0; a < 48 && !shore; a++) {
-      const ang = a / 48 * Math.PI * 2;
-      for (let d = r * 0.5; d < r + 10; d += 1) {
-        const tx = k.cx + Math.round(Math.cos(ang) * d), ty = k.cy + Math.round(Math.sin(ang) * d);
-        const e = elevAt(tx, ty);
-        if (e < SEA && e > SEA - 0.03 && d < bd) { bd = d; shore = { tx, ty }; break; }
-      }
-    }
-    if (shore) {
-      push(shore.tx - 2, shore.ty, makeHarbor());
-      poi.work.push({ x: shore.tx * TILE, y: shore.ty * TILE });
-    }
-  }
-
+  // Banners on the keep, more of them the greater the house.
   if (has.has('keep')) {
     const hue = kingdomHue(k.hue);
-    for (let i = 0; i < 4; i++) {
-      const a = spokeA + i * Math.PI / 2 + 0.4;
-      const tx = k.cx + Math.round(Math.cos(a) * 6), ty = k.cy + Math.round(Math.sin(a) * 6);
+    const n = has.has('palace') ? 8 : 4;
+    for (let i = 0; i < n; i++) {
+      const a = spokeA + i * Math.PI * 2 / n + 0.4;
+      const tx = k.cx + Math.round(Math.cos(a) * 7), ty = k.cy + Math.round(Math.sin(a) * 7);
       push(tx, ty, makeBanner(hue));
     }
   }
@@ -1346,9 +1543,51 @@ function layoutVillage(k) {
   k.buildings = b; k.roadTiles = roads; k.poi = poi;
 }
 
-const BRIDGE_CV = makeBridge();
+/* An ordered, gap-free ring of tiles around a tilted ellipse. Consecutive
+   entries are always adjacent, so anything placed along it forms one line. */
+function ellipseRing(A, B, ct, st, cx, cy) {
+  const steps = Math.max(48, Math.round((A + B) * 4));
+  const out = [], seen = new Set();
+  let prev = null;
+  const add = (x, y) => {
+    const key = x + ',' + y;
+    if (seen.has(key)) return;
+    seen.add(key); out.push({ x, y });
+  };
+  for (let i = 0; i <= steps; i++) {
+    const a = i / steps * Math.PI * 2;
+    const u = Math.cos(a) * A, v = Math.sin(a) * B;
+    const x = cx + Math.round(u * ct - v * st);
+    const y = cy + Math.round(u * st + v * ct);
+    if (prev) {
+      // Bresenham the gap so the curtain never breaks.
+      let px0 = prev.x, py0 = prev.y;
+      const dx = Math.abs(x - px0), sx = px0 < x ? 1 : -1;
+      const dy = -Math.abs(y - py0), sy = py0 < y ? 1 : -1;
+      let err = dx + dy, guard = dx - dy + 4;
+      while ((px0 !== x || py0 !== y) && guard-- > 0) {
+        const e2 = 2 * err;
+        if (e2 >= dy) { err += dy; px0 += sx; }
+        if (e2 <= dx) { err += dx; py0 += sy; }
+        add(px0, py0);
+      }
+    } else add(x, y);
+    prev = { x, y };
+  }
+  return out;
+}
+
+const BRIDGE_H = makeBridgeH();
+const BRIDGE_V = makeBridgeV();
 const GATE_CV = makeGate();
-const TOWER_CV = makeWatchtower();
+const TOWER_CV = buildingCanvas(10, 24, (g) => {
+  px(g, 0, 21, 10, 3, C.shadow);
+  px(g, 1, 6, 8, 16, C.stone[1]); outlineRect(g, 1, 6, 8, 16);
+  px(g, 2, 8, 2, 12, C.stone[2]);
+  px(g, 0, 2, 10, 6, C.stone[2]); outlineRect(g, 0, 2, 10, 6);
+  for (let x = 0; x < 10; x += 3) { px(g, x, 0, 2, 3, C.stone[1]); px(g, x, 0, 2, 1, C.ink); }
+  px(g, 4, 11, 3, 4, '#1d1610');
+});
 const POST_CV = buildingCanvas(6, 10, (g) => {
   px(g, 1, 8, 4, 2, C.shadow);
   px(g, 2, 2, 2, 7, C.wood[0]);
@@ -1360,11 +1599,18 @@ const FENCE_CV = buildingCanvas(16, 10, (g) => {
   px(g, 0, 3, 16, 1, C.wood[1]); px(g, 0, 6, 16, 1, C.wood[1]);
   px(g, 0, 4, 16, 1, C.wood[0]);
 });
-const WALL_CV = buildingCanvas(16, 14, (g) => {
-  px(g, 0, 11, 16, 3, C.shadow);
-  px(g, 0, 3, 16, 9, C.stone[1]); outlineRect(g, 0, 3, 16, 9);
-  px(g, 0, 3, 16, 2, C.stone[2]);
-  for (let x = 0; x < 16; x += 4) { px(g, x, 0, 3, 4, C.stone[1]); outlineRect(g, x, 0, 3, 4); }
+/* One tile of curtain wall. No outline on the left or right edge, so a run
+   of them reads as one wall rather than a row of blocks. */
+const WALL_CV = buildingCanvas(8, 16, (g) => {
+  px(g, 0, 13, 8, 3, C.shadow);
+  px(g, 0, 4, 8, 10, C.stone[1]);
+  px(g, 0, 4, 8, 2, C.stone[2]);
+  px(g, 0, 11, 8, 2, C.stone[0]);
+  px(g, 0, 13, 8, 1, C.ink);
+  px(g, 0, 0, 3, 5, C.stone[1]); px(g, 5, 0, 3, 5, C.stone[1]);
+  px(g, 0, 0, 3, 1, C.stone[2]); px(g, 5, 0, 3, 1, C.stone[2]);
+  px(g, 3, 3, 2, 2, C.stone[0]);
+  px(g, 2, 0, 1, 4, C.ink); px(g, 5, 0, 1, 4, C.ink); px(g, 3, 2, 2, 1, C.ink);
 });
 
 /* ── road network between kingdoms ───────────────────────────────────────── */
@@ -1417,10 +1663,19 @@ function buildRoads(ks) {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const hiCache = new Map(), loCache = new Map();
-const HI_MAX = 130, LO_MAX = 2200;
+const HI_MAX = 130, LO_MAX = 2600;
 let genBudget = 0;
 
 function ckey(cx, cy) { return cx + ',' + cy; }
+
+/* Chunks past the rim are open ocean and the background already paints it,
+   so never generate or cache them. At the widest zoom the viewport reaches
+   well beyond the world and this is the difference between 6fps and 60. */
+function inWorld(cx, cy) {
+  const tx = cx * CHUNK + CHUNK / 2, ty = cy * CHUNK + CHUNK / 2;
+  const lim = WORLD.radius + CHUNK * 2;
+  return tx * tx + ty * ty < lim * lim;
+}
 
 function tileCode(tx, ty, e) {
   const base = e === undefined ? tileAt(tx, ty) : tileAtE(tx, ty, e);
@@ -1433,6 +1688,13 @@ function tileCode(tx, ty, e) {
 }
 function isBridge(tx, ty) {
   return !!(WORLD.roadSet && WORLD.roadSet.has(tx + ',' + ty) && tileAt(tx, ty) === T.RIVER);
+}
+/* Lay the deck along the road, not across it. */
+function bridgeCv(tx, ty) {
+  const rs = WORLD.roadSet;
+  const h = rs.has((tx - 1) + ',' + ty) || rs.has((tx + 1) + ',' + ty);
+  const v = rs.has(tx + ',' + (ty - 1)) || rs.has(tx + ',' + (ty + 1));
+  return v && !h ? BRIDGE_V : BRIDGE_H;
 }
 
 function tileColor(code, tx, ty, e) {
@@ -1522,7 +1784,10 @@ function renderHi(cx, cy) {
     for (let tx = -3; tx < CHUNK + 3; tx++) {
       const wx = ox + tx, wy = oy + ty;
       const code = tileCode(wx, wy);
-      if (isBridge(wx, wy)) { deco.push({ x: tx * TILE - 1, y: ty * TILE, cv: BRIDGE_CV }); continue; }
+      if (isBridge(wx, wy)) {
+        deco.push({ x: tx * TILE, y: ty * TILE, cv: bridgeCv(wx, wy) });
+        continue;
+      }
       if (code === T.ROAD || isWater(code)) continue;
       if (nearVillage(wx, wy)) continue;
       const h = hash2(wx, wy, WORLD_SEED + 909);
@@ -1578,13 +1843,16 @@ function renderLo(cx, cy) {
   }
   // Settled land reads as a warm patch, so kingdoms are findable from orbit.
   for (const k of WORLD.kingdoms) {
-    const kr = (k.rTown || k.r) + 1;
+    const sh = k.shape;
+    if (!sh) continue;
+    const kr = k.rMax + 2;
     if (Math.abs(k.cx - (ox + CHUNK / 2)) > kr + CHUNK || Math.abs(k.cy - (oy + CHUNK / 2)) > kr + CHUNK) continue;
     for (let ty = 0; ty < CHUNK; ty++) for (let tx = 0; tx < CHUNK; tx++) {
       const dx = ox + tx - k.cx, dy = oy + ty - k.cy;
-      const d2 = dx * dx + dy * dy;
-      if (d2 > kr * kr) continue;
-      g.fillStyle = d2 > kr * kr * 0.78 ? 'rgba(168,124,72,0.62)' : 'rgba(186,136,78,0.88)';
+      const u = (dx * sh.ct + dy * sh.st) / sh.A, v = (-dx * sh.st + dy * sh.ct) / sh.B;
+      const d2 = u * u + v * v;
+      if (d2 > 1) continue;
+      g.fillStyle = d2 > 0.72 ? 'rgba(168,124,72,0.62)' : 'rgba(186,136,78,0.88)';
       g.fillRect(tx * MIDPX, ty * MIDPX, MIDPX, MIDPX);
     }
   }
@@ -1595,6 +1863,7 @@ function getHi(cx, cy) {
   const key = ckey(cx, cy);
   let c = hiCache.get(key);
   if (c) return c;
+  if (!inWorld(cx, cy)) return null;
   if (genBudget <= 0) return null;
   genBudget--;
   c = renderHi(cx, cy);
@@ -1607,13 +1876,42 @@ function getLo(cx, cy) {
   const key = ckey(cx, cy);
   let c = loCache.get(key);
   if (c) return c;
+  if (!inWorld(cx, cy)) return null;
   if (genBudget <= 0) return null;
   genBudget -= 0.10;
   c = renderLo(cx, cy);
   loCache.set(key, c);
   if (loCache.size > LO_MAX) loCache.delete(loCache.keys().next().value);
+  paintAtlas(cx, cy, c);
   return c;
 }
+
+/* At the widest zoom the viewport holds about eighteen hundred chunks, and
+   eighteen hundred blits a frame is the difference between 48fps and 60. So
+   every chunk is also stamped, one pixel per tile, into a single world
+   canvas. Once it is complete the far view costs one draw call. */
+let atlas = null, atlasCtx = null, atlasHas = null;
+function paintAtlas(cx, cy, cv) {
+  if (!atlas) {
+    const R = WORLD.radius;
+    atlas = document.createElement('canvas');
+    atlas.width = atlas.height = R * 2;
+    atlasCtx = atlas.getContext('2d');
+    atlasCtx.imageSmoothingEnabled = true;
+    atlasCtx.fillStyle = C.deep[1];
+    atlasCtx.fillRect(0, 0, R * 2, R * 2);
+    atlasHas = new Set();
+    let need = 0;
+    const n = Math.ceil(R / CHUNK) + 2;
+    for (let y = -n; y <= n; y++) for (let x = -n; x <= n; x++) if (inWorld(x, y)) need++;
+    WORLD.atlasNeed = need;
+  }
+  const key = ckey(cx, cy);
+  if (atlasHas.has(key)) return;
+  atlasHas.add(key);
+  atlasCtx.drawImage(cv, cx * CHUNK + WORLD.radius, cy * CHUNK + WORLD.radius, CHUNK, CHUNK);
+}
+const atlasReady = () => atlas && atlasHas.size >= WORLD.atlasNeed;
 
 /* ═══════════════════════════════════════════════════════════════════════════
    7. THE LIVING PART
@@ -1723,8 +2021,9 @@ const POOL = {};
 function lit(cv) { cv.lit = true; return cv; }
 function fillPools() {
   const r = mulberry(90210);
-  POOL.house = []; for (let i = 0; i < 22; i++) POOL.house.push(lit(makeHouse(r, false)));
-  POOL.big = [];   for (let i = 0; i < 7; i++)  POOL.big.push(lit(makeHouse(r, true)));
+  POOL.house = []; for (let i = 0; i < 22; i++) POOL.house.push(lit(makeHouse(r, 0)));
+  POOL.big = [];   for (let i = 0; i < 12; i++) POOL.big.push(lit(makeHouse(r, 1)));
+  POOL.manor = []; for (let i = 0; i < 8; i++)  POOL.manor.push(lit(makeHouse(r, 2)));
   POOL.farm = [];  for (let i = 0; i < 5; i++)  POOL.farm.push(makeFarm(r));
   POOL.mill = [];  for (let i = 0; i < 3; i++)  POOL.mill.push(makeWindmill(r));
   POOL.tomb = [];  for (let i = 0; i < 5; i++)  POOL.tomb.push(makeTombstone(r));
@@ -1818,7 +2117,7 @@ function draw(dt) {
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.imageSmoothingEnabled = false;
-  ctx.fillStyle = C.deep[0];
+  ctx.fillStyle = C.deep[1];
   ctx.fillRect(0, 0, cvs.width, cvs.height);
 
   if (z >= NEAR_MIN) drawNear(z, dt); else drawFar(z);
@@ -1839,7 +2138,7 @@ function drawNear(z, dt) {
   const bw = Math.ceil(cssW / z) + 2, bh = Math.ceil(cssH / z) + 2;
   if (back.width !== bw || back.height !== bh) { back.width = bw; back.height = bh; }
   bctx.imageSmoothingEnabled = false;
-  bctx.fillStyle = C.deep[0];
+  bctx.fillStyle = C.deep[1];
   bctx.fillRect(0, 0, bw, bh);
 
   const left = Math.round(cam.x - bw / 2), top = Math.round(cam.y - bh / 2);
@@ -1941,13 +2240,20 @@ function bakeVignette() {
   VIGNETTE = c;
 }
 
-function ringKingdom(g, k, left, top, sc) {
+function ringKingdom(g, k, left, top) {
+  const sh = k.shape;
   g.save();
   g.strokeStyle = 'rgba(255,226,140,0.85)';
   g.lineWidth = 1;
   g.setLineDash([4, 4]);
   g.beginPath();
-  g.arc(k.cx * TILE - left, k.cy * TILE - top, (k.rTown || k.r) * TILE + 8, 0, 6.2832);
+  if (sh) {
+    g.translate(k.cx * TILE - left, k.cy * TILE - top);
+    g.rotate(Math.atan2(sh.st, sh.ct));
+    g.ellipse(0, 0, (sh.A + 2) * TILE, (sh.B + 2) * TILE, 0, 0, 6.2832);
+  } else {
+    g.arc(k.cx * TILE - left, k.cy * TILE - top, k.r * TILE, 0, 6.2832);
+  }
   g.stroke();
   g.restore();
 }
@@ -1956,6 +2262,15 @@ function drawFar(z) {
   const px_ = z * TILE * dpr;             // screen pixels per tile
   const step = CHUNK * px_;               // screen pixels per chunk
   const wLeft = cam.x - cssW / 2 / z, wTop = cam.y - cssH / 2 / z;
+  if (z < 0.17 && atlasReady()) {
+    const R = WORLD.radius;
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(atlas,
+      (-R * TILE - wLeft) * z * dpr, (-R * TILE - wTop) * z * dpr,
+      R * 2 * TILE * z * dpr, R * 2 * TILE * z * dpr);
+    ctx.imageSmoothingEnabled = false;
+    return;
+  }
   const c0x = Math.floor(wLeft / CHUNK_PX), c1x = Math.floor((wLeft + cssW / z) / CHUNK_PX);
   const c0y = Math.floor(wTop / CHUNK_PX), c1y = Math.floor((wTop + cssH / z) / CHUNK_PX);
   ctx.imageSmoothingEnabled = step < CHUNK * MIDPX;
@@ -1977,33 +2292,61 @@ function worldToScreen(wx, wy) {
 }
 
 let UI_FONT = 'monospace';
+let labelOrder = [];
 function drawLabels(z, tint) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.textAlign = 'center';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+  const far = z < NEAR_MIN;
   let shown = 0;
-  for (const k of WORLD.kingdoms) {
+  const placed = [];
+  // Biggest first, so when two plates collide the one that matters survives.
+  for (const k of labelOrder) {
     if (shown >= 24) break;
-    const p = worldToScreen(k.cx * TILE, (k.cy - (k.rTown || k.r)) * TILE - 16);
-    if (p.x < -140 || p.x > cssW + 140 || p.y < -40 || p.y > cssH + 40) continue;
-    const big = z >= 1;
-    const scale = big ? 1 : 0.88;
-    ctx.font = '700 ' + (13 * scale).toFixed(0) + 'px ' + UI_FONT;
-    const label = k.name;
-    const w = ctx.measureText(label).width + 16;
-    ctx.fillStyle = 'rgba(24,18,12,0.72)';
-    roundRect(ctx, p.x - w / 2, p.y - 15, w, 19, 3);
+    // Zoomed out the plate sits inside the kingdom's own ground, so the name
+    // and the flag belong to the patch you are looking at.
+    const a = far ? worldToScreen(k.cx * TILE, k.cy * TILE)
+                  : worldToScreen(k.cx * TILE, (k.cy - (k.rTown || k.r)) * TILE - 20);
+    if (a.x < -180 || a.x > cssW + 180 || a.y < -60 || a.y > cssH + 60) continue;
+
+    const fw = 12, fh = 14, pad = 7, gap = 6;
+    ctx.font = '700 13px ' + UI_FONT;
+    const tw = ctx.measureText(k.name).width;
+    const sub = far ? fmt(k.pop) + ' population' : '';
+    ctx.font = '700 9px ' + UI_FONT;
+    const sw = sub ? ctx.measureText(sub).width : 0;
+    const bodyW = Math.max(fw + gap + tw, sub ? fw + gap + sw : 0);
+    const boxW = pad * 2 + bodyW;
+    const boxH = sub ? 32 : 22;
+    let x = Math.round(a.x - boxW / 2), y = Math.round(a.y - boxH / 2);
+    let clash = true;
+    for (let tries = 0; tries < 3 && clash; tries++) {
+      clash = false;
+      for (const q of placed) {
+        if (x < q.x + q.w + 3 && x + boxW + 3 > q.x && y < q.y + q.h + 3 && y + boxH + 3 > q.y) {
+          clash = true; y += boxH + 4; break;
+        }
+      }
+    }
+    if (clash) continue;
+    placed.push({ x, y, w: boxW, h: boxH });
+
+    ctx.fillStyle = 'rgba(24,18,12,0.76)';
+    roundRect(ctx, x, y, boxW, boxH, 3);
     ctx.fill();
     if (k === selected || k === hovered) {
       ctx.strokeStyle = '#e8b03a'; ctx.lineWidth = 1.5; ctx.stroke();
     }
-    ctx.fillStyle = '#f2e6cc';
-    ctx.fillText(label, p.x, p.y - 1.5);
-    shown++;
-    if (z < NEAR_MIN) {
+    if (k.flag) ctx.drawImage(k.flag, x + pad, y + (boxH - fh) / 2, fw, fh);
+    ctx.fillStyle = '#f4e9d0';
+    ctx.font = '700 13px ' + UI_FONT;
+    ctx.fillText(k.name, x + pad + fw + gap, y + 15);
+    if (sub) {
+      ctx.fillStyle = 'rgba(255,225,160,0.92)';
       ctx.font = '700 9px ' + UI_FONT;
-      ctx.fillStyle = 'rgba(255,225,160,0.9)';
-      ctx.fillText(fmt(k.pop) + ' souls', p.x, p.y + 12);
+      ctx.fillText(sub, x + pad + fw + gap, y + 27);
     }
+    shown++;
   }
   ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
@@ -2131,41 +2474,63 @@ function weekDelta(k) {
 
 function buildNews() {
   const ev = [];
+  const add = (k, w, em, t) => ev.push({ k, w, em, t });
   for (const k of WORLD.kingdoms) {
     const h = k.hist, n = h.length;
     const d = weekDelta(k);
     const houses = k.houses - Math.floor(h[n - 8].users / 100);
     const knights = k.knights - Math.floor(h[n - 8].subs / 10);
     const mrrD = k.mrr - h[n - 8].mrr;
+    const who = lordOf(k);
 
-    if (houses > 0) ev.push({ k, w: houses * 3, t: k.name + ' raises ' + houses + ' new ' + (houses === 1 ? 'house' : 'houses') + '.' });
-    if (houses < 0) ev.push({ k, w: -houses * 3, t: k.name + ' boards up ' + (-houses) + ' ' + (houses === -1 ? 'house' : 'houses') + '.' });
-    if (knights > 0) ev.push({ k, w: knights * 2, t: fmt(knights) + ' knights sworn in at ' + k.name + '.' });
-    if (knights < 0) ev.push({ k, w: -knights * 4, t: k.name + ' loses ' + fmt(-knights) + ' knights this week.' });
-    if (k.horsemen >= 1 && mrrD > 500) ev.push({ k, w: 6, t: k.name + ' mounts a horseman on ' + money(mrrD) + ' new coin.' });
-    if (k.grave.stones >= 12) ev.push({ k, w: 7, t: 'Gravediggers busy at ' + k.name + ': ' + fmt(k.churn) + ' departed.' });
-    if (d.pct > 0.08) ev.push({ k, w: 9, t: k.name + ' swells ' + (d.pct * 100).toFixed(0) + ' percent in seven days.' });
-    if (d.pct < -0.05) ev.push({ k, w: 9, t: k.name + ' thins by ' + (-d.pct * 100).toFixed(0) + ' percent.' });
-    if (k.pop >= 50000) ev.push({ k, w: 5, t: 'The palace at ' + k.name + ' opens its gates.' });
-    else if (k.pop >= 25000) ev.push({ k, w: 4, t: 'Cathedral bells ring over ' + k.name + '.' });
-    else if (k.pop >= 10000) ev.push({ k, w: 4, t: k.name + ' finishes the stone keep.' });
-    else if (k.pop >= 5000) ev.push({ k, w: 3, t: 'Walls go up around ' + k.name + '.' });
-    else if (k.pop < 100) ev.push({ k, w: 2, t: k.name + ' is one hut and a campfire.' });
-    if (k.trials > 0) ev.push({ k, w: 1, t: fmt(k.archers) + ' archers wait outside the walls of ' + k.name + '.' });
+    if (houses > 0) add(k, houses * 3, '🏠', k.name + ' raises ' + fmt(houses) + ' new ' + (houses === 1 ? 'house' : 'houses') + '.');
+    if (houses < 0) add(k, -houses * 3, '🏚️', k.name + ' boards up ' + fmt(-houses) + ' houses.');
+    if (knights > 0) add(k, knights * 2, '⚔️', fmt(knights) + ' knights sworn in at ' + k.name + '.');
+    if (knights < 0) add(k, -knights * 4, '💔', k.name + ' loses ' + fmt(-knights) + ' knights this week.');
+    if (k.horsemen >= 1 && mrrD > 500) add(k, 6, '🐎', k.name + ' mounts a horseman on ' + money(mrrD) + ' new coin.');
+    if (k.grave.stones >= 12) add(k, 7, '🪦', 'Gravediggers busy at ' + k.name + ': ' + fmt(k.churn) + ' departed.');
+    if (d.pct > 0.08) add(k, 9, '📈', k.name + ' swells ' + (d.pct * 100).toFixed(0) + ' percent, says ' + who + '.');
+    if (d.pct < -0.05) add(k, 9, '📉', k.name + ' thins by ' + (-d.pct * 100).toFixed(0) + ' percent.');
+    if (k.port) add(k, 5, '⚓', k.name + ' works ' + k.port + ' ' + (k.port === 1 ? 'berth' : 'berths') + ' on the water.');
+    if (k.pop >= 50000) add(k, 5, '👑', 'The palace at ' + k.name + ' opens its gates.');
+    else if (k.pop >= 25000) add(k, 4, '⛪', 'Cathedral bells ring over ' + k.name + '.');
+    else if (k.pop >= 10000) add(k, 4, '🏰', k.name + ' finishes the stone keep.');
+    else if (k.pop >= 5000) add(k, 3, '🧱', 'Walls go up around ' + k.name + '.');
+    else if (k.pop < 100) add(k, 2, '🔥', k.name + ' is one hut and a campfire, says ' + who + '.');
+    if (k.trials > 0) add(k, 1, '🏹', fmt(k.archers) + ' archers wait outside ' + k.name + '.');
   }
   ev.sort((a, b) => b.w - a.w);
-  return ev.slice(0, 20);
+  return ev.slice(0, 10);
 }
 
 let news = [], teaseIdx = 0;
 const teaseEl = document.getElementById('tease');
 const paperEl = document.getElementById('paper');
 
+function goTo(id) {
+  const k = WORLD.kingdoms.find(x => x.id === id);
+  if (k) { flyTo(k); openCard(k); }
+}
+function wireRows(root) {
+  root.querySelectorAll('[data-k]').forEach(r => r.addEventListener('click', () => goTo(r.dataset.k)));
+}
+
 function paintNews() {
   news = buildNews();
   const evBox = document.getElementById('events');
   evBox.innerHTML = news.map((e, i) =>
-    '<div class="ev"><span class="when">' + (i < 4 ? 'now' : i < 10 ? '1d' : '2d') + '</span><span>' + e.t + '</span></div>'
+    '<div class="ev" data-k="' + e.k.id + '"><span class="when">' +
+    (i < 3 ? 'now' : i < 7 ? '1d' : '2d') + '</span><span class="em">' + e.em +
+    '</span><span>' + e.t + '</span></div>'
+  ).join('');
+
+  // Newest arrivals, with the founder who brought them.
+  const fresh = WORLD.kingdoms.slice().sort((a, b) => a.joined - b.joined).slice(0, 5);
+  document.getElementById('newk').innerHTML = fresh.map(k =>
+    '<div class="row" data-k="' + k.id + '"><span class="rank">🚩</span>' +
+    '<span class="nm">' + k.name + '</span>' +
+    '<span class="who">' + (k.anonFounder ? '🎭 anonymous' : '@' + k.founders[0]) + '</span>' +
+    '<span class="val">' + (k.joined <= 1 ? 'today' : k.joined + 'd') + '</span></div>'
   ).join('');
 
   const byGrowth = WORLD.kingdoms.slice().sort((a, b) => weekDelta(b).pct - weekDelta(a).pct).slice(0, 5);
@@ -2180,8 +2545,7 @@ function paintNews() {
   const now = WORLD.kingdoms.slice().sort((a, b) => b.pop - a.pop);
   const then = WORLD.kingdoms.slice().sort((a, b) => popOf(b.hist[b.hist.length - 8]) - popOf(a.hist[a.hist.length - 8]));
   document.getElementById('board').innerHTML = now.slice(0, 10).map((k, i) => {
-    const was = then.indexOf(k);
-    const mv = was - i;
+    const mv = then.indexOf(k) - i;
     const arrow = mv > 0 ? '<span class="mv up">▲' + mv + '</span>'
                 : mv < 0 ? '<span class="mv down">▼' + (-mv) + '</span>'
                 : '<span class="mv flat">–</span>';
@@ -2189,18 +2553,14 @@ function paintNews() {
       '<span class="nm">' + k.name + '</span><span class="val">' + fmt(k.pop) + '</span>' + arrow + '</div>';
   }).join('');
 
-  paperEl.querySelectorAll('.row').forEach(r => r.addEventListener('click', () => {
-    const k = WORLD.kingdoms.find(x => x.id === r.dataset.k);
-    if (k) { flyTo(k); openCard(k); }
-  }));
-
+  wireRows(paperEl);
   rotateTease();
 }
 
 function rotateTease() {
   if (!news.length) return;
   const e = news[teaseIdx % news.length];
-  teaseEl.innerHTML = '<b>' + e.t + '</b>';
+  teaseEl.innerHTML = e.em + ' <b>' + e.t + '</b>';
   teaseIdx++;
 }
 setInterval(() => { if (!paperEl.classList.contains('open')) rotateTease(); }, 5200);
@@ -2224,8 +2584,10 @@ function openCard(k) {
   selected = k;
   document.getElementById('cName').textContent = k.name;
   document.getElementById('cSub').textContent = k.tag.toUpperCase() + ' · ' + fmt(k.users) + ' ACTIVE USERS';
-  document.getElementById('cFounders').innerHTML = k.founders.map(f =>
-    '<a href="https://x.com/' + f + '" target="_blank" rel="noopener">👑 @' + f + '</a>').join('');
+  document.getElementById('cFounders').innerHTML = k.anonFounder
+    ? '<span class="anon">🎭 Anonymous founder</span>'
+    : k.founders.map(f =>
+        '<a href="https://x.com/' + f + '" target="_blank" rel="noopener">👑 @' + f + '</a>').join('');
   document.getElementById('cStats').innerHTML = [
     [fmt(k.pop), 'Population'], [fmt(k.houses), 'Houses'],
     [fmt(k.knights), 'Knights'], [fmt(k.archers), 'Archers'],
@@ -2247,15 +2609,9 @@ document.getElementById('cClose').addEventListener('click', closeCard);
 function drawFlag(k) {
   const cv = document.getElementById('cardFlag');
   const g = cv.getContext('2d');
+  g.imageSmoothingEnabled = false;
   g.clearRect(0, 0, cv.width, cv.height);
-  const hue = kingdomHue(k.hue);
-  g.fillStyle = C.wood[0]; g.fillRect(8, 0, 1, 20);
-  g.fillStyle = hue; g.fillRect(2, 1, 13, 13);
-  g.fillStyle = C.ink;
-  g.fillRect(2, 1, 13, 1); g.fillRect(2, 13, 13, 1);
-  g.fillRect(2, 1, 1, 13); g.fillRect(14, 1, 1, 13);
-  g.fillStyle = C.gold[2];
-  g.fillRect(6, 5, 5, 4); g.fillRect(5, 4, 1, 2); g.fillRect(11, 4, 1, 2); g.fillRect(8, 3, 1, 3);
+  if (k.flag) g.drawImage(k.flag, 2, 2);
 }
 
 function drawSpark(k) {
@@ -2293,16 +2649,24 @@ function flyTo(k) {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const modal = document.getElementById('modal');
+const rules = document.getElementById('modal2');
 function openModal() { modal.classList.add('on'); }
-function closeModal() { modal.classList.remove('on'); }
+function closeModal() { modal.classList.remove('on'); rules.classList.remove('on'); }
+document.getElementById('rulesBtn').addEventListener('click', () => rules.classList.add('on'));
+document.getElementById('r2Close').addEventListener('click', () => rules.classList.remove('on'));
+rules.addEventListener('click', e => { if (e.target === rules) rules.classList.remove('on'); });
 document.getElementById('addBtn').addEventListener('click', openModal);
 document.getElementById('mClose').addEventListener('click', closeModal);
 modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 document.getElementById('mGo').addEventListener('click', () => {
-  const name = document.getElementById('fKing').value.trim();
+  const anonA = document.getElementById('fAnonA').checked;
+  const anonF = document.getElementById('fAnonF').checked;
+  const typed = document.getElementById('fKing').value.trim();
   const note = document.getElementById('mNote');
-  if (!name) { note.textContent = 'Name the kingdom first.'; return; }
-  note.textContent = 'Saved. ' + name + ' joins the map at the next daily refresh.';
+  if (!typed && !anonA) { note.textContent = 'Name the kingdom first, or hide the app.'; return; }
+  const name = anonA ? veilName(typed.length * 977 + 13) : typed;
+  note.textContent = 'Saved. ' + name + ' joins the map at the next daily refresh'
+    + (anonF ? ', with no handle on it.' : '.');
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -2352,8 +2716,9 @@ function boot() {
   progress(0.3);
 
   ks = placeKingdoms(ks);
-  ks.forEach((k, i) => { k.hue = i; });
+  ks.forEach((k, i) => { k.hue = i; k.flag = makeFlag(kingdomHue(i)); });
   WORLD.kingdoms = ks;
+  labelOrder = ks.slice().sort((a, b) => b.pop - a.pop);
   progress(0.5);
 
   buildRoads(ks);
@@ -2383,6 +2748,8 @@ function boot() {
   spawnMerchants();
   stepMerchants(0);
   progress(1);
+
+  ZOOMS[0] = clamp(Math.min(cssW, cssH) / (WORLD.radius * 2.2 * TILE), 0.05, 0.2);
 
   const me = ks.find(k => k.id === 'kaught') || ks[0];
   cam.x = me.cx * TILE; cam.y = me.cy * TILE;
