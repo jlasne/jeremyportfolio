@@ -474,8 +474,8 @@ const C = {
   dry:     ['#8b9a52', '#96a45c', '#a1af66'],
   forest:  ['#3a7233', '#427d39', '#4b8940'],
   hill:    ['#7e8757', '#8a9161', '#969d6c'],
-  rock:    ['#6e6b63', '#7d7970', '#8d897f'],
-  snow:    ['#dfe6ea', '#eef3f6', '#ffffff'],
+  rock:    ['#585449', '#75705f', '#948d77'],
+  snow:    ['#b4c2ce', '#d3dde6', '#eef4f9'],
   river:   ['#2f6fae', '#3b83c4', '#4a95d6'],
   road:    ['#a98d66', '#b2966f', '#bb9f78'],
   dirt:    ['#8a6f4b', '#9c7f57'],
@@ -950,6 +950,9 @@ function elevAt(tx, ty) {
   e = e * (0.42 + 0.58 * rim) - (1 - rim) * 0.30;
   // A second, coarser field breaks the ring into bays and peninsulas.
   e += (fbm(wx / 340, wy / 340, s + 401, 3, 0.5, 2) - 0.5) * 0.30 * rim;
+  // Ridged noise, applied only above the treeline, turns high blobs into
+  // ranges with spines and passes instead of grey pancakes.
+  if (e > 0.56) e += (e - 0.56) * ridge(wx / 190, wy / 190, s + 77, 4) * 0.85;
   return e;
 }
 
@@ -959,8 +962,12 @@ function elevAt(tx, ty) {
 function riverAt(tx, ty, e) {
   if (e <= SEA + 0.004 || e > 0.78) return false;
   const s = WORLD_SEED + 555;
-  const dx = (vnoise(tx * 0.016, ty * 0.016, s + 3) - 0.5) * 34;
-  const dy = (vnoise(tx * 0.016 + 3.1, ty * 0.016 + 7.7, s + 9) - 0.5) * 34;
+  // Two warps: a broad one that decides where the valley runs, and a tight
+  // one that keeps the channel from ever running dead straight.
+  const dx = (vnoise(tx * 0.016, ty * 0.016, s + 3) - 0.5) * 34
+           + (vnoise(tx * 0.075, ty * 0.075, s + 21) - 0.5) * 9;
+  const dy = (vnoise(tx * 0.016 + 3.1, ty * 0.016 + 7.7, s + 9) - 0.5) * 34
+           + (vnoise(tx * 0.075 + 1.3, ty * 0.075 + 5.1, s + 27) - 0.5) * 9;
   const n = vnoise((tx + dx) / 88, (ty + dy) / 88, s);
   const r = 1 - Math.abs(n * 2 - 1);
   return r > 0.986 - (0.78 - e) * 0.055;
@@ -970,15 +977,15 @@ function moistAt(tx, ty) {
   return fbm(tx / 172, ty / 172, WORLD_SEED + 733, 3, 0.55, 2);
 }
 
-function tileAt(tx, ty) {
-  const e = elevAt(tx, ty);
+function tileAt(tx, ty) { return tileAtE(tx, ty, elevAt(tx, ty)); }
+function tileAtE(tx, ty, e) {
   if (e < SEA - 0.075) return T.DEEP;
   if (e < SEA - 0.020) return T.OCEAN;
   if (e < SEA) return T.SHALLOW;
   if (riverAt(tx, ty, e)) return T.RIVER;
   if (e < SEA + 0.022) return T.SAND;
-  if (e > 0.830) return T.SNOW;
-  if (e > 0.775) return T.ROCK;
+  if (e > 0.865) return T.SNOW;
+  if (e > 0.760) return T.ROCK;
   if (e > 0.660) return T.HILL;
   const m = moistAt(tx, ty);
   if (m < 0.40) return T.DRY;
@@ -1411,8 +1418,8 @@ let genBudget = 0;
 
 function ckey(cx, cy) { return cx + ',' + cy; }
 
-function tileCode(tx, ty) {
-  const base = tileAt(tx, ty);
+function tileCode(tx, ty, e) {
+  const base = e === undefined ? tileAt(tx, ty) : tileAtE(tx, ty, e);
   if (base !== T.RIVER && base <= T.SHALLOW) return base;
   if (WORLD.roadSet && WORLD.roadSet.has(tx + ',' + ty)) {
     // A road over water keeps the water and gets a bridge laid on top.
@@ -1424,13 +1431,23 @@ function isBridge(tx, ty) {
   return !!(WORLD.roadSet && WORLD.roadSet.has(tx + ',' + ty) && tileAt(tx, ty) === T.RIVER);
 }
 
-function tileColor(code, tx, ty) {
+function tileColor(code, tx, ty, e) {
   const ramp = RAMPS[code];
   // One low frequency field mottles every biome the same way, so the ground
   // reads as terrain rather than as a checkerboard of swatches.
   const d = vnoise(tx / 11, ty / 11, WORLD_SEED + 88) * 0.72
           + hash2(tx, ty, WORLD_SEED + 13) * 0.28;
-  const i = d < 0.40 ? 0 : d < 0.70 ? 1 : 2;
+  let i = d < 0.40 ? 0 : d < 0.70 ? 1 : 2;
+  // Above the treeline the stop comes from height instead: snow brightens
+  // towards the peaks, bare rock darkens, and the range gains a shape.
+  if (code === T.HILL || code === T.ROCK || code === T.SNOW) {
+    if (e === undefined) e = elevAt(tx, ty);
+    const lo = code === T.HILL ? 0.660 : code === T.ROCK ? 0.760 : 0.865;
+    const span = code === T.SNOW ? 0.075 : 0.100;
+    const t = clamp((e - lo) / span, 0, 0.999) * 0.80 + d * 0.20;
+    i = (t * 3) | 0;
+    if (code === T.ROCK) i = 2 - i;
+  }
   return ramp[Math.min(i, ramp.length - 1)];
 }
 
@@ -1447,9 +1464,10 @@ function renderHi(cx, cy) {
   for (let ty = 0; ty < CHUNK; ty++) {
     for (let tx = 0; tx < CHUNK; tx++) {
       const wx = ox + tx, wy = oy + ty;
-      const code = tileCode(wx, wy);
+      const e = elevAt(wx, wy);
+      const code = tileCode(wx, wy, e);
       const X = tx * TILE, Y = ty * TILE;
-      g.fillStyle = tileColor(code, wx, wy);
+      g.fillStyle = tileColor(code, wx, wy, e);
       g.fillRect(X, Y, TILE, TILE);
       if (!isWater(code) && WORLD.graveSet.has(wx + ',' + wy)) {
         g.fillStyle = 'rgba(122,106,72,0.80)';
@@ -1486,7 +1504,7 @@ function renderHi(cx, cy) {
           coast.push(X, Y);
       } else {
         // Relief without isometry: a dark lip under anything that rises north.
-        const e = elevAt(wx, wy), eN = elevAt(wx, wy - 1), eW = elevAt(wx - 1, wy);
+        const eN = elevAt(wx, wy - 1), eW = elevAt(wx - 1, wy);
         if (eN - e > 0.016) { g.fillStyle = 'rgba(20,30,18,0.20)'; g.fillRect(X, Y, TILE, 3); }
         else if (e - eN > 0.016) { g.fillStyle = 'rgba(255,246,214,0.13)'; g.fillRect(X, Y, TILE, 2); }
         if (eW - e > 0.016) { g.fillStyle = 'rgba(20,30,18,0.16)'; g.fillRect(X, Y, 3, TILE); }
@@ -1513,7 +1531,8 @@ function renderHi(cx, cy) {
       if (h < dens) {
         deco.push({ x: tx * TILE + 2 + ((h * 991 | 0) % 6), y: ty * TILE + 2 + ((h * 577 | 0) % 6),
                     cv: grab(POOL[kind], h * 37 % 1) });
-      } else if (h > 0.9955 && (code === T.ROCK || code === T.HILL || code === T.SNOW)) {
+      } else if (h > (code === T.HILL ? 0.9955 : 0.982) &&
+                 (code === T.ROCK || code === T.HILL || code === T.SNOW)) {
         deco.push({ x: tx * TILE + 3, y: ty * TILE + 3, cv: grab(POOL.rock, h * 53 % 1) });
       }
     }
