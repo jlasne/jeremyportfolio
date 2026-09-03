@@ -75,30 +75,24 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 #addBtn{top:14px;left:14px}
 #addBtn .crown{width:16px;height:12px;display:block}
 
-/* ── under it: where the numbers come from ─────────────────────────────── */
-#rcBadge{
-  top:56px;left:14px;display:inline-flex;align-items:center;gap:7px;
-  padding:6px 11px;font-size:10px;font-weight:700;letter-spacing:.04em;
-  text-decoration:none;color:var(--ink);opacity:.9;
+/* ── where the numbers come from, stated once inside the form ─────────── */
+#modal .rcline{
+  display:flex;align-items:center;gap:8px;font-size:11.5px;opacity:.7;
+  margin:-4px 0 16px;
 }
-#rcBadge:hover{opacity:1}
-#rcBadge svg{width:15px;height:14px;display:block}
+#modal .rcline svg{width:16px;height:15px;flex:0 0 16px;display:block}
 
 /* ── bottom right: zoom + clock ────────────────────────────────────────── */
 #clock{
   bottom:14px;right:14px;display:flex;align-items:stretch;gap:0;overflow:hidden;
 }
 #clock .credit{
-  padding:10px 13px;font-size:10.5px;font-weight:500;letter-spacing:.02em;
+  padding:10px 14px;font-size:10.5px;font-weight:500;letter-spacing:.02em;
   line-height:1.15;white-space:nowrap;text-decoration:none;color:inherit;
-  border-right:2px solid #a98a5c;opacity:.8;display:flex;align-items:center;
+  opacity:.8;display:flex;align-items:center;
 }
 #clock .credit:hover{opacity:1}
 #clock .credit b{font-weight:700;margin-left:4px}
-#clock .z{width:34px;font-size:16px;font-weight:700;line-height:1;
-  display:flex;align-items:center;justify-content:center}
-#clock .z+.z{border-left:2px solid #a98a5c}
-#clock .z:disabled{opacity:.3;cursor:default}
 
 /* ── top right: the newspaper ──────────────────────────────────────────── */
 #paper{
@@ -302,9 +296,8 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 @media (max-width:700px){
   /* The paper takes the whole top edge, so the button moves out from under it. */
   #paper{width:calc(100vw - 28px);max-height:calc(100vh - 130px)}
-  #addBtn{top:auto;bottom:56px;left:14px}
-  #rcBadge{top:auto;bottom:14px;left:14px}
-  #card{width:calc(100vw - 28px);bottom:104px}
+  #addBtn{top:auto;bottom:14px;left:14px}
+  #card{width:calc(100vw - 28px);bottom:62px}
   #clock .credit{padding:10px;font-size:9.5px}
   #modal,#modal2{padding:0}
   #modal .sheet,#modal2 .sheet{max-height:100vh;border-radius:0;border-left:0;border-right:0}
@@ -339,22 +332,10 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   </div>
 </div>
 
-<a class="hud plate rcbadge" id="rcBadge" href="https://www.revenuecat.com" target="_blank" rel="noopener">
-  <svg viewBox="0 0 20 18" aria-hidden="true">
-    <path d="M3 9V2l4.2 3.4h5.6L17 2v7a7 6.6 0 0 1-14 0Z" fill="#f2545b"/>
-    <circle cx="7.4" cy="9" r="1.15" fill="#1f1f47"/>
-    <circle cx="12.6" cy="9" r="1.15" fill="#1f1f47"/>
-    <path d="M9 11.6h2l-1 1.5Z" fill="#1f1f47"/>
-  </svg>
-  Verified by RevenueCat
-</a>
-
 <div class="hud plate" id="clock">
   <a class="credit" href="https://x.com/jeremylasne" target="_blank" rel="noopener">
     made with fun by <b>@jeremylasne</b>
   </a>
-  <button class="z" id="zOut" title="Zoom out">−</button>
-  <button class="z" id="zIn" title="Zoom in">+</button>
 </div>
 
 <div class="plate" id="card">
@@ -379,6 +360,16 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
     </div>
     <div class="bd">
       <p>Your app becomes a kingdom on the map. It refreshes once a day.</p>
+
+      <p class="rcline">
+        <svg viewBox="0 0 20 18" aria-hidden="true">
+          <path d="M3 9V2l4.2 3.4h5.6L17 2v7a7 6.6 0 0 1-14 0Z" fill="#f2545b"/>
+          <circle cx="7.4" cy="9" r="1.15" fill="#1f1f47"/>
+          <circle cx="12.6" cy="9" r="1.15" fill="#1f1f47"/>
+          <path d="M9 11.6h2l-1 1.5Z" fill="#1f1f47"/>
+        </svg>
+        Every number on this map is read from RevenueCat.
+      </p>
 
       <h3>Make a read-only key</h3>
       <ol>
@@ -411,6 +402,14 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
       <div class="field">
         <label for="fX">Founder handles on X <em>optional</em></label>
         <input id="fX" placeholder="Leave empty to stay anonymous" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="field">
+        <label for="fIOS">App Store link <em>optional</em></label>
+        <input id="fIOS" placeholder="https://apps.apple.com/app/..." autocomplete="off" spellcheck="false">
+      </div>
+      <div class="field">
+        <label for="fPlay">Play Store link <em>optional</em></label>
+        <input id="fPlay" placeholder="https://play.google.com/store/apps/..." autocomplete="off" spellcheck="false">
       </div>
       <div class="veil">
         <label class="chk"><input type="checkbox" id="fAnonF"> 🎭 Hide my handle. The kings walk without a name.</label>
@@ -492,15 +491,15 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 
 const SEED_KINGDOMS = [
   {id:'kaught',   name:'Kaught',      tag:'Fishing log',      founders:['jeremylasne'],
-   seed:1041, joined:64, users:18400, trials:610,  subs:2240, mrr:15680, curve:'grow'},
+   seed:1041, joined:64, ios:'https://apps.apple.com/app/id0000000001', play:'https://play.google.com/store/apps/details?id=com.kaught', users:18400, trials:610,  subs:2240, mrr:15680, curve:'grow'},
   {id:'plotter',  name:'Plotter',     tag:'Habit tracker',    founders:['annaships'],
-   seed:2277, joined:41, users:245000,trials:8200, subs:26000,mrr:208000,curve:'grow'},
+   seed:2277, joined:41, play:'https://play.google.com/store/apps/details?id=com.plotter', users:245000,trials:8200, subs:26000,mrr:208000,curve:'grow'},
   {id:'wanderly', name:'Wanderly',    tag:'Trip planner',     founders:['tomdraws','lu_builds'],
    seed:3319, joined:12, users:4100,  trials:130,  subs:410,  mrr:2870,  curve:'flat'},
   {id:'sunsetdb', name:'Sunset',      tag:'Sleep sounds',     founders:['mira_dev'],
    anonFounder:true, seed:4483, joined:29, users:960,   trials:31,   subs:88,   mrr:530,   curve:'shrink'},
   {id:'forkful',  name:'Forkful',     tag:'Recipe scanner',   founders:['chefpablo'],
-   seed:5527, joined:57, users:480000,trials:14000,subs:52000,mrr:416000,curve:'spike'},
+   seed:5527, joined:57, ios:'https://apps.apple.com/app/id0000000002', users:480000,trials:14000,subs:52000,mrr:416000,curve:'spike'},
   {id:'lifted',   name:'Lifted',      tag:'Gym logger',       founders:['ben_lifts','kaycodes'],
    seed:6659, joined:23, users:31500, trials:1120, subs:3860, mrr:30880, curve:'grow'},
   {id:'quillo',   name:'Quillo',      tag:'Journal',          founders:['sofiawrites'],
@@ -1073,34 +1072,37 @@ const WORLD = { radius: 400, kingdoms: [], buildingsByChunk: new Map(), roads: [
                 graveSet: new Set(), highwaySet: new Set() };
 
 function warp(tx, ty, s) {
-  const wx = vnoise(tx * 0.0062, ty * 0.0062, s + 91) - 0.5;
-  const wy = vnoise(tx * 0.0062 + 4.7, ty * 0.0062 + 2.3, s + 177) - 0.5;
-  return [tx + wx * 130, ty + wy * 130];
+  const wx = vnoise(tx * 0.008, ty * 0.008, s + 91) - 0.5;
+  const wy = vnoise(tx * 0.008 + 4.7, ty * 0.008 + 2.3, s + 177) - 0.5;
+  return [tx + wx * 92, ty + wy * 92];
 }
 
 function elevAt(tx, ty) {
   const s = WORLD_SEED;
   const [wx, wy] = warp(tx, ty, s);
-  let e = fbm(wx / 215, wy / 215, s, 5, 0.5, 2.05);
+  // Landmass first: three octaves at a long wavelength, so the coast is one
+  // coherent line instead of a scatter of ponds.
+  let e = fbm(wx / 205, wy / 205, s, 3, 0.5, 2.05);
   const d = Math.sqrt(tx * tx + ty * ty) / WORLD.radius;
   // Where the land gives out depends on the bearing, so the world edge is a
   // ragged coast of gulfs and headlands rather than the rim of a coin.
   const ang = Math.atan2(ty, tx);
-  const lobe = vnoise(Math.cos(ang) * 3.4 + 11, Math.sin(ang) * 3.4 + 7, s + 909);
+  const lobe = vnoise(Math.cos(ang) * 5.2 + 11, Math.sin(ang) * 5.2 + 7, s + 909);
   const start = 0.66 + lobe * 0.26;
   const rim = 1 - smooth(clamp((d - start) / 0.19, 0, 1));
   e = e * (0.42 + 0.58 * rim) - (1 - rim) * 0.34;
-  // A second, coarser field breaks the coast into bays and peninsulas.
-  e += (fbm(wx / 520, wy / 520, s + 401, 3, 0.5, 2) - 0.5) * 0.30 * rim;
-  // Ridged noise, applied only above the treeline, turns high blobs into
-  // ranges with spines and passes instead of grey pancakes.
-  if (e > 0.56) e += (e - 0.56) * ridge(wx / 300, wy / 300, s + 77, 4) * 0.85;
+  // A coarser field breaks the coast into bays and peninsulas.
+  e += (fbm(wx / 430, wy / 430, s + 401, 2, 0.5, 2) - 0.5) * 0.26 * rim;
+  // Relief is added inland only, faded in over the first tenth above the
+  // waterline, so fine detail textures the land without carving new lakes.
+  const inland = smooth(clamp((e - SEA) / 0.10, 0, 1));
+  if (inland > 0) e += (fbm(wx / 44, wy / 44, s + 55, 3, 0.5, 2) - 0.5) * 0.14 * inland;
+  // Ridged noise above the treeline turns high blobs into ranges with spines
+  // and passes instead of grey pancakes.
+  if (e > 0.56) e += (e - 0.56) * ridge(wx / 200, wy / 200, s + 77, 4) * 0.85;
   return e;
 }
 
-/* Rivers are the near-zero band of one warped noise field. The band is a
-   continuous winding curve by construction, it stops where the land stops,
-   and it widens as it runs downhill, so it reads as flowing to the sea. */
 function riverAt(tx, ty, e) {
   if (e <= SEA + 0.004 || e > 0.78) return false;
   const s = WORLD_SEED + 555;
@@ -1110,13 +1112,13 @@ function riverAt(tx, ty, e) {
            + (vnoise(tx * 0.075, ty * 0.075, s + 21) - 0.5) * 9;
   const dy = (vnoise(tx * 0.016 + 3.1, ty * 0.016 + 7.7, s + 9) - 0.5) * 34
            + (vnoise(tx * 0.075 + 1.3, ty * 0.075 + 5.1, s + 27) - 0.5) * 9;
-  const n = vnoise((tx + dx) / 120, (ty + dy) / 120, s);
+  const n = vnoise((tx + dx) / 76, (ty + dy) / 76, s);
   const r = 1 - Math.abs(n * 2 - 1);
   return r > 0.988 - (0.78 - e) * 0.050;
 }
 
 function moistAt(tx, ty) {
-  return fbm(tx / 340, ty / 340, WORLD_SEED + 733, 3, 0.55, 2);
+  return fbm(tx / 150, ty / 150, WORLD_SEED + 733, 3, 0.55, 2);
 }
 
 function tileAt(tx, ty) { return tileAtE(tx, ty, elevAt(tx, ty)); }
@@ -1240,11 +1242,13 @@ function popOf(m) {
 function placeKingdoms(list) {
   const sorted = list.slice().sort((a, b) => b.r - a.r);
   let sq = 0;
-  for (const k of sorted) sq += (k.rMax + 45) * (k.rMax + 45);
+  for (const k of sorted) sq += (k.rMax + 26) * (k.rMax + 26);
   // Quantised to 64 tile steps. Terrain inside 70% of the radius does not
   // depend on it at all, and the rim only moves on real growth, so a kingdom
   // losing a few hundred users never reshapes the coast.
-  WORLD.radius = Math.ceil((80 + 1.55 * Math.sqrt(sq)) / 64) * 64;
+  // The settled land is a cluster in a much larger world, so there is
+  // always somewhere for the next kingdom to appear.
+  WORLD.radius = Math.ceil((340 + 5.2 * Math.sqrt(sq)) / 64) * 64;
 
   const placed = [];
   for (let i = 0; i < sorted.length; i++) {
@@ -1254,9 +1258,9 @@ function placeKingdoms(list) {
     const a0 = rnd() * Math.PI * 2;
     outer:
     for (let ring = 0; ring < 260; ring++) {
-      const dist = i === 0 ? 0 : (k.rMax + 55) + ring * 11;
-      if (dist > WORLD.radius * 0.80) break;
-      const steps = Math.max(1, Math.round(dist / 16));
+      const dist = i === 0 ? 0 : (k.rMax + 24) + ring * 6;
+      if (dist > WORLD.radius * 0.55) break;
+      const steps = Math.max(1, Math.round(dist / 11));
       for (let sIdx = 0; sIdx < steps; sIdx++) {
         const ang = a0 + sIdx * 2.39996;
         const x = Math.round(Math.cos(ang) * dist);
@@ -1264,7 +1268,7 @@ function placeKingdoms(list) {
         let clash = false;
         for (const p of placed) {
           const dx = p.cx - x, dy = p.cy - y;
-          if (Math.sqrt(dx * dx + dy * dy) < p.rMax + k.rMax + 40) { clash = true; break; }
+          if (Math.sqrt(dx * dx + dy * dy) < p.rMax + k.rMax + 22) { clash = true; break; }
         }
         if (clash) continue;
         if (!landEnough(x, y, k.r)) continue;
@@ -1291,7 +1295,7 @@ function landEnough(cx, cy, r) {
       if (e > SEA + 0.020 && e < 0.72) good++;
     }
   }
-  return total > 0 && good / total > 0.86;
+  return total > 0 && good / total > 0.78;
 }
 
 /* ── village layout ──────────────────────────────────────────────────────── */
@@ -1369,10 +1373,15 @@ function layoutVillage(k) {
       }
       return false;
     }
-    // Organic: lanes are the near-zero band of a noise field, so they wander.
+    // Organic: a handful of lanes leaving the square, wobbling as they go.
+    // They start somewhere, which a noise band does not.
     if (d < 2.5) return true;
-    const w = vnoise((k.cx + x) / 13, (k.cy + y) / 13, k.seed + 404);
-    return Math.abs(w - 0.5) < 0.012 * rw / 0.6;
+    const lanes = k.pop < 300 ? 3 : 5;
+    const seg = Math.PI * 2 / lanes;
+    const wob = (vnoise(d / 8, k.seed % 11, k.seed + 404) - 0.5) * 0.55;
+    const a = Math.atan2(v, u) - spokeA + wob;
+    const off = Math.abs(((a % seg) + seg) % seg - seg / 2);
+    return off * d < rw * 1.2;
   };
 
   const dryLand = (tx, ty) => elevAt(tx, ty) > SEA;
@@ -1576,7 +1585,41 @@ function layoutVillage(k) {
   }
 
   k.rBuilt = Math.max(6, built + 2);
-  k.buildings = b; k.roadTiles = roads; k.poi = poi;
+  k.buildings = b; k.roadTiles = pruneStubs(roads, b); k.poi = poi;
+}
+
+/* A street tile with fewer than two street neighbours, no building beside it
+   and no highway touching it, leads nowhere. Cut it and look again: that is
+   what clears a whole stub rather than its last tile. */
+function pruneStubs(roads, buildings) {
+  const set = new Set();
+  for (const t of roads) set.add(t.x + ',' + t.y);
+  const anchor = new Set();
+  for (const b of buildings) {
+    for (let dy = -1; dy <= 1; dy++)
+      for (let dx = -1; dx <= 1; dx++) anchor.add((b.tx + dx) + ',' + (b.ty + dy));
+  }
+  for (let pass = 0; pass < 20; pass++) {
+    let cut = 0;
+    for (const key of Array.from(set)) {
+      const c = key.indexOf(',');
+      const x = +key.slice(0, c), y = +key.slice(c + 1);
+      let n = 0;
+      if (set.has((x - 1) + ',' + y)) n++;
+      if (set.has((x + 1) + ',' + y)) n++;
+      if (set.has(x + ',' + (y - 1))) n++;
+      if (set.has(x + ',' + (y + 1))) n++;
+      if (n >= 2 || anchor.has(key) || WORLD.highwaySet.has(key)) continue;
+      set.delete(key); cut++;
+    }
+    if (!cut) break;
+  }
+  const out = [];
+  for (const key of set) {
+    const c = key.indexOf(',');
+    out.push({ x: +key.slice(0, c), y: +key.slice(c + 1) });
+  }
+  return out;
 }
 
 /* An ordered, gap-free ring of tiles around a tilted ellipse. Consecutive
@@ -1731,7 +1774,7 @@ function layRoad(a, b, roadSet) {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const hiCache = new Map(), loCache = new Map();
-const HI_MAX = 130, LO_MAX = 2600;
+const HI_MAX = 130, LO_MAX = 1200;
 let genBudget = 0;
 
 function ckey(cx, cy) { return cx + ',' + cy; }
@@ -1771,7 +1814,7 @@ function tileColor(code, tx, ty, e) {
   const ramp = RAMPS[code];
   // One low frequency field mottles every biome the same way, so the ground
   // reads as terrain rather than as a checkerboard of swatches.
-  const d = vnoise(tx / 17, ty / 17, WORLD_SEED + 88) * 0.72
+  const d = vnoise(tx / 10, ty / 10, WORLD_SEED + 88) * 0.72
           + hash2(tx, ty, WORLD_SEED + 13) * 0.28;
   let i = d < 0.40 ? 0 : d < 0.70 ? 1 : 2;
   // Above the treeline the stop comes from height instead: snow brightens
@@ -1940,36 +1983,45 @@ function getLo(cx, cy) {
   c = renderLo(cx, cy);
   loCache.set(key, c);
   if (loCache.size > LO_MAX) loCache.delete(loCache.keys().next().value);
-  paintAtlas(cx, cy, c);
   return c;
 }
 
-/* At the widest zoom the viewport holds about eighteen hundred chunks, and
-   eighteen hundred blits a frame is the difference between 48fps and 60. So
-   every chunk is also stamped, one pixel per tile, into a single world
-   canvas. Once it is complete the far view costs one draw call. */
-let atlas = null, atlasCtx = null, atlasHas = null;
-function paintAtlas(cx, cy, cv) {
+/* The world is far larger than any viewport, so the two widest zooms are
+   drawn from one canvas holding the whole map at a pixel per two tiles. It
+   builds itself a slice per frame and then costs a single draw call. */
+const ATLAS_STEP = 2;                 // tiles per atlas pixel
+let atlas = null, atlasCtx = null, atlasRow = 0, atlasSize = 0;
+const atlasReady = () => atlas && atlasRow >= atlasSize;
+
+function buildAtlas(sampleBudget) {
+  const R = WORLD.radius;
   if (!atlas) {
-    const R = WORLD.radius;
+    atlasSize = Math.ceil(R * 2 / ATLAS_STEP);
     atlas = document.createElement('canvas');
-    atlas.width = atlas.height = R * 2;
+    atlas.width = atlas.height = atlasSize;
     atlasCtx = atlas.getContext('2d');
-    atlasCtx.imageSmoothingEnabled = true;
     atlasCtx.fillStyle = C.deep[1];
-    atlasCtx.fillRect(0, 0, R * 2, R * 2);
-    atlasHas = new Set();
-    let need = 0;
-    const n = Math.ceil(R / CHUNK) + 2;
-    for (let y = -n; y <= n; y++) for (let x = -n; x <= n; x++) if (inWorld(x, y)) need++;
-    WORLD.atlasNeed = need;
+    atlasCtx.fillRect(0, 0, atlasSize, atlasSize);
+    atlasRow = 0;
   }
-  const key = ckey(cx, cy);
-  if (atlasHas.has(key)) return;
-  atlasHas.add(key);
-  atlasCtx.drawImage(cv, cx * CHUNK + WORLD.radius, cy * CHUNK + WORLD.radius, CHUNK, CHUNK);
+  const hw = WORLD.highwaySet;
+  let spent = 0;
+  while (atlasRow < atlasSize && spent < sampleBudget) {
+    const ty = -R + atlasRow * ATLAS_STEP;
+    for (let i = 0; i < atlasSize; i++) {
+      const tx = -R + i * ATLAS_STEP;
+      if (tx * tx + ty * ty > R * R) continue;
+      let code = tileAt(tx, ty);
+      // A two tile road sampled every two tiles would come and go, so check
+      // the whole cell for a highway before deciding.
+      if (!isWater(code) && (hw.has(tx + ',' + ty) || hw.has((tx + 1) + ',' + ty) ||
+          hw.has(tx + ',' + (ty + 1)) || hw.has((tx + 1) + ',' + (ty + 1)))) code = T.ROAD;
+      atlasCtx.fillStyle = isWater(code) ? RAMPS[code][1] : tileColor(code, tx, ty);
+      atlasCtx.fillRect(i, atlasRow, 1, 1);
+    }
+    spent += atlasSize; atlasRow++;
+  }
 }
-const atlasReady = () => atlas && atlasHas.size >= WORLD.atlasNeed;
 
 /* ═══════════════════════════════════════════════════════════════════════════
    7. THE LIVING PART
@@ -2104,9 +2156,10 @@ const ctx = cvs.getContext('2d', { alpha: false });
 const back = document.createElement('canvas');
 const bctx = back.getContext('2d', { alpha: false });
 
-const ZOOMS = [0.12, 0.22, 0.38, 0.6, 1, 2, 3, 4];
-const NEAR_MIN = 0.6;
-const cam = { x: 0, y: 0, zi: 5 };
+const ZOOMS = [0.05, 0.11, 0.22, 0.4, 0.7, 1, 2, 3, 4];
+const NEAR_MIN = 0.7;              // above this the crisp path runs
+const ATLAS_MAX = 0.22;            // below this the whole world is one image
+const cam = { x: 0, y: 0, zi: 6 };
 let dpr = 1, cssW = 0, cssH = 0;
 
 function zoom() { return ZOOMS[cam.zi]; }
@@ -2182,6 +2235,7 @@ function draw(dt) {
   ctx.fillRect(0, 0, cvs.width, cvs.height);
 
   if (z >= NEAR_MIN) drawNear(z, dt); else drawFar(z);
+  if (!atlasReady()) buildAtlas(z < ATLAS_MAX ? 60000 : 14000);
 
   const t = tintNow();
   if (t.lum < 0.999) {
@@ -2331,7 +2385,7 @@ function drawFar(z) {
   const px_ = z * TILE * dpr;             // screen pixels per tile
   const step = CHUNK * px_;               // screen pixels per chunk
   const wLeft = cam.x - cssW / 2 / z, wTop = cam.y - cssH / 2 / z;
-  if (z < 0.17 && atlasReady()) {
+  if (z < ATLAS_MAX && atlasReady()) {
     const R = WORLD.radius;
     ctx.imageSmoothingEnabled = true;
     ctx.drawImage(atlas,
@@ -2654,10 +2708,13 @@ function openCard(k) {
   selected = k;
   document.getElementById('cName').textContent = k.name;
   document.getElementById('cSub').textContent = k.tag.toUpperCase() + ' · ' + fmt(k.users) + ' ACTIVE USERS';
-  document.getElementById('cFounders').innerHTML = k.anonFounder
-    ? '<span class="anon">🎭 Anonymous founder</span>'
+  const chips = k.anonFounder
+    ? ['<span class="anon">🎭 Anonymous founder</span>']
     : k.founders.map(f =>
-        '<a href="https://x.com/' + f + '" target="_blank" rel="noopener">👑 @' + f + '</a>').join('');
+        '<a href="https://x.com/' + f + '" target="_blank" rel="noopener">👑 @' + f + '</a>');
+  if (k.ios) chips.push('<a href="' + k.ios + '" target="_blank" rel="noopener"> App Store</a>');
+  if (k.play) chips.push('<a href="' + k.play + '" target="_blank" rel="noopener">▶ Play Store</a>');
+  document.getElementById('cFounders').innerHTML = chips.join('');
   document.getElementById('cStats').innerHTML = [
     [fmt(k.pop), 'Population', 'farmers, archers, knights, horsemen'],
     [fmt(k.houses), 'Houses', '1 per 100 active users'],
@@ -2715,7 +2772,7 @@ function drawSpark(k) {
 
 function flyTo(k) {
   cam.x = k.cx * TILE; cam.y = k.cy * TILE;
-  cam.zi = k.r > 80 ? 3 : k.r > 40 ? 4 : k.r > 18 ? 5 : 6;
+  cam.zi = k.r > 90 ? 4 : k.r > 45 ? 5 : k.r > 18 ? 6 : 7;
   clampCam(); syncZoomBtns();
 }
 
@@ -2770,13 +2827,8 @@ document.getElementById('mGo').addEventListener('click', () => {
    16. CLOCK AND ZOOM CHROME
    ═══════════════════════════════════════════════════════════════════════════ */
 
-const zIn = document.getElementById('zIn'), zOut = document.getElementById('zOut');
-zIn.addEventListener('click', () => setZoom(1));
-zOut.addEventListener('click', () => setZoom(-1));
-function syncZoomBtns() {
-  zIn.disabled = cam.zi >= ZOOMS.length - 1;
-  zOut.disabled = cam.zi <= 0;
-}
+/* Zoom is the wheel, a pinch, or the plus and minus keys. */
+function syncZoomBtns() {}
 
 /* The clock still runs the light and the crowds; only the newspaper's issue
    number shows it. */
@@ -2844,11 +2896,11 @@ function boot() {
   stepMerchants(0);
   progress(1);
 
-  ZOOMS[0] = clamp(Math.min(cssW, cssH) / (WORLD.radius * 2.2 * TILE), 0.05, 0.2);
+  ZOOMS[0] = clamp(Math.min(cssW, cssH) / (WORLD.radius * 2.15 * TILE), 0.012, 0.2);
 
   const me = ks.find(k => k.id === 'kaught') || ks[0];
   cam.x = me.cx * TILE; cam.y = me.cy * TILE;
-  cam.zi = 5;
+  cam.zi = 6;
   syncZoomBtns();
   paintNews();
   setTimeout(() => bootEl.classList.add('gone'), 320);
