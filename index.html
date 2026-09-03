@@ -55,7 +55,7 @@
 
   --ink:     #f2f3f7;
   --muted:   #a2a7b6;
-  --faint:   #8d92a2;
+  --faint:   #989daa;
   --ink-2:   #8d92a2;   /* the softened display line — large text only */
 
   --rule:      rgba(255, 255, 255, 0.10);
@@ -85,8 +85,8 @@
    buttons — without a single override. */
 .tone--light {
   --ink:       #0d1017;
-  --muted:     #565a68;
-  --faint:     #6b6f7d;
+  --muted:     #4b4f5d;
+  --faint:     #5d6270;
   --ink-2:     #9aa0ad;
   --rule:      rgba(0, 0, 0, 0.10);
   --rule-firm: rgba(0, 0, 0, 0.17);
@@ -98,17 +98,26 @@
   color: var(--ink);
 }
 
-/* Each band picks its ground up where the band above it stopped, so the
-   whole page reads as one gradient. The crossover from dark to light runs
-   through the bottom padding of #how and the top padding of #audience —
-   exactly the gap between the last dark line and the first light one, so no
-   text ever sits on the mid grey. */
-#asset    { background: linear-gradient(180deg, #0a0e16, #161b25); }
-#how      { background: linear-gradient(180deg, #161b25 0, #262d3a calc(100% - clamp(88px, 12vw, 168px)), #798091 100%); }
-#audience { background: linear-gradient(180deg, #798091 0, #e7e9ef clamp(88px, 12vw, 168px), #f0f1f4 100%); }
-#contact  { background: linear-gradient(180deg, #f0f1f4, #f6f6f8); }
-#projects { background: linear-gradient(180deg, #f6f6f8, #fcfcfd); }
-.foot     { background: linear-gradient(180deg, #fcfcfd, #ffffff); }
+/* One ramp, black at the first pixel and white at the last. Each band picks
+   its ground up where the band above it stopped, so there is never a seam,
+   and every band moves — the top half is not a flat black with a jump in it.
+
+   The steep part is the exception. Between #767676 and #8a8a8a no ink is
+   readable, light or dark, so that stretch is crossed inside the padding
+   between the last dark line and the first light one, where nothing sits. */
+#asset    { background: linear-gradient(180deg, #0d111a, #1a2029 40%, #2b323e); }
+
+/* the two bands either side of the crossover stand further apart than the
+   rest, because the mid greys need the room to arrive gently */
+#how, #audience { --cross: clamp(150px, 19vw, 300px); }
+#how      { padding-bottom: var(--cross); }
+#audience { padding-top: var(--cross); }
+
+#how      { background: linear-gradient(180deg, #2b323e 0, #434a57 calc(100% - var(--cross)), #6b7280 calc(100% - var(--cross) * 0.42), #8b919d 100%); }
+#audience { background: linear-gradient(180deg, #8b919d 0, #adb2bc calc(var(--cross) * 0.42), #ced2d9 var(--cross), #dbdde3 60%, #e6e8ec 100%); }
+#contact  { background: linear-gradient(180deg, #e6e8ec, #f1f2f5); }
+#projects { background: linear-gradient(180deg, #f1f2f5, #fafafb); }
+.foot     { background: linear-gradient(180deg, #fafafb, #ffffff); }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -338,7 +347,7 @@ button.btn { cursor: pointer; font-family: inherit; }
 .hero {
   padding-block: clamp(128px, 15vh, 168px) clamp(52px, 6vh, 76px);
   background:
-    linear-gradient(180deg, rgba(3, 5, 11, 0.78) 0%, rgba(5, 8, 15, 0.9) 60%, #0a0e16 100%),
+    linear-gradient(180deg, rgba(2, 3, 7, 0.80) 0%, rgba(5, 7, 13, 0.9) 45%, #0d111a 100%),
     radial-gradient(60% 50% at 80% 0%, rgba(38, 62, 120, 0.42), transparent 70%),
     url(media/hero.jpg) center / cover no-repeat var(--bg);
 }
