@@ -754,7 +754,7 @@ button.btn { cursor: pointer; font-family: inherit; }
   margin: clamp(38px, 5vw, 56px) auto 0; max-width: 940px;
 }
 @media (min-width: 780px) {
-  .ladder { grid-template-columns: 1fr auto 1fr auto 1.35fr; gap: 16px; align-items: stretch; }
+  .ladder { grid-template-columns: 1fr auto 1.35fr; gap: 16px; align-items: stretch; }
 }
 
 .rung {
@@ -768,6 +768,7 @@ button.btn { cursor: pointer; font-family: inherit; }
   font-variant-numeric: tabular-nums; color: var(--ink-2);
 }
 .band--quote .head h2 { text-wrap: balance; }
+.band--quote .proof-note { text-align: center; }
 
 .rung-k { font-size: 12.5px; font-weight: 700; letter-spacing: -0.01em; color: var(--muted); text-align: center; }
 
@@ -978,24 +979,23 @@ button.btn { cursor: pointer; font-family: inherit; }
       <h2 class="h-section">Recurring revenue, and an asset that is yours.</h2>
     </div>
 
-    <!-- The figures carry it, so each card is read as one thing: the screen
-         reader gets "$10k a month", not a number and a caption. -->
+    <!-- One step, because that is how an app is actually valued: a multiple
+         of what it makes in a month. The figures carry it, so each card is
+         read as one thing — the screen reader gets "$10k a month", not a
+         number and a caption. -->
     <div class="ladder rise" style="--d:90ms">
       <div class="rung">
         <span class="rung-v">$10k</span>
-        <span class="rung-k">a month</span>
+        <span class="rung-k">a month, realistically, from your audience</span>
       </div>
-      <span class="rung-op">&times;12</span>
-      <div class="rung">
-        <span class="rung-v">$120k</span>
-        <span class="rung-k">a year</span>
-      </div>
-      <span class="rung-op">&times;3</span>
+      <span class="rung-op">&times;36</span>
       <div class="rung rung--end">
         <span class="rung-v">$360k</span>
-        <span class="rung-k">what it sells for</span>
+        <span class="rung-k">what the asset sells for</span>
       </div>
     </div>
+
+    <p class="proof-note rise" style="--d:180ms">Thirty-six times monthly revenue is the basic multiple small subscription apps trade at. Your audience keeps the revenue recurring; the multiple is what someone pays to buy it from you.</p>
   </div>
 </section>
 
