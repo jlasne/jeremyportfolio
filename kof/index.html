@@ -383,13 +383,13 @@ const SEED_KINGDOMS = [
   {id:'kaught',   name:'Kaught',      tag:'Fishing log',      founders:['jeremylasne'],
    seed:1041, users:18400, trials:610,  subs:2240, mrr:15680, curve:'grow'},
   {id:'plotter',  name:'Plotter',     tag:'Habit tracker',    founders:['annaships'],
-   seed:2277, users:52000, trials:1980, subs:6100, mrr:48800, curve:'grow'},
+   seed:2277, users:245000,trials:8200, subs:26000,mrr:208000,curve:'grow'},
   {id:'wanderly', name:'Wanderly',    tag:'Trip planner',     founders:['tomdraws','lu_builds'],
    seed:3319, users:4100,  trials:130,  subs:410,  mrr:2870,  curve:'flat'},
   {id:'sunsetdb', name:'Sunset',      tag:'Sleep sounds',     founders:['mira_dev'],
    seed:4483, users:960,   trials:31,   subs:88,   mrr:530,   curve:'shrink'},
   {id:'forkful',  name:'Forkful',     tag:'Recipe scanner',   founders:['chefpablo'],
-   seed:5527, users:128000,trials:5400, subs:14900,mrr:119200,curve:'spike'},
+   seed:5527, users:480000,trials:14000,subs:52000,mrr:416000,curve:'spike'},
   {id:'lifted',   name:'Lifted',      tag:'Gym logger',       founders:['ben_lifts','kaycodes'],
    seed:6659, users:31500, trials:1120, subs:3860, mrr:30880, curve:'grow'},
   {id:'quillo',   name:'Quillo',      tag:'Journal',          founders:['sofiawrites'],
@@ -1413,7 +1413,7 @@ function buildRoads(ks) {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const hiCache = new Map(), loCache = new Map();
-const HI_MAX = 130, LO_MAX = 1400;
+const HI_MAX = 130, LO_MAX = 3400;
 let genBudget = 0;
 
 function ckey(cx, cy) { return cx + ',' + cy; }
@@ -1557,7 +1557,7 @@ function nearVillage(tx, ty) {
   return false;
 }
 
-const MIDPX = 3;                      // pixels per tile in the far view
+const MIDPX = 2;                      // pixels per tile in the far view
 function renderLo(cx, cy) {
   const cv = document.createElement('canvas');
   cv.width = CHUNK * MIDPX; cv.height = CHUNK * MIDPX;
@@ -1566,7 +1566,9 @@ function renderLo(cx, cy) {
   for (let ty = 0; ty < CHUNK; ty++) {
     for (let tx = 0; tx < CHUNK; tx++) {
       const wx = ox + tx, wy = oy + ty;
-      g.fillStyle = tileColor(tileCode(wx, wy), wx, wy);
+      const code = tileCode(wx, wy);
+      // Water renders flat out here: sub pixel grain on an ocean is shimmer.
+      g.fillStyle = isWater(code) ? RAMPS[code][1] : tileColor(code, wx, wy);
       g.fillRect(tx * MIDPX, ty * MIDPX, MIDPX, MIDPX);
     }
   }
@@ -1602,7 +1604,7 @@ function getLo(cx, cy) {
   let c = loCache.get(key);
   if (c) return c;
   if (genBudget <= 0) return null;
-  genBudget -= 0.14;
+  genBudget -= 0.10;
   c = renderLo(cx, cy);
   loCache.set(key, c);
   if (loCache.size > LO_MAX) loCache.delete(loCache.keys().next().value);
@@ -1738,9 +1740,9 @@ const ctx = cvs.getContext('2d', { alpha: false });
 const back = document.createElement('canvas');
 const bctx = back.getContext('2d', { alpha: false });
 
-const ZOOMS = [0.18, 0.32, 0.6, 1, 2, 3, 4];
+const ZOOMS = [0.12, 0.22, 0.38, 0.6, 1, 2, 3, 4];
 const NEAR_MIN = 0.6;
-const cam = { x: 0, y: 0, zi: 4 };
+const cam = { x: 0, y: 0, zi: 5 };
 let dpr = 1, cssW = 0, cssH = 0;
 
 function zoom() { return ZOOMS[cam.zi]; }
@@ -2278,7 +2280,7 @@ function drawSpark(k) {
 
 function flyTo(k) {
   cam.x = k.cx * TILE; cam.y = k.cy * TILE;
-  cam.zi = k.r > 60 ? 3 : k.r > 24 ? 4 : 5;
+  cam.zi = k.r > 80 ? 3 : k.r > 40 ? 4 : k.r > 18 ? 5 : 6;
   clampCam(); syncZoomBtns();
 }
 
@@ -2380,7 +2382,7 @@ function boot() {
 
   const me = ks.find(k => k.id === 'kaught') || ks[0];
   cam.x = me.cx * TILE; cam.y = me.cy * TILE;
-  cam.zi = 4;
+  cam.zi = 5;
   syncZoomBtns();
   paintNews();
   setTimeout(() => bootEl.classList.add('gone'), 320);
