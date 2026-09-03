@@ -253,9 +253,13 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 #boot .bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .2s}
 
 @media (max-width:700px){
-  #paper{width:calc(100vw - 28px)}
-  #card{width:calc(100vw - 28px);bottom:66px}
-  #clock .day{min-width:78px}
+  /* The paper takes the whole top edge, so the button moves out from under it. */
+  #paper{width:calc(100vw - 28px);max-height:calc(100vh - 130px)}
+  #addBtn{top:auto;bottom:14px;left:14px}
+  #card{width:calc(100vw - 28px);bottom:62px}
+  #clock .day{min-width:70px}
+  #modal{padding:0}
+  #modal .sheet{max-height:100vh;border-radius:0;border-left:0;border-right:0}
 }
 </style>
 </head>
@@ -949,12 +953,17 @@ function elevAt(tx, ty) {
   return e;
 }
 
+/* Rivers are the near-zero band of one warped noise field. The band is a
+   continuous winding curve by construction, it stops where the land stops,
+   and it widens as it runs downhill, so it reads as flowing to the sea. */
 function riverAt(tx, ty, e) {
-  if (e <= SEA + 0.008 || e > 0.80) return false;
-  const r = ridge(tx / 210, ty / 210, WORLD_SEED + 555, 3);
-  // Channels widen as they run downhill towards the sea.
-  const thr = 0.972 - (0.80 - e) * 0.055;
-  return r > thr;
+  if (e <= SEA + 0.004 || e > 0.78) return false;
+  const s = WORLD_SEED + 555;
+  const dx = (vnoise(tx * 0.016, ty * 0.016, s + 3) - 0.5) * 34;
+  const dy = (vnoise(tx * 0.016 + 3.1, ty * 0.016 + 7.7, s + 9) - 0.5) * 34;
+  const n = vnoise((tx + dx) / 88, (ty + dy) / 88, s);
+  const r = 1 - Math.abs(n * 2 - 1);
+  return r > 0.986 - (0.78 - e) * 0.055;
 }
 
 function moistAt(tx, ty) {
@@ -968,9 +977,9 @@ function tileAt(tx, ty) {
   if (e < SEA) return T.SHALLOW;
   if (riverAt(tx, ty, e)) return T.RIVER;
   if (e < SEA + 0.022) return T.SAND;
-  if (e > 0.845) return T.SNOW;
-  if (e > 0.745) return T.ROCK;
-  if (e > 0.605) return T.HILL;
+  if (e > 0.830) return T.SNOW;
+  if (e > 0.775) return T.ROCK;
+  if (e > 0.660) return T.HILL;
   const m = moistAt(tx, ty);
   if (m < 0.40) return T.DRY;
   if (m > 0.585) return T.FOREST;
@@ -1234,10 +1243,22 @@ function layoutVillage(k) {
   // the month was.
   const stones = clamp(Math.ceil(k.churn / 10), 1, 20);
   const cols = Math.min(5, stones), rows = Math.ceil(stones / 5);
-  const ga = spokeA + 2.2;
+  // Find dry ground for it: circle the town until the whole plot is on land.
   const gd = townR + 5 + rows;
-  const gx = k.cx + Math.round(Math.cos(ga) * gd);
-  const gy = k.cy + Math.round(Math.sin(ga) * gd);
+  const gw = cols * 2 + 2, gh = rows * 2 + 2;
+  const dryPlot = (px0, py0) => {
+    for (let y = -2; y <= gh; y += 2) for (let x = -2; x <= gw; x += 2)
+      if (elevAt(px0 + x, py0 + y) <= SEA + 0.02) return false;
+    return true;
+  };
+  let ga = spokeA + 2.2, gx = 0, gy = 0;
+  for (let t = 0; t < 24; t++) {
+    const a = spokeA + 2.2 + t * 0.34;
+    const d = gd + (t > 11 ? 6 : 0);
+    const cx2 = k.cx + Math.round(Math.cos(a) * d), cy2 = k.cy + Math.round(Math.sin(a) * d);
+    if (t === 0) { gx = cx2; gy = cy2; }
+    if (dryPlot(cx2, cy2)) { ga = a; gx = cx2; gy = cy2; break; }
+  }
   k.grave = { x: gx, y: gy, stones,
               x0: gx - 2, y0: gy - 2, x1: gx + cols * 2, y1: gy + rows * 2 };
   for (let i = 0; i < stones; i++) {
@@ -1247,8 +1268,15 @@ function layoutVillage(k) {
     poi.graves.push({ x: tx * TILE + TILE / 2, y: ty * TILE + TILE / 2 });
   }
   const gr = k.grave;
-  for (let x = gr.x0; x <= gr.x1; x += 2) { push(x, gr.y0, FENCE_CV); push(x, gr.y1, FENCE_CV); }
-  for (let y = gr.y0 + 2; y < gr.y1; y += 2) { push(gr.x0, y, POST_CV); push(gr.x1, y, POST_CV); }
+  const dry = (x, y) => elevAt(x, y) > SEA + 0.01;
+  for (let x = gr.x0; x <= gr.x1; x += 2) {
+    if (dry(x, gr.y0)) push(x, gr.y0, FENCE_CV);
+    if (dry(x, gr.y1)) push(x, gr.y1, FENCE_CV);
+  }
+  for (let y = gr.y0 + 2; y < gr.y1; y += 2) {
+    if (dry(gr.x0, y)) push(gr.x0, y, POST_CV);
+    if (dry(gr.x1, y)) push(gr.x1, y, POST_CV);
+  }
 
   // Walls, gates and towers once the town is worth defending.
   if (has.has('walls')) {
@@ -1423,7 +1451,7 @@ function renderHi(cx, cy) {
       const X = tx * TILE, Y = ty * TILE;
       g.fillStyle = tileColor(code, wx, wy);
       g.fillRect(X, Y, TILE, TILE);
-      if (WORLD.graveSet.has(wx + ',' + wy)) {
+      if (!isWater(code) && WORLD.graveSet.has(wx + ',' + wy)) {
         g.fillStyle = 'rgba(122,106,72,0.80)';
         g.fillRect(X, Y, TILE, TILE);
       }
