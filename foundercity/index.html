@@ -272,7 +272,6 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
         <input type="password" id="fKey" placeholder="sk_..." autocomplete="off" spellcheck="false"></div>
       <button class="go" id="mGo">Break ground</button>
       <p class="fine" id="mNote">Your browser reads the six numbers from RevenueCat once, right now. The key then lives on the server, for the refresh every day at 04:00 UTC, and is never shown to anyone.</p>
-      <p class="fine">To change or remove a tower later, email <a href="mailto:hey@jeremylasne.com">hey@jeremylasne.com</a>.</p>
       <div class="rc"><svg viewBox="0 0 20 18" aria-hidden="true"><path d="M3 9V2l4.2 3.4h5.6L17 2v7a7 6.6 0 0 1-14 0Z" fill="#f2545b"/><circle cx="7.4" cy="9" r="1.15" fill="#1f1f47"/><circle cx="12.6" cy="9" r="1.15" fill="#1f1f47"/><path d="M9 11.6h2l-1 1.5Z" fill="#1f1f47"/></svg>Verified by RevenueCat</div>
     </div>
   </div>
@@ -290,25 +289,9 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const SEED = [
-  {id:'kaught',   name:'Kaught',   tag:'Fishing log',    founders:['jeremylasne'],
-   seed:1041, joined:64, ios:'https://apps.apple.com/app/id0000000001', play:'https://play.google.com/store/apps/details?id=com.kaught', users:18400, trials:610,  subs:2240, mrr:15680, curve:'grow'},
-  {id:'plotter',  name:'Plotter',  tag:'Habit tracker',  founders:['annaships'],
-   seed:2277, joined:41, play:'https://play.google.com/store/apps/details?id=com.plotter', users:245000,trials:8200, subs:26000,mrr:208000,curve:'grow'},
-  {id:'wanderly', name:'Wanderly', tag:'Trip planner',   founders:['tomdraws','lu_builds'],
-   seed:3319, joined:12, users:4100,  trials:130,  subs:410,  mrr:2870,  curve:'flat'},
-  {id:'sunsetdb', name:'Sunset',   tag:'Sleep sounds',   founders:['mira_dev'],
-   anonFounder:true, seed:4483, joined:29, users:960,   trials:31,   subs:88,   mrr:530,   curve:'shrink'},
-  {id:'forkful',  name:'Forkful',  tag:'Recipe scanner', founders:['chefpablo'],
-   seed:5527, joined:57, ios:'https://apps.apple.com/app/id0000000002', users:480000,trials:14000,subs:52000,mrr:416000,curve:'spike'},
-  {id:'lifted',   name:'Lifted',   tag:'Gym logger',     founders:['ben_lifts','kaycodes'],
-   seed:6659, joined:23, users:31500, trials:1120, subs:3860, mrr:30880, curve:'grow'},
-  {id:'quillo',   name:'Quillo',   tag:'Journal',        founders:['sofiawrites'],
-   seed:7717, joined:6,  users:2300,  trials:74,   subs:190,  mrr:1140,  curve:'grow'},
-  {id:'tidepool', name:'Tidepool', tag:'Budget app',     founders:['marcusr'],
-   anonApp:true, seed:8837, joined:3,  users:390,   trials:12,   subs:34,   mrr:238,   curve:'flat'},
-  {id:'orbitcam', name:'Orbit',    tag:'Camera presets', founders:['nikolab'],
-   seed:9931, joined:1,  users:74,    trials:3,    subs:6,    mrr:42,    curve:'grow'},
-];
+  {id:'first', name:'First tower', tag:'Kept private', founders:['jeremylasne'],
+   anonApp:true, seed:4242, joined:30, users:4000, trials:60, subs:150, mrr:1200, curve:'grow'},
+]
 
 /* ═══════════════════════════════════════════════════════════════════════════
    2. NUMBERS
@@ -1174,7 +1157,6 @@ function openCard(t) {
   else for (const f of t.k.founders) chips.push('<a href="https://x.com/' + f + '" target="_blank" rel="noopener">@' + f + '</a>');
   if (!t.k.anonApp && t.k.ios) chips.push('<a href="' + t.k.ios + '" target="_blank" rel="noopener"> App Store</a>');
   if (!t.k.anonApp && t.k.play) chips.push('<a href="' + t.k.play + '" target="_blank" rel="noopener">▶ Play</a>');
-  if (t.k.local || t.k.server) chips.push('<a class="mail" href="mailto:hey@jeremylasne.com?subject=' + encodeURIComponent('Founder City: ' + t.name) + '">✉ change or remove: hey@jeremylasne.com</a>');
   document.getElementById('cChips').innerHTML = chips.join('');
   const litPct = Math.round(t.lit * 100);
   document.getElementById('cStats').innerHTML = [
@@ -1417,7 +1399,8 @@ function buildWorld() {
   towers.length = 0; cars.length = 0; walkers.length = 0; crowds.length = 0; stars.length = 0; clouds.length = 0;
   WORLD_H = Math.max(360, cssH);
   BASE_Y = WORLD_H - WIRE_H - 62;
-  maxMrr = Math.max(1, Math.max.apply(null, allSeeds().map(k => k.mrr)));
+  // The tallest tower fills the screen once somebody passes $50k; below that, height keeps its meaning.
+  maxMrr = Math.max(50000, Math.max.apply(null, allSeeds().map(k => k.mrr)));
   maxFloors = Math.max(12, Math.floor((BASE_Y - BAND_H - 16 - ROOF_PAD) / FLOOR_H));
   allSeeds().forEach((k, i) => towers.push(makeTower(k, i)));
   worldW = layoutTowers(towers);

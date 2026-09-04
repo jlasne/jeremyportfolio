@@ -146,7 +146,7 @@ deployment (`overlap/convex/city.ts`, table `towers`, ops `city.towers` and
 `city.breakGround` on the same `/overlap` door); a cron re-reads every tower
 at 04:00 UTC and keeps thirty days of history, and the key never leaves the
 server. If the door cannot be reached the tower stays in that browser's
-storage. Changes and removals go through hey@jeremylasne.com. Deploy with
+storage. Deploy with
 `cd overlap && npx convex deploy`.
 
 **Founder City** is the same data as a skyline, scrolling left and right
