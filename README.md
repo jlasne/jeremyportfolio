@@ -136,8 +136,14 @@ by the golden angle. Name and handle are both optional: leave either blank and
 the land names itself or the kings walk anonymous.
 
 Demo data lives in `SEED_KINGDOMS` at the top of the file. Replace that array
-with a fetch to wire it to real accounts. The RevenueCat key must never reach
-the browser: it needs a server that holds it and serves the six numbers.
+with a fetch to wire it to real accounts.
+
+Founder City reads RevenueCat from the browser: RevenueCat's API answers
+cross-origin requests from this domain, so "Break ground" makes one call to
+the overview metrics endpoint with the founder's own key and project id, keeps
+the six numbers, and drops the key. Towers added that way live in that
+browser's storage until the daily server pull exists; changes and removals go
+through hey@jeremylasne.com.
 
 **Founder City** is the same data as a skyline, scrolling left and right
 and nothing else: the tallest tower always fills the screen. Height is MRR on

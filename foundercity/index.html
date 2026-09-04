@@ -7,6 +7,7 @@
 <meta name="description" content="Your app as a tower in a pixel city at night. Height is MRR, width is subscribers, lit windows are active users.">
 <link rel="canonical" href="https://www.jeremylasne.com/foundercity/">
 <meta name="theme-color" content="#070914">
+<meta name="color-scheme" content="dark">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Founder City">
@@ -119,7 +120,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   border:1px solid var(--line);padding:3px 7px;border-radius:3px;background:rgba(140,170,255,.06)}
 #card .chips a:hover{background:rgba(140,170,255,.16)}
 #card .chips .anon{border-style:dashed;color:var(--dim)}
-#card .chips .rm{color:#ff6b6b;border-color:rgba(255,107,107,.35);cursor:pointer}
+#card .chips .mail{color:var(--amber);border-color:rgba(255,184,77,.35)}
 #card .stats{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line)}
 #card .stat{padding:8px 12px 9px;border-bottom:1px solid var(--line)}
 #card .stat:nth-child(odd){border-right:1px solid var(--line)}
@@ -184,6 +185,10 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   letter-spacing:.08em;text-transform:uppercase;font-size:11px;margin-top:4px}
 #modal .go:active{transform:translateY(1px)}
 #modal .fine{font-size:10.5px;line-height:1.55;color:var(--dim);margin-top:12px;margin-bottom:0}
+#modal .fine a{color:var(--amber);text-decoration:none}
+#modal .fine a:hover{text-decoration:underline}
+#modal .go[disabled]{opacity:.6;cursor:wait}
+#modal label em b{color:var(--ink);font-weight:700}
 #modal .rc{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--dim);margin-top:10px}
 #modal .rc svg{width:14px;height:13px}
 
@@ -262,10 +267,13 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
         <label class="chk"><input type="checkbox" id="fAnonF"> 🎭 Hide my handle. Needs an app named or linked.</label>
         <label class="chk"><input type="checkbox" id="fAnonA"> 🏙️ Hide my app. The tower takes a name of its own.</label>
       </div>
-      <div class="field"><label for="fKey">RevenueCat V2 key, charts metrics read only</label>
+      <div class="field"><label for="fProj">RevenueCat project ID <em class="req">required</em><em>in the dashboard URL: app.revenuecat.com/projects/<b>proj…</b>/</em></label>
+        <input type="text" id="fProj" placeholder="proj1ab2c3d4" autocomplete="off" spellcheck="false"></div>
+      <div class="field"><label for="fKey">RevenueCat V2 key, charts metrics read only <em class="req">required</em></label>
         <input type="password" id="fKey" placeholder="sk_..." autocomplete="off" spellcheck="false"></div>
       <button class="go" id="mGo">Break ground</button>
-      <p class="fine" id="mNote">The key goes to the server, never to this page.</p>
+      <p class="fine" id="mNote">Your browser reads the six numbers from RevenueCat once, right now. The key is used for that one call and is not stored anywhere.</p>
+      <p class="fine">To change or remove a tower later, email <a href="mailto:hey@jeremylasne.com">hey@jeremylasne.com</a>.</p>
       <div class="rc"><svg viewBox="0 0 20 18" aria-hidden="true"><path d="M3 9V2l4.2 3.4h5.6L17 2v7a7 6.6 0 0 1-14 0Z" fill="#f2545b"/><circle cx="7.4" cy="9" r="1.15" fill="#1f1f47"/><circle cx="12.6" cy="9" r="1.15" fill="#1f1f47"/><path d="M9 11.6h2l-1 1.5Z" fill="#1f1f47"/></svg>Verified by RevenueCat</div>
     </div>
   </div>
@@ -335,6 +343,10 @@ const money = n => '$' + fmt(n);
 function buildHistory(k) {
   const rnd = mulberry(k.seed * 17 + 3);
   const days = 30, hist = [];
+  if (k.curve === 'exact') {
+    for (let i = 0; i < days; i++) hist.push({ users: k.users, trials: k.trials, subs: k.subs, mrr: k.mrr });
+    return hist;
+  }
   const shape = { grow: 0.0115, flat: 0.0008, shrink: -0.0075, spike: 0.006 }[k.curve];
   for (let i = 0; i < days; i++) {
     const t = i - (days - 1);
@@ -417,7 +429,7 @@ function baysFor(users, floors) {
 
 function makeTower(k, idx) {
   const hist = buildHistory(k);
-  const churn = churn30(hist);
+  const churn = k.curve === 'exact' ? 0 : churn30(hist);
   const floors = floorsFor(k.mrr);
   const bays = baysFor(k.users, floors);
   // The paying share of the audience, stretched so a typical ten percent
@@ -427,12 +439,12 @@ function makeTower(k, idx) {
   const darkTop = Math.min(Math.round(floors * clamp(churn / Math.max(1, k.subs), 0, 0.45)), Math.max(0, floors - 3));
   const wk = hist[29].mrr - hist[22].mrr;
   const newUsers = Math.max(0, hist[29].users - hist[22].users);
-  const crane = wk > 0 && newUsers > 0;
+  const crane = k.curve === 'exact' ? (k.newCustomers || 0) > 0 : wk > 0 && newUsers > 0;
   const crowd = clamp(Math.round(k.trials / 10), 0, 40);
-  const revenue = Math.round(k.mrr * (k.joined / 30 * 0.8 + 1));
+  const revenue = k.rev28 !== undefined ? Math.round(k.rev28) : Math.round(k.mrr * (k.joined / 30 * 0.8 + 1));
   const tier = revenue >= 1e6 ? 'gold' : revenue >= 250000 ? 'amber' : revenue >= 25000 ? 'cyan' : 'white';
   const name = k.anonApp ? veilName(k.seed) : k.name;
-  const tag = k.local && !k.mrr ? 'Breaking ground' : k.anonApp ? 'App kept private' : k.tag;
+  const tag = k.anonApp ? 'App kept private' : k.tag;
   const kind = hash1(k.seed, 5) < 0.5 ? 'office' : 'homes';
   const rnd = mulberry(k.seed * 911 + 1);
 
@@ -446,7 +458,7 @@ function makeTower(k, idx) {
   } else sections = [{ f0: 0, f1: floors, bays }];
 
   return {
-    k, idx, hist, churn, floors, bays, lit, darkTop, crane: crane || (k.local && !k.mrr), crowd, revenue, tier, name, tag, kind, conv,
+    k, idx, hist, churn, floors, bays, lit, darkTop, crane, crowd, revenue, tier, name, tag, kind, conv,
     logo: k.logoCv || null,
     hue: hueOf(idx), rnd, sections, wk, newUsers,
     w: bays * BAY_W + 2, h: floors * FLOOR_H + ROOF_PAD,
@@ -573,9 +585,10 @@ function bakeTower(g, t) {
   // A tower with room for it carries its name at double size, so the ones
   // that dominate the skyline can be read from across it.
   const sc = t.logo || (t.floors >= 40 && t.w >= (pxTextW(txt, 2) + 12)) ? 2 : 1;
-  const lw = t.logo ? 8 * sc + 2 * sc : 0;
-  const tw = pxTextW(txt, sc) + lw;
-  const bw = Math.max(tw + 6 * sc, 9), bh = (t.logo ? 12 : 9) * sc;
+  const tw = pxTextW(txt, sc);
+  // With a logo the sign stacks: logo on top, name underneath.
+  const bw = t.logo ? Math.max(tw, 16) + 6 * sc : Math.max(tw + 6 * sc, 9);
+  const bh = t.logo ? 2 * sc + 16 + sc + 5 * sc + 2 * sc : 9 * sc;
   const towerH = t.floors * FLOOR_H;
   const onRoof = bh * 1.6 > towerH;
   const sx = Math.round(t.x + t.w / 2 - bw / 2);
@@ -640,9 +653,13 @@ function bakeTower(g, t) {
   px(g, sx, sy, bw, bh, '#0b0e1c');
   px(g, sx, sy, bw, sc, TIER[t.tier]); px(g, sx, sy + bh - sc, bw, sc, TIER[t.tier]);
   px(g, sx, sy, sc, bh, TIER[t.tier]); px(g, sx + bw - sc, sy, sc, bh, TIER[t.tier]);
-  let txx = sx + 3 * sc;
-  if (t.logo) { g.imageSmoothingEnabled = false; g.drawImage(t.logo, txx, sy + 2 * sc, 8 * sc, 8 * sc); txx += lw; }
-  pxText(g, txt, txx, sy + Math.round((bh - 5 * sc) / 2), TIER[t.tier], sc);
+  if (t.logo) {
+    g.imageSmoothingEnabled = false;
+    g.drawImage(t.logo, Math.round(sx + bw / 2 - 8), sy + 2 * sc, 16, 16);
+    pxText(g, txt, Math.round(sx + bw / 2 - tw / 2), sy + 2 * sc + 16 + sc, TIER[t.tier], sc);
+  } else {
+    pxText(g, txt, sx + 3 * sc, sy + Math.round((bh - 5 * sc) / 2), TIER[t.tier], sc);
+  }
 }
 
 /* A slow drift of window states keeps the equilibrium the data asks for:
@@ -693,19 +710,35 @@ function bakeStreet() {
   const cv = document.createElement('canvas');
   cv.width = W; cv.height = 62;
   const g = cv.getContext('2d');
-  px(g, 0, 0, W, 8, '#2b3049'); px(g, 0, 0, W, 1, '#3d4366');
-  for (let x = 0; x < W; x += 16) px(g, x, 1, 1, 7, '#242942');
-  px(g, 0, 8, W, 1, '#4a5070');
-  px(g, 0, 9, W, 34, '#12162a');
-  for (let x = 0; x < W; x += 14) px(g, x, 26, 7, 1, '#3a3f5c');
-  px(g, 0, 43, W, 1, '#4a5070');
-  px(g, 0, 44, W, 18, '#262b42'); px(g, 0, 44, W, 1, '#353a56');
-  for (let x = 8; x < W; x += 16) px(g, x, 45, 1, 17, '#20243a');
-  // Crossings by the doors.
-  for (const t of towers) {
-    const cx = PAD + t.x + Math.floor(t.w / 2) - 5;
-    for (let i = 0; i < 5; i++) px(g, cx + i * 2, 10, 1, 32, '#3a3f5c');
+  const rnd = mulberry(5151);
+  // Sidewalk: paving with joints, planters and the odd bench.
+  px(g, 0, 0, W, 9, '#2b3049'); px(g, 0, 0, W, 1, '#3d4366');
+  for (let x = 0; x < W; x += 12) px(g, x, 1, 1, 8, '#242942');
+  for (let x = 20; x < W; x += 12) px(g, x, 5, 12, 1, '#272c45');
+  for (let x = 30; x < W; x += 140 + ((rnd() * 60) | 0)) {
+    px(g, x, 4, 9, 4, '#3a2f22'); px(g, x, 4, 9, 1, '#4a3c2c');
+    px(g, x + 1, 0, 7, 4, '#2e6b3a'); px(g, x + 2, -1, 5, 2, '#3f8a47'); px(g, x + 3, 1, 1, 1, '#6cc06a');
   }
+  for (let x = 90; x < W; x += 210 + ((rnd() * 90) | 0)) {
+    px(g, x, 3, 8, 2, '#6b4a2a'); px(g, x, 5, 1, 3, '#3a3f5c'); px(g, x + 7, 5, 1, 3, '#3a3f5c'); px(g, x, 3, 8, 1, '#8a6238');
+  }
+  // Kerb, then asphalt with a grain, edge lines and a faded centre line.
+  px(g, 0, 9, W, 2, '#4a5070'); px(g, 0, 9, W, 1, '#5c6388');
+  px(g, 0, 11, W, 32, '#13172a');
+  for (let i = 0; i < W * 0.6; i++) px(g, (rnd() * W) | 0, 11 + ((rnd() * 32) | 0), 1, 1, rnd() < 0.5 ? '#171c31' : '#0f1324');
+  px(g, 0, 13, W, 1, '#2a2f4d'); px(g, 0, 40, W, 1, '#2a2f4d');
+  for (let x = 0; x < W; x += 16) { px(g, x, 26, 9, 1, '#6a5d33'); px(g, x, 28, 9, 1, '#6a5d33'); }
+  for (let x = 140; x < W; x += 260 + ((rnd() * 200) | 0)) { px(g, x, 33, 5, 2, '#2a2f45'); px(g, x + 1, 33, 3, 1, '#3a405c'); }
+  // Zebra crossings by the doors.
+  for (const t of towers) {
+    const cx = PAD + t.x + Math.floor(t.w / 2) - 8;
+    for (let i = 0; i < 6; i++) px(g, cx + i * 3, 14, 2, 26, '#4a4f6a');
+  }
+  // Far kerb and a railed promenade beyond it.
+  px(g, 0, 43, W, 2, '#4a5070'); px(g, 0, 43, W, 1, '#5c6388');
+  px(g, 0, 45, W, 17, '#20243a'); px(g, 0, 45, W, 1, '#2c3150');
+  for (let x = 6; x < W; x += 12) px(g, x, 46, 1, 16, '#1b1f33');
+  px(g, 0, 52, W, 1, '#3d4366'); for (let x = 0; x < W; x += 10) px(g, x, 50, 1, 5, '#3d4366');
   return cv;
 }
 
@@ -730,6 +763,7 @@ function bakeFront() {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const cars = [], walkers = [], crowds = [], stars = [], clouds = [];
+const STAR_A = [0.1, 0.22, 0.34, 0.46, 0.58, 0.7, 0.82, 0.95].map(a => 'rgba(223,230,255,' + a + ')');
 let plane = null, planeTimer = 20;
 const CAR_COLORS = ['#3d4460', '#4c3a5c', '#2f4a58', '#5a3d3d', '#3a3f4f', '#4a4a30'];
 const SKIN = ['#e8c39e', '#c99a72', '#8d5a3c', '#f1d2b6'];
@@ -755,11 +789,39 @@ function seedMotion() {
 }
 function newCar(rnd, anywhere) {
   const near = rnd() < 0.5;
-  const bus = rnd() < 0.12;
+  const r = rnd();
+  const kind = r < 0.1 ? 'bus' : r < 0.22 ? 'taxi' : r < 0.34 ? 'van' : 'car';
   const dir = near ? 1 : -1;
   const x = anywhere ? -PAD + rnd() * (worldW + PAD * 2) : (dir > 0 ? -PAD - 20 : worldW + PAD + 20);
-  return { x, near, dir, spd: (bus ? 34 : 45) + rnd() * 35, w: bus ? 14 : 8, bus,
-           color: bus ? '#5a4a2a' : CAR_COLORS[(rnd() * CAR_COLORS.length) | 0] };
+  const w = { bus: 20, taxi: 12, van: 14, car: 11 + ((rnd() * 2) | 0) }[kind];
+  const color = kind === 'bus' ? '#4a5d8c' : kind === 'taxi' ? '#e3b23c' : kind === 'van' ? '#5b6270' : CAR_COLORS[(rnd() * CAR_COLORS.length) | 0];
+  return { x, near, dir, kind, w, color, spd: (kind === 'bus' ? 30 : 42) + rnd() * 34 };
+}
+function drawCar(g, c, cx, cy) {
+  const w = c.w, fwd = c.dir > 0;
+  const h = c.kind === 'bus' ? 6 : c.kind === 'van' ? 5 : 4;
+  const y = cy - h;
+  // Body, cabin, windows, wheels.
+  px(g, cx, y + 1, w, h - 1, c.color);
+  if (c.kind === 'bus') { px(g, cx, y, w, 2, c.color); for (let i = 2; i < w - 2; i += 3) px(g, cx + i, y + 1, 2, 2, '#c9e6ff'); px(g, cx + (fwd ? w - 1 : 0), y + 1, 1, 2, '#c9e6ff'); }
+  else if (c.kind === 'van') { px(g, cx + (fwd ? 0 : 3), y, w - 3, 2, c.color); px(g, cx + (fwd ? w - 4 : 1), y + 1, 3, 2, '#c9e6ff'); }
+  else {
+    const cab = Math.max(4, w - 5);
+    px(g, cx + (fwd ? 1 : w - cab - 1), y, cab, 1, c.color);
+    px(g, cx + (fwd ? 2 : w - cab), y, cab - 2, 2, '#bcd8f5');
+    if (c.kind === 'taxi') { px(g, cx + (w >> 1) - 1, y - 1, 3, 1, '#fff1b0'); }
+  }
+  px(g, cx, y + 1, w, 1, 'rgba(255,255,255,0.10)');
+  px(g, cx + 1, cy, 2, 1, '#0b0d18'); px(g, cx + w - 3, cy, 2, 1, '#0b0d18');
+  if (c.kind === 'bus') px(g, cx + (w >> 1) - 1, cy, 2, 1, '#0b0d18');
+  // Lights, beams, and the glint they leave on the wet road.
+  const head = fwd ? cx + w : cx - 1, tail = fwd ? cx - 1 : cx + w;
+  px(g, head, y + h - 2, 1, 1, '#fff3c4'); px(g, tail, y + h - 2, 1, 1, '#ff4d4d');
+  g.globalAlpha = 0.22; px(g, fwd ? head + 1 : head - 7, y + h - 3, 7, 3, '#fff3c4');
+  g.globalAlpha = 0.12; px(g, fwd ? head + 8 : head - 12, y + h - 3, 5, 3, '#fff3c4');
+  g.globalAlpha = 0.35; px(g, fwd ? tail - 6 : tail + 1, y + h - 2, 6, 1, '#ff4d4d');
+  g.globalAlpha = 0.18; px(g, cx + 1, cy + 2, w - 2, 1, c.kind === 'taxi' ? '#ffe9a0' : '#9fb7ff');
+  g.globalAlpha = 1;
 }
 
 const rr = mulberry(777);
@@ -855,7 +917,7 @@ function draw(dt) {
     const sx = s.x - left * 0.12, sy = s.y - top;
     if (sx < -2 || sx > bw + 2 || sy < -2 || sy > bh) continue;
     const a = s.a * (0.65 + 0.35 * Math.sin(T * s.sp + s.ph));
-    g.fillStyle = 'rgba(223,230,255,' + a.toFixed(2) + ')';
+    g.fillStyle = STAR_A[(a * 7.99) | 0];
     g.fillRect(sx | 0, sy | 0, 1, 1);
     if (s.big) { g.fillRect((sx | 0) - 1, sy | 0, 3, 1); g.fillRect(sx | 0, (sy | 0) - 1, 1, 3); }
   }
@@ -951,14 +1013,8 @@ function draw(dt) {
   g.restore();
   for (const c of cars) {
     const cx = c.x - left;
-    if (cx < -30 || cx > bw + 30) continue;
-    const cy = BASE_Y - top + (c.near ? 31 : 14);
-    px(g, cx, cy, c.w, 3, c.color); px(g, cx + 1, cy, c.w - 2, 1, '#6a7290');
-    const head = c.dir > 0 ? cx + c.w : cx - 1, tail = c.dir > 0 ? cx - 1 : cx + c.w;
-    px(g, head, cy + 1, 1, 1, '#fff3c4'); px(g, tail, cy + 1, 1, 1, '#ff4d4d');
-    g.globalAlpha = 0.28; px(g, c.dir > 0 ? head + 1 : head - 5, cy + 1, 5, 1, '#fff3c4');
-    g.globalAlpha = 0.35; px(g, c.dir > 0 ? tail - 6 : tail + 1, cy + 1, 6, 1, '#ff4d4d');
-    g.globalAlpha = 1;
+    if (cx < -40 || cx > bw + 40) continue;
+    drawCar(g, c, cx, BASE_Y - top + (c.near ? 38 : 24));
   }
   g.drawImage(front, left + PAD, 0, bw, 40, 0, BASE_Y - top - 34, bw, 40);
   for (const w of walkers) { const wx = w.x - left; if (wx > -4 && wx < bw + 4) drawPerson(g, wx | 0, BASE_Y - top, w, true); }
@@ -1058,25 +1114,22 @@ function openCard(t) {
   else for (const f of t.k.founders) chips.push('<a href="https://x.com/' + f + '" target="_blank" rel="noopener">@' + f + '</a>');
   if (!t.k.anonApp && t.k.ios) chips.push('<a href="' + t.k.ios + '" target="_blank" rel="noopener"> App Store</a>');
   if (!t.k.anonApp && t.k.play) chips.push('<a href="' + t.k.play + '" target="_blank" rel="noopener">▶ Play</a>');
-  if (t.k.local) chips.push('<span class="rm" id="cRemove">Remove</span>');
+  if (t.k.local) chips.push('<a class="mail" href="mailto:hey@jeremylasne.com?subject=' + encodeURIComponent('Founder City: ' + t.name) + '">✉ change or remove: hey@jeremylasne.com</a>');
   document.getElementById('cChips').innerHTML = chips.join('');
-  if (t.k.local) document.getElementById('cRemove').addEventListener('click', () => {
-    LOCAL = LOCAL.filter(k => k.id !== t.k.id); saveLocal(); closeCard(); rebuild();
-  });
   const litPct = Math.round(t.lit * 100);
   document.getElementById('cStats').innerHTML = [
     [money(t.k.mrr), 'MRR', 'the height: ' + t.floors + ' floors'],
     [fmt(t.k.users), 'Active users', 'the size: ' + fmt(t.floors * t.bays) + ' windows, ' + t.bays + ' across'],
     [fmt(t.k.subs), 'Subscribers', 'lit windows, about ' + litPct + '%, ' + (t.conv * 100).toFixed(1) + '% of users'],
     [fmt(t.k.trials), 'Free trials', 'the crowd at the door: ' + t.crowd],
-    [fmt(t.churn), 'Lost, 30 days', t.darkTop ? 'the dark floors on top: ' + t.darkTop : 'no dark floors'],
-    [money(t.revenue), 'Lifetime revenue', 'the sign: ' + t.tier + (t.crane ? ' · crane up, still growing' : '')],
+    [t.k.curve === 'exact' ? '–' : fmt(t.churn), 'Lost, 30 days', t.k.curve === 'exact' ? 'known after the second daily pull' : t.darkTop ? 'the dark floors on top: ' + t.darkTop : 'no dark floors'],
+    [money(t.revenue), t.k.rev28 !== undefined ? 'Revenue, 28 days' : 'Lifetime revenue', 'the sign: ' + t.tier + (t.crane ? ' · crane up, still growing' : '')],
   ].map(([n, l, w]) => '<div class="stat"><div class="n">' + n + '</div><div class="l">' + l + '</div><div class="w">' + w + '</div></div>').join('');
   const d = t.wk, de = document.getElementById('cDelta');
-  const fresh = t.k.local && !t.k.mrr;
+  const fresh = t.k.curve === 'exact';
   de.textContent = fresh ? '' : (d >= 0 ? '+' : '') + money(d) + ' in 7 days';
   de.className = d > 0 ? 'up' : d < 0 ? 'down' : 'flat';
-  document.getElementById('cSparkLab').textContent = fresh ? 'First numbers land at the next daily refresh' : 'MRR, 30 days';
+  document.getElementById('cSparkLab').textContent = fresh ? 'Read from RevenueCat today. The chart starts with the second daily pull.' : 'MRR, 30 days';
   document.getElementById('cSpark').style.display = fresh ? 'none' : 'block';
   drawSignIcon(t); if (!fresh) drawSpark(t);
   cardEl.classList.add('on');
@@ -1111,7 +1164,7 @@ function flyTo(t) { cam.x = t.x + t.w / 2; clampCam(); }
 /* The wire along the bottom of the screen. */
 function buildWire() {
   const items = [];
-  for (const t of towers) if (t.k.local && !t.k.mrr) items.push('🏗️ <b data-k="' + t.k.id + '">' + t.name.toUpperCase() + '</b> BREAKS GROUND, ' + (t.k.anonFounder ? 'FOUNDER UNNAMED' : '@' + t.k.founders[0].toUpperCase()));
+  for (const t of towers) if (t.k.local) items.push('🏗️ NEW: <b data-k="' + t.k.id + '">' + t.name.toUpperCase() + '</b>, ' + money(t.k.mrr) + ' MRR, ' + (t.k.anonFounder ? 'FOUNDER UNNAMED' : '@' + t.k.founders[0].toUpperCase()));
   for (const t of towers) {
     const nm = '<b data-k="' + t.k.id + '">' + t.name.toUpperCase() + '</b>';
     const fl = t.floors - floorsFor(t.hist[22].mrr);
@@ -1194,27 +1247,76 @@ document.getElementById('fLogo').addEventListener('change', (e) => {
   };
   img.src = URL.createObjectURL(f);
 });
-document.getElementById('mGo').addEventListener('click', () => {
+/* One call to RevenueCat from this browser, with the founder's own key,
+   for the six numbers on the overview. The key is used here and dropped. */
+const RC_API = 'https://api.revenuecat.com/v2';
+async function readRevenueCat(key, projectId) {
+  const headers = { Authorization: 'Bearer ' + key, Accept: 'application/json' };
+  let pid = projectId.trim();
+  if (!pid) {
+    const r = await fetch(RC_API + '/projects', { headers });
+    if (r.status === 403) throw new Error('This key cannot list projects. Paste the project ID from the dashboard URL.');
+    if (!r.ok) throw new Error(rcError(r.status));
+    const j = await r.json();
+    if (!j.items || !j.items.length) throw new Error('No project found on that key.');
+    pid = j.items[0].id;
+  }
+  const r = await fetch(RC_API + '/projects/' + encodeURIComponent(pid) + '/metrics/overview', { headers });
+  if (!r.ok) throw new Error(rcError(r.status));
+  const j = await r.json();
+  const m = {};
+  for (const x of (j.metrics || [])) m[x.id] = +x.value || 0;
+  return {
+    users: m.active_users || 0, trials: m.active_trials || 0, subs: m.active_subscriptions || 0,
+    mrr: m.mrr || 0, rev28: m.revenue || 0, newCustomers: m.new_customers || 0, currency: j.currency || 'USD',
+  };
+}
+function rcError(status) {
+  if (status === 401) return 'RevenueCat rejected the key. Check it was copied whole.';
+  if (status === 403) return 'The key lacks the permission. Set Charts metrics permissions to Read.';
+  if (status === 404) return 'No project with that ID on this key.';
+  if (status === 429) return 'RevenueCat is rate limiting. Try again in a minute.';
+  return 'RevenueCat answered ' + status + '.';
+}
+
+document.getElementById('mGo').addEventListener('click', async () => {
   const anonA = document.getElementById('fAnonA').checked, anonF = document.getElementById('fAnonF').checked;
   const typed = document.getElementById('fKing').value.trim();
   const handle = document.getElementById('fX').value.trim().replace(/^@/, '');
   const store = document.getElementById('fIOS').value.trim() || document.getElementById('fPlay').value.trim();
-  const note = document.getElementById('mNote');
+  const key = document.getElementById('fKey').value.trim();
+  const proj = document.getElementById('fProj').value.trim();
+  const note = document.getElementById('mNote'), go = document.getElementById('mGo');
   if (!handle) { note.textContent = 'A founder handle on X is required. It is how the tower is yours.'; return; }
   if ((anonF || anonA) && !typed && !store) { note.textContent = 'To stay anonymous, name the app or add a store link.'; return; }
+  if (!key) { note.textContent = 'The RevenueCat key is required. It is where the numbers come from.'; return; }
+  if (!proj) { note.textContent = 'The project ID is required. It is in the dashboard URL after /projects/.'; return; }
+
+  go.disabled = true; go.textContent = 'Reading RevenueCat…'; note.textContent = 'One call, six numbers.';
+  let nums;
+  try { nums = await readRevenueCat(key, proj); }
+  catch (e) {
+    go.disabled = false; go.textContent = 'Break ground';
+    note.textContent = (e && e.message && !/fetch|network/i.test(e.message)) ? e.message : 'This browser could not reach RevenueCat. Check the connection and try again.';
+    return;
+  }
+  document.getElementById('fKey').value = '';
+  go.disabled = false; go.textContent = 'Break ground';
+
   const seed = (hash1(handle.length * 977 + typed.length * 31 + LOCAL.length * 7 + 13, 99) * 1e6) | 0;
   const rec = {
-    id: 'local-' + seed, local: true, name: typed || veilName(seed), tag: 'New tower',
+    id: 'local-' + seed, local: true, name: typed || veilName(seed), tag: 'Read from RevenueCat',
     founders: handle.split(',').map(h => h.trim().replace(/^@/, '')).filter(Boolean),
     ios: document.getElementById('fIOS').value.trim() || undefined,
     play: document.getElementById('fPlay').value.trim() || undefined,
     anonFounder: anonF, anonApp: anonA, seed, joined: 0,
-    users: 0, trials: 0, subs: 0, mrr: 0, curve: 'flat',
+    users: nums.users, trials: nums.trials, subs: nums.subs, mrr: nums.mrr, rev28: nums.rev28,
+    newCustomers: nums.newCustomers, curve: 'exact',
     logo: pendingLogo ? pendingLogo.toDataURL() : undefined,
   };
   LOCAL.push(rec); saveLocal();
   closeModal();
-  ['fKing', 'fX', 'fIOS', 'fPlay', 'fKey'].forEach(id => { document.getElementById(id).value = ''; });
+  ['fKing', 'fX', 'fIOS', 'fPlay', 'fKey', 'fProj'].forEach(id => { document.getElementById(id).value = ''; });
   document.getElementById('fAnonA').checked = false; document.getElementById('fAnonF').checked = false;
   pendingLogo = null; document.getElementById('fLogoPrev').getContext('2d').clearRect(0, 0, 16, 16); document.getElementById('fLogo').value = '';
   rebuild(rec.id);
@@ -1272,7 +1374,9 @@ function start() {
   if (want) { flyTo(want); openCard(want); }
 
   let prev = performance.now();
-  (function frame(now) {
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { prev = performance.now(); requestAnimationFrame(frame); } });
+  function frame(now) {
+    if (document.hidden) return;
     const dt = Math.min(0.05, (now - prev) / 1000); prev = now; clockT += dt * 1000;
     if (rebuildAt && now > rebuildAt) {
       rebuildAt = 0;
@@ -1282,7 +1386,9 @@ function start() {
     }
     stepMotion(dt); draw(dt);
     requestAnimationFrame(frame);
-  })(prev);
+  }
+  performance.mark('city-first-frame');
+  frame(prev);
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 </script>
