@@ -51,18 +51,26 @@ canvas#city.dragging{cursor:grabbing}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .hud{position:fixed;z-index:20}
 
-/* ── top left: wordmark and join ─────────────────────────────────────── */
-#brand{top:14px;left:14px;display:flex;align-items:stretch;gap:0;overflow:hidden}
-#brand .mark{padding:9px 13px;display:flex;align-items:center;gap:9px;border-right:1px solid var(--line)}
-#brand .mark canvas{width:22px;height:22px;image-rendering:pixelated}
-#brand .mark b{font-size:12px;letter-spacing:.14em;text-transform:uppercase}
-#brand .mark small{display:block;font-size:9px;letter-spacing:.06em;color:var(--dim);margin-top:2px}
-#addBtn{padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--amber)}
+/* ── top: the city in numbers ────────────────────────────────────────── */
+#band{top:0;left:0;right:0;height:46px;display:flex;align-items:stretch;background:var(--glass);
+  border-bottom:1px solid var(--line);backdrop-filter:blur(6px);z-index:20}
+#band .mark{padding:0 14px;display:flex;align-items:center;gap:9px;border-right:1px solid var(--line);flex:0 0 auto}
+#band .mark canvas{width:22px;height:22px;image-rendering:pixelated}
+#band .mark b{font-size:12px;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+#band .mark small{display:block;font-size:9px;letter-spacing:.06em;color:var(--dim);margin-top:2px;white-space:nowrap}
+#band .totals{flex:1;display:flex;align-items:stretch;overflow-x:auto;scrollbar-width:none}
+#band .totals::-webkit-scrollbar{display:none}
+#band .tot{display:flex;flex-direction:column;justify-content:center;padding:0 16px;border-right:1px solid var(--line);
+  white-space:nowrap}
+#band .tot .n{font-size:14px;font-weight:700;line-height:1}
+#band .tot .n.up{color:#5be09a}#band .tot .n.down{color:#ff6b6b}
+#band .tot .l{font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-top:3px}
+#addBtn{padding:0 16px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--amber);flex:0 0 auto;border-left:1px solid var(--line)}
 #addBtn:hover{background:rgba(255,184,77,.08)}
 
-/* ── top right: the legend ───────────────────────────────────────────── */
-#legend{top:14px;right:14px;width:min(290px,calc(100vw - 28px));font-size:11px}
+/* ── the legend, inside the join form ────────────────────────────────── */
+#legend{font-size:11px;border:1px solid var(--line);border-radius:3px;margin-bottom:16px;background:rgba(140,170,255,.04)}
 #legend .hd{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;user-select:none}
 #legend .hd b{flex:1;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
 #legend .hd span{color:var(--dim);font-size:11px}
@@ -179,8 +187,11 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 #modal .rc svg{width:14px;height:13px}
 
 @media (max-width:700px){
-  #legend{top:auto;bottom:80px;right:14px;width:calc(100vw - 28px)}
-  #card{bottom:80px;width:calc(100vw - 28px)}
+  #band .mark small{display:none}
+  #band .mark b{font-size:10px}
+  #band .tot{padding:0 11px}
+  #addBtn{padding:0 11px;font-size:10px}
+  #card{bottom:42px;width:calc(100vw - 28px)}
   #credit{display:none}
   #brand .mark small{display:none}
   #modal{padding:0}
@@ -192,18 +203,14 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 
 <canvas id="city"></canvas>
 
-<div class="hud glass" id="brand">
+<div class="hud" id="band">
   <div class="mark"><canvas id="markCv" width="11" height="11"></canvas>
     <div><b>Founder City</b><small>one tower per app, at night</small></div></div>
+  <div class="totals" id="totals"></div>
   <button id="addBtn">+ Add your tower</button>
 </div>
 
-<div class="hud glass" id="legend">
-  <div class="hd" id="legHd"><b>How to read it</b><span id="legCaret">▾</span></div>
-  <div class="rows" id="legRows"></div>
-</div>
-
-<div class="hud" id="ticker"><div class="lbl">CITY WIRE</div><div class="track"><div class="run" id="run"></div></div></div>
+<div class="hud" id="ticker"><div class="lbl">LATEST</div><div class="track"><div class="run" id="run"></div></div></div>
 
 <a class="hud glass" id="credit" href="https://x.com/jeremylasne" target="_blank" rel="noopener">made with fun by <b>@jeremylasne</b></a>
 
@@ -226,6 +233,10 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
     <div class="hd"><div><h2>Add your tower</h2><small>Verified by RevenueCat. Numbers refresh once a day.</small></div>
       <button class="x" id="mClose" style="font-size:15px;color:var(--dim)">✕</button></div>
     <div class="bd">
+      <div class="legend" id="legend">
+        <div class="hd" id="legHd"><b>How to read the city</b><span id="legCaret">▾</span></div>
+        <div class="rows" id="legRows"></div>
+      </div>
       <h3>Make a read-only key</h3>
       <ol>
         <li>Open RevenueCat, then <code>Project settings → API keys</code>.</li>
@@ -359,23 +370,41 @@ const hueOf = i => (i * 137.508) % 360;
 /* ═══════════════════════════════════════════════════════════════════════════
    3. WHAT A TOWER IS
    Height is MRR on a power curve, so a forty thousand dollar app and a four
-   hundred thousand dollar app both fit one skyline. Width is subscribers.
-   Lit windows follow active users. The dark floors at the top are the
+   hundred thousand dollar app both fit one skyline. The building's size,
+   floors times width, is active users, so the width is whatever the audience
+   needs at that height: a free app with a huge audience is a wide low block,
+   a premium app with a few hundred customers is a thin spire. Lit windows
+   are the subscribers among those users. The dark floors at the top are the
    subscribers lost this month. A crane means the week was up.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-const FLOOR_H = 5, BAY_W = 4, WORLD_H = 900, ROOF_PAD = 44;
-const BASE_Y = WORLD_H - 62;          // the sidewalk the towers stand on
+const FLOOR_H = 5, BAY_W = 4, ROOF_PAD = 44;
+const BAND_H = 46, WIRE_H = 28;       // the two bands of chrome the city fits between
+let WORLD_H = 900, BASE_Y = 838;      // set from the screen at boot: the sidewalk the towers stand on
+let maxMrr = 1, maxFloors = 100;
 const PAD = 1600;                     // road and lamps run this far past the last tower
 
-function floorsFor(mrr) { return 3 + Math.round(Math.pow(Math.max(0, mrr), 0.42) * 0.55); }
+/* The tallest tower fills the screen; every other height follows on a
+   power curve, so a $40k app and a $400k app share one frame however tall
+   the window is. */
+function floorsFor(mrr) { return 3 + Math.round((maxFloors - 3) * Math.pow(clamp(mrr / maxMrr, 0, 1), 0.42)); }
+/* Windows in the building follow the audience; divide by the height MRR
+   gave it and the width falls out. Capped so a free app with a million users
+   is a mall, not a wall. */
+function baysFor(users, floors) {
+  const area = 2.5 * Math.pow(Math.max(0, users), 0.55);
+  return clamp(Math.round(area / Math.max(1, floors)), 3, 70);
+}
 
 function makeTower(k, idx) {
   const hist = buildHistory(k);
   const churn = churn30(hist);
   const floors = floorsFor(k.mrr);
-  const bays = 3 + Math.round(Math.pow(Math.max(0, k.subs), 0.30) * 0.8);
-  const lit = clamp(0.25 + 0.6 * Math.log(k.users + 1) / Math.log(500001), 0.2, 0.95);
+  const bays = baysFor(k.users, floors);
+  // The paying share of the audience, stretched so a typical ten percent
+  // conversion still reads as a building with people in it.
+  const conv = k.subs / Math.max(1, k.users);
+  const lit = clamp(0.2 + 3.0 * conv, 0.2, 0.92);
   const darkTop = Math.min(Math.round(floors * clamp(churn / Math.max(1, k.subs), 0, 0.45)), Math.max(0, floors - 3));
   const wk = hist[29].mrr - hist[22].mrr;
   const newUsers = Math.max(0, hist[29].users - hist[22].users);
@@ -398,7 +427,7 @@ function makeTower(k, idx) {
   } else sections = [{ f0: 0, f1: floors, bays }];
 
   return {
-    k, idx, hist, churn, floors, bays, lit, darkTop, crane, crowd, revenue, tier, name, tag, kind,
+    k, idx, hist, churn, floors, bays, lit, darkTop, crane, crowd, revenue, tier, name, tag, kind, conv,
     hue: hueOf(idx), rnd, sections, wk, newUsers,
     w: bays * BAY_W + 2, h: floors * FLOOR_H + ROOF_PAD,
     win: null, x: 0, rank: 0,
@@ -446,16 +475,17 @@ const FONT = {
   '9':['111','101','111','001','111'], '$':['010','111','110','011','111'], '.':['000','000','000','000','010'],
   '-':['000','000','111','000','000'], ' ':['000','000','000','000','000'],
 };
-function pxText(g, text, x, y, color) {
+function pxText(g, text, x, y, color, sc) {
+  sc = sc || 1;
   g.fillStyle = color;
   let cx = x;
   for (const ch of text) {
     const gl = FONT[ch] || FONT[' '];
-    for (let r = 0; r < 5; r++) for (let c = 0; c < 3; c++) if (gl[r][c] === '1') g.fillRect(cx + c, y + r, 1, 1);
-    cx += 4;
+    for (let r = 0; r < 5; r++) for (let c = 0; c < 3; c++) if (gl[r][c] === '1') g.fillRect(cx + c * sc, y + r * sc, sc, sc);
+    cx += 4 * sc;
   }
 }
-const pxTextW = text => text.length * 4 - 1;
+const pxTextW = (text, sc) => (text.length * 4 - 1) * (sc || 1);
 const signText = t => t.name.toUpperCase().replace(/[^A-Z0-9 .$-]/g, '').slice(0, 12) || 'TOWER';
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -517,6 +547,18 @@ function bakeTower(g, t) {
     px(g, x0 - 1, y0, 1, y1 - y0, hsl(h, 18, 14));
     px(g, x0 - 1, y1 - 1, ww + 2, 1, hsl(h, 14, 15));
   }
+  // The sign, on the facade at half height, allowed to overhang a small
+  // tower the way a billboard does. Windows behind it are simply not there.
+  const txt = signText(t);
+  // A tower with room for it carries its name at double size, so the ones
+  // that dominate the skyline can be read from across it.
+  const sc = t.floors >= 40 && t.w >= (pxTextW(txt, 2) + 12) ? 2 : 1;
+  const lw = t.logo ? 8 * sc + 2 * sc : 0;
+  const tw = pxTextW(txt, sc) + lw;
+  const bw = Math.max(tw + 6 * sc, 9), bh = (t.logo ? 12 : 9) * sc;
+  const sx = Math.round(t.x + t.w / 2 - bw / 2), sy = Math.round(BASE_Y - t.floors * FLOOR_H * 0.5 - bh / 2);
+  t.sign = { x: sx, y: sy, w: bw, h: bh, color: TIER[t.tier], sc };
+  const underSign = (f, b) => { const p = winPos(t, f, b); return p.x + 2 > sx - 1 && p.x < sx + bw + 1 && p.y + 3 > sy - 1 && p.y < sy + bh + 1; };
   // Windows.
   t.win = new Uint8Array(t.floors * t.bays);
   t.palette = new Uint8Array(t.floors * t.bays);
@@ -529,7 +571,7 @@ function bakeTower(g, t) {
     const s = sectionAt(t, f);
     for (let b = 0; b < t.bays; b++) {
       const i = f * t.bays + b;
-      if (!bayInSection(t, s, b)) { t.win[i] = 255; continue; }
+      if (!bayInSection(t, s, b) || underSign(f, b)) { t.win[i] = 255; continue; }
       t.palette[i] = t.rnd() < coolBias ? 1 : 0;
       if (f >= t.floors - t.darkTop) { t.win[i] = 254; }
       else if (f === 0) { t.win[i] = 2; }
@@ -569,19 +611,13 @@ function bakeTower(g, t) {
     px(g, ax, top - ah, 1, ah, hsl(h, 10, 45));
     t.antenna = { x: ax, y: top - ah - 1, phase: t.rnd() * 6.28 };
   }
-  // The sign. It may overhang a small tower, as billboards do.
-  const txt = signText(t);
-  const tw = pxTextW(txt) + (t.logo ? 10 : 0);
-  const bw = Math.max(tw + 6, 9), bh = t.logo ? 12 : 9;
-  const sx = Math.round(t.x + t.w / 2 - bw / 2), sy = top - (t.antenna ? 3 : 2) - bh - 3;
-  t.sign = { x: sx, y: sy, w: bw, h: bh, color: TIER[t.tier] };
-  px(g, sx + 2, sy + bh, 1, 3, '#3a4058'); px(g, sx + bw - 3, sy + bh, 1, 3, '#3a4058');
+  // Paint the sign last so it sits over the facade.
   px(g, sx, sy, bw, bh, '#0b0e1c');
-  px(g, sx, sy, bw, 1, TIER[t.tier]); px(g, sx, sy + bh - 1, bw, 1, TIER[t.tier]);
-  px(g, sx, sy, 1, bh, TIER[t.tier]); px(g, sx + bw - 1, sy, 1, bh, TIER[t.tier]);
-  let txx = sx + 3;
-  if (t.logo) { g.imageSmoothingEnabled = false; g.drawImage(t.logo, txx, sy + 2, 8, 8); txx += 10; }
-  pxText(g, txt, txx, sy + (bh - 5) / 2, TIER[t.tier]);
+  px(g, sx, sy, bw, sc, TIER[t.tier]); px(g, sx, sy + bh - sc, bw, sc, TIER[t.tier]);
+  px(g, sx, sy, sc, bh, TIER[t.tier]); px(g, sx + bw - sc, sy, sc, bh, TIER[t.tier]);
+  let txx = sx + 3 * sc;
+  if (t.logo) { g.imageSmoothingEnabled = false; g.drawImage(t.logo, txx, sy + 2 * sc, 8 * sc, 8 * sc); txx += lw; }
+  pxText(g, txt, txx, sy + Math.round((bh - 5 * sc) / 2), TIER[t.tier], sc);
 }
 
 /* A slow drift of window states keeps the equilibrium the data asks for:
@@ -689,8 +725,8 @@ function seedMotion() {
       skin: SKIN[(rnd() * SKIN.length) | 0], cloth: CLOTH[(rnd() * CLOTH.length) | 0], wait: rnd() * 5,
     });
   }
-  for (let i = 0; i < 260; i++) stars.push({ x: rnd() * (worldW * 0.15 + 2400), y: rnd() * 420, a: 0.3 + rnd() * 0.7, sp: 0.5 + rnd() * 2, ph: rnd() * 6.28, big: rnd() < 0.08 });
-  for (let i = 0; i < 7; i++) clouds.push({ x: rnd() * (worldW * 0.25 + 2000), y: 90 + rnd() * 220, spd: 2 + rnd() * 4, blobs: 3 + ((rnd() * 3) | 0), seed: (rnd() * 1e6) | 0 });
+  for (let i = 0; i < 260; i++) stars.push({ x: rnd() * (worldW * 0.15 + 2400), y: BAND_H + rnd() * (BASE_Y * 0.55), a: 0.3 + rnd() * 0.7, sp: 0.5 + rnd() * 2, ph: rnd() * 6.28, big: rnd() < 0.08 });
+  for (let i = 0; i < 7; i++) clouds.push({ x: rnd() * (worldW * 0.25 + 2000), y: BAND_H + 40 + rnd() * (BASE_Y * 0.3), spd: 2 + rnd() * 4, blobs: 3 + ((rnd() * 3) | 0), seed: (rnd() * 1e6) | 0 });
 }
 function newCar(rnd, anywhere) {
   const near = rnd() < 0.5;
@@ -718,7 +754,7 @@ function stepMotion(dt) {
   }
   for (const c of clouds) { c.x -= c.spd * dt; if (c.x < -200) c.x = worldW * 0.25 + 2000; }
   if (plane) { plane.x += plane.spd * dt; plane.ph += dt; if (plane.x > worldW * 0.3 + 2400) plane = null; }
-  else { planeTimer -= dt; if (planeTimer < 0) { plane = { x: -40, y: 50 + Math.random() * 80, spd: 70 + Math.random() * 40, ph: 0 }; planeTimer = 35 + Math.random() * 40; } }
+  else { planeTimer -= dt; if (planeTimer < 0) { plane = { x: -40, y: BAND_H + 20 + Math.random() * 80, spd: 70 + Math.random() * 40, ph: 0 }; planeTimer = 35 + Math.random() * 40; } }
   for (const t of towers) flicker(t, Math.max(1, Math.round(t.win.length * 0.0025)));
 }
 
@@ -730,38 +766,42 @@ const cvs = document.getElementById('city');
 const ctx = cvs.getContext('2d', { alpha: false });
 const back = document.createElement('canvas');
 const bctx = back.getContext('2d', { alpha: false });
-const ZOOMS = [1, 2, 3, 4];
+const ZOOMS = [1, 2];
 const cam = { x: 0, y: 0, zi: 0 };
 let dpr = 1, cssW = 0, cssH = 0, clockT = 0;
 let hovered = null, selected = null;
 
 const zoom = () => ZOOMS[cam.zi];
+let rebuildAt = 0;
 function resize() {
   dpr = Math.min(2, window.devicePixelRatio || 1);
+  const h0 = cssH;
   cssW = window.innerWidth; cssH = window.innerHeight;
   cvs.width = Math.round(cssW * dpr); cvs.height = Math.round(cssH * dpr);
   ctx.imageSmoothingEnabled = false;
+  // A new height is a new skyline: the towers are sized to the screen.
+  if (h0 && h0 !== cssH) rebuildAt = performance.now() + 180;
   clampCam();
 }
 window.addEventListener('resize', resize);
 function viewSize() { const z = zoom(); return { bw: Math.ceil(cssW / z) + 2, bh: Math.ceil(cssH / z) + 2 }; }
+/* The city scrolls left and right and nothing else. The street stays pinned
+   just above the wire; zooming in grows the towers upward off the top. */
 function clampCam() {
   const { bw, bh } = viewSize();
   cam.x = worldW <= bw ? worldW / 2 : clamp(cam.x, bw / 2, worldW - bw / 2);
-  const maxY = WORLD_H - bh / 2 + 30;
-  cam.y = Math.min(cam.y, maxY);
-  cam.y = Math.max(cam.y, Math.min(bh / 2, maxY));
+  cam.y = WORLD_H - bh / 2;
 }
 function screenToWorld(sx, sy) {
   const z = zoom();
   return { x: cam.x + (sx - cssW / 2) / z, y: cam.y + (sy - cssH / 2) / z };
 }
-function setZoom(dir, ax, ay) {
-  const px0 = ax === undefined ? cssW / 2 : ax, py0 = ay === undefined ? cssH / 2 : ay;
-  const before = screenToWorld(px0, py0);
+function setZoom(dir, ax) {
+  const px0 = ax === undefined ? cssW / 2 : ax;
+  const before = screenToWorld(px0, 0);
   cam.zi = clamp(cam.zi + dir, 0, ZOOMS.length - 1);
-  const after = screenToWorld(px0, py0);
-  cam.x += before.x - after.x; cam.y += before.y - after.y;
+  const after = screenToWorld(px0, 0);
+  cam.x += before.x - after.x;
   clampCam();
 }
 
@@ -795,7 +835,7 @@ function draw(dt) {
     if (s.big) { g.fillRect((sx | 0) - 1, sy | 0, 3, 1); g.fillRect(sx | 0, (sy | 0) - 1, 1, 3); }
   }
   {
-    const mx = 380 + worldW * 0.5 - left * 0.06, my = 120 - top;
+    const mx = 380 + worldW * 0.5 - left * 0.06, my = BAND_H + 70 - top;
     const gl = g.createRadialGradient(mx, my, 4, mx, my, 40);
     gl.addColorStop(0, 'rgba(244,240,220,0.16)'); gl.addColorStop(1, 'rgba(244,240,220,0)');
     g.fillStyle = gl; g.fillRect(mx - 40, my - 40, 80, 80);
@@ -871,7 +911,7 @@ function draw(dt) {
     if (t === selected || t === hovered) {
       g.strokeStyle = t === selected ? 'rgba(255,184,77,0.9)' : 'rgba(77,232,208,0.85)';
       g.lineWidth = 1;
-      g.strokeRect(tx - 1.5, roof - 1.5 - (t.sign ? (roof - (t.sign.y - top)) : 0), t.w + 3, BASE_Y - top - roof + 3 + (t.sign ? (roof - (t.sign.y - top)) : 0));
+      g.strokeRect(tx - 1.5, roof - 1.5, t.w + 3, BASE_Y - top - roof + 3);
     }
   }
   // Street, then the wet reflection of the lobbies in the road, then the lamps.
@@ -919,7 +959,7 @@ cvs.addEventListener('pointerdown', (e) => {
 cvs.addEventListener('pointermove', (e) => {
   if (drag) {
     const z = zoom();
-    cam.x = drag.cx - (e.clientX - drag.x) / z; cam.y = drag.cy - (e.clientY - drag.y) / z;
+    cam.x = drag.cx - (e.clientX - drag.x) / z;
     moved += Math.abs(e.movementX || 0) + Math.abs(e.movementY || 0); clampCam();
   } else hoverAt(e.clientX, e.clientY);
 });
@@ -927,7 +967,20 @@ function endDrag(e) { if (drag && moved < 5) clickAt(e.clientX, e.clientY); drag
 cvs.addEventListener('pointerup', endDrag);
 cvs.addEventListener('pointercancel', () => { drag = null; cvs.classList.remove('dragging'); });
 cvs.addEventListener('pointerleave', () => { hovered = null; tip.classList.remove('on'); });
-cvs.addEventListener('wheel', (e) => { e.preventDefault(); setZoom(e.deltaY < 0 ? 1 : -1, e.clientX, e.clientY); }, { passive: false });
+/* The wheel scrolls the city sideways, as a wide page would. Hold ctrl or
+   command, or pinch, to zoom. */
+let wheelZoomAt = 0;
+cvs.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  if (e.ctrlKey || e.metaKey) {
+    if (performance.now() - wheelZoomAt < 260) return;
+    wheelZoomAt = performance.now();
+    setZoom(e.deltaY < 0 ? 1 : -1, e.clientX);
+    return;
+  }
+  const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+  cam.x += d / zoom(); clampCam();
+}, { passive: false });
 cvs.addEventListener('touchstart', (e) => { if (e.touches.length === 2) pinch = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); }, { passive: true });
 cvs.addEventListener('touchmove', (e) => {
   if (e.touches.length === 2 && pinch) {
@@ -941,14 +994,13 @@ window.addEventListener('keydown', (e) => {
   if (e.key === '+' || e.key === '=') setZoom(1); if (e.key === '-') setZoom(-1);
   const pan = 120 / zoom();
   if (e.key === 'ArrowLeft') cam.x -= pan; if (e.key === 'ArrowRight') cam.x += pan;
-  if (e.key === 'ArrowUp') cam.y -= pan; if (e.key === 'ArrowDown') cam.y += pan;
   clampCam();
 });
 
 function towerAt(sx, sy) {
   const w = screenToWorld(sx, sy);
   for (const t of towers) {
-    const topY = Math.min(t.sign.y - 2, BASE_Y - t.floors * FLOOR_H - 8);
+    const topY = BASE_Y - t.floors * FLOOR_H - 10;
     if (w.x >= t.x - 2 && w.x <= t.x + t.w + 2 && w.y >= topY && w.y <= BASE_Y + 6) return t;
   }
   return null;
@@ -960,7 +1012,7 @@ function hoverAt(sx, sy) {
   if (!t) { tip.classList.remove('on'); cvs.style.cursor = 'grab'; return; }
   cvs.style.cursor = 'pointer';
   tip.innerHTML = '<b>' + t.name + '</b> <em>#' + t.rank + '</em><br>' + money(t.k.mrr) + ' MRR · ' + t.floors + ' floors<br>' +
-    '<em>' + fmt(t.k.subs) + ' subscribers · ' + fmt(t.k.users) + ' active</em>';
+    '<em>' + fmt(t.k.users) + ' active users · ' + fmt(t.k.subs) + ' paying</em>';
   tip.style.left = Math.min(sx + 14, cssW - 240) + 'px'; tip.style.top = (sy + 16) + 'px';
   tip.classList.add('on');
 }
@@ -985,8 +1037,8 @@ function openCard(t) {
   const litPct = Math.round(t.lit * 100);
   document.getElementById('cStats').innerHTML = [
     [money(t.k.mrr), 'MRR', 'the height: ' + t.floors + ' floors'],
-    [fmt(t.k.subs), 'Subscribers', 'the width: ' + t.bays + ' windows across'],
-    [fmt(t.k.users), 'Active users', 'lit windows, about ' + litPct + '%'],
+    [fmt(t.k.users), 'Active users', 'the size: ' + fmt(t.floors * t.bays) + ' windows, ' + t.bays + ' across'],
+    [fmt(t.k.subs), 'Subscribers', 'lit windows, about ' + litPct + '%, ' + (t.conv * 100).toFixed(1) + '% of users'],
     [fmt(t.k.trials), 'Free trials', 'the crowd at the door: ' + t.crowd],
     [fmt(t.churn), 'Lost, 30 days', t.darkTop ? 'the dark floors on top: ' + t.darkTop : 'no dark floors'],
     [money(t.revenue), 'Lifetime revenue', 'the sign: ' + t.tier + (t.crane ? ' · crane up, still growing' : '')],
@@ -1022,19 +1074,19 @@ function drawSpark(t) {
   g.strokeStyle = '#ffb84d'; g.lineWidth = 3; g.lineJoin = 'round'; g.stroke();
   g.beginPath(); g.arc(X(vals.length - 1), Y(vals[vals.length - 1]), 5, 0, 6.2832); g.fillStyle = '#4de8d0'; g.fill();
 }
-function flyTo(t) { cam.x = t.x + t.w / 2; cam.zi = t.floors > 60 ? 0 : 1; const { bh } = viewSize(); cam.y = WORLD_H - bh / 2 + 30; clampCam(); }
+function flyTo(t) { cam.x = t.x + t.w / 2; clampCam(); }
 
 /* The wire along the bottom of the screen. */
 function buildWire() {
   const items = [];
-  const board = towers.slice().sort((a, b) => a.rank - b.rank).map(t => '#' + t.rank + ' <b data-k="' + t.k.id + '">' + t.name.toUpperCase() + '</b> ' + money(t.k.mrr) + ' MRR').join(' · ');
-  items.push('🏙️ SKYLINE ' + board);
   for (const t of towers) {
     const nm = '<b data-k="' + t.k.id + '">' + t.name.toUpperCase() + '</b>';
     const fl = t.floors - floorsFor(t.hist[22].mrr);
     const tenants = t.k.subs - t.hist[22].subs;
     if (fl > 0) items.push('🏗️ ' + nm + ' ADDS ' + fl + (fl === 1 ? ' FLOOR' : ' FLOORS'));
     if (fl < 0) items.push('📉 ' + nm + ' LOSES ' + (-fl) + ' FLOORS');
+    const crowdIn = t.k.users - t.hist[22].users;
+    if (crowdIn > 0) items.push('🏢 ' + nm + ' GROWS BY ' + fmt(crowdIn) + ' PEOPLE');
     if (tenants > 0) items.push('🔑 ' + fmt(tenants) + ' NEW TENANTS SIGN AT ' + nm);
     if (tenants < 0) items.push('🚪 ' + fmt(-tenants) + ' TENANTS MOVE OUT OF ' + nm);
     if (t.darkTop >= 2) items.push('🌑 ' + nm + ' GOES DARK ON ' + t.darkTop + ' FLOORS');
@@ -1048,11 +1100,23 @@ function buildWire() {
   run.querySelectorAll('b[data-k]').forEach(b => b.addEventListener('click', () => { const t = towers.find(x => x.k.id === b.dataset.k); if (t) { flyTo(t); openCard(t); } }));
 }
 
+function buildTotals() {
+  const sum = f => towers.reduce((a, t) => a + f(t), 0);
+  const wk = sum(t => t.wk);
+  const rows = [
+    [towers.length, 'towers'], [money(sum(t => t.k.mrr)), 'MRR'], [fmt(sum(t => t.k.subs)), 'subscribers'],
+    [fmt(sum(t => t.k.users)), 'active users'], [fmt(sum(t => t.k.trials)), 'on trial'],
+    [fmt(sum(t => t.churn)), 'lost, 30 days'], [(wk >= 0 ? '+' : '') + money(wk), 'this week', wk > 0 ? 'up' : wk < 0 ? 'down' : ''],
+  ];
+  document.getElementById('totals').innerHTML = rows.map(r =>
+    '<div class="tot"><div class="n ' + (r[2] || '') + '">' + r[0] + '</div><div class="l">' + r[1] + '</div></div>').join('');
+}
+
 function buildLegend() {
   const rows = [
-    ['height', 'Height is MRR', 'power curve'],
-    ['width', 'Width is subscribers', ''],
-    ['lit', 'Lit windows are active users', '20% to 95%'],
+    ['height', 'Height is MRR', 'the tallest tower fills the screen, the rest follow a power curve'],
+    ['width', 'Size is active users', 'wide and low is a free app with a crowd, tall and thin is a premium one'],
+    ['lit', 'Lit windows are subscribers', 'the paying share of the people inside'],
     ['dark', 'Dark floors on top are subscribers lost', '30 days'],
     ['crane', 'A crane means the week was up', ''],
     ['crowd', 'The crowd at the door is free trials', '1 per 10'],
@@ -1074,7 +1138,6 @@ function buildLegend() {
   });
   const leg = document.getElementById('legend');
   document.getElementById('legHd').addEventListener('click', () => { leg.classList.toggle('open'); document.getElementById('legCaret').textContent = leg.classList.contains('open') ? '▴' : '▾'; });
-  if (cssW > 700) { leg.classList.add('open'); document.getElementById('legCaret').textContent = '▴'; }
 }
 
 /* Join form. Same rules as the map: the handle is required, anonymity
@@ -1114,8 +1177,12 @@ document.getElementById('mGo').addEventListener('click', () => {
    10. BOOT
    ═══════════════════════════════════════════════════════════════════════════ */
 
-function boot() {
-  resize();
+function buildWorld() {
+  towers.length = 0; cars.length = 0; walkers.length = 0; crowds.length = 0; stars.length = 0; clouds.length = 0;
+  WORLD_H = Math.max(360, cssH);
+  BASE_Y = WORLD_H - WIRE_H - 62;
+  maxMrr = Math.max(1, Math.max.apply(null, SEED.map(k => k.mrr)));
+  maxFloors = Math.max(12, Math.floor((BASE_Y - BAND_H - 16 - ROOF_PAD) / FLOOR_H));
   SEED.forEach((k, i) => towers.push(makeTower(k, i)));
   worldW = layoutTowers(towers);
 
@@ -1127,20 +1194,31 @@ function boot() {
   far = bakeSilhouette(Math.ceil(worldW * 0.35) + 2400, { seed: 11, minW: 10, maxW: 34, minH: 40, maxH: 210, body: '#0d1126', edge: '#171d3a', lit: 0.10, win: '#26305a', winWarm: '#4a3f2a' });
   mid = bakeSilhouette(Math.ceil(worldW * 0.6) + 2400, { seed: 23, minW: 12, maxW: 44, minH: 30, maxH: 150, body: '#121733', edge: '#1f2650', lit: 0.16, win: '#3a4a86', winWarm: '#6b5a2a' });
   seedMotion();
+  clampCam();
+}
+
+function boot() {
+  resize();
+  buildWorld();
 
   const mk = document.getElementById('markCv').getContext('2d');
   px(mk, 3, 2, 5, 9, '#2b3350'); px(mk, 4, 3, 1, 1, '#ffd27a'); px(mk, 6, 3, 1, 1, '#ffd27a'); px(mk, 4, 5, 1, 1, '#ffd27a'); px(mk, 6, 7, 1, 1, '#ffd27a'); px(mk, 5, 0, 1, 2, '#ff4d4d');
   px(mk, 0, 6, 2, 5, '#1c2140'); px(mk, 9, 5, 2, 6, '#1c2140');
 
-  buildLegend(); buildWire();
+  buildLegend(); buildTotals(); buildWire();
   const want = towers.find(t => t.k.id === location.hash.slice(1));
-  const { bh } = viewSize();
-  cam.x = worldW / 2; cam.y = WORLD_H - bh / 2 + 30; cam.zi = 0; clampCam();
+  cam.x = worldW / 2; cam.zi = 0; clampCam();
   if (want) { flyTo(want); openCard(want); }
 
   let prev = performance.now();
   (function frame(now) {
     const dt = Math.min(0.05, (now - prev) / 1000); prev = now; clockT += dt * 1000;
+    if (rebuildAt && now > rebuildAt) {
+      rebuildAt = 0;
+      const frac = worldW ? cam.x / worldW : 0.5;
+      buildWorld(); cam.x = frac * worldW; clampCam();
+      if (selected) selected = towers.find(t => t.k.id === selected.k.id) || null;
+    }
     stepMotion(dt); draw(dt);
     requestAnimationFrame(frame);
   })(prev);

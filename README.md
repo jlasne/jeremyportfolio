@@ -139,16 +139,22 @@ Demo data lives in `SEED_KINGDOMS` at the top of the file. Replace that array
 with a fetch to wire it to real accounts. The RevenueCat key must never reach
 the browser: it needs a server that holds it and serves the six numbers.
 
-**Founder City** is the same data as a skyline. Height is MRR on a power curve
-so a $40k app and a $400k app share one frame; width is subscribers; lit
-windows follow active users, with each floor keeping its own mood so the
-lights come in bands; the dark floors at the top are subscribers lost this
-month; a crane means the week was up; the crowd at the door is free trials;
-the sign colour is lifetime revenue, from white through cyan and amber to gold.
-Rank one stands in the middle and the others alternate outward, so rank reads
-as distance from downtown. Everything static bakes once; per frame the page
-moves cars, people, clouds, two searchlights and a few dozen windows. Same
-join rules as the map, same `SEED` array to swap for a fetch.
+**Founder City** is the same data as a skyline, scrolling left and right
+and nothing else: the tallest tower always fills the screen. Height is MRR on
+a power curve so a $40k app and a $400k app share one frame. The building's
+size, floors times width, is active users, so the width is whatever the
+audience needs at that height: a free app with a big crowd is a wide low
+block, a premium app with a few hundred customers is a thin spire. Lit
+windows are the subscribers among those users, with each floor keeping its
+own mood so the lights come in bands. The dark floors at the top are
+subscribers lost this month; a crane means the week was up; the crowd at the
+door is free trials; the sign on the facade is the app's name and logo, its
+colour lifetime revenue from white through cyan and amber to gold. Rank one
+stands in the middle and the others alternate outward, so rank reads as
+distance from downtown. A band along the top totals the city, a wire along
+the bottom carries the latest activity. Everything static bakes once; per
+frame the page moves cars, people, clouds, two searchlights and a few dozen
+windows. Same join rules as the map, same `SEED` array to swap for a fetch.
 
 ## Run locally
 
