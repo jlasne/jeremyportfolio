@@ -118,7 +118,8 @@ export default defineSchema({
     seed: v.number(),
     /* 16x16 pixel logo as a data URL, about a kilobyte */
     logo: v.optional(v.string()),
-    rcKey: v.string(),
+    /* absent on the demo tower, which is never refreshed */
+    rcKey: v.optional(v.string()),
     rcProject: v.string(),
     users: v.number(),
     trials: v.number(),

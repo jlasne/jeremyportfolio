@@ -142,7 +142,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 #tip em{font-style:normal;color:var(--dim)}
 
 /* ── modal ───────────────────────────────────────────────────────────── */
-#modal{position:fixed;inset:0;z-index:40;display:none;background:rgba(3,5,12,.7);backdrop-filter:blur(4px);
+#modal{position:fixed;inset:0;z-index:40;display:none;background:rgba(3,5,12,.82);
   align-items:center;justify-content:center;padding:20px}
 #modal.on{display:flex}
 #modal .sheet{width:min(540px,100%);max-height:calc(100vh - 40px);overflow-y:auto;
@@ -166,6 +166,8 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 #modal .safe{background:rgba(77,232,208,.08);border-left:3px solid var(--cyan);padding:9px 12px;
   font-size:11.5px;line-height:1.55;margin:4px 0 6px;color:var(--ink)}
 #modal .field{margin-bottom:11px}
+#modal .two{display:grid;grid-template-columns:1fr 1fr;column-gap:10px}
+#modal .two input{min-width:0}
 #modal label{display:block;font-size:9px;letter-spacing:.11em;text-transform:uppercase;font-weight:700;
   color:var(--dim);margin-bottom:5px}
 #modal label em{font-style:normal;font-weight:400;opacity:.7;text-transform:none;letter-spacing:.03em;margin-left:5px}
@@ -255,16 +257,18 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
       <div class="field"><label>App logo, on the sign <em>optional</em></label>
         <div class="logo"><canvas id="fLogoPrev" width="16" height="16"></canvas><input type="file" id="fLogo" accept="image/*"></div></div>
       <div class="field"><label for="fKing">App name <em>optional</em></label>
-        <input type="text" id="fKing" placeholder="Leave empty and the tower names itself" autocomplete="off" spellcheck="false"></div>
-      <div class="field"><label for="fX">Founder handles on X <em class="req">required</em></label>
+        <input type="text" id="fKing" placeholder="Leave empty and it shows as Anonymous" autocomplete="off" spellcheck="false"></div>
+      <div class="field"><label for="fX">Founder handles on X <em>optional</em></label>
         <input type="text" id="fX" placeholder="jeremylasne, cofounder" autocomplete="off" spellcheck="false"></div>
+      <div class="two">
       <div class="field"><label for="fIOS">App Store link <em>optional</em></label>
         <input type="text" id="fIOS" placeholder="https://apps.apple.com/app/..." autocomplete="off" spellcheck="false"></div>
       <div class="field"><label for="fPlay">Play Store link <em>optional</em></label>
         <input type="text" id="fPlay" placeholder="https://play.google.com/store/apps/..." autocomplete="off" spellcheck="false"></div>
+      </div>
       <div class="veil">
         <label class="chk"><input type="checkbox" id="fAnonF"> 🎭 Hide my handle. Needs an app named or linked.</label>
-        <label class="chk"><input type="checkbox" id="fAnonA"> 🏙️ Hide my app. The tower takes a name of its own.</label>
+        <label class="chk"><input type="checkbox" id="fAnonA"> 🏙️ Hide my app. It turns anonymous.</label>
       </div>
       <div class="field"><label for="fProj">RevenueCat project ID <em class="req">required</em><em>in the dashboard URL: app.revenuecat.com/projects/<b>proj…</b>/</em></label>
         <input type="text" id="fProj" placeholder="proj1ab2c3d4" autocomplete="off" spellcheck="false"></div>
@@ -288,10 +292,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
    plus thirty days of history. Replace SEED with a fetch to go live.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-const SEED = [
-  {id:'first', name:'First tower', tag:'Kept private', founders:['jeremylasne'],
-   anonApp:true, seed:4242, joined:30, users:2100, trials:34, subs:68, mrr:540, curve:'grow'},
-]
+const SEED = [];
 
 /* ═══════════════════════════════════════════════════════════════════════════
    2. NUMBERS
@@ -465,8 +466,9 @@ function layoutTowers(ts) {
   ts.sort((a, b) => b.k.mrr - a.k.mrr);
   ts.forEach((t, i) => { t.rank = i + 1; });
   const gap = t => 10 + Math.round(t.rnd() * 14);
-  let left = 0, right = ts[0].w;
-  ts[0].x = 0;
+  // An empty lot is still a street to walk down.
+  let left = 0, right = ts.length ? ts[0].w : 0;
+  if (ts.length) ts[0].x = 0;
   for (let i = 1; i < ts.length; i++) {
     const t = ts[i];
     if (i % 2 === 1) { t.x = right + gap(t); right = t.x + t.w; }
@@ -977,7 +979,7 @@ function draw(dt) {
   }
   // Two searchlights sweep from the tallest roof. Drawn behind the depth
   // layers so the beams read as sky, not as paint on the buildings.
-  {
+  if (towers.length) {
     const t1 = towers[0];
     const ox = t1.x + t1.w / 2 - left, oy = BASE_Y - t1.floors * FLOOR_H - top - 2;
     g.save(); g.globalCompositeOperation = 'lighter';
@@ -1330,7 +1332,6 @@ document.getElementById('mGo').addEventListener('click', async () => {
   const key = document.getElementById('fKey').value.trim();
   const proj = document.getElementById('fProj').value.trim();
   const note = document.getElementById('mNote'), go = document.getElementById('mGo');
-  if (!handle) { note.textContent = 'A founder handle on X is required. It is how the tower is yours.'; return; }
   if ((anonF || anonA) && !typed && !store) { note.textContent = 'To stay anonymous, name the app or add a store link.'; return; }
   if (!key) { note.textContent = 'The RevenueCat key is required. It is where the numbers come from.'; return; }
   if (!proj) { note.textContent = 'The project ID is required. It is in the dashboard URL after /projects/.'; return; }
@@ -1348,7 +1349,7 @@ document.getElementById('mGo').addEventListener('click', async () => {
   const seed = (hash1(handle.length * 977 + typed.length * 31 + (REMOTE.length + LOCAL.length) * 7 + 13, 99) * 1e6) | 0;
   const rec = {
     id: 'local-' + seed, local: true, name: typed || 'Anonymous', tag: 'Read from RevenueCat',
-    founders: handle.split(',').map(h => h.trim().replace(/^@/, '')).filter(Boolean),
+    founders: handle ? handle.split(',').map(h => h.trim().replace(/^@/, '')).filter(Boolean) : [],
     ios: document.getElementById('fIOS').value.trim() || undefined,
     play: document.getElementById('fPlay').value.trim() || undefined,
     anonFounder: anonF, anonApp: anonA, seed, joined: 0,
@@ -1453,7 +1454,7 @@ function start() {
       buildWorld(); cam.x = frac * worldW; clampCam();
       if (selected) selected = towers.find(t => t.k.id === selected.k.id) || null;
     }
-    stepMotion(dt); draw(dt);
+    if (!modal.classList.contains('on')) { stepMotion(dt); draw(dt); }
     requestAnimationFrame(frame);
   }
   performance.mark('city-first-frame');

@@ -73,7 +73,6 @@ export const breakGround = mutation({
   },
   handler: async (ctx, a) => {
     const founders = a.founders.map((f) => f.trim().replace(/^@/, "").slice(0, 40)).filter(Boolean).slice(0, 6);
-    if (!founders.length) throw new Error("A founder handle on X is required");
     if (!/^sk_/.test(a.rcKey) || a.rcKey.length > 200) throw new Error("That does not look like a RevenueCat V2 key");
     if (!a.rcProject.trim()) throw new Error("The project ID is required");
     if (a.logo && (a.logo.length > 8000 || !/^data:image\/png;base64,/.test(a.logo))) throw new Error("The logo must be a small PNG");
@@ -101,12 +100,34 @@ export const breakGround = mutation({
   },
 });
 
+/* The one tower the city opens with. No key, so the daily pull leaves it be.
+   Run once: npx convex run --prod city:plant */
+export const plant = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+    const n = { users: 2100, trials: 34, subs: 68, mrr: 540, rev28: 560, newCustomers: 3 };
+    const history = [];
+    for (let i = 29; i >= 0; i--) {
+      const f = Math.exp(-0.0115 * i);
+      history.push({ at: now - i * DAY, users: Math.round(n.users * f), trials: Math.round(n.trials * f), subs: Math.round(n.subs * f), mrr: Math.round(n.mrr * f) });
+    }
+    await ctx.db.insert("towers", {
+      name: "Anonymous", tag: "Kept private", founders: ["jeremylasne"], anonFounder: false, anonApp: true, seed: 4242,
+      rcProject: "", ...n, currency: "USD", history, createdAt: now - 30 * DAY, refreshedAt: now,
+    });
+    return null;
+  },
+});
+
 /* ── the daily pull ─────────────────────────────────────────────────────── */
 
 export const keys = internalQuery({
   args: {},
   handler: async (ctx) =>
-    (await ctx.db.query("towers").collect()).map((t) => ({ id: t._id, rcKey: t.rcKey, rcProject: t.rcProject })),
+    (await ctx.db.query("towers").collect())
+      .filter((t) => t.rcKey)
+      .map((t) => ({ id: t._id, rcKey: t.rcKey!, rcProject: t.rcProject })),
 });
 
 export const record = internalMutation({
