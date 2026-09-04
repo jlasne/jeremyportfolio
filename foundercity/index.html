@@ -178,10 +178,10 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 #modal .logo{display:flex;align-items:center;gap:10px}
 #modal .logo canvas{width:36px;height:36px;image-rendering:pixelated;background:#0b0e1c;border:1px solid var(--line)}
 #modal .logo input{font-size:11px;color:var(--dim)}
-#modal .veil{background:rgba(140,170,255,.05);border:1px solid var(--line);border-radius:3px;padding:9px 11px;margin-bottom:12px}
 #modal .chk{display:flex;align-items:flex-start;gap:8px;font-size:11px;line-height:1.45;letter-spacing:0;
   text-transform:none;color:var(--ink);font-weight:500;cursor:pointer}
-#modal .chk+.chk{margin-top:7px}
+#modal .lr{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+#modal .lr .chk{font-size:10px;margin:0 0 5px;align-items:center;cursor:pointer}
 #modal .chk input{margin-top:1px;accent-color:var(--amber)}
 #modal .go{width:100%;background:var(--amber);color:#1a1200;border-radius:3px;padding:12px;font-weight:700;
   letter-spacing:.08em;text-transform:uppercase;font-size:11px;margin-top:4px}
@@ -256,19 +256,17 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
       <h3>Your tower</h3>
       <div class="field"><label>App logo, on the sign <em>optional</em></label>
         <div class="logo"><canvas id="fLogoPrev" width="16" height="16"></canvas><input type="file" id="fLogo" accept="image/*"></div></div>
-      <div class="field"><label for="fKing">App name <em>optional</em></label>
+      <div class="field"><div class="lr"><label for="fKing">App name <em>optional</em></label>
+          <label class="chk"><input type="checkbox" id="fAnonA"> 🏙️ Hide it, it turns anonymous</label></div>
         <input type="text" id="fKing" placeholder="Leave empty and it shows as Anonymous" autocomplete="off" spellcheck="false"></div>
-      <div class="field"><label for="fX">Founder handles on X <em>optional</em></label>
+      <div class="field"><div class="lr"><label for="fX">Founder handles on X <em>optional</em></label>
+          <label class="chk"><input type="checkbox" id="fAnonF"> 🎭 Hide them, needs an app named or linked</label></div>
         <input type="text" id="fX" placeholder="jeremylasne, cofounder" autocomplete="off" spellcheck="false"></div>
       <div class="two">
       <div class="field"><label for="fIOS">App Store link <em>optional</em></label>
         <input type="text" id="fIOS" placeholder="https://apps.apple.com/app/..." autocomplete="off" spellcheck="false"></div>
       <div class="field"><label for="fPlay">Play Store link <em>optional</em></label>
         <input type="text" id="fPlay" placeholder="https://play.google.com/store/apps/..." autocomplete="off" spellcheck="false"></div>
-      </div>
-      <div class="veil">
-        <label class="chk"><input type="checkbox" id="fAnonF"> 🎭 Hide my handle. Needs an app named or linked.</label>
-        <label class="chk"><input type="checkbox" id="fAnonA"> 🏙️ Hide my app. It turns anonymous.</label>
       </div>
       <div class="field"><label for="fProj">RevenueCat project ID <em class="req">required</em><em>in the dashboard URL: app.revenuecat.com/projects/<b>proj…</b>/</em></label>
         <input type="text" id="fProj" placeholder="proj1ab2c3d4" autocomplete="off" spellcheck="false"></div>
