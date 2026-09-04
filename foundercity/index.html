@@ -468,7 +468,7 @@ function makeTower(k, idx) {
 
   return {
     k, idx, hist, churn, floors, bays, lit, darkTop, crane, crowd, revenue, tier, name, tag, kind, conv,
-    logo: k.logoCv || null,
+    logo: k.anonApp ? ANON_LOGO : (k.logoCv || null),
     hue: hueOf(idx), rnd, sections, wk, newUsers,
     w: bays * BAY_W + 2, h: floors * FLOOR_H + ROOF_PAD,
     win: null, x: 0, rank: 0,
@@ -541,6 +541,15 @@ const EMPTY = '#0d1122';
 function px(g, x, y, w, h, c) { g.fillStyle = c; g.fillRect(x, y, w, h); }
 function hsl(h, s, l) { return 'hsl(' + h.toFixed(0) + ',' + s + '%,' + l + '%)'; }
 
+/* A private app wears one mask: a white question mark on a black block. */
+const ANON_LOGO = (() => {
+  const cv = document.createElement('canvas'); cv.width = cv.height = 16;
+  const g = cv.getContext('2d');
+  px(g, 0, 0, 16, 16, '#000');
+  const Q = ['.####.', '##..##', '##..##', '....##', '...##.', '..##..', '..##..', '......', '..##..', '..##..'];
+  Q.forEach((row, y) => [...row].forEach((c, x) => { if (c === '#') px(g, 5 + x, 3 + y, 1, 1, '#fff'); }));
+  return cv;
+})();
 let worldW = 0;
 const towers = [];
 let skyline, skyCtx, street, front, far, mid;
@@ -1363,7 +1372,7 @@ document.getElementById('mGo').addEventListener('click', async () => {
     anonFounder: anonF, anonApp: anonA, seed, joined: 0,
     users: nums.users, trials: nums.trials, subs: nums.subs, mrr: nums.mrr, rev28: nums.rev28,
     newCustomers: nums.newCustomers, curve: 'exact',
-    logo: pendingLogo ? pendingLogo.toDataURL() : undefined,
+    logo: pendingLogo && !anonA ? pendingLogo.toDataURL() : undefined,
   };
   go.textContent = 'Breaking ground…';
   let saved = null;
