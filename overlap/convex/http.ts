@@ -91,6 +91,10 @@ const door = httpAction(async (ctx, request) => {
         return ok(await ctx.runMutation(api.meet.book, args));
       case "feedback.send":
         return ok(await ctx.runMutation(api.feedback.send, args));
+      case "city.towers":
+        return ok(await ctx.runQuery(api.city.towers, args));
+      case "city.breakGround":
+        return ok(await ctx.runMutation(api.city.breakGround, args));
       default:
         return bad("Unknown operation");
     }

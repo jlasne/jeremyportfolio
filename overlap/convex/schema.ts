@@ -104,6 +104,37 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_meeting_user", ["meetingId", "userId"]),
 
+  /* Founder City — one tower per app. The RevenueCat key is kept here so
+     the daily pull can refresh the numbers; it is never returned to a page.
+     Only Charts metrics read keys are expected: nothing else is asked of it. */
+  towers: defineTable({
+    name: v.string(),
+    tag: v.string(),
+    founders: v.array(v.string()),
+    ios: v.optional(v.string()),
+    play: v.optional(v.string()),
+    anonFounder: v.boolean(),
+    anonApp: v.boolean(),
+    seed: v.number(),
+    /* 16x16 pixel logo as a data URL, about a kilobyte */
+    logo: v.optional(v.string()),
+    rcKey: v.string(),
+    rcProject: v.string(),
+    users: v.number(),
+    trials: v.number(),
+    subs: v.number(),
+    mrr: v.number(),
+    rev28: v.number(),
+    newCustomers: v.number(),
+    currency: v.string(),
+    /* one row per daily pull, newest last, thirty kept */
+    history: v.array(v.object({ at: v.number(), users: v.number(), trials: v.number(), subs: v.number(), mrr: v.number() })),
+    createdAt: v.number(),
+    refreshedAt: v.number(),
+    /* set when a pull failed, cleared when one succeeds */
+    error: v.optional(v.string()),
+  }),
+
   feedback: defineTable({
     text: v.string(),
     wants: v.array(v.string()),

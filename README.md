@@ -140,10 +140,14 @@ with a fetch to wire it to real accounts.
 
 Founder City reads RevenueCat from the browser: RevenueCat's API answers
 cross-origin requests from this domain, so "Break ground" makes one call to
-the overview metrics endpoint with the founder's own key and project id, keeps
-the six numbers, and drops the key. Towers added that way live in that
-browser's storage until the daily server pull exists; changes and removals go
-through hey@jeremylasne.com.
+the overview metrics endpoint with the founder's own key and project id and
+keeps the six numbers. The tower and the key then go to the Overlap Convex
+deployment (`overlap/convex/city.ts`, table `towers`, ops `city.towers` and
+`city.breakGround` on the same `/overlap` door); a cron re-reads every tower
+at 04:00 UTC and keeps thirty days of history, and the key never leaves the
+server. If the door cannot be reached the tower stays in that browser's
+storage. Changes and removals go through hey@jeremylasne.com. Deploy with
+`cd overlap && npx convex deploy`.
 
 **Founder City** is the same data as a skyline, scrolling left and right
 and nothing else: the tallest tower always fills the screen. Height is MRR on

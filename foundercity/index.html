@@ -272,7 +272,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
       <div class="field"><label for="fKey">RevenueCat V2 key, charts metrics read only <em class="req">required</em></label>
         <input type="password" id="fKey" placeholder="sk_..." autocomplete="off" spellcheck="false"></div>
       <button class="go" id="mGo">Break ground</button>
-      <p class="fine" id="mNote">Your browser reads the six numbers from RevenueCat once, right now. The key is used for that one call and is not stored anywhere.</p>
+      <p class="fine" id="mNote">Your browser reads the six numbers from RevenueCat once, right now. The key then lives on the server, for the refresh every day at 04:00 UTC, and is never shown to anyone.</p>
       <p class="fine">To change or remove a tower later, email <a href="mailto:hey@jeremylasne.com">hey@jeremylasne.com</a>.</p>
       <div class="rc"><svg viewBox="0 0 20 18" aria-hidden="true"><path d="M3 9V2l4.2 3.4h5.6L17 2v7a7 6.6 0 0 1-14 0Z" fill="#f2545b"/><circle cx="7.4" cy="9" r="1.15" fill="#1f1f47"/><circle cx="12.6" cy="9" r="1.15" fill="#1f1f47"/><path d="M9 11.6h2l-1 1.5Z" fill="#1f1f47"/></svg>Verified by RevenueCat</div>
     </div>
@@ -344,7 +344,12 @@ function buildHistory(k) {
   const rnd = mulberry(k.seed * 17 + 3);
   const days = 30, hist = [];
   if (k.curve === 'exact') {
-    for (let i = 0; i < days; i++) hist.push({ users: k.users, trials: k.trials, subs: k.subs, mrr: k.mrr });
+    // Real daily pulls, padded at the front with the oldest one until there are thirty.
+    const real = k.history || [];
+    for (let i = 0; i < days; i++) {
+      const r = real[Math.max(0, real.length - days + i)] || { users: k.users, trials: k.trials, subs: k.subs, mrr: k.mrr };
+      hist.push({ users: r.users, trials: r.trials, subs: r.subs, mrr: r.mrr });
+    }
     return hist;
   }
   const shape = { grow: 0.0115, flat: 0.0008, shrink: -0.0075, spike: 0.006 }[k.curve];
@@ -364,14 +369,16 @@ function buildHistory(k) {
   last.users = k.users; last.trials = k.trials; last.subs = k.subs; last.mrr = k.mrr;
   return hist;
 }
-function churn30(hist) {
+function churn30(hist, real) {
   let lost = 0;
   for (let i = 1; i < hist.length; i++) {
     const d = hist[i - 1].subs - hist[i].subs;
     if (d > 0) lost += d;
   }
-  return Math.max(lost, Math.round(hist[hist.length - 1].subs * 0.03));
+  return real ? lost : Math.max(lost, Math.round(hist[hist.length - 1].subs * 0.03));
 }
+/* Read today, so there is no yesterday to compare with yet. */
+const isFresh = k => k.curve === 'exact' && !(k.history && k.history.length >= 2);
 
 const VEIL_A = ['Ash', 'Bram', 'Cald', 'Dun', 'Eld', 'Fern', 'Gray', 'Holl', 'Kest',
                 'Mor', 'Nor', 'Oak', 'Pell', 'Quar', 'Rook', 'Stan', 'Thorn', 'Vale', 'Wyn'];
@@ -380,17 +387,25 @@ const VEIL_B = ['bury', 'combe', 'fell', 'ford', 'gate', 'hollow', 'march', 'mer
 const veilName = seed => VEIL_A[seed % VEIL_A.length] + VEIL_B[((seed / 7) | 0) % VEIL_B.length];
 const hueOf = i => (i * 137.508) % 360;
 
-/* Towers founded from this page. They live in this browser until the server
-   exists; each one breaks ground as a construction site and gets its numbers
-   at the first daily pull. */
+/* Towers founded from this page live on the server (Convex, the same door
+   Overlap uses) and get their numbers again every day at 04:00 UTC. When the
+   server cannot be reached the tower stays in this browser instead. */
+const CITY_API = 'https://fiery-eel-944.eu-west-1.convex.site/overlap';
+function cx(op, args, ms) {
+  const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), ms || 8000);
+  return fetch(CITY_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ op, args: args || {} }), signal: ctl.signal })
+    .then(r => r.json()).then(j => { clearTimeout(timer); if (j && j.ok) return j.value; throw new Error((j && j.error) || 'Something went wrong'); },
+          e => { clearTimeout(timer); throw e; });
+}
+let REMOTE = [];
 const LOCAL_KEY = 'foundercity.local';
 let LOCAL = [];
 try { LOCAL = JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]'); } catch (e) { LOCAL = []; }
 function saveLocal() { try { localStorage.setItem(LOCAL_KEY, JSON.stringify(LOCAL)); } catch (e) {} }
-const allSeeds = () => SEED.concat(LOCAL);
+const allSeeds = () => SEED.concat(REMOTE, LOCAL);
 /* A stored logo is a data URL; the baker wants a canvas. */
 function loadLogos() {
-  return Promise.all(LOCAL.filter(k => k.logo && !k.logoCv).map(k => new Promise(res => {
+  return Promise.all(REMOTE.concat(LOCAL).filter(k => k.logo && !k.logoCv).map(k => new Promise(res => {
     const img = new Image();
     img.onload = () => { const cv = document.createElement('canvas'); cv.width = cv.height = 16; cv.getContext('2d').drawImage(img, 0, 0, 16, 16); k.logoCv = cv; res(); };
     img.onerror = () => res();
@@ -429,7 +444,7 @@ function baysFor(users, floors) {
 
 function makeTower(k, idx) {
   const hist = buildHistory(k);
-  const churn = k.curve === 'exact' ? 0 : churn30(hist);
+  const churn = isFresh(k) ? 0 : churn30(hist, k.curve === 'exact');
   const floors = floorsFor(k.mrr);
   const bays = baysFor(k.users, floors);
   // The paying share of the audience, stretched so a typical ten percent
@@ -439,7 +454,7 @@ function makeTower(k, idx) {
   const darkTop = Math.min(Math.round(floors * clamp(churn / Math.max(1, k.subs), 0, 0.45)), Math.max(0, floors - 3));
   const wk = hist[29].mrr - hist[22].mrr;
   const newUsers = Math.max(0, hist[29].users - hist[22].users);
-  const crane = k.curve === 'exact' ? (k.newCustomers || 0) > 0 : wk > 0 && newUsers > 0;
+  const crane = isFresh(k) ? (k.newCustomers || 0) > 0 : wk > 0 && newUsers > 0;
   const crowd = clamp(Math.round(k.trials / 10), 0, 40);
   const revenue = k.rev28 !== undefined ? Math.round(k.rev28) : Math.round(k.mrr * (k.joined / 30 * 0.8 + 1));
   const tier = revenue >= 1e6 ? 'gold' : revenue >= 250000 ? 'amber' : revenue >= 25000 ? 'cyan' : 'white';
@@ -1156,7 +1171,7 @@ function openCard(t) {
   else for (const f of t.k.founders) chips.push('<a href="https://x.com/' + f + '" target="_blank" rel="noopener">@' + f + '</a>');
   if (!t.k.anonApp && t.k.ios) chips.push('<a href="' + t.k.ios + '" target="_blank" rel="noopener"> App Store</a>');
   if (!t.k.anonApp && t.k.play) chips.push('<a href="' + t.k.play + '" target="_blank" rel="noopener">▶ Play</a>');
-  if (t.k.local) chips.push('<a class="mail" href="mailto:hey@jeremylasne.com?subject=' + encodeURIComponent('Founder City: ' + t.name) + '">✉ change or remove: hey@jeremylasne.com</a>');
+  if (t.k.local || t.k.server) chips.push('<a class="mail" href="mailto:hey@jeremylasne.com?subject=' + encodeURIComponent('Founder City: ' + t.name) + '">✉ change or remove: hey@jeremylasne.com</a>');
   document.getElementById('cChips').innerHTML = chips.join('');
   const litPct = Math.round(t.lit * 100);
   document.getElementById('cStats').innerHTML = [
@@ -1164,11 +1179,11 @@ function openCard(t) {
     [fmt(t.k.users), 'Active users', 'the size: ' + fmt(t.floors * t.bays) + ' windows, ' + t.bays + ' across'],
     [fmt(t.k.subs), 'Subscribers', 'lit windows, about ' + litPct + '%, ' + (t.conv * 100).toFixed(1) + '% of users'],
     [fmt(t.k.trials), 'Free trials', 'the crowd at the door: ' + t.crowd],
-    [t.k.curve === 'exact' ? '–' : fmt(t.churn), 'Lost, 30 days', t.k.curve === 'exact' ? 'known after the second daily pull' : t.darkTop ? 'the dark floors on top: ' + t.darkTop : 'no dark floors'],
+    [isFresh(t.k) ? '–' : fmt(t.churn), 'Lost, 30 days', isFresh(t.k) ? 'known after the second daily pull' : t.darkTop ? 'the dark floors on top: ' + t.darkTop : 'no dark floors'],
     [money(t.revenue), t.k.rev28 !== undefined ? 'Revenue, 28 days' : 'Lifetime revenue', 'the sign: ' + t.tier + (t.crane ? ' · crane up, still growing' : '')],
   ].map(([n, l, w]) => '<div class="stat"><div class="n">' + n + '</div><div class="l">' + l + '</div><div class="w">' + w + '</div></div>').join('');
   const d = t.wk, de = document.getElementById('cDelta');
-  const fresh = t.k.curve === 'exact';
+  const fresh = isFresh(t.k);
   de.textContent = fresh ? '' : (d >= 0 ? '+' : '') + money(d) + ' in 7 days';
   de.className = d > 0 ? 'up' : d < 0 ? 'down' : 'flat';
   document.getElementById('cSparkLab').textContent = fresh ? 'Read from RevenueCat today. The chart starts with the second daily pull.' : 'MRR, 30 days';
@@ -1290,7 +1305,8 @@ document.getElementById('fLogo').addEventListener('change', (e) => {
   img.src = URL.createObjectURL(f);
 });
 /* One call to RevenueCat from this browser, with the founder's own key,
-   for the six numbers on the overview. The key is used here and dropped. */
+   for the six numbers on the overview. Then the key goes to the server for
+   the daily pull, or is dropped if the server cannot be reached. */
 const RC_API = 'https://api.revenuecat.com/v2';
 async function readRevenueCat(key, projectId) {
   const headers = { Authorization: 'Bearer ' + key, Accept: 'application/json' };
@@ -1343,9 +1359,8 @@ document.getElementById('mGo').addEventListener('click', async () => {
     return;
   }
   document.getElementById('fKey').value = '';
-  go.disabled = false; go.textContent = 'Break ground';
 
-  const seed = (hash1(handle.length * 977 + typed.length * 31 + LOCAL.length * 7 + 13, 99) * 1e6) | 0;
+  const seed = (hash1(handle.length * 977 + typed.length * 31 + (REMOTE.length + LOCAL.length) * 7 + 13, 99) * 1e6) | 0;
   const rec = {
     id: 'local-' + seed, local: true, name: typed || veilName(seed), tag: 'Read from RevenueCat',
     founders: handle.split(',').map(h => h.trim().replace(/^@/, '')).filter(Boolean),
@@ -1356,7 +1371,21 @@ document.getElementById('mGo').addEventListener('click', async () => {
     newCustomers: nums.newCustomers, curve: 'exact',
     logo: pendingLogo ? pendingLogo.toDataURL() : undefined,
   };
-  LOCAL.push(rec); saveLocal();
+  go.textContent = 'Breaking ground…';
+  let saved = null;
+  try {
+    saved = await cx('city.breakGround', {
+      name: typed || undefined, founders: rec.founders, ios: rec.ios, play: rec.play, anonFounder: anonF, anonApp: anonA,
+      seed, logo: rec.logo, rcKey: key, rcProject: proj, currency: nums.currency,
+      users: nums.users, trials: nums.trials, subs: nums.subs, mrr: nums.mrr, rev28: nums.rev28, newCustomers: nums.newCustomers,
+    });
+  } catch (e) {
+    // The server said no: tell the founder. The server is unreachable: keep the tower here.
+    if (e && e.message && !/fetch|network|abort|JSON/i.test(e.message)) { go.disabled = false; go.textContent = 'Break ground'; note.textContent = e.message; return; }
+  }
+  go.disabled = false; go.textContent = 'Break ground';
+  if (saved) { REMOTE.push(saved); rec.id = saved.id; }
+  else { LOCAL.push(rec); saveLocal(); }
   closeModal();
   ['fKing', 'fX', 'fIOS', 'fPlay', 'fKey', 'fProj'].forEach(id => { document.getElementById(id).value = ''; });
   document.getElementById('fAnonA').checked = false; document.getElementById('fAnonF').checked = false;
@@ -1404,7 +1433,14 @@ function buildWorld() {
 
 function boot() {
   resize();
-  loadLogos().then(start);
+  let started = false;
+  const go = () => { if (started) return; started = true; loadLogos().then(start); };
+  cx('city.towers', {}, 6000).then(list => {
+    if (!Array.isArray(list)) return;
+    REMOTE = list;
+    if (started) rebuild(); else go();
+  }, () => go());
+  setTimeout(go, 1200);
 }
 function start() {
   buildWorld();
