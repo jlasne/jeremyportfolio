@@ -56,7 +56,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 #band{top:0;left:0;right:0;height:46px;display:flex;align-items:stretch;background:var(--glass);
   border-bottom:1px solid var(--line);backdrop-filter:blur(6px);z-index:20}
 #band .mark{padding:0 14px;display:flex;align-items:center;gap:9px;border-right:1px solid var(--line);flex:0 0 auto}
-#band .mark canvas{width:22px;height:22px;image-rendering:pixelated}
+#band .mark canvas{width:22px;height:22px;image-rendering:pixelated;filter:drop-shadow(0 0 4px rgba(255,184,77,.45))}
 #band .mark b{font-size:12px;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
 #band .mark small{display:block;font-size:9px;letter-spacing:.06em;color:var(--dim);margin-top:2px;white-space:nowrap}
 #band .totals{flex:1;display:flex;align-items:stretch;overflow-x:auto;scrollbar-width:none}
@@ -555,6 +555,20 @@ function drawWin(g, t, f, b) {
   const pal = t.palette[f * t.bays + b] ? COOL : WARM;
   px(g, p.x, p.y, 2, 3, pal[st]);
   if (st === 3) px(g, p.x, p.y, 1, 1, '#ffffff');
+  if (glowRaw && st >= 2) px(glowRaw, p.x, p.y, 2, 3, pal[2]);
+}
+let glowRaw = null, glowCtx = null, glow = null;
+/* The bloom is the lit windows drawn once more and blurred once. It is a haze
+   that never updates, and nobody can tell: the eye reads the sharp windows
+   and feels the glow. */
+function bakeGlow() {
+  glow = document.createElement('canvas'); glow.width = worldW; glow.height = WORLD_H;
+  const g = glow.getContext('2d');
+  g.filter = 'blur(5px)';
+  g.drawImage(glowRaw.canvas, 0, 0);
+  g.filter = 'none';
+  g.drawImage(glow, 0, 0);
+  glowRaw = null;
 }
 
 /* Bake a tower body onto the skyline, then seed its windows. */
@@ -564,11 +578,18 @@ function bakeTower(g, t) {
   for (const s of t.sections) {
     const x0 = t.x + 1 + (t.bays - s.bays) / 2 * BAY_W, ww = s.bays * BAY_W;
     const yT = BASE_Y - s.f1 * FLOOR_H, yB = BASE_Y - s.f0 * FLOOR_H;
+    // A one pixel outline in near-black separates a tower from the sky, its
+    // neighbours and the buildings behind it. Pixel art lives on that line.
+    px(g, x0 - 2, yT - 1, ww + 4, yB - yT + 1, '#06070f');
     px(g, x0 - 1, yT, ww + 2, yB - yT, body);
     px(g, x0 - 1, yT, 1, yB - yT, edgeL);
     px(g, x0 + ww, yT, 1, yB - yT, edgeR);
     px(g, x0 - 1, yT, ww + 2, 1, par);
     for (let y = yT + FLOOR_H; y < yB; y += FLOOR_H) px(g, x0, y, ww, 1, hsl(h, 22, 11));
+    // Mullions every four bays, a shade lighter, so a wide facade has rhythm.
+    for (let b = 4; b < s.bays; b += 4) px(g, x0 + b * BAY_W, yT + 1, 1, yB - yT - 1, hsl(h, 20, 17));
+    // A ledge where the tower steps back.
+    if (s.f0 > 0) px(g, x0 - 3, yB, ww + 6, 1, hsl(h, 18, 30));
   }
   // Unfinished floors at the top: a darker shell with no glass.
   if (t.darkTop > 0) {
@@ -635,6 +656,14 @@ function bakeTower(g, t) {
     const wx = rx + rw - 8;
     px(g, wx + 1, top - 7, 4, 6, '#4a4f66'); px(g, wx + 1, top - 7, 4, 1, '#5c627e');
     px(g, wx, top - 1, 1, 1, '#2b2f44'); px(g, wx + 5, top - 1, 1, 1, '#2b2f44');
+  }
+  if (t.floors >= 20 && rw > 12 && t.rnd() < 0.45) {
+    const dx2 = rx + 1 + ((t.rnd() * (rw - 5)) | 0);
+    px(g, dx2 + 1, top - 5, 1, 5, '#6a7290'); px(g, dx2, top - 7, 3, 3, '#9aa3c7'); px(g, dx2 + 1, top - 6, 1, 1, '#dfe6ff');
+  }
+  if (t.kind === 'homes' && rw > 16 && t.rnd() < 0.6) {
+    px(g, rx + 2, top - 1, rw - 4, 1, '#2e6b3a'); px(g, rx + 3, top - 2, rw - 6, 1, '#3f8a47');
+    for (let gx2 = rx + 4; gx2 < rx + rw - 4; gx2 += 5) px(g, gx2, top - 3, 1, 1, '#6cc06a');
   }
   if (t.floors >= 90 && rw > 20) {
     const hx = rx + 3, hw = 9;
@@ -963,10 +992,17 @@ function draw(dt) {
     }
     g.restore();
   }
-  // Depth.
+  // Depth: a band of haze low in the sky, the far row, more haze, the near
+  // row, then the bloom of the city's own windows, then the city.
+  const hz = g.createLinearGradient(0, BASE_Y - 260 - top, 0, BASE_Y - top);
+  hz.addColorStop(0, 'rgba(90,70,130,0)'); hz.addColorStop(1, 'rgba(90,70,130,0.30)');
+  g.fillStyle = hz; g.fillRect(0, BASE_Y - 260 - top, bw, 260);
   g.drawImage(far, -Math.round(left * 0.35), -top);
+  const hz2 = g.createLinearGradient(0, BASE_Y - 140 - top, 0, BASE_Y - top);
+  hz2.addColorStop(0, 'rgba(24,20,48,0)'); hz2.addColorStop(1, 'rgba(24,20,48,0.55)');
+  g.fillStyle = hz2; g.fillRect(0, BASE_Y - 140 - top, bw, 140);
   g.drawImage(mid, -Math.round(left * 0.6), -top);
-  // The city itself.
+  if (glow) { g.globalCompositeOperation = 'lighter'; g.globalAlpha = 0.55; g.drawImage(glow, left, top, bw, bh, 0, 0, bw, bh); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; }
   g.drawImage(skyline, left, top, bw, bh, 0, 0, bw, bh);
   // Dynamic detail on the towers.
   for (const t of towers) {
@@ -977,8 +1013,10 @@ function draw(dt) {
     // Sign glow.
     const s = t.sign;
     if (z >= 1) {
-      g.globalAlpha = t.tier === 'gold' ? 0.28 : 0.16;
-      g.fillStyle = s.color; g.fillRect(s.x - left - 2, s.y - top - 2, s.w + 4, s.h + 4);
+      g.globalAlpha = t.tier === 'gold' ? 0.22 : 0.12;
+      g.fillStyle = s.color; g.fillRect(s.x - left - 4, s.y - top - 4, s.w + 8, s.h + 8);
+      g.globalAlpha = t.tier === 'gold' ? 0.30 : 0.18;
+      g.fillRect(s.x - left - 2, s.y - top - 2, s.w + 4, s.h + 4);
       g.globalAlpha = 1;
     }
     if (t.crane) {
@@ -996,9 +1034,13 @@ function draw(dt) {
       if (Math.sin(T * 2.4 + t.idx) > 0.4) px(g, mx, jibY - 1, 1, 1, '#ff4d4d');
     }
     if (t === selected || t === hovered) {
-      g.strokeStyle = t === selected ? 'rgba(255,184,77,0.9)' : 'rgba(77,232,208,0.85)';
+      const col = t === selected ? '255,184,77' : '77,232,208';
+      const y0 = Math.min(roof, t.sign.y - top) - 3;
+      g.fillStyle = 'rgba(' + col + ',0.07)';
+      g.fillRect(tx - 2, y0, t.w + 4, BASE_Y - top - y0);
+      g.strokeStyle = 'rgba(' + col + ',0.9)';
       g.lineWidth = 1;
-      g.strokeRect(tx - 1.5, roof - 1.5, t.w + 3, BASE_Y - top - roof + 3);
+      g.strokeRect(tx - 2.5, y0 - 0.5, t.w + 5, BASE_Y - top - y0 + 1);
     }
   }
   // Street, then the wet reflection of the lobbies in the road, then the lamps.
@@ -1348,7 +1390,10 @@ function buildWorld() {
 
   skyline = document.createElement('canvas'); skyline.width = worldW; skyline.height = WORLD_H;
   skyCtx = skyline.getContext('2d');
+  const gr = document.createElement('canvas'); gr.width = worldW; gr.height = WORLD_H;
+  glowRaw = gr.getContext('2d');
   for (const t of towers) bakeTower(skyCtx, t);
+  bakeGlow();
   street = bakeStreet();
   front = bakeFront();
   far = bakeSilhouette(Math.ceil(worldW * 0.35) + 2400, { seed: 11, minW: 10, maxW: 34, minH: 40, maxH: 210, body: '#0d1126', edge: '#171d3a', lit: 0.10, win: '#26305a', winWarm: '#4a3f2a' });
