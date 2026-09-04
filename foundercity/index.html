@@ -119,6 +119,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   border:1px solid var(--line);padding:3px 7px;border-radius:3px;background:rgba(140,170,255,.06)}
 #card .chips a:hover{background:rgba(140,170,255,.16)}
 #card .chips .anon{border-style:dashed;color:var(--dim)}
+#card .chips .rm{color:#ff6b6b;border-color:rgba(255,107,107,.35);cursor:pointer}
 #card .stats{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line)}
 #card .stat{padding:8px 12px 9px;border-bottom:1px solid var(--line)}
 #card .stat:nth-child(odd){border-right:1px solid var(--line)}
@@ -145,10 +146,10 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 #modal.on{display:flex}
 #modal .sheet{width:min(540px,100%);max-height:calc(100vh - 40px);overflow-y:auto;
   scrollbar-width:thin;scrollbar-color:rgba(140,170,255,.3) transparent}
-#modal .hd{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);
-  position:sticky;top:0;background:rgba(9,12,24,.96)}
-#modal .hd h2{font-size:15px;flex:1;font-weight:700;letter-spacing:.04em}
-#modal .hd small{display:block;font-size:9px;letter-spacing:.06em;color:var(--dim);margin-top:3px;font-weight:400}
+#modal .sheet > .hd{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);
+  position:sticky;top:0;z-index:2;background:rgba(9,12,24,.97)}
+#modal .sheet > .hd h2{font-size:15px;flex:1;font-weight:700;letter-spacing:.04em}
+#modal .sheet > .hd small{display:block;font-size:9px;letter-spacing:.06em;color:var(--dim);margin-top:3px;font-weight:400}
 #modal .bd{padding:16px}
 #modal p{font-size:12px;line-height:1.6;margin-bottom:12px;color:var(--dim)}
 #modal h3{font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--dim);
@@ -223,7 +224,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   <div class="chips" id="cChips"></div>
   <div class="stats" id="cStats"></div>
   <div class="spark">
-    <div class="lab"><span>MRR, 30 days</span><span id="cDelta"></span></div>
+    <div class="lab"><span id="cSparkLab">MRR, 30 days</span><span id="cDelta"></span></div>
     <canvas id="cSpark" width="600" height="120"></canvas>
   </div>
 </div>
@@ -367,6 +368,24 @@ const VEIL_B = ['bury', 'combe', 'fell', 'ford', 'gate', 'hollow', 'march', 'mer
 const veilName = seed => VEIL_A[seed % VEIL_A.length] + VEIL_B[((seed / 7) | 0) % VEIL_B.length];
 const hueOf = i => (i * 137.508) % 360;
 
+/* Towers founded from this page. They live in this browser until the server
+   exists; each one breaks ground as a construction site and gets its numbers
+   at the first daily pull. */
+const LOCAL_KEY = 'foundercity.local';
+let LOCAL = [];
+try { LOCAL = JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]'); } catch (e) { LOCAL = []; }
+function saveLocal() { try { localStorage.setItem(LOCAL_KEY, JSON.stringify(LOCAL)); } catch (e) {} }
+const allSeeds = () => SEED.concat(LOCAL);
+/* A stored logo is a data URL; the baker wants a canvas. */
+function loadLogos() {
+  return Promise.all(LOCAL.filter(k => k.logo && !k.logoCv).map(k => new Promise(res => {
+    const img = new Image();
+    img.onload = () => { const cv = document.createElement('canvas'); cv.width = cv.height = 16; cv.getContext('2d').drawImage(img, 0, 0, 16, 16); k.logoCv = cv; res(); };
+    img.onerror = () => res();
+    img.src = k.logo;
+  })));
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    3. WHAT A TOWER IS
    Height is MRR on a power curve, so a forty thousand dollar app and a four
@@ -413,7 +432,7 @@ function makeTower(k, idx) {
   const revenue = Math.round(k.mrr * (k.joined / 30 * 0.8 + 1));
   const tier = revenue >= 1e6 ? 'gold' : revenue >= 250000 ? 'amber' : revenue >= 25000 ? 'cyan' : 'white';
   const name = k.anonApp ? veilName(k.seed) : k.name;
-  const tag = k.anonApp ? 'App kept private' : k.tag;
+  const tag = k.local && !k.mrr ? 'Breaking ground' : k.anonApp ? 'App kept private' : k.tag;
   const kind = hash1(k.seed, 5) < 0.5 ? 'office' : 'homes';
   const rnd = mulberry(k.seed * 911 + 1);
 
@@ -427,7 +446,8 @@ function makeTower(k, idx) {
   } else sections = [{ f0: 0, f1: floors, bays }];
 
   return {
-    k, idx, hist, churn, floors, bays, lit, darkTop, crane, crowd, revenue, tier, name, tag, kind, conv,
+    k, idx, hist, churn, floors, bays, lit, darkTop, crane: crane || (k.local && !k.mrr), crowd, revenue, tier, name, tag, kind, conv,
+    logo: k.logoCv || null,
     hue: hueOf(idx), rnd, sections, wk, newUsers,
     w: bays * BAY_W + 2, h: floors * FLOOR_H + ROOF_PAD,
     win: null, x: 0, rank: 0,
@@ -448,7 +468,7 @@ function layoutTowers(ts) {
     if (i % 2 === 1) { t.x = right + gap(t); right = t.x + t.w; }
     else { t.x = left - gap(t) - t.w; left = t.x; }
   }
-  const margin = 220;
+  const margin = Math.max(260, Math.ceil(cssW / 2));
   const shift = margin - left;
   for (const t of ts) t.x += shift;
   return right + shift + margin;
@@ -552,12 +572,15 @@ function bakeTower(g, t) {
   const txt = signText(t);
   // A tower with room for it carries its name at double size, so the ones
   // that dominate the skyline can be read from across it.
-  const sc = t.floors >= 40 && t.w >= (pxTextW(txt, 2) + 12) ? 2 : 1;
+  const sc = t.logo || (t.floors >= 40 && t.w >= (pxTextW(txt, 2) + 12)) ? 2 : 1;
   const lw = t.logo ? 8 * sc + 2 * sc : 0;
   const tw = pxTextW(txt, sc) + lw;
   const bw = Math.max(tw + 6 * sc, 9), bh = (t.logo ? 12 : 9) * sc;
-  const sx = Math.round(t.x + t.w / 2 - bw / 2), sy = Math.round(BASE_Y - t.floors * FLOOR_H * 0.5 - bh / 2);
-  t.sign = { x: sx, y: sy, w: bw, h: bh, color: TIER[t.tier], sc };
+  const towerH = t.floors * FLOOR_H;
+  const onRoof = bh * 1.6 > towerH;
+  const sx = Math.round(t.x + t.w / 2 - bw / 2);
+  const sy = onRoof ? top - bh - 4 : Math.round(BASE_Y - towerH * 0.5 - bh / 2);
+  t.sign = { x: sx, y: sy, w: bw, h: bh, color: TIER[t.tier], sc, onRoof };
   const underSign = (f, b) => { const p = winPos(t, f, b); return p.x + 2 > sx - 1 && p.x < sx + bw + 1 && p.y + 3 > sy - 1 && p.y < sy + bh + 1; };
   // Windows.
   t.win = new Uint8Array(t.floors * t.bays);
@@ -611,7 +634,9 @@ function bakeTower(g, t) {
     px(g, ax, top - ah, 1, ah, hsl(h, 10, 45));
     t.antenna = { x: ax, y: top - ah - 1, phase: t.rnd() * 6.28 };
   }
-  // Paint the sign last so it sits over the facade.
+  // Paint the sign last so it sits over the facade. A rooftop billboard
+  // stands on two legs.
+  if (onRoof) { px(g, sx + 2, sy + bh, 1, 4, '#3a4058'); px(g, sx + bw - 3, sy + bh, 1, 4, '#3a4058'); }
   px(g, sx, sy, bw, bh, '#0b0e1c');
   px(g, sx, sy, bw, sc, TIER[t.tier]); px(g, sx, sy + bh - sc, bw, sc, TIER[t.tier]);
   px(g, sx, sy, sc, bh, TIER[t.tier]); px(g, sx + bw - sc, sy, sc, bh, TIER[t.tier]);
@@ -897,7 +922,7 @@ function draw(dt) {
     if (t.crane) {
       const ts = t.sections[t.sections.length - 1];
       const rx = t.x + 1 + (t.bays - ts.bays) / 2 * BAY_W - left, rw = ts.bays * BAY_W;
-      const mx = rx + rw - 4, mh = 22 + Math.min(10, t.floors / 10);
+      const mx = rx + rw - 4, mh = 22 + Math.min(10, t.floors / 10) + (t.sign.onRoof ? t.sign.h + 6 : 0);
       const jibY = roof - mh;
       px(g, rx - 1, roof - 5, rw + 2, 1, '#3b4368');
       for (let xx = rx; xx < rx + rw; xx += 4) px(g, xx, roof - 5, 1, 5, '#2b3150');
@@ -1000,7 +1025,7 @@ window.addEventListener('keydown', (e) => {
 function towerAt(sx, sy) {
   const w = screenToWorld(sx, sy);
   for (const t of towers) {
-    const topY = BASE_Y - t.floors * FLOOR_H - 10;
+    const topY = Math.min(t.sign.y - 2, BASE_Y - t.floors * FLOOR_H - 10);
     if (w.x >= t.x - 2 && w.x <= t.x + t.w + 2 && w.y >= topY && w.y <= BASE_Y + 6) return t;
   }
   return null;
@@ -1033,7 +1058,11 @@ function openCard(t) {
   else for (const f of t.k.founders) chips.push('<a href="https://x.com/' + f + '" target="_blank" rel="noopener">@' + f + '</a>');
   if (!t.k.anonApp && t.k.ios) chips.push('<a href="' + t.k.ios + '" target="_blank" rel="noopener"> App Store</a>');
   if (!t.k.anonApp && t.k.play) chips.push('<a href="' + t.k.play + '" target="_blank" rel="noopener">▶ Play</a>');
+  if (t.k.local) chips.push('<span class="rm" id="cRemove">Remove</span>');
   document.getElementById('cChips').innerHTML = chips.join('');
+  if (t.k.local) document.getElementById('cRemove').addEventListener('click', () => {
+    LOCAL = LOCAL.filter(k => k.id !== t.k.id); saveLocal(); closeCard(); rebuild();
+  });
   const litPct = Math.round(t.lit * 100);
   document.getElementById('cStats').innerHTML = [
     [money(t.k.mrr), 'MRR', 'the height: ' + t.floors + ' floors'],
@@ -1044,9 +1073,12 @@ function openCard(t) {
     [money(t.revenue), 'Lifetime revenue', 'the sign: ' + t.tier + (t.crane ? ' · crane up, still growing' : '')],
   ].map(([n, l, w]) => '<div class="stat"><div class="n">' + n + '</div><div class="l">' + l + '</div><div class="w">' + w + '</div></div>').join('');
   const d = t.wk, de = document.getElementById('cDelta');
-  de.textContent = (d >= 0 ? '+' : '') + money(d) + ' in 7 days';
+  const fresh = t.k.local && !t.k.mrr;
+  de.textContent = fresh ? '' : (d >= 0 ? '+' : '') + money(d) + ' in 7 days';
   de.className = d > 0 ? 'up' : d < 0 ? 'down' : 'flat';
-  drawSignIcon(t); drawSpark(t);
+  document.getElementById('cSparkLab').textContent = fresh ? 'First numbers land at the next daily refresh' : 'MRR, 30 days';
+  document.getElementById('cSpark').style.display = fresh ? 'none' : 'block';
+  drawSignIcon(t); if (!fresh) drawSpark(t);
   cardEl.classList.add('on');
 }
 function closeCard() { selected = null; cardEl.classList.remove('on'); if (location.hash) history.replaceState(null, '', location.pathname); }
@@ -1079,6 +1111,7 @@ function flyTo(t) { cam.x = t.x + t.w / 2; clampCam(); }
 /* The wire along the bottom of the screen. */
 function buildWire() {
   const items = [];
+  for (const t of towers) if (t.k.local && !t.k.mrr) items.push('🏗️ <b data-k="' + t.k.id + '">' + t.name.toUpperCase() + '</b> BREAKS GROUND, ' + (t.k.anonFounder ? 'FOUNDER UNNAMED' : '@' + t.k.founders[0].toUpperCase()));
   for (const t of towers) {
     const nm = '<b data-k="' + t.k.id + '">' + t.name.toUpperCase() + '</b>';
     const fl = t.floors - floorsFor(t.hist[22].mrr);
@@ -1169,9 +1202,34 @@ document.getElementById('mGo').addEventListener('click', () => {
   const note = document.getElementById('mNote');
   if (!handle) { note.textContent = 'A founder handle on X is required. It is how the tower is yours.'; return; }
   if ((anonF || anonA) && !typed && !store) { note.textContent = 'To stay anonymous, name the app or add a store link.'; return; }
-  const name = (anonA || !typed) ? veilName(typed.length * 977 + handle.length * 31 + 13) : typed;
-  note.textContent = 'Saved. ' + name + ' breaks ground at the next daily refresh' + (anonF ? ', with no handle on it' : ' under @' + handle) + (pendingLogo ? ', logo on the sign.' : '.');
+  const seed = (hash1(handle.length * 977 + typed.length * 31 + LOCAL.length * 7 + 13, 99) * 1e6) | 0;
+  const rec = {
+    id: 'local-' + seed, local: true, name: typed || veilName(seed), tag: 'New tower',
+    founders: handle.split(',').map(h => h.trim().replace(/^@/, '')).filter(Boolean),
+    ios: document.getElementById('fIOS').value.trim() || undefined,
+    play: document.getElementById('fPlay').value.trim() || undefined,
+    anonFounder: anonF, anonApp: anonA, seed, joined: 0,
+    users: 0, trials: 0, subs: 0, mrr: 0, curve: 'flat',
+    logo: pendingLogo ? pendingLogo.toDataURL() : undefined,
+  };
+  LOCAL.push(rec); saveLocal();
+  closeModal();
+  ['fKing', 'fX', 'fIOS', 'fPlay', 'fKey'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('fAnonA').checked = false; document.getElementById('fAnonF').checked = false;
+  pendingLogo = null; document.getElementById('fLogoPrev').getContext('2d').clearRect(0, 0, 16, 16); document.getElementById('fLogo').value = '';
+  rebuild(rec.id);
 });
+
+/* Bake the city again with whatever is in it now, then look at one tower. */
+function rebuild(focusId) {
+  loadLogos().then(() => {
+    const frac = worldW ? cam.x / worldW : 0.5;
+    buildWorld(); buildTotals(); buildWire();
+    const t = focusId ? towers.find(x => x.k.id === focusId) : null;
+    if (t) { flyTo(t); openCard(t); }
+    else { cam.x = frac * worldW; clampCam(); if (selected) selected = towers.find(x => x.k.id === selected.k.id) || null; }
+  });
+}
 
 /* ═══════════════════════════════════════════════════════════════════════════
    10. BOOT
@@ -1181,9 +1239,9 @@ function buildWorld() {
   towers.length = 0; cars.length = 0; walkers.length = 0; crowds.length = 0; stars.length = 0; clouds.length = 0;
   WORLD_H = Math.max(360, cssH);
   BASE_Y = WORLD_H - WIRE_H - 62;
-  maxMrr = Math.max(1, Math.max.apply(null, SEED.map(k => k.mrr)));
+  maxMrr = Math.max(1, Math.max.apply(null, allSeeds().map(k => k.mrr)));
   maxFloors = Math.max(12, Math.floor((BASE_Y - BAND_H - 16 - ROOF_PAD) / FLOOR_H));
-  SEED.forEach((k, i) => towers.push(makeTower(k, i)));
+  allSeeds().forEach((k, i) => towers.push(makeTower(k, i)));
   worldW = layoutTowers(towers);
 
   skyline = document.createElement('canvas'); skyline.width = worldW; skyline.height = WORLD_H;
@@ -1199,6 +1257,9 @@ function buildWorld() {
 
 function boot() {
   resize();
+  loadLogos().then(start);
+}
+function start() {
   buildWorld();
 
   const mk = document.getElementById('markCv').getContext('2d');
