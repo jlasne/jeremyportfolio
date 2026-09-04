@@ -250,7 +250,6 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
         <li>Set every permission group to <code>No access</code>, then <code>Charts metrics permissions</code> to <code>Read</code>.</li>
         <li>Click <code>Generate</code> and copy the key once.</li>
       </ol>
-      <div class="safe">That key reads 6 numbers: active users, trials, subscriptions, MRR, revenue, new customers. It reads no emails, names, customer IDs or purchases, and it writes nothing.</div>
 
       <h3>Your tower</h3>
       <div class="field"><label>App logo, on the sign <em>optional</em></label>
@@ -380,11 +379,6 @@ function churn30(hist, real) {
 /* Read today, so there is no yesterday to compare with yet. */
 const isFresh = k => k.curve === 'exact' && !(k.history && k.history.length >= 2);
 
-const VEIL_A = ['Ash', 'Bram', 'Cald', 'Dun', 'Eld', 'Fern', 'Gray', 'Holl', 'Kest',
-                'Mor', 'Nor', 'Oak', 'Pell', 'Quar', 'Rook', 'Stan', 'Thorn', 'Vale', 'Wyn'];
-const VEIL_B = ['bury', 'combe', 'fell', 'ford', 'gate', 'hollow', 'march', 'mere',
-                'reach', 'stead', 'thorpe', 'vale', 'watch', 'wick'];
-const veilName = seed => VEIL_A[seed % VEIL_A.length] + VEIL_B[((seed / 7) | 0) % VEIL_B.length];
 const hueOf = i => (i * 137.508) % 360;
 
 /* Towers founded from this page live on the server (Convex, the same door
@@ -458,7 +452,7 @@ function makeTower(k, idx) {
   const crowd = clamp(Math.round(k.trials / 10), 0, 40);
   const revenue = k.rev28 !== undefined ? Math.round(k.rev28) : Math.round(k.mrr * (k.joined / 30 * 0.8 + 1));
   const tier = revenue >= 1e6 ? 'gold' : revenue >= 250000 ? 'amber' : revenue >= 25000 ? 'cyan' : 'white';
-  const name = k.anonApp ? veilName(k.seed) : k.name;
+  const name = k.anonApp ? 'Anonymous' : k.name;
   const tag = k.anonApp ? 'App kept private' : k.tag;
   const kind = hash1(k.seed, 5) < 0.5 ? 'office' : 'homes';
   const rnd = mulberry(k.seed * 911 + 1);
@@ -1362,7 +1356,7 @@ document.getElementById('mGo').addEventListener('click', async () => {
 
   const seed = (hash1(handle.length * 977 + typed.length * 31 + (REMOTE.length + LOCAL.length) * 7 + 13, 99) * 1e6) | 0;
   const rec = {
-    id: 'local-' + seed, local: true, name: typed || veilName(seed), tag: 'Read from RevenueCat',
+    id: 'local-' + seed, local: true, name: typed || 'Anonymous', tag: 'Read from RevenueCat',
     founders: handle.split(',').map(h => h.trim().replace(/^@/, '')).filter(Boolean),
     ios: document.getElementById('fIOS').value.trim() || undefined,
     play: document.getElementById('fPlay').value.trim() || undefined,
