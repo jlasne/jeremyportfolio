@@ -1380,8 +1380,10 @@ document.getElementById('mGo').addEventListener('click', async () => {
       users: nums.users, trials: nums.trials, subs: nums.subs, mrr: nums.mrr, rev28: nums.rev28, newCustomers: nums.newCustomers,
     });
   } catch (e) {
-    // The server said no: tell the founder. The server is unreachable: keep the tower here.
-    if (e && e.message && !/fetch|network|abort|JSON/i.test(e.message)) { go.disabled = false; go.textContent = 'Break ground'; note.textContent = e.message; return; }
+    // The server said no: tell the founder. The server is unreachable, or older
+    // than this page and has never heard of the city: keep the tower here.
+    const m = (e && e.message) || '';
+    if (m && !/fetch|network|abort|JSON|Unknown operation|newer than the server/i.test(m)) { go.disabled = false; go.textContent = 'Break ground'; note.textContent = m; return; }
   }
   go.disabled = false; go.textContent = 'Break ground';
   if (saved) { REMOTE.push(saved); rec.id = saved.id; }
