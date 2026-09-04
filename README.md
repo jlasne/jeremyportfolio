@@ -98,6 +98,7 @@ current one is not checked in, so redraw it to match if the hero copy changes.
 | `/overlap` | **Overlap** — landing page and live world clock |
 | `/overlap/team` · `/plan` · `/next` | the app: the team, the meeting, and what to build next |
 | `/kof` | **King of Founders** — a living pixel world map, one kingdom per app |
+| `/foundercity` | **Founder City** — the same apps as a pixel skyline at night, one tower each |
 
 `/investment` and `/invest` are redirect stubs into `/wealth`.
 
@@ -137,6 +138,17 @@ the land names itself or the kings walk anonymous.
 Demo data lives in `SEED_KINGDOMS` at the top of the file. Replace that array
 with a fetch to wire it to real accounts. The RevenueCat key must never reach
 the browser: it needs a server that holds it and serves the six numbers.
+
+**Founder City** is the same data as a skyline. Height is MRR on a power curve
+so a $40k app and a $400k app share one frame; width is subscribers; lit
+windows follow active users, with each floor keeping its own mood so the
+lights come in bands; the dark floors at the top are subscribers lost this
+month; a crane means the week was up; the crowd at the door is free trials;
+the sign colour is lifetime revenue, from white through cyan and amber to gold.
+Rank one stands in the middle and the others alternate outward, so rank reads
+as distance from downtown. Everything static bakes once; per frame the page
+moves cars, people, clouds, two searchlights and a few dozen windows. Same
+join rules as the map, same `SEED` array to swap for a fetch.
 
 ## Run locally
 

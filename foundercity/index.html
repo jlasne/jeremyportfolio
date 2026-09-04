@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Founder City</title>
+<meta name="description" content="Your app as a tower in a pixel city at night. Height is MRR, width is subscribers, lit windows are active users.">
+<link rel="canonical" href="https://www.jeremylasne.com/foundercity/">
+<meta name="theme-color" content="#070914">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Founder City">
+<meta property="og:url" content="https://www.jeremylasne.com/foundercity/">
+<meta property="og:title" content="Founder City">
+<meta property="og:description" content="Your app as a tower in a pixel city at night. Height is MRR, width is subscribers, lit windows are active users.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:creator" content="@jeremylasne">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   Founder City — /foundercity/
+
+   One tower per app, side on, at night. Height is MRR, width is subscribers,
+   lit windows are active users, the dark floors at the top are churn, a
+   crane means the company is still building, the crowd at the door is
+   people on a trial.
+
+   One self-contained file. No build step, no framework, no network at
+   runtime. Everything static is baked into offscreen canvases once; per
+   frame the page moves cars, people, clouds and a few hundred windows.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --glass:rgba(9,12,24,.84);
+  --line:rgba(140,170,255,.22);
+  --ink:#e6ecff;
+  --dim:rgba(230,236,255,.55);
+  --amber:#ffb84d;
+  --cyan:#4de8d0;
+  --ui: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+}
+html,body{height:100%;overflow:hidden;background:#070914}
+body{font-family:var(--ui);color:var(--ink);-webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+canvas#city{display:block;width:100vw;height:100vh;image-rendering:pixelated;image-rendering:crisp-edges;
+  cursor:grab;touch-action:none}
+canvas#city.dragging{cursor:grabbing}
+
+.glass{background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(6px);
+  border-radius:4px;box-shadow:0 8px 30px rgba(0,0,0,.45)}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+.hud{position:fixed;z-index:20}
+
+/* ── top left: wordmark and join ─────────────────────────────────────── */
+#brand{top:14px;left:14px;display:flex;align-items:stretch;gap:0;overflow:hidden}
+#brand .mark{padding:9px 13px;display:flex;align-items:center;gap:9px;border-right:1px solid var(--line)}
+#brand .mark canvas{width:22px;height:22px;image-rendering:pixelated}
+#brand .mark b{font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+#brand .mark small{display:block;font-size:9px;letter-spacing:.06em;color:var(--dim);margin-top:2px}
+#addBtn{padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--amber)}
+#addBtn:hover{background:rgba(255,184,77,.08)}
+
+/* ── top right: the legend ───────────────────────────────────────────── */
+#legend{top:14px;right:14px;width:min(290px,calc(100vw - 28px));font-size:11px}
+#legend .hd{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;user-select:none}
+#legend .hd b{flex:1;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+#legend .hd span{color:var(--dim);font-size:11px}
+#legend .rows{display:none;border-top:1px solid var(--line);padding:6px 12px 10px}
+#legend.open .rows{display:block}
+#legend .r{display:grid;grid-template-columns:14px 1fr;column-gap:9px;padding:5px 0;line-height:1.3;align-items:center}
+#legend .r i{width:14px;height:10px;flex:0 0 14px;image-rendering:pixelated;display:block}
+#legend .r em{font-style:normal;color:var(--dim);font-size:10px;grid-column:2;margin-top:1px}
+#legend .r em:empty{display:none}
+
+/* ── bottom: the LED ticker ──────────────────────────────────────────── */
+#ticker{left:0;right:0;bottom:0;height:28px;background:#05060c;border-top:1px solid rgba(255,184,77,.25);
+  overflow:hidden;display:flex;align-items:center;z-index:15}
+#ticker .lbl{flex:0 0 auto;padding:0 12px;font-size:9px;letter-spacing:.16em;color:var(--amber);
+  border-right:1px solid rgba(255,184,77,.25);height:100%;display:flex;align-items:center;
+  background:#05060c;z-index:2}
+#ticker .track{flex:1;overflow:hidden;height:100%;position:relative;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent)}
+#ticker .run{position:absolute;white-space:nowrap;top:0;height:100%;display:flex;align-items:center;
+  font-size:11px;letter-spacing:.12em;color:#ffcf7a;text-shadow:0 0 6px rgba(255,184,77,.55);
+  animation:run linear infinite;padding-left:100%}
+#ticker .run span{padding:0 22px}
+#ticker .run span b{color:var(--cyan);font-weight:700;cursor:pointer;text-shadow:0 0 6px rgba(77,232,208,.5)}
+#ticker .run span b:hover{text-decoration:underline}
+@keyframes run{to{transform:translateX(-100%)}}
+#ticker:hover .run{animation-play-state:paused}
+
+/* ── bottom right: credit ────────────────────────────────────────────── */
+#credit{right:14px;bottom:42px;padding:7px 11px;font-size:10px;color:var(--dim);text-decoration:none}
+#credit b{color:var(--ink);font-weight:700}
+#credit:hover{color:var(--ink)}
+
+/* ── tower card ──────────────────────────────────────────────────────── */
+#card{position:fixed;z-index:25;left:14px;bottom:42px;width:min(330px,calc(100vw - 28px));display:none}
+#card.on{display:block}
+#card .top{display:flex;gap:10px;padding:12px 12px 8px;align-items:flex-start}
+#card .sign{width:36px;height:36px;flex:0 0 36px;image-rendering:pixelated}
+#card .ttl{flex:1;min-width:0}
+#card .ttl h3{font-size:16px;line-height:1.05;font-weight:700;letter-spacing:.02em}
+#card .ttl p{font-size:10px;letter-spacing:.06em;color:var(--dim);margin-top:4px;text-transform:uppercase}
+#card .x{font-size:15px;line-height:1;color:var(--dim);padding:2px 5px}
+#card .x:hover{color:var(--ink)}
+#card .chips{display:flex;flex-wrap:wrap;gap:5px;padding:0 12px 10px}
+#card .chips a,#card .chips span{font-size:10px;font-weight:700;text-decoration:none;color:var(--ink);
+  border:1px solid var(--line);padding:3px 7px;border-radius:3px;background:rgba(140,170,255,.06)}
+#card .chips a:hover{background:rgba(140,170,255,.16)}
+#card .chips .anon{border-style:dashed;color:var(--dim)}
+#card .stats{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line)}
+#card .stat{padding:8px 12px 9px;border-bottom:1px solid var(--line)}
+#card .stat:nth-child(odd){border-right:1px solid var(--line)}
+#card .stat .n{font-size:16px;font-weight:700;line-height:1}
+#card .stat .l{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-top:3px}
+#card .stat .w{font-size:9px;line-height:1.35;color:rgba(230,236,255,.4);margin-top:3px}
+#card .spark{padding:9px 12px 11px}
+#card .spark canvas{width:100%;height:34px;display:block;image-rendering:auto}
+#card .spark .lab{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);
+  display:flex;justify-content:space-between;margin-bottom:5px}
+.up{color:#5be09a}.down{color:#ff6b6b}.flat{color:var(--dim)}
+
+/* ── tooltip ─────────────────────────────────────────────────────────── */
+#tip{position:fixed;z-index:30;pointer-events:none;display:none;background:#0b0e1c;color:var(--ink);
+  font-size:11px;line-height:1.4;padding:6px 9px;border:1px solid var(--line);border-radius:3px;
+  max-width:230px;box-shadow:0 3px 12px rgba(0,0,0,.5)}
+#tip.on{display:block}
+#tip b{color:var(--amber)}
+#tip em{font-style:normal;color:var(--dim)}
+
+/* ── modal ───────────────────────────────────────────────────────────── */
+#modal{position:fixed;inset:0;z-index:40;display:none;background:rgba(3,5,12,.7);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;padding:20px}
+#modal.on{display:flex}
+#modal .sheet{width:min(540px,100%);max-height:calc(100vh - 40px);overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:rgba(140,170,255,.3) transparent}
+#modal .hd{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);
+  position:sticky;top:0;background:rgba(9,12,24,.96)}
+#modal .hd h2{font-size:15px;flex:1;font-weight:700;letter-spacing:.04em}
+#modal .hd small{display:block;font-size:9px;letter-spacing:.06em;color:var(--dim);margin-top:3px;font-weight:400}
+#modal .bd{padding:16px}
+#modal p{font-size:12px;line-height:1.6;margin-bottom:12px;color:var(--dim)}
+#modal h3{font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--dim);
+  margin:18px 0 9px}
+#modal h3:first-child{margin-top:0}
+#modal ol{margin:0 0 6px;padding-left:0;list-style:none;counter-reset:s}
+#modal ol li{counter-increment:s;position:relative;padding:0 0 9px 28px;font-size:12px;line-height:1.5}
+#modal ol li::before{content:counter(s);position:absolute;left:0;top:1px;width:18px;height:18px;
+  background:var(--amber);color:#1a1200;border-radius:50%;font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center}
+#modal code{font-size:11px;background:rgba(140,170,255,.1);border:1px solid var(--line);padding:1px 5px;
+  border-radius:2px;white-space:nowrap}
+#modal .safe{background:rgba(77,232,208,.08);border-left:3px solid var(--cyan);padding:9px 12px;
+  font-size:11.5px;line-height:1.55;margin:4px 0 6px;color:var(--ink)}
+#modal .field{margin-bottom:11px}
+#modal label{display:block;font-size:9px;letter-spacing:.11em;text-transform:uppercase;font-weight:700;
+  color:var(--dim);margin-bottom:5px}
+#modal label em{font-style:normal;font-weight:400;opacity:.7;text-transform:none;letter-spacing:.03em;margin-left:5px}
+#modal label em.req{color:#ff6b6b;opacity:.9}
+#modal input[type=text],#modal input[type=password]{width:100%;font-family:var(--ui);font-size:13px;padding:9px 11px;
+  color:var(--ink);background:rgba(140,170,255,.06);border:1px solid var(--line);border-radius:3px}
+#modal input:focus{outline:0;border-color:var(--amber)}
+#modal .logo{display:flex;align-items:center;gap:10px}
+#modal .logo canvas{width:36px;height:36px;image-rendering:pixelated;background:#0b0e1c;border:1px solid var(--line)}
+#modal .logo input{font-size:11px;color:var(--dim)}
+#modal .veil{background:rgba(140,170,255,.05);border:1px solid var(--line);border-radius:3px;padding:9px 11px;margin-bottom:12px}
+#modal .chk{display:flex;align-items:flex-start;gap:8px;font-size:11px;line-height:1.45;letter-spacing:0;
+  text-transform:none;color:var(--ink);font-weight:500;cursor:pointer}
+#modal .chk+.chk{margin-top:7px}
+#modal .chk input{margin-top:1px;accent-color:var(--amber)}
+#modal .go{width:100%;background:var(--amber);color:#1a1200;border-radius:3px;padding:12px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;font-size:11px;margin-top:4px}
+#modal .go:active{transform:translateY(1px)}
+#modal .fine{font-size:10.5px;line-height:1.55;color:var(--dim);margin-top:12px;margin-bottom:0}
+#modal .rc{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--dim);margin-top:10px}
+#modal .rc svg{width:14px;height:13px}
+
+@media (max-width:700px){
+  #legend{top:auto;bottom:80px;right:14px;width:calc(100vw - 28px)}
+  #card{bottom:80px;width:calc(100vw - 28px)}
+  #credit{display:none}
+  #brand .mark small{display:none}
+  #modal{padding:0}
+  #modal .sheet{max-height:100vh;border-radius:0}
+}
+</style>
+</head>
+<body>
+
+<canvas id="city"></canvas>
+
+<div class="hud glass" id="brand">
+  <div class="mark"><canvas id="markCv" width="11" height="11"></canvas>
+    <div><b>Founder City</b><small>one tower per app, at night</small></div></div>
+  <button id="addBtn">+ Add your tower</button>
+</div>
+
+<div class="hud glass" id="legend">
+  <div class="hd" id="legHd"><b>How to read it</b><span id="legCaret">▾</span></div>
+  <div class="rows" id="legRows"></div>
+</div>
+
+<div class="hud" id="ticker"><div class="lbl">CITY WIRE</div><div class="track"><div class="run" id="run"></div></div></div>
+
+<a class="hud glass" id="credit" href="https://x.com/jeremylasne" target="_blank" rel="noopener">made with fun by <b>@jeremylasne</b></a>
+
+<div class="glass" id="card">
+  <div class="top">
+    <canvas class="sign" id="cardSign" width="18" height="18"></canvas>
+    <div class="ttl"><h3 id="cName"></h3><p id="cSub"></p></div>
+    <button class="x" id="cClose">✕</button>
+  </div>
+  <div class="chips" id="cChips"></div>
+  <div class="stats" id="cStats"></div>
+  <div class="spark">
+    <div class="lab"><span>MRR, 30 days</span><span id="cDelta"></span></div>
+    <canvas id="cSpark" width="600" height="120"></canvas>
+  </div>
+</div>
+
+<div id="modal">
+  <div class="glass sheet">
+    <div class="hd"><div><h2>Add your tower</h2><small>Verified by RevenueCat. Numbers refresh once a day.</small></div>
+      <button class="x" id="mClose" style="font-size:15px;color:var(--dim)">✕</button></div>
+    <div class="bd">
+      <h3>Make a read-only key</h3>
+      <ol>
+        <li>Open RevenueCat, then <code>Project settings → API keys</code>.</li>
+        <li>Click <code>+ New API key</code>, name it <code>Founder City</code>, version <code>V2</code>.</li>
+        <li>Set every permission group to <code>No access</code>, then <code>Charts metrics permissions</code> to <code>Read</code>.</li>
+        <li>Click <code>Generate</code> and copy the key once.</li>
+      </ol>
+      <div class="safe">That key reads 6 numbers: active users, trials, subscriptions, MRR, revenue, new customers. It reads no emails, names, customer IDs or purchases, and it writes nothing.</div>
+
+      <h3>Your tower</h3>
+      <div class="field"><label>App logo, on the sign <em>optional</em></label>
+        <div class="logo"><canvas id="fLogoPrev" width="16" height="16"></canvas><input type="file" id="fLogo" accept="image/*"></div></div>
+      <div class="field"><label for="fKing">App name <em>optional</em></label>
+        <input type="text" id="fKing" placeholder="Leave empty and the tower names itself" autocomplete="off" spellcheck="false"></div>
+      <div class="field"><label for="fX">Founder handles on X <em class="req">required</em></label>
+        <input type="text" id="fX" placeholder="jeremylasne, cofounder" autocomplete="off" spellcheck="false"></div>
+      <div class="field"><label for="fIOS">App Store link <em>optional</em></label>
+        <input type="text" id="fIOS" placeholder="https://apps.apple.com/app/..." autocomplete="off" spellcheck="false"></div>
+      <div class="field"><label for="fPlay">Play Store link <em>optional</em></label>
+        <input type="text" id="fPlay" placeholder="https://play.google.com/store/apps/..." autocomplete="off" spellcheck="false"></div>
+      <div class="veil">
+        <label class="chk"><input type="checkbox" id="fAnonF"> 🎭 Hide my handle. Needs an app named or linked.</label>
+        <label class="chk"><input type="checkbox" id="fAnonA"> 🏙️ Hide my app. The tower takes a name of its own.</label>
+      </div>
+      <div class="field"><label for="fKey">RevenueCat V2 key, charts metrics read only</label>
+        <input type="password" id="fKey" placeholder="sk_..." autocomplete="off" spellcheck="false"></div>
+      <button class="go" id="mGo">Break ground</button>
+      <p class="fine" id="mNote">The key goes to the server, never to this page.</p>
+      <div class="rc"><svg viewBox="0 0 20 18" aria-hidden="true"><path d="M3 9V2l4.2 3.4h5.6L17 2v7a7 6.6 0 0 1-14 0Z" fill="#f2545b"/><circle cx="7.4" cy="9" r="1.15" fill="#1f1f47"/><circle cx="12.6" cy="9" r="1.15" fill="#1f1f47"/><path d="M9 11.6h2l-1 1.5Z" fill="#1f1f47"/></svg>Verified by RevenueCat</div>
+    </div>
+  </div>
+</div>
+
+<div id="tip"></div>
+
+<script>
+"use strict";
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   1. THE DATA
+   Same demo kingdoms as /kof/, same numbers. One RevenueCat pull per app
+   plus thirty days of history. Replace SEED with a fetch to go live.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const SEED = [
+  {id:'kaught',   name:'Kaught',   tag:'Fishing log',    founders:['jeremylasne'],
+   seed:1041, joined:64, ios:'https://apps.apple.com/app/id0000000001', play:'https://play.google.com/store/apps/details?id=com.kaught', users:18400, trials:610,  subs:2240, mrr:15680, curve:'grow'},
+  {id:'plotter',  name:'Plotter',  tag:'Habit tracker',  founders:['annaships'],
+   seed:2277, joined:41, play:'https://play.google.com/store/apps/details?id=com.plotter', users:245000,trials:8200, subs:26000,mrr:208000,curve:'grow'},
+  {id:'wanderly', name:'Wanderly', tag:'Trip planner',   founders:['tomdraws','lu_builds'],
+   seed:3319, joined:12, users:4100,  trials:130,  subs:410,  mrr:2870,  curve:'flat'},
+  {id:'sunsetdb', name:'Sunset',   tag:'Sleep sounds',   founders:['mira_dev'],
+   anonFounder:true, seed:4483, joined:29, users:960,   trials:31,   subs:88,   mrr:530,   curve:'shrink'},
+  {id:'forkful',  name:'Forkful',  tag:'Recipe scanner', founders:['chefpablo'],
+   seed:5527, joined:57, ios:'https://apps.apple.com/app/id0000000002', users:480000,trials:14000,subs:52000,mrr:416000,curve:'spike'},
+  {id:'lifted',   name:'Lifted',   tag:'Gym logger',     founders:['ben_lifts','kaycodes'],
+   seed:6659, joined:23, users:31500, trials:1120, subs:3860, mrr:30880, curve:'grow'},
+  {id:'quillo',   name:'Quillo',   tag:'Journal',        founders:['sofiawrites'],
+   seed:7717, joined:6,  users:2300,  trials:74,   subs:190,  mrr:1140,  curve:'grow'},
+  {id:'tidepool', name:'Tidepool', tag:'Budget app',     founders:['marcusr'],
+   anonApp:true, seed:8837, joined:3,  users:390,   trials:12,   subs:34,   mrr:238,   curve:'flat'},
+  {id:'orbitcam', name:'Orbit',    tag:'Camera presets', founders:['nikolab'],
+   seed:9931, joined:1,  users:74,    trials:3,    subs:6,    mrr:42,    curve:'grow'},
+];
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   2. NUMBERS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+function hash2(x, y, s) {
+  let h = (x | 0) * 374761393 + (y | 0) * 668265263 + (s | 0) * 1274126177;
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+function hash1(i, s) { return hash2(i, i * 31 + 7, s); }
+function mulberry(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const lerp = (a, b, t) => a + (b - a) * t;
+
+function fmt(n) {
+  n = Math.round(n);
+  if (n >= 1000000) return (n / 1000000).toFixed(n >= 10000000 ? 0 : 1) + 'M';
+  if (n >= 10000) return (n / 1000).toFixed(0) + 'k';
+  return n.toLocaleString('en-US');
+}
+const money = n => '$' + fmt(n);
+
+function buildHistory(k) {
+  const rnd = mulberry(k.seed * 17 + 3);
+  const days = 30, hist = [];
+  const shape = { grow: 0.0115, flat: 0.0008, shrink: -0.0075, spike: 0.006 }[k.curve];
+  for (let i = 0; i < days; i++) {
+    const t = i - (days - 1);
+    let f = Math.exp(shape * t);
+    if (k.curve === 'spike') f = i < 21 ? Math.exp(0.004 * t) * 0.62 : Math.exp(0.006 * t);
+    const wob = 1 + (rnd() - 0.5) * 0.028;
+    hist.push({
+      users: Math.round(k.users * f * wob),
+      trials: Math.round(k.trials * f * (1 + (rnd() - 0.5) * 0.10)),
+      subs: Math.round(k.subs * f * (1 + (rnd() - 0.5) * 0.020)),
+      mrr: Math.round(k.mrr * f * wob),
+    });
+  }
+  const last = hist[days - 1];
+  last.users = k.users; last.trials = k.trials; last.subs = k.subs; last.mrr = k.mrr;
+  return hist;
+}
+function churn30(hist) {
+  let lost = 0;
+  for (let i = 1; i < hist.length; i++) {
+    const d = hist[i - 1].subs - hist[i].subs;
+    if (d > 0) lost += d;
+  }
+  return Math.max(lost, Math.round(hist[hist.length - 1].subs * 0.03));
+}
+
+const VEIL_A = ['Ash', 'Bram', 'Cald', 'Dun', 'Eld', 'Fern', 'Gray', 'Holl', 'Kest',
+                'Mor', 'Nor', 'Oak', 'Pell', 'Quar', 'Rook', 'Stan', 'Thorn', 'Vale', 'Wyn'];
+const VEIL_B = ['bury', 'combe', 'fell', 'ford', 'gate', 'hollow', 'march', 'mere',
+                'reach', 'stead', 'thorpe', 'vale', 'watch', 'wick'];
+const veilName = seed => VEIL_A[seed % VEIL_A.length] + VEIL_B[((seed / 7) | 0) % VEIL_B.length];
+const hueOf = i => (i * 137.508) % 360;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   3. WHAT A TOWER IS
+   Height is MRR on a power curve, so a forty thousand dollar app and a four
+   hundred thousand dollar app both fit one skyline. Width is subscribers.
+   Lit windows follow active users. The dark floors at the top are the
+   subscribers lost this month. A crane means the week was up.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const FLOOR_H = 5, BAY_W = 4, WORLD_H = 900, ROOF_PAD = 44;
+const BASE_Y = WORLD_H - 62;          // the sidewalk the towers stand on
+const PAD = 1600;                     // road and lamps run this far past the last tower
+
+function floorsFor(mrr) { return 3 + Math.round(Math.pow(Math.max(0, mrr), 0.42) * 0.55); }
+
+function makeTower(k, idx) {
+  const hist = buildHistory(k);
+  const churn = churn30(hist);
+  const floors = floorsFor(k.mrr);
+  const bays = 3 + Math.round(Math.pow(Math.max(0, k.subs), 0.30) * 0.8);
+  const lit = clamp(0.25 + 0.6 * Math.log(k.users + 1) / Math.log(500001), 0.2, 0.95);
+  const darkTop = Math.min(Math.round(floors * clamp(churn / Math.max(1, k.subs), 0, 0.45)), Math.max(0, floors - 3));
+  const wk = hist[29].mrr - hist[22].mrr;
+  const newUsers = Math.max(0, hist[29].users - hist[22].users);
+  const crane = wk > 0 && newUsers > 0;
+  const crowd = clamp(Math.round(k.trials / 10), 0, 40);
+  const revenue = Math.round(k.mrr * (k.joined / 30 * 0.8 + 1));
+  const tier = revenue >= 1e6 ? 'gold' : revenue >= 250000 ? 'amber' : revenue >= 25000 ? 'cyan' : 'white';
+  const name = k.anonApp ? veilName(k.seed) : k.name;
+  const tag = k.anonApp ? 'App kept private' : k.tag;
+  const kind = hash1(k.seed, 5) < 0.5 ? 'office' : 'homes';
+  const rnd = mulberry(k.seed * 911 + 1);
+
+  let sections;
+  if (floors >= 40) {
+    const f1 = Math.round(floors * 0.58), f2 = Math.round(floors * 0.84);
+    sections = [{ f0: 0, f1, bays }, { f0: f1, f1: f2, bays: Math.max(3, bays - 2) }, { f0: f2, f1: floors, bays: Math.max(3, bays - 4) }];
+  } else if (floors >= 18) {
+    const f1 = Math.round(floors * 0.7);
+    sections = [{ f0: 0, f1, bays }, { f0: f1, f1: floors, bays: Math.max(3, bays - 2) }];
+  } else sections = [{ f0: 0, f1: floors, bays }];
+
+  return {
+    k, idx, hist, churn, floors, bays, lit, darkTop, crane, crowd, revenue, tier, name, tag, kind,
+    hue: hueOf(idx), rnd, sections, wk, newUsers,
+    w: bays * BAY_W + 2, h: floors * FLOOR_H + ROOF_PAD,
+    win: null, x: 0, rank: 0,
+  };
+}
+
+/* Rank one stands in the middle, rank two to its right, rank three to its
+   left, and so on outward. Downtown is where the money is, and you can read
+   rank as distance from the centre without a leaderboard. */
+function layoutTowers(ts) {
+  ts.sort((a, b) => b.k.mrr - a.k.mrr);
+  ts.forEach((t, i) => { t.rank = i + 1; });
+  const gap = t => 10 + Math.round(t.rnd() * 14);
+  let left = 0, right = ts[0].w;
+  ts[0].x = 0;
+  for (let i = 1; i < ts.length; i++) {
+    const t = ts[i];
+    if (i % 2 === 1) { t.x = right + gap(t); right = t.x + t.w; }
+    else { t.x = left - gap(t) - t.w; left = t.x; }
+  }
+  const margin = 220;
+  const shift = margin - left;
+  for (const t of ts) t.x += shift;
+  return right + shift + margin;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   4. PIXEL FONT
+   Three by five. Enough for a rooftop sign.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const FONT = {
+  A:['010','101','111','101','101'], B:['110','101','110','101','110'], C:['011','100','100','100','011'],
+  D:['110','101','101','101','110'], E:['111','100','110','100','111'], F:['111','100','110','100','100'],
+  G:['011','100','101','101','011'], H:['101','101','111','101','101'], I:['111','010','010','010','111'],
+  J:['001','001','001','101','010'], K:['101','101','110','101','101'], L:['100','100','100','100','111'],
+  M:['101','111','111','101','101'], N:['110','101','101','101','101'], O:['010','101','101','101','010'],
+  P:['110','101','110','100','100'], Q:['010','101','101','111','011'], R:['110','101','110','101','101'],
+  S:['011','100','010','001','110'], T:['111','010','010','010','010'], U:['101','101','101','101','111'],
+  V:['101','101','101','101','010'], W:['101','101','111','111','101'], X:['101','101','010','101','101'],
+  Y:['101','101','010','010','010'], Z:['111','001','010','100','111'],
+  '0':['111','101','101','101','111'], '1':['010','110','010','010','111'], '2':['111','001','111','100','111'],
+  '3':['111','001','111','001','111'], '4':['101','101','111','001','001'], '5':['111','100','111','001','111'],
+  '6':['111','100','111','101','111'], '7':['111','001','001','001','001'], '8':['111','101','111','101','111'],
+  '9':['111','101','111','001','111'], '$':['010','111','110','011','111'], '.':['000','000','000','000','010'],
+  '-':['000','000','111','000','000'], ' ':['000','000','000','000','000'],
+};
+function pxText(g, text, x, y, color) {
+  g.fillStyle = color;
+  let cx = x;
+  for (const ch of text) {
+    const gl = FONT[ch] || FONT[' '];
+    for (let r = 0; r < 5; r++) for (let c = 0; c < 3; c++) if (gl[r][c] === '1') g.fillRect(cx + c, y + r, 1, 1);
+    cx += 4;
+  }
+}
+const pxTextW = text => text.length * 4 - 1;
+const signText = t => t.name.toUpperCase().replace(/[^A-Z0-9 .$-]/g, '').slice(0, 12) || 'TOWER';
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   5. PAINT
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const TIER = { white: '#e9f0ff', cyan: '#4de8d0', amber: '#ffb84d', gold: '#ffd94a' };
+const WARM = ['#0c1020', '#3b2f18', '#ffd27a', '#fff1c2'];   // dark, dim, lit, bright
+const COOL = ['#0c1020', '#1c3340', '#8fe3ff', '#d6f6ff'];
+const EMPTY = '#0d1122';
+
+function px(g, x, y, w, h, c) { g.fillStyle = c; g.fillRect(x, y, w, h); }
+function hsl(h, s, l) { return 'hsl(' + h.toFixed(0) + ',' + s + '%,' + l + '%)'; }
+
+let worldW = 0;
+const towers = [];
+let skyline, skyCtx, street, front, far, mid;
+
+function winPos(t, f, b) {
+  return { x: t.x + 1 + b * BAY_W + 1, y: BASE_Y - (f + 1) * FLOOR_H + 1 };
+}
+function sectionAt(t, f) {
+  for (const s of t.sections) if (f >= s.f0 && f < s.f1) return s;
+  return t.sections[t.sections.length - 1];
+}
+function bayInSection(t, s, b) {
+  const off = (t.bays - s.bays) / 2;
+  return b >= off && b < off + s.bays;
+}
+function drawWin(g, t, f, b) {
+  const st = t.win[f * t.bays + b];
+  if (st === 255) return;
+  const p = winPos(t, f, b);
+  if (st === 254) { px(g, p.x, p.y, 2, 3, EMPTY); return; }
+  const pal = t.palette[f * t.bays + b] ? COOL : WARM;
+  px(g, p.x, p.y, 2, 3, pal[st]);
+  if (st === 3) px(g, p.x, p.y, 1, 1, '#ffffff');
+}
+
+/* Bake a tower body onto the skyline, then seed its windows. */
+function bakeTower(g, t) {
+  const h = t.hue, top = BASE_Y - t.floors * FLOOR_H;
+  const body = hsl(h, 22, 13), edgeL = hsl(h, 26, 21), edgeR = hsl(h, 24, 8), par = hsl(h, 20, 26);
+  for (const s of t.sections) {
+    const x0 = t.x + 1 + (t.bays - s.bays) / 2 * BAY_W, ww = s.bays * BAY_W;
+    const yT = BASE_Y - s.f1 * FLOOR_H, yB = BASE_Y - s.f0 * FLOOR_H;
+    px(g, x0 - 1, yT, ww + 2, yB - yT, body);
+    px(g, x0 - 1, yT, 1, yB - yT, edgeL);
+    px(g, x0 + ww, yT, 1, yB - yT, edgeR);
+    px(g, x0 - 1, yT, ww + 2, 1, par);
+    for (let y = yT + FLOOR_H; y < yB; y += FLOOR_H) px(g, x0, y, ww, 1, hsl(h, 22, 11));
+  }
+  // Unfinished floors at the top: a darker shell with no glass.
+  if (t.darkTop > 0) {
+    const s = sectionAt(t, t.floors - 1);
+    const x0 = t.x + 1 + (t.bays - s.bays) / 2 * BAY_W, ww = s.bays * BAY_W;
+    const y0 = BASE_Y - t.floors * FLOOR_H, y1 = BASE_Y - (t.floors - t.darkTop) * FLOOR_H;
+    px(g, x0 - 1, y0, ww + 2, y1 - y0, hsl(h, 16, 9));
+    px(g, x0 - 1, y0, 1, y1 - y0, hsl(h, 18, 14));
+    px(g, x0 - 1, y1 - 1, ww + 2, 1, hsl(h, 14, 15));
+  }
+  // Windows.
+  t.win = new Uint8Array(t.floors * t.bays);
+  t.palette = new Uint8Array(t.floors * t.bays);
+  const coolBias = t.kind === 'office' ? 0.85 : 0.15;
+  t.floorLit = new Float32Array(t.floors);
+  for (let f = 0; f < t.floors; f++) {
+    // Each floor keeps its own mood around the tower's average, so the
+    // lights come in bands the way a real building does at night.
+    t.floorLit[f] = clamp(t.lit * (0.45 + t.rnd() * 1.1), 0.05, 0.98);
+    const s = sectionAt(t, f);
+    for (let b = 0; b < t.bays; b++) {
+      const i = f * t.bays + b;
+      if (!bayInSection(t, s, b)) { t.win[i] = 255; continue; }
+      t.palette[i] = t.rnd() < coolBias ? 1 : 0;
+      if (f >= t.floors - t.darkTop) { t.win[i] = 254; }
+      else if (f === 0) { t.win[i] = 2; }
+      else if (t.rnd() < t.floorLit[f]) t.win[i] = t.rnd() < 0.8 ? 2 : 3;
+      else t.win[i] = t.rnd() < 0.6 ? 0 : 1;
+      drawWin(g, t, f, b);
+    }
+  }
+  // Lobby: a bright band, a door, an awning in the tower's own colour.
+  const gs = t.sections[0], gx = t.x + 1, gw = t.bays * BAY_W;
+  px(g, gx, BASE_Y - FLOOR_H, gw, FLOOR_H, hsl(h, 30, 20));
+  for (let b = 0; b < t.bays; b++) px(g, gx + b * BAY_W + 1, BASE_Y - FLOOR_H + 1, 2, 3, '#c9a35c');
+  const dx = t.x + Math.floor(t.w / 2) - 2;
+  px(g, dx, BASE_Y - 4, 4, 4, '#ffe7a8'); px(g, dx + 1, BASE_Y - 3, 2, 3, '#fff6d8');
+  px(g, dx - 2, BASE_Y - 5, 8, 1, hsl(h, 70, 55));
+  // Roof furniture on the top section.
+  const ts = t.sections[t.sections.length - 1];
+  const rx = t.x + 1 + (t.bays - ts.bays) / 2 * BAY_W, rw = ts.bays * BAY_W;
+  const acN = 1 + ((t.rnd() * 3) | 0);
+  for (let i = 0; i < acN && rw > 10; i++) {
+    const ax = rx + 2 + ((t.rnd() * (rw - 6)) | 0);
+    px(g, ax, top - 2, 3, 2, '#3a4058'); px(g, ax, top - 2, 3, 1, '#525a78');
+  }
+  if (t.kind === 'homes' && t.floors > 8 && rw > 14) {
+    const wx = rx + rw - 8;
+    px(g, wx + 1, top - 7, 4, 6, '#4a4f66'); px(g, wx + 1, top - 7, 4, 1, '#5c627e');
+    px(g, wx, top - 1, 1, 1, '#2b2f44'); px(g, wx + 5, top - 1, 1, 1, '#2b2f44');
+  }
+  if (t.floors >= 90 && rw > 20) {
+    const hx = rx + 3, hw = 9;
+    px(g, hx, top - 1, hw, 1, '#2b3350'); px(g, hx + 1, top - 2, hw - 2, 1, '#3a4468');
+    px(g, hx + 3, top - 2, 1, 1, '#8a96c4'); px(g, hx + 5, top - 2, 1, 1, '#8a96c4');
+  }
+  t.antenna = null;
+  if (t.floors >= 30) {
+    const ax = rx + 3 + ((t.rnd() * Math.max(1, rw - 6)) | 0), ah = 10 + Math.round(t.floors / 8);
+    px(g, ax, top - ah, 1, ah, hsl(h, 10, 45));
+    t.antenna = { x: ax, y: top - ah - 1, phase: t.rnd() * 6.28 };
+  }
+  // The sign. It may overhang a small tower, as billboards do.
+  const txt = signText(t);
+  const tw = pxTextW(txt) + (t.logo ? 10 : 0);
+  const bw = Math.max(tw + 6, 9), bh = t.logo ? 12 : 9;
+  const sx = Math.round(t.x + t.w / 2 - bw / 2), sy = top - (t.antenna ? 3 : 2) - bh - 3;
+  t.sign = { x: sx, y: sy, w: bw, h: bh, color: TIER[t.tier] };
+  px(g, sx + 2, sy + bh, 1, 3, '#3a4058'); px(g, sx + bw - 3, sy + bh, 1, 3, '#3a4058');
+  px(g, sx, sy, bw, bh, '#0b0e1c');
+  px(g, sx, sy, bw, 1, TIER[t.tier]); px(g, sx, sy + bh - 1, bw, 1, TIER[t.tier]);
+  px(g, sx, sy, 1, bh, TIER[t.tier]); px(g, sx + bw - 1, sy, 1, bh, TIER[t.tier]);
+  let txx = sx + 3;
+  if (t.logo) { g.imageSmoothingEnabled = false; g.drawImage(t.logo, txx, sy + 2, 8, 8); txx += 10; }
+  pxText(g, txt, txx, sy + (bh - 5) / 2, TIER[t.tier]);
+}
+
+/* A slow drift of window states keeps the equilibrium the data asks for:
+   a tower with more active users has more windows on, and the ones that
+   flip are the ones you notice. */
+function flicker(t, n) {
+  for (let i = 0; i < n; i++) {
+    const idx = (Math.random() * t.win.length) | 0;
+    const st = t.win[idx];
+    if (st >= 254) continue;
+    const f = (idx / t.bays) | 0, b = idx % t.bays;
+    if (f === 0) continue;
+    const want = t.floorLit[f];
+    if (st <= 1) { if (Math.random() < want) t.win[idx] = Math.random() < 0.8 ? 2 : 3; else continue; }
+    else { if (Math.random() > want) t.win[idx] = Math.random() < 0.6 ? 0 : 1; else continue; }
+    drawWin(skyCtx, t, f, b);
+  }
+}
+
+/* Background rows of nobody's buildings, two depths, both baked. */
+function bakeSilhouette(width, p) {
+  const cv = document.createElement('canvas');
+  cv.width = width; cv.height = WORLD_H;
+  const g = cv.getContext('2d');
+  const rnd = mulberry(p.seed);
+  let x = 0;
+  while (x < width) {
+    const w = p.minW + ((rnd() * (p.maxW - p.minW)) | 0);
+    let h = p.minH + ((rnd() * (p.maxH - p.minH)) | 0);
+    if (rnd() < 0.08) h = Math.round(h * 1.8);
+    const top = BASE_Y - h;
+    px(g, x, top, w, h + 6, p.body);
+    px(g, x, top, w, 1, p.edge);
+    if (rnd() < 0.3) px(g, x + 2 + ((rnd() * Math.max(1, w - 4)) | 0), top - 6, 1, 6, p.edge);
+    for (let wy = top + 4; wy < BASE_Y - 4; wy += 6) {
+      for (let wx = x + 2; wx < x + w - 2; wx += 5) {
+        const r = rnd();
+        if (r < p.lit) px(g, wx, wy, 2, 2, r < p.lit * 0.15 ? p.winWarm : p.win);
+      }
+    }
+    x += w + 1 + ((rnd() * 4) | 0);
+  }
+  return cv;
+}
+
+function bakeStreet() {
+  const W = worldW + PAD * 2;
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = 62;
+  const g = cv.getContext('2d');
+  px(g, 0, 0, W, 8, '#2b3049'); px(g, 0, 0, W, 1, '#3d4366');
+  for (let x = 0; x < W; x += 16) px(g, x, 1, 1, 7, '#242942');
+  px(g, 0, 8, W, 1, '#4a5070');
+  px(g, 0, 9, W, 34, '#12162a');
+  for (let x = 0; x < W; x += 14) px(g, x, 26, 7, 1, '#3a3f5c');
+  px(g, 0, 43, W, 1, '#4a5070');
+  px(g, 0, 44, W, 18, '#262b42'); px(g, 0, 44, W, 1, '#353a56');
+  for (let x = 8; x < W; x += 16) px(g, x, 45, 1, 17, '#20243a');
+  // Crossings by the doors.
+  for (const t of towers) {
+    const cx = PAD + t.x + Math.floor(t.w / 2) - 5;
+    for (let i = 0; i < 5; i++) px(g, cx + i * 2, 10, 1, 32, '#3a3f5c');
+  }
+  return cv;
+}
+
+/* Lamp posts and their light, drawn over the tower bases. */
+function bakeFront() {
+  const W = worldW + PAD * 2;
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = 40;
+  const g = cv.getContext('2d');
+  const y0 = 40;                                  // sidewalk line in this canvas
+  for (let x = (PAD + 60) % 96; x < W; x += 96) {
+    const gr = g.createRadialGradient(x + 1, y0 - 15, 1, x + 1, y0 - 15, 24);
+    gr.addColorStop(0, 'rgba(255,214,140,0.20)'); gr.addColorStop(1, 'rgba(255,214,140,0)');
+    g.fillStyle = gr; g.fillRect(x - 24, y0 - 40, 50, 40);
+    px(g, x, y0 - 18, 1, 18, '#3b4160'); px(g, x - 1, y0 - 19, 4, 2, '#ffd98a'); px(g, x, y0 - 20, 2, 1, '#3b4160');
+  }
+  return cv;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   6. THE MOVING PARTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const cars = [], walkers = [], crowds = [], stars = [], clouds = [];
+let plane = null, planeTimer = 20;
+const CAR_COLORS = ['#3d4460', '#4c3a5c', '#2f4a58', '#5a3d3d', '#3a3f4f', '#4a4a30'];
+const SKIN = ['#e8c39e', '#c99a72', '#8d5a3c', '#f1d2b6'];
+const CLOTH = ['#5a6a9c', '#8a4c5c', '#4c7a6a', '#8a7a4c', '#6c5a8c', '#4a5a6c'];
+
+function seedMotion() {
+  const rnd = mulberry(4242);
+  const nCars = clamp(Math.round((worldW + PAD * 2) / 110), 8, 48);
+  for (let i = 0; i < nCars; i++) cars.push(newCar(rnd, true));
+  const nWalk = clamp(Math.round((worldW + PAD) / 55), 10, 80);
+  for (let i = 0; i < nWalk; i++) walkers.push({
+    x: -PAD / 2 + rnd() * (worldW + PAD), dir: rnd() < 0.5 ? -1 : 1, spd: 8 + rnd() * 7,
+    skin: SKIN[(rnd() * SKIN.length) | 0], cloth: CLOTH[(rnd() * CLOTH.length) | 0], ph: rnd() * 10,
+  });
+  for (const t of towers) {
+    for (let i = 0; i < t.crowd; i++) crowds.push({
+      t, x: t.x + t.w / 2 + (rnd() - 0.5) * (t.w + 18), ph: rnd() * 10,
+      skin: SKIN[(rnd() * SKIN.length) | 0], cloth: CLOTH[(rnd() * CLOTH.length) | 0], wait: rnd() * 5,
+    });
+  }
+  for (let i = 0; i < 260; i++) stars.push({ x: rnd() * (worldW * 0.15 + 2400), y: rnd() * 420, a: 0.3 + rnd() * 0.7, sp: 0.5 + rnd() * 2, ph: rnd() * 6.28, big: rnd() < 0.08 });
+  for (let i = 0; i < 7; i++) clouds.push({ x: rnd() * (worldW * 0.25 + 2000), y: 90 + rnd() * 220, spd: 2 + rnd() * 4, blobs: 3 + ((rnd() * 3) | 0), seed: (rnd() * 1e6) | 0 });
+}
+function newCar(rnd, anywhere) {
+  const near = rnd() < 0.5;
+  const bus = rnd() < 0.12;
+  const dir = near ? 1 : -1;
+  const x = anywhere ? -PAD + rnd() * (worldW + PAD * 2) : (dir > 0 ? -PAD - 20 : worldW + PAD + 20);
+  return { x, near, dir, spd: (bus ? 34 : 45) + rnd() * 35, w: bus ? 14 : 8, bus,
+           color: bus ? '#5a4a2a' : CAR_COLORS[(rnd() * CAR_COLORS.length) | 0] };
+}
+
+const rr = mulberry(777);
+function stepMotion(dt) {
+  for (const c of cars) {
+    c.x += c.dir * c.spd * dt;
+    if (c.dir > 0 && c.x > worldW + PAD + 30) Object.assign(c, newCar(rr, false), { dir: 1, near: true, x: -PAD - 20 });
+    if (c.dir < 0 && c.x < -PAD - 30) Object.assign(c, newCar(rr, false), { dir: -1, near: false, x: worldW + PAD + 20 });
+  }
+  for (const w of walkers) {
+    w.x += w.dir * w.spd * dt; w.ph += dt * 6;
+    if (w.x < -PAD / 2) w.x = worldW + PAD / 2; if (w.x > worldW + PAD / 2) w.x = -PAD / 2;
+  }
+  for (const c of crowds) {
+    c.ph += dt * 2.2; c.wait -= dt;
+    if (c.wait < 0) { c.wait = 2 + Math.random() * 6; c.x += (Math.random() - 0.5) * 6; }
+  }
+  for (const c of clouds) { c.x -= c.spd * dt; if (c.x < -200) c.x = worldW * 0.25 + 2000; }
+  if (plane) { plane.x += plane.spd * dt; plane.ph += dt; if (plane.x > worldW * 0.3 + 2400) plane = null; }
+  else { planeTimer -= dt; if (planeTimer < 0) { plane = { x: -40, y: 50 + Math.random() * 80, spd: 70 + Math.random() * 40, ph: 0 }; planeTimer = 35 + Math.random() * 40; } }
+  for (const t of towers) flicker(t, Math.max(1, Math.round(t.win.length * 0.0025)));
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   7. CAMERA AND FRAME
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const cvs = document.getElementById('city');
+const ctx = cvs.getContext('2d', { alpha: false });
+const back = document.createElement('canvas');
+const bctx = back.getContext('2d', { alpha: false });
+const ZOOMS = [1, 2, 3, 4];
+const cam = { x: 0, y: 0, zi: 0 };
+let dpr = 1, cssW = 0, cssH = 0, clockT = 0;
+let hovered = null, selected = null;
+
+const zoom = () => ZOOMS[cam.zi];
+function resize() {
+  dpr = Math.min(2, window.devicePixelRatio || 1);
+  cssW = window.innerWidth; cssH = window.innerHeight;
+  cvs.width = Math.round(cssW * dpr); cvs.height = Math.round(cssH * dpr);
+  ctx.imageSmoothingEnabled = false;
+  clampCam();
+}
+window.addEventListener('resize', resize);
+function viewSize() { const z = zoom(); return { bw: Math.ceil(cssW / z) + 2, bh: Math.ceil(cssH / z) + 2 }; }
+function clampCam() {
+  const { bw, bh } = viewSize();
+  cam.x = worldW <= bw ? worldW / 2 : clamp(cam.x, bw / 2, worldW - bw / 2);
+  const maxY = WORLD_H - bh / 2 + 30;
+  cam.y = Math.min(cam.y, maxY);
+  cam.y = Math.max(cam.y, Math.min(bh / 2, maxY));
+}
+function screenToWorld(sx, sy) {
+  const z = zoom();
+  return { x: cam.x + (sx - cssW / 2) / z, y: cam.y + (sy - cssH / 2) / z };
+}
+function setZoom(dir, ax, ay) {
+  const px0 = ax === undefined ? cssW / 2 : ax, py0 = ay === undefined ? cssH / 2 : ay;
+  const before = screenToWorld(px0, py0);
+  cam.zi = clamp(cam.zi + dir, 0, ZOOMS.length - 1);
+  const after = screenToWorld(px0, py0);
+  cam.x += before.x - after.x; cam.y += before.y - after.y;
+  clampCam();
+}
+
+function drawPerson(g, x, y, p, walking) {
+  const step = walking ? ((Math.sin(p.ph) > 0) ? 1 : 0) : 0;
+  px(g, x + 1, y - 6, 1, 1, p.skin);
+  px(g, x, y - 5, 3, 3, p.cloth);
+  px(g, x + step, y - 2, 1, 2, '#1b1e2c'); px(g, x + 2 - step, y - 2, 1, 2, '#1b1e2c');
+}
+
+function draw(dt) {
+  const z = zoom();
+  const { bw, bh } = viewSize();
+  if (back.width !== bw || back.height !== bh) { back.width = bw; back.height = bh; }
+  const g = bctx;
+  g.imageSmoothingEnabled = false;
+  const left = Math.round(cam.x - bw / 2), top = Math.round(cam.y - bh / 2);
+  const T = clockT / 1000;
+
+  // Sky.
+  const sky = g.createLinearGradient(0, -top, 0, BASE_Y - top);
+  sky.addColorStop(0, '#04050d'); sky.addColorStop(0.5, '#0b0f2c'); sky.addColorStop(0.82, '#1a1a3f'); sky.addColorStop(1, '#3a2848');
+  g.fillStyle = sky; g.fillRect(0, 0, bw, bh);
+  // Stars, moon, clouds, plane: each on its own slow parallax.
+  for (const s of stars) {
+    const sx = s.x - left * 0.12, sy = s.y - top;
+    if (sx < -2 || sx > bw + 2 || sy < -2 || sy > bh) continue;
+    const a = s.a * (0.65 + 0.35 * Math.sin(T * s.sp + s.ph));
+    g.fillStyle = 'rgba(223,230,255,' + a.toFixed(2) + ')';
+    g.fillRect(sx | 0, sy | 0, 1, 1);
+    if (s.big) { g.fillRect((sx | 0) - 1, sy | 0, 3, 1); g.fillRect(sx | 0, (sy | 0) - 1, 1, 3); }
+  }
+  {
+    const mx = 380 + worldW * 0.5 - left * 0.06, my = 120 - top;
+    const gl = g.createRadialGradient(mx, my, 4, mx, my, 40);
+    gl.addColorStop(0, 'rgba(244,240,220,0.16)'); gl.addColorStop(1, 'rgba(244,240,220,0)');
+    g.fillStyle = gl; g.fillRect(mx - 40, my - 40, 80, 80);
+    const R = 7;
+    for (let yy = -R; yy <= R; yy++) { const half = Math.round(Math.sqrt(R * R - yy * yy)); px(g, mx - half, my + yy, half * 2, 1, '#f4f0dc'); }
+    px(g, mx - 2, my - 3, 2, 2, '#d9d4bd'); px(g, mx + 1, my + 1, 3, 2, '#d9d4bd'); px(g, mx - 4, my + 2, 2, 1, '#d9d4bd');
+  }
+  for (const c of clouds) {
+    const cx = c.x - left * 0.2, cy = c.y - top;
+    if (cx < -160 || cx > bw + 160) continue;
+    const cr = mulberry(c.seed);
+    for (let i = 0; i < c.blobs; i++) {
+      const bx = cx + i * 22 + ((cr() * 8) | 0), by = cy + ((cr() * 6) | 0), bwid = 24 + ((cr() * 22) | 0), bh2 = 8 + ((cr() * 6) | 0);
+      px(g, bx, by, bwid, bh2, '#101430'); px(g, bx + 2, by + bh2, bwid - 4, 1, '#2a2350'); px(g, bx + 3, by - 1, bwid - 6, 1, '#141a3a');
+    }
+  }
+  if (plane) {
+    const pxx = plane.x - left * 0.3, pyy = plane.y - top;
+    px(g, pxx, pyy, 6, 1, '#9aa3c7'); px(g, pxx + 2, pyy - 1, 1, 1, '#9aa3c7');
+    if (Math.sin(plane.ph * 6) > 0.3) px(g, pxx - 1, pyy, 1, 1, '#ff4d4d');
+    if (Math.sin(plane.ph * 6 + 3) > 0.3) px(g, pxx + 6, pyy, 1, 1, '#5bff8a');
+  }
+  // Two searchlights sweep from the tallest roof. Drawn behind the depth
+  // layers so the beams read as sky, not as paint on the buildings.
+  {
+    const t1 = towers[0];
+    const ox = t1.x + t1.w / 2 - left, oy = BASE_Y - t1.floors * FLOOR_H - top - 2;
+    g.save(); g.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < 2; i++) {
+      const a = -Math.PI / 2 + Math.sin(T * 0.23 + i * 2.1) * 0.75;
+      const len = 520, spread = 0.06;
+      const gr = g.createLinearGradient(ox, oy, ox + Math.cos(a) * len, oy + Math.sin(a) * len);
+      gr.addColorStop(0, 'rgba(255,236,200,0.16)'); gr.addColorStop(1, 'rgba(255,236,200,0)');
+      g.fillStyle = gr; g.beginPath(); g.moveTo(ox, oy);
+      g.lineTo(ox + Math.cos(a - spread) * len, oy + Math.sin(a - spread) * len);
+      g.lineTo(ox + Math.cos(a + spread) * len, oy + Math.sin(a + spread) * len);
+      g.closePath(); g.fill();
+    }
+    g.restore();
+  }
+  // Depth.
+  g.drawImage(far, -Math.round(left * 0.35), -top);
+  g.drawImage(mid, -Math.round(left * 0.6), -top);
+  // The city itself.
+  g.drawImage(skyline, left, top, bw, bh, 0, 0, bw, bh);
+  // Dynamic detail on the towers.
+  for (const t of towers) {
+    const tx = t.x - left;
+    if (tx + t.w < -40 || tx > bw + 40) continue;
+    const roof = BASE_Y - t.floors * FLOOR_H - top;
+    if (t.antenna && Math.sin(T * 3.1 + t.antenna.phase) > 0.2) px(g, t.antenna.x - left, t.antenna.y - top, 1, 1, '#ff4d4d');
+    // Sign glow.
+    const s = t.sign;
+    if (z >= 1) {
+      g.globalAlpha = t.tier === 'gold' ? 0.28 : 0.16;
+      g.fillStyle = s.color; g.fillRect(s.x - left - 2, s.y - top - 2, s.w + 4, s.h + 4);
+      g.globalAlpha = 1;
+    }
+    if (t.crane) {
+      const ts = t.sections[t.sections.length - 1];
+      const rx = t.x + 1 + (t.bays - ts.bays) / 2 * BAY_W - left, rw = ts.bays * BAY_W;
+      const mx = rx + rw - 4, mh = 22 + Math.min(10, t.floors / 10);
+      const jibY = roof - mh;
+      px(g, rx - 1, roof - 5, rw + 2, 1, '#3b4368');
+      for (let xx = rx; xx < rx + rw; xx += 4) px(g, xx, roof - 5, 1, 5, '#2b3150');
+      px(g, mx, jibY, 2, mh, '#e0b050'); px(g, mx + 1, jibY, 1, mh, '#a5802a');
+      px(g, mx - 24, jibY, 30, 1, '#e0b050'); px(g, mx - 24, jibY + 1, 30, 1, '#a5802a');
+      const hook = 4 + Math.round((Math.sin(T * 0.7 + t.idx) + 1) * 5);
+      const hx = mx - 18 + Math.round(Math.sin(T * 0.4 + t.idx) * 4);
+      px(g, hx, jibY + 2, 1, hook, '#8a8fa8'); px(g, hx - 1, jibY + 2 + hook, 3, 2, '#dcdcdc');
+      if (Math.sin(T * 2.4 + t.idx) > 0.4) px(g, mx, jibY - 1, 1, 1, '#ff4d4d');
+    }
+    if (t === selected || t === hovered) {
+      g.strokeStyle = t === selected ? 'rgba(255,184,77,0.9)' : 'rgba(77,232,208,0.85)';
+      g.lineWidth = 1;
+      g.strokeRect(tx - 1.5, roof - 1.5 - (t.sign ? (roof - (t.sign.y - top)) : 0), t.w + 3, BASE_Y - top - roof + 3 + (t.sign ? (roof - (t.sign.y - top)) : 0));
+    }
+  }
+  // Street, then the wet reflection of the lobbies in the road, then the lamps.
+  g.drawImage(street, left + PAD, 0, bw, 62, 0, BASE_Y - top, bw, 62);
+  g.save();
+  g.globalAlpha = 0.16;
+  for (let i = 0; i < 17; i++) {
+    const dy = i * 2;
+    const dx = Math.round(Math.sin(T * 1.3 + i * 0.7) * 1.5);
+    g.drawImage(skyline, left - dx, BASE_Y - 6 - i * 6, bw, 6, 0, BASE_Y - top + 9 + dy, bw, 2);
+  }
+  g.restore();
+  for (const c of cars) {
+    const cx = c.x - left;
+    if (cx < -30 || cx > bw + 30) continue;
+    const cy = BASE_Y - top + (c.near ? 31 : 14);
+    px(g, cx, cy, c.w, 3, c.color); px(g, cx + 1, cy, c.w - 2, 1, '#6a7290');
+    const head = c.dir > 0 ? cx + c.w : cx - 1, tail = c.dir > 0 ? cx - 1 : cx + c.w;
+    px(g, head, cy + 1, 1, 1, '#fff3c4'); px(g, tail, cy + 1, 1, 1, '#ff4d4d');
+    g.globalAlpha = 0.28; px(g, c.dir > 0 ? head + 1 : head - 5, cy + 1, 5, 1, '#fff3c4');
+    g.globalAlpha = 0.35; px(g, c.dir > 0 ? tail - 6 : tail + 1, cy + 1, 6, 1, '#ff4d4d');
+    g.globalAlpha = 1;
+  }
+  g.drawImage(front, left + PAD, 0, bw, 40, 0, BASE_Y - top - 34, bw, 40);
+  for (const w of walkers) { const wx = w.x - left; if (wx > -4 && wx < bw + 4) drawPerson(g, wx | 0, BASE_Y - top, w, true); }
+  for (const c of crowds) {
+    const cx = c.x - left; if (cx < -4 || cx > bw + 4) continue;
+    drawPerson(g, cx | 0, BASE_Y - top - (Math.sin(c.ph) > 0.9 ? 1 : 0), c, false);
+  }
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(back, 0, 0, bw, bh, 0, 0, Math.round(bw * z * dpr), Math.round(bh * z * dpr));
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   8. INPUT
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+let drag = null, moved = 0, pinch = null;
+cvs.addEventListener('pointerdown', (e) => {
+  cvs.setPointerCapture(e.pointerId);
+  drag = { x: e.clientX, y: e.clientY, cx: cam.x, cy: cam.y }; moved = 0; cvs.classList.add('dragging');
+});
+cvs.addEventListener('pointermove', (e) => {
+  if (drag) {
+    const z = zoom();
+    cam.x = drag.cx - (e.clientX - drag.x) / z; cam.y = drag.cy - (e.clientY - drag.y) / z;
+    moved += Math.abs(e.movementX || 0) + Math.abs(e.movementY || 0); clampCam();
+  } else hoverAt(e.clientX, e.clientY);
+});
+function endDrag(e) { if (drag && moved < 5) clickAt(e.clientX, e.clientY); drag = null; cvs.classList.remove('dragging'); }
+cvs.addEventListener('pointerup', endDrag);
+cvs.addEventListener('pointercancel', () => { drag = null; cvs.classList.remove('dragging'); });
+cvs.addEventListener('pointerleave', () => { hovered = null; tip.classList.remove('on'); });
+cvs.addEventListener('wheel', (e) => { e.preventDefault(); setZoom(e.deltaY < 0 ? 1 : -1, e.clientX, e.clientY); }, { passive: false });
+cvs.addEventListener('touchstart', (e) => { if (e.touches.length === 2) pinch = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); }, { passive: true });
+cvs.addEventListener('touchmove', (e) => {
+  if (e.touches.length === 2 && pinch) {
+    const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+    if (d / pinch > 1.4) { setZoom(1); pinch = d; } if (d / pinch < 0.72) { setZoom(-1); pinch = d; }
+  }
+}, { passive: true });
+cvs.addEventListener('touchend', () => { pinch = null; }, { passive: true });
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { closeCard(); closeModal(); }
+  if (e.key === '+' || e.key === '=') setZoom(1); if (e.key === '-') setZoom(-1);
+  const pan = 120 / zoom();
+  if (e.key === 'ArrowLeft') cam.x -= pan; if (e.key === 'ArrowRight') cam.x += pan;
+  if (e.key === 'ArrowUp') cam.y -= pan; if (e.key === 'ArrowDown') cam.y += pan;
+  clampCam();
+});
+
+function towerAt(sx, sy) {
+  const w = screenToWorld(sx, sy);
+  for (const t of towers) {
+    const topY = Math.min(t.sign.y - 2, BASE_Y - t.floors * FLOOR_H - 8);
+    if (w.x >= t.x - 2 && w.x <= t.x + t.w + 2 && w.y >= topY && w.y <= BASE_Y + 6) return t;
+  }
+  return null;
+}
+const tip = document.getElementById('tip');
+function hoverAt(sx, sy) {
+  const t = towerAt(sx, sy);
+  hovered = t;
+  if (!t) { tip.classList.remove('on'); cvs.style.cursor = 'grab'; return; }
+  cvs.style.cursor = 'pointer';
+  tip.innerHTML = '<b>' + t.name + '</b> <em>#' + t.rank + '</em><br>' + money(t.k.mrr) + ' MRR · ' + t.floors + ' floors<br>' +
+    '<em>' + fmt(t.k.subs) + ' subscribers · ' + fmt(t.k.users) + ' active</em>';
+  tip.style.left = Math.min(sx + 14, cssW - 240) + 'px'; tip.style.top = (sy + 16) + 'px';
+  tip.classList.add('on');
+}
+function clickAt(sx, sy) { const t = towerAt(sx, sy); if (t) openCard(t); else closeCard(); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   9. CHROME
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const cardEl = document.getElementById('card');
+function openCard(t) {
+  selected = t;
+  location.hash = t.k.id;
+  document.getElementById('cName').textContent = t.name;
+  document.getElementById('cSub').textContent = t.tag + ' · #' + t.rank + ' of ' + towers.length;
+  const chips = [];
+  if (t.k.anonFounder) chips.push('<span class="anon">🎭 Anonymous founder</span>');
+  else for (const f of t.k.founders) chips.push('<a href="https://x.com/' + f + '" target="_blank" rel="noopener">@' + f + '</a>');
+  if (!t.k.anonApp && t.k.ios) chips.push('<a href="' + t.k.ios + '" target="_blank" rel="noopener"> App Store</a>');
+  if (!t.k.anonApp && t.k.play) chips.push('<a href="' + t.k.play + '" target="_blank" rel="noopener">▶ Play</a>');
+  document.getElementById('cChips').innerHTML = chips.join('');
+  const litPct = Math.round(t.lit * 100);
+  document.getElementById('cStats').innerHTML = [
+    [money(t.k.mrr), 'MRR', 'the height: ' + t.floors + ' floors'],
+    [fmt(t.k.subs), 'Subscribers', 'the width: ' + t.bays + ' windows across'],
+    [fmt(t.k.users), 'Active users', 'lit windows, about ' + litPct + '%'],
+    [fmt(t.k.trials), 'Free trials', 'the crowd at the door: ' + t.crowd],
+    [fmt(t.churn), 'Lost, 30 days', t.darkTop ? 'the dark floors on top: ' + t.darkTop : 'no dark floors'],
+    [money(t.revenue), 'Lifetime revenue', 'the sign: ' + t.tier + (t.crane ? ' · crane up, still growing' : '')],
+  ].map(([n, l, w]) => '<div class="stat"><div class="n">' + n + '</div><div class="l">' + l + '</div><div class="w">' + w + '</div></div>').join('');
+  const d = t.wk, de = document.getElementById('cDelta');
+  de.textContent = (d >= 0 ? '+' : '') + money(d) + ' in 7 days';
+  de.className = d > 0 ? 'up' : d < 0 ? 'down' : 'flat';
+  drawSignIcon(t); drawSpark(t);
+  cardEl.classList.add('on');
+}
+function closeCard() { selected = null; cardEl.classList.remove('on'); if (location.hash) history.replaceState(null, '', location.pathname); }
+document.getElementById('cClose').addEventListener('click', closeCard);
+
+function drawSignIcon(t) {
+  const cv = document.getElementById('cardSign'), g = cv.getContext('2d');
+  g.imageSmoothingEnabled = false; g.clearRect(0, 0, 18, 18);
+  px(g, 0, 0, 18, 18, '#0b0e1c');
+  px(g, 0, 0, 18, 1, t.sign.color); px(g, 0, 17, 18, 1, t.sign.color); px(g, 0, 0, 1, 18, t.sign.color); px(g, 17, 0, 1, 18, t.sign.color);
+  if (t.logo) g.drawImage(t.logo, 1, 1, 16, 16);
+  else { pxText(g, signText(t).slice(0, 3), 3, 4, t.sign.color); px(g, 3, 11, 12, 1, hsl(t.hue, 60, 50)); }
+}
+function drawSpark(t) {
+  const cv = document.getElementById('cSpark'), g = cv.getContext('2d');
+  const W = cv.width, H = cv.height, pad = 8;
+  g.clearRect(0, 0, W, H);
+  const vals = t.hist.map(h => h.mrr);
+  const lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals), rng = (hi - lo) || 1;
+  const X = i => pad + i / (vals.length - 1) * (W - pad * 2), Y = v => H - pad - (v - lo) / rng * (H - pad * 2);
+  g.beginPath(); g.moveTo(X(0), H); vals.forEach((v, i) => g.lineTo(X(i), Y(v))); g.lineTo(X(vals.length - 1), H); g.closePath();
+  const grad = g.createLinearGradient(0, 0, 0, H); grad.addColorStop(0, 'rgba(255,184,77,0.30)'); grad.addColorStop(1, 'rgba(255,184,77,0.02)');
+  g.fillStyle = grad; g.fill();
+  g.beginPath(); vals.forEach((v, i) => i ? g.lineTo(X(i), Y(v)) : g.moveTo(X(i), Y(v)));
+  g.strokeStyle = '#ffb84d'; g.lineWidth = 3; g.lineJoin = 'round'; g.stroke();
+  g.beginPath(); g.arc(X(vals.length - 1), Y(vals[vals.length - 1]), 5, 0, 6.2832); g.fillStyle = '#4de8d0'; g.fill();
+}
+function flyTo(t) { cam.x = t.x + t.w / 2; cam.zi = t.floors > 60 ? 0 : 1; const { bh } = viewSize(); cam.y = WORLD_H - bh / 2 + 30; clampCam(); }
+
+/* The wire along the bottom of the screen. */
+function buildWire() {
+  const items = [];
+  const board = towers.slice().sort((a, b) => a.rank - b.rank).map(t => '#' + t.rank + ' <b data-k="' + t.k.id + '">' + t.name.toUpperCase() + '</b> ' + money(t.k.mrr) + ' MRR').join(' · ');
+  items.push('🏙️ SKYLINE ' + board);
+  for (const t of towers) {
+    const nm = '<b data-k="' + t.k.id + '">' + t.name.toUpperCase() + '</b>';
+    const fl = t.floors - floorsFor(t.hist[22].mrr);
+    const tenants = t.k.subs - t.hist[22].subs;
+    if (fl > 0) items.push('🏗️ ' + nm + ' ADDS ' + fl + (fl === 1 ? ' FLOOR' : ' FLOORS'));
+    if (fl < 0) items.push('📉 ' + nm + ' LOSES ' + (-fl) + ' FLOORS');
+    if (tenants > 0) items.push('🔑 ' + fmt(tenants) + ' NEW TENANTS SIGN AT ' + nm);
+    if (tenants < 0) items.push('🚪 ' + fmt(-tenants) + ' TENANTS MOVE OUT OF ' + nm);
+    if (t.darkTop >= 2) items.push('🌑 ' + nm + ' GOES DARK ON ' + t.darkTop + ' FLOORS');
+    if (t.crane) items.push('🏗️ CRANE UP AT ' + nm);
+    if (t.tier === 'gold') items.push('🏆 ' + nm + ' LIGHTS THE GOLD SIGN, ' + money(t.revenue) + ' LIFETIME');
+    if (t.crowd >= 20) items.push('🧍 ' + t.crowd + ' WAITING AT THE DOOR OF ' + nm);
+  }
+  const run = document.getElementById('run');
+  run.innerHTML = items.map(s => '<span>' + s + '</span>').join('');
+  run.style.animationDuration = Math.max(30, items.join('').length * 0.09) + 's';
+  run.querySelectorAll('b[data-k]').forEach(b => b.addEventListener('click', () => { const t = towers.find(x => x.k.id === b.dataset.k); if (t) { flyTo(t); openCard(t); } }));
+}
+
+function buildLegend() {
+  const rows = [
+    ['height', 'Height is MRR', 'power curve'],
+    ['width', 'Width is subscribers', ''],
+    ['lit', 'Lit windows are active users', '20% to 95%'],
+    ['dark', 'Dark floors on top are subscribers lost', '30 days'],
+    ['crane', 'A crane means the week was up', ''],
+    ['crowd', 'The crowd at the door is free trials', '1 per 10'],
+    ['sign', 'Sign colour is lifetime revenue', 'white, then cyan at $25k, amber at $250k, gold at $1M'],
+  ];
+  const box = document.getElementById('legRows');
+  box.innerHTML = rows.map(r => '<div class="r"><i data-ic="' + r[0] + '"></i><span>' + r[1] + '</span><em>' + r[2] + '</em></div>').join('');
+  box.querySelectorAll('i[data-ic]').forEach(i => {
+    const cv = document.createElement('canvas'); cv.width = 14; cv.height = 10; const g = cv.getContext('2d');
+    const ic = i.dataset.ic;
+    if (ic === 'height') { px(g, 2, 2, 3, 8, '#2b3350'); px(g, 6, 5, 3, 5, '#2b3350'); px(g, 10, 7, 3, 3, '#2b3350'); px(g, 3, 3, 1, 1, '#ffd27a'); px(g, 3, 5, 1, 1, '#ffd27a'); }
+    if (ic === 'width') { px(g, 1, 4, 5, 6, '#2b3350'); px(g, 7, 4, 6, 6, '#2b3350'); px(g, 8, 5, 1, 1, '#ffd27a'); px(g, 11, 5, 1, 1, '#ffd27a'); px(g, 8, 7, 1, 1, '#ffd27a'); }
+    if (ic === 'lit') { px(g, 2, 1, 10, 9, '#2b3350'); for (let y = 2; y < 9; y += 2) for (let x = 3; x < 11; x += 2) px(g, x, y, 1, 1, ((x + y) % 3) ? '#ffd27a' : '#0c1020'); }
+    if (ic === 'dark') { px(g, 3, 4, 8, 6, '#2b3350'); px(g, 3, 1, 8, 3, '#0d1122'); px(g, 4, 5, 1, 1, '#ffd27a'); px(g, 7, 5, 1, 1, '#ffd27a'); px(g, 4, 7, 1, 1, '#ffd27a'); }
+    if (ic === 'crane') { px(g, 3, 5, 8, 5, '#2b3350'); px(g, 9, 0, 1, 5, '#e0b050'); px(g, 3, 0, 7, 1, '#e0b050'); px(g, 4, 1, 1, 3, '#8a8fa8'); }
+    if (ic === 'crowd') { px(g, 3, 2, 8, 6, '#2b3350'); for (let x = 1; x < 13; x += 3) { px(g, x + 1, 6, 1, 1, '#e8c39e'); px(g, x, 7, 3, 3, '#5a6a9c'); } }
+    if (ic === 'sign') { px(g, 1, 2, 12, 6, '#0b0e1c'); px(g, 1, 2, 12, 1, '#ffd94a'); px(g, 1, 7, 12, 1, '#ffd94a'); px(g, 1, 2, 1, 6, '#ffd94a'); px(g, 12, 2, 1, 6, '#ffd94a'); px(g, 3, 4, 8, 2, '#ffd94a'); }
+    i.appendChild(cv);
+  });
+  const leg = document.getElementById('legend');
+  document.getElementById('legHd').addEventListener('click', () => { leg.classList.toggle('open'); document.getElementById('legCaret').textContent = leg.classList.contains('open') ? '▴' : '▾'; });
+  if (cssW > 700) { leg.classList.add('open'); document.getElementById('legCaret').textContent = '▴'; }
+}
+
+/* Join form. Same rules as the map: the handle is required, anonymity
+   needs an app named or linked, the logo is optional. */
+const modal = document.getElementById('modal');
+function openModal() { modal.classList.add('on'); }
+function closeModal() { modal.classList.remove('on'); }
+document.getElementById('addBtn').addEventListener('click', openModal);
+document.getElementById('mClose').addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+let pendingLogo = null;
+document.getElementById('fLogo').addEventListener('change', (e) => {
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  const img = new Image();
+  img.onload = () => {
+    const cv = document.getElementById('fLogoPrev'), g = cv.getContext('2d');
+    g.imageSmoothingEnabled = true; g.clearRect(0, 0, 16, 16);
+    const s = Math.min(img.width, img.height);
+    g.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, 16, 16);
+    pendingLogo = cv; URL.revokeObjectURL(img.src);
+  };
+  img.src = URL.createObjectURL(f);
+});
+document.getElementById('mGo').addEventListener('click', () => {
+  const anonA = document.getElementById('fAnonA').checked, anonF = document.getElementById('fAnonF').checked;
+  const typed = document.getElementById('fKing').value.trim();
+  const handle = document.getElementById('fX').value.trim().replace(/^@/, '');
+  const store = document.getElementById('fIOS').value.trim() || document.getElementById('fPlay').value.trim();
+  const note = document.getElementById('mNote');
+  if (!handle) { note.textContent = 'A founder handle on X is required. It is how the tower is yours.'; return; }
+  if ((anonF || anonA) && !typed && !store) { note.textContent = 'To stay anonymous, name the app or add a store link.'; return; }
+  const name = (anonA || !typed) ? veilName(typed.length * 977 + handle.length * 31 + 13) : typed;
+  note.textContent = 'Saved. ' + name + ' breaks ground at the next daily refresh' + (anonF ? ', with no handle on it' : ' under @' + handle) + (pendingLogo ? ', logo on the sign.' : '.');
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   10. BOOT
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+function boot() {
+  resize();
+  SEED.forEach((k, i) => towers.push(makeTower(k, i)));
+  worldW = layoutTowers(towers);
+
+  skyline = document.createElement('canvas'); skyline.width = worldW; skyline.height = WORLD_H;
+  skyCtx = skyline.getContext('2d');
+  for (const t of towers) bakeTower(skyCtx, t);
+  street = bakeStreet();
+  front = bakeFront();
+  far = bakeSilhouette(Math.ceil(worldW * 0.35) + 2400, { seed: 11, minW: 10, maxW: 34, minH: 40, maxH: 210, body: '#0d1126', edge: '#171d3a', lit: 0.10, win: '#26305a', winWarm: '#4a3f2a' });
+  mid = bakeSilhouette(Math.ceil(worldW * 0.6) + 2400, { seed: 23, minW: 12, maxW: 44, minH: 30, maxH: 150, body: '#121733', edge: '#1f2650', lit: 0.16, win: '#3a4a86', winWarm: '#6b5a2a' });
+  seedMotion();
+
+  const mk = document.getElementById('markCv').getContext('2d');
+  px(mk, 3, 2, 5, 9, '#2b3350'); px(mk, 4, 3, 1, 1, '#ffd27a'); px(mk, 6, 3, 1, 1, '#ffd27a'); px(mk, 4, 5, 1, 1, '#ffd27a'); px(mk, 6, 7, 1, 1, '#ffd27a'); px(mk, 5, 0, 1, 2, '#ff4d4d');
+  px(mk, 0, 6, 2, 5, '#1c2140'); px(mk, 9, 5, 2, 6, '#1c2140');
+
+  buildLegend(); buildWire();
+  const want = towers.find(t => t.k.id === location.hash.slice(1));
+  const { bh } = viewSize();
+  cam.x = worldW / 2; cam.y = WORLD_H - bh / 2 + 30; cam.zi = 0; clampCam();
+  if (want) { flyTo(want); openCard(want); }
+
+  let prev = performance.now();
+  (function frame(now) {
+    const dt = Math.min(0.05, (now - prev) / 1000); prev = now; clockT += dt * 1000;
+    stepMotion(dt); draw(dt);
+    requestAnimationFrame(frame);
+  })(prev);
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+</script>
+</body>
+</html>
