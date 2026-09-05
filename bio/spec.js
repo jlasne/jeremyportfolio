@@ -62,7 +62,7 @@ export const shift = (key, n) => new Date(utcOf(key) + n * 86400000).toISOString
 export const daysBetween = (from, to) => Math.round((utcOf(to) - utcOf(from)) / 86400000);
 
 /* What a save may contain, decided once for both sides: only days from the
-   start up to today, only known habits, every number finite and inside its range,
+   start up to tomorrow, only known habits, every number finite and inside its range,
    sleep, weight and the training result kept only when given, the
    session note trimmed to 80 characters. */
 export function clean(input, today) {
@@ -72,7 +72,8 @@ export function clean(input, today) {
     return Number.isFinite(n) ? Math.min(m.max, Math.max(0, Math.round(n * 100) / 100)) : undefined;
   };
   const log = {};
-  const keys = Object.keys(input?.log ?? {}).filter(k => isKey(k) && k >= SPEC.start && k <= today).sort().slice(-3650);
+  const last = shift(today, 1); /* tomorrow's line can be opened the evening before */
+  const keys = Object.keys(input?.log ?? {}).filter(k => isKey(k) && k >= SPEC.start && k <= last).sort().slice(-3650);
   for (const key of keys) {
     const day = input.log[key];
     if (!day || typeof day !== 'object') continue;

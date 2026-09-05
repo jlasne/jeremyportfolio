@@ -163,6 +163,9 @@ h2 {
 
 .more { margin: 14px 0 0; }
 .editing .more { display: none; }
+.addday { display: none; align-items: center; gap: 12px; margin: 0 0 14px; }
+.editing .addday:not([hidden]) { display: flex; }
+.addday .pass { flex: 0 1 200px; }
 .legend { list-style: none; margin: 28px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px 32px; }
 .legend li { font-size: 14px; color: var(--ice-70); max-width: 44ch; }
 .legend b { display: block; font-weight: 500; font-size: 15px; color: var(--ice); margin-bottom: 2px; }
@@ -280,6 +283,11 @@ footer a:hover { color: var(--ice); }
       <p class="tag">An energized day starts with a full night of sleep.</p>
       <p class="sum mono" id="sum"></p>
     </div>
+    <form class="addday" id="addday" hidden>
+      <label class="mono" for="newday">Add a day</label>
+      <input class="pass" id="newday" type="date" required>
+      <button class="btn" type="submit">Add</button>
+    </form>
     <div class="log" id="log" role="table" aria-label="Daily log"></div>
     <button class="btn more" id="more" type="button" hidden></button>
     <ul class="legend" id="legend"></ul>
@@ -447,6 +455,7 @@ function api(op, args) {
 /* The rows: today first, back to the first logged day, or to yesterday
    when the log is new. Fourteen at most until "Earlier days" is pressed. */
 let rows = [], all = false;
+const extra = new Set();
 const first = () => Object.keys(state.log).filter(k => k <= today).sort()[0];
 const numCell = (id, m, label) => `<span class="s"><input class="val" id="${id}" type="number" inputmode="decimal" min="0" max="${m.max}" step="${m.step}" placeholder=" " readonly aria-label="${label}"><i>${m.unit}</i></span>`;
 function grid(host, head, row) {
@@ -468,6 +477,8 @@ function build() {
   if (hidden) from = shift(today, 1 - SHOWN);
   rows = [];
   for (let k = today; k >= from; k = shift(k, -1)) rows.push({ key: k, when: k === today ? 'today' : 'past' });
+  for (const k of extra) if (!rows.some(r => r.key === k)) rows.push({ key: k, when: k === today ? 'today' : 'past' });
+  rows.sort((a, b) => (a.key < b.key ? 1 : -1));
   $('log').style.setProperty('--n', HABITS.length);
   grid($('log'), HABITS.map(h => `<span class="h" title="${h.name}">${h.short}</span>`).join('') + '<span class="s">Sleep</span><span class="s">Weight</span>',
     key => HABITS.map(h => `<label class="cell"><input class="tick" type="checkbox" id="h-${key}-${h.id}" disabled aria-label="${h.name}, ${pretty(key)}"></label>`).join('') + numCell('s-' + key, SPEC.sleep, 'Sleep, ' + pretty(key)) + numCell('g-' + key, SPEC.weight, 'Weight, ' + pretty(key)));
@@ -527,9 +538,9 @@ function unit(key) {
   const picked = $('p-' + key).value, e = TESTS.find(t => t.id === picked) || TESTS[0], inp = $('t-' + key);
   inp.max = e.max; inp.step = e.step; inp.nextElementSibling.textContent = picked ? e.unit : '';
 }
-function paint() {
+function paint(log = state.log) {
   for (const r of rows) {
-    const d = state.log[r.key];
+    const d = log[r.key];
     for (const h of HABITS) $(`h-${r.key}-${h.id}`).checked = !!d?.habits?.[h.id];
     val('s-' + r.key, d?.sleep); val('g-' + r.key, d?.weight);
     const done = TESTS.find(e => Number.isFinite(d?.train?.[e.id]));
@@ -577,8 +588,10 @@ const remembered = () => { try { return sessionStorage.getItem(PASS) || ''; } ca
 const remember = p => { try { p ? sessionStorage.setItem(PASS, p) : sessionStorage.removeItem(PASS); } catch (e) {} };
 const say = (t, bad) => { status.textContent = t; status.classList.toggle('bad', !!bad); };
 
-function open(editing) {
+function open(editing, quiet) {
   document.body.classList.toggle('editing', editing);
+  $('addday').hidden = !editing;
+  if (editing) { const nd = $('newday'); nd.min = SPEC.start; nd.max = shift(today, 1); nd.value = nd.value || (today >= SPEC.start ? today : SPEC.start); }
   for (const r of rows) {
     for (const h of HABITS) $(`h-${r.key}-${h.id}`).disabled = !editing;
     $('s-' + r.key).readOnly = !editing;
@@ -588,7 +601,7 @@ function open(editing) {
     $('w-' + r.key).readOnly = !editing;
   }
   bar.hidden = !editing; gate.hidden = editing; tools.hidden = !editing;
-  if (editing) { say('Editing. Every day shown is open, in both logs.'); document.querySelector('.lrow.today .tick')?.focus(); }
+  if (editing && !quiet) { say('Editing. Every day shown is open. One test a day.'); document.querySelector('.lrow.today .tick')?.focus(); }
 }
 $('edit').addEventListener('click', () => {
   if (remembered()) return open(true);
@@ -605,10 +618,10 @@ gate.addEventListener('submit', async ev => {
   }
   $('unlock').disabled = false;
 });
-function cancel() { paint(); open(false); }
+function cancel() { extra.clear(); build(); paint(); open(false); }
 document.querySelectorAll('[data-cancel]').forEach(b => b.addEventListener('click', cancel));
 
-async function save() {
+function collect() {
   const log = { ...state.log };
   for (const r of rows) {
     const entry = { habits: Object.fromEntries(HABITS.map(h => [h.id, $(`h-${r.key}-${h.id}`).checked])), train: {} };
@@ -621,11 +634,24 @@ async function save() {
     if (note) entry.note = note;
     log[r.key] = entry;
   }
+  return log;
+}
+$('addday').addEventListener('submit', ev => {
+  ev.preventDefault();
+  const k = $('newday').value;
+  if (!k || k < SPEC.start || k > shift(today, 1)) { say(`Pick a day from ${pretty(SPEC.start)} to ${pretty(shift(today, 1))}`, true); return; }
+  const draft = collect();
+  extra.add(k); build(); paint(draft); open(true, true);
+  say(`${pretty(k, true)} added. Fill it in, then Save.`);
+  document.querySelector(`#h-${k}-${HABITS[0].id}`)?.focus();
+});
+async function save() {
+  const log = collect();
   const draft = clean({ log }, today);
   $('save').disabled = true; say('Saving…');
   try {
     const doc = await api('bio.save', { passphrase: remembered(), today, ...draft });
-    apply(doc); open(false); build(); paint();
+    apply(doc); extra.clear(); open(false); build(); paint();
   } catch (e) {
     say(e.message, true);
     if (/passphrase/i.test(e.message)) { remember(''); gate.hidden = false; tools.hidden = true; pass.value = ''; pass.focus(); }
