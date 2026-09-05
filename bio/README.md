@@ -1,8 +1,9 @@
 # jeremylasne.com/bio
 
 One page over a snowy ridge that runs behind the whole site: a fifteen-day
-daily log of five habits and sleep, then one number per training
-discipline. Everyone reads it. One passphrase writes it.
+challenge logged one line a day. Five habits and sleep, then every
+training session, with the best result per discipline on top. Everyone
+reads it. One passphrase writes it.
 
 ## Stack
 
@@ -37,12 +38,14 @@ Copy lives in `spec.js`: the why-text under each habit, the note under each
 number, units and steps. `start` is day 1 of the log; move it and the
 fifteen rows move with it. Old days stay in the document and are ignored.
 
-The log is one row per day. Every habit is open from day 1. Sleep is a
-number per row, in hours. Rows after today are dimmed and locked; today and
-the days before it are editable, so yesterday can be filled in.
+Both logs are one row per day. Health: five checks and hours slept.
+Performance: the result of each test done that day, blank when it was a
+rest day. Rows after today are dimmed and locked; today and the days before
+it are editable, so yesterday can be filled in.
 
-The first numbers shown are the `fallback` values in `spec.js`, there so
-the page never shows dashes. Replace them on the first *Save*.
+The three cards show the best result in the log and the number of sessions
+it came from. Before the first session they show the `target` from
+`spec.js`, labelled as such, so the page never shows dashes.
 
 ## Deploy
 
