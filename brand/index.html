@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>BrandMatch · Your audience&rsquo;s app, built and run for you</title>
-<meta name="description" content="You bring 100,000 people. I find the idea in what they already ask you, build the app, run it, and split what it earns.">
+<title>BrandMatch · Turn your audience into recurring revenue</title>
+<meta name="description" content="Ebooks and courses pay once. Your own app pays every month, and gives your audience a place they open every day. It takes 100,000 followers to start.">
 <link rel="canonical" href="https://www.jeremylasne.com/brand/">
 <meta name="theme-color" content="#070a12">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="BrandMatch">
 <meta property="og:url" content="https://www.jeremylasne.com/brand/">
-<meta property="og:title" content="Turn your audience into an app you own.">
-<meta property="og:description" content="You bring 100,000 people. I find the idea in what they already ask you, build the app, run it, and split what it earns.">
+<meta property="og:title" content="Turn your audience into recurring revenue.">
+<meta property="og:description" content="Ebooks and courses pay once. Your own app pays every month. It takes 100,000 followers to start.">
 <meta property="og:image" content="https://www.jeremylasne.com/og-image.png?v=2">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@jeremylasne">
@@ -249,7 +249,11 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .tb-card .cn { margin-top: 12px; font-size: 15px; font-weight: 800; letter-spacing: -0.02em; }
 .tb-card .cc { font-size: 13px; color: var(--muted); }
 .tb-card .go { margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--muted); }
-.tb-note { margin: 18px auto 0; max-width: 62ch; text-align: center; font-size: 13px; line-height: 1.55; color: var(--faint); }
+.tb-logos { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px 28px; margin: 26px auto 0; padding: 0 var(--gutter); }
+.tb-logos a { display: inline-flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 700; color: var(--muted); transition: color .2s; }
+.tb-logos a:hover { color: var(--ink); }
+.tb-logos img { width: 36px; height: 36px; border-radius: 10px; box-shadow: 0 8px 20px -8px rgba(0,0,0,.6); }
+.tb-note { margin: 14px auto 0; max-width: 62ch; text-align: center; font-size: 13px; line-height: 1.55; color: var(--faint); }
 
 /* ── the portal: five greys open onto the app, or the video once it exists ─ */
 .pin { position: relative; }
@@ -354,7 +358,7 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .co-track { display: flex; gap: 10px; width: max-content; will-change: transform; }
 .chip { flex: none; padding: 11px 18px; border-radius: 100px; background: var(--card); border: 1px solid var(--rule); box-shadow: var(--lift); font-size: 15px; font-weight: 700; letter-spacing: -0.01em; white-space: nowrap; }
 
-/* ── what you get: three cards and a bar joined to the last ─────────────── */
+/* (what you get: removed) */
 .in-grid { margin-top: clamp(28px, 4vh, 44px); display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 .in-card { position: relative; overflow: hidden; padding: 28px 0 30px; border-top: 1px solid var(--rule-firm); }
 .in-i { font-family: var(--mono); font-size: 12px; letter-spacing: .14em; color: var(--faint); }
@@ -473,12 +477,12 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 /* the receipts, behind the rings */
 .pd-rc { position: absolute; inset: 0; z-index: 2; display: grid; grid-template-columns: repeat(3, 1fr); align-items: center; gap: 2%; padding: 5% 6%; color: #fff; opacity: clamp(0, calc(var(--p) * 2.8 - .5), 1); }
 .pd-rc > div { text-align: center; }
-.pd-rc img { width: clamp(34px, 5vw, 64px); height: auto; border-radius: 22%; margin: 0 auto 10px; }
+.pd-rc img { width: clamp(44px, 6.4vw, 88px); height: auto; border-radius: 22%; margin: 0 auto 12px; box-shadow: 0 12px 30px -12px rgba(0,0,0,.7); }
 .pd-rc .n { font-size: clamp(1.3rem, 4vw, 3.4rem); font-weight: 800; letter-spacing: -0.05em; line-height: 1; font-variant-numeric: tabular-nums; }
 .pd-rc .n small { font-size: .38em; font-weight: 700; letter-spacing: 0; color: #a2a7b6; }
 .pd-rc .k { margin-top: 8px; font-size: clamp(10px, 1.1vw, 14px); color: #a2a7b6; line-height: 1.35; }
 .pd-rc .k b { color: #fff; }
-@media (max-width: 760px) { .pd-rc { gap: 4%; padding: 6% 4%; } .pd-rc img { display: none; } .pd-rc .k { font-size: 9.5px; } }
+@media (max-width: 760px) { .pd-rc { gap: 3%; padding: 5% 3%; } .pd-rc img { width: 34px; margin-bottom: 6px; } .pd-rc .n { font-size: 1.15rem; } .pd-rc .k { font-size: 9px; margin-top: 4px; } }
 .pd.has-video .pd-rc { opacity: clamp(0, calc((var(--p) * 2.8 - .5) * .35), .35); }
 
 /* the asset columns: app tiles and yours */
@@ -544,10 +548,10 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
         <span>Creator apps at <b>$340k</b> and <b>$80k</b> a month</span>
       </div>
       <h1 class="h-display hero-in" style="--d:160ms">
-        <span class="ln">Turn your <span class="rotor"><span class="rotor-word" id="rotor">fly fishing</span></span></span>
-        <span class="ln">audience into an app you own.</span>
+        <span class="ln">Turn your audience</span>
+        <span class="ln">into recurring revenue.</span>
       </h1>
-      <p class="sub hero-in" style="--d:360ms">You bring <b>100,000 people</b>. I find the idea in what they already ask you, build the app, run it, and split what it earns.</p>
+      <p class="sub hero-in" style="--d:360ms">Ebooks and courses pay once. <b>Your own app pays every month</b>, and gives your audience a place they open every day. It takes <b>100,000 followers</b> to start.</p>
       <div class="btn-row hero-in" style="--d:520ms">
         <a class="btn" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call <span class="arr">&rarr;</span></a>
         <a class="btn btn--ghost" href="#how"><span class="btn-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.5v7l6-3.5z"/></svg></span>See how it works</a>
@@ -634,6 +638,12 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
   <div class="tb-marquee" id="tb-marquee" aria-label="Creator apps">
     <div class="tb-row" id="tb-row"></div>
   </div>
+  <div class="tb-logos" aria-label="The apps">
+    <a href="https://apps.apple.com/us/app/stella-manifest-anything/id6757347283" target="_blank" rel="noopener"><img src="media/stella.webp" alt="" width="36" height="36">Stella</a>
+    <a href="https://apps.apple.com/us/app/face-harmony-by-clavicular/id6781068829" target="_blank" rel="noopener"><img src="media/faceharmony.webp" alt="" width="36" height="36">Face Harmony</a>
+    <a href="https://play.google.com/store/apps/details?id=com.thepanash.app&amp;hl=en" target="_blank" rel="noopener"><img src="media/thepanash.webp" alt="" width="36" height="36">ThePanash</a>
+    <a href="https://kaught.app" target="_blank" rel="noopener"><img src="media/kaught.webp" alt="" width="36" height="36">Kaught</a>
+  </div>
   <p class="tb-note">Their numbers, publicly posted, every app linked so you can check. Kaught is mine, the latest build.</p>
 </section>
 
@@ -666,7 +676,7 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
   <div class="shell bar">
     <div class="bar-l">
       <span class="brand-mark bar-mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="116" fill="#eff0ee"/><circle cx="198" cy="256" r="96" fill="#070a12"/><circle cx="318" cy="256" r="96" fill="none" stroke="#070a12" stroke-width="42"/></svg></span>
-      <h3>100,000 followers or more? Twenty minutes tells us if there is an app in your audience.</h3>
+      <h3>It takes 100,000 followers to work with us. From there, twenty minutes tells us if there is an app in your audience.</h3>
     </div>
     <a class="btn" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call <span class="arr">&rarr;</span></a>
   </div>
@@ -785,25 +795,6 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
   <div class="co-rows">
     <div class="co-row" id="co-a" data-dir="-1"><div class="co-track"></div></div>
     <div class="co-row" id="co-b" data-dir="1"><div class="co-track"></div></div>
-  </div>
-</section>
-
-<!-- ── what you get ──────────────────────────────────────────────────────── -->
-<section class="band tone--light" id="get">
-  <div class="shell">
-    <div class="head reveal-up">
-      <span class="eyebrow">What you get</span>
-      <h2 class="h-section">The idea, the build, the run.</h2>
-    </div>
-    <div class="in-grid">
-      <div class="in-card reveal-up"><span class="in-no">01</span><div class="in-i">01</div><div class="in-tt">The idea</div><div class="in-bd">Found in what your audience already asks you for. Matched to your content and your posting rhythm on one 20-minute call.</div></div>
-      <div class="in-card reveal-up" style="--d:90ms"><span class="in-no">02</span><div class="in-i">02</div><div class="in-tt">The build</div><div class="in-bd">Product, design, both stores, subscriptions, paywall, analytics, retention, support. Eight parts, one person, all on me.</div></div>
-      <div class="in-card reveal-up" style="--d:180ms"><span class="in-no">03</span><div class="in-i">03</div><div class="in-tt">The run</div><div class="in-bd">Updates, store reviews, support replies, every month, for as long as the app earns. You post once a week.</div></div>
-    </div>
-    <div class="in-cta reveal-up">
-      <div class="in-tt">Costs you nothing. I take the build risk. We split what it earns.</div>
-      <a class="btn" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call <span class="arr">&rarr;</span></a>
-    </div>
   </div>
 </section>
 
