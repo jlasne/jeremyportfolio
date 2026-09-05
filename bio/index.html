@@ -65,10 +65,9 @@ button, input { font: inherit; color: inherit; }
 .scene .tw { animation: tw var(--t, 5s) ease-in-out var(--d, 0s) infinite; }
 @keyframes tw { 50% { opacity: .1; } }
 
-/* ── header: a challenge, one line a day ───────────────────────────── */
-.hero { position: relative; display: grid; grid-template-rows: auto auto; }
+/* ── top bar ────────────────────────────────────────────────────────── */
 .top {
-  display: flex; justify-content: space-between; align-items: center;
+  max-width: var(--w); margin: 0 auto; display: flex; justify-content: space-between; align-items: center;
   padding: calc(var(--pad) * .6) var(--pad);
 }
 .brand { text-decoration: none; color: var(--ice-70); }
@@ -79,20 +78,11 @@ button, input { font: inherit; color: inherit; }
 }
 .edit:hover { color: var(--ice); border-color: var(--blue); }
 .editing .edit { visibility: hidden; }
-.copy { max-width: var(--w); width: 100%; margin: 0 auto; padding: clamp(28px, 6vh, 72px) var(--pad) clamp(8px, 2vw, 24px); }
-.kicker { color: var(--blue); margin: 0 0 14px; text-shadow: 0 1px 12px rgba(5, 11, 22, .8); }
-h1 {
-  margin: 0; font: 400 clamp(44px, 6.5vw, 80px)/.94 var(--display);
-  letter-spacing: .01em; text-wrap: balance; max-width: 18ch; text-shadow: 0 2px 24px rgba(5, 11, 22, .6);
-}
-.lede {
-  margin: 16px 0 0; max-width: 52ch; font-size: clamp(15px, 1.5vw, 17px); color: var(--ice-70);
-  text-shadow: 0 1px 12px rgba(5, 11, 22, .8);
-}
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* ── sections ───────────────────────────────────────────────────────── */
 main { max-width: var(--w); margin: 0 auto; padding: 0 var(--pad); }
-section { padding: clamp(40px, 7vw, 96px) 0 0; }
+section { padding: clamp(28px, 5vw, 64px) 0 0; }
 section:last-child { padding-bottom: clamp(40px, 6vw, 80px); }
 .head { margin-bottom: clamp(24px, 4vw, 40px); }
 .head .n { color: var(--blue); display: block; margin-bottom: 14px; }
@@ -247,16 +237,10 @@ footer a:hover { color: var(--ice); }
 <svg class="scene" id="scene" aria-hidden="true" preserveAspectRatio="xMidYMid slice"></svg>
 <div class="veil" id="veil"></div>
 
-<header class="hero">
-  <nav class="top">
-    <a class="brand mono" href="https://jeremylasne.com">Jeremy Lasne</a>
-    <button class="edit mono" id="edit" type="button">Edit</button>
-  </nav>
-  <div class="copy">
-    <p class="kicker mono" id="kicker">Daily log</p>
-    <h1>Energized and performing life.</h1>
-    <p class="lede" id="lede">Five habits, sleep and every training session. One line a day, saved the day it happens.</p>
-  </div>
+<header class="top">
+  <a class="brand mono" href="https://jeremylasne.com">Jeremy Lasne</a>
+  <h1 class="sr">Jeremy Lasne, daily log</h1>
+  <button class="edit mono" id="edit" type="button">Edit</button>
 </header>
 
 <main>
@@ -264,7 +248,7 @@ footer a:hover { color: var(--ice); }
     <div class="head">
       <span class="n mono">01</span>
       <h2>Health</h2>
-      <p class="tag">Energized and performing life starts before 9am.</p>
+      <p class="tag">An energized day starts with a full night of sleep.</p>
       <p class="sum mono" id="sum"></p>
     </div>
     <div class="log" id="log" role="table" aria-label="Daily log"></div>
@@ -276,7 +260,7 @@ footer a:hover { color: var(--ice); }
     <div class="head">
       <span class="n mono">02</span>
       <h2>Performance</h2>
-      <p class="tag">One number per discipline. Everything else is process.</p>
+      <p class="tag">One all-round, high-performing body. Strength, endurance and speed, one test each.</p>
       <p class="sum mono" id="tsum"></p>
     </div>
     <div class="cards" id="cards"></div>
@@ -460,7 +444,6 @@ function build() {
   grid($('train'), TESTS, { one: (key, e) => numCell(`t-${key}-${e.id}`, e, `${e.name}, ${pretty(key)}`) });
   $('more').hidden = !hidden;
   $('more').textContent = `Earlier days · ${hidden} more`;
-  $('kicker').textContent = 'Daily log · ' + (f ? `since ${pretty(f)}` : 'starts today');
 }
 $('more').addEventListener('click', () => { all = true; build(); paint(); });
 $('legend').innerHTML = HABITS.map(h => `<li><b>${h.name}<small>${h.short}</small></b>${h.why}</li>`).join('');
