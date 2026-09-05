@@ -408,8 +408,9 @@ addEventListener('resize', () => {
 /* the page darkens the scene as it scrolls over it */
 const veil = document.getElementById('veil'), bg = document.getElementById('bg');
 const photo = () => document.body.classList.add('has-photo');
-if (bg.complete && bg.naturalWidth) photo(); else bg.addEventListener('load', photo);
-bg.addEventListener('error', () => { if (!bg.src.endsWith('.png')) bg.src = '/bio/bg.png'; });
+const tryPng = () => { if (!bg.src.endsWith('.png')) bg.src = '/bio/bg.png'; };
+bg.addEventListener('load', photo); bg.addEventListener('error', tryPng);
+if (bg.complete) bg.naturalWidth ? photo() : tryPng();
 const dim = () => { veil.style.opacity = Math.min(1, scrollY / (innerHeight * .45)).toFixed(2); };
 addEventListener('scroll', dim, { passive: true }); dim();
 
