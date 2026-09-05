@@ -24,8 +24,10 @@ export const SPEC = {
     },
   ],
 
-  /* Hours slept, logged per day next to the habits. */
+  /* Hours slept and morning weight, logged per day next to the habits. */
   sleep: { unit: 'h', step: 0.25, max: 24 },
+  weight: { unit: 'kg', step: 0.1, max: 300, height: '1.90 m',
+    why: 'Weighed each morning before water, in kg. Height 1.90 m.' },
 
   /* The five habits, one check each per day. */
   habits: [
@@ -58,8 +60,8 @@ export const daysBetween = (from, to) => Math.round((utcOf(to) - utcOf(from)) / 
 
 /* What a save may contain, decided once for both sides: only days up to
    today, only known habits, every number finite and inside its range,
-   sleep and the training result kept only when given, the session note
-   trimmed to 80 characters. */
+   sleep, weight and the training result kept only when given, the
+   session note trimmed to 80 characters. */
 export function clean(input, today) {
   const num = (x, m) => {
     if (x === '' || x == null) return undefined;
@@ -76,8 +78,9 @@ export function clean(input, today) {
     /* one test a day: the first valid result wins */
     for (const e of SPEC.exercises) { const v = num(day.train?.[e.id], e); if (v !== undefined) { train[e.id] = v; break; } }
     const entry = { habits };
-    const sleep = num(day.sleep, SPEC.sleep);
+    const sleep = num(day.sleep, SPEC.sleep), weight = num(day.weight, SPEC.weight);
     if (sleep !== undefined) entry.sleep = sleep;
+    if (weight !== undefined) entry.weight = weight;
     if (Object.keys(train).length) entry.train = train;
     const note = typeof day.note === 'string' ? day.note.trim().slice(0, 80) : '';
     if (note) entry.note = note;
