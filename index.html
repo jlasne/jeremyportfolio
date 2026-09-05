@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="grain">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -120,15 +120,6 @@
 #how      { padding-bottom: var(--cross); }
 #audience { padding-top: var(--cross); }
 
-/* From /brand, P13: film grain over the whole page. The ramp runs 250 grey
-   steps over nine screens; 4.5% noise hides the bands an 8-bit display
-   would show between them. */
-html.grain body::after {
-  content: ""; position: fixed; inset: 0; z-index: 200; pointer-events: none;
-  opacity: .045; mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html {
@@ -151,9 +142,7 @@ body {
   letter-spacing: -0.006em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* clip, never hidden: hidden would make the body a scroll container and
-     the pinned hero and portal would stop sticking */
-  overflow-x: clip;
+  overflow-x: hidden;
 }
 
 img, svg { display: block; max-width: 100%; }
@@ -291,7 +280,7 @@ button.btn { cursor: pointer; font-family: inherit; }
 .nav-logo { width: 28px; height: 28px; flex: none; }
 .nav-logo svg { width: 100%; height: 100%; display: block; }
 .nav-links { display: flex; align-items: center; gap: 24px; flex: none; }
-.nav-links a { font-size: 14.5px; font-weight: 600; color: var(--muted); white-space: nowrap; -webkit-tap-highlight-color: transparent; transition: color .2s var(--ease-soft), opacity .2s var(--ease-soft); }
+.nav-links a { font-size: 14.5px; font-weight: 600; color: var(--muted); white-space: nowrap; -webkit-tap-highlight-color: transparent; transition: color .3s var(--ease-soft); }
 .nav-links a.nav-cta {
   padding: 9px 19px; border-radius: 980px;
   background: var(--ink); color: var(--bg); font-weight: 700;
@@ -301,9 +290,7 @@ button.btn { cursor: pointer; font-family: inherit; }
 /* Hover only where a pointer can actually hover. On a touchscreen the hover
    state latches after a tap and stays lit until you touch something else. */
 @media (hover: hover) {
-  /* From /brand, P14: point at one link and the other steps back */
-  .nav-links:hover a:not(.nav-cta) { color: var(--faint); opacity: .7; }
-  .nav-links a:not(.nav-cta):hover { color: var(--ink); opacity: 1; }
+  .nav-links a:hover { color: var(--ink); }
   .nav-links a.nav-cta:hover { transform: scale(1.04); color: var(--bg); }
 }
 .nav-links a:not(.nav-cta):active { color: var(--ink); }
@@ -321,7 +308,8 @@ button.btn { cursor: pointer; font-family: inherit; }
 @media (pointer: coarse) {
   .btn { padding: 16px 28px; min-height: 50px; }
   .nav-links a.nav-cta { padding: 11px 20px; min-height: 44px; display: inline-flex; align-items: center; }
-  .rail-btn { min-height: 44px; }
+  .stage-dots button { height: 5px; width: 34px; }
+  .stage-dots { gap: 10px; padding: 12px 0; }
   .foot-links a { padding-block: 4px; }
 }
 
@@ -350,12 +338,6 @@ button.btn { cursor: pointer; font-family: inherit; }
   opacity: 0; transition: opacity .4s var(--ease-soft);
 }
 .nav.stuck .nav-progress { opacity: 1; }
-
-/* The header is the one element every page shares. Named here and on
-   /brand, it holds still while the rest of the page crossfades between
-   the two, so a click from one to the other never flashes white. */
-@view-transition { navigation: auto; }
-.nav { view-transition-name: site-nav; }
 
 /* ── hero ───────────────────────────────────────────────────────────────── */
 
@@ -398,45 +380,6 @@ button.btn { cursor: pointer; font-family: inherit; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 
 .hero .btn-row { margin-top: 30px; }
-.hero .shell { position: relative; z-index: 1; }
-
-/* From /brand, P01: on a laptop the hero pins for 260vh. The copy steps
-   back, the five names rise and pin under the header, the phone takes the
-   centre, then the scroll walks its five screens. Below 941px, and under
-   reduced motion, none of this applies and the hero is the plain stack. */
-.hero-pin { position: relative; }
-.hero-stage { position: relative; }
-.hero.hero--pinned { padding-top: 0; }
-.hero-pin.pinned { height: 260vh; }
-.hero-pin.pinned .hero-stage { position: sticky; top: 0; height: 100svh; display: flex; align-items: center; overflow: clip; }
-.hero-copy, .hero-show { will-change: transform, opacity; }
-.show-head {
-  display: none; position: absolute; left: 0; right: 0; top: 78px; z-index: 6;
-  text-align: center; padding: 0 20px;
-  font-family: var(--display); font-weight: 500; font-size: clamp(1.2rem, 2.6vw, 2rem);
-  letter-spacing: -0.04em; text-transform: uppercase; opacity: 0; pointer-events: none;
-}
-.hero-pin.pinned .show-head { display: block; }
-
-/* From /brand, P11: the cue that says the page moves on scroll. Only with the pin. */
-.cue { display: none; flex-direction: column; align-items: center; gap: 7px; color: var(--ink); font-family: var(--mono); font-size: 9.5px; letter-spacing: .18em; text-transform: uppercase; opacity: .85; }
-.cue .ch { width: 22px; height: 34px; border-radius: 100px; border: 1.5px solid var(--rule-firm); position: relative; }
-.cue .ch::after { content: ""; position: absolute; left: 50%; top: 7px; width: 3px; height: 7px; border-radius: 3px; background: var(--ink); transform: translateX(-50%); animation: cue 1.6s var(--ease) infinite; }
-@keyframes cue { 0% { opacity: 0; transform: translate(-50%, 0); } 40% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, 11px); } }
-.hero-pin.pinned .cue { display: flex; position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 6; }
-
-/* From /brand, P12: four blurred greys drifting behind the stage, on
-   periods of 19 to 27 seconds. Zero colour, zero requests. */
-.hero-mesh { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
-.hero-mesh .blobs { position: absolute; inset: -16%; filter: blur(48px); opacity: .3; mix-blend-mode: screen; }
-.hero-mesh i { position: absolute; display: block; border-radius: 50%; will-change: transform; }
-.hero-mesh i:nth-child(1) { width: 62%; height: 120%; left: -14%; top: -12%; background: radial-gradient(circle, rgba(255,255,255,.55), transparent 62%); animation: meshA 19s ease-in-out infinite; }
-.hero-mesh i:nth-child(2) { width: 56%; height: 110%; right: -12%; top: 0; background: radial-gradient(circle, rgba(255,255,255,.4), transparent 62%); animation: meshB 24s ease-in-out infinite; }
-.hero-mesh i:nth-child(3) { width: 52%; height: 100%; left: 14%; bottom: -18%; background: radial-gradient(circle, rgba(255,255,255,.5), transparent 64%); animation: meshC 27s ease-in-out infinite; }
-.hero-mesh i:nth-child(4) { width: 48%; height: 96%; right: 10%; bottom: -12%; background: radial-gradient(circle, rgba(255,255,255,.45), transparent 62%); animation: meshA 21s ease-in-out infinite reverse; }
-@keyframes meshA { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(8%, -7%) scale(1.18); } }
-@keyframes meshB { 0%, 100% { transform: translate(0, 0) scale(1.06); } 50% { transform: translate(-9%, 6%) scale(1.24); } }
-@keyframes meshC { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(7%, -8%) scale(1.2); } }
 
 /* what it costs and how fast I reply, beside the button rather than in fine
    print at the bottom of the page */
@@ -457,11 +400,6 @@ button.btn { cursor: pointer; font-family: inherit; }
 }
 .copy-inline:hover { color: var(--muted); }
 .tone--light .copy-inline:hover { color: var(--ink); }
-/* From /brand, B02: the confirmation goes from display none to shown in one
-   transition. Starting-style supplies the from state; no timer, no class. */
-.copied { display: none; opacity: 0; translate: 0 -6px; margin-left: 10px; font-size: 13.5px; font-weight: 700; color: var(--ink); transition: display .2s allow-discrete, opacity .2s var(--ease-soft), translate .2s var(--ease-soft); }
-.copied[data-open] { display: inline-block; opacity: 1; translate: 0 0; }
-@starting-style { .copied[data-open] { opacity: 0; translate: 0 -6px; } }
 
 /* the proof cards sit under the hero grid, full width rather than in a column */
 .hero .shell.hero-proof { display: block; }
@@ -527,15 +465,16 @@ button.btn { cursor: pointer; font-family: inherit; }
 
 /* a stand-in for the camera viewfinder — swap for a real screenshot */
 
-/* From /brand, P19: the five screens have names, and the pill slides to
-   the one showing. Pinned, the pill is scrubbed by the scroll instead. */
-.rail { position: relative; z-index: 7; display: flex; gap: 4px; padding: 5px; border-radius: 100px; background: var(--card); border: 1px solid var(--rule); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: var(--lift); margin: 24px auto 0; width: min(100%, 380px); }
-.rail.solid { background: var(--bg); border-color: var(--rule-firm); box-shadow: var(--lift-lg); }
-.rail-hl { position: absolute; top: 5px; bottom: 5px; left: 5px; width: 60px; z-index: 0; border-radius: 100px; background: var(--ink); pointer-events: none; will-change: transform; }
-.rail--anim .rail-hl { transition: transform .45s var(--ease), width .45s var(--ease); }
-.rail-btn { flex: 1; position: relative; z-index: 1; border: 0; background: transparent; font-size: 12.5px; font-weight: 700; letter-spacing: -0.01em; color: var(--muted); padding: 10px 4px; border-radius: 100px; white-space: nowrap; transition: color .32s var(--ease); cursor: pointer; }
-.rail-btn.on { color: var(--bg); }
-.hero-pin.pinned .hero-stage > .rail { position: absolute; left: 50%; top: 132px; width: min(94%, 600px); margin: 0; transform: translateX(-50%); }
+.stage-dots { display: flex; gap: 7px; justify-content: center; margin-top: 24px; }
+.stage-dots button {
+  position: relative;
+  width: 26px; height: 4px; border-radius: 980px;
+  background: var(--rule-firm);
+  transition: background .45s var(--ease-soft), width .45s var(--ease);
+}
+/* the bar is 4px tall by design; the thing a finger has to hit is not */
+.stage-dots button::after { content: ''; position: absolute; inset: -14px -6px; }
+.stage-dots button[aria-selected="true"] { background: var(--ink); width: 38px; }
 .stage-note { margin-top: 12px; text-align: center; font-size: 12.5px; font-weight: 600; color: var(--faint); }
 .swipe-hint { display: none; }
 @media (pointer: coarse) { .swipe-hint { display: inline; } }
@@ -752,38 +691,6 @@ button.btn { cursor: pointer; font-family: inherit; }
   font-size: clamp(1.15rem, 2.2vw, 1.5rem); font-weight: 700; letter-spacing: -0.025em;
 }
 
-/* From /brand, P02: Kaught arrives through five grey rings that open onto
-   its five screens; the store button lands with them. One number, --p,
-   drives the whole thing in CSS. Pinned for 165vh on a laptop; on a phone
-   and under reduced motion it is the open frame, still. */
-.pin { position: relative; margin-top: 44px; }
-.pin-stage { position: relative; display: grid; place-items: center; padding: 110px 0 120px; }
-.pin.pinned { height: 165vh; }
-.pin.pinned .pin-stage { position: sticky; top: 0; height: 100svh; padding: 0; overflow: clip; }
-.pd { --p: 0; --g: clamp(12px, 1.7vw, 24px); position: relative; width: min(60vw, 720px); aspect-ratio: 1.82; }
-@media (max-width: 760px) { .pd { width: min(72vw, 420px); --g: clamp(7px, 1.7vw, 10px); } }
-.pd-head { position: absolute; left: 0; right: 0; bottom: 100%; margin-bottom: clamp(18px, 3vh, 34px); text-align: center; font-family: var(--display); font-weight: 500; font-size: clamp(1.2rem, 2.6vw, 2rem); letter-spacing: -0.04em; text-transform: uppercase; text-wrap: balance; pointer-events: none; opacity: clamp(0, calc((var(--p) - .72) * 5), 1); transform: translateY(calc(18px * (1 - clamp(0, calc((var(--p) - .72) * 5), 1)))); }
-.pd-cta { position: absolute; z-index: 20; left: 0; right: 0; top: 100%; margin-top: clamp(20px, 3vh, 36px); display: flex; justify-content: center; pointer-events: none; opacity: clamp(0, calc((var(--p) - .78) * 5), 1); transform: translateY(calc(-14px * (1 - clamp(0, calc((var(--p) - .78) * 5), 1)))); }
-.pd.pd-open .pd-cta { pointer-events: auto; }
-.pd-ring { position: absolute; border-radius: 9999px; transform-origin: 50% 50%; will-change: transform, opacity; opacity: clamp(0, calc(1.28 - var(--p) * 1.85), 1); pointer-events: none; box-shadow: 0 50px 120px -60px rgba(0,0,0,.35); }
-.pd-r1 { inset: calc(-1 * var(--g)); background: #2a2f3b; z-index: 5; transform: scale(calc(1 + var(--p) * .85)); }
-.pd-r2 { inset: calc(-2 * var(--g)); background: #4b515e; z-index: 4; transform: scale(calc(1 + var(--p) * 1.25)); }
-.pd-r3 { inset: calc(-3 * var(--g)); background: #7a8090; z-index: 3; transform: scale(calc(1 + var(--p) * 1.75)); }
-.pd-r4 { inset: calc(-4 * var(--g)); background: #a9aeb9; z-index: 2; transform: scale(calc(1 + var(--p) * 2.4)); }
-.pd-r5 { inset: calc(-5 * var(--g)); background: #d3d6dc; z-index: 1; transform: scale(calc(1 + var(--p) * 3.2)); }
-.pd-core { position: absolute; inset: 0; border-radius: calc(240px - var(--p) * 212px); overflow: hidden; z-index: 10; background: #0d1017; box-shadow: 0 60px 120px -50px rgba(0,0,0,.5); }
-.pd-title { position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; padding: 0 8%; text-align: center; color: #fff; font-family: var(--display); font-weight: 500; font-size: clamp(1.1rem, 3vw, 2.4rem); letter-spacing: -0.04em; text-transform: uppercase; text-wrap: balance; opacity: clamp(0, calc(1 - var(--p) * 2.6), 1); pointer-events: none; }
-.pd-strip { position: absolute; inset: 0; z-index: 2; display: flex; gap: 2%; opacity: clamp(0, calc(var(--p) * 2.8 - .5), 1); }
-.pd-strip img { flex: 1; min-width: 0; height: 100%; object-fit: cover; object-position: top; }
-.pd-cap { position: absolute; left: 0; right: 0; bottom: clamp(10px, 2.4vw, 22px); z-index: 4; text-align: center; color: #fff; font-family: var(--mono); font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase; text-shadow: 0 2px 12px rgba(0,0,0,.6); opacity: clamp(0, calc(var(--p) * 2.8 - .5), 1); }
-/* the still frame: rings as a frame, screens showing, heading and button in place */
-.pin:not(.pinned) .pd-ring { transform: none; opacity: 1; }
-.pin:not(.pinned) .pd-core { border-radius: 22px; }
-.pin:not(.pinned) .pd-title { opacity: 0; }
-.pin:not(.pinned) .pd-strip, .pin:not(.pinned) .pd-cap { opacity: 1; }
-.pin:not(.pinned) .pd-head, .pin:not(.pinned) .pd-cta { opacity: 1; transform: none; }
-.pin:not(.pinned) .pd-cta { pointer-events: auto; }
-
 /* current projects */
 .projects { display: grid; gap: 14px; margin-top: 44px; }
 @media (min-width: 860px) { .projects { grid-template-columns: repeat(3, 1fr); } }
@@ -966,12 +873,8 @@ button.btn { cursor: pointer; font-family: inherit; }
 
 <!-- ── 1 · hero ─────────────────────────────────────────────────────────── -->
 <section class="hero" id="top">
-  <div class="hero-pin" id="hero-pin">
-  <div class="hero-stage" id="hero-stage">
-  <div class="hero-mesh" aria-hidden="true"><div class="blobs"><i></i><i></i><i></i><i></i></div></div>
-  <p class="show-head" id="show-head">My latest app, live.</p>
   <div class="shell">
-    <div class="hero-copy" id="hero-copy">
+    <div>
 
       <span class="kicker hero-in" style="--d:120ms">Jeremy Lasne</span>
 
@@ -997,7 +900,6 @@ button.btn { cursor: pointer; font-family: inherit; }
 
     </div>
 
-    <div class="hero-show" id="hero-show">
     <div class="hero-in" style="--d:500ms">
       <div class="stage">
         <div class="phone" id="phone">
@@ -1016,22 +918,15 @@ button.btn { cursor: pointer; font-family: inherit; }
         </div>
       </div>
 
-      <!-- One name per screen, in the order of the .scr divs above. Add or
-           drop a screen and add or drop its name here; the script counts both. -->
-      <div class="rail rail--anim" id="rail" role="tablist" aria-label="App screens">
-        <span class="rail-hl" aria-hidden="true"></span>
-        <button class="rail-btn on" role="tab" aria-selected="true">Collection</button>
-        <button class="rail-btn" role="tab" aria-selected="false">Identify</button>
-        <button class="rail-btn" role="tab" aria-selected="false">Nearby</button>
-        <button class="rail-btn" role="tab" aria-selected="false">Species</button>
-        <button class="rail-btn" role="tab" aria-selected="false">Snap</button>
+      <div class="stage-dots" id="dots" role="tablist" aria-label="App screens">
+        <button role="tab" aria-selected="true"  aria-label="Your collection"></button>
+        <button role="tab" aria-selected="false" aria-label="Identifying"></button>
+        <button role="tab" aria-selected="false" aria-label="Animals near you"></button>
+        <button role="tab" aria-selected="false" aria-label="Species detail"></button>
+        <button role="tab" aria-selected="false" aria-label="Snap a species"></button>
       </div>
-      <p class="stage-note">My latest app, live.<span class="swipe-hint"> Swipe, or tap a name.</span></p>
+      <p class="stage-note">My latest app, live.<span class="swipe-hint"> Swipe or tap the dots.</span></p>
     </div>
-    </div>
-  </div>
-  <div class="cue" aria-hidden="true"><span class="ch"></span>scroll</div>
-  </div>
   </div>
 
   <!-- The apps the numbers belong to, linked so the claim is checkable.
@@ -1040,7 +935,7 @@ button.btn { cursor: pointer; font-family: inherit; }
        from and what the subscription costs, never a revenue figure it has
        not earned yet. -->
   <div class="shell hero-proof">
-    <div class="cases rise">
+    <div class="cases hero-in" style="--d:940ms">
       <a class="case-card" href="https://apps.apple.com/us/app/stella-manifest-anything/id6757347283" target="_blank" rel="noopener">
         <img class="case-icon" src="data:image/webp;base64,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" alt="" width="80" height="80" loading="lazy" decoding="async">
         <span class="case-fig">$340k<small>/mo</small></span>
@@ -1068,7 +963,7 @@ button.btn { cursor: pointer; font-family: inherit; }
         <span class="case-go">See it on Google Play <span class="arrow">&rarr;</span></span>
       </a>
     </div>
-    <p class="proof-note rise" style="--d:90ms">Not my projects. Their numbers, publicly posted, apps linked so you can check. ThePanash just launched: audience and price, not revenue.</p>
+    <p class="proof-note hero-in" style="--d:1120ms">Not my projects. Their numbers, publicly posted, apps linked so you can check. ThePanash just launched: audience and price, not revenue.</p>
   </div>
 </section>
 
@@ -1182,7 +1077,7 @@ button.btn { cursor: pointer; font-family: inherit; }
         </a>
         <a class="btn btn--ghost magnetic" href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=hey@jeremylasne.com&amp;su=Building%20an%20app%20together&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A" target="_blank" rel="noopener">hey@jeremylasne.com</a>
       </div>
-      <button class="copy-inline" type="button" id="copy-email" data-email="hey@jeremylasne.com">Copy the address</button><span class="copied" id="copied" role="status" aria-live="polite">Copied</span>
+      <button class="copy-inline" type="button" id="copy-email" data-email="hey@jeremylasne.com">Copy the address</button>
       <p class="cta-fine">
         Costs you nothing. I take the build risk. We split what it earns.
       </p>
@@ -1196,25 +1091,6 @@ button.btn { cursor: pointer; font-family: inherit; }
     <div class="head head--center rise">
       <span class="eyebrow"><i></i>Current projects</span>
       <h2 class="h-section">What I am running right now.</h2>
-    </div>
-
-    <!-- Kaught arrives first, through the rings. The five screens are the
-         same files the hero phone shows. -->
-    <div class="pin" id="kaught-portal">
-      <div class="pin-stage">
-        <div class="pd" id="kaught-pd">
-          <p class="pd-head">Kaught, live on the App Store.</p>
-          <span class="pd-ring pd-r5"></span><span class="pd-ring pd-r4"></span><span class="pd-ring pd-r3"></span><span class="pd-ring pd-r2"></span><span class="pd-ring pd-r1"></span>
-          <div class="pd-core">
-            <div class="pd-title">Point your camera at any wild animal.</div>
-            <div class="pd-strip" aria-hidden="true">
-              <img src="media/app/6.png" alt="" loading="lazy" decoding="async"><img src="media/app/3.png" alt="" loading="lazy" decoding="async"><img src="media/app/2.png" alt="" loading="lazy" decoding="async"><img src="media/app/4.png" alt="" loading="lazy" decoding="async"><img src="media/app/5.png" alt="" loading="lazy" decoding="async">
-            </div>
-            <div class="pd-cap">Kaught &middot; live</div>
-          </div>
-          <div class="pd-cta"><a class="btn" href="https://kaught.app" target="_blank" rel="noopener">See it on the App Store <span class="arrow">&rarr;</span></a></div>
-        </div>
-      </div>
     </div>
 
     <div class="projects">
@@ -1518,48 +1394,19 @@ button.btn { cursor: pointer; font-family: inherit; }
   /* ═══ the phone's three screens ══════════════════════════════════════════ */
 
   var screens = document.querySelectorAll('#phone .scr');
-  var rail = document.getElementById('rail');
-  var railHL = rail ? rail.querySelector('.rail-hl') : null;
-  var tabs = rail ? [].slice.call(rail.querySelectorAll('.rail-btn')) : [];
+  var dots = document.querySelectorAll('#dots button');
   var current = 0;
   var timer = null;
-  var rg = { l0: 0, cx: [], wd: [] };
-
-  // where each name sits in the rail, so the pill can slide to it
-  function measureRail() {
-    if (!tabs.length) return;
-    rg.l0 = tabs[0].offsetLeft;
-    rg.cx = tabs.map(function (b) { return b.offsetLeft + b.offsetWidth / 2; });
-    rg.wd = tabs.map(function (b) { return b.offsetWidth; });
-    railHL.style.left = rg.l0 + 'px';
-    placeHL(current);
-  }
-  // the pill under one name, or, when scrubbed, part way to the next
-  function placeHL(f) {
-    if (!rg.cx.length) return;
-    var i = Math.max(0, Math.min(tabs.length - 2, Math.floor(f))), fr = f - i;
-    var cx = rg.cx[i] + (rg.cx[i + 1] - rg.cx[i]) * fr, w = rg.wd[i] + (rg.wd[i + 1] - rg.wd[i]) * fr;
-    railHL.style.width = w.toFixed(1) + 'px';
-    railHL.style.transform = 'translateX(' + (cx - w / 2 - rg.l0).toFixed(1) + 'px)';
-  }
 
   function show(i) {
     current = i;
     screens.forEach(function (s, n) { s.classList.toggle('on', n === i); });
-    tabs.forEach(function (b, n) { b.classList.toggle('on', n === i); b.setAttribute('aria-selected', n === i ? 'true' : 'false'); });
-    placeHL(i);
+    dots.forEach(function (d, n) { d.setAttribute('aria-selected', n === i ? 'true' : 'false'); });
   }
   function play() { if (!reduced && !timer) timer = setInterval(function () { show((current + 1) % screens.length); }, 1600); }
   function stop() { clearInterval(timer); timer = null; }
 
-  measureRail();
-  window.addEventListener('resize', measureRail, { passive: true });
-  window.addEventListener('load', measureRail);
-
-  // a name tapped at rest shows that screen; pinned, it scrolls the runway there
-  tabs.forEach(function (b, n) { b.addEventListener('click', function () {
-    if (heroPin && heroPin.pinned) heroPin.go(n); else { stop(); show(n); }
-  }); });
+  dots.forEach(function (d, n) { d.addEventListener('click', function () { stop(); show(n); }); });
 
   // Swipe on the phone itself. Horizontal intent only, so a vertical drag
   // still scrolls the page rather than flicking the screen.
@@ -1581,154 +1428,12 @@ button.btn { cursor: pointer; font-family: inherit; }
     }, { passive: true });
   }
 
-  // only cycle while the hero is on screen and, pinned, while it is at rest
-  var stageEl = document.getElementById('hero-stage');
-  var heroInView = true;
-  function tick() { if (heroInView && (!heroPin || !heroPin.pinned || heroPin.p < 0.05)) play(); else stop(); }
-  if (!reduced && screens.length && 'IntersectionObserver' in window && stageEl) {
+  // only cycle while the hero is actually on screen
+  if (!reduced && screens.length && 'IntersectionObserver' in window) {
     new IntersectionObserver(function (entries) {
-      heroInView = entries[0].isIntersecting;
-      tick();
-    }, { threshold: 0.25 }).observe(stageEl);
+      entries[0].isIntersecting ? play() : stop();
+    }, { threshold: 0.25 }).observe(document.getElementById('top'));
   }
-
-  /* ═══ the hero pins (from /brand, P01) ═══════════════════════════════════
-     260vh of runway on a laptop. From 0 to 46% the copy steps back, the
-     rail rises from under the phone to pin under the header, and the phone
-     glides to the centre and grows. From 46% to 88% the scroll walks the
-     five screens, the pill sliding with it. Below 941px, and under reduced
-     motion, the hero is the plain stack and none of this runs.
-     ═══════════════════════════════════════════════════════════════════════ */
-
-  var wide = window.matchMedia('(min-width: 941px)');
-  function onMQ(mq, fn) { if (mq.addEventListener) mq.addEventListener('change', fn); else if (mq.addListener) mq.addListener(fn); }
-  function cl(v, a, b) { return v < a ? a : (v > b ? b : v); }
-  function ez(t) { t = cl(t, 0, 1); return t * t * (3 - 2 * t); }
-
-  var heroPin = (function () {
-    var pin = document.getElementById('hero-pin'), stage = stageEl, hero = document.getElementById('top'),
-        copy = document.getElementById('hero-copy'), showEl = document.getElementById('hero-show'),
-        head = document.getElementById('show-head'), note = showEl && showEl.querySelector('.stage-note'),
-        cue = pin && pin.querySelector('.cue'), phoneBox = document.getElementById('phone'), N = tabs.length;
-    if (!pin || !stage || !copy || !showEl || !rail || !phoneBox || N < 2) return null;
-    var api = { pinned: false, p: 0, go: function () {} };
-    var g = { H: 0 }, last = -1;
-
-    // the rest geometry, measured with the transforms off
-    function measure() {
-      if (!api.pinned) return;
-      showEl.style.transform = ''; rail.style.transform = '';
-      var st = stage.getBoundingClientRect(), sh = showEl.getBoundingClientRect(), ph = phoneBox.getBoundingClientRect();
-      g.H = stage.clientHeight;
-      g.ox = ph.left + ph.width / 2 - sh.left; g.oy = ph.top + ph.height / 2 - sh.top;
-      showEl.style.transformOrigin = g.ox.toFixed(1) + 'px ' + g.oy.toFixed(1) + 'px';
-      g.s = Math.min(1.05, (g.H - 204 - 60) / Math.max(1, ph.height));
-      var cxRest = ph.left + ph.width / 2 - st.left, cyRest = ph.top + ph.height / 2 - st.top;
-      g.dx = st.width / 2 - cxRest;
-      g.dy = 204 + ph.height * g.s / 2 - cyRest;
-      g.rx = cxRest - st.width / 2;
-      g.ry = ph.top + ph.height - st.top + 24 - 132;
-      last = -1;
-    }
-
-    function apply(p) {
-      api.p = p;
-      var t1 = cl(p / .46, 0, 1), e1 = ez(t1), cf = cl((e1 - .18) / .34, 0, 1);
-      copy.style.opacity = (1 - cf).toFixed(3);
-      copy.style.transform = 'translateY(' + (120 * e1).toFixed(0) + 'px)';
-      copy.style.pointerEvents = cf > .5 ? 'none' : '';
-      if (note) note.style.opacity = (1 - cl(e1 * 3.6, 0, 1)).toFixed(3);
-      if (cue) cue.style.opacity = (1 - cl(p * 20, 0, 1)).toFixed(3);
-      var k = 1 - e1;
-      rail.style.transform = 'translate(calc(-50% + ' + (g.rx * k).toFixed(1) + 'px),' + (g.ry * k).toFixed(1) + 'px)';
-      rail.classList.toggle('solid', t1 > .2);
-      var eS = ez(cl((p - .05) / .44, 0, 1));
-      showEl.style.transform = 'translate(' + (g.dx * eS).toFixed(1) + 'px,' + (g.dy * eS).toFixed(1) + 'px) scale(' + (1 + (g.s - 1) * eS).toFixed(4) + ')';
-      if (head) head.style.opacity = cl((p - .40) / .12, 0, 1).toFixed(3);
-      var scrub = p > .3;
-      rail.classList.toggle('rail--anim', !scrub);
-      if (scrub) {
-        var t2 = cl((p - .46) / .42, 0, 1), f = t2 * (N - 1), fi = Math.round(f);
-        if (fi !== current) show(fi);
-        placeHL(f);
-      }
-      tick();
-    }
-
-    function progress() {
-      var r = pin.getBoundingClientRect(), tot = pin.offsetHeight - window.innerHeight;
-      return cl(-r.top / Math.max(1, tot), 0, 1);
-    }
-    function frame() {
-      if (api.pinned) {
-        var r = pin.getBoundingClientRect();
-        if (r.bottom > -200 && r.top < window.innerHeight + 200) {
-          if (!g.H) measure();
-          var p = progress();
-          if (Math.abs(p - last) > .0005) { apply(p); last = p; }
-        }
-      }
-      requestAnimationFrame(frame);
-    }
-    function mode() {
-      api.pinned = wide.matches && !reduced;
-      pin.classList.toggle('pinned', api.pinned);
-      hero.classList.toggle('hero--pinned', api.pinned);
-      if (api.pinned) {
-        stage.appendChild(rail);
-      } else {
-        showEl.querySelector('.hero-in').insertBefore(rail, note);
-        [copy, showEl, rail, head, note, cue].forEach(function (el) { if (el) el.style.cssText = ''; });
-        rail.classList.remove('solid'); rail.classList.add('rail--anim');
-        api.p = 0; g.H = 0;
-      }
-      measureRail();
-      measure();
-      tick();
-    }
-    api.go = function (n) {
-      var tot = pin.offsetHeight - window.innerHeight, p = .46 + (n / (N - 1)) * .42;
-      window.scrollTo({ top: pin.getBoundingClientRect().top + (window.scrollY || 0) + p * tot, behavior: 'smooth' });
-    };
-    onMQ(wide, mode);
-    window.addEventListener('resize', function () { measure(); }, { passive: true });
-    window.addEventListener('load', function () { measure(); });
-    // the load reveal moves the phone for its first second; measure again after it
-    setTimeout(function () { measure(); measureRail(); }, 1800);
-    mode();
-    requestAnimationFrame(frame);
-    return api;
-  })();
-
-  /* ═══ Kaught arrives through the rings (from /brand, P02) ════════════════
-     One number, --p, from 0 at the top of the runway to 1 at the bottom;
-     the CSS does the rest. Unpinned, the frame is simply open.
-     ═══════════════════════════════════════════════════════════════════════ */
-
-  (function () {
-    var pin = document.getElementById('kaught-portal'), pd = document.getElementById('kaught-pd');
-    if (!pin || !pd) return;
-    var pinned = false, last = -1;
-    function mode() {
-      pinned = wide.matches && !reduced;
-      pin.classList.toggle('pinned', pinned);
-      last = -1;
-      if (!pinned) { pd.style.removeProperty('--p'); pd.classList.add('pd-open'); }
-    }
-    function frame() {
-      if (pinned) {
-        var r = pin.getBoundingClientRect();
-        if (r.bottom > -200 && r.top < window.innerHeight + 200) {
-          var tot = pin.offsetHeight - window.innerHeight, p = cl(-r.top / Math.max(1, tot), 0, 1);
-          if (Math.abs(p - last) > .0015) { pd.style.setProperty('--p', p.toFixed(3)); pd.classList.toggle('pd-open', p > .78); last = p; }
-        }
-      }
-      requestAnimationFrame(frame);
-    }
-    onMQ(wide, mode);
-    mode();
-    requestAnimationFrame(frame);
-  })();
 
   /* ═══ the niche cycles through real examples ═════════════════════════════ */
 
@@ -1798,15 +1503,16 @@ button.btn { cursor: pointer; font-family: inherit; }
 
   var copyBtn = document.getElementById('copy-email');
   if (copyBtn) {
-    var badge = document.getElementById('copied');
+    var copyLabel = copyBtn.textContent;
     var copyTimer;
     copyBtn.addEventListener('click', function () {
       var email = copyBtn.getAttribute('data-email');
-      // the badge arrives on its own transition (starting-style, from /brand B02)
+      // freeze the width so the label swap doesn't resize the button
+      copyBtn.style.minWidth = copyBtn.offsetWidth + 'px';
       var copied = function () {
-        badge.setAttribute('data-open', '');
+        copyBtn.textContent = 'Copied ✓';
         clearTimeout(copyTimer);
-        copyTimer = setTimeout(function () { badge.removeAttribute('data-open'); }, 2000);
+        copyTimer = setTimeout(function () { copyBtn.textContent = copyLabel; }, 2000);
       };
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(email).then(copied, function () { legacyCopy(email, copied); });

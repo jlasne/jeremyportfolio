@@ -26,16 +26,8 @@ network requests at runtime. Open it and edit it.
 - Interactive without being fussy: the niche cycles, cards take a
   pointer-tracked sheen, the phone cycles and swipes, the nav retreats on the
   way down and returns on the way up
-- Eight patterns lifted from the `/brand` study: 4.5% film grain over the
-  ramp, a spotlight on the hovered nav link, a view transition that keeps the
-  header still between pages, a starting-style fade on the copied badge, five
-  named screens under the phone with a sliding pill, four grey blobs drifting
-  behind the hero, and two pinned sections on a laptop: the hero pins for
-  260vh while the scroll walks the five screens, and Kaught arrives through
-  five grey rings above the project cards. Below 941px, and under reduced
-  motion, both pins are plain stacks
 - Everything degrades: `prefers-reduced-motion` is respected throughout, the
-  hero at rest is CSS-only, and a `<noscript>` block reveals the rest, so the
+  whole hero is CSS-only, and a `<noscript>` block reveals the rest, so the
   page reads in full with JavaScript off
 - Nothing is hidden behind a hover state. Every sentence renders on a phone
 - Every text node on the page meets WCAG AA contrast in both bands
@@ -77,11 +69,10 @@ itself is the reason to reply.
 
 ### The phone screenshots
 
-The hero phone shows five real Kaught screens from `media/app/2.png` through
-`6.png`. Replace a file and the page shows the new one; `index.html` needs no
-editing. Adding or dropping a screen means a matching `.scr` div and a named
-tab in `#rail` — the script counts both. The same five files fill the Kaught
-portal above the project cards.
+The hero phone shows five real Kaught screens from `media/app/1.png` through
+`5.png`. Replace a file and the page shows the new one; `index.html` needs no
+editing. Adding or dropping a screen means a matching `.scr` div and a dot in
+`#dots` — the script counts both.
 
 Each image runs 7% taller than the frame and is pinned to the top, so the
 device's own navigation bar falls off the bottom edge. A missing file removes
@@ -109,7 +100,7 @@ current one is not checked in, so redraw it to match if the hero copy changes.
 | `/kof` | **King of Founders** — a living pixel world map, one kingdom per app |
 | `/foundercity` | **Founder City** — the same apps as a pixel skyline at night, one tower each |
 | `/bio` | **Bio** — a fifteen-day daily log of five habits and sleep, then one number per training discipline, live |
-| `/brand` | **Brand study 01** · 34 motion patterns from passion.io and playbookapp.io, rebuilt in the landing page's system with one verdict each: steal, adapt, or skip |
+| `/brand` | **BrandMatch** · the same offer as the pitch under its own name, laid out and animated the way passion.io is, in black and white. Self-contained: the folder moves to brandmatch.app as it is |
 
 `/investment` and `/invest` are redirect stubs into `/wealth`.
 
