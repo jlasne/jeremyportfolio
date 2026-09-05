@@ -2,225 +2,544 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Wealth Architecture · Jeremy Lasne</title>
-<meta name="description" content="The research I keep on how wealth is built and held — fourteen principles, thirty-two countries, an interactive lecture — and the positions I actually hold behind it.">
-<meta name="robots" content="noindex, nofollow">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="description" content="How to think about money when the world changes. 15 steps for beginners, built from Ray Dalio, Charles Gave and Richard Détente, and one schema that holds them all.">
+<link rel="canonical" href="https://www.jeremylasne.com/wealth/">
+<meta name="theme-color" content="#050b16">
 <link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..600;1,9..40,300..500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/wealth/style.css">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Jeremy Lasne">
+<meta property="og:url" content="https://www.jeremylasne.com/wealth/">
+<meta property="og:title" content="Wealth Architecture">
+<meta property="og:description" content="How to think about money when the world changes. 15 steps, one schema.">
+<meta property="og:image" content="https://www.jeremylasne.com/og-image.png?v=4">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@jeremylasne">
+
 <style>
-  /* ── section headers ──────────────────────────────────────────────── */
-  .band { margin: clamp(72px, 10vw, 118px) 0 0; padding-top: 28px; border-top: 1px solid var(--ink); }
-  .band-no { font-size: 11px; letter-spacing: 0.2em; color: var(--gold); font-variant-numeric: tabular-nums; margin: 0 0 10px; }
-  .band h2 {
-    font-family: var(--display); font-weight: 400; font-size: clamp(32px, 5vw, 46px);
-    line-height: 1.08; color: var(--ink); margin: 0;
-  }
-  .band > p { margin: 18px 0 0; color: var(--muted); max-width: 62ch; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  /* ── research pieces ──────────────────────────────────────────────── */
-  .pieces { margin-top: 34px; display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
-  .piece {
-    background: var(--paper); padding: clamp(26px, 3.6vw, 38px);
-    display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; text-decoration: none;
-    transition: background .15s;
-  }
-  .piece:hover { background: var(--paper-card); }
-  .piece:hover h3 { color: var(--gold); }
-  /* every child carries its own class — a bare `.piece p` would also match the
-     kicker and the meta row and fight them for a grid slot */
-  .piece-k { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--faint); margin: 0; }
-  .piece h3 {
-    font-family: var(--display); font-weight: 400; font-size: clamp(27px, 3.6vw, 34px);
-    line-height: 1.12; color: var(--ink); margin: 0; transition: color .15s;
-  }
-  .piece-d { margin: 0; font-size: 16px; line-height: 1.7; color: var(--muted); max-width: 60ch; }
-  .piece-m {
-    margin: 0; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint);
-    display: flex; flex-wrap: wrap; gap: 6px 18px;
-  }
-  @media (min-width: 900px) {
-    .piece { grid-template-columns: minmax(0, 300px) minmax(0, 1fr); column-gap: 44px; align-items: start; }
-    .piece-k { grid-column: 1; grid-row: 1; }
-    .piece h3 { grid-column: 1; grid-row: 2; }
-    .piece-d { grid-column: 2; grid-row: 1 / span 2; }
-    .piece-m { grid-column: 2; grid-row: 3; }
+  :root {
+    --ink: #050b16;
+    --blue: #5fa8d3;
+    --ice: #eaf4fb;
+    --ice-70: rgba(234, 244, 251, .72);
+    --ice-45: rgba(234, 244, 251, .46);
+    --line: rgba(95, 168, 211, .18);
+    --glass: rgba(5, 11, 22, .55);
+    --card: rgba(23, 61, 89, .28);
   }
 
-  /* ── the book ─────────────────────────────────────────────────────── */
-  .holdings { margin-top: 34px; display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
-  .holding { background: var(--paper); padding: clamp(26px, 3.6vw, 38px); }
-  .holding-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 18px; }
-  .holding h3 {
-    font-family: var(--display); font-weight: 400; font-size: clamp(25px, 3.2vw, 31px);
-    line-height: 1.12; color: var(--ink); margin: 0;
+  html { background: var(--ink); color-scheme: dark; scroll-behavior: smooth; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ice); -webkit-font-smoothing: antialiased; overflow-x: hidden;
+    font-size: 17px; line-height: 1.65;
   }
-  .pocket-pill {
-    font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold);
-    border: 1px solid var(--gold); padding: 3px 9px;
-  }
-  .holding-fig {
-    margin-left: auto; font-family: var(--display); font-size: clamp(26px, 3.4vw, 34px);
-    line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap;
-  }
-  .holding-fig small {
-    display: block; font-family: var(--body); font-size: 10.5px; letter-spacing: 0.16em;
-    text-transform: uppercase; color: var(--faint); margin-top: 8px; text-align: right;
-  }
-  .holding p { margin: 18px 0 0; font-size: 16px; line-height: 1.72; color: var(--muted); max-width: 62ch; }
-  .holding a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--gold); padding-bottom: 1px; }
-  .holding a:hover { background: var(--gold-wash); }
-  .holding dl {
-    margin: 24px 0 0; padding-top: 20px; border-top: 1px solid var(--rule);
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 22px 20px;
-  }
-  .holding dt {
-    font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin: 0 0 6px;
-  }
-  .holding dd { margin: 0; font-size: 15.5px; color: var(--ink); line-height: 1.5; }
-  @media (max-width: 560px) { .holding-fig { margin-left: 0; } }
+  ::selection { background: var(--blue); color: var(--ink); }
+  a { color: inherit; }
 
-  /* ── the shape ────────────────────────────────────────────────────── */
-  .shape { margin-top: 34px; }
-  .shape-row {
-    display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 16px 24px; align-items: baseline;
-    padding: 20px 0; border-bottom: 1px solid var(--rule);
+  /* ---- the same sky as the front page ---- */
+  .bg {
+    position: fixed; top: -6%; left: -6%; width: 112%; height: 112%; z-index: 0; pointer-events: none;
+    object-fit: cover; object-position: 50% 42%;
+    filter: blur(10px) brightness(.5) saturate(.9);
   }
-  .shape-row:last-child { border-bottom: 0; }
-  .shape-row h4 { font-family: var(--display); font-weight: 400; font-size: 23px; line-height: 1.15; color: var(--ink); margin: 0; }
-  .shape-row h4 small { display: block; font-family: var(--body); font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); margin-top: 7px; }
-  .shape-row p { margin: 0; font-size: 16px; line-height: 1.7; color: var(--muted); }
-  .shape-row .state { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-top: 8px; }
-  @media (max-width: 620px) { .shape-row { grid-template-columns: 1fr; gap: 10px; } }
+  #snow { position: fixed; inset: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; }
+
+  /* ---- the page ---- */
+  .top {
+    position: relative; z-index: 2; max-width: 1040px; margin: 0 auto; padding: 22px 24px;
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  }
+  .top a { text-decoration: none; font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ice-45); }
+  .top a:hover { color: var(--blue); }
+
+  main { position: relative; z-index: 2; padding: 24px 0 80px; }
+  .col { max-width: 680px; margin: 0 auto; padding: 0 24px; }
+  .wide { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+  .glass {
+    background: var(--glass); border: 1px solid var(--line); border-radius: 22px;
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    padding: clamp(28px, 5vw, 56px) clamp(22px, 5vw, 56px);
+  }
+
+  header.hero { text-align: center; padding: 48px 24px 40px; max-width: 760px; margin: 0 auto; }
+  .kicker { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--ice-45); }
+  h1 { font-size: clamp(40px, 7vw, 68px); font-weight: 700; letter-spacing: -.035em; line-height: 1; margin: 16px 0 18px; text-wrap: balance; }
+  .stand { font-size: 19px; color: var(--ice-70); max-width: 44ch; margin: 0 auto; text-wrap: pretty; }
+  .meta { margin-top: 26px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .meta span { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ice-45); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; }
+
+  /* ---- parts and steps ---- */
+  .part { margin-top: 64px; }
+  .part-head { display: flex; align-items: baseline; gap: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+  .part-head .no { font-size: 12px; font-weight: 700; letter-spacing: .14em; color: var(--blue); }
+  .part-head h2 { font-size: clamp(24px, 3.4vw, 30px); font-weight: 600; letter-spacing: -.02em; line-height: 1.15; }
+  .part-head .who { margin-left: auto; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--ice-45); white-space: nowrap; }
+  .part > p.lead { margin-top: 18px; color: var(--ice-70); }
+
+  .step { margin-top: 40px; display: grid; grid-template-columns: 44px 1fr; gap: 0 18px; }
+  .step .n {
+    width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--card); border: 1px solid var(--line); font-weight: 700; font-size: 15px; color: var(--blue);
+    font-variant-numeric: tabular-nums;
+  }
+  .step h3 { font-size: 21px; font-weight: 600; letter-spacing: -.015em; line-height: 1.3; align-self: center; }
+  .step .body { grid-column: 2; margin-top: 12px; }
+  .step p + p { margin-top: 12px; }
+  .step ul { margin: 12px 0 0 0; padding-left: 20px; }
+  .step li + li { margin-top: 6px; }
+  .step .src { display: inline-block; margin-top: 12px; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ice-45); }
+  b { font-weight: 600; color: var(--ice); }
+
+  .fig {
+    margin: 18px 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+    background: var(--line); border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+  }
+  .fig > div { background: var(--glass); padding: 14px 16px; }
+  .fig .k { font-size: 30px; font-weight: 700; letter-spacing: -.03em; line-height: 1; color: var(--ice); }
+  .fig .l { margin-top: 6px; font-size: 13px; color: var(--ice-70); line-height: 1.4; }
+  @media (max-width: 520px) { .fig { grid-template-columns: 1fr; } }
+
+  /* the four squares, inline */
+  .quad { margin-top: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .quad div { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+  .quad .t { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--ice-45); }
+  .quad .a { margin-top: 6px; font-size: 18px; font-weight: 600; }
+  .quad .d { margin-top: 4px; font-size: 14px; color: var(--ice-70); }
+
+  /* ---- the schema ---- */
+  .schema { margin-top: 80px; }
+  .schema-head { text-align: center; max-width: 640px; margin: 0 auto 36px; padding: 0 24px; }
+  .schema-head h2 { font-size: clamp(30px, 5vw, 44px); font-weight: 700; letter-spacing: -.03em; line-height: 1.05; }
+  .schema-head p { margin-top: 12px; color: var(--ice-70); }
+
+  .board { display: block; }
+  .layer { display: grid; grid-template-columns: 180px 1fr; gap: 20px; align-items: stretch; }
+  .layer .tag { padding: 6px 0; }
+  .layer .tag .name { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--blue); }
+  .layer .tag .who { margin-top: 4px; font-size: 12px; color: var(--ice-45); }
+  .layer .tag .why { margin-top: 10px; font-size: 14px; color: var(--ice-70); line-height: 1.5; }
+  .cells { display: grid; gap: 8px; }
+  .cells.c2 { grid-template-columns: repeat(2, 1fr); }
+  .cells.c3 { grid-template-columns: repeat(3, 1fr); }
+  .cells.c4 { grid-template-columns: repeat(4, 1fr); }
+  .cell { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; min-width: 0; }
+  .cell.hot { border-color: rgba(95,168,211,.55); background: rgba(95,168,211,.16); }
+  .cell.dim { opacity: .55; }
+  .cell .h { font-size: 15px; font-weight: 600; line-height: 1.3; }
+  .cell .s { margin-top: 5px; font-size: 13px; color: var(--ice-70); line-height: 1.45; }
+  .cell .e { margin-top: 8px; font-size: 12px; color: var(--ice-45); line-height: 1.4; }
+  .link { margin-left: 200px; height: 34px; display: grid; place-items: center; position: relative; }
+  .link::before { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: rgba(95,168,211,.45); }
+  .link span { position: relative; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ice-45); background: var(--ink); padding: 2px 10px; border-radius: 999px; border: 1px solid var(--line); }
+
+  .q4 { display: grid; grid-template-columns: 18px 1fr 1fr; grid-template-rows: 1fr 1fr 18px; gap: 6px; }
+  .q4 .ax { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ice-45); display: grid; place-items: center; }
+  .q4 .ax.y { writing-mode: vertical-rl; transform: rotate(180deg); grid-row: 1 / span 2; }
+  .q4 .ax.x { grid-column: 2 / span 2; }
+  .q4 .cell { padding: 12px 14px; }
+  .dials { margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .dials .cell { background: transparent; }
+  .foot-row .cell { text-align: center; }
+
+  @media (max-width: 820px) {
+    .layer { grid-template-columns: 1fr; gap: 10px; }
+    .link { margin-left: 0; }
+    .cells.c4 { grid-template-columns: repeat(2, 1fr); }
+    .cells.c3 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 520px) {
+    .cells.c4, .cells.c2, .dials { grid-template-columns: 1fr; }
+    .q4 { grid-template-columns: 14px 1fr; grid-template-rows: auto; }
+    .q4 .ax.y { grid-row: 1 / span 4; }
+    .q4 .ax.x { grid-column: 2; }
+  }
+
+  /* ---- deeper, footer ---- */
+  .deeper { margin-top: 64px; }
+  .deeper h2 { font-size: 13px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--ice-45); padding-bottom: 8px; }
+  .deeper ul { list-style: none; }
+  .deeper li + li a { border-top: 1px solid var(--line); }
+  .deeper a { display: flex; align-items: center; gap: 14px; padding: 15px 14px; margin: 0 -14px; border-radius: 14px; text-decoration: none; }
+  .deeper a:hover { background: rgba(234,244,251,.06); }
+  .deeper a:hover .name { color: var(--blue); }
+  .deeper .name { font-weight: 600; white-space: nowrap; }
+  .deeper .desc { color: var(--ice-70); font-size: 15px; flex: 1; }
+  .deeper .arrow { width: 16px; height: 16px; fill: var(--ice-45); flex: none; }
+  .fine { margin-top: 40px; font-size: 13px; color: var(--ice-45); line-height: 1.6; }
+  footer { position: relative; z-index: 2; text-align: center; padding: 0 24px 48px; font-size: 14px; color: var(--ice-45); }
+  footer a { text-decoration: none; }
+  footer a:hover { color: var(--blue); }
+
+  @media print {
+    .bg, #snow, .top, .deeper, footer { display: none; }
+    html, body { background: #fff; color: #111; }
+    .glass, .cell, .quad div, .fig div { background: #fff; border-color: #bbb; color: #111; }
+    .cell .s, .cell .e, .stand, .step p, .layer .tag .why { color: #333; }
+  }
 </style>
 </head>
 <body>
 
-<nav class="rail">
-  <div class="rail-in">
-    <a class="rail-home" href="/">Jeremy Lasne</a>
-    <div class="rail-nav">
-      <a class="rail-drop" href="/wealth/" aria-current="page">Wealth Architecture</a>
-      <a href="/wealth/principles/">Principles</a>
-      <a href="/wealth/country/">Country Map</a>
-      <a href="/wealth/exercice/">Exercise</a>
-    </div>
-  </div>
+<img class="bg" src="/bio/bg.jpg" alt="" fetchpriority="high">
+<canvas id="snow" aria-hidden="true"></canvas>
+
+<nav class="top">
+  <a href="/">← Jeremy Lasne</a>
+  <a href="#schema">Jump to the schema</a>
 </nav>
 
-<main class="shell">
-
-  <header class="masthead">
-    <p class="eyebrow">Jeremy Lasne · Research</p>
-    <h1 class="title">Wealth<br>Architecture</h1>
-    <p class="standfirst">What I read, what I concluded, and what I <em>actually own</em>.</p>
+<main>
+  <header class="hero">
+    <p class="kicker">A beginner's map</p>
+    <h1>Wealth Architecture</h1>
+    <p class="stand">How to think about money when the world changes. Built from Ray Dalio, Charles Gave and Richard Détente.</p>
+    <div class="meta"><span>15 steps</span><span>12 min read</span><span>1 schema</span></div>
   </header>
 
-  <!-- ── 01 · the research ─────────────────────────────────────────── -->
-  <section class="band">
-    <p class="band-no">01</p>
-    <h2>The research</h2>
-    <p>Four settings of the same material, ordered by how much work they ask of you.</p>
-  </section>
+  <div class="col">
+  <div class="glass">
 
-  <div class="pieces wide">
-    <a class="piece" href="/wealth/principles/">
-      <p class="piece-k">The argument</p>
-      <h3>Principles</h3>
-      <p class="piece-d">Fourteen principles, built from nothing. Every one gets a picture.</p>
-      <p class="piece-m"><span>14 principles</span><span>4 parts</span><span>9 figures</span></p>
-    </a>
-    <a class="piece" href="/wealth/country/">
-      <p class="piece-k">Applied</p>
-      <h3>The Country Map</h3>
-      <p class="piece-d">Thirty-two countries, three readings each, on three charts.</p>
-      <p class="piece-m"><span>32 countries</span><span>3 readings</span><span>Updated 2026-06-05</span></p>
-    </a>
-    <a class="piece" href="/wealth/exercice/">
-      <p class="piece-k">Played</p>
-      <h3>The Exercise</h3>
-      <p class="piece-d">The same three maps, played rather than read. Build a compass, print the schema.</p>
-      <p class="piece-m"><span>11 lessons</span><span>6 interactive</span><span>Printable schema</span></p>
-    </a>
+    <section class="part" style="margin-top:0">
+      <div class="part-head"><span class="no">00</span><h2>Start with one question</h2></div>
+      <p class="lead"><b>Will tomorrow look like yesterday?</b></p>
+      <p style="margin-top:12px">Your answer picks your assets. In a stable world, the recipes of the last 40 years keep working. In a changing world, the same recipes lose. Richard Détente calls this the first choice, and it is yours alone. The 15 steps below help you answer it, then act on it.</p>
+    </section>
+
+    <!-- ── Part 1 ─────────────────────────────────────────────────── -->
+    <section class="part">
+      <div class="part-head"><span class="no">01</span><h2>The long picture</h2><span class="who">Ray Dalio</span></div>
+
+      <article class="step">
+        <div class="n">1</div>
+        <h3>Printed money lifts real things.</h3>
+        <div class="body">
+          <p>In 1933, and again in 1971, the United States stopped exchanging dollars for gold. Both times the stock market rose. After 1971 it gained close to 25% within a year. The same move happened in 2008 and in 2020.</p>
+          <p>The rule: when a central bank prints to fix a crisis, hold stocks, gold and commodities. Paper money loses value.</p>
+          <span class="src">Dalio</span>
+        </div>
+      </article>
+
+      <article class="step">
+        <div class="n">2</div>
+        <h3>Empires run in cycles of about 250 years.</h3>
+        <div class="body">
+          <p>Dalio studied 10 empires over 500 years. Each rose, peaked and declined in a similar order. Eight things measure the power: education, invention, competitiveness, output, share of world trade, military strength, the financial center, and the reserve currency.</p>
+          <p>Education leads the rise. The reserve currency is the last to go.</p>
+          <span class="src">Dalio</span>
+        </div>
+      </article>
+
+      <article class="step">
+        <div class="n">3</div>
+        <h3>Three signs say we are late in the cycle.</h3>
+        <div class="body">
+          <p>Dalio watches for three things together: debt too large to repay, so the central bank prints; a wealth gap that turns into populism; and a rising power facing the leading power. All three are present today.</p>
+          <p>The last time all three lined up was 1930 to 1945. A change of order takes 10 to 20 years.</p>
+          <span class="src">Dalio</span>
+        </div>
+      </article>
+
+      <article class="step">
+        <div class="n">4</div>
+        <h3>Money dies. Plan for it.</h3>
+        <div class="body">
+          <div class="fig">
+            <div><div class="k">750</div><div class="l">currencies existed since 1700</div></div>
+            <div><div class="k">&lt;20%</div><div class="l">still exist, all devalued</div></div>
+            <div><div class="k">8%</div><div class="l">new dollars printed each year</div></div>
+          </div>
+          <p style="margin-top:14px">Détente puts the working life of a currency near 70 years. The dollar system began in 1944. With 8% of new dollars a year, a portfolio in dollars needs more than 8% a year to hold its value. Every product sold as "prudent" pays under 8%.</p>
+          <span class="src">Dalio · Détente</span>
+        </div>
+      </article>
+    </section>
+
+    <!-- ── Part 2 ─────────────────────────────────────────────────── -->
+    <section class="part">
+      <div class="part-head"><span class="no">02</span><h2>Where are we now?</h2><span class="who">Charles Gave</span></div>
+
+      <article class="step">
+        <div class="n">5</div>
+        <h3>Two questions place you in one of four squares.</h3>
+        <div class="body">
+          <p>Charles Gave asks two questions. Is the economy growing? Are prices rising? The answers make four squares, and each square has one winner.</p>
+          <div class="quad">
+            <div><div class="t">Inflation · recession</div><div class="a">Cash</div><div class="d">In a serious currency: the Swiss franc.</div></div>
+            <div><div class="t">Inflation · growth</div><div class="a">Gold</div><div class="d">Plus stocks and metals.</div></div>
+            <div><div class="t">No inflation · recession</div><div class="a">Government bonds</div><div class="d">The state's promise holds value.</div></div>
+            <div><div class="t">No inflation · growth</div><div class="a">Stocks</div><div class="d">Efficient companies, technology first.</div></div>
+          </div>
+          <span class="src">Gave</span>
+        </div>
+      </article>
+
+      <article class="step">
+        <div class="n">6</div>
+        <h3>Read two dials set by millions of trades.</h3>
+        <div class="body">
+          <p><b>Growth dial:</b> the S&amp;P 500 divided by the oil price, averaged over 7 years. Gave's idea is that the economy is transformed energy. When companies turn oil into profit, the ratio rises.</p>
+          <p><b>Inflation dial:</b> gold divided by long government bonds, averaged over 7 years. Gold winning means people trust metal over the state. Bonds won from 1980 to 2020. Gold won in the 1970s and wins again since 2020.</p>
+          <p>Millions of trades set these two prices, so they stay honest. Seven years filters the noise: in Gave's 100-year test, shorter windows gave false signals.</p>
+          <span class="src">Gave</span>
+        </div>
+      </article>
+
+      <article class="step">
+        <div class="n">7</div>
+        <h3>Choose by exclusion.</h3>
+        <div class="body">
+          <p>Four assets: stocks, bonds, gold, cash. In each square, one or two of them lose. Gave removes those and holds the other two or three. His reason: spotting the loser is easier than picking the winner.</p>
+          <p>It is how a bettor beats the track: cross out the horses with zero chance, then bet on the rest. The job of managing money is to avoid the 45% to 80% losses that take 10 years to repair.</p>
+          <span class="src">Gave</span>
+        </div>
+      </article>
+
+      <article class="step">
+        <div class="n">8</div>
+        <h3>When inflation rises, shorten your horizon.</h3>
+        <div class="body">
+          <p>Without inflation, buyers pay 20 years of profit for a stock. With inflation they pay 15, then 10, then 5. A company can keep the same profit and lose three quarters of its price.</p>
+          <p>So hold what pays you soon: companies with 4% to 7% dividends and sound management. Nestlé pays near 5%, Exxon near 4%. Swiss bonds pay 1%.</p>
+          <p>Every big bear market since 1945 began with a jump in the energy price. Gave holds 25% in energy stocks. They gain when oil gets expensive, and they pay the dividend.</p>
+          <span class="src">Gave</span>
+        </div>
+      </article>
+    </section>
+
+    <!-- ── Part 3 ─────────────────────────────────────────────────── -->
+    <section class="part">
+      <div class="part-head"><span class="no">03</span><h2>Risk is the wrong word</h2><span class="who">Détente · Gave</span></div>
+
+      <article class="step">
+        <div class="n">9</div>
+        <h3>Separate risk from danger.</h3>
+        <div class="body">
+          <p>Finance calls price movement "risk". The S&amp;P 500 moves 15% to 20% in a year, Bitcoin far more. Détente names the real thing <b>danger</b>: the chance your capital goes to zero. The two are different.</p>
+          <p>A bond from a badly run state pays the same coupon every year, then one Monday it pays zero. A salary arrives every month, then one Monday it stops. A taxi driver's income jumps around all year, and Paris keeps taking taxis.</p>
+          <p>Low movement can hide high danger. High movement can carry low danger.</p>
+          <span class="src">Détente · Gave</span>
+        </div>
+      </article>
+
+      <article class="step">
+        <div class="n">10</div>
+        <h3>Accept movement, refuse danger.</h3>
+        <div class="body">
+          <p>Higher expected return comes with higher movement. Détente's test: Bernard Madoff showed 10% a year on a flat line. A flat line paying 10% breaks the physics of markets, and it was fraud.</p>
+          <p>So accept the movement. Limit the danger with two tools: strong collateral (a building keeps a value), and liquidity (a digital asset trades 24 hours a day, 7 days a week, so you can leave).</p>
+          <span class="src">Détente</span>
+        </div>
+      </article>
+
+      <article class="step">
+        <div class="n">11</div>
+        <h3>Prudence is the trap.</h3>
+        <div class="body">
+          <p>Prudence means repeating what worked over the last 40 years. In a changing world, that is a bet that the world stays still.</p>
+          <p>Détente's image: the grandfather is an eagle, the son a falcon, the grandson a pigeon, and pigeons get plucked. He cites the parable of the talents: the servant who buried his coin to stay safe was the one punished.</p>
+          <p>80% of the civilizations that existed have vanished. Taking the risk gives about 20% odds of surviving a change. Refusing the risk gives 0%.</p>
+          <span class="src">Détente</span>
+        </div>
+      </article>
+    </section>
+
+    <!-- ── Part 4 ─────────────────────────────────────────────────── -->
+    <section class="part">
+      <div class="part-head"><span class="no">04</span><h2>Four tools to build the portfolio</h2><span class="who">Détente's compass</span></div>
+
+      <article class="step">
+        <div class="n">12</div>
+        <h3>Value moves. Bet on where it goes.</h3>
+        <div class="body">
+          <p>First compass point. The car maker ruined the cart maker. Value moves toward new things, and now it moves faster: technology adoption follows S-curves, and the curves now overlap.</p>
+          <p>Two of Détente's examples. AI unlocks robotics and biology: AlphaFold folded 200 million proteins in 15 days. Compute is becoming an asset class, and Larry Fink of BlackRock said so; a new asset class appears about every 30 years.</p>
+          <p>The bet on where value goes is yours to take. It is the one bet that is yours alone.</p>
+          <span class="src">Détente</span>
+        </div>
+      </article>
+
+      <article class="step">
+        <div class="n">13</div>
+        <h3>In a storm, hold antifragile assets.</h3>
+        <div class="body">
+          <p>Second compass point, from Nassim Taleb, measured by Didier Darcet. A <b>fragile</b> asset gains when markets are calm: a stock index. An <b>antifragile</b> asset gains when markets shake: gold, the yen, Bitcoin, homes in Switzerland or Dubai.</p>
+          <p>Each time Europe shakes, wealthy Europeans move and Swiss prices rise. The test is a slope: plot return against volatility, and the two kinds of asset point in opposite directions.</p>
+          <p>If you answered "the world is changing" in step 00, you want antifragile.</p>
+          <span class="src">Détente</span>
+        </div>
+      </article>
+
+      <article class="step">
+        <div class="n">14</div>
+        <h3>Decorrelation is the one free lunch.</h3>
+        <div class="body">
+          <p>Third compass point. Milton Friedman said finance has one free lunch: assets that move for different reasons. Add waves that peak at different times and the sum is flatter. Your maximum loss shrinks and your return stays.</p>
+          <p>Bitcoin is the least correlated asset over long series. Hold only S&amp;P 500 stocks and, the day the index cracks, all of it cracks.</p>
+          <p>Your brain fights this. A flat in Singapore, a datacenter in Texas and a Bitcoin company in one portfolio offend everyone. That is the sign it works.</p>
+          <span class="src">Détente</span>
+        </div>
+      </article>
+
+      <article class="step">
+        <div class="n">15</div>
+        <h3>Size by proportion, then place the pieces where blocs meet.</h3>
+        <div class="body">
+          <p>Fourth compass point. A bet is a size, and the size replaces the yes or no. Détente's example: gold's market value against Bitcoin's gives about 2%. Put 2% in. Lose it and you live. Win and the portfolio doubles.</p>
+          <p>Three assets at 40%, 30% and 20% a year: if one goes to zero, the other two repay it in a year.</p>
+          <p>Then place the pieces. The world splits into blocs, the United States and China first. Gave and Détente both point to hinge places where the blocs still talk: Switzerland, Singapore, Dubai, Miami, Hong Kong. Money there is left alone, and it is where wealth goes when the rest shakes.</p>
+          <span class="src">Détente · Gave</span>
+        </div>
+      </article>
+    </section>
+
+    <!-- ── Part 5 ─────────────────────────────────────────────────── -->
+    <section class="part">
+      <div class="part-head"><span class="no">05</span><h2>One portfolio, as an example</h2><span class="who">The three burrows</span></div>
+      <p class="lead">Détente's own three pockets. Each sits where value moves, gains in a storm, and moves for its own reasons.</p>
+      <div class="quad" style="grid-template-columns:1fr">
+        <div><div class="t">Pocket 1 · Compute</div><div class="a">Energy plus datacenters</div><div class="d">Bought at book value, while CoreWeave trades at 11 times book.</div></div>
+        <div><div class="t">Pocket 2 · Hinge cities</div><div class="a">Luxury homes, off plan</div><div class="d">For people who live in 2 to 4 countries a year.</div></div>
+        <div><div class="t">Pocket 3 · Amplified Bitcoin</div><div class="a">Treasury companies, plus options</div><div class="d">About 10% of the pocket in call options for convexity.</div></div>
+      </div>
+      <p style="margin-top:18px">Under it, Gave's base layer: stocks, gold, cash and bonds picked by the square, 25% in energy, dividends when inflation rises.</p>
+      <p style="margin-top:12px">Under everything, Dalio's two rules: earn more than you spend, and treat each other well.</p>
+    </section>
+
+    <section class="part">
+      <div class="part-head"><span class="no">06</span><h2>Rules of the road</h2></div>
+      <ul style="margin-top:18px;padding-left:20px">
+        <li>Strong convictions, and change your mind when conditions change. <span class="src" style="margin:0">Détente</span></li>
+        <li style="margin-top:8px">The blow comes from where you looked least. List the risks; the one that kills you is off the list. <span class="src" style="margin:0">Détente</span></li>
+        <li style="margin-top:8px">Transitions are the hardest moments. <span class="src" style="margin:0">Gave</span></li>
+        <li style="margin-top:8px">3% of assets moving is enough to move value. Change comes from the edge. <span class="src" style="margin:0">Détente</span></li>
+        <li style="margin-top:8px">When gold leaves a country, leave with it. Gold knows first. <span class="src" style="margin:0">Gave</span></li>
+      </ul>
+    </section>
+
+  </div>
   </div>
 
-  <!-- ── 02 · the book ─────────────────────────────────────────────── -->
-  <section class="band" id="book">
-    <p class="band-no">02</p>
-    <h2>The book</h2>
-    <p>What I actually own.</p>
+  <!-- ── The schema ─────────────────────────────────────────────── -->
+  <section class="schema wide" id="schema">
+    <div class="schema-head">
+      <h2>The whole map on one page</h2>
+      <p>Read it top to bottom. Each layer answers the one above it.</p>
+    </div>
+
+    <div class="glass board">
+
+      <div class="layer">
+        <div class="tag"><div class="name">The question</div><div class="who">Step 00 · Détente</div><div class="why">Your answer picks every asset below.</div></div>
+        <div class="cells c2">
+          <div class="cell dim"><div class="h">Tomorrow looks like yesterday</div><div class="s">Fragile assets. The recipes of the last 40 years. Index funds, state bonds.</div></div>
+          <div class="cell hot"><div class="h">The world is changing</div><div class="s">Antifragile assets, decorrelated, sized by proportion. Everything below.</div></div>
+        </div>
+      </div>
+
+      <div class="link"><span>Why the world is changing</span></div>
+
+      <div class="layer">
+        <div class="tag"><div class="name">The era</div><div class="who">Steps 1 to 4 · Dalio</div><div class="why">Late in a 250-year cycle. Money loses value by design.</div></div>
+        <div>
+          <div class="cells c3">
+            <div class="cell"><div class="h">Debt too large to repay</div><div class="s">The central bank prints.</div><div class="e">1933 · 1971 · 2008 · 2020</div></div>
+            <div class="cell"><div class="h">Wealth gap</div><div class="s">Turns into populism, left and right.</div><div class="e">Last time: 1930 to 1945</div></div>
+            <div class="cell"><div class="h">Rising power vs leader</div><div class="s">China and the United States.</div><div class="e">Change of order: 10 to 20 years</div></div>
+          </div>
+          <div class="cells c3" style="margin-top:8px">
+            <div class="cell"><div class="h">Printing lifts stocks, gold, commodities</div></div>
+            <div class="cell"><div class="h">&lt;20% of 750 currencies survive</div></div>
+            <div class="cell"><div class="h">8% new dollars a year: beat 8% or lose</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="link"><span>Which season are we in</span></div>
+
+      <div class="layer">
+        <div class="tag"><div class="name">The season</div><div class="who">Steps 5 to 8 · Gave</div><div class="why">Two dials, four squares, one asset to hold in each. Exclude the 1 or 2 losers.</div></div>
+        <div>
+          <div class="q4">
+            <div class="ax y">Inflation dial · gold ÷ bonds, 7 years</div>
+            <div class="cell"><div class="h">Inflation · recession</div><div class="s"><b>Cash</b> in a serious currency</div></div>
+            <div class="cell"><div class="h">Inflation · growth</div><div class="s"><b>Gold</b>, stocks, metals</div></div>
+            <div class="cell"><div class="h">No inflation · recession</div><div class="s"><b>Government bonds</b></div></div>
+            <div class="cell"><div class="h">No inflation · growth</div><div class="s"><b>Stocks</b>, efficiency first</div></div>
+            <div class="ax x">Growth dial · S&amp;P 500 ÷ oil, 7 years</div>
+          </div>
+          <div class="dials">
+            <div class="cell"><div class="h">Inflation up: shorten the horizon</div><div class="s">4% to 7% dividends beat 1% bonds. P/E goes 20 → 15 → 10 → 5.</div></div>
+            <div class="cell"><div class="h">Energy, 25%</div><div class="s">Every big bear since 1945 began with oil. Energy stocks gain and pay.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="link"><span>How to stand in it</span></div>
+
+      <div class="layer">
+        <div class="tag"><div class="name">The posture</div><div class="who">Steps 9 to 11 · Détente</div><div class="why">Movement is the price of return. Zero is the thing to refuse.</div></div>
+        <div class="cells c3">
+          <div class="cell"><div class="h">Risk = movement</div><div class="s">Accept it. S&amp;P 500 moves 15% to 20% a year. A flat 10% line was Madoff.</div></div>
+          <div class="cell hot"><div class="h">Danger = zero</div><div class="s">Refuse it. Strong collateral. Liquidity 24/7.</div></div>
+          <div class="cell"><div class="h">Prudence = the trap</div><div class="s">Repeating 40 years. Eagle, falcon, pigeon. 20% odds with risk, 0% without.</div></div>
+        </div>
+      </div>
+
+      <div class="link"><span>What to build</span></div>
+
+      <div class="layer">
+        <div class="tag"><div class="name">The build</div><div class="who">Steps 12 to 15 · Détente</div><div class="why">Every pocket passes four tests.</div></div>
+        <div>
+          <div class="cells c4">
+            <div class="cell"><div class="h">1 · Value moves</div><div class="s">Bet where it goes in 10 to 20 years.</div><div class="e">AI · compute · energy</div></div>
+            <div class="cell"><div class="h">2 · Antifragile</div><div class="s">Gains when markets shake.</div><div class="e">Gold · Bitcoin · hinge real estate</div></div>
+            <div class="cell"><div class="h">3 · Decorrelated</div><div class="s">Moves for its own reasons. The free lunch.</div><div class="e">Offends everyone: good sign</div></div>
+            <div class="cell"><div class="h">4 · Sized</div><div class="s">A proportion, so a zero costs one year.</div><div class="e">2% Bitcoin by market cap</div></div>
+          </div>
+          <div class="cells c3" style="margin-top:8px">
+            <div class="cell hot"><div class="h">Pocket · Compute</div><div class="s">Energy + datacenters at book value.</div></div>
+            <div class="cell hot"><div class="h">Pocket · Hinge cities</div><div class="s">Switzerland, Singapore, Dubai, Miami, Hong Kong.</div></div>
+            <div class="cell hot"><div class="h">Pocket · Amplified Bitcoin</div><div class="s">Treasury companies, 10% in calls.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="link"><span>What holds it up</span></div>
+
+      <div class="layer foot-row">
+        <div class="tag"><div class="name">The floor</div><div class="who">Dalio · Gave · Détente</div><div class="why">Four rules under every layer.</div></div>
+        <div class="cells c4">
+          <div class="cell"><div class="h">Earn more than you spend</div></div>
+          <div class="cell"><div class="h">Treat each other well</div></div>
+          <div class="cell"><div class="h">Change your mind when conditions change</div></div>
+          <div class="cell"><div class="h">The blow comes from where you looked least</div></div>
+        </div>
+      </div>
+
+    </div>
   </section>
-
-  <div class="holdings wide">
-    <article class="holding">
-      <div class="holding-top">
-        <h3>Medical SaaS</h3>
-        <span class="pocket-pill">Private equity</span>
-        <span class="holding-fig">~€1,100<small>per month</small></span>
-      </div>
-      <dl>
-        <div class="fact"><dt>Entered</dt><dd>2023</dd></div>
-        <div class="fact"><dt>Job in the book</dt><dd>Cash flow</dd></div>
-        <div class="fact"><dt>How fast you can sell</dt><dd>Illiquid</dd></div>
-        <div class="fact"><dt>Moves with</dt><dd>Practice billings, not the cycle</dd></div>
-      </dl>
-    </article>
-
-    <article class="holding">
-      <div class="holding-top">
-        <h3>Datacenter</h3>
-        <span class="pocket-pill">Compute &amp; energy</span>
-        <span class="holding-fig">~€2,100<small>per month</small></span>
-      </div>
-      <dl>
-        <div class="fact"><dt>Entered</dt><dd>2026</dd></div>
-        <div class="fact"><dt>Job in the book</dt><dd>Engine</dd></div>
-        <div class="fact"><dt>How fast you can sell</dt><dd>Quarterly</dd></div>
-        <div class="fact"><dt>Moves with</dt><dd>AI capex and power supply</dd></div>
-      </dl>
-    </article>
-
-    <article class="holding">
-      <div class="holding-top">
-        <h3>Liquid portfolio</h3>
-        <span class="pocket-pill">Liquid</span>
-        <span class="holding-fig">~35%<small>as pinned on the front page</small></span>
-      </div>
-      <dl>
-        <div class="fact"><dt>Job in the book</dt><dd>Engine</dd></div>
-        <div class="fact"><dt>How fast you can sell</dt><dd>Daily</dd></div>
-        <div class="fact"><dt>Time horizon</dt><dd>1–5 years</dd></div>
-        <div class="fact"><dt>Moves with</dt><dd>The global macro cycle</dd></div>
-      </dl>
-    </article>
-  </div>
 
   <div class="col">
-    <p class="disclaimer">Figures are the ones pinned to the front page of this site and are rounded. The two private positions report a monthly distribution; the liquid figure is a performance number, not a monthly yield, and it is the one number here I would treat as the least comparable to the others. None of it is audited and none of it is an offer or a recommendation.</p>
+    <section class="deeper">
+      <h2>Go deeper</h2>
+      <ul>
+        <li><a href="/wealth/principles/"><span class="name">Principles</span><span class="desc">14 principles, 9 figures, the long argument.</span><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M4.22 11.78a.75.75 0 0 1 0-1.06L9.44 5.5H5.75a.75.75 0 0 1 0-1.5h5.5a.75.75 0 0 1 .75.75v5.5a.75.75 0 0 1-1.5 0V6.56l-5.22 5.22a.75.75 0 0 1-1.06 0Z"/></svg></a></li>
+        <li><a href="/wealth/country/"><span class="name">Country Map</span><span class="desc">32 countries, 3 readings each, on the four squares.</span><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M4.22 11.78a.75.75 0 0 1 0-1.06L9.44 5.5H5.75a.75.75 0 0 1 0-1.5h5.5a.75.75 0 0 1 .75.75v5.5a.75.75 0 0 1-1.5 0V6.56l-5.22 5.22a.75.75 0 0 1-1.06 0Z"/></svg></a></li>
+        <li><a href="/wealth/exercice/"><span class="name">The Exercise</span><span class="desc">The same map, played. 11 lessons, 6 interactive.</span><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M4.22 11.78a.75.75 0 0 1 0-1.06L9.44 5.5H5.75a.75.75 0 0 1 0-1.5h5.5a.75.75 0 0 1 .75.75v5.5a.75.75 0 0 1-1.5 0V6.56l-5.22 5.22a.75.75 0 0 1-1.06 0Z"/></svg></a></li>
+      </ul>
+      <p class="fine">Sources: Ray Dalio, <em>Principles for Dealing with the Changing World Order</em>; Charles Gave, Université de l'Épargne; Richard Détente, Grand Angle, the Three Burrows talk and the Financiers interview. Figures are theirs, as spoken, and rounded. This page is a study, published so it can be argued with. It is education, and it is my reading, so make your own decisions.</p>
+    </section>
   </div>
-
-  <section class="note col">
-    <p class="disclaimer">None of this is advice, and I am not a financial adviser. It is a structure I find defensible, published so it can be argued with.</p>
-    <p><a class="next" href="/wealth/principles/">Start with the principles</a></p>
-  </section>
-
 </main>
 
-<footer class="foot">
-  <div class="foot-in">
-    <a href="/wealth/">Wealth Architecture</a>
-    <a href="/wealth/principles/">Principles</a>
-    <a href="/wealth/country/">Country Map</a>
-    <a href="/wealth/exercice/">Exercise</a>
-    <a href="/">jeremylasne.com</a>
-    <span class="fine">Free research on wealth architecture · Not financial advice</span>
-  </div>
-</footer>
+<footer><a href="/">jeremylasne.com</a></footer>
 
+<script src="/snow.js" defer></script>
 </body>
 </html>
