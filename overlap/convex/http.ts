@@ -1,5 +1,5 @@
 import { httpRouter } from "convex/server";
-import { httpAction } from "./_generated/server";
+import { httpAction, type ActionCtx } from "./_generated/server";
 import { api } from "./_generated/api";
 
 /**
@@ -13,12 +13,17 @@ import { api } from "./_generated/api";
  * Lives at https://<deployment>.convex.site/overlap
  */
 
-const ALLOW = process.env.OVERLAP_ALLOW_ORIGIN ?? "*";
+/* One origin, or several separated by commas: a request from an origin on
+   the list gets its own origin back, so jeremylasne.com and
+   bio.jeremylasne.com share the door. Unset means anyone. */
+const ALLOW = (process.env.OVERLAP_ALLOW_ORIGIN ?? "*").split(",").map((s) => s.trim()).filter(Boolean);
+const allowFor = (origin: string | null) =>
+  ALLOW.includes("*") ? "*" : origin && ALLOW.includes(origin) ? origin : ALLOW[0];
 
 function headers(): Record<string, string> {
   return {
     "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": ALLOW,
+    "Access-Control-Allow-Origin": ALLOW[0],
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Max-Age": "86400",
@@ -48,6 +53,12 @@ const bad = (error: string, status = 400) =>
   new Response(JSON.stringify({ ok: false, error }), { status, headers: headers() });
 
 const door = httpAction(async (ctx, request) => {
+  const res = await answer(ctx, request);
+  res.headers.set("Access-Control-Allow-Origin", allowFor(request.headers.get("Origin")));
+  return res;
+});
+
+async function answer(ctx: ActionCtx, request: Request): Promise<Response> {
   let body: { op?: string; args?: Record<string, unknown> };
   try {
     body = await request.json();
@@ -95,6 +106,12 @@ const door = httpAction(async (ctx, request) => {
         return ok(await ctx.runQuery(api.city.towers, args));
       case "city.breakGround":
         return ok(await ctx.runMutation(api.city.breakGround, args));
+      case "bio.get":
+        return ok(await ctx.runQuery(api.bio.get, args));
+      case "bio.unlock":
+        return ok(await ctx.runQuery(api.bio.unlock, args));
+      case "bio.save":
+        return ok(await ctx.runMutation(api.bio.save, args));
       default:
         return bad("Unknown operation");
     }
@@ -105,14 +122,18 @@ const door = httpAction(async (ctx, request) => {
        and nothing else, and the internet is owed no file paths at all. */
     return bad(e instanceof Error ? clean(e.message) : "Something went wrong");
   }
-});
+}
 
 const http = httpRouter();
 http.route({ path: "/overlap", method: "POST", handler: door });
 http.route({
   path: "/overlap",
   method: "OPTIONS",
-  handler: httpAction(async () => new Response(null, { status: 204, headers: headers() })),
+  handler: httpAction(async (_ctx, request) => {
+    const h = headers();
+    h["Access-Control-Allow-Origin"] = allowFor(request.headers.get("Origin"));
+    return new Response(null, { status: 204, headers: h });
+  }),
 });
 
 export default http;

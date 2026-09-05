@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Jeremy Lasne — Energized and performing life</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Training performance and daily health habits, live. One number per discipline, one habit at a time.">
+<meta name="theme-color" content="#050b16">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23050b16'/%3E%3Ccircle cx='44' cy='20' r='8' fill='%23eaf4fb'/%3E%3Cpath d='M0 56 L14 30 L24 44 L36 22 L50 46 L64 36 V64 H0Z' fill='%235fa8d3'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Jeremy Lasne">
+<meta property="og:url" content="https://bio.jeremylasne.com/">
+<meta property="og:title" content="Energized and performing life">
+<meta property="og:description" content="Training performance and daily health habits, live. One number per discipline, one habit at a time.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* ── tokens ─────────────────────────────────────────────────────────── */
+:root {
+  --ink: #050b16;
+  --navy: #173d59;
+  --blue: #5fa8d3;
+  --ice: #eaf4fb;
+  --ice-70: rgba(234, 244, 251, .72);
+  --ice-45: rgba(234, 244, 251, .46);
+  --line: rgba(95, 168, 211, .18);
+  --card: linear-gradient(180deg, rgba(23, 61, 89, .42), rgba(23, 61, 89, .10));
+  --display: 'Bebas Neue', 'Oswald', Impact, 'Arial Narrow', sans-serif;
+  --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --pad: clamp(20px, 5vw, 56px);
+  --w: 1080px;
+}
+* { box-sizing: border-box; }
+html { background: var(--ink); color-scheme: dark; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--ink); color: var(--ice);
+  font: 400 16px/1.55 var(--sans); -webkit-font-smoothing: antialiased;
+}
+body.editing { padding-bottom: 92px; }
+a { color: inherit; }
+button, input { font: inherit; color: inherit; }
+::selection { background: var(--blue); color: var(--ink); }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+.mono {
+  font: 500 11px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase;
+}
+
+/* ── hero ───────────────────────────────────────────────────────────── */
+.hero {
+  position: relative; min-height: min(92svh, 880px); display: grid;
+  grid-template-rows: auto 1fr auto; overflow: hidden; isolation: isolate;
+}
+.scene {
+  position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; display: block;
+}
+.top {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: calc(var(--pad) * .6) var(--pad);
+}
+.brand { text-decoration: none; color: var(--ice-70); }
+.brand:hover { color: var(--ice); }
+.edit {
+  background: none; border: 1px solid var(--line); padding: 9px 12px 8px; cursor: pointer;
+  color: var(--ice-70); transition: color .2s, border-color .2s;
+}
+.edit:hover { color: var(--ice); border-color: var(--blue); }
+.editing .edit { visibility: hidden; }
+.copy {
+  grid-row: 3; padding: 0 var(--pad) calc(var(--pad) * 1.2); max-width: 1040px;
+}
+.kicker { color: var(--blue); margin: 0 0 18px; }
+h1 {
+  margin: 0; font: 400 clamp(64px, 10.5vw, 136px)/.92 var(--display);
+  letter-spacing: .01em; text-wrap: balance;
+}
+.lede {
+  margin: 22px 0 0; max-width: 46ch; font-size: clamp(16px, 1.6vw, 19px); color: var(--ice-70);
+}
+.scene .tw { animation: tw var(--t, 5s) ease-in-out var(--d, 0s) infinite; }
+@keyframes tw { 50% { opacity: .1; } }
+
+/* ── sections ───────────────────────────────────────────────────────── */
+main { max-width: var(--w); margin: 0 auto; padding: 0 var(--pad); }
+section { padding: clamp(56px, 9vw, 120px) 0 0; }
+section:last-child { padding-bottom: clamp(40px, 6vw, 80px); }
+.head { margin-bottom: clamp(28px, 4vw, 44px); }
+.head .n { color: var(--blue); display: block; margin-bottom: 14px; }
+h2 {
+  margin: 0; font: 400 clamp(46px, 7vw, 88px)/.95 var(--display); letter-spacing: .015em;
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+}
+.tag { margin: 14px 0 0; max-width: 52ch; font-size: clamp(16px, 1.6vw, 18px); color: var(--ice-70); }
+
+.pill, .badge {
+  font: 500 10.5px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase;
+  padding: 7px 9px 6px; border: 1px solid var(--line); color: var(--ice-70); white-space: nowrap;
+}
+.badge { border-color: var(--blue); color: var(--blue); padding: 9px 11px 8px; letter-spacing: .18em; }
+.badge.full { background: var(--blue); color: var(--ink); }
+
+/* ── cards ──────────────────────────────────────────────────────────── */
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.card {
+  background: var(--card); border-top: 2px solid var(--blue);
+  padding: 24px 24px 26px; min-width: 0;
+}
+.card .label { color: var(--blue); display: block; }
+.card .name {
+  margin: 14px 0 0; font: 400 clamp(26px, 2.6vw, 32px)/1 var(--display); letter-spacing: .02em;
+}
+.card .name small {
+  font: 500 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ice-45); margin-left: 10px;
+}
+.stat { display: flex; align-items: baseline; gap: 10px; margin: 18px 0 0; }
+.num {
+  font: 400 clamp(72px, 8vw, 104px)/1 var(--display); letter-spacing: .01em;
+  background: none; border: 0; border-bottom: 2px solid transparent; padding: 0; margin: 0;
+  width: 3ch; min-width: 1ch; color: var(--ice); pointer-events: none;
+  appearance: textfield; -moz-appearance: textfield; field-sizing: content; caret-color: var(--blue);
+  transition: border-color .2s;
+}
+.num::-webkit-outer-spin-button, .num::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.num:invalid { box-shadow: none; }
+.editing .num:not([readonly]) { pointer-events: auto; border-bottom-color: var(--blue); }
+.editing .num:not([readonly]):focus { outline: none; border-bottom-color: var(--ice); }
+.unit { color: var(--blue); font-size: 12px; }
+.card .note { margin: 14px 0 0; font-size: 14px; color: var(--ice-70); max-width: 34ch; }
+
+.card.wide { display: grid; grid-template-columns: auto 1fr; column-gap: 40px; align-items: end; margin-bottom: 40px; }
+.card.wide .note { grid-column: 2; grid-row: 1 / 4; align-self: center; max-width: 42ch; margin: 0; }
+
+/* ── ramp ───────────────────────────────────────────────────────────── */
+.ramp { display: grid; grid-template-columns: repeat(15, 1fr); gap: 3px; height: 4px; margin: 0 0 40px; }
+.ramp i { background: rgba(95, 168, 211, .16); }
+.ramp i.past { background: var(--blue); }
+.ramp i.now { background: var(--ice); }
+
+/* ── habits ─────────────────────────────────────────────────────────── */
+.habits { list-style: none; margin: 0; padding: 0; border-bottom: 1px solid var(--line); }
+.habit {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: start;
+  padding: 20px 0; border-top: 1px solid var(--line); transition: opacity .3s;
+}
+.habit .name { display: block; font-weight: 500; font-size: 17px; }
+.habit .why { display: block; margin-top: 4px; font-size: 14px; color: var(--ice-70); max-width: 58ch; }
+.habit.locked { opacity: .38; }
+.habit.locked .tick { border-style: dashed; }
+.tick {
+  appearance: none; -webkit-appearance: none; width: 20px; height: 20px; margin: 3px 0 0;
+  border: 1px solid var(--blue); background: transparent; position: relative; flex: none;
+  transition: background .15s, box-shadow .15s;
+}
+.tick:checked { background: var(--blue); }
+.tick:checked::after {
+  content: ''; position: absolute; left: 6px; top: 2px; width: 5px; height: 10px;
+  border: solid var(--ink); border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
+.tick:not(:disabled) { cursor: pointer; box-shadow: 0 0 0 4px rgba(95, 168, 211, .14); }
+.tick:not(:disabled) + label { cursor: pointer; }
+
+/* ── footer ─────────────────────────────────────────────────────────── */
+footer {
+  max-width: var(--w); margin: 0 auto; padding: 0 var(--pad) calc(var(--pad) * 1.2);
+  display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; color: var(--ice-45);
+}
+footer a { text-decoration: none; }
+footer a:hover { color: var(--ice); }
+.status { color: var(--ice-70); min-height: 1em; }
+.status.bad { color: #ff9e9e; }
+
+/* ── edit bar ───────────────────────────────────────────────────────── */
+.bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+  background: rgba(5, 11, 22, .86); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid var(--blue);
+  padding: 14px var(--pad) calc(14px + env(safe-area-inset-bottom));
+}
+.bar[hidden] { display: none; }
+.row { max-width: var(--w); margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+.row[hidden] { display: none; }
+.row .status { flex: 1; }
+.row label { color: var(--ice-70); }
+.pass {
+  flex: 1; min-width: 0; background: rgba(23, 61, 89, .35); border: 1px solid var(--line);
+  padding: 10px 12px; font-family: var(--mono); font-size: 14px; letter-spacing: .06em;
+}
+.pass:focus { outline: none; border-color: var(--blue); }
+.btn {
+  border: 1px solid var(--blue); background: none; padding: 10px 16px 9px; cursor: pointer;
+  font: 500 11px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; white-space: nowrap;
+  transition: background .15s, color .15s, opacity .15s;
+}
+.btn.solid { background: var(--blue); color: var(--ink); }
+.btn:hover { background: var(--ice); color: var(--ink); border-color: var(--ice); }
+.btn:disabled { opacity: .5; cursor: default; }
+.shake { animation: shake .4s; }
+@keyframes shake { 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+
+/* ── small screens ──────────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .cards { grid-template-columns: 1fr; }
+  .card.wide { grid-template-columns: 1fr; }
+  .card.wide .note { grid-column: 1; grid-row: auto; margin-top: 14px; }
+  .hero { min-height: min(84svh, 760px); }
+}
+@media (max-width: 520px) {
+  .habit { grid-template-columns: auto 1fr; }
+  .habit .pill { grid-column: 2; justify-self: start; }
+  .row { flex-wrap: wrap; }
+  .row label { width: 100%; }
+  .pass { flex-basis: 100%; }
+  .row .status { flex-basis: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <svg class="scene" id="scene" aria-hidden="true" preserveAspectRatio="xMidYMid slice"></svg>
+  <nav class="top">
+    <a class="brand mono" href="https://jeremylasne.com">Jeremy Lasne</a>
+    <button class="edit mono" id="edit" type="button">Edit</button>
+  </nav>
+  <div class="copy">
+    <p class="kicker mono">Training performance &amp; daily health habits</p>
+    <h1>Energized and performing life.</h1>
+    <p class="lede">What I train for and what I wake up to. Live numbers, updated as they change, no filter.</p>
+  </div>
+</header>
+
+<main>
+  <section id="performance">
+    <div class="head">
+      <span class="n mono">01</span>
+      <h2>Performance</h2>
+      <p class="tag">One number per discipline. Everything else is process.</p>
+    </div>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section id="health">
+    <div class="head">
+      <span class="n mono">02</span>
+      <h2>Health <span class="badge" id="badge"></span></h2>
+      <p class="tag">Energized and performing life starts before 9am.</p>
+    </div>
+    <div class="ramp" id="ramp" aria-hidden="true"></div>
+    <div id="sleep"></div>
+    <ul class="habits" id="habits"></ul>
+  </section>
+</main>
+
+<footer class="mono">
+  <a href="https://jeremylasne.com">jeremylasne.com</a>
+  <span class="status" id="updated"></span>
+</footer>
+
+<div class="bar" id="bar" hidden>
+  <form class="row" id="gate">
+    <label class="mono" for="pass">Passphrase</label>
+    <input class="pass" id="pass" type="password" autocomplete="current-password" required>
+    <button class="btn" type="button" data-cancel>Cancel</button>
+    <button class="btn solid" type="submit" id="unlock">Unlock</button>
+  </form>
+  <div class="row" id="tools" hidden>
+    <span class="status mono" id="status">Editing. Locked habits stay locked.</span>
+    <button class="btn" type="button" data-cancel>Cancel</button>
+    <button class="btn solid" type="button" id="save">Save</button>
+  </div>
+</div>
+
+<noscript><p style="text-align:center;padding:40px">The live numbers need JavaScript.</p></noscript>
+
+<script type="module">
+import { SPEC, dayOf, dateKey, unlocked, fullRhythm, clean } from './spec.js';
+
+/* ── the scene ──────────────────────────────────────────────────────────
+   Four ridgelines by midpoint displacement, each blurred a little less
+   than the one behind it, under a moon. Drawn once for the hero's own
+   aspect ratio, so a phone gets the peaks and the moon, not the middle
+   of a widescreen crop. Seeded, so it is the same mountain every visit. */
+const svg = document.getElementById('scene');
+const NS = 'http://www.w3.org/2000/svg';
+const el = (tag, attrs, parent) => {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return (parent || svg).appendChild(e);
+};
+function rng(seed) {
+  return () => {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+/* control points in fractions of W/H, then 8 rounds of displacement */
+function ridge(rnd, W, H, ctrl, amp, rough) {
+  let pts = ctrl.map(([x, y]) => [x * W, y * H]);
+  pts.unshift([-W * .1, pts[0][1]]); pts.push([W * 1.1, pts[pts.length - 1][1]]);
+  let a = amp * H;
+  for (let i = 0; i < 8; i++) {
+    const next = [pts[0]];
+    for (let j = 1; j < pts.length; j++) {
+      const [x0, y0] = pts[j - 1], [x1, y1] = pts[j];
+      next.push([(x0 + x1) / 2, (y0 + y1) / 2 + (rnd() - .5) * a], pts[j]);
+    }
+    pts = next; a *= rough;
+  }
+  return 'M' + pts.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join('L') + `L${W * 1.1} ${H * 1.2}L${-W * .1} ${H * 1.2}Z`;
+}
+function grad(id, stops, defs, attrs) {
+  const g = el(attrs ? 'radialGradient' : 'linearGradient', Object.assign({ id, x1: 0, y1: 0, x2: 0, y2: 1 }, attrs || {}), defs);
+  for (const [o, c, op] of stops) el('stop', { offset: o, 'stop-color': c, 'stop-opacity': op == null ? 1 : op }, g);
+}
+function scene() {
+  const w = svg.clientWidth || 1200, h = svg.clientHeight || 700;
+  const W = 1600, H = Math.round(W * h / w), k = W / w; /* k: css px → user units */
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = '';
+  const defs = el('defs', {});
+  grad('sky', [[0, '#03081a'], ['.45', '#0a1d33'], ['.78', '#173d59'], [1, '#22557a']], defs);
+  grad('glow', [[0, '#eaf4fb', .55], ['.35', '#8fc0e2', .16], [1, '#5fa8d3', 0]], defs, { cx: .5, cy: .5, r: .5 });
+  grad('haze', [[0, '#6fb0da', .28], [1, '#173d59', 0]], defs, { cx: .5, cy: .5, r: .5 });
+  grad('far', [[0, '#d3e5f3'], ['.17', '#6394ba'], [1, '#1a4262']], defs);
+  grad('mid', [[0, '#b4d0e8'], ['.15', '#3e78a1'], [1, '#0f2c45']], defs);
+  grad('near', [[0, '#86b0cf'], ['.14', '#265676'], [1, '#08182a']], defs);
+  grad('fore', [[0, '#0b1a2b'], [1, '#030810']], defs);
+  grad('fog', [[0, '#5fa8d3', 0], [1, '#5fa8d3', .22]], defs);
+  grad('veil', [[0, '#050b16', 0], ['.55', '#050b16', .55], [1, '#050b16', 1]], defs);
+  const blur = (id, px) => { const f = el('filter', { id, x: '-5%', y: '-20%', width: '110%', height: '140%' }, defs); el('feGaussianBlur', { stdDeviation: (px * k).toFixed(2) }, f); };
+  blur('b1', 7); blur('b2', 4.5); blur('b3', 2.5); blur('b4', 1.4); blur('bm', 1.2);
+
+  el('rect', { width: W, height: H, fill: 'url(#sky)' });
+  const rnd = rng(1809);
+  for (let i = 0; i < 90; i++) {
+    const x = rnd() * W, y = rnd() * H * .55, r = .6 + rnd() * 1.3;
+    const s = el('circle', { cx: x.toFixed(1), cy: y.toFixed(1), r: r.toFixed(2), fill: '#eaf4fb', opacity: (.25 + rnd() * .65).toFixed(2) });
+    if (i % 4 === 0) { s.setAttribute('class', 'tw'); s.style.setProperty('--d', (rnd() * 6).toFixed(1) + 's'); s.style.setProperty('--t', (4 + rnd() * 4).toFixed(1) + 's'); }
+  }
+  const mx = W * .72, my = H * .22, mr = Math.min(W, H) * .034;
+  el('circle', { cx: mx, cy: my, r: mr * 11, fill: 'url(#glow)', opacity: .55 });
+  el('circle', { cx: mx, cy: my, r: mr * 4.2, fill: 'url(#glow)' });
+  el('circle', { cx: mx, cy: my, r: mr, fill: '#f2f8fd', filter: 'url(#bm)' });
+  el('ellipse', { cx: W * .62, cy: H * .58, rx: W * .7, ry: H * .3, fill: 'url(#haze)' });
+
+  const layer = (id, fill, ctrl, amp, rough, op) => {
+    const g = el('g', { filter: `url(#${id})` });
+    el('path', { d: ridge(rnd, W, H, ctrl, amp, rough), fill: `url(#${fill})`, opacity: op }, g);
+  };
+  layer('b1', 'far',  [[.05, .55], [.14, .34], [.22, .5], [.33, .3], [.42, .47], [.5, .36], [.6, .48], [.7, .4], [.8, .5], [.88, .38], [1, .52]], .085, .6, .85);
+  layer('b2', 'mid',  [[0, .66], [.1, .48], [.2, .6], [.3, .44], [.4, .58], [.5, .5], [.6, .62], [.7, .49], [.8, .6], [.9, .5], [1, .63]], .07, .6, .95);
+  layer('b3', 'near', [[0, .78], [.08, .66], [.2, .75], [.3, .62], [.42, .72], [.52, .66], [.64, .76], [.74, .64], [.86, .74], [1, .7]], .06, .58, 1);
+  el('rect', { y: H * .55, width: W, height: H * .45, fill: 'url(#fog)' });
+  layer('b4', 'fore', [[0, .9], [.15, .84], [.3, .9], [.5, .86], [.7, .91], [.85, .85], [1, .9]], .04, .7, 1);
+  el('rect', { width: W, height: H, fill: 'url(#veil)' });
+}
+scene();
+let aspect = svg.clientWidth / svg.clientHeight, timer;
+addEventListener('resize', () => {
+  clearTimeout(timer);
+  timer = setTimeout(() => { const a = svg.clientWidth / svg.clientHeight; if (Math.abs(a - aspect) / aspect > .12) { aspect = a; scene(); } }, 200);
+});
+
+/* ── the numbers ────────────────────────────────────────────────────── */
+const API = 'https://fiery-eel-944.eu-west-1.convex.site/overlap';
+const $ = id => document.getElementById(id);
+const day = dayOf(), today = dateKey();
+
+const state = { values: {}, habits: {}, sleep: SPEC.sleep.fallback, updatedAt: 0 };
+for (const e of SPEC.exercises) state.values[e.id] = e.fallback;
+for (const h of SPEC.habits) state.habits[h.id] = false;
+
+function api(op, args) {
+  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 9000);
+  return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ op, args: args || {} }), signal: ctl.signal })
+    .then(r => r.json())
+    .then(j => { clearTimeout(t); if (j && j.ok) return j.value; throw new Error((j && j.error) || 'Something went wrong'); },
+          e => { clearTimeout(t); throw new Error(e.name === 'AbortError' ? 'The server did not answer' : 'Could not reach the server'); });
+}
+
+/* one card, one number */
+function card(m, label, wide) {
+  const c = document.createElement('div');
+  c.className = 'card' + (wide ? ' wide' : '');
+  c.innerHTML = `
+    <span class="label mono">${label}</span>
+    <p class="name">${m.name}<small>${m.protocol}</small></p>
+    <div class="stat">
+      <input class="num" id="n-${m.id}" type="number" inputmode="decimal" min="0" max="${m.max}" step="${m.step}" readonly aria-label="${m.name}, ${m.unit}">
+      <span class="unit mono">${m.unit}</span>
+    </div>
+    <p class="note">${m.note}</p>`;
+  return c;
+}
+const cards = $('cards');
+SPEC.exercises.forEach((e, i) => cards.appendChild(card(e, `0${i + 1} · ${e.discipline}`)));
+$('sleep').appendChild(card(SPEC.sleep, 'Sleep · not gated', true));
+
+const habits = $('habits');
+for (const h of [...SPEC.habits].sort((a, b) => a.unlockDay - b.unlockDay)) {
+  const open = unlocked(h, day);
+  const li = document.createElement('li');
+  li.className = 'habit' + (open ? '' : ' locked');
+  li.innerHTML = `
+    <input class="tick" type="checkbox" id="h-${h.id}" disabled>
+    <label for="h-${h.id}"><span class="name">${h.name}</span><span class="why">${h.why}</span></label>
+    ${open ? '' : `<span class="pill">Unlocks day ${h.unlockDay}</span>`}`;
+  habits.appendChild(li);
+}
+
+const badge = $('badge');
+badge.textContent = fullRhythm(day) ? 'Full rhythm' : `Day ${day} of ${SPEC.rampDays}`;
+badge.classList.toggle('full', fullRhythm(day));
+const ramp = $('ramp');
+for (let i = 1; i <= SPEC.rampDays; i++) {
+  const s = document.createElement('i');
+  s.className = i < day ? 'past' : i === day && !fullRhythm(day) ? 'now' : '';
+  if (fullRhythm(day)) s.className = 'past';
+  ramp.appendChild(s);
+}
+
+/* the input is as wide as its number: natively where field-sizing exists, by ch elsewhere */
+const fit = CSS.supports('field-sizing', 'content') ? () => {} : inp => { inp.style.width = `calc(${Math.max(1, String(inp.value).length)}ch + .1em)`; };
+function paint() {
+  for (const e of SPEC.exercises) { const i = $('n-' + e.id); i.value = state.values[e.id]; fit(i); }
+  const s = $('n-sleep'); s.value = state.sleep; fit(s);
+  for (const h of SPEC.habits) $('h-' + h.id).checked = !!state.habits[h.id];
+  const when = state.updatedAt ? new Date(state.updatedAt) : null;
+  $('updated').textContent = !when ? '' :
+    dateKey(when) === today ? 'Updated today' :
+    dateKey(new Date(when.getTime() + 864e5)) === today ? 'Updated yesterday' :
+    'Updated ' + when.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+function apply(doc) {
+  if (!doc) return;
+  for (const e of SPEC.exercises) if (Number.isFinite(doc.values?.[e.id])) state.values[e.id] = doc.values[e.id];
+  if (Number.isFinite(doc.sleep)) state.sleep = doc.sleep;
+  /* checks are for today; a save from another day starts the day blank */
+  for (const h of SPEC.habits) state.habits[h.id] = doc.today === today && doc.habits?.[h.id] === true;
+  state.updatedAt = doc.updatedAt || 0;
+}
+paint();
+api('bio.get').then(doc => { apply(doc); paint(); }).catch(() => {});
+document.querySelectorAll('.num').forEach(i => i.addEventListener('input', () => fit(i)));
+
+/* ── editing ────────────────────────────────────────────────────────── */
+const bar = $('bar'), gate = $('gate'), tools = $('tools'), pass = $('pass'), status = $('status');
+const PASS = 'bio.pass';
+const remembered = () => { try { return sessionStorage.getItem(PASS) || ''; } catch (e) { return ''; } };
+const remember = p => { try { p ? sessionStorage.setItem(PASS, p) : sessionStorage.removeItem(PASS); } catch (e) {} };
+const say = (t, bad) => { status.textContent = t; status.classList.toggle('bad', !!bad); };
+
+function open(editing) {
+  document.body.classList.toggle('editing', editing);
+  for (const e of SPEC.exercises) $('n-' + e.id).readOnly = !editing;
+  $('n-sleep').readOnly = !editing;
+  for (const h of SPEC.habits) $('h-' + h.id).disabled = !editing || !unlocked(h, day);
+  bar.hidden = !editing; gate.hidden = editing; tools.hidden = !editing;
+  if (editing) { say('Editing. Locked habits stay locked.'); $('n-' + SPEC.exercises[0].id).focus(); }
+}
+$('edit').addEventListener('click', () => {
+  if (remembered()) return open(true);
+  bar.hidden = false; gate.hidden = false; tools.hidden = true; pass.value = ''; pass.focus();
+});
+gate.addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const p = pass.value; $('unlock').disabled = true;
+  try { await api('bio.unlock', { passphrase: p }); remember(p); open(true); }
+  catch (e) { pass.classList.remove('shake'); void pass.offsetWidth; pass.classList.add('shake'); pass.select(); }
+  $('unlock').disabled = false;
+});
+function cancel() { paint(); open(false); }
+document.querySelectorAll('[data-cancel]').forEach(b => b.addEventListener('click', cancel));
+
+async function save() {
+  const draft = clean({
+    values: Object.fromEntries(SPEC.exercises.map(e => [e.id, $('n-' + e.id).value])),
+    habits: Object.fromEntries(SPEC.habits.map(h => [h.id, $('h-' + h.id).checked])),
+    sleep: $('n-sleep').value,
+  }, day);
+  $('save').disabled = true; say('Saving…');
+  try {
+    const doc = await api('bio.save', { passphrase: remembered(), today, ...draft });
+    apply(doc); paint(); open(false);
+  } catch (e) {
+    say(e.message, true);
+    if (/passphrase/i.test(e.message)) { remember(''); gate.hidden = false; tools.hidden = true; pass.value = ''; pass.focus(); }
+  }
+  $('save').disabled = false;
+}
+$('save').addEventListener('click', save);
+addEventListener('keydown', ev => {
+  if (!document.body.classList.contains('editing')) return;
+  if (ev.key === 'Escape') cancel();
+  if (ev.key === 'Enter' && ev.target.classList.contains('num')) { ev.preventDefault(); save(); }
+});
+</script>
+</body>
+</html>

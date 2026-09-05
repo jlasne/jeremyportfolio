@@ -143,4 +143,17 @@ export default defineSchema({
     userId: v.optional(v.id("users")),
     createdAt: v.number(),
   }),
+
+  /* bio.jeremylasne.com — one document, the numbers on the page. Written
+     only with the passphrase in BIO_PASSPHRASE; what it may contain is
+     decided in bio/spec.js, which the page imports too. */
+  bio: defineTable({
+    key: v.string(),
+    values: v.record(v.string(), v.number()),
+    habits: v.record(v.string(), v.boolean()),
+    sleep: v.number(),
+    /* the local date the habit checks were made for */
+    today: v.string(),
+    updatedAt: v.number(),
+  }).index("by_key", ["key"]),
 });
