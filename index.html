@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Jeremy Lasne</title>
-<meta name="description" content="Founder. I build mobile apps and small internet businesses. BrandMatch, TrustViews, Kaught.">
+<meta name="description" content="Founder. I build mobile apps and small internet businesses. BrandMatch, Kaught, TrustViews.">
 <link rel="canonical" href="https://www.jeremylasne.com/">
 <meta name="theme-color" content="#eef1f8">
 <link rel="icon" href="favicon.ico" sizes="any">
@@ -46,8 +46,8 @@
   #sky {
     position: fixed; inset: 0; z-index: 0;
     width: 100%; height: 100%;
-    -webkit-mask-image: radial-gradient(ellipse 80% 85% at center, #000 0%, rgba(0,0,0,.9) 45%, rgba(0,0,0,.25) 78%, transparent 98%);
-    mask-image: radial-gradient(ellipse 80% 85% at center, #000 0%, rgba(0,0,0,.9) 45%, rgba(0,0,0,.25) 78%, transparent 98%);
+    -webkit-mask-image: radial-gradient(ellipse 95% 100% at center, #000 0%, rgba(0,0,0,.95) 55%, rgba(0,0,0,.35) 85%, transparent 100%);
+    mask-image: radial-gradient(ellipse 95% 100% at center, #000 0%, rgba(0,0,0,.95) 55%, rgba(0,0,0,.35) 85%, transparent 100%);
   }
 
   main {
@@ -58,7 +58,7 @@
   }
   main::before {
     content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-    background: radial-gradient(ellipse 60% 70% at 50% 46%, rgba(238,241,248,.9) 0%, rgba(238,241,248,.5) 50%, transparent 80%);
+    background: radial-gradient(ellipse 58% 68% at 50% 46%, rgba(238,241,248,.85) 0%, rgba(238,241,248,.45) 50%, transparent 80%);
   }
 
   .col { width: 100%; max-width: 560px; display: flex; flex-direction: column; align-items: center; text-align: center; }
@@ -104,7 +104,7 @@
   .item .name { font-size: 16px; line-height: 24px; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; flex: none; }
   .item .desc { font-size: 15px; line-height: 24px; color: var(--ink-soft); flex: 1 1 auto; min-width: 0; }
   .item .arrow { width: 16px; height: 16px; flex: none; fill: rgba(40,50,80,.35); transition: transform .25s cubic-bezier(.22,1,.36,1), fill .2s; }
-  .item .soon {
+  .item .tag {
     flex: none; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
     color: var(--ink-faint); border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px;
   }
@@ -129,7 +129,7 @@
   @media (max-width: 520px) {
     .item { flex-wrap: wrap; row-gap: 3px; padding: 13px 12px; margin: 0 -12px; }
     .item .name { flex: 1 1 auto; }
-    .item .arrow, .item .soon { order: 2; }
+    .item .arrow, .item .tag { order: 2; }
     .item .desc { flex-basis: 100%; order: 3; padding-left: 38px; line-height: 1.5; }
   }
   @media (prefers-reduced-motion: reduce) { .reveal { animation: none; } }
@@ -146,18 +146,12 @@
     <p class="tagline reveal" style="--d:130">Founder. I build mobile apps and small internet businesses.</p>
 
     <section class="reveal" style="--d:220">
-      <h2>Projects</h2>
+      <h2>Active Projects</h2>
       <ul>
         <li><a class="item" href="https://brandmatch.app" target="_blank" rel="noopener">
           <img class="logo" src="media/logos/brandmatch.svg" alt="" width="24" height="24">
           <span class="name">BrandMatch</span>
           <span class="desc">Turn your audience into recurring revenue.</span>
-          <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
-        </a></li>
-        <li><a class="item" href="https://trustviews.io" target="_blank" rel="noopener">
-          <img class="logo" src="media/logos/trustviews.svg" alt="" width="24" height="24">
-          <span class="name">TrustViews</span>
-          <span class="desc">Verified websites and their founders, ranked on real traffic.</span>
           <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
         </a></li>
         <li><a class="item" href="https://kaught.app" target="_blank" rel="noopener">
@@ -166,44 +160,32 @@
           <span class="desc">Point your camera at any wild animal, it names the species.</span>
           <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
         </a></li>
+        <li><a class="item" href="https://trustviews.io" target="_blank" rel="noopener">
+          <img class="logo" src="media/logos/trustviews.svg" alt="" width="24" height="24">
+          <span class="name">TrustViews</span>
+          <span class="desc">Verified websites and their founders, ranked on real traffic.</span>
+          <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
+        </a></li>
       </ul>
     </section>
 
     <section class="reveal" style="--d:300">
       <h2>Personal</h2>
       <ul>
-        <li><span class="item"><span class="dot"></span><span class="name">Invest</span><span class="desc">Where my own money goes.</span><span class="soon">soon</span></span></li>
-        <li><span class="item"><span class="dot"></span><span class="name">SaaS Health</span><span class="desc">A check-up for software businesses.</span><span class="soon">soon</span></span></li>
-        <li><span class="item"><span class="dot"></span><span class="name">H100 datacenters</span><span class="desc">Notes on GPU compute as an asset.</span><span class="soon">soon</span></span></li>
-        <li><span class="item"><span class="dot"></span><span class="name">Astrologie &amp; astronomie</span><span class="desc">A blog on the sky, both ways of reading it.</span><span class="soon">soon</span></span></li>
-      </ul>
-    </section>
-
-    <section class="reveal" style="--d:380">
-      <h2>Articles</h2>
-      <ul>
-        <li><a class="item" href="/wealth/">
-          <span class="dot"></span>
-          <span class="name">Wealth Architecture</span>
-          <span class="desc">Principles for building and keeping wealth.</span>
-          <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
-        </a></li>
-      </ul>
-    </section>
-
-    <section class="reveal" style="--d:460">
-      <h2>Other</h2>
-      <ul>
+        <li><span class="item"><span class="dot"></span><span class="name">Invest</span><span class="desc"></span><span class="tag">private equity</span></span></li>
+        <li><span class="item"><span class="dot"></span><span class="name">SaaS Health</span><span class="desc"></span><span class="tag">private equity</span></span></li>
+        <li><span class="item"><span class="dot"></span><span class="name">H100 datacenters</span><span class="desc"></span><span class="tag">private equity</span></span></li>
+        <li><span class="item"><span class="dot"></span><span class="name">Astro Blog</span><span class="desc">Astrology and astronomy.</span><span class="tag">soon</span></span></li>
         <li><a class="item" href="/bio/">
           <span class="dot"></span>
-          <span class="name">Superhuman challenge</span>
+          <span class="name">Bio Tracker</span>
           <span class="desc">An energized and performing life, tracked.</span>
           <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
         </a></li>
       </ul>
     </section>
 
-    <section class="reveal" style="--d:540">
+    <section class="reveal" style="--d:380">
       <h2>Domains, waiting</h2>
       <ul class="domains">
         <li>openrate.email</li>
@@ -218,7 +200,7 @@
       </ul>
     </section>
 
-    <footer class="reveal" style="--d:620">
+    <footer class="reveal" style="--d:460">
       <a href="https://x.com/jeremylasne" target="_blank" rel="noopener">@jeremylasne</a>
       <span class="sep" aria-hidden="true"></span>
       <a href="https://www.youtube.com/@jeremyfounder" target="_blank" rel="noopener">YouTube</a>
@@ -235,66 +217,119 @@
 <script>
 (function () {
   "use strict";
-  /* A slow sky. Stars drift; the ones near your pointer wake up and join
-     into a constellation. Click anywhere and one of them falls. */
+  /* A galaxy, drawn in ink. Two spiral arms of stars over a tinted haze,
+     turning slowly, three depths deep so it shifts as your pointer moves.
+     Stars near the pointer are pulled in and joined into a constellation.
+     Click and the nearest one falls. */
   var c = document.getElementById("sky"), x = c.getContext("2d");
   var still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var W, H, dpr, stars = [], shots = [], p = { x: -1e4, y: -1e4 }, t = 0;
-  var INK = "40,50,80", BLUE = "71,112,189", R = 150;
+  var W, H, stars = [], shots = [], rings = [], haze, Rg;
+  var p = { x: -1e4, y: -1e4 }, look = { x: 0, y: 0 }, t = 0, rot = 0, scroll = 0;
+  var INK = "40,50,80", BLUE = "71,112,189", VIOLET = "122,92,199", ROSE = "196,98,140";
+  var TINTS = [BLUE, VIOLET, ROSE], R = 160, A = 40, B = 0.32;
+
+  function rnd(a, b) { return a + Math.random() * (b - a); }
+  function gauss() { return (Math.random() + Math.random() + Math.random() - 1.5) / 1.5; }
+  function armAngle(r, arm) { return Math.log(r / A) / B + arm * Math.PI; }
 
   function size() {
-    dpr = Math.min(devicePixelRatio || 1, 2);
+    var dpr = Math.min(devicePixelRatio || 1, 2);
     W = innerWidth; H = innerHeight;
     c.width = W * dpr; c.height = H * dpr;
     x.setTransform(dpr, 0, 0, dpr, 0, 0);
-    var n = Math.round((W * H) / 9000);
+    Rg = Math.hypot(W, H) * 0.5;
+
     stars = [];
-    for (var i = 0; i < n; i++) stars.push({
-      x: Math.random() * W, y: Math.random() * H,
-      r: .6 + Math.random() * 1.4,
-      vx: (Math.random() - .5) * .08, vy: (Math.random() - .5) * .08,
-      ph: Math.random() * 6.28, w: 0
-    });
+    var n = Math.round((W * H) / 2200);
+    for (var i = 0; i < n; i++) {
+      var r, th, u;
+      if (Math.random() < 0.78) {
+        u = Math.pow(Math.random(), 0.6);
+        r = A + u * Rg;
+        th = armAngle(r, i % 2) + gauss() * 0.28 * (0.25 + u);
+      } else {
+        r = Math.sqrt(Math.random()) * Rg * 1.1; th = Math.random() * 6.28;
+      }
+      var z = rnd(0.35, 1), big = Math.random() < 0.07;
+      stars.push({
+        r: r, th: th, z: z,
+        s: (big ? rnd(1.8, 3) : rnd(0.8, 1.7)) * z,
+        col: big ? TINTS[i % 3] : INK,
+        a: big ? rnd(0.6, 0.9) : rnd(0.35, 0.7),
+        ph: Math.random() * 6.28, w: 0, x: 0, y: 0
+      });
+    }
+
+    haze = document.createElement("canvas");
+    var S = Math.ceil(Rg * 2.4); haze.width = haze.height = S;
+    var hx = haze.getContext("2d"), cx = S / 2;
+    function blob(px, py, rad, col, al) {
+      var g = hx.createRadialGradient(px, py, 0, px, py, rad);
+      g.addColorStop(0, "rgba(" + col + "," + al + ")"); g.addColorStop(1, "rgba(" + col + ",0)");
+      hx.fillStyle = g; hx.fillRect(px - rad, py - rad, rad * 2, rad * 2);
+    }
+    blob(cx, cx, Rg * 0.38, BLUE, 0.26);
+    for (var k = 0; k < 24; k++) {
+      var uk = k / 24, rk = A + uk * Rg * 0.95, tk = armAngle(rk, k % 2);
+      blob(cx + Math.cos(tk) * rk, cx + Math.sin(tk) * rk * 0.8, 70 + uk * 150, TINTS[k % 3], 0.11);
+    }
   }
 
   function frame() {
-    t += .016;
+    t += 0.016;
+    if (!still) {
+      rot += 0.00035;
+      var tx = p.x > -1e3 ? (p.x - W / 2) / W : 0, ty = p.y > -1e3 ? (p.y - H / 2) / H : 0;
+      look.x += (tx - look.x) * 0.04; look.y += (ty - look.y) * 0.04;
+    }
+    var CX = W / 2, CY = H * 0.46 - scroll * 0.08;
     x.clearRect(0, 0, W, H);
-    var near = [];
-    for (var i = 0; i < stars.length; i++) {
-      var s = stars[i];
-      if (!still) {
-        s.x += s.vx; s.y += s.vy;
-        if (s.x < -5) s.x = W + 5; else if (s.x > W + 5) s.x = -5;
-        if (s.y < -5) s.y = H + 5; else if (s.y > H + 5) s.y = -5;
-      }
-      var dx = s.x - p.x, dy = s.y - p.y, d = Math.hypot(dx, dy);
+
+    x.save();
+    x.translate(CX - look.x * 30, CY - look.y * 30); x.rotate(rot * 0.6);
+    x.drawImage(haze, -haze.width / 2, -haze.height / 2);
+    x.restore();
+
+    var near = [], i, j;
+    for (i = 0; i < stars.length; i++) {
+      var s = stars[i], an = s.th + rot;
+      var bx = CX + Math.cos(an) * s.r - look.x * 60 * s.z;
+      var by = CY + Math.sin(an) * s.r * 0.8 - look.y * 60 * s.z;
+      var dx = p.x - bx, dy = p.y - by, d = Math.hypot(dx, dy) || 1;
       var goal = d < R ? 1 - d / R : 0;
-      s.w += (goal - s.w) * .08;
-      if (s.w > .02) near.push(s);
-      if (!still && s.w > .3) { s.x += dx / d * s.w * .35; s.y += dy / d * s.w * .35; }
-      var tw = .55 + .45 * Math.sin(t * 1.3 + s.ph);
+      s.w += (goal - s.w) * 0.1;
+      s.x = bx + dx * s.w * 0.55; s.y = by + dy * s.w * 0.55;
+      if (s.w > 0.04) near.push(s);
+      var tw = still ? 1 : 0.65 + 0.35 * Math.sin(t * 1.5 + s.ph);
       x.beginPath();
-      x.arc(s.x, s.y, s.r + s.w * 1.2, 0, 6.28);
-      x.fillStyle = "rgba(" + (s.w > .05 ? BLUE : INK) + "," + (.22 * tw + s.w * .7) + ")";
+      x.arc(s.x, s.y, s.s + s.w * 1.4, 0, 6.28);
+      x.fillStyle = "rgba(" + (s.w > 0.08 ? BLUE : s.col) + "," + Math.min(1, s.a * tw + s.w * 0.6) + ")";
       x.fill();
     }
-    for (i = 0; i < near.length; i++) for (var j = i + 1; j < near.length; j++) {
+    x.lineWidth = 1;
+    for (i = 0; i < near.length; i++) for (j = i + 1; j < near.length; j++) {
       var a = near[i], b = near[j], dd = Math.hypot(a.x - b.x, a.y - b.y);
-      if (dd < 110) {
+      if (dd < 100) {
         x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(b.x, b.y);
-        x.strokeStyle = "rgba(" + BLUE + "," + Math.min(a.w, b.w) * (1 - dd / 110) * .8 + ")";
-        x.lineWidth = 1; x.stroke();
+        x.strokeStyle = "rgba(" + BLUE + "," + Math.min(a.w, b.w) * (1 - dd / 100) * 0.8 + ")";
+        x.stroke();
       }
     }
+    for (i = rings.length - 1; i >= 0; i--) {
+      var rg = rings[i]; rg.life -= 0.025; rg.r += 3.2;
+      if (rg.life <= 0) { rings.splice(i, 1); continue; }
+      x.beginPath(); x.arc(rg.x, rg.y, rg.r, 0, 6.28);
+      x.strokeStyle = "rgba(" + BLUE + "," + rg.life * 0.5 + ")"; x.stroke();
+    }
+    x.lineWidth = 1.5;
     for (i = shots.length - 1; i >= 0; i--) {
-      var sh = shots[i]; sh.life -= .02;
+      var sh = shots[i]; sh.life -= 0.02;
       if (sh.life <= 0) { shots.splice(i, 1); continue; }
       sh.x += sh.vx; sh.y += sh.vy;
-      var g = x.createLinearGradient(sh.x, sh.y, sh.x - sh.vx * 14, sh.y - sh.vy * 14);
+      var ex = sh.x - sh.vx * 14, ey = sh.y - sh.vy * 14;
+      var g = x.createLinearGradient(sh.x, sh.y, ex, ey);
       g.addColorStop(0, "rgba(" + BLUE + "," + sh.life + ")"); g.addColorStop(1, "rgba(" + BLUE + ",0)");
-      x.beginPath(); x.moveTo(sh.x, sh.y); x.lineTo(sh.x - sh.vx * 14, sh.y - sh.vy * 14);
-      x.strokeStyle = g; x.lineWidth = 1.5; x.stroke();
+      x.beginPath(); x.moveTo(sh.x, sh.y); x.lineTo(ex, ey); x.strokeStyle = g; x.stroke();
     }
     requestAnimationFrame(frame);
   }
@@ -310,11 +345,13 @@
       if (d < bd) { bd = d; best = stars[i]; }
     }
     if (!best) return;
-    var ang = Math.PI / 4 + (Math.random() - .5) * .6;
+    var ang = Math.PI / 4 + (Math.random() - 0.5) * 0.6;
     shots.push({ x: best.x, y: best.y, vx: Math.cos(ang) * 9, vy: Math.sin(ang) * 9, life: 1 });
-    best.x = Math.random() * W; best.y = -5;
+    rings.push({ x: p.x, y: p.y, r: 6, life: 1 });
+    best.th = Math.random() * 6.28; best.w = 0;
   }, { passive: true });
   addEventListener("pointerleave", function () { p.x = p.y = -1e4; });
+  addEventListener("scroll", function () { scroll = scrollY; }, { passive: true });
   addEventListener("resize", size);
   size(); frame();
 })();
