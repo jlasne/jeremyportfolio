@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>BrandMatch · Turn your audience into recurring revenue</title>
-<meta name="description" content="Ebooks and courses pay once. Your own app pays every month, and gives your audience a place they open every day. It takes 100,000 followers to start.">
+<meta name="description" content="Paid posts, ebooks and courses pay once. Your app pays every month, and gives your audience a place they open every day. It takes 100,000 followers to start.">
 <link rel="canonical" href="https://www.jeremylasne.com/brand/">
 <meta name="theme-color" content="#070a12">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -12,7 +12,7 @@
 <meta property="og:site_name" content="BrandMatch">
 <meta property="og:url" content="https://www.jeremylasne.com/brand/">
 <meta property="og:title" content="Turn your audience into recurring revenue.">
-<meta property="og:description" content="Ebooks and courses pay once. Your own app pays every month. It takes 100,000 followers to start.">
+<meta property="og:description" content="Paid posts, ebooks and courses pay once. Your app pays every month. It takes 100,000 followers to start.">
 <meta property="og:image" content="https://www.jeremylasne.com/og-image.png?v=2">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@jeremylasne">
@@ -137,9 +137,9 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .nav.stuck { background: rgba(7, 10, 18, 0.66); border-bottom-color: var(--rule); backdrop-filter: saturate(180%) blur(18px); -webkit-backdrop-filter: saturate(180%) blur(18px); }
 .nav.tone--light.stuck { background: rgba(250, 250, 252, 0.72); }
 .nav .shell { display: flex; align-items: center; gap: 18px; min-width: 0; }
-.brand { display: flex; align-items: center; gap: 9px; min-width: 0; font-size: 16px; font-weight: 800; letter-spacing: -0.02em; flex: none; }
-.brand-mark { width: 28px; height: 28px; flex: none; }
-.brand-mark svg { width: 100%; height: 100%; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; flex: none; color: var(--ink); }
+.brand-name { font-family: var(--display); font-weight: 500; font-size: 15px; letter-spacing: -0.03em; }
+.brand-mark { width: 30px; height: 30px; flex: none; color: var(--ink); }
 .nav-links { flex: 1; display: flex; gap: 30px; align-items: center; justify-content: center; }
 .nav-links a { font-size: 14.5px; font-weight: 600; color: var(--muted); white-space: nowrap; transition: color .2s, opacity .2s; }
 /* spotlight: the hovered link keeps its ink, the others step back */
@@ -176,8 +176,8 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .nav-menu-cta .btn--ghost { background: transparent; color: #0d1017; border-color: rgba(0,0,0,.2); }
 
 /* ── hero ───────────────────────────────────────────────────────────────── */
-.hero { position: relative; z-index: 10; background: #101420; }
-.hero-sticky { position: relative; overflow: clip; min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: clamp(98px, 13vh, 138px) 0 clamp(72px, 9vh, 96px); background: radial-gradient(60% 50% at 80% 0%, rgba(38, 62, 120, 0.42), transparent 70%), #070a12; }
+.hero { position: relative; z-index: 10; }
+.hero-sticky { position: relative; overflow: clip; min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: clamp(98px, 13vh, 138px) 0 clamp(72px, 9vh, 96px); background: radial-gradient(60% 50% at 80% 0%, rgba(38, 62, 120, 0.42), transparent 70%); }
 .hero-copy { position: relative; z-index: 6; width: min(94%, 1040px); margin: 0 auto; text-align: center; }
 .proof-pill { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 26px; padding: 6px 16px 6px 7px; border-radius: 100px; background: var(--card); border: 1px solid var(--rule-firm); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font-size: 13.5px; font-weight: 600; color: var(--muted); }
 .proof-pill .stk { display: inline-flex; }
@@ -198,16 +198,11 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .scr.on { opacity: 1; transform: none; }
 .phone--sm { width: min(220px, 56vw); border-radius: 40px; padding: 8px; }
 .phone--sm .phone-screen { border-radius: 32px; }
-/* the cue */
-.scroll-cue { position: absolute; z-index: 6; left: 50%; bottom: 28px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 7px; color: var(--ink); font-family: var(--mono); font-size: 9.5px; letter-spacing: .18em; text-transform: uppercase; opacity: .85; }
-.scroll-cue .ch { width: 22px; height: 34px; border-radius: 100px; border: 1.5px solid var(--rule-firm); position: relative; }
-.scroll-cue .ch::after { content: ""; position: absolute; left: 50%; top: 7px; width: 3px; height: 7px; border-radius: 3px; background: var(--ink); transform: translateX(-50%); animation: cue 1.6s var(--ease) infinite; }
-@keyframes cue { 0% { opacity: 0; transform: translate(-50%, 0); } 40% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, 11px); } }
 .hero-in { opacity: 0; animation: fadeUp .95s var(--ease) forwards; animation-delay: var(--d, 0ms); }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 
 /* ── trust: the apps, in a marquee a thumb can throw ────────────────────── */
-#trust { position: relative; background: #101420; padding: clamp(40px, 6vh, 64px) 0 clamp(36px, 5vh, 56px); z-index: 3; }
+#trust { position: relative; padding: clamp(24px, 4vh, 48px) 0 clamp(36px, 5vh, 56px); z-index: 3; }
 .tb-marquee { overflow: hidden; cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; -webkit-mask: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); mask: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); }
 .tb-marquee.grabbing { cursor: grabbing; }
 .tb-row { display: flex; gap: clamp(14px, 1.6vw, 22px); width: max-content; will-change: transform; }
@@ -263,15 +258,6 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .pin:not(.pinned) .pd-head, .pin:not(.pinned) .pd-cta { opacity: 1; transform: none; }
 .pin:not(.pinned) .pd-cta { pointer-events: auto; }
 
-/* ── the black bar, pulled 48px over the section below ──────────────────── */
-#ctabar { position: relative; z-index: 2; margin-top: clamp(40px, 6vw, 80px); background: #0d1017; color: #f2f3f7; padding: clamp(72px, 10vw, 128px) 0; }
-#ctabar .bar { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px; }
-#ctabar .bar-mark { width: 56px; height: 56px; flex: none; margin-bottom: 6px; }
-#ctabar .eyebrow { margin-bottom: 0; color: #989daa; }
-#ctabar h3 { font-family: var(--display); font-weight: 500; font-size: clamp(1.9rem, 5vw, 3.6rem); letter-spacing: -0.045em; text-transform: uppercase; line-height: 1.02; text-wrap: balance; }
-#ctabar p { font-size: clamp(1.02rem, 1.5vw, 1.2rem); line-height: 1.55; color: #a2a7b6; max-width: 40em; }
-#ctabar .btn { background: #f2f3f7; color: #0d1017; flex: none; margin-top: 8px; }
-
 /* ── how it works: a line down the middle that fills as you read ────────── */
 #how { padding-top: clamp(72px, 10vw, 124px); }
 .cv-list { position: relative; margin-top: clamp(40px, 5.5vh, 64px); display: flex; flex-direction: column; gap: clamp(2px, .8vh, 12px); }
@@ -317,7 +303,7 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .ac-col { width: clamp(120px, 14vw, 182px); margin: 0 auto; height: clamp(440px, 58vh, 520px); overflow: hidden; display: flex; align-items: center; justify-content: center; }
 .ac-track { display: flex; flex-direction: column; gap: clamp(14px, 1.6vw, 22px); width: 100%; will-change: transform; }
 .ac-mid { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 22px; padding: 40px 0; }
-.ac-mid .brand-mark { width: clamp(46px, 4.4vw, 60px); height: auto; }
+.ac-mid .brand-mark { width: clamp(46px, 4.4vw, 60px); height: clamp(46px, 4.4vw, 60px); }
 .ac-mid h2 { max-width: none; }
 .ac-mid .lede { color: #a2a7b6; }
 @media (max-width: 900px) { #asset { padding: clamp(44px, 6vh, 64px) 0; } .ac-col { display: none; } .ac-grid { grid-template-columns: 1fr; } }
@@ -346,7 +332,7 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .fn-box { position: relative; overflow: hidden; padding: clamp(64px, 9vw, 124px) 24px clamp(64px, 9vw, 112px); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 24px; background: #070a12; color: #f2f3f7; }
 .fn-rings { position: absolute; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(58% 72% at 50% 44%, transparent 57%, rgba(255,255,255,.08) 58%, transparent 61%), radial-gradient(72% 88% at 50% 44%, transparent 70%, rgba(255,255,255,.06) 71%, transparent 74%), radial-gradient(88% 104% at 50% 44%, transparent 82%, rgba(255,255,255,.04) 83%, transparent 86%); }
 .fn-box > * { position: relative; z-index: 1; }
-.fn-box .brand-mark { width: clamp(40px, 4vw, 56px); height: auto; }
+.fn-box .brand-mark { width: clamp(40px, 4vw, 56px); height: clamp(40px, 4vw, 56px); }
 .fn-box h2 { max-width: 16ch; margin: 0; }
 .fn-box .lede { color: #a2a7b6; }
 .fn-box .btn { background: #f2f3f7; color: #0d1017; }
@@ -372,7 +358,6 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
   .reveal, .reveal-up, .hero-in { opacity: 1; transform: none; }
-  .rotor-word::after, .scroll-cue { display: none; }
   .nav.away { transform: translate3d(0, 0, 0); }
 }
 
@@ -468,6 +453,8 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 </head>
 <body>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="bm-mark" viewBox="0 0 512 512"><path fill="currentColor" fill-rule="evenodd" d="M176 126a130 130 0 1 0 0 260 130 130 0 1 0 0-260zM256 126h140a60 60 0 0 1 60 60v140a60 60 0 0 1-60 60H256a60 60 0 0 1-60-60V186a60 60 0 0 1 60-60z"/></symbol></svg>
+
 <a class="skip" href="#main">Skip to content</a>
 
 <div class="page">
@@ -475,8 +462,8 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 <nav class="nav" id="nav">
   <div class="shell">
     <a class="brand" href="#top" aria-label="BrandMatch, back to top">
-      <img class="brand-mark" src="media/logo.svg" alt="" width="28" height="28">
-      <span>BrandMatch</span>
+      <svg class="brand-mark" aria-hidden="true"><use href="#bm-mark"/></svg>
+      <span class="brand-name">BrandMatch</span>
     </a>
     <div class="nav-links">
       <a href="#how">How it works</a>
@@ -521,15 +508,14 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
         <span class="ln">Turn your audience</span>
         <span class="ln">into recurring revenue.</span>
       </h1>
-      <p class="sub hero-in" style="--d:360ms">Ebooks and courses pay once. <b>Your own app pays every month</b>, and gives your audience a place they open every day. It takes <b>100,000 followers</b> to start.</p>
+      <p class="sub hero-in" style="--d:360ms">Paid posts, ebooks and courses pay once. <b>Your app pays every month</b>, and gives your audience a place they open every day. It takes <b>100,000 followers</b> to start.</p>
       <div class="btn-row hero-in" style="--d:520ms">
         <a class="btn" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call <span class="arr">&rarr;</span></a>
         <a class="btn btn--ghost" href="#how"><span class="btn-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.5v7l6-3.5z"/></svg></span>See how it works</a>
       </div>
     </div>
 
-    <p class="hero-trust" id="hero-trust"><span class="hero-in" style="--d:700ms"><b>Your own app</b> on both stores <i>&middot;</i> <b>Costs you nothing</b> <i>&middot;</i> <b>You keep posting</b></span></p>
-    <div class="scroll-cue" id="cue" aria-hidden="true"><span class="ch"></span>scroll</div>
+    <p class="hero-trust" id="hero-trust"><span class="hero-in" style="--d:700ms"><b>Your own app</b> <i>&middot;</i> <b>Costs you nothing</b> <i>&middot;</i> <b>You keep posting</b></span></p>
   </div>
 </section>
 
@@ -571,36 +557,25 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
   </div>
 </section>
 
-<!-- ── the bar ───────────────────────────────────────────────────────────── -->
-<section id="ctabar">
-  <div class="shell bar">
-    <img class="brand-mark bar-mark" src="media/logo.svg" alt="" width="56" height="56">
-    <span class="eyebrow">The one requirement</span>
-    <h3>100,000 followers or more.</h3>
-    <p>That is what it takes to work with us. From there, 20min tells us if there is an app in your audience.</p>
-    <a class="btn" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call <span class="arr">&rarr;</span></a>
-  </div>
-</section>
-
 <!-- ── how it works: the line fills as you read ─────────────────────────── -->
 <section class="band tone--light" id="how">
   <div class="shell">
     <div class="head head--center reveal-up">
       <span class="eyebrow">How it works</span>
       <h2 class="h-section xl">Your audience already told you what they want.</h2>
-      <p class="lede">The app is in their questions. We build it, run it, and upgrade it. You keep posting.</p>
+      <p class="lede">We make it, we keep it running. You keep posting.</p>
     </div>
 
     <div class="cv-list" id="cv-list">
       <div class="cv-row reveal-up">
         <div class="cv-txt">
           <div class="cv-no">01</div>
-          <h3 class="cv-tt">Their questions</h3>
-          <div class="cv-li">The comments and DMs that repeat. Send them over.</div>
-          <div class="cv-li">Any platform, any language.</div>
+          <h3 class="cv-tt">The idea is already in your audience</h3>
+          <div class="cv-li">It sits in the comments and DMs that repeat.</div>
+          <div class="cv-li">Send them over. Any platform, any language.</div>
         </div>
         <div class="cv-fig"><div class="fig chat">
-          <span class="who">Comments, this week</span>
+          <span class="who">Their comments, this week</span>
           <div class="b">Is there an app for this? I keep losing your videos.</div>
           <div class="b">Where is the full routine? The 60 seconds is never enough.</div>
           <div class="b">Can you make a checklist I can tick off?</div>
@@ -611,24 +586,24 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
       <div class="cv-row rev reveal-up">
         <div class="cv-txt">
           <div class="cv-no">02</div>
-          <h3 class="cv-tt">One idea, picked together</h3>
-          <div class="cv-li">A 20min call. The idea comes from what they ask, matched to your content.</div>
-          <div class="cv-li">The split is agreed on that call.</div>
+          <h3 class="cv-tt">We make it, and polish it with you</h3>
+          <div class="cv-li">Your name, your look, your say on every screen.</div>
+          <div class="cv-li">One 20min call to start. The split is agreed there.</div>
         </div>
         <div class="cv-fig"><div class="fig sheet">
-          <span class="k">The match</span>
-          <div class="r"><span>A place to keep every video</span><em>They can already do this</em></div>
-          <div class="r pick"><span>The full routine, day by day, ticked off</span><em>The app</em></div>
-          <div class="r"><span>A community</span><em>Later</em></div>
+          <span class="k">Polished with you</span>
+          <div class="r pick"><span>Your name and your icon</span><em>Done</em></div>
+          <div class="r pick"><span>Your colours, your words</span><em>Done</em></div>
+          <div class="r"><span>Every screen, your say</span><em>With you</em></div>
         </div></div>
       </div>
 
       <div class="cv-row reveal-up">
         <div class="cv-txt">
           <div class="cv-no">03</div>
-          <h3 class="cv-tt">We build, run and upgrade the app</h3>
-          <div class="cv-li">Design, both stores, subscriptions, support. Every update, on us.</div>
-          <div class="cv-li">Your name and your icon, from the first screen.</div>
+          <h3 class="cv-tt">We maintain it, at no cost</h3>
+          <div class="cv-li">Updates, both stores, support: on us, every month.</div>
+          <div class="cv-li">We are partners. We split what it earns.</div>
         </div>
         <div class="cv-fig"><div class="fig fig--phone">
           <div class="phone phone--sm"><div class="phone-screen"><div class="scr on"><div class="mock">
@@ -645,16 +620,16 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
       <div class="cv-row rev reveal-up">
         <div class="cv-txt">
           <div class="cv-no">04</div>
-          <h3 class="cv-tt">Your audience pays every month</h3>
-          <div class="cv-li">You post once a week. They subscribe. We split what it earns.</div>
-          <div class="cv-li">The app is yours, and an app that pays every month can be sold.</div>
+          <h3 class="cv-tt">Your audience pays you every month</h3>
+          <div class="cv-li">Nothing changes in what you do. The app fits your bio, your posts and your replies, because we made it for them.</div>
+          <div class="cv-li">The app is yours.</div>
         </div>
         <div class="cv-fig"><div class="fig asset">
-          <div class="r"><span>Owner</span><b>You</b></div>
-          <div class="r"><span>Stores</span><b>App Store, Google Play</b></div>
-          <div class="r"><span>Pays</span><b>Every month</b></div>
-          <div class="r"><span>Your part</span><b>One post a week</b></div>
-          <div class="r"><span>Can be sold</span><b>Yes</b></div>
+          <div class="r"><span>Your bio</span><b>One link</b></div>
+          <div class="r"><span>Your posts</span><b>Same rhythm</b></div>
+          <div class="r"><span>Your replies</span><b>&ldquo;It is in the app&rdquo;</b></div>
+          <div class="r"><span>Every month</span><b>They pay you</b></div>
+          <div class="r"><span>The app</span><b>Yours</b></div>
         </div></div>
       </div>
 
@@ -669,7 +644,7 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
     <div class="ac-grid">
       <div class="ac-col"><div class="ac-track" id="ac-l"></div></div>
       <div class="ac-mid">
-        <img class="brand-mark" src="media/logo.svg" alt="" width="28" height="28">
+        <svg class="brand-mark" aria-hidden="true"><use href="#bm-mark"/></svg>
         <h2 class="h-section">A post pays once. An app pays every month.</h2>
         <a class="btn" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call <span class="arr">&rarr;</span></a>
       </div>
@@ -697,7 +672,7 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 <section id="final">
   <div class="fn-box">
     <div class="fn-rings" aria-hidden="true"></div>
-    <img class="brand-mark" src="media/logo.svg" alt="" width="28" height="28">
+    <svg class="brand-mark" aria-hidden="true"><use href="#bm-mark"/></svg>
     <h2 class="h-section xl">20min for a life-changing collab.</h2>
     <p class="lede">Bring what you make and the thing your people keep asking you for. We find out if there is an app in it.</p>
     <div class="btn-row">
@@ -780,7 +755,8 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
       var H = document.documentElement.scrollHeight; if (!H) return;
       var zone = parseFloat(getComputedStyle(whatis).paddingTop) || 0, w0 = top(whatis);
       var anchors = [
-        [0,                 [ 16,  20,  32]],
+        [0,                 [  5,   7,  13]],
+        [top(document.getElementById('trust')), [ 12,  15,  24]],
         [w0,                [ 16,  20,  32]],
         [w0 + zone * .35,   [ 67,  74,  87]],
         [w0 + zone * .5,    [139, 145, 157]],
