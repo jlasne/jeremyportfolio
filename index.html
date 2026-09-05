@@ -104,6 +104,24 @@
     color: var(--ice-45); border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px;
   }
   span.item { cursor: default; }
+
+  /* ---- the fold: one row that opens into its list ---- */
+  .fold summary { cursor: pointer; list-style: none; }
+  .fold summary::-webkit-details-marker { display: none; }
+  .fold .chev { width: 16px; height: 16px; flex: none; fill: var(--ice-45); transition: transform .25s cubic-bezier(.22,1,.36,1), fill .2s; }
+  .fold[open] .chev { transform: rotate(180deg); }
+  @media (hover: hover) {
+    .fold summary:hover { background: rgba(234,244,251,.06); }
+    .fold summary:hover .name, .fold summary:hover .chev { color: var(--blue); fill: var(--blue); }
+  }
+  .fold summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .sub { padding: 0 0 8px 38px; }
+  .sub .item { padding: 7px 14px; gap: 10px; }
+  .sub .item::before { content: ""; width: 4px; height: 4px; border-radius: 50%; background: rgba(234,244,251,.3); flex: none; }
+  .sub .name { font-weight: 500; color: var(--ice-70); }
+  .sub li + li .item { border-top: 0; }
+  @keyframes foldIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+  .fold[open] .sub { animation: foldIn .25s ease both; }
   @media (hover: hover) {
     a.item:hover { background: rgba(234,244,251,.06); }
     a.item:hover .name { color: var(--blue); }
@@ -166,9 +184,19 @@
     <section class="reveal" style="--d:300">
       <h2>Personal</h2>
       <ul>
-        <li><span class="item"><span class="dot"></span><span class="name">SaaS Health</span><span class="tag">private equity</span></span></li>
-        <li><span class="item"><span class="dot"></span><span class="name">H100 datacenters</span><span class="tag">private equity</span></span></li>
-        <li><span class="item"><span class="dot"></span><span class="name">Astro Blog</span><span class="tag">private equity</span></span></li>
+        <li><details class="fold">
+          <summary class="item">
+            <span class="dot"></span>
+            <span class="name">Private equity</span>
+            <span class="desc">Three positions of my own.</span>
+            <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
+          </summary>
+          <ul class="sub">
+            <li><span class="item"><span class="name">SaaS Health</span></span></li>
+            <li><span class="item"><span class="name">H100 datacenters</span></span></li>
+            <li><span class="item"><span class="name">Astro Blog</span></span></li>
+          </ul>
+        </details></li>
         <li><a class="item" href="/bio/">
           <span class="dot"></span>
           <span class="name">Bio Tracker</span>
