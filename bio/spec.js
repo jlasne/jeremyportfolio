@@ -1,52 +1,48 @@
-/* jeremylasne.com/bio — the one place the content and the unlock rule live.
+/* jeremylasne.com/bio: the one place the content and the log rules live.
 
    Imported by the page (bio/index.html) and by the server
-   (overlap/convex/bio.ts), so the two can never disagree about which
-   habit unlocks on which day or what a saved number may look like. Plain
-   JavaScript on purpose: the page has no build step. */
+   (overlap/convex/bio.ts), so the two agree on which days exist, which
+   habits exist and what a saved number may look like. Plain JavaScript on
+   purpose: the page has no build step. */
 
 export const SPEC = {
-  /* Day 1 of the ramp. A local calendar date, daily resolution. */
+  /* Day 1 of the log. A local calendar date, daily resolution. */
   start: '2026-09-05',
-  rampDays: 15,
+  days: 15,
 
-  /* One flagship exercise per discipline, one number each. */
+  /* One flagship test per discipline, one number each. */
   exercises: [
     {
-      id: 'squat', discipline: 'Strength', name: 'Back Squat', protocol: '5 reps',
-      unit: 'kg', step: 2.5, max: 500, fallback: 100,
-      note: 'One lift that loads the whole body at once. Five reps proves strength that repeats.',
+      id: 'pullup', discipline: 'Strength', name: 'Pull-up', protocol: 'strict, one set',
+      unit: 'reps', step: 1, max: 100, fallback: 10,
+      note: 'Dead hang to chin over the bar, one set to failure. Reps per kilo of bodyweight is the strength number.',
     },
     {
-      id: 'zone2', discipline: 'Cardio', name: 'Zone 2', protocol: 'steady',
-      unit: 'min', step: 5, max: 600, fallback: 45,
-      note: '60 to 70% of max heart rate, held. Builds the base every other session draws on.',
+      id: 'swim', discipline: 'Cardio', name: 'Swim', protocol: '30 minutes',
+      unit: 'm', step: 25, max: 5000, fallback: 1200,
+      note: 'Meters covered in 30 minutes at one even pace. Water loads the heart with zero impact on the joints.',
     },
     {
-      id: 'sprint', discipline: 'Sprint', name: '30 / 10 Intervals', protocol: '30s on · 10s off',
-      unit: 'rounds', step: 1, max: 100, fallback: 8,
-      note: '30 seconds all out, 10 seconds off, counted until form breaks. Each extra round widens the top end.',
+      id: 'sprint', discipline: 'Sprint', name: '100 m', protocol: 'standing start',
+      unit: 's', step: 0.1, max: 60, fallback: 14,
+      note: 'One timed run on the track. The shortest test of top speed and power.',
     },
   ],
 
-  /* Logged from day 1, open on every day of the ramp. */
-  sleep: {
-    id: 'sleep', name: 'Sleep', protocol: 'last night',
-    unit: 'h', step: 0.25, max: 24, fallback: 7.5,
-    note: 'Logged from day 1, open on every day of the ramp. Sleep is the input the other numbers depend on.',
-  },
+  /* Hours slept, logged per day next to the habits. */
+  sleep: { unit: 'h', step: 0.25, max: 24 },
 
-  /* The ramp. A habit is dimmed and disabled until its day comes. */
+  /* The five habits. All five are open from day 1; the log is the ramp. */
   habits: [
-    { id: 'light', unlockDay: 1, name: 'Morning light & water',
+    { id: 'light', short: 'Light', name: 'Morning light & water',
       why: '10 minutes of daylight and 500 ml of water within 30 minutes of waking. Sets the body clock and replaces the water lost over 7 hours of sleep.' },
-    { id: 'walk', unlockDay: 6, name: 'Walk after eating',
+    { id: 'walk', short: 'Walk', name: 'Walk after eating',
       why: '10 to 15 minutes after each meal. Lowers the glucose spike, so the afternoon stays awake.' },
-    { id: 'collagen', unlockDay: 11, name: 'Collagen',
+    { id: 'collagen', short: 'Collagen', name: 'Collagen',
       why: '10 g a day for tendons and joints, the parts that fail first under load.' },
-    { id: 'vitc', unlockDay: 11, name: 'Vitamin C',
+    { id: 'vitc', short: 'Vit C', name: 'Vitamin C',
       why: 'Taken with the collagen. The body needs it to turn collagen into tissue.' },
-    { id: 'coffee', unlockDay: 11, name: 'Caffeine, coffee only',
+    { id: 'coffee', short: 'Coffee', name: 'Caffeine, coffee only',
       why: 'Coffee only, 90 minutes after waking, last cup before noon.' },
   ],
 };
@@ -61,25 +57,31 @@ const KEY = /^(\d{4})-(\d{2})-(\d{2})$/;
 const utcOf = key => { const m = KEY.exec(key); return m ? Date.UTC(+m[1], +m[2] - 1, +m[3]) : NaN; };
 export const isKey = key => typeof key === 'string' && !Number.isNaN(utcOf(key));
 
-/* Which day of the ramp a date is: 1 on the start date, never lower.
+/* Which day of the log a date is: 1 on the start date, 0 the day before.
    Whole-day arithmetic on the calendar parts, so DST cannot shift it. */
-export function dayOf(key = dateKey()) {
-  return Math.max(1, Math.floor((utcOf(key) - utcOf(SPEC.start)) / 86400000) + 1);
-}
+export const dayOf = key => Math.floor((utcOf(key) - utcOf(SPEC.start)) / 86400000) + 1;
 
-export const unlocked = (habit, day) => day >= habit.unlockDay;
-export const fullRhythm = day => day > SPEC.rampDays;
+/* The date of day n of the log, as a key. */
+export const keyOfDay = n => new Date(utcOf(SPEC.start) + (n - 1) * 86400000).toISOString().slice(0, 10);
 
 /* What a save may contain, decided once for both sides: every number
-   finite and inside its range, only known habits, and a locked habit is
-   off no matter what the page sent. */
-export function clean(input, day) {
+   finite and inside its range, only the days of the log up to today, only
+   known habits, sleep kept only when a number was given. */
+export function clean(input, today) {
   const num = (x, m) => {
+    if (x === '' || x == null) return undefined;
     const n = Number(x);
-    return Number.isFinite(n) ? Math.min(m.max, Math.max(0, Math.round(n * 100) / 100)) : m.fallback;
+    return Number.isFinite(n) ? Math.min(m.max, Math.max(0, Math.round(n * 100) / 100)) : undefined;
   };
-  const values = {}, habits = {};
-  for (const e of SPEC.exercises) values[e.id] = num(input?.values?.[e.id], e);
-  for (const h of SPEC.habits) habits[h.id] = unlocked(h, day) && input?.habits?.[h.id] === true;
-  return { values, habits, sleep: num(input?.sleep, SPEC.sleep) };
+  const values = {}, log = {};
+  for (const e of SPEC.exercises) values[e.id] = num(input?.values?.[e.id], e) ?? e.fallback;
+  for (let n = 1; n <= SPEC.days; n++) {
+    const key = keyOfDay(n), day = input?.log?.[key];
+    if (key > today || !day || typeof day !== 'object') continue;
+    const habits = {};
+    for (const h of SPEC.habits) habits[h.id] = day.habits?.[h.id] === true;
+    const sleep = num(day.sleep, SPEC.sleep);
+    log[key] = sleep === undefined ? { habits } : { habits, sleep };
+  }
+  return { values, log };
 }

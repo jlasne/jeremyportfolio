@@ -150,9 +150,9 @@ export default defineSchema({
   bio: defineTable({
     key: v.string(),
     values: v.record(v.string(), v.number()),
-    habits: v.record(v.string(), v.boolean()),
-    sleep: v.number(),
-    /* the local date the habit checks were made for */
+    /* one entry per logged day, keyed YYYY-MM-DD */
+    log: v.record(v.string(), v.object({ habits: v.record(v.string(), v.boolean()), sleep: v.optional(v.number()) })),
+    /* the page's local date at the last save */
     today: v.string(),
     updatedAt: v.number(),
   }).index("by_key", ["key"]),

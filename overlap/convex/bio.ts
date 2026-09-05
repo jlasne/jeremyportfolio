@@ -1,18 +1,18 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
-import { clean, dayOf, isKey } from "../../bio/spec.js";
+import { clean, dayOf, dateKey, isKey } from "../../bio/spec.js";
 
 /**
- * jeremylasne.com/bio — one document, read by everyone, written by one person.
+ * jeremylasne.com/bio: one document, read by everyone, written by one person.
  *
  * The page renders the fallbacks from bio/spec.js and then patches in what is
  * here. A write carries the passphrase set as BIO_PASSPHRASE in the Convex
  * dashboard; there are no accounts because there is exactly one author. What
- * a write may contain — ranges, known habits, which of them are still locked
- * today — is decided by `clean` in the same spec file the page uses.
+ * a write may contain (number ranges, the fifteen days of the log up to today,
+ * the known habits) is decided by `clean` in the same spec file the page uses.
  */
-const KEY = "v1";
+const KEY = "v2";
 
 function mustBeJeremy(passphrase: string) {
   const want = process.env.BIO_PASSPHRASE;
@@ -21,7 +21,7 @@ function mustBeJeremy(passphrase: string) {
 }
 
 const pub = (d: Omit<Doc<"bio">, "_id" | "_creationTime">) => ({
-  values: d.values, habits: d.habits, sleep: d.sleep, today: d.today, updatedAt: d.updatedAt,
+  values: d.values, log: d.log, today: d.today, updatedAt: d.updatedAt,
 });
 const current = (ctx: { db: any }) =>
   ctx.db.query("bio").withIndex("by_key", (q: any) => q.eq("key", KEY)).unique() as Promise<Doc<"bio"> | null>;
@@ -44,18 +44,16 @@ export const unlock = query({
 export const save = mutation({
   args: {
     passphrase: v.string(),
-    /* the page's local date: the habit checks belong to that day */
+    /* the page's local date: days after it are refused */
     today: v.string(),
     values: v.record(v.string(), v.number()),
-    habits: v.record(v.string(), v.boolean()),
-    sleep: v.number(),
+    log: v.record(v.string(), v.object({ habits: v.record(v.string(), v.boolean()), sleep: v.optional(v.number()) })),
   },
   handler: async (ctx, { passphrase, today, ...input }) => {
     mustBeJeremy(passphrase);
     if (!isKey(today)) throw new Error("Send the day as YYYY-MM-DD");
-    const day = dayOf(today);
-    if (Math.abs(day - dayOf()) > 1) throw new Error("Your clock and the server disagree by more than a day");
-    const doc = { key: KEY, ...clean(input, day), today, updatedAt: Date.now() };
+    if (Math.abs(dayOf(today) - dayOf(dateKey())) > 1) throw new Error("Your clock and the server disagree by more than a day");
+    const doc = { key: KEY, ...clean(input, today), today, updatedAt: Date.now() };
     const old = await current(ctx);
     if (old) await ctx.db.replace(old._id, doc);
     else await ctx.db.insert("bio", doc);
