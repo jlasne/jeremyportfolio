@@ -339,6 +339,12 @@ button.btn { cursor: pointer; font-family: inherit; }
 }
 .nav.stuck .nav-progress { opacity: 1; }
 
+/* The header is the one element every page shares. Named here and on
+   /brand, it holds still while the rest of the page crossfades between
+   the two, so a click from one to the other never flashes white. */
+@view-transition { navigation: auto; }
+.nav { view-transition-name: site-nav; }
+
 /* ── hero ───────────────────────────────────────────────────────────────── */
 
 /* the proof cards close the hero now, so it no longer needs the full

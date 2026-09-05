@@ -811,7 +811,7 @@ td code { font-family: var(--mono); font-size: 12px; color: var(--ink); }
           <tr><td class="n"><a href="#p18">P18</a></td><td><b>Button hovers</b></td><td>Hover</td><td class="t">.22s, arrow +3px, lift &minus;2px</td><td><span class="chip chip--here">Already here</span></td><td class="w">Arrow +4px, shadow lift, press to .975.</td></tr>
           <tr><td class="n"><a href="#p19">P19</a></td><td><b>Named tabs, sliding pill</b></td><td>Tap</td><td class="t">.45s crossfade</td><td><span class="chip chip--adapt">Adapt</span></td><td class="w">5 dots become 5 names.</td></tr>
           <tr><td class="n"><a href="#p03">P20</a></td><td><b>Ambient tone per scene</b></td><td>Scroll</td><td class="t">.6s</td><td><span class="chip chip--adapt">Adapt</span></td><td class="w">Lightness moves. Colour stays in the phone.</td></tr>
-          <tr><td class="n"><a href="#p21">P21</a></td><td><b>Cross page view transition</b></td><td>Navigate</td><td class="t">2 rules</td><td><span class="chip chip--steal">Steal</span></td><td class="w">The nav stays put between pages.</td></tr>
+          <tr><td class="n"><a href="#p21">P21</a></td><td><b>Cross page view transition</b></td><td>Navigate</td><td class="t">2 rules</td><td><span class="chip chip--steal">Steal</span></td><td class="w">The nav stays put between pages. Live on both pages.</td></tr>
           <tr><td class="n"><a href="#p22">P22</a></td><td><b>Rounded seams, overlap bar</b></td><td>Layout</td><td class="t">84px radius, &minus;48px</td><td><span class="chip chip--skip">Skip</span></td><td class="w">The ramp exists to remove seams.</td></tr>
           <tr><td class="n"><a href="#p03">P23</a></td><td><b>Pointer tilt, lerped</b></td><td>Pointer</td><td class="t">&plusmn;11&deg;, &plusmn;15&deg;, 8% per frame</td><td><span class="chip chip--here">Already here</span></td><td class="w">Landing: &plusmn;7&deg;, &plusmn;12&deg;, .5s ease.</td></tr>
           <tr><td class="n">P24</td><td><b>Reduced motion</b></td><td>Setting</td><td class="t">Everything off</td><td><span class="chip chip--here">Already here</span></td><td class="w">Same rule, same result.</td></tr>
@@ -868,15 +868,15 @@ td code { font-family: var(--mono); font-size: 12px; color: var(--ink); }
       <div class="study-grid">
       <article class="study rise" id="p21">
         <div class="study-head"><span class="mono">P21</span><h4>Cross page view transition</h4><span class="chip chip--src">Passion.io</span><span class="chip chip--steal">Steal</span></div>
-        <dl class="spec"><div><dt>Trigger</dt><dd>Navigate</dd></div><div><dt>Cost</dt><dd>2 rules</dd></div><div><dt>Needs</dt><dd>Both pages opt in</dd></div></dl>
+        <dl class="spec"><div><dt>Trigger</dt><dd>Navigate</dd></div><div><dt>Cost</dt><dd>2 rules per page</dd></div><div><dt>State</dt><dd>Live on / and /brand</dd></div></dl>
         <div class="demo" style="padding:22px">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start">
             <div style="border-radius:14px;border:1px solid var(--rule);background:var(--card);padding:10px"><div style="height:22px;border-radius:980px;background:var(--ink);margin-bottom:10px"></div><div style="height:54px;border-radius:8px;background:var(--bg-sunk);margin-bottom:6px"></div><div style="height:26px;border-radius:8px;background:var(--bg-sunk)"></div><p class="mono" style="margin-top:10px">/ the pitch</p></div>
             <div style="border-radius:14px;border:1px solid var(--rule);background:var(--card);padding:10px"><div style="height:22px;border-radius:980px;background:var(--ink);margin-bottom:10px"></div><div style="height:26px;border-radius:8px;background:var(--bg-sunk);margin-bottom:6px"></div><div style="height:54px;border-radius:8px;background:var(--bg-sunk)"></div><p class="mono" style="margin-top:10px">/brand this study</p></div>
           </div>
-          <p style="margin-top:14px;font-size:13.5px;color:var(--muted)">The black bar is the same element on both pages. It holds still while the body crossfades. This page opts in; the landing page needs the same 2 rules.</p>
+          <p style="margin-top:14px;font-size:13.5px;color:var(--muted)">The black bar is the same element on both pages. It holds still while the body crossfades. Both pages opt in: click Back to the pitch and watch the header hold.</p>
         </div>
-        <p class="why"><b>For jeremylasne.com:</b> a reader who clicks Brand from the pitch keeps the header and loses the flash. The landing page carries zero of it today.</p>
+        <p class="why"><b>For jeremylasne.com:</b> a reader moving between the pitch and this page keeps the header and loses the white flash. Live on both pages.</p>
       </article>
 
       <article class="study rise" id="b02" style="--d:90ms">
@@ -1289,12 +1289,12 @@ td code { font-family: var(--mono); font-size: 12px; color: var(--ink); }
     <div class="head head--center rise">
       <span class="eyebrow"><i></i>What ships first</span>
       <h2 class="h-section">Ten steals, in the order they pay back.</h2>
-      <p class="lede">Cost is rules and lines. Two are live on this page already.</p>
+      <p class="lede">Cost is rules and lines. Three are live already.</p>
     </div>
     <ol class="ship rise" style="--d:90ms">
       <li><b>Film grain</b><span>1 rule &middot; live here</span></li>
       <li><b>Nav spotlight</b><span>2 rules &middot; live here</span></li>
-      <li><b>View transition</b><span>2 rules on each page</span></li>
+      <li><b>View transition</b><span>2 rules on each page &middot; live</span></li>
       <li><b>Starting-style entries</b><span>3 rules</span></li>
       <li><b>Sentinel nav, CTA in the bar</b><span>1 element, 8 lines</span></li>
       <li><b>Carousel cooldown</b><span>2 timers</span></li>
