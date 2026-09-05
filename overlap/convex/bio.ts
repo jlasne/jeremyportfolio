@@ -9,8 +9,10 @@ import { clean, dayOf, dateKey, isKey } from "../../bio/spec.js";
  * The page renders the fallbacks from bio/spec.js and then patches in what is
  * here. A write carries the passphrase set as BIO_PASSPHRASE in the Convex
  * dashboard; there are no accounts because there is exactly one author. What
- * a write may contain (number ranges, the fifteen days of the log up to today,
- * the known habits) is decided by `clean` in the same spec file the page uses.
+ * a write may contain (the fifteen days of the log up to today, the known
+ * habits, number ranges) is decided by `clean` in the same spec file the page
+ * uses. One entry per day: the habit checks, hours slept, and the result of
+ * each training session done that day.
  */
 const KEY = "v2";
 
@@ -21,7 +23,7 @@ function mustBeJeremy(passphrase: string) {
 }
 
 const pub = (d: Omit<Doc<"bio">, "_id" | "_creationTime">) => ({
-  values: d.values, log: d.log, today: d.today, updatedAt: d.updatedAt,
+  log: d.log, today: d.today, updatedAt: d.updatedAt,
 });
 const current = (ctx: { db: any }) =>
   ctx.db.query("bio").withIndex("by_key", (q: any) => q.eq("key", KEY)).unique() as Promise<Doc<"bio"> | null>;
@@ -46,8 +48,11 @@ export const save = mutation({
     passphrase: v.string(),
     /* the page's local date: days after it are refused */
     today: v.string(),
-    values: v.record(v.string(), v.number()),
-    log: v.record(v.string(), v.object({ habits: v.record(v.string(), v.boolean()), sleep: v.optional(v.number()) })),
+    log: v.record(v.string(), v.object({
+      habits: v.record(v.string(), v.boolean()),
+      sleep: v.optional(v.number()),
+      train: v.optional(v.record(v.string(), v.number())),
+    })),
   },
   handler: async (ctx, { passphrase, today, ...input }) => {
     mustBeJeremy(passphrase);

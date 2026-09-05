@@ -10,21 +10,22 @@ export const SPEC = {
   start: '2026-09-05',
   days: 15,
 
-  /* One flagship test per discipline, one number each. */
+  /* One test per discipline, logged per session. The card shows the best
+     result so far, or the target until the first session. */
   exercises: [
     {
       id: 'pullup', discipline: 'Strength', name: 'Pull-up', protocol: 'strict, one set',
-      unit: 'reps', step: 1, max: 100, fallback: 10,
+      unit: 'reps', step: 1, max: 100, best: 'max', target: 10,
       note: 'Dead hang to chin over the bar, one set to failure. Reps per kilo of bodyweight is the strength number.',
     },
     {
       id: 'swim', discipline: 'Cardio', name: 'Swim', protocol: '30 minutes',
-      unit: 'm', step: 25, max: 5000, fallback: 1200,
+      unit: 'm', step: 25, max: 5000, best: 'max', target: 1200,
       note: 'Meters covered in 30 minutes at one even pace. Water loads the heart with zero impact on the joints.',
     },
     {
       id: 'sprint', discipline: 'Sprint', name: '100 m', protocol: 'standing start',
-      unit: 's', step: 0.1, max: 60, fallback: 14,
+      unit: 's', step: 0.1, max: 60, best: 'min', target: 14,
       note: 'One timed run on the track. The shortest test of top speed and power.',
     },
   ],
@@ -64,24 +65,40 @@ export const dayOf = key => Math.floor((utcOf(key) - utcOf(SPEC.start)) / 864000
 /* The date of day n of the log, as a key. */
 export const keyOfDay = n => new Date(utcOf(SPEC.start) + (n - 1) * 86400000).toISOString().slice(0, 10);
 
-/* What a save may contain, decided once for both sides: every number
-   finite and inside its range, only the days of the log up to today, only
-   known habits, sleep kept only when a number was given. */
+/* What a save may contain, decided once for both sides: only the days of
+   the log up to today, only known habits, every number finite and inside
+   its range, sleep and each training result kept only when given. */
 export function clean(input, today) {
   const num = (x, m) => {
     if (x === '' || x == null) return undefined;
     const n = Number(x);
     return Number.isFinite(n) ? Math.min(m.max, Math.max(0, Math.round(n * 100) / 100)) : undefined;
   };
-  const values = {}, log = {};
-  for (const e of SPEC.exercises) values[e.id] = num(input?.values?.[e.id], e) ?? e.fallback;
+  const log = {};
   for (let n = 1; n <= SPEC.days; n++) {
     const key = keyOfDay(n), day = input?.log?.[key];
     if (key > today || !day || typeof day !== 'object') continue;
-    const habits = {};
+    const habits = {}, train = {};
     for (const h of SPEC.habits) habits[h.id] = day.habits?.[h.id] === true;
+    for (const e of SPEC.exercises) { const v = num(day.train?.[e.id], e); if (v !== undefined) train[e.id] = v; }
+    const entry = { habits };
     const sleep = num(day.sleep, SPEC.sleep);
-    log[key] = sleep === undefined ? { habits } : { habits, sleep };
+    if (sleep !== undefined) entry.sleep = sleep;
+    if (Object.keys(train).length) entry.train = train;
+    log[key] = entry;
   }
-  return { values, log };
+  return { log };
+}
+
+/* The headline number of a discipline: the best result in the log, and
+   how many sessions it came from. Zero sessions means the target. */
+export function bestOf(e, log) {
+  let best, sessions = 0;
+  for (const key in log) {
+    const v = log[key]?.train?.[e.id];
+    if (!Number.isFinite(v)) continue;
+    sessions++;
+    best = best === undefined || (e.best === 'min' ? v < best : v > best) ? v : best;
+  }
+  return { value: sessions ? best : e.target, sessions };
 }

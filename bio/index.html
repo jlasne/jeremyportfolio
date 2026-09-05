@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>Energized and performing life | Jeremy Lasne</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Daily health habits logged for 15 days, and one number per training discipline. Live.">
+<meta name="description" content="A 15-day challenge, logged daily: five habits, sleep, and every training session. Live.">
 <meta name="theme-color" content="#050b16">
 <meta name="color-scheme" content="dark">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23050b16'/%3E%3Ccircle cx='44' cy='20' r='8' fill='%23eaf4fb'/%3E%3Cpath d='M0 56 L14 30 L24 44 L36 22 L50 46 L64 36 V64 H0Z' fill='%235fa8d3'/%3E%3C/svg%3E">
@@ -12,7 +12,7 @@
 <meta property="og:site_name" content="Jeremy Lasne">
 <meta property="og:url" content="https://www.jeremylasne.com/bio/">
 <meta property="og:title" content="Energized and performing life">
-<meta property="og:description" content="Daily health habits logged for 15 days, and one number per training discipline. Live.">
+<meta property="og:description" content="A 15-day challenge, logged daily: five habits, sleep, and every training session. Live.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -59,11 +59,8 @@ button, input { font: inherit; color: inherit; }
 .scene .tw { animation: tw var(--t, 5s) ease-in-out var(--d, 0s) infinite; }
 @keyframes tw { 50% { opacity: .1; } }
 
-/* ── hero ───────────────────────────────────────────────────────────── */
-.hero {
-  position: relative; min-height: min(92svh, 880px); display: grid;
-  grid-template-rows: auto 1fr auto;
-}
+/* ── header: a challenge, one line a day ───────────────────────────── */
+.hero { position: relative; display: grid; grid-template-rows: auto auto; }
 .top {
   display: flex; justify-content: space-between; align-items: center;
   padding: calc(var(--pad) * .6) var(--pad);
@@ -76,20 +73,20 @@ button, input { font: inherit; color: inherit; }
 }
 .edit:hover { color: var(--ice); border-color: var(--blue); }
 .editing .edit { visibility: hidden; }
-.copy { grid-row: 3; padding: 0 var(--pad) calc(var(--pad) * 1.2); max-width: 1040px; }
-.kicker { color: var(--blue); margin: 0 0 18px; text-shadow: 0 1px 12px rgba(5, 11, 22, .8); }
+.copy { max-width: var(--w); width: 100%; margin: 0 auto; padding: clamp(28px, 6vh, 72px) var(--pad) clamp(8px, 2vw, 24px); }
+.kicker { color: var(--blue); margin: 0 0 14px; text-shadow: 0 1px 12px rgba(5, 11, 22, .8); }
 h1 {
-  margin: 0; font: 400 clamp(64px, 10.5vw, 136px)/.92 var(--display);
-  letter-spacing: .01em; text-wrap: balance; text-shadow: 0 2px 24px rgba(5, 11, 22, .6);
+  margin: 0; font: 400 clamp(44px, 6.5vw, 80px)/.94 var(--display);
+  letter-spacing: .01em; text-wrap: balance; max-width: 18ch; text-shadow: 0 2px 24px rgba(5, 11, 22, .6);
 }
 .lede {
-  margin: 22px 0 0; max-width: 46ch; font-size: clamp(16px, 1.6vw, 19px); color: var(--ice-70);
+  margin: 16px 0 0; max-width: 52ch; font-size: clamp(15px, 1.5vw, 17px); color: var(--ice-70);
   text-shadow: 0 1px 12px rgba(5, 11, 22, .8);
 }
 
 /* ── sections ───────────────────────────────────────────────────────── */
 main { max-width: var(--w); margin: 0 auto; padding: 0 var(--pad); }
-section { padding: clamp(56px, 9vw, 120px) 0 0; }
+section { padding: clamp(40px, 7vw, 96px) 0 0; }
 section:last-child { padding-bottom: clamp(40px, 6vw, 80px); }
 .head { margin-bottom: clamp(24px, 4vw, 40px); }
 .head .n { color: var(--blue); display: block; margin-bottom: 14px; }
@@ -136,19 +133,22 @@ h2 {
 }
 .future .tick { border-style: dashed; }
 .tick:not(:disabled) { cursor: pointer; box-shadow: 0 0 0 4px rgba(95, 168, 211, .14); }
-.s { display: flex; align-items: baseline; justify-content: flex-end; gap: 4px; }
-.sleep {
+.s { display: flex; align-items: baseline; justify-content: flex-end; gap: 4px; min-width: 0; }
+.val {
   width: 100%; min-width: 0; text-align: right; font: 400 24px/1 var(--display); letter-spacing: .02em;
   background: none; border: 0; border-bottom: 1px solid transparent; padding: 0; margin: 0;
   appearance: textfield; -moz-appearance: textfield; caret-color: var(--blue); pointer-events: none;
 }
-.sleep::-webkit-outer-spin-button, .sleep::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.sleep:invalid { box-shadow: none; }
+.val::-webkit-outer-spin-button, .val::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.val:invalid { box-shadow: none; }
 .s i { font: 500 10px/1 var(--mono); color: var(--blue); font-style: normal; }
-.sleep:placeholder-shown + i { visibility: hidden; }
-.editing .sleep:not([readonly]) + i { visibility: visible; }
-.editing .sleep:not([readonly]) { pointer-events: auto; border-bottom-color: var(--blue); }
-.editing .sleep:not([readonly]):focus { outline: none; border-bottom-color: var(--ice); }
+.val:placeholder-shown + i { visibility: hidden; }
+.editing .val:not([readonly]) + i { visibility: visible; }
+.editing .val:not([readonly]) { pointer-events: auto; border-bottom-color: var(--blue); }
+.editing .val:not([readonly]):focus { outline: none; border-bottom-color: var(--ice); }
+.log.train .lrow { grid-template-columns: 36px 108px repeat(var(--n), minmax(0, 1fr)); }
+.log.train .lrow.lhead .h { text-align: right; }
+.log.train { margin-top: 16px; }
 
 .legend { list-style: none; margin: 28px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px 32px; }
 .legend li { font-size: 14px; color: var(--ice-70); max-width: 44ch; }
@@ -165,18 +165,8 @@ h2 {
   color: var(--ice-45); margin-left: 10px;
 }
 .stat { display: flex; align-items: baseline; gap: 10px; margin: 18px 0 0; }
-.num {
-  font: 400 clamp(72px, 8vw, 104px)/1 var(--display); letter-spacing: .01em;
-  background: none; border: 0; border-bottom: 2px solid transparent; padding: 0; margin: 0;
-  width: auto; min-width: 1ch; color: var(--ice); pointer-events: none;
-  appearance: textfield; -moz-appearance: textfield; field-sizing: content; caret-color: var(--blue);
-  transition: border-color .2s;
-}
-@supports not (field-sizing: content) { .num { width: 3ch; } }
-.num::-webkit-outer-spin-button, .num::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.num:invalid { box-shadow: none; }
-.editing .num:not([readonly]) { pointer-events: auto; border-bottom-color: var(--blue); }
-.editing .num:not([readonly]):focus { outline: none; border-bottom-color: var(--ice); }
+.num { font: 400 clamp(72px, 8vw, 104px)/1 var(--display); letter-spacing: .01em; color: var(--ice); }
+.sub { display: block; margin-top: 6px; color: var(--ice-45); }
 .unit { color: var(--blue); font-size: 12px; text-transform: none; }
 .card .note { margin: 14px 0 0; font-size: 14px; color: var(--ice-70); max-width: 34ch; }
 
@@ -221,7 +211,6 @@ footer a:hover { color: var(--ice); }
 /* ── small screens ──────────────────────────────────────────────────── */
 @media (max-width: 860px) {
   .cards { grid-template-columns: 1fr; }
-  .hero { min-height: min(84svh, 760px); }
   .legend { grid-template-columns: 1fr; }
 }
 @media (max-width: 560px) {
@@ -233,7 +222,9 @@ footer a:hover { color: var(--ice); }
   .lrow .d { font-size: 10px; letter-spacing: .06em; }
   .tick { width: 18px; height: 18px; }
   .tick:checked::after { left: 5px; top: 1px; }
-  .sleep { font-size: 20px; }
+  .val { font-size: 20px; }
+  .log.train .lrow { grid-template-columns: 26px 54px repeat(var(--n), minmax(0, 1fr)); }
+  .log.train .lrow.lhead .h { writing-mode: horizontal-tb; transform: none; height: auto; margin: 0; text-align: right; }
   .row { flex-wrap: wrap; }
   .row label { width: 100%; }
   .pass { flex-basis: 100%; }
@@ -255,9 +246,9 @@ footer a:hover { color: var(--ice); }
     <button class="edit mono" id="edit" type="button">Edit</button>
   </nav>
   <div class="copy">
-    <p class="kicker mono">Daily health habits &amp; training performance</p>
+    <p class="kicker mono" id="kicker">15-day challenge</p>
     <h1>Energized and performing life.</h1>
-    <p class="lede">What I wake up to and what I train for. Five habits logged every day for 15 days, and three numbers.</p>
+    <p class="lede" id="lede">Five habits, sleep and every training session. One line a day, saved the day it happens.</p>
   </div>
 </header>
 
@@ -278,8 +269,10 @@ footer a:hover { color: var(--ice); }
       <span class="n mono">02</span>
       <h2>Performance</h2>
       <p class="tag">One number per discipline. Everything else is process.</p>
+      <p class="sum mono" id="tsum"></p>
     </div>
     <div class="cards" id="cards"></div>
+    <div class="log train" id="train" role="table" aria-label="Training log"></div>
   </section>
 </main>
 
@@ -296,7 +289,7 @@ footer a:hover { color: var(--ice); }
     <button class="btn solid" type="submit" id="unlock">Unlock</button>
   </form>
   <div class="row" id="tools" hidden>
-    <span class="status mono" id="status">Editing. Today and past days are open.</span>
+    <span class="status mono" id="status">Editing. Today and past days are open, in both logs.</span>
     <button class="btn" type="button" data-cancel>Cancel</button>
     <button class="btn solid" type="button" id="save">Save</button>
   </div>
@@ -305,7 +298,7 @@ footer a:hover { color: var(--ice); }
 <noscript><p style="text-align:center;padding:40px">The live numbers need JavaScript.</p></noscript>
 
 <script type="module">
-import { SPEC, dayOf, dateKey, keyOfDay, clean } from '/bio/spec.js';
+import { SPEC, dayOf, dateKey, keyOfDay, clean, bestOf } from '/bio/spec.js';
 
 /* ── the scene ──────────────────────────────────────────────────────────
    Five ridgelines by midpoint displacement, each with a snow cap: the
@@ -364,7 +357,7 @@ function scene() {
   grad('glow', [[0, '#eaf4fb', .5], ['.4', '#8fc0e2', .12], [1, '#5fa8d3', 0]], defs, { cx: .5, cy: .5, r: .5 });
   grad('mist', [[0, '#a6cbe4', .38], [1, '#a6cbe4', 0]], defs, { cx: .5, cy: .5, r: .5 });
   grad('fog', [[0, '#5fa8d3', 0], [1, '#5fa8d3', .22]], defs);
-  grad('fade', [[0, '#050b16', 0], ['.55', '#050b16', .3], [1, '#050b16', .95]], defs);
+  grad('fade', [[0, '#050b16', 0], ['.5', '#050b16', .38], [1, '#050b16', .95]], defs);
   const blur = (id, px) => { const f = el('filter', { id, x: '-5%', y: '-20%', width: '110%', height: '140%' }, defs); el('feGaussianBlur', { stdDeviation: (px * k).toFixed(2) }, f); };
   blur('b1', 4.5); blur('b2', 2);
   const grain = el('filter', { id: 'grain', x: 0, y: 0, width: '100%', height: '100%' }, defs);
@@ -378,7 +371,7 @@ function scene() {
     const s = el('circle', { cx: x.toFixed(1), cy: y.toFixed(1), r: (r * k).toFixed(2), fill: '#eaf4fb', opacity: (.25 + rnd() * .7).toFixed(2) });
     if (i % 4 === 0) { s.setAttribute('class', 'tw'); s.style.setProperty('--d', (rnd() * 6).toFixed(1) + 's'); s.style.setProperty('--t', (4 + rnd() * 4).toFixed(1) + 's'); }
   }
-  const mx = W * .74, my = H * (tall ? .12 : .19), mr = Math.min(W, H) * .032;
+  const mx = W * (tall ? .8 : .74), my = H * (tall ? .07 : .19), mr = Math.min(W, H) * .032;
   el('circle', { cx: mx, cy: my, r: mr * 10, fill: 'url(#glow)', opacity: .5 });
   el('circle', { cx: mx, cy: my, r: mr * 3.4, fill: 'url(#glow)' });
   el('circle', { cx: mx, cy: my, r: mr * 1.75, fill: 'none', stroke: '#eaf4fb', 'stroke-opacity': .14, 'stroke-width': mr * .08 });
@@ -404,20 +397,18 @@ addEventListener('resize', () => {
   timer = setTimeout(() => { const a = innerWidth / innerHeight; if (Math.abs(a - aspect) / aspect > .12) { aspect = a; scene(); } }, 200);
 });
 /* the page darkens the scene as it scrolls over it */
-const veil = document.getElementById('veil'), hero = document.querySelector('.hero');
-const dim = () => { veil.style.opacity = Math.min(1, scrollY / (hero.offsetHeight * .6)).toFixed(2); };
+const veil = document.getElementById('veil');
+const dim = () => { veil.style.opacity = Math.min(1, scrollY / (innerHeight * .45)).toFixed(2); };
 addEventListener('scroll', dim, { passive: true }); dim();
 
-/* ── the numbers ────────────────────────────────────────────────────── */
+/* ── the log ────────────────────────────────────────────────────────── */
 const API = 'https://fiery-eel-944.eu-west-1.convex.site/overlap';
 const $ = id => document.getElementById(id);
-const today = dateKey(), day = dayOf(today), N = SPEC.days, HABITS = SPEC.habits;
+const today = dateKey(), day = dayOf(today), N = SPEC.days, HABITS = SPEC.habits, TESTS = SPEC.exercises;
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const pretty = (key, dow) => { const [y, m, d] = key.split('-').map(Number); const t = new Date(y, m - 1, d); return (dow ? DOW[t.getDay()] + ' ' : '') + d + ' ' + MON[m - 1]; };
-
-const state = { values: {}, log: {}, updatedAt: 0 };
-for (const e of SPEC.exercises) state.values[e.id] = e.fallback;
+const state = { log: {}, updatedAt: 0 };
 
 function api(op, args) {
   const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 9000);
@@ -427,59 +418,71 @@ function api(op, args) {
           e => { clearTimeout(t); throw new Error(e.name === 'AbortError' ? 'The server timed out after 9 seconds' : 'The server is unreachable right now'); });
 }
 
-/* the log: one row per day, one cell per habit, sleep at the end */
-const log = $('log');
-log.style.setProperty('--n', HABITS.length);
-log.innerHTML = `<div class="lrow lhead" role="row"><span class="d">Day</span><span class="date">Date</span>${HABITS.map(h => `<span class="h" title="${h.name}">${h.short}</span>`).join('')}<span class="s">Sleep</span></div>`;
+/* the fifteen days, once, for both logs */
 const rows = [];
 for (let n = 1; n <= N; n++) {
-  const key = keyOfDay(n), when = key === today ? 'today' : key < today ? 'past' : 'future';
-  const r = document.createElement('div');
-  r.className = 'lrow ' + when; r.setAttribute('role', 'row');
-  r.innerHTML = `<span class="d">${String(n).padStart(2, '0')}</span><span class="date">${pretty(key, true)}</span>` +
-    HABITS.map(h => `<label class="cell"><input class="tick" type="checkbox" id="h-${key}-${h.id}" disabled aria-label="${h.name}, ${pretty(key)}"></label>`).join('') +
-    `<span class="s"><input class="sleep" id="s-${key}" type="number" inputmode="decimal" min="0" max="${SPEC.sleep.max}" step="${SPEC.sleep.step}" placeholder=" " readonly aria-label="Sleep, ${pretty(key)}"><i>${SPEC.sleep.unit}</i></span>`;
-  log.appendChild(r); rows.push({ key, when });
+  const key = keyOfDay(n);
+  rows.push({ n, key, when: key === today ? 'today' : key < today ? 'past' : 'future' });
 }
+const numCell = (id, m, label) => `<span class="s"><input class="val" id="${id}" type="number" inputmode="decimal" min="0" max="${m.max}" step="${m.step}" placeholder=" " readonly aria-label="${label}"><i>${m.unit}</i></span>`;
+function grid(host, cols, cell) {
+  host.style.setProperty('--n', cols.length);
+  host.innerHTML = `<div class="lrow lhead" role="row"><span class="d">Day</span><span class="date">Date</span>${cols.map(c => `<span class="h" title="${c.name}">${c.short || c.name}</span>`).join('')}${cell.tail ? `<span class="s">${cell.tail}</span>` : ''}</div>`;
+  for (const r of rows) {
+    const div = document.createElement('div');
+    div.className = 'lrow ' + r.when; div.setAttribute('role', 'row');
+    div.innerHTML = `<span class="d">${String(r.n).padStart(2, '0')}</span><span class="date">${pretty(r.key, true)}</span>` + cols.map(c => cell.one(r.key, c)).join('') + (cell.tail ? cell.last(r.key) : '');
+    host.appendChild(div);
+  }
+}
+grid($('log'), HABITS, {
+  one: (key, h) => `<label class="cell"><input class="tick" type="checkbox" id="h-${key}-${h.id}" disabled aria-label="${h.name}, ${pretty(key)}"></label>`,
+  tail: 'Sleep', last: key => numCell('s-' + key, SPEC.sleep, 'Sleep, ' + pretty(key)),
+});
+grid($('train'), TESTS, { one: (key, e) => numCell(`t-${key}-${e.id}`, e, `${e.name}, ${pretty(key)}`) });
 $('legend').innerHTML = HABITS.map(h => `<li><b>${h.name}<small>${h.short}</small></b>${h.why}</li>`).join('');
 
-/* one card, one number */
-function card(m, label) {
+/* one card, one number: the best result so far, or the target */
+TESTS.forEach((e, i) => {
   const c = document.createElement('div');
   c.className = 'card';
   c.innerHTML = `
-    <span class="label mono">${label}</span>
-    <p class="name">${m.name}<small>${m.protocol}</small></p>
-    <div class="stat">
-      <input class="num" id="n-${m.id}" type="number" inputmode="decimal" min="0" max="${m.max}" step="${m.step}" readonly aria-label="${m.name}, ${m.unit}">
-      <span class="unit mono">${m.unit}</span>
-    </div>
-    <p class="note">${m.note}</p>`;
-  return c;
-}
-SPEC.exercises.forEach((e, i) => $('cards').appendChild(card(e, `0${i + 1} · ${e.discipline}`)));
+    <span class="label mono">0${i + 1} · ${e.discipline}</span>
+    <p class="name">${e.name}<small>${e.protocol}</small></p>
+    <div class="stat"><span class="num" id="n-${e.id}"></span><span class="unit mono">${e.unit}</span></div>
+    <span class="sub mono" id="b-${e.id}"></span>
+    <p class="note">${e.note}</p>`;
+  $('cards').appendChild(c);
+});
 
 const badge = $('badge');
 badge.textContent = day < 1 ? 'Starts ' + pretty(keyOfDay(1)) : day <= N ? `Day ${day} of ${N}` : `${N} days logged`;
 badge.classList.toggle('full', day > N);
+$('kicker').textContent = `15-day challenge · ${pretty(keyOfDay(1))} to ${pretty(keyOfDay(N))}`.replace(/ /g, '\u00a0').replace(/\u00a0·\u00a0/g, ' · ') + (day >= 1 && day <= N ? ` · day\u00a0${day}` : '');
 
-/* the input is as wide as its number: natively where field-sizing exists, by ch elsewhere */
-const fit = CSS.supports('field-sizing', 'content') ? () => {} : inp => { inp.style.width = `calc(${Math.max(1, String(inp.value).length)}ch + .1em)`; };
+const val = (id, v) => { $(id).value = Number.isFinite(v) ? v : ''; };
 function paint() {
-  for (const e of SPEC.exercises) { const i = $('n-' + e.id); i.value = state.values[e.id]; fit(i); }
+  const done = Math.min(N, Math.max(0, day));
+  let checks = 0, hours = 0, nights = 0, sessions = 0;
   for (const r of rows) {
     const d = state.log[r.key];
     for (const h of HABITS) $(`h-${r.key}-${h.id}`).checked = !!d?.habits?.[h.id];
-    $('s-' + r.key).value = Number.isFinite(d?.sleep) ? d.sleep : '';
-  }
-  const done = Math.min(N, Math.max(0, day));
-  let checks = 0, hours = 0, nights = 0;
-  for (let n = 1; n <= done; n++) {
-    const d = state.log[keyOfDay(n)]; if (!d) continue;
+    val('s-' + r.key, d?.sleep);
+    for (const e of TESTS) val(`t-${r.key}-${e.id}`, d?.train?.[e.id]);
+    if (r.n > done || !d) continue;
     for (const h of HABITS) if (d.habits?.[h.id]) checks++;
     if (Number.isFinite(d.sleep)) { hours += d.sleep; nights++; }
+    if (d.train && Object.keys(d.train).length) sessions++;
   }
   $('sum').textContent = done ? `${checks} of ${done * HABITS.length} checks` + (nights ? ` · ${(hours / nights).toFixed(1)} h sleep on average` : '') : `${N} days, ${HABITS.length} habits, one line a day`;
+  const counts = [];
+  for (const e of TESTS) {
+    const b = bestOf(e, state.log);
+    $('n-' + e.id).textContent = b.value;
+    $('b-' + e.id).textContent = b.sessions ? `Best of ${b.sessions} ${b.sessions === 1 ? 'session' : 'sessions'}` : 'Target';
+    counts.push(`${e.name.toLowerCase()} ${b.sessions}`);
+  }
+  $('tsum').textContent = done ? `${sessions} of ${done} ${done === 1 ? 'day' : 'days'} trained · sessions: ${counts.join(', ')}` : `${TESTS.length} tests, logged per session`;
   const when = state.updatedAt ? new Date(state.updatedAt) : null;
   $('updated').textContent = !when ? '' :
     dateKey(when) === today ? 'Updated today' :
@@ -488,13 +491,11 @@ function paint() {
 }
 function apply(doc) {
   if (!doc) return;
-  for (const e of SPEC.exercises) if (Number.isFinite(doc.values?.[e.id])) state.values[e.id] = doc.values[e.id];
   state.log = doc.log && typeof doc.log === 'object' ? doc.log : {};
   state.updatedAt = doc.updatedAt || 0;
 }
 paint();
 api('bio.get').then(doc => { apply(doc); paint(); }).catch(() => {});
-document.querySelectorAll('.num').forEach(i => i.addEventListener('input', () => fit(i)));
 
 /* ── editing ────────────────────────────────────────────────────────── */
 const bar = $('bar'), gate = $('gate'), tools = $('tools'), pass = $('pass'), status = $('status');
@@ -505,14 +506,14 @@ const say = (t, bad) => { status.textContent = t; status.classList.toggle('bad',
 
 function open(editing) {
   document.body.classList.toggle('editing', editing);
-  for (const e of SPEC.exercises) $('n-' + e.id).readOnly = !editing;
   for (const r of rows) {
     const shut = !editing || r.when === 'future';
     for (const h of HABITS) $(`h-${r.key}-${h.id}`).disabled = shut;
     $('s-' + r.key).readOnly = shut;
+    for (const e of TESTS) $(`t-${r.key}-${e.id}`).readOnly = shut;
   }
   bar.hidden = !editing; gate.hidden = editing; tools.hidden = !editing;
-  if (editing) { say('Editing. Today and past days are open.'); (document.querySelector('.lrow.today .tick') || $('n-' + SPEC.exercises[0].id)).focus(); }
+  if (editing) { say('Editing. Today and past days are open, in both logs.'); (document.querySelector('.lrow.today .tick') || document.querySelector('.lrow.past .tick'))?.focus(); }
 }
 $('edit').addEventListener('click', () => {
   if (remembered()) return open(true);
@@ -532,11 +533,13 @@ async function save() {
   const log = {};
   for (const r of rows) {
     if (r.when === 'future') continue;
-    const habits = Object.fromEntries(HABITS.map(h => [h.id, $(`h-${r.key}-${h.id}`).checked]));
+    const entry = { habits: Object.fromEntries(HABITS.map(h => [h.id, $(`h-${r.key}-${h.id}`).checked])), train: {} };
     const s = $('s-' + r.key).value;
-    log[r.key] = s === '' ? { habits } : { habits, sleep: Number(s) };
+    if (s !== '') entry.sleep = Number(s);
+    for (const e of TESTS) { const v = $(`t-${r.key}-${e.id}`).value; if (v !== '') entry.train[e.id] = Number(v); }
+    log[r.key] = entry;
   }
-  const draft = clean({ values: Object.fromEntries(SPEC.exercises.map(e => [e.id, $('n-' + e.id).value])), log }, today);
+  const draft = clean({ log }, today);
   $('save').disabled = true; say('Saving…');
   try {
     const doc = await api('bio.save', { passphrase: remembered(), today, ...draft });
@@ -551,7 +554,7 @@ $('save').addEventListener('click', save);
 addEventListener('keydown', ev => {
   if (!document.body.classList.contains('editing')) return;
   if (ev.key === 'Escape') cancel();
-  if (ev.key === 'Enter' && /num|sleep/.test(ev.target.className)) { ev.preventDefault(); save(); }
+  if (ev.key === 'Enter' && ev.target.classList.contains('val')) { ev.preventDefault(); save(); }
 });
 </script>
 </body>

@@ -149,9 +149,15 @@ export default defineSchema({
      decided in bio/spec.js, which the page imports too. */
   bio: defineTable({
     key: v.string(),
-    values: v.record(v.string(), v.number()),
-    /* one entry per logged day, keyed YYYY-MM-DD */
-    log: v.record(v.string(), v.object({ habits: v.record(v.string(), v.boolean()), sleep: v.optional(v.number()) })),
+    /* kept from an earlier shape; nothing writes it now */
+    values: v.optional(v.record(v.string(), v.number())),
+    /* one entry per logged day, keyed YYYY-MM-DD: habit checks, hours
+       slept, and the result of each training session done that day */
+    log: v.record(v.string(), v.object({
+      habits: v.record(v.string(), v.boolean()),
+      sleep: v.optional(v.number()),
+      train: v.optional(v.record(v.string(), v.number())),
+    })),
     /* the page's local date at the last save */
     today: v.string(),
     updatedAt: v.number(),
