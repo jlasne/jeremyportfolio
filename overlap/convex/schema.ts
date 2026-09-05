@@ -157,6 +157,7 @@ export default defineSchema({
       habits: v.record(v.string(), v.boolean()),
       sleep: v.optional(v.number()),
       train: v.optional(v.record(v.string(), v.number())),
+      note: v.optional(v.string()),
     })),
     /* the page's local date at the last save */
     today: v.string(),

@@ -139,8 +139,17 @@ h2 {
 .editing .val:not([readonly]) + i { visibility: visible; }
 .editing .val:not([readonly]) { pointer-events: auto; border-bottom-color: var(--blue); }
 .editing .val:not([readonly]):focus { outline: none; border-bottom-color: var(--ice); }
-.log.train .lrow { grid-template-columns: 124px minmax(0, 1fr) 132px; }
+.log.train .lrow { grid-template-columns: 124px minmax(0, 1fr) 150px 110px; }
 .log.train .lrow.lhead .h { text-align: left; }
+.res { display: contents; }
+.txt {
+  width: 100%; min-width: 0; background: none; border: 0; border-bottom: 1px solid transparent; padding: 0; margin: 0;
+  font: 400 15px/1.4 var(--sans); color: var(--ice); pointer-events: none;
+}
+.txt::placeholder { color: transparent; }
+.editing .txt:not([readonly]) { pointer-events: auto; border-bottom-color: var(--blue); }
+.editing .txt:not([readonly])::placeholder { color: var(--ice-45); }
+.editing .txt:not([readonly]):focus { outline: none; border-bottom-color: var(--ice); }
 .pick {
   appearance: none; -webkit-appearance: none; background: none; border: 0; border-bottom: 1px solid transparent;
   padding: 0; margin: 0; min-width: 0; width: 100%; font: 500 15px/1.4 var(--sans); color: var(--ice); pointer-events: none;
@@ -172,6 +181,14 @@ h2 {
 .sub { display: block; margin-top: 6px; color: var(--ice-45); }
 .unit { color: var(--blue); font-size: 12px; text-transform: none; }
 .card .note { margin: 14px 0 0; font-size: 14px; color: var(--ice-70); max-width: 34ch; }
+.spark { display: block; width: 100%; height: 72px; margin: 16px 0 0; overflow: visible; }
+.spark[hidden] { display: none; }
+.spark .base { stroke: rgba(234, 244, 251, .14); stroke-width: 1; }
+.spark .tgt { stroke: rgba(95, 168, 211, .45); stroke-width: 1; }
+.spark .ln { fill: none; stroke: rgba(95, 168, 211, .6); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.spark .pt { fill: var(--blue); stroke: #0b1a2b; stroke-width: 2; }
+.spark .pt.now { fill: var(--ice); }
+.spark text { font: 500 9.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; fill: var(--ice-45); }
 
 /* ── footer ─────────────────────────────────────────────────────────── */
 footer {
@@ -227,9 +244,12 @@ footer a:hover { color: var(--ice); }
   .tick { width: 18px; height: 18px; }
   .tick:checked::after { left: 5px; top: 1px; }
   .val { font-size: 20px; }
-  .log.train .lrow { grid-template-columns: 72px minmax(0, 1fr) 96px; }
+  .log.train .lrow { grid-template-columns: 72px minmax(0, 1fr) 104px; }
   .log.train .lrow.lhead .h { writing-mode: horizontal-tb; transform: none; height: auto; margin: 0; text-align: left; }
-  .pick { font-size: 13px; }
+  .res { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+  .lhead .res .h { display: none; }
+  .pick { font: 500 10px/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--blue); text-align: right; direction: rtl; }
+  .txt { font-size: 13px; }
   .row { flex-wrap: wrap; }
   .row label { width: 100%; }
   .pass { flex-basis: 100%; }
@@ -300,7 +320,7 @@ footer a:hover { color: var(--ice); }
 <noscript><p style="text-align:center;padding:40px">The live numbers need JavaScript.</p></noscript>
 
 <script type="module">
-import { SPEC, dateKey, shift, daysBetween, clean, bestOf } from '/bio/spec.js';
+import { SPEC, dateKey, shift, daysBetween, clean, bestOf, series } from '/bio/spec.js';
 
 /* ── the scene ──────────────────────────────────────────────────────────
    Five ridgelines by midpoint displacement, each with a snow cap: the
@@ -429,13 +449,12 @@ function api(op, args) {
 let rows = [], all = false;
 const first = () => Object.keys(state.log).filter(k => k <= today).sort()[0];
 const numCell = (id, m, label) => `<span class="s"><input class="val" id="${id}" type="number" inputmode="decimal" min="0" max="${m.max}" step="${m.step}" placeholder=" " readonly aria-label="${label}"><i>${m.unit}</i></span>`;
-function grid(host, cols, cell) {
-  host.style.setProperty('--n', cols.length);
-  host.innerHTML = `<div class="lrow lhead" role="row"><span class="date">Date</span>${cols.map(c => `<span class="h" title="${c.name}">${c.short || c.name}</span>`).join('')}${cell.tail ? `<span class="s">${cell.tail}</span>` : ''}</div>`;
+function grid(host, head, row) {
+  host.innerHTML = `<div class="lrow lhead" role="row"><span class="date">Date</span>${head}</div>`;
   for (const r of rows) {
     const div = document.createElement('div');
     div.className = 'lrow ' + r.when; div.setAttribute('role', 'row');
-    div.innerHTML = `<span class="date">${pretty(r.key, true)}</span>` + cols.map(c => cell.one(r.key, c)).join('') + (cell.tail ? cell.last(r.key) : '');
+    div.innerHTML = `<span class="date">${pretty(r.key, true)}</span>` + row(r.key);
     host.appendChild(div);
   }
 }
@@ -446,14 +465,13 @@ function build() {
   if (hidden) from = shift(today, 1 - SHOWN);
   rows = [];
   for (let k = today; k >= from; k = shift(k, -1)) rows.push({ key: k, when: k === today ? 'today' : 'past' });
-  grid($('log'), HABITS, {
-    one: (key, h) => `<label class="cell"><input class="tick" type="checkbox" id="h-${key}-${h.id}" disabled aria-label="${h.name}, ${pretty(key)}"></label>`,
-    tail: 'Sleep', last: key => numCell('s-' + key, SPEC.sleep, 'Sleep, ' + pretty(key)),
-  });
-  grid($('train'), [{ name: 'Test' }], {
-    one: key => `<span class="cell test"><select class="pick" id="p-${key}" disabled aria-label="Test, ${pretty(key)}"><option value=""></option>${TESTS.map(e => `<option value="${e.id}">${e.name}</option>`).join('')}</select></span>`,
-    tail: 'Result', last: key => numCell('t-' + key, TESTS[0], 'Result, ' + pretty(key)),
-  });
+  $('log').style.setProperty('--n', HABITS.length);
+  grid($('log'), HABITS.map(h => `<span class="h" title="${h.name}">${h.short}</span>`).join('') + '<span class="s">Sleep</span>',
+    key => HABITS.map(h => `<label class="cell"><input class="tick" type="checkbox" id="h-${key}-${h.id}" disabled aria-label="${h.name}, ${pretty(key)}"></label>`).join('') + numCell('s-' + key, SPEC.sleep, 'Sleep, ' + pretty(key)));
+  grid($('train'), '<span class="h">Session</span><span class="res"><span class="h">Test</span><span class="s">Result</span></span>',
+    key => `<input class="txt" id="w-${key}" type="text" maxlength="80" placeholder="Rest, or what was done" readonly aria-label="Session, ${pretty(key)}">` +
+      `<span class="res"><select class="pick" id="p-${key}" disabled aria-label="Test, ${pretty(key)}"><option value=""></option>${TESTS.map(e => `<option value="${e.id}">${e.name}</option>`).join('')}</select>` +
+      numCell('t-' + key, TESTS[0], 'Result, ' + pretty(key)) + '</span>');
   document.querySelectorAll('.pick').forEach(sel => sel.addEventListener('change', () => unit(sel.id.slice(2))));
   $('more').hidden = !hidden;
   $('more').textContent = `Earlier days · ${hidden} more`;
@@ -470,15 +488,42 @@ TESTS.forEach((e, i) => {
     <p class="name">${e.name}<small>${e.protocol}</small></p>
     <div class="stat"><span class="num" id="n-${e.id}"></span><span class="unit mono">${e.unit}</span></div>
     <span class="sub mono" id="b-${e.id}"></span>
+    <svg class="spark" id="k-${e.id}" hidden aria-hidden="true"></svg>
     <p class="note">${e.note}</p>`;
   $('cards').appendChild(c);
 });
 
 const val = (id, v) => { $(id).value = Number.isFinite(v) ? v : ''; };
+/* The curve: every result of the test in order, the target as a hairline,
+   the latest point in ice. Drawn for the card's own width. */
+function spark(e) {
+  const svg = $('k-' + e.id), pts = series(e, state.log);
+  svg.toggleAttribute('hidden', pts.length < 1);
+  if (pts.length < 1) return;
+  const W = Math.max(120, Math.round(svg.getBoundingClientRect().width) || 240), H = 72, L = 6, R = 6, T = 10, B = 22;
+  const vals = pts.map(p => p.v).concat(e.target);
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  if (hi === lo) { lo -= 1; hi += 1; }
+  const x = i => pts.length === 1 ? W / 2 : L + i * (W - L - R) / (pts.length - 1);
+  const y = v => T + (hi - v) / (hi - lo) * (H - T - B);
+  const best = bestOf(e, state.log).value;
+  const fmt = k => pretty(k);
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML =
+    `<line class="base" x1="0" x2="${W}" y1="${H - B + 6}" y2="${H - B + 6}"/>` +
+    `<line class="tgt" x1="0" x2="${W}" y1="${y(e.target).toFixed(1)}" y2="${y(e.target).toFixed(1)}"/>` +
+    (pts.length > 1 ? `<polyline class="ln" points="${pts.map((p, i) => x(i).toFixed(1) + ',' + y(p.v).toFixed(1)).join(' ')}"/>` : '') +
+    pts.map((p, i) => `<circle class="pt${i === pts.length - 1 ? ' now' : ''}" cx="${x(i).toFixed(1)}" cy="${y(p.v).toFixed(1)}" r="4"><title>${p.v} ${e.unit} · ${fmt(p.key)}</title></circle>`).join('') +
+    `<text x="0" y="${H - 2}">${fmt(pts[0].key)}</text>` +
+    (pts.length > 1 ? `<text x="${W}" y="${H - 2}" text-anchor="end">${fmt(pts[pts.length - 1].key)}</text>` : '') +
+    `<text x="${W}" y="${(y(e.target) - 4).toFixed(1)}" text-anchor="end">target ${e.target}</text>`;
+}
+let sparkTimer;
+addEventListener('resize', () => { clearTimeout(sparkTimer); sparkTimer = setTimeout(() => TESTS.forEach(spark), 200); });
 /* the result cell takes the unit, step and range of the chosen test */
 function unit(key) {
-  const e = TESTS.find(t => t.id === $('p-' + key).value) || TESTS[0], inp = $('t-' + key);
-  inp.max = e.max; inp.step = e.step; inp.nextElementSibling.textContent = e.unit;
+  const picked = $('p-' + key).value, e = TESTS.find(t => t.id === picked) || TESTS[0], inp = $('t-' + key);
+  inp.max = e.max; inp.step = e.step; inp.nextElementSibling.textContent = picked ? e.unit : '';
 }
 function paint() {
   for (const r of rows) {
@@ -488,6 +533,7 @@ function paint() {
     const done = TESTS.find(e => Number.isFinite(d?.train?.[e.id]));
     $('p-' + r.key).value = done ? done.id : '';
     unit(r.key); val('t-' + r.key, done ? d.train[done.id] : undefined);
+    $('w-' + r.key).value = d?.note || '';
   }
   /* the last seven days, today included */
   let checks = 0, hours = 0, nights = 0, trained = 0;
@@ -504,6 +550,7 @@ function paint() {
     $('n-' + e.id).textContent = b.value;
     $('b-' + e.id).textContent = b.sessions ? `Best of ${b.sessions} ${b.sessions === 1 ? 'session' : 'sessions'}` : 'Target';
     counts.push(`${e.short.toLowerCase()} ${b.sessions}`);
+    spark(e);
   }
   $('tsum').textContent = `Last 7 days · ${trained} ${trained === 1 ? 'day' : 'days'} trained · all sessions: ${counts.join(', ')}`;
   const when = state.updatedAt ? new Date(state.updatedAt) : null;
@@ -534,6 +581,7 @@ function open(editing) {
     $('s-' + r.key).readOnly = !editing;
     $('p-' + r.key).disabled = !editing;
     $('t-' + r.key).readOnly = !editing;
+    $('w-' + r.key).readOnly = !editing;
   }
   bar.hidden = !editing; gate.hidden = editing; tools.hidden = !editing;
   if (editing) { say('Editing. Every day shown is open, in both logs.'); document.querySelector('.lrow.today .tick')?.focus(); }
@@ -564,6 +612,8 @@ async function save() {
     if (s !== '') entry.sleep = Number(s);
     const test = $('p-' + r.key).value, v = $('t-' + r.key).value;
     if (test && v !== '') entry.train[test] = Number(v);
+    const note = $('w-' + r.key).value.trim();
+    if (note) entry.note = note;
     log[r.key] = entry;
   }
   const draft = clean({ log }, today);
@@ -581,7 +631,7 @@ $('save').addEventListener('click', save);
 addEventListener('keydown', ev => {
   if (!document.body.classList.contains('editing')) return;
   if (ev.key === 'Escape') cancel();
-  if (ev.key === 'Enter' && ev.target.classList.contains('val')) { ev.preventDefault(); save(); }
+  if (ev.key === 'Enter' && /\b(val|txt)\b/.test(ev.target.className)) { ev.preventDefault(); save(); }
 });
 </script>
 </body>

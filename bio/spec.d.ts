@@ -4,7 +4,7 @@ export interface Exercise {
   step: number; max: number; best: 'max' | 'min'; target: number; note: string;
 }
 export interface Habit { id: string; short: string; name: string; why: string }
-export interface Day { habits: Record<string, boolean>; sleep?: number; train?: Record<string, number> }
+export interface Day { habits: Record<string, boolean>; sleep?: number; train?: Record<string, number>; note?: string }
 export interface Payload { log: Record<string, Day> }
 export const SPEC: {
   exercises: Exercise[];
@@ -16,3 +16,4 @@ export function shift(key: string, n: number): string;
 export function daysBetween(from: string, to: string): number;
 export function clean(input: Partial<Payload> | undefined, today: string): Payload;
 export function bestOf(e: Exercise, log: Record<string, Day>): { value: number; sessions: number };
+export function series(e: Exercise, log: Record<string, Day>): { key: string; v: number }[];

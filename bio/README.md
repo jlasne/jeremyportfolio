@@ -35,8 +35,9 @@ Copy lives in `spec.js`: the why-text under each habit, the note under each
 number, units, steps and targets.
 
 Both logs are one row per day, today first, back to the first logged day.
-Health: five checks and hours slept. Performance: the result of each test
-done that day, blank when it was a rest day. Fourteen rows show; older days
+Health: five checks and hours slept. Performance: a free line for the
+session ("Rest" counts), and when a test was done, which one and its
+result. One test a day at most. Fourteen rows show; older days
 sit behind *Earlier days*. Every row shown is editable, so yesterday can be
 filled in. A new log shows today and yesterday.
 
@@ -45,7 +46,8 @@ page blurs it 16px and takes it down to 45% brightness, so a bright photo
 is fine.
 
 The three cards show the best result in the log and the number of sessions
-it came from. Before the first session they show the `target` from
+it came from, with the curve of every result under it, the target as a
+hairline. Before the first session they show the `target` from
 `spec.js`, labelled as such, so the page never shows dashes.
 
 ## Deploy

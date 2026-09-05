@@ -62,7 +62,8 @@ export const daysBetween = (from, to) => Math.round((utcOf(to) - utcOf(from)) / 
 
 /* What a save may contain, decided once for both sides: only days up to
    today, only known habits, every number finite and inside its range,
-   sleep and each training result kept only when given. */
+   sleep and the training result kept only when given, the session note
+   trimmed to 80 characters. */
 export function clean(input, today) {
   const num = (x, m) => {
     if (x === '' || x == null) return undefined;
@@ -82,6 +83,8 @@ export function clean(input, today) {
     const sleep = num(day.sleep, SPEC.sleep);
     if (sleep !== undefined) entry.sleep = sleep;
     if (Object.keys(train).length) entry.train = train;
+    const note = typeof day.note === 'string' ? day.note.trim().slice(0, 80) : '';
+    if (note) entry.note = note;
     log[key] = entry;
   }
   return { log };
@@ -99,3 +102,7 @@ export function bestOf(e, log) {
   }
   return { value: sessions ? best : e.target, sessions };
 }
+
+/* Every result of one test, oldest first, for the curve. */
+export const series = (e, log) =>
+  Object.keys(log).sort().map(key => ({ key, v: log[key]?.train?.[e.id] })).filter(p => Number.isFinite(p.v));

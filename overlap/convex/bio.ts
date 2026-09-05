@@ -51,6 +51,7 @@ export const save = mutation({
       habits: v.record(v.string(), v.boolean()),
       sleep: v.optional(v.number()),
       train: v.optional(v.record(v.string(), v.number())),
+      note: v.optional(v.string()),
     })),
   },
   handler: async (ctx, { passphrase, today, ...input }) => {
