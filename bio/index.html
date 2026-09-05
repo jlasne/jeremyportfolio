@@ -196,6 +196,8 @@ footer a:hover { color: var(--ice); }
 .row { max-width: var(--w); margin: 0 auto; display: flex; align-items: center; gap: 12px; }
 .row[hidden] { display: none; }
 .row .status { flex: 1; }
+#why { flex-basis: 100%; }
+#why[hidden] { display: none; }
 .row label { color: var(--ice-70); }
 .pass {
   flex: 1; min-width: 0; background: rgba(23, 61, 89, .35); border: 1px solid var(--line);
@@ -293,6 +295,7 @@ footer a:hover { color: var(--ice); }
     <input class="pass" id="pass" type="password" autocomplete="current-password" required>
     <button class="btn" type="button" data-cancel>Cancel</button>
     <button class="btn solid" type="submit" id="unlock">Unlock</button>
+    <span class="status mono bad" id="why" hidden></span>
   </form>
   <div class="row" id="tools" hidden>
     <span class="status mono" id="status">Editing. Every day shown is open, in both logs.</span>
@@ -406,6 +409,7 @@ addEventListener('resize', () => {
 const veil = document.getElementById('veil'), bg = document.getElementById('bg');
 const photo = () => document.body.classList.add('has-photo');
 if (bg.complete && bg.naturalWidth) photo(); else bg.addEventListener('load', photo);
+bg.addEventListener('error', () => { if (!bg.src.endsWith('.png')) bg.src = '/bio/bg.png'; });
 const dim = () => { veil.style.opacity = Math.min(1, scrollY / (innerHeight * .45)).toFixed(2); };
 addEventListener('scroll', dim, { passive: true }); dim();
 
@@ -531,13 +535,17 @@ function open(editing) {
 }
 $('edit').addEventListener('click', () => {
   if (remembered()) return open(true);
-  bar.hidden = false; gate.hidden = false; tools.hidden = true; pass.value = ''; pass.focus();
+  bar.hidden = false; gate.hidden = false; tools.hidden = true; $('why').hidden = true; pass.value = ''; pass.focus();
 });
 gate.addEventListener('submit', async ev => {
   ev.preventDefault();
-  const p = pass.value; $('unlock').disabled = true;
+  const p = pass.value; $('unlock').disabled = true; $('why').hidden = true;
   try { await api('bio.unlock', { passphrase: p }); remember(p); open(true); }
-  catch (e) { pass.classList.remove('shake'); void pass.offsetWidth; pass.classList.add('shake'); pass.select(); }
+  catch (e) {
+    pass.classList.remove('shake'); void pass.offsetWidth; pass.classList.add('shake'); pass.select();
+    $('why').textContent = /Unknown operation/.test(e.message) ? 'The server runs an older version. Pull the repository, then deploy the overlap folder.' : e.message;
+    $('why').hidden = false;
+  }
   $('unlock').disabled = false;
 });
 function cancel() { paint(); open(false); }
