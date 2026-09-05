@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Jeremy Lasne</title>
-<meta name="description" content="Founder. I build mobile apps and small internet businesses. BrandMatch, Kaught, TrustViews.">
+<meta name="description" content="I make mobile apps with influencers. BrandMatch, Kaught, TrustViews.">
 <link rel="canonical" href="https://www.jeremylasne.com/">
-<meta name="theme-color" content="#eef1f8">
+<meta name="theme-color" content="#050b16">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -14,7 +14,7 @@
 <meta property="og:site_name" content="Jeremy Lasne">
 <meta property="og:url" content="https://www.jeremylasne.com/">
 <meta property="og:title" content="Jeremy Lasne">
-<meta property="og:description" content="Founder. I build mobile apps and small internet businesses.">
+<meta property="og:description" content="I make mobile apps with influencers.">
 <meta property="og:image" content="https://www.jeremylasne.com/og-image.png?v=3">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@jeremylasne">
@@ -24,31 +24,30 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --ink: #1d2540;
-    --ink-soft: rgba(40, 50, 80, 0.62);
-    --ink-faint: rgba(40, 50, 80, 0.45);
-    --line: rgba(40, 50, 80, 0.08);
-    --accent: #4770bd;
-    --bg-0: #eef1f8;
-    --bg-1: #dde2ed;
+    --ink: #050b16;
+    --blue: #5fa8d3;
+    --ice: #eaf4fb;
+    --ice-70: rgba(234, 244, 251, .72);
+    --ice-45: rgba(234, 244, 251, .46);
+    --line: rgba(95, 168, 211, .18);
   }
 
-  html, body { min-height: 100%; }
+  html { background: var(--ink); color-scheme: dark; }
   body {
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: radial-gradient(ellipse at center, var(--bg-0) 0%, var(--bg-1) 100%) fixed;
-    color: var(--ink);
+    color: var(--ice);
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
+  ::selection { background: var(--blue); color: var(--ink); }
 
-  /* ---- sky ---- */
-  #sky {
-    position: fixed; inset: 0; z-index: 0;
-    width: 100%; height: 100%;
-    -webkit-mask-image: radial-gradient(ellipse 95% 100% at center, #000 0%, rgba(0,0,0,.95) 55%, rgba(0,0,0,.35) 85%, transparent 100%);
-    mask-image: radial-gradient(ellipse 95% 100% at center, #000 0%, rgba(0,0,0,.95) 55%, rgba(0,0,0,.35) 85%, transparent 100%);
+  /* ---- the ridge from /bio, blurred, and the snow over it ---- */
+  .bg {
+    position: fixed; top: -6%; left: -6%; width: 112%; height: 112%; z-index: 0; pointer-events: none;
+    object-fit: cover; object-position: 50% 42%;
+    filter: blur(16px) brightness(.45) saturate(.9);
   }
+  #snow { position: fixed; inset: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; }
 
   main {
     position: relative; z-index: 2;
@@ -56,37 +55,34 @@
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     padding: 64px 24px 48px;
   }
-  main::before {
-    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-    background: radial-gradient(ellipse 58% 68% at 50% 46%, rgba(238,241,248,.85) 0%, rgba(238,241,248,.45) 50%, transparent 80%);
-  }
 
   .col { width: 100%; max-width: 560px; display: flex; flex-direction: column; align-items: center; text-align: center; }
 
   @keyframes riseIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
   .reveal { animation: riseIn .7s cubic-bezier(.22,1,.36,1) both; animation-delay: calc(var(--d, 0) * 1ms); }
 
-  .avatar {
-    position: relative; width: 104px; height: 104px; margin-bottom: 26px;
-    border-radius: 50%;
-    display: grid; place-items: center;
-    background: var(--ink); color: #fff;
-    font-size: 34px; font-weight: 600; letter-spacing: -.03em;
-    box-shadow: 0 1px 2px rgba(30,41,82,.08), 0 12px 32px -8px rgba(54,94,167,.35);
-  }
-  .avatar::before {
+  .avatar-wrap { position: relative; margin-bottom: 26px; }
+  .avatar-wrap::before {
     content: ""; position: absolute; inset: -14px; border-radius: 50%; z-index: -1;
-    background: rgba(71,112,189,.38); filter: blur(30px);
+    background: rgba(95,168,211,.35); filter: blur(30px);
   }
+  .avatar {
+    position: relative; width: 104px; height: 104px;
+    border-radius: 50%; overflow: hidden;
+    display: grid; place-items: center;
+    background: #173d59; color: var(--ice);
+    font-size: 34px; font-weight: 600; letter-spacing: -.03em;
+    box-shadow: 0 0 0 1px rgba(234,244,251,.12), 0 12px 40px -8px rgba(95,168,211,.45);
+  }
+  .avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
 
   h1 { font-size: 30px; font-weight: 600; letter-spacing: -.025em; text-wrap: balance; }
-  .tagline { margin-top: 10px; font-size: 17px; line-height: 1.6; color: var(--ink-soft); max-width: 40ch; text-wrap: pretty; }
+  .tagline { margin-top: 10px; font-size: 17px; line-height: 1.6; color: var(--ice-70); max-width: 40ch; text-wrap: pretty; }
 
-  /* ---- sections ---- */
   section { width: 100%; margin-top: 40px; text-align: left; }
   h2 {
     font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-    color: var(--ink-faint); padding: 0 0 6px;
+    color: var(--ice-45); padding: 0 0 6px;
   }
   ul { list-style: none; }
   li + li .item { border-top: 1px solid var(--line); }
@@ -97,33 +93,27 @@
     text-decoration: none; color: inherit;
   }
   .item .logo { width: 24px; height: 24px; border-radius: 6px; flex: none; }
-  .item .dot {
-    width: 24px; height: 24px; flex: none; display: grid; place-items: center;
-  }
-  .item .dot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: rgba(40,50,80,.25); }
+  .item .dot { width: 24px; height: 24px; flex: none; display: grid; place-items: center; }
+  .item .dot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: rgba(234,244,251,.3); }
   .item .name { font-size: 16px; line-height: 24px; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; flex: none; }
-  .item .desc { font-size: 15px; line-height: 24px; color: var(--ink-soft); flex: 1 1 auto; min-width: 0; }
-  .item .arrow { width: 16px; height: 16px; flex: none; fill: rgba(40,50,80,.35); transition: transform .25s cubic-bezier(.22,1,.36,1), fill .2s; }
+  .item .desc { font-size: 15px; line-height: 24px; color: var(--ice-70); flex: 1 1 auto; min-width: 0; }
+  .item .arrow { width: 16px; height: 16px; flex: none; fill: var(--ice-45); transition: transform .25s cubic-bezier(.22,1,.36,1), fill .2s; }
   .item .tag {
-    flex: none; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
-    color: var(--ink-faint); border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px;
+    flex: none; margin-left: auto; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ice-45); border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px;
   }
   span.item { cursor: default; }
   @media (hover: hover) {
-    a.item:hover { background: rgba(255,255,255,.55); }
-    a.item:hover .name { color: var(--accent); }
-    a.item:hover .arrow { fill: var(--accent); transform: translate(2px,-2px); }
+    a.item:hover { background: rgba(234,244,251,.06); }
+    a.item:hover .name { color: var(--blue); }
+    a.item:hover .arrow { fill: var(--blue); transform: translate(2px,-2px); }
   }
-  a.item:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-  /* ---- domains ---- */
-  .domains { display: flex; flex-wrap: wrap; gap: 6px 16px; padding-top: 10px; }
-  .domains li { font-size: 14px; line-height: 1.6; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+  a.item:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
   footer { margin-top: 48px; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
-  footer a { font-size: 14px; font-weight: 500; color: var(--ink-faint); text-decoration: none; padding: 8px 10px; border-radius: 10px; }
-  @media (hover: hover) { footer a:hover { color: var(--accent); } }
-  footer .sep { width: 3px; height: 3px; border-radius: 50%; background: rgba(40,50,80,.25); }
+  footer a { font-size: 14px; font-weight: 500; color: var(--ice-45); text-decoration: none; padding: 8px 10px; border-radius: 10px; }
+  @media (hover: hover) { footer a:hover { color: var(--blue); } }
+  footer .sep { width: 3px; height: 3px; border-radius: 50%; background: rgba(234,244,251,.3); }
 
   @media (min-width: 640px) { h1 { font-size: 34px; } .tagline { font-size: 16px; } }
   @media (max-width: 520px) {
@@ -137,13 +127,16 @@
 </head>
 <body>
 
-<canvas id="sky" aria-hidden="true"></canvas>
+<img class="bg" src="bio/bg.jpg" alt="" fetchpriority="high">
+<canvas id="snow" aria-hidden="true"></canvas>
 
 <main>
   <div class="col">
-    <div class="avatar reveal" aria-hidden="true">JL</div>
+    <div class="avatar-wrap reveal">
+      <div class="avatar" aria-hidden="true">JL<img src="media/avatar.jpg" alt="" onerror="this.remove()"></div>
+    </div>
     <h1 class="reveal" style="--d:60">Jeremy Lasne</h1>
-    <p class="tagline reveal" style="--d:130">Founder. I build mobile apps and small internet businesses.</p>
+    <p class="tagline reveal" style="--d:130">I make mobile apps with influencers.</p>
 
     <section class="reveal" style="--d:220">
       <h2>Active Projects</h2>
@@ -172,10 +165,9 @@
     <section class="reveal" style="--d:300">
       <h2>Personal</h2>
       <ul>
-        <li><span class="item"><span class="dot"></span><span class="name">Invest</span><span class="desc"></span><span class="tag">private equity</span></span></li>
-        <li><span class="item"><span class="dot"></span><span class="name">SaaS Health</span><span class="desc"></span><span class="tag">private equity</span></span></li>
-        <li><span class="item"><span class="dot"></span><span class="name">H100 datacenters</span><span class="desc"></span><span class="tag">private equity</span></span></li>
-        <li><span class="item"><span class="dot"></span><span class="name">Astro Blog</span><span class="desc">Astrology and astronomy.</span><span class="tag">soon</span></span></li>
+        <li><span class="item"><span class="dot"></span><span class="name">SaaS Health</span><span class="tag">private equity</span></span></li>
+        <li><span class="item"><span class="dot"></span><span class="name">H100 datacenters</span><span class="tag">private equity</span></span></li>
+        <li><span class="item"><span class="dot"></span><span class="name">Astro Blog</span><span class="desc">Astrology and astronomy.</span><span class="tag">private equity</span></span></li>
         <li><a class="item" href="/bio/">
           <span class="dot"></span>
           <span class="name">Bio Tracker</span>
@@ -185,22 +177,7 @@
       </ul>
     </section>
 
-    <section class="reveal" style="--d:380">
-      <h2>Domains, waiting</h2>
-      <ul class="domains">
-        <li>openrate.email</li>
-        <li>startuphunt.io</li>
-        <li>bedata.me</li>
-        <li>beforescroll.app</li>
-        <li>tasu.ai</li>
-        <li>nom8.io</li>
-        <li>my-relations.app</li>
-        <li>closerswarm.com</li>
-        <li>claudeportfolio.com</li>
-      </ul>
-    </section>
-
-    <footer class="reveal" style="--d:460">
+    <footer class="reveal" style="--d:380">
       <a href="https://x.com/jeremylasne" target="_blank" rel="noopener">@jeremylasne</a>
       <span class="sep" aria-hidden="true"></span>
       <a href="https://www.youtube.com/@jeremyfounder" target="_blank" rel="noopener">YouTube</a>
@@ -217,141 +194,81 @@
 <script>
 (function () {
   "use strict";
-  /* A galaxy, drawn in ink. Two spiral arms of stars over a tinted haze,
-     turning slowly, three depths deep so it shifts as your pointer moves.
-     Stars near the pointer are pulled in and joined into a constellation.
-     Click and the nearest one falls. */
-  var c = document.getElementById("sky"), x = c.getContext("2d");
+  /* Snow in a strong wind. It comes in from the left in gusts and streaks
+     across; the pointer is a gust of its own, kicking up flakes as it moves
+     and swirling the ones it passes. */
+  var c = document.getElementById("snow"), x = c.getContext("2d");
   var still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var W, H, stars = [], shots = [], rings = [], haze, Rg;
-  var p = { x: -1e4, y: -1e4 }, look = { x: 0, y: 0 }, t = 0, rot = 0, scroll = 0;
-  var INK = "40,50,80", BLUE = "71,112,189", VIOLET = "122,92,199", ROSE = "196,98,140";
-  var TINTS = [BLUE, VIOLET, ROSE], R = 160, A = 40, B = 0.32;
+  var W, H, flakes = [], t = 0, p = { x: -1e4, y: -1e4, vx: 0, vy: 0, on: false };
+  var REACH = 170, MAX = 900;
 
-  function rnd(a, b) { return a + Math.random() * (b - a); }
-  function gauss() { return (Math.random() + Math.random() + Math.random() - 1.5) / 1.5; }
-  function armAngle(r, arm) { return Math.log(r / A) / B + arm * Math.PI; }
-
+  function flake(x0, y0, z, life) {
+    return { x: x0, y: y0, z: z, r: .6 + z * 1.6, vx: 0, vy: 0, ph: Math.random() * 6.28, a: .35 + z * .5, life: life };
+  }
   function size() {
     var dpr = Math.min(devicePixelRatio || 1, 2);
     W = innerWidth; H = innerHeight;
     c.width = W * dpr; c.height = H * dpr;
     x.setTransform(dpr, 0, 0, dpr, 0, 0);
-    Rg = Math.hypot(W, H) * 0.5;
-
-    stars = [];
-    var n = Math.round((W * H) / 2200);
-    for (var i = 0; i < n; i++) {
-      var r, th, u;
-      if (Math.random() < 0.78) {
-        u = Math.pow(Math.random(), 0.6);
-        r = A + u * Rg;
-        th = armAngle(r, i % 2) + gauss() * 0.28 * (0.25 + u);
-      } else {
-        r = Math.sqrt(Math.random()) * Rg * 1.1; th = Math.random() * 6.28;
-      }
-      var z = rnd(0.35, 1), big = Math.random() < 0.07;
-      stars.push({
-        r: r, th: th, z: z,
-        s: (big ? rnd(1.8, 3) : rnd(0.8, 1.7)) * z,
-        col: big ? TINTS[i % 3] : INK,
-        a: big ? rnd(0.6, 0.9) : rnd(0.35, 0.7),
-        ph: Math.random() * 6.28, w: 0, x: 0, y: 0
-      });
-    }
-
-    haze = document.createElement("canvas");
-    var S = Math.ceil(Rg * 2.4); haze.width = haze.height = S;
-    var hx = haze.getContext("2d"), cx = S / 2;
-    function blob(px, py, rad, col, al) {
-      var g = hx.createRadialGradient(px, py, 0, px, py, rad);
-      g.addColorStop(0, "rgba(" + col + "," + al + ")"); g.addColorStop(1, "rgba(" + col + ",0)");
-      hx.fillStyle = g; hx.fillRect(px - rad, py - rad, rad * 2, rad * 2);
-    }
-    blob(cx, cx, Rg * 0.38, BLUE, 0.26);
-    for (var k = 0; k < 24; k++) {
-      var uk = k / 24, rk = A + uk * Rg * 0.95, tk = armAngle(rk, k % 2);
-      blob(cx + Math.cos(tk) * rk, cx + Math.sin(tk) * rk * 0.8, 70 + uk * 150, TINTS[k % 3], 0.11);
-    }
+    flakes = [];
+    for (var n = Math.round((W * H) / 6500); n--;) flakes.push(flake(Math.random() * W, Math.random() * H, Math.random(), -1));
   }
 
   function frame() {
-    t += 0.016;
-    if (!still) {
-      rot += 0.00035;
-      var tx = p.x > -1e3 ? (p.x - W / 2) / W : 0, ty = p.y > -1e3 ? (p.y - H / 2) / H : 0;
-      look.x += (tx - look.x) * 0.04; look.y += (ty - look.y) * 0.04;
-    }
-    var CX = W / 2, CY = H * 0.46 - scroll * 0.08;
+    t += .016;
+    var wind = still ? 0 : 2.4 + Math.sin(t * .35) * 1.3 + Math.sin(t * 1.7) * .5 + Math.sin(t * 4.1) * .2;
     x.clearRect(0, 0, W, H);
+    x.strokeStyle = x.fillStyle = "#fff"; x.lineCap = "round";
+    p.vx *= .88; p.vy *= .88;
 
-    x.save();
-    x.translate(CX - look.x * 30, CY - look.y * 30); x.rotate(rot * 0.6);
-    x.drawImage(haze, -haze.width / 2, -haze.height / 2);
-    x.restore();
+    for (var i = flakes.length - 1; i >= 0; i--) {
+      var f = flakes[i];
+      var tvx = wind * (.45 + f.z) + Math.sin(t * 2 + f.ph) * .4;
+      var tvy = still ? 0 : .5 + f.z * 1.1 + Math.cos(t * 1.6 + f.ph) * .3;
+      var dx = f.x - p.x, dy = f.y - p.y, d = Math.hypot(dx, dy);
+      if (d < REACH) {
+        var k = (1 - d / REACH), ux = dx / (d || 1), uy = dy / (d || 1);
+        tvx += (p.vx * .4 + ux * 2.2 - uy * 2.4) * k;
+        tvy += (p.vy * .4 + uy * 2.2 + ux * 2.4) * k;
+      }
+      f.vx += (tvx - f.vx) * .08; f.vy += (tvy - f.vy) * .08;
+      f.x += f.vx; f.y += f.vy;
 
-    var near = [], i, j;
-    for (i = 0; i < stars.length; i++) {
-      var s = stars[i], an = s.th + rot;
-      var bx = CX + Math.cos(an) * s.r - look.x * 60 * s.z;
-      var by = CY + Math.sin(an) * s.r * 0.8 - look.y * 60 * s.z;
-      var dx = p.x - bx, dy = p.y - by, d = Math.hypot(dx, dy) || 1;
-      var goal = d < R ? 1 - d / R : 0;
-      s.w += (goal - s.w) * 0.1;
-      s.x = bx + dx * s.w * 0.55; s.y = by + dy * s.w * 0.55;
-      if (s.w > 0.04) near.push(s);
-      var tw = still ? 1 : 0.65 + 0.35 * Math.sin(t * 1.5 + s.ph);
-      x.beginPath();
-      x.arc(s.x, s.y, s.s + s.w * 1.4, 0, 6.28);
-      x.fillStyle = "rgba(" + (s.w > 0.08 ? BLUE : s.col) + "," + Math.min(1, s.a * tw + s.w * 0.6) + ")";
-      x.fill();
-    }
-    x.lineWidth = 1;
-    for (i = 0; i < near.length; i++) for (j = i + 1; j < near.length; j++) {
-      var a = near[i], b = near[j], dd = Math.hypot(a.x - b.x, a.y - b.y);
-      if (dd < 100) {
-        x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(b.x, b.y);
-        x.strokeStyle = "rgba(" + BLUE + "," + Math.min(a.w, b.w) * (1 - dd / 100) * 0.8 + ")";
-        x.stroke();
+      if (f.life > 0) { f.life -= .011; if (f.life <= 0) { flakes.splice(i, 1); continue; } }
+      else {
+        if (f.x > W + 20) { f.x = -20; f.y = Math.random() * H; }
+        else if (f.x < -30) f.x = W + 20;
+        if (f.y > H + 20) { f.y = -20; f.x = Math.random() * W; }
+        else if (f.y < -30) f.y = H + 20;
+      }
+      x.globalAlpha = f.a * (f.life > 0 ? Math.min(1, f.life * 3) : 1);
+      var sp = Math.hypot(f.vx, f.vy);
+      if (sp > 1.2) {
+        x.lineWidth = f.r * 1.7;
+        x.beginPath(); x.moveTo(f.x, f.y); x.lineTo(f.x - f.vx * 1.6, f.y - f.vy * 1.6); x.stroke();
+      } else {
+        x.beginPath(); x.arc(f.x, f.y, f.r, 0, 6.28); x.fill();
       }
     }
-    for (i = rings.length - 1; i >= 0; i--) {
-      var rg = rings[i]; rg.life -= 0.025; rg.r += 3.2;
-      if (rg.life <= 0) { rings.splice(i, 1); continue; }
-      x.beginPath(); x.arc(rg.x, rg.y, rg.r, 0, 6.28);
-      x.strokeStyle = "rgba(" + BLUE + "," + rg.life * 0.5 + ")"; x.stroke();
+
+    if (p.on && !still && flakes.length < MAX) {
+      var n = Math.min(7, Math.floor(Math.hypot(p.vx, p.vy) * .45) + (Math.random() < .45 ? 1 : 0));
+      while (n--) {
+        var a = Math.random() * 6.28, rr = Math.random() * 44, z = Math.random();
+        var nf = flake(p.x + Math.cos(a) * rr, p.y + Math.sin(a) * rr, z, 1);
+        nf.vx = p.vx * .5 + wind; nf.vy = p.vy * .5;
+        flakes.push(nf);
+      }
     }
-    x.lineWidth = 1.5;
-    for (i = shots.length - 1; i >= 0; i--) {
-      var sh = shots[i]; sh.life -= 0.02;
-      if (sh.life <= 0) { shots.splice(i, 1); continue; }
-      sh.x += sh.vx; sh.y += sh.vy;
-      var ex = sh.x - sh.vx * 14, ey = sh.y - sh.vy * 14;
-      var g = x.createLinearGradient(sh.x, sh.y, ex, ey);
-      g.addColorStop(0, "rgba(" + BLUE + "," + sh.life + ")"); g.addColorStop(1, "rgba(" + BLUE + ",0)");
-      x.beginPath(); x.moveTo(sh.x, sh.y); x.lineTo(ex, ey); x.strokeStyle = g; x.stroke();
-    }
-    requestAnimationFrame(frame);
+    x.globalAlpha = 1;
+    if (!still) requestAnimationFrame(frame);
   }
 
-  function move(e) { p.x = e.clientX; p.y = e.clientY; }
-  addEventListener("pointermove", move, { passive: true });
-  addEventListener("pointerdown", function (e) {
-    move(e);
-    if (still) return;
-    var best = null, bd = 1e9;
-    for (var i = 0; i < stars.length; i++) {
-      var d = Math.hypot(stars[i].x - p.x, stars[i].y - p.y);
-      if (d < bd) { bd = d; best = stars[i]; }
-    }
-    if (!best) return;
-    var ang = Math.PI / 4 + (Math.random() - 0.5) * 0.6;
-    shots.push({ x: best.x, y: best.y, vx: Math.cos(ang) * 9, vy: Math.sin(ang) * 9, life: 1 });
-    rings.push({ x: p.x, y: p.y, r: 6, life: 1 });
-    best.th = Math.random() * 6.28; best.w = 0;
+  addEventListener("pointermove", function (e) {
+    if (p.on) { p.vx = p.vx * .5 + (e.clientX - p.x) * .5; p.vy = p.vy * .5 + (e.clientY - p.y) * .5; }
+    p.x = e.clientX; p.y = e.clientY; p.on = true;
   }, { passive: true });
-  addEventListener("pointerleave", function () { p.x = p.y = -1e4; });
-  addEventListener("scroll", function () { scroll = scrollY; }, { passive: true });
+  addEventListener("pointerleave", function () { p.on = false; p.x = p.y = -1e4; p.vx = p.vy = 0; });
   addEventListener("resize", size);
   size(); frame();
 })();
