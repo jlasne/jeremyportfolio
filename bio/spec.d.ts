@@ -1,6 +1,6 @@
 /* Types for spec.js, so the Convex side can import it under tsc. */
 export interface Exercise {
-  id: string; discipline: string; name: string; protocol: string; unit: string;
+  id: string; discipline: string; name: string; short: string; protocol: string; unit: string;
   step: number; max: number; best: 'max' | 'min'; target: number; note: string;
 }
 export interface Habit { id: string; short: string; name: string; why: string }

@@ -10,17 +10,17 @@ export const SPEC = {
      result so far, or the target until the first session. */
   exercises: [
     {
-      id: 'pullup', discipline: 'Strength', name: 'Pull-up', protocol: 'strict, one set',
-      unit: 'reps', step: 1, max: 100, best: 'max', target: 10,
-      note: 'Dead hang to chin over the bar, one set to failure. Reps per kilo of bodyweight is the strength number.',
+      id: 'pullup', discipline: 'Strength', name: 'Weighted pull-up', short: 'Pull-up', protocol: '1 rep max',
+      unit: 'kg', step: 2.5, max: 200, best: 'max', target: 20,
+      note: 'One strict rep with the heaviest weight on the belt. Kilos added on top of bodyweight is the strength number.',
     },
     {
-      id: 'swim', discipline: 'Cardio', name: 'Swim', protocol: '30 minutes',
+      id: 'swim', discipline: 'Cardio', name: 'Swim', short: 'Swim', protocol: '30 minutes',
       unit: 'm', step: 25, max: 5000, best: 'max', target: 1200,
       note: 'Meters covered in 30 minutes at one even pace. Water loads the heart with zero impact on the joints.',
     },
     {
-      id: 'sprint', discipline: 'Sprint', name: '100 m', protocol: 'standing start',
+      id: 'sprint', discipline: 'Sprint', name: '100 m', short: '100 m', protocol: 'standing start',
       unit: 's', step: 0.1, max: 60, best: 'min', target: 14,
       note: 'One timed run on the track. The shortest test of top speed and power.',
     },

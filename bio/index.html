@@ -495,7 +495,7 @@ function paint() {
     const b = bestOf(e, state.log);
     $('n-' + e.id).textContent = b.value;
     $('b-' + e.id).textContent = b.sessions ? `Best of ${b.sessions} ${b.sessions === 1 ? 'session' : 'sessions'}` : 'Target';
-    counts.push(`${e.name.toLowerCase()} ${b.sessions}`);
+    counts.push(`${e.short.toLowerCase()} ${b.sessions}`);
   }
   $('tsum').textContent = `Last 7 days · ${trained} ${trained === 1 ? 'day' : 'days'} trained · all sessions: ${counts.join(', ')}`;
   const when = state.updatedAt ? new Date(state.updatedAt) : null;
