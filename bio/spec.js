@@ -6,8 +6,8 @@
    the page has no build step. */
 
 export const SPEC = {
-  /* One test per discipline, logged per session. The card shows the best
-     result so far, or the target until the first session. */
+  /* One test per discipline, one test a day at most. The card shows the
+     best result so far, or the target until the first session. */
   exercises: [
     {
       id: 'pullup', discipline: 'Strength', name: 'Weighted pull-up', short: 'Pull-up', protocol: '1 rep max',
@@ -76,7 +76,8 @@ export function clean(input, today) {
     if (!day || typeof day !== 'object') continue;
     const habits = {}, train = {};
     for (const h of SPEC.habits) habits[h.id] = day.habits?.[h.id] === true;
-    for (const e of SPEC.exercises) { const v = num(day.train?.[e.id], e); if (v !== undefined) train[e.id] = v; }
+    /* one test a day: the first valid result wins */
+    for (const e of SPEC.exercises) { const v = num(day.train?.[e.id], e); if (v !== undefined) { train[e.id] = v; break; } }
     const entry = { habits };
     const sleep = num(day.sleep, SPEC.sleep);
     if (sleep !== undefined) entry.sleep = sleep;

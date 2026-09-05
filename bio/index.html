@@ -139,8 +139,16 @@ h2 {
 .editing .val:not([readonly]) + i { visibility: visible; }
 .editing .val:not([readonly]) { pointer-events: auto; border-bottom-color: var(--blue); }
 .editing .val:not([readonly]):focus { outline: none; border-bottom-color: var(--ice); }
-.log.train .lrow { grid-template-columns: 124px repeat(var(--n), minmax(0, 1fr)); }
-.log.train .lrow.lhead .h { text-align: right; }
+.log.train .lrow { grid-template-columns: 124px minmax(0, 1fr) 132px; }
+.log.train .lrow.lhead .h { text-align: left; }
+.pick {
+  appearance: none; -webkit-appearance: none; background: none; border: 0; border-bottom: 1px solid transparent;
+  padding: 0; margin: 0; min-width: 0; width: 100%; font: 500 15px/1.4 var(--sans); color: var(--ice); pointer-events: none;
+}
+.pick:disabled { color: var(--ice); opacity: 1; }
+.editing .pick { pointer-events: auto; cursor: pointer; border-bottom-color: var(--blue); }
+.editing .pick:focus { outline: none; border-bottom-color: var(--ice); }
+.pick option { background: var(--ink); color: var(--ice); }
 .log.train { margin-top: 16px; }
 
 .more { margin: 14px 0 0; }
@@ -219,8 +227,9 @@ footer a:hover { color: var(--ice); }
   .tick { width: 18px; height: 18px; }
   .tick:checked::after { left: 5px; top: 1px; }
   .val { font-size: 20px; }
-  .log.train .lrow { grid-template-columns: 72px repeat(var(--n), minmax(0, 1fr)); }
-  .log.train .lrow.lhead .h { writing-mode: horizontal-tb; transform: none; height: auto; margin: 0; text-align: right; }
+  .log.train .lrow { grid-template-columns: 72px minmax(0, 1fr) 96px; }
+  .log.train .lrow.lhead .h { writing-mode: horizontal-tb; transform: none; height: auto; margin: 0; text-align: left; }
+  .pick { font-size: 13px; }
   .row { flex-wrap: wrap; }
   .row label { width: 100%; }
   .pass { flex-basis: 100%; }
@@ -282,7 +291,7 @@ footer a:hover { color: var(--ice); }
     <span class="status mono bad" id="why" hidden></span>
   </form>
   <div class="row" id="tools" hidden>
-    <span class="status mono" id="status">Editing. Every day shown is open, in both logs.</span>
+    <span class="status mono" id="status">Editing. Every day shown is open. One test a day.</span>
     <button class="btn" type="button" data-cancel>Cancel</button>
     <button class="btn solid" type="button" id="save">Save</button>
   </div>
@@ -441,7 +450,11 @@ function build() {
     one: (key, h) => `<label class="cell"><input class="tick" type="checkbox" id="h-${key}-${h.id}" disabled aria-label="${h.name}, ${pretty(key)}"></label>`,
     tail: 'Sleep', last: key => numCell('s-' + key, SPEC.sleep, 'Sleep, ' + pretty(key)),
   });
-  grid($('train'), TESTS, { one: (key, e) => numCell(`t-${key}-${e.id}`, e, `${e.name}, ${pretty(key)}`) });
+  grid($('train'), [{ name: 'Test' }], {
+    one: key => `<span class="cell test"><select class="pick" id="p-${key}" disabled aria-label="Test, ${pretty(key)}"><option value=""></option>${TESTS.map(e => `<option value="${e.id}">${e.name}</option>`).join('')}</select></span>`,
+    tail: 'Result', last: key => numCell('t-' + key, TESTS[0], 'Result, ' + pretty(key)),
+  });
+  document.querySelectorAll('.pick').forEach(sel => sel.addEventListener('change', () => unit(sel.id.slice(2))));
   $('more').hidden = !hidden;
   $('more').textContent = `Earlier days · ${hidden} more`;
 }
@@ -462,12 +475,19 @@ TESTS.forEach((e, i) => {
 });
 
 const val = (id, v) => { $(id).value = Number.isFinite(v) ? v : ''; };
+/* the result cell takes the unit, step and range of the chosen test */
+function unit(key) {
+  const e = TESTS.find(t => t.id === $('p-' + key).value) || TESTS[0], inp = $('t-' + key);
+  inp.max = e.max; inp.step = e.step; inp.nextElementSibling.textContent = e.unit;
+}
 function paint() {
   for (const r of rows) {
     const d = state.log[r.key];
     for (const h of HABITS) $(`h-${r.key}-${h.id}`).checked = !!d?.habits?.[h.id];
     val('s-' + r.key, d?.sleep);
-    for (const e of TESTS) val(`t-${r.key}-${e.id}`, d?.train?.[e.id]);
+    const done = TESTS.find(e => Number.isFinite(d?.train?.[e.id]));
+    $('p-' + r.key).value = done ? done.id : '';
+    unit(r.key); val('t-' + r.key, done ? d.train[done.id] : undefined);
   }
   /* the last seven days, today included */
   let checks = 0, hours = 0, nights = 0, trained = 0;
@@ -512,7 +532,8 @@ function open(editing) {
   for (const r of rows) {
     for (const h of HABITS) $(`h-${r.key}-${h.id}`).disabled = !editing;
     $('s-' + r.key).readOnly = !editing;
-    for (const e of TESTS) $(`t-${r.key}-${e.id}`).readOnly = !editing;
+    $('p-' + r.key).disabled = !editing;
+    $('t-' + r.key).readOnly = !editing;
   }
   bar.hidden = !editing; gate.hidden = editing; tools.hidden = !editing;
   if (editing) { say('Editing. Every day shown is open, in both logs.'); document.querySelector('.lrow.today .tick')?.focus(); }
@@ -541,7 +562,8 @@ async function save() {
     const entry = { habits: Object.fromEntries(HABITS.map(h => [h.id, $(`h-${r.key}-${h.id}`).checked])), train: {} };
     const s = $('s-' + r.key).value;
     if (s !== '') entry.sleep = Number(s);
-    for (const e of TESTS) { const v = $(`t-${r.key}-${e.id}`).value; if (v !== '') entry.train[e.id] = Number(v); }
+    const test = $('p-' + r.key).value, v = $('t-' + r.key).value;
+    if (test && v !== '') entry.train[test] = Number(v);
     log[r.key] = entry;
   }
   const draft = clean({ log }, today);
