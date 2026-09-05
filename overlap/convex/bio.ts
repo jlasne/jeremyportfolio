@@ -52,7 +52,7 @@ export const save = mutation({
   },
   handler: async (ctx, { passphrase, today, ...input }) => {
     mustBeJeremy(passphrase);
-    if (!isKey(today)) throw new Error("That is not a date");
+    if (!isKey(today)) throw new Error("Send the day as YYYY-MM-DD");
     const day = dayOf(today);
     if (Math.abs(day - dayOf()) > 1) throw new Error("Your clock and the server disagree by more than a day");
     const doc = { key: KEY, ...clean(input, day), today, updatedAt: Date.now() };

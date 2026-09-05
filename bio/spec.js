@@ -15,39 +15,39 @@ export const SPEC = {
     {
       id: 'squat', discipline: 'Strength', name: 'Back Squat', protocol: '5 reps',
       unit: 'kg', step: 2.5, max: 500, fallback: 100,
-      note: 'The lift that tells the truth about the whole body. Five reps, not one: strength you can repeat.',
+      note: 'One lift that loads the whole body at once. Five reps proves strength that repeats.',
     },
     {
       id: 'zone2', discipline: 'Cardio', name: 'Zone 2', protocol: 'steady',
       unit: 'min', step: 5, max: 600, fallback: 45,
-      note: 'Conversational pace, held. The engine everything else runs on.',
+      note: '60 to 70% of max heart rate, held. Builds the base every other session draws on.',
     },
     {
       id: 'sprint', discipline: 'Sprint', name: '30 / 10 Intervals', protocol: '30s on · 10s off',
       unit: 'rounds', step: 1, max: 100, fallback: 8,
-      note: 'Rounds finished at full effort before form breaks. The top end, and the will to keep it.',
+      note: '30 seconds all out, 10 seconds off, counted until form breaks. Each extra round widens the top end.',
     },
   ],
 
-  /* Logged from day one and never gated: it is data, not a habit. */
+  /* Logged from day 1, open on every day of the ramp. */
   sleep: {
     id: 'sleep', name: 'Sleep', protocol: 'last night',
     unit: 'h', step: 0.25, max: 24, fallback: 7.5,
-    note: 'Logged from day one, never gated. Data, not a habit.',
+    note: 'Logged from day 1, open on every day of the ramp. Sleep is the input the other numbers depend on.',
   },
 
   /* The ramp. A habit is dimmed and disabled until its day comes. */
   habits: [
     { id: 'light', unlockDay: 1, name: 'Morning light & water',
-      why: 'Ten minutes of daylight and a big glass of water before anything else. Sets the clock, ends the night’s dehydration.' },
+      why: '10 minutes of daylight and 500 ml of water within 30 minutes of waking. Sets the body clock and replaces the water lost over 7 hours of sleep.' },
     { id: 'walk', unlockDay: 6, name: 'Walk after eating',
-      why: 'Ten to fifteen minutes after the meal. Flattens the glucose spike, keeps the afternoon awake.' },
+      why: '10 to 15 minutes after each meal. Lowers the glucose spike, so the afternoon stays awake.' },
     { id: 'collagen', unlockDay: 11, name: 'Collagen',
-      why: 'Tendons and joints give out before muscle does. Feed them.' },
+      why: '10 g a day for tendons and joints, the parts that fail first under load.' },
     { id: 'vitc', unlockDay: 11, name: 'Vitamin C',
-      why: 'Taken with the collagen. The cofactor the body needs to build with it.' },
+      why: 'Taken with the collagen. The body needs it to turn collagen into tissue.' },
     { id: 'coffee', unlockDay: 11, name: 'Caffeine, coffee only',
-      why: 'Coffee and nothing else. Ninety minutes after waking, none after noon.' },
+      why: 'Coffee only, 90 minutes after waking, last cup before noon.' },
   ],
 };
 

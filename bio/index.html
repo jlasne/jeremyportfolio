@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Jeremy Lasne — Energized and performing life</title>
+<title>Energized and performing life | Jeremy Lasne</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Training performance and daily health habits, live. One number per discipline, one habit at a time.">
 <meta name="theme-color" content="#050b16">
@@ -232,7 +232,7 @@ footer a:hover { color: var(--ice); }
   <div class="copy">
     <p class="kicker mono">Training performance &amp; daily health habits</p>
     <h1>Energized and performing life.</h1>
-    <p class="lede">What I train for and what I wake up to. Live numbers, updated as they change, no filter.</p>
+    <p class="lede">What I train for and what I wake up to. Three numbers and five habits, updated the day they change.</p>
   </div>
 </header>
 
@@ -385,7 +385,7 @@ function api(op, args) {
   return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ op, args: args || {} }), signal: ctl.signal })
     .then(r => r.json())
     .then(j => { clearTimeout(t); if (j && j.ok) return j.value; throw new Error((j && j.error) || 'Something went wrong'); },
-          e => { clearTimeout(t); throw new Error(e.name === 'AbortError' ? 'The server did not answer' : 'Could not reach the server'); });
+          e => { clearTimeout(t); throw new Error(e.name === 'AbortError' ? 'The server timed out after 9 seconds' : 'The server is unreachable right now'); });
 }
 
 /* one card, one number */
@@ -404,7 +404,7 @@ function card(m, label, wide) {
 }
 const cards = $('cards');
 SPEC.exercises.forEach((e, i) => cards.appendChild(card(e, `0${i + 1} · ${e.discipline}`)));
-$('sleep').appendChild(card(SPEC.sleep, 'Sleep · not gated', true));
+$('sleep').appendChild(card(SPEC.sleep, 'Sleep · from day 1', true));
 
 const habits = $('habits');
 for (const h of [...SPEC.habits].sort((a, b) => a.unlockDay - b.unlockDay)) {
