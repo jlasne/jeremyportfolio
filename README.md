@@ -100,6 +100,7 @@ current one is not checked in, so redraw it to match if the hero copy changes.
 | `/kof` | **King of Founders** — a living pixel world map, one kingdom per app |
 | `/foundercity` | **Founder City** — the same apps as a pixel skyline at night, one tower each |
 | `/bio` | **Bio** — a fifteen-day daily log of five habits and sleep, then one number per training discipline, live |
+| `/brand` | **Brand study 01** · 34 motion patterns from passion.io and playbookapp.io, rebuilt in the landing page's system with one verdict each: steal, adapt, or skip |
 
 `/investment` and `/invest` are redirect stubs into `/wealth`.
 
