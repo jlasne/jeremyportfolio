@@ -175,13 +175,10 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .nav-menu-cta .btn { background: #0d1017; color: #fff; }
 .nav-menu-cta .btn--ghost { background: transparent; color: #0d1017; border-color: rgba(0,0,0,.2); }
 
-/* ── hero: pinned for 300vh on a laptop ─────────────────────────────────── */
+/* ── hero ───────────────────────────────────────────────────────────────── */
 .hero { position: relative; z-index: 10; background: #101420; }
-.hero.pinned { height: 300vh; }
-.hero-sticky { position: relative; overflow: clip; min-height: 100svh; display: block; padding: clamp(98px, 13vh, 138px) 0 clamp(40px, 6vh, 64px); background: radial-gradient(60% 50% at 80% 0%, rgba(38, 62, 120, 0.42), transparent 70%), #070a12; }
-.hero.pinned .hero-sticky { position: sticky; top: 0; height: 100svh; min-height: 0; padding: 0; }
+.hero-sticky { position: relative; overflow: clip; min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: clamp(98px, 13vh, 138px) 0 clamp(72px, 9vh, 96px); background: radial-gradient(60% 50% at 80% 0%, rgba(38, 62, 120, 0.42), transparent 70%), #070a12; }
 .hero-copy { position: relative; z-index: 6; width: min(94%, 1040px); margin: 0 auto; text-align: center; }
-.hero.pinned .hero-copy { position: absolute; left: 50%; top: 50svh; transform: translate(-50%, -50%); }
 .proof-pill { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 26px; padding: 6px 16px 6px 7px; border-radius: 100px; background: var(--card); border: 1px solid var(--rule-firm); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font-size: 13.5px; font-weight: 600; color: var(--muted); }
 .proof-pill .stk { display: inline-flex; }
 .proof-pill .stk img { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--bg); margin-left: -9px; }
@@ -189,37 +186,12 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .proof-pill b { color: var(--ink); font-weight: 800; }
 .hero h1 { margin: 0 0 22px; }
 .hero h1 .ln { display: block; }
-/* a fixed slot for the typed word, so line one never re-centres */
-.rotor { display: inline-block; vertical-align: baseline; text-align: left; width: 7.1em; }
-.rotor-word { display: inline-block; position: relative; white-space: nowrap; padding-bottom: .07em; }
-.rotor-word::after { content: ""; display: inline-block; width: .07em; height: .92em; margin-left: .06em; vertical-align: -.12em; border-radius: 2px; background: var(--ink); animation: caret 1.05s step-end infinite; }
-@keyframes caret { 50% { opacity: 0; } }
 .hero .sub { font-size: clamp(1.02rem, 1.4vw, 1.2rem); line-height: 1.55; color: var(--muted); max-width: 40em; margin: 0 auto 30px; }
 .hero .sub b { color: var(--ink); font-weight: 800; }
-.hero-trust { position: relative; z-index: 6; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 13px; margin: 24px auto 0; width: min(94%, 1040px); text-align: center; font-size: 13.5px; font-weight: 600; color: var(--muted); letter-spacing: .01em; }
-.hero.pinned .hero-trust { position: absolute; left: 50%; bottom: 84px; transform: translateX(-50%); margin: 0; }
+.hero-trust { position: relative; z-index: 6; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 13px; margin: 34px auto 0; width: min(94%, 1040px); text-align: center; font-size: 13.5px; font-weight: 600; color: var(--muted); letter-spacing: .01em; }
 .hero-trust i { color: var(--rule-firm); font-style: normal; }
 .hero-trust b { font-weight: 700; color: var(--ink); }
-/* the second headline, once the phone is in place */
-.show-head { position: absolute; z-index: 6; left: 50%; top: 78px; transform: translateX(-50%); width: min(96%, 1220px); text-align: center; font-family: var(--display); font-weight: 500; font-size: clamp(1.2rem, 2.8vw, 2.1rem); letter-spacing: -0.04em; text-transform: uppercase; opacity: 0; pointer-events: none; display: none; }
-.hero.pinned .show-head { display: block; }
-/* the five names: a tab bar low at rest, pinned under the header once assembled */
-.rail { position: relative; z-index: 7; display: flex; gap: 4px; padding: 5px; border-radius: 100px; background: var(--card); border: 1px solid var(--rule); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 22px 50px -22px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.06); width: min(94%, 600px); margin: 30px auto 0; }
-.hero.pinned .rail { position: absolute; left: 50%; top: 132px; transform: translateX(-50%); margin: 0; }
-.rail.solid { background: var(--bg); border-color: var(--rule-firm); }
-.rail-hl { position: absolute; top: 5px; bottom: 5px; left: 5px; width: 60px; z-index: 0; border-radius: 100px; background: var(--ink); pointer-events: none; will-change: transform; }
-.rail--anim .rail-hl { transition: transform .45s var(--ease), width .45s var(--ease); }
-.hero:not(.pinned) .rail-hl { display: none; }
-.rail-btn { flex: 1; position: relative; z-index: 1; border: 0; background: transparent; font-size: 12.5px; font-weight: 700; letter-spacing: -0.01em; color: var(--muted); padding: 11px 6px; border-radius: 100px; white-space: nowrap; transition: color .32s var(--ease), background .32s var(--ease); }
-.rail-btn.on { color: var(--bg); }
-.hero.pinned .rail-btn, .hero.pinned .rail-btn.on { color: #fff; mix-blend-mode: difference; }
-.hero:not(.pinned) .rail-btn.on { background: var(--ink); }
-@media (max-width: 560px) { .rail { flex-wrap: wrap; border-radius: 22px; } .rail-btn { flex: 1 1 30%; font-size: 11.5px; padding: 10px 4px; } }
-/* the phone, rising from below the fold into the centre */
-.showcase { position: relative; z-index: 5; width: min(94%, 1080px); margin: 42px auto 0; display: flex; align-items: center; justify-content: center; }
-.hero.pinned .showcase { position: absolute; left: 50%; top: 204px; bottom: 64px; transform: translateX(-50%); margin: 0; opacity: 0; width: auto; }
 .phone { position: relative; z-index: 1; width: min(292px, 66vw); aspect-ratio: 393 / 852; border-radius: 52px; padding: 11px; background: linear-gradient(148deg, #4a4a54 0%, #1b1b21 26%, #0e0e12 54%, #383840 100%); box-shadow: 0 2px 3px rgba(255,255,255,0.2) inset, 0 40px 80px -26px rgba(0,0,0,0.6), 0 8px 24px -8px rgba(0,0,0,0.3); }
-.hero.pinned .phone { width: auto; height: 100%; max-height: 560px; }
 .phone-screen { position: relative; overflow: hidden; width: 100%; height: 100%; border-radius: 42px; background: #05070a; }
 .shot { position: absolute; top: 0; left: 0; z-index: 6; width: 100%; height: 107%; object-fit: cover; object-position: top center; }
 .scr { position: absolute; inset: 0; opacity: 0; transform: scale(1.03); transition: opacity .45s var(--ease), transform .45s var(--ease); pointer-events: none; }
@@ -227,8 +199,7 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .phone--sm { width: min(220px, 56vw); border-radius: 40px; padding: 8px; }
 .phone--sm .phone-screen { border-radius: 32px; }
 /* the cue */
-.scroll-cue { position: absolute; z-index: 6; left: 50%; bottom: 28px; transform: translateX(-50%); display: none; flex-direction: column; align-items: center; gap: 7px; color: var(--ink); font-family: var(--mono); font-size: 9.5px; letter-spacing: .18em; text-transform: uppercase; opacity: .85; }
-.hero.pinned .scroll-cue { display: flex; }
+.scroll-cue { position: absolute; z-index: 6; left: 50%; bottom: 28px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 7px; color: var(--ink); font-family: var(--mono); font-size: 9.5px; letter-spacing: .18em; text-transform: uppercase; opacity: .85; }
 .scroll-cue .ch { width: 22px; height: 34px; border-radius: 100px; border: 1.5px solid var(--rule-firm); position: relative; }
 .scroll-cue .ch::after { content: ""; position: absolute; left: 50%; top: 7px; width: 3px; height: 7px; border-radius: 3px; background: var(--ink); transform: translateX(-50%); animation: cue 1.6s var(--ease) infinite; }
 @keyframes cue { 0% { opacity: 0; transform: translate(-50%, 0); } 40% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, 11px); } }
@@ -293,13 +264,13 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .pin:not(.pinned) .pd-cta { pointer-events: auto; }
 
 /* ── the black bar, pulled 48px over the section below ──────────────────── */
-#ctabar { position: relative; z-index: 2; margin-top: clamp(40px, 6vw, 80px); background: #0d1017; color: #f2f3f7; padding: clamp(34px, 5vw, 56px) 0; }
-#ctabar .bar { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
-#ctabar .bar-l { display: flex; align-items: center; gap: 16px; flex: 1; min-width: 0; }
-#ctabar .bar-mark { width: 40px; height: 40px; flex: none; }
-#ctabar h3 { font-family: var(--display); font-weight: 500; font-size: clamp(1.05rem, 2vw, 1.55rem); letter-spacing: -0.03em; text-transform: uppercase; line-height: 1.12; text-wrap: balance; }
-#ctabar .btn { background: #f2f3f7; color: #0d1017; flex: none; }
-@media (max-width: 760px) { #ctabar .bar { flex-direction: column; text-align: center; } #ctabar .bar-l { flex-direction: column; } }
+#ctabar { position: relative; z-index: 2; margin-top: clamp(40px, 6vw, 80px); background: #0d1017; color: #f2f3f7; padding: clamp(72px, 10vw, 128px) 0; }
+#ctabar .bar { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px; }
+#ctabar .bar-mark { width: 56px; height: 56px; flex: none; margin-bottom: 6px; }
+#ctabar .eyebrow { margin-bottom: 0; color: #989daa; }
+#ctabar h3 { font-family: var(--display); font-weight: 500; font-size: clamp(1.9rem, 5vw, 3.6rem); letter-spacing: -0.045em; text-transform: uppercase; line-height: 1.02; text-wrap: balance; }
+#ctabar p { font-size: clamp(1.02rem, 1.5vw, 1.2rem); line-height: 1.55; color: #a2a7b6; max-width: 40em; }
+#ctabar .btn { background: #f2f3f7; color: #0d1017; flex: none; margin-top: 8px; }
 
 /* ── how it works: a line down the middle that fills as you read ────────── */
 #how { padding-top: clamp(72px, 10vw, 124px); }
@@ -504,7 +475,7 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 <nav class="nav" id="nav">
   <div class="shell">
     <a class="brand" href="#top" aria-label="BrandMatch, back to top">
-      <span class="brand-mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="116" fill="#eff0ee"/><circle cx="198" cy="256" r="96" fill="#070a12"/><circle cx="318" cy="256" r="96" fill="none" stroke="#070a12" stroke-width="42"/></svg></span>
+      <img class="brand-mark" src="media/logo.svg" alt="" width="28" height="28">
       <span>BrandMatch</span>
     </a>
     <div class="nav-links">
@@ -537,8 +508,7 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 
 <main id="main">
 
-<!-- ── hero: pinned on a laptop. The copy steps back, the five names rise and
-     pin, the phone takes the centre, then the scroll walks the five screens. ── -->
+<!-- ── hero ──────────────────────────────────────────────────────────────── -->
 <section class="hero" id="top">
   <div class="hero-sticky" id="hero-sticky">
 
@@ -555,76 +525,6 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
       <div class="btn-row hero-in" style="--d:520ms">
         <a class="btn" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call <span class="arr">&rarr;</span></a>
         <a class="btn btn--ghost" href="#how"><span class="btn-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.5v7l6-3.5z"/></svg></span>See how it works</a>
-      </div>
-    </div>
-
-    <p class="show-head" id="show-head">Everything your audience needs. One app, yours.</p>
-
-    <div class="rail" id="rail" role="tablist" aria-label="What the app holds">
-      <span class="rail-hl" id="rail-hl" aria-hidden="true"></span>
-      <button class="rail-btn on" role="tab" aria-selected="true">Your idea</button>
-      <button class="rail-btn" role="tab" aria-selected="false">Your app</button>
-      <button class="rail-btn" role="tab" aria-selected="false">Subscriptions</button>
-      <button class="rail-btn" role="tab" aria-selected="false">Retention</button>
-      <button class="rail-btn" role="tab" aria-selected="false">Support</button>
-    </div>
-
-    <div class="showcase" id="showcase">
-      <div class="phone" id="phone">
-        <div class="phone-screen">
-
-          <!-- 1 · your idea: a programme built from what the audience asked for -->
-          <div class="scr on"><div class="mock">
-            <div class="m-sbar"><span>9:41</span><i></i></div>
-            <div class="m-hd"><span class="m-av"></span><span><b>Morning, Sam</b><small>Week 3 of your programme</small></span></div>
-            <div class="m-card"><b>Today: the cast, part 2</b><span>18 minutes, then log your session</span><div class="m-bar"><i></i></div></div>
-            <div class="m-row"><span class="m-ic">1</span><span><b>Knots that hold</b><small>Watched twice this week</small></span><em>Done</em></div>
-            <div class="m-row"><span class="m-ic g">2</span><span><b>Reading the water</b><small>New this week</small></span></div>
-            <div class="m-tab"><i class="on"></i><i></i><span class="cam"></span><i></i><i></i></div>
-          </div></div>
-
-          <!-- 2 · your app: your name on the store, your icon, your listing -->
-          <div class="scr"><div class="mock">
-            <div class="m-sbar"><span>9:41</span><i></i></div>
-            <div class="m-store"><span class="m-icon">S</span><span><b>Sam Casts</b><small>Fly fishing, from the first knot</small><span class="m-get">GET</span></span></div>
-            <div class="m-stars"><span><b>4.9</b>Rating</span><span><b>#3</b>Sports</span><span><b>4+</b>Age</span></div>
-            <div class="m-shots"><i></i><i></i><i></i></div>
-            <div class="m-title" style="padding-top:5cqw"><small>Your name. Your icon. Your listing, on both stores.</small></div>
-          </div></div>
-
-          <!-- 3 · subscriptions: the paywall, trial first -->
-          <div class="scr"><div class="mock">
-            <div class="m-sbar"><span>9:41</span><i></i></div>
-            <div class="m-title">Go all in.<small>Every programme, every week, one plan.</small></div>
-            <div class="m-plan on"><span><b>Yearly</b><small>Two months free</small></span><em>Best value</em><span class="rad"></span></div>
-            <div class="m-plan"><span><b>Monthly</b><small>Cancel any time</small></span><span class="rad"></span></div>
-            <div class="m-cta">Start 7 days free</div>
-            <div class="m-fine">Renews after the trial. Cancel in one tap.</div>
-          </div></div>
-
-          <!-- 4 · retention: the push that brings them back, the streak that keeps them -->
-          <div class="scr"><div class="mock">
-            <div class="m-sbar"><span>9:41</span><i></i></div>
-            <div class="m-push"><i></i><span><b>Sam Casts</b><span>Your rod is drying. Session 12 is 15 minutes.</span></span><small>now</small></div>
-            <div class="m-streak"><b>12 days</b><span>Your longest streak yet</span><div class="m-days"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div></div>
-            <div class="m-row"><span class="m-ic g">&#9829;</span><span><b>Weekly recap</b><small>Sent every Sunday, 8am</small></span><em>On</em></div>
-            <div class="m-tab"><i></i><i class="on"></i><span class="cam"></span><i></i><i></i></div>
-          </div></div>
-
-          <!-- 5 · support: answered inside the app, by us -->
-          <div class="scr"><div class="mock">
-            <div class="m-sbar"><span>9:41</span><i></i></div>
-            <div class="m-hd"><span class="m-av" style="background:#0b0b16"></span><span><b>Support</b><small>Replies within the hour</small></span></div>
-            <div class="m-msgs">
-              <div class="m-b in">Hi! Where is the week 2 checklist?</div>
-              <div class="m-b out">Library, second row. Pinned it for you too.</div>
-              <div class="m-b in">Perfect, thank you!</div>
-              <span class="m-when">Answered in 4 minutes</span>
-            </div>
-            <div class="m-input"><span class="box">Message&hellip;</span><span class="snd"></span></div>
-          </div></div>
-
-        </div>
       </div>
     </div>
 
@@ -674,10 +574,10 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 <!-- ── the bar ───────────────────────────────────────────────────────────── -->
 <section id="ctabar">
   <div class="shell bar">
-    <div class="bar-l">
-      <span class="brand-mark bar-mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="116" fill="#eff0ee"/><circle cx="198" cy="256" r="96" fill="#070a12"/><circle cx="318" cy="256" r="96" fill="none" stroke="#070a12" stroke-width="42"/></svg></span>
-      <h3>It takes 100,000 followers to work with us. From there, twenty minutes tells us if there is an app in your audience.</h3>
-    </div>
+    <img class="brand-mark bar-mark" src="media/logo.svg" alt="" width="56" height="56">
+    <span class="eyebrow">The one requirement</span>
+    <h3>100,000 followers or more.</h3>
+    <p>That is what it takes to work with us. From there, 20min tells us if there is an app in your audience.</p>
     <a class="btn" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call <span class="arr">&rarr;</span></a>
   </div>
 </section>
@@ -687,18 +587,17 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
   <div class="shell">
     <div class="head head--center reveal-up">
       <span class="eyebrow">How it works</span>
-      <h2 class="h-section xl">The idea is already in your replies.</h2>
-      <p class="lede">Four steps. One call. Zero cost to you.</p>
+      <h2 class="h-section xl">Your audience already told you what they want.</h2>
+      <p class="lede">The app is in their questions. We build it, run it, and upgrade it. You keep posting.</p>
     </div>
 
     <div class="cv-list" id="cv-list">
       <div class="cv-row reveal-up">
         <div class="cv-txt">
           <div class="cv-no">01</div>
-          <h3 class="cv-tt">You bring the asks</h3>
-          <div class="cv-li">Screenshots of the comments, DMs and replies your audience sends. The ones that repeat.</div>
-          <div class="cv-li">What they keep asking for, what they buy from other people, what they cannot find.</div>
-          <div class="cv-li">Any platform. Any language.</div>
+          <h3 class="cv-tt">Their questions</h3>
+          <div class="cv-li">The comments and DMs that repeat. Send them over.</div>
+          <div class="cv-li">Any platform, any language.</div>
         </div>
         <div class="cv-fig"><div class="fig chat">
           <span class="who">Comments, this week</span>
@@ -712,26 +611,24 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
       <div class="cv-row rev reveal-up">
         <div class="cv-txt">
           <div class="cv-no">02</div>
-          <h3 class="cv-tt">We pick the idea</h3>
-          <div class="cv-li">One 20-minute call. The asks are matched to an app that fits your audience, your content, and your posting rhythm.</div>
-          <div class="cv-li">The idea comes from your audience, never from a trend list.</div>
-          <div class="cv-li">Terms for the split are agreed on that call.</div>
+          <h3 class="cv-tt">One idea, picked together</h3>
+          <div class="cv-li">A 20min call. The idea comes from what they ask, matched to your content.</div>
+          <div class="cv-li">The split is agreed on that call.</div>
         </div>
         <div class="cv-fig"><div class="fig sheet">
           <span class="k">The match</span>
-          <div class="r"><span>A place to keep every video</span><em>Already solved by saves</em></div>
+          <div class="r"><span>A place to keep every video</span><em>They can already do this</em></div>
           <div class="r pick"><span>The full routine, day by day, ticked off</span><em>The app</em></div>
-          <div class="r"><span>A community</span><em>Version 2</em></div>
+          <div class="r"><span>A community</span><em>Later</em></div>
         </div></div>
       </div>
 
       <div class="cv-row reveal-up">
         <div class="cv-txt">
           <div class="cv-no">03</div>
-          <h3 class="cv-tt">I build it and ship it</h3>
-          <div class="cv-li">Product, design, both stores, subscriptions, paywall, analytics, retention, support. Eight parts, all on me.</div>
-          <div class="cv-li">Your name, your icon, your listing. Your brand from the first screen.</div>
-          <div class="cv-li">Live on the App Store and Google Play.</div>
+          <h3 class="cv-tt">We build, run and upgrade the app</h3>
+          <div class="cv-li">Design, both stores, subscriptions, support. Every update, on us.</div>
+          <div class="cv-li">Your name and your icon, from the first screen.</div>
         </div>
         <div class="cv-fig"><div class="fig fig--phone">
           <div class="phone phone--sm"><div class="phone-screen"><div class="scr on"><div class="mock">
@@ -748,17 +645,16 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
       <div class="cv-row rev reveal-up">
         <div class="cv-txt">
           <div class="cv-no">04</div>
-          <h3 class="cv-tt">You post. It earns. You own it.</h3>
-          <div class="cv-li">One post a week about the app. Your audience already trusts you, so that post is the launch.</div>
-          <div class="cv-li">The app pays every month. We split what it earns.</div>
-          <div class="cv-li">The app stays yours. An app with recurring revenue can be sold.</div>
+          <h3 class="cv-tt">Your audience pays every month</h3>
+          <div class="cv-li">You post once a week. They subscribe. We split what it earns.</div>
+          <div class="cv-li">The app is yours, and an app that pays every month can be sold.</div>
         </div>
         <div class="cv-fig"><div class="fig asset">
           <div class="r"><span>Owner</span><b>You</b></div>
           <div class="r"><span>Stores</span><b>App Store, Google Play</b></div>
           <div class="r"><span>Pays</span><b>Every month</b></div>
           <div class="r"><span>Your part</span><b>One post a week</b></div>
-          <div class="r"><span>Sellable</span><b>Yes</b></div>
+          <div class="r"><span>Can be sold</span><b>Yes</b></div>
         </div></div>
       </div>
 
@@ -773,9 +669,8 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
     <div class="ac-grid">
       <div class="ac-col"><div class="ac-track" id="ac-l"></div></div>
       <div class="ac-mid">
-        <span class="brand-mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="116" fill="#eff0ee"/><circle cx="198" cy="256" r="96" fill="#070a12"/><circle cx="318" cy="256" r="96" fill="none" stroke="#070a12" stroke-width="42"/></svg></span>
+        <img class="brand-mark" src="media/logo.svg" alt="" width="28" height="28">
         <h2 class="h-section">A post pays once. An app pays every month.</h2>
-        <p class="lede">And an app that pays every month is an asset. It can be sold. Playbook gives you a profile in their app. This gives you your own.</p>
         <a class="btn" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call <span class="arr">&rarr;</span></a>
       </div>
       <div class="ac-col"><div class="ac-track" id="ac-r"></div></div>
@@ -788,8 +683,8 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
   <div class="shell">
     <div class="head head--center reveal-up">
       <span class="eyebrow">Who it&rsquo;s for</span>
-      <h2 class="h-section xl">Any niche with 100,000 people in it.</h2>
-      <p class="lede">The narrower the audience, the better the app. Fly fishing beats fishing. IELTS prep beats English.</p>
+      <h2 class="h-section xl">100k followers or more?</h2>
+      <p class="lede">Ready for a life-changing collab? This is for you. Any niche, and the narrower the better: fly fishing beats fishing.</p>
     </div>
   </div>
   <div class="co-rows">
@@ -802,8 +697,8 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 <section id="final">
   <div class="fn-box">
     <div class="fn-rings" aria-hidden="true"></div>
-    <span class="brand-mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="116" fill="#eff0ee"/><circle cx="198" cy="256" r="96" fill="#070a12"/><circle cx="318" cy="256" r="96" fill="none" stroke="#070a12" stroke-width="42"/></svg></span>
-    <h2 class="h-section xl">Twenty minutes for a life-changing collab.</h2>
+    <img class="brand-mark" src="media/logo.svg" alt="" width="28" height="28">
+    <h2 class="h-section xl">20min for a life-changing collab.</h2>
     <p class="lede">Bring what you make and the thing your people keep asking you for. We find out if there is an app in it.</p>
     <div class="btn-row">
       <a class="btn" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call <span class="arr">&rarr;</span></a>
@@ -820,10 +715,6 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
     <span class="copy">&copy; 2026 BrandMatch &middot; by <a href="https://www.jeremylasne.com/">Jeremy Lasne</a></span>
     <div class="foot-links">
       <a href="https://kaught.app" target="_blank" rel="noopener">Kaught</a>
-      <a href="https://tasu.ai" target="_blank" rel="noopener">Tasu</a>
-      <a href="https://trustviews.io" target="_blank" rel="noopener">Trustviews</a>
-      <a href="https://x.com/jeremylasne" target="_blank" rel="noopener">X</a>
-      <a href="https://www.youtube.com/@jeremyfounder" target="_blank" rel="noopener">YouTube</a>
       <a href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call</a>
     </div>
   </div>
@@ -966,115 +857,6 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
     window.addEventListener('keydown', function (e) { if (e.key === 'Escape' && menu.classList.contains('open')) shut(); });
     window.addEventListener('resize', function () { if (window.innerWidth > 880 && menu.classList.contains('open')) shut(); });
   })();
-
-  /* ═══ the typed niche: 74ms a letter in, 38ms out, 1.6s hold ════════════ */
-
-  (function () {
-    var rw = document.getElementById('rotor'); if (!rw) return;
-    var WORDS = ['fly fishing', 'crochet', 'sourdough', 'bouldering', 'latte art', 'bonsai', 'beekeeping', 'disc golf', 'IELTS prep', 'freediving'];
-    var wi = 0, del = false;
-    function loop() {
-      var w = WORDS[wi], len = rw.textContent.length;
-      if (!del) {
-        rw.textContent = w.slice(0, len + 1);
-        if (len + 1 >= w.length) { del = true; setTimeout(loop, 1600); return; }
-        setTimeout(loop, 74);
-      } else {
-        rw.textContent = w.slice(0, len - 1);
-        if (len - 1 <= 0) { del = false; wi = (wi + 1) % WORDS.length; setTimeout(loop, 320); return; }
-        setTimeout(loop, 38);
-      }
-    }
-    if (reduced) rw.textContent = WORDS[0]; else { rw.textContent = ''; setTimeout(loop, 500); }
-  })();
-
-  /* ═══ the hero: pinned for 300vh on a laptop ═════════════════════════════
-     0 to 46%: the copy slides down and fades, the rail rises from the
-     bottom and turns solid, the phone rises from below the fold and grows
-     to size. 40 to 52%: the second headline. 46 to 88%: the five screens,
-     one per name, the pill sliding under the name in play. Below 881px and
-     under reduced motion the hero is the stack, tap-based.
-     ═══════════════════════════════════════════════════════════════════════ */
-
-  var hero = document.getElementById('top'), heroCopy = document.getElementById('hero-copy'), showHead = document.getElementById('show-head'),
-      rail = document.getElementById('rail'), railHl = document.getElementById('rail-hl'), showcase = document.getElementById('showcase'),
-      cue = document.getElementById('cue'), heroTrust = document.getElementById('hero-trust'),
-      tabs = [].slice.call(rail.querySelectorAll('.rail-btn')), screens = [].slice.call(document.querySelectorAll('#phone .scr')),
-      N = tabs.length, cur = -1, pinned = false, vh = window.innerHeight, rg = {}, lastP = -1, cool = 0, cycle = null;
-
-  function setFeature(i) {
-    i = cl(i, 0, N - 1); if (i === cur) return; cur = i;
-    screens.forEach(function (s, k) { s.classList.toggle('on', k === i); });
-    tabs.forEach(function (b, k) { b.classList.toggle('on', k === i); b.setAttribute('aria-selected', k === i ? 'true' : 'false'); });
-  }
-  function measureRail() {
-    rg.l0 = tabs[0].offsetLeft;
-    rg.cx = tabs.map(function (b) { return b.offsetLeft + b.offsetWidth / 2; });
-    rg.wd = tabs.map(function (b) { return b.offsetWidth; });
-    railHl.style.left = rg.l0 + 'px'; railHl.style.width = rg.wd[0] + 'px';
-  }
-  function placeHL(t2) {
-    var f = t2 * (N - 1), i = cl(Math.floor(f), 0, N - 2), fr = f - i;
-    var cx = rg.cx[i] + (rg.cx[i + 1] - rg.cx[i]) * fr, w = rg.wd[i] + (rg.wd[i + 1] - rg.wd[i]) * fr;
-    railHl.style.width = w.toFixed(1) + 'px';
-    railHl.style.transform = 'translateX(' + (cx - w / 2 - rg.l0).toFixed(1) + 'px)';
-  }
-  function applyScroll() {
-    var total = hero.offsetHeight - vh; if (total <= 0) return;
-    var p = cl(-hero.getBoundingClientRect().top / total, 0, 1);
-    if (Math.abs(p - lastP) < .0005) return; lastP = p;
-    var t1 = cl(p / .46, 0, 1), e1 = ez(t1), cf = cl((e1 - .18) / .34, 0, 1);
-    heroCopy.style.opacity = (1 - cf).toFixed(3);
-    heroCopy.style.transform = 'translate(-50%, calc(-50% + ' + (200 * e1).toFixed(0) + 'px))';
-    heroCopy.style.pointerEvents = cf > .5 ? 'none' : '';
-    heroTrust.style.opacity = (1 - cl(e1 * 3.6, 0, 1)).toFixed(3);
-    cue.style.opacity = (1 - cl(p * 20, 0, 1)).toFixed(3);
-    rail.style.transform = 'translate(-50%,' + ((vh * .63) * (1 - e1)).toFixed(1) + 'px)';
-    rail.classList.toggle('solid', t1 > .2);
-    var eS = ez(cl((p - .05) / .44, 0, 1));
-    showcase.style.opacity = '1';
-    showcase.style.transform = 'translate(-50%,' + ((vh * .74) * (1 - eS)).toFixed(1) + 'px) scale(' + (.9 + .1 * eS).toFixed(3) + ')';
-    showHead.style.opacity = cl((p - .40) / .12, 0, 1).toFixed(3);
-    var hlIn = cl((p - .30) / .16, 0, 1); railHl.style.opacity = hlIn.toFixed(3);
-    var t2 = cl((p - .46) / .42, 0, 1); placeHL(t2);
-    var fi = Math.round(t2 * (N - 1)); setFeature(fi);
-    tabs.forEach(function (b, i) { b.classList.toggle('on', hlIn > .5 && i === fi); });
-  }
-  var tk = false;
-  function onHero() { if (!tk) { tk = true; requestAnimationFrame(function () { applyScroll(); tk = false; }); } }
-  function stopCycle() { clearInterval(cycle); cycle = null; }
-  function startCycle() { if (reduced || cycle) return; cycle = setInterval(function () { if (Date.now() < cool) return; setFeature((cur + 1) % N); }, 2400); }
-  function mode() {
-    var want = wide.matches && !reduced;
-    if (want === pinned) return;
-    pinned = want;
-    hero.classList.toggle('pinned', pinned);
-    if (pinned) {
-      vh = window.innerHeight; measureRail(); lastP = -1; stopCycle();
-      window.addEventListener('scroll', onHero, { passive: true });
-      applyScroll();
-    } else {
-      window.removeEventListener('scroll', onHero);
-      [heroCopy, showHead, rail, showcase, cue, heroTrust, railHl].forEach(function (el) { el.style.cssText = ''; });
-      rail.classList.remove('solid'); cur = -1; setFeature(0); startCycle();
-    }
-  }
-  onMQ(wide, mode);
-  window.addEventListener('resize', function () { vh = window.innerHeight; if (pinned) { measureRail(); lastP = -1; applyScroll(); } }, { passive: true });
-  window.addEventListener('load', function () { if (pinned) { measureRail(); lastP = -1; applyScroll(); } });
-  setFeature(0);
-  pinned = !(wide.matches && !reduced); mode();
-  // a name tapped: pinned, scroll the runway there; at rest, show it and hold 10s
-  tabs.forEach(function (b, i) {
-    b.addEventListener('click', function () {
-      if (pinned) { var total = hero.offsetHeight - vh, p = .46 + (i / (N - 1)) * .42; window.scrollTo({ top: hero.offsetTop + p * total, behavior: 'smooth' }); }
-      else { cool = Date.now() + 10000; setFeature(i); }
-    });
-  });
-  // the stack only cycles while it is on screen
-  if ('IntersectionObserver' in window) {
-    new IntersectionObserver(function (es) { if (pinned) return; es[0].isIntersecting ? startCycle() : stopCycle(); }, { threshold: .25 }).observe(document.getElementById('hero-sticky'));
-  }
 
   /* ═══ marquees: a transform, a rAF, a thumb can throw them ══════════════ */
 
