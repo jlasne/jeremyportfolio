@@ -1,15 +1,11 @@
 /* jeremylasne.com/bio: the one place the content and the log rules live.
 
    Imported by the page (bio/index.html) and by the server
-   (overlap/convex/bio.ts), so the two agree on which days exist, which
-   habits exist and what a saved number may look like. Plain JavaScript on
-   purpose: the page has no build step. */
+   (overlap/convex/bio.ts), so the two agree on which habits and tests
+   exist and what a saved day may look like. Plain JavaScript on purpose:
+   the page has no build step. */
 
 export const SPEC = {
-  /* Day 1 of the log. A local calendar date, daily resolution. */
-  start: '2026-09-05',
-  days: 15,
-
   /* One test per discipline, logged per session. The card shows the best
      result so far, or the target until the first session. */
   exercises: [
@@ -33,7 +29,7 @@ export const SPEC = {
   /* Hours slept, logged per day next to the habits. */
   sleep: { unit: 'h', step: 0.25, max: 24 },
 
-  /* The five habits. All five are open from day 1; the log is the ramp. */
+  /* The five habits, one check each per day. */
   habits: [
     { id: 'light', short: 'Light', name: 'Morning light & water',
       why: '10 minutes of daylight and 500 ml of water within 30 minutes of waking. Sets the body clock and replaces the water lost over 7 hours of sleep.' },
@@ -58,16 +54,15 @@ const KEY = /^(\d{4})-(\d{2})-(\d{2})$/;
 const utcOf = key => { const m = KEY.exec(key); return m ? Date.UTC(+m[1], +m[2] - 1, +m[3]) : NaN; };
 export const isKey = key => typeof key === 'string' && !Number.isNaN(utcOf(key));
 
-/* Which day of the log a date is: 1 on the start date, 0 the day before.
-   Whole-day arithmetic on the calendar parts, so DST cannot shift it. */
-export const dayOf = key => Math.floor((utcOf(key) - utcOf(SPEC.start)) / 86400000) + 1;
+/* The key n days after another one (negative n for earlier), and the
+   whole days from one key to another. UTC arithmetic on the calendar
+   parts, so DST cannot shift a day. */
+export const shift = (key, n) => new Date(utcOf(key) + n * 86400000).toISOString().slice(0, 10);
+export const daysBetween = (from, to) => Math.round((utcOf(to) - utcOf(from)) / 86400000);
 
-/* The date of day n of the log, as a key. */
-export const keyOfDay = n => new Date(utcOf(SPEC.start) + (n - 1) * 86400000).toISOString().slice(0, 10);
-
-/* What a save may contain, decided once for both sides: only the days of
-   the log up to today, only known habits, every number finite and inside
-   its range, sleep and each training result kept only when given. */
+/* What a save may contain, decided once for both sides: only days up to
+   today, only known habits, every number finite and inside its range,
+   sleep and each training result kept only when given. */
 export function clean(input, today) {
   const num = (x, m) => {
     if (x === '' || x == null) return undefined;
@@ -75,9 +70,10 @@ export function clean(input, today) {
     return Number.isFinite(n) ? Math.min(m.max, Math.max(0, Math.round(n * 100) / 100)) : undefined;
   };
   const log = {};
-  for (let n = 1; n <= SPEC.days; n++) {
-    const key = keyOfDay(n), day = input?.log?.[key];
-    if (key > today || !day || typeof day !== 'object') continue;
+  const keys = Object.keys(input?.log ?? {}).filter(k => isKey(k) && k <= today).sort().slice(-3650);
+  for (const key of keys) {
+    const day = input.log[key];
+    if (!day || typeof day !== 'object') continue;
     const habits = {}, train = {};
     for (const h of SPEC.habits) habits[h.id] = day.habits?.[h.id] === true;
     for (const e of SPEC.exercises) { const v = num(day.train?.[e.id], e); if (v !== undefined) train[e.id] = v; }

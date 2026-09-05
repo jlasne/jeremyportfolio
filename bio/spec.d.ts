@@ -7,12 +7,12 @@ export interface Habit { id: string; short: string; name: string; why: string }
 export interface Day { habits: Record<string, boolean>; sleep?: number; train?: Record<string, number> }
 export interface Payload { log: Record<string, Day> }
 export const SPEC: {
-  start: string; days: number; exercises: Exercise[];
+  exercises: Exercise[];
   sleep: { unit: string; step: number; max: number }; habits: Habit[];
 };
 export function dateKey(d?: Date): string;
 export function isKey(key: unknown): key is string;
-export function dayOf(key: string): number;
-export function keyOfDay(n: number): string;
+export function shift(key: string, n: number): string;
+export function daysBetween(from: string, to: string): number;
 export function clean(input: Partial<Payload> | undefined, today: string): Payload;
 export function bestOf(e: Exercise, log: Record<string, Day>): { value: number; sessions: number };

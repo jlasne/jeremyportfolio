@@ -1,7 +1,7 @@
 # jeremylasne.com/bio
 
-One page over a snowy ridge that runs behind the whole site: a fifteen-day
-challenge logged one line a day. Five habits and sleep, then every
+One page over a snowy ridge that runs behind the whole site: a daily log,
+one line a day, newest day on top. Five habits and sleep, then every
 training session, with the best result per discipline on top. Everyone
 reads it. One passphrase writes it.
 
@@ -9,15 +9,13 @@ reads it. One passphrase writes it.
 
 - **`index.html`** — the page, hand-written, no build step. Bebas Neue for
   headings and the big numbers, Inter for body, JetBrains Mono for labels,
-  all from Google Fonts. The mountains are drawn at load and fixed behind
-  the page: five ridgelines by midpoint displacement, each with a snow cap
-  that fades out by altitude, the two far ranges blurred and hazed, film
-  grain over everything. The page darkens the scene as it scrolls over it.
-  Seeded, so it is the same mountain on every visit, and drawn for the
-  viewport's own aspect ratio so a phone gets the peaks and the moon.
-- **`spec.js`** — the single source of truth: the start date and length of
-  the log, the five habits, the three tests and the ranges a number may
-  take. The page imports it and so does the server
+  all from Google Fonts. The background is `bg.jpg`, fixed behind the page,
+  blurred and darkened by CSS, and the page darkens it further as it
+  scrolls. Until that file exists the page draws its own ridge instead:
+  five ridgelines by midpoint displacement with snow caps, seeded, so it is
+  the same mountain on every visit.
+- **`spec.js`** — the single source of truth: the five habits, the three
+  tests with their targets, and the ranges a number may take. The page imports it and so does the server
   ([`overlap/convex/bio.ts`](../overlap/convex/bio.ts)), so the two agree
   on which days exist and what a save may contain. `spec.d.ts` is its
   types for `tsc`.
@@ -28,20 +26,23 @@ reads it. One passphrase writes it.
 - **Auth** — a passphrase, `BIO_PASSPHRASE` on the Convex deployment.
   *Edit* asks for it once per tab (kept in `sessionStorage`), opens the
   rows for today and past days plus the three numbers, and *Save* sends it
-  along with the values. The server clamps every number, keeps only the
-  days of the log up to today and only the known habits, whatever the page
-  sent.
+  along with the whole log. The server clamps every number, keeps only days
+  up to today and only the known habits, whatever the page sent.
 
 ## Editing it
 
 Copy lives in `spec.js`: the why-text under each habit, the note under each
-number, units and steps. `start` is day 1 of the log; move it and the
-fifteen rows move with it. Old days stay in the document and are ignored.
+number, units, steps and targets.
 
-Both logs are one row per day. Health: five checks and hours slept.
-Performance: the result of each test done that day, blank when it was a
-rest day. Rows after today are dimmed and locked; today and the days before
-it are editable, so yesterday can be filled in.
+Both logs are one row per day, today first, back to the first logged day.
+Health: five checks and hours slept. Performance: the result of each test
+done that day, blank when it was a rest day. Fourteen rows show; older days
+sit behind *Earlier days*. Every row shown is editable, so yesterday can be
+filled in. A new log shows today and yesterday.
+
+The background photo is `bg.jpg` in this folder. Any landscape works; the
+page blurs it 16px and takes it down to 45% brightness, so a bright photo
+is fine.
 
 The three cards show the best result in the log and the number of sessions
 it came from. Before the first session they show the `target` from

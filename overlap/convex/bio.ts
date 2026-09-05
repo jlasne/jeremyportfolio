@@ -1,7 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
-import { clean, dayOf, dateKey, isKey } from "../../bio/spec.js";
+import { clean, daysBetween, dateKey, isKey } from "../../bio/spec.js";
 
 /**
  * jeremylasne.com/bio: one document, read by everyone, written by one person.
@@ -9,10 +9,9 @@ import { clean, dayOf, dateKey, isKey } from "../../bio/spec.js";
  * The page renders the fallbacks from bio/spec.js and then patches in what is
  * here. A write carries the passphrase set as BIO_PASSPHRASE in the Convex
  * dashboard; there are no accounts because there is exactly one author. What
- * a write may contain (the fifteen days of the log up to today, the known
- * habits, number ranges) is decided by `clean` in the same spec file the page
- * uses. One entry per day: the habit checks, hours slept, and the result of
- * each training session done that day.
+ * a write may contain (days up to today, the known habits, number ranges) is
+ * decided by `clean` in the same spec file the page uses. One entry per day:
+ * the habit checks, hours slept, and the result of each training session.
  */
 const KEY = "v2";
 
@@ -57,7 +56,7 @@ export const save = mutation({
   handler: async (ctx, { passphrase, today, ...input }) => {
     mustBeJeremy(passphrase);
     if (!isKey(today)) throw new Error("Send the day as YYYY-MM-DD");
-    if (Math.abs(dayOf(today) - dayOf(dateKey())) > 1) throw new Error("Your clock and the server disagree by more than a day");
+    if (Math.abs(daysBetween(today, dateKey())) > 1) throw new Error("Your clock and the server disagree by more than a day");
     const doc = { key: KEY, ...clean(input, today), today, updatedAt: Date.now() };
     const old = await current(ctx);
     if (old) await ctx.db.replace(old._id, doc);
