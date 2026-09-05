@@ -10,7 +10,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23050b16'/%3E%3Ccircle cx='44' cy='20' r='8' fill='%23eaf4fb'/%3E%3Cpath d='M0 56 L14 30 L24 44 L36 22 L50 46 L64 36 V64 H0Z' fill='%235fa8d3'/%3E%3C/svg%3E">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Jeremy Lasne">
-<meta property="og:url" content="https://bio.jeremylasne.com/">
+<meta property="og:url" content="https://www.jeremylasne.com/bio/">
 <meta property="og:title" content="Energized and performing life">
 <meta property="og:description" content="Training performance and daily health habits, live. One number per discipline, one habit at a time.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -280,7 +280,8 @@ footer a:hover { color: var(--ice); }
 <noscript><p style="text-align:center;padding:40px">The live numbers need JavaScript.</p></noscript>
 
 <script type="module">
-import { SPEC, dayOf, dateKey, unlocked, fullRhythm, clean } from './spec.js';
+/* absolute on purpose: Vercel serves /bio with no trailing slash, where './spec.js' would resolve to /spec.js */
+import { SPEC, dayOf, dateKey, unlocked, fullRhythm, clean } from '/bio/spec.js';
 
 /* ── the scene ──────────────────────────────────────────────────────────
    Four ridgelines by midpoint displacement, each blurred a little less

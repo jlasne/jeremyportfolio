@@ -99,13 +99,12 @@ current one is not checked in, so redraw it to match if the hero copy changes.
 | `/overlap/team` · `/plan` · `/next` | the app: the team, the meeting, and what to build next |
 | `/kof` | **King of Founders** — a living pixel world map, one kingdom per app |
 | `/foundercity` | **Founder City** — the same apps as a pixel skyline at night, one tower each |
-| `/bio` | **Bio** — three training numbers and a fifteen-day habit ramp, live; also `bio.jeremylasne.com` |
+| `/bio` | **Bio** — three training numbers and a fifteen-day habit ramp, live |
 
 `/investment` and `/invest` are redirect stubs into `/wealth`.
 
-**Bio** is its own subdomain and its own Vercel project, rooted at `bio/`.
-The numbers live in the Overlap Convex deployment behind a passphrase; see
-[`bio/README.md`](bio/README.md).
+**Bio** keeps its numbers in the Overlap Convex deployment behind a
+passphrase; see [`bio/README.md`](bio/README.md).
 
 The four `/wealth` pages share one design system in
 [`wealth/style.css`](wealth/style.css) — warm paper, hairline rules, a single

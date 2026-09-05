@@ -144,7 +144,7 @@ export default defineSchema({
     createdAt: v.number(),
   }),
 
-  /* bio.jeremylasne.com — one document, the numbers on the page. Written
+  /* jeremylasne.com/bio — one document, the numbers on the page. Written
      only with the passphrase in BIO_PASSPHRASE; what it may contain is
      decided in bio/spec.js, which the page imports too. */
   bio: defineTable({

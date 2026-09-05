@@ -4,7 +4,7 @@ import type { Doc } from "./_generated/dataModel";
 import { clean, dayOf, isKey } from "../../bio/spec.js";
 
 /**
- * bio.jeremylasne.com — one document, read by everyone, written by one person.
+ * jeremylasne.com/bio — one document, read by everyone, written by one person.
  *
  * The page renders the fallbacks from bio/spec.js and then patches in what is
  * here. A write carries the passphrase set as BIO_PASSPHRASE in the Convex

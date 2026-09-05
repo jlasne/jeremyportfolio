@@ -1,7 +1,8 @@
-# bio.jeremylasne.com
+# /bio
 
-One page over a moonlit ridge: three training numbers and a fifteen-day
-habit ramp. Everyone reads it. One passphrase writes it.
+One page over a moonlit ridge, at [jeremylasne.com/bio](https://www.jeremylasne.com/bio):
+three training numbers and a fifteen-day habit ramp. Everyone reads it.
+One passphrase writes it.
 
 ## Stack
 
@@ -45,20 +46,20 @@ page never shows dashes. Replace them with real ones on the first *Save*.
 
 ## Deploy
 
-1. **Convex** — `cd overlap && npx convex deploy`, then in the dashboard
-   (Settings → Environment Variables) set `BIO_PASSPHRASE`. If
-   `OVERLAP_ALLOW_ORIGIN` is set, make it a comma-separated list:
-   `https://jeremylasne.com,https://bio.jeremylasne.com`.
-2. **Vercel** — a new project from this repository with *Root Directory*
-   `bio`, no framework, no build command. Add the domain
-   `bio.jeremylasne.com` (a CNAME to `cname.vercel-dns.com`). The main
-   project keeps serving the same page at `jeremylasne.com/bio` untouched.
+The page is part of the main site: push to `main` and Vercel serves it at
+`/bio` with everything else. Saving needs the Convex side once:
+`cd overlap && npx convex deploy`, then in the dashboard (Settings →
+Environment Variables) set `BIO_PASSPHRASE`. If `OVERLAP_ALLOW_ORIGIN` is
+set, it can be a comma-separated list, e.g.
+`https://www.jeremylasne.com,https://jeremylasne.com`.
 
 ## Run locally
 
+From the repository root, so `/bio/spec.js` resolves:
+
 ```bash
-cd bio && python -m http.server 8000
-# → http://localhost:8000
+python -m http.server 8000
+# → http://localhost:8000/bio/
 ```
 
 The page is an ES module and imports `spec.js`, so it needs a server; a

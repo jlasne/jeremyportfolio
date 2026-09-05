@@ -1,4 +1,4 @@
-/* bio.jeremylasne.com — the one place the content and the unlock rule live.
+/* jeremylasne.com/bio — the one place the content and the unlock rule live.
 
    Imported by the page (bio/index.html) and by the server
    (overlap/convex/bio.ts), so the two can never disagree about which

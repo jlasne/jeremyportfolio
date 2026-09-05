@@ -14,8 +14,8 @@ import { api } from "./_generated/api";
  */
 
 /* One origin, or several separated by commas: a request from an origin on
-   the list gets its own origin back, so jeremylasne.com and
-   bio.jeremylasne.com share the door. Unset means anyone. */
+   the list gets its own origin back, so www and the bare domain can both
+   use the door. Unset means anyone. */
 const ALLOW = (process.env.OVERLAP_ALLOW_ORIGIN ?? "*").split(",").map((s) => s.trim()).filter(Boolean);
 const allowFor = (origin: string | null) =>
   ALLOW.includes("*") ? "*" : origin && ALLOW.includes(origin) ? origin : ALLOW[0];
