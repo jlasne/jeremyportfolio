@@ -113,6 +113,7 @@ h2 {
 .lrow.today { background: linear-gradient(90deg, rgba(95, 168, 211, .16), rgba(95, 168, 211, .03) 60%, transparent); box-shadow: inset 3px 0 var(--blue); }
 .lrow.today .date { color: var(--ice); font-weight: 500; }
 .lrow.future { opacity: .32; }
+.lrow.empty { grid-template-columns: 1fr; color: var(--ice-70); }
 .cell { display: flex; justify-content: center; }
 .tick {
   appearance: none; -webkit-appearance: none; width: 20px; height: 20px; margin: 0;
@@ -237,7 +238,7 @@ footer a:hover { color: var(--ice); }
 @media (max-width: 560px) {
   .lrow { grid-template-columns: 66px repeat(var(--n), minmax(0, 1fr)) 40px 52px; gap: 4px; padding: 9px 6px 9px 8px; }
   .lrow.lhead { align-items: end; }
-  .lrow.lhead .h { writing-mode: vertical-rl; transform: rotate(180deg); text-align: left; font-size: 9px; letter-spacing: .08em; height: 58px; margin: 0 auto; }
+  .lrow.lhead .h { writing-mode: vertical-rl; transform: rotate(180deg); text-align: left; font-size: 9px; letter-spacing: .08em; height: 86px; margin: 0 auto; white-space: nowrap; }
   .lrow.lhead .s { align-self: end; }
   .lrow .date { font-size: 12px; }
   .tick { width: 18px; height: 18px; }
@@ -449,7 +450,8 @@ let rows = [], all = false;
 const first = () => Object.keys(state.log).filter(k => k <= today).sort()[0];
 const numCell = (id, m, label) => `<span class="s"><input class="val" id="${id}" type="number" inputmode="decimal" min="0" max="${m.max}" step="${m.step}" placeholder=" " readonly aria-label="${label}"><i>${m.unit}</i></span>`;
 function grid(host, head, row) {
-  host.innerHTML = `<div class="lrow lhead" role="row"><span class="date">Date</span>${head}</div>`;
+  host.innerHTML = `<div class="lrow lhead" role="row"><span class="date">Date</span>${head}</div>` +
+    (rows.length ? '' : `<div class="lrow empty"><span class="date">First entry ${pretty(SPEC.start, true)}</span></div>`);
   for (const r of rows) {
     const div = document.createElement('div');
     div.className = 'lrow ' + r.when; div.setAttribute('role', 'row');
@@ -460,7 +462,9 @@ function grid(host, head, row) {
 function build() {
   const f = first(), yesterday = shift(today, -1);
   let from = f && f < yesterday ? f : yesterday;
-  const hidden = all ? 0 : Math.max(0, daysBetween(from, today) + 1 - SHOWN);
+  /* the first two weeks show every day since the start, missed ones included */
+  if (from < SPEC.start || daysBetween(SPEC.start, today) < SHOWN) from = SPEC.start;
+  const hidden = all || today < from ? 0 : Math.max(0, daysBetween(from, today) + 1 - SHOWN);
   if (hidden) from = shift(today, 1 - SHOWN);
   rows = [];
   for (let k = today; k >= from; k = shift(k, -1)) rows.push({ key: k, when: k === today ? 'today' : 'past' });

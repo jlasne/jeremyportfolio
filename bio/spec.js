@@ -6,6 +6,9 @@
    the page has no build step. */
 
 export const SPEC = {
+  /* The first day of the log. Nothing is shown or saved before it. */
+  start: '2026-09-06',
+
   /* One test per discipline, one test a day at most. The card shows the
      best result so far, or the target as a placeholder until the first
      session. */
@@ -31,8 +34,8 @@ export const SPEC = {
 
   /* The five habits, one check each per day. */
   habits: [
-    { id: 'light', short: 'Light', name: 'Morning light & water',
-      why: '10 minutes of daylight and 500 ml of water within 30 minutes of waking. Sets the body clock and replaces the water lost over 7 hours of sleep.' },
+    { id: 'light', short: 'Light & water', name: 'Morning light & water',
+      why: '500 ml of water on waking, then 10 minutes of daylight. Refills 7 hours of sleep and sets the body clock.' },
     { id: 'walk', short: 'Walk', name: 'Walk after eating',
       why: '10 to 15 minutes after each meal. Lowers the glucose spike, so the afternoon stays awake.' },
     { id: 'collagen', short: 'Collagen', name: 'Collagen & vitamin C',
@@ -58,8 +61,8 @@ export const isKey = key => typeof key === 'string' && !Number.isNaN(utcOf(key))
 export const shift = (key, n) => new Date(utcOf(key) + n * 86400000).toISOString().slice(0, 10);
 export const daysBetween = (from, to) => Math.round((utcOf(to) - utcOf(from)) / 86400000);
 
-/* What a save may contain, decided once for both sides: only days up to
-   today, only known habits, every number finite and inside its range,
+/* What a save may contain, decided once for both sides: only days from the
+   start up to today, only known habits, every number finite and inside its range,
    sleep, weight and the training result kept only when given, the
    session note trimmed to 80 characters. */
 export function clean(input, today) {
@@ -69,7 +72,7 @@ export function clean(input, today) {
     return Number.isFinite(n) ? Math.min(m.max, Math.max(0, Math.round(n * 100) / 100)) : undefined;
   };
   const log = {};
-  const keys = Object.keys(input?.log ?? {}).filter(k => isKey(k) && k <= today).sort().slice(-3650);
+  const keys = Object.keys(input?.log ?? {}).filter(k => isKey(k) && k >= SPEC.start && k <= today).sort().slice(-3650);
   for (const key of keys) {
     const day = input.log[key];
     if (!day || typeof day !== 'object') continue;
