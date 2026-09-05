@@ -99,7 +99,7 @@ current one is not checked in, so redraw it to match if the hero copy changes.
 | `/overlap/team` · `/plan` · `/next` | the app: the team, the meeting, and what to build next |
 | `/kof` | **King of Founders** — a living pixel world map, one kingdom per app |
 | `/foundercity` | **Founder City** — the same apps as a pixel skyline at night, one tower each |
-| `/bio` | **Bio** — three training numbers and a fifteen-day habit ramp, live |
+| `/bio` | **Bio** — a fifteen-day daily log of five habits and sleep, then one number per training discipline, live |
 
 `/investment` and `/invest` are redirect stubs into `/wealth`.
 
