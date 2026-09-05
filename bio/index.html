@@ -180,7 +180,6 @@ h2 {
 .num { font: 400 clamp(72px, 8vw, 104px)/1 var(--display); letter-spacing: .01em; color: var(--ice); }
 .sub { display: block; margin-top: 6px; color: var(--ice-45); }
 .unit { color: var(--blue); font-size: 12px; text-transform: none; }
-.card .note { margin: 14px 0 0; font-size: 14px; color: var(--ice-70); max-width: 34ch; }
 .spark { display: block; width: 100%; height: 72px; margin: 16px 0 0; overflow: visible; }
 .spark[hidden] { display: none; }
 .spark .base { stroke: rgba(234, 244, 251, .14); stroke-width: 1; }
@@ -488,8 +487,7 @@ TESTS.forEach((e, i) => {
     <p class="name">${e.name}<small>${e.protocol}</small></p>
     <div class="stat"><span class="num" id="n-${e.id}"></span><span class="unit mono">${e.unit}</span></div>
     <span class="sub mono" id="b-${e.id}"></span>
-    <svg class="spark" id="k-${e.id}" hidden aria-hidden="true"></svg>
-    <p class="note">${e.note}</p>`;
+    <svg class="spark" id="k-${e.id}" hidden aria-hidden="true"></svg>`;
   $('cards').appendChild(c);
 });
 

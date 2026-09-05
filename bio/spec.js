@@ -7,22 +7,20 @@
 
 export const SPEC = {
   /* One test per discipline, one test a day at most. The card shows the
-     best result so far, or the target until the first session. */
+     best result so far, or the target as a placeholder until the first
+     session. */
   exercises: [
     {
       id: 'pullup', discipline: 'Strength', name: 'Weighted pull-up', short: 'Pull-up', protocol: '1 rep max',
       unit: 'kg', step: 2.5, max: 200, best: 'max', target: 20,
-      note: 'One strict rep with the heaviest weight on the belt. Kilos added on top of bodyweight is the strength number.',
     },
     {
       id: 'swim', discipline: 'Cardio', name: 'Swim', short: 'Swim', protocol: '30 minutes',
       unit: 'm', step: 25, max: 5000, best: 'max', target: 1200,
-      note: 'Meters covered in 30 minutes at one even pace. Water loads the heart with zero impact on the joints.',
     },
     {
       id: 'sprint', discipline: 'Sprint', name: '100 m', short: '100 m', protocol: 'standing start',
       unit: 's', step: 0.1, max: 60, best: 'min', target: 14,
-      note: 'One timed run on the track. The shortest test of top speed and power.',
     },
   ],
 
@@ -35,10 +33,8 @@ export const SPEC = {
       why: '10 minutes of daylight and 500 ml of water within 30 minutes of waking. Sets the body clock and replaces the water lost over 7 hours of sleep.' },
     { id: 'walk', short: 'Walk', name: 'Walk after eating',
       why: '10 to 15 minutes after each meal. Lowers the glucose spike, so the afternoon stays awake.' },
-    { id: 'collagen', short: 'Collagen', name: 'Collagen',
-      why: '10 g a day for tendons and joints, the parts that fail first under load.' },
-    { id: 'vitc', short: 'Vit C', name: 'Vitamin C',
-      why: 'Taken with the collagen. The body needs it to turn collagen into tissue.' },
+    { id: 'collagen', short: 'Collagen', name: 'Collagen & vitamin C',
+      why: '10 g of collagen with vitamin C, taken together. Vitamin C is what turns the collagen into tendon and joint tissue.' },
     { id: 'coffee', short: 'Coffee', name: 'Caffeine, coffee only',
       why: 'Coffee only, 90 minutes after waking, last cup before noon.' },
   ],
