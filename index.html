@@ -15,10 +15,16 @@
 <meta property="og:url" content="https://www.jeremylasne.com/">
 <meta property="og:title" content="Jeremy Lasne">
 <meta property="og:description" content="I make mobile apps with influencers.">
-<meta property="og:image" content="https://www.jeremylasne.com/og-image.png?v=3">
+<meta property="og:image" content="https://www.jeremylasne.com/og-image.png?v=4">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Jeremy Lasne. I make mobile apps with influencers.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@jeremylasne">
 <meta name="twitter:creator" content="@jeremylasne">
+<meta name="twitter:title" content="Jeremy Lasne">
+<meta name="twitter:description" content="I make mobile apps with influencers.">
+<meta name="twitter:image" content="https://www.jeremylasne.com/og-image.png?v=4">
 
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -45,7 +51,7 @@
   .bg {
     position: fixed; top: -6%; left: -6%; width: 112%; height: 112%; z-index: 0; pointer-events: none;
     object-fit: cover; object-position: 50% 42%;
-    filter: blur(16px) brightness(.45) saturate(.9);
+    filter: blur(10px) brightness(.5) saturate(.9);
   }
   #snow { position: fixed; inset: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; }
 
@@ -67,14 +73,9 @@
     background: rgba(95,168,211,.35); filter: blur(30px);
   }
   .avatar {
-    position: relative; width: 104px; height: 104px;
-    border-radius: 50%; overflow: hidden;
-    display: grid; place-items: center;
-    background: #173d59; color: var(--ice);
-    font-size: 34px; font-weight: 600; letter-spacing: -.03em;
+    display: block; width: 104px; height: 104px; border-radius: 50%; object-fit: cover;
     box-shadow: 0 0 0 1px rgba(234,244,251,.12), 0 12px 40px -8px rgba(95,168,211,.45);
   }
-  .avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
 
   h1 { font-size: 30px; font-weight: 600; letter-spacing: -.025em; text-wrap: balance; }
   .tagline { margin-top: 10px; font-size: 17px; line-height: 1.6; color: var(--ice-70); max-width: 40ch; text-wrap: pretty; }
@@ -133,7 +134,7 @@
 <main>
   <div class="col">
     <div class="avatar-wrap reveal">
-      <div class="avatar" aria-hidden="true">JL<img src="media/avatar.jpg" alt="" onerror="this.remove()"></div>
+      <img class="avatar" src="media/avatar.webp" alt="Jeremy Lasne" width="104" height="104">
     </div>
     <h1 class="reveal" style="--d:60">Jeremy Lasne</h1>
     <p class="tagline reveal" style="--d:130">I make mobile apps with influencers.</p>
@@ -167,7 +168,7 @@
       <ul>
         <li><span class="item"><span class="dot"></span><span class="name">SaaS Health</span><span class="tag">private equity</span></span></li>
         <li><span class="item"><span class="dot"></span><span class="name">H100 datacenters</span><span class="tag">private equity</span></span></li>
-        <li><span class="item"><span class="dot"></span><span class="name">Astro Blog</span><span class="desc">Astrology and astronomy.</span><span class="tag">private equity</span></span></li>
+        <li><span class="item"><span class="dot"></span><span class="name">Astro Blog</span><span class="tag">private equity</span></span></li>
         <li><a class="item" href="/bio/">
           <span class="dot"></span>
           <span class="name">Bio Tracker</span>
@@ -194,16 +195,18 @@
 <script>
 (function () {
   "use strict";
-  /* Snow in a strong wind. It comes in from the left in gusts and streaks
-     across; the pointer is a gust of its own, kicking up flakes as it moves
-     and swirling the ones it passes. */
+  /* Snow in a strong wind. Gusts travel across the screen as fronts, so the
+     snow surges and eases in waves; eddies in the flow field roll it into
+     curls on the way. Near flakes are big, fast and bright, far ones small
+     and slow. The pointer is a gust of its own: it kicks up snow as it
+     moves and spins what it passes. */
   var c = document.getElementById("snow"), x = c.getContext("2d");
   var still = matchMedia("(prefers-reduced-motion: reduce)").matches;
   var W, H, flakes = [], t = 0, p = { x: -1e4, y: -1e4, vx: 0, vy: 0, on: false };
-  var REACH = 170, MAX = 900;
+  var REACH = 180, MAX = 900;
 
   function flake(x0, y0, z, life) {
-    return { x: x0, y: y0, z: z, r: .6 + z * 1.6, vx: 0, vy: 0, ph: Math.random() * 6.28, a: .35 + z * .5, life: life };
+    return { x: x0, y: y0, z: z, r: .5 + z * z * 2.2, vx: 0, vy: 0, ph: Math.random() * 6.28, a: .3 + z * .55, life: life };
   }
   function size() {
     var dpr = Math.min(devicePixelRatio || 1, 2);
@@ -211,52 +214,68 @@
     c.width = W * dpr; c.height = H * dpr;
     x.setTransform(dpr, 0, 0, dpr, 0, 0);
     flakes = [];
-    for (var n = Math.round((W * H) / 6500); n--;) flakes.push(flake(Math.random() * W, Math.random() * H, Math.random(), -1));
+    for (var n = Math.round((W * H) / 5500); n--;) flakes.push(flake(Math.random() * W, Math.random() * H, Math.random(), -1));
   }
 
+  /* wind at a point: a base blow, a gust front rolling left to right, and eddies */
+  function wind(px, py, z, out) {
+    var front = .5 + .5 * Math.sin(px * .0035 - t * 2.1) ;
+    var slow = Math.sin(t * .31) * .8 + Math.sin(t * .77) * .4;
+    var base = 1.6 + slow + front * front * 3.2;
+    var s = .0032;
+    var e1 = Math.sin(px * s * 1.3 + t * .9) * Math.cos(py * s * .9 - t * .6);
+    var e2 = Math.sin(py * s * 1.7 - t * .7 + px * s * .4);
+    out[0] = (base + e1 * 1.3 + e2 * .5) * (.35 + z * .9);
+    out[1] = (.35 + z * .9 + e2 * 1.1 - e1 * .5) * (.5 + front * .4);
+  }
+
+  var w = [0, 0];
   function frame() {
     t += .016;
-    var wind = still ? 0 : 2.4 + Math.sin(t * .35) * 1.3 + Math.sin(t * 1.7) * .5 + Math.sin(t * 4.1) * .2;
     x.clearRect(0, 0, W, H);
     x.strokeStyle = x.fillStyle = "#fff"; x.lineCap = "round";
     p.vx *= .88; p.vy *= .88;
 
     for (var i = flakes.length - 1; i >= 0; i--) {
       var f = flakes[i];
-      var tvx = wind * (.45 + f.z) + Math.sin(t * 2 + f.ph) * .4;
-      var tvy = still ? 0 : .5 + f.z * 1.1 + Math.cos(t * 1.6 + f.ph) * .3;
+      if (still) { w[0] = w[1] = 0; } else wind(f.x, f.y, f.z, w);
+      var tvx = w[0], tvy = w[1];
       var dx = f.x - p.x, dy = f.y - p.y, d = Math.hypot(dx, dy);
       if (d < REACH) {
         var k = (1 - d / REACH), ux = dx / (d || 1), uy = dy / (d || 1);
-        tvx += (p.vx * .4 + ux * 2.2 - uy * 2.4) * k;
-        tvy += (p.vy * .4 + uy * 2.2 + ux * 2.4) * k;
+        k *= k;
+        tvx += (p.vx * .5 + ux * 2.6 - uy * 3.2) * k;
+        tvy += (p.vy * .5 + uy * 2.6 + ux * 3.2) * k;
       }
-      f.vx += (tvx - f.vx) * .08; f.vy += (tvy - f.vy) * .08;
+      var ease = .05 + f.z * .07;
+      f.vx += (tvx - f.vx) * ease; f.vy += (tvy - f.vy) * ease;
       f.x += f.vx; f.y += f.vy;
 
       if (f.life > 0) { f.life -= .011; if (f.life <= 0) { flakes.splice(i, 1); continue; } }
       else {
         if (f.x > W + 20) { f.x = -20; f.y = Math.random() * H; }
-        else if (f.x < -30) f.x = W + 20;
+        else if (f.x < -30) { f.x = W + 20; f.y = Math.random() * H; }
         if (f.y > H + 20) { f.y = -20; f.x = Math.random() * W; }
         else if (f.y < -30) f.y = H + 20;
       }
-      x.globalAlpha = f.a * (f.life > 0 ? Math.min(1, f.life * 3) : 1);
       var sp = Math.hypot(f.vx, f.vy);
-      if (sp > 1.2) {
-        x.lineWidth = f.r * 1.7;
-        x.beginPath(); x.moveTo(f.x, f.y); x.lineTo(f.x - f.vx * 1.6, f.y - f.vy * 1.6); x.stroke();
+      x.globalAlpha = f.a * (f.life > 0 ? Math.min(1, f.life * 3) : 1) * Math.max(.45, 1 - sp * .04);
+      if (sp > 1.4) {
+        x.lineWidth = f.r * 1.6;
+        var L = Math.min(2.6, .9 + sp * .22);
+        x.beginPath(); x.moveTo(f.x, f.y); x.lineTo(f.x - f.vx * L, f.y - f.vy * L); x.stroke();
       } else {
         x.beginPath(); x.arc(f.x, f.y, f.r, 0, 6.28); x.fill();
       }
     }
 
     if (p.on && !still && flakes.length < MAX) {
-      var n = Math.min(7, Math.floor(Math.hypot(p.vx, p.vy) * .45) + (Math.random() < .45 ? 1 : 0));
+      var n = Math.min(7, Math.floor(Math.hypot(p.vx, p.vy) * .45) + (Math.random() < .5 ? 1 : 0));
       while (n--) {
-        var a = Math.random() * 6.28, rr = Math.random() * 44, z = Math.random();
+        var a = Math.random() * 6.28, rr = Math.random() * 48, z = .4 + Math.random() * .6;
         var nf = flake(p.x + Math.cos(a) * rr, p.y + Math.sin(a) * rr, z, 1);
-        nf.vx = p.vx * .5 + wind; nf.vy = p.vy * .5;
+        wind(nf.x, nf.y, z, w);
+        nf.vx = p.vx * .5 + w[0]; nf.vy = p.vy * .5 + w[1];
         flakes.push(nf);
       }
     }
