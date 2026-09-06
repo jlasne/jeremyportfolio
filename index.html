@@ -142,12 +142,35 @@
     .item .desc { flex-basis: 100%; order: 3; padding-left: 38px; line-height: 1.5; }
   }
   @media (prefers-reduced-motion: reduce) { .reveal { animation: none; } }
+
+  /* ---- the wind, and the one control for it, top right ---- */
+  .mute {
+    position: fixed; top: max(14px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); z-index: 3;
+    width: 40px; height: 40px; display: grid; place-items: center;
+    background: none; border: 0; border-radius: 50%; cursor: pointer; color: var(--ice-45);
+  }
+  .mute svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .mute .body { fill: currentColor; stroke: none; }
+  .mute .off { display: none; }
+  .mute[aria-pressed="true"] .on { display: none; }
+  .mute[aria-pressed="true"] .off { display: block; }
+  @media (hover: hover) { .mute:hover { color: var(--blue); } }
+  .mute:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 </style>
 </head>
 <body>
 
 <img class="bg" src="bio/bg.jpg" alt="" fetchpriority="high">
 <canvas id="snow" aria-hidden="true"></canvas>
+
+<audio id="wind" src="media/wind.mp3" loop preload="auto"></audio>
+<button id="mute" class="mute" type="button" aria-label="Mute the wind" aria-pressed="false" hidden>
+  <svg viewBox="0 0 20 20" aria-hidden="true">
+    <path class="body" d="M3 7.5h3l4-3.5v12l-4-3.5H3z"/>
+    <path class="on" d="M13 7a4.2 4.2 0 0 1 0 6M15.5 4.5a7.8 7.8 0 0 1 0 11"/>
+    <path class="off" d="M13 7.5l5 5M18 7.5l-5 5"/>
+  </svg>
+</button>
 
 <main>
   <div class="col">
@@ -221,5 +244,22 @@
 </svg>
 
 <script src="snow.js" defer></script>
+<script>
+  /* The wind plays on arrival, quietly, and loops. Browsers that refuse sound
+     before a gesture get it on the first click or key instead. Mute once and
+     it stays muted on the next visit. */
+  (function () {
+    var a = document.getElementById("wind"), b = document.getElementById("mute");
+    var off = localStorage.getItem("wind") === "off";
+    a.volume = .35;
+    function paint() { b.setAttribute("aria-pressed", off); b.setAttribute("aria-label", off ? "Unmute the wind" : "Mute the wind"); }
+    function blow() { if (!off) a.play().catch(function () {}); }
+    b.onclick = function () { off = !off; localStorage.setItem("wind", off ? "off" : "on"); off ? a.pause() : blow(); paint(); };
+    addEventListener("pointerdown", blow, { once: true });
+    addEventListener("keydown", blow, { once: true });
+    a.onerror = function () { b.hidden = true; };
+    paint(); b.hidden = false; blow();
+  })();
+</script>
 </body>
 </html>
