@@ -245,17 +245,17 @@
 
 <script src="snow.js" defer></script>
 <script>
-  /* The wind plays on arrival, quietly, and loops. Browsers that refuse sound
-     before a gesture get it on the first click or key instead. Mute once and
-     it stays muted on the next visit. */
+  /* The wind plays on arrival and loops, wrapping just before the recording's
+     silent tail. Browsers that refuse sound before a gesture get it on the
+     first click or key instead. Mute once and it stays muted on the next visit. */
   (function () {
     var a = document.getElementById("wind"), b = document.getElementById("mute");
     var off = localStorage.getItem("wind") === "off";
-    a.volume = .35;
+    a.ontimeupdate = function () { if (a.currentTime > 57) a.currentTime = 0; };
     function paint() { b.setAttribute("aria-pressed", off); b.setAttribute("aria-label", off ? "Unmute the wind" : "Mute the wind"); }
     function blow() { if (!off) a.play().catch(function () {}); }
     b.onclick = function () { off = !off; localStorage.setItem("wind", off ? "off" : "on"); off ? a.pause() : blow(); paint(); };
-    addEventListener("pointerdown", blow, { once: true });
+    addEventListener("click", blow, { once: true });
     addEventListener("keydown", blow, { once: true });
     a.onerror = function () { b.hidden = true; };
     paint(); b.hidden = false; blow();
