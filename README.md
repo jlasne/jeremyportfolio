@@ -100,6 +100,7 @@ current one is not checked in, so redraw it to match if the hero copy changes.
 | `/kof` | **King of Founders** — a living pixel world map, one kingdom per app |
 | `/foundercity` | **Founder City** — the same apps as a pixel skyline at night, one tower each |
 | `/bio` | **Bio** — a fifteen-day daily log of five habits and sleep, then one number per training discipline, live |
+| `/brand` | **BrandMatch** · the same offer as the pitch under its own name, laid out and animated the way passion.io is, in black and white. Self-contained: the folder moves to brandmatch.app as it is |
 
 `/investment` and `/invest` are redirect stubs into `/wealth`.
 

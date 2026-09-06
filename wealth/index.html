@@ -2,225 +2,360 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Wealth Architecture · Jeremy Lasne</title>
-<meta name="description" content="The research I keep on how wealth is built and held — fourteen principles, thirty-two countries, an interactive lecture — and the positions I actually hold behind it.">
-<meta name="robots" content="noindex, nofollow">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="description" content="Notes on holding money through a change of era, written for someone starting from zero. Dalio, Gave and Détente in one line of thought, with seven figures and one map.">
+<link rel="canonical" href="https://www.jeremylasne.com/wealth/">
+<meta name="theme-color" content="#050b16">
 <link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Jeremy Lasne">
+<meta property="og:url" content="https://www.jeremylasne.com/wealth/">
+<meta property="og:title" content="Wealth Architecture">
+<meta property="og:description" content="Notes on holding money through a change of era, for someone starting from zero.">
+<meta property="og:image" content="https://www.jeremylasne.com/og-image.png?v=4">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@jeremylasne">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..600;1,9..40,300..500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/wealth/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+
 <style>
-  /* ── section headers ──────────────────────────────────────────────── */
-  .band { margin: clamp(72px, 10vw, 118px) 0 0; padding-top: 28px; border-top: 1px solid var(--ink); }
-  .band-no { font-size: 11px; letter-spacing: 0.2em; color: var(--gold); font-variant-numeric: tabular-nums; margin: 0 0 10px; }
-  .band h2 {
-    font-family: var(--display); font-weight: 400; font-size: clamp(32px, 5vw, 46px);
-    line-height: 1.08; color: var(--ink); margin: 0;
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --ink: #050b16; --blue: #5fa8d3; --ice: #eaf4fb;
+    --ice-70: rgba(234,244,251,.72); --ice-45: rgba(234,244,251,.46);
+    --line: rgba(95,168,211,.18); --glass: rgba(5,11,22,.6); --card: rgba(23,61,89,.28);
+    --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --display: "Instrument Serif", Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
-  .band > p { margin: 18px 0 0; color: var(--muted); max-width: 62ch; }
+  html { background: var(--ink); color-scheme: dark; }
+  body { font-family: var(--serif); font-size: 19px; line-height: 1.68; color: var(--ice); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  ::selection { background: var(--blue); color: var(--ink); }
+  a { color: inherit; }
 
-  /* ── research pieces ──────────────────────────────────────────────── */
-  .pieces { margin-top: 34px; display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
-  .piece {
-    background: var(--paper); padding: clamp(26px, 3.6vw, 38px);
-    display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; text-decoration: none;
-    transition: background .15s;
-  }
-  .piece:hover { background: var(--paper-card); }
-  .piece:hover h3 { color: var(--gold); }
-  /* every child carries its own class — a bare `.piece p` would also match the
-     kicker and the meta row and fight them for a grid slot */
-  .piece-k { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--faint); margin: 0; }
-  .piece h3 {
-    font-family: var(--display); font-weight: 400; font-size: clamp(27px, 3.6vw, 34px);
-    line-height: 1.12; color: var(--ink); margin: 0; transition: color .15s;
-  }
-  .piece-d { margin: 0; font-size: 16px; line-height: 1.7; color: var(--muted); max-width: 60ch; }
-  .piece-m {
-    margin: 0; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint);
-    display: flex; flex-wrap: wrap; gap: 6px 18px;
-  }
-  @media (min-width: 900px) {
-    .piece { grid-template-columns: minmax(0, 300px) minmax(0, 1fr); column-gap: 44px; align-items: start; }
-    .piece-k { grid-column: 1; grid-row: 1; }
-    .piece h3 { grid-column: 1; grid-row: 2; }
-    .piece-d { grid-column: 2; grid-row: 1 / span 2; }
-    .piece-m { grid-column: 2; grid-row: 3; }
-  }
+  .bg { position: fixed; top: -6%; left: -6%; width: 112%; height: 112%; z-index: 0; pointer-events: none; object-fit: cover; object-position: 50% 42%; filter: blur(10px) brightness(.5) saturate(.9); }
+  #snow { position: fixed; inset: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; }
 
-  /* ── the book ─────────────────────────────────────────────────────── */
-  .holdings { margin-top: 34px; display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
-  .holding { background: var(--paper); padding: clamp(26px, 3.6vw, 38px); }
-  .holding-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 18px; }
-  .holding h3 {
-    font-family: var(--display); font-weight: 400; font-size: clamp(25px, 3.2vw, 31px);
-    line-height: 1.12; color: var(--ink); margin: 0;
-  }
-  .pocket-pill {
-    font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold);
-    border: 1px solid var(--gold); padding: 3px 9px;
-  }
-  .holding-fig {
-    margin-left: auto; font-family: var(--display); font-size: clamp(26px, 3.4vw, 34px);
-    line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap;
-  }
-  .holding-fig small {
-    display: block; font-family: var(--body); font-size: 10.5px; letter-spacing: 0.16em;
-    text-transform: uppercase; color: var(--faint); margin-top: 8px; text-align: right;
-  }
-  .holding p { margin: 18px 0 0; font-size: 16px; line-height: 1.72; color: var(--muted); max-width: 62ch; }
-  .holding a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--gold); padding-bottom: 1px; }
-  .holding a:hover { background: var(--gold-wash); }
-  .holding dl {
-    margin: 24px 0 0; padding-top: 20px; border-top: 1px solid var(--rule);
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 22px 20px;
-  }
-  .holding dt {
-    font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin: 0 0 6px;
-  }
-  .holding dd { margin: 0; font-size: 15.5px; color: var(--ink); line-height: 1.5; }
-  @media (max-width: 560px) { .holding-fig { margin-left: 0; } }
+  .top { position: relative; z-index: 2; max-width: 1040px; margin: 0 auto; padding: 22px 24px; display: flex; justify-content: space-between; gap: 16px; font-family: var(--sans); }
+  .top a { text-decoration: none; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ice-45); }
+  .top a:hover { color: var(--blue); }
 
-  /* ── the shape ────────────────────────────────────────────────────── */
-  .shape { margin-top: 34px; }
-  .shape-row {
-    display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 16px 24px; align-items: baseline;
-    padding: 20px 0; border-bottom: 1px solid var(--rule);
+  main { position: relative; z-index: 2; padding: 16px 0 80px; }
+  .col { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+  .wide { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+  .paper { background: var(--glass); border: 1px solid var(--line); border-radius: 24px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: clamp(28px, 6vw, 72px) clamp(22px, 6vw, 72px); }
+
+  /* masthead, as a paper */
+  .mast { text-align: left; padding-bottom: 36px; border-bottom: 1px solid var(--line); }
+  .kicker { font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--ice-45); }
+  h1 { font-family: var(--display); font-weight: 400; font-size: clamp(46px, 8vw, 84px); line-height: .98; letter-spacing: -.02em; margin: 18px 0 20px; }
+  h1 em { font-style: italic; color: var(--blue); }
+  .deck { font-size: clamp(19px, 2.4vw, 23px); line-height: 1.5; color: var(--ice-70); max-width: 34em; text-wrap: pretty; }
+  .byline { margin-top: 26px; font-family: var(--sans); font-size: 13px; color: var(--ice-45); display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  .byline b { color: var(--ice-70); font-weight: 600; }
+  .toc { margin-top: 28px; font-family: var(--sans); font-size: 14px; line-height: 1.9; color: var(--ice-70); columns: 2; column-gap: 32px; }
+  .toc a { text-decoration: none; display: block; break-inside: avoid; }
+  .toc a:hover { color: var(--blue); }
+  .toc span { color: var(--ice-45); margin-right: 8px; font-variant-numeric: tabular-nums; }
+  @media (max-width: 560px) { .toc { columns: 1; } }
+
+  h2 { font-family: var(--display); font-weight: 400; font-size: clamp(32px, 4.6vw, 44px); line-height: 1.05; letter-spacing: -.015em; margin: 72px 0 22px; text-wrap: balance; }
+  h2 + p::first-letter { }
+  p { margin: 0 0 1.15em; text-wrap: pretty; }
+  p.lede { font-size: 1.08em; }
+  h3 { font-family: var(--serif); font-size: 1em; font-weight: 600; font-style: italic; margin: 30px 0 8px; color: var(--ice); }
+  b { font-weight: 600; }
+  .who { font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ice-45); }
+
+  .pull { margin: 34px 0; padding: 4px 0 4px 22px; border-left: 2px solid var(--blue); font-family: var(--display); font-size: clamp(24px, 3.2vw, 30px); line-height: 1.25; color: var(--ice); text-wrap: balance; }
+  .pull small { display: block; margin-top: 10px; font-family: var(--sans); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ice-45); }
+
+  /* figures */
+  .fig { margin: 30px -8px 34px; }
+  .fig .plot { background: rgba(11,26,44,.82); border: 1px solid var(--line); border-radius: 16px; padding: 18px 14px 10px; font-family: var(--sans); }
+  .fig svg { display: block; width: 100%; height: auto; }
+  figcaption { margin-top: 12px; padding: 0 8px; font-family: var(--sans); font-size: 13.5px; line-height: 1.55; color: var(--ice-70); }
+  figcaption b { color: var(--ice); }
+
+  /* the map */
+  .schema { margin-top: 80px; font-family: var(--sans); }
+  .schema-head { max-width: 640px; margin: 0 auto 32px; padding: 0 24px; text-align: center; }
+  .schema-head h2 { margin: 0; }
+  .schema-head p { margin: 12px 0 0; color: var(--ice-70); font-family: var(--serif); font-size: 18px; }
+  .board { display: block; }
+  .layer { display: grid; grid-template-columns: 180px 1fr; gap: 20px; }
+  .layer .tag .name { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--blue); }
+  .layer .tag .sub { margin-top: 4px; font-size: 12px; color: var(--ice-45); }
+  .layer .tag .why { margin-top: 10px; font-size: 14px; color: var(--ice-70); line-height: 1.5; font-family: var(--serif); }
+  .cells { display: grid; gap: 8px; }
+  .cells.c2 { grid-template-columns: repeat(2, 1fr); }
+  .cells.c3 { grid-template-columns: repeat(3, 1fr); }
+  .cells.c4 { grid-template-columns: repeat(4, 1fr); }
+  .cell { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; min-width: 0; }
+  .cell.hot { border-color: rgba(95,168,211,.55); background: rgba(95,168,211,.16); }
+  .cell.dim { opacity: .55; }
+  .cell .h { font-size: 15px; font-weight: 600; line-height: 1.3; }
+  .cell .s { margin-top: 5px; font-size: 13px; color: var(--ice-70); line-height: 1.45; }
+  .cell .e { margin-top: 8px; font-size: 12px; color: var(--ice-45); line-height: 1.4; }
+  .link { margin-left: 200px; height: 34px; display: grid; place-items: center; position: relative; }
+  .link::before { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: rgba(95,168,211,.45); }
+  .link span { position: relative; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ice-45); background: var(--ink); padding: 2px 10px; border-radius: 999px; border: 1px solid var(--line); }
+  .q4 { display: grid; grid-template-columns: 18px 1fr 1fr; grid-template-rows: 1fr 1fr 18px; gap: 6px; }
+  .q4 .ax { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ice-45); display: grid; place-items: center; }
+  .q4 .ax.y { writing-mode: vertical-rl; transform: rotate(180deg); grid-row: 1 / span 2; }
+  .q4 .ax.x { grid-column: 2 / span 2; }
+  .dials { margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .dials .cell { background: transparent; }
+  @media (max-width: 820px) { .layer { grid-template-columns: 1fr; gap: 10px; } .link { margin-left: 0; } .cells.c4 { grid-template-columns: repeat(2, 1fr); } .cells.c3 { grid-template-columns: 1fr; } }
+  @media (max-width: 520px) { .cells.c4, .cells.c2, .dials { grid-template-columns: 1fr; } .q4 { grid-template-columns: 14px 1fr; grid-template-rows: auto; } .q4 .ax.y { grid-row: 1 / span 4; } .q4 .ax.x { grid-column: 2; } }
+
+  /* sources, deeper */
+  .sources { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--line); font-family: var(--sans); font-size: 14px; line-height: 1.6; color: var(--ice-70); }
+  .sources h2 { font-family: var(--sans); font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--ice-45); margin: 0 0 12px; }
+  .sources ol { padding-left: 20px; }
+  .sources li + li { margin-top: 6px; }
+  .deeper { margin-top: 40px; font-family: var(--sans); }
+  .deeper h2 { font-family: var(--sans); font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--ice-45); margin: 0 0 4px; }
+  .deeper ul { list-style: none; }
+  .deeper li + li a { border-top: 1px solid var(--line); }
+  .deeper a { display: flex; align-items: center; gap: 14px; padding: 15px 14px; margin: 0 -14px; border-radius: 14px; text-decoration: none; font-size: 16px; }
+  .deeper a:hover { background: rgba(234,244,251,.06); }
+  .deeper a:hover .name { color: var(--blue); }
+  .deeper .name { font-weight: 600; white-space: nowrap; }
+  .deeper .desc { color: var(--ice-70); font-size: 15px; flex: 1; }
+  .deeper .arrow { width: 16px; height: 16px; fill: var(--ice-45); flex: none; }
+  .fine { margin-top: 28px; font-family: var(--sans); font-size: 13px; color: var(--ice-45); line-height: 1.6; }
+  footer { position: relative; z-index: 2; text-align: center; padding: 0 24px 48px; font-family: var(--sans); font-size: 14px; color: var(--ice-45); }
+  footer a { text-decoration: none; }
+  footer a:hover { color: var(--blue); }
+
+  @media (max-width: 640px) { body { font-size: 17.5px; } .fig { margin-left: -6px; margin-right: -6px; } }
+  @media print {
+    .bg, #snow, .top, .deeper, footer { display: none; }
+    html, body { background: #fff; color: #111; }
+    .paper, .cell, .fig .plot { background: #fff; border-color: #bbb; color: #111; }
+    .deck, .cell .s, .cell .e, figcaption, .layer .tag .why { color: #333; }
   }
-  .shape-row:last-child { border-bottom: 0; }
-  .shape-row h4 { font-family: var(--display); font-weight: 400; font-size: 23px; line-height: 1.15; color: var(--ink); margin: 0; }
-  .shape-row h4 small { display: block; font-family: var(--body); font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); margin-top: 7px; }
-  .shape-row p { margin: 0; font-size: 16px; line-height: 1.7; color: var(--muted); }
-  .shape-row .state { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-top: 8px; }
-  @media (max-width: 620px) { .shape-row { grid-template-columns: 1fr; gap: 10px; } }
 </style>
 </head>
 <body>
 
-<nav class="rail">
-  <div class="rail-in">
-    <a class="rail-home" href="/">Jeremy Lasne</a>
-    <div class="rail-nav">
-      <a class="rail-drop" href="/wealth/" aria-current="page">Wealth Architecture</a>
-      <a href="/wealth/principles/">Principles</a>
-      <a href="/wealth/country/">Country Map</a>
-      <a href="/wealth/exercice/">Exercise</a>
-    </div>
-  </div>
+<img class="bg" src="/bio/bg.jpg" alt="" fetchpriority="high">
+<canvas id="snow" aria-hidden="true"></canvas>
+
+<nav class="top">
+  <a href="/">← Jeremy Lasne</a>
+  <a href="#map">The map</a>
 </nav>
 
-<main class="shell">
+<main>
+  <div class="col">
+  <div class="paper">
 
-  <header class="masthead">
-    <p class="eyebrow">Jeremy Lasne · Research</p>
-    <h1 class="title">Wealth<br>Architecture</h1>
-    <p class="standfirst">What I read, what I concluded, and what I <em>actually own</em>.</p>
-  </header>
+    <header class="mast">
+      <p class="kicker">Research note · Wealth</p>
+      <h1>Wealth <em>Architecture</em></h1>
+      <p class="deck">Notes on holding money through a change of era, written for someone starting from zero. Three teachers, Ray Dalio, Charles Gave and Richard Détente, folded into one line of thought.</p>
+      <div class="byline"><b>Jeremy Lasne</b><span>September 2026</span><span>14 min read</span><span>7 figures, 1 map</span></div>
+      <nav class="toc" aria-label="Contents">
+        <a href="#s1"><span>i</span>A Sunday evening in 1971</a>
+        <a href="#s2"><span>ii</span>Why it keeps happening</a>
+        <a href="#s3"><span>iii</span>Which season it is</a>
+        <a href="#s4"><span>iv</span>The word "risk" misleads</a>
+        <a href="#s5"><span>v</span>What to own when the ground moves</a>
+        <a href="#s6"><span>vi</span>Where to keep it</a>
+        <a href="#s7"><span>vii</span>One way to build it</a>
+        <a href="#map"><span>viii</span>The map</a>
+      </nav>
+    </header>
 
-  <!-- ── 01 · the research ─────────────────────────────────────────── -->
-  <section class="band">
-    <p class="band-no">01</p>
-    <h2>The research</h2>
-    <p>Four settings of the same material, ordered by how much work they ask of you.</p>
-  </section>
+    <h2 id="s1">A Sunday evening in 1971</h2>
+    <p class="lede">Ray Dalio was a young clerk on the floor of the New York Stock Exchange when President Nixon went on television and ended the exchange of dollars for gold. Until that evening a dollar was a cheque you could cash in metal. The United States had written more cheques than it had gold, so it stopped honouring them. Dalio came in early on Monday, ready for a crash. The market opened up, and gained close to 25% over the following months.</p>
+    <p>He went looking for a precedent and found the same evening in 1933, with Roosevelt on the radio instead of Nixon. Same broken promise, same rise in stocks. Then 2008, then 2020. Once you have seen the pattern it is plain: when a state runs short, it prints. New money, with the same wealth behind it, makes each dollar worth less, and the price of things that already exist, shares, gold, oil, copper, goes up.</p>
+    <p>That is the first thing a saver needs to know, and it changes the question. The beginner asks how to make money grow. The older question is what money is losing against. Richard Détente counts about 8% of new dollars printed each year. Anything held in dollars needs more than 8% a year to stand still, and every product sold as prudent pays less than that.</p>
+    <p>Dalio's count is wider. Of about 750 currencies that have existed since 1700, fewer than 20% still exist, and each survivor buys less than it did. Détente gives a currency a working life of around 70 years. The dollar system we live in was signed at Bretton Woods in 1944.</p>
 
-  <div class="pieces wide">
-    <a class="piece" href="/wealth/principles/">
-      <p class="piece-k">The argument</p>
-      <h3>Principles</h3>
-      <p class="piece-d">Fourteen principles, built from nothing. Every one gets a picture.</p>
-      <p class="piece-m"><span>14 principles</span><span>4 parts</span><span>9 figures</span></p>
-    </a>
-    <a class="piece" href="/wealth/country/">
-      <p class="piece-k">Applied</p>
-      <h3>The Country Map</h3>
-      <p class="piece-d">Thirty-two countries, three readings each, on three charts.</p>
-      <p class="piece-m"><span>32 countries</span><span>3 readings</span><span>Updated 2026-06-05</span></p>
-    </a>
-    <a class="piece" href="/wealth/exercice/">
-      <p class="piece-k">Played</p>
-      <h3>The Exercise</h3>
-      <p class="piece-d">The same three maps, played rather than read. Build a compass, print the schema.</p>
-      <p class="piece-m"><span>11 lessons</span><span>6 interactive</span><span>Printable schema</span></p>
-    </a>
+    <h2 id="s2">Why it keeps happening</h2>
+    <p>Dalio spent 50 years investing, then studied 500 years of history to understand the surprises that had hurt him. The Dutch, the British and the Americans each rose and fell along the same arc, over about 250 years. Between one order and the next came 10 to 20 years of trouble.</p>
+    <p>The arc has a logic, and it reads like a family story. A war ends and the winner writes the rules. Peace follows, because the winner is too strong to fight. Peace brings trade, trade brings a currency everyone accepts, and a currency everyone accepts lets the country borrow more than anyone else. People grow used to good times and borrow against them. The rich pull away from the rest. Then the debt turns out to be larger than the income, the state prints, prices rise, rich and poor fight over who pays, and a younger power notices the weakness.</p>
+    <figure class="fig"><div class="plot"><svg viewBox="0 0 640 282" role="img" xmlns="http://www.w3.org/2000/svg"><style>text{font-family:inherit} .l{font-size:12px;fill:rgba(234,244,251,.72)} .k{font-size:12px;font-weight:600;fill:#eaf4fb} .ax{font-size:11px;fill:rgba(234,244,251,.46);letter-spacing:.06em;text-transform:uppercase} .n{font-size:11px;font-weight:700;fill:#eaf4fb}</style><line x1="40" y1="214" x2="600" y2="214" stroke="rgba(95,168,211,.22)"/><polyline points="40,210.9 44,210.6 48,210.1 52,209.7 56,209.2 60,208.7 64,208.1 68,207.4 72,206.7 76,205.9 80,205.1 84,204.2 88,203.2 92,202.2 96,201.0 100,199.8 104,198.5 108,197.0 112,195.5 116,193.9 120,192.2 124,190.3 128,188.4 132,186.3 136,184.1 140,181.8 144,179.4 148,176.9 152,174.2 156,171.4 160,168.5 164,165.5 168,162.3 172,159.1 176,155.7 180,152.2 184,148.6 188,144.9 192,141.2 196,137.3 200,133.4 204,129.4 208,125.4 212,121.3 216,117.3 220,113.1 224,109.0 228,104.9 232,100.8 236,96.8 240,92.8 244,88.9 248,85.0 252,81.3 256,77.7 260,74.2 264,70.8 268,67.6 272,64.6 276,61.8 280,59.2 284,56.7 288,54.6 292,52.6 296,50.9 300,49.4 304,48.2 308,47.2 312,46.5 316,46.1 320,46.0 324,46.1 328,46.5 332,47.2 336,48.2 340,49.4 344,50.9 348,52.6 352,54.6 356,56.7 360,59.2 364,61.8 368,64.6 372,67.6 376,70.8 380,74.2 384,77.7 388,81.3 392,85.0 396,88.9 400,92.8 404,96.8 408,100.8 412,104.9 416,109.0 420,113.1 424,117.3 428,121.3 432,125.4 436,129.4 440,133.4 444,137.3 448,141.2 452,144.9 456,148.6 460,152.2 464,155.7 468,159.1 472,162.3 476,165.5 480,168.5 484,171.4 488,174.2 492,176.9 496,179.4 500,181.8 504,184.1 508,186.3 512,188.4 516,190.3 520,192.2 524,193.9 528,195.5 532,197.0 536,198.5 540,199.8 544,201.0 548,202.2 552,203.2 556,204.2 560,205.1 564,205.9 568,206.7 572,207.4 576,208.1 580,208.7 584,209.2 588,209.7 592,210.1 596,210.6 600,210.9" fill="none" stroke="#3b95d8" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="96" cy="201.01280360552565" r="7" fill="#0b1a2c"/><circle cx="96" cy="201.01280360552565" r="5" fill="#3b95d8"/><text x="96" y="189.01280360552565" class="n" text-anchor="middle" >1</text><circle cx="125" cy="189.85896815406525" r="7" fill="#0b1a2c"/><circle cx="125" cy="189.85896815406525" r="5" fill="#3b95d8"/><text x="125" y="177.85896815406525" class="n" text-anchor="middle" >2</text><circle cx="154" cy="172.8161737696484" r="7" fill="#0b1a2c"/><circle cx="154" cy="172.8161737696484" r="5" fill="#3b95d8"/><text x="154" y="160.8161737696484" class="n" text-anchor="middle" >3</text><circle cx="183" cy="149.51955893023714" r="7" fill="#0b1a2c"/><circle cx="183" cy="149.51955893023714" r="5" fill="#3b95d8"/><text x="183" y="137.51955893023714" class="n" text-anchor="middle" >4</text><circle cx="212" cy="121.3469438100768" r="7" fill="#0b1a2c"/><circle cx="212" cy="121.3469438100768" r="5" fill="#3b95d8"/><text x="212" y="109.3469438100768" class="n" text-anchor="middle" >5</text><circle cx="241" cy="91.81386093186951" r="7" fill="#0b1a2c"/><circle cx="241" cy="91.81386093186951" r="5" fill="#3b95d8"/><text x="241" y="79.81386093186951" class="n" text-anchor="middle" >6</text><circle cx="270" cy="66.11825131950587" r="7" fill="#0b1a2c"/><circle cx="270" cy="66.11825131950587" r="5" fill="#3b95d8"/><text x="270" y="54.11825131950587" class="n" text-anchor="middle" >7</text><circle cx="299" cy="49.7377921515195" r="7" fill="#0b1a2c"/><circle cx="299" cy="49.7377921515195" r="5" fill="#3b95d8"/><text x="299" y="37.7377921515195" class="n" text-anchor="middle" >8</text><circle cx="544" cy="201.0" r="7" fill="#0b1a2c"/><circle cx="544" cy="201.0" r="5" fill="#3b95d8" opacity=".45"/><text x="544" y="189.01280360552565" class="n" text-anchor="middle" opacity=".55">1</text><circle cx="515" cy="189.9" r="7" fill="#0b1a2c"/><circle cx="515" cy="189.9" r="5" fill="#3b95d8" opacity=".45"/><text x="515" y="177.85896815406525" class="n" text-anchor="middle" opacity=".55">2</text><circle cx="486" cy="172.8" r="7" fill="#0b1a2c"/><circle cx="486" cy="172.8" r="5" fill="#3b95d8" opacity=".45"/><text x="486" y="160.8161737696484" class="n" text-anchor="middle" opacity=".55">3</text><circle cx="457" cy="149.5" r="7" fill="#0b1a2c"/><circle cx="457" cy="149.5" r="5" fill="#3b95d8" opacity=".45"/><text x="457" y="137.51955893023714" class="n" text-anchor="middle" opacity=".55">4</text><circle cx="428" cy="121.3" r="7" fill="#0b1a2c"/><circle cx="428" cy="121.3" r="5" fill="#3b95d8" opacity=".45"/><text x="428" y="109.3469438100768" class="n" text-anchor="middle" opacity=".55">5</text><circle cx="399" cy="91.8" r="7" fill="#0b1a2c"/><circle cx="399" cy="91.8" r="5" fill="#3b95d8" opacity=".45"/><text x="399" y="79.81386093186951" class="n" text-anchor="middle" opacity=".55">6</text><circle cx="370" cy="66.1" r="7" fill="#0b1a2c"/><circle cx="370" cy="66.1" r="5" fill="#3b95d8" opacity=".45"/><text x="370" y="54.11825131950587" class="n" text-anchor="middle" opacity=".55">7</text><circle cx="341" cy="49.7" r="7" fill="#0b1a2c"/><circle cx="341" cy="49.7" r="5" fill="#3b95d8" opacity=".45"/><text x="341" y="37.7377921515195" class="n" text-anchor="middle" opacity=".55">8</text><text x="40" y="232" class="ax" text-anchor="start" >peace, trade, borrowing</text><text x="600" y="232" class="ax" text-anchor="end" >printing, conflict</text><text x="320" y="232" class="ax" text-anchor="middle" >about 250 years</text><path d="M370 40 L370 30 L520 30 L520 40" fill="none" stroke="rgba(234,244,251,.46)" stroke-width="1"/><text x="445" y="22" class="l" text-anchor="middle" >the three signs appear here</text><text x="40" y="246" class="l" text-anchor="start" >1  education</text><text x="190" y="246" class="l" text-anchor="start" >2  invention</text><text x="340" y="246" class="l" text-anchor="start" >3  competitiveness</text><text x="490" y="246" class="l" text-anchor="start" >4  output</text><text x="40" y="262" class="l" text-anchor="start" >5  share of trade</text><text x="190" y="262" class="l" text-anchor="start" >6  military</text><text x="340" y="262" class="l" text-anchor="start" >7  financial centre</text><text x="490" y="262" class="l" text-anchor="start" >8  reserve currency</text></svg></div><figcaption><b>Figure 1.</b> The arc of an empire, after Dalio. Eight powers rise in order and fall in the same order. Education moves first, the reserve currency last, which is why a country looks rich long after it has stopped being strong. The three warning signs cluster after the peak.</figcaption></figure>
+    <p>Dalio measures the arc with eight powers, numbered in the figure. They rise in order: education first, then invention, competitiveness, output, share of world trade, military strength, the financial centre, and last the reserve currency. He watches for three things arriving together. Debt too large to repay, so the central bank prints. A wealth gap turning into populism on both sides. A rising power facing the leading one. The last time all three lined up was 1930 to 1945. All three are present now.</p>
+    <p>Détente reads the same cycle in a single number. Take the United States policy interest rate from 1950. It climbs for 30 years, peaks near 1980, then falls for 40 years to zero. Lay the old saying over it: hard times make strong men, strong men make good times, good times make weak men, weak men make hard times. The rate is the temperature of the cycle, and it has been at the bottom of the thermometer.</p>
+    <p>So the first answer to "will tomorrow look like yesterday" comes from the century. The order that shaped the last 80 years is late in its arc. The turn carries no date, and that is exactly why the rest of these notes exist.</p>
+
+    <h2 id="s3">Which season it is</h2>
+    <p>The century tells you the era. It says little about this year. For that, Charles Gave uses two questions he has been refining since 1978. Is the economy growing? Are prices rising? Two answers give four squares, and he found that each square has one asset that does well in it.</p>
+    <figure class="fig"><div class="plot"><svg viewBox="0 0 640 362" role="img" xmlns="http://www.w3.org/2000/svg"><style>text{font-family:inherit} .l{font-size:12px;fill:rgba(234,244,251,.72)} .k{font-size:12px;font-weight:600;fill:#eaf4fb} .ax{font-size:11px;fill:rgba(234,244,251,.46);letter-spacing:.06em;text-transform:uppercase} .n{font-size:11px;font-weight:700;fill:#eaf4fb}</style><defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="rgba(234,244,251,.46)"/></marker></defs><rect x="90" y="30" width="246.0" height="136.0" rx="12" fill="rgba(23,61,89,.35)" stroke="rgba(95,168,211,.22)"/><text x="106" y="56" class="ax" text-anchor="start" >Recession · inflation</text><text x="106" y="88" font-size="20" font-weight="600" fill="#eaf4fb">Cash</text><text x="106" y="110" class="l" text-anchor="start" >in a currency run by serious people</text><rect x="344.0" y="30" width="246.0" height="136.0" rx="12" fill="rgba(23,61,89,.35)" stroke="rgba(95,168,211,.22)"/><text x="360.0" y="56" class="ax" text-anchor="start" >Growth · inflation</text><text x="360.0" y="88" font-size="20" font-weight="600" fill="#eaf4fb">Gold</text><text x="360.0" y="110" class="l" text-anchor="start" >then stocks and metals</text><rect x="90" y="174.0" width="246.0" height="136.0" rx="12" fill="rgba(23,61,89,.35)" stroke="rgba(95,168,211,.22)"/><text x="106" y="200.0" class="ax" text-anchor="start" >Recession · stable prices</text><text x="106" y="232.0" font-size="20" font-weight="600" fill="#eaf4fb">Government bonds</text><text x="106" y="254.0" class="l" text-anchor="start" >the state's promise gains value</text><rect x="344.0" y="174.0" width="246.0" height="136.0" rx="12" fill="rgba(59,149,216,.16)" stroke="rgba(95,168,211,.22)"/><text x="360.0" y="200.0" class="ax" text-anchor="start" >Growth · stable prices</text><text x="360.0" y="232.0" font-size="20" font-weight="600" fill="#eaf4fb">Stocks</text><text x="360.0" y="254.0" class="l" text-anchor="start" >efficient companies, technology first</text><line x1="90" y1="328" x2="590" y2="328" stroke="rgba(234,244,251,.46)" marker-end="url(#ar)"/><line x1="72" y1="310" x2="72" y2="30" stroke="rgba(234,244,251,.46)" marker-end="url(#ar)"/><text x="340.0" y="350" class="ax" text-anchor="middle" >Growth dial · S&amp;P 500 ÷ oil, 7-year average</text><text x="0" y="0" class="ax" text-anchor="middle" transform="translate(50 170.0) rotate(-90)">Inflation dial · gold ÷ bonds, 7 years</text><circle cx="342.0" cy="130" r="7" fill="#0b1a2c"/><circle cx="342.0" cy="130" r="5" fill="#b58a1c"/><text x="342.0" y="154" class="k" text-anchor="middle" >spring 2026: on the line</text></svg></div><figcaption><b>Figure 2.</b> Gave's four squares. The vertical dial reads inflation, the horizontal dial reads growth, and each square names the asset that wins there. In spring 2026 his dials sat on the line between the two inflation squares, tipping with the price of oil.</figcaption></figure>
+    <p>Growth without inflation is the good square: stocks, and above all the efficient companies, often technology. Growth with inflation: gold, with stocks and metals alongside. Recession with inflation is the square Gave calls the most unpleasant: cash, in a currency run by serious people, which for him means the Swiss franc. Recession without inflation: government bonds, because the state's promise is the one thing gaining value.</p>
+    <p>The hard part is knowing which square you are in, since official numbers get revised and massaged. Gave's answer took him 40 years, and it comes from markets, where millions of people vote with money every day.</p>
+    <p>For growth, divide the S&amp;P 500 by the price of oil and average it over 7 years. His reasoning is physical: an economy is energy turned into things. If companies turn oil into profit, the ratio rises. For inflation, divide the price of gold by the price of long government bonds, over the same 7 years. Both are stores of value. One is offered by the state; the other is what people buy when they stop believing the state.</p>
+    <figure class="fig"><div class="plot"><svg viewBox="0 0 640 126" role="img" xmlns="http://www.w3.org/2000/svg"><style>text{font-family:inherit} .l{font-size:12px;fill:rgba(234,244,251,.72)} .k{font-size:12px;font-weight:600;fill:#eaf4fb} .ax{font-size:11px;fill:rgba(234,244,251,.46);letter-spacing:.06em;text-transform:uppercase} .n{font-size:11px;font-weight:700;fill:#eaf4fb}</style><rect x="61.0" y="46" width="94.4" height="22" rx="4" fill="#b58a1c"/><text x="108.21428571428572" y="36" class="k" text-anchor="middle" >gold ahead</text><rect x="157.4" y="46" width="383.7" height="22" rx="4" fill="#3b95d8"/><text x="349.2857142857143" y="36" class="k" text-anchor="middle" >bonds ahead</text><rect x="543.1" y="46" width="55.9" height="22" rx="4" fill="#b58a1c"/><text x="571.0714285714286" y="36" class="k" text-anchor="middle" >gold</text><line x1="60.0" y1="68" x2="60.0" y2="74" stroke="rgba(234,244,251,.46)"/><text x="60.0" y="88" class="l" text-anchor="middle" >1970</text><line x1="156.4" y1="68" x2="156.4" y2="74" stroke="rgba(234,244,251,.46)"/><text x="156.42857142857144" y="88" class="l" text-anchor="middle" >1980</text><line x1="252.9" y1="68" x2="252.9" y2="74" stroke="rgba(234,244,251,.46)"/><text x="252.85714285714286" y="88" class="l" text-anchor="middle" >1990</text><line x1="349.3" y1="68" x2="349.3" y2="74" stroke="rgba(234,244,251,.46)"/><text x="349.2857142857143" y="88" class="l" text-anchor="middle" >2000</text><line x1="445.7" y1="68" x2="445.7" y2="74" stroke="rgba(234,244,251,.46)"/><text x="445.7142857142857" y="88" class="l" text-anchor="middle" >2010</text><line x1="542.1" y1="68" x2="542.1" y2="74" stroke="rgba(234,244,251,.46)"/><text x="542.1428571428571" y="88" class="l" text-anchor="middle" >2020</text><text x="600" y="88" class="l" text-anchor="end" >2026</text><rect x="60" y="110" width="14" height="4" rx="2" fill="#b58a1c"/><text x="80" y="115" class="l" text-anchor="start" >gold ÷ bonds rising: inflation season</text><rect x="338.8" y="110" width="14" height="4" rx="2" fill="#3b95d8"/><text x="358.8" y="115" class="l" text-anchor="start" >falling: the state's paper holds</text></svg></div><figcaption><b>Figure 3.</b> Five decades of the inflation dial, drawn as a strip. Gold beat bonds in the 1970s, bonds beat gold from 1980 to about 2020, and gold has been ahead since. The shape is Gave's; the strip is a schematic of his 7-year ratio, with the years rounded to the decade.</figcaption></figure>
+    <p>Seven years matters. In Gave's 100-year test, shorter averages threw false signals, and seven caught every large turn while ignoring the noise. Here Dalio and Gave meet. Dalio's printing is the reason the gold dial swings. Gave's ratio is how you watch it happen from your kitchen table, with the market as your only source.</p>
+    <p>Gave then does something that looks backwards. He picks a portfolio by what he leaves out. Of the four assets, one or two lose in every square. Remove them and hold the rest. Spotting a loser is easier than picking a winner; it is how a bettor beats the track, by crossing out the horses with zero chance. The job, in his words, is to avoid the huge falls, the bear markets that take 45% to 80% of a portfolio in real terms and 10 years to repair. Since 1945, every one of those began with a jump in the price of energy.</p>
+    <p>Inflation does one more thing worth understanding early, because it explains how prices can halve while companies keep earning. When prices are stable, buyers pay about 20 years of profit for a share. When inflation appears they stop trusting the far future and pay 15 years, then 10, then 5 at the bottom of the worst markets.</p>
+    <figure class="fig"><div class="plot"><svg viewBox="0 0 640 232" role="img" xmlns="http://www.w3.org/2000/svg"><style>text{font-family:inherit} .l{font-size:12px;fill:rgba(234,244,251,.72)} .k{font-size:12px;font-weight:600;fill:#eaf4fb} .ax{font-size:11px;fill:rgba(234,244,251,.46);letter-spacing:.06em;text-transform:uppercase} .n{font-size:11px;font-weight:700;fill:#eaf4fb}</style><line x1="40" y1="200" x2="600" y2="200" stroke="rgba(95,168,211,.22)"/><path d="M98 200 V44.0 q0 -4 4 -4 h16 q4 0 4 4 V200 z" fill="#3b95d8"/><text x="110" y="30.0" class="k" text-anchor="middle" >20 years</text><text x="110" y="220" class="l" text-anchor="middle" >stable prices</text><path d="M238 200 V84.0 q0 -4 4 -4 h16 q4 0 4 4 V200 z" fill="#3b95d8"/><text x="250" y="70.0" class="k" text-anchor="middle" >15 years</text><text x="250" y="220" class="l" text-anchor="middle" >inflation appears</text><path d="M378 200 V124.0 q0 -4 4 -4 h16 q4 0 4 4 V200 z" fill="#3b95d8"/><text x="390" y="110.0" class="k" text-anchor="middle" >10 years</text><text x="390" y="220" class="l" text-anchor="middle" >inflation persists</text><path d="M518 200 V164.0 q0 -4 4 -4 h16 q4 0 4 4 V200 z" fill="#3b95d8"/><text x="530" y="150.0" class="k" text-anchor="middle" >5 years</text><text x="530" y="220" class="l" text-anchor="middle" >worst bear markets</text><text x="530" y="72" class="ax" text-anchor="middle" >same profit every year</text><text x="530" y="92" class="k" text-anchor="middle" >price down 75%</text></svg></div><figcaption><b>Figure 4.</b> The same company, the same profit, four moods. The years of profit a buyer will pay fall from 20 to 5 as inflation takes hold, so the price falls 75% with the business unchanged. Gave's word for the exposure is duration.</figcaption></figure>
+    <p>Gave's response is to hold what pays you soon: companies with 4% to 7% dividends and sound management, at a time when a Swiss bond pays 1%. He keeps 25% in energy shares for a double reason. They gain when oil gets expensive, which is the moment everything else suffers, and they pay the dividend while you wait.</p>
+
+    <h2 id="s4">The word "risk" misleads</h2>
+    <p>Finance calls price movement risk. A share that moves 2% in a day is risky; a bond that pays the same coupon every year is safe. Détente says this confuses two different things, and Gave says the same in his own words: volatility is movement, and risk is the chance you are never paid back.</p>
+    <p>Détente calls that second thing <b>danger</b>. The S&amp;P 500 moves 15% to 20% in a normal year. Bitcoin moves far more. Both numbers describe motion and say zero about whether your capital will exist in ten years.</p>
+    <p>Three pictures make it clear. A bond from a badly run state pays every year, then one Monday a minister announces it pays zero: low movement, total danger. A salary arrives every month for years and stops on a single morning. A taxi driver's income swings with the seasons and the fashion weeks, and Paris keeps hailing taxis: high movement, low danger.</p>
+    <figure class="fig"><div class="plot"><svg viewBox="0 0 640 334" role="img" xmlns="http://www.w3.org/2000/svg"><style>text{font-family:inherit} .l{font-size:12px;fill:rgba(234,244,251,.72)} .k{font-size:12px;font-weight:600;fill:#eaf4fb} .ax{font-size:11px;fill:rgba(234,244,251,.46);letter-spacing:.06em;text-transform:uppercase} .n{font-size:11px;font-weight:700;fill:#eaf4fb}</style><line x1="70" y1="274" x2="610" y2="274" stroke="rgba(234,244,251,.46)"/><line x1="70" y1="274" x2="70" y2="24" stroke="rgba(234,244,251,.46)"/><text x="340.0" y="304" class="ax" text-anchor="middle" >movement (how much the price swings)</text><text x="0" y="0" class="ax" text-anchor="middle" transform="translate(44 149.0) rotate(-90)">danger (odds of going to zero)</text><text x="76" y="266" class="ax" text-anchor="start" >low</text><text x="604" y="266" class="ax" text-anchor="end" >high</text><text x="78" y="38" class="ax" text-anchor="start" >high</text><circle cx="108" cy="50" r="7" fill="#0b1a2c"/><circle cx="108" cy="50" r="5" fill="#d9648f"/><text x="120" y="54" class="l" text-anchor="start" >Madoff: 10% a year on a flat line</text><circle cx="140" cy="98" r="7" fill="#0b1a2c"/><circle cx="140" cy="98" r="5" fill="#d9648f"/><text x="152" y="102" class="l" text-anchor="start" >Bond of a badly run state</text><circle cx="170" cy="146" r="7" fill="#0b1a2c"/><circle cx="170" cy="146" r="5" fill="#d9648f"/><text x="182" y="150" class="l" text-anchor="start" >A salary</text><circle cx="340" cy="220" r="7" fill="#0b1a2c"/><circle cx="340" cy="220" r="5" fill="#3b95d8"/><text x="352" y="224" class="l" text-anchor="start" >A stock index</text><circle cx="500" cy="240" r="7" fill="#0b1a2c"/><circle cx="500" cy="240" r="5" fill="#3b95d8"/><text x="488" y="244" class="l" text-anchor="end" >A taxi driver's income</text><circle cx="570" cy="194" r="7" fill="#0b1a2c"/><circle cx="570" cy="194" r="5" fill="#3b95d8"/><text x="558" y="198" class="l" text-anchor="end" >Bitcoin</text><rect x="70" y="318" width="14" height="4" rx="2" fill="#d9648f"/><text x="90" y="323" class="l" text-anchor="start" >calm, and dangerous</text><rect x="233.60000000000002" y="318" width="14" height="4" rx="2" fill="#3b95d8"/><text x="253.60000000000002" y="323" class="l" text-anchor="start" >moves, and survives</text></svg></div><figcaption><b>Figure 5.</b> Movement against danger, with Détente's examples placed by hand. The calm corner holds the things that go to zero on a Monday. The moving side holds the things that survive. Madoff sits alone at the top left: 10% a year on a line flat as a ruler, which is the signature of fraud.</figcaption></figure>
+    <p>Madoff is the extreme case, and the useful one. Détente's test is that markets refuse the trade he offered: high return with zero movement is a sign someone is lying. Accept the movement, then. It is the price of return. Danger is the thing to refuse, and there are two tools for it. Collateral: a building keeps a value in most worlds. Liquidity: a digital asset trades 24 hours a day, 7 days a week, so you can leave before the door shuts.</p>
+    <p>This is where prudence turns into a trap. Prudence, as sold, means repeating what worked over the last 40 years. That is a bet that the world stands still, made at the moment the century says it is turning. Détente's image is three generations. The grandfather is an eagle, the son a falcon, the grandson a pigeon, and pigeons get plucked. The grandfather took risk and was called a speculator. The grandson hires prudence and loses the house slowly.</p>
+    <blockquote class="pull">Taking the risk of change gives you 20% odds of surviving it. Refusing the risk gives you 0%.<small>Détente, from the 80% of civilisations that are gone</small></blockquote>
+    <p>Gave arrives at the same place through Warren Buffett: big bear markets are the moment capital returns to its rightful owners, the people who did the work and have the time. The point of all this study is to be one of them.</p>
+
+    <h2 id="s5">What to own when the ground moves</h2>
+    <p>If the era is late, the season is inflationary and movement is the price of return, the question becomes practical. Détente carries a compass with four points, and Gave's rules fit inside it.</p>
+    <h3>Value moves</h3>
+    <p>The car ruined the cart maker. Value goes to new things, and today it goes faster: technologies are adopted along S-curves, and the curves now overlap instead of waiting their turn. Détente gives two examples. AI unlocks robotics and biology: AlphaFold folded 200 million proteins in 15 days. Computing power is turning into an asset class, and Larry Fink of BlackRock has said so out loud. A new asset class arrives about every 30 years. Gave supplies the physical version: an economy is energy transformed, and the datacenters need more power than the grid has built.</p>
+    <p>The bet on where value goes is the one bet that is yours alone. It means choosing, and choosing means being wrong sometimes.</p>
+    <h3>Antifragile</h3>
+    <p>Nassim Taleb's word, measured by Didier Darcet. A fragile asset earns when the world is calm: a stock index, a salary. An antifragile asset earns when the world shakes: gold, the yen, Bitcoin, a flat in Geneva or Dubai. Each time Europe shakes, wealthy Europeans move house, and Swiss prices rise. Plot return against volatility and the two kinds of asset slope in opposite directions.</p>
+    <figure class="fig"><div class="plot"><svg viewBox="0 0 640 304" role="img" xmlns="http://www.w3.org/2000/svg"><style>text{font-family:inherit} .l{font-size:12px;fill:rgba(234,244,251,.72)} .k{font-size:12px;font-weight:600;fill:#eaf4fb} .ax{font-size:11px;fill:rgba(234,244,251,.46);letter-spacing:.06em;text-transform:uppercase} .n{font-size:11px;font-weight:700;fill:#eaf4fb}</style><line x1="70" y1="244" x2="610" y2="244" stroke="rgba(234,244,251,.46)"/><line x1="70" y1="244" x2="70" y2="24" stroke="rgba(234,244,251,.46)"/><text x="340.0" y="274" class="ax" text-anchor="middle" >volatility of the world</text><text x="0" y="0" class="ax" text-anchor="middle" transform="translate(44 134.0) rotate(-90)">return above inflation</text><text x="76" y="236" class="ax" text-anchor="start" >calm decades</text><text x="604" y="236" class="ax" text-anchor="end" >avalanche decades</text><line x1="90" y1="74" x2="500" y2="214" stroke="#3b95d8" stroke-width="2" stroke-linecap="round"/><line x1="90" y1="204" x2="500" y2="64" stroke="#b58a1c" stroke-width="2" stroke-linecap="round"/><circle cx="500" cy="214" r="7" fill="#0b1a2c"/><circle cx="500" cy="214" r="5" fill="#3b95d8"/><circle cx="500" cy="64" r="7" fill="#0b1a2c"/><circle cx="500" cy="64" r="5" fill="#b58a1c"/><text x="512" y="218" class="k" text-anchor="start" >fragile</text><text x="512" y="68" class="k" text-anchor="start" >antifragile</text><rect x="70" y="288" width="14" height="4" rx="2" fill="#3b95d8"/><text x="90" y="293" class="l" text-anchor="start" >Fragile · stock index, salary</text><rect x="297.6" y="288" width="14" height="4" rx="2" fill="#b58a1c"/><text x="317.6" y="293" class="l" text-anchor="start" >Antifragile · gold, yen, Bitcoin, a Geneva flat</text></svg></div><figcaption><b>Figure 6.</b> Fragile and antifragile, as Darcet measures them. Return above inflation against the volatility of the world. A fragile asset earns in calm decades and loses in avalanche decades; an antifragile asset does the reverse. The slopes are schematic, the direction is the finding.</figcaption></figure>
+    <p>Most assets are fragile, and in calm decades that is fine. In a decade of avalanches you want the other kind. Détente's picture: snow falls quietly for months, then 30 seconds of avalanche reshape the mountain. Revolutions, wars and currency collapses are short, and they do the reshaping.</p>
+    <h3>Decorrelated</h3>
+    <p>Milton Friedman said finance has one free lunch: assets that move for different reasons. Add three waves that peak at different times and the sum is flatter than any of them. Your worst loss shrinks and your return stays. Bitcoin is the least correlated asset over long series. The trap is a portfolio of 500 American shares that feels diversified and falls as one.</p>
+    <figure class="fig"><div class="plot"><svg viewBox="0 0 640 246" role="img" xmlns="http://www.w3.org/2000/svg"><style>text{font-family:inherit} .l{font-size:12px;fill:rgba(234,244,251,.72)} .k{font-size:12px;font-weight:600;fill:#eaf4fb} .ax{font-size:11px;fill:rgba(234,244,251,.46);letter-spacing:.06em;text-transform:uppercase} .n{font-size:11px;font-weight:700;fill:#eaf4fb}</style><line x1="40" y1="130" x2="600" y2="130" stroke="rgba(95,168,211,.22)"/><polyline points="40.0,130.0 42.8,127.1 45.6,124.3 48.4,121.4 51.2,118.7 54.0,116.0 56.8,113.4 59.6,111.0 62.4,108.7 65.2,106.5 68.0,104.5 70.8,102.7 73.6,101.1 76.4,99.7 79.2,98.5 82.0,97.5 84.8,96.8 87.6,96.3 90.4,96.0 93.2,96.0 96.0,96.3 98.8,96.8 101.6,97.5 104.4,98.4 107.2,99.6 110.0,101.0 112.8,102.6 115.6,104.4 118.4,106.4 121.2,108.6 124.0,110.9 126.8,113.3 129.6,115.9 132.4,118.6 135.2,121.3 138.0,124.2 140.8,127.0 143.6,129.9 146.4,132.8 149.2,135.6 152.0,138.5 154.8,141.2 157.6,143.9 160.4,146.5 163.2,148.9 166.0,151.3 168.8,153.4 171.6,155.4 174.4,157.3 177.2,158.9 180.0,160.3 182.8,161.5 185.6,162.5 188.4,163.2 191.2,163.7 194.0,164.0 196.8,164.0 199.6,163.7 202.4,163.3 205.2,162.6 208.0,161.6 210.8,160.4 213.6,159.0 216.4,157.4 219.2,155.6 222.0,153.7 224.8,151.5 227.6,149.2 230.4,146.8 233.2,144.2 236.0,141.5 238.8,138.8 241.6,136.0 244.4,133.1 247.2,130.2 250.0,127.3 252.8,124.5 255.6,121.6 258.4,118.9 261.2,116.2 264.0,113.6 266.8,111.2 269.6,108.8 272.4,106.6 275.2,104.6 278.0,102.8 280.8,101.2 283.6,99.8 286.4,98.5 289.2,97.6 292.0,96.8 294.8,96.3 297.6,96.0 300.4,96.0 303.2,96.2 306.0,96.7 308.8,97.4 311.6,98.3 314.4,99.5 317.2,100.9 320.0,102.5 322.8,104.3 325.6,106.3 328.4,108.4 331.2,110.7 334.0,113.2 336.8,115.7 339.6,118.4 342.4,121.1 345.2,123.9 348.0,126.8 350.8,129.7 353.6,132.6 356.4,135.4 359.2,138.2 362.0,141.0 364.8,143.7 367.6,146.3 370.4,148.8 373.2,151.1 376.0,153.3 378.8,155.3 381.6,157.1 384.4,158.8 387.2,160.2 390.0,161.4 392.8,162.4 395.6,163.2 398.4,163.7 401.2,164.0 404.0,164.0 406.8,163.8 409.6,163.3 412.4,162.6 415.2,161.7 418.0,160.5 420.8,159.2 423.6,157.6 426.4,155.8 429.2,153.8 432.0,151.7 434.8,149.4 437.6,146.9 440.4,144.4 443.2,141.7 446.0,139.0 448.8,136.2 451.6,133.3 454.4,130.4 457.2,127.5 460.0,124.7 462.8,121.9 465.6,119.1 468.4,116.4 471.2,113.8 474.0,111.3 476.8,109.0 479.6,106.8 482.4,104.8 485.2,102.9 488.0,101.3 490.8,99.9 493.6,98.6 496.4,97.6 499.2,96.9 502.0,96.3 504.8,96.1 507.6,96.0 510.4,96.2 513.2,96.7 516.0,97.4 518.8,98.3 521.6,99.4 524.4,100.8 527.2,102.4 530.0,104.1 532.8,106.1 535.6,108.2 538.4,110.5 541.2,113.0 544.0,115.5 546.8,118.2 549.6,120.9 552.4,123.7 555.2,126.6 558.0,129.5 560.8,132.3 563.6,135.2 566.4,138.0 569.2,140.8 572.0,143.5 574.8,146.1 577.6,148.6 580.4,150.9 583.2,153.1 586.0,155.1 588.8,157.0 591.6,158.6 594.4,160.1 597.2,161.3 600.0,162.3" fill="none" stroke="#3b95d8" stroke-width="1.5" opacity=".6"/><polyline points="40.0,104.1 42.8,106.2 45.6,108.8 48.4,111.6 51.2,114.8 54.0,118.2 56.8,121.8 59.6,125.5 62.4,129.3 65.2,133.1 68.0,136.9 70.8,140.5 73.6,144.0 76.4,147.2 79.2,150.2 82.0,152.9 84.8,155.1 87.6,157.0 90.4,158.5 93.2,159.4 96.0,159.9 98.8,159.9 101.6,159.5 104.4,158.5 107.2,157.1 110.0,155.3 112.8,153.0 115.6,150.4 118.4,147.4 121.2,144.2 124.0,140.7 126.8,137.1 129.6,133.3 132.4,129.5 135.2,125.7 138.0,122.0 140.8,118.4 143.6,115.0 146.4,111.8 149.2,108.9 152.0,106.4 154.8,104.2 157.6,102.5 160.4,101.2 163.2,100.4 166.0,100.0 168.8,100.1 171.6,100.8 174.4,101.9 177.2,103.4 180.0,105.4 182.8,107.7 185.6,110.5 188.4,113.5 191.2,116.8 194.0,120.4 196.8,124.1 199.6,127.8 202.4,131.6 205.2,135.4 208.0,139.1 210.8,142.7 213.6,146.0 216.4,149.1 219.2,151.9 222.0,154.3 224.8,156.4 227.6,158.0 230.4,159.1 233.2,159.8 236.0,160.0 238.8,159.7 241.6,159.0 244.4,157.7 247.2,156.0 250.0,153.9 252.8,151.4 255.6,148.6 258.4,145.5 261.2,142.1 264.0,138.5 266.8,134.8 269.6,131.0 272.4,127.2 275.2,123.4 278.0,119.8 280.8,116.3 283.6,113.0 286.4,110.0 289.2,107.3 292.0,105.0 294.8,103.1 297.6,101.6 300.4,100.6 303.2,100.1 306.0,100.0 308.8,100.5 311.6,101.4 314.4,102.8 317.2,104.6 320.0,106.8 322.8,109.4 325.6,112.3 328.4,115.5 331.2,119.0 334.0,122.6 336.8,126.4 339.6,130.2 342.4,134.0 345.2,137.7 348.0,141.3 350.8,144.8 353.6,148.0 356.4,150.9 359.2,153.4 362.0,155.6 364.8,157.4 367.6,158.7 370.4,159.6 373.2,160.0 376.0,159.9 378.8,159.3 381.6,158.2 384.4,156.7 387.2,154.8 390.0,152.4 392.8,149.7 395.6,146.7 398.4,143.4 401.2,139.9 404.0,136.2 406.8,132.5 409.6,128.6 412.4,124.8 415.2,121.1 418.0,117.6 420.8,114.2 423.6,111.1 426.4,108.3 429.2,105.8 432.0,103.8 434.8,102.1 437.6,101.0 440.4,100.2 443.2,100.0 446.0,100.2 448.8,101.0 451.6,102.2 454.4,103.8 457.2,105.9 460.0,108.4 462.8,111.2 465.6,114.3 468.4,117.7 471.2,121.2 474.0,124.9 476.8,128.7 479.6,132.5 482.4,136.3 485.2,140.0 488.0,143.5 490.8,146.8 493.6,149.8 496.4,152.5 499.2,154.8 502.0,156.8 504.8,158.3 507.6,159.3 510.4,159.9 513.2,160.0 516.0,159.6 518.8,158.7 521.6,157.4 524.4,155.6 527.2,153.4 530.0,150.8 532.8,147.9 535.6,144.7 538.4,141.3 541.2,137.6 544.0,133.9 546.8,130.1 549.6,126.3 552.4,122.5 555.2,118.9 558.0,115.5 560.8,112.3 563.6,109.3 566.4,106.7 569.2,104.5 572.0,102.7 574.8,101.4 577.6,100.5 580.4,100.0 583.2,100.1 586.0,100.6 588.8,101.7 591.6,103.1 594.4,105.1 597.2,107.4 600.0,110.1" fill="none" stroke="#b58a1c" stroke-width="1.5" opacity=".6"/><polyline points="40.0,149.7 42.8,150.6 45.6,151.5 48.4,152.3 51.2,153.1 54.0,153.7 56.8,154.3 59.6,154.8 62.4,155.2 65.2,155.5 68.0,155.8 70.8,155.9 73.6,156.0 76.4,156.0 79.2,155.9 82.0,155.7 84.8,155.4 87.6,155.0 90.4,154.5 93.2,154.0 96.0,153.3 98.8,152.6 101.6,151.8 104.4,151.0 107.2,150.1 110.0,149.1 112.8,148.0 115.6,146.9 118.4,145.7 121.2,144.4 124.0,143.1 126.8,141.8 129.6,140.4 132.4,139.0 135.2,137.6 138.0,136.1 140.8,134.6 143.6,133.1 146.4,131.6 149.2,130.1 152.0,128.6 154.8,127.1 157.6,125.6 160.4,124.1 163.2,122.6 166.0,121.2 168.8,119.8 171.6,118.4 174.4,117.0 177.2,115.8 180.0,114.5 182.8,113.3 185.6,112.2 188.4,111.1 191.2,110.1 194.0,109.1 196.8,108.3 199.6,107.5 202.4,106.8 205.2,106.1 208.0,105.6 210.8,105.1 213.6,104.7 216.4,104.4 219.2,104.2 222.0,104.0 224.8,104.0 227.6,104.0 230.4,104.2 233.2,104.4 236.0,104.7 238.8,105.1 241.6,105.6 244.4,106.2 247.2,106.8 250.0,107.5 252.8,108.4 255.6,109.2 258.4,110.2 261.2,111.2 264.0,112.3 266.8,113.4 269.6,114.6 272.4,115.9 275.2,117.2 278.0,118.5 280.8,119.9 283.6,121.3 286.4,122.7 289.2,124.2 292.0,125.7 294.8,127.2 297.6,128.7 300.4,130.2 303.2,131.8 306.0,133.3 308.8,134.8 311.6,136.3 314.4,137.7 317.2,139.2 320.0,140.6 322.8,141.9 325.6,143.3 328.4,144.5 331.2,145.8 334.0,147.0 336.8,148.1 339.6,149.1 342.4,150.1 345.2,151.1 348.0,151.9 350.8,152.7 353.6,153.4 356.4,154.0 359.2,154.6 362.0,155.0 364.8,155.4 367.6,155.7 370.4,155.9 373.2,156.0 376.0,156.0 378.8,155.9 381.6,155.8 384.4,155.5 387.2,155.2 390.0,154.8 392.8,154.3 395.6,153.7 398.4,153.0 401.2,152.3 404.0,151.4 406.8,150.6 409.6,149.6 412.4,148.6 415.2,147.5 418.0,146.3 420.8,145.1 423.6,143.8 426.4,142.5 429.2,141.2 432.0,139.8 434.8,138.4 437.6,136.9 440.4,135.4 443.2,133.9 446.0,132.4 448.8,130.9 451.6,129.4 454.4,127.9 457.2,126.4 460.0,124.9 462.8,123.4 465.6,121.9 468.4,120.5 471.2,119.1 474.0,117.7 476.8,116.4 479.6,115.2 482.4,113.9 485.2,112.8 488.0,111.7 490.8,110.6 493.6,109.6 496.4,108.7 499.2,107.9 502.0,107.1 504.8,106.4 507.6,105.8 510.4,105.3 513.2,104.9 516.0,104.5 518.8,104.3 521.6,104.1 524.4,104.0 527.2,104.0 530.0,104.1 532.8,104.3 535.6,104.5 538.4,104.9 541.2,105.3 544.0,105.9 546.8,106.5 549.6,107.2 552.4,107.9 555.2,108.8 558.0,109.7 560.8,110.7 563.6,111.7 566.4,112.8 569.2,114.0 572.0,115.2 574.8,116.5 577.6,117.8 580.4,119.2 583.2,120.6 586.0,122.0 588.8,123.4 591.6,124.9 594.4,126.4 597.2,127.9 600.0,129.4" fill="none" stroke="#d9648f" stroke-width="1.5" opacity=".6"/><polyline points="40.0,127.9 42.8,128.0 45.6,128.2 48.4,128.5 51.2,128.8 54.0,129.3 56.8,129.8 59.6,130.4 62.4,131.1 65.2,131.7 68.0,132.4 70.8,133.0 73.6,133.7 76.4,134.3 79.2,134.8 82.0,135.3 84.8,135.8 87.6,136.1 90.4,136.3 93.2,136.5 96.0,136.5 98.8,136.4 101.6,136.3 104.4,136.0 107.2,135.6 110.0,135.1 112.8,134.5 115.6,133.9 118.4,133.2 121.2,132.4 124.0,131.6 126.8,130.8 129.6,129.9 132.4,129.1 135.2,128.2 138.0,127.4 140.8,126.7 143.6,126.0 146.4,125.4 149.2,124.9 152.0,124.5 154.8,124.2 157.6,124.0 160.4,123.9 163.2,124.0 166.0,124.1 168.8,124.4 171.6,124.9 174.4,125.4 177.2,126.0 180.0,126.7 182.8,127.5 185.6,128.4 188.4,129.3 191.2,130.2 194.0,131.2 196.8,132.1 199.6,133.0 202.4,133.9 205.2,134.7 208.0,135.4 210.8,136.1 213.6,136.6 216.4,137.0 219.2,137.2 222.0,137.3 224.8,137.3 227.6,137.1 230.4,136.7 233.2,136.1 236.0,135.4 238.8,134.5 241.6,133.5 244.4,132.3 247.2,131.0 250.0,129.6 252.8,128.1 255.6,126.5 258.4,124.8 261.2,123.2 264.0,121.5 266.8,119.8 269.6,118.1 272.4,116.6 275.2,115.1 278.0,113.7 280.8,112.4 283.6,111.3 286.4,110.4 289.2,109.7 292.0,109.2 294.8,108.9 297.6,108.8 300.4,109.0 303.2,109.4 306.0,110.0 308.8,110.9 311.6,112.0 314.4,113.3 317.2,114.9 320.0,116.6 322.8,118.5 325.6,120.6 328.4,122.8 331.2,125.2 334.0,127.6 336.8,130.1 339.6,132.6 342.4,135.1 345.2,137.6 348.0,140.0 350.8,142.4 353.6,144.6 356.4,146.8 359.2,148.7 362.0,150.6 364.8,152.2 367.6,153.6 370.4,154.7 373.2,155.7 376.0,156.4 378.8,156.8 381.6,157.0 384.4,157.0 387.2,156.7 390.0,156.2 392.8,155.5 395.6,154.5 398.4,153.4 401.2,152.0 404.0,150.6 406.8,148.9 409.6,147.2 412.4,145.3 415.2,143.4 418.0,141.5 420.8,139.5 423.6,137.5 426.4,135.5 429.2,133.6 432.0,131.7 434.8,130.0 437.6,128.3 440.4,126.7 443.2,125.2 446.0,123.9 448.8,122.7 451.6,121.6 454.4,120.7 457.2,119.9 460.0,119.3 462.8,118.8 465.6,118.4 468.4,118.2 471.2,118.0 474.0,118.0 476.8,118.0 479.6,118.2 482.4,118.3 485.2,118.6 488.0,118.8 490.8,119.1 493.6,119.4 496.4,119.6 499.2,119.9 502.0,120.1 504.8,120.3 507.6,120.4 510.4,120.5 513.2,120.5 516.0,120.5 518.8,120.4 521.6,120.3 524.4,120.1 527.2,119.9 530.0,119.7 532.8,119.4 535.6,119.2 538.4,118.9 541.2,118.7 544.0,118.4 546.8,118.2 549.6,118.1 552.4,118.1 555.2,118.1 558.0,118.2 560.8,118.4 563.6,118.7 566.4,119.2 569.2,119.8 572.0,120.5 574.8,121.3 577.6,122.3 580.4,123.4 583.2,124.6 586.0,125.9 588.8,127.4 591.6,128.9 594.4,130.5 597.2,132.2 600.0,133.9" fill="none" stroke="#eaf4fb" stroke-width="2.5" stroke-linejoin="round"/><circle cx="600.0" cy="133.94503784657098" r="7" fill="#0b1a2c"/><circle cx="600.0" cy="133.94503784657098" r="5" fill="#eaf4fb"/><text x="596.0" y="155.94503784657098" class="k" text-anchor="end" >the three together</text><text x="40" y="26" class="ax" text-anchor="start" >each pocket alone swings</text><rect x="40" y="228" width="14" height="4" rx="2" fill="#3b95d8"/><text x="60" y="233" class="l" text-anchor="start" >compute</text><rect x="126.80000000000001" y="228" width="14" height="4" rx="2" fill="#b58a1c"/><text x="146.8" y="233" class="l" text-anchor="start" >homes in hinge cities</text><rect x="303.20000000000005" y="228" width="14" height="4" rx="2" fill="#d9648f"/><text x="323.20000000000005" y="233" class="l" text-anchor="start" >Bitcoin</text><rect x="390.00000000000006" y="228" width="14" height="4" rx="2" fill="#eaf4fb"/><text x="410.00000000000006" y="233" class="l" text-anchor="start" >average of the three</text></svg></div><figcaption><b>Figure 7.</b> The free lunch, drawn. Three pockets that move for their own reasons, each swinging on its own, and the average of the three in white. The average swings less than any pocket alone, with the same expected return. This is the whole argument for owning things that offend each other.</figcaption></figure>
+    <p>Your brain fights this. A flat in Singapore, a datacenter in Texas and a Bitcoin treasury company in one portfolio offend every specialist in the room. Détente takes the offence as the sign it is working.</p>
+    <h3>Sized</h3>
+    <p>A bet is a proportion, and the proportion replaces the yes or no. His example: the market value of gold against the market value of Bitcoin gives about 2%. Put 2% in. Lose it and you live. Win and the portfolio doubles. Three pockets returning 40%, 30% and 20% a year can lose one to zero and repay it with the other two inside a year.</p>
+
+    <h2 id="s6">Where to keep it</h2>
+    <p>The world is splitting into blocs, the United States and China first. Détente names the places where the blocs still talk: Switzerland, Singapore, Dubai, Miami, Hong Kong. He calls them hinge countries. Property there rises when the countries around them shake. Gave says it in older words: keep your money where people are left alone, and when gold leaves a country, leave with it, because gold knows first.</p>
+    <p>Gave adds a structural point that a beginner can hold onto. For 30 years the world ran on zero inventory: buy anything anywhere tomorrow, keep the cash in Treasuries meanwhile. Now countries stockpile rice, copper and oil, and capital that once flowed sits frozen in warehouses. That pushes real interest rates up. Saving pays again, and property bought with cheap loans suffers. He expects to be paid 6% to save, and he plans to save more.</p>
+
+    <h2 id="s7">One way to build it</h2>
+    <p>Détente manages his own money in three pockets, which he calls burrows. Computing power: energy plus datacenters in Texas, bought at book value, at a time when CoreWeave trades at 11 times book. Luxury homes off plan in hinge cities, for people who live in two to four countries a year. Bitcoin, amplified through treasury companies, with about 10% of the pocket in call options for convexity. Each pocket passes the four tests. Value is moving toward it, it gains in a storm, it moves for its own reasons, and its size is one he can lose.</p>
+    <p>Under that sits Gave's base: stocks, gold, cash and bonds picked by the square, a quarter in energy, dividends when inflation runs. Under everything sit Dalio's two rules, which he wrote for a country and which fit a household: earn more than you spend, and treat each other well.</p>
+    <p>And one rule from Détente for the road. Hold strong convictions, and change your mind the day the conditions change. The blow that ends a business comes from the risk that was left off the list. The map below is the whole argument on one page, and it is meant to be argued with.</p>
+
+  </div>
   </div>
 
-  <!-- ── 02 · the book ─────────────────────────────────────────────── -->
-  <section class="band" id="book">
-    <p class="band-no">02</p>
-    <h2>The book</h2>
-    <p>What I actually own.</p>
+  <section class="schema wide" id="map">
+    <div class="schema-head">
+      <h2>The map</h2>
+      <p>Read it top to bottom. Each layer answers the one above it.</p>
+    </div>
+    <div class="paper board">
+
+      <div class="layer">
+        <div class="tag"><div class="name">The question</div><div class="sub">Détente</div><div class="why">Will tomorrow look like yesterday? The answer picks every asset below.</div></div>
+        <div class="cells c2">
+          <div class="cell dim"><div class="h">Yes</div><div class="s">Fragile assets. The recipes of the last 40 years: index funds, state bonds, prudence.</div></div>
+          <div class="cell hot"><div class="h">No</div><div class="s">Antifragile assets, decorrelated, sized by proportion. Everything below.</div></div>
+        </div>
+      </div>
+      <div class="link"><span>Why the world is changing</span></div>
+
+      <div class="layer">
+        <div class="tag"><div class="name">The era</div><div class="sub">Dalio · sections i and ii</div><div class="why">Late in a 250-year arc. Money loses value by design.</div></div>
+        <div>
+          <div class="cells c3">
+            <div class="cell"><div class="h">Debt too large to repay</div><div class="s">The central bank prints.</div><div class="e">1933 · 1971 · 2008 · 2020</div></div>
+            <div class="cell"><div class="h">Wealth gap</div><div class="s">Turns into populism, left and right.</div><div class="e">Last time: 1930 to 1945</div></div>
+            <div class="cell"><div class="h">Rising power meets leader</div><div class="s">China and the United States.</div><div class="e">Change of order: 10 to 20 years</div></div>
+          </div>
+          <div class="cells c3" style="margin-top:8px">
+            <div class="cell"><div class="h">Printing lifts stocks, gold, commodities</div></div>
+            <div class="cell"><div class="h">Fewer than 20% of 750 currencies survive</div></div>
+            <div class="cell"><div class="h">8% new dollars a year: beat 8% or lose</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="link"><span>Which season we are in</span></div>
+
+      <div class="layer">
+        <div class="tag"><div class="name">The season</div><div class="sub">Gave · section iii</div><div class="why">Two dials, four squares, one asset to hold in each. Exclude the one or two losers.</div></div>
+        <div>
+          <div class="q4">
+            <div class="ax y">Inflation dial · gold ÷ bonds, 7 years</div>
+            <div class="cell"><div class="h">Inflation · recession</div><div class="s"><b>Cash</b> in a serious currency</div></div>
+            <div class="cell"><div class="h">Inflation · growth</div><div class="s"><b>Gold</b>, stocks, metals</div></div>
+            <div class="cell"><div class="h">Stable prices · recession</div><div class="s"><b>Government bonds</b></div></div>
+            <div class="cell"><div class="h">Stable prices · growth</div><div class="s"><b>Stocks</b>, efficiency first</div></div>
+            <div class="ax x">Growth dial · S&amp;P 500 ÷ oil, 7 years</div>
+          </div>
+          <div class="dials">
+            <div class="cell"><div class="h">Inflation up: shorten the horizon</div><div class="s">4% to 7% dividends beat 1% bonds. Buyers pay 20 years of profit, then 5.</div></div>
+            <div class="cell"><div class="h">Energy, 25%</div><div class="s">Every big bear since 1945 began with oil. Energy shares gain and pay.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="link"><span>How to stand in it</span></div>
+
+      <div class="layer">
+        <div class="tag"><div class="name">The posture</div><div class="sub">Détente · Gave · section iv</div><div class="why">Movement is the price of return. Zero is the thing to refuse.</div></div>
+        <div class="cells c3">
+          <div class="cell"><div class="h">Risk = movement</div><div class="s">Accept it. The S&amp;P 500 moves 15% to 20% a year. A flat 10% line was Madoff.</div></div>
+          <div class="cell hot"><div class="h">Danger = zero</div><div class="s">Refuse it. Strong collateral. Liquidity 24/7.</div></div>
+          <div class="cell"><div class="h">Prudence = the trap</div><div class="s">Repeating 40 years. Eagle, falcon, pigeon. 20% odds with risk, 0% without.</div></div>
+        </div>
+      </div>
+      <div class="link"><span>What to build</span></div>
+
+      <div class="layer">
+        <div class="tag"><div class="name">The build</div><div class="sub">Détente · section v</div><div class="why">Every pocket passes four tests.</div></div>
+        <div>
+          <div class="cells c4">
+            <div class="cell"><div class="h">Value moves</div><div class="s">Bet where it goes in 10 to 20 years.</div><div class="e">AI · compute · energy</div></div>
+            <div class="cell"><div class="h">Antifragile</div><div class="s">Gains when markets shake.</div><div class="e">Gold · Bitcoin · hinge real estate</div></div>
+            <div class="cell"><div class="h">Decorrelated</div><div class="s">Moves for its own reasons. The free lunch.</div><div class="e">Offends everyone: good sign</div></div>
+            <div class="cell"><div class="h">Sized</div><div class="s">A proportion, so a zero costs one year.</div><div class="e">2% Bitcoin, by market value</div></div>
+          </div>
+          <div class="cells c3" style="margin-top:8px">
+            <div class="cell hot"><div class="h">Pocket · Compute</div><div class="s">Energy plus datacenters at book value.</div></div>
+            <div class="cell hot"><div class="h">Pocket · Hinge cities</div><div class="s">Switzerland, Singapore, Dubai, Miami, Hong Kong.</div></div>
+            <div class="cell hot"><div class="h">Pocket · Amplified Bitcoin</div><div class="s">Treasury companies, 10% in calls.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="link"><span>What holds it up</span></div>
+
+      <div class="layer">
+        <div class="tag"><div class="name">The floor</div><div class="sub">Dalio · Gave · Détente</div><div class="why">Four rules under every layer.</div></div>
+        <div class="cells c4">
+          <div class="cell"><div class="h">Earn more than you spend</div></div>
+          <div class="cell"><div class="h">Treat each other well</div></div>
+          <div class="cell"><div class="h">Change your mind when conditions change</div></div>
+          <div class="cell"><div class="h">The blow comes from the risk left off the list</div></div>
+        </div>
+      </div>
+
+    </div>
   </section>
-
-  <div class="holdings wide">
-    <article class="holding">
-      <div class="holding-top">
-        <h3>Medical SaaS</h3>
-        <span class="pocket-pill">Private equity</span>
-        <span class="holding-fig">~€1,100<small>per month</small></span>
-      </div>
-      <dl>
-        <div class="fact"><dt>Entered</dt><dd>2023</dd></div>
-        <div class="fact"><dt>Job in the book</dt><dd>Cash flow</dd></div>
-        <div class="fact"><dt>How fast you can sell</dt><dd>Illiquid</dd></div>
-        <div class="fact"><dt>Moves with</dt><dd>Practice billings, not the cycle</dd></div>
-      </dl>
-    </article>
-
-    <article class="holding">
-      <div class="holding-top">
-        <h3>Datacenter</h3>
-        <span class="pocket-pill">Compute &amp; energy</span>
-        <span class="holding-fig">~€2,100<small>per month</small></span>
-      </div>
-      <dl>
-        <div class="fact"><dt>Entered</dt><dd>2026</dd></div>
-        <div class="fact"><dt>Job in the book</dt><dd>Engine</dd></div>
-        <div class="fact"><dt>How fast you can sell</dt><dd>Quarterly</dd></div>
-        <div class="fact"><dt>Moves with</dt><dd>AI capex and power supply</dd></div>
-      </dl>
-    </article>
-
-    <article class="holding">
-      <div class="holding-top">
-        <h3>Liquid portfolio</h3>
-        <span class="pocket-pill">Liquid</span>
-        <span class="holding-fig">~35%<small>as pinned on the front page</small></span>
-      </div>
-      <dl>
-        <div class="fact"><dt>Job in the book</dt><dd>Engine</dd></div>
-        <div class="fact"><dt>How fast you can sell</dt><dd>Daily</dd></div>
-        <div class="fact"><dt>Time horizon</dt><dd>1–5 years</dd></div>
-        <div class="fact"><dt>Moves with</dt><dd>The global macro cycle</dd></div>
-      </dl>
-    </article>
-  </div>
 
   <div class="col">
-    <p class="disclaimer">Figures are the ones pinned to the front page of this site and are rounded. The two private positions report a monthly distribution; the liquid figure is a performance number, not a monthly yield, and it is the one number here I would treat as the least comparable to the others. None of it is audited and none of it is an offer or a recommendation.</p>
+    <section class="sources">
+      <h2>Sources</h2>
+      <ol>
+        <li>Ray Dalio, <em>Principles for Dealing with the Changing World Order</em>, the animated summary. The 1971 and 1933 episodes, the eight powers, the three signs, the 750 currencies.</li>
+        <li>Charles Gave with Emmanuelle Gave, Université de l'Épargne, the four-quadrant lesson. The two dials and their 7-year averages, exclusion, duration, the 25% in energy, the reading of spring 2026.</li>
+        <li>Richard Détente, "La stratégie patrimoniale des trois terriers", keynote for a Swiss private bank. The four compass points, the 2% sizing, the three pockets.</li>
+        <li>Richard Détente with Les Financiers, the long interview. Risk against danger, the parable of the talents, the three generations, avalanches, the grid as a web.</li>
+      </ol>
+      <p class="fine">Figures 1 to 7 are schematics: they draw the shape each author describes, with the numbers they gave and no data series of my own. Amounts are as spoken and rounded. These are study notes, published so they can be argued with. They are my reading, not advice; make your own decisions.</p>
+    </section>
+
+    <section class="deeper">
+      <h2>Go deeper</h2>
+      <ul>
+        <li><a href="/wealth/principles/"><span class="name">Principles</span><span class="desc">14 principles, 9 figures, the long argument.</span><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M4.22 11.78a.75.75 0 0 1 0-1.06L9.44 5.5H5.75a.75.75 0 0 1 0-1.5h5.5a.75.75 0 0 1 .75.75v5.5a.75.75 0 0 1-1.5 0V6.56l-5.22 5.22a.75.75 0 0 1-1.06 0Z"/></svg></a></li>
+        <li><a href="/wealth/country/"><span class="name">Country Map</span><span class="desc">32 countries, 3 readings each, on the four squares.</span><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M4.22 11.78a.75.75 0 0 1 0-1.06L9.44 5.5H5.75a.75.75 0 0 1 0-1.5h5.5a.75.75 0 0 1 .75.75v5.5a.75.75 0 0 1-1.5 0V6.56l-5.22 5.22a.75.75 0 0 1-1.06 0Z"/></svg></a></li>
+        <li><a href="/wealth/exercice/"><span class="name">The Exercise</span><span class="desc">The same map, played. 11 lessons, 6 interactive.</span><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M4.22 11.78a.75.75 0 0 1 0-1.06L9.44 5.5H5.75a.75.75 0 0 1 0-1.5h5.5a.75.75 0 0 1 .75.75v5.5a.75.75 0 0 1-1.5 0V6.56l-5.22 5.22a.75.75 0 0 1-1.06 0Z"/></svg></a></li>
+      </ul>
+    </section>
   </div>
-
-  <section class="note col">
-    <p class="disclaimer">None of this is advice, and I am not a financial adviser. It is a structure I find defensible, published so it can be argued with.</p>
-    <p><a class="next" href="/wealth/principles/">Start with the principles</a></p>
-  </section>
-
 </main>
 
-<footer class="foot">
-  <div class="foot-in">
-    <a href="/wealth/">Wealth Architecture</a>
-    <a href="/wealth/principles/">Principles</a>
-    <a href="/wealth/country/">Country Map</a>
-    <a href="/wealth/exercice/">Exercise</a>
-    <a href="/">jeremylasne.com</a>
-    <span class="fine">Free research on wealth architecture · Not financial advice</span>
-  </div>
-</footer>
+<footer><a href="/">jeremylasne.com</a></footer>
 
+<script src="/snow.js" defer></script>
 </body>
 </html>
