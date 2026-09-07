@@ -17,11 +17,11 @@ export const SPEC = {
       unit: 'kg', step: 2.5, max: 200, best: 'max',
     },
     {
-      id: 'swim', discipline: 'Cardio', name: 'Swim', short: 'Swim', protocol: '30 minutes',
+      id: 'swim', discipline: 'Endurance', name: 'Swim', short: 'Swim', protocol: '30 minutes',
       unit: 'm', step: 25, max: 5000, best: 'max',
     },
     {
-      id: 'sprint', discipline: 'Sprint', name: '100 m', short: '100 m', protocol: 'standing start',
+      id: 'sprint', discipline: 'Speed', name: '100 m', short: '100 m', protocol: 'standing start',
       unit: 's', step: 0.1, max: 60, best: 'min',
     },
   ],

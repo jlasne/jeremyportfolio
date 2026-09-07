@@ -499,7 +499,7 @@ function build() {
   document.querySelectorAll('.log:not(.train) .val[type=text]').forEach(i => i.addEventListener('change', () => { const h = parseSleep(i.value); i.value = h === undefined ? '' : fmtSleep(h); }));
   grid($('train'), '<span class="h">Session</span><span class="res"><span class="h">Test</span><span class="s">Result</span></span>',
     key => `<input class="txt" id="w-${key}" type="text" maxlength="80" placeholder="Rest, or what was done" readonly aria-label="Session, ${pretty(key)}">` +
-      `<span class="res"><select class="pick" id="p-${key}" disabled aria-label="Test, ${pretty(key)}"><option value=""></option>${TESTS.map(e => `<option value="${e.id}">${e.name}</option>`).join('')}</select>` +
+      `<span class="res"><select class="pick" id="p-${key}" disabled aria-label="Test, ${pretty(key)}"><option value=""></option>${TESTS.map(e => `<option value="${e.id}">${e.discipline}</option>`).join('')}</select>` +
       numCell('t-' + key, TESTS[0], 'Result, ' + pretty(key)) + '</span>');
   document.querySelectorAll('.pick').forEach(sel => sel.addEventListener('change', () => unit(sel.id.slice(2))));
   $('more').hidden = !hidden;
