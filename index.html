@@ -94,6 +94,7 @@
     text-decoration: none; color: inherit;
   }
   .item .logo { width: 24px; height: 24px; border-radius: 6px; flex: none; }
+  .item .logo.round { border-radius: 50%; object-fit: cover; }
   .item .dot { width: 24px; height: 24px; flex: none; display: grid; place-items: center; }
   .item .dot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: rgba(234,244,251,.3); }
   .item .name { font-size: 16px; line-height: 24px; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; flex: none; }
@@ -208,13 +209,13 @@
       <h2>Social</h2>
       <ul>
         <li><a class="item" href="https://www.youtube.com/@jerandmax" target="_blank" rel="noopener">
-          <span class="dot"></span>
+          <img class="logo round" src="media/avatar.webp" alt="" width="24" height="24">
           <span class="name">YouTube</span>
           <span class="desc">@jerandmax</span>
           <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
         </a></li>
         <li><a class="item" href="https://x.com/jeremylasne" target="_blank" rel="noopener">
-          <span class="dot"></span>
+          <img class="logo round" src="media/avatar.webp" alt="" width="24" height="24">
           <span class="name">X</span>
           <span class="desc">@jeremylasne</span>
           <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
