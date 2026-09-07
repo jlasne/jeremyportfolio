@@ -9,21 +9,20 @@ export const SPEC = {
   /* The first day of the log. Nothing is shown or saved before it. */
   start: '2026-09-06',
 
-  /* One test per discipline, one test a day at most. The card shows the
-     best result so far, or the target as a placeholder until the first
-     session. */
+  /* The tests worth a number. Logging one is optional: a card appears
+     under the section once a test has its first result. */
   exercises: [
     {
       id: 'pullup', discipline: 'Strength', name: 'Weighted pull-up', short: 'Pull-up', protocol: '1 rep max',
-      unit: 'kg', step: 2.5, max: 200, best: 'max', target: 20,
+      unit: 'kg', step: 2.5, max: 200, best: 'max',
     },
     {
       id: 'swim', discipline: 'Cardio', name: 'Swim', short: 'Swim', protocol: '30 minutes',
-      unit: 'm', step: 25, max: 5000, best: 'max', target: 1200,
+      unit: 'm', step: 25, max: 5000, best: 'max',
     },
     {
       id: 'sprint', discipline: 'Sprint', name: '100 m', short: '100 m', protocol: 'standing start',
-      unit: 's', step: 0.1, max: 60, best: 'min', target: 14,
+      unit: 's', step: 0.1, max: 60, best: 'min',
     },
   ],
 
@@ -93,8 +92,8 @@ export function clean(input, today) {
   return { log };
 }
 
-/* The headline number of a discipline: the best result in the log, and
-   how many sessions it came from. Zero sessions means the target. */
+/* The best result of a discipline in the log, and how many sessions it
+   came from. No session means no number to show. */
 export function bestOf(e, log) {
   let best, sessions = 0;
   for (const key in log) {
@@ -103,7 +102,7 @@ export function bestOf(e, log) {
     sessions++;
     best = best === undefined || (e.best === 'min' ? v < best : v > best) ? v : best;
   }
-  return { value: sessions ? best : e.target, sessions };
+  return { value: best, sessions };
 }
 
 /* Every result of one test, oldest first, for the curve. */

@@ -162,6 +162,7 @@ h2 {
 .editing .pick:focus { outline: none; border-bottom-color: var(--ice); }
 .pick option { background: var(--ink); color: var(--ice); }
 .log.train { margin-top: 16px; }
+.cards:has(.card:not([hidden])) + .log.train { margin-top: 24px; }
 
 .more { margin: 14px 0 0; }
 .editing .more { display: none; }
@@ -175,6 +176,8 @@ h2 {
 
 /* ── cards ──────────────────────────────────────────────────────────── */
 .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.cards:empty { display: none; }
+.card[hidden] { display: none; }
 .card { background: var(--card); border-top: 2px solid var(--blue); padding: 24px 24px 26px; min-width: 0; }
 .card .label { color: var(--blue); display: block; }
 .card .name { margin: 14px 0 0; font: 400 clamp(26px, 2.6vw, 32px)/1 var(--display); letter-spacing: .02em; }
@@ -189,7 +192,6 @@ h2 {
 .spark { display: block; width: 100%; height: 72px; margin: 16px 0 0; overflow: visible; }
 .spark[hidden] { display: none; }
 .spark .base { stroke: rgba(234, 244, 251, .14); stroke-width: 1; }
-.spark .tgt { stroke: rgba(95, 168, 211, .45); stroke-width: 1; }
 .spark .ln { fill: none; stroke: rgba(95, 168, 211, .6); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 .spark .pt { fill: var(--blue); stroke: #0b1a2b; stroke-width: 2; }
 .spark .pt.now { fill: var(--ice); }
@@ -299,7 +301,7 @@ footer a:hover { color: var(--ice); }
     <div class="head">
       <span class="n mono">02</span>
       <h2>Performance</h2>
-      <p class="tag">One all-round, high-performing body. Strength, endurance and speed, one test each.</p>
+      <p class="tag">One all-round, high-performing body. What I did, day by day, and the number when there is one.</p>
       <p class="sum mono" id="tsum"></p>
     </div>
     <div class="cards" id="cards"></div>
@@ -509,7 +511,7 @@ $('legend').innerHTML = HABITS.map(h => `<li><b>${h.name}<small>${h.short}</smal
 /* one card, one number: the best result so far, or the target */
 TESTS.forEach((e, i) => {
   const c = document.createElement('div');
-  c.className = 'card';
+  c.className = 'card'; c.id = 'c-' + e.id; c.hidden = true;
   c.innerHTML = `
     <span class="label mono">0${i + 1} · ${e.discipline}</span>
     <p class="name">${e.name}<small>${e.protocol}</small></p>
@@ -527,22 +529,19 @@ function spark(e) {
   svg.toggleAttribute('hidden', pts.length < 1);
   if (pts.length < 1) return;
   const W = Math.max(120, Math.round(svg.getBoundingClientRect().width) || 240), H = 72, L = 6, R = 6, T = 10, B = 22;
-  const vals = pts.map(p => p.v).concat(e.target);
+  const vals = pts.map(p => p.v);
   let lo = Math.min(...vals), hi = Math.max(...vals);
   if (hi === lo) { lo -= 1; hi += 1; }
   const x = i => pts.length === 1 ? W / 2 : L + i * (W - L - R) / (pts.length - 1);
   const y = v => T + (hi - v) / (hi - lo) * (H - T - B);
-  const best = bestOf(e, state.log).value;
   const fmt = k => pretty(k);
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   svg.innerHTML =
     `<line class="base" x1="0" x2="${W}" y1="${H - B + 6}" y2="${H - B + 6}"/>` +
-    `<line class="tgt" x1="0" x2="${W}" y1="${y(e.target).toFixed(1)}" y2="${y(e.target).toFixed(1)}"/>` +
     (pts.length > 1 ? `<polyline class="ln" points="${pts.map((p, i) => x(i).toFixed(1) + ',' + y(p.v).toFixed(1)).join(' ')}"/>` : '') +
     pts.map((p, i) => `<circle class="pt${i === pts.length - 1 ? ' now' : ''}" cx="${x(i).toFixed(1)}" cy="${y(p.v).toFixed(1)}" r="4"><title>${p.v} ${e.unit} · ${fmt(p.key)}</title></circle>`).join('') +
     `<text x="0" y="${H - 2}">${fmt(pts[0].key)}</text>` +
-    (pts.length > 1 ? `<text x="${W}" y="${H - 2}" text-anchor="end">${fmt(pts[pts.length - 1].key)}</text>` : '') +
-    `<text x="${W}" y="${(y(e.target) - 4).toFixed(1)}" text-anchor="end">target ${e.target}</text>`;
+    (pts.length > 1 ? `<text x="${W}" y="${H - 2}" text-anchor="end">${fmt(pts[pts.length - 1].key)}</text>` : '');
 }
 let sparkTimer;
 addEventListener('resize', () => { clearTimeout(sparkTimer); sparkTimer = setTimeout(() => TESTS.forEach(spark), 200); });
@@ -573,13 +572,15 @@ function paint(log = state.log) {
   $('sum').textContent = `Last 7 days · ${checks} of ${7 * HABITS.length} checks` + (nights ? ` · ${fmtSleep(hours / nights)} sleep on average` : '') + (weighed ? ` · ${(kilos / weighed).toFixed(1)} kg on average` : '');
   const counts = [];
   for (const e of TESTS) {
-    const b = bestOf(e, state.log);
+    const b = bestOf(e, state.log), card = $('c-' + e.id);
+    card.hidden = !b.sessions;
+    if (!b.sessions) continue;
     $('n-' + e.id).textContent = b.value;
-    $('b-' + e.id).textContent = b.sessions ? `Best of ${b.sessions} ${b.sessions === 1 ? 'session' : 'sessions'}` : 'Target';
+    $('b-' + e.id).textContent = `Best of ${b.sessions} ${b.sessions === 1 ? 'session' : 'sessions'}`;
     counts.push(`${e.short.toLowerCase()} ${b.sessions}`);
     spark(e);
   }
-  $('tsum').textContent = `Last 7 days · ${trained} ${trained === 1 ? 'day' : 'days'} trained · all sessions: ${counts.join(', ')}`;
+  $('tsum').textContent = `Last 7 days · ${trained} ${trained === 1 ? 'day' : 'days'} trained` + (counts.length ? ` · all sessions: ${counts.join(', ')}` : '');
   const when = state.updatedAt ? new Date(state.updatedAt) : null;
   $('updated').textContent = !when ? '' :
     dateKey(when) === today ? 'Updated today' :
