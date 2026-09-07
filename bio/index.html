@@ -659,12 +659,28 @@ $('addday').addEventListener('submit', ev => {
   say(`${pretty(k, true)} added. Fill it in, then Save.`);
   document.querySelector(`#h-${k}-${HABITS[0].id}`)?.focus();
 });
+/* What the server kept against what the page sent. A server running older
+   code drops a field it does not know without a word, which would lose the
+   entry: say so and stay in edit mode, so nothing on screen is lost. */
+function dropped(sent, kept) {
+  for (const key in sent) {
+    const a = sent[key], b = kept?.[key];
+    if (!b) return true;
+    for (const f of ['sleep', 'weight', 'note']) if (f in a && b[f] !== a[f]) return true;
+    for (const id in a.train || {}) if (b.train?.[id] !== a.train[id]) return true;
+  }
+  return false;
+}
 async function save() {
   const log = collect();
   const draft = clean({ log }, today);
   $('save').disabled = true; say('Saving…');
   try {
     const doc = await api('bio.save', { passphrase: remembered(), today, ...draft });
+    if (dropped(draft.log, doc.log)) {
+      say('The server kept less than this page sent. Deploy the overlap folder, then save again.', true);
+      $('save').disabled = false; return;
+    }
     apply(doc); extra.clear(); open(false); build(); paint();
   } catch (e) {
     say(e.message, true);
