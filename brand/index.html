@@ -295,7 +295,8 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 
 
 /* ── niches: two rows, opposite ways ────────────────────────────────────── */
-.co-rows { margin-top: clamp(40px, 6vh, 64px); display: flex; flex-direction: column; gap: 14px; }
+.co-band { padding: 0 0 clamp(28px, 5vh, 56px); }
+.co-rows { display: flex; flex-direction: column; gap: 14px; }
 .co-row { overflow: hidden; touch-action: pan-y; cursor: grab; user-select: none; -webkit-user-select: none; -webkit-mask: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); mask: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
 .co-row.grabbing { cursor: grabbing; }
 .co-track { display: flex; gap: 10px; width: max-content; will-change: transform; }
@@ -314,15 +315,13 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 @media (max-width: 860px) { .in-grid { grid-template-columns: 1fr; } .in-cta { flex-direction: column; text-align: center; } }
 
 /* ── final: the black box with the rounded top ──────────────────────────── */
-#final { position: relative; z-index: 1; margin-top: clamp(72px, 10vw, 140px); }
+#final { position: relative; z-index: 1; }
 .fn-box { position: relative; overflow: hidden; padding: clamp(64px, 9vw, 124px) 24px clamp(64px, 9vw, 112px); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 24px; background: #070a12; color: #f2f3f7; }
 .fn-rings { position: absolute; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(58% 72% at 50% 44%, transparent 57%, rgba(255,255,255,.08) 58%, transparent 61%), radial-gradient(72% 88% at 50% 44%, transparent 70%, rgba(255,255,255,.06) 71%, transparent 74%), radial-gradient(88% 104% at 50% 44%, transparent 82%, rgba(255,255,255,.04) 83%, transparent 86%); }
 .fn-box > * { position: relative; z-index: 1; }
 .fn-box .brand-mark { width: clamp(40px, 4vw, 56px); height: clamp(40px, 4vw, 56px); }
 .fn-box h2 { max-width: 16ch; margin: 0; }
 .fn-box .lede { color: #a2a7b6; max-width: 52ch; text-wrap: pretty; }
-.fn-box .co-rows { align-self: stretch; margin: 6px -24px 6px; }
-.fn-box .chip { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.16); color: #f2f3f7; box-shadow: none; }
 .fn-box .btn { background: #f2f3f7; color: #0d1017; }
 .fn-box .btn--ghost { background: rgba(255,255,255,.06); color: #f2f3f7; border-color: rgba(255,255,255,.18); }
 /* the confirmation arrives on its own transition: starting-style, zero timers in CSS */
@@ -653,6 +652,14 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
   </div>
 </section>
 
+<!-- ── the niches glide past between the steps and the call ──────────────── -->
+<div class="co-band tone--light" aria-hidden="true">
+  <div class="co-rows">
+    <div class="co-row" id="co-a" data-dir="-1"><div class="co-track"></div></div>
+    <div class="co-row" id="co-b" data-dir="1"><div class="co-track"></div></div>
+  </div>
+</div>
+
 <!-- ── who it is for ─────────────────────────────────────────────────────── -->
 <!-- ── who it's for, and the call: one black band ────────────────────────── -->
 <section id="final">
@@ -661,10 +668,6 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
     <svg class="brand-mark" aria-hidden="true"><use href="#bm-mark"/></svg>
     <h2 class="h-section xl">Let&rsquo;s chat for a <span style="white-space:nowrap">life-changing</span> collab.</h2>
     <p class="lede">A post pays once. An app pays you every month. Let&rsquo;s talk if you have 100k followers or more.</p>
-    <div class="co-rows">
-      <div class="co-row" id="co-a" data-dir="-1"><div class="co-track"></div></div>
-      <div class="co-row" id="co-b" data-dir="1"><div class="co-track"></div></div>
-    </div>
     <div class="btn-row">
       <a class="btn" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call <span class="arr">&rarr;</span></a>
       <a class="btn btn--ghost" href="mailto:hey@jeremylasne.com?subject=An%20app%20for%20my%20audience&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A" data-mail target="_blank" rel="noopener">hey@jeremylasne.com</a>
