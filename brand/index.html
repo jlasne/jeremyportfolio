@@ -293,16 +293,6 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .asset .r span:first-child { color: var(--muted); }
 .asset .r b { font-weight: 800; }
 
-/* ── the asset: a black card, two columns drifting apart ────────────────── */
-#asset { background: #070a12; color: #f2f3f7; padding: 0; overflow: hidden; }
-.ac-grid { display: grid; grid-template-columns: 1fr minmax(auto, 620px) 1fr; align-items: center; gap: clamp(10px, 2vw, 28px); padding: 0 12px; }
-.ac-col { width: clamp(120px, 14vw, 182px); margin: 0 auto; height: clamp(440px, 58vh, 520px); overflow: hidden; display: flex; align-items: center; justify-content: center; }
-.ac-track { display: flex; flex-direction: column; gap: clamp(14px, 1.6vw, 22px); width: 100%; will-change: transform; }
-.ac-mid { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 22px; padding: 40px 0; }
-.ac-mid .brand-mark { width: clamp(46px, 4.4vw, 60px); height: clamp(46px, 4.4vw, 60px); }
-.ac-mid h2 { max-width: none; }
-.ac-mid .lede { color: #a2a7b6; }
-@media (max-width: 900px) { #asset { padding: clamp(44px, 6vh, 64px) 0; } .ac-col { display: none; } .ac-grid { grid-template-columns: 1fr; } }
 
 /* ── niches: two rows, opposite ways ────────────────────────────────────── */
 .co-rows { margin-top: clamp(40px, 6vh, 64px); display: flex; flex-direction: column; gap: 14px; }
@@ -330,7 +320,7 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .fn-box > * { position: relative; z-index: 1; }
 .fn-box .brand-mark { width: clamp(40px, 4vw, 56px); height: clamp(40px, 4vw, 56px); }
 .fn-box h2 { max-width: 16ch; margin: 0; }
-.fn-box .lede { color: #a2a7b6; }
+.fn-box .lede { color: #a2a7b6; max-width: 52ch; text-wrap: pretty; }
 .fn-box .co-rows { align-self: stretch; margin: 6px -24px 6px; }
 .fn-box .chip { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.16); color: #f2f3f7; box-shadow: none; }
 .fn-box .btn { background: #f2f3f7; color: #0d1017; }
@@ -364,7 +354,6 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
   #trust { padding-top: clamp(12px, 2vh, 24px); }
   #whatis { --zone: clamp(170px, 26vh, 260px); }
   .band { padding-block: clamp(56px, 9vw, 88px); }
-  #asset .ac-mid { padding: 24px 0; }
 }
 @media (max-width: 420px) {
   .proof-pill { flex-wrap: wrap; justify-content: center; text-align: center; border-radius: 22px; padding: 9px 14px; }
@@ -478,10 +467,6 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 }
 .pd.has-video .pd-rc { opacity: clamp(0, calc((var(--p) * 2.8 - .5) * .35), .35); }
 
-/* the asset columns: app tiles and yours */
-.ac-col .t { width: 100%; aspect-ratio: 1; border-radius: 28%; overflow: hidden; box-shadow: 0 24px 50px -28px rgba(0,0,0,.7); flex: none; }
-.ac-col .t img { width: 100%; height: 100%; object-fit: cover; }
-.ac-col .t.you { background: #f2f3f7; color: #070a12; display: grid; place-items: center; font-family: var(--display); font-weight: 500; font-size: clamp(.9rem, 1.4vw, 1.2rem); letter-spacing: -0.03em; text-transform: uppercase; text-align: center; padding: 10%; line-height: 1.05; }
 </style>
 <noscript><style>
   .reveal, .reveal-up, .hero-in { opacity: 1; transform: none; }
@@ -668,29 +653,14 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
   </div>
 </section>
 
-<!-- ── the asset: a black band, two columns drifting apart ───────────────── -->
-<section class="tone--dark" id="asset">
-  <div class="ac">
-    <div class="ac-grid">
-      <div class="ac-col"><div class="ac-track" id="ac-l"></div></div>
-      <div class="ac-mid">
-        <svg class="brand-mark" aria-hidden="true"><use href="#bm-mark"/></svg>
-        <h2 class="h-section">A post pays once. An app pays you every month.</h2>
-        <a class="btn" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call <span class="arr">&rarr;</span></a>
-      </div>
-      <div class="ac-col"><div class="ac-track" id="ac-r"></div></div>
-    </div>
-  </div>
-</section>
-
 <!-- ── who it is for ─────────────────────────────────────────────────────── -->
 <!-- ── who it's for, and the call: one black band ────────────────────────── -->
 <section id="final">
   <div class="fn-box">
     <div class="fn-rings" aria-hidden="true"></div>
     <svg class="brand-mark" aria-hidden="true"><use href="#bm-mark"/></svg>
-    <h2 class="h-section xl">100k followers or more?</h2>
-    <p class="lede">Let&rsquo;s chat for a life-changing collab.</p>
+    <h2 class="h-section xl">Let&rsquo;s chat for a <span style="white-space:nowrap">life-changing</span> collab.</h2>
+    <p class="lede">A post pays once. An app pays you every month. Let&rsquo;s talk if you have 100k followers or more.</p>
     <div class="co-rows">
       <div class="co-row" id="co-a" data-dir="-1"><div class="co-track"></div></div>
       <div class="co-row" id="co-b" data-dir="1"><div class="co-track"></div></div>
@@ -984,26 +954,6 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
     window.addEventListener('scroll', function () { if (!tk) { tk = true; requestAnimationFrame(function () { paint(); tk = false; }); } }, { passive: true });
     window.addEventListener('resize', paint);
     paint();
-  })();
-
-  /* ═══ the asset: left column up, right column down, 90px each way ═══════ */
-
-  (function () {
-    var sec = document.getElementById('asset'), L = document.getElementById('ac-l'), R = document.getElementById('ac-r'); if (!sec || !L || !R) return;
-    var ICONS = ['media/stella.webp', 'media/faceharmony.webp', 'media/thepanash.webp', 'media/kaught.webp'];
-    function tile(src) { return src ? '<span class="t"><img src="' + src + '" alt="" loading="lazy" decoding="async"></span>' : '<span class="t you">Your app</span>'; }
-    L.innerHTML = [ICONS[0], null, ICONS[2], ICONS[1], null, ICONS[3]].map(tile).join('');
-    R.innerHTML = [null, ICONS[3], ICONS[1], null, ICONS[0], ICONS[2]].map(tile).join('');
-    if (reduced) return;
-    var tick = false;
-    function upd() {
-      tick = false;
-      var r = sec.getBoundingClientRect(), h = window.innerHeight;
-      var prog = cl((h - r.top) / (h + r.height), 0, 1), d = (prog * 2 - 1) * 90;
-      L.style.transform = 'translateY(' + (-d).toFixed(1) + 'px)'; R.style.transform = 'translateY(' + d.toFixed(1) + 'px)';
-    }
-    function onS() { if (!tick) { tick = true; requestAnimationFrame(upd); } }
-    window.addEventListener('scroll', onS, { passive: true }); window.addEventListener('resize', onS, { passive: true }); upd();
   })();
 
   /* ═══ copy the address ═══════════════════════════════════════════════════ */
