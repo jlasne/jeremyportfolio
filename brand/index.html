@@ -3,22 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>BrandMatch · Turn your audience into recurring revenue</title>
-<meta name="description" content="Paid posts, ebooks and courses pay once. Your app pays every month, and gives your audience a place they open every day. It takes 100,000 followers to start.">
+<title>BrandMatch.app · Turn your audience into an app</title>
+<meta name="description" content="Paid posts, ebooks and courses pay once. Your own app pays you every month. We build it, we run it, you keep posting.">
 <link rel="canonical" href="https://www.brandmatch.app/">
 <meta name="theme-color" content="#070a12">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="BrandMatch">
 <meta property="og:url" content="https://www.brandmatch.app/">
-<meta property="og:title" content="Turn your audience into recurring revenue.">
-<meta property="og:description" content="Paid posts, ebooks and courses pay once. Your app pays every month. It takes 100,000 followers to start.">
-<meta property="og:image" content="https://www.brandmatch.app/media/og.png?v=1">
+<meta property="og:title" content="Turn your audience into an app.">
+<meta property="og:description" content="Paid posts, ebooks and courses pay once. Your own app pays you every month. We build it, we run it, you keep posting.">
+<meta property="og:image" content="https://www.brandmatch.app/media/og.png?v=2">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="BrandMatch. Turn your audience into recurring revenue.">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://www.brandmatch.app/media/og.png?v=1">
+<meta name="twitter:image" content="https://www.brandmatch.app/media/og.png?v=2">
 <meta name="twitter:site" content="@jeremylasne">
 
 <style>
@@ -229,11 +229,14 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 /* ── the portal: five greys open onto the app, or the video once it exists ─ */
 .pin { position: relative; }
 .pin-stage { position: relative; display: grid; place-items: center; padding: 90px 0 110px; }
-.pin.pinned { height: 165vh; }
+.pin.pinned { height: 190vh; }
 .pin.pinned .pin-stage { position: sticky; top: 0; height: 100svh; padding: 0; overflow: clip; }
-.pd { --p: 0; --g: clamp(14px, 1.7vw, 28px); position: relative; width: min(58vw, 860px); aspect-ratio: 1.82; }
+.pd { --p: 0; --g: clamp(14px, 1.7vw, 28px); position: relative; width: min(72vw, 1100px, calc((100svh - 250px) * 1.82)); aspect-ratio: 1.82; }
 @media (max-width: 760px) { .pd { width: min(74vw, 440px); --g: clamp(7px, 1.7vw, 10px); } }
 .pd-head { position: absolute; z-index: 12; left: 0; right: 0; bottom: 100%; margin-bottom: clamp(18px, 3vh, 34px); text-align: center; font-family: var(--display); font-weight: 500; font-size: clamp(1.3rem, 3.2vw, 2.6rem); letter-spacing: -0.04em; text-transform: uppercase; text-wrap: balance; pointer-events: none; opacity: clamp(0, calc((var(--p) - .72) * 5), 1); transform: translateY(calc(18px * (1 - clamp(0, calc((var(--p) - .72) * 5), 1)))); }
+.pd-faces { display: flex; justify-content: center; }
+.pd-faces img { width: clamp(46px, 5.2vw, 76px); aspect-ratio: 1; border-radius: 50%; object-fit: cover; border: 3px solid #f4f5f8; box-shadow: 0 12px 30px -14px rgba(0,0,0,.55); margin-left: -12px; background: #d3d6dc; }
+.pd-faces img:first-child { margin-left: 0; }
 .pd-cta { position: absolute; z-index: 20; left: 0; right: 0; top: 100%; margin-top: clamp(20px, 3vh, 36px); display: flex; justify-content: center; pointer-events: none; opacity: clamp(0, calc((var(--p) - .78) * 5), 1); transform: translateY(calc(-14px * (1 - clamp(0, calc((var(--p) - .78) * 5), 1)))); }
 .pd.pd-open .pd-cta { pointer-events: auto; }
 .pd-ring { position: absolute; border-radius: 9999px; transform-origin: 50% 50%; will-change: transform, opacity; opacity: clamp(0, calc(1.28 - var(--p) * 1.85), 1); pointer-events: none; box-shadow: 0 50px 120px -60px rgba(0,0,0,.4); }
@@ -339,9 +342,18 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .fn-box .chip { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.16); color: #f2f3f7; box-shadow: none; }
 .fn-box .btn { background: #f2f3f7; color: #0d1017; }
 .fn-box .btn--ghost { background: rgba(255,255,255,.06); color: #f2f3f7; border-color: rgba(255,255,255,.18); }
-.copy-inline { margin-top: 2px; padding: 4px 2px; font-size: 13.5px; font-weight: 600; color: #989daa; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(255,255,255,.18); transition: color .3s; }
-.copy-inline:hover { color: #f2f3f7; }
 /* the confirmation arrives on its own transition: starting-style, zero timers in CSS */
+.mail-dialog { position: fixed; inset: 0; margin: auto; width: min(92vw, 520px); padding: clamp(32px, 5vw, 48px) clamp(22px, 4vw, 40px) clamp(28px, 4vw, 40px); border: 0; border-radius: 28px; background: #070a12; color: #f2f3f7; text-align: center; box-shadow: 0 40px 100px -30px rgba(0,0,0,.7); opacity: 0; translate: 0 12px; transition: opacity .25s var(--ease), translate .25s var(--ease), display .25s allow-discrete, overlay .25s allow-discrete; }
+.mail-dialog[open] { opacity: 1; translate: 0 0; }
+@starting-style { .mail-dialog[open] { opacity: 0; translate: 0 12px; } }
+.mail-dialog::backdrop { background: rgba(7,10,18,.55); backdrop-filter: blur(6px); }
+.mail-dialog .eyebrow { color: #989daa; }
+.mail-addr { margin: 12px 0 22px; font-family: var(--display); font-weight: 500; font-size: clamp(1.05rem, 3.2vw, 1.5rem); letter-spacing: -0.03em; overflow-wrap: anywhere; }
+.mail-dialog .btn { background: #f2f3f7; color: #0d1017; }
+.mail-dialog .btn--ghost { background: rgba(255,255,255,.06); color: #f2f3f7; border-color: rgba(255,255,255,.18); }
+.mail-close { position: absolute; top: 12px; right: 12px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,.18); background: transparent; color: #f2f3f7; font-size: 22px; line-height: 1; cursor: pointer; }
+.mail-close:hover { background: rgba(255,255,255,.08); }
+.mail-note { min-height: 22px; margin: 14px 0 0; }
 .copied { display: none; opacity: 0; translate: 0 -6px; margin-left: 10px; font-size: 13.5px; font-weight: 700; color: #f2f3f7; transition: display .2s allow-discrete, opacity .2s var(--ease-soft), translate .2s var(--ease-soft); }
 .copied[data-open] { display: inline-block; opacity: 1; translate: 0 0; }
 @starting-style { .copied[data-open] { opacity: 0; translate: 0 -6px; } }
@@ -455,7 +467,7 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 /* the receipts, behind the rings */
 .pd-rc { position: absolute; inset: 0; z-index: 2; display: grid; grid-template-columns: repeat(3, 1fr); align-items: center; gap: 2%; padding: 5% 6%; color: #fff; opacity: clamp(0, calc(var(--p) * 2.8 - .5), 1); }
 .pd-rc > div { text-align: center; }
-.pd-rc img { width: clamp(44px, 6.4vw, 88px); height: auto; border-radius: 22%; margin: 0 auto 12px; box-shadow: 0 12px 30px -12px rgba(0,0,0,.7); }
+.pd-rc img { width: clamp(44px, 7.4vw, 104px); height: auto; border-radius: 22%; margin: 0 auto 12px; box-shadow: 0 12px 30px -12px rgba(0,0,0,.7); }
 .pd-rc .n { font-size: clamp(1.3rem, 4vw, 3.4rem); font-weight: 800; letter-spacing: -0.05em; line-height: 1; font-variant-numeric: tabular-nums; }
 .pd-rc .n small { font-size: .38em; font-weight: 700; letter-spacing: 0; color: #a2a7b6; }
 .pd-rc .k { margin-top: 8px; font-size: clamp(10px, 1.1vw, 14px); color: #a2a7b6; line-height: 1.35; }
@@ -495,12 +507,12 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
   <div class="shell">
     <a class="brand" href="#top" aria-label="BrandMatch, back to top">
       <svg class="brand-mark" aria-hidden="true"><use href="#bm-mark"/></svg>
-      <span class="brand-name">BrandMatch</span>
+      <span class="brand-name">BrandMatch.app</span>
     </a>
     <div class="nav-links">
       <a href="#how">How it works</a>
       <a href="#final">Who it&rsquo;s for</a>
-      <a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=hey@jeremylasne.com&amp;su=An%20app%20for%20my%20audience&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A" target="_blank" rel="noopener">Email</a>
+      <a href="mailto:hey@jeremylasne.com?subject=An%20app%20for%20my%20audience&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A" data-mail target="_blank" rel="noopener">Email</a>
     </div>
     <div class="nav-right">
       <a class="btn" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call <span class="arr">&rarr;</span></a>
@@ -511,14 +523,14 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 </nav>
 
 <div class="nav-menu" id="menu" aria-hidden="true">
-  <div class="nav-menu-top"><span>BrandMatch</span><button class="nav-close" id="menu-close" aria-label="Close menu">&times;</button></div>
+  <div class="nav-menu-top"><span>BrandMatch.app</span><button class="nav-close" id="menu-close" aria-label="Close menu">&times;</button></div>
   <div class="nav-menu-links">
     <a href="#how" style="--i:0"><i>01</i>How it works</a>
     <a href="#final" style="--i:1"><i>02</i>Who it&rsquo;s for</a>
   </div>
   <div class="nav-menu-cta">
     <a class="btn" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call <span class="arr">&rarr;</span></a>
-    <a class="btn btn--ghost" href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=hey@jeremylasne.com&amp;su=An%20app%20for%20my%20audience" target="_blank" rel="noopener">hey@jeremylasne.com</a>
+    <a class="btn btn--ghost" href="mailto:hey@jeremylasne.com?subject=An%20app%20for%20my%20audience&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A" data-mail target="_blank" rel="noopener">hey@jeremylasne.com</a>
   </div>
 </div>
 
@@ -531,20 +543,20 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
     <div class="hero-copy" id="hero-copy">
       <div class="proof-pill hero-in" style="--d:80ms">
         <span class="stk" aria-hidden="true"><img src="media/stella.webp" alt=""><img src="media/faceharmony.webp" alt=""><img src="media/thepanash.webp" alt=""></span>
-        <span>Creator apps at <b>$340k</b> and <b>$80k</b> a month</span>
+        <span>Creator apps making <b>$340k/mo</b> and <b>$80k/mo</b></span>
       </div>
       <h1 class="h-display hero-in" style="--d:160ms">
         <span class="ln">Turn your audience</span>
-        <span class="ln">into recurring revenue.</span>
+        <span class="ln">into an app.</span>
       </h1>
-      <p class="sub hero-in" style="--d:360ms">Paid posts, ebooks and courses pay once. <b>Your app pays every month</b>, and gives your audience a place they open every day. It takes <b>100,000 followers</b> to start.</p>
+      <p class="sub hero-in" style="--d:360ms">Paid posts, ebooks and courses pay once. <b>Your own app pays you every month.</b> We build it, we run it, you keep posting.</p>
       <div class="btn-row hero-in" style="--d:520ms">
         <a class="btn" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call <span class="arr">&rarr;</span></a>
         <a class="btn btn--ghost" href="#how"><span class="btn-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.5v7l6-3.5z"/></svg></span>See how it works</a>
       </div>
     </div>
 
-    <p class="hero-trust" id="hero-trust"><span class="hero-in" style="--d:700ms"><b>Your own app</b> <i>&middot;</i> <b>Costs you nothing</b> <i>&middot;</i> <b>You keep posting</b></span></p>
+    <p class="hero-trust" id="hero-trust"><span class="hero-in" style="--d:700ms"><b>Your own app</b> <i>&middot;</i> <b>Costs you nothing</b> <i>&middot;</i> <b>Fits your brand and content</b></span></p>
   </div>
 </section>
 
@@ -559,7 +571,7 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
     <a href="https://play.google.com/store/apps/details?id=com.thepanash.app&amp;hl=en" target="_blank" rel="noopener"><img src="media/thepanash.webp" alt="" width="36" height="36">ThePanash</a>
     <a href="https://kaught.app" target="_blank" rel="noopener"><img src="media/kaught.webp" alt="" width="36" height="36">Kaught</a>
   </div>
-  <p class="tb-note">Their numbers, publicly posted, every app linked so you can check. Kaught is mine, the latest build.</p>
+  <p class="tb-note">Their numbers, publicly posted, every app linked so you can check. Kaught is ours, the latest build.</p>
 </section>
 
 <!-- ── the portal: five greys open onto the receipts. A video takes the
@@ -568,7 +580,7 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
   <div class="pin" id="portal">
     <div class="pin-stage">
       <div class="pd" id="pd">
-        <p class="pd-head">Creators who did it.</p>
+        <div class="pd-head pd-faces" role="img" aria-label="The creators behind Stella, Face Harmony and ThePanash"><img src="media/creators/hhpriestess.webp" alt=""><img src="media/creators/clavicular0.webp" alt=""><img src="media/creators/thepanash.webp" alt=""></div>
         <span class="pd-ring pd-r5"></span><span class="pd-ring pd-r4"></span><span class="pd-ring pd-r3"></span><span class="pd-ring pd-r2"></span><span class="pd-ring pd-r1"></span>
         <div class="pd-core" id="pd-core">
           <div class="pd-title">Your audience&rsquo;s app.</div>
@@ -600,10 +612,10 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
         <div class="cv-txt">
           <div class="cv-no">01</div>
           <h3 class="cv-tt">You have 100k followers, niche and active</h3>
-          <div class="cv-li">Any platform. The narrower the niche, the better.</div>
+          <div class="cv-li">On one platform. The narrower the niche, the better.</div>
         </div>
         <div class="cv-fig"><div class="fig asset">
-          <div class="r"><span>Followers</span><b>100k minimum</b></div>
+          <div class="r"><span>Followers</span><b>100k on one platform</b></div>
           <div class="r"><span>Niche</span><b>Fly fishing beats fishing</b></div>
           <div class="r"><span>Active</span><b>Comments and DMs every day</b></div>
         </div></div>
@@ -627,7 +639,7 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
       <div class="cv-row reveal-up">
         <div class="cv-txt">
           <div class="cv-no">03</div>
-          <h3 class="cv-tt">We build the app</h3>
+          <h3 class="cv-tt">We build the app within a month</h3>
           <div class="cv-li">Your name, your look, both stores. On us.</div>
         </div>
         <div class="cv-fig"><div class="fig fig--phone">
@@ -680,7 +692,7 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
       <div class="ac-col"><div class="ac-track" id="ac-l"></div></div>
       <div class="ac-mid">
         <svg class="brand-mark" aria-hidden="true"><use href="#bm-mark"/></svg>
-        <h2 class="h-section">A post pays once. An app pays every month.</h2>
+        <h2 class="h-section">A post pays once. An app pays you every month.</h2>
         <a class="btn" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call <span class="arr">&rarr;</span></a>
       </div>
       <div class="ac-col"><div class="ac-track" id="ac-r"></div></div>
@@ -702,9 +714,8 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
     </div>
     <div class="btn-row">
       <a class="btn" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call <span class="arr">&rarr;</span></a>
-      <a class="btn btn--ghost" href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=hey@jeremylasne.com&amp;su=An%20app%20for%20my%20audience&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A" target="_blank" rel="noopener">hey@jeremylasne.com</a>
+      <a class="btn btn--ghost" href="mailto:hey@jeremylasne.com?subject=An%20app%20for%20my%20audience&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A" data-mail target="_blank" rel="noopener">hey@jeremylasne.com</a>
     </div>
-    <p><button class="copy-inline" type="button" id="copy-email" data-email="hey@jeremylasne.com">Copy the address</button><span class="copied" id="copied" role="status" aria-live="polite">Copied</span></p>
   </div>
 </section>
 
@@ -712,12 +723,23 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 
 <footer class="foot">
   <div class="shell">
-    <span class="copy">&copy; 2026 BrandMatch &middot; by <a href="https://www.jeremylasne.com/">Jeremy Lasne</a></span>
+    <span class="copy">&copy; 2026 BrandMatch.app &middot; <a href="https://www.jeremylasne.com/">Jeremy Lasne</a> and <a href="https://maximehouel.com/" target="_blank" rel="noopener">Maxime Houel</a></span>
     <div class="foot-links">
       <a href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call</a>
     </div>
   </div>
 </footer>
+
+<dialog class="mail-dialog" id="mail-dialog" aria-labelledby="mail-title">
+  <form method="dialog"><button class="mail-close" aria-label="Close">&times;</button></form>
+  <span class="eyebrow" id="mail-title">Write to us</span>
+  <p class="mail-addr">hey@jeremylasne.com</p>
+  <div class="btn-row">
+    <button class="btn" type="button" id="copy-email" data-email="hey@jeremylasne.com">Copy the address <span class="arr">&rarr;</span></button>
+    <a class="btn btn--ghost" href="mailto:hey@jeremylasne.com?subject=An%20app%20for%20my%20audience&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A">Open your mail app</a>
+  </div>
+  <p class="mail-note"><span class="copied" id="copied" role="status" aria-live="polite">Copied</span></p>
+</dialog>
 
 </div>
 
@@ -900,7 +922,7 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
       ['$340k', '/mo', '2 months after launch', 'Stella &middot; Manifest Anything', '@hhpriestess', 'media/stella.webp', 'https://apps.apple.com/us/app/stella-manifest-anything/id6757347283', 'See it on the App Store'],
       ['$80k', '/mo', '1 month after launch', 'Face Harmony by Clavicular', '@Clavicular0', 'media/faceharmony.webp', 'https://apps.apple.com/us/app/face-harmony-by-clavicular/id6781068829', 'See it on the App Store'],
       ['262K', ' followers', 'Just launched, &euro;39.99/mo', 'ThePanash &middot; Powerlifting', '@thepanash', 'media/thepanash.webp', 'https://play.google.com/store/apps/details?id=com.thepanash.app&hl=en', 'See it on Google Play'],
-      ['Live', '', 'On the App Store', 'Kaught &middot; wildlife ID', 'My latest build', 'media/kaught.webp', 'https://kaught.app', 'kaught.app']
+      ['Live', '', 'On the App Store', 'Kaught &middot; wildlife ID', 'Our latest build', 'media/kaught.webp', 'https://kaught.app', 'kaught.app']
     ];
     function card(a) {
       return '<a class="tb-card" href="' + a[6] + '" target="_blank" rel="noopener" draggable="false"><img src="' + a[5] + '" alt="" width="48" height="48" loading="lazy" decoding="async" draggable="false"><span class="n">' + a[0] + '<small>' + a[1] + '</small></span><span class="w">' + a[2] + '</span><span class="cn">' + a[3] + '</span><span class="cc">' + a[4] + '</span><span class="go">' + a[7] + ' &rarr;</span></a>';
@@ -1005,12 +1027,16 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 
   (function () {
     var btn = document.getElementById('copy-email'), badge = document.getElementById('copied'); if (!btn || !badge) return;
+    var dlg = document.getElementById('mail-dialog'), menu = document.getElementById('menu'), burger = document.getElementById('burger');
+    if (dlg && dlg.showModal) document.querySelectorAll('[data-mail]').forEach(function (el) {
+      el.addEventListener('click', function (e) { e.preventDefault(); if (menu && menu.classList.contains('open') && burger) burger.click(); dlg.showModal(); });
+    });
     var t;
     function done() { badge.setAttribute('data-open', ''); clearTimeout(t); t = setTimeout(function () { badge.removeAttribute('data-open'); }, 2000); }
     btn.addEventListener('click', function () {
       var email = btn.getAttribute('data-email');
-      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(email).then(done, function () { window.prompt('Copy my email:', email); });
-      else window.prompt('Copy my email:', email);
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(email).then(done, function () { window.prompt('Copy the address:', email); });
+      else window.prompt('Copy the address:', email);
     });
   })();
 
