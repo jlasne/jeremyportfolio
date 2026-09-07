@@ -41,6 +41,7 @@ Open it and edit it.
 | `/overlap/team` · `/plan` · `/next` | the app: the team, the meeting, and what to build next |
 | `/foundercity` | **Founder City** — product metrics as a pixel skyline at night, one tower per app |
 | `/bio` | **Bio** — a fifteen-day daily log of five habits and sleep, then one number per training discipline, live |
+| `/brain` | **brain**: a self-tidying knowledge brain in plain markdown, open source, one screen that links to the repo |
 
 **Bio** keeps its numbers in the Overlap Convex deployment behind a
 passphrase; see [`bio/README.md`](bio/README.md).

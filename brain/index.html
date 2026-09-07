@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>brain</title>
+<meta name="description" content="A self-tidying knowledge brain in plain markdown. Open source.">
+<link rel="canonical" href="https://www.jeremylasne.com/brain/">
+<meta name="theme-color" content="#050b16">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Jeremy Lasne">
+<meta property="og:url" content="https://www.jeremylasne.com/brain/">
+<meta property="og:title" content="brain">
+<meta property="og:description" content="A self-tidying knowledge brain in plain markdown. Open source.">
+<meta property="og:image" content="https://www.jeremylasne.com/og-image.png?v=4">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@jeremylasne">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&display=swap">
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --ink: #050b16; --blue: #5fa8d3; --ice: #eaf4fb;
+    --ice-70: rgba(234,244,251,.72); --ice-45: rgba(234,244,251,.46);
+    --line: rgba(95,168,211,.18);
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  html { background: var(--ink); color-scheme: dark; }
+  body { font: 400 15px/1.75 var(--mono); color: var(--ice-70); -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--blue); color: var(--ink); }
+
+  main { min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 48px 24px; }
+  .col { width: 100%; max-width: 64ch; }
+  .col > * + * { margin-top: 1.5em; }
+
+  h1 { font: inherit; color: var(--blue); }
+  .lede { color: var(--ice); }
+  a { color: var(--ice); text-decoration: none; border-bottom: 1px solid var(--line); }
+  a:hover { color: var(--blue); border-color: var(--blue); }
+  a:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+  .when { margin-top: 3.5em; font-size: 12px; color: var(--ice-45); }
+
+  @media (max-width: 520px) { body { font-size: 14px; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="col">
+    <h1>/brain</h1>
+    <p class="lede">A folder that gets smarter every time you feed it.</p>
+    <p>Drop articles, transcripts, studies. It stores each one once, files it where it belongs, and rewrites what it knows instead of piling up quotes. Ask it a question, get a position with evidence and dates.</p>
+    <p>One skill file. One setup conversation. Plain markdown. Works with Claude Code and Claude.ai.</p>
+    <p>Open source, MIT.</p>
+    <p><a href="https://github.com/jlasne/brain" target="_blank" rel="noopener">→ github.com/jlasne/brain</a></p>
+    <p class="when">built in public, september 2026</p>
+  </div>
+</main>
+</body>
+</html>
