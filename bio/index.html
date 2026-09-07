@@ -513,8 +513,8 @@ TESTS.forEach((e, i) => {
   const c = document.createElement('div');
   c.className = 'card'; c.id = 'c-' + e.id; c.hidden = true;
   c.innerHTML = `
-    <span class="label mono">0${i + 1} · ${e.discipline}</span>
-    <p class="name">${e.name}<small>${e.protocol}</small></p>
+    <span class="label mono">0${i + 1}</span>
+    <p class="name">${e.discipline}</p>
     <div class="stat"><span class="num" id="n-${e.id}"></span><span class="unit mono">${e.unit}</span></div>
     <span class="sub mono" id="b-${e.id}"></span>
     <svg class="spark" id="k-${e.id}" hidden aria-hidden="true"></svg>`;
@@ -577,7 +577,7 @@ function paint(log = state.log) {
     if (!b.sessions) continue;
     $('n-' + e.id).textContent = b.value;
     $('b-' + e.id).textContent = `Best of ${b.sessions} ${b.sessions === 1 ? 'session' : 'sessions'}`;
-    counts.push(`${e.short.toLowerCase()} ${b.sessions}`);
+    counts.push(`${e.discipline.toLowerCase()} ${b.sessions}`);
     spark(e);
   }
   $('tsum').textContent = `Last 7 days · ${trained} ${trained === 1 ? 'day' : 'days'} trained` + (counts.length ? ` · all sessions: ${counts.join(', ')}` : '');

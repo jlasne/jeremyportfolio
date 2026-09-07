@@ -9,21 +9,13 @@ export const SPEC = {
   /* The first day of the log. Nothing is shown or saved before it. */
   start: '2026-09-06',
 
-  /* The tests worth a number. Logging one is optional: a card appears
-     under the section once a test has its first result. */
+  /* The three qualities worth a number. Pick one and give the result; the
+     session line says what was actually done. A card appears under the
+     section once a discipline has its first result. */
   exercises: [
-    {
-      id: 'pullup', discipline: 'Strength', name: 'Weighted pull-up', short: 'Pull-up', protocol: '1 rep max',
-      unit: 'kg', step: 2.5, max: 200, best: 'max',
-    },
-    {
-      id: 'swim', discipline: 'Endurance', name: 'Swim', short: 'Swim', protocol: '30 minutes',
-      unit: 'm', step: 25, max: 5000, best: 'max',
-    },
-    {
-      id: 'sprint', discipline: 'Speed', name: '100 m', short: '100 m', protocol: 'standing start',
-      unit: 's', step: 0.1, max: 60, best: 'min',
-    },
+    { id: 'strength', discipline: 'Strength', unit: 'kg', step: 2.5, max: 500, best: 'max' },
+    { id: 'endurance', discipline: 'Endurance', unit: 'm', step: 100, max: 100000, best: 'max' },
+    { id: 'speed', discipline: 'Speed', unit: 's', step: 0.1, max: 600, best: 'min' },
   ],
 
   /* Hours slept and morning weight, logged per day next to the habits. */
