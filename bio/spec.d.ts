@@ -16,5 +16,3 @@ export function isKey(key: unknown): key is string;
 export function shift(key: string, n: number): string;
 export function daysBetween(from: string, to: string): number;
 export function clean(input: Partial<Payload> | undefined, today: string): Payload;
-export function bestOf(e: Exercise, log: Record<string, Day>): { value?: number; sessions: number };
-export function series(e: Exercise, log: Record<string, Day>): { key: string; v: number }[];

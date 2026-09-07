@@ -83,20 +83,3 @@ export function clean(input, today) {
   }
   return { log };
 }
-
-/* The best result of a discipline in the log, and how many sessions it
-   came from. No session means no number to show. */
-export function bestOf(e, log) {
-  let best, sessions = 0;
-  for (const key in log) {
-    const v = log[key]?.train?.[e.id];
-    if (!Number.isFinite(v)) continue;
-    sessions++;
-    best = best === undefined || (e.best === 'min' ? v < best : v > best) ? v : best;
-  }
-  return { value: best, sessions };
-}
-
-/* Every result of one test, oldest first, for the curve. */
-export const series = (e, log) =>
-  Object.keys(log).sort().map(key => ({ key, v: log[key]?.train?.[e.id] })).filter(p => Number.isFinite(p.v));

@@ -162,7 +162,6 @@ h2 {
 .editing .pick:focus { outline: none; border-bottom-color: var(--ice); }
 .pick option { background: var(--ink); color: var(--ice); }
 .log.train { margin-top: 16px; }
-.cards:has(.card:not([hidden])) + .log.train { margin-top: 24px; }
 
 .more { margin: 14px 0 0; }
 .editing .more { display: none; }
@@ -173,29 +172,6 @@ h2 {
 .legend li { font-size: 14px; color: var(--ice-70); max-width: 44ch; }
 .legend b { display: block; font-weight: 500; font-size: 15px; color: var(--ice); margin-bottom: 2px; }
 .legend b small { font: 500 10px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--blue); margin-left: 8px; }
-
-/* ── cards ──────────────────────────────────────────────────────────── */
-.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-.cards:empty { display: none; }
-.card[hidden] { display: none; }
-.card { background: var(--card); border-top: 2px solid var(--blue); padding: 24px 24px 26px; min-width: 0; }
-.card .label { color: var(--blue); display: block; }
-.card .name { margin: 14px 0 0; font: 400 clamp(26px, 2.6vw, 32px)/1 var(--display); letter-spacing: .02em; }
-.card .name small {
-  font: 500 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase;
-  color: var(--ice-45); margin-left: 10px;
-}
-.stat { display: flex; align-items: baseline; gap: 10px; margin: 18px 0 0; }
-.num { font: 400 clamp(72px, 8vw, 104px)/1 var(--display); letter-spacing: .01em; color: var(--ice); }
-.sub { display: block; margin-top: 6px; color: var(--ice-45); }
-.unit { color: var(--blue); font-size: 12px; text-transform: none; }
-.spark { display: block; width: 100%; height: 72px; margin: 16px 0 0; overflow: visible; }
-.spark[hidden] { display: none; }
-.spark .base { stroke: rgba(234, 244, 251, .14); stroke-width: 1; }
-.spark .ln { fill: none; stroke: rgba(95, 168, 211, .6); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
-.spark .pt { fill: var(--blue); stroke: #0b1a2b; stroke-width: 2; }
-.spark .pt.now { fill: var(--ice); }
-.spark text { font: 500 9.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; fill: var(--ice-45); }
 
 /* ── footer ─────────────────────────────────────────────────────────── */
 footer {
@@ -239,7 +215,6 @@ footer a:hover { color: var(--ice); }
 
 /* ── small screens ──────────────────────────────────────────────────── */
 @media (max-width: 860px) {
-  .cards { grid-template-columns: 1fr; }
   .legend { grid-template-columns: 1fr; }
 }
 @media (max-width: 560px) {
@@ -304,7 +279,6 @@ footer a:hover { color: var(--ice); }
       <p class="tag">One all-round, high-performing body. What I did, day by day, and the number when there is one.</p>
       <p class="sum mono" id="tsum"></p>
     </div>
-    <div class="cards" id="cards"></div>
     <div class="log train" id="train" role="table" aria-label="Training log"></div>
   </section>
 </main>
@@ -332,7 +306,7 @@ footer a:hover { color: var(--ice); }
 <noscript><p style="text-align:center;padding:40px">The live numbers need JavaScript.</p></noscript>
 
 <script type="module">
-import { SPEC, dateKey, shift, daysBetween, clean, bestOf, series } from '/bio/spec.js';
+import { SPEC, dateKey, shift, daysBetween, clean } from '/bio/spec.js';
 
 /* ── the scene ──────────────────────────────────────────────────────────
    Five ridgelines by midpoint displacement, each with a snow cap: the
@@ -508,44 +482,8 @@ function build() {
 $('more').addEventListener('click', () => { all = true; build(); paint(); });
 $('legend').innerHTML = HABITS.map(h => `<li><b>${h.name}<small>${h.short}</small></b>${h.why}</li>`).join('') + `<li><b>Weight<small>${SPEC.weight.unit}</small></b>${SPEC.weight.why}</li>`;
 
-/* one card, one number: the best result so far, or the target */
-TESTS.forEach((e, i) => {
-  const c = document.createElement('div');
-  c.className = 'card'; c.id = 'c-' + e.id; c.hidden = true;
-  c.innerHTML = `
-    <span class="label mono">0${i + 1}</span>
-    <p class="name">${e.discipline}</p>
-    <div class="stat"><span class="num" id="n-${e.id}"></span><span class="unit mono">${e.unit}</span></div>
-    <span class="sub mono" id="b-${e.id}"></span>
-    <svg class="spark" id="k-${e.id}" hidden aria-hidden="true"></svg>`;
-  $('cards').appendChild(c);
-});
-
 const val = (id, v) => { $(id).value = Number.isFinite(v) ? v : ''; };
-/* The curve: every result of the test in order, the target as a hairline,
-   the latest point in ice. Drawn for the card's own width. */
-function spark(e) {
-  const svg = $('k-' + e.id), pts = series(e, state.log);
-  svg.toggleAttribute('hidden', pts.length < 1);
-  if (pts.length < 1) return;
-  const W = Math.max(120, Math.round(svg.getBoundingClientRect().width) || 240), H = 72, L = 6, R = 6, T = 10, B = 22;
-  const vals = pts.map(p => p.v);
-  let lo = Math.min(...vals), hi = Math.max(...vals);
-  if (hi === lo) { lo -= 1; hi += 1; }
-  const x = i => pts.length === 1 ? W / 2 : L + i * (W - L - R) / (pts.length - 1);
-  const y = v => T + (hi - v) / (hi - lo) * (H - T - B);
-  const fmt = k => pretty(k);
-  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  svg.innerHTML =
-    `<line class="base" x1="0" x2="${W}" y1="${H - B + 6}" y2="${H - B + 6}"/>` +
-    (pts.length > 1 ? `<polyline class="ln" points="${pts.map((p, i) => x(i).toFixed(1) + ',' + y(p.v).toFixed(1)).join(' ')}"/>` : '') +
-    pts.map((p, i) => `<circle class="pt${i === pts.length - 1 ? ' now' : ''}" cx="${x(i).toFixed(1)}" cy="${y(p.v).toFixed(1)}" r="4"><title>${p.v} ${e.unit} · ${fmt(p.key)}</title></circle>`).join('') +
-    `<text x="0" y="${H - 2}">${fmt(pts[0].key)}</text>` +
-    (pts.length > 1 ? `<text x="${W}" y="${H - 2}" text-anchor="end">${fmt(pts[pts.length - 1].key)}</text>` : '');
-}
-let sparkTimer;
-addEventListener('resize', () => { clearTimeout(sparkTimer); sparkTimer = setTimeout(() => TESTS.forEach(spark), 200); });
-/* the result cell takes the unit, step and range of the chosen test */
+/* the result cell takes the unit, step and range of the chosen discipline */
 function unit(key) {
   const picked = $('p-' + key).value, e = TESTS.find(t => t.id === picked) || TESTS[0], inp = $('t-' + key);
   inp.max = e.max; inp.step = e.step; inp.nextElementSibling.textContent = picked ? e.unit : '';
@@ -570,16 +508,11 @@ function paint(log = state.log) {
     if (d.train && Object.keys(d.train).length) trained++;
   }
   $('sum').textContent = `Last 7 days · ${checks} of ${7 * HABITS.length} checks` + (nights ? ` · ${fmtSleep(hours / nights)} sleep on average` : '') + (weighed ? ` · ${(kilos / weighed).toFixed(1)} kg on average` : '');
-  const counts = [];
-  for (const e of TESTS) {
-    const b = bestOf(e, state.log), card = $('c-' + e.id);
-    card.hidden = !b.sessions;
-    if (!b.sessions) continue;
-    $('n-' + e.id).textContent = b.value;
-    $('b-' + e.id).textContent = `Best of ${b.sessions} ${b.sessions === 1 ? 'session' : 'sessions'}`;
-    counts.push(`${e.discipline.toLowerCase()} ${b.sessions}`);
-    spark(e);
-  }
+  const counts = TESTS.map(e => {
+    let n = 0;
+    for (const key in state.log) if (Number.isFinite(state.log[key]?.train?.[e.id])) n++;
+    return `${e.discipline.toLowerCase()} ${n}`;
+  }).filter(c => !c.endsWith(' 0'));
   $('tsum').textContent = `Last 7 days · ${trained} ${trained === 1 ? 'day' : 'days'} trained` + (counts.length ? ` · all sessions: ${counts.join(', ')}` : '');
   const when = state.updatedAt ? new Date(state.updatedAt) : null;
   $('updated').textContent = !when ? '' :
