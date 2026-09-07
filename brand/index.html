@@ -220,10 +220,6 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .tb-card .cn { margin-top: 12px; font-size: 15px; font-weight: 800; letter-spacing: -0.02em; }
 .tb-card .cc { font-size: 13px; color: var(--muted); }
 .tb-card .go { margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--muted); }
-.tb-logos { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px 28px; margin: 26px auto 0; padding: 0 var(--gutter); }
-.tb-logos a { display: inline-flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 700; color: var(--muted); transition: color .2s; }
-.tb-logos a:hover { color: var(--ink); }
-.tb-logos img { width: 36px; height: 36px; border-radius: 10px; box-shadow: 0 8px 20px -8px rgba(0,0,0,.6); }
 .tb-note { margin: 14px auto 0; max-width: 62ch; text-align: center; font-size: 13px; line-height: 1.55; color: var(--faint); }
 
 /* ── the portal: five greys open onto the app, or the video once it exists ─ */
@@ -234,9 +230,6 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .pd { --p: 0; --g: clamp(14px, 1.7vw, 28px); position: relative; width: min(72vw, 1100px, calc((100svh - 250px) * 1.82)); aspect-ratio: 1.82; }
 @media (max-width: 760px) { .pd { width: min(74vw, 440px); --g: clamp(7px, 1.7vw, 10px); } }
 .pd-head { position: absolute; z-index: 12; left: 0; right: 0; bottom: 100%; margin-bottom: clamp(18px, 3vh, 34px); text-align: center; font-family: var(--display); font-weight: 500; font-size: clamp(1.3rem, 3.2vw, 2.6rem); letter-spacing: -0.04em; text-transform: uppercase; text-wrap: balance; pointer-events: none; opacity: clamp(0, calc((var(--p) - .72) * 5), 1); transform: translateY(calc(18px * (1 - clamp(0, calc((var(--p) - .72) * 5), 1)))); }
-.pd-faces { display: flex; justify-content: center; }
-.pd-faces img { width: clamp(46px, 5.2vw, 76px); aspect-ratio: 1; border-radius: 50%; object-fit: cover; border: 3px solid #f4f5f8; box-shadow: 0 12px 30px -14px rgba(0,0,0,.55); margin-left: -12px; background: #d3d6dc; }
-.pd-faces img:first-child { margin-left: 0; }
 .pd-cta { position: absolute; z-index: 20; left: 0; right: 0; top: 100%; margin-top: clamp(20px, 3vh, 36px); display: flex; justify-content: center; pointer-events: none; opacity: clamp(0, calc((var(--p) - .78) * 5), 1); transform: translateY(calc(-14px * (1 - clamp(0, calc((var(--p) - .78) * 5), 1)))); }
 .pd.pd-open .pd-cta { pointer-events: auto; }
 .pd-ring { position: absolute; border-radius: 9999px; transform-origin: 50% 50%; will-change: transform, opacity; opacity: clamp(0, calc(1.28 - var(--p) * 1.85), 1); pointer-events: none; box-shadow: 0 50px 120px -60px rgba(0,0,0,.4); }
@@ -467,7 +460,7 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 /* the receipts, behind the rings */
 .pd-rc { position: absolute; inset: 0; z-index: 2; display: grid; grid-template-columns: repeat(3, 1fr); align-items: center; gap: 2%; padding: 5% 6%; color: #fff; opacity: clamp(0, calc(var(--p) * 2.8 - .5), 1); }
 .pd-rc > div { text-align: center; }
-.pd-rc img { width: clamp(44px, 7.4vw, 104px); height: auto; border-radius: 22%; margin: 0 auto 12px; box-shadow: 0 12px 30px -12px rgba(0,0,0,.7); }
+.pd-rc img { width: clamp(44px, 7.4vw, 104px); height: auto; border-radius: 50%; object-fit: cover; aspect-ratio: 1; border: 3px solid rgba(255,255,255,.14); margin: 0 auto 12px; box-shadow: 0 12px 30px -12px rgba(0,0,0,.7); }
 .pd-rc .n { font-size: clamp(1.3rem, 4vw, 3.4rem); font-weight: 800; letter-spacing: -0.05em; line-height: 1; font-variant-numeric: tabular-nums; }
 .pd-rc .n small { font-size: .38em; font-weight: 700; letter-spacing: 0; color: #a2a7b6; }
 .pd-rc .k { margin-top: 8px; font-size: clamp(10px, 1.1vw, 14px); color: #a2a7b6; line-height: 1.35; }
@@ -565,12 +558,6 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
   <div class="tb-marquee" id="tb-marquee" aria-label="Creator apps">
     <div class="tb-row" id="tb-row"></div>
   </div>
-  <div class="tb-logos" aria-label="The apps">
-    <a href="https://apps.apple.com/us/app/stella-manifest-anything/id6757347283" target="_blank" rel="noopener"><img src="media/stella.webp" alt="" width="36" height="36">Stella</a>
-    <a href="https://apps.apple.com/us/app/face-harmony-by-clavicular/id6781068829" target="_blank" rel="noopener"><img src="media/faceharmony.webp" alt="" width="36" height="36">Face Harmony</a>
-    <a href="https://play.google.com/store/apps/details?id=com.thepanash.app&amp;hl=en" target="_blank" rel="noopener"><img src="media/thepanash.webp" alt="" width="36" height="36">ThePanash</a>
-    <a href="https://kaught.app" target="_blank" rel="noopener"><img src="media/kaught.webp" alt="" width="36" height="36">Kaught</a>
-  </div>
   <p class="tb-note">Their numbers, publicly posted, every app linked so you can check. Kaught is ours, the latest build.</p>
 </section>
 
@@ -580,14 +567,14 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
   <div class="pin" id="portal">
     <div class="pin-stage">
       <div class="pd" id="pd">
-        <div class="pd-head pd-faces" role="img" aria-label="The creators behind Stella, Face Harmony and ThePanash"><img src="media/creators/hhpriestess.webp" alt=""><img src="media/creators/clavicular0.webp" alt=""><img src="media/creators/thepanash.webp" alt=""></div>
+        <p class="pd-head">Creators who did it.</p>
         <span class="pd-ring pd-r5"></span><span class="pd-ring pd-r4"></span><span class="pd-ring pd-r3"></span><span class="pd-ring pd-r2"></span><span class="pd-ring pd-r1"></span>
         <div class="pd-core" id="pd-core">
           <div class="pd-title">Your audience&rsquo;s app.</div>
           <div class="pd-rc" aria-label="The receipts">
-            <div><img src="media/stella.webp" alt=""><div class="n">$340k<small>/mo</small></div><div class="k"><b>Stella</b><br>2 months after launch</div></div>
-            <div><img src="media/faceharmony.webp" alt=""><div class="n">$80k<small>/mo</small></div><div class="k"><b>Face Harmony</b><br>1 month after launch</div></div>
-            <div><img src="media/thepanash.webp" alt=""><div class="n">262K<small> followers</small></div><div class="k"><b>ThePanash</b><br>just launched, &euro;39.99/mo</div></div>
+            <div><img src="media/creators/hhpriestess.webp" alt=""><div class="n">$340k<small>/mo</small></div><div class="k"><b>Stella</b><br>2 months after launch</div></div>
+            <div><img src="media/creators/clavicular0.webp" alt=""><div class="n">$80k<small>/mo</small></div><div class="k"><b>Face Harmony</b><br>1 month after launch</div></div>
+            <div><img src="media/creators/thepanash.webp" alt=""><div class="n">262K<small> followers</small></div><div class="k"><b>ThePanash</b><br>just launched, &euro;39.99/mo</div></div>
           </div>
           <div class="pd-play" aria-hidden="true"><svg viewBox="0 0 10 10"><path d="M2 1.5v7l6-3.5z"/></svg></div>
           <div class="pd-cap">Their apps &middot; public numbers</div>
@@ -612,7 +599,6 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
         <div class="cv-txt">
           <div class="cv-no">01</div>
           <h3 class="cv-tt">You have 100k followers, niche and active</h3>
-          <div class="cv-li">On one platform. The narrower the niche, the better.</div>
         </div>
         <div class="cv-fig"><div class="fig asset">
           <div class="r"><span>Followers</span><b>100k on one platform</b></div>
@@ -625,7 +611,6 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
         <div class="cv-txt">
           <div class="cv-no">02</div>
           <h3 class="cv-tt">Together we find the simplest app for your audience</h3>
-          <div class="cv-li">One 20min call. We start from what they ask in comments and DMs.</div>
         </div>
         <div class="cv-fig"><div class="fig chat">
           <span class="who">Their comments, this week</span>
@@ -640,14 +625,13 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
         <div class="cv-txt">
           <div class="cv-no">03</div>
           <h3 class="cv-tt">We build the app within a month</h3>
-          <div class="cv-li">Your name, your look, both stores. On us.</div>
         </div>
         <div class="cv-fig"><div class="fig fig--phone">
           <div class="phone phone--sm"><div class="phone-screen"><div class="scr on"><div class="mock">
             <div class="m-sbar"><span>9:41</span><i></i></div>
             <div class="m-seg"><b class="on">App Store</b><b>Google Play</b></div>
-            <div class="m-store"><div class="m-icon acc">S</div><div><b>Sam Casts</b><small>Fly fishing, every day</small><span class="m-get">GET</span></div></div>
-            <div class="m-stars"><span><b>Free</b>Price</span><span><b>Sports</b>Category</span><span><b>Sam</b>Developer</span></div>
+            <div class="m-store"><div class="m-icon acc">Y</div><div><b>Your app</b><small>With more to it</small><span class="m-get">GET</span></div></div>
+            <div class="m-stars"><span><b>Free</b>Price</span><span><b>Your niche</b>Category</span><span><b>You</b>Developer</span></div>
             <div class="m-shots"><i></i><i></i><i></i></div>
             <div class="m-tab"><i class="on"></i><i></i><i></i><i></i><i></i></div>
           </div></div></div></div>
@@ -671,7 +655,6 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
         <div class="cv-txt">
           <div class="cv-no">05</div>
           <h3 class="cv-tt">You earn every month</h3>
-          <div class="cv-li">We are partners. We split what it earns.</div>
         </div>
         <div class="cv-fig"><div class="fig asset">
           <div class="r"><span>Every month</span><b>They pay you</b></div>
