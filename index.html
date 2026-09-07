@@ -95,6 +95,7 @@
   }
   .item .logo { width: 24px; height: 24px; border-radius: 6px; flex: none; }
   .item .logo.round { border-radius: 50%; object-fit: cover; }
+  .item .logo.mail { fill: none; stroke: var(--ice-70); stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; padding: 2px; }
   .item .dot { width: 24px; height: 24px; flex: none; display: grid; place-items: center; }
   .item .dot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: rgba(234,244,251,.3); }
   .item .name { font-size: 16px; line-height: 24px; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; flex: none; }
@@ -217,7 +218,7 @@
           <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
         </a></li>
         <li><a class="item" href="mailto:hey@jeremylasne.com">
-          <img class="logo round" src="media/avatar.webp" alt="" width="24" height="24">
+          <svg class="logo mail" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M4 7l8 6 8-6"/></svg>
           <span class="name">Email</span>
           <span class="desc">hey@jeremylasne.com</span>
           <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
