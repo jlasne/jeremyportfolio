@@ -13,7 +13,7 @@ The landing page is one screen: a portrait, one sentence, three lists.
 - **Social.** YouTube ([@jerandmax](https://www.youtube.com/@jerandmax)),
   X ([@jeremylasne](https://x.com/jeremylasne)) and email
 - **Personal.** Three private equity positions (SaaS health, H100
-  datacenters, an astronomy blog) and the Bio tracker
+  datacenters, an astronomy blog), the Bio tracker and the brain
 
 ## Stack
 
@@ -41,7 +41,7 @@ Open it and edit it.
 | `/overlap/team` · `/plan` · `/next` | the app: the team, the meeting, and what to build next |
 | `/foundercity` | **Founder City** — product metrics as a pixel skyline at night, one tower per app |
 | `/bio` | **Bio** — a fifteen-day daily log of five habits and sleep, then one number per training discipline, live |
-| `/brain` | **brain**: a self-tidying knowledge brain in plain markdown, open source, one screen that links to the repo |
+| `/brain` | **brain**: a self-tidying knowledge brain in plain markdown, open source. How it works, the folder it makes, the full skill file, and the repo link |
 
 **Bio** keeps its numbers in the Overlap Convex deployment behind a
 passphrase; see [`bio/README.md`](bio/README.md).
