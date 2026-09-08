@@ -186,9 +186,9 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .hero { position: relative; z-index: 10; }
 /* the photo ground: the cards in the corners, the copy in the empty middle; dissolves into the page top and bottom, zooms slowly */
 .hero-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; -webkit-mask: linear-gradient(to bottom, transparent, #000 9%, #000 80%, rgba(0,0,0,.45) 91%, transparent 100%); mask: linear-gradient(to bottom, transparent, #000 9%, #000 80%, rgba(0,0,0,.45) 91%, transparent 100%); }
-.hero-bg::before { content: ""; position: absolute; inset: 0; background: url(media/hero.jpg) center / cover no-repeat; animation: hero-zoom 26s ease-in-out infinite alternate; will-change: transform; }
-@keyframes hero-zoom { from { transform: scale(1); } to { transform: scale(1.07); } }
-@media (prefers-reduced-motion: reduce) { .hero-bg::before { animation: none; } }
+.hero-bg::before { content: ""; position: absolute; inset: 0; background: url(media/hero.jpg) center / cover no-repeat; }
+.hero-bg video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+@media (prefers-reduced-motion: reduce) { .hero-bg video { display: none; } }
 .hero-sticky > :not(.hero-bg) { position: relative; z-index: 1; }
 @media (max-width: 880px) { .hero-bg::after { content: ""; position: absolute; inset: 0; background: radial-gradient(70% 62% at 50% 52%, rgba(5,7,13,.72), rgba(5,7,13,.25) 70%, transparent); } }
 .hero-sticky { position: relative; overflow: clip; min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: clamp(98px, 13vh, 138px) 0 clamp(72px, 9vh, 96px); background: radial-gradient(60% 50% at 80% 0%, rgba(38, 62, 120, 0.42), transparent 70%); }
@@ -573,7 +573,7 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 <!-- ── hero ──────────────────────────────────────────────────────────────── -->
 <section class="hero" id="top">
   <div class="hero-sticky" id="hero-sticky">
-    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="hero-bg" aria-hidden="true"><video autoplay muted loop playsinline preload="auto" poster="media/hero.jpg"><source src="media/hero.mp4" type="video/mp4"></video></div>
 
     <div class="hero-copy" id="hero-copy">
       <h1 class="h-display hero-in" style="--d:160ms">
