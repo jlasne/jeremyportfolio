@@ -185,13 +185,13 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 /* ── hero ───────────────────────────────────────────────────────────────── */
 .hero { position: relative; z-index: 10; }
 /* the photo ground: the cards in the corners, the copy in the empty middle; dissolves into the page top and bottom, zooms slowly */
-.hero-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; -webkit-mask: linear-gradient(to bottom, transparent, #000 14%, #000 48%, rgba(0,0,0,.3) 76%, transparent 93%); mask: linear-gradient(to bottom, transparent, #000 14%, #000 48%, rgba(0,0,0,.3) 76%, transparent 93%); }
+.hero-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; -webkit-mask: linear-gradient(to bottom, transparent, #000 9%, #000 80%, rgba(0,0,0,.45) 91%, transparent 100%); mask: linear-gradient(to bottom, transparent, #000 9%, #000 80%, rgba(0,0,0,.45) 91%, transparent 100%); }
 .hero-bg::before { content: ""; position: absolute; inset: 0; background: url(media/hero.jpg) center / cover no-repeat; animation: hero-zoom 26s ease-in-out infinite alternate; will-change: transform; }
 @keyframes hero-zoom { from { transform: scale(1); } to { transform: scale(1.07); } }
 @media (prefers-reduced-motion: reduce) { .hero-bg::before { animation: none; } }
 .hero-sticky > :not(.hero-bg) { position: relative; z-index: 1; }
 @media (max-width: 880px) { .hero-bg::after { content: ""; position: absolute; inset: 0; background: radial-gradient(70% 62% at 50% 52%, rgba(5,7,13,.72), rgba(5,7,13,.25) 70%, transparent); } }
-.hero-sticky { position: relative; overflow: clip; min-height: max(100svh, 62vw); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: clamp(150px, 17vw, 330px) 0 clamp(72px, 9vh, 96px); background: radial-gradient(60% 50% at 80% 0%, rgba(38, 62, 120, 0.42), transparent 70%); }
+.hero-sticky { position: relative; overflow: clip; min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: clamp(150px, 17vw, 330px) 0 clamp(72px, 9vh, 96px); background: radial-gradient(60% 50% at 80% 0%, rgba(38, 62, 120, 0.42), transparent 70%); }
 .hero-copy { position: relative; z-index: 6; width: min(94%, 1040px); margin: 0 auto; text-align: center; }
 .hero h1 { margin: 0 0 22px; }
 .hero h1 .ln { display: block; }
