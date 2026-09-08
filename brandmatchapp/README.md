@@ -22,7 +22,7 @@ npm install
 npm run dev
 ```
 
-Opens on `http://localhost:5173`.
+Opens on `http://localhost:5173/brandmatchapp/`.
 
 ## Publish
 
@@ -35,8 +35,12 @@ npm run build
 ```
 
 That typechecks, builds, and copies `index.html` and `assets/` up one level,
-replacing the previous build. Commit those two alongside the source. Paths in
-the build are relative, so the folder works from any host or subpath.
+replacing the previous build. Commit those two alongside the source.
+
+The build hard codes `/brandmatchapp/` in its asset paths, set by `base` in
+`app/vite.config.ts`. Vercel answers `/brandmatchapp` with the index and adds
+no trailing slash, so relative paths would resolve one level too high and
+return 404. Serving this app from another path means changing `base` first.
 
 ## Where things live
 
