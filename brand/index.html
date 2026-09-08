@@ -309,13 +309,41 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .two h3 { margin: 0 0 18px; }
 .two .close { margin: 20px 0 0; font-size: 15px; font-weight: 700; }
 @media (max-width: 860px) { .two { grid-template-columns: 1fr; } }
-@media (max-width: 600px) { .math { flex-direction: column; gap: 4px; } .math .op { padding-bottom: 0; } }
 
-/* ── why an app: the arithmetic ─────────────────────────────────────────── */
-.math { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px clamp(18px, 3vw, 40px); margin-top: clamp(32px, 5vh, 56px); text-align: center; }
-.math .n { display: block; font-family: var(--display); font-weight: 500; font-size: clamp(1.9rem, 5vw, 4rem); letter-spacing: -0.05em; line-height: 1; font-variant-numeric: tabular-nums; }
-.math .k { display: block; margin-top: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); }
-.math .op { font-family: var(--display); font-size: clamp(1.4rem, 3vw, 2.4rem); color: var(--faint); padding-bottom: 22px; }
+/* ── why an app: one year, three ways ────────────────────────────────── */
+#why .head { max-width: 960px; }
+#why h2 { font-size: clamp(1.8rem, 4.2vw, 3.2rem); }
+.cmp-wrap { margin-top: clamp(32px, 5vh, 56px); }
+.cmp { width: 100%; max-width: 980px; margin: 0 auto; border-collapse: separate; border-spacing: 0; font-size: 15px; }
+.cmp caption { caption-side: top; text-align: center; padding-bottom: 18px; font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); }
+.cmp th, .cmp td { padding: 14px 16px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--rule); }
+.cmp thead th { padding-top: 0; font-family: var(--display); font-weight: 500; font-size: 15px; letter-spacing: -0.02em; text-transform: uppercase; border-bottom: 2px solid var(--ink); }
+.cmp tbody th { width: 21%; font-weight: 600; color: var(--muted); }
+.cmp td { font-weight: 700; }
+.cmp small { display: block; margin-top: 3px; font-size: 12.5px; font-weight: 500; color: var(--muted); }
+.cmp .you { background: var(--ink); color: var(--bg); border-bottom-color: rgba(255,255,255,.14); }
+.cmp thead .you { border-radius: 14px 14px 0 0; border-bottom-color: rgba(255,255,255,.35); padding-top: 14px; }
+.cmp tbody tr:last-child .you { border-radius: 0 0 14px 14px; border-bottom: 0; }
+.cmp .you small { color: #a2a7b6; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+@media (max-width: 700px) {
+  .cmp thead { display: none; }
+  .cmp, .cmp tbody, .cmp tr, .cmp th, .cmp td { display: block; width: auto; }
+  .cmp tr { padding: 14px 0 10px; border-bottom: 1px solid var(--rule); }
+  .cmp caption { display: block; text-align: left; padding-bottom: 12px; }
+  .cmp tbody th { width: auto; padding: 0 0 8px; border: 0; font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); }
+  .cmp td { display: grid; grid-template-columns: 1fr 1.5fr; gap: 12px; padding: 7px 0; border: 0; }
+  .cmp td::before { content: attr(data-h); font-weight: 600; color: var(--muted); }
+  .cmp td small { grid-column: 2; margin-top: -6px; }
+  .cmp td.you { padding: 10px 12px; margin-top: 4px; border-radius: 12px; }
+  .cmp td.you::before { color: #a2a7b6; }
+}
+
+/* ── the slots badge in the final band ──────────────────────────────────── */
+.slots { display: inline-flex; align-items: center; gap: 9px; padding: 8px 14px 8px 11px; border-radius: 100px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18); font-size: 13px; font-weight: 700; color: #f2f3f7; }
+.slots i { width: 8px; height: 8px; border-radius: 50%; background: #fff; animation: slots-pulse 1.8s ease-out infinite; }
+@keyframes slots-pulse { 0% { box-shadow: 0 0 0 0 rgba(255,255,255,.55); } 100% { box-shadow: 0 0 0 10px rgba(255,255,255,0); } }
+@media (prefers-reduced-motion: reduce) { .slots i { animation: none; } }
 
 /* ── faq: native disclosures ─────────────────────────────────────────────── */
 .faq { max-width: 760px; margin: clamp(28px, 4vh, 44px) auto 0; border-top: 1px solid var(--rule); }
@@ -740,15 +768,21 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
   <div class="shell">
     <div class="head head--center reveal-up">
       <span class="eyebrow">Why an app</span>
-      <h2 class="h-section xl">A course sells once. An app charges on the 1st.</h2>
+      <h2 class="h-section xl">A course sells once.<br>An app charges on the 1st.</h2>
       <p class="lede">10,000 subscribers at $5 a month is $50,000 a month. Your audience already trusts you. A generic fitness app starts from zero. Your app starts from your comments section.</p>
     </div>
-    <div class="math reveal-up" aria-hidden="true">
-      <div><span class="n">10,000</span><span class="k">subscribers</span></div>
-      <span class="op">&times;</span>
-      <div><span class="n">$5</span><span class="k">a month</span></div>
-      <span class="op">=</span>
-      <div><span class="n">$50,000</span><span class="k">a month</span></div>
+    <div class="cmp-wrap reveal-up">
+      <table class="cmp">
+        <caption>Worked example: 100k followers, 1 year</caption>
+        <thead><tr><th scope="col"><span class="sr">Row</span></th><th scope="col">Paid post</th><th scope="col">Ebook or course</th><th scope="col" class="you">Your app</th></tr></thead>
+        <tbody>
+      <tr><th scope="row">Paid</th><td data-h="Paid post">Once, by the brand</td><td data-h="Ebook or course">Once, per buyer</td><td data-h="Your app" class="you">Every month, per subscriber</td></tr>
+      <tr><th scope="row">Month 1</th><td data-h="Paid post">$2,500<small>1 post</small></td><td data-h="Ebook or course">$50,000<small>1,000 buyers &times; $50</small></td><td data-h="Your app" class="you">$50,000<small>10,000 subscribers &times; $5</small></td></tr>
+      <tr><th scope="row">After 1 year</th><td data-h="Paid post">$2,500<small>1 payment</small></td><td data-h="Ebook or course">$50,000<small>1 launch</small></td><td data-h="Your app" class="you">$600,000<small>12 months &times; $50,000</small></td></tr>
+      <tr><th scope="row">Year 2 starts with</th><td data-h="Paid post">A new post to sell</td><td data-h="Ebook or course">A new launch</td><td data-h="Your app" class="you">10,000 subscribers</td></tr>
+      <tr><th scope="row">The asset</th><td data-h="Paid post">The brand keeps it</td><td data-h="Ebook or course">A file, sold once each</td><td data-h="Your app" class="you">A company, yours with us</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </section>
@@ -767,8 +801,9 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
   <div class="fn-box">
     <div class="fn-rings" aria-hidden="true"></div>
     <svg class="brand-mark" aria-hidden="true"><use href="#bm-mark"/></svg>
+    <span class="slots reveal-up" style="--d:180ms"><i></i>2 slots left</span>
     <h2 class="h-section xl">Limited spots.</h2>
-    <p class="lede">We build 3 apps a quarter, 1 per niche. When your niche is taken, it is taken.</p>
+    <p class="lede">Our capacity is 3 apps a quarter, 1 per niche.</p>
     <div class="btn-row">
       <a class="btn" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call <span class="arr">&rarr;</span></a>
       <a class="btn btn--ghost" href="mailto:hey@jeremylasne.com?subject=An%20app%20for%20my%20audience&amp;body=What%20I%20make%3A%0A%0AAudience%20size%20and%20platform%3A%0A%0AWhat%20my%20people%20keep%20asking%20me%20for%3A%0A%0A" data-mail target="_blank" rel="noopener">hey@jeremylasne.com</a>
@@ -790,7 +825,7 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
       <details><summary>Who owns the app?</summary><p>You and us, together. The exact split is explained on the call.</p></details>
       <details><summary>What if the app makes little money?</summary><p>At month 6, if the numbers are below the agreed floor, you can leave. You keep what you earned.</p></details>
       <details><summary>How long does it take?</summary><p>We scope it with you on 1 call, then build. You keep posting during the build.</p></details>
-      <details><summary>What do I commit to?</summary><p>4 posts a month for 12 months, with the app in 1 of 3. After that, you post as a co-owner.</p></details>
+      <details><summary>What do I commit to?</summary><p>A business, held with us, from day 1. For 12 months you post as you do today: 4 a month, the app in 1 of 3. Every post grows an asset you co-own: the app, its subscribers, its revenue. After month 12 you keep posting as its co-owner, with the numbers in front of you every month.</p></details>
     </div>
   </div>
 </section>
