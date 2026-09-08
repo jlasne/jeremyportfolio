@@ -5,13 +5,18 @@ import { useEffect, useState } from 'react'
 export type Route =
   | { name: 'home' }
   | { name: 'onboarding'; step: 'who' | 'details' | 'filters' | 'running' }
+  | { name: 'dashboard' }
   | { name: 'feed'; creatorId: string | null }
+  | { name: 'groups'; agentId: string | null }
+  | { name: 'contacts' }
+  | { name: 'agents'; agentId: string | null }
   | { name: 'lists'; listId: string | null }
   | { name: 'settings' }
 
 export function parse(hash: string): Route {
   const path = hash.replace(/^#/, '').replace(/^\/+/, '')
   const [head, second] = path.split('/')
+  const id = second ? decodeURIComponent(second) : null
   switch (head) {
     case '':
       return { name: 'home' }
@@ -19,10 +24,18 @@ export function parse(hash: string): Route {
       const step = second === 'details' || second === 'filters' || second === 'running' ? second : 'who'
       return { name: 'onboarding', step }
     }
+    case 'dashboard':
+      return { name: 'dashboard' }
     case 'feed':
-      return { name: 'feed', creatorId: second ? decodeURIComponent(second) : null }
+      return { name: 'feed', creatorId: id }
+    case 'groups':
+      return { name: 'groups', agentId: id }
+    case 'contacts':
+      return { name: 'contacts' }
+    case 'agents':
+      return { name: 'agents', agentId: id }
     case 'lists':
-      return { name: 'lists', listId: second ? decodeURIComponent(second) : null }
+      return { name: 'lists', listId: id }
     case 'settings':
       return { name: 'settings' }
     default:

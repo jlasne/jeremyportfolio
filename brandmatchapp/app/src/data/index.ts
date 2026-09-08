@@ -1,27 +1,34 @@
-import type { Brief, BriefAnswer, Creator, FilterKey, Filters, FollowUpQuestion, Post, SavedList, Settings, Signal } from '../types'
+import type {
+  Agent, Brief, BriefAnswer, Creator, DailyStat, FilterKey, Filters, FollowUpQuestion, Post, SavedList, Score, Settings, Signal, Stars,
+} from '../types'
 import { defaultFilters } from '../mock/filters'
 import { followUpQuestions } from '../mock/questions'
 import { timezones as mockTimezones } from '../mock/settings'
 import { toCsv } from '../lib/csv'
 import { absolute, isNewToday, withinDays } from '../lib/format'
+import { latestSignal, scoreOf } from './score'
 import { getState, resetState, setState } from './store'
 
 // Every screen reads and writes through these functions.
 // They work on the in memory store today and will call the real source later.
 
+export { RUNGS, scoreOf } from './score'
+
 // Feed --------------------------------------------------------------------
 
-export interface FeedItem {
+export interface Lead {
   creator: Creator
-  totalStars: number
+  score: Score
   latestSignal: Signal | null
   isNew: boolean
   isSaved: boolean
   isRejected: boolean
+  agent: Agent | null
 }
 
-function latestSignal(c: Creator): Signal | null {
-  return c.signals.length ? c.signals[0] : null
+/** 2 or 3 stars. The leads worth a message today. */
+export function isHigh(score: Score): boolean {
+  return score.stars >= 2
 }
 
 function passes(c: Creator, f: Filters, now: Date): boolean {
@@ -36,45 +43,46 @@ function passes(c: Creator, f: Filters, now: Date): boolean {
   return true
 }
 
-function toItem(c: Creator, now: Date): FeedItem {
+function toLead(c: Creator, now: Date): Lead {
   const s = getState()
   return {
     creator: c,
-    totalStars: c.intent.stars + c.match.stars,
+    score: scoreOf(c, now),
     latestSignal: latestSignal(c),
     isNew: isNewToday(c.firstSeenAt, now),
     isSaved: s.lists.some((l) => l.creatorIds.includes(c.id)),
     isRejected: s.rejections.some((r) => r.creatorId === c.id),
+    agent: s.agents.find((a) => a.id === c.agentId) ?? null,
   }
 }
 
-function sortFeed(a: FeedItem, b: FeedItem): number {
-  if (b.totalStars !== a.totalStars) return b.totalStars - a.totalStars
-  if (b.creator.intent.stars !== a.creator.intent.stars) return b.creator.intent.stars - a.creator.intent.stars
+function sortLeads(a: Lead, b: Lead): number {
+  if (b.score.stars !== a.score.stars) return b.score.stars - a.score.stars
   const ad = a.latestSignal?.date ?? ''
   const bd = b.latestSignal?.date ?? ''
   if (ad !== bd) return bd.localeCompare(ad)
   return b.creator.followers - a.creator.followers
 }
 
-/** The feed: visible creators, filtered, sorted best first. Rejected creators never return. */
-export function getFeed(filters: Filters = getState().filters, now = new Date()): FeedItem[] {
+/** Every lead ever gathered, rejected ones included. The dashboard counts from here. */
+export function getAllLeads(now = new Date()): Lead[] {
+  return getState().creators.map((c) => toLead(c, now)).sort(sortLeads)
+}
+
+/** The feed: visible leads, filtered, sorted best first. Rejected leads never return. */
+export function getFeed(filters: Filters = getState().filters, now = new Date()): Lead[] {
   const s = getState()
   const rejected = new Set(s.rejections.map((r) => r.creatorId))
   return s.creators
     .filter((c) => !rejected.has(c.id) && passes(c, filters, now))
-    .map((c) => toItem(c, now))
-    .sort(sortFeed)
-}
-
-export function getNewTodayCount(filters?: Filters): number {
-  return getFeed(filters).filter((i) => i.isNew).length
+    .map((c) => toLead(c, now))
+    .sort(sortLeads)
 }
 
 export interface FilterDiagnosis {
   key: FilterKey
   label: string
-  /** How many creators come back if this one filter goes to its default. */
+  /** How many leads come back if this one filter goes to its default. */
   restored: number
 }
 
@@ -102,15 +110,112 @@ export function diagnoseEmptyFeed(): FilterDiagnosis | null {
   return best
 }
 
+// Dashboard ----------------------------------------------------------------
+
+export interface Dashboard {
+  /** Leads first seen in the last 24 hours. */
+  today: number
+  /** Leads at 2 or 3 stars, all time. */
+  high: number
+  /** Every lead gathered, all time. */
+  total: number
+  /** Profiles crawled today. */
+  gatheredToday: number
+  /** 14 days of crawl output, newest last. */
+  daily: DailyStat[]
+  /** How many leads sit at each rung. */
+  byStars: Record<Stars, number>
+}
+
+export function getDashboard(now = new Date()): Dashboard {
+  const leads = getAllLeads(now)
+  const daily = getState().daily
+  const byStars: Record<Stars, number> = { 0: 0, 1: 0, 2: 0, 3: 0 }
+  for (const l of leads) byStars[l.score.stars]++
+  return {
+    today: leads.filter((l) => l.isNew).length,
+    high: leads.filter((l) => isHigh(l.score)).length,
+    total: leads.length,
+    gatheredToday: daily.length ? daily[daily.length - 1].gathered : 0,
+    daily,
+    byStars,
+  }
+}
+
+// Agents -------------------------------------------------------------------
+
+export function getAgents(): Agent[] {
+  return getState().agents
+}
+
+export function getAgent(id: string): Agent | null {
+  return getState().agents.find((a) => a.id === id) ?? null
+}
+
+export function updateAgent(id: string, patch: Partial<Agent>): void {
+  setState((s) => ({ agents: s.agents.map((a) => (a.id === id ? { ...a, ...patch } : a)) }))
+}
+
+export function updateAgentFilters(id: string, patch: Partial<Filters>): void {
+  setState((s) => ({ agents: s.agents.map((a) => (a.id === id ? { ...a, filters: { ...a.filters, ...patch } } : a)) }))
+}
+
+export function createAgent(name: string): Agent {
+  const agent: Agent = {
+    id: `a${Date.now()}`,
+    name: name.trim() || 'Untitled agent',
+    brief: { who: '', answers: [], summary: 'No brief yet.' },
+    filters: { ...defaultFilters, countries: [], languages: [] },
+    leadsPerDay: 20,
+    runAt: '07:00',
+    active: true,
+    createdAt: new Date().toISOString(),
+  }
+  setState((s) => ({ agents: [...s.agents, agent] }))
+  return agent
+}
+
+export function deleteAgent(id: string): void {
+  setState((s) => ({ agents: s.agents.filter((a) => a.id !== id) }))
+}
+
+export interface Group {
+  agent: Agent
+  leads: Lead[]
+  high: number
+  today: number
+}
+
+/** Leads grouped by the agent that found them. */
+export function getGroups(now = new Date()): Group[] {
+  const leads = getAllLeads(now)
+  return getState().agents.map((agent) => {
+    const mine = leads.filter((l) => l.creator.agentId === agent.id)
+    return {
+      agent,
+      leads: mine,
+      high: mine.filter((l) => isHigh(l.score)).length,
+      today: mine.filter((l) => l.isNew).length,
+    }
+  })
+}
+
+// Contacts -----------------------------------------------------------------
+
+/** Every lead with an email found. These are the ones a brand can reach today. */
+export function getContacts(now = new Date()): Lead[] {
+  return getAllLeads(now).filter((l) => l.creator.email !== null && !l.isRejected)
+}
+
 // One creator --------------------------------------------------------------
 
 export function getCreator(id: string): Creator | null {
   return getState().creators.find((c) => c.id === id) ?? null
 }
 
-export function getCreatorItem(id: string): FeedItem | null {
+export function getLead(id: string): Lead | null {
   const c = getCreator(id)
-  return c ? toItem(c, new Date()) : null
+  return c ? toLead(c, new Date()) : null
 }
 
 export function getPosts(creatorId: string): Post[] {
@@ -173,8 +278,9 @@ export function addTag(creatorId: string, label: string): void {
   if (!clean) return
   setState((s) => {
     const current = s.tags[creatorId] ?? []
-    if (current.includes(clean)) return {}
-    return { tags: { ...s.tags, [creatorId]: [...current, clean] } }
+    const vocabulary = s.tagVocabulary.includes(clean) ? s.tagVocabulary : [...s.tagVocabulary, clean]
+    if (current.includes(clean)) return { tagVocabulary: vocabulary }
+    return { tags: { ...s.tags, [creatorId]: [...current, clean] }, tagVocabulary: vocabulary }
   })
 }
 
@@ -182,7 +288,35 @@ export function removeTag(creatorId: string, label: string): void {
   setState((s) => ({ tags: { ...s.tags, [creatorId]: (s.tags[creatorId] ?? []).filter((t) => t !== label) } }))
 }
 
-export function getAllTags(): string[] {
+export function toggleTag(creatorId: string, label: string): void {
+  if (getTags(creatorId).includes(label)) removeTag(creatorId, label)
+  else addTag(creatorId, label)
+}
+
+/** The labels offered when tagging. Free text adds to this list. */
+export function getTagVocabulary(): string[] {
+  return getState().tagVocabulary
+}
+
+export function addToVocabulary(label: string): void {
+  const clean = label.trim().toLowerCase()
+  if (!clean) return
+  setState((s) => (s.tagVocabulary.includes(clean) ? {} : { tagVocabulary: [...s.tagVocabulary, clean] }))
+}
+
+export function removeFromVocabulary(label: string): void {
+  setState((s) => ({
+    tagVocabulary: s.tagVocabulary.filter((t) => t !== label),
+    tags: Object.fromEntries(Object.entries(s.tags).map(([k, v]) => [k, v.filter((t) => t !== label)])),
+  }))
+}
+
+export function countTagged(label: string): number {
+  return Object.values(getState().tags).filter((list) => list.includes(label)).length
+}
+
+/** Tags in use, sorted. */
+export function getUsedTags(): string[] {
   return Array.from(new Set(Object.values(getState().tags).flat())).sort()
 }
 
@@ -192,32 +326,30 @@ export function reject(creatorId: string): void {
   setState((s) => (s.rejections.some((r) => r.creatorId === creatorId) ? {} : { rejections: [...s.rejections, { creatorId, date: new Date().toISOString() }] }))
 }
 
-export function isRejected(creatorId: string): boolean {
-  return getState().rejections.some((r) => r.creatorId === creatorId)
+export function unreject(creatorId: string): void {
+  setState((s) => ({ rejections: s.rejections.filter((r) => r.creatorId !== creatorId) }))
 }
 
-export function getRejected(): FeedItem[] {
-  const now = new Date()
-  return getState()
-    .rejections.map((r) => getCreator(r.creatorId))
-    .filter((c): c is Creator => c !== null)
-    .map((c) => toItem(c, now))
+export function isRejected(creatorId: string): boolean {
+  return getState().rejections.some((r) => r.creatorId === creatorId)
 }
 
 // Export -----------------------------------------------------------------------
 
 export function exportCsv(creatorIds: string[]): string {
   const rows = creatorIds
-    .map((id) => getCreatorItem(id))
-    .filter((i): i is FeedItem => i !== null)
-    .map(({ creator: c, latestSignal: sig }) => ({
+    .map((id) => getLead(id))
+    .filter((l): l is Lead => l !== null)
+    .map(({ creator: c, score, latestSignal: sig, agent }) => ({
       name: c.name,
       handle: c.handle,
       url: `https://instagram.com/${c.handle}`,
-      intent_stars: c.intent.stars,
-      match_stars: c.match.stars,
+      stars: score.stars,
+      rung: score.rung,
+      why: score.why,
       signal: sig?.label ?? '',
       signal_date: sig ? absolute(sig.date) : '',
+      sells: c.sells,
       followers: c.followers,
       engagement_rate: (c.engagementRate * 100).toFixed(1) + '%',
       median_reel_views: c.medianReelViews,
@@ -227,6 +359,7 @@ export function exportCsv(creatorIds: string[]): string {
       language: c.language,
       email: c.email,
       bio: c.bio,
+      agent: agent?.name ?? '',
       note: getNote(c.id),
       tags: getTags(c.id).join('; '),
       lists: listsFor(c.id).map((l) => l.name).join('; '),
@@ -266,7 +399,7 @@ export function buildSummary(who: string, answers: BriefAnswer[]): string {
 
 export function setBrief(who: string, answers: BriefAnswer[]): Brief {
   const b: Brief = { who: who.trim(), answers, summary: buildSummary(who, answers) }
-  setState({ brief: b })
+  setState((s) => ({ brief: b, agents: s.agents.map((a, i) => (i === 0 ? { ...a, brief: b } : a)) }))
   return b
 }
 
@@ -309,7 +442,7 @@ export function getTimezones(): string[] {
 
 export function restartOnboarding(): void {
   resetState()
-  setState({ brief: null, settings: { ...getState().settings, onboarded: false } })
+  setState((s) => ({ brief: null, settings: { ...s.settings, onboarded: false } }))
 }
 
 // First run -------------------------------------------------------------------

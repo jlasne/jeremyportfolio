@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { createList, exportCsv, getAllTags, getCreatorItem, getList, getLists, getNote, getTags, removeFromList, type FeedItem } from '../data'
+import { createList, exportCsv, getUsedTags, getLead, getList, getLists, getNote, getTags, removeFromList, type Lead } from '../data'
 import { useStore } from '../data/hooks'
 import { downloadCsv } from '../lib/csv'
 import { navigate } from '../lib/router'
@@ -16,10 +16,10 @@ export function Lists({ listId }: { listId: string | null }) {
   const [openId, setOpenId] = useState<string | null>(null)
 
   const items = current
-    ? current.creatorIds.map((id) => getCreatorItem(id)).filter((i): i is FeedItem => i !== null).filter((i) => !tag || getTags(i.creator.id).includes(tag))
+    ? current.creatorIds.map((id) => getLead(id)).filter((i): i is Lead => i !== null).filter((i) => !tag || getTags(i.creator.id).includes(tag))
     : []
   const tagsInList = current ? Array.from(new Set(current.creatorIds.flatMap((id) => getTags(id)))).sort() : []
-  const allTags = getAllTags()
+  const allTags = getUsedTags()
 
   return (
     <div className="page">
@@ -118,7 +118,7 @@ export function Lists({ listId }: { listId: string | null }) {
                     </div>
                   )}
                 </div>
-                <Stars intent={c.intent.stars} match={c.match.stars} />
+                <Stars score={item.score} />
                 <Signal signal={item.latestSignal} />
                 <div className="side">
                   <button type="button" className="btn small" onClick={() => setOpenId(c.id)}>Open</button>

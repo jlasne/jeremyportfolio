@@ -1,11 +1,12 @@
-import type { Brief, Creator, Filters, Note, Post, Rejection, SavedList, Settings } from '../types'
+import type { Agent, Brief, Creator, DailyStat, Filters, Note, Post, Rejection, SavedList, Settings } from '../types'
 import { creators as mockCreators } from '../mock/creators'
 import { posts as mockPosts } from '../mock/posts'
+import { agents as mockAgents } from '../mock/agents'
+import { dailyStats as mockDaily } from '../mock/daily'
 import { lists as mockLists } from '../mock/lists'
 import { notes as mockNotes } from '../mock/notes'
-import { tags as mockTags } from '../mock/tags'
+import { tags as mockTags, tagVocabulary as mockVocabulary } from '../mock/tags'
 import { rejections as mockRejections } from '../mock/rejections'
-import { brief as mockBrief } from '../mock/brief'
 import { defaultFilters } from '../mock/filters'
 import { settings as mockSettings } from '../mock/settings'
 
@@ -15,9 +16,12 @@ import { settings as mockSettings } from '../mock/settings'
 export interface State {
   creators: Creator[]
   posts: Record<string, Post[]>
+  agents: Agent[]
+  daily: DailyStat[]
   lists: SavedList[]
   notes: Record<string, Note>
   tags: Record<string, string[]>
+  tagVocabulary: string[]
   rejections: Rejection[]
   brief: Brief | null
   filters: Filters
@@ -28,12 +32,15 @@ function seed(): State {
   return {
     creators: mockCreators,
     posts: mockPosts,
+    agents: mockAgents.map((a) => ({ ...a, filters: { ...a.filters } })),
+    daily: mockDaily,
     lists: mockLists.map((l) => ({ ...l, creatorIds: [...l.creatorIds] })),
     notes: Object.fromEntries(mockNotes.map((n) => [n.creatorId, n])),
     tags: Object.fromEntries(Object.entries(mockTags).map(([k, v]) => [k, [...v]])),
+    tagVocabulary: [...mockVocabulary],
     rejections: [...mockRejections],
-    brief: mockBrief,
-    filters: { ...defaultFilters, countries: [...defaultFilters.countries], languages: [...defaultFilters.languages] },
+    brief: mockAgents[0].brief,
+    filters: { ...defaultFilters, countries: [], languages: [] },
     settings: { ...mockSettings },
   }
 }

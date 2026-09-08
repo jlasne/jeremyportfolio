@@ -1,9 +1,9 @@
-import type { FeedItem } from '../data'
+import type { Lead } from '../data'
 import { compact, percent } from '../lib/format'
 import { Signal } from './Signal'
 import { Stars } from './Stars'
 
-export function LeadRow({ item, open, onOpen }: { item: FeedItem; open: boolean; onOpen: (id: string) => void }) {
+export function LeadRow({ item, open, onOpen }: { item: Lead; open: boolean; onOpen: (id: string) => void }) {
   const c = item.creator
   return (
     <button type="button" className={`lead${open ? ' open' : ''}`} onClick={() => onOpen(c.id)} aria-expanded={open}>
@@ -14,10 +14,11 @@ export function LeadRow({ item, open, onOpen }: { item: FeedItem; open: boolean;
           <span className="handle">@{c.handle}</span>
           {item.isNew && <span className="badge-new">NEW</span>}
           {item.isSaved && <span className="badge-saved">Saved</span>}
+          {item.isRejected && <span className="badge-saved">Rejected</span>}
         </div>
         <p className="bio">{c.bio}</p>
       </div>
-      <Stars intent={c.intent.stars} match={c.match.stars} />
+      <Stars score={item.score} />
       <Signal signal={item.latestSignal} />
       <div className="metrics-inline">
         <div className="metric">

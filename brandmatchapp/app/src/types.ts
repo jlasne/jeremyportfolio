@@ -32,10 +32,22 @@ export interface Post {
   date: string
 }
 
+/**
+ * One score per creator, 0 to 3 stars, built from three facts.
+ * 0 outside the niche, 1 niche, 2 niche and selling, 3 niche, selling and a signal in the last 30 days.
+ */
 export interface Score {
   stars: Stars
+  /** Content, audience and follower band fit the brief. */
+  niche: boolean
+  /** Sells a program, coaching, an ebook, an app, or runs a link hub or media kit. */
+  active: boolean
+  /** A dated brand signal fired in the last 30 days. */
+  intent: boolean
   /** One plain sentence, written at scoring time. */
   why: string
+  /** The rung name: Outside, Niche fit, Selling, Ready now. */
+  rung: string
 }
 
 export interface Creator {
@@ -55,12 +67,43 @@ export interface Creator {
   language: Language
   email: string | null
   signals: Signal[]
-  intent: Score
-  match: Score
+  /** Content, audience and follower band fit the brief. */
+  niche: boolean
+  /** Why the niche call went that way, one plain sentence. */
+  nicheWhy: string
+  /** What the creator sells today, or an empty string. */
+  sells: string
+  /** The agent that found this creator. */
+  agentId: string
   /** ISO date */
   firstSeenAt: string
   /** ISO date */
   lastCrawlAt: string
+}
+
+export interface Agent {
+  id: string
+  name: string
+  brief: Brief
+  filters: Filters
+  /** How many leads a day this agent should deliver. */
+  leadsPerDay: number
+  /** Local time the daily batch lands, "07:00". */
+  runAt: string
+  active: boolean
+  /** ISO date */
+  createdAt: string
+}
+
+export interface DailyStat {
+  /** ISO date, midnight */
+  date: string
+  /** Profiles crawled. */
+  gathered: number
+  /** Leads kept after the filters. */
+  leads: number
+  /** Leads at 2 or 3 stars. */
+  high: number
 }
 
 export interface SavedList {

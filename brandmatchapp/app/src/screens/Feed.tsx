@@ -33,7 +33,7 @@ export function Feed({ creatorId }: { creatorId: string | null }) {
         <span className="count num">{items.length} in view</span>
         <span className="spacer" />
         <FilterButton />
-        <a className="btn hide-m" href="#/lists">Saved lists</a>
+        <a className="btn hide-m" href="#/contacts">Contacts</a>
         <button type="button" className="btn" onClick={exportView} disabled={items.length === 0}>Export</button>
       </div>
 
@@ -48,7 +48,7 @@ export function Feed({ creatorId }: { creatorId: string | null }) {
           <div className="feed-cols" aria-hidden="true">
             <span />
             <span>Creator</span>
-            <span>Stars</span>
+            <span>Score</span>
             <span>Signal</span>
             <span className="r">Followers</span>
             <span className="r">Engaged</span>

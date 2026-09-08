@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import {
   addTag,
   createList,
-  getCreatorItem,
+  getLead,
   getLists,
   getNote,
   getPosts,
   getTags,
+  getTagVocabulary,
+  toggleTag,
   listsFor,
   reject,
   removeFromList,
@@ -23,7 +25,7 @@ import { Stars } from './Stars'
 
 export function CreatorDetail({ id, onClose }: { id: string; onClose: () => void }) {
   useStore()
-  const item = getCreatorItem(id)
+  const item = getLead(id)
   const panel = useRef<HTMLDivElement>(null)
   const [mode, setMode] = useState<'none' | 'save' | 'note' | 'tag'>('none')
   const [noteDraft, setNoteDraft] = useState(() => getNote(id))
@@ -93,14 +95,17 @@ export function CreatorDetail({ id, onClose }: { id: string; onClose: () => void
           )}
 
           <section>
-            <h3>Why these stars</h3>
+            <h3>Why this score</h3>
             <div className="why">
-              <Stars intent={c.intent.stars} match={c.match.stars} large />
-              <div className="stack" style={{ gap: 6 }}>
-                <p><b>Intent.</b> {c.intent.why}</p>
-                <p><b>Match.</b> {c.match.why}</p>
-              </div>
+              <Stars score={item.score} size="large" />
+              <p>{item.score.why}</p>
             </div>
+            <ul className="facts">
+              <li className={item.score.niche ? 'yes' : 'no'}>{item.score.niche ? 'Fits the brief' : 'Outside the brief'}</li>
+              <li className={item.score.active ? 'yes' : 'no'}>{c.sells ? `Sells ${c.sells}` : 'Sells nothing yet'}</li>
+              <li className={item.score.intent ? 'yes' : 'no'}>{item.score.intent ? 'Brand signal in the last 30 days' : 'Last brand signal over 30 days ago'}</li>
+            </ul>
+            {item.agent && <p className="hint">Found by {item.agent.name}.</p>}
           </section>
 
           <section>
@@ -196,6 +201,16 @@ export function CreatorDetail({ id, onClose }: { id: string; onClose: () => void
 
             {mode === 'tag' && (
               <div className="card" style={{ marginTop: 10 }}>
+                <div className="chips" style={{ marginBottom: 10 }}>
+                  {getTagVocabulary().map((t) => {
+                    const on = tags.includes(t)
+                    return (
+                      <button key={t} type="button" className={`chip small${on ? ' on' : ''}`} aria-pressed={on} onClick={() => toggleTag(c.id, t)}>
+                        {t}
+                      </button>
+                    )
+                  })}
+                </div>
                 <form
                   className="tags-edit"
                   onSubmit={(e) => {
@@ -204,10 +219,10 @@ export function CreatorDetail({ id, onClose }: { id: string; onClose: () => void
                     setTagDraft('')
                   }}
                 >
-                  <input className="input" value={tagDraft} onChange={(e) => setTagDraft(e.target.value)} placeholder="Add a tag" aria-label="Tag" />
+                  <input className="input" value={tagDraft} onChange={(e) => setTagDraft(e.target.value)} placeholder="New tag" aria-label="New tag" />
                   <button type="submit" className="btn small">Add</button>
                 </form>
-                <p className="hint">Tags filter saved lists.</p>
+                <p className="hint">Tags filter contacts and saved lists.</p>
               </div>
             )}
 
