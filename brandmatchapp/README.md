@@ -17,23 +17,39 @@ spec this follows.
 ## Run
 
 ```bash
+cd app
 npm install
 npm run dev
 ```
 
-Opens on `http://localhost:5173`. `npm run build` writes a static `dist`
-folder that works from any path or host.
+Opens on `http://localhost:5173`.
+
+## Publish
+
+The site has no build step, so the built app is committed at the folder root
+and served straight from `jeremylasne.com/brandmatchapp`.
+
+```bash
+cd app
+npm run build
+```
+
+That typechecks, builds, and copies `index.html` and `assets/` up one level,
+replacing the previous build. Commit those two alongside the source. Paths in
+the build are relative, so the folder works from any host or subpath.
 
 ## Where things live
 
 | Path | What it is |
 | --- | --- |
-| `src/mock/` | All mock data, one file per entity: creators, posts, lists, notes, tags, rejections, brief, filters, questions, settings. No data literal lives anywhere else |
-| `src/data/index.ts` | The data functions every screen reads through: get the feed, get one creator, save, note, tag, reject, export, brief, filters, settings, first run. Swap the mock for the real source here and nothing else changes |
-| `src/data/store.ts` | The one in memory state, seeded from the mock folder. Refresh resets it |
-| `src/screens/` | Onboarding (3 steps and the first run), Feed, Saved lists, Settings |
-| `src/components/` | Stars, Signal, the lead row, the detail panel, the filter form |
-| `src/lib/` | Formatting, CSV, hash router, placeholder images drawn on the device |
+| `index.html`, `assets/` | The built app, committed, served by the site |
+| `app/` | The source: Vite, React, TypeScript. Its own `npm install` |
+| `app/src/mock/` | All mock data, one file per entity: creators, posts, lists, notes, tags, rejections, brief, filters, questions, settings. No data literal lives anywhere else |
+| `app/src/data/index.ts` | The data functions every screen reads through: get the feed, get one creator, save, note, tag, reject, export, brief, filters, settings, first run. Swap the mock for the real source here and nothing else changes |
+| `app/src/data/store.ts` | The one in memory state, seeded from the mock folder. Refresh resets it |
+| `app/src/screens/` | Onboarding (3 steps and the first run), Feed, Saved lists, Settings |
+| `app/src/components/` | Stars, Signal, the lead row, the detail panel, the filter form |
+| `app/src/lib/` | Formatting, CSV, hash router, placeholder images drawn on the device |
 
 ## Screens
 

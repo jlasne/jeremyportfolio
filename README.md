@@ -42,7 +42,7 @@ Open it and edit it.
 | `/foundercity` | **Founder City** — product metrics as a pixel skyline at night, one tower per app |
 | `/bio` | **Bio** — a fifteen-day daily log of five habits and sleep, then one number per training discipline, live |
 | `/brain` | **brain**: a self-tidying knowledge brain in plain markdown, open source. How it works, the folder it makes, the full skill file, and the repo link |
-| `/brandmatchapp` | **brandmatch** · a daily feed of Instagram creators ready for a brand deal, ranked by intent and match stars. Front end prototype on mock data, Vite and React, its own `npm install` and `npm run dev`. See [`brandmatchapp/README.md`](brandmatchapp/README.md) |
+| `/brandmatchapp` | **brandmatch** · a daily feed of Instagram creators ready for a brand deal, ranked by intent and match stars. Front end prototype on mock data. The source is Vite and React under `brandmatchapp/app`; `npm run build` there commits the built app to the folder the site serves. See [`brandmatchapp/README.md`](brandmatchapp/README.md) |
 | `/brand` | **CreatorMatch** · the offer, live at [creatormatch.app](https://creatormatch.app). A second Vercel project builds this repo with `brand` as its root directory, so the folder stays here even though nothing on the landing links to it |
 
 **Bio** keeps its numbers in the Overlap Convex deployment behind a
