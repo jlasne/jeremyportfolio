@@ -34,17 +34,7 @@ export function Agents({ agentId }: { agentId: string | null }) {
         </form>
       </div>
 
-      <div className="two-col">
-        <nav className="list-nav" aria-label="Agents">
-          {agents.map((a) => (
-            <a key={a.id} href={`#/agents/${a.id}`} className={current?.id === a.id ? 'on' : undefined}>
-              <span>{a.name}</span>
-              <span className="count num">{a.active ? a.leadsPerDay : 'off'}</span>
-            </a>
-          ))}
-        </nav>
-
-        <div>
+      <div className="settings">
           {!current && (
             <div className="card">
               <h2>No agent yet</h2>
@@ -143,7 +133,6 @@ export function Agents({ agentId }: { agentId: string | null }) {
               </div>
             </>
           )}
-        </div>
       </div>
     </div>
   )

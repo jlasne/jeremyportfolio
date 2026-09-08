@@ -60,17 +60,7 @@ export function Lists({ listId }: { listId: string | null }) {
         </div>
       )}
 
-      <div className="two-col">
-        <nav className="list-nav" aria-label="Lists">
-          {lists.map((l) => (
-            <a key={l.id} href={`#/lists/${l.id}`} className={current?.id === l.id ? 'on' : undefined}>
-              <span>{l.name}</span>
-              <span className="count num">{l.creatorIds.length}</span>
-            </a>
-          ))}
-        </nav>
-
-        <div className="feed">
+      <div className="feed">
           {!current && (
             <div className="empty">
               <h2>No list yet</h2>
@@ -126,8 +116,7 @@ export function Lists({ listId }: { listId: string | null }) {
                 </div>
               </div>
             )
-          })}
-        </div>
+        })}
       </div>
 
       {openId && <CreatorDetail id={openId} onClose={() => setOpenId(null)} />}

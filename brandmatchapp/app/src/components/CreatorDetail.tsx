@@ -105,6 +105,7 @@ export function CreatorDetail({ id, onClose }: { id: string; onClose: () => void
               <li className={item.score.active ? 'yes' : 'no'}>{c.sells ? `Sells ${c.sells}` : 'Sells nothing yet'}</li>
               <li className={item.score.intent ? 'yes' : 'no'}>{item.score.intent ? 'Brand signal in the last 30 days' : 'Last brand signal over 30 days ago'}</li>
             </ul>
+            {!item.score.niche && <p className="hint">{c.nicheWhy}</p>}
             {item.agent && <p className="hint">Found by {item.agent.name}.</p>}
           </section>
 

@@ -7,7 +7,7 @@ import { nextBatchLabel } from '../lib/format'
 import { navigate } from '../lib/router'
 import { useState } from 'react'
 import { FilterForm } from '../components/FilterForm'
-import { LADDER } from '../components/Stars'
+import { CRITERIA } from '../data'
 
 export function Settings() {
   useStore()
@@ -38,7 +38,7 @@ export function Settings() {
                 <FragmentRow key={q.id} label={q.text} value={brief.answers.find((a) => a.questionId === q.id)?.value ?? null} />
               ))}
             </dl>
-            <p className="hint" style={{ marginTop: 10 }}>The brief drives the crawl keywords and the match score. Editing it re-runs the three questions.</p>
+            <p className="hint" style={{ marginTop: 10 }}>The brief drives the crawl keywords and the niche star. Editing it re-runs the three questions.</p>
           </>
         ) : (
           <p className="muted">No brief yet. <a href="#/onboarding/who">Write one</a>.</p>
@@ -79,15 +79,16 @@ export function Settings() {
 
       <div className="card">
         <h2>How the score works</h2>
-        <ul className="rungs plain">
-          {LADDER.map((r) => (
-            <li key={r.stars}>
-              <span className="rung-name"><span className="num">{r.stars}</span> {r.rung}</span>
-              <span className="rung-means">{r.means}</span>
+        <p className="muted">One star each, added up. The three are independent, so a creator selling with a fresh signal scores 2 even outside the niche.</p>
+        <ul className="criteria plain">
+          {CRITERIA.map((c) => (
+            <li key={c.key}>
+              <span className="crit-name">{c.label}</span>
+              <span className="crit-means">{c.means}</span>
             </li>
           ))}
         </ul>
-        <p className="hint">One score per creator. Filters cut the volume, the score sets the order.</p>
+        <p className="hint">Filters cut the volume. The score sets the order.</p>
       </div>
 
       <div className="card">

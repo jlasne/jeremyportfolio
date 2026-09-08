@@ -36,30 +36,19 @@ export function Groups({ agentId }: { agentId: string | null }) {
       </div>
       {current && <p className="subhead">{current.agent.brief.summary}</p>}
 
-      <div className="two-col">
-        <nav className="list-nav" aria-label="Groups">
-          {groups.map((g) => (
-            <a key={g.agent.id} href={`#/groups/${g.agent.id}`} className={current?.agent.id === g.agent.id ? 'on' : undefined}>
-              <span>{g.agent.name}</span>
-              <span className="count num">{g.leads.length}</span>
-            </a>
-          ))}
-        </nav>
-
-        <div className="feed">
-          {current && current.leads.length === 0 && (
-            <div className="empty">
-              <h2>{current.agent.name} found nothing yet</h2>
-              <p>The agent runs at {current.agent.runAt} and delivers up to {current.agent.leadsPerDay} leads a day. Widen its brief or its filters to raise that.</p>
-              <div className="actions">
-                <a className="btn primary" href={`#/agents/${current.agent.id}`}>Open agent settings</a>
-              </div>
+      <div className="feed">
+        {current && current.leads.length === 0 && (
+          <div className="empty">
+            <h2>{current.agent.name} found nothing yet</h2>
+            <p>The agent runs at {current.agent.runAt} and delivers up to {current.agent.leadsPerDay} leads a day. Widen its brief or its filters to raise that.</p>
+            <div className="actions">
+              <a className="btn primary" href={`#/agents/${current.agent.id}`}>Open agent settings</a>
             </div>
-          )}
-          {current?.leads.map((lead) => (
-            <LeadRow key={lead.creator.id} item={lead} open={openId === lead.creator.id} onOpen={setOpenId} />
-          ))}
-        </div>
+          </div>
+        )}
+        {current?.leads.map((lead) => (
+          <LeadRow key={lead.creator.id} item={lead} open={openId === lead.creator.id} onOpen={setOpenId} />
+        ))}
       </div>
 
       {openId && <CreatorDetail id={openId} onClose={() => setOpenId(null)} />}

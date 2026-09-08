@@ -6,13 +6,13 @@ import { followUpQuestions } from '../mock/questions'
 import { timezones as mockTimezones } from '../mock/settings'
 import { toCsv } from '../lib/csv'
 import { absolute, isNewToday, withinDays } from '../lib/format'
-import { latestSignal, scoreOf } from './score'
+import { CRITERIA, latestSignal, scoreOf } from './score'
 import { getState, resetState, setState } from './store'
 
 // Every screen reads and writes through these functions.
 // They work on the in memory store today and will call the real source later.
 
-export { RUNGS, scoreOf } from './score'
+export { CRITERIA, scoreOf } from './score'
 
 // Feed --------------------------------------------------------------------
 
@@ -123,8 +123,10 @@ export interface Dashboard {
   gatheredToday: number
   /** 14 days of crawl output, newest last. */
   daily: DailyStat[]
-  /** How many leads sit at each rung. */
+  /** How many leads sit at each star count. */
   byStars: Record<Stars, number>
+  /** How many leads earned each criterion. */
+  byCriterion: { key: string; label: string; means: string; count: number }[]
 }
 
 export function getDashboard(now = new Date()): Dashboard {
@@ -132,6 +134,12 @@ export function getDashboard(now = new Date()): Dashboard {
   const daily = getState().daily
   const byStars: Record<Stars, number> = { 0: 0, 1: 0, 2: 0, 3: 0 }
   for (const l of leads) byStars[l.score.stars]++
+  const byCriterion = CRITERIA.map((c) => ({
+    key: c.key,
+    label: c.label,
+    means: c.means,
+    count: leads.filter((l) => l.score[c.key]).length,
+  }))
   return {
     today: leads.filter((l) => l.isNew).length,
     high: leads.filter((l) => isHigh(l.score)).length,
@@ -139,6 +147,7 @@ export function getDashboard(now = new Date()): Dashboard {
     gatheredToday: daily.length ? daily[daily.length - 1].gathered : 0,
     daily,
     byStars,
+    byCriterion,
   }
 }
 
@@ -345,11 +354,12 @@ export function exportCsv(creatorIds: string[]): string {
       handle: c.handle,
       url: `https://instagram.com/${c.handle}`,
       stars: score.stars,
-      rung: score.rung,
+      niche: score.niche ? 'yes' : 'no',
+      selling: c.sells || 'nothing',
+      signal_fresh: score.intent ? 'yes' : 'no',
       why: score.why,
       signal: sig?.label ?? '',
       signal_date: sig ? absolute(sig.date) : '',
-      sells: c.sells,
       followers: c.followers,
       engagement_rate: (c.engagementRate * 100).toFixed(1) + '%',
       median_reel_views: c.medianReelViews,

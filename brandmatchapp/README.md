@@ -5,14 +5,16 @@ A daily feed of Instagram creators for brands, ranked by stars.
 The brand writes one sentence about who it wants. An agent crawls Instagram
 every day, scores every profile, and delivers the list sorted best first.
 
-**One score per creator, 0 to 3 stars.**
+**One score per creator, 0 to 3 stars. One star each, added up.**
 
-| Stars | Rung | Means |
-| --- | --- | --- |
-| 3 | Ready now | Fits the brief, sells something, and a brand signal fired in the last 30 days |
-| 2 | Selling | Fits the brief and sells a program, coaching, an ebook or an app |
-| 1 | Niche fit | Fits the brief and sells nothing yet |
-| 0 | Outside | Content or audience sits outside the brief |
+| Star | Earned when |
+| --- | --- |
+| Niche | Content and audience fit the brief |
+| Selling | Sells a program, coaching, an ebook or an app |
+| Signal | A brand signal fired in the last 30 days |
+
+The three are independent. A creator selling with a fresh signal scores 2 even
+outside the niche. Each row shows which stars it earned.
 
 The rule lives in one file, `app/src/data/score.ts`. Change it there and every
 screen follows. `brandmatch-spec.md` still describes the two score version it
@@ -68,18 +70,19 @@ return 404. Serving this app from another path means changing `base` first.
 
 ## Screens
 
-The nav sits on the right edge, full height, and collapses to a scrolling bar
-under 900px.
+The nav sits on the right edge, full height, and is the only navigation: the
+section you are in opens to list what it holds, so every screen runs full
+width. Under 900px it collapses to a scrolling bar across the top.
 
 | Route | What it holds |
 | --- | --- |
-| `#/dashboard` | Leads today, high leads at 2 or 3 stars, leads in total, 14 days of leads gathered per day, where the leads sit on the ladder, and a row per agent |
+| `#/dashboard` | Leads today, high leads at 2 or 3 stars, leads in total, 14 days of leads gathered per day, how many leads earned each star, and a row per agent |
 | `#/feed` | One list, best first. Click a row for the detail panel |
 | `#/groups` | Leads grouped by the agent that found them |
 | `#/contacts` | Every lead with an email, filtered by stars and tags, tags assigned inline |
 | `#/agents` | One agent per saved search: name, brief, filters, leads a day, run time, pause, delete |
 | `#/lists` | Saved lists with notes and tags, one filled, one empty |
-| `#/settings` | The brief, the filters, the tag list, the score ladder, the timezone |
+| `#/settings` | The brief, the filters, the tag list, how the score works, the timezone |
 | `#/onboarding/who` | One question, one text box |
 | `#/onboarding/details` | Three follow ups with chips and free text, all skippable |
 | `#/onboarding/filters` | The filter bar |
@@ -91,8 +94,9 @@ agent that found it, which is what Groups reads.
 
 ## Mock data
 
-40 creators in the fitness and nutrition niche, spread across the ladder:
-8 at three stars, 13 at two, 11 at one, 8 at zero. 5 first seen in the last 24
+40 creators in the fitness and nutrition niche: 8 at three stars, 14 at two,
+14 at one, 4 at zero. 32 fit the niche, 25 sell something, 9 carry a signal
+from the last 30 days. 5 first seen in the last 24
 hours, 3 saved with a note and a tag, 2 rejected. 22 carry an email. Followers
 from 12k to 840k, engagement from 0.8% to 9%. Six countries: US, UK, Canada,
 Australia, France, Germany. Three agents, one of them paused, plus 14 days of
@@ -107,11 +111,12 @@ placeholder image service, so nothing fails offline.
 
 ## Design
 
-Six colors: Ink `#17191F`, Paper `#F4F5F7`, Line `#E3E6EB`, Amber `#D98E04`
-for intent stars, Teal `#0F8A7A` for match stars, Blue `#2657D9` for actions.
+Five colors: Ink `#1A1A17`, warm Paper `#F7F6F3`, Line `#E9E6E0`, Amber
+`#C8860D` on the stars, Blue `#2F5BD6` on links and the chart.
 One typeface, Inter over the system stack, with tabular numerals for every
-metric. A 208px nav on the right, flat rows split by 1px lines, and a detail
-panel that slides in from the left edge of the screen.
+metric. A 216px nav on the right, white cards on warm paper with a 1px border
+and a soft shadow, flat rows split by hairlines, and a detail panel that slides
+over the list.
 
 The stars and the dated signal are the only color in a row. Everything else is
 grey text. The dashboard chart is one series in blue, checked against the

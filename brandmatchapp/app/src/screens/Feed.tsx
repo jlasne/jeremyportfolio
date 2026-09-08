@@ -53,7 +53,6 @@ export function Feed({ creatorId }: { creatorId: string | null }) {
             <span className="r">Followers</span>
             <span className="r">Engaged</span>
             <span className="r">Reel views</span>
-            <span>Country</span>
             <span>Email</span>
           </div>
         )}

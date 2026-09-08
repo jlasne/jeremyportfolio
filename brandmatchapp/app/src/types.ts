@@ -33,8 +33,8 @@ export interface Post {
 }
 
 /**
- * One score per creator, 0 to 3 stars, built from three facts.
- * 0 outside the niche, 1 niche, 2 niche and selling, 3 niche, selling and a signal in the last 30 days.
+ * One score per creator, 0 to 3 stars. One star each for niche, selling and a
+ * fresh signal, added up. The three are independent of each other.
  */
 export interface Score {
   stars: Stars
@@ -44,10 +44,10 @@ export interface Score {
   active: boolean
   /** A dated brand signal fired in the last 30 days. */
   intent: boolean
+  /** The criteria that earned a star, in order. */
+  earned: string[]
   /** One plain sentence, written at scoring time. */
   why: string
-  /** The rung name: Outside, Niche fit, Selling, Ready now. */
-  rung: string
 }
 
 export interface Creator {

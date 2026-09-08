@@ -15,6 +15,7 @@ export function LeadRow({ item, open, onOpen }: { item: Lead; open: boolean; onO
           {item.isNew && <span className="badge-new">NEW</span>}
           {item.isSaved && <span className="badge-saved">Saved</span>}
           {item.isRejected && <span className="badge-saved">Rejected</span>}
+          <span className="geo">{c.country} {c.language.toUpperCase()}</span>
         </div>
         <p className="bio">{c.bio}</p>
       </div>
@@ -33,9 +34,6 @@ export function LeadRow({ item, open, onOpen }: { item: Lead; open: boolean; onO
           <b>{compact(c.medianReelViews)}</b>
           <small>reel views</small>
         </div>
-      </div>
-      <div className="geo">
-        <span>{c.country}</span> <span className="faint">{c.language.toUpperCase()}</span>
       </div>
       <div className={`mail${c.email ? '' : ' none'}`}>{c.email ?? 'No email'}</div>
     </button>

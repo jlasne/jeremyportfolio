@@ -2,13 +2,11 @@ import type { Stars } from '../types'
 import { getDashboard, getGroups } from '../data'
 import { useStore } from '../data/hooks'
 import { DailyChart } from '../components/DailyChart'
-import { LADDER } from '../components/Stars'
 
 export function Dashboard() {
   useStore()
   const d = getDashboard()
   const groups = getGroups()
-  const maxRung = Math.max(...Object.values(d.byStars), 1)
   const avgLeads = Math.round(d.daily.reduce((sum, x) => sum + x.leads, 0) / d.daily.length)
 
   return (
@@ -43,24 +41,27 @@ export function Dashboard() {
 
       <div className="split">
         <div className="card">
-          <h2>Where the leads sit</h2>
-          <ul className="rungs">
-            {LADDER.map((r) => {
-              const n = d.byStars[r.stars as Stars]
-              return (
-                <li key={r.stars}>
-                  <span className="rung-name">
-                    <span className="num">{r.stars}</span> {r.rung}
-                  </span>
-                  <span className="rung-bar">
-                    <i style={{ width: `${(n / maxRung) * 100}%` }} />
-                  </span>
-                  <span className="num rung-count">{n}</span>
-                  <span className="rung-means faint">{r.means}</span>
-                </li>
-              )
-            })}
+          <h2>What earns a star</h2>
+          <ul className="criteria">
+            {d.byCriterion.map((c) => (
+              <li key={c.key}>
+                <span className="crit-name">{c.label}</span>
+                <span className="crit-bar">
+                  <i style={{ width: `${(c.count / d.total) * 100}%` }} />
+                </span>
+                <span className="num crit-count">{c.count}</span>
+                <span className="crit-means faint">{c.means}</span>
+              </li>
+            ))}
           </ul>
+          <div className="star-split">
+            {([3, 2, 1, 0] as Stars[]).map((n) => (
+              <div key={n}>
+                <b className="num">{d.byStars[n]}</b>
+                <span>{n === 1 ? '1 star' : `${n} stars`}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="card">
