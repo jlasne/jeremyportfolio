@@ -156,7 +156,9 @@ export default defineSchema({
     log: v.record(v.string(), v.object({
       habits: v.record(v.string(), v.boolean()),
       sleep: v.optional(v.number()),
-      weight: v.optional(v.number()),
+      test: v.optional(v.string()),
+      result: v.optional(v.number()),
+      /* the older shape, still sent for a day left untouched on screen */
       train: v.optional(v.record(v.string(), v.number())),
       note: v.optional(v.string()),
     })),

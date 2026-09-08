@@ -103,7 +103,7 @@ h2 {
 /* ── the log ────────────────────────────────────────────────────────── */
 .log { border-top: 1px solid var(--line); background: rgba(5, 11, 22, .35); }
 .lrow {
-  display: grid; grid-template-columns: 124px repeat(var(--n), minmax(0, 1fr)) 64px 76px;
+  display: grid; grid-template-columns: 124px repeat(var(--n), minmax(0, 1fr)) 64px;
   align-items: center; gap: 8px; padding: 10px 10px 10px 12px; border-bottom: 1px solid var(--line);
   transition: opacity .3s;
 }
@@ -218,7 +218,7 @@ footer a:hover { color: var(--ice); }
   .legend { grid-template-columns: 1fr; }
 }
 @media (max-width: 560px) {
-  .lrow { grid-template-columns: 66px repeat(var(--n), minmax(0, 1fr)) 40px 52px; gap: 4px; padding: 9px 6px 9px 8px; }
+  .lrow { grid-template-columns: 72px repeat(var(--n), minmax(0, 1fr)) 44px; gap: 4px; padding: 9px 6px 9px 8px; }
   .lrow.lhead { align-items: end; }
   .lrow.lhead .h { writing-mode: vertical-rl; transform: rotate(180deg); text-align: left; font-size: 9px; letter-spacing: .08em; height: 86px; margin: 0 auto; white-space: nowrap; }
   .lrow.lhead .s { align-self: end; }
@@ -306,7 +306,7 @@ footer a:hover { color: var(--ice); }
 <noscript><p style="text-align:center;padding:40px">The live numbers need JavaScript.</p></noscript>
 
 <script type="module">
-import { SPEC, dateKey, shift, daysBetween, clean } from '/bio/spec.js';
+import { SPEC, dateKey, shift, daysBetween, clean, testOf } from '/bio/spec.js';
 
 /* ── the scene ──────────────────────────────────────────────────────────
    Five ridgelines by midpoint displacement, each with a snow cap: the
@@ -468,8 +468,8 @@ function build() {
   for (const k of extra) if (!rows.some(r => r.key === k)) rows.push({ key: k, when: k === today ? 'today' : 'past' });
   rows.sort((a, b) => (a.key < b.key ? 1 : -1));
   $('log').style.setProperty('--n', HABITS.length);
-  grid($('log'), HABITS.map(h => `<span class="h" title="${h.name}">${h.short}</span>`).join('') + '<span class="s">Sleep</span><span class="s">Weight</span>',
-    key => HABITS.map(h => `<label class="cell"><input class="tick" type="checkbox" id="h-${key}-${h.id}" disabled aria-label="${h.name}, ${pretty(key)}"></label>`).join('') + sleepCell('s-' + key, 'Sleep, ' + pretty(key)) + numCell('g-' + key, SPEC.weight, 'Weight, ' + pretty(key)));
+  grid($('log'), HABITS.map(h => `<span class="h" title="${h.name}">${h.short}</span>`).join('') + '<span class="s">Sleep</span>',
+    key => HABITS.map(h => `<label class="cell"><input class="tick" type="checkbox" id="h-${key}-${h.id}" disabled aria-label="${h.name}, ${pretty(key)}"></label>`).join('') + sleepCell('s-' + key, 'Sleep, ' + pretty(key)));
   document.querySelectorAll('.log:not(.train) .val[type=text]').forEach(i => i.addEventListener('change', () => { const h = parseSleep(i.value); i.value = h === undefined ? '' : fmtSleep(h); }));
   grid($('train'), '<span class="h">Session</span><span class="res"><span class="h">Test</span><span class="s">Result</span></span>',
     key => `<input class="txt" id="w-${key}" type="text" maxlength="80" placeholder="Rest, or what was done" readonly aria-label="Session, ${pretty(key)}">` +
@@ -480,7 +480,7 @@ function build() {
   $('more').textContent = `Earlier days · ${hidden} more`;
 }
 $('more').addEventListener('click', () => { all = true; build(); paint(); });
-$('legend').innerHTML = HABITS.map(h => `<li><b>${h.name}<small>${h.short}</small></b>${h.why}</li>`).join('') + `<li><b>Weight<small>${SPEC.weight.unit}</small></b>${SPEC.weight.why}</li>`;
+$('legend').innerHTML = HABITS.map(h => `<li><b>${h.name}<small>${h.short}</small></b>${h.why}</li>`).join('');
 
 const val = (id, v) => { $(id).value = Number.isFinite(v) ? v : ''; };
 /* the result cell takes the unit, step and range of the chosen discipline */
@@ -492,25 +492,24 @@ function paint(log = state.log) {
   for (const r of rows) {
     const d = log[r.key];
     for (const h of HABITS) $(`h-${r.key}-${h.id}`).checked = !!d?.habits?.[h.id];
-    $('s-' + r.key).value = Number.isFinite(d?.sleep) ? fmtSleep(d.sleep) : ''; val('g-' + r.key, d?.weight);
-    const done = TESTS.find(e => Number.isFinite(d?.train?.[e.id]));
-    $('p-' + r.key).value = done ? done.id : '';
-    unit(r.key); val('t-' + r.key, done ? d.train[done.id] : undefined);
+    $('s-' + r.key).value = Number.isFinite(d?.sleep) ? fmtSleep(d.sleep) : '';
+    const { test, result } = testOf(d);
+    $('p-' + r.key).value = TESTS.some(e => e.id === test) ? test : '';
+    unit(r.key); val('t-' + r.key, result);
     $('w-' + r.key).value = d?.note || '';
   }
   /* the last seven days, today included */
-  let checks = 0, hours = 0, nights = 0, kilos = 0, weighed = 0, trained = 0;
+  let checks = 0, hours = 0, nights = 0, trained = 0;
   for (let i = 0; i < 7; i++) {
     const d = state.log[shift(today, -i)]; if (!d) continue;
     for (const h of HABITS) if (d.habits?.[h.id]) checks++;
     if (Number.isFinite(d.sleep)) { hours += d.sleep; nights++; }
-    if (Number.isFinite(d.weight)) { kilos += d.weight; weighed++; }
-    if (d.train && Object.keys(d.train).length) trained++;
+    if (testOf(d).test) trained++;
   }
-  $('sum').textContent = `Last 7 days · ${checks} of ${7 * HABITS.length} checks` + (nights ? ` · ${fmtSleep(hours / nights)} sleep on average` : '') + (weighed ? ` · ${(kilos / weighed).toFixed(1)} kg on average` : '');
+  $('sum').textContent = `Last 7 days · ${checks} of ${7 * HABITS.length} checks` + (nights ? ` · ${fmtSleep(hours / nights)} sleep on average` : '');
   const counts = TESTS.map(e => {
     let n = 0;
-    for (const key in state.log) if (Number.isFinite(state.log[key]?.train?.[e.id])) n++;
+    for (const key in state.log) if (testOf(state.log[key]).test === e.id) n++;
     return `${e.discipline.toLowerCase()} ${n}`;
   }).filter(c => !c.endsWith(' 0'));
   $('tsum').textContent = `Last 7 days · ${trained} ${trained === 1 ? 'day' : 'days'} trained` + (counts.length ? ` · all sessions: ${counts.join(', ')}` : '');
@@ -542,7 +541,6 @@ function open(editing, quiet) {
   for (const r of rows) {
     for (const h of HABITS) $(`h-${r.key}-${h.id}`).disabled = !editing;
     $('s-' + r.key).readOnly = !editing;
-    $('g-' + r.key).readOnly = !editing;
     $('p-' + r.key).disabled = !editing;
     $('t-' + r.key).readOnly = !editing;
     $('w-' + r.key).readOnly = !editing;
@@ -571,12 +569,11 @@ document.querySelectorAll('[data-cancel]').forEach(b => b.addEventListener('clic
 function collect() {
   const log = { ...state.log };
   for (const r of rows) {
-    const entry = { habits: Object.fromEntries(HABITS.map(h => [h.id, $(`h-${r.key}-${h.id}`).checked])), train: {} };
-    const s = parseSleep($('s-' + r.key).value), g = $('g-' + r.key).value;
+    const entry = { habits: Object.fromEntries(HABITS.map(h => [h.id, $(`h-${r.key}-${h.id}`).checked])) };
+    const s = parseSleep($('s-' + r.key).value);
     if (s !== undefined) entry.sleep = s;
-    if (g !== '') entry.weight = Number(g);
     const test = $('p-' + r.key).value, v = $('t-' + r.key).value;
-    if (test && v !== '') entry.train[test] = Number(v);
+    if (test) { entry.test = test; if (v !== '') entry.result = Number(v); }
     const note = $('w-' + r.key).value.trim();
     if (note) entry.note = note;
     log[r.key] = entry;
@@ -599,8 +596,7 @@ function dropped(sent, kept) {
   for (const key in sent) {
     const a = sent[key], b = kept?.[key];
     if (!b) return true;
-    for (const f of ['sleep', 'weight', 'note']) if (f in a && b[f] !== a[f]) return true;
-    for (const id in a.train || {}) if (b.train?.[id] !== a.train[id]) return true;
+    for (const f of ['sleep', 'note', 'test', 'result']) if (f in a && b[f] !== a[f]) return true;
   }
   return false;
 }

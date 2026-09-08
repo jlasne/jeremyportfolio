@@ -18,10 +18,8 @@ export const SPEC = {
     { id: 'speed', discipline: 'Speed', unit: 's', step: 0.1, max: 600, best: 'min' },
   ],
 
-  /* Hours slept and morning weight, logged per day next to the habits. */
+  /* Hours slept, logged per day next to the habits. */
   sleep: { unit: 'h', step: 0.25, max: 24 },
-  weight: { unit: 'kg', step: 0.1, max: 300, height: '1.90 m',
-    why: 'Weighed each morning before water, in kg. Height 1.90 m.' },
 
   /* The five habits, one check each per day. */
   habits: [
@@ -52,10 +50,18 @@ export const isKey = key => typeof key === 'string' && !Number.isNaN(utcOf(key))
 export const shift = (key, n) => new Date(utcOf(key) + n * 86400000).toISOString().slice(0, 10);
 export const daysBetween = (from, to) => Math.round((utcOf(to) - utcOf(from)) / 86400000);
 
+/* The discipline logged that day and its result. Reads the older shape
+   too, where the result sat under the discipline's own key. */
+export function testOf(day) {
+  if (day?.test) return { test: day.test, result: day.result };
+  for (const e of SPEC.exercises) if (Number.isFinite(day?.train?.[e.id])) return { test: e.id, result: day.train[e.id] };
+  return {};
+}
+
 /* What a save may contain, decided once for both sides: only days from the
-   start up to tomorrow, only known habits, every number finite and inside its range,
-   sleep, weight and the training result kept only when given, the
-   session note trimmed to 80 characters. */
+   start up to tomorrow, only known habits and disciplines, every number
+   finite and inside its range. A discipline saves on its own: the result
+   is what the day may not have. */
 export function clean(input, today) {
   const num = (x, m) => {
     if (x === '' || x == null) return undefined;
@@ -68,15 +74,18 @@ export function clean(input, today) {
   for (const key of keys) {
     const day = input.log[key];
     if (!day || typeof day !== 'object') continue;
-    const habits = {}, train = {};
+    const habits = {};
     for (const h of SPEC.habits) habits[h.id] = day.habits?.[h.id] === true;
-    /* one test a day: the first valid result wins */
-    for (const e of SPEC.exercises) { const v = num(day.train?.[e.id], e); if (v !== undefined) { train[e.id] = v; break; } }
     const entry = { habits };
-    const sleep = num(day.sleep, SPEC.sleep), weight = num(day.weight, SPEC.weight);
+    const sleep = num(day.sleep, SPEC.sleep);
     if (sleep !== undefined) entry.sleep = sleep;
-    if (weight !== undefined) entry.weight = weight;
-    if (Object.keys(train).length) entry.train = train;
+    const { test, result } = testOf(day);
+    const e = SPEC.exercises.find(x => x.id === test);
+    if (e) {
+      entry.test = e.id;
+      const r = num(result, e);
+      if (r !== undefined) entry.result = r;
+    }
     const note = typeof day.note === 'string' ? day.note.trim().slice(0, 80) : '';
     if (note) entry.note = note;
     log[key] = entry;
