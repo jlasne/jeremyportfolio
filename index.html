@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Jeremy Lasne</title>
-<meta name="description" content="I make mobile apps with influencers. BrandMatch, Kaught, TrustViews.">
+<meta name="description" content="I make mobile apps with influencers. CreatorMatch, Kaught, TrustViews.">
 <link rel="canonical" href="https://www.jeremylasne.com/">
 <meta name="theme-color" content="#050b16">
 <link rel="icon" href="favicon.ico" sizes="any">
@@ -154,6 +154,20 @@
   .mute[aria-pressed="true"] .off { display: block; }
   @media (hover: hover) { .mute:hover { color: var(--blue); } }
   .mute:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+  /* ---- the toast, bottom centre, after the address is copied ---- */
+  .toast {
+    position: fixed; left: 0; right: 0; bottom: max(24px, env(safe-area-inset-bottom)); z-index: 4;
+    width: max-content; max-width: calc(100vw - 32px); margin: 0 auto; padding: 12px 18px; border-radius: 999px;
+    background: rgba(234,244,251,.96); color: var(--ink);
+    font-size: 14px; line-height: 1.4; letter-spacing: -.01em; text-align: center;
+    box-shadow: 0 12px 40px -8px rgba(5,11,22,.6);
+    opacity: 0; transform: translateY(12px); pointer-events: none;
+    transition: opacity .25s cubic-bezier(.22,1,.36,1), transform .25s cubic-bezier(.22,1,.36,1);
+  }
+  .toast[data-open] { opacity: 1; transform: none; }
+  .toast b { font-weight: 700; }
+  @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
 </style>
 </head>
 <body>
@@ -181,9 +195,9 @@
     <section class="reveal" style="--d:220">
       <h2>Active Projects</h2>
       <ul>
-        <li><a class="item" href="https://brandmatch.app" target="_blank" rel="noopener">
-          <img class="logo" src="media/logos/brandmatch.svg" alt="" width="24" height="24">
-          <span class="name">BrandMatch</span>
+        <li><a class="item" href="https://creatormatch.app" target="_blank" rel="noopener">
+          <img class="logo" src="media/logos/creatormatch.svg" alt="" width="24" height="24">
+          <span class="name">CreatorMatch</span>
           <span class="desc">Turn your audience into recurring revenue.</span>
           <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
         </a></li>
@@ -217,7 +231,7 @@
           <span class="desc">@jeremylasne</span>
           <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
         </a></li>
-        <li><a class="item" href="mailto:hey@jeremylasne.com">
+        <li><a class="item" id="mail" href="mailto:hey@jeremylasne.com">
           <svg class="logo mail" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M4 7l8 6 8-6"/></svg>
           <span class="name">Email</span>
           <span class="desc">hey@jeremylasne.com</span>
@@ -248,11 +262,19 @@
           <span class="desc">An energized and performing life, tracked.</span>
           <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
         </a></li>
+        <li><a class="item" href="/brain/">
+          <span class="dot"></span>
+          <span class="name">Brain</span>
+          <span class="desc">A folder that gets smarter every time you feed it.</span>
+          <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
+        </a></li>
       </ul>
     </section>
 
   </div>
 </main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs><path id="ar" fill-rule="evenodd" d="M4.22 11.78a.75.75 0 0 1 0-1.06L9.44 5.5H5.75a.75.75 0 0 1 0-1.5h5.5a.75.75 0 0 1 .75.75v5.5a.75.75 0 0 1-1.5 0V6.56l-5.22 5.22a.75.75 0 0 1-1.06 0Z"/></defs>
@@ -274,6 +296,24 @@
     addEventListener("keydown", blow, { once: true });
     a.onerror = function () { b.hidden = true; };
     paint(); b.hidden = false; blow();
+  })();
+
+  /* The Email row copies the address too: on a machine with no mail app,
+     mailto: alone does nothing visible. The mail app still opens where one exists. */
+  (function () {
+    var a = document.getElementById("mail"), t = document.getElementById("toast"), timer;
+    var email = a.getAttribute("href").slice("mailto:".length);
+    function show() {
+      t.innerHTML = "<b>Address copied.</b> Do send me an email.";
+      t.setAttribute("data-open", "");
+      clearTimeout(timer);
+      timer = setTimeout(function () { t.removeAttribute("data-open"); }, 2600);
+    }
+    function ask() { window.prompt("Copy the address:", email); }
+    a.addEventListener("click", function () {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(email).then(show, ask);
+      else ask();
+    });
   })();
 </script>
 </body>

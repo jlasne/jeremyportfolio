@@ -1,116 +1,57 @@
 # jeremylasne.com
 
-A landing page with one job: tell someone who has an audience that I will build
-them a mobile app, run it, and split what it earns.
+I make mobile apps with influencers. A creator brings the audience, I bring
+the whole build and run it, and we split what it earns. This repository is
+the site behind that, plus everything else I keep in public.
 
-The pitch is the whole page. You bring distribution, I bring the entire build —
-product, design, both stores, subscriptions, analytics, paywall, retention,
-support — and we split the equity. Terms are negotiated per project and stated
-plainly on the page rather than saved for a call.
+The landing page is one screen: a portrait, one sentence, three lists.
+
+- **Active projects.** [CreatorMatch](https://creatormatch.app) is the offer
+  itself: turn your audience into recurring revenue.
+  [Kaught](https://kaught.app) names any wild animal with your camera.
+  [TrustViews](https://trustviews.io) ranks verified sites on real traffic
+- **Social.** YouTube ([@jerandmax](https://www.youtube.com/@jerandmax)),
+  X ([@jeremylasne](https://x.com/jeremylasne)) and email
+- **Personal.** Three private equity positions (SaaS health, H100
+  datacenters, an astronomy blog), the Bio tracker and the brain
 
 ## Stack
 
-Single hand-written `index.html`. No build step, no framework, no bundler, no
-network requests at runtime. Open it and edit it.
+Single hand-written `index.html`. No build step, no framework, no bundler.
+Open it and edit it.
 
-- **Nunito**, inlined once as a variable woff2 covering weights 400–800. One
-  file, one family, no second voice, and no FOUT because nothing is fetched
-- Black, white, and the greys between. The only colour on the page lives
-  inside the phone, because that is the product
-- Bands alternate white and black, strictly: hero, How it works, Your
-  audience, the ask, projects. A `.band--dark` section re-points the
-  colour tokens rather than overriding components, so every card, rule, chip
-  and slider inside it inverts on its own
-- Project logos are the real icons from each site, resized to 128px and
-  inlined as webp (340 KB of source PNGs down to 14 KB)
-- Interactive without being fussy: the niche cycles, cards take a
-  pointer-tracked sheen, the phone cycles and swipes, the nav retreats on the
-  way down and returns on the way up
-- Everything degrades: `prefers-reduced-motion` is respected throughout, the
-  whole hero is CSS-only, and a `<noscript>` block reveals the rest, so the
-  page reads in full with JavaScript off
-- Nothing is hidden behind a hover state. Every sentence renders on a phone
-- Every text node on the page meets WCAG AA contrast in both bands
-
-## Editing it
-
-### The Kaught numbers — the one thing that needs real data
-
-`KAUGHT_STATS` at the top of the `<script>` block. Fill in the `v` values and
-they render as a stat strip in the Kaught section:
-
-```js
-var KAUGHT_STATS = [
-  { v: '12k',  k: 'DOWNLOADS' },
-  { v: '$2.4k', k: 'MONTHLY REVENUE' },
-  ...
-];
-```
-
-An empty `v` is skipped. If every one is empty the strip hides itself and a
-qualitative line shows instead, so the page never displays placeholder dashes.
-
-Keep these honest — the people this page is aimed at will ask you to back them
-up on the first call.
-
-### The niche that rotates
-
-`NICHES` in the `<script>` block is the headline of the *Your audience*
-band — the rotating word is the section's `<h2>` in everything but markup, and
-the three numbered cards under it are the argument for it. Keep the examples
-narrow and unglamorous: fly fishing, crochet, IELTS prep, knife sharpening. The
-narrower the example, the better the argument lands; "fitness" makes the
-section say nothing. Anything much longer than *mechanical keyboards* starts
-crowding the slot on a small phone — the word is set `nowrap` on purpose.
-
-There is no simulator and no split shown. The page says the build costs the
-creator nothing and that we split what it earns, and stops there — the split
-itself is the reason to reply.
-
-### The phone screenshots
-
-The hero phone shows five real Kaught screens from `media/app/1.png` through
-`5.png`. Replace a file and the page shows the new one; `index.html` needs no
-editing. Adding or dropping a screen means a matching `.scr` div and a dot in
-`#dots` — the script counts both.
-
-Each image runs 7% taller than the frame and is pinned to the top, so the
-device's own navigation bar falls off the bottom edge. A missing file removes
-its own `<img>` rather than breaking the layout.
-
-See [`media/app/README.md`](media/app/README.md) for formats and sizes.
-
-### The social card
-
-`og-image.png` is generated, not hand-drawn. It mirrors the hero. Regenerate it
-by rendering a 1200×630 page and screenshotting — the source used to make the
-current one is not checked in, so redraw it to match if the hero copy changes.
+- System font stack, dark ink, one blue accent, and the greys of ice
+  between. `/wealth` shares the palette, the ridge and the snow
+- The ridge photo from `/bio` blurred behind everything; snow drawn on a
+  canvas by `snow.js`; the wind looping from `media/wind.mp3` with one mute
+  button top right. Mute once and it stays muted on the next visit
+- Project logos are the real icons from each site, in `media/logos`
+- Rows reveal on load; `prefers-reduced-motion` turns that off
+- `og-image.png` is generated, not hand-drawn: render the hero at 1200×630
+  and screenshot it. The source is not checked in, so redraw it to match if
+  the copy changes
 
 ## Pages
 
 | Path | What it is |
 | --- | --- |
-| `/` | the pitch |
-| `/wealth` | **Wealth Architecture** — the research index and the book behind it |
-| `/wealth/principles` | fourteen principles in four parts, with hairline SVG figures |
-| `/wealth/country` | thirty-two countries read three ways |
-| `/wealth/exercice` | the same three maps as an interactive lecture |
+| `/` | the landing |
+| `/wealth` | **Wealth Architecture** — *Era, Season, Compass*: a research note on holding money when the world order turns, the principles on one page, and the country map, thirty-two countries read three ways |
 | `/overlap` | **Overlap** — landing page and live world clock |
 | `/overlap/team` · `/plan` · `/next` | the app: the team, the meeting, and what to build next |
-| `/kof` | **King of Founders** — a living pixel world map, one kingdom per app |
-| `/foundercity` | **Founder City** — the same apps as a pixel skyline at night, one tower each |
+| `/foundercity` | **Founder City** — product metrics as a pixel skyline at night, one tower per app |
 | `/bio` | **Bio** — a fifteen-day daily log of five habits and sleep, then one number per training discipline, live |
-| `/brand` | **BrandMatch** · the same offer as the pitch under its own name, laid out and animated the way passion.io is, in black and white. Self-contained: the folder moves to brandmatch.app as it is |
-
-`/investment` and `/invest` are redirect stubs into `/wealth`.
+| `/brain` | **brain**: a self-tidying knowledge brain in plain markdown, open source. How it works, the folder it makes, the full skill file, and the repo link |
+| `/brand` | **CreatorMatch** · the offer, live at [creatormatch.app](https://creatormatch.app). A second Vercel project builds this repo with `brand` as its root directory, so the folder stays here even though nothing on the landing links to it |
 
 **Bio** keeps its numbers in the Overlap Convex deployment behind a
 passphrase; see [`bio/README.md`](bio/README.md).
 
-The four `/wealth` pages share one design system in
-[`wealth/style.css`](wealth/style.css) — warm paper, hairline rules, a single
-gold accent, Instrument Serif over DM Sans. It is a different audience and a
-different voice, and it is deliberately not linked from the landing page.
+**Wealth Architecture** is one page, and deliberately not linked from the
+landing: a different audience and a different voice. The note is set in
+Source Serif and Instrument Serif over the same ridge and snow as the
+landing; every figure is inline SVG, and the country map at the end is my
+own reading of thirty-two countries, refreshed by hand.
 
 **Overlap** is the one page here that is a product rather than a piece of
 writing. Three steps — Team, Plan, Next — with the overlap drawn the
@@ -119,29 +60,23 @@ column the same instant on a different clock. It runs with no backend at all
 (team in `localStorage`, shared by link); connecting Convex adds accounts,
 teams and invite links. See [`overlap/README.md`](overlap/README.md).
 
-**King of Founders** turns product metrics into a map. Every kingdom is one
-founder's app, refreshed once a day from a RevenueCat key scoped to charts
-metrics only. 100 active users raise a house, 10 active trials arm an archer,
-10 subscriptions swear in a knight, 500 MRR mounts a horseman, and 10 departed
-subscribers earn a tombstone, capped at 20 stones. The building ladder runs from
-one hut at 40 souls to a royal palace at 50,000, so the skyline states the tier
-at a glance.
-
-Terrain is a pure function of tile coordinates — seeded value noise with domain
-warp for coastlines, a warped noise band for rivers, ridged noise above the
-treeline for mountain ranges — so a chunk generated today looks the same
-tomorrow. Land reaches only as far as the total population needs, and new
-kingdoms extend the rim without moving anything already drawn. Everything static
-bakes into 32×32 tile chunks once, so a frame costs about forty image blits plus
-the villagers: 60fps from one village up to the whole continent.
-
-Founders upload their app logo, which becomes a 16 pixel shield beside the
-kingdom's name; without one the kingdom gets a heraldic shield in a hue spaced
-by the golden angle. Name and handle are both optional: leave either blank and
-the land names itself or the kings walk anonymous.
-
-Demo data lives in `SEED_KINGDOMS` at the top of the file. Replace that array
-with a fetch to wire it to real accounts.
+**Founder City** draws product metrics as a skyline, scrolling left and
+right and nothing else: the tallest tower always fills the screen. Height is
+MRR on a power curve so a $40k app and a $400k app share one frame. The
+building's size, floors times width, is active users, so the width is
+whatever the audience needs at that height: a free app with a big crowd is a
+wide low block, a premium app with a few hundred customers is a thin spire.
+Lit windows are the subscribers among those users, with each floor keeping
+its own mood so the lights come in bands. The dark floors at the top are
+subscribers lost this month; a crane means the week was up; the crowd at the
+door is free trials; the sign on the facade is the app's name and logo, its
+colour lifetime revenue from white through cyan and amber to gold. Rank one
+stands in the middle and the others alternate outward, so rank reads as
+distance from downtown. A band along the top totals the city, a wire along
+the bottom carries the latest activity. Everything static bakes once; per
+frame the page moves cars, people, clouds, two searchlights and a few dozen
+windows. Demo data lives in the `SEED` array at the top of the file; replace
+it with a fetch to wire it to real accounts.
 
 Founder City reads RevenueCat from the browser: RevenueCat's API answers
 cross-origin requests from this domain, so "Break ground" makes one call to
@@ -153,23 +88,6 @@ at 04:00 UTC and keeps thirty days of history, and the key never leaves the
 server. If the door cannot be reached the tower stays in that browser's
 storage. Deploy with
 `cd overlap && npx convex deploy`.
-
-**Founder City** is the same data as a skyline, scrolling left and right
-and nothing else: the tallest tower always fills the screen. Height is MRR on
-a power curve so a $40k app and a $400k app share one frame. The building's
-size, floors times width, is active users, so the width is whatever the
-audience needs at that height: a free app with a big crowd is a wide low
-block, a premium app with a few hundred customers is a thin spire. Lit
-windows are the subscribers among those users, with each floor keeping its
-own mood so the lights come in bands. The dark floors at the top are
-subscribers lost this month; a crane means the week was up; the crowd at the
-door is free trials; the sign on the facade is the app's name and logo, its
-colour lifetime revenue from white through cyan and amber to gold. Rank one
-stands in the middle and the others alternate outward, so rank reads as
-distance from downtown. A band along the top totals the city, a wire along
-the bottom carries the latest activity. Everything static bakes once; per
-frame the page moves cars, people, clouds, two searchlights and a few dozen
-windows. Same join rules as the map, same `SEED` array to swap for a fetch.
 
 ## Run locally
 
