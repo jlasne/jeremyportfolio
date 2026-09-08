@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CreatorMatch.app · Turn your audience into an app</title>
 <meta name="description" content="Paid posts, ebooks and courses pay once. Your own app pays you every month. We build it, we run it, you keep posting.">
+<link rel="preload" as="image" href="media/hero.jpg" fetchpriority="high">
 <link rel="canonical" href="https://creatormatch.app/">
 <meta name="theme-color" content="#070a12">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -192,7 +193,11 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .hero-rings i:nth-child(5) { --d: 46vmax; --t: -9.6s; }
 @keyframes rings-breathe { from { transform: scale(1); } to { transform: scale(1.08); } }
 @media (prefers-reduced-motion: reduce) { .hero-rings i { animation: none; } }
-.hero-sticky > :not(.hero-rings) { position: relative; z-index: 1; }
+/* the photo ground: the cards in the corners, the copy in the empty middle; fades into the page at the bottom */
+.hero-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; background: url(media/hero.jpg) center / cover no-repeat; }
+.hero-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(5,7,13,.35) 0, transparent 18%, transparent 72%, rgb(5,7,13) 100%); }
+.hero-sticky > :not(.hero-rings):not(.hero-bg) { position: relative; z-index: 1; }
+@media (max-width: 880px) { .hero-bg::after { background: radial-gradient(70% 62% at 50% 52%, rgba(5,7,13,.72), rgba(5,7,13,.25) 70%, transparent), linear-gradient(to bottom, rgba(5,7,13,.35) 0, transparent 18%, transparent 72%, rgb(5,7,13) 100%); } }
 .hero-sticky { position: relative; overflow: clip; min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: clamp(98px, 13vh, 138px) 0 clamp(72px, 9vh, 96px); background: radial-gradient(60% 50% at 80% 0%, rgba(38, 62, 120, 0.42), transparent 70%); }
 .hero-copy { position: relative; z-index: 6; width: min(94%, 1040px); margin: 0 auto; text-align: center; }
 .proof-pill { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 26px; padding: 6px 16px 6px 7px; border-radius: 100px; background: var(--card); border: 1px solid var(--rule-firm); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font-size: 13.5px; font-weight: 600; color: var(--muted); }
@@ -583,6 +588,7 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 <section class="hero" id="top">
   <div class="hero-sticky" id="hero-sticky">
     <div class="hero-rings" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="hero-bg" aria-hidden="true"></div>
 
     <div class="hero-copy" id="hero-copy">
       <div class="proof-pill hero-in" style="--d:80ms">
