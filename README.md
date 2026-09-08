@@ -6,7 +6,7 @@ the site behind that, plus everything else I keep in public.
 
 The landing page is one screen: a portrait, one sentence, three lists.
 
-- **Active projects.** [BrandMatch](https://brandmatch.app) is the offer
+- **Active projects.** [CreatorMatch](https://creatormatch.app) is the offer
   itself: turn your audience into recurring revenue.
   [Kaught](https://kaught.app) names any wild animal with your camera.
   [TrustViews](https://trustviews.io) ranks verified sites on real traffic
@@ -42,7 +42,7 @@ Open it and edit it.
 | `/foundercity` | **Founder City** — product metrics as a pixel skyline at night, one tower per app |
 | `/bio` | **Bio** — a fifteen-day daily log of five habits and sleep, then one number per training discipline, live |
 | `/brain` | **brain**: a self-tidying knowledge brain in plain markdown, open source. How it works, the folder it makes, the full skill file, and the repo link |
-| `/brand` | **BrandMatch** · the offer, live at [brandmatch.app](https://brandmatch.app). A second Vercel project builds this repo with `brand` as its root directory, so the folder stays here even though nothing on the landing links to it |
+| `/brand` | **CreatorMatch** · the offer, live at [creatormatch.app](https://creatormatch.app). A second Vercel project builds this repo with `brand` as its root directory, so the folder stays here even though nothing on the landing links to it |
 
 **Bio** keeps its numbers in the Overlap Convex deployment behind a
 passphrase; see [`bio/README.md`](bio/README.md).
