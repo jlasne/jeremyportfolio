@@ -156,6 +156,7 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .nav-progress { position: absolute; left: 0; bottom: -1px; height: 2px; width: 100%; transform: scaleX(var(--p, 0)); transform-origin: left; background: var(--ink); opacity: 0; transition: opacity .4s var(--ease-soft); }
 .nav.stuck .nav-progress { opacity: 1; }
 .nav-burger { display: none; }
+@media (min-width: 881px) { .nav .shell { justify-content: center; gap: 30px; } .nav-links { flex: none; } }
 @media (max-width: 880px) {
   .nav { height: 62px; }
   .nav-links, .nav-right { display: none; }
@@ -183,29 +184,15 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 
 /* ── hero ───────────────────────────────────────────────────────────────── */
 .hero { position: relative; z-index: 10; }
-/* the hero ground: five soft circles stacked, lighter toward the middle, each breathing on its own beat */
-.hero-rings { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
-.hero-rings i { position: absolute; left: 50%; top: 60%; width: var(--d); height: var(--d); translate: -50% -50%; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.042) 95%, rgba(255,255,255,0) 100%); animation: rings-breathe 12s ease-in-out infinite alternate; animation-delay: var(--t); will-change: transform; }
-.hero-rings i:nth-child(1) { --d: 176vmax; --t: 0s; }
-.hero-rings i:nth-child(2) { --d: 142vmax; --t: -2.4s; }
-.hero-rings i:nth-child(3) { --d: 108vmax; --t: -4.8s; }
-.hero-rings i:nth-child(4) { --d: 76vmax; --t: -7.2s; }
-.hero-rings i:nth-child(5) { --d: 46vmax; --t: -9.6s; }
-@keyframes rings-breathe { from { transform: scale(1); } to { transform: scale(1.08); } }
-@media (prefers-reduced-motion: reduce) { .hero-rings i { animation: none; } }
 /* the photo ground: the cards in the corners, the copy in the empty middle; dissolves into the page top and bottom, zooms slowly */
-.hero-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; background: url(media/hero.jpg) center / cover no-repeat; -webkit-mask: linear-gradient(to bottom, transparent, #000 16%, #000 66%, transparent); mask: linear-gradient(to bottom, transparent, #000 16%, #000 66%, transparent); animation: hero-zoom 26s ease-in-out infinite alternate; will-change: transform; }
+.hero-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; -webkit-mask: linear-gradient(to bottom, transparent, #000 14%, #000 48%, rgba(0,0,0,.3) 76%, transparent 93%); mask: linear-gradient(to bottom, transparent, #000 14%, #000 48%, rgba(0,0,0,.3) 76%, transparent 93%); }
+.hero-bg::before { content: ""; position: absolute; inset: 0; background: url(media/hero.jpg) center / cover no-repeat; animation: hero-zoom 26s ease-in-out infinite alternate; will-change: transform; }
 @keyframes hero-zoom { from { transform: scale(1); } to { transform: scale(1.07); } }
-@media (prefers-reduced-motion: reduce) { .hero-bg { animation: none; } }
-.hero-sticky > :not(.hero-rings):not(.hero-bg) { position: relative; z-index: 1; }
+@media (prefers-reduced-motion: reduce) { .hero-bg::before { animation: none; } }
+.hero-sticky > :not(.hero-bg) { position: relative; z-index: 1; }
 @media (max-width: 880px) { .hero-bg::after { content: ""; position: absolute; inset: 0; background: radial-gradient(70% 62% at 50% 52%, rgba(5,7,13,.72), rgba(5,7,13,.25) 70%, transparent); } }
-.hero-sticky { position: relative; overflow: clip; min-height: max(100svh, 62vw); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: clamp(98px, 13vh, 138px) 0 clamp(72px, 9vh, 96px); background: radial-gradient(60% 50% at 80% 0%, rgba(38, 62, 120, 0.42), transparent 70%); }
+.hero-sticky { position: relative; overflow: clip; min-height: max(100svh, 62vw); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: clamp(150px, 17vw, 330px) 0 clamp(72px, 9vh, 96px); background: radial-gradient(60% 50% at 80% 0%, rgba(38, 62, 120, 0.42), transparent 70%); }
 .hero-copy { position: relative; z-index: 6; width: min(94%, 1040px); margin: 0 auto; text-align: center; }
-.proof-pill { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 26px; padding: 6px 16px 6px 7px; border-radius: 100px; background: var(--card); border: 1px solid var(--rule-firm); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font-size: 13.5px; font-weight: 600; color: var(--muted); }
-.proof-pill .stk { display: inline-flex; }
-.proof-pill .stk img { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--bg); margin-left: -9px; }
-.proof-pill .stk img:first-child { margin-left: 0; }
-.proof-pill b { color: var(--ink); font-weight: 800; }
 .hero h1 { margin: 0 0 22px; }
 .hero h1 .ln { display: block; }
 .hero .sub { font-size: clamp(1.02rem, 1.4vw, 1.2rem); line-height: 1.55; color: var(--muted); max-width: 40em; margin: 0 auto 30px; }
@@ -428,7 +415,6 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
   .band { padding-block: clamp(56px, 9vw, 88px); }
 }
 @media (max-width: 420px) {
-  .proof-pill { flex-wrap: wrap; justify-content: center; text-align: center; border-radius: 22px; padding: 9px 14px; }
   .h-display { font-size: clamp(1.75rem, 8.6vw, 2.2rem); }
 }
 
@@ -555,7 +541,6 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
   <div class="shell">
     <a class="brand" href="#top" aria-label="CreatorMatch, back to top">
       <svg class="brand-mark" aria-hidden="true"><use href="#bm-mark"/></svg>
-      <span class="brand-name">CreatorMatch.app</span>
     </a>
     <div class="nav-links">
       <a href="#how">How it works</a>
@@ -588,14 +573,9 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 <!-- ── hero ──────────────────────────────────────────────────────────────── -->
 <section class="hero" id="top">
   <div class="hero-sticky" id="hero-sticky">
-    <div class="hero-rings" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
     <div class="hero-bg" aria-hidden="true"></div>
 
     <div class="hero-copy" id="hero-copy">
-      <div class="proof-pill hero-in" style="--d:80ms">
-        <span class="stk" aria-hidden="true"><img src="media/stella.webp" alt=""><img src="media/faceharmony.webp" alt=""><img src="media/thepanash.webp" alt=""></span>
-        <span>Creator apps making <b>$340k/mo</b> and <b>$80k/mo</b></span>
-      </div>
       <h1 class="h-display hero-in" style="--d:160ms">
         <span class="ln">Turn your audience</span>
         <span class="ln">into an app.</span>
