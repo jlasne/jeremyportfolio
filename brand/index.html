@@ -193,12 +193,13 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .hero-rings i:nth-child(5) { --d: 46vmax; --t: -9.6s; }
 @keyframes rings-breathe { from { transform: scale(1); } to { transform: scale(1.08); } }
 @media (prefers-reduced-motion: reduce) { .hero-rings i { animation: none; } }
-/* the photo ground: the cards in the corners, the copy in the empty middle; fades into the page at the bottom */
-.hero-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; background: url(media/hero.jpg) center / cover no-repeat; }
-.hero-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(5,7,13,.35) 0, transparent 18%, transparent 72%, rgb(5,7,13) 100%); }
+/* the photo ground: the cards in the corners, the copy in the empty middle; dissolves into the page top and bottom, zooms slowly */
+.hero-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; background: url(media/hero.jpg) center / cover no-repeat; -webkit-mask: linear-gradient(to bottom, transparent, #000 16%, #000 66%, transparent); mask: linear-gradient(to bottom, transparent, #000 16%, #000 66%, transparent); animation: hero-zoom 26s ease-in-out infinite alternate; will-change: transform; }
+@keyframes hero-zoom { from { transform: scale(1); } to { transform: scale(1.07); } }
+@media (prefers-reduced-motion: reduce) { .hero-bg { animation: none; } }
 .hero-sticky > :not(.hero-rings):not(.hero-bg) { position: relative; z-index: 1; }
-@media (max-width: 880px) { .hero-bg::after { background: radial-gradient(70% 62% at 50% 52%, rgba(5,7,13,.72), rgba(5,7,13,.25) 70%, transparent), linear-gradient(to bottom, rgba(5,7,13,.35) 0, transparent 18%, transparent 72%, rgb(5,7,13) 100%); } }
-.hero-sticky { position: relative; overflow: clip; min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: clamp(98px, 13vh, 138px) 0 clamp(72px, 9vh, 96px); background: radial-gradient(60% 50% at 80% 0%, rgba(38, 62, 120, 0.42), transparent 70%); }
+@media (max-width: 880px) { .hero-bg::after { content: ""; position: absolute; inset: 0; background: radial-gradient(70% 62% at 50% 52%, rgba(5,7,13,.72), rgba(5,7,13,.25) 70%, transparent); } }
+.hero-sticky { position: relative; overflow: clip; min-height: max(100svh, 62vw); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: clamp(98px, 13vh, 138px) 0 clamp(72px, 9vh, 96px); background: radial-gradient(60% 50% at 80% 0%, rgba(38, 62, 120, 0.42), transparent 70%); }
 .hero-copy { position: relative; z-index: 6; width: min(94%, 1040px); margin: 0 auto; text-align: center; }
 .proof-pill { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 26px; padding: 6px 16px 6px 7px; border-radius: 100px; background: var(--card); border: 1px solid var(--rule-firm); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font-size: 13.5px; font-weight: 600; color: var(--muted); }
 .proof-pill .stk { display: inline-flex; }
