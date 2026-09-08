@@ -14,9 +14,15 @@ export function Groups({ agentId }: { agentId: string | null }) {
   return (
     <div className="page">
       <div className="page-head">
-        <h1>Groups</h1>
-        <span className="count">One group per agent</span>
+        <h1>{current ? current.agent.name : 'Groups'}</h1>
+        {current && (
+          <span className="count">
+            <span className="num">{current.high}</span> high · <span className="num">{current.today}</span> new today ·{' '}
+            {current.agent.active ? `up to ${current.agent.leadsPerDay} a day at ${current.agent.runAt}` : 'paused'}
+          </span>
+        )}
         <span className="spacer" />
+        {current && <a className="btn" href={`#/agents/${current.agent.id}`}>Agent settings</a>}
         {current && (
           <button
             type="button"
@@ -28,34 +34,17 @@ export function Groups({ agentId }: { agentId: string | null }) {
           </button>
         )}
       </div>
+      {current && <p className="subhead">{current.agent.brief.summary}</p>}
 
       <div className="two-col">
-        <aside>
-          <nav className="list-nav" aria-label="Groups">
-            {groups.map((g) => (
-              <a key={g.agent.id} href={`#/groups/${g.agent.id}`} className={current?.agent.id === g.agent.id ? 'on' : undefined}>
-                <span>{g.agent.name}</span>
-                <span className="count num">{g.leads.length}</span>
-              </a>
-            ))}
-          </nav>
-          {current && (
-            <div className="card" style={{ marginTop: 14 }}>
-              <p className="muted">{current.agent.brief.summary}</p>
-              <dl className="pairs">
-                <dt>High leads</dt>
-                <dd className="num">{current.high}</dd>
-                <dt>New today</dt>
-                <dd className="num">{current.today}</dd>
-                <dt>Target a day</dt>
-                <dd className="num">{current.agent.leadsPerDay}</dd>
-                <dt>Runs at</dt>
-                <dd>{current.agent.active ? current.agent.runAt : 'paused'}</dd>
-              </dl>
-              <a className="btn small" href={`#/agents/${current.agent.id}`}>Open agent settings</a>
-            </div>
-          )}
-        </aside>
+        <nav className="list-nav" aria-label="Groups">
+          {groups.map((g) => (
+            <a key={g.agent.id} href={`#/groups/${g.agent.id}`} className={current?.agent.id === g.agent.id ? 'on' : undefined}>
+              <span>{g.agent.name}</span>
+              <span className="count num">{g.leads.length}</span>
+            </a>
+          ))}
+        </nav>
 
         <div className="feed">
           {current && current.leads.length === 0 && (

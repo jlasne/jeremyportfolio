@@ -18,32 +18,31 @@ export function Agents({ agentId }: { agentId: string | null }) {
       <div className="page-head">
         <h1>Agents</h1>
         <span className="count">Each agent runs once a day and fills its own group</span>
+        <span className="spacer" />
+        <form
+          className="new-inline"
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (!name.trim()) return
+            const a = createAgent(name)
+            setName('')
+            navigate(`agents/${a.id}`)
+          }}
+        >
+          <input className="input" placeholder="New agent" value={name} onChange={(e) => setName(e.target.value)} aria-label="New agent name" />
+          <button type="submit" className="btn">Create</button>
+        </form>
       </div>
 
       <div className="two-col">
-        <aside>
-          <nav className="list-nav" aria-label="Agents">
-            {agents.map((a) => (
-              <a key={a.id} href={`#/agents/${a.id}`} className={current?.id === a.id ? 'on' : undefined}>
-                <span>{a.name}</span>
-                <span className="count num">{a.active ? a.leadsPerDay : 'off'}</span>
-              </a>
-            ))}
-          </nav>
-          <form
-            className="new-list"
-            onSubmit={(e) => {
-              e.preventDefault()
-              if (!name.trim()) return
-              const a = createAgent(name)
-              setName('')
-              navigate(`agents/${a.id}`)
-            }}
-          >
-            <input className="input" placeholder="New agent" value={name} onChange={(e) => setName(e.target.value)} aria-label="New agent name" />
-            <button type="submit" className="btn">Create</button>
-          </form>
-        </aside>
+        <nav className="list-nav" aria-label="Agents">
+          {agents.map((a) => (
+            <a key={a.id} href={`#/agents/${a.id}`} className={current?.id === a.id ? 'on' : undefined}>
+              <span>{a.name}</span>
+              <span className="count num">{a.active ? a.leadsPerDay : 'off'}</span>
+            </a>
+          ))}
+        </nav>
 
         <div>
           {!current && (

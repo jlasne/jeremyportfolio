@@ -26,6 +26,19 @@ export function Lists({ listId }: { listId: string | null }) {
       <div className="page-head">
         <h1>Saved lists</h1>
         <span className="spacer" />
+        <form
+          className="new-inline"
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (!name.trim()) return
+            const l = createList(name)
+            setName('')
+            navigate(`lists/${l.id}`)
+          }}
+        >
+          <input className="input" placeholder="New list" value={name} onChange={(e) => setName(e.target.value)} aria-label="New list name" />
+          <button type="submit" className="btn">Create</button>
+        </form>
         {current && (
           <button type="button" className="btn" disabled={items.length === 0} onClick={() => downloadCsv(`${current.name.replace(/\s+/g, '-').toLowerCase()}.csv`, exportCsv(items.map((i) => i.creator.id)))}>
             Export
@@ -33,42 +46,29 @@ export function Lists({ listId }: { listId: string | null }) {
         )}
       </div>
 
-      <div className="two-col">
-        <aside>
-          <nav className="list-nav" aria-label="Lists">
-            {lists.map((l) => (
-              <a key={l.id} href={`#/lists/${l.id}`} className={current?.id === l.id ? 'on' : undefined}>
-                <span>{l.name}</span>
-                <span className="count num">{l.creatorIds.length}</span>
-              </a>
+      {allTags.length > 0 && (
+        <div className="tag-strip">
+          <span className="field-label" style={{ margin: 0 }}>Tags</span>
+          <div className="chips">
+            {allTags.map((t) => (
+              <button key={t} type="button" className={`chip small${tag === t ? ' on' : ''}`} aria-pressed={tag === t} onClick={() => setTag(tag === t ? null : t)} disabled={!tagsInList.includes(t)}>
+                {t}
+              </button>
             ))}
-          </nav>
-          <form
-            className="new-list"
-            onSubmit={(e) => {
-              e.preventDefault()
-              if (!name.trim()) return
-              const l = createList(name)
-              setName('')
-              navigate(`lists/${l.id}`)
-            }}
-          >
-            <input className="input" placeholder="New list" value={name} onChange={(e) => setName(e.target.value)} aria-label="New list name" />
-            <button type="submit" className="btn">Create</button>
-          </form>
-          {allTags.length > 0 && (
-            <div style={{ marginTop: 18 }}>
-              <span className="field-label">Tags</span>
-              <div className="chips">
-                {allTags.map((t) => (
-                  <button key={t} type="button" className={`chip small${tag === t ? ' on' : ''}`} aria-pressed={tag === t} onClick={() => setTag(tag === t ? null : t)} disabled={!tagsInList.includes(t)}>
-                    {t}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </aside>
+          </div>
+          {tag && <button type="button" className="btn quiet small" onClick={() => setTag(null)}>Clear</button>}
+        </div>
+      )}
+
+      <div className="two-col">
+        <nav className="list-nav" aria-label="Lists">
+          {lists.map((l) => (
+            <a key={l.id} href={`#/lists/${l.id}`} className={current?.id === l.id ? 'on' : undefined}>
+              <span>{l.name}</span>
+              <span className="count num">{l.creatorIds.length}</span>
+            </a>
+          ))}
+        </nav>
 
         <div className="feed">
           {!current && (

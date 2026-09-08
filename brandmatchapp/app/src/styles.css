@@ -120,9 +120,12 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 .page { max-width: 1240px; margin: 0 auto; padding: 0 16px 60px; }
 .page-head { display: flex; align-items: center; gap: 8px; padding: 14px 0 10px; flex-wrap: wrap; }
 .page-head h1 { font-size: 15px; font-weight: 600; }
+.subhead { color: var(--ink-2); padding: 0 0 10px; }
+.new-inline { display: flex; gap: 6px; }
+.new-inline .input { width: 150px; height: 30px; }
 .page-head .count { color: var(--ink-2); }
 .page-head .spacer { flex: 1; }
-.two-col { display: grid; grid-template-columns: 240px 1fr; gap: 24px; align-items: start; }
+.two-col { display: grid; grid-template-columns: 190px 1fr; gap: 20px; align-items: start; }
 .stack { display: flex; flex-direction: column; gap: 14px; }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
 .card h2 { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
@@ -190,6 +193,14 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 .mail { color: var(--ink-2); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mail.none { color: var(--ink-3); }
 .m-label { display: none; }
+
+/* Rows inside a two column screen have less room, so the email column goes. */
+@media (min-width: 901px) {
+  .two-col .feed-cols, .two-col .lead {
+    grid-template-columns: 36px minmax(170px, 1.5fr) 78px minmax(180px, 1.3fr) 58px 50px 58px 52px;
+  }
+  .two-col .lead .mail, .two-col .feed-cols > span:last-child { display: none; }
+}
 
 /* Empty states ------------------------------------------------------ */
 .empty { padding: 48px 24px; text-align: center; color: var(--ink-2); }
@@ -265,7 +276,7 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 .bar i { display: block; height: 100%; background: var(--ink); transition: width 120ms linear; }
 
 /* Lists ----------------------------------------------------------------- */
-.list-nav { display: flex; flex-direction: column; gap: 2px; }
+.list-nav { display: flex; flex-direction: column; gap: 1px; position: sticky; top: 14px; }
 .list-nav a { display: flex; justify-content: space-between; padding: 7px 9px; border-radius: var(--radius); color: var(--ink); }
 .list-nav a:hover { text-decoration: none; background: rgba(23, 25, 31, 0.06); }
 .list-nav a.on { background: var(--blue-soft); color: var(--blue); }
