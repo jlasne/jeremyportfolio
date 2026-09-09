@@ -1,4 +1,4 @@
-import type { Agent, Brief, Creator, DailyStat, Filters, Note, Post, Rejection, Settings } from '../types'
+import type { Agent, Creator, DailyStat, Filters, Note, Post, Rejection, Settings } from '../types'
 import { creators as mockCreators } from '../mock/creators'
 import { posts as mockPosts } from '../mock/posts'
 import { agents as mockAgents } from '../mock/agents'
@@ -21,7 +21,6 @@ export interface State {
   tags: Record<string, string[]>
   tagVocabulary: string[]
   rejections: Rejection[]
-  brief: Brief | null
   filters: Filters
   settings: Settings
 }
@@ -36,7 +35,6 @@ function seed(): State {
     tags: Object.fromEntries(Object.entries(mockTags).map(([k, v]) => [k, [...v]])),
     tagVocabulary: [...mockVocabulary],
     rejections: [...mockRejections],
-    brief: mockAgents[0].brief,
     filters: { ...defaultFilters, countries: [], languages: [] },
     settings: { ...mockSettings },
   }

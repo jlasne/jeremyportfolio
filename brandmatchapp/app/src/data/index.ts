@@ -1,11 +1,10 @@
-import type { Agent, Brief, BriefAnswer, Creator, DailyStat, FilterKey, Filters, FollowUpQuestion, Level, Post, Score, Settings, Signal, Stars } from '../types'
+import type { Agent, Brief, Creator, DailyStat, FilterKey, Filters, Level, Post, Score, Settings, Signal, Stars } from '../types'
 import { defaultFilters } from '../mock/filters'
-import { followUpQuestions } from '../mock/questions'
 import { timezones as mockTimezones } from '../mock/settings'
 import { toCsv } from '../lib/csv'
 import { absolute, isNewToday, withinDays } from '../lib/format'
 import { BUCKETS, CRITERIA, latestSignal, scoreOf } from './score'
-import { getState, resetState, setState } from './store'
+import { getState, setState } from './store'
 
 // Every screen reads and writes through these functions.
 // They work on the in memory store today and will call the real source later.
@@ -84,9 +83,9 @@ export interface ContactQuery {
 }
 
 /** The list. Filters cut the volume, the score sets the order. */
-export function getContacts(q: ContactQuery = {}, now = new Date()): Contact[] {
+export function getContacts(q: ContactQuery = {}, now = new Date(), filters: Filters = getState().filters): Contact[] {
   const s = getState()
-  const f = s.filters
+  const f = filters
   const rejected = new Set(s.rejections.map((r) => r.creatorId))
   return s.creators
     .filter((c) => !rejected.has(c.id) && passes(c, f, now))
@@ -120,16 +119,13 @@ export function diagnoseEmpty(): FilterDiagnosis | null {
     { key: 'countries', label: 'Country' },
     { key: 'languages', label: 'Language' },
   ]
-  const before = { ...f }
   let best: FilterDiagnosis | null = null
   for (const k of keys) {
     const loosened = { ...f, [k.key]: defaultFilters[k.key] } as Filters
     if (k.key === 'lastPostWithin') loosened.lastPostWithin = 90
-    setState({ filters: loosened })
-    const restored = getContacts().length
+    const restored = getContacts({}, new Date(), loosened).length
     if (restored > (best?.restored ?? 0)) best = { key: k.key, label: k.label, restored }
   }
-  setState({ filters: before })
   return best
 }
 
@@ -211,7 +207,7 @@ export function updateAgentFilters(id: string, patch: Partial<Filters>): void {
 export function createAgent(): Agent {
   const agent: Agent = {
     id: `a${Date.now()}`,
-    name: 'New agent',
+    name: '',
     brief: { who: '', answers: [], summary: 'No brief yet.' },
     filters: { ...defaultFilters, countries: [], languages: [] },
     qualifiedPerDay: 20,
@@ -358,48 +354,6 @@ export function exportCsv(creatorIds: string[]): string {
   return toCsv(rows)
 }
 
-// Brief and onboarding ------------------------------------------------
-
-export function getBrief(): Brief | null {
-  return getState().brief
-}
-
-export function getFollowUpQuestions(_who: string): FollowUpQuestion[] {
-  return followUpQuestions
-}
-
-export function buildSummary(who: string, answers: BriefAnswer[]): string {
-  const clean = who.trim().replace(/\.$/, '')
-  if (!clean) return 'No brief yet.'
-  const lead = clean.charAt(0).toLowerCase() + clean.slice(1)
-  const parts = [lead]
-  const get = (id: string) => answers.find((a) => a.questionId === id)?.value?.trim().toLowerCase()
-  const sells = get('sells')
-  const content = get('content')
-  const audience = get('audience')
-  const mentioned = (phrase: string) => phrase.split(/\s+/).some((w) => w.length > 3 && lead.includes(w))
-  if (sells && sells !== 'anything' && !(/sell/.test(lead) && mentioned(sells))) {
-    const article = /^(an?|the) /.test(sells) ? '' : /^[aeiou]/.test(sells) ? 'an ' : 'a '
-    parts.push(`sell ${article}${sells}`)
-  }
-  if (content && !mentioned(content)) parts.push(`${content.replace(/ tutorials$/, '')} content`)
-  if (audience && !mentioned(audience)) parts.push(`audience of ${audience}`)
-  return `Looking for: ${parts.join(', ')}.`
-}
-
-export function setBrief(who: string, answers: BriefAnswer[]): Brief {
-  const b: Brief = { who: who.trim(), answers, summary: buildSummary(who, answers) }
-  setState((s) => ({ brief: b, agents: s.agents.map((a, i) => (i === 0 ? { ...a, brief: b } : a)) }))
-  return b
-}
-
-/** An agent's brief is one sentence. Onboarding still asks its three follow ups. */
-export function setAgentBrief(id: string, who: string): void {
-  const clean = who.trim()
-  const b: Brief = { who: clean, answers: [], summary: clean ? clean.replace(/\.$/, '') + '.' : 'No brief yet.' }
-  setState((s) => ({ agents: s.agents.map((a) => (a.id === id ? { ...a, brief: b } : a)) }))
-}
-
 // Filters ---------------------------------------------------------------------
 
 export function getFilters(): Filters {
@@ -437,11 +391,6 @@ export function getTimezones(): string[] {
   return mockTimezones
 }
 
-export function restartOnboarding(): void {
-  resetState()
-  setState((s) => ({ brief: null, settings: { ...s.settings, onboarded: false } }))
-}
-
 // First run -------------------------------------------------------------------
 
 export interface CrawlProgress {
@@ -469,3 +418,12 @@ export function runFirstCrawl(onProgress: (p: CrawlProgress) => void): () => voi
 }
 
 export type { Stars }
+
+// Brief ------------------------------------------------------------------------
+
+/** An agent's brief is one sentence. */
+export function setAgentBrief(id: string, who: string): void {
+  const clean = who.trim()
+  const b: Brief = { who: clean, answers: [], summary: clean ? clean.replace(/\.$/, '') + '.' : 'No brief yet.' }
+  setState((s) => ({ agents: s.agents.map((a) => (a.id === id ? { ...a, brief: b } : a)) }))
+}

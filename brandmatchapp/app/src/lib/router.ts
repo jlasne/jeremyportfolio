@@ -4,21 +4,19 @@ import { useEffect, useState } from 'react'
 
 export type Route =
   | { name: 'home' }
-  | { name: 'onboarding'; step: 'who' | 'details' | 'filters' | 'running' }
+  | { name: 'onboarding'; agentId: string | null; running: boolean }
   | { name: 'contacts'; agentId: string | null }
   | { name: 'agents'; agentId: string | null }
 
 export function parse(hash: string): Route {
   const path = hash.replace(/^#/, '').replace(/^\/+/, '')
-  const [head, second] = path.split('/')
+  const [head, second, third] = path.split('/')
   const id = second ? decodeURIComponent(second) : null
   switch (head) {
     case '':
       return { name: 'home' }
-    case 'onboarding': {
-      const step = second === 'details' || second === 'filters' || second === 'running' ? second : 'who'
-      return { name: 'onboarding', step }
-    }
+    case 'onboarding':
+      return { name: 'onboarding', agentId: id, running: third === 'running' }
     case 'contacts':
       return { name: 'contacts', agentId: id }
     case 'agents':

@@ -127,12 +127,6 @@ export interface Rejection {
   date: string
 }
 
-export interface FollowUpQuestion {
-  id: string
-  text: string
-  chips: string[]
-}
-
 export interface BriefAnswer {
   questionId: string
   value: string | null

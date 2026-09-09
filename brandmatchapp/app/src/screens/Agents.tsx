@@ -88,7 +88,7 @@ export function Agents() {
 }
 
 /** The editor: one sentence, the filters, and when the batch lands. */
-export function AgentEditor({ agentId }: { agentId: string }) {
+export function AgentEditor({ agentId, firstRun = false }: { agentId: string; firstRun?: boolean }) {
   useStore()
   const agent = getAgent(agentId)
   const settings = getSettings()
@@ -106,22 +106,34 @@ export function AgentEditor({ agentId }: { agentId: string }) {
   const tally = agentTally(agent.id)
   const onFilters = (patch: Partial<Filters>) => updateAgentFilters(agent.id, patch)
 
+  const canRun = agent.brief.who.trim().length > 0
+
   return (
     <div className="page editor">
-      <div className="page-head">
-        <a className="back" href="#/agents">Agents</a>
-        <span className="spacer" />
-        <button type="button" className="btn" onClick={() => updateAgent(agent.id, { active: !agent.active })}>
-          {agent.active ? 'Pause' : 'Run every day'}
-        </button>
-        <a className="btn primary" href={`#/contacts/${agent.id}`}>See {tally.found} leads</a>
-      </div>
+      {firstRun ? (
+        <div className="page-head">
+          <h1>Create your first agent</h1>
+        </div>
+      ) : (
+        <div className="page-head">
+          <a className="back" href="#/agents">Agents</a>
+          <span className="spacer" />
+          <button type="button" className="btn" onClick={() => updateAgent(agent.id, { active: !agent.active })}>
+            {agent.active ? 'Pause' : 'Run every day'}
+          </button>
+          <a className="btn primary" href={`#/contacts/${agent.id}`}>See {tally.found} leads</a>
+        </div>
+      )}
+      {firstRun && (
+        <p className="subhead">An agent is one search that runs every morning. Name it, say who you want, set the filters, and it starts.</p>
+      )}
 
       <input
         className="input title-input"
         value={agent.name}
         aria-label="Agent name"
         placeholder="Agent name"
+        autoFocus={firstRun}
         onChange={(e) => updateAgent(agent.id, { name: e.target.value })}
       />
 
@@ -177,6 +189,7 @@ export function AgentEditor({ agentId }: { agentId: string }) {
         </p>
       </section>
 
+      {!firstRun && (
       <section className="ask">
         <h2>How this agent scores</h2>
         <ul className="criteria plain">
@@ -193,7 +206,17 @@ export function AgentEditor({ agentId }: { agentId: string }) {
         </ul>
         <p className="hint">Three criteria, one star each, added up. Half a star when it half fits, so the score runs 0 to 3 in half steps.</p>
       </section>
+      )}
 
+      {firstRun ? (
+        <div className="editor-foot">
+          <span className="faint">You can add more agents later.</span>
+          <span className="spacer" />
+          <button type="button" className="btn primary" disabled={!canRun} onClick={() => navigate(`onboarding/${agent.id}/running`)}>
+            Find contacts
+          </button>
+        </div>
+      ) : (
       <div className="editor-foot">
         {confirmDelete ? (
           <>
@@ -206,6 +229,7 @@ export function AgentEditor({ agentId }: { agentId: string }) {
         <span className="spacer" />
         <a className="btn primary" href={`#/contacts/${agent.id}`}>See {tally.found} leads</a>
       </div>
+      )}
     </div>
   )
 }

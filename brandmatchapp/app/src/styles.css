@@ -523,3 +523,96 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
   .contact { grid-template-areas: 'avatar who' 'score score' 'mail mail' 'metrics metrics'; }
   .contact .mail { grid-area: mail; }
 }
+
+/* Onboarding, one agent ------------------------------------------------- */
+.onboard-shell { min-height: 100vh; }
+.onboard-top { display: flex; align-items: center; gap: 12px; padding: 18px 24px; border-bottom: 1px solid var(--line); background: var(--panel); }
+.brand-word { font-weight: 600; letter-spacing: -0.02em; }
+.onboard-shell .editor { margin: 0 auto; padding-top: 12px; }
+
+/* Landing ----------------------------------------------------------------- */
+.landing { background: var(--paper); }
+.land-nav {
+  display: flex; align-items: center; gap: 8px; padding: 14px 32px;
+  border-bottom: 1px solid var(--line); background: var(--panel); position: sticky; top: 0; z-index: 10;
+}
+.land-nav .brand { font-weight: 600; font-size: 15px; letter-spacing: -0.02em; color: var(--ink); display: flex; align-items: center; gap: 8px; margin-right: 18px; }
+.land-nav .brand svg { width: 20px; height: 20px; }
+.land-nav .brand:hover { text-decoration: none; }
+.land-nav nav { display: flex; gap: 4px; }
+.land-nav nav a { color: var(--ink-2); padding: 6px 10px; border-radius: var(--radius); font-weight: 500; }
+.land-nav nav a:hover { background: rgba(26, 26, 23, 0.06); color: var(--ink); text-decoration: none; }
+.land-nav .spacer { flex: 1; }
+
+.hero { max-width: 820px; margin: 0 auto; padding: 88px 24px 40px; text-align: center; }
+.kicker { color: var(--amber); font-weight: 600; font-size: 13px; margin-bottom: 18px; }
+.hero h1 { font-size: 46px; line-height: 1.08; letter-spacing: -0.035em; font-weight: 600; margin-bottom: 18px; }
+.lede { font-size: 17px; line-height: 1.5; color: var(--ink-2); max-width: 640px; margin: 0 auto 30px; }
+.hero-prompt {
+  display: flex; align-items: center; gap: 12px; text-align: left;
+  max-width: 680px; margin: 0 auto; padding: 8px 8px 8px 16px;
+  background: var(--panel); border: 1px solid var(--line-2); border-radius: 12px; box-shadow: 0 6px 24px rgba(26, 26, 23, 0.08);
+}
+.hero-prompt .faint { font-size: 12px; white-space: nowrap; }
+.hero-prompt .prompt-text { flex: 1; font-size: 15px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hero-prompt .btn { height: 38px; padding: 0 16px; }
+.hero-meta { margin-top: 16px; font-size: 12.5px; color: var(--ink-3); }
+
+.demo-list { max-width: 1040px; margin: 0 auto; padding: 0 24px 40px; }
+.demo-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.demo-list .contact { text-decoration: none; }
+.demo-list .contact:hover { text-decoration: none; }
+
+.land-section { max-width: 1040px; margin: 0 auto; padding: 56px 24px; border-top: 1px solid var(--line); }
+.land-section h2 { font-size: 28px; letter-spacing: -0.03em; font-weight: 600; margin-bottom: 10px; }
+.section-lede { color: var(--ink-2); font-size: 15px; max-width: 640px; margin-bottom: 26px; }
+.steps3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 22px; }
+.step { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 20px; box-shadow: var(--shadow); }
+.step-n { display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; border-radius: 50%; background: var(--ink); color: #fff; font-weight: 600; font-size: 13px; margin-bottom: 12px; }
+.step h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+.step p { color: var(--ink-2); }
+.signal-grid, .score-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.signal-card, .score-card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; box-shadow: var(--shadow); }
+.signal-card b, .score-card b { display: block; margin-bottom: 4px; }
+.signal-card p, .score-card p { color: var(--ink-2); }
+.score-card p + p { margin-top: 4px; }
+.score-card b { color: var(--amber); }
+
+.calc { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 22px; box-shadow: var(--shadow); max-width: 720px; }
+.calc .field > span { font-size: 13px; color: var(--ink-2); margin-bottom: 8px; }
+.calc .slider { width: 100%; }
+.calc-out { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0; }
+.calc-out b { display: block; font-size: 28px; font-weight: 600; letter-spacing: -0.03em; }
+.calc-out span { color: var(--ink-2); font-size: 12.5px; }
+.calc .hint { margin-top: 10px; }
+
+.faq { max-width: 720px; }
+.faq-item { border-top: 1px solid var(--line); }
+.faq-item:last-child { border-bottom: 1px solid var(--line); }
+.faq-item button { width: 100%; text-align: left; background: none; border: 0; padding: 14px 0; font-size: 15px; font-weight: 600; color: var(--ink); display: flex; justify-content: space-between; }
+.faq-item button::after { content: '+'; color: var(--ink-3); font-weight: 400; }
+.faq-item.open button::after { content: '\2013'; }
+.faq-item p { color: var(--ink-2); padding: 0 0 16px; max-width: 640px; }
+
+.land-cta { text-align: center; padding: 72px 24px; border-top: 1px solid var(--line); background: var(--panel); }
+.land-cta h2 { font-size: 30px; letter-spacing: -0.03em; font-weight: 600; margin-bottom: 20px; }
+.land-cta .btn { margin: 0 4px; height: 38px; padding: 0 16px; }
+.land-foot { display: flex; align-items: center; gap: 16px; padding: 22px 32px; border-top: 1px solid var(--line); color: var(--ink-2); flex-wrap: wrap; }
+.land-foot .spacer { flex: 1; }
+.land-foot a { color: var(--ink-2); }
+
+@media (max-width: 900px) {
+  .land-nav nav { display: none; }
+  .hero { padding-top: 56px; }
+  .hero h1 { font-size: 32px; }
+  .hero-prompt { flex-wrap: wrap; padding: 12px; }
+  .hero-prompt .prompt-text { white-space: normal; flex-basis: 100%; }
+  .steps3, .signal-grid, .score-grid, .calc-out { grid-template-columns: 1fr; }
+}
+.demo-head .chip { white-space: nowrap; flex: none; }
+@media (max-width: 600px) {
+  .land-nav { padding: 12px 16px; }
+  .land-nav .btn:not(.primary) { display: none; }
+  .land-nav .btn.primary { padding: 0 10px; }
+  .demo-head { align-items: flex-start; }
+}

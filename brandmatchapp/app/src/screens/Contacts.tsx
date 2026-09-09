@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { CRITERIA, countTagged, diagnoseEmpty, exportCsv, getAgents, getContacts, getFilters, getTagVocabulary, resetFilter, resetFilters, setFilters } from '../data'
+import { CRITERIA, countTagged, diagnoseEmpty, exportCsv, getAgents, getContacts, getFilters, getSettings, getTagVocabulary, resetFilter, resetFilters, setFilters } from '../data'
 import { useStore } from '../data/hooks'
 import { downloadCsv } from '../lib/csv'
-import { compact, percent } from '../lib/format'
+import { compact, nextBatchLabel, percent } from '../lib/format'
 import { navigate } from '../lib/router'
 import { CreatorDetail } from '../components/CreatorDetail'
 import { FilterForm } from '../components/FilterForm'
@@ -178,7 +178,13 @@ export function Contacts({ agentId }: { agentId: string | null }) {
           </button>
         ))}
         {contacts.length === 0 && (
-          <Empty tag={tag} minStars={minStars} mustHave={mustHave.length} onClear={() => { setTag(null); setMinStars(0); setMustHave([]) }} />
+          <Empty
+            tag={tag}
+            minStars={minStars}
+            mustHave={mustHave.length}
+            agentNames={picked.map((id) => agents.find((a) => a.id === id)?.name ?? '').filter(Boolean)}
+            onClear={() => { setTag(null); setMinStars(0); setMustHave([]); setPicked([]); if (agentId) navigate('contacts') }}
+          />
         )}
       </div>
 
@@ -187,7 +193,19 @@ export function Contacts({ agentId }: { agentId: string | null }) {
   )
 }
 
-function Empty({ tag, minStars, mustHave, onClear }: { tag: string | null; minStars: number; mustHave: number; onClear: () => void }) {
+function Empty({ tag, minStars, mustHave, agentNames, onClear }: { tag: string | null; minStars: number; mustHave: number; agentNames: string[]; onClear: () => void }) {
+  const settings = getSettings()
+  if (agentNames.length > 0 && !tag && !minStars && !mustHave) {
+    return (
+      <div className="empty">
+        <h2>Nothing from {agentNames.join(' and ')} yet</h2>
+        <p>The first batch lands {nextBatchLabel(settings.timezone)}. Until then, every other agent's contacts are one click away.</p>
+        <div className="actions">
+          <button type="button" className="btn primary" onClick={onClear}>Show every agent</button>
+        </div>
+      </div>
+    )
+  }
   if (tag || minStars || mustHave) {
     return (
       <div className="empty">

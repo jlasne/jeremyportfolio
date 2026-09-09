@@ -66,21 +66,23 @@ return 404. Serving this app from another path means changing `base` first.
 | `app/src/mock/` | All mock data, one file per entity: creators, posts, lists, notes, tags, rejections, brief, filters, questions, settings. No data literal lives anywhere else |
 | `app/src/data/index.ts` | The data functions every screen reads through: get the feed, get one creator, save, note, tag, reject, export, brief, filters, settings, first run. Swap the mock for the real source here and nothing else changes |
 | `app/src/data/store.ts` | The one in memory state, seeded from the mock folder. Refresh resets it |
-| `app/src/screens/` | Onboarding, Contacts, Agents |
+| `app/src/screens/` | Landing, Onboarding, Contacts, Agents |
 | `app/src/components/` | Stars, Signal, the detail panel, the filter chips, the daily line |
 | `app/src/data/score.ts` | The scoring rule, in one place |
 | `app/src/lib/` | Formatting, CSV, hash router, placeholder images drawn on the device |
 
 ## Screens
 
-Two screens. The nav sits on the left, full height, and collapses to a
-scrolling bar across the top under 900px.
+A landing page, one onboarding step, and two app screens. In the app the nav
+sits on the left, full height, and collapses to a scrolling bar across the
+top under 900px.
 
 | Route | What it holds |
 | --- | --- |
 | `#/contacts` | The one list. Three controls above it: a stars slider with must-have criteria, agent chips that take several at once, and more Instagram filters with your tags inside. A row shows the picture, the name, the stars, the signal with its date, followers and engagement. Everything else lives behind the row, in the panel |
 | `#/agents` | Qualified leads as columns and every lead as a smooth line over 14 days, per agent or all together, four counts, then who is running and who is paused. Clicking one opens its sentence, its filters, its delivery and how it scores |
-| `#/onboarding/*` | One question, three follow ups, the filters, then the first batch over 8 seconds |
+| `#/` | The landing: the promise, the one sentence prompt, six qualified rows live from the demo data, three steps, the signals, the score, a pricing calculator on qualified leads a day, five questions |
+| `#/onboarding` | Create your first agent. Name, one sentence, filters, delivery, then the first batch over 8 seconds and straight into its contacts |
 
 An **agent** is one saved search that runs every morning. It owns one sentence
 about who to look for, its own filters, how many **qualified** leads a day it

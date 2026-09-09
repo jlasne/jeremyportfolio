@@ -1,29 +1,34 @@
-import { useEffect } from 'react'
-import { getSettings } from './data'
 import { useStore } from './data/hooks'
-import { navigate, useRoute } from './lib/router'
+import { useRoute } from './lib/router'
 import { SideNav } from './components/SideNav'
 import { StarClip } from './components/Stars'
 import { AgentEditor, Agents } from './screens/Agents'
 import { Contacts } from './screens/Contacts'
-import { FirstRun, OnboardingDetails, OnboardingFilters, OnboardingWho } from './screens/Onboarding'
+import { Landing } from './screens/Landing'
+import { FirstRun, OnboardingAgent, OnboardingStart } from './screens/Onboarding'
 
 export function App() {
   useStore()
   const route = useRoute()
-  const onboarded = getSettings().onboarded
 
-  useEffect(() => {
-    if (route.name === 'home') navigate(onboarded ? 'contacts' : 'onboarding/who')
-  }, [route.name, onboarded])
+  if (route.name === 'home') {
+    return (
+      <>
+        <StarClip />
+        <Landing />
+      </>
+    )
+  }
 
   if (route.name === 'onboarding') {
-    switch (route.step) {
-      case 'who': return <OnboardingWho />
-      case 'details': return <OnboardingDetails />
-      case 'filters': return <OnboardingFilters />
-      case 'running': return <FirstRun />
-    }
+    return (
+      <>
+        <StarClip />
+        {!route.agentId && <OnboardingStart />}
+        {route.agentId && !route.running && <OnboardingAgent agentId={route.agentId} />}
+        {route.agentId && route.running && <FirstRun agentId={route.agentId} />}
+      </>
+    )
   }
 
   return (
