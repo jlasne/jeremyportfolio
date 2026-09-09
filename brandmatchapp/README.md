@@ -79,68 +79,33 @@ top under 900px.
 
 | Route | What it holds |
 | --- | --- |
-| `#/` | The landing: what a brand gets, how it works, connecting your AI, pricing on creators a day, questions |
-| `#/contacts` | The one list. Three controls above it: a stars slider with must-have criteria, search chips that take several at once, and more Instagram filters with your tags inside. A row shows the picture, the name, the stars, the email, followers and engagement. Everything else lives behind the row, in the panel |
-| `#/leads` | Leads a day as two marks over 14 days, four counts, then the searches: who is running, who is paused. Clicking one opens its sentence, its filters and its delivery |
-| `#/agent` | MCP and API. An address, a key, one example each, and what an AI can ask for |
-| `#/onboarding` | Set up your first search. Name, one sentence, filters, delivery, then the first list over 8 seconds and straight into it |
+| `#/` | The landing: the promise, the app in a frame, why it beats a database, three steps, connecting your AI, two plans, four questions |
+| `#/contacts` | The one list. A handle, the stars, the email, followers and engagement. Two dropdowns, agent and tag, plus more filters. Tick a row to mark it done and it leaves the list |
+| `#/agent` | Leads a day over 14 days, then the agents. Clicking one opens its sentence, its filters and its delivery |
+| `#/connect` | MCP and API. An address, a key, one example each, and what an AI can ask for |
+| `#/settings` | Timezone, tags, what counts as qualified, your account, start over |
+| `#/onboarding` | Set up your first agent, then the first list over 8 seconds and straight into it |
 
-A **search** is one saved sentence plus filters that runs every morning. It owns
-how many leads a day it should deliver. Every contact carries the search that
-found it, and the chip row on Contacts filters on it. Tags do the work saved
-lists used to do.
+An **agent** is one saved sentence plus filters that runs every morning. It owns
+how many leads a day it delivers. Every contact carries the agent that found it.
 
-**Leads** are every creator delivered. **Qualified** means 2 stars or more, and
-about 1 lead in 10 lands there. You set the lead count; the qualified count
-follows from it.
-
-The **Agent** page hands the list to whatever AI the brand already uses: MCP for
-Claude and anything that speaks it, a plain API for code or a workflow tool. One
-key covers both. The endpoints are illustrative in this prototype.
-
-Filters are written as choices, not number boxes: audience size, engagement,
-reel views, posts a month, when they last posted, email, 18 countries and 10
-languages. Six presets set several at once, from `Micro and engaged` to
-`Ready to contact`.
-
-The chart on Agents runs two scales, columns on the right and the line on the
-left, because qualified leads are about a tenth of the total. Each axis prints
-its maximum in its own colour. Where the two marks cross means nothing.
-
-Every count of qualified leads carries its total and its share, so `41` always
-reads as `41 qualified of 400, 10%`.
-
-## Mock data
-
-40 creators in the fitness and nutrition niche: 4 at three stars, 12 from 2 to
-2.5, 17 from 1 to 1.5, 7 under 1. 23 fit the niche and 11 half fit. 19 sell
-their own product and 6 sell a download. 4 carry a strong fresh signal and 9 a
-softer one. 5 first seen in the last 24
-hours, 3 saved with a note and a tag, 2 rejected. 22 carry an email. Followers
-from 12k to 840k, engagement from 0.8% to 9%. Six countries: US, UK, Canada,
-Australia, France, Germany. Three agents, one of them paused, plus 14 days of
-crawl output for the dashboard.
-
-The score is computed, never stored. Each creator carries three facts: does it
-fit the brief, what does it sell, and what signals fired with what date.
-
-Dates are relative to the day the app runs, so "11 days ago" stays true.
-Pictures and thumbnails are SVGs generated on the device instead of a
-placeholder image service, so nothing fails offline.
+**Qualified** means above 1.5 stars. Each of niche, selling and signal is worth
+one star, half when it half fits.
 
 ## Design
 
-The whole app wears Gojiberry's clothes, read from gojiberry.ai's published
-source: white page, near black ink `#0a0a0a`, one coral accent `#fa651e`,
-hairline borders `#eee`, grey sections `#fafafa`, 16px cards, 100px pill
-buttons, a yellow marker `#fbef76` behind the key phrase. Fustat for every
-headline, Inter for everything else. Both typefaces ship as Latin woff2 files
-in `app/src/fonts`, so nothing loads from the network.
+The app is light and the landing is dark, both on the CreatorMatch system:
+navy `#070a12`, off white `#f2f3f7`, hairline rules at 10% white, translucent
+cards at 4.5% white, no shadows, and a grain overlay. Unbounded for display,
+Satoshi for everything else, both lifted from `brand/index.html` and bundled as
+woff2 so nothing loads from the network.
 
-The landing follows Gojiberry's beats in order: numbered nav, a hero with the
-one sentence prompt, the app inside a browser frame, a numbers strip, what the
-agent does, three steps, what it replaces, the score, two plans, questions, a
-dark close. Testimonials and customer logos are left out on purpose: none exist
-yet, and none are invented.
+The mark is two circles overlapping with the middle knocked out. The overlap is
+the match, and it sits beside the CreatorMatch circle and square as a sibling.
 
-Works down to a phone, keyboard focus visible, reduced motion respected.
+The landing carries no invented prices. The monthly plan sets a daily volume,
+the one off pack is 1,000 creators at 50% more per creator. Real numbers go in
+when they are decided.
+
+Works down to a phone, keyboard focus visible, reduced motion respected: the
+rolling hero number and the grain both stop.

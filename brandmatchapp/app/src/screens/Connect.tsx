@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { getAgents, getDashboard } from '../data'
 import { useStore } from '../data/hooks'
 
-// The Agent page: hand brandmatch to whatever AI the brand already uses.
+// Connect AI: hand brandmatch to whatever AI the brand already uses.
 // One address, one key, and a list of what it can ask for.
 
 const MCP_URL = 'https://mcp.brandmatch.app/sse'
@@ -55,7 +55,7 @@ function Field({ label, value, mask = false }: { label: string; value: string; m
   )
 }
 
-export function AgentConnect() {
+export function Connect() {
   useStore()
   const d = getDashboard()
   const searches = getAgents()
@@ -63,7 +63,7 @@ export function AgentConnect() {
   return (
     <div className="page editor">
       <div className="page-head">
-        <h1>Agent</h1>
+        <h1>Connect AI</h1>
         <span className="count">Your leads, inside the AI you already use</span>
       </div>
       <p className="subhead">
@@ -121,10 +121,10 @@ export function AgentConnect() {
           <dd className="num">{d.high}</dd>
           <dt>New this morning</dt>
           <dd className="num">{d.today}</dd>
-          <dt>Searches running</dt>
+          <dt>Agents running</dt>
           <dd className="num">{searches.filter((s) => s.active).length}</dd>
         </dl>
-        <p className="hint">The key reads every search on your account. Pause a search and its leads stop arriving.</p>
+        <p className="hint">The key reads every agent on your account. Pause an agent and its leads stop arriving.</p>
       </section>
     </div>
   )

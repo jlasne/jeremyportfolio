@@ -1,16 +1,16 @@
-/* Fustat for headlines, Inter for everything else. Both variable, Latin subset,
-   bundled here so nothing loads from the network. */
+/* The CreatorMatch faces: Unbounded for display, Satoshi for everything else.
+   Both subset and bundled, so nothing loads from the network. */
 @font-face {
-  font-family: 'Fustat';
+  font-family: 'Unbounded';
   font-style: normal;
-  font-weight: 200 800;
+  font-weight: 500;
   font-display: swap;
-  src: url('./fonts/fustat.woff2') format('woff2');
+  src: url('./fonts/unbounded.woff2') format('woff2');
 }
 @font-face {
-  font-family: 'Inter';
+  font-family: 'Satoshi';
   font-style: normal;
-  font-weight: 100 900;
+  font-weight: 300 900;
   font-display: swap;
-  src: url('./fonts/inter.woff2') format('woff2');
+  src: url('./fonts/satoshi.woff2') format('woff2');
 }

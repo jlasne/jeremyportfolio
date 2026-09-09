@@ -21,6 +21,8 @@ export interface State {
   tags: Record<string, string[]>
   tagVocabulary: string[]
   rejections: Rejection[]
+  /** Contacts the brand has finished with. */
+  done: string[]
   filters: Filters
   settings: Settings
 }
@@ -35,6 +37,7 @@ function seed(): State {
     tags: Object.fromEntries(Object.entries(mockTags).map(([k, v]) => [k, [...v]])),
     tagVocabulary: [...mockVocabulary],
     rejections: [...mockRejections],
+    done: [],
     filters: { ...defaultFilters, countries: [], languages: [] },
     settings: { ...mockSettings },
   }

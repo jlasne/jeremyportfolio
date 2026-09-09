@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { createAgent, getAgent, runFirstCrawl, type CrawlProgress } from '../data'
 import { useStore } from '../data/hooks'
 import { navigate } from '../lib/router'
-import { LeadEditor } from './Leads'
+import { AgentEditor } from './Agent'
 
 // Onboarding is one thing: create the first agent. Then the first batch runs.
 
@@ -28,7 +28,7 @@ export function OnboardingAgent({ agentId }: { agentId: string }) {
         <span className="brand-word">brandmatch</span>
         <span className="faint">Step 1 of 2</span>
       </header>
-      <LeadEditor agentId={agentId} firstRun />
+      <AgentEditor agentId={agentId} firstRun />
     </div>
   )
 }

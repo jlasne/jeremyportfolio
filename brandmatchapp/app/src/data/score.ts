@@ -85,6 +85,9 @@ function lower(text: string): string {
   return text.charAt(0).toLowerCase() + text.slice(1).replace(/\.$/, '')
 }
 
+/** A lead counts as qualified above 1.5 stars. */
+export const QUALIFIED_MIN = 1.5
+
 /** Where a score sits, for the split under the chart. */
 export const BUCKETS = [
   { label: '3 stars', min: 3 },

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Country, Filters, Language } from '../types'
 import { COUNTRY_NAMES, LANGUAGE_NAMES, compact } from '../lib/format'
 
@@ -80,12 +81,15 @@ function Line({ label, children }: { label: string; children: React.ReactNode })
 
 /** Plain choices instead of number boxes. Every option says what it keeps. */
 export function FilterForm({ value, onChange }: { value: Filters; onChange: (patch: Partial<Filters>) => void }) {
+  const [more, setMore] = useState(false)
   const toggle = <K extends 'countries' | 'languages'>(key: K, item: Filters[K][number]) => {
     const list = value[key] as string[]
     const next = list.includes(item) ? list.filter((x) => x !== item) : [...list, item]
     onChange({ [key]: next } as Partial<Filters>)
   }
   const sizeOn = (s: (typeof SIZES)[number]) => value.followersMin === s.min && value.followersMax === s.max
+  const advanced =
+    value.reelViewsMin !== null || value.postsPerMonthMin !== 3 || value.countries.length > 0 || value.languages.length > 0
 
   const matches = (patch: Partial<Filters>) =>
     (Object.keys(patch) as (keyof Filters)[]).every((k) => JSON.stringify(value[k]) === JSON.stringify(patch[k]))
@@ -126,6 +130,8 @@ export function FilterForm({ value, onChange }: { value: Filters; onChange: (pat
         ))}
       </Line>
 
+      {(more || advanced) && (
+      <>
       <Line label="Reel views">
         {VIEWS.map((v) => (
           <button key={v.label} type="button" className={`chip${value.reelViewsMin === v.value ? ' on' : ''}`} aria-pressed={value.reelViewsMin === v.value} onClick={() => onChange({ reelViewsMin: v.value })}>
@@ -141,6 +147,9 @@ export function FilterForm({ value, onChange }: { value: Filters; onChange: (pat
           </button>
         ))}
       </Line>
+
+      </>
+      )}
 
       <Line label="Posted">
         {RECENCY.map((r) => (
@@ -159,6 +168,8 @@ export function FilterForm({ value, onChange }: { value: Filters; onChange: (pat
         </button>
       </Line>
 
+      {(more || advanced) && (
+      <>
       <Line label="Country">
         {COUNTRIES.map((c) => (
           <button key={c} type="button" className={`chip${value.countries.includes(c) ? ' on' : ''}`} aria-pressed={value.countries.includes(c)} onClick={() => toggle('countries', c)}>
@@ -176,6 +187,14 @@ export function FilterForm({ value, onChange }: { value: Filters; onChange: (pat
         ))}
         {value.languages.length === 0 && <span className="filter-note">Every language</span>}
       </Line>
+      </>
+      )}
+
+      {!more && !advanced && (
+        <button type="button" className="btn quiet small more-filters" onClick={() => setMore(true)}>
+          Reel views, posting, country and language
+        </button>
+      )}
     </div>
   )
 }

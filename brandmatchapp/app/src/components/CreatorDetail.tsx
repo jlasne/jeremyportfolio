@@ -53,16 +53,15 @@ export function CreatorDetail({ id, onClose }: { id: string; onClose: () => void
   return (
     <>
       <div className="backdrop" onClick={onClose} aria-hidden="true" />
-      <aside className="panel" role="dialog" aria-modal="true" aria-label={`${c.name}, creator detail`} ref={panel} tabIndex={-1}>
+      <aside className="panel" role="dialog" aria-modal="true" aria-label={`@${c.handle}, creator detail`} ref={panel} tabIndex={-1}>
         <div className="panel-head">
-          <img className="avatar lg" src={c.avatar} alt="" width={52} height={52} />
           <div className="who" style={{ flex: 1 }}>
             <div className="name">
-              <span>{c.name}</span>
+              <span>@{c.handle}</span>
               {item.isNew && <span className="badge-new">NEW</span>}
             </div>
             <div className="muted">
-              @{c.handle} · {COUNTRY_NAMES[c.country]} · {LANGUAGE_NAMES[c.language]}
+              {COUNTRY_NAMES[c.country]} · {LANGUAGE_NAMES[c.language]}
             </div>
           </div>
           <button type="button" className="btn quiet" onClick={onClose} aria-label="Close">Close</button>

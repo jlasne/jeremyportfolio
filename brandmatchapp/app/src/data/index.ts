@@ -3,13 +3,13 @@ import { defaultFilters } from '../mock/filters'
 import { timezones as mockTimezones } from '../mock/settings'
 import { toCsv } from '../lib/csv'
 import { absolute, isNewToday, withinDays } from '../lib/format'
-import { BUCKETS, CRITERIA, latestSignal, scoreOf } from './score'
+import { BUCKETS, CRITERIA, QUALIFIED_MIN, latestSignal, scoreOf } from './score'
 import { getState, setState } from './store'
 
 // Every screen reads and writes through these functions.
 // They work on the in memory store today and will call the real source later.
 
-export { BUCKETS, CRITERIA, scoreOf } from './score'
+export { BUCKETS, CRITERIA, QUALIFIED_MIN, scoreOf } from './score'
 
 /** Roughly 1 lead in 10 comes back qualified, which is 2 stars or more. */
 export const QUALIFIED_RATIO = 10
@@ -27,12 +27,13 @@ export interface Contact {
   latestSignal: Signal | null
   isNew: boolean
   isRejected: boolean
+  isDone: boolean
   agent: Agent | null
 }
 
-/** 2 stars or more. The contacts worth a message today. */
+/** Above 1.5 stars. The contacts worth a message today. */
 export function isHigh(score: Score): boolean {
-  return score.stars >= 2
+  return score.stars > QUALIFIED_MIN
 }
 
 function passes(c: Creator, f: Filters, now: Date): boolean {
@@ -55,6 +56,7 @@ function toContact(c: Creator, now: Date): Contact {
     latestSignal: latestSignal(c),
     isNew: isNewToday(c.firstSeenAt, now),
     isRejected: s.rejections.some((r) => r.creatorId === c.id),
+    isDone: s.done.includes(c.id),
     agent: s.agents.find((a) => a.id === c.agentId) ?? null,
   }
 }
@@ -80,6 +82,8 @@ export interface ContactQuery {
   /** Criteria that must score above zero. */
   mustHave?: ('niche' | 'active' | 'intent')[]
   newOnly?: boolean
+  /** Contacts you marked done: hide them, show only them, or show everything. */
+  done?: 'hide' | 'only' | 'any'
 }
 
 /** The list. Filters cut the volume, the score sets the order. */
@@ -95,6 +99,7 @@ export function getContacts(q: ContactQuery = {}, now = new Date(), filters: Fil
     .filter((x) => x.score.stars >= (q.minStars ?? 0))
     .filter((x) => (q.mustHave ?? []).every((k) => x.score[k] > 0))
     .filter((x) => !q.newOnly || x.isNew)
+    .filter((x) => (q.done ?? 'hide') === 'any' || (q.done === 'only' ? x.isDone : !x.isDone))
     .sort(byScore)
 }
 
@@ -312,6 +317,16 @@ export function reject(creatorId: string): void {
 
 export function unreject(creatorId: string): void {
   setState((s) => ({ rejections: s.rejections.filter((r) => r.creatorId !== creatorId) }))
+}
+
+// Done ------------------------------------------------------------------------
+
+export function toggleDone(creatorId: string): void {
+  setState((s) => ({ done: s.done.includes(creatorId) ? s.done.filter((id) => id !== creatorId) : [...s.done, creatorId] }))
+}
+
+export function countDone(): number {
+  return getState().done.length
 }
 
 export function isRejected(creatorId: string): boolean {

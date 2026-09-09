@@ -1,45 +1,31 @@
 import { useEffect, useRef, useState } from 'react'
-import { CRITERIA, countTagged, diagnoseEmpty, exportCsv, getAgents, getContacts, getFilters, getSettings, getTagVocabulary, resetFilter, resetFilters, setFilters } from '../data'
+import {
+  countDone, countTagged, diagnoseEmpty, exportCsv, getAgents, getContacts, getFilters, getTagVocabulary,
+  resetFilter, resetFilters, setFilters, toggleDone,
+} from '../data'
 import { useStore } from '../data/hooks'
 import { downloadCsv } from '../lib/csv'
-import { compact, nextBatchLabel, percent } from '../lib/format'
+import { compact, percent } from '../lib/format'
 import { navigate } from '../lib/router'
 import { CreatorDetail } from '../components/CreatorDetail'
 import { FilterForm } from '../components/FilterForm'
 import { Stars } from '../components/Stars'
 
-type CriterionKey = 'niche' | 'active' | 'intent'
-
-/** The one list. Everything else about a contact lives behind the row. */
+/** The one list. A handle, how ready they are, and the email. */
 export function Contacts({ agentId }: { agentId: string | null }) {
   useStore()
-  const searches = getAgents()
-  const [picked, setPicked] = useState<string[]>(agentId ? [agentId] : [])
+  const agents = getAgents()
   const [tag, setTag] = useState<string | null>(null)
-  const [minStars, setMinStars] = useState(0)
-  const [mustHave, setMustHave] = useState<CriterionKey[]>([])
+  const [showDone, setShowDone] = useState(false)
   const [openId, setOpenId] = useState<string | null>(null)
   const [showFilters, setShowFilters] = useState(false)
-  const [showStars, setShowStars] = useState(false)
   const box = useRef<HTMLDivElement>(null)
-  const starBox = useRef<HTMLDivElement>(null)
-
-  // A link from an agent preselects it.
-  useEffect(() => {
-    if (agentId) setPicked([agentId])
-  }, [agentId])
 
   useEffect(() => {
     const onDown = (e: MouseEvent) => {
       if (box.current && !box.current.contains(e.target as Node)) setShowFilters(false)
-      if (starBox.current && !starBox.current.contains(e.target as Node)) setShowStars(false)
     }
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setShowFilters(false)
-        setShowStars(false)
-      }
-    }
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setShowFilters(false)
     document.addEventListener('mousedown', onDown)
     document.addEventListener('keydown', onKey)
     return () => {
@@ -48,15 +34,13 @@ export function Contacts({ agentId }: { agentId: string | null }) {
     }
   }, [])
 
-  const contacts = getContacts({ agentIds: picked, tag, minStars, mustHave })
+  const contacts = getContacts({
+    agentIds: agentId ? [agentId] : [],
+    tag,
+    done: showDone ? 'any' : 'hide',
+  })
   const vocabulary = getTagVocabulary().filter((t) => countTagged(t) > 0)
-
-  const toggleSearch = (id: string) => {
-    setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))
-    if (agentId) navigate('contacts')
-  }
-  const toggleMust = (key: CriterionKey) => setMustHave((m) => (m.includes(key) ? m.filter((k) => k !== key) : [...m, key]))
-  const starLabel = minStars === 0 && mustHave.length === 0 ? 'Any' : `${minStars}+${mustHave.length ? ` · ${mustHave.length} must have` : ''}`
+  const done = countDone()
 
   return (
     <div className="page">
@@ -70,101 +54,59 @@ export function Contacts({ agentId }: { agentId: string | null }) {
       </div>
 
       <div className="filter-bar">
-        <div className="popover-wrap" ref={starBox}>
-          <button type="button" className={`btn${minStars || mustHave.length ? ' on' : ''}`} aria-expanded={showStars} onClick={() => setShowStars((v) => !v)}>
-            Stars: {starLabel}
-          </button>
-          {showStars && (
-            <div className="popover narrow left" role="dialog" aria-label="Stars">
-              <h2>Stars</h2>
-              <div className="slider-row">
-                <input
-                  className="slider"
-                  type="range"
-                  min={0}
-                  max={3}
-                  step={0.5}
-                  value={minStars}
-                  aria-label="Minimum stars"
-                  onChange={(e) => setMinStars(Number(e.target.value))}
-                />
-                <span className="slider-value num">{minStars === 0 ? 'Any' : `${minStars}+`}</span>
-              </div>
-              <div className="slider-ticks">
-                <span>0</span><span>1</span><span>2</span><span>3</span>
-              </div>
-              <p className="hint" style={{ marginTop: 10 }}>2 stars and up is what counts as qualified.</p>
-              <h2 style={{ marginTop: 16 }}>Must have</h2>
-              <div className="chips">
-                {CRITERIA.map((c) => {
-                  const key = c.key as CriterionKey
-                  const on = mustHave.includes(key)
-                  return (
-                    <button key={key} type="button" className={`chip${on ? ' on' : ''}`} aria-pressed={on} onClick={() => toggleMust(key)}>
-                      {c.label}
-                    </button>
-                  )
-                })}
-              </div>
-              <p className="hint">Each one picked must score above zero.</p>
-            </div>
-          )}
-        </div>
+        <label className="filter-select">
+          <span>Agent</span>
+          <select className="select" value={agentId ?? ''} onChange={(e) => navigate(e.target.value ? `contacts/${e.target.value}` : 'contacts')}>
+            <option value="">Every agent</option>
+            {agents.map((a) => (
+              <option key={a.id} value={a.id}>{a.name}</option>
+            ))}
+          </select>
+        </label>
 
-        <div className="chips agent-chips">
-          <button type="button" className={`chip${picked.length === 0 ? ' on' : ''}`} aria-pressed={picked.length === 0} onClick={() => { setPicked([]); if (agentId) navigate('contacts') }}>
-            Every search
-          </button>
-          {searches.map((a) => (
-            <button key={a.id} type="button" className={`chip${picked.includes(a.id) ? ' on' : ''}`} aria-pressed={picked.includes(a.id)} onClick={() => toggleSearch(a.id)}>
-              {a.name}
-            </button>
-          ))}
-        </div>
+        <label className="filter-select">
+          <span>Tag</span>
+          <select className="select" value={tag ?? ''} onChange={(e) => setTag(e.target.value || null)}>
+            <option value="">Any tag</option>
+            {vocabulary.map((t) => (
+              <option key={t} value={t}>{t} ({countTagged(t)})</option>
+            ))}
+          </select>
+        </label>
 
         <div className="popover-wrap" ref={box}>
           <button type="button" className={`btn${showFilters ? ' on' : ''}`} aria-expanded={showFilters} onClick={() => setShowFilters((v) => !v)}>
-            More Instagram filters
+            More filters
           </button>
           {showFilters && (
-            <div className="popover" role="dialog" aria-label="Instagram filters">
+            <div className="popover" role="dialog" aria-label="Filters">
               <h2>
-                Instagram filters
+                Filters
                 <button type="button" className="btn quiet small" onClick={() => resetFilters()}>Reset</button>
               </h2>
               <FilterForm value={getFilters()} onChange={setFilters} />
-              {vocabulary.length > 0 && (
-                <div className="filter-line" style={{ marginTop: 14 }}>
-                  <span className="filter-label">Your tags</span>
-                  <div className="chips">
-                    {vocabulary.map((t) => (
-                      <button key={t} type="button" className={`chip${tag === t ? ' on' : ''}`} aria-pressed={tag === t} onClick={() => setTag(tag === t ? null : t)}>
-                        {t}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>
 
-        {(tag || minStars > 0 || mustHave.length > 0) && (
-          <button type="button" className="btn quiet" onClick={() => { setTag(null); setMinStars(0); setMustHave([]) }}>Clear</button>
+        <span className="spacer" />
+        {done > 0 && (
+          <button type="button" className={`btn${showDone ? ' on' : ''}`} onClick={() => setShowDone((v) => !v)}>
+            {showDone ? 'Hide done' : `Show ${done} done`}
+          </button>
         )}
       </div>
 
       <div className="list">
         {contacts.map((c) => (
-          <button type="button" className={`contact${openId === c.creator.id ? ' open' : ''}`} key={c.creator.id} onClick={() => setOpenId(c.creator.id)}>
-            <img className="avatar" src={c.creator.avatar} alt="" width={38} height={38} />
-            <span className="who">
-              <span className="name">
-                {c.creator.name}
-                {c.isNew && <span className="badge-new">NEW</span>}
-              </span>
-              <span className="handle">@{c.creator.handle}</span>
-            </span>
+          <div className={`contact${openId === c.creator.id ? ' open' : ''}${c.isDone ? ' done' : ''}`} key={c.creator.id}>
+            <label className="tick">
+              <input type="checkbox" checked={c.isDone} onChange={() => toggleDone(c.creator.id)} aria-label={`Mark @${c.creator.handle} done`} />
+            </label>
+            <button type="button" className="handle-btn" onClick={() => setOpenId(c.creator.id)}>
+              @{c.creator.handle}
+              {c.isNew && <span className="badge-new">NEW</span>}
+            </button>
             <Stars score={c.score} />
             <span className={`mail${c.creator.email ? '' : ' none'}`}>{c.creator.email ?? 'No email found'}</span>
             <span className="metric">
@@ -175,17 +117,9 @@ export function Contacts({ agentId }: { agentId: string | null }) {
               <b className="num">{percent(c.creator.engagementRate)}</b>
               <small>engaged</small>
             </span>
-          </button>
+          </div>
         ))}
-        {contacts.length === 0 && (
-          <Empty
-            tag={tag}
-            minStars={minStars}
-            mustHave={mustHave.length}
-            agentNames={picked.map((id) => searches.find((a) => a.id === id)?.name ?? '').filter(Boolean)}
-            onClear={() => { setTag(null); setMinStars(0); setMustHave([]); setPicked([]); if (agentId) navigate('contacts') }}
-          />
-        )}
+        {contacts.length === 0 && <Empty tag={tag} done={done} onClear={() => { setTag(null); navigate('contacts') }} />}
       </div>
 
       {openId && <CreatorDetail id={openId} onClose={() => setOpenId(null)} />}
@@ -193,27 +127,23 @@ export function Contacts({ agentId }: { agentId: string | null }) {
   )
 }
 
-function Empty({ tag, minStars, mustHave, agentNames, onClear }: { tag: string | null; minStars: number; mustHave: number; agentNames: string[]; onClear: () => void }) {
-  const settings = getSettings()
-  if (agentNames.length > 0 && !tag && !minStars && !mustHave) {
+function Empty({ tag, done, onClear }: { tag: string | null; done: number; onClear: () => void }) {
+  if (tag) {
     return (
       <div className="empty">
-        <h2>Nothing from {agentNames.join(' and ')} yet</h2>
-        <p>The first batch lands {nextBatchLabel(settings.timezone)}. Until then, every other agent's contacts are one click away.</p>
+        <h2>Nothing tagged {tag}</h2>
+        <p>Tag a contact from its panel and it shows up here.</p>
         <div className="actions">
-          <button type="button" className="btn primary" onClick={onClear}>Show every agent</button>
+          <button type="button" className="btn primary" onClick={onClear}>Show every contact</button>
         </div>
       </div>
     )
   }
-  if (tag || minStars || mustHave) {
+  if (done > 0) {
     return (
       <div className="empty">
-        <h2>Nothing matches</h2>
-        <p>{tag ? `No contact carries the tag ${tag}` : mustHave ? 'No contact scores on every criterion you asked for' : `No contact reaches ${minStars} stars`} under the filters you set.</p>
-        <div className="actions">
-          <button type="button" className="btn primary" onClick={onClear}>Clear the chips</button>
-        </div>
+        <h2>You are through today's list</h2>
+        <p>All {done} contacts are marked done. The next batch lands tomorrow morning.</p>
       </div>
     )
   }

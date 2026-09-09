@@ -6,8 +6,9 @@ export type Route =
   | { name: 'home' }
   | { name: 'onboarding'; agentId: string | null; running: boolean }
   | { name: 'contacts'; agentId: string | null }
-  | { name: 'leads'; agentId: string | null }
-  | { name: 'agent' }
+  | { name: 'agent'; agentId: string | null }
+  | { name: 'connect' }
+  | { name: 'settings' }
 
 export function parse(hash: string): Route {
   const path = hash.replace(/^#/, '').replace(/^\/+/, '')
@@ -20,11 +21,14 @@ export function parse(hash: string): Route {
       return { name: 'onboarding', agentId: id, running: third === 'running' }
     case 'contacts':
       return { name: 'contacts', agentId: id }
-    case 'leads':
-    case 'agents':
-      return { name: 'leads', agentId: id }
     case 'agent':
-      return { name: 'agent' }
+    case 'agents':
+    case 'leads':
+      return { name: 'agent', agentId: id }
+    case 'connect':
+      return { name: 'connect' }
+    case 'settings':
+      return { name: 'settings' }
     default:
       return { name: 'home' }
   }
