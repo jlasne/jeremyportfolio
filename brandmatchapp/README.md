@@ -79,10 +79,10 @@ top under 900px.
 
 | Route | What it holds |
 | --- | --- |
-| `#/` | The landing: the promise, the app in a frame, why it beats a database, three steps, connecting your AI, two plans, four questions |
+| `#/` | The landing: the promise, the app in a frame, a comparison table, how the agent hunts, MCP and the API, two plans at $500, four questions |
 | `#/contacts` | The one list. A handle, the stars, the email, followers and engagement. Two dropdowns, agent and tag, plus more filters. Tick a row to mark it done and it leaves the list |
 | `#/agent` | Leads a day over 14 days, then the agents. Clicking one opens its sentence, its filters and its delivery |
-| `#/connect` | MCP and API. An address, a key, one example each, and what an AI can ask for |
+| `#/connect` | MCP to get your leads, the API to manage your agents. An address, a key, an example each, and what each one can do |
 | `#/settings` | Timezone, tags, what counts as qualified, your account, start over |
 | `#/onboarding` | Set up your first agent, then the first list over 8 seconds and straight into it |
 
@@ -103,9 +103,9 @@ woff2 so nothing loads from the network.
 The mark is two circles overlapping with the middle knocked out. The overlap is
 the match, and it sits beside the CreatorMatch circle and square as a sibling.
 
-The landing carries no invented prices. The monthly plan sets a daily volume,
-the one off pack is 1,000 creators at 50% more per creator. Real numbers go in
-when they are decided.
+Pricing on the landing: $500 a month for 100 to 1,000 leads a day, or $500 once
+for a 30,000 lead pack with no renewal. The plans show lead counts, not the
+qualified share.
 
 Works down to a phone, keyboard focus visible, reduced motion respected: the
 rolling hero number and the grain both stop.
