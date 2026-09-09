@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Level } from '../types'
 import {
-  CRITERIA, addTag, countDone, countTagged, diagnoseEmpty, exportCsv, getAgents, getContacts, getFilters, getTagVocabulary,
+  CRITERIA, addTag, countDone, countTagged, diagnoseEmpty, exportCsv, getCampaigns, getContacts, getFilters, getTagVocabulary,
   reject, resetFilter, resetFilters, setFilters, toggleDone,
 } from '../data'
 import { useStore } from '../data/hooks'
@@ -15,9 +15,9 @@ import { Stars } from '../components/Stars'
 type CriterionKey = 'niche' | 'active' | 'intent'
 
 /** The one list. A handle, how ready they are, and the email. */
-export function Contacts({ agentId }: { agentId: string | null }) {
+export function Contacts({ campaignId }: { campaignId: string | null }) {
   useStore()
-  const agents = getAgents()
+  const campaigns = getCampaigns()
   const [tag, setTag] = useState<string | null>(null)
   const [minStars, setMinStars] = useState(0)
   const [minLevels, setMinLevels] = useState<Partial<Record<CriterionKey, Level>>>({})
@@ -49,7 +49,7 @@ export function Contacts({ agentId }: { agentId: string | null }) {
   }, [])
 
   const contacts = getContacts({
-    agentIds: agentId ? [agentId] : [],
+    campaignIds: campaignId ? [campaignId] : [],
     tag,
     minStars,
     minLevels,
@@ -149,10 +149,10 @@ export function Contacts({ agentId }: { agentId: string | null }) {
         </div>
 
         <label className="filter-select">
-          <span>Agent</span>
-          <select className="select" value={agentId ?? ''} onChange={(e) => navigate(e.target.value ? `contacts/${e.target.value}` : 'contacts')}>
-            <option value="">Every agent</option>
-            {agents.map((a) => (
+          <span>Campaign</span>
+          <select className="select" value={campaignId ?? ''} onChange={(e) => navigate(e.target.value ? `contacts/${e.target.value}` : 'contacts')}>
+            <option value="">Every campaign</option>
+            {campaigns.map((a) => (
               <option key={a.id} value={a.id}>{a.name}</option>
             ))}
           </select>

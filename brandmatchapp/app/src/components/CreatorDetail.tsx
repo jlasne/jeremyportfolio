@@ -85,7 +85,7 @@ export function CreatorDetail({ id, onClose }: { id: string; onClose: () => void
                 </li>
               ))}
             </ul>
-            {item.agent && <p className="hint">Found by {item.agent.name}.</p>}
+            {item.campaign && <p className="hint">Found by {item.campaign.name}.</p>}
           </section>
 
           <section>

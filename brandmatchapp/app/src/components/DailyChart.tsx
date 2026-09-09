@@ -1,16 +1,13 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { DailyStat } from '../types'
 
-// Two marks over 14 days. Qualified leads are columns on the right scale.
-// Every lead delivered is a smooth line on the left scale.
-//
-// The two scales differ by about ten times, so each axis is printed in its own
-// series colour and the marks never share a gridline. Where the marks cross
-// means nothing.
+// Leads a day. One stacked column per day, one colour per campaign, and a line
+// for the total across them. Campaign colours sit in a fixed order.
 
 const W = 760
-const H = 168
-const PAD = { top: 26, bottom: 24, left: 34, right: 34 }
+const H = 180
+const PAD = { top: 26, bottom: 24, left: 36, right: 12 }
+export const CAMPAIGN_COLOURS = ['#f2662a', '#7c5cff', '#2aa17a', '#e0a100', '#d94a8c', '#3b7dd8']
 
 /** Monotone cubic, so the curve bends without overshooting a point. */
 function smooth(points: [number, number][]): string {
@@ -40,80 +37,125 @@ function nice(v: number): number {
   return Math.ceil(v / pow) * pow
 }
 
-export function DailyChart({ data }: { data: DailyStat[] }) {
-  const [hover, setHover] = useState<number | null>(null)
-  if (data.length < 2) return null
+export interface ChartCampaign {
+  id: string
+  name: string
+}
 
-  const maxLeads = nice(Math.max(...data.map((d) => d.leads), 1))
-  const maxQual = nice(Math.max(...data.map((d) => d.qualified), 1))
-  const slot = (W - PAD.left - PAD.right) / data.length
+export function DailyChart({ rows, campaigns }: { rows: DailyStat[]; campaigns: ChartCampaign[] }) {
+  const [hover, setHover] = useState<number | null>(null)
+
+  const { dates, byDate, totals } = useMemo(() => {
+    const dates = [...new Set(rows.map((r) => r.date))].sort()
+    const byDate = new Map<string, Map<string, DailyStat>>()
+    for (const r of rows) {
+      if (!byDate.has(r.date)) byDate.set(r.date, new Map())
+      byDate.get(r.date)!.set(r.campaignId, r)
+    }
+    const totals = dates.map((d) => [...(byDate.get(d)?.values() ?? [])].reduce((s, r) => s + r.leads, 0))
+    return { dates, byDate, totals }
+  }, [rows])
+
+  if (dates.length < 2) return null
+
+  const max = nice(Math.max(...totals, 1))
+  const slot = (W - PAD.left - PAD.right) / dates.length
   const x = (i: number) => PAD.left + slot * (i + 0.5)
   const base = H - PAD.bottom
-  const yLeads = (v: number) => PAD.top + (base - PAD.top) * (1 - v / maxLeads)
-  const hQual = (v: number) => (base - PAD.top) * (v / maxQual)
+  const y = (v: number) => PAD.top + (base - PAD.top) * (1 - v / max)
+  const h = (v: number) => (base - PAD.top) * (v / max)
+  const barW = Math.max(2, slot * (dates.length > 45 ? 0.7 : 0.6))
 
-  const active = hover ?? data.length - 1
-  const point = data[active]
-  const rate = point.leads ? Math.round((point.qualified / point.leads) * 100) : 0
+  const active = hover ?? dates.length - 1
+  const date = dates[active]
   const day = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+  const atActive = byDate.get(date) ?? new Map<string, DailyStat>()
+  const total = totals[active]
+  const qualified = [...atActive.values()].reduce((s, r) => s + r.qualified, 0)
+  const tickEvery = dates.length > 45 ? 10 : dates.length > 20 ? 5 : 2
+  const colour = (id: string) => CAMPAIGN_COLOURS[Math.max(0, campaigns.findIndex((c) => c.id === id)) % CAMPAIGN_COLOURS.length]
 
   return (
     <figure className="chart" style={{ margin: 0 }}>
       <figcaption className="chart-head">
-        <span className="chart-value num">{point.leads}</span>
-        <span className="muted">leads on {day(point.date)}</span>
-        <span className="chart-value num qualified">{point.qualified}</span>
-        <span className="muted">qualified of {point.leads}, {rate}%</span>
+        <span className="chart-value num">{total.toLocaleString('en-US')}</span>
+        <span className="muted">leads on {day(date)}</span>
+        <span className="chart-value num qualified">{qualified.toLocaleString('en-US')}</span>
+        <span className="muted">qualified, {total ? Math.round((qualified / total) * 100) : 0}%</span>
         <span className="spacer" />
         <span className="legend">
-          <span className="legend-item"><i className="bar qualified" />Qualified, right scale</span>
-          <span className="legend-item"><i className="leads" />Leads, left scale</span>
+          {campaigns.map((c) => (
+            <span key={c.id} className="legend-item">
+              <i className="bar" style={{ background: colour(c.id) }} />
+              {c.name}
+            </span>
+          ))}
+          <span className="legend-item"><i className="line-swatch" />Total</span>
         </span>
       </figcaption>
 
-      <svg viewBox={`0 0 ${W} ${H}`} className="chart-svg" role="img" aria-label="Leads and qualified leads per day over 14 days" onMouseLeave={() => setHover(null)}>
-        <line x1={PAD.left - 8} y1={base} x2={W - PAD.right + 8} y2={base} className="axis" />
-        <text x={PAD.left - 10} y={PAD.top + 4} textAnchor="end" className="axis-label leads">{maxLeads}</text>
-        <text x={W - PAD.right + 10} y={PAD.top + 4} className="axis-label qualified">{maxQual}</text>
+      <svg viewBox={`0 0 ${W} ${H}`} className="chart-svg" role="img" aria-label={`Leads a day over ${dates.length} days, stacked by campaign`} onMouseLeave={() => setHover(null)}>
+        <line x1={PAD.left - 8} y1={base} x2={W - PAD.right} y2={base} className="axis" />
+        <text x={PAD.left - 10} y={PAD.top + 4} textAnchor="end" className="axis-label total">{max.toLocaleString('en-US')}</text>
 
-        {data.map((d, i) => (
-          <rect
-            key={d.date + 'q'}
-            x={x(i) - slot * 0.28}
-            y={base - hQual(d.qualified)}
-            width={slot * 0.56}
-            height={hQual(d.qualified)}
-            rx="3"
-            className={`chart-bar${i === active ? ' on' : ''}`}
-          />
-        ))}
+        {dates.map((d, i) => {
+          let stack = 0
+          const at = byDate.get(d) ?? new Map<string, DailyStat>()
+          return (
+            <g key={d}>
+              {campaigns.map((c) => {
+                const r = at.get(c.id)
+                if (!r || r.leads === 0) return null
+                const top = stack + r.leads
+                const el = (
+                  <rect
+                    key={c.id}
+                    x={x(i) - barW / 2}
+                    y={y(top)}
+                    width={barW}
+                    height={Math.max(0, h(r.leads) - 1)}
+                    fill={colour(c.id)}
+                    opacity={i === active ? 1 : 0.55}
+                  />
+                )
+                stack = top
+                return el
+              })}
+            </g>
+          )
+        })}
 
-        <path d={smooth(data.map((d, i) => [x(i), yLeads(d.leads)]))} className="chart-line leads" />
+        <path d={smooth(dates.map((_, i) => [x(i), y(totals[i])]))} className="chart-line total" />
         <line x1={x(active)} y1={PAD.top - 10} x2={x(active)} y2={base} className="crosshair" />
-        <circle cx={x(active)} cy={yLeads(point.leads)} r="4.5" className="chart-dot leads" />
+        <circle cx={x(active)} cy={y(total)} r="4.5" className="chart-dot total" />
 
-        {data.map((d, i) => (
-          <g key={d.date} onMouseEnter={() => setHover(i)}>
+        {dates.map((d, i) => (
+          <g key={d + 't'} onMouseEnter={() => setHover(i)}>
             <rect x={x(i) - slot / 2} y="0" width={slot} height={base} fill="transparent" />
-            <text x={x(i)} y={H - 8} textAnchor="middle" className="tick">{new Date(d.date).getDate()}</text>
+            {(i % tickEvery === 0 || i === dates.length - 1) && (
+              <text x={x(i)} y={H - 8} textAnchor="middle" className="tick">{new Date(d).getDate()}</text>
+            )}
           </g>
         ))}
       </svg>
 
       <table className="sr-only">
-        <caption>Leads and qualified leads per day</caption>
+        <caption>Leads a day by campaign</caption>
         <thead>
-          <tr><th>Date</th><th>Leads</th><th>Qualified</th><th>Share</th></tr>
+          <tr><th>Date</th>{campaigns.map((c) => <th key={c.id}>{c.name}</th>)}<th>Total</th><th>Qualified</th></tr>
         </thead>
         <tbody>
-          {data.map((d) => (
-            <tr key={d.date}>
-              <td>{day(d.date)}</td>
-              <td>{d.leads}</td>
-              <td>{d.qualified}</td>
-              <td>{d.leads ? Math.round((d.qualified / d.leads) * 100) : 0}%</td>
-            </tr>
-          ))}
+          {dates.map((d, i) => {
+            const at = byDate.get(d) ?? new Map<string, DailyStat>()
+            return (
+              <tr key={d}>
+                <td>{day(d)}</td>
+                {campaigns.map((c) => <td key={c.id}>{at.get(c.id)?.leads ?? 0}</td>)}
+                <td>{totals[i]}</td>
+                <td>{[...at.values()].reduce((s, r) => s + r.qualified, 0)}</td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </figure>

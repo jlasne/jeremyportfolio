@@ -1,7 +1,7 @@
-import type { Agent, Creator, DailyStat, Filters, Note, Post, Rejection, Settings } from '../types'
+import type { Campaign, Creator, DailyStat, Filters, Note, Post, Rejection, Settings } from '../types'
 import { creators as mockCreators } from '../mock/creators'
 import { posts as mockPosts } from '../mock/posts'
-import { agents as mockAgents } from '../mock/agents'
+import { campaigns as mockCampaigns } from '../mock/campaigns'
 import { dailyStats as mockDaily } from '../mock/daily'
 import { notes as mockNotes } from '../mock/notes'
 import { tags as mockTags, tagVocabulary as mockVocabulary } from '../mock/tags'
@@ -15,7 +15,7 @@ import { settings as mockSettings } from '../mock/settings'
 export interface State {
   creators: Creator[]
   posts: Record<string, Post[]>
-  agents: Agent[]
+  campaigns: Campaign[]
   daily: DailyStat[]
   notes: Record<string, Note>
   tags: Record<string, string[]>
@@ -31,7 +31,7 @@ function seed(): State {
   return {
     creators: mockCreators,
     posts: mockPosts,
-    agents: mockAgents.map((a) => ({ ...a, filters: { ...a.filters } })),
+    campaigns: mockCampaigns.map((a) => ({ ...a, filters: { ...a.filters } })),
     daily: mockDaily,
     notes: Object.fromEntries(mockNotes.map((n) => [n.creatorId, n])),
     tags: Object.fromEntries(Object.entries(mockTags).map(([k, v]) => [k, [...v]])),

@@ -2,8 +2,9 @@
 
 A daily feed of Instagram creators for brands, ranked by stars.
 
-The brand writes one sentence about who it wants. An agent crawls Instagram
-every day, scores every profile, and delivers the list sorted best first.
+The brand enters its website. A campaign, run by one or more agents, crawls
+Instagram every day, scores every profile, and delivers the list sorted best
+first.
 
 **One score per creator, 0 to 3 stars in half steps.** Three criteria, one
 star each, added up. A criterion that half fits pays half a star.
@@ -63,11 +64,11 @@ return 404. Serving this app from another path means changing `base` first.
 | --- | --- |
 | `index.html`, `assets/` | The built app, committed, served by the site |
 | `app/` | The source: Vite, React, TypeScript. Its own `npm install` |
-| `app/src/mock/` | All mock data, one file per entity: creators, posts, lists, notes, tags, rejections, brief, filters, questions, settings. No data literal lives anywhere else |
-| `app/src/data/index.ts` | The data functions every screen reads through: get the feed, get one creator, save, note, tag, reject, export, brief, filters, settings, first run. Swap the mock for the real source here and nothing else changes |
+| `app/src/mock/` | All mock data, one file per entity: creators, posts, campaigns, daily counts over 90 days, notes, tags, rejections, filters, settings. No data literal lives anywhere else |
+| `app/src/data/index.ts` | The data functions every screen reads through: contacts, one creator, note, tag, reject, export, campaigns and their agents, daily rows, settings, first run. Swap the mock for the real source here and nothing else changes |
 | `app/src/data/store.ts` | The one in memory state, seeded from the mock folder. Refresh resets it |
-| `app/src/screens/` | Landing, Onboarding, Contacts, Agents |
-| `app/src/components/` | Stars, Signal, the detail panel, the filter chips, the daily line |
+| `app/src/screens/` | Landing, Onboarding, Contacts, Campaign, Connect, Settings |
+| `app/src/components/` | Stars, Signal, the detail panel, the filter chips, the stacked daily chart, the hero animation |
 | `app/src/data/score.ts` | The scoring rule, in one place |
 | `app/src/lib/` | Formatting, CSV, hash router, placeholder images drawn on the device |
 
@@ -79,33 +80,36 @@ top under 900px.
 
 | Route | What it holds |
 | --- | --- |
-| `#/` | The landing: the promise, the app in a frame, a comparison table, the two steps, MCP and the API, two plans at $500, four questions |
-| `#/contacts` | The one list. A handle, the stars, the email, followers and engagement. Two dropdowns, agent and tag, plus more filters. Tick a row to mark it done and it leaves the list |
-| `#/agent` | Leads a day over 14 days, then the agents. Clicking one opens its sentence, its filters and its delivery |
-| `#/connect` | Coming soon. MCP to get your leads, the API to manage your agents, shown as a preview with the copy buttons off |
-| `#/settings` | Timezone, tags, what counts as qualified, your account, start over |
-| `#/onboarding` | Set up your first agent, then the first list over 8 seconds and straight into it |
+| `#/` | The landing: the promise, a 12 second animation from website to chart, a comparison table, the two steps, MCP and the API, two plans, six questions |
+| `#/contacts` | The one list. A handle, the stars, the email, followers and engagement. Two dropdowns, campaign and tag, plus more filters. The checkbox selects rows for a tag, done or reject in bulk |
+| `#/campaign` | Leads a day over 7, 30 or 90 days, stacked by campaign with the total as a line, then the campaigns. Clicking one opens its website, its audience, its agents and its delivery |
+| `#/connect` | A coming soon popup over the blurred page. Behind it, MCP to get your leads and the API to manage your campaigns, with the copy buttons off |
+| `#/settings` | Billing, feedback, your account |
+| `#/onboarding` | Set up your first campaign, then the first list over 8 seconds and straight into it |
 
-An **agent** starts from your website. We read it and write the audience it
-should hunt for, in as many words as it takes, and you edit any of it. It owns
-its filters and how many leads a day it delivers. Every contact carries the
-agent that found it.
+A **campaign** starts from your website. We read it and write the audience it
+should hunt for, in as many words as it takes, and you edit any of it. A
+campaign holds one or more **agents**. Each agent takes one angle on that
+audience and brings its own share of leads a day. Filters live on Contacts, so
+a campaign carries none. Every contact carries the campaign that found it.
 
 On Contacts the checkbox selects. Selecting opens a bar to tag, mark done or
-reject in bulk. Agent and tag filter through dropdowns. Stars filter through a
+reject in bulk. Campaign and tag filter through dropdowns. Stars filter through a
 slider for the total, plus a minimum per criterion: niche, selling and signal
 each set to any, half or full.
 
-**Qualified** means above 1.5 stars. Each of niche, selling and signal is worth
+**Qualified** means 0.5 stars or more. About 9 leads in 10 reach it. Each of niche, selling and signal is worth
 one star, half when it half fits.
 
 ## Design
 
 Broken white ground `#fbf9f7`, ink `#1b1420`, and two accents: orange
-`#f2662a` and purple `#7c5cff`. Pastel washes of both sit behind the fold, the
-headline runs a gradient between them, and the mark is two circles overlapping
-with the middle knocked out, filled with the same gradient. The chart pair
-passes the colourblind and contrast checks.
+`#f2662a` and purple `#7c5cff`. The landing stacks them as flat slabs: an
+orange hero, a purple steps section, an orange call to action and an ink
+footer. No gradients anywhere. The mark is two circles overlapping, orange and
+purple, with the middle knocked out. The campaign colours, orange, purple,
+green `#2aa17a` and gold `#e0a100`, pass the colourblind and contrast checks
+and always sit next to a legend.
 
 Unbounded for display, Satoshi for everything else, both lifted from
 `brand/index.html` and bundled as woff2 so nothing loads from the network.
@@ -115,4 +119,4 @@ pack at the same price with no renewal. The cards show lead counts and carry no
 figure, since the number is not decided.
 
 Works down to a phone, keyboard focus visible, reduced motion respected: the
-rolling hero number, the grain and the reading dots all stop.
+hero animation holds on its final chart, the grain and the reading dots stop.

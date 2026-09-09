@@ -79,17 +79,29 @@ export interface Creator {
   nicheWhy: string
   /** What the creator sells today, or an empty string. */
   sells: string
-  /** The agent that found this creator. */
-  agentId: string
+  /** The campaign that found this creator. */
+  campaignId: string
   /** ISO date */
   firstSeenAt: string
   /** ISO date */
   lastCrawlAt: string
 }
 
-export interface Agent {
+/** One searcher inside a campaign. Each has its own angle and its own share of the day. */
+export interface CampaignAgent {
   id: string
   name: string
+  /** What this agent hunts for, in one line. */
+  focus: string
+  leadsPerDay: number
+  active: boolean
+}
+
+export interface Campaign {
+  id: string
+  name: string
+  /** The agents that run this campaign. */
+  agents: CampaignAgent[]
   /** The brand's own site. The audience below is written from it. */
   website: string
   brief: Brief
@@ -108,8 +120,8 @@ export interface DailyStat {
   date: string
   /** Profiles crawled. */
   gathered: number
-  /** The agent that delivered this day. */
-  agentId: string
+  /** The campaign that delivered this day. */
+  campaignId: string
   /** Leads delivered to the list. Every one of them shows. */
   leads: number
   /** Of those, the ones at 2 stars or more. Around 1 in 10. */

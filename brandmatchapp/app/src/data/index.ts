@@ -1,4 +1,4 @@
-import type { Agent, Brief, Creator, DailyStat, FilterKey, Filters, Level, Post, Score, Settings, Signal, Stars } from '../types'
+import type { Brief, Campaign, CampaignAgent, Creator, DailyStat, FilterKey, Filters, Level, Post, Score, Settings, Signal, Stars } from '../types'
 import { defaultFilters } from '../mock/filters'
 import { timezones as mockTimezones } from '../mock/settings'
 import { toCsv } from '../lib/csv'
@@ -11,12 +11,12 @@ import { getState, setState } from './store'
 
 export { BUCKETS, CRITERIA, QUALIFIED_MIN, scoreOf } from './score'
 
-/** Roughly 1 lead in 10 comes back qualified, which is 2 stars or more. */
-export const QUALIFIED_RATIO = 10
+/** About 9 leads in 10 reach half a star, which is what counts as qualified. */
+export const QUALIFIED_SHARE = 0.9
 
 /** How many of a day's leads come back qualified. */
 export function qualifiedFrom(leadsPerDay: number): number {
-  return Math.round(leadsPerDay / QUALIFIED_RATIO)
+  return Math.round(leadsPerDay * QUALIFIED_SHARE)
 }
 
 // Contacts, the one list ---------------------------------------------------
@@ -28,12 +28,12 @@ export interface Contact {
   isNew: boolean
   isRejected: boolean
   isDone: boolean
-  agent: Agent | null
+  campaign: Campaign | null
 }
 
-/** Above 1.5 stars. The contacts worth a message today. */
+/** Half a star or more. The contacts worth a message today. */
 export function isHigh(score: Score): boolean {
-  return score.stars > QUALIFIED_MIN
+  return score.stars >= QUALIFIED_MIN
 }
 
 function passes(c: Creator, f: Filters, now: Date): boolean {
@@ -57,7 +57,7 @@ function toContact(c: Creator, now: Date): Contact {
     isNew: isNewToday(c.firstSeenAt, now),
     isRejected: s.rejections.some((r) => r.creatorId === c.id),
     isDone: s.done.includes(c.id),
-    agent: s.agents.find((a) => a.id === c.agentId) ?? null,
+    campaign: s.campaigns.find((a) => a.id === c.campaignId) ?? null,
   }
 }
 
@@ -75,8 +75,8 @@ export function getAllContacts(now = new Date()): Contact[] {
 }
 
 export interface ContactQuery {
-  /** Empty means every agent. */
-  agentIds?: string[]
+  /** Empty means every campaign. */
+  campaignIds?: string[]
   tag?: string | null
   minStars?: number
   /** The least each criterion may score: 0 any, 0.5 half a star, 1 a full star. */
@@ -94,7 +94,7 @@ export function getContacts(q: ContactQuery = {}, now = new Date(), filters: Fil
   return s.creators
     .filter((c) => !rejected.has(c.id) && passes(c, f, now))
     .map((c) => toContact(c, now))
-    .filter((x) => !q.agentIds?.length || q.agentIds.includes(x.creator.agentId))
+    .filter((x) => !q.campaignIds?.length || q.campaignIds.includes(x.creator.campaignId))
     .filter((x) => !q.tag || getTags(x.creator.id).includes(q.tag))
     .filter((x) => x.score.stars >= (q.minStars ?? 0))
     .filter((x) => Object.entries(q.minLevels ?? {}).every(([k, min]) => x.score[k as 'niche' | 'active' | 'intent'] >= (min ?? 0)))
@@ -149,10 +149,16 @@ export interface Dashboard {
   byCriterion: { key: string; label: string; full: number; half: number; note: string }[]
 }
 
-/** The 14 day series for one agent, or every agent added together. */
-export function getDaily(agentId: string | null = null): DailyStat[] {
-  const rows = getState().daily
-  if (agentId) return rows.filter((r) => r.agentId === agentId)
+/** Per campaign rows for the last N days, newest last. One campaign, or all of them. */
+export function getDailyRows(campaignId: string | null = null, days = 30): DailyStat[] {
+  const rows = getState().daily.filter((r) => !campaignId || r.campaignId === campaignId)
+  const dates = [...new Set(rows.map((r) => r.date))].sort().slice(-days)
+  const keep = new Set(dates)
+  return rows.filter((r) => keep.has(r.date)).sort((a, b) => a.date.localeCompare(b.date))
+}
+
+/** The same rows added together per day. */
+export function sumDaily(rows: DailyStat[]): DailyStat[] {
   const byDate = new Map<string, DailyStat>()
   for (const r of rows) {
     const at = byDate.get(r.date)
@@ -161,15 +167,19 @@ export function getDaily(agentId: string | null = null): DailyStat[] {
       at.gathered += r.gathered
       at.qualified += r.qualified
     } else {
-      byDate.set(r.date, { ...r, agentId: 'all' })
+      byDate.set(r.date, { ...r, campaignId: 'all' })
     }
   }
   return [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date))
 }
 
-export function getDashboard(agentId: string | null = null, now = new Date()): Dashboard {
-  const all = getAllContacts(now).filter((c) => !agentId || c.creator.agentId === agentId)
-  const daily = getDaily(agentId)
+export function getDaily(campaignId: string | null = null, days = 30): DailyStat[] {
+  return sumDaily(getDailyRows(campaignId, days))
+}
+
+export function getDashboard(campaignId: string | null = null, now = new Date(), days = 30): Dashboard {
+  const all = getAllContacts(now).filter((c) => !campaignId || c.creator.campaignId === campaignId)
+  const daily = getDaily(campaignId, days)
   return {
     today: all.filter((c) => c.isNew).length,
     high: all.filter((c) => isHigh(c.score)).length,
@@ -191,22 +201,22 @@ export function getDashboard(agentId: string | null = null, now = new Date()): D
   }
 }
 
-// Agents -------------------------------------------------------------------
+// Campaigns -------------------------------------------------------------------
 
-export function getAgents(): Agent[] {
-  return getState().agents
+export function getCampaigns(): Campaign[] {
+  return getState().campaigns
 }
 
-export function getAgent(id: string): Agent | null {
-  return getState().agents.find((a) => a.id === id) ?? null
+export function getCampaign(id: string): Campaign | null {
+  return getState().campaigns.find((a) => a.id === id) ?? null
 }
 
-export function updateAgent(id: string, patch: Partial<Agent>): void {
-  setState((s) => ({ agents: s.agents.map((a) => (a.id === id ? { ...a, ...patch } : a)) }))
+export function updateCampaign(id: string, patch: Partial<Campaign>): void {
+  setState((s) => ({ campaigns: s.campaigns.map((a) => (a.id === id ? { ...a, ...patch } : a)) }))
 }
 
-export function updateAgentFilters(id: string, patch: Partial<Filters>): void {
-  setState((s) => ({ agents: s.agents.map((a) => (a.id === id ? { ...a, filters: { ...a.filters, ...patch } } : a)) }))
+export function updateCampaignFilters(id: string, patch: Partial<Filters>): void {
+  setState((s) => ({ campaigns: s.campaigns.map((a) => (a.id === id ? { ...a, filters: { ...a.filters, ...patch } } : a)) }))
 }
 
 /**
@@ -226,11 +236,12 @@ export function audienceFromWebsite(website: string): string {
   ].join(' ')
 }
 
-export function createAgent(): Agent {
-  const agent: Agent = {
+export function createCampaign(): Campaign {
+  const campaign: Campaign = {
     id: `a${Date.now()}`,
     name: '',
     website: '',
+    agents: [{ id: `g${Date.now()}`, name: 'Agent 1', focus: '', leadsPerDay: 200, active: true }],
     brief: { who: '', answers: [], summary: 'No brief yet.' },
     filters: { ...defaultFilters, countries: [], languages: [] },
     leadsPerDay: 200,
@@ -238,17 +249,43 @@ export function createAgent(): Agent {
     active: true,
     createdAt: new Date().toISOString(),
   }
-  setState((s) => ({ agents: [...s.agents, agent] }))
+  setState((s) => ({ campaigns: [...s.campaigns, campaign] }))
+  return campaign
+}
+
+// The agents inside a campaign ------------------------------------------------
+
+export function addCampaignAgent(campaignId: string): CampaignAgent {
+  const n = (getCampaign(campaignId)?.agents.length ?? 0) + 1
+  const agent: CampaignAgent = { id: `g${Date.now()}`, name: `Agent ${n}`, focus: '', leadsPerDay: 100, active: true }
+  setState((s) => ({ campaigns: s.campaigns.map((c) => (c.id === campaignId ? { ...c, agents: [...c.agents, agent] } : c)) }))
   return agent
 }
 
-export function deleteAgent(id: string): void {
-  setState((s) => ({ agents: s.agents.filter((a) => a.id !== id) }))
+export function updateCampaignAgent(campaignId: string, agentId: string, patch: Partial<CampaignAgent>): void {
+  setState((s) => ({
+    campaigns: s.campaigns.map((c) =>
+      c.id === campaignId ? { ...c, agents: c.agents.map((a) => (a.id === agentId ? { ...a, ...patch } : a)) } : c,
+    ),
+  }))
 }
 
-/** How many contacts each agent found, and how many reach 2 stars. */
-export function agentTally(id: string, now = new Date()): { found: number; high: number; today: number } {
-  const mine = getAllContacts(now).filter((c) => c.creator.agentId === id)
+export function removeCampaignAgent(campaignId: string, agentId: string): void {
+  setState((s) => ({ campaigns: s.campaigns.map((c) => (c.id === campaignId ? { ...c, agents: c.agents.filter((a) => a.id !== agentId) } : c)) }))
+}
+
+/** A campaign's day is the sum of its running agents. */
+export function campaignLeadsPerDay(c: Campaign): number {
+  return c.agents.filter((a) => a.active).reduce((sum, a) => sum + a.leadsPerDay, 0)
+}
+
+export function deleteCampaign(id: string): void {
+  setState((s) => ({ campaigns: s.campaigns.filter((a) => a.id !== id) }))
+}
+
+/** How many contacts each campaign found, and how many reach 2 stars. */
+export function campaignTally(id: string, now = new Date()): { found: number; high: number; today: number } {
+  const mine = getAllContacts(now).filter((c) => c.creator.campaignId === id)
   return { found: mine.length, high: mine.filter((c) => isHigh(c.score)).length, today: mine.filter((c) => c.isNew).length }
 }
 
@@ -359,7 +396,7 @@ export function exportCsv(creatorIds: string[]): string {
   const rows = creatorIds
     .map((id) => getContact(id))
     .filter((c): c is Contact => c !== null)
-    .map(({ creator: c, score, latestSignal: sig, agent }) => ({
+    .map(({ creator: c, score, latestSignal: sig, campaign }) => ({
       name: c.name,
       handle: c.handle,
       url: `https://instagram.com/${c.handle}`,
@@ -379,7 +416,7 @@ export function exportCsv(creatorIds: string[]): string {
       language: c.language,
       email: c.email,
       bio: c.bio,
-      agent: agent?.name ?? '',
+      campaign: campaign?.name ?? '',
       note: getNote(c.id),
       tags: getTags(c.id).join('; '),
       rejected: isRejected(c.id) ? 'yes' : 'no',
@@ -454,15 +491,15 @@ export type { Stars }
 
 // Brief ------------------------------------------------------------------------
 
-/** The audience an agent looks for, in as many words as it takes. */
-export function setAgentBrief(id: string, who: string): void {
+/** The audience a campaign looks for, in as many words as it takes. */
+export function setCampaignBrief(id: string, who: string): void {
   const clean = who.trim()
   const first = clean.split(/(?<=\.)\s/)[0] ?? clean
   const b: Brief = { who: clean, answers: [], summary: clean ? first : 'No audience yet.' }
-  setState((s) => ({ agents: s.agents.map((a) => (a.id === id ? { ...a, brief: b } : a)) }))
+  setState((s) => ({ campaigns: s.campaigns.map((a) => (a.id === id ? { ...a, brief: b } : a)) }))
 }
 
-/** Read the site, write the audience, name the agent. */
-export function setAgentWebsite(id: string, website: string): void {
-  setState((s) => ({ agents: s.agents.map((a) => (a.id === id ? { ...a, website } : a)) }))
+/** Read the site, write the audience, name the campaign. */
+export function setCampaignWebsite(id: string, website: string): void {
+  setState((s) => ({ campaigns: s.campaigns.map((a) => (a.id === id ? { ...a, website } : a)) }))
 }

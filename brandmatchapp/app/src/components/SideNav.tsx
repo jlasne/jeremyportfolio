@@ -6,7 +6,7 @@ import { Logo } from './Logo'
 
 const ITEMS: { href: string; label: string; name: Route['name'] }[] = [
   { href: '#/contacts', label: 'Contacts', name: 'contacts' },
-  { href: '#/agent', label: 'Agents', name: 'agent' },
+  { href: '#/campaign', label: 'Campaigns', name: 'campaign' },
   { href: '#/connect', label: 'Connect AI', name: 'connect' },
   { href: '#/settings', label: 'Settings', name: 'settings' },
 ]

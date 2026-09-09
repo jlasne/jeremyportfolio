@@ -43,7 +43,7 @@ interface Row {
   niche: Level
   nicheWhy: string
   signals: Signal[]
-  agent: string
+  campaign: string
   /** Hours since first seen. Under 24 means new today. */
   seen: number
 }
@@ -56,7 +56,7 @@ const rows: Row[] = [
     followers: 184_000, er: 0.041, reel: 62_000, ppm: 14, lastPost: 1, country: 'US', language: 'en', email: 'hello@liftwithmaya.com',
     sells: 'an online program', niche: 1,
     nicheWhy: 'Technique content, an audience of beginner women, and a follower count inside the band.',
-    signals: [sig('sponsored_post', 2), sig('media_kit', 48)], agent: 'a1', seen: 900,
+    signals: [sig('sponsored_post', 2), sig('media_kit', 48)], campaign: 'a1', seen: 900,
   },
   {
     id: 'c02', handle: 'sophie.souleve', name: 'Sophie Marchand',
@@ -64,7 +64,7 @@ const rows: Row[] = [
     followers: 62_000, er: 0.058, reel: 29_000, ppm: 9, lastPost: 2, country: 'FR', language: 'fr', email: null,
     sells: 'an 8 week program', niche: 1,
     nicheWhy: 'Beginner program, technique content, and an audience of women new to the barbell.',
-    signals: [sig('collab_bio', 3)], agent: 'a1', seen: 5,
+    signals: [sig('collab_bio', 3)], campaign: 'a1', seen: 5,
   },
   {
     id: 'c03', handle: 'jennakstrong', name: 'Jenna Kowalski',
@@ -72,7 +72,7 @@ const rows: Row[] = [
     followers: 240_000, er: 0.033, reel: 88_000, ppm: 12, lastPost: 1, country: 'CA', language: 'en', email: 'team@jennakstrong.com',
     sells: 'an online program', niche: 1,
     nicheWhy: 'Technique content, a beginner program alongside the competition posts, and 240k followers.',
-    signals: [sig('promoted_supplement', 1), sig('sponsored_post', 41), sig('launched_program', 120)], agent: 'a2', seen: 1_300,
+    signals: [sig('promoted_supplement', 1), sig('sponsored_post', 41), sig('launched_program', 120)], campaign: 'a2', seen: 1_300,
   },
   {
     id: 'c04', handle: 'priyalifts', name: 'Priya Nair',
@@ -80,7 +80,7 @@ const rows: Row[] = [
     followers: 91_000, er: 0.047, reel: 34_000, ppm: 10, lastPost: 3, country: 'UK', language: 'en', email: 'priya@priyalifts.co.uk',
     sells: 'a 6 week program', niche: 1,
     nicheWhy: 'Beginner women, a program of her own, and a follower count inside the band.',
-    signals: [sig('media_kit', 7)], agent: 'a1', seen: 400,
+    signals: [sig('media_kit', 7)], campaign: 'a1', seen: 400,
   },
   {
     id: 'c06', handle: 'tashtrains', name: 'Tash Coleman',
@@ -88,7 +88,7 @@ const rows: Row[] = [
     followers: 315_000, er: 0.028, reel: 104_000, ppm: 16, lastPost: 1, country: 'AU', language: 'en', email: 'partnerships@tashtrains.com',
     sells: 'an app', niche: 1,
     nicheWhy: 'Technique first content, 3,200 paying members, and an audience of women starting out.',
-    signals: [sig('posted_rates', 9), sig('sponsored_post', 66)], agent: 'a1', seen: 2_000,
+    signals: [sig('posted_rates', 9), sig('sponsored_post', 66)], campaign: 'a1', seen: 2_000,
   },
   {
     id: 'c09', handle: 'rachelkimfit', name: 'Rachel Kim',
@@ -96,7 +96,7 @@ const rows: Row[] = [
     followers: 402_000, er: 0.024, reel: 120_000, ppm: 18, lastPost: 1, country: 'US', language: 'en', email: 'rachel@rachelkimfit.com',
     sells: 'an online program', niche: 1,
     nicheWhy: 'Technique tutorials for beginners, 40k program members, and 402k followers.',
-    signals: [sig('promoted_supplement', 4), sig('sponsored_post', 74)], agent: 'a2', seen: 3_000,
+    signals: [sig('promoted_supplement', 4), sig('sponsored_post', 74)], campaign: 'a2', seen: 3_000,
   },
   {
     id: 'c11', handle: 'amaraliftsheavy', name: 'Amara Okafor',
@@ -104,7 +104,7 @@ const rows: Row[] = [
     followers: 76_000, er: 0.049, reel: 31_000, ppm: 9, lastPost: 2, country: 'CA', language: 'en', email: 'coach@amaraliftsheavy.com',
     sells: 'one to one coaching', niche: 1,
     nicheWhy: 'Coaching for women new to the barbell, which is the brief in one line.',
-    signals: [sig('collab_bio', 6)], agent: 'a1', seen: 3,
+    signals: [sig('collab_bio', 6)], campaign: 'a1', seen: 3,
   },
   {
     id: 'c12', handle: 'hannahbrooksfit', name: 'Hannah Brooks',
@@ -112,7 +112,7 @@ const rows: Row[] = [
     followers: 210_000, er: 0.031, reel: 70_000, ppm: 13, lastPost: 1, country: 'AU', language: 'en', email: 'hello@hannahbrooksfit.com',
     sells: 'an app', niche: 0.5,
     nicheWhy: 'Strength content for women and 12k app downloads, with transformations instead of technique.',
-    signals: [sig('launched_merch', 10), sig('media_kit', 95)], agent: 'a1', seen: 4_000,
+    signals: [sig('launched_merch', 10), sig('media_kit', 95)], campaign: 'a1', seen: 4_000,
   },
 
   // Two stars. Niche and selling, with the last brand signal older than 30 days or none at all.
@@ -122,7 +122,7 @@ const rows: Row[] = [
     followers: 33_000, er: 0.055, reel: 14_000, ppm: 6, lastPost: 5, country: 'UK', language: 'en', email: null,
     sells: 'an ebook', niche: 1,
     nicheWhy: 'A 200 page beginner lifting ebook and an audience of women starting out.',
-    signals: [], agent: 'a1', seen: 1_100,
+    signals: [], campaign: 'a1', seen: 1_100,
   },
   {
     id: 'c14', handle: 'camille.muscu', name: 'Camille Roux',
@@ -130,7 +130,7 @@ const rows: Row[] = [
     followers: 54_000, er: 0.046, reel: 22_000, ppm: 7, lastPost: 6, country: 'FR', language: 'fr', email: 'camille@camillemuscu.fr',
     sells: 'a 12 week program', niche: 1,
     nicheWhy: 'A 12 week beginner program and an audience of women new to the gym.',
-    signals: [sig('launched_program', 160)], agent: 'a1', seen: 900,
+    signals: [sig('launched_program', 160)], campaign: 'a1', seen: 900,
   },
   {
     id: 'c15', handle: 'brookelifts', name: 'Brooke Anderson',
@@ -138,7 +138,7 @@ const rows: Row[] = [
     followers: 640_000, er: 0.019, reel: 210_000, ppm: 20, lastPost: 1, country: 'US', language: 'en', email: 'mgmt@brookelifts.com',
     sells: 'an online program', niche: 1,
     nicheWhy: 'Technique tutorials for beginners, a program of her own, and 640k followers.',
-    signals: [sig('sponsored_post', 8)], agent: 'a1', seen: 5_000,
+    signals: [sig('sponsored_post', 8)], campaign: 'a1', seen: 5_000,
   },
   {
     id: 'c18', handle: 'zoepham.fit', name: 'Zoe Pham',
@@ -146,7 +146,7 @@ const rows: Row[] = [
     followers: 39_000, er: 0.051, reel: 15_000, ppm: 6, lastPost: 4, country: 'AU', language: 'en', email: null,
     sells: 'an ebook', niche: 0.5,
     nicheWhy: 'Technique content and an ebook, with an audience of women over 40 rather than beginners.',
-    signals: [], agent: 'a3', seen: 1_700,
+    signals: [], campaign: 'a3', seen: 1_700,
   },
   {
     id: 'c19', handle: 'kat.mueller.strong', name: 'Kat Müller',
@@ -154,7 +154,7 @@ const rows: Row[] = [
     followers: 27_000, er: 0.067, reel: 12_000, ppm: 8, lastPost: 2, country: 'DE', language: 'de', email: 'kat@katmueller.de',
     sells: 'an online program', niche: 1,
     nicheWhy: 'Technique first content and a program for beginners, in German.',
-    signals: [sig('launched_program', 200)], agent: 'a1', seen: 2_600,
+    signals: [sig('launched_program', 200)], campaign: 'a1', seen: 2_600,
   },
   {
     id: 'c22', handle: 'freyalifts', name: 'Freya Nilsson',
@@ -162,7 +162,7 @@ const rows: Row[] = [
     followers: 22_000, er: 0.069, reel: 9_800, ppm: 6, lastPost: 2, country: 'UK', language: 'en', email: 'freya@freyalifts.co.uk',
     sells: 'one to one coaching', niche: 1,
     nicheWhy: 'Technique tips for beginners from a coach who started as one.',
-    signals: [], agent: 'a1', seen: 7,
+    signals: [], campaign: 'a1', seen: 7,
   },
   {
     id: 'c26', handle: 'naomibellstrong', name: 'Naomi Bell',
@@ -170,7 +170,7 @@ const rows: Row[] = [
     followers: 29_000, er: 0.061, reel: 12_500, ppm: 7, lastPost: 1, country: 'CA', language: 'en', email: null,
     sells: 'a membership', niche: 1,
     nicheWhy: 'Barbell basics for women, technique first, with a membership of her own.',
-    signals: [], agent: 'a1', seen: 500,
+    signals: [], campaign: 'a1', seen: 500,
   },
   {
     id: 'c31', handle: 'miathompsontrains', name: 'Mia Thompson',
@@ -178,7 +178,7 @@ const rows: Row[] = [
     followers: 260_000, er: 0.023, reel: 72_000, ppm: 12, lastPost: 1, country: 'AU', language: 'en', email: 'mia@miathompsontrains.com',
     sells: 'an online program', niche: 0.5,
     nicheWhy: 'Strength content for women and a program of her own, with routines instead of technique.',
-    signals: [sig('sponsored_post', 88)], agent: 'a1', seen: 4_400,
+    signals: [sig('sponsored_post', 88)], campaign: 'a1', seen: 4_400,
   },
   {
     id: 'c32', handle: 'kelseywardfit', name: 'Kelsey Ward',
@@ -186,7 +186,7 @@ const rows: Row[] = [
     followers: 48_000, er: 0.05, reel: 20_000, ppm: 9, lastPost: 2, country: 'CA', language: 'en', email: null,
     sells: 'an online program', niche: 1,
     nicheWhy: 'One coaching cue per video for beginners, with a program of her own.',
-    signals: [], agent: 'a1', seen: 750,
+    signals: [], campaign: 'a1', seen: 750,
   },
   {
     id: 'c34', handle: 'hollyfraserfit', name: 'Holly Fraser',
@@ -194,7 +194,7 @@ const rows: Row[] = [
     followers: 37_000, er: 0.057, reel: 15_500, ppm: 6, lastPost: 4, country: 'UK', language: 'en', email: null,
     sells: 'an ebook', niche: 0.5,
     nicheWhy: 'Technique content and an ebook, with an audience of women over 40 rather than beginners.',
-    signals: [], agent: 'a3', seen: 3_600,
+    signals: [], campaign: 'a3', seen: 3_600,
   },
   {
     id: 'c38', handle: 'rubycollinsfit', name: 'Ruby Collins',
@@ -202,7 +202,7 @@ const rows: Row[] = [
     followers: 52_000, er: 0.015, reel: 11_000, ppm: 4, lastPost: 22, country: 'AU', language: 'en', email: null,
     sells: 'one to one coaching', niche: 1,
     nicheWhy: 'Technique clips for beginners, with coaching she sells herself.',
-    signals: [sig('sponsored_post', 140)], agent: 'a1', seen: 4_900,
+    signals: [sig('sponsored_post', 140)], campaign: 'a1', seen: 4_900,
   },
   {
     id: 'c40', handle: 'lisaschneider.fit', name: 'Lisa Schneider',
@@ -210,7 +210,7 @@ const rows: Row[] = [
     followers: 19_000, er: 0.074, reel: 8_200, ppm: 5, lastPost: 6, country: 'DE', language: 'de', email: 'lisa@lisaschneider.fit',
     sells: 'an online program', niche: 0.5,
     nicheWhy: 'First weights for postpartum women, with a program of her own, in German.',
-    signals: [], agent: 'a3', seen: 1_600,
+    signals: [], campaign: 'a3', seen: 1_600,
   },
   {
     id: 'c13', handle: 'nadiafischer.fit', name: 'Nadia Fischer',
@@ -218,7 +218,7 @@ const rows: Row[] = [
     followers: 88_000, er: 0.039, reel: 35_000, ppm: 8, lastPost: 3, country: 'DE', language: 'en', email: null,
     sells: 'one to one coaching', niche: 0.5,
     nicheWhy: 'Strength coaching for women in English, with meet recaps alongside the technique posts.',
-    signals: [], agent: 'a1', seen: 1_500,
+    signals: [], campaign: 'a1', seen: 1_500,
   },
 
   // One star. Niche, selling nothing yet.
@@ -228,7 +228,7 @@ const rows: Row[] = [
     followers: 47_000, er: 0.062, reel: 21_000, ppm: 8, lastPost: 1, country: 'DE', language: 'de', email: null,
     sells: '', niche: 1,
     nicheWhy: 'Technique content for women lifting their first kilos, in German.',
-    signals: [], agent: 'a1', seen: 44,
+    signals: [], campaign: 'a1', seen: 44,
   },
   {
     id: 'c08', handle: 'chloe.fit.paris', name: 'Chloé Bernard',
@@ -236,7 +236,7 @@ const rows: Row[] = [
     followers: 18_000, er: 0.081, reel: 9_400, ppm: 7, lastPost: 4, country: 'FR', language: 'fr', email: 'chloe.fit.paris@gmail.com',
     sells: '', niche: 1,
     nicheWhy: 'Squat and deadlift technique for beginner women, in French.',
-    signals: [], agent: 'a1', seen: 300,
+    signals: [], campaign: 'a1', seen: 300,
   },
   {
     id: 'c21', handle: 'graceliulifts', name: 'Grace Liu',
@@ -244,7 +244,7 @@ const rows: Row[] = [
     followers: 58_000, er: 0.044, reel: 24_000, ppm: 8, lastPost: 3, country: 'US', language: 'en', email: 'grace.liu.lifts@gmail.com',
     sells: '', niche: 1,
     nicheWhy: 'Squat, bench and deadlift tutorials for women starting out.',
-    signals: [], agent: 'a1', seen: 800,
+    signals: [], campaign: 'a1', seen: 800,
   },
   {
     id: 'c23', handle: 'saraweber.fit', name: 'Sara Weber',
@@ -252,7 +252,7 @@ const rows: Row[] = [
     followers: 36_000, er: 0.053, reel: 15_000, ppm: 7, lastPost: 5, country: 'DE', language: 'en', email: null,
     sells: '', niche: 1,
     nicheWhy: 'Technique videos for women starting out, in English from Germany.',
-    signals: [], agent: 'a1', seen: 2_900,
+    signals: [], campaign: 'a1', seen: 2_900,
   },
   {
     id: 'c24', handle: 'tarasinghlifts', name: 'Tara Singh',
@@ -260,7 +260,7 @@ const rows: Row[] = [
     followers: 12_000, er: 0.09, reel: 6_800, ppm: 6, lastPost: 3, country: 'UK', language: 'en', email: 'tara@tarasinghlifts.com',
     sells: '', niche: 1,
     nicheWhy: 'Teaches women to lift from her own beginner story, at 9% engagement.',
-    signals: [], agent: 'a1', seen: 14,
+    signals: [], campaign: 'a1', seen: 14,
   },
   {
     id: 'c28', handle: 'jade.thomas.lifts', name: 'Jade Thomas',
@@ -268,7 +268,7 @@ const rows: Row[] = [
     followers: 24_000, er: 0.063, reel: 10_400, ppm: 9, lastPost: 2, country: 'UK', language: 'en', email: null,
     sells: '', niche: 1,
     nicheWhy: 'Films every coaching cue she gives beginners at her barbell club.',
-    signals: [], agent: 'a1', seen: 1_000,
+    signals: [], campaign: 'a1', seen: 1_000,
   },
   {
     id: 'c30', handle: 'mel.andrews.lifts', name: 'Mel Andrews',
@@ -276,7 +276,7 @@ const rows: Row[] = [
     followers: 31_000, er: 0.058, reel: 13_200, ppm: 7, lastPost: 3, country: 'AU', language: 'en', email: 'mel@melandrews.fit',
     sells: '', niche: 0.5,
     nicheWhy: 'Postpartum strength progressions, an audience the brief names.',
-    signals: [], agent: 'a3', seen: 2_100,
+    signals: [], campaign: 'a3', seen: 2_100,
   },
   {
     id: 'c35', handle: 'bethmarshall', name: 'Beth Marshall',
@@ -284,7 +284,7 @@ const rows: Row[] = [
     followers: 24_000, er: 0.008, reel: 4_100, ppm: 1, lastPost: 62, country: 'US', language: 'en', email: null,
     sells: '', niche: 0.5,
     nicheWhy: 'Technique posts for women lifting, buried in personal content.',
-    signals: [], agent: 'a1', seen: 5_500,
+    signals: [], campaign: 'a1', seen: 5_500,
   },
   {
     id: 'c36', handle: 'ines.leroy.fit', name: 'Inès Leroy',
@@ -292,7 +292,7 @@ const rows: Row[] = [
     followers: 16_000, er: 0.047, reel: 7_300, ppm: 6, lastPost: 4, country: 'FR', language: 'fr', email: null,
     sells: '', niche: 1,
     nicheWhy: 'Starting to lift without getting hurt, aimed at beginner women, in French.',
-    signals: [], agent: 'a1', seen: 52,
+    signals: [], campaign: 'a1', seen: 52,
   },
   {
     id: 'c37', handle: 'dana.olsen.lifts', name: 'Dana Olsen',
@@ -300,7 +300,7 @@ const rows: Row[] = [
     followers: 21_000, er: 0.054, reel: 9_100, ppm: 5, lastPost: 6, country: 'CA', language: 'en', email: 'dana.olsen.lifts@gmail.com',
     sells: '', niche: 0.5,
     nicheWhy: 'Filmed progressions for women over 45, an audience next to the brief.',
-    signals: [], agent: 'a3', seen: 7_000,
+    signals: [], campaign: 'a3', seen: 7_000,
   },
   {
     id: 'c39', handle: 'erinwalshlifts', name: 'Erin Walsh',
@@ -308,7 +308,7 @@ const rows: Row[] = [
     followers: 13_000, er: 0.041, reel: 5_900, ppm: 4, lastPost: 9, country: 'CA', language: 'en', email: null,
     sells: '', niche: 1,
     nicheWhy: 'Films her own beginner sessions, mistakes included, for other beginners.',
-    signals: [], agent: 'a1', seen: 6_200,
+    signals: [], campaign: 'a1', seen: 6_200,
   },
 
   // Zero stars. Outside the niche.
@@ -318,7 +318,7 @@ const rows: Row[] = [
     followers: 128_000, er: 0.036, reel: 45_000, ppm: 11, lastPost: 2, country: 'US', language: 'en', email: null,
     sells: 'merch', niche: 0,
     nicheWhy: 'Bench press content for a mostly male gym crowd, which is not the audience in the brief.',
-    signals: [sig('launched_merch', 3)], agent: 'a2', seen: 600,
+    signals: [sig('launched_merch', 3)], campaign: 'a2', seen: 600,
   },
   {
     id: 'c16', handle: 'islagrantstrong', name: 'Isla Grant',
@@ -326,7 +326,7 @@ const rows: Row[] = [
     followers: 15_000, er: 0.072, reel: 6_100, ppm: 5, lastPost: 8, country: 'UK', language: 'en', email: null,
     sells: 'meet prep coaching', niche: 0.5,
     nicheWhy: 'Strongwoman meet prep serves competitors, not the beginners in the brief.',
-    signals: [], agent: 'a1', seen: 700,
+    signals: [], campaign: 'a1', seen: 700,
   },
   {
     id: 'c17', handle: 'megdoylefit', name: 'Megan Doyle',
@@ -334,7 +334,7 @@ const rows: Row[] = [
     followers: 121_000, er: 0.027, reel: 38_000, ppm: 12, lastPost: 2, country: 'CA', language: 'en', email: 'megan@megdoylefit.com',
     sells: 'an ebook', niche: 0,
     nicheWhy: 'Home workouts and meal ideas sit outside lifting.',
-    signals: [sig('promoted_supplement', 80)], agent: 'a2', seen: 2_200,
+    signals: [sig('promoted_supplement', 80)], campaign: 'a2', seen: 2_200,
   },
   {
     id: 'c20', handle: 'oliviahartfit', name: 'Olivia Hart',
@@ -342,7 +342,7 @@ const rows: Row[] = [
     followers: 840_000, er: 0.012, reel: 190_000, ppm: 22, lastPost: 1, country: 'US', language: 'en', email: 'olivia@oliviahartmgmt.com',
     sells: 'affiliate codes', niche: 0,
     nicheWhy: 'Lifestyle content across travel and recipes reaches a broad audience, not lifting beginners.',
-    signals: [sig('sponsored_post', 5), sig('media_kit', 110)], agent: 'a2', seen: 6_000,
+    signals: [sig('sponsored_post', 5), sig('media_kit', 110)], campaign: 'a2', seen: 6_000,
   },
   {
     id: 'c25', handle: 'emcarterfit', name: 'Emily Carter',
@@ -350,7 +350,7 @@ const rows: Row[] = [
     followers: 150_000, er: 0.021, reel: 41_000, ppm: 9, lastPost: 2, country: 'AU', language: 'en', email: 'emily@emcarterfit.com',
     sells: '', niche: 0,
     nicheWhy: 'Running and hiking content reaches an endurance audience.',
-    signals: [], agent: 'a2', seen: 3_300,
+    signals: [], campaign: 'a2', seen: 3_300,
   },
   {
     id: 'c27', handle: 'alexismoreno.fit', name: 'Alexis Moreno',
@@ -358,7 +358,7 @@ const rows: Row[] = [
     followers: 67_000, er: 0.035, reel: 27_000, ppm: 10, lastPost: 2, country: 'US', language: 'en', email: 'alexis@alexismoreno.fit',
     sells: '', niche: 0.5,
     nicheWhy: 'Bodybuilding prep and posing serves stage competitors.',
-    signals: [], agent: 'a2', seen: 1_900,
+    signals: [], campaign: 'a2', seen: 1_900,
   },
   {
     id: 'c29', handle: 'jade.lambert.fit', name: 'Jade Lambert',
@@ -366,7 +366,7 @@ const rows: Row[] = [
     followers: 71_000, er: 0.029, reel: 22_000, ppm: 8, lastPost: 2, country: 'FR', language: 'fr', email: null,
     sells: '', niche: 0,
     nicheWhy: 'Pilates and yoga is a different discipline, audience and format.',
-    signals: [], agent: 'a1', seen: 2_400,
+    signals: [], campaign: 'a1', seen: 2_400,
   },
   {
     id: 'c33', handle: 'avamitchell.strong', name: 'Ava Mitchell',
@@ -374,7 +374,7 @@ const rows: Row[] = [
     followers: 95_000, er: 0.032, reel: 33_000, ppm: 15, lastPost: 1, country: 'US', language: 'en', email: 'ava@avamitchell.com',
     sells: '', niche: 0,
     nicheWhy: 'CrossFit competition content serves athletes already deep in the sport.',
-    signals: [], agent: 'a2', seen: 16,
+    signals: [], campaign: 'a2', seen: 16,
   },
 ]
 
@@ -396,7 +396,7 @@ export const creators: Creator[] = rows.map((r) => ({
   niche: r.niche,
   nicheWhy: r.nicheWhy,
   sells: r.sells,
-  agentId: r.agent,
+  campaignId: r.campaign,
   firstSeenAt: hoursAgo(r.seen),
   lastCrawlAt: hoursAgo(Math.min(r.seen, 6)),
 }))

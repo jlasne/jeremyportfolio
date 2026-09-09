@@ -1,20 +1,17 @@
 import { useState } from 'react'
-import {
-  CRITERIA, QUALIFIED_MIN, addToVocabulary, countDone, countTagged, getAgents, getDashboard, getSettings, getTagVocabulary,
-  getTimezones, removeFromVocabulary, setSettings,
-} from '../data'
+import { campaignLeadsPerDay, countDone, getCampaigns, getDashboard, getSettings } from '../data'
 import { useStore } from '../data/hooks'
-import { resetState } from '../data/store'
 import { nextBatchLabel } from '../lib/format'
-import { navigate } from '../lib/router'
 
 export function Settings() {
   useStore()
   const settings = getSettings()
-  const agents = getAgents()
+  const campaigns = getCampaigns()
   const d = getDashboard()
-  const [newTag, setNewTag] = useState('')
-  const [confirmReset, setConfirmReset] = useState(false)
+  const perDay = campaigns.filter((c) => c.active).reduce((sum, c) => sum + campaignLeadsPerDay(c), 0)
+  const [feedback, setFeedback] = useState('')
+  const [sent, setSent] = useState(false)
+  const [email, setEmail] = useState('jeremy@strongher.co')
 
   return (
     <div className="page editor">
@@ -23,87 +20,68 @@ export function Settings() {
       </div>
 
       <section className="ask">
-        <h2>When your list lands</h2>
-        <label className="field">
-          <span>Your timezone</span>
-          <select className="select" value={settings.timezone} onChange={(e) => setSettings({ timezone: e.target.value })}>
-            {getTimezones().map((tz) => (
-              <option key={tz} value={tz}>{tz.replace('_', ' ')}</option>
-            ))}
-          </select>
-        </label>
-        <p className="hint">Next batch {nextBatchLabel(settings.timezone)}. Each agent sets its own hour.</p>
-      </section>
-
-      <section className="ask">
-        <h2>Tags</h2>
-        <p className="muted">The labels offered when you tag a contact. Typing a new one on a contact adds it here.</p>
-        <div className="chips" style={{ margin: '12px 0' }}>
-          {getTagVocabulary().map((t) => (
-            <span key={t} className="chip small">
-              {t} <span className="num faint">{countTagged(t)}</span>
-              <button type="button" className="x" aria-label={`Remove the tag ${t}`} onClick={() => removeFromVocabulary(t)}>×</button>
-            </span>
-          ))}
+        <h2>Billing</h2>
+        <div className="bill">
+          <div className="bill-row">
+            <span className="bill-label">Plan</span>
+            <span className="bill-value">Brand, monthly</span>
+            <span className="tag">Active</span>
+          </div>
+          <div className="bill-row">
+            <span className="bill-label">Volume</span>
+            <span className="bill-value num">{perDay.toLocaleString('en-US')} leads a day across {campaigns.filter((c) => c.active).length} running campaign{campaigns.filter((c) => c.active).length === 1 ? '' : 's'}</span>
+          </div>
+          <div className="bill-row">
+            <span className="bill-label">Next invoice</span>
+            <span className="bill-value">1 October 2026</span>
+          </div>
+          <div className="bill-row">
+            <span className="bill-label">Billing email</span>
+            <input className="input" value={email} onChange={(e) => setEmail(e.target.value)} aria-label="Billing email" style={{ maxWidth: 300 }} />
+          </div>
         </div>
-        <form
-          className="new-inline"
-          onSubmit={(e) => {
-            e.preventDefault()
-            addToVocabulary(newTag)
-            setNewTag('')
-          }}
-        >
-          <input className="input" placeholder="New tag" value={newTag} onChange={(e) => setNewTag(e.target.value)} aria-label="New tag" />
-          <button type="submit" className="btn">Add</button>
-        </form>
+        <div className="actions-bar" style={{ marginTop: 14 }}>
+          <button type="button" className="btn">Change plan</button>
+          <button type="button" className="btn">Update card</button>
+          <button type="button" className="btn quiet">Download invoices</button>
+        </div>
+        <p className="hint">Billing runs through Stripe once the product ships. These buttons are placeholders in the prototype.</p>
       </section>
 
       <section className="ask">
-        <h2>What counts as qualified</h2>
-        <p className="muted">Above {QUALIFIED_MIN} stars. Each of the three below is worth one star, and half a star when it half fits.</p>
-        <ul className="criteria plain">
-          {CRITERIA.map((c) => (
-            <li key={c.key}>
-              <span className="crit-name">{c.label}</span>
-              <span className="crit-means">
-                <b>Full.</b> {c.full}
-                <br />
-                <b>Half.</b> {c.half}
-              </span>
-            </li>
-          ))}
-        </ul>
+        <h2>Feedback</h2>
+        <p className="muted">A lead that made no sense, a filter you miss, a niche we get wrong. Tell us and we read every one.</p>
+        {sent ? (
+          <div className="reading" style={{ borderStyle: 'solid' }}>Thanks. It landed with the team, and you will hear back within a day.</div>
+        ) : (
+          <>
+            <textarea
+              className="textarea"
+              value={feedback}
+              placeholder="What should be better?"
+              aria-label="Feedback"
+              onChange={(e) => setFeedback(e.target.value)}
+              style={{ minHeight: 110 }}
+            />
+            <div className="actions-bar" style={{ marginTop: 10 }}>
+              <button type="button" className="btn primary" disabled={!feedback.trim()} onClick={() => setSent(true)}>Send</button>
+            </div>
+          </>
+        )}
       </section>
 
       <section className="ask">
         <h2>Your account</h2>
         <dl className="pairs">
-          <dt>Agents</dt>
-          <dd className="num">{agents.length}, {agents.filter((a) => a.active).length} running</dd>
-          <dt>Leads a day</dt>
-          <dd className="num">{agents.filter((a) => a.active).reduce((sum, a) => sum + a.leadsPerDay, 0).toLocaleString('en-US')}</dd>
+          <dt>Campaigns</dt>
+          <dd className="num">{campaigns.length}, {campaigns.filter((c) => c.active).length} running</dd>
           <dt>Contacts in your list</dt>
           <dd className="num">{d.total}</dd>
           <dt>Marked done</dt>
           <dd className="num">{countDone()}</dd>
+          <dt>Next batch</dt>
+          <dd>{nextBatchLabel(settings.timezone)}</dd>
         </dl>
-        <a className="btn small" href="#/connect">Connect your AI</a>
-      </section>
-
-      <section className="ask">
-        <h2>Start over</h2>
-        <p className="muted">Clears your agents, tags, notes and everything marked done, then runs setup again.</p>
-        <div className="actions-bar" style={{ marginTop: 10 }}>
-          {confirmReset ? (
-            <>
-              <button type="button" className="btn danger" onClick={() => { resetState(); navigate('onboarding') }}>Confirm reset</button>
-              <button type="button" className="btn quiet" onClick={() => setConfirmReset(false)}>Keep my data</button>
-            </>
-          ) : (
-            <button type="button" className="btn quiet danger" onClick={() => setConfirmReset(true)}>Reset everything</button>
-          )}
-        </div>
       </section>
     </div>
   )

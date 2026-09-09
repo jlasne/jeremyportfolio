@@ -1,25 +1,10 @@
-import { useEffect, useState } from 'react'
-import { getContacts } from '../data'
+import { useState } from 'react'
 import { useStore } from '../data/hooks'
-import { compact, percent } from '../lib/format'
 import { Logo } from '../components/Logo'
-import { Stars } from '../components/Stars'
+import { HeroDemo } from '../components/HeroDemo'
 
 // The landing, in the CreatorMatch mood: navy, off white, hairlines, no shadows.
 // One promise: it runs on its own, and what lands is qualified.
-
-/** Different brands ask for different volumes, so the number keeps moving. */
-const VOLUMES = [120, 250, 400, 640, 800, 1000]
-
-function useRollingVolume(): number {
-  const [i, setI] = useState(1)
-  useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const t = window.setInterval(() => setI(() => Math.floor(Math.random() * VOLUMES.length)), 1800)
-    return () => window.clearInterval(t)
-  }, [])
-  return VOLUMES[i]
-}
 
 const COMPARE: { row: string; database: string; scraper: string; agency: string; ours: string }[] = [
   {
@@ -62,7 +47,7 @@ const COMPARE: { row: string; database: string; scraper: string; agency: string;
 const FAQ = [
   {
     q: 'How do I set it up?',
-    a: 'Enter your website. Your agent reads it and writes the audience it should hunt for: the niche, who follows them, the size band. Change any word of it, set your daily volume, and it starts that night.',
+    a: 'Enter your website. Your agents read it and write the audience they should hunt for: the niche, who follows them, the size band. Change any word of it, set your daily volume, and it starts that night.',
   },
   {
     q: 'How many leads do I get?',
@@ -70,11 +55,11 @@ const FAQ = [
   },
   {
     q: 'What makes a lead high intent?',
-    a: 'Three things, each worth a star: the creator fits your niche, they already sell something of their own, and a brand signal fired in the last few days. A paid post, a rate card, collab wording in the bio.',
+    a: 'Three things, each worth a star: the creator fits your niche, they already sell something of their own, and a brand signal fired in the last few days. Half a star or more counts as qualified.',
   },
   {
-    q: 'Can I run more than one agent?',
-    a: 'Yes. One per launch, per product or per market. Every contact carries the agent that found it, so you can read them together or apart.',
+    q: 'Can I run more than one campaign?',
+    a: 'Yes. One per launch, per product or per market. Every contact carries the campaign that found it, so you can read them together or apart.',
   },
   {
     q: 'What do I do with the list?',
@@ -82,14 +67,12 @@ const FAQ = [
   },
   {
     q: 'Can my own AI read the list?',
-    a: 'That is Connect AI, and it is coming soon. MCP will hand your leads to Claude or ChatGPT, and an API will create and pause your agents from your own code.',
+    a: 'That is Connect AI, and it is coming soon. MCP will hand your leads to Claude or ChatGPT, and an API will create and pause your campaigns from your own code.',
   },
 ]
 
 export function Landing() {
   useStore()
-  const volume = useRollingVolume()
-  const top = getContacts({ minStars: 2 }).slice(0, 5)
   const [perDay, setPerDay] = useState(250)
   const [open, setOpen] = useState<number | null>(0)
 
@@ -111,44 +94,19 @@ export function Landing() {
         <a className="btn primary" href="#/onboarding">Start free</a>
       </header>
 
+      <div className="hero-block">
       <section className="hero">
-        <h1>Your AI agent finds <mark>high intent influencers</mark> for you.</h1>
-        <p className="lede">
-          Enter your website. brandmatch learns your brand, finds the influencers whose audience matches yours, and brings you
-          the ones ready for a deal with their contact attached.
-        </p>
+        <h1>Your AI agent finds <br />high intent influencers.</h1>
+        <p className="lede">Enter your website. brandmatch learns your brand and brings you influencers ready for a deal, with their contact.</p>
         <div className="hero-prompt" role="group" aria-label="Your website">
           <span className="prompt-text">strongher.co</span>
           <a className="btn primary" href="#/onboarding">Launch my agent</a>
         </div>
-        <p className="hero-tag">{volume.toLocaleString('en-US')} leads a day, <b>picked while you sleep.</b></p>
       </section>
 
-      <div className="browser">
-        <div className="browser-frame">
-          <div className="browser-bar">
-            <i /><i /><i />
-            <span className="url">app.brandmatch.app</span>
-          </div>
-          <div className="list">
-            {top.map((c) => (
-              <a className="contact" key={c.creator.id} href="#/contacts">
-                <span className="tick" aria-hidden="true"><input type="checkbox" readOnly tabIndex={-1} /></span>
-                <span className="handle-btn">@{c.creator.handle}</span>
-                <Stars score={c.score} />
-                <span className="mail">{c.creator.email ?? 'No email found'}</span>
-                <span className="metric">
-                  <b className="num">{compact(c.creator.followers)}</b>
-                  <small>followers</small>
-                </span>
-                <span className="metric">
-                  <b className="num">{percent(c.creator.engagementRate)}</b>
-                  <small>engaged</small>
-                </span>
-              </a>
-            ))}
-          </div>
-        </div>
+      <div className="demo-wrap">
+        <HeroDemo />
+      </div>
       </div>
 
       <section className="land-section" id="why">
@@ -187,11 +145,11 @@ export function Landing() {
           <div className="step">
             <span className="step-n">01</span>
             <h3>Enter your website</h3>
-            <p>Your agent reads it and writes who it should hunt for: the niche, the audience, the size. Change any word of it.</p>
+            <p>Your agents read it and write who they should hunt for: the niche, the audience, the size. Change any word of it.</p>
           </div>
           <div className="step">
             <span className="step-n">02</span>
-            <h3>Your agents find high intent influencers</h3>
+            <h3>Your campaigns find high intent influencers</h3>
             <p>Every night they go creator by creator, drop the quiet accounts, and bring you the ones showing they want a brand deal, with their contact attached.</p>
           </div>
         </div>
@@ -199,7 +157,7 @@ export function Landing() {
 
       <section className="land-section" id="connect">
         <p className="eyebrow">Connect AI</p>
-        <h2 className="big">Your agents and your leads, <em>reachable from your own AI.</em></h2>
+        <h2 className="big">Your campaigns and your leads, <em>reachable from your own AI.</em></h2>
         <p className="section-lede">One key, two doors. Nothing to install.</p>
         <div className="doors">
           <div className="door">
@@ -214,12 +172,12 @@ export function Landing() {
           </div>
           <div className="door">
             <span className="door-tag">API</span>
-            <h3>Manage your agents</h3>
-            <p>Create an agent, change its sentence, move its daily volume, pause it. Your own code or a workflow tool drives it.</p>
+            <h3>Manage your campaigns</h3>
+            <p>Create a campaign, add agents to it, move its daily volume, pause it. Your own code or a workflow tool drives it.</p>
             <div className="asks">
-              <span className="ask-line">Create an agent for a new launch</span>
+              <span className="ask-line">Create a campaign for a new launch</span>
               <span className="ask-line">Raise a volume from 100 to 800 a day</span>
-              <span className="ask-line">Pause every agent while you are closed</span>
+              <span className="ask-line">Pause every campaign while you are closed</span>
             </div>
           </div>
         </div>
@@ -229,7 +187,7 @@ export function Landing() {
         <h2 className="big">One price. <em>Two ways to take it.</em></h2>
         <p className="section-lede">The same price either way. Pick the one that matches how you buy.</p>
         <div className="plans">
-          <div className="plan">
+          <div className="plan brand">
             <span className="plan-tag">Monthly</span>
             <h3>Brand</h3>
             <p className="muted">Set the daily volume. Move it any morning.</p>
@@ -243,9 +201,9 @@ export function Landing() {
             </p>
             <ul>
               <li>Anywhere from 100 to 1,000 leads a day</li>
-              <li>Unlimited agents, each with its own sentence</li>
+              <li>Unlimited campaigns, each with its own sentence</li>
               <li>Their email attached where we find one</li>
-              <li>MCP for your leads, API for your agents</li>
+              <li>MCP for your leads, API for your campaigns</li>
               <li>Change the volume or cancel any morning</li>
             </ul>
             <a className="btn primary" href="#/onboarding">Start at {perDay} a day</a>
@@ -261,8 +219,8 @@ export function Landing() {
             <ul>
               <li>30,000 leads in total, billed once</li>
               <li>Spread them over as many days as you like</li>
-              <li>Unlimited agents while the pack lasts</li>
-              <li>MCP for your leads, API for your agents</li>
+              <li>Unlimited campaigns while the pack lasts</li>
+              <li>MCP for your leads, API for your campaigns</li>
               <li>Nothing to cancel</li>
             </ul>
             <a className="btn" href="#/onboarding">Buy 30,000 leads</a>
@@ -304,7 +262,7 @@ export function Landing() {
         <div>
           <h4>App</h4>
           <a href="#/contacts">See a live list</a>
-          <a href="#/onboarding">Create an agent</a>
+          <a href="#/onboarding">Create a campaign</a>
           <a href="#/connect">Connect AI</a>
         </div>
         <div>

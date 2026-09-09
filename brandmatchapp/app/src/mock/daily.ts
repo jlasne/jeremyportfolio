@@ -1,22 +1,32 @@
 import type { DailyStat } from '../types'
-import { agents } from './agents'
+import { campaigns } from './campaigns'
 import { daysAgo } from './time'
 
-// 14 days per agent, newest last. Every lead shows in the list; roughly 1 in 10
-// comes back qualified, which is 2 stars or more.
+// 90 days per campaign, newest last. Every lead shows in the list, and about
+// 9 in 10 reach half a star, which is what counts as qualified.
 
-const SHAPE = [0.98, 0.92, 1.03, 0.85, 0.96, 1.14, 0.88, 0.94, 1.05, 1.0, 0.78, 1.1, 0.97, 1.0]
-const RATE = [0.092, 0.088, 0.109, 0.081, 0.102, 0.109, 0.084, 0.091, 0.1, 0.096, 0.079, 0.106, 0.096, 0.102]
+const DAYS = 90
 
-export const dailyStats: DailyStat[] = agents.flatMap((agent) =>
-  SHAPE.map((shape, i) => {
-    const leads = agent.active ? Math.round(agent.leadsPerDay * shape) : 0
+/** A steady shape with a weekly dip and a slow climb, seeded per campaign so they differ. */
+function shape(day: number, seed: number): number {
+  const week = day % 7 === 5 || day % 7 === 6 ? 0.78 : 1
+  const wave = 1 + 0.12 * Math.sin((day + seed * 9) / 4.5)
+  const climb = 0.86 + (day / DAYS) * 0.22
+  return week * wave * climb
+}
+
+export const dailyStats: DailyStat[] = campaigns.flatMap((campaign, index) =>
+  Array.from({ length: DAYS }, (_, i) => {
+    const target = campaign.agents.filter((a) => a.active).reduce((sum, a) => sum + a.leadsPerDay, 0)
+    const started = i >= DAYS - 34 - index * 12
+    const leads = campaign.active && started ? Math.round(target * shape(i, index)) : 0
+    const share = 0.86 + 0.06 * Math.sin((i + index * 5) / 3)
     return {
-      date: daysAgo(SHAPE.length - 1 - i, 7),
-      agentId: agent.id,
+      date: daysAgo(DAYS - 1 - i, 7),
+      campaignId: campaign.id,
       gathered: leads,
       leads,
-      qualified: Math.round(leads * RATE[i]),
+      qualified: Math.round(leads * share),
     }
   }),
 )

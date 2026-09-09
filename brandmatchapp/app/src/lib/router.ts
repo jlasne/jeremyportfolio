@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react'
 
 export type Route =
   | { name: 'home' }
-  | { name: 'onboarding'; agentId: string | null; running: boolean }
-  | { name: 'contacts'; agentId: string | null }
-  | { name: 'agent'; agentId: string | null }
+  | { name: 'onboarding'; campaignId: string | null; running: boolean }
+  | { name: 'contacts'; campaignId: string | null }
+  | { name: 'campaign'; campaignId: string | null }
   | { name: 'connect' }
   | { name: 'settings' }
 
@@ -18,13 +18,13 @@ export function parse(hash: string): Route {
     case '':
       return { name: 'home' }
     case 'onboarding':
-      return { name: 'onboarding', agentId: id, running: third === 'running' }
+      return { name: 'onboarding', campaignId: id, running: third === 'running' }
     case 'contacts':
-      return { name: 'contacts', agentId: id }
-    case 'agent':
-    case 'agents':
+      return { name: 'contacts', campaignId: id }
+    case 'campaign':
+    case 'campaigns':
     case 'leads':
-      return { name: 'agent', agentId: id }
+      return { name: 'campaign', campaignId: id }
     case 'connect':
       return { name: 'connect' }
     case 'settings':

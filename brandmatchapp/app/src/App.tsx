@@ -2,12 +2,12 @@ import { useStore } from './data/hooks'
 import { useRoute } from './lib/router'
 import { SideNav } from './components/SideNav'
 import { StarClip } from './components/Stars'
-import { AgentEditor, Agents } from './screens/Agent'
+import { CampaignEditor, Campaigns } from './screens/Campaign'
 import { Connect } from './screens/Connect'
 import { Settings } from './screens/Settings'
 import { Contacts } from './screens/Contacts'
 import { Landing } from './screens/Landing'
-import { FirstRun, OnboardingAgent, OnboardingStart } from './screens/Onboarding'
+import { FirstRun, OnboardingCampaign, OnboardingStart } from './screens/Onboarding'
 
 export function App() {
   useStore()
@@ -26,9 +26,9 @@ export function App() {
     return (
       <>
         <StarClip />
-        {!route.agentId && <OnboardingStart />}
-        {route.agentId && !route.running && <OnboardingAgent agentId={route.agentId} />}
-        {route.agentId && route.running && <FirstRun agentId={route.agentId} />}
+        {!route.campaignId && <OnboardingStart />}
+        {route.campaignId && !route.running && <OnboardingCampaign campaignId={route.campaignId} />}
+        {route.campaignId && route.running && <FirstRun campaignId={route.campaignId} />}
       </>
     )
   }
@@ -38,8 +38,8 @@ export function App() {
       <StarClip />
       <SideNav route={route} />
       <main className="main">
-        {route.name === 'contacts' && <Contacts agentId={route.agentId} />}
-        {route.name === 'agent' && (route.agentId ? <AgentEditor agentId={route.agentId} /> : <Agents />)}
+        {route.name === 'contacts' && <Contacts campaignId={route.campaignId} />}
+        {route.name === 'campaign' && (route.campaignId ? <CampaignEditor campaignId={route.campaignId} /> : <Campaigns />)}
         {route.name === 'connect' && <Connect />}
         {route.name === 'settings' && <Settings />}
       </main>

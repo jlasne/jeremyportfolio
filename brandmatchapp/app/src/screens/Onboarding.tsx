@@ -1,58 +1,58 @@
 import { useEffect, useState } from 'react'
-import { createAgent, getAgent, runFirstCrawl, type CrawlProgress } from '../data'
+import { createCampaign, getCampaign, runFirstCrawl, type CrawlProgress } from '../data'
 import { useStore } from '../data/hooks'
 import { navigate } from '../lib/router'
-import { AgentEditor } from './Agent'
+import { CampaignEditor } from './Campaign'
 
-// Onboarding is one thing: create the first agent. Then the first batch runs.
+// Onboarding is one thing: create the first campaign. Then the first batch runs.
 
-/** No id yet: make an agent and move to its editor. */
+/** No id yet: make a campaign and move to its editor. */
 export function OnboardingStart() {
   useEffect(() => {
-    const a = createAgent()
+    const a = createCampaign()
     navigate(`onboarding/${a.id}`)
   }, [])
   return null
 }
 
-export function OnboardingAgent({ agentId }: { agentId: string }) {
+export function OnboardingCampaign({ campaignId }: { campaignId: string }) {
   useStore()
-  const agent = getAgent(agentId)
+  const campaign = getCampaign(campaignId)
   useEffect(() => {
-    if (!agent) navigate('onboarding')
-  }, [agent])
-  if (!agent) return null
+    if (!campaign) navigate('onboarding')
+  }, [campaign])
+  if (!campaign) return null
   return (
     <div className="onboard-shell">
       <header className="onboard-top">
         <span className="brand-word">brandmatch</span>
         <span className="faint">Step 1 of 2</span>
       </header>
-      <AgentEditor agentId={agentId} firstRun />
+      <CampaignEditor campaignId={campaignId} firstRun />
     </div>
   )
 }
 
-export function FirstRun({ agentId }: { agentId: string }) {
+export function FirstRun({ campaignId }: { campaignId: string }) {
   useStore()
-  const agent = getAgent(agentId)
+  const campaign = getCampaign(campaignId)
   const [p, setP] = useState<CrawlProgress>({ found: 0, scored: 0, done: false })
   useEffect(() => runFirstCrawl(setP), [])
   useEffect(() => {
     if (p.done) {
-      const t = window.setTimeout(() => navigate(`contacts/${agentId}`), 500)
+      const t = window.setTimeout(() => navigate(`contacts/${campaignId}`), 500)
       return () => window.clearTimeout(t)
     }
-  }, [p.done, agentId])
+  }, [p.done, campaignId])
   const pct = Math.round(((p.found + p.scored) / (412 * 2)) * 100)
   return (
     <div className="onboard">
       <div className="onboard-box" aria-live="polite">
         <p className="steps">Step 2 of 2</p>
-        <h1>{agent?.name || 'Your search'} is running now</h1>
+        <h1>{campaign?.name || 'Your search'} is running now</h1>
         <div className="brief-line">
-          <p>{agent?.brief.summary ?? ''}</p>
-          <a href={`#/onboarding/${agentId}`}>Edit</a>
+          <p>{campaign?.brief.summary ?? ''}</p>
+          <a href={`#/onboarding/${campaignId}`}>Edit</a>
         </div>
         <div className="progress">
           <div className="stat">
