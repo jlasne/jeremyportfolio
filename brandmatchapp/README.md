@@ -104,9 +104,9 @@ one star, half when it half fits.
 ## Design
 
 Broken white ground `#fbf9f7`, ink `#1b1420`, and two accents: orange
-`#f2662a` and purple `#7c5cff`. The landing stacks them as flat slabs: an
-orange hero, a purple steps section, an orange call to action and an ink
-footer. No gradients anywhere. The mark is two circles overlapping, orange and
+`#f2662a` and purple `#7c5cff`. The landing sits on a warmer broken white
+with an orange cast, `#fdf4ee`, and stacks flat slabs on it: a purple steps
+section, an orange call to action and an ink footer. No gradients anywhere. The mark is two circles overlapping, orange and
 purple, with the middle knocked out. The campaign colours, orange, purple,
 green `#2aa17a` and gold `#e0a100`, pass the colourblind and contrast checks
 and always sit next to a legend.

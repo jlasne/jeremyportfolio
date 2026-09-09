@@ -546,7 +546,7 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 .onboard-shell .editor { margin: 0 auto; padding-top: 12px; }
 
 /* Landing, flat colour blocks ---------------------------------------------- */
-/* Orange, purple, ink and paper as solid slabs. No gradients, no shadows. */
+/* Broken white with an orange cast as the ground, purple, orange and ink as slabs. No gradients, no shadows. */
 .landing {
   --l-ink: #1b1420;
   --l-muted: #5f5567;
@@ -554,7 +554,9 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
   --l-rule: #ece6e6;
   --l-rule-firm: #ddd4d8;
   --l-card: #ffffff;
-  background: var(--paper);
+  --l-ground: #fdf4ee;
+  --l-ground-2: #f9ebe1;
+  background: var(--l-ground);
   color: var(--l-ink);
   overflow-x: hidden;
 }
@@ -577,7 +579,7 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 .land-nav {
   display: flex; align-items: center; gap: 6px; padding: 18px 40px;
   border-bottom: 1px solid var(--l-rule); position: sticky; top: 0; z-index: 10;
-  background: rgba(251, 249, 247, 0.86); backdrop-filter: blur(12px);
+  background: rgba(253, 244, 238, 0.88); backdrop-filter: blur(12px);
 }
 .land-nav .brand { font-size: 17px; color: var(--l-ink); display: flex; align-items: center; gap: 10px; margin-right: 28px; }
 .land-nav .brand:hover { text-decoration: none; }
@@ -588,7 +590,7 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 .land-nav .login { color: var(--l-muted); font-weight: 500; padding: 7px 12px; }
 .land-nav .login:hover { color: var(--l-ink); text-decoration: none; }
 
-.hero-block { background: var(--orange); color: var(--l-ink); }
+.hero-block { background: var(--l-ground); color: var(--l-ink); }
 .hero { max-width: 900px; margin: 0 auto; padding: 96px 24px 40px; text-align: center; }
 .pill-note { display: inline-flex; align-items: center; gap: 9px; padding: 7px 15px 7px 11px; border: 1px solid var(--l-rule-firm); border-radius: 100px; font-size: 12.5px; color: var(--l-muted); margin-bottom: 30px; }
 .pill-note i { width: 7px; height: 7px; border-radius: 50%; background: var(--orange); }
@@ -598,7 +600,7 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 .hero-prompt {
   display: flex; align-items: center; gap: 12px; text-align: left;
   max-width: 640px; margin: 0 auto; padding: 7px 7px 7px 20px;
-  background: #fff; border: 1px solid #fff; border-radius: 100px;
+  background: #fff; border: 1px solid var(--l-rule-firm); border-radius: 100px;
 }
 .hero-prompt .prompt-text { flex: 1; font-size: 15px; color: var(--l-muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hero-prompt .btn { height: 42px; padding: 0 20px; }
@@ -804,12 +806,12 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 .landing #how .muted { color: rgba(255, 255, 255, 0.7); }
 .landing #how .eyebrow { color: #ffb08f; }
 .landing #connect { border-top: 0; }
-.landing #pricing { background: var(--paper-2); }
+.landing #pricing { background: var(--l-ground-2); }
 .landing #faq { border-top: 0; }
 
 /* The hero demo: four steps on a loop --------------------------------------- */
-.demo-wrap { background: var(--orange); padding: 0 24px 72px; }
-.demo { max-width: 860px; margin: 0 auto; background: #fff; border-radius: 20px; padding: 22px 26px 26px; color: var(--ink); text-align: left; }
+.demo-wrap { background: var(--l-ground); padding: 0 24px 72px; }
+.demo { max-width: 860px; margin: 0 auto; background: #fff; border: 1px solid var(--l-rule); border-radius: 20px; padding: 22px 26px 26px; color: var(--ink); text-align: left; }
 .demo-steps { list-style: none; margin: 0 0 18px; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; counter-reset: step; }
 .demo-steps li {
   counter-increment: step; display: inline-flex; align-items: center; gap: 7px;
