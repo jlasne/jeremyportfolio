@@ -4,7 +4,7 @@ import {
 } from '../data'
 import { useStore } from '../data/hooks'
 import { downloadCsv } from '../lib/csv'
-import { compact, relative } from '../lib/format'
+import { compact, percent, relative } from '../lib/format'
 import { navigate } from '../lib/router'
 import { CreatorDetail } from '../components/CreatorDetail'
 import { FilterForm } from '../components/FilterForm'
@@ -110,7 +110,14 @@ export function Contacts({ agentId }: { agentId: string | null }) {
                 <span className="faint">No signal</span>
               )}
             </span>
-            <span className="metric num">{compact(c.creator.followers)}</span>
+            <span className="metric">
+              <b className="num">{compact(c.creator.followers)}</b>
+              <small>followers</small>
+            </span>
+            <span className="metric">
+              <b className="num">{percent(c.creator.engagementRate)}</b>
+              <small>engaged</small>
+            </span>
           </button>
         ))}
         {contacts.length === 0 && <Empty tag={tag} minStars={minStars} onClear={() => { setTag(null); setMinStars(0) }} />}

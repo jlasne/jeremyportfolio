@@ -1,14 +1,20 @@
 import { useState } from 'react'
-import type { BriefAnswer, Filters } from '../types'
-import { agentTally, createAgent, deleteAgent, getAgent, getAgents, getFollowUpQuestions, setAgentBrief, updateAgent, updateAgentFilters } from '../data'
+import type { Filters } from '../types'
+import {
+  CRITERIA, agentTally, createAgent, deleteAgent, getAgent, getAgents, getDashboard, getSettings, getTimezones,
+  setAgentBrief, setSettings, updateAgent, updateAgentFilters,
+} from '../data'
 import { useStore } from '../data/hooks'
 import { navigate } from '../lib/router'
+import { DailyChart } from '../components/DailyChart'
 import { FilterForm } from '../components/FilterForm'
 
-/** The list: who is running, who is paused. */
+/** The list: what each agent brings in, who is running, who is paused. */
 export function Agents() {
   useStore()
   const agents = getAgents()
+  const d = getDashboard()
+
   return (
     <div className="page">
       <div className="page-head">
@@ -18,7 +24,18 @@ export function Agents() {
         <button type="button" className="btn primary" onClick={() => navigate(`agents/${createAgent().id}`)}>New agent</button>
       </div>
 
-      <div className="list">
+      <div className="card">
+        <h2>New contacts a day</h2>
+        <DailyChart data={d.daily} />
+        <div className="star-split">
+          <div><b className="num">{d.today}</b><span>new today</span></div>
+          <div><b className="num">{d.high}</b><span>at 2 stars or more</span></div>
+          <div><b className="num">{d.total}</b><span>contacts in total</span></div>
+          <div><b className="num">{agents.filter((a) => a.active).length}</b><span>agents running</span></div>
+        </div>
+      </div>
+
+      <div className="list" style={{ marginTop: 14 }}>
         {agents.map((a) => {
           const t = agentTally(a.id)
           return (
@@ -47,10 +64,11 @@ export function Agents() {
   )
 }
 
-/** The editor: the same two questions as onboarding, then the filters. */
+/** The editor: one sentence, the filters, and when the batch lands. */
 export function AgentEditor({ agentId }: { agentId: string }) {
   useStore()
   const agent = getAgent(agentId)
+  const settings = getSettings()
   const [confirmDelete, setConfirmDelete] = useState(false)
 
   if (!agent) {
@@ -62,13 +80,6 @@ export function AgentEditor({ agentId }: { agentId: string }) {
     )
   }
 
-  const questions = getFollowUpQuestions(agent.brief.who)
-  const answers: BriefAnswer[] = questions.map((q) => ({
-    questionId: q.id,
-    value: agent.brief.answers.find((a) => a.questionId === q.id)?.value ?? null,
-  }))
-  const setAnswer = (id: string, value: string | null) =>
-    setAgentBrief(agent.id, agent.brief.who, answers.map((a) => (a.questionId === id ? { ...a, value } : a)))
   const tally = agentTally(agent.id)
   const onFilters = (patch: Partial<Filters>) => updateAgentFilters(agent.id, patch)
 
@@ -98,40 +109,10 @@ export function AgentEditor({ agentId }: { agentId: string }) {
           className="input big"
           placeholder="Women lifting coaches who sell their own program"
           value={agent.brief.who}
-          onChange={(e) => setAgentBrief(agent.id, e.target.value, answers)}
+          onChange={(e) => setAgentBrief(agent.id, e.target.value)}
         />
         <p className="helper">One sentence. It drives the crawl keywords and the niche star.</p>
       </section>
-
-      {questions.map((q) => {
-        const value = answers.find((a) => a.questionId === q.id)?.value ?? ''
-        return (
-          <section className="ask" key={q.id}>
-            <h2>{q.text}</h2>
-            <div className="chips" role="group" aria-label={q.text}>
-              {q.chips.map((chip) => {
-                const on = value === chip
-                return (
-                  <button key={chip} type="button" className={`chip${on ? ' on' : ''}`} aria-pressed={on} onClick={() => setAnswer(q.id, on ? null : chip)}>
-                    {chip}
-                  </button>
-                )
-              })}
-            </div>
-            <input
-              className="input"
-              placeholder="Or type your own"
-              value={q.chips.includes(value) ? '' : value}
-              aria-label={`${q.text} Free text`}
-              onChange={(e) => setAnswer(q.id, e.target.value || null)}
-            />
-          </section>
-        )
-      })}
-
-      <div className="brief-line">
-        <p>{agent.brief.summary}</p>
-      </div>
 
       <section className="ask">
         <h2>Filters</h2>
@@ -151,13 +132,38 @@ export function AgentEditor({ agentId }: { agentId: string }) {
             />
           </label>
           <label className="field">
-            <span>Batch ready at</span>
+            <span>Ready at</span>
             <input className="input" type="time" value={agent.runAt} onChange={(e) => updateAgent(agent.id, { runAt: e.target.value })} />
+          </label>
+          <label className="field">
+            <span>Timezone</span>
+            <select className="select" value={settings.timezone} onChange={(e) => setSettings({ timezone: e.target.value })}>
+              {getTimezones().map((tz) => (
+                <option key={tz} value={tz}>{tz.replace('_', ' ')}</option>
+              ))}
+            </select>
           </label>
         </div>
         <p className="hint">
           Found {tally.found} contacts so far, {tally.high} at 2 stars or more. Cost follows the profiles crawled, so a lower number costs less.
         </p>
+      </section>
+
+      <section className="ask">
+        <h2>How this agent scores</h2>
+        <ul className="criteria plain">
+          {CRITERIA.map((c) => (
+            <li key={c.key}>
+              <span className="crit-name">{c.label}</span>
+              <span className="crit-means">
+                <b>Full.</b> {c.full}
+                <br />
+                <b>Half.</b> {c.half}
+              </span>
+            </li>
+          ))}
+        </ul>
+        <p className="hint">Three criteria, one star each, added up. Half a star when it half fits, so the score runs 0 to 3 in half steps.</p>
       </section>
 
       <div className="editor-foot">

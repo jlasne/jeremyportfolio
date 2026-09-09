@@ -66,28 +66,29 @@ return 404. Serving this app from another path means changing `base` first.
 | `app/src/mock/` | All mock data, one file per entity: creators, posts, lists, notes, tags, rejections, brief, filters, questions, settings. No data literal lives anywhere else |
 | `app/src/data/index.ts` | The data functions every screen reads through: get the feed, get one creator, save, note, tag, reject, export, brief, filters, settings, first run. Swap the mock for the real source here and nothing else changes |
 | `app/src/data/store.ts` | The one in memory state, seeded from the mock folder. Refresh resets it |
-| `app/src/screens/` | Onboarding, Dashboard, Contacts, Agents, Settings |
-| `app/src/components/` | Stars, Signal, the detail panel, the filter form, the daily chart |
+| `app/src/screens/` | Onboarding, Contacts, Agents |
+| `app/src/components/` | Stars, Signal, the detail panel, the filter chips, the daily line |
 | `app/src/data/score.ts` | The scoring rule, in one place |
 | `app/src/lib/` | Formatting, CSV, hash router, placeholder images drawn on the device |
 
 ## Screens
 
-Four screens. The nav sits on the left, full height, and collapses to a
+Two screens. The nav sits on the left, full height, and collapses to a
 scrolling bar across the top under 900px.
 
 | Route | What it holds |
 | --- | --- |
-| `#/dashboard` | Contacts today, contacts at 2 stars or more, contacts in total, 14 days of contacts gathered per day, how many earned each star, and a row per agent |
-| `#/contacts` | The one list. Chips filter by agent, by stars and by tag. A row shows the picture, the name, the stars, the signal with its date and the follower count. Everything else lives behind the row, in the panel |
-| `#/agents` | Who is running, who is paused. Clicking one opens the same questions as onboarding, then the filters, then a button through to its contacts |
-| `#/settings` | The brief, the filters, the tag list, how the score works, the timezone |
+| `#/contacts` | The one list. Chips filter by agent, by stars and by tag. A row shows the picture, the name, the stars, the signal with its date, followers and engagement. Everything else lives behind the row, in the panel |
+| `#/agents` | New contacts a day as a line over 14 days, four counts, then who is running and who is paused. Clicking one opens its sentence, its filters, its delivery and how it scores |
 | `#/onboarding/*` | One question, three follow ups, the filters, then the first batch over 8 seconds |
 
-An **agent** is one saved search that runs every morning. It owns a brief, its
-own filters, and how many contacts a day it should deliver. Every contact
-carries the agent that found it, and the chip row filters on it. Tags do the
-work saved lists used to do.
+An **agent** is one saved search that runs every morning. It owns one sentence
+about who to look for, its own filters, how many contacts a day it should
+deliver and when. Every contact carries the agent that found it, and the chip
+row on Contacts filters on it. Tags do the work saved lists used to do.
+
+Filters are written as choices, not number boxes: audience size, engagement,
+reel views, posts a month, when they last posted, email, country, language.
 
 ## Mock data
 

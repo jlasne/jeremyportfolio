@@ -11,12 +11,8 @@ export const agents: Agent[] = [
     name: 'Women lifting coaches',
     brief: {
       who: 'Women lifting coaches who sell their own program',
-      answers: [
-        { questionId: 'sells', value: 'online program' },
-        { questionId: 'content', value: 'technique tutorials' },
-        { questionId: 'audience', value: 'beginner women' },
-      ],
-      summary: 'Looking for: women lifting coaches, sell an online program, technique content, audience of beginner women.',
+      answers: [],
+      summary: 'Women lifting coaches who sell their own program.',
     },
     filters: { ...defaultFilters, countries: [], languages: [] },
     leadsPerDay: 25,
@@ -29,12 +25,8 @@ export const agents: Agent[] = [
     name: 'Supplement ambassadors',
     brief: {
       who: 'Fitness creators who already promote supplement brands',
-      answers: [
-        { questionId: 'sells', value: 'anything' },
-        { questionId: 'content', value: 'transformations' },
-        { questionId: 'audience', value: 'competitive lifters' },
-      ],
-      summary: 'Looking for: fitness creators who already promote supplement brands, transformation content, audience of competitive lifters.',
+      answers: [],
+      summary: 'Fitness creators who already promote supplement brands.',
     },
     filters: { ...defaultFilters, followersMin: 50_000, emailInBio: 'yes', countries: ['US', 'CA'], languages: [] },
     leadsPerDay: 15,
@@ -47,12 +39,8 @@ export const agents: Agent[] = [
     name: 'Postpartum and 40+',
     brief: {
       who: 'Coaches training women through postpartum and after 40',
-      answers: [
-        { questionId: 'sells', value: 'coaching' },
-        { questionId: 'content', value: 'technique tutorials' },
-        { questionId: 'audience', value: 'postpartum' },
-      ],
-      summary: 'Looking for: coaches training women through postpartum and after 40, sell coaching, technique content, audience of postpartum women.',
+      answers: [],
+      summary: 'Coaches training women through postpartum and after 40.',
     },
     filters: { ...defaultFilters, followersMax: 200_000, countries: [], languages: [] },
     leadsPerDay: 10,

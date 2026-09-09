@@ -6,9 +6,7 @@ import { SideNav } from './components/SideNav'
 import { StarClip } from './components/Stars'
 import { AgentEditor, Agents } from './screens/Agents'
 import { Contacts } from './screens/Contacts'
-import { Dashboard } from './screens/Dashboard'
 import { FirstRun, OnboardingDetails, OnboardingFilters, OnboardingWho } from './screens/Onboarding'
-import { Settings } from './screens/Settings'
 
 export function App() {
   useStore()
@@ -16,7 +14,7 @@ export function App() {
   const onboarded = getSettings().onboarded
 
   useEffect(() => {
-    if (route.name === 'home') navigate(onboarded ? 'dashboard' : 'onboarding/who')
+    if (route.name === 'home') navigate(onboarded ? 'contacts' : 'onboarding/who')
   }, [route.name, onboarded])
 
   if (route.name === 'onboarding') {
@@ -33,10 +31,8 @@ export function App() {
       <StarClip />
       <SideNav route={route} />
       <main className="main">
-        {route.name === 'dashboard' && <Dashboard />}
         {route.name === 'contacts' && <Contacts agentId={route.agentId} />}
         {route.name === 'agents' && (route.agentId ? <AgentEditor agentId={route.agentId} /> : <Agents />)}
-        {route.name === 'settings' && <Settings />}
       </main>
     </div>
   )

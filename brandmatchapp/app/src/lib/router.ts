@@ -5,10 +5,8 @@ import { useEffect, useState } from 'react'
 export type Route =
   | { name: 'home' }
   | { name: 'onboarding'; step: 'who' | 'details' | 'filters' | 'running' }
-  | { name: 'dashboard' }
   | { name: 'contacts'; agentId: string | null }
   | { name: 'agents'; agentId: string | null }
-  | { name: 'settings' }
 
 export function parse(hash: string): Route {
   const path = hash.replace(/^#/, '').replace(/^\/+/, '')
@@ -21,14 +19,10 @@ export function parse(hash: string): Route {
       const step = second === 'details' || second === 'filters' || second === 'running' ? second : 'who'
       return { name: 'onboarding', step }
     }
-    case 'dashboard':
-      return { name: 'dashboard' }
     case 'contacts':
       return { name: 'contacts', agentId: id }
     case 'agents':
       return { name: 'agents', agentId: id }
-    case 'settings':
-      return { name: 'settings' }
     default:
       return { name: 'home' }
   }

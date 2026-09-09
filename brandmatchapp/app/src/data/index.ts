@@ -360,8 +360,10 @@ export function setBrief(who: string, answers: BriefAnswer[]): Brief {
   return b
 }
 
-export function setAgentBrief(id: string, who: string, answers: BriefAnswer[]): void {
-  const b: Brief = { who: who.trim(), answers, summary: buildSummary(who, answers) }
+/** An agent's brief is one sentence. Onboarding still asks its three follow ups. */
+export function setAgentBrief(id: string, who: string): void {
+  const clean = who.trim()
+  const b: Brief = { who: clean, answers: [], summary: clean ? clean.replace(/\.$/, '') + '.' : 'No brief yet.' }
   setState((s) => ({ agents: s.agents.map((a) => (a.id === id ? { ...a, brief: b } : a)) }))
 }
 

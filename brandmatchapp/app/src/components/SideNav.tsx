@@ -11,10 +11,8 @@ const Mark = () => (
 )
 
 const ITEMS: { href: string; label: string; name: Route['name'] }[] = [
-  { href: '#/dashboard', label: 'Dashboard', name: 'dashboard' },
   { href: '#/contacts', label: 'Contacts', name: 'contacts' },
   { href: '#/agents', label: 'Agents', name: 'agents' },
-  { href: '#/settings', label: 'Settings', name: 'settings' },
 ]
 
 export function SideNav({ route }: { route: Route }) {
@@ -22,7 +20,7 @@ export function SideNav({ route }: { route: Route }) {
   const d = getDashboard()
   return (
     <nav className="sidenav" aria-label="Main">
-      <a className="brand" href="#/dashboard">
+      <a className="brand" href="#/contacts">
         <Mark />
         brandmatch
       </a>
