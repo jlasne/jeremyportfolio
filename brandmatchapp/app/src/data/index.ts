@@ -79,8 +79,8 @@ export interface ContactQuery {
   agentIds?: string[]
   tag?: string | null
   minStars?: number
-  /** Criteria that must score above zero. */
-  mustHave?: ('niche' | 'active' | 'intent')[]
+  /** The least each criterion may score: 0 any, 0.5 half a star, 1 a full star. */
+  minLevels?: Partial<Record<'niche' | 'active' | 'intent', Level>>
   newOnly?: boolean
   /** Contacts you marked done: hide them, show only them, or show everything. */
   done?: 'hide' | 'only' | 'any'
@@ -97,7 +97,7 @@ export function getContacts(q: ContactQuery = {}, now = new Date(), filters: Fil
     .filter((x) => !q.agentIds?.length || q.agentIds.includes(x.creator.agentId))
     .filter((x) => !q.tag || getTags(x.creator.id).includes(q.tag))
     .filter((x) => x.score.stars >= (q.minStars ?? 0))
-    .filter((x) => (q.mustHave ?? []).every((k) => x.score[k] > 0))
+    .filter((x) => Object.entries(q.minLevels ?? {}).every(([k, min]) => x.score[k as 'niche' | 'active' | 'intent'] >= (min ?? 0)))
     .filter((x) => !q.newOnly || x.isNew)
     .filter((x) => (q.done ?? 'hide') === 'any' || (q.done === 'only' ? x.isDone : !x.isDone))
     .sort(byScore)

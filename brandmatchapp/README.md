@@ -92,7 +92,9 @@ its filters and how many leads a day it delivers. Every contact carries the
 agent that found it.
 
 On Contacts the checkbox selects. Selecting opens a bar to tag, mark done or
-reject in bulk. Stars filter through a slider, agent and tag through dropdowns.
+reject in bulk. Agent and tag filter through dropdowns. Stars filter through a
+slider for the total, plus a minimum per criterion: niche, selling and signal
+each set to any, half or full.
 
 **Qualified** means above 1.5 stars. Each of niche, selling and signal is worth
 one star, half when it half fits.
@@ -108,8 +110,9 @@ passes the colourblind and contrast checks.
 Unbounded for display, Satoshi for everything else, both lifted from
 `brand/index.html` and bundled as woff2 so nothing loads from the network.
 
-Pricing: $500 a month for 100 to 1,000 leads a day, or $500 once for a 30,000
-lead pack with no renewal. The plans show lead counts, not the qualified share.
+Pricing: a monthly plan at 100 to 1,000 leads a day, or a one off 30,000 lead
+pack at the same price with no renewal. The cards show lead counts and carry no
+figure, since the number is not decided.
 
 Works down to a phone, keyboard focus visible, reduced motion respected: the
 rolling hero number, the grain and the reading dots all stop.

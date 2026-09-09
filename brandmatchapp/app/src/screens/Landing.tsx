@@ -60,10 +60,30 @@ const COMPARE: { row: string; database: string; scraper: string; agency: string;
 ]
 
 const FAQ = [
-  { q: 'How many creators do I get?', a: 'You choose. Set 250 a day and 250 land every morning. Move it to 1,000 or down to 50 whenever you like.' },
-  { q: 'What makes one qualified?', a: 'We only count creators who are active in your niche and show intent for collabs. A paid post this week, a rate card, collab wording in the bio.' },
-  { q: 'Do I have to run it?', a: 'No. It runs every night on its own. You open the list in the morning, tick off the ones you have written to, and close it.' },
-  { q: 'Can my own AI read the list?', a: 'Yes. Connect Claude, ChatGPT or your own tool with one key. Ask in plain words and it answers from your live list.' },
+  {
+    q: 'How do I set it up?',
+    a: 'Enter your website. Your agent reads it and writes the audience it should hunt for: the niche, who follows them, the size band. Change any word of it, set your daily volume, and it starts that night.',
+  },
+  {
+    q: 'How many leads do I get?',
+    a: 'You choose, anywhere from 100 to 1,000 a day. Move the number any morning and the next batch follows it.',
+  },
+  {
+    q: 'What makes a lead high intent?',
+    a: 'Three things, each worth a star: the creator fits your niche, they already sell something of their own, and a brand signal fired in the last few days. A paid post, a rate card, collab wording in the bio.',
+  },
+  {
+    q: 'Can I run more than one agent?',
+    a: 'Yes. One per launch, per product or per market. Every contact carries the agent that found it, so you can read them together or apart.',
+  },
+  {
+    q: 'What do I do with the list?',
+    a: 'Open it, tick off the ones you wrote to, tag the rest in bulk, and export whatever you want to keep. The contact is on the row where we found one.',
+  },
+  {
+    q: 'Can my own AI read the list?',
+    a: 'That is Connect AI, and it is coming soon. MCP will hand your leads to Claude or ChatGPT, and an API will create and pause your agents from your own code.',
+  },
 ]
 
 export function Landing() {
@@ -207,12 +227,11 @@ export function Landing() {
 
       <section className="land-section" id="pricing">
         <h2 className="big">One price. <em>Two ways to take it.</em></h2>
-        <p className="section-lede">$500 either way. Pick the one that matches how you buy.</p>
+        <p className="section-lede">The same price either way. Pick the one that matches how you buy.</p>
         <div className="plans">
           <div className="plan">
             <span className="plan-tag">Monthly</span>
             <h3>Brand</h3>
-            <p className="price">$500 <small>a month</small></p>
             <p className="muted">Set the daily volume. Move it any morning.</p>
             <div className="calc-line">
               <input className="slider" type="range" min={100} max={1000} step={50} value={perDay} onChange={(e) => setPerDay(Number(e.target.value))} aria-label="Leads a day" />
@@ -234,14 +253,13 @@ export function Landing() {
           <div className="plan dark">
             <span className="plan-tag">One off</span>
             <h3>Pack</h3>
-            <p className="price">$500 <small>once</small></p>
             <p className="muted">The same price as one month, with no renewal.</p>
             <p className="big-figure">
               <b className="num">30,000</b>
               <span>leads, delivered at the pace you set</span>
             </p>
             <ul>
-              <li>30,000 leads in total, no monthly bill</li>
+              <li>30,000 leads in total, billed once</li>
               <li>Spread them over as many days as you like</li>
               <li>Unlimited agents while the pack lasts</li>
               <li>MCP for your leads, API for your agents</li>

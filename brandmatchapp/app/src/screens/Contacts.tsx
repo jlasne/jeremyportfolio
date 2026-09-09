@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
+import type { Level } from '../types'
 import {
-  addTag, countDone, countTagged, diagnoseEmpty, exportCsv, getAgents, getContacts, getFilters, getTagVocabulary,
+  CRITERIA, addTag, countDone, countTagged, diagnoseEmpty, exportCsv, getAgents, getContacts, getFilters, getTagVocabulary,
   reject, resetFilter, resetFilters, setFilters, toggleDone,
 } from '../data'
 import { useStore } from '../data/hooks'
@@ -11,12 +12,15 @@ import { CreatorDetail } from '../components/CreatorDetail'
 import { FilterForm } from '../components/FilterForm'
 import { Stars } from '../components/Stars'
 
+type CriterionKey = 'niche' | 'active' | 'intent'
+
 /** The one list. A handle, how ready they are, and the email. */
 export function Contacts({ agentId }: { agentId: string | null }) {
   useStore()
   const agents = getAgents()
   const [tag, setTag] = useState<string | null>(null)
   const [minStars, setMinStars] = useState(0)
+  const [minLevels, setMinLevels] = useState<Partial<Record<CriterionKey, Level>>>({})
   const [showDone, setShowDone] = useState(false)
   const [openId, setOpenId] = useState<string | null>(null)
   const [showFilters, setShowFilters] = useState(false)
@@ -48,6 +52,7 @@ export function Contacts({ agentId }: { agentId: string | null }) {
     agentIds: agentId ? [agentId] : [],
     tag,
     minStars,
+    minLevels,
     done: showDone ? 'any' : 'hide',
   })
   const vocabulary = getTagVocabulary().filter((t) => countTagged(t) > 0)
@@ -56,6 +61,15 @@ export function Contacts({ agentId }: { agentId: string | null }) {
   const shown = contacts.map((c) => c.creator.id)
   const selected = picked.filter((id) => shown.includes(id))
   const allPicked = shown.length > 0 && selected.length === shown.length
+
+  const levelCount = Object.values(minLevels).filter((v) => (v ?? 0) > 0).length
+  const setLevel = (key: CriterionKey, level: Level) =>
+    setMinLevels((m) => {
+      const next = { ...m }
+      if (level === 0) delete next[key]
+      else next[key] = level
+      return next
+    })
 
   const pick = (id: string) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))
   const clearPick = () => setPicked([])
@@ -77,8 +91,8 @@ export function Contacts({ agentId }: { agentId: string | null }) {
 
       <div className="filter-bar">
         <div className="popover-wrap" ref={starBox}>
-          <button type="button" className={`btn${minStars ? ' on' : ''}`} aria-expanded={showStars} onClick={() => setShowStars((v) => !v)}>
-            Stars: {minStars === 0 ? 'Any' : `${minStars}+`}
+          <button type="button" className={`btn${minStars || levelCount ? ' on' : ''}`} aria-expanded={showStars} onClick={() => setShowStars((v) => !v)}>
+            Stars: {minStars === 0 && levelCount === 0 ? 'Any' : `${minStars > 0 ? `${minStars}+` : 'Any'}${levelCount ? ` · ${levelCount} set` : ''}`}
           </button>
           {showStars && (
             <div className="popover narrow left" role="dialog" aria-label="Stars">
@@ -98,6 +112,38 @@ export function Contacts({ agentId }: { agentId: string | null }) {
               </div>
               <div className="slider-ticks"><span>0</span><span>1</span><span>2</span><span>3</span></div>
               <p className="hint" style={{ marginTop: 10 }}>Above 1.5 stars is what counts as qualified.</p>
+
+              <h2 style={{ marginTop: 18 }}>At least</h2>
+              <div className="levels">
+                {CRITERIA.map((c) => {
+                  const key = c.key as CriterionKey
+                  const at = minLevels[key] ?? 0
+                  return (
+                    <div className="level-row" key={key}>
+                      <span className="level-name">{c.label}</span>
+                      <div className="chips">
+                        {([0, 0.5, 1] as Level[]).map((lv) => (
+                          <button
+                            key={lv}
+                            type="button"
+                            className={`chip small${at === lv ? ' on' : ''}`}
+                            aria-pressed={at === lv}
+                            onClick={() => setLevel(key, lv)}
+                          >
+                            {lv === 0 ? 'Any' : lv === 0.5 ? 'Half' : 'Full'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              <p className="hint">Niche is the fit, selling is their own product, signal is a fresh brand deal.</p>
+              {(minStars > 0 || levelCount > 0) && (
+                <button type="button" className="btn quiet small" style={{ marginTop: 12 }} onClick={() => { setMinStars(0); setMinLevels({}) }}>
+                  Clear stars
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -213,7 +259,7 @@ export function Contacts({ agentId }: { agentId: string | null }) {
             </span>
           </div>
         ))}
-        {contacts.length === 0 && <Empty tag={tag} done={done} onClear={() => { setTag(null); setMinStars(0); navigate('contacts') }} />}
+        {contacts.length === 0 && <Empty tag={tag} done={done} onClear={() => { setTag(null); setMinStars(0); setMinLevels({}); navigate('contacts') }} />}
       </div>
 
       {openId && <CreatorDetail id={openId} onClose={() => setOpenId(null)} />}
