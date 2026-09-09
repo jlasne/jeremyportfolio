@@ -25,12 +25,12 @@ export function DailyChart({ data, field = 'leads' }: { data: DailyStat[]; field
       <figcaption className="chart-head">
         <span className="chart-value num">{point[field]}</span>
         <span className="muted">
-          leads on {new Date(point.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+          contacts on {new Date(point.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
           {' · '}
           {point.gathered} profiles crawled
         </span>
       </figcaption>
-      <svg viewBox={`0 0 ${W} ${H}`} className="chart-svg" role="img" aria-label={`Leads gathered per day over ${data.length} days`}>
+      <svg viewBox={`0 0 ${W} ${H}`} className="chart-svg" role="img" aria-label={`Contacts gathered per day over ${data.length} days`}>
         <line x1="0" y1={H - PAD_B} x2={W} y2={H - PAD_B} className="axis" />
         {data.map((d, i) => {
           const h = scale(d[field])
@@ -51,9 +51,9 @@ export function DailyChart({ data, field = 'leads' }: { data: DailyStat[]; field
         </text>
       </svg>
       <table className="sr-only">
-        <caption>Leads gathered per day</caption>
+        <caption>Contacts gathered per day</caption>
         <thead>
-          <tr><th>Date</th><th>Profiles crawled</th><th>Leads</th><th>Leads at 2 or 3 stars</th></tr>
+          <tr><th>Date</th><th>Profiles crawled</th><th>Contacts</th><th>At 2 stars or more</th></tr>
         </thead>
         <tbody>
           {data.map((d) => (

@@ -1,22 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import {
-  addTag,
-  createList,
-  getLead,
-  getLists,
-  getNote,
-  getPosts,
-  getTags,
-  getTagVocabulary,
-  toggleTag,
-  listsFor,
-  reject,
-  removeFromList,
-  removeTag,
-  saveToList,
-  setNote,
-  exportCsv,
-} from '../data'
+import { addTag, exportCsv, getContact, getNote, getPosts, getTagVocabulary, getTags, reject, removeTag, setNote, toggleTag, unreject } from '../data'
 import { useStore } from '../data/hooks'
 import { downloadCsv } from '../lib/csv'
 import { COUNTRY_NAMES, LANGUAGE_NAMES, absolute, compact, percent, relative } from '../lib/format'
@@ -25,12 +8,11 @@ import { Stars } from './Stars'
 
 export function CreatorDetail({ id, onClose }: { id: string; onClose: () => void }) {
   useStore()
-  const item = getLead(id)
+  const item = getContact(id)
   const panel = useRef<HTMLDivElement>(null)
-  const [mode, setMode] = useState<'none' | 'save' | 'note' | 'tag'>('none')
+  const [mode, setMode] = useState<'none' | 'note' | 'tag'>('none')
   const [noteDraft, setNoteDraft] = useState(() => getNote(id))
   const [tagDraft, setTagDraft] = useState('')
-  const [newList, setNewList] = useState('')
   const [copied, setCopied] = useState(false)
   const [confirmReject, setConfirmReject] = useState(false)
 
@@ -54,8 +36,6 @@ export function CreatorDetail({ id, onClose }: { id: string; onClose: () => void
   if (!item) return null
   const c = item.creator
   const posts = getPosts(c.id)
-  const lists = getLists()
-  const inLists = listsFor(c.id)
   const tags = getTags(c.id)
   const note = getNote(c.id)
 
@@ -89,23 +69,23 @@ export function CreatorDetail({ id, onClose }: { id: string; onClose: () => void
         </div>
 
         <div className="panel-body">
-          {item.isRejected && <div className="state-line rejected">Rejected. This creator stays out of the feed.</div>}
-          {inLists.length > 0 && !item.isRejected && (
-            <div className="state-line">Saved in {inLists.map((l) => l.name).join(', ')}.</div>
+          {item.isRejected && (
+            <div className="state-line rejected">
+              Rejected, so this contact stays out of the list.
+              <button type="button" className="btn small" style={{ marginLeft: 8 }} onClick={() => unreject(c.id)}>Put it back</button>
+            </div>
           )}
 
           <section>
             <h3>Why this score</h3>
-            <div className="why">
-              <Stars score={item.score} size="large" />
-              <p>{item.score.why}</p>
-            </div>
+            <Stars score={item.score} size="large" />
             <ul className="facts">
-              <li className={item.score.niche ? 'yes' : 'no'}>{item.score.niche ? 'Fits the brief' : 'Outside the brief'}</li>
-              <li className={item.score.active ? 'yes' : 'no'}>{c.sells ? `Sells ${c.sells}` : 'Sells nothing yet'}</li>
-              <li className={item.score.intent ? 'yes' : 'no'}>{item.score.intent ? 'Brand signal in the last 30 days' : 'Last brand signal over 30 days ago'}</li>
+              {item.score.earned.map((e) => (
+                <li key={e.label} className={e.level === 1 ? 'yes' : e.level === 0.5 ? 'half' : 'no'}>
+                  <b>{e.label}</b> {e.note}
+                </li>
+              ))}
             </ul>
-            {!item.score.niche && <p className="hint">{c.nicheWhy}</p>}
             {item.agent && <p className="hint">Found by {item.agent.name}.</p>}
           </section>
 
@@ -142,7 +122,6 @@ export function CreatorDetail({ id, onClose }: { id: string; onClose: () => void
           <section>
             <h3>Actions</h3>
             <div className="actions-bar">
-              <button type="button" className={`btn${mode === 'save' ? ' on' : ''}`} onClick={() => setMode(mode === 'save' ? 'none' : 'save')}>Save</button>
               <button type="button" className={`btn${mode === 'note' ? ' on' : ''}`} onClick={() => setMode(mode === 'note' ? 'none' : 'note')}>{note ? 'Edit note' : 'Add note'}</button>
               <button type="button" className={`btn${mode === 'tag' ? ' on' : ''}`} onClick={() => setMode(mode === 'tag' ? 'none' : 'tag')}>Tag</button>
               <button type="button" className="btn" onClick={copyEmail} disabled={!c.email}>{copied ? 'Copied' : 'Copy email'}</button>
@@ -158,37 +137,6 @@ export function CreatorDetail({ id, onClose }: { id: string; onClose: () => void
                 </>
               )}
             </div>
-
-            {mode === 'save' && (
-              <div className="card" style={{ marginTop: 10 }}>
-                <div className="list-picker">
-                  {lists.map((l) => {
-                    const on = l.creatorIds.includes(c.id)
-                    return (
-                      <div className="row" key={l.id}>
-                        <span className="name">{l.name} <span className="faint num">{l.creatorIds.length}</span></span>
-                        <button type="button" className={`btn small${on ? ' on' : ''}`} onClick={() => (on ? removeFromList(c.id, l.id) : saveToList(c.id, l.id))}>
-                          {on ? 'Saved' : 'Save here'}
-                        </button>
-                      </div>
-                    )
-                  })}
-                  <form
-                    className="new-list"
-                    onSubmit={(e) => {
-                      e.preventDefault()
-                      if (!newList.trim()) return
-                      const l = createList(newList)
-                      saveToList(c.id, l.id)
-                      setNewList('')
-                    }}
-                  >
-                    <input className="input" placeholder="New list name" value={newList} onChange={(e) => setNewList(e.target.value)} aria-label="New list name" />
-                    <button type="submit" className="btn">Create and save</button>
-                  </form>
-                </div>
-              </div>
-            )}
 
             {mode === 'note' && (
               <div className="card" style={{ marginTop: 10 }}>
@@ -223,7 +171,7 @@ export function CreatorDetail({ id, onClose }: { id: string; onClose: () => void
                   <input className="input" value={tagDraft} onChange={(e) => setTagDraft(e.target.value)} placeholder="New tag" aria-label="New tag" />
                   <button type="submit" className="btn small">Add</button>
                 </form>
-                <p className="hint">Tags filter contacts and saved lists.</p>
+                <p className="hint">Tags filter the contact list.</p>
               </div>
             )}
 

@@ -1,32 +1,29 @@
-import type {
-  Agent, Brief, BriefAnswer, Creator, DailyStat, FilterKey, Filters, FollowUpQuestion, Post, SavedList, Score, Settings, Signal, Stars,
-} from '../types'
+import type { Agent, Brief, BriefAnswer, Creator, DailyStat, FilterKey, Filters, FollowUpQuestion, Level, Post, Score, Settings, Signal, Stars } from '../types'
 import { defaultFilters } from '../mock/filters'
 import { followUpQuestions } from '../mock/questions'
 import { timezones as mockTimezones } from '../mock/settings'
 import { toCsv } from '../lib/csv'
 import { absolute, isNewToday, withinDays } from '../lib/format'
-import { CRITERIA, latestSignal, scoreOf } from './score'
+import { BUCKETS, CRITERIA, latestSignal, scoreOf } from './score'
 import { getState, resetState, setState } from './store'
 
 // Every screen reads and writes through these functions.
 // They work on the in memory store today and will call the real source later.
 
-export { CRITERIA, scoreOf } from './score'
+export { BUCKETS, CRITERIA, scoreOf } from './score'
 
-// Feed --------------------------------------------------------------------
+// Contacts, the one list ---------------------------------------------------
 
-export interface Lead {
+export interface Contact {
   creator: Creator
   score: Score
   latestSignal: Signal | null
   isNew: boolean
-  isSaved: boolean
   isRejected: boolean
   agent: Agent | null
 }
 
-/** 2 or 3 stars. The leads worth a message today. */
+/** 2 stars or more. The contacts worth a message today. */
 export function isHigh(score: Score): boolean {
   return score.stars >= 2
 }
@@ -43,20 +40,19 @@ function passes(c: Creator, f: Filters, now: Date): boolean {
   return true
 }
 
-function toLead(c: Creator, now: Date): Lead {
+function toContact(c: Creator, now: Date): Contact {
   const s = getState()
   return {
     creator: c,
     score: scoreOf(c, now),
     latestSignal: latestSignal(c),
     isNew: isNewToday(c.firstSeenAt, now),
-    isSaved: s.lists.some((l) => l.creatorIds.includes(c.id)),
     isRejected: s.rejections.some((r) => r.creatorId === c.id),
     agent: s.agents.find((a) => a.id === c.agentId) ?? null,
   }
 }
 
-function sortLeads(a: Lead, b: Lead): number {
+function byScore(a: Contact, b: Contact): number {
   if (b.score.stars !== a.score.stars) return b.score.stars - a.score.stars
   const ad = a.latestSignal?.date ?? ''
   const bd = b.latestSignal?.date ?? ''
@@ -64,30 +60,42 @@ function sortLeads(a: Lead, b: Lead): number {
   return b.creator.followers - a.creator.followers
 }
 
-/** Every lead ever gathered, rejected ones included. The dashboard counts from here. */
-export function getAllLeads(now = new Date()): Lead[] {
-  return getState().creators.map((c) => toLead(c, now)).sort(sortLeads)
+/** Everything gathered, rejected included. The dashboard counts from here. */
+export function getAllContacts(now = new Date()): Contact[] {
+  return getState().creators.map((c) => toContact(c, now)).sort(byScore)
 }
 
-/** The feed: visible leads, filtered, sorted best first. Rejected leads never return. */
-export function getFeed(filters: Filters = getState().filters, now = new Date()): Lead[] {
+export interface ContactQuery {
+  agentId?: string | null
+  tag?: string | null
+  minStars?: number
+  newOnly?: boolean
+}
+
+/** The list. Filters cut the volume, the score sets the order. */
+export function getContacts(q: ContactQuery = {}, now = new Date()): Contact[] {
   const s = getState()
+  const f = s.filters
   const rejected = new Set(s.rejections.map((r) => r.creatorId))
   return s.creators
-    .filter((c) => !rejected.has(c.id) && passes(c, filters, now))
-    .map((c) => toLead(c, now))
-    .sort(sortLeads)
+    .filter((c) => !rejected.has(c.id) && passes(c, f, now))
+    .map((c) => toContact(c, now))
+    .filter((x) => !q.agentId || x.creator.agentId === q.agentId)
+    .filter((x) => !q.tag || getTags(x.creator.id).includes(q.tag))
+    .filter((x) => x.score.stars >= (q.minStars ?? 0))
+    .filter((x) => !q.newOnly || x.isNew)
+    .sort(byScore)
 }
 
 export interface FilterDiagnosis {
   key: FilterKey
   label: string
-  /** How many leads come back if this one filter goes to its default. */
+  /** How many contacts come back if this one filter goes to its default. */
   restored: number
 }
 
 /** When nothing passes, find the filter cutting the most. */
-export function diagnoseEmptyFeed(): FilterDiagnosis | null {
+export function diagnoseEmpty(): FilterDiagnosis | null {
   const f = getState().filters
   const keys: { key: FilterKey; label: string }[] = [
     { key: 'followersMin', label: 'Followers minimum' },
@@ -100,54 +108,52 @@ export function diagnoseEmptyFeed(): FilterDiagnosis | null {
     { key: 'countries', label: 'Country' },
     { key: 'languages', label: 'Language' },
   ]
+  const before = { ...f }
   let best: FilterDiagnosis | null = null
   for (const k of keys) {
     const loosened = { ...f, [k.key]: defaultFilters[k.key] } as Filters
     if (k.key === 'lastPostWithin') loosened.lastPostWithin = 90
-    const restored = getFeed(loosened).length
+    setState({ filters: loosened })
+    const restored = getContacts().length
     if (restored > (best?.restored ?? 0)) best = { key: k.key, label: k.label, restored }
   }
+  setState({ filters: before })
   return best
 }
 
 // Dashboard ----------------------------------------------------------------
 
 export interface Dashboard {
-  /** Leads first seen in the last 24 hours. */
   today: number
-  /** Leads at 2 or 3 stars, all time. */
+  /** Contacts at 2 stars or more. */
   high: number
-  /** Every lead gathered, all time. */
   total: number
-  /** Profiles crawled today. */
   gatheredToday: number
-  /** 14 days of crawl output, newest last. */
   daily: DailyStat[]
-  /** How many leads sit at each star count. */
-  byStars: Record<Stars, number>
-  /** How many leads earned each criterion. */
-  byCriterion: { key: string; label: string; means: string; count: number }[]
+  buckets: { label: string; count: number }[]
+  byCriterion: { key: string; label: string; full: number; half: number; note: string }[]
 }
 
 export function getDashboard(now = new Date()): Dashboard {
-  const leads = getAllLeads(now)
+  const all = getAllContacts(now)
   const daily = getState().daily
-  const byStars: Record<Stars, number> = { 0: 0, 1: 0, 2: 0, 3: 0 }
-  for (const l of leads) byStars[l.score.stars]++
-  const byCriterion = CRITERIA.map((c) => ({
-    key: c.key,
-    label: c.label,
-    means: c.means,
-    count: leads.filter((l) => l.score[c.key]).length,
-  }))
   return {
-    today: leads.filter((l) => l.isNew).length,
-    high: leads.filter((l) => isHigh(l.score)).length,
-    total: leads.length,
+    today: all.filter((c) => c.isNew).length,
+    high: all.filter((c) => isHigh(c.score)).length,
+    total: all.length,
     gatheredToday: daily.length ? daily[daily.length - 1].gathered : 0,
     daily,
-    byStars,
-    byCriterion,
+    buckets: BUCKETS.map((b, i) => ({
+      label: b.label,
+      count: all.filter((c) => c.score.stars >= b.min && (i === 0 || c.score.stars < BUCKETS[i - 1].min)).length,
+    })),
+    byCriterion: CRITERIA.map((c) => ({
+      key: c.key,
+      label: c.label,
+      note: c.full,
+      full: all.filter((x) => x.score[c.key] === 1).length,
+      half: all.filter((x) => x.score[c.key] === 0.5).length,
+    })),
   }
 }
 
@@ -169,10 +175,10 @@ export function updateAgentFilters(id: string, patch: Partial<Filters>): void {
   setState((s) => ({ agents: s.agents.map((a) => (a.id === id ? { ...a, filters: { ...a.filters, ...patch } } : a)) }))
 }
 
-export function createAgent(name: string): Agent {
+export function createAgent(): Agent {
   const agent: Agent = {
     id: `a${Date.now()}`,
-    name: name.trim() || 'Untitled agent',
+    name: 'New agent',
     brief: { who: '', answers: [], summary: 'No brief yet.' },
     filters: { ...defaultFilters, countries: [], languages: [] },
     leadsPerDay: 20,
@@ -188,32 +194,10 @@ export function deleteAgent(id: string): void {
   setState((s) => ({ agents: s.agents.filter((a) => a.id !== id) }))
 }
 
-export interface Group {
-  agent: Agent
-  leads: Lead[]
-  high: number
-  today: number
-}
-
-/** Leads grouped by the agent that found them. */
-export function getGroups(now = new Date()): Group[] {
-  const leads = getAllLeads(now)
-  return getState().agents.map((agent) => {
-    const mine = leads.filter((l) => l.creator.agentId === agent.id)
-    return {
-      agent,
-      leads: mine,
-      high: mine.filter((l) => isHigh(l.score)).length,
-      today: mine.filter((l) => l.isNew).length,
-    }
-  })
-}
-
-// Contacts -----------------------------------------------------------------
-
-/** Every lead with an email found. These are the ones a brand can reach today. */
-export function getContacts(now = new Date()): Lead[] {
-  return getAllLeads(now).filter((l) => l.creator.email !== null && !l.isRejected)
+/** How many contacts each agent found, and how many reach 2 stars. */
+export function agentTally(id: string, now = new Date()): { found: number; high: number; today: number } {
+  const mine = getAllContacts(now).filter((c) => c.creator.agentId === id)
+  return { found: mine.length, high: mine.filter((c) => isHigh(c.score)).length, today: mine.filter((c) => c.isNew).length }
 }
 
 // One creator --------------------------------------------------------------
@@ -222,45 +206,13 @@ export function getCreator(id: string): Creator | null {
   return getState().creators.find((c) => c.id === id) ?? null
 }
 
-export function getLead(id: string): Lead | null {
+export function getContact(id: string): Contact | null {
   const c = getCreator(id)
-  return c ? toLead(c, new Date()) : null
+  return c ? toContact(c, new Date()) : null
 }
 
 export function getPosts(creatorId: string): Post[] {
   return getState().posts[creatorId] ?? []
-}
-
-// Lists -----------------------------------------------------------------------
-
-export function getLists(): SavedList[] {
-  return getState().lists
-}
-
-export function getList(id: string): SavedList | null {
-  return getState().lists.find((l) => l.id === id) ?? null
-}
-
-export function createList(name: string): SavedList {
-  const list: SavedList = { id: `l${Date.now()}`, name: name.trim() || 'Untitled list', creatorIds: [], createdAt: new Date().toISOString() }
-  setState((s) => ({ lists: [...s.lists, list] }))
-  return list
-}
-
-export function saveToList(creatorId: string, listId: string): void {
-  setState((s) => ({
-    lists: s.lists.map((l) => (l.id === listId && !l.creatorIds.includes(creatorId) ? { ...l, creatorIds: [...l.creatorIds, creatorId] } : l)),
-  }))
-}
-
-export function removeFromList(creatorId: string, listId: string): void {
-  setState((s) => ({
-    lists: s.lists.map((l) => (l.id === listId ? { ...l, creatorIds: l.creatorIds.filter((id) => id !== creatorId) } : l)),
-  }))
-}
-
-export function listsFor(creatorId: string): SavedList[] {
-  return getState().lists.filter((l) => l.creatorIds.includes(creatorId))
 }
 
 // Notes and tags -----------------------------------------------------------
@@ -302,7 +254,6 @@ export function toggleTag(creatorId: string, label: string): void {
   else addTag(creatorId, label)
 }
 
-/** The labels offered when tagging. Free text adds to this list. */
 export function getTagVocabulary(): string[] {
   return getState().tagVocabulary
 }
@@ -324,11 +275,6 @@ export function countTagged(label: string): number {
   return Object.values(getState().tags).filter((list) => list.includes(label)).length
 }
 
-/** Tags in use, sorted. */
-export function getUsedTags(): string[] {
-  return Array.from(new Set(Object.values(getState().tags).flat())).sort()
-}
-
 // Reject -----------------------------------------------------------------------
 
 export function reject(creatorId: string): void {
@@ -345,19 +291,21 @@ export function isRejected(creatorId: string): boolean {
 
 // Export -----------------------------------------------------------------------
 
+const LEVELS: Record<Level, string> = { 0: 'no', 0.5: 'half', 1: 'yes' }
+
 export function exportCsv(creatorIds: string[]): string {
   const rows = creatorIds
-    .map((id) => getLead(id))
-    .filter((l): l is Lead => l !== null)
+    .map((id) => getContact(id))
+    .filter((c): c is Contact => c !== null)
     .map(({ creator: c, score, latestSignal: sig, agent }) => ({
       name: c.name,
       handle: c.handle,
       url: `https://instagram.com/${c.handle}`,
       stars: score.stars,
-      niche: score.niche ? 'yes' : 'no',
-      selling: c.sells || 'nothing',
-      signal_fresh: score.intent ? 'yes' : 'no',
-      why: score.why,
+      niche: LEVELS[c.niche],
+      selling: LEVELS[score.active],
+      signal_strength: LEVELS[score.intent],
+      sells: c.sells,
       signal: sig?.label ?? '',
       signal_date: sig ? absolute(sig.date) : '',
       followers: c.followers,
@@ -372,7 +320,6 @@ export function exportCsv(creatorIds: string[]): string {
       agent: agent?.name ?? '',
       note: getNote(c.id),
       tags: getTags(c.id).join('; '),
-      lists: listsFor(c.id).map((l) => l.name).join('; '),
       rejected: isRejected(c.id) ? 'yes' : 'no',
     }))
   return toCsv(rows)
@@ -384,13 +331,13 @@ export function getBrief(): Brief | null {
   return getState().brief
 }
 
-/** The 3 follow up questions for a first answer. Fixed in the mock, generated for real later. */
 export function getFollowUpQuestions(_who: string): FollowUpQuestion[] {
   return followUpQuestions
 }
 
 export function buildSummary(who: string, answers: BriefAnswer[]): string {
   const clean = who.trim().replace(/\.$/, '')
+  if (!clean) return 'No brief yet.'
   const lead = clean.charAt(0).toLowerCase() + clean.slice(1)
   const parts = [lead]
   const get = (id: string) => answers.find((a) => a.questionId === id)?.value?.trim().toLowerCase()
@@ -411,6 +358,11 @@ export function setBrief(who: string, answers: BriefAnswer[]): Brief {
   const b: Brief = { who: who.trim(), answers, summary: buildSummary(who, answers) }
   setState((s) => ({ brief: b, agents: s.agents.map((a, i) => (i === 0 ? { ...a, brief: b } : a)) }))
   return b
+}
+
+export function setAgentBrief(id: string, who: string, answers: BriefAnswer[]): void {
+  const b: Brief = { who: who.trim(), answers, summary: buildSummary(who, answers) }
+  setState((s) => ({ agents: s.agents.map((a) => (a.id === id ? { ...a, brief: b } : a)) }))
 }
 
 // Filters ---------------------------------------------------------------------
@@ -463,10 +415,6 @@ export interface CrawlProgress {
   done: boolean
 }
 
-/**
- * The first batch. In the mock it fakes progress over about 8 seconds and ends with the feed ready.
- * The real version calls the crawl and reports the same progress shape.
- */
 export function runFirstCrawl(onProgress: (p: CrawlProgress) => void): () => void {
   const target = 412
   const durationMs = 8_000
@@ -484,3 +432,5 @@ export function runFirstCrawl(onProgress: (p: CrawlProgress) => void): () => voi
   tick()
   return () => window.clearTimeout(handle)
 }
+
+export type { Stars }

@@ -6,11 +6,8 @@ export type Route =
   | { name: 'home' }
   | { name: 'onboarding'; step: 'who' | 'details' | 'filters' | 'running' }
   | { name: 'dashboard' }
-  | { name: 'feed'; creatorId: string | null }
-  | { name: 'groups'; agentId: string | null }
-  | { name: 'contacts' }
+  | { name: 'contacts'; agentId: string | null }
   | { name: 'agents'; agentId: string | null }
-  | { name: 'lists'; listId: string | null }
   | { name: 'settings' }
 
 export function parse(hash: string): Route {
@@ -26,16 +23,10 @@ export function parse(hash: string): Route {
     }
     case 'dashboard':
       return { name: 'dashboard' }
-    case 'feed':
-      return { name: 'feed', creatorId: id }
-    case 'groups':
-      return { name: 'groups', agentId: id }
     case 'contacts':
-      return { name: 'contacts' }
+      return { name: 'contacts', agentId: id }
     case 'agents':
       return { name: 'agents', agentId: id }
-    case 'lists':
-      return { name: 'lists', listId: id }
     case 'settings':
       return { name: 'settings' }
     default:

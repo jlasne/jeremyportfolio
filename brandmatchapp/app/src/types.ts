@@ -3,7 +3,10 @@
 
 export type Country = 'US' | 'UK' | 'CA' | 'AU' | 'FR' | 'DE'
 export type Language = 'en' | 'fr' | 'de'
-export type Stars = 0 | 1 | 2 | 3
+/** 0 to 3 in half steps. */
+export type Stars = number
+/** How far one criterion is met: none, half, full. */
+export type Level = 0 | 0.5 | 1
 
 export type SignalType =
   | 'sponsored_post'
@@ -17,6 +20,8 @@ export type SignalType =
 export interface Signal {
   type: SignalType
   label: string
+  /** A paid post or a public rate card is strong. Bio wording or a launch is soft. */
+  strength: 'strong' | 'soft'
   /** ISO date */
   date: string
 }
@@ -33,19 +38,17 @@ export interface Post {
 }
 
 /**
- * One score per creator, 0 to 3 stars. One star each for niche, selling and a
- * fresh signal, added up. The three are independent of each other.
+ * One score per creator, 0 to 3 stars in half steps. One star each for niche,
+ * selling and signal. Each pays a half star when it half fits and a full star
+ * when it fits. The three are independent of each other.
  */
 export interface Score {
   stars: Stars
-  /** Content, audience and follower band fit the brief. */
-  niche: boolean
-  /** Sells a program, coaching, an ebook, an app, or runs a link hub or media kit. */
-  active: boolean
-  /** A dated brand signal fired in the last 30 days. */
-  intent: boolean
-  /** The criteria that earned a star, in order. */
-  earned: string[]
+  niche: Level
+  active: Level
+  intent: Level
+  /** What each criterion earned, in order, for the row label and the panel. */
+  earned: { label: string; level: Level; note: string }[]
   /** One plain sentence, written at scoring time. */
   why: string
 }
@@ -67,8 +70,8 @@ export interface Creator {
   language: Language
   email: string | null
   signals: Signal[]
-  /** Content, audience and follower band fit the brief. */
-  niche: boolean
+  /** How well content, audience and follower band fit the brief. */
+  niche: Level
   /** Why the niche call went that way, one plain sentence. */
   nicheWhy: string
   /** What the creator sells today, or an empty string. */
@@ -104,14 +107,6 @@ export interface DailyStat {
   leads: number
   /** Leads at 2 or 3 stars. */
   high: number
-}
-
-export interface SavedList {
-  id: string
-  name: string
-  creatorIds: string[]
-  /** ISO date */
-  createdAt: string
 }
 
 export interface Note {

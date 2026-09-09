@@ -1,130 +1,149 @@
-import { useState } from 'react'
-import { countTagged, exportCsv, getContacts, getNote, getTagVocabulary, getTags, toggleTag } from '../data'
+import { useEffect, useRef, useState } from 'react'
+import {
+  countTagged, diagnoseEmpty, exportCsv, getAgents, getContacts, getFilters, getTagVocabulary, resetFilter, resetFilters, setFilters,
+} from '../data'
 import { useStore } from '../data/hooks'
 import { downloadCsv } from '../lib/csv'
+import { compact, relative } from '../lib/format'
+import { navigate } from '../lib/router'
 import { CreatorDetail } from '../components/CreatorDetail'
+import { FilterForm } from '../components/FilterForm'
 import { Stars } from '../components/Stars'
 
-export function Contacts() {
+/** The one list. Everything else about a contact lives behind the row. */
+export function Contacts({ agentId }: { agentId: string | null }) {
   useStore()
-  const all = getContacts()
-  const vocabulary = getTagVocabulary()
+  const agents = getAgents()
   const [tag, setTag] = useState<string | null>(null)
   const [minStars, setMinStars] = useState(0)
   const [openId, setOpenId] = useState<string | null>(null)
-  const [copied, setCopied] = useState<string | null>(null)
-  const [tagging, setTagging] = useState<string | null>(null)
+  const [showFilters, setShowFilters] = useState(false)
+  const box = useRef<HTMLDivElement>(null)
 
-  const contacts = all.filter((l) => l.score.stars >= minStars).filter((l) => !tag || getTags(l.creator.id).includes(tag))
+  const agent = agents.find((a) => a.id === agentId) ?? null
+  const contacts = getContacts({ agentId, tag, minStars })
+  const vocabulary = getTagVocabulary().filter((t) => countTagged(t) > 0)
 
-  const copy = async (email: string) => {
-    try {
-      await navigator.clipboard.writeText(email)
-      setCopied(email)
-      window.setTimeout(() => setCopied(null), 1500)
-    } catch {
-      window.prompt('Copy the email', email)
+  useEffect(() => {
+    if (!showFilters) return
+    const onDown = (e: MouseEvent) => {
+      if (box.current && !box.current.contains(e.target as Node)) setShowFilters(false)
     }
-  }
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setShowFilters(false)
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [showFilters])
 
   return (
     <div className="page">
       <div className="page-head">
         <h1>Contacts</h1>
-        <span className="count num">{contacts.length} reachable by email</span>
+        <span className="count num">{contacts.length}</span>
         <span className="spacer" />
-        <div className="chips">
-          {[0, 1, 2, 3].map((n) => (
-            <button key={n} type="button" className={`chip small${minStars === n ? ' on' : ''}`} aria-pressed={minStars === n} onClick={() => setMinStars(n)}>
-              {n === 0 ? 'All' : `${n}+ stars`}
-            </button>
-          ))}
+        <div className="popover-wrap" ref={box}>
+          <button type="button" className="btn" aria-expanded={showFilters} onClick={() => setShowFilters((v) => !v)}>Filters</button>
+          {showFilters && (
+            <div className="popover" role="dialog" aria-label="Filters">
+              <h2>
+                Filters
+                <button type="button" className="btn quiet small" onClick={() => resetFilters()}>Reset</button>
+              </h2>
+              <FilterForm value={getFilters()} onChange={setFilters} />
+            </div>
+          )}
         </div>
-        <button type="button" className="btn" disabled={contacts.length === 0} onClick={() => downloadCsv('brandmatch-contacts.csv', exportCsv(contacts.map((l) => l.creator.id)))}>
+        <button type="button" className="btn" disabled={contacts.length === 0} onClick={() => downloadCsv('brandmatch-contacts.csv', exportCsv(contacts.map((c) => c.creator.id)))}>
           Export
         </button>
       </div>
 
-      <div className="tag-strip">
-        <span className="field-label" style={{ margin: 0 }}>Tags</span>
+      <div className="filter-row">
         <div className="chips">
-          {vocabulary.map((t) => {
-            const n = countTagged(t)
-            return (
-              <button key={t} type="button" className={`chip small${tag === t ? ' on' : ''}`} aria-pressed={tag === t} onClick={() => setTag(tag === t ? null : t)}>
-                {t} <span className="num faint">{n}</span>
-              </button>
-            )
-          })}
+          <button type="button" className={`chip${agentId ? '' : ' on'}`} aria-pressed={!agentId} onClick={() => navigate('contacts')}>
+            Every agent
+          </button>
+          {agents.map((a) => (
+            <button key={a.id} type="button" className={`chip${agentId === a.id ? ' on' : ''}`} aria-pressed={agentId === a.id} onClick={() => navigate(`contacts/${a.id}`)}>
+              {a.name}
+            </button>
+          ))}
         </div>
-        {tag && <button type="button" className="btn quiet small" onClick={() => setTag(null)}>Clear</button>}
+        <span className="rule" />
+        <div className="chips">
+          {[2, 3].map((n) => (
+            <button key={n} type="button" className={`chip${minStars === n ? ' on' : ''}`} aria-pressed={minStars === n} onClick={() => setMinStars(minStars === n ? 0 : n)}>
+              {n} stars and up
+            </button>
+          ))}
+          {vocabulary.map((t) => (
+            <button key={t} type="button" className={`chip${tag === t ? ' on' : ''}`} aria-pressed={tag === t} onClick={() => setTag(tag === t ? null : t)}>
+              {t}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="feed">
-        <div className="contact-cols" aria-hidden="true">
-          <span />
-          <span>Contact</span>
-          <span>Email</span>
-          <span>Score</span>
-          <span>Agent</span>
-          <span>Tags</span>
-          <span />
-        </div>
-        {contacts.map((lead) => {
-          const c = lead.creator
-          const tags = getTags(c.id)
-          const note = getNote(c.id)
-          return (
-            <div className="contact-row" key={c.id}>
-              <img className="avatar" src={c.avatar} alt="" width={36} height={36} />
-              <div className="who">
-                <div className="name">
-                  <button type="button" className="link-btn" onClick={() => setOpenId(c.id)}>{c.name}</button>
-                  <span className="handle">@{c.handle}</span>
-                </div>
-                {note && <p className="note">{note}</p>}
-              </div>
-              <div className="mail">{c.email}</div>
-              <Stars score={lead.score} />
-              <div className="muted">{lead.agent?.name ?? 'No agent'}</div>
-              <div className="tag-cell">
-                {tags.map((t) => (
-                  <span key={t} className="tag">{t}</span>
-                ))}
-                <button type="button" className="btn quiet small" onClick={() => setTagging(tagging === c.id ? null : c.id)} aria-expanded={tagging === c.id}>
-                  {tags.length ? 'Edit tags' : 'Add a tag'}
-                </button>
-                {tagging === c.id && (
-                  <div className="chips" style={{ marginTop: 6, flexBasis: '100%' }}>
-                    {vocabulary.map((t) => {
-                      const on = tags.includes(t)
-                      return (
-                        <button key={t} type="button" className={`chip small${on ? ' on' : ''}`} aria-pressed={on} onClick={() => toggleTag(c.id, t)}>
-                          {t}
-                        </button>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
-              <div className="side">
-                <button type="button" className="btn small" onClick={() => copy(c.email!)}>{copied === c.email ? 'Copied' : 'Copy email'}</button>
-              </div>
-            </div>
-          )
-        })}
-        {contacts.length === 0 && (
-          <div className="empty">
-            <h2>No contact matches</h2>
-            <p>{tag ? `No contact carries the tag ${tag} at ${minStars}+ stars.` : `No contact reaches ${minStars} stars.`} Lower the bar or clear the tag.</p>
-            <div className="actions">
-              <button type="button" className="btn primary" onClick={() => { setTag(null); setMinStars(0) }}>Show every contact</button>
-            </div>
-          </div>
-        )}
+      {agent && <p className="subhead">{agent.brief.summary}</p>}
+
+      <div className="list">
+        {contacts.map((c) => (
+          <button type="button" className={`contact${openId === c.creator.id ? ' open' : ''}`} key={c.creator.id} onClick={() => setOpenId(c.creator.id)}>
+            <img className="avatar" src={c.creator.avatar} alt="" width={38} height={38} />
+            <span className="who">
+              <span className="name">
+                {c.creator.name}
+                {c.isNew && <span className="badge-new">NEW</span>}
+              </span>
+              <span className="handle">@{c.creator.handle}</span>
+            </span>
+            <Stars score={c.score} />
+            <span className="signal-cell">
+              {c.latestSignal ? (
+                <>
+                  {c.latestSignal.label} <span className="faint">{relative(c.latestSignal.date)}</span>
+                </>
+              ) : (
+                <span className="faint">No signal</span>
+              )}
+            </span>
+            <span className="metric num">{compact(c.creator.followers)}</span>
+          </button>
+        ))}
+        {contacts.length === 0 && <Empty tag={tag} minStars={minStars} onClear={() => { setTag(null); setMinStars(0) }} />}
       </div>
 
       {openId && <CreatorDetail id={openId} onClose={() => setOpenId(null)} />}
+    </div>
+  )
+}
+
+function Empty({ tag, minStars, onClear }: { tag: string | null; minStars: number; onClear: () => void }) {
+  if (tag || minStars) {
+    return (
+      <div className="empty">
+        <h2>Nothing matches</h2>
+        <p>{tag ? `No contact carries the tag ${tag}` : `No contact reaches ${minStars} stars`} under the filters you set.</p>
+        <div className="actions">
+          <button type="button" className="btn primary" onClick={onClear}>Clear the chips</button>
+        </div>
+      </div>
+    )
+  }
+  const d = diagnoseEmpty()
+  return (
+    <div className="empty">
+      <h2>No contact passes the filters</h2>
+      <p>
+        {d ? `${d.label} is cutting everything. Loosen it and ${d.restored} contacts come back.` : 'Every filter together cuts all contacts.'}
+      </p>
+      <div className="actions">
+        {d && <button type="button" className="btn primary" onClick={() => resetFilter(d.key)}>Loosen {d.label.toLowerCase()}</button>}
+        <button type="button" className="btn" onClick={() => resetFilters()}>Reset all filters</button>
+      </div>
     </div>
   )
 }

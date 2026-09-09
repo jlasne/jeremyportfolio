@@ -1,12 +1,11 @@
-import type { Stars } from '../types'
-import { getDashboard, getGroups } from '../data'
+import { agentTally, getAgents, getDashboard } from '../data'
 import { useStore } from '../data/hooks'
 import { DailyChart } from '../components/DailyChart'
 
 export function Dashboard() {
   useStore()
   const d = getDashboard()
-  const groups = getGroups()
+  const agents = getAgents()
   const avgLeads = Math.round(d.daily.reduce((sum, x) => sum + x.leads, 0) / d.daily.length)
 
   return (
@@ -19,23 +18,23 @@ export function Dashboard() {
       <div className="tiles">
         <div className="tile">
           <b className="num">{d.today}</b>
-          <span>leads today</span>
+          <span>contacts today</span>
           <small className="faint">{d.gatheredToday} profiles crawled</small>
         </div>
         <div className="tile">
           <b className="num">{d.high}</b>
-          <span>high leads, 2 or 3 stars</span>
-          <small className="faint">{Math.round((d.high / d.total) * 100)}% of every lead</small>
+          <span>at 2 stars or more</span>
+          <small className="faint">{Math.round((d.high / d.total) * 100)}% of every contact</small>
         </div>
         <div className="tile">
           <b className="num">{d.total}</b>
-          <span>leads in total</span>
+          <span>contacts in total</span>
           <small className="faint">{avgLeads} a day on average</small>
         </div>
       </div>
 
       <div className="card">
-        <h2>Leads gathered per day</h2>
+        <h2>Contacts gathered per day</h2>
         <DailyChart data={d.daily} />
       </div>
 
@@ -47,18 +46,19 @@ export function Dashboard() {
               <li key={c.key}>
                 <span className="crit-name">{c.label}</span>
                 <span className="crit-bar">
-                  <i style={{ width: `${(c.count / d.total) * 100}%` }} />
+                  <i className="full" style={{ width: `${(c.full / d.total) * 100}%` }} />
+                  <i className="half" style={{ width: `${(c.half / d.total) * 100}%` }} />
                 </span>
-                <span className="num crit-count">{c.count}</span>
-                <span className="crit-means faint">{c.means}</span>
+                <span className="num crit-count">{c.full + c.half / 2}</span>
+                <span className="crit-means faint">{c.full} full · {c.half} half</span>
               </li>
             ))}
           </ul>
           <div className="star-split">
-            {([3, 2, 1, 0] as Stars[]).map((n) => (
-              <div key={n}>
-                <b className="num">{d.byStars[n]}</b>
-                <span>{n === 1 ? '1 star' : `${n} stars`}</span>
+            {d.buckets.map((b) => (
+              <div key={b.label}>
+                <b className="num">{b.count}</b>
+                <span>{b.label}</span>
               </div>
             ))}
           </div>
@@ -77,18 +77,21 @@ export function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {groups.map((g) => (
-                <tr key={g.agent.id}>
-                  <td>
-                    <a href={`#/groups/${g.agent.id}`}>{g.agent.name}</a>
-                    {g.agent.active ? null : <span className="tag" style={{ marginLeft: 6 }}>paused</span>}
-                  </td>
-                  <td className="r num">{g.agent.leadsPerDay}</td>
-                  <td className="r num">{g.leads.length}</td>
-                  <td className="r num">{g.high}</td>
-                  <td className="r num">{g.today}</td>
-                </tr>
-              ))}
+              {agents.map((a) => {
+                const t = agentTally(a.id)
+                return (
+                  <tr key={a.id}>
+                    <td>
+                      <a href={`#/contacts/${a.id}`}>{a.name}</a>
+                      {a.active ? null : <span className="tag" style={{ marginLeft: 6 }}>paused</span>}
+                    </td>
+                    <td className="r num">{a.leadsPerDay}</td>
+                    <td className="r num">{t.found}</td>
+                    <td className="r num">{t.high}</td>
+                    <td className="r num">{t.today}</td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>

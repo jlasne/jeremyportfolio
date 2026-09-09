@@ -1,4 +1,4 @@
-import { getAgents, getDashboard, getGroups, getLists, getSettings } from '../data'
+import { getDashboard, getSettings } from '../data'
 import { useStore } from '../data/hooks'
 import { nextBatchLabel } from '../lib/format'
 import type { Route } from '../lib/router'
@@ -10,53 +10,16 @@ const Mark = () => (
   </svg>
 )
 
-interface Child {
-  href: string
-  label: string
-  count: string | number
-  id: string
-}
+const ITEMS: { href: string; label: string; name: Route['name'] }[] = [
+  { href: '#/dashboard', label: 'Dashboard', name: 'dashboard' },
+  { href: '#/contacts', label: 'Contacts', name: 'contacts' },
+  { href: '#/agents', label: 'Agents', name: 'agents' },
+  { href: '#/settings', label: 'Settings', name: 'settings' },
+]
 
-/**
- * The nav holds every route, and the section you are in opens to show what it
- * contains. Nothing else navigates, so the screens run full width.
- */
 export function SideNav({ route }: { route: Route }) {
   useStore()
   const d = getDashboard()
-
-  const children = (name: Route['name']): Child[] => {
-    if (name !== route.name) return []
-    switch (name) {
-      case 'groups':
-        return getGroups().map((g) => ({ href: `#/groups/${g.agent.id}`, label: g.agent.name, count: g.leads.length, id: g.agent.id }))
-      case 'agents':
-        return getAgents().map((a) => ({ href: `#/agents/${a.id}`, label: a.name, count: a.active ? a.leadsPerDay : 'off', id: a.id }))
-      case 'lists':
-        return getLists().map((l) => ({ href: `#/lists/${l.id}`, label: l.name, count: l.creatorIds.length, id: l.id }))
-      default:
-        return []
-    }
-  }
-
-  const currentChild = (name: Route['name'], list: Child[]): string | null => {
-    if (list.length === 0) return null
-    if (route.name === 'groups' && name === 'groups') return route.agentId ?? list[0].id
-    if (route.name === 'agents' && name === 'agents') return route.agentId ?? list[0].id
-    if (route.name === 'lists' && name === 'lists') return route.listId ?? list[0].id
-    return null
-  }
-
-  const items: { href: string; label: string; name: Route['name'] }[] = [
-    { href: '#/dashboard', label: 'Dashboard', name: 'dashboard' },
-    { href: '#/feed', label: 'Feed', name: 'feed' },
-    { href: '#/groups', label: 'Groups', name: 'groups' },
-    { href: '#/contacts', label: 'Contacts', name: 'contacts' },
-    { href: '#/agents', label: 'Agents', name: 'agents' },
-    { href: '#/lists', label: 'Saved lists', name: 'lists' },
-    { href: '#/settings', label: 'Settings', name: 'settings' },
-  ]
-
   return (
     <nav className="sidenav" aria-label="Main">
       <a className="brand" href="#/dashboard">
@@ -64,28 +27,14 @@ export function SideNav({ route }: { route: Route }) {
         brandmatch
       </a>
       <ul>
-        {items.map((item) => {
-          const kids = children(item.name)
+        {ITEMS.map((item) => {
           const on = route.name === item.name
-          const openId = currentChild(item.name, kids)
           return (
             <li key={item.href}>
               <a href={item.href} className={on ? 'on' : undefined} aria-current={on ? 'page' : undefined}>
                 <span>{item.label}</span>
-                {item.name === 'feed' && d.today ? <span className="pill num">{d.today}</span> : null}
+                {item.name === 'contacts' && d.today ? <span className="pill num">{d.today}</span> : null}
               </a>
-              {kids.length > 0 && (
-                <ul className="sub">
-                  {kids.map((k) => (
-                    <li key={k.id}>
-                      <a href={k.href} className={openId === k.id ? 'on' : undefined}>
-                        <span>{k.label}</span>
-                        <span className="count num">{k.count}</span>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              )}
             </li>
           )
         })}

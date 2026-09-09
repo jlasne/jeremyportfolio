@@ -3,12 +3,10 @@ import { getSettings } from './data'
 import { useStore } from './data/hooks'
 import { navigate, useRoute } from './lib/router'
 import { SideNav } from './components/SideNav'
-import { Agents } from './screens/Agents'
+import { StarClip } from './components/Stars'
+import { AgentEditor, Agents } from './screens/Agents'
 import { Contacts } from './screens/Contacts'
 import { Dashboard } from './screens/Dashboard'
-import { Feed } from './screens/Feed'
-import { Groups } from './screens/Groups'
-import { Lists } from './screens/Lists'
 import { FirstRun, OnboardingDetails, OnboardingFilters, OnboardingWho } from './screens/Onboarding'
 import { Settings } from './screens/Settings'
 
@@ -32,16 +30,14 @@ export function App() {
 
   return (
     <div className="shell">
+      <StarClip />
+      <SideNav route={route} />
       <main className="main">
         {route.name === 'dashboard' && <Dashboard />}
-        {route.name === 'feed' && <Feed creatorId={route.creatorId} />}
-        {route.name === 'groups' && <Groups agentId={route.agentId} />}
-        {route.name === 'contacts' && <Contacts />}
-        {route.name === 'agents' && <Agents agentId={route.agentId} />}
-        {route.name === 'lists' && <Lists listId={route.listId} />}
+        {route.name === 'contacts' && <Contacts agentId={route.agentId} />}
+        {route.name === 'agents' && (route.agentId ? <AgentEditor agentId={route.agentId} /> : <Agents />)}
         {route.name === 'settings' && <Settings />}
       </main>
-      <SideNav route={route} />
     </div>
   )
 }

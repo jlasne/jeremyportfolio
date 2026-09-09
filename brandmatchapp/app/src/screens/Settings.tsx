@@ -79,12 +79,16 @@ export function Settings() {
 
       <div className="card">
         <h2>How the score works</h2>
-        <p className="muted">One star each, added up. The three are independent, so a creator selling with a fresh signal scores 2 even outside the niche.</p>
+        <p className="muted">Three criteria, one star each, added up. A half star means the criterion half fits, so the score runs 0 to 3 in half steps. The three are independent, so a creator selling with a fresh signal scores 2 even outside the niche.</p>
         <ul className="criteria plain">
           {CRITERIA.map((c) => (
             <li key={c.key}>
               <span className="crit-name">{c.label}</span>
-              <span className="crit-means">{c.means}</span>
+              <span className="crit-means">
+                <b>Full.</b> {c.full}
+                <br />
+                <b>Half.</b> {c.half}
+              </span>
             </li>
           ))}
         </ul>
