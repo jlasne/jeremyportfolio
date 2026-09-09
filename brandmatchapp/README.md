@@ -11,8 +11,8 @@ star each, added up. A criterion that half fits pays half a star.
 | Star | Full | Half |
 | --- | --- | --- |
 | Niche | Content and audience fit the brief | The right discipline, a different audience |
-| Selling | A program, coaching, an app or a membership | An ebook, merch or affiliate links |
-| Signal | A paid post or a rate card in the last 30 days | A softer signal, or a paid post 31 to 90 days old |
+| Selling | Actively doing business, an own product on sale | A few collabs already done |
+| Signal | A brand signal in the last 4 days | A brand signal in the last 10 days |
 
 The stars sit in that fixed order, so the row shows which criteria fired, not
 only how many. The three are independent: a creator selling with a fresh signal
@@ -78,8 +78,8 @@ scrolling bar across the top under 900px.
 
 | Route | What it holds |
 | --- | --- |
-| `#/contacts` | The one list. Three controls above it: stars, agent, and more Instagram filters, with your tags inside that last one. A row shows the picture, the name, the stars, the signal with its date, followers and engagement. Everything else lives behind the row, in the panel |
-| `#/agents` | Leads and qualified leads a day as two smooth lines over 14 days, four counts, then who is running and who is paused. Clicking one opens its sentence, its filters, its delivery and how it scores |
+| `#/contacts` | The one list. Three controls above it: a stars slider with must-have criteria, agent chips that take several at once, and more Instagram filters with your tags inside. A row shows the picture, the name, the stars, the signal with its date, followers and engagement. Everything else lives behind the row, in the panel |
+| `#/agents` | Qualified leads as columns and every lead as a smooth line over 14 days, per agent or all together, four counts, then who is running and who is paused. Clicking one opens its sentence, its filters, its delivery and how it scores |
 | `#/onboarding/*` | One question, three follow ups, the filters, then the first batch over 8 seconds |
 
 An **agent** is one saved search that runs every morning. It owns one sentence
@@ -90,7 +90,16 @@ shows in the list, qualified or not. Every contact carries the agent that found 
 row on Contacts filters on it. Tags do the work saved lists used to do.
 
 Filters are written as choices, not number boxes: audience size, engagement,
-reel views, posts a month, when they last posted, email, country, language.
+reel views, posts a month, when they last posted, email, 18 countries and 10
+languages. Six presets set several at once, from `Micro and engaged` to
+`Ready to contact`.
+
+The chart on Agents runs two scales, columns on the right and the line on the
+left, because qualified leads are about a tenth of the total. Each axis prints
+its maximum in its own colour. Where the two marks cross means nothing.
+
+Every count of qualified leads carries its total and its share, so `41` always
+reads as `41 qualified of 400, 10%`.
 
 ## Mock data
 

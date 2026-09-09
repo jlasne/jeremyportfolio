@@ -46,14 +46,33 @@ export const COUNTRY_NAMES: Record<string, string> = {
   UK: 'United Kingdom',
   CA: 'Canada',
   AU: 'Australia',
+  IE: 'Ireland',
+  NZ: 'New Zealand',
   FR: 'France',
   DE: 'Germany',
+  ES: 'Spain',
+  IT: 'Italy',
+  NL: 'Netherlands',
+  SE: 'Sweden',
+  PL: 'Poland',
+  BR: 'Brazil',
+  MX: 'Mexico',
+  IN: 'India',
+  JP: 'Japan',
+  ZA: 'South Africa',
 }
 
 export const LANGUAGE_NAMES: Record<string, string> = {
   en: 'English',
   fr: 'French',
   de: 'German',
+  es: 'Spanish',
+  it: 'Italian',
+  pt: 'Portuguese',
+  nl: 'Dutch',
+  sv: 'Swedish',
+  pl: 'Polish',
+  ja: 'Japanese',
 }
 
 export function nextBatchLabel(timezone: string, now = new Date()): string {

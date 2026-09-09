@@ -1,8 +1,11 @@
 // Shared shapes for every entity in the app.
 // The mock folder produces these today. The real crawl will produce the same shapes later.
 
-export type Country = 'US' | 'UK' | 'CA' | 'AU' | 'FR' | 'DE'
-export type Language = 'en' | 'fr' | 'de'
+export type Country =
+  | 'US' | 'UK' | 'CA' | 'AU' | 'IE' | 'NZ'
+  | 'FR' | 'DE' | 'ES' | 'IT' | 'NL' | 'SE' | 'PL'
+  | 'BR' | 'MX' | 'IN' | 'JP' | 'ZA'
+export type Language = 'en' | 'fr' | 'de' | 'es' | 'it' | 'pt' | 'nl' | 'sv' | 'pl' | 'ja'
 /** 0 to 3 in half steps. */
 export type Stars = number
 /** How far one criterion is met: none, half, full. */
@@ -103,6 +106,8 @@ export interface DailyStat {
   date: string
   /** Profiles crawled. */
   gathered: number
+  /** The agent that delivered this day. */
+  agentId: string
   /** Leads delivered to the list. Every one of them shows. */
   leads: number
   /** Of those, the ones at 2 stars or more. Around 1 in 10. */

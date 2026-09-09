@@ -9,11 +9,17 @@ import { navigate } from '../lib/router'
 import { DailyChart } from '../components/DailyChart'
 import { FilterForm } from '../components/FilterForm'
 
+/** A count of qualified always carries its total and its share. */
+function rate(part: number, whole: number): string {
+  return whole ? `${Math.round((part / whole) * 100)}%` : '0%'
+}
+
 /** The list: what each agent brings in, who is running, who is paused. */
 export function Agents() {
   useStore()
   const agents = getAgents()
-  const d = getDashboard()
+  const [pick, setPick] = useState<string | null>(null)
+  const d = getDashboard(pick)
 
   return (
     <div className="page">
@@ -25,13 +31,27 @@ export function Agents() {
       </div>
 
       <div className="card">
-        <h2>Leads a day</h2>
+        <h2>
+          Leads a day
+          <select className="select inline-select" value={pick ?? ''} onChange={(e) => setPick(e.target.value || null)} aria-label="Agent">
+            <option value="">Every agent</option>
+            {agents.map((a) => (
+              <option key={a.id} value={a.id}>{a.name}</option>
+            ))}
+          </select>
+        </h2>
         <DailyChart data={d.daily} />
         <div className="star-split">
           <div><b className="num">{d.leadsToday}</b><span>leads today</span></div>
-          <div><b className="num">{d.qualifiedToday}</b><span>qualified today</span></div>
-          <div><b className="num">{Math.round((d.qualifiedToday / d.leadsToday) * 100)}%</b><span>come back qualified</span></div>
-          <div><b className="num">{agents.filter((a) => a.active).length}</b><span>agents running</span></div>
+          <div>
+            <b className="num">{d.qualifiedToday}</b>
+            <span>qualified of {d.leadsToday}, {rate(d.qualifiedToday, d.leadsToday)}</span>
+          </div>
+          <div>
+            <b className="num">{d.high}</b>
+            <span>qualified of {d.total} in the list, {rate(d.high, d.total)}</span>
+          </div>
+          <div><b className="num">{pick ? 1 : agents.filter((a) => a.active).length}</b><span>{pick ? 'agent shown' : 'agents running'}</span></div>
         </div>
       </div>
 
@@ -46,7 +66,10 @@ export function Agents() {
                 <span className="handle">{a.brief.summary}</span>
               </span>
               <span className="state">{a.active ? `Running, ${a.qualifiedPerDay} qualified a day at ${a.runAt}` : 'Paused'}</span>
-              <span className="metric num">{t.found}</span>
+              <span className="metric">
+                <b className="num">{t.high}</b>
+                <small>qualified of {t.found}, {rate(t.high, t.found)}</small>
+              </span>
             </a>
           )
         })}
@@ -149,7 +172,8 @@ export function AgentEditor({ agentId }: { agentId: string }) {
           qualified, and every one of them shows in the list.
         </p>
         <p className="hint">
-          Found {tally.found} leads so far, {tally.high} qualified. Cost follows the leads crawled, so a lower target costs less.
+          Found {tally.found} leads so far, {tally.high} qualified, {rate(tally.high, tally.found)}. Cost follows the leads crawled, so a
+          lower target costs less.
         </p>
       </section>
 

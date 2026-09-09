@@ -10,39 +10,37 @@ import { daysSince } from '../lib/format'
 //
 //   Niche    1 content, audience and follower band fit the brief
 //            0.5 the right discipline, a different audience
-//   Selling  1 own program, coaching, app or membership
-//            0.5 an ebook, merch or affiliate links
-//   Signal   1 a paid post or a public rate card in the last 30 days
-//            0.5 bio wording, a media kit or a launch in the last 30 days,
-//                or a paid post 31 to 90 days old
+//   Selling  1 actively doing business, an own product on sale
+//            0.5 a few collabs already done
+//   Signal   1 a brand signal in the last 4 days
+//            0.5 a brand signal in the last 10 days
 
 export const CRITERIA = [
   { key: 'niche', label: 'Niche', full: 'Content and audience fit the brief', half: 'The right discipline, a different audience' },
-  { key: 'active', label: 'Selling', full: 'Sells a program, coaching, an app or a membership', half: 'Sells an ebook, merch or affiliate links' },
-  { key: 'intent', label: 'Signal', full: 'A paid post or a rate card in the last 30 days', half: 'A softer signal, or a paid post 31 to 90 days old' },
+  { key: 'active', label: 'Selling', full: 'Actively doing business, an own product on sale', half: 'A few collabs already done' },
+  { key: 'intent', label: 'Signal', full: 'A brand signal in the last 4 days', half: 'A brand signal in the last 10 days' },
 ] as const
 
-export const SIGNAL_WINDOW_DAYS = 30
+export const SIGNAL_STRONG_DAYS = 4
+export const SIGNAL_SOFT_DAYS = 10
 
 export function latestSignal(c: Creator): Signal | null {
   return c.signals.length ? c.signals[0] : null
 }
 
-/** What a creator sells, weighed. Its own product beats a download. */
-export function sellingLevel(sells: string): Level {
+/** An own product means business today. A download or a past collab is half. */
+export function sellingLevel(sells: string, signals: Signal[]): Level {
   if (/program|coaching|app|membership/.test(sells)) return 1
-  if (/ebook|merch|affiliate/.test(sells)) return 0.5
+  if (/ebook|merch|affiliate/.test(sells) || signals.length > 0) return 0.5
   return 0
 }
 
-/** The best signal on record, weighed by strength and by age. */
+/** How hot the intent is, by how recently a signal fired. */
 export function signalLevel(signals: Signal[], now = new Date()): Level {
   let best: Level = 0
   for (const s of signals) {
     const age = daysSince(s.date, now)
-    let level: Level = 0
-    if (age <= SIGNAL_WINDOW_DAYS) level = s.strength === 'strong' ? 1 : 0.5
-    else if (age <= 90 && s.strength === 'strong') level = 0.5
+    const level: Level = age <= SIGNAL_STRONG_DAYS ? 1 : age <= SIGNAL_SOFT_DAYS ? 0.5 : 0
     if (level > best) best = level
   }
   return best
@@ -50,15 +48,16 @@ export function signalLevel(signals: Signal[], now = new Date()): Level {
 
 export function scoreOf(c: Creator, now = new Date()): Score {
   const niche = c.niche
-  const active = sellingLevel(c.sells)
+  const active = sellingLevel(c.sells, c.signals)
   const intent = signalLevel(c.signals, now)
   const stars = (niche + active + intent) as Stars
   const earned = [
     { label: 'Niche', level: niche, note: nicheNote(c, niche) },
-    { label: 'Selling', level: active, note: c.sells ? `Sells ${c.sells}` : 'Sells nothing of its own yet' },
+    { label: 'Selling', level: active, note: sellingNote(c, active) },
     { label: 'Signal', level: intent, note: signalNote(c, intent, now) },
   ]
-  return { stars, niche, active, intent, earned, why: earned.filter((e) => e.level > 0).map((e) => e.note).join('. ') + '.' || c.nicheWhy }
+  const said = earned.filter((e) => e.level > 0).map((e) => e.note)
+  return { stars, niche, active, intent, earned, why: said.length ? said.join('. ') + '.' : c.nicheWhy }
 }
 
 function nicheNote(c: Creator, level: Level): string {
@@ -67,20 +66,26 @@ function nicheNote(c: Creator, level: Level): string {
   return c.nicheWhy
 }
 
+function sellingNote(c: Creator, level: Level): string {
+  if (level === 1) return `Sells ${c.sells}, so it is doing business today`
+  if (level === 0.5) return c.sells ? `Sells ${c.sells}` : `${c.signals.length} collab${c.signals.length === 1 ? '' : 's'} already done`
+  return 'Sells nothing and has run no collab'
+}
+
 function signalNote(c: Creator, level: Level, now: Date): string {
   const s = latestSignal(c)
   if (!s) return 'No brand signal on record'
   const age = daysSince(s.date, now)
-  if (level === 1) return `${s.label} ${age} days ago`
-  if (level === 0.5) return `${s.label} ${age} days ago, a softer signal`
-  return `Last brand signal ${age} days ago`
+  if (level === 1) return `${s.label} ${age === 0 ? 'today' : `${age} days ago`}`
+  if (level === 0.5) return `${s.label} ${age} days ago`
+  return `Last brand signal ${age} days ago, past the 10 day window`
 }
 
 function lower(text: string): string {
   return text.charAt(0).toLowerCase() + text.slice(1).replace(/\.$/, '')
 }
 
-/** Where a score sits, for the dashboard split. */
+/** Where a score sits, for the split under the chart. */
 export const BUCKETS = [
   { label: '3 stars', min: 3 },
   { label: '2 to 2.5', min: 2 },

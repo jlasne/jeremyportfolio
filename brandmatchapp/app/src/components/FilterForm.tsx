@@ -1,8 +1,42 @@
 import type { Country, Filters, Language } from '../types'
 import { COUNTRY_NAMES, LANGUAGE_NAMES, compact } from '../lib/format'
 
-const COUNTRIES: Country[] = ['US', 'UK', 'CA', 'AU', 'FR', 'DE']
-const LANGUAGES: Language[] = ['en', 'fr', 'de']
+const COUNTRIES: Country[] = ['US', 'UK', 'CA', 'AU', 'IE', 'NZ', 'FR', 'DE', 'ES', 'IT', 'NL', 'SE', 'PL', 'BR', 'MX', 'IN', 'JP', 'ZA']
+const LANGUAGES: Language[] = ['en', 'fr', 'de', 'es', 'it', 'pt', 'nl', 'sv', 'pl', 'ja']
+
+/** One click bundles. Each one says what it keeps. */
+const PRESETS: { label: string; note: string; patch: Partial<Filters> }[] = [
+  {
+    label: 'Micro and engaged',
+    note: '10k to 100k followers, 3% engagement and up',
+    patch: { followersMin: 10_000, followersMax: 100_000, engagementMin: 0.03, reelViewsMin: null },
+  },
+  {
+    label: 'Mid tier reach',
+    note: '100k to 500k followers, 1% engagement and up',
+    patch: { followersMin: 100_000, followersMax: 500_000, engagementMin: 0.01, reelViewsMin: 10_000 },
+  },
+  {
+    label: 'Big reach',
+    note: '500k and up, 50k median reel views',
+    patch: { followersMin: 500_000, followersMax: 100_000_000, engagementMin: 0, reelViewsMin: 50_000 },
+  },
+  {
+    label: 'Ready to contact',
+    note: 'Email in the bio, posted this month, 3 posts a month and up',
+    patch: { emailInBio: 'yes', lastPostWithin: 30, postsPerMonthMin: 3 },
+  },
+  {
+    label: 'Posting daily',
+    note: '15 posts a month and up, posted this week',
+    patch: { postsPerMonthMin: 15, lastPostWithin: 7 },
+  },
+  {
+    label: 'English speaking',
+    note: 'United States, United Kingdom, Canada, Australia, Ireland, New Zealand',
+    patch: { countries: ['US', 'UK', 'CA', 'AU', 'IE', 'NZ'], languages: ['en'] },
+  },
+]
 
 const SIZES: { label: string; min: number; max: number }[] = [
   { label: '10k to 100k', min: 10_000, max: 100_000 },
@@ -53,8 +87,26 @@ export function FilterForm({ value, onChange }: { value: Filters; onChange: (pat
   }
   const sizeOn = (s: (typeof SIZES)[number]) => value.followersMin === s.min && value.followersMax === s.max
 
+  const matches = (patch: Partial<Filters>) =>
+    (Object.keys(patch) as (keyof Filters)[]).every((k) => JSON.stringify(value[k]) === JSON.stringify(patch[k]))
+
   return (
     <div className="filters-form">
+      <div className="presets">
+        {PRESETS.map((preset) => (
+          <button
+            key={preset.label}
+            type="button"
+            className={`preset${matches(preset.patch) ? ' on' : ''}`}
+            aria-pressed={matches(preset.patch)}
+            onClick={() => onChange(preset.patch)}
+          >
+            <b>{preset.label}</b>
+            <span>{preset.note}</span>
+          </button>
+        ))}
+      </div>
+
       <Line label="Audience size">
         {SIZES.map((s) => (
           <button key={s.label} type="button" className={`chip${sizeOn(s) ? ' on' : ''}`} aria-pressed={sizeOn(s)} onClick={() => onChange({ followersMin: s.min, followersMax: s.max })}>

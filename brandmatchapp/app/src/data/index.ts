@@ -74,9 +74,12 @@ export function getAllContacts(now = new Date()): Contact[] {
 }
 
 export interface ContactQuery {
-  agentId?: string | null
+  /** Empty means every agent. */
+  agentIds?: string[]
   tag?: string | null
   minStars?: number
+  /** Criteria that must score above zero. */
+  mustHave?: ('niche' | 'active' | 'intent')[]
   newOnly?: boolean
 }
 
@@ -88,9 +91,10 @@ export function getContacts(q: ContactQuery = {}, now = new Date()): Contact[] {
   return s.creators
     .filter((c) => !rejected.has(c.id) && passes(c, f, now))
     .map((c) => toContact(c, now))
-    .filter((x) => !q.agentId || x.creator.agentId === q.agentId)
+    .filter((x) => !q.agentIds?.length || q.agentIds.includes(x.creator.agentId))
     .filter((x) => !q.tag || getTags(x.creator.id).includes(q.tag))
     .filter((x) => x.score.stars >= (q.minStars ?? 0))
+    .filter((x) => (q.mustHave ?? []).every((k) => x.score[k] > 0))
     .filter((x) => !q.newOnly || x.isNew)
     .sort(byScore)
 }
@@ -144,9 +148,27 @@ export interface Dashboard {
   byCriterion: { key: string; label: string; full: number; half: number; note: string }[]
 }
 
-export function getDashboard(now = new Date()): Dashboard {
-  const all = getAllContacts(now)
-  const daily = getState().daily
+/** The 14 day series for one agent, or every agent added together. */
+export function getDaily(agentId: string | null = null): DailyStat[] {
+  const rows = getState().daily
+  if (agentId) return rows.filter((r) => r.agentId === agentId)
+  const byDate = new Map<string, DailyStat>()
+  for (const r of rows) {
+    const at = byDate.get(r.date)
+    if (at) {
+      at.leads += r.leads
+      at.gathered += r.gathered
+      at.qualified += r.qualified
+    } else {
+      byDate.set(r.date, { ...r, agentId: 'all' })
+    }
+  }
+  return [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date))
+}
+
+export function getDashboard(agentId: string | null = null, now = new Date()): Dashboard {
+  const all = getAllContacts(now).filter((c) => !agentId || c.creator.agentId === agentId)
+  const daily = getDaily(agentId)
   return {
     today: all.filter((c) => c.isNew).length,
     high: all.filter((c) => isHigh(c.score)).length,
