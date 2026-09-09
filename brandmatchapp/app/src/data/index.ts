@@ -209,10 +209,28 @@ export function updateAgentFilters(id: string, patch: Partial<Filters>): void {
   setState((s) => ({ agents: s.agents.map((a) => (a.id === id ? { ...a, filters: { ...a.filters, ...patch } } : a)) }))
 }
 
+/**
+ * What an AI writes after reading a brand's site. The real one calls a model,
+ * this one builds the same shape so the screen behaves the same.
+ */
+export function audienceFromWebsite(website: string): string {
+  const domain = website.trim().replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/^www\./, '')
+  const name = domain.split('.')[0] || 'your brand'
+  const label = name.charAt(0).toUpperCase() + name.slice(1)
+  return [
+    `${label} sells to women who train with weights and want a plan they can follow at home or in a gym.`,
+    'The creators who fit are coaches and teachers, not athletes chasing a podium.',
+    'They film technique, they answer questions in their comments, and they already sell something of their own: a program, coaching, an ebook or an app.',
+    'Their audience is mostly women between 25 and 45 who started lifting in the last two years.',
+    'Between 10k and 500k followers, posting at least three times a month, in English.',
+  ].join(' ')
+}
+
 export function createAgent(): Agent {
   const agent: Agent = {
     id: `a${Date.now()}`,
     name: '',
+    website: '',
     brief: { who: '', answers: [], summary: 'No brief yet.' },
     filters: { ...defaultFilters, countries: [], languages: [] },
     leadsPerDay: 200,
@@ -436,9 +454,15 @@ export type { Stars }
 
 // Brief ------------------------------------------------------------------------
 
-/** An agent's brief is one sentence. */
+/** The audience an agent looks for, in as many words as it takes. */
 export function setAgentBrief(id: string, who: string): void {
   const clean = who.trim()
-  const b: Brief = { who: clean, answers: [], summary: clean ? clean.replace(/\.$/, '') + '.' : 'No brief yet.' }
+  const first = clean.split(/(?<=\.)\s/)[0] ?? clean
+  const b: Brief = { who: clean, answers: [], summary: clean ? first : 'No audience yet.' }
   setState((s) => ({ agents: s.agents.map((a) => (a.id === id ? { ...a, brief: b } : a)) }))
+}
+
+/** Read the site, write the audience, name the agent. */
+export function setAgentWebsite(id: string, website: string): void {
+  setState((s) => ({ agents: s.agents.map((a) => (a.id === id ? { ...a, website } : a)) }))
 }

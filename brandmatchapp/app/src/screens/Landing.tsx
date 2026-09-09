@@ -92,21 +92,16 @@ export function Landing() {
       </header>
 
       <section className="hero">
-        <span className="pill-note"><i />Runs every night. You open the list.</span>
-        <h1>
-          <span className="rolling num">{volume.toLocaleString('en-US')}</span> creators a day,
-          <br />
-          <mark>ready to work</mark> with your brand.
-        </h1>
+        <h1>Your AI agent finds <mark>high intent influencers</mark> for you.</h1>
         <p className="lede">
-          We find active people in your niche with intent for collabs. You say who you want in one sentence, and your list is
-          waiting every morning with their email attached.
+          Enter your website. brandmatch learns your brand, finds the influencers whose audience matches yours, and brings you
+          the ones ready for a deal with their contact attached.
         </p>
-        <div className="hero-prompt" role="group" aria-label="Who are you looking for">
-          <span className="prompt-text">Women lifting coaches who sell their own program</span>
-          <a className="btn primary" href="#/onboarding">Get my first list</a>
+        <div className="hero-prompt" role="group" aria-label="Your website">
+          <span className="prompt-text">strongher.co</span>
+          <a className="btn primary" href="#/onboarding">Launch my agent</a>
         </div>
-        <p className="hero-tag">You choose the volume. <b>We do the finding.</b></p>
+        <p className="hero-tag">{volume.toLocaleString('en-US')} leads a day, <b>picked while you sleep.</b></p>
       </section>
 
       <div className="browser">
@@ -166,27 +161,18 @@ export function Landing() {
       </section>
 
       <section className="land-section" id="how">
-        <p className="eyebrow">The agent</p>
-        <h2 className="big">It hunts every night. <em>You read the good ones.</em></h2>
-        <p className="section-lede">
-          You write one sentence. From then on the agent works without you: it goes creator by creator, throws out the quiet
-          accounts, and keeps the ones showing they want a brand deal.
-        </p>
-        <div className="steps3">
+        <p className="eyebrow">Two steps</p>
+        <h2 className="big">That is the whole setup.</h2>
+        <div className="steps2">
           <div className="step">
-            <span className="step-n">IT LEARNS</span>
-            <h3>Your sentence is the brief</h3>
-            <p>"Women lifting coaches who sell their own program." The agent turns that into what it looks for and what it drops.</p>
+            <span className="step-n">01</span>
+            <h3>Enter your website</h3>
+            <p>Your agent reads it and writes who it should hunt for: the niche, the audience, the size. Change any word of it.</p>
           </div>
           <div className="step">
-            <span className="step-n">IT WORKS</span>
-            <h3>All night, on its own</h3>
-            <p>It reads bios, audiences and the last 12 posts of every creator it finds. Quiet accounts and wrong audiences never reach you.</p>
-          </div>
-          <div className="step">
-            <span className="step-n">IT LEARNS AGAIN</span>
-            <h3>Your ticks teach it</h3>
-            <p>Reject a creator and it stops bringing you that kind. Tick one off and it moves on. The list gets closer to your taste every week.</p>
+            <span className="step-n">02</span>
+            <h3>Your agents find high intent influencers</h3>
+            <p>Every night they go creator by creator, drop the quiet accounts, and bring you the ones showing they want a brand deal, with their contact attached.</p>
           </div>
         </div>
       </section>

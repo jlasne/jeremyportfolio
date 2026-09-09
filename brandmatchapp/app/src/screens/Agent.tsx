@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { Filters } from '../types'
 import {
   CRITERIA, QUALIFIED_RATIO, agentTally, createAgent, deleteAgent, getAgent, getAgents, getDashboard, getSettings, getTimezones,
-  qualifiedFrom, setAgentBrief, setSettings, updateAgent, updateAgentFilters,
+  audienceFromWebsite, qualifiedFrom, setAgentBrief, setAgentWebsite, setSettings, updateAgent, updateAgentFilters,
 } from '../data'
 import { useStore } from '../data/hooks'
 import { navigate } from '../lib/router'
@@ -24,7 +24,7 @@ export function Agents() {
   return (
     <div className="page">
       <div className="page-head">
-        <h1>Agent</h1>
+        <h1>Agents</h1>
         <span className="count">Each one runs every morning on its own</span>
         <span className="spacer" />
         <button type="button" className="btn primary" onClick={() => navigate(`agent/${createAgent().id}`)}>New agent</button>
@@ -93,6 +93,7 @@ export function AgentEditor({ agentId, firstRun = false }: { agentId: string; fi
   const agent = getAgent(agentId)
   const settings = getSettings()
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [reading, setReading] = useState(false)
 
   if (!agent) {
     return (
@@ -124,7 +125,7 @@ export function AgentEditor({ agentId, firstRun = false }: { agentId: string; fi
         </div>
       )}
       {firstRun && (
-        <p className="subhead">One sentence about the creators you want, plus your filters. It runs every morning and fills your list.</p>
+        <p className="subhead">Put in your website. We read it and write who your agent should look for. Edit anything, then start it.</p>
       )}
 
       <input
@@ -137,15 +138,54 @@ export function AgentEditor({ agentId, firstRun = false }: { agentId: string; fi
       />
 
       <section className="ask">
-        <h2><label htmlFor="who">Who are you looking for?</label></h2>
-        <input
-          id="who"
-          className="input big"
-          placeholder="Women lifting coaches who sell their own program"
-          value={agent.brief.who}
-          onChange={(e) => setAgentBrief(agent.id, e.target.value)}
-        />
-        <p className="helper">One sentence. It decides who we look for and how well each creator fits.</p>
+        <h2><label htmlFor="site">Your website</label></h2>
+        <div className="site-row">
+          <input
+            id="site"
+            className="input big"
+            placeholder="strongher.co"
+            value={agent.website}
+            onChange={(e) => setAgentWebsite(agent.id, e.target.value)}
+          />
+          <button
+            type="button"
+            className="btn primary"
+            disabled={!agent.website.trim() || reading}
+            onClick={() => {
+              setReading(true)
+              window.setTimeout(() => {
+                setAgentBrief(agent.id, audienceFromWebsite(agent.website))
+                if (!agent.name.trim()) {
+                  const domain = agent.website.replace(/^https?:\/\//, '').replace(/^www\./, '').split('.')[0]
+                  updateAgent(agent.id, { name: domain.charAt(0).toUpperCase() + domain.slice(1) + ' creators' })
+                }
+                setReading(false)
+              }, 1400)
+            }}
+          >
+            {reading ? 'Reading it' : agent.brief.who ? 'Read it again' : 'Read my site'}
+          </button>
+        </div>
+        <p className="helper">We read your site and write the audience below. Change any of it.</p>
+      </section>
+
+      <section className="ask">
+        <h2><label htmlFor="who">The audience your agent looks for</label></h2>
+        {reading ? (
+          <div className="reading" aria-live="polite">
+            <span className="dots"><i /><i /><i /></span>
+            Reading {agent.website} and writing your audience.
+          </div>
+        ) : (
+          <textarea
+            id="who"
+            className="textarea audience"
+            placeholder="Write it yourself, or put your website above and let us draft it."
+            value={agent.brief.who}
+            onChange={(e) => setAgentBrief(agent.id, e.target.value)}
+          />
+        )}
+        <p className="helper">This is what the agent hunts for. The more precise it is, the better the leads.</p>
       </section>
 
       <section className="ask">

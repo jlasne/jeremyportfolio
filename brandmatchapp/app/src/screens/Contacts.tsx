@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import {
-  countDone, countTagged, diagnoseEmpty, exportCsv, getAgents, getContacts, getFilters, getTagVocabulary,
-  resetFilter, resetFilters, setFilters, toggleDone,
+  addTag, countDone, countTagged, diagnoseEmpty, exportCsv, getAgents, getContacts, getFilters, getTagVocabulary,
+  reject, resetFilter, resetFilters, setFilters, toggleDone,
 } from '../data'
 import { useStore } from '../data/hooks'
 import { downloadCsv } from '../lib/csv'
@@ -16,16 +16,26 @@ export function Contacts({ agentId }: { agentId: string | null }) {
   useStore()
   const agents = getAgents()
   const [tag, setTag] = useState<string | null>(null)
+  const [minStars, setMinStars] = useState(0)
   const [showDone, setShowDone] = useState(false)
   const [openId, setOpenId] = useState<string | null>(null)
   const [showFilters, setShowFilters] = useState(false)
+  const [showStars, setShowStars] = useState(false)
+  const [picked, setPicked] = useState<string[]>([])
+  const [bulkTag, setBulkTag] = useState('')
   const box = useRef<HTMLDivElement>(null)
+  const starBox = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const onDown = (e: MouseEvent) => {
       if (box.current && !box.current.contains(e.target as Node)) setShowFilters(false)
+      if (starBox.current && !starBox.current.contains(e.target as Node)) setShowStars(false)
     }
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setShowFilters(false)
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      setShowFilters(false)
+      setShowStars(false)
+    }
     document.addEventListener('mousedown', onDown)
     document.addEventListener('keydown', onKey)
     return () => {
@@ -37,10 +47,22 @@ export function Contacts({ agentId }: { agentId: string | null }) {
   const contacts = getContacts({
     agentIds: agentId ? [agentId] : [],
     tag,
+    minStars,
     done: showDone ? 'any' : 'hide',
   })
   const vocabulary = getTagVocabulary().filter((t) => countTagged(t) > 0)
+  const allTags = getTagVocabulary()
   const done = countDone()
+  const shown = contacts.map((c) => c.creator.id)
+  const selected = picked.filter((id) => shown.includes(id))
+  const allPicked = shown.length > 0 && selected.length === shown.length
+
+  const pick = (id: string) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))
+  const clearPick = () => setPicked([])
+  const bulk = (run: (id: string) => void) => {
+    selected.forEach(run)
+    clearPick()
+  }
 
   return (
     <div className="page">
@@ -54,6 +76,32 @@ export function Contacts({ agentId }: { agentId: string | null }) {
       </div>
 
       <div className="filter-bar">
+        <div className="popover-wrap" ref={starBox}>
+          <button type="button" className={`btn${minStars ? ' on' : ''}`} aria-expanded={showStars} onClick={() => setShowStars((v) => !v)}>
+            Stars: {minStars === 0 ? 'Any' : `${minStars}+`}
+          </button>
+          {showStars && (
+            <div className="popover narrow left" role="dialog" aria-label="Stars">
+              <h2>Stars</h2>
+              <div className="slider-row">
+                <input
+                  className="slider"
+                  type="range"
+                  min={0}
+                  max={3}
+                  step={0.5}
+                  value={minStars}
+                  aria-label="Minimum stars"
+                  onChange={(e) => setMinStars(Number(e.target.value))}
+                />
+                <span className="slider-value num">{minStars === 0 ? 'Any' : `${minStars}+`}</span>
+              </div>
+              <div className="slider-ticks"><span>0</span><span>1</span><span>2</span><span>3</span></div>
+              <p className="hint" style={{ marginTop: 10 }}>Above 1.5 stars is what counts as qualified.</p>
+            </div>
+          )}
+        </div>
+
         <label className="filter-select">
           <span>Agent</span>
           <select className="select" value={agentId ?? ''} onChange={(e) => navigate(e.target.value ? `contacts/${e.target.value}` : 'contacts')}>
@@ -97,15 +145,61 @@ export function Contacts({ agentId }: { agentId: string | null }) {
         )}
       </div>
 
+      {selected.length > 0 && (
+        <div className="bulk-bar" role="region" aria-label="Selected contacts">
+          <b className="num">{selected.length}</b>
+          <span>selected</span>
+          <span className="spacer" />
+          <select
+            className="select"
+            value={bulkTag}
+            aria-label="Tag the selected contacts"
+            onChange={(e) => {
+              const label = e.target.value
+              if (!label) return
+              bulk((id) => addTag(id, label))
+              setBulkTag('')
+            }}
+          >
+            <option value="">Add a tag</option>
+            {allTags.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+          <button type="button" className="btn" onClick={() => bulk(toggleDone)}>Mark done</button>
+          <button type="button" className="btn danger" onClick={() => bulk(reject)}>Reject</button>
+          <button type="button" className="btn quiet" onClick={clearPick}>Clear</button>
+        </div>
+      )}
+
       <div className="list">
+        {contacts.length > 0 && (
+          <div className="select-all">
+            <label className="tick">
+              <input
+                type="checkbox"
+                checked={allPicked}
+                aria-label="Select every contact shown"
+                onChange={() => setPicked(allPicked ? [] : shown)}
+              />
+            </label>
+            <span className="faint">Select all {contacts.length}</span>
+          </div>
+        )}
         {contacts.map((c) => (
           <div className={`contact${openId === c.creator.id ? ' open' : ''}${c.isDone ? ' done' : ''}`} key={c.creator.id}>
             <label className="tick">
-              <input type="checkbox" checked={c.isDone} onChange={() => toggleDone(c.creator.id)} aria-label={`Mark @${c.creator.handle} done`} />
+              <input
+                type="checkbox"
+                checked={picked.includes(c.creator.id)}
+                onChange={() => pick(c.creator.id)}
+                aria-label={`Select @${c.creator.handle}`}
+              />
             </label>
             <button type="button" className="handle-btn" onClick={() => setOpenId(c.creator.id)}>
               @{c.creator.handle}
               {c.isNew && <span className="badge-new">NEW</span>}
+              {c.isDone && <span className="badge-done">Done</span>}
             </button>
             <Stars score={c.score} />
             <span className={`mail${c.creator.email ? '' : ' none'}`}>{c.creator.email ?? 'No email found'}</span>
@@ -119,7 +213,7 @@ export function Contacts({ agentId }: { agentId: string | null }) {
             </span>
           </div>
         ))}
-        {contacts.length === 0 && <Empty tag={tag} done={done} onClear={() => { setTag(null); navigate('contacts') }} />}
+        {contacts.length === 0 && <Empty tag={tag} done={done} onClear={() => { setTag(null); setMinStars(0); navigate('contacts') }} />}
       </div>
 
       {openId && <CreatorDetail id={openId} onClose={() => setOpenId(null)} />}

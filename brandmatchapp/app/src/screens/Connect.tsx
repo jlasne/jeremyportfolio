@@ -33,6 +33,8 @@ function Copy({ text, label }: { text: string; label: string }) {
     <button
       type="button"
       className="btn small"
+      disabled
+      title="Available when Connect AI ships"
       onClick={async () => {
         try {
           await navigator.clipboard.writeText(text)
@@ -73,12 +75,17 @@ export function Connect() {
     <div className="page editor">
       <div className="page-head">
         <h1>Connect AI</h1>
-        <span className="count">Your leads, inside the AI you already use</span>
+        <span className="soon">Coming soon</span>
       </div>
       <p className="subhead">
         One key, two doors. MCP hands your leads to the AI you already use. The API runs your agents from your own code.
-        Nothing to install.
+        Both open soon, and the shape below is what they will look like.
       </p>
+
+      <div className="soon-panel">
+        <b style={{ color: 'var(--ink)' }}>Want it first?</b> Tell us which AI you run and we will open your key on the day it
+        ships. Everything below is a preview: the address, the key and the calls are placeholders.
+      </div>
 
       <section className="ask">
         <h2>MCP · get your leads</h2>

@@ -79,33 +79,37 @@ top under 900px.
 
 | Route | What it holds |
 | --- | --- |
-| `#/` | The landing: the promise, the app in a frame, a comparison table, how the agent hunts, MCP and the API, two plans at $500, four questions |
+| `#/` | The landing: the promise, the app in a frame, a comparison table, the two steps, MCP and the API, two plans at $500, four questions |
 | `#/contacts` | The one list. A handle, the stars, the email, followers and engagement. Two dropdowns, agent and tag, plus more filters. Tick a row to mark it done and it leaves the list |
 | `#/agent` | Leads a day over 14 days, then the agents. Clicking one opens its sentence, its filters and its delivery |
-| `#/connect` | MCP to get your leads, the API to manage your agents. An address, a key, an example each, and what each one can do |
+| `#/connect` | Coming soon. MCP to get your leads, the API to manage your agents, shown as a preview with the copy buttons off |
 | `#/settings` | Timezone, tags, what counts as qualified, your account, start over |
 | `#/onboarding` | Set up your first agent, then the first list over 8 seconds and straight into it |
 
-An **agent** is one saved sentence plus filters that runs every morning. It owns
-how many leads a day it delivers. Every contact carries the agent that found it.
+An **agent** starts from your website. We read it and write the audience it
+should hunt for, in as many words as it takes, and you edit any of it. It owns
+its filters and how many leads a day it delivers. Every contact carries the
+agent that found it.
+
+On Contacts the checkbox selects. Selecting opens a bar to tag, mark done or
+reject in bulk. Stars filter through a slider, agent and tag through dropdowns.
 
 **Qualified** means above 1.5 stars. Each of niche, selling and signal is worth
 one star, half when it half fits.
 
 ## Design
 
-The app is light and the landing is dark, both on the CreatorMatch system:
-navy `#070a12`, off white `#f2f3f7`, hairline rules at 10% white, translucent
-cards at 4.5% white, no shadows, and a grain overlay. Unbounded for display,
-Satoshi for everything else, both lifted from `brand/index.html` and bundled as
-woff2 so nothing loads from the network.
+Broken white ground `#fbf9f7`, ink `#1b1420`, and two accents: orange
+`#f2662a` and purple `#7c5cff`. Pastel washes of both sit behind the fold, the
+headline runs a gradient between them, and the mark is two circles overlapping
+with the middle knocked out, filled with the same gradient. The chart pair
+passes the colourblind and contrast checks.
 
-The mark is two circles overlapping with the middle knocked out. The overlap is
-the match, and it sits beside the CreatorMatch circle and square as a sibling.
+Unbounded for display, Satoshi for everything else, both lifted from
+`brand/index.html` and bundled as woff2 so nothing loads from the network.
 
-Pricing on the landing: $500 a month for 100 to 1,000 leads a day, or $500 once
-for a 30,000 lead pack with no renewal. The plans show lead counts, not the
-qualified share.
+Pricing: $500 a month for 100 to 1,000 leads a day, or $500 once for a 30,000
+lead pack with no renewal. The plans show lead counts, not the qualified share.
 
 Works down to a phone, keyboard focus visible, reduced motion respected: the
-rolling hero number and the grain both stop.
+rolling hero number, the grain and the reading dots all stop.

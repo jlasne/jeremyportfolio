@@ -90,6 +90,8 @@ export interface Creator {
 export interface Agent {
   id: string
   name: string
+  /** The brand's own site. The audience below is written from it. */
+  website: string
   brief: Brief
   filters: Filters
   /** How many leads a day this search should deliver. */

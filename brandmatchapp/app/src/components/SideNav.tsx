@@ -6,7 +6,7 @@ import { Logo } from './Logo'
 
 const ITEMS: { href: string; label: string; name: Route['name'] }[] = [
   { href: '#/contacts', label: 'Contacts', name: 'contacts' },
-  { href: '#/agent', label: 'Agent', name: 'agent' },
+  { href: '#/agent', label: 'Agents', name: 'agent' },
   { href: '#/connect', label: 'Connect AI', name: 'connect' },
   { href: '#/settings', label: 'Settings', name: 'settings' },
 ]
@@ -28,6 +28,7 @@ export function SideNav({ route }: { route: Route }) {
               <a href={item.href} className={on ? 'on' : undefined} aria-current={on ? 'page' : undefined}>
                 <span>{item.label}</span>
                 {item.name === 'contacts' && d.today ? <span className="pill num">{d.today}</span> : null}
+                {item.name === 'connect' ? <span className="soon">Soon</span> : null}
               </a>
             </li>
           )

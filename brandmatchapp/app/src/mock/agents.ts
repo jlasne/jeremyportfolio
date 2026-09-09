@@ -9,6 +9,7 @@ export const agents: Agent[] = [
   {
     id: 'a1',
     name: 'Women lifting coaches',
+    website: 'strongher.co',
     brief: {
       who: 'Women lifting coaches who sell their own program',
       answers: [],
@@ -23,6 +24,7 @@ export const agents: Agent[] = [
   {
     id: 'a2',
     name: 'Supplement ambassadors',
+    website: 'purefuel.com',
     brief: {
       who: 'Fitness creators who already promote supplement brands',
       answers: [],
@@ -37,6 +39,7 @@ export const agents: Agent[] = [
   {
     id: 'a3',
     name: 'Postpartum and 40+',
+    website: 'strongher.co',
     brief: {
       who: 'Coaches training women through postpartum and after 40',
       answers: [],
