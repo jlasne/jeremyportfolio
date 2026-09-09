@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import type { Filters } from '../types'
 import {
-  CRITERIA, agentTally, createAgent, deleteAgent, getAgent, getAgents, getDashboard, getSettings, getTimezones,
-  setAgentBrief, setSettings, updateAgent, updateAgentFilters,
+  CRITERIA, QUALIFIED_RATIO, agentTally, createAgent, deleteAgent, getAgent, getAgents, getDashboard, getSettings, getTimezones,
+  leadsNeeded, setAgentBrief, setSettings, updateAgent, updateAgentFilters,
 } from '../data'
 import { useStore } from '../data/hooks'
 import { navigate } from '../lib/router'
@@ -25,12 +25,12 @@ export function Agents() {
       </div>
 
       <div className="card">
-        <h2>New contacts a day</h2>
+        <h2>Leads a day</h2>
         <DailyChart data={d.daily} />
         <div className="star-split">
-          <div><b className="num">{d.today}</b><span>new today</span></div>
-          <div><b className="num">{d.high}</b><span>at 2 stars or more</span></div>
-          <div><b className="num">{d.total}</b><span>contacts in total</span></div>
+          <div><b className="num">{d.leadsToday}</b><span>leads today</span></div>
+          <div><b className="num">{d.qualifiedToday}</b><span>qualified today</span></div>
+          <div><b className="num">{Math.round((d.qualifiedToday / d.leadsToday) * 100)}%</b><span>come back qualified</span></div>
           <div><b className="num">{agents.filter((a) => a.active).length}</b><span>agents running</span></div>
         </div>
       </div>
@@ -45,7 +45,7 @@ export function Agents() {
                 <span className="name">{a.name}</span>
                 <span className="handle">{a.brief.summary}</span>
               </span>
-              <span className="state">{a.active ? `Running, ${a.leadsPerDay} a day at ${a.runAt}` : 'Paused'}</span>
+              <span className="state">{a.active ? `Running, ${a.qualifiedPerDay} qualified a day at ${a.runAt}` : 'Paused'}</span>
               <span className="metric num">{t.found}</span>
             </a>
           )
@@ -91,7 +91,7 @@ export function AgentEditor({ agentId }: { agentId: string }) {
         <button type="button" className="btn" onClick={() => updateAgent(agent.id, { active: !agent.active })}>
           {agent.active ? 'Pause' : 'Run every day'}
         </button>
-        <a className="btn primary" href={`#/contacts/${agent.id}`}>See {tally.found} contacts</a>
+        <a className="btn primary" href={`#/contacts/${agent.id}`}>See {tally.found} leads</a>
       </div>
 
       <input
@@ -123,12 +123,12 @@ export function AgentEditor({ agentId }: { agentId: string }) {
         <h2>Delivery</h2>
         <div className="field-row">
           <label className="field">
-            <span>Contacts a day</span>
+            <span>Qualified leads a day</span>
             <input
               className="input num"
               inputMode="numeric"
-              value={agent.leadsPerDay}
-              onChange={(e) => updateAgent(agent.id, { leadsPerDay: Math.max(0, Number(e.target.value.replace(/\D/g, '')) || 0) })}
+              value={agent.qualifiedPerDay}
+              onChange={(e) => updateAgent(agent.id, { qualifiedPerDay: Math.max(0, Number(e.target.value.replace(/\D/g, '')) || 0) })}
             />
           </label>
           <label className="field">
@@ -144,8 +144,12 @@ export function AgentEditor({ agentId }: { agentId: string }) {
             </select>
           </label>
         </div>
+        <p className="estimate">
+          <b className="num">{leadsNeeded(agent.qualifiedPerDay)}</b> leads a day to find them. About 1 lead in {QUALIFIED_RATIO} comes back
+          qualified, and every one of them shows in the list.
+        </p>
         <p className="hint">
-          Found {tally.found} contacts so far, {tally.high} at 2 stars or more. Cost follows the profiles crawled, so a lower number costs less.
+          Found {tally.found} leads so far, {tally.high} qualified. Cost follows the leads crawled, so a lower target costs less.
         </p>
       </section>
 
@@ -176,7 +180,7 @@ export function AgentEditor({ agentId }: { agentId: string }) {
           <button type="button" className="btn quiet danger" onClick={() => setConfirmDelete(true)}>Delete this agent</button>
         )}
         <span className="spacer" />
-        <a className="btn primary" href={`#/contacts/${agent.id}`}>See {tally.found} contacts</a>
+        <a className="btn primary" href={`#/contacts/${agent.id}`}>See {tally.found} leads</a>
       </div>
     </div>
   )

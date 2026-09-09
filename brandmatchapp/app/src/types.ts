@@ -89,8 +89,8 @@ export interface Agent {
   name: string
   brief: Brief
   filters: Filters
-  /** How many leads a day this agent should deliver. */
-  leadsPerDay: number
+  /** How many qualified leads a day this agent should deliver. */
+  qualifiedPerDay: number
   /** Local time the daily batch lands, "07:00". */
   runAt: string
   active: boolean
@@ -103,10 +103,10 @@ export interface DailyStat {
   date: string
   /** Profiles crawled. */
   gathered: number
-  /** Leads kept after the filters. */
+  /** Leads delivered to the list. Every one of them shows. */
   leads: number
-  /** Leads at 2 or 3 stars. */
-  high: number
+  /** Of those, the ones at 2 stars or more. Around 1 in 10. */
+  qualified: number
 }
 
 export interface Note {

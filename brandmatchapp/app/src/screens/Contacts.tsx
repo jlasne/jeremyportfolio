@@ -44,47 +44,62 @@ export function Contacts({ agentId }: { agentId: string | null }) {
         <h1>Contacts</h1>
         <span className="count num">{contacts.length}</span>
         <span className="spacer" />
-        <div className="popover-wrap" ref={box}>
-          <button type="button" className="btn" aria-expanded={showFilters} onClick={() => setShowFilters((v) => !v)}>Filters</button>
-          {showFilters && (
-            <div className="popover" role="dialog" aria-label="Filters">
-              <h2>
-                Filters
-                <button type="button" className="btn quiet small" onClick={() => resetFilters()}>Reset</button>
-              </h2>
-              <FilterForm value={getFilters()} onChange={setFilters} />
-            </div>
-          )}
-        </div>
         <button type="button" className="btn" disabled={contacts.length === 0} onClick={() => downloadCsv('brandmatch-contacts.csv', exportCsv(contacts.map((c) => c.creator.id)))}>
           Export
         </button>
       </div>
 
-      <div className="filter-row">
-        <div className="chips">
-          <button type="button" className={`chip${agentId ? '' : ' on'}`} aria-pressed={!agentId} onClick={() => navigate('contacts')}>
-            Every agent
+      <div className="filter-bar">
+        <label className="filter-select">
+          <span>Stars</span>
+          <select className="select" value={minStars} onChange={(e) => setMinStars(Number(e.target.value))}>
+            <option value={0}>Any</option>
+            <option value={1}>1 and up</option>
+            <option value={2}>2 and up, qualified</option>
+            <option value={3}>3 only</option>
+          </select>
+        </label>
+
+        <label className="filter-select">
+          <span>Agent</span>
+          <select className="select" value={agentId ?? ''} onChange={(e) => navigate(e.target.value ? `contacts/${e.target.value}` : 'contacts')}>
+            <option value="">Every agent</option>
+            {agents.map((a) => (
+              <option key={a.id} value={a.id}>{a.name}</option>
+            ))}
+          </select>
+        </label>
+
+        <div className="popover-wrap" ref={box}>
+          <button type="button" className={`btn${showFilters ? ' on' : ''}`} aria-expanded={showFilters} onClick={() => setShowFilters((v) => !v)}>
+            More Instagram filters
           </button>
-          {agents.map((a) => (
-            <button key={a.id} type="button" className={`chip${agentId === a.id ? ' on' : ''}`} aria-pressed={agentId === a.id} onClick={() => navigate(`contacts/${a.id}`)}>
-              {a.name}
-            </button>
-          ))}
+          {showFilters && (
+            <div className="popover" role="dialog" aria-label="Instagram filters">
+              <h2>
+                Instagram filters
+                <button type="button" className="btn quiet small" onClick={() => resetFilters()}>Reset</button>
+              </h2>
+              <FilterForm value={getFilters()} onChange={setFilters} />
+              {vocabulary.length > 0 && (
+                <div className="filter-line" style={{ marginTop: 14 }}>
+                  <span className="filter-label">Your tags</span>
+                  <div className="chips">
+                    {vocabulary.map((t) => (
+                      <button key={t} type="button" className={`chip${tag === t ? ' on' : ''}`} aria-pressed={tag === t} onClick={() => setTag(tag === t ? null : t)}>
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
-        <span className="rule" />
-        <div className="chips">
-          {[2, 3].map((n) => (
-            <button key={n} type="button" className={`chip${minStars === n ? ' on' : ''}`} aria-pressed={minStars === n} onClick={() => setMinStars(minStars === n ? 0 : n)}>
-              {n} stars and up
-            </button>
-          ))}
-          {vocabulary.map((t) => (
-            <button key={t} type="button" className={`chip${tag === t ? ' on' : ''}`} aria-pressed={tag === t} onClick={() => setTag(tag === t ? null : t)}>
-              {t}
-            </button>
-          ))}
-        </div>
+
+        {(tag || minStars > 0) && (
+          <button type="button" className="btn quiet" onClick={() => { setTag(null); setMinStars(0) }}>Clear</button>
+        )}
       </div>
 
       {agent && <p className="subhead">{agent.brief.summary}</p>}

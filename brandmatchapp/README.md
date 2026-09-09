@@ -78,13 +78,15 @@ scrolling bar across the top under 900px.
 
 | Route | What it holds |
 | --- | --- |
-| `#/contacts` | The one list. Chips filter by agent, by stars and by tag. A row shows the picture, the name, the stars, the signal with its date, followers and engagement. Everything else lives behind the row, in the panel |
-| `#/agents` | New contacts a day as a line over 14 days, four counts, then who is running and who is paused. Clicking one opens its sentence, its filters, its delivery and how it scores |
+| `#/contacts` | The one list. Three controls above it: stars, agent, and more Instagram filters, with your tags inside that last one. A row shows the picture, the name, the stars, the signal with its date, followers and engagement. Everything else lives behind the row, in the panel |
+| `#/agents` | Leads and qualified leads a day as two smooth lines over 14 days, four counts, then who is running and who is paused. Clicking one opens its sentence, its filters, its delivery and how it scores |
 | `#/onboarding/*` | One question, three follow ups, the filters, then the first batch over 8 seconds |
 
 An **agent** is one saved search that runs every morning. It owns one sentence
-about who to look for, its own filters, how many contacts a day it should
-deliver and when. Every contact carries the agent that found it, and the chip
+about who to look for, its own filters, how many **qualified** leads a day it
+should deliver and when. Qualified means 2 stars or more, and about 1 lead in
+10 comes back qualified, so a target of 25 asks for 250 leads a day. Every lead
+shows in the list, qualified or not. Every contact carries the agent that found it, and the chip
 row on Contacts filters on it. Tags do the work saved lists used to do.
 
 Filters are written as choices, not number boxes: audience size, engagement,

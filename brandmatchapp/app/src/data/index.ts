@@ -12,6 +12,14 @@ import { getState, resetState, setState } from './store'
 
 export { BUCKETS, CRITERIA, scoreOf } from './score'
 
+/** Roughly 1 lead in 10 comes back qualified. Used to size a day's crawl. */
+export const QUALIFIED_RATIO = 10
+
+/** How many leads an agent must deliver to hit a qualified target. */
+export function leadsNeeded(qualifiedPerDay: number): number {
+  return qualifiedPerDay * QUALIFIED_RATIO
+}
+
 // Contacts, the one list ---------------------------------------------------
 
 export interface Contact {
@@ -128,7 +136,9 @@ export interface Dashboard {
   /** Contacts at 2 stars or more. */
   high: number
   total: number
-  gatheredToday: number
+  /** Yesterday's delivery, from the daily series. */
+  leadsToday: number
+  qualifiedToday: number
   daily: DailyStat[]
   buckets: { label: string; count: number }[]
   byCriterion: { key: string; label: string; full: number; half: number; note: string }[]
@@ -141,7 +151,8 @@ export function getDashboard(now = new Date()): Dashboard {
     today: all.filter((c) => c.isNew).length,
     high: all.filter((c) => isHigh(c.score)).length,
     total: all.length,
-    gatheredToday: daily.length ? daily[daily.length - 1].gathered : 0,
+    leadsToday: daily.length ? daily[daily.length - 1].leads : 0,
+    qualifiedToday: daily.length ? daily[daily.length - 1].qualified : 0,
     daily,
     buckets: BUCKETS.map((b, i) => ({
       label: b.label,
@@ -181,7 +192,7 @@ export function createAgent(): Agent {
     name: 'New agent',
     brief: { who: '', answers: [], summary: 'No brief yet.' },
     filters: { ...defaultFilters, countries: [], languages: [] },
-    leadsPerDay: 20,
+    qualifiedPerDay: 20,
     runAt: '07:00',
     active: true,
     createdAt: new Date().toISOString(),
