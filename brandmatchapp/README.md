@@ -123,14 +123,17 @@ placeholder image service, so nothing fails offline.
 
 ## Design
 
-Five colors: Ink `#1A1A17`, warm Paper `#F7F6F3`, Line `#E9E6E0`, Amber
-`#C8860D` on the stars, Blue `#2F5BD6` on links and the chart.
-One typeface, Inter over the system stack, with tabular numerals for every
-metric. A 216px nav on the left, white cards on warm paper with a 1px border
-and a soft shadow, flat rows split by hairlines, and a detail panel that slides
-over the list.
+The whole app wears Gojiberry's clothes, read from gojiberry.ai's published
+source: white page, near black ink `#0a0a0a`, one coral accent `#fa651e`,
+hairline borders `#eee`, grey sections `#fafafa`, 16px cards, 100px pill
+buttons, a yellow marker `#fbef76` behind the key phrase. Fustat for every
+headline, Inter for everything else. Both typefaces ship as Latin woff2 files
+in `app/src/fonts`, so nothing loads from the network.
 
-The stars and the dated signal are the only color in a row. Everything else is
-grey text. The dashboard chart is one series in blue, checked against the
-colorblind and contrast rules before shipping. Works down to a phone, keyboard
-focus visible, reduced motion respected.
+The landing follows Gojiberry's beats in order: numbered nav, a hero with the
+one sentence prompt, the app inside a browser frame, a numbers strip, what the
+agent does, three steps, what it replaces, the score, two plans, questions, a
+dark close. Testimonials and customer logos are left out on purpose: none exist
+yet, and none are invented.
+
+Works down to a phone, keyboard focus visible, reduced motion respected.
