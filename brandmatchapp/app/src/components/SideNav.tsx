@@ -12,7 +12,8 @@ const Mark = () => (
 
 const ITEMS: { href: string; label: string; name: Route['name'] }[] = [
   { href: '#/contacts', label: 'Contacts', name: 'contacts' },
-  { href: '#/agents', label: 'Agents', name: 'agents' },
+  { href: '#/leads', label: 'Leads', name: 'leads' },
+  { href: '#/agent', label: 'Agent', name: 'agent' },
 ]
 
 export function SideNav({ route }: { route: Route }) {

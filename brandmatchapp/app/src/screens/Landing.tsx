@@ -1,12 +1,11 @@
 import { useState } from 'react'
-import { CRITERIA, QUALIFIED_RATIO, getContacts, leadsNeeded } from '../data'
+import { CRITERIA, QUALIFIED_RATIO, getContacts, qualifiedFrom } from '../data'
 import { useStore } from '../data/hooks'
 import { compact, relative } from '../lib/format'
 import { Stars } from '../components/Stars'
 
-// The landing, on Gojiberry's beats: nav with numbered items, a hero with the
-// prompt, the app in a browser frame, a numbers strip, what the agent does,
-// three steps, what it replaces, the score, two plans, questions, a dark close.
+// The landing, on Gojiberry's beats, written for a brand: how many creators
+// land in the list every morning, and how fast you can message them.
 
 const Mark = () => (
   <svg viewBox="0 0 32 32" aria-hidden="true">
@@ -16,17 +15,18 @@ const Mark = () => (
 )
 
 const FAQ = [
-  { q: 'Where does the data come from?', a: 'An agent crawls Instagram every night, 300 to 500 profiles a run. Engagement and views come from the last 12 posts we pull ourselves, never from an aggregator average.' },
-  { q: 'What counts as qualified?', a: '2 stars or more. One star each for niche, selling and signal, half a star when it half fits. About 1 lead in 10 comes back qualified.' },
-  { q: 'How fast is the first batch?', a: 'Under 10 minutes after you create your first agent. Every morning after that, the batch is ready before 7:00 in your timezone.' },
-  { q: 'Can I run more than one search?', a: 'Yes. Each agent is one search with its own sentence, filters and daily target. Every contact carries the agent that found it.' },
-  { q: 'Does it send messages?', a: 'No. It finds, scores and hands you the email. Outreach stays in your hands.' },
+  { q: 'How many creators do I get?', a: 'You pick. Set 250 a day and 250 land in your list every morning, ranked, with the email where we found one. Change the number any time.' },
+  { q: 'Where do they come from?', a: 'We look through Instagram every night and read each creator the way you would: their bio, their audience, their last 12 posts, and what they have promoted lately.' },
+  { q: 'Are the numbers real?', a: 'Engagement and views come from the last 12 posts we read ourselves. Databases copy an average that can run 74 times the real number, so we never use one.' },
+  { q: 'How fast is the first list?', a: 'Under 10 minutes after you write your first sentence. Every morning after that, your list is ready before 7:00 in your timezone.' },
+  { q: 'Can I run more than one search?', a: 'Yes. One for each launch, each product, each market. Every creator carries the search that found them, so your lists stay clean.' },
+  { q: 'Does it message creators for me?', a: 'No. It finds them, ranks them and hands you the email. What you say to a creator stays yours.' },
 ]
 
 export function Landing() {
   useStore()
   const top = getContacts({ minStars: 2 }).slice(0, 6)
-  const [target, setTarget] = useState(25)
+  const [perDay, setPerDay] = useState(250)
   const [open, setOpen] = useState<number | null>(0)
 
   return (
@@ -37,9 +37,9 @@ export function Landing() {
           brandmatch
         </a>
         <nav>
-          <a href="#features">Features <small>01</small></a>
+          <a href="#features">What you get <small>01</small></a>
           <a href="#how">How it works <small>02</small></a>
-          <a href="#score">The score <small>03</small></a>
+          <a href="#connect">Connect <small>03</small></a>
           <a href="#pricing">Pricing <small>04</small></a>
         </nav>
         <span className="spacer" />
@@ -48,17 +48,17 @@ export function Landing() {
       </header>
 
       <section className="hero">
-        <span className="pill-note"><i />Instagram creators, scored for intent, every morning</span>
-        <h1>Your AI agent finds creators ready for a <mark>brand deal</mark> and hands you their email.</h1>
+        <span className="pill-note"><i />For brands looking for creators</span>
+        <h1>250 Instagram creators a day, <mark>ready to work</mark> with your brand.</h1>
         <p className="lede">
-          Describe the creator you want in one sentence. brandmatch crawls Instagram every night, scores each profile on niche,
-          selling and intent, and the list is sorted before 7:00.
+          Say who you want in one sentence. Every morning your list is waiting: creators who fit your brand, ranked by how ready
+          they are, with their email attached.
         </p>
         <div className="hero-prompt" role="group" aria-label="Who are you looking for">
           <span className="prompt-text">Women lifting coaches who sell their own program</span>
-          <a className="btn primary" href="#/onboarding">Launch my agent for free</a>
+          <a className="btn primary" href="#/onboarding">Get my first list free</a>
         </div>
-        <p className="hero-tag">It's like having a <b>radar for creators ready to sign.</b></p>
+        <p className="hero-tag">Stop scrolling Instagram. <b>Open the list and start messaging.</b></p>
       </section>
 
       <div className="browser">
@@ -92,93 +92,93 @@ export function Landing() {
       </div>
 
       <div className="strip">
-        <div><b>300 to 500</b><span>profiles crawled a night, per agent</span></div>
-        <div><b>1 in 10</b><span>comes back qualified</span></div>
-        <div><b>7:00</b><span>the list is sorted before</span></div>
-        <div><b>10 min</b><span>from signup to the first batch</span></div>
+        <div><b>250</b><span>creators in your list, every morning</span></div>
+        <div><b>7:00</b><span>your list is ready before</span></div>
+        <div><b>10 min</b><span>from one sentence to your first list</span></div>
+        <div><b>1 in 2</b><span>has their email in the bio</span></div>
       </div>
 
       <section className="land-section grey" id="features">
         <div className="inner">
-          <h2 className="big">Your agent runs every night. <em>The list is ready every morning.</em></h2>
-          <p className="section-lede">From finding the right creators to attaching the right email, your agent handles it, on its own.</p>
+          <h2 className="big">A full list every morning. <em>Nothing to search for.</em></h2>
+          <p className="section-lede">Your team stops hunting and starts talking to creators.</p>
           <div className="features">
             <div className="feature wide">
               <div>
-                <h3>Finds and scores the ready ones first</h3>
-                <p>Your agent watches for brand signals, scores every creator against your sentence, and puts the ones most likely to sign at the top, before you write a word.</p>
+                <h3>The ones ready to sign, at the top</h3>
+                <p>We watch what creators do, not just who they are. A paid post this week, a rate card, a media kit. Those move to the top of your list, with the date attached.</p>
               </div>
               <div className="chips">
                 <span className="chip on">Ran a sponsored post</span>
-                <span className="chip">Promoted a brand in your category</span>
-                <span className="chip">Posted about brand deal rates</span>
-                <span className="chip">Added collab wording to the bio</span>
+                <span className="chip">Promoted a brand like yours</span>
+                <span className="chip">Posted their rates</span>
+                <span className="chip">Opened their DMs to collabs</span>
                 <span className="chip">Published a media kit</span>
-                <span className="chip">Launched a program or merch</span>
+                <span className="chip">Launched a program</span>
               </div>
             </div>
             <div className="feature">
-              <h3>Only the creators that fit. Nothing else.</h3>
-              <p>Every lead passes your filters first: audience size, engagement, reel views, posting cadence, country, language. No message wasted on the wrong audience.</p>
+              <h3>Only creators who fit your brand</h3>
+              <p>Set the audience size, the engagement, the country and the language once. Every creator in your list already passed it.</p>
             </div>
             <div className="feature">
-              <h3>Numbers you can trust</h3>
-              <p>Engagement and views come from the last 12 posts we pull ourselves. An aggregator's average can run 74 times the real number, so we never use one.</p>
+              <h3>Numbers you can quote</h3>
+              <p>Engagement and views come from the last 12 posts we read ourselves. What you see is what a creator really gets.</p>
             </div>
             <div className="feature">
-              <h3>The email, attached</h3>
-              <p>When the address is in the bio, it sits on the row. Copy it in one click, or export the list as a CSV with notes and tags.</p>
+              <h3>Their email, on the row</h3>
+              <p>About half of creators put an address in their bio. When it is there, it sits on the row. Copy it and write.</p>
             </div>
             <div className="feature">
-              <h3>A fresh top every morning</h3>
-              <p>A creator returns to the top only when a new signal fires or the score goes up. The same face never sits there two mornings in a row.</p>
+              <h3>A different top every morning</h3>
+              <p>A creator returns to the top when something new happens. Your team never reads the same five names twice.</p>
             </div>
           </div>
         </div>
       </section>
 
       <section className="land-section" id="how">
-        <h2 className="big">10 minutes to set up. <em>First batch today.</em></h2>
-        <p className="section-lede">Write one sentence. Your agent takes it from there.</p>
+        <h2 className="big">One sentence today. <em>Your first list in 10 minutes.</em></h2>
+        <p className="section-lede">No categories to pick, no filters to learn first.</p>
         <div className="steps3">
           <div className="step">
-            <span className="step-n">01 · DESCRIBE</span>
-            <h3>Say who you want</h3>
-            <p>"Women lifting coaches who sell their own program." Add filters for size, engagement, country and language, or pick a preset.</p>
-            <p className="quiet">No categories to pick. No forms.</p>
+            <span className="step-n">01 · SAY IT</span>
+            <h3>Describe the creator</h3>
+            <p>"Women lifting coaches who sell their own program." Add your audience size, country and language, or pick a preset.</p>
+            <p className="quiet">Takes about a minute.</p>
           </div>
           <div className="step">
-            <span className="step-n">02 · CRAWL</span>
-            <h3>Your agent finds them</h3>
-            <p>Keyword and hashtag search, then the full profile and the last 12 posts for every new handle. Each one scored on niche, selling and signal.</p>
-            <p className="quiet">What used to take an afternoon of scrolling runs while you sleep.</p>
+            <span className="step-n">02 · WE LOOK</span>
+            <h3>We read Instagram for you</h3>
+            <p>Every night we go through creators one by one, read their last 12 posts, and rank them on fit, business and how recently a brand paid them.</p>
+            <p className="quiet">Runs while your team sleeps.</p>
           </div>
           <div className="step">
-            <span className="step-n">03 · CONTACT</span>
+            <span className="step-n">03 · YOU WRITE</span>
             <h3>Open the list at 7:00</h3>
-            <p>Sorted by stars, the signal dated, the email attached. Tag, note, reject, export. Your pipeline grows in the background every single day.</p>
-            <p className="quiet">This is what creator sourcing was always supposed to feel like.</p>
+            <p>Best first, the reason attached, the email ready. Tag the ones you like, reject the rest, hand the list to your team.</p>
+            <p className="quiet">This is the part your team actually enjoys.</p>
           </div>
         </div>
       </section>
 
       <section className="land-section grey">
         <div className="inner">
-          <h2 className="big">One agent. <em>Replaces the database, the scrolling and the spreadsheet.</em></h2>
-          <p className="section-lede">Stop paying for a database you still have to read. brandmatch reads it for you and hands you the ones that are ready.</p>
+          <h2 className="big">Replaces the database, <em>the scrolling and the spreadsheet.</em></h2>
+          <p className="section-lede">Stop paying for a database your team still has to read.</p>
           <div className="replaces">
-            <div><b>Creator databases</b><span>A million profiles, none of them sorted by intent.</span></div>
-            <div><b>Manual scrolling</b><span>Hours on Instagram to find three names.</span></div>
-            <div><b>Spreadsheets</b><span>Stale the day after you build them.</span></div>
-            <div><b>Agency retainers</b><span>A monthly fee for a list you could read yourself.</span></div>
+            <div><b>Creator databases</b><span>A million names, sorted by follower count, ready by nobody.</span></div>
+            <div><b>Manual scrolling</b><span>A full afternoon on Instagram for three usable names.</span></div>
+            <div><b>Spreadsheets</b><span>Out of date the week after your team builds one.</span></div>
+            <div><b>Agency retainers</b><span>A monthly invoice for a list you could read yourself.</span></div>
           </div>
         </div>
       </section>
 
       <section className="land-section" id="score">
-        <p className="eyebrow">Lead scoring</p>
-        <h2 className="big">One score. <em>Three stars, half steps.</em></h2>
-        <p className="section-lede">Each criterion is one star, added up. Half a star when it half fits. The stars sit in a fixed order, so a row shows which fired, not only how many.</p>
+        <p className="eyebrow">How we rank</p>
+        <h2 className="big">Three stars. <em>You see why, every time.</em></h2>
+        <p className="section-lede">Each star answers one question about a creator. Half a star when the answer is partly yes.</p>
         <div className="score-grid">
           {CRITERIA.map((c, i) => (
             <div className="score-card" key={c.key}>
@@ -193,46 +193,71 @@ export function Landing() {
         </div>
       </section>
 
-      <section className="land-section grey" id="pricing">
+      <section className="land-section grey" id="connect">
         <div className="inner">
-          <h2 className="big">Simple pricing for what you asked for</h2>
-          <p className="section-lede">Qualified leads found. The email attached. All before 7:00.</p>
-          <div className="plans">
-            <div className="plan">
-              <h3>Solo</h3>
-              <p className="muted">Your first sourcing agent. For a brand running its own creator outreach.</p>
-              <div className="calc-line">
-                <input className="slider" type="range" min={5} max={100} step={5} value={target} onChange={(e) => setTarget(Number(e.target.value))} aria-label="Qualified leads a day" />
-                <b className="num">{target}</b>
-              </div>
-              <p className="price">
-                {target} <small>qualified leads a day</small>
-              </p>
-              <ul>
-                <li>{leadsNeeded(target)} leads crawled a night, about 1 in {QUALIFIED_RATIO} qualifies</li>
-                <li>{target * 22} qualified a month, on 22 working days</li>
-                <li>Up to 3 agents, each with its own sentence and filters</li>
-                <li>Email found and attached where it exists</li>
-                <li>Tags, notes, reject, CSV export</li>
-                <li>Cancel any morning</li>
-              </ul>
-              <a className="btn primary" href="#/onboarding">Start with {target} a day</a>
-              <p className="faint">Monthly plan with the crawl included. Extra days on top.</p>
+          <p className="eyebrow">Agent</p>
+          <h2 className="big">Your creator list, <em>inside the AI you already use.</em></h2>
+          <p className="section-lede">Point Claude, ChatGPT or your own tool at brandmatch. Ask in plain words and it answers from your live list.</p>
+          <div className="features">
+            <div className="feature">
+              <h3>Ask, and it answers</h3>
+              <p>"Who came in today above 2 stars with an email?" "Show me UK creators who ran a paid post this week." Your AI reads the list and replies.</p>
             </div>
-            <div className="plan dark">
-              <h3>Talk with us</h3>
-              <p className="muted">For agencies and brands running several launches, or more than 100 qualified a day.</p>
-              <p className="price">Custom</p>
-              <ul>
-                <li>Everything in Solo</li>
-                <li>Custom number of agents</li>
-                <li>Custom qualified leads a day</li>
-                <li>Shared lists across the team</li>
-                <li>CRM export on a schedule</li>
-                <li>A person on the other end</li>
-              </ul>
-              <a className="btn" href="#/contacts">Get a demo</a>
+            <div className="feature">
+              <h3>It writes back too</h3>
+              <p>Tag a creator, leave a note, reject one. Your AI keeps your list tidy while it works.</p>
             </div>
+            <div className="feature">
+              <h3>Two ways in</h3>
+              <p>MCP for Claude and anything that speaks it. A plain API for your own code or a workflow tool. One key covers both.</p>
+            </div>
+            <div className="feature">
+              <h3>Nothing to install</h3>
+              <p>Copy an address and a key from your Agent page. Paste them once. Your AI has your creators from that moment on.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="land-section" id="pricing">
+        <h2 className="big">You pick how many creators a day</h2>
+        <p className="section-lede">One price, the list included. Change the number any morning.</p>
+        <div className="plans">
+          <div className="plan">
+            <h3>Brand</h3>
+            <p className="muted">For a brand running its own creator outreach.</p>
+            <div className="calc-line">
+              <input className="slider" type="range" min={50} max={1000} step={50} value={perDay} onChange={(e) => setPerDay(Number(e.target.value))} aria-label="Creators a day" />
+              <b className="num">{perDay}</b>
+            </div>
+            <p className="price">
+              {perDay} <small>creators a day</small>
+            </p>
+            <ul>
+              <li>{perDay * 22} creators a month, on 22 working days</li>
+              <li>About {qualifiedFrom(perDay)} a day at 2 stars or more, ready to message</li>
+              <li>Up to 3 searches, each with its own sentence and filters</li>
+              <li>Their email attached where we find one</li>
+              <li>Tags, notes, reject, export to a spreadsheet</li>
+              <li>Connect your AI through MCP or the API</li>
+              <li>Cancel any morning</li>
+            </ul>
+            <a className="btn primary" href="#/onboarding">Start with {perDay} a day</a>
+            <p className="faint">About 1 creator in {QUALIFIED_RATIO} comes back qualified. Every one shows in your list either way.</p>
+          </div>
+          <div className="plan dark">
+            <h3>Talk with us</h3>
+            <p className="muted">For agencies and brands running several launches, or more than 1,000 creators a day.</p>
+            <p className="price">Custom</p>
+            <ul>
+              <li>Everything in Brand</li>
+              <li>Unlimited searches</li>
+              <li>More creators a day</li>
+              <li>Shared lists across your team</li>
+              <li>Export to your CRM on a schedule</li>
+              <li>A person on the other end</li>
+            </ul>
+            <a className="btn" href="#/contacts">Get a demo</a>
           </div>
         </div>
       </section>
@@ -251,32 +276,33 @@ export function Landing() {
 
       <section className="land-cta">
         <h2>Your next 10 creators are already out there.</h2>
-        <p>Let your agent find them.</p>
-        <a className="btn primary" href="#/onboarding">Launch my agent for free</a>
-        <a className="btn ghost" href="#/contacts">Open the demo</a>
-        <p className="fine">Free trial · Live in 10 minutes · Cancel any morning</p>
+        <p>Tomorrow morning they are in your list.</p>
+        <a className="btn primary" href="#/onboarding">Get my first list free</a>
+        <a className="btn ghost" href="#/contacts">See a live list</a>
+        <p className="fine">Free trial · First list in 10 minutes · Cancel any morning</p>
       </section>
 
       <footer className="land-foot">
         <div>
           <span className="brand-word">brandmatch</span>
-          <p className="muted" style={{ marginTop: 8 }}>Your creator sourcing agent. Instagram today, TikTok and YouTube next.</p>
-        </div>
-        <div>
-          <h4>Sections</h4>
-          <a href="#features">Features</a>
-          <a href="#how">How it works</a>
-          <a href="#pricing">Pricing</a>
+          <p className="muted" style={{ marginTop: 8 }}>Creators for your brand, every morning. Instagram today, TikTok and YouTube next.</p>
         </div>
         <div>
           <h4>Product</h4>
-          <a href="#/contacts">Open the demo</a>
-          <a href="#/onboarding">Create an agent</a>
-          <a href="#score">The score</a>
+          <a href="#features">What you get</a>
+          <a href="#how">How it works</a>
+          <a href="#connect">Connect your AI</a>
+          <a href="#pricing">Pricing</a>
+        </div>
+        <div>
+          <h4>App</h4>
+          <a href="#/contacts">See a live list</a>
+          <a href="#/onboarding">Start a search</a>
+          <a href="#/agent">Agent</a>
         </div>
         <div>
           <h4>Information</h4>
-          <a href="#faq">FAQ</a>
+          <a href="#faq">Questions</a>
           <a href="#/">Legal notice</a>
           <a href="#/">Privacy</a>
         </div>

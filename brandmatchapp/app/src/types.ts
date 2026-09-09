@@ -92,8 +92,8 @@ export interface Agent {
   name: string
   brief: Brief
   filters: Filters
-  /** How many qualified leads a day this agent should deliver. */
-  qualifiedPerDay: number
+  /** How many leads a day this search should deliver. */
+  leadsPerDay: number
   /** Local time the daily batch lands, "07:00". */
   runAt: string
   active: boolean

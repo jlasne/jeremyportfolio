@@ -393,6 +393,8 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 .criteria .crit-count { text-align: right; font-weight: 600; }
 .criteria .crit-means { grid-column: 1 / -1; font-size: 12px; margin-top: -8px; }
 .criteria.plain li { grid-template-columns: 66px 1fr; }
+.criteria.wide li { grid-template-columns: 132px 1fr; }
+.criteria.wide .crit-name { white-space: nowrap; }
 .criteria.plain .crit-means { grid-column: 2; margin-top: 0; color: var(--ink-2); font-size: 13.5px; }
 
 .star-split { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
@@ -675,4 +677,15 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 }
 @media (max-width: 600px) {
   .land-nav .btn:not(.primary) { display: none; }
+}
+
+/* The Agent page: an address, a key, one example ------------------------- */
+.keys { display: flex; flex-direction: column; gap: 8px; margin: 14px 0; }
+.key-row { display: flex; align-items: center; gap: 10px; }
+.key-label { font-size: 12.5px; color: var(--ink-2); min-width: 54px; }
+.key-value { flex: 1; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 12px; overflow-x: auto; white-space: nowrap; }
+.code {
+  margin: 12px 0 0; padding: 14px 16px; background: var(--ink); color: #f2f2f2;
+  border-radius: var(--radius); font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12.5px; line-height: 1.55; overflow-x: auto;
 }

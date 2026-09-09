@@ -2,7 +2,8 @@ import { useStore } from './data/hooks'
 import { useRoute } from './lib/router'
 import { SideNav } from './components/SideNav'
 import { StarClip } from './components/Stars'
-import { AgentEditor, Agents } from './screens/Agents'
+import { AgentConnect } from './screens/AgentConnect'
+import { LeadEditor, Leads } from './screens/Leads'
 import { Contacts } from './screens/Contacts'
 import { Landing } from './screens/Landing'
 import { FirstRun, OnboardingAgent, OnboardingStart } from './screens/Onboarding'
@@ -37,7 +38,8 @@ export function App() {
       <SideNav route={route} />
       <main className="main">
         {route.name === 'contacts' && <Contacts agentId={route.agentId} />}
-        {route.name === 'agents' && (route.agentId ? <AgentEditor agentId={route.agentId} /> : <Agents />)}
+        {route.name === 'leads' && (route.agentId ? <LeadEditor agentId={route.agentId} /> : <Leads />)}
+        {route.name === 'agent' && <AgentConnect />}
       </main>
     </div>
   )

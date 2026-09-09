@@ -11,12 +11,12 @@ import { getState, setState } from './store'
 
 export { BUCKETS, CRITERIA, scoreOf } from './score'
 
-/** Roughly 1 lead in 10 comes back qualified. Used to size a day's crawl. */
+/** Roughly 1 lead in 10 comes back qualified, which is 2 stars or more. */
 export const QUALIFIED_RATIO = 10
 
-/** How many leads an agent must deliver to hit a qualified target. */
-export function leadsNeeded(qualifiedPerDay: number): number {
-  return qualifiedPerDay * QUALIFIED_RATIO
+/** How many of a day's leads come back qualified. */
+export function qualifiedFrom(leadsPerDay: number): number {
+  return Math.round(leadsPerDay / QUALIFIED_RATIO)
 }
 
 // Contacts, the one list ---------------------------------------------------
@@ -210,7 +210,7 @@ export function createAgent(): Agent {
     name: '',
     brief: { who: '', answers: [], summary: 'No brief yet.' },
     filters: { ...defaultFilters, countries: [], languages: [] },
-    qualifiedPerDay: 20,
+    leadsPerDay: 200,
     runAt: '07:00',
     active: true,
     createdAt: new Date().toISOString(),

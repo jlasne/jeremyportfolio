@@ -13,7 +13,7 @@ type CriterionKey = 'niche' | 'active' | 'intent'
 /** The one list. Everything else about a contact lives behind the row. */
 export function Contacts({ agentId }: { agentId: string | null }) {
   useStore()
-  const agents = getAgents()
+  const searches = getAgents()
   const [picked, setPicked] = useState<string[]>(agentId ? [agentId] : [])
   const [tag, setTag] = useState<string | null>(null)
   const [minStars, setMinStars] = useState(0)
@@ -51,7 +51,7 @@ export function Contacts({ agentId }: { agentId: string | null }) {
   const contacts = getContacts({ agentIds: picked, tag, minStars, mustHave })
   const vocabulary = getTagVocabulary().filter((t) => countTagged(t) > 0)
 
-  const toggleAgent = (id: string) => {
+  const toggleSearch = (id: string) => {
     setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))
     if (agentId) navigate('contacts')
   }
@@ -113,10 +113,10 @@ export function Contacts({ agentId }: { agentId: string | null }) {
 
         <div className="chips agent-chips">
           <button type="button" className={`chip${picked.length === 0 ? ' on' : ''}`} aria-pressed={picked.length === 0} onClick={() => { setPicked([]); if (agentId) navigate('contacts') }}>
-            Every agent
+            Every search
           </button>
-          {agents.map((a) => (
-            <button key={a.id} type="button" className={`chip${picked.includes(a.id) ? ' on' : ''}`} aria-pressed={picked.includes(a.id)} onClick={() => toggleAgent(a.id)}>
+          {searches.map((a) => (
+            <button key={a.id} type="button" className={`chip${picked.includes(a.id) ? ' on' : ''}`} aria-pressed={picked.includes(a.id)} onClick={() => toggleSearch(a.id)}>
               {a.name}
             </button>
           ))}
@@ -182,7 +182,7 @@ export function Contacts({ agentId }: { agentId: string | null }) {
             tag={tag}
             minStars={minStars}
             mustHave={mustHave.length}
-            agentNames={picked.map((id) => agents.find((a) => a.id === id)?.name ?? '').filter(Boolean)}
+            agentNames={picked.map((id) => searches.find((a) => a.id === id)?.name ?? '').filter(Boolean)}
             onClear={() => { setTag(null); setMinStars(0); setMustHave([]); setPicked([]); if (agentId) navigate('contacts') }}
           />
         )}

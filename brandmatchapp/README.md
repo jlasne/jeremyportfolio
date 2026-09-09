@@ -79,17 +79,24 @@ top under 900px.
 
 | Route | What it holds |
 | --- | --- |
-| `#/contacts` | The one list. Three controls above it: a stars slider with must-have criteria, agent chips that take several at once, and more Instagram filters with your tags inside. A row shows the picture, the name, the stars, the signal with its date, followers and engagement. Everything else lives behind the row, in the panel |
-| `#/agents` | Qualified leads as columns and every lead as a smooth line over 14 days, per agent or all together, four counts, then who is running and who is paused. Clicking one opens its sentence, its filters, its delivery and how it scores |
-| `#/` | The landing: the promise, the one sentence prompt, six qualified rows live from the demo data, three steps, the signals, the score, a pricing calculator on qualified leads a day, five questions |
-| `#/onboarding` | Create your first agent. Name, one sentence, filters, delivery, then the first batch over 8 seconds and straight into its contacts |
+| `#/` | The landing: what a brand gets, how it works, connecting your AI, pricing on creators a day, questions |
+| `#/contacts` | The one list. Three controls above it: a stars slider with must-have criteria, search chips that take several at once, and more Instagram filters with your tags inside. A row shows the picture, the name, the stars, the email, followers and engagement. Everything else lives behind the row, in the panel |
+| `#/leads` | Leads a day as two marks over 14 days, four counts, then the searches: who is running, who is paused. Clicking one opens its sentence, its filters and its delivery |
+| `#/agent` | MCP and API. An address, a key, one example each, and what an AI can ask for |
+| `#/onboarding` | Set up your first search. Name, one sentence, filters, delivery, then the first list over 8 seconds and straight into it |
 
-An **agent** is one saved search that runs every morning. It owns one sentence
-about who to look for, its own filters, how many **qualified** leads a day it
-should deliver and when. Qualified means 2 stars or more, and about 1 lead in
-10 comes back qualified, so a target of 25 asks for 250 leads a day. Every lead
-shows in the list, qualified or not. Every contact carries the agent that found it, and the chip
-row on Contacts filters on it. Tags do the work saved lists used to do.
+A **search** is one saved sentence plus filters that runs every morning. It owns
+how many leads a day it should deliver. Every contact carries the search that
+found it, and the chip row on Contacts filters on it. Tags do the work saved
+lists used to do.
+
+**Leads** are every creator delivered. **Qualified** means 2 stars or more, and
+about 1 lead in 10 lands there. You set the lead count; the qualified count
+follows from it.
+
+The **Agent** page hands the list to whatever AI the brand already uses: MCP for
+Claude and anything that speaks it, a plain API for code or a workflow tool. One
+key covers both. The endpoints are illustrative in this prototype.
 
 Filters are written as choices, not number boxes: audience size, engagement,
 reel views, posts a month, when they last posted, email, 18 countries and 10

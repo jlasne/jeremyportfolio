@@ -10,7 +10,7 @@ const RATE = [0.092, 0.088, 0.109, 0.081, 0.102, 0.109, 0.084, 0.091, 0.1, 0.096
 
 export const dailyStats: DailyStat[] = agents.flatMap((agent) =>
   SHAPE.map((shape, i) => {
-    const leads = agent.active ? Math.round(agent.qualifiedPerDay * 10 * shape) : 0
+    const leads = agent.active ? Math.round(agent.leadsPerDay * shape) : 0
     return {
       date: daysAgo(SHAPE.length - 1 - i, 7),
       agentId: agent.id,

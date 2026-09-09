@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { createAgent, getAgent, runFirstCrawl, type CrawlProgress } from '../data'
 import { useStore } from '../data/hooks'
 import { navigate } from '../lib/router'
-import { AgentEditor } from './Agents'
+import { LeadEditor } from './Leads'
 
 // Onboarding is one thing: create the first agent. Then the first batch runs.
 
@@ -28,7 +28,7 @@ export function OnboardingAgent({ agentId }: { agentId: string }) {
         <span className="brand-word">brandmatch</span>
         <span className="faint">Step 1 of 2</span>
       </header>
-      <AgentEditor agentId={agentId} firstRun />
+      <LeadEditor agentId={agentId} firstRun />
     </div>
   )
 }
@@ -49,7 +49,7 @@ export function FirstRun({ agentId }: { agentId: string }) {
     <div className="onboard">
       <div className="onboard-box" aria-live="polite">
         <p className="steps">Step 2 of 2</p>
-        <h1>{agent?.name ?? 'Your agent'} is on its first run</h1>
+        <h1>{agent?.name || 'Your search'} is running now</h1>
         <div className="brief-line">
           <p>{agent?.brief.summary ?? ''}</p>
           <a href={`#/onboarding/${agentId}`}>Edit</a>
@@ -57,17 +57,17 @@ export function FirstRun({ agentId }: { agentId: string }) {
         <div className="progress">
           <div className="stat">
             <b>{p.found}</b>
-            <span>profiles found</span>
+            <span>creators found</span>
           </div>
           <div className="stat">
             <b>{p.scored}</b>
-            <span>profiles scored</span>
+            <span>creators ranked</span>
           </div>
         </div>
         <div className="bar" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
           <i style={{ width: `${pct}%` }} />
         </div>
-        <p className="helper">{p.done ? 'Done. Opening your contacts.' : 'Usually under 10 minutes. This preview takes 8 seconds.'}</p>
+        <p className="helper">{p.done ? 'Done. Opening your leads.' : 'Usually under 10 minutes. This preview takes 8 seconds.'}</p>
       </div>
     </div>
   )
