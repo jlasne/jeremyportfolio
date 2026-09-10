@@ -9,7 +9,9 @@ The landing page is one screen: a portrait, one sentence, three lists.
 - **Active projects.** [CreatorMatch](https://creatormatch.app) is the offer
   itself: turn your audience into recurring revenue.
   [Kaught](https://kaught.app) names any wild animal with your camera.
-  [TrustViews](https://trustviews.io) ranks verified sites on real traffic
+  [i dare you](https://www.idareyou.lol) sends a dare: film it, or dare them
+  back. [TrustViews](https://trustviews.io) ranks verified sites on real
+  traffic
 - **Social.** YouTube ([@jerandmax](https://www.youtube.com/@jerandmax)),
   X ([@jeremylasne](https://x.com/jeremylasne)) and email
 - **Personal.** Three private equity positions (SaaS health, H100
