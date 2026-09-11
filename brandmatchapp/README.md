@@ -59,8 +59,10 @@ Opens on `http://localhost:5173/brandmatchapp/`.
 
 ## Publish
 
-The site has no build step, so the built app is committed at the folder root
-and served straight from `jeremylasne.com/brandmatchapp`.
+The app is live at [brandmatch.app](https://brandmatch.app). A Vercel project
+builds this repo with `brandmatchapp` as its **root directory**, no build
+command and no framework preset, so it serves this folder as the site root.
+The build is committed here because the host runs no build step.
 
 ```bash
 cd app
@@ -68,12 +70,14 @@ npm run build
 ```
 
 That typechecks, builds, and copies `index.html` and `assets/` up one level,
-replacing the previous build. Commit those two alongside the source.
+replacing the previous build. Commit those two alongside the source, then
+redeploy.
 
-The build hard codes `/brandmatchapp/` in its asset paths, set by `base` in
-`app/vite.config.ts`. Vercel answers `/brandmatchapp` with the index and adds
-no trailing slash, so relative paths would resolve one level too high and
-return 404. Serving this app from another path means changing `base` first.
+`base` in `app/vite.config.ts` is `/`, so the index asks for `/assets/...`,
+which is where they sit at the domain root. Serving this app from a
+subdirectory again means changing `base` to that path first: the same build
+cannot answer both. Routes are hashes, so the host needs no rewrite rule to
+answer a deep link like `brandmatch.app/#/campaign`.
 
 ## Where things live
 
