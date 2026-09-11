@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Guild</title>
+<meta name="description" content="Six stats, no cap, a pixel character per friend. XP is effort, the same formula for every sport.">
+<link rel="canonical" href="https://www.jeremylasne.com/games/">
+<meta name="theme-color" content="#050b16">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Guild">
+<meta property="og:url" content="https://www.jeremylasne.com/games/">
+<meta property="og:title" content="Guild">
+<meta property="og:description" content="Six stats, no cap, a pixel character per friend. XP is effort, the same formula for every sport.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:creator" content="@jeremylasne">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   Guild — /games/
+
+   Six stats, no cap, a pixel character per friend. XP is effort, measured
+   the same way for every sport: minutes × (RPE² ÷ 20), minutes past sixty
+   at half value. A personal best is worth five sessions. Signup tops out
+   at level 10; everything above is earned inside. Level N costs 50 × N²
+   XP in total. Fatigue is the last 7 days of physical effort over the
+   28-day average: under 0.8 Fresh ×1.0, to 1.3 Primed ×1.2, to the burn
+   line Fatigued ×0.7, past it Burnt ×0.4. The burn line is 1.4 + Health
+   ÷ 100; a rest day cuts the recent load 15%, eight hours of sleep 10%.
+   Health, Social and Brain skip the multiplier.
+
+   One self-contained file. No build step, no framework. Players and logs
+   live in localStorage; the demo seeds four friends with six weeks of
+   history. Activities match against a built-in table of forty; the model
+   call that splits any other activity is the one thing left to wire.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#050b16;
+  --glass:rgba(9,14,28,.82);
+  --line:rgba(95,168,211,.2);
+  --ice:#eaf4fb;
+  --dim:rgba(234,244,251,.55);
+  --blue:#5fa8d3;
+  --str:#ff6b4d; --spd:#ffd24d; --end:#5be09a; --hea:#4de8d0; --soc:#ff7ab6; --bra:#a98bff;
+  --ui:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --px:"Press Start 2P",var(--ui);
+}
+html{background:var(--ink);color-scheme:dark;-webkit-text-size-adjust:100%}
+body{font-family:var(--ui);color:var(--ice);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased;min-height:100dvh;
+  background:
+    radial-gradient(1100px 520px at 50% -8%,rgba(95,168,211,.16),transparent 62%),
+    linear-gradient(rgba(234,244,251,.028) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(234,244,251,.028) 1px,transparent 1px),
+    var(--ink);
+  background-size:auto,24px 24px,24px 24px,auto}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+::selection{background:var(--blue);color:var(--ink)}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+canvas{display:block}
+[hidden]{display:none!important}
+.dim{color:var(--dim)}
+.glass{background:var(--glass);border:1px solid var(--line);border-radius:6px;backdrop-filter:blur(6px)}
+h2{font-family:var(--px);font-size:13px;letter-spacing:.02em;line-height:1.5;font-weight:400}
+h3{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-weight:700}
+.sub{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.note{font-size:11px;color:var(--dim);line-height:1.55}
+.note b{color:var(--ice)}
+.btn{font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:9px 12px;border:1px solid var(--line);border-radius:4px;color:var(--ice);background:rgba(95,168,211,.08)}
+.btn:hover{background:rgba(95,168,211,.18)}
+.btn.primary{background:var(--blue);color:var(--ink);border-color:var(--blue);font-weight:700}
+.btn.primary:hover{background:#7fbde0}
+.btn.sm{padding:4px 8px;font-size:9px}
+input[type=text],input[type=number],input[type=date],select{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:4px;color:var(--ice);padding:8px 10px;font:inherit;min-width:0}
+input:focus,select:focus{outline:0;border-color:var(--blue)}
+input[type=range]{width:100%;accent-color:var(--blue)}
+.f label{display:block;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:5px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kv{display:grid;grid-template-columns:1fr auto;gap:5px 12px;font-size:11px;margin-top:10px;align-items:baseline}
+.kv b{font-family:var(--px);font-size:10px;font-weight:400}
+.big{font-family:var(--px);font-size:20px;margin-top:12px;line-height:1.3}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.chip{font-size:10px;padding:3px 7px;border:1px solid var(--line);border-radius:3px;background:rgba(255,255,255,.04)}
+.up{color:#5be09a}.down{color:#ff6b6b}.flat{color:var(--dim)}
+
+/* ── top band: the guild in numbers ────────────────────────────────────── */
+#band{position:sticky;top:0;z-index:20;height:48px;display:flex;align-items:stretch;background:var(--glass);border-bottom:1px solid var(--line);backdrop-filter:blur(6px)}
+#band .mark{padding:0 14px;display:flex;align-items:center;gap:10px;border-right:1px solid var(--line);flex:0 0 auto}
+#band .mark canvas{width:24px;height:24px;image-rendering:pixelated}
+#band .mark b{font-family:var(--px);font-size:11px;font-weight:400;letter-spacing:.04em;white-space:nowrap}
+#band .mark small{display:block;font-size:8.5px;letter-spacing:.1em;color:var(--dim);margin-top:4px;text-transform:uppercase;white-space:nowrap}
+#band .totals{flex:1;display:flex;align-items:stretch;overflow-x:auto;scrollbar-width:none}
+#band .totals::-webkit-scrollbar{display:none}
+#band .tot{display:flex;flex-direction:column;justify-content:center;padding:0 14px;border-right:1px solid var(--line);white-space:nowrap}
+#band .tot .n{font-size:14px;font-weight:700;line-height:1}
+#band .tot .l{font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-top:3px}
+#addBtn{padding:0 14px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--spd);border-left:1px solid var(--line);flex:0 0 auto;white-space:nowrap}
+#addBtn:hover{background:rgba(255,210,77,.08)}
+
+/* ── tabs ──────────────────────────────────────────────────────────────── */
+#tabs{position:sticky;top:48px;z-index:19;display:flex;overflow-x:auto;scrollbar-width:none;background:var(--glass);border-bottom:1px solid var(--line);backdrop-filter:blur(6px)}
+#tabs::-webkit-scrollbar{display:none}
+#tabs button{flex:1 0 auto;padding:12px 16px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);border-bottom:2px solid transparent;margin-bottom:-1px}
+#tabs button.on{color:var(--ice);border-bottom-color:var(--blue)}
+main{max-width:1080px;margin:0 auto;padding:18px 16px 40px}
+.tab{display:none}.tab.on{display:block}
+
+/* ── character ─────────────────────────────────────────────────────────── */
+.roster{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 14px;scrollbar-width:none}
+.roster::-webkit-scrollbar{display:none}
+.roster button{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:rgba(9,14,28,.6);min-width:88px}
+.roster button.on{border-color:var(--blue);background:rgba(95,168,211,.12)}
+.roster canvas{width:48px;height:64px;image-rendering:pixelated}
+.roster b{font-size:11px}.roster small{font-size:8.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
+.hero{display:grid;grid-template-columns:minmax(220px,1fr) 1.5fr;gap:14px}
+@media(max-width:720px){.hero{grid-template-columns:1fr}}
+.portrait{padding:18px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.portrait canvas#big{width:192px;height:256px;image-rendering:pixelated;filter:drop-shadow(0 8px 24px rgba(95,168,211,.25))}
+.portrait h2{font-size:14px;margin-top:6px}
+.portrait .cls{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.portrait .sport{font-size:11px;color:var(--blue)}
+.portrait .btn{margin-top:8px}
+.stats{padding:14px 16px;display:flex;flex-direction:column;gap:11px;justify-content:center}
+.stat{display:grid;grid-template-columns:86px 40px 1fr 96px;align-items:center;gap:10px}
+.stat .k{font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+.stat .lv{font-family:var(--px);font-size:12px;text-align:right}
+.stat .bar{height:10px;border:1px solid var(--line);background:rgba(255,255,255,.04);position:relative;overflow:hidden;display:block}
+.stat .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--c);transition:width .4s}
+.stat .to{font-size:9px;color:var(--dim);text-align:right;white-space:nowrap}
+.week{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:10px;color:var(--dim);margin-top:8px;padding-top:12px;border-top:1px solid var(--line)}
+.week b{font-family:var(--px);font-size:10px;color:var(--ice);font-weight:400}
+@media(max-width:480px){.stat{grid-template-columns:76px 34px 1fr}.stat .to{display:none}}
+.gauge{margin-top:14px;padding:14px 16px}
+.gauge .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.gauge .state{font-family:var(--px);font-size:11px}
+.gauge .track{position:relative;height:14px;margin:12px 0 4px;display:flex;border:1px solid var(--line)}
+.gauge .z{height:100%;opacity:.5}
+.gauge .needle{position:absolute;top:-5px;bottom:-5px;width:3px;margin-left:-1px;background:#fff;box-shadow:0 0 6px #fff;transition:left .4s}
+.gauge .ticks{position:relative;height:26px;font-size:9px;color:var(--dim)}
+.gauge .ticks span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.gauge p{font-size:11px;color:var(--dim);margin-top:8px;line-height:1.55}
+.cust{margin-top:14px;padding:14px 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.cust label{display:block;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.sw{display:flex;gap:6px;flex-wrap:wrap}
+.sw button{width:28px;height:28px;border:2px solid transparent;border-radius:3px;font-size:10px;font-weight:700;color:var(--ink)}
+.sw button.on{border-color:#fff}
+.sw button.t{background:rgba(255,255,255,.08);color:var(--ice);width:auto;padding:0 8px;font-size:9px;letter-spacing:.08em;text-transform:uppercase}
+
+/* ── tree ──────────────────────────────────────────────────────────────── */
+.treewrap{display:grid;grid-template-columns:minmax(280px,1fr) 300px;gap:14px}
+@media(max-width:720px){.treewrap{grid-template-columns:1fr}}
+.tree{padding:10px;display:grid;place-items:center}
+canvas#tree{width:100%;max-width:540px;aspect-ratio:1;cursor:pointer}
+.detail{padding:16px}
+.detail ul{list-style:none;font-size:11px;margin-top:8px}
+.detail li{padding:5px 0;border-top:1px solid var(--line)}
+.detail li:first-child{border-top:0}
+
+/* ── log ───────────────────────────────────────────────────────────────── */
+.log{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+@media(max-width:720px){.log{grid-template-columns:1fr}}
+.form{padding:16px;display:flex;flex-direction:column;gap:12px}
+.chk{font-size:11px;display:flex;gap:8px;align-items:center}
+.chk input{accent-color:var(--blue)}
+.quick{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-top:6px;border-top:1px solid var(--line)}
+.quick input{width:58px;display:inline-block;padding:3px 6px;margin:0 4px}
+.preview{padding:16px}
+.recent{margin-top:14px;padding:12px 16px}
+.recent .r{display:grid;grid-template-columns:56px 1fr auto;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:11px;align-items:center}
+.recent .r:nth-child(2){border-top:0}
+.recent .r .g{font-family:var(--px);font-size:10px}
+
+/* ── board ─────────────────────────────────────────────────────────────── */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.card{padding:14px 16px}
+.card .hd{display:flex;align-items:center;gap:10px}
+.card .hd canvas{width:36px;height:48px;image-rendering:pixelated}
+.card .hd b{font-size:12px}
+.card .rank{font-family:var(--px);font-size:13px;margin-left:auto}
+.card .growth{font-family:var(--px);font-size:20px;margin:12px 0 4px}
+.card canvas.spark{width:100%;height:40px;margin:10px 0 8px}
+.card .meta{display:flex;justify-content:space-between;font-size:11px;gap:8px;flex-wrap:wrap}
+.card .badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.badge{font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;padding:3px 6px;border-radius:3px;color:var(--ink);font-weight:700}
+
+/* ── team ──────────────────────────────────────────────────────────────── */
+.team{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+@media(max-width:720px){.team{grid-template-columns:1fr}}
+.goal{padding:16px}
+.goal .big{margin-top:6px;font-size:18px}
+.goal .track{height:16px;border:1px solid var(--line);position:relative;margin:10px 0 12px;background:rgba(255,255,255,.04)}
+.goal .track i{position:absolute;top:0;bottom:0;left:0;transition:width .4s}
+.goal .contrib{display:flex;flex-direction:column;gap:6px;font-size:11px}
+.goal .contrib .c{display:grid;grid-template-columns:70px 1fr 56px;gap:8px;align-items:center}
+.goal .contrib .c i{display:block;height:8px;background:var(--blue)}
+.goal .contrib .c .dim{text-align:right}
+.bounty{padding:16px}
+.bounty .b{display:grid;grid-template-columns:1fr auto;gap:8px;padding:9px 0;border-top:1px solid var(--line);font-size:11.5px;align-items:center}
+.bounty .b:first-of-type{border-top:0;margin-top:8px}
+.ticks{display:flex;gap:4px}
+.tick{width:22px;height:22px;border:1px solid var(--line);border-radius:3px;display:grid;place-items:center;font-size:10px;color:var(--dim)}
+.tick.ok{background:var(--end);color:var(--ink);border-color:var(--end);font-weight:700}
+
+/* ── plan ──────────────────────────────────────────────────────────────── */
+.plan .ctl{display:grid;grid-template-columns:2fr 1fr auto;gap:10px;align-items:end;padding:16px}
+@media(max-width:600px){.plan .ctl{grid-template-columns:1fr}}
+.plan table{width:100%;border-collapse:collapse;font-size:11px}
+.plan th,.plan td{text-align:left;padding:7px 10px;border-top:1px solid var(--line);vertical-align:middle;white-space:nowrap}
+.plan th{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:700}
+.plan .wk{font-family:var(--px);font-size:9px}
+.plan .xp{font-family:var(--px);font-size:9px;text-align:right}
+.tblwrap{overflow-x:auto}
+
+/* ── footer, toast, dialog ─────────────────────────────────────────────── */
+footer{max-width:1080px;margin:0 auto;padding:0 16px 40px}
+footer .rules{padding:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px 22px}
+footer .rules h3{margin-bottom:6px}
+footer .rules p{font-size:11px;color:var(--dim);line-height:1.6}
+footer .foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px;font-size:10px;color:var(--dim)}
+footer a{color:var(--dim)}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;transition:.25s;z-index:40;pointer-events:none;background:#0b1224;border:1px solid var(--blue);padding:10px 16px;border-radius:4px;font-family:var(--px);font-size:10px;line-height:1.6;max-width:calc(100vw - 32px);text-align:center}
+#toast.on{opacity:1;transform:translateX(-50%)}
+dialog{background:#0b1224;color:var(--ice);border:1px solid var(--line);border-radius:6px;padding:0;width:min(560px,calc(100vw - 32px))}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+dialog .in{padding:18px}
+.tiers{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin-top:12px}
+@media(max-width:480px){.tiers{grid-template-columns:1fr}}
+.tiers label{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);display:block;margin-bottom:4px}
+.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header id="band">
+  <div class="mark"><canvas id="markC" width="16" height="16" aria-hidden="true"></canvas>
+    <div><b>GUILD</b><small>six stats · no cap</small></div></div>
+  <div class="totals" id="totals"></div>
+  <button id="addBtn" type="button">+ player</button>
+</header>
+
+<nav id="tabs" aria-label="Sections">
+  <button type="button" data-tab="char" class="on">Character</button>
+  <button type="button" data-tab="tree">Tree</button>
+  <button type="button" data-tab="log">Log</button>
+  <button type="button" data-tab="board">Board</button>
+  <button type="button" data-tab="team">Team</button>
+  <button type="button" data-tab="plan">Plan</button>
+</nav>
+
+<main>
+
+<section id="tab-char" class="tab on">
+  <div class="roster" id="roster"></div>
+  <div class="hero">
+    <div class="glass portrait">
+      <canvas id="big" width="24" height="32"></canvas>
+      <h2 id="pName"></h2>
+      <div class="cls" id="pClass"></div>
+      <div class="sport" id="pSport"></div>
+      <button class="btn" id="custBtn" type="button">Customize</button>
+    </div>
+    <div class="glass stats" id="stats"></div>
+  </div>
+  <div class="glass gauge" id="gauge"></div>
+  <div class="glass cust" id="cust" hidden>
+    <div><label for="cName">Name</label><input type="text" id="cName" maxlength="16" autocomplete="off"></div>
+    <div><label for="cSport">Sport</label><input type="text" id="cSport" maxlength="24" autocomplete="off"></div>
+    <div><label>Skin</label><div class="sw" id="swSkin"></div></div>
+    <div><label>Hair</label><div class="sw" id="swHair"></div></div>
+    <div><label>Hair colour</label><div class="sw" id="swHairC"></div></div>
+    <div><label>Top</label><div class="sw" id="swTop"></div></div>
+    <div><label>Bottom</label><div class="sw" id="swBot"></div></div>
+  </div>
+</section>
+
+<section id="tab-tree" class="tab">
+  <div class="treewrap">
+    <div class="glass tree"><canvas id="tree" aria-label="Skill tree, six branches"></canvas></div>
+    <div class="glass detail" id="treeDetail"></div>
+  </div>
+</section>
+
+<section id="tab-log" class="tab">
+  <div class="log">
+    <div class="glass form">
+      <h3>Log for <span id="lWho" style="color:var(--ice)"></span></h3>
+      <div class="f"><label for="lText">What did you do</label>
+        <input type="text" id="lText" list="acts" placeholder="heavy squats, swim sprints, called an old friend…" autocomplete="off">
+        <datalist id="acts"></datalist></div>
+      <div class="two">
+        <div class="f"><label for="lMin">Minutes</label><input type="number" id="lMin" min="5" max="600" step="5" value="60"></div>
+        <div class="f"><label for="lDate">Date</label><input type="date" id="lDate"></div>
+      </div>
+      <div class="f"><label for="lRpe">How hard, 1 to 10 · <b id="lRpeV" style="color:var(--ice)">7</b></label><input type="range" id="lRpe" min="1" max="10" value="7"></div>
+      <div class="two">
+        <div class="f"><label for="lKm">km, optional</label><input type="number" id="lKm" min="0" step="0.1" placeholder="0"></div>
+        <div class="f"><label for="lKg">kg moved, optional</label><input type="number" id="lKg" min="0" step="50" placeholder="0"></div>
+      </div>
+      <label class="chk"><input type="checkbox" id="lPb"> New personal best, worth 5 sessions</label>
+      <button class="btn primary" id="lGo" type="button">Log it</button>
+      <div class="quick">
+        <button class="btn" id="qRest" type="button">Rest day</button>
+        <span class="btn" style="display:inline-flex;align-items:center;gap:2px;padding:4px 8px 4px 12px">Slept <input type="number" id="qHours" min="3" max="12" step="0.5" value="8"> h <button class="btn sm" id="qSleep" type="button" style="margin-left:6px">log</button></span>
+      </div>
+    </div>
+    <div>
+      <div class="glass preview" id="preview"></div>
+      <div class="glass recent" id="recent"></div>
+    </div>
+  </div>
+</section>
+
+<section id="tab-board" class="tab">
+  <div class="cards" id="cards"></div>
+</section>
+
+<section id="tab-team" class="tab">
+  <div class="team">
+    <div class="glass goal" id="goalKm"></div>
+    <div class="glass goal" id="goalT"></div>
+    <div class="glass bounty" id="bounty"></div>
+    <div class="glass goal" id="goalS"></div>
+  </div>
+</section>
+
+<section id="tab-plan" class="tab">
+  <div class="glass plan">
+    <div class="ctl">
+      <div class="f"><label for="pGoal">Goal</label><select id="pGoal"></select></div>
+      <div class="f"><label for="pDays">Days a week</label><select id="pDays"><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select></div>
+      <div class="f"><label>&nbsp;</label><button class="btn primary" id="pGo" type="button">Generate</button></div>
+    </div>
+    <div class="tblwrap" id="planOut"></div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="glass rules">
+    <div><h3>XP is effort</h3><p>Minutes × (RPE² ÷ 20). Minutes past 60 count half. RPE 8 is worth 4× RPE 4. A personal best pays 5 sessions.</p></div>
+    <div><h3>Levels</h3><p>Level N costs 50 × N² XP in total. Signup tops out at 10. There is no cap.</p></div>
+    <div><h3>Fatigue</h3><p>Last 7 days of physical effort over your 28-day average. Under 0.8 Fresh ×1.0. To 1.3 Primed ×1.2. To the burn line Fatigued ×0.7. Past it Burnt ×0.4.</p></div>
+    <div><h3>Health</h3><p>Rest day 60 XP and −15% recent load. Sleep 8 XP an hour, −10% at 8 h. Mobility, yoga and sauna count at least a point a minute. Every 10 levels moves the burn line up 0.1.</p></div>
+    <div><h3>Social</h3><p>Reconnect with an old friend, call someone new, go out and talk. RPE is how far out of your comfort zone.</p></div>
+    <div><h3>Brain</h3><p>Minutes of a book or a learning video. RPE is how hard the material was.</p></div>
+  </div>
+  <div class="foot"><span>Honor system. Manual log. Your data stays in this browser.</span><a href="#" id="reset">reset the demo</a></div>
+</footer>
+
+<div id="toast" role="status"></div>
+
+<dialog id="addDlg">
+  <form class="in" id="addForm">
+    <h2>New player</h2>
+    <p class="note" style="margin:10px 0 12px">Level 10 is the ceiling at signup. Everything above is earned inside.</p>
+    <div class="two">
+      <div class="f"><label for="aName">Name</label><input type="text" id="aName" required maxlength="16" autocomplete="off"></div>
+      <div class="f"><label for="aSport">Sport</label><input type="text" id="aSport" maxlength="24" placeholder="Running" autocomplete="off"></div>
+    </div>
+    <div class="tiers" id="aTiers"></div>
+    <div class="actions"><button class="btn" type="button" id="aCancel">Cancel</button><button class="btn primary" type="submit">Join</button></div>
+  </form>
+</dialog>
+
+<script>
+'use strict';
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const DAY=864e5, WEEK=7*DAY, now=()=>Date.now();
+const fmt=n=>Math.round(n).toLocaleString('en-US');
+const startOfDay=t=>{const d=new Date(t);d.setHours(0,0,0,0);return +d};
+const fmtDate=t=>new Date(t).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+const isoLocal=t=>{const d=new Date(t),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ── the rules ─────────────────────────────────────────────────────────── */
+const STATS=[
+  {k:'str',n:'Strength', c:'#ff6b4d'},
+  {k:'spd',n:'Speed',    c:'#ffd24d'},
+  {k:'end',n:'Endurance',c:'#5be09a'},
+  {k:'hea',n:'Health',   c:'#4de8d0'},
+  {k:'soc',n:'Social',   c:'#ff7ab6'},
+  {k:'bra',n:'Brain',    c:'#a98bff'},
+];
+const SK=STATS.map(s=>s.k), SC={}, SN={}; STATS.forEach(s=>{SC[s.k]=s.c;SN[s.k]=s.n});
+const PHYS=new Set(['str','spd','end']);
+const lvlXP=n=>50*n*n;
+const lvlOf=xp=>Math.floor(Math.sqrt(Math.max(0,xp)/50));
+const factor=r=>r*r/20;
+const effMin=m=>Math.min(m,60)+Math.max(0,m-60)*.5;
+const effort=(m,r)=>effMin(m)*factor(r);
+const BANDS=[[0,'Rookie'],[10,'Trained'],[20,'Solid'],[30,'Serious'],[45,'Elite'],[60,'Master'],[80,'Legend']];
+const bandOf=lv=>{let n='Rookie';for(const [l,s] of BANDS) if(lv>=l) n=s;return n};
+const tierOf=lv=>lv>=60?5:lv>=45?4:lv>=30?3:lv>=20?2:lv>=10?1:0;
+const MILESTONES=[10,20,30,45,60,80,100];
+const CLASSES={'str+spd':'Striker','str+end':'Juggernaut','str+hea':'Ironclad','str+soc':'Captain','str+bra':'Tactician',
+  'spd+end':'Pacer','spd+hea':'Sprinter','spd+soc':'Messenger','spd+bra':'Hacker','end+hea':'Monk','end+soc':'Pilgrim',
+  'end+bra':'Scholar','hea+soc':'Healer','hea+bra':'Sage','soc+bra':'Diplomat'};
+const className=lv=>{const top=SK.slice().sort((a,b)=>lv[b]-lv[a]||SK.indexOf(a)-SK.indexOf(b)).slice(0,2).sort((a,b)=>SK.indexOf(a)-SK.indexOf(b));return CLASSES[top.join('+')]};
+const ZONES=[{n:'Fresh',m:1,c:'#5fa8d3'},{n:'Primed',m:1.2,c:'#5be09a'},{n:'Fatigued',m:.7,c:'#ffd24d'},{n:'Burnt',m:.4,c:'#ff6b4d'}];
+const SIGNUP=[[1,'never trained'],[3,'now and then'],[5,'average adult'],[7,'trains every week'],[10,'competitive']];
+
+/* ── forty activities and their splits: str spd end hea soc bra ────────── */
+const ACTS=[
+  {id:'pl_heavy',n:'Powerlifting, heavy sets of 1 to 5',kw:['powerlifting','heavy','1rm','max ','singles','triples','squat','deadlift','bench'],s:[90,10,0,0,0,0],rpe:8,u:'kg'},
+  {id:'hyper',n:'Lifting, sets of 8 to 15',kw:['hypertrophy','bodybuilding','gym','lifting','volume','pump','curl','press','upper','lower','legs'],s:[70,0,30,0,0,0],rpe:7,u:'kg'},
+  {id:'sl_weighted',n:'Streetlifting, weighted pull-ups and dips',kw:['streetlifting','weighted','pull-up','pullup','pull up','dips','chin'],s:[80,20,0,0,0,0],rpe:8,u:'kg'},
+  {id:'calis',n:'Calisthenics, muscle-ups and skills',kw:['muscle-up','muscle up','muscleup','calisthenics','handstand','lever','planche','skills'],s:[50,50,0,0,0,0],rpe:7},
+  {id:'kb',n:'Kettlebell',kw:['kettlebell','kb ','swings'],s:[60,20,20,0,0,0],rpe:7,u:'kg'},
+  {id:'crossfit',n:'CrossFit, metcon',kw:['crossfit','metcon','wod','amrap','emom'],s:[40,20,40,0,0,0],rpe:8},
+  {id:'hiit',n:'HIIT circuit',kw:['hiit','circuit','tabata','burpee'],s:[20,40,40,0,0,0],rpe:8},
+  {id:'run_easy',n:'Easy run',kw:['easy run','jog','recovery run','zone 2'],s:[5,10,85,0,0,0],rpe:4,u:'km'},
+  {id:'run_long',n:'Long run',kw:['long run','half marathon','marathon','15k','20k'],s:[5,10,85,0,0,0],rpe:5,u:'km'},
+  {id:'run_tempo',n:'Tempo run',kw:['tempo','threshold','10k','5k'],s:[5,35,60,0,0,0],rpe:7,u:'km'},
+  {id:'run',n:'Run',kw:['run','running','ran '],s:[5,20,75,0,0,0],rpe:5,u:'km'},
+  {id:'sprints',n:'Sprint intervals',kw:['sprint','interval','400m','200m','100m','track'],s:[10,70,20,0,0,0],rpe:9,u:'km'},
+  {id:'hill',n:'Hill sprints',kw:['hill','sand'],s:[10,55,35,0,0,0],rpe:9},
+  {id:'swim_dist',n:'Swim, distance',kw:['swim','swimming','laps','pool','open water'],s:[20,10,70,0,0,0],rpe:6,u:'km'},
+  {id:'swim_sprint',n:'Swim sprints',kw:['swim sprint','sprint swim','fast 50','50s','100s'],s:[20,60,20,0,0,0],rpe:8,u:'km'},
+  {id:'bike',n:'Cycling',kw:['bike','cycling','ride','velo','vélo','zwift'],s:[10,15,75,0,0,0],rpe:5,u:'km'},
+  {id:'row',n:'Rowing',kw:['row','rowing','erg'],s:[30,10,60,0,0,0],rpe:7,u:'km'},
+  {id:'hike',n:'Hike',kw:['hike','hiking','trail','trek'],s:[10,0,80,10,0,0],rpe:4,u:'km'},
+  {id:'walk',n:'Walk',kw:['walk','steps'],s:[0,0,60,40,0,0],rpe:2,u:'km'},
+  {id:'climb',n:'Climbing, bouldering',kw:['climb','boulder'],s:[60,25,15,0,0,0],rpe:7},
+  {id:'box',n:'Boxing, Muay Thai',kw:['boxing','muay','thai','pads','sparring','mma','kick'],s:[20,35,45,0,0,0],rpe:8},
+  {id:'football',n:'Football',kw:['football','soccer','foot '],s:[10,40,40,0,10,0],rpe:7},
+  {id:'basket',n:'Basketball',kw:['basket'],s:[15,40,35,0,10,0],rpe:7},
+  {id:'tennis',n:'Tennis, padel',kw:['tennis','padel','squash','badminton'],s:[15,45,30,0,10,0],rpe:6},
+  {id:'surf',n:'Surf',kw:['surf'],s:[30,20,50,0,0,0],rpe:6},
+  {id:'ski',n:'Ski, snowboard',kw:['ski','snowboard'],s:[30,30,40,0,0,0],rpe:6},
+  {id:'yoga',n:'Yoga',kw:['yoga','pilates'],s:[10,0,10,80,0,0],rpe:3},
+  {id:'mobility',n:'Mobility, stretching',kw:['mobility','stretch','foam'],s:[0,0,10,90,0,0],rpe:2},
+  {id:'sauna',n:'Sauna, cold plunge',kw:['sauna','cold','ice bath','plunge'],s:[0,0,0,100,0,0],rpe:3},
+  {id:'read',n:'Reading',kw:['read','book','pages','kindle'],s:[0,0,0,0,0,100],rpe:5},
+  {id:'video',n:'Learning video, course',kw:['video','course','lecture','youtube','tutorial','learn','study','class'],s:[0,0,0,0,0,100],rpe:4},
+  {id:'lang',n:'Language practice',kw:['language','spanish','french','english','duolingo','vocab'],s:[0,0,0,0,20,80],rpe:5},
+  {id:'chess',n:'Chess',kw:['chess','puzzle'],s:[0,0,0,0,0,100],rpe:6},
+  {id:'write',n:'Writing',kw:['write','writing','journal','notes'],s:[0,0,0,0,0,100],rpe:5},
+  {id:'reconnect',n:'Reconnected with an old friend',kw:['old friend','reconnect','caught up','catch up','havent talked',"haven't talked"],s:[0,0,0,0,100,0],rpe:5},
+  {id:'stranger',n:'Call with someone new',kw:['stranger','someone new','new person','cold call','networking','call with','met '],s:[0,0,0,0,100,0],rpe:8},
+  {id:'out',n:'Went out and talked to people',kw:['went out','party','bar','event','meetup','talked to people','dinner','drinks'],s:[0,0,0,0,100,0],rpe:6},
+  {id:'train_with',n:'Trained with a friend',kw:['with a friend','together','partner','buddy'],s:[30,20,30,0,20,0],rpe:7},
+  {id:'dance',n:'Dance',kw:['dance','dancing','salsa'],s:[10,30,40,0,20,0],rpe:6},
+  {id:'martial',n:'Martial arts, BJJ, judo',kw:['bjj','jiu','judo','wrestling','grappling','karate'],s:[35,25,40,0,0,0],rpe:8},
+];
+const GENERIC={id:'generic',n:'Unknown activity',s:[40,20,40,0,0,0],rpe:6};
+const actById=id=>ACTS.find(a=>a.id===id);
+function matchAct(text){const t=(text||'').toLowerCase();let best=null,bs=0;for(const a of ACTS){let s=0;for(const k of a.kw) if(t.includes(k)) s+=k.length;if(s>bs){bs=s;best=a}}return best}
+
+/* ── the sprite palette ────────────────────────────────────────────────── */
+const SKINS=['#f5cba7','#d9a16b','#a86c3c','#5a3a22'];
+const HAIRC=['#2b1d12','#6b3e1a','#d9a441','#151515','#b53a2e'];
+const TOPS=['#5fa8d3','#ff6b4d','#5be09a','#ffd24d','#a98bff','#eaf4fb'];
+const BOTS=['#1f2a44','#3b3b3b','#5a3a22','#173d59'];
+const HAIRS=['short','long','bun','cap'];
+const SPRITE_NOTES={
+  str:['lv 10 wider torso','lv 20 belt, thicker arms','lv 30 wider again','lv 45 arms again'],
+  spd:['lv 10 headband, yellow shoes','lv 20 motion lines','lv 30 more lines'],
+  end:['lv 10 aura ring','lv 20 medal on the chest','the aura grows every band'],
+  hea:['lv 10 halo','lv 30 bright halo'],
+  soc:['lv 10 scarf','lv 30 speech bubble'],
+  bra:['lv 20 glasses','lv 30 book in hand']};
+
+/* ── state ─────────────────────────────────────────────────────────────── */
+const KEY='games.v1';
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));return s&&s.v===1&&s.members&&s.logs?s:null}catch(e){return null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function seed(){
+  const r=rng(7), pick=arr=>arr[Math.floor(r()*arr.length)], between=(a,b)=>a+r()*(b-a);
+  const mk=(id,name,sport,tiers,look,acts,pat)=>({id,name,sport,look,acts,pat,base:Object.fromEntries(SK.map((k,i)=>[k,lvlXP(tiers[i])]))});
+  // each friend keeps a weekly pattern (days 0 to 6), skips one in seven, adds one in ten
+  const members=[
+    mk('m1','Jeremy','Powerlifting',[7,3,5,7,5,7],{skin:0,hair:0,hairC:0,top:0,bot:0},['pl_heavy','pl_heavy','hyper','hyper'],{days:[1,2,4,6],kg:[4000,9000]}),
+    mk('m2','Léo','Streetlifting',[7,5,3,5,7,3],{skin:1,hair:3,hairC:1,top:1,bot:1},['sl_weighted','calis','sl_weighted','run_easy'],{days:[1,2,4,6],kg:[1500,4000]}),
+    mk('m3','Nina','Running',[3,7,7,5,5,5],{skin:2,hair:1,hairC:2,top:2,bot:3},['run_easy','run_tempo','run_long','sprints','mobility'],{days:[0,2,4,6],km:[5,18]}),
+    mk('m4','Sam','Swimming',[5,5,7,7,3,5],{skin:3,hair:2,hairC:3,top:3,bot:2},['swim_dist','swim_sprint','swim_dist','hyper','bike'],{days:[1,3,5],km:[1,3]}),
+  ];
+  const logs=[]; let id=1; const today=startOfDay(now());
+  for(const m of members){
+    for(let d=42;d>=1;d--){
+      const t0=today-d*DAY;
+      if(r()<.9) logs.push({id:id++,m:m.id,t:t0+7*36e5,kind:'sleep',hours:Math.round(between(6,8.7)*2)/2});
+      const dow=new Date(t0).getDay(), planned=m.pat.days.includes(dow);
+      if(planned?r()<.86:r()<.1){
+        const a=actById(pick(m.acts));
+        const min=Math.round(between(35,95)/5)*5, rpe=Math.max(3,Math.min(10,Math.round(a.rpe+between(-1.5,1.5))));
+        const l={id:id++,m:m.id,t:t0+18*36e5,kind:'train',text:a.n,act:a.id,min,rpe,pb:r()<.06};
+        if(a.u==='kg'&&m.pat.kg) l.kg=Math.round(between(m.pat.kg[0],m.pat.kg[1])/100)*100;
+        if(a.u==='km'){const kr=m.pat.km||[5,12];l.km=Math.round(between(kr[0],kr[1])*10)/10;if(a.id==='bike') l.km=Math.round(between(20,50))}
+        logs.push(l);
+      } else if(r()<.45) logs.push({id:id++,m:m.id,t:t0+12*36e5,kind:'rest'});
+      if(r()<.4){const a=actById(pick(['read','video','read','lang']));logs.push({id:id++,m:m.id,t:t0+21*36e5,kind:'train',text:a.n,act:a.id,min:Math.round(between(15,45)/5)*5,rpe:Math.round(between(3,6))})}
+      if(r()<.15){const a=actById(pick(['reconnect','stranger','out']));logs.push({id:id++,m:m.id,t:t0+20*36e5,kind:'train',text:a.n,act:a.id,min:Math.round(between(20,90)/5)*5,rpe:Math.round(between(4,8))})}
+    }
+  }
+  return {v:1,members,logs,nextId:id,sel:'m1'};
+}
+let state=load()||seed();
+const memberById=id=>state.members.find(m=>m.id===id);
+
+/* ── derive everything from the logs, in order ─────────────────────────── */
+const cache=new Map();
+const dirty=()=>cache.clear();
+function D(id){if(!cache.has(id)) cache.set(id,derive(id));return cache.get(id)}
+function fatigueFrom(load,t,hea){
+  let recent=0,month=0;
+  for(const e of load){if(e.t>t) break;if(e.t>t-28*DAY){month+=e.e;if(e.t>t-WEEK) recent+=e.e}}
+  // a fresh player has fewer than four weeks behind them: average over the weeks that exist
+  const weeks=load.length?Math.min(4,Math.max(1,(t-load[0].t)/WEEK)):1;
+  const usual=Math.max(month/weeks,240);
+  const g=recent/usual, burnT=1.4+hea/100;
+  const z=g<.8?0:g<1.3?1:g<burnT?2:3;
+  return {g,z,mult:ZONES[z].m,name:ZONES[z].n,recent,usual,burnT};
+}
+function gainFor(l,mult,actO){
+  const xp={};let ef=0,physFrac=0,note='';
+  if(l.kind==='rest'){xp.hea=60;note='Rest day'}
+  else if(l.kind==='sleep'){xp.hea=Math.round(l.hours*8);note=`Slept ${l.hours} h`}
+  else{
+    const a=actO||actById(l.act)||GENERIC;
+    ef=effort(l.min,l.rpe);
+    const pb=l.pb?5:1, heaEf=effMin(l.min)*Math.max(1,factor(l.rpe));
+    physFrac=(a.s[0]+a.s[1]+a.s[2])/100;
+    SK.forEach((k,i)=>{if(!a.s[i]) return;xp[k]=Math.round((k==='hea'?heaEf:ef)*pb*a.s[i]/100*(PHYS.has(k)?mult:1))});
+    note=a.n;
+  }
+  const total=SK.reduce((t,k)=>t+(xp[k]||0),0);
+  return {xp,total,effort:ef,physFrac,note};
+}
+function derive(mid){
+  const m=memberById(mid);
+  const logs=state.logs.filter(l=>l.m===mid).sort((a,b)=>a.t-b.t||a.id-b.id);
+  const xp={...m.base}, gains=new Map(), load=[];
+  const credit=(t,f)=>{for(const e of load) if(e.t<=t&&e.t>t-WEEK) e.e*=f};
+  for(const l of logs){
+    const f=fatigueFrom(load,l.t,lvlOf(xp.hea));
+    const g=gainFor(l,f.mult);
+    for(const k in g.xp) xp[k]+=g.xp[k];
+    gains.set(l.id,{...g,fat:f});
+    if(l.kind==='train'&&g.physFrac>0) load.push({t:l.t,e:g.effort*g.physFrac});
+    if(l.kind==='rest') credit(l.t,.85);
+    if(l.kind==='sleep'&&l.hours>=8) credit(l.t,.9);
+  }
+  const lv=Object.fromEntries(SK.map(k=>[k,lvlOf(xp[k])]));
+  return {xp,lv,gains,logs,fat:fatigueFrom(load,now(),lv.hea)};
+}
+function weekly(d){
+  const t=now(), w=Array(8).fill(0), sess=Array(8).fill(0), by=Array.from({length:8},()=>({}));
+  for(const l of d.logs){
+    const wi=Math.floor((t-l.t)/WEEK);if(wi<0||wi>=8) continue;
+    const g=d.gains.get(l.id);w[wi]+=g.total;
+    if(l.kind==='train'&&g.physFrac>=.5) sess[wi]++;
+    for(const k in g.xp) by[wi][k]=(by[wi][k]||0)+g.xp[k];
+  }
+  const total=SK.reduce((s,k)=>s+d.xp[k],0);
+  const growth=w[0]/Math.max(1,total-w[0])*100, prevG=w[1]/Math.max(1,total-w[0]-w[1])*100;
+  let streak=0;for(let i=sess[0]>=3?0:1;i<8;i++){if(sess[i]>=3) streak++;else break}
+  return {w,sess,by,total,growth,prevG,streak};
+}
+function kmEq(l){
+  let k=0;
+  if(l.km) k+=(l.act||'').startsWith('swim')?l.km*4:l.act==='bike'?l.km/3:l.km;
+  if(l.kg) k+=l.kg/1000*4/3;
+  return k;
+}
+
+/* ── the sprite: 24 × 32, upscaled by CSS ──────────────────────────────── */
+function px(g,x,y,w,h,c){g.fillStyle=c;g.fillRect(x,y,w,h)}
+function drawChar(cv,m,lv,frame){
+  const g=cv.getContext('2d');g.clearRect(0,0,24,32);
+  const T=Object.fromEntries(SK.map(k=>[k,tierOf(lv[k])]));
+  const L=m.look, skin=SKINS[L.skin]||SKINS[0], hair=HAIRC[L.hairC]||HAIRC[0], top=TOPS[L.top]||TOPS[0], bot=BOTS[L.bot]||BOTS[0];
+  const b=frame&1;
+  if(T.end>=1){const rx=8+T.end,ry=12+T.end;g.fillStyle=`rgba(91,224,154,${.22+.1*T.end})`;
+    for(let a=0;a<Math.PI*2;a+=Math.PI/(9+T.end*2)){const x=Math.round(11.5+rx*Math.cos(a+frame*.2)),y=Math.round(17.5+ry*Math.sin(a+frame*.2));if(x>=0&&x<24&&y>=0&&y<32) g.fillRect(x,y,1,1)}}
+  if(T.hea>=1){const c=T.hea>=3?'#bffff6':'#4de8d0';px(g,9,0,6,1,c);px(g,8,1,1,1,c);px(g,15,1,1,1,c);if(T.hea>=3) px(g,10,1,4,1,'rgba(77,232,208,.5)')}
+  if(T.spd>=2){const c='rgba(255,210,77,.85)';px(g,2,23,3,1,c);px(g,1,26,4,1,c);if(T.spd>=3){px(g,3,20,2,1,c);px(g,0,29,3,1,c)}}
+  px(g,8,21,3,7,bot);px(g,13,21,3,7,bot);
+  const shoe=T.spd>=1?'#ffd24d':'#2a2f3d';px(g,7,28,4,2,shoe);px(g,13,28,4,2,shoe);
+  const w=8+2*Math.min(T.str,3), x0=12-w/2;
+  px(g,x0,12+b,w,9-b,top);
+  const aw=2+(T.str>=2?1:0)+(T.str>=4?1:0);
+  px(g,x0-aw,12+b,aw,8,skin);px(g,x0+w,12+b,aw,8,skin);
+  px(g,x0-aw,12+b,aw,2,top);px(g,x0+w,12+b,aw,2,top);
+  if(T.str>=2){px(g,x0,20,w,1,'#6b3e1a');px(g,11,20,2,1,'#ffd24d')}
+  if(T.end>=2){px(g,11,15+b,2,2,'#ffd24d');px(g,11,14+b,2,1,'#ff6b4d')}
+  if(T.soc>=1){px(g,9,11+b,6,2,'#ff7ab6');px(g,15,13+b,1,3,'#ff7ab6')}
+  px(g,11,11+b,2,1,skin);
+  px(g,8,3+b,8,8,skin);
+  const hs=HAIRS[L.hair]||'short';
+  if(hs==='short'){px(g,8,2+b,8,2,hair);px(g,8,4+b,1,2,hair);px(g,15,4+b,1,2,hair)}
+  if(hs==='long'){px(g,8,2+b,8,2,hair);px(g,7,3+b,1,8,hair);px(g,16,3+b,1,8,hair);px(g,8,4+b,1,1,hair);px(g,15,4+b,1,1,hair)}
+  if(hs==='bun'){px(g,8,2+b,8,2,hair);px(g,10,b,4,2,hair);px(g,8,4+b,1,2,hair);px(g,15,4+b,1,2,hair)}
+  if(hs==='cap'){px(g,7,2+b,10,2,top);px(g,6,4+b,4,1,top);px(g,8,4+b,1,1,hair);px(g,15,4+b,1,1,hair)}
+  if(T.spd>=1&&hs!=='cap') px(g,8,5+b,8,1,'#ffd24d');
+  px(g,10,7+b,1,1,'#111');px(g,13,7+b,1,1,'#111');px(g,11,9+b,2,1,'#b0664a');
+  if(T.bra>=2){const c='#eaf4fb';px(g,9,6+b,3,1,c);px(g,12,6+b,3,1,c);px(g,9,8+b,3,1,c);px(g,12,8+b,3,1,c);px(g,9,7+b,1,1,c);px(g,14,7+b,1,1,c)}
+  if(T.bra>=3){px(g,x0+w,18+b,aw+1,4,'#a98bff');px(g,x0+w+1,19+b,aw-1,1,'#eaf4fb')}
+  if(T.soc>=3){px(g,17,2,6,4,'#eaf4fb');px(g,17,6,1,1,'#eaf4fb');px(g,18,4,1,1,'#ff7ab6');px(g,20,4,1,1,'#ff7ab6');px(g,22,4,1,1,'#ff7ab6')}
+}
+function drawMark(){
+  const g=$('#markC').getContext('2d');
+  const M=['......####......','.....#....#.....','....#..##..#....','...#..####..#...','..#..######..#..','.#....####....#.','#......##......#','#......##......#','#......##......#','#......##......#','.#............#.','..#..........#..','...#........#...','....#......#....','.....#....#.....','......####......'];
+  M.forEach((row,y)=>[...row].forEach((c,x)=>{if(c==='#') px(g,x,y,1,1,y<10&&x>4&&x<11?'#ffd24d':'#5fa8d3')}));
+}
+
+/* ── render ────────────────────────────────────────────────────────────── */
+let frame=0, treeStat='str', custOpen=false;
+function renderAll(){renderBand();renderRoster();renderChar();renderCust();renderLog();renderBoard();renderTeam();if($('#tab-tree').classList.contains('on')) renderTree();renderTreeDetail()}
+function renderBand(){
+  const t=now();let xp=0,km=0,tn=0,ss=0;
+  for(const m of state.members){const d=D(m.id);for(const l of d.logs){if(l.t<t-WEEK) continue;const g=d.gains.get(l.id);xp+=g.total;if(l.kind==='train'){km+=kmEq(l);tn+=(l.kg||0)/1000;if(g.physFrac>=.5) ss++}}}
+  $('#totals').innerHTML=[[state.members.length,'players'],[fmt(xp),'xp this week'],[km.toFixed(0),'km-eq this week'],[tn.toFixed(1),'tonnes this week'],[ss,'sessions this week']]
+    .map(([n,l])=>`<div class="tot"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
+}
+function renderRoster(){
+  $('#roster').innerHTML=state.members.map(m=>`<button type="button" data-m="${m.id}" class="${m.id===state.sel?'on':''}"><canvas width="24" height="32"></canvas><b>${esc(m.name)}</b><small>${className(D(m.id).lv)}</small></button>`).join('');
+  $$('#roster button').forEach(b=>{const m=memberById(b.dataset.m);drawChar(b.querySelector('canvas'),m,D(m.id).lv,0);b.onclick=()=>{state.sel=m.id;save();renderAll()}});
+}
+function renderChar(){
+  const m=memberById(state.sel), d=D(m.id);
+  drawChar($('#big'),m,d.lv,frame);
+  $('#pName').textContent=m.name;
+  $('#pClass').textContent=`${className(d.lv)} · ${bandOf(Math.max(...SK.map(k=>d.lv[k])))}`;
+  $('#pSport').textContent=m.sport;
+  $('#stats').innerHTML=STATS.map(s=>{const lv=d.lv[s.k],x=d.xp[s.k],a=lvlXP(lv),b=lvlXP(lv+1),p=(x-a)/(b-a);
+    return `<div class="stat" style="--c:${s.c}"><span class="k" style="color:${s.c}">${s.n}</span><span class="lv">${lv}</span><span class="bar"><i style="width:${(p*100).toFixed(1)}%"></i></span><span class="to">${fmt(b-x)} xp to ${lv+1}</span></div>`}).join('')
+    +(()=>{const wk=weekly(d);return `<div class="week"><span><b>${fmt(wk.w[0])}</b> xp this week</span><span><b>+${wk.growth.toFixed(1)}%</b> growth</span><span><b>${wk.sess[0]}</b> sessions</span><span><b>${wk.streak}</b> wk streak</span></div>`})();
+  renderGauge(d);
+}
+function renderGauge(d){
+  const f=d.fat, max=2.2, w=v=>Math.min(100,v/max*100);
+  const zones=[[0,.8,ZONES[0].c],[.8,1.3,ZONES[1].c],[1.3,f.burnT,ZONES[2].c],[f.burnT,max,ZONES[3].c]];
+  $('#gauge').innerHTML=`<div class="row"><h3>Fatigue</h3><span class="state" style="color:${ZONES[f.z].c}">${f.name} · ×${f.mult}</span></div>
+    <div class="track">${zones.map(([a,b,c])=>`<span class="z" style="width:${(w(b)-w(a)).toFixed(2)}%;background:${c}"></span>`).join('')}<span class="needle" style="left:${w(f.g).toFixed(2)}%"></span></div>
+    <div class="ticks"><span style="left:0;transform:none">0</span><span style="left:${w(.8)}%">0.8</span><span style="left:${w(1.3)}%">1.3</span><span style="left:${w(f.burnT)}%;top:12px;color:#ff6b4d">burn ${f.burnT.toFixed(1)}</span><span style="left:100%;transform:translateX(-100%)">${max}</span></div>
+    <p>Last 7 days <b>${fmt(f.recent)}</b> effort against your usual <b>${fmt(f.usual)}</b>, gauge <b>${f.g.toFixed(2)}</b>. Health ${d.lv.hea} puts the burn line at ${f.burnT.toFixed(2)}. A rest day takes 15% off the recent load, 8 h of sleep 10%.</p>`;
+}
+function sw(sel,arr,cur,set,text){
+  $(sel).innerHTML=arr.map((c,i)=>text?`<button type="button" class="t ${i===cur?'on':''}" data-i="${i}">${c}</button>`:`<button type="button" class="${i===cur?'on':''}" style="background:${c}" data-i="${i}" aria-label="option ${i+1}"></button>`).join('');
+  $$(sel+' button').forEach(b=>b.onclick=()=>{set(+b.dataset.i);save();renderAll()});
+}
+function renderCust(){
+  const m=memberById(state.sel);
+  $('#cust').hidden=!custOpen;
+  if(document.activeElement!==$('#cName')) $('#cName').value=m.name;
+  if(document.activeElement!==$('#cSport')) $('#cSport').value=m.sport;
+  sw('#swSkin',SKINS,m.look.skin,v=>m.look.skin=v);
+  sw('#swHair',HAIRS,m.look.hair,v=>m.look.hair=v,true);
+  sw('#swHairC',HAIRC,m.look.hairC,v=>m.look.hairC=v);
+  sw('#swTop',TOPS,m.look.top,v=>m.look.top=v);
+  sw('#swBot',BOTS,m.look.bot,v=>m.look.bot=v);
+}
+
+/* tree */
+function renderTree(){
+  const cv=$('#tree'), size=cv.clientWidth||480, dpr=window.devicePixelRatio||1;
+  cv.width=size*dpr;cv.height=size*dpr;const g=cv.getContext('2d');g.scale(dpr,dpr);
+  const d=D(state.sel), cx=size/2, cy=size/2, R=size/2-50;
+  const at=(ux,uy,r)=>[cx+ux*r,cy+uy*r];
+  STATS.forEach((s,i)=>{
+    const ang=-Math.PI/2+i*Math.PI/3, ux=Math.cos(ang), uy=Math.sin(ang), lv=d.lv[s.k], pos=l=>Math.sqrt(Math.min(1,l/100));
+    const sel=s.k===treeStat;
+    g.lineWidth=2;g.strokeStyle='rgba(234,244,251,.12)';g.beginPath();g.moveTo(...at(ux,uy,14));g.lineTo(...at(ux,uy,R));g.stroke();
+    const p=pos(lv);g.lineWidth=sel?4:3;g.strokeStyle=s.c;g.beginPath();g.moveTo(...at(ux,uy,14));g.lineTo(...at(ux,uy,14+(R-14)*p));g.stroke();
+    g.setLineDash([2,4]);g.lineWidth=1;g.strokeStyle='rgba(234,244,251,.35)';g.beginPath();g.moveTo(...at(ux,uy,R));g.lineTo(...at(ux,uy,R+16));g.stroke();g.setLineDash([]);
+    MILESTONES.forEach(ml=>{const [x,y]=at(ux,uy,14+(R-14)*pos(ml));const lit=lv>=ml;g.beginPath();g.rect(x-4,y-4,8,8);g.fillStyle=lit?s.c:'#0b1224';g.fill();g.lineWidth=1.5;g.strokeStyle=lit?s.c:'rgba(234,244,251,.35)';g.stroke();
+      if(sel){g.fillStyle=lit?s.c:'rgba(234,244,251,.5)';g.font='8px '+getComputedStyle(document.body).fontFamily;g.textAlign=Math.abs(ux)<.1?'left':'center';g.textBaseline=Math.abs(ux)<.1?'middle':'top';g.fillText(ml,x+(Math.abs(ux)<.1?9:0),y+(Math.abs(ux)<.1?0:8))}});
+    const [hx,hy]=at(ux,uy,14+(R-14)*p);g.fillStyle='#fff';g.fillRect(hx-2,hy-2,4,4);
+    const [lx,ly]=at(ux,uy,R+30);g.textAlign=ux>.1?'left':ux<-.1?'right':'center';g.textBaseline='middle';
+    g.fillStyle=sel?'#eaf4fb':s.c;g.font='bold 10px '+getComputedStyle(document.body).fontFamily;g.fillText(s.n.toUpperCase(),lx,ly-7);
+    g.fillStyle=s.c;g.font='9px "Press Start 2P", monospace';g.fillText('LV '+lv,lx,ly+8);
+  });
+  g.fillStyle='#eaf4fb';g.fillRect(cx-6,cy-6,12,12);
+}
+function renderTreeDetail(){
+  const d=D(state.sel), k=treeStat, s=STATS.find(x=>x.k===k), lv=d.lv[k], x=d.xp[k], i=SK.indexOf(k);
+  const next=MILESTONES.find(m=>m>lv);
+  const feeds=ACTS.filter(a=>a.s[i]>=40).sort((a,b)=>b.s[i]-a.s[i]).slice(0,8);
+  const rules={hea:'Rest day 60 XP and −15% recent load. Sleep 8 XP an hour, −10% at 8 h. Mobility, yoga and sauna count at least a point a minute. Every 10 levels moves the burn line up 0.1.',soc:'Reconnect with an old friend, call someone new, go out and talk. RPE is how far out of your comfort zone.',bra:'Minutes of a book or a learning video. RPE is how hard the material was.'};
+  $('#treeDetail').innerHTML=`<h2 style="color:${s.c}">${s.n}</h2><div class="sub" style="margin-top:6px">level ${lv} · ${bandOf(lv)}</div>
+    <div class="kv"><span>XP</span><b>${fmt(x)}</b><span>To level ${lv+1}</span><b>${fmt(lvlXP(lv+1)-x)}</b><span>Next milestone</span><b>${next?'lv '+next:'none, no cap'}</b></div>
+    ${rules[k]?`<p class="note" style="margin-top:10px">${rules[k]}</p>`:''}
+    <h3 style="margin-top:16px">What feeds it</h3><ul>${feeds.map(a=>`<li>${a.n} <span class="dim">· ${a.s[i]}%</span></li>`).join('')}</ul>
+    <h3 style="margin-top:16px">On the sprite</h3><ul>${SPRITE_NOTES[k].map(n=>`<li>${n}</li>`).join('')}</ul>`;
+}
+
+/* log */
+function readForm(){return {text:$('#lText').value.trim(),min:+$('#lMin').value||0,rpe:+$('#lRpe').value,km:+$('#lKm').value||0,kg:+$('#lKg').value||0,pb:$('#lPb').checked,date:$('#lDate').value}}
+function renderLog(){$('#lWho').textContent=memberById(state.sel).name;preview();renderRecent()}
+function preview(){
+  const f=readForm(), a=f.text?matchAct(f.text):null, act=a||GENERIC, d=D(state.sel), fat=d.fat;
+  const g=gainFor({kind:'train',act:act.id,min:f.min,rpe:f.rpe,pb:f.pb},fat.mult,act);
+  $('#preview').innerHTML=`<h3>Preview</h3>
+    <div class="chips">${SK.map((k,i)=>act.s[i]?`<span class="chip" style="border-color:${SC[k]};color:${SC[k]}">${SN[k]} ${act.s[i]}%</span>`:'').join('')}</div>
+    <div class="note">${a?esc(a.n):f.text?'No built-in match. The model call fills this in later. Generic split for now.':'Type an activity. 40 are built in, the model call covers the rest.'}</div>
+    <div class="kv"><span>Effective minutes</span><b>${effMin(f.min)}</b><span>Factor, RPE² ÷ 20</span><b>${factor(f.rpe).toFixed(2)}</b><span>Effort</span><b>${fmt(g.effort)}</b><span>Fatigue ${fat.name}, physical share</span><b>×${fat.mult}</b>${f.pb?'<span>Personal best</span><b>×5</b>':''}</div>
+    <div class="big">+${fmt(g.total)} XP</div>
+    <div class="chips">${SK.map(k=>g.xp[k]?`<span class="chip" style="color:${SC[k]}">+${g.xp[k]} ${k.toUpperCase()}</span>`:'').join('')}</div>`;
+}
+function topStat(g){let bk=null,bv=-1;for(const k in g.xp) if(g.xp[k]>bv){bv=g.xp[k];bk=k}return bk?SC[bk]:'#eaf4fb'}
+function renderRecent(){
+  const d=D(state.sel), ls=d.logs.slice(-12).reverse();
+  $('#recent').innerHTML=`<h3>Recent · ${d.logs.length} logs</h3>`+ls.map(l=>{const g=d.gains.get(l.id);
+    const what=l.kind==='train'?`${esc(l.text||g.note)} · ${l.min} min · RPE ${l.rpe}${l.km?` · ${l.km} km`:''}${l.kg?` · ${fmt(l.kg)} kg`:''}${l.pb?' · PB':''}`:g.note;
+    const fat=l.kind==='train'&&g.physFrac>0?`${g.fat.name} ×${g.fat.mult}`:'';
+    return `<div class="r"><span class="dim">${fmtDate(l.t)}</span><span>${what}${fat?`<br><small class="dim">${fat}</small>`:''}</span><span class="g" style="color:${topStat(g)}">+${fmt(g.total)}</span></div>`}).join('');
+}
+function logTime(dateStr){const today=isoLocal(now());if(!dateStr||dateStr===today) return now();const [y,mo,da]=dateStr.split('-').map(Number);return new Date(y,mo-1,da,12,0,0).getTime()}
+function addLog(l){
+  l.id=state.nextId++;l.m=state.sel;
+  const before=D(state.sel).lv;
+  state.logs.push(l);dirty();save();
+  const d=D(state.sel), after=d.lv, g=d.gains.get(l.id);
+  const ups=SK.filter(k=>after[k]>before[k]).map(k=>`${SN[k]} ${before[k]} → ${after[k]}`);
+  toast(ups.length?'LEVEL UP · '+ups.join(' · '):`+${fmt(g.total)} XP · ${g.note}`);
+  renderAll();
+}
+let toastT;
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2800)}
+
+/* board */
+function spark(cv,vals){const g=cv.getContext('2d'),W=cv.width,H=cv.height;g.clearRect(0,0,W,H);const max=Math.max(1,...vals),n=vals.length,bw=W/n;vals.forEach((v,i)=>{const h=Math.max(3,v/max*(H-6));g.fillStyle=i===n-1?'#5fa8d3':'rgba(95,168,211,.38)';g.fillRect(i*bw+4,H-h,bw-8,h)})}
+function renderBoard(){
+  const rows=state.members.map(m=>{const d=D(m.id);return {m,d,wk:weekly(d)}});
+  const byNow=rows.slice().sort((a,b)=>b.wk.growth-a.wk.growth), byPrev=rows.slice().sort((a,b)=>b.wk.prevG-a.wk.prevG);
+  const best={};for(const k of SK){let bm=null,bv=0;for(const r of rows){const v=r.wk.by[0][k]||0;if(v>bv){bv=v;bm=r.m.id}}if(bm) best[k]=bm}
+  $('#cards').innerHTML=byNow.map((r,i)=>{const prev=byPrev.findIndex(x=>x.m.id===r.m.id),mv=prev-i,cls=mv>0?'up':mv<0?'down':'flat';
+    const badges=SK.filter(k=>best[k]===r.m.id).map(k=>`<span class="badge" style="background:${SC[k]}">most improved ${SN[k]}</span>`).join('');
+    return `<div class="glass card"><div class="hd"><canvas class="mini" data-m="${r.m.id}" width="24" height="32"></canvas><div><b>${esc(r.m.name)}</b><br><small class="dim">${className(r.d.lv)} · ${esc(r.m.sport)}</small></div><span class="rank">#${i+1}</span></div>
+      <div class="growth" style="color:${r.wk.growth>0?'#5be09a':'var(--dim)'}">+${r.wk.growth.toFixed(1)}%</div><div class="sub">growth this week · ${fmt(r.wk.w[0])} xp</div>
+      <canvas class="spark" data-m="${r.m.id}" width="400" height="80"></canvas>
+      <div class="meta"><span>streak <b>${r.wk.streak} wk</b></span><span>sessions <b>${r.wk.sess[0]}</b></span><span class="${cls}">${mv>0?'▲ '+mv:mv<0?'▼ '+(-mv):'▬ 0'}</span></div>
+      <div class="badges">${badges}</div></div>`}).join('');
+  $$('#cards canvas.mini').forEach(c=>{const m=memberById(c.dataset.m);drawChar(c,m,D(m.id).lv,0)});
+  $$('#cards canvas.spark').forEach(c=>{const r=rows.find(x=>x.m.id===c.dataset.m);spark(c,r.wk.w.slice().reverse())});
+}
+
+/* team */
+const BOUNTIES=[
+  {n:'Move 3 tonnes today',ok:ls=>ls.some(l=>l.kind==='train'&&(l.kg||0)>=3000)},
+  {n:'Cover 8 km today',ok:ls=>ls.some(l=>l.kind==='train'&&(l.km||0)>=8)},
+  {n:'One RPE 9 session today',ok:ls=>ls.some(l=>l.kind==='train'&&l.rpe>=9)},
+  {n:'Call someone new today',ok:ls=>ls.some(l=>l.act==='stranger')},
+  {n:'Take the rest day',ok:ls=>ls.some(l=>l.kind==='rest')},
+  {n:'Sleep 8 hours',ok:ls=>ls.some(l=>l.kind==='sleep'&&l.hours>=8)},
+  {n:'Learn 30 minutes',ok:ls=>ls.some(l=>l.kind==='train'&&(actById(l.act)||GENERIC).s[5]>=50&&l.min>=30)},
+  {n:'Swim 1 km',ok:ls=>ls.some(l=>(l.act||'').startsWith('swim')&&(l.km||0)>=1)},
+];
+function goal(el,title,rows,target,unit,note){
+  const sum=rows.reduce((s,r)=>s+r[1],0), p=Math.min(100,sum/target*100), max=Math.max(1e-9,...rows.map(r=>r[1])), dp=unit==='sessions'?0:1;
+  el.innerHTML=`<h3>${title}</h3><div class="big">${sum.toFixed(dp)} <small style="font:inherit;font-size:10px;color:var(--dim)">/ ${target} ${unit}</small></div>
+    <div class="track"><i style="width:${p.toFixed(1)}%;background:${p>=100?'#5be09a':'#5fa8d3'}"></i></div>
+    <div class="contrib">${rows.map(([n,v])=>`<div class="c"><span>${esc(n)}</span><i style="width:${(v/max*100).toFixed(1)}%"></i><span class="dim">${v.toFixed(dp)}</span></div>`).join('')}</div>
+    <div class="note" style="margin-top:10px">${note}</div>`;
+}
+function renderTeam(){
+  const t=now(), day0=startOfDay(t);
+  const rows=state.members.map(m=>{const d=D(m.id);let km=0,tn=0,ss=0;const today=[];
+    for(const l of d.logs){if(l.t>=day0) today.push(l);if(l.t<t-WEEK) continue;if(l.kind==='train'){km+=kmEq(l);tn+=(l.kg||0)/1000;if(d.gains.get(l.id).physFrac>=.5) ss++}}
+    return {m,km,tn,ss,today}});
+  const n=state.members.length;
+  goal($('#goalKm'),'Distance this week',rows.map(r=>[r.m.name,r.km]),40*n,'km-eq','40 km-eq a player. 1 km swim = 4 km run. 1 tonne = 1.3 km. Bike ÷ 3.');
+  goal($('#goalT'),'Tonnage this week',rows.map(r=>[r.m.name,r.tn]),10*n,'tonnes','10 tonnes a player. kg moved across every lift.');
+  goal($('#goalS'),'Sessions this week',rows.map(r=>[r.m.name,r.ss]),4*n,'sessions','4 a player. Physical sessions only.');
+  const doy=Math.floor(t/DAY), L=BOUNTIES.length, ids=[...new Set([doy%L,(doy*3+1)%L,(doy*5+2)%L])].slice(0,3);
+  $('#bounty').innerHTML=`<h3>Daily bounties</h3><div class="note" style="margin-top:4px">Clear one, take a tick. New set at midnight.</div>`+
+    ids.map(i=>{const b=BOUNTIES[i];return `<div class="b"><span>${b.n}</span><span class="ticks">${rows.map(r=>{const ok=b.ok(r.today);return `<span class="tick ${ok?'ok':''}" title="${esc(r.m.name)}">${ok?'✓':esc(r.m.name[0])}</span>`}).join('')}</span></div>`}).join('');
+}
+
+/* plan */
+const GOALS=[
+  {id:'10k',n:'First 10 km',s:[['run_easy',[35,40,45,35],4],['run_tempo',[25,30,35,20],7],['run_long',[50,60,75,40],5],['mobility',[20,20,20,20],2],['sprints',[20,25,25,15],8],['run_easy',[30,35,40,30],4]]},
+  {id:'bench',n:'100 kg bench',s:[['pl_heavy',[60,70,75,45],8],['hyper',[60,60,60,40],7],['pl_heavy',[50,55,60,40],7],['mobility',[20,20,20,20],2],['hyper',[45,50,50,35],6],['walk',[30,30,30,30],2]]},
+  {id:'mu',n:'5 muscle-ups',s:[['calis',[45,50,55,35],7],['sl_weighted',[50,55,60,40],8],['calis',[40,45,50,30],6],['mobility',[20,20,20,20],2],['hyper',[45,45,45,30],6],['run_easy',[25,30,30,20],4]]},
+  {id:'swim',n:'Swim 1500 m nonstop',s:[['swim_dist',[40,45,55,35],6],['swim_sprint',[30,35,35,25],8],['swim_dist',[45,55,65,40],5],['mobility',[20,20,20,20],2],['hyper',[45,45,45,30],6],['bike',[45,50,60,40],4]]},
+  {id:'sleep',n:'Sleep 8 h for 30 nights',s:[['yoga',[30,30,30,30],3],['mobility',[20,25,25,20],2],['walk',[40,40,40,40],2],['sauna',[20,20,20,20],3],['yoga',[30,30,30,30],3],['walk',[30,30,30,30],2]],note:'Plus a sleep log every night: 8 h is 64 Health XP, on top of the sessions below.'},
+  {id:'books',n:'Read 4 books',s:[['read',[30,30,30,30],5],['read',[30,30,30,30],5],['read',[30,30,30,30],5],['read',[30,30,30,30],5],['read',[30,30,30,30],5],['read',[30,30,30,30],5]],note:'About 25 pages a sitting. 4 books of 250 pages in 4 weeks takes 6 sittings a week.'},
+];
+function renderPlan(){
+  const G=GOALS.find(g=>g.id===$('#pGoal').value)||GOALS[0], days=+$('#pDays').value;
+  const rows=[];let block=0;
+  for(let w=0;w<4;w++) for(let d=0;d<days;d++){const [aid,mins,rpe0]=G.s[d%G.s.length],a=actById(aid),min=mins[w],rpe=w===3?Math.max(1,rpe0-1):rpe0;const g=gainFor({kind:'train',act:aid,min,rpe},1.2);block+=g.total;rows.push({w,d,a,min,rpe,xp:g.total})}
+  $('#planOut').innerHTML=`<div class="note" style="padding:0 16px 12px">${G.note||'Week 4 is the deload: shorter, one RPE lower.'} XP shown at Primed, ×1.2. Block total <b>${fmt(block)} XP</b>.</div>
+    <table><thead><tr><th>Week</th><th>Day</th><th>Session</th><th>Min</th><th>RPE</th><th style="text-align:right">XP</th><th></th></tr></thead><tbody>${rows.map(r=>`<tr><td class="wk">${r.d===0?'W'+(r.w+1)+(r.w===3?' deload':''):''}</td><td>${r.d+1}</td><td>${r.a.n}</td><td>${r.min}</td><td>${r.rpe}</td><td class="xp">${fmt(r.xp)}</td><td><button class="btn sm" type="button" data-log="${r.a.id}|${r.min}|${r.rpe}">log</button></td></tr>`).join('')}</tbody></table>`;
+  $$('#planOut [data-log]').forEach(b=>b.onclick=()=>{const [aid,min,rpe]=b.dataset.log.split('|');$('#lText').value=actById(aid).n;$('#lMin').value=min;$('#lRpe').value=rpe;$('#lRpeV').textContent=rpe;$('#lDate').value=isoLocal(now());showTab('log');preview();$('#lText').focus()});
+}
+
+/* ── wiring ────────────────────────────────────────────────────────────── */
+function showTab(id){$$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===id));$$('.tab').forEach(s=>s.classList.toggle('on',s.id==='tab-'+id));if(id==='tree') renderTree();if(id==='plan'&&!$('#planOut').innerHTML) renderPlan()}
+function init(){
+  drawMark();
+  $('#lDate').value=isoLocal(now());
+  $('#acts').innerHTML=ACTS.map(a=>`<option value="${esc(a.n)}">`).join('');
+  $('#pGoal').innerHTML=GOALS.map(g=>`<option value="${g.id}">${g.n}</option>`).join('');
+  $$('#tabs button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+  $('#custBtn').onclick=()=>{custOpen=!custOpen;renderCust()};
+  $('#cName').oninput=e=>{const m=memberById(state.sel);m.name=e.target.value.trim()||m.name;save();renderRoster();renderChar();$('#lWho').textContent=m.name};
+  $('#cSport').oninput=e=>{const m=memberById(state.sel);m.sport=e.target.value.trim();save();renderChar()};
+  ['lText','lMin','lRpe','lPb'].forEach(id=>$('#'+id).addEventListener('input',()=>{$('#lRpeV').textContent=$('#lRpe').value;preview()}));
+  $('#lGo').onclick=()=>{const f=readForm();if(!f.text){$('#lText').focus();toast('Say what you did');return}if(f.min<5){$('#lMin').focus();toast('Minutes, at least 5');return}
+    const a=matchAct(f.text);const l={t:logTime(f.date),kind:'train',text:f.text,act:a?a.id:'generic',min:f.min,rpe:f.rpe,pb:f.pb};if(f.km) l.km=f.km;if(f.kg) l.kg=f.kg;
+    addLog(l);$('#lText').value='';$('#lKm').value='';$('#lKg').value='';$('#lPb').checked=false;preview()};
+  $('#qRest').onclick=()=>addLog({t:logTime($('#lDate').value),kind:'rest'});
+  $('#qSleep').onclick=()=>{const h=Math.max(3,Math.min(12,+$('#qHours').value||8));addLog({t:logTime($('#lDate').value),kind:'sleep',hours:h})};
+  $('#pGo').onclick=renderPlan;$('#pGoal').onchange=renderPlan;$('#pDays').onchange=renderPlan;
+  $('#tree').onclick=e=>{const r=e.target.getBoundingClientRect(),x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2;let ang=Math.atan2(y,x)+Math.PI/2;if(ang<0) ang+=Math.PI*2;treeStat=SK[Math.round(ang/(Math.PI/3))%6];renderTree();renderTreeDetail()};
+  $('#addBtn').onclick=()=>{$('#aTiers').innerHTML=STATS.map(s=>`<div><label style="color:${s.c}">${s.n}</label><select data-k="${s.k}">${SIGNUP.map(([v,n])=>`<option value="${v}" ${v===5?'selected':''}>${v} · ${n}</option>`).join('')}</select></div>`).join('');$('#aName').value='';$('#aSport').value='';$('#addDlg').showModal();$('#aName').focus()};
+  $('#aCancel').onclick=()=>$('#addDlg').close();
+  $('#addForm').onsubmit=e=>{e.preventDefault();const name=$('#aName').value.trim();if(!name) return;
+    const base={};$$('#aTiers select').forEach(s=>base[s.dataset.k]=lvlXP(+s.value));
+    const R=n=>Math.floor(Math.random()*n);
+    const m={id:'m'+Date.now().toString(36),name,sport:$('#aSport').value.trim()||'Training',look:{skin:R(SKINS.length),hair:R(HAIRS.length),hairC:R(HAIRC.length),top:R(TOPS.length),bot:R(BOTS.length)},base};
+    state.members.push(m);state.sel=m.id;dirty();save();$('#addDlg').close();custOpen=true;showTab('char');renderAll();toast(`${name} joined the guild`)};
+  $('#reset').onclick=e=>{e.preventDefault();if(!confirm('Reset the demo? Your logs in this browser go away.')) return;localStorage.removeItem(KEY);state=seed();dirty();custOpen=false;renderAll();toast('Demo reset')};
+  window.addEventListener('resize',()=>{if($('#tab-tree').classList.contains('on')) renderTree()});
+  renderAll();
+  setInterval(()=>{frame++;const m=memberById(state.sel);drawChar($('#big'),m,D(m.id).lv,frame)},600);
+}
+init();
+</script>
+</body>
+</html>
