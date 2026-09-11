@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useStore } from '../data/hooks'
 import { Backdrop } from '../components/Backdrop'
 import { Logo } from '../components/Logo'
 import { HeroDemo } from '../components/HeroDemo'
@@ -30,7 +29,7 @@ const PROMISES: { title: string; note: string }[] = [
 const FAQ = [
   {
     q: 'How do I set it up?',
-    a: 'Enter your website. Your agents read it and write the audience they should hunt for: the niche, who follows them, the size band. Change any word of it, set your daily volume, and it starts that night.',
+    a: 'Enter your website. Your agents read it and write the audience they should hunt for: the niche, who follows them, the size band. Change any word of it, set each agent a daily quota, and they start that night.',
   },
   {
     q: 'How many leads do I get?',
@@ -55,7 +54,6 @@ const FAQ = [
 ]
 
 export function Landing() {
-  useStore()
   const [perDay, setPerDay] = useState(250)
   /** How you pay for that volume: every month, or once. */
   const [term, setTerm] = useState<'monthly' | 'once'>('monthly')
@@ -77,7 +75,7 @@ export function Landing() {
           <a href="#pricing">Volume</a>
         </nav>
         <span className="spacer" />
-        <a className="btn primary" href="#/onboarding">See demo</a>
+        <a className="btn primary" href="#/contacts">See demo</a>
       </header>
 
       <div className="hero-block">
@@ -86,7 +84,7 @@ export function Landing() {
         <p className="lede">Enter your website. brandmatch learns your brand and brings you influencers ready for a deal, with their contact.</p>
         <div className="hero-prompt" role="group" aria-label="Your website">
           <span className="prompt-text">strongher.co</span>
-          <a className="btn primary" href="#/onboarding">See demo</a>
+          <a className="btn primary" href="#/contacts">See demo</a>
         </div>
       </section>
 
@@ -110,6 +108,10 @@ export function Landing() {
               <p>{pm.note}</p>
             </div>
           ))}
+        </div>
+        <div className="section-cta">
+          <a className="btn primary" href="#/contacts">See demo</a>
+          <span className="faint">45,000 creators already in the demo list.</span>
         </div>
       </section>
 
@@ -168,27 +170,30 @@ export function Landing() {
         </div>
       </section>
 
-      <section className="land-section" id="pricing">
+      <section className="land-section centred" id="pricing">
         <p className="eyebrow">Your volume</p>
         <h2 className="big">You pick the leads. <em>That is the whole decision.</em></h2>
         <p className="section-lede">
-          Move the bar for how many creators land each morning, then say how you want to pay for them: every month, or
-          once. Monthly costs 30% less per lead.
+          Set how many creators land each morning, then say how you want to pay for them. Monthly costs 30% less per
+          lead than the one off pack.
         </p>
 
         <div className="volume-picker">
-          <div className="picker-top">
-            <div className="volume-read">
-              <b className="num">{perDay}</b>
-              <span>leads a day</span>
+          <div className="term-wrap">
+            <div className="term-toggle" role="group" aria-label="How you pay">
+              <button type="button" className={term === 'monthly' ? 'on' : ''} aria-pressed={term === 'monthly'} onClick={() => setTerm('monthly')}>
+                Monthly
+                <span className="term-off">30% off</span>
+              </button>
+              <button type="button" className={term === 'once' ? 'on' : ''} aria-pressed={term === 'once'} onClick={() => setTerm('once')}>
+                One off
+              </button>
             </div>
-            <div className="term-wrap">
-              <div className="term-toggle" role="group" aria-label="How you pay">
-                <button type="button" className={term === 'monthly' ? 'on' : ''} aria-pressed={term === 'monthly'} onClick={() => setTerm('monthly')}>Monthly</button>
-                <button type="button" className={term === 'once' ? 'on' : ''} aria-pressed={term === 'once'} onClick={() => setTerm('once')}>One off</button>
-              </div>
-              <span className="term-note">30% off</span>
-            </div>
+          </div>
+
+          <div className="volume-read">
+            <b className="num">{perDay}</b>
+            <span>leads a day</span>
           </div>
           <input
             className="slider"
@@ -205,23 +210,28 @@ export function Landing() {
           <div className="bar-ends"><span>100 a day</span><span>1,000 a day</span></div>
 
           <div className="plan-single">
-            <span className="plan-tag">{term === 'monthly' ? 'Every month' : 'One off'}</span>
             <p className="big-figure">
               <b className="num">{(perDay * 30).toLocaleString('en-US')}</b>
-              <span>{term === 'monthly' ? `leads a month, at ${perDay} a day` : `leads in the pack, at ${perDay} a day for 30 days`}</span>
+              <span>{term === 'monthly' ? `leads every month, at ${perDay} a day` : `leads in the pack, at ${perDay} a day for 30 days`}</span>
             </p>
             <ul>
-              <li className="yes">{term === 'monthly' ? 'Move your volume any morning, 100 to 1,000 a day' : 'Billed once, spread over as many days as you like'}</li>
-              <li className="yes">Unlimited campaigns, each with its own agents</li>
+              <li className="yes">{term === 'monthly' ? '30% less per lead than the one off pack' : 'Billed once, spread over as many days as you like'}</li>
+              <li className="yes">{term === 'monthly' ? 'Move your volume any morning, 100 to 1,000 a day' : 'Unlimited campaigns while the pack lasts'}</li>
               <li className="yes">Their email attached where we find one</li>
               {term === 'monthly'
                 ? <li className="yes">API and CRM, so your code reads and classifies the list</li>
                 : <li className="no">No API, no CRM writes. The app only</li>}
-              <li className="yes">{term === 'monthly' ? '30% less per lead than a one off' : 'Nothing renews, nothing to cancel'}</li>
+              <li className="yes">{term === 'monthly' ? 'Change the volume or cancel any morning' : 'Nothing renews, nothing to cancel'}</li>
             </ul>
-            <a className="btn primary" href="#/onboarding">See demo at {perDay} a day</a>
+            <a className="btn primary" href="#/contacts">See demo</a>
           </div>
         </div>
+      </section>
+
+      <section className="land-cta">
+        <h2>Your next 10 creators are already out there.</h2>
+        <p>Open the demo and read the list as it stands this morning.</p>
+        <a className="btn primary" href="#/contacts">See demo</a>
       </section>
 
       <section className="land-section" id="faq">
@@ -234,12 +244,6 @@ export function Landing() {
             </div>
           ))}
         </div>
-      </section>
-
-      <section className="land-cta">
-        <h2>Your next 10 creators are already out there.</h2>
-        <p>See them in your list on a 20 minute demo.</p>
-        <a className="btn primary" href="#/onboarding">See demo</a>
       </section>
 
       <footer className="land-foot">
@@ -256,7 +260,7 @@ export function Landing() {
         </div>
         <div>
           <h4>App</h4>
-          <a href="#/onboarding">See demo</a>
+          <a href="#/contacts">See demo</a>
           <a href="#/connect">API</a>
         </div>
         <div>

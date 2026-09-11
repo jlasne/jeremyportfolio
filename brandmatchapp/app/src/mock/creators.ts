@@ -1,5 +1,5 @@
 import type { Country, Creator, Language, Level, Signal, SignalType } from '../types'
-import { avatarFor } from '../lib/images'
+import { campaigns } from './campaigns'
 import { daysAgo, hoursAgo } from './time'
 
 // 40 creators, fitness and nutrition niche. Every one carries the campaign
@@ -381,11 +381,10 @@ const rows: Row[] = [
   },
 ]
 
-export const creators: Creator[] = rows.map((r) => ({
+const seeded: Creator[] = rows.map((r) => ({
   id: r.id,
   handle: r.handle,
   name: r.name,
-  avatar: avatarFor(r.name, r.handle),
   bio: r.bio,
   followers: r.followers,
   engagementRate: r.er,
@@ -404,3 +403,127 @@ export const creators: Creator[] = rows.map((r) => ({
   firstSeenAt: hoursAgo(r.seen),
   lastCrawlAt: hoursAgo(Math.min(r.seen, 6)),
 }))
+
+// The demo runs on a full list, not a sample: the 40 rows above are the ones
+// written by hand, and the rest are generated around them so every screen,
+// filter and count behaves the way it will on a real account.
+
+export const TOTAL_CREATORS = 45_000
+
+/** xorshift, so the same list comes back on every load. */
+function rng(seed: number): () => number {
+  let s = seed >>> 0 || 1
+  return () => {
+    s ^= s << 13
+    s ^= s >>> 17
+    s ^= s << 5
+    return (s >>> 0) / 4_294_967_296
+  }
+}
+
+const FIRST = [
+  'Maya', 'Jenna', 'Sophie', 'Priya', 'Tash', 'Amara', 'Brooke', 'Rachel', 'Hannah', 'Ruby',
+  'Camille', 'Kat', 'Kelsey', 'Naomi', 'Nadia', 'Isla', 'Sara', 'Jade', 'Chloe', 'Lena',
+  'Nina', 'Zoe', 'Elena', 'Mia', 'Freya', 'Alba', 'Ines', 'Greta', 'Nora', 'Talia',
+  'Dani', 'Robin', 'Sam', 'Alex', 'Jess', 'Carmen', 'Lucia', 'Marta', 'Anika', 'Yuki',
+]
+const LAST = [
+  'Reyes', 'Novak', 'Fischer', 'Okafor', 'Bennett', 'Marchetti', 'Kowalski', 'Dubois', 'Silva', 'Nakamura',
+  'Hansen', 'Moreau', 'Castillo', 'Vargas', 'Lindqvist', 'Whelan', 'Bauer', 'Petrov', 'Adeyemi', 'Rossi',
+]
+const HANDLE_TAIL = [
+  'lifts', 'strong', 'trains', 'coach', 'fit', 'moves', 'barbell', 'strength', 'method', 'daily',
+]
+const DISCIPLINE = [
+  'Strength coach', 'Powerlifting coach', 'Postpartum coach', 'Mobility coach', 'Nutrition coach',
+  'Hybrid athlete', 'Kettlebell coach', 'Pilates teacher', 'Running coach', 'CrossFit coach',
+]
+const AUDIENCE = [
+  'women starting in the gym', 'women lifting after a baby', 'women over 40', 'busy parents',
+  'beginners at home', 'runners adding strength', 'desk workers', 'lifters chasing a first pull-up',
+]
+const SELLS = [
+  'an online program', 'coaching', 'a membership', 'an app', 'an ebook', 'merch', '', '', '',
+]
+const SIGNAL_PICK: SignalType[] = [
+  'sponsored_post', 'promoted_supplement', 'posted_rates', 'collab_bio', 'media_kit', 'launched_program', 'launched_merch',
+]
+const COUNTRY_PICK: Country[] = [
+  'US', 'US', 'US', 'UK', 'UK', 'CA', 'AU', 'IE', 'NZ', 'FR', 'DE', 'ES', 'IT', 'NL', 'SE', 'PL', 'BR', 'MX', 'IN', 'JP', 'ZA',
+]
+const LANGUAGE_FOR: Record<string, Language> = {
+  US: 'en', UK: 'en', CA: 'en', AU: 'en', IE: 'en', NZ: 'en',
+  FR: 'fr', DE: 'de', ES: 'es', IT: 'it', NL: 'nl', SE: 'sv', PL: 'pl',
+  BR: 'pt', MX: 'es', IN: 'en', JP: 'ja', ZA: 'en',
+}
+
+/**
+ * Which agent brings a given lead. Each agent takes a share of the list in
+ * proportion to its daily quota, the same way it fills one every morning.
+ */
+const SLOTS: { campaign: string; agent: string }[] = campaigns.flatMap((c) =>
+  c.agents.flatMap((a) => Array.from({ length: Math.max(1, Math.round(a.leadsPerDay / 50)) }, () => ({ campaign: c.id, agent: a.id }))),
+)
+
+function pick<T>(list: T[], r: number): T {
+  return list[Math.min(list.length - 1, Math.floor(r * list.length))]
+}
+
+function generated(index: number): Creator {
+  const next = rng(index * 2_654_435_761 + 97)
+  const first = pick(FIRST, next())
+  const last = pick(LAST, next())
+  const handle = `${first.toLowerCase()}${next() < 0.4 ? '.' : ''}${pick(HANDLE_TAIL, next())}${index % 7 === 0 ? index % 97 : ''}`
+  const discipline = pick(DISCIPLINE, next())
+  const audience = pick(AUDIENCE, next())
+  const sells = pick(SELLS, next())
+
+  // Followers lean small, the way a real crawl comes back.
+  const roll = next()
+  const followers = Math.round(
+    roll < 0.55 ? 8_000 + next() * 92_000 : roll < 0.87 ? 100_000 + next() * 400_000 : 500_000 + next() * 900_000,
+  )
+  const engagementRate = Number((0.006 + next() * 0.062).toFixed(4))
+  const country = pick(COUNTRY_PICK, next())
+  const slot = SLOTS[index % SLOTS.length]
+
+  const signalCount = next() < 0.42 ? 0 : next() < 0.75 ? 1 : 2
+  const signals: Signal[] = Array.from({ length: signalCount }, (_, i) => sig(pick(SIGNAL_PICK, next()), Math.round(next() * 26) + i * 5))
+    .sort((a, b) => b.date.localeCompare(a.date))
+
+  const nicheRoll = next()
+  const niche: Level = nicheRoll < 0.34 ? 1 : nicheRoll < 0.7 ? 0.5 : 0
+
+  return {
+    id: `x${index}`,
+    handle,
+    name: `${first} ${last}`,
+    bio: `${discipline}. Training ${audience}.${sells ? ` ${sells.charAt(0).toUpperCase() + sells.slice(1)} in the bio.` : ''}`,
+    followers,
+    engagementRate,
+    medianReelViews: Math.round(followers * (0.12 + next() * 0.55)),
+    postsPerMonth: 2 + Math.floor(next() * 22),
+    lastPostAt: daysAgo(Math.floor(next() * 34), 12),
+    country,
+    language: LANGUAGE_FOR[country] ?? 'en',
+    email: next() < 0.58 ? `hello@${handle.replace(/[^a-z0-9]/g, '')}.com` : null,
+    signals,
+    niche,
+    nicheWhy:
+      niche === 1
+        ? `${discipline} content for ${audience}, inside the size band.`
+        : niche === 0.5
+          ? `The right discipline, but the audience is ${audience}.`
+          : `${discipline} content, a different audience from the brief.`,
+    sells,
+    campaignId: slot.campaign,
+    agentId: slot.agent,
+    firstSeenAt: hoursAgo(index % 211 === 0 ? Math.floor(next() * 20) : 30 + Math.floor(next() * 2_000)),
+    lastCrawlAt: hoursAgo(Math.floor(next() * 6)),
+  }
+}
+
+export const creators: Creator[] = [
+  ...seeded,
+  ...Array.from({ length: TOTAL_CREATORS - seeded.length }, (_, i) => generated(i + 1)),
+]

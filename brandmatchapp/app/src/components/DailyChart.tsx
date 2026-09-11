@@ -1,17 +1,17 @@
 import { useMemo, useState } from 'react'
 import type { DailyStat } from '../types'
 
-// Leads a day. One stacked column per day, one colour per agent, and a line for
-// the share of those leads showing high intent. Bars read on the left axis in
+// Leads a day. One stacked column per day, one colour per campaign, and a line
+// for the share of those leads that qualified. Bars read on the left axis in
 // leads, the line on the right axis in percent. The legend under the chart is
-// also the agent picker: click one to keep it, click it again for all of them.
+// also the campaign picker: click one to keep it, click again for all of them.
 
 const W = 760
 const H = 208
 const PAD = { top: 22, bottom: 30, left: 42, right: 46 }
 
-/** One colour per agent, in the order the agents come in. */
-export const AGENT_COLOURS = ['#ff5c2b', '#7c5cff', '#2aa17a', '#e0a100', '#d94a8c', '#3b7dd8', '#ff9e6b', '#00a4b8']
+/** One colour per campaign, in the order the campaigns come in. */
+export const CAMPAIGN_COLOURS = ['#ff5c2b', '#7c5cff', '#2aa17a', '#e0a100', '#d94a8c', '#3b7dd8', '#ff9e6b', '#00a4b8']
 
 /** Monotone cubic, so the curve bends without overshooting a point. */
 function smooth(points: [number, number][]): string {
@@ -42,44 +42,53 @@ function nice(v: number): number {
   return Math.ceil(v / step) * step
 }
 
-export interface ChartAgent {
+export interface ChartCampaign {
   id: string
   name: string
-  /** The campaign it runs under, so two agents named alike stay apart. */
-  campaignName: string
-  /** Its place in the whole account, which fixes its colour. */
+  /** How many agents run under it, for the legend's title. */
+  agents: number
+  /** Its place on the account, which fixes its colour. */
   colourIndex: number
   /** What it brought over the period, whatever is selected, for the legend. */
   leads: number
 }
 
 export function DailyChart({
-  rows, agents, selected, onSelect,
+  rows, campaigns, selected, onSelect,
 }: {
   rows: DailyStat[]
-  agents: ChartAgent[]
-  /** The agent kept on its own, or null for every agent. */
+  campaigns: ChartCampaign[]
+  /** The campaign kept on its own, or null for every campaign. */
   selected: string | null
-  onSelect: (agentId: string | null) => void
+  onSelect: (campaignId: string | null) => void
 }) {
   const [hover, setHover] = useState<number | null>(null)
 
   const { dates, byDate, totals, shares } = useMemo(() => {
     const dates = [...new Set(rows.map((r) => r.date))].sort()
+    // Agents fill their quota one row each, so a day adds them up per campaign.
     const byDate = new Map<string, Map<string, DailyStat>>()
     for (const r of rows) {
       if (!byDate.has(r.date)) byDate.set(r.date, new Map())
-      byDate.get(r.date)!.set(r.agentId, r)
+      const at = byDate.get(r.date)!
+      const sum = at.get(r.campaignId)
+      if (sum) {
+        sum.leads += r.leads
+        sum.qualified += r.qualified
+        sum.gathered += r.gathered
+      } else {
+        at.set(r.campaignId, { ...r, agentId: 'all' })
+      }
     }
     const totals = dates.map((d) => [...(byDate.get(d)?.values() ?? [])].reduce((s, r) => s + r.leads, 0))
     const shares = dates.map((d, i) => {
-      const h = [...(byDate.get(d)?.values() ?? [])].reduce((s, r) => s + r.highIntent, 0)
-      return totals[i] ? (h / totals[i]) * 100 : 0
+      const q = [...(byDate.get(d)?.values() ?? [])].reduce((s, r) => s + r.qualified, 0)
+      return totals[i] ? (q / totals[i]) * 100 : 0
     })
     return { dates, byDate, totals, shares }
   }, [rows])
 
-  const colour = (a: ChartAgent) => AGENT_COLOURS[a.colourIndex % AGENT_COLOURS.length]
+  const colour = (c: ChartCampaign) => CAMPAIGN_COLOURS[c.colourIndex % CAMPAIGN_COLOURS.length]
 
   if (dates.length < 2) return null
 
@@ -107,18 +116,18 @@ export function DailyChart({
       <figcaption className="chart-head">
         <span className="chart-value num">{total.toLocaleString('en-US')}</span>
         <span className="muted">leads on {day(date)}</span>
-        <span className="chart-value num intent">{share}%</span>
-        <span className="muted">high intent</span>
+        <span className="chart-value num rate">{share}%</span>
+        <span className="muted">qualified</span>
       </figcaption>
 
-      <svg viewBox={`0 0 ${W} ${H}`} className="chart-svg" role="img" aria-label={`Leads a day over ${dates.length} days, stacked by agent, with the high intent share as a line`} onMouseLeave={() => setHover(null)}>
+      <svg viewBox={`0 0 ${W} ${H}`} className="chart-svg" role="img" aria-label={`Leads a day over ${dates.length} days, stacked by campaign, with the qualified share as a line`} onMouseLeave={() => setHover(null)}>
         {gridAt.map((f) => (
           <g key={f}>
             <line x1={PAD.left} y1={PAD.top + plot * (1 - f)} x2={W - PAD.right} y2={PAD.top + plot * (1 - f)} className={f === 0 ? 'axis' : 'grid'} />
             <text x={PAD.left - 8} y={PAD.top + plot * (1 - f) + 3.5} textAnchor="end" className="axis-label leads">
               {f === 0 ? '0' : Math.round(max * f).toLocaleString('en-US')}
             </text>
-            <text x={W - PAD.right + 8} y={PAD.top + plot * (1 - f) + 3.5} textAnchor="start" className="axis-label intent">
+            <text x={W - PAD.right + 8} y={PAD.top + plot * (1 - f) + 3.5} textAnchor="start" className="axis-label rate">
               {Math.round(100 * f)}%
             </text>
           </g>
@@ -129,19 +138,19 @@ export function DailyChart({
           const at = byDate.get(d) ?? new Map<string, DailyStat>()
           return (
             <g key={d}>
-              {agents.map((a) => {
-                const r = at.get(a.id)
+              {campaigns.map((c) => {
+                const r = at.get(c.id)
                 if (!r || r.leads === 0) return null
                 const top = stack + r.leads
                 const el = (
                   <rect
-                    key={a.id}
+                    key={c.id}
                     x={x(i) - barW / 2}
                     y={y(top)}
                     width={barW}
                     height={Math.max(0, h(r.leads) - 1)}
                     rx={Math.min(3, barW / 3)}
-                    fill={colour(a)}
+                    fill={colour(c)}
                     opacity={i === active ? 1 : 0.5}
                   />
                 )
@@ -152,9 +161,9 @@ export function DailyChart({
           )
         })}
 
-        <path d={smooth(dates.map((_, i) => [x(i), yPct(shares[i])]))} className="chart-line intent" />
+        <path d={smooth(dates.map((_, i) => [x(i), yPct(shares[i])]))} className="chart-line rate" />
         <line x1={x(active)} y1={PAD.top - 8} x2={x(active)} y2={base} className="crosshair" />
-        <circle cx={x(active)} cy={yPct(shares[active])} r="4.5" className="chart-dot intent" />
+        <circle cx={x(active)} cy={yPct(shares[active])} r="4.5" className="chart-dot rate" />
 
         {dates.map((d, i) => (
           <g key={d + 't'} onMouseEnter={() => setHover(i)}>
@@ -166,40 +175,40 @@ export function DailyChart({
         ))}
       </svg>
 
-      {/* The legend is the agent picker. One click keeps an agent, a second lets them all back. */}
-      <div className="chart-legend" role="group" aria-label="Agents in this chart">
+      {/* The legend is the campaign picker. One click keeps one, a second lets them all back. */}
+      <div className="chart-legend" role="group" aria-label="Campaigns in this chart">
         <button
           type="button"
           className={`legend-pick${selected === null ? ' on' : ''}`}
           aria-pressed={selected === null}
           onClick={() => onSelect(null)}
         >
-          Every agent
+          Every campaign
         </button>
-        {agents.map((a) => {
-          const at = selected === a.id
+        {campaigns.map((c) => {
+          const at = selected === c.id
           return (
             <button
-              key={a.id}
+              key={c.id}
               type="button"
-              className={`legend-pick${at ? ' on' : ''}${a.leads === 0 ? ' quiet' : ''}`}
+              className={`legend-pick${at ? ' on' : ''}${c.leads === 0 ? ' quiet' : ''}`}
               aria-pressed={at}
-              title={`${a.name} in ${a.campaignName}`}
-              onClick={() => onSelect(at ? null : a.id)}
+              title={`${c.name}, ${c.agents} agent${c.agents === 1 ? '' : 's'}`}
+              onClick={() => onSelect(at ? null : c.id)}
             >
-              <i className="swatch" style={{ background: colour(a) }} />
-              <span className="legend-name">{a.name}</span>
-              <span className="legend-count num">{a.leads.toLocaleString('en-US')}</span>
+              <i className="swatch" style={{ background: colour(c) }} />
+              <span className="legend-name">{c.name}</span>
+              <span className="legend-count num">{c.leads.toLocaleString('en-US')}</span>
             </button>
           )
         })}
-        <span className="legend-pick static"><i className="line-swatch" />High intent %</span>
+        <span className="legend-pick static"><i className="line-swatch" />Qualified %</span>
       </div>
 
       <table className="sr-only">
-        <caption>Leads a day by agent, and the share of them showing high intent</caption>
+        <caption>Leads a day by campaign, and the share of them qualified</caption>
         <thead>
-          <tr><th>Date</th>{agents.map((a) => <th key={a.id}>{a.name}</th>)}<th>Total</th><th>High intent</th><th>High intent share</th></tr>
+          <tr><th>Date</th>{campaigns.map((c) => <th key={c.id}>{c.name}</th>)}<th>Total</th><th>Qualified</th><th>Qualified share</th></tr>
         </thead>
         <tbody>
           {dates.map((d, i) => {
@@ -207,9 +216,9 @@ export function DailyChart({
             return (
               <tr key={d}>
                 <td>{day(d)}</td>
-                {agents.map((a) => <td key={a.id}>{at.get(a.id)?.leads ?? 0}</td>)}
+                {campaigns.map((c) => <td key={c.id}>{at.get(c.id)?.leads ?? 0}</td>)}
                 <td>{totals[i]}</td>
-                <td>{[...at.values()].reduce((s, r) => s + r.highIntent, 0)}</td>
+                <td>{[...at.values()].reduce((s, r) => s + r.qualified, 0)}</td>
                 <td>{Math.round(shares[i])}%</td>
               </tr>
             )

@@ -1,4 +1,3 @@
-import { useStore } from './data/hooks'
 import { useRoute } from './lib/router'
 import { SideNav } from './components/SideNav'
 import { StarClip } from './components/Stars'
@@ -10,7 +9,6 @@ import { Landing } from './screens/Landing'
 import { FirstRun, OnboardingCampaign, OnboardingStart } from './screens/Onboarding'
 
 export function App() {
-  useStore()
   const route = useRoute()
 
   if (route.name === 'home') {

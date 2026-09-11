@@ -1,22 +1,23 @@
 import type { Brief, Campaign, CampaignAgent, Creator, DailyStat, FilterKey, Filters, Level, Post, Score, Settings, Signal, Stars } from '../types'
 import { defaultFilters } from '../mock/filters'
+import { postsFor } from '../mock/posts'
 import { timezones as mockTimezones } from '../mock/settings'
 import { toCsv } from '../lib/csv'
 import { absolute, isNewToday, withinDays } from '../lib/format'
-import { BUCKETS, CRITERIA, HIGH_INTENT_MIN, latestSignal, scoreOf } from './score'
-import { getState, setState } from './store'
+import { BUCKETS, CRITERIA, QUALIFIED_MIN, latestSignal, scoreOf } from './score'
+import { getState, getVersion, setState } from './store'
 
 // Every screen reads and writes through these functions.
 // They work on the in memory store today and will call the real source later.
 
-export { BUCKETS, CRITERIA, HIGH_INTENT_MIN, scoreOf } from './score'
+export { BUCKETS, CRITERIA, QUALIFIED_MIN, scoreOf } from './score'
 
-/** About 9 leads in 10 reach half a star, which is where high intent starts. */
-export const HIGH_INTENT_SHARE = 0.9
+/** Around 6 leads in 10 reach a full star, which is what qualifies. */
+export const QUALIFIED_SHARE = 0.6
 
-/** How many of a day's leads come back showing high intent. */
-export function highIntentFrom(leadsPerDay: number): number {
-  return Math.round(leadsPerDay * HIGH_INTENT_SHARE)
+/** How many of a day's leads come back qualified. */
+export function qualifiedFrom(leadsPerDay: number): number {
+  return Math.round(leadsPerDay * QUALIFIED_SHARE)
 }
 
 // Contacts, the one list ---------------------------------------------------
@@ -31,9 +32,9 @@ export interface Contact {
   campaign: Campaign | null
 }
 
-/** Half a star or more. The contacts worth a message today. */
+/** A full star or more. The contacts worth a message today. */
 export function isHigh(score: Score): boolean {
-  return score.stars >= HIGH_INTENT_MIN
+  return score.stars >= QUALIFIED_MIN
 }
 
 function passes(c: Creator, f: Filters, now: Date): boolean {
@@ -69,9 +70,44 @@ function byScore(a: Contact, b: Contact): number {
   return b.creator.followers - a.creator.followers
 }
 
-/** Everything gathered, rejected included. The dashboard counts from here. */
+/**
+ * Scoring 45,000 creators and sorting them is the one expensive thing the app
+ * does, so it happens once per write and every read after that is a filter over
+ * the result. The cache drops whenever the store moves or the day turns.
+ */
+let cache: { version: number; day: string; contacts: Contact[]; byCampaign: Map<string, Tally>; byAgent: Map<string, Tally> } | null = null
+
+interface Tally {
+  found: number
+  high: number
+  today: number
+}
+
+function bump(map: Map<string, Tally>, key: string, c: Contact): void {
+  const at = map.get(key) ?? { found: 0, high: 0, today: 0 }
+  at.found++
+  if (isHigh(c.score)) at.high++
+  if (c.isNew) at.today++
+  map.set(key, at)
+}
+
+function build(now: Date) {
+  const day = now.toISOString().slice(0, 10)
+  if (cache && cache.version === getVersion() && cache.day === day) return cache
+  const contacts = getState().creators.map((c) => toContact(c, now)).sort(byScore)
+  const byCampaign = new Map<string, Tally>()
+  const byAgent = new Map<string, Tally>()
+  for (const c of contacts) {
+    bump(byCampaign, c.creator.campaignId, c)
+    bump(byAgent, c.creator.agentId, c)
+  }
+  cache = { version: getVersion(), day, contacts, byCampaign, byAgent }
+  return cache
+}
+
+/** Everything gathered, rejected included, ranked best first. */
 export function getAllContacts(now = new Date()): Contact[] {
-  return getState().creators.map((c) => toContact(c, now)).sort(byScore)
+  return build(now).contacts
 }
 
 export interface ContactQuery {
@@ -88,22 +124,25 @@ export interface ContactQuery {
   done?: 'hide' | 'only' | 'any'
 }
 
-/** The list. Filters cut the volume, the score sets the order. */
+/**
+ * The list. Filters cut the volume, the score sets the order. The source list
+ * is already ranked, and filtering keeps that order, so nothing sorts here.
+ */
 export function getContacts(q: ContactQuery = {}, now = new Date(), filters: Filters = getState().filters): Contact[] {
-  const s = getState()
   const f = filters
-  const rejected = new Set(s.rejections.map((r) => r.creatorId))
-  return s.creators
-    .filter((c) => !rejected.has(c.id) && passes(c, f, now))
-    .map((c) => toContact(c, now))
-    .filter((x) => !q.campaignIds?.length || q.campaignIds.includes(x.creator.campaignId))
-    .filter((x) => !q.agentIds?.length || q.agentIds.includes(x.creator.agentId))
-    .filter((x) => !q.tag || getTags(x.creator.id).includes(q.tag))
-    .filter((x) => x.score.stars >= (q.minStars ?? 0))
-    .filter((x) => Object.entries(q.minLevels ?? {}).every(([k, min]) => x.score[k as 'niche' | 'active' | 'intent'] >= (min ?? 0)))
-    .filter((x) => !q.newOnly || x.isNew)
-    .filter((x) => (q.done ?? 'hide') === 'any' || (q.done === 'only' ? x.isDone : !x.isDone))
-    .sort(byScore)
+  const levels = Object.entries(q.minLevels ?? {}).filter(([, min]) => (min ?? 0) > 0) as ['niche' | 'active' | 'intent', Level][]
+  return getAllContacts(now).filter((x) => {
+    if (x.isRejected || !passes(x.creator, f, now)) return false
+    if (q.campaignIds?.length && !q.campaignIds.includes(x.creator.campaignId)) return false
+    if (q.agentIds?.length && !q.agentIds.includes(x.creator.agentId)) return false
+    if (q.tag && !getTags(x.creator.id).includes(q.tag)) return false
+    if (x.score.stars < (q.minStars ?? 0)) return false
+    if (levels.some(([k, min]) => x.score[k] < min)) return false
+    if (q.newOnly && !x.isNew) return false
+    const done = q.done ?? 'hide'
+    if (done !== 'any' && (done === 'only' ? !x.isDone : x.isDone)) return false
+    return true
+  })
 }
 
 export interface FilterDiagnosis {
@@ -146,7 +185,7 @@ export interface Dashboard {
   total: number
   /** Yesterday's delivery, from the daily series. */
   leadsToday: number
-  highIntentToday: number
+  qualifiedToday: number
   daily: DailyStat[]
   buckets: { label: string; count: number }[]
   byCriterion: { key: string; label: string; full: number; half: number; note: string }[]
@@ -173,7 +212,7 @@ export function sumDaily(rows: DailyStat[]): DailyStat[] {
     if (at) {
       at.leads += r.leads
       at.gathered += r.gathered
-      at.highIntent += r.highIntent
+      at.qualified += r.qualified
     } else {
       byDate.set(r.date, { ...r, campaignId: 'all', agentId: 'all' })
     }
@@ -187,16 +226,18 @@ export function getDaily(scopeId: string | null = null, days = 30): DailyStat[] 
 
 export function getDashboard(scopeId: string | null = null, now = new Date(), days = 30): Dashboard {
   const scope = scopeOf(scopeId)
-  const all = getAllContacts(now)
-    .filter((c) => !scope.campaignIds.length || scope.campaignIds.includes(c.creator.campaignId))
-    .filter((c) => !scope.agentIds.length || scope.agentIds.includes(c.creator.agentId))
+  const all = getAllContacts(now).filter(
+    (c) =>
+      (!scope.campaignIds.length || scope.campaignIds.includes(c.creator.campaignId)) &&
+      (!scope.agentIds.length || scope.agentIds.includes(c.creator.agentId)),
+  )
   const daily = getDaily(scopeId, days)
   return {
     today: all.filter((c) => c.isNew).length,
     high: all.filter((c) => isHigh(c.score)).length,
     total: all.length,
     leadsToday: daily.length ? daily[daily.length - 1].leads : 0,
-    highIntentToday: daily.length ? daily[daily.length - 1].highIntent : 0,
+    qualifiedToday: daily.length ? daily[daily.length - 1].qualified : 0,
     daily,
     buckets: BUCKETS.map((b, i) => ({
       label: b.label,
@@ -318,14 +359,13 @@ export function scopeOf(id: string | null): Scope {
 }
 
 /** How many leads one agent brought in, so the dropdown can say so. */
-export function agentTally(campaignId: string, agentId: string, now = new Date()): number {
-  return getAllContacts(now).filter((c) => c.creator.campaignId === campaignId && c.creator.agentId === agentId).length
+export function agentTally(_campaignId: string, agentId: string, now = new Date()): number {
+  return build(now).byAgent.get(agentId)?.found ?? 0
 }
 
 /** How many contacts each campaign found, and how many reach 2 stars. */
-export function campaignTally(id: string, now = new Date()): { found: number; high: number; today: number } {
-  const mine = getAllContacts(now).filter((c) => c.creator.campaignId === id)
-  return { found: mine.length, high: mine.filter((c) => isHigh(c.score)).length, today: mine.filter((c) => c.isNew).length }
+export function campaignTally(id: string, now = new Date()): Tally {
+  return build(now).byCampaign.get(id) ?? { found: 0, high: 0, today: 0 }
 }
 
 // One creator --------------------------------------------------------------
@@ -339,8 +379,15 @@ export function getContact(id: string): Contact | null {
   return c ? toContact(c, new Date()) : null
 }
 
+/** Drawn the first time a panel asks, then kept for the session. */
 export function getPosts(creatorId: string): Post[] {
-  return getState().posts[creatorId] ?? []
+  const at = getState().posts[creatorId]
+  if (at) return at
+  const creator = getCreator(creatorId)
+  if (!creator) return []
+  const list = postsFor(creator)
+  getState().posts[creatorId] = list
+  return list
 }
 
 // Notes and tags -----------------------------------------------------------

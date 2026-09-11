@@ -46,18 +46,41 @@ export function signalLevel(signals: Signal[], now = new Date()): Level {
   return best
 }
 
+/**
+ * The three levels and their sum. The wording behind them, `earned` and `why`,
+ * is built the first time something reads it: the list wants the stars, and
+ * only the panel and the export want the sentences. On a full account that is
+ * a hundred thousand strings nobody looks at.
+ */
 export function scoreOf(c: Creator, now = new Date()): Score {
   const niche = c.niche
   const active = sellingLevel(c.sells, c.signals)
   const intent = signalLevel(c.signals, now)
   const stars = (niche + active + intent) as Stars
-  const earned = [
-    { label: 'Niche', level: niche, note: nicheNote(c, niche) },
-    { label: 'Selling', level: active, note: sellingNote(c, active) },
-    { label: 'Signal', level: intent, note: signalNote(c, intent, now) },
-  ]
-  const said = earned.filter((e) => e.level > 0).map((e) => e.note)
-  return { stars, niche, active, intent, earned, why: said.length ? said.join('. ') + '.' : c.nicheWhy }
+  let earned: Score['earned'] | null = null
+  const read = () => {
+    if (!earned) {
+      earned = [
+        { label: 'Niche', level: niche, note: nicheNote(c, niche) },
+        { label: 'Selling', level: active, note: sellingNote(c, active) },
+        { label: 'Signal', level: intent, note: signalNote(c, intent, now) },
+      ]
+    }
+    return earned
+  }
+  return {
+    stars,
+    niche,
+    active,
+    intent,
+    get earned() {
+      return read()
+    },
+    get why() {
+      const said = read().filter((e) => e.level > 0).map((e) => e.note)
+      return said.length ? said.join('. ') + '.' : c.nicheWhy
+    },
+  }
 }
 
 function nicheNote(c: Creator, level: Level): string {
@@ -85,8 +108,8 @@ function lower(text: string): string {
   return text.charAt(0).toLowerCase() + text.slice(1).replace(/\.$/, '')
 }
 
-/** A lead shows high intent at half a star or more. */
-export const HIGH_INTENT_MIN = 0.5
+/** A lead counts as qualified at a full star or more, whichever star fired. */
+export const QUALIFIED_MIN = 1
 
 /** Where a score sits, for the split under the chart. */
 export const BUCKETS = [

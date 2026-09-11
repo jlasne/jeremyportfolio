@@ -14,6 +14,9 @@ import { Stars } from '../components/Stars'
 
 type CriterionKey = 'niche' | 'active' | 'intent'
 
+/** How many rows the list paints at once. The count in the head is the real one. */
+const PAGE = 60
+
 /** The one list. A handle, how ready they are, and the email. */
 export function Contacts({ scopeId }: { scopeId: string | null }) {
   useStore()
@@ -29,6 +32,7 @@ export function Contacts({ scopeId }: { scopeId: string | null }) {
   const [showStars, setShowStars] = useState(false)
   const [picked, setPicked] = useState<string[]>([])
   const [bulkTag, setBulkTag] = useState('')
+  const [shownCount, setShownCount] = useState(PAGE)
   const box = useRef<HTMLDivElement>(null)
   const starBox = useRef<HTMLDivElement>(null)
 
@@ -61,7 +65,8 @@ export function Contacts({ scopeId }: { scopeId: string | null }) {
   const vocabulary = getTagVocabulary().filter((t) => countTagged(t) > 0)
   const allTags = getTagVocabulary()
   const done = countDone()
-  const shown = contacts.map((c) => c.creator.id)
+  const page = contacts.slice(0, shownCount)
+  const shown = page.map((c) => c.creator.id)
   const selected = picked.filter((id) => shown.includes(id))
   const allPicked = shown.length > 0 && selected.length === shown.length
 
@@ -85,9 +90,9 @@ export function Contacts({ scopeId }: { scopeId: string | null }) {
     <div className="page">
       <div className="page-head">
         <h1>Contacts</h1>
-        <span className="count num">{contacts.length}</span>
+        <span className="count num">{contacts.length.toLocaleString('en-US')}</span>
         <span className="spacer" />
-        <button type="button" className="btn" disabled={contacts.length === 0} onClick={() => downloadCsv('brandmatch-contacts.csv', exportCsv(contacts.map((c) => c.creator.id)))}>
+        <button type="button" className="btn" disabled={contacts.length === 0} onClick={() => downloadCsv('brandmatch-contacts.csv', exportCsv(contacts.slice(0, 5_000).map((c) => c.creator.id)))}>
           Export
         </button>
       </div>
@@ -234,10 +239,10 @@ export function Contacts({ scopeId }: { scopeId: string | null }) {
                 onChange={() => setPicked(allPicked ? [] : shown)}
               />
             </label>
-            <span className="faint">Select all {contacts.length}</span>
+            <span className="faint">Select the {shown.length} shown</span>
           </div>
         )}
-        {contacts.map((c) => (
+        {page.map((c) => (
           <div className={`contact${openId === c.creator.id ? ' open' : ''}${c.isDone ? ' done' : ''}`} key={c.creator.id}>
             <label className="tick">
               <input
@@ -266,6 +271,17 @@ export function Contacts({ scopeId }: { scopeId: string | null }) {
         ))}
         {contacts.length === 0 && <Empty tag={tag} done={done} onClear={() => { setTag(null); setMinStars(0); setMinLevels({}); navigate('contacts') }} />}
       </div>
+
+      {contacts.length > page.length && (
+        <div className="more-rows">
+          <button type="button" className="btn" onClick={() => setShownCount((n) => n + PAGE * 4)}>
+            Show {Math.min(PAGE * 4, contacts.length - page.length).toLocaleString('en-US')} more
+          </button>
+          <span className="faint">
+            {page.length.toLocaleString('en-US')} of {contacts.length.toLocaleString('en-US')}
+          </span>
+        </div>
+      )}
 
       {openId && <CreatorDetail id={openId} onClose={() => setOpenId(null)} />}
     </div>

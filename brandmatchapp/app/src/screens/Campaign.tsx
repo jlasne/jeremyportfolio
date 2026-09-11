@@ -7,7 +7,7 @@ import {
 import { useStore } from '../data/hooks'
 import { nextRunLabel } from '../lib/format'
 import { navigate } from '../lib/router'
-import { AGENT_COLOURS, DailyChart, type ChartAgent } from '../components/DailyChart'
+import { CAMPAIGN_COLOURS, DailyChart, type ChartCampaign } from '../components/DailyChart'
 
 const PERIODS = [
   { days: 7, label: '7 days' },
@@ -19,22 +19,23 @@ const PERIODS = [
 export function Campaigns() {
   useStore()
   const campaigns = getCampaigns()
-  /** The agent kept on its own, picked from the legend under the chart. */
+  /** The campaign kept on its own, picked from the legend under the chart. */
   const [pick, setPick] = useState<string | null>(null)
   const [days, setDays] = useState(30)
   const d = getDashboard(pick, new Date(), days)
   const rows = getDailyRows(pick, days)
-  /** Unscoped, so the legend keeps every agent's number whatever is picked. */
+  /** Unscoped, so the legend keeps every campaign's number whatever is picked. */
   const everyRow = getDailyRows(null, days)
 
-  /** Every agent in the account, in order, so a colour sticks to an agent. */
-  const allAgents: ChartAgent[] = campaigns
-    .flatMap((c) => c.agents.map((a) => ({ id: a.id, name: a.name, campaignName: c.name })))
-    .map((a, i) => ({
-      ...a,
-      colourIndex: i,
-      leads: everyRow.filter((r) => r.agentId === a.id).reduce((sum, r) => sum + r.leads, 0),
-    }))
+  /** Every campaign, in order, so a colour sticks to a campaign. */
+  const chartCampaigns: ChartCampaign[] = campaigns.map((c, i) => ({
+    id: c.id,
+    name: c.name,
+    agents: c.agents.length,
+    colourIndex: i,
+    leads: everyRow.filter((r) => r.campaignId === c.id).reduce((sum, r) => sum + r.leads, 0),
+  }))
+  const agentCount = campaigns.reduce((sum, c) => sum + c.agents.length, 0)
 
   return (
     <div className="page">
@@ -57,7 +58,7 @@ export function Campaigns() {
             ))}
           </span>
         </h2>
-        <DailyChart rows={rows} agents={allAgents} selected={pick} onSelect={setPick} />
+        <DailyChart rows={rows} campaigns={chartCampaigns} selected={pick} onSelect={setPick} />
         <div className="star-split">
           <div><b className="num">{d.leadsToday.toLocaleString('en-US')}</b><span>leads today</span></div>
           <div>
@@ -65,8 +66,8 @@ export function Campaigns() {
             <span>leads over {days} days</span>
           </div>
           <div>
-            <b className="num">{allAgents.length}</b>
-            <span>{allAgents.length === 1 ? 'agent' : 'agents'} on your account</span>
+            <b className="num">{agentCount}</b>
+            <span>{agentCount === 1 ? 'agent' : 'agents'} on your account</span>
           </div>
           <div><b className="num">{campaigns.filter((c) => c.active).length}</b><span>{campaigns.length === 1 ? 'campaign' : 'campaigns'} running</span></div>
         </div>
@@ -76,7 +77,7 @@ export function Campaigns() {
         {campaigns.map((c) => {
           const t = campaignTally(c.id)
           const running = c.agents.filter((a) => a.active).length
-          const colourOf = (id: string) => allAgents.find((a) => a.id === id)?.colourIndex ?? 0
+          const colour = CAMPAIGN_COLOURS[chartCampaigns.findIndex((x) => x.id === c.id) % CAMPAIGN_COLOURS.length]
           return (
             <section className="campaign-group" key={c.id}>
               <div className="group-head">
@@ -91,7 +92,7 @@ export function Campaigns() {
                     : 'Paused'}
                 </span>
                 <span className="metric">
-                  <b className="num">{t.found}</b>
+                  <b className="num">{t.found.toLocaleString('en-US')}</b>
                   <small>leads found</small>
                 </span>
                 <a className="btn small" href={`#/campaign/${c.id}`}>Open to edit</a>
@@ -103,7 +104,7 @@ export function Campaigns() {
                   <li
                     className={`agent-line${c.active && a.active ? '' : ' off'}`}
                     key={a.id}
-                    style={{ borderLeftColor: c.active && a.active ? AGENT_COLOURS[colourOf(a.id) % AGENT_COLOURS.length] : undefined }}
+                    style={{ borderLeftColor: c.active && a.active ? colour : undefined }}
                   >
                     <span className="agent-line-name">
                       {c.active && a.active && <i className="pulse" aria-hidden="true" />}
@@ -170,7 +171,7 @@ export function CampaignEditor({ campaignId, firstRun = false }: { campaignId: s
           <button type="button" className="btn" onClick={() => updateCampaign(campaign.id, { active: !campaign.active })}>
             {campaign.active ? 'Pause' : 'Run every day'}
           </button>
-          <a className="btn primary" href={`#/contacts/${campaign.id}`}>See {tally.found} leads</a>
+          <a className="btn primary" href={`#/contacts/${campaign.id}`}>See {tally.found.toLocaleString('en-US')} leads</a>
         </div>
       )}
       {firstRun && (
@@ -293,7 +294,7 @@ export function CampaignEditor({ campaignId, firstRun = false }: { campaignId: s
           Next run {nextRunLabel(campaign.runAt)}.
         </p>
         {!firstRun && (
-          <p className="hint">Found {tally.found} leads so far. Narrow the list on Contacts, where the filters live.</p>
+          <p className="hint">Found {tally.found.toLocaleString('en-US')} leads so far. Narrow the list on Contacts, where the filters live.</p>
         )}
       </section>
 
@@ -316,7 +317,7 @@ export function CampaignEditor({ campaignId, firstRun = false }: { campaignId: s
             <button type="button" className="btn quiet danger" onClick={() => setConfirmDelete(true)}>Delete this campaign</button>
           )}
           <span className="spacer" />
-          <a className="btn primary" href={`#/contacts/${campaign.id}`}>See {tally.found} leads</a>
+          <a className="btn primary" href={`#/contacts/${campaign.id}`}>See {tally.found.toLocaleString('en-US')} leads</a>
         </div>
       )}
     </div>

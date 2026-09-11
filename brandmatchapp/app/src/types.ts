@@ -60,7 +60,6 @@ export interface Creator {
   id: string
   handle: string
   name: string
-  avatar: string
   bio: string
   followers: number
   /** 0.034 means 3.4% */
@@ -128,8 +127,8 @@ export interface DailyStat {
   agentId: string
   /** Leads delivered to the list. Every one of them shows. */
   leads: number
-  /** Of those, the ones showing high intent: half a star or more. */
-  highIntent: number
+  /** Of those, the ones at a full star or more. */
+  qualified: number
 }
 
 export interface Note {

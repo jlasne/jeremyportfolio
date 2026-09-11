@@ -30,6 +30,23 @@ This folder is the front end prototype. Mock data only. No backend, no API
 calls, no auth, no network requests. See `brandmatch-spec.md` for the product
 spec this follows.
 
+## Running at 45,000
+
+The demo carries a full account, so the list reads the way a real one does.
+Three things keep that fast, and they all matter if the numbers move:
+
+- The store seeds the first time something reads it. The landing reads nothing,
+  so it never pays for the account.
+- Scoring and ranking 45,000 creators happens once per write, in `build()` in
+  `app/src/data/index.ts`. Every read after that is a filter over the ranked
+  list, so nothing sorts twice, and the per campaign and per agent counts come
+  from the same pass.
+- The wording behind a score, `earned` and `why`, is built on first read. The
+  list wants the stars; only the panel and the export want the sentences.
+
+Contacts paints 60 rows and offers the next 240. The count in the head is the
+real one.
+
 ## Run
 
 ```bash
@@ -65,6 +82,7 @@ return 404. Serving this app from another path means changing `base` first.
 | `index.html`, `assets/` | The built app, committed, served by the site |
 | `app/` | The source: Vite, React, TypeScript. Its own `npm install` |
 | `app/src/mock/` | All mock data, one file per entity: creators, posts, campaigns, daily counts over 90 days per agent, notes, tags, rejections, filters, settings. No data literal lives anywhere else |
+| `app/src/mock/creators.ts` | 40 creators written by hand, then 44,960 generated around them from a fixed seed, so every screen, filter and count behaves the way it will on a real account |
 | `app/src/data/index.ts` | The data functions every screen reads through: contacts, one creator, note, tag, reject, export, campaigns and their agents, daily rows, settings, first run. Swap the mock for the real source here and nothing else changes |
 | `app/src/data/store.ts` | The one in memory state, seeded from the mock folder. Refresh resets it |
 | `app/src/screens/` | Landing, Onboarding, Contacts, Campaign, Connect, Settings |
@@ -80,9 +98,9 @@ places to go. It collapses to a scrolling bar across the top under 900px.
 
 | Route | What it holds |
 | --- | --- |
-| `#/` | The landing: the promise, a 12 second animation in three steps, the four things a lead carries, the two steps of setup, the API, the volume picker, six questions. Every call to action reads See demo, and there is no login link |
-| `#/contacts` | The one list. A handle, the stars, the email, followers and engagement. One dropdown that picks a whole campaign or one agent inside it, plus more filters. The checkbox selects rows for a tag, done or reject in bulk |
-| `#/campaign` | Leads a day over 7, 30 or 90 days, stacked by agent with one colour each, and the high intent share as a line on a right axis. The legend under the chart is the agent picker. Below it every campaign, each with its agents listed read only: the daily quota and the next run. Editing happens inside the campaign |
+| `#/` | The landing: the promise, a nine second animation in three steps, the four things a lead carries, the two steps of setup, the API, the volume picker, the call to action, six questions. Every call to action reads See demo and opens the app itself, since there is no onboarding to walk through yet |
+| `#/contacts` | The one list, 35,000 rows deep after the default filters. A handle, the stars, the email, followers and engagement. One dropdown that picks a whole campaign or one agent inside it, plus more filters. 60 rows paint at a time, with a button for the next 240. The checkbox selects the rows shown for a tag, done or reject in bulk |
+| `#/campaign` | Leads a day over 7, 30 or 90 days, stacked by campaign with one colour each, and the qualified share as a line on a right axis. The legend under the chart is the campaign picker. Below it every campaign, each with its agents listed read only: the daily quota and the next run. Editing happens inside the campaign |
 | `#/connect` | A coming soon popup over the blurred page. Behind it, one API that reads your leads, classifies them and runs your campaigns, with the copy buttons off |
 | `#/settings` | Billing, feedback, your account |
 | `#/onboarding` | Set up your first campaign, then the first list over 8 seconds and straight into it |
@@ -109,10 +127,10 @@ the same scale, the other two carry one thumb each. Stars filter through a
 slider for the total, plus a switch per criterion: niche, selling and signal
 each off, meaning any, or on, meaning half a star and up.
 
-**High intent** means 0.5 stars or more. About 9 leads in 10 reach it, and it
-is the line on the campaigns chart. Everything in the list is a lead: the word
-qualified appears nowhere. Each of niche, selling and signal is worth one star,
-half when it half fits.
+**Qualified** means a full star or more, whichever star fired. Around 6 leads
+in 10 reach it, and it is the line on the campaigns chart. Everything in the
+list is a lead; qualified is a rate, never a second list. Each of niche,
+selling and signal is worth one star, half when it half fits.
 
 ## Design
 
@@ -129,10 +147,11 @@ contrast checks and always sit next to a legend.
 Unbounded for display, Satoshi for everything else, both lifted from
 `brand/index.html` and bundled as woff2 so nothing loads from the network.
 
-Volume, not price: the section is one slide bar, 100 to 1,000 leads a day, and
-a toggle for how you pay, every month or once. Monthly costs 30% less per lead.
-The one off pack has no API. The card shows lead counts and carries no figure,
-since the number is not decided.
+Volume, not price: the section sits centred on its slab and holds a toggle for
+how you pay, then one slide bar, 100 to 1,000 leads a day. Monthly carries the
+30% off badge, since it costs 30% less per lead than the one off pack, and the
+one off has no API. The card shows lead counts and carries no figure, since the
+number is not decided.
 
 **Connect is one API, and the app is the CRM.** One base URL and one key read
 this morning's leads, classify them in the same list you work in, and run the

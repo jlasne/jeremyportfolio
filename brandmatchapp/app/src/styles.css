@@ -378,7 +378,7 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 .chart-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
 .chart-head .spacer { flex: 1; }
 .chart-value { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; color: var(--purple); }
-.chart-value.intent { color: var(--amber); margin-left: 8px; }
+.chart-value.rate { color: var(--amber); margin-left: 8px; }
 .legend { display: inline-flex; gap: 14px; align-items: center; }
 .legend-item { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-2); }
 .legend-item i { width: 14px; height: 2px; border-radius: 1px; }
@@ -390,13 +390,13 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 .chart-svg .chart-bar.on { opacity: 1; }
 .chart-svg .axis-label { font-size: 8.5px; font-weight: 600; }
 .chart-svg .axis-label.leads { fill: var(--purple); }
-.chart-svg .axis-label.intent { fill: var(--amber); }
+.chart-svg .axis-label.rate { fill: var(--amber); }
 .chart-svg .chart-line { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .chart-svg .chart-line.leads { stroke: var(--purple); }
-.chart-svg .chart-line.intent { stroke: var(--amber); }
+.chart-svg .chart-line.rate { stroke: var(--amber); }
 .chart-svg .chart-dot { stroke: var(--panel); stroke-width: 2; }
 .chart-svg .chart-dot.leads { fill: var(--purple); }
-.chart-svg .chart-dot.intent { fill: var(--amber); }
+.chart-svg .chart-dot.rate { fill: var(--amber); }
 .chart-svg .crosshair { stroke: var(--line-2); stroke-width: 1; }
 .chart-svg .axis { stroke: var(--line); stroke-width: 1; }
 .chart-svg .tick { fill: var(--ink-3); font-size: 8.5px; }
@@ -1016,15 +1016,15 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
   .agent-line-focus { grid-column: 1 / -1; }
 }
 
-/* The chart: bars on the left axis, the high intent share on the right ----- */
+/* The chart: bars on the left axis, the qualified share on the right ------ */
 .chart-svg .grid { stroke: var(--line); stroke-width: 1; }
 .chart-svg .axis { stroke: var(--line-2); stroke-width: 1; }
-.chart-svg .chart-line.intent { stroke: var(--ink); stroke-width: 2; }
-.chart-svg .chart-dot.intent { fill: var(--ink); }
+.chart-svg .chart-line.rate { stroke: var(--ink); stroke-width: 2; }
+.chart-svg .chart-dot.rate { fill: var(--ink); }
 .chart-svg .axis-label.leads { fill: var(--ink-3); font-weight: 500; }
-.chart-svg .axis-label.intent { fill: var(--ink-2); font-weight: 500; }
+.chart-svg .axis-label.rate { fill: var(--ink-2); font-weight: 500; }
 .chart-value { color: var(--ink); }
-.chart-value.intent { color: var(--orange-deep); }
+.chart-value.rate { color: var(--orange-deep); }
 .legend-item .line-swatch { background: var(--ink); }
 .card h2 .period { flex: none; }
 
@@ -1168,3 +1168,30 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 }
 .legend-pick.quiet { opacity: 0.5; }
 .legend-pick.quiet.on { opacity: 1; }
+
+/* The list paints a page at a time. The count in the head is the real one. */
+.more-rows { display: flex; align-items: center; gap: 12px; padding: 14px 2px 0; }
+
+/* A way into the demo, under the four promises ---------------------------- */
+.section-cta { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 34px; }
+.section-cta .btn { height: 44px; padding: 0 22px; font-size: 15px; }
+
+/* Pricing sits in the middle of its slab --------------------------------- */
+.land-section.centred { text-align: center; }
+.land-section.centred h2.big, .land-section.centred .section-lede { margin-left: auto; margin-right: auto; }
+.land-section.centred .volume-picker { margin: 0 auto; max-width: 560px; text-align: left; }
+.land-section.centred .eyebrow { text-align: center; }
+
+.volume-picker .term-wrap { justify-content: center; margin-bottom: 26px; }
+.term-toggle button { position: relative; display: inline-flex; align-items: center; gap: 8px; }
+.term-off {
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.02em;
+  color: var(--orange-deep); background: var(--orange-soft);
+  border-radius: 100px; padding: 2px 7px; line-height: 14px;
+}
+.term-toggle button.on .term-off { background: var(--orange); color: #fff; }
+
+.volume-read { justify-content: center; text-align: center; }
+.plan-single { align-items: center; text-align: center; }
+.plan-single .big-figure { text-align: center; }
+.plan-single ul { max-width: 380px; margin: 0 auto; text-align: left; }
