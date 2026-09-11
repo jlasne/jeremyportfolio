@@ -381,7 +381,6 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 .fn-box { position: relative; overflow: hidden; padding: clamp(64px, 9vw, 124px) 24px clamp(64px, 9vw, 112px); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 24px; background: #070a12; color: #f2f3f7; }
 .fn-rings { position: absolute; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(58% 72% at 50% 44%, transparent 57%, rgba(255,255,255,.08) 58%, transparent 61%), radial-gradient(72% 88% at 50% 44%, transparent 70%, rgba(255,255,255,.06) 71%, transparent 74%), radial-gradient(88% 104% at 50% 44%, transparent 82%, rgba(255,255,255,.04) 83%, transparent 86%); }
 .fn-box > * { position: relative; z-index: 1; }
-.fn-box .brand-mark { width: clamp(40px, 4vw, 56px); height: clamp(40px, 4vw, 56px); }
 .fn-box h2 { max-width: 16ch; margin: 0; }
 .fn-box .lede { color: #a2a7b6; max-width: 52ch; text-wrap: pretty; }
 .fn-box .btn { background: #f2f3f7; color: #0d1017; }
@@ -723,8 +722,8 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
   </div>
 </section>
 
-<!-- ── why an app ───────────────────────────────────────────────────────── -->
-<section class="band tone--light" id="why">
+<!-- ── why an app: hidden. Drop the hidden attribute to bring it back. ── -->
+<section class="band tone--light" id="why" hidden>
   <div class="shell">
     <div class="head head--center reveal-up">
       <span class="eyebrow">Why an app</span>
@@ -757,7 +756,6 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 <section id="final">
   <div class="fn-box">
     <div class="fn-rings" aria-hidden="true"></div>
-    <svg class="brand-mark" aria-hidden="true"><use href="#bm-mark"/></svg>
     <span class="slots reveal-up" style="--d:180ms"><i></i>2 slots left</span>
     <h2 class="h-section xl">Limited spots.</h2>
     <p class="lede">20 minutes for a <span style="white-space:nowrap">life-changing</span> collab. We tell you if it fits and what your app would be.</p>
@@ -1001,9 +999,9 @@ h1, h2 { font-family: var(--display); font-weight: 500; letter-spacing: -0.04em;
 
   (function () {
     var a = document.getElementById('co-a'), b = document.getElementById('co-b'); if (!a || !b) return;
-    var NICHES = ['fly fishing', 'birdwatching', 'sourdough', 'crochet', 'chess openings', 'vocal warmups', 'van conversions', 'IELTS prep',
-      'bouldering', 'freediving', 'film photography', 'bonsai', 'mechanical keyboards', 'latte art', 'disc golf', 'orchid care',
-      'sneaker restoration', 'knife sharpening', 'powerlifting form', 'aquascaping', 'beekeeping', 'marathon pacing', 'vintage watches', 'drone racing'];
+    var NICHES = ['glute training', 'hypertrophy 30+', 'knee pain', 'lower back pain', 'mobility', 'high protein recipes', 'meal prep', 'weight loss recipes',
+      'macro tracking', 'home workouts', 'dumbbell only', 'kettlebells', 'postpartum core', 'pilates', 'calisthenics', 'running form',
+      'marathon pacing', 'stretching', 'sleep and recovery', 'menopause strength', 'gut health', 'sugar free eating', 'bulking meals', 'push pull legs'];
     var one = NICHES.slice(0, 12).map(function (n) { return '<span class="chip">' + n + '</span>'; }).join('');
     var two = NICHES.slice(12).map(function (n) { return '<span class="chip">' + n + '</span>'; }).join('');
     a.firstElementChild.innerHTML = one + one + one;
