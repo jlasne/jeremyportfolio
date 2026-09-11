@@ -1195,3 +1195,22 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 .plan-single { align-items: center; text-align: center; }
 .plan-single .big-figure { text-align: center; }
 .plan-single ul { max-width: 380px; margin: 0 auto; text-align: left; }
+
+/* One ground everywhere: the app sits on the same grid as the hero --------- */
+body { background: transparent; }
+.shell { background: transparent; }
+.sidenav { background: transparent; border-right: 1px solid var(--line); }
+.sidenav a:hover { background: rgba(16, 16, 20, 0.05); }
+.onboard-top { background: transparent; }
+.onboard-shell { background: transparent; }
+
+/* Two slabs step aside so the grid shows through them. */
+.landing #why, .landing #pricing { background: transparent; }
+
+/* On the grid, a bare section is hard to read, so each one takes a panel. */
+.editor .ask {
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-card);
+  padding: 22px 24px; box-shadow: var(--shadow); margin-top: 14px;
+}
+.editor .ask h2 { margin-top: 0; }
+.editor .site-row .btn { flex: none; }

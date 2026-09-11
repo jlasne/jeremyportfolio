@@ -76,7 +76,7 @@ export function Settings() {
           <dt>Campaigns</dt>
           <dd className="num">{campaigns.length}, {campaigns.filter((c) => c.active).length} running</dd>
           <dt>Contacts in your list</dt>
-          <dd className="num">{d.total}</dd>
+          <dd className="num">{d.total.toLocaleString('en-US')}</dd>
           <dt>Marked done</dt>
           <dd className="num">{countDone()}</dd>
           <dt>Next batch</dt>

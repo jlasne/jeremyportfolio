@@ -1,4 +1,5 @@
 import { useRoute } from './lib/router'
+import { Backdrop } from './components/Backdrop'
 import { SideNav } from './components/SideNav'
 import { StarClip } from './components/Stars'
 import { CampaignEditor, Campaigns } from './screens/Campaign'
@@ -23,6 +24,7 @@ export function App() {
   if (route.name === 'onboarding') {
     return (
       <>
+        <Backdrop />
         <StarClip />
         {!route.campaignId && <OnboardingStart />}
         {route.campaignId && !route.running && <OnboardingCampaign campaignId={route.campaignId} />}
@@ -31,8 +33,10 @@ export function App() {
     )
   }
 
+  // Same ground as the landing: one grid, one warm glow, under every screen.
   return (
     <div className="shell">
+      <Backdrop />
       <StarClip />
       <SideNav route={route} />
       <main className="main">

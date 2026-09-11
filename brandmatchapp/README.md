@@ -139,10 +139,13 @@ selling and signal is worth one star, half when it half fits.
 ## Design
 
 White ground, ink `#101014`, one accent: orange `#ff5c2b`. Same mood as
-Gojiberry. The landing sits on a faint grid with one warm glow in the top
-right corner, and stacks rounded slabs on it, each with its own colour: a
-tinted comparison, an ink steps section, an orange call to action, an ink
-footer. Corners run wide everywhere: 32px on a slab, 22px on a card, 14px on
+Gojiberry. One ground runs under everything, the landing and the app alike: a
+faint grid with one warm glow in the top right corner, drawn by `Backdrop`.
+The landing stacks rounded slabs on it, each with its own colour: an ink steps
+section, a white API section, an orange call to action, an ink footer. What
+lands every morning and the volume picker carry no slab at all, so the ground
+shows through. In the app the nav and the page sit on that same ground, and
+every panel is white, so nothing reads over a grid line. Corners run wide everywhere: 32px on a slab, 22px on a card, 14px on
 an input, a full pill on a button. The mark is two circles overlapping in two
 oranges, the overlap knocked out. The campaign colours in the chart, orange,
 purple `#7c5cff`, green `#2aa17a` and gold `#e0a100`, pass the colourblind and
