@@ -105,6 +105,7 @@ export function Contacts({ campaignId }: { campaignId: string | null }) {
                   max={3}
                   step={0.5}
                   value={minStars}
+                  style={{ ['--fill' as string]: `${(minStars / 3) * 100}%` }}
                   aria-label="Minimum stars"
                   onChange={(e) => setMinStars(Number(e.target.value))}
                 />
@@ -117,28 +118,22 @@ export function Contacts({ campaignId }: { campaignId: string | null }) {
               <div className="levels">
                 {CRITERIA.map((c) => {
                   const key = c.key as CriterionKey
-                  const at = minLevels[key] ?? 0
+                  const on = (minLevels[key] ?? 0) > 0
                   return (
-                    <div className="level-row" key={key}>
+                    <label className="switch-row" key={key}>
                       <span className="level-name">{c.label}</span>
-                      <div className="chips">
-                        {([0, 0.5, 1] as Level[]).map((lv) => (
-                          <button
-                            key={lv}
-                            type="button"
-                            className={`chip small${at === lv ? ' on' : ''}`}
-                            aria-pressed={at === lv}
-                            onClick={() => setLevel(key, lv)}
-                          >
-                            {lv === 0 ? 'Any' : lv === 0.5 ? 'Half' : 'Full'}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                      <span className="switch-note">{on ? 'Half a star and up' : 'Any'}</span>
+                      <input
+                        type="checkbox"
+                        className="switch"
+                        checked={on}
+                        onChange={() => setLevel(key, on ? 0 : 0.5)}
+                      />
+                    </label>
                   )
                 })}
               </div>
-              <p className="hint">Niche is the fit, selling is their own product, signal is a fresh brand deal.</p>
+              <p className="hint">On keeps the creators scoring at least half a star there. Niche is the fit, selling is their own product, signal is a fresh brand deal.</p>
               {(minStars > 0 || levelCount > 0) && (
                 <button type="button" className="btn quiet small" style={{ marginTop: 12 }} onClick={() => { setMinStars(0); setMinLevels({}) }}>
                   Clear stars

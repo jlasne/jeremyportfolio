@@ -80,36 +80,43 @@ top under 900px.
 
 | Route | What it holds |
 | --- | --- |
-| `#/` | The landing: the promise, a 12 second animation from website to chart, a comparison table, the two steps, MCP and the API, two plans, six questions |
+| `#/` | The landing: the promise, a 12 second animation from website to chart, a comparison table, the two steps, MCP and the API, two plans, six questions. Every call to action books a demo |
 | `#/contacts` | The one list. A handle, the stars, the email, followers and engagement. Two dropdowns, campaign and tag, plus more filters. The checkbox selects rows for a tag, done or reject in bulk |
-| `#/campaign` | Leads a day over 7, 30 or 90 days, stacked by campaign with the total as a line, then the campaigns. Clicking one opens its website, its audience, its agents and its delivery |
+| `#/campaign` | Leads a day over 7, 30 or 90 days, stacked by campaign, with the qualified share as a line on a right axis. Under it every campaign, each with its agents as a sublist you edit in place. Opening one shows its website, its audience, its agents and its delivery |
 | `#/connect` | A coming soon popup over the blurred page. Behind it, MCP to get your leads and the API to manage your campaigns, with the copy buttons off |
 | `#/settings` | Billing, feedback, your account |
 | `#/onboarding` | Set up your first campaign, then the first list over 8 seconds and straight into it |
 
-A **campaign** starts from your website. We read it and write the audience it
-should hunt for, in as many words as it takes, and you edit any of it. A
-campaign holds one or more **agents**. Each agent takes one angle on that
-audience and brings its own share of leads a day. Filters live on Contacts, so
-a campaign carries none. Every contact carries the campaign that found it.
+A **campaign** is a group, and it starts from your website. We read it and
+write the audience it should hunt for, in as many words as it takes, and you
+edit any of it. A campaign holds one or more **agents**, and the agents are
+what run. Each takes one angle on that audience and brings its own share of
+leads a day. They show as a sublist under their campaign, on the campaigns
+page and in the side nav, and you rename them, move their volume and pause
+them from either place. Filters live on Contacts, so a campaign carries none.
+Every contact carries the campaign that found it.
 
 On Contacts the checkbox selects. Selecting opens a bar to tag, mark done or
-reject in bulk. Campaign and tag filter through dropdowns. Stars filter through a
-slider for the total, plus a minimum per criterion: niche, selling and signal
-each set to any, half or full.
+reject in bulk. Campaign and tag filter through dropdowns. Audience size,
+engagement and posted are slide bars: audience size carries a from and a to on
+the same scale, the other two carry one thumb each. Stars filter through a
+slider for the total, plus a switch per criterion: niche, selling and signal
+each off, meaning any, or on, meaning half a star and up.
 
 **Qualified** means 0.5 stars or more. About 9 leads in 10 reach it. Each of niche, selling and signal is worth
 one star, half when it half fits.
 
 ## Design
 
-Broken white ground `#fbf9f7`, ink `#1b1420`, and two accents: orange
-`#f2662a` and purple `#7c5cff`. The landing sits on a warmer broken white
-with an orange cast, `#fdf4ee`, and stacks flat slabs on it: a purple steps
-section, an orange call to action and an ink footer. No gradients anywhere. The mark is two circles overlapping, orange and
-purple, with the middle knocked out. The campaign colours, orange, purple,
-green `#2aa17a` and gold `#e0a100`, pass the colourblind and contrast checks
-and always sit next to a legend.
+White ground, ink `#101014`, one accent: orange `#ff5c2b`. Same mood as
+Gojiberry. The landing sits on a faint grid with one warm glow in the top
+right corner, and stacks rounded slabs on it, each with its own colour: a
+tinted comparison, an ink steps section, an orange call to action, an ink
+footer. Corners run wide everywhere: 32px on a slab, 22px on a card, 14px on
+an input, a full pill on a button. The mark is two circles overlapping in two
+oranges, the overlap knocked out. The campaign colours in the chart, orange,
+purple `#7c5cff`, green `#2aa17a` and gold `#e0a100`, pass the colourblind and
+contrast checks and always sit next to a legend.
 
 Unbounded for display, Satoshi for everything else, both lifted from
 `brand/index.html` and bundled as woff2 so nothing loads from the network.
@@ -119,4 +126,5 @@ pack at the same price with no renewal. The cards show lead counts and carry no
 figure, since the number is not decided.
 
 Works down to a phone, keyboard focus visible, reduced motion respected: the
-hero animation holds on its final chart, the grain and the reading dots stop.
+hero animation holds on its final chart, the switches and the reading dots
+stop moving.

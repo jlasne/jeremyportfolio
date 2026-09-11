@@ -1,14 +1,22 @@
+import { useId } from 'react'
+
 /**
- * Two circles overlapping, the middle knocked out. The overlap is the match.
- * Orange on the left, purple on the right, flat.
+ * Two circles overlapping, the overlap knocked out. The gap is the match.
+ * Two shades of orange and nothing else: no frame, no second hue.
+ * The mask id comes from useId, so two marks on one page stay separate.
  */
 export function Logo({ size = 22 }: { size?: number }) {
+  const id = useId()
   return (
     <svg width={size} height={size} viewBox="0 0 512 512" aria-hidden="true" className="logo">
-      <rect width="512" height="512" rx="116" fill="#1B1420" />
-      <circle cx="186" cy="256" r="118" fill="#F2662A" />
-      <circle cx="326" cy="256" r="118" fill="#7C5CFF" />
-      <path fill="#1B1420" d="M256 161A118 118 0 0 1 256 351A118 118 0 0 1 256 161Z" />
+      <mask id={id}>
+        <rect width="512" height="512" fill="#fff" />
+        <path fill="#000" d="M256 126.1A150 150 0 0 1 256 385.9A150 150 0 0 1 256 126.1Z" />
+      </mask>
+      <g mask={`url(#${id})`}>
+        <circle cx="181" cy="256" r="150" fill="#FFA277" />
+        <circle cx="331" cy="256" r="150" fill="#FF5C2B" />
+      </g>
     </svg>
   )
 }

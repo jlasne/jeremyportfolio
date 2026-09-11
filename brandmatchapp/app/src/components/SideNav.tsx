@@ -1,4 +1,4 @@
-import { getDashboard, getSettings } from '../data'
+import { getCampaigns, getDashboard, getSettings } from '../data'
 import { useStore } from '../data/hooks'
 import { nextBatchLabel } from '../lib/format'
 import type { Route } from '../lib/router'
@@ -14,6 +14,7 @@ const ITEMS: { href: string; label: string; name: Route['name'] }[] = [
 export function SideNav({ route }: { route: Route }) {
   useStore()
   const d = getDashboard()
+  const campaigns = getCampaigns()
   return (
     <nav className="sidenav" aria-label="Main">
       <a className="brand" href="#/contacts">
@@ -30,6 +31,23 @@ export function SideNav({ route }: { route: Route }) {
                 {item.name === 'contacts' && d.today ? <span className="pill num">{d.today}</span> : null}
                 {item.name === 'connect' ? <span className="soon">Soon</span> : null}
               </a>
+              {/* A campaign is a group. Its agents run under it, so the nav shows them that way. */}
+              {item.name === 'campaign' && campaigns.length > 0 && (
+                <ul className="sub">
+                  {campaigns.map((c) => {
+                    const here = route.name === 'campaign' && route.campaignId === c.id
+                    const running = c.agents.filter((a) => a.active).length
+                    return (
+                      <li key={c.id}>
+                        <a href={`#/campaign/${c.id}`} className={here ? 'on' : undefined} aria-current={here ? 'page' : undefined}>
+                          <span>{c.name || 'Untitled'}</span>
+                          <span className="count num">{running}/{c.agents.length}</span>
+                        </a>
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
             </li>
           )
         })}

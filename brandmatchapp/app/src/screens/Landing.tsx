@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useStore } from '../data/hooks'
+import { Backdrop } from '../components/Backdrop'
 import { Logo } from '../components/Logo'
 import { HeroDemo } from '../components/HeroDemo'
 
-// The landing, in the CreatorMatch mood: navy, off white, hairlines, no shadows.
-// One promise: it runs on its own, and what lands is qualified.
+// The landing: white ground, a faint grid, one orange accent, wide corners.
+// Every call to action asks for the same thing, a demo.
 
 const COMPARE: { row: string; database: string; scraper: string; agency: string; ours: string }[] = [
   {
@@ -77,7 +78,9 @@ export function Landing() {
   const [open, setOpen] = useState<number | null>(0)
 
   return (
-    <div className="landing">
+    <>
+      <Backdrop />
+      <div className="landing">
       <header className="land-nav">
         <a className="brand" href="#/">
           <Logo size={24} />
@@ -91,7 +94,7 @@ export function Landing() {
         </nav>
         <span className="spacer" />
         <a className="login" href="#/contacts">Login</a>
-        <a className="btn primary" href="#/onboarding">Start free</a>
+        <a className="btn primary" href="#/onboarding">Book a demo</a>
       </header>
 
       <div className="hero-block">
@@ -100,7 +103,7 @@ export function Landing() {
         <p className="lede">Enter your website. brandmatch learns your brand and brings you influencers ready for a deal, with their contact.</p>
         <div className="hero-prompt" role="group" aria-label="Your website">
           <span className="prompt-text">strongher.co</span>
-          <a className="btn primary" href="#/onboarding">Launch my agent</a>
+          <a className="btn primary" href="#/onboarding">Book a demo</a>
         </div>
       </section>
 
@@ -192,7 +195,17 @@ export function Landing() {
             <h3>Brand</h3>
             <p className="muted">Set the daily volume. Move it any morning.</p>
             <div className="calc-line">
-              <input className="slider" type="range" min={100} max={1000} step={50} value={perDay} onChange={(e) => setPerDay(Number(e.target.value))} aria-label="Leads a day" />
+              <input
+                className="slider"
+                type="range"
+                min={100}
+                max={1000}
+                step={50}
+                value={perDay}
+                style={{ ['--fill' as string]: `${((perDay - 100) / 900) * 100}%` }}
+                onChange={(e) => setPerDay(Number(e.target.value))}
+                aria-label="Leads a day"
+              />
               <b className="num">{perDay}</b>
             </div>
             <p className="big-figure">
@@ -206,7 +219,7 @@ export function Landing() {
               <li>MCP for your leads, API for your campaigns</li>
               <li>Change the volume or cancel any morning</li>
             </ul>
-            <a className="btn primary" href="#/onboarding">Start at {perDay} a day</a>
+            <a className="btn primary" href="#/onboarding">Book a demo at {perDay} a day</a>
           </div>
           <div className="plan dark">
             <span className="plan-tag">One off</span>
@@ -223,7 +236,7 @@ export function Landing() {
               <li>MCP for your leads, API for your campaigns</li>
               <li>Nothing to cancel</li>
             </ul>
-            <a className="btn" href="#/onboarding">Buy 30,000 leads</a>
+            <a className="btn" href="#/onboarding">Book a demo for the pack</a>
           </div>
         </div>
       </section>
@@ -242,8 +255,8 @@ export function Landing() {
 
       <section className="land-cta">
         <h2>Your next 10 creators are already out there.</h2>
-        <p>Tomorrow morning they are in your list.</p>
-        <a className="btn primary" href="#/onboarding">Get my first list</a>
+        <p>See them in your list on a 20 minute demo.</p>
+        <a className="btn primary" href="#/onboarding">Book a demo</a>
         <a className="btn ghost" href="#/contacts">See a live list</a>
       </section>
 
@@ -262,7 +275,7 @@ export function Landing() {
         <div>
           <h4>App</h4>
           <a href="#/contacts">See a live list</a>
-          <a href="#/onboarding">Create a campaign</a>
+          <a href="#/onboarding">Book a demo</a>
           <a href="#/connect">Connect AI</a>
         </div>
         <div>
@@ -273,6 +286,7 @@ export function Landing() {
         </div>
         <p className="copy">© 2026 brandmatch. Front end prototype on demo data.</p>
       </footer>
-    </div>
+      </div>
+    </>
   )
 }

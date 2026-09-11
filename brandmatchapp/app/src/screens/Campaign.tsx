@@ -33,7 +33,7 @@ export function Campaigns() {
     <div className="page">
       <div className="page-head">
         <h1>Campaigns</h1>
-        <span className="count">Each one run by its agents, every morning</span>
+        <span className="count">A campaign is a group. Its agents run under it every morning.</span>
         <span className="spacer" />
         <button type="button" className="btn primary" onClick={() => navigate(`campaign/${createCampaign().id}`)}>New campaign</button>
       </div>
@@ -71,31 +71,77 @@ export function Campaigns() {
         </div>
       </div>
 
-      <div className="list" style={{ marginTop: 14 }}>
+      <div className="list campaign-groups" style={{ marginTop: 14 }}>
         {campaigns.map((c) => {
           const t = campaignTally(c.id)
           const running = c.agents.filter((a) => a.active).length
           return (
-            <a className="campaign-row" key={c.id} href={`#/campaign/${c.id}`}>
-              <span className={`dot${c.active ? ' on' : ''}`} aria-hidden="true" />
-              <span className="who">
-                <span className="name">{c.name}</span>
-                <span className="handle">{c.brief.summary}</span>
-              </span>
-              <span className="state">
-                {c.active ? `${running} agent${running === 1 ? '' : 's'} running, ${campaignLeadsPerDay(c)} leads a day at ${c.runAt}` : 'Paused'}
-              </span>
-              <span className="metric">
-                <b className="num">{t.found}</b>
-                <small>leads, {t.high} qualified</small>
-              </span>
-            </a>
+            <section className="campaign-group" key={c.id}>
+              <div className="group-head">
+                <span className={`dot${c.active ? ' on' : ''}`} aria-hidden="true" />
+                <span className="who">
+                  <a className="name" href={`#/campaign/${c.id}`}>{c.name || 'Untitled campaign'}</a>
+                  <span className="handle">{c.brief.summary}</span>
+                </span>
+                <span className="state">
+                  {c.active
+                    ? `${running} of ${c.agents.length} agent${c.agents.length === 1 ? '' : 's'} running, ${campaignLeadsPerDay(c)} leads a day at ${c.runAt}`
+                    : 'Paused'}
+                </span>
+                <span className="metric">
+                  <b className="num">{t.found}</b>
+                  <small>leads, {t.high} qualified</small>
+                </span>
+                <a className="btn small" href={`#/campaign/${c.id}`}>Open</a>
+              </div>
+
+              <ul className="agent-list">
+                {c.agents.map((a) => (
+                  <li className={`agent-line${a.active ? '' : ' off'}`} key={a.id}>
+                    <input
+                      className="input agent-line-name"
+                      value={a.name}
+                      aria-label={`Agent name in ${c.name}`}
+                      onChange={(e) => updateCampaignAgent(c.id, a.id, { name: e.target.value })}
+                    />
+                    <input
+                      className="input agent-line-focus"
+                      value={a.focus}
+                      placeholder="What this agent hunts for, in one line"
+                      aria-label={`What ${a.name} hunts for`}
+                      onChange={(e) => updateCampaignAgent(c.id, a.id, { focus: e.target.value })}
+                    />
+                    <label className="agent-leads">
+                      <input
+                        className="input num"
+                        inputMode="numeric"
+                        value={a.leadsPerDay}
+                        aria-label={`Leads a day for ${a.name}`}
+                        onChange={(e) => updateCampaignAgent(c.id, a.id, { leadsPerDay: Math.max(0, Number(e.target.value.replace(/\D/g, '')) || 0) })}
+                      />
+                      <span>a day</span>
+                    </label>
+                    <button
+                      type="button"
+                      className={`btn small${a.active ? ' on' : ''}`}
+                      aria-pressed={a.active}
+                      onClick={() => updateCampaignAgent(c.id, a.id, { active: !a.active })}
+                    >
+                      {a.active ? 'Running' : 'Paused'}
+                    </button>
+                  </li>
+                ))}
+                <li className="agent-add">
+                  <button type="button" className="btn small quiet" onClick={() => addCampaignAgent(c.id)}>Add an agent</button>
+                </li>
+              </ul>
+            </section>
           )
         })}
         {campaigns.length === 0 && (
           <div className="empty">
             <h2>No campaign yet</h2>
-            <p>A campaign starts from your website. Its agents run every morning and fill your contact list.</p>
+            <p>A campaign is a group. Its agents run under it every morning and fill your contact list.</p>
             <div className="actions">
               <button type="button" className="btn primary" onClick={() => navigate(`campaign/${createCampaign().id}`)}>Create the first campaign</button>
             </div>
@@ -223,8 +269,13 @@ export function CampaignEditor({ campaignId, firstRun = false }: { campaignId: s
                   />
                   <span>a day</span>
                 </label>
-                <button type="button" className={`btn small${a.active ? '' : ' on'}`} onClick={() => updateCampaignAgent(campaign.id, a.id, { active: !a.active })}>
-                  {a.active ? 'Pause' : 'Paused'}
+                <button
+                  type="button"
+                  className={`btn small${a.active ? ' on' : ''}`}
+                  aria-pressed={a.active}
+                  onClick={() => updateCampaignAgent(campaign.id, a.id, { active: !a.active })}
+                >
+                  {a.active ? 'Running' : 'Paused'}
                 </button>
                 {campaign.agents.length > 1 && (
                   <button type="button" className="btn small quiet" aria-label={`Remove ${a.name}`} onClick={() => removeCampaignAgent(campaign.id, a.id)}>
