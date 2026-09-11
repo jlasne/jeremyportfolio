@@ -82,3 +82,19 @@ export function nextBatchLabel(timezone: string, now = new Date()): string {
   const day = hour < 7 ? 'today' : 'tomorrow'
   return `${day} at 7:00 (${timezone.replace('_', ' ')})`
 }
+
+/**
+ * When an agent next fills its daily quota. The campaign sets the hour, so
+ * every agent under it wakes at the same time.
+ */
+export function nextRunLabel(runAt: string, now = new Date()): string {
+  const [h, m] = runAt.split(':').map(Number)
+  if (Number.isNaN(h)) return 'Not scheduled'
+  const next = new Date(now)
+  next.setHours(h, m || 0, 0, 0)
+  const today = next > now
+  if (!today) next.setDate(next.getDate() + 1)
+  const minutes = Math.max(1, Math.round((next.getTime() - now.getTime()) / 60_000))
+  const away = minutes >= 60 ? `${Math.floor(minutes / 60)}h` : `${minutes}m`
+  return `${today ? 'today' : 'tomorrow'} at ${runAt}, in ${away}`
+}

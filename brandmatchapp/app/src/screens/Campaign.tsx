@@ -1,17 +1,13 @@
 import { useState } from 'react'
 import {
-  QUALIFIED_SHARE, addCampaignAgent, audienceFromWebsite, campaignLeadsPerDay, campaignTally, createCampaign, deleteCampaign,
-  getCampaign, getCampaigns, getDailyRows, getDashboard, qualifiedFrom, removeCampaignAgent, setCampaignBrief, setCampaignWebsite,
-  updateCampaign, updateCampaignAgent,
+  addCampaignAgent, audienceFromWebsite, campaignLeadsPerDay, campaignTally, createCampaign, deleteCampaign, getCampaign,
+  getCampaigns, getDailyRows, getDashboard, removeCampaignAgent, setCampaignBrief, setCampaignWebsite, updateCampaign,
+  updateCampaignAgent,
 } from '../data'
 import { useStore } from '../data/hooks'
+import { nextRunLabel } from '../lib/format'
 import { navigate } from '../lib/router'
-import { DailyChart } from '../components/DailyChart'
-
-/** A count of qualified always carries its total and its share. */
-function rate(part: number, whole: number): string {
-  return whole ? `${Math.round((part / whole) * 100)}%` : '0%'
-}
+import { AGENT_COLOURS, DailyChart, type ChartAgent } from '../components/DailyChart'
 
 const PERIODS = [
   { days: 7, label: '7 days' },
@@ -19,21 +15,32 @@ const PERIODS = [
   { days: 90, label: '90 days' },
 ]
 
-/** How many leads come in a day, and which campaigns bring them. */
+/** How many leads come in a day, and which agents bring them. */
 export function Campaigns() {
   useStore()
   const campaigns = getCampaigns()
+  /** The agent kept on its own, picked from the legend under the chart. */
   const [pick, setPick] = useState<string | null>(null)
   const [days, setDays] = useState(30)
   const d = getDashboard(pick, new Date(), days)
   const rows = getDailyRows(pick, days)
-  const shown = pick ? campaigns.filter((c) => c.id === pick) : campaigns
+  /** Unscoped, so the legend keeps every agent's number whatever is picked. */
+  const everyRow = getDailyRows(null, days)
+
+  /** Every agent in the account, in order, so a colour sticks to an agent. */
+  const allAgents: ChartAgent[] = campaigns
+    .flatMap((c) => c.agents.map((a) => ({ id: a.id, name: a.name, campaignName: c.name })))
+    .map((a, i) => ({
+      ...a,
+      colourIndex: i,
+      leads: everyRow.filter((r) => r.agentId === a.id).reduce((sum, r) => sum + r.leads, 0),
+    }))
 
   return (
     <div className="page">
       <div className="page-head">
         <h1>Campaigns</h1>
-        <span className="count">A campaign is a group. Its agents run under it every morning.</span>
+        <span className="count">A campaign is a group. Its agents each fill a daily quota of leads.</span>
         <span className="spacer" />
         <button type="button" className="btn primary" onClick={() => navigate(`campaign/${createCampaign().id}`)}>New campaign</button>
       </div>
@@ -41,12 +48,6 @@ export function Campaigns() {
       <div className="card">
         <h2>
           Leads a day
-          <select className="select inline-select" value={pick ?? ''} onChange={(e) => setPick(e.target.value || null)} aria-label="Campaign">
-            <option value="">Every campaign</option>
-            {campaigns.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
           <span className="spacer" />
           <span className="chips period">
             {PERIODS.map((p) => (
@@ -56,18 +57,18 @@ export function Campaigns() {
             ))}
           </span>
         </h2>
-        <DailyChart rows={rows} campaigns={shown.map((c) => ({ id: c.id, name: c.name }))} />
+        <DailyChart rows={rows} agents={allAgents} selected={pick} onSelect={setPick} />
         <div className="star-split">
           <div><b className="num">{d.leadsToday.toLocaleString('en-US')}</b><span>leads today</span></div>
-          <div>
-            <b className="num">{d.qualifiedToday.toLocaleString('en-US')}</b>
-            <span>qualified of {d.leadsToday.toLocaleString('en-US')}, {rate(d.qualifiedToday, d.leadsToday)}</span>
-          </div>
           <div>
             <b className="num">{d.daily.reduce((sum, x) => sum + x.leads, 0).toLocaleString('en-US')}</b>
             <span>leads over {days} days</span>
           </div>
-          <div><b className="num">{shown.filter((c) => c.active).length}</b><span>{shown.length === 1 ? 'campaign' : 'campaigns'} running</span></div>
+          <div>
+            <b className="num">{allAgents.length}</b>
+            <span>{allAgents.length === 1 ? 'agent' : 'agents'} on your account</span>
+          </div>
+          <div><b className="num">{campaigns.filter((c) => c.active).length}</b><span>{campaigns.length === 1 ? 'campaign' : 'campaigns'} running</span></div>
         </div>
       </div>
 
@@ -75,6 +76,7 @@ export function Campaigns() {
         {campaigns.map((c) => {
           const t = campaignTally(c.id)
           const running = c.agents.filter((a) => a.active).length
+          const colourOf = (id: string) => allAgents.find((a) => a.id === id)?.colourIndex ?? 0
           return (
             <section className="campaign-group" key={c.id}>
               <div className="group-head">
@@ -85,55 +87,38 @@ export function Campaigns() {
                 </span>
                 <span className="state">
                   {c.active
-                    ? `${running} of ${c.agents.length} agent${c.agents.length === 1 ? '' : 's'} running, ${campaignLeadsPerDay(c)} leads a day at ${c.runAt}`
+                    ? `${running} of ${c.agents.length} agent${c.agents.length === 1 ? '' : 's'} running, ${campaignLeadsPerDay(c)} leads a day in quota`
                     : 'Paused'}
                 </span>
                 <span className="metric">
                   <b className="num">{t.found}</b>
-                  <small>leads, {t.high} qualified</small>
+                  <small>leads found</small>
                 </span>
-                <a className="btn small" href={`#/campaign/${c.id}`}>Open</a>
+                <a className="btn small" href={`#/campaign/${c.id}`}>Open to edit</a>
               </div>
 
+              {/* Read only here. Every change happens inside the campaign. */}
               <ul className="agent-list">
                 {c.agents.map((a) => (
-                  <li className={`agent-line${a.active ? '' : ' off'}`} key={a.id}>
-                    <input
-                      className="input agent-line-name"
-                      value={a.name}
-                      aria-label={`Agent name in ${c.name}`}
-                      onChange={(e) => updateCampaignAgent(c.id, a.id, { name: e.target.value })}
-                    />
-                    <input
-                      className="input agent-line-focus"
-                      value={a.focus}
-                      placeholder="What this agent hunts for, in one line"
-                      aria-label={`What ${a.name} hunts for`}
-                      onChange={(e) => updateCampaignAgent(c.id, a.id, { focus: e.target.value })}
-                    />
-                    <label className="agent-leads">
-                      <input
-                        className="input num"
-                        inputMode="numeric"
-                        value={a.leadsPerDay}
-                        aria-label={`Leads a day for ${a.name}`}
-                        onChange={(e) => updateCampaignAgent(c.id, a.id, { leadsPerDay: Math.max(0, Number(e.target.value.replace(/\D/g, '')) || 0) })}
-                      />
-                      <span>a day</span>
-                    </label>
-                    <button
-                      type="button"
-                      className={`btn small${a.active ? ' on' : ''}`}
-                      aria-pressed={a.active}
-                      onClick={() => updateCampaignAgent(c.id, a.id, { active: !a.active })}
-                    >
-                      {a.active ? 'Running' : 'Paused'}
-                    </button>
+                  <li
+                    className={`agent-line${c.active && a.active ? '' : ' off'}`}
+                    key={a.id}
+                    style={{ borderLeftColor: c.active && a.active ? AGENT_COLOURS[colourOf(a.id) % AGENT_COLOURS.length] : undefined }}
+                  >
+                    <span className="agent-line-name">
+                      {c.active && a.active && <i className="pulse" aria-hidden="true" />}
+                      {a.name}
+                    </span>
+                    <span className="agent-line-focus">{a.focus || 'No angle written yet'}</span>
+                    <span className="agent-quota">
+                      <b className="num">{a.leadsPerDay}</b>
+                      <span>a day quota</span>
+                    </span>
+                    <span className="agent-when">
+                      {c.active && a.active ? `Next run ${nextRunLabel(c.runAt)}` : 'Paused, no next run'}
+                    </span>
                   </li>
                 ))}
-                <li className="agent-add">
-                  <button type="button" className="btn small quiet" onClick={() => addCampaignAgent(c.id)}>Add an agent</button>
-                </li>
               </ul>
             </section>
           )
@@ -141,7 +126,7 @@ export function Campaigns() {
         {campaigns.length === 0 && (
           <div className="empty">
             <h2>No campaign yet</h2>
-            <p>A campaign is a group. Its agents run under it every morning and fill your contact list.</p>
+            <p>A campaign is a group. Its agents each carry a daily quota and fill it every morning.</p>
             <div className="actions">
               <button type="button" className="btn primary" onClick={() => navigate(`campaign/${createCampaign().id}`)}>Create the first campaign</button>
             </div>
@@ -248,7 +233,7 @@ export function CampaignEditor({ campaignId, firstRun = false }: { campaignId: s
 
       <section className="ask">
         <h2>Agents</h2>
-        <p className="muted">Each agent takes one angle on the audience and brings its own share of the day.</p>
+        <p className="muted">Each agent takes one angle on the audience and carries its own daily quota of leads. This is the only place they change.</p>
         <div className="agents">
           {campaign.agents.map((a) => (
             <div className={`agent-card${a.active ? '' : ' off'}`} key={a.id}>
@@ -264,10 +249,10 @@ export function CampaignEditor({ campaignId, firstRun = false }: { campaignId: s
                     className="input num"
                     inputMode="numeric"
                     value={a.leadsPerDay}
-                    aria-label="Leads a day for this agent"
+                    aria-label="Daily quota for this agent"
                     onChange={(e) => updateCampaignAgent(campaign.id, a.id, { leadsPerDay: Math.max(0, Number(e.target.value.replace(/\D/g, '')) || 0) })}
                   />
-                  <span>a day</span>
+                  <span>a day quota</span>
                 </label>
                 <button
                   type="button"
@@ -299,16 +284,16 @@ export function CampaignEditor({ campaignId, firstRun = false }: { campaignId: s
       <section className="ask">
         <h2>Delivery</h2>
         <label className="field" style={{ maxWidth: 260 }}>
-          <span>Ready at</span>
+          <span>Quotas filled by</span>
           <input className="input" type="time" value={campaign.runAt} onChange={(e) => updateCampaign(campaign.id, { runAt: e.target.value })} />
         </label>
         <p className="estimate">
-          <b className="num">{perDay.toLocaleString('en-US')}</b> leads in your list every morning across {campaign.agents.filter((a) => a.active).length} running
-          agent{campaign.agents.filter((a) => a.active).length === 1 ? '' : 's'}, about <b className="num">{qualifiedFrom(perDay).toLocaleString('en-US')}</b> of
-          them qualified. About {Math.round(QUALIFIED_SHARE * 10)} leads in 10 reach half a star.
+          <b className="num">{perDay.toLocaleString('en-US')}</b> leads in your list every morning, the quotas of your{' '}
+          {campaign.agents.filter((a) => a.active).length} running agent{campaign.agents.filter((a) => a.active).length === 1 ? '' : 's'} added up.
+          Next run {nextRunLabel(campaign.runAt)}.
         </p>
         {!firstRun && (
-          <p className="hint">Found {tally.found} leads so far, {tally.high} qualified, {rate(tally.high, tally.found)}. Narrow the list on Contacts, where the filters live.</p>
+          <p className="hint">Found {tally.found} leads so far. Narrow the list on Contacts, where the filters live.</p>
         )}
       </section>
 

@@ -115,7 +115,7 @@ export function Contacts({ scopeId }: { scopeId: string | null }) {
                 <span className="slider-value num">{minStars === 0 ? 'Any' : `${minStars}+`}</span>
               </div>
               <div className="slider-ticks"><span>0</span><span>1</span><span>2</span><span>3</span></div>
-              <p className="hint" style={{ marginTop: 10 }}>Above 1.5 stars is what counts as qualified.</p>
+              <p className="hint" style={{ marginTop: 10 }}>Three stars means every criterion fired: niche, selling and a fresh signal.</p>
 
               <h2 style={{ marginTop: 18 }}>At least</h2>
               <div className="levels">

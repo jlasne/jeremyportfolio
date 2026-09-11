@@ -124,10 +124,12 @@ export interface DailyStat {
   gathered: number
   /** The campaign that delivered this day. */
   campaignId: string
+  /** The agent inside that campaign that filled its quota this day. */
+  agentId: string
   /** Leads delivered to the list. Every one of them shows. */
   leads: number
-  /** Of those, the ones at 2 stars or more. Around 1 in 10. */
-  qualified: number
+  /** Of those, the ones showing high intent: half a star or more. */
+  highIntent: number
 }
 
 export interface Note {

@@ -2,12 +2,13 @@ import type { DailyStat } from '../types'
 import { campaigns } from './campaigns'
 import { daysAgo } from './time'
 
-// 90 days per campaign, newest last. Every lead shows in the list, and about
-// 9 in 10 reach half a star, which is what counts as qualified.
+// 90 days per agent, newest last. Every agent has a daily quota of leads and
+// fills it every morning, so one row is one agent on one day. Every lead shows
+// in the list, and about 9 in 10 come back showing high intent.
 
 const DAYS = 90
 
-/** A steady shape with a weekly dip and a slow climb, seeded per campaign so they differ. */
+/** A steady shape with a weekly dip and a slow climb, seeded per agent so they differ. */
 function shape(day: number, seed: number): number {
   const week = day % 7 === 5 || day % 7 === 6 ? 0.78 : 1
   const wave = 1 + 0.12 * Math.sin((day + seed * 9) / 4.5)
@@ -16,17 +17,21 @@ function shape(day: number, seed: number): number {
 }
 
 export const dailyStats: DailyStat[] = campaigns.flatMap((campaign, index) =>
-  Array.from({ length: DAYS }, (_, i) => {
-    const target = campaign.agents.filter((a) => a.active).reduce((sum, a) => sum + a.leadsPerDay, 0)
-    const started = i >= DAYS - 34 - index * 12
-    const leads = campaign.active && started ? Math.round(target * shape(i, index)) : 0
-    const share = 0.86 + 0.06 * Math.sin((i + index * 5) / 3)
-    return {
-      date: daysAgo(DAYS - 1 - i, 7),
-      campaignId: campaign.id,
-      gathered: leads,
-      leads,
-      qualified: Math.round(leads * share),
-    }
+  campaign.agents.flatMap((agent, agentIndex) => {
+    const seed = index * 3 + agentIndex
+    return Array.from({ length: DAYS }, (_, i) => {
+      const started = i >= DAYS - 34 - index * 12
+      const running = campaign.active && agent.active && started
+      const leads = running ? Math.round(agent.leadsPerDay * shape(i, seed)) : 0
+      const share = 0.86 + 0.06 * Math.sin((i + seed * 5) / 3)
+      return {
+        date: daysAgo(DAYS - 1 - i, 7),
+        campaignId: campaign.id,
+        agentId: agent.id,
+        gathered: leads,
+        leads,
+        highIntent: Math.round(leads * share),
+      }
+    })
   }),
 )

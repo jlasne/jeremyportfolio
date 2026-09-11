@@ -85,8 +85,8 @@ function lower(text: string): string {
   return text.charAt(0).toLowerCase() + text.slice(1).replace(/\.$/, '')
 }
 
-/** A lead counts as qualified at half a star or more. */
-export const QUALIFIED_MIN = 0.5
+/** A lead shows high intent at half a star or more. */
+export const HIGH_INTENT_MIN = 0.5
 
 /** Where a score sits, for the split under the chart. */
 export const BUCKETS = [

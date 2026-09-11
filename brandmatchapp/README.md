@@ -64,36 +64,37 @@ return 404. Serving this app from another path means changing `base` first.
 | --- | --- |
 | `index.html`, `assets/` | The built app, committed, served by the site |
 | `app/` | The source: Vite, React, TypeScript. Its own `npm install` |
-| `app/src/mock/` | All mock data, one file per entity: creators, posts, campaigns, daily counts over 90 days, notes, tags, rejections, filters, settings. No data literal lives anywhere else |
+| `app/src/mock/` | All mock data, one file per entity: creators, posts, campaigns, daily counts over 90 days per agent, notes, tags, rejections, filters, settings. No data literal lives anywhere else |
 | `app/src/data/index.ts` | The data functions every screen reads through: contacts, one creator, note, tag, reject, export, campaigns and their agents, daily rows, settings, first run. Swap the mock for the real source here and nothing else changes |
 | `app/src/data/store.ts` | The one in memory state, seeded from the mock folder. Refresh resets it |
 | `app/src/screens/` | Landing, Onboarding, Contacts, Campaign, Connect, Settings |
-| `app/src/components/` | Stars, Signal, the detail panel, the filter chips, the stacked daily chart, the hero animation |
+| `app/src/components/` | Stars, Signal, the detail panel, the filter chips and slide bars, the daily chart stacked by agent, the hero animation, the grid backdrop |
 | `app/src/data/score.ts` | The scoring rule, in one place |
 | `app/src/lib/` | Formatting, CSV, hash router, placeholder images drawn on the device |
 
 ## Screens
 
 A landing page, one onboarding step, and two app screens. In the app the nav
-sits on the left, full height, and collapses to a scrolling bar across the
-top under 900px.
+sits on the left, full height, 176px wide, carrying the mark alone and four
+places to go. It collapses to a scrolling bar across the top under 900px.
 
 | Route | What it holds |
 | --- | --- |
-| `#/` | The landing: the promise, a 12 second animation from website to chart, the four things a lead carries, a comparison table, the two steps, the API, the volume picker with two ways to take it, six questions. Every call to action books a demo |
+| `#/` | The landing: the promise, a 12 second animation in three steps, the four things a lead carries, the two steps of setup, the API, the volume picker, six questions. Every call to action reads See demo, and there is no login link |
 | `#/contacts` | The one list. A handle, the stars, the email, followers and engagement. One dropdown that picks a whole campaign or one agent inside it, plus more filters. The checkbox selects rows for a tag, done or reject in bulk |
-| `#/campaign` | Leads a day over 7, 30 or 90 days, stacked by campaign, with the qualified share as a line on a right axis. Under it every campaign, each with its agents as a sublist you edit in place. Opening one shows its website, its audience, its agents and its delivery |
-| `#/connect` | A coming soon popup over the blurred page. Behind it, one API that reads your leads and runs your campaigns, with the copy buttons off |
+| `#/campaign` | Leads a day over 7, 30 or 90 days, stacked by agent with one colour each, and the high intent share as a line on a right axis. The legend under the chart is the agent picker. Below it every campaign, each with its agents listed read only: the daily quota and the next run. Editing happens inside the campaign |
+| `#/connect` | A coming soon popup over the blurred page. Behind it, one API that reads your leads, classifies them and runs your campaigns, with the copy buttons off |
 | `#/settings` | Billing, feedback, your account |
 | `#/onboarding` | Set up your first campaign, then the first list over 8 seconds and straight into it |
 
 A **campaign** is a group, and it starts from your website. We read it and
 write the audience it should hunt for, in as many words as it takes, and you
 edit any of it. A campaign holds one or more **agents**, and the agents are
-what run. Each takes one angle on that audience and brings its own share of
-leads a day. They show as a sublist under their campaign, on the campaigns
-page and in the side nav, and you rename them, move their volume and pause
-them from either place. Filters live on Contacts, so a campaign carries none.
+what run. Each takes one angle on that audience and carries its own **daily
+quota** of leads, filled at the campaign's delivery hour. The campaigns page
+lists them under their campaign read only, with the quota and the next run;
+open the campaign to change any of it. Filters live on Contacts, so a campaign
+carries none.
 Every contact carries the campaign that found it and the agent that brought
 it in.
 
@@ -108,8 +109,10 @@ the same scale, the other two carry one thumb each. Stars filter through a
 slider for the total, plus a switch per criterion: niche, selling and signal
 each off, meaning any, or on, meaning half a star and up.
 
-**Qualified** means 0.5 stars or more. About 9 leads in 10 reach it. Each of niche, selling and signal is worth
-one star, half when it half fits.
+**High intent** means 0.5 stars or more. About 9 leads in 10 reach it, and it
+is the line on the campaigns chart. Everything in the list is a lead: the word
+qualified appears nowhere. Each of niche, selling and signal is worth one star,
+half when it half fits.
 
 ## Design
 
@@ -126,15 +129,15 @@ contrast checks and always sit next to a legend.
 Unbounded for display, Satoshi for everything else, both lifted from
 `brand/index.html` and bundled as woff2 so nothing loads from the network.
 
-Volume, not price: the section leads with one slide bar, 100 to 1,000 leads a
-day, and reads back the week, the month and how many of those come back
-qualified. Under it, two ways to take that volume: every month, or a one off
-30,000 lead pack. The cards show lead counts and carry no figure, since the
-number is not decided.
+Volume, not price: the section is one slide bar, 100 to 1,000 leads a day, and
+a toggle for how you pay, every month or once. Monthly costs 30% less per lead.
+The one off pack has no API. The card shows lead counts and carries no figure,
+since the number is not decided.
 
-**Connect is one API.** One base URL and one key read this morning's leads and
-run the campaigns that fill them. No MCP server: the API covers both, and the
-AI tools that would have used MCP read it the same way they read any API.
+**Connect is one API, and the app is the CRM.** One base URL and one key read
+this morning's leads, classify them in the same list you work in, and run the
+campaigns that fill it. No MCP server: the API covers all three, and the AI
+tools that would have used MCP read it the same way they read any API.
 
 Works down to a phone, keyboard focus visible, reduced motion respected: the
 hero animation holds on its final chart, the switches and the reading dots

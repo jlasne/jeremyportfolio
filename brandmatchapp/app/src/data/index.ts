@@ -3,20 +3,20 @@ import { defaultFilters } from '../mock/filters'
 import { timezones as mockTimezones } from '../mock/settings'
 import { toCsv } from '../lib/csv'
 import { absolute, isNewToday, withinDays } from '../lib/format'
-import { BUCKETS, CRITERIA, QUALIFIED_MIN, latestSignal, scoreOf } from './score'
+import { BUCKETS, CRITERIA, HIGH_INTENT_MIN, latestSignal, scoreOf } from './score'
 import { getState, setState } from './store'
 
 // Every screen reads and writes through these functions.
 // They work on the in memory store today and will call the real source later.
 
-export { BUCKETS, CRITERIA, QUALIFIED_MIN, scoreOf } from './score'
+export { BUCKETS, CRITERIA, HIGH_INTENT_MIN, scoreOf } from './score'
 
-/** About 9 leads in 10 reach half a star, which is what counts as qualified. */
-export const QUALIFIED_SHARE = 0.9
+/** About 9 leads in 10 reach half a star, which is where high intent starts. */
+export const HIGH_INTENT_SHARE = 0.9
 
-/** How many of a day's leads come back qualified. */
-export function qualifiedFrom(leadsPerDay: number): number {
-  return Math.round(leadsPerDay * QUALIFIED_SHARE)
+/** How many of a day's leads come back showing high intent. */
+export function highIntentFrom(leadsPerDay: number): number {
+  return Math.round(leadsPerDay * HIGH_INTENT_SHARE)
 }
 
 // Contacts, the one list ---------------------------------------------------
@@ -33,7 +33,7 @@ export interface Contact {
 
 /** Half a star or more. The contacts worth a message today. */
 export function isHigh(score: Score): boolean {
-  return score.stars >= QUALIFIED_MIN
+  return score.stars >= HIGH_INTENT_MIN
 }
 
 function passes(c: Creator, f: Filters, now: Date): boolean {
@@ -146,15 +146,20 @@ export interface Dashboard {
   total: number
   /** Yesterday's delivery, from the daily series. */
   leadsToday: number
-  qualifiedToday: number
+  highIntentToday: number
   daily: DailyStat[]
   buckets: { label: string; count: number }[]
   byCriterion: { key: string; label: string; full: number; half: number; note: string }[]
 }
 
-/** Per campaign rows for the last N days, newest last. One campaign, or all of them. */
-export function getDailyRows(campaignId: string | null = null, days = 30): DailyStat[] {
-  const rows = getState().daily.filter((r) => !campaignId || r.campaignId === campaignId)
+/**
+ * One row per agent per day for the last N days, newest last. Pass a campaign
+ * id to keep its agents, an agent id to keep one, or nothing for everything.
+ */
+export function getDailyRows(scopeId: string | null = null, days = 30): DailyStat[] {
+  const rows = getState().daily.filter(
+    (r) => !scopeId || r.campaignId === scopeId || r.agentId === scopeId,
+  )
   const dates = [...new Set(rows.map((r) => r.date))].sort().slice(-days)
   const keep = new Set(dates)
   return rows.filter((r) => keep.has(r.date)).sort((a, b) => a.date.localeCompare(b.date))
@@ -168,27 +173,30 @@ export function sumDaily(rows: DailyStat[]): DailyStat[] {
     if (at) {
       at.leads += r.leads
       at.gathered += r.gathered
-      at.qualified += r.qualified
+      at.highIntent += r.highIntent
     } else {
-      byDate.set(r.date, { ...r, campaignId: 'all' })
+      byDate.set(r.date, { ...r, campaignId: 'all', agentId: 'all' })
     }
   }
   return [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date))
 }
 
-export function getDaily(campaignId: string | null = null, days = 30): DailyStat[] {
-  return sumDaily(getDailyRows(campaignId, days))
+export function getDaily(scopeId: string | null = null, days = 30): DailyStat[] {
+  return sumDaily(getDailyRows(scopeId, days))
 }
 
-export function getDashboard(campaignId: string | null = null, now = new Date(), days = 30): Dashboard {
-  const all = getAllContacts(now).filter((c) => !campaignId || c.creator.campaignId === campaignId)
-  const daily = getDaily(campaignId, days)
+export function getDashboard(scopeId: string | null = null, now = new Date(), days = 30): Dashboard {
+  const scope = scopeOf(scopeId)
+  const all = getAllContacts(now)
+    .filter((c) => !scope.campaignIds.length || scope.campaignIds.includes(c.creator.campaignId))
+    .filter((c) => !scope.agentIds.length || scope.agentIds.includes(c.creator.agentId))
+  const daily = getDaily(scopeId, days)
   return {
     today: all.filter((c) => c.isNew).length,
     high: all.filter((c) => isHigh(c.score)).length,
     total: all.length,
     leadsToday: daily.length ? daily[daily.length - 1].leads : 0,
-    qualifiedToday: daily.length ? daily[daily.length - 1].qualified : 0,
+    highIntentToday: daily.length ? daily[daily.length - 1].highIntent : 0,
     daily,
     buckets: BUCKETS.map((b, i) => ({
       label: b.label,

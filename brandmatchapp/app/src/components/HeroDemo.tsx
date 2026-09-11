@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 
-// The product in 12 seconds, on a loop: a website goes in, agents wake up,
-// leads land day after day, and it ends on the chart. Under reduced motion it
-// shows the final chart and stays there.
+// The product in 12 seconds, on a loop: a website goes in, agents wake up, and
+// leads land day after day. Three steps, and the last one ends on the chart.
+// Under reduced motion it shows that chart and stays there.
 
 const SITE = 'strongher.co'
 const AGENTS = ['Technique coaches', 'Program sellers', 'Paid post watchers']
@@ -48,8 +48,7 @@ export function HeroDemo() {
       <ol className="demo-steps">
         <li className={phase === 'site' ? 'on' : 'done'}>Enter your website</li>
         <li className={phase === 'agents' ? 'on' : phase === 'site' ? '' : 'done'}>Agents wake up</li>
-        <li className={phase === 'leads' ? 'on' : phase === 'chart' ? 'done' : ''}>Leads land every day</li>
-        <li className={phase === 'chart' ? 'on' : ''}>Your list grows</li>
+        <li className={phase === 'leads' || phase === 'chart' ? 'on' : ''}>Leads land every day</li>
       </ol>
 
       <div className="demo-stage">
@@ -97,8 +96,8 @@ export function HeroDemo() {
               ))}
             </div>
             <div className="demo-legend" aria-hidden="true">
-              <span><i style={{ background: '#f2662a' }} /> Women lifting coaches</span>
-              <span><i style={{ background: '#7c5cff' }} /> Supplement ambassadors</span>
+              <span><i style={{ background: '#ff5c2b' }} /> Technique coaches</span>
+              <span><i style={{ background: '#7c5cff' }} /> Program sellers</span>
             </div>
           </div>
         )}
