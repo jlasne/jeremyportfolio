@@ -122,8 +122,22 @@ function Bar({
   )
 }
 
+export interface TagOption {
+  label: string
+  count: number
+}
+
 /** Three slide bars carry the volume. Everything else stays a plain choice. */
-export function FilterForm({ value, onChange }: { value: Filters; onChange: (patch: Partial<Filters>) => void }) {
+export function FilterForm({
+  value, onChange, tag, tags, onTag,
+}: {
+  value: Filters
+  onChange: (patch: Partial<Filters>) => void
+  /** The tag in force, or null for any. Tags live on contacts, not on Filters. */
+  tag: string | null
+  tags: TagOption[]
+  onTag: (tag: string | null) => void
+}) {
   const [more, setMore] = useState(false)
   const toggle = <K extends 'countries' | 'languages'>(key: K, item: Filters[K][number]) => {
     const list = value[key] as string[]
@@ -228,6 +242,19 @@ export function FilterForm({ value, onChange }: { value: Filters; onChange: (pat
         onChange={(i) => onChange({ lastPostWithin: RECENCY_STOPS[i] })}
         ends={['This week', '3 months']}
       />
+
+      {tags.length > 0 && (
+        <Line label="Tag">
+          <button type="button" className={`chip${tag === null ? ' on' : ''}`} aria-pressed={tag === null} onClick={() => onTag(null)}>
+            Any
+          </button>
+          {tags.map((t) => (
+            <button key={t.label} type="button" className={`chip${tag === t.label ? ' on' : ''}`} aria-pressed={tag === t.label} onClick={() => onTag(tag === t.label ? null : t.label)}>
+              {t.label} <span className="chip-count num">{t.count}</span>
+            </button>
+          ))}
+        </Line>
+      )}
 
       <Line label="Email">
         <button type="button" className={`chip${value.emailInBio === 'any' ? ' on' : ''}`} aria-pressed={value.emailInBio === 'any'} onClick={() => onChange({ emailInBio: 'any' })}>

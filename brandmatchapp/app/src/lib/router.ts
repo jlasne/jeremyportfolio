@@ -5,7 +5,8 @@ import { useEffect, useState } from 'react'
 export type Route =
   | { name: 'home' }
   | { name: 'onboarding'; campaignId: string | null; running: boolean }
-  | { name: 'contacts'; campaignId: string | null }
+  /** The scope is a campaign id or one agent id inside a campaign. */
+  | { name: 'contacts'; scopeId: string | null }
   | { name: 'campaign'; campaignId: string | null }
   | { name: 'connect' }
   | { name: 'settings' }
@@ -20,7 +21,7 @@ export function parse(hash: string): Route {
     case 'onboarding':
       return { name: 'onboarding', campaignId: id, running: third === 'running' }
     case 'contacts':
-      return { name: 'contacts', campaignId: id }
+      return { name: 'contacts', scopeId: id }
     case 'campaign':
     case 'campaigns':
     case 'leads':

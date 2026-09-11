@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Level } from '../types'
 import {
-  CRITERIA, addTag, countDone, countTagged, diagnoseEmpty, exportCsv, getCampaigns, getContacts, getFilters, getTagVocabulary,
-  reject, resetFilter, resetFilters, setFilters, toggleDone,
+  CRITERIA, addTag, agentTally, countDone, countTagged, diagnoseEmpty, exportCsv, getCampaigns, getContacts, getFilters,
+  getTagVocabulary, reject, resetFilter, resetFilters, scopeOf, setFilters, toggleDone,
 } from '../data'
 import { useStore } from '../data/hooks'
 import { downloadCsv } from '../lib/csv'
@@ -15,9 +15,11 @@ import { Stars } from '../components/Stars'
 type CriterionKey = 'niche' | 'active' | 'intent'
 
 /** The one list. A handle, how ready they are, and the email. */
-export function Contacts({ campaignId }: { campaignId: string | null }) {
+export function Contacts({ scopeId }: { scopeId: string | null }) {
   useStore()
   const campaigns = getCampaigns()
+  /** One id in the route covers both levels: a whole campaign, or one agent. */
+  const scope = scopeOf(scopeId)
   const [tag, setTag] = useState<string | null>(null)
   const [minStars, setMinStars] = useState(0)
   const [minLevels, setMinLevels] = useState<Partial<Record<CriterionKey, Level>>>({})
@@ -49,7 +51,8 @@ export function Contacts({ campaignId }: { campaignId: string | null }) {
   }, [])
 
   const contacts = getContacts({
-    campaignIds: campaignId ? [campaignId] : [],
+    campaignIds: scope.campaignIds,
+    agentIds: scope.agentIds,
     tag,
     minStars,
     minLevels,
@@ -143,37 +146,44 @@ export function Contacts({ campaignId }: { campaignId: string | null }) {
           )}
         </div>
 
-        <label className="filter-select">
+        {/* One dropdown, two levels: a whole campaign, or one agent inside it. */}
+        <label className="filter-select wide">
           <span>Campaign</span>
-          <select className="select" value={campaignId ?? ''} onChange={(e) => navigate(e.target.value ? `contacts/${e.target.value}` : 'contacts')}>
+          <select
+            className="select"
+            value={scopeId ?? ''}
+            aria-label="Campaign or agent"
+            onChange={(e) => navigate(e.target.value ? `contacts/${e.target.value}` : 'contacts')}
+          >
             <option value="">Every campaign</option>
-            {campaigns.map((a) => (
-              <option key={a.id} value={a.id}>{a.name}</option>
-            ))}
-          </select>
-        </label>
-
-        <label className="filter-select">
-          <span>Tag</span>
-          <select className="select" value={tag ?? ''} onChange={(e) => setTag(e.target.value || null)}>
-            <option value="">Any tag</option>
-            {vocabulary.map((t) => (
-              <option key={t} value={t}>{t} ({countTagged(t)})</option>
+            {campaigns.map((c) => (
+              <optgroup key={c.id} label={c.name}>
+                <option value={c.id}>{c.name}, every agent</option>
+                {c.agents.map((a) => (
+                  <option key={a.id} value={a.id}>{a.name} ({agentTally(c.id, a.id)})</option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </label>
 
         <div className="popover-wrap" ref={box}>
-          <button type="button" className={`btn${showFilters ? ' on' : ''}`} aria-expanded={showFilters} onClick={() => setShowFilters((v) => !v)}>
-            More filters
+          <button type="button" className={`btn${showFilters || tag ? ' on' : ''}`} aria-expanded={showFilters} onClick={() => setShowFilters((v) => !v)}>
+            More filters{tag ? `: ${tag}` : ''}
           </button>
           {showFilters && (
             <div className="popover" role="dialog" aria-label="Filters">
               <h2>
                 Filters
-                <button type="button" className="btn quiet small" onClick={() => resetFilters()}>Reset</button>
+                <button type="button" className="btn quiet small" onClick={() => { resetFilters(); setTag(null) }}>Reset</button>
               </h2>
-              <FilterForm value={getFilters()} onChange={setFilters} />
+              <FilterForm
+                value={getFilters()}
+                onChange={setFilters}
+                tag={tag}
+                tags={vocabulary.map((t) => ({ label: t, count: countTagged(t) }))}
+                onTag={setTag}
+              />
             </div>
           )}
         </div>

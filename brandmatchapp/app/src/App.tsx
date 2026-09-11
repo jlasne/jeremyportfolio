@@ -38,7 +38,7 @@ export function App() {
       <StarClip />
       <SideNav route={route} />
       <main className="main">
-        {route.name === 'contacts' && <Contacts campaignId={route.campaignId} />}
+        {route.name === 'contacts' && <Contacts scopeId={route.scopeId} />}
         {route.name === 'campaign' && (route.campaignId ? <CampaignEditor campaignId={route.campaignId} /> : <Campaigns />)}
         {route.name === 'connect' && <Connect />}
         {route.name === 'settings' && <Settings />}

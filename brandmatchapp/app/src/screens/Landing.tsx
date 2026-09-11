@@ -7,41 +7,61 @@ import { HeroDemo } from '../components/HeroDemo'
 // The landing: white ground, a faint grid, one orange accent, wide corners.
 // Every call to action asks for the same thing, a demo.
 
-const COMPARE: { row: string; database: string; scraper: string; agency: string; ours: string }[] = [
+/** What every lead carries. The four claims the section is built on. */
+const PROMISES: { title: string; note: string }[] = [
   {
-    row: 'Still posting',
-    database: 'Nobody checks',
-    scraper: 'You check',
-    agency: 'Sometimes',
-    ours: 'Read this month, last 12 posts',
+    title: 'Qualified in your niche',
+    note: 'Your website writes the audience. Content, followers and size band are read against it, creator by creator.',
   },
   {
-    row: 'Ranked by intent',
+    title: 'Actively posting',
+    note: 'Last 12 posts read every night. Quiet accounts drop out before they reach your list.',
+  },
+  {
+    title: 'Collab intent',
+    note: 'A paid post, a rate card, a media kit or collab wording, each dated. A signal in the last 4 days counts full.',
+  },
+  {
+    title: 'Contact attached',
+    note: 'The email sits on the row where we find one. Nothing to enrich, nothing to buy twice.',
+  },
+]
+
+const COMPARE: { row: string; database: string; scraper: string; agency: string; ours: string }[] = [
+  {
+    row: 'Qualified in your niche',
     database: 'By follower count',
     scraper: 'Raw rows, no order',
     agency: 'Their taste',
-    ours: 'Active in your niche, showing intent',
+    ours: 'Read against your own audience',
   },
   {
-    row: 'Email attached',
+    row: 'Actively posting',
+    database: 'Nobody checks',
+    scraper: 'You check',
+    agency: 'Sometimes',
+    ours: 'Last 12 posts, read this month',
+  },
+  {
+    row: 'Collab intent',
+    database: 'Not tracked',
+    scraper: 'Not tracked',
+    agency: 'They ask around',
+    ours: 'Dated signals, ranked by freshness',
+  },
+  {
+    row: 'Contact attached',
     database: 'Extra fee',
     scraper: 'You enrich it',
     agency: 'They keep it',
     ours: 'On the row',
   },
   {
-    row: 'You stay in control',
-    database: 'Fixed filters',
-    scraper: 'You maintain it',
-    agency: 'Their picks',
-    ours: 'Your sentence, change it any morning',
-  },
-  {
-    row: 'Runs on its own',
+    row: 'Arrives on its own',
     database: 'You search it',
     scraper: 'You run it',
     agency: 'For a retainer',
-    ours: 'Every night',
+    ours: 'Every night, 100 to 1,000 a day',
   },
 ]
 
@@ -67,8 +87,8 @@ const FAQ = [
     a: 'Open it, tick off the ones you wrote to, tag the rest in bulk, and export whatever you want to keep. The contact is on the row where we found one.',
   },
   {
-    q: 'Can my own AI read the list?',
-    a: 'That is Connect AI, and it is coming soon. MCP will hand your leads to Claude or ChatGPT, and an API will create and pause your campaigns from your own code.',
+    q: 'Can my own code read the list?',
+    a: 'Yes, through one API, coming soon. The same key reads this morning\'s leads and runs the campaigns that fill it: create one, add agents, move a daily volume, pause it.',
   },
 ]
 
@@ -87,10 +107,10 @@ export function Landing() {
           brandmatch
         </a>
         <nav>
-          <a href="#why">Why</a>
+          <a href="#why">What lands</a>
           <a href="#how">How it works</a>
-          <a href="#connect">Connect AI</a>
-          <a href="#pricing">Pricing</a>
+          <a href="#api">API</a>
+          <a href="#pricing">Volume</a>
         </nav>
         <span className="spacer" />
         <a className="login" href="#/contacts">Login</a>
@@ -113,8 +133,22 @@ export function Landing() {
       </div>
 
       <section className="land-section" id="why">
-        <h2 className="big">Better than what you use today</h2>
-        <p className="section-lede">The same job, done four ways. Only one of them wakes up before you do.</p>
+        <p className="eyebrow">What lands every morning</p>
+        <h2 className="big">Daily leads, found for you, <em>while you sleep.</em></h2>
+        <p className="section-lede">
+          Every creator in your list is qualified in your niche, actively posting, showing collab intent, and carries
+          their contact. Nothing else reaches the list.
+        </p>
+        <div className="promises">
+          {PROMISES.map((pm, i) => (
+            <div className="promise" key={pm.title}>
+              <span className="promise-n">0{i + 1}</span>
+              <h3>{pm.title}</h3>
+              <p>{pm.note}</p>
+            </div>
+          ))}
+        </div>
+        <p className="section-lede" style={{ marginTop: 46 }}>The same job, done four ways. Only one of them wakes up before you do.</p>
         <div className="table-wrap">
           <table className="compare">
             <thead>
@@ -158,65 +192,94 @@ export function Landing() {
         </div>
       </section>
 
-      <section className="land-section" id="connect">
-        <p className="eyebrow">Connect AI</p>
-        <h2 className="big">Your campaigns and your leads, <em>reachable from your own AI.</em></h2>
-        <p className="section-lede">One key, two doors. Nothing to install.</p>
+      <section className="land-section" id="api">
+        <p className="eyebrow">API</p>
+        <h2 className="big">One API. <em>Your leads and your campaigns.</em></h2>
+        <p className="section-lede">
+          One key, one base URL. Read this morning's list and run the campaigns that fill it, from your own code or from
+          the AI tool you already point at your APIs.
+        </p>
         <div className="doors">
           <div className="door">
-            <span className="door-tag">MCP</span>
-            <h3>Get your leads</h3>
-            <p>Connect Claude, ChatGPT or your own tool. Ask in plain words and it answers from this morning's list.</p>
+            <span className="door-tag">Read</span>
+            <h3>Your leads</h3>
+            <p>Every lead with its stars, its dated signals and its email, filtered the same way the app filters them.</p>
             <div className="asks">
-              <span className="ask-line">"Who came in today with an email?"</span>
-              <span className="ask-line">"UK creators who ran a paid post this week."</span>
-              <span className="ask-line">"Tag the top ten for the spring launch."</span>
+              <span className="ask-line">GET /leads?since=today&amp;email=yes</span>
+              <span className="ask-line">GET /leads?country=UK&amp;signal_within=7</span>
+              <span className="ask-line">POST /leads/:id/tags</span>
             </div>
           </div>
           <div className="door">
-            <span className="door-tag">API</span>
-            <h3>Manage your campaigns</h3>
-            <p>Create a campaign, add agents to it, move its daily volume, pause it. Your own code or a workflow tool drives it.</p>
+            <span className="door-tag">Write</span>
+            <h3>Your campaigns</h3>
+            <p>Create a campaign, add agents to it, move a daily volume, pause it. Every field the app has, reachable here.</p>
             <div className="asks">
-              <span className="ask-line">Create a campaign for a new launch</span>
-              <span className="ask-line">Raise a volume from 100 to 800 a day</span>
-              <span className="ask-line">Pause every campaign while you are closed</span>
+              <span className="ask-line">POST /campaigns</span>
+              <span className="ask-line">PATCH /campaigns/:id/agents/:id</span>
+              <span className="ask-line">POST /campaigns/:id/pause</span>
             </div>
           </div>
         </div>
       </section>
 
       <section className="land-section" id="pricing">
-        <h2 className="big">One price. <em>Two ways to take it.</em></h2>
-        <p className="section-lede">The same price either way. Pick the one that matches how you buy.</p>
+        <p className="eyebrow">Your volume</p>
+        <h2 className="big">You pick the leads a day. <em>Everything else follows.</em></h2>
+        <p className="section-lede">
+          Move the bar. That is the whole decision: how many creators land in your list each morning, anywhere from 100
+          to 1,000 a day.
+        </p>
+
+        <div className="volume-picker">
+          <div className="volume-read">
+            <b className="num">{perDay}</b>
+            <span>leads a day</span>
+          </div>
+          <input
+            className="slider"
+            type="range"
+            min={100}
+            max={1000}
+            step={50}
+            value={perDay}
+            style={{ ['--fill' as string]: `${((perDay - 100) / 900) * 100}%` }}
+            onChange={(e) => setPerDay(Number(e.target.value))}
+            aria-label="Leads a day"
+            aria-valuetext={`${perDay} leads a day`}
+          />
+          <div className="bar-ends"><span>100 a day</span><span>1,000 a day</span></div>
+          <div className="volume-out">
+            <div>
+              <b className="num">{(perDay * 7).toLocaleString('en-US')}</b>
+              <span>a week</span>
+            </div>
+            <div>
+              <b className="num">{(perDay * 30).toLocaleString('en-US')}</b>
+              <span>a month</span>
+            </div>
+            <div>
+              <b className="num">{Math.round(perDay * 30 * 0.9).toLocaleString('en-US')}</b>
+              <span>of those qualified</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 className="volume-sub">Two ways to take that volume</h3>
         <div className="plans">
           <div className="plan brand">
-            <span className="plan-tag">Monthly</span>
-            <h3>Brand</h3>
-            <p className="muted">Set the daily volume. Move it any morning.</p>
-            <div className="calc-line">
-              <input
-                className="slider"
-                type="range"
-                min={100}
-                max={1000}
-                step={50}
-                value={perDay}
-                style={{ ['--fill' as string]: `${((perDay - 100) / 900) * 100}%` }}
-                onChange={(e) => setPerDay(Number(e.target.value))}
-                aria-label="Leads a day"
-              />
-              <b className="num">{perDay}</b>
-            </div>
+            <span className="plan-tag">Every month</span>
+            <h3>Running</h3>
+            <p className="muted">{perDay} leads land every morning, month after month.</p>
             <p className="big-figure">
               <b className="num">{(perDay * 30).toLocaleString('en-US')}</b>
               <span>leads a month, at {perDay} a day</span>
             </p>
             <ul>
-              <li>Anywhere from 100 to 1,000 leads a day</li>
-              <li>Unlimited campaigns, each with its own sentence</li>
+              <li>Move your volume any morning, 100 to 1,000 a day</li>
+              <li>Unlimited campaigns, each with its own agents</li>
               <li>Their email attached where we find one</li>
-              <li>MCP for your leads, API for your campaigns</li>
+              <li>One API for your leads and your campaigns</li>
               <li>Change the volume or cancel any morning</li>
             </ul>
             <a className="btn primary" href="#/onboarding">Book a demo at {perDay} a day</a>
@@ -224,16 +287,16 @@ export function Landing() {
           <div className="plan dark">
             <span className="plan-tag">One off</span>
             <h3>Pack</h3>
-            <p className="muted">The same price as one month, with no renewal.</p>
+            <p className="muted">30,000 leads, spent at whatever pace you set. Nothing renews.</p>
             <p className="big-figure">
-              <b className="num">30,000</b>
-              <span>leads, delivered at the pace you set</span>
+              <b className="num">{Math.round(30_000 / perDay)}</b>
+              <span>days of delivery at {perDay} a day</span>
             </p>
             <ul>
               <li>30,000 leads in total, billed once</li>
               <li>Spread them over as many days as you like</li>
               <li>Unlimited campaigns while the pack lasts</li>
-              <li>MCP for your leads, API for your campaigns</li>
+              <li>One API for your leads and your campaigns</li>
               <li>Nothing to cancel</li>
             </ul>
             <a className="btn" href="#/onboarding">Book a demo for the pack</a>
@@ -267,16 +330,16 @@ export function Landing() {
         </div>
         <div>
           <h4>Product</h4>
-          <a href="#why">Why</a>
+          <a href="#why">What lands</a>
           <a href="#how">How it works</a>
-          <a href="#connect">Connect AI</a>
-          <a href="#pricing">Pricing</a>
+          <a href="#api">API</a>
+          <a href="#pricing">Volume</a>
         </div>
         <div>
           <h4>App</h4>
           <a href="#/contacts">See a live list</a>
           <a href="#/onboarding">Book a demo</a>
-          <a href="#/connect">Connect AI</a>
+          <a href="#/connect">API</a>
         </div>
         <div>
           <h4>Information</h4>

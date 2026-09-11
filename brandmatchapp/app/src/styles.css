@@ -1037,3 +1037,55 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 .range-leg { display: grid; grid-template-columns: 34px 1fr 52px; gap: 10px; align-items: center; }
 .range-leg > span { font-size: 12px; color: var(--ink-3); }
 .range-leg > b { font-size: 12.5px; font-weight: 600; text-align: right; }
+
+/* The nav: a campaign, then the agents running under it ------------------- */
+.sidenav .sub a { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.sidenav .sub .sub-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sidenav .sub .sub-state { font-size: 10.5px; color: var(--ink-3); flex: none; }
+.sidenav .sub-agents { list-style: none; margin: 0 0 4px; padding: 0 0 0 10px; display: flex; flex-direction: column; gap: 1px; }
+.sidenav .sub-agents a { padding: 4px 8px; font-size: 12.5px; color: var(--ink-3); font-weight: 400; gap: 7px; }
+.sidenav .sub-agents a:hover { background: rgba(16, 16, 20, 0.05); color: var(--ink-2); }
+.sidenav .sub-agents a.on { background: var(--orange-soft); color: var(--orange-deep); font-weight: 600; }
+.sidenav .sub-agents .sub-name { flex: 1; }
+.sidenav .agent-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--line-2); flex: none; }
+.sidenav .agent-dot.on { background: var(--orange); }
+.sidenav .sub-agents a.on .count { color: var(--orange-deep); }
+
+/* A tag chip carries how many contacts wear it. */
+.chip-count { margin-left: 4px; font-size: 11px; opacity: 0.65; }
+.filter-select.wide .select { min-width: 220px; max-width: 280px; }
+
+@media (max-width: 900px) {
+  .sidenav .sub, .sidenav .sub-agents { display: none; }
+}
+
+/* What lands every morning: four promises ---------------------------------- */
+.promises { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 30px; }
+.promise { border: 1px solid var(--l-rule); border-radius: 20px; padding: 22px; background: var(--l-card); }
+.promise-n { font-family: var(--display); font-size: 11.5px; color: var(--orange); display: block; margin-bottom: 14px; }
+.promise h3 { font-size: 17px; margin-bottom: 8px; line-height: 1.2; }
+.promise p { color: var(--l-muted); font-size: 14px; line-height: 1.5; }
+
+/* The volume picker: the only number you choose ---------------------------- */
+.volume-picker {
+  border: 1px solid var(--l-rule); border-radius: 24px; padding: 30px 32px; background: var(--l-card);
+  max-width: 720px;
+}
+.volume-read { display: flex; align-items: baseline; gap: 10px; margin-bottom: 18px; }
+.volume-read b { font-family: var(--display); font-weight: 500; font-size: 52px; line-height: 1; letter-spacing: -0.03em; color: var(--orange); }
+.volume-read span { font-size: 17px; color: var(--l-muted); }
+.volume-picker .slider { width: 100%; height: 8px; border-radius: 4px; }
+.volume-picker .bar-ends { margin-top: 8px; }
+.volume-out { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 24px; padding-top: 22px; border-top: 1px solid var(--l-rule); }
+.volume-out b { font-family: var(--display); font-weight: 500; font-size: 26px; letter-spacing: -0.02em; display: block; line-height: 1.15; }
+.volume-out span { color: var(--l-muted); font-size: 13.5px; }
+.volume-sub { font-size: 20px; margin: 46px 0 18px; }
+
+@media (max-width: 1000px) {
+  .promises { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 700px) {
+  .promises, .volume-out { grid-template-columns: 1fr; }
+  .volume-picker { padding: 22px; }
+  .volume-read b { font-size: 40px; }
+}

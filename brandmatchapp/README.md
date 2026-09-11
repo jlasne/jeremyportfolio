@@ -80,10 +80,10 @@ top under 900px.
 
 | Route | What it holds |
 | --- | --- |
-| `#/` | The landing: the promise, a 12 second animation from website to chart, a comparison table, the two steps, MCP and the API, two plans, six questions. Every call to action books a demo |
-| `#/contacts` | The one list. A handle, the stars, the email, followers and engagement. Two dropdowns, campaign and tag, plus more filters. The checkbox selects rows for a tag, done or reject in bulk |
+| `#/` | The landing: the promise, a 12 second animation from website to chart, the four things a lead carries, a comparison table, the two steps, the API, the volume picker with two ways to take it, six questions. Every call to action books a demo |
+| `#/contacts` | The one list. A handle, the stars, the email, followers and engagement. One dropdown that picks a whole campaign or one agent inside it, plus more filters. The checkbox selects rows for a tag, done or reject in bulk |
 | `#/campaign` | Leads a day over 7, 30 or 90 days, stacked by campaign, with the qualified share as a line on a right axis. Under it every campaign, each with its agents as a sublist you edit in place. Opening one shows its website, its audience, its agents and its delivery |
-| `#/connect` | A coming soon popup over the blurred page. Behind it, MCP to get your leads and the API to manage your campaigns, with the copy buttons off |
+| `#/connect` | A coming soon popup over the blurred page. Behind it, one API that reads your leads and runs your campaigns, with the copy buttons off |
 | `#/settings` | Billing, feedback, your account |
 | `#/onboarding` | Set up your first campaign, then the first list over 8 seconds and straight into it |
 
@@ -94,10 +94,15 @@ what run. Each takes one angle on that audience and brings its own share of
 leads a day. They show as a sublist under their campaign, on the campaigns
 page and in the side nav, and you rename them, move their volume and pause
 them from either place. Filters live on Contacts, so a campaign carries none.
-Every contact carries the campaign that found it.
+Every contact carries the campaign that found it and the agent that brought
+it in.
 
 On Contacts the checkbox selects. Selecting opens a bar to tag, mark done or
-reject in bulk. Campaign and tag filter through dropdowns. Audience size,
+reject in bulk. One dropdown filters the list at either level: a whole
+campaign, or one agent inside it. Campaign ids start with `a` and agent ids
+with `g`, so `#/contacts/a1` and `#/contacts/g2` both work and `scopeOf` in
+`app/src/data/index.ts` reads which is which. Tags sit inside more filters
+with a count each. Audience size,
 engagement and posted are slide bars: audience size carries a from and a to on
 the same scale, the other two carry one thumb each. Stars filter through a
 slider for the total, plus a switch per criterion: niche, selling and signal
@@ -121,9 +126,15 @@ contrast checks and always sit next to a legend.
 Unbounded for display, Satoshi for everything else, both lifted from
 `brand/index.html` and bundled as woff2 so nothing loads from the network.
 
-Pricing: a monthly plan at 100 to 1,000 leads a day, or a one off 30,000 lead
-pack at the same price with no renewal. The cards show lead counts and carry no
-figure, since the number is not decided.
+Volume, not price: the section leads with one slide bar, 100 to 1,000 leads a
+day, and reads back the week, the month and how many of those come back
+qualified. Under it, two ways to take that volume: every month, or a one off
+30,000 lead pack. The cards show lead counts and carry no figure, since the
+number is not decided.
+
+**Connect is one API.** One base URL and one key read this morning's leads and
+run the campaigns that fill them. No MCP server: the API covers both, and the
+AI tools that would have used MCP read it the same way they read any API.
 
 Works down to a phone, keyboard focus visible, reduced motion respected: the
 hero animation holds on its final chart, the switches and the reading dots

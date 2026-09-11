@@ -77,6 +77,8 @@ export function getAllContacts(now = new Date()): Contact[] {
 export interface ContactQuery {
   /** Empty means every campaign. */
   campaignIds?: string[]
+  /** Empty means every agent. Narrows inside a campaign. */
+  agentIds?: string[]
   tag?: string | null
   minStars?: number
   /** The least each criterion may score: 0 any, 0.5 half a star, 1 a full star. */
@@ -95,6 +97,7 @@ export function getContacts(q: ContactQuery = {}, now = new Date(), filters: Fil
     .filter((c) => !rejected.has(c.id) && passes(c, f, now))
     .map((c) => toContact(c, now))
     .filter((x) => !q.campaignIds?.length || q.campaignIds.includes(x.creator.campaignId))
+    .filter((x) => !q.agentIds?.length || q.agentIds.includes(x.creator.agentId))
     .filter((x) => !q.tag || getTags(x.creator.id).includes(q.tag))
     .filter((x) => x.score.stars >= (q.minStars ?? 0))
     .filter((x) => Object.entries(q.minLevels ?? {}).every(([k, min]) => x.score[k as 'niche' | 'active' | 'intent'] >= (min ?? 0)))
@@ -283,6 +286,34 @@ export function deleteCampaign(id: string): void {
   setState((s) => ({ campaigns: s.campaigns.filter((a) => a.id !== id) }))
 }
 
+/** One pick in the contacts dropdown: a whole campaign, or one agent inside it. */
+export interface Scope {
+  campaignIds: string[]
+  agentIds: string[]
+  /** What to call it on screen. Empty for every campaign. */
+  label: string
+}
+
+/**
+ * Read a selected id. Campaign ids start with "a", agent ids with "g", so one
+ * field in the route carries either level.
+ */
+export function scopeOf(id: string | null): Scope {
+  if (!id) return { campaignIds: [], agentIds: [], label: '' }
+  const campaign = getCampaigns().find((c) => c.id === id)
+  if (campaign) return { campaignIds: [campaign.id], agentIds: [], label: campaign.name }
+  for (const c of getCampaigns()) {
+    const agent = c.agents.find((a) => a.id === id)
+    if (agent) return { campaignIds: [c.id], agentIds: [agent.id], label: `${c.name} · ${agent.name}` }
+  }
+  return { campaignIds: [], agentIds: [], label: '' }
+}
+
+/** How many leads one agent brought in, so the dropdown can say so. */
+export function agentTally(campaignId: string, agentId: string, now = new Date()): number {
+  return getAllContacts(now).filter((c) => c.creator.campaignId === campaignId && c.creator.agentId === agentId).length
+}
+
 /** How many contacts each campaign found, and how many reach 2 stars. */
 export function campaignTally(id: string, now = new Date()): { found: number; high: number; today: number } {
   const mine = getAllContacts(now).filter((c) => c.creator.campaignId === id)
@@ -417,6 +448,7 @@ export function exportCsv(creatorIds: string[]): string {
       email: c.email,
       bio: c.bio,
       campaign: campaign?.name ?? '',
+      agent: campaign?.agents.find((a) => a.id === c.agentId)?.name ?? '',
       note: getNote(c.id),
       tags: getTags(c.id).join('; '),
       rejected: isRejected(c.id) ? 'yes' : 'no',

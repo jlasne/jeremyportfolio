@@ -81,6 +81,8 @@ export interface Creator {
   sells: string
   /** The campaign that found this creator. */
   campaignId: string
+  /** The agent inside that campaign that brought it in. */
+  agentId: string
   /** ISO date */
   firstSeenAt: string
   /** ISO date */
