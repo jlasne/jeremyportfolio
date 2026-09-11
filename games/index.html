@@ -161,7 +161,10 @@ button.stat.on{border-color:var(--cream);background:rgba(243,236,210,.07)}
 .gauge .ticks{position:relative;height:28px;font-family:var(--px);font-size:7px;color:var(--dim)}
 .gauge .ticks span{position:absolute;transform:translateX(-50%);white-space:nowrap;top:2px}
 
-.cust{margin-top:14px;padding:14px 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.custrow{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;margin-top:12px}
+@media(max-width:480px){.custrow{grid-template-columns:1fr;justify-items:center}}
+#custPreview{width:120px;height:160px;image-rendering:pixelated;background:var(--well);border:2px solid var(--faint);animation:bob 1.2s steps(1) infinite}
+.cust{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px 14px}
 .cust label{display:block;font-family:var(--px);font-size:7px;color:var(--dim);margin-bottom:6px}
 .sw{display:flex;gap:6px;flex-wrap:wrap}
 .sw button{width:28px;height:28px;border:2px solid var(--faint)}
@@ -244,16 +247,6 @@ canvas#web{width:100%;max-width:420px;aspect-ratio:1;cursor:pointer}
 .tick{width:22px;height:22px;border:2px solid var(--faint);display:grid;place-items:center;font-family:var(--px);font-size:7px;color:var(--dim)}
 .tick.ok{background:var(--end);color:var(--night);border-color:var(--end)}
 
-/* ── plan ──────────────────────────────────────────────────────────────── */
-.plan .ctl{display:grid;grid-template-columns:2fr 1fr auto;gap:10px;align-items:end;padding:16px}
-@media(max-width:600px){.plan .ctl{grid-template-columns:1fr}}
-.plan table{width:100%;border-collapse:collapse;font-size:17px}
-.plan th,.plan td{text-align:left;padding:6px 10px;border-top:2px solid var(--faint);vertical-align:middle;white-space:nowrap}
-.plan th{font-family:var(--px);font-size:7px;color:var(--dim);font-weight:400}
-.plan .wk{font-family:var(--px);font-size:8px;color:var(--fire)}
-.plan .xp{font-family:var(--px);font-size:8px;text-align:right}
-.tblwrap{overflow-x:auto}
-
 /* ── footer, dialogue, dialog ──────────────────────────────────────────── */
 footer{max-width:1080px;margin:0 auto;padding:0 12px 40px}
 footer .rules{padding:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px 22px}
@@ -296,7 +289,6 @@ dialog .in{padding:14px}
   <button type="button" data-tab="card" class="on">CARD</button>
   <button type="button" data-tab="log">LOG</button>
   <button type="button" data-tab="team">TEAM</button>
-  <button type="button" data-tab="plan">PLAN</button>
 </nav>
 
 <main>
@@ -317,15 +309,6 @@ dialog .in{padding:14px}
   <div class="webwrap">
     <div class="box web"><canvas id="web" aria-label="Six stats as a web"></canvas><div class="cap" id="webCap"></div></div>
     <div class="box detail" id="detail"></div>
-  </div>
-  <div class="box cust" id="cust" hidden>
-    <div><label for="cName">Name</label><input type="text" id="cName" maxlength="16" autocomplete="off"></div>
-    <div><label for="cSport">Sport</label><input type="text" id="cSport" maxlength="24" autocomplete="off"></div>
-    <div><label>Skin</label><div class="sw" id="swSkin"></div></div>
-    <div><label>Hair</label><div class="sw" id="swHair"></div></div>
-    <div><label>Hair colour</label><div class="sw" id="swHairC"></div></div>
-    <div><label>Top</label><div class="sw" id="swTop"></div></div>
-    <div><label>Bottom</label><div class="sw" id="swBot"></div></div>
   </div>
 </section>
 
@@ -365,30 +348,39 @@ dialog .in{padding:14px}
   <div class="team">
     <div class="box goal" id="goalKm"></div>
     <div class="box goal" id="goalT"></div>
-    <div class="box bounty" id="bounty"></div>
     <div class="box goal" id="goalS"></div>
-  </div>
-</section>
-
-<section id="tab-plan" class="tab">
-  <div class="box plan">
-    <div class="ctl">
-      <div class="f"><label for="pGoal">Goal</label><select id="pGoal"></select></div>
-      <div class="f"><label for="pDays">Days a week</label><select id="pDays"><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select></div>
-      <div class="f"><label>&nbsp;</label><button class="btn primary" id="pGo" type="button">GENERATE</button></div>
-    </div>
-    <div class="note" style="padding:0 16px 10px">Pick a goal and how many days you can train. It writes a 4-week block, week 4 lighter, and prices every session in XP before you do it. LOG puts one straight in the log.</div>
-    <div class="tblwrap" id="planOut"></div>
+    <div class="box goal" id="goalSleep"></div>
+    <div class="box goal" id="goalSoc"></div>
+    <div class="box bounty" id="bounty"></div>
   </div>
 </section>
 
 </main>
 
 <footer>
-  <div class="foot"><span>Honor system. Manual log. Your data stays in this browser. The camp follows your clock.</span><a href="#" id="reset">reset the demo</a></div>
+  <div class="foot"><span>Honor system. Manual log. Every team goal is last week's number: beat it together. Your data stays in this browser.</span><a href="#" id="reset">reset the demo</a></div>
 </footer>
 
 <div id="toast" class="box thin" role="status"></div>
+
+<dialog id="custDlg">
+  <form class="in" method="dialog">
+    <h2>CUSTOMIZE</h2>
+    <div class="custrow">
+      <canvas id="custPreview" width="24" height="32" aria-hidden="true"></canvas>
+      <div class="cust">
+        <div><label for="cName">Name</label><input type="text" id="cName" maxlength="16" autocomplete="off"></div>
+        <div><label for="cSport">Sport</label><input type="text" id="cSport" maxlength="24" autocomplete="off"></div>
+        <div><label>Skin</label><div class="sw" id="swSkin"></div></div>
+        <div><label>Hair</label><div class="sw" id="swHair"></div></div>
+        <div><label>Hair colour</label><div class="sw" id="swHairC"></div></div>
+        <div><label>Top</label><div class="sw" id="swTop"></div></div>
+        <div><label>Bottom</label><div class="sw" id="swBot"></div></div>
+      </div>
+    </div>
+    <div class="actions"><button class="btn primary" type="submit">DONE</button></div>
+  </form>
+</dialog>
 
 <dialog id="addDlg">
   <form class="in" id="addForm">
@@ -496,7 +488,7 @@ const SKINS=['#f5cba7','#d9a16b','#a86c3c','#5a3a22'];
 const HAIRC=['#2b1d12','#6b3e1a','#d9a441','#151515','#b53a2e'];
 const TOPS=['#5fa8d3','#ff6b4d','#5be09a','#ffd24d','#a98bff','#eaf4fb'];
 const BOTS=['#1f2a44','#3b3b3b','#5a3a22','#173d59'];
-const HAIRS=['short','long','bun','cap'];
+const HAIRS=['short','long','bun','spiky'];
 const SPRITE_NOTES={
   str:['lv 10 wider torso','lv 20 belt, thicker arms','lv 30 wider again','lv 45 arms again'],
   spd:['lv 10 headband, yellow shoes','lv 20 motion lines','lv 30 more lines'],
@@ -640,8 +632,8 @@ function drawChar(cv,m,lv,frame){
   if(hs==='short'){px(t,7,2+b,10,3,hair);px(t,7,5+b,2,2,hair);px(t,15,5+b,2,2,hair);px(t,12,5+b,2,1,hair)}
   if(hs==='long'){px(t,7,2+b,10,3,hair);px(t,6,4+b,1,9,hair);px(t,17,4+b,1,9,hair);px(t,7,5+b,2,1,hair);px(t,15,5+b,2,1,hair)}
   if(hs==='bun'){px(t,7,2+b,10,3,hair);px(t,10,b,4,2,hair);px(t,7,5+b,2,2,hair);px(t,15,5+b,2,2,hair)}
-  if(hs==='cap'){px(t,6,2+b,12,3,top);px(t,5,5+b,14,1,top);px(t,7,6+b,1,1,hair);px(t,16,6+b,1,1,hair)}
-  if(T.spd>=1&&hs!=='cap') px(t,7,5+b,10,1,'#ffd24d');
+  if(hs==='spiky'){px(t,7,2+b,10,3,hair);px(t,7,1+b,2,1,hair);px(t,10,1+b,3,1,hair);px(t,14,1+b,2,1,hair);px(t,11,b,1,1,hair);px(t,7,5+b,2,2,hair);px(t,15,5+b,2,2,hair)}
+  if(T.spd>=1) px(t,7,5+b,10,1,'#ffd24d');
   if(T.hea>=1){const c=T.hea>=3?'#dffff9':'#4de8d0';px(t,8,0,8,1,c)}
   if(blink){px(t,9,9+b,2,1,EYE);px(t,13,9+b,2,1,EYE)}
   else{px(t,9,8+b,2,2,EYE);px(t,13,8+b,2,2,EYE);px(t,10,8+b,1,1,'#fff');px(t,14,8+b,1,1,'#fff')}
@@ -741,7 +733,7 @@ function sceneFrame(){
 }
 
 /* ── render ────────────────────────────────────────────────────────────── */
-let frame=0, detailKey='str', custOpen=false;
+let frame=0, detailKey='str';
 function renderAll(){renderBand();layoutScene();renderChar();renderCust();renderLog();renderBoard();renderTeam()}
 function renderBand(){
   const t=now();let xp=0,km=0,tn=0,ss=0;
@@ -773,11 +765,11 @@ function renderGauge(d){
 }
 function sw(sel,arr,cur,set,text){
   $(sel).innerHTML=arr.map((c,i)=>text?`<button type="button" class="t ${i===cur?'on':''}" data-i="${i}">${c}</button>`:`<button type="button" class="${i===cur?'on':''}" style="background:${c}" data-i="${i}" aria-label="option ${i+1}"></button>`).join('');
-  $$(sel+' button').forEach(b=>b.onclick=()=>{set(+b.dataset.i);save();renderAll()});
+  $$(sel+' button').forEach(b=>b.onclick=()=>{set(+b.dataset.i);save();renderAll();renderCust()});
 }
 function renderCust(){
   const m=memberById(state.sel);
-  $('#cust').hidden=!custOpen;
+  drawChar($('#custPreview'),m,D(m.id).lv,frame);
   if(document.activeElement!==$('#cName')) $('#cName').value=m.name;
   if(document.activeElement!==$('#cSport')) $('#cSport').value=m.sport;
   sw('#swSkin',SKINS,m.look.skin,v=>m.look.skin=v);
@@ -945,54 +937,51 @@ const BOUNTIES=[
   {n:'Learn 30 minutes',ok:ls=>ls.some(l=>l.kind==='train'&&(actById(l.act)||GENERIC).s[5]>=50&&l.min>=30)},
   {n:'Swim 1 km',ok:ls=>ls.some(l=>(l.act||'').startsWith('swim')&&(l.km||0)>=1)},
 ];
-function goal(el,title,rows,target,unit,note){
-  const sum=rows.reduce((s,r)=>s+r[1],0), p=Math.min(100,sum/target*100), max=Math.max(1e-9,...rows.map(r=>r[1])), dp=unit==='sessions'?0:1;
-  el.innerHTML=`<h3>${title}</h3><div class="big">${sum.toFixed(dp)} <small style="font:inherit;font-size:10px;color:var(--dim)">/ ${target} ${unit}</small></div>
-    <div class="track"><i style="width:${p.toFixed(1)}%;background:${p>=100?'#5be09a':'#62d6c8'}"></i></div>
+// every team goal is last week's number: the guild has to beat itself, with a floor so week one is not free
+function goal(el,title,rows,floorPer,unit,note,last){
+  const dp=unit==='sessions'||unit==='chats'?0:1;
+  const target=Math.max(floorPer*rows.length,last), onFloor=target>last, beaten=rows.reduce((s,r)=>s+r[1],0)>target;
+  const sum=rows.reduce((s,r)=>s+r[1],0), p=Math.min(100,sum/Math.max(target,1e-9)*100), max=Math.max(1e-9,...rows.map(r=>r[1]));
+  el.innerHTML=`<h3>${title} ${beaten?'<span class="status" style="--z:#5be09a">BEATEN</span>':''}</h3>
+    <div class="big">${sum.toFixed(dp)} <small style="font:inherit;font-size:10px;color:var(--dim)">/ ${target.toFixed(dp)} ${unit} to beat</small></div>
+    <div class="track"><i style="width:${p.toFixed(1)}%;background:${beaten?'#5be09a':'#62d6c8'}"></i></div>
     <div class="contrib">${rows.map(([n,v])=>`<div class="c"><span>${esc(n)}</span><i style="width:${(v/max*100).toFixed(1)}%"></i><span class="dim">${v.toFixed(dp)}</span></div>`).join('')}</div>
-    ${note?`<div class="note" style="margin-top:10px">${note}</div>`:''}`;
+    <div class="note" style="margin-top:10px">${onFloor?`Last week ${last.toFixed(dp)}, under the floor of ${floorPer} a player.`:`Last week ${last.toFixed(dp)}. Beat it.`} ${note}</div>`;
 }
 function renderTeam(){
   const t=now(), day0=startOfDay(t);
-  const rows=state.members.map(m=>{const d=D(m.id);let km=0,tn=0,ss=0;const today=[];
-    for(const l of d.logs){if(l.t>=day0) today.push(l);if(l.t<t-WEEK) continue;if(l.kind==='train'){km+=kmEq(l);tn+=(l.kg||0)/1000;if(d.gains.get(l.id).physFrac>=.5) ss++}}
-    return {m,km,tn,ss,today}});
-  const n=state.members.length;
-  goal($('#goalKm'),'DISTANCE THIS WEEK',rows.map(r=>[r.m.name,r.km]),40*n,'km-eq','40 km-eq a player. 1 km swim = 4 km run, bike ÷ 3, 1 tonne = 1.3 km.');
-  goal($('#goalT'),'TONNAGE THIS WEEK',rows.map(r=>[r.m.name,r.tn]),10*n,'tonnes','10 tonnes a player.');
-  goal($('#goalS'),'SESSIONS THIS WEEK',rows.map(r=>[r.m.name,r.ss]),4*n,'sessions','4 a player.');
+  const blank=()=>({km:0,tn:0,ss:0,sl:0,so:0});
+  const rows=state.members.map(m=>{const d=D(m.id), cur=blank(), prev=blank(), today=[];
+    for(const l of d.logs){
+      if(l.t>=day0) today.push(l);
+      const wi=Math.floor((day0-startOfDay(l.t))/WEEK);if(wi<0||wi>1) continue;
+      const b=wi?prev:cur;
+      if(l.kind==='sleep') b.sl+=l.hours;
+      if(l.kind==='train'){b.km+=kmEq(l);b.tn+=(l.kg||0)/1000;
+        if(d.gains.get(l.id).physFrac>=.5) b.ss++;
+        if((actById(l.act)||GENERIC).s[4]>=50) b.so++}
+    }
+    return {m,cur,prev,today}});
+  const last=k=>rows.reduce((s,r)=>s+r.prev[k],0);
+  const col=k=>rows.map(r=>[r.m.name,r.cur[k]]);
+  goal($('#goalKm'),'DISTANCE',col('km'),10,'km-eq','1 km swim = 4 km run, bike ÷ 3, 1 tonne = 1.3 km.',last('km'));
+  goal($('#goalT'),'TONNAGE',col('tn'),2,'tonnes','kg moved across every lift.',last('tn'));
+  goal($('#goalS'),'SESSIONS',col('ss'),2,'sessions','Physical sessions only.',last('ss'));
+  goal($('#goalSleep'),'HOURS SLEPT',col('sl'),35,'hours','Sleep logs only, one a night.',last('sl'));
+  goal($('#goalSoc'),'PEOPLE TALKED TO',col('so'),1,'chats','An old friend, someone new, or a night out.',last('so'));
   const doy=Math.floor(t/DAY), L=BOUNTIES.length, ids=[...new Set([doy%L,(doy*3+1)%L,(doy*5+2)%L])].slice(0,3);
   $('#bounty').innerHTML=`<h3>DAILY BOUNTIES</h3><div class="note" style="margin-top:4px">Clear one, take a tick. New set at midnight.</div>`+
     ids.map(i=>{const b=BOUNTIES[i];return `<div class="b"><span>${b.n}</span><span class="ticks">${rows.map(r=>{const ok=b.ok(r.today);return `<span class="tick ${ok?'ok':''}" title="${esc(r.m.name)}">${ok?'✓':esc(r.m.name[0])}</span>`}).join('')}</span></div>`}).join('');
 }
 
-/* plan */
-const GOALS=[
-  {id:'10k',n:'First 10 km',s:[['run_easy',[35,40,45,35],4],['run_tempo',[25,30,35,20],7],['run_long',[50,60,75,40],5],['mobility',[20,20,20,20],2],['sprints',[20,25,25,15],8],['run_easy',[30,35,40,30],4]]},
-  {id:'bench',n:'100 kg bench',s:[['pl_heavy',[60,70,75,45],8],['hyper',[60,60,60,40],7],['pl_heavy',[50,55,60,40],7],['mobility',[20,20,20,20],2],['hyper',[45,50,50,35],6],['walk',[30,30,30,30],2]]},
-  {id:'mu',n:'5 muscle-ups',s:[['calis',[45,50,55,35],7],['sl_weighted',[50,55,60,40],8],['calis',[40,45,50,30],6],['mobility',[20,20,20,20],2],['hyper',[45,45,45,30],6],['run_easy',[25,30,30,20],4]]},
-  {id:'swim',n:'Swim 1500 m nonstop',s:[['swim_dist',[40,45,55,35],6],['swim_sprint',[30,35,35,25],8],['swim_dist',[45,55,65,40],5],['mobility',[20,20,20,20],2],['hyper',[45,45,45,30],6],['bike',[45,50,60,40],4]]},
-  {id:'sleep',n:'Sleep 8 h for 30 nights',s:[['yoga',[30,30,30,30],3],['mobility',[20,25,25,20],2],['walk',[40,40,40,40],2],['sauna',[20,20,20,20],3],['yoga',[30,30,30,30],3],['walk',[30,30,30,30],2]],note:'Plus a sleep log every night: 8 h is 64 Health XP, on top of the sessions below.'},
-  {id:'books',n:'Read 4 books',s:[['read',[30,30,30,30],5],['read',[30,30,30,30],5],['read',[30,30,30,30],5],['read',[30,30,30,30],5],['read',[30,30,30,30],5],['read',[30,30,30,30],5]],note:'About 25 pages a sitting. 4 books of 250 pages in 4 weeks takes 6 sittings a week.'},
-];
-function renderPlan(){
-  const G=GOALS.find(g=>g.id===$('#pGoal').value)||GOALS[0], days=+$('#pDays').value;
-  const rows=[];let block=0;
-  for(let w=0;w<4;w++) for(let d=0;d<days;d++){const [aid,mins,rpe0]=G.s[d%G.s.length],a=actById(aid),min=mins[w],rpe=w===3?Math.max(1,rpe0-1):rpe0;const g=gainFor({kind:'train',act:aid,min,rpe},1.2);block+=g.total;rows.push({w,d,a,min,rpe,xp:g.total})}
-  $('#planOut').innerHTML=`<div class="note" style="padding:0 16px 12px">${G.note||'Week 4 is the deload: shorter, one RPE lower.'} XP shown at Primed, ×1.2. Block total <b>${fmt(block)} XP</b>.</div>
-    <table><thead><tr><th>Week</th><th>Day</th><th>Session</th><th>Min</th><th>RPE</th><th style="text-align:right">XP</th><th></th></tr></thead><tbody>${rows.map(r=>`<tr><td class="wk">${r.d===0?'W'+(r.w+1)+(r.w===3?' deload':''):''}</td><td>${r.d+1}</td><td>${r.a.n}</td><td>${r.min}</td><td>${r.rpe}</td><td class="xp">${fmt(r.xp)}</td><td><button class="btn sm" type="button" data-log="${r.a.id}|${r.min}|${r.rpe}">log</button></td></tr>`).join('')}</tbody></table>`;
-  $$('#planOut [data-log]').forEach(b=>b.onclick=()=>{const [aid,min,rpe]=b.dataset.log.split('|');$('#lText').value=actById(aid).n;$('#lMin').value=min;$('#lRpe').value=rpe;$('#lRpeV').textContent=rpe;$('#lDate').value=isoLocal(now());showTab('log');preview();$('#lText').focus()});
-}
-
 /* ── wiring ────────────────────────────────────────────────────────────── */
-function showTab(id){$$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===id));$$('.tab').forEach(s=>s.classList.toggle('on',s.id==='tab-'+id));if(id==='card') renderWeb();if(id==='team') renderBoard();if(id==='plan'&&!$('#planOut').innerHTML) renderPlan()}
+function showTab(id){$$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===id));$$('.tab').forEach(s=>s.classList.toggle('on',s.id==='tab-'+id));if(id==='card') renderWeb();if(id==='team') renderBoard()}
 function init(){
   drawMark();sceneSize();
   $('#lDate').value=isoLocal(now());$('#lDate').max=isoLocal(now());
   $('#acts').innerHTML=ACTS.map(a=>`<option value="${esc(a.n)}">`).join('');
-  $('#pGoal').innerHTML=GOALS.map(g=>`<option value="${g.id}">${g.n}</option>`).join('');
   $$('#tabs button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
-  $('#custBtn').onclick=()=>{custOpen=!custOpen;renderCust()};
+  $('#custBtn').onclick=()=>{renderCust();$('#custDlg').showModal()};
   $('#cName').oninput=e=>{const m=memberById(state.sel);m.name=e.target.value.trim()||m.name;save();layoutScene();renderChar();$('#lWho').textContent=m.name};
   $('#cSport').oninput=e=>{const m=memberById(state.sel);m.sport=e.target.value.trim();save();renderChar()};
   ['lText','lMin','lRpe','lPb'].forEach(id=>$('#'+id).addEventListener('input',()=>{$('#lRpeV').textContent=$('#lRpe').value;preview()}));
@@ -1003,7 +992,6 @@ function init(){
   $('#qSleep').onclick=()=>{const raw=parseFloat($('#qHours').value);
     const h=Math.max(3,Math.min(12,Math.round((isFinite(raw)?raw:8)*2)/2));
     $('#qHours').value=h;addLog({t:logTime($('#lDate').value,7),kind:'sleep',hours:h})};
-  $('#pGo').onclick=renderPlan;$('#pGoal').onchange=renderPlan;$('#pDays').onchange=renderPlan;
   $('#scene').onclick=e=>{const r=e.target.getBoundingClientRect(),x=(e.clientX-r.left)/SCENE.S;const c=SCENE.chars.find(c=>Math.abs(x-c.x)<13);if(c){state.sel=c.m.id;save();renderAll()}};
   $('#web').onclick=e=>{const r=e.target.getBoundingClientRect(),x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2;
     if(Math.hypot(x,y)<r.width*.07) return;let ang=Math.atan2(y,x)+Math.PI/2;if(ang<0) ang+=Math.PI*2;
@@ -1025,12 +1013,13 @@ function init(){
     const base={};$$('#aTiers select').forEach(s=>base[s.dataset.k]=lvlXP(+s.value));
     const R=n=>Math.floor(Math.random()*n);
     const m={id:'m'+Date.now().toString(36),name,sport:$('#aSport').value.trim()||'Training',look:{skin:R(SKINS.length),hair:R(HAIRS.length),hairC:R(HAIRC.length),top:R(TOPS.length),bot:R(BOTS.length)},base};
-    state.members.push(m);state.sel=m.id;dirty();save();$('#addDlg').close();custOpen=true;showTab('card');sceneSize();renderAll();toast(`${name} joined the guild`)};
-  $('#reset').onclick=e=>{e.preventDefault();if(!confirm('Reset the demo? Your logs in this browser go away.')) return;localStorage.removeItem(KEY);state=seed();dirty();custOpen=false;sceneSize();renderAll();toast('Demo reset')};
+    state.members.push(m);state.sel=m.id;dirty();save();$('#addDlg').close();showTab('card');sceneSize();renderAll();renderCust();$('#custDlg').showModal();toast(`${name} joined the guild`)};
+  $('#reset').onclick=e=>{e.preventDefault();if(!confirm('Reset the demo? Your logs in this browser go away.')) return;localStorage.removeItem(KEY);state=seed();dirty();sceneSize();renderAll();toast('Demo reset')};
   let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{sceneSize();if($('#tab-card').classList.contains('on')) renderWeb();if($('#tab-team').classList.contains('on')) renderBoard()},120)});
   renderAll();
   setInterval(sceneFrame,90);
-  setInterval(()=>{frame++;const m=memberById(state.sel);drawChar($('#big'),m,D(m.id).lv,frame)},600);
+  setInterval(()=>{frame++;const m=memberById(state.sel);const lv=D(m.id).lv;drawChar($('#big'),m,lv,frame);
+    if($('#custDlg').open) drawChar($('#custPreview'),m,lv,frame)},600);
 }
 init();
 </script>
