@@ -137,24 +137,30 @@ main{max-width:1080px;margin:0 auto;padding:16px 12px 32px}
 .portrait .sport{font-size:18px;color:var(--fire)}
 .portrait .btn{margin-top:8px}
 .stats{padding:14px 16px;display:flex;flex-direction:column;gap:12px;justify-content:center}
-.stat{display:grid;grid-template-columns:78px 40px 1fr 92px;align-items:center;gap:10px}
+button.stat{display:grid;grid-template-columns:78px 44px 1fr 68px;align-items:center;gap:10px;width:100%;text-align:left;padding:3px 5px;border:2px solid transparent;background:none}
+button.stat:hover{border-color:var(--faint)}
+button.stat.on{border-color:var(--cream);background:rgba(243,236,210,.07)}
 .stat .k{font-family:var(--px);font-size:8px;color:var(--c)}
 .stat .lv{font-family:var(--px);font-size:9px;text-align:right}
 .stat .bar{height:12px;border:2px solid var(--cream);background:var(--well);padding:1px;display:block}
 .stat .bar i{display:block;height:100%;background:var(--c);box-shadow:inset 0 -2px 0 rgba(0,0,0,.28);transition:width .4s}
 .stat .to{font-size:15px;line-height:1;color:var(--dim);text-align:right;white-space:nowrap}
-@media(max-width:480px){.stat{grid-template-columns:64px 36px 1fr}.stat .to{display:none}}
+@media(max-width:480px){button.stat{grid-template-columns:60px 38px 1fr}.stat .to{display:none}}
+.overall{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-bottom:10px;margin-bottom:2px;border-bottom:2px solid var(--faint)}
+.overall .n{font-family:var(--px);font-size:20px;color:var(--fire)}
+.overall .l{font-family:var(--px);font-size:7px;color:var(--dim);line-height:1.7}
 .week{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:16px;color:var(--dim);margin-top:6px;padding-top:12px;border-top:2px solid var(--faint)}
 .week b{font-family:var(--px);font-size:9px;color:var(--cream);font-weight:400}
-.gauge{margin-top:14px;padding:14px 16px}
+.gauge{margin-top:14px;padding:14px 16px;cursor:pointer}
+.gauge:hover{background:#15233f}
+.gauge .hint{font-family:var(--px);font-size:7px;color:var(--fire);animation:blink 1.1s steps(1) infinite}
 .gauge .row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .gauge .track{position:relative;height:14px;margin:16px 0 4px;display:flex;border:2px solid var(--cream);background:var(--well);padding:1px;gap:1px}
 .gauge .z{height:100%;opacity:.55}
 .gauge .needle{position:absolute;top:-13px;margin-left:-5px;border-top:8px solid var(--cream);border-left:5px solid transparent;border-right:5px solid transparent;transition:left .4s}
 .gauge .ticks{position:relative;height:28px;font-family:var(--px);font-size:7px;color:var(--dim)}
 .gauge .ticks span{position:absolute;transform:translateX(-50%);white-space:nowrap;top:2px}
-.gauge p{font-size:17px;color:var(--dim);margin-top:6px;line-height:1.2}
-.gauge p b{color:var(--cream);font-weight:400}
+
 .cust{margin-top:14px;padding:14px 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
 .cust label{display:block;font-family:var(--px);font-size:7px;color:var(--dim);margin-bottom:6px}
 .sw{display:flex;gap:6px;flex-wrap:wrap}
@@ -163,11 +169,13 @@ main{max-width:1080px;margin:0 auto;padding:16px 12px 32px}
 .sw button.t{background:var(--well);color:var(--cream);width:auto;padding:0 8px;font-family:var(--px);font-size:7px}
 
 /* ── tree ──────────────────────────────────────────────────────────────── */
-.treewrap{display:grid;grid-template-columns:minmax(280px,1fr) 300px;gap:14px}
-@media(max-width:720px){.treewrap{grid-template-columns:1fr}}
-.tree{padding:10px;display:grid;place-items:center}
-canvas#tree{width:100%;max-width:540px;aspect-ratio:1;cursor:pointer}
+.webwrap{display:grid;grid-template-columns:minmax(260px,1fr) 1fr;gap:14px;margin-top:14px;align-items:start}
+@media(max-width:720px){.webwrap{grid-template-columns:1fr}}
+.web{padding:12px;display:grid;place-items:center}
+canvas#web{width:100%;max-width:420px;aspect-ratio:1;cursor:pointer}
+.web .cap{font-family:var(--px);font-size:7px;color:var(--dim);line-height:1.7;text-align:center;margin-top:4px}
 .detail{padding:16px}
+.detail .hdr{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
 .detail ul{list-style:none;font-size:17px;margin-top:6px}
 .detail li{padding:5px 0;border-top:2px solid var(--faint)}
 .detail li:first-child{border-top:0}
@@ -193,8 +201,22 @@ canvas#tree{width:100%;max-width:540px;aspect-ratio:1;cursor:pointer}
 .card{padding:12px 14px 14px}
 .card .hd{display:flex;align-items:center;gap:10px}
 .card .hd canvas{width:36px;height:48px;image-rendering:pixelated}
-.card .hd b{font-family:var(--px);font-size:9px;font-weight:400}
-.card .hd small{font-size:15px}
+.card canvas.web{width:72px;height:72px;flex:0 0 72px}
+.card .midrow{display:flex;align-items:center;gap:12px;margin-top:8px}
+.card .midrow>div{flex:1;min-width:0}
+.summary{padding:14px 16px;margin-bottom:14px;display:grid;grid-template-columns:minmax(150px,auto) 1fr;gap:14px 22px;align-items:center}
+@media(max-width:600px){.summary{grid-template-columns:1fr}}
+.summary .tot .n{font-family:var(--px);font-size:20px;color:var(--fire)}
+.summary .tot .l{font-family:var(--px);font-size:7px;color:var(--dim);line-height:1.7;margin-top:6px}
+.summary .movers{display:flex;flex-direction:column;gap:8px}
+.summary .mv{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;font-size:17px}
+.summary .mv .p{font-family:var(--px);font-size:9px}
+.summary .mv .d{font-family:var(--px);font-size:8px}
+.card .hd b{font-family:var(--px);font-size:9px;font-weight:400;display:block}
+.card .hd .who{flex:1;min-width:0}
+.card .hd small{display:block;font-size:15px;line-height:1.15;margin-top:4px;color:var(--teal)}
+.card .hd small.dim{color:var(--dim);margin-top:1px}
+.card .rank{align-self:flex-start}
 .card .rank{font-family:var(--px);font-size:12px;margin-left:auto;color:var(--fire)}
 .card .growth{font-family:var(--px);font-size:18px;margin:12px 0 4px}
 .card canvas.spark{width:100%;height:40px;margin:10px 0 8px;image-rendering:pixelated}
@@ -204,7 +226,7 @@ canvas#tree{width:100%;max-width:540px;aspect-ratio:1;cursor:pointer}
 .badge{font-family:var(--px);font-size:6px;line-height:1;padding:4px 5px;color:var(--night)}
 
 /* ── team ──────────────────────────────────────────────────────────────── */
-.team{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+.team{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;margin-top:14px}
 @media(max-width:720px){.team{grid-template-columns:1fr}}
 .goal{padding:16px}
 .goal .big{margin-top:6px;font-size:15px}
@@ -245,6 +267,10 @@ footer a{color:var(--dim)}
 dialog{margin:auto;background:var(--panel);color:var(--cream);border:8px solid transparent;border-image:var(--frame) 4 / 8px repeat;padding:0;width:min(560px,calc(100vw - 24px))}
 dialog::backdrop{background:rgba(3,6,14,.7)}
 dialog .in{padding:14px}
+.budget{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:14px;padding:8px 10px;background:var(--well);border:2px solid var(--faint);font-family:var(--px);font-size:8px;line-height:1.7}
+.budget.over{border-color:#ff6b4d;color:#ff6b4d}
+.budget b{font-size:11px;font-weight:400;color:var(--fire)}
+.budget.over b{color:#ff6b4d}
 .tiers{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin-top:12px}
 @media(max-width:480px){.tiers{grid-template-columns:1fr}}
 .tiers label{font-family:var(--px);font-size:7px;color:var(--dim);display:block;margin-bottom:4px}
@@ -267,17 +293,15 @@ dialog .in{padding:14px}
 </div>
 
 <nav id="tabs" aria-label="Menu">
-  <button type="button" data-tab="char" class="on">CARD</button>
-  <button type="button" data-tab="tree">TREE</button>
+  <button type="button" data-tab="card" class="on">CARD</button>
   <button type="button" data-tab="log">LOG</button>
-  <button type="button" data-tab="board">BOARD</button>
   <button type="button" data-tab="team">TEAM</button>
   <button type="button" data-tab="plan">PLAN</button>
 </nav>
 
 <main>
 
-<section id="tab-char" class="tab on">
+<section id="tab-card" class="tab on">
   <div class="hero">
     <div class="box portrait">
       <div class="cardhd"><span>GUILD CARD</span><span id="pNo"></span></div>
@@ -289,7 +313,11 @@ dialog .in{padding:14px}
     </div>
     <div class="box stats" id="stats"></div>
   </div>
-  <div class="box gauge" id="gauge"></div>
+  <div class="box gauge" id="gauge" role="button" tabindex="0" aria-label="Fatigue, click to read how it works"></div>
+  <div class="webwrap">
+    <div class="box web"><canvas id="web" aria-label="Six stats as a web"></canvas><div class="cap" id="webCap"></div></div>
+    <div class="box detail" id="detail"></div>
+  </div>
   <div class="box cust" id="cust" hidden>
     <div><label for="cName">Name</label><input type="text" id="cName" maxlength="16" autocomplete="off"></div>
     <div><label for="cSport">Sport</label><input type="text" id="cSport" maxlength="24" autocomplete="off"></div>
@@ -298,13 +326,6 @@ dialog .in{padding:14px}
     <div><label>Hair colour</label><div class="sw" id="swHairC"></div></div>
     <div><label>Top</label><div class="sw" id="swTop"></div></div>
     <div><label>Bottom</label><div class="sw" id="swBot"></div></div>
-  </div>
-</section>
-
-<section id="tab-tree" class="tab">
-  <div class="treewrap">
-    <div class="box tree"><canvas id="tree" aria-label="Skill tree, six branches"></canvas></div>
-    <div class="box detail" id="treeDetail"></div>
   </div>
 </section>
 
@@ -324,7 +345,7 @@ dialog .in{padding:14px}
         <div class="f"><label for="lKm">km, optional</label><input type="number" id="lKm" min="0" step="0.1" placeholder="0"></div>
         <div class="f"><label for="lKg">kg moved, optional</label><input type="number" id="lKg" min="0" step="50" placeholder="0"></div>
       </div>
-      <label class="chk"><input type="checkbox" id="lPb"> New personal best, worth 5 sessions</label>
+      <label class="chk"><input type="checkbox" id="lPb"> New personal best, worth 2 sessions</label>
       <button class="btn primary" id="lGo" type="button">LOG IT</button>
       <div class="quick">
         <button class="btn" id="qRest" type="button">REST DAY</button>
@@ -338,11 +359,9 @@ dialog .in{padding:14px}
   </div>
 </section>
 
-<section id="tab-board" class="tab">
-  <div class="cards" id="cards"></div>
-</section>
-
 <section id="tab-team" class="tab">
+  <div class="box summary" id="summary"></div>
+  <div class="cards" id="cards"></div>
   <div class="team">
     <div class="box goal" id="goalKm"></div>
     <div class="box goal" id="goalT"></div>
@@ -358,6 +377,7 @@ dialog .in{padding:14px}
       <div class="f"><label for="pDays">Days a week</label><select id="pDays"><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select></div>
       <div class="f"><label>&nbsp;</label><button class="btn primary" id="pGo" type="button">GENERATE</button></div>
     </div>
+    <div class="note" style="padding:0 16px 10px">Pick a goal and how many days you can train. It writes a 4-week block, week 4 lighter, and prices every session in XP before you do it. LOG puts one straight in the log.</div>
     <div class="tblwrap" id="planOut"></div>
   </div>
 </section>
@@ -365,14 +385,6 @@ dialog .in{padding:14px}
 </main>
 
 <footer>
-  <div class="box rules">
-    <div><h3>XP IS EFFORT</h3><p>Minutes × (RPE² ÷ 20). Minutes past 60 count half. RPE 8 is worth 4× RPE 4. A personal best pays 5 sessions.</p></div>
-    <div><h3>LEVELS</h3><p>Level N costs 50 × N² XP in total. Signup tops out at 10. There is no cap.</p></div>
-    <div><h3>FATIGUE</h3><p>Last 7 days of physical effort over your 28-day average. Under 0.8 Fresh ×1.0. To 1.3 Primed ×1.2. To the burn line Fatigued ×0.7. Past it Burnt ×0.4.</p></div>
-    <div><h3>HEALTH</h3><p>Rest day 60 XP and −15% recent load. Sleep 8 XP an hour, −10% at 8 h. Mobility, yoga and sauna count at least a point a minute. Every 10 levels moves the burn line up 0.1.</p></div>
-    <div><h3>SOCIAL</h3><p>Reconnect with an old friend, call someone new, go out and talk. RPE is how far out of your comfort zone.</p></div>
-    <div><h3>BRAIN</h3><p>Minutes of a book or a learning video. RPE is how hard the material was.</p></div>
-  </div>
   <div class="foot"><span>Honor system. Manual log. Your data stays in this browser. The camp follows your clock.</span><a href="#" id="reset">reset the demo</a></div>
 </footer>
 
@@ -381,11 +393,12 @@ dialog .in{padding:14px}
 <dialog id="addDlg">
   <form class="in" id="addForm">
     <h2>NEW PLAYER</h2>
-    <p class="note" style="margin:8px 0 12px">Level 10 is the ceiling at signup. Everything above is earned inside.</p>
+    <p class="note" style="margin:8px 0 12px">Level 10 per stat at signup, 40 levels across the six. Everything above is earned inside.</p>
     <div class="two">
       <div class="f"><label for="aName">Name</label><input type="text" id="aName" required maxlength="16" autocomplete="off"></div>
       <div class="f"><label for="aSport">Sport</label><input type="text" id="aSport" maxlength="24" placeholder="Running" autocomplete="off"></div>
     </div>
+    <div class="budget" id="aBudget"></div>
     <div class="tiers" id="aTiers"></div>
     <div class="actions"><button class="btn" type="button" id="aCancel">CANCEL</button><button class="btn primary" type="submit">JOIN</button></div>
   </form>
@@ -413,6 +426,8 @@ const STATS=[
 const SK=STATS.map(s=>s.k), SC={}, SN={}; STATS.forEach(s=>{SC[s.k]=s.c;SN[s.k]=s.n});
 const PHYS=new Set(['str','spd','end']);
 const lvlXP=n=>50*n*n;
+const PB_MULT=2, SIGNUP_BUDGET=40, SIGNUP_CAP=10;
+const overallOf=lv=>SK.reduce((t,k)=>t+lv[k],0);
 const lvlOf=xp=>Math.floor(Math.sqrt(Math.max(0,xp)/50));
 const factor=r=>r*r/20;
 const effMin=m=>Math.min(m,60)+Math.max(0,m-60)*.5;
@@ -426,7 +441,8 @@ const CLASSES={'str+spd':'Striker','str+end':'Juggernaut','str+hea':'Ironclad','
   'end+bra':'Scholar','hea+soc':'Healer','hea+bra':'Sage','soc+bra':'Diplomat'};
 const className=lv=>{const top=SK.slice().sort((a,b)=>lv[b]-lv[a]||SK.indexOf(a)-SK.indexOf(b)).slice(0,2).sort((a,b)=>SK.indexOf(a)-SK.indexOf(b));return CLASSES[top.join('+')]};
 const ZONES=[{n:'Fresh',m:1,c:'#5fa8d3'},{n:'Primed',m:1.2,c:'#5be09a'},{n:'Fatigued',m:.7,c:'#ffd24d'},{n:'Burnt',m:.4,c:'#ff6b4d'}];
-const SIGNUP=[[1,'never trained'],[3,'now and then'],[5,'average adult'],[7,'trains every week'],[10,'competitive']];
+const SIGNUP_LABEL={0:'never',1:'barely',3:'now and then',5:'average adult',7:'trains weekly',10:'competitive'};
+const SIGNUP=Array.from({length:SIGNUP_CAP+1},(_,v)=>[v,SIGNUP_LABEL[v]]);
 
 /* ── forty activities and their splits: str spd end hea soc bra ────────── */
 const ACTS=[
@@ -532,10 +548,12 @@ const cache=new Map();
 const dirty=()=>cache.clear();
 function D(id){if(!cache.has(id)) cache.set(id,derive(id));return cache.get(id)}
 function fatigueFrom(load,t,hea){
+  // the windows are calendar days: the last 7 and the last 28, today included
+  const d0=startOfDay(t), w7=d0-6*DAY, w28=d0-27*DAY;
   let recent=0,month=0;
-  for(const e of load){if(e.t>t) break;if(e.t>t-28*DAY){month+=e.e;if(e.t>t-WEEK) recent+=e.e}}
+  for(const e of load){if(e.t>t) break;if(e.t>=w28){month+=e.e;if(e.t>=w7) recent+=e.e}}
   // a fresh player has fewer than four weeks behind them: average over the weeks that exist
-  const weeks=load.length?Math.min(4,Math.max(1,(t-load[0].t)/WEEK)):1;
+  const weeks=load.length?Math.min(4,Math.max(1,(d0-startOfDay(load[0].t)+DAY)/WEEK)):1;
   const usual=Math.max(month/weeks,240);
   const g=recent/usual, burnT=1.4+hea/100;
   const z=g<.8?0:g<1.3?1:g<burnT?2:3;
@@ -548,7 +566,7 @@ function gainFor(l,mult,actO){
   else{
     const a=actO||actById(l.act)||GENERIC;
     ef=effort(l.min,l.rpe);
-    const pb=l.pb?5:1, heaEf=effMin(l.min)*Math.max(1,factor(l.rpe));
+    const pb=l.pb?PB_MULT:1, heaEf=effMin(l.min)*Math.max(1,factor(l.rpe));
     physFrac=(a.s[0]+a.s[1]+a.s[2])/100;
     SK.forEach((k,i)=>{if(!a.s[i]) return;xp[k]=Math.round((k==='hea'?heaEf:ef)*pb*a.s[i]/100*(PHYS.has(k)?mult:1))});
     note=a.n;
@@ -568,15 +586,15 @@ function derive(mid){
     gains.set(l.id,{...g,fat:f});
     if(l.kind==='train'&&g.physFrac>0) load.push({t:l.t,e:g.effort*g.physFrac});
     if(l.kind==='rest') credit(l.t,.85);
-    if(l.kind==='sleep'&&l.hours>=8) credit(l.t,.9);
+    if(l.kind==='sleep'&&l.hours>=7) credit(l.t,l.hours>=8?.9:.95);
   }
   const lv=Object.fromEntries(SK.map(k=>[k,lvlOf(xp[k])]));
   return {xp,lv,gains,logs,fat:fatigueFrom(load,now(),lv.hea)};
 }
 function weekly(d){
-  const t=now(), w=Array(8).fill(0), sess=Array(8).fill(0), by=Array.from({length:8},()=>({}));
+  const d0=startOfDay(now()), w=Array(8).fill(0), sess=Array(8).fill(0), by=Array.from({length:8},()=>({}));
   for(const l of d.logs){
-    const wi=Math.floor((t-l.t)/WEEK);if(wi<0||wi>=8) continue;
+    const wi=Math.floor((d0-startOfDay(l.t))/WEEK);if(wi<0||wi>=8) continue;
     const g=d.gains.get(l.id);w[wi]+=g.total;
     if(l.kind==='train'&&g.physFrac>=.5) sess[wi]++;
     for(const k in g.xp) by[wi][k]=(by[wi][k]||0)+g.xp[k];
@@ -671,7 +689,7 @@ function sceneSize(){
 function layoutScene(){
   const fx=Math.floor(SCENE.W/2), S=SCENE.S;SCENE.fx=fx;
   SCENE.chars=state.members.map((m,i)=>({m,x:fx+(i%2?1:-1)*(28+30*Math.floor(i/2))}));
-  $('#tags').innerHTML=SCENE.chars.map(c=>`<button type="button" data-m="${c.m.id}" class="${c.m.id===state.sel?'on':''}" style="left:${c.x*S}px;top:${77*S}px">${esc(c.m.name)}</button>`).join('');
+  $('#tags').innerHTML=SCENE.chars.map(c=>`<button type="button" data-m="${c.m.id}" class="${c.m.id===state.sel?'on':''}" style="left:${c.x*S}px;top:${77*S}px">${esc(c.m.name)} <span style="color:#ffa03c">Lv${overallOf(D(c.m.id).lv)}</span></button>`).join('');
   $$('#tags button').forEach(b=>b.onclick=()=>{state.sel=b.dataset.m;save();renderAll()});
 }
 function buildBg(){
@@ -723,8 +741,8 @@ function sceneFrame(){
 }
 
 /* ── render ────────────────────────────────────────────────────────────── */
-let frame=0, treeStat='str', custOpen=false;
-function renderAll(){renderBand();layoutScene();renderChar();renderCust();renderLog();renderBoard();renderTeam();if($('#tab-tree').classList.contains('on')) renderTree();renderTreeDetail()}
+let frame=0, detailKey='str', custOpen=false;
+function renderAll(){renderBand();layoutScene();renderChar();renderCust();renderLog();renderBoard();renderTeam()}
 function renderBand(){
   const t=now();let xp=0,km=0,tn=0,ss=0;
   for(const m of state.members){const d=D(m.id);for(const l of d.logs){if(l.t<t-WEEK) continue;const g=d.gains.get(l.id);xp+=g.total;if(l.kind==='train'){km+=kmEq(l);tn+=(l.kg||0)/1000;if(g.physFrac>=.5) ss++}}}
@@ -738,18 +756,20 @@ function renderChar(){
   $('#pNo').textContent='No.'+String(state.members.indexOf(m)+1).padStart(3,'0');
   $('#pClass').textContent=`${className(d.lv).toUpperCase()} · ${bandOf(Math.max(...SK.map(k=>d.lv[k]))).toUpperCase()}`;
   $('#pSport').textContent=m.sport;
-  $('#stats').innerHTML=STATS.map(s=>{const lv=d.lv[s.k],x=d.xp[s.k],a=lvlXP(lv),b=lvlXP(lv+1),p=(x-a)/(b-a);
-    return `<div class="stat" style="--c:${s.c}"><span class="k" style="color:${s.c}">${s.n.toUpperCase()}</span><span class="lv">Lv${lv}</span><span class="bar"><i style="width:${(p*100).toFixed(1)}%"></i></span><span class="to">${fmt(b-x)} xp to ${lv+1}</span></div>`}).join('')
-    +(()=>{const wk=weekly(d);return `<div class="week"><span><b>${fmt(wk.w[0])}</b> xp this week</span><span><b>+${wk.growth.toFixed(1)}%</b> growth</span><span><b>${wk.sess[0]}</b> sessions</span><span><b>${wk.streak}</b> wk streak</span></div>`})();
-  renderGauge(d);
+  const wk=weekly(d), ranked=STATS.slice().sort((a,b)=>d.lv[b.k]-d.lv[a.k]||SK.indexOf(a.k)-SK.indexOf(b.k));
+  $('#stats').innerHTML=`<div class="overall"><span class="l">OVERALL<br>the six added up</span><span class="n">Lv${overallOf(d.lv)}</span></div>`
+    +ranked.map(s=>{const lv=d.lv[s.k],x=d.xp[s.k],a=lvlXP(lv),b=lvlXP(lv+1),p=(x-a)/(b-a);
+    return `<button type="button" class="stat" data-k="${s.k}" style="--c:${s.c}"><span class="k" style="color:${s.c}">${s.n.toUpperCase()}</span><span class="lv">Lv${lv}</span><span class="bar"><i style="width:${(p*100).toFixed(1)}%"></i></span><span class="to">${fmt(b-x)} xp</span></button>`}).join('')
+    +`<div class="week"><span><b>${fmt(wk.w[0])}</b> xp this week</span><span><b>+${wk.growth.toFixed(1)}%</b> growth</span><span><b>${wk.sess[0]}</b> sessions</span><span><b>${wk.streak}</b> wk streak</span></div>`;
+  $$('#stats button.stat').forEach(b=>b.onclick=()=>{detailKey=b.dataset.k;renderWeb();renderDetail()});
+  renderGauge(d);renderWeb();renderDetail();
 }
 function renderGauge(d){
   const f=d.fat, max=2.2, w=v=>Math.min(100,v/max*100);
   const zones=[[0,.8,ZONES[0].c],[.8,1.3,ZONES[1].c],[1.3,f.burnT,ZONES[2].c],[f.burnT,max,ZONES[3].c]];
-  $('#gauge').innerHTML=`<div class="row"><h3>FATIGUE</h3><span><span class="status" style="--z:${ZONES[f.z].c}">${f.name.toUpperCase()}</span><span class="px" style="font-size:9px;margin-left:10px">×${f.mult}</span></span></div>
+  $('#gauge').innerHTML=`<div class="row"><h3>FATIGUE <span class="hint">▶ TAP</span></h3><span><span class="status" style="--z:${ZONES[f.z].c}">${f.name.toUpperCase()}</span><span class="px" style="font-size:9px;margin-left:10px">×${f.mult}</span></span></div>
     <div class="track">${zones.map(([a,b,c])=>`<span class="z" style="width:${(w(b)-w(a)).toFixed(2)}%;background:${c}"></span>`).join('')}<span class="needle" style="left:${w(f.g).toFixed(2)}%"></span></div>
-    <div class="ticks"><span style="left:0;transform:none">0</span><span style="left:${w(.8)}%">0.8</span><span style="left:${w(1.3)}%">1.3</span><span style="left:${w(f.burnT)}%;top:15px;color:#ff6b4d">BURN ${f.burnT.toFixed(1)}</span><span style="left:100%;transform:translateX(-100%)">${max}</span></div>
-    <p>Last 7 days <b>${fmt(f.recent)}</b> effort against your usual <b>${fmt(f.usual)}</b>, gauge <b>${f.g.toFixed(2)}</b>. Health ${d.lv.hea} puts the burn line at ${f.burnT.toFixed(2)}. A rest day takes 15% off the recent load, 8 h of sleep 10%.</p>`;
+    <div class="ticks"><span style="left:0;transform:none">0</span><span style="left:${w(.8)}%">0.8</span><span style="left:${w(1.3)}%">1.3</span><span style="left:${w(f.burnT)}%;top:15px;color:#ff6b4d">BURN ${f.burnT.toFixed(1)}</span><span style="left:100%;transform:translateX(-100%)">${max}</span></div>`;
 }
 function sw(sel,arr,cur,set,text){
   $(sel).innerHTML=arr.map((c,i)=>text?`<button type="button" class="t ${i===cur?'on':''}" data-i="${i}">${c}</button>`:`<button type="button" class="${i===cur?'on':''}" style="background:${c}" data-i="${i}" aria-label="option ${i+1}"></button>`).join('');
@@ -767,37 +787,78 @@ function renderCust(){
   sw('#swBot',BOTS,m.look.bot,v=>m.look.bot=v);
 }
 
-/* tree */
-function renderTree(){
-  const cv=$('#tree'), size=cv.clientWidth||480, dpr=window.devicePixelRatio||1;
-  cv.width=size*dpr;cv.height=size*dpr;const g=cv.getContext('2d');g.scale(dpr,dpr);
-  const d=D(state.sel), cx=size/2, cy=size/2, R=size/2-50;
-  const at=(ux,uy,r)=>[cx+ux*r,cy+uy*r];
-  STATS.forEach((s,i)=>{
-    const ang=-Math.PI/2+i*Math.PI/3, ux=Math.cos(ang), uy=Math.sin(ang), lv=d.lv[s.k], pos=l=>Math.sqrt(Math.min(1,l/100));
-    const sel=s.k===treeStat;
-    g.lineWidth=2;g.strokeStyle='rgba(243,236,210,.12)';g.beginPath();g.moveTo(...at(ux,uy,14));g.lineTo(...at(ux,uy,R));g.stroke();
-    const p=pos(lv);g.lineWidth=sel?4:3;g.strokeStyle=s.c;g.beginPath();g.moveTo(...at(ux,uy,14));g.lineTo(...at(ux,uy,14+(R-14)*p));g.stroke();
-    g.setLineDash([2,4]);g.lineWidth=1;g.strokeStyle='rgba(243,236,210,.35)';g.beginPath();g.moveTo(...at(ux,uy,R));g.lineTo(...at(ux,uy,R+16));g.stroke();g.setLineDash([]);
-    MILESTONES.forEach(ml=>{const [x,y]=at(ux,uy,14+(R-14)*pos(ml));const lit=lv>=ml;g.beginPath();g.rect(x-4,y-4,8,8);g.fillStyle=lit?s.c:'#0b1224';g.fill();g.lineWidth=1.5;g.strokeStyle=lit?s.c:'rgba(243,236,210,.35)';g.stroke();
-      if(sel){g.fillStyle=lit?s.c:'rgba(243,236,210,.5)';g.font='11px "VT323", monospace';g.textAlign=Math.abs(ux)<.1?'left':'center';g.textBaseline=Math.abs(ux)<.1?'middle':'top';g.fillText(ml,x+(Math.abs(ux)<.1?9:0),y+(Math.abs(ux)<.1?0:8))}});
-    const [hx,hy]=at(ux,uy,14+(R-14)*p);g.fillStyle='#fff';g.fillRect(hx-2,hy-2,4,4);
-    const [lx,ly]=at(ux,uy,R+30);g.textAlign=ux>.1?'left':ux<-.1?'right':'center';g.textBaseline='middle';
-    g.fillStyle=sel?'#f3ecd2':s.c;g.font='7px "Press Start 2P", monospace';g.fillText(s.n.toUpperCase(),lx,ly-7);
-    g.fillStyle=s.c;g.font='8px "Press Start 2P", monospace';g.fillText('LV'+lv,lx,ly+8);
-  });
-  g.fillStyle='#f3ecd2';g.fillRect(cx-6,cy-6,12,12);g.fillStyle='#ffa03c';g.fillRect(cx-3,cy-3,6,6);
+/* the web: six axes, scaled to the player's own best stat */
+function webScale(lv){return Math.max(5,Math.ceil(Math.max(...SK.map(k=>lv[k]))/5)*5)}
+function drawWeb(cv,lv,{scale,labels=false,sel=null}={}){
+  const dpr=window.devicePixelRatio||1, S=labels?(cv.clientWidth||360):cv.clientWidth||76;
+  cv.width=S*dpr;cv.height=S*dpr;const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,S,S);
+  const cx=S/2, cy=S/2, R=S/2-(labels?Math.max(36,S*.13):5), max=scale||webScale(lv);
+  const at=(i,r)=>{const a=-Math.PI/2+i*Math.PI/3;return [cx+Math.cos(a)*r,cy+Math.sin(a)*r]};
+  const ring=(r,c,w)=>{g.beginPath();for(let i=0;i<6;i++){const p=at(i,r);i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1])}g.closePath();g.lineWidth=w;g.strokeStyle=c;g.stroke()};
+  const spokes=c=>{for(let i=0;i<6;i++){const p=at(i,R);g.beginPath();g.moveTo(cx,cy);g.lineTo(p[0],p[1]);g.lineWidth=1;g.strokeStyle=c;g.stroke()}};
+  for(let i=1;i<=4;i++) ring(R*i/4,'rgba(243,236,210,.14)',1);
+  spokes('rgba(243,236,210,.14)');
+  g.beginPath();SK.forEach((k,i)=>{const p=at(i,R*Math.min(1,lv[k]/max));i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1])});g.closePath();
+  g.fillStyle='rgba(255,176,80,.30)';g.fill();
+  // the web sits back on top of the fill, so it stays a web
+  for(let i=1;i<=4;i++) ring(R*i/4,'rgba(243,236,210,.20)',1);
+  spokes('rgba(243,236,210,.20)');
+  ring(R,'rgba(243,236,210,.42)',2);
+  g.beginPath();SK.forEach((k,i)=>{const p=at(i,R*Math.min(1,lv[k]/max));i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1])});g.closePath();
+  g.strokeStyle='#ffc26e';g.lineWidth=labels?3:2;g.stroke();
+  const sq=labels?4:2.5;
+  SK.forEach((k,i)=>{const p=at(i,R*Math.min(1,lv[k]/max));g.fillStyle=SC[k];g.fillRect(p[0]-sq,p[1]-sq,sq*2,sq*2);
+    if(labels){g.strokeStyle=k===sel?'#f3ecd2':'#1b1530';g.lineWidth=2;g.strokeRect(p[0]-sq,p[1]-sq,sq*2,sq*2)}});
+  if(!labels) return;
+  STATS.forEach((st,i)=>{const p=at(i,R+Math.max(20,S*.075)), ux=Math.cos(-Math.PI/2+i*Math.PI/3);
+    g.textAlign=ux>.1?'left':ux<-.1?'right':'center';g.textBaseline='middle';
+    g.fillStyle=st.k===sel?'#f3ecd2':st.c;g.font='7px "Press Start 2P", monospace';g.fillText(st.n.toUpperCase(),p[0],p[1]-7);
+    g.fillStyle=st.c;g.font='8px "Press Start 2P", monospace';g.fillText('LV'+lv[st.k],p[0],p[1]+8)});
 }
-function renderTreeDetail(){
-  const d=D(state.sel), k=treeStat, s=STATS.find(x=>x.k===k), lv=d.lv[k], x=d.xp[k], i=SK.indexOf(k);
-  const next=MILESTONES.find(m=>m>lv);
-  const feeds=ACTS.filter(a=>a.s[i]>=40).sort((a,b)=>b.s[i]-a.s[i]).slice(0,8);
-  const rules={hea:'Rest day 60 XP and −15% recent load. Sleep 8 XP an hour, −10% at 8 h. Mobility, yoga and sauna count at least a point a minute. Every 10 levels moves the burn line up 0.1.',soc:'Reconnect with an old friend, call someone new, go out and talk. RPE is how far out of your comfort zone.',bra:'Minutes of a book or a learning video. RPE is how hard the material was.'};
-  $('#treeDetail').innerHTML=`<h2 style="color:${s.c}">${s.n.toUpperCase()}</h2><div class="sub" style="margin-top:6px">LV${lv} · ${bandOf(lv).toUpperCase()}</div>
-    <div class="kv"><span>XP</span><b>${fmt(x)}</b><span>To level ${lv+1}</span><b>${fmt(lvlXP(lv+1)-x)}</b><span>Next milestone</span><b>${next?'lv '+next:'none, no cap'}</b></div>
-    ${rules[k]?`<p class="note" style="margin-top:10px">${rules[k]}</p>`:''}
-    <h3 style="margin-top:16px">WHAT FEEDS IT</h3><ul>${feeds.map(a=>`<li>${a.n} <span class="dim">· ${a.s[i]}%</span></li>`).join('')}</ul>
-    <h3 style="margin-top:16px">ON THE SPRITE</h3><ul>${SPRITE_NOTES[k].map(n=>`<li>${n}</li>`).join('')}</ul>`;
+function renderWeb(){
+  const d=D(state.sel), max=webScale(d.lv);
+  drawWeb($('#web'),d.lv,{scale:max,labels:true,sel:detailKey==='fat'?null:detailKey});
+  $('#webCap').textContent=`OUTER RING LV${max} · OVERALL LV${overallOf(d.lv)}`;
+}
+
+/* the detail box: one stat, or fatigue */
+const EFFECT={
+  str:'Score and shape only, nothing in the game gates on it. Every kg you log also feeds the tonnage challenge.',
+  spd:'Score and shape only. It rides on the RPE 9 bounty, the one worth chasing on a short day.',
+  end:'Score and shape only. Every km feeds the distance challenge: swims at 4×, rides at a third.',
+  hea:'The one stat that changes the rules. Every 10 levels moves your burn line up 0.1, so you can push a harder week before the penalty lands.',
+  soc:'Score only. The one stat you cannot train alone.',
+  bra:'Score only. The cheapest levels in the game, and the easiest to forget.'};
+function renderDetail(){
+  const d=D(state.sel), el=$('#detail');
+  $$('#stats button.stat').forEach(b=>b.classList.toggle('on',b.dataset.k===detailKey));
+  $('#gauge').classList.toggle('on',detailKey==='fat');
+  if(detailKey==='fat'){
+    const f=d.fat, rows=ZONES.map((z,i)=>{const r=['under 0.8','0.8 to 1.3','1.3 to '+f.burnT.toFixed(2),'over '+f.burnT.toFixed(2)][i];
+      return `<li><span class="status" style="--z:${z.c}">${z.n.toUpperCase()}</span> <span class="dim">${r}</span> · ×${z.m}</li>`}).join('');
+    el.innerHTML=`<div class="hdr"><h2 style="color:${ZONES[f.z].c}">FATIGUE</h2><span class="px" style="font-size:9px;color:${ZONES[f.z].c}">${f.name.toUpperCase()} ×${f.mult}</span></div>
+      <div class="kv"><span>Last 7 days</span><b>${fmt(f.recent)}</b><span>Your usual week</span><b>${fmt(f.usual)}</b><span>Gauge</span><b>${f.g.toFixed(2)}</b><span>Burn line, Health ${d.lv.hea}</span><b>${f.burnT.toFixed(2)}</b></div>
+      <h3 style="margin-top:16px">WHAT IT COSTS</h3><ul>${rows}</ul>
+      <h3 style="margin-top:16px">HOW TO MOVE IT</h3><ul>
+        <li>Rest day · takes 15% off the last 7 days</li>
+        <li>Sleep 8 h · takes 10% off, 7 h takes 5%</li>
+        <li>A lighter week · your usual stays, the recent drops</li>
+        <li>Health Lv${Math.floor(d.lv.hea/10)*10+10} · burn line to ${(1.4+(Math.floor(d.lv.hea/10)*10+10)/100).toFixed(2)}</li></ul>
+      <p class="note" style="margin-top:14px">Physical XP only. Health, Social and Brain ignore the multiplier.</p>`;
+    return;
+  }
+  const k=detailKey, st=STATS.find(x=>x.k===k), lv=d.lv[k], x=d.xp[k], i=SK.indexOf(k);
+  const feeds=ACTS.filter(a=>a.s[i]>=40).sort((a,b)=>b.s[i]-a.s[i]).slice(0,6);
+  const top=feeds[0]||GENERIC, ex=gainFor({kind:'train',act:top.id,min:60,rpe:top.rpe||6},d.fat.mult,top);
+  const toNext=lvlXP(lv+1)-x, per=Math.max(1,ex.xp[k]||1);
+  el.innerHTML=`<div class="hdr"><h2 style="color:${st.c}">${st.n.toUpperCase()}</h2><span class="px" style="font-size:9px;color:${st.c}">LV${lv} · ${bandOf(lv).toUpperCase()}</span></div>
+    <div class="kv"><span>XP</span><b>${fmt(x)}</b><span>To level ${lv+1}</span><b>${fmt(toNext)}</b><span>Sessions away, at ${fmt(per)} a go</span><b>${Math.ceil(toNext/per)}</b></div>
+    <h3 style="margin-top:16px">HOW TO IMPROVE IT</h3>
+    <ul>${feeds.map(a=>`<li>${a.n} <span class="dim">· ${a.s[i]}% of the session</span></li>`).join('')}</ul>
+    <p class="note" style="margin-top:8px">60 min of ${top.n.toLowerCase()} at RPE ${top.rpe||6} pays <b>${fmt(ex.xp[k]||0)} ${k.toUpperCase()}</b> at your ${d.fat.name.toLowerCase()} multiplier. Double the RPE and you quadruple the XP.</p>
+    <h3 style="margin-top:16px">WHAT IT CHANGES</h3>
+    <p class="note">${EFFECT[k]}</p>
+    <h3 style="margin-top:14px">ON THE SPRITE</h3><ul>${SPRITE_NOTES[k].map(n=>`<li>${n}</li>`).join('')}</ul>`;
 }
 
 /* log */
@@ -821,35 +882,56 @@ function renderRecent(){
     const fat=l.kind==='train'&&g.physFrac>0?`${g.fat.name} ×${g.fat.mult}`:'';
     return `<div class="r"><span class="dim">${fmtDate(l.t)}</span><span>${what}${fat?`<br><small class="dim">${fat}</small>`:''}</span><span class="g" style="color:${topStat(g)}">+${fmt(g.total)}</span></div>`}).join('');
 }
-function logTime(dateStr){const today=isoLocal(now());if(!dateStr||dateStr===today) return now();const [y,mo,da]=dateStr.split('-').map(Number);return new Date(y,mo-1,da,12,0,0).getTime()}
+// a log lands on the day you picked: training at the hour you log it, a rest day at noon, sleep at 7am
+function logTime(dateStr,hour){
+  const today=isoLocal(now());
+  if(!dateStr||dateStr===today) return hour==null?now():Math.min(now(),new Date().setHours(hour,0,0,0));
+  const [y,mo,da]=dateStr.split('-').map(Number);
+  return new Date(y,mo-1,da,hour==null?18:hour,0,0).getTime();
+}
 function addLog(l){
+  // one rest day and one sleep per calendar day: logging again replaces it
+  if(l.kind==='rest'||l.kind==='sleep'){
+    const d0=startOfDay(l.t), was=state.logs.length;
+    state.logs=state.logs.filter(x=>!(x.m===state.sel&&x.kind===l.kind&&startOfDay(x.t)===d0));
+    if(state.logs.length<was) l.replaced=true;
+  }
   l.id=state.nextId++;l.m=state.sel;
   const before=D(state.sel).lv;
   state.logs.push(l);dirty();save();
   const d=D(state.sel), after=d.lv, g=d.gains.get(l.id);
   const ups=SK.filter(k=>after[k]>before[k]).map(k=>`${SN[k]} ${before[k]} → ${after[k]}`);
-  toast(ups.length?'LEVEL UP · '+ups.join(' · '):`+${fmt(g.total)} XP · ${g.note}`);
+  const when=startOfDay(l.t)===startOfDay(now())?'':' on '+fmtDate(l.t);
+  toast(ups.length?'LEVEL UP · '+ups.join(' · '):`${l.replaced?'UPDATED':'+'+fmt(g.total)+' XP'} · ${g.note}${when}`);
   renderAll();
 }
 let toastT,typeT;
 function toast(msg){const t=$('#toast');t.classList.add('on');clearTimeout(toastT);clearInterval(typeT);let i=0;t.textContent='';
   typeT=setInterval(()=>{i++;t.textContent=msg.slice(0,i);if(i>=msg.length){clearInterval(typeT);toastT=setTimeout(()=>t.classList.remove('on'),2800)}},20)}
 
-/* board */
+/* team: the board and the challenges on one screen */
 function spark(cv,vals){const g=cv.getContext('2d'),W=cv.width,H=cv.height;g.clearRect(0,0,W,H);const max=Math.max(1,...vals),n=vals.length,bw=W/n;vals.forEach((v,i)=>{const h=Math.max(3,v/max*(H-6));g.fillStyle=i===n-1?'#ffa03c':'rgba(98,214,200,.55)';g.fillRect(i*bw+4,H-h,bw-8,h)})}
 function renderBoard(){
   const rows=state.members.map(m=>{const d=D(m.id);return {m,d,wk:weekly(d)}});
   const byNow=rows.slice().sort((a,b)=>b.wk.growth-a.wk.growth), byPrev=rows.slice().sort((a,b)=>b.wk.prevG-a.wk.prevG);
+  byNow.forEach((r,i)=>{r.rank=i+1;r.mv=byPrev.findIndex(x=>x.m.id===r.m.id)-i});
   const best={};for(const k of SK){let bm=null,bv=0;for(const r of rows){const v=r.wk.by[0][k]||0;if(v>bv){bv=v;bm=r.m.id}}if(bm) best[k]=bm}
-  $('#cards').innerHTML=byNow.map((r,i)=>{const prev=byPrev.findIndex(x=>x.m.id===r.m.id),mv=prev-i,cls=mv>0?'up':mv<0?'down':'flat';
+  const guildMax=Math.max(...rows.map(r=>webScale(r.d.lv)));
+  const guildXp=rows.reduce((t,r)=>t+r.wk.w[0],0), prevXp=rows.reduce((t,r)=>t+r.wk.w[1],0);
+  const dXp=prevXp?(guildXp-prevXp)/prevXp*100:0;
+  const movers=rows.slice().sort((a,b)=>b.mv-a.mv||b.wk.growth-a.wk.growth).slice(0,2);
+  $('#summary').innerHTML=`<div class="tot"><div class="n">${fmt(guildXp)}</div><div class="l">XP THE GUILD GAINED<br>THIS WEEK · ${dXp>=0?'+':''}${dXp.toFixed(0)}% ON LAST</div></div>
+    <div class="movers"><h3>BIGGEST MOVERS</h3>${movers.map(r=>`<div class="mv"><span class="p" style="color:${r.mv>0?'#5be09a':r.mv<0?'#ff6b6b':'var(--dim)'}">${r.mv>0?'▲'+r.mv:r.mv<0?'▼'+(-r.mv):'▬0'}</span><span>${esc(r.m.name)} <span class="dim">to No.${r.rank}</span></span><span class="d" style="color:#5be09a">+${r.wk.growth.toFixed(1)}%</span></div>`).join('')}</div>`;
+  $('#cards').innerHTML=byNow.map(r=>{const cls=r.mv>0?'up':r.mv<0?'down':'flat';
     const badges=SK.filter(k=>best[k]===r.m.id).map(k=>`<span class="badge" style="background:${SC[k]}">most improved ${SN[k]}</span>`).join('');
-    return `<div class="box card"><div class="hd"><canvas class="mini" data-m="${r.m.id}" width="24" height="32"></canvas><div><b>${esc(r.m.name)}</b><br><small class="dim">${className(r.d.lv)} · ${esc(r.m.sport)}</small></div><span class="rank">No.${i+1}</span></div>
-      <div class="growth" style="color:${r.wk.growth>0?'#5be09a':'var(--dim)'}">+${r.wk.growth.toFixed(1)}%</div><div class="sub">growth this week · ${fmt(r.wk.w[0])} xp</div>
+    return `<div class="box card"><div class="hd"><canvas class="mini" data-m="${r.m.id}" width="24" height="32"></canvas><div class="who"><b>${esc(r.m.name)}</b><small>Lv${overallOf(r.d.lv)} · ${className(r.d.lv)}</small><small class="dim">${esc(r.m.sport)}</small></div><span class="rank">No.${r.rank}</span></div>
+      <div class="midrow"><canvas class="web" data-m="${r.m.id}"></canvas><div><div class="growth" style="color:${r.wk.growth>0?'#5be09a':'var(--dim)'}">+${r.wk.growth.toFixed(1)}%</div><div class="sub">growth this week<br>${fmt(r.wk.w[0])} xp</div></div></div>
       <canvas class="spark" data-m="${r.m.id}" width="400" height="80"></canvas>
-      <div class="meta"><span>streak <b>${r.wk.streak} wk</b></span><span>sessions <b>${r.wk.sess[0]}</b></span><span class="${cls}">${mv>0?'▲ '+mv:mv<0?'▼ '+(-mv):'▬ 0'}</span></div>
+      <div class="meta"><span>streak <b>${r.wk.streak} wk</b></span><span>sessions <b>${r.wk.sess[0]}</b></span><span class="${cls}">${r.mv>0?'▲ '+r.mv:r.mv<0?'▼ '+(-r.mv):'▬ 0'}</span></div>
       <div class="badges">${badges}</div></div>`}).join('');
   $$('#cards canvas.mini').forEach(c=>{const m=memberById(c.dataset.m);drawChar(c,m,D(m.id).lv,0)});
   $$('#cards canvas.spark').forEach(c=>{const r=rows.find(x=>x.m.id===c.dataset.m);spark(c,r.wk.w.slice().reverse())});
+  $$('#cards canvas.web').forEach(c=>{const r=rows.find(x=>x.m.id===c.dataset.m);drawWeb(c,r.d.lv,{scale:guildMax})});
 }
 
 /* team */
@@ -868,7 +950,7 @@ function goal(el,title,rows,target,unit,note){
   el.innerHTML=`<h3>${title}</h3><div class="big">${sum.toFixed(dp)} <small style="font:inherit;font-size:10px;color:var(--dim)">/ ${target} ${unit}</small></div>
     <div class="track"><i style="width:${p.toFixed(1)}%;background:${p>=100?'#5be09a':'#62d6c8'}"></i></div>
     <div class="contrib">${rows.map(([n,v])=>`<div class="c"><span>${esc(n)}</span><i style="width:${(v/max*100).toFixed(1)}%"></i><span class="dim">${v.toFixed(dp)}</span></div>`).join('')}</div>
-    <div class="note" style="margin-top:10px">${note}</div>`;
+    ${note?`<div class="note" style="margin-top:10px">${note}</div>`:''}`;
 }
 function renderTeam(){
   const t=now(), day0=startOfDay(t);
@@ -876,9 +958,9 @@ function renderTeam(){
     for(const l of d.logs){if(l.t>=day0) today.push(l);if(l.t<t-WEEK) continue;if(l.kind==='train'){km+=kmEq(l);tn+=(l.kg||0)/1000;if(d.gains.get(l.id).physFrac>=.5) ss++}}
     return {m,km,tn,ss,today}});
   const n=state.members.length;
-  goal($('#goalKm'),'DISTANCE THIS WEEK',rows.map(r=>[r.m.name,r.km]),40*n,'km-eq','40 km-eq a player. 1 km swim = 4 km run. 1 tonne = 1.3 km. Bike ÷ 3.');
-  goal($('#goalT'),'TONNAGE THIS WEEK',rows.map(r=>[r.m.name,r.tn]),10*n,'tonnes','10 tonnes a player. kg moved across every lift.');
-  goal($('#goalS'),'SESSIONS THIS WEEK',rows.map(r=>[r.m.name,r.ss]),4*n,'sessions','4 a player. Physical sessions only.');
+  goal($('#goalKm'),'DISTANCE THIS WEEK',rows.map(r=>[r.m.name,r.km]),40*n,'km-eq','40 km-eq a player. 1 km swim = 4 km run, bike ÷ 3, 1 tonne = 1.3 km.');
+  goal($('#goalT'),'TONNAGE THIS WEEK',rows.map(r=>[r.m.name,r.tn]),10*n,'tonnes','10 tonnes a player.');
+  goal($('#goalS'),'SESSIONS THIS WEEK',rows.map(r=>[r.m.name,r.ss]),4*n,'sessions','4 a player.');
   const doy=Math.floor(t/DAY), L=BOUNTIES.length, ids=[...new Set([doy%L,(doy*3+1)%L,(doy*5+2)%L])].slice(0,3);
   $('#bounty').innerHTML=`<h3>DAILY BOUNTIES</h3><div class="note" style="margin-top:4px">Clear one, take a tick. New set at midnight.</div>`+
     ids.map(i=>{const b=BOUNTIES[i];return `<div class="b"><span>${b.n}</span><span class="ticks">${rows.map(r=>{const ok=b.ok(r.today);return `<span class="tick ${ok?'ok':''}" title="${esc(r.m.name)}">${ok?'✓':esc(r.m.name[0])}</span>`}).join('')}</span></div>`}).join('');
@@ -903,10 +985,10 @@ function renderPlan(){
 }
 
 /* ── wiring ────────────────────────────────────────────────────────────── */
-function showTab(id){$$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===id));$$('.tab').forEach(s=>s.classList.toggle('on',s.id==='tab-'+id));if(id==='tree') renderTree();if(id==='plan'&&!$('#planOut').innerHTML) renderPlan()}
+function showTab(id){$$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===id));$$('.tab').forEach(s=>s.classList.toggle('on',s.id==='tab-'+id));if(id==='card') renderWeb();if(id==='team') renderBoard();if(id==='plan'&&!$('#planOut').innerHTML) renderPlan()}
 function init(){
   drawMark();sceneSize();
-  $('#lDate').value=isoLocal(now());
+  $('#lDate').value=isoLocal(now());$('#lDate').max=isoLocal(now());
   $('#acts').innerHTML=ACTS.map(a=>`<option value="${esc(a.n)}">`).join('');
   $('#pGoal').innerHTML=GOALS.map(g=>`<option value="${g.id}">${g.n}</option>`).join('');
   $$('#tabs button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
@@ -917,20 +999,35 @@ function init(){
   $('#lGo').onclick=()=>{const f=readForm();if(!f.text){$('#lText').focus();toast('Say what you did');return}if(f.min<5){$('#lMin').focus();toast('Minutes, at least 5');return}
     const a=matchAct(f.text);const l={t:logTime(f.date),kind:'train',text:f.text,act:a?a.id:'generic',min:f.min,rpe:f.rpe,pb:f.pb};if(f.km) l.km=f.km;if(f.kg) l.kg=f.kg;
     addLog(l);$('#lText').value='';$('#lKm').value='';$('#lKg').value='';$('#lPb').checked=false;preview()};
-  $('#qRest').onclick=()=>addLog({t:logTime($('#lDate').value),kind:'rest'});
-  $('#qSleep').onclick=()=>{const h=Math.max(3,Math.min(12,+$('#qHours').value||8));addLog({t:logTime($('#lDate').value),kind:'sleep',hours:h})};
+  $('#qRest').onclick=()=>addLog({t:logTime($('#lDate').value,12),kind:'rest'});
+  $('#qSleep').onclick=()=>{const raw=parseFloat($('#qHours').value);
+    const h=Math.max(3,Math.min(12,Math.round((isFinite(raw)?raw:8)*2)/2));
+    $('#qHours').value=h;addLog({t:logTime($('#lDate').value,7),kind:'sleep',hours:h})};
   $('#pGo').onclick=renderPlan;$('#pGoal').onchange=renderPlan;$('#pDays').onchange=renderPlan;
   $('#scene').onclick=e=>{const r=e.target.getBoundingClientRect(),x=(e.clientX-r.left)/SCENE.S;const c=SCENE.chars.find(c=>Math.abs(x-c.x)<13);if(c){state.sel=c.m.id;save();renderAll()}};
-  $('#tree').onclick=e=>{const r=e.target.getBoundingClientRect(),x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2;let ang=Math.atan2(y,x)+Math.PI/2;if(ang<0) ang+=Math.PI*2;treeStat=SK[Math.round(ang/(Math.PI/3))%6];renderTree();renderTreeDetail()};
-  $('#addBtn').onclick=()=>{$('#aTiers').innerHTML=STATS.map(s=>`<div><label style="color:${s.c}">${s.n}</label><select data-k="${s.k}">${SIGNUP.map(([v,n])=>`<option value="${v}" ${v===5?'selected':''}>${v} · ${n}</option>`).join('')}</select></div>`).join('');$('#aName').value='';$('#aSport').value='';$('#addDlg').showModal();$('#aName').focus()};
+  $('#web').onclick=e=>{const r=e.target.getBoundingClientRect(),x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2;
+    if(Math.hypot(x,y)<r.width*.07) return;let ang=Math.atan2(y,x)+Math.PI/2;if(ang<0) ang+=Math.PI*2;
+    detailKey=SK[Math.round(ang/(Math.PI/3))%6];renderWeb();renderDetail()};
+  const openFat=()=>{detailKey='fat';renderWeb();renderDetail();$('#detail').scrollIntoView({block:'nearest',behavior:'smooth'})};
+  $('#gauge').onclick=openFat;
+  $('#gauge').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openFat()}};
+  const budget=()=>{const spent=$$('#aTiers select').reduce((t,s)=>t+ +s.value,0), left=SIGNUP_BUDGET-spent;
+    $('#aBudget').className='budget'+(left<0?' over':'');
+    $('#aBudget').innerHTML=`<span>LEVELS SPENT</span><span><b>${spent}</b> / ${SIGNUP_BUDGET} · ${left<0?(-left)+' OVER':left+' LEFT'}</span>`;
+    return left>=0};
+  $('#addBtn').onclick=()=>{
+    $('#aTiers').innerHTML=STATS.map(s=>`<div><label style="color:${s.c}">${s.n}</label><select data-k="${s.k}">${SIGNUP.map(([v,n])=>`<option value="${v}" ${v===5?'selected':''}>${v}${n?' · '+n:''}</option>`).join('')}</select></div>`).join('');
+    $$('#aTiers select').forEach(sel=>sel.onchange=budget);
+    $('#aName').value='';$('#aSport').value='';budget();$('#addDlg').showModal();$('#aName').focus()};
   $('#aCancel').onclick=()=>$('#addDlg').close();
   $('#addForm').onsubmit=e=>{e.preventDefault();const name=$('#aName').value.trim();if(!name) return;
+    if(!budget()){toast('40 LEVELS TO SPEND, NO MORE');return}
     const base={};$$('#aTiers select').forEach(s=>base[s.dataset.k]=lvlXP(+s.value));
     const R=n=>Math.floor(Math.random()*n);
     const m={id:'m'+Date.now().toString(36),name,sport:$('#aSport').value.trim()||'Training',look:{skin:R(SKINS.length),hair:R(HAIRS.length),hairC:R(HAIRC.length),top:R(TOPS.length),bot:R(BOTS.length)},base};
-    state.members.push(m);state.sel=m.id;dirty();save();$('#addDlg').close();custOpen=true;showTab('char');sceneSize();renderAll();toast(`${name} joined the guild`)};
+    state.members.push(m);state.sel=m.id;dirty();save();$('#addDlg').close();custOpen=true;showTab('card');sceneSize();renderAll();toast(`${name} joined the guild`)};
   $('#reset').onclick=e=>{e.preventDefault();if(!confirm('Reset the demo? Your logs in this browser go away.')) return;localStorage.removeItem(KEY);state=seed();dirty();custOpen=false;sceneSize();renderAll();toast('Demo reset')};
-  let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{sceneSize();if($('#tab-tree').classList.contains('on')) renderTree()},120)});
+  let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{sceneSize();if($('#tab-card').classList.contains('on')) renderWeb();if($('#tab-team').classList.contains('on')) renderBoard()},120)});
   renderAll();
   setInterval(sceneFrame,90);
   setInterval(()=>{frame++;const m=memberById(state.sel);drawChar($('#big'),m,D(m.id).lv,frame)},600);
