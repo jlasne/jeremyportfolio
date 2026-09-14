@@ -6,14 +6,18 @@ import { clean, daysBetween, dateKey, isKey } from "../../bio/spec.js";
 /**
  * jeremylasne.com/bio: one document, read by everyone, written by one person.
  *
- * The page renders the fallbacks from bio/spec.js and then patches in what is
- * here. A write carries the passphrase set as BIO_PASSPHRASE in the Convex
- * dashboard; there are no accounts because there is exactly one author. What
- * a write may contain (days up to today, the known habits, number ranges) is
- * decided by `clean` in the same spec file the page uses. One entry per day:
- * the habit checks, hours slept, and the result of each training session.
+ * October 2026, 31 days: nine things logged by hand and nine read off the
+ * watch, the scale and Yazio, one entry a day. A write carries the passphrase
+ * set as BIO_PASSPHRASE in the Convex dashboard; there are no accounts because
+ * there is exactly one author. What a write may contain (days inside the
+ * challenge and not after today, the known field ids, every number in range)
+ * is decided by `clean` in bio/spec.js, the same file the page imports, so the
+ * two sides cannot drift apart.
+ *
+ * The key is bumped for the new shape, so the habit log from before it sits
+ * untouched under "v2" instead of being half-read as this one.
  */
-const KEY = "v2";
+const KEY = "oct26";
 
 function mustBeJeremy(passphrase: string) {
   const want = process.env.BIO_PASSPHRASE;
@@ -47,15 +51,8 @@ export const save = mutation({
     passphrase: v.string(),
     /* the page's local date: days after it are refused */
     today: v.string(),
-    log: v.record(v.string(), v.object({
-      habits: v.record(v.string(), v.boolean()),
-      sleep: v.optional(v.number()),
-      test: v.optional(v.string()),
-      result: v.optional(v.number()),
-      /* the older shape, still sent for a day left untouched on screen */
-      train: v.optional(v.record(v.string(), v.number())),
-      note: v.optional(v.string()),
-    })),
+    /* Anything the page sends; `clean` decides what survives. */
+    log: v.record(v.string(), v.record(v.string(), v.union(v.float64(), v.boolean(), v.string()))),
   },
   handler: async (ctx, { passphrase, today, ...input }) => {
     mustBeJeremy(passphrase);

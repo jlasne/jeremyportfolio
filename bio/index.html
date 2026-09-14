@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Energized and performing life | Jeremy Lasne</title>
+<title>31 days of measuring | Jeremy Lasne</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="A daily log: five habits, sleep, and every training session. Live.">
+<meta name="description" content="October 2026: 18 things measured every day, then the matrix of what actually moves my recovery, resting heart rate and sleep.">
 <meta name="theme-color" content="#050b16">
 <meta name="color-scheme" content="dark">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -13,8 +13,8 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Jeremy Lasne">
 <meta property="og:url" content="https://www.jeremylasne.com/bio/">
-<meta property="og:title" content="Energized and performing life">
-<meta property="og:description" content="A daily log: five habits, sleep, and every training session. Live.">
+<meta property="og:title" content="31 days of measuring">
+<meta property="og:description" content="18 things measured every day for a month, then the matrix of what actually moves the body.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -28,11 +28,14 @@
   --ice-70: rgba(234, 244, 251, .72);
   --ice-45: rgba(234, 244, 251, .46);
   --line: rgba(95, 168, 211, .18);
-  --card: linear-gradient(180deg, rgba(23, 61, 89, .42), rgba(23, 61, 89, .14));
+  --good: #6ee7a8;
+  --good-bg: rgba(110, 231, 168, .12);
+  --bad: #ff9e9e;
+  --bad-bg: rgba(255, 158, 158, .12);
   --display: 'Bebas Neue', 'Oswald', Impact, 'Arial Narrow', sans-serif;
   --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --pad: clamp(20px, 5vw, 56px);
+  --pad: clamp(18px, 5vw, 56px);
   --w: 1080px;
 }
 * { box-sizing: border-box; }
@@ -41,161 +44,213 @@ body {
   margin: 0; background: transparent; color: var(--ice);
   font: 400 16px/1.55 var(--sans); -webkit-font-smoothing: antialiased;
 }
-body.editing { padding-bottom: 92px; }
 a { color: inherit; }
-button, input { font: inherit; color: inherit; }
+button, input, select { font: inherit; color: inherit; }
 ::selection { background: var(--blue); color: var(--ink); }
 :focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
-
 .mono { font: 500 11px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-/* ── the scene, behind the whole page ───────────────────────────────── */
-.scene {
-  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100lvh;
-  z-index: -2; display: block; pointer-events: none;
-}
+/* ── the ridge behind the page ──────────────────────────────────────── */
 .bg {
   position: fixed; top: -6%; left: -6%; width: 112%; height: 112%; z-index: -2; pointer-events: none;
   object-fit: cover; object-position: 50% 42%; filter: blur(16px) brightness(.45) saturate(.9); display: none;
 }
 .has-photo .bg { display: block; }
-.has-photo .scene { display: none; }
-.veil {
-  position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background: rgba(5, 11, 22, .76); opacity: 0;
+.fallback {
+  position: fixed; inset: 0; z-index: -2; pointer-events: none;
+  background:
+    radial-gradient(120% 70% at 50% 0%, rgba(23, 61, 89, .55), transparent 70%),
+    linear-gradient(180deg, #08152a, var(--ink) 60%);
 }
-.scene .tw { animation: tw var(--t, 5s) ease-in-out var(--d, 0s) infinite; }
-@keyframes tw { 50% { opacity: .1; } }
+.has-photo .fallback { display: none; }
+.veil { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: rgba(5, 11, 22, .78); opacity: 0; }
 
 /* ── top bar ────────────────────────────────────────────────────────── */
 .top {
   max-width: var(--w); margin: 0 auto; display: flex; justify-content: space-between; align-items: center;
-  padding: calc(var(--pad) * .6) var(--pad);
+  gap: 12px; padding: calc(var(--pad) * .6) var(--pad);
 }
 .brand { text-decoration: none; color: var(--ice-70); }
 .brand:hover { color: var(--ice); }
 .edit {
   background: rgba(5, 11, 22, .4); border: 1px solid var(--line); padding: 9px 12px 8px; cursor: pointer;
-  color: var(--ice-70); transition: color .2s, border-color .2s;
+  color: var(--ice-70); transition: color .2s, border-color .2s; white-space: nowrap;
 }
 .edit:hover { color: var(--ice); border-color: var(--blue); }
-.editing .edit { visibility: hidden; }
-.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.edit[hidden] { display: none; }
 
 /* ── sections ───────────────────────────────────────────────────────── */
 main { max-width: var(--w); margin: 0 auto; padding: 0 var(--pad); }
-section { padding: clamp(28px, 5vw, 64px) 0 0; }
-section:last-child { padding-bottom: clamp(40px, 6vw, 80px); }
-.head { margin-bottom: clamp(24px, 4vw, 40px); }
-.head .n { color: var(--blue); display: block; margin-bottom: 14px; }
+section { padding: clamp(26px, 5vw, 60px) 0 0; }
+section:last-of-type { padding-bottom: clamp(40px, 6vw, 80px); }
+.head { margin-bottom: clamp(20px, 3vw, 34px); }
+.head .n { color: var(--blue); display: block; margin-bottom: 12px; }
 h2 {
-  margin: 0; font: 400 clamp(46px, 7vw, 88px)/.95 var(--display); letter-spacing: .015em;
-  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  margin: 0; font: 400 clamp(42px, 7vw, 88px)/.95 var(--display); letter-spacing: .015em;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
 }
-.tag { margin: 14px 0 0; max-width: 52ch; font-size: clamp(16px, 1.6vw, 18px); color: var(--ice-70); }
-.sum { margin: 16px 0 0; color: var(--ice-70); line-height: 1.6; }
-
+.tag { margin: 12px 0 0; max-width: 56ch; font-size: clamp(15px, 1.6vw, 18px); color: var(--ice-70); }
 .pill {
   font: 500 10.5px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase;
   padding: 7px 9px 6px; border: 1px solid var(--line); color: var(--ice-70); white-space: nowrap;
 }
+.pill.live { border-color: var(--blue); color: var(--blue); }
 
-/* ── the log ────────────────────────────────────────────────────────── */
-.log { border-top: 1px solid var(--line); background: rgba(5, 11, 22, .35); }
-.lrow {
-  display: grid; grid-template-columns: 124px repeat(var(--n), minmax(0, 1fr)) 64px;
-  align-items: center; gap: 8px; padding: 10px 10px 10px 12px; border-bottom: 1px solid var(--line);
-  transition: opacity .3s;
+/* ── the card for one day ───────────────────────────────────────────── */
+.card { border: 1px solid var(--line); background: rgba(5, 11, 22, .46); }
+.chead {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  padding: 14px 16px; border-bottom: 1px solid var(--line);
 }
-.lrow.lhead { padding: 9px 10px 8px 12px; color: var(--ice-45); }
-.lrow.lhead span { font: 500 10px/1.2 var(--mono); letter-spacing: .12em; text-transform: uppercase; text-align: center; }
-.lrow.lhead .date { text-align: left; }
-.lrow.lhead .s { text-align: right; }
-.lrow .date { font-size: 14px; color: var(--ice-70); white-space: nowrap; }
-.lrow.today { background: linear-gradient(90deg, rgba(95, 168, 211, .16), rgba(95, 168, 211, .03) 60%, transparent); box-shadow: inset 3px 0 var(--blue); }
-.lrow.today .date { color: var(--ice); font-weight: 500; }
-.lrow.future { opacity: .32; }
-.lrow.empty { grid-template-columns: 1fr; color: var(--ice-70); }
-.cell { display: flex; justify-content: center; }
-.tick {
-  appearance: none; -webkit-appearance: none; width: 20px; height: 20px; margin: 0;
-  border: 1px solid var(--blue); background: transparent; position: relative; flex: none;
-  transition: background .15s, box-shadow .15s;
-}
-.tick:checked { background: var(--blue); }
-.tick:checked::after {
-  content: ''; position: absolute; left: 6px; top: 2px; width: 5px; height: 10px;
-  border: solid var(--ink); border-width: 0 2px 2px 0; transform: rotate(45deg);
-}
-.future .tick { border-style: dashed; }
-.tick:not(:disabled) { cursor: pointer; box-shadow: 0 0 0 4px rgba(95, 168, 211, .14); }
-.s { display: flex; align-items: baseline; justify-content: flex-end; gap: 4px; min-width: 0; }
-.val {
-  width: 100%; min-width: 0; text-align: right; font: 400 24px/1 var(--display); letter-spacing: .02em;
-  background: none; border: 0; border-bottom: 1px solid transparent; padding: 0; margin: 0;
-  appearance: textfield; -moz-appearance: textfield; caret-color: var(--blue); pointer-events: none;
-}
-.val::-webkit-outer-spin-button, .val::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.val:invalid { box-shadow: none; }
-.s i { font: 500 10px/1 var(--mono); color: var(--blue); font-style: normal; }
-.val:placeholder-shown + i { visibility: hidden; }
-.editing .val:not([readonly]) + i { visibility: visible; }
-.editing .val:not([readonly]) { pointer-events: auto; border-bottom-color: var(--blue); }
-.editing .val:not([readonly]):focus { outline: none; border-bottom-color: var(--ice); }
-.log.train .lrow { grid-template-columns: 124px minmax(0, 1fr) 150px 110px; }
-.log.train .lrow.lhead .h { text-align: left; }
-.res { display: contents; }
-.txt {
-  width: 100%; min-width: 0; background: none; border: 0; border-bottom: 1px solid transparent; padding: 0; margin: 0;
-  font: 400 15px/1.4 var(--sans); color: var(--ice); pointer-events: none;
-}
-.txt::placeholder { color: transparent; }
-.editing .txt:not([readonly]) { pointer-events: auto; border-bottom-color: var(--blue); }
-.editing .txt:not([readonly])::placeholder { color: var(--ice-45); }
-.editing .txt:not([readonly]):focus { outline: none; border-bottom-color: var(--ice); }
-.pick {
-  appearance: none; -webkit-appearance: none; background: none; border: 0; border-bottom: 1px solid transparent;
-  padding: 0; margin: 0; min-width: 0; width: 100%; font: 500 15px/1.4 var(--sans); color: var(--ice); pointer-events: none;
-}
-.pick:disabled { color: var(--ice); opacity: 1; }
-.editing .pick { pointer-events: auto; cursor: pointer; border-bottom-color: var(--blue); }
-.editing .pick:focus { outline: none; border-bottom-color: var(--ice); }
-.pick option { background: var(--ink); color: var(--ice); }
-.log.train { margin-top: 16px; }
+.chead .when { font: 400 clamp(26px, 4vw, 38px)/1 var(--display); letter-spacing: .02em; }
+.chead .when small { font: 500 11px/1 var(--mono); letter-spacing: .16em; color: var(--blue); margin-left: 10px; }
+.saved { color: var(--ice-45); min-height: 1em; text-align: right; }
+.saved.bad { color: var(--bad); }
+.saved.on { color: var(--good); }
 
-.more { margin: 14px 0 0; }
-.editing .more { display: none; }
-.addday { display: none; align-items: center; gap: 12px; margin: 0 0 14px; }
-.editing .addday:not([hidden]) { display: flex; }
-.addday .pass { flex: 0 1 200px; }
-.legend { list-style: none; margin: 28px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px 32px; }
-.legend li { font-size: 14px; color: var(--ice-70); max-width: 44ch; }
-.legend b { display: block; font-weight: 500; font-size: 15px; color: var(--ice); margin-bottom: 2px; }
-.legend b small { font: 500 10px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--blue); margin-left: 8px; }
+.group { border-bottom: 1px solid var(--line); padding: 4px 0 14px; }
+.group:last-child { border-bottom: 0; }
+.gtitle { color: var(--ice-45); padding: 14px 16px 10px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.gtitle b { color: var(--blue); font-weight: 500; }
 
-/* ── footer ─────────────────────────────────────────────────────────── */
+/* a tap row: label left, minus, the number, plus */
+.tapr { display: flex; align-items: center; gap: 12px; padding: 6px 16px; }
+.tapr .lbl { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; font-size: 15px; }
+.tapr .lbl em { font-style: normal; font-size: 19px; width: 24px; text-align: center; flex: none; }
+.tapr .lbl span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tapr .lbl i { font: 500 10px/1 var(--mono); letter-spacing: .1em; color: var(--ice-45); font-style: normal; flex: none; }
+.pm {
+  width: 46px; height: 46px; flex: none; border: 1px solid var(--line); background: rgba(23, 61, 89, .3);
+  font: 400 26px/1 var(--display); color: var(--ice-70); cursor: pointer; border-radius: 50%;
+  display: grid; place-items: center; transition: border-color .15s, color .15s, background .15s;
+}
+.pm:hover:not(:disabled) { border-color: var(--blue); color: var(--ice); }
+.pm:active:not(:disabled) { background: var(--blue); color: var(--ink); }
+.pm:disabled { opacity: .3; cursor: default; }
+.count { width: 46px; flex: none; text-align: center; font: 400 34px/1 var(--display); letter-spacing: .02em; }
+.count.zero { color: var(--ice-45); }
+
+/* an on/off row */
+.flagr { display: flex; align-items: center; gap: 12px; padding: 6px 16px; }
+.flagr .lbl { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; font-size: 15px; }
+.flagr .lbl em { font-style: normal; font-size: 19px; width: 24px; text-align: center; flex: none; }
+.toggle {
+  border: 1px solid var(--line); background: rgba(23, 61, 89, .3); cursor: pointer; padding: 0;
+  width: 92px; height: 46px; flex: none; border-radius: 999px; position: relative;
+  transition: background .18s, border-color .18s;
+}
+.toggle::after {
+  content: ''; position: absolute; top: 5px; left: 5px; width: 34px; height: 34px; border-radius: 50%;
+  background: var(--ice-45); transition: transform .18s, background .18s;
+}
+.toggle span {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  font: 500 10px/1 var(--mono); letter-spacing: .12em; color: var(--ice-45); transition: color .18s, right .18s, left .18s;
+}
+.toggle[aria-pressed="true"] { background: rgba(95, 168, 211, .28); border-color: var(--blue); }
+.toggle[aria-pressed="true"]::after { transform: translateX(46px); background: var(--blue); }
+.toggle[aria-pressed="true"] span { right: auto; left: 14px; color: var(--blue); }
+.toggle:disabled { opacity: .4; cursor: default; }
+
+/* the typed numbers, two or three across */
+.nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(198px, 1fr)); gap: 2px 16px; padding: 4px 16px 0; }
+.nf { display: flex; align-items: baseline; gap: 8px; padding: 7px 0; border-bottom: 1px solid rgba(95, 168, 211, .1); }
+.nf label { flex: 1; min-width: 0; font-size: 14px; color: var(--ice-70); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nf input {
+  width: 84px; flex: none; text-align: right; background: none; border: 0; border-bottom: 1px solid transparent;
+  padding: 2px 0; font: 400 24px/1 var(--display); letter-spacing: .02em; caret-color: var(--blue);
+  appearance: textfield; -moz-appearance: textfield;
+}
+.nf input::-webkit-outer-spin-button, .nf input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.nf input::placeholder { color: var(--ice-45); }
+.nf input:not(:disabled) { border-bottom-color: var(--line); }
+.nf input:not(:disabled):focus { outline: none; border-bottom-color: var(--blue); }
+.nf i { font: 500 10px/1 var(--mono); letter-spacing: .1em; color: var(--blue); font-style: normal; width: 34px; flex: none; }
+.nf i:empty { display: none; }
+.notef { padding: 12px 16px 2px; }
+.notef input {
+  width: 100%; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 6px 0;
+  font: 400 15px/1.4 var(--sans);
+}
+.notef input:disabled { border-bottom-color: transparent; }
+.notef input:focus { outline: none; border-bottom-color: var(--blue); }
+.notef input::placeholder { color: var(--ice-45); }
+
+/* ── the 31 days ────────────────────────────────────────────────────── */
+.strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(54px, 1fr)); gap: 6px; }
+.dbtn {
+  border: 1px solid var(--line); background: rgba(5, 11, 22, .4); cursor: pointer; padding: 9px 4px 7px;
+  display: grid; gap: 6px; justify-items: center; transition: border-color .15s, background .15s;
+}
+.dbtn:hover { border-color: var(--blue); }
+.dbtn .dn { font: 400 22px/1 var(--display); letter-spacing: .02em; color: var(--ice-70); }
+.dbtn .dw { font: 500 8.5px/1 var(--mono); letter-spacing: .1em; color: var(--ice-45); }
+.dbtn .dots { display: flex; gap: 3px; }
+.dbtn .dots b { width: 5px; height: 5px; border-radius: 50%; background: rgba(95, 168, 211, .22); }
+.dbtn .dots b.on { background: var(--blue); }
+.dbtn[aria-current="true"] { border-color: var(--blue); background: rgba(95, 168, 211, .16); }
+.dbtn[aria-current="true"] .dn { color: var(--ice); }
+.dbtn.future { opacity: .34; }
+.dbtn.gap { border-color: rgba(255, 158, 158, .34); }
+.dbtn.gap .dn { color: var(--bad); }
+.legend { display: flex; gap: 18px; flex-wrap: wrap; margin: 14px 0 0; color: var(--ice-45); }
+.legend span { display: flex; align-items: center; gap: 7px; }
+.legend b { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); display: block; }
+.legend b.off { background: rgba(95, 168, 211, .22); }
+.legend b.miss { background: var(--bad); }
+
+/* ── the matrix ─────────────────────────────────────────────────────── */
+.mxwrap { overflow-x: auto; border: 1px solid var(--line); background: rgba(5, 11, 22, .46); }
+.mx { width: 100%; border-collapse: collapse; min-width: 620px; }
+.mx th, .mx td { padding: 11px 10px; text-align: center; }
+.mx thead th { font: 500 10px/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ice-45); border-bottom: 1px solid var(--line); font-weight: 500; }
+.mx thead th:first-child { text-align: left; }
+.mx tbody tr { border-bottom: 1px solid rgba(95, 168, 211, .1); }
+.mx tbody tr:last-child { border-bottom: 0; }
+.mx td.f { text-align: left; white-space: nowrap; font-size: 15px; }
+.mx td.f em { font-style: normal; margin-right: 9px; }
+.cellv { display: inline-grid; gap: 3px; justify-items: center; padding: 6px 10px; border: 1px solid transparent; border-radius: 4px; min-width: 76px; }
+.cellv u { text-decoration: none; font: 400 21px/1 var(--display); letter-spacing: .02em; }
+.cellv s { text-decoration: none; font: 500 8.5px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ice-45); }
+.cellv.good u { color: var(--good); }
+.cellv.bad u { color: var(--bad); }
+.cellv.lit.good { border-color: rgba(110, 231, 168, .45); background: var(--good-bg); }
+.cellv.lit.bad { border-color: rgba(255, 158, 158, .42); background: var(--bad-bg); }
+.cellv.lit s { color: inherit; }
+.cellv.lit.good s { color: var(--good); }
+.cellv.lit.bad s { color: var(--bad); }
+.cellv.thin u { color: var(--ice-45); }
+
+.locked { border: 1px solid var(--line); background: rgba(5, 11, 22, .46); padding: clamp(24px, 5vw, 44px); text-align: center; }
+.locked .big { font: 400 clamp(56px, 12vw, 120px)/.9 var(--display); letter-spacing: .02em; color: var(--blue); }
+.locked p { margin: 14px auto 0; max-width: 46ch; color: var(--ice-70); }
+.meter { height: 3px; background: rgba(95, 168, 211, .18); margin: 26px auto 0; max-width: 420px; }
+.meter i { display: block; height: 100%; background: var(--blue); }
+
+/* ── how it works ───────────────────────────────────────────────────── */
+.notes { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px 32px; }
+.notes li { font-size: 14px; color: var(--ice-70); max-width: 46ch; }
+.notes b { display: block; font-weight: 500; font-size: 15px; color: var(--ice); margin-bottom: 3px; }
+
+/* ── footer and the unlock bar ──────────────────────────────────────── */
 footer {
   max-width: var(--w); margin: 0 auto; padding: 0 var(--pad) calc(var(--pad) * 1.2);
   display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; color: var(--ice-45);
 }
-footer a { text-decoration: none; }
-footer a:hover { color: var(--ice); }
-.status { color: var(--ice-70); min-height: 1em; }
-.status.bad { color: #ff9e9e; }
-
-/* ── edit bar ───────────────────────────────────────────────────────── */
+footer a, footer button { text-decoration: none; background: none; border: 0; padding: 0; cursor: pointer; color: inherit; }
+footer a:hover, footer button:hover { color: var(--ice); }
+body.editing { padding-bottom: 88px; }
 .bar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
-  background: rgba(5, 11, 22, .86); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  border-top: 1px solid var(--blue);
-  padding: 14px var(--pad) calc(14px + env(safe-area-inset-bottom));
+  background: rgba(5, 11, 22, .88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid var(--blue); padding: 14px var(--pad) calc(14px + env(safe-area-inset-bottom));
 }
 .bar[hidden] { display: none; }
 .row { max-width: var(--w); margin: 0 auto; display: flex; align-items: center; gap: 12px; }
 .row[hidden] { display: none; }
-.row .status { flex: 1; }
-#why { flex-basis: 100%; }
-#why[hidden] { display: none; }
+.row .status { flex: 1; color: var(--ice-70); }
+.row .status.bad { color: var(--bad); }
 .row label { color: var(--ice-70); }
 .pass {
   flex: 1; min-width: 0; background: rgba(23, 61, 89, .35); border: 1px solid var(--line);
@@ -214,28 +269,19 @@ footer a:hover { color: var(--ice); }
 @keyframes shake { 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
 
 /* ── small screens ──────────────────────────────────────────────────── */
-@media (max-width: 860px) {
-  .legend { grid-template-columns: 1fr; }
-}
 @media (max-width: 560px) {
-  .lrow { grid-template-columns: 72px repeat(var(--n), minmax(0, 1fr)) 44px; gap: 4px; padding: 9px 6px 9px 8px; }
-  .lrow.lhead { align-items: end; }
-  .lrow.lhead .h { writing-mode: vertical-rl; transform: rotate(180deg); text-align: left; font-size: 9px; letter-spacing: .08em; height: 86px; margin: 0 auto; white-space: nowrap; }
-  .lrow.lhead .s { align-self: end; }
-  .lrow .date { font-size: 12px; }
-  .tick { width: 18px; height: 18px; }
-  .tick:checked::after { left: 5px; top: 1px; }
-  .val { font-size: 20px; }
-  .log.train .lrow { grid-template-columns: 72px minmax(0, 1fr) 104px; }
-  .log.train .lrow.lhead .h { writing-mode: horizontal-tb; transform: none; height: auto; margin: 0; text-align: left; }
-  .res { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
-  .lhead .res .h { display: none; }
-  .pick { font: 500 10px/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--blue); text-align: right; direction: rtl; }
-  .txt { font-size: 13px; }
+  .nums { grid-template-columns: 1fr 1fr; gap: 0 14px; }
+  .nf input { width: 66px; font-size: 21px; }
+  .nf label { font-size: 13px; }
+  .nf i { width: 28px; font-size: 9px; }
+  .strip { grid-template-columns: repeat(7, 1fr); gap: 5px; }
+  .toggle { width: 78px; height: 42px; }
+  .toggle::after { width: 30px; height: 30px; }
+  .toggle[aria-pressed="true"]::after { transform: translateX(40px); }
+  .pm { width: 42px; height: 42px; }
+  .count { width: 40px; font-size: 30px; }
   .row { flex-wrap: wrap; }
-  .row label { width: 100%; }
-  .pass { flex-basis: 100%; }
-  .row .status { flex-basis: 100%; }
+  .row label, .pass, .row .status { flex-basis: 100%; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after { animation: none !important; transition: none !important; }
@@ -245,47 +291,69 @@ footer a:hover { color: var(--ice); }
 <body>
 
 <img class="bg" id="bg" src="/bio/bg.jpg" alt="">
-<svg class="scene" id="scene" aria-hidden="true" preserveAspectRatio="xMidYMid slice"></svg>
+<div class="fallback"></div>
 <div class="veil" id="veil"></div>
 
 <header class="top">
   <a class="brand mono" href="https://jeremylasne.com">Jeremy Lasne</a>
-  <h1 class="sr">Jeremy Lasne, daily log</h1>
-  <button class="edit mono" id="edit" type="button">Edit</button>
+  <h1 class="sr">31 days of measuring, October 2026</h1>
+  <button class="edit mono" id="edit" type="button">Log</button>
 </header>
 
 <main>
-  <section id="health">
+  <section id="today">
     <div class="head">
       <span class="n mono">01</span>
-      <h2>Health</h2>
-      <p class="tag">An energized day starts with a full night of sleep.</p>
-      <p class="sum mono" id="sum"></p>
+      <h2>Today <span class="pill live" id="dayPill">Day 0 of 31</span></h2>
+      <p class="tag">Nine things I tap, nine the watch already knows. Under two minutes a day, every day of October, then the matrix reads what moved.</p>
     </div>
-    <form class="addday" id="addday" hidden>
-      <label class="mono" for="newday">Add a day</label>
-      <input class="pass" id="newday" type="date" required>
-      <button class="btn" type="submit">Add</button>
-    </form>
-    <div class="log" id="log" role="table" aria-label="Daily log"></div>
-    <button class="btn more" id="more" type="button" hidden></button>
-    <ul class="legend" id="legend"></ul>
+    <div class="card" id="card"></div>
   </section>
 
-  <section id="performance">
+  <section id="month">
     <div class="head">
       <span class="n mono">02</span>
-      <h2>Performance</h2>
-      <p class="tag">One all-round, high-performing body. What I did, day by day, and the number when there is one.</p>
-      <p class="sum mono" id="tsum"></p>
+      <h2>The 31 days <span class="pill" id="monthPill"></span></h2>
+      <p class="tag">Every day of the challenge. Pick one to fill it in. A red day is a hole in the data, and a hole costs a correlation.</p>
     </div>
-    <div class="log train" id="train" role="table" aria-label="Training log"></div>
+    <div class="strip" id="strip"></div>
+    <div class="legend mono">
+      <span><b></b> Taps in</span>
+      <span><b></b><b></b> Body in</span>
+      <span><b class="off"></b> Empty</span>
+      <span><b class="miss"></b> Missed, past</span>
+    </div>
+  </section>
+
+  <section id="matrix">
+    <div class="head">
+      <span class="n mono">03</span>
+      <h2>Correlations <span class="pill" id="mxPill"></span></h2>
+      <p class="tag">Each row is something I did. Each column is what my body said the morning after. The number is how far the average moved, the label how far apart the two groups really sit.</p>
+    </div>
+    <div id="mxbox"></div>
+  </section>
+
+  <section id="how">
+    <div class="head">
+      <span class="n mono">04</span>
+      <h2>How to read it</h2>
+    </div>
+    <ul class="notes">
+      <li><b>The morning after</b>A day is judged by the night that follows it. A drink on Tuesday is scored against Wednesday's sleep, never Tuesday's.</li>
+      <li><b>High against low</b>An on/off thing splits on itself. A counted thing splits at my own median, so "high coffee" means high for me.</li>
+      <li><b>Green is good, not positive</b>A resting heart rate going down is a win, so it turns green while the number falls.</li>
+      <li><b>The strength label</b>How far apart the two groups sit, measured against how much that number swings day to day anyway. A big percent on a wild metric says less than a small one on a steady metric.</li>
+      <li><b>What stays hidden</b>A cell needs 4 days on each side before it prints. The whole matrix stays shut until 21 days carry both the taps and the body numbers.</li>
+      <li><b>One month only</b>1 to 31 October 2026. Thirty-one days, one video a day, then the table stands as it is.</li>
+    </ul>
   </section>
 </main>
 
 <footer class="mono">
   <a href="https://jeremylasne.com">jeremylasne.com</a>
-  <span class="status" id="updated"></span>
+  <button type="button" id="csv">Download CSV</button>
+  <span id="updated"></span>
 </footer>
 
 <div class="bar" id="bar" hidden>
@@ -297,131 +365,36 @@ footer a:hover { color: var(--ice); }
     <span class="status mono bad" id="why" hidden></span>
   </form>
   <div class="row" id="tools" hidden>
-    <span class="status mono" id="status">Editing. Every day shown is open. One test a day.</span>
-    <button class="btn" type="button" data-cancel>Cancel</button>
-    <button class="btn solid" type="button" id="save">Save</button>
+    <span class="status mono" id="status">Logging. Every change saves itself.</span>
+    <button class="btn" type="button" data-cancel>Done</button>
   </div>
 </div>
 
 <noscript><p style="text-align:center;padding:40px">The live numbers need JavaScript.</p></noscript>
 
 <script type="module">
-import { SPEC, dateKey, shift, daysBetween, clean, testOf } from '/bio/spec.js';
+import { SPEC, dateKey, shift, daysBetween, allDays, clean, matrix, readyDays, isLogged, hasBody } from '/bio/spec.js';
 
-/* ── the scene ──────────────────────────────────────────────────────────
-   Five ridgelines by midpoint displacement, each with a snow cap: the
-   silhouette drawn in snow, then again in rock shifted down a few pixels,
-   so the cap thins on the steep faces and sits on the peaks. The two far
-   ranges are blurred and hazed, the near ones are crisp, under a moon and
-   film grain. Fixed behind the whole page. Drawn once for the viewport's
-   own aspect ratio, seeded, so it is the same mountain on every visit. */
-const svg = document.getElementById('scene');
-const NS = 'http://www.w3.org/2000/svg';
-const el = (tag, attrs, parent) => {
-  const e = document.createElementNS(NS, tag);
-  for (const k in attrs) e.setAttribute(k, attrs[k]);
-  return (parent || svg).appendChild(e);
-};
-function rng(seed) {
-  return () => {
-    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
-    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
-    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
-    return ((t ^ t >>> 14) >>> 0) / 4294967296;
-  };
-}
-function ridge(rnd, W, H, ctrl, amp, rough) {
-  let pts = ctrl.map(([x, y]) => [x * W, y * H]);
-  pts.unshift([-W * .1, pts[0][1]]); pts.push([W * 1.1, pts[pts.length - 1][1]]);
-  let a = amp * H;
-  for (let i = 0; i < 8; i++) {
-    const next = [pts[0]];
-    for (let j = 1; j < pts.length; j++) {
-      const [x0, y0] = pts[j - 1], [x1, y1] = pts[j];
-      next.push([(x0 + x1) / 2, (y0 + y1) / 2 + (rnd() - .5) * a], pts[j]);
-    }
-    pts = next; a *= rough;
-  }
-  return 'M' + pts.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join('L') + `L${W * 1.1} ${H * 1.3}L${-W * .1} ${H * 1.3}Z`;
-}
-function grad(id, stops, defs, attrs) {
-  const g = el(attrs ? 'radialGradient' : 'linearGradient', Object.assign({ id, x1: 0, y1: 0, x2: 0, y2: 1 }, attrs || {}), defs);
-  for (const [o, c, op] of stops) el('stop', { offset: o, 'stop-color': c, 'stop-opacity': op == null ? 1 : op }, g);
-}
-const RANGES = [
-  { c: [[0, .56], [.1, .40], [.2, .52], [.3, .35], [.4, .5], [.5, .38], [.62, .5], [.72, .4], [.84, .52], [.94, .42], [1, .54]], amp: .09, rough: .6, snow: '#cfe2f2', rock: ['#4f83aa', '#2c5f86'], cap: .024, blur: 'b1', op: .8 },
-  { c: [[0, .64], [.08, .5], [.18, .6], [.28, .45], [.4, .58], [.5, .49], [.6, .62], [.7, .5], [.82, .6], [.92, .52], [1, .62]], amp: .08, rough: .6, snow: '#b0cde5', rock: ['#33678d', '#1a4262'], cap: .02, blur: 'b2', op: .94 },
-  { c: [[0, .74], [.1, .62], [.22, .72], [.32, .59], [.44, .7], [.54, .64], [.66, .74], [.76, .62], [.88, .72], [1, .68]], amp: .07, rough: .62, snow: '#86afd0', rock: ['#22506f', '#0f2c45'], cap: .016 },
-  { c: [[0, .84], [.12, .76], [.26, .83], [.38, .73], [.5, .82], [.62, .77], [.76, .85], [.88, .77], [1, .84]], amp: .05, rough: .66, snow: '#4a7a9e', rock: ['#14324c', '#08192a'], cap: .012 },
-  { c: [[0, .94], [.15, .9], [.3, .94], [.5, .91], [.7, .95], [.85, .9], [1, .94]], amp: .035, rough: .8, snow: '#183650', rock: ['#07131f', '#03080f'], cap: .01 },
-];
-function scene() {
-  const w = innerWidth || 1200, h = innerHeight || 800;
-  const W = 1600, H = Math.round(W * h / w), k = W / w, tall = H > W;
-  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  svg.innerHTML = '';
-  const defs = el('defs', {});
-  grad('sky', [[0, '#02071a'], ['.5', '#0a1c33'], ['.8', '#173d59'], [1, '#245b80']], defs);
-  grad('glow', [[0, '#eaf4fb', .5], ['.4', '#8fc0e2', .12], [1, '#5fa8d3', 0]], defs, { cx: .5, cy: .5, r: .5 });
-  grad('mist', [[0, '#a6cbe4', .38], [1, '#a6cbe4', 0]], defs, { cx: .5, cy: .5, r: .5 });
-  grad('fog', [[0, '#5fa8d3', 0], [1, '#5fa8d3', .22]], defs);
-  grad('fade', [[0, '#050b16', 0], ['.5', '#050b16', .38], [1, '#050b16', .95]], defs);
-  const blur = (id, px) => { const f = el('filter', { id, x: '-5%', y: '-20%', width: '110%', height: '140%' }, defs); el('feGaussianBlur', { stdDeviation: (px * k).toFixed(2) }, f); };
-  blur('b1', 4.5); blur('b2', 2);
-  const grain = el('filter', { id: 'grain', x: 0, y: 0, width: '100%', height: '100%' }, defs);
-  el('feTurbulence', { type: 'fractalNoise', baseFrequency: (.7 / k).toFixed(3), numOctaves: 2, stitchTiles: 'stitch' }, grain);
-  el('feColorMatrix', { type: 'saturate', values: 0 }, grain);
-
-  el('rect', { width: W, height: H, fill: 'url(#sky)' });
-  const rnd = rng(1809);
-  for (let i = 0; i < 110; i++) {
-    const x = rnd() * W, y = rnd() * H * .5, r = .5 + rnd() * 1.4;
-    const s = el('circle', { cx: x.toFixed(1), cy: y.toFixed(1), r: (r * k).toFixed(2), fill: '#eaf4fb', opacity: (.25 + rnd() * .7).toFixed(2) });
-    if (i % 4 === 0) { s.setAttribute('class', 'tw'); s.style.setProperty('--d', (rnd() * 6).toFixed(1) + 's'); s.style.setProperty('--t', (4 + rnd() * 4).toFixed(1) + 's'); }
-  }
-  const mx = W * (tall ? .8 : .74), my = H * (tall ? .07 : .19), mr = Math.min(W, H) * .032;
-  el('circle', { cx: mx, cy: my, r: mr * 10, fill: 'url(#glow)', opacity: .5 });
-  el('circle', { cx: mx, cy: my, r: mr * 3.4, fill: 'url(#glow)' });
-  el('circle', { cx: mx, cy: my, r: mr * 1.75, fill: 'none', stroke: '#eaf4fb', 'stroke-opacity': .14, 'stroke-width': mr * .08 });
-  el('circle', { cx: mx, cy: my, r: mr, fill: '#f4f9fd' });
-
-  RANGES.forEach((L, i) => {
-    if (i === 2) el('ellipse', { cx: W * .5, cy: H * .68, rx: W * .75, ry: H * .06, fill: 'url(#mist)' });
-    if (i === 3) el('rect', { y: H * .6, width: W, height: H * .4, fill: 'url(#fog)' });
-    const d = ridge(rnd, W, H, L.c, L.amp, L.rough);
-    grad('rock' + i, [[0, L.rock[0], 0], ['.12', L.rock[0], .55], ['.28', L.rock[0], 1], [1, L.rock[1], 1]], defs);
-    grad('snow' + i, [[0, L.snow], ['.3', L.snow], [1, L.rock[0]]], defs);
-    const g = el('g', L.blur ? { filter: `url(#${L.blur})`, opacity: L.op } : { opacity: L.op || 1 });
-    el('path', { d, fill: `url(#snow${i})` }, g);
-    el('path', { d, fill: `url(#rock${i})`, transform: `translate(0 ${(L.cap * H).toFixed(1)})` }, g);
-  });
-  el('rect', { width: W, height: H, filter: 'url(#grain)', opacity: .07 });
-  el('rect', { width: W, height: H, fill: 'url(#fade)' });
-}
-scene();
-let aspect = innerWidth / innerHeight, timer;
-addEventListener('resize', () => {
-  clearTimeout(timer);
-  timer = setTimeout(() => { const a = innerWidth / innerHeight; if (Math.abs(a - aspect) / aspect > .12) { aspect = a; scene(); } }, 200);
-});
-/* the page darkens the scene as it scrolls over it */
-const veil = document.getElementById('veil'), bg = document.getElementById('bg');
-const photo = () => document.body.classList.add('has-photo');
-const tryPng = () => { if (!bg.src.endsWith('.png')) bg.src = '/bio/bg.png'; };
-bg.addEventListener('load', photo); bg.addEventListener('error', tryPng);
-if (bg.complete) bg.naturalWidth ? photo() : tryPng();
-const dim = () => { veil.style.opacity = Math.min(1, scrollY / (innerHeight * .45)).toFixed(2); };
-addEventListener('scroll', dim, { passive: true }); dim();
-
-/* ── the log ────────────────────────────────────────────────────────── */
-const API = 'https://fiery-eel-944.eu-west-1.convex.site/overlap';
 const $ = id => document.getElementById(id);
-const today = dateKey(), HABITS = SPEC.habits, TESTS = SPEC.exercises, SHOWN = 14;
+const API = 'https://fiery-eel-944.eu-west-1.convex.site/overlap';
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const pretty = (key, dow) => { const [y, m, d] = key.split('-').map(Number); const t = new Date(y, m - 1, d); return (dow ? DOW[t.getDay()] + ' ' : '') + d + ' ' + MON[m - 1]; };
-const state = { log: {}, updatedAt: 0 };
+const DAYS = allDays();
+const today = dateKey();
+/* Before the first and after the last, the card lands on the nearest day
+   inside the month, so the page is never blank. */
+const clampDay = k => k < SPEC.start ? SPEC.start : k > SPEC.end ? SPEC.end : k;
 
+const state = { log: {}, updatedAt: 0 };
+let sel = clampDay(today);
+let pass = '';
+let dirty = false, saving = false, timer = 0;
+
+const at = key => (state.log[key] ||= {});
+const pretty = key => { const [y, m, d] = key.split('-').map(Number); return `${DOW[new Date(y, m - 1, d).getDay()]} ${d} ${MON[m - 1]}`; };
+const editable = key => !!pass && key <= today && key >= SPEC.start && key <= SPEC.end;
+
+/* ── the door ───────────────────────────────────────────────────────── */
 function api(op, args) {
   const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 9000);
   return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ op, args: args || {} }), signal: ctl.signal })
@@ -430,199 +403,334 @@ function api(op, args) {
           e => { clearTimeout(t); throw new Error(e.name === 'AbortError' ? 'The server timed out after 9 seconds' : 'The server is unreachable right now'); });
 }
 
-/* The rows: today first, back to the first logged day, or to yesterday
-   when the log is new. Fourteen at most until "Earlier days" is pressed. */
-let rows = [], all = false;
-const extra = new Set();
-const first = () => Object.keys(state.log).filter(k => k <= today).sort()[0];
-const fmtSleep = h => { const m = Math.round(h * 60); return `${Math.floor(m / 60)}h${String(m % 60).padStart(2, '0')}`; };
-/* 7:04, 7h04, 704, 0704, 7.5 and 7,5 all read as hours */
-function parseSleep(str) {
+/* ── minutes typed as a person types them ───────────────────────────── */
+/* 7:30, 7h30, 730 and 7.5 all read as 450 minutes; 450 reads as itself. */
+function toMinutes(str) {
   const t = String(str).trim().toLowerCase(); let m;
-  if ((m = /^(\d{1,2})\s*[:h]\s*(\d{1,2})$/.exec(t))) return +m[1] + Math.min(59, +m[2]) / 60;
-  if ((m = /^(\d{1,2})(\d{2})$/.exec(t))) return +m[1] + Math.min(59, +m[2]) / 60;
-  if (/^\d+([.,]\d+)?$/.test(t)) return Number(t.replace(',', '.'));
-  return undefined;
+  if ((m = /^(\d{1,2})\s*[:h]\s*(\d{1,2})$/.exec(t))) return +m[1] * 60 + Math.min(59, +m[2]);
+  if (!/^\d+([.,]\d+)?$/.test(t)) return undefined;
+  const n = Number(t.replace(',', '.'));
+  if (!Number.isFinite(n)) return undefined;
+  if (/^\d{3,4}$/.test(t) && n > 60 && n % 100 < 60 && n <= 2359) return Math.floor(n / 100) * 60 + (n % 100);
+  return n <= 24 ? Math.round(n * 60) : Math.round(n);
 }
-const sleepCell = (id, label) => `<span class="s"><input class="val" id="${id}" type="text" inputmode="numeric" maxlength="6" placeholder=" " readonly aria-label="${label}"></span>`;
-const numCell = (id, m, label) => `<span class="s"><input class="val" id="${id}" type="number" inputmode="decimal" min="0" max="${m.max}" step="${m.step}" placeholder=" " readonly aria-label="${label}"><i>${m.unit}</i></span>`;
-function grid(host, head, row) {
-  host.innerHTML = `<div class="lrow lhead" role="row"><span class="date">Date</span>${head}</div>` +
-    (rows.length ? '' : `<div class="lrow empty"><span class="date">First entry ${pretty(SPEC.start, true)}</span></div>`);
-  for (const r of rows) {
-    const div = document.createElement('div');
-    div.className = 'lrow ' + r.when; div.setAttribute('role', 'row');
-    div.innerHTML = `<span class="date">${pretty(r.key, true)}</span>` + row(r.key);
-    host.appendChild(div);
-  }
-}
-function build() {
-  const f = first(), yesterday = shift(today, -1);
-  let from = f && f < yesterday ? f : yesterday;
-  /* the first two weeks show every day since the start, missed ones included */
-  if (from < SPEC.start || daysBetween(SPEC.start, today) < SHOWN) from = SPEC.start;
-  const hidden = all || today < from ? 0 : Math.max(0, daysBetween(from, today) + 1 - SHOWN);
-  if (hidden) from = shift(today, 1 - SHOWN);
-  rows = [];
-  for (let k = today; k >= from; k = shift(k, -1)) rows.push({ key: k, when: k === today ? 'today' : 'past' });
-  for (const k of extra) if (!rows.some(r => r.key === k)) rows.push({ key: k, when: k === today ? 'today' : 'past' });
-  rows.sort((a, b) => (a.key < b.key ? 1 : -1));
-  $('log').style.setProperty('--n', HABITS.length);
-  grid($('log'), HABITS.map(h => `<span class="h" title="${h.name}">${h.short}</span>`).join('') + '<span class="s">Sleep</span>',
-    key => HABITS.map(h => `<label class="cell"><input class="tick" type="checkbox" id="h-${key}-${h.id}" disabled aria-label="${h.name}, ${pretty(key)}"></label>`).join('') + sleepCell('s-' + key, 'Sleep, ' + pretty(key)));
-  document.querySelectorAll('.log:not(.train) .val[type=text]').forEach(i => i.addEventListener('change', () => { const h = parseSleep(i.value); i.value = h === undefined ? '' : fmtSleep(h); }));
-  grid($('train'), '<span class="h">Session</span><span class="res"><span class="h">Test</span><span class="s">Result</span></span>',
-    key => `<input class="txt" id="w-${key}" type="text" maxlength="80" placeholder="Rest, or what was done" readonly aria-label="Session, ${pretty(key)}">` +
-      `<span class="res"><select class="pick" id="p-${key}" disabled aria-label="Test, ${pretty(key)}"><option value=""></option>${TESTS.map(e => `<option value="${e.id}">${e.discipline}</option>`).join('')}</select>` +
-      numCell('t-' + key, TESTS[0], 'Result, ' + pretty(key)) + '</span>');
-  document.querySelectorAll('.pick').forEach(sel => sel.addEventListener('change', () => unit(sel.id.slice(2))));
-  $('more').hidden = !hidden;
-  $('more').textContent = `Earlier days · ${hidden} more`;
-}
-$('more').addEventListener('click', () => { all = true; build(); paint(); });
-$('legend').innerHTML = HABITS.map(h => `<li><b>${h.name}<small>${h.short}</small></b>${h.why}</li>`).join('');
+const fmtMinutes = n => `${Math.floor(n / 60)}h${String(Math.round(n % 60)).padStart(2, '0')}`;
 
-const val = (id, v) => { $(id).value = Number.isFinite(v) ? v : ''; };
-/* the result cell takes the unit, step and range of the chosen discipline */
-function unit(key) {
-  const picked = $('p-' + key).value, e = TESTS.find(t => t.id === picked) || TESTS[0], inp = $('t-' + key);
-  inp.max = e.max; inp.step = e.step; inp.nextElementSibling.textContent = picked ? e.unit : '';
-}
-function paint(log = state.log) {
-  for (const r of rows) {
-    const d = log[r.key];
-    for (const h of HABITS) $(`h-${r.key}-${h.id}`).checked = !!d?.habits?.[h.id];
-    $('s-' + r.key).value = Number.isFinite(d?.sleep) ? fmtSleep(d.sleep) : '';
-    const { test, result } = testOf(d);
-    $('p-' + r.key).value = TESTS.some(e => e.id === test) ? test : '';
-    unit(r.key); val('t-' + r.key, result);
-    $('w-' + r.key).value = d?.note || '';
-  }
-  /* the last seven days, today included */
-  let checks = 0, hours = 0, nights = 0, trained = 0;
-  for (let i = 0; i < 7; i++) {
-    const d = state.log[shift(today, -i)]; if (!d) continue;
-    for (const h of HABITS) if (d.habits?.[h.id]) checks++;
-    if (Number.isFinite(d.sleep)) { hours += d.sleep; nights++; }
-    if (testOf(d).test) trained++;
-  }
-  $('sum').textContent = `Last 7 days · ${checks} of ${7 * HABITS.length} checks` + (nights ? ` · ${fmtSleep(hours / nights)} sleep on average` : '');
-  const counts = TESTS.map(e => {
-    let n = 0;
-    for (const key in state.log) if (testOf(state.log[key]).test === e.id) n++;
-    return `${e.discipline.toLowerCase()} ${n}`;
-  }).filter(c => !c.endsWith(' 0'));
-  $('tsum').textContent = `Last 7 days · ${trained} ${trained === 1 ? 'day' : 'days'} trained` + (counts.length ? ` · all sessions: ${counts.join(', ')}` : '');
-  const when = state.updatedAt ? new Date(state.updatedAt) : null;
-  $('updated').textContent = !when ? '' :
-    dateKey(when) === today ? 'Updated today' :
-    dateKey(new Date(when.getTime() + 864e5)) === today ? 'Updated yesterday' :
-    'Updated ' + pretty(dateKey(when));
-}
-function apply(doc) {
-  if (!doc) return;
-  state.log = doc.log && typeof doc.log === 'object' ? doc.log : {};
-  state.updatedAt = doc.updatedAt || 0;
-}
-build(); paint();
-api('bio.get').then(doc => { apply(doc); if (!document.body.classList.contains('editing')) build(); paint(); }).catch(() => {});
+/* ── the card ───────────────────────────────────────────────────────── */
+function drawCard() {
+  const day = state.log[sel] || {};
+  const open = editable(sel);
+  const n = daysBetween(SPEC.start, sel) + 1;
+  const el = document.createElement('div');
 
-/* ── editing ────────────────────────────────────────────────────────── */
-const bar = $('bar'), gate = $('gate'), tools = $('tools'), pass = $('pass'), status = $('status');
-const PASS = 'bio.pass';
-const remembered = () => { try { return sessionStorage.getItem(PASS) || ''; } catch (e) { return ''; } };
-const remember = p => { try { p ? sessionStorage.setItem(PASS, p) : sessionStorage.removeItem(PASS); } catch (e) {} };
-const say = (t, bad) => { status.textContent = t; status.classList.toggle('bad', !!bad); };
+  const head = document.createElement('div');
+  head.className = 'chead';
+  head.innerHTML = `<div class="when">${pretty(sel)}${sel === today ? '<small>Today</small>' : ''}</div>`;
+  const saved = document.createElement('div');
+  saved.className = 'saved mono'; saved.id = 'saved';
+  saved.textContent = open ? '' : sel > today ? 'Not yet' : 'Read only';
+  head.append(saved);
+  el.append(head);
 
-function open(editing, quiet) {
-  document.body.classList.toggle('editing', editing);
-  $('addday').hidden = !editing;
-  if (editing) { const nd = $('newday'); nd.min = SPEC.start; nd.max = shift(today, 1); nd.value = nd.value || (today >= SPEC.start ? today : SPEC.start); }
-  for (const r of rows) {
-    for (const h of HABITS) $(`h-${r.key}-${h.id}`).disabled = !editing;
-    $('s-' + r.key).readOnly = !editing;
-    $('p-' + r.key).disabled = !editing;
-    $('t-' + r.key).readOnly = !editing;
-    $('w-' + r.key).readOnly = !editing;
-  }
-  bar.hidden = !editing; gate.hidden = editing; tools.hidden = !editing;
-  if (editing && !quiet) { say('Editing. Every day shown is open. One test a day.'); document.querySelector('.lrow.today .tick')?.focus(); }
-}
-$('edit').addEventListener('click', () => {
-  if (remembered()) return open(true);
-  bar.hidden = false; gate.hidden = false; tools.hidden = true; $('why').hidden = true; pass.value = ''; pass.focus();
-});
-gate.addEventListener('submit', async ev => {
-  ev.preventDefault();
-  const p = pass.value; $('unlock').disabled = true; $('why').hidden = true;
-  try { await api('bio.unlock', { passphrase: p }); remember(p); open(true); }
-  catch (e) {
-    pass.classList.remove('shake'); void pass.offsetWidth; pass.classList.add('shake'); pass.select();
-    $('why').textContent = /Unknown operation/.test(e.message) ? 'The server runs an older version. Pull the repository, then deploy the overlap folder.' : e.message;
-    $('why').hidden = false;
-  }
-  $('unlock').disabled = false;
-});
-function cancel() { extra.clear(); build(); paint(); open(false); }
-document.querySelectorAll('[data-cancel]').forEach(b => b.addEventListener('click', cancel));
+  el.append(group('Tap it as it happens', 'four things', SPEC.manual.filter(f => f.kind === 'tap'), day, open));
+  el.append(group('Tonight, 30 seconds', 'five things', SPEC.manual.filter(f => f.kind !== 'tap'), day, open));
+  el.append(bodyGroup(day, open));
 
-function collect() {
-  const log = { ...state.log };
+  const note = document.createElement('div');
+  note.className = 'group notef';
+  const ni = document.createElement('input');
+  ni.type = 'text'; ni.maxLength = 120; ni.placeholder = 'Anything worth remembering about this day';
+  ni.value = day.note || ''; ni.disabled = !open;
+  ni.addEventListener('input', () => { const v = ni.value.trim(); if (v) at(sel).note = v; else delete at(sel).note; touch(); });
+  note.append(ni);
+  el.append(note);
+
+  $('card').replaceChildren(...el.childNodes);
+  $('dayPill').textContent = `Day ${Math.max(0, Math.min(31, n))} of 31`;
+}
+
+function group(title, sub, fields, day, open) {
+  const g = document.createElement('div');
+  g.className = 'group';
+  g.innerHTML = `<div class="gtitle mono">${title} <b>${sub}</b></div>`;
+  const nums = document.createElement('div');
+  nums.className = 'nums';
+  for (const f of fields) {
+    if (f.kind === 'tap') g.append(tapRow(f, day, open));
+    else if (f.kind === 'flag') g.append(flagRow(f, day, open));
+    else nums.append(numField(f, day, open));
+  }
+  if (nums.childElementCount) g.append(nums);
+  return g;
+}
+
+function tapRow(f, day, open) {
+  const r = document.createElement('div');
+  r.className = 'tapr';
+  r.innerHTML = `<div class="lbl"><em>${f.icon}</em><span>${f.name}</span>${f.unit ? `<i>${f.unit}</i>` : ''}</div>`;
+  const minus = document.createElement('button'), out = document.createElement('div'), plus = document.createElement('button');
+  minus.type = plus.type = 'button';
+  minus.className = plus.className = 'pm';
+  minus.textContent = '−'; plus.textContent = '+';
+  minus.setAttribute('aria-label', `One less ${f.name}`); plus.setAttribute('aria-label', `One more ${f.name}`);
+  out.className = 'count';
+  const paint = () => {
+    const v = Number(day[f.id] ?? 0);
+    out.textContent = v;
+    out.classList.toggle('zero', !v);
+    minus.disabled = !open || v <= 0;
+    plus.disabled = !open || v >= f.max;
+  };
+  const bump = d => { const v = Math.max(0, Math.min(f.max, Number(day[f.id] ?? 0) + d)); at(sel)[f.id] = v; day[f.id] = v; paint(); touch(); };
+  minus.addEventListener('click', () => bump(-1));
+  plus.addEventListener('click', () => bump(1));
+  paint();
+  r.append(minus, out, plus);
+  return r;
+}
+
+function flagRow(f, day, open) {
+  const r = document.createElement('div');
+  r.className = 'flagr';
+  r.innerHTML = `<div class="lbl"><em>${f.icon}</em><span>${f.name}</span></div>`;
+  const t = document.createElement('button');
+  t.type = 'button'; t.className = 'toggle'; t.disabled = !open;
+  t.innerHTML = '<span>No</span>';
+  const paint = () => {
+    const on = day[f.id] === true;
+    t.setAttribute('aria-pressed', String(on));
+    t.querySelector('span').textContent = on ? 'Yes' : 'No';
+  };
+  t.addEventListener('click', () => {
+    const on = day[f.id] !== true;
+    if (on) { at(sel)[f.id] = true; day[f.id] = true; } else { delete at(sel)[f.id]; delete day[f.id]; }
+    paint(); touch();
+  });
+  paint();
+  r.append(t);
+  return r;
+}
+
+function numField(f, day, open) {
+  const w = document.createElement('div');
+  w.className = 'nf';
+  const id = `f_${f.id}`;
+  w.innerHTML = `<label for="${id}">${f.name}</label>`;
+  const i = document.createElement('input');
+  i.id = id; i.type = f.clock ? 'text' : 'number'; i.inputMode = 'decimal';
+  i.placeholder = '—'; i.disabled = !open;
+  if (!f.clock) { i.min = '0'; i.max = String(f.max); i.step = String(f.step || 1); }
+  const show = () => {
+    const v = day[f.id];
+    i.value = v == null ? '' : f.clock ? fmtMinutes(v) : String(v);
+  };
+  i.addEventListener('input', () => {
+    const raw = i.value.trim();
+    if (!raw) { delete at(sel)[f.id]; delete day[f.id]; touch(); return; }
+    const n = f.clock ? toMinutes(raw) : Number(raw.replace(',', '.'));
+    if (!Number.isFinite(n)) return;
+    const v = Math.min(f.max, Math.max(0, Math.round(n * 100) / 100));
+    at(sel)[f.id] = v; day[f.id] = v; touch();
+  });
+  i.addEventListener('blur', show);
+  show();
+  const u = document.createElement('i');
+  u.textContent = f.unit || '';
+  w.append(i, u);
+  return w;
+}
+
+function bodyGroup(day, open) {
+  const g = document.createElement('div');
+  g.className = 'group';
+  g.innerHTML = `<div class="gtitle mono">From the watch, each morning <b>nine numbers</b></div>`;
+  const nums = document.createElement('div');
+  nums.className = 'nums';
+  for (const f of SPEC.body) nums.append(numField(f, day, open));
+  g.append(nums);
+  return g;
+}
+
+/* ── the month strip ────────────────────────────────────────────────── */
+function drawStrip() {
+  const frag = document.createDocumentFragment();
+  let done = 0;
+  for (const key of DAYS) {
+    const day = state.log[key], taps = isLogged(day), body = hasBody(day);
+    if (taps && body) done++;
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'dbtn';
+    if (key > today) b.classList.add('future');
+    else if (key < today && !taps && !body) b.classList.add('gap');
+    if (key === sel) b.setAttribute('aria-current', 'true');
+    const [y, m, d] = key.split('-').map(Number);
+    b.innerHTML =
+      `<span class="dw">${DOW[new Date(y, m - 1, d).getDay()]}</span>` +
+      `<span class="dn">${d}</span>` +
+      `<span class="dots"><b class="${taps ? 'on' : ''}"></b><b class="${body ? 'on' : ''}"></b></span>`;
+    b.setAttribute('aria-label', `${pretty(key)}, ${taps ? 'taps in' : 'no taps'}, ${body ? 'body in' : 'no body numbers'}`);
+    b.addEventListener('click', () => { sel = key; draw(); document.getElementById('today').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+    frag.append(b);
+  }
+  $('strip').replaceChildren(frag);
+  $('monthPill').textContent = `${done} of 31 complete`;
+}
+
+/* ── the matrix ─────────────────────────────────────────────────────── */
+function drawMatrix() {
+  const ready = readyDays(state.log);
+  $('mxPill').textContent = `${ready} of ${SPEC.minDays} days`;
+  if (ready < SPEC.minDays) {
+    const box = document.createElement('div');
+    box.className = 'locked';
+    box.innerHTML =
+      `<div class="big">${ready} / ${SPEC.minDays}</div>` +
+      `<p>The matrix opens on day ${SPEC.minDays}. Under that, a correlation is a coin toss wearing a percentage, so the page keeps it shut.</p>` +
+      `<div class="meter"><i style="width:${Math.round(ready / SPEC.minDays * 100)}%"></i></div>`;
+    $('mxbox').replaceChildren(box);
+    return;
+  }
+  const rows = matrix(state.log);
+  const t = document.createElement('table');
+  t.className = 'mx';
+  t.innerHTML =
+    '<thead><tr><th>Factor</th>' +
+    SPEC.outcomes.map(o => `<th>Δ ${o.name}</th>`).join('') +
+    '</tr></thead>';
+  const body = document.createElement('tbody');
   for (const r of rows) {
-    const entry = { habits: Object.fromEntries(HABITS.map(h => [h.id, $(`h-${r.key}-${h.id}`).checked])) };
-    const s = parseSleep($('s-' + r.key).value);
-    if (s !== undefined) entry.sleep = s;
-    const test = $('p-' + r.key).value, v = $('t-' + r.key).value;
-    if (test) { entry.test = test; if (v !== '') entry.result = Number(v); }
-    const note = $('w-' + r.key).value.trim();
-    if (note) entry.note = note;
-    log[r.key] = entry;
-  }
-  return log;
-}
-$('addday').addEventListener('submit', ev => {
-  ev.preventDefault();
-  const k = $('newday').value;
-  if (!k || k < SPEC.start || k > shift(today, 1)) { say(`Pick a day from ${pretty(SPEC.start)} to ${pretty(shift(today, 1))}`, true); return; }
-  const draft = collect();
-  extra.add(k); build(); paint(draft); open(true, true);
-  say(`${pretty(k, true)} added. Fill it in, then Save.`);
-  document.querySelector(`#h-${k}-${HABITS[0].id}`)?.focus();
-});
-/* What the server kept against what the page sent. A server running older
-   code drops a field it does not know without a word, which would lose the
-   entry: say so and stay in edit mode, so nothing on screen is lost. */
-function dropped(sent, kept) {
-  for (const key in sent) {
-    const a = sent[key], b = kept?.[key];
-    if (!b) return true;
-    for (const f of ['sleep', 'note', 'test', 'result']) if (f in a && b[f] !== a[f]) return true;
-  }
-  return false;
-}
-async function save() {
-  const log = collect();
-  const draft = clean({ log }, today);
-  $('save').disabled = true; say('Saving…');
-  try {
-    const doc = await api('bio.save', { passphrase: remembered(), today, ...draft });
-    if (dropped(draft.log, doc.log)) {
-      say('The server kept less than this page sent. Deploy the overlap folder, then save again.', true);
-      $('save').disabled = false; return;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="f"><em>${r.factor.icon}</em>${r.factor.name}</td>`;
+    for (const c of r.cells) {
+      const td = document.createElement('td');
+      if (!c) td.innerHTML = '<span class="cellv thin"><u>—</u><s>Thin</s></span>';
+      else {
+        const lit = c.label === 'medium' || c.label === 'strong' || c.label === 'v. strong';
+        const sign = c.delta > 0 ? '+' : '';
+        td.innerHTML =
+          `<span class="cellv ${c.good ? 'good' : 'bad'}${lit ? ' lit' : ''}" title="${c.nOn} of ${c.n} days on the high side">` +
+          `<u>${sign}${c.delta.toFixed(0)}%</u><s>${c.label}</s></span>`;
+      }
+      tr.append(td);
     }
-    apply(doc); extra.clear(); open(false); build(); paint();
-  } catch (e) {
-    say(e.message, true);
-    if (/passphrase/i.test(e.message)) { remember(''); gate.hidden = false; tools.hidden = true; pass.value = ''; pass.focus(); }
+    body.append(tr);
   }
-  $('save').disabled = false;
+  t.append(body);
+  const wrap = document.createElement('div');
+  wrap.className = 'mxwrap';
+  wrap.append(t);
+  $('mxbox').replaceChildren(wrap);
 }
-$('save').addEventListener('click', save);
-addEventListener('keydown', ev => {
-  if (!document.body.classList.contains('editing')) return;
-  if (ev.key === 'Escape') cancel();
-  if (ev.key === 'Enter' && /\b(val|txt)\b/.test(ev.target.className)) { ev.preventDefault(); save(); }
+
+function draw() { drawCard(); drawStrip(); drawMatrix(); }
+
+/* ── saving ─────────────────────────────────────────────────────────── */
+const say = (msg, bad) => { const s = $('saved'); if (!s) return; s.textContent = msg; s.className = `saved mono${bad ? ' bad' : msg === 'Saved' ? ' on' : ''}`; };
+
+function touch() {
+  dirty = true;
+  drawStrip(); drawMatrix();
+  say('Saving…');
+  clearTimeout(timer);
+  timer = setTimeout(push, 900);
+}
+
+async function push() {
+  if (!pass || saving || !dirty) return;
+  saving = true; dirty = false;
+  try {
+    const out = await api('bio.save', { passphrase: pass, today, ...clean(state, today) });
+    state.log = out.log; state.updatedAt = out.updatedAt;
+    say('Saved');
+    stamp();
+  } catch (e) {
+    dirty = true;
+    say(e.message, true);
+  } finally {
+    saving = false;
+    if (dirty) { clearTimeout(timer); timer = setTimeout(push, 2500); }
+  }
+}
+
+addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+function stamp() {
+  if (!state.updatedAt) { $('updated').textContent = ''; return; }
+  const d = new Date(state.updatedAt);
+  $('updated').textContent = `Updated ${d.getDate()} ${MON[d.getMonth()]} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+/* ── the unlock bar ─────────────────────────────────────────────────── */
+function openBar(unlocked) {
+  $('bar').hidden = false;
+  document.body.classList.add('editing');
+  $('gate').hidden = unlocked; $('tools').hidden = !unlocked;
+  $('edit').hidden = true;
+  if (!unlocked) $('pass').focus();
+}
+function closeBar() {
+  $('bar').hidden = true;
+  document.body.classList.remove('editing');
+  $('edit').hidden = false;
+  $('why').hidden = true;
+}
+$('edit').addEventListener('click', () => openBar(!!pass));
+for (const b of document.querySelectorAll('[data-cancel]')) b.addEventListener('click', closeBar);
+
+$('gate').addEventListener('submit', async e => {
+  e.preventDefault();
+  const tryPass = $('pass').value;
+  $('unlock').disabled = true; $('why').hidden = true;
+  try {
+    await api('bio.unlock', { passphrase: tryPass });
+    pass = tryPass;
+    try { localStorage.setItem('bio.pass', pass); } catch {}
+    $('pass').value = '';
+    openBar(true);
+    draw();
+  } catch (err) {
+    $('why').textContent = err.message;
+    $('why').hidden = false;
+    $('gate').classList.add('shake');
+    setTimeout(() => $('gate').classList.remove('shake'), 400);
+  } finally {
+    $('unlock').disabled = false;
+  }
 });
+
+/* ── the CSV, one row a day ─────────────────────────────────────────── */
+$('csv').addEventListener('click', () => {
+  const cols = [...SPEC.manual, ...SPEC.body];
+  const head = ['date', ...cols.map(c => c.id), 'note'];
+  const lines = [head.join(',')];
+  for (const key of DAYS) {
+    const d = state.log[key] || {};
+    lines.push([key, ...cols.map(c => {
+      const v = d[c.id];
+      return v === true ? '1' : v == null ? (c.kind === 'flag' ? '0' : '') : String(v);
+    }), `"${String(d.note || '').replace(/"/g, '""')}"`].join(','));
+  }
+  const url = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' }));
+  const a = document.createElement('a');
+  a.href = url; a.download = 'bio-october-2026.csv';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+
+/* ── the background photo, if it is there ───────────────────────────── */
+const bg = $('bg'), veil = $('veil');
+bg.addEventListener('load', () => document.body.classList.add('has-photo'));
+if (bg.complete && bg.naturalWidth) document.body.classList.add('has-photo');
+const dim = () => { veil.style.opacity = Math.min(1, scrollY / (innerHeight * .45)).toFixed(2); };
+addEventListener('scroll', dim, { passive: true }); dim();
+
+/* ── start ──────────────────────────────────────────────────────────── */
+try { pass = localStorage.getItem('bio.pass') || ''; } catch {}
+draw();
+api('bio.get')
+  .then(d => { if (d) { state.log = d.log || {}; state.updatedAt = d.updatedAt || 0; } })
+  .catch(() => {})
+  .finally(() => { draw(); stamp(); });
 </script>
 </body>
 </html>

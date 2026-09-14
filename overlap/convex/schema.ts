@@ -151,17 +151,12 @@ export default defineSchema({
     key: v.string(),
     /* kept from an earlier shape; nothing writes it now */
     values: v.optional(v.record(v.string(), v.number())),
-    /* one entry per logged day, keyed YYYY-MM-DD: habit checks, hours
-       slept, and the result of each training session done that day */
-    log: v.record(v.string(), v.object({
-      habits: v.record(v.string(), v.boolean()),
-      sleep: v.optional(v.number()),
-      test: v.optional(v.string()),
-      result: v.optional(v.number()),
-      /* the older shape, still sent for a day left untouched on screen */
-      train: v.optional(v.record(v.string(), v.number())),
-      note: v.optional(v.string()),
-    })),
+    /* one entry per logged day, keyed YYYY-MM-DD: the nine things tapped
+       by hand, the nine the watch and the scale know, and a note. Which
+       ids may appear and what range each may take is decided by `clean`
+       in bio/spec.js, which the page imports too, so the field list lives
+       in one file and this only says what a value may be. */
+    log: v.record(v.string(), v.record(v.string(), v.union(v.float64(), v.boolean(), v.string()))),
     /* the page's local date at the last save */
     today: v.string(),
     updatedAt: v.number(),
