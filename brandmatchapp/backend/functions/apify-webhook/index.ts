@@ -3,9 +3,10 @@
 //   search run  → pull the handles out, start the detail run on them
 //   detail run  → write the profiles into the shared pool, then qualify them
 //
-// The pool has no owner. A creator is crawled once and every campaign after
-// that reads the same row. Only the crawl that first put it there is fresh,
-// and only that one costs the brand a credit.
+// The pool has no owner, but a lead does. A creator is crawled once and the
+// row is shared, while being handed to a brand claims it for 14 days: inside
+// that window no other brand is given the same handle. Only the crawl that
+// first put a creator in the pool is fresh, and only that one costs a credit.
 
 import { db, fail, json, type Signal } from './lib.ts'
 
@@ -135,6 +136,7 @@ Deno.serve(async (req) => {
     if (!campaign) return fail('No such campaign', 404)
 
     let fresh = 0
+    let held = 0
     const touched: string[] = []
 
     for (const r of rows) {
@@ -185,8 +187,14 @@ Deno.serve(async (req) => {
       const { data: saved, error } = await sb.from('creators')
         .upsert(record, { onConflict: 'platform,handle' }).select('id').single()
       if (error || !saved) continue
-      if (isNew) fresh++
-      touched.push(saved.id)
+
+      // The profile is refreshed either way, which is worth having for
+      // whoever holds it. Whether this campaign may be given it is another
+      // question, and claim answers it.
+      const { data: claimed } = await sb.rpc('claim', {
+        p_creator: saved.id, p_campaign: campaignId,
+        p_agent: agentId || null, p_brand: campaign.brand_id, p_fresh: isNew,
+      })
 
       if (posts.length) {
         await sb.from('creator_posts').upsert(
@@ -199,10 +207,9 @@ Deno.serve(async (req) => {
         )
       }
 
-      await sb.from('discoveries').upsert({
-        creator_id: saved.id, campaign_id: campaignId, agent_id: agentId || null,
-        brand_id: campaign.brand_id, fresh: isNew,
-      }, { onConflict: 'campaign_id,creator_id', ignoreDuplicates: true })
+      if (claimed === false) { held++; continue }
+      if (isNew) fresh++
+      touched.push(saved.id)
     }
 
     // A credit buys a fresh profile. Reading the pool costs nothing.
@@ -234,7 +241,7 @@ Deno.serve(async (req) => {
       }).catch(() => {})
     }
 
-    return json({ ok: true, ingested: touched.length, fresh })
+    return json({ ok: true, ingested: touched.length, fresh, heldByOthers: held })
   } catch (e) {
     return fail(String(e instanceof Error ? e.message : e), 500)
   }

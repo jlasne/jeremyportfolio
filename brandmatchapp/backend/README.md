@@ -5,23 +5,47 @@ Dashboard: https://supabase.com/dashboard/project/decuztcvbfwgkudnbljk
 
 ## The model
 
-One creator is crawled once and belongs to everyone.
+The profile row is shared. The lead is not.
 
 ```
 creators        the shared pool, one row per handle, no owner
-discoveries     who found whom, and whether that find was fresh or a pool hit
+discoveries     who holds which lead, and when it was handed over
 creator_scores  the per campaign read of a pooled creator, written by the model
 ```
 
-A brand pays for a fresh crawl, never for a read. A campaign created today
-seeds itself from the pool for free, then spends credits only on profiles
-nobody had crawled before. Apify bills about $0.0023 a profile on the detail
-phase, measured over 262 runs, so one credit is worth roughly a quarter of a
-cent of cost.
+**A brand sees only the leads attributed to it.** The feed joins on the brand,
+and `/creators/:id` and `/actions` both check the brand holds the lead, so a
+handle someone else holds is unreachable by id, not merely hidden.
+
+**A lead is exclusive for 14 days.** Handing a creator to a brand claims it.
+Inside `brandmatch.claim_window()` no other brand can be given the same
+handle. After that it is free again, by which time its Signal star has long
+expired (strong at 4 days, gone at 10), so whoever gets it next gets it
+re-crawled. Change the window in one place, that function.
+
+**Pool first, crawl second.** Apify bills about $0.0023 a profile on the
+detail phase, measured over 262 runs. A handle already in the database costs
+nothing to hand out. So every night `brandmatch.shortfall()` fills the
+campaign's quota from what is free and unclaimed, and returns what is left.
+Zero means no run starts at all. Only the shortfall is ever crawled.
+
+Credits follow the same line: a credit buys a profile nobody had crawled
+before. Reading the pool is free.
 
 Notes, tags, rejections and done marks belong to the brand and survive every
 crawl. Nothing in the schema is reachable with the project's anon key: every
 read and write goes through the `api` function, which holds the service role.
+
+### The functions that carry it
+
+| Function | What it answers |
+| --- | --- |
+| `claim_window()` | How long a lead stays exclusive. 14 days |
+| `is_free(creator, brand)` | Is this handle unheld by anyone else |
+| `claim(creator, campaign, agent, brand, fresh)` | Take it, or say no |
+| `seed_from_pool(campaign, limit)` | Hand over free leads, best signal first |
+| `shortfall(agent)` | Fill from the pool, return what must be crawled |
+| `free_pool(brand)` | How much of the pool this brand could still be given |
 
 ## The three stars
 
@@ -100,10 +124,10 @@ curl https://decuztcvbfwgkudnbljk.supabase.co/functions/v1/api/contacts \
 | Route | Method | Notes |
 | --- | --- | --- |
 | `/waitlist` | POST | Public. `{ email, website? }` |
-| `/me` | GET | Credits and pool size |
+| `/me` | GET | Credits, pool size, and what is still free to this brand |
 | `/contacts` | GET | `campaign`, `scope`, `limit`, `offset` |
 | `/creators/:id` | GET | Profile and its last 12 posts |
-| `/campaigns` | GET POST | POST seeds from the pool before it crawls |
+| `/campaigns` | GET POST | POST seeds from the pool first, free, and says how many |
 | `/campaigns/:id` | PATCH | Brief, filters, volume, active |
 | `/campaigns/:id/agents` | POST | A searcher with its own hashtags |
 | `/campaigns/:id/run` | POST | Starts a crawl now. Needs credits |

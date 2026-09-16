@@ -394,9 +394,43 @@ export function getPosts(creatorId: string): Post[] {
   if (at) return at
   const creator = getCreator(creatorId)
   if (!creator) return []
+
+  // Live, the real 12 posts arrive a moment later and the panel re-renders.
+  // The shapes below hold the row until they land, and stand in for good when
+  // the app is running on its sample data.
   const list = postsFor(creator)
   getState().posts[creatorId] = list
+  if (getState().live) void loadPosts(creatorId)
   return list
+}
+
+const loading = new Set<string>()
+
+/** Pulls one creator's crawled posts and drops them into the store. */
+async function loadPosts(creatorId: string): Promise<void> {
+  if (loading.has(creatorId)) return
+  loading.add(creatorId)
+  try {
+    const { posts } = await api.creator(creatorId)
+    setState((s) => ({
+      posts: {
+        ...s.posts,
+        [creatorId]: posts.map((p) => ({
+          id: p.id,
+          creatorId,
+          kind: p.kind === 'reel' ? 'reel' : 'post',
+          thumbnail: p.thumbnail ?? '',
+          views: p.views,
+          comments: p.comments,
+          date: p.posted_at ?? new Date().toISOString(),
+        })),
+      },
+    }))
+  } catch (e) {
+    console.warn('brandmatch: could not read the posts', e)
+  } finally {
+    loading.delete(creatorId)
+  }
 }
 
 // Notes and tags -----------------------------------------------------------

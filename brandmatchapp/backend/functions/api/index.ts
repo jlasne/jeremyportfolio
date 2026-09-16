@@ -1,6 +1,10 @@
 // The one API. The front end reads it, and so can the brand's own code.
 // Every call carries `Authorization: Bearer <api key>`, except the waitlist.
 //
+// A brand only ever sees the leads attributed to it. Every read below is
+// joined to its own discoveries, so a handle held by another brand is not
+// merely hidden from the list, it is unreachable by id.
+//
 // JWT verification is off on purpose: this function runs its own auth on the
 // brand api key, so the project's anon key never has to ship in a browser.
 //
@@ -49,7 +53,9 @@ Deno.serve(async (req) => {
 
     if (head === 'me') {
       const { count } = await sb.from('creators').select('*', { count: 'exact', head: true })
-      return json({ ...brand, poolSize: count ?? 0 })
+      // What is left to be given: the pool minus every handle held elsewhere.
+      const { data: free } = await sb.rpc('free_pool', { p_brand: brand.id })
+      return json({ ...brand, poolSize: count ?? 0, availableToYou: free ?? 0 })
     }
 
     if (head === 'contacts' && req.method === 'GET') {
@@ -67,6 +73,14 @@ Deno.serve(async (req) => {
     }
 
     if (head === 'creators' && parts[1]) {
+      // A brand reads a profile only where it holds the lead.
+      const { data: mine } = await sb.from('discoveries').select('creator_id')
+        .eq('creator_id', parts[1]).eq('brand_id', brand.id).maybeSingle()
+      if (!mine) return fail('No such creator', 404)
+      // A brand reads a profile only where it holds the lead.
+      const { data: mine } = await sb.from('discoveries').select('creator_id')
+        .eq('creator_id', parts[1]).eq('brand_id', brand.id).maybeSingle()
+      if (!mine) return fail('No such creator', 404)
       const { data: creator } = await sb.from('creators').select('*').eq('id', parts[1]).maybeSingle()
       if (!creator) return fail('No such creator', 404)
       const { data: posts } = await sb.from('creator_posts').select('*')
@@ -93,9 +107,9 @@ Deno.serve(async (req) => {
         run_at: body.runAt ?? '07:00',
       }).select().single()
       if (error) return fail(error.message, 500)
-      // A new campaign reads the pool before it crawls anything of its own.
-      await sb.rpc('seed_from_pool', { p_campaign: data.id, p_limit: body.seed ?? 400 })
-      return json({ campaign: data })
+      // Free first: the pool hands over what nobody else holds, before any crawl.
+      const { data: seeded } = await sb.rpc('seed_from_pool', { p_campaign: data.id, p_limit: body.seed ?? 400 })
+      return json({ campaign: data, seededFromPool: seeded ?? 0 })
     }
 
     if (head === 'campaigns' && parts[1] && req.method === 'PATCH') {
@@ -159,6 +173,10 @@ Deno.serve(async (req) => {
     if (head === 'actions' && req.method === 'POST') {
       const { creatorId, action, value } = await req.json()
       if (!creatorId || !action) return fail('creatorId and action are required')
+      // Write only against a lead this brand holds.
+      const { data: mine } = await sb.from('discoveries').select('creator_id')
+        .eq('creator_id', creatorId).eq('brand_id', brand.id).maybeSingle()
+      if (!mine) return fail('No such creator', 404)
       const row = { brand_id: brand.id, creator_id: creatorId }
       switch (action) {
         case 'reject':   await sb.from('rejections').upsert(row); break

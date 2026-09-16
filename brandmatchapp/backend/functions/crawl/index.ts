@@ -85,8 +85,20 @@ Deno.serve(async (req) => {
 
     const started: string[] = []
     const failed: string[] = []
+    let fromPool = 0
 
     for (const agent of due as (Agent & Record<string, unknown>)[]) {
+      // Free first. What comes back is what the pool could not cover.
+      const { data: missing, error: shortfallError } = await sb.rpc('shortfall', { p_agent: agent.id })
+      if (shortfallError) { failed.push(`${agent.name}: ${shortfallError.message}`); continue }
+
+      const want = Number(missing ?? 0)
+      if (want <= 0) {
+        fromPool++
+        await sb.from('agents').update({ last_run_at: new Date().toISOString() }).eq('id', agent.id)
+        continue
+      }
+
       // Hashtag pages beat the actor's own search field: they answer the same
       // way every time, which is why 247 of the 248 search runs on record use
       // them. Keywords fall back to search when an agent has no hashtag.
@@ -94,21 +106,21 @@ Deno.serve(async (req) => {
       const words = (agent.keywords ?? []).filter(Boolean)
       if (!tags.length && !words.length) { failed.push(`${agent.name}: no keywords yet`); continue }
 
-      // Ask for more than the quota, since the filters cut some of it.
-      const want = Math.ceil(agent.leads_per_day * 1.5)
+      // Ask for more than the shortfall, since the filters cut some of it.
+      const ask = Math.ceil(want * 1.5)
       const input: Record<string, unknown> = tags.length
         ? {
             directUrls: tags.map((t) => `https://www.instagram.com/explore/tags/${encodeURIComponent(t)}/`),
             resultsType: 'posts',
-            resultsLimit: Math.ceil(want / tags.length),
+            resultsLimit: Math.ceil(ask / tags.length),
             addParentData: true,
           }
         : {
             search: words.join(' '),
             searchType: 'hashtag',
-            searchLimit: Math.max(3, Math.ceil(agent.leads_per_day / 40)),
+            searchLimit: Math.max(3, Math.ceil(want / 40)),
             resultsType: 'posts',
-            resultsLimit: want,
+            resultsLimit: ask,
             addParentData: true,
           }
 
@@ -120,7 +132,7 @@ Deno.serve(async (req) => {
       await sb.from('agents').update({ last_run_at: new Date().toISOString() }).eq('id', agent.id)
     }
 
-    return json({ started: started.length, runs: started, failed })
+    return json({ started: started.length, runs: started, coveredByPool: fromPool, failed })
   } catch (e) {
     return fail(String(e instanceof Error ? e.message : e), 500)
   }

@@ -25,11 +25,15 @@ was written with.
 
 ## The pool
 
-One creator is crawled once and belongs to everyone. A campaign created today
-reads what every campaign before it already found, free, and spends credits
-only on profiles nobody had crawled before. The pool holds 14,259 creators
-today. See `backend/README.md` for the schema, the functions and the secrets
-still to set.
+The profile row is shared, the lead is not. A brand sees only the leads
+attributed to it, and a lead it is given is exclusive to it for 14 days.
+
+A campaign fills its daily quota from what is already in the database and
+held by nobody, which costs nothing, and only the shortfall goes to Apify at
+about $0.0023 a profile. A night the pool covers starts no run at all.
+
+The pool holds 14,259 creators today. See `backend/README.md` for the schema,
+the functions and the secrets still to set.
 
 The front end reads the real pool when a key sits in `localStorage` under
 `brandmatch.key`, and falls back to the sample data in `app/src/mock` when
