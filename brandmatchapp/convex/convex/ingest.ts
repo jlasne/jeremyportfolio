@@ -1,6 +1,7 @@
 import { internalAction, internalMutation } from './_generated/server'
 import { internal } from './_generated/api'
 import { v } from 'convex/values'
+import type { Id } from './_generated/dataModel'
 import { deliver } from './pool'
 import { newestSignal, type Signal } from './scoring'
 import { APIFY, ACTOR, toBase64 } from './crawl'
@@ -84,7 +85,7 @@ export const fromApify = internalAction({
     agentId: v.optional(v.id('agents')),
   },
   returns: v.any(),
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<Record<string, unknown>> => {
     const token = process.env.APIFY_TOKEN
     if (!token) return { error: 'APIFY_TOKEN is not set' }
 
@@ -189,7 +190,8 @@ export const fromApify = internalAction({
       })
     }
 
-    const result = await ctx.runMutation(internal.ingest.save, {
+    const result: { ingested: number; fresh: number; heldByOthers: number; claimed: Id<'creators'>[] } =
+      await ctx.runMutation(internal.ingest.save, {
       runId: args.runId, campaignId: args.campaignId, agentId: args.agentId,
       gathered: rows.length, profiles,
     })

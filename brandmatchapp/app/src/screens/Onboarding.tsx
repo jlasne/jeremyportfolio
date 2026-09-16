@@ -7,7 +7,7 @@ import { CampaignEditor } from './Campaign'
 // Onboarding is three screens: the campaign, the price, the first batch.
 
 /** What $99 a month covers. Past this it is a conversation, not a checkout. */
-const INCLUDED_PER_DAY = 250
+const INCLUDED_PER_DAY = 500
 
 /** No id yet: make a campaign and move to its editor. */
 export function OnboardingStart() {
@@ -84,7 +84,7 @@ export function ChoosePlan({ campaignId }: { campaignId: string }) {
               className="btn primary"
               onClick={() => navigate(`onboarding/${campaign.id}/running`)}
             >
-              {overflow ? 'Start at 250 a day' : 'Start my first batch'}
+              {overflow ? `Start at ${INCLUDED_PER_DAY} a day` : 'Start my first batch'}
             </button>
           </div>
         </div>
@@ -92,7 +92,7 @@ export function ChoosePlan({ campaignId }: { campaignId: string }) {
         <p className="hint centred-text">
           {overflow
             ? `You asked for ${perDay} a day, which is past the plan. We start at ${INCLUDED_PER_DAY} and size the rest together.`
-            : 'Need more than 250 a day later? Chat with me and we size it together.'}
+            : `Need more than ${INCLUDED_PER_DAY} a day later? Chat with me and we size it together.`}
           {' '}
           <a href="mailto:jeremy@brandmatch.app">jeremy@brandmatch.app</a>
         </p>

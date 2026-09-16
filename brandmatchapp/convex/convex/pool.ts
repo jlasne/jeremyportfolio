@@ -1,8 +1,10 @@
 import { internalMutation, internalQuery } from './_generated/server'
+import { internal } from './_generated/api'
 import { v } from 'convex/values'
 import type { Doc, Id } from './_generated/dataModel'
 import type { MutationCtx, QueryCtx } from './_generated/server'
-import { CLAIM_WINDOW, DAY, passes, type Filters } from './scoring'
+import { DAY, passes, type Filters } from './scoring'
+import { readSettings } from './settings'
 
 // Who gets which lead, and what it costs.
 //
@@ -43,7 +45,8 @@ export async function deliver(
     .first()
   if (already) return false
 
-  await ctx.db.patch(args.creator._id, { claimedBy: brand._id, claimedUntil: now + CLAIM_WINDOW })
+  const { claimDays } = await readSettings(ctx)
+  await ctx.db.patch(args.creator._id, { claimedBy: brand._id, claimedUntil: now + claimDays * DAY })
   await ctx.db.insert('discoveries', {
     creatorId: args.creator._id,
     campaignId: args.campaign._id,
@@ -97,6 +100,7 @@ async function fillFromPool(ctx: MutationCtx, campaignId: Id<'campaigns'>, limit
   let given = 0
   const seen = new Set<string>()
 
+  const delivered: Id<'creators'>[] = []
   for (const order of ['by_signal', 'by_followers'] as const) {
     if (given >= budget) break
     for await (const creator of ctx.db.query('creators').withIndex(order).order('desc')) {
@@ -105,8 +109,19 @@ async function fillFromPool(ctx: MutationCtx, campaignId: Id<'campaigns'>, limit
       seen.add(creator._id)
       if (!isFree(creator, brand._id, now)) continue
       if (!passes(creator, filters, now)) continue
-      if (await deliver(ctx, { creator, campaign, fresh: false })) given++
+      if (await deliver(ctx, { creator, campaign, fresh: false })) {
+        given++
+        delivered.push(creator._id)
+      }
     }
+  }
+
+  // Selling and Signal travel with the creator. Niche does not: it is a read
+  // against this brief, so a lead out of the pool is scored again for it.
+  if (delivered.length) {
+    await ctx.scheduler.runAfter(0, internal.qualify.score, {
+      campaignId: campaign._id, creatorIds: delivered,
+    })
   }
   return given
 }
@@ -140,7 +155,14 @@ export const shortfall = internalMutation({
     const want = Math.min(Math.max(agent.leadsPerDay - done, 0), brand.credits)
     if (want <= 0) return 0
 
-    const filled = await fillFromPool(ctx, campaign._id, want)
+    // The pool never covers the whole day. At least `freshFloor` of the quota
+    // is crawled new, so the database keeps growing with every customer and
+    // nobody is fed only what somebody else already saw.
+    const { freshFloor } = await readSettings(ctx)
+    const mustCrawl = Math.ceil(agent.leadsPerDay * freshFloor)
+    const fromPool = Math.max(want - mustCrawl, 0)
+
+    const filled = fromPool > 0 ? await fillFromPool(ctx, campaign._id, fromPool) : 0
     return Math.max(want - filled, 0)
   },
 })

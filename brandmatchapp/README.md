@@ -32,8 +32,9 @@ A campaign fills its daily quota from what is already in the database and
 held by nobody, which costs nothing, and only the shortfall goes to Apify at
 about $0.0023 a profile. A night the pool covers starts no run at all.
 
-The pool holds 14,259 creators today. See `backend/README.md` for the schema,
-the functions and the secrets still to set.
+The pool holds 14,259 creators today, on Convex. See `convex/README.md` for
+the schema, the functions and the secrets still to set. `backend/` is the
+earlier Supabase build, kept until the move is signed off.
 
 The front end reads the real pool when a key sits in `localStorage` under
 `brandmatch.key`, and falls back to the sample data in `app/src/mock` when

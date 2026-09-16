@@ -119,6 +119,7 @@ export const mcp = httpAction(async (ctx, req) => {
   try {
     if (name === 'account') {
       const me = await ctx.runQuery(internal.brands.me, { brandId: brand._id })
+      if (!me) return rpcError(id, -32001, 'No such brand')
       return reply(id, text({
         credits_left: me.credits,
         still_free_to_you: me.availableToYou,

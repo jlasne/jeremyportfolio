@@ -1,6 +1,7 @@
 import { internalAction, internalMutation, internalQuery } from './_generated/server'
 import { internal } from './_generated/api'
 import { v } from 'convex/values'
+import type { Doc } from './_generated/dataModel'
 
 // Website in, a brief and three agents out. Nothing crawls yet.
 //
@@ -75,12 +76,13 @@ async function readSite(url: string): Promise<string> {
 export const forCampaign = internalAction({
   args: { campaignId: v.id('campaigns'), website: v.optional(v.string()) },
   returns: v.any(),
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<Record<string, unknown>> => {
     const key = process.env.OPENROUTER_API_KEY
     if (!key) return { error: 'OPENROUTER_API_KEY is not set' }
     const model = process.env.OPENROUTER_MODEL ?? DEFAULT_MODEL
 
-    const campaign = await ctx.runQuery(internal.propose.campaign, { campaignId: args.campaignId })
+    const campaign: Doc<'campaigns'> | null =
+      await ctx.runQuery(internal.propose.campaign, { campaignId: args.campaignId })
     if (!campaign) return { error: 'No such campaign' }
 
     const site = args.website ?? campaign.website

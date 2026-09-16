@@ -190,6 +190,23 @@ export default defineSchema({
     campaignId: v.optional(v.id('campaigns')),
   }).index('by_brand', ['brandId']),
 
+  /**
+   * The knobs. One document, read by the crawl every night, edited from the
+   * Convex dashboard without a deploy. `settings.get` fills in the defaults.
+   */
+  settings: defineTable({
+    key: v.string(),
+    /** Share of a brand's daily quota that must be crawled fresh. 0.3 = 30%. */
+    freshFloor: v.optional(v.number()),
+    /** Leads a day the $99 plan covers. */
+    includedPerDay: v.optional(v.number()),
+    /** Days a lead stays exclusive to the brand it was handed to. */
+    claimDays: v.optional(v.number()),
+    /** Days and credits a trial gets on the pool. */
+    trialDays: v.optional(v.number()),
+    trialCredits: v.optional(v.number()),
+  }).index('by_key', ['key']),
+
   waitlist: defineTable({
     email: v.string(),
     website: v.optional(v.string()),

@@ -27,14 +27,14 @@ const STEPS = [
   {
     n: '01',
     title: 'Understand your ICP',
-    note: 'Your website goes in. It comes back as the creators you should reach, in your words, and you change any of them.',
+    note: 'Your website goes in. It comes back as the creators you should reach, in plain words. No forms, no manual setup. Change any word.',
     tick: 'strongher.co read in 8 seconds',
   },
   {
     n: '02',
     title: 'Find leads',
-    note: 'Agents search Instagram every night. Quiet accounts drop out before they reach you. The email rides along where we find one.',
-    tick: '250 a night, while you sleep',
+    note: 'Three agents search Instagram every night, each on its own angle. Quiet accounts drop out before they reach you. The email rides along.',
+    tick: '500 a night, while you sleep',
   },
   {
     n: '03',
@@ -45,7 +45,7 @@ const STEPS = [
   {
     n: '04',
     title: 'You close deals',
-    note: 'Open the list, write to the top of it, tick them off. That is the only step left for you.',
+    note: 'Open the list, write to the top of it, tick them off. Sourcing that used to take an intern a week now lands before breakfast.',
     tick: 'The only one you do',
   },
 ]
@@ -161,6 +161,9 @@ export function Landing() {
         <section className="land-section" id="how">
           <p className="eyebrow">How it works</p>
           <h2 className="big">Four steps. <em>You only do the last one.</em></h2>
+          <p className="section-lede">
+            Enter your website. Everything from there to a ranked list with emails on it runs on its own, every night.
+          </p>
           <div className="steps4">
             {STEPS.map((s) => (
               <div className="step" key={s.n}>
@@ -201,12 +204,32 @@ export function Landing() {
         <section className="land-section centred" id="pricing">
           <p className="eyebrow">Pricing</p>
           <h2 className="big">One plan. <em>That is the whole page.</em></h2>
+          <p className="section-lede">
+            Your first sourcing hire, for founders and small brand teams who would rather write to creators than
+            search for them.
+          </p>
+
+          <div className="outcomes">
+            <div className="outcome">
+              <b>500</b>
+              <span>scored leads land every morning, best first, emails on the row</span>
+            </div>
+            <div className="outcome">
+              <b>0 hours</b>
+              <span>of searching. The list is built while you sleep, from your website alone</span>
+            </div>
+            <div className="outcome">
+              <b>14 days</b>
+              <span>every lead is yours alone. Nobody else on the platform is handed the same handle</span>
+            </div>
+          </div>
+
           <div className="one-plan">
             <div className="plan dark">
               <span className="plan-tag">Everything</span>
               <p className="price">$99<small>a month</small></p>
               <ul>
-                <li>Up to 250 scored leads a day</li>
+                <li>Up to 500 scored leads a day</li>
                 <li>Their email where we find one</li>
                 <li>Unlimited campaigns and agents</li>
                 <li>API and MCP, same key, no extra tier</li>
@@ -218,7 +241,7 @@ export function Landing() {
           </div>
           <p className="section-lede">
             Three days free on the 14,259 creators already in the pool. No card.
-            Need more than 250 a day after that? <a href="mailto:jeremy@brandmatch.app">Chat with me</a> and we size it together.
+            Need more than 500 a day? <a href="mailto:jeremy@brandmatch.app">Chat with me</a> and we size it together.
           </p>
         </section>
 

@@ -2,6 +2,7 @@ import { internalMutation, internalQuery } from './_generated/server'
 import { v } from 'convex/values'
 import type { Doc } from './_generated/dataModel'
 import { countFree } from './pool'
+import { readSettings } from './settings'
 
 // Brands, campaigns and the agents inside them.
 
@@ -44,9 +45,6 @@ export const me = internalQuery({
   },
 })
 
-/** Three days on the pool. Costs the Apify bill nothing, so it is the default. */
-export const TRIAL_DAYS = 3
-export const TRIAL_CREDITS = 750
 
 export const create = internalMutation({
   args: {
@@ -61,16 +59,19 @@ export const create = internalMutation({
     const already = await ctx.db.query('brands').withIndex('by_email', (q) => q.eq('email', clean)).first()
     if (already) return already
 
+    // A trial reads the pool for three days and never crawls, so it costs
+    // the Apify bill nothing. That is why it is the default.
+    const { trialDays, trialCredits, includedPerDay } = await readSettings(ctx)
     const onTrial = plan !== 'paid'
     const id = await ctx.db.insert('brands', {
       email: clean,
       website,
       timezone: 'Europe/Paris',
-      credits: credits ?? (onTrial ? TRIAL_CREDITS : 7500),
+      credits: credits ?? (onTrial ? trialCredits : includedPerDay * 30),
       apiKey: newKey(),
       onboarded: false,
       plan: onTrial ? 'trial' : 'paid',
-      trialEndsAt: onTrial ? Date.now() + TRIAL_DAYS * 86_400_000 : undefined,
+      trialEndsAt: onTrial ? Date.now() + trialDays * 86_400_000 : undefined,
     })
     return await ctx.db.get(id)
   },

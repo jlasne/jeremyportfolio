@@ -1,7 +1,7 @@
 import { httpRouter } from 'convex/server'
 import { httpAction } from './_generated/server'
 import { internal } from './_generated/api'
-import type { Id } from './_generated/dataModel'
+import type { Doc, Id } from './_generated/dataModel'
 import { mcp } from './mcp'
 
 // Everything that speaks HTTP: the one API, the Apify callback, and MCP.
@@ -93,7 +93,7 @@ const api = httpAction(async (ctx, req) => {
 
     if (head === 'campaigns' && req.method === 'POST' && !parts[1]) {
       const body = await req.json()
-      const campaign = await ctx.runMutation(internal.brands.createCampaign, {
+      const campaign: Doc<'campaigns'> | null = await ctx.runMutation(internal.brands.createCampaign, {
         brandId: brand._id,
         name: body.name ?? 'New campaign',
         website: body.website,
@@ -101,6 +101,7 @@ const api = httpAction(async (ctx, req) => {
         filters: body.filters,
         leadsPerDay: body.leadsPerDay,
       })
+      if (!campaign) return fail('Could not create the campaign', 500)
       // Free to us, one credit to them: the pool hands over what nobody holds.
       const seeded = await ctx.runMutation(internal.pool.seedFromPool, {
         campaignId: campaign._id, limit: body.seed ?? 400,
@@ -138,7 +139,7 @@ const api = httpAction(async (ctx, req) => {
       const body = await req.json().catch(() => ({}))
       const owned = await ctx.runQuery(internal.propose.campaign, { campaignId: parts[1] as Id<'campaigns'> })
       if (!owned || owned.brandId !== brand._id) return fail('No such campaign', 404)
-      const out = await ctx.runAction(internal.propose.forCampaign, {
+      const out: Record<string, unknown> = await ctx.runAction(internal.propose.forCampaign, {
         campaignId: parts[1] as Id<'campaigns'>, website: body.website,
       })
       return json(out, out?.error ? 502 : 200)
@@ -162,7 +163,8 @@ const api = httpAction(async (ctx, req) => {
     }
 
     if (head === 'campaigns' && parts[1] && parts[2] === 'run' && req.method === 'POST') {
-      const owned = await ctx.runQuery(internal.propose.campaign, { campaignId: parts[1] as Id<'campaigns'> })
+      const owned: Doc<'campaigns'> | null =
+        await ctx.runQuery(internal.propose.campaign, { campaignId: parts[1] as Id<'campaigns'> })
       if (!owned || owned.brandId !== brand._id) return fail('No such campaign', 404)
       // One credit, one lead. No credits, nothing to deliver.
       if (brand.credits <= 0) return fail('No credits left. Top up to take more leads.', 402)
