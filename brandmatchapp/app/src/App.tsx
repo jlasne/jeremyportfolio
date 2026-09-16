@@ -5,6 +5,7 @@ import { StarClip } from './components/Stars'
 import { CampaignEditor, Campaigns } from './screens/Campaign'
 import { Connect } from './screens/Connect'
 import { Settings } from './screens/Settings'
+import { Admin } from './screens/Admin'
 import { Contacts } from './screens/Contacts'
 import { Landing } from './screens/Landing'
 import { ChoosePlan, FirstRun, OnboardingCampaign, OnboardingStart } from './screens/Onboarding'
@@ -45,6 +46,7 @@ export function App() {
         {route.name === 'campaign' && (route.campaignId ? <CampaignEditor campaignId={route.campaignId} /> : <Campaigns />)}
         {route.name === 'connect' && <Connect />}
         {route.name === 'settings' && <Settings />}
+        {route.name === 'admin' && <Admin />}
       </main>
     </div>
   )

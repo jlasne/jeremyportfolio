@@ -11,7 +11,7 @@ import { api } from '../lib/api'
 const VIDEO_URL = ''
 
 /** The word that turns. Same people, three names, depending who is asking. */
-const WORDS = ['influencers', 'content creators', 'Instagram contacts']
+const WORDS = ['content creators', 'influencers', 'contacts']
 
 /** Paste this and an agent is connected. Shown on the landing as is. */
 const MCP_CONFIG = `{
@@ -106,9 +106,13 @@ function TurningWord() {
     return () => window.clearInterval(t)
   }, [still])
 
+  // Every word sits in the same grid cell, so the box is as wide as the
+  // widest one and the line never reflows as the word turns.
   return (
     <span className="turn" aria-label={WORDS.join(', ')}>
-      <span key={i} className="turn-word">{WORDS[i]}</span>
+      {WORDS.map((w, n) => (
+        <span key={w} className={n === i ? 'turn-word' : 'turn-ghost'} aria-hidden={n !== i}>{w}</span>
+      ))}
     </span>
   )
 }

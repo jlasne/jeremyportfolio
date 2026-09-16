@@ -10,6 +10,7 @@ export type Route =
   | { name: 'campaign'; campaignId: string | null }
   | { name: 'connect' }
   | { name: 'settings' }
+  | { name: 'admin' }
 
 export function parse(hash: string): Route {
   const path = hash.replace(/^#/, '').replace(/^\/+/, '')
@@ -34,6 +35,8 @@ export function parse(hash: string): Route {
       return { name: 'connect' }
     case 'settings':
       return { name: 'settings' }
+    case 'admin':
+      return { name: 'admin' }
     default:
       return { name: 'home' }
   }

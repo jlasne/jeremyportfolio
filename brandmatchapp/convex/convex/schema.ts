@@ -32,6 +32,8 @@ export default defineSchema({
      */
     plan: v.optional(v.union(v.literal('trial'), v.literal('paid'))),
     trialEndsAt: v.optional(v.number()),
+    /** The owner sees the admin screen and turns the knobs. */
+    role: v.optional(v.union(v.literal('owner'), v.literal('brand'))),
   })
     .index('by_key', ['apiKey'])
     .index('by_email', ['email']),

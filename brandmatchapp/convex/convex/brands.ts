@@ -35,6 +35,7 @@ export const me = internalQuery({
       credits: brand.credits,
       timezone: brand.timezone,
       plan: brand.plan ?? 'trial',
+      role: brand.role ?? 'brand',
       trialEndsAt: brand.trialEndsAt,
       trialDaysLeft: trialLive(brand, now)
         ? Math.ceil(((brand.trialEndsAt ?? 0) - now) / 86_400_000)
@@ -266,5 +267,17 @@ export const stats = internalQuery({
     }
     out.sort((a, b) => (a.date < b.date ? -1 : 1))
     return out
+  },
+})
+
+/** Makes a brand the owner. Run once from the CLI, never from a route. */
+export const makeOwner = internalMutation({
+  args: { email: v.string() },
+  returns: v.boolean(),
+  handler: async (ctx, { email }) => {
+    const brand = await ctx.db.query('brands').withIndex('by_email', (q) => q.eq('email', email.toLowerCase())).first()
+    if (!brand) return false
+    await ctx.db.patch(brand._id, { role: 'owner' })
+    return true
   },
 })

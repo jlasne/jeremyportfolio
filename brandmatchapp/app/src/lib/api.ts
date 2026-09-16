@@ -68,7 +68,7 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
 }
 
 export const api = {
-  me: () => call<{ id: string; email: string; credits: number; poolSize: number }>('/me'),
+  me: () => call<{ id: string; email: string; credits: number; plan: string; role: 'owner' | 'brand'; availableToYou: number }>('/me'),
   contacts: (campaign?: string | null, limit = 500) =>
     call<{ contacts: FeedRow[]; counts: { total: number; today: number; qualified: number } }>(
       `/contacts?limit=${limit}${campaign ? `&campaign=${campaign}` : ''}`,
@@ -81,6 +81,29 @@ export const api = {
   run: (campaignId: string) => call<{ started: number }>(`/campaigns/${campaignId}/run`, { method: 'POST' }),
   waitlist: (email: string, website?: string) =>
     call<{ ok: true }>('/waitlist', { method: 'POST', body: JSON.stringify({ email, website }) }),
+  admin: () => call<AdminOverview>('/admin'),
+  setSettings: (patch: Partial<AdminSettings>) =>
+    call<{ settings: AdminSettings }>('/admin/settings', { method: 'POST', body: JSON.stringify(patch) }),
+}
+
+export interface AdminSettings {
+  freshFloor: number
+  includedPerDay: number
+  claimDays: number
+  trialDays: number
+  trialCredits: number
+}
+
+export interface AdminOverview {
+  settings: AdminSettings
+  pool: { size: number; free: number; sustainablePerDay: number }
+  demand: { paidAccounts: number; leadsPerDay: number }
+  recommendation: { floor: number; ceiling: number; current: number; verdict: 'pool runs dry' | 'margin too thin' | 'in range' }
+  cost: { apifyPerDay: number; scoringPerDay: number; perMonth: number; revenuePerMonth: number; marginPct: number | null }
+  accounts: {
+    id: string; email: string; plan: 'trial' | 'paid'; role: 'owner' | 'brand'; credits: number
+    trialDaysLeft: number; quota: number; today: number; freshToday: number; poolToday: number; costPerDay: number
+  }[]
 }
 
 // What the API sends back -------------------------------------------------

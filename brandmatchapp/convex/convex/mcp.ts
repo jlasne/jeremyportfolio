@@ -59,7 +59,7 @@ const TOOLS = [
   },
   {
     name: 'classify_lead',
-    description: 'Tag, note, tick off or reject a lead. The app is the CRM, so a write here shows in the list straight away.',
+    description: 'Mark a lead as dealt with (done), tag it, note it, or reject it. The app is the CRM, so a write here shows in the list straight away. Use done once you have written to them.',
     inputSchema: {
       type: 'object',
       required: ['creator_id', 'action'],
@@ -74,6 +74,45 @@ const TOOLS = [
     name: 'list_campaigns',
     description: 'Every campaign the brand runs, with its brief, its filters, its daily volume and its agents. An agent marked proposed is waiting on a human.',
     inputSchema: { type: 'object', properties: {} },
+  },
+  {
+    name: 'create_campaign',
+    description: 'Start a campaign for the brand: a name, the website, one sentence on who to look for. It is seeded from the shared pool at once, one credit a lead, before any agent runs.',
+    inputSchema: {
+      type: 'object',
+      required: ['name'],
+      properties: {
+        name: { type: 'string' },
+        website: { type: 'string' },
+        who: { type: 'string', description: 'One sentence: who the brand wants to reach.' },
+        leads_per_day: { type: 'number', description: 'Daily volume. Defaults to 250.' },
+        seed: { type: 'number', description: 'How many to take from the pool now. Defaults to 200.' },
+      },
+    },
+  },
+  {
+    name: 'create_agent',
+    description: 'Add a searcher to a campaign with its own hashtags and daily share. It lands as proposed and spends nothing until approved.',
+    inputSchema: {
+      type: 'object',
+      required: ['campaign_id', 'name', 'hashtags'],
+      properties: {
+        campaign_id: { type: 'string' },
+        name: { type: 'string' },
+        hashtags: { type: 'array', items: { type: 'string' }, description: 'Without the # sign.' },
+        leads_per_day: { type: 'number', description: 'Defaults to 80.' },
+      },
+    },
+  },
+  {
+    name: 'approve_agent',
+    description: 'Turn a proposed or paused agent on. It runs tonight and starts spending credits.',
+    inputSchema: { type: 'object', required: ['agent_id'], properties: { agent_id: { type: 'string' }, leads_per_day: { type: 'number' } } },
+  },
+  {
+    name: 'pause_agent',
+    description: 'Stop an agent without deleting it. Nothing it found is lost.',
+    inputSchema: { type: 'object', required: ['agent_id'], properties: { agent_id: { type: 'string' } } },
   },
   {
     name: 'account',
@@ -180,6 +219,44 @@ export const mcp = httpAction(async (ctx, req) => {
         value: args.value as string | undefined,
       })
       return reply(id, text(ok ? `Done. ${args.action} on ${args.creator_id}.` : 'No such lead in your list.'))
+    }
+
+    if (name === 'create_campaign') {
+      const campaign = await ctx.runMutation(internal.brands.createCampaign, {
+        brandId: brand._id,
+        name: String(args.name ?? 'New campaign'),
+        website: args.website as string | undefined,
+        brief: args.who ? { who: String(args.who) } : {},
+        leadsPerDay: args.leads_per_day ? Number(args.leads_per_day) : undefined,
+      })
+      if (!campaign) return reply(id, text('Could not create the campaign.'))
+      const seeded = await ctx.runMutation(internal.pool.seedFromPool, {
+        campaignId: campaign._id, limit: Number(args.seed ?? 200),
+      })
+      return reply(id, text({ campaign_id: campaign._id, name: campaign.name, seeded_from_pool: seeded }))
+    }
+
+    if (name === 'create_agent') {
+      const agent = await ctx.runMutation(internal.brands.addAgent, {
+        brandId: brand._id,
+        campaignId: args.campaign_id as Id<'campaigns'>,
+        name: String(args.name ?? 'New agent'),
+        hashtags: ((args.hashtags as string[]) ?? []).map((h) => String(h).replace(/^#/, '')),
+        leadsPerDay: args.leads_per_day ? Number(args.leads_per_day) : undefined,
+      })
+      if (!agent) return reply(id, text('No such campaign in your account.'))
+      return reply(id, text({ agent_id: agent._id, status: agent.status, note: 'Proposed. Approve it to run tonight.' }))
+    }
+
+    if (name === 'approve_agent' || name === 'pause_agent') {
+      const agent = await ctx.runMutation(internal.brands.setAgentStatus, {
+        brandId: brand._id,
+        agentId: args.agent_id as Id<'agents'>,
+        status: name === 'approve_agent' ? 'active' : 'paused',
+        leadsPerDay: args.leads_per_day ? Number(args.leads_per_day) : undefined,
+      })
+      if (!agent) return reply(id, text('No such agent in your account.'))
+      return reply(id, text({ agent_id: agent._id, name: agent.name, status: agent.status }))
     }
 
     if (name === 'list_campaigns') {

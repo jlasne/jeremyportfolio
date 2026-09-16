@@ -176,6 +176,21 @@ const api = httpAction(async (ctx, req) => {
       return json(out)
     }
 
+    // The owner's screen. Everyone else gets a 404, not a hint.
+    if (head === 'admin') {
+      if (brand.role !== 'owner') return fail(`No route for /${parts.join('/')}`, 404)
+      if (parts[1] === 'settings' && req.method === 'POST') {
+        const body = await req.json()
+        const settings = await ctx.runMutation(internal.settings.set, {
+          freshFloor: body.freshFloor, includedPerDay: body.includedPerDay,
+          claimDays: body.claimDays, trialDays: body.trialDays, trialCredits: body.trialCredits,
+        })
+        return json({ settings })
+      }
+      const overview = await ctx.runQuery(internal.admin.overview, {})
+      return json(overview)
+    }
+
     if (head === 'stats') {
       const daily = await ctx.runQuery(internal.brands.stats, {
         brandId: brand._id, days: Math.min(Number(q.get('days') ?? 30), 180),

@@ -45,3 +45,28 @@ export const init = internalMutation({
     return await ctx.db.get(id)
   },
 })
+
+/** The owner turns a knob. Every field is optional; only what is sent moves. */
+export const set = internalMutation({
+  args: {
+    freshFloor: v.optional(v.number()),
+    includedPerDay: v.optional(v.number()),
+    claimDays: v.optional(v.number()),
+    trialDays: v.optional(v.number()),
+    trialCredits: v.optional(v.number()),
+  },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    const patch: Record<string, number> = {}
+    if (args.freshFloor !== undefined) patch.freshFloor = Math.min(Math.max(args.freshFloor, 0), 1)
+    if (args.includedPerDay !== undefined) patch.includedPerDay = Math.max(Math.round(args.includedPerDay), 0)
+    if (args.claimDays !== undefined) patch.claimDays = Math.max(Math.round(args.claimDays), 1)
+    if (args.trialDays !== undefined) patch.trialDays = Math.max(Math.round(args.trialDays), 0)
+    if (args.trialCredits !== undefined) patch.trialCredits = Math.max(Math.round(args.trialCredits), 0)
+
+    const row = await ctx.db.query('settings').withIndex('by_key', (q) => q.eq('key', 'main')).first()
+    if (row) await ctx.db.patch(row._id, patch)
+    else await ctx.db.insert('settings', { key: 'main', ...DEFAULTS, ...patch })
+    return await readSettings(ctx)
+  },
+})
