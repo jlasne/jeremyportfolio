@@ -29,18 +29,36 @@ nothing to hand out. So every night `brandmatch.shortfall()` fills the
 campaign's quota from what is free and unclaimed, and returns what is left.
 Zero means no run starts at all. Only the shortfall is ever crawled.
 
-Credits follow the same line: a credit buys a profile nobody had crawled
-before. Reading the pool is free.
+**One credit, one lead.** A lead costs a credit wherever it came from. A
+handle out of the pool costs us nothing to hand over and earns the same
+credit as one we crawled, which is where the margin sits: the bigger the
+pool, the fewer crawls a credit has to pay for. The charge is a trigger on
+`discoveries`, so no code path can hand a lead over for free, and both the
+pool and the crawl stop at the balance.
+
+**The model proposes, a human approves.** `propose` reads the brand's own
+site and writes the brief plus three agents, each with the hashtags it would
+search. They land as `status = 'proposed'`, which the crawl skips. Approving
+one flips it to `active`, and only then does it spend anything.
 
 Notes, tags, rejections and done marks belong to the brand and survive every
 crawl. Nothing in the schema is reachable with the project's anon key: every
 read and write goes through the `api` function, which holds the service role.
+
+### A note on embeds
+
+`discoveries`, `daily_stats` and `apify_runs` each carry a `campaign_id` and
+an `agent_id`, so PostgREST reads them as junction tables and any
+campaigns-to-agents embed comes back ambiguous. Both places that needed one
+use two plain reads instead. Worth knowing before adding a third.
 
 ### The functions that carry it
 
 | Function | What it answers |
 | --- | --- |
 | `claim_window()` | How long a lead stays exclusive. 14 days |
+| `credits_left(brand)` | The balance, which caps every delivery path |
+| `delivered_today(campaign)` | How much of today's quota is already filled |
 | `is_free(creator, brand)` | Is this handle unheld by anyone else |
 | `claim(creator, campaign, agent, brand, fresh)` | Take it, or say no |
 | `seed_from_pool(campaign, limit)` | Hand over free leads, best signal first |
@@ -64,9 +82,10 @@ front end adds them up the same way in `app/src/data/score.ts`.
 | Function | JWT | Auth | What it does |
 | --- | --- | --- | --- |
 | `api` | off | brand api key | Everything the front end and a customer's code call |
-| `crawl` | off | `x-crawl-secret` | Starts the Apify search runs for whatever agent is due |
+| `crawl` | off | `x-crawl-secret` | Fills from the pool, crawls only the shortfall |
 | `apify-webhook` | off | `x-crawl-secret` | Takes the run output into the pool, then calls qualify |
 | `qualify` | on | service role | Asks OpenRouter for the Niche star and writes the scores |
+| `propose` | on | service role | Reads the brand's site, writes a brief and three agents |
 
 JWT verification is off where the function runs its own auth. That is what
 keeps the project's anon key out of the browser bundle, which matters here:
@@ -80,7 +99,7 @@ Dashboard → Project Settings → Edge Functions → Secrets.
 | --- | --- |
 | `APIFY_TOKEN` | From https://console.apify.com/settings/integrations |
 | `OPENROUTER_API_KEY` | From https://openrouter.ai/keys |
-| `OPENROUTER_MODEL` | Optional. Defaults to `google/gemini-2.5-flash` |
+| `OPENROUTER_MODEL` | Optional. Defaults to `deepseek/deepseek-v4-flash-0731` |
 | `CRAWL_SECRET` | `select decrypted_secret from vault.decrypted_secrets where name = 'brandmatch_crawl_secret'` |
 
 `CRAWL_SECRET` already exists in the vault, where pg_cron reads it. Paste the
@@ -96,12 +115,18 @@ hourly job covers every timezone without a job per brand.
 ## The chain
 
 ```
-cron ─▶ crawl ─▶ Apify search run  ─▶ apify-webhook ─▶ Apify detail run
-                                                    └─▶ apify-webhook
-                                                          ├─▶ creators, creator_posts
-                                                          ├─▶ discoveries, credits
-                                                          └─▶ qualify ─▶ OpenRouter ─▶ creator_scores
+website ─▶ propose ─▶ 3 agents, proposed ─▶ a human approves ─▶ active
+
+cron ─▶ crawl ─▶ pool fills the quota, free
+             └▶ shortfall only ─▶ Apify search run ─▶ apify-webhook ─▶ Apify detail run
+                                                                                  └─▶ apify-webhook
+                                                                                        ├─▶ creators, creator_posts
+                                                                                        ├─▶ claim, one credit each
+                                                                                        └─▶ qualify ─▶ creator_scores
 ```
+
+A model costs about half a cent to read 500 profiles, against the $1.15 the
+same 500 cost to crawl. Judgment is what to buy there, not tokens.
 
 Nothing waits. Apify calls back when a run ends, which is why no function
 holds a connection open for the minutes a crawl takes.
@@ -130,6 +155,10 @@ curl https://decuztcvbfwgkudnbljk.supabase.co/functions/v1/api/contacts \
 | `/campaigns` | GET POST | POST seeds from the pool first, free, and says how many |
 | `/campaigns/:id` | PATCH | Brief, filters, volume, active |
 | `/campaigns/:id/agents` | POST | A searcher with its own hashtags |
+| `/campaigns/:id/propose` | POST | The model reads the site and writes three agents |
+| `/agents/:id/approve` | POST | A proposed agent starts running tonight |
+| `/agents/:id/pause` | POST | Stop it without deleting it |
+| `/agents/:id` | DELETE | Remove it |
 | `/campaigns/:id/run` | POST | Starts a crawl now. Needs credits |
 | `/stats` | GET | `days`, up to 180 |
 | `/actions` | POST | `reject`, `unreject`, `done`, `undone`, `note`, `tag`, `untag` |

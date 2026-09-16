@@ -129,7 +129,7 @@ Deno.serve(async (req) => {
   const sb = db()
   const key = Deno.env.get('OPENROUTER_API_KEY')
   if (!key) return fail('OPENROUTER_API_KEY is not set', 500)
-  const model = Deno.env.get('OPENROUTER_MODEL') ?? 'google/gemini-2.5-flash'
+  const model = Deno.env.get('OPENROUTER_MODEL') ?? 'deepseek/deepseek-v4-flash-0731'
 
   try {
     const { campaignId, creatorIds, limit } = await req.json()

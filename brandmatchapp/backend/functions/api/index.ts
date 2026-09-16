@@ -16,6 +16,10 @@
 //   POST   /campaigns                 { name, website, brief, filters, leadsPerDay }
 //   PATCH  /campaigns/:id             any column above
 //   POST   /campaigns/:id/agents      { name, focus, keywords, hashtags, leadsPerDay }
+//   POST   /campaigns/:id/propose     the model reads the site and writes 3 agents
+//   POST   /agents/:id/approve        a proposed agent starts running tonight
+//   POST   /agents/:id/pause          stop it without deleting it
+//   DELETE /agents/:id
 //   POST   /campaigns/:id/run         starts a crawl now
 //   GET    /stats?days=30
 //   POST   /actions                   { creatorId, action, value? }
@@ -89,10 +93,26 @@ Deno.serve(async (req) => {
     }
 
     if (head === 'campaigns' && req.method === 'GET') {
-      const { data, error } = await sb.from('campaigns')
-        .select('*, agents(*)').eq('brand_id', brand.id).order('created_at', { ascending: false })
+      // Two plain reads, joined here: discoveries, daily_stats and apify_runs
+      // each carry a campaign_id and an agent_id, so PostgREST reads them as
+      // junctions and an agents embed comes back ambiguous.
+      const { data: rows, error } = await sb.from('campaigns').select('*')
+        .eq('brand_id', brand.id).order('created_at', { ascending: false })
       if (error) return fail(error.message, 500)
-      return json({ campaigns: data ?? [] })
+
+      const campaigns = rows ?? []
+      const { data: agents } = await sb.from('agents').select('*')
+        .in('campaign_id', campaigns.map((c: { id: string }) => c.id))
+        .order('created_at')
+      const byCampaign = new Map<string, unknown[]>()
+      for (const a of agents ?? []) {
+        const list = byCampaign.get(a.campaign_id) ?? []
+        list.push(a)
+        byCampaign.set(a.campaign_id, list)
+      }
+      return json({
+        campaigns: campaigns.map((c: { id: string }) => ({ ...c, agents: byCampaign.get(c.id) ?? [] })),
+      })
     }
 
     if (head === 'campaigns' && req.method === 'POST' && !parts[1]) {
@@ -142,11 +162,59 @@ Deno.serve(async (req) => {
       return json({ agent: data })
     }
 
+    // The model proposes, a human approves. Nothing here spends a credit.
+    if (head === 'campaigns' && parts[1] && parts[2] === 'propose' && req.method === 'POST') {
+      const { data: owned } = await sb.from('campaigns').select('id').eq('id', parts[1]).eq('brand_id', brand.id).maybeSingle()
+      if (!owned) return fail('No such campaign', 404)
+      const body = await req.json().catch(() => ({}))
+      const res = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/propose`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+        },
+        body: JSON.stringify({ campaignId: parts[1], website: body.website }),
+      })
+      return json(await res.json(), res.status)
+    }
+
+    if (head === 'agents' && parts[1] && req.method !== 'GET') {
+      // An agent belongs to a brand through its campaign. Two plain reads,
+      // rather than an embed the junction tables make ambiguous.
+      const { data: agent } = await sb.from('agents')
+        .select('id, status, campaign_id').eq('id', parts[1]).maybeSingle()
+      if (!agent) return fail('No such agent', 404)
+      const { data: owns } = await sb.from('campaigns').select('id')
+        .eq('id', agent.campaign_id).eq('brand_id', brand.id).maybeSingle()
+      if (!owns) return fail('No such agent', 404)
+
+      if (req.method === 'DELETE') {
+        await sb.from('agents').delete().eq('id', parts[1])
+        return json({ ok: true })
+      }
+      if (parts[2] === 'approve') {
+        const body = await req.json().catch(() => ({}))
+        const patch: Record<string, unknown> = { status: 'active', active: true }
+        if (typeof body.leadsPerDay === 'number') patch.leads_per_day = body.leadsPerDay
+        if (Array.isArray(body.hashtags)) patch.hashtags = body.hashtags
+        const { data, error } = await sb.from('agents').update(patch).eq('id', parts[1]).select().single()
+        if (error) return fail(error.message, 500)
+        return json({ agent: data })
+      }
+      if (parts[2] === 'pause') {
+        const { data, error } = await sb.from('agents')
+          .update({ status: 'paused', active: false }).eq('id', parts[1]).select().single()
+        if (error) return fail(error.message, 500)
+        return json({ agent: data })
+      }
+      return fail(`No route for /agents/${parts[1]}/${parts[2] ?? ''}`, 404)
+    }
+
     if (head === 'campaigns' && parts[1] && parts[2] === 'run' && req.method === 'POST') {
       const { data: owned } = await sb.from('campaigns').select('id').eq('id', parts[1]).eq('brand_id', brand.id).maybeSingle()
       if (!owned) return fail('No such campaign', 404)
-      // A crawl spends credits on whatever comes back fresh, so it needs some.
-      if (brand.credits <= 0) return fail('No credits left. The pool still reads free.', 402)
+      // One credit, one lead. No credits, nothing to deliver.
+      if (brand.credits <= 0) return fail('No credits left. Top up to take more leads.', 402)
       const res = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/crawl`, {
         method: 'POST',
         headers: {

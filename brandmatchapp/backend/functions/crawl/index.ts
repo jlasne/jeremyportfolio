@@ -74,14 +74,25 @@ Deno.serve(async (req) => {
     const campaignId: string | undefined = body.campaignId
 
     // Pick the agents to run: one campaign on demand, or everything due today.
-    let query = sb.from('agents').select('*, campaigns!inner(id, brand_id, active)').eq('active', true)
+    // `proposed` agents are the model's suggestion and spend nothing until a
+    // human approves them, which is what flips them to `active`.
+    //
+    // Two plain reads rather than an embed: discoveries, daily_stats and
+    // apify_runs each carry a campaign_id and an agent_id, so PostgREST reads
+    // them as junctions and a campaigns embed comes back ambiguous.
+    let query = sb.from('agents').select('*').eq('status', 'active')
     if (campaignId) query = query.eq('campaign_id', campaignId)
     else query = query.or(`last_run_at.is.null,last_run_at.lt.${new Date(Date.now() - 20 * 3600_000).toISOString()}`)
     const { data: agents, error } = await query
     if (error) return fail(error.message, 500)
+    if (!agents?.length) return json({ started: 0, note: 'No approved agent was due' })
 
-    const due = (agents ?? []).filter((a: Agent & { campaigns: { active: boolean } }) => a.campaigns?.active)
-    if (!due.length) return json({ started: 0, note: 'No agent was due' })
+    const { data: live } = await sb.from('campaigns').select('id')
+      .in('id', [...new Set((agents as Agent[]).map((a) => a.campaign_id))]).eq('active', true)
+    const running = new Set((live ?? []).map((c: { id: string }) => c.id))
+
+    const due = (agents as Agent[]).filter((a) => running.has(a.campaign_id))
+    if (!due.length) return json({ started: 0, note: 'No approved agent was due' })
 
     const started: string[] = []
     const failed: string[] = []
