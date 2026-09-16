@@ -4,9 +4,32 @@
 // the real pool; without one it falls back to the sample data it shipped with,
 // so a stranger who types the URL sees the prototype and no real lead.
 
-export const API = 'https://decuztcvbfwgkudnbljk.supabase.co/functions/v1/api'
+// The Convex deployment serving the API. Set once the backend is deployed,
+// and overridable from this browser while a deployment is being moved.
+const DEFAULT_API = 'https://brandmatch.convex.site/api'
 
 const KEY = 'brandmatch.key'
+const BASE = 'brandmatch.api'
+
+function base(): string {
+  try {
+    return window.localStorage.getItem(BASE) || DEFAULT_API
+  } catch {
+    return DEFAULT_API
+  }
+}
+
+export const API = base()
+
+/** Points this browser at another deployment, for a move or a staging one. */
+export function setApi(url: string): void {
+  try {
+    if (url) window.localStorage.setItem(BASE, url.replace(/\/$/, ''))
+    else window.localStorage.removeItem(BASE)
+  } catch {
+    /* a browser with storage off stays on the built-in address */
+  }
+}
 
 export function getKey(): string | null {
   try {
@@ -31,7 +54,7 @@ export function isLive(): boolean {
 
 async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
   const key = getKey()
-  const res = await fetch(`${API}${path}`, {
+  const res = await fetch(`${base()}${path}`, {
     ...init,
     headers: {
       'Content-Type': 'application/json',

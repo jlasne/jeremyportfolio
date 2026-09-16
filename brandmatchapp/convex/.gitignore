@@ -1,0 +1,6 @@
+node_modules/
+.env.local
+.convex/
+
+# The raw JSONL is rebuilt from the gzip beside it.
+seed/creators.jsonl

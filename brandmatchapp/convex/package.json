@@ -1,0 +1,19 @@
+{
+  "name": "brandmatch-backend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "brandmatch on Convex: the shared creator pool, the crawl, the scoring, the API and MCP.",
+  "scripts": {
+    "dev": "convex dev",
+    "deploy": "convex deploy",
+    "import-pool": "convex run migrate:importPool"
+  },
+  "dependencies": {
+    "convex": "^1.45.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.3",
+    "typescript": "^5.6.3"
+  }
+}
