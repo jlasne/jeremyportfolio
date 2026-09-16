@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Backdrop } from '../components/Backdrop'
 import { Logo } from '../components/Logo'
 import { HeroDemo } from '../components/HeroDemo'
@@ -10,26 +10,43 @@ import { api } from '../lib/api'
 /** Drop the recording in here and the animation below steps aside for it. */
 const VIDEO_URL = ''
 
+/** The word that turns. Same people, three names, depending who is asking. */
+const WORDS = ['influencers', 'content creators', 'Instagram contacts']
+
+/** Paste this and an agent is connected. Shown on the landing as is. */
+const MCP_CONFIG = `{
+  "mcpServers": {
+    "brandmatch": {
+      "type": "http",
+      "url": "https://brandmatch.app/api/mcp"
+    }
+  }
+}`
+
 const STEPS = [
   {
     n: '01',
     title: 'Understand your ICP',
-    note: 'Enter your website. It is read back to you as the creators you should reach: the niche, what they sell, who follows them. Change any word.',
+    note: 'Your website goes in. It comes back as the creators you should reach, in your words, and you change any of them.',
+    tick: 'strongher.co read in 8 seconds',
   },
   {
     n: '02',
     title: 'Find leads',
-    note: 'Agents search Instagram every night. Quiet accounts drop out before they reach you. The contact rides along where we find one.',
+    note: 'Agents search Instagram every night. Quiet accounts drop out before they reach you. The email rides along where we find one.',
+    tick: '250 a night, while you sleep',
   },
   {
     n: '03',
     title: 'Score it',
-    note: 'Three stars, one each: fits your niche, sells something of their own, fired a brand signal in the last 4 days. Best first.',
+    note: 'Three stars, one each: fits your niche, sells something of their own, fired a brand signal in the last 4 days.',
+    tick: 'Best first, every morning',
   },
   {
     n: '04',
     title: 'You close deals',
     note: 'Open the list, write to the top of it, tick them off. That is the only step left for you.',
+    tick: 'The only one you do',
   },
 ]
 
@@ -77,6 +94,25 @@ function EarlyAccess({ size = 'normal', website }: { size?: 'normal' | 'small'; 
   )
 }
 
+/** The word turns every 2.4 seconds, and holds still under reduced motion. */
+function TurningWord() {
+  const still = typeof window !== 'undefined'
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const [i, setI] = useState(0)
+
+  useEffect(() => {
+    if (still) return
+    const t = window.setInterval(() => setI((n) => (n + 1) % WORDS.length), 2400)
+    return () => window.clearInterval(t)
+  }, [still])
+
+  return (
+    <span className="turn" aria-label={WORDS.join(', ')}>
+      <span key={i} className="turn-word">{WORDS[i]}</span>
+    </span>
+  )
+}
+
 /** The product in one take. The looping animation holds the frame until then. */
 function ProductVideo() {
   if (!VIDEO_URL) return <HeroDemo />
@@ -108,13 +144,13 @@ export function Landing() {
 
         <div className="hero-block">
           <section className="hero">
-            <h1>Your AI agent finds <br />high intent Instagram contacts.</h1>
+            <h1>Your AI agent finds <br />high intent <TurningWord />.</h1>
             <p className="lede">
               Enter your website. brandmatch learns your brand, finds the creators ready for a deal, and ranks them
               before you wake up.
             </p>
             <EarlyAccess website="strongher.co" />
-            <p className="hero-note">14,259 creators in the pool today. Instagram first, TikTok and YouTube next.</p>
+            <p className="hero-note">Three days free on 14,259 creators already in the pool. No card.</p>
           </section>
 
           <div className="video-wrap">
@@ -131,40 +167,35 @@ export function Landing() {
                 <span className="step-n">{s.n}</span>
                 <h3>{s.title}</h3>
                 <p>{s.note}</p>
+                <span className="step-tick">{s.tick}</span>
               </div>
             ))}
           </div>
         </section>
 
         <section className="land-section" id="ways">
-          <p className="eyebrow">AI native</p>
-          <h2 className="big">Open the app. <em>Or never open it at all.</em></h2>
+          <p className="eyebrow">Connect your agent</p>
+          <h2 className="big">Hooked up in <em>one config block.</em></h2>
           <p className="section-lede">
-            Same leads, same writes, two doors. Work the list here, or point the AI you already pay for at it and stay
-            where you are.
+            One click for Claude, or paste this into any MCP agent: Cursor, an IDE, your own. The REST API covers
+            everything else. Work the list here, or never open the app at all.
           </p>
-          <div className="doors">
-            <div className="door">
-              <span className="door-tag">The platform</span>
-              <h3>Work the list here</h3>
-              <p>
-                Ranked every morning, filters on top, contact on the row. Tag, note, tick off, reject, export. It is
-                the CRM as well as the feed, so nothing needs syncing.
-              </p>
+
+          <div className="connect">
+            <div className="connect-code">
+              <pre><code>{MCP_CONFIG}</code></pre>
             </div>
-            <div className="door">
-              <span className="door-tag">Your own AI</span>
-              <h3>API and MCP</h3>
-              <p>
-                One key reads your leads, classifies them and runs your campaigns. Point Claude, Cursor or your IDE at
-                the MCP server and ask in words. Your AI subscription does the work.
-              </p>
-              <div className="asks">
-                <span className="ask-line">"Who fired a brand signal this week?"</span>
-                <span className="ask-line">"Tag the 3 star ones and draft my first message."</span>
-              </div>
+            <div className="connect-side">
+              <a className="btn primary" href="#access">Add to Claude</a>
+              <a className="btn" href="#/connect">View API docs</a>
             </div>
           </div>
+
+          <ul className="connect-notes">
+            <li>MCP and REST on every plan, same key, no extra tier</li>
+            <li>Ask in words: who fired a brand signal this week</li>
+            <li>Writes land in the app, because the app is the CRM</li>
+          </ul>
         </section>
 
         <section className="land-section centred" id="pricing">
@@ -182,16 +213,17 @@ export function Landing() {
                 <li>Every lead yours alone for 14 days</li>
                 <li>Cancel any morning</li>
               </ul>
-              <a className="btn primary" href="#access">Get early access</a>
+              <a className="btn primary" href="#access">Start 3 days free</a>
             </div>
           </div>
           <p className="section-lede">
-            Need more than 250 a day? <a href="mailto:jeremy@brandmatch.app">Chat with me</a> and we size it together.
+            Three days free on the 14,259 creators already in the pool. No card.
+            Need more than 250 a day after that? <a href="mailto:jeremy@brandmatch.app">Chat with me</a> and we size it together.
           </p>
         </section>
 
         <section className="land-cta" id="access">
-          <h2>Your next 10 creators are already out there.</h2>
+          <h2>Your next 10 leads are already out there.</h2>
           <p>Leave your email. We open the doors in batches and write when yours is ready.</p>
           <EarlyAccess />
         </section>

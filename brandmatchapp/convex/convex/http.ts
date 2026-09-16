@@ -166,6 +166,10 @@ const api = httpAction(async (ctx, req) => {
       if (!owned || owned.brandId !== brand._id) return fail('No such campaign', 404)
       // One credit, one lead. No credits, nothing to deliver.
       if (brand.credits <= 0) return fail('No credits left. Top up to take more leads.', 402)
+      // A trial reads the pool. Crawling is what a plan pays for.
+      if (brand.plan !== 'paid') {
+        return fail('Your trial reads the shared pool. Start a plan to crawl for new ones.', 402)
+      }
       const out = await ctx.runAction(internal.crawl.run, { campaignId: parts[1] as Id<'campaigns'> })
       return json(out)
     }

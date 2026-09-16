@@ -6,7 +6,7 @@
 
 // The Convex deployment serving the API. Set once the backend is deployed,
 // and overridable from this browser while a deployment is being moved.
-const DEFAULT_API = 'https://brandmatch.convex.site/api'
+const DEFAULT_API = 'https://canny-mandrill-528.eu-west-1.convex.site/api'
 
 const KEY = 'brandmatch.key'
 const BASE = 'brandmatch.api'

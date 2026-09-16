@@ -27,35 +27,64 @@ export const me = internalQuery({
     const brand = await ctx.db.get(brandId)
     if (!brand) return null
     const { free, capped } = await countFree(ctx, brandId)
+    const now = Date.now()
     return {
       id: brand._id,
       email: brand.email,
       credits: brand.credits,
       timezone: brand.timezone,
+      plan: brand.plan ?? 'trial',
+      trialEndsAt: brand.trialEndsAt,
+      trialDaysLeft: trialLive(brand, now)
+        ? Math.ceil(((brand.trialEndsAt ?? 0) - now) / 86_400_000)
+        : 0,
       availableToYou: free,
       availableIsFloor: capped,
     }
   },
 })
 
+/** Three days on the pool. Costs the Apify bill nothing, so it is the default. */
+export const TRIAL_DAYS = 3
+export const TRIAL_CREDITS = 750
+
 export const create = internalMutation({
-  args: { email: v.string(), website: v.optional(v.string()), credits: v.optional(v.number()) },
+  args: {
+    email: v.string(),
+    website: v.optional(v.string()),
+    credits: v.optional(v.number()),
+    plan: v.optional(v.union(v.literal('trial'), v.literal('paid'))),
+  },
   returns: v.any(),
-  handler: async (ctx, { email, website, credits }) => {
-    const already = await ctx.db.query('brands').withIndex('by_email', (q) => q.eq('email', email)).first()
+  handler: async (ctx, { email, website, credits, plan }) => {
+    const clean = email.toLowerCase().trim()
+    const already = await ctx.db.query('brands').withIndex('by_email', (q) => q.eq('email', clean)).first()
     if (already) return already
 
+    const onTrial = plan !== 'paid'
     const id = await ctx.db.insert('brands', {
-      email: email.toLowerCase().trim(),
+      email: clean,
       website,
       timezone: 'Europe/Paris',
-      credits: credits ?? 500,
+      credits: credits ?? (onTrial ? TRIAL_CREDITS : 7500),
       apiKey: newKey(),
       onboarded: false,
+      plan: onTrial ? 'trial' : 'paid',
+      trialEndsAt: onTrial ? Date.now() + TRIAL_DAYS * 86_400_000 : undefined,
     })
     return await ctx.db.get(id)
   },
 })
+
+/** True while a trial is still inside its three days. */
+export function trialLive(brand: { plan?: string; trialEndsAt?: number }, now = Date.now()): boolean {
+  return brand.plan === 'trial' && (brand.trialEndsAt ?? 0) > now
+}
+
+/** A trial reads the pool. Only a paid brand may spend on a crawl. */
+export function mayCrawl(brand: { plan?: string }): boolean {
+  return brand.plan === 'paid'
+}
 
 export const joinWaitlist = internalMutation({
   args: { email: v.string(), website: v.optional(v.string()), source: v.optional(v.string()) },

@@ -26,6 +26,12 @@ export default defineSchema({
     credits: v.number(),
     apiKey: v.string(),
     onboarded: v.boolean(),
+    /**
+     * `trial` reads the shared pool and never starts a crawl, so three days
+     * of it costs the Apify bill nothing. `paid` unlocks the crawl.
+     */
+    plan: v.optional(v.union(v.literal('trial'), v.literal('paid'))),
+    trialEndsAt: v.optional(v.number()),
   })
     .index('by_key', ['apiKey'])
     .index('by_email', ['email']),

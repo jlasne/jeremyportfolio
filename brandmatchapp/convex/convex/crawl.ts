@@ -137,6 +137,9 @@ export const dueAgents = internalQuery({
       if (!campaignId && a.lastRunAt && a.lastRunAt > cutoff) continue
       const campaign = await ctx.db.get(a.campaignId)
       if (!campaign?.active) continue
+      // A trial reads the pool and never spends on Apify.
+      const brand = await ctx.db.get(campaign.brandId)
+      if (brand?.plan !== 'paid') continue
       out.push(a)
     }
     return out
