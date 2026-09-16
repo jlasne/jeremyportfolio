@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { getCampaigns, getDashboard } from '../data'
 import { useStore } from '../data/hooks'
-import { API, getKey, setKey } from '../lib/api'
+import { API, MCP, getKey, setKey } from '../lib/api'
 
 // One API and one MCP server over the same key. It reads the leads, classifies
 // them in the list you work in, and runs the campaigns that fill it.
 
 const API_URL = API
-const MCP_URL = API.replace(/\/api\/?$/, '/mcp')
+const MCP_URL = MCP
 
 interface Call {
   verb: 'GET' | 'POST' | 'PATCH' | 'DELETE'

@@ -19,7 +19,8 @@ const MCP_CONFIG = `{
   "mcpServers": {
     "brandmatch": {
       "type": "http",
-      "url": "https://brandmatch.app/api/mcp"
+      "url": "https://www.brandmatch.app/api/mcp",
+      "headers": { "Authorization": "Bearer YOUR_KEY" }
     }
   }
 }`

@@ -4,16 +4,17 @@
 // the real pool; without one it falls back to the sample data it shipped with,
 // so a stranger who types the URL sees the prototype and no real lead.
 
-// Production answers on the app's own domain: brandmatch.app/api is rewritten
-// to the Convex deployment, so the backend address never ships in the bundle.
-// Anywhere else, including a local preview, talks to production directly.
-// Either way this browser can be pointed elsewhere with setApi.
-const SAME_ORIGIN = 'https://brandmatch.app/api'
+// On its own domain the app calls /api, which Vercel rewrites to the Convex
+// deployment: same origin, no redirect, and the backend address never ships in
+// the bundle. Anywhere else, a local preview included, it talks to production
+// directly. Either way this browser can be pointed elsewhere with setApi.
 const DIRECT = 'https://dashing-swan-386.eu-west-1.convex.site/api'
 
 function built(): string {
   try {
-    return window.location.hostname.endsWith('brandmatch.app') ? SAME_ORIGIN : DIRECT
+    return window.location.hostname.endsWith('brandmatch.app')
+      ? `${window.location.origin}/api`
+      : DIRECT
   } catch {
     return DIRECT
   }
@@ -31,6 +32,15 @@ function base(): string {
 }
 
 export const API = base()
+
+/**
+ * Where an AI connects. On the app's own domain the rewrite that carries the
+ * API carries MCP too, at /api/mcp. Against a Convex deployment directly, MCP
+ * sits at the site root.
+ */
+export const MCP = API.endsWith('.convex.site/api')
+  ? API.replace(/\/api$/, '/mcp')
+  : `${API}/mcp`
 
 /** Points this browser at another deployment, for a move or a staging one. */
 export function setApi(url: string): void {
