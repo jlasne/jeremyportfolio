@@ -40,6 +40,7 @@ export const overview = internalQuery({
 
     // Every account, what it asks for, what it got today.
     const brands = await ctx.db.query('brands').collect()
+    const waitlist = await ctx.db.query('waitlist').collect()
     const accounts = []
     let paidDemand = 0
     let paidCount = 0
@@ -116,6 +117,17 @@ export const overview = internalQuery({
           : null,
       },
       accounts: accounts.sort((a, b) => b.quota - a.quota),
+      // Who asked to be let in, newest first. The landing writes here and
+      // nothing else reads it, so this page is where it is answered.
+      waitlist: {
+        total: waitlist.length,
+        recent: waitlist.slice(-40).reverse().map((w) => ({
+          email: w.email,
+          website: w.website ?? '',
+          source: w.source ?? 'landing',
+          at: w._creationTime,
+        })),
+      },
     }
   },
 })

@@ -1580,3 +1580,17 @@ body { background: transparent; }
   font-size: 12.5px; padding: 5px 10px; color: var(--l-muted);
   border: 1px solid var(--l-rule-firm); background: rgba(247, 242, 230, 0.04);
 }
+
+/* Who asked to be let in. The landing writes here, this page answers it. */
+.waitlist-box { margin-top: 14px; }
+.waitlist-box h2 { display: flex; align-items: center; gap: 10px; }
+.waitlist-box h2 .spacer { flex: 1; }
+.waitlist-list { list-style: none; margin: 10px 0 0; padding: 0; }
+.waitlist-list li {
+  display: flex; align-items: baseline; gap: 12px;
+  padding: 9px 0; border-top: 1px solid var(--line); font-size: 13.5px;
+}
+.waitlist-list li:first-child { border-top: 0; }
+.waitlist-list a { color: var(--ink); }
+.waitlist-list a:hover { color: var(--orange); }
+.waitlist-list .spacer { flex: 1; }

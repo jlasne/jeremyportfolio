@@ -136,6 +136,10 @@ export interface AdminOverview {
   demand: { paidAccounts: number; leadsPerDay: number }
   recommendation: { floor: number; ceiling: number; current: number; verdict: 'pool runs dry' | 'margin too thin' | 'in range' }
   cost: { apifyPerDay: number; scoringPerDay: number; perMonth: number; revenuePerMonth: number; marginPct: number | null }
+  waitlist: {
+    total: number
+    recent: { email: string; website: string; source: string; at: number }[]
+  }
   accounts: {
     id: string; email: string; plan: 'trial' | 'paid'; role: 'owner' | 'brand'; credits: number
     trialDaysLeft: number; quota: number; today: number; freshToday: number; poolToday: number; costPerDay: number

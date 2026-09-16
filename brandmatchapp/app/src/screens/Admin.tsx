@@ -73,7 +73,7 @@ export function Admin() {
     return <div className="page editor"><div className="page-head"><h1>Admin</h1></div><p className="subhead">Reading…</p></div>
   }
 
-  const { pool, demand, recommendation: r, cost, accounts } = data
+  const { pool, demand, recommendation: r, cost, accounts, waitlist } = data
   const fresh = draft.freshFloor
   const verdict =
     fresh < r.floor ? `Under the floor. The pool sustains ${pool.sustainablePerDay} a day against ${demand.leadsPerDay} asked. It runs dry.`
@@ -158,6 +158,37 @@ export function Admin() {
           </div>
         ))}
       </section>
+
+      <section className="card waitlist-box">
+        <h2>
+          Waitlist
+          <span className="spacer" />
+          <b className="num">{waitlist.total.toLocaleString('en-US')}</b>
+        </h2>
+        {waitlist.total === 0 ? (
+          <p className="faint">Nobody yet. The form on the landing writes straight here.</p>
+        ) : (
+          <ul className="waitlist-list">
+            {waitlist.recent.map((w) => (
+              <li key={w.email}>
+                <a href={`mailto:${w.email}`}>{w.email}</a>
+                {w.website && <span className="faint">{w.website}</span>}
+                <span className="spacer" />
+                <span className="faint">{when(w.at)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   )
+}
+
+/** A date said the way a person would say it. */
+function when(at: number): string {
+  const days = Math.floor((Date.now() - at) / 86_400_000)
+  if (days <= 0) return 'today'
+  if (days === 1) return 'yesterday'
+  if (days < 30) return `${days} days ago`
+  return new Date(at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 }
