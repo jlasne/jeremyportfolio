@@ -4,7 +4,7 @@ import { v } from 'convex/values'
 import type { Id } from './_generated/dataModel'
 import { deliver } from './pool'
 import { newestSignal, type Signal } from './scoring'
-import { APIFY, ACTOR, toBase64 } from './crawl'
+import { APIFY, ACTOR, webhookParam } from './crawl'
 
 // What Apify sends back, turned into pool rows.
 //
@@ -106,16 +106,10 @@ export const fromApify = internalAction({
       const handles = [...new Set(rows.map((r) => String(r.ownerUsername ?? '').toLowerCase()).filter(Boolean))]
       if (!handles.length) return { ok: true, handles: 0 }
 
-      const hook = toBase64(JSON.stringify([{
-        eventTypes: ['ACTOR.RUN.SUCCEEDED', 'ACTOR.RUN.FAILED', 'ACTOR.RUN.TIMED_OUT'],
-        requestUrl: `${process.env.CONVEX_SITE_URL ?? ''}/apify`,
-        headersTemplate: JSON.stringify({ 'x-crawl-secret': process.env.CRAWL_SECRET ?? '' }),
-        payloadTemplate: JSON.stringify({
-          runId: '{{resource.id}}', status: '{{resource.status}}',
-          datasetId: '{{resource.defaultDatasetId}}',
-          phase: 'detail', campaignId: args.campaignId, agentId: args.agentId ?? '',
-        }),
-      }]))
+      // One builder for both phases. A second copy is a second thing to fix.
+      const hook = webhookParam({
+        phase: 'detail', campaignId: args.campaignId, agentId: args.agentId ?? '',
+      })
 
       const input = {
         directUrls: handles.slice(0, 300).map((h) => `https://www.instagram.com/${h}/`),

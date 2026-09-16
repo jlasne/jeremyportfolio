@@ -24,18 +24,24 @@ export function toBase64(text: string): string {
   return btoa(binary)
 }
 
-/** Apify wants the webhook as base64 JSON on the query string. */
+/**
+ * Apify wants the webhook as base64 JSON on the query string.
+ *
+ * The payload template is a JSON string where `{{variable}}` is spliced in
+ * before the call. Only whole top-level variables are substituted, so the run
+ * arrives as `{{resource}}`, unquoted, and the handler reads its fields. A
+ * dotted `{{resource.status}}` is not resolved: it arrives as those literal
+ * characters, and a crawl that finished looks to us like it never did.
+ */
 export function webhookParam(payload: Record<string, string>): string {
+  const ours = Object.entries(payload)
+    .map(([k, v]) => `${JSON.stringify(k)}: ${JSON.stringify(v)}`)
+    .join(', ')
   return toBase64(JSON.stringify([{
     eventTypes: ['ACTOR.RUN.SUCCEEDED', 'ACTOR.RUN.FAILED', 'ACTOR.RUN.TIMED_OUT'],
     requestUrl: `${process.env.CONVEX_SITE_URL ?? ''}/apify`,
     headersTemplate: JSON.stringify({ 'x-crawl-secret': process.env.CRAWL_SECRET ?? '' }),
-    payloadTemplate: JSON.stringify({
-      runId: '{{resource.id}}',
-      status: '{{resource.status}}',
-      datasetId: '{{resource.defaultDatasetId}}',
-      ...payload,
-    }),
+    payloadTemplate: `{ "resource": {{resource}}, "eventType": {{eventType}}${ours ? ', ' + ours : ''} }`,
   }]))
 }
 

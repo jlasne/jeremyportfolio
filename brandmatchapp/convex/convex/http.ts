@@ -238,10 +238,18 @@ http.route({
     const secret = process.env.CRAWL_SECRET
     if (!secret || req.headers.get('x-crawl-secret') !== secret) return fail('Bad secret', 401)
     const body = await req.json()
+    // The run arrives whole under `resource`. The older flat shape is still
+    // read, so a webhook registered by an earlier deploy still lands.
+    const run = (body.resource ?? {}) as Record<string, unknown>
+    const runId = String(run.id ?? body.runId ?? '')
+    const status = String(run.status ?? body.status ?? '')
+    const datasetId = String(run.defaultDatasetId ?? body.datasetId ?? '')
+    // A status we cannot read is not a reason to drop a finished crawl.
+    if (!/^[A-Z-]+$/.test(status)) return fail(`Unreadable run status for ${runId}`, 400)
     const out = await ctx.runAction(internal.ingest.fromApify, {
-      runId: String(body.runId ?? ''),
-      status: String(body.status ?? ''),
-      datasetId: body.datasetId ? String(body.datasetId) : undefined,
+      runId,
+      status,
+      datasetId: datasetId || undefined,
       phase: String(body.phase ?? 'search'),
       campaignId: body.campaignId as Id<'campaigns'>,
       agentId: body.agentId ? (body.agentId as Id<'agents'>) : undefined,
