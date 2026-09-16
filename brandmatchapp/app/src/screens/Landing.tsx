@@ -4,53 +4,32 @@ import { Logo } from '../components/Logo'
 import { HeroDemo } from '../components/HeroDemo'
 import { api } from '../lib/api'
 
-// The landing: white ground, a faint grid, one orange accent, wide corners.
-// Every call to action asks for the same thing, a demo.
+// The landing, in six blocks: hero, video, the four steps, the two ways in,
+// one price, one ask. Cream ground, one orange accent, wide corners.
 
-/** What every lead carries. The four claims the section is built on. */
-const PROMISES: { title: string; note: string }[] = [
-  {
-    title: 'Matched to your niche',
-    note: 'Your website writes the audience. Content, followers and size band are read against it, creator by creator.',
-  },
-  {
-    title: 'Actively posting',
-    note: 'Last 12 posts read every night. Quiet accounts drop out before they reach your list.',
-  },
-  {
-    title: 'Collab intent',
-    note: 'A paid post, a rate card, a media kit or collab wording, each dated. A signal in the last 4 days counts full.',
-  },
-  {
-    title: 'Contact attached',
-    note: 'The email sits on the row where we find one. Nothing to enrich, nothing to buy twice.',
-  },
-]
+/** Drop the recording in here and the animation below steps aside for it. */
+const VIDEO_URL = ''
 
-const FAQ = [
+const STEPS = [
   {
-    q: 'How do I set it up?',
-    a: 'Enter your website. Your agents read it and write the audience they should hunt for: the niche, who follows them, the size band. Change any word of it, set each agent a daily quota, and they start that night.',
+    n: '01',
+    title: 'Understand your ICP',
+    note: 'Enter your website. It is read back to you as the creators you should reach: the niche, what they sell, who follows them. Change any word.',
   },
   {
-    q: 'How many leads do I get?',
-    a: 'You choose, anywhere from 100 to 1,000 a day. Move the number any morning and the next batch follows it.',
+    n: '02',
+    title: 'Find leads',
+    note: 'Agents search Instagram every night. Quiet accounts drop out before they reach you. The contact rides along where we find one.',
   },
   {
-    q: 'What makes a lead high intent?',
-    a: 'Three things, each worth a star: the creator fits your niche, they already sell something of their own, and a brand signal fired in the last few days. The list comes ranked, best first.',
+    n: '03',
+    title: 'Score it',
+    note: 'Three stars, one each: fits your niche, sells something of their own, fired a brand signal in the last 4 days. Best first.',
   },
   {
-    q: 'Can I run more than one campaign?',
-    a: 'Yes. One per launch, per product or per market. Every contact carries the campaign that found it, so you can read them together or apart.',
-  },
-  {
-    q: 'What do I do with the list?',
-    a: 'Open it, tick off the ones you wrote to, tag the rest in bulk, and export whatever you want to keep. The contact is on the row where we found one.',
-  },
-  {
-    q: 'Can my own code read the list?',
-    a: 'Yes, through one API, coming soon. The same key reads this morning\'s leads and runs the campaigns that fill it: create one, add agents, move a daily volume, pause it.',
+    n: '04',
+    title: 'You close deals',
+    note: 'Open the list, write to the top of it, tick them off. That is the only step left for you.',
   },
 ]
 
@@ -98,222 +77,145 @@ function EarlyAccess({ size = 'normal', website }: { size?: 'normal' | 'small'; 
   )
 }
 
-export function Landing() {
-  const [perDay, setPerDay] = useState(250)
-  /** How you pay for that volume: every month, or once. */
-  const [term, setTerm] = useState<'monthly' | 'once'>('monthly')
-  const [open, setOpen] = useState<number | null>(0)
+/** The product in one take. The looping animation holds the frame until then. */
+function ProductVideo() {
+  if (!VIDEO_URL) return <HeroDemo />
+  return (
+    <video className="product-video" controls playsInline preload="metadata" poster="/og-image.png">
+      <source src={VIDEO_URL} type="video/mp4" />
+    </video>
+  )
+}
 
+export function Landing() {
   return (
     <>
       <Backdrop />
       <div className="landing">
-      <header className="land-nav">
-        <a className="brand" href="#/">
-          <Logo size={24} />
-          brandmatch
-        </a>
-        <nav>
-          <a href="#why">What lands</a>
-          <a href="#how">How it works</a>
-          <a href="#api">API</a>
-          <a href="#pricing">Volume</a>
-        </nav>
-        <span className="spacer" />
-        <a className="btn primary" href="#access">Get early access</a>
-      </header>
-
-      <div className="hero-block">
-      <section className="hero">
-        <h1>Your AI agent finds <br />high intent influencers.</h1>
-        <p className="lede">Enter your website. brandmatch learns your brand and brings you influencers ready for a deal, with their contact.</p>
-        <EarlyAccess website="strongher.co" />
-        <p className="hero-note">Instagram creators, ranked by intent, in your inbox every morning.</p>
-      </section>
-
-      <div className="demo-wrap">
-        <HeroDemo />
-      </div>
-      </div>
-
-      <section className="land-section" id="why">
-        <p className="eyebrow">What lands every morning</p>
-        <h2 className="big">Daily leads, found for you, <em>while you sleep.</em></h2>
-        <p className="section-lede">
-          Every creator in your list matches your niche, posts actively, shows collab intent, and carries their contact.
-          Nothing else reaches the list.
-        </p>
-        <div className="promises">
-          {PROMISES.map((pm, i) => (
-            <div className="promise" key={pm.title}>
-              <span className="promise-n">0{i + 1}</span>
-              <h3>{pm.title}</h3>
-              <p>{pm.note}</p>
-            </div>
-          ))}
-        </div>
-        <div className="section-cta">
+        <header className="land-nav">
+          <a className="brand" href="#/">
+            <Logo size={24} />
+            brandmatch
+          </a>
+          <nav>
+            <a href="#how">How it works</a>
+            <a href="#ways">API and MCP</a>
+            <a href="#pricing">Pricing</a>
+          </nav>
+          <span className="spacer" />
           <a className="btn primary" href="#access">Get early access</a>
-          <span className="faint">14,000 creators already in the shared pool.</span>
-        </div>
-      </section>
+        </header>
 
-      <section className="land-section" id="how">
-        <p className="eyebrow">Two steps</p>
-        <h2 className="big">That is the whole setup.</h2>
-        <div className="steps2">
-          <div className="step">
-            <span className="step-n">01</span>
-            <h3>Enter your website</h3>
-            <p>Your agents read it and write who they should hunt for: the niche, the audience, the size. Change any word of it.</p>
-          </div>
-          <div className="step">
-            <span className="step-n">02</span>
-            <h3>Your campaigns find high intent influencers</h3>
-            <p>Every night they go creator by creator, drop the quiet accounts, and bring you the ones showing they want a brand deal, with their contact attached.</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="land-section" id="api">
-        <p className="eyebrow">API</p>
-        <h2 className="big">One API. <em>And the app is your CRM.</em></h2>
-        <p className="section-lede">
-          One key, one base URL. Read this morning's list, classify it in the same place you work, and run the campaigns
-          that fill it. Your own code, or the AI tool you already point at your APIs.
-        </p>
-        <div className="doors three">
-          <div className="door">
-            <span className="door-tag">Read</span>
-            <h3>Your leads</h3>
-            <p>Every lead with its stars, its dated signals and its email, filtered the way the app filters them.</p>
-            <div className="asks">
-              <span className="ask-line">GET /leads?since=today&amp;email=yes</span>
-              <span className="ask-line">GET /leads?country=UK&amp;signal_within=7</span>
-            </div>
-          </div>
-          <div className="door">
-            <span className="door-tag">Classify</span>
-            <h3>Your CRM</h3>
-            <p>Tag, note, tick off, reject. The list you work in is the record, so a write here shows in the app.</p>
-            <div className="asks">
-              <span className="ask-line">POST /leads/:id/tags</span>
-              <span className="ask-line">POST /leads/:id/done</span>
-            </div>
-          </div>
-          <div className="door">
-            <span className="door-tag">Run</span>
-            <h3>Your campaigns</h3>
-            <p>Create a campaign, add agents, move a daily quota, pause it. Every field the app has, reachable here.</p>
-            <div className="asks">
-              <span className="ask-line">POST /campaigns</span>
-              <span className="ask-line">PATCH /campaigns/:id/agents/:id</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="land-section centred" id="pricing">
-        <p className="eyebrow">Your volume</p>
-        <h2 className="big">You pick the leads. <em>That is the whole decision.</em></h2>
-        <p className="section-lede">
-          Set how many creators land each morning, then say how you want to pay for them. Monthly costs 30% less per
-          lead than the one off pack.
-        </p>
-
-        <div className="volume-picker">
-          <div className="term-wrap">
-            <div className="term-toggle" role="group" aria-label="How you pay">
-              <button type="button" className={term === 'monthly' ? 'on' : ''} aria-pressed={term === 'monthly'} onClick={() => setTerm('monthly')}>
-                Monthly
-                <span className="term-off">30% off</span>
-              </button>
-              <button type="button" className={term === 'once' ? 'on' : ''} aria-pressed={term === 'once'} onClick={() => setTerm('once')}>
-                One off
-              </button>
-            </div>
-          </div>
-
-          <div className="volume-read">
-            <b className="num">{perDay}</b>
-            <span>leads a day</span>
-          </div>
-          <input
-            className="slider"
-            type="range"
-            min={100}
-            max={1000}
-            step={50}
-            value={perDay}
-            style={{ ['--fill' as string]: `${((perDay - 100) / 900) * 100}%` }}
-            onChange={(e) => setPerDay(Number(e.target.value))}
-            aria-label="Leads a day"
-            aria-valuetext={`${perDay} leads a day`}
-          />
-          <div className="bar-ends"><span>100 a day</span><span>1,000 a day</span></div>
-
-          <div className="plan-single">
-            <p className="big-figure">
-              <b className="num">{(perDay * 30).toLocaleString('en-US')}</b>
-              <span>{term === 'monthly' ? `leads every month, at ${perDay} a day` : `leads in the pack, at ${perDay} a day for 30 days`}</span>
+        <div className="hero-block">
+          <section className="hero">
+            <h1>Your AI agent finds <br />high intent Instagram contacts.</h1>
+            <p className="lede">
+              Enter your website. brandmatch learns your brand, finds the creators ready for a deal, and ranks them
+              before you wake up.
             </p>
-            <ul>
-              <li className="yes">{term === 'monthly' ? '30% less per lead than the one off pack' : 'Billed once, spread over as many days as you like'}</li>
-              <li className="yes">{term === 'monthly' ? 'Move your volume any morning, 100 to 1,000 a day' : 'Unlimited campaigns while the pack lasts'}</li>
-              <li className="yes">Their email attached where we find one</li>
-              {term === 'monthly'
-                ? <li className="yes">API and CRM, so your code reads and classifies the list</li>
-                : <li className="no">No API, no CRM writes. The app only</li>}
-              <li className="yes">{term === 'monthly' ? 'Change the volume or cancel any morning' : 'Nothing renews, nothing to cancel'}</li>
-            </ul>
-            <a className="btn primary" href="#access">Get early access</a>
+            <EarlyAccess website="strongher.co" />
+            <p className="hero-note">14,259 creators in the pool today. Instagram first, TikTok and YouTube next.</p>
+          </section>
+
+          <div className="video-wrap">
+            <ProductVideo />
           </div>
         </div>
-      </section>
 
-      <section className="land-cta" id="access">
-        <h2>Your next 10 creators are already out there.</h2>
-        <p>Leave your email. We open the doors in batches and write when yours is ready.</p>
-        <EarlyAccess />
-      </section>
+        <section className="land-section" id="how">
+          <p className="eyebrow">How it works</p>
+          <h2 className="big">Four steps. <em>You only do the last one.</em></h2>
+          <div className="steps4">
+            {STEPS.map((s) => (
+              <div className="step" key={s.n}>
+                <span className="step-n">{s.n}</span>
+                <h3>{s.title}</h3>
+                <p>{s.note}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
-      <section className="land-section" id="faq">
-        <h2 className="big">Questions</h2>
-        <div className="faq">
-          {FAQ.map((f, i) => (
-            <div className={`faq-item${open === i ? ' open' : ''}`} key={f.q}>
-              <button type="button" onClick={() => setOpen(open === i ? null : i)} aria-expanded={open === i}>{f.q}</button>
-              {open === i && <p>{f.a}</p>}
+        <section className="land-section" id="ways">
+          <p className="eyebrow">AI native</p>
+          <h2 className="big">Open the app. <em>Or never open it at all.</em></h2>
+          <p className="section-lede">
+            Same leads, same writes, two doors. Work the list here, or point the AI you already pay for at it and stay
+            where you are.
+          </p>
+          <div className="doors">
+            <div className="door">
+              <span className="door-tag">The platform</span>
+              <h3>Work the list here</h3>
+              <p>
+                Ranked every morning, filters on top, contact on the row. Tag, note, tick off, reject, export. It is
+                the CRM as well as the feed, so nothing needs syncing.
+              </p>
             </div>
-          ))}
-        </div>
-      </section>
+            <div className="door">
+              <span className="door-tag">Your own AI</span>
+              <h3>API and MCP</h3>
+              <p>
+                One key reads your leads, classifies them and runs your campaigns. Point Claude, Cursor or your IDE at
+                the MCP server and ask in words. Your AI subscription does the work.
+              </p>
+              <div className="asks">
+                <span className="ask-line">"Who fired a brand signal this week?"</span>
+                <span className="ask-line">"Tag the 3 star ones and draft my first message."</span>
+              </div>
+            </div>
+          </div>
+        </section>
 
-      <footer className="land-foot">
-        <div>
-          <span className="brand-word">brandmatch</span>
-          <p className="muted" style={{ marginTop: 8 }}>Creators for your brand, every morning. Instagram today, TikTok and YouTube next.</p>
-        </div>
-        <div>
-          <h4>Product</h4>
-          <a href="#why">What lands</a>
-          <a href="#how">How it works</a>
-          <a href="#api">API</a>
-          <a href="#pricing">Volume</a>
-        </div>
-        <div>
-          <h4>Get in</h4>
-          <a href="#access">Early access</a>
-          <a href="#api">The API</a>
-        </div>
-        <div>
-          <h4>Information</h4>
-          <a href="#faq">Questions</a>
-          <a href="#/">Legal notice</a>
-          <a href="#/">Privacy</a>
-        </div>
-        <p className="copy">© 2026 brandmatch. Creators for your brand, every morning.</p>
-      </footer>
+        <section className="land-section centred" id="pricing">
+          <p className="eyebrow">Pricing</p>
+          <h2 className="big">One plan. <em>That is the whole page.</em></h2>
+          <div className="one-plan">
+            <div className="plan dark">
+              <span className="plan-tag">Everything</span>
+              <p className="price">$99<small>a month</small></p>
+              <ul>
+                <li>Up to 250 scored leads a day</li>
+                <li>Their email where we find one</li>
+                <li>Unlimited campaigns and agents</li>
+                <li>API and MCP, same key, no extra tier</li>
+                <li>Every lead yours alone for 14 days</li>
+                <li>Cancel any morning</li>
+              </ul>
+              <a className="btn primary" href="#access">Get early access</a>
+            </div>
+          </div>
+          <p className="section-lede">
+            Need more than 250 a day? <a href="mailto:jeremy@brandmatch.app">Chat with me</a> and we size it together.
+          </p>
+        </section>
+
+        <section className="land-cta" id="access">
+          <h2>Your next 10 creators are already out there.</h2>
+          <p>Leave your email. We open the doors in batches and write when yours is ready.</p>
+          <EarlyAccess />
+        </section>
+
+        <footer className="land-foot">
+          <div>
+            <span className="brand-word">brandmatch</span>
+            <p className="muted" style={{ marginTop: 8 }}>
+              Creators for your brand, every morning. Instagram today, TikTok and YouTube next.
+            </p>
+          </div>
+          <div>
+            <h4>Product</h4>
+            <a href="#how">How it works</a>
+            <a href="#ways">API and MCP</a>
+            <a href="#pricing">Pricing</a>
+          </div>
+          <div>
+            <h4>Get in</h4>
+            <a href="#access">Early access</a>
+            <a href="mailto:jeremy@brandmatch.app">Chat with me</a>
+          </div>
+          <p className="copy">© 2026 brandmatch. Creators for your brand, every morning.</p>
+        </footer>
       </div>
     </>
   )

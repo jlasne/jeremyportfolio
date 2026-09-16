@@ -86,6 +86,7 @@ front end adds them up the same way in `app/src/data/score.ts`.
 | `apify-webhook` | off | `x-crawl-secret` | Takes the run output into the pool, then calls qualify |
 | `qualify` | on | service role | Asks OpenRouter for the Niche star and writes the scores |
 | `propose` | on | service role | Reads the brand's site, writes a brief and three agents |
+| `mcp` | off | brand api key | The same leads and writes over MCP, for Claude, Cursor or an IDE |
 
 JWT verification is off where the function runs its own auth. That is what
 keeps the project's anon key out of the browser bundle, which matters here:
@@ -138,6 +139,18 @@ migrations/   the schema, applied in order
 functions/    one folder per function, _shared/lib.ts is the source of truth
 functions/build.mjs   copies _shared/lib.ts next to each entrypoint for deploy
 ```
+
+## MCP
+
+```
+https://decuztcvbfwgkudnbljk.supabase.co/functions/v1/mcp
+```
+
+JSON-RPC 2.0 on one POST endpoint, brand key as a bearer token. Tools:
+`list_leads`, `get_lead`, `classify_lead`, `list_campaigns`, `account`.
+`initialize` and `tools/list` answer without a key, since a client lists
+before it authenticates. Everything else runs the same ownership checks as
+the REST API, so an AI cannot read or write a lead the brand does not hold.
 
 ## Calling it
 

@@ -7,7 +7,7 @@ import { Connect } from './screens/Connect'
 import { Settings } from './screens/Settings'
 import { Contacts } from './screens/Contacts'
 import { Landing } from './screens/Landing'
-import { FirstRun, OnboardingCampaign, OnboardingStart } from './screens/Onboarding'
+import { ChoosePlan, FirstRun, OnboardingCampaign, OnboardingStart } from './screens/Onboarding'
 
 export function App() {
   const route = useRoute()
@@ -27,8 +27,9 @@ export function App() {
         <Backdrop />
         <StarClip />
         {!route.campaignId && <OnboardingStart />}
-        {route.campaignId && !route.running && <OnboardingCampaign campaignId={route.campaignId} />}
-        {route.campaignId && route.running && <FirstRun campaignId={route.campaignId} />}
+        {route.campaignId && route.step === null && <OnboardingCampaign campaignId={route.campaignId} />}
+        {route.campaignId && route.step === 'plan' && <ChoosePlan campaignId={route.campaignId} />}
+        {route.campaignId && route.step === 'running' && <FirstRun campaignId={route.campaignId} />}
       </>
     )
   }

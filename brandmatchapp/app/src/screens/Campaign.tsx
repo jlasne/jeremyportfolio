@@ -302,7 +302,7 @@ export function CampaignEditor({ campaignId, firstRun = false }: { campaignId: s
         <div className="editor-foot">
           <span className="faint">You can add more campaigns later.</span>
           <span className="spacer" />
-          <button type="button" className="btn primary" disabled={!canRun} onClick={() => navigate(`onboarding/${campaign.id}/running`)}>
+          <button type="button" className="btn primary" disabled={!canRun} onClick={() => navigate(`onboarding/${campaign.id}/plan`)}>
             Find my leads
           </button>
         </div>
