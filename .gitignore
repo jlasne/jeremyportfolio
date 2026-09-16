@@ -12,3 +12,6 @@ _og_raw.png
 _desktop.png
 _orig_head.html
 brandmatchapp/app/dist/
+
+# assembled per-function deploy bundles
+brandmatchapp/backend/functions/.build/

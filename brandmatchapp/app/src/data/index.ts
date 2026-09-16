@@ -6,6 +6,15 @@ import { toCsv } from '../lib/csv'
 import { absolute, isNewToday, withinDays } from '../lib/format'
 import { BUCKETS, CRITERIA, QUALIFIED_MIN, latestSignal, scoreOf } from './score'
 import { getState, getVersion, setState } from './store'
+import { api } from '../lib/api'
+
+// Writes land in the store first so the screen never waits, then go to the
+// API when the app is live. A failed write is logged, not thrown: the row on
+// screen is what the brand just did, and the next load reconciles it.
+function push(creatorId: string, action: string, value?: string): void {
+  if (!getState().live) return
+  api.act(creatorId, action, value).catch((e) => console.warn('brandmatch: write failed', action, e))
+}
 
 // Every screen reads and writes through these functions.
 // They work on the in memory store today and will call the real source later.
@@ -403,6 +412,7 @@ export function setNote(creatorId: string, text: string): void {
     else delete notes[creatorId]
     return { notes }
   })
+  push(creatorId, 'note', text)
 }
 
 export function getTags(creatorId: string): string[] {
@@ -418,10 +428,12 @@ export function addTag(creatorId: string, label: string): void {
     if (current.includes(clean)) return { tagVocabulary: vocabulary }
     return { tags: { ...s.tags, [creatorId]: [...current, clean] }, tagVocabulary: vocabulary }
   })
+  push(creatorId, 'tag', clean)
 }
 
 export function removeTag(creatorId: string, label: string): void {
   setState((s) => ({ tags: { ...s.tags, [creatorId]: (s.tags[creatorId] ?? []).filter((t) => t !== label) } }))
+  push(creatorId, 'untag', label)
 }
 
 export function toggleTag(creatorId: string, label: string): void {
@@ -454,16 +466,20 @@ export function countTagged(label: string): number {
 
 export function reject(creatorId: string): void {
   setState((s) => (s.rejections.some((r) => r.creatorId === creatorId) ? {} : { rejections: [...s.rejections, { creatorId, date: new Date().toISOString() }] }))
+  push(creatorId, 'reject')
 }
 
 export function unreject(creatorId: string): void {
   setState((s) => ({ rejections: s.rejections.filter((r) => r.creatorId !== creatorId) }))
+  push(creatorId, 'unreject')
 }
 
 // Done ------------------------------------------------------------------------
 
 export function toggleDone(creatorId: string): void {
-  setState((s) => ({ done: s.done.includes(creatorId) ? s.done.filter((id) => id !== creatorId) : [...s.done, creatorId] }))
+  const was = getState().done.includes(creatorId)
+  setState((s) => ({ done: was ? s.done.filter((id) => id !== creatorId) : [...s.done, creatorId] }))
+  push(creatorId, was ? 'undone' : 'done')
 }
 
 export function countDone(): number {

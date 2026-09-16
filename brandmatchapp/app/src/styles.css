@@ -1,15 +1,16 @@
-/* brandmatch. White ground, one orange accent, wide rounded corners.
+/* brandmatch. Cream ground, one orange accent, wide rounded corners.
    Unbounded for display, Satoshi for everything else. */
 
 :root {
   --ink: #101014;
   --ink-2: #5b5b63;
   --ink-3: #8c8c95;
-  --paper: #f6f4f3;
-  --paper-2: #efebe9;
-  --panel: #ffffff;
-  --line: #ececec;
-  --line-2: #dcdcdc;
+  /* Cream, not white. Panels sit a shade lighter than the ground they rest on. */
+  --paper: #f2ede2;
+  --paper-2: #e9e2d3;
+  --panel: #fdfaf4;
+  --line: #e7e0d2;
+  --line-2: #d8d0be;
 
   /* One accent. Everything warm comes off these four. */
   --orange: #ff5c2b;
@@ -34,7 +35,7 @@
   --teal: #2aa17a;
   --teal-soft: #e2f5ee;
   --yellow: #ffe8a3;
-  --star-empty: #e6e2e0;
+  --star-empty: #e3dbc9;
 
   --shadow: 0 1px 2px rgba(16, 16, 20, 0.04);
   --shadow-card: 0 2px 4px rgba(16, 16, 20, 0.03), 0 12px 32px rgba(16, 16, 20, 0.04);
@@ -208,7 +209,7 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 }
 .contact:last-child, .campaign-row:last-child { border-bottom: 0; }
 .contact:hover, .campaign-row:hover { background: var(--paper); text-decoration: none; }
-.contact.open { background: #fff7f4; }
+.contact.open { background: #fdf1e8; }
 .contact:focus-visible, .campaign-row:focus-visible { outline-offset: -2px; }
 .contact .who, .campaign-row .who { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .contact .name, .campaign-row .name { font-weight: 600; display: flex; align-items: center; gap: 6px; min-width: 0; }
@@ -565,11 +566,11 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
   --l-ink: #101014;
   --l-muted: #5b5b63;
   --l-faint: #8c8c95;
-  --l-rule: #ececec;
-  --l-rule-firm: #dcdcdc;
-  --l-card: #ffffff;
-  --l-ground: #ffffff;
-  --l-ground-2: #faf8f7;
+  --l-rule: #e7e0d2;
+  --l-rule-firm: #d8d0be;
+  --l-card: #fdfaf4;
+  --l-ground: #faf6ec;
+  --l-ground-2: #f4eee2;
   background: var(--l-ground);
   color: var(--l-ink);
   overflow-x: hidden;
@@ -611,10 +612,33 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 .hero-prompt {
   display: flex; align-items: center; gap: 12px; text-align: left;
   max-width: 640px; margin: 0 auto; padding: 7px 7px 7px 20px;
-  background: #fff; border: 1px solid var(--l-rule-firm); border-radius: 100px;
+  background: var(--l-card); border: 1px solid var(--l-rule-firm); border-radius: 100px;
 }
 .hero-prompt .prompt-text { flex: 1; font-size: 15px; color: var(--l-muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hero-prompt .btn { height: 42px; padding: 0 20px; }
+/* The one ask on the landing: an email. Same pill as the website box it replaced. */
+.waitlist {
+  display: flex; align-items: center; gap: 12px; text-align: left; flex-wrap: wrap;
+  max-width: 640px; margin: 0 auto; padding: 7px 7px 7px 20px;
+  background: var(--l-card); border: 1px solid var(--l-rule-firm); border-radius: 100px;
+}
+.waitlist input {
+  flex: 1; min-width: 0; font: inherit; font-size: 15px; color: var(--l-ink);
+  background: none; border: 0; outline: none; padding: 0;
+}
+.waitlist input::placeholder { color: var(--l-muted); }
+.waitlist .btn { height: 42px; padding: 0 20px; white-space: nowrap; }
+.waitlist.small { max-width: 460px; padding: 5px 5px 5px 16px; }
+.waitlist.small .btn { height: 36px; padding: 0 16px; }
+.waitlist-error { flex-basis: 100%; padding: 0 8px 6px; font-size: 13px; color: #c0392b; }
+.waitlist-done {
+  max-width: 640px; margin: 0 auto; padding: 16px 24px; text-align: center;
+  background: var(--l-card); border: 1px solid var(--l-rule-firm); border-radius: 100px;
+  font-size: 15px; color: var(--l-ink);
+}
+.hero-note { margin-top: 16px; color: var(--l-faint); font-size: 14px; }
+.land-cta .waitlist, .land-cta .waitlist-done { margin-top: 24px; }
+
 .hero-tag { margin-top: 20px; color: var(--l-faint); font-size: 14px; }
 .hero-tag b { color: var(--l-ink); font-weight: 600; }
 
@@ -658,7 +682,7 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 .plan.dark h3, .plan.dark .big-figure b { color: #fff; }
 .plan.dark .muted, .plan.dark li, .plan.dark .big-figure span, .plan.dark .plan-tag { color: rgba(255, 255, 255, 0.78); }
 .plan.dark li::before { color: var(--orange); }
-.plan.dark .btn { background: #fff; border-color: #fff; color: var(--ink); font-weight: 600; }
+.plan.dark .btn { background: var(--panel); border-color: var(--panel); color: var(--ink); font-weight: 600; }
 .plan.dark .btn:hover { background: var(--orange); border-color: var(--orange); color: #fff; }
 .plan.brand { background: var(--orange-soft); border-color: var(--orange-line); }
 .plan-tag { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--l-faint); }
@@ -685,7 +709,7 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 
 .land-cta { text-align: center; margin: 14px; border-radius: var(--radius-slab); padding: 116px 24px; background: var(--orange); color: #fff; }
 .land-cta p { color: rgba(255, 255, 255, 0.86); }
-.land-cta .btn.primary { background: #fff; border-color: #fff; color: var(--orange-deep); }
+.land-cta .btn.primary { background: var(--panel); border-color: var(--panel); color: var(--orange-deep); }
 .land-cta .btn.primary:hover { background: var(--ink); border-color: var(--ink); color: #fff; }
 .land-cta .btn.ghost { border-color: rgba(255, 255, 255, 0.5); color: #fff; }
 .land-cta .btn.ghost:hover { border-color: #fff; background: rgba(255, 255, 255, 0.12); }
@@ -719,6 +743,10 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
   .demo-bars { height: 130px; gap: 4px; }
   .hero-prompt { flex-wrap: wrap; padding: 14px; border-radius: 20px; }
   .hero-prompt .prompt-text { white-space: normal; flex-basis: 100%; }
+  .waitlist { flex-wrap: wrap; padding: 14px; border-radius: 20px; gap: 10px; }
+  .waitlist input { flex-basis: 100%; }
+  .waitlist .btn { width: 100%; }
+  .waitlist-done { border-radius: 20px; padding: 14px 18px; }
   .objections, .steps3, .steps2, .plans { grid-template-columns: 1fr; }
   .land-section, .land-cta, .land-foot { margin: 10px; }
   .land-section { padding: 64px 20px; }
@@ -759,7 +787,9 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 .keys { display: flex; flex-direction: column; gap: 8px; margin: 14px 0; }
 .key-row { display: flex; align-items: center; gap: 10px; }
 .key-label { font-size: 12.5px; color: var(--ink-2); min-width: 54px; }
-.key-value { flex: 1; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 12px; overflow-x: auto; white-space: nowrap; }
+.key-value { flex: 1; min-width: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 12px; overflow-x: auto; white-space: nowrap; }
+input.key-value { outline: none; color: inherit; }
+input.key-value:focus { border-color: var(--l-rule-firm); }
 .code {
   margin: 12px 0 0; padding: 14px 16px; background: var(--ink); color: #f2f2f2;
   border-radius: var(--radius); font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -820,7 +850,7 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 .landing #how .step h3 { color: #fff; }
 .landing #how .step p { color: rgba(255, 255, 255, 0.82); }
 .landing #how .step-n { color: var(--orange); }
-.landing #how .btn.primary:hover { background: #fff; border-color: #fff; color: var(--ink); }
+.landing #how .btn.primary:hover { background: var(--panel); border-color: var(--panel); color: var(--ink); }
 .landing #how .muted { color: rgba(255, 255, 255, 0.7); }
 .landing #how .eyebrow { color: #ff9c6e; }
 .landing #pricing { background: var(--l-ground-2); }
@@ -828,7 +858,7 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 
 /* The hero demo: four steps on a loop --------------------------------------- */
 .demo-wrap { background: var(--l-ground); padding: 0 24px 72px; }
-.demo { max-width: 880px; margin: 0 auto; background: #fff; border: 1px solid var(--l-rule); border-radius: 28px; box-shadow: var(--shadow-card); padding: 22px 26px 26px; color: var(--ink); text-align: left; }
+.demo { max-width: 880px; margin: 0 auto; background: var(--l-card); border: 1px solid var(--l-rule); border-radius: 28px; box-shadow: var(--shadow-card); padding: 22px 26px 26px; color: var(--ink); text-align: left; }
 .demo-steps { list-style: none; margin: 0 0 18px; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; counter-reset: step; }
 .demo-steps li {
   counter-increment: step; display: inline-flex; align-items: center; gap: 7px;
@@ -971,7 +1001,7 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 }
 .switch::after {
   content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px;
-  border-radius: 50%; background: #fff; transition: transform 140ms ease;
+  border-radius: 50%; background: var(--panel); transition: transform 140ms ease;
 }
 .switch:checked { background: var(--orange); }
 .switch:checked::after { transform: translateX(16px); }

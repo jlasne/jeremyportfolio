@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Backdrop } from '../components/Backdrop'
 import { Logo } from '../components/Logo'
 import { HeroDemo } from '../components/HeroDemo'
+import { api } from '../lib/api'
 
 // The landing: white ground, a faint grid, one orange accent, wide corners.
 // Every call to action asks for the same thing, a demo.
@@ -53,6 +54,50 @@ const FAQ = [
   },
 ]
 
+/**
+ * Every call to action asks for the same thing: an email. The list is the
+ * product until the doors open, so the form is the only way in from here.
+ */
+function EarlyAccess({ size = 'normal', website }: { size?: 'normal' | 'small'; website?: string }) {
+  const [email, setEmail] = useState('')
+  const [state, setState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
+  const [message, setMessage] = useState('')
+
+  if (state === 'done') {
+    return <p className="waitlist-done">You are on the list. We write when your first batch is ready.</p>
+  }
+
+  return (
+    <form
+      className={`waitlist${size === 'small' ? ' small' : ''}`}
+      onSubmit={async (e) => {
+        e.preventDefault()
+        setState('sending')
+        try {
+          await api.waitlist(email, website)
+          setState('done')
+        } catch (err) {
+          setState('error')
+          setMessage(err instanceof Error ? err.message : 'That did not go through')
+        }
+      }}
+    >
+      <input
+        type="email"
+        required
+        placeholder="you@yourbrand.com"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        aria-label="Your email"
+      />
+      <button className="btn primary" type="submit" disabled={state === 'sending'}>
+        {state === 'sending' ? 'Sending' : 'Get early access'}
+      </button>
+      {state === 'error' && <span className="waitlist-error">{message}</span>}
+    </form>
+  )
+}
+
 export function Landing() {
   const [perDay, setPerDay] = useState(250)
   /** How you pay for that volume: every month, or once. */
@@ -75,17 +120,15 @@ export function Landing() {
           <a href="#pricing">Volume</a>
         </nav>
         <span className="spacer" />
-        <a className="btn primary" href="#/contacts">See demo</a>
+        <a className="btn primary" href="#access">Get early access</a>
       </header>
 
       <div className="hero-block">
       <section className="hero">
         <h1>Your AI agent finds <br />high intent influencers.</h1>
         <p className="lede">Enter your website. brandmatch learns your brand and brings you influencers ready for a deal, with their contact.</p>
-        <div className="hero-prompt" role="group" aria-label="Your website">
-          <span className="prompt-text">strongher.co</span>
-          <a className="btn primary" href="#/contacts">See demo</a>
-        </div>
+        <EarlyAccess website="strongher.co" />
+        <p className="hero-note">Instagram creators, ranked by intent, in your inbox every morning.</p>
       </section>
 
       <div className="demo-wrap">
@@ -110,8 +153,8 @@ export function Landing() {
           ))}
         </div>
         <div className="section-cta">
-          <a className="btn primary" href="#/contacts">See demo</a>
-          <span className="faint">45,000 creators already in the demo list.</span>
+          <a className="btn primary" href="#access">Get early access</a>
+          <span className="faint">14,000 creators already in the shared pool.</span>
         </div>
       </section>
 
@@ -223,15 +266,15 @@ export function Landing() {
                 : <li className="no">No API, no CRM writes. The app only</li>}
               <li className="yes">{term === 'monthly' ? 'Change the volume or cancel any morning' : 'Nothing renews, nothing to cancel'}</li>
             </ul>
-            <a className="btn primary" href="#/contacts">See demo</a>
+            <a className="btn primary" href="#access">Get early access</a>
           </div>
         </div>
       </section>
 
-      <section className="land-cta">
+      <section className="land-cta" id="access">
         <h2>Your next 10 creators are already out there.</h2>
-        <p>Open the demo and read the list as it stands this morning.</p>
-        <a className="btn primary" href="#/contacts">See demo</a>
+        <p>Leave your email. We open the doors in batches and write when yours is ready.</p>
+        <EarlyAccess />
       </section>
 
       <section className="land-section" id="faq">
@@ -259,9 +302,9 @@ export function Landing() {
           <a href="#pricing">Volume</a>
         </div>
         <div>
-          <h4>App</h4>
-          <a href="#/contacts">See demo</a>
-          <a href="#/connect">API</a>
+          <h4>Get in</h4>
+          <a href="#access">Early access</a>
+          <a href="#api">The API</a>
         </div>
         <div>
           <h4>Information</h4>
@@ -269,7 +312,7 @@ export function Landing() {
           <a href="#/">Legal notice</a>
           <a href="#/">Privacy</a>
         </div>
-        <p className="copy">© 2026 brandmatch. Front end prototype on demo data.</p>
+        <p className="copy">© 2026 brandmatch. Creators for your brand, every morning.</p>
       </footer>
       </div>
     </>

@@ -30,7 +30,6 @@ export function SideNav({ route }: { route: Route }) {
               <a href={item.href} className={on ? 'on' : undefined} aria-current={on ? 'page' : undefined}>
                 <span>{item.label}</span>
                 {item.name === 'contacts' && d.today ? <span className="pill num">{d.today}</span> : null}
-                {item.name === 'connect' ? <span className="soon">Soon</span> : null}
               </a>
             </li>
           )

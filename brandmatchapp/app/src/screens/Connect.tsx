@@ -1,36 +1,35 @@
 import { useState } from 'react'
 import { getCampaigns, getDashboard } from '../data'
 import { useStore } from '../data/hooks'
+import { API, getKey, setKey } from '../lib/api'
 
 // One API: read the leads, classify them, and run the campaigns that fill
 // them. The app is the CRM, so what the API writes is what the list shows.
 
-const API_URL = 'https://api.brandmatch.app/v1'
-const KEY = 'bm_live_7f2a9c41d8e6b350'
+const API_URL = API
 
 /** Reading the list. */
 const READ_ACTIONS = [
-  { call: 'GET /leads', note: "This morning's list, ranked, with the email where we found one. Filter it the way the app does." },
-  { call: 'GET /leads?min_stars=2', note: 'The ones scoring 2 stars and up, ready for a message today.' },
-  { call: 'GET /leads/:id', note: 'The full profile: last 12 posts, every signal with its date, and why it ranks where it does.' },
-  { call: 'GET /stats', note: 'How many leads each campaign and each agent brought against its daily quota, day by day.' },
+  { call: 'GET /contacts', note: "This morning's list, ranked, with the email where we found one. Filter it the way the app does." },
+  { call: 'GET /contacts?campaign=:id', note: 'One campaign at a time, or one agent inside it.' },
+  { call: 'GET /creators/:id', note: 'The full profile: last 12 posts, every signal with its date, and why it ranks where it does.' },
+  { call: 'GET /stats?days=30', note: 'How many leads each campaign and each agent brought against its daily quota, day by day.' },
 ]
 
 /** Classifying what came in. The app is the CRM, so these writes show in the list. */
 const CRM_ACTIONS = [
-  { call: 'POST /leads/:id/tags', note: 'Put a lead in a bucket: a launch, a market, a wave. The same tags the app filters on.' },
-  { call: 'POST /leads/:id/note', note: 'Write what you know. It sits on the contact panel, next to the score.' },
-  { call: 'POST /leads/:id/done', note: 'Tick off the ones you wrote to, so tomorrow only shows what is left.' },
-  { call: 'POST /leads/:id/reject', note: 'Drop one for good. It never comes back, in any campaign.' },
-  { call: 'POST /leads/bulk', note: 'The same four moves over a whole batch, in one call.' },
+  { call: "POST /actions { action: 'tag' }", note: 'Put a lead in a bucket: a launch, a market, a wave. The same tags the app filters on.' },
+  { call: "POST /actions { action: 'note' }", note: 'Write what you know. It sits on the contact panel, next to the score.' },
+  { call: "POST /actions { action: 'done' }", note: 'Tick off the ones you wrote to, so tomorrow only shows what is left.' },
+  { call: "POST /actions { action: 'reject' }", note: 'Drop one for good. It never comes back in this campaign.' },
 ]
 
 /** Running the campaigns. */
 const WRITE_ACTIONS = [
-  { call: 'POST /campaigns', note: 'A name, its website, the agents inside it and the daily quota each one carries.' },
-  { call: 'PATCH /campaigns/:id', note: 'Point a campaign at a new audience without touching the app.' },
-  { call: 'PATCH /campaigns/:id/agents/:id', note: 'Raise an agent quota from 100 to 800 a day, or drop it back.' },
-  { call: 'POST /campaigns/:id/pause', note: 'Stop every campaign while you are closed, start them again on Monday.' },
+  { call: 'POST /campaigns', note: 'A name, its website, the brief and the daily quota. It reads the shared pool before it crawls anything.' },
+  { call: 'PATCH /campaigns/:id', note: 'Point a campaign at a new audience, or set active to false to stop it.' },
+  { call: 'POST /campaigns/:id/agents', note: 'Add a searcher with its own hashtags and its own share of the day.' },
+  { call: 'POST /campaigns/:id/run', note: 'Start a crawl now instead of waiting for tonight.' },
 ]
 
 function Copy({ text, label }: { text: string; label: string }) {
@@ -39,8 +38,6 @@ function Copy({ text, label }: { text: string; label: string }) {
     <button
       type="button"
       className="btn small"
-      disabled
-      title="Available when the API ships"
       onClick={async () => {
         try {
           await navigator.clipboard.writeText(text)
@@ -53,6 +50,30 @@ function Copy({ text, label }: { text: string; label: string }) {
     >
       {done ? 'Copied' : 'Copy'}
     </button>
+  )
+}
+
+function KeyBox() {
+  const [value, setValue] = useState(getKey() ?? '')
+  const [saved, setSaved] = useState(false)
+  return (
+    <div className="key-row">
+      <span className="key-label">Key</span>
+      <input
+        className="key-value"
+        type="password"
+        placeholder="Paste your key to read your own leads"
+        value={value}
+        onChange={(e) => { setValue(e.target.value); setSaved(false) }}
+      />
+      <button
+        type="button"
+        className="btn small"
+        onClick={() => { setKey(value); setSaved(true); window.location.reload() }}
+      >
+        {saved ? 'Saved' : 'Save'}
+      </button>
+    </div>
   )
 }
 
@@ -74,53 +95,39 @@ function Field({ label, value, mask = false }: { label: string; value: string; m
 
 export function Connect() {
   useStore()
-  const [peek, setPeek] = useState(false)
   const d = getDashboard()
   const searches = getCampaigns()
 
   return (
-    <div className="page editor soon-page">
-      {!peek && (
-        <div className="modal-back" role="dialog" aria-modal="true" aria-labelledby="soon-title">
-          <div className="modal">
-            <span className="soon">Coming soon</span>
-            <h2 id="soon-title">The API is on its way</h2>
-            <p>
-              One key reads this morning's leads, classifies them in the list you already work in, and runs the campaigns
-              that fill it. Your own code, or the AI tool you already point at your APIs.
-            </p>
-            <div className="actions-bar">
-              <a className="btn primary" href="#/contacts">Back to contacts</a>
-              <button type="button" className="btn" onClick={() => setPeek(true)}>Show me the preview</button>
-            </div>
-          </div>
-        </div>
-      )}
-      <div className={peek ? '' : 'blurred'} aria-hidden={!peek}>
+    <div className="page editor">
+      <div>
       <div className="page-head">
         <h1>API</h1>
-        <span className="soon">Coming soon</span>
       </div>
       <p className="subhead">
         One base URL, one key. It reads your leads, classifies them in the same list you work in, and runs the campaigns
-        that fill it. It opens soon, and the shape below is what it will look like.
+        that fill it. Your own code, or the AI tool you already point at your APIs.
       </p>
 
       <section className="ask">
         <h2>Your key</h2>
         <div className="keys">
           <Field label="Base" value={API_URL} />
-          <Field label="Key" value={KEY} mask />
+          <KeyBox />
         </div>
-        <pre className="code" aria-label="Request example">{`curl ${API_URL}/leads?min_stars=2 \\
-  -H "Authorization: Bearer ${KEY}"
+        <pre className="code" aria-label="Request example">{`curl ${API_URL}/contacts \\
+  -H "Authorization: Bearer $BRANDMATCH_KEY"
 
 curl -X POST ${API_URL}/campaigns \\
-  -H "Authorization: Bearer ${KEY}" \\
+  -H "Authorization: Bearer $BRANDMATCH_KEY" \\
   -d '{ "name": "Spring launch",
-        "audience": "Women lifting coaches who sell their own program",
-        "leads_per_day": 250 }'`}</pre>
-        <p className="hint">Same key both ways. Every field you see in the app, reachable here.</p>
+        "website": "strongher.co",
+        "brief": { "who": "Women lifting coaches who sell their own program" },
+        "leadsPerDay": 250 }'`}</pre>
+        <p className="hint">
+          Same key both ways. The key stays in this browser, never in the page. Every field you see in the app is
+          reachable here.
+        </p>
       </section>
 
       <section className="ask">

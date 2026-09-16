@@ -23,6 +23,19 @@ The rule lives in one file, `app/src/data/score.ts`. Change it there and every
 screen follows. `brandmatch-spec.md` still describes the two score version it
 was written with.
 
+## The pool
+
+One creator is crawled once and belongs to everyone. A campaign created today
+reads what every campaign before it already found, free, and spends credits
+only on profiles nobody had crawled before. The pool holds 14,259 creators
+today. See `backend/README.md` for the schema, the functions and the secrets
+still to set.
+
+The front end reads the real pool when a key sits in `localStorage` under
+`brandmatch.key`, and falls back to the sample data in `app/src/mock` when
+there is none. So the app screens stay open without putting a real lead or a
+real credit behind a URL anyone can type.
+
 Same promise as Gojiberry, for creators instead of B2B buyers: stop scrolling
 through a database, open the app and see who is ready today.
 
