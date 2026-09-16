@@ -95,7 +95,14 @@ export interface CampaignAgent {
   /** What this agent hunts for, in one line. */
   focus: string
   leadsPerDay: number
+  /** True while status is 'active'. Kept in step by updateCampaignAgent. */
   active: boolean
+  /** Proposed waits for a human. Active runs. Paused sits still. */
+  status: 'proposed' | 'active' | 'paused'
+  /** The hashtags it searches. What the agent actually does, in plain sight. */
+  hashtags: string[]
+  /** Why the model proposed this angle. Shown while it waits for approval. */
+  why?: string
 }
 
 export interface Campaign {

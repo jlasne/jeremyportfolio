@@ -4,18 +4,29 @@
 // the real pool; without one it falls back to the sample data it shipped with,
 // so a stranger who types the URL sees the prototype and no real lead.
 
-// The Convex deployment serving the API. Set once the backend is deployed,
-// and overridable from this browser while a deployment is being moved.
-const DEFAULT_API = 'https://canny-mandrill-528.eu-west-1.convex.site/api'
+// Production answers on the app's own domain: brandmatch.app/api is rewritten
+// to the Convex deployment, so the backend address never ships in the bundle.
+// Anywhere else, including a local preview, talks to production directly.
+// Either way this browser can be pointed elsewhere with setApi.
+const SAME_ORIGIN = 'https://brandmatch.app/api'
+const DIRECT = 'https://dashing-swan-386.eu-west-1.convex.site/api'
+
+function built(): string {
+  try {
+    return window.location.hostname.endsWith('brandmatch.app') ? SAME_ORIGIN : DIRECT
+  } catch {
+    return DIRECT
+  }
+}
 
 const KEY = 'brandmatch.key'
 const BASE = 'brandmatch.api'
 
 function base(): string {
   try {
-    return window.localStorage.getItem(BASE) || DEFAULT_API
+    return window.localStorage.getItem(BASE) || built()
   } catch {
-    return DEFAULT_API
+    return built()
   }
 }
 
@@ -81,6 +92,21 @@ export const api = {
   run: (campaignId: string) => call<{ started: number }>(`/campaigns/${campaignId}/run`, { method: 'POST' }),
   waitlist: (email: string, website?: string) =>
     call<{ ok: true }>('/waitlist', { method: 'POST', body: JSON.stringify({ email, website }) }),
+  // Campaigns and their agents. The model proposes, a human approves.
+  createCampaign: (body: { name?: string; website?: string; brief?: unknown; leadsPerDay?: number; seed?: number }) =>
+    call<{ campaign: ApiCampaign; seededFromPool: number }>('/campaigns', { method: 'POST', body: JSON.stringify(body) }),
+  patchCampaign: (id: string, patch: Record<string, unknown>) =>
+    call<{ campaign: ApiCampaign }>(`/campaigns/${id}`, { method: 'PATCH', body: JSON.stringify(patch) }),
+  propose: (id: string, website?: string) =>
+    call<{ agents?: ApiAgent[]; who?: string; summary?: string; readSite?: boolean; error?: string }>(
+      `/campaigns/${id}/propose`, { method: 'POST', body: JSON.stringify({ website }) },
+    ),
+  addAgent: (campaignId: string, body: Record<string, unknown>) =>
+    call<{ agent: ApiAgent }>(`/campaigns/${campaignId}/agents`, { method: 'POST', body: JSON.stringify(body) }),
+  setAgent: (agentId: string, on: boolean, body: Record<string, unknown> = {}) =>
+    call<{ agent: ApiAgent }>(`/agents/${agentId}/${on ? 'approve' : 'pause'}`, { method: 'POST', body: JSON.stringify(body) }),
+  removeAgent: (agentId: string) => call<{ ok: true }>(`/agents/${agentId}`, { method: 'DELETE' }),
+  removeCampaign: (id: string) => call<{ ok: true }>(`/campaigns/${id}`, { method: 'DELETE' }),
   admin: () => call<AdminOverview>('/admin'),
   setSettings: (patch: Partial<AdminSettings>) =>
     call<{ settings: AdminSettings }>('/admin/settings', { method: 'POST', body: JSON.stringify(patch) }),

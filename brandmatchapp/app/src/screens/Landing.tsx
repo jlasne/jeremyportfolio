@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Backdrop } from '../components/Backdrop'
 import { Logo } from '../components/Logo'
 import { HeroDemo } from '../components/HeroDemo'
@@ -165,13 +165,16 @@ function EarlyAccess({ size = 'normal', website }: { size?: 'normal' | 'small'; 
 
 /**
  * A word that turns every 2.4 seconds and holds still under reduced motion.
- * Every candidate sits in one grid cell, so the box is as wide as the widest
- * and the line never reflows as the word changes.
+ * Each candidate sits in the same grid cell at its own width, and the box
+ * animates to the width of the word on show. So the line never reflows and
+ * never leaves a hole where a longer word used to be.
  */
 function TurningWord({ words, every = 2400 }: { words: readonly string[]; every?: number }) {
   const still = typeof window !== 'undefined'
     && window.matchMedia('(prefers-reduced-motion: reduce)').matches
   const [i, setI] = useState(0)
+  const box = useRef<HTMLSpanElement>(null)
+  const [width, setWidth] = useState<number | undefined>(undefined)
 
   useEffect(() => {
     if (still) return
@@ -179,8 +182,24 @@ function TurningWord({ words, every = 2400 }: { words: readonly string[]; every?
     return () => window.clearInterval(t)
   }, [still, words, every])
 
+  // Measure the word on show. The display font arrives after the first paint
+  // and the headline resizes with the viewport, so measure again on both:
+  // a width taken from fallback metrics would clip the last letter.
+  useLayoutEffect(() => {
+    const live = box.current?.querySelector('.turn-word') as HTMLElement | null
+    if (!live) return
+    const measure = () => setWidth(Math.ceil(live.getBoundingClientRect().width))
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(live)
+    window.addEventListener('resize', measure)
+    let gone = false
+    void document.fonts?.ready.then(() => { if (!gone) measure() })
+    return () => { gone = true; ro.disconnect(); window.removeEventListener('resize', measure) }
+  }, [i, words])
+
   return (
-    <span className="turn" aria-label={words.join(', ')}>
+    <span className="turn" ref={box} style={width ? { width } : undefined} aria-label={words.join(', ')}>
       {words.map((w, n) => (
         <span key={w} className={n === i ? 'turn-word' : 'turn-ghost'} aria-hidden={n !== i}>{w}</span>
       ))}

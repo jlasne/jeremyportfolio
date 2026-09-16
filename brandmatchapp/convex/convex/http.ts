@@ -110,6 +110,13 @@ const api = httpAction(async (ctx, req) => {
       return json({ campaign, seededFromPool: seeded })
     }
 
+    if (head === 'campaigns' && parts[1] && !parts[2] && req.method === 'DELETE') {
+      const ok = await ctx.runMutation(internal.brands.removeCampaign, {
+        brandId: brand._id, campaignId: parts[1] as Id<'campaigns'>,
+      })
+      return ok ? json({ ok: true }) : fail('No such campaign', 404)
+    }
+
     if (head === 'campaigns' && parts[1] && req.method === 'PATCH') {
       const patch = await req.json()
       const campaign = await ctx.runMutation(internal.brands.patchCampaign, {

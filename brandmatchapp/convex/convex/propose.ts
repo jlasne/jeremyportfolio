@@ -141,7 +141,7 @@ export const forCampaign = internalAction({
       summary: plan.summary ?? '',
       agents,
     })
-    return { summary: plan.summary, agents: saved, model, readSite: text.length > 0 }
+    return { summary: plan.summary, who: saved.who, agents: saved.agents, model, readSite: text.length > 0 }
   },
 })
 
@@ -168,12 +168,15 @@ export const save = internalMutation({
   returns: v.any(),
   handler: async (ctx, args) => {
     const campaign = await ctx.db.get(args.campaignId)
-    if (!campaign) return []
+    if (!campaign) return { who: '', summary: args.summary, agents: [] }
 
-    // Keep the brand's own sentence, take the model's summary.
+    // A read writes the audience. The brand's own sentence went to the model
+    // as context, so the new summary already carries it. Predictable: the
+    // button says read the site, and the box shows what the site said.
+    const who = args.summary
     await ctx.db.patch(args.campaignId, {
       website: args.website,
-      brief: { ...campaign.brief, summary: args.summary },
+      brief: { ...campaign.brief, who, summary: args.summary },
     })
 
     const old = await ctx.db
@@ -199,6 +202,6 @@ export const save = internalMutation({
       })
       saved.push(await ctx.db.get(id))
     }
-    return saved
+    return { who, summary: args.summary, agents: saved }
   },
 })

@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import {
-  addCampaignAgent, audienceFromWebsite, campaignLeadsPerDay, campaignTally, createCampaign, deleteCampaign, getCampaign,
-  getCampaigns, getDailyRows, getDashboard, removeCampaignAgent, setCampaignBrief, setCampaignWebsite, updateCampaign,
-  updateCampaignAgent,
+  addCampaignAgent, campaignLeadsPerDay, campaignTally, createCampaign, deleteCampaign, getCampaign,
+  getCampaigns, getDailyRows, getDashboard, proposeAgents, removeCampaignAgent, setCampaignBrief, setCampaignWebsite,
+  updateCampaign, updateCampaignAgent,
 } from '../data'
 import { useStore } from '../data/hooks'
 import { nextRunLabel } from '../lib/format'
@@ -31,11 +31,11 @@ export function Campaigns() {
   const chartCampaigns: ChartCampaign[] = campaigns.map((c, i) => ({
     id: c.id,
     name: c.name,
-    agents: c.agents.length,
+    agents: c.agents.filter((a) => a.status !== 'proposed').length,
     colourIndex: i,
     leads: everyRow.filter((r) => r.campaignId === c.id).reduce((sum, r) => sum + r.leads, 0),
   }))
-  const agentCount = campaigns.reduce((sum, c) => sum + c.agents.length, 0)
+  const agentCount = campaigns.reduce((sum, c) => sum + c.agents.filter((a) => a.status === 'active').length, 0)
 
   return (
     <div className="page">
@@ -67,16 +67,18 @@ export function Campaigns() {
           </div>
           <div>
             <b className="num">{agentCount}</b>
-            <span>{agentCount === 1 ? 'agent' : 'agents'} on your account</span>
+            <span>{agentCount === 1 ? 'agent' : 'agents'} running</span>
           </div>
-          <div><b className="num">{campaigns.filter((c) => c.active).length}</b><span>{campaigns.length === 1 ? 'campaign' : 'campaigns'} running</span></div>
+          <div><b className="num">{campaigns.filter((c) => c.active).length}</b><span>{campaigns.length === 1 ? 'campaign' : 'campaigns'} live</span></div>
         </div>
       </div>
 
       <div className="list campaign-groups" style={{ marginTop: 14 }}>
         {campaigns.map((c) => {
           const t = campaignTally(c.id)
-          const running = c.agents.filter((a) => a.active).length
+          const live = c.agents.filter((a) => a.status !== 'proposed')
+          const waiting = c.agents.filter((a) => a.status === 'proposed').length
+          const running = c.agents.filter((a) => a.status === 'active').length
           const colour = CAMPAIGN_COLOURS[chartCampaigns.findIndex((x) => x.id === c.id) % CAMPAIGN_COLOURS.length]
           return (
             <section className="campaign-group" key={c.id}>
@@ -88,26 +90,39 @@ export function Campaigns() {
                 </span>
                 <span className="state">
                   {c.active
-                    ? `${running} of ${c.agents.length} agent${c.agents.length === 1 ? '' : 's'} running, ${campaignLeadsPerDay(c)} leads a day in quota`
+                    ? `${running} of ${live.length} agent${live.length === 1 ? '' : 's'} running, ${campaignLeadsPerDay(c)} leads a day in quota`
                     : 'Paused'}
                 </span>
+                {waiting > 0 && (
+                  <a className="badge waiting" href={`#/campaign/${c.id}`}>
+                    {waiting} waiting for you
+                  </a>
+                )}
                 <span className="metric">
                   <b className="num">{t.found.toLocaleString('en-US')}</b>
                   <small>leads found</small>
                 </span>
-                <a className="btn small" href={`#/campaign/${c.id}`}>Open to edit</a>
+                <button
+                  type="button"
+                  className={`btn small toggle${c.active ? ' on' : ''}`}
+                  aria-pressed={c.active}
+                  onClick={() => updateCampaign(c.id, { active: !c.active })}
+                >
+                  {c.active ? 'Running' : 'Paused'}
+                </button>
+                <a className="btn small" href={`#/campaign/${c.id}`}>Open</a>
               </div>
 
               {/* Read only here. Every change happens inside the campaign. */}
               <ul className="agent-list">
-                {c.agents.map((a) => (
+                {live.map((a) => (
                   <li
-                    className={`agent-line${c.active && a.active ? '' : ' off'}`}
+                    className={`agent-line${c.active && a.status === 'active' ? '' : ' off'}`}
                     key={a.id}
-                    style={{ borderLeftColor: c.active && a.active ? colour : undefined }}
+                    style={{ borderLeftColor: c.active && a.status === 'active' ? colour : undefined }}
                   >
                     <span className="agent-line-name">
-                      {c.active && a.active && <i className="pulse" aria-hidden="true" />}
+                      {c.active && a.status === 'active' && <i className="pulse" aria-hidden="true" />}
                       {a.name}
                     </span>
                     <span className="agent-line-focus">{a.focus || 'No angle written yet'}</span>
@@ -116,8 +131,17 @@ export function Campaigns() {
                       <span>a day quota</span>
                     </span>
                     <span className="agent-when">
-                      {c.active && a.active ? `Next run ${nextRunLabel(c.runAt)}` : 'Paused, no next run'}
+                      {c.active && a.status === 'active' ? `Next run ${nextRunLabel(c.runAt)}` : 'Paused, no next run'}
                     </span>
+                    <button
+                      type="button"
+                      className={`btn small toggle${a.status === 'active' ? ' on' : ''}`}
+                      aria-pressed={a.status === 'active'}
+                      onClick={() => updateCampaignAgent(c.id, a.id, { status: a.status === 'active' ? 'paused' : 'active' })}
+                    >
+                      {a.status === 'active' ? 'Running' : 'Paused'}
+                    </button>
+                    <Hashtags tags={a.hashtags} />
                   </li>
                 ))}
               </ul>
@@ -138,12 +162,42 @@ export function Campaigns() {
   )
 }
 
+/** The hashtags an agent searches, so what it does is never a guess. */
+function Hashtags({ tags }: { tags: string[] }) {
+  if (!tags.length) return null
+  return (
+    <span className="tagrow">
+      {tags.slice(0, 6).map((t) => <span className="hashtag" key={t}>#{t}</span>)}
+    </span>
+  )
+}
+
+/** A quota you set by stepping it, or by typing over it. */
+function Quota({ value, onChange }: { value: number; onChange: (n: number) => void }) {
+  const step = (by: number) => onChange(Math.max(0, Math.min(500, value + by)))
+  return (
+    <span className="quota">
+      <button type="button" className="quota-step" aria-label="Fewer leads a day" onClick={() => step(-25)}>&minus;</button>
+      <input
+        className="input num"
+        inputMode="numeric"
+        value={value}
+        aria-label="Daily quota for this agent"
+        onChange={(e) => onChange(Math.max(0, Math.min(500, Number(e.target.value.replace(/\D/g, '')) || 0)))}
+      />
+      <button type="button" className="quota-step" aria-label="More leads a day" onClick={() => step(25)}>+</button>
+      <span className="quota-unit">a day</span>
+    </span>
+  )
+}
+
 /** One campaign: the website, the audience, its agents, and when it lands. */
 export function CampaignEditor({ campaignId, firstRun = false }: { campaignId: string; firstRun?: boolean }) {
   useStore()
   const campaign = getCampaign(campaignId)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [reading, setReading] = useState(false)
+  const [failed, setFailed] = useState<string | null>(null)
 
   if (!campaign) {
     return (
@@ -157,6 +211,25 @@ export function CampaignEditor({ campaignId, firstRun = false }: { campaignId: s
   const tally = campaignTally(campaign.id)
   const perDay = campaignLeadsPerDay(campaign)
   const canRun = campaign.brief.who.trim().length > 0 && perDay > 0
+  const proposed = campaign.agents.filter((a) => a.status === 'proposed')
+  const live = campaign.agents.filter((a) => a.status !== 'proposed')
+  const running = campaign.agents.filter((a) => a.status === 'active')
+
+  /** Read the site, then let the model write the audience and the agents. */
+  function read(): void {
+    if (!campaign || reading || !campaign.website.trim()) return
+    setReading(true)
+    setFailed(null)
+    proposeAgents(campaign.id, campaign.website)
+      .then(() => {
+        if (!campaign.name.trim()) {
+          const domain = campaign.website.replace(/^https?:\/\//, '').replace(/^www\./, '').split('.')[0]
+          updateCampaign(campaign.id, { name: domain.charAt(0).toUpperCase() + domain.slice(1) + ' creators' })
+        }
+      })
+      .catch((e: Error) => setFailed(e.message || 'Could not read that site. Try the full address.'))
+      .finally(() => setReading(false))
+  }
 
   return (
     <div className="page editor">
@@ -190,27 +263,22 @@ export function CampaignEditor({ campaignId, firstRun = false }: { campaignId: s
       <section className="ask">
         <h2><label htmlFor="site">Your website</label></h2>
         <div className="site-row">
-          <input id="site" className="input big" placeholder="strongher.co" value={campaign.website} onChange={(e) => setCampaignWebsite(campaign.id, e.target.value)} />
-          <button
-            type="button"
-            className="btn primary"
-            disabled={!campaign.website.trim() || reading}
-            onClick={() => {
-              setReading(true)
-              window.setTimeout(() => {
-                setCampaignBrief(campaign.id, audienceFromWebsite(campaign.website))
-                if (!campaign.name.trim()) {
-                  const domain = campaign.website.replace(/^https?:\/\//, '').replace(/^www\./, '').split('.')[0]
-                  updateCampaign(campaign.id, { name: domain.charAt(0).toUpperCase() + domain.slice(1) + ' creators' })
-                }
-                setReading(false)
-              }, 1400)
-            }}
-          >
-            {reading ? 'Reading it' : campaign.brief.who ? 'Read it again' : 'Read my site'}
+          <input
+            id="site"
+            className="input big"
+            placeholder="strongher.co"
+            value={campaign.website}
+            onChange={(e) => setCampaignWebsite(campaign.id, e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') read() }}
+          />
+          <button type="button" className="btn primary" disabled={!campaign.website.trim() || reading} onClick={read}>
+            {reading ? 'Reading it' : campaign.agents.length ? 'Read it again' : 'Read my site'}
           </button>
         </div>
-        <p className="helper">We read your site and write the audience below. Change any of it.</p>
+        <p className="helper">
+          We read your site, write the audience, and propose three agents. Nothing searches until you approve one.
+        </p>
+        {failed && <p className="warn">{failed}</p>}
       </section>
 
       <section className="ask">
@@ -232,12 +300,61 @@ export function CampaignEditor({ campaignId, firstRun = false }: { campaignId: s
         <p className="helper">This is what the agents hunt for. The more precise it is, the better the leads.</p>
       </section>
 
+      {proposed.length > 0 && (
+        <section className="ask proposals">
+          <h2>Three agents proposed</h2>
+          <p className="muted">
+            Each takes one angle and searches its own hashtags. Approve the ones you want. The rest cost nothing.
+          </p>
+          <div className="agents">
+            {proposed.map((a) => (
+              <div className="agent-card proposed" key={a.id}>
+                <div className="agent-top">
+                  <span className="agent-title">{a.name}</span>
+                  <span className="spacer" />
+                  <button
+                    type="button"
+                    className="btn small primary"
+                    onClick={() => updateCampaignAgent(campaign.id, a.id, { status: 'active' })}
+                  >
+                    Approve
+                  </button>
+                  <button type="button" className="btn small quiet" onClick={() => removeCampaignAgent(campaign.id, a.id)}>
+                    Drop
+                  </button>
+                </div>
+                <p className="agent-focus">{a.focus}</p>
+                {a.why && <p className="agent-why">{a.why}</p>}
+                <Hashtags tags={a.hashtags} />
+                <span className="agent-quota-note">{a.leadsPerDay} leads a day once it runs</span>
+              </div>
+            ))}
+          </div>
+          <div className="proposal-foot">
+            <button
+              type="button"
+              className="btn primary"
+              onClick={() => proposed.forEach((a) => updateCampaignAgent(campaign.id, a.id, { status: 'active' }))}
+            >
+              Approve all three
+            </button>
+            <span className="faint">{proposed.reduce((n, a) => n + a.leadsPerDay, 0)} leads a day if you take them all</span>
+          </div>
+        </section>
+      )}
+
       <section className="ask">
-        <h2>Agents</h2>
-        <p className="muted">Each agent takes one angle on the audience and carries its own daily quota of leads. This is the only place they change.</p>
+        <h2>{live.length > 0 ? `Your agents (${live.length})` : 'Agents'}</h2>
+        {live.length === 0 ? (
+          <p className="muted">
+            No agent runs yet. Put your website above and we propose three, or add one yourself.
+          </p>
+        ) : (
+          <p className="muted">Each agent takes one angle and carries its own daily quota. This is the only place they change.</p>
+        )}
         <div className="agents">
-          {campaign.agents.map((a) => (
-            <div className={`agent-card${a.active ? '' : ' off'}`} key={a.id}>
+          {live.map((a) => (
+            <div className={`agent-card${a.status === 'active' ? '' : ' off'}`} key={a.id}>
               <div className="agent-top">
                 <input
                   className="input agent-name"
@@ -245,29 +362,22 @@ export function CampaignEditor({ campaignId, firstRun = false }: { campaignId: s
                   aria-label="Agent name"
                   onChange={(e) => updateCampaignAgent(campaign.id, a.id, { name: e.target.value })}
                 />
-                <label className="agent-leads">
-                  <input
-                    className="input num"
-                    inputMode="numeric"
-                    value={a.leadsPerDay}
-                    aria-label="Daily quota for this agent"
-                    onChange={(e) => updateCampaignAgent(campaign.id, a.id, { leadsPerDay: Math.max(0, Number(e.target.value.replace(/\D/g, '')) || 0) })}
-                  />
-                  <span>a day quota</span>
-                </label>
+                <span className="spacer" />
+                <Quota
+                  value={a.leadsPerDay}
+                  onChange={(n) => updateCampaignAgent(campaign.id, a.id, { leadsPerDay: n })}
+                />
                 <button
                   type="button"
-                  className={`btn small${a.active ? ' on' : ''}`}
-                  aria-pressed={a.active}
-                  onClick={() => updateCampaignAgent(campaign.id, a.id, { active: !a.active })}
+                  className={`btn small toggle${a.status === 'active' ? ' on' : ''}`}
+                  aria-pressed={a.status === 'active'}
+                  onClick={() => updateCampaignAgent(campaign.id, a.id, { status: a.status === 'active' ? 'paused' : 'active' })}
                 >
-                  {a.active ? 'Running' : 'Paused'}
+                  {a.status === 'active' ? 'Running' : 'Paused'}
                 </button>
-                {campaign.agents.length > 1 && (
-                  <button type="button" className="btn small quiet" aria-label={`Remove ${a.name}`} onClick={() => removeCampaignAgent(campaign.id, a.id)}>
-                    Remove
-                  </button>
-                )}
+                <button type="button" className="btn small quiet" aria-label={`Remove ${a.name}`} onClick={() => removeCampaignAgent(campaign.id, a.id)}>
+                  Remove
+                </button>
               </div>
               <input
                 className="input"
@@ -276,9 +386,10 @@ export function CampaignEditor({ campaignId, firstRun = false }: { campaignId: s
                 aria-label="Agent focus"
                 onChange={(e) => updateCampaignAgent(campaign.id, a.id, { focus: e.target.value })}
               />
+              <Hashtags tags={a.hashtags} />
             </div>
           ))}
-          <button type="button" className="btn" onClick={() => addCampaignAgent(campaign.id)}>Add an agent</button>
+          <button type="button" className="btn" onClick={() => addCampaignAgent(campaign.id)}>Add an agent myself</button>
         </div>
       </section>
 
@@ -290,7 +401,7 @@ export function CampaignEditor({ campaignId, firstRun = false }: { campaignId: s
         </label>
         <p className="estimate">
           <b className="num">{perDay.toLocaleString('en-US')}</b> leads in your list every morning, the quotas of your{' '}
-          {campaign.agents.filter((a) => a.active).length} running agent{campaign.agents.filter((a) => a.active).length === 1 ? '' : 's'} added up.
+          {running.length} running agent{running.length === 1 ? '' : 's'} added up.
           Next run {nextRunLabel(campaign.runAt)}.
         </p>
         {!firstRun && (

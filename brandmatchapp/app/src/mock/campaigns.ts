@@ -11,8 +11,8 @@ export const campaigns: Campaign[] = [
     name: 'Women lifting coaches',
     website: 'strongher.co',
     agents: [
-      { id: 'g1', name: 'Technique coaches', focus: 'Coaches filming squat, bench and deadlift cues for beginners', leadsPerDay: 150, active: true },
-      { id: 'g2', name: 'Program sellers', focus: 'Creators with a program, an app or a membership in the bio', leadsPerDay: 100, active: true },
+      { id: 'g1', name: 'Technique coaches', focus: 'Coaches filming squat, bench and deadlift cues for beginners', leadsPerDay: 150, active: true, status: 'active', hashtags: ['squatform', 'liftingcoach', 'strengthcoach'] },
+      { id: 'g2', name: 'Program sellers', focus: 'Creators with a program, an app or a membership in the bio', leadsPerDay: 100, active: true, status: 'active', hashtags: ['onlinecoach', 'fitnessprogram', 'coachingbusiness'] },
     ],
     brief: {
       who: 'Women lifting coaches who sell their own program',
@@ -30,7 +30,7 @@ export const campaigns: Campaign[] = [
     name: 'Supplement ambassadors',
     website: 'purefuel.com',
     agents: [
-      { id: 'g3', name: 'Paid post watchers', focus: 'Fitness creators who ran a sponsored post in the last month', leadsPerDay: 150, active: true },
+      { id: 'g3', name: 'Paid post watchers', focus: 'Fitness creators who ran a sponsored post in the last month', leadsPerDay: 150, active: true, status: 'active', hashtags: ['fitfam', 'supplementreview', 'gymtok'] },
     ],
     brief: {
       who: 'Fitness creators who already promote supplement brands',
@@ -48,8 +48,8 @@ export const campaigns: Campaign[] = [
     name: 'Postpartum and 40+',
     website: 'strongher.co',
     agents: [
-      { id: 'g4', name: 'Postpartum', focus: 'Coaches training women back after birth', leadsPerDay: 50, active: true },
-      { id: 'g5', name: 'Over 40', focus: 'Coaches for women over 40 lifting for the first time', leadsPerDay: 50, active: false },
+      { id: 'g4', name: 'Postpartum', focus: 'Coaches training women back after birth', leadsPerDay: 50, active: true, status: 'active', hashtags: ['postpartumfitness', 'diastasisrecti', 'mumstrength'] },
+      { id: 'g5', name: 'Over 40', focus: 'Coaches for women over 40 lifting for the first time', leadsPerDay: 50, active: false, status: 'paused', hashtags: ['over40fitness', 'menopausefitness', 'strongover40'] },
     ],
     brief: {
       who: 'Coaches training women through postpartum and after 40',

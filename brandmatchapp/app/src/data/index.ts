@@ -274,8 +274,35 @@ export function getCampaign(id: string): Campaign | null {
   return getState().campaigns.find((a) => a.id === id) ?? null
 }
 
+/**
+ * Campaign edits are typed, so they are held for half a second and sent once.
+ * A local id means the campaign is still being created; it saves on the next
+ * keystroke after the real id lands.
+ */
+const pending = new Map<string, ReturnType<typeof setTimeout>>()
+
+/** A local id is a letter and digits. A server id is not. */
+function local(id: string): boolean {
+  return /^[ag]\d+$/.test(id)
+}
+
+function saveCampaign(id: string, patch: Record<string, unknown>): void {
+  if (!getState().live || local(id)) return
+  const known = pending.get(id)
+  if (known) clearTimeout(known)
+  pending.set(id, setTimeout(() => {
+    pending.delete(id)
+    api.patchCampaign(id, patch).catch((e) => console.warn('brandmatch: campaign not saved', e))
+  }, 500))
+}
+
 export function updateCampaign(id: string, patch: Partial<Campaign>): void {
   setState((s) => ({ campaigns: s.campaigns.map((a) => (a.id === id ? { ...a, ...patch } : a)) }))
+  const send: Record<string, unknown> = {}
+  for (const k of ['name', 'website', 'runAt', 'active', 'leadsPerDay'] as const) {
+    if (k in patch) send[k] = patch[k]
+  }
+  if (Object.keys(send).length) saveCampaign(id, send)
 }
 
 export function updateCampaignFilters(id: string, patch: Partial<Filters>): void {
@@ -304,7 +331,7 @@ export function createCampaign(): Campaign {
     id: `a${Date.now()}`,
     name: '',
     website: '',
-    agents: [{ id: `g${Date.now()}`, name: 'Agent 1', focus: '', leadsPerDay: 200, active: true }],
+    agents: [],
     brief: { who: '', answers: [], summary: 'No brief yet.' },
     filters: { ...defaultFilters, countries: [], languages: [] },
     leadsPerDay: 200,
@@ -313,37 +340,114 @@ export function createCampaign(): Campaign {
     createdAt: new Date().toISOString(),
   }
   setState((s) => ({ campaigns: [...s.campaigns, campaign] }))
+  if (getState().live) {
+    // The local id stands in until the server answers, then swaps for the real
+    // one. Nothing in between writes to the server, so nothing is lost.
+    api.createCampaign({ name: campaign.name || 'New campaign', leadsPerDay: 200, seed: 0 })
+      .then(({ campaign: made }) => {
+        setState((st) => ({ campaigns: st.campaigns.map((c) => (c.id === campaign.id ? { ...c, id: made._id } : c)) }))
+        if (window.location.hash.includes(campaign.id)) {
+          window.location.hash = window.location.hash.replace(campaign.id, made._id)
+        }
+      })
+      .catch((e) => console.warn('brandmatch: campaign not created', e))
+  }
   return campaign
+}
+
+/**
+ * Read the site and let the model propose the agents. Nothing runs until a
+ * human approves one, and nothing here spends a credit.
+ */
+export async function proposeAgents(campaignId: string, website: string): Promise<number> {
+  if (!getState().live) {
+    // The sample account answers from the same shapes, so the screen is honest.
+    const drafted: CampaignAgent[] = [
+      { id: `g${Date.now()}`, name: 'Technique coaches', focus: 'Coaches filming form cues for beginners',
+        leadsPerDay: 200, active: false, status: 'proposed', hashtags: ['squatform', 'liftingcoach'],
+        why: 'They teach, so a brand fits inside what they already post.' },
+      { id: `g${Date.now() + 1}`, name: 'Program sellers', focus: 'Creators with a program or app in the bio',
+        leadsPerDay: 150, active: false, status: 'proposed', hashtags: ['onlinecoach', 'fitnessprogram'],
+        why: 'They sell their own thing, so they know how a paid deal works.' },
+      { id: `g${Date.now() + 2}`, name: 'Paid post watchers', focus: 'Creators who ran a sponsored post this month',
+        leadsPerDay: 150, active: false, status: 'proposed', hashtags: ['ad', 'sponsored'],
+        why: 'A recent #ad is the strongest signal that they take deals.' },
+    ]
+    setCampaignBrief(campaignId, audienceFromWebsite(website))
+    setState((s) => ({
+      campaigns: s.campaigns.map((c) => (c.id === campaignId ? { ...c, agents: [...c.agents, ...drafted] } : c)),
+    }))
+    return drafted.length
+  }
+  const out = await api.propose(campaignId, website)
+  if (out.error) throw new Error(out.error)
+  const fresh = (out.agents ?? []).map((a) => ({
+    id: a._id, name: a.name, focus: a.focus, leadsPerDay: a.leadsPerDay,
+    active: a.status === 'active', status: a.status, hashtags: a.hashtags ?? [], why: a.proposedWhy,
+  }))
+  setState((s) => ({
+    campaigns: s.campaigns.map((c) => (c.id === campaignId
+      ? {
+          ...c,
+          website,
+          brief: { ...c.brief, who: out.who ?? c.brief.who, summary: out.summary ?? c.brief.summary },
+          agents: [...c.agents.filter((a) => a.status !== 'proposed'), ...fresh],
+        }
+      : c)),
+  }))
+  return fresh.length
 }
 
 // The agents inside a campaign ------------------------------------------------
 
 export function addCampaignAgent(campaignId: string): CampaignAgent {
   const n = (getCampaign(campaignId)?.agents.length ?? 0) + 1
-  const agent: CampaignAgent = { id: `g${Date.now()}`, name: `Agent ${n}`, focus: '', leadsPerDay: 100, active: true }
+  const agent: CampaignAgent = {
+    id: `g${Date.now()}`, name: `Agent ${n}`, focus: '', leadsPerDay: 100,
+    active: true, status: 'active', hashtags: [],
+  }
   setState((s) => ({ campaigns: s.campaigns.map((c) => (c.id === campaignId ? { ...c, agents: [...c.agents, agent] } : c)) }))
+  if (getState().live && !local(campaignId)) {
+    api.addAgent(campaignId, { name: agent.name, focus: '', leadsPerDay: 100, status: 'active' })
+      .then(({ agent: made }) => setState((st) => ({
+        campaigns: st.campaigns.map((c) => (c.id === campaignId
+          ? { ...c, agents: c.agents.map((a) => (a.id === agent.id ? { ...a, id: made._id } : a)) } : c)),
+      })))
+      .catch((e) => console.warn('brandmatch: agent not added', e))
+  }
   return agent
 }
 
 export function updateCampaignAgent(campaignId: string, agentId: string, patch: Partial<CampaignAgent>): void {
+  // One truth for whether an agent runs. Set either field, both stay in step.
+  const full: Partial<CampaignAgent> = { ...patch }
+  if (patch.status !== undefined) full.active = patch.status === 'active'
+  else if (patch.active !== undefined) full.status = patch.active ? 'active' : 'paused'
   setState((s) => ({
     campaigns: s.campaigns.map((c) =>
-      c.id === campaignId ? { ...c, agents: c.agents.map((a) => (a.id === agentId ? { ...a, ...patch } : a)) } : c,
+      c.id === campaignId ? { ...c, agents: c.agents.map((a) => (a.id === agentId ? { ...a, ...full } : a)) } : c,
     ),
   }))
+  if (!getState().live || local(agentId)) return
+  if (full.status !== undefined) {
+    api.setAgent(agentId, full.status === 'active', { leadsPerDay: patch.leadsPerDay })
+      .catch((e) => console.warn('brandmatch: agent status not saved', e))
+  }
 }
 
 export function removeCampaignAgent(campaignId: string, agentId: string): void {
   setState((s) => ({ campaigns: s.campaigns.map((c) => (c.id === campaignId ? { ...c, agents: c.agents.filter((a) => a.id !== agentId) } : c)) }))
+  if (getState().live && !local(agentId)) api.removeAgent(agentId).catch((e) => console.warn('brandmatch: agent not removed', e))
 }
 
-/** A campaign's day is the sum of its running agents. */
+/** A campaign's day is the sum of its running agents. Proposed ones cost nothing. */
 export function campaignLeadsPerDay(c: Campaign): number {
-  return c.agents.filter((a) => a.active).reduce((sum, a) => sum + a.leadsPerDay, 0)
+  return c.agents.filter((a) => a.status === 'active').reduce((sum, a) => sum + a.leadsPerDay, 0)
 }
 
 export function deleteCampaign(id: string): void {
   setState((s) => ({ campaigns: s.campaigns.filter((a) => a.id !== id) }))
+  if (getState().live && !local(id)) api.removeCampaign(id).catch((e) => console.warn('brandmatch: campaign not removed', e))
 }
 
 /** One pick in the contacts dropdown: a whole campaign, or one agent inside it. */
@@ -636,9 +740,11 @@ export function setCampaignBrief(id: string, who: string): void {
   const first = clean.split(/(?<=\.)\s/)[0] ?? clean
   const b: Brief = { who: clean, answers: [], summary: clean ? first : 'No audience yet.' }
   setState((s) => ({ campaigns: s.campaigns.map((a) => (a.id === id ? { ...a, brief: b } : a)) }))
+  saveCampaign(id, { brief: b })
 }
 
 /** Read the site, write the audience, name the campaign. */
 export function setCampaignWebsite(id: string, website: string): void {
   setState((s) => ({ campaigns: s.campaigns.map((a) => (a.id === id ? { ...a, website } : a)) }))
+  saveCampaign(id, { website })
 }

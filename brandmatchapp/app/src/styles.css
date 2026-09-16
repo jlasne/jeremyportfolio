@@ -52,13 +52,16 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
+/* The grid backdrop is fixed to the viewport, so the page under it carries the
+   same dark ground all the way down however far it scrolls. */
+html { background: #141414; color-scheme: dark; }
 body {
   font-family: var(--font);
   font-size: 14px;
   line-height: 1.5;
   letter-spacing: 0;
   color: var(--ink);
-  background: var(--paper);
+  background: transparent;
   -webkit-font-smoothing: antialiased;
 }
 button, input, select, textarea { font: inherit; color: inherit; }
@@ -435,8 +438,6 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 .criteria .crit-count { text-align: right; font-weight: 600; }
 .criteria .crit-means { grid-column: 1 / -1; font-size: 12px; margin-top: -8px; }
 .criteria.plain li { grid-template-columns: 66px 1fr; }
-.criteria.wide li { grid-template-columns: 132px 1fr; }
-.criteria.wide .crit-name { white-space: nowrap; }
 .criteria.plain .crit-means { grid-column: 2; margin-top: 0; color: var(--ink-2); font-size: 13.5px; }
 
 .star-split { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
@@ -488,7 +489,7 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 }
 
 /* Campaign editor ------------------------------------------------------------ */
-.editor { max-width: 680px; margin-left: 0; margin-right: auto; }
+.editor { max-width: 780px; margin-left: auto; margin-right: auto; }
 .editor .back { color: var(--ink-2); font-weight: 500; }
 .title-input { height: 48px; font-family: var(--display); font-size: 26px; font-weight: 600; letter-spacing: -0.01em; border-color: transparent; background: transparent; padding: 0 8px; margin: 0 -8px 6px; width: calc(100% + 16px); }
 .title-input:hover { border-color: var(--line); background: var(--panel); }
@@ -728,9 +729,14 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 }
 
 /* The word that turns in the headline. */
-.turn { display: inline-grid; text-align: left; vertical-align: top; }
+.turn {
+  display: inline-grid; justify-items: start; text-align: left; vertical-align: top;
+  overflow: hidden; padding-bottom: 0.16em; margin-bottom: -0.16em;
+  transition: width 0.42s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
 .turn > span { grid-area: 1 / 1; white-space: nowrap; }
-.turn-ghost { visibility: hidden; }
+.turn-ghost { visibility: hidden; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .turn { transition: none; } }
 .turn-word {
   color: var(--orange);
   animation: turn-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
@@ -1122,9 +1128,13 @@ input.key-value:focus { border-color: var(--l-rule-firm); }
 .campaign-groups { padding: 0; }
 .campaign-group + .campaign-group { border-top: 1px solid var(--line); }
 .group-head {
-  display: grid; grid-template-columns: 10px minmax(200px, 1.3fr) minmax(180px, 1fr) 150px auto;
-  gap: 16px; align-items: center; padding: 16px 18px 12px;
+  display: grid;
+  grid-template-columns: 10px minmax(200px, 1.3fr) minmax(170px, 1fr) auto 120px auto auto;
+  gap: 14px; align-items: center; padding: 16px 18px 12px;
 }
+/* No badge on this campaign: the row closes up rather than leaving a hole. */
+.group-head > .metric { grid-column: 5; }
+.group-head > .badge.waiting { grid-column: 4; justify-self: start; }
 .group-head .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line-2); }
 .group-head .dot.on { background: var(--orange); }
 .group-head .who { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
@@ -1136,7 +1146,7 @@ input.key-value:focus { border-color: var(--l-rule-firm); }
 
 .agent-list { list-style: none; margin: 0; padding: 0 18px 16px 36px; display: flex; flex-direction: column; gap: 6px; }
 .agent-line {
-  display: grid; grid-template-columns: minmax(140px, 0.9fr) minmax(200px, 1.6fr) 116px 92px;
+  display: grid; grid-template-columns: minmax(140px, 0.9fr) minmax(200px, 1.6fr) 106px 92px 86px;
   gap: 8px; align-items: center;
   padding: 8px 10px 8px 14px; border-radius: var(--radius); background: var(--paper);
   border-left: 3px solid var(--orange);
@@ -1155,6 +1165,9 @@ input.key-value:focus { border-color: var(--l-rule-firm); }
   .agent-list { padding-left: 18px; }
   .agent-line { grid-template-columns: 1fr 1fr; }
   .agent-line-focus { grid-column: 1 / -1; }
+  .group-head { grid-template-columns: 10px 1fr auto; }
+  .group-head .state, .group-head .metric { grid-column: 2 / -1; text-align: left; }
+  .group-head > .badge.waiting, .group-head > .metric { grid-column: 2 / -1; justify-self: start; }
 }
 
 /* The chart: bars on the left axis, the qualified share on the right ------ */
@@ -1253,11 +1266,13 @@ input.key-value:focus { border-color: var(--l-rule-firm); }
 
 /* An agent row on the campaigns page: read only, with its quota and next run */
 .agent-line {
-  grid-template-columns: minmax(150px, 0.9fr) minmax(200px, 1.5fr) 110px minmax(160px, 0.9fr);
+  grid-template-columns: minmax(150px, 0.9fr) minmax(200px, 1.5fr) 104px minmax(150px, 0.9fr) 86px;
   padding: 11px 14px;
 }
+/* The hashtags sit under the angle, on their own row, never in the ellipsis. */
+.agent-line > .tagrow { grid-column: 2 / -1; margin-top: 2px; }
 .agent-line .agent-line-name { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13.5px; }
-.agent-line .agent-line-focus { color: var(--ink-2); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.agent-line .agent-line-focus { color: var(--ink-2); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: 12px; }
 .agent-quota { display: flex; align-items: baseline; gap: 5px; }
 .agent-quota b { font-size: 15px; font-weight: 600; }
 .agent-quota span { font-size: 11.5px; color: var(--ink-3); }
@@ -1457,3 +1472,74 @@ body { background: transparent; }
 .stage-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .stage-chips .chip small { font-size: 11px; opacity: 0.75; margin-left: 2px; }
 .viz-faces { top: 40%; }
+
+/* The API page: two columns of cards, every call on its own line ------------ */
+.page.api { max-width: 1280px; }
+.api-grid { display: grid; grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr); gap: 14px; align-items: start; }
+.api-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.api-col .card { margin: 0; }
+.api-col .card h2 { margin-bottom: 4px; }
+.api-col .muted { margin-bottom: 10px; }
+.api .keys { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.api .code, .card .code { max-width: 100%; white-space: pre-wrap; overflow-wrap: anywhere; overflow-x: hidden; }
+.copy-row { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+
+/* An endpoint reads top to bottom: what it is, then what it does. */
+.endpoints { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; }
+.endpoints li { display: flex; flex-direction: column; gap: 3px; padding: 11px 0; border-top: 1px solid var(--line); min-width: 0; }
+.endpoints li:first-child { border-top: 0; padding-top: 4px; }
+.ep-call { display: flex; align-items: baseline; gap: 9px; min-width: 0; }
+.ep-call code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px;
+  color: var(--ink); overflow-wrap: anywhere;
+}
+.ep-note { font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+.verb {
+  flex: none; font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em;
+  padding: 3px 7px; border-radius: 5px; background: var(--paper-2); color: var(--ink-2);
+}
+.verb.get { color: #6fd08c; background: rgba(111, 208, 140, 0.12); }
+.verb.post { color: var(--orange); background: rgba(255, 90, 31, 0.14); }
+.verb.patch { color: #e0b44a; background: rgba(224, 180, 74, 0.14); }
+.verb.delete { color: #e46a6a; background: rgba(228, 106, 106, 0.14); }
+
+/* The hashtags an agent searches, and the MCP tool names. */
+.tagrow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.hashtag {
+  font-size: 11.5px; padding: 3px 8px; border-radius: 999px;
+  background: var(--paper-2); color: var(--ink-2); border: 1px solid var(--line);
+}
+.hashtag.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; }
+
+/* Agents the model proposed, waiting on a yes ------------------------------ */
+.proposals .agent-card.proposed { border-color: rgba(255, 90, 31, 0.4); background: rgba(255, 90, 31, 0.05); }
+.agent-title { font-weight: 600; font-size: 15px; }
+.agent-focus { margin: 0; font-size: 13.5px; color: var(--ink); }
+.agent-why { margin: 0; font-size: 13px; color: var(--ink-2); font-style: italic; }
+.agent-quota-note { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+.proposal-foot { display: flex; align-items: center; gap: 14px; margin-top: 14px; }
+.agent-card .spacer { flex: 1; }
+
+/* A quota you step, or type over. */
+.quota { display: inline-flex; align-items: center; gap: 4px; }
+.quota .input.num { width: 64px; text-align: center; padding: 7px 4px; }
+.quota-step {
+  width: 26px; height: 28px; border-radius: 7px; border: 1px solid var(--line);
+  background: var(--paper); color: var(--ink); font-size: 15px; line-height: 1; cursor: pointer;
+}
+.quota-step:hover { border-color: var(--orange); color: var(--orange); }
+.quota-unit { font-size: 12px; color: var(--ink-2); margin-left: 2px; }
+
+/* Running or paused, said once and the same everywhere. */
+.btn.small.toggle { min-width: 78px; }
+.btn.small.toggle.on { color: var(--orange); border-color: rgba(255, 90, 31, 0.5); }
+.badge.waiting {
+  font-size: 12px; padding: 4px 10px; border-radius: 999px; text-decoration: none;
+  background: rgba(255, 90, 31, 0.14); color: var(--orange); border: 1px solid rgba(255, 90, 31, 0.35);
+}
+.badge.waiting:hover { background: rgba(255, 90, 31, 0.22); }
+.warn { margin-top: 10px; font-size: 13px; color: #e46a6a; }
+
+@media (max-width: 1040px) {
+  .api-grid { grid-template-columns: 1fr; }
+}

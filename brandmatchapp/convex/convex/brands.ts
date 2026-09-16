@@ -163,6 +163,21 @@ export const patchCampaign = internalMutation({
   },
 })
 
+/** Drop a campaign and its agents. The leads it found stay with the brand. */
+export const removeCampaign = internalMutation({
+  args: { brandId: v.id('brands'), campaignId: v.id('campaigns') },
+  returns: v.boolean(),
+  handler: async (ctx, { brandId, campaignId }) => {
+    const campaign = await ctx.db.get(campaignId)
+    if (!campaign || campaign.brandId !== brandId) return false
+    const agents = await ctx.db.query('agents')
+      .withIndex('by_campaign', (q) => q.eq('campaignId', campaignId)).collect()
+    for (const a of agents) await ctx.db.delete(a._id)
+    await ctx.db.delete(campaignId)
+    return true
+  },
+})
+
 // Agents ------------------------------------------------------------------
 
 export const addAgent = internalMutation({
