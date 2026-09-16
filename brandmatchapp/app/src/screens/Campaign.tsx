@@ -102,14 +102,6 @@ export function Campaigns() {
                   <b className="num">{t.found.toLocaleString('en-US')}</b>
                   <small>leads found</small>
                 </span>
-                <button
-                  type="button"
-                  className={`btn small toggle${c.active ? ' on' : ''}`}
-                  aria-pressed={c.active}
-                  onClick={() => updateCampaign(c.id, { active: !c.active })}
-                >
-                  {c.active ? 'Running' : 'Paused'}
-                </button>
                 <a className="btn small" href={`#/campaign/${c.id}`}>Open</a>
               </div>
 

@@ -25,32 +25,30 @@ const MCP_CONFIG = `{
   }
 }`
 
+/** Where the config block goes. Named, so nobody wonders about theirs. */
+const CLIENTS = ['Claude', 'Claude Code', 'Cursor', 'Codex', 'VS Code', 'Windsurf', 'Zed', 'any MCP client']
+
 const STEPS = [
   {
-    n: '1/4',
-    title: 'Understand your ICP',
-    note: 'Your website goes in. Out comes who to reach, in plain words: the discipline, what they sell, who follows them. Three agents proposed, each on its own angle. Change any word.',
+    n: '1/3',
+    title: 'Enter your website',
+    note: 'We read it and write who to reach: the discipline, what they sell, who follows them. Three agents proposed, each on its own angle. Change any word, then approve.',
   },
   {
-    n: '2/4',
-    title: 'Find leads',
-    note: 'Three agents search Instagram every night. Quiet accounts drop out before they reach you. Email and handle ride along on every row.',
+    n: '2/3',
+    title: 'Get 500 leads a day',
+    note: 'The agents search Instagram every night and score what they find. Three stars: fits your niche, sells something of their own, fired a brand signal in the last 4 days. Email and handle on every row.',
   },
   {
-    n: '3/4',
-    title: 'Score it',
-    note: 'Three stars, one each: fits your niche, sells something of their own, fired a brand signal in the last 4 days. Best first, every morning.',
-  },
-  {
-    n: '4/4',
-    title: 'You close deals',
+    n: '3/3',
+    title: 'Close deals',
     note: 'Open the list, write to the top of it, move each one along: contacted, replied, deal. The only step left for you.',
   },
 ]
 
-/** The four visuals, one per step, built from the same parts as the app. */
+/** One visual per step, built from the same parts as the app. */
 function StepVisual({ n }: { n: string }) {
-  if (n === '1/4') {
+  if (n === '1/3') {
     return (
       <div className="viz viz-icp">
         <div className="viz-input"><span className="viz-caret" />strongher.co</div>
@@ -65,23 +63,7 @@ function StepVisual({ n }: { n: string }) {
       </div>
     )
   }
-  if (n === '2/4') {
-    const faces = ['LM', 'JK', 'SS', 'PL', 'TT', 'AL', 'RB', 'NK']
-    return (
-      <div className="viz viz-find">
-        <div className="viz-tags">
-          <span style={{ left: '4%', top: '10%' }}>Posted #ad 3 days ago</span>
-          <span style={{ left: '40%', top: '0%' }}>Sells a program</span>
-          <span style={{ left: '70%', top: '12%' }}>Media kit in bio</span>
-        </div>
-        <div className="viz-faces">
-          {faces.map((f, i) => <i key={f} style={{ ['--i' as string]: i }}>{f}</i>)}
-        </div>
-        <div className="viz-box"><span>tonight's batch</span></div>
-      </div>
-    )
-  }
-  if (n === '3/4') {
+  if (n === '2/3') {
     const rows = [
       ['liftwithmaya', '3', 'high intent'],
       ['jennakstrong', '2.5', 'high intent'],
@@ -166,9 +148,10 @@ function EarlyAccess({ size = 'normal', website }: { size?: 'normal' | 'small'; 
 
 /**
  * A word that turns every 2.4 seconds and holds still under reduced motion.
- * Each candidate sits in the same grid cell at its own width, and the box
- * animates to the width of the word on show. So the line never reflows and
- * never leaves a hole where a longer word used to be.
+ * Each candidate sits in the same grid cell at its own width, and the box takes
+ * the width of the word on show. So the line never leaves a hole where a longer
+ * word used to be. The width changes with the word rather than easing into it:
+ * a box easing open clips the incoming word mid-letter for the whole ease.
  */
 function TurningWord({ words, every = 2400 }: { words: readonly string[]; every?: number }) {
   const still = typeof window !== 'undefined'
@@ -218,12 +201,41 @@ function ProductVideo() {
   )
 }
 
+/** True once the page has scrolled past the hero. */
+function useFloated(after = 120): boolean {
+  const [past, setPast] = useState(false)
+  useEffect(() => {
+    const read = () => setPast(window.scrollY > after)
+    read()
+    window.addEventListener('scroll', read, { passive: true })
+    return () => window.removeEventListener('scroll', read)
+  }, [after])
+  return past
+}
+
+/** The nav links name sections, not routes. Take the page to them. */
+function useSectionScroll(): void {
+  useEffect(() => {
+    const go = () => {
+      const id = window.location.hash.replace(/^#\/?/, '')
+      if (!id || id.includes('/')) return
+      const el = document.getElementById(id)
+      if (el) window.requestAnimationFrame(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+    }
+    go()
+    window.addEventListener('hashchange', go)
+    return () => window.removeEventListener('hashchange', go)
+  }, [])
+}
+
 export function Landing() {
+  const floated = useFloated()
+  useSectionScroll()
   return (
     <>
       <Backdrop />
       <div className="landing">
-        <header className="land-nav">
+        <header className={`land-nav${floated ? ' floated' : ''}`}>
           <a className="brand" href="#/">
             <Logo size={24} />
             brandmatch
@@ -255,7 +267,7 @@ export function Landing() {
 
         <section className="land-section" id="how">
           <p className="eyebrow">How it works</p>
-          <h2 className="big">Four steps. <em>You only do the last one.</em></h2>
+          <h2 className="big">Three steps. <em>You only do the last one.</em></h2>
           <p className="section-lede">
             Enter your website. Everything from there to a ranked list with emails on it runs on its own, every night.
           </p>
@@ -279,8 +291,8 @@ export function Landing() {
           <p className="eyebrow">Connect your agent</p>
           <h2 className="big">Hooked up in <em>one config block.</em></h2>
           <p className="section-lede">
-            One click for Claude, or paste this into any MCP agent: Cursor, an IDE, your own. The REST API covers
-            everything else. Work the list here, or never open the app at all.
+            One config block, any MCP client. Your agent reads the list, classifies it and runs your campaigns.
+            The REST API covers everything else. Work the list here, or never open the app at all.
           </p>
 
           <div className="connect">
@@ -288,7 +300,11 @@ export function Landing() {
               <pre><code>{MCP_CONFIG}</code></pre>
             </div>
             <div className="connect-side">
-              <a className="btn primary" href="#access">Add to Claude</a>
+              <span className="connect-where">Add it to</span>
+              <ul className="clients">
+                {CLIENTS.map((c) => <li key={c}>{c}</li>)}
+              </ul>
+              <a className="btn primary" href="#access">Get your key</a>
               <a className="btn" href="#/connect">View API docs</a>
             </div>
           </div>
@@ -302,35 +318,24 @@ export function Landing() {
 
         <section className="land-section centred" id="pricing">
           <p className="eyebrow">Pricing</p>
-          <h2 className="big">One plan. <em>That is the whole page.</em></h2>
+          <h2 className="big">Simple pricing <em>for all needs.</em></h2>
           <p className="section-lede">
-            Your first sourcing hire, for founders and small brand teams who would rather write to creators than
-            search for them.
+            Leads that fit your niche, post this week, and already take brand deals. Found every morning, yours alone.
           </p>
-
-          <div className="outcomes">
-            <div className="outcome">
-              <b>500</b>
-              <span>scored leads land every morning, best first, emails on the row</span>
-            </div>
-            <div className="outcome">
-              <b>0 hours</b>
-              <span>of searching. The list is built while you sleep, from your website alone</span>
-            </div>
-            <div className="outcome">
-              <b>Forever</b>
-              <span>every lead is yours alone. Nobody else on the platform is ever handed the same handle</span>
-            </div>
-          </div>
 
           <div className="one-plan">
             <div className="plan dark">
               <span className="plan-tag">Everything</span>
-              <p className="price">$99<small>a month</small></p>
+              <p className="price">
+                <s>$299</s>
+                <span className="now">$99</span>
+                <small>a month</small>
+              </p>
+              <p className="per-lead"><b>$0.0066 a lead</b>, scored, with the contact on the row</p>
               <ul>
                 <li className="lead">
                   Up to 500 scored leads a day
-                  <small>15,000 a month. $0.0066 a lead, scored, with the contact on the row.</small>
+                  <small>15,000 a month, at the price most tools charge for a search box.</small>
                 </li>
                 <li>Email and Instagram handle on every row</li>
                 <li>Unlimited campaigns and agents</li>
