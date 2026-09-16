@@ -93,3 +93,9 @@ export function passes(c: Creatorish, f: Filters, now = Date.now()): boolean {
   if (f.languages?.length && (!c.language || !f.languages.includes(c.language))) return false
   return true
 }
+
+/**
+ * The CRM, in six words. A tag is a stage, and these are the stages, so an
+ * API or an AI moves a lead along them without inventing its own.
+ */
+export const STAGES = ['to contact', 'contacted', 'replied', 'in talks', 'deal', 'passed'] as const

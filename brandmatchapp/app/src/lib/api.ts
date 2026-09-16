@@ -69,9 +69,9 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
 
 export const api = {
   me: () => call<{ id: string; email: string; credits: number; plan: string; role: 'owner' | 'brand'; availableToYou: number }>('/me'),
-  contacts: (campaign?: string | null, limit = 500) =>
+  contacts: (campaign?: string | null, limit = 500, offset = 0) =>
     call<{ contacts: FeedRow[]; counts: { total: number; today: number; qualified: number } }>(
-      `/contacts?limit=${limit}${campaign ? `&campaign=${campaign}` : ''}`,
+      `/contacts?limit=${limit}&offset=${offset}${campaign ? `&campaign=${campaign}` : ''}`,
     ),
   campaigns: () => call<{ campaigns: ApiCampaign[] }>('/campaigns'),
   stats: (days = 30) => call<{ daily: ApiDaily[] }>(`/stats?days=${days}`),
@@ -107,69 +107,85 @@ export interface AdminOverview {
 }
 
 // What the API sends back -------------------------------------------------
+// Convex shapes: camelCase, ids under _id where the row is a document, and
+// every date as milliseconds since the epoch.
 
 export interface FeedRow {
   id: string
   handle: string
   name: string
   bio: string
-  avatar: string | null
+  avatar?: string
   followers: number
-  engagement_rate: number | null
-  median_reel_views: number | null
-  posts_per_month: number | null
-  last_post_at: string | null
-  country: string | null
-  language: string | null
-  email: string | null
-  external_links: string[]
+  engagementRate?: number
+  medianReelViews?: number
+  postsPerMonth?: number
+  lastPostAt?: number
+  country?: string
+  language?: string
+  email?: string
+  externalLinks: string[]
   sells: string
   signals: { type: string; label: string; strength: 'strong' | 'soft'; date: string }[]
   niche: number
-  niche_why: string
+  nicheWhy: string
   selling: number
   signal: number
   stars: number
-  campaign_id: string
-  campaign_name: string
-  agent_id: string | null
-  discovered_at: string
+  campaignId: string
+  campaignName: string
+  agentId?: string
+  discoveredAt: number
   fresh: boolean
-  note: string | null
+  note?: string
   tags: string[]
   rejected: boolean
   done: boolean
 }
 
-export interface ApiCampaign {
-  id: string
+export interface ApiAgent {
+  _id: string
+  campaignId: string
   name: string
-  website: string | null
+  focus: string
+  keywords: string[]
+  hashtags: string[]
+  leadsPerDay: number
+  status: 'proposed' | 'active' | 'paused'
+  proposedWhy?: string
+  lastRunAt?: number
+}
+
+export interface ApiCampaign {
+  _id: string
+  _creationTime: number
+  name: string
+  website?: string
   brief: { who?: string; summary?: string; answers?: { questionId: string; value: string | null }[] }
   filters: Record<string, unknown>
-  leads_per_day: number
-  run_at: string
+  leadsPerDay: number
+  runAt: string
   active: boolean
-  created_at: string
-  agents: { id: string; name: string; focus: string; leads_per_day: number; active: boolean }[]
+  agents: ApiAgent[]
 }
 
 export interface ApiDaily {
   date: string
-  campaign_id: string
-  agent_id: string | null
+  campaignId: string
+  agentId?: string
   gathered: number
   leads: number
   qualified: number
 }
 
 export interface ApiPost {
-  id: string
-  creator_id: string
+  _id: string
+  creatorId: string
   kind: string
-  url: string | null
-  thumbnail: string | null
+  url: string
+  thumbnail?: string
   views: number
+  likes: number
   comments: number
-  posted_at: string | null
+  postedAt?: number
 }

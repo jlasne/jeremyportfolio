@@ -12,6 +12,8 @@ import { CreatorDetail } from '../components/CreatorDetail'
 import { FilterForm } from '../components/FilterForm'
 import { Stars } from '../components/Stars'
 
+import { STAGES } from '../data/stages'
+
 type CriterionKey = 'niche' | 'active' | 'intent'
 
 /** How many rows the list paints at once. The count in the head is the real one. */
@@ -193,6 +195,20 @@ export function Contacts({ scopeId }: { scopeId: string | null }) {
           )}
         </div>
 
+        <div className="stage-chips" role="group" aria-label="Stage">
+          {STAGES.map((st) => (
+            <button
+              key={st}
+              type="button"
+              className={`chip${tag === st ? ' on' : ''}`}
+              aria-pressed={tag === st}
+              onClick={() => setTag(tag === st ? null : st)}
+            >
+              {st}{countTagged(st) ? <small> {countTagged(st)}</small> : null}
+            </button>
+          ))}
+        </div>
+
         <span className="spacer" />
         {done > 0 && (
           <button type="button" className={`btn${showDone ? ' on' : ''}`} onClick={() => setShowDone((v) => !v)}>
@@ -274,8 +290,8 @@ export function Contacts({ scopeId }: { scopeId: string | null }) {
 
       {contacts.length > page.length && (
         <div className="more-rows">
-          <button type="button" className="btn" onClick={() => setShownCount((n) => n + PAGE * 4)}>
-            Show {Math.min(PAGE * 4, contacts.length - page.length).toLocaleString('en-US')} more
+          <button type="button" className="btn" onClick={() => setShownCount(contacts.length)}>
+            Show all {contacts.length.toLocaleString('en-US')}
           </button>
           <span className="faint">
             {page.length.toLocaleString('en-US')} of {contacts.length.toLocaleString('en-US')}

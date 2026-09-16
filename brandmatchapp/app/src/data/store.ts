@@ -8,6 +8,7 @@ import { rejections as mockRejections } from '../mock/rejections'
 import { defaultFilters } from '../mock/filters'
 import { settings as mockSettings } from '../mock/settings'
 import { isLive } from '../lib/api'
+import { STAGES } from './stages'
 
 // The only place state lives. Seeded from the mock folder the first time
 // something reads it, so a page that shows no data pays nothing: building a
@@ -41,7 +42,7 @@ function seed(): State {
     daily: mockDaily,
     notes: Object.fromEntries(mockNotes.map((n) => [n.creatorId, n])),
     tags: Object.fromEntries(Object.entries(mockTags).map(([k, v]) => [k, [...v]])),
-    tagVocabulary: [...mockVocabulary],
+    tagVocabulary: [...STAGES, ...mockVocabulary.filter((t) => !(STAGES as readonly string[]).includes(t))],
     rejections: [...mockRejections],
     done: [],
     filters: { ...defaultFilters, countries: [], languages: [] },
@@ -98,6 +99,7 @@ export async function hydrate(): Promise<boolean> {
       rejections: remote.rejections,
       done: remote.done,
       filters: remote.filters,
+      tagVocabulary: [...new Set([...STAGES, ...Object.values(remote.tags).flat()])],
     })
     return true
   } catch (e) {

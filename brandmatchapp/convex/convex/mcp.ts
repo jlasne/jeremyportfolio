@@ -1,6 +1,7 @@
 import { httpAction } from './_generated/server'
 import { internal } from './_generated/api'
 import type { Id } from './_generated/dataModel'
+import { STAGES } from './scoring'
 
 // brandmatch over MCP, so the AI you already pay for can work the list.
 //
@@ -48,6 +49,7 @@ const TOOLS = [
         min_stars: { type: 'number', description: 'Only leads at or above this score, 0 to 3.' },
         with_email: { type: 'boolean', description: 'Only leads carrying a contact.' },
         signal_within_days: { type: 'number', description: 'Only leads whose last brand signal is this fresh.' },
+        stage: { type: 'string', description: `Only leads at this CRM stage: ${STAGES.join(', ')}.` },
         limit: { type: 'number', description: 'How many rows, up to 200. Defaults to 40.' },
       },
     },
@@ -59,14 +61,14 @@ const TOOLS = [
   },
   {
     name: 'classify_lead',
-    description: 'Mark a lead as dealt with (done), tag it, note it, or reject it. The app is the CRM, so a write here shows in the list straight away. Use done once you have written to them.',
+    description: `Move a lead through the CRM. Tags are stages, use exactly one of: ${STAGES.join(', ')}. Set a stage with action tag and the stage as value; the earlier stage is replaced. Mark done once you have written to them. note keeps free text. reject drops the lead for good.`,
     inputSchema: {
       type: 'object',
       required: ['creator_id', 'action'],
       properties: {
         creator_id: { type: 'string' },
         action: { type: 'string', enum: ['tag', 'untag', 'note', 'done', 'undone', 'reject', 'unreject'] },
-        value: { type: 'string', description: 'The tag, or the note text. Ignored by the others.' },
+        value: { type: 'string', description: `For tag: one of ${STAGES.join(', ')}. For note: the text.` },
       },
     },
   },
@@ -171,6 +173,7 @@ export const mcp = httpAction(async (ctx, req) => {
         brandId: brand._id,
         campaignId: (args.campaign as Id<'campaigns'>) ?? undefined,
         scope: 'open',
+        tag: args.stage ? String(args.stage) : undefined,
         limit: Math.min(Number(args.limit ?? 40), 200),
       })
       const minStars = Number(args.min_stars ?? 0)
@@ -197,6 +200,7 @@ export const mcp = httpAction(async (ctx, req) => {
           email: r.email,
           sells: r.sells,
           last_signal: r.signals?.[0] ?? null,
+          stage: (r.tags as string[]).find((t) => (STAGES as readonly string[]).includes(t)) ?? 'to contact',
           campaign: r.campaignName,
         }))
 

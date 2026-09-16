@@ -2,7 +2,7 @@ import { internalMutation, internalQuery } from './_generated/server'
 import { v } from 'convex/values'
 import type { Doc, Id } from './_generated/dataModel'
 import type { QueryCtx } from './_generated/server'
-import { QUALIFIED_MIN, passes, sellingLevel, signalLevel, type Filters } from './scoring'
+import { QUALIFIED_MIN, STAGES, passes, sellingLevel, signalLevel, type Filters } from './scoring'
 
 // The feed, and what the brand does to it.
 //
@@ -103,7 +103,7 @@ async function toRow(
 /** Filters cut the volume. Stars set the order. Filters never change a score. */
 export async function readFeed(
   ctx: QueryCtx,
-  args: { brandId: Id<'brands'>; campaignId?: Id<'campaigns'>; scope?: string; limit?: number; offset?: number },
+  args: { brandId: Id<'brands'>; campaignId?: Id<'campaigns'>; scope?: string; tag?: string; limit?: number; offset?: number },
 ): Promise<{ rows: Row[]; counts: { total: number; today: number; qualified: number } }> {
   const now = Date.now()
   const midnight = new Date().setHours(0, 0, 0, 0)
@@ -133,6 +133,7 @@ export async function readFeed(
     if (scope === 'rejected' && !row.rejected) continue
     if (scope !== 'rejected' && row.rejected) continue
     if (scope === 'open' && row.done) continue
+    if (args.tag && !row.tags.includes(args.tag)) continue
     all.push(row)
   }
 
@@ -153,6 +154,7 @@ export const feed = internalQuery({
     brandId: v.id('brands'),
     campaignId: v.optional(v.id('campaigns')),
     scope: v.optional(v.string()),
+    tag: v.optional(v.string()),
     limit: v.optional(v.number()),
     offset: v.optional(v.number()),
   },
@@ -223,6 +225,12 @@ export const mark = internalMutation({
       case 'tag': {
         if (!value) return false
         if (existing.some((m) => m.kind === 'tag' && m.value === value)) break
+        // A stage replaces the earlier stage. Any other tag simply adds.
+        if ((STAGES as readonly string[]).includes(value)) {
+          for (const m of existing) {
+            if (m.kind === 'tag' && m.value && (STAGES as readonly string[]).includes(m.value)) await ctx.db.delete(m._id)
+          }
+        }
         await ctx.db.insert('marks', { brandId, creatorId, kind: 'tag', value })
         break
       }

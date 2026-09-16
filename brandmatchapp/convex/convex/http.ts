@@ -72,7 +72,8 @@ const api = httpAction(async (ctx, req) => {
         brandId: brand._id,
         campaignId: (q.get('campaign') as Id<'campaigns'>) ?? undefined,
         scope: q.get('scope') ?? 'all',
-        limit: Math.min(Number(q.get('limit') ?? 60), 500),
+        tag: q.get('tag') ?? undefined,
+        limit: Math.min(Number(q.get('limit') ?? 60), 5000),
         offset: Number(q.get('offset') ?? 0),
       })
       return json({ contacts: out.rows, counts: out.counts })

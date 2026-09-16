@@ -8,13 +8,14 @@ import { DAY } from './scoring'
 //
 // Two numbers frame the recommendation:
 //
-//   floor    below this share of fresh crawling, the pool cannot keep up.
-//            A claim lasts `claimDays`, so the pool can sustain at most
-//            free / claimDays leads a day. Whatever demand is above that has
-//            to be crawled.
+//   floor    the fresh share at which the pool lasts 90 days. A lead handed
+//            over is gone from the pool for good, so the pool is a stock, and
+//            what is not crawled fresh is drawn from it. Under the floor it
+//            empties inside a quarter.
 //   ceiling  above this share, Apify eats more than 30% of revenue. A crawl
 //            nets about two thirds of what it fetches, at $0.0023 a profile.
 
+const POOL_HORIZON_DAYS = 90
 const APIFY_PER_PROFILE = 0.0023
 const FETCH_PER_LEAD = 1.5
 const SCORE_PER_LEAD = 0.000011
@@ -80,28 +81,29 @@ export const overview = internalQuery({
     }
 
     // The recommendation.
-    const sustainablePoolPerDay = poolFree / settings.claimDays
-    const floor = paidDemand > 0 ? Math.max(0, 1 - sustainablePoolPerDay / paidDemand) : 0
+    const fresh = settings.freshFloor
+    const drawPerDay = paidDemand * (1 - fresh)
+    const poolDaysLeft = drawPerDay > 0 ? Math.floor(poolFree / drawPerDay) : null
+    const floor = paidDemand > 0 ? Math.min(1, Math.max(0, 1 - poolFree / (paidDemand * POOL_HORIZON_DAYS))) : 0
     const revenuePerDay = (paidCount * PRICE_PER_MONTH) / 30
     const apifyPerFreshLead = FETCH_PER_LEAD * APIFY_PER_PROFILE
     const ceiling = paidDemand > 0
       ? Math.min(1, (COST_SHARE_CAP * revenuePerDay) / (paidDemand * apifyPerFreshLead))
       : 1
 
-    const fresh = settings.freshFloor
     const apifyPerDay = paidDemand * fresh * apifyPerFreshLead
     const scoringPerDay = paidDemand * SCORE_PER_LEAD
 
     return {
       settings,
-      pool: { size: poolSize, free: poolFree, sustainablePerDay: Math.round(sustainablePoolPerDay) },
+      pool: { size: poolSize, free: poolFree, daysLeft: poolDaysLeft, horizonDays: POOL_HORIZON_DAYS },
       demand: { paidAccounts: paidCount, leadsPerDay: paidDemand },
       recommendation: {
         floor: Math.round(floor * 100) / 100,
         ceiling: Math.round(ceiling * 100) / 100,
         current: fresh,
-        // Where the current setting sits: under the floor the pool runs dry,
-        // over the ceiling the margin does.
+        // Where the current setting sits: under the floor the pool is spent
+        // inside the horizon, over the ceiling the margin is.
         verdict: fresh < floor ? 'pool runs dry' : fresh > ceiling ? 'margin too thin' : 'in range',
       },
       cost: {

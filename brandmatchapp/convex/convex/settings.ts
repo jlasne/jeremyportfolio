@@ -10,7 +10,8 @@ export const DEFAULTS = {
   freshFloor: 0.3,
   /** What the $99 plan covers, a day. */
   includedPerDay: 500,
-  claimDays: 14,
+  /** A lead handed to a brand is that brand's. A hundred years is forever. */
+  claimDays: 36500,
   trialDays: 3,
   trialCredits: 750,
 }

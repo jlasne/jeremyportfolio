@@ -3,7 +3,7 @@ import { defaultFilters } from '../mock/filters'
 import { postsFor } from '../mock/posts'
 import { timezones as mockTimezones } from '../mock/settings'
 import { toCsv } from '../lib/csv'
-import { absolute, isNewToday, withinDays } from '../lib/format'
+import { absolute, daysSince, isNewToday } from '../lib/format'
 import { BUCKETS, CRITERIA, QUALIFIED_MIN, latestSignal, scoreOf } from './score'
 import { getState, getVersion, setState } from './store'
 import { api } from '../lib/api'
@@ -47,12 +47,14 @@ export function isHigh(score: Score): boolean {
 }
 
 function passes(c: Creator, f: Filters, now: Date): boolean {
+  // Unknown reads as 0 on a live row. The API lets an unknown through, so a
+  // 0 here is not a failing value, it is a missing one, and it passes too.
   if (c.followers < f.followersMin || c.followers > f.followersMax) return false
-  if (c.engagementRate < f.engagementMin) return false
-  if (f.reelViewsMin !== null && c.medianReelViews < f.reelViewsMin) return false
+  if (c.engagementRate > 0 && c.engagementRate < f.engagementMin) return false
+  if (f.reelViewsMin !== null && c.medianReelViews > 0 && c.medianReelViews < f.reelViewsMin) return false
   if (f.emailInBio === 'yes' && !c.email) return false
-  if (!withinDays(c.lastPostAt, f.lastPostWithin, now)) return false
-  if (c.postsPerMonth < f.postsPerMonthMin) return false
+  if (daysSince(c.lastPostAt, now) > f.lastPostWithin) return false
+  if (c.postsPerMonth > 0 && c.postsPerMonth < f.postsPerMonthMin) return false
   if (f.countries.length && !f.countries.includes(c.country)) return false
   if (f.languages.length && !f.languages.includes(c.language)) return false
   return true
@@ -416,13 +418,13 @@ async function loadPosts(creatorId: string): Promise<void> {
       posts: {
         ...s.posts,
         [creatorId]: posts.map((p) => ({
-          id: p.id,
+          id: p._id,
           creatorId,
           kind: p.kind === 'reel' ? 'reel' : 'post',
           thumbnail: p.thumbnail ?? '',
           views: p.views,
           comments: p.comments,
-          date: p.posted_at ?? new Date().toISOString(),
+          date: p.postedAt ? new Date(p.postedAt).toISOString() : new Date().toISOString(),
         })),
       },
     }))
