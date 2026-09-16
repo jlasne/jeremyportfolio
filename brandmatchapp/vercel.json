@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/api/mcp", "destination": "https://dashing-swan-386.eu-west-1.convex.site/mcp" },
+    { "source": "/api/:path*", "destination": "https://dashing-swan-386.eu-west-1.convex.site/api/:path*" }
+  ]
+}

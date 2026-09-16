@@ -1387,3 +1387,5 @@ body { background: transparent; }
   .admin-table .row { grid-template-columns: 1.6fr 1fr 1fr; }
   .admin-table .row > :nth-child(n+4) { display: none; }
 }
+/* The admin page holds a four-up knob row and three tiles, so it runs wider. */
+.page.admin { max-width: 1100px; }
