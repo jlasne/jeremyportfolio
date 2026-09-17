@@ -25,6 +25,12 @@ const MCP_CONFIG = `{
   }
 }`
 
+/**
+ * The one thing every button asks for, said the same way in every place.
+ * When the doors open this becomes 'Start for free' and the page follows.
+ */
+const CTA = 'Get early access'
+
 /** Where the config block goes. Named, so nobody wonders about theirs. */
 const CLIENTS = ['Claude', 'Claude Code', 'Cursor', 'Codex', 'VS Code', 'Windsurf', 'Zed', 'any MCP client']
 
@@ -139,7 +145,7 @@ function EarlyAccess({ size = 'normal', website }: { size?: 'normal' | 'small'; 
         aria-label="Your email"
       />
       <button className="btn primary" type="submit" disabled={state === 'sending'}>
-        {state === 'sending' ? 'Sending' : 'Get early access'}
+        {state === 'sending' ? 'Sending' : CTA}
       </button>
       {state === 'error' && <span className="waitlist-error">{message}</span>}
     </form>
@@ -246,7 +252,7 @@ export function Landing() {
             <a href="#pricing">Pricing</a>
           </nav>
           <span className="spacer" />
-          <a className="btn primary" href="#access">Get early access</a>
+          <a className="btn primary" href="#access">{CTA}</a>
         </header>
 
         <div className="hero-block">
@@ -257,7 +263,6 @@ export function Landing() {
               before you wake up.
             </p>
             <EarlyAccess website="strongher.co" />
-            <p className="hero-note">Three days free on 14,259 creators already in the pool. No card.</p>
           </section>
 
           <div className="video-wrap">
@@ -291,8 +296,8 @@ export function Landing() {
           <p className="eyebrow">Connect your agent</p>
           <h2 className="big">Hooked up in <em>one config block.</em></h2>
           <p className="section-lede">
-            One config block, any MCP client. Your agent reads the list, classifies it and runs your campaigns.
-            The REST API covers everything else. Work the list here, or never open the app at all.
+            brandmatch is built for an agent to drive. Yours reads the list, scores it, moves each lead along a
+            stage and starts the next search, on your key. The app is the same account, for when you want to look.
           </p>
 
           <div className="connect">
@@ -304,15 +309,14 @@ export function Landing() {
               <ul className="clients">
                 {CLIENTS.map((c) => <li key={c}>{c}</li>)}
               </ul>
-              <a className="btn primary" href="#access">Get your key</a>
-              <a className="btn" href="#/connect">View API docs</a>
+              <a className="btn primary" href="#access">{CTA}</a>
             </div>
           </div>
 
           <ul className="connect-notes">
-            <li>MCP and REST on every plan, same key, no extra tier</li>
             <li>Ask in words: who fired a brand signal this week</li>
-            <li>Writes land in the app, because the app is the CRM</li>
+            <li>Nine tools, one key: read, score, classify, create, approve, pause</li>
+            <li>What your agent writes is what the app shows, because the app is the CRM</li>
           </ul>
         </section>
 
@@ -331,7 +335,6 @@ export function Landing() {
                 <span className="now">$99</span>
                 <small>a month</small>
               </p>
-              <p className="per-lead"><b>$0.0066 a lead</b>, scored, with the contact on the row</p>
               <ul>
                 <li className="lead">
                   Up to 500 scored leads a day
@@ -343,7 +346,7 @@ export function Landing() {
                 <li>Every lead yours alone. Forever</li>
                 <li>Cancel any morning</li>
               </ul>
-              <a className="btn primary" href="#access">Start 3 days free</a>
+              <a className="btn primary" href="#access">{CTA}</a>
             </div>
           </div>
           <p className="section-lede compare">
@@ -351,8 +354,7 @@ export function Landing() {
             Here the list is done when you wake up.
           </p>
           <p className="section-lede">
-            Three days free on the 14,259 creators already in the pool. No card.
-            Need more than 500 a day? <a href="mailto:jeremy@brandmatch.app">Chat with me</a> and we size it together.
+            Need more than 500 a day? <a href="mailto:hey@jeremylasne.com">Chat with me</a> and we size it together.
           </p>
         </section>
 
@@ -378,7 +380,7 @@ export function Landing() {
           <div>
             <h4>Get in</h4>
             <a href="#access">Early access</a>
-            <a href="mailto:jeremy@brandmatch.app">Chat with me</a>
+            <a href="mailto:hey@jeremylasne.com">Chat with me</a>
           </div>
           <p className="copy">© 2026 brandmatch. Creators for your brand, every morning.</p>
         </footer>

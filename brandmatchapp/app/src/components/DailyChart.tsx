@@ -116,7 +116,7 @@ export function DailyChart({
                     y={y(top)}
                     width={barW}
                     height={Math.max(0, h(r.leads) - 1)}
-                    rx={Math.min(3, barW / 3)}
+                    rx={0}
                     fill={colour(c)}
                     opacity={i === active ? 1 : 0.5}
                   />

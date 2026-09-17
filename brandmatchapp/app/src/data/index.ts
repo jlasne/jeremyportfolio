@@ -429,9 +429,12 @@ export function updateCampaignAgent(campaignId: string, agentId: string, patch: 
     ),
   }))
   if (!getState().live || local(agentId)) return
-  if (full.status !== undefined) {
-    api.setAgent(agentId, full.status === 'active', { leadsPerDay: patch.leadsPerDay })
-      .catch((e) => console.warn('brandmatch: agent status not saved', e))
+  if (full.status !== undefined || patch.hashtags !== undefined || patch.leadsPerDay !== undefined) {
+    const now = getCampaign(campaignId)?.agents.find((a) => a.id === agentId)
+    api.setAgent(agentId, (full.status ?? now?.status) === 'active', {
+      leadsPerDay: patch.leadsPerDay,
+      hashtags: patch.hashtags,
+    }).catch((e) => console.warn('brandmatch: agent not saved', e))
   }
 }
 

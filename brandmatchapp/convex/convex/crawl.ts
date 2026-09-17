@@ -126,7 +126,13 @@ export const run = internalAction({
   },
 })
 
-/** Active agents on active campaigns, 20 hours stale or never run. */
+/**
+ * Active agents, 20 hours stale or never run.
+ *
+ * A campaign is a name for a group. Whether anything runs is the agents' own
+ * answer, one flag per agent, so a campaign cannot say paused while its agents
+ * say running.
+ */
 export const dueAgents = internalQuery({
   args: { campaignId: v.optional(v.id('campaigns')) },
   returns: v.any(),
@@ -142,7 +148,7 @@ export const dueAgents = internalQuery({
       if (campaignId && a.campaignId !== campaignId) continue
       if (!campaignId && a.lastRunAt && a.lastRunAt > cutoff) continue
       const campaign = await ctx.db.get(a.campaignId)
-      if (!campaign?.active) continue
+      if (!campaign) continue
       // A trial reads the pool and never spends on Apify.
       const brand = await ctx.db.get(campaign.brandId)
       if (brand?.plan !== 'paid') continue

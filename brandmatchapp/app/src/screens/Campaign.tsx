@@ -83,15 +83,15 @@ export function Campaigns() {
           return (
             <section className="campaign-group" key={c.id}>
               <div className="group-head">
-                <span className={`dot${c.active ? ' on' : ''}`} aria-hidden="true" />
+                <span className={`dot${running > 0 ? ' on' : ''}`} aria-hidden="true" />
                 <span className="who">
                   <a className="name" href={`#/campaign/${c.id}`}>{c.name || 'Untitled campaign'}</a>
                   <span className="handle">{c.brief.summary}</span>
                 </span>
                 <span className="state">
-                  {c.active
+                  {running > 0
                     ? `${running} of ${live.length} agent${live.length === 1 ? '' : 's'} running, ${campaignLeadsPerDay(c)} leads a day in quota`
-                    : 'Paused'}
+                    : `${live.length} agent${live.length === 1 ? '' : 's'}, none running`}
                 </span>
                 {waiting > 0 && (
                   <a className="badge waiting" href={`#/campaign/${c.id}`}>
@@ -109,12 +109,12 @@ export function Campaigns() {
               <ul className="agent-list">
                 {live.map((a) => (
                   <li
-                    className={`agent-line${c.active && a.status === 'active' ? '' : ' off'}`}
+                    className={`agent-line${a.status === 'active' ? '' : ' off'}`}
                     key={a.id}
-                    style={{ borderLeftColor: c.active && a.status === 'active' ? colour : undefined }}
+                    style={{ borderLeftColor: a.status === 'active' ? colour : undefined }}
                   >
                     <span className="agent-line-name">
-                      {c.active && a.status === 'active' && <i className="pulse" aria-hidden="true" />}
+                      {a.status === 'active' && <i className="pulse" aria-hidden="true" />}
                       {a.name}
                     </span>
                     <span className="agent-line-focus">{a.focus || 'No angle written yet'}</span>
@@ -123,7 +123,7 @@ export function Campaigns() {
                       <span>a day quota</span>
                     </span>
                     <span className="agent-when">
-                      {c.active && a.status === 'active' ? `Next run ${nextRunLabel(c.runAt)}` : 'Paused, no next run'}
+                      {a.status === 'active' ? `Next run ${nextRunLabel(c.runAt)}` : 'Paused, no next run'}
                     </span>
                     <button
                       type="button"
@@ -133,7 +133,6 @@ export function Campaigns() {
                     >
                       {a.status === 'active' ? 'Running' : 'Paused'}
                     </button>
-                    <Hashtags tags={a.hashtags} />
                   </li>
                 ))}
               </ul>
@@ -233,9 +232,6 @@ export function CampaignEditor({ campaignId, firstRun = false }: { campaignId: s
         <div className="page-head">
           <a className="back" href="#/campaign">Campaigns</a>
           <span className="spacer" />
-          <button type="button" className="btn" onClick={() => updateCampaign(campaign.id, { active: !campaign.active })}>
-            {campaign.active ? 'Pause' : 'Run every day'}
-          </button>
           <a className="btn primary" href={`#/contacts/${campaign.id}`}>See {tally.found.toLocaleString('en-US')} leads</a>
         </div>
       )}
@@ -339,10 +335,13 @@ export function CampaignEditor({ campaignId, firstRun = false }: { campaignId: s
         <h2>{live.length > 0 ? `Your agents (${live.length})` : 'Agents'}</h2>
         {live.length === 0 ? (
           <p className="muted">
-            No agent runs yet. Put your website above and we propose three, or add one yourself.
+            No agent yet. Put your website above and we propose three, or write one yourself.
           </p>
         ) : (
-          <p className="muted">Each agent takes one angle and carries its own daily quota. This is the only place they change.</p>
+          <p className="muted">
+            An agent is the filter: what it hunts for, the hashtags it searches, and how many leads a day it brings.
+            The campaign around it is only a name for the group.
+          </p>
         )}
         <div className="agents">
           {live.map((a) => (
@@ -371,14 +370,28 @@ export function CampaignEditor({ campaignId, firstRun = false }: { campaignId: s
                   Remove
                 </button>
               </div>
-              <input
-                className="input"
-                placeholder="What this agent hunts for, in one line"
-                value={a.focus}
-                aria-label="Agent focus"
-                onChange={(e) => updateCampaignAgent(campaign.id, a.id, { focus: e.target.value })}
-              />
-              <Hashtags tags={a.hashtags} />
+              <label className="agent-field">
+                <span>Hunts for</span>
+                <input
+                  className="input"
+                  placeholder="What this agent hunts for, in one line"
+                  value={a.focus}
+                  onChange={(e) => updateCampaignAgent(campaign.id, a.id, { focus: e.target.value })}
+                />
+              </label>
+              <label className="agent-field">
+                <span>Searches</span>
+                <input
+                  className="input"
+                  placeholder="squatform, liftingcoach, strengthcoach"
+                  value={a.hashtags.join(', ')}
+                  onChange={(e) => updateCampaignAgent(campaign.id, a.id, {
+                    hashtags: e.target.value.split(',')
+                      .map((h) => h.trim().replace(/^#/, '').toLowerCase().replace(/[^a-z0-9_]/g, ''))
+                      .filter(Boolean).slice(0, 6),
+                  })}
+                />
+              </label>
             </div>
           ))}
           <button type="button" className="btn" onClick={() => addCampaignAgent(campaign.id)}>Add an agent myself</button>

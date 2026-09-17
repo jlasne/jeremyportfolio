@@ -280,8 +280,11 @@ export function Contacts({ scopeId }: { scopeId: string | null }) {
               <small>followers</small>
             </span>
             <span className="metric">
-              <b className="num">{percent(c.creator.engagementRate)}</b>
-              <small>engaged</small>
+              {c.creator.engagementRate > 0 ? (
+                <><b className="num">{percent(c.creator.engagementRate)}</b><small>engaged</small></>
+              ) : (
+                <><b className="num">{c.creator.postsPerMonth || '—'}</b><small>posts a month</small></>
+              )}
             </span>
           </div>
         ))}

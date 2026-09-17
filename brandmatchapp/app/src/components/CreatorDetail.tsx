@@ -105,9 +105,15 @@ export function CreatorDetail({ id, onClose }: { id: string; onClose: () => void
             <h3>Numbers</h3>
             <div className="metrics">
               <div className="metric"><b>{compact(c.followers)}</b><small>followers</small></div>
-              <div className="metric"><b>{percent(c.engagementRate)}</b><small>engagement</small></div>
-              <div className="metric"><b>{compact(c.medianReelViews)}</b><small>median reel views</small></div>
-              <div className="metric"><b>{c.postsPerMonth}</b><small>posts a month</small></div>
+              {c.engagementRate > 0 && (
+                <div className="metric"><b>{percent(c.engagementRate)}</b><small>engagement</small></div>
+              )}
+              {c.medianReelViews > 0 && (
+                <div className="metric"><b>{compact(c.medianReelViews)}</b><small>median reel views</small></div>
+              )}
+              {c.postsPerMonth > 0 && (
+                <div className="metric"><b>{c.postsPerMonth}</b><small>posts a month</small></div>
+              )}
             </div>
             <p className="hint">Engagement and views come from the last 12 posts we crawled. Last post {relative(c.lastPostAt)}. First seen {relative(c.firstSeenAt)}. Crawled {relative(c.lastCrawlAt)}.</p>
           </section>

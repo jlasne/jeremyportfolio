@@ -683,7 +683,6 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
   position: relative; margin: 0; border-radius: 0;
   padding: 92px max(30px, calc((100% - 1128px) / 2));
 }
-.land-section + .land-section { border-top: 1px solid var(--l-rule); }
 .land-section h2.big { font-size: 38px; line-height: 1.15; margin-bottom: 16px; max-width: 880px; }
 .land-section h2.big em { font-style: normal; color: var(--orange); }
 .section-lede { color: var(--l-muted); font-size: 16.5px; max-width: 640px; margin-bottom: 34px; line-height: 1.55; }
@@ -1422,11 +1421,10 @@ body { background: transparent; }
 .page.admin { max-width: 1100px; }
 
 /* How it works: four wide panels, text left, a visual right, on the grid ---- */
-.hiw { display: flex; flex-direction: column; gap: 18px; margin-top: 34px; }
+.hiw { display: flex; flex-direction: column; gap: 10px; margin-top: 30px; }
 .hiw-panel {
-  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 40px; align-items: center;
-  padding: 36px 40px; border: 1px solid var(--l-rule); border-radius: 0;
-  background: rgba(25, 25, 25, 0.66); backdrop-filter: blur(6px);
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 48px; align-items: center;
+  padding: 44px 36px; border: 0; border-radius: 0; background: transparent;
 }
 .hiw-badge {
   display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: 0;
@@ -1435,8 +1433,8 @@ body { background: transparent; }
 .hiw-text h3 { font-size: 30px; line-height: 1.12; margin-bottom: 14px; letter-spacing: -0.02em; }
 .hiw-text p { font-size: 16px; line-height: 1.55; color: var(--l-muted); max-width: 440px; }
 .hiw-visual {
-  min-height: 300px; border: 1px solid var(--l-rule); border-radius: 0; background: var(--l-ground);
-  padding: 26px; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  min-height: 260px; border: 0; border-radius: 0; background: transparent;
+  padding: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
 .viz { width: 100%; }
 
@@ -1457,9 +1455,10 @@ body { background: transparent; }
 .viz-faces i { width: 44px; height: 44px; border-radius: 0; display: inline-flex; align-items: center; justify-content: center; font-style: normal; font-size: 12px; font-weight: 600; color: var(--l-ink); background: linear-gradient(135deg, rgba(255, 92, 43, 0.55), rgba(255, 92, 43, 0.15)); border: 1px solid var(--l-rule-firm); transform: translateY(calc(var(--i) * 3px - 10px)); }
 .viz-box { position: absolute; left: 22%; right: 22%; bottom: 0; height: 88px; border: 1px solid var(--l-rule-firm); border-top-width: 6px; border-top-color: var(--orange); border-radius: 0 6px 14px 14px; background: var(--l-card); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px; font-size: 12px; color: var(--l-faint); }
 
-.viz-score, .viz-close { display: flex; flex-direction: column; gap: 8px; }
-.viz-row { display: grid; grid-template-columns: 34px 1fr auto auto; gap: 12px; align-items: center; padding: 10px 14px; border-radius: 0; border: 1px solid var(--l-rule); background: var(--l-card); font-size: 14px; }
-.viz-row i { width: 34px; height: 34px; border-radius: 0; display: inline-flex; align-items: center; justify-content: center; font-style: normal; font-size: 11px; font-weight: 600; background: rgba(247, 242, 230, 0.08); color: var(--l-muted); border: 1px solid var(--l-rule); }
+.viz-score, .viz-close { display: flex; flex-direction: column; gap: 0; }
+.viz-row { display: grid; grid-template-columns: 26px 1fr auto auto; gap: 12px; align-items: center; padding: 13px 2px; border: 0; border-top: 1px solid var(--l-rule); background: transparent; font-size: 14px; }
+.viz-row:first-child { border-top: 0; }
+.viz-row i { width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-style: normal; font-size: 10px; font-weight: 600; background: transparent; color: var(--l-faint); border: 1px solid var(--l-rule); }
 .viz-row i.done { background: var(--orange); color: #fff; border-color: var(--orange); }
 .viz-row b { font-weight: 600; color: var(--l-ink); }
 .viz-stars { color: var(--orange); letter-spacing: 1px; font-size: 13px; }
@@ -1594,3 +1593,98 @@ body { background: transparent; }
 .waitlist-list a { color: var(--ink); }
 .waitlist-list a:hover { color: var(--orange); }
 .waitlist-list .spacer { flex: 1; }
+
+/* Corners, not a frame -------------------------------------------------------
+   A section is marked at its four corners and left open along its sides, so
+   the grid behind the page runs through it. Eight gradients draw the eight
+   arms; no extra element, and the background colour stays free underneath. */
+.corners {
+  --corner: 20px;
+  --corner-w: 1.5px;
+  --corner-c: var(--l-rule-firm, rgba(247, 242, 230, 0.34));
+  border: 0;
+  background-image:
+    linear-gradient(var(--corner-c), var(--corner-c)), linear-gradient(var(--corner-c), var(--corner-c)),
+    linear-gradient(var(--corner-c), var(--corner-c)), linear-gradient(var(--corner-c), var(--corner-c)),
+    linear-gradient(var(--corner-c), var(--corner-c)), linear-gradient(var(--corner-c), var(--corner-c)),
+    linear-gradient(var(--corner-c), var(--corner-c)), linear-gradient(var(--corner-c), var(--corner-c));
+  background-repeat: no-repeat;
+  background-size:
+    var(--corner) var(--corner-w), var(--corner-w) var(--corner),
+    var(--corner) var(--corner-w), var(--corner-w) var(--corner),
+    var(--corner) var(--corner-w), var(--corner-w) var(--corner),
+    var(--corner) var(--corner-w), var(--corner-w) var(--corner);
+  background-position:
+    left top, left top,
+    right top, right top,
+    left bottom, left bottom,
+    right bottom, right bottom;
+}
+
+/* Every container is marked at its corners instead of boxed in ------------- */
+.card, .list, .panel, .popover, .hiw-panel, .plan, .connect-code, .demo,
+.agent-card, .empty, .waitlist-box, .campaign-group, .viz-brief, .viz-input {
+  --corner: 20px;
+  --corner-w: 1.5px;
+  --corner-c: var(--line-2);
+  border: 0;
+  background-image:
+    linear-gradient(var(--corner-c), var(--corner-c)), linear-gradient(var(--corner-c), var(--corner-c)),
+    linear-gradient(var(--corner-c), var(--corner-c)), linear-gradient(var(--corner-c), var(--corner-c)),
+    linear-gradient(var(--corner-c), var(--corner-c)), linear-gradient(var(--corner-c), var(--corner-c)),
+    linear-gradient(var(--corner-c), var(--corner-c)), linear-gradient(var(--corner-c), var(--corner-c));
+  background-repeat: no-repeat;
+  background-size:
+    var(--corner) var(--corner-w), var(--corner-w) var(--corner),
+    var(--corner) var(--corner-w), var(--corner-w) var(--corner),
+    var(--corner) var(--corner-w), var(--corner-w) var(--corner),
+    var(--corner) var(--corner-w), var(--corner-w) var(--corner);
+  background-position:
+    left top, left top, right top, right top,
+    left bottom, left bottom, right bottom, right bottom;
+}
+/* On the landing the corners take the landing's own rule colour. */
+.landing .card, .landing .list, .hiw-panel, .plan, .connect-code, .landing .demo,
+.viz-brief, .viz-input { --corner-c: var(--l-rule-firm); }
+.plan.dark { --corner-c: var(--orange); --corner: 26px; --corner-w: 2px; }
+/* The step visuals carry no frame at all. */
+.hiw-visual, .viz { background-image: none; border: 0; }
+/* A card still needs its ground, so the colour is set apart from the corners. */
+.card, .list, .panel, .popover, .agent-card, .campaign-group, .waitlist-box { background-color: var(--panel); }
+.hiw-panel, .connect-code, .viz-brief, .viz-input { background-color: transparent; }
+.plan { background-color: transparent; }
+.plan.dark { background-color: rgba(255, 90, 31, 0.04); }
+.demo { background-color: var(--panel); }
+.empty { background-color: transparent; }
+
+/* The rail, open or down to its icons ------------------------------------- */
+.shell { transition: grid-template-columns 0.22s ease; }
+body.nav-shut .shell { grid-template-columns: 62px minmax(0, 1fr); }
+.sidenav-top { display: flex; align-items: center; gap: 6px; padding-bottom: 18px; }
+.sidenav .brand { padding: 4px 6px; flex: 1; min-width: 0; }
+.nav-toggle {
+  width: 26px; height: 26px; flex: none; display: inline-flex; align-items: center; justify-content: center;
+  background: transparent; border: 1px solid var(--line); color: var(--ink-2); cursor: pointer;
+}
+.nav-toggle:hover { border-color: var(--orange); color: var(--orange); }
+.nav-toggle i { display: block; width: 11px; height: 9px; border-top: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; position: relative; }
+.nav-toggle i::after { content: ''; position: absolute; left: 0; top: 3px; width: 100%; border-top: 1.5px solid currentColor; }
+.nav-glyph { width: 16px; height: 16px; flex: none; display: inline-flex; align-items: center; justify-content: center; }
+.sidenav a { display: flex; align-items: center; gap: 9px; }
+.sidenav .nav-label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; }
+
+/* Collapsed: the glyphs stay, every label becomes a tooltip. */
+.sidenav.shut { padding: 16px 8px; }
+.sidenav.shut .sidenav-top { justify-content: center; }
+.sidenav.shut .brand { display: none; }
+.sidenav.shut .nav-label { display: none; }
+.sidenav.shut a { justify-content: center; padding: 9px 0; gap: 0; }
+.sidenav.shut .pill { display: none; }
+.sidenav.shut .sidenav-foot { display: none; }
+.sidenav.shut .nav-glyph { width: 18px; height: 18px; }
+
+/* An agent's fields say what each one is for. */
+.agent-field { display: flex; align-items: center; gap: 10px; }
+.agent-field > span { flex: none; width: 74px; font-size: 12px; color: var(--ink-2); }
+.agent-field .input { flex: 1; min-width: 0; }
+.sidenav-foot .nav-label { white-space: normal; }
