@@ -773,7 +773,7 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 .page.centred .page-head, .page.centred .subhead { justify-content: center; }
 .one-plan { display: flex; justify-content: center; margin: 30px 0 22px; }
 .one-plan .plan { max-width: 420px; width: 100%; text-align: left; }
-.landing .one-plan .plan.dark { background: var(--l-ground); border-color: var(--orange); }
+.landing .one-plan .plan.dark { background-color: rgba(255, 90, 31, 0.05); }
 .landing .one-plan .plan.dark .price { color: var(--orange); }
 .landing .one-plan .plan.dark .btn { background: var(--orange); border-color: var(--orange); color: #fff; }
 .landing .one-plan .plan.dark .btn:hover { background: var(--orange-deep); border-color: var(--orange-deep); }
@@ -793,7 +793,7 @@ label.field > span, .field-label { display: block; font-size: 12px; color: var(-
 
 .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .plan { border: 1px solid var(--l-rule); border-radius: 0; padding: 30px; display: flex; flex-direction: column; gap: 16px; background: var(--l-card); }
-.plan.dark { background: var(--paper-2); border-color: var(--orange); color: var(--ink); }
+.plan.dark { background-color: rgba(255, 90, 31, 0.05); color: var(--ink); }
 .plan.dark h3, .plan.dark .big-figure b { color: var(--ink); }
 .plan.dark .price { color: var(--orange); }
 .plan.dark .muted, .plan.dark li, .plan.dark .big-figure span, .plan.dark .plan-tag { color: var(--ink-2); }
@@ -1561,8 +1561,11 @@ body { background: transparent; }
 /* The price, said twice: what it is worth, and what it costs ---------------- */
 .landing .one-plan .price { display: flex; align-items: baseline; justify-content: center; gap: 12px; flex-wrap: wrap; }
 .landing .one-plan .price s {
-  font-size: 0.52em; color: var(--l-muted); text-decoration-thickness: 3px;
+  font-size: 0.52em; color: var(--l-faint);
+  text-decoration-line: line-through;
   text-decoration-color: var(--orange);
+  -webkit-text-decoration-color: var(--orange);
+  text-decoration-thickness: 3px;
 }
 .landing .one-plan .price .now { color: var(--orange); }
 .landing .one-plan .price small { font-size: 0.26em; color: var(--l-muted); font-family: var(--font); letter-spacing: 0; }
