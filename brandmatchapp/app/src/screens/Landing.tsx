@@ -10,9 +10,21 @@ import { api } from '../lib/api'
 /** Drop the recording in here and the animation below steps aside for it. */
 const VIDEO_URL = ''
 
-/** The words that turn. Same people, three names; same thing, two names. */
-const WHO = ['content creators', 'influencers', 'contacts']
-const WHAT = ['agent', 'campaign']
+/** What the creators on your list have already done. The turn is the point. */
+const WHO = ['take deals', 'post weekly', 'sell already', 'reply']
+
+/** What both prices include. Said once, under them. */
+const HAS = [
+  'Up to 500 scored leads a day',
+  'Email and Instagram handle on every row',
+  'Unlimited campaigns and agents',
+  'API and MCP on the same key',
+  'Every lead yours alone, forever',
+  'Cancel any morning',
+]
+
+/** Said in three, under the buttons, the way a launch says them. */
+const FACTS = ['500 a day', 'Email on the row', 'Yours alone, forever']
 
 /** Paste this and an agent is connected. Shown on the landing as is. */
 const MCP_CONFIG = `{
@@ -251,6 +263,14 @@ export function Landing() {
     <>
       <Backdrop />
       <div className="landing">
+        <div className="land-banner">
+          <span>Early access</span>
+          <i aria-hidden="true" />
+          <span><b>$79 a month</b>, locked while you stay</span>
+          <i aria-hidden="true" />
+          <a href="#access">Get in →</a>
+        </div>
+
         <header className={`land-nav${floated ? ' floated' : ''}`}>
           <a className="brand" href="#/">
             <Logo size={24} />
@@ -267,12 +287,17 @@ export function Landing() {
 
         <div className="hero-block">
           <section className="hero">
-            <h1>Your AI <TurningWord words={WHAT} every={3600} /> finds <br />high intent <TurningWord words={WHO} />.</h1>
+            <h1>Find creators <br />who <TurningWord words={WHO} />.</h1>
             <p className="lede">
-              Enter your website. brandmatch learns your brand, finds the creators ready for a deal, and ranks them
-              before you wake up.
+              Enter your website. Every morning you get 500 creators who take brand deals, ranked, with the email on
+              the row.
             </p>
             <EarlyAccess website="strongher.co" />
+            <p className="hero-meta">
+              {FACTS.map((f, i) => (
+                <span key={f}>{i > 0 && <i aria-hidden="true" />}{f}</span>
+              ))}
+            </p>
           </section>
 
           <div className="video-wrap">
@@ -282,9 +307,9 @@ export function Landing() {
 
         <section className="land-section" id="how">
           <p className="eyebrow">How it works</p>
-          <h2 className="big">How do we <em>get you deals?</em></h2>
+          <h2 className="big">Three steps. <em>You do the last one.</em></h2>
           <p className="section-lede">
-            Three steps, and you only do the last one. What arrives is a qualified list, not a directory dump.
+            A qualified list, not a directory dump. Here is how it gets built while you sleep.
           </p>
           <div className="hiw">
             {STEPS.map((st) => (
@@ -313,7 +338,7 @@ export function Landing() {
 
         <section className="land-section" id="ways">
           <p className="eyebrow">Connect your agent</p>
-          <h2 className="big">Hooked up in <em>one config block.</em></h2>
+          <h2 className="big">Built for agents. <em>Yours drives it.</em></h2>
           <p className="section-lede">
             brandmatch is built for an agent to drive. Yours reads the list, scores it, moves each lead along a
             stage and starts the next search, on your key. The app is the same account, for when you want to look.
@@ -341,33 +366,30 @@ export function Landing() {
 
         <section className="land-section centred" id="pricing">
           <p className="eyebrow">Pricing</p>
-          <h2 className="big">Simple pricing <em>for all needs.</em></h2>
+          <h2 className="big">One plan. <em>Two prices.</em></h2>
           <p className="section-lede">
-            Leads that fit your niche, post this week, and already take brand deals. Found every morning, yours alone.
+            Lock $79 now and keep it while you stay. Or wait and pay $99 later. Same product either way.
           </p>
 
-          <div className="one-plan">
-            <div className="plan dark">
-              <span className="plan-tag">Everything</span>
-              <p className="price">
-                <s>$299</s>
-                <span className="now">$99</span>
-                <small>a month</small>
-              </p>
-              <ul>
-                <li className="lead">
-                  Up to 500 scored leads a day
-                  <small>15,000 a month, at the price most tools charge for a search box.</small>
-                </li>
-                <li>Email and Instagram handle on every row</li>
-                <li>Unlimited campaigns and agents</li>
-                <li>API and MCP, same key, no extra tier</li>
-                <li>Every lead yours alone. Forever</li>
-                <li>Cancel any morning</li>
-              </ul>
+          <div className="prices">
+            <div className="price-card now">
+              <span className="price-tag">Lock it now</span>
+              <p className="price"><span className="now">$79</span><small>a month</small></p>
+              <p className="price-note">Your card goes on file, the price stays yours, and the 3 days are still free.</p>
               <a className="btn primary" href="#access">{CTA}</a>
             </div>
+            <div className="price-card later">
+              <span className="price-tag">Or later</span>
+              <p className="price"><span>$99</span><small>a month</small></p>
+              <p className="price-note">Start the 3 days with no card. The price when you decide is $99.</p>
+              <a className="btn" href="#access">Start free</a>
+            </div>
           </div>
+
+          <ul className="plan-has">
+            {HAS.map((h) => <li key={h}>{h}</li>)}
+          </ul>
+
           <p className="section-lede compare">
             A database at $120 to $400 a month sells you a search box. You still find, vet and score each one.
             Here the list is done when you wake up.
@@ -378,8 +400,8 @@ export function Landing() {
         </section>
 
         <section className="land-cta" id="access">
-          <h2>Your next 10 leads are already out there.</h2>
-          <p>Leave your email. We open the doors in batches and write when yours is ready.</p>
+          <h2>Your next deal <em>is already out there.</em></h2>
+          <p>Leave your email. We open in batches and write the morning yours is ready.</p>
           <EarlyAccess />
         </section>
 
