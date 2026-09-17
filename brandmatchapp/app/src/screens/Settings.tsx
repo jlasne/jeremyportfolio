@@ -3,6 +3,37 @@ import { campaignLeadsPerDay, countDone, getCampaigns, getDashboard, getSettings
 import { useStore } from '../data/hooks'
 import { nextBatchLabel } from '../lib/format'
 
+/**
+ * On the way out, the offer that was on the table at onboarding. Anyone still
+ * paying $99 never took it, so it is new money to them and cheaper to us than
+ * finding them again.
+ */
+function Leaving({ onStay }: { onStay: () => void }) {
+  const [step, setStep] = useState<'offer' | 'gone'>('offer')
+  if (step === 'gone') {
+    return (
+      <div className="leaving">
+        <h3>Your plan runs to the end of the month.</h3>
+        <p>The leads you were given stay yours. Nothing else is charged.</p>
+        <button type="button" className="btn" onClick={onStay}>Close</button>
+      </div>
+    )
+  }
+  return (
+    <div className="leaving">
+      <h3>Stay at $79 a month?</h3>
+      <p>
+        That is $20 off every month, held for as long as you stay subscribed. Same 500 leads a day, same
+        everything. One click and it is done.
+      </p>
+      <div className="leaving-foot">
+        <button type="button" className="btn primary" onClick={onStay}>Keep it at $79</button>
+        <button type="button" className="btn quiet" onClick={() => setStep('gone')}>No, cancel my plan</button>
+      </div>
+    </div>
+  )
+}
+
 export function Settings() {
   useStore()
   const settings = getSettings()
@@ -12,6 +43,7 @@ export function Settings() {
   const [feedback, setFeedback] = useState('')
   const [sent, setSent] = useState(false)
   const [email, setEmail] = useState('jeremy@strongher.co')
+  const [leaving, setLeaving] = useState(false)
 
   return (
     <div className="page editor">
@@ -41,11 +73,14 @@ export function Settings() {
           </div>
         </div>
         <div className="actions-bar" style={{ marginTop: 14 }}>
-          <button type="button" className="btn">Change plan</button>
           <button type="button" className="btn">Update card</button>
           <button type="button" className="btn quiet">Download invoices</button>
+          <span className="spacer" />
+          <button type="button" className="btn quiet danger" onClick={() => setLeaving(true)}>Cancel</button>
         </div>
         <p className="hint">Billing runs through Stripe once the product ships. These buttons are placeholders in the prototype.</p>
+
+        {leaving && <Leaving onStay={() => setLeaving(false)} />}
       </section>
 
       <section className="ask">

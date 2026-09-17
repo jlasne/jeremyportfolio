@@ -3,6 +3,7 @@ import { Backdrop } from '../components/Backdrop'
 import { Logo } from '../components/Logo'
 import { HeroDemo } from '../components/HeroDemo'
 import { api } from '../lib/api'
+import art from '../art/creator-cards.png'
 
 // The landing, in six blocks: hero, video, the four steps, the two ways in,
 // one price, one ask. Cream ground, one orange accent, wide corners.
@@ -11,7 +12,7 @@ import { api } from '../lib/api'
 const VIDEO_URL = ''
 
 /** What the creators on your list have already done. The turn is the point. */
-const WHO = ['take deals', 'post weekly', 'sell already', 'reply']
+const WHO = ['take deals', 'post weekly', 'highly perform', 'sell already', 'reply']
 
 /** What both prices include. Said once, under them. */
 const HAS = [
@@ -57,20 +58,20 @@ const STEPS = [
   {
     n: '1/3',
     title: 'We learn what you sell',
-    note: 'Your website goes in. Out comes the creator who fits it: the discipline, what they sell, who follows them. You approve it before anything searches.',
-    tick: 'Takes one minute, once',
+    note: 'Your website goes in. Out comes who to reach and three agents to go and find them. You approve before anything searches.',
+    tick: 'One minute, once',
   },
   {
     n: '2/3',
-    title: 'We find who is ready to deal',
-    note: 'Every night we search, then cut. Three tests decide: intent, are they taking brand deals already. Active, did they post this week. Scope, are they in your niche.',
-    tick: 'Everything that fails a test never reaches you',
+    title: 'We find who is ready',
+    note: 'The agents search every night, then cut. What is left is ranked best first, by how ready each one is to take a deal.',
+    tick: 'Runs while you sleep',
   },
   {
     n: '3/3',
-    title: 'You get the contact and write',
-    note: 'The handle and the email sit on the row, best first. You open the list and send. This is a list you can work, not a list you have to vet.',
-    tick: 'Email and Instagram handle on every row',
+    title: 'You write and close',
+    note: 'The handle and the email sit on the row. Open the list, send, and move each one along as they answer.',
+    tick: 'The only step left for you',
   },
 ]
 
@@ -266,7 +267,7 @@ export function Landing() {
         <div className="land-banner">
           <span>Early access</span>
           <i aria-hidden="true" />
-          <span><b>$79 a month</b>, locked while you stay</span>
+          <span><b>500 scored leads a day</b> for $99 a month</span>
           <i aria-hidden="true" />
           <a href="#access">Get in →</a>
         </div>
@@ -298,6 +299,7 @@ export function Landing() {
                 <span key={f}>{i > 0 && <i aria-hidden="true" />}{f}</span>
               ))}
             </p>
+            <img className="hero-art" src={art} alt="" width={1254} height={1254} />
           </section>
 
           <div className="video-wrap">
@@ -311,28 +313,31 @@ export function Landing() {
           <p className="section-lede">
             A qualified list, not a directory dump. Here is how it gets built while you sleep.
           </p>
-          <div className="hiw">
-            {STEPS.map((st) => (
-              <article className="hiw-panel" key={st.n}>
-                <div className="hiw-text">
-                  <span className="hiw-badge">{st.n}</span>
-                  <h3>{st.title}</h3>
-                  <p>{st.note}</p>
-                  <span className="step-tick">{st.tick}</span>
-                </div>
-                <div className="hiw-visual">
+
+          <div className="steps3">
+            {STEPS.map((st, i) => (
+              <article className="step3" key={st.n}>
+                <div className="step3-art">
                   <StepVisual n={st.n} />
                 </div>
+                <span className="step3-n">{i + 1}</span>
+                <h3>{st.title}</h3>
+                <p>{st.note}</p>
+                <span className="step3-tick">{st.tick}</span>
               </article>
             ))}
           </div>
+
           <div className="tests">
-            {TESTS.map((t) => (
-              <div className="test" key={t.name}>
-                <b>{t.name}</b>
-                <span>{t.means}</span>
-              </div>
-            ))}
+            <p className="tests-head">Every lead passes three tests, or it never reaches you.</p>
+            <div className="tests-row">
+              {TESTS.map((t) => (
+                <div className="test" key={t.name}>
+                  <b>{t.name}</b>
+                  <span>{t.means}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -366,29 +371,19 @@ export function Landing() {
 
         <section className="land-section centred" id="pricing">
           <p className="eyebrow">Pricing</p>
-          <h2 className="big">One plan. <em>Two prices.</em></h2>
+          <h2 className="big">One plan. <em>One price.</em></h2>
           <p className="section-lede">
-            Lock $79 now and keep it while you stay. Or wait and pay $99 later. Same product either way.
+            Everything, for every account, at one number. Three days free before it starts.
           </p>
 
-          <div className="prices">
-            <div className="price-card now">
-              <span className="price-tag">Lock it now</span>
-              <p className="price"><span className="now">$79</span><small>a month</small></p>
-              <p className="price-note">Your card goes on file, the price stays yours, and the 3 days are still free.</p>
-              <a className="btn primary" href="#access">{CTA}</a>
-            </div>
-            <div className="price-card later">
-              <span className="price-tag">Or later</span>
-              <p className="price"><span>$99</span><small>a month</small></p>
-              <p className="price-note">Start the 3 days with no card. The price when you decide is $99.</p>
-              <a className="btn" href="#access">Start free</a>
-            </div>
+          <div className="one-price">
+            <p className="price"><span className="now">$99</span><small>a month</small></p>
+            <ul className="plan-has">
+              {HAS.map((h) => <li key={h}>{h}</li>)}
+            </ul>
+            <a className="btn primary" href="#access">{CTA}</a>
+            <p className="price-note">Three days free. No card to start.</p>
           </div>
-
-          <ul className="plan-has">
-            {HAS.map((h) => <li key={h}>{h}</li>)}
-          </ul>
 
           <p className="section-lede compare">
             A database at $120 to $400 a month sells you a search box. You still find, vet and score each one.

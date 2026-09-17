@@ -10,10 +10,11 @@ import { navigate } from '../lib/router'
 //
 //   1  Your website goes in. The model reads it and proposes the campaign and
 //      three agents. You approve what you want.
-//   2  Your price. $79 held for as long as you stay, or $99 when you decide.
-//      Either way the three days are free.
-//   3  Your first 500 land. The clock when they finish is the clock they land
+//   2  Your first 500 land. The clock when they finish is the clock they land
 //      on every morning after.
+//   3  The offer, once the leads are on the screen and worth something: put a
+//      card down now and hold $79, or decide later at $99. The three days are
+//      free on either.
 
 const INCLUDED_PER_DAY = 500
 
@@ -154,8 +155,8 @@ export function OnboardingCampaign({ campaignId }: { campaignId: string }) {
               {Math.min(campaignLeadsPerDay(campaign), INCLUDED_PER_DAY)} leads a day
             </span>
             <span className="spacer" />
-            <button type="button" className="btn primary" onClick={() => navigate(`onboarding/${campaign.id}/plan`)}>
-              Next
+            <button type="button" className="btn primary" onClick={() => navigate(`onboarding/${campaign.id}/running`)}>
+              Find my first 500
             </button>
           </div>
         )}
@@ -164,7 +165,13 @@ export function OnboardingCampaign({ campaignId }: { campaignId: string }) {
   )
 }
 
-/** Step two: the price. The three days are free on either one. */
+/**
+ * Step three: the offer. It lands here, after the leads, because that is the
+ * first moment the number on the card means anything.
+ *
+ * $99 is the price. A card now holds $79 for as long as they stay subscribed.
+ * Later is $99 and the $79 is gone, which is the whole point of deciding now.
+ */
 export function ChoosePlan({ campaignId }: { campaignId: string }) {
   useStore()
   const campaign = getCampaign(campaignId)
@@ -173,36 +180,37 @@ export function ChoosePlan({ campaignId }: { campaignId: string }) {
   }, [campaign])
   if (!campaign) return null
 
-  const go = (locked: boolean) => {
+  const take = (locked: boolean) => {
     updateCampaign(campaign.id, { pricePlan: locked ? 'locked79' : 'later99' })
-    navigate(`onboarding/${campaign.id}/running`)
+    navigate(`contacts/${campaign.id}`)
   }
 
   return (
-    <Shell step={2}>
+    <Shell step={3}>
       <div className="onboard-body">
-        <h1 className="onboard-h1">Pick your price.</h1>
+        <h1 className="onboard-h1">Hold $79, or pay $99 later.</h1>
         <p className="onboard-lede">
-          Three days free either way. The only difference is what you pay after them, and for how long.
+          brandmatch is $99 a month. Put a card down now and it stays $79 for as long as you stay subscribed.
+          Three days free either way, and nothing is charged until they end.
         </p>
 
         <div className="prices onboard-prices">
           <div className="price-card now">
-            <span className="price-tag">Lock it now</span>
-            <p className="price"><span className="now">$79</span><small>a month</small></p>
+            <span className="price-tag">Card now</span>
+            <p className="price"><span className="now">$79</span><small>a month, held</small></p>
             <p className="price-note">
-              Your card goes on file today and is charged when the three days end. The $79 is yours for as long as
-              you stay subscribed.
+              Charged when the three days end, and never more than $79 while you stay. This offer goes when you
+              leave this screen.
             </p>
-            <button type="button" className="btn primary" onClick={() => go(true)}>Lock $79</button>
+            <button type="button" className="btn primary" onClick={() => take(true)}>Hold $79</button>
           </div>
           <div className="price-card later">
-            <span className="price-tag">Or decide later</span>
+            <span className="price-tag">Decide later</span>
             <p className="price"><span>$99</span><small>a month</small></p>
             <p className="price-note">
-              No card now. Work the three days, then choose. The price on the other side is $99.
+              No card now. Work the three days and choose at the end. The price then is $99, the standard one.
             </p>
-            <button type="button" className="btn" onClick={() => go(false)}>Start without a card</button>
+            <button type="button" className="btn" onClick={() => take(false)}>Skip for now</button>
           </div>
         </div>
 
@@ -235,7 +243,7 @@ export function FirstRun({ campaignId }: { campaignId: string }) {
   const pct = Math.min(100, Math.round(((p.found + p.scored) / (target * 2)) * 100))
 
   return (
-    <Shell step={3}>
+    <Shell step={2}>
       <div className="onboard-body centred-text" aria-live="polite">
         <h1 className="onboard-h1">{p.done ? 'Your first 500 are in.' : 'Finding your first 500.'}</h1>
         <p className="onboard-lede">
@@ -254,7 +262,9 @@ export function FirstRun({ campaignId }: { campaignId: string }) {
 
         {p.done ? (
           <div className="onboard-foot centred">
-            <a className="btn primary" href={`#/contacts/${campaignId}`}>Open my leads</a>
+            <button type="button" className="btn primary" onClick={() => navigate(`onboarding/${campaignId}/plan`)}>
+              See them
+            </button>
           </div>
         ) : (
           <p className="onboard-note">Usually under ten minutes. This preview takes eight seconds.</p>
