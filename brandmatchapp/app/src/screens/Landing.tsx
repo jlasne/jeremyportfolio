@@ -4,6 +4,8 @@ import { Logo } from '../components/Logo'
 import { HeroDemo } from '../components/HeroDemo'
 import { api } from '../lib/api'
 import art from '../art/creator-cards.png'
+import connectArt from '../art/connect.png'
+import priceArt from '../art/price-tag.png'
 
 // The landing, in six blocks: hero, video, the four steps, the two ways in,
 // one price, one ask. Cream ground, one orange accent, wide corners.
@@ -220,13 +222,44 @@ function TurningWord({ words, every = 2400 }: { words: readonly string[]; every?
   )
 }
 
-/** The product in one take. The looping animation holds the frame until then. */
+/**
+ * The product in one take.
+ *
+ * Until the film exists, the frame holds the live demo behind a play button,
+ * so the slot reads as a video and still shows something moving. Drop the
+ * file in `app/src/video/` and set VIDEO_URL: the frame keeps its shape and
+ * plays the real thing instead.
+ */
 function ProductVideo() {
-  if (!VIDEO_URL) return <HeroDemo />
+  const [playing, setPlaying] = useState(false)
+
+  if (VIDEO_URL && playing) {
+    return (
+      <div className="film">
+        <video className="film-media" src={VIDEO_URL} controls autoPlay playsInline />
+      </div>
+    )
+  }
+
   return (
-    <video className="product-video" controls playsInline preload="metadata" poster="/og-image.png">
-      <source src={VIDEO_URL} type="video/mp4" />
-    </video>
+    <figure className="film">
+      <div className="film-frame">
+        <HeroDemo />
+        <button
+          type="button"
+          className="film-play"
+          onClick={() => setPlaying(true)}
+          disabled={!VIDEO_URL}
+          aria-label={VIDEO_URL ? 'Play the film' : 'The film is on its way'}
+        >
+          <span className="film-play-mark" aria-hidden="true" />
+          <span className="film-play-text">{VIDEO_URL ? 'Play the film' : 'Film on its way'}</span>
+        </button>
+      </div>
+      <figcaption className="film-cap">
+        {VIDEO_URL ? 'Sixty seconds, start to first lead.' : 'Sixty seconds, start to first lead. Recording now.'}
+      </figcaption>
+    </figure>
   )
 }
 
@@ -349,6 +382,8 @@ export function Landing() {
             stage and starts the next search, on your key. The app is the same account, for when you want to look.
           </p>
 
+          <img className="connect-art" src={connectArt} alt="" width={1600} height={1000} />
+
           <div className="connect">
             <div className="connect-code">
               <pre><code>{MCP_CONFIG}</code></pre>
@@ -377,6 +412,7 @@ export function Landing() {
           </p>
 
           <div className="one-price">
+            <img className="price-art" src={priceArt} alt="" width={1254} height={1254} />
             <p className="price"><span className="now">$99</span><small>a month</small></p>
             <ul className="plan-has">
               {HAS.map((h) => <li key={h}>{h}</li>)}

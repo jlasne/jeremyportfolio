@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import emptyArt from '../art/empty-tray.png'
 import {
   addCampaignAgent, campaignLeadsPerDay, campaignTally, createCampaign, deleteCampaign, getCampaign,
   getCampaigns, getDailyRows, getDashboard, proposeAgents, removeCampaignAgent, setCampaignBrief, setCampaignWebsite,
@@ -141,6 +142,7 @@ export function Campaigns() {
         })}
         {campaigns.length === 0 && (
           <div className="empty">
+            <img className="empty-art" src={emptyArt} alt="" width={1254} height={1254} />
             <h2>No campaign yet</h2>
             <p>A campaign is a group. Its agents each carry a daily quota and fill it every morning.</p>
             <div className="actions">

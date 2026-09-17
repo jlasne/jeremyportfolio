@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import emptyArt from '../art/empty-tray.png'
 import type { Level } from '../types'
 import {
   CRITERIA, addTag, agentTally, countDone, countTagged, diagnoseEmpty, exportCsv, getCampaigns, getContacts, getFilters,
@@ -311,6 +312,7 @@ function Empty({ tag, done, onClear }: { tag: string | null; done: number; onCle
   if (tag) {
     return (
       <div className="empty">
+        <img className="empty-art" src={emptyArt} alt="" width={1254} height={1254} />
         <h2>Nothing tagged {tag}</h2>
         <p>Tag a contact from its panel and it shows up here.</p>
         <div className="actions">
@@ -322,6 +324,7 @@ function Empty({ tag, done, onClear }: { tag: string | null; done: number; onCle
   if (done > 0) {
     return (
       <div className="empty">
+        <img className="empty-art" src={emptyArt} alt="" width={1254} height={1254} />
         <h2>You are through today's list</h2>
         <p>All {done} contacts are marked done. The next batch lands tomorrow morning.</p>
       </div>
@@ -330,6 +333,7 @@ function Empty({ tag, done, onClear }: { tag: string | null; done: number; onCle
   const d = diagnoseEmpty()
   return (
     <div className="empty">
+      <img className="empty-art" src={emptyArt} alt="" width={1254} height={1254} />
       <h2>No contact passes the filters</h2>
       <p>{d ? `${d.label} is cutting everything. Loosen it and ${d.restored} contacts come back.` : 'Every filter together cuts all contacts.'}</p>
       <div className="actions">
