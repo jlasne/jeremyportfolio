@@ -716,7 +716,9 @@ export interface CrawlProgress {
 }
 
 export function runFirstCrawl(onProgress: (p: CrawlProgress) => void): () => void {
-  const target = 412
+  // The first batch is the number the plan promises, so the screen that counts
+  // it up cannot end on a different one.
+  const target = 500
   const durationMs = 8_000
   const start = performance.now()
   let handle = 0

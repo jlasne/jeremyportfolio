@@ -1,15 +1,43 @@
 import { useEffect, useState } from 'react'
-import { campaignLeadsPerDay, createCampaign, getCampaign, runFirstCrawl, type CrawlProgress } from '../data'
+import {
+  campaignLeadsPerDay, createCampaign, getCampaign, proposeAgents, removeCampaignAgent,
+  runFirstCrawl, setCampaignWebsite, updateCampaign, updateCampaignAgent, type CrawlProgress,
+} from '../data'
 import { useStore } from '../data/hooks'
 import { navigate } from '../lib/router'
-import { CampaignEditor } from './Campaign'
 
-// Onboarding is three screens: the campaign, the price, the first batch.
+// Onboarding is three screens and about a minute.
+//
+//   1  Your website goes in. The model reads it and proposes the campaign and
+//      three agents. You approve what you want.
+//   2  Your price. $79 held for as long as you stay, or $99 when you decide.
+//      Either way the three days are free.
+//   3  Your first 500 land. The clock when they finish is the clock they land
+//      on every morning after.
 
-/** What $99 a month covers. Past this it is a conversation, not a checkout. */
 const INCLUDED_PER_DAY = 500
 
-/** No id yet: make a campaign and move to its editor. */
+/** The moment onboarding ends is the moment the batch lands, every day. */
+function clockNow(): string {
+  const d = new Date()
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
+
+function Shell({ step, children }: { step: number; children: React.ReactNode }) {
+  return (
+    <div className="onboard-shell landing">
+      <header className="onboard-top">
+        <span className="brand-word">brandmatch</span>
+        <span className="onboard-dots" aria-label={`Step ${step} of 3`}>
+          {[1, 2, 3].map((n) => <i key={n} className={n <= step ? 'on' : undefined} />)}
+        </span>
+      </header>
+      {children}
+    </div>
+  )
+}
+
+/** No id yet: make a campaign and move to its first step. */
 export function OnboardingStart() {
   useEffect(() => {
     const a = createCampaign()
@@ -18,29 +46,125 @@ export function OnboardingStart() {
   return null
 }
 
+/** Step one: the website, then what the model proposes from it. */
 export function OnboardingCampaign({ campaignId }: { campaignId: string }) {
   useStore()
   const campaign = getCampaign(campaignId)
+  const [reading, setReading] = useState(false)
+  const [failed, setFailed] = useState<string | null>(null)
+
   useEffect(() => {
     if (!campaign) navigate('onboarding')
   }, [campaign])
   if (!campaign) return null
+
+  const proposed = campaign.agents.filter((a) => a.status === 'proposed')
+  const taken = campaign.agents.filter((a) => a.status === 'active')
+
+  function read(): void {
+    if (reading || !campaign || !campaign.website.trim()) return
+    setReading(true)
+    setFailed(null)
+    proposeAgents(campaign.id, campaign.website)
+      .then(() => {
+        if (!campaign.name.trim()) {
+          const domain = campaign.website.replace(/^https?:\/\//, '').replace(/^www\./, '').split('.')[0]
+          updateCampaign(campaign.id, { name: domain.charAt(0).toUpperCase() + domain.slice(1) + ' creators' })
+        }
+      })
+      .catch((e: Error) => setFailed(e.message || 'Could not read that site. Try the full address.'))
+      .finally(() => setReading(false))
+  }
+
   return (
-    <div className="onboard-shell">
-      <header className="onboard-top">
-        <span className="brand-word">brandmatch</span>
-        <span className="faint">Step 1 of 3</span>
-      </header>
-      <CampaignEditor campaignId={campaignId} firstRun />
-    </div>
+    <Shell step={1}>
+      <div className="onboard-body">
+        <h1 className="onboard-h1">What do you sell?</h1>
+        <p className="onboard-lede">
+          Your website is enough. We read it and write who to reach, then propose three agents to go and find them.
+        </p>
+
+        <div className="onboard-field">
+          <input
+            className="onboard-input"
+            placeholder="yourbrand.com"
+            value={campaign.website}
+            autoFocus
+            aria-label="Your website"
+            onChange={(e) => setCampaignWebsite(campaign.id, e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') read() }}
+          />
+          <button type="button" className="btn primary" disabled={!campaign.website.trim() || reading} onClick={read}>
+            {reading ? 'Reading it' : proposed.length || taken.length ? 'Read it again' : 'Read my site'}
+          </button>
+        </div>
+        {failed && <p className="warn">{failed}</p>}
+
+        {reading && (
+          <div className="reading" aria-live="polite">
+            <span className="dots"><i /><i /><i /></span>
+            Reading {campaign.website} and writing your audience.
+          </div>
+        )}
+
+        {campaign.brief.who && !reading && (
+          <div className="onboard-brief">
+            <span className="eyebrow">Looking for</span>
+            <p>{campaign.brief.who}</p>
+          </div>
+        )}
+
+        {proposed.length > 0 && (
+          <div className="onboard-agents">
+            <span className="eyebrow">Three agents proposed</span>
+            {proposed.map((a) => (
+              <div className="onboard-agent" key={a.id}>
+                <div className="onboard-agent-head">
+                  <b>{a.name}</b>
+                  <span className="spacer" />
+                  <button
+                    type="button"
+                    className="btn small primary"
+                    onClick={() => updateCampaignAgent(campaign.id, a.id, { status: 'active' })}
+                  >
+                    Take it
+                  </button>
+                  <button type="button" className="btn small" onClick={() => removeCampaignAgent(campaign.id, a.id)}>
+                    Drop
+                  </button>
+                </div>
+                <p>{a.focus}</p>
+                {a.why && <p className="onboard-why">{a.why}</p>}
+              </div>
+            ))}
+            <button
+              type="button"
+              className="btn"
+              onClick={() => proposed.forEach((a) => updateCampaignAgent(campaign.id, a.id, { status: 'active' }))}
+            >
+              Take all three
+            </button>
+          </div>
+        )}
+
+        {taken.length > 0 && (
+          <div className="onboard-foot">
+            <span className="faint">
+              {taken.length} agent{taken.length === 1 ? '' : 's'} taken,{' '}
+              {Math.min(campaignLeadsPerDay(campaign), INCLUDED_PER_DAY)} leads a day
+            </span>
+            <span className="spacer" />
+            <button type="button" className="btn primary" onClick={() => navigate(`onboarding/${campaign.id}/plan`)}>
+              Next
+            </button>
+          </div>
+        )}
+      </div>
+    </Shell>
   )
 }
 
-/**
- * One plan, shown once the volume is set, so the number on the card is the
- * number the brand just chose. Above 250 a day it stops being self serve and
- * becomes a conversation.
- */
+/** Step two: the price. The three days are free on either one. */
 export function ChoosePlan({ campaignId }: { campaignId: string }) {
   useStore()
   const campaign = getCampaign(campaignId)
@@ -49,94 +173,93 @@ export function ChoosePlan({ campaignId }: { campaignId: string }) {
   }, [campaign])
   if (!campaign) return null
 
-  const perDay = campaignLeadsPerDay(campaign)
-  const overflow = perDay > INCLUDED_PER_DAY
+  const go = (locked: boolean) => {
+    updateCampaign(campaign.id, { pricePlan: locked ? 'locked79' : 'later99' })
+    navigate(`onboarding/${campaign.id}/running`)
+  }
 
   return (
-    <div className="onboard-shell">
-      <header className="onboard-top">
-        <span className="brand-word">brandmatch</span>
-        <span className="faint">Step 2 of 3</span>
-      </header>
-
-      <div className="page editor centred">
-        <div className="page-head">
-          <h1>One plan</h1>
-        </div>
-        <p className="subhead">
-          Your agents are set to {perDay} leads a day. Everything below is included at that volume.
+    <Shell step={2}>
+      <div className="onboard-body">
+        <h1 className="onboard-h1">Pick your price.</h1>
+        <p className="onboard-lede">
+          Three days free either way. The only difference is what you pay after them, and for how long.
         </p>
 
-        <div className="one-plan">
-          <div className="plan dark">
-            <span className="plan-tag">Everything</span>
-            <p className="price">$99<small>a month</small></p>
-            <ul>
-              <li>Up to {INCLUDED_PER_DAY} scored leads a day</li>
-              <li>Their email where we find one</li>
-              <li>Unlimited campaigns and agents</li>
-              <li>API and MCP, same key, no extra tier</li>
-              <li>Every lead yours alone for 14 days</li>
-              <li>Cancel any morning</li>
-            </ul>
-            <button
-              type="button"
-              className="btn primary"
-              onClick={() => navigate(`onboarding/${campaign.id}/running`)}
-            >
-              {overflow ? `Start at ${INCLUDED_PER_DAY} a day` : 'Start my first batch'}
-            </button>
+        <div className="prices onboard-prices">
+          <div className="price-card now">
+            <span className="price-tag">Lock it now</span>
+            <p className="price"><span className="now">$79</span><small>a month</small></p>
+            <p className="price-note">
+              Your card goes on file today and is charged when the three days end. The $79 is yours for as long as
+              you stay subscribed.
+            </p>
+            <button type="button" className="btn primary" onClick={() => go(true)}>Lock $79</button>
+          </div>
+          <div className="price-card later">
+            <span className="price-tag">Or decide later</span>
+            <p className="price"><span>$99</span><small>a month</small></p>
+            <p className="price-note">
+              No card now. Work the three days, then choose. The price on the other side is $99.
+            </p>
+            <button type="button" className="btn" onClick={() => go(false)}>Start without a card</button>
           </div>
         </div>
 
-        <p className="hint centred-text">
-          {overflow
-            ? `You asked for ${perDay} a day, which is past the plan. We start at ${INCLUDED_PER_DAY} and size the rest together.`
-            : `Need more than ${INCLUDED_PER_DAY} a day later? Chat with me and we size it together.`}
-          {' '}
-          <a href="mailto:jeremy@brandmatch.app">jeremy@brandmatch.app</a>
+        <p className="onboard-note">
+          Up to {INCLUDED_PER_DAY} scored leads a day on both. Cancel any morning.{' '}
+          Need more? <a href="mailto:hey@jeremylasne.com">Chat with me</a>.
         </p>
       </div>
-    </div>
+    </Shell>
   )
 }
 
+/** Step three: the first batch, and the clock it sets for every morning after. */
 export function FirstRun({ campaignId }: { campaignId: string }) {
   useStore()
-  const campaign = getCampaign(campaignId)
   const [p, setP] = useState<CrawlProgress>({ found: 0, scored: 0, done: false })
+  const [landsAt, setLandsAt] = useState<string | null>(null)
+
   useEffect(() => runFirstCrawl(setP), [])
+
+  // The clock when the first batch finishes is the clock it lands on daily.
   useEffect(() => {
-    if (p.done) {
-      const t = window.setTimeout(() => navigate(`contacts/${campaignId}`), 500)
-      return () => window.clearTimeout(t)
-    }
-  }, [p.done, campaignId])
-  const pct = Math.round(((p.found + p.scored) / (412 * 2)) * 100)
+    if (!p.done || landsAt) return
+    const at = clockNow()
+    setLandsAt(at)
+    updateCampaign(campaignId, { runAt: at })
+  }, [p.done, landsAt, campaignId])
+
+  const target = 500
+  const pct = Math.min(100, Math.round(((p.found + p.scored) / (target * 2)) * 100))
+
   return (
-    <div className="onboard">
-      <div className="onboard-box" aria-live="polite">
-        <p className="steps">Step 3 of 3</p>
-        <h1>{campaign?.name || 'Your search'} is running now</h1>
-        <div className="brief-line">
-          <p>{campaign?.brief.summary ?? ''}</p>
-          <a href={`#/onboarding/${campaignId}`}>Edit</a>
-        </div>
+    <Shell step={3}>
+      <div className="onboard-body centred-text" aria-live="polite">
+        <h1 className="onboard-h1">{p.done ? 'Your first 500 are in.' : 'Finding your first 500.'}</h1>
+        <p className="onboard-lede">
+          {p.done
+            ? `From tomorrow they land at ${landsAt} every morning, ranked, with the email on the row.`
+            : 'The agents are searching now. This is the only time you wait for them.'}
+        </p>
+
         <div className="progress">
-          <div className="stat">
-            <b>{p.found}</b>
-            <span>creators found</span>
-          </div>
-          <div className="stat">
-            <b>{p.scored}</b>
-            <span>creators ranked</span>
-          </div>
+          <div className="stat"><b>{p.found}</b><span>creators found</span></div>
+          <div className="stat"><b>{p.scored}</b><span>creators ranked</span></div>
         </div>
         <div className="bar" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
           <i style={{ width: `${pct}%` }} />
         </div>
-        <p className="helper">{p.done ? 'Done. Opening your leads.' : 'Usually under 10 minutes. This preview takes 8 seconds.'}</p>
+
+        {p.done ? (
+          <div className="onboard-foot centred">
+            <a className="btn primary" href={`#/contacts/${campaignId}`}>Open my leads</a>
+          </div>
+        ) : (
+          <p className="onboard-note">Usually under ten minutes. This preview takes eight seconds.</p>
+        )}
       </div>
-    </div>
+    </Shell>
   )
 }

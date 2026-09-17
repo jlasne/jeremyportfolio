@@ -119,6 +119,12 @@ export interface Campaign {
   /** Local time the daily batch lands, "07:00". */
   runAt: string
   active: boolean
+  /**
+   * Which price the brand took at onboarding. Locked keeps $79 for as long as
+   * they stay; later is $99 once the three days end. Nothing is charged until
+   * checkout exists.
+   */
+  pricePlan?: 'locked79' | 'later99'
   /** ISO date */
   createdAt: string
 }

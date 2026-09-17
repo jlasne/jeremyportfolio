@@ -1888,3 +1888,59 @@ body.nav-shut .shell { grid-template-columns: 62px minmax(0, 1fr); }
 /* A white button on a white card needs a ground, not a shadow. */
 .price-card.later .btn { background: var(--l-ground-2); box-shadow: none; }
 .price-card.later .btn:hover { background: #dfdfe1; box-shadow: none; }
+
+/* Onboarding: one question a screen, on the light ground ------------------- */
+.onboard-shell { min-height: 100vh; background: var(--l-ground); color: var(--l-ink); }
+.onboard-top {
+  display: flex; align-items: center; gap: 14px;
+  padding: 20px max(24px, calc((100% - 820px) / 2));
+}
+.onboard-top .brand-word { font-family: var(--hero); font-weight: 800; font-size: 19px; letter-spacing: -0.04em; }
+.onboard-dots { margin-left: auto; display: flex; gap: 6px; }
+.onboard-dots i { width: 22px; height: 3px; background: var(--l-rule-firm); }
+.onboard-dots i.on { background: var(--orange); }
+
+.onboard-body {
+  padding: 40px max(24px, calc((100% - 820px) / 2)) 80px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+.onboard-h1 { font-family: var(--hero); font-weight: 800; letter-spacing: -0.045em; font-size: clamp(32px, 5.4vw, 60px); line-height: 1.0; }
+.onboard-lede { font-size: 18px; line-height: 1.5; color: var(--l-muted); max-width: 52ch; }
+.onboard-body.centred-text .onboard-lede { margin: 0 auto; }
+
+.onboard-field {
+  display: flex; gap: 10px; align-items: center; background: var(--l-card);
+  border-radius: 999px; padding: 6px 6px 6px 24px; max-width: 620px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+.onboard-input { flex: 1; min-width: 0; border: 0; background: transparent; height: 52px; font-size: 17px; color: var(--l-ink); outline: 0; }
+.onboard-input::placeholder { color: var(--l-faint); }
+.onboard-field .btn { flex: none; }
+
+.onboard-brief { background: var(--l-card); padding: 20px 24px; max-width: 620px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); }
+.onboard-brief p { margin-top: 6px; font-size: 16px; line-height: 1.5; }
+
+.onboard-agents { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; max-width: 620px; }
+.onboard-agent { width: 100%; background: var(--l-card); padding: 18px 20px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); }
+.onboard-agent-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.onboard-agent-head b { font-size: 16px; font-weight: 700; }
+.onboard-agent-head .spacer { flex: 1; }
+.onboard-agent p { font-size: 14.5px; line-height: 1.5; color: var(--l-muted); }
+.onboard-why { font-style: italic; color: var(--l-faint); margin-top: 4px; }
+.landing .btn.small { height: 36px; padding: 0 16px; font-size: 13.5px; }
+
+.onboard-prices { margin: 8px 0 0; max-width: 700px; }
+.onboard-foot { display: flex; align-items: center; gap: 14px; margin-top: 12px; max-width: 620px; }
+.onboard-foot.centred { justify-content: center; }
+.onboard-foot .spacer { flex: 1; }
+.onboard-note { font-size: 14.5px; color: var(--l-faint); max-width: 52ch; }
+.onboard-body.centred-text .onboard-note { margin: 0 auto; }
+.onboard-body .progress { display: flex; gap: 40px; justify-content: center; margin-top: 10px; }
+.onboard-body .progress .stat b { font-family: var(--hero); font-weight: 800; font-size: 40px; letter-spacing: -0.04em; display: block; }
+.onboard-body .progress .stat span { font-size: 13.5px; color: var(--l-faint); }
+.onboard-body .bar { height: 4px; background: var(--l-rule); max-width: 520px; width: 100%; margin: 6px auto 0; }
+.onboard-body .bar i { display: block; height: 100%; background: var(--orange); transition: width 0.2s linear; }
+.onboard-body .reading { display: flex; align-items: center; gap: 10px; color: var(--l-muted); font-size: 15px; }
+/* The counters on light: numbers, not tiles. */
+.onboard-body .progress .stat { background: transparent; border: 0; padding: 0; text-align: center; }
+.onboard-body .progress .stat b { color: var(--l-ink); }
