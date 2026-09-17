@@ -31,24 +31,34 @@ const MCP_CONFIG = `{
  */
 const CTA = 'Get early access'
 
+/** The three tests a lead passes before it reaches your list. */
+const TESTS: { name: string; means: string }[] = [
+  { name: 'Intent', means: 'They take brand deals already: a sponsored post, rates in the bio, a media kit.' },
+  { name: 'Active', means: 'They posted this week. A dormant account is a dead lead however big it is.' },
+  { name: 'Scope', means: 'They are in your niche, judged against your own words, not a category tag.' },
+]
+
 /** Where the config block goes. Named, so nobody wonders about theirs. */
 const CLIENTS = ['Claude', 'Claude Code', 'Cursor', 'Codex', 'VS Code', 'Windsurf', 'Zed', 'any MCP client']
 
 const STEPS = [
   {
     n: '1/3',
-    title: 'Enter your website',
-    note: 'We read it and write who to reach: the discipline, what they sell, who follows them. Three agents proposed, each on its own angle. Change any word, then approve.',
+    title: 'We learn what you sell',
+    note: 'Your website goes in. Out comes the creator who fits it: the discipline, what they sell, who follows them. You approve it before anything searches.',
+    tick: 'Takes one minute, once',
   },
   {
     n: '2/3',
-    title: 'Get 500 leads a day',
-    note: 'The agents search Instagram every night and score what they find. Three stars: fits your niche, sells something of their own, fired a brand signal in the last 4 days. Email and handle on every row.',
+    title: 'We find who is ready to deal',
+    note: 'Every night we search, then cut. Three tests decide: intent, are they taking brand deals already. Active, did they post this week. Scope, are they in your niche.',
+    tick: 'Everything that fails a test never reaches you',
   },
   {
     n: '3/3',
-    title: 'Close deals',
-    note: 'Open the list, write to the top of it, move each one along: contacted, replied, deal. The only step left for you.',
+    title: 'You get the contact and write',
+    note: 'The handle and the email sit on the row, best first. You open the list and send. This is a list you can work, not a list you have to vet.',
+    tick: 'Email and Instagram handle on every row',
   },
 ]
 
@@ -272,9 +282,9 @@ export function Landing() {
 
         <section className="land-section" id="how">
           <p className="eyebrow">How it works</p>
-          <h2 className="big">Three steps. <em>You only do the last one.</em></h2>
+          <h2 className="big">How do we <em>get you deals?</em></h2>
           <p className="section-lede">
-            Enter your website. Everything from there to a ranked list with emails on it runs on its own, every night.
+            Three steps, and you only do the last one. What arrives is a qualified list, not a directory dump.
           </p>
           <div className="hiw">
             {STEPS.map((st) => (
@@ -283,11 +293,20 @@ export function Landing() {
                   <span className="hiw-badge">{st.n}</span>
                   <h3>{st.title}</h3>
                   <p>{st.note}</p>
+                  <span className="step-tick">{st.tick}</span>
                 </div>
                 <div className="hiw-visual">
                   <StepVisual n={st.n} />
                 </div>
               </article>
+            ))}
+          </div>
+          <div className="tests">
+            {TESTS.map((t) => (
+              <div className="test" key={t.name}>
+                <b>{t.name}</b>
+                <span>{t.means}</span>
+              </div>
             ))}
           </div>
         </section>

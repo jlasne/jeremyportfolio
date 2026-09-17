@@ -75,6 +75,47 @@ async function datasetItems(datasetId: string, token: string): Promise<Record<st
 }
 
 /** Called by the /apify HTTP route when a run ends. */
+/**
+ * Pay Apify for what only Apify has: the profile behind a handle, its bio, its
+ * email and its last posts. Where the handles came from is not its business,
+ * so a search engine and a hashtag crawl both end here.
+ */
+export const detailRun = internalAction({
+  args: {
+    handles: v.array(v.string()),
+    campaignId: v.id('campaigns'),
+    agentId: v.optional(v.id('agents')),
+  },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<Record<string, unknown>> => {
+    const token = process.env.APIFY_TOKEN
+    if (!token) return { error: 'APIFY_TOKEN is not set' }
+    const handles = [...new Set(args.handles.map((h) => h.toLowerCase()))].filter(Boolean)
+    if (!handles.length) return { handles: 0 }
+
+    // One builder for both phases. A second copy is a second thing to fix.
+    const hook = webhookParam({
+      phase: 'detail', campaignId: args.campaignId, agentId: args.agentId ?? '',
+    })
+    const input = {
+      directUrls: handles.slice(0, 300).map((h) => `https://www.instagram.com/${h}/`),
+      resultsType: 'details',
+      resultsLimit: 12,
+      addParentData: false,
+    }
+    const res = await fetch(`${APIFY}/acts/${ACTOR}/runs?token=${token}&webhooks=${encodeURIComponent(hook)}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input),
+    })
+    const started = (await res.json().catch(() => ({}))) as { data?: { id?: string } }
+    if (!res.ok || !started?.data?.id) return { error: `Apify replied ${res.status}`, handles: handles.length }
+    await ctx.runMutation(internal.crawl.noteRun, {
+      runId: started.data.id, phase: 'detail',
+      campaignId: args.campaignId, agentId: args.agentId, input,
+    })
+    return { runId: started.data.id, handles: handles.length }
+  },
+})
+
 export const fromApify = internalAction({
   args: {
     runId: v.string(),
@@ -105,29 +146,10 @@ export const fromApify = internalAction({
     if (args.phase === 'search') {
       const handles = [...new Set(rows.map((r) => String(r.ownerUsername ?? '').toLowerCase()).filter(Boolean))]
       if (!handles.length) return { ok: true, handles: 0 }
-
-      // One builder for both phases. A second copy is a second thing to fix.
-      const hook = webhookParam({
-        phase: 'detail', campaignId: args.campaignId, agentId: args.agentId ?? '',
+      const run: Record<string, unknown> = await ctx.runAction(internal.ingest.detailRun, {
+        handles, campaignId: args.campaignId, agentId: args.agentId,
       })
-
-      const input = {
-        directUrls: handles.slice(0, 300).map((h) => `https://www.instagram.com/${h}/`),
-        resultsType: 'details',
-        resultsLimit: 12,
-        addParentData: false,
-      }
-      const res = await fetch(`${APIFY}/acts/${ACTOR}/runs?token=${token}&webhooks=${encodeURIComponent(hook)}`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input),
-      })
-      const started = (await res.json().catch(() => ({}))) as { data?: { id?: string } }
-      if (res.ok && started?.data?.id) {
-        await ctx.runMutation(internal.crawl.noteRun, {
-          runId: started.data.id, phase: 'detail',
-          campaignId: args.campaignId, agentId: args.agentId, input,
-        })
-      }
-      return { ok: true, handles: handles.length, detailRun: started?.data?.id ?? null }
+      return { ok: true, handles: handles.length, detailRun: run.runId ?? null }
     }
 
     // Phase two: the profiles land in the pool ------------------------------

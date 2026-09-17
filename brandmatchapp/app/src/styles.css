@@ -102,11 +102,14 @@ h1, h2, h3, p { margin: 0; }
 .btn.on { background: var(--amber-soft); border-color: var(--coral); color: var(--coral-deep); }
 
 .input, .select, .textarea {
-  height: 36px; padding: 0 12px;
-  border: 1px solid var(--line-2); border-radius: var(--radius);
-  background: var(--panel); width: 100%;
+  height: 36px; padding: 0 10px;
+  border: 0; border-bottom: 1px solid var(--line-2); border-radius: 0;
+  background: rgba(247, 242, 230, 0.035); width: 100%; color: inherit;
 }
-.input:focus, .select:focus, .textarea:focus { outline: 2px solid var(--ink); outline-offset: -1px; border-color: var(--ink); }
+.input:hover, .select:hover, .textarea:hover { background: rgba(247, 242, 230, 0.055); }
+.input:focus, .select:focus, .textarea:focus {
+  outline: 0; border-bottom-color: var(--orange); background: rgba(247, 242, 230, 0.06);
+}
 .textarea { height: auto; min-height: 72px; padding: 8px 9px; resize: vertical; line-height: 1.45; }
 .select { padding-right: 24px; appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%235b6170' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
@@ -1045,8 +1048,9 @@ input.key-value:focus { border-color: var(--l-rule-firm); }
 
 /* Agents inside a campaign ---------------------------------------------------- */
 .agents { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; margin-top: 12px; }
-.agent-card { width: 100%; border: 1px solid var(--line); border-radius: var(--radius-card); padding: 14px; display: flex; flex-direction: column; gap: 10px; background: var(--panel); }
-.agent-card .input { background: var(--paper); }
+.agent-card { width: 100%; border: 0; border-top: 1px solid var(--line); border-radius: 0; padding: 18px 0 20px; display: flex; flex-direction: column; gap: 12px; background: transparent; }
+.agents > .agent-card:first-child { border-top: 0; padding-top: 4px; }
+.agent-card .input { background: rgba(247, 242, 230, 0.04); }
 .agent-card.off { opacity: 0.6; }
 .agent-top { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .agent-name { flex: 1; min-width: 180px; font-weight: 600; }
@@ -1439,11 +1443,11 @@ body { background: transparent; }
 .viz { width: 100%; }
 
 .viz-icp { display: flex; flex-direction: column; align-items: center; gap: 14px; }
-.viz-input { width: min(320px, 100%); height: 50px; display: flex; align-items: center; padding: 0 18px; border-radius: 0; border: 1px solid var(--l-rule-firm); background: var(--l-card); font-size: 17px; font-weight: 500; color: var(--l-ink); }
+.viz-input { width: min(320px, 100%); height: 46px; display: flex; align-items: center; padding: 0 2px; border: 0; border-bottom: 1px solid var(--l-rule-firm); background: transparent; font-size: 17px; font-weight: 500; color: var(--l-ink); }
 .viz-caret { width: 2px; height: 20px; background: var(--orange); margin-right: 6px; animation: blink 0.9s steps(1) infinite; }
 .viz-arrow { width: 1px; height: 26px; background: var(--orange); position: relative; }
 .viz-arrow::after { content: ''; position: absolute; left: -4px; bottom: -1px; border: 5px solid transparent; border-top-color: var(--orange); }
-.viz-brief { width: 100%; padding: 16px 18px; border-radius: 0; border: 1px solid var(--l-rule); background: var(--l-card); }
+.viz-brief { width: 100%; padding: 2px; border: 0; background: transparent; }
 .viz-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--orange); display: block; margin-bottom: 6px; }
 .viz-brief p { font-size: 14px; color: var(--l-ink); line-height: 1.5; margin-bottom: 12px; }
 .viz-chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -1625,8 +1629,7 @@ body { background: transparent; }
 }
 
 /* Every container is marked at its corners instead of boxed in ------------- */
-.card, .list, .panel, .popover, .hiw-panel, .plan, .connect-code, .demo,
-.agent-card, .empty, .waitlist-box, .campaign-group, .viz-brief, .viz-input {
+.card, .list, .panel, .popover, .plan, .connect-code, .demo, .campaign-group {
   --corner: 20px;
   --corner-w: 1.5px;
   --corner-c: var(--line-2);
@@ -1647,14 +1650,14 @@ body { background: transparent; }
     left bottom, left bottom, right bottom, right bottom;
 }
 /* On the landing the corners take the landing's own rule colour. */
-.landing .card, .landing .list, .hiw-panel, .plan, .connect-code, .landing .demo,
-.viz-brief, .viz-input { --corner-c: var(--l-rule-firm); }
+.landing .card, .landing .list, .plan, .connect-code, .landing .demo { --corner-c: var(--l-rule-firm); }
 .plan.dark { --corner-c: var(--orange); --corner: 26px; --corner-w: 2px; }
 /* The step visuals carry no frame at all. */
 .hiw-visual, .viz { background-image: none; border: 0; }
 /* A card still needs its ground, so the colour is set apart from the corners. */
-.card, .list, .panel, .popover, .agent-card, .campaign-group, .waitlist-box { background-color: var(--panel); }
-.hiw-panel, .connect-code, .viz-brief, .viz-input { background-color: transparent; }
+.card, .list, .panel, .popover, .campaign-group { background-color: var(--panel); }
+.agent-card, .waitlist-box, .empty { background-color: transparent; }
+.connect-code { background-color: transparent; }
 .plan { background-color: transparent; }
 .plan.dark { background-color: rgba(255, 90, 31, 0.04); }
 .demo { background-color: var(--panel); }
@@ -1691,3 +1694,14 @@ body.nav-shut .shell { grid-template-columns: 62px minmax(0, 1fr); }
 .agent-field > span { flex: none; width: 74px; font-size: 12px; color: var(--ink-2); }
 .agent-field .input { flex: 1; min-width: 0; }
 .sidenav-foot .nav-label { white-space: normal; }
+
+/* The three tests, said once, under the steps that produce them. */
+.tests { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin-top: 44px; }
+.tests .test { padding: 22px 26px 22px 0; border-top: 1px solid var(--l-rule-firm); }
+.tests .test + .test { padding-left: 26px; }
+.tests b {
+  display: block; font-family: var(--display); font-weight: 500; font-size: 17px;
+  color: var(--orange); margin-bottom: 7px; letter-spacing: -0.01em;
+}
+.tests span { font-size: 14px; line-height: 1.55; color: var(--l-muted); }
+@media (max-width: 900px) { .tests { grid-template-columns: 1fr; } .tests .test + .test { padding-left: 0; } }

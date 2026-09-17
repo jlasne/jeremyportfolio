@@ -12,6 +12,7 @@ import type * as admin from "../admin.js";
 import type * as brands from "../brands.js";
 import type * as crawl from "../crawl.js";
 import type * as crons from "../crons.js";
+import type * as discover from "../discover.js";
 import type * as http from "../http.js";
 import type * as ingest from "../ingest.js";
 import type * as leads from "../leads.js";
@@ -33,6 +34,7 @@ declare const fullApi: ApiFromModules<{
   brands: typeof brands;
   crawl: typeof crawl;
   crons: typeof crons;
+  discover: typeof discover;
   http: typeof http;
   ingest: typeof ingest;
   leads: typeof leads;

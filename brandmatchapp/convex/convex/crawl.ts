@@ -94,6 +94,23 @@ export const run = internalAction({
       const words: string[] = (agent.keywords ?? []).filter(Boolean)
       if (!tags.length && !words.length) { failed.push(`${agent.name}: no hashtags yet`); continue }
 
+      // Handles first, from wherever they are cheapest. A search engine answers
+      // the same question as the search crawl and costs a fraction of it, so
+      // when one is configured Apify is paid for detail alone.
+      const free: Record<string, unknown> = await ctx.runAction(internal.discover.handles, {
+        hashtags: tags, focus: agent.focus ?? '', want,
+      })
+      const found = (free.handles ?? []) as string[]
+      if (found.length) {
+        const run: Record<string, unknown> = await ctx.runAction(internal.ingest.detailRun, {
+          handles: found, campaignId: agent.campaignId, agentId: agent._id,
+        })
+        await ctx.runMutation(internal.crawl.touchAgent, { agentId: agent._id })
+        if (typeof run.runId === 'string') { started.push(run.runId); continue }
+        failed.push(`${agent.name}: ${String(run.error ?? 'no detail run')}`)
+        continue
+      }
+
       // Ask for more than the shortfall, since the filters cut some of it.
       const ask = Math.ceil(want * 1.5)
       const input: Record<string, unknown> = tags.length
