@@ -89,7 +89,20 @@ export function Admin() {
 
   return (
     <div className="page">
-      <div className="page-head"><h1>Admin</h1></div>
+      <div className="page-head">
+        <h1>Admin</h1>
+        <span className="spacer" />
+        {/* The way back to the sample account. Without it the only exit is the
+            browser's own storage panel, and showing the demo to somebody means
+            signing out of your own account for a minute. */}
+        <button
+          type="button"
+          className="btn small quiet"
+          onClick={() => { setKey(''); window.location.hash = '#/dashboard'; window.location.reload() }}
+        >
+          Sign out, back to the sample
+        </button>
+      </div>
       <p className="subhead">Internal. Nothing on this page is readable by a client account.</p>
 
       <div className="tiles">
