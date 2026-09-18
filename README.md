@@ -4,18 +4,20 @@ I make mobile apps with influencers. A creator brings the audience, I bring
 the whole build and run it, and we split what it earns. This repository is
 the site behind that, plus everything else I keep in public.
 
-The landing page is one screen: a portrait, one sentence, three lists.
+The landing page is one screen: a portrait, a name, three lists.
 
-- **Active projects.** [CreatorMatch](https://creatormatch.app) is the offer
-  itself: turn your audience into recurring revenue.
-  [Kaught](https://kaught.app) names any wild animal with your camera.
-  [i dare you](https://www.idareyou.lol) sends a dare: film it, or dare them
-  back. [TrustViews](https://trustviews.io) ranks verified sites on real
-  traffic
-- **Social.** YouTube ([@jerandmax](https://www.youtube.com/@jerandmax)),
-  X ([@jeremylasne](https://x.com/jeremylasne)) and email
+- **Mobile app portfolio.** [CreatorMatch](https://creatormatch.app) is the
+  door in, and what manages the rest. [i dare you](https://www.idareyou.lol)
+  sends a dare: film it, or dare them back, built with
+  [@ayade369](https://www.tiktok.com/@ayade369). [Kaught](https://kaught.app)
+  names any wild animal with your camera, and its creator seat is open
+- **Projects.** BrandMatch finds you deals, not leads. Marked coming soon
+  until it ships
 - **Personal.** Three private equity positions (SaaS health, H100
-  datacenters, an astronomy blog), the Bio tracker and the brain
+  datacenters, an astronomy blog), Social folded away (YouTube
+  [@jerandmax](https://www.youtube.com/@jerandmax), X
+  [@jeremylasne](https://x.com/jeremylasne), email), the Bio tracker and
+  Octopus
 
 ## Stack
 
