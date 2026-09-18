@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Jeremy Lasne</title>
-<meta name="description" content="I make mobile apps with influencers. CreatorMatch, Kaught, i dare you, TrustViews.">
+<meta name="description" content="Mobile apps built with influencers: CreatorMatch, i dare you, Kaught. Plus BrandMatch and TrustViews.">
 <link rel="canonical" href="https://www.jeremylasne.com/">
 <meta name="theme-color" content="#050b16">
 <link rel="icon" href="favicon.ico" sizes="any">
@@ -78,7 +78,6 @@
   }
 
   h1 { font-size: 30px; font-weight: 600; letter-spacing: -.025em; text-wrap: balance; }
-  .tagline { margin-top: 10px; font-size: 17px; line-height: 1.6; color: var(--ice-70); max-width: 40ch; text-wrap: pretty; }
 
   section { width: 100%; margin-top: 40px; text-align: left; }
   h2 {
@@ -121,7 +120,16 @@
   .sub .item { padding: 7px 14px; gap: 10px; }
   .sub .item::before { content: ""; width: 4px; height: 4px; border-radius: 50%; background: rgba(234,244,251,.3); flex: none; }
   .sub .name { font-weight: 500; color: var(--ice-70); }
+  .sub .desc { flex: 0 1 auto; }
   .sub li + li .item { border-top: 0; }
+
+  /* ---- the credit under an app row: who the app is built with ---- */
+  .credit {
+    display: inline-block; margin: -9px 0 0 38px; padding: 0 0 2px;
+    font-size: 13px; line-height: 20px; color: var(--ice-45); text-decoration: none;
+  }
+  @media (hover: hover) { a.credit:hover { color: var(--blue); } }
+  a.credit:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 6px; }
   @keyframes foldIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
   .fold[open] .sub { animation: foldIn .25s ease both; }
   @media (hover: hover) {
@@ -132,12 +140,14 @@
   a.item:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
 
-  @media (min-width: 640px) { h1 { font-size: 34px; } .tagline { font-size: 16px; } }
+  @media (min-width: 640px) { h1 { font-size: 34px; } }
   @media (max-width: 520px) {
     .item { flex-wrap: wrap; row-gap: 3px; padding: 13px 12px; margin: 0 -12px; }
     .item .name { flex: 1 1 auto; }
     .item .arrow, .item .tag { order: 2; }
     .item .desc { flex-basis: 100%; order: 3; padding-left: 38px; line-height: 1.5; }
+    .sub .item { flex-wrap: nowrap; }
+    .sub .item .desc { flex-basis: auto; order: 0; padding-left: 0; }
   }
   @media (prefers-reduced-motion: reduce) { .reveal { animation: none; } }
 
@@ -190,35 +200,45 @@
       <img class="avatar" src="media/avatar.webp" alt="Jeremy Lasne" width="104" height="104">
     </div>
     <h1 class="reveal" style="--d:60">Jeremy Lasne</h1>
-    <p class="tagline reveal" style="--d:130">I make mobile apps with influencers.</p>
-
-    <section class="reveal" style="--d:220">
-      <h2>Agency</h2>
+    <section class="reveal" style="--d:160">
+      <h2>Mobile app portfolio</h2>
       <ul>
         <li><a class="item" href="https://creatormatch.app" target="_blank" rel="noopener">
           <img class="logo" src="media/logos/creatormatch.svg" alt="" width="24" height="24">
           <span class="name">CreatorMatch</span>
-          <span class="desc">Turn your audience into recurring revenue.</span>
+          <span class="desc">I make mobile apps with influencers.</span>
           <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
         </a></li>
+        <li>
+          <a class="item" href="https://www.idareyou.lol" target="_blank" rel="noopener">
+            <img class="logo" src="media/logos/idareyou.webp" alt="" width="24" height="24">
+            <span class="name">i dare you</span>
+            <span class="desc">Film the dare, or dare them back.</span>
+            <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
+          </a>
+          <a class="credit" href="https://www.tiktok.com/@ayade369" target="_blank" rel="noopener">With @ayade369</a>
+        </li>
+        <li>
+          <a class="item" href="https://kaught.app" target="_blank" rel="noopener">
+            <img class="logo" src="media/logos/kaught.webp" alt="" width="24" height="24">
+            <span class="name">Kaught</span>
+            <span class="desc">Name any wild animal with your camera.</span>
+            <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
+          </a>
+          <span class="credit">Looking for a creator to partner with</span>
+        </li>
       </ul>
     </section>
 
-    <section class="reveal" style="--d:260">
+    <section class="reveal" style="--d:220">
       <h2>Projects</h2>
       <ul>
-        <li><a class="item" href="https://kaught.app" target="_blank" rel="noopener">
-          <img class="logo" src="media/logos/kaught.webp" alt="" width="24" height="24">
-          <span class="name">Kaught</span>
-          <span class="desc">Name any wild animal with your camera.</span>
-          <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
-        </a></li>
-        <li><a class="item" href="https://www.idareyou.lol" target="_blank" rel="noopener">
-          <img class="logo" src="media/logos/idareyou.webp" alt="" width="24" height="24">
-          <span class="name">i dare you</span>
-          <span class="desc">Film the dare, or dare them back.</span>
-          <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
-        </a></li>
+        <li><span class="item">
+          <span class="dot"></span>
+          <span class="name">BrandMatch</span>
+          <span class="desc">I find you deals, not leads.</span>
+          <span class="tag">Coming soon</span>
+        </span></li>
         <li><a class="item" href="https://trustviews.io" target="_blank" rel="noopener">
           <img class="logo" src="media/logos/trustviews.svg" alt="" width="24" height="24">
           <span class="name">TrustViews</span>
@@ -228,31 +248,7 @@
       </ul>
     </section>
 
-    <section class="reveal" style="--d:300">
-      <h2>Social</h2>
-      <ul>
-        <li><a class="item" href="https://www.youtube.com/@jerandmax" target="_blank" rel="noopener">
-          <img class="logo round" src="media/logos/jerandmax.webp" alt="" width="24" height="24">
-          <span class="name">YouTube</span>
-          <span class="desc">@jerandmax</span>
-          <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
-        </a></li>
-        <li><a class="item" href="https://x.com/jeremylasne" target="_blank" rel="noopener">
-          <img class="logo round" src="media/avatar.webp" alt="" width="24" height="24">
-          <span class="name">X</span>
-          <span class="desc">@jeremylasne</span>
-          <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
-        </a></li>
-        <li><a class="item" id="mail" href="mailto:hey@jeremylasne.com">
-          <svg class="logo mail" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M4 7l8 6 8-6"/></svg>
-          <span class="name">Email</span>
-          <span class="desc">hey@jeremylasne.com</span>
-          <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
-        </a></li>
-      </ul>
-    </section>
-
-    <section class="reveal" style="--d:380">
+    <section class="reveal" style="--d:280">
       <h2>Personal</h2>
       <ul>
         <li><details class="fold">
@@ -266,6 +262,28 @@
             <li><span class="item"><span class="name">SaaS Health</span></span></li>
             <li><span class="item"><span class="name">H100 datacenters</span></span></li>
             <li><span class="item"><span class="name">Astronomy blog</span></span></li>
+          </ul>
+        </details></li>
+        <li><details class="fold">
+          <summary class="item">
+            <span class="dot"></span>
+            <span class="name">Social</span>
+            <span class="desc">Where to find me.</span>
+            <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
+          </summary>
+          <ul class="sub">
+            <li><a class="item" href="https://www.youtube.com/@jerandmax" target="_blank" rel="noopener">
+              <span class="name">YouTube</span>
+              <span class="desc">@jerandmax</span>
+            </a></li>
+            <li><a class="item" href="https://x.com/jeremylasne" target="_blank" rel="noopener">
+              <span class="name">X</span>
+              <span class="desc">@jeremylasne</span>
+            </a></li>
+            <li><a class="item" id="mail" href="mailto:hey@jeremylasne.com">
+              <span class="name">Email</span>
+              <span class="desc">hey@jeremylasne.com</span>
+            </a></li>
           </ul>
         </details></li>
         <li><a class="item" href="/bio/">
