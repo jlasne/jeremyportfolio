@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="16 96 480 320">
+  <!-- Two circles overlapping, the overlap knocked out. The gap is the match. -->
+  <mask id="bm">
+    <rect x="16" y="96" width="480" height="320" fill="#fff"/>
+    <path fill="#000" d="M256 126.1A150 150 0 0 1 256 385.9A150 150 0 0 1 256 126.1Z"/>
+  </mask>
+  <g mask="url(#bm)">
+    <circle cx="181" cy="256" r="150" fill="#FFA277"/>
+    <circle cx="331" cy="256" r="150" fill="#FF5C2B"/>
+  </g>
+</svg>
