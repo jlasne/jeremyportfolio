@@ -239,3 +239,84 @@ export function evaluate(
 function clamp(n: number): number {
   return n < 0 ? 0 : n > 2 ? 2 : Math.round(n)
 }
+
+// ---------------------------------------------------------------------------
+// Widening: did this edit open anything, and what does a lead miss
+// ---------------------------------------------------------------------------
+
+/** Which way each number has to move for more people to come through. */
+const LOOSER: Record<string, 'down' | 'up'> = {
+  followersMin: 'down',
+  followersMax: 'up',
+  lastPostWithinDays: 'up',
+  medianViewsMin: 'down',
+  medianCommentsMin: 'down',
+  postsPerMonthMin: 'down',
+}
+
+/**
+ * True when the second set of rules lets in someone the first would turn away.
+ *
+ * Read structurally rather than by running the pool, because it runs on every
+ * save. It errs towards saying yes, and saying yes only means the leads that
+ * follow carry a mark, which costs a client nothing and tells them the truth.
+ */
+export function loosens(
+  before: { hard: HardRules; passScore: number; niches: Niche[] },
+  after: { hard: HardRules; passScore: number; niches: Niche[] },
+): boolean {
+  if (after.passScore < before.passScore) return true
+  for (const key of Object.keys(LOOSER)) {
+    const a = (before.hard as Record<string, unknown>)[key]
+    const b = (after.hard as Record<string, unknown>)[key]
+    if (typeof a !== 'number') continue
+    if (typeof b !== 'number') return true
+    if (LOOSER[key] === 'down' ? b < a : b > a) return true
+  }
+  for (const key of ['countries', 'languages'] as const) {
+    const a = before.hard[key]
+    const b = after.hard[key]
+    if (!a?.length) continue
+    if (!b?.length) return true
+    if (b.some((v) => !a.includes(v))) return true
+  }
+  const on = new Set(before.niches.filter((n) => n.enabled).map((n) => n.id))
+  if (after.niches.filter((n) => n.enabled).some((n) => !on.has(n.id))) return true
+  return false
+}
+
+function compact(n: number): string {
+  if (n >= 1_000_000) return `${Math.round(n / 100_000) / 10}M`
+  if (n >= 1_000) return `${Math.round(n / 100) / 10}k`
+  return String(n)
+}
+
+/** What a number reads as on one profile, in the client's own words. */
+const SAYS: Record<string, (n: number) => string> = {
+  followersMin: (n) => `${compact(n)} followers`,
+  followersMax: (n) => `${compact(n)} followers`,
+  medianViewsMin: (n) => `${compact(n)} views on a typical post`,
+  medianCommentsMin: (n) => `${n} comments on a typical post`,
+  postsPerMonthMin: (n) => `${n} posts a month`,
+  lastPostWithinDays: (n) => `last posted ${n} days ago`,
+}
+
+/**
+ * The one line a lead misses against the rules its campaign started with.
+ *
+ * Written at delivery and stored on the lead, so a row can explain itself a
+ * year later without re-running anything.
+ */
+export function beyondLine(result: GateResult, gates: GateSetShape): string {
+  const key = result.blockedBy
+  if (key === 'score') return `Scored ${result.score}, your first rules asked ${gates.passScore}`
+  if (key === 'niche') return 'Works in a slice you switched on later'
+  if (key === 'countries') return 'Posts from outside the countries you first picked'
+  if (key === 'languages') return 'Posts in a language outside the ones you first picked'
+  const say = key ? SAYS[key] : undefined
+  const limit = key ? (gates.hard as Record<string, unknown>)[key] : undefined
+  const check = result.hardChecks.find((c) => c.key === key)
+  if (!say || typeof limit !== 'number' || !check) return 'Outside the rules you started with'
+  const asked = key === 'lastPostWithinDays' ? `${limit} days` : compact(limit)
+  return `${say(check.value)}, your first rules asked ${asked}`
+}

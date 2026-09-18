@@ -1,10 +1,29 @@
-import type { Campaign } from '../types'
+import type { Campaign, Niche } from '../types'
 import { suggestNiches } from '../data/niches'
 import { account } from './account'
 import { daysAgo } from './time'
 
 // Two campaigns under one agency account. Between them they take the whole
 // daily quota, and the caps show that the split is the client's to set.
+//
+// The first one has already opened a door. Three weeks ago its rules stopped
+// filling the day, views were lowered, and the flow came back. It is kept here
+// because it is the normal life of a campaign, and because every screen that
+// touches a lead has to be able to say which side of that move it came from.
+
+/**
+ * The slices the first campaign looks in.
+ *
+ * A postnatal account at 20k is worth more than a general one at 200k, so that
+ * slice carries its own, lower numbers.
+ */
+const fitnessNiches: Niche[] = suggestNiches('fitness coaches strength training', 'mobile apps').map((n) =>
+  n.id === 'postnatal_and_womens_health'
+    ? { ...n, hard: { followersMin: 8_000, medianViewsMin: 6_000 } }
+    : n.id === 'rehab_and_physio'
+      ? { ...n, hard: { followersMin: 10_000, medianViewsMin: 7_000 } }
+      : n,
+)
 
 export const campaigns: Campaign[] = [
   {
@@ -25,20 +44,26 @@ export const campaigns: Campaign[] = [
       countries: ['US', 'UK', 'CA', 'AU'],
       languages: ['en'],
       templateId: 'sell_to_creators',
-      // A postnatal account at 20k is worth more than a general one at 200k,
-      // so that slice carries its own, lower numbers.
-      niches: suggestNiches('fitness coaches strength training', 'mobile apps').map((n) =>
-        n.id === 'postnatal_and_womens_health'
-          ? { ...n, hard: { followersMin: 8_000, medianViewsMin: 6_000 } }
-          : n.id === 'rehab_and_physio'
-            ? { ...n, hard: { followersMin: 10_000, medianViewsMin: 7_000 } }
-            : n,
-      ),
+      niches: fitnessNiches,
       extractedAt: daysAgo(96),
     },
-    gateSetId: 'gate_fit_v2',
+    gateSetId: 'gate_fit_v3',
+    // The rules this campaign agreed to before it opened anything. Every lead
+    // handed over since is measured against these, and the ones that only clear
+    // today's rules are marked on the list.
+    widened: {
+      fromGateSetId: 'gate_fit_v2',
+      fromNiches: fitnessNiches,
+      doors: [
+        {
+          id: 'medianViewsMin',
+          label: 'Followers lowered from 15k to 7k',
+          openedAt: daysAgo(24),
+        },
+      ],
+    },
     createdAt: daysAgo(96),
-    updatedAt: daysAgo(31),
+    updatedAt: daysAgo(24),
   },
   {
     id: 'cmp_finance',

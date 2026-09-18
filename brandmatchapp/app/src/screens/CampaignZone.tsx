@@ -4,14 +4,16 @@ import type { CampaignTab } from '../lib/router'
 import { Brief } from './Brief'
 import { Feasibility } from './Feasibility'
 import { Gates } from './Gates'
+import { Room } from './Room'
 
-// The three campaign zones, chained in the order they are filled at creation
+// The four campaign zones, chained in the order they are filled at creation
 // and editable one by one afterwards. Each tab answers one question.
 
 const TABS: { id: CampaignTab; label: string; question: string }[] = [
   { id: 'brief', label: 'Your brief', question: 'Who you want to reach, and what you sell them' },
   { id: 'gates', label: 'Your rules', question: 'What makes someone a lead' },
   { id: 'feasibility', label: 'Test it', question: 'Can this deliver every day' },
+  { id: 'room', label: 'Room left', question: 'How long these rules keep delivering' },
 ]
 
 export function CampaignZone({ campaignId, tab }: { campaignId: string; tab: CampaignTab }) {
@@ -46,6 +48,7 @@ export function CampaignZone({ campaignId, tab }: { campaignId: string; tab: Cam
       {tab === 'brief' && <Brief campaignId={campaign.id} />}
       {tab === 'gates' && <Gates campaignId={campaign.id} />}
       {tab === 'feasibility' && <Feasibility campaignId={campaign.id} />}
+      {tab === 'room' && <Room campaignId={campaign.id} />}
     </div>
   )
 }

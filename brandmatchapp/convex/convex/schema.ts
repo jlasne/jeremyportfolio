@@ -213,6 +213,29 @@ export default defineSchema({
     }),
     /** The gate version leads are judged against right now. */
     gateSetId: v.optional(v.id('gateSets')),
+    /**
+     * What this campaign has opened up since it started.
+     *
+     * Set the first time a rule is moved so that more people come through.
+     * The rules it started from are kept whole rather than as a diff, because
+     * every lead handed over afterwards is measured against them and marked.
+     * Niches are part of it: adding a slice widens a campaign exactly as
+     * lowering a number does.
+     */
+    widened: v.optional(v.object({
+      fromGateSetId: v.id('gateSets'),
+      fromNiches: v.array(v.object({
+        id: v.string(),
+        label: v.string(),
+        enabled: v.boolean(),
+        hard: v.optional(hardRules),
+      })),
+      doors: v.array(v.object({
+        id: v.string(),
+        label: v.string(),
+        openedAt: v.number(),
+      })),
+    })),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -386,6 +409,17 @@ export default defineSchema({
       v.literal('signed'),
       v.literal('lost'),
     ),
+    /**
+     * Inside the rules the client first agreed to, or past them. Written once,
+     * at delivery, against the rules in force before any door was opened.
+     *
+     * A client who widens their rules to keep the flow going is owed the truth
+     * about what came through. Without this the widening is invisible: the
+     * list looks unchanged while the reply rate quietly falls.
+     */
+    reach: v.optional(v.union(v.literal('core'), v.literal('wider'))),
+    /** When wider: the one line they miss. "7.9k followers, you asked 15k" */
+    beyond: v.optional(v.string()),
     /** Which member is on it. Absent means nobody has taken it. */
     ownerId: v.optional(v.id('members')),
     /**

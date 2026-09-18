@@ -2,6 +2,7 @@ import { internalMutation, internalQuery } from './_generated/server'
 import { internal } from './_generated/api'
 import { v } from 'convex/values'
 import { periodKey } from './accounts'
+import { beyondLine, evaluate, type Judgement, type Niche } from './gates'
 
 // The daily hand over.
 //
@@ -15,6 +16,12 @@ import { periodKey } from './accounts'
 //
 // Delivering claims the profile for this account, for good. It is never
 // evaluated for another account after that.
+//
+// It also marks the lead. A campaign that widened its rules to keep the flow
+// going gets people its first rules would have turned away, and every one of
+// them says so, on the row, for as long as the lead exists. The mark is written
+// here and never recomputed: the rules move, and what a lead was when it
+// arrived does not.
 
 export const candidates = internalQuery({
   args: { accountId: v.id('accounts') },
@@ -87,11 +94,16 @@ export const today = internalMutation({
     const takenPerCampaign = new Map<string, number>()
     let delivered = 0
     const now = Date.now()
+    // Two lookups per lead become two lookups per campaign.
+    const campaignCache = new Map<string, any>()
+    const gateCache = new Map<string, any>()
 
     for (const row of list as Record<string, any>[]) {
       if (delivered >= room) break
       const taken = takenPerCampaign.get(row.campaignId) ?? row.deliveredToday
       if (row.cap !== null && taken >= row.cap) continue
+
+      const side = await standing(ctx, row, campaignCache, gateCache, now)
 
       const leadId = await ctx.db.insert('leads', {
         accountId: args.accountId,
@@ -100,6 +112,8 @@ export const today = internalMutation({
         evaluationId: row.evaluationId,
         score: row.score,
         status: 'new',
+        reach: side.reach,
+        beyond: side.beyond,
         deliveredAt: now,
         statusAt: now,
       })
@@ -166,3 +180,53 @@ export const activeAccounts = internalQuery({
     return subs.map((s) => ({ accountId: s.accountId, tier: s.tier }))
   },
 })
+
+/**
+ * Where one lead stands against the rules its campaign agreed to at the start.
+ *
+ * The model already answered, once, for today's rules. Relaxing a threshold
+ * changes who reaches the model, never what the model would say, so the stored
+ * answers are replayed against the first rules rather than paid for twice.
+ */
+async function standing(
+  ctx: { db: { get: (id: any) => Promise<any> } },
+  row: Record<string, any>,
+  campaignCache: Map<string, any>,
+  gateCache: Map<string, any>,
+  now: number,
+): Promise<{ reach: 'core' | 'wider'; beyond?: string }> {
+  const campaignKey = String(row.campaignId)
+  if (!campaignCache.has(campaignKey)) campaignCache.set(campaignKey, await ctx.db.get(row.campaignId))
+  const campaign = campaignCache.get(campaignKey)
+  if (!campaign?.widened) return { reach: 'core' }
+
+  const gateKey = String(campaign.widened.fromGateSetId)
+  if (!gateCache.has(gateKey)) gateCache.set(gateKey, await ctx.db.get(campaign.widened.fromGateSetId))
+  const first = gateCache.get(gateKey)
+  const creator = await ctx.db.get(row.creatorId)
+  const evaluation = await ctx.db.get(row.evaluationId)
+  if (!first || !creator || !evaluation) return { reach: 'core' }
+
+  const judgement: Judgement = {
+    niche: evaluation.niche ?? null,
+    knockouts: Object.fromEntries(
+      (evaluation.knockoutAnswers ?? []).map((a: any) => [a.id, { pass: a.pass, note: a.note }]),
+    ),
+    criteria: Object.fromEntries(
+      (evaluation.criteriaScores ?? []).map((c: any) => [c.id, { score: c.score, note: c.note }]),
+    ),
+    reason: evaluation.reason ?? '',
+  }
+  const measured = {
+    followers: creator.followers,
+    medianViews: creator.medianViews,
+    medianComments: creator.medianComments,
+    postsPerMonth: creator.postsPerMonth,
+    lastPostAt: creator.lastPostAt,
+    country: creator.country,
+    language: creator.language,
+  }
+  const result = evaluate(measured, first, (campaign.widened.fromNiches ?? []) as Niche[], judgement, now)
+  if (result.verdict === 'qualified') return { reach: 'core' }
+  return { reach: 'wider', beyond: beyondLine(result, first) }
+}

@@ -9,10 +9,12 @@ import type {
   LeadStatus,
   Member,
   QuotaPeriod,
+  Reach,
   Subscription,
   Verdict,
 } from '../types'
 import { indexOfCreator, postsFor } from '../mock/creators'
+import { survey, type FirstRules, type Survey } from './pool'
 import { getState, getVersion } from './store'
 import { rank, WALK } from './status'
 
@@ -106,6 +108,38 @@ function allRows(): LeadRow[] {
   return rows
 }
 
+// ---------------------------------------------------------------------------
+// How much room is left, and the ways out of it
+// ---------------------------------------------------------------------------
+
+let surveyCache: { version: number; id: string; out: Survey } | null = null
+
+/**
+ * How much room a campaign has left, with every way out priced.
+ *
+ * Held against the store version because answering it means running the whole
+ * sample once per way out, and three screens ask for it.
+ */
+export function getSurvey(campaignId: string): Survey | null {
+  const campaign = getCampaign(campaignId)
+  const gates = getGateSet(campaignId)
+  if (!campaign || !gates) return null
+  const version = getVersion()
+  if (surveyCache && surveyCache.version === version && surveyCache.id === campaignId) return surveyCache.out
+  const delivered = getState().leads.filter((l) => l.campaignId === campaignId).length
+  const out = survey(campaign, gates, delivered, campaign.dailyCap ?? getSubscription().tier)
+  surveyCache = { version, id: campaignId, out }
+  return out
+}
+
+/** The rules a campaign agreed to before it opened anything, when it has. */
+export function getFirstRules(campaignId: string): FirstRules | null {
+  const campaign = getCampaign(campaignId)
+  if (!campaign?.widened) return null
+  const gates = getState().gateSets.find((g) => g.id === campaign.widened!.fromGateSetId)
+  return gates ? { gates, niches: campaign.widened.fromNiches } : null
+}
+
 export type LeadSort = 'fit' | 'newest' | 'status'
 
 export interface LeadQuery {
@@ -117,6 +151,8 @@ export interface LeadQuery {
   /** Only people who scored this or better. */
   scoreMin?: number | null
   savedOnly?: boolean
+  /** Inside the rules you started with, or past them. */
+  reach?: Reach | null
   sort?: LeadSort
 }
 
@@ -134,6 +170,7 @@ export function listLeads(query: LeadQuery = {}): LeadRow[] {
     .filter((r) => (query.campaignId ? r.lead.campaignId === query.campaignId : true))
     .filter((r) => (query.status ? r.lead.status === query.status : true))
     .filter((r) => (query.savedOnly ? Boolean(r.lead.saved) : true))
+    .filter((r) => (query.reach ? (r.lead.reach ?? 'core') === query.reach : true))
     .filter((r) => (query.followersMin ? r.creator.followers >= query.followersMin : true))
     .filter((r) => (query.scoreMin ? r.lead.score >= query.scoreMin : true))
     .filter((r) =>

@@ -229,6 +229,7 @@ function shape(
   lead: {
     _id: string; campaignId: string; score: number; status: string
     saved?: boolean; note?: string; refreshedAt?: number; lostReason?: string
+    reach?: string; beyond?: string
     deliveredAt: number; statusAt: number
   },
   creator: {
@@ -249,6 +250,10 @@ function shape(
     saved: lead.saved ?? false,
     note: lead.note ?? '',
     lostReason: lead.lostReason ?? null,
+    // Inside the rules the client first agreed to, or past them. The row says
+    // so on screen for as long as the lead exists.
+    reach: lead.reach ?? 'core',
+    beyond: lead.beyond ?? null,
     refreshedAt: lead.refreshedAt ?? null,
     deliveredAt: lead.deliveredAt,
     statusAt: lead.statusAt,

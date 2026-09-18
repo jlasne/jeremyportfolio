@@ -69,6 +69,7 @@ export async function fetchAll(): Promise<Loaded> {
       brief: {
         audience: c.brief?.audience ?? '',
         offer: c.brief?.offer ?? '',
+        seeds: c.brief?.seeds ?? undefined,
         writtenAt: iso(c.brief?.writtenAt ?? c.createdAt),
       },
       extracted: {
@@ -79,6 +80,17 @@ export async function fetchAll(): Promise<Loaded> {
         extractedAt: iso(c.extracted?.extractedAt),
       },
       gateSetId: c.gateSetId ?? '',
+      widened: c.widened
+        ? {
+            fromGateSetId: c.widened.fromGateSetId,
+            fromNiches: c.widened.fromNiches ?? [],
+            doors: (c.widened.doors ?? []).map((d: any) => ({
+              id: d.id,
+              label: d.label,
+              openedAt: iso(d.openedAt),
+            })),
+          }
+        : undefined,
       createdAt: iso(c.createdAt),
       updatedAt: iso(c.updatedAt),
     })
@@ -156,6 +168,9 @@ export async function fetchAll(): Promise<Loaded> {
       evaluationId,
       score: row.score,
       status: row.status as LeadStatus,
+      reach: row.reach === 'wider' ? 'wider' : 'core',
+      beyond: row.beyond ?? undefined,
+      lostReason: row.lostReason ?? undefined,
       ownerId: null,
       saved: Boolean(row.saved),
       note: row.note ?? '',

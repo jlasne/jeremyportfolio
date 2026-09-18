@@ -2,6 +2,7 @@ import { internalMutation, internalQuery } from './_generated/server'
 import { v } from 'convex/values'
 import type { Doc } from './_generated/dataModel'
 import { enforceLocks, settle, settleScore, template } from './templates'
+import { loosens, type Niche } from './gates'
 
 
 // Campaigns and their gate versions.
@@ -9,6 +10,21 @@ import { enforceLocks, settle, settleScore, template } from './templates'
 // A gate version is never updated in place. An edit writes version n + 1 and
 // the campaign points at it, so a lead delivered last Monday can still be
 // explained against the rules that were live last Monday.
+//
+// An edit that lets more people through is also a door. The rules in force at
+// the first one are kept whole on the campaign, and every lead handed over
+// afterwards is measured against them and marked. Both ways in land here, so
+// the mark never depends on which screen the client used.
+
+/** The door a widening leaves behind, appended to what the campaign has open. */
+function widenedWith(campaign: Doc<'campaigns'>, id: string, label: string, niches: Niche[]) {
+  const from = campaign.widened ?? {
+    fromGateSetId: campaign.gateSetId!,
+    fromNiches: niches,
+    doors: [],
+  }
+  return { ...from, doors: [...from.doors, { id, label, openedAt: Date.now() }] }
+}
 
 export function publicCampaign(c: Doc<'campaigns'>) {
   return {
@@ -19,6 +35,8 @@ export function publicCampaign(c: Doc<'campaigns'>) {
     brief: c.brief,
     extracted: c.extracted,
     gateSetId: c.gateSetId ?? null,
+    /** What has been opened since the campaign started, and when. */
+    widened: c.widened ?? null,
     createdAt: c.createdAt,
     updatedAt: c.updatedAt,
   }
@@ -148,6 +166,17 @@ export const patch = internalMutation({
         if (Object.keys(hard).length) row.hard = hard
         return row
       })
+      // Switching a slice back on is a widening like any other.
+      const on = new Set((campaign.extracted.niches ?? []).filter((n) => n.enabled).map((n) => n.id))
+      const added = niches.filter((n) => n.enabled && !on.has(String(n.id)))
+      if (added.length && campaign.gateSetId) {
+        patch.widened = widenedWith(
+          campaign,
+          `niche_${added[0].id}`,
+          `${added.map((n) => n.label).join(', ')} switched on`,
+          (campaign.extracted.niches ?? []) as Niche[],
+        )
+      }
       patch.extracted = { ...(patch.extracted ?? campaign.extracted), niches }
     }
     await ctx.db.patch(args.campaignId, patch)
@@ -197,22 +226,47 @@ export const saveGates = internalMutation({
         }))
       : lib.criteria
 
+    const hard = settle(args.hard ?? {})
+    const passScore = settleScore(args.passScore, criteria.length)
+
     const gateSetId = await ctx.db.insert('gateSets', {
       campaignId: args.campaignId,
       accountId: args.accountId,
       version,
       origin: args.origin,
       templateId,
-      hard: settle(args.hard ?? {}),
+      hard,
       knockouts: enforceLocks(templateId, args.knockouts),
       criteria,
-      passScore: settleScore(args.passScore, criteria.length),
+      passScore,
       preset: args.preset ?? 'custom',
       by: args.by ?? 'system',
       changes: args.changes ?? [],
       createdAt: Date.now(),
     })
-    await ctx.db.patch(args.campaignId, { gateSetId, updatedAt: Date.now() })
+
+    const active = campaign.gateSetId ? await ctx.db.get(campaign.gateSetId) : null
+    const niches = (campaign.extracted.niches ?? []) as Niche[]
+    const opened =
+      active !== null &&
+      loosens(
+        { hard: active.hard, passScore: active.passScore, niches },
+        { hard, passScore, niches },
+      )
+    await ctx.db.patch(args.campaignId, {
+      gateSetId,
+      updatedAt: Date.now(),
+      ...(opened
+        ? {
+            widened: widenedWith(
+              campaign,
+              `v${version}`,
+              (args.changes ?? []).slice(0, 2).join(', ') || 'Rules widened',
+              niches,
+            ),
+          }
+        : {}),
+    })
     const gates = await ctx.db.get(gateSetId)
     return publicGates(gates!)
   },

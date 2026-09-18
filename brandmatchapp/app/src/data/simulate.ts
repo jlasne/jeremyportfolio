@@ -111,6 +111,36 @@ function walk(gates: GateSet, niches: Niche[], answers: Judgement[], now: number
   }
 }
 
+/**
+ * Everyone in the sample these rules would hand over, by position.
+ *
+ * The room screen reads this rather than a count, because the difference
+ * between two rule versions is a set of people, and what those people look like
+ * is the honest cost of widening.
+ */
+export function qualifiedSet(
+  gates: GateSet, niches: Niche[], answers?: Judgement[], now = Date.now(),
+): Set<number> {
+  const ans = answers ?? judgements(gates, niches)
+  const out = new Set<number>()
+  SAMPLE.forEach((s, i) => {
+    if (evaluate(s.creator, gates, niches, ans[i], now).verdict === 'qualified') out.add(i)
+  })
+  return out
+}
+
+/** The model's answers for one gate version, so a caller can reuse them. */
+export function answersFor(gates: GateSet, niches: Niche[]): Judgement[] {
+  return judgements(gates, niches)
+}
+
+/** One profile of the shared sample, by position. */
+export function creatorAt(index: number): Creator {
+  return SAMPLE[index].creator
+}
+
+export const SAMPLE_SIZE = SAMPLE.length
+
 export function simulate(gates: GateSet, niches: Niche[], tier: number): SimResult {
   const out = walk(gates, niches, judgements(gates, niches), Date.now())
   out.estimatedPerDay = Math.round((out.funnel.qualified / Math.max(1, out.funnel.scanned)) * scanRate(tier))

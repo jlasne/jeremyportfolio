@@ -25,6 +25,16 @@ export const GROUP_MIN = 12
 /** And a gap under a quarter is not a finding at this sample size. */
 export const GAP_MIN = 0.25
 
+/**
+ * Days before a lead is worth counting in a reply rate.
+ *
+ * It only matters where a group is younger than the rest, which is exactly the
+ * case for anyone who came through a door: they all arrived after it opened. A
+ * straight comparison would report them as silent when the truth is that
+ * nobody has written to them yet.
+ */
+export const SETTLED_DAYS = 5
+
 export type Period = 7 | 30 | 0
 
 export function inPeriod(rows: LeadRow[], days: Period): LeadRow[] {
@@ -146,6 +156,47 @@ export function scoreBands(rows: LeadRow[]): Band[] {
     band(rows, 'Scored 11 or 12', (r) => r.lead.score === 11 || r.lead.score === 12),
     band(rows, 'Scored 13 or 14', (r) => r.lead.score >= 13),
   ]
+}
+
+/** Leads old enough that silence means silence. */
+export function settled(rows: LeadRow[]): LeadRow[] {
+  const cut = Date.now() - SETTLED_DAYS * 86_400_000
+  return rows.filter((r) => new Date(r.lead.deliveredAt).getTime() <= cut)
+}
+
+/**
+ * What widening the rules actually cost.
+ *
+ * The promise made when a door is opened is a number of extra people. This is
+ * the receipt: whether those people answer like the rest. Measured on leads old
+ * enough to have answered, because everyone past the first rules arrived after
+ * the door opened and would otherwise look silent by age alone.
+ */
+export function reachBands(rows: LeadRow[]): Band[] {
+  const ripe = settled(rows)
+  return [
+    band(ripe, 'Inside your first rules', (r) => (r.lead.reach ?? 'core') === 'core'),
+    band(ripe, 'Past your first rules', (r) => r.lead.reach === 'wider'),
+  ].filter((b) => b.delivered > 0)
+}
+
+/** The receipt in one sentence, and only when both sides carry a rate. */
+export function widenedReading(bands: Band[]): string | null {
+  const inside = bands.find((b) => b.label === 'Inside your first rules')
+  const past = bands.find((b) => b.label === 'Past your first rules')
+  // A rate of zero is a finding, not a missing figure. Only a null is missing.
+  if (inside?.rate == null || past?.rate == null) {
+    const held = past?.delivered ?? 0
+    return `Once ${RATE_MIN} of them have been worked we can tell you whether they answer like the rest. ${held} so far.`
+  }
+  const gap = inside.rate > 0 ? (past.rate - inside.rate) / inside.rate : past.rate > 0 ? 1 : 0
+  if (Math.abs(gap) < GAP_MIN) {
+    return `They answer like everyone else, ${Math.round(past.rate * 100)}% against ${Math.round(inside.rate * 100)}%. The widening cost you nothing measurable.`
+  }
+  if (gap < 0) {
+    return `They answer ${Math.round(past.rate * 100)}% of the time, against ${Math.round(inside.rate * 100)}% inside your first rules. That is what the extra volume cost.`
+  }
+  return `They answer ${Math.round(past.rate * 100)}% of the time, against ${Math.round(inside.rate * 100)}% inside your first rules. The wider rules are working better than the ones you started with.`
 }
 
 export function nicheBands(rows: LeadRow[], niches: Niche[]): Band[] {
@@ -434,7 +485,7 @@ export function nudges(rows: LeadRow[]): Nudge[] {
       id: 'stale',
       text: `${stale} leads were contacted over a week ago and have not moved.`,
       action: 'Update them',
-      href: '#/leads?waiting=1',
+      href: '#/leads?status=contacted',
     })
   }
 

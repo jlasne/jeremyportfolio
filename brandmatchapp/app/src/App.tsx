@@ -24,7 +24,7 @@ export function App() {
       <SideNav route={route} />
       <main className="main">
         {route.name === 'dashboard' && <Dashboard />}
-        {route.name === 'leads' && <Leads leadId={route.leadId} />}
+        {route.name === 'leads' && <Leads leadId={route.leadId} query={route.query} />}
         {route.name === 'campaigns' && <Campaigns />}
         {route.name === 'newCampaign' && <NewCampaign />}
         {route.name === 'campaign' && <CampaignZone campaignId={route.campaignId} tab={route.tab} />}

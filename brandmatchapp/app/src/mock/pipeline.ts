@@ -12,6 +12,7 @@ import type {
   QuotaPeriod,
 } from '../types'
 import { evaluate } from '../data/gates'
+import { standing, type FirstRules } from '../data/pool'
 import { account, currentPeriod, dayOfPeriod, daysInPeriod, subscription, topups } from './account'
 import { campaigns } from './campaigns'
 import { gateSetById, gateSets } from './gates'
@@ -85,14 +86,31 @@ interface Passed {
   score: number
   evaluationId: string
   niche: string | null
+  /** Inside the rules this campaign started with, or past them. */
+  reach: 'core' | 'wider'
+  beyond?: string
 }
 const passed: Passed[] = []
+
+/**
+ * The rules each campaign agreed to before it opened anything, looked up once.
+ * A campaign that never widened has none, and every one of its leads is core.
+ */
+const firstRules = new Map<string, FirstRules | null>(
+  campaigns.map((c) => [
+    c.id,
+    c.widened
+      ? { gates: gateSetById.get(c.widened.fromGateSetId)!, niches: c.widened.fromNiches }
+      : null,
+  ]),
+)
 
 built.forEach((b, index) => {
   const campaign = b.niche === 'fitness' ? campaigns[0] : campaigns[1]
   const gates = gateSetById.get(campaign.gateSetId)!
   const niches = campaign.extracted.niches
-  const result = evaluate(b.creator, gates, niches, judge(index, b.band, gates, niches), now)
+  const judgement = judge(index, b.band, gates, niches)
+  const result = evaluate(b.creator, gates, niches, judgement, now)
   const rand = seeded(777_001 + index * 31)
 
   const evaluationId = `evl_${b.creator.id}`
@@ -115,6 +133,9 @@ built.forEach((b, index) => {
   })
 
   if (result.verdict === 'qualified') {
+    // Judged once against today's rules, then held up against the rules this
+    // campaign started with. That second read is what puts the mark on the row.
+    const side = standing(b.creator, judgement, firstRules.get(campaign.id) ?? null, now)
     passed.push({
       index,
       creatorId: b.creator.id,
@@ -122,6 +143,8 @@ built.forEach((b, index) => {
       score: result.score,
       evaluationId,
       niche: result.niche,
+      reach: side.reach,
+      beyond: side.beyond,
     })
   }
 })
@@ -132,10 +155,37 @@ built.forEach((b, index) => {
 // it came from. That is the rule the backend's deliver.ts follows too.
 passed.sort((a, b) => b.score - a.score)
 
+/**
+ * Nobody arrived through a door before it was opened.
+ *
+ * The first campaign lowered its views three weeks ago, so the people who only
+ * clear today's rules are spread across those three weeks and nowhere earlier.
+ * Spread, and not stacked at the end: a group handed over in the last two days
+ * would read as replying badly when the truth is that nobody has had time to
+ * answer them yet.
+ */
+const DOOR_DAYS = 24
+
 // Enough history to have a month behind the current one, so the dashboard can
 // compare a period against the one before it.
 const daysElapsed = Math.max(1, dayOfPeriod) + 28
 const perDay = Math.max(1, Math.round(passed.length / daysElapsed))
+
+// Rank 0 is today, so the people who came through the door take the first
+// slots, mixed in one at a time rather than in a block.
+const wider = passed.filter((p) => p.reach === 'wider')
+const core = passed.filter((p) => p.reach === 'core')
+const recentSlots = Math.max(1, wider.length, Math.min(passed.length, (DOOR_DAYS + 1) * perDay))
+const order: Passed[] = []
+let wi = 0
+let ci = 0
+for (let i = 0; i < passed.length; i++) {
+  const takeWider =
+    wi < wider.length &&
+    (ci >= core.length ||
+      (i < recentSlots && Math.floor(((i + 1) * wider.length) / recentSlots) > wi))
+  order.push(takeWider ? wider[wi++] : core[ci++])
+}
 
 /**
  * How likely this person is to answer, before any dice are thrown.
@@ -159,7 +209,7 @@ function warmth(row: Passed, niches: { id: string }[]): number {
   return size * niche * score
 }
 
-passed.forEach((row, rank) => {
+order.forEach((row, rank) => {
   const daysBack = Math.min(daysElapsed - 1, Math.floor(rank / perDay))
   const deliveredAt = daysAgo(daysBack, 7)
   const rand = seeded(313_007 + row.index * 17)
@@ -180,14 +230,17 @@ passed.forEach((row, rank) => {
   // conversation turns into a signature depends on the pitch and the budget,
   // which has nothing to do with their follower count, so that roll is cold.
   const warm = warmth(row, campaigns.find((c) => c.id === row.campaignId)!.extracted.niches)
-  const answer = Math.min(0.999, rand() * warm)
+  const answer = rand()
   const close = rand()
+  const worked = rand()
 
-  let reach =
-    daysBack === 0 ? 0
-      : daysBack <= 2 ? (answer > 0.45 ? 1 : 0)
-        : daysBack <= 5 ? (answer > 0.72 ? 2 : 1)
-          : (answer > 0.6 ? 2 : 1)
+  // Warmth shifts a chance, it never decides for a whole group at once. A
+  // threshold on a scaled roll looks like the same thing and is not: below the
+  // line every last person goes silent, and the dashboard then reports a clean
+  // zero for a slice that in real life still answers now and then.
+  const replyChance = Math.min(0.78, 0.34 * warm)
+  const contacted = daysBack >= 3 || (daysBack >= 1 && worked < 0.8)
+  let reach = !contacted ? 0 : contacted && daysBack >= 3 && answer < replyChance ? 2 : 1
   // Booking is uncommon and signing is rare, which is the whole reason a lead
   // costs what it costs.
   if (reach === 2 && daysBack > 4 && close > 0.62) reach = 3
@@ -213,6 +266,8 @@ passed.forEach((row, rank) => {
     evaluationId: row.evaluationId,
     score: row.score,
     status,
+    reach: row.reach,
+    beyond: row.beyond,
     lostReason: lost ? why : undefined,
     ownerId: reach === 0 ? null : rank % 2 === 0 ? 'mem_1' : 'mem_2',
     deliveredAt,

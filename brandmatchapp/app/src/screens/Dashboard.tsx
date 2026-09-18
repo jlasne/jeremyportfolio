@@ -3,8 +3,8 @@ import { deliveredToday, getCampaigns, getGateSet, getQuota, getSubscription, li
 import { useStore } from '../data/hooks'
 import {
   advice, byWeek, compare, economics, funnelOf, GROUP_MIN, inPeriod, insight, nicheBands, nudges,
-  lostBreakdown, previousPeriod, RATE_MIN, readTable, repliedRows, scoreBands, sizeBands,
-  type Band, type Period,
+  lostBreakdown, previousPeriod, RATE_MIN, reachBands, readTable, repliedRows, scoreBands,
+  SETTLED_DAYS, sizeBands, widenedReading, type Band, type Period,
 } from '../data/insights'
 import { LOST_LABEL, STATUS_LABEL } from '../data/status'
 import { download, toCsv } from '../lib/csv'
@@ -123,6 +123,9 @@ export function Dashboard() {
   const campaign = campaigns.find((c) => c.id === campaignId)
   const niches = campaign?.extracted.niches ?? campaigns.flatMap((c) => c.extracted.niches)
   const headline = insight(rows, niches)
+  // The receipt on any door already opened. Only drawn when there is one.
+  const widened = reachBands(rows)
+  const wideCampaign = campaignId ?? campaigns.find((c) => c.widened)?.id ?? null
   const table = compare(rows)
   // What the rules currently ask for, so a suggestion can say "and your rules
   // still let them in" rather than guessing.
@@ -249,6 +252,23 @@ export function Dashboard() {
           A share only appears once {RATE_MIN} leads sit behind it. Below that one reply would swing it, so we say too
           few yet instead.
         </p>
+
+        {widened.length > 1 && (
+          <div className="widened-block">
+            <Bands rows={widened} title="What widening your rules cost" />
+            <p className="reading">{widenedReading(widened)}</p>
+            <p className="hint">
+              Leads sent in the last {SETTLED_DAYS} days are left out here. Everyone past your first rules arrived
+              after you opened them, so counting the newest would call them silent when nobody has written yet.
+            </p>
+            {wideCampaign && (
+              <div className="verdict-actions">
+                <a className="btn small" href="#/leads?reach=wider">See those leads</a>
+                <a className="btn small quiet" href={`#/campaign/${wideCampaign}/room`}>Manage what is open</a>
+              </div>
+            )}
+          </div>
+        )}
         <Suggestions list={tips.filter((t) => t.id !== 'after-reply')} />
       </div>
 

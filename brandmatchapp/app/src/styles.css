@@ -2862,3 +2862,96 @@ body { background: var(--paper); }
 .seed-tag.fails { background: var(--paper-2); color: var(--ink-3); }
 .seed-tag.unknown { background: var(--orange-soft); color: var(--orange-deep); }
 .rules.stacked li.fails > b { color: var(--ink-3); }
+
+/* ---------------------------------------------------------------------------
+   Room left: the gauge, the ways we search, and the ways out.
+
+   Three colours and no more. Green is room, orange is thinning, deep orange is
+   out of room under today's rules. Nothing here ever goes red on one way of
+   searching running dry, because one is not the end.
+
+   The list class is `.exits` and not `.doors`: the landing already owns that
+   name with a two column grid, and the two would fight.
+--------------------------------------------------------------------------- */
+
+.room-card { border-left: 3px solid var(--line-2); }
+.room-card.wide { border-left-color: #2f9e6b; }
+.room-card.thin { border-left-color: var(--orange); }
+.room-card.dry { border-left-color: var(--orange-deep); }
+
+.room-big { font-size: 19px; line-height: 1.45; margin: 6px 0 14px; color: var(--ink); }
+.room-big b { font-size: 22px; font-weight: 650; }
+
+.room-gauge {
+  display: flex; height: 16px; border-radius: 4px; overflow: hidden;
+  background: var(--paper-2); margin-bottom: 10px;
+}
+.room-gauge i { display: block; height: 100%; min-width: 2px; }
+.room-gauge i.done { background: var(--ink-3); }
+.room-gauge i.ahead { background: #2f9e6b; }
+.room-card.thin .room-gauge i.ahead { background: var(--orange); }
+.room-card.dry .room-gauge i.ahead { background: var(--orange-deep); }
+
+.room-key { list-style: none; margin: 0 0 14px; padding: 0; display: flex; gap: 18px; flex-wrap: wrap; }
+.room-key li { font-size: 12.5px; color: var(--ink-2); display: flex; gap: 6px; align-items: baseline; }
+.room-key li::before { content: ''; width: 9px; height: 9px; border-radius: 2px; flex: none; }
+.room-key li.done::before { background: var(--ink-3); }
+.room-key li.ahead::before { background: #2f9e6b; }
+.room-card.thin .room-key li.ahead::before { background: var(--orange); }
+.room-card.dry .room-key li.ahead::before { background: var(--orange-deep); }
+.room-key b { color: var(--ink); font-weight: 600; }
+
+.room-span { font-size: 15px; font-weight: 600; color: var(--ink); margin: 0 0 8px; }
+
+/* The ways we search. No counts anywhere: a share of a bar and a state. */
+.ways { list-style: none; margin: 4px 0 14px; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.ways li { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 6px 16px; align-items: center; }
+.way-head { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.way-head b { font-weight: 600; font-size: 13.5px; }
+.way-head small { font-size: 12px; color: var(--ink-2); }
+.ways li.out .way-head small { color: var(--ink-3); }
+.way-track { display: block; height: 10px; border-radius: 3px; background: var(--paper-2); }
+.way-track i { display: block; height: 100%; border-radius: 3px; min-width: 3px; background: #2f9e6b; }
+.ways li.low .way-track i { background: var(--orange); }
+.ways li.out .way-track i { background: var(--ink-3); }
+.way-note { grid-column: 1 / -1; font-size: 12px; }
+
+/* The ways out. Each one priced on both sides. */
+.exits-card.urgent { border-color: var(--orange-line); }
+.exits { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.exits li {
+  display: grid; grid-template-columns: minmax(0, 1fr) 150px auto; gap: 8px 16px;
+  align-items: center; padding: 13px 14px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--panel);
+}
+.exit-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.exit-text b { font-weight: 600; }
+.exit-move { font-size: 13px; color: var(--ink); }
+.exit-text small { font-size: 12.5px; line-height: 1.45; }
+.exit-gain { display: flex; flex-direction: column; gap: 1px; }
+.exit-gain b { font-size: 17px; font-weight: 650; }
+.exit-gain small { font-size: 12px; color: var(--ink-2); }
+.exit-act { display: flex; gap: 6px; flex-wrap: wrap; }
+.exit-warn {
+  grid-column: 1 / -1; margin: 4px 0 0; font-size: 12.5px; line-height: 1.5;
+  color: var(--orange-darker); background: var(--orange-soft); padding: 9px 11px; border-radius: 10px;
+}
+
+/* The mark on a lead that only got here because the rules were widened. */
+.badge-wider {
+  flex: none; padding: 1px 8px; border-radius: var(--pill); font-size: 10.5px;
+  font-weight: 600; letter-spacing: 0.01em; white-space: nowrap;
+  background: var(--orange-soft); color: var(--orange-darker); border: 1px solid var(--orange-line);
+}
+/* Two marks on one line need room, and a name is worth more than a truncation.
+   Only the rows that carry the second mark wrap, which is one row in ten. */
+.contact.wider .name { white-space: normal; flex-wrap: wrap; row-gap: 3px; }
+.notice.wider { border-color: var(--orange-line); background: var(--orange-soft); color: var(--orange-darker); }
+
+.widened-block { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
+
+@media (max-width: 760px) {
+  .ways li { grid-template-columns: minmax(0, 1fr); }
+  .exits li { grid-template-columns: minmax(0, 1fr); }
+  .exit-gain { flex-direction: row; gap: 6px; align-items: baseline; }
+}

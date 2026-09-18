@@ -42,6 +42,7 @@ import {
 import type { Proposal } from './propose'
 import { describeChanges } from './tuning'
 import { simulate, type Lever, type SimResult } from './simulate'
+import { loosens, type Door } from './pool'
 
 // The only place state lives, client side. Seeded from the mock folder, and
 // shaped exactly like the client API's response so swapping the seed for a
@@ -166,16 +167,116 @@ export function undoMove(leadId: string): void {
 }
 
 /**
+ * Any move that lets more people through is written down as a door.
+ *
+ * The rules in force when the first one opened are kept whole, and every lead
+ * handed over afterwards is measured against them. Without this the widening
+ * is invisible: the list looks the same and the reply rate simply drifts.
+ */
+function noteDoor(s: State, campaignId: string, id: string, label: string, niches?: Niche[]): Campaign[] {
+  const at = new Date().toISOString()
+  return s.campaigns.map((c) => {
+    if (c.id !== campaignId) return c
+    const from = c.widened ?? { fromGateSetId: c.gateSetId, fromNiches: c.extracted.niches, doors: [] }
+    return {
+      ...c,
+      widened: { ...from, doors: [...from.doors, { id, label, openedAt: at }] },
+      ...(niches ? { extracted: { ...c.extracted, niches } } : {}),
+      updatedAt: at,
+    }
+  })
+}
+
+/**
  * The niche list is the client's. Adding, renaming, switching one off or giving
  * it its own numbers all land here, and all of them change who gets found.
+ *
+ * Switching one back on is a widening like any other, so it is written down.
  */
 export function setNiches(campaignId: string, niches: Niche[]): void {
   const now = new Date().toISOString()
-  setState((s) => ({
-    campaigns: s.campaigns.map((c) =>
-      c.id === campaignId ? { ...c, extracted: { ...c.extracted, niches }, updatedAt: now } : c,
+  setState((s) => {
+    const campaign = s.campaigns.find((c) => c.id === campaignId)
+    if (!campaign) return {}
+    const before = new Set(campaign.extracted.niches.filter((n) => n.enabled).map((n) => n.id))
+    const added = niches.filter((n) => n.enabled && !before.has(n.id))
+    if (added.length) {
+      return {
+        campaigns: noteDoor(
+          s,
+          campaignId,
+          `niche_${added[0].id}`,
+          `Niches: ${added.map((n) => n.label).join(', ')} switched on`,
+          niches,
+        ),
+      }
+    }
+    return {
+      campaigns: s.campaigns.map((c) =>
+        c.id === campaignId ? { ...c, extracted: { ...c.extracted, niches }, updatedAt: now } : c,
+      ),
+    }
+  })
+}
+
+/**
+ * Takes one of the ways out. It writes a gate version like any other edit, so
+ * the history says what was opened and when, and the leads that follow carry
+ * the mark.
+ */
+export function openDoor(campaignId: string, door: Door): void {
+  const s = getState()
+  const campaign = s.campaigns.find((c) => c.id === campaignId)
+  const gates = s.gateSets.find((g) => g.id === campaign?.gateSetId)
+  if (!campaign || !gates) return
+  setState((st) => ({ campaigns: noteDoor(st, campaignId, door.id, door.label, door.next.niches) }))
+  // A door that only turns a slice back on has no numbers to write.
+  if (JSON.stringify(door.next.hard) === JSON.stringify(gates.hard)) return
+  saveGateSet(
+    campaignId,
+    {
+      hard: door.next.hard,
+      knockouts: gates.knockouts,
+      criteria: gates.criteria,
+      passScore: gates.passScore,
+      preset: 'custom',
+    },
+    'mem_1',
+    true,
+  )
+}
+
+/**
+ * Puts the first rules back. The leads already handed over keep their mark,
+ * because they did arrive under the wider rules and pretending otherwise would
+ * rewrite the client's own history.
+ */
+export function closeDoors(campaignId: string): void {
+  const s = getState()
+  const campaign = s.campaigns.find((c) => c.id === campaignId)
+  const first = campaign?.widened ? s.gateSets.find((g) => g.id === campaign.widened!.fromGateSetId) : null
+  if (!campaign?.widened || !first) return
+  const niches = campaign.widened.fromNiches
+  const at = new Date().toISOString()
+  setState((st) => ({
+    campaigns: st.campaigns.map((c) =>
+      c.id === campaignId
+        ? { ...c, widened: undefined, extracted: { ...c.extracted, niches }, updatedAt: at }
+        : c,
     ),
   }))
+  saveGateSet(
+    campaignId,
+    {
+      hard: first.hard,
+      knockouts: first.knockouts,
+      criteria: first.criteria,
+      passScore: first.passScore,
+      preset: first.preset,
+    },
+    'mem_1',
+    true,
+  )
 }
 
 /** Kept across campaigns. A plain flag: it says nothing about the deal. */
@@ -275,6 +376,8 @@ export function saveGateSet(
   campaignId: string,
   draft: { hard: HardRules; knockouts: Knockout[]; criteria: Criterion[]; passScore: number; preset: PresetId },
   by = 'mem_1',
+  /** True when the caller has already written the door down. */
+  noted = false,
 ): void {
   const now = new Date().toISOString()
   let live = false
@@ -307,9 +410,21 @@ export function saveGateSet(
       ),
       createdAt: now,
     }
+    // An edit that lets more people through is a door, wherever it was made.
+    // The editor and the two screens that offer a way out all land here, so
+    // the mark on a lead does not depend on which screen the client used.
+    const opened =
+      !noted &&
+      loosens(
+        { hard: current.hard, passScore: current.passScore, niches: campaign.extracted.niches },
+        { hard: draft.hard, passScore: draft.passScore, niches: campaign.extracted.niches },
+      )
+    const campaigns = opened
+      ? noteDoor(s, campaignId, `v${version}`, next.changes.slice(0, 2).join(', ') || 'Rules widened')
+      : s.campaigns
     return {
       gateSets: [...s.gateSets, next],
-      campaigns: s.campaigns.map((c) => (c.id === campaignId ? { ...c, gateSetId: id, updatedAt: now } : c)),
+      campaigns: campaigns.map((c) => (c.id === campaignId ? { ...c, gateSetId: id, updatedAt: now } : c)),
     }
   })
   if (live) runFeasibility(campaignId)

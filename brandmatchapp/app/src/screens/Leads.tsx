@@ -9,8 +9,8 @@ import { LOST_LABEL, LOST_REASONS, nextLabel, nextStatus, STATUSES, STATUS_LABEL
 import { Avatar } from '../components/Avatar'
 import { download, toCsv } from '../lib/csv'
 import { absolute, compact, money, relative } from '../lib/format'
-import { navigate } from '../lib/router'
-import type { LeadStatus, LostReason } from '../types'
+import { navigate, type Query } from '../lib/router'
+import type { LeadStatus, LostReason, Reach } from '../types'
 
 // The daily screen, and the one the client lives in.
 //
@@ -23,12 +23,22 @@ import type { LeadStatus, LostReason } from '../types'
 //     cursor, which is the classic bug on a filtered list
 //   six seconds of undo, because people click the wrong row
 //   signed asks for an amount inline, once, and never asks again
+//
+// One mark on the row is not about the click: a lead that only got here because
+// the client widened their rules says so, every day, for as long as it exists.
+// Without it the list looks unchanged while its quality moves underneath.
 
 const FOLLOWER_STEPS = [
   { label: 'Any size', value: null },
   { label: '25k+', value: 25_000 },
   { label: '100k+', value: 100_000 },
   { label: '250k+', value: 250_000 },
+]
+
+const REACHES: { id: Reach | null; label: string }[] = [
+  { id: null, label: 'All matches' },
+  { id: 'core', label: 'Your first rules' },
+  { id: 'wider', label: 'Past your first rules' },
 ]
 
 const SORTS: { id: LeadSort; label: string }[] = [
@@ -195,12 +205,24 @@ function Row({
   }
 
   return (
-    <div className={`contact${open ? ' open' : ''}${lead.status === 'lost' ? ' dropped' : ''}`}>
+    <div
+      className={`contact${open ? ' open' : ''}${lead.status === 'lost' ? ' dropped' : ''}${
+        lead.reach === 'wider' ? ' wider' : ''
+      }`}
+    >
       <a className="who" href={`#/leads/${lead.id}`}>
         <Avatar name={creator.name} handle={creator.handle} />
         <span className="who-text">
           <span className="name">
             {creator.name}
+            {lead.reach === 'wider' && (
+              <span
+                className="badge-wider"
+                title={lead.beyond ? `${lead.beyond}. You opened that rule yourself.` : 'Past the rules you started with'}
+              >
+                Wider match
+              </span>
+            )}
             {badge && <span className="badge-new">{badge}</span>}
             {lead.saved && <span className="saved-dot" title="Saved">★</span>}
           </span>
@@ -297,6 +319,22 @@ function Panel({ row }: { row: LeadRow }) {
         Checked against your rules, version {evaluation.gateSetVersion}, the ones in use the day this lead arrived.
       </p>
 
+      {lead.reach === 'wider' && (
+        <>
+          <h2>Where they sit</h2>
+          <p className="notice wider">
+            Past the rules you started with. {lead.beyond}.
+            {campaign.widened?.doors.length
+              ? ` They reached you because you opened one: ${campaign.widened.doors[campaign.widened.doors.length - 1].label.toLowerCase()}, ${relative(campaign.widened.doors[campaign.widened.doors.length - 1].openedAt)}.`
+              : ''}
+          </p>
+          <p className="hint">
+            <a href={`#/campaign/${campaign.id}/room`}>See what that door has brought you</a>, and put your first
+            rules back in one click.
+          </p>
+        </>
+      )}
+
       <h2>Your notes</h2>
       <textarea
         className="textarea"
@@ -326,7 +364,7 @@ function Panel({ row }: { row: LeadRow }) {
 
 // ---------------------------------------------------------------------------
 
-export function Leads({ leadId }: { leadId: string | null }) {
+export function Leads({ leadId, query: params }: { leadId: string | null; query: Query }) {
   useStore()
   const campaigns = getCampaigns()
   const [campaignId, setCampaignId] = useState<string | null>(null)
@@ -334,12 +372,22 @@ export function Leads({ leadId }: { leadId: string | null }) {
   const [followersMin, setFollowersMin] = useState<number | null>(null)
   const [scoreMin, setScoreMin] = useState<number | null>(null)
   const [savedOnly, setSavedOnly] = useState(false)
+  const [reach, setReach] = useState<Reach | null>(null)
   const [sort, setSort] = useState<LeadSort>('fit')
   const [search, setSearch] = useState('')
   const [undoable, setUndoable] = useState<string | null>(null)
   const timer = useRef<number | null>(null)
 
-  const query = { campaignId, status, search, followersMin, scoreMin, savedOnly, sort }
+  // A link from anywhere else can arrive with the filter already set, which is
+  // what makes "see the 39 of them" on another screen land on those 39.
+  const incoming = `${params.status ?? ''}|${params.reach ?? ''}|${params.campaign ?? ''}`
+  useEffect(() => {
+    if (params.status && STATUSES.includes(params.status as LeadStatus)) setStatus(params.status as LeadStatus)
+    if (params.reach === 'core' || params.reach === 'wider') setReach(params.reach)
+    if (params.campaign) setCampaignId(params.campaign)
+  }, [incoming])
+
+  const query = { campaignId, status, search, followersMin, scoreMin, savedOnly, reach, sort }
   const signature = JSON.stringify(query)
 
   /**
@@ -360,7 +408,7 @@ export function Leads({ leadId }: { leadId: string | null }) {
   useEffect(() => () => { if (timer.current) window.clearTimeout(timer.current) }, [])
 
   const exportCsv = () => {
-    const columns = ['name', 'handle', 'email', 'followers', 'views_per_post', 'fit_score', 'status', 'campaign', 'delivered', 'note']
+    const columns = ['name', 'handle', 'email', 'followers', 'views_per_post', 'fit_score', 'match', 'status', 'campaign', 'delivered', 'note']
     const body = rows.map((r) => ({
       name: r.creator.name,
       handle: `@${r.creator.handle}`,
@@ -368,6 +416,7 @@ export function Leads({ leadId }: { leadId: string | null }) {
       followers: r.creator.followers,
       views_per_post: r.creator.medianViews ?? '',
       fit_score: `${r.lead.score} of 14`,
+      match: r.lead.reach === 'wider' ? 'past your first rules' : 'your first rules',
       status: STATUS_LABEL[r.lead.status],
       campaign: r.campaign.name,
       delivered: r.lead.deliveredAt.slice(0, 10),
@@ -437,6 +486,14 @@ export function Leads({ leadId }: { leadId: string | null }) {
         <button type="button" className={`chip${savedOnly ? ' on' : ''}`} onClick={() => setSavedOnly(!savedOnly)}>
           Saved only
         </button>
+        <select
+          className="select"
+          value={reach ?? ''}
+          aria-label="Match against your first rules"
+          onChange={(e) => setReach((e.target.value || null) as Reach | null)}
+        >
+          {REACHES.map((r) => <option key={r.label} value={r.id ?? ''}>{r.label}</option>)}
+        </select>
         <span className="rule" />
         {SORTS.map((s) => (
           <button key={s.id} type="button" className={`chip${sort === s.id ? ' on' : ''}`} onClick={() => setSort(s.id)}>

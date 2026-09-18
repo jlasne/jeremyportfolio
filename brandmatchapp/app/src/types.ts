@@ -19,6 +19,15 @@ export type LeadStatus = 'new' | 'contacted' | 'replied' | 'call' | 'signed' | '
  * and only when giving up on someone.
  */
 export type LostReason = 'no_answer' | 'wrong_person' | 'not_interested' | 'bad_timing'
+
+/**
+ * How a lead stands against the rules the client first agreed to.
+ *
+ * A client who opens a door to keep the flow going is owed the truth about
+ * what came through it. Without this mark the widening is invisible: the list
+ * looks the same, the reply rate quietly drops, and nobody can say why.
+ */
+export type Reach = 'core' | 'wider'
 /** A Gate 3 criterion is worth 0, 1 or 2. Seven of them, so 14 is the ceiling. */
 export type CriterionScore = 0 | 1 | 2
 
@@ -137,6 +146,27 @@ export interface BriefExtract {
   extractedAt: string
 }
 
+/** One rule opened past the client's first ones, and when. */
+export interface OpenDoor {
+  id: string
+  /** "Views on a typical post, lowered from 12k to 7.5k" */
+  label: string
+  openedAt: string
+}
+
+/**
+ * What a campaign has opened up since it started.
+ *
+ * The rules it started from are kept whole, not as a diff, because every lead
+ * delivered afterwards is measured against them. Niches are part of it: adding
+ * a slice widens a campaign exactly as lowering a number does.
+ */
+export interface Widening {
+  fromGateSetId: string
+  fromNiches: Niche[]
+  doors: OpenDoor[]
+}
+
 export interface Campaign {
   id: string
   accountId: string
@@ -148,6 +178,8 @@ export interface Campaign {
   brief: CampaignBrief
   extracted: BriefExtract
   gateSetId: string
+  /** Set the first time a door is opened. Absent while the rules never moved. */
+  widened?: Widening
   createdAt: string
   updatedAt: string
 }
@@ -354,6 +386,13 @@ export interface Lead {
   evaluationId: string
   score: number
   status: LeadStatus
+  /**
+   * Inside the client's first rules, or past them. Written once, at delivery,
+   * against the rules in force before any door was opened.
+   */
+  reach?: Reach
+  /** When wider: the one line they miss. "7.9k views a post, you asked 12k" */
+  beyond?: string
   ownerId: string | null
   /** Set when the status is lost. What actually happened. */
   lostReason?: LostReason

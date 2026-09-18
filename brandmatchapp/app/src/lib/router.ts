@@ -9,25 +9,31 @@ import { useEffect, useState } from 'react'
 //   brief        who do I want to reach, and what do I sell
 //   gates        which criteria decide
 //   feasibility  does it hold my quota
+//   room         how long these rules keep delivering
 //
 // Two surfaces sit outside them: the account, and the internal admin.
 
-export type CampaignTab = 'brief' | 'gates' | 'feasibility'
+export type CampaignTab = 'brief' | 'gates' | 'feasibility' | 'room'
 
 export type Route =
   | { name: 'home' }
   | { name: 'dashboard' }
   | { name: 'newCampaign' }
-  | { name: 'leads'; leadId: string | null }
+  | { name: 'leads'; leadId: string | null; query: Query }
   | { name: 'campaigns' }
   | { name: 'campaign'; campaignId: string; tab: CampaignTab }
   | { name: 'account' }
   | { name: 'admin' }
 
-const TABS: CampaignTab[] = ['brief', 'gates', 'feasibility']
+const TABS: CampaignTab[] = ['brief', 'gates', 'feasibility', 'room']
+
+/** Whatever follows a question mark. The list screen reads a filter from it. */
+export type Query = Record<string, string>
 
 export function parse(hash: string): Route {
-  const path = hash.replace(/^#/, '').replace(/^\/+/, '')
+  const [raw, search] = hash.replace(/^#/, '').split('?')
+  const path = raw.replace(/^\/+/, '')
+  const query: Query = Object.fromEntries(new URLSearchParams(search ?? ''))
   const [head, second, third] = path.split('/')
   const id = second ? decodeURIComponent(second) : null
   switch (head) {
@@ -37,7 +43,7 @@ export function parse(hash: string): Route {
     case 'dashboard':
       return { name: 'dashboard' }
     case 'leads':
-      return { name: 'leads', leadId: id }
+      return { name: 'leads', leadId: id, query }
     case 'campaigns':
       return { name: 'campaigns' }
     case 'campaign':
