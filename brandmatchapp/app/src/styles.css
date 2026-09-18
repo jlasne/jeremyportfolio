@@ -2814,3 +2814,30 @@ body { background: var(--paper); }
   .bands li { grid-template-columns: 96px minmax(0, 1fr) 70px; }
   .funnel-shape.steps li { grid-template-columns: minmax(0, 1fr) 100px; }
 }
+
+/* Who replies, written as two people rather than as a table of deltas. */
+.typicals { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 14px; }
+.typical {
+  padding: 14px 16px; border-radius: var(--radius-card); border: 1px solid var(--line); background: var(--panel);
+}
+.typical.muted-card { background: var(--paper); border-color: transparent; }
+.typical h3 { margin: 0 0 10px; }
+.typical ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.typical li { display: flex; align-items: baseline; gap: 8px; }
+.typical li b { font-size: 17px; font-weight: 600; min-width: 62px; }
+.typical li span { color: var(--ink-2); font-size: 12.5px; }
+
+/* The sentence that says what the two cards add up to. */
+.reading { font-size: 15px; line-height: 1.5; margin-top: 14px; }
+
+/* What the numbers say to do about it. Never more than two. */
+.suggestions { list-style: none; margin: 18px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.suggestions li {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  padding: 12px 14px; border-radius: var(--radius); border: 1px solid var(--orange-line);
+  background: var(--orange-soft);
+}
+.suggestions li > span { flex: 1; min-width: 220px; }
+
+.trend { display: block; font-size: 11px; color: var(--ink-3); }
+.trend.up { color: var(--teal); }

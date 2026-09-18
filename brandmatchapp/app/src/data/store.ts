@@ -3,7 +3,6 @@ import type {
   Campaign,
   CampaignBrief,
   Creator,
-  CreatorPost,
   Deal,
   Evaluation,
   GateSet,
@@ -26,7 +25,7 @@ import type {
 import { account, members, subscription, topups } from '../mock/account'
 import { campaigns } from '../mock/campaigns'
 import { gateSets } from '../mock/gates'
-import { creators, posts } from '../mock/creators'
+import { creators } from '../mock/creators'
 import {
   claims,
   dailyDeliveries,
@@ -61,7 +60,6 @@ export interface State {
   campaigns: Campaign[]
   gateSets: GateSet[]
   creators: Creator[]
-  posts: CreatorPost[]
   evaluations: Evaluation[]
   claims: { creatorId: string; accountId: string; campaignId: string; claimedAt: string }[]
   leads: Lead[]
@@ -83,7 +81,6 @@ function seed(): State {
     campaigns,
     gateSets,
     creators,
-    posts,
     evaluations,
     claims,
     leads,
@@ -394,7 +391,7 @@ export async function hydrate(): Promise<boolean> {
   try {
     const { fetchAll } = await import('./remote')
     const loaded = await fetchAll()
-    setState({ live: true, ...loaded, topups: [], quotaEntries: [], posts: [], claims: [] })
+    setState({ live: true, ...loaded, topups: [], quotaEntries: [], claims: [] })
     return true
   } catch (e) {
     console.warn('brandmatch: staying on the sample account.', e)

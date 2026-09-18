@@ -36,6 +36,17 @@ export function inPeriod(rows: LeadRow[], days: Period): LeadRow[] {
   return rows.filter((r) => new Date(r.lead.deliveredAt).getTime() >= from)
 }
 
+/** The same length of time, just before the window being looked at. */
+export function previousPeriod(rows: LeadRow[], days: Period): LeadRow[] {
+  if (!days) return []
+  const end = Date.now() - days * 86_400_000
+  const start = end - days * 86_400_000
+  return rows.filter((r) => {
+    const at = new Date(r.lead.deliveredAt).getTime()
+    return at >= start && at < end
+  })
+}
+
 // ---------------------------------------------------------------------------
 // Block one: who replies
 // ---------------------------------------------------------------------------
@@ -74,6 +85,31 @@ export function compare(rows: LeadRow[]): Comparison[] {
     build('Comments on a typical post', (r) => r.creator.medianComments ?? 0, (n) => String(n)),
     build('Fit score', (r) => r.lead.score, (n) => `${n} of 14`),
   ]
+}
+
+/**
+ * What the comparison adds up to, in a sentence anyone can act on.
+ *
+ * When nothing separates the two groups that is a finding too, and a useful
+ * one: it means size is not what decides, so stop tuning it.
+ */
+export function readTable(table: Comparison[], replied: number, patternBelow: boolean): string {
+  if (replied < GROUP_MIN) {
+    return `Once about ${GROUP_MIN} people have replied we can tell you what they have in common.`
+  }
+  const moved = table.filter((t) => t.gap !== null && Math.abs(t.gap) >= GAP_MIN)
+  if (!moved.length) {
+    // A middle value cannot see a pattern that lives at both ends. When the
+    // charts below have found one, say where to look instead of saying nothing
+    // is happening, which would read as a contradiction.
+    return patternBelow
+      ? 'Side by side the two look alike, because what decides is not being bigger or smaller but landing in the right band. The charts below show where.'
+      : 'The people who reply look much like everyone else you were sent. Size and score are not what decides here, so what you send is doing the work.'
+  }
+  const said = moved
+    .map((t) => `${t.label.toLowerCase()} ${t.gap! > 0 ? 'higher' : 'lower'} by ${Math.abs(Math.round(t.gap! * 100))}%`)
+    .join(', and ')
+  return `The people who reply have ${said}.`
 }
 
 export interface Band {
@@ -177,17 +213,26 @@ export interface Step {
   rate: number | null
   /** What the rate was computed on, so the figure can be checked. */
   base: number
+  /** The same rate over the period before this one, when there was one. */
+  was: number | null
 }
 
-export function funnelOf(rows: LeadRow[]): Step[] {
+export function funnelOf(rows: LeadRow[], before: LeadRow[] = []): Step[] {
+  const rateAt = (list: LeadRow[], i: number): number | null => {
+    if (i === 0) return null
+    const reached = list.filter((r) => rank(r.lead.status) >= rank(WALK[i])).length
+    const from = list.filter((r) => rank(r.lead.status) >= rank(WALK[i - 1])).length
+    return from >= RATE_MIN ? reached / from : null
+  }
   return WALK.map((status, i) => {
     const count = rows.filter((r) => rank(r.lead.status) >= rank(status)).length
-    const before = i === 0 ? rows.length : rows.filter((r) => rank(r.lead.status) >= rank(WALK[i - 1])).length
+    const from = i === 0 ? rows.length : rows.filter((r) => rank(r.lead.status) >= rank(WALK[i - 1])).length
     return {
       status,
       count,
-      base: before,
-      rate: i === 0 || before < RATE_MIN ? null : count / before,
+      base: from,
+      rate: rateAt(rows, i),
+      was: before.length ? rateAt(before, i) : null,
     }
   })
 }
@@ -269,6 +314,78 @@ export function economics(
     multiple: deals > 0 && costCents > 0 ? wonCents / costCents : null,
     early: deals < 3,
   }
+}
+
+// ---------------------------------------------------------------------------
+// What to do about it
+// ---------------------------------------------------------------------------
+
+export interface Advice {
+  id: string
+  /** What the numbers say, and what to change because of it. */
+  text: string
+  action?: string
+  href?: string
+}
+
+/**
+ * A dashboard that only reports leaves the work to the reader. These are the
+ * few things the numbers say clearly enough to act on, and nothing is offered
+ * unless the sample behind it clears the same bars as everything else here.
+ */
+export function advice(
+  rows: LeadRow[],
+  niches: Niche[],
+  funnel: Step[],
+  campaignId: string | null,
+  followersFrom: number | null,
+): Advice[] {
+  const out: Advice[] = []
+  const rated = (bands: Band[]) => bands.filter((b) => b.rate !== null)
+
+  // The size band that answers best, against what the rules currently ask for.
+  const sizes = rated(sizeBands(rows))
+  if (sizes.length >= 2) {
+    const best = sizes.reduce((a, b) => (b.rate! > a.rate! ? b : a))
+    const worst = sizes.reduce((a, b) => (b.rate! < a.rate! ? b : a))
+    if (best.rate! >= worst.rate! * (1 + GAP_MIN) && worst.label === 'Under 25k' && (followersFrom ?? 0) < 25_000) {
+      out.push({
+        id: 'raise-floor',
+        text: `People under 25k followers reply least, and your rules still let them in. Starting at 25k would spend your daily leads on the sizes that answer.`,
+        action: 'Raise my minimum',
+        href: campaignId ? `#/campaign/${campaignId}/gates` : '#/campaigns',
+      })
+    }
+  }
+
+  // A niche that costs leads and returns nothing.
+  const niched = rated(nicheBands(rows, niches))
+  if (niched.length >= 3) {
+    const best = niched.reduce((a, b) => (b.rate! > a.rate! ? b : a))
+    const worst = niched.reduce((a, b) => (b.rate! < a.rate! ? b : a))
+    if (worst.rate! > 0 && best.rate! >= worst.rate! * 2) {
+      out.push({
+        id: 'drop-niche',
+        text: `${worst.label} takes ${worst.delivered} of your leads and replies half as often as ${best.label.toLowerCase()}. Switching it off would move those leads to the slices that answer.`,
+        action: 'Edit my niches',
+        href: campaignId ? `#/campaign/${campaignId}/gates` : '#/campaigns',
+      })
+    }
+  }
+
+  // People answer, then stop. That is a message problem, not a lead problem.
+  const replied = funnel.find((s) => s.status === 'replied')
+  const call = funnel.find((s) => s.status === 'call')
+  if (replied?.rate !== null && replied?.rate !== undefined && call?.rate !== null && call?.rate !== undefined) {
+    if (replied.rate >= 0.25 && call.rate < 0.2) {
+      out.push({
+        id: 'after-reply',
+        text: `${Math.round(replied.rate * 100)}% of the people you contact reply, but only ${Math.round(call.rate * 100)}% of those book a call. The leads are working. What you send after the reply is where it stalls.`,
+      })
+    }
+  }
+
+  return out.slice(0, 2)
 }
 
 // ---------------------------------------------------------------------------

@@ -76,7 +76,14 @@ const STATUS_WALK: LeadStatus[] = ['new', 'contacted', 'replied', 'call', 'signe
 
 // Pass one: judge everything ------------------------------------------------
 
-interface Passed { index: number; creatorId: string; campaignId: string; score: number; evaluationId: string }
+interface Passed {
+  index: number
+  creatorId: string
+  campaignId: string
+  score: number
+  evaluationId: string
+  niche: string | null
+}
 const passed: Passed[] = []
 
 built.forEach((b, index) => {
@@ -106,7 +113,14 @@ built.forEach((b, index) => {
   })
 
   if (result.verdict === 'qualified') {
-    passed.push({ index, creatorId: b.creator.id, campaignId: campaign.id, score: result.score, evaluationId })
+    passed.push({
+      index,
+      creatorId: b.creator.id,
+      campaignId: campaign.id,
+      score: result.score,
+      evaluationId,
+      niche: result.niche,
+    })
   }
 })
 
@@ -116,8 +130,32 @@ built.forEach((b, index) => {
 // it came from. That is the rule the backend's deliver.ts follows too.
 passed.sort((a, b) => b.score - a.score)
 
-const daysElapsed = Math.max(1, dayOfPeriod)
+// Enough history to have a month behind the current one, so the dashboard can
+// compare a period against the one before it.
+const daysElapsed = Math.max(1, dayOfPeriod) + 28
 const perDay = Math.max(1, Math.round(passed.length / daysElapsed))
+
+/**
+ * How likely this person is to answer, before any dice are thrown.
+ *
+ * Replies are not uniform in real life and they must not be uniform here, or
+ * the dashboard would find patterns in noise. Small accounts answer less
+ * because they are less sure, very large ones answer less because they get
+ * hundreds of messages, and the slices of a market do not behave alike.
+ */
+function warmth(row: Passed, niches: { id: string }[]): number {
+  const followers = built[row.index].creator.followers
+  const size =
+    followers < 25_000 ? 0.5
+      : followers < 100_000 ? 1.2
+        : followers < 250_000 ? 1.25
+          : 0.65
+  const at = niches.findIndex((n) => n.id === row.niche)
+  // The first named slice is the core of the market. The tail is a stretch.
+  const niche = at < 0 ? 0.5 : at === 0 ? 1.25 : at <= 2 ? 1.05 : 0.55
+  const score = row.score >= 13 ? 1.15 : row.score <= 10 ? 0.8 : 1
+  return size * niche * score
+}
 
 passed.forEach((row, rank) => {
   const daysBack = Math.min(daysElapsed - 1, Math.floor(rank / perDay))
@@ -127,16 +165,25 @@ passed.forEach((row, rank) => {
   claims.push({ creatorId: row.creatorId, accountId: account.id, campaignId: row.campaignId, claimedAt: deliveredAt })
 
   // Fresh leads sit untouched. The longer a client has had one, the further it
-  // has walked, and a few fall out along the way.
-  const roll = rand()
-  const reach =
+  // has walked, and how far depends on who they are, not on the dice alone.
+  // Two separate dice, because two different things are happening. Whether
+  // someone answers depends on who they are, so that roll is warmed. Whether a
+  // conversation turns into a signature depends on the pitch and the budget,
+  // which has nothing to do with their follower count, so that roll is cold.
+  const warm = warmth(row, campaigns.find((c) => c.id === row.campaignId)!.extracted.niches)
+  const answer = Math.min(0.999, rand() * warm)
+  const close = rand()
+
+  let reach =
     daysBack === 0 ? 0
-      : daysBack <= 2 ? (roll > 0.45 ? 1 : 0)
-        : daysBack <= 5 ? (roll > 0.75 ? 2 : 1)
-          // Signing is rare, which is the whole reason a lead costs what it
-          // costs. Two or three a month out of a hundred and fifty leads.
-          : daysBack <= 9 ? (roll > 0.97 ? 4 : roll > 0.82 ? 3 : roll > 0.55 ? 2 : 1)
-            : (roll > 0.94 ? 4 : roll > 0.74 ? 3 : roll > 0.55 ? 2 : 1)
+      : daysBack <= 2 ? (answer > 0.45 ? 1 : 0)
+        : daysBack <= 5 ? (answer > 0.72 ? 2 : 1)
+          : (answer > 0.6 ? 2 : 1)
+  // Booking is uncommon and signing is rare, which is the whole reason a lead
+  // costs what it costs.
+  if (reach === 2 && daysBack > 4 && close > 0.62) reach = 3
+  if (reach === 3 && daysBack > 9 && close > 0.945) reach = 4
+
   const lost = daysBack > 6 && rand() > 0.88 && reach > 0
   const status: LeadStatus = lost ? 'lost' : STATUS_WALK[reach]
   const leadId = `led_${row.creatorId}`
@@ -242,25 +289,31 @@ export const quotaEntries: QuotaEntry[] = [
     note: 'One off top up',
     at: topups[0].purchasedAt,
   },
-  ...leads.map((lead) => ({
-    id: `qte_${lead.id}`,
-    accountId: account.id,
-    period: currentPeriod,
-    kind: 'delivery' as const,
-    delta: -1,
-    campaignId: lead.campaignId,
-    leadId: lead.id,
-    at: lead.deliveredAt,
-  })),
+  // Only this month's deliveries spend this month's balance. The older leads
+  // still exist, they were simply paid for in a period that has closed.
+  ...leads
+    .filter((lead) => lead.deliveredAt.slice(0, 7) === currentPeriod)
+    .map((lead) => ({
+      id: `qte_${lead.id}`,
+      accountId: account.id,
+      period: currentPeriod,
+      kind: 'delivery' as const,
+      delta: -1,
+      campaignId: lead.campaignId,
+      leadId: lead.id,
+      at: lead.deliveredAt,
+    })),
 ]
+
+const deliveredThisMonth = leads.filter((l) => l.deliveredAt.slice(0, 7) === currentPeriod).length
 
 export const quotaPeriod: QuotaPeriod = {
   accountId: account.id,
   period: currentPeriod,
   entitled: entitled + topups[0].leads,
-  delivered: leads.length,
+  delivered: deliveredThisMonth,
   carried: 0,
-  remaining: entitled + topups[0].leads - leads.length,
+  remaining: entitled + topups[0].leads - deliveredThisMonth,
 }
 
 // ---------------------------------------------------------------------------

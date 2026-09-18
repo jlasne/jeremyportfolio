@@ -2,8 +2,9 @@ import type { Creator, CreatorPost } from '../types'
 import { between, pick, seeded } from './rand'
 import { daysAgo } from './time'
 
-// Twenty four hundred profiles, built from one seed so the sample account never
-// moves. That is the real shape of the funnel: most of them never become a lead.
+// Eight thousand profiles, built from one seed so the sample account never
+// moves. Enough that a month of delivery fills a dashboard, and every band on
+// it carries the twenty leads a share needs. That is the real shape of the funnel: most of them never become a lead.
 //
 // Every number a gate reads is computed from the posts below, never declared.
 // That is the rule in production too: reach comes off the posts we fetched.
@@ -61,13 +62,12 @@ function median(list: number[]): number {
 
 export interface Built {
   creator: Creator
-  posts: CreatorPost[]
   /** Which campaign this profile was crawled for. */
   niche: 'fitness' | 'finance'
   band: Band
 }
 
-function build(index: number): Built {
+function build(index: number): { built: Built; posts: CreatorPost[] } {
   const rand = seeded(9_000_017 + index * 7919)
   const niche: 'fitness' | 'finance' = index % 3 === 2 ? 'finance' : 'fitness'
   const band = BANDS[index % BANDS.length]
@@ -131,11 +131,29 @@ function build(index: number): Built {
     firstSeenAt: daysAgo(between(rand, 4, 90)),
   }
 
-  return { creator, posts, niche, band }
+  return { built: { creator, niche, band }, posts }
 }
 
-export const built: Built[] = Array.from({ length: 2_400 }, (_, i) => build(i))
+/**
+ * The twelve posts behind one profile's numbers.
+ *
+ * Kept out of memory until something asks. At this sample size holding every
+ * post would be a hundred thousand objects nobody looks at, and `build` is pure
+ * and seeded, so regenerating one profile's posts costs nothing and gives
+ * exactly the posts its medians came from.
+ */
+const postCache = new Map<number, CreatorPost[]>()
+
+export function postsFor(index: number): CreatorPost[] {
+  const held = postCache.get(index)
+  if (held) return held
+  const made = build(index).posts
+  postCache.set(index, made)
+  return made
+}
+
+export const built: Built[] = Array.from({ length: 8_000 }, (_, i) => build(i).built)
 export const creators: Creator[] = built.map((b) => b.creator)
-export const posts: CreatorPost[] = built.flatMap((b) => b.posts)
 export const creatorById = new Map(creators.map((c) => [c.id, c]))
-export const postsByCreator = new Map(built.map((b) => [b.creator.id, b.posts]))
+/** Position in `built`, so posts can be regenerated from an id alone. */
+export const indexOfCreator = new Map(built.map((b, i) => [b.creator.id, i]))

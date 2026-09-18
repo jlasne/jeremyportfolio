@@ -12,6 +12,7 @@ import type {
   Subscription,
   Verdict,
 } from '../types'
+import { indexOfCreator, postsFor } from '../mock/creators'
 import { getState, getVersion } from './store'
 import { rank, WALK } from './status'
 
@@ -63,8 +64,14 @@ export function getCreator(id: string): Creator | null {
   return getState().creators.find((c) => c.id === id) ?? null
 }
 
+/**
+ * The posts a creator's numbers were measured from, regenerated on demand.
+ * Holding every post for every profile would be a hundred thousand objects
+ * nobody looks at.
+ */
 export function getPosts(creatorId: string) {
-  return getState().posts.filter((p) => p.creatorId === creatorId)
+  const at = indexOfCreator.get(creatorId)
+  return at === undefined ? [] : postsFor(at)
 }
 
 /** One row of the lead flow: everything a list line and its panel need. */

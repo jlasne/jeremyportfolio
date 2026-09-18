@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { deliveredToday, getCampaigns, getQuota, getSubscription, listLeads } from '../data'
+import { deliveredToday, getCampaigns, getGateSet, getQuota, getSubscription, listLeads } from '../data'
 import { useStore } from '../data/hooks'
 import {
-  byWeek, compare, economics, funnelOf, GROUP_MIN, inPeriod, insight, nicheBands, nudges,
-  RATE_MIN, repliedRows, scoreBands, sizeBands, type Band, type Period,
+  advice, byWeek, compare, economics, funnelOf, GROUP_MIN, inPeriod, insight, nicheBands, nudges,
+  previousPeriod, RATE_MIN, readTable, repliedRows, scoreBands, sizeBands, type Band, type Period,
 } from '../data/insights'
 import { STATUS_LABEL } from '../data/status'
 import { download, toCsv } from '../lib/csv'
@@ -28,12 +28,12 @@ const PERIODS: { id: Period; label: string }[] = [
 
 const DISMISSED = 'brandmatch.nudges'
 
-/** A rate, or an honest blank. Never a percentage on a handful of rows. */
+/** A share, or an honest blank. Never a percentage on a handful of rows. */
 function Rate({ value, base, unit = 'leads' }: { value: number | null; base: number; unit?: string }) {
   if (value === null) {
     return (
-      <span className="rate thin" title={`Based on ${base} ${unit}. We show a share from ${RATE_MIN}.`}>
-        collecting data
+      <span className="rate thin" title={`Only ${base} ${unit} so far. We wait for ${RATE_MIN}.`}>
+        too few yet
       </span>
     )
   }
@@ -42,6 +42,42 @@ function Rate({ value, base, unit = 'leads' }: { value: number | null; base: num
       {Math.round(value * 100)}%
       <small>of {base}</small>
     </span>
+  )
+}
+
+/** What one of the four numbers says, written as a person would say it. */
+function Typical({ title, table, side, muted }: {
+  title: string
+  table: ReturnType<typeof compare>
+  side: 'all' | 'replied'
+  muted?: boolean
+}) {
+  return (
+    <div className={`typical${muted ? ' muted-card' : ''}`}>
+      <h3>{title}</h3>
+      <ul>
+        {table.map((row) => (
+          <li key={row.label}>
+            <b className="num">{row.format(side === 'all' ? row.all : row.replied)}</b>
+            <span>{row.label.toLowerCase()}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+function Suggestions({ list }: { list: ReturnType<typeof advice> }) {
+  if (!list.length) return null
+  return (
+    <ul className="suggestions">
+      {list.map((a) => (
+        <li key={a.id}>
+          <span>{a.text}</span>
+          {a.action && a.href && <a className="btn small" href={a.href}>{a.action}</a>}
+        </li>
+      ))}
+    </ul>
   )
 }
 
@@ -78,14 +114,19 @@ export function Dashboard() {
 
   const all = listLeads({ campaignId })
   const rows = inPeriod(all, period)
+  const before = previousPeriod(all, period)
   const replied = repliedRows(rows)
-  const funnel = funnelOf(rows)
+  const funnel = funnelOf(rows, before)
   const weeks = byWeek(rows)
   const money_ = economics(rows, plan, campaigns, campaignId)
   const campaign = campaigns.find((c) => c.id === campaignId)
   const niches = campaign?.extracted.niches ?? campaigns.flatMap((c) => c.extracted.niches)
   const headline = insight(rows, niches)
   const table = compare(rows)
+  // What the rules currently ask for, so a suggestion can say "and your rules
+  // still let them in" rather than guessing.
+  const followersFrom = campaignId ? getGateSet(campaignId)?.hard.followersMin ?? null : null
+  const tips = advice(rows, niches, funnel, campaignId, followersFrom)
   const reminders = nudges(all).filter((n) => !hidden.includes(n.id))
 
   const dismiss = (id: string) => {
@@ -176,46 +217,42 @@ export function Dashboard() {
             anything.
           </p>
         )}
-        <div className="compare-scroll">
-        <table className="compare">
-          <thead>
-            <tr>
-              <th />
-              <th>All leads</th>
-              <th>The ones who replied</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {table.map((row) => (
-              <tr key={row.label}>
-                <th>{row.label}</th>
-                <td className="num">{row.format(row.all)}</td>
-                <td className="num">
-                  {replied.length >= GROUP_MIN ? row.format(row.replied) : <span className="rate thin">collecting data</span>}
-                </td>
-                <td className={`num gap${row.gap && row.gap > 0 ? ' up' : ''}`}>
-                  {replied.length >= GROUP_MIN && row.gap !== null
-                    ? `${row.gap > 0 ? '+' : ''}${Math.round(row.gap * 100)}%`
-                    : ''}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+
+        <div className="typicals">
+          <Typical title="A typical lead we send you" table={table} side="all" muted />
+          {replied.length >= GROUP_MIN ? (
+            <Typical title="A typical person who replies" table={table} side="replied" />
+          ) : (
+            <div className="typical">
+              <h3>A typical person who replies</h3>
+              <p className="muted">
+                {replied.length} {replied.length === 1 ? 'person has' : 'people have'} replied so far. We need about{' '}
+                {GROUP_MIN} before this means anything.
+              </p>
+            </div>
+          )}
         </div>
-        <p className="hint">Medians, not averages, so one outlier cannot move them. Based on {rows.length} leads.</p>
+        <p className="reading">{readTable(table, replied.length, Boolean(headline))}</p>
+        <p className="hint">
+          These are middle values, not averages, so one unusual account cannot pull them. Taken from {rows.length}{' '}
+          leads.
+        </p>
 
         <div className="band-grid">
-          <Bands rows={sizeBands(rows)} title="Reply rate by size" />
-          <Bands rows={scoreBands(rows)} title="Reply rate by fit score" />
-          {niches.length > 0 && <Bands rows={nicheBands(rows, niches)} title="Reply rate by niche" />}
+          <Bands rows={sizeBands(rows)} title="How often each size replies" />
+          <Bands rows={scoreBands(rows)} title="How often each score replies" />
+          {niches.length > 0 && <Bands rows={nicheBands(rows, niches)} title="How often each niche replies" />}
         </div>
+        <p className="hint">
+          A share only appears once {RATE_MIN} leads sit behind it. Below that one reply would swing it, so we say too
+          few yet instead.
+        </p>
+        <Suggestions list={tips.filter((t) => t.id !== 'after-reply')} />
       </div>
 
       {/* Block two ------------------------------------------------------- */}
       <div className="card">
-        <h2>From delivered to signed</h2>
+        <h2>How far your leads get</h2>
         <ol className="funnel-shape steps">
           {funnel.map((step, i) => (
             <li key={step.status}>
@@ -228,12 +265,17 @@ export function Dashboard() {
               </span>
               <span className="funnel-drop">
                 {i > 0 && <Rate value={step.rate} base={step.base} />}
+                {i > 0 && step.rate !== null && step.was !== null && (
+                  <small className={`trend${step.rate >= step.was ? ' up' : ''}`}>
+                    {step.rate >= step.was ? 'up from' : 'down from'} {Math.round(step.was * 100)}%
+                  </small>
+                )}
               </span>
             </li>
           ))}
         </ol>
 
-        <h3>Week by week</h3>
+        <h3>Reply rate, week by week</h3>
         <ul className="weeks">
           {weeks.map((w) => (
             <li key={w.start}>
@@ -247,9 +289,11 @@ export function Dashboard() {
           ))}
         </ul>
 
+        <Suggestions list={tips.filter((t) => t.id === 'after-reply')} />
+
         {campaigns.length > 1 && !campaignId && (
           <>
-            <h3>Side by side</h3>
+            <h3>One campaign against the other</h3>
             <div className="compare-scroll">
             <table className="compare">
               <thead>
@@ -284,7 +328,7 @@ export function Dashboard() {
 
       {/* Block three ----------------------------------------------------- */}
       <div className="card">
-        <h2>What it returned</h2>
+        <h2>What you got back</h2>
         <div className="tiles">
           <div className="tile">
             <b className="num">{money_.costPerReplyCents ? money(money_.costPerReplyCents) : '—'}</b>
@@ -303,11 +347,14 @@ export function Dashboard() {
               {/* A decimal on a big multiple is false precision. */}
               {money_.multiple ? `${money_.multiple >= 20 ? Math.round(money_.multiple) : money_.multiple.toFixed(1)}x` : '—'}
             </b>
-            <span>back on what you spent</span>
+            <span>back for every euro spent</span>
             <small className="faint">{money(money_.wonCents)} won</small>
           </div>
         </div>
-        <p className="hint">{money_.basis} That comes to {money(money_.costCents)}.</p>
+        <p className="hint">
+          {money_.basis} That comes to {money(money_.costCents)}. One deal is worth many months of your plan, so the
+          ratio grows quickly. The two figures to its left are the ones to plan with.
+        </p>
         {money_.early && money_.deals > 0 && (
           <p className="notice">
             These rest on {money_.deals} {money_.deals === 1 ? 'deal' : 'deals'}. Worth watching, too early to plan
