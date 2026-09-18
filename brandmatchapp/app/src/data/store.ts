@@ -7,10 +7,14 @@ import type {
   Deal,
   Evaluation,
   GateSet,
+  HardRules,
   Lead,
   LeadEvent,
+  Criterion,
+  Knockout,
   LeadStatus,
   Member,
+  PresetId,
   QuotaEntry,
   QuotaPeriod,
   Subscription,
@@ -34,6 +38,7 @@ import {
   quotaPeriod,
 } from '../mock/pipeline'
 import type { Proposal } from './propose'
+import { describeChanges } from './tuning'
 import { built } from '../mock/creators'
 import { judge } from '../mock/judge'
 import { evaluate } from './gates'
@@ -204,11 +209,65 @@ export function createCampaign(brief: CampaignBrief, proposal: Proposal, name: s
         knockouts: proposal.knockouts,
         criteria: proposal.criteria,
         passScore: proposal.passScore,
+        preset: 'balanced',
+        by: 'system',
+        changes: ['Proposed from the brief'],
         createdAt: now,
       },
     ],
   }))
   return id
+}
+
+/**
+ * An edit writes the next version, it never overwrites one. The change lines
+ * come with it, so the history reads as sentences rather than as a diff.
+ *
+ * A live campaign is re-tested straight away: rules that changed and a
+ * feasibility figure from the old rules would be worse than no figure at all.
+ */
+export function saveGateSet(
+  campaignId: string,
+  draft: { hard: HardRules; knockouts: Knockout[]; criteria: Criterion[]; passScore: number; preset: PresetId },
+  by = 'mem_1',
+): void {
+  const now = new Date().toISOString()
+  let live = false
+  setState((s) => {
+    const campaign = s.campaigns.find((c) => c.id === campaignId)
+    const current = s.gateSets.find((g) => g.id === campaign?.gateSetId)
+    if (!campaign || !current) return {}
+    live = campaign.status === 'live'
+    const version = s.gateSets
+      .filter((g) => g.campaignId === campaignId)
+      .reduce((top, g) => Math.max(top, g.version), 0) + 1
+    const id = `${campaignId}_v${version}`
+    const next: GateSet = {
+      id,
+      campaignId,
+      accountId: campaign.accountId,
+      version,
+      origin: 'edited',
+      templateId: current.templateId,
+      hard: draft.hard,
+      knockouts: draft.knockouts,
+      criteria: draft.criteria,
+      passScore: draft.passScore,
+      preset: draft.preset,
+      by,
+      changes: describeChanges(
+        { hard: current.hard, passScore: current.passScore, knockouts: current.knockouts },
+        { hard: draft.hard, passScore: draft.passScore, knockouts: draft.knockouts },
+        { before: current.criteria, after: draft.criteria },
+      ),
+      createdAt: now,
+    }
+    return {
+      gateSets: [...s.gateSets, next],
+      campaigns: s.campaigns.map((c) => (c.id === campaignId ? { ...c, gateSetId: id, updatedAt: now } : c)),
+    }
+  })
+  if (live) runFeasibility(campaignId)
 }
 
 /**

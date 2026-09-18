@@ -43,6 +43,11 @@ const knockout = v.object({
   question: v.string(),
   /** What the client is protecting by asking. Shown under the question. */
   why: v.optional(v.string()),
+  /** What a yes looks like, and what a no looks like. One line each. */
+  pass: v.optional(v.string()),
+  fail: v.optional(v.string()),
+  /** Off means the question is not asked. Locked ones can never be off. */
+  enabled: v.optional(v.boolean()),
 })
 
 /** Gate 3. Seven of these, each worth 0, 1 or 2. */
@@ -209,6 +214,12 @@ export default defineSchema({
     criteria: v.array(criterion),
     /** Out of 14. A profile at or above this is qualified. */
     passScore: v.number(),
+    /** The preset this version sits on: strict, balanced, broad or custom. */
+    preset: v.optional(v.string()),
+    /** Who wrote it. A member id, or "system". */
+    by: v.optional(v.string()),
+    /** What moved since the previous version, in plain lines. */
+    changes: v.optional(v.array(v.string())),
     createdAt: v.number(),
   })
     .index('by_campaign', ['campaignId'])

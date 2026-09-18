@@ -114,14 +114,17 @@ export function evaluate(creator: Creator, gates: GateSet, judgement: Judgement 
     return { verdict: 'hard_fail', blockedBy: null, hardChecks, knockoutAnswers: [], criteriaScores: [], score: 0, reason: 'Not evaluated yet' }
   }
 
-  const knockoutAnswers: KnockoutAnswer[] = gates.knockouts.map((k) => ({
+  // A knockout the client switched off is not asked at all. It is not asked
+  // and answered yes: an unasked question has no answer to show on the lead.
+  const asked = gates.knockouts.filter((k) => k.enabled !== false)
+  const knockoutAnswers: KnockoutAnswer[] = asked.map((k) => ({
     id: k.id,
     pass: judgement.knockouts[k.id]?.pass ?? false,
     note: judgement.knockouts[k.id]?.note,
   }))
   const failed = knockoutAnswers.find((a) => !a.pass)
   if (failed) {
-    const asked = gates.knockouts.find((k) => k.id === failed.id)
+    const question = gates.knockouts.find((k) => k.id === failed.id)
     return {
       verdict: 'knockout_fail',
       blockedBy: failed.id,
@@ -129,7 +132,7 @@ export function evaluate(creator: Creator, gates: GateSet, judgement: Judgement 
       knockoutAnswers,
       criteriaScores: [],
       score: 0,
-      reason: failed.note ?? `No on: ${asked?.question ?? failed.id}`,
+      reason: failed.note ?? `No on: ${question?.question ?? failed.id}`,
     }
   }
 

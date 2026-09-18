@@ -32,7 +32,7 @@ export interface Measured {
 
 export interface GateSetShape {
   hard: HardRules
-  knockouts: { id: string; question: string; why?: string }[]
+  knockouts: { id: string; question: string; why?: string; enabled?: boolean }[]
   criteria: { id: string; label: string; guide?: string }[]
   passScore: number
 }
@@ -116,14 +116,18 @@ export function evaluate(m: Measured, gates: GateSetShape, judgement: Judgement 
     return { verdict: 'hard_fail', hardChecks, knockoutAnswers: [], criteriaScores: [], score: 0, reason: 'Not evaluated yet' }
   }
 
-  const knockoutAnswers = gates.knockouts.map((k) => ({
-    id: k.id,
-    pass: judgement.knockouts[k.id]?.pass ?? false,
-    note: judgement.knockouts[k.id]?.note,
-  }))
+  // A knockout the client switched off is not asked at all. It is not asked
+  // and answered yes: an unasked question has no answer to show on the lead.
+  const knockoutAnswers = gates.knockouts
+    .filter((k) => k.enabled !== false)
+    .map((k) => ({
+      id: k.id,
+      pass: judgement.knockouts[k.id]?.pass ?? false,
+      note: judgement.knockouts[k.id]?.note,
+    }))
   const failed = knockoutAnswers.find((a) => !a.pass)
   if (failed) {
-    const asked = gates.knockouts.find((k) => k.id === failed.id)
+    const question = gates.knockouts.find((k) => k.id === failed.id)
     return {
       verdict: 'knockout_fail',
       blockedBy: failed.id,
@@ -131,7 +135,7 @@ export function evaluate(m: Measured, gates: GateSetShape, judgement: Judgement 
       knockoutAnswers,
       criteriaScores: [],
       score: 0,
-      reason: failed.note ?? `No on: ${asked?.question ?? failed.id}`,
+      reason: failed.note ?? `No on: ${question?.question ?? failed.id}`,
     }
   }
 

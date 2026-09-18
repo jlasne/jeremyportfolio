@@ -128,6 +128,9 @@ export const clientApi = httpAction(async (ctx, req) => {
           knockouts: body.knockouts ?? [],
           criteria: body.criteria ?? [],
           passScore: Number(body.passScore ?? 0),
+          preset: body.preset,
+          by: body.by,
+          changes: Array.isArray(body.changes) ? body.changes.map(String) : undefined,
         })
         if ('error' in gates) return fail(gates.error, 404)
         return json({ gates })

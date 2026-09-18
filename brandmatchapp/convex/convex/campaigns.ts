@@ -1,6 +1,7 @@
 import { internalMutation, internalQuery } from './_generated/server'
 import { v } from 'convex/values'
 import type { Doc } from './_generated/dataModel'
+import { enforceLocks, settle, settleScore, template } from './templates'
 
 // Campaigns and their gate versions.
 //
@@ -33,6 +34,9 @@ export function publicGates(g: Doc<'gateSets'>) {
     knockouts: g.knockouts,
     criteria: g.criteria,
     passScore: g.passScore,
+    preset: g.preset ?? 'custom',
+    by: g.by ?? 'system',
+    changes: g.changes ?? [],
     createdAt: g.createdAt,
   }
 }
@@ -130,6 +134,9 @@ export const saveGates = internalMutation({
     knockouts: v.any(),
     criteria: v.any(),
     passScore: v.number(),
+    preset: v.optional(v.string()),
+    by: v.optional(v.string()),
+    changes: v.optional(v.array(v.string())),
   },
   returns: v.any(),
   handler: async (ctx, args) => {
@@ -140,16 +147,33 @@ export const saveGates = internalMutation({
       .withIndex('by_campaign', (q) => q.eq('campaignId', args.campaignId))
       .collect()
     const version = existing.reduce((top, g) => Math.max(top, g.version), 0) + 1
+
+    // Bounded personalisation is enforced here and not only on screen. A dial
+    // outside its limits comes back inside, a locked knockout comes back on,
+    // and the seven criteria stay seven.
+    const templateId = args.templateId ?? existing[0]?.templateId ?? 'sell_to_creators'
+    const lib = template(templateId)
+    const criteria = Array.isArray(args.criteria) && args.criteria.length === lib.criteria.length
+      ? args.criteria.map((c: any, i: number) => ({
+          id: lib.criteria[i].id,
+          label: String(c?.label ?? lib.criteria[i].label),
+          guide: c?.guide ? String(c.guide) : lib.criteria[i].guide,
+        }))
+      : lib.criteria
+
     const gateSetId = await ctx.db.insert('gateSets', {
       campaignId: args.campaignId,
       accountId: args.accountId,
       version,
       origin: args.origin,
-      templateId: args.templateId,
-      hard: args.hard,
-      knockouts: args.knockouts,
-      criteria: args.criteria,
-      passScore: args.passScore,
+      templateId,
+      hard: settle(args.hard ?? {}),
+      knockouts: enforceLocks(templateId, args.knockouts),
+      criteria,
+      passScore: settleScore(args.passScore, criteria.length),
+      preset: args.preset ?? 'custom',
+      by: args.by ?? 'system',
+      changes: args.changes ?? [],
       createdAt: Date.now(),
     })
     await ctx.db.patch(args.campaignId, { gateSetId, updatedAt: Date.now() })

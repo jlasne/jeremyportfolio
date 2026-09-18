@@ -93,6 +93,9 @@ export interface Topup {
 /** The Gate 3 libraries a proposal can be built from. */
 export type TemplateId = 'recruit_partners' | 'sell_to_creators' | 'sponsorship'
 
+/** How hard the dials sit. A client starts from one of these and then tunes. */
+export type PresetId = 'strict' | 'balanced' | 'broad' | 'custom'
+
 /**
  * The two questions, kept in the client's own words. Two fields and not one
  * blob, because the target and the offer answer different things and the
@@ -145,6 +148,12 @@ export interface Knockout {
   id: string
   question: string
   why?: string
+  /** What a yes looks like, in one line. */
+  pass?: string
+  /** What a no looks like, in one line. */
+  fail?: string
+  /** Off means the question is not asked. Locked ones cannot be turned off. */
+  enabled?: boolean
 }
 
 /** Gate 3. What a 2 looks like is written in the guide. */
@@ -168,6 +177,12 @@ export interface GateSet {
   criteria: Criterion[]
   /** Out of 14. At or above is qualified. */
   passScore: number
+  /** The preset this version sits on, or custom once a dial is moved alone. */
+  preset: PresetId
+  /** Who wrote it. A member id, or "system". */
+  by: string
+  /** What moved since the previous version, in plain lines. */
+  changes: string[]
   createdAt: string
 }
 

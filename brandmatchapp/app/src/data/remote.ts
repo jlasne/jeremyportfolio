@@ -95,6 +95,9 @@ export async function fetchAll(): Promise<Loaded> {
         knockouts: g.knockouts,
         criteria: g.criteria,
         passScore: g.passScore,
+        preset: g.preset ?? 'custom',
+        by: g.by ?? 'system',
+        changes: g.changes ?? [],
         createdAt: iso(g.createdAt),
       })
     }
