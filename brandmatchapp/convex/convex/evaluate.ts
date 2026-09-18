@@ -172,7 +172,7 @@ export const campaign = internalAction({
         criteriaScores: result.criteriaScores,
         score: result.score,
         reason: result.reason,
-        model: process.env.OPENROUTER_MODEL ?? 'deepseek/deepseek-v4-flash-0731',
+        model: process.env.OPENROUTER_MODEL ?? 'deepseek/deepseek-v4-flash',
       })
     }
 
@@ -263,7 +263,7 @@ async function ask(
     method: 'POST',
     headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: process.env.OPENROUTER_MODEL ?? 'deepseek/deepseek-v4-flash-0731',
+      model: process.env.OPENROUTER_MODEL ?? 'deepseek/deepseek-v4-flash',
       messages: [{ role: 'user', content: prompt }],
       response_format: { type: 'json_schema', json_schema: { name: 'gates', strict: true, schema } },
     }),

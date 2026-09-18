@@ -121,7 +121,7 @@ export const gatesFromBrief = internalAction({
       method: 'POST',
       headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: process.env.OPENROUTER_MODEL ?? 'deepseek/deepseek-v4-flash-0731',
+        model: process.env.OPENROUTER_MODEL ?? 'deepseek/deepseek-v4-flash',
         messages: [
           { role: 'system', content: instructions() },
           { role: 'user', content: `Who they want to reach: ${args.audience}\nWhat they sell: ${args.offer}` },

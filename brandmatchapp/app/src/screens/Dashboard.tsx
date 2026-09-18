@@ -102,6 +102,71 @@ function Bands({ rows, title }: { rows: Band[]; title: string }) {
   )
 }
 
+/**
+ * What this screen says before it has anything to say.
+ *
+ * A dashboard on day one is twenty rows of zeros and "too few yet", which is
+ * honest and useless at the same time. It is the first screen a paying client
+ * sees, so it answers the question they actually have: what happens next.
+ *
+ * Three cases, and they are different questions. No campaign at all. A
+ * campaign whose first morning has not come. And enough leads to count but
+ * not enough to compare.
+ */
+function Starting({ leads, total, campaigns, days }: {
+  /** Leads inside the window being looked at. */
+  leads: number
+  /** Leads on the account, whatever the window. */
+  total: number
+  campaigns: { id: string; name: string }[]
+  days: Period
+}) {
+  if (!campaigns.length) {
+    return (
+      <div className="card">
+        <h2>Nothing is running yet</h2>
+        <p className="gate-lede">
+          Tell us who you want to reach and what you sell them. We turn that into rules you can change, test them
+          against real accounts, and the first leads land the next morning.
+        </p>
+        <div className="verdict-actions">
+          <a className="btn primary" href="#/campaign/new">Start a campaign</a>
+        </div>
+      </div>
+    )
+  }
+  if (total === 0) {
+    return (
+      <div className="card">
+        <h2>Your first leads land tomorrow morning</h2>
+        <p className="gate-lede">
+          We are searching tonight. Two things are worth doing while you wait: read your rules once to check they say
+          what you mean, and test them so you know how many to expect each day.
+        </p>
+        <div className="verdict-actions">
+          <a className="btn" href={`#/campaign/${campaigns[0].id}/gates`}>Read my rules</a>
+          <a className="btn primary" href={`#/campaign/${campaigns[0].id}/feasibility`}>Test them</a>
+        </div>
+      </div>
+    )
+  }
+  return (
+    <div className="card">
+      <h2>Too early to read anything into it</h2>
+      <p className="gate-lede">
+        {leads} {leads === 1 ? 'lead' : 'leads'} {days ? `in the last ${days} days` : 'so far'}. A share starts meaning
+        something at about {RATE_MIN}, because below that one reply moves it by more than five points.
+      </p>
+      <p className="muted">
+        The counts below are real. Everything else appears on its own, the day there is enough behind it.
+      </p>
+      <div className="verdict-actions">
+        <a className="btn primary" href="#/leads">Work the list</a>
+      </div>
+    </div>
+  )
+}
+
 export function Dashboard() {
   useStore()
   const campaigns = getCampaigns()
@@ -138,6 +203,9 @@ export function Dashboard() {
   const tips = advice(rows, niches, funnel, campaignId, followersFrom)
   const lost = lostBreakdown(rows)
   const reminders = nudges(all).filter((n) => !hidden.includes(n.id))
+  // Nothing at all, something but not enough, or enough to compare. The blocks
+  // below are drawn against this rather than each one printing its own blank.
+  const phase = all.length === 0 ? 'none' : rows.length < RATE_MIN ? 'early' : 'ready'
 
   const dismiss = (id: string) => {
     const next = [...hidden, id]
@@ -197,6 +265,9 @@ export function Dashboard() {
         </div>
       ))}
 
+      {/* Four zeros tell a new client nothing, and the sidebar already carries
+          the allowance. The tiles wait until there is something in them. */}
+      {phase !== 'none' && (
       <div className="tiles">
         <div className="tile">
           <b className="num">{rows.length}</b>
@@ -215,8 +286,14 @@ export function Dashboard() {
           <span>won, from {money_.deals} {money_.deals === 1 ? 'deal' : 'deals'}</span>
         </div>
       </div>
+      )}
+
+      {phase !== 'ready' && (
+        <Starting leads={rows.length} total={all.length} campaigns={campaigns} days={period} />
+      )}
 
       {/* Block one ------------------------------------------------------- */}
+      {phase === 'ready' && (
       <div className="card">
         <h2>Who replies</h2>
         {headline ? (
@@ -278,8 +355,10 @@ export function Dashboard() {
         )}
         <Suggestions list={tips.filter((t) => t.id !== 'after-reply')} />
       </div>
+      )}
 
       {/* Block two ------------------------------------------------------- */}
+      {phase !== 'none' && (
       <div className="card">
         <h2>How far your leads get</h2>
         <ol className="funnel-shape steps">
@@ -362,8 +441,10 @@ export function Dashboard() {
           </>
         )}
       </div>
+      )}
 
       {/* Block three ----------------------------------------------------- */}
+      {phase === 'ready' && (
       <div className="card">
         <h2>What you got back</h2>
         <div className="tiles">
@@ -402,9 +483,13 @@ export function Dashboard() {
           <button type="button" className="btn" onClick={exportReport}>Export this for your report</button>
         </div>
       </div>
+      )}
 
       <div className="card">
         <h2>Campaigns</h2>
+        {campaigns.length === 0 && (
+          <p className="muted">None yet. A campaign is one brief, one set of rules, one daily limit.</p>
+        )}
         <ul className="zone-list">
           {campaigns.map((c) => (
             <li key={c.id}>

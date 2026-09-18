@@ -141,7 +141,11 @@ export const finishRun = internalMutation({
     await ctx.db.patch(run._id, {
       status: args.status,
       profilesFetched: args.profilesFetched ?? run.profilesFetched,
-      // Measured on real runs: search plus detail lands near 0.6 cents a profile.
+      // Measured on real runs: search plus detail lands near 0.6 cents a
+      // profile. Both halves are paid to Apify. If the search half ever proves
+      // to be most of that, a search engine answers the same question for less
+      // and only detail needs paying for. That is a change to make against a
+      // number from this table, never before one.
       costCents: args.costCents ?? Math.round((args.profilesFetched ?? run.profilesFetched) * 0.6),
       error: args.error,
       finishedAt: Date.now(),

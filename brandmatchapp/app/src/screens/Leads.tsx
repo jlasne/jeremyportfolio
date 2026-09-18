@@ -399,6 +399,9 @@ export function Leads({ leadId, query: params }: { leadId: string | null; query:
   const rows = ids.map((id) => getLeadRow(id)).filter((r): r is LeadRow => r !== null)
   const open = leadId ? getLeadRow(leadId) : null
   const today = todayCount(campaignId)
+  // Filters over a list that has never held anything are a wall of controls in
+  // front of an empty room. They appear with the first lead.
+  const anyLeads = listLeads({}).length > 0
 
   const armUndo = (id: string) => {
     setUndoable(id)
@@ -442,6 +445,8 @@ export function Leads({ leadId, query: params }: { leadId: string | null; query:
         <button type="button" className="btn" onClick={exportCsv} disabled={!rows.length}>Export</button>
       </div>
 
+      {anyLeads && (
+      <>
       <div className="filter-row">
         {campaigns.length > 1 && (
           <select
@@ -503,6 +508,8 @@ export function Leads({ leadId, query: params }: { leadId: string | null; query:
         <span className="spacer" />
         <span className="faint num">{rows.length} shown</span>
       </div>
+      </>
+      )}
 
       <div className={open ? 'with-panel' : undefined}>
         <div className="list">

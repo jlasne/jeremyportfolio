@@ -22,6 +22,15 @@ export function Campaigns() {
       </div>
       <p className="subhead">Each campaign has its own brief, its own rules and its own daily limit. They share your monthly allowance.</p>
       <div className="list">
+        {campaigns.length === 0 && (
+          <div className="empty">
+            <h2>No campaign yet</h2>
+            <p>Two questions, and we write the rules. You can change every one of them afterwards.</p>
+            <div className="actions">
+              <a className="btn primary" href="#/campaign/new">Start a campaign</a>
+            </div>
+          </div>
+        )}
         {campaigns.map((c) => {
           const gates = getGateSet(c.id)
           const run = getFeasibility(c.id)
