@@ -58,6 +58,15 @@ const api = httpAction(async (ctx, req) => {
       return json({ ok: true })
     }
 
+    // The admin door: a password in, the owner's key out. Public by necessity,
+    // since somebody standing outside has no key to present yet.
+    if (head === 'admin-login' && req.method === 'POST') {
+      const { password } = await req.json().catch(() => ({ password: '' }))
+      const out = await ctx.runQuery(internal.brands.ownerKeyFor, { password: String(password ?? '') })
+      if (out.error) return fail(out.error, 401)
+      return json(out)
+    }
+
     // Everything below needs a brand ---------------------------------------
     const brand = await brandFrom(ctx, req)
     if (!brand) return fail('Send Authorization: Bearer <api key>', 401)

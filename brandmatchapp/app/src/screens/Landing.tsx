@@ -28,7 +28,7 @@ const HAS = [
 ]
 
 /** Said in three, under the buttons, the way a launch says them. */
-const FACTS = ['500 a day', 'Email on the row', 'Yours alone, forever']
+const FACTS = ['Handle and email on every row', 'Searched fresh today', 'Yours alone, forever']
 
 /** Paste this and an agent is connected. Shown on the landing as is. */
 const MCP_CONFIG = `{
@@ -47,34 +47,44 @@ const MCP_CONFIG = `{
  */
 const CTA = 'Get early access'
 
-/** The three tests a lead passes before it reaches your list. */
+/** What we check before a lead reaches you, and what each check is worth. */
 const TESTS: { name: string; means: string }[] = [
-  { name: 'Intent', means: 'They take brand deals already: a sponsored post, rates in the bio, a media kit.' },
-  { name: 'Active', means: 'They posted this week. A dormant account is a dead lead however big it is.' },
-  { name: 'Scope', means: 'They are in your niche, judged against your own words, not a category tag.' },
+  {
+    name: 'In your niche',
+    means: 'Judged against your own words, not a category tag. The pitch you send already fits what they post.',
+  },
+  {
+    name: 'Active this week',
+    means: 'They posted in the last few days. A dead account costs you the time to write and never answers.',
+  },
+  {
+    name: 'Big enough for you',
+    means: 'The follower range you set, not ours. Reach you can afford, at a size that moves your numbers.',
+  },
+  {
+    name: 'Already sells',
+    means: 'They have run a paid campaign and sold to their own audience. Creators who convert, twice as often.',
+  },
 ]
-
-/** Where the config block goes. Named, so nobody wonders about theirs. */
-const CLIENTS = ['Claude', 'Claude Code', 'Cursor', 'Codex', 'VS Code', 'Windsurf', 'Zed', 'any MCP client']
 
 const STEPS = [
   {
     n: '1/3',
-    title: 'We learn what you sell',
-    note: 'Your website goes in. Out comes who to reach and three agents to go and find them. You approve before anything searches.',
+    title: 'You get your ideal buyer, not a category',
+    note: 'Your website goes in. We work out who actually fits what you sell, and you approve it before a single search runs.',
     tick: 'One minute, once',
   },
   {
     n: '2/3',
-    title: 'We find who is ready',
-    note: 'The agents search every night, then cut. What is left is ranked best first, by how ready each one is to take a deal.',
-    tick: 'Runs while you sleep',
+    title: 'You get a list searched today',
+    note: 'Instagram gets searched fresh every night against your criteria. Nothing here was scraped two years ago and left to rot.',
+    tick: 'New every morning',
   },
   {
     n: '3/3',
-    title: 'You write and close',
-    note: 'The handle and the email sit on the row. Open the list, send, and move each one along as they answer.',
-    tick: 'The only step left for you',
+    title: 'You get the handle and the email',
+    note: 'Send a DM where they are already active, or the email for the rate card and the contract. Both sit on the row.',
+    tick: 'Two ways to reach every one',
   },
 ]
 
@@ -325,8 +335,8 @@ export function Landing() {
             <div className="hero-copy">
               <h1>Find creators <br />who <TurningWord words={WHO} />.</h1>
               <p className="lede">
-                Enter your website. Every morning you get 500 creators who take brand deals, ranked, with the email on
-                the row.
+                Every morning, creators who fit what you sell, post this week, and already take paid deals. Their
+                Instagram handle and their email, on every row.
               </p>
               <EarlyAccess website="strongher.co" />
               <p className="hero-meta">
@@ -345,9 +355,10 @@ export function Landing() {
 
         <section className="land-section" id="how">
           <p className="eyebrow">How it works</p>
-          <h2 className="big">Three steps. <em>You do the last one.</em></h2>
+          <h2 className="big">Not a database. <em>A search, run for you daily.</em></h2>
           <p className="section-lede">
-            A qualified list, not a directory dump. Here is how it gets built while you sleep.
+            Every directory sells the same scraped list to everyone, and half of it is dead. We go looking for your
+            buyer instead, and we go again tonight.
           </p>
 
           <div className="steps3">
@@ -364,9 +375,26 @@ export function Landing() {
             ))}
           </div>
 
+          <div className="reach">
+            <div className="reach-one">
+              <span className="reach-k">Instagram handle</span>
+              <p>
+                Where they already are, every day. A DM lands in the same place their work does, which is why it gets
+                answered far more often than a cold email to a brand address.
+              </p>
+            </div>
+            <div className="reach-one">
+              <span className="reach-k">Email</span>
+              <p>
+                For the part that is business. The rate card, the brief, the contract. One inbox, one thread, and
+                something you can forward to whoever signs.
+              </p>
+            </div>
+          </div>
+
           <div className="tests">
             <div className="tests-copy">
-              <p className="tests-head">Every lead passes three tests, or it never reaches you.</p>
+              <p className="tests-head">Four checks. Fail one and it never reaches you.</p>
               <div className="tests-row">
                 {TESTS.map((t) => (
                   <div className="test" key={t.name}>
@@ -398,10 +426,6 @@ export function Landing() {
               <pre><code>{MCP_CONFIG}</code></pre>
             </div>
             <div className="connect-side">
-              <span className="connect-where">Add it to</span>
-              <ul className="clients">
-                {CLIENTS.map((c) => <li key={c}>{c}</li>)}
-              </ul>
               <a className="btn primary" href="#access">{CTA}</a>
             </div>
           </div>
@@ -415,7 +439,7 @@ export function Landing() {
 
         <section className="land-section centred" id="pricing">
           <p className="eyebrow">Pricing</p>
-          <h2 className="big">One plan. <em>One price.</em></h2>
+          <h2 className="big">One price. <em>Or a conversation.</em></h2>
           <p className="section-lede">
             Everything, for every account, at one number. Three days free before it starts.
           </p>
@@ -430,12 +454,18 @@ export function Landing() {
             <p className="price-note">Three days free. No card to start.</p>
           </div>
 
+          <div className="one-price more">
+            <span className="price-tag">More than 500 a day?</span>
+            <p className="price-more">Let's talk</p>
+            <p className="price-note">
+              Bigger volume, more niches, or a whole agency. Tell me the number and we size it together.
+            </p>
+            <a className="btn" href="mailto:hey@jeremylasne.com">Contact us</a>
+          </div>
+
           <p className="section-lede compare">
             A database at $120 to $400 a month sells you a search box. You still find, vet and score each one.
             Here the list is done when you wake up.
-          </p>
-          <p className="section-lede">
-            Need more than 500 a day? <a href="mailto:hey@jeremylasne.com">Chat with me</a> and we size it together.
           </p>
         </section>
 

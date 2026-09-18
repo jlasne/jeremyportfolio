@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { api, isLive, type AdminOverview, type AdminSettings } from '../lib/api'
+import { api, isLive, setKey, type AdminOverview, type AdminSettings } from '../lib/api'
 
 // The owner's screen. One slider decides how much of every account's day is
 // crawled fresh, and the page says what that does to the pool and the bill
@@ -11,6 +11,54 @@ import { api, isLive, type AdminOverview, type AdminSettings } from '../lib/api'
 
 const pct = (n: number) => `${Math.round(n * 100)}%`
 const usd = (n: number) => `$${n.toFixed(n < 10 ? 2 : 0)}`
+
+/**
+ * The way in. One password, exchanged for the owner's key, which is then kept
+ * in this browser like any other key. Nothing else on the page is reachable
+ * without it, and the server decides, not this screen.
+ */
+function AdminDoor({ reason }: { reason: string }) {
+  const [password, setPassword] = useState('')
+  const [state, setState] = useState<'idle' | 'checking' | 'failed'>('idle')
+  const [message, setMessage] = useState('')
+
+  const open = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setState('checking')
+    try {
+      const { key } = await api.adminLogin(password)
+      setKey(key)
+      window.location.reload()
+    } catch (err) {
+      setState('failed')
+      setMessage(err instanceof Error ? err.message : 'That did not work')
+    }
+  }
+
+  return (
+    <div className="page editor">
+      <div className="page-head"><h1>Admin</h1></div>
+      <p className="subhead">
+        {reason ? `${reason}. Sign in with the admin password.` : 'Sign in with the admin password.'}
+      </p>
+      <form className="admin-door" onSubmit={open}>
+        <input
+          className="input"
+          type="password"
+          placeholder="Admin password"
+          value={password}
+          autoFocus
+          aria-label="Admin password"
+          onChange={(e) => { setPassword(e.target.value); setState('idle') }}
+        />
+        <button className="btn primary" type="submit" disabled={state === 'checking' || !password}>
+          {state === 'checking' ? 'Checking' : 'Sign in'}
+        </button>
+        {state === 'failed' && <p className="warn">{message}</p>}
+      </form>
+    </div>
+  )
+}
 
 export function Admin() {
   const [data, setData] = useState<AdminOverview | null>(null)
@@ -51,13 +99,10 @@ export function Admin() {
     }, 400)
   }
 
-  if (!isLive()) {
-    return (
-      <div className="page editor">
-        <div className="page-head"><h1>Admin</h1></div>
-        <p className="subhead">Paste your key on the API screen first. This page reads the live deployment.</p>
-      </div>
-    )
+  // No key in this browser, or a key that is not the owner's: ask for the
+  // password instead of asking somebody to type 48 hex characters.
+  if (!isLive() || error) {
+    return <AdminDoor reason={isLive() ? error : ''} />
   }
 
   if (error) {

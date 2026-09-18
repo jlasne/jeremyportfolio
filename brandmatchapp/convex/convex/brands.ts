@@ -286,6 +286,38 @@ export const stats = internalQuery({
 })
 
 /** Makes a brand the owner. Run once from the CLI, never from a route. */
+/**
+ * The owner's key, handed over for a password.
+ *
+ * The admin page needs the owner's API key in the browser, and typing 48 hex
+ * characters on a phone is not a thing anyone does. One password, set as an
+ * environment variable on the deployment, buys that key.
+ *
+ * The comparison runs over the whole string either way, so a wrong password
+ * takes the same time as a right one and tells an attacker nothing.
+ */
+export const ownerKeyFor = internalQuery({
+  args: { password: v.string() },
+  returns: v.any(),
+  handler: async (ctx, { password }) => {
+    const expected = process.env.ADMIN_PASSWORD
+    if (!expected) return { error: 'No admin password is set on this deployment' }
+
+    let same = password.length === expected.length
+    for (let i = 0; i < Math.max(password.length, expected.length); i++) {
+      if (password.charCodeAt(i) !== expected.charCodeAt(i)) same = false
+    }
+    if (!same) return { error: 'Wrong password' }
+
+    const owner = await ctx.db
+      .query('brands')
+      .filter((q) => q.eq(q.field('role'), 'owner'))
+      .first()
+    if (!owner) return { error: 'No owner account on this deployment' }
+    return { key: owner.apiKey, email: owner.email }
+  },
+})
+
 export const makeOwner = internalMutation({
   args: { email: v.string() },
   returns: v.boolean(),

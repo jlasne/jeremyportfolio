@@ -117,6 +117,9 @@ export const api = {
     call<{ agent: ApiAgent }>(`/agents/${agentId}/${on ? 'approve' : 'pause'}`, { method: 'POST', body: JSON.stringify(body) }),
   removeAgent: (agentId: string) => call<{ ok: true }>(`/agents/${agentId}`, { method: 'DELETE' }),
   removeCampaign: (id: string) => call<{ ok: true }>(`/campaigns/${id}`, { method: 'DELETE' }),
+  /** A password in, the owner's key out. The one call that needs no key. */
+  adminLogin: (password: string) =>
+    call<{ key: string; email: string }>('/admin-login', { method: 'POST', body: JSON.stringify({ password }) }),
   admin: () => call<AdminOverview>('/admin'),
   setSettings: (patch: Partial<AdminSettings>) =>
     call<{ settings: AdminSettings }>('/admin/settings', { method: 'POST', body: JSON.stringify(patch) }),
