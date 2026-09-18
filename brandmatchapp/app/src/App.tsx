@@ -1,51 +1,32 @@
 import { useRoute } from './lib/router'
 import { Backdrop } from './components/Backdrop'
 import { SideNav } from './components/SideNav'
-import { StarClip } from './components/Stars'
-import { CampaignEditor, Campaigns } from './screens/Campaign'
-import { Connect } from './screens/Connect'
-import { Settings } from './screens/Settings'
+import { Account } from './screens/Account'
 import { Admin } from './screens/Admin'
-import { Contacts } from './screens/Contacts'
+import { CampaignZone } from './screens/CampaignZone'
+import { Campaigns } from './screens/Campaigns'
+import { Dashboard } from './screens/Dashboard'
 import { Landing } from './screens/Landing'
-import { ChoosePlan, FirstRun, OnboardingCampaign, OnboardingStart } from './screens/Onboarding'
+import { Leads } from './screens/Leads'
+
+// Five product zones, plus the account and the internal admin. The landing is
+// its own page with its own ground.
 
 export function App() {
   const route = useRoute()
 
-  if (route.name === 'home') {
-    return (
-      <>
-        <StarClip />
-        <Landing />
-      </>
-    )
-  }
+  if (route.name === 'home') return <Landing />
 
-  if (route.name === 'onboarding') {
-    return (
-      <>
-        <Backdrop />
-        <StarClip />
-        {!route.campaignId && <OnboardingStart />}
-        {route.campaignId && route.step === null && <OnboardingCampaign campaignId={route.campaignId} />}
-        {route.campaignId && route.step === 'plan' && <ChoosePlan campaignId={route.campaignId} />}
-        {route.campaignId && route.step === 'running' && <FirstRun campaignId={route.campaignId} />}
-      </>
-    )
-  }
-
-  // Same ground as the landing: one grid, one warm glow, under every screen.
   return (
     <div className="shell">
       <Backdrop />
-      <StarClip />
       <SideNav route={route} />
       <main className="main">
-        {route.name === 'contacts' && <Contacts scopeId={route.scopeId} />}
-        {route.name === 'campaign' && (route.campaignId ? <CampaignEditor campaignId={route.campaignId} /> : <Campaigns />)}
-        {route.name === 'connect' && <Connect />}
-        {route.name === 'settings' && <Settings />}
+        {route.name === 'dashboard' && <Dashboard />}
+        {route.name === 'leads' && <Leads leadId={route.leadId} />}
+        {route.name === 'campaigns' && <Campaigns />}
+        {route.name === 'campaign' && <CampaignZone campaignId={route.campaignId} tab={route.tab} />}
+        {route.name === 'account' && <Account />}
         {route.name === 'admin' && <Admin />}
       </main>
     </div>

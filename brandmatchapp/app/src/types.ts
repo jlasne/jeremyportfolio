@@ -1,190 +1,325 @@
-// Shared shapes for every entity in the app.
-// The mock folder produces these today. The real crawl will produce the same shapes later.
+// The shapes every screen reads. One per table in the Convex schema, with ids
+// as plain strings so the mock folder and the real backend produce the same
+// objects and nothing in the UI knows which one it got.
+//
+// Dates are ISO strings here and epoch numbers in Convex. The adapter in
+// data/remote.ts is the only place that converts.
 
-export type Country =
-  | 'US' | 'UK' | 'CA' | 'AU' | 'IE' | 'NZ'
-  | 'FR' | 'DE' | 'ES' | 'IT' | 'NL' | 'SE' | 'PL'
-  | 'BR' | 'MX' | 'IN' | 'JP' | 'ZA'
-export type Language = 'en' | 'fr' | 'de' | 'es' | 'it' | 'pt' | 'nl' | 'sv' | 'pl' | 'ja'
-/** 0 to 3 in half steps. */
-export type Stars = number
-/** How far one criterion is met: none, half, full. */
-export type Level = 0 | 0.5 | 1
+export type AccountKind = 'brand' | 'agency'
+export type MemberRole = 'owner' | 'admin' | 'member'
+export type CampaignStatus = 'draft' | 'live' | 'paused' | 'archived'
+export type Verdict = 'qualified' | 'hard_fail' | 'knockout_fail' | 'below_threshold'
+export type LeadStatus = 'new' | 'contacted' | 'replied' | 'call' | 'signed' | 'lost'
+/** A Gate 3 criterion is worth 0, 1 or 2. Seven of them, so 14 is the ceiling. */
+export type CriterionScore = 0 | 1 | 2
 
-export type SignalType =
-  | 'sponsored_post'
-  | 'promoted_supplement'
-  | 'collab_bio'
-  | 'media_kit'
-  | 'launched_program'
-  | 'launched_merch'
-  | 'posted_rates'
+// ---------------------------------------------------------------------------
+// Account and money
+// ---------------------------------------------------------------------------
 
-export interface Signal {
-  type: SignalType
-  label: string
-  /** A paid post or a public rate card is strong. Bio wording or a launch is soft. */
-  strength: 'strong' | 'soft'
-  /** ISO date */
-  date: string
+export interface Account {
+  id: string
+  name: string
+  kind: AccountKind
+  email: string
+  timezone: string
+  createdAt: string
 }
 
-export interface Post {
+export interface Member {
   id: string
-  creatorId: string
-  kind: 'reel' | 'post'
-  thumbnail: string
-  views: number
-  comments: number
-  /** ISO date */
-  date: string
+  accountId: string
+  email: string
+  name: string
+  role: MemberRole
+}
+
+/** 15, 30 or 50 qualified leads a day. Prices are placeholders until checkout. */
+export interface Subscription {
+  id: string
+  accountId: string
+  tier: 15 | 30 | 50
+  priceCents: number
+  currency: string
+  status: 'active' | 'past_due' | 'canceled'
+  /** "2026-09" */
+  period: string
+  periodStart: string
+  periodEnd: string
+}
+
+export type QuotaKind = 'entitlement' | 'delivery' | 'topup' | 'adjustment'
+
+/** One line of the journal. Nothing edits these, everything appends. */
+export interface QuotaEntry {
+  id: string
+  accountId: string
+  period: string
+  kind: QuotaKind
+  delta: number
+  campaignId?: string
+  leadId?: string
+  note?: string
+  at: string
 }
 
 /**
- * One score per creator, 0 to 3 stars in half steps. One star each for niche,
- * selling and signal. Each pays a half star when it half fits and a full star
- * when it fits. The three are independent of each other.
+ * The journal summed for one month. `remaining` is what the client sees, and
+ * it carries within the month: a thin Tuesday is spendable on Wednesday.
  */
-export interface Score {
-  stars: Stars
-  niche: Level
-  active: Level
-  intent: Level
-  /** What each criterion earned, in order, for the row label and the panel. */
-  earned: { label: string; level: Level; note: string }[]
-  /** One plain sentence, written at scoring time. */
-  why: string
+export interface QuotaPeriod {
+  accountId: string
+  period: string
+  entitled: number
+  delivered: number
+  carried: number
+  remaining: number
 }
 
-export interface Creator {
+export interface Topup {
   id: string
-  handle: string
-  name: string
-  bio: string
-  followers: number
-  /** 0.034 means 3.4% */
-  engagementRate: number
-  medianReelViews: number
-  postsPerMonth: number
-  /** ISO date */
-  lastPostAt: string
-  country: Country
-  language: Language
-  email: string | null
-  signals: Signal[]
-  /** How well content, audience and follower band fit the brief. */
-  niche: Level
-  /** Why the niche call went that way, one plain sentence. */
-  nicheWhy: string
-  /** What the creator sells today, or an empty string. */
+  accountId: string
+  leads: number
+  priceCents: number
+  currency: string
+  remaining: number
+  purchasedAt: string
+}
+
+// ---------------------------------------------------------------------------
+// Campaign and gates
+// ---------------------------------------------------------------------------
+
+export interface BriefExtract {
   sells: string
-  /** The campaign that found this creator. */
-  campaignId: string
-  /** The agent inside that campaign that brought it in. */
-  agentId: string
-  /** ISO date */
-  firstSeenAt: string
-  /** ISO date */
-  lastCrawlAt: string
-}
-
-/** One searcher inside a campaign. Each has its own angle and its own share of the day. */
-export interface CampaignAgent {
-  id: string
-  name: string
-  /** What this agent hunts for, in one line. */
-  focus: string
-  leadsPerDay: number
-  /** True while status is 'active'. Kept in step by updateCampaignAgent. */
-  active: boolean
-  /** Proposed waits for a human. Active runs. Paused sits still. */
-  status: 'proposed' | 'active' | 'paused'
-  /** The hashtags it searches. What the agent actually does, in plain sight. */
-  hashtags: string[]
-  /** Why the model proposed this angle. Shown while it waits for approval. */
-  why?: string
+  audience: string
+  outcome: string
+  countries: string[]
+  languages: string[]
+  extractedAt: string
 }
 
 export interface Campaign {
   id: string
+  accountId: string
   name: string
-  /** The agents that run this campaign. */
-  agents: CampaignAgent[]
-  /** The brand's own site. The audience below is written from it. */
-  website: string
-  brief: Brief
-  filters: Filters
-  /** How many leads a day this search should deliver. */
-  leadsPerDay: number
-  /** Local time the daily batch lands, "07:00". */
-  runAt: string
-  active: boolean
-  /**
-   * Which price the brand took at onboarding. Locked keeps $79 for as long as
-   * they stay; later is $99 once the three days end. Nothing is charged until
-   * checkout exists.
-   */
-  pricePlan?: 'locked79' | 'later99'
-  /** ISO date */
+  status: CampaignStatus
+  /** Ceiling on the account quota this campaign may take in a day. */
+  dailyCap: number | null
+  /** What the client wrote, word for word. */
+  brief: string
+  extracted: BriefExtract
+  gateSetId: string
   createdAt: string
-}
-
-export interface DailyStat {
-  /** ISO date, midnight */
-  date: string
-  /** Profiles crawled. */
-  gathered: number
-  /** The campaign that delivered this day. */
-  campaignId: string
-  /** The agent inside that campaign that filled its quota this day. */
-  agentId: string
-  /** Leads delivered to the list. Every one of them shows. */
-  leads: number
-  /** Of those, the ones at a full star or more. */
-  qualified: number
-}
-
-export interface Note {
-  creatorId: string
-  text: string
-  /** ISO date */
   updatedAt: string
 }
 
-export interface Rejection {
+/** Gate 1. A missing threshold is simply not applied. */
+export interface HardRules {
+  followersMin?: number
+  followersMax?: number
+  lastPostWithinDays?: number
+  medianViewsMin?: number
+  medianCommentsMin?: number
+  postsPerMonthMin?: number
+  countries?: string[]
+  languages?: string[]
+}
+
+/** Gate 2. One no ends it. */
+export interface Knockout {
+  id: string
+  question: string
+  why?: string
+}
+
+/** Gate 3. What a 2 looks like is written in the guide. */
+export interface Criterion {
+  id: string
+  label: string
+  guide?: string
+}
+
+/** One version of a campaign's three gates. Edits write a new version. */
+export interface GateSet {
+  id: string
+  campaignId: string
+  accountId: string
+  version: number
+  origin: 'generated' | 'edited'
+  hard: HardRules
+  knockouts: Knockout[]
+  criteria: Criterion[]
+  /** Out of 14. At or above is qualified. */
+  passScore: number
+  createdAt: string
+}
+
+// ---------------------------------------------------------------------------
+// Profile and evaluation
+// ---------------------------------------------------------------------------
+
+/** Measured facts only. Every number here came off real posts. */
+export interface Creator {
+  id: string
+  platform: 'instagram'
+  handle: string
+  name: string
+  bio: string
+  avatar?: string
+  email: string | null
+  followers: number
+  medianViews: number | null
+  medianComments: number | null
+  postsPerMonth: number | null
+  lastPostAt: string | null
+  country: string | null
+  language: string | null
+  links: string[]
+  measuredAt: string
+  firstSeenAt: string
+}
+
+export interface CreatorPost {
+  id: string
   creatorId: string
-  /** ISO date */
+  kind: 'reel' | 'post'
+  url: string
+  thumbnail?: string
+  caption?: string
+  views: number
+  likes: number
+  comments: number
+  postedAt: string
+}
+
+export interface HardCheck {
+  key: keyof HardRules
+  value: number
+  pass: boolean
+}
+
+export interface KnockoutAnswer {
+  id: string
+  pass: boolean
+  note?: string
+}
+
+export interface CriterionResult {
+  id: string
+  score: CriterionScore
+  note?: string
+}
+
+/** The audit trail. Why this profile did or did not become a lead. */
+export interface Evaluation {
+  id: string
+  creatorId: string
+  campaignId: string
+  accountId: string
+  gateSetId: string
+  gateSetVersion: number
+  verdict: Verdict
+  /** The hard key or knockout id that ended it. Null when nothing blocked. */
+  blockedBy: string | null
+  hardChecks: HardCheck[]
+  knockoutAnswers: KnockoutAnswer[]
+  criteriaScores: CriterionResult[]
+  score: number
+  reason: string
+  evaluatedAt: string
+}
+
+/** Permanent. A profile handed to one account is never offered to another. */
+export interface CreatorClaim {
+  creatorId: string
+  accountId: string
+  campaignId: string
+  claimedAt: string
+}
+
+// ---------------------------------------------------------------------------
+// Commercial proof
+// ---------------------------------------------------------------------------
+
+/** The billed object. One qualified creator, delivered. */
+export interface Lead {
+  id: string
+  accountId: string
+  campaignId: string
+  creatorId: string
+  evaluationId: string
+  score: number
+  status: LeadStatus
+  ownerId: string | null
+  deliveredAt: string
+  statusAt: string
+}
+
+export interface LeadEvent {
+  id: string
+  leadId: string
+  accountId: string
+  campaignId: string
+  from: LeadStatus | null
+  to: LeadStatus
+  /** A member id, or "system". */
+  by: string
+  note?: string
+  at: string
+}
+
+/** Separate from the lead because one lead can sign more than once. */
+export interface Deal {
+  id: string
+  leadId: string
+  accountId: string
+  campaignId: string
+  amountCents: number
+  currency: string
+  signedAt: string
+  note?: string
+}
+
+// ---------------------------------------------------------------------------
+// Operations. None of this crosses into a client read.
+// ---------------------------------------------------------------------------
+
+/** Internal only. Cost lives here and nowhere a client can reach. */
+export interface CrawlRun {
+  id: string
+  campaignId: string | null
+  source: string
+  phase: string
+  status: string
+  profilesFetched: number
+  profilesEvaluated: number
+  qualified: number
+  costCents: number
+  startedAt: string
+  finishedAt: string | null
+}
+
+/** The simulator's output. Client safe: it carries no cost and no volume sold. */
+export interface FeasibilityRun {
+  id: string
+  campaignId: string
+  gateSetId: string
+  gateSetVersion: number
+  sampleSize: number
+  passedHard: number
+  passedKnockouts: number
+  scoreHistogram: { score: number; count: number }[]
+  estimatedPerDay: number
+  ranAt: string
+}
+
+/** One day of one campaign. What the dashboard chart reads. */
+export interface DailyDelivery {
+  accountId: string
+  campaignId: string
+  /** "2026-09-18" */
   date: string
-}
-
-export interface BriefAnswer {
-  questionId: string
-  value: string | null
-}
-
-export interface Brief {
-  who: string
-  answers: BriefAnswer[]
-  /** One plain sentence shown back to the brand. */
-  summary: string
-}
-
-export interface Filters {
-  followersMin: number
-  followersMax: number
-  /** 0.01 means 1% */
-  engagementMin: number
-  reelViewsMin: number | null
-  emailInBio: 'any' | 'yes'
-  lastPostWithin: 7 | 30 | 90
-  postsPerMonthMin: number
-  countries: Country[]
-  languages: Language[]
-}
-
-export type FilterKey = keyof Filters
-
-export interface Settings {
-  timezone: string
-  onboarded: boolean
+  delivered: number
+  target: number
 }

@@ -11,6 +11,6 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 )
 
-// Paint the sample data first, swap in the real pool when it lands. A visitor
+// Paint the sample account first, swap in the real one when it lands. A visitor
 // with no key never calls out and stays on the sample.
 void hydrate()

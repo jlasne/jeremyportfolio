@@ -8,20 +8,26 @@
  * @module
  */
 
-import type * as admin from "../admin.js";
-import type * as brands from "../brands.js";
+import type * as accounts from "../accounts.js";
+import type * as campaigns from "../campaigns.js";
+import type * as clientApi from "../clientApi.js";
 import type * as crawl from "../crawl.js";
 import type * as crons from "../crons.js";
+import type * as deliver from "../deliver.js";
 import type * as discover from "../discover.js";
+import type * as drafting from "../drafting.js";
+import type * as evaluate from "../evaluate.js";
+import type * as feasibility from "../feasibility.js";
+import type * as gates from "../gates.js";
 import type * as http from "../http.js";
+import type * as httpUtil from "../httpUtil.js";
 import type * as ingest from "../ingest.js";
+import type * as jobs from "../jobs.js";
 import type * as leads from "../leads.js";
-import type * as mcp from "../mcp.js";
-import type * as pool from "../pool.js";
-import type * as propose from "../propose.js";
-import type * as qualify from "../qualify.js";
-import type * as scoring from "../scoring.js";
-import type * as settings from "../settings.js";
+import type * as ops from "../ops.js";
+import type * as opsApi from "../opsApi.js";
+import type * as quota from "../quota.js";
+import type * as waitlist from "../waitlist.js";
 
 import type {
   ApiFromModules,
@@ -30,20 +36,26 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  admin: typeof admin;
-  brands: typeof brands;
+  accounts: typeof accounts;
+  campaigns: typeof campaigns;
+  clientApi: typeof clientApi;
   crawl: typeof crawl;
   crons: typeof crons;
+  deliver: typeof deliver;
   discover: typeof discover;
+  drafting: typeof drafting;
+  evaluate: typeof evaluate;
+  feasibility: typeof feasibility;
+  gates: typeof gates;
   http: typeof http;
+  httpUtil: typeof httpUtil;
   ingest: typeof ingest;
+  jobs: typeof jobs;
   leads: typeof leads;
-  mcp: typeof mcp;
-  pool: typeof pool;
-  propose: typeof propose;
-  qualify: typeof qualify;
-  scoring: typeof scoring;
-  settings: typeof settings;
+  ops: typeof ops;
+  opsApi: typeof opsApi;
+  quota: typeof quota;
+  waitlist: typeof waitlist;
 }>;
 
 /**

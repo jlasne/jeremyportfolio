@@ -3,11 +3,10 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "brandmatch on Convex: the shared creator pool, the crawl, the scoring, the API and MCP.",
+  "description": "brandmatch on Convex: the three gates, the quota journal, the client API and the internal ops API.",
   "scripts": {
     "dev": "convex dev",
-    "deploy": "convex deploy",
-    "import-pool": "convex run migrate:importPool"
+    "deploy": "convex deploy"
   },
   "dependencies": {
     "convex": "^1.45.0"

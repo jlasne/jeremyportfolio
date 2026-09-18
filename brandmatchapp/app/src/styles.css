@@ -2275,3 +2275,105 @@ body { background: var(--paper); }
 .tests { grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr); }
 .tests-art { max-width: 420px; }
 @media (max-width: 900px) { .tests .tests-row { grid-template-columns: 1fr; } }
+
+/* ====================================================================
+   The five zones
+   Added with the gate model. Overrides sit after the rules they replace,
+   so the older blocks above keep serving the landing untouched.
+   ==================================================================== */
+
+/* Tiles: the four numbers a zone opens with. */
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.tile {
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-card);
+  padding: 18px 20px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 2px;
+}
+.tile b { font-family: var(--display); font-size: 26px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+.tile span { color: var(--ink-2); font-size: 12.5px; }
+
+/* One column a day, thirty days. No axis: the shape is the point.
+   Named apart from .bar, which is the thin progress rule further up. */
+.daybars { display: flex; align-items: flex-end; gap: 3px; height: 92px; }
+.daybar { flex: 1; height: 100%; display: flex; align-items: flex-end; }
+.daybar i { display: block; width: 100%; min-height: 2px; border-radius: 3px; background: var(--orange); opacity: 0.85; }
+.daybar:hover i { opacity: 1; }
+
+/* The pipeline, left to right. */
+.funnel { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+.funnel li {
+  flex: 1; min-width: 96px; background: var(--paper); border-radius: var(--radius);
+  padding: 12px 14px; display: flex; flex-direction: column; gap: 1px;
+}
+.funnel li b { font-size: 20px; font-weight: 600; }
+.funnel li span { color: var(--ink-2); font-size: 12.5px; }
+.funnel li.out { background: transparent; border: 1px dashed var(--line-2); }
+
+/* A rule is a label and its value. The whole gates editor is built from it. */
+.rules { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.rules li {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+  padding: 9px 0; border-bottom: 1px solid var(--line);
+}
+.rules li:last-child { border-bottom: 0; }
+.rules li > span { color: var(--ink-2); min-width: 0; }
+.rules li > b { font-weight: 600; text-align: right; white-space: nowrap; }
+.rules li.on { color: var(--orange-deep); }
+.rules li.on > span, .rules li.on > b { color: var(--orange-deep); }
+.rules.stacked li { flex-direction: column; align-items: flex-start; gap: 3px; }
+.rules.stacked li > b { text-align: left; white-space: normal; font-weight: 600; }
+.rules.stacked li > small { color: var(--ink-2); font-size: 12.5px; }
+
+/* The brief read back as structure. */
+.pairs { display: grid; grid-template-columns: 150px 1fr; gap: 8px 16px; margin: 0; }
+.pairs dt { color: var(--ink-3); font-size: 12.5px; }
+.pairs dd { margin: 0; }
+
+/* Score spread in the simulator. Bars in range carry the accent. */
+.spread { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.spread li { display: grid; grid-template-columns: 26px 1fr 34px; align-items: center; gap: 10px; }
+.spread li > b { color: var(--ink-3); font-weight: 500; }
+.spread li > i { display: block; height: 14px; border-radius: 4px; background: var(--line-2); min-width: 2px; }
+.spread li.in > i { background: var(--orange); }
+.spread li.in > b { color: var(--ink); font-weight: 600; }
+.spread li > span { color: var(--ink-2); text-align: right; font-size: 12.5px; }
+
+/* Straight list of links into a zone. */
+.zone-list { list-style: none; margin: 0; padding: 0; }
+.zone-list li { border-bottom: 1px solid var(--line); }
+.zone-list li:last-child { border-bottom: 0; }
+.zone-list a { display: flex; justify-content: space-between; gap: 16px; padding: 11px 0; color: inherit; }
+.zone-list a:hover { text-decoration: none; color: var(--orange-deep); }
+
+/* The lead row. Five cells, and the last one is the single click. */
+.contact {
+  grid-template-columns: minmax(150px, 1fr) minmax(200px, 1.6fr) 84px 72px 128px;
+}
+.contact .who { color: var(--ink); }
+.contact .who:hover { text-decoration: none; color: var(--orange-deep); }
+.row-act { text-align: right; }
+.row-act .btn { width: 100%; justify-content: center; }
+
+/* The list and its panel, side by side once there is room. */
+.with-panel { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; align-items: start; }
+.panel-side { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; position: sticky; top: 16px; }
+.lead-panel { width: 100%; }
+.lead-panel h2 { margin-top: 16px; }
+.lead-panel h2:first-of-type { margin-top: 0; }
+
+.notice.warn { border-color: var(--orange-line); background: var(--orange-soft); color: var(--orange-darker); }
+
+.admin-door { display: flex; gap: 8px; flex-wrap: wrap; max-width: 420px; }
+.admin-door .input { flex: 1; min-width: 200px; }
+
+@media (max-width: 1040px) {
+  .with-panel { grid-template-columns: minmax(0, 1fr); }
+  .panel-side { position: static; }
+  .contact { grid-template-columns: minmax(140px, 1fr) 72px 120px; }
+  .contact .signal-cell, .contact .metric:first-of-type { display: none; }
+}
+
+@media (max-width: 700px) {
+  .pairs { grid-template-columns: 1fr; gap: 2px 0; }
+  .pairs dd { margin-bottom: 8px; }
+  .tiles { grid-template-columns: 1fr 1fr; }
+}

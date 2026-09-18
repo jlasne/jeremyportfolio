@@ -1,109 +1,241 @@
 import { defineSchema, defineTable } from 'convex/server'
 import { v } from 'convex/values'
 
-// brandmatch, in one file.
+// brandmatch, the whole model in one file.
 //
-// The profile row is shared. The lead is not. A creator is crawled once and
-// every campaign after that reads the same document, while being handed to a
-// brand claims it for 14 days. Postgres carried that claim in a join over the
-// discovery log; here it sits on the creator as two fields, so deciding
-// whether a handle is free is a read of the document rather than a scan.
+// Three ideas hold it together.
+//
+// 1. We sell delivered leads. Everything about what a lead costs to produce
+//    lives in the ops block at the bottom and is never joined into a client
+//    read. The client API projects rows field by field, so a cost can only
+//    reach a screen if someone types it in.
+//
+// 2. A profile becomes a lead by passing three gates: measured thresholds,
+//    binary knockouts, then a 0 to 2 score on seven criteria. The gates belong
+//    to the campaign and are versioned, so a lead delivered on Monday can be
+//    explained against the rules that were live on Monday.
+//
+// 3. The money is a journal. `quotaEntries` is append only and is the truth.
+//    `quotaPeriods` is a cache of it and can be rebuilt at any time.
 
-/** A dated brand signal: a paid post, a rate card, collab wording in the bio. */
-const signal = v.object({
-  type: v.string(),
+// ---------------------------------------------------------------------------
+// Shared shapes
+// ---------------------------------------------------------------------------
+
+/** Gate 1. Measured thresholds. Absent means the threshold is not applied. */
+const hardRules = v.object({
+  followersMin: v.optional(v.number()),
+  followersMax: v.optional(v.number()),
+  /** Last post must be newer than this many days. */
+  lastPostWithinDays: v.optional(v.number()),
+  /** Median views over the posts we actually read. Never a declared figure. */
+  medianViewsMin: v.optional(v.number()),
+  medianCommentsMin: v.optional(v.number()),
+  postsPerMonthMin: v.optional(v.number()),
+  countries: v.optional(v.array(v.string())),
+  languages: v.optional(v.array(v.string())),
+})
+
+/** Gate 2. One no ends it. */
+const knockout = v.object({
+  id: v.string(),
+  /** Asked as a yes or no question about the profile. */
+  question: v.string(),
+  /** What the client is protecting by asking. Shown under the question. */
+  why: v.optional(v.string()),
+})
+
+/** Gate 3. Seven of these, each worth 0, 1 or 2. */
+const criterion = v.object({
+  id: v.string(),
   label: v.string(),
-  strength: v.string(),
-  date: v.string(),
+  /** What a 2 looks like, in one line. Steers the model and the human editor. */
+  guide: v.optional(v.string()),
 })
 
 export default defineSchema({
-  brands: defineTable({
+  // -------------------------------------------------------------------------
+  // Account and money
+  // -------------------------------------------------------------------------
+
+  accounts: defineTable({
+    name: v.string(),
+    /** A brand runs its own campaigns. An agency runs campaigns for clients. */
+    kind: v.union(v.literal('brand'), v.literal('agency')),
     email: v.string(),
-    website: v.optional(v.string()),
     timezone: v.string(),
-    /** One credit, one lead, wherever the lead came from. */
-    credits: v.number(),
     apiKey: v.string(),
-    onboarded: v.boolean(),
+    role: v.union(v.literal('owner'), v.literal('client')),
     /**
-     * `trial` reads the shared pool and never starts a crawl, so three days
-     * of it costs the Apify bill nothing. `paid` unlocks the crawl.
+     * Fair use. How many profiles a day we are willing to analyse for this
+     * account. Internal only: it never leaves the ops API.
      */
-    plan: v.optional(v.union(v.literal('trial'), v.literal('paid'))),
-    trialEndsAt: v.optional(v.number()),
-    /** The owner sees the admin screen and turns the knobs. */
-    role: v.optional(v.union(v.literal('owner'), v.literal('brand'))),
+    analysisBudgetPerDay: v.number(),
+    createdAt: v.number(),
   })
     .index('by_key', ['apiKey'])
     .index('by_email', ['email']),
 
-  campaigns: defineTable({
-    brandId: v.id('brands'),
+  /** A person on an account. Structured now so roles cost nothing later. */
+  members: defineTable({
+    accountId: v.id('accounts'),
+    email: v.string(),
     name: v.string(),
-    website: v.optional(v.string()),
-    brief: v.object({
-      who: v.optional(v.string()),
-      summary: v.optional(v.string()),
-      answers: v.optional(v.array(v.object({ questionId: v.string(), value: v.union(v.string(), v.null()) }))),
-    }),
-    filters: v.any(),
-    leadsPerDay: v.number(),
-    runAt: v.string(),
-    active: v.boolean(),
-  }).index('by_brand', ['brandId']),
+    role: v.union(v.literal('owner'), v.literal('admin'), v.literal('member')),
+    createdAt: v.number(),
+  })
+    .index('by_account', ['accountId'])
+    .index('by_email', ['email']),
 
-  agents: defineTable({
-    campaignId: v.id('campaigns'),
-    brandId: v.id('brands'),
+  subscriptions: defineTable({
+    accountId: v.id('accounts'),
+    /** Qualified leads a day the plan covers: 15, 30 or 50. */
+    tier: v.number(),
+    priceCents: v.number(),
+    currency: v.string(),
+    status: v.union(v.literal('active'), v.literal('past_due'), v.literal('canceled')),
+    /** Current billing period, as timestamps, plus its calendar key. */
+    period: v.string(),
+    periodStart: v.number(),
+    periodEnd: v.number(),
+    startedAt: v.number(),
+  })
+    .index('by_account', ['accountId'])
+    .index('by_account_period', ['accountId', 'period']),
+
+  /**
+   * The journal. Append only, never edited. A month's entitlement lands as one
+   * positive line, every delivered lead as one negative line. Unused leads stay
+   * in the balance until the period closes, which is what carry over means.
+   */
+  quotaEntries: defineTable({
+    accountId: v.id('accounts'),
+    /** Calendar month, "2026-09". */
+    period: v.string(),
+    kind: v.union(
+      v.literal('entitlement'),
+      v.literal('delivery'),
+      v.literal('topup'),
+      v.literal('adjustment'),
+    ),
+    /** Positive adds leads to the balance. Negative spends them. */
+    delta: v.number(),
+    campaignId: v.optional(v.id('campaigns')),
+    leadId: v.optional(v.id('leads')),
+    topupId: v.optional(v.id('topups')),
+    note: v.optional(v.string()),
+    at: v.number(),
+  })
+    .index('by_account_period', ['accountId', 'period'])
+    .index('by_lead', ['leadId']),
+
+  /** The journal, summed. Rebuildable from quotaEntries at any time. */
+  quotaPeriods: defineTable({
+    accountId: v.id('accounts'),
+    period: v.string(),
+    /** tier x days in the period, plus any top up bought inside it. */
+    entitled: v.number(),
+    delivered: v.number(),
+    /** Left over from the previous period and still spendable. */
+    carried: v.number(),
+    remaining: v.number(),
+    computedAt: v.number(),
+  }).index('by_account_period', ['accountId', 'period']),
+
+  topups: defineTable({
+    accountId: v.id('accounts'),
+    leads: v.number(),
+    priceCents: v.number(),
+    currency: v.string(),
+    remaining: v.number(),
+    purchasedAt: v.number(),
+  }).index('by_account', ['accountId']),
+
+  // -------------------------------------------------------------------------
+  // Campaign and gates
+  // -------------------------------------------------------------------------
+
+  campaigns: defineTable({
+    accountId: v.id('accounts'),
     name: v.string(),
-    focus: v.string(),
-    keywords: v.array(v.string()),
-    hashtags: v.array(v.string()),
-    leadsPerDay: v.number(),
-    /** Written by the model as `proposed`. A human turns it to `active`. */
-    status: v.union(v.literal('proposed'), v.literal('active'), v.literal('paused')),
-    proposedWhy: v.optional(v.string()),
-    lastRunAt: v.optional(v.number()),
+    status: v.union(
+      v.literal('draft'),
+      v.literal('live'),
+      v.literal('paused'),
+      v.literal('archived'),
+    ),
+    /** Optional ceiling on the account quota this campaign may take per day. */
+    dailyCap: v.optional(v.number()),
+    /** What the client typed, kept word for word. */
+    brief: v.string(),
+    /** What the model read out of it. Edited by the client, never overwritten. */
+    extracted: v.object({
+      sells: v.optional(v.string()),
+      audience: v.optional(v.string()),
+      outcome: v.optional(v.string()),
+      countries: v.optional(v.array(v.string())),
+      languages: v.optional(v.array(v.string())),
+      extractedAt: v.optional(v.number()),
+    }),
+    /** The gate version leads are judged against right now. */
+    gateSetId: v.optional(v.id('gateSets')),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_account', ['accountId'])
+    .index('by_account_status', ['accountId', 'status']),
+
+  /**
+   * One version of a campaign's three gates. Never updated in place: an edit
+   * writes version n + 1 and the campaign points at it. Old versions stay so a
+   * past delivery still has its rules.
+   */
+  gateSets: defineTable({
+    campaignId: v.id('campaigns'),
+    accountId: v.id('accounts'),
+    version: v.number(),
+    origin: v.union(v.literal('generated'), v.literal('edited')),
+    hard: hardRules,
+    knockouts: v.array(knockout),
+    criteria: v.array(criterion),
+    /** Out of 14. A profile at or above this is qualified. */
+    passScore: v.number(),
+    createdAt: v.number(),
   })
     .index('by_campaign', ['campaignId'])
-    .index('by_status', ['status']),
+    .index('by_campaign_version', ['campaignId', 'version']),
 
-  // The shared pool -------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // Profile and evaluation
+  // -------------------------------------------------------------------------
+
+  /** Measured facts only. No judgement lives here. */
   creators: defineTable({
     platform: v.string(),
     handle: v.string(),
     name: v.string(),
     bio: v.string(),
     avatar: v.optional(v.string()),
+    email: v.optional(v.string()),
     followers: v.number(),
-    /** 0.034 means 3.4%. Computed from the posts we crawl, never an aggregator field. */
-    engagementRate: v.optional(v.number()),
-    medianReelViews: v.optional(v.number()),
+    /** Median over the posts in creatorPosts, not a declared number. */
+    medianViews: v.optional(v.number()),
+    medianComments: v.optional(v.number()),
     postsPerMonth: v.optional(v.number()),
     lastPostAt: v.optional(v.number()),
     country: v.optional(v.string()),
     language: v.optional(v.string()),
-    email: v.optional(v.string()),
-    externalLinks: v.array(v.string()),
-    linkType: v.optional(v.string()),
-    /** What the creator sells today, in plain words. Drives the Selling star. */
-    sells: v.string(),
-    signals: v.array(signal),
-    /** The newest signal date, so the pool can be walked freshest first. */
-    lastSignalAt: v.optional(v.number()),
+    links: v.array(v.string()),
+    /** When the numbers above were last read. Stale data is visible as stale. */
+    measuredAt: v.number(),
     firstSeenAt: v.number(),
-    lastCrawlAt: v.number(),
-    /** Who holds this lead, and until when. Absent means free to anyone. */
-    claimedBy: v.optional(v.id('brands')),
-    claimedUntil: v.optional(v.number()),
   })
     .index('by_handle', ['platform', 'handle'])
-    .index('by_signal', ['lastSignalAt'])
-    .index('by_claim', ['claimedUntil'])
-    .index('by_followers', ['followers']),
+    .index('by_followers', ['followers'])
+    .index('by_measured', ['measuredAt']),
 
-  posts: defineTable({
+  /** The posts the medians were computed from. The proof behind the reach. */
+  creatorPosts: defineTable({
     creatorId: v.id('creators'),
     kind: v.string(),
     url: v.string(),
@@ -112,102 +244,178 @@ export default defineSchema({
     views: v.number(),
     likes: v.number(),
     comments: v.number(),
-    postedAt: v.optional(v.number()),
+    postedAt: v.number(),
   })
     .index('by_creator', ['creatorId'])
     .index('by_creator_url', ['creatorId', 'url']),
 
-  /** Who was handed whom. One row per campaign and creator. */
-  discoveries: defineTable({
+  /**
+   * One profile's run through one campaign's gates. The audit trail: which
+   * gate it died at, what each knockout answered, what each criterion scored.
+   */
+  evaluations: defineTable({
     creatorId: v.id('creators'),
     campaignId: v.id('campaigns'),
-    agentId: v.optional(v.id('agents')),
-    brandId: v.id('brands'),
-    /** True when this crawl is what first put the creator in the pool. */
-    fresh: v.boolean(),
-    discoveredAt: v.number(),
+    accountId: v.id('accounts'),
+    gateSetId: v.id('gateSets'),
+    gateSetVersion: v.number(),
+    verdict: v.union(
+      v.literal('qualified'),
+      v.literal('hard_fail'),
+      v.literal('knockout_fail'),
+      v.literal('below_threshold'),
+    ),
+    /** The rule that ended it: a hard key, a knockout id, or absent. */
+    blockedBy: v.optional(v.string()),
+    hardChecks: v.array(
+      v.object({ key: v.string(), value: v.number(), pass: v.boolean() }),
+    ),
+    knockoutAnswers: v.array(
+      v.object({ id: v.string(), pass: v.boolean(), note: v.optional(v.string()) }),
+    ),
+    criteriaScores: v.array(
+      v.object({ id: v.string(), score: v.number(), note: v.optional(v.string()) }),
+    ),
+    score: v.number(),
+    /** One sentence, written at evaluation time. Shown on the lead row. */
+    reason: v.string(),
+    model: v.optional(v.string()),
+    evaluatedAt: v.number(),
   })
-    .index('by_brand', ['brandId'])
     .index('by_campaign', ['campaignId'])
     .index('by_campaign_creator', ['campaignId', 'creatorId'])
-    .index('by_brand_creator', ['brandId', 'creatorId']),
-
-  /** The per campaign read of a pooled creator, written by the model. */
-  scores: defineTable({
-    creatorId: v.id('creators'),
-    campaignId: v.id('campaigns'),
-    brandId: v.id('brands'),
-    niche: v.number(),
-    nicheWhy: v.string(),
-    stars: v.number(),
-    model: v.optional(v.string()),
-  })
-    .index('by_campaign', ['campaignId'])
-    .index('by_campaign_creator', ['campaignId', 'creatorId']),
+    .index('by_campaign_verdict', ['campaignId', 'verdict'])
+    .index('by_creator', ['creatorId']),
 
   /**
-   * Everything the brand types or ticks. One table rather than four, because
-   * every screen reads them together and a document store makes that cheap.
+   * Exclusivity. A profile delivered to one account is never evaluated for
+   * another. There is no expiry: the claim is permanent.
    */
-  marks: defineTable({
-    brandId: v.id('brands'),
+  creatorClaims: defineTable({
     creatorId: v.id('creators'),
-    kind: v.union(v.literal('note'), v.literal('tag'), v.literal('reject'), v.literal('done')),
-    value: v.optional(v.string()),
+    accountId: v.id('accounts'),
+    campaignId: v.id('campaigns'),
+    claimedAt: v.number(),
   })
-    .index('by_brand_creator', ['brandId', 'creatorId'])
-    .index('by_brand_kind', ['brandId', 'kind']),
+    .index('by_creator', ['creatorId'])
+    .index('by_account', ['accountId']),
 
-  runs: defineTable({
-    runId: v.optional(v.string()),
-    actor: v.string(),
-    phase: v.string(),
-    campaignId: v.optional(v.id('campaigns')),
-    agentId: v.optional(v.id('agents')),
-    status: v.string(),
-    input: v.optional(v.any()),
-    items: v.number(),
-    fresh: v.number(),
-    error: v.optional(v.string()),
-    finishedAt: v.optional(v.number()),
+  // -------------------------------------------------------------------------
+  // Commercial proof
+  // -------------------------------------------------------------------------
+
+  /** A qualified creator, delivered. This is the thing we bill. */
+  leads: defineTable({
+    accountId: v.id('accounts'),
+    campaignId: v.id('campaigns'),
+    creatorId: v.id('creators'),
+    evaluationId: v.id('evaluations'),
+    score: v.number(),
+    status: v.union(
+      v.literal('new'),
+      v.literal('contacted'),
+      v.literal('replied'),
+      v.literal('call'),
+      v.literal('signed'),
+      v.literal('lost'),
+    ),
+    /** Which member is on it. Absent means nobody has taken it. */
+    ownerId: v.optional(v.id('members')),
+    deliveredAt: v.number(),
+    statusAt: v.number(),
   })
-    .index('by_runId', ['runId'])
+    .index('by_account', ['accountId'])
+    .index('by_account_status', ['accountId', 'status'])
+    .index('by_campaign', ['campaignId'])
+    .index('by_campaign_delivered', ['campaignId', 'deliveredAt'])
+    .index('by_creator', ['creatorId']),
+
+  /**
+   * Every status change, append only. This is the raw material for the scoring
+   * feedback loop later: which gate reads actually turned into replies.
+   */
+  leadEvents: defineTable({
+    leadId: v.id('leads'),
+    accountId: v.id('accounts'),
+    campaignId: v.id('campaigns'),
+    from: v.optional(v.string()),
+    to: v.string(),
+    /** A member id, or "system" when we wrote it. */
+    by: v.string(),
+    note: v.optional(v.string()),
+    at: v.number(),
+  })
+    .index('by_lead', ['leadId'])
+    .index('by_account_at', ['accountId', 'at']),
+
+  /**
+   * Its own table rather than a field on the lead, because one lead can sign
+   * twice and because the amounts will feed a price benchmark later.
+   */
+  deals: defineTable({
+    leadId: v.id('leads'),
+    accountId: v.id('accounts'),
+    campaignId: v.id('campaigns'),
+    amountCents: v.number(),
+    currency: v.string(),
+    signedAt: v.number(),
+    note: v.optional(v.string()),
+  })
+    .index('by_lead', ['leadId'])
+    .index('by_account', ['accountId'])
+    .index('by_campaign', ['campaignId']),
+
+  // -------------------------------------------------------------------------
+  // Operations. Nothing below this line is ever readable by a client.
+  // -------------------------------------------------------------------------
+
+  crawlRuns: defineTable({
+    accountId: v.optional(v.id('accounts')),
+    campaignId: v.optional(v.id('campaigns')),
+    source: v.string(),
+    externalRunId: v.optional(v.string()),
+    phase: v.string(),
+    status: v.string(),
+    profilesFetched: v.number(),
+    profilesEvaluated: v.number(),
+    qualified: v.number(),
+    costCents: v.number(),
+    startedAt: v.number(),
+    finishedAt: v.optional(v.number()),
+    error: v.optional(v.string()),
+  })
+    .index('by_external', ['externalRunId'])
+    .index('by_campaign', ['campaignId'])
     .index('by_status', ['status']),
 
-  dailyStats: defineTable({
-    date: v.string(),
+  /** One simulation of a gate version against a sample. Drives the simulator. */
+  feasibilityRuns: defineTable({
     campaignId: v.id('campaigns'),
-    agentId: v.optional(v.id('agents')),
-    gathered: v.number(),
-    leads: v.number(),
-    qualified: v.number(),
+    accountId: v.id('accounts'),
+    gateSetId: v.id('gateSets'),
+    gateSetVersion: v.number(),
+    sampleSize: v.number(),
+    passedHard: v.number(),
+    passedKnockouts: v.number(),
+    /** How many profiles landed on each score from 0 to 14. */
+    scoreHistogram: v.array(v.object({ score: v.number(), count: v.number() })),
+    /** What this version would deliver in a day at the current crawl rate. */
+    estimatedPerDay: v.number(),
+    ranAt: v.number(),
   })
-    .index('by_campaign_date', ['campaignId', 'date'])
-    .index('by_date', ['date']),
+    .index('by_campaign', ['campaignId']),
 
-  ledger: defineTable({
-    brandId: v.id('brands'),
-    delta: v.number(),
-    reason: v.string(),
-    campaignId: v.optional(v.id('campaigns')),
-  }).index('by_brand', ['brandId']),
-
-  /**
-   * The knobs. One document, read by the crawl every night, edited from the
-   * Convex dashboard without a deploy. `settings.get` fills in the defaults.
-   */
-  settings: defineTable({
-    key: v.string(),
-    /** Share of a brand's daily quota that must be crawled fresh. 0.3 = 30%. */
-    freshFloor: v.optional(v.number()),
-    /** Leads a day the $99 plan covers. */
-    includedPerDay: v.optional(v.number()),
-    /** Days a lead stays exclusive to the brand it was handed to. */
-    claimDays: v.optional(v.number()),
-    /** Days and credits a trial gets on the pool. */
-    trialDays: v.optional(v.number()),
-    trialCredits: v.optional(v.number()),
-  }).index('by_key', ['key']),
+  /** Per day and per campaign. The only thing the dashboard chart reads. */
+  dailyDeliveries: defineTable({
+    accountId: v.id('accounts'),
+    campaignId: v.id('campaigns'),
+    /** "2026-09-18" */
+    date: v.string(),
+    delivered: v.number(),
+    target: v.number(),
+  })
+    .index('by_account_date', ['accountId', 'date'])
+    .index('by_campaign_date', ['campaignId', 'date']),
 
   waitlist: defineTable({
     email: v.string(),

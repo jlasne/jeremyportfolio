@@ -1,158 +1,172 @@
-import type { Campaign, Country, Creator, DailyStat, Filters, Language, Level, Note, Signal } from '../types'
-import { api, type ApiCampaign, type ApiDaily, type FeedRow } from '../lib/api'
-import { defaultFilters } from '../mock/filters'
+import type {
+  Account, Campaign, Creator, Deal, Evaluation, GateSet, Lead, LeadEvent,
+  Member, QuotaPeriod, Subscription, DailyDelivery, FeasibilityRun, LeadStatus,
+} from '../types'
+import { api } from '../lib/api'
 
-// Turns what the API sends into the shapes every screen already reads.
-// The star rule stays in data/score.ts: the API hands over niche, sells and
-// the dated signals, and the front end adds them up the same way it always has.
+// The one place epoch numbers become ISO strings.
 //
-// Convex speaks camelCase and hands dates over as milliseconds. The app's
-// types carry ISO strings, so every date crosses here and nowhere else.
+// Convex stores every date as milliseconds. The screens read ISO strings. This
+// adapter is the whole difference between the sample data and a real account,
+// which is what makes swapping one for the other a change to this file alone.
 
-const iso = (ms: number | undefined | null): string => (ms ? new Date(ms).toISOString() : new Date().toISOString())
+const iso = (ms: number | null | undefined): string => (ms ? new Date(ms).toISOString() : '')
 
-function level(n: number | null | undefined): Level {
-  return n === 1 ? 1 : n === 0.5 ? 0.5 : 0
-}
-
-function toCreator(r: FeedRow): Creator {
-  return {
-    id: r.id,
-    handle: r.handle,
-    name: r.name || r.handle,
-    bio: r.bio ?? '',
-    followers: r.followers ?? 0,
-    engagementRate: r.engagementRate ?? 0,
-    medianReelViews: r.medianReelViews ?? 0,
-    postsPerMonth: r.postsPerMonth ?? 0,
-    lastPostAt: iso(r.lastPostAt),
-    country: (r.country as Country) ?? 'US',
-    language: (r.language as Language) ?? 'en',
-    email: r.email ?? null,
-    signals: (r.signals ?? []) as Signal[],
-    niche: level(r.niche),
-    nicheWhy: r.nicheWhy || 'Not read against the brief yet',
-    sells: r.sells ?? '',
-    campaignId: r.campaignId,
-    agentId: r.agentId ?? '',
-    firstSeenAt: iso(r.discoveredAt),
-    lastCrawlAt: iso(r.discoveredAt),
-  }
-}
-
-/**
- * What the API assumes when a campaign leaves a filter unset. The sample data
- * ships stricter defaults for a fuller demo; live, the list must show what the
- * API returned, so the gaps are filled the way the API fills them.
- */
-const API_DEFAULTS: Filters = {
-  ...defaultFilters,
-  followersMin: 0,
-  followersMax: 2_000_000_000,
-  engagementMin: 0,
-  reelViewsMin: null,
-  emailInBio: 'any',
-  lastPostWithin: 90,
-  postsPerMonthMin: 0,
-  countries: [],
-  languages: [],
-}
-
-function toFilters(f: Record<string, unknown>): Filters {
-  return {
-    ...API_DEFAULTS,
-    ...(f as Partial<Filters>),
-    countries: (f.countries as Country[]) ?? [],
-    languages: (f.languages as Language[]) ?? [],
-  }
-}
-
-function toCampaign(c: ApiCampaign): Campaign {
-  return {
-    id: c._id,
-    name: c.name,
-    website: c.website ?? '',
-    brief: {
-      who: c.brief?.who ?? '',
-      answers: c.brief?.answers ?? [],
-      summary: c.brief?.summary ?? '',
-    },
-    filters: toFilters(c.filters ?? {}),
-    agents: (c.agents ?? []).map((a) => ({
-      id: a._id,
-      name: a.name,
-      focus: a.focus,
-      leadsPerDay: a.leadsPerDay,
-      active: a.status === 'active',
-      status: a.status ?? 'active',
-      hashtags: a.hashtags ?? [],
-      why: a.proposedWhy,
-    })),
-    leadsPerDay: c.leadsPerDay,
-    runAt: c.runAt,
-    active: c.active,
-    createdAt: iso(c._creationTime),
-  }
-}
-
-function toDaily(d: ApiDaily): DailyStat {
-  return {
-    date: d.date,
-    gathered: d.gathered,
-    campaignId: d.campaignId,
-    agentId: d.agentId ?? '',
-    leads: d.leads,
-    qualified: d.qualified,
-  }
-}
-
-export interface Remote {
-  creators: Creator[]
+export interface Loaded {
+  account: Account
+  members: Member[]
+  subscription: Subscription
+  quotaPeriod: QuotaPeriod
   campaigns: Campaign[]
-  daily: DailyStat[]
-  notes: Record<string, Note>
-  tags: Record<string, string[]>
-  rejections: { creatorId: string; date: string }[]
-  done: string[]
-  filters: Filters
+  gateSets: GateSet[]
+  creators: Creator[]
+  evaluations: Evaluation[]
+  leads: Lead[]
+  leadEvents: LeadEvent[]
+  deals: Deal[]
+  dailyDeliveries: DailyDelivery[]
+  feasibilityRuns: FeasibilityRun[]
 }
 
-/** Every page of the list, then campaigns and stats. Throws when the key is wrong. */
-async function allContacts(): Promise<FeedRow[]> {
-  const rows: FeedRow[] = []
-  const PAGE = 2000
-  for (let offset = 0; ; offset += PAGE) {
-    const { contacts, counts } = await api.contacts(null, PAGE, offset)
-    rows.push(...contacts)
-    if (contacts.length < PAGE || rows.length >= counts.total) break
-  }
-  return rows
-}
+/** Reads a whole account: the plan, the campaigns, their gates, the leads. */
+export async function fetchAll(): Promise<Loaded> {
+  const me = (await api.me()) as any
+  const accountId = me.account.id as string
 
-export async function fetchAll(): Promise<Remote> {
-  const [contacts, camps, stats] = await Promise.all([allContacts(), api.campaigns(), api.stats(60)])
-
-  const notes: Record<string, Note> = {}
-  const tags: Record<string, string[]> = {}
-  const rejections: { creatorId: string; date: string }[] = []
-  const done: string[] = []
-
-  for (const r of contacts) {
-    if (r.note) notes[r.id] = { creatorId: r.id, text: r.note, updatedAt: iso(r.discoveredAt) }
-    if (r.tags?.length) tags[r.id] = r.tags
-    if (r.rejected) rejections.push({ creatorId: r.id, date: iso(r.discoveredAt) })
-    if (r.done) done.push(r.id)
+  const account: Account = {
+    id: accountId,
+    name: me.account.name,
+    kind: me.account.kind,
+    email: me.account.email,
+    timezone: me.account.timezone,
+    createdAt: iso(me.account.createdAt),
   }
 
-  const campaigns = camps.campaigns.map(toCampaign)
+  const subscription: Subscription = {
+    id: `sub_${accountId}`,
+    accountId,
+    tier: me.subscription?.tier ?? 15,
+    priceCents: me.subscription?.priceCents ?? 0,
+    currency: me.subscription?.currency ?? 'EUR',
+    status: me.subscription?.status ?? 'active',
+    period: me.subscription?.period ?? '',
+    periodStart: iso(me.subscription?.periodStart),
+    periodEnd: iso(me.subscription?.periodEnd),
+  }
+
+  const { campaigns: raw } = (await api.campaigns()) as any
+  const campaigns: Campaign[] = []
+  const gateSets: GateSet[] = []
+  const feasibilityRuns: FeasibilityRun[] = []
+
+  for (const c of raw as any[]) {
+    campaigns.push({
+      id: c.id,
+      accountId,
+      name: c.name,
+      status: c.status,
+      dailyCap: c.dailyCap,
+      brief: c.brief,
+      extracted: {
+        sells: c.extracted?.sells ?? '',
+        audience: c.extracted?.audience ?? '',
+        outcome: c.extracted?.outcome ?? '',
+        countries: c.extracted?.countries ?? [],
+        languages: c.extracted?.languages ?? [],
+        extractedAt: iso(c.extracted?.extractedAt),
+      },
+      gateSetId: c.gateSetId ?? '',
+      createdAt: iso(c.createdAt),
+      updatedAt: iso(c.updatedAt),
+    })
+
+    const detail = (await api.campaign(c.id)) as any
+    for (const g of (detail.versions ?? []) as any[]) {
+      gateSets.push({
+        id: g.id,
+        campaignId: g.campaignId,
+        accountId,
+        version: g.version,
+        origin: g.origin,
+        hard: g.hard,
+        knockouts: g.knockouts,
+        criteria: g.criteria,
+        passScore: g.passScore,
+        createdAt: iso(g.createdAt),
+      })
+    }
+  }
+
+  const { leads: rows } = (await api.leads('?limit=500')) as any
+  const creators: Creator[] = []
+  const evaluations: Evaluation[] = []
+  const leads: Lead[] = []
+
+  for (const row of rows as any[]) {
+    const c = row.creator
+    creators.push({
+      id: c.id,
+      platform: 'instagram',
+      handle: c.handle,
+      name: c.name,
+      bio: c.bio,
+      avatar: c.avatar ?? undefined,
+      email: c.email,
+      followers: c.followers,
+      medianViews: c.medianViews,
+      medianComments: c.medianComments,
+      postsPerMonth: c.postsPerMonth,
+      lastPostAt: c.lastPostAt ? iso(c.lastPostAt) : null,
+      country: c.country,
+      language: c.language,
+      links: c.links ?? [],
+      measuredAt: iso(c.measuredAt),
+      firstSeenAt: iso(c.measuredAt),
+    })
+    const evaluationId = `evl_${row.id}`
+    evaluations.push({
+      id: evaluationId,
+      creatorId: c.id,
+      campaignId: row.campaignId,
+      accountId,
+      gateSetId: '',
+      gateSetVersion: row.evaluation.gateSetVersion,
+      verdict: row.evaluation.verdict,
+      blockedBy: row.evaluation.blockedBy,
+      hardChecks: row.evaluation.hardChecks,
+      knockoutAnswers: row.evaluation.knockoutAnswers,
+      criteriaScores: row.evaluation.criteriaScores,
+      score: row.evaluation.score,
+      reason: row.evaluation.reason,
+      evaluatedAt: iso(row.evaluation.evaluatedAt),
+    })
+    leads.push({
+      id: row.id,
+      accountId,
+      campaignId: row.campaignId,
+      creatorId: c.id,
+      evaluationId,
+      score: row.score,
+      status: row.status as LeadStatus,
+      ownerId: null,
+      deliveredAt: iso(row.deliveredAt),
+      statusAt: iso(row.statusAt),
+    })
+  }
+
   return {
-    creators: contacts.map(toCreator),
+    account,
+    members: (me.members ?? []).map((m: any) => ({ ...m, accountId })),
+    subscription,
+    quotaPeriod: { accountId, ...me.quota },
     campaigns,
-    daily: stats.daily.map(toDaily),
-    notes,
-    tags,
-    rejections,
-    done,
-    filters: campaigns[0]?.filters ?? API_DEFAULTS,
+    gateSets,
+    creators,
+    evaluations,
+    leads,
+    leadEvents: [],
+    deals: [],
+    dailyDeliveries: [],
+    feasibilityRuns,
   }
 }

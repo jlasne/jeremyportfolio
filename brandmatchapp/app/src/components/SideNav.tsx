@@ -1,69 +1,46 @@
 import { useEffect, useState } from 'react'
-import { getDashboard, getSettings } from '../data'
+import { deliveredToday, getQuota } from '../data'
 import { useStore } from '../data/hooks'
 import { api, isLive } from '../lib/api'
-import { nextBatchLabel } from '../lib/format'
 import type { Route } from '../lib/router'
 import { Logo } from './Logo'
 
-// The mark, four places to go, and when the next batch lands. Campaigns and
-// their agents live on their own page, so nothing nests here.
+// Four places to go, and the month's balance underneath. The three campaign
+// zones live inside a campaign, so nothing nests here.
 //
-// The rail collapses to its icons, and the choice is remembered in this
-// browser. On a narrow screen it starts collapsed and every label is a tooltip.
+// The rail collapses to its icons and the choice is remembered in this browser.
+// On a narrow screen it starts collapsed and every label is a tooltip.
 
 const ITEMS: { href: string; label: string; name: Route['name'] }[] = [
-  { href: '#/contacts', label: 'Contacts', name: 'contacts' },
-  { href: '#/campaign', label: 'Campaigns', name: 'campaign' },
-  { href: '#/connect', label: 'API', name: 'connect' },
-  { href: '#/settings', label: 'Settings', name: 'settings' },
+  { href: '#/app', label: 'Dashboard', name: 'dashboard' },
+  { href: '#/leads', label: 'Leads', name: 'leads' },
+  { href: '#/campaigns', label: 'Campaigns', name: 'campaigns' },
+  { href: '#/account', label: 'Account', name: 'account' },
 ]
 
 const SHUT = 'brandmatch.nav'
 
-/** One mark per place, drawn so the rail still reads when it is down to them. */
 function Glyph({ name }: { name: string }) {
   const common = {
     width: 16, height: 16, viewBox: '0 0 16 16', fill: 'none',
     stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round' as const,
     strokeLinejoin: 'round' as const, 'aria-hidden': true,
   }
-  if (name === 'contacts') {
-    return (
-      <svg {...common}>
-        <path d="M2 4h12M2 8h12M2 12h7" />
-      </svg>
-    )
+  if (name === 'dashboard') {
+    return <svg {...common}><path d="M2.5 10.5 6 6.5l3 2.5 4.5-5.5" /><path d="M2.5 13.5h11" /></svg>
   }
-  if (name === 'campaign') {
-    return (
-      <svg {...common}>
-        <circle cx="8" cy="8" r="5.5" /><circle cx="8" cy="8" r="1.5" />
-      </svg>
-    )
+  if (name === 'leads') {
+    return <svg {...common}><path d="M2 4h12M2 8h12M2 12h7" /></svg>
   }
-  if (name === 'connect') {
-    return (
-      <svg {...common}>
-        <path d="M6 3 2.5 8 6 13M10 3l3.5 5-3.5 5" />
-      </svg>
-    )
+  if (name === 'campaigns') {
+    return <svg {...common}><circle cx="8" cy="8" r="5.5" /><circle cx="8" cy="8" r="1.5" /></svg>
   }
-  if (name === 'settings') {
-    return (
-      <svg {...common}>
-        <path d="M2.5 5h11M2.5 11h11" /><circle cx="6" cy="5" r="1.6" /><circle cx="10.5" cy="11" r="1.6" />
-      </svg>
-    )
+  if (name === 'account') {
+    return <svg {...common}><path d="M2.5 5h11M2.5 11h11" /><circle cx="6" cy="5" r="1.6" /><circle cx="10.5" cy="11" r="1.6" /></svg>
   }
-  return (
-    <svg {...common}>
-      <path d="M2.5 12a5.5 5.5 0 1 1 11 0" /><path d="M8 12 11 7" />
-    </svg>
-  )
+  return <svg {...common}><path d="M2.5 12a5.5 5.5 0 1 1 11 0" /><path d="M8 12 11 7" /></svg>
 }
 
-/** Collapsed or open, remembered here. Narrow screens start collapsed. */
 function useCollapsed(): [boolean, (v: boolean) => void] {
   const [shut, setShut] = useState(() => {
     try {
@@ -93,9 +70,10 @@ function useOwner(): boolean {
 
 export function SideNav({ route }: { route: Route }) {
   useStore()
-  const d = getDashboard()
   const owner = useOwner()
   const [shut, setShut] = useCollapsed()
+  const today = deliveredToday()
+  const quota = getQuota()
   const items = owner ? [...ITEMS, { href: '#/admin', label: 'Admin', name: 'admin' as const }] : ITEMS
 
   useEffect(() => {
@@ -106,7 +84,7 @@ export function SideNav({ route }: { route: Route }) {
   return (
     <nav className={`sidenav${shut ? ' shut' : ''}`} aria-label="Main">
       <div className="sidenav-top">
-        <a className="brand" href="#/contacts" aria-label="brandmatch, back to contacts">
+        <a className="brand" href="#/app" aria-label="brandmatch, back to the dashboard">
           <Logo size={26} />
         </a>
         <button
@@ -122,8 +100,8 @@ export function SideNav({ route }: { route: Route }) {
       </div>
       <ul>
         {items.map((item) => {
-          const on = route.name === item.name
-          const count = item.name === 'contacts' && d.today ? d.today : null
+          const on = route.name === item.name || (item.name === 'campaigns' && route.name === 'campaign')
+          const count = item.name === 'leads' && today ? today : null
           return (
             <li key={item.href}>
               <a
@@ -141,7 +119,9 @@ export function SideNav({ route }: { route: Route }) {
         })}
       </ul>
       <p className="sidenav-foot">
-        <span className="nav-label">Next batch {nextBatchLabel(getSettings().timezone)}</span>
+        <span className="nav-label">
+          <b className="num">{quota.remaining}</b> leads left this month
+        </span>
       </p>
     </nav>
   )

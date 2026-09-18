@@ -1,16 +1,29 @@
 import { useEffect, useState } from 'react'
 
-// Hash routes. No library, no server config needed.
+// Hash routes. No library, no server config.
+//
+// Five product zones, each answering one question:
+//
+//   dashboard    how many today, and where is my pipeline
+//   leads        who do I contact now
+//   brief        who do I want to reach, and what do I sell
+//   gates        which criteria decide
+//   feasibility  does it hold my quota
+//
+// Two surfaces sit outside them: the account, and the internal admin.
+
+export type CampaignTab = 'brief' | 'gates' | 'feasibility'
 
 export type Route =
   | { name: 'home' }
-  | { name: 'onboarding'; campaignId: string | null; step: 'plan' | 'running' | null }
-  /** The scope is a campaign id or one agent id inside a campaign. */
-  | { name: 'contacts'; scopeId: string | null }
-  | { name: 'campaign'; campaignId: string | null }
-  | { name: 'connect' }
-  | { name: 'settings' }
+  | { name: 'dashboard' }
+  | { name: 'leads'; leadId: string | null }
+  | { name: 'campaigns' }
+  | { name: 'campaign'; campaignId: string; tab: CampaignTab }
+  | { name: 'account' }
   | { name: 'admin' }
+
+const TABS: CampaignTab[] = ['brief', 'gates', 'feasibility']
 
 export function parse(hash: string): Route {
   const path = hash.replace(/^#/, '').replace(/^\/+/, '')
@@ -19,22 +32,19 @@ export function parse(hash: string): Route {
   switch (head) {
     case '':
       return { name: 'home' }
-    case 'onboarding':
-      return {
-        name: 'onboarding',
-        campaignId: id,
-        step: third === 'plan' || third === 'running' ? third : null,
-      }
-    case 'contacts':
-      return { name: 'contacts', scopeId: id }
-    case 'campaign':
-    case 'campaigns':
+    case 'app':
+    case 'dashboard':
+      return { name: 'dashboard' }
     case 'leads':
-      return { name: 'campaign', campaignId: id }
-    case 'connect':
-      return { name: 'connect' }
+      return { name: 'leads', leadId: id }
+    case 'campaigns':
+      return { name: 'campaigns' }
+    case 'campaign':
+      if (!id) return { name: 'campaigns' }
+      return { name: 'campaign', campaignId: id, tab: TABS.includes(third as CampaignTab) ? (third as CampaignTab) : 'brief' }
+    case 'account':
     case 'settings':
-      return { name: 'settings' }
+      return { name: 'account' }
     case 'admin':
       return { name: 'admin' }
     default:

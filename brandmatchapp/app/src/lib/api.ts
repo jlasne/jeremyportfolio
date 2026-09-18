@@ -1,20 +1,17 @@
-// The one API, from the browser.
+// The API, from the browser. Two surfaces, and they are separate on purpose.
 //
-// The key lives in localStorage, never in the bundle. With a key the app reads
-// the real pool; without one it falls back to the sample data it shipped with,
-// so a stranger who types the URL sees the prototype and no real lead.
+//   api  — what a client account can read. Leads, gates, quota, deals.
+//   ops  — what only the owner can read. Cost, analysed volume, fair use.
+//
+// They are separate objects here and separate routers on the server, so a cost
+// figure has no path into a client screen. Rule one of the product: we sell
+// delivered leads and the production side of it is invisible.
 
-// On its own domain the app calls /api, which Vercel rewrites to the Convex
-// deployment: same origin, no redirect, and the backend address never ships in
-// the bundle. Anywhere else, a local preview included, it talks to production
-// directly. Either way this browser can be pointed elsewhere with setApi.
-const DIRECT = 'https://dashing-swan-386.eu-west-1.convex.site/api'
+const DIRECT = 'https://dashing-swan-386.eu-west-1.convex.site'
 
 function built(): string {
   try {
-    return window.location.hostname.endsWith('brandmatch.app')
-      ? `${window.location.origin}/api`
-      : DIRECT
+    return window.location.hostname.endsWith('brandmatch.app') ? window.location.origin : DIRECT
   } catch {
     return DIRECT
   }
@@ -23,7 +20,7 @@ function built(): string {
 const KEY = 'brandmatch.key'
 const BASE = 'brandmatch.api'
 
-function base(): string {
+function root(): string {
   try {
     return window.localStorage.getItem(BASE) || built()
   } catch {
@@ -31,16 +28,8 @@ function base(): string {
   }
 }
 
-export const API = base()
-
-/**
- * Where an AI connects. On the app's own domain the rewrite that carries the
- * API carries MCP too, at /api/mcp. Against a Convex deployment directly, MCP
- * sits at the site root.
- */
-export const MCP = API.endsWith('.convex.site/api')
-  ? API.replace(/\/api$/, '/mcp')
-  : `${API}/mcp`
+export const API = `${root()}/api`
+export const OPS = `${root()}/ops`
 
 /** Points this browser at another deployment, for a move or a staging one. */
 export function setApi(url: string): void {
@@ -73,9 +62,9 @@ export function isLive(): boolean {
   return Boolean(getKey())
 }
 
-async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
+async function call<T>(prefix: string, path: string, init: RequestInit = {}): Promise<T> {
   const key = getKey()
-  const res = await fetch(`${base()}${path}`, {
+  const res = await fetch(`${root()}${prefix}${path}`, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
@@ -88,147 +77,84 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
   return body as T
 }
 
+// ---------------------------------------------------------------------------
+// Client surface
+// ---------------------------------------------------------------------------
+
 export const api = {
-  me: () => call<{ id: string; email: string; credits: number; plan: string; role: 'owner' | 'brand'; availableToYou: number }>('/me'),
-  contacts: (campaign?: string | null, limit = 500, offset = 0) =>
-    call<{ contacts: FeedRow[]; counts: { total: number; today: number; qualified: number } }>(
-      `/contacts?limit=${limit}&offset=${offset}${campaign ? `&campaign=${campaign}` : ''}`,
-    ),
-  campaigns: () => call<{ campaigns: ApiCampaign[] }>('/campaigns'),
-  stats: (days = 30) => call<{ daily: ApiDaily[] }>(`/stats?days=${days}`),
-  creator: (id: string) => call<{ creator: FeedRow; posts: ApiPost[] }>(`/creators/${id}`),
-  act: (creatorId: string, action: string, value?: string) =>
-    call<{ ok: true }>('/actions', { method: 'POST', body: JSON.stringify({ creatorId, action, value }) }),
-  run: (campaignId: string) => call<{ started: number }>(`/campaigns/${campaignId}/run`, { method: 'POST' }),
+  /** The account, its plan and the month's balance. No volume, no cost. */
+  me: () => call<ClientMe>('/api', '/me'),
+  campaigns: () => call<{ campaigns: unknown[] }>('/api', '/campaigns'),
+  campaign: (id: string) => call<{ campaign: unknown; gates: unknown }>('/api', `/campaigns/${id}`),
+  /** Rewrites the brief and asks for a fresh gate proposal. */
+  draftGates: (id: string, brief: string) =>
+    call<{ gates: unknown }>('/api', `/campaigns/${id}/gates/draft`, { method: 'POST', body: JSON.stringify({ brief }) }),
+  /** An edit writes a new gate version. Nothing is updated in place. */
+  saveGates: (id: string, gates: unknown) =>
+    call<{ gates: unknown }>('/api', `/campaigns/${id}/gates`, { method: 'POST', body: JSON.stringify(gates) }),
+  feasibility: (id: string) => call<{ run: unknown }>('/api', `/campaigns/${id}/feasibility`, { method: 'POST' }),
+  leads: (query = '') => call<{ leads: unknown[] }>('/api', `/leads${query}`),
+  lead: (id: string) => call<{ lead: unknown }>('/api', `/leads/${id}`),
+  /** The one click. Status in, event appended server side. */
+  moveLead: (id: string, status: string, note?: string) =>
+    call<{ ok: true }>('/api', `/leads/${id}/status`, { method: 'POST', body: JSON.stringify({ status, note }) }),
+  recordDeal: (id: string, amountCents: number, note?: string) =>
+    call<{ ok: true }>('/api', `/leads/${id}/deal`, { method: 'POST', body: JSON.stringify({ amountCents, note }) }),
   waitlist: (email: string, website?: string) =>
-    call<{ ok: true }>('/waitlist', { method: 'POST', body: JSON.stringify({ email, website }) }),
-  // Campaigns and their agents. The model proposes, a human approves.
-  createCampaign: (body: { name?: string; website?: string; brief?: unknown; leadsPerDay?: number; seed?: number }) =>
-    call<{ campaign: ApiCampaign; seededFromPool: number }>('/campaigns', { method: 'POST', body: JSON.stringify(body) }),
-  patchCampaign: (id: string, patch: Record<string, unknown>) =>
-    call<{ campaign: ApiCampaign }>(`/campaigns/${id}`, { method: 'PATCH', body: JSON.stringify(patch) }),
-  propose: (id: string, website?: string) =>
-    call<{ agents?: ApiAgent[]; who?: string; summary?: string; readSite?: boolean; error?: string }>(
-      `/campaigns/${id}/propose`, { method: 'POST', body: JSON.stringify({ website }) },
-    ),
-  addAgent: (campaignId: string, body: Record<string, unknown>) =>
-    call<{ agent: ApiAgent }>(`/campaigns/${campaignId}/agents`, { method: 'POST', body: JSON.stringify(body) }),
-  setAgent: (agentId: string, on: boolean, body: Record<string, unknown> = {}) =>
-    call<{ agent: ApiAgent }>(`/agents/${agentId}/${on ? 'approve' : 'pause'}`, { method: 'POST', body: JSON.stringify(body) }),
-  removeAgent: (agentId: string) => call<{ ok: true }>(`/agents/${agentId}`, { method: 'DELETE' }),
-  removeCampaign: (id: string) => call<{ ok: true }>(`/campaigns/${id}`, { method: 'DELETE' }),
+    call<{ ok: true }>('/api', '/waitlist', { method: 'POST', body: JSON.stringify({ email, website }) }),
   /** A password in, the owner's key out. The one call that needs no key. */
   adminLogin: (password: string) =>
-    call<{ key: string; email: string }>('/admin-login', { method: 'POST', body: JSON.stringify({ password }) }),
-  admin: () => call<AdminOverview>('/admin'),
-  setSettings: (patch: Partial<AdminSettings>) =>
-    call<{ settings: AdminSettings }>('/admin/settings', { method: 'POST', body: JSON.stringify(patch) }),
+    call<{ key: string; email: string }>('/api', '/admin-login', { method: 'POST', body: JSON.stringify({ password }) }),
 }
 
-export interface AdminSettings {
-  freshFloor: number
-  includedPerDay: number
-  claimDays: number
-  trialDays: number
-  trialCredits: number
+/** Everything a client account is allowed to know about itself. */
+export interface ClientMe {
+  account: { id: string; name: string; kind: 'brand' | 'agency'; email: string; timezone: string }
+  role: 'owner' | 'client'
+  subscription: { tier: number; priceCents: number; currency: string; status: string; period: string }
+  quota: { entitled: number; delivered: number; carried: number; remaining: number }
 }
 
-export interface AdminOverview {
-  settings: AdminSettings
-  pool: { size: number; free: number; sustainablePerDay: number }
-  demand: { paidAccounts: number; leadsPerDay: number }
-  recommendation: { floor: number; ceiling: number; current: number; verdict: 'pool runs dry' | 'margin too thin' | 'in range' }
-  cost: { apifyPerDay: number; scoringPerDay: number; perMonth: number; revenuePerMonth: number; marginPct: number | null }
-  waitlist: {
-    total: number
-    recent: { email: string; website: string; source: string; at: number }[]
-  }
-  accounts: {
-    id: string; email: string; plan: 'trial' | 'paid'; role: 'owner' | 'brand'; credits: number
-    trialDaysLeft: number; quota: number; today: number; freshToday: number; poolToday: number; costPerDay: number
-  }[]
+// ---------------------------------------------------------------------------
+// Internal surface. Owner only, and never imported by a client screen.
+// ---------------------------------------------------------------------------
+
+export const ops = {
+  overview: () => call<OpsOverview>('/ops', '/overview'),
+  runs: (limit = 30) => call<{ runs: OpsRun[] }>('/ops', `/runs?limit=${limit}`),
+  setBudget: (accountId: string, analysisBudgetPerDay: number) =>
+    call<{ ok: true }>('/ops', '/budget', { method: 'POST', body: JSON.stringify({ accountId, analysisBudgetPerDay }) }),
 }
 
-// What the API sends back -------------------------------------------------
-// Convex shapes: camelCase, ids under _id where the row is a document, and
-// every date as milliseconds since the epoch.
-
-export interface FeedRow {
+export interface OpsRun {
   id: string
-  handle: string
-  name: string
-  bio: string
-  avatar?: string
-  followers: number
-  engagementRate?: number
-  medianReelViews?: number
-  postsPerMonth?: number
-  lastPostAt?: number
-  country?: string
-  language?: string
-  email?: string
-  externalLinks: string[]
-  sells: string
-  signals: { type: string; label: string; strength: 'strong' | 'soft'; date: string }[]
-  niche: number
-  nicheWhy: string
-  selling: number
-  signal: number
-  stars: number
-  campaignId: string
-  campaignName: string
-  agentId?: string
-  discoveredAt: number
-  fresh: boolean
-  note?: string
-  tags: string[]
-  rejected: boolean
-  done: boolean
-}
-
-export interface ApiAgent {
-  _id: string
-  campaignId: string
-  name: string
-  focus: string
-  keywords: string[]
-  hashtags: string[]
-  leadsPerDay: number
-  status: 'proposed' | 'active' | 'paused'
-  proposedWhy?: string
-  lastRunAt?: number
-}
-
-export interface ApiCampaign {
-  _id: string
-  _creationTime: number
-  name: string
-  website?: string
-  brief: { who?: string; summary?: string; answers?: { questionId: string; value: string | null }[] }
-  filters: Record<string, unknown>
-  leadsPerDay: number
-  runAt: string
-  active: boolean
-  agents: ApiAgent[]
-}
-
-export interface ApiDaily {
-  date: string
-  campaignId: string
-  agentId?: string
-  gathered: number
-  leads: number
+  campaignId: string | null
+  phase: string
+  status: string
+  profilesFetched: number
+  profilesEvaluated: number
   qualified: number
+  costCents: number
+  startedAt: number
+  finishedAt: number | null
 }
 
-export interface ApiPost {
-  _id: string
-  creatorId: string
-  kind: string
-  url: string
-  thumbnail?: string
-  views: number
-  likes: number
-  comments: number
-  postedAt?: number
+export interface OpsOverview {
+  accounts: {
+    id: string
+    name: string
+    tier: number
+    priceCents: number
+    deliveredThisPeriod: number
+    analysedToday: number
+    analysisBudgetPerDay: number
+    costCentsThisPeriod: number
+  }[]
+  totals: {
+    revenueCentsPerMonth: number
+    costCentsPerMonth: number
+    marginPct: number | null
+    profilesAnalysedToday: number
+    leadsDeliveredToday: number
+  }
 }

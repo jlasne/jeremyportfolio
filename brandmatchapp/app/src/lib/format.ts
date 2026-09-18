@@ -98,3 +98,12 @@ export function nextRunLabel(runAt: string, now = new Date()): string {
   const away = minutes >= 60 ? `${Math.floor(minutes / 60)}h` : `${minutes}m`
   return `${today ? 'today' : 'tomorrow'} at ${runAt}, in ${away}`
 }
+
+/** Cents to a readable amount. Deals are typed by the client, so keep it exact. */
+export function money(cents: number, currency = 'EUR'): string {
+  return new Intl.NumberFormat('en-GB', {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: 0,
+  }).format(cents / 100)
+}

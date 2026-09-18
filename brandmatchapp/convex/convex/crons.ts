@@ -1,20 +1,15 @@
 import { cronJobs } from 'convex/server'
 import { internal } from './_generated/api'
 
-// Every hour, hand the crawl whatever agent has not run in 20 hours.
+// Two jobs, in order.
 //
-// The hour is the granularity: the crawl itself decides who is due, so a
-// brand in Sydney and a brand in Paris both get their batch before their 7am
-// without a job per timezone. Most hours it spends nothing, because the pool
-// covers the quota before Apify is ever called.
+// The month opens once, so a new period has its entitlement line before
+// anything spends against it. Delivery then runs every morning and hands over
+// the best qualified profiles the account's balance allows.
 
 const crons = cronJobs()
 
-crons.hourly(
-  'fill every due agent',
-  { minuteUTC: 17 },
-  internal.crawl.run,
-  {},
-)
+crons.cron('open the month', '5 0 1 * *', internal.jobs.openPeriods, {})
+crons.cron('deliver the day', '0 6 * * *', internal.jobs.deliverAll, {})
 
 export default crons
