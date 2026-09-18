@@ -155,6 +155,9 @@ export async function fetchAll(): Promise<Loaded> {
       score: row.score,
       status: row.status as LeadStatus,
       ownerId: null,
+      saved: Boolean(row.saved),
+      note: row.note ?? '',
+      refreshedAt: row.refreshedAt ? iso(row.refreshedAt) : undefined,
       deliveredAt: iso(row.deliveredAt),
       statusAt: iso(row.statusAt),
     })

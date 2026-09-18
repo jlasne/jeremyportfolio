@@ -341,7 +341,16 @@ export default defineSchema({
     ),
     /** Which member is on it. Absent means nobody has taken it. */
     ownerId: v.optional(v.id('members')),
+    /** Kept across campaigns, so a good one is not lost in a long list. */
+    saved: v.optional(v.boolean()),
+    /** Whatever the client typed about them. Free text, theirs alone. */
+    note: v.optional(v.string()),
     deliveredAt: v.number(),
+    /**
+     * When we last re-measured this person. A re-measure refreshes the row and
+     * sends it back to the top. It never costs a second lead.
+     */
+    refreshedAt: v.optional(v.number()),
     statusAt: v.number(),
   })
     .index('by_account', ['accountId'])

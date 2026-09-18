@@ -118,6 +118,47 @@ export const move = internalMutation({
   },
 })
 
+/**
+ * Takes back the last status change. A list built for one click needs one click
+ * back out of it, because people click the wrong row.
+ *
+ * The delivery event is the lead existing at all, so it is never undone.
+ */
+export const undo = internalMutation({
+  args: { accountId: v.id('accounts'), leadId: v.id('leads') },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    const lead = await ctx.db.get(args.leadId)
+    if (!lead || lead.accountId !== args.accountId) return { error: 'No such lead' }
+    const events = await ctx.db.query('leadEvents').withIndex('by_lead', (q) => q.eq('leadId', args.leadId)).collect()
+    const last = events.sort((a, b) => a.at - b.at)[events.length - 1]
+    if (!last?.from) return { ok: true, status: lead.status }
+    await ctx.db.patch(args.leadId, { status: last.from as typeof lead.status, statusAt: last.at })
+    await ctx.db.delete(last._id)
+    return { ok: true, status: last.from }
+  },
+})
+
+/** Saved and notes are plain fields. They say nothing about the deal. */
+export const mark = internalMutation({
+  args: {
+    accountId: v.id('accounts'),
+    leadId: v.id('leads'),
+    saved: v.optional(v.boolean()),
+    note: v.optional(v.string()),
+  },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    const lead = await ctx.db.get(args.leadId)
+    if (!lead || lead.accountId !== args.accountId) return { error: 'No such lead' }
+    const patch: Record<string, unknown> = {}
+    if (args.saved !== undefined) patch.saved = args.saved
+    if (args.note !== undefined) patch.note = args.note.slice(0, 4_000)
+    await ctx.db.patch(args.leadId, patch)
+    return { ok: true }
+  },
+})
+
 /** A signed lead gets an amount. Its own row: one lead can sign twice. */
 export const addDeal = internalMutation({
   args: {
@@ -179,7 +220,11 @@ export const overview = internalQuery({
  * added upstream.
  */
 function shape(
-  lead: { _id: string; campaignId: string; score: number; status: string; deliveredAt: number; statusAt: number },
+  lead: {
+    _id: string; campaignId: string; score: number; status: string
+    saved?: boolean; note?: string; refreshedAt?: number
+    deliveredAt: number; statusAt: number
+  },
   creator: {
     _id: string; handle: string; name: string; bio: string; avatar?: string; email?: string
     followers: number; medianViews?: number; medianComments?: number; postsPerMonth?: number
@@ -195,6 +240,9 @@ function shape(
     campaignId: lead.campaignId,
     score: lead.score,
     status: lead.status,
+    saved: lead.saved ?? false,
+    note: lead.note ?? '',
+    refreshedAt: lead.refreshedAt ?? null,
     deliveredAt: lead.deliveredAt,
     statusAt: lead.statusAt,
     creator: {

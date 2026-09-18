@@ -145,6 +145,36 @@ export function moveLead(leadId: string, to: LeadStatus, by = 'mem_1'): void {
   })
 }
 
+/**
+ * Undoes the last status change on a lead. People click the wrong row, and a
+ * list built for one click needs one click back out of it.
+ */
+export function undoMove(leadId: string): void {
+  setState((s) => {
+    const events = s.leadEvents.filter((e) => e.leadId === leadId).sort((a, b) => a.at.localeCompare(b.at))
+    const last = events[events.length - 1]
+    // The delivery event is the lead existing at all. There is no undoing that.
+    if (!last || !last.from) return {}
+    return {
+      leads: s.leads.map((l) => (l.id === leadId ? { ...l, status: last.from!, statusAt: last.at } : l)),
+      leadEvents: s.leadEvents.filter((e) => e.id !== last.id),
+    }
+  })
+}
+
+/** Kept across campaigns. A plain flag: it says nothing about the deal. */
+export function toggleSaved(leadId: string): void {
+  setState((s) => ({
+    leads: s.leads.map((l) => (l.id === leadId ? { ...l, saved: !l.saved } : l)),
+  }))
+}
+
+export function setNote(leadId: string, note: string): void {
+  setState((s) => ({
+    leads: s.leads.map((l) => (l.id === leadId ? { ...l, note } : l)),
+  }))
+}
+
 /** A signed lead gets an amount. Kept separate: one lead can sign twice. */
 export function recordDeal(leadId: string, amountCents: number, note?: string): void {
   setState((s) => {

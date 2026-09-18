@@ -183,6 +183,25 @@ export const clientApi = httpAction(async (ctx, req) => {
         return json(out)
       }
 
+      // One click back out of the last change.
+      if (parts[2] === 'undo' && req.method === 'POST') {
+        const out = await ctx.runMutation(internal.leads.undo, { accountId: account._id, leadId })
+        if ('error' in out) return fail(String(out.error), 404)
+        return json(out)
+      }
+
+      if (parts[2] === 'mark' && req.method === 'POST') {
+        const { saved, note } = await req.json()
+        const out = await ctx.runMutation(internal.leads.mark, {
+          accountId: account._id,
+          leadId,
+          saved: typeof saved === 'boolean' ? saved : undefined,
+          note: typeof note === 'string' ? note : undefined,
+        })
+        if ('error' in out) return fail(String(out.error), 404)
+        return json(out)
+      }
+
       if (parts[2] === 'deal' && req.method === 'POST') {
         const { amountCents, currency, note } = await req.json()
         const out = await ctx.runMutation(internal.leads.addDeal, {

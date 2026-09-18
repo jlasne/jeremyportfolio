@@ -283,7 +283,16 @@ export interface Lead {
   score: number
   status: LeadStatus
   ownerId: string | null
+  /** Kept across campaigns, so a good one is not lost in a long list. */
+  saved?: boolean
+  /** Whatever the client typed about them. Free text, theirs alone. */
+  note?: string
   deliveredAt: string
+  /**
+   * When we last re-measured this person. A re-measure refreshes the row and
+   * sends it back to the top. It never costs a second lead.
+   */
+  refreshedAt?: string
   statusAt: string
 }
 

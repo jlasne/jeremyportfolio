@@ -107,6 +107,11 @@ export const api = {
   /** The one click. Status in, event appended server side. */
   moveLead: (id: string, status: string, note?: string) =>
     call<{ ok: true }>('/api', `/leads/${id}/status`, { method: 'POST', body: JSON.stringify({ status, note }) }),
+  /** One click back out of the last change. */
+  undoLead: (id: string) => call<{ ok: true }>('/api', `/leads/${id}/undo`, { method: 'POST' }),
+  /** Saved and notes. Plain fields, nothing to do with the deal. */
+  markLead: (id: string, patch: { saved?: boolean; note?: string }) =>
+    call<{ ok: true }>('/api', `/leads/${id}/mark`, { method: 'POST', body: JSON.stringify(patch) }),
   recordDeal: (id: string, amountCents: number, note?: string) =>
     call<{ ok: true }>('/api', `/leads/${id}/deal`, { method: 'POST', body: JSON.stringify({ amountCents, note }) }),
   waitlist: (email: string, website?: string) =>

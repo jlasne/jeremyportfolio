@@ -35,6 +35,15 @@ const REASONS: Record<string, string[]> = {
     'Client numbers posted with dates, and the method is repeated across the last thirty posts.',
     'Teaches a four phase system, face on camera, answers every comment herself.',
     'Programme sold through a PDF today, which is exactly what an app replaces.',
+    'Runs a waiting list for the next cohort and says so in every caption.',
+    'Answers technique questions in the comments, one by one, on every post.',
+    'Posts the same eight week structure for every client, with the numbers.',
+    'Sells one on one coaching at a public rate and turns people away.',
+    'Built a following on rehab work, no app anywhere, spreadsheet in the bio.',
+    'Three launches this year, each one sold out, all run from a link hub.',
+    'Face on camera in every clip, first person, the audience knows her name.',
+    'Reach holds above the follower count across the last twelve posts.',
+    'Named method, weekly check ins, and a price people ask about daily.',
   ],
   cmp_finance: [
     'Runs a paid community with a monthly fee, education only, no regulated advice anywhere.',
@@ -42,6 +51,15 @@ const REASONS: Record<string, string[]> = {
     'Sells through a third party course tool today and the audience asks for more.',
     'Nine years as an analyst, teaches the research process, reach above the follower count.',
     'Paid cohort at a public price, people ask in every thread where to join.',
+    'Publishes the same research checklist every Sunday, and sells the long version.',
+    'Members only chat, monthly fee in the bio, and a waiting list twice a year.',
+    'Explains one report a week, in full, and never gives a recommendation.',
+    'Sells a spreadsheet library today, which is a platform waiting to happen.',
+    'Audience in the US and UK, asking about tax and pricing in the comments.',
+    'Two years of weekly posts, no gaps, and the reach is climbing.',
+    'Teaches the framework by name, repeats it, and sells the workbook.',
+    'Runs a live cohort from a booking link, no platform of their own.',
+    'Comments are real questions, answered one by one, by the same person.',
   ],
 }
 
@@ -174,6 +192,25 @@ passed.forEach((row, rank) => {
       note: row.campaignId === 'cmp_fitness' ? 'App build, three month delivery' : 'Platform, twelve month contract',
     })
   }
+})
+
+// A few leads the client has touched beyond a status: saved for later, noted,
+// or re-measured since they arrived. Enough for the list to look lived in.
+
+const NOTES = [
+  'Replied on the second message. Wants a call after the launch.',
+  'Big audience but the offer is thin. Worth a soft pitch.',
+  'Asked for pricing in the DMs. Send the deck.',
+  'Already using a competitor. Follow up in the spring.',
+  'Warm intro through Sacha. Do not cold message.',
+]
+
+leads.forEach((lead, i) => {
+  if (i % 9 === 0) lead.saved = true
+  if (i % 17 === 0) lead.note = NOTES[(i / 17) % NOTES.length | 0]
+  // A profile we looked at again since it was handed over. The row refreshes
+  // and goes back to the top. It never costs a second lead.
+  if (i % 53 === 7) lead.refreshedAt = daysAgo(i % 3, 5)
 })
 
 // ---------------------------------------------------------------------------

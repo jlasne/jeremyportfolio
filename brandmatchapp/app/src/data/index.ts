@@ -99,32 +99,70 @@ function allRows(): LeadRow[] {
   return rows
 }
 
+export type LeadSort = 'fit' | 'newest' | 'status'
+
 export interface LeadQuery {
   campaignId?: string | null
   status?: LeadStatus | null
   search?: string
+  /** Only people this big or bigger. */
+  followersMin?: number | null
+  /** Only people who scored this or better. */
+  scoreMin?: number | null
+  savedOnly?: boolean
+  sort?: LeadSort
 }
 
 /**
- * The daily list. Untouched leads first, then by score, because the question
- * the screen answers is "who do I contact now".
+ * The daily list.
+ *
+ * Best fit first, but people nobody has touched sit above people already
+ * worked, because the question the screen answers is "who do I contact now".
+ * A signed lead at 14 out of 14 at the top of the list every morning is noise.
  */
 export function listLeads(query: LeadQuery = {}): LeadRow[] {
   const term = query.search?.trim().toLowerCase() ?? ''
+  const sort = query.sort ?? 'fit'
   return allRows()
     .filter((r) => (query.campaignId ? r.lead.campaignId === query.campaignId : true))
     .filter((r) => (query.status ? r.lead.status === query.status : true))
+    .filter((r) => (query.savedOnly ? Boolean(r.lead.saved) : true))
+    .filter((r) => (query.followersMin ? r.creator.followers >= query.followersMin : true))
+    .filter((r) => (query.scoreMin ? r.lead.score >= query.scoreMin : true))
     .filter((r) =>
       term
         ? r.creator.handle.toLowerCase().includes(term) || r.creator.name.toLowerCase().includes(term)
         : true,
     )
     .sort((a, b) => {
+      // A re-measured person goes back to the top of any order, because the
+      // numbers on their row just changed.
+      const fresh = freshness(b) - freshness(a)
+      if (fresh !== 0) return fresh
+      if (sort === 'newest') return b.lead.deliveredAt.localeCompare(a.lead.deliveredAt)
+      if (sort === 'status') {
+        const step = rank(a.lead.status) - rank(b.lead.status)
+        if (step !== 0) return step
+        return b.lead.score - a.lead.score
+      }
       const untouched = Number(a.lead.status !== 'new') - Number(b.lead.status !== 'new')
       if (untouched !== 0) return untouched
       if (b.lead.score !== a.lead.score) return b.lead.score - a.lead.score
       return b.lead.deliveredAt.localeCompare(a.lead.deliveredAt)
     })
+}
+
+function freshness(row: LeadRow): number {
+  return row.lead.refreshedAt ? new Date(row.lead.refreshedAt).getTime() : 0
+}
+
+/** How many of today's leads have landed, against what the campaign may take. */
+export function todayCount(campaignId?: string | null): { delivered: number; target: number } {
+  const campaign = campaignId ? getCampaign(campaignId) : null
+  return {
+    delivered: deliveredToday(campaignId),
+    target: campaign?.dailyCap ?? getSubscription().tier,
+  }
 }
 
 export function getLeadRow(leadId: string): LeadRow | null {
