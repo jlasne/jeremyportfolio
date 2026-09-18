@@ -14,7 +14,7 @@ export function Campaigns() {
         <span className="spacer" />
         <a className="btn primary" href="#/campaign/new">New campaign</a>
       </div>
-      <p className="subhead">One brief, one set of gates, one daily cap. The quota is shared across them.</p>
+      <p className="subhead">Each campaign has its own brief, its own rules and its own daily limit. They share your monthly allowance.</p>
       <div className="list">
         {campaigns.map((c) => {
           const gates = getGateSet(c.id)
@@ -27,11 +27,11 @@ export function Campaigns() {
                 <span className="handle">{c.brief.audience}</span>
               </span>
               <span className="state">
-                Gate version {gates?.version ?? 1}, pass at {gates?.passScore ?? 0} of 14
+                Rules version {gates?.version ?? 1}, pass mark {gates?.passScore ?? 0} of 14
               </span>
               <span className="metric">
                 <b className="num">{deliveredToday(c.id)}</b>
-                <small>today, {run ? `${run.estimatedPerDay} a day possible` : 'not simulated'}</small>
+                <small>today, {run ? `up to ${run.estimatedPerDay} a day` : 'not tested yet'}</small>
               </span>
             </a>
           )

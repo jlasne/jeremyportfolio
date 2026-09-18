@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { getGateSet, getLeadEvents, getLeadRow, listLeads, type LeadRow } from '../data'
 import { useStore } from '../data/hooks'
-import { ruleLabel } from '../data/gates'
+import { foundLabel } from '../data/gates'
 import { moveLead } from '../data/store'
 import { nextLabel, nextStatus, STATUSES, STATUS_LABEL } from '../data/status'
 import { compact, money, relative } from '../lib/format'
@@ -34,7 +34,7 @@ function Row({ row, open }: { row: LeadRow; open: boolean }) {
       </span>
       <span className="metric">
         <b className="num">{lead.score}/14</b>
-        <small>score</small>
+        <small>fit score</small>
       </span>
       <span className="row-act">
         {step && next ? (
@@ -61,8 +61,8 @@ function Panel({ row }: { row: LeadRow }) {
       <p className="muted">{creator.bio}</p>
       <ul className="facts">
         <li className="yes"><b>{compact(creator.followers)}</b> followers</li>
-        <li className="yes"><b>{compact(creator.medianViews ?? 0)}</b> median views, measured on 12 posts</li>
-        <li className="yes"><b>{creator.medianComments ?? 0}</b> median comments</li>
+        <li className="yes"><b>{compact(creator.medianViews ?? 0)}</b> views on a typical post, from their last 12</li>
+        <li className="yes"><b>{creator.medianComments ?? 0}</b> comments on a typical post</li>
         <li className="yes"><b>{creator.postsPerMonth ?? 0}</b> posts a month</li>
         <li className={creator.lastPostAt ? 'yes' : 'no'}>
           Last post {creator.lastPostAt ? relative(creator.lastPostAt) : 'unknown'}
@@ -70,7 +70,7 @@ function Panel({ row }: { row: LeadRow }) {
         <li className={creator.email ? 'yes' : 'no'}>{creator.email ?? 'No email on the profile'}</li>
       </ul>
 
-      <h2>Why it passed</h2>
+      <h2>Why they reached you</h2>
       <p>{evaluation.reason}</p>
       <ul className="facts">
         {evaluation.criteriaScores.map((c) => {
@@ -83,14 +83,14 @@ function Panel({ row }: { row: LeadRow }) {
         })}
       </ul>
       <p className="hint">
-        Judged against gate version {evaluation.gateSetVersion}, the rules live when it was delivered.
+        Checked against your rules, version {evaluation.gateSetVersion}, the ones in use the day this lead arrived.
       </p>
 
-      <h2>What was measured</h2>
+      <h2>The numbers we found</h2>
       <ul className="facts">
         {evaluation.hardChecks.map((c) => (
           <li key={c.key} className={c.pass ? 'yes' : 'no'}>
-            <b>{ruleLabel(c.key)}</b> {c.value}
+            <b>{foundLabel(c.key)}</b> {c.value}
           </li>
         ))}
       </ul>
@@ -152,7 +152,7 @@ export function Leads({ leadId }: { leadId: string | null }) {
           {rows.length === 0 && (
             <div className="empty">
               <h2>Nothing here yet</h2>
-              <p>The next batch lands tomorrow morning.</p>
+              <p>Your next leads land tomorrow morning.</p>
             </div>
           )}
         </div>

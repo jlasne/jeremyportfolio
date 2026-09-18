@@ -98,7 +98,7 @@ function BriefStep({ onDone }: { onDone: (brief: CampaignBrief) => void }) {
 
       <div className={`ask-foot${second ? ' in' : ' out'}`}>
         <button type="submit" className="btn primary" disabled={!ready}>
-          Build my gates
+          Write my rules
         </button>
         <span className="hint">You can change every rule after.</span>
       </div>
@@ -147,9 +147,9 @@ function AskStep({
 
 const STEPS = [
   'Reading your brief',
-  'Setting the hard filters',
-  'Writing the knockouts',
-  'Choosing the score',
+  'Setting the size and activity',
+  'Writing your deal breakers',
+  'Choosing the fit score',
 ]
 
 function BuildingStep({ onDone }: { onDone: () => void }) {
@@ -239,7 +239,7 @@ function ProposalStep({
       )}
 
       <div className="card gate-card">
-        <h2>Gate 1, hard filters</h2>
+        <h2>1. Size and activity</h2>
         <p className="gate-lede">{proposal.summaries.gate1}</p>
         <ul className="rules">
           {HARD_ORDER.map((key) => (
@@ -258,7 +258,7 @@ function ProposalStep({
       </div>
 
       <div className="card gate-card">
-        <h2>Gate 2, knockouts</h2>
+        <h2>2. Deal breakers</h2>
         <p className="gate-lede">{proposal.summaries.gate2}</p>
         <ul className="rules stacked">
           {proposal.knockouts.map((k) => (
@@ -271,7 +271,7 @@ function ProposalStep({
       </div>
 
       <div className="card gate-card">
-        <h2>Gate 3, score</h2>
+        <h2>3. Fit score</h2>
         <p className="gate-lede">{proposal.summaries.gate3}</p>
         <ul className="rules stacked">
           {proposal.criteria.map((c) => (
@@ -282,7 +282,7 @@ function ProposalStep({
           ))}
         </ul>
         <div className="from-lib">
-          <span className="faint">Built from: <b>{library.name}</b></span>
+          <span className="faint">Starting point: <b>{library.name}</b></span>
           <button type="button" className="btn small quiet" onClick={() => setSwitching(!switching)}>
             {switching ? 'Keep this one' : 'Wrong one?'}
           </button>
@@ -309,9 +309,9 @@ function ProposalStep({
       </div>
 
       <div className="page-head">
-        <span className="hint">Nothing is delivered before you test these.</span>
+        <span className="hint">Nothing reaches you before you have tested these.</span>
         <span className="spacer" />
-        <button type="button" className="btn" onClick={() => create(true)}>Adjust the rules</button>
+        <button type="button" className="btn" onClick={() => create(true)}>Change something</button>
         <button type="button" className="btn primary" onClick={() => create(false)}>Looks right, create it</button>
       </div>
     </>

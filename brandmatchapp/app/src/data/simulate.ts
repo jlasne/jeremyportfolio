@@ -189,11 +189,11 @@ export function levers(gates: GateSet): Lever[] {
     const gain = (base.funnel.qualified + admitted) / from
     candidates.push({
       id: 'passScore',
-      label: `Qualifying score, ${gates.passScore} of ${gates.criteria.length * 2}`,
+      label: `Pass mark, ${gates.passScore} of ${gates.criteria.length * 2}`,
       action: `Lowering it to ${next} ${phrase(gain)}.`,
       gain,
       next: { hard: gates.hard, passScore: next },
-      change: `Qualifying score: ${gates.passScore} to ${next}`,
+      change: `Pass mark: ${gates.passScore} to ${next}`,
     })
   }
 
@@ -213,9 +213,9 @@ function verb(key: DialKey): string {
 
 /** Estimates, said as estimates. Never a guarantee. */
 function phrase(gain: number): string {
-  if (gain >= 2.8) return 'roughly triples your volume'
-  if (gain >= 1.8) return 'roughly doubles your volume'
-  return `adds about ${Math.max(10, Math.round(((gain - 1) * 100) / 10) * 10)}% more`
+  if (gain >= 2.8) return 'gets you roughly three times as many'
+  if (gain >= 1.8) return 'gets you roughly twice as many'
+  return `gets you about ${Math.max(10, Math.round(((gain - 1) * 100) / 10) * 10)}% more`
 }
 
 // ---------------------------------------------------------------------------

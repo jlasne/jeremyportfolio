@@ -205,10 +205,10 @@ export function getFeasibility(campaignId: string) {
 export const VERDICTS: Verdict[] = ['qualified', 'below_threshold', 'knockout_fail', 'hard_fail']
 
 export const VERDICT_LABEL: Record<Verdict, string> = {
-  qualified: 'Qualified',
-  below_threshold: 'Below the score',
-  knockout_fail: 'Stopped at a knockout',
-  hard_fail: 'Stopped at a hard filter',
+  qualified: 'Became a lead',
+  below_threshold: 'Under your pass mark',
+  knockout_fail: 'Failed a deal breaker',
+  hard_fail: 'Too small or too quiet',
 }
 
 /** Where profiles died, per campaign. The simulator and the gates editor read it. */

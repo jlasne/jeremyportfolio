@@ -3,9 +3,9 @@ import { useStore } from '../data/hooks'
 import { STATUS_LABEL } from '../data/status'
 import { money } from '../lib/format'
 
-// Zone 1. It answers one question: how many landed today, and where is the
-// pipeline. Nothing about what a lead cost to produce appears here, because
-// nothing on this page can reach it.
+// Zone 1. It answers one question: how many landed today, and where they are.
+// Nothing about what a lead cost to produce appears here, because nothing on
+// this page can reach it.
 
 function Bars() {
   const rows = getDelivery()
@@ -41,7 +41,7 @@ export function Dashboard() {
       <div className="tiles">
         <div className="tile">
           <b className="num">{today}</b>
-          <span>delivered today</span>
+          <span>leads today</span>
         </div>
         <div className="tile">
           <b className="num">{quota.remaining}</b>
@@ -49,25 +49,25 @@ export function Dashboard() {
         </div>
         <div className="tile">
           <b className="num">{funnel.find((f) => f.status === 'replied')?.count ?? 0}</b>
-          <span>replied so far</span>
+          <span>have replied</span>
         </div>
         <div className="tile">
           <b className="num">{money(signed.amountCents)}</b>
-          <span>signed, {signed.count} deals</span>
+          <span>won, from {signed.count} deals</span>
         </div>
       </div>
 
       <div className="card">
-        <h2>Delivered, day by day</h2>
+        <h2>Leads a day, this month</h2>
         <Bars />
         <p className="hint">
-          {quota.delivered} of {quota.entitled} delivered this month. Unused leads stay in the balance until the month
+          {quota.delivered} of your {quota.entitled} used this month. Whatever you do not use stays until the month
           ends.
         </p>
       </div>
 
       <div className="card">
-        <h2>Pipeline</h2>
+        <h2>Where your leads are</h2>
         <ul className="funnel">
           {funnel.map((step) => (
             <li key={step.status}>
@@ -90,7 +90,7 @@ export function Dashboard() {
               <a href={`#/campaign/${c.id}/brief`}>
                 <b>{c.name}</b>
                 <span className="muted">
-                  {deliveredToday(c.id)} today, cap {c.dailyCap ?? 'none'} a day
+                  {deliveredToday(c.id)} today, up to {c.dailyCap ?? 'any number'} a day
                 </span>
               </a>
             </li>

@@ -10,12 +10,15 @@ import type { GateTemplate } from './templates'
 //   fixed     a dial's own floor and ceiling. Followers under 5,000 are too
 //             noisy to trust. A last post older than 90 days is not an active
 //             account by anyone's definition.
-//   coupled   a dial bounded by another dial. Median views only mean something
-//             next to the follower floor, so they are held between 5% and 300%
-//             of it. Comments are held under 2% of the views floor.
+//   coupled   a dial bounded by another dial. Views only mean something next to
+//             the follower minimum, so they are held between 5% and 300% of it.
+//             Comments are held under 2% of the views minimum.
 //
-// The coupled ones matter more than the fixed ones. Median views of 500,000 is
-// not absurd on its own. It is absurd next to a follower floor of 15,000.
+// The coupled ones matter more than the fixed ones. 500,000 views is not absurd
+// on its own. It is absurd next to a follower minimum of 15,000.
+//
+// Every label here is read by a client, so none of it says median, floor,
+// ceiling or threshold. A median is "a typical post". A floor is "at least".
 
 export type DialKey =
   | 'followersMin' | 'followersMax' | 'lastPostWithinDays'
@@ -39,59 +42,59 @@ const viewsOf = (hard: HardRules) => hard.medianViewsMin ?? 0
 export const DIALS: Dial[] = [
   {
     key: 'followersMin',
-    label: 'Followers, floor',
+    label: 'Followers, from',
     scale: 'log',
     range: () => ({ min: 5_000, max: 500_000 }),
     format: compact,
-    limit: 'Under 5,000 the numbers are too noisy to trust.',
+    limit: 'Below 5,000 followers the numbers swing too much to trust.',
   },
   {
     key: 'followersMax',
-    label: 'Followers, ceiling',
+    label: 'Followers, up to',
     scale: 'log',
-    // Always at least three times the floor, or the band holds nobody.
+    // Always at least three times the minimum, or the band holds nobody.
     range: (h) => ({ min: Math.max(25_000, floorOf(h) * 3), max: 5_000_000 }),
-    format: (v) => (v >= 5_000_000 ? 'no ceiling' : compact(v)),
-    limit: 'Above 5M nobody answers a message.',
+    format: (v) => (v >= 5_000_000 ? 'no limit' : compact(v)),
+    limit: 'Above 5M people almost never answer a message.',
   },
   {
     key: 'lastPostWithinDays',
-    label: 'Last post, no older than',
+    label: 'Posted in the last',
     scale: 'linear',
     range: () => ({ min: 3, max: 90 }),
     format: (v) => `${v} days`,
-    limit: 'Under 3 days you filter on luck. Past 90 the account is dead.',
+    limit: 'Under 3 days you are filtering on luck. Past 90 days the account is asleep.',
   },
   {
     key: 'medianViewsMin',
-    label: 'Median views, floor',
+    label: 'Views on a typical post, at least',
     scale: 'log',
-    // 5% to 300% of the follower floor. Below, the filter says nothing. Above,
-    // you are asking for a permanently viral account.
+    // 5% to 300% of the follower minimum. Below, the filter says nothing.
+    // Above, you are asking for a permanently viral account.
     range: (h) => ({
       min: Math.max(500, Math.round(floorOf(h) * 0.05)),
       max: Math.min(2_000_000, Math.round(floorOf(h) * 3)),
     }),
     format: compact,
-    limit: 'Held between 5% and 300% of your follower floor.',
+    limit: 'Tied to your follower minimum, between 5% and 300% of it.',
   },
   {
     key: 'postsPerMonthMin',
-    label: 'Posts a month, floor',
+    label: 'Posts a month, at least',
     scale: 'linear',
     range: () => ({ min: 2, max: 30 }),
     format: (v) => String(v),
-    limit: 'Under 2 is not a cadence. Over 30 excludes anyone who batches.',
+    limit: 'Under 2 a month is not really posting. Over 30 rules out anyone who posts in bursts.',
   },
   {
     key: 'medianCommentsMin',
-    label: 'Median comments, floor',
+    label: 'Comments on a typical post, at least',
     scale: 'linear',
     // The cheapest signal to fake and the most variable by niche, so it can be
-    // switched off and it can never grow past 2% of the views floor.
+    // switched off and it can never grow past 2% of the views minimum.
     range: (h) => ({ min: 0, max: Math.max(10, Math.min(2_000, Math.round(viewsOf(h) * 0.02))) }),
-    format: (v) => (v <= 0 ? 'not applied' : String(v)),
-    limit: 'Capped at 2% of your views floor, or it kills the campaign quietly.',
+    format: (v) => (v <= 0 ? 'off' : String(v)),
+    limit: 'Capped at 2% of your views setting. Higher and it quietly empties your list.',
   },
 ]
 
@@ -165,19 +168,19 @@ const PRESETS: Record<Exclude<PresetId, 'custom'>, {
 }> = {
   strict: {
     label: 'Strict',
-    blurb: 'Fewer, better. Only creators already performing.',
+    blurb: 'Fewer people, better ones. Only accounts already doing well.',
     followersFloor: 2, followersCeiling: 1, recency: 0.5, viewsShare: 1, cadence: 1.5,
     commentsShare: 0.004, passScore: 12,
   },
   balanced: {
     label: 'Balanced',
-    blurb: 'The default. Good reach, real activity, room to grow.',
+    blurb: 'Where most people start. Decent reach, posting regularly.',
     followersFloor: 1, followersCeiling: 1, recency: 1, viewsShare: 0.5, cadence: 1,
     commentsShare: 0.002, passScore: 9,
   },
   broad: {
     label: 'Broad',
-    blurb: 'More volume. You sort more yourself.',
+    blurb: 'More people every day. You do more of the sorting.',
     followersFloor: 0.5, followersCeiling: 1.5, recency: 2, viewsShare: 0.25, cadence: 0.5,
     commentsShare: 0, passScore: 7,
   },
@@ -309,18 +312,18 @@ export function describeChanges(
     lines.push(`${dial.label}: ${typeof a === 'number' ? dial.format(a) : 'not applied'} to ${dial.format(b)}`)
   }
   if (before.passScore !== after.passScore) {
-    lines.push(`Qualifying score: ${before.passScore} to ${after.passScore}`)
+    lines.push(`Pass mark: ${before.passScore} to ${after.passScore}`)
   }
   for (const k of after.knockouts) {
     const was = before.knockouts.find((x) => x.id === k.id)
     const on = k.enabled !== false
     if (was && (was.enabled !== false) !== on) {
-      lines.push(`${on ? 'Asking' : 'No longer asking'}: ${k.question}`)
+      lines.push(`${on ? 'Now checking' : 'Stopped checking'}: ${k.question}`)
     }
   }
   for (const c of criteria.after) {
     const was = criteria.before.find((x) => x.id === c.id)
-    if (was && was.label !== c.label) lines.push(`Criterion reworded: ${was.label} to ${c.label}`)
+    if (was && was.label !== c.label) lines.push(`Renamed: ${was.label} to ${c.label}`)
   }
   return lines
 }

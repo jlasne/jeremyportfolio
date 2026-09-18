@@ -37,47 +37,47 @@ export function Account() {
             </li>
           ))}
         </ul>
-        <p className="hint">You pay for leads delivered. Nothing else is counted.</p>
+        <p className="hint">You pay for the leads we hand you. Nothing else is counted.</p>
       </div>
 
       <div className="card">
         <h2>This month</h2>
         <ul className="rules">
-          <li><span>Entitled</span><b className="num">{quota.entitled}</b></li>
-          <li><span>Delivered</span><b className="num">{quota.delivered}</b></li>
-          <li><span>Carried in</span><b className="num">{quota.carried}</b></li>
+          <li><span>Your allowance</span><b className="num">{quota.entitled}</b></li>
+          <li><span>Used so far</span><b className="num">{quota.delivered}</b></li>
+          <li><span>Carried over from last month</span><b className="num">{quota.carried}</b></li>
           <li><span>Left</span><b className="num">{quota.remaining}</b></li>
         </ul>
         <p className="hint">
-          A thin day is not lost. The balance runs to the end of {sub.period} and the quota is shared across campaigns.
+          A quiet day is not lost. Whatever is left runs to the end of {sub.period}, and your campaigns share it.
         </p>
       </div>
 
       <div className="card">
-        <h2>Per campaign cap</h2>
+        <h2>Daily limit per campaign</h2>
         <ul className="rules">
           {campaigns.map((c) => (
             <li key={c.id}>
               <span>{c.name}</span>
-              <b className="num">{c.dailyCap ?? 'no cap'}</b>
+              <b className="num">{c.dailyCap ?? 'no limit'}</b>
             </li>
           ))}
         </ul>
-        <p className="hint">A cap stops one campaign taking the whole day. Leave it empty to share freely.</p>
+        <p className="hint">This stops one campaign taking the whole day. Leave it empty and they share.</p>
       </div>
 
       <div className="card">
-        <h2>Top ups</h2>
+        <h2>Extra leads bought</h2>
         <ul className="rules">
           {topups.map((t) => (
             <li key={t.id}>
-              <span>{t.leads} leads bought {absolute(t.purchasedAt)}</span>
+              <span>{t.leads} leads, bought {absolute(t.purchasedAt)}</span>
               <b className="num">{t.remaining} left</b>
             </li>
           ))}
           {topups.length === 0 && <li><span>None bought</span><b>—</b></li>}
         </ul>
-        <button type="button" className="btn">Buy a top up</button>
+        <button type="button" className="btn">Buy extra leads</button>
       </div>
 
       <div className="card">
@@ -93,7 +93,7 @@ export function Account() {
       </div>
 
       <div className="card">
-        <h2>Balance history</h2>
+        <h2>What went in and out</h2>
         <ul className="rules">
           {journal.map((e) => (
             <li key={e.id}>

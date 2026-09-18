@@ -40,7 +40,7 @@ export const TEMPLATES: GateTemplate[] = [
       {
         id: 'k_method',
         question: 'Do they teach a repeatable method rather than only show results?',
-        why: 'A method can become a product. A highlight reel cannot.',
+        why: 'A method can be turned into a product. A highlight reel cannot.',
         pass: 'Teaches a how to, or breaks down how a result was reached.',
         fail: 'Pure entertainment, vlogs, outfit posts, reaction content.',
       },
@@ -60,7 +60,7 @@ export const TEMPLATES: GateTemplate[] = [
       {
         id: 'k_person',
         question: 'Is this a real person rather than a theme page?',
-        why: 'A theme page has nobody to contact and nobody to sign.',
+        why: 'A page with no owner has nobody to write to and nobody to sign.',
         pass: 'A named human, face or voice on the account, speaks as themselves.',
         fail: 'Aggregator, quote page, repost account, no named owner.',
       },
@@ -85,14 +85,14 @@ export const TEMPLATES: GateTemplate[] = [
       {
         id: 'k_paid_offer',
         question: 'Do they have a paid offer live today?',
-        why: 'No revenue, no budget.',
+        why: 'If they earn nothing today, they have nothing to spend on you.',
         pass: 'A programme, a course, a membership or a service with a price.',
         fail: 'Everything is free, or the only link is an affiliate page.',
       },
       {
         id: 'k_decides',
         question: 'Are they the one who decides?',
-        why: 'An agency or a manager in the way doubles the sales cycle.',
+        why: 'An agency or a manager in the way makes every deal twice as slow.',
         pass: 'Answers from their own account, no management in the bio.',
         fail: 'An agency, a label or a manager fronts the inbox.',
       },
@@ -105,7 +105,7 @@ export const TEMPLATES: GateTemplate[] = [
       {
         id: 'k_person',
         question: 'Is this a real person rather than a theme page?',
-        why: 'A theme page has nobody to contact and nobody to sign.',
+        why: 'A page with no owner has nobody to write to and nobody to sign.',
         pass: 'A named human, face or voice on the account, speaks as themselves.',
         fail: 'Aggregator, quote page, repost account, no named owner.',
       },
@@ -130,7 +130,7 @@ export const TEMPLATES: GateTemplate[] = [
       {
         id: 'k_ran_paid',
         question: 'Have they run a paid partnership before?',
-        why: 'A first timer costs you the learning.',
+        why: 'Someone doing their first one will cost you the time to teach them.',
         pass: 'Tagged partnerships, a rate card, or a media kit in the bio.',
         fail: 'Nothing sponsored anywhere on the account.',
       },
@@ -143,14 +143,14 @@ export const TEMPLATES: GateTemplate[] = [
       {
         id: 'k_safe',
         question: 'Is there nothing on the account you cannot stand next to?',
-        why: 'This one is a liability, not a preference.',
+        why: 'This one protects you legally. It is not a matter of taste.',
         pass: 'Tone and topics a brand can sit beside without a meeting.',
         fail: 'Recurring content that would need signing off by legal.',
       },
       {
         id: 'k_person',
         question: 'Is this a real person rather than a theme page?',
-        why: 'A theme page has nobody to contact and nobody to sign.',
+        why: 'A page with no owner has nobody to write to and nobody to sign.',
         pass: 'A named human, face or voice on the account, speaks as themselves.',
         fail: 'Aggregator, quote page, repost account, no named owner.',
       },
@@ -186,10 +186,10 @@ export const LOCKED: Record<TemplateId, string[]> = {
 }
 
 export const LOCK_REASON: Record<string, string> = {
-  k_person: 'Without it you get accounts with nobody to contact and nobody to sign.',
-  k_not_built: 'Without it you pitch people who already shipped the thing.',
-  k_paid_offer: 'No revenue means no budget. It is the best predictor of a wasted call.',
-  k_safe: 'This one is a brand and legal risk, not a preference.',
+  k_person: 'Without it you get pages with nobody to write to and nobody to sign a contract.',
+  k_not_built: 'Without it you end up pitching people who already built it themselves.',
+  k_paid_offer: 'If they earn nothing today, they have nothing to spend. It is the clearest sign of a wasted call.',
+  k_safe: 'This one protects your brand and your legal team. It is not a matter of taste.',
 }
 
 export function isLocked(templateId: TemplateId, knockoutId: string): boolean {

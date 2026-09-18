@@ -159,40 +159,59 @@ export function maxScore(gates: GateSet): number {
   return gates.criteria.length * 2
 }
 
+// Three ways to name the same rule, because a rule reads differently depending
+// on why it is on screen. None of them says median, floor or threshold.
+//
+//   why it failed   "Not enough views on a typical post"
+//   the setting     "Views on a typical post, at least"   (data/tuning.ts)
+//   what we found   "Views on a typical post"
+
 const HARD_LABELS: Record<string, string> = {
-  followersMin: 'Followers below the floor',
-  followersMax: 'Followers above the ceiling',
-  medianViewsMin: 'Median views below the floor',
-  medianCommentsMin: 'Median comments below the floor',
-  postsPerMonthMin: 'Posts a month below the floor',
-  lastPostWithinDays: 'Last post too old',
-  countries: 'Outside the country list',
-  languages: 'Outside the language list',
+  followersMin: 'Not enough followers',
+  followersMax: 'Too many followers',
+  medianViewsMin: 'Not enough views on a typical post',
+  medianCommentsMin: 'Not enough comments on a typical post',
+  postsPerMonthMin: 'Not posting often enough',
+  lastPostWithinDays: 'Has not posted recently enough',
+  countries: 'Not in a country you picked',
+  languages: 'Not in a language you picked',
 }
 
 export function hardLabel(key: string): string {
   return HARD_LABELS[key] ?? key
 }
 
+const FOUND_LABELS: Record<string, string> = {
+  followersMin: 'Followers',
+  followersMax: 'Followers',
+  medianViewsMin: 'Views on a typical post',
+  medianCommentsMin: 'Comments on a typical post',
+  postsPerMonthMin: 'Posts a month',
+  lastPostWithinDays: 'Days since their last post',
+  countries: 'Country',
+  languages: 'Language',
+}
+
+/** What we measured, named for a panel that is showing the measurement. */
+export function foundLabel(key: string): string {
+  return FOUND_LABELS[key] ?? key
+}
+
 function hardReason(check: HardCheck, hard: HardRules): string {
   const limit = hard[check.key]
-  if (check.value < 0) return `${hardLabel(check.key)}, and we have no measurement`
-  if (typeof limit === 'number') return `${hardLabel(check.key)}: ${check.value} against ${limit}`
+  if (check.value < 0) return `${hardLabel(check.key)}, and we could not measure it`
+  if (typeof limit === 'number') return `${hardLabel(check.key)}: ${check.value}, you asked for ${limit}`
   return hardLabel(check.key)
 }
 
-/**
- * The same rules, named for the editor rather than for a rejection. On a lead
- * panel a failed check reads "Followers below the floor". In the gates editor
- * the row is the threshold itself, so it reads "Followers, floor".
- */
+/** The same rules, named as the settings a client is looking at. */
 const RULE_LABELS: Record<string, string> = {
-  followersMin: 'Followers, floor',
-  followersMax: 'Followers, ceiling',
-  medianViewsMin: 'Median views, floor',
-  medianCommentsMin: 'Median comments, floor',
-  postsPerMonthMin: 'Posts a month, floor',
-  lastPostWithinDays: 'Last post, no older than',
+  followersMin: 'Followers, from',
+  followersMax: 'Followers, up to',
+  medianViewsMin: 'Views on a typical post, at least',
+  medianCommentsMin: 'Comments on a typical post, at least',
+  postsPerMonthMin: 'Posts a month, at least',
+  lastPostWithinDays: 'Posted in the last',
   countries: 'Countries',
   languages: 'Languages',
 }

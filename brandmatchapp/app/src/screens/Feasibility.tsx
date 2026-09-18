@@ -7,10 +7,13 @@ import { absolute } from '../lib/format'
 
 // Zone 5, and the screen nobody else has.
 //
-// It answers one question: do these criteria hold your daily flow. Two blocks
-// answer it. The funnel shows where the target narrows. The verdict says what
-// to do about it, and when the answer is no it comes with the two moves worth
-// making rather than a list to study.
+// It answers one question: can these rules fill your day. Two blocks answer it.
+// The funnel shows where people drop out. The verdict says what to do about it,
+// and when the answer is no it comes with the two changes worth making rather
+// than a list to study.
+//
+// Nothing here says gate, knockout, median or threshold. A client is deciding,
+// not reading our design notes.
 //
 // What is on this screen: volume, criteria, and moves between them. What is
 // never on it: a price, a cost, or what a lead costs to produce. The simulator
@@ -25,10 +28,10 @@ import { absolute } from '../lib/format'
 // ---------------------------------------------------------------------------
 
 const STAGES = [
-  { at: 0, label: 'Reading profiles' },
-  { at: 1400, label: 'Measuring reach on their real posts' },
-  { at: 2600, label: 'Asking the knockouts' },
-  { at: 3700, label: 'Scoring' },
+  { at: 0, label: 'Looking through accounts' },
+  { at: 1400, label: 'Counting views on their real posts' },
+  { at: 2600, label: 'Checking your deal breakers' },
+  { at: 3700, label: 'Scoring the fit' },
 ]
 const SCAN_MS = 4600
 
@@ -71,7 +74,7 @@ function Scanning({ result, passScore, onDone }: { result: SimResult; passScore:
       {/* The funnel fills as the scan reaches each gate, so the wait shows the
           shape of the answer rather than a spinner. */}
       <div className="card gate-card">
-        <h2>Where your target narrows</h2>
+        <h2>Where people drop out</h2>
         <Funnel result={result} passScore={passScore} upTo={stage} />
       </div>
     </div>
@@ -101,10 +104,10 @@ function Funnel({
   // say what the picture cannot.
   const widest = Math.max(1, f.pastHard)
   const rows: Band[] = [
-    { label: 'Profiles looked at', count: f.scanned, width: 1, share: 1, drop: null },
-    { label: 'Past the hard filters', count: f.pastHard, width: f.pastHard / widest, share: f.pastHard / top, drop: null },
-    { label: 'Past the knockouts', count: f.pastKnockouts, width: f.pastKnockouts / widest, share: f.pastKnockouts / top, drop: null },
-    { label: `Scored ${passScore} or above`, count: f.qualified, width: f.qualified / widest, share: f.qualified / top, drop: null },
+    { label: 'People we looked at', count: f.scanned, width: 1, share: 1, drop: null },
+    { label: 'Big and active enough', count: f.pastHard, width: f.pastHard / widest, share: f.pastHard / top, drop: null },
+    { label: 'Passed your deal breakers', count: f.pastKnockouts, width: f.pastKnockouts / widest, share: f.pastKnockouts / top, drop: null },
+    { label: `Scored ${passScore} or more`, count: f.qualified, width: f.qualified / widest, share: f.qualified / top, drop: null },
   ]
   for (let i = 1; i < rows.length; i++) {
     const before = rows[i - 1].count
@@ -168,14 +171,15 @@ function Spread({ histogram, passScore }: { histogram: { score: number; count: n
 // ---------------------------------------------------------------------------
 
 const HEADLINE: Record<Verdict, (per: number, want: number) => string> = {
-  feasible: (_per, want) => `These criteria can deliver your ${want} qualified leads a day.`,
-  short: (per) => `These criteria max out around ${per} leads a day.`,
-  too_narrow: () => 'These criteria are too narrow for a daily feed. Broaden them or switch to a lower plan.',
+  feasible: (_per, want) => `These rules can bring you ${want} leads a day.`,
+  short: (per) => `These rules top out at around ${per} leads a day.`,
+  too_narrow: () =>
+    'These rules are too narrow to fill a day. Loosen them, or move to a smaller plan.',
 }
 
 function Levers({ list, onApply }: { list: Lever[]; onApply: (l: Lever) => void }) {
   if (!list.length) {
-    return <p className="hint">No single change moves this much. Loosen a few thresholds together.</p>
+    return <p className="hint">No single change makes enough difference. Try loosening a few settings together.</p>
   }
   return (
     <ul className="levers">
@@ -222,9 +226,9 @@ export function Feasibility({ campaignId }: { campaignId: string }) {
     return (
       <div className="empty">
         <h2>Not tested yet</h2>
-        <p>Run a sample scan to see what these criteria would deliver in a day.</p>
+        <p>We look at a sample of accounts and tell you how many leads a day your rules would bring.</p>
         <div className="actions">
-          <button type="button" className="btn primary" onClick={start}>Run the test</button>
+          <button type="button" className="btn primary" onClick={start}>Test my rules</button>
         </div>
       </div>
     )
@@ -235,7 +239,7 @@ export function Feasibility({ campaignId }: { campaignId: string }) {
   return (
     <>
       <div className="card gate-card">
-        <h2>Where your target narrows</h2>
+        <h2>Where people drop out</h2>
         <Funnel
           result={{
             funnel: {
@@ -248,22 +252,23 @@ export function Feasibility({ campaignId }: { campaignId: string }) {
           passScore={gates.passScore}
         />
         <p className="gate-lede">
-          That is around <b className="num">{run.estimatedPerDay}</b> qualified a day at your current search rate.
+          That works out at around <b className="num">{run.estimatedPerDay}</b> leads a day, at the pace we search
+          for you.
         </p>
         <p className="hint">
-          A sample, not a promise. Every figure here is an estimate from gate version {run.gateSetVersion}, run on{' '}
-          {absolute(run.ranAt)}.
+          This is a sample, not a promise. Every number here is an estimate, from your rules version{' '}
+          {run.gateSetVersion}, tested on {absolute(run.ranAt)}.
         </p>
       </div>
 
       <div className={`card verdict-card ${verdict}`}>
-        <h2>{verdict === 'feasible' ? 'It holds' : verdict === 'short' ? 'It falls short' : 'Too narrow'}</h2>
+        <h2>{verdict === 'feasible' ? 'This works' : verdict === 'short' ? 'Not quite enough' : 'Too narrow'}</h2>
         <p className="verdict-line">{HEADLINE[verdict](run.estimatedPerDay, want)}</p>
 
         {verdict === 'feasible' && (
           <>
             <p className="muted">
-              Around {run.estimatedPerDay} a day at this rate, against {want} asked for. There is room.
+              Around {run.estimatedPerDay} a day, and you asked for {want}. You have room to spare.
             </p>
             <div className="verdict-actions">
               <a className="btn primary" href="#/leads">Work the list</a>
@@ -273,7 +278,7 @@ export function Feasibility({ campaignId }: { campaignId: string }) {
 
         {verdict !== 'feasible' && (
           <>
-            <p className="muted">Two moves would change that.</p>
+            <p className="muted">Two changes would fix it.</p>
             <Levers list={list} onApply={(l) => applyLever(campaignId, l)} />
             <div className="verdict-actions">
               {list.length > 0 && (
@@ -295,24 +300,24 @@ export function Feasibility({ campaignId }: { campaignId: string }) {
                 className="btn"
                 onClick={() => acceptVolume(campaignId, run.estimatedPerDay)}
               >
-                Keep my criteria, take {run.estimatedPerDay} a day
+                Keep my rules, take {run.estimatedPerDay} a day
               </button>
-              <a className="btn quiet" href="#/account">Look at my plan</a>
+              <a className="btn quiet" href="#/account">See my plan</a>
             </div>
           </>
         )}
       </div>
 
       <div className="card">
-        <h2>Score spread</h2>
+        <h2>How people scored</h2>
         <Spread histogram={run.scoreHistogram} passScore={gates.passScore} />
-        <p className="hint">Moving the bar changes what you get, not what you pay.</p>
+        <p className="hint">Orange is everyone who would reach you. Moving your pass mark changes what you get, never what you pay.</p>
       </div>
 
       <div className="page-head">
         <span className="spacer" />
-        <a className="btn" href={`#/campaign/${campaignId}/gates`}>Edit the gates</a>
-        <button type="button" className="btn" onClick={start}>Run it again</button>
+        <a className="btn" href={`#/campaign/${campaignId}/gates`}>Change my rules</a>
+        <button type="button" className="btn" onClick={start}>Test again</button>
       </div>
     </>
   )

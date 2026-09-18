@@ -10,12 +10,16 @@ import {
 } from '../data/tuning'
 import { absolute, compact } from '../lib/format'
 
-// Zone 4. Three gates, in the order they run, and the client tunes them.
+// Zone 4. Three checks, in the order they run, and the client tunes them.
 //
-// The rule that shapes this screen is bounded personalisation. Every dial has
-// limits, some fixed and some tied to another dial, so nobody can set median
-// views to 1 or ask for 500k views off a 15k follower floor. The limits are
-// written next to the dial rather than enforced silently.
+// Nothing on this screen says gate, knockout, threshold or median. The three
+// checks are named for what they ask: how big and how active, what would rule
+// someone out, and how good a fit they are.
+//
+// The rule that shapes the screen is bounded personalisation. Every dial has
+// limits, some fixed and some tied to another dial, so nobody can ask for one
+// view or for 500k views off a 15k follower minimum. The limits are written
+// next to the dial rather than enforced silently.
 //
 // Nothing is written until Save. An edit then writes the next version, never
 // over the old one, so a lead delivered last week still has its rules.
@@ -92,16 +96,19 @@ function Hardness({ score }: { score: number }) {
   )
 }
 
-/** Gate 1 in one sentence, rewritten on every drag. */
+/** The first check in one sentence, rewritten on every drag. */
 function gateOneLine(hard: HardRules): string {
-  const bits = [
-    `${compact(hard.followersMin ?? 0)} to ${hard.followersMax && hard.followersMax >= 5_000_000 ? 'any' : compact(hard.followersMax ?? 0)} followers`,
-    hard.postsPerMonthMin ? cadence(hard.postsPerMonthMin) : null,
-    hard.medianViewsMin ? `${compact(hard.medianViewsMin)} median views` : null,
-    hard.lastPostWithinDays ? `posted in the last ${hard.lastPostWithinDays} days` : null,
-    hard.medianCommentsMin ? `${hard.medianCommentsMin} median comments` : null,
+  const reach = [
+    hard.medianViewsMin ? `${compact(hard.medianViewsMin)} views` : null,
+    hard.medianCommentsMin ? `${hard.medianCommentsMin} comments` : null,
   ].filter(Boolean)
-  return `We keep creators at ${bits.join(', ')}.`
+  const bits = [
+    `${compact(hard.followersMin ?? 0)} to ${hard.followersMax && hard.followersMax >= 5_000_000 ? 'any number of' : compact(hard.followersMax ?? 0)} followers`,
+    hard.postsPerMonthMin ? cadence(hard.postsPerMonthMin) : null,
+    reach.length ? `around ${reach.join(' and ')} on a typical post` : null,
+    hard.lastPostWithinDays ? `active in the last ${hard.lastPostWithinDays} days` : null,
+  ].filter(Boolean)
+  return `We keep people with ${bits.join(', ')}.`
 }
 
 function cadence(perMonth: number): string {
@@ -172,15 +179,15 @@ export function Gates({ campaignId }: { campaignId: string }) {
           ))}
         </div>
         <div className="tune-side">
-          <span className="faint">{at === 'custom' ? 'Tuned by hand' : `On ${at}`}</span>
+          <span className="faint">{at === 'custom' ? 'Your own settings' : `Using ${at}`}</span>
           <Hardness score={score} />
         </div>
       </div>
 
       <div className="card gate-card">
-        <h2>Gate 1, hard filters</h2>
+        <h2>1. Size and activity</h2>
         <p className="gate-lede">{gateOneLine(live.hard)}</p>
-        <p className="hint">Measured on real posts. A profile that fails here never reaches the model.</p>
+        <p className="hint">We count all of this from their last 12 posts. Miss one and we stop there and move on.</p>
         <div className="dials">
           {DIALS.map((dial) => (
             <Slider
@@ -195,9 +202,9 @@ export function Gates({ campaignId }: { campaignId: string }) {
       </div>
 
       <div className="card gate-card">
-        <h2>Gate 2, knockouts</h2>
+        <h2>2. Deal breakers</h2>
         <p className="gate-lede">
-          {asking} of {live.knockouts.length} questions on. One no and the profile is out.
+          {asking} of {live.knockouts.length} questions switched on. One no about a person and we drop them.
         </p>
         <ul className="switches">
           {live.knockouts.map((k) => {
@@ -222,28 +229,27 @@ export function Gates({ campaignId }: { campaignId: string }) {
                 <div className="switch-body">
                   <b>
                     {k.question}
-                    {locked && <span className="lock" title={LOCK_REASON[k.id]}>Always on</span>}
+                    {locked && <span className="lock" title={LOCK_REASON[k.id]}>Can't turn off</span>}
                   </b>
-                  {k.pass && <small><b>Pass:</b> {k.pass}</small>}
-                  {k.fail && <small><b>Fail:</b> {k.fail}</small>}
+                  {k.pass && <small><b>Yes looks like:</b> {k.pass}</small>}
+                  {k.fail && <small><b>No looks like:</b> {k.fail}</small>}
                   {locked && <small className="faint">{LOCK_REASON[k.id]}</small>}
                 </div>
               </li>
             )
           })}
         </ul>
-        {optional.length === 0 && <p className="hint">Every question in this library is required.</p>}
+        {optional.length === 0 && <p className="hint">Every question here is required.</p>}
       </div>
 
       <div className="card gate-card">
-        <h2>Gate 3, score</h2>
+        <h2>3. Fit score</h2>
         <p className="gate-lede">
-          Seven things we score, 0 to 2 each. A profile needs {live.passScore} out of {live.criteria.length * 2} to
-          reach you.
+          Seven things we rate out of 2. Someone needs {live.passScore} out of {live.criteria.length * 2} to reach you.
         </p>
         <div className="dial">
           <div className="dial-head">
-            <span>Qualifying score</span>
+            <span>Pass mark</span>
             <b className="num">{live.passScore} of {live.criteria.length * 2}</b>
           </div>
           <input
@@ -256,7 +262,7 @@ export function Gates({ campaignId }: { campaignId: string }) {
           />
           <div className="dial-foot">
             <span>5</span>
-            <span className="dial-limit">Under 5 the score stops deciding anything.</span>
+            <span className="dial-limit">Below 5 the score stops filtering anything.</span>
             <span>{live.criteria.length * 2}</span>
           </div>
         </div>
@@ -283,7 +289,7 @@ export function Gates({ campaignId }: { campaignId: string }) {
             </li>
           ))}
         </ul>
-        <p className="hint">Seven criteria, always. Reword them to fit your offer.</p>
+        <p className="hint">Always seven. Change the wording to match what you sell.</p>
       </div>
 
       <div className="card">
@@ -293,8 +299,8 @@ export function Gates({ campaignId }: { campaignId: string }) {
             <li key={v.id}>
               <div className="history-head">
                 <b>
-                  Version {v.version}, {v.origin === 'generated' ? 'proposed from the brief' : 'edited'}
-                  {v.id === gates.id ? ', live now' : ''}
+                  Version {v.version}, {v.origin === 'generated' ? 'written from your brief' : 'your edit'}
+                  {v.id === gates.id ? ', in use now' : ''}
                 </b>
                 <span className="faint">
                   {members.find((m) => m.id === v.by)?.name ?? 'brandmatch'}, {absolute(v.createdAt)}
@@ -314,10 +320,14 @@ export function Gates({ campaignId }: { campaignId: string }) {
         {saved && (
           <span className="hint">
             Saved as version {gates.version}.
-            {campaign.status === 'live' ? ' The simulator has been run again.' : ''}
+            {campaign.status === 'live' ? ' We tested the new rules straight away.' : ''}
           </span>
         )}
-        {dirty && <span className="hint">Saving writes version {gates.version + 1}. The old one stays.</span>}
+        {dirty && (
+          <span className="hint">
+            Saving keeps a copy of the current rules, so leads you already have still make sense.
+          </span>
+        )}
         <span className="spacer" />
         {dirty && (
           <button type="button" className="btn" onClick={() => { setDraft(null); setSaved(false) }}>
@@ -325,9 +335,9 @@ export function Gates({ campaignId }: { campaignId: string }) {
           </button>
         )}
         <button type="button" className="btn primary" disabled={!dirty} onClick={save}>
-          Save the gates
+          Save my rules
         </button>
-        <a className="btn" href={`#/campaign/${campaignId}/feasibility`}>Test it</a>
+        <a className="btn" href={`#/campaign/${campaignId}/feasibility`}>Test them</a>
       </div>
     </>
   )

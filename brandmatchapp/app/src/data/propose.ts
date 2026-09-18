@@ -250,9 +250,9 @@ export function propose(brief: CampaignBrief, answers: Answers = {}): Proposal {
     countries,
     languages,
     summaries: {
-      gate1: `We only keep creators between ${compact(followersMin)} and ${compact(followersMax)} followers who posted in the last ${d.lastPostWithinDays} days and pull ${compact(medianViewsMin)} views on a normal post.`,
-      gate2: `${count(lib.knockouts.length)} questions. One no and the profile is out.`,
-      gate3: `Seven things we score. A profile needs ${lib.passScore} out of ${lib.criteria.length * 2} to reach you.`,
+      gate1: `We keep people with ${compact(followersMin)} to ${compact(followersMax)} followers, who posted in the last ${d.lastPostWithinDays} days and get about ${compact(medianViewsMin)} views on a typical post.`,
+      gate2: `${count(lib.knockouts.length)} yes or no questions about each person. One no and we drop them.`,
+      gate3: `Seven things we rate out of 2. Someone needs ${lib.passScore} out of ${lib.criteria.length * 2} to reach you.`,
     },
   }
 }
@@ -268,8 +268,8 @@ export function switchTemplate(proposal: Proposal, id: TemplateId): Proposal {
     passScore: lib.passScore,
     summaries: {
       ...proposal.summaries,
-      gate2: `${count(lib.knockouts.length)} questions. One no and the profile is out.`,
-      gate3: `Seven things we score. A profile needs ${lib.passScore} out of ${lib.criteria.length * 2} to reach you.`,
+      gate2: `${count(lib.knockouts.length)} yes or no questions about each person. One no and we drop them.`,
+      gate3: `Seven things we rate out of 2. Someone needs ${lib.passScore} out of ${lib.criteria.length * 2} to reach you.`,
     },
   }
 }
