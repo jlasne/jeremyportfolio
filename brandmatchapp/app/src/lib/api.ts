@@ -7,6 +7,14 @@
 // figure has no path into a client screen. Rule one of the product: we sell
 // delivered leads and the production side of it is invisible.
 
+/**
+ * The deployment, for anywhere that is not brandmatch.app.
+ *
+ * On the domain itself the two surfaces are same origin, proxied by the
+ * rewrites in brandmatchapp/vercel.json. That file holds this address a second
+ * time and the two have to move together: a stale rewrite answers 404 to every
+ * call while this constant looks perfectly correct.
+ */
 const DIRECT = 'https://limitless-ladybug-747.eu-west-1.convex.site'
 
 function built(): string {

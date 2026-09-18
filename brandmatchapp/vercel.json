@@ -1,6 +1,8 @@
 {
   "rewrites": [
-    { "source": "/api/mcp", "destination": "https://dashing-swan-386.eu-west-1.convex.site/mcp" },
-    { "source": "/api/:path*", "destination": "https://dashing-swan-386.eu-west-1.convex.site/api/:path*" }
+    { "source": "/api", "destination": "https://limitless-ladybug-747.eu-west-1.convex.site/api" },
+    { "source": "/api/:path*", "destination": "https://limitless-ladybug-747.eu-west-1.convex.site/api/:path*" },
+    { "source": "/ops", "destination": "https://limitless-ladybug-747.eu-west-1.convex.site/ops" },
+    { "source": "/ops/:path*", "destination": "https://limitless-ladybug-747.eu-west-1.convex.site/ops/:path*" }
   ]
 }
