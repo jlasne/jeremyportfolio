@@ -38,7 +38,7 @@ export const pending = internalQuery({
       gateSetId: gates._id,
       gateSetVersion: gates.version,
       gates: { hard: gates.hard, knockouts: gates.knockouts, criteria: gates.criteria, passScore: gates.passScore },
-      brief: campaign.brief,
+      brief: `${campaign.brief.audience}. They sell: ${campaign.brief.offer}`,
       extracted: campaign.extracted,
       creators: fresh.map((c) => ({
         id: c._id,

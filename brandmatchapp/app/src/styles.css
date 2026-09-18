@@ -2377,3 +2377,91 @@ body { background: var(--paper); }
   .pairs dd { margin-bottom: 8px; }
   .tiles { grid-template-columns: 1fr 1fr; }
 }
+
+/* ====================================================================
+   Campaign creation. Two questions, a short wait, a proposal.
+   ==================================================================== */
+
+.page.narrow { max-width: 760px; }
+
+/* The questions. Big type, no labels, nothing that reads as a form. */
+.ask { padding: 56px 0 0; display: flex; flex-direction: column; gap: 34px; }
+.ask-block { display: block; }
+.ask-block h1 {
+  font-family: var(--display); font-size: 30px; font-weight: 600;
+  letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 14px;
+}
+.ask-field {
+  width: 100%; font-size: 17px; line-height: 1.5; padding: 14px 16px;
+  min-height: 92px; border-radius: var(--radius-card); background: var(--panel);
+}
+.ask-field::placeholder { color: var(--ink-3); }
+
+/* The second question arrives once the first has an answer. */
+.ask-block.out, .ask-foot.out {
+  opacity: 0; transform: translateY(8px); pointer-events: none;
+  max-height: 0; overflow: hidden; margin: 0;
+}
+.ask-block.in, .ask-foot.in {
+  opacity: 1; transform: none; max-height: 400px;
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+.ask-foot { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.ask-foot .hint { margin: 0; }
+.ask-options { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.chip.big { height: 40px; padding: 0 18px; font-size: 14.5px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ask-block.in, .ask-foot.in { transition: none; }
+}
+
+/* The wait. Four lines that name the three gates, so the pause teaches. */
+.building { padding: 90px 0; }
+.building ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+.building li { display: flex; align-items: center; gap: 12px; color: var(--ink-3); font-size: 17px; }
+.building li i {
+  width: 18px; height: 18px; border-radius: 50%; flex: none;
+  border: 2px solid var(--line-2); background: transparent;
+}
+.building li.now { color: var(--ink); }
+.building li.now i { border-color: var(--orange); animation: pulse 900ms ease-in-out infinite; }
+.building li.done { color: var(--ink-2); }
+.building li.done i { border-color: var(--orange); background: var(--orange); }
+
+@keyframes pulse { 50% { transform: scale(1.25); } }
+@media (prefers-reduced-motion: reduce) { .building li.now i { animation: none; } }
+
+/* The proposal. Each gate leads with a plain sentence, the detail comes after. */
+.name-field {
+  font-family: var(--display); font-size: 22px; font-weight: 600; letter-spacing: -0.01em;
+  height: 44px; flex: 1 1 auto; min-width: 0; width: auto;
+  background: transparent; border-color: transparent; padding-left: 0;
+}
+.name-field:hover, .name-field:focus { background: var(--panel); border-color: var(--line); padding-left: 10px; }
+
+.gate-lede { font-size: 15.5px; color: var(--ink); margin-bottom: 14px; }
+.gate-card h2 { margin-bottom: 6px; }
+
+.brief-peek {
+  width: 100%; text-align: left; cursor: pointer; margin-bottom: 14px;
+  justify-content: space-between; font: inherit;
+}
+.brief-peek .faint { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.from-lib { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+
+.lib-switch { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.lib-switch button {
+  width: 100%; text-align: left; display: flex; flex-direction: column; gap: 2px;
+  padding: 11px 14px; border-radius: var(--radius); border: 1px solid var(--line);
+  background: var(--paper); color: inherit;
+}
+.lib-switch button:hover { border-color: var(--ink-3); }
+.lib-switch button.on { border-color: var(--orange); background: var(--orange-soft); }
+.lib-switch small { color: var(--ink-2); }
+
+@media (max-width: 700px) {
+  .ask { padding-top: 28px; gap: 26px; }
+  .ask-block h1 { font-size: 24px; }
+  .name-field { min-width: 0; width: 100%; font-size: 19px; }
+}

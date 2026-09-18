@@ -105,9 +105,12 @@ export const clientApi = httpAction(async (ctx, req) => {
 
       // Zone 3 into zone 4: the brief becomes a first set of gates.
       if (tail === 'gates' && parts[3] === 'draft' && req.method === 'POST') {
-        const { brief } = await req.json()
+        const { audience, offer } = await req.json()
         const out = await ctx.runAction(internal.drafting.gatesFromBrief, {
-          accountId: account._id, campaignId, brief: String(brief ?? ''),
+          accountId: account._id,
+          campaignId,
+          audience: String(audience ?? ''),
+          offer: String(offer ?? ''),
         })
         if (out.error) return fail(String(out.error), 502)
         return json(out)
@@ -120,6 +123,7 @@ export const clientApi = httpAction(async (ctx, req) => {
           accountId: account._id,
           campaignId,
           origin: 'edited',
+          templateId: body.templateId,
           hard: body.hard ?? {},
           knockouts: body.knockouts ?? [],
           criteria: body.criteria ?? [],

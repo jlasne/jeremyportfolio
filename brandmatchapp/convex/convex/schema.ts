@@ -166,15 +166,22 @@ export default defineSchema({
     ),
     /** Optional ceiling on the account quota this campaign may take per day. */
     dailyCap: v.optional(v.number()),
-    /** What the client typed, kept word for word. */
-    brief: v.string(),
-    /** What the model read out of it. Edited by the client, never overwritten. */
+    /**
+     * The two questions, kept word for word. Two fields and not one blob: the
+     * target and the offer answer different things and the screens read them
+     * apart.
+     */
+    brief: v.object({
+      audience: v.string(),
+      offer: v.string(),
+      writtenAt: v.optional(v.number()),
+    }),
+    /** What the model read out of them. Edited by the client, never overwritten. */
     extracted: v.object({
-      sells: v.optional(v.string()),
-      audience: v.optional(v.string()),
-      outcome: v.optional(v.string()),
       countries: v.optional(v.array(v.string())),
       languages: v.optional(v.array(v.string())),
+      /** Which Gate 3 library the first proposal came from. */
+      templateId: v.optional(v.string()),
       extractedAt: v.optional(v.number()),
     }),
     /** The gate version leads are judged against right now. */
@@ -195,6 +202,8 @@ export default defineSchema({
     accountId: v.id('accounts'),
     version: v.number(),
     origin: v.union(v.literal('generated'), v.literal('edited')),
+    /** The library this version grew from. Kept so the source stays readable. */
+    templateId: v.optional(v.string()),
     hard: hardRules,
     knockouts: v.array(knockout),
     criteria: v.array(criterion),

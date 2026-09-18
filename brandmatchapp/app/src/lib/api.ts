@@ -85,10 +85,19 @@ export const api = {
   /** The account, its plan and the month's balance. No volume, no cost. */
   me: () => call<ClientMe>('/api', '/me'),
   campaigns: () => call<{ campaigns: unknown[] }>('/api', '/campaigns'),
+  createCampaign: (body: { name?: string; audience: string; offer: string; dailyCap?: number }) =>
+    call<{ campaign: { id: string } }>('/api', '/campaigns', { method: 'POST', body: JSON.stringify(body) }),
   campaign: (id: string) => call<{ campaign: unknown; gates: unknown }>('/api', `/campaigns/${id}`),
-  /** Rewrites the brief and asks for a fresh gate proposal. */
-  draftGates: (id: string, brief: string) =>
-    call<{ gates: unknown }>('/api', `/campaigns/${id}/gates/draft`, { method: 'POST', body: JSON.stringify({ brief }) }),
+  /**
+   * The two questions in, a full proposal out. The server picks the Gate 3
+   * library and the model only edits inside it, so the answer is always one of
+   * the three libraries and never seven invented criteria.
+   */
+  draftGates: (id: string, audience: string, offer: string) =>
+    call<{ gates: unknown; name?: string; templateId?: string }>('/api', `/campaigns/${id}/gates/draft`, {
+      method: 'POST',
+      body: JSON.stringify({ audience, offer }),
+    }),
   /** An edit writes a new gate version. Nothing is updated in place. */
   saveGates: (id: string, gates: unknown) =>
     call<{ gates: unknown }>('/api', `/campaigns/${id}/gates`, { method: 'POST', body: JSON.stringify(gates) }),

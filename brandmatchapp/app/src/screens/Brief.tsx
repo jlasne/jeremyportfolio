@@ -1,35 +1,41 @@
 import { getCampaign } from '../data'
+import { LIBRARIES } from '../data/propose'
 import { absolute } from '../lib/format'
 
-// Zone 3. The client writes who they want to reach in plain words. The model
-// reads it back as structure, and the client corrects the structure rather than
-// filling a form. The gates are generated from what is on this page.
+// Zone 3. The two questions the campaign was born from, still in the client's
+// own words, plus the handful of things we read out of them.
+//
+// Rewriting either answer proposes a new set of gates. It never rewrites them
+// silently: the client sees the proposal and decides.
 
 export function Brief({ campaignId }: { campaignId: string }) {
   const campaign = getCampaign(campaignId)
   if (!campaign) return null
-  const { extracted } = campaign
+  const { brief, extracted } = campaign
+  const library = LIBRARIES.find((l) => l.id === extracted.templateId)
+
   return (
     <>
       <div className="card">
-        <h2>What you wrote</h2>
-        <textarea className="textarea" defaultValue={campaign.brief} rows={6} />
-        <p className="hint">Kept word for word. Changing it proposes a new set of gates.</p>
+        <h2>Who you want to reach</h2>
+        <textarea className="textarea" defaultValue={brief.audience} rows={3} />
+      </div>
+
+      <div className="card">
+        <h2>What you sell them</h2>
+        <textarea className="textarea" defaultValue={brief.offer} rows={3} />
+        <p className="hint">Written on {absolute(brief.writtenAt)}. Changing either one proposes new gates.</p>
       </div>
 
       <div className="card">
         <h2>What we read out of it</h2>
         <dl className="pairs">
-          <dt>You sell</dt>
-          <dd>{extracted.sells}</dd>
-          <dt>You want to reach</dt>
-          <dd>{extracted.audience}</dd>
-          <dt>You want them to</dt>
-          <dd>{extracted.outcome}</dd>
           <dt>Countries</dt>
-          <dd>{extracted.countries.join(', ')}</dd>
+          <dd>{extracted.countries.length ? extracted.countries.join(', ') : 'Anywhere'}</dd>
           <dt>Languages</dt>
-          <dd>{extracted.languages.join(', ')}</dd>
+          <dd>{extracted.languages.length ? extracted.languages.join(', ') : 'Any'}</dd>
+          <dt>Gate 3 built from</dt>
+          <dd>{library?.name ?? extracted.templateId}</dd>
         </dl>
         <p className="hint">Read on {absolute(extracted.extractedAt)}. Correct anything here before touching the gates.</p>
       </div>

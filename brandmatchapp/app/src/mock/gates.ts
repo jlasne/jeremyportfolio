@@ -16,6 +16,7 @@ export const gateSets: GateSet[] = [
     accountId: account.id,
     version: 1,
     origin: 'generated',
+    templateId: 'sell_to_creators',
     hard: {
       followersMin: 10_000,
       followersMax: 400_000,
@@ -41,6 +42,7 @@ export const gateSets: GateSet[] = [
     accountId: account.id,
     version: 2,
     origin: 'edited',
+    templateId: 'sell_to_creators',
     hard: {
       followersMin: 15_000,
       followersMax: 400_000,
@@ -67,6 +69,7 @@ export const gateSets: GateSet[] = [
     accountId: account.id,
     version: 1,
     origin: 'generated',
+    templateId: 'sell_to_creators',
     hard: {
       followersMin: 25_000,
       followersMax: 600_000,

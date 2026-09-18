@@ -28,6 +28,7 @@ export function publicGates(g: Doc<'gateSets'>) {
     campaignId: g.campaignId,
     version: g.version,
     origin: g.origin,
+    templateId: g.templateId ?? null,
     hard: g.hard,
     knockouts: g.knockouts,
     criteria: g.criteria,
@@ -68,7 +69,7 @@ export const create = internalMutation({
   args: {
     accountId: v.id('accounts'),
     name: v.string(),
-    brief: v.string(),
+    brief: v.object({ audience: v.string(), offer: v.string() }),
     dailyCap: v.optional(v.number()),
   },
   returns: v.any(),
@@ -79,7 +80,7 @@ export const create = internalMutation({
       name: args.name,
       status: 'draft',
       dailyCap: args.dailyCap,
-      brief: args.brief,
+      brief: { ...args.brief, writtenAt: now },
       extracted: {},
       createdAt: now,
       updatedAt: now,
@@ -96,7 +97,7 @@ export const patch = internalMutation({
     name: v.optional(v.string()),
     status: v.optional(v.union(v.literal('draft'), v.literal('live'), v.literal('paused'), v.literal('archived'))),
     dailyCap: v.optional(v.number()),
-    brief: v.optional(v.string()),
+    brief: v.optional(v.object({ audience: v.string(), offer: v.string() })),
     extracted: v.optional(v.any()),
   },
   returns: v.any(),
@@ -104,9 +105,10 @@ export const patch = internalMutation({
     const campaign = await ctx.db.get(args.campaignId)
     if (!campaign || campaign.accountId !== args.accountId) return { error: 'No such campaign' }
     const patch: Record<string, unknown> = { updatedAt: Date.now() }
-    for (const key of ['name', 'status', 'dailyCap', 'brief'] as const) {
+    for (const key of ['name', 'status', 'dailyCap'] as const) {
       if (args[key] !== undefined) patch[key] = args[key]
     }
+    if (args.brief) patch.brief = { ...args.brief, writtenAt: Date.now() }
     if (args.extracted) patch.extracted = { ...campaign.extracted, ...args.extracted }
     await ctx.db.patch(args.campaignId, patch)
     const after = await ctx.db.get(args.campaignId)
@@ -123,6 +125,7 @@ export const saveGates = internalMutation({
     accountId: v.id('accounts'),
     campaignId: v.id('campaigns'),
     origin: v.union(v.literal('generated'), v.literal('edited')),
+    templateId: v.optional(v.string()),
     hard: v.any(),
     knockouts: v.any(),
     criteria: v.any(),
@@ -142,6 +145,7 @@ export const saveGates = internalMutation({
       accountId: args.accountId,
       version,
       origin: args.origin,
+      templateId: args.templateId,
       hard: args.hard,
       knockouts: args.knockouts,
       criteria: args.criteria,

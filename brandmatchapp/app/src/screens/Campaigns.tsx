@@ -12,7 +12,7 @@ export function Campaigns() {
       <div className="page-head">
         <h1>Campaigns</h1>
         <span className="spacer" />
-        <button type="button" className="btn primary">New campaign</button>
+        <a className="btn primary" href="#/campaign/new">New campaign</a>
       </div>
       <p className="subhead">One brief, one set of gates, one daily cap. The quota is shared across them.</p>
       <div className="list">
@@ -24,7 +24,7 @@ export function Campaigns() {
               <span className={`dot${c.status === 'live' ? ' on' : ''}`} />
               <span className="who">
                 <span className="name">{c.name}</span>
-                <span className="handle">{c.extracted.audience}</span>
+                <span className="handle">{c.brief.audience}</span>
               </span>
               <span className="state">
                 Gate version {gates?.version ?? 1}, pass at {gates?.passScore ?? 0} of 14

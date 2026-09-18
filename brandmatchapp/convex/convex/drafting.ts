@@ -1,36 +1,36 @@
 import { internalAction } from './_generated/server'
 import { internal } from './_generated/api'
 import { v } from 'convex/values'
+import { template, TEMPLATE_IDS, withinTemplate } from './templates'
 
-// Zone three into zone four: the brief becomes a first set of gates.
+// Two questions become a proposal.
 //
-// The model proposes, the client edits. It never runs a campaign on its own
-// proposal: the draft is written as version 1 with origin `generated`, and the
-// first edit writes version 2 with origin `edited`.
+// The client never starts from a blank page. They say who they want to reach
+// and what they sell, and everything below is the first draft they correct.
+//
+// What the model is allowed to do:
+//
+//   Gate 1  write the numbers. Only thresholds, so the risk is low and the
+//           brief has to move them or every campaign would filter the same.
+//   Gate 2  reword the library's questions, and add at most one.
+//   Gate 3  reword the library's seven criteria and move the bar. Never invent
+//           a criterion, never drop one. templates.ts enforces it.
 
 const OPENROUTER = 'https://openrouter.ai/api/v1/chat/completions'
 
 const SCHEMA = {
   type: 'object',
   additionalProperties: false,
-  required: ['extracted', 'hard', 'knockouts', 'criteria', 'passScore'],
+  required: ['templateId', 'name', 'countries', 'languages', 'hard', 'knockouts', 'criteria', 'passScore'],
   properties: {
-    extracted: {
-      type: 'object',
-      additionalProperties: false,
-      required: ['sells', 'audience', 'outcome', 'countries', 'languages'],
-      properties: {
-        sells: { type: 'string' },
-        audience: { type: 'string' },
-        outcome: { type: 'string' },
-        countries: { type: 'array', items: { type: 'string' } },
-        languages: { type: 'array', items: { type: 'string' } },
-      },
-    },
+    templateId: { type: 'string', enum: TEMPLATE_IDS },
+    name: { type: 'string' },
+    countries: { type: 'array', items: { type: 'string' } },
+    languages: { type: 'array', items: { type: 'string' } },
     hard: {
       type: 'object',
       additionalProperties: false,
-      required: ['followersMin', 'followersMax', 'lastPostWithinDays', 'medianViewsMin', 'medianCommentsMin', 'postsPerMonthMin', 'languages'],
+      required: ['followersMin', 'followersMax', 'lastPostWithinDays', 'medianViewsMin', 'medianCommentsMin', 'postsPerMonthMin'],
       properties: {
         followersMin: { type: 'integer' },
         followersMax: { type: 'integer' },
@@ -38,7 +38,6 @@ const SCHEMA = {
         medianViewsMin: { type: 'integer' },
         medianCommentsMin: { type: 'integer' },
         postsPerMonthMin: { type: 'integer' },
-        languages: { type: 'array', items: { type: 'string' } },
       },
     },
     knockouts: {
@@ -67,19 +66,39 @@ const SCHEMA = {
   },
 }
 
-const INSTRUCTIONS = [
-  'You write qualification rules for an Instagram lead search.',
-  '',
-  'Three gates, in order.',
-  'Gate 1, hard filters: thresholds on numbers we measure off real posts. Follower range, days since the last post, median views, median comments, posts a month. Never a declared figure.',
-  'Gate 2, knockouts: four to six yes or no questions about the profile. A single no eliminates. Write them so a no is unambiguous.',
-  'Gate 3, score: exactly seven criteria, each worth 0, 1 or 2. The guide says what a 2 looks like. Set passScore so roughly one profile in six that reaches gate 3 qualifies.',
-  '',
-  'Ids are short snake_case. Write in English. Never use an em dash.',
-].join('\n')
+function instructions(): string {
+  const libraries = TEMPLATE_IDS.map((id) => {
+    const lib = template(id)
+    return [
+      `${lib.id}: ${lib.name}. ${lib.when}`,
+      '  knockouts: ' + lib.knockouts.map((k) => `${k.id} (${k.question})`).join('; '),
+      '  criteria: ' + lib.criteria.map((c) => `${c.id} (${c.label})`).join('; '),
+    ].join('\n')
+  }).join('\n')
+
+  return [
+    'You turn a lead search brief into qualification rules.',
+    '',
+    'Pick the library that matches what they want from these creators.',
+    libraries,
+    '',
+    'Then adapt it to the brief.',
+    'Gate 1: write thresholds for the target described. Reach is measured on real posts, never a declared figure. Keep the follower range the brief asks for when it gives one.',
+    'Gate 2: keep every knockout id of the library. Reword the questions for this offer. You may add at most one new knockout.',
+    'Gate 3: keep the seven criteria ids of the library, in order. Reword the label and the guide for this offer. Set passScore so roughly one profile in six reaching gate 3 qualifies.',
+    '',
+    'Also write a short campaign name, "<who>, <what you sell>", and the country and language codes the brief implies.',
+    'Write in English. Never use an em dash.',
+  ].join('\n')
+}
 
 export const gatesFromBrief = internalAction({
-  args: { accountId: v.id('accounts'), campaignId: v.id('campaigns'), brief: v.string() },
+  args: {
+    accountId: v.id('accounts'),
+    campaignId: v.id('campaigns'),
+    audience: v.string(),
+    offer: v.string(),
+  },
   returns: v.any(),
   handler: async (ctx, args): Promise<Record<string, unknown>> => {
     const key = process.env.OPENROUTER_API_KEY
@@ -91,10 +110,10 @@ export const gatesFromBrief = internalAction({
       body: JSON.stringify({
         model: process.env.OPENROUTER_MODEL ?? 'deepseek/deepseek-v4-flash-0731',
         messages: [
-          { role: 'system', content: INSTRUCTIONS },
-          { role: 'user', content: args.brief },
+          { role: 'system', content: instructions() },
+          { role: 'user', content: `Who they want to reach: ${args.audience}\nWhat they sell: ${args.offer}` },
         ],
-        response_format: { type: 'json_schema', json_schema: { name: 'gates', strict: true, schema: SCHEMA } },
+        response_format: { type: 'json_schema', json_schema: { name: 'proposal', strict: true, schema: SCHEMA } },
       }),
     })
     if (!res.ok) return { error: `OpenRouter replied ${res.status}` }
@@ -109,21 +128,37 @@ export const gatesFromBrief = internalAction({
       return { error: 'OpenRouter sent something that is not JSON' }
     }
 
+    // The library decides what gate 2 and gate 3 may be. The model only edits.
+    const lib = template(draft.templateId)
+    const kept = withinTemplate(lib, draft)
+    const hard = {
+      ...draft.hard,
+      ...(Array.isArray(draft.countries) && draft.countries.length ? { countries: draft.countries } : {}),
+      ...(Array.isArray(draft.languages) && draft.languages.length ? { languages: draft.languages } : {}),
+    }
+
     await ctx.runMutation(internal.campaigns.patch, {
       accountId: args.accountId,
       campaignId: args.campaignId,
-      brief: args.brief,
-      extracted: { ...draft.extracted, extractedAt: Date.now() },
+      name: draft.name ? String(draft.name).slice(0, 80) : undefined,
+      brief: { audience: args.audience, offer: args.offer },
+      extracted: {
+        countries: draft.countries ?? [],
+        languages: draft.languages ?? [],
+        templateId: lib.id,
+        extractedAt: Date.now(),
+      },
     })
     const gates = await ctx.runMutation(internal.campaigns.saveGates, {
       accountId: args.accountId,
       campaignId: args.campaignId,
       origin: 'generated',
-      hard: draft.hard,
-      knockouts: draft.knockouts,
-      criteria: draft.criteria,
-      passScore: draft.passScore,
+      templateId: lib.id,
+      hard,
+      knockouts: kept.knockouts,
+      criteria: kept.criteria,
+      passScore: kept.passScore,
     })
-    return { gates, extracted: draft.extracted }
+    return { gates, name: draft.name, templateId: lib.id, usedLibrary: lib.name }
   },
 })

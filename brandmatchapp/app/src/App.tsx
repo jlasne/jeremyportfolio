@@ -8,6 +8,7 @@ import { Campaigns } from './screens/Campaigns'
 import { Dashboard } from './screens/Dashboard'
 import { Landing } from './screens/Landing'
 import { Leads } from './screens/Leads'
+import { NewCampaign } from './screens/NewCampaign'
 
 // Five product zones, plus the account and the internal admin. The landing is
 // its own page with its own ground.
@@ -25,6 +26,7 @@ export function App() {
         {route.name === 'dashboard' && <Dashboard />}
         {route.name === 'leads' && <Leads leadId={route.leadId} />}
         {route.name === 'campaigns' && <Campaigns />}
+        {route.name === 'newCampaign' && <NewCampaign />}
         {route.name === 'campaign' && <CampaignZone campaignId={route.campaignId} tab={route.tab} />}
         {route.name === 'account' && <Account />}
         {route.name === 'admin' && <Admin />}

@@ -90,12 +90,26 @@ export interface Topup {
 // Campaign and gates
 // ---------------------------------------------------------------------------
 
-export interface BriefExtract {
-  sells: string
+/** The Gate 3 libraries a proposal can be built from. */
+export type TemplateId = 'recruit_partners' | 'sell_to_creators' | 'sponsorship'
+
+/**
+ * The two questions, kept in the client's own words. Two fields and not one
+ * blob, because the target and the offer answer different things and the
+ * screens read them apart.
+ */
+export interface CampaignBrief {
   audience: string
-  outcome: string
+  offer: string
+  writtenAt: string
+}
+
+/** What the model read out of the brief. Everything else is the client's text. */
+export interface BriefExtract {
   countries: string[]
   languages: string[]
+  /** Which Gate 3 library the first proposal came from. */
+  templateId: TemplateId
   extractedAt: string
 }
 
@@ -106,8 +120,8 @@ export interface Campaign {
   status: CampaignStatus
   /** Ceiling on the account quota this campaign may take in a day. */
   dailyCap: number | null
-  /** What the client wrote, word for word. */
-  brief: string
+  /** What the client wrote, word for word, in two answers. */
+  brief: CampaignBrief
   extracted: BriefExtract
   gateSetId: string
   createdAt: string
@@ -147,6 +161,8 @@ export interface GateSet {
   accountId: string
   version: number
   origin: 'generated' | 'edited'
+  /** The library this version grew from. Kept so the source stays readable. */
+  templateId: TemplateId
   hard: HardRules
   knockouts: Knockout[]
   criteria: Criterion[]

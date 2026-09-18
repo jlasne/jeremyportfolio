@@ -1,4 +1,6 @@
-import { getCampaign, getFeasibility, getGateSet, getQuota } from '../data'
+import { getCampaign, getFeasibility, getGateSet, getSubscription } from '../data'
+import { useStore } from '../data/hooks'
+import { runFeasibility } from '../data/store'
 import { absolute } from '../lib/format'
 
 // Zone 5. It answers one question: do these gates hold my quota.
@@ -8,10 +10,11 @@ import { absolute } from '../lib/format'
 // or what the run cost. That is rule one.
 
 export function Feasibility({ campaignId }: { campaignId: string }) {
+  useStore()
   const campaign = getCampaign(campaignId)
   const gates = getGateSet(campaignId)
   const run = getFeasibility(campaignId)
-  const quota = getQuota()
+  const plan = getSubscription()
   if (!campaign || !gates) return null
 
   if (!run) {
@@ -19,12 +22,18 @@ export function Feasibility({ campaignId }: { campaignId: string }) {
       <div className="empty">
         <h2>Not tested yet</h2>
         <p>Run the simulator to see what these gates would deliver in a day.</p>
-        <div className="actions"><button type="button" className="btn primary">Run the test</button></div>
+        <div className="actions">
+          <button type="button" className="btn primary" onClick={() => runFeasibility(campaignId)}>
+            Run the test
+          </button>
+        </div>
       </div>
     )
   }
 
-  const cap = campaign.dailyCap ?? quota.remaining
+  // What this campaign may take in a day: its own cap, or the whole tier when
+  // it has none. Never the monthly balance, which is not a daily number.
+  const cap = campaign.dailyCap ?? plan.tier
   const holds = run.estimatedPerDay >= cap
   const qualified = run.scoreHistogram
     .filter((h) => h.score >= gates.passScore)
@@ -73,6 +82,11 @@ export function Feasibility({ campaignId }: { campaignId: string }) {
           Moving the bar changes what you get, not what you pay. Tested against gate version {run.gateSetVersion} on{' '}
           {absolute(run.ranAt)}.
         </p>
+      </div>
+
+      <div className="page-head">
+        <span className="spacer" />
+        <button type="button" className="btn" onClick={() => runFeasibility(campaignId)}>Run it again</button>
       </div>
     </>
   )

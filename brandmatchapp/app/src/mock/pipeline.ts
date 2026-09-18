@@ -1,5 +1,4 @@
 import type {
-  CriterionScore,
   DailyDelivery,
   Deal,
   Evaluation,
@@ -10,11 +9,12 @@ import type {
   QuotaEntry,
   QuotaPeriod,
 } from '../types'
-import { evaluate, type Judgement } from '../data/gates'
+import { evaluate } from '../data/gates'
 import { account, currentPeriod, dayOfPeriod, daysInPeriod, subscription, topups } from './account'
 import { campaigns } from './campaigns'
 import { gateSetById, gateSets } from './gates'
 import { built } from './creators'
+import { judge } from './judge'
 import { pick, seeded } from './rand'
 import { daysAgo, NOW } from './time'
 
@@ -26,54 +26,6 @@ import { daysAgo, NOW } from './time'
 // Two passes. The first judges every profile. The second spreads whatever
 // qualified across the days of the month, because a client is delivered a flow
 // and not a pile.
-
-const KNOCKOUT_NOTES: Record<string, [string, string]> = {
-  k_method: ['Names a four phase system and repeats it across posts', 'Posts results, never the method behind them'],
-  k_software: ['Programme is a weekly plan and a check in, both fit an app', 'Value is hands on gym work, an app cannot carry it'],
-  k_no_app: ['Sells through a PDF and a spreadsheet today', 'Already ships an app on both stores'],
-  k_buys: ['Cohort sold out twice this year', 'No paid offer anywhere on the account'],
-  k_person: ['Face on camera in every post, answers the comments themselves', 'Theme page reposting other people, no named owner'],
-  k_paid: ['Runs a paid community with a monthly fee', 'Everything published is free'],
-  k_clear: ['Education only, and says so in the bio', 'Gives position sized recommendations, that is regulated advice'],
-  k_no_platform: ['Sells through a third party course tool today', 'Already runs a platform of their own'],
-}
-
-const CRITERION_NOTES: Record<string, [string, string, string]> = {
-  c_sells: ['No paid offer found', 'Coaching mentioned, no price in public', 'Programme sold at a public price'],
-  c_method: ['No method named', 'A loose framework, unnamed', 'Names the method and repeats it'],
-  c_demand: ['Comments are compliments', 'A few asking how to start', 'People asking where to buy, every post'],
-  c_proof: ['No numbers shown', 'Before and after, no dates', 'Client numbers with dates, repeatedly'],
-  c_stable: ['Under a year old', 'Two years, with a long gap', 'Four years, no gap over a month'],
-  c_person: ['Faceless account', 'Face sometimes, mostly reposts', 'Face on camera, first person, replies'],
-  c_reach: ['Reach well under the count', 'Reach near the count', 'Median views above the follower count'],
-}
-
-/** Builds the model's answer for one profile, from its band. */
-function judge(index: number, band: string, gateId: string): Judgement {
-  const rand = seeded(4_400_011 + index * 104_729)
-  const gates = gateSetById.get(gateId)!
-  const knockouts: Judgement['knockouts'] = {}
-  // A strong profile clears the knockouts. A fair one fails roughly one in five.
-  const failOdds = band === 'strong' ? 0.04 : band === 'fair' ? 0.2 : 0.4
-  let failed = false
-  for (const k of gates.knockouts) {
-    const pass = failed ? true : rand() > failOdds
-    if (!pass) failed = true
-    const notes = KNOCKOUT_NOTES[k.id] ?? ['Yes', 'No']
-    knockouts[k.id] = { pass, note: pass ? notes[0] : notes[1] }
-  }
-  const criteria: Judgement['criteria'] = {}
-  for (const c of gates.criteria) {
-    const roll = rand()
-    const score: CriterionScore =
-      band === 'strong' ? (roll > 0.22 ? 2 : 1)
-        : band === 'fair' ? (roll > 0.6 ? 2 : roll > 0.24 ? 1 : 0)
-          : (roll > 0.8 ? 1 : 0)
-    const notes = CRITERION_NOTES[c.id] ?? ['No', 'Partly', 'Yes']
-    criteria[c.id] = { score, note: notes[score] }
-  }
-  return { knockouts, criteria, reason: '' }
-}
 
 const REASONS: Record<string, string[]> = {
   cmp_fitness: [
@@ -111,7 +63,7 @@ const passed: Passed[] = []
 built.forEach((b, index) => {
   const campaign = b.niche === 'fitness' ? campaigns[0] : campaigns[1]
   const gates = gateSetById.get(campaign.gateSetId)!
-  const result = evaluate(b.creator, gates, judge(index, b.band, gates.id), now)
+  const result = evaluate(b.creator, gates, judge(index, b.band, gates), now)
   const rand = seeded(777_001 + index * 31)
 
   const evaluationId = `evl_${b.creator.id}`
@@ -304,7 +256,7 @@ export const feasibilityRuns: FeasibilityRun[] = gateSets.map((gates, i) => {
   let passedKnockouts = 0
   const histogram = new Map<number, number>()
   sample.forEach((b, index) => {
-    const result = evaluate(b.creator, gates, judge(index, b.band, gates.id), now)
+    const result = evaluate(b.creator, gates, judge(index, b.band, gates), now)
     if (result.verdict === 'hard_fail') return
     passedHard++
     if (result.verdict === 'knockout_fail') return

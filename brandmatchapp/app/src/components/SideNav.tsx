@@ -100,7 +100,9 @@ export function SideNav({ route }: { route: Route }) {
       </div>
       <ul>
         {items.map((item) => {
-          const on = route.name === item.name || (item.name === 'campaigns' && route.name === 'campaign')
+          const on =
+            route.name === item.name ||
+            (item.name === 'campaigns' && (route.name === 'campaign' || route.name === 'newCampaign'))
           const count = item.name === 'leads' && today ? today : null
           return (
             <li key={item.href}>

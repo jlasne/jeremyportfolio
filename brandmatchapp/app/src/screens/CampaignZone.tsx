@@ -9,9 +9,9 @@ import { Gates } from './Gates'
 // and editable one by one afterwards. Each tab answers one question.
 
 const TABS: { id: CampaignTab; label: string; question: string }[] = [
-  { id: 'brief', label: 'Brief', question: 'Who do I want to reach, and what do I sell' },
+  { id: 'brief', label: 'Brief', question: 'Who you want to reach, and what you sell' },
   { id: 'gates', label: 'Gates', question: 'Which criteria decide' },
-  { id: 'feasibility', label: 'Simulator', question: 'Does it hold my quota' },
+  { id: 'feasibility', label: 'Simulator', question: 'Does it hold your quota' },
 ]
 
 export function CampaignZone({ campaignId, tab }: { campaignId: string; tab: CampaignTab }) {

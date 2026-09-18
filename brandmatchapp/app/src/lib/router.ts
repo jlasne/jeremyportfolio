@@ -17,6 +17,7 @@ export type CampaignTab = 'brief' | 'gates' | 'feasibility'
 export type Route =
   | { name: 'home' }
   | { name: 'dashboard' }
+  | { name: 'newCampaign' }
   | { name: 'leads'; leadId: string | null }
   | { name: 'campaigns' }
   | { name: 'campaign'; campaignId: string; tab: CampaignTab }
@@ -40,6 +41,7 @@ export function parse(hash: string): Route {
     case 'campaigns':
       return { name: 'campaigns' }
     case 'campaign':
+      if (id === 'new') return { name: 'newCampaign' }
       if (!id) return { name: 'campaigns' }
       return { name: 'campaign', campaignId: id, tab: TABS.includes(third as CampaignTab) ? (third as CampaignTab) : 'brief' }
     case 'account':
