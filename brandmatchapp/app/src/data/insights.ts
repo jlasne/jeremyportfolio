@@ -26,6 +26,15 @@ export const GROUP_MIN = 12
 export const GAP_MIN = 0.25
 
 /**
+ * Leads a niche needs before it earns a row on the chart.
+ *
+ * Under this it can only ever print "too few yet", and a chart of ten rows
+ * where five say nothing is noise wearing the clothes of a chart. The rest are
+ * counted in one line instead, so nothing is hidden.
+ */
+export const NICHE_MIN = 8
+
+/**
  * Days before a lead is worth counting in a reply rate.
  *
  * It only matters where a group is younger than the rest, which is exactly the
@@ -436,7 +445,7 @@ export function advice(
     if (worst.rate! > 0 && best.rate! >= worst.rate! * 2) {
       out.push({
         id: 'drop-niche',
-        text: `${worst.label} takes ${worst.delivered} of your leads and replies half as often as ${best.label.toLowerCase()}. Switching it off would move those leads to the slices that answer.`,
+        text: `${worst.label} takes ${worst.delivered} of your leads and replies half as often as ${best.label.toLowerCase()}. Switching it off would move those leads to the niches that answer.`,
         action: 'Edit my niches',
         href: campaignId ? `#/campaign/${campaignId}/gates` : '#/campaigns',
       })

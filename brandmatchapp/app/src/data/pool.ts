@@ -300,7 +300,7 @@ export function doors(
     const looser = after < value
     price(
       dial.key,
-      dial.label.replace(/,.*$/, ''),
+      dial.label,
       `${looser ? 'Lower' : 'Raise'} it from ${dial.format(value)} to ${dial.format(after)}`,
       `${dial.label.replace(/,.*$/, '')} ${looser ? 'lowered' : 'raised'} from ${dial.format(value)} to ${dial.format(after)}`,
       { hard, niches },
@@ -357,7 +357,7 @@ export function doors(
     const next = campaign.extracted.niches.map((n) => (n.id === slice.id ? { ...n, enabled: true } : n))
     price(
       `niche_${slice.id}`,
-      'A slice you switched off',
+      'A niche you switched off',
       `Look in ${slice.label.toLowerCase()} again`,
       `${slice.label} switched back on`,
       { hard: gates.hard, niches: next },
@@ -431,7 +431,7 @@ export function standing(
 function missed(result: GateResult, gates: GateSet, creator: Creator, now: number): string {
   const key = result.blockedBy
   if (key === 'score') return `Scored ${result.score}, your first rules asked ${gates.passScore}`
-  if (key === 'niche') return 'Works in a slice you switched on later'
+  if (key === 'niche') return 'Works in a niche you switched on later'
   if (key === 'countries') return `Posts from ${COUNTRY_NAMES[creator.country ?? ''] ?? 'somewhere else'}, outside your first list`
   if (key === 'languages') return `Posts in ${LANGUAGE_NAMES[creator.language ?? ''] ?? 'another language'}, outside your first list`
   const dial = DIALS.find((d) => d.key === key)

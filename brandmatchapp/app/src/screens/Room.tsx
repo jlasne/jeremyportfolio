@@ -81,8 +81,8 @@ function Channels({ room }: { room: RoomShape }) {
       {spent.length > 0 && working.length > 0 && (
         <p className="gate-lede">
           {spent.length === 1
-            ? `${spent[0].label} has run its course.`
-            : `${spent.length} of these have run their course.`}{' '}
+            ? `One way of searching has run its course: ${spent[0].label.toLowerCase()}.`
+            : `${spent.length} of these ways have run their course.`}{' '}
           {working.length === 1 ? 'The other one is' : `The other ${working.length} are`} still turning up people
           you have never seen.
         </p>

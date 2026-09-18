@@ -17,15 +17,17 @@ import { CORS, fail, json } from './httpUtil'
 
 const http = httpRouter()
 
-for (const path of ['/api', '/ops']) {
-  http.route({
-    path,
-    method: 'OPTIONS',
-    handler: httpAction(async () => new Response(null, { status: 204, headers: CORS })),
-  })
+// The preflight is answered by one handler and the methods by another. A route
+// is claimed once per path and method, so OPTIONS is left out of the list
+// below: registering it in both loops is a push the deployment refuses.
+const preflight = httpAction(async () => new Response(null, { status: 204, headers: CORS }))
+
+for (const path of ['/api', '/ops'] as const) {
+  http.route({ path, method: 'OPTIONS', handler: preflight })
+  http.route({ pathPrefix: `${path}/`, method: 'OPTIONS', handler: preflight })
 }
 
-for (const method of ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'] as const) {
+for (const method of ['GET', 'POST', 'PATCH', 'DELETE'] as const) {
   http.route({ path: '/api', method, handler: clientApi })
   http.route({ pathPrefix: '/api/', method, handler: clientApi })
   http.route({ path: '/ops', method, handler: opsApi })

@@ -74,7 +74,7 @@ export function checkSeeds(handles: string[], gates: GateSet | null, niches: Nic
       handle,
       state: 'fails',
       note: result.verdict === 'off_niche'
-        ? 'Works in something outside the slices you picked.'
+        ? 'Works in something outside the niches you picked.'
         : `Fails a deal breaker: ${lower(result.reason)}`,
       followers: creator.followers,
     }

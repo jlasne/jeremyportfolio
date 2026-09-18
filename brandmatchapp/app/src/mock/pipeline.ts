@@ -350,7 +350,7 @@ export const quotaEntries: QuotaEntry[] = [
     period: currentPeriod,
     kind: 'entitlement',
     delta: entitled,
-    note: `Tier ${subscription.tier} a day over ${daysInPeriod} days`,
+    note: `Your plan, ${subscription.tier} a day over ${daysInPeriod} days`,
     at: subscription.periodStart,
   },
   {

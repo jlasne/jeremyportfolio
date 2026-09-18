@@ -3,8 +3,8 @@ import { deliveredToday, getCampaigns, getGateSet, getQuota, getSubscription, li
 import { useStore } from '../data/hooks'
 import {
   advice, byWeek, compare, economics, funnelOf, GROUP_MIN, inPeriod, insight, nicheBands, nudges,
-  lostBreakdown, previousPeriod, RATE_MIN, reachBands, readTable, repliedRows, scoreBands,
-  SETTLED_DAYS, sizeBands, widenedReading, type Band, type Period,
+  lostBreakdown, NICHE_MIN, previousPeriod, RATE_MIN, reachBands, readTable, repliedRows,
+  scoreBands, SETTLED_DAYS, sizeBands, widenedReading, type Band, type Period,
 } from '../data/insights'
 import { LOST_LABEL, STATUS_LABEL } from '../data/status'
 import { download, toCsv } from '../lib/csv'
@@ -123,6 +123,11 @@ export function Dashboard() {
   const campaign = campaigns.find((c) => c.id === campaignId)
   const niches = campaign?.extracted.niches ?? campaigns.flatMap((c) => c.extracted.niches)
   const headline = insight(rows, niches)
+  // Niches with a handful of leads can only print "too few yet", so they are
+  // counted in a line rather than drawn as five empty rows.
+  const niched = nicheBands(rows, niches)
+  const shownNiches = niched.filter((b) => b.delivered >= NICHE_MIN)
+  const quietNiches = niched.length - shownNiches.length
   // The receipt on any door already opened. Only drawn when there is one.
   const widened = reachBands(rows)
   const wideCampaign = campaignId ?? campaigns.find((c) => c.widened)?.id ?? null
@@ -246,11 +251,13 @@ export function Dashboard() {
         <div className="band-grid">
           <Bands rows={sizeBands(rows)} title="How often each size replies" />
           <Bands rows={scoreBands(rows)} title="How often each score replies" />
-          {niches.length > 0 && <Bands rows={nicheBands(rows, niches)} title="How often each niche replies" />}
+          {shownNiches.length > 0 && <Bands rows={shownNiches} title="How often each niche replies" />}
         </div>
         <p className="hint">
           A share only appears once {RATE_MIN} leads sit behind it. Below that one reply would swing it, so we say too
           few yet instead.
+          {quietNiches > 0 &&
+            ` ${quietNiches} other ${quietNiches === 1 ? 'niche has' : 'niches have'} fewer than ${NICHE_MIN} leads so far, so they are left off the chart.`}
         </p>
 
         {widened.length > 1 && (

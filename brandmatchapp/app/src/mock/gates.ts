@@ -68,8 +68,8 @@ export const gateSets: GateSet[] = [
     preset: 'custom',
     by: 'mem_1',
     changes: [
-      'Median views, floor: 7.5k to 12k',
-      'Median comments, floor: 15 to 25',
+      'Views on a typical post, at least: 7.5k to 12k',
+      'Comments on a typical post, at least: 15 to 25',
     ],
     createdAt: daysAgo(31),
   },

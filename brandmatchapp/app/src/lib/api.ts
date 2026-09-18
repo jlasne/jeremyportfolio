@@ -7,7 +7,7 @@
 // figure has no path into a client screen. Rule one of the product: we sell
 // delivered leads and the production side of it is invisible.
 
-const DIRECT = 'https://dashing-swan-386.eu-west-1.convex.site'
+const DIRECT = 'https://limitless-ladybug-747.eu-west-1.convex.site'
 
 function built(): string {
   try {

@@ -148,7 +148,7 @@ function Niches({ campaignId, niches, hard }: { campaignId: string; niches: Nich
     <div className="card gate-card">
       <h2>2. Niches</h2>
       <p className="gate-lede">
-        Looking in {on} of {niches.length} slices of your market. Anyone too small for every one of them is dropped
+        Looking in {on} of {niches.length} niches. Anyone too small for every one of them is dropped
         before we look closer.
       </p>
       <ul className="switches">
@@ -193,8 +193,8 @@ function Niches({ campaignId, niches, hard }: { campaignId: string; niches: Nich
                 {openId === n.id && (
                   <div className="niche-dials">
                     <p className="hint">
-                      Anything you leave alone follows the campaign numbers above. A small account in the right slice
-                      can be worth more than a big one in the wrong slice.
+                      Anything you leave alone follows the campaign numbers above. A small account in the right niche
+                      can be worth more than a big one in the wrong niche.
                     </p>
                     {OWN.map((key) => {
                       const dial = dialByKey.get(key)!
@@ -240,7 +240,7 @@ function Niches({ campaignId, niches, hard }: { campaignId: string; niches: Nich
       <div className="niche-add">
         <input
           className="input"
-          placeholder="Add a slice we missed"
+          placeholder="Add a niche we missed"
           value={adding}
           onChange={(e) => setAdding(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); add() } }}

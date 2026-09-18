@@ -29,6 +29,13 @@ export function relative(iso: string, now = new Date()): string {
   return `${Math.floor(d / 365)} years ago`
 }
 
+/** "2026-09" as a month a person reads. */
+export function monthOf(period: string): string {
+  const [year, month] = period.split('-').map(Number)
+  if (!year || !month) return period
+  return new Date(year, month - 1, 1).toLocaleDateString('en-GB', { month: 'long' })
+}
+
 export function absolute(iso: string): string {
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 }

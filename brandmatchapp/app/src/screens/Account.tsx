@@ -2,7 +2,7 @@ import { getAccount, getCampaigns, getMembers, getQuota, getSubscription } from 
 import { useStore } from '../data/hooks'
 import { getState } from '../data/store'
 import { TIERS } from '../mock/account'
-import { absolute, money } from '../lib/format'
+import { absolute, money, monthOf } from '../lib/format'
 
 // Outside the five zones: the plan, the month's balance, the team.
 //
@@ -49,7 +49,7 @@ export function Account() {
           <li><span>Left</span><b className="num">{quota.remaining}</b></li>
         </ul>
         <p className="hint">
-          A quiet day is not lost. Whatever is left runs to the end of {sub.period}, and your campaigns share it.
+          A quiet day is not lost. Whatever is left runs to the end of {monthOf(sub.period)}, and your campaigns share it.
         </p>
       </div>
 

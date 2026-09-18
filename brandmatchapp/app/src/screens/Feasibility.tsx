@@ -173,7 +173,7 @@ function Spread({ histogram, passScore }: { histogram: { score: number; count: n
 // ---------------------------------------------------------------------------
 
 const HEADLINE: Record<Verdict, (per: number, want: number) => string> = {
-  feasible: (_per, want) => `These rules can bring you ${want} leads a day.`,
+  feasible: (per) => `These rules can bring you around ${per} leads a day.`,
   short: (per) => `These rules top out at around ${per} leads a day.`,
   too_narrow: () =>
     'These rules are too narrow to fill a day. Loosen them, or move to a smaller plan.',
@@ -272,7 +272,7 @@ export function Feasibility({ campaignId }: { campaignId: string }) {
         {verdict === 'feasible' && (
           <>
             <p className="muted">
-              Around {run.estimatedPerDay} a day, and you asked for {want}. You have room to spare.
+              You asked for {want} a day, so you have room to spare.
             </p>
             <div className="verdict-actions">
               <a className="btn primary" href="#/leads">Work the list</a>
