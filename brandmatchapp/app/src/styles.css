@@ -2373,7 +2373,12 @@ body { background: var(--paper); }
 @media (max-width: 700px) {
   .pairs { grid-template-columns: 1fr; gap: 2px 0; }
   .pairs dd { margin-bottom: 8px; }
-  .tiles { grid-template-columns: 1fr 1fr; }
+  /* Two across, and the tiles have to be allowed to shrink. A grid item will
+     not go below its content on its own, and a big number in the display font
+     is wider than half a phone. */
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tile { min-width: 0; padding: 14px 15px; }
+  .tile b { font-size: 21px; overflow-wrap: anywhere; }
 }
 
 /* ====================================================================
@@ -2724,4 +2729,88 @@ body { background: var(--paper); }
   .contact { grid-template-columns: minmax(130px, 1fr) 150px; row-gap: 8px; }
   .contact .metric { display: none; }
   .search-field { width: 100%; }
+}
+
+/* ====================================================================
+   Niches. A slice of the market, its switch, and its own numbers.
+   ==================================================================== */
+
+.niche-name {
+  width: auto; min-width: 200px; max-width: 320px; height: 28px;
+  font-weight: 600; border-radius: var(--radius); padding: 0 8px;
+}
+.switch-body > b .btn.small { font-weight: 400; }
+
+.niche-dials {
+  margin: 10px 0 2px; padding: 12px 14px; border-radius: var(--radius);
+  background: var(--paper); display: flex; flex-direction: column; gap: 14px;
+}
+.niche-dials .hint { margin: 0; }
+/* A dial still on the campaign number is drawn back, so an override stands out. */
+.niche-dials .inherited .dial-head span, .niche-dials .inherited .dial-head b { color: var(--ink-3); }
+
+.niche-add { display: flex; gap: 8px; margin-top: 14px; }
+.niche-add .input { max-width: 280px; }
+
+/* ====================================================================
+   The dashboard. Everything here is built from what the client typed,
+   so a figure that rests on too little says so instead of guessing.
+   ==================================================================== */
+
+.head-select { width: auto; min-width: 150px; }
+
+/* A reminder states the fact and offers the fix. No colour, no reproach. */
+.nudge {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 11px 16px; margin-bottom: 10px;
+  border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel);
+  box-shadow: var(--shadow);
+}
+.nudge > span { flex: 1; min-width: 200px; }
+
+.rate { display: inline-flex; align-items: baseline; gap: 5px; font-weight: 600; }
+.rate small { font-weight: 400; color: var(--ink-3); font-size: 11px; }
+.rate.thin { color: var(--ink-3); font-weight: 400; font-size: 12px; font-style: italic; }
+
+/* A five column table does not fit a phone, and shrinking the type until it
+   does is not a fix. It scrolls sideways inside its own card instead. */
+.compare-scroll { overflow-x: auto; margin-top: 12px; }
+.compare { width: 100%; min-width: 440px; border-collapse: collapse; }
+.compare th, .compare td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: right; }
+.compare thead th { color: var(--ink-3); font-weight: 500; font-size: 12px; }
+.compare tbody th, .compare thead th:first-child { text-align: left; font-weight: 500; color: var(--ink-2); }
+.compare tbody tr:last-child th, .compare tbody tr:last-child td { border-bottom: 0; }
+.compare td small { color: var(--ink-3); font-size: 11px; }
+.compare .gap { color: var(--ink-3); }
+.compare .gap.up { color: var(--orange-deep); font-weight: 600; }
+
+.band-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
+.band-group h3, .card h3 {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase;
+  color: var(--ink-3); margin: 18px 0 10px;
+}
+.band-group h3 { margin-top: 0; }
+.bands { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+.bands li { display: grid; grid-template-columns: 118px minmax(0, 1fr) 84px; gap: 10px; align-items: center; }
+.band-label { color: var(--ink-2); font-size: 12.5px; }
+.band-track { display: block; height: 12px; border-radius: 3px; background: var(--paper-2); }
+.band-track i { display: block; height: 100%; border-radius: 3px; background: var(--orange); min-width: 2px; }
+
+.funnel-shape.steps li { grid-template-columns: 130px minmax(0, 1fr) 60px 120px; }
+.funnel-shape.steps .funnel-drop { text-align: left; }
+
+.weeks { list-style: none; margin: 0; padding: 0; display: flex; gap: 10px; align-items: flex-end; }
+.weeks li { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.week-bar { display: flex; align-items: flex-end; width: 100%; height: 70px; background: var(--paper-2); border-radius: 4px; }
+.week-bar i { display: block; width: 100%; background: var(--orange); border-radius: 4px; min-height: 2px; }
+.weeks b { font-size: 12.5px; }
+.weeks small { color: var(--ink-3); font-size: 11px; }
+
+.tile small { color: var(--ink-3); font-size: 11.5px; margin-top: 2px; }
+
+@media (max-width: 760px) {
+  .compare { font-size: 12.5px; }
+  .compare th, .compare td { padding: 7px 5px; }
+  .bands li { grid-template-columns: 96px minmax(0, 1fr) 70px; }
+  .funnel-shape.steps li { grid-template-columns: minmax(0, 1fr) 100px; }
 }

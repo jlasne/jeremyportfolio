@@ -98,6 +98,7 @@ export const clientApi = httpAction(async (ctx, req) => {
           dailyCap: body.dailyCap,
           brief: body.brief,
           extracted: body.extracted,
+          niches: body.niches,
         })
         if ('error' in campaign) return fail(campaign.error, 404)
         return json({ campaign })

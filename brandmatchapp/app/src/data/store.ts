@@ -14,6 +14,7 @@ import type {
   Knockout,
   LeadStatus,
   Member,
+  Niche,
   PresetId,
   QuotaEntry,
   QuotaPeriod,
@@ -162,6 +163,19 @@ export function undoMove(leadId: string): void {
   })
 }
 
+/**
+ * The niche list is the client's. Adding, renaming, switching one off or giving
+ * it its own numbers all land here, and all of them change who gets found.
+ */
+export function setNiches(campaignId: string, niches: Niche[]): void {
+  const now = new Date().toISOString()
+  setState((s) => ({
+    campaigns: s.campaigns.map((c) =>
+      c.id === campaignId ? { ...c, extracted: { ...c.extracted, niches }, updatedAt: now } : c,
+    ),
+  }))
+}
+
 /** Kept across campaigns. A plain flag: it says nothing about the deal. */
 export function toggleSaved(leadId: string): void {
   setState((s) => ({
@@ -217,6 +231,7 @@ export function createCampaign(brief: CampaignBrief, proposal: Proposal, name: s
           countries: proposal.countries,
           languages: proposal.languages,
           templateId: proposal.templateId,
+          niches: proposal.niches,
           extractedAt: now,
         },
         gateSetId,
@@ -313,7 +328,7 @@ export function runFeasibility(campaignId: string, precomputed?: SimResult): voi
     if (!campaign || !gates) return {}
     // The screen runs the scan while it animates, so the result is handed back
     // rather than computed twice.
-    const out = precomputed ?? simulate(gates, s.subscription.tier)
+    const out = precomputed ?? simulate(gates, campaign.extracted.niches, s.subscription.tier)
     const run: FeasibilityRun = {
       id: `fea_${gates.id}_${s.feasibilityRuns.length}`,
       campaignId,
@@ -321,6 +336,7 @@ export function runFeasibility(campaignId: string, precomputed?: SimResult): voi
       gateSetVersion: gates.version,
       sampleSize: out.funnel.scanned,
       passedHard: out.funnel.pastHard,
+      inNiche: out.funnel.inNiche,
       passedKnockouts: out.funnel.pastKnockouts,
       qualified: out.funnel.qualified,
       blame: out.blame,

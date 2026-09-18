@@ -1,4 +1,5 @@
 import type { Campaign } from '../types'
+import { suggestNiches } from '../data/niches'
 import { account } from './account'
 import { daysAgo } from './time'
 
@@ -22,6 +23,15 @@ export const campaigns: Campaign[] = [
       countries: ['US', 'UK', 'CA', 'AU'],
       languages: ['en'],
       templateId: 'sell_to_creators',
+      // A postnatal account at 20k is worth more than a general one at 200k,
+      // so that slice carries its own, lower numbers.
+      niches: suggestNiches('fitness coaches strength training', 'mobile apps').map((n) =>
+        n.id === 'postnatal_and_womens_health'
+          ? { ...n, hard: { followersMin: 8_000, medianViewsMin: 6_000 } }
+          : n.id === 'rehab_and_physio'
+            ? { ...n, hard: { followersMin: 10_000, medianViewsMin: 7_000 } }
+            : n,
+      ),
       extractedAt: daysAgo(96),
     },
     gateSetId: 'gate_fit_v2',
@@ -44,6 +54,10 @@ export const campaigns: Campaign[] = [
       countries: ['US', 'UK', 'CA'],
       languages: ['en'],
       templateId: 'sell_to_creators',
+      niches: suggestNiches('finance educators investing', 'course platform').map((n) =>
+        // Options is a small, noisy corner. Switched off for now.
+        n.id === 'options_and_derivatives' ? { ...n, enabled: false } : n,
+      ),
       extractedAt: daysAgo(24),
     },
     gateSetId: 'gate_fin_v1',

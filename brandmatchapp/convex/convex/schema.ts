@@ -187,6 +187,20 @@ export default defineSchema({
       languages: v.optional(v.array(v.string())),
       /** Which Gate 3 library the first proposal came from. */
       templateId: v.optional(v.string()),
+      /**
+       * The slices of the target we look in.
+       *
+       * Each one can carry its own measured numbers, because what counts as
+       * big is not the same in every slice: a 20k postnatal account can be
+       * worth more than a 200k general one. Switching one off stops us looking
+       * there, and every delivered lead records which slice it matched.
+       */
+      niches: v.optional(v.array(v.object({
+        id: v.string(),
+        label: v.string(),
+        enabled: v.boolean(),
+        hard: v.optional(hardRules),
+      }))),
       extractedAt: v.optional(v.number()),
     }),
     /** The gate version leads are judged against right now. */
@@ -282,9 +296,12 @@ export default defineSchema({
     verdict: v.union(
       v.literal('qualified'),
       v.literal('hard_fail'),
+      v.literal('off_niche'),
       v.literal('knockout_fail'),
       v.literal('below_threshold'),
     ),
+    /** Which of the campaign's niches this person works in, when one fit. */
+    niche: v.optional(v.string()),
     /** The rule that ended it: a hard key, a knockout id, or absent. */
     blockedBy: v.optional(v.string()),
     hardChecks: v.array(
@@ -425,6 +442,8 @@ export default defineSchema({
     gateSetVersion: v.number(),
     sampleSize: v.number(),
     passedHard: v.number(),
+    /** In a niche still switched on, and big enough for that niche's own bar. */
+    inNiche: v.optional(v.number()),
     passedKnockouts: v.number(),
     qualified: v.number(),
     /** Which threshold sent profiles home, and whether it did so on its own. */

@@ -3,6 +3,7 @@ import { v } from 'convex/values'
 import type { Doc } from './_generated/dataModel'
 import { enforceLocks, settle, settleScore, template } from './templates'
 
+
 // Campaigns and their gate versions.
 //
 // A gate version is never updated in place. An edit writes version n + 1 and
@@ -103,6 +104,7 @@ export const patch = internalMutation({
     dailyCap: v.optional(v.number()),
     brief: v.optional(v.object({ audience: v.string(), offer: v.string() })),
     extracted: v.optional(v.any()),
+    niches: v.optional(v.any()),
   },
   returns: v.any(),
   handler: async (ctx, args) => {
@@ -114,6 +116,32 @@ export const patch = internalMutation({
     }
     if (args.brief) patch.brief = { ...args.brief, writtenAt: Date.now() }
     if (args.extracted) patch.extracted = { ...campaign.extracted, ...args.extracted }
+    if (args.niches) {
+      // A niche's own numbers go through the same limits as the campaign's, so
+      // the editor cannot be used to set a bar nobody could ever clear. They
+      // are settled against the campaign's current numbers, because half the
+      // limits are ties between two dials.
+      const gates = campaign.gateSetId ? await ctx.db.get(campaign.gateSetId) : null
+      const base = gates?.hard ?? {}
+      const niches = (Array.isArray(args.niches) ? args.niches : []).map((n: any) => {
+        const raw = (n.hard ?? {}) as Record<string, unknown>
+        const keys = Object.keys(raw)
+        const row: Record<string, unknown> = {
+          id: String(n.id),
+          label: String(n.label ?? n.id).slice(0, 80),
+          enabled: n.enabled !== false,
+        }
+        if (!keys.length) return row
+        const settled = settle({ ...base, ...raw }) as Record<string, unknown>
+        const hard: Record<string, unknown> = {}
+        for (const key of keys) {
+          if (typeof settled[key] === 'number') hard[key] = settled[key]
+        }
+        if (Object.keys(hard).length) row.hard = hard
+        return row
+      })
+      patch.extracted = { ...(patch.extracted ?? campaign.extracted), niches }
+    }
     await ctx.db.patch(args.campaignId, patch)
     const after = await ctx.db.get(args.campaignId)
     return publicCampaign(after!)

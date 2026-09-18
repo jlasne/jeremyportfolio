@@ -29,11 +29,12 @@ import { absolute } from '../lib/format'
 
 const STAGES = [
   { at: 0, label: 'Looking through accounts' },
-  { at: 1400, label: 'Counting views on their real posts' },
-  { at: 2600, label: 'Checking your deal breakers' },
-  { at: 3700, label: 'Scoring the fit' },
+  { at: 1200, label: 'Counting views on their real posts' },
+  { at: 2200, label: 'Sorting them into your niches' },
+  { at: 3200, label: 'Checking your deal breakers' },
+  { at: 4100, label: 'Scoring the fit' },
 ]
-const SCAN_MS = 4600
+const SCAN_MS = 5000
 
 function Scanning({ result, passScore, onDone }: { result: SimResult; passScore: number; onDone: () => void }) {
   const [elapsed, setElapsed] = useState(0)
@@ -106,6 +107,7 @@ function Funnel({
   const rows: Band[] = [
     { label: 'People we looked at', count: f.scanned, width: 1, share: 1, drop: null },
     { label: 'Big and active enough', count: f.pastHard, width: f.pastHard / widest, share: f.pastHard / top, drop: null },
+    { label: 'In a niche you want', count: f.inNiche, width: f.inNiche / widest, share: f.inNiche / top, drop: null },
     { label: 'Passed your deal breakers', count: f.pastKnockouts, width: f.pastKnockouts / widest, share: f.pastKnockouts / top, drop: null },
     { label: `Scored ${passScore} or more`, count: f.qualified, width: f.qualified / widest, share: f.qualified / top, drop: null },
   ]
@@ -210,11 +212,12 @@ export function Feasibility({ campaignId }: { campaignId: string }) {
   // it has none. Never the monthly balance, which is not a daily number.
   const want = campaign?.dailyCap ?? plan.tier
 
-  const list = useMemo(() => (gates ? levers(gates) : []), [gates])
+  const niches = campaign?.extracted.niches ?? []
+  const list = useMemo(() => (gates ? levers(gates, niches) : []), [gates, niches])
   if (!campaign || !gates) return null
 
   // The scan runs at once and the screen spends the wait showing it happen.
-  const start = () => setScan(simulate(gates, plan.tier))
+  const start = () => setScan(simulate(gates, niches, plan.tier))
   const finish = () => {
     if (scan) runFeasibility(campaignId, scan)
     setScan(null)
@@ -245,6 +248,7 @@ export function Feasibility({ campaignId }: { campaignId: string }) {
             funnel: {
               scanned: run.sampleSize,
               pastHard: run.passedHard,
+              inNiche: run.inNiche,
               pastKnockouts: run.passedKnockouts,
               qualified: run.qualified,
             },

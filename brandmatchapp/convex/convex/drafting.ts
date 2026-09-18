@@ -21,12 +21,23 @@ const OPENROUTER = 'https://openrouter.ai/api/v1/chat/completions'
 const SCHEMA = {
   type: 'object',
   additionalProperties: false,
-  required: ['templateId', 'name', 'countries', 'languages', 'hard', 'knockouts', 'criteria', 'passScore'],
+  required: ['templateId', 'name', 'countries', 'languages', 'niches', 'hard', 'knockouts', 'criteria', 'passScore'],
   properties: {
     templateId: { type: 'string', enum: TEMPLATE_IDS },
     name: { type: 'string' },
     countries: { type: 'array', items: { type: 'string' } },
     languages: { type: 'array', items: { type: 'string' } },
+    niches: {
+      type: 'array',
+      minItems: 4,
+      maxItems: 7,
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['id', 'label'],
+        properties: { id: { type: 'string' }, label: { type: 'string' } },
+      },
+    },
     hard: {
       type: 'object',
       additionalProperties: false,
@@ -87,6 +98,8 @@ function instructions(): string {
     'Gate 2: keep every knockout id of the library. Reword the questions for this offer. You may add at most one new knockout.',
     'Gate 3: keep the seven criteria ids of the library, in order. Reword the label and the guide for this offer. Set passScore so roughly one profile in six reaching gate 3 qualifies.',
     '',
+    'Niches: four to seven slices of the target, the sub topics these people actually work in. A target is never one audience, and the slices do not answer at the same rate. Ids are short snake_case.',
+    '',
     'Also write a short campaign name, "<who>, <what you sell>", and the country and language codes the brief implies.',
     'Write in English. Never use an em dash.',
   ].join('\n')
@@ -146,6 +159,13 @@ export const gatesFromBrief = internalAction({
         countries: draft.countries ?? [],
         languages: draft.languages ?? [],
         templateId: lib.id,
+        // All switched on: a suggestion the client has to switch on is not a
+        // suggestion. Each one can take its own numbers later.
+        niches: (Array.isArray(draft.niches) ? draft.niches : []).map((n: any) => ({
+          id: String(n.id),
+          label: String(n.label),
+          enabled: true,
+        })),
         extractedAt: Date.now(),
       },
     })

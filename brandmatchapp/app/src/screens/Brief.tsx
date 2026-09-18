@@ -36,8 +36,15 @@ export function Brief({ campaignId }: { campaignId: string }) {
           <dd>{extracted.languages.length ? extracted.languages.join(', ') : 'Any'}</dd>
           <dt>Scoring started from</dt>
           <dd>{library?.name ?? extracted.templateId}</dd>
+          <dt>Slices of your market</dt>
+          <dd>
+            {extracted.niches.filter((n) => n.enabled).map((n) => n.label).join(', ') || 'None picked yet'}
+          </dd>
         </dl>
-        <p className="hint">Read on {absolute(extracted.extractedAt)}. Fix anything wrong here before you touch your rules.</p>
+        <p className="hint">
+          Read on {absolute(extracted.extractedAt)}. The slices are edited in{' '}
+          <a href={`#/campaign/${campaignId}/gates`}>your rules</a>, where each one can carry its own numbers.
+        </p>
       </div>
 
       <div className="page-head">

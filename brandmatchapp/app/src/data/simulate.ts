@@ -1,7 +1,7 @@
-import type { Creator, GateSet, HardRules } from '../types'
+import type { Creator, GateSet, HardRules, Niche } from '../types'
 import { built } from '../mock/creators'
 import { judge } from '../mock/judge'
-import { evaluate, passesHard, runHard, type Judgement } from './gates'
+import { evaluate, loosest, passesHard, runHard, type Judgement } from './gates'
 import { DIALS, settle, type DialKey } from './tuning'
 
 // The simulator's engine.
@@ -25,6 +25,8 @@ function scanRate(tier: number): number {
 export interface Funnel {
   scanned: number
   pastHard: number
+  /** In a niche still switched on, and big enough for that niche's own bar. */
+  inNiche: number
   pastKnockouts: number
   qualified: number
 }
@@ -61,19 +63,20 @@ const SAMPLE: Sample[] = built.map((b, index) => ({ index, creator: b.creator, b
  * would say, so the answers are reused across every relaxation run. On the
  * server this is the evaluations table doing the same job.
  */
-function judgements(gates: GateSet): Judgement[] {
-  return SAMPLE.map((s) => judge(s.index, s.band, gates))
+function judgements(gates: GateSet, niches: Niche[]): Judgement[] {
+  return SAMPLE.map((s) => judge(s.index, s.band, gates, niches))
 }
 
-function walk(gates: GateSet, answers: Judgement[], now: number): SimResult {
+function walk(gates: GateSet, niches: Niche[], answers: Judgement[], now: number): SimResult {
   const blame = new Map<DialKey, { sole: number; shared: number }>()
   const histogram = new Map<number, number>()
   let pastHard = 0
+  let inNiche = 0
   let pastKnockouts = 0
   let qualified = 0
 
   SAMPLE.forEach((s, i) => {
-    const checks = runHard(s.creator, gates.hard, now)
+    const checks = runHard(s.creator, loosest(gates.hard, niches), now)
     if (!passesHard(checks)) {
       const failed = checks.filter((c) => !c.pass).map((c) => c.key as DialKey)
       for (const key of failed) {
@@ -85,7 +88,9 @@ function walk(gates: GateSet, answers: Judgement[], now: number): SimResult {
       return
     }
     pastHard++
-    const result = evaluate(s.creator, gates, answers[i], now)
+    const result = evaluate(s.creator, gates, niches, answers[i], now)
+    if (result.verdict === 'off_niche') return
+    inNiche++
     if (result.verdict === 'knockout_fail') return
     pastKnockouts++
     histogram.set(result.score, (histogram.get(result.score) ?? 0) + 1)
@@ -93,7 +98,7 @@ function walk(gates: GateSet, answers: Judgement[], now: number): SimResult {
   })
 
   return {
-    funnel: { scanned: SAMPLE.length, pastHard, pastKnockouts, qualified },
+    funnel: { scanned: SAMPLE.length, pastHard, inNiche, pastKnockouts, qualified },
     // Every score from 0 to the ceiling, so the spread reads as a spread.
     histogram: Array.from({ length: gates.criteria.length * 2 + 1 }, (_, score) => ({
       score,
@@ -106,8 +111,8 @@ function walk(gates: GateSet, answers: Judgement[], now: number): SimResult {
   }
 }
 
-export function simulate(gates: GateSet, tier: number): SimResult {
-  const out = walk(gates, judgements(gates), Date.now())
+export function simulate(gates: GateSet, niches: Niche[], tier: number): SimResult {
+  const out = walk(gates, niches, judgements(gates, niches), Date.now())
   out.estimatedPerDay = Math.round((out.funnel.qualified / Math.max(1, out.funnel.scanned)) * scanRate(tier))
   return out
 }
@@ -152,10 +157,10 @@ export interface Lever {
  * creator has a paid offer, so that a quota is met, is selling them worse
  * leads. Volume is negotiated on the numbers, never on the questions.
  */
-export function levers(gates: GateSet): Lever[] {
-  const answers = judgements(gates)
+export function levers(gates: GateSet, niches: Niche[]): Lever[] {
+  const answers = judgements(gates, niches)
   const now = Date.now()
-  const base = walk(gates, answers, now)
+  const base = walk(gates, niches, answers, now)
   const from = Math.max(1, base.funnel.qualified)
   const blameOf = (key: DialKey) => base.blame.find((b) => b.key === key)?.sole ?? 0
 
@@ -167,7 +172,7 @@ export function levers(gates: GateSet): Lever[] {
     const loosened = settle({ ...gates.hard, [dial.key]: NOTCH[dial.key](value) })
     const after = loosened[dial.key]
     if (after === value) continue
-    const run = walk({ ...gates, hard: loosened }, answers, now)
+    const run = walk({ ...gates, hard: loosened }, niches, answers, now)
     const gain = run.funnel.qualified / from
     candidates.push({
       id: dial.key,

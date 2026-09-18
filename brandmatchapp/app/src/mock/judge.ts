@@ -1,4 +1,4 @@
-import type { CriterionScore, GateSet } from '../types'
+import type { CriterionScore, GateSet, Niche } from '../types'
 import type { Judgement } from '../data/gates'
 import { seeded } from './rand'
 
@@ -53,8 +53,28 @@ const CRITERION_NOTES: Record<string, [string, string, string]> = {
 }
 
 /** A deterministic answer for one profile against one gate version. */
-export function judge(index: number, band: string, gates: GateSet): Judgement {
+export function judge(index: number, band: string, gates: GateSet, niches: Niche[] = []): Judgement {
   const rand = seeded(4_400_011 + index * 104_729)
+
+  // Which slice this person works in. Weighted, because a real target is never
+  // split evenly: the first niche named is usually the biggest.
+  const on = niches.filter((n) => n.enabled)
+  let niche: string | null = null
+  if (on.length) {
+    const roll = rand()
+    // Roughly one in eleven works in something the client did not name.
+    if (roll > 0.91) niche = null
+    else {
+      const weights = on.map((_, i) => 1 / (i + 1.4))
+      const total = weights.reduce((a, b) => a + b, 0)
+      let cut = (roll / 0.91) * total
+      niche = on[on.length - 1].id
+      for (let i = 0; i < on.length; i++) {
+        cut -= weights[i]
+        if (cut <= 0) { niche = on[i].id; break }
+      }
+    }
+  }
   const knockouts: Judgement['knockouts'] = {}
   // A strong profile clears the knockouts. A fair one fails roughly one in five.
   const failOdds = band === 'strong' ? 0.04 : band === 'fair' ? 0.2 : 0.4
@@ -75,5 +95,5 @@ export function judge(index: number, band: string, gates: GateSet): Judgement {
     const notes = CRITERION_NOTES[c.id] ?? ['No', 'Partly', 'Yes']
     criteria[c.id] = { score, note: notes[score] }
   }
-  return { knockouts, criteria, reason: '' }
+  return { niche, knockouts, criteria, reason: '' }
 }

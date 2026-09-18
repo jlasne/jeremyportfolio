@@ -82,7 +82,8 @@ const passed: Passed[] = []
 built.forEach((b, index) => {
   const campaign = b.niche === 'fitness' ? campaigns[0] : campaigns[1]
   const gates = gateSetById.get(campaign.gateSetId)!
-  const result = evaluate(b.creator, gates, judge(index, b.band, gates), now)
+  const niches = campaign.extracted.niches
+  const result = evaluate(b.creator, gates, niches, judge(index, b.band, gates, niches), now)
   const rand = seeded(777_001 + index * 31)
 
   const evaluationId = `evl_${b.creator.id}`
@@ -94,6 +95,7 @@ built.forEach((b, index) => {
     gateSetId: gates.id,
     gateSetVersion: gates.version,
     verdict: result.verdict,
+    niche: result.niche,
     blockedBy: result.blockedBy,
     hardChecks: result.hardChecks,
     knockoutAnswers: result.knockoutAnswers,
@@ -131,8 +133,10 @@ passed.forEach((row, rank) => {
     daysBack === 0 ? 0
       : daysBack <= 2 ? (roll > 0.45 ? 1 : 0)
         : daysBack <= 5 ? (roll > 0.75 ? 2 : 1)
-          : daysBack <= 10 ? (roll > 0.88 ? 3 : roll > 0.55 ? 2 : 1)
-            : (roll > 0.95 ? 4 : roll > 0.86 ? 3 : roll > 0.6 ? 2 : 1)
+          // Signing is rare, which is the whole reason a lead costs what it
+          // costs. Two or three a month out of a hundred and fifty leads.
+          : daysBack <= 9 ? (roll > 0.97 ? 4 : roll > 0.82 ? 3 : roll > 0.55 ? 2 : 1)
+            : (roll > 0.94 ? 4 : roll > 0.74 ? 3 : roll > 0.55 ? 2 : 1)
   const lost = daysBack > 6 && rand() > 0.88 && reach > 0
   const status: LeadStatus = lost ? 'lost' : STATUS_WALK[reach]
   const leadId = `led_${row.creatorId}`
@@ -288,7 +292,8 @@ for (let back = 29; back >= 0; back--) {
 // ---------------------------------------------------------------------------
 
 export const feasibilityRuns: FeasibilityRun[] = gateSets.map((gates, i) => {
-  const out = simulate(gates, subscription.tier)
+  const campaign = campaigns.find((c) => c.id === gates.campaignId)!
+  const out = simulate(gates, campaign.extracted.niches, subscription.tier)
   return {
     id: `fea_${gates.id}`,
     campaignId: gates.campaignId,
@@ -296,6 +301,7 @@ export const feasibilityRuns: FeasibilityRun[] = gateSets.map((gates, i) => {
     gateSetVersion: gates.version,
     sampleSize: out.funnel.scanned,
     passedHard: out.funnel.pastHard,
+    inNiche: out.funnel.inNiche,
     passedKnockouts: out.funnel.pastKnockouts,
     qualified: out.funnel.qualified,
     blame: out.blame,

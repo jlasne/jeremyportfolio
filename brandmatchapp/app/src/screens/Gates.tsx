@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react'
-import type { Criterion, GateSet, HardRules, Knockout, PresetId } from '../types'
+import type { Criterion, GateSet, HardRules, Knockout, Niche, PresetId } from '../types'
 import { getCampaign, getGateSet, getGateVersions, getMembers } from '../data'
 import { useStore } from '../data/hooks'
-import { saveGateSet } from '../data/store'
+import { saveGateSet, setNiches } from '../data/store'
+import { slug } from '../data/niches'
 import { isLocked, LOCK_REASON, template } from '../data/templates'
 import {
-  bandOf, DIALS, fromPosition, hardness, preset, presetOf, PRESET_LIST, settle, toPosition,
-  type Dial,
+  bandOf, DIALS, dialByKey, fromPosition, hardness, preset, presetOf, PRESET_LIST, settle, toPosition,
+  type Dial, type DialKey,
 } from '../data/tuning'
 import { absolute, compact } from '../lib/format'
 
@@ -119,6 +120,138 @@ function cadence(perMonth: number): string {
 }
 
 // ---------------------------------------------------------------------------
+// The niches. Which slices of the target we look in, and what each one's
+// numbers are, because what counts as big is not the same in every slice.
+// ---------------------------------------------------------------------------
+
+const OWN: DialKey[] = ['followersMin', 'medianViewsMin', 'medianCommentsMin', 'postsPerMonthMin']
+
+function Niches({ campaignId, niches, hard }: { campaignId: string; niches: Niche[]; hard: HardRules }) {
+  const [openId, setOpenId] = useState<string | null>(null)
+  const [adding, setAdding] = useState('')
+  const on = niches.filter((n) => n.enabled).length
+
+  const write = (next: Niche[]) => setNiches(campaignId, next)
+  const patch = (id: string, change: Partial<Niche>) =>
+    write(niches.map((n) => (n.id === id ? { ...n, ...change } : n)))
+
+  const add = () => {
+    const label = adding.trim()
+    if (!label) return
+    const id = slug(label)
+    if (niches.some((n) => n.id === id)) return
+    write([...niches, { id, label, enabled: true }])
+    setAdding('')
+  }
+
+  return (
+    <div className="card gate-card">
+      <h2>2. Niches</h2>
+      <p className="gate-lede">
+        Looking in {on} of {niches.length} slices of your market. Anyone too small for every one of them is dropped
+        before we look closer.
+      </p>
+      <ul className="switches">
+        {niches.map((n) => {
+          const own = n.hard ?? {}
+          const owned = Object.keys(own).length
+          return (
+            <li key={n.id} className={n.enabled ? undefined : 'off'}>
+              <button
+                type="button"
+                className={`gate-switch${n.enabled ? ' on' : ''}`}
+                aria-pressed={n.enabled}
+                aria-label={n.label}
+                onClick={() => patch(n.id, { enabled: !n.enabled })}
+              >
+                <i aria-hidden="true" />
+              </button>
+              <div className="switch-body">
+                <b>
+                  <input
+                    className="input niche-name"
+                    value={n.label}
+                    aria-label={`Name of ${n.label}`}
+                    onChange={(e) => patch(n.id, { label: e.target.value })}
+                  />
+                  <button
+                    type="button"
+                    className="btn small quiet"
+                    onClick={() => setOpenId(openId === n.id ? null : n.id)}
+                  >
+                    {owned ? `${owned} of its own numbers` : 'Own numbers'}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn small quiet drop"
+                    aria-label={`Remove ${n.label}`}
+                    onClick={() => write(niches.filter((x) => x.id !== n.id))}
+                  >
+                    ✕
+                  </button>
+                </b>
+                {openId === n.id && (
+                  <div className="niche-dials">
+                    <p className="hint">
+                      Anything you leave alone follows the campaign numbers above. A small account in the right slice
+                      can be worth more than a big one in the wrong slice.
+                    </p>
+                    {OWN.map((key) => {
+                      const dial = dialByKey.get(key)!
+                      const merged = { ...hard, ...own }
+                      const value = (own[key] as number) ?? (hard[key] as number) ?? dial.range(merged).min
+                      return (
+                        <div key={key} className={own[key] === undefined ? 'inherited' : undefined}>
+                          <Slider
+                            dial={dial}
+                            hard={merged}
+                            value={value}
+                            onChange={(v) => {
+                              // Settle against the merged rules so a niche's
+                              // numbers respect the same limits, then keep only
+                              // what this niche actually overrides.
+                              const settled = settle({ ...merged, [key]: v })
+                              patch(n.id, { hard: { ...own, [key]: settled[key] as number } })
+                            }}
+                          />
+                          {own[key] !== undefined && (
+                            <button
+                              type="button"
+                              className="btn small quiet"
+                              onClick={() => {
+                                const rest = { ...own }
+                                delete rest[key]
+                                patch(n.id, { hard: Object.keys(rest).length ? rest : undefined })
+                              }}
+                            >
+                              Back to the campaign number
+                            </button>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            </li>
+          )
+        })}
+      </ul>
+      <div className="niche-add">
+        <input
+          className="input"
+          placeholder="Add a slice we missed"
+          value={adding}
+          onChange={(e) => setAdding(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); add() } }}
+        />
+        <button type="button" className="btn" onClick={add} disabled={!adding.trim()}>Add</button>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 
 export function Gates({ campaignId }: { campaignId: string }) {
   useStore()
@@ -187,7 +320,9 @@ export function Gates({ campaignId }: { campaignId: string }) {
       <div className="card gate-card">
         <h2>1. Size and activity</h2>
         <p className="gate-lede">{gateOneLine(live.hard)}</p>
-        <p className="hint">We count all of this from their last 12 posts. Miss one and we stop there and move on.</p>
+        <p className="hint">
+          Counted from their last 12 posts. These are your campaign numbers. Any niche below can use its own instead.
+        </p>
         <div className="dials">
           {DIALS.map((dial) => (
             <Slider
@@ -201,8 +336,10 @@ export function Gates({ campaignId }: { campaignId: string }) {
         </div>
       </div>
 
+      <Niches campaignId={campaignId} niches={campaign.extracted.niches} hard={live.hard} />
+
       <div className="card gate-card">
-        <h2>2. Deal breakers</h2>
+        <h2>3. Deal breakers</h2>
         <p className="gate-lede">
           {asking} of {live.knockouts.length} questions switched on. One no about a person and we drop them.
         </p>
@@ -243,7 +380,7 @@ export function Gates({ campaignId }: { campaignId: string }) {
       </div>
 
       <div className="card gate-card">
-        <h2>3. Fit score</h2>
+        <h2>4. Fit score</h2>
         <p className="gate-lede">
           Seven things we rate out of 2. Someone needs {live.passScore} out of {live.criteria.length * 2} to reach you.
         </p>

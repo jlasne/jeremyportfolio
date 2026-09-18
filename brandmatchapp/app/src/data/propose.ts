@@ -1,4 +1,5 @@
-import type { CampaignBrief, Criterion, HardRules, Knockout, TemplateId } from '../types'
+import type { CampaignBrief, Criterion, HardRules, Knockout, Niche, TemplateId } from '../types'
+import { suggestNiches } from './niches'
 import { compact } from '../lib/format'
 import { template, TEMPLATES } from './templates'
 
@@ -31,6 +32,8 @@ export interface Proposal {
   passScore: number
   countries: string[]
   languages: string[]
+  /** The slices of the target we suggest looking in. All switched on. */
+  niches: Niche[]
   /** One plain sentence per gate, for the card headers. */
   summaries: { gate1: string; gate2: string; gate3: string }
 }
@@ -249,6 +252,7 @@ export function propose(brief: CampaignBrief, answers: Answers = {}): Proposal {
     passScore: lib.passScore,
     countries,
     languages,
+    niches: suggestNiches(brief.audience, brief.offer),
     summaries: {
       gate1: `We keep people with ${compact(followersMin)} to ${compact(followersMax)} followers, who posted in the last ${d.lastPostWithinDays} days and get about ${compact(medianViewsMin)} views on a typical post.`,
       gate2: `${count(lib.knockouts.length)} yes or no questions about each person. One no and we drop them.`,

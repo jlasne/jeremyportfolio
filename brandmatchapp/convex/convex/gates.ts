@@ -7,7 +7,7 @@
 
 const DAY = 86_400_000
 
-export type Verdict = 'qualified' | 'hard_fail' | 'knockout_fail' | 'below_threshold'
+export type Verdict = 'qualified' | 'hard_fail' | 'off_niche' | 'knockout_fail' | 'below_threshold'
 
 export interface HardRules {
   followersMin?: number
@@ -37,7 +37,43 @@ export interface GateSetShape {
   passScore: number
 }
 
+export interface Niche {
+  id: string
+  label: string
+  enabled: boolean
+  hard?: Partial<HardRules>
+}
+
+/**
+ * The widest version of the numbers across every niche still switched on.
+ *
+ * Someone who fails this fails every niche, so they are dropped before a model
+ * call is paid for. That is what keeps the first check free even though each
+ * niche carries its own bar.
+ */
+export function loosest(hard: HardRules, niches: Niche[]): HardRules {
+  const on = niches.filter((n) => n.enabled)
+  if (!on.length) return hard
+  const LOWER_IS_LOOSER = ['followersMin', 'medianViewsMin', 'medianCommentsMin', 'postsPerMonthMin']
+  const out: HardRules = { ...hard }
+  for (const key of [...LOWER_IS_LOOSER, 'followersMax', 'lastPostWithinDays'] as (keyof HardRules)[]) {
+    const values = on
+      .map((n) => n.hard?.[key] ?? hard[key])
+      .filter((v): v is number => typeof v === 'number')
+    if (!values.length) continue
+    out[key] = (LOWER_IS_LOOSER.includes(key) ? Math.min(...values) : Math.max(...values)) as never
+  }
+  return out
+}
+
+/** The numbers that apply once we know which niche someone works in. */
+export function forNiche(hard: HardRules, niche: Niche | undefined): HardRules {
+  return niche?.hard ? { ...hard, ...niche.hard } : hard
+}
+
 export interface Judgement {
+  /** Which niche this person works in, from the campaign's list, or null. */
+  niche?: string | null
   knockouts: Record<string, { pass: boolean; note?: string }>
   criteria: Record<string, { score: number; note?: string }>
   reason: string
@@ -47,6 +83,7 @@ export interface HardCheck { key: string; value: number; pass: boolean }
 
 export interface GateResult {
   verdict: Verdict
+  niche?: string
   blockedBy?: string
   hardChecks: HardCheck[]
   knockoutAnswers: { id: string; pass: boolean; note?: string }[]
@@ -98,8 +135,16 @@ export function passesHard(checks: HardCheck[]): boolean {
 }
 
 /** The full run. The judgement is the model's answer, or null before we ask. */
-export function evaluate(m: Measured, gates: GateSetShape, judgement: Judgement | null, now = Date.now()): GateResult {
-  const hardChecks = runHard(m, gates.hard, now)
+export function evaluate(
+  m: Measured,
+  gates: GateSetShape,
+  niches: Niche[],
+  judgement: Judgement | null,
+  now = Date.now(),
+): GateResult {
+  // The widest bar first, so anyone too small for every niche costs nothing.
+  const wide = loosest(gates.hard, niches)
+  let hardChecks = runHard(m, wide, now)
   const blocker = hardChecks.find((c) => !c.pass)
   if (blocker) {
     return {
@@ -109,11 +154,43 @@ export function evaluate(m: Measured, gates: GateSetShape, judgement: Judgement 
       knockoutAnswers: [],
       criteriaScores: [],
       score: 0,
-      reason: `${blocker.key}: measured ${blocker.value} against ${gates.hard[blocker.key as keyof HardRules]}`,
+      reason: `${blocker.key}: measured ${blocker.value} against ${wide[blocker.key as keyof HardRules]}`,
     }
   }
   if (!judgement) {
     return { verdict: 'hard_fail', hardChecks, knockoutAnswers: [], criteriaScores: [], score: 0, reason: 'Not evaluated yet' }
+  }
+
+  // Which slice they work in, and whether it is one we still want.
+  const on = niches.filter((n) => n.enabled)
+  const niche = on.find((n) => n.id === judgement.niche)
+  if (on.length && !niche) {
+    return {
+      verdict: 'off_niche',
+      blockedBy: 'niche',
+      hardChecks,
+      knockoutAnswers: [],
+      criteriaScores: [],
+      score: 0,
+      reason: 'Works in something you are not looking for',
+    }
+  }
+
+  // Now the niche is known, its own numbers apply.
+  const own = forNiche(gates.hard, niche)
+  hardChecks = runHard(m, own, now)
+  const short = hardChecks.find((c) => !c.pass)
+  if (short) {
+    return {
+      verdict: 'off_niche',
+      niche: niche?.id,
+      blockedBy: short.key,
+      hardChecks,
+      knockoutAnswers: [],
+      criteriaScores: [],
+      score: 0,
+      reason: `${short.key}: measured ${short.value}, ${niche?.label ?? 'this niche'} asks for ${own[short.key as keyof HardRules]}`,
+    }
   }
 
   // A knockout the client switched off is not asked at all. It is not asked
@@ -130,6 +207,7 @@ export function evaluate(m: Measured, gates: GateSetShape, judgement: Judgement 
     const question = gates.knockouts.find((k) => k.id === failed.id)
     return {
       verdict: 'knockout_fail',
+      niche: niche?.id,
       blockedBy: failed.id,
       hardChecks,
       knockoutAnswers,
@@ -148,6 +226,7 @@ export function evaluate(m: Measured, gates: GateSetShape, judgement: Judgement 
   const qualified = score >= gates.passScore
   return {
     verdict: qualified ? 'qualified' : 'below_threshold',
+    niche: niche?.id,
     blockedBy: qualified ? undefined : 'score',
     hardChecks,
     knockoutAnswers,

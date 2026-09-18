@@ -1,7 +1,10 @@
 import { internalAction, internalMutation, internalQuery } from './_generated/server'
 import { internal } from './_generated/api'
 import { v } from 'convex/values'
-import { evaluate as runGates, passesHard, runHard, type GateSetShape, type Judgement } from './gates'
+import {
+  evaluate as runGates, loosest, passesHard, runHard,
+  type GateSetShape, type Judgement, type Niche,
+} from './gates'
 
 // One profile through one campaign's gates.
 //
@@ -38,6 +41,7 @@ export const pending = internalQuery({
       gateSetId: gates._id,
       gateSetVersion: gates.version,
       gates: { hard: gates.hard, knockouts: gates.knockouts, criteria: gates.criteria, passScore: gates.passScore },
+      niches: campaign.extracted.niches ?? [],
       brief: `${campaign.brief.audience}. They sell: ${campaign.brief.offer}`,
       extracted: campaign.extracted,
       creators: fresh.map((c) => ({
@@ -67,8 +71,10 @@ export const write = internalMutation({
     gateSetId: v.id('gateSets'),
     gateSetVersion: v.number(),
     verdict: v.union(
-      v.literal('qualified'), v.literal('hard_fail'), v.literal('knockout_fail'), v.literal('below_threshold'),
+      v.literal('qualified'), v.literal('hard_fail'), v.literal('off_niche'),
+      v.literal('knockout_fail'), v.literal('below_threshold'),
     ),
+    niche: v.optional(v.string()),
     blockedBy: v.optional(v.string()),
     hardChecks: v.any(),
     knockoutAnswers: v.any(),
@@ -103,6 +109,7 @@ export const campaign = internalAction({
     if ('error' in batch) return batch as Record<string, unknown>
 
     const gates = batch.gates as GateSetShape
+    const niches = (batch.niches ?? []) as Niche[]
     const now = Date.now()
     let hardFail = 0
     let asked = 0
@@ -118,12 +125,12 @@ export const campaign = internalAction({
         country: creator.country,
         language: creator.language,
       }
-      const checks = runHard(measured, gates.hard, now)
+      const checks = runHard(measured, loosest(gates.hard, niches), now)
 
       // Gate 1 decided. No model call, no cost.
       if (!passesHard(checks)) {
         hardFail++
-        const result = runGates(measured, gates, null, now)
+        const result = runGates(measured, gates, niches, null, now)
         await ctx.runMutation(internal.evaluate.write, {
           creatorId: creator.id,
           campaignId: args.campaignId,
@@ -142,8 +149,8 @@ export const campaign = internalAction({
       }
 
       asked++
-      const judgement = await ask(creator, gates, batch.brief as string)
-      const result = runGates(measured, gates, judgement, now)
+      const judgement = await ask(creator, gates, niches, batch.brief as string)
+      const result = runGates(measured, gates, niches, judgement, now)
       if (result.verdict === 'qualified') qualified++
       await ctx.runMutation(internal.evaluate.write, {
         creatorId: creator.id,
@@ -152,6 +159,7 @@ export const campaign = internalAction({
         gateSetId: batch.gateSetId,
         gateSetVersion: batch.gateSetVersion,
         verdict: result.verdict,
+        niche: result.niche,
         blockedBy: result.blockedBy,
         hardChecks: result.hardChecks,
         knockoutAnswers: result.knockoutAnswers,
@@ -170,16 +178,22 @@ export const campaign = internalAction({
 async function ask(
   creator: Record<string, unknown>,
   gates: GateSetShape,
+  niches: Niche[],
   brief: string,
 ): Promise<Judgement | null> {
   const key = process.env.OPENROUTER_API_KEY
   if (!key) return null
 
+  const on = niches.filter((n) => n.enabled)
   const schema = {
     type: 'object',
     additionalProperties: false,
-    required: ['knockouts', 'criteria', 'reason'],
+    required: [...(on.length ? ['niche'] : []), 'knockouts', 'criteria', 'reason'],
     properties: {
+      // Classification against a list the client controls, never a free guess.
+      ...(on.length
+        ? { niche: { type: 'string', enum: [...on.map((n) => n.id), 'other'] } }
+        : {}),
       knockouts: {
         type: 'object',
         additionalProperties: false,
@@ -226,6 +240,14 @@ async function ask(
     'Score every criterion 0, 1 or 2. A 2 is what the guide describes.',
     ...gates.criteria.map((c) => `- ${c.id}: ${c.label}${c.guide ? ` (${c.guide})` : ''}`),
     '',
+    ...(on.length
+      ? [
+          '',
+          'Say which of these they work in. Use "other" when none of them fits.',
+          ...on.map((n) => `- ${n.id}: ${n.label}`),
+        ]
+      : []),
+    '',
     'Judge only what the profile shows. Never assume. Write one plain sentence as the reason.',
     '',
     `Profile: ${JSON.stringify(creator)}`,
@@ -245,7 +267,10 @@ async function ask(
   const text = body?.choices?.[0]?.message?.content
   if (!text) return null
   try {
-    return JSON.parse(text) as Judgement
+    const parsed = JSON.parse(text) as Judgement
+    // "other" is not a niche, it is the absence of one.
+    if (parsed.niche === 'other') parsed.niche = null
+    return parsed
   } catch {
     return null
   }

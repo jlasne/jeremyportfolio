@@ -8,7 +8,7 @@
 export type AccountKind = 'brand' | 'agency'
 export type MemberRole = 'owner' | 'admin' | 'member'
 export type CampaignStatus = 'draft' | 'live' | 'paused' | 'archived'
-export type Verdict = 'qualified' | 'hard_fail' | 'knockout_fail' | 'below_threshold'
+export type Verdict = 'qualified' | 'hard_fail' | 'off_niche' | 'knockout_fail' | 'below_threshold'
 export type LeadStatus = 'new' | 'contacted' | 'replied' | 'call' | 'signed' | 'lost'
 /** A Gate 3 criterion is worth 0, 1 or 2. Seven of them, so 14 is the ceiling. */
 export type CriterionScore = 0 | 1 | 2
@@ -107,10 +107,13 @@ export interface CampaignBrief {
   writtenAt: string
 }
 
+
 /** What the model read out of the brief. Everything else is the client's text. */
 export interface BriefExtract {
   countries: string[]
   languages: string[]
+  /** The slices of the target we look in. Edited on the brief screen. */
+  niches: Niche[]
   /** Which Gate 3 library the first proposal came from. */
   templateId: TemplateId
   extractedAt: string
@@ -131,7 +134,7 @@ export interface Campaign {
   updatedAt: string
 }
 
-/** Gate 1. A missing threshold is simply not applied. */
+/** The measured numbers. A missing one is simply not applied. */
 export interface HardRules {
   followersMin?: number
   followersMax?: number
@@ -141,6 +144,31 @@ export interface HardRules {
   postsPerMonthMin?: number
   countries?: string[]
   languages?: string[]
+}
+
+/**
+ * A slice of the campaign's target. What these people actually talk about.
+ *
+ * Suggested from the brief, then the client's to edit. Switching one off stops
+ * us looking there. Every delivered lead carries the niche it matched, which is
+ * what lets the dashboard say which slice actually answers.
+ */
+export interface Niche {
+  id: string
+  label: string
+  /** Off means we stop looking in it. The label stays, so it can come back. */
+  enabled: boolean
+  /**
+   * Numbers that apply to this niche alone, over the campaign's own.
+   *
+   * What counts as big and active is not the same in every slice. A 20k
+   * postnatal account can be worth more than a 200k general fitness one, so
+   * one set of thresholds across a whole campaign is simply wrong.
+   *
+   * Only the measured numbers can be overridden. The deal breakers and the fit
+   * score describe your offer, and your offer does not change by niche.
+   */
+  hard?: Partial<HardRules>
 }
 
 /** Gate 2. One no ends it. */
@@ -251,7 +279,9 @@ export interface Evaluation {
   gateSetId: string
   gateSetVersion: number
   verdict: Verdict
-  /** The hard key or knockout id that ended it. Null when nothing blocked. */
+  /** Which of the campaign's niches this person works in. Null when none fit. */
+  niche: string | null
+  /** The rule that ended it: a measurement, a niche, a deal breaker, or null. */
   blockedBy: string | null
   hardChecks: HardCheck[]
   knockoutAnswers: KnockoutAnswer[]
@@ -348,6 +378,8 @@ export interface FeasibilityRun {
   gateSetVersion: number
   sampleSize: number
   passedHard: number
+  /** In a niche still switched on, and big enough for that niche's own bar. */
+  inNiche: number
   passedKnockouts: number
   qualified: number
   /** Which threshold sent profiles home, and whether it did so on its own. */

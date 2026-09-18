@@ -1,5 +1,6 @@
 import type {
   Creator,
+  Niche,
   CriterionResult,
   CriterionScore,
   GateSet,
@@ -21,8 +22,41 @@ import type {
 
 const DAY = 86_400_000
 
+/**
+ * The widest version of the numbers across every niche still switched on.
+ *
+ * Someone who fails this fails every niche, so they can be dropped before a
+ * single model call is paid for. That is what keeps the first check free even
+ * though each niche carries its own bar.
+ */
+export function loosest(hard: HardRules, niches: Niche[]): HardRules {
+  const on = niches.filter((n) => n.enabled)
+  if (!on.length) return hard
+  // Higher is stricter on these, lower is stricter on the other two.
+  const LOWER_IS_LOOSER: (keyof HardRules)[] = [
+    'followersMin', 'medianViewsMin', 'medianCommentsMin', 'postsPerMonthMin',
+  ]
+  const out: HardRules = { ...hard }
+  for (const key of [...LOWER_IS_LOOSER, 'followersMax', 'lastPostWithinDays'] as (keyof HardRules)[]) {
+    const values = on
+      .map((n) => (n.hard?.[key] ?? hard[key]))
+      .filter((v): v is number => typeof v === 'number')
+    if (!values.length) continue
+    const loose = LOWER_IS_LOOSER.includes(key) ? Math.min(...values) : Math.max(...values)
+    out[key] = loose as never
+  }
+  return out
+}
+
+/** The numbers that apply once we know which niche someone works in. */
+export function forNiche(hard: HardRules, niche: Niche | undefined): HardRules {
+  return niche?.hard ? { ...hard, ...niche.hard } : hard
+}
+
 /** What the model answers about one profile, for one gate version. */
 export interface Judgement {
+  /** Which niche this person works in, from the campaign's list, or null. */
+  niche?: string | null
   /** Keyed by knockout id. */
   knockouts: Record<string, { pass: boolean; note?: string }>
   /** Keyed by criterion id. */
@@ -33,7 +67,9 @@ export interface Judgement {
 
 export interface GateResult {
   verdict: Verdict
-  /** The hard key or the knockout id that ended it. Null when nothing blocked. */
+  /** The niche this person matched, once we know it. */
+  niche: string | null
+  /** The rule that ended it. Null when nothing blocked. */
   blockedBy: string | null
   hardChecks: HardCheck[]
   knockoutAnswers: KnockoutAnswer[]
@@ -94,24 +130,66 @@ export function passesHard(checks: HardCheck[]): boolean {
  * The full run. Hand it a judgement and it returns the verdict plus every
  * intermediate answer, which is what the evaluation row stores.
  */
-export function evaluate(creator: Creator, gates: GateSet, judgement: Judgement | null, now = Date.now()): GateResult {
-  const hardChecks = runHard(creator, gates.hard, now)
+export function evaluate(
+  creator: Creator,
+  gates: GateSet,
+  niches: Niche[],
+  judgement: Judgement | null,
+  now = Date.now(),
+): GateResult {
+  // The widest bar first, so anyone too small for every niche costs nothing.
+  const wide = loosest(gates.hard, niches)
+  let hardChecks = runHard(creator, wide, now)
   const blocker = hardChecks.find((c) => !c.pass)
   if (blocker) {
     return {
       verdict: 'hard_fail',
+      niche: null,
       blockedBy: blocker.key,
       hardChecks,
       knockoutAnswers: [],
       criteriaScores: [],
       score: 0,
-      reason: hardReason(blocker, gates.hard),
+      reason: hardReason(blocker, wide),
     }
   }
 
-  // Gate 1 held, so the model read is worth paying for.
+  // It held, so the model read is worth paying for.
   if (!judgement) {
-    return { verdict: 'hard_fail', blockedBy: null, hardChecks, knockoutAnswers: [], criteriaScores: [], score: 0, reason: 'Not evaluated yet' }
+    return { verdict: 'hard_fail', niche: null, blockedBy: null, hardChecks, knockoutAnswers: [], criteriaScores: [], score: 0, reason: 'Not evaluated yet' }
+  }
+
+  // Which slice they work in, and whether that slice is one we still want.
+  const on = niches.filter((n) => n.enabled)
+  const niche = on.find((n) => n.id === judgement.niche)
+  if (on.length && !niche) {
+    return {
+      verdict: 'off_niche',
+      niche: null,
+      blockedBy: 'niche',
+      hardChecks,
+      knockoutAnswers: [],
+      criteriaScores: [],
+      score: 0,
+      reason: 'Works in something you are not looking for',
+    }
+  }
+
+  // Now the niche is known, its own numbers apply.
+  const own = forNiche(gates.hard, niche)
+  hardChecks = runHard(creator, own, now)
+  const short = hardChecks.find((c) => !c.pass)
+  if (short) {
+    return {
+      verdict: 'off_niche',
+      niche: niche?.id ?? null,
+      blockedBy: short.key,
+      hardChecks,
+      knockoutAnswers: [],
+      criteriaScores: [],
+      score: 0,
+      reason: `${hardReason(short, own)}, for ${niche?.label ?? 'this niche'}`,
+    }
   }
 
   // A knockout the client switched off is not asked at all. It is not asked
@@ -127,6 +205,7 @@ export function evaluate(creator: Creator, gates: GateSet, judgement: Judgement 
     const question = gates.knockouts.find((k) => k.id === failed.id)
     return {
       verdict: 'knockout_fail',
+      niche: niche?.id ?? null,
       blockedBy: failed.id,
       hardChecks,
       knockoutAnswers,
@@ -145,6 +224,7 @@ export function evaluate(creator: Creator, gates: GateSet, judgement: Judgement 
   const verdict: Verdict = score >= gates.passScore ? 'qualified' : 'below_threshold'
   return {
     verdict,
+    niche: niche?.id ?? null,
     blockedBy: verdict === 'qualified' ? null : 'score',
     hardChecks,
     knockoutAnswers,

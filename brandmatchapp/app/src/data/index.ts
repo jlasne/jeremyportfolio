@@ -240,12 +240,13 @@ export function getFeasibility(campaignId: string) {
   )
 }
 
-export const VERDICTS: Verdict[] = ['qualified', 'below_threshold', 'knockout_fail', 'hard_fail']
+export const VERDICTS: Verdict[] = ['qualified', 'below_threshold', 'knockout_fail', 'off_niche', 'hard_fail']
 
 export const VERDICT_LABEL: Record<Verdict, string> = {
   qualified: 'Became a lead',
   below_threshold: 'Under your pass mark',
   knockout_fail: 'Failed a deal breaker',
+  off_niche: 'Not in a niche you want',
   hard_fail: 'Too small or too quiet',
 }
 
