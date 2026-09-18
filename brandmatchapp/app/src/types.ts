@@ -340,6 +340,9 @@ export interface FeasibilityRun {
   sampleSize: number
   passedHard: number
   passedKnockouts: number
+  qualified: number
+  /** Which threshold sent profiles home, and whether it did so on its own. */
+  blame: { key: string; sole: number; shared: number }[]
   scoreHistogram: { score: number; count: number }[]
   estimatedPerDay: number
   ranAt: string

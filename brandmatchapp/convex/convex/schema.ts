@@ -417,6 +417,9 @@ export default defineSchema({
     sampleSize: v.number(),
     passedHard: v.number(),
     passedKnockouts: v.number(),
+    qualified: v.number(),
+    /** Which threshold sent profiles home, and whether it did so on its own. */
+    blame: v.optional(v.array(v.object({ key: v.string(), sole: v.number(), shared: v.number() }))),
     /** How many profiles landed on each score from 0 to 14. */
     scoreHistogram: v.array(v.object({ score: v.number(), count: v.number() })),
     /** What this version would deliver in a day at the current crawl rate. */

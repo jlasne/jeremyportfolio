@@ -37,8 +37,8 @@ export const dayOfPeriod = start.getDate()
 export const subscription: Subscription = {
   id: 'sub_1',
   accountId: account.id,
-  tier: 30,
-  priceCents: 45000,
+  tier: 15,
+  priceCents: 25000,
   currency: 'EUR',
   status: 'active',
   period,

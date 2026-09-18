@@ -11,7 +11,7 @@ export const campaigns: Campaign[] = [
     accountId: account.id,
     name: 'Fitness coaches, app build',
     status: 'live',
-    dailyCap: 20,
+    dailyCap: 10,
     brief: {
       audience:
         'English speaking fitness coaches who already sell a programme and teach a method of their own, with an audience that buys from them',

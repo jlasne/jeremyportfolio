@@ -1,8 +1,8 @@
 import type { Creator, CreatorPost } from '../types'
-import { between, pick, seeded, skewed } from './rand'
+import { between, pick, seeded } from './rand'
 import { daysAgo } from './time'
 
-// Sixteen hundred profiles, built from one seed so the sample account never
+// Twenty four hundred profiles, built from one seed so the sample account never
 // moves. That is the real shape of the funnel: most of them never become a lead.
 //
 // Every number a gate reads is computed from the posts below, never declared.
@@ -77,20 +77,20 @@ function build(index: number): Built {
   const handle = `${first.toLowerCase()}.${word}`
   const id = `cre_${String(index).padStart(3, '0')}`
 
-  const followers =
-    band === 'strong' ? between(rand, 28_000, 320_000)
-      : band === 'fair' ? between(rand, 16_000, 90_000)
-        : band === 'thin' ? skewed(rand, 2_400, 22_000)
-          : between(rand, 12_000, 160_000)
+  // Follower counts are a power law, not a range. Most accounts are small and
+  // a handful are enormous, which is what makes a threshold bite: moving the
+  // floor from 15k to 30k has to remove a real slice of the population.
+  const followers = Math.round(2_000 * Math.pow(1_000, Math.pow(rand(), 2.1)))
 
-  // Reach as a share of the follower count. A strong account beats its count.
+  // Reach as a share of the follower count, spread wide inside each band. A
+  // strong account beats its count. A thin one is a tenth of it.
   const reachRate =
-    band === 'strong' ? 0.9 + rand() * 1.4
-      : band === 'fair' ? 0.35 + rand() * 0.6
-        : band === 'thin' ? 0.12 + rand() * 0.3
-          : 0.2 + rand() * 0.5
+    band === 'strong' ? 0.45 + rand() * rand() * 2.4
+      : band === 'fair' ? 0.18 + rand() * rand() * 1.1
+        : band === 'thin' ? 0.04 + rand() * 0.3
+          : 0.08 + rand() * 0.55
 
-  const cadence = band === 'strong' ? between(rand, 14, 26) : band === 'fair' ? between(rand, 8, 15) : between(rand, 2, 7)
+  const cadence = band === 'strong' ? between(rand, 9, 28) : band === 'fair' ? between(rand, 4, 18) : between(rand, 1, 9)
   const gapDays = Math.max(1, Math.round(30 / cadence))
   const startedDaysAgo = band === 'stale' ? between(rand, 34, 190) : between(rand, 0, 9)
 
@@ -134,7 +134,7 @@ function build(index: number): Built {
   return { creator, posts, niche, band }
 }
 
-export const built: Built[] = Array.from({ length: 1_600 }, (_, i) => build(i))
+export const built: Built[] = Array.from({ length: 2_400 }, (_, i) => build(i))
 export const creators: Creator[] = built.map((b) => b.creator)
 export const posts: CreatorPost[] = built.flatMap((b) => b.posts)
 export const creatorById = new Map(creators.map((c) => [c.id, c]))

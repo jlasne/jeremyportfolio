@@ -39,9 +39,7 @@ import {
 } from '../mock/pipeline'
 import type { Proposal } from './propose'
 import { describeChanges } from './tuning'
-import { built } from '../mock/creators'
-import { judge } from '../mock/judge'
-import { evaluate } from './gates'
+import { simulate, type Lever, type SimResult } from './simulate'
 
 // The only place state lives, client side. Seeded from the mock folder, and
 // shaped exactly like the client API's response so swapping the seed for a
@@ -271,50 +269,72 @@ export function saveGateSet(
 }
 
 /**
- * Runs a campaign's current gates over the pool and writes the distribution.
+ * Runs a campaign's current gates over the pool and writes the funnel.
  *
- * The sample stand in for the backend's feasibility run. Same inputs, same
- * output shape: survival per gate, the score spread, and what the ratio turns
- * into over a day. No cost and no analysed volume, here or there.
+ * The sample stand in for the backend's feasibility run, so the shape it writes
+ * is the shape the API will return. What it writes is a survival count per gate
+ * and an estimate a day. What it does not write, anywhere, is what reading the
+ * sample would cost.
  */
-export function runFeasibility(campaignId: string): void {
+export function runFeasibility(campaignId: string, precomputed?: SimResult): void {
   setState((s) => {
     const campaign = s.campaigns.find((c) => c.id === campaignId)
     const gates = s.gateSets.find((g) => g.id === campaign?.gateSetId)
     if (!campaign || !gates) return {}
-    const now = Date.now()
-    let passedHard = 0
-    let passedKnockouts = 0
-    const histogram = new Map<number, number>()
-    built.forEach((b, index) => {
-      const result = evaluate(b.creator, gates, judge(index, b.band, gates), now)
-      if (result.verdict === 'hard_fail') return
-      passedHard++
-      if (result.verdict === 'knockout_fail') return
-      passedKnockouts++
-      histogram.set(result.score, (histogram.get(result.score) ?? 0) + 1)
-    })
-    const qualified = [...histogram.entries()]
-      .filter(([score]) => score >= gates.passScore)
-      .reduce((sum, [, count]) => sum + count, 0)
+    // The screen runs the scan while it animates, so the result is handed back
+    // rather than computed twice.
+    const out = precomputed ?? simulate(gates, s.subscription.tier)
     const run: FeasibilityRun = {
       id: `fea_${gates.id}_${s.feasibilityRuns.length}`,
       campaignId,
       gateSetId: gates.id,
       gateSetVersion: gates.version,
-      sampleSize: built.length,
-      passedHard,
-      passedKnockouts,
-      // Every score from 0 to the ceiling, so the spread reads as a spread.
-      scoreHistogram: Array.from({ length: gates.criteria.length * 2 + 1 }, (_, score) => ({
-        score,
-        count: histogram.get(score) ?? 0,
-      })),
-      estimatedPerDay: Math.round((qualified / Math.max(1, built.length)) * 900),
+      sampleSize: out.funnel.scanned,
+      passedHard: out.funnel.pastHard,
+      passedKnockouts: out.funnel.pastKnockouts,
+      qualified: out.funnel.qualified,
+      blame: out.blame,
+      scoreHistogram: out.histogram,
+      estimatedPerDay: out.estimatedPerDay,
       ranAt: new Date().toISOString(),
     }
     return { feasibilityRuns: [...s.feasibilityRuns, run] }
   })
+}
+
+/**
+ * Takes a suggestion from the simulator. It writes a gate version like any
+ * other edit, so the history says the client loosened a threshold and says by
+ * how much, and then re-tests.
+ */
+export function applyLever(campaignId: string, lever: Lever): void {
+  const s = getState()
+  const campaign = s.campaigns.find((c) => c.id === campaignId)
+  const gates = s.gateSets.find((g) => g.id === campaign?.gateSetId)
+  if (!campaign || !gates) return
+  saveGateSet(
+    campaignId,
+    {
+      hard: lever.next.hard,
+      knockouts: gates.knockouts,
+      criteria: gates.criteria,
+      passScore: lever.next.passScore,
+      preset: 'custom',
+    },
+    'mem_1',
+  )
+}
+
+/**
+ * The client keeps their criteria and takes the smaller flow. The cap is what
+ * makes that honest: the campaign stops promising a number it cannot reach.
+ */
+export function acceptVolume(campaignId: string, perDay: number): void {
+  setState((s) => ({
+    campaigns: s.campaigns.map((c) =>
+      c.id === campaignId ? { ...c, dailyCap: Math.max(1, perDay), updatedAt: new Date().toISOString() } : c,
+    ),
+  }))
 }
 
 /**

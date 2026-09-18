@@ -15,6 +15,7 @@ import { campaigns } from './campaigns'
 import { gateSetById, gateSets } from './gates'
 import { built } from './creators'
 import { judge } from './judge'
+import { simulate } from '../data/simulate'
 import { pick, seeded } from './rand'
 import { daysAgo, NOW } from './time'
 
@@ -250,38 +251,19 @@ for (let back = 29; back >= 0; back--) {
 // ---------------------------------------------------------------------------
 
 export const feasibilityRuns: FeasibilityRun[] = gateSets.map((gates, i) => {
-  const campaign = campaigns.find((c) => c.id === gates.campaignId)!
-  const sample = built.filter((b) => (b.niche === 'fitness') === (campaign.id === 'cmp_fitness'))
-  let passedHard = 0
-  let passedKnockouts = 0
-  const histogram = new Map<number, number>()
-  sample.forEach((b, index) => {
-    const result = evaluate(b.creator, gates, judge(index, b.band, gates), now)
-    if (result.verdict === 'hard_fail') return
-    passedHard++
-    if (result.verdict === 'knockout_fail') return
-    passedKnockouts++
-    histogram.set(result.score, (histogram.get(result.score) ?? 0) + 1)
-  })
-  const qualified = [...histogram.entries()]
-    .filter(([score]) => score >= gates.passScore)
-    .reduce((sum, [, count]) => sum + count, 0)
-  // Every score from 0 to the ceiling, so the spread reads as a spread.
-  const dense = Array.from({ length: gates.criteria.length * 2 + 1 }, (_, score) => ({
-    score,
-    count: histogram.get(score) ?? 0,
-  }))
+  const out = simulate(gates, subscription.tier)
   return {
     id: `fea_${gates.id}`,
     campaignId: gates.campaignId,
     gateSetId: gates.id,
     gateSetVersion: gates.version,
-    sampleSize: sample.length,
-    passedHard,
-    passedKnockouts,
-    scoreHistogram: dense,
-    // What the ratio turns into over a day at the current crawl rate.
-    estimatedPerDay: Math.round((qualified / Math.max(1, sample.length)) * 900),
+    sampleSize: out.funnel.scanned,
+    passedHard: out.funnel.pastHard,
+    passedKnockouts: out.funnel.pastKnockouts,
+    qualified: out.funnel.qualified,
+    blame: out.blame,
+    scoreHistogram: out.histogram,
+    estimatedPerDay: out.estimatedPerDay,
     ranAt: daysAgo(i === 1 ? 31 : 2),
   }
 })

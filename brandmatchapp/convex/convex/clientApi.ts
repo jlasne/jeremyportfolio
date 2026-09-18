@@ -139,12 +139,17 @@ export const clientApi = httpAction(async (ctx, req) => {
       // Zone 5. Survival per gate and the score spread. No cost, no volume.
       if (tail === 'feasibility' && req.method === 'POST') {
         const out = await ctx.runMutation(internal.feasibility.run, { accountId: account._id, campaignId })
-        if (out.error) return fail(out.error, 400)
-        return json({ run: out })
+        if ('error' in out) return fail(String(out.error), 400)
+        const levers = await ctx.runQuery(internal.feasibility.levers, { accountId: account._id, campaignId })
+        return json({ run: out, levers: levers.levers })
       }
 
       if (tail === 'feasibility' && req.method === 'GET') {
-        return json({ run: await ctx.runQuery(internal.feasibility.latest, { campaignId }) })
+        const [run, levers] = await Promise.all([
+          ctx.runQuery(internal.feasibility.latest, { campaignId }),
+          ctx.runQuery(internal.feasibility.levers, { accountId: account._id, campaignId }),
+        ])
+        return json({ run, levers: levers.levers })
       }
     }
 
