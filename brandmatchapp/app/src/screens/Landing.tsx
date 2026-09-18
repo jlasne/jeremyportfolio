@@ -3,9 +3,10 @@ import { Backdrop } from '../components/Backdrop'
 import { Logo } from '../components/Logo'
 import { HeroDemo } from '../components/HeroDemo'
 import { api } from '../lib/api'
-import art from '../art/creator-cards.png'
+import stackArt from '../art/stack.png'
 import connectArt from '../art/connect.png'
 import priceArt from '../art/price-tag.png'
+import testsArt from '../art/tests.png'
 
 // The landing, in six blocks: hero, video, the four steps, the two ways in,
 // one price, one ask. Cream ground, one orange accent, wide corners.
@@ -321,18 +322,20 @@ export function Landing() {
 
         <div className="hero-block">
           <section className="hero">
-            <h1>Find creators <br />who <TurningWord words={WHO} />.</h1>
-            <p className="lede">
-              Enter your website. Every morning you get 500 creators who take brand deals, ranked, with the email on
-              the row.
-            </p>
-            <EarlyAccess website="strongher.co" />
-            <p className="hero-meta">
-              {FACTS.map((f, i) => (
-                <span key={f}>{i > 0 && <i aria-hidden="true" />}{f}</span>
-              ))}
-            </p>
-            <img className="hero-art" src={art} alt="" width={1254} height={1254} />
+            <div className="hero-copy">
+              <h1>Find creators <br />who <TurningWord words={WHO} />.</h1>
+              <p className="lede">
+                Enter your website. Every morning you get 500 creators who take brand deals, ranked, with the email on
+                the row.
+              </p>
+              <EarlyAccess website="strongher.co" />
+              <p className="hero-meta">
+                {FACTS.map((f, i) => (
+                  <span key={f}>{i > 0 && <i aria-hidden="true" />}{f}</span>
+                ))}
+              </p>
+            </div>
+            <img className="hero-art" src={stackArt} alt="" width={1254} height={1254} />
           </section>
 
           <div className="video-wrap">
@@ -362,27 +365,33 @@ export function Landing() {
           </div>
 
           <div className="tests">
-            <p className="tests-head">Every lead passes three tests, or it never reaches you.</p>
-            <div className="tests-row">
-              {TESTS.map((t) => (
-                <div className="test" key={t.name}>
-                  <b>{t.name}</b>
-                  <span>{t.means}</span>
-                </div>
-              ))}
+            <div className="tests-copy">
+              <p className="tests-head">Every lead passes three tests, or it never reaches you.</p>
+              <div className="tests-row">
+                {TESTS.map((t) => (
+                  <div className="test" key={t.name}>
+                    <b>{t.name}</b>
+                    <span>{t.means}</span>
+                  </div>
+                ))}
+              </div>
             </div>
+            <img className="tests-art" src={testsArt} alt="" width={1774} height={887} />
           </div>
         </section>
 
         <section className="land-section" id="ways">
-          <p className="eyebrow">Connect your agent</p>
-          <h2 className="big">Built for agents. <em>Yours drives it.</em></h2>
-          <p className="section-lede">
-            brandmatch is built for an agent to drive. Yours reads the list, scores it, moves each lead along a
-            stage and starts the next search, on your key. The app is the same account, for when you want to look.
-          </p>
-
-          <img className="connect-art" src={connectArt} alt="" width={1600} height={1000} />
+          <div className="split">
+            <div>
+              <p className="eyebrow">Connect your agent</p>
+              <h2 className="big">Built for agents. <em>Yours drives it.</em></h2>
+              <p className="section-lede">
+                brandmatch is built for an agent to drive. Yours reads the list, scores it, moves each lead along a
+                stage and starts the next search, on your key. The app is the same account, for when you want to look.
+              </p>
+            </div>
+            <img className="connect-art" src={connectArt} alt="" width={1586} height={992} />
+          </div>
 
           <div className="connect">
             <div className="connect-code">
