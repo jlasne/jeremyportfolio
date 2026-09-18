@@ -106,6 +106,7 @@ export const fromApify = internalAction({
     }
 
     // Phase two: the measured facts land -------------------------------------
+    const now = Date.now()
     const profiles = []
     for (const r of rows) {
       const handle = String(r.username ?? '').toLowerCase()
@@ -123,6 +124,14 @@ export const fromApify = internalAction({
         postedAt: Date.parse(String(p.timestamp ?? '')) || 0,
       })).filter((p) => p.url && p.postedAt)
 
+      // Views, counted only on posts that have had time to be seen. Someone
+      // posting ten times a week has twelve posts four days old, and a post two
+      // hours old has almost no views. Counting those punishes the most active
+      // accounts for being active: measured on a real pipeline, at twenty one
+      // posts a week it rejected 86% of them.
+      const ripe = posts.filter((p) => now - p.postedAt >= 48 * 3_600_000)
+      const forReach = ripe.length >= 6 ? ripe : posts
+
       const bio = String(r.biography ?? '')
       const link = String(r.externalUrl ?? '')
       const dates = posts.map((p) => p.postedAt)
@@ -136,8 +145,8 @@ export const fromApify = internalAction({
           avatar: String(r.profilePicUrlHD ?? r.profilePicUrl ?? '') || undefined,
           followers: Number(r.followersCount ?? 0),
           // Gate 1 reads these three. All computed, none declared.
-          medianViews: median(posts.filter((p) => p.kind === 'reel').map((p) => p.views)),
-          medianComments: median(posts.map((p) => p.comments)),
+          medianViews: median(forReach.filter((p) => p.kind === 'reel').map((p) => p.views)),
+          medianComments: median(forReach.map((p) => p.comments)),
           postsPerMonth: postsPerMonth(dates),
           lastPostAt: dates.length ? Math.max(...dates) : undefined,
           email: String(r.publicEmail ?? r.businessEmail ?? '') || bio.match(EMAIL)?.[0] || undefined,

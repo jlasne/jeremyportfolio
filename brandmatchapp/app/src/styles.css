@@ -2841,3 +2841,24 @@ body { background: var(--paper); }
 
 .trend { display: block; font-size: 11px; color: var(--ink-3); }
 .trend.up { color: var(--teal); }
+
+/* Dropping someone, and the accounts a client already knows. */
+/* The question takes the row, because four answers do not fit in a cell. */
+.contact.why-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  background: var(--orange-soft);
+}
+.why-ask { font-weight: 600; }
+.why-picks { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+
+.ask-note { color: var(--ink-2); font-size: 13.5px; line-height: 1.45; margin: -6px 0 12px; max-width: 560px; }
+.ask-field.short { min-height: 64px; }
+
+.seed-tag {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  border-radius: var(--pill); padding: 2px 8px; margin-left: 8px;
+}
+.seed-tag.fits { background: var(--teal-soft); color: #1d7a5b; }
+.seed-tag.fails { background: var(--paper-2); color: var(--ink-3); }
+.seed-tag.unknown { background: var(--orange-soft); color: var(--orange-deep); }
+.rules.stacked li.fails > b { color: var(--ink-3); }

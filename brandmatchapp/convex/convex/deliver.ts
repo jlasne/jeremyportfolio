@@ -25,11 +25,20 @@ export const candidates = internalQuery({
       .withIndex('by_account', (q) => q.eq('accountId', accountId))
       .collect()
     const live = campaigns.filter((c) => c.status === 'live')
-    const claimed = new Set((await ctx.db.query('creatorClaims').collect()).map((c) => c.creatorId))
+    // Held against the kind of offer, not against the world. Two clients
+    // selling the same thing never receive the same person; a client selling
+    // an app and one selling a platform both can, because one coach can buy
+    // both. A claim over every offer at once would empty the pool a little
+    // more with every customer we sign.
+    const claims = await ctx.db.query('creatorClaims').collect()
     const today = new Date().toISOString().slice(0, 10)
 
     const out = []
     for (const campaign of live) {
+      const offerKey = campaign.extracted.templateId ?? 'sell_to_creators'
+      const taken = new Set(
+        claims.filter((c) => c.offerKey === offerKey).map((c) => c.creatorId as string),
+      )
       const rows = await ctx.db
         .query('evaluations')
         .withIndex('by_campaign_verdict', (q) => q.eq('campaignId', campaign._id).eq('verdict', 'qualified'))
@@ -39,12 +48,13 @@ export const candidates = internalQuery({
         .withIndex('by_campaign_date', (q) => q.eq('campaignId', campaign._id).eq('date', today))
         .first()
       for (const row of rows) {
-        if (claimed.has(row.creatorId)) continue
+        if (taken.has(row.creatorId as string)) continue
         out.push({
           evaluationId: row._id,
           creatorId: row.creatorId,
           campaignId: campaign._id,
           score: row.score,
+          offerKey,
           cap: campaign.dailyCap ?? null,
           deliveredToday: deliveredToday?.delivered ?? 0,
         })
@@ -101,11 +111,12 @@ export const today = internalMutation({
         by: 'system',
         at: now,
       })
-      // Exclusive from here on. No expiry.
+      // Exclusive against this kind of offer, from here on and with no expiry.
       await ctx.db.insert('creatorClaims', {
         creatorId: row.creatorId,
         accountId: args.accountId,
         campaignId: row.campaignId,
+        offerKey: row.offerKey,
         claimedAt: now,
       })
       await ctx.db.insert('quotaEntries', {

@@ -3,9 +3,10 @@ import { deliveredToday, getCampaigns, getGateSet, getQuota, getSubscription, li
 import { useStore } from '../data/hooks'
 import {
   advice, byWeek, compare, economics, funnelOf, GROUP_MIN, inPeriod, insight, nicheBands, nudges,
-  previousPeriod, RATE_MIN, readTable, repliedRows, scoreBands, sizeBands, type Band, type Period,
+  lostBreakdown, previousPeriod, RATE_MIN, readTable, repliedRows, scoreBands, sizeBands,
+  type Band, type Period,
 } from '../data/insights'
-import { STATUS_LABEL } from '../data/status'
+import { LOST_LABEL, STATUS_LABEL } from '../data/status'
 import { download, toCsv } from '../lib/csv'
 import { money } from '../lib/format'
 
@@ -127,6 +128,7 @@ export function Dashboard() {
   // still let them in" rather than guessing.
   const followersFrom = campaignId ? getGateSet(campaignId)?.hard.followersMin ?? null : null
   const tips = advice(rows, niches, funnel, campaignId, followersFrom)
+  const lost = lostBreakdown(rows)
   const reminders = nudges(all).filter((n) => !hidden.includes(n.id))
 
   const dismiss = (id: string) => {
@@ -288,6 +290,14 @@ export function Dashboard() {
             </li>
           ))}
         </ul>
+
+        {lost.length > 0 && (
+          <p className="hint">
+            Of the {lost.reduce((sum, l) => sum + l.count, 0)} you dropped:{' '}
+            {lost.map((l) => `${l.count} ${LOST_LABEL[l.reason].toLowerCase()}`).join(', ')}. Counting silence as a
+            reply is how a reply rate stops meaning anything.
+          </p>
+        )}
 
         <Suggestions list={tips.filter((t) => t.id === 'after-reply')} />
 

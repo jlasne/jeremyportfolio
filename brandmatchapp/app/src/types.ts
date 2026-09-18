@@ -10,6 +10,15 @@ export type MemberRole = 'owner' | 'admin' | 'member'
 export type CampaignStatus = 'draft' | 'live' | 'paused' | 'archived'
 export type Verdict = 'qualified' | 'hard_fail' | 'off_niche' | 'knockout_fail' | 'below_threshold'
 export type LeadStatus = 'new' | 'contacted' | 'replied' | 'call' | 'signed' | 'lost'
+
+/**
+ * Why a lead was dropped.
+ *
+ * Without this, "replied" quietly absorbs the silence and the bounces, and the
+ * reply rate on the dashboard is a number nobody can trust. One extra click,
+ * and only when giving up on someone.
+ */
+export type LostReason = 'no_answer' | 'wrong_person' | 'not_interested' | 'bad_timing'
 /** A Gate 3 criterion is worth 0, 1 or 2. Seven of them, so 14 is the ceiling. */
 export type CriterionScore = 0 | 1 | 2
 
@@ -104,6 +113,15 @@ export type PresetId = 'strict' | 'balanced' | 'broad' | 'custom'
 export interface CampaignBrief {
   audience: string
   offer: string
+  /**
+   * Handles the client already knows. Optional, and the highest value input
+   * there is: the people around a good account look like that account.
+   *
+   * They are not taken on trust. Each one goes through the campaign's own
+   * rules, and one that fails is never used to find others, because its
+   * neighbours would be off target too.
+   */
+  seeds?: string[]
   writtenAt: string
 }
 
@@ -237,6 +255,20 @@ export interface Creator {
   links: string[]
   measuredAt: string
   firstSeenAt: string
+  /**
+   * How we came across them.
+   *
+   * Without the parents, no channel can be measured, no candidate can be
+   * ranked before we pay to look at them, and no stop rule can fire. It costs
+   * nothing to write and everything to add later.
+   */
+  foundVia?: {
+    channel: 'search' | 'neighbour' | 'seed' | 'import'
+    /** The accounts that led us here. Their quality ranks this candidate. */
+    parents?: string[]
+    /** The handle the client gave us, when that is where it started. */
+    seed?: string
+  }
 }
 
 export interface CreatorPost {
@@ -291,11 +323,21 @@ export interface Evaluation {
   evaluatedAt: string
 }
 
-/** Permanent. A profile handed to one account is never offered to another. */
+/**
+ * A profile handed over is held against the offer it was sold for, not against
+ * the world.
+ *
+ * Two clients selling the same thing never receive the same person. A client
+ * selling an app build and a client selling a course platform can both receive
+ * them, because that is true: one coach can buy both. A claim over every offer
+ * at once would empty the pool a little more with every customer we sign.
+ */
 export interface CreatorClaim {
   creatorId: string
   accountId: string
   campaignId: string
+  /** Which kind of offer holds them. Today that is the campaign's library. */
+  offerKey: string
   claimedAt: string
 }
 
@@ -313,6 +355,8 @@ export interface Lead {
   score: number
   status: LeadStatus
   ownerId: string | null
+  /** Set when the status is lost. What actually happened. */
+  lostReason?: LostReason
   /** Kept across campaigns, so a good one is not lost in a long list. */
   saved?: boolean
   /** Whatever the client typed about them. Free text, theirs alone. */

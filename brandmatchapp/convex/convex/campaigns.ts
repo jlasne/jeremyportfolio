@@ -74,7 +74,11 @@ export const create = internalMutation({
   args: {
     accountId: v.id('accounts'),
     name: v.string(),
-    brief: v.object({ audience: v.string(), offer: v.string() }),
+    brief: v.object({
+      audience: v.string(),
+      offer: v.string(),
+      seeds: v.optional(v.array(v.string())),
+    }),
     dailyCap: v.optional(v.number()),
   },
   returns: v.any(),
@@ -102,7 +106,11 @@ export const patch = internalMutation({
     name: v.optional(v.string()),
     status: v.optional(v.union(v.literal('draft'), v.literal('live'), v.literal('paused'), v.literal('archived'))),
     dailyCap: v.optional(v.number()),
-    brief: v.optional(v.object({ audience: v.string(), offer: v.string() })),
+    brief: v.optional(v.object({
+      audience: v.string(),
+      offer: v.string(),
+      seeds: v.optional(v.array(v.string())),
+    })),
     extracted: v.optional(v.any()),
     niches: v.optional(v.any()),
   },

@@ -9,9 +9,11 @@ import type {
   HardRules,
   Lead,
   LeadEvent,
+  CreatorClaim,
   Criterion,
   Knockout,
   LeadStatus,
+  LostReason,
   Member,
   Niche,
   PresetId,
@@ -61,7 +63,7 @@ export interface State {
   gateSets: GateSet[]
   creators: Creator[]
   evaluations: Evaluation[]
-  claims: { creatorId: string; accountId: string; campaignId: string; claimedAt: string }[]
+  claims: CreatorClaim[]
   leads: Lead[]
   leadEvents: LeadEvent[]
   deals: Deal[]
@@ -121,10 +123,10 @@ export function subscribe(listener: () => void): () => void {
  * The one click. Moves a lead and appends the event in the same write, because
  * the event is the record and the field on the lead is only a cache of it.
  */
-export function moveLead(leadId: string, to: LeadStatus, by = 'mem_1'): void {
+export function moveLead(leadId: string, to: LeadStatus, by = 'mem_1', lostReason?: LostReason): void {
   setState((s) => {
     const lead = s.leads.find((l) => l.id === leadId)
-    if (!lead || lead.status === to) return {}
+    if (!lead || (lead.status === to && !lostReason)) return {}
     const at = new Date().toISOString()
     const event: LeadEvent = {
       id: `lev_${leadId}_${s.leadEvents.length}`,
@@ -134,10 +136,13 @@ export function moveLead(leadId: string, to: LeadStatus, by = 'mem_1'): void {
       from: lead.status,
       to,
       by,
+      note: lostReason,
       at,
     }
     return {
-      leads: s.leads.map((l) => (l.id === leadId ? { ...l, status: to, statusAt: at } : l)),
+      leads: s.leads.map((l) =>
+        l.id === leadId ? { ...l, status: to, statusAt: at, lostReason: to === 'lost' ? lostReason : undefined } : l,
+      ),
       leadEvents: [...s.leadEvents, event],
     }
   })

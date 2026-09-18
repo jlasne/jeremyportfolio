@@ -176,9 +176,9 @@ export const clientApi = httpAction(async (ctx, req) => {
 
       // The one click. A status and nothing else, and the event is appended.
       if (parts[2] === 'status' && req.method === 'POST') {
-        const { status, note, by } = await req.json()
+        const { status, note, by, lostReason } = await req.json()
         const out = await ctx.runMutation(internal.leads.move, {
-          accountId: account._id, leadId, status, note, by,
+          accountId: account._id, leadId, status, note, by, lostReason,
         })
         if (out.error) return fail(out.error, 404)
         return json(out)

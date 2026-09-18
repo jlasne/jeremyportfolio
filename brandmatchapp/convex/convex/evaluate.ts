@@ -30,8 +30,14 @@ export const pending = internalQuery({
       .collect()
     const seen = new Set(done.map((e) => e.creatorId))
 
-    // Exclusivity: a profile claimed by anyone is never evaluated again.
-    const claimed = new Set((await ctx.db.query('creatorClaims').collect()).map((c) => c.creatorId))
+    // Exclusivity is against the kind of offer, so a profile held by a client
+    // selling something else is still worth looking at for this one.
+    const offerKey = campaign.extracted.templateId ?? 'sell_to_creators'
+    const claimed = new Set(
+      (await ctx.db.query('creatorClaims').collect())
+        .filter((c) => c.offerKey === offerKey)
+        .map((c) => c.creatorId),
+    )
 
     const creators = await ctx.db.query('creators').withIndex('by_measured').order('desc').take(1_500)
     const fresh = creators.filter((c) => !seen.has(c._id) && !claimed.has(c._id)).slice(0, args.limit ?? 200)

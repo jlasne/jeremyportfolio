@@ -10,6 +10,7 @@ import {
   type Proposal,
 } from '../data/propose'
 import { ruleLabel } from '../data/gates'
+import { checkSeeds, cleanHandles, seedMismatch } from '../data/seeds'
 import { createCampaign } from '../data/store'
 import { compact } from '../lib/format'
 import { navigate } from '../lib/router'
@@ -27,6 +28,12 @@ const AUDIENCE_EXAMPLES = [
   'US skincare creators between 50k and 500k followers',
   'finance educators running a paid community',
   'home cooks in the UK posting weekly',
+]
+
+const SEED_EXAMPLES = [
+  'paste a few handles you would love to work with',
+  '@mara.strength @tobias.lift @lena.method',
+  'anyone you already have in mind',
 ]
 
 const OFFER_EXAMPLES = [
@@ -54,21 +61,31 @@ function useRotating(list: string[], on: boolean): string {
 function BriefStep({ onDone }: { onDone: (brief: CampaignBrief) => void }) {
   const [audience, setAudience] = useState('')
   const [offer, setOffer] = useState('')
+  const [seeds, setSeeds] = useState('')
   const offerRef = useRef<HTMLTextAreaElement>(null)
   // The second question appears once the first has an answer. One thing at a
   // time, without a page turn, so the first stays readable while writing it.
   const second = audience.trim().length > 3
   const ready = second && offer.trim().length > 3
 
+  const third = ready
   const audiencePlaceholder = useRotating(AUDIENCE_EXAMPLES, audience.length === 0)
   const offerPlaceholder = useRotating(OFFER_EXAMPLES, offer.length === 0)
+  const seedPlaceholder = useRotating(SEED_EXAMPLES, seeds.length === 0)
 
   return (
     <form
       className="ask"
       onSubmit={(e) => {
         e.preventDefault()
-        if (ready) onDone({ audience: audience.trim(), offer: offer.trim(), writtenAt: new Date().toISOString() })
+        if (ready) {
+          onDone({
+            audience: audience.trim(),
+            offer: offer.trim(),
+            seeds: cleanHandles(seeds),
+            writtenAt: new Date().toISOString(),
+          })
+        }
       }}
     >
       <label className="ask-block">
@@ -93,6 +110,22 @@ function BriefStep({ onDone }: { onDone: (brief: CampaignBrief) => void }) {
           placeholder={offerPlaceholder}
           tabIndex={second ? 0 : -1}
           onChange={(e) => setOffer(e.target.value)}
+        />
+      </label>
+
+      <label className={`ask-block${third ? ' in' : ' out'}`} aria-hidden={!third}>
+        <h1>Know anyone already?</h1>
+        <p className="ask-note">
+          Optional, and the most useful thing you can give us. The people around a good account look like that
+          account, so a handful of names is the fastest way to a good first day.
+        </p>
+        <textarea
+          className="textarea ask-field short"
+          rows={2}
+          value={seeds}
+          placeholder={seedPlaceholder}
+          tabIndex={third ? 0 : -1}
+          onChange={(e) => setSeeds(e.target.value)}
         />
       </label>
 
@@ -207,6 +240,11 @@ function ProposalStep({
   const [showBrief, setShowBrief] = useState(false)
   const [switching, setSwitching] = useState(false)
   const library = LIBRARIES.find((l) => l.id === proposal.templateId)!
+  // The seeds go through the rules the client is about to accept, so the
+  // verdict is about these rules and not about some general idea of quality.
+  const verdicts = checkSeeds(brief.seeds ?? [], asGateSet(proposal), proposal.niches)
+  const fits = verdicts.filter((v) => v.state !== 'fails').length
+  const mismatch = seedMismatch(verdicts, proposal.hard)
 
   const create = (andEdit: boolean) => {
     const id = createCampaign(brief, proposal, name.trim() || proposal.name)
@@ -308,6 +346,30 @@ function ProposalStep({
         )}
       </div>
 
+      {brief.seeds && brief.seeds.length > 0 && (
+        <div className="card gate-card">
+          <h2>The accounts you gave us</h2>
+          <p className="gate-lede">
+            {fits} of {brief.seeds.length} hold up against these rules. We follow the ones that do, and leave the rest
+            alone: their neighbours would be off target too.
+          </p>
+          {mismatch && <p className="notice warn">{mismatch}</p>}
+          <ul className="rules stacked">
+            {verdicts.map((v) => (
+              <li key={v.handle} className={v.state}>
+                <b>
+                  @{v.handle}
+                  <span className={`seed-tag ${v.state}`}>
+                    {v.state === 'fits' ? 'Fits' : v.state === 'fails' ? 'Does not fit' : 'New to us'}
+                  </span>
+                </b>
+                <small className="muted">{v.note}</small>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div className="page-head">
         <span className="hint">Nothing reaches you before you have tested these.</span>
         <span className="spacer" />
@@ -316,6 +378,26 @@ function ProposalStep({
       </div>
     </>
   )
+}
+
+/** The proposal, shaped as a gate version so the seed check can run on it. */
+function asGateSet(proposal: Proposal) {
+  return {
+    id: 'draft',
+    campaignId: 'draft',
+    accountId: 'draft',
+    version: 1,
+    origin: 'generated' as const,
+    templateId: proposal.templateId,
+    hard: proposal.hard,
+    knockouts: proposal.knockouts,
+    criteria: proposal.criteria,
+    passScore: proposal.passScore,
+    preset: 'balanced' as const,
+    by: 'system',
+    changes: [],
+    createdAt: new Date().toISOString(),
+  }
 }
 
 // ---------------------------------------------------------------------------

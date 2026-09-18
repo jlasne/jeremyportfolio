@@ -1,6 +1,6 @@
 import type { Creator, CreatorPost } from '../types'
 import { between, pick, seeded } from './rand'
-import { daysAgo } from './time'
+import { daysAgo, NOW } from './time'
 
 // Eight thousand profiles, built from one seed so the sample account never
 // moves. Enough that a month of delivery fills a dashboard, and every band on
@@ -58,6 +58,46 @@ function median(list: number[]): number {
   const sorted = [...list].sort((a, b) => a - b)
   const mid = Math.floor(sorted.length / 2)
   return sorted.length % 2 ? sorted[mid] : Math.round((sorted[mid - 1] + sorted[mid]) / 2)
+}
+
+const MATURED_MS = 48 * 3_600_000
+
+/**
+ * Views, counted only on posts that have had time to be seen.
+ *
+ * Someone posting ten times a week has twelve posts that are four days old,
+ * and a post two hours old has almost no views yet. Counting those punishes the
+ * most active accounts for being active. Measured on a real pipeline: at
+ * twenty one posts a week it rejected 86% of them.
+ *
+ * So the fresh ones are left out, unless leaving them out leaves too little to
+ * measure, in which case everything counts and the figure is what it is.
+ */
+function maturedViews(posts: CreatorPost[], now: number): number {
+  const ripe = posts.filter((p) => now - new Date(p.postedAt).getTime() >= MATURED_MS)
+  return median((ripe.length >= 6 ? ripe : posts).map((p) => p.views))
+}
+
+/**
+ * Where this profile came from. The mix mirrors what a real run produces: most
+ * people arrive as the neighbour of someone already qualified, which is why a
+ * good lead is worth more than the lead itself.
+ */
+function foundVia(index: number, rand: () => number): Creator['foundVia'] {
+  const roll = rand()
+  if (index % 97 === 3) {
+    return { channel: 'seed', seed: `seed_${index}` }
+  }
+  if (roll > 0.42) {
+    // One to three parents. More parents means a stronger candidate, which is
+    // what the priority queue will read before paying to look at anyone.
+    const many = roll > 0.86 ? 3 : roll > 0.66 ? 2 : 1
+    return {
+      channel: 'neighbour',
+      parents: Array.from({ length: many }, (_, i) => `cre_${String((index * 7 + i * 131) % 8_000).padStart(3, '0')}`),
+    }
+  }
+  return { channel: 'search' }
 }
 
 export interface Built {
@@ -120,7 +160,7 @@ function build(index: number): { built: Built; posts: CreatorPost[] } {
     bio: pick(rand, niche === 'fitness' ? FIT_BIOS : FIN_BIOS),
     email: hasEmail ? `${first.toLowerCase()}@${pick(rand, DOMAINS)}` : null,
     followers,
-    medianViews: median(posts.map((p) => p.views)),
+    medianViews: maturedViews(posts, NOW.getTime()),
     medianComments: median(posts.map((p) => p.comments)),
     postsPerMonth: cadence,
     lastPostAt: posts[0].postedAt,
@@ -129,6 +169,7 @@ function build(index: number): { built: Built; posts: CreatorPost[] } {
     links: [`https://${handle.replace('.', '')}.com`],
     measuredAt: daysAgo(between(rand, 0, 3)),
     firstSeenAt: daysAgo(between(rand, 4, 90)),
+    foundVia: foundVia(index, rand),
   }
 
   return { built: { creator, niche, band }, posts }

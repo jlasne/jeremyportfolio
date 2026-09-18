@@ -1,4 +1,5 @@
 import type {
+  CreatorClaim,
   DailyDelivery,
   Deal,
   Evaluation,
@@ -6,6 +7,7 @@ import type {
   Lead,
   LeadEvent,
   LeadStatus,
+  LostReason,
   QuotaEntry,
   QuotaPeriod,
 } from '../types'
@@ -69,7 +71,7 @@ export const evaluations: Evaluation[] = []
 export const leads: Lead[] = []
 export const leadEvents: LeadEvent[] = []
 export const deals: Deal[] = []
-export const claims: { creatorId: string; accountId: string; campaignId: string; claimedAt: string }[] = []
+export const claims: CreatorClaim[] = []
 
 /** Where a lead sits on the walk, given how long it has been in the client's hands. */
 const STATUS_WALK: LeadStatus[] = ['new', 'contacted', 'replied', 'call', 'signed', 'lost']
@@ -162,7 +164,14 @@ passed.forEach((row, rank) => {
   const deliveredAt = daysAgo(daysBack, 7)
   const rand = seeded(313_007 + row.index * 17)
 
-  claims.push({ creatorId: row.creatorId, accountId: account.id, campaignId: row.campaignId, claimedAt: deliveredAt })
+  claims.push({
+    creatorId: row.creatorId,
+    accountId: account.id,
+    campaignId: row.campaignId,
+    // Held against the kind of offer, not against the world.
+    offerKey: campaigns.find((c) => c.id === row.campaignId)!.extracted.templateId,
+    claimedAt: deliveredAt,
+  })
 
   // Fresh leads sit untouched. The longer a client has had one, the further it
   // has walked, and how far depends on who they are, not on the dice alone.
@@ -185,6 +194,13 @@ passed.forEach((row, rank) => {
   if (reach === 3 && daysBack > 9 && close > 0.945) reach = 4
 
   const lost = daysBack > 6 && rand() > 0.88 && reach > 0
+  // Why it ended. Mostly silence, which is the point of asking.
+  const whyRoll = rand()
+  const why: LostReason =
+    whyRoll > 0.52 ? 'no_answer'
+      : whyRoll > 0.3 ? 'not_interested'
+        : whyRoll > 0.14 ? 'bad_timing'
+          : 'wrong_person'
   const status: LeadStatus = lost ? 'lost' : STATUS_WALK[reach]
   const leadId = `led_${row.creatorId}`
   const statusAt = daysAgo(Math.max(0, daysBack - reach), 11)
@@ -197,6 +213,7 @@ passed.forEach((row, rank) => {
     evaluationId: row.evaluationId,
     score: row.score,
     status,
+    lostReason: lost ? why : undefined,
     ownerId: reach === 0 ? null : rank % 2 === 0 ? 'mem_1' : 'mem_2',
     deliveredAt,
     statusAt,
@@ -227,6 +244,7 @@ passed.forEach((row, rank) => {
       from,
       to: 'lost',
       by: rank % 2 === 0 ? 'mem_1' : 'mem_2',
+      note: why,
       at: statusAt,
     })
   }

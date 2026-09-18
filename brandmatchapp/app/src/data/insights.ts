@@ -1,4 +1,4 @@
-import type { Campaign, LeadStatus, Niche, Subscription } from '../types'
+import type { Campaign, LeadStatus, LostReason, Niche, Subscription } from '../types'
 import type { LeadRow } from './index'
 import { rank, WALK } from './status'
 import { compact } from '../lib/format'
@@ -314,6 +314,25 @@ export function economics(
     multiple: deals > 0 && costCents > 0 ? wonCents / costCents : null,
     early: deals < 3,
   }
+}
+
+/**
+ * Why leads were dropped.
+ *
+ * This is what stops the reply rate from being a number nobody can trust:
+ * silence counted as a reply is how a real pipeline reported 1.9% as something
+ * much healthier.
+ */
+export function lostBreakdown(rows: LeadRow[]): { reason: LostReason; count: number }[] {
+  const dropped = rows.filter((r) => r.lead.status === 'lost' && r.lead.lostReason)
+  const counts = new Map<LostReason, number>()
+  for (const row of dropped) {
+    const why = row.lead.lostReason!
+    counts.set(why, (counts.get(why) ?? 0) + 1)
+  }
+  return [...counts.entries()]
+    .map(([reason, count]) => ({ reason, count }))
+    .sort((a, b) => b.count - a.count)
 }
 
 // ---------------------------------------------------------------------------

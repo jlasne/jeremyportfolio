@@ -17,6 +17,8 @@ export const campaigns: Campaign[] = [
       audience:
         'English speaking fitness coaches who already sell a programme and teach a method of their own, with an audience that buys from them',
       offer: 'We build custom mobile apps for coaches, 12k to 30k euros a project',
+      // Four we know, one we have never seen. Exactly what a client gives you.
+      seeds: ['nolan.built', 'marco.hybrid', 'bram.form', 'rae.method', 'coachsamira'],
       writtenAt: daysAgo(96),
     },
     extracted: {
@@ -48,6 +50,7 @@ export const campaigns: Campaign[] = [
       audience:
         'Finance educators who already run a paid community or cohort, publish every week, and whose audience has money to invest. Nobody giving regulated advice',
       offer: 'We sell a white label course and community platform, 450 euros a month',
+      seeds: ['milo.signal', 'marco.capital'],
       writtenAt: daysAgo(24),
     },
     extracted: {

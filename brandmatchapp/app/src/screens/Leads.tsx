@@ -5,12 +5,12 @@ import {
 } from '../data'
 import { useStore } from '../data/hooks'
 import { moveLead, recordDeal, setNote, toggleSaved, undoMove } from '../data/store'
-import { nextLabel, nextStatus, STATUSES, STATUS_LABEL } from '../data/status'
+import { LOST_LABEL, LOST_REASONS, nextLabel, nextStatus, STATUSES, STATUS_LABEL } from '../data/status'
 import { Avatar } from '../components/Avatar'
 import { download, toCsv } from '../lib/csv'
 import { absolute, compact, money, relative } from '../lib/format'
 import { navigate } from '../lib/router'
-import type { LeadStatus } from '../types'
+import type { LeadStatus, LostReason } from '../types'
 
 // The daily screen, and the one the client lives in.
 //
@@ -53,14 +53,15 @@ function badgeFor(row: LeadRow): string | null {
 // ---------------------------------------------------------------------------
 
 function Action({
-  row, undoable, onMove, onUndo, onDeal,
+  row, undoable, onMove, onUndo, onDeal, onDrop,
 }: {
   row: LeadRow
   /** True while this lead's last change can still be taken back. */
   undoable: boolean
-  onMove: (to: LeadStatus) => void
+  onMove: (to: LeadStatus, lostReason?: LostReason) => void
   onUndo: () => void
   onDeal: (amountCents: number | null) => void
+  onDrop: () => void
 }) {
   const { lead } = row
   const [asking, setAsking] = useState(false)
@@ -110,6 +111,8 @@ function Action({
       <small className="row-state">
         {undoable ? (
           <button type="button" className="undo" onClick={onUndo}>Undo</button>
+        ) : lead.status === 'lost' && lead.lostReason ? (
+          LOST_LABEL[lead.lostReason]
         ) : (
           STATUS_LABEL[lead.status]
         )}
@@ -134,7 +137,7 @@ function Action({
               className="btn small quiet drop"
               title="Not a fit"
               aria-label="Not a fit"
-              onClick={() => onMove('lost')}
+              onClick={onDrop}
             >
               ✕
             </button>
@@ -160,12 +163,37 @@ function Row({
   open: boolean
   manyCampaigns: boolean
   undoable: boolean
-  onMove: (to: LeadStatus) => void
+  onMove: (to: LeadStatus, lostReason?: LostReason) => void
   onUndo: () => void
   onDeal: (amountCents: number | null) => void
 }) {
   const { lead, creator, evaluation, campaign } = row
   const badge = badgeFor(row)
+  const [dropping, setDropping] = useState(false)
+
+  // Asking why takes the whole row. Four answers do not fit in an action cell,
+  // and the question deserves to be read rather than squeezed.
+  if (dropping) {
+    return (
+      <div className="contact why-row">
+        <span className="why-ask">Dropping {creator.name}. What happened?</span>
+        <span className="why-picks">
+          {LOST_REASONS.map((r) => (
+            <button
+              key={r.id}
+              type="button"
+              className="btn small"
+              onClick={() => { onMove('lost', r.id); setDropping(false) }}
+            >
+              {r.label}
+            </button>
+          ))}
+          <button type="button" className="btn small quiet" onClick={() => setDropping(false)}>Keep them</button>
+        </span>
+      </div>
+    )
+  }
+
   return (
     <div className={`contact${open ? ' open' : ''}${lead.status === 'lost' ? ' dropped' : ''}`}>
       <a className="who" href={`#/leads/${lead.id}`}>
@@ -188,7 +216,14 @@ function Row({
         <b className="num">{lead.score}</b>
         <small>of 14</small>
       </span>
-      <Action row={row} undoable={undoable} onMove={onMove} onUndo={onUndo} onDeal={onDeal} />
+      <Action
+        row={row}
+        undoable={undoable}
+        onMove={onMove}
+        onUndo={onUndo}
+        onDeal={onDeal}
+        onDrop={() => setDropping(true)}
+      />
     </div>
   )
 }
@@ -421,7 +456,7 @@ export function Leads({ leadId }: { leadId: string | null }) {
               open={open?.lead.id === row.lead.id}
               manyCampaigns={!campaignId && campaigns.length > 1}
               undoable={undoable === row.lead.id}
-              onMove={(to) => { moveLead(row.lead.id, to); armUndo(row.lead.id) }}
+              onMove={(to, why) => { moveLead(row.lead.id, to, 'mem_1', why); armUndo(row.lead.id) }}
               onUndo={() => { undoMove(row.lead.id); setUndoable(null) }}
               onDeal={(cents) => { if (cents) recordDeal(row.lead.id, cents) }}
             />

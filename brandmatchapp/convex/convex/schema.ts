@@ -179,6 +179,14 @@ export default defineSchema({
     brief: v.object({
       audience: v.string(),
       offer: v.string(),
+      /**
+       * Handles the client already knows. The highest value input there is,
+       * and the least trustworthy: a client naming accounts off the top of
+       * their head is not running their own rules while they do it. Each one
+       * goes through the campaign's rules, and one that fails is never used to
+       * find others, because its neighbours would be off target too.
+       */
+      seeds: v.optional(v.array(v.string())),
       writtenAt: v.optional(v.number()),
     }),
     /** What the model read out of them. Edited by the client, never overwritten. */
@@ -263,6 +271,19 @@ export default defineSchema({
     /** When the numbers above were last read. Stale data is visible as stale. */
     measuredAt: v.number(),
     firstSeenAt: v.number(),
+    /**
+     * How we came across them: the channel, the accounts that led us here, and
+     * the client handle it started from.
+     *
+     * Without the parents no channel can be measured, no candidate can be
+     * ranked before we pay to look at them, and no stop rule can fire. It costs
+     * nothing to write and everything to add later.
+     */
+    foundVia: v.optional(v.object({
+      channel: v.string(),
+      parents: v.optional(v.array(v.string())),
+      seed: v.optional(v.string()),
+    })),
   })
     .index('by_handle', ['platform', 'handle'])
     .index('by_followers', ['followers'])
@@ -332,9 +353,18 @@ export default defineSchema({
     creatorId: v.id('creators'),
     accountId: v.id('accounts'),
     campaignId: v.id('campaigns'),
+    /**
+     * Which kind of offer holds them. Two clients selling the same thing never
+     * receive the same person. A client selling an app build and a client
+     * selling a course platform can both receive them, because one coach can
+     * buy both. A claim over every offer at once would empty the pool a little
+     * more with every customer we sign.
+     */
+    offerKey: v.string(),
     claimedAt: v.number(),
   })
     .index('by_creator', ['creatorId'])
+    .index('by_creator_offer', ['creatorId', 'offerKey'])
     .index('by_account', ['accountId']),
 
   // -------------------------------------------------------------------------
@@ -358,6 +388,12 @@ export default defineSchema({
     ),
     /** Which member is on it. Absent means nobody has taken it. */
     ownerId: v.optional(v.id('members')),
+    /**
+     * Why a lead was dropped: no_answer, wrong_person, not_interested,
+     * bad_timing. Without it, silence hides inside the reply rate, which is
+     * how a real pipeline reported 1.9% as something much healthier.
+     */
+    lostReason: v.optional(v.string()),
     /** Kept across campaigns, so a good one is not lost in a long list. */
     saved: v.optional(v.boolean()),
     /** Whatever the client typed about them. Free text, theirs alone. */

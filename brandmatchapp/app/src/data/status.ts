@@ -1,4 +1,4 @@
-import type { LeadStatus } from '../types'
+import type { LeadStatus, LostReason } from '../types'
 
 // The pipeline, in six words. A status change is one click from the list and
 // never more than one, so this file has to answer "what is the next click"
@@ -7,6 +7,11 @@ import type { LeadStatus } from '../types'
 // These values are strategic: they and the deal amounts are what will feed the
 // scoring loop and a price benchmark later. They are stored as an append only
 // event, never as a field someone overwrites.
+//
+// Dropping someone asks why. Without it, silence and bounces hide inside the
+// numbers and the reply rate on the dashboard means nothing. Measured on a real
+// pipeline: a headline reply rate that was really 1.9% once the noise was taken
+// out. One extra click, and only when giving up on someone.
 
 export const STATUSES: LeadStatus[] = ['new', 'contacted', 'replied', 'call', 'signed', 'lost']
 
@@ -36,6 +41,20 @@ export function nextLabel(status: LeadStatus): string | null {
   return { contacted: 'Mark contacted', replied: 'Mark replied', call: 'Book call', signed: 'Mark signed' }[
     next as 'contacted' | 'replied' | 'call' | 'signed'
   ]
+}
+
+export const LOST_REASONS: { id: LostReason; label: string }[] = [
+  { id: 'no_answer', label: 'Never answered' },
+  { id: 'wrong_person', label: 'Wrong person' },
+  { id: 'not_interested', label: 'Not interested' },
+  { id: 'bad_timing', label: 'Bad timing' },
+]
+
+export const LOST_LABEL: Record<LostReason, string> = {
+  no_answer: 'Never answered',
+  wrong_person: 'Wrong person',
+  not_interested: 'Not interested',
+  bad_timing: 'Bad timing',
 }
 
 /** Where a status sits on the walk, for the funnel on the dashboard. */

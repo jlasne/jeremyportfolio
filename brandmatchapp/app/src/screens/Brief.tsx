@@ -1,5 +1,6 @@
-import { getCampaign } from '../data'
+import { getCampaign, getGateSet } from '../data'
 import { LIBRARIES } from '../data/propose'
+import { checkSeeds, seedMismatch } from '../data/seeds'
 import { absolute } from '../lib/format'
 
 // Zone 3. The two questions the campaign was born from, still in the client's
@@ -10,9 +11,14 @@ import { absolute } from '../lib/format'
 
 export function Brief({ campaignId }: { campaignId: string }) {
   const campaign = getCampaign(campaignId)
+  const gates = getGateSet(campaignId)
   if (!campaign) return null
   const { brief, extracted } = campaign
   const library = LIBRARIES.find((l) => l.id === extracted.templateId)
+  // Checked against the rules in use today, not against the ones they were
+  // given under. A rule change can turn a good seed into a bad one.
+  const seeds = checkSeeds(brief.seeds ?? [], gates, extracted.niches)
+  const mismatch = gates ? seedMismatch(seeds, gates.hard) : null
 
   return (
     <>
@@ -26,6 +32,30 @@ export function Brief({ campaignId }: { campaignId: string }) {
         <textarea className="textarea" defaultValue={brief.offer} rows={3} />
         <p className="hint">Written on {absolute(brief.writtenAt)}. Change either answer and we will suggest new rules.</p>
       </div>
+
+      {seeds.length > 0 && (
+        <div className="card">
+          <h2>Accounts you gave us</h2>
+          <p className="muted">
+            {seeds.filter((v) => v.state !== 'fails').length} of {seeds.length} hold up against your rules today. We
+            follow those to find people like them, and leave the rest alone.
+          </p>
+          {mismatch && <p className="notice warn">{mismatch}</p>}
+          <ul className="rules stacked">
+            {seeds.map((v) => (
+              <li key={v.handle} className={v.state}>
+                <b>
+                  @{v.handle}
+                  <span className={`seed-tag ${v.state}`}>
+                    {v.state === 'fits' ? 'Fits' : v.state === 'fails' ? 'Does not fit' : 'New to us'}
+                  </span>
+                </b>
+                <small className="muted">{v.note}</small>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="card">
         <h2>What we read out of it</h2>

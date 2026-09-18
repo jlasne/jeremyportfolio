@@ -96,6 +96,8 @@ export const move = internalMutation({
     status: STATUS,
     by: v.optional(v.string()),
     note: v.optional(v.string()),
+    /** Set when the status is lost. What actually happened. */
+    lostReason: v.optional(v.string()),
   },
   returns: v.any(),
   handler: async (ctx, args) => {
@@ -110,10 +112,14 @@ export const move = internalMutation({
       from: lead.status,
       to: args.status,
       by: args.by ?? 'client',
-      note: args.note,
+      note: args.note ?? args.lostReason,
       at,
     })
-    await ctx.db.patch(args.leadId, { status: args.status, statusAt: at })
+    await ctx.db.patch(args.leadId, {
+      status: args.status,
+      statusAt: at,
+      lostReason: args.status === 'lost' ? args.lostReason : undefined,
+    })
     return { ok: true, status: args.status }
   },
 })
@@ -222,7 +228,7 @@ export const overview = internalQuery({
 function shape(
   lead: {
     _id: string; campaignId: string; score: number; status: string
-    saved?: boolean; note?: string; refreshedAt?: number
+    saved?: boolean; note?: string; refreshedAt?: number; lostReason?: string
     deliveredAt: number; statusAt: number
   },
   creator: {
@@ -242,6 +248,7 @@ function shape(
     status: lead.status,
     saved: lead.saved ?? false,
     note: lead.note ?? '',
+    lostReason: lead.lostReason ?? null,
     refreshedAt: lead.refreshedAt ?? null,
     deliveredAt: lead.deliveredAt,
     statusAt: lead.statusAt,
