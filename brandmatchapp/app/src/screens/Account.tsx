@@ -1,15 +1,18 @@
 import { useState } from 'react'
-import { getAccount, getMembers, getQuota, getSubscription } from '../data'
+import { getAccount, getMembers, getSubscription } from '../data'
 import { useStore } from '../data/hooks'
 import { getState } from '../data/store'
 import { TIERS } from '../mock/account'
-import { absolute, money, monthOf } from '../lib/format'
+import { absolute, money } from '../lib/format'
 
-// Outside the five zones: the plan, the month's balance, the team.
+// Outside the zones: the plan and the team.
 //
-// What is on this page is what the client bought: leads delivered per day, and
-// what is left of the month. There is no analysed volume here and no cost,
-// because there is none anywhere a client can reach.
+// What is on this page is what the client bought, and a plan is bought by the
+// month. The month is the number on the invoice; the daily rate is how it
+// arrives, so it sits underneath in small type.
+//
+// There is no analysed volume here and no cost, because there is none
+// anywhere a client can reach.
 
 /**
  * One link, copied by hand. Nothing is emailed, because nothing here sends
@@ -49,16 +52,15 @@ function Invite() {
   )
 }
 
+/** A tier's month, from its daily rate. A month is 30 days of delivery. */
+const MONTH_DAYS = 30
+
 export function Account() {
   useStore()
   const account = getAccount()
   const sub = getSubscription()
-  const quota = getQuota()
   const members = getMembers()
   const topups = getState().topups
-  const journal = getState()
-    .quotaEntries.filter((e) => e.kind !== 'delivery')
-    .sort((a, b) => b.at.localeCompare(a.at))
 
   return (
     <div className="page">
@@ -67,29 +69,23 @@ export function Account() {
 
       <div className="card">
         <h2>Billing</h2>
-        <ul className="rules">
+        <ul className="plan-list">
           {TIERS.map((t) => (
             <li key={t.tier} className={t.tier === sub.tier ? 'on' : undefined}>
-              <span>{t.tier} qualified leads a day</span>
-              <b>{money(t.priceCents)} a month{t.tier === sub.tier ? ', your plan' : ''}</b>
+              <span className="plan-size">
+                <b className="num">{t.tier * MONTH_DAYS}</b>
+                <span>qualified leads a month</span>
+                <small className="muted">{t.tier} a day</small>
+              </span>
+              <span className="plan-price">
+                <b>{money(t.priceCents)}</b>
+                <small className="muted">a month{t.tier === sub.tier ? ', your plan' : ''}</small>
+              </span>
             </li>
           ))}
         </ul>
-        <p className="hint">You pay for the leads we hand you. Nothing else is counted.</p>
-      </div>
-
-      <div className="card">
-        <h2>This month</h2>
-        <div className="month-gauge">
-          <i style={{ width: `${quota.entitled ? Math.min(100, Math.round((quota.delivered / quota.entitled) * 100)) : 0}%` }} />
-        </div>
-        <ul className="room-key month-key">
-          <li className="done"><b className="num">{quota.delivered}</b> sent to you</li>
-          <li className="ahead"><b className="num">{quota.remaining}</b> still to come by the end of {monthOf(sub.period)}</li>
-          <li><b className="num">{quota.entitled}</b> in total{quota.carried > 0 ? `, ${quota.carried} of them carried over from last month` : ''}</li>
-        </ul>
         <p className="hint">
-          A quiet day is not lost. Whatever is left runs to the end of the month, and your campaigns share it.
+          You pay for the leads we hand you. A quiet day is not lost: whatever is left runs to the end of the month.
         </p>
       </div>
 
@@ -120,17 +116,6 @@ export function Account() {
         <Invite />
       </div>
 
-      <div className="card">
-        <h2>What went in and out</h2>
-        <ul className="rules">
-          {journal.map((e) => (
-            <li key={e.id}>
-              <span>{e.note ?? e.kind}</span>
-              <b className="num">{e.delta > 0 ? `+${e.delta}` : e.delta}</b>
-            </li>
-          ))}
-        </ul>
-      </div>
     </div>
   )
 }

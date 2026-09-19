@@ -26,6 +26,8 @@ export interface Loaded {
   deals: Deal[]
   dailyDeliveries: DailyDelivery[]
   feasibilityRuns: FeasibilityRun[]
+  /** Every tag the account's leads carry, so the drawer can list them. */
+  tags: string[]
 }
 
 /** Reads a whole account: the plan, the campaigns, their gates, the leads. */
@@ -175,6 +177,7 @@ export async function fetchAll(): Promise<Loaded> {
       ownerId: null,
       saved: Boolean(row.saved),
       note: row.note ?? '',
+      tags: Array.isArray(row.tags) ? row.tags : undefined,
       refreshedAt: row.refreshedAt ? iso(row.refreshedAt) : undefined,
       deliveredAt: iso(row.deliveredAt),
       statusAt: iso(row.statusAt),
@@ -195,5 +198,7 @@ export async function fetchAll(): Promise<Loaded> {
     deals: [],
     dailyDeliveries: [],
     feasibilityRuns,
+    // Every tag the account has, whether or not a lead carries it today.
+    tags: [...new Set(leads.flatMap((l) => l.tags ?? []))].sort(),
   }
 }

@@ -38,6 +38,7 @@ import {
   leads,
   quotaEntries,
   quotaPeriod,
+  SAMPLE_TAGS,
 } from '../mock/pipeline'
 import type { Proposal } from './propose'
 import { describeChanges } from './tuning'
@@ -70,6 +71,12 @@ export interface State {
   deals: Deal[]
   dailyDeliveries: DailyDelivery[]
   feasibilityRuns: FeasibilityRun[]
+  /**
+   * Every tag the account has made, in the order they made them. Kept beside
+   * the leads and not derived from them, so a tag can exist before anything
+   * carries it and survives the last lead losing it.
+   */
+  tags: string[]
 }
 
 function seed(): State {
@@ -91,6 +98,9 @@ function seed(): State {
     deals,
     dailyDeliveries,
     feasibilityRuns,
+    // The sample arrives filed the way an account files itself after a month
+    // of use. An empty account starts with none and makes its own.
+    tags: SAMPLE_TAGS,
   }
 }
 
@@ -277,6 +287,56 @@ export function closeDoors(campaignId: string): void {
     'mem_1',
     true,
   )
+}
+
+/** A tag as it is stored: trimmed, one space between words, lower case. */
+export function cleanTag(raw: string): string {
+  return raw.trim().replace(/\s+/g, ' ').slice(0, 24).toLowerCase()
+}
+
+/** Makes a tag that nothing carries yet, so it can be filed against later. */
+export function createTag(raw: string): void {
+  const tag = cleanTag(raw)
+  if (!tag) return
+  setState((s) => (s.tags.includes(tag) ? {} : { tags: [...s.tags, tag] }))
+}
+
+/** Puts a tag on a lead, making it first if it is new. */
+export function tagLead(leadId: string, raw: string): void {
+  const tag = cleanTag(raw)
+  if (!tag) return
+  setState((s) => ({
+    tags: s.tags.includes(tag) ? s.tags : [...s.tags, tag],
+    leads: s.leads.map((l) =>
+      l.id === leadId && !(l.tags ?? []).includes(tag) ? { ...l, tags: [...(l.tags ?? []), tag] } : l,
+    ),
+  }))
+}
+
+export function untagLead(leadId: string, tag: string): void {
+  setState((s) => ({
+    leads: s.leads.map((l) => (l.id === leadId ? { ...l, tags: (l.tags ?? []).filter((t) => t !== tag) } : l)),
+  }))
+}
+
+/** Renames a tag everywhere at once. A tag is one thing, in one place. */
+export function renameTag(from: string, raw: string): void {
+  const to = cleanTag(raw)
+  if (!to || to === from) return
+  setState((s) => ({
+    tags: [...new Set(s.tags.map((t) => (t === from ? to : t)))],
+    leads: s.leads.map((l) =>
+      (l.tags ?? []).includes(from) ? { ...l, tags: [...new Set((l.tags ?? []).map((t) => (t === from ? to : t)))] } : l,
+    ),
+  }))
+}
+
+/** Deletes a tag, and takes it off every lead carrying it. */
+export function deleteTag(tag: string): void {
+  setState((s) => ({
+    tags: s.tags.filter((t) => t !== tag),
+    leads: s.leads.map((l) => ((l.tags ?? []).includes(tag) ? { ...l, tags: (l.tags ?? []).filter((t) => t !== tag) } : l)),
+  }))
 }
 
 /** Kept across campaigns. A plain flag: it says nothing about the deal. */
@@ -552,7 +612,7 @@ export async function hydrate(): Promise<boolean> {
   try {
     const { fetchAll } = await import('./remote')
     const loaded = await fetchAll()
-    setState({ live: true, ...loaded, topups: [], quotaEntries: [], claims: [] })
+    setState({ live: true, ...loaded, topups: [], quotaEntries: [], claims: [], tags: loaded.tags ?? [] })
     return true
   } catch (e) {
     console.warn('brandmatch: staying on the sample account.', e)

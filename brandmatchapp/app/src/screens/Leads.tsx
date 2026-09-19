@@ -1,33 +1,37 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  fitOf, getAccountShape, getCampaigns, getGateSet, getLeadEvents, getLeadRow, listLeads, todayCount,
+  fitOf, getAccountShape, getCampaigns, getGateSet, getLeadEvents, getLeadRow, getTags, listLeads, todayCount,
   type LeadRow,
 } from '../data'
 import { useStore } from '../data/hooks'
-import { moveLead, recordDeal, setNote, toggleSaved, undoMove } from '../data/store'
-import { LOST_LABEL, LOST_REASONS, nextLabel, nextStatus, STATUSES, STATUS_LABEL } from '../data/status'
+import {
+  createTag, deleteTag, moveLead, recordDeal, renameTag, setNote, tagLead, toggleSaved, undoMove, untagLead,
+} from '../data/store'
+import { LOST_LABEL, LOST_REASONS, STATUSES, STATUS_LABEL } from '../data/status'
 import { Avatar } from '../components/Avatar'
 import { Range } from '../components/Range'
 import { download, toCsv } from '../lib/csv'
 import { absolute, compact, COUNTRY_NAMES, LANGUAGE_NAMES, money, relative } from '../lib/format'
+import { hasKey } from '../lib/api'
 import { navigate, type Query } from '../lib/router'
-import type { Creator, LeadStatus, LostReason } from '../types'
+import type { Creator, LeadStatus } from '../types'
 
 // The daily screen, and the one the client lives in.
 //
-// One rule shapes everything: a status changes in one click from the list,
-// without opening anything. Every other decision here follows from protecting
-// that click.
+// It is a table, and it is read across before it is read down: who they are,
+// how big, how well they fit, how to reach them, and how you have filed them.
+// Every one of those is a fact. Nothing in a row asks to be clicked, because
+// a row full of buttons is a row nobody reads.
 //
-//   the button carries the next step, never a menu
-//   the row does not move when its status changes, or it vanishes under the
-//     cursor, which is the classic bug on a filtered list
-//   six seconds of undo, because people click the wrong row
-//   signed asks for an amount inline, once, and never asks again
+// Filing happens in one place, the last cell, and it holds both halves of a
+// CRM: where someone is in the conversation, which is our pipeline, and
+// whatever the client calls them, which is their own. The same tags are
+// readable and writable through the API, so a model can file a hundred leads
+// while the client files three.
 //
-// The row carries four things: who, how big, how well they fit, and the click.
-// Everything else about a person lives behind the click. A list is for moving
-// through, and a line that has to be read is a line nobody moves past.
+// Above the table, five controls and no more: brand fit, because it is the
+// one number that decides who is here at all; the filters, which are the
+// facts we measured; the tags; a search; and the export.
 //
 // One order, and it is not offered as a choice: people nobody has touched
 // first, best fit first inside that. It is the order of the morning.
@@ -35,152 +39,189 @@ import type { Creator, LeadStatus, LostReason } from '../types'
 /** The whole span a size range can cover. Nobody under 5k, no ceiling above 5M. */
 const SIZE_SPAN: [number, number] = [5_000, 5_000_000]
 const FIT_SPAN: [number, number] = [0, 100]
+const VIEW_SPAN: [number, number] = [0, 1_000_000]
 
-// ---------------------------------------------------------------------------
-// The action cell. This is the whole point of the screen.
-// ---------------------------------------------------------------------------
+const ADDED: { days: number | null; label: string }[] = [
+  { days: null, label: 'Any time' },
+  { days: 1, label: 'Today' },
+  { days: 7, label: 'Last 7 days' },
+  { days: 30, label: 'Last 30 days' },
+]
 
-function Action({
-  row, undoable, onMove, onUndo, onDeal, onDrop,
-}: {
-  row: LeadRow
-  /** True while this lead's last change can still be taken back. */
-  undoable: boolean
-  onMove: (to: LeadStatus, lostReason?: LostReason) => void
-  onUndo: () => void
-  onDeal: (amountCents: number | null) => void
-  onDrop: () => void
-}) {
-  const { lead } = row
-  const [asking, setAsking] = useState(false)
-  const [amount, setAmount] = useState('')
-  const field = useRef<HTMLInputElement>(null)
-  const next = nextStatus(lead.status)
-  const step = nextLabel(lead.status)
+interface Filters {
+  size: [number, number]
+  views: [number, number]
+  postsMin: number
+  withEmail: boolean
+  addedWithinDays: number | null
+}
 
-  useEffect(() => {
-    if (asking) field.current?.focus()
-  }, [asking])
+const NO_FILTERS: Filters = {
+  size: SIZE_SPAN,
+  views: VIEW_SPAN,
+  postsMin: 0,
+  withEmail: false,
+  addedWithinDays: null,
+}
 
-  // Signed was clicked. The lead is already signed; this is only the amount,
-  // and it is asked once. A lead that already has a deal never sees it again.
-  if (asking) {
-    const save = () => {
-      const cents = Math.round(Number(amount.replace(/[^\d.]/g, '')) * 100)
-      onDeal(Number.isFinite(cents) && cents > 0 ? cents : null)
-      setAsking(false)
-      setAmount('')
-    }
-    return (
-      <span className="row-act asking">
-        <input
-          ref={field}
-          className="input deal-field"
-          inputMode="decimal"
-          placeholder="Deal size"
-          aria-label="Deal amount in euros"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') save()
-            if (e.key === 'Escape') { onDeal(null); setAsking(false) }
-          }}
-        />
-        <button type="button" className="btn small primary" onClick={save}>Save</button>
-        <button type="button" className="btn small quiet" onClick={() => { onDeal(null); setAsking(false) }}>
-          Skip
-        </button>
-      </span>
-    )
-  }
-
-  return (
-    <span className="row-act">
-      <small className="row-state">
-        {undoable ? (
-          <button type="button" className="undo" onClick={onUndo}>Undo</button>
-        ) : lead.status === 'lost' && lead.lostReason ? (
-          LOST_LABEL[lead.lostReason]
-        ) : (
-          STATUS_LABEL[lead.status]
-        )}
-      </small>
-      {step && next ? (
-        <span className="row-buttons">
-          <button
-            type="button"
-            className="btn small primary"
-            onClick={() => {
-              onMove(next)
-              // Signed is the one step that asks a question, and only when we
-              // have not already been told.
-              if (next === 'signed' && !row.deal) setAsking(true)
-            }}
-          >
-            {step}
-          </button>
-          {lead.status !== 'lost' && (
-            <button
-              type="button"
-              className="btn small quiet drop"
-              title="Not a fit"
-              aria-label="Not a fit"
-              onClick={onDrop}
-            >
-              ✕
-            </button>
-          )}
-        </span>
-      ) : (
-        lead.status === 'lost' && (
-          <button type="button" className="btn small quiet" onClick={() => onMove('new')}>Put back</button>
-        )
-      )}
-    </span>
-  )
+/** How many of the five are doing something. Shown on the button, so a hidden
+ *  filter can never quietly empty the list. */
+function countFilters(f: Filters): number {
+  let n = 0
+  if (f.size[0] > SIZE_SPAN[0] || f.size[1] < SIZE_SPAN[1]) n++
+  if (f.views[0] > VIEW_SPAN[0] || f.views[1] < VIEW_SPAN[1]) n++
+  if (f.postsMin > 0) n++
+  if (f.withEmail) n++
+  if (f.addedWithinDays !== null) n++
+  return n
 }
 
 // ---------------------------------------------------------------------------
-// The row
+// Filing a lead: where they are, and what you call them.
 // ---------------------------------------------------------------------------
 
-function Row({
-  row, open, manyCampaigns, undoable, onMove, onUndo, onDeal,
-}: {
-  row: LeadRow
-  open: boolean
-  manyCampaigns: boolean
-  undoable: boolean
-  onMove: (to: LeadStatus, lostReason?: LostReason) => void
-  onUndo: () => void
-  onDeal: (amountCents: number | null) => void
-}) {
-  const { lead, creator, campaign } = row
-  const [dropping, setDropping] = useState(false)
+function FileMenu({ row, onClose, onMoved }: { row: LeadRow; onClose: () => void; onMoved: () => void }) {
+  const { lead } = row
+  const all = getTags()
+  const mine = lead.tags ?? []
+  const [why, setWhy] = useState(false)
+  const [fresh, setFresh] = useState('')
+  const [amount, setAmount] = useState<string | null>(null)
 
-  // Asking why takes the whole row. Four answers do not fit in an action cell,
-  // and the question deserves to be read rather than squeezed.
-  if (dropping) {
+  // Signed asks for the amount once, and never again on a lead that has one.
+  if (amount !== null) {
+    const save = () => {
+      const cents = Math.round(Number(amount.replace(/[^\d.]/g, '')) * 100)
+      if (Number.isFinite(cents) && cents > 0) recordDeal(lead.id, cents)
+      onClose()
+    }
     return (
-      <div className="contact why-row">
-        <span className="why-ask">Dropping {creator.name}. What happened?</span>
-        <span className="why-picks">
-          {LOST_REASONS.map((r) => (
-            <button
-              key={r.id}
-              type="button"
-              className="btn small"
-              onClick={() => { onMove('lost', r.id); setDropping(false) }}
-            >
-              {r.label}
-            </button>
-          ))}
-          <button type="button" className="btn small quiet" onClick={() => setDropping(false)}>Keep them</button>
-        </span>
+      <div className="file-menu">
+        <h3>What did they sign for?</h3>
+        <div className="file-deal">
+          <input
+            className="input"
+            autoFocus
+            inputMode="decimal"
+            placeholder="Deal size"
+            aria-label="Deal amount in euros"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') save() }}
+          />
+          <button type="button" className="btn small primary" onClick={save}>Save</button>
+          <button type="button" className="btn small quiet" onClick={onClose}>Skip</button>
+        </div>
       </div>
     )
   }
 
+  if (why) {
+    return (
+      <div className="file-menu">
+        <h3>What happened?</h3>
+        <div className="file-chips">
+          {LOST_REASONS.map((r) => (
+            <button
+              key={r.id}
+              type="button"
+              className="chip"
+              onClick={() => { moveLead(lead.id, 'lost', 'mem_1', r.id); onMoved(); onClose() }}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="file-menu">
+      <h3>Where they are</h3>
+      <div className="file-chips">
+        {STATUSES.map((s) => (
+          <button
+            key={s}
+            type="button"
+            className={`chip${lead.status === s ? ' on' : ''}`}
+            onClick={() => {
+              if (s === lead.status) return
+              if (s === 'lost') { setWhy(true); return }
+              moveLead(lead.id, s, 'mem_1')
+              onMoved()
+              if (s === 'signed' && !row.deal) { setAmount(''); return }
+              onClose()
+            }}
+          >
+            {STATUS_LABEL[s]}
+          </button>
+        ))}
+      </div>
+
+      <h3>Your tags</h3>
+      <div className="file-chips">
+        {all.map((t) => (
+          <button
+            key={t.name}
+            type="button"
+            className={`chip${mine.includes(t.name) ? ' on' : ''}`}
+            onClick={() => (mine.includes(t.name) ? untagLead(lead.id, t.name) : tagLead(lead.id, t.name))}
+          >
+            {t.name}
+          </button>
+        ))}
+        {all.length === 0 && <span className="faint">None yet. Write one below.</span>}
+      </div>
+      <div className="file-new">
+        <input
+          className="input"
+          placeholder="New tag"
+          aria-label="New tag"
+          value={fresh}
+          onChange={(e) => setFresh(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter' && fresh.trim()) { tagLead(lead.id, fresh); setFresh('') } }}
+        />
+        <button
+          type="button"
+          className="btn small"
+          disabled={!fresh.trim()}
+          onClick={() => { tagLead(lead.id, fresh); setFresh('') }}
+        >
+          Add
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// The row. Five facts, no buttons.
+// ---------------------------------------------------------------------------
+
+function Row({ row, open, manyCampaigns, onMoved }: {
+  row: LeadRow
+  open: boolean
+  manyCampaigns: boolean
+  onMoved: () => void
+}) {
+  const { lead, creator, campaign } = row
+  const [filing, setFiling] = useState(false)
+  const cell = useRef<HTMLSpanElement>(null)
+
+  // Clicking anywhere else puts the menu away, so it never covers the next row.
+  useEffect(() => {
+    if (!filing) return
+    const away = (e: MouseEvent) => {
+      if (!cell.current?.contains(e.target as Node)) setFiling(false)
+    }
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setFiling(false) }
+    document.addEventListener('mousedown', away)
+    document.addEventListener('keydown', esc)
+    return () => { document.removeEventListener('mousedown', away); document.removeEventListener('keydown', esc) }
+  }, [filing])
+
+  const tags = lead.tags ?? []
   return (
     <div className={`contact${open ? ' open' : ''}${lead.status === 'lost' ? ' dropped' : ''}`}>
       <a className="who" href={`#/leads/${lead.id}`}>
@@ -201,14 +242,31 @@ function Row({
         <b className="num">{fitOf(row)}%</b>
         <small>brand fit</small>
       </span>
-      <Action
-        row={row}
-        undoable={undoable}
-        onMove={onMove}
-        onUndo={onUndo}
-        onDeal={onDeal}
-        onDrop={() => setDropping(true)}
-      />
+      <span className="cell-email">
+        {creator.email ? (
+          <a href={`mailto:${creator.email}`} title={creator.email}>{creator.email}</a>
+        ) : (
+          <small className="faint">handle only</small>
+        )}
+      </span>
+      <span className="cell-file" ref={cell}>
+        <button
+          type="button"
+          className="file-open"
+          aria-expanded={filing}
+          onClick={() => setFiling(!filing)}
+        >
+          {lead.status !== 'new' && (
+            <span className={`tag-chip status ${lead.status}`}>
+              {lead.status === 'lost' && lead.lostReason ? LOST_LABEL[lead.lostReason] : STATUS_LABEL[lead.status]}
+            </span>
+          )}
+          {tags.slice(0, 2).map((t) => <span key={t} className="tag-chip">{t}</span>)}
+          {tags.length > 2 && <span className="tag-chip more">+{tags.length - 2}</span>}
+          {lead.status === 'new' && tags.length === 0 && <span className="tag-add">File</span>}
+        </button>
+        {filing && <FileMenu row={row} onClose={() => setFiling(false)} onMoved={onMoved} />}
+      </span>
     </div>
   )
 }
@@ -343,16 +401,181 @@ function Panel({ row }: { row: LeadRow }) {
 }
 
 // ---------------------------------------------------------------------------
+// The two drawers above the table.
+// ---------------------------------------------------------------------------
+
+function FilterDrawer({ value, onChange }: { value: Filters; onChange: (next: Filters) => void }) {
+  return (
+    <div className="card drawer">
+      <div className="drawer-grid">
+        <Range
+          label="Followers"
+          min={SIZE_SPAN[0]}
+          max={SIZE_SPAN[1]}
+          value={value.size}
+          scale="log"
+          format={compact}
+          onChange={(size) => onChange({ ...value, size })}
+        />
+        <Range
+          label="Views on a typical post"
+          min={VIEW_SPAN[0]}
+          max={VIEW_SPAN[1]}
+          value={value.views}
+          scale="log"
+          format={compact}
+          onChange={(views) => onChange({ ...value, views })}
+        />
+        <div className="drawer-field">
+          <span className="drawer-label">Posts a month, at least</span>
+          <div className="drawer-chips">
+            {[0, 4, 8, 12, 20].map((n) => (
+              <button
+                key={n}
+                type="button"
+                className={`chip${value.postsMin === n ? ' on' : ''}`}
+                onClick={() => onChange({ ...value, postsMin: n })}
+              >
+                {n === 0 ? 'Any' : `${n}+`}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="drawer-field">
+          <span className="drawer-label">Added</span>
+          <div className="drawer-chips">
+            {ADDED.map((a) => (
+              <button
+                key={a.label}
+                type="button"
+                className={`chip${value.addedWithinDays === a.days ? ' on' : ''}`}
+                onClick={() => onChange({ ...value, addedWithinDays: a.days })}
+              >
+                {a.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="drawer-field">
+          <span className="drawer-label">Email</span>
+          <div className="drawer-chips">
+            <button
+              type="button"
+              className={`chip${!value.withEmail ? ' on' : ''}`}
+              onClick={() => onChange({ ...value, withEmail: false })}
+            >
+              Everyone
+            </button>
+            <button
+              type="button"
+              className={`chip${value.withEmail ? ' on' : ''}`}
+              onClick={() => onChange({ ...value, withEmail: true })}
+            >
+              With an email
+            </button>
+          </div>
+        </div>
+      </div>
+      <div className="drawer-foot">
+        <button type="button" className="btn small quiet" onClick={() => onChange(NO_FILTERS)}>Clear them all</button>
+      </div>
+    </div>
+  )
+}
+
+function TagDrawer({ picked, onPick }: { picked: string[]; onPick: (next: string[]) => void }) {
+  const tags = getTags()
+  const [fresh, setFresh] = useState('')
+  const [editing, setEditing] = useState<string | null>(null)
+  const [name, setName] = useState('')
+
+  return (
+    <div className="card drawer">
+      <p className="drawer-label">
+        Your own labels, beside our pipeline. Filter on them here, write them on a lead in its last column, or let
+        your AI file a hundred at once through <a href="#/ai">the API</a>.
+      </p>
+      <ul className="tag-rows">
+        {tags.map((t) => (
+          <li key={t.name}>
+            {editing === t.name ? (
+              <>
+                <input
+                  className="input"
+                  autoFocus
+                  value={name}
+                  aria-label={`Rename ${t.name}`}
+                  onChange={(e) => setName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') { renameTag(t.name, name); setEditing(null) }
+                    if (e.key === 'Escape') setEditing(null)
+                  }}
+                />
+                <button type="button" className="btn small" onClick={() => { renameTag(t.name, name); setEditing(null) }}>
+                  Save
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className={`chip${picked.includes(t.name) ? ' on' : ''}`}
+                  onClick={() => onPick(picked.includes(t.name) ? picked.filter((x) => x !== t.name) : [...picked, t.name])}
+                >
+                  {t.name}
+                </button>
+                <span className="faint num">{t.count}</span>
+                <button
+                  type="button"
+                  className="btn small quiet"
+                  onClick={() => { setEditing(t.name); setName(t.name) }}
+                >
+                  Rename
+                </button>
+                <button
+                  type="button"
+                  className="btn small quiet drop"
+                  aria-label={`Delete ${t.name}`}
+                  onClick={() => { deleteTag(t.name); onPick(picked.filter((x) => x !== t.name)) }}
+                >
+                  ✕
+                </button>
+              </>
+            )}
+          </li>
+        ))}
+        {tags.length === 0 && <li><span className="faint">No tags yet. Your first one goes below.</span></li>}
+      </ul>
+      <div className="file-new">
+        <input
+          className="input"
+          placeholder="Make a tag"
+          aria-label="Make a tag"
+          value={fresh}
+          onChange={(e) => setFresh(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter' && fresh.trim()) { createTag(fresh); setFresh('') } }}
+        />
+        <button type="button" className="btn small" disabled={!fresh.trim()} onClick={() => { createTag(fresh); setFresh('') }}>
+          Make it
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 
 export function Leads({ leadId, query: params }: { leadId: string | null; query: Query }) {
   useStore()
   const campaigns = getCampaigns()
   const [campaignId, setCampaignId] = useState<string | null>(null)
   const [status, setStatus] = useState<LeadStatus | null>(null)
-  const [size, setSize] = useState<[number, number]>(SIZE_SPAN)
   const [fit, setFit] = useState<[number, number]>(FIT_SPAN)
+  const [filters, setFilters] = useState<Filters>(NO_FILTERS)
+  const [tags, setTags] = useState<string[]>([])
+  const [drawer, setDrawer] = useState<'filters' | 'tags' | null>(null)
   const [search, setSearch] = useState('')
-  const [undoable, setUndoable] = useState<string | null>(null)
+  const [moved, setMoved] = useState<string | null>(null)
   const timer = useRef<number | null>(null)
 
   // A link from anywhere else can arrive with the filter already set, which is
@@ -367,10 +590,16 @@ export function Leads({ leadId, query: params }: { leadId: string | null; query:
     campaignId,
     status,
     search,
-    followersMin: size[0] > SIZE_SPAN[0] ? size[0] : null,
-    followersMax: size[1] < SIZE_SPAN[1] ? size[1] : null,
+    tags,
     fitMin: fit[0] > 0 ? fit[0] : null,
     fitMax: fit[1] < 100 ? fit[1] : null,
+    followersMin: filters.size[0] > SIZE_SPAN[0] ? filters.size[0] : null,
+    followersMax: filters.size[1] < SIZE_SPAN[1] ? filters.size[1] : null,
+    viewsMin: filters.views[0] > VIEW_SPAN[0] ? filters.views[0] : null,
+    viewsMax: filters.views[1] < VIEW_SPAN[1] ? filters.views[1] : null,
+    postsMin: filters.postsMin || null,
+    withEmail: filters.withEmail,
+    addedWithinDays: filters.addedWithinDays,
   }
   const signature = JSON.stringify(query)
 
@@ -378,37 +607,43 @@ export function Leads({ leadId, query: params }: { leadId: string | null; query:
    * Which rows are on screen is decided once per set of filters, and not again
    * until the filters change. Marking a lead contacted while the Contacted
    * filter is off would otherwise pull the row out from under the cursor.
+   *
+   * It is recomputed when the account underneath changes too: the real account
+   * lands a second after the sample painted, and a list remembered from the
+   * sample finds none of its rows in it.
    */
-  // Recomputed when the filters change, and when the account underneath
-  // changes: the real account lands a second after the sample painted, and
-  // a list remembered from the sample finds none of its rows in it. A status
-  // change moves neither flag, so a row never vanishes under the cursor.
   const { live, leadCount } = getAccountShape()
   const ids = useMemo(() => listLeads(query).map((r) => r.lead.id), [signature, live, leadCount])
   const rows = ids.map((id) => getLeadRow(id)).filter((r): r is LeadRow => r !== null)
   const open = leadId ? getLeadRow(leadId) : null
   const today = todayCount(campaignId)
-  // Filters over a list that has never held anything are a wall of controls in
-  // front of an empty room. They appear with the first lead.
+  // Controls over a list that has never held anything are a wall in front of
+  // an empty room. They appear with the first lead.
   const anyLeads = listLeads({}).length > 0
+  const active = countFilters(filters)
 
   const armUndo = (id: string) => {
-    setUndoable(id)
+    setMoved(id)
     if (timer.current) window.clearTimeout(timer.current)
-    timer.current = window.setTimeout(() => setUndoable(null), 6_000)
+    timer.current = window.setTimeout(() => setMoved(null), 6_000)
   }
   useEffect(() => () => { if (timer.current) window.clearTimeout(timer.current) }, [])
 
   const exportCsv = () => {
-    const columns = ['name', 'handle', 'email', 'followers', 'views_per_post', 'brand_fit', 'status', 'campaign', 'delivered', 'note']
+    const columns = [
+      'name', 'handle', 'email', 'followers', 'views_per_post', 'posts_per_month',
+      'brand_fit', 'status', 'tags', 'campaign', 'delivered', 'note',
+    ]
     const body = rows.map((r) => ({
       name: r.creator.name,
       handle: `@${r.creator.handle}`,
       email: r.creator.email ?? '',
       followers: r.creator.followers,
       views_per_post: r.creator.medianViews ?? '',
+      posts_per_month: r.creator.postsPerMonth ?? '',
       brand_fit: `${fitOf(r)}%`,
       status: STATUS_LABEL[r.lead.status],
+      tags: (r.lead.tags ?? []).join(', '),
       campaign: r.campaign.name,
       delivered: r.lead.deliveredAt.slice(0, 10),
       note: r.lead.note ?? '',
@@ -420,9 +655,7 @@ export function Leads({ leadId, query: params }: { leadId: string | null; query:
     <div className="page">
       <div className="page-head">
         <h1>Leads</h1>
-        <span className="count num">
-          {today.delivered} of {today.target} today
-        </span>
+        <span className="count num">{today.delivered} of {today.target} today</span>
         <span className="spacer" />
         <input
           className="input search-field"
@@ -460,11 +693,44 @@ export function Leads({ leadId, query: params }: { leadId: string | null; query:
         <span className="faint num">{rows.length} shown</span>
       </div>
 
-      <div className="ranges">
-        <Range label="Followers" min={SIZE_SPAN[0]} max={SIZE_SPAN[1]} value={size} scale="log" format={compact} onChange={setSize} />
+      <div className="table-tools">
         <Range label="Brand fit" min={0} max={100} value={fit} format={(n) => `${n}%`} onChange={setFit} />
+        <button
+          type="button"
+          className={`btn${drawer === 'filters' ? ' on' : ''}`}
+          aria-expanded={drawer === 'filters'}
+          onClick={() => setDrawer(drawer === 'filters' ? null : 'filters')}
+        >
+          Filters{active ? ` · ${active}` : ''}
+        </button>
+        <button
+          type="button"
+          className={`btn${drawer === 'tags' ? ' on' : ''}`}
+          aria-expanded={drawer === 'tags'}
+          onClick={() => setDrawer(drawer === 'tags' ? null : 'tags')}
+        >
+          Tags{tags.length ? ` · ${tags.length}` : ''}
+        </button>
+        {(active > 0 || tags.length > 0 || fit[0] > 0 || fit[1] < 100) && (
+          <button
+            type="button"
+            className="btn quiet"
+            onClick={() => { setFilters(NO_FILTERS); setTags([]); setFit(FIT_SPAN) }}
+          >
+            Clear
+          </button>
+        )}
       </div>
+
+      {drawer === 'filters' && <FilterDrawer value={filters} onChange={setFilters} />}
+      {drawer === 'tags' && <TagDrawer picked={tags} onPick={setTags} />}
       </>
+      )}
+
+      {moved && (
+        <p className="moved-line">
+          Filed. <button type="button" className="undo" onClick={() => { undoMove(moved); setMoved(null) }}>Undo</button>
+        </p>
       )}
 
       <div className={open ? 'with-panel' : undefined}>
@@ -475,14 +741,14 @@ export function Leads({ leadId, query: params }: { leadId: string | null; query:
               row={row}
               open={open?.lead.id === row.lead.id}
               manyCampaigns={!campaignId && campaigns.length > 1}
-              undoable={undoable === row.lead.id}
-              onMove={(to, why) => { moveLead(row.lead.id, to, 'mem_1', why); armUndo(row.lead.id) }}
-              onUndo={() => { undoMove(row.lead.id); setUndoable(null) }}
-              onDeal={(cents) => { if (cents) recordDeal(row.lead.id, cents) }}
+              onMoved={() => armUndo(row.lead.id)}
             />
           ))}
           {rows.length === 0 && (
-            <Empty waiting={!status && !search && size === SIZE_SPAN && fit === FIT_SPAN} campaignId={campaignId} />
+            <Empty
+              waiting={!status && !search && !active && !tags.length && fit[0] === 0 && fit[1] === 100}
+              campaignId={campaignId}
+            />
           )}
         </div>
         {open && (
@@ -518,6 +784,9 @@ function Empty({ waiting, campaignId }: { waiting: boolean; campaignId: string |
         <a className="btn primary" href={campaignId ? `#/campaign/${campaignId}/feasibility` : '#/campaigns'}>
           Test them
         </a>
+        {hasKey() && (
+          <a className="btn quiet" href="#/demo" target="_blank" rel="noreferrer">See it filled with sample data</a>
+        )}
       </div>
     </div>
   )

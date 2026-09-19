@@ -2,28 +2,29 @@ import { useEffect, useState } from 'react'
 
 // Hash routes. No library, no server config.
 //
-// Five product zones, each answering one question:
+// Four product zones, each answering one question:
 //
-//   dashboard    how many today, and where is my pipeline
 //   leads        who do I contact now
 //   brief        who do I want to reach, and what do I sell
 //   gates        which criteria decide
 //   feasibility  how many, for how long, and what if
 //
-// Two surfaces sit outside them: the account, and the internal admin.
+// Three surfaces sit outside them: the account, the API, and the internal
+// admin. There is no dashboard: the list is the screen people live in, and a
+// page of charts in front of it was one click between them and the work.
 
 export type CampaignTab = 'brief' | 'gates' | 'feasibility'
 
 export type Route =
   | { name: 'home' }
   | { name: 'demo' }
-  | { name: 'dashboard' }
   | { name: 'newCampaign' }
   | { name: 'leads'; leadId: string | null; query: Query }
   | { name: 'campaigns' }
   | { name: 'campaign'; campaignId: string; tab: CampaignTab }
   | { name: 'account' }
   | { name: 'outreach' }
+  | { name: 'ai' }
   | { name: 'admin' }
 
 const TABS: CampaignTab[] = ['brief', 'gates', 'feasibility']
@@ -40,9 +41,10 @@ export function parse(hash: string): Route {
   switch (head) {
     case '':
       return { name: 'home' }
+    // The old dashboard. Everything it answered is answered on the list.
     case 'app':
     case 'dashboard':
-      return { name: 'dashboard' }
+      return { name: 'leads', leadId: null, query }
     // The sample, filled, at one address. For a visitor it is what they see
     // anyway; for an account it swaps the data until the click back.
     case 'demo':
@@ -65,6 +67,8 @@ export function parse(hash: string): Route {
       return { name: 'account' }
     case 'outreach':
       return { name: 'outreach' }
+    case 'ai':
+      return { name: 'ai' }
     case 'admin':
       return { name: 'admin' }
     default:

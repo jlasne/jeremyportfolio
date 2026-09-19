@@ -329,12 +329,27 @@ const NOTES = [
   'Warm intro through Sacha. Do not cold message.',
 ]
 
+/**
+ * The account's own filing. Not our pipeline: a status says where someone is
+ * in the conversation, a tag says what the client thinks of them. An account
+ * a month old has a handful of these and uses three of them.
+ */
+export const SAMPLE_TAGS = ['priority', 'warm intro', 'agency', 'big audience', 'follow up q2', 'no budget']
+
 leads.forEach((lead, i) => {
   if (i % 9 === 0) lead.saved = true
   if (i % 17 === 0) lead.note = NOTES[(i / 17) % NOTES.length | 0]
   // A profile we looked at again since it was handed over. The row refreshes
   // and goes back to the top. It never costs a second lead.
   if (i % 53 === 7) lead.refreshedAt = daysAgo(i % 3, 5)
+  // Filed the way people file: most leads carry nothing, a few carry one, and
+  // a handful carry two. A list where every row is tagged is a list where the
+  // tags mean nothing.
+  const tags: string[] = []
+  if (i % 6 === 1) tags.push(SAMPLE_TAGS[i % SAMPLE_TAGS.length])
+  if (i % 23 === 4) tags.push(SAMPLE_TAGS[(i + 3) % SAMPLE_TAGS.length])
+  if (lead.status === 'signed' || lead.status === 'call') tags.push('priority')
+  if (tags.length) lead.tags = [...new Set(tags)]
 })
 
 // ---------------------------------------------------------------------------

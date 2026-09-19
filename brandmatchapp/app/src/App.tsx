@@ -7,10 +7,10 @@ import { Account } from './screens/Account'
 import { Admin } from './screens/Admin'
 import { CampaignZone } from './screens/CampaignZone'
 import { Campaigns } from './screens/Campaigns'
-import { Dashboard } from './screens/Dashboard'
 import { Landing } from './screens/Landing'
 import { Leads } from './screens/Leads'
 import { NewCampaign } from './screens/NewCampaign'
+import { Ai } from './screens/Ai'
 import { Outreach } from './screens/Outreach'
 
 // Five product zones, plus the account and the internal admin. The landing is
@@ -27,13 +27,13 @@ export function App() {
       <Backdrop />
       <SideNav route={route} />
       <main className="main">
-        {route.name === 'dashboard' && <Dashboard />}
         {route.name === 'leads' && <Leads leadId={route.leadId} query={route.query} />}
         {route.name === 'campaigns' && <Campaigns />}
         {route.name === 'newCampaign' && <NewCampaign />}
         {route.name === 'campaign' && <CampaignZone campaignId={route.campaignId} tab={route.tab} />}
         {route.name === 'account' && <Account />}
         {route.name === 'outreach' && <Outreach />}
+        {route.name === 'ai' && <Ai />}
         {route.name === 'admin' && <Admin />}
       </main>
     </div>

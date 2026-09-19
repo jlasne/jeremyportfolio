@@ -202,6 +202,17 @@ export interface LeadQuery {
   /** Only people who scored this share or better, in percent of the ceiling. */
   fitMin?: number | null
   fitMax?: number | null
+  /** Views on a typical post, counted from their last twelve. */
+  viewsMin?: number | null
+  viewsMax?: number | null
+  /** How often they post. */
+  postsMin?: number | null
+  /** Only people whose email is on their profile. */
+  withEmail?: boolean
+  /** Handed over inside this many days. */
+  addedWithinDays?: number | null
+  /** Carrying any one of these tags. */
+  tags?: string[]
   savedOnly?: boolean
   /** Inside the rules you started with, or past them. */
   reach?: Reach | null
@@ -227,6 +238,16 @@ export function listLeads(query: LeadQuery = {}): LeadRow[] {
     .filter((r) => (query.followersMax ? r.creator.followers <= query.followersMax : true))
     .filter((r) => (query.fitMin ? fitOf(r) >= query.fitMin : true))
     .filter((r) => (query.fitMax != null ? fitOf(r) <= query.fitMax : true))
+    .filter((r) => (query.viewsMin ? (r.creator.medianViews ?? 0) >= query.viewsMin : true))
+    .filter((r) => (query.viewsMax != null ? (r.creator.medianViews ?? 0) <= query.viewsMax : true))
+    .filter((r) => (query.postsMin ? (r.creator.postsPerMonth ?? 0) >= query.postsMin : true))
+    .filter((r) => (query.withEmail ? Boolean(r.creator.email) : true))
+    .filter((r) =>
+      query.addedWithinDays
+        ? Date.now() - new Date(r.lead.deliveredAt).getTime() <= query.addedWithinDays * 86_400_000
+        : true,
+    )
+    .filter((r) => (query.tags?.length ? (r.lead.tags ?? []).some((t) => query.tags!.includes(t)) : true))
     .filter((r) =>
       term
         ? r.creator.handle.toLowerCase().includes(term) || r.creator.name.toLowerCase().includes(term)
@@ -349,4 +370,17 @@ export const VERDICT_LABEL: Record<Verdict, string> = {
 export function getVerdictCounts(campaignId: string): { verdict: Verdict; count: number }[] {
   const rows = getState().evaluations.filter((e) => e.campaignId === campaignId)
   return VERDICTS.map((verdict) => ({ verdict, count: rows.filter((e) => e.verdict === verdict).length }))
+}
+
+/**
+ * The account's tags, with how many leads carry each one.
+ *
+ * Read from the tag list and not from the leads, so a tag made and not yet
+ * used still appears. A tag nothing carries is a tag you are about to use.
+ */
+export function getTags(): { name: string; count: number }[] {
+  const s = getState()
+  const count = new Map<string, number>()
+  for (const l of s.leads) for (const t of l.tags ?? []) count.set(t, (count.get(t) ?? 0) + 1)
+  return s.tags.map((name) => ({ name, count: count.get(name) ?? 0 }))
 }

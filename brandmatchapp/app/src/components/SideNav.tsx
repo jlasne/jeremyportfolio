@@ -1,21 +1,24 @@
 import { useEffect, useState } from 'react'
-import { deliveredToday, getQuota } from '../data'
+import { deliveredToday } from '../data'
 import { useStore } from '../data/hooks'
 import { api, hasKey, isDemo } from '../lib/api'
 import type { Route } from '../lib/router'
 import { Logo } from './Logo'
 
-// Four places to go, and the month's balance underneath. The three campaign
-// zones live inside a campaign, so nothing nests here.
+// Five places to go. The three campaign zones live inside a campaign, so
+// nothing nests here.
+//
+// The month's balance used to sit at the foot of this rail. It was a number
+// with nothing to do: it appears on the account page, where it is acted on.
 //
 // The rail collapses to its icons and the choice is remembered in this browser.
 // On a narrow screen it starts collapsed and every label is a tooltip.
 
 const ITEMS: { href: string; label: string; name: Route['name'] }[] = [
-  { href: '#/app', label: 'Dashboard', name: 'dashboard' },
   { href: '#/leads', label: 'Leads', name: 'leads' },
   { href: '#/campaigns', label: 'Campaigns', name: 'campaigns' },
   { href: '#/outreach', label: 'Outreach', name: 'outreach' },
+  { href: '#/ai', label: 'API and MCP', name: 'ai' },
   { href: '#/account', label: 'Account', name: 'account' },
 ]
 
@@ -27,8 +30,8 @@ function Glyph({ name }: { name: string }) {
     stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round' as const,
     strokeLinejoin: 'round' as const, 'aria-hidden': true,
   }
-  if (name === 'dashboard') {
-    return <svg {...common}><path d="M2.5 10.5 6 6.5l3 2.5 4.5-5.5" /><path d="M2.5 13.5h11" /></svg>
+  if (name === 'ai') {
+    return <svg {...common}><path d="M5.5 5.5 2.5 8l3 2.5" /><path d="M10.5 5.5 13.5 8l-3 2.5" /><path d="M9 3.5 7 12.5" /></svg>
   }
   if (name === 'leads') {
     return <svg {...common}><path d="M2 4h12M2 8h12M2 12h7" /></svg>
@@ -78,7 +81,6 @@ export function SideNav({ route }: { route: Route }) {
   const owner = useOwner()
   const [shut, setShut] = useCollapsed()
   const today = deliveredToday()
-  const quota = getQuota()
   const items = owner ? [...ITEMS, { href: '#/admin', label: 'Admin', name: 'admin' as const }] : ITEMS
 
   useEffect(() => {
@@ -89,7 +91,7 @@ export function SideNav({ route }: { route: Route }) {
   return (
     <nav className={`sidenav${shut ? ' shut' : ''}`} aria-label="Main">
       <div className="sidenav-top">
-        <a className="brand" href="#/app" aria-label="brandmatch, back to the dashboard">
+        <a className="brand" href="#/leads" aria-label="brandmatch, back to the list">
           <Logo size={26} />
         </a>
         <button
@@ -125,11 +127,6 @@ export function SideNav({ route }: { route: Route }) {
           )
         })}
       </ul>
-      <p className="sidenav-foot">
-        <span className="nav-label">
-          <b className="num">{quota.remaining}</b> leads left this month
-        </span>
-      </p>
     </nav>
   )
 }

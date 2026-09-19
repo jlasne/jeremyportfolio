@@ -404,6 +404,12 @@ export interface Lead {
   lostReason?: LostReason
   /** Kept across campaigns, so a good one is not lost in a long list. */
   saved?: boolean
+  /**
+   * The client's own labels. Free text, theirs alone, and the one part of the
+   * CRM we do not define for them: a status is our pipeline, a tag is their
+   * filing. Written here or through the API, read by both.
+   */
+  tags?: string[]
   /** Whatever the client typed about them. Free text, theirs alone. */
   note?: string
   deliveredAt: string
