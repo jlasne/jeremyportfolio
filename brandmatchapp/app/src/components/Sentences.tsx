@@ -6,6 +6,10 @@ import type { Criterion } from '../types'
 // or false. Between one and twelve, because under one nothing is scored and
 // over twelve nothing is read. The draft they start from came from their
 // brief; every word of it is theirs to change.
+//
+// An empty line stays on screen until the client fills it or removes it. It
+// used to be filtered out by the screen above on every change, which meant
+// Add a sentence added a line and the same keystroke threw it away.
 
 export const SENTENCES_MAX = 12
 

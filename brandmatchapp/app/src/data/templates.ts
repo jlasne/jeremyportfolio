@@ -59,7 +59,7 @@ export const TEMPLATES: GateTemplate[] = [
       },
       {
         id: 'k_person',
-        question: 'Is this a real person rather than a theme page?',
+        question: 'Is this a real person rather than a theme or AI page?',
         why: 'A page with no owner has nobody to write to and nobody to sign.',
         pass: 'A named human, face or voice on the account, speaks as themselves.',
         fail: 'Aggregator, quote page, repost account, no named owner.',
@@ -73,8 +73,10 @@ export const TEMPLATES: GateTemplate[] = [
       { id: 'c_proof', text: 'Their posts show measurable client progress, with dates.' },
       { id: 'c_stable', text: 'The account is over two years old and its reach is stable or growing.' },
       { id: 'c_person', text: 'The audience follows the person: face on camera, first person, replies in the comments.' },
+      { id: 'c_buys', text: 'Their audience buys from them: launches fill up, or they mention a waiting list.' },
+      { id: 'c_full', text: 'They are short on time rather than on demand: they turn work away or say they are full.' },
     ],
-    passScore: 9,
+    passScore: 11,
     defaults: { followersMin: 15_000, followersMax: 400_000, lastPostWithinDays: 14, postsPerMonthMin: 8, viewsShare: 0.5 },
   },
   {
@@ -104,7 +106,7 @@ export const TEMPLATES: GateTemplate[] = [
       },
       {
         id: 'k_person',
-        question: 'Is this a real person rather than a theme page?',
+        question: 'Is this a real person rather than a theme or AI page?',
         why: 'A page with no owner has nobody to write to and nobody to sign.',
         pass: 'A named human, face or voice on the account, speaks as themselves.',
         fail: 'Aggregator, quote page, repost account, no named owner.',
@@ -118,8 +120,10 @@ export const TEMPLATES: GateTemplate[] = [
       { id: 'c_tools', text: 'They already pay for tools, and link to them from the bio.' },
       { id: 'c_fit', text: 'Their audience is big enough to afford you and small enough to still need you.' },
       { id: 'c_growing', text: 'Their reach and posting rhythm went up over the last year.' },
+      { id: 'c_alone', text: 'They do the unglamorous work themselves: editing, invoicing, answering every message.' },
+      { id: 'c_shipped', text: 'They have put something new out in the last three months.' },
     ],
-    passScore: 9,
+    passScore: 11,
     defaults: { followersMin: 15_000, followersMax: 400_000, lastPostWithinDays: 14, postsPerMonthMin: 8, viewsShare: 0.5 },
   },
   {
@@ -149,7 +153,7 @@ export const TEMPLATES: GateTemplate[] = [
       },
       {
         id: 'k_person',
-        question: 'Is this a real person rather than a theme page?',
+        question: 'Is this a real person rather than a theme or AI page?',
         why: 'A page with no owner has nobody to write to and nobody to sign.',
         pass: 'A named human, face or voice on the account, speaks as themselves.',
         fail: 'Aggregator, quote page, repost account, no named owner.',
@@ -163,8 +167,10 @@ export const TEMPLATES: GateTemplate[] = [
       { id: 'c_sells_well', text: 'Their past promotions kept the engagement up.' },
       { id: 'c_safe', text: 'Their tone and topics are ones you can stand next to.' },
       { id: 'c_budget', text: 'Their size and category suggest a rate inside your budget.' },
+      { id: 'c_repeat', text: 'Brands come back to them: the same partner shows up more than once.' },
+      { id: 'c_clean', text: 'They mark paid posts properly, so a campaign with them is clean.' },
     ],
-    passScore: 9,
+    passScore: 11,
     defaults: { followersMin: 20_000, followersMax: 1_000_000, lastPostWithinDays: 10, postsPerMonthMin: 12, viewsShare: 0.6 },
   },
 ]
@@ -179,7 +185,12 @@ export const TEMPLATES: GateTemplate[] = [
  * Locked ones stay on screen with a lock and their reason. Hiding them would
  * make the rules look shorter than they are.
  */
-export const LOCKED: Record<TemplateId, string[]> = {
+/**
+ * The questions a library switches on for you. Not locked: a client who knows
+ * their market can switch any of them off, and one that cannot be switched off
+ * is a rule the client never agreed to.
+ */
+export const DEFAULT_ON: Record<TemplateId, string[]> = {
   recruit_partners: ['k_person', 'k_not_built'],
   sell_to_creators: ['k_person', 'k_paid_offer'],
   sponsorship: ['k_person', 'k_safe'],
@@ -192,8 +203,13 @@ export const LOCK_REASON: Record<string, string> = {
   k_safe: 'This one protects your brand and your legal team. It is not a matter of taste.',
 }
 
-export function isLocked(templateId: TemplateId, knockoutId: string): boolean {
-  return LOCKED[templateId]?.includes(knockoutId) ?? false
+export function isLocked(_templateId: TemplateId, _knockoutId: string): boolean {
+  // Nothing is locked any more. Kept so older callers keep compiling.
+  return false
+}
+
+export function isDefaultOn(templateId: TemplateId, knockoutId: string): boolean {
+  return DEFAULT_ON[templateId]?.includes(knockoutId) ?? false
 }
 
 export const templateById = new Map(TEMPLATES.map((t) => [t.id, t]))

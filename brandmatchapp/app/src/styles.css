@@ -3263,3 +3263,30 @@ body { background: var(--paper); }
 .chart-tip li i { width: 8px; height: 8px; border-radius: 2px; align-self: center; }
 .chart-tip li b { color: var(--ink); font-weight: 600; }
 .chart-tip li small { grid-column: 2 / -1; color: var(--ink-3); font-size: 11px; }
+
+/* The brief's readings, each one changeable. */
+.read-field { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.read-field:first-of-type { margin-top: 12px; }
+.pill-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.pick-row { padding: 10px 0 2px; border-top: 1px dashed var(--line); }
+.rules.stacked li b .btn.drop { margin-left: auto; }
+
+/* The niches: a name and a way out. No third state. */
+.niche-list { list-style: none; margin: 14px 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.niche-list li { display: flex; align-items: center; gap: 8px; }
+.niche-list .niche-name { flex: 1 1 auto; min-width: 0; max-width: 420px; }
+
+/* Offering sentences rather than writing them in. */
+.suggest { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+.suggest .verdict-actions { align-items: center; }
+
+/* The one setting that decides who is handed over. */
+.qualify-card { border-color: var(--orange-line); }
+.qualify-body { display: flex; align-items: center; gap: 24px; margin: 14px 0 10px; flex-wrap: wrap; }
+.qualify-num { font-size: 46px; font-weight: 600; line-height: 1; color: var(--orange-deep); }
+.qualify-dial { flex: 1 1 320px; min-width: 240px; }
+.qualify-dial input[type='range'] { width: 100%; accent-color: var(--orange); }
+
+/* The one line the simulation is read for. */
+.filter-headline { margin: 10px 0 16px; font-size: 17px; line-height: 1.4; color: var(--ink); }
+.filter-headline b { font-weight: 600; color: var(--orange-deep); }

@@ -2,7 +2,7 @@ import type { GateSet, HardRules, Niche } from '../types'
 import { built, creators } from '../mock/creators'
 import { judge } from '../mock/judge'
 import { evaluate, hardLabel, loosest, runHard } from './gates'
-import { compact } from '../lib/format'
+import { compact, fitPercent } from '../lib/format'
 
 // The accounts a client already knows.
 //
@@ -66,7 +66,9 @@ export function checkSeeds(handles: string[], gates: GateSet | null, niches: Nic
       return {
         handle,
         state: 'fits',
-        note: `${compact(creator.followers)} followers, scores ${result.score} of 14.`,
+        // Out of this campaign's own ceiling, not out of fourteen: the number
+        // of sentences is the client's and it moves.
+        note: `${compact(creator.followers)} followers, ${fitPercent(result.score, gates.criteria.length * 2)}% brand fit.`,
         followers: creator.followers,
       }
     }

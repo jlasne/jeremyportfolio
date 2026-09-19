@@ -8,10 +8,12 @@ import { Gates } from './Gates'
 // The three campaign zones, chained in the order they are filled at creation
 // and editable one by one afterwards. Each tab answers one question.
 
+// The brief carries no question: its first card asks it word for word, and a
+// line above repeating it is a line nobody reads twice.
 const TABS: { id: CampaignTab; label: string; question: string }[] = [
-  { id: 'brief', label: 'Your brief', question: 'Who you want to reach, and what you sell them' },
+  { id: 'brief', label: 'Your brief', question: '' },
   { id: 'gates', label: 'Your rules', question: 'What makes someone a lead' },
-  { id: 'feasibility', label: 'Test it', question: 'How many a day, for how long, and what if' },
+  { id: 'feasibility', label: 'Test it', question: 'What your rules let through, and what to open up' },
 ]
 
 export function CampaignZone({ campaignId, tab }: { campaignId: string; tab: CampaignTab }) {
@@ -42,7 +44,7 @@ export function CampaignZone({ campaignId, tab }: { campaignId: string; tab: Cam
           </a>
         ))}
       </div>
-      <p className="subhead">{current.question}</p>
+      {current.question && <p className="subhead">{current.question}</p>}
       {tab === 'brief' && <Brief campaignId={campaign.id} />}
       {tab === 'gates' && <Gates campaignId={campaign.id} />}
       {tab === 'feasibility' && <Feasibility campaignId={campaign.id} />}

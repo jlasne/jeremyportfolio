@@ -289,3 +289,47 @@ function round(n: number): number {
 function count(n: number): string {
   return ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six'][n] ?? String(n)
 }
+
+// ---------------------------------------------------------------------------
+// Filling the sentences back up
+// ---------------------------------------------------------------------------
+
+/** Eight is where a share of the ceiling starts separating people rather than
+ *  jumping between a handful of values. Under it, one sentence is worth 12%. */
+export const SENTENCES_ENOUGH = 8
+
+/**
+ * Sentences to offer a client who has fewer than eight.
+ *
+ * Two sources, in this order: the library their campaign was built from, which
+ * was chosen from their brief, and then their brief itself, in their own
+ * nouns. Nothing already written is touched, and nothing is added silently:
+ * this returns a list and the screen asks before using it.
+ */
+export function suggest(brief: CampaignBrief, templateId: TemplateId, have: Criterion[]): Criterion[] {
+  const said = new Set(have.map((c) => c.text.trim().toLowerCase()).filter(Boolean))
+  const ids = new Set(have.map((c) => c.id))
+  const out: Criterion[] = []
+
+  const lib = TEMPLATES.find((t) => t.id === templateId) ?? TEMPLATES[1]
+  for (const c of lib.criteria) {
+    if (said.has(c.text.toLowerCase()) || ids.has(c.id)) continue
+    out.push({ ...c })
+  }
+
+  // Their own words, last, because a sentence built from a brief is a draft
+  // and the library's are finished. The audience gives the topic; the offer
+  // gives the thing they would be buying.
+  const who = say(content(brief.audience).slice(0, 4))
+  const what = say(content(brief.offer).slice(-3))
+  const mine: Criterion[] = [
+    who ? { id: 'c_brief_topic', text: `What they post about is ${who}.` } : null,
+    what ? { id: 'c_brief_need', text: `They have said out loud that they need ${what}, or work around not having it.` } : null,
+  ].filter((c): c is Criterion => c !== null)
+  for (const c of mine) {
+    if (said.has(c.text.toLowerCase()) || ids.has(c.id)) continue
+    out.push(c)
+  }
+
+  return out.slice(0, Math.max(0, SENTENCES_ENOUGH - have.filter((c) => c.text.trim()).length))
+}

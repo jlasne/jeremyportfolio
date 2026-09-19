@@ -23,6 +23,8 @@ import type {
   Topup,
   DailyDelivery,
   FeasibilityRun,
+  TemplateId,
+
 } from '../types'
 import { account, members, subscription, topups } from '../mock/account'
 import { campaigns } from '../mock/campaigns'
@@ -588,17 +590,49 @@ export function addSeeds(campaignId: string, handles: string[]): void {
   }))
 }
 
+/** Drops a handle the client gave us. Nothing else about the campaign moves. */
+export function removeSeed(campaignId: string, handle: string): void {
+  setState((s) => ({
+    campaigns: s.campaigns.map((c) =>
+      c.id === campaignId
+        ? { ...c, brief: { ...c.brief, seeds: (c.brief.seeds ?? []).filter((h) => h !== handle) }, updatedAt: new Date().toISOString() }
+        : c,
+    ),
+  }))
+}
+
 /**
- * Back to an earlier version. Written as a new version, like any edit, so the
- * history stays a straight line and a lead from last week still points at the
- * rules it was judged by.
+ * The two answers, rewritten. Kept word for word, and never used to rewrite
+ * the rules behind the client's back: an edit here suggests, the client saves.
  */
-export function restoreVersion(campaignId: string, gateSetId: string): void {
-  const old = getState().gateSets.find((g) => g.id === gateSetId && g.campaignId === campaignId)
-  if (!old) return
-  saveGateSet(campaignId, {
-    hard: old.hard, knockouts: old.knockouts, criteria: old.criteria, passScore: old.passScore, preset: old.preset,
-  })
+export function setBrief(campaignId: string, patch: { audience?: string; offer?: string }): void {
+  setState((s) => ({
+    campaigns: s.campaigns.map((c) =>
+      c.id === campaignId
+        ? { ...c, brief: { ...c.brief, ...patch, writtenAt: new Date().toISOString() }, updatedAt: new Date().toISOString() }
+        : c,
+    ),
+  }))
+}
+
+/**
+ * What we read out of the brief, corrected by the person who wrote it.
+ *
+ * The countries and the library were a machine's reading of two sentences, and
+ * a machine's reading is the thing most worth being able to fix. Niches are not
+ * here: they carry their own numbers and are edited with the rules.
+ */
+export function setExtracted(
+  campaignId: string,
+  patch: { countries?: string[]; templateId?: TemplateId },
+): void {
+  setState((s) => ({
+    campaigns: s.campaigns.map((c) =>
+      c.id === campaignId
+        ? { ...c, extracted: { ...c.extracted, ...patch, extractedAt: new Date().toISOString() }, updatedAt: new Date().toISOString() }
+        : c,
+    ),
+  }))
 }
 
 /**

@@ -1,28 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
-import { getCampaign, getFeasibility, getGateSet, getSubscription, getSurvey, getVersionRows, type VersionRow } from '../data'
+import { getCampaign, getFeasibility, getGateSet, getSubscription, getSurvey } from '../data'
 import { useStore } from '../data/hooks'
-import type { Channel, Door, Room } from '../data/pool'
+import type { Door } from '../data/pool'
 import { about, simulate, verdictOf, type Funnel as Counts, type SimResult, type Verdict } from '../data/simulate'
-import { acceptVolume, addSeeds, openDoor, restoreVersion, runFeasibility } from '../data/store'
+import { acceptVolume, addSeeds, openDoor, runFeasibility } from '../data/store'
 import { cleanHandles } from '../data/seeds'
 import { Info } from '../components/Info'
-import { absolute } from '../lib/format'
-import { DIALS, perNicheKeys, type DialKey } from '../data/tuning'
 
-// Zone 5. It answers three questions, in order: how many a day, for how long,
-// and what if.
+// Zone 5. One question, asked twice: how much do these rules filter, and what
+// would change if you opened one of them.
 //
-// One screen and not two, because they are the same object looked at twice.
-// The funnel says how many of the people we find make it through; the room
-// says how many are left to find; the doors say what each rule costs in both.
-// A client who has to hold two screens in their head to answer "should I
-// loosen this" never answers it.
+// It is a simulation and it says so. We run the campaign's rules over a sample
+// of real accounts and count what survives each check. The number worth
+// reading is not how many died at a step, it is how much of the world these
+// rules keep: one in four hundred is a different business from one in ten, and
+// a client who has never seen that number tunes their rules blind.
 //
 // Nothing here says gate, knockout, median or threshold. And nothing here says
 // what a lead costs to produce: this screen negotiates volume and rules, never
-// the price. The one figure it borrows from our side of the table is the count
-// of people we looked at, rounded to two figures and always "about", because
-// the point of it is to teach that we look at many to find few.
+// the price.
 
 // ---------------------------------------------------------------------------
 // The wait
@@ -74,7 +70,7 @@ function Scanning({ result, passScore, max, onDone }: { result: SimResult; passS
         ))}
       </ol>
       <div className="card gate-card">
-        <h2>Where people drop out</h2>
+        <h2>How much your rules filter</h2>
         <Funnel counts={result.funnel} passScore={passScore} max={max} upTo={stage} />
       </div>
     </div>
@@ -82,48 +78,40 @@ function Scanning({ result, passScore, max, onDone }: { result: SimResult; passS
 }
 
 // ---------------------------------------------------------------------------
-// Block one, the funnel
+// What the rules keep
 // ---------------------------------------------------------------------------
 
-interface Band { label: string; count: number; width: number; share: number; drop: number | null; was: number | null }
+interface Band { label: string; count: number; width: number; kept: number }
 
 /**
  * Five steps, in the order a client thinks of them: we search their niches,
  * keep the big active ones, confirm what each person works in, ask the deal
  * breakers, score the fit. The size check runs before the niche is confirmed
- * because it is free and the confirmation is not, which is why the counts
- * come in this order and not the other.
+ * because it is free and the confirmation is not.
+ *
+ * Every row says what share of the people we started with is still standing.
+ * The old version said how many were lost at each step, which reads as a list
+ * of failures rather than as the shape of a filter.
  */
 function Funnel({
-  counts, passScore, max, upTo, before,
+  counts, passScore, max, upTo,
 }: {
   counts: Counts
   passScore: number
   max: number
   /** How many bands to show. Everything once the scan is done. */
   upTo?: number
-  /** The same counts under the version before, for a before and after. */
-  before?: Counts | null
 }) {
   const f = counts
   const top = Math.max(1, f.scanned)
   const widest = Math.max(1, f.pastHard)
   const rows: Band[] = [
-    { label: 'Found, searching your niches', count: f.scanned, width: 1, share: 1, drop: null, was: before?.scanned ?? null },
-    { label: 'Big and active enough', count: f.pastHard, width: f.pastHard / widest, share: f.pastHard / top, drop: null, was: before?.pastHard ?? null },
-    { label: 'Working in a niche you want', count: f.inNiche, width: f.inNiche / widest, share: f.inNiche / top, drop: null, was: before?.inNiche ?? null },
-    { label: 'Passed your deal breakers', count: f.pastKnockouts, width: f.pastKnockouts / widest, share: f.pastKnockouts / top, drop: null, was: before?.pastKnockouts ?? null },
-    { label: `Brand fit ${Math.round((passScore / max) * 100)}% or more`, count: f.qualified, width: f.qualified / widest, share: f.qualified / top, drop: null, was: before?.qualified ?? null },
+    { label: 'We look at', count: f.scanned, width: 1, kept: 1 },
+    { label: 'Big and active enough', count: f.pastHard, width: f.pastHard / widest, kept: f.pastHard / top },
+    { label: 'Working in a niche you want', count: f.inNiche, width: f.inNiche / widest, kept: f.inNiche / top },
+    { label: 'Past your deal breakers', count: f.pastKnockouts, width: f.pastKnockouts / widest, kept: f.pastKnockouts / top },
+    { label: `Brand fit ${Math.round((passScore / max) * 100)}% or more`, count: f.qualified, width: f.qualified / widest, kept: f.qualified / top },
   ]
-  for (let i = 1; i < rows.length; i++) {
-    const prev = rows[i - 1].count
-    if (prev <= 0) {
-      rows[i].drop = 0
-      continue
-    }
-    const pct = (1 - rows[i].count / prev) * 100
-    rows[i].drop = rows[i].count > 0 ? Math.min(99, Math.round(pct)) : 100
-  }
 
   const shown = upTo === undefined ? rows.length : Math.max(1, upTo + 1)
   return (
@@ -136,12 +124,8 @@ function Funnel({
           </span>
           <span className="funnel-count">
             <b className="num">about {about(row.count)}</b>
-            {i > 0 && <small className="num">{share(row.share)} of all</small>}
-            {i > 0 && row.was !== null && about(row.was) !== about(row.count) && (
-              <small className={`num was${row.count > row.was ? ' up' : ''}`}>was about {about(row.was)}</small>
-            )}
+            {i > 0 && <small className="num">{share(row.kept)} still standing</small>}
           </span>
-          {row.drop !== null && row.drop > 0 && <span className="funnel-drop num">-{row.drop}%</span>}
         </li>
       ))}
     </ol>
@@ -156,15 +140,18 @@ function share(fraction: number): string {
   return `${pct.toFixed(2)}%`
 }
 
-const VERDICT: Record<Verdict, (per: number, want: number) => string> = {
-  feasible: (per, want) => `Around ${per} a day. You asked for ${want}, so there is room to spare.`,
-  short: (per, want) => `Around ${per} a day, and you asked for ${want}. Open something up below, or take ${per}.`,
-  too_narrow: () => 'Too narrow to fill a day. Open something up below, or move to a smaller plan.',
+/** "One in 340". The share written the way people say it out loud. */
+function oneIn(kept: number, total: number): string {
+  if (kept <= 0) return 'nobody yet'
+  const n = Math.round(total / kept)
+  return `1 in ${n.toLocaleString('en-GB')}`
 }
 
-// ---------------------------------------------------------------------------
-// Block two, how long it lasts
-// ---------------------------------------------------------------------------
+const VERDICT: Record<Verdict, (per: number, want: number) => string> = {
+  feasible: (per, want) => `That is around ${per} a day. You asked for ${want}, so there is room to spare.`,
+  short: (per, want) => `That is around ${per} a day, and you asked for ${want}. Open something up below, or take ${per}.`,
+  too_narrow: () => 'That is not enough to fill a day. Open something up below, or move to a smaller plan.',
+}
 
 function span(days: number): string {
   if (days <= 0) return 'nothing left'
@@ -175,63 +162,16 @@ function span(days: number): string {
   return `about ${Math.round(days / 30)} months`
 }
 
-function health(c: Channel): { label: string; tone: string } {
-  if (c.spent) return { label: 'run its course', tone: 'out' }
-  const left = c.capacity > 0 ? c.frontier / c.capacity : 0
-  if (left < 0.3) return { label: 'slowing down', tone: 'low' }
-  return { label: 'still finding new people', tone: 'ok' }
-}
-
-function Lasting({ room }: { room: Room }) {
-  const total = Math.max(1, room.found + room.left)
-  const spent = room.channels.filter((c) => c.spent).length
-  return (
-    <div className={`card room-card ${room.state}`}>
-      <h2>
-        How long this lasts
-        <Info text="Instagram publishes no list of everyone. This is everyone we can reach with four ways of searching, which is a large number and not every number. It is an estimate, and it moves every night." />
-      </h2>
-      <p className="room-big">
-        About <b className="num">{about(room.left)}</b> more people fit these rules.{' '}
-        {span(room.days).charAt(0).toUpperCase() + span(room.days).slice(1)} at {room.perDay} a day.
-      </p>
-      <div className="room-gauge">
-        <i className="done" style={{ width: `${Math.round((room.found / total) * 100)}%` }} />
-        <i className="ahead" style={{ width: `${Math.round((room.left / total) * 100)}%` }} />
-      </div>
-      <ul className="room-key">
-        <li className="done"><b className="num">{room.found}</b> sent to you</li>
-        <li className="ahead"><b className="num">about {about(room.left)}</b> still to find</li>
-      </ul>
-      <ul className="ways-short">
-        {room.channels.map((c) => {
-          const h = health(c)
-          return (
-            <li key={c.id} className={h.tone}>
-              <i aria-hidden="true" />
-              <span>{c.label}</span>
-              <small>{h.label}</small>
-            </li>
-          )
-        })}
-      </ul>
-      {spent > 0 && spent < room.channels.length && (
-        <p className="hint">
-          {spent === 1 ? 'One way of searching' : `${spent} ways of searching`} ran its course. The rest still finds
-          people you have never seen.
-        </p>
-      )}
-      {room.allSpent && (
-        <p className="hint">Every way of searching has run its course under these rules. Opening one rule below starts them all again.</p>
-      )}
-    </div>
-  )
-}
-
 // ---------------------------------------------------------------------------
-// Block three, what if
+// What we would change
 // ---------------------------------------------------------------------------
 
+/**
+ * Each one is measured, not guessed: the whole sample is run again with that
+ * single change and the difference is what is printed. What it brings is said
+ * in leads a day and in weeks; what it costs is said in the numbers of the
+ * people it lets in, never as "slightly lower quality".
+ */
 function Doors({ list, dry, campaignId, seeds, onOpen }: {
   list: Door[]
   dry: boolean
@@ -245,9 +185,12 @@ function Doors({ list, dry, campaignId, seeds, onOpen }: {
   return (
     <div className={`card exits-card${dry ? ' urgent' : ''}`}>
       <h2>
-        {dry ? 'Ways to keep it going' : 'What if you opened something up'}
-        <Info text="Each one is measured by running the whole sample again with that one change. What it brings is said in leads a day and in weeks. What it costs is said in the numbers of the people it lets in." />
+        {dry ? 'What we would change to keep it going' : 'What we would change to get you more'}
+        <Info text="Each line is measured by running your whole sample again with that one change, so the gain and the cost are counted, not guessed." />
       </h2>
+      <p className="gate-lede">
+        Written from your own numbers: these are the rules costing you the most people, in the order they cost them.
+      </p>
       <ul className="exits">
         {list.map((door) => (
           <li key={door.id}>
@@ -319,81 +262,6 @@ function Doors({ list, dry, campaignId, seeds, onOpen }: {
 }
 
 // ---------------------------------------------------------------------------
-// Block four, the versions side by side
-// ---------------------------------------------------------------------------
-
-function Versions({ rows, campaignId, max, perNiche }: { rows: VersionRow[]; campaignId: string; max: number; perNiche: DialKey[] }) {
-  if (rows.length < 2) return null
-  const shown = DIALS.filter((d) => rows.some((r) => typeof r.gates.hard[d.key] === 'number'))
-  return (
-    <div className="card">
-      <h2>
-        Your rules, version by version
-        <Info text="Every save is a new version and every version was tested on the same people, so the columns compare. Going back writes a new version too, so a lead from last week still points at the rules that chose it." />
-      </h2>
-      <div className="compare-scroll">
-        <table className="compare versions">
-          <thead>
-            <tr>
-              <th />
-              {rows.map((r) => (
-                <th key={r.gates.id}>
-                  v{r.gates.version}{r.current ? ', in use' : ''}
-                  <small>{absolute(r.gates.createdAt)}</small>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {shown.map((d) => (
-              <tr key={d.key}>
-                <th>{d.label}</th>
-                {rows.map((r) => {
-                  const v = r.gates.hard[d.key]
-                  return (
-                    <td key={r.gates.id} className="num">
-                      {typeof v === 'number' ? d.format(v) : r.current && perNiche.includes(d.key) ? 'per niche' : 'not set'}
-                    </td>
-                  )
-                })}
-              </tr>
-            ))}
-            <tr>
-              <th>Qualified from</th>
-              {rows.map((r) => <td key={r.gates.id} className="num">{Math.round((r.gates.passScore / max) * 100)}%</td>)}
-            </tr>
-            <tr>
-              <th>Deal breakers asked</th>
-              {rows.map((r) => <td key={r.gates.id} className="num">{r.gates.knockouts.filter((k) => k.enabled !== false).length}</td>)}
-            </tr>
-            <tr className="versions-out">
-              <th>Make it through</th>
-              {rows.map((r) => <td key={r.gates.id} className="num">about {about(r.funnel.qualified)}</td>)}
-            </tr>
-            <tr className="versions-out">
-              <th>A day</th>
-              {rows.map((r) => <td key={r.gates.id} className="num"><b>{r.estimatedPerDay}</b></td>)}
-            </tr>
-            <tr>
-              <th />
-              {rows.map((r) => (
-                <td key={r.gates.id}>
-                  {!r.current && (
-                    <button type="button" className="btn small" onClick={() => restoreVersion(campaignId, r.gates.id)}>
-                      Go back to these
-                    </button>
-                  )}
-                </td>
-              ))}
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  )
-}
-
-// ---------------------------------------------------------------------------
 
 export function Feasibility({ campaignId }: { campaignId: string }) {
   useStore()
@@ -421,7 +289,7 @@ export function Feasibility({ campaignId }: { campaignId: string }) {
     return (
       <div className="empty">
         <h2>Not tested yet</h2>
-        <p>We run your rules over a sample of real accounts and tell you how many leads a day they would bring, and for how long.</p>
+        <p>We run your rules over a sample of real accounts and tell you how much of the world they keep, and how many leads a day that is.</p>
         <div className="actions">
           <button type="button" className="btn primary" onClick={start}>Test my rules</button>
         </div>
@@ -434,24 +302,22 @@ export function Feasibility({ campaignId }: { campaignId: string }) {
     scanned: run.sampleSize, pastHard: run.passedHard, inNiche: run.inNiche,
     pastKnockouts: run.passedKnockouts, qualified: run.qualified,
   }
-  const versions = getVersionRows(campaignId)
-  const previous = versions.find((v) => !v.current) ?? null
   const survey = getSurvey(campaignId)
 
   return (
     <>
-      <div className="page-head test-head">
-        <span className="hint">
-          Tested on {absolute(run.ranAt)}, rules version {run.gateSetVersion}. A sample, not a promise.
-        </span>
-        <span className="spacer" />
-        <a className="btn" href={`#/campaign/${campaignId}/gates`}>Change my rules</a>
-        <button type="button" className="btn primary" onClick={start}>Test again</button>
-      </div>
-
       <div className="card gate-card">
-        <h2>Where people drop out</h2>
-        <Funnel counts={counts} passScore={gates.passScore} max={max} before={previous?.funnel} />
+        <div className="chart-head">
+          <h2>
+            How much your rules filter
+            <Info text="A simulation over a sample of real accounts, run against the rules you have saved. It is a measurement of your rules, not a promise about next week." />
+          </h2>
+          <button type="button" className="btn small" onClick={start}>Test again</button>
+        </div>
+        <p className="filter-headline">
+          Your rules keep <b className="num">{oneIn(run.qualified, run.sampleSize)}</b> of the people we look at.
+        </p>
+        <Funnel counts={counts} passScore={gates.passScore} max={max} />
         <p className={`verdict-line ${verdict}`}>{VERDICT[verdict](run.estimatedPerDay, want)}</p>
         {verdict !== 'feasible' && (
           <div className="verdict-actions">
@@ -461,14 +327,7 @@ export function Feasibility({ campaignId }: { campaignId: string }) {
             <a className="btn quiet" href="#/account">See my plan</a>
           </div>
         )}
-        {previous && (
-          <p className="hint">
-            "Was" is version {previous.gates.version}, the one before this. The full side by side is at the bottom.
-          </p>
-        )}
       </div>
-
-      {survey && <Lasting room={survey.room} />}
 
       {survey && (
         <Doors
@@ -479,9 +338,6 @@ export function Feasibility({ campaignId }: { campaignId: string }) {
           onOpen={(d) => openDoor(campaignId, d)}
         />
       )}
-
-      <Versions rows={versions} campaignId={campaignId} max={max} perNiche={perNicheKeys(gates.hard, niches)} />
     </>
   )
 }
-

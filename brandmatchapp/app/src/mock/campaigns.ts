@@ -19,14 +19,10 @@ import { daysAgo } from './time'
  * the campaign carries no single number for it and every niche carries its
  * own. One number, one place.
  */
-const VIEWS_BY_NICHE: Record<string, number> = {
-  postnatal_and_womens_health: 6_000,
-  rehab_and_physio: 7_000,
-}
-const fitnessNiches: Niche[] = suggestNiches('fitness coaches strength training', 'mobile apps').map((n) => ({
-  ...n,
-  hard: { medianViewsMin: VIEWS_BY_NICHE[n.id] ?? 12_000 },
-}))
+// Size and activity are the campaign's, not the niche's. A number that moves
+// per niche is a number nobody can state in one sentence, and the rules screen
+// exists to state them in one sentence.
+const fitnessNiches: Niche[] = suggestNiches('fitness coaches strength training', 'mobile apps')
 
 export const campaigns: Campaign[] = [
   {

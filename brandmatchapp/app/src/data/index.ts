@@ -16,7 +16,6 @@ import type {
 import { indexOfCreator, postsFor } from '../mock/creators'
 import { fitPercent } from '../lib/format'
 import { survey, type FirstRules, type Survey } from './pool'
-import { simulate } from './simulate'
 import { getState, getVersion } from './store'
 import { rank, WALK } from './status'
 
@@ -139,47 +138,6 @@ export function getSurvey(campaignId: string): Survey | null {
   const out = survey(campaign, gates, delivered, campaign.dailyCap ?? tier, tier)
   surveyCache = { version, id: campaignId, out }
   return out
-}
-
-/** One version of the rules with what it delivers, for the side by side. */
-export interface VersionRow {
-  gates: GateSet
-  /** The sample's answer for this version: how many at each step. */
-  funnel: { scanned: number; pastHard: number; inNiche: number; pastKnockouts: number; qualified: number }
-  estimatedPerDay: number
-  /** True for the version in use today. */
-  current: boolean
-}
-
-const versionCache = new Map<string, VersionRow['funnel'] & { estimatedPerDay: number }>()
-
-/**
- * Every version this campaign has had, each with its own numbers, newest
- * first. A version that was tested keeps its run. One that never was is run
- * now, once, because a row with no numbers cannot be compared to anything.
- */
-export function getVersionRows(campaignId: string): VersionRow[] {
-  const campaign = getCampaign(campaignId)
-  if (!campaign) return []
-  const tier = getSubscription().tier
-  return getGateVersions(campaignId).map((gates) => {
-    const run = getState()
-      .feasibilityRuns.filter((f) => f.gateSetId === gates.id)
-      .sort((a, b) => b.ranAt.localeCompare(a.ranAt))[0]
-    let numbers = run
-      ? {
-          scanned: run.sampleSize, pastHard: run.passedHard, inNiche: run.inNiche,
-          pastKnockouts: run.passedKnockouts, qualified: run.qualified, estimatedPerDay: run.estimatedPerDay,
-        }
-      : versionCache.get(gates.id)
-    if (!numbers) {
-      const out = simulate(gates, campaign.extracted.niches, tier)
-      numbers = { ...out.funnel, estimatedPerDay: out.estimatedPerDay }
-      versionCache.set(gates.id, numbers)
-    }
-    const { estimatedPerDay, ...funnel } = numbers
-    return { gates, funnel, estimatedPerDay, current: gates.id === campaign.gateSetId }
-  })
 }
 
 /** The rules a campaign agreed to before it opened anything, when it has. */

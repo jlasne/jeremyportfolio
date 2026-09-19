@@ -35,13 +35,7 @@ const tuned = settle({
  * Every lead handed over since is measured against the version above, and the
  * ones that only clear this one carry the mark for good.
  */
-const opened = (() => {
-  // Views moved under the niches when this version was written, so the
-  // campaign carries no number for them any more.
-  const hard = settle({ ...tuned, followersMin: 7_000 })
-  delete hard.medianViewsMin
-  return hard
-})()
+const opened = settle({ ...tuned, followersMin: 7_000 })
 
 export const gateSets: GateSet[] = [
   {
@@ -70,7 +64,7 @@ export const gateSets: GateSet[] = [
     hard: tuned,
     knockouts: lib.knockouts.map((k) => ({ ...k, enabled: true })),
     criteria: lib.criteria,
-    passScore: 9,
+    passScore: 11,
     preset: 'custom',
     by: 'mem_1',
     changes: [
@@ -89,10 +83,10 @@ export const gateSets: GateSet[] = [
     hard: opened,
     knockouts: lib.knockouts.map((k) => ({ ...k, enabled: true })),
     criteria: lib.criteria,
-    passScore: 9,
+    passScore: 11,
     preset: 'custom',
     by: 'mem_1',
-    changes: ['Followers, from: 15k to 7k', 'Views on a typical post, at least: now set per niche'],
+    changes: ['Followers, from: 15k to 7k', 'Views on a typical post, at least: 12k to 9k'],
     createdAt: daysAgo(24),
   },
   {
@@ -115,7 +109,7 @@ export const gateSets: GateSet[] = [
     }),
     knockouts: lib.knockouts.map((k) => ({ ...k, enabled: true })),
     criteria: lib.criteria,
-    passScore: 12,
+    passScore: 14,
     preset: 'custom',
     by: 'system',
     changes: ['Proposed from the brief'],
