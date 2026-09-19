@@ -50,20 +50,47 @@ export const pending = internalQuery({
       niches: campaign.extracted.niches ?? [],
       brief: `${campaign.brief.audience}. They sell: ${campaign.brief.offer}`,
       extracted: campaign.extracted,
-      creators: fresh.map((c) => ({
-        id: c._id,
-        handle: c.handle,
-        name: c.name,
-        bio: c.bio,
-        followers: c.followers,
-        medianViews: c.medianViews,
-        medianComments: c.medianComments,
-        postsPerMonth: c.postsPerMonth,
-        lastPostAt: c.lastPostAt,
-        country: c.country,
-        language: c.language,
-        links: c.links,
-        firstSeenAt: c.firstSeenAt,
+      creators: await Promise.all(fresh.map(async (c) => {
+        // The posts go to the model too. Half the sentences a client writes
+        // are about what a person posts and who answers them, and a model
+        // given only a bio scores every one of those a zero for lack of data,
+        // which the first real run did.
+        const posts = await ctx.db
+          .query('creatorPosts')
+          .withIndex('by_creator', (q) => q.eq('creatorId', c._id))
+          .collect()
+        const typical = posts
+          .filter((p) => !p.pinned)
+          .sort((a, b) => b.postedAt - a.postedAt)
+          .slice(0, 12)
+          .map((p) => ({
+            date: new Date(p.postedAt).toISOString().slice(0, 10),
+            kind: p.kind,
+            views: p.views || undefined,
+            likes: p.likes,
+            comments: p.comments,
+            // Cut by characters, not by code units: a slice through the middle
+            // of an emoji leaves half a surrogate pair, and that is a value
+            // the runtime refuses to serialise. The first re-judge died on it.
+            caption: Array.from((p.caption ?? '').replace(/\s+/g, ' ')).slice(0, 280).join(''),
+          }))
+        return {
+          id: c._id,
+          handle: c.handle,
+          name: c.name,
+          bio: c.bio,
+          followers: c.followers,
+          medianViews: c.medianViews,
+          medianComments: c.medianComments,
+          postsPerMonth: c.postsPerMonth,
+          lastPostAt: c.lastPostAt,
+          country: c.country,
+          language: c.language,
+          links: c.links,
+          email: c.email ? 'on the profile' : undefined,
+          firstSeenAt: c.firstSeenAt,
+          posts: typical,
+        }
       })),
     }
   },
@@ -264,9 +291,14 @@ async function ask(
         ]
       : []),
     '',
-    'Judge only what the profile shows. Never assume. Write one plain sentence as the reason.',
+    'Judge from the bio, the links, the numbers and the posts below. The posts are the last twelve, newest first, with their captions and their counts: read them for what the person sells, teaches, complains about, and how people respond. Never assume what the posts do not show. Write one plain sentence as the reason.',
     '',
-    `Profile: ${JSON.stringify(creator)}`,
+    `Profile: ${JSON.stringify({ ...creator, posts: undefined })}`,
+    '',
+    'Their last posts, newest first:',
+    ...((creator.posts as Record<string, unknown>[] | undefined) ?? []).map(
+      (p) => `- ${p.date} ${p.kind}${p.views ? `, ${p.views} views` : ''}, ${p.likes} likes, ${p.comments} comments: ${p.caption || '(no caption)'}`,
+    ),
   ].join('\n')
 
   const res = await fetch(OPENROUTER, {

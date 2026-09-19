@@ -96,7 +96,7 @@ function instructions(): string {
     'Then adapt it to the brief.',
     'Gate 1: write thresholds for the target described. Reach is measured on real posts, never a declared figure. Keep the follower range the brief asks for when it gives one.',
     'Gate 2: keep every knockout id of the library. Reword the questions for this offer. You may add at most one new knockout.',
-    'Gate 3: write four to nine sentences describing the ideal profile for this offer, starting from the library sentences and rewording them for the brief. Each sentence is a plain statement about a person that can be answered true, partly true or false from their profile and posts. Ids are short snake_case. Set passScore in points out of twice the number of sentences, so that roughly one profile in six reaching gate 3 qualifies.',
+    'Gate 3: write four to nine sentences describing the ideal profile for this offer, starting from the library sentences and rewording them for the brief. Each sentence is a plain statement about a person that can be answered true, partly true or false from what the judge will see: the bio, the links, the follower count, and the last twelve posts with their captions, dates, likes, comments and views. Never write a sentence that needs what the judge cannot see, such as whether they reply to comments, how their reach moved over a year, or what their audience earns. Ids are short snake_case. Set passScore in points out of twice the number of sentences, so that roughly one profile in six reaching gate 3 qualifies.',
     '',
     'Niches: four to seven slices of the target, the sub topics these people actually work in. A target is never one audience, and the slices do not answer at the same rate. Ids are short snake_case.',
     '',
