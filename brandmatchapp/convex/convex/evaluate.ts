@@ -104,7 +104,7 @@ export const write = internalMutation({
  * Runs the gates over one campaign's untouched profiles.
  *
  * The model is asked once per surviving profile and answers both the knockouts
- * and the seven criteria in one strict JSON object, so a profile costs one call
+ * and every sentence in one strict JSON object, so a profile costs one call
  * and never two.
  */
 export const campaign = internalAction({
@@ -243,8 +243,8 @@ async function ask(
     'Answer every knockout with true or false. One false eliminates the profile.',
     ...gates.knockouts.map((k) => `- ${k.id}: ${k.question}${k.why ? ` (${k.why})` : ''}`),
     '',
-    'Score every criterion 0, 1 or 2. A 2 is what the guide describes.',
-    ...gates.criteria.map((c) => `- ${c.id}: ${c.label}${c.guide ? ` (${c.guide})` : ''}`),
+    'Then read each sentence below against the profile. Answer 2 when it is true of them, 1 when it is partly true, 0 when it is false or you cannot tell. Give one line of evidence as the note.',
+    ...gates.criteria.map((c) => `- ${c.id}: ${c.text}`),
     '',
     ...(on.length
       ? [

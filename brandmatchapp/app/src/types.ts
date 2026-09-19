@@ -234,11 +234,17 @@ export interface Knockout {
   enabled?: boolean
 }
 
-/** Gate 3. What a 2 looks like is written in the guide. */
+/**
+ * Gate 3. One sentence about the ideal client, in the client's own words.
+ *
+ * The model reads each sentence against the profile and answers true, partly
+ * or false, which is 2, 1 or 0. There is no library to stay inside any more:
+ * the sentences a campaign starts with are a draft written from the brief,
+ * and the client keeps, changes, adds or deletes them. Between one and twelve.
+ */
 export interface Criterion {
   id: string
-  label: string
-  guide?: string
+  text: string
 }
 
 /** One version of a campaign's three gates. Edits write a new version. */

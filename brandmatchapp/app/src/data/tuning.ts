@@ -37,7 +37,10 @@ export interface Dial {
 }
 
 const floorOf = (hard: HardRules) => hard.followersMin ?? 15_000
-const viewsOf = (hard: HardRules) => hard.medianViewsMin ?? 0
+// When views live under the niches the campaign carries no number for them,
+// so the comments cap leans on half the follower floor, which is where a
+// balanced views setting sits anyway.
+const viewsOf = (hard: HardRules) => hard.medianViewsMin ?? Math.round(floorOf(hard) * 0.5)
 
 // In the order a client reads them: how big, how often, how far they reach.
 export const DIALS: Dial[] = [
@@ -165,25 +168,26 @@ const PRESETS: Record<Exclude<PresetId, 'custom'>, {
   viewsShare: number
   cadence: number
   commentsShare: number
-  passScore: number
+  /** Brand fit needed, as a share of the ceiling. Works for any number of sentences. */
+  passShare: number
 }> = {
   strict: {
     label: 'Strict',
     blurb: 'Fewer people, better ones. Only accounts already doing well.',
     followersFloor: 2, followersCeiling: 1, recency: 0.5, viewsShare: 1, cadence: 1.5,
-    commentsShare: 0.004, passScore: 12,
+    commentsShare: 0.004, passShare: 0.86,
   },
   balanced: {
     label: 'Balanced',
     blurb: 'Where most people start. Decent reach, posting regularly.',
     followersFloor: 1, followersCeiling: 1, recency: 1, viewsShare: 0.5, cadence: 1,
-    commentsShare: 0.002, passScore: 9,
+    commentsShare: 0.002, passShare: 0.64,
   },
   broad: {
     label: 'Broad',
     blurb: 'More people every day. You do more of the sorting.',
     followersFloor: 0.5, followersCeiling: 1.5, recency: 2, viewsShare: 0.25, cadence: 0.5,
-    commentsShare: 0, passScore: 7,
+    commentsShare: 0, passShare: 0.5,
   },
 }
 
@@ -196,6 +200,30 @@ export const PRESET_LIST = (['strict', 'balanced', 'broad'] as const).map((id) =
 export interface Tuned {
   hard: HardRules
   passScore: number
+}
+
+/**
+ * The dials set under each niche rather than once for the campaign.
+ *
+ * A dial lives in exactly one place. Either the campaign carries the number
+ * and every niche follows it, or the campaign carries nothing for it and each
+ * niche carries its own. Never both, because a number with an override is a
+ * number nobody can be sure of.
+ */
+export function perNicheKeys(hard: HardRules, niches: { hard?: Partial<HardRules> }[]): DialKey[] {
+  return DIALS.map((d) => d.key).filter(
+    (key) => typeof hard[key] !== 'number' && niches.some((n) => typeof n.hard?.[key] === 'number'),
+  )
+}
+
+/** A share of brand fit as points, for a given number of sentences. */
+export function pointsFor(share: number, sentences: number): number {
+  return Math.max(1, Math.min(sentences * 2, Math.round(share * sentences * 2)))
+}
+
+/** Points as a share of brand fit, for a given number of sentences. */
+export function shareOf(points: number, sentences: number): number {
+  return sentences > 0 ? Math.round((points / (sentences * 2)) * 100) : 0
 }
 
 export function preset(id: Exclude<PresetId, 'custom'>, lib: GateTemplate, keep: HardRules = {}): Tuned {
@@ -214,7 +242,7 @@ export function preset(id: Exclude<PresetId, 'custom'>, lib: GateTemplate, keep:
     ...(keep.countries ? { countries: keep.countries } : {}),
     ...(keep.languages ? { languages: keep.languages } : {}),
   }
-  return { hard: settle(hard), passScore: Math.min(p.passScore, lib.criteria.length * 2) }
+  return { hard: settle(hard), passScore: pointsFor(p.passShare, lib.criteria.length) }
 }
 
 /** Which preset a set of rules sits on, or custom once anything drifted. */
@@ -303,14 +331,18 @@ export function bandOf(score: number): string {
 export function describeChanges(
   before: { hard: HardRules; passScore: number; knockouts: { id: string; enabled?: boolean }[] },
   after: { hard: HardRules; passScore: number; knockouts: { id: string; question: string; enabled?: boolean }[] },
-  criteria: { before: { id: string; label: string }[]; after: { id: string; label: string }[] },
+  criteria: { before: { id: string; text: string }[]; after: { id: string; text: string }[] },
 ): string[] {
   const lines: string[] = []
   for (const dial of DIALS) {
     const a = before.hard[dial.key]
     const b = after.hard[dial.key]
-    if (a === b || typeof b !== 'number') continue
-    lines.push(`${dial.label}: ${typeof a === 'number' ? dial.format(a) : 'not applied'} to ${dial.format(b)}`)
+    if (a === b) continue
+    if (typeof b !== 'number') {
+      if (typeof a === 'number') lines.push(`${dial.label}: now set per niche`)
+      continue
+    }
+    lines.push(`${dial.label}: ${typeof a === 'number' ? dial.format(a) : 'per niche'} to ${dial.format(b)}`)
   }
   if (before.passScore !== after.passScore) {
     lines.push(`Pass mark: ${before.passScore} to ${after.passScore}`)
@@ -324,7 +356,11 @@ export function describeChanges(
   }
   for (const c of criteria.after) {
     const was = criteria.before.find((x) => x.id === c.id)
-    if (was && was.label !== c.label) lines.push(`Renamed: ${was.label} to ${c.label}`)
+    if (!was) lines.push(`Added: ${c.text}`)
+    else if (was.text !== c.text) lines.push(`Reworded: ${was.text} to ${c.text}`)
+  }
+  for (const c of criteria.before) {
+    if (!criteria.after.some((x) => x.id === c.id)) lines.push(`Removed: ${c.text}`)
   }
   return lines
 }

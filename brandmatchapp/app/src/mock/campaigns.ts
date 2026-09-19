@@ -14,16 +14,19 @@ import { daysAgo } from './time'
 /**
  * The slices the first campaign looks in.
  *
- * A postnatal account at 20k is worth more than a general one at 200k, so that
- * slice carries its own, lower numbers.
+ * Views on a typical post are set under each niche here and nowhere else: a
+ * postnatal account at 6k views is worth more than a general one at 12k, so
+ * the campaign carries no single number for it and every niche carries its
+ * own. One number, one place.
  */
-const fitnessNiches: Niche[] = suggestNiches('fitness coaches strength training', 'mobile apps').map((n) =>
-  n.id === 'postnatal_and_womens_health'
-    ? { ...n, hard: { followersMin: 8_000, medianViewsMin: 6_000 } }
-    : n.id === 'rehab_and_physio'
-      ? { ...n, hard: { followersMin: 10_000, medianViewsMin: 7_000 } }
-      : n,
-)
+const VIEWS_BY_NICHE: Record<string, number> = {
+  postnatal_and_womens_health: 6_000,
+  rehab_and_physio: 7_000,
+}
+const fitnessNiches: Niche[] = suggestNiches('fitness coaches strength training', 'mobile apps').map((n) => ({
+  ...n,
+  hard: { medianViewsMin: VIEWS_BY_NICHE[n.id] ?? 12_000 },
+}))
 
 export const campaigns: Campaign[] = [
   {

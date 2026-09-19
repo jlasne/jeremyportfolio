@@ -3059,3 +3059,21 @@ body { background: var(--paper); }
   .split-rows .btn { grid-column: 2 / -1; justify-self: start; }
   .exit-seeds { grid-template-columns: minmax(0, 1fr) !important; }
 }
+
+/* The sentences that describe who the client wants. */
+.sentences { margin: 6px 0 16px; }
+.sentence-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.sentence-list li { display: grid; grid-template-columns: 22px minmax(0, 1fr) 30px; gap: 8px; align-items: start; }
+.sentence-n { color: var(--ink-3); font-size: 12px; padding-top: 10px; text-align: right; }
+.textarea.sentence { border-radius: 14px; min-height: 40px; resize: vertical; line-height: 1.4; }
+.sentence-list .drop { margin-top: 4px; }
+.sentence-foot { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+
+/* A dial that lives under the niches, and the way there and back. */
+.dial-wrap { display: flex; flex-direction: column; gap: 2px; }
+.dial-wrap .per-niche { align-self: flex-end; font-size: 11px; padding: 0 8px; opacity: 0.55; }
+.dial-wrap:hover .per-niche, .dial-wrap:focus-within .per-niche { opacity: 1; }
+.dial.elsewhere { justify-content: center; gap: 8px; padding: 6px 10px; border: 1px dashed var(--line-2); border-radius: 12px; }
+.dial.elsewhere .dial-head b { color: var(--ink-2); font-weight: 500; }
+.dial.elsewhere .btn { align-self: flex-start; }
+.niche-dials { margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 12px 24px; min-width: 0; }

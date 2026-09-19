@@ -13,7 +13,7 @@ import { template, TEMPLATE_IDS, withinTemplate } from './templates'
 //   Gate 1  write the numbers. Only thresholds, so the risk is low and the
 //           brief has to move them or every campaign would filter the same.
 //   Gate 2  reword the library's questions, and add at most one.
-//   Gate 3  reword the library's seven criteria and move the bar. Never invent
+//   Gate 3  write the sentences for this offer, from the library's. Then set the bar. Never invent
 //           a criterion, never drop one. templates.ts enforces it.
 
 const OPENROUTER = 'https://openrouter.ai/api/v1/chat/completions'
@@ -64,16 +64,16 @@ const SCHEMA = {
     },
     criteria: {
       type: 'array',
-      minItems: 7,
-      maxItems: 7,
+      minItems: 4,
+      maxItems: 9,
       items: {
         type: 'object',
         additionalProperties: false,
-        required: ['id', 'label', 'guide'],
-        properties: { id: { type: 'string' }, label: { type: 'string' }, guide: { type: 'string' } },
+        required: ['id', 'text'],
+        properties: { id: { type: 'string' }, text: { type: 'string' } },
       },
     },
-    passScore: { type: 'integer', minimum: 0, maximum: 14 },
+    passScore: { type: 'integer', minimum: 1, maximum: 18 },
   },
 }
 
@@ -83,7 +83,7 @@ function instructions(): string {
     return [
       `${lib.id}: ${lib.name}. ${lib.when}`,
       '  knockouts: ' + lib.knockouts.map((k) => `${k.id} (${k.question})`).join('; '),
-      '  criteria: ' + lib.criteria.map((c) => `${c.id} (${c.label})`).join('; '),
+      '  sentences: ' + lib.criteria.map((c) => `${c.id} (${c.text})`).join('; '),
     ].join('\n')
   }).join('\n')
 
@@ -96,7 +96,7 @@ function instructions(): string {
     'Then adapt it to the brief.',
     'Gate 1: write thresholds for the target described. Reach is measured on real posts, never a declared figure. Keep the follower range the brief asks for when it gives one.',
     'Gate 2: keep every knockout id of the library. Reword the questions for this offer. You may add at most one new knockout.',
-    'Gate 3: keep the seven criteria ids of the library, in order. Reword the label and the guide for this offer. Set passScore so roughly one profile in six reaching gate 3 qualifies.',
+    'Gate 3: write four to nine sentences describing the ideal profile for this offer, starting from the library sentences and rewording them for the brief. Each sentence is a plain statement about a person that can be answered true, partly true or false from their profile and posts. Ids are short snake_case. Set passScore in points out of twice the number of sentences, so that roughly one profile in six reaching gate 3 qualifies.',
     '',
     'Niches: four to seven slices of the target, the sub topics these people actually work in. A target is never one audience, and the slices do not answer at the same rate. Ids are short snake_case.',
     '',

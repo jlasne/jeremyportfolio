@@ -33,7 +33,7 @@ export interface Measured {
 export interface GateSetShape {
   hard: HardRules
   knockouts: { id: string; question: string; why?: string; enabled?: boolean }[]
-  criteria: { id: string; label: string; guide?: string }[]
+  criteria: { id: string; text: string }[]
   passScore: number
 }
 

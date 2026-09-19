@@ -2,11 +2,11 @@ import type { Criterion, Knockout, TemplateId } from '../types'
 
 // Three libraries, one per reason to go looking for a creator.
 //
-// Gate 3 is never written from nothing. The model picks the closest library and
-// rewords it, which is both more predictable and safer than inventing seven
-// criteria each time. Gate 2 comes from here too, and the model may add at most
-// one question to it. Gate 1 is the only part generated freely, because it is
-// only numbers.
+// Gate 3 starts from here and then belongs to the client. The library gives
+// seven sentences about the ideal client, the model rewords them to the brief,
+// and from then on the client keeps, changes, adds or deletes them freely.
+// Gate 2 comes from here too, and the model may add at most one question to
+// it. Gate 1 is generated freely, because it is only numbers.
 //
 // There is deliberately no generic fourth library. When the model is unsure it
 // takes the nearest one and says so, and the client switches in one click. A
@@ -66,13 +66,13 @@ export const TEMPLATES: GateTemplate[] = [
       },
     ],
     criteria: [
-      { id: 'c_sells', label: 'Sells a product today', guide: 'A paid programme, coaching or course, priced in public.' },
-      { id: 'c_stakes', label: 'The topic carries real stakes', guide: 'Money, body or career. Something the audience cannot shrug off.' },
-      { id: 'c_method', label: 'Has a named method', guide: 'The method has a name and they repeat it.' },
-      { id: 'c_demand', label: 'Demand shows in the comments', guide: 'People ask how to buy or where to start.' },
-      { id: 'c_proof', label: 'Measurable progress in the posts', guide: 'Client numbers, before and after, with dates.' },
-      { id: 'c_stable', label: 'Over two years old, stable or growing', guide: 'No long gap, and the reach is not sliding.' },
-      { id: 'c_person', label: 'The audience follows the person', guide: 'Face on camera, first person, replies in the comments.' },
+      { id: 'c_sells', text: 'They sell a paid programme, coaching or course today, at a price shown in public.' },
+      { id: 'c_stakes', text: 'Their topic carries real stakes: money, body or career.' },
+      { id: 'c_method', text: 'They teach a method with a name, and they repeat it.' },
+      { id: 'c_demand', text: 'People in the comments ask how to buy or where to start.' },
+      { id: 'c_proof', text: 'Their posts show measurable client progress, with dates.' },
+      { id: 'c_stable', text: 'The account is over two years old and its reach is stable or growing.' },
+      { id: 'c_person', text: 'The audience follows the person: face on camera, first person, replies in the comments.' },
     ],
     passScore: 9,
     defaults: { followersMin: 15_000, followersMax: 400_000, lastPostWithinDays: 14, postsPerMonthMin: 8, viewsShare: 0.5 },
@@ -111,13 +111,13 @@ export const TEMPLATES: GateTemplate[] = [
       },
     ],
     criteria: [
-      { id: 'c_revenue', label: 'Sells something today', guide: 'A paid offer at a public price, so there is money to spend.' },
-      { id: 'c_pain', label: 'The problem you solve is visible', guide: 'They show it, complain about it, or work around it in public.' },
-      { id: 'c_solo', label: 'Runs the business themselves', guide: 'No agency or manager standing between you and them.' },
-      { id: 'c_replies', label: 'Replies to people', guide: 'Answers comments and questions. It predicts they answer you.' },
-      { id: 'c_tools', label: 'Already pays for tools', guide: 'Links to a stack you can plug into or replace.' },
-      { id: 'c_fit', label: 'Audience size fits your price', guide: 'Big enough to afford you, small enough to still need you.' },
-      { id: 'c_growing', label: 'Growing, not coasting', guide: 'Reach and cadence going up over the last year.' },
+      { id: 'c_revenue', text: 'They sell something today: a paid offer at a public price.' },
+      { id: 'c_pain', text: 'The problem you solve is visible: they show it, complain about it or work around it in public.' },
+      { id: 'c_solo', text: 'They run the business themselves, with no agency or manager in between.' },
+      { id: 'c_replies', text: 'They answer comments and questions.' },
+      { id: 'c_tools', text: 'They already pay for tools, and link to them from the bio.' },
+      { id: 'c_fit', text: 'Their audience is big enough to afford you and small enough to still need you.' },
+      { id: 'c_growing', text: 'Their reach and posting rhythm went up over the last year.' },
     ],
     passScore: 9,
     defaults: { followersMin: 15_000, followersMax: 400_000, lastPostWithinDays: 14, postsPerMonthMin: 8, viewsShare: 0.5 },
@@ -156,13 +156,13 @@ export const TEMPLATES: GateTemplate[] = [
       },
     ],
     criteria: [
-      { id: 'c_paid_posts', label: 'Already runs paid partnerships', guide: 'Tagged partnerships, a rate card, or a media kit.' },
-      { id: 'c_buyer', label: 'The audience is your buyer', guide: 'Right country, right spending power, not only the right topic.' },
-      { id: 'c_steady', label: 'Reach is steady, not one spike', guide: 'Median views hold across the last twelve posts.' },
-      { id: 'c_trust', label: 'Comments show trust', guide: 'Questions and thanks, not only applause and emoji.' },
-      { id: 'c_sells_well', label: 'Recommends without losing the room', guide: 'Past promotions kept the engagement up.' },
-      { id: 'c_safe', label: 'Brand safe', guide: 'A tone and a set of topics you can stand next to.' },
-      { id: 'c_budget', label: 'Rates likely inside your budget', guide: 'Size and category suggest a price you can pay.' },
+      { id: 'c_paid_posts', text: 'They already run paid partnerships: tagged posts, a rate card or a media kit.' },
+      { id: 'c_buyer', text: 'Their audience is your buyer: right country and right spending power, not only the right topic.' },
+      { id: 'c_steady', text: 'Their reach is steady across the last twelve posts, with no single spike.' },
+      { id: 'c_trust', text: 'The comments show trust: questions and thanks, not only applause.' },
+      { id: 'c_sells_well', text: 'Their past promotions kept the engagement up.' },
+      { id: 'c_safe', text: 'Their tone and topics are ones you can stand next to.' },
+      { id: 'c_budget', text: 'Their size and category suggest a rate inside your budget.' },
     ],
     passScore: 9,
     defaults: { followersMin: 20_000, followersMax: 1_000_000, lastPostWithinDays: 10, postsPerMonthMin: 12, viewsShare: 0.6 },

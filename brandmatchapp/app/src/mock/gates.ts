@@ -35,7 +35,13 @@ const tuned = settle({
  * Every lead handed over since is measured against the version above, and the
  * ones that only clear this one carry the mark for good.
  */
-const opened = settle({ ...tuned, followersMin: 7_000 })
+const opened = (() => {
+  // Views moved under the niches when this version was written, so the
+  // campaign carries no number for them any more.
+  const hard = settle({ ...tuned, followersMin: 7_000 })
+  delete hard.medianViewsMin
+  return hard
+})()
 
 export const gateSets: GateSet[] = [
   {
@@ -86,7 +92,7 @@ export const gateSets: GateSet[] = [
     passScore: 9,
     preset: 'custom',
     by: 'mem_1',
-    changes: ['Followers, from: 15k to 7k'],
+    changes: ['Followers, from: 15k to 7k', 'Views on a typical post, at least: now set per niche'],
     createdAt: daysAgo(24),
   },
   {

@@ -14,7 +14,6 @@ import type * as clientApi from "../clientApi.js";
 import type * as crawl from "../crawl.js";
 import type * as crons from "../crons.js";
 import type * as deliver from "../deliver.js";
-import type * as discover from "../discover.js";
 import type * as drafting from "../drafting.js";
 import type * as evaluate from "../evaluate.js";
 import type * as feasibility from "../feasibility.js";
@@ -43,7 +42,6 @@ declare const fullApi: ApiFromModules<{
   crawl: typeof crawl;
   crons: typeof crons;
   deliver: typeof deliver;
-  discover: typeof discover;
   drafting: typeof drafting;
   evaluate: typeof evaluate;
   feasibility: typeof feasibility;

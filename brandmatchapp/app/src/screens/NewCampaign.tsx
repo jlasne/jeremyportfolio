@@ -14,6 +14,7 @@ import { checkSeeds, cleanHandles, seedMismatch } from '../data/seeds'
 import { createCampaign } from '../data/store'
 import { compact } from '../lib/format'
 import { navigate } from '../lib/router'
+import { Sentences } from '../components/Sentences'
 
 // Campaign creation, in two questions.
 //
@@ -309,16 +310,9 @@ function ProposalStep({
       </div>
 
       <div className="card gate-card">
-        <h2>3. Fit score</h2>
+        <h2>3. Brand fit</h2>
         <p className="gate-lede">{proposal.summaries.gate3}</p>
-        <ul className="rules stacked">
-          {proposal.criteria.map((c) => (
-            <li key={c.id}>
-              <b>{c.label}</b>
-              {c.guide && <small className="muted">{c.guide}</small>}
-            </li>
-          ))}
-        </ul>
+        <Sentences list={proposal.criteria} onChange={(criteria) => onProposal({ ...proposal, criteria })} />
         <div className="from-lib">
           <span className="faint">Starting point: <b>{library.name}</b></span>
           <button type="button" className="btn small quiet" onClick={() => setSwitching(!switching)}>

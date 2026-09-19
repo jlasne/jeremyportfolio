@@ -13,7 +13,7 @@ export interface GateTemplate {
   name: string
   when: string
   knockouts: { id: string; question: string; why?: string; pass?: string; fail?: string; enabled?: boolean }[]
-  criteria: { id: string; label: string; guide?: string }[]
+  criteria: { id: string; text: string }[]
   passScore: number
   defaults: {
     followersMin: number
@@ -36,13 +36,13 @@ export const TEMPLATES: GateTemplate[] = [
       { id: 'k_person', question: 'Is this a real person rather than a theme page?', why: 'A theme page has no method and nobody to sign.' , pass: 'A named human, face or voice on the account, speaks as themselves.', fail: 'Aggregator, quote page, repost account, no named owner.' },
     ],
     criteria: [
-      { id: 'c_sells', label: 'Sells a product today', guide: 'A paid programme, coaching or course, priced in public.' },
-      { id: 'c_stakes', label: 'The topic carries real stakes', guide: 'Money, body or career. Something the audience cannot shrug off.' },
-      { id: 'c_method', label: 'Has a named method', guide: 'The method has a name and they repeat it.' },
-      { id: 'c_demand', label: 'Demand shows in the comments', guide: 'People ask how to buy or where to start.' },
-      { id: 'c_proof', label: 'Measurable progress in the posts', guide: 'Client numbers, before and after, with dates.' },
-      { id: 'c_stable', label: 'Over two years old, stable or growing', guide: 'No long gap, and the reach is not sliding.' },
-      { id: 'c_person', label: 'The audience follows the person', guide: 'Face on camera, first person, replies in the comments.' },
+      { id: 'c_sells', text: 'They sell a paid programme, coaching or course today, at a price shown in public.' },
+      { id: 'c_stakes', text: 'Their topic carries real stakes: money, body or career.' },
+      { id: 'c_method', text: 'They teach a method with a name, and they repeat it.' },
+      { id: 'c_demand', text: 'People in the comments ask how to buy or where to start.' },
+      { id: 'c_proof', text: 'Their posts show measurable client progress, with dates.' },
+      { id: 'c_stable', text: 'The account is over two years old and its reach is stable or growing.' },
+      { id: 'c_person', text: 'The audience follows the person: face on camera, first person, replies in the comments.' },
     ],
     passScore: 9,
     defaults: { followersMin: 15_000, followersMax: 400_000, lastPostWithinDays: 14, postsPerMonthMin: 8, viewsShare: 0.5 },
@@ -58,13 +58,13 @@ export const TEMPLATES: GateTemplate[] = [
       { id: 'k_person', question: 'Is this a real person rather than a theme page?' , pass: 'A named human, face or voice on the account, speaks as themselves.', fail: 'Aggregator, quote page, repost account, no named owner.' },
     ],
     criteria: [
-      { id: 'c_revenue', label: 'Sells something today', guide: 'A paid offer at a public price, so there is money to spend.' },
-      { id: 'c_pain', label: 'The problem you solve is visible', guide: 'They show it, complain about it, or work around it in public.' },
-      { id: 'c_solo', label: 'Runs the business themselves', guide: 'No agency or manager standing between you and them.' },
-      { id: 'c_replies', label: 'Replies to people', guide: 'Answers comments and questions. It predicts they answer you.' },
-      { id: 'c_tools', label: 'Already pays for tools', guide: 'Links to a stack you can plug into or replace.' },
-      { id: 'c_fit', label: 'Audience size fits your price', guide: 'Big enough to afford you, small enough to still need you.' },
-      { id: 'c_growing', label: 'Growing, not coasting', guide: 'Reach and cadence going up over the last year.' },
+      { id: 'c_revenue', text: 'They sell something today: a paid offer at a public price.' },
+      { id: 'c_pain', text: 'The problem you solve is visible: they show it, complain about it or work around it in public.' },
+      { id: 'c_solo', text: 'They run the business themselves, with no agency or manager in between.' },
+      { id: 'c_replies', text: 'They answer comments and questions.' },
+      { id: 'c_tools', text: 'They already pay for tools, and link to them from the bio.' },
+      { id: 'c_fit', text: 'Their audience is big enough to afford you and small enough to still need you.' },
+      { id: 'c_growing', text: 'Their reach and posting rhythm went up over the last year.' },
     ],
     passScore: 9,
     defaults: { followersMin: 15_000, followersMax: 400_000, lastPostWithinDays: 14, postsPerMonthMin: 8, viewsShare: 0.5 },
@@ -80,13 +80,13 @@ export const TEMPLATES: GateTemplate[] = [
       { id: 'k_person', question: 'Is this a real person rather than a theme page?' , pass: 'A named human, face or voice on the account, speaks as themselves.', fail: 'Aggregator, quote page, repost account, no named owner.' },
     ],
     criteria: [
-      { id: 'c_paid_posts', label: 'Already runs paid partnerships', guide: 'Tagged partnerships, a rate card, or a media kit.' },
-      { id: 'c_buyer', label: 'The audience is your buyer', guide: 'Right country, right spending power, not only the right topic.' },
-      { id: 'c_steady', label: 'Reach is steady, not one spike', guide: 'Median views hold across the last twelve posts.' },
-      { id: 'c_trust', label: 'Comments show trust', guide: 'Questions and thanks, not only applause and emoji.' },
-      { id: 'c_sells_well', label: 'Recommends without losing the room', guide: 'Past promotions kept the engagement up.' },
-      { id: 'c_safe', label: 'Brand safe', guide: 'A tone and a set of topics you can stand next to.' },
-      { id: 'c_budget', label: 'Rates likely inside your budget', guide: 'Size and category suggest a price you can pay.' },
+      { id: 'c_paid_posts', text: 'They already run paid partnerships: tagged posts, a rate card or a media kit.' },
+      { id: 'c_buyer', text: 'Their audience is your buyer: right country and right spending power, not only the right topic.' },
+      { id: 'c_steady', text: 'Their reach is steady across the last twelve posts, with no single spike.' },
+      { id: 'c_trust', text: 'The comments show trust: questions and thanks, not only applause.' },
+      { id: 'c_sells_well', text: 'Their past promotions kept the engagement up.' },
+      { id: 'c_safe', text: 'Their tone and topics are ones you can stand next to.' },
+      { id: 'c_budget', text: 'Their size and category suggest a rate inside your budget.' },
     ],
     passScore: 9,
     defaults: { followersMin: 20_000, followersMax: 1_000_000, lastPostWithinDays: 10, postsPerMonthMin: 12, viewsShare: 0.6 },
@@ -113,13 +113,10 @@ export function withinTemplate(
   const ids = (rows: any[] | undefined) => (Array.isArray(rows) ? rows.map((r) => String(r?.id ?? '')) : [])
   const same = (a: string[], b: string[]) => a.length === b.length && a.every((v, i) => v === b[i])
 
-  const criteria = same(ids(draft.criteria), lib.criteria.map((c) => c.id))
-    ? draft.criteria!.map((c, i) => ({
-        id: lib.criteria[i].id,
-        label: String(c.label ?? lib.criteria[i].label),
-        guide: String(c.guide ?? lib.criteria[i].guide ?? ''),
-      }))
-    : lib.criteria
+  // The sentences are free. The model rewrites the library's for this offer
+  // and may write its own; the only rule is one to twelve of them, each a
+  // sentence. When nothing usable comes back, the library stands in.
+  const criteria = cleanSentences(draft.criteria) ?? lib.criteria
 
   // The model may add one knockout, never drop the library's own.
   const asked = ids(draft.knockouts)
@@ -234,7 +231,29 @@ export function enforceLocks(templateId: string, knockouts: any[]): any[] {
 
 /** Under 5 out of 14 the score stops deciding anything. */
 export function settleScore(passScore: number, criteriaCount: number): number {
-  const max = criteriaCount * 2
-  if (!Number.isFinite(passScore)) return Math.min(9, max)
-  return Math.min(max, Math.max(5, Math.round(passScore)))
+  const max = Math.max(2, criteriaCount * 2)
+  if (!Number.isFinite(passScore)) return Math.max(1, Math.round(max * 0.64))
+  return Math.min(max, Math.max(1, Math.round(passScore)))
+}
+
+export const SENTENCES_MAX = 12
+
+/**
+ * The client's sentences, made safe: one to twelve, each a line of text with
+ * an id that is a plain word. Null when nothing usable was sent.
+ */
+export function cleanSentences(rows: unknown): { id: string; text: string }[] | null {
+  if (!Array.isArray(rows)) return null
+  const seen = new Set<string>()
+  const out: { id: string; text: string }[] = []
+  for (const row of rows) {
+    const text = String((row as any)?.text ?? (row as any)?.label ?? '').replace(/\s+/g, ' ').trim().slice(0, 240)
+    if (!text) continue
+    let id = String((row as any)?.id ?? '').replace(/[^a-z0-9_]/gi, '').slice(0, 40) || `c_${out.length + 1}`
+    while (seen.has(id)) id = `${id}_`
+    seen.add(id)
+    out.push({ id, text })
+    if (out.length >= SENTENCES_MAX) break
+  }
+  return out.length ? out : null
 }

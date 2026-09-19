@@ -3,11 +3,12 @@ import type { Criterion, GateSet, HardRules, Knockout, Niche, PresetId } from '.
 import { getCampaign, getGateSet } from '../data'
 import { useStore } from '../data/hooks'
 import { Info } from '../components/Info'
+import { Sentences } from '../components/Sentences'
 import { saveGateSet, setNiches } from '../data/store'
 import { slug } from '../data/niches'
 import { isLocked, LOCK_REASON, template } from '../data/templates'
 import {
-  bandOf, DIALS, dialByKey, fromPosition, hardness, preset, presetOf, PRESET_LIST, settle, toPosition,
+  bandOf, DIALS, dialByKey, fromPosition, hardness, perNicheKeys, pointsFor, preset, presetOf, PRESET_LIST, settle, shareOf, toPosition,
   type Dial, type DialKey,
 } from '../data/tuning'
 import { compact } from '../lib/format'
@@ -31,14 +32,49 @@ interface Draft {
   knockouts: Knockout[]
   criteria: Criterion[]
   passScore: number
+  /** The niches ride in the draft too: a dial moving under them moves both. */
+  niches: Niche[]
 }
 
-function draftOf(gates: GateSet): Draft {
+function draftOf(gates: GateSet, niches: Niche[]): Draft {
   return {
     hard: { ...gates.hard },
     knockouts: gates.knockouts.map((k) => ({ ...k })),
     criteria: gates.criteria.map((c) => ({ ...c })),
     passScore: gates.passScore,
+    niches: niches.map((n) => ({ ...n, hard: n.hard ? { ...n.hard } : undefined })),
+  }
+}
+
+/**
+ * A dial goes under the niches: every niche gets the campaign's number to
+ * start from, and the campaign stops carrying it.
+ */
+function toPerNiche(d: Draft, key: DialKey): Draft {
+  const value = d.hard[key]
+  if (typeof value !== 'number') return d
+  const hard = { ...d.hard }
+  delete hard[key]
+  return {
+    ...d,
+    hard,
+    niches: d.niches.map((n) => ({ ...n, hard: { ...(n.hard ?? {}), [key]: value } })),
+  }
+}
+
+/** A dial comes back to the campaign, at the middle of what the niches had. */
+function toCampaign(d: Draft, key: DialKey): Draft {
+  const values = d.niches.map((n) => n.hard?.[key]).filter((v): v is number => typeof v === 'number').sort((a, b) => a - b)
+  const middle = values.length ? values[Math.floor(values.length / 2)] : undefined
+  return {
+    ...d,
+    hard: middle === undefined ? d.hard : settle({ ...d.hard, [key]: middle }),
+    niches: d.niches.map((n) => {
+      if (!n.hard) return n
+      const rest = { ...n.hard }
+      delete rest[key]
+      return { ...n, hard: Object.keys(rest).length ? rest : undefined }
+    }),
   }
 }
 
@@ -99,7 +135,7 @@ function Hardness({ score }: { score: number }) {
 }
 
 /** The first check in one sentence, rewritten on every drag. */
-function gateOneLine(hard: HardRules): string {
+function gateOneLine(hard: HardRules, perNiche: DialKey[]): string {
   const reach = [
     hard.medianViewsMin ? `${compact(hard.medianViewsMin)} views` : null,
     hard.medianCommentsMin ? `${hard.medianCommentsMin} comments` : null,
@@ -110,7 +146,11 @@ function gateOneLine(hard: HardRules): string {
     reach.length ? `around ${reach.join(' and ')} on a typical post` : null,
     hard.lastPostWithinDays ? `active in the last ${hard.lastPostWithinDays} days` : null,
   ].filter(Boolean)
-  return `We keep people with ${bits.join(', ')}.`
+  const names = perNiche.map((k) => dialByKey.get(k)!.label.replace(/,.*$/, '').toLowerCase())
+  const under = names.length
+    ? ` ${(names.join(' and ').charAt(0).toUpperCase() + names.join(' and ').slice(1))} ${names.length === 1 ? 'is' : 'are'} set under each niche.`
+    : ''
+  return `We keep people with ${bits.join(', ')}.${under}`.replace('with .', 'with the numbers below.')
 }
 
 function cadence(perMonth: number): string {
@@ -125,37 +165,47 @@ function cadence(perMonth: number): string {
 // numbers are, because what counts as big is not the same in every slice.
 // ---------------------------------------------------------------------------
 
-const OWN: DialKey[] = ['followersMin', 'medianViewsMin', 'medianCommentsMin', 'postsPerMonthMin']
-
-function Niches({ campaignId, niches, hard }: { campaignId: string; niches: Niche[]; hard: HardRules }) {
-  const [openId, setOpenId] = useState<string | null>(null)
+function Niches({ niches, hard, perNiche, onChange }: {
+  niches: Niche[]
+  hard: HardRules
+  perNiche: DialKey[]
+  onChange: (next: Niche[]) => void
+}) {
   const [adding, setAdding] = useState('')
   const on = niches.filter((n) => n.enabled).length
 
-  const write = (next: Niche[]) => setNiches(campaignId, next)
   const patch = (id: string, change: Partial<Niche>) =>
-    write(niches.map((n) => (n.id === id ? { ...n, ...change } : n)))
+    onChange(niches.map((n) => (n.id === id ? { ...n, ...change } : n)))
 
   const add = () => {
     const label = adding.trim()
     if (!label) return
     const id = slug(label)
     if (niches.some((n) => n.id === id)) return
-    write([...niches, { id, label, enabled: true }])
+    // A new niche takes the middle of what the others carry for each dial that
+    // lives under the niches, so it starts where the campaign already is.
+    const own: Partial<HardRules> = {}
+    for (const key of perNiche) {
+      const values = niches.map((n) => n.hard?.[key]).filter((v): v is number => typeof v === 'number').sort((x, y) => x - y)
+      if (values.length) own[key] = values[Math.floor(values.length / 2)]
+    }
+    onChange([...niches, { id, label, enabled: true, hard: Object.keys(own).length ? own : undefined }])
     setAdding('')
   }
 
   return (
     <div className="card gate-card">
-      <h2>2. Niches</h2>
+      <h2>
+        2. Niches
+        <Info text="The slices of your target we search in. Switching one off stops us looking there. A number set per niche appears here, under each one, and nowhere else." />
+      </h2>
       <p className="gate-lede">
-        Looking in {on} of {niches.length} niches. Anyone too small for every one of them is dropped
-        before we look closer.
+        Looking in {on} of {niches.length} niches. Anyone too small for every one of them is dropped before we look closer.
       </p>
       <ul className="switches">
         {niches.map((n) => {
           const own = n.hard ?? {}
-          const owned = Object.keys(own).length
+          const merged = { ...hard, ...own }
           return (
             <li key={n.id} className={n.enabled ? undefined : 'off'}>
               <button
@@ -177,58 +227,29 @@ function Niches({ campaignId, niches, hard }: { campaignId: string; niches: Nich
                   />
                   <button
                     type="button"
-                    className="btn small quiet"
-                    onClick={() => setOpenId(openId === n.id ? null : n.id)}
-                  >
-                    {owned ? `${owned} of its own numbers` : 'Own numbers'}
-                  </button>
-                  <button
-                    type="button"
                     className="btn small quiet drop"
                     aria-label={`Remove ${n.label}`}
-                    onClick={() => write(niches.filter((x) => x.id !== n.id))}
+                    onClick={() => onChange(niches.filter((x) => x.id !== n.id))}
                   >
                     ✕
                   </button>
                 </b>
-                {openId === n.id && (
+                {perNiche.length > 0 && n.enabled && (
                   <div className="niche-dials">
-                    <p className="hint">
-                      Anything you leave alone follows the campaign numbers above. A small account in the right niche
-                      can be worth more than a big one in the wrong niche.
-                    </p>
-                    {OWN.map((key) => {
+                    {perNiche.map((key) => {
                       const dial = dialByKey.get(key)!
-                      const merged = { ...hard, ...own }
-                      const value = (own[key] as number) ?? (hard[key] as number) ?? dial.range(merged).min
+                      const value = (own[key] as number) ?? dial.range(merged).min
                       return (
-                        <div key={key} className={own[key] === undefined ? 'inherited' : undefined}>
-                          <Slider
-                            dial={dial}
-                            hard={merged}
-                            value={value}
-                            onChange={(v) => {
-                              // Settle against the merged rules so a niche's
-                              // numbers respect the same limits, then keep only
-                              // what this niche actually overrides.
-                              const settled = settle({ ...merged, [key]: v })
-                              patch(n.id, { hard: { ...own, [key]: settled[key] as number } })
-                            }}
-                          />
-                          {own[key] !== undefined && (
-                            <button
-                              type="button"
-                              className="btn small quiet"
-                              onClick={() => {
-                                const rest = { ...own }
-                                delete rest[key]
-                                patch(n.id, { hard: Object.keys(rest).length ? rest : undefined })
-                              }}
-                            >
-                              Back to the campaign number
-                            </button>
-                          )}
-                        </div>
+                        <Slider
+                          key={key}
+                          dial={dial}
+                          hard={merged}
+                          value={value}
+                          onChange={(v) => {
+                            const settled = settle({ ...merged, [key]: v })
+                            patch(n.id, { hard: { ...own, [key]: settled[key] as number } })
+                          }}
+                        />
                       )
                     })}
                   </div>
@@ -261,7 +282,7 @@ export function Gates({ campaignId }: { campaignId: string }) {
   const [draft, setDraft] = useState<Draft | null>(null)
   const [saved, setSaved] = useState(false)
 
-  const live = gates ? draft ?? draftOf(gates) : null
+  const live = gates && campaign ? draft ?? draftOf(gates, campaign.extracted.niches) : null
   const lib = gates ? template(gates.templateId) : null
 
   const score = useMemo(
@@ -271,7 +292,8 @@ export function Gates({ campaignId }: { campaignId: string }) {
   if (!gates || !live || !lib || !campaign) return null
 
   const at: PresetId = presetOf(live.hard, live.passScore, lib)
-  const dirty = !same(live, draftOf(gates))
+  const dirty = !same(live, draftOf(gates, campaign.extracted.niches))
+  const perNiche = perNicheKeys(live.hard, live.niches)
   const optional = live.knockouts.filter((k) => !isLocked(lib.id, k.id))
   const asking = live.knockouts.filter((k) => k.enabled !== false).length
 
@@ -289,7 +311,9 @@ export function Gates({ campaignId }: { campaignId: string }) {
     set({ hard: tuned.hard, passScore: tuned.passScore })
   }
   const save = () => {
-    saveGateSet(campaignId, { ...live, preset: at }, 'mem_1')
+    const { niches, ...rules } = live
+    if (JSON.stringify(niches) !== JSON.stringify(campaign.extracted.niches)) setNiches(campaignId, niches)
+    saveGateSet(campaignId, { ...rules, preset: at }, 'mem_1')
     setDraft(null)
     setSaved(true)
   }
@@ -321,21 +345,39 @@ export function Gates({ campaignId }: { campaignId: string }) {
           1. Size and activity
           <Info text="Every number is counted from their last 12 posts. These are your campaign numbers. Any niche below can use its own instead." />
         </h2>
-        <p className="gate-lede">{gateOneLine(live.hard)}</p>
+        <p className="gate-lede">{gateOneLine(live.hard, perNiche)}</p>
         <div className="dials">
-          {DIALS.map((dial) => (
-            <Slider
-              key={dial.key}
-              dial={dial}
-              hard={live.hard}
-              value={(live.hard[dial.key] as number) ?? dial.range(live.hard).min}
-              onChange={(v) => setDial(dial.key, v)}
-            />
-          ))}
+          {DIALS.map((dial) =>
+            perNiche.includes(dial.key) ? (
+              <div key={dial.key} className="dial elsewhere">
+                <div className="dial-head">
+                  <span>{dial.label}</span>
+                  <b>Set under each niche</b>
+                </div>
+                <button type="button" className="btn small quiet" onClick={() => set(toCampaign(live, dial.key))}>
+                  Same for every niche
+                </button>
+              </div>
+            ) : (
+              <div key={dial.key} className="dial-wrap">
+                <Slider
+                  dial={dial}
+                  hard={live.hard}
+                  value={(live.hard[dial.key] as number) ?? dial.range(live.hard).min}
+                  onChange={(v) => setDial(dial.key, v)}
+                />
+                {live.niches.length > 1 && (
+                  <button type="button" className="btn small quiet per-niche" onClick={() => set(toPerNiche(live, dial.key))}>
+                    Per niche
+                  </button>
+                )}
+              </div>
+            ),
+          )}
         </div>
       </div>
 
-      <Niches campaignId={campaignId} niches={campaign.extracted.niches} hard={live.hard} />
+      <Niches niches={live.niches} hard={live.hard} perNiche={perNiche} onChange={(niches) => set({ niches })} />
 
       <div className="card gate-card">
         <h2>3. Deal breakers</h2>
@@ -384,54 +426,43 @@ export function Gates({ campaignId }: { campaignId: string }) {
       </div>
 
       <div className="card gate-card">
-        <h2>4. Fit score</h2>
+        <h2>
+          4. Brand fit
+          <Info text="Describe the people you want, one sentence a line. For each person we answer every sentence: true, partly true, or false. That is their brand fit. Someone reaches you from the share you set here." />
+        </h2>
         <p className="gate-lede">
-          Seven things we check, each fully true, partly true or false. Someone reaches you from{' '}
-          <b className="num">{Math.round((live.passScore / (live.criteria.length * 2)) * 100)}%</b> brand fit.
+          {live.criteria.length} {live.criteria.length === 1 ? 'sentence' : 'sentences'} about who you want. Someone reaches you from{' '}
+          <b className="num">{shareOf(live.passScore, live.criteria.length)}%</b> brand fit.
         </p>
+        <Sentences
+          list={live.criteria}
+          onChange={(next) => {
+            // The share stays where it was when a sentence comes or goes; only
+            // the points behind it move.
+            const share = shareOf(live.passScore, live.criteria.length) / 100
+            const kept = next.filter((c) => c.text.trim() || next.length === 1)
+            set({ criteria: kept.length ? kept : next.slice(0, 1), passScore: pointsFor(share, Math.max(1, kept.length || 1)) })
+          }}
+        />
         <div className="dial">
           <div className="dial-head">
             <span>Qualified from</span>
-            <b className="num">{Math.round((live.passScore / (live.criteria.length * 2)) * 100)}% brand fit</b>
+            <b className="num">{shareOf(live.passScore, live.criteria.length)}% brand fit</b>
           </div>
           <input
             type="range"
-            min={5}
-            max={live.criteria.length * 2}
-            value={live.passScore}
-            aria-label="Qualifying score"
-            onChange={(e) => set({ passScore: Number(e.target.value) })}
+            min={10}
+            max={100}
+            value={shareOf(live.passScore, live.criteria.length)}
+            aria-label="Brand fit needed to qualify"
+            onChange={(e) => set({ passScore: pointsFor(Number(e.target.value) / 100, live.criteria.length) })}
           />
           <div className="dial-foot">
-            <span>{Math.round((5 / (live.criteria.length * 2)) * 100)}%</span>
-            <span className="dial-limit">Under that, the score stops filtering anything.</span>
+            <span>10%</span>
+            <span className="dial-limit">Lower means more people, and more sorting for you.</span>
             <span>100%</span>
           </div>
         </div>
-        <ul className="criteria-edit">
-          {live.criteria.map((c, i) => (
-            <li key={c.id}>
-              <input
-                className="input"
-                value={c.label}
-                aria-label={`Criterion ${i + 1}`}
-                onChange={(e) =>
-                  set({ criteria: live.criteria.map((x) => (x.id === c.id ? { ...x, label: e.target.value } : x)) })
-                }
-              />
-              <input
-                className="input guide"
-                value={c.guide ?? ''}
-                placeholder="What a 2 looks like"
-                aria-label={`What scores 2 on ${c.label}`}
-                onChange={(e) =>
-                  set({ criteria: live.criteria.map((x) => (x.id === c.id ? { ...x, guide: e.target.value } : x)) })
-                }
-              />
-            </li>
-          ))}
-        </ul>
-        <p className="hint">Always seven. Change the wording to match what you sell.</p>
       </div>
 
       <div className="save-bar">

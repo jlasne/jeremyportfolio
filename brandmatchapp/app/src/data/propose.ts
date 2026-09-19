@@ -256,7 +256,7 @@ export function propose(brief: CampaignBrief, answers: Answers = {}): Proposal {
     summaries: {
       gate1: `We keep people with ${compact(followersMin)} to ${compact(followersMax)} followers, who posted in the last ${d.lastPostWithinDays} days and get about ${compact(medianViewsMin)} views on a typical post.`,
       gate2: `${count(lib.knockouts.length)} yes or no questions about each person. One no and we drop them.`,
-      gate3: `Seven things we rate out of 2. Someone needs ${lib.passScore} out of ${lib.criteria.length * 2} to reach you.`,
+      gate3: `Seven sentences about who you want. Each one is true, partly true or false about a person, and someone reaches you from ${Math.round((lib.passScore / (lib.criteria.length * 2)) * 100)}% brand fit. Change every word.`,
     },
   }
 }
@@ -273,7 +273,7 @@ export function switchTemplate(proposal: Proposal, id: TemplateId): Proposal {
     summaries: {
       ...proposal.summaries,
       gate2: `${count(lib.knockouts.length)} yes or no questions about each person. One no and we drop them.`,
-      gate3: `Seven things we rate out of 2. Someone needs ${lib.passScore} out of ${lib.criteria.length * 2} to reach you.`,
+      gate3: `Seven sentences about who you want. Each one is true, partly true or false about a person, and someone reaches you from ${Math.round((lib.passScore / (lib.criteria.length * 2)) * 100)}% brand fit. Change every word.`,
     },
   }
 }

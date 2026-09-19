@@ -7,7 +7,7 @@ import { acceptVolume, addSeeds, openDoor, restoreVersion, runFeasibility } from
 import { cleanHandles } from '../data/seeds'
 import { Info } from '../components/Info'
 import { absolute } from '../lib/format'
-import { DIALS } from '../data/tuning'
+import { DIALS, perNicheKeys, type DialKey } from '../data/tuning'
 
 // Zone 5. It answers three questions, in order: how many a day, for how long,
 // and what if.
@@ -322,7 +322,7 @@ function Doors({ list, dry, campaignId, seeds, onOpen }: {
 // Block four, the versions side by side
 // ---------------------------------------------------------------------------
 
-function Versions({ rows, campaignId, max }: { rows: VersionRow[]; campaignId: string; max: number }) {
+function Versions({ rows, campaignId, max, perNiche }: { rows: VersionRow[]; campaignId: string; max: number; perNiche: DialKey[] }) {
   if (rows.length < 2) return null
   const shown = DIALS.filter((d) => rows.some((r) => typeof r.gates.hard[d.key] === 'number'))
   return (
@@ -350,7 +350,11 @@ function Versions({ rows, campaignId, max }: { rows: VersionRow[]; campaignId: s
                 <th>{d.label}</th>
                 {rows.map((r) => {
                   const v = r.gates.hard[d.key]
-                  return <td key={r.gates.id} className="num">{typeof v === 'number' ? d.format(v) : 'not set'}</td>
+                  return (
+                    <td key={r.gates.id} className="num">
+                      {typeof v === 'number' ? d.format(v) : r.current && perNiche.includes(d.key) ? 'per niche' : 'not set'}
+                    </td>
+                  )
                 })}
               </tr>
             ))}
@@ -476,7 +480,7 @@ export function Feasibility({ campaignId }: { campaignId: string }) {
         />
       )}
 
-      <Versions rows={versions} campaignId={campaignId} max={max} />
+      <Versions rows={versions} campaignId={campaignId} max={max} perNiche={perNicheKeys(gates.hard, niches)} />
     </>
   )
 }

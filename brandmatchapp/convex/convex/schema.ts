@@ -11,7 +11,7 @@ import { v } from 'convex/values'
 //    reach a screen if someone types it in.
 //
 // 2. A profile becomes a lead by passing three gates: measured thresholds,
-//    binary knockouts, then a 0 to 2 score on seven criteria. The gates belong
+//    binary knockouts, then a 0 to 2 answer per sentence about the ideal client. The gates belong
 //    to the campaign and are versioned, so a lead delivered on Monday can be
 //    explained against the rules that were live on Monday.
 //
@@ -50,12 +50,14 @@ const knockout = v.object({
   enabled: v.optional(v.boolean()),
 })
 
-/** Gate 3. Seven of these, each worth 0, 1 or 2. */
+/**
+ * Gate 3. One sentence about the ideal client, in the client's own words.
+ * The model answers each one true, partly or false: 2, 1 or 0. Between one
+ * and twelve of them, and the score is read as a share of the ceiling.
+ */
 const criterion = v.object({
   id: v.string(),
-  label: v.string(),
-  /** What a 2 looks like, in one line. Steers the model and the human editor. */
-  guide: v.optional(v.string()),
+  text: v.string(),
 })
 
 export default defineSchema({

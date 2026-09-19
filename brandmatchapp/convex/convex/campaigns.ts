@@ -1,7 +1,7 @@
 import { internalMutation, internalQuery } from './_generated/server'
 import { v } from 'convex/values'
 import type { Doc } from './_generated/dataModel'
-import { enforceLocks, settle, settleScore, template } from './templates'
+import { cleanSentences, enforceLocks, settle, settleScore, template } from './templates'
 import { loosens, type Niche } from './gates'
 
 
@@ -215,16 +215,11 @@ export const saveGates = internalMutation({
 
     // Bounded personalisation is enforced here and not only on screen. A dial
     // outside its limits comes back inside, a locked knockout comes back on,
-    // and the seven criteria stay seven.
+    // and the sentences are one to twelve lines of plain text.
     const templateId = args.templateId ?? existing[0]?.templateId ?? 'sell_to_creators'
     const lib = template(templateId)
-    const criteria = Array.isArray(args.criteria) && args.criteria.length === lib.criteria.length
-      ? args.criteria.map((c: any, i: number) => ({
-          id: lib.criteria[i].id,
-          label: String(c?.label ?? lib.criteria[i].label),
-          guide: c?.guide ? String(c.guide) : lib.criteria[i].guide,
-        }))
-      : lib.criteria
+    const criteria =
+      cleanSentences(args.criteria) ?? existing.find((g) => g._id === campaign.gateSetId)?.criteria ?? lib.criteria
 
     const hard = settle(args.hard ?? {})
     const passScore = settleScore(args.passScore, criteria.length)

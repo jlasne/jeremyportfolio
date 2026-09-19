@@ -276,7 +276,8 @@ function Panel({ row }: { row: LeadRow }) {
           const criterion = gates?.criteria.find((k) => k.id === c.id)
           return (
             <li key={c.id} className={c.score === 2 ? 'yes' : c.score === 1 ? 'half' : 'no'}>
-              <b>{criterion?.label ?? c.id}</b> <span className="num">{c.score} of 2</span>. {c.note}
+              <b>{c.score === 2 ? 'True' : c.score === 1 ? 'Partly' : 'False'}</b>: {(criterion?.text ?? c.id).replace(/[.]+$/, '')}.
+              {c.note ? <span className="muted"> {c.note}</span> : null}
             </li>
           )
         })}
