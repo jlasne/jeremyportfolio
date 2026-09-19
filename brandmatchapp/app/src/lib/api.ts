@@ -72,25 +72,26 @@ export function hasKey(): boolean {
 }
 
 /**
- * Looking at the sample while signed in. An account with one lead has nothing
- * for its charts to show, and a client deciding whether to keep paying wants
- * to see the screens filled. The flag swaps the data and nothing else: the
- * key stays, and one click brings the account back.
+ * The demo: the sample, exactly as a client with a full account sees it.
+ * No bar, no way back, nothing that says it is a sample, because the point
+ * is to look at the product and not at a notice. The flag lives in this tab
+ * alone, so a tab opened on #/demo stays the demo and a new tab is the
+ * account again, key kept.
  */
-const PREVIEW = 'brandmatch.preview'
+const DEMO = 'brandmatch.demo'
 
-export function isPreview(): boolean {
+export function isDemo(): boolean {
   try {
-    return hasKey() && window.localStorage.getItem(PREVIEW) === '1'
+    return window.sessionStorage.getItem(DEMO) === '1'
   } catch {
     return false
   }
 }
 
-export function setPreview(on: boolean): void {
+export function setDemo(on: boolean): void {
   try {
-    if (on) window.localStorage.setItem(PREVIEW, '1')
-    else window.localStorage.removeItem(PREVIEW)
+    if (on) window.sessionStorage.setItem(DEMO, '1')
+    else window.sessionStorage.removeItem(DEMO)
   } catch {
     /* storage off: the sample is all there is anyway */
   }
@@ -98,7 +99,7 @@ export function setPreview(on: boolean): void {
 
 /** The screens read the account's own data, not the sample. */
 export function isLive(): boolean {
-  return hasKey() && !isPreview()
+  return hasKey() && !isDemo()
 }
 
 async function call<T>(prefix: string, path: string, init: RequestInit = {}): Promise<T> {

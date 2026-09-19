@@ -10,7 +10,7 @@ import { Info } from '../components/Info'
 import { LOST_LABEL, STATUS_LABEL } from '../data/status'
 import { download, toCsv } from '../lib/csv'
 import { money } from '../lib/format'
-import { hasKey, setPreview } from '../lib/api'
+import { hasKey } from '../lib/api'
 
 // Zone 1. What the client shows their boss.
 //
@@ -172,20 +172,15 @@ function Starting({ leads, total, campaigns, days }: {
 }
 
 /**
- * The way to see every screen with something on it. The account keeps its
- * key and its data; only what the screens read changes, and a bar at the top
- * says so until the one click back.
+ * The way to see every screen with something on it: the demo, in a new tab,
+ * so this one stays the account.
  */
 function SeeItFilled() {
   if (!hasKey()) return null
   return (
-    <button
-      type="button"
-      className="btn quiet"
-      onClick={() => { setPreview(true); window.location.reload() }}
-    >
+    <a className="btn quiet" href="#/demo" target="_blank" rel="noreferrer">
       See it filled with sample data
-    </button>
+    </a>
   )
 }
 

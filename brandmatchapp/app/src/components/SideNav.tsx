@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { deliveredToday, getQuota } from '../data'
 import { useStore } from '../data/hooks'
-import { api, hasKey } from '../lib/api'
+import { api, hasKey, isDemo } from '../lib/api'
 import type { Route } from '../lib/router'
 import { Logo } from './Logo'
 
@@ -66,7 +66,8 @@ function useCollapsed(): [boolean, (v: boolean) => void] {
 function useOwner(): boolean {
   const [owner, setOwner] = useState(false)
   useEffect(() => {
-    if (!hasKey()) return
+    // The demo is a client's view, and a client has no admin entry.
+    if (!hasKey() || isDemo()) return
     api.me().then((m) => setOwner(m.role === 'owner')).catch(() => setOwner(false))
   }, [])
   return owner

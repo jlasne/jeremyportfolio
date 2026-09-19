@@ -1,7 +1,7 @@
 import { useRoute } from './lib/router'
 import { Backdrop } from './components/Backdrop'
 import { SideNav } from './components/SideNav'
-import { isPreview, setPreview } from './lib/api'
+import { setDemo } from './lib/api'
 import { useEffect } from 'react'
 import { Account } from './screens/Account'
 import { Admin } from './screens/Admin'
@@ -27,18 +27,6 @@ export function App() {
       <Backdrop />
       <SideNav route={route} />
       <main className="main">
-        {isPreview() && (
-          <div className="preview-bar" role="status">
-            <span>Sample data, so you can see every screen filled. Nothing here is yours.</span>
-            <button
-              type="button"
-              className="btn small"
-              onClick={() => { setPreview(false); window.location.reload() }}
-            >
-              Back to your account
-            </button>
-          </div>
-        )}
         {route.name === 'dashboard' && <Dashboard />}
         {route.name === 'leads' && <Leads leadId={route.leadId} query={route.query} />}
         {route.name === 'campaigns' && <Campaigns />}
@@ -52,10 +40,10 @@ export function App() {
   )
 }
 
-/** #/demo: the sample, filled. One address to send anyone who wants to see it. */
+/** #/demo: the sample, filled, in this tab. One address to send anyone who wants to see it. */
 function Demo() {
   useEffect(() => {
-    setPreview(true)
+    setDemo(true)
     window.location.replace('#/dashboard')
     window.location.reload()
   }, [])

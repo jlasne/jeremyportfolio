@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { api, hasKey, ops, setKey, setPreview, type OpsCampaign, type OpsDay, type OpsOverview, type OpsRun } from '../lib/api'
+import { api, hasKey, isDemo, ops, setKey, setDemo, type OpsCampaign, type OpsDay, type OpsOverview, type OpsRun } from '../lib/api'
 import { analysisBudgetPerDay, analysedToday, crawlRuns, opsCampaigns, opsDays } from '../mock/ops'
 import { money, relative } from '../lib/format'
 import { Info } from '../components/Info'
@@ -92,7 +92,8 @@ export function Admin() {
     ops.runs().then((r) => setRuns(r.runs)).catch(() => { /* stay on the sample */ })
   }, [])
 
-  if (!hasKey() || error) return <AdminDoor reason={error} />
+  // The demo is a client's view, and a client has no admin.
+  if (!hasKey() || isDemo() || error) return <AdminDoor reason={error} />
 
   const spentCents = runs.reduce((sum, r) => sum + r.costCents, 0)
   const qualified = runs.reduce((sum, r) => sum + r.qualified, 0)
@@ -110,7 +111,7 @@ export function Admin() {
         <button
           type="button"
           className="btn small quiet"
-          onClick={() => { setKey(''); setPreview(false); window.location.hash = '#/dashboard'; window.location.reload() }}
+          onClick={() => { setKey(''); setDemo(false); window.location.hash = '#/dashboard'; window.location.reload() }}
         >
           Sign out, back to the sample
         </button>
