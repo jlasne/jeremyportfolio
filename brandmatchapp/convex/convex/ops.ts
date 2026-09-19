@@ -52,7 +52,59 @@ export const overview = internalQuery({
 
     const costCentsPerMonth = rows.reduce((sum, r) => sum + r.costCentsThisPeriod, 0)
     const leads = await ctx.db.query('leads').collect()
+
+    // Each campaign as the operator reads it. Evaluations are read whole and
+    // filtered to thirty days; at this size that is cheaper than an index
+    // nobody else needs, and the day it stops being true is the day to add one.
+    const since = Date.now() - 30 * 86_400_000
+    const evaluations = (await ctx.db.query('evaluations').collect()).filter((e) => e.evaluatedAt >= since)
+    const allCampaigns = await ctx.db.query('campaigns').collect()
+    const byAccount = new Map(accounts.map((a) => [a._id as string, a]))
+    const campaignRows = []
+    for (const c of allCampaigns) {
+      const mine = evaluations.filter((e) => e.campaignId === c._id)
+      const sub = rows.find((r) => r.id === c.accountId)
+      const qualified = mine.filter((e) => e.verdict === 'qualified').length
+      const delivered = leads.filter((l) => l.campaignId === c._id).length
+      const costCents = runs
+        .filter((r) => r.campaignId === c._id && r.startedAt >= since)
+        .reduce((sum, r) => sum + r.costCents, 0)
+      const perDay = c.dailyCap ?? sub?.tier ?? 0
+      const held = Math.max(0, qualified - delivered)
+      campaignRows.push({
+        id: c._id,
+        name: c.name,
+        account: byAccount.get(c.accountId as string)?.name ?? '',
+        status: c.status,
+        perDay,
+        analysed: mine.length,
+        passedSize: mine.filter((e) => e.verdict !== 'hard_fail').length,
+        passedNiche: mine.filter((e) => e.verdict !== 'hard_fail' && e.verdict !== 'off_niche').length,
+        passedBreakers: mine.filter((e) => e.verdict === 'qualified' || e.verdict === 'below_threshold').length,
+        qualified,
+        delivered,
+        costCents,
+        costPerQualifiedCents: qualified ? Math.round(costCents / qualified) : null,
+        held,
+        daysHeld: perDay ? Math.floor(held / perDay) : null,
+      })
+    }
+
+    const days = []
+    for (let back = 13; back >= 0; back--) {
+      const date = new Date(Date.now() - back * 86_400_000).toISOString().slice(0, 10)
+      const mine = runs.filter((r) => new Date(r.startedAt).toISOString().slice(0, 10) === date)
+      days.push({
+        date,
+        analysed: mine.reduce((sum, r) => sum + r.profilesFetched, 0),
+        qualified: mine.reduce((sum, r) => sum + r.qualified, 0),
+        costCents: mine.reduce((sum, r) => sum + r.costCents, 0),
+      })
+    }
+
     return {
+      campaigns: campaignRows,
+      days,
       accounts: rows,
       totals: {
         revenueCentsPerMonth,

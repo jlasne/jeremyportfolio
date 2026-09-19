@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { api, isLive, ops, setKey, type OpsOverview, type OpsRun } from '../lib/api'
-import { analysisBudgetPerDay, analysedToday, crawlRuns } from '../mock/ops'
+import { api, isLive, ops, setKey, type OpsCampaign, type OpsDay, type OpsOverview, type OpsRun } from '../lib/api'
+import { analysisBudgetPerDay, analysedToday, crawlRuns, opsCampaigns, opsDays } from '../mock/ops'
 import { money, relative } from '../lib/format'
+import { Info } from '../components/Info'
 
 // The internal screen, and the only one that reads the ops surface.
 //
@@ -86,6 +87,8 @@ export function Admin() {
 
   const spentCents = runs.reduce((sum, r) => sum + r.costCents, 0)
   const qualified = runs.reduce((sum, r) => sum + r.qualified, 0)
+  const campaigns: OpsCampaign[] = data?.campaigns ?? opsCampaigns
+  const days: OpsDay[] = data?.days ?? opsDays
 
   return (
     <div className="page">
@@ -111,17 +114,93 @@ export function Admin() {
           <span>profiles analysed today</span>
         </div>
         <div className="tile">
-          <b className="num">{analysisBudgetPerDay}</b>
+          <b className="num">{data ? data.accounts.reduce((sum, a) => sum + a.analysisBudgetPerDay, 0) : analysisBudgetPerDay}</b>
           <span>fair use ceiling a day</span>
         </div>
         <div className="tile">
           <b className="num">{money(data ? data.totals.costCentsPerMonth : spentCents, 'USD')}</b>
-          <span>crawl cost</span>
+          <span>crawl cost this month</span>
         </div>
         <div className="tile">
           <b className="num">{data?.totals.marginPct != null ? `${data.totals.marginPct}%` : `${qualified} qualified`}</b>
           <span>{data?.totals.marginPct != null ? 'margin' : 'from these runs'}</span>
         </div>
+      </div>
+
+      <div className="card">
+        <h2>
+          Each campaign, last 30 days
+          <Info text="Analysed is every profile the model or the free check looked at. The three passed columns are the funnel: size and activity, then niche, then deal breakers. Held is qualified people not yet handed over, and the days that buys at the campaign's pace. Cost is the crawl, attributed by campaign." />
+        </h2>
+        <div className="compare-scroll">
+          <table className="compare cockpit">
+            <thead>
+              <tr>
+                <th>Campaign</th>
+                <th>Analysed</th>
+                <th>Passed size</th>
+                <th>Passed niche</th>
+                <th>Passed breakers</th>
+                <th>Qualified</th>
+                <th>Delivered</th>
+                <th>Cost</th>
+                <th>Per qualified</th>
+                <th>Held</th>
+              </tr>
+            </thead>
+            <tbody>
+              {campaigns.map((c) => {
+                const pct = (n: number) => (c.analysed ? ` ${Math.round((n / c.analysed) * 100)}%` : '')
+                const dry = c.daysHeld !== null && c.daysHeld < 3
+                return (
+                  <tr key={c.id} className={c.status === 'live' ? undefined : 'off'}>
+                    <th>
+                      {c.name}
+                      <small>{c.account}, {c.status}, {c.perDay} a day</small>
+                    </th>
+                    <td className="num">{c.analysed}</td>
+                    <td className="num">{c.passedSize}<small>{pct(c.passedSize)}</small></td>
+                    <td className="num">{c.passedNiche}<small>{pct(c.passedNiche)}</small></td>
+                    <td className="num">{c.passedBreakers}<small>{pct(c.passedBreakers)}</small></td>
+                    <td className="num"><b>{c.qualified}</b><small>{pct(c.qualified)}</small></td>
+                    <td className="num">{c.delivered}</td>
+                    <td className="num">{money(c.costCents, 'USD')}</td>
+                    <td className="num">{c.costPerQualifiedCents !== null ? money(c.costPerQualifiedCents, 'USD') : '—'}</td>
+                    <td className={`num${dry ? ' warn' : ''}`}>
+                      {c.held}
+                      <small>{c.daysHeld !== null ? ` ${c.daysHeld} ${c.daysHeld === 1 ? 'day' : 'days'}` : ''}</small>
+                    </td>
+                  </tr>
+                )
+              })}
+              {campaigns.length === 0 && (
+                <tr><td colSpan={10} className="muted left">No campaign yet.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        <p className="hint">Held under three days is a campaign about to run dry under its rules. That is the one to look at first.</p>
+      </div>
+
+      <div className="card">
+        <h2>Day by day, last two weeks</h2>
+        <ul className="ops-days">
+          {days.map((d) => {
+            const top = Math.max(1, ...days.map((x) => x.analysed))
+            return (
+              <li key={d.date} title={`${d.date}: ${d.analysed} analysed, ${d.qualified} qualified, ${money(d.costCents, 'USD')}`}>
+                <span className="ops-bar">
+                  {d.analysed > 0 && <i style={{ height: `${Math.round((d.analysed / top) * 100)}%` }} />}
+                  {d.qualified > 0 && <em style={{ height: `${Math.round((d.qualified / top) * 100)}%` }} />}
+                </span>
+                <b className="num">{d.analysed}</b>
+                <small className="num">{d.qualified} in</small>
+                <small className="num faint">{money(d.costCents, 'USD')}</small>
+              </li>
+            )
+          })}
+        </ul>
+        <p className="hint">Grey is analysed, orange is qualified, and the cost under each day is the crawl for that day.</p>
       </div>
 
       <div className="card">

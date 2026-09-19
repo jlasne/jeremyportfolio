@@ -161,7 +161,37 @@ export interface OpsRun {
   finishedAt: number | null
 }
 
+/** One campaign, as the operator sees it. Cost and analysed volume included. */
+export interface OpsCampaign {
+  id: string
+  name: string
+  account: string
+  status: string
+  perDay: number
+  /** Over the last thirty days. */
+  analysed: number
+  passedSize: number
+  passedNiche: number
+  passedBreakers: number
+  qualified: number
+  delivered: number
+  costCents: number
+  costPerQualifiedCents: number | null
+  /** Found, qualified and not yet handed over. The part of the room we hold. */
+  held: number
+  daysHeld: number | null
+}
+
+export interface OpsDay {
+  date: string
+  analysed: number
+  qualified: number
+  costCents: number
+}
+
 export interface OpsOverview {
+  campaigns: OpsCampaign[]
+  days: OpsDay[]
   accounts: {
     id: string
     name: string
