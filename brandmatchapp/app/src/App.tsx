@@ -44,7 +44,7 @@ export function App() {
 function Demo() {
   useEffect(() => {
     setDemo(true)
-    window.location.replace('#/dashboard')
+    window.location.replace('#/leads')
     window.location.reload()
   }, [])
   return null

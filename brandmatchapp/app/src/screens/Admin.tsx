@@ -111,7 +111,7 @@ export function Admin() {
         <button
           type="button"
           className="btn small quiet"
-          onClick={() => { setKey(''); setDemo(false); window.location.hash = '#/dashboard'; window.location.reload() }}
+          onClick={() => { setKey(''); setDemo(false); window.location.hash = '#/leads'; window.location.reload() }}
         >
           Sign out, back to the sample
         </button>
