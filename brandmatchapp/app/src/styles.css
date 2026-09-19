@@ -2675,8 +2675,8 @@ body { background: var(--paper); }
   border-radius: 50%; color: #fff; font-weight: 700; letter-spacing: 0.02em;
 }
 
-/* who, why, size, fit, action */
-.contact { grid-template-columns: minmax(180px, 1.1fr) minmax(200px, 1.5fr) 96px 62px 210px; }
+/* who, size, fit, action. Four cells, and a line you move past rather than read. */
+.contact { grid-template-columns: minmax(200px, 1fr) 96px 84px 210px; }
 /* The older rule stacks .who in a column. A row with an avatar needs a row. */
 .contact .who { display: flex; flex-direction: row; align-items: center; gap: 10px; }
 .who-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
@@ -2713,17 +2713,12 @@ body { background: var(--paper); }
 .panel-top > div { flex: 1; min-width: 0; }
 .panel-links { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0 4px; }
 
-/* With the panel open the row loses the columns it can least afford to clip:
-   the reason, which is readable in the panel anyway, and the views line. */
-.with-panel .contact { grid-template-columns: minmax(150px, 1fr) 76px 52px 168px; }
-.with-panel .contact .signal-cell { display: none; }
-/* The views line goes, the score keeps its "of 14" or the number means nothing. */
-.with-panel .contact .metric.size small { display: none; }
+.with-panel .contact { grid-template-columns: minmax(150px, 1fr) 76px 66px 168px; }
+.with-panel .contact .metric small { display: none; }
 .with-panel .row-buttons .btn.primary { min-width: 0; padding: 0 9px; }
 
 @media (max-width: 1240px) {
-  .contact { grid-template-columns: minmax(150px, 1fr) 84px 58px 190px; }
-  .contact .signal-cell { display: none; }
+  .contact { grid-template-columns: minmax(150px, 1fr) 84px 72px 190px; }
 }
 @media (max-width: 820px) {
   .contact { grid-template-columns: minmax(130px, 1fr) 150px; row-gap: 8px; }
@@ -2955,3 +2950,71 @@ body { background: var(--paper); }
   .exits li { grid-template-columns: minmax(0, 1fr); }
   .exit-gain { flex-direction: row; gap: 6px; align-items: baseline; }
 }
+
+/* ---------------------------------------------------------------------------
+   Ranges: two ends on one track, for the lead list filters.
+--------------------------------------------------------------------------- */
+.ranges { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 28px; margin: 4px 0 14px; }
+.range { display: flex; flex-direction: column; gap: 6px; }
+.range-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 12.5px; color: var(--ink-2); }
+.range-head b { color: var(--ink); font-weight: 600; }
+.range-track { position: relative; height: 22px; }
+.range-track::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 9px; height: 4px; border-radius: 2px; background: var(--line-2);
+}
+.range-track > i { position: absolute; top: 9px; height: 4px; border-radius: 2px; background: var(--orange); }
+.range-track input[type='range'] {
+  position: absolute; inset: 0; width: 100%; height: 22px; margin: 0; appearance: none; background: transparent;
+  pointer-events: none;
+}
+.range-track input[type='range']::-webkit-slider-runnable-track { height: 22px; background: transparent; }
+.range-track input[type='range']::-moz-range-track { height: 22px; background: transparent; }
+.range-track input[type='range']::-webkit-slider-thumb {
+  appearance: none; pointer-events: auto; width: 16px; height: 16px; margin-top: 3px; border-radius: 50%;
+  background: var(--panel); border: 2px solid var(--orange); cursor: pointer;
+}
+.range-track input[type='range']::-moz-range-thumb {
+  pointer-events: auto; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--panel); border: 2px solid var(--orange); cursor: pointer;
+}
+@media (max-width: 720px) {
+  .ranges { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* The explanation that waits to be asked for. */
+.info { display: inline; }
+.info-mark {
+  display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px;
+  margin-left: 6px; padding: 0; border-radius: 50%; border: 1px solid var(--line-2); background: var(--panel);
+  color: var(--ink-2); font-size: 10.5px; font-weight: 700; font-style: italic; line-height: 1; cursor: pointer;
+  vertical-align: middle;
+}
+.info-mark:hover, .info-mark.on { border-color: var(--orange); color: var(--orange-deep); }
+.info-text {
+  display: block; margin: 8px 0 4px; padding: 9px 12px; border-radius: 10px; background: var(--paper-2);
+  color: var(--ink-2); font-size: 12.5px; line-height: 1.5; font-weight: 400; text-transform: none; letter-spacing: 0;
+}
+
+/* The dashboard's own funnel. Not `.steps`: the landing owns that name and
+   paints it twelve pixels and grey. The last cell holds a share and a trend. */
+.funnel-shape.journey li { grid-template-columns: 150px minmax(0, 1fr) 64px 150px; }
+.funnel-shape.journey .funnel-drop { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; color: var(--ink); }
+.funnel-shape.journey .funnel-drop .trend { font-size: 11px; color: var(--ink-3); }
+.funnel-shape.journey .funnel-drop .trend.up { color: #2f9e6b; }
+@media (max-width: 720px) {
+  .funnel-shape.journey li { grid-template-columns: 96px minmax(0, 1fr) 48px 96px; gap: 8px; }
+}
+.compare td small.thin { color: var(--ink-3); }
+
+/* The month, as a bar. */
+.month-gauge { height: 16px; border-radius: 4px; background: var(--paper-2); overflow: hidden; margin: 6px 0 10px; }
+.month-gauge i { display: block; height: 100%; background: var(--orange); min-width: 2px; }
+.month-key li.done::before { background: var(--orange); }
+.month-key li.ahead::before { background: var(--paper-2); border: 1px solid var(--line-2); }
+
+.invite { margin-top: 12px; }
+.invite-row { display: flex; gap: 8px; }
+.invite-row .input { flex: 1; min-width: 0; }
+.invite-link { display: inline-block; margin-top: 6px; font-size: 11.5px; color: var(--ink-2); word-break: break-all; }
+
+.month-key li:not(.done):not(.ahead)::before { display: none; }

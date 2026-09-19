@@ -1,5 +1,5 @@
 import type { Campaign, LeadStatus, LostReason, Niche, Subscription } from '../types'
-import type { LeadRow } from './index'
+import { fitOf, type LeadRow } from './index'
 import { rank, WALK } from './status'
 import { compact } from '../lib/format'
 
@@ -102,7 +102,7 @@ export function compare(rows: LeadRow[]): Comparison[] {
     build('Followers', (r) => r.creator.followers, compact),
     build('Views on a typical post', (r) => r.creator.medianViews ?? 0, compact),
     build('Comments on a typical post', (r) => r.creator.medianComments ?? 0, (n) => String(n)),
-    build('Fit score', (r) => r.lead.score, (n) => `${n} of 14`),
+    build('Brand fit', (r) => fitOf(r), (n) => `${n}%`),
   ]
 }
 
@@ -161,9 +161,9 @@ export function sizeBands(rows: LeadRow[]): Band[] {
 
 export function scoreBands(rows: LeadRow[]): Band[] {
   return [
-    band(rows, 'Scored 9 or 10', (r) => r.lead.score <= 10),
-    band(rows, 'Scored 11 or 12', (r) => r.lead.score === 11 || r.lead.score === 12),
-    band(rows, 'Scored 13 or 14', (r) => r.lead.score >= 13),
+    band(rows, 'Fit under 75%', (r) => fitOf(r) < 75),
+    band(rows, 'Fit 75% to 90%', (r) => fitOf(r) >= 75 && fitOf(r) < 90),
+    band(rows, 'Fit 90% and up', (r) => fitOf(r) >= 90),
   ]
 }
 
@@ -245,7 +245,7 @@ export function insight(rows: LeadRow[], niches: Niche[]): string | null {
   if (niche) {
     parts.push(`${niche.best.label.toLowerCase()} replies ${compared(niche.best.rate!, niche.worst.rate!, niche.worst.label.toLowerCase())}`)
   } else if (score) {
-    parts.push(`people scoring ${score.best.label.replace('Scored ', '')} reply ${compared(score.best.rate!, score.worst.rate!, score.worst.label.replace('Scored ', '').toLowerCase())}`)
+    parts.push(`people with a ${score.best.label.toLowerCase()} reply ${compared(score.best.rate!, score.worst.rate!, score.worst.label.toLowerCase())}`)
   }
   if (!parts.length) return null
 

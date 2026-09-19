@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { getAccount, getCampaigns, getMembers, getQuota, getSubscription } from '../data'
 import { useStore } from '../data/hooks'
 import { getState } from '../data/store'
@@ -9,6 +10,44 @@ import { absolute, money, monthOf } from '../lib/format'
 // What is on this page is what the client bought: leads delivered per day, and
 // what is left of the month. There is no analysed volume here and no cost,
 // because there is none anywhere a client can reach.
+
+/**
+ * One link, copied by hand. Nothing is emailed, because nothing here sends
+ * email yet and a half built invite is worse than a link you paste yourself.
+ */
+function Invite() {
+  const [email, setEmail] = useState('')
+  const [link, setLink] = useState<string | null>(null)
+  const make = () => {
+    const clean = email.trim().toLowerCase()
+    if (!clean.includes('@')) return
+    const token = Math.random().toString(36).slice(2, 10)
+    setLink(`${window.location.origin}/#/join/${token}?email=${encodeURIComponent(clean)}`)
+  }
+  return (
+    <div className="invite">
+      <div className="invite-row">
+        <input
+          className="input"
+          type="email"
+          placeholder="Their email"
+          aria-label="Email of the person to invite"
+          value={email}
+          onChange={(e) => { setEmail(e.target.value); setLink(null) }}
+          onKeyDown={(e) => { if (e.key === 'Enter') make() }}
+        />
+        <button type="button" className="btn" onClick={make} disabled={!email.includes('@')}>Invite</button>
+      </div>
+      {link && (
+        <p className="hint">
+          Send them this link. It signs them in as a member of {'your account'}.{' '}
+          <button type="button" className="undo" onClick={() => { void navigator.clipboard?.writeText(link) }}>Copy it</button>
+          <br /><code className="invite-link">{link}</code>
+        </p>
+      )}
+    </div>
+  )
+}
 
 export function Account() {
   useStore()
@@ -28,7 +67,7 @@ export function Account() {
       <p className="subhead">{account.name}, {account.kind === 'agency' ? 'agency' : 'brand'}. {account.timezone}.</p>
 
       <div className="card">
-        <h2>Plan</h2>
+        <h2>Billing</h2>
         <ul className="rules">
           {TIERS.map((t) => (
             <li key={t.tier} className={t.tier === sub.tier ? 'on' : undefined}>
@@ -42,14 +81,16 @@ export function Account() {
 
       <div className="card">
         <h2>This month</h2>
-        <ul className="rules">
-          <li><span>Your allowance</span><b className="num">{quota.entitled}</b></li>
-          <li><span>Used so far</span><b className="num">{quota.delivered}</b></li>
-          <li><span>Carried over from last month</span><b className="num">{quota.carried}</b></li>
-          <li><span>Left</span><b className="num">{quota.remaining}</b></li>
+        <div className="month-gauge">
+          <i style={{ width: `${quota.entitled ? Math.min(100, Math.round((quota.delivered / quota.entitled) * 100)) : 0}%` }} />
+        </div>
+        <ul className="room-key month-key">
+          <li className="done"><b className="num">{quota.delivered}</b> sent to you</li>
+          <li className="ahead"><b className="num">{quota.remaining}</b> still to come by the end of {monthOf(sub.period)}</li>
+          <li><b className="num">{quota.entitled}</b> in total{quota.carried > 0 ? `, ${quota.carried} of them carried over from last month` : ''}</li>
         </ul>
         <p className="hint">
-          A quiet day is not lost. Whatever is left runs to the end of {monthOf(sub.period)}, and your campaigns share it.
+          A quiet day is not lost. Whatever is left runs to the end of the month, and your campaigns share it.
         </p>
       </div>
 
@@ -90,6 +131,7 @@ export function Account() {
             </li>
           ))}
         </ul>
+        <Invite />
       </div>
 
       <div className="card">

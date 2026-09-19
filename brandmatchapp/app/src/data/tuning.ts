@@ -39,6 +39,7 @@ export interface Dial {
 const floorOf = (hard: HardRules) => hard.followersMin ?? 15_000
 const viewsOf = (hard: HardRules) => hard.medianViewsMin ?? 0
 
+// In the order a client reads them: how big, how often, how far they reach.
 export const DIALS: Dial[] = [
   {
     key: 'followersMin',
@@ -66,6 +67,14 @@ export const DIALS: Dial[] = [
     limit: 'Under 3 days you are filtering on luck. Past 90 days the account is asleep.',
   },
   {
+    key: 'postsPerMonthMin',
+    label: 'Posts a month, at least',
+    scale: 'linear',
+    range: () => ({ min: 2, max: 30 }),
+    format: (v) => String(v),
+    limit: 'Under 2 a month is not really posting. Over 30 rules out anyone who posts in bursts.',
+  },
+  {
     key: 'medianViewsMin',
     label: 'Views on a typical post, at least',
     scale: 'log',
@@ -77,14 +86,6 @@ export const DIALS: Dial[] = [
     }),
     format: compact,
     limit: 'Tied to your follower minimum, between 5% and 300% of it.',
-  },
-  {
-    key: 'postsPerMonthMin',
-    label: 'Posts a month, at least',
-    scale: 'linear',
-    range: () => ({ min: 2, max: 30 }),
-    format: (v) => String(v),
-    limit: 'Under 2 a month is not really posting. Over 30 rules out anyone who posts in bursts.',
   },
   {
     key: 'medianCommentsMin',

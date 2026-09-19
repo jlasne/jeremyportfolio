@@ -14,6 +14,7 @@ import type {
   Verdict,
 } from '../types'
 import { indexOfCreator, postsFor } from '../mock/creators'
+import { fitPercent } from '../lib/format'
 import { survey, type FirstRules, type Survey } from './pool'
 import { getState, getVersion } from './store'
 import { rank, WALK } from './status'
@@ -148,8 +149,10 @@ export interface LeadQuery {
   search?: string
   /** Only people this big or bigger. */
   followersMin?: number | null
-  /** Only people who scored this or better. */
-  scoreMin?: number | null
+  followersMax?: number | null
+  /** Only people who scored this share or better, in percent of the ceiling. */
+  fitMin?: number | null
+  fitMax?: number | null
   savedOnly?: boolean
   /** Inside the rules you started with, or past them. */
   reach?: Reach | null
@@ -172,17 +175,15 @@ export function listLeads(query: LeadQuery = {}): LeadRow[] {
     .filter((r) => (query.savedOnly ? Boolean(r.lead.saved) : true))
     .filter((r) => (query.reach ? (r.lead.reach ?? 'core') === query.reach : true))
     .filter((r) => (query.followersMin ? r.creator.followers >= query.followersMin : true))
-    .filter((r) => (query.scoreMin ? r.lead.score >= query.scoreMin : true))
+    .filter((r) => (query.followersMax ? r.creator.followers <= query.followersMax : true))
+    .filter((r) => (query.fitMin ? fitOf(r) >= query.fitMin : true))
+    .filter((r) => (query.fitMax != null ? fitOf(r) <= query.fitMax : true))
     .filter((r) =>
       term
         ? r.creator.handle.toLowerCase().includes(term) || r.creator.name.toLowerCase().includes(term)
         : true,
     )
     .sort((a, b) => {
-      // A re-measured person goes back to the top of any order, because the
-      // numbers on their row just changed.
-      const fresh = freshness(b) - freshness(a)
-      if (fresh !== 0) return fresh
       if (sort === 'newest') return b.lead.deliveredAt.localeCompare(a.lead.deliveredAt)
       if (sort === 'status') {
         const step = rank(a.lead.status) - rank(b.lead.status)
@@ -196,8 +197,9 @@ export function listLeads(query: LeadQuery = {}): LeadRow[] {
     })
 }
 
-function freshness(row: LeadRow): number {
-  return row.lead.refreshedAt ? new Date(row.lead.refreshedAt).getTime() : 0
+/** The score as a share of its own ceiling, which is what the filter reads. */
+export function fitOf(row: LeadRow): number {
+  return fitPercent(row.lead.score, row.evaluation.criteriaScores.length * 2 || 14)
 }
 
 /** How many of today's leads have landed, against what the campaign may take. */

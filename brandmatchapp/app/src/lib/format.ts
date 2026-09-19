@@ -10,6 +10,14 @@ function trim(x: number): string {
   return x >= 100 ? String(Math.round(x)) : x >= 10 ? x.toFixed(1).replace(/\.0$/, '') : x.toFixed(1).replace(/\.0$/, '')
 }
 
+/**
+ * A fit score as a share of its ceiling. 9 of 14 reads as 64%, which is what a
+ * client understands at a glance and the same whatever the ceiling becomes.
+ */
+export function fitPercent(score: number, max: number): number {
+  return max > 0 ? Math.round((score / max) * 100) : 0
+}
+
 export function percent(rate: number): string {
   const v = rate * 100
   return (v >= 10 ? v.toFixed(0) : v.toFixed(1)) + '%'

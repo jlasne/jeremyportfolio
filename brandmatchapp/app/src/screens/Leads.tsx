@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  getCampaigns, getGateSet, getLeadEvents, getLeadRow, listLeads, todayCount,
-  type LeadRow, type LeadSort,
+  fitOf, getCampaigns, getGateSet, getLeadEvents, getLeadRow, listLeads, todayCount,
+  type LeadRow,
 } from '../data'
 import { useStore } from '../data/hooks'
 import { moveLead, recordDeal, setNote, toggleSaved, undoMove } from '../data/store'
 import { LOST_LABEL, LOST_REASONS, nextLabel, nextStatus, STATUSES, STATUS_LABEL } from '../data/status'
 import { Avatar } from '../components/Avatar'
+import { Range } from '../components/Range'
 import { download, toCsv } from '../lib/csv'
 import { absolute, compact, money, relative } from '../lib/format'
 import { navigate, type Query } from '../lib/router'
-import type { LeadStatus, LostReason, Reach } from '../types'
+import type { LeadStatus, LostReason } from '../types'
 
 // The daily screen, and the one the client lives in.
 //
@@ -24,39 +25,16 @@ import type { LeadStatus, LostReason, Reach } from '../types'
 //   six seconds of undo, because people click the wrong row
 //   signed asks for an amount inline, once, and never asks again
 //
-// One mark on the row is not about the click: a lead that only got here because
-// the client widened their rules says so, every day, for as long as it exists.
-// Without it the list looks unchanged while its quality moves underneath.
+// The row carries four things: who, how big, how well they fit, and the click.
+// Everything else about a person lives behind the click. A list is for moving
+// through, and a line that has to be read is a line nobody moves past.
+//
+// One order, and it is not offered as a choice: people nobody has touched
+// first, best fit first inside that. It is the order of the morning.
 
-const FOLLOWER_STEPS = [
-  { label: 'Any size', value: null },
-  { label: '25k+', value: 25_000 },
-  { label: '100k+', value: 100_000 },
-  { label: '250k+', value: 250_000 },
-]
-
-const REACHES: { id: Reach | null; label: string }[] = [
-  { id: null, label: 'All matches' },
-  { id: 'core', label: 'Your first rules' },
-  { id: 'wider', label: 'Past your first rules' },
-]
-
-const SORTS: { id: LeadSort; label: string }[] = [
-  { id: 'fit', label: 'Best fit' },
-  { id: 'newest', label: 'Newest' },
-  { id: 'status', label: 'Furthest along' },
-]
-
-/** New today, new this week, or freshly re-measured. */
-function badgeFor(row: LeadRow): string | null {
-  const day = 86_400_000
-  const now = Date.now()
-  if (row.lead.refreshedAt && now - new Date(row.lead.refreshedAt).getTime() < 3 * day) return 'Updated'
-  const age = now - new Date(row.lead.deliveredAt).getTime()
-  if (age < day) return 'New today'
-  if (age < 7 * day) return 'New this week'
-  return null
-}
+/** The whole span a size range can cover. Nobody under 5k, no ceiling above 5M. */
+const SIZE_SPAN: [number, number] = [5_000, 5_000_000]
+const FIT_SPAN: [number, number] = [0, 100]
 
 // ---------------------------------------------------------------------------
 // The action cell. This is the whole point of the screen.
@@ -177,8 +155,7 @@ function Row({
   onUndo: () => void
   onDeal: (amountCents: number | null) => void
 }) {
-  const { lead, creator, evaluation, campaign } = row
-  const badge = badgeFor(row)
+  const { lead, creator, campaign } = row
   const [dropping, setDropping] = useState(false)
 
   // Asking why takes the whole row. Four answers do not fit in an action cell,
@@ -205,38 +182,24 @@ function Row({
   }
 
   return (
-    <div
-      className={`contact${open ? ' open' : ''}${lead.status === 'lost' ? ' dropped' : ''}${
-        lead.reach === 'wider' ? ' wider' : ''
-      }`}
-    >
+    <div className={`contact${open ? ' open' : ''}${lead.status === 'lost' ? ' dropped' : ''}`}>
       <a className="who" href={`#/leads/${lead.id}`}>
         <Avatar name={creator.name} handle={creator.handle} />
         <span className="who-text">
           <span className="name">
             {creator.name}
-            {lead.reach === 'wider' && (
-              <span
-                className="badge-wider"
-                title={lead.beyond ? `${lead.beyond}. You opened that rule yourself.` : 'Past the rules you started with'}
-              >
-                Wider match
-              </span>
-            )}
-            {badge && <span className="badge-new">{badge}</span>}
             {lead.saved && <span className="saved-dot" title="Saved">★</span>}
           </span>
           <span className="handle">@{creator.handle}{manyCampaigns ? ` · ${campaign.name}` : ''}</span>
         </span>
       </a>
-      <span className="signal-cell muted">{evaluation.reason}</span>
       <span className="metric size">
         <b className="num">{compact(creator.followers)}</b>
-        <small>{compact(creator.medianViews ?? 0)} views a post</small>
+        <small>followers</small>
       </span>
       <span className="metric fit">
-        <b className="num">{lead.score}</b>
-        <small>of 14</small>
+        <b className="num">{fitOf(row)}%</b>
+        <small>brand fit</small>
       </span>
       <Action
         row={row}
@@ -304,7 +267,10 @@ function Panel({ row }: { row: LeadRow }) {
       <p className="hint">Measured {relative(creator.measuredAt)}.</p>
 
       <h2>Why they reached you</h2>
-      <p>{evaluation.reason}</p>
+      <p>
+        <b className="num">{fitOf(row)}% brand fit</b>, {lead.score} of {evaluation.criteriaScores.length * 2} on your
+        criteria. {evaluation.reason}
+      </p>
       <ul className="facts">
         {evaluation.criteriaScores.map((c) => {
           const criterion = gates?.criteria.find((k) => k.id === c.id)
@@ -318,22 +284,6 @@ function Panel({ row }: { row: LeadRow }) {
       <p className="hint">
         Checked against your rules, version {evaluation.gateSetVersion}, the ones in use the day this lead arrived.
       </p>
-
-      {lead.reach === 'wider' && (
-        <>
-          <h2>Where they sit</h2>
-          <p className="notice wider">
-            Past the rules you started with. {lead.beyond}.
-            {campaign.widened?.doors.length
-              ? ` They reached you because you opened one: ${campaign.widened.doors[campaign.widened.doors.length - 1].label.toLowerCase()}, ${relative(campaign.widened.doors[campaign.widened.doors.length - 1].openedAt)}.`
-              : ''}
-          </p>
-          <p className="hint">
-            <a href={`#/campaign/${campaign.id}/room`}>See what that door has brought you</a>, and put your first
-            rules back in one click.
-          </p>
-        </>
-      )}
 
       <h2>Your notes</h2>
       <textarea
@@ -369,25 +319,29 @@ export function Leads({ leadId, query: params }: { leadId: string | null; query:
   const campaigns = getCampaigns()
   const [campaignId, setCampaignId] = useState<string | null>(null)
   const [status, setStatus] = useState<LeadStatus | null>(null)
-  const [followersMin, setFollowersMin] = useState<number | null>(null)
-  const [scoreMin, setScoreMin] = useState<number | null>(null)
-  const [savedOnly, setSavedOnly] = useState(false)
-  const [reach, setReach] = useState<Reach | null>(null)
-  const [sort, setSort] = useState<LeadSort>('fit')
+  const [size, setSize] = useState<[number, number]>(SIZE_SPAN)
+  const [fit, setFit] = useState<[number, number]>(FIT_SPAN)
   const [search, setSearch] = useState('')
   const [undoable, setUndoable] = useState<string | null>(null)
   const timer = useRef<number | null>(null)
 
   // A link from anywhere else can arrive with the filter already set, which is
   // what makes "see the 39 of them" on another screen land on those 39.
-  const incoming = `${params.status ?? ''}|${params.reach ?? ''}|${params.campaign ?? ''}`
+  const incoming = `${params.status ?? ''}|${params.campaign ?? ''}`
   useEffect(() => {
     if (params.status && STATUSES.includes(params.status as LeadStatus)) setStatus(params.status as LeadStatus)
-    if (params.reach === 'core' || params.reach === 'wider') setReach(params.reach)
     if (params.campaign) setCampaignId(params.campaign)
   }, [incoming])
 
-  const query = { campaignId, status, search, followersMin, scoreMin, savedOnly, reach, sort }
+  const query = {
+    campaignId,
+    status,
+    search,
+    followersMin: size[0] > SIZE_SPAN[0] ? size[0] : null,
+    followersMax: size[1] < SIZE_SPAN[1] ? size[1] : null,
+    fitMin: fit[0] > 0 ? fit[0] : null,
+    fitMax: fit[1] < 100 ? fit[1] : null,
+  }
   const signature = JSON.stringify(query)
 
   /**
@@ -411,15 +365,14 @@ export function Leads({ leadId, query: params }: { leadId: string | null; query:
   useEffect(() => () => { if (timer.current) window.clearTimeout(timer.current) }, [])
 
   const exportCsv = () => {
-    const columns = ['name', 'handle', 'email', 'followers', 'views_per_post', 'fit_score', 'match', 'status', 'campaign', 'delivered', 'note']
+    const columns = ['name', 'handle', 'email', 'followers', 'views_per_post', 'brand_fit', 'status', 'campaign', 'delivered', 'note']
     const body = rows.map((r) => ({
       name: r.creator.name,
       handle: `@${r.creator.handle}`,
       email: r.creator.email ?? '',
       followers: r.creator.followers,
       views_per_post: r.creator.medianViews ?? '',
-      fit_score: `${r.lead.score} of 14`,
-      match: r.lead.reach === 'wider' ? 'past your first rules' : 'your first rules',
+      brand_fit: `${fitOf(r)}%`,
       status: STATUS_LABEL[r.lead.status],
       campaign: r.campaign.name,
       delivered: r.lead.deliveredAt.slice(0, 10),
@@ -468,45 +421,13 @@ export function Leads({ leadId, query: params }: { leadId: string | null; query:
             {STATUS_LABEL[s]}
           </button>
         ))}
-      </div>
-
-      <div className="filter-row">
-        <select
-          className="select"
-          value={followersMin ?? ''}
-          aria-label="Smallest size"
-          onChange={(e) => setFollowersMin(e.target.value ? Number(e.target.value) : null)}
-        >
-          {FOLLOWER_STEPS.map((f) => <option key={f.label} value={f.value ?? ''}>{f.label}</option>)}
-        </select>
-        <select
-          className="select"
-          value={scoreMin ?? ''}
-          aria-label="Lowest fit score"
-          onChange={(e) => setScoreMin(e.target.value ? Number(e.target.value) : null)}
-        >
-          <option value="">Any score</option>
-          {[10, 11, 12, 13, 14].map((n) => <option key={n} value={n}>{n} of 14 or more</option>)}
-        </select>
-        <button type="button" className={`chip${savedOnly ? ' on' : ''}`} onClick={() => setSavedOnly(!savedOnly)}>
-          Saved only
-        </button>
-        <select
-          className="select"
-          value={reach ?? ''}
-          aria-label="Match against your first rules"
-          onChange={(e) => setReach((e.target.value || null) as Reach | null)}
-        >
-          {REACHES.map((r) => <option key={r.label} value={r.id ?? ''}>{r.label}</option>)}
-        </select>
-        <span className="rule" />
-        {SORTS.map((s) => (
-          <button key={s.id} type="button" className={`chip${sort === s.id ? ' on' : ''}`} onClick={() => setSort(s.id)}>
-            {s.label}
-          </button>
-        ))}
         <span className="spacer" />
         <span className="faint num">{rows.length} shown</span>
+      </div>
+
+      <div className="ranges">
+        <Range label="Followers" min={SIZE_SPAN[0]} max={SIZE_SPAN[1]} value={size} scale="log" format={compact} onChange={setSize} />
+        <Range label="Brand fit" min={0} max={100} value={fit} format={(n) => `${n}%`} onChange={setFit} />
       </div>
       </>
       )}
@@ -526,7 +447,7 @@ export function Leads({ leadId, query: params }: { leadId: string | null; query:
             />
           ))}
           {rows.length === 0 && (
-            <Empty waiting={!status && !savedOnly && !search} campaignId={campaignId} />
+            <Empty waiting={!status && !search && size === SIZE_SPAN && fit === FIT_SPAN} campaignId={campaignId} />
           )}
         </div>
         {open && (

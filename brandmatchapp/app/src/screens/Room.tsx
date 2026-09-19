@@ -1,11 +1,9 @@
 import { useState } from 'react'
-import { getCampaign, getSurvey, listLeads } from '../data'
+import { getCampaign, getSurvey } from '../data'
 import { useStore } from '../data/hooks'
-import { reachBands, SETTLED_DAYS, widenedReading } from '../data/insights'
 import type { Channel, Door, Room as RoomShape, RoomState } from '../data/pool'
 import { about } from '../data/simulate'
-import { closeDoors, openDoor } from '../data/store'
-import { absolute, relative } from '../lib/format'
+import { openDoor } from '../data/store'
 
 // Zone 6. It answers one question: how long do these rules keep delivering.
 //
@@ -21,9 +19,6 @@ import { absolute, relative } from '../lib/format'
 //
 //   Every way out is priced on both sides. What it buys, in people and days.
 //   What it costs, in the numbers of the people it lets in.
-//
-//   And the last door opened comes with its receipt: whether the people it let
-//   in actually answer. A promise made three weeks ago is checked here.
 //
 // The limit we state rather than hide: Instagram publishes no list of
 // everyone. What we can reach is what searching, neighbours and your own
@@ -135,12 +130,6 @@ function Doors({ list, dry, onOpen }: { list: Door[]; dry: boolean; onOpen: (d: 
                 <button type="button" className="btn small" onClick={() => setAsking(door.id)}>Open this</button>
               </div>
             )}
-            {asking === door.id && (
-              <p className="exit-warn">
-                Everyone who arrives through this stays marked on your list, so you always know which leads came
-                from your first rules and which came from this.
-              </p>
-            )}
           </li>
         ))}
       </ul>
@@ -157,11 +146,6 @@ export function Room({ campaignId }: { campaignId: string }) {
   if (!campaign || !out) return null
   const { room, doors } = out
 
-  const rows = listLeads({ campaignId })
-  const wider = rows.filter((r) => r.lead.reach === 'wider')
-  const bands = reachBands(rows)
-  const reading = campaign.widened ? widenedReading(bands) : null
-  const share = rows.length ? Math.round((wider.length / rows.length) * 100) : 0
   const total = Math.max(1, room.found + room.left)
 
   return (
@@ -189,57 +173,6 @@ export function Room({ campaignId }: { campaignId: string }) {
       </div>
 
       <Channels room={room} />
-
-      {campaign.widened && (
-        <div className="card">
-          <h2>What you have already opened</h2>
-          <ul className="facts">
-            {campaign.widened.doors.map((d) => (
-              <li key={d.id} className="half">
-                <b>{d.label}</b>. Opened {relative(d.openedAt)}, on {absolute(d.openedAt)}.
-              </li>
-            ))}
-          </ul>
-          <p className="gate-lede">
-            {wider.length} of your {rows.length} leads came through {campaign.widened.doors.length > 1 ? 'these' : 'it'},{' '}
-            {share}% of what you were sent.
-          </p>
-          {bands.length > 1 && (
-            <ul className="bands">
-              {bands.map((b) => {
-                const top = Math.max(0.01, ...bands.map((x) => x.rate ?? 0))
-                return (
-                  <li key={b.label}>
-                    <span className="band-label">{b.label}</span>
-                    <span className="band-track">
-                      <i style={{ width: `${Math.round(((b.rate ?? 0) / top) * 100)}%` }} />
-                    </span>
-                    {b.rate === null ? (
-                      <span className="rate thin">too few yet</span>
-                    ) : (
-                      <span className="rate">{Math.round(b.rate * 100)}%<small>of {b.delivered}</small></span>
-                    )}
-                  </li>
-                )
-              })}
-            </ul>
-          )}
-          {reading && <p className="reading">{reading}</p>}
-          <p className="hint">
-            Leads sent in the last {SETTLED_DAYS} days are left out of these two figures. Nobody has had time to answer them.
-          </p>
-          <div className="verdict-actions">
-            <a className="btn" href="#/leads?reach=wider">See the {wider.length} of them</a>
-            <button type="button" className="btn quiet" onClick={() => closeDoors(campaignId)}>
-              Put my first rules back
-            </button>
-          </div>
-          <p className="hint">
-            Putting them back stops new ones arriving. The leads you already have keep their mark, because they did
-            arrive under the wider rules.
-          </p>
-        </div>
-      )}
 
       <Doors list={doors} dry={room.state === 'dry'} onOpen={(d) => openDoor(campaignId, d)} />
 

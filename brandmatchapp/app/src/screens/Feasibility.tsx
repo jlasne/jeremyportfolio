@@ -266,7 +266,6 @@ export function Feasibility({ campaignId }: { campaignId: string }) {
       </div>
 
       <div className={`card verdict-card ${verdict}`}>
-        <h2>{verdict === 'feasible' ? 'This works' : verdict === 'short' ? 'Not quite enough' : 'Too narrow'}</h2>
         <p className="verdict-line">{HEADLINE[verdict](run.estimatedPerDay, want)}</p>
 
         {verdict === 'feasible' && (

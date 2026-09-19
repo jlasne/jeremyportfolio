@@ -15,6 +15,7 @@ const ITEMS: { href: string; label: string; name: Route['name'] }[] = [
   { href: '#/app', label: 'Dashboard', name: 'dashboard' },
   { href: '#/leads', label: 'Leads', name: 'leads' },
   { href: '#/campaigns', label: 'Campaigns', name: 'campaigns' },
+  { href: '#/outreach', label: 'Outreach', name: 'outreach' },
   { href: '#/account', label: 'Account', name: 'account' },
 ]
 
@@ -34,6 +35,9 @@ function Glyph({ name }: { name: string }) {
   }
   if (name === 'campaigns') {
     return <svg {...common}><circle cx="8" cy="8" r="5.5" /><circle cx="8" cy="8" r="1.5" /></svg>
+  }
+  if (name === 'outreach') {
+    return <svg {...common}><path d="M2.5 8h9" /><path d="M8.5 4.5 12 8l-3.5 3.5" /></svg>
   }
   if (name === 'account') {
     return <svg {...common}><path d="M2.5 5h11M2.5 11h11" /><circle cx="6" cy="5" r="1.6" /><circle cx="10.5" cy="11" r="1.6" /></svg>

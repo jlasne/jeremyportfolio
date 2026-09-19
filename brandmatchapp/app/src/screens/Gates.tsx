@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import type { Criterion, GateSet, HardRules, Knockout, Niche, PresetId } from '../types'
-import { getCampaign, getGateSet, getGateVersions, getMembers } from '../data'
+import { getCampaign, getGateSet } from '../data'
 import { useStore } from '../data/hooks'
+import { Info } from '../components/Info'
 import { saveGateSet, setNiches } from '../data/store'
 import { slug } from '../data/niches'
 import { isLocked, LOCK_REASON, template } from '../data/templates'
@@ -9,7 +10,7 @@ import {
   bandOf, DIALS, dialByKey, fromPosition, hardness, preset, presetOf, PRESET_LIST, settle, toPosition,
   type Dial, type DialKey,
 } from '../data/tuning'
-import { absolute, compact } from '../lib/format'
+import { compact } from '../lib/format'
 
 // Zone 4. Three checks, in the order they run, and the client tunes them.
 //
@@ -257,8 +258,6 @@ export function Gates({ campaignId }: { campaignId: string }) {
   useStore()
   const campaign = getCampaign(campaignId)
   const gates = getGateSet(campaignId)
-  const versions = getGateVersions(campaignId)
-  const members = getMembers()
   const [draft, setDraft] = useState<Draft | null>(null)
   const [saved, setSaved] = useState(false)
 
@@ -318,11 +317,11 @@ export function Gates({ campaignId }: { campaignId: string }) {
       </div>
 
       <div className="card gate-card">
-        <h2>1. Size and activity</h2>
+        <h2>
+          1. Size and activity
+          <Info text="Every number is counted from their last 12 posts. These are your campaign numbers. Any niche below can use its own instead." />
+        </h2>
         <p className="gate-lede">{gateOneLine(live.hard)}</p>
-        <p className="hint">
-          Counted from their last 12 posts. These are your campaign numbers. Any niche below can use its own instead.
-        </p>
         <div className="dials">
           {DIALS.map((dial) => (
             <Slider
@@ -366,11 +365,16 @@ export function Gates({ campaignId }: { campaignId: string }) {
                 <div className="switch-body">
                   <b>
                     {k.question}
-                    {locked && <span className="lock" title={LOCK_REASON[k.id]}>Can't turn off</span>}
+                    <Info
+                      text={[
+                        k.why,
+                        k.pass ? `A yes looks like: ${k.pass}` : '',
+                        k.fail ? `A no looks like: ${k.fail}` : '',
+                        locked ? `Always asked. ${LOCK_REASON[k.id]}` : '',
+                      ].filter(Boolean).join(' ')}
+                    />
                   </b>
-                  {k.pass && <small><b>Yes looks like:</b> {k.pass}</small>}
-                  {k.fail && <small><b>No looks like:</b> {k.fail}</small>}
-                  {locked && <small className="faint">{LOCK_REASON[k.id]}</small>}
+                  {locked && <small className="faint">Always asked</small>}
                 </div>
               </li>
             )
@@ -382,12 +386,13 @@ export function Gates({ campaignId }: { campaignId: string }) {
       <div className="card gate-card">
         <h2>4. Fit score</h2>
         <p className="gate-lede">
-          Seven things we rate out of 2. Someone needs {live.passScore} out of {live.criteria.length * 2} to reach you.
+          Seven things we check, each fully true, partly true or false. Someone reaches you from{' '}
+          <b className="num">{Math.round((live.passScore / (live.criteria.length * 2)) * 100)}%</b> brand fit.
         </p>
         <div className="dial">
           <div className="dial-head">
-            <span>Pass mark</span>
-            <b className="num">{live.passScore} of {live.criteria.length * 2}</b>
+            <span>Qualified from</span>
+            <b className="num">{Math.round((live.passScore / (live.criteria.length * 2)) * 100)}% brand fit</b>
           </div>
           <input
             type="range"
@@ -398,9 +403,9 @@ export function Gates({ campaignId }: { campaignId: string }) {
             onChange={(e) => set({ passScore: Number(e.target.value) })}
           />
           <div className="dial-foot">
-            <span>5</span>
-            <span className="dial-limit">Below 5 the score stops filtering anything.</span>
-            <span>{live.criteria.length * 2}</span>
+            <span>{Math.round((5 / (live.criteria.length * 2)) * 100)}%</span>
+            <span className="dial-limit">Under that, the score stops filtering anything.</span>
+            <span>100%</span>
           </div>
         </div>
         <ul className="criteria-edit">
@@ -427,30 +432,6 @@ export function Gates({ campaignId }: { campaignId: string }) {
           ))}
         </ul>
         <p className="hint">Always seven. Change the wording to match what you sell.</p>
-      </div>
-
-      <div className="card">
-        <h2>History</h2>
-        <ul className="history">
-          {versions.map((v) => (
-            <li key={v.id}>
-              <div className="history-head">
-                <b>
-                  Version {v.version}, {v.origin === 'generated' ? 'written from your brief' : 'your edit'}
-                  {v.id === gates.id ? ', in use now' : ''}
-                </b>
-                <span className="faint">
-                  {members.find((m) => m.id === v.by)?.name ?? 'brandmatch'}, {absolute(v.createdAt)}
-                </span>
-              </div>
-              {v.changes.length > 0 && (
-                <ul className="history-changes">
-                  {v.changes.map((line) => <li key={line}>{line}</li>)}
-                </ul>
-              )}
-            </li>
-          ))}
-        </ul>
       </div>
 
       <div className="save-bar">

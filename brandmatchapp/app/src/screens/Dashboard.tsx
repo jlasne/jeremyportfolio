@@ -3,9 +3,10 @@ import { deliveredToday, getCampaigns, getGateSet, getQuota, getSubscription, li
 import { useStore } from '../data/hooks'
 import {
   advice, byWeek, compare, economics, funnelOf, GROUP_MIN, inPeriod, insight, nicheBands, nudges,
-  lostBreakdown, NICHE_MIN, previousPeriod, RATE_MIN, reachBands, readTable, repliedRows,
-  scoreBands, SETTLED_DAYS, sizeBands, widenedReading, type Band, type Period,
+  lostBreakdown, NICHE_MIN, previousPeriod, RATE_MIN, readTable, repliedRows,
+  scoreBands, sizeBands, type Band, type Period,
 } from '../data/insights'
+import { Info } from '../components/Info'
 import { LOST_LABEL, STATUS_LABEL } from '../data/status'
 import { download, toCsv } from '../lib/csv'
 import { money } from '../lib/format'
@@ -193,9 +194,6 @@ export function Dashboard() {
   const niched = nicheBands(rows, niches)
   const shownNiches = niched.filter((b) => b.delivered >= NICHE_MIN)
   const quietNiches = niched.length - shownNiches.length
-  // The receipt on any door already opened. Only drawn when there is one.
-  const widened = reachBands(rows)
-  const wideCampaign = campaignId ?? campaigns.find((c) => c.widened)?.id ?? null
   const table = compare(rows)
   // What the rules currently ask for, so a suggestion can say "and your rules
   // still let them in" rather than guessing.
@@ -321,8 +319,8 @@ export function Dashboard() {
         </div>
         <p className="reading">{readTable(table, replied.length, Boolean(headline))}</p>
         <p className="hint">
-          These are middle values, not averages, so one unusual account cannot pull them. Taken from {rows.length}{' '}
-          leads.
+          Taken from {rows.length} leads.
+          <Info text="These are middle values, not averages, so one unusual account cannot pull them." />
         </p>
 
         <div className="band-grid">
@@ -331,28 +329,11 @@ export function Dashboard() {
           {shownNiches.length > 0 && <Bands rows={shownNiches} title="How often each niche replies" />}
         </div>
         <p className="hint">
-          A share only appears once {RATE_MIN} leads sit behind it. Below that one reply would swing it, so we say too
-          few yet instead.
           {quietNiches > 0 &&
-            ` ${quietNiches} other ${quietNiches === 1 ? 'niche has' : 'niches have'} fewer than ${NICHE_MIN} leads so far, so they are left off the chart.`}
+            `${quietNiches} other ${quietNiches === 1 ? 'niche has' : 'niches have'} fewer than ${NICHE_MIN} leads so far, so they are left off the chart.`}
+          <Info text={`A share only appears once ${RATE_MIN} leads sit behind it. Below that one reply would swing it, so we say too few yet instead.`} />
         </p>
 
-        {widened.length > 1 && (
-          <div className="widened-block">
-            <Bands rows={widened} title="What widening your rules cost" />
-            <p className="reading">{widenedReading(widened)}</p>
-            <p className="hint">
-              Leads sent in the last {SETTLED_DAYS} days are left out here. Everyone past your first rules arrived
-              after you opened them, so counting the newest would call them silent when nobody has written yet.
-            </p>
-            {wideCampaign && (
-              <div className="verdict-actions">
-                <a className="btn small" href="#/leads?reach=wider">See those leads</a>
-                <a className="btn small quiet" href={`#/campaign/${wideCampaign}/room`}>Manage what is open</a>
-              </div>
-            )}
-          </div>
-        )}
         <Suggestions list={tips.filter((t) => t.id !== 'after-reply')} />
       </div>
       )}
@@ -361,7 +342,7 @@ export function Dashboard() {
       {phase !== 'none' && (
       <div className="card">
         <h2>How far your leads get</h2>
-        <ol className="funnel-shape steps">
+        <ol className="funnel-shape journey">
           {funnel.map((step, i) => (
             <li key={step.status}>
               <span className="funnel-label">{STATUS_LABEL[step.status]}</span>
@@ -426,12 +407,21 @@ export function Dashboard() {
                     <tr key={c.id}>
                       <th>{c.name}</th>
                       <td className="num">{mine.length}</td>
-                      {steps.slice(1).map((s) => (
-                        <td key={s.status} className="num">
-                          {s.count}
-                          {s.rate !== null && <small> {Math.round(s.rate * 100)}%</small>}
-                        </td>
-                      ))}
+                      {steps.slice(1).map((s) => {
+                        // A small campaign still gets its share, or the two
+                        // rows cannot be read against each other. It is grey
+                        // and it says what it rests on.
+                        const share = s.base > 0 ? Math.round((s.count / s.base) * 100) : null
+                        return (
+                          <td key={s.status} className="num">
+                            {s.count}
+                            {share !== null && s.rate !== null && <small> {share}%</small>}
+                            {share !== null && s.rate === null && s.base > 0 && (
+                              <small className="thin" title={`On ${s.base} leads. Under ${RATE_MIN}, one reply moves it a lot.`}> {share}%</small>
+                            )}
+                          </td>
+                        )
+                      })}
                     </tr>
                   )
                 })}

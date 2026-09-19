@@ -23,6 +23,7 @@ export type Route =
   | { name: 'campaigns' }
   | { name: 'campaign'; campaignId: string; tab: CampaignTab }
   | { name: 'account' }
+  | { name: 'outreach' }
   | { name: 'admin' }
 
 const TABS: CampaignTab[] = ['brief', 'gates', 'feasibility', 'room']
@@ -53,6 +54,8 @@ export function parse(hash: string): Route {
     case 'account':
     case 'settings':
       return { name: 'account' }
+    case 'outreach':
+      return { name: 'outreach' }
     case 'admin':
       return { name: 'admin' }
     default:
