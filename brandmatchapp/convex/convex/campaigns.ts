@@ -242,7 +242,11 @@ export const saveGates = internalMutation({
 
     const active = campaign.gateSetId ? await ctx.db.get(campaign.gateSetId) : null
     const niches = (campaign.extracted.niches ?? []) as Niche[]
+    // Only an edit can open a door. A generated draft replacing another
+    // generated draft is the model changing its mind, and the first real run
+    // marked its one lead as outside rules the client never wrote.
     const opened =
+      args.origin === 'edited' &&
       active !== null &&
       loosens(
         { hard: active.hard, passScore: active.passScore, niches },
@@ -285,5 +289,22 @@ export const dueToday = internalQuery({
   handler: async (ctx) => {
     const rows = await ctx.db.query('campaigns').filter((q) => q.eq(q.field('status'), 'live')).collect()
     return rows.filter((c) => Boolean(c.gateSetId))
+  },
+})
+
+/**
+ * Clears what a campaign has opened, and the marks its leads carry from it.
+ * For the operator, when a widening was recorded by mistake.
+ */
+export const unwiden = internalMutation({
+  args: { campaignId: v.id('campaigns') },
+  returns: v.any(),
+  handler: async (ctx, { campaignId }) => {
+    const campaign = await ctx.db.get(campaignId)
+    if (!campaign) return { error: 'No such campaign' }
+    await ctx.db.patch(campaignId, { widened: undefined })
+    const leads = await ctx.db.query('leads').withIndex('by_campaign', (q) => q.eq('campaignId', campaignId)).collect()
+    for (const l of leads) await ctx.db.patch(l._id, { reach: 'core', beyond: undefined })
+    return { cleared: true, leads: leads.length }
   },
 })

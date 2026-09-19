@@ -29,6 +29,12 @@ export function getAccount(): Account {
   return getState().account
 }
 
+/** Which account is loaded and how many leads it holds. Changes on a swap or a delivery, never on a click. */
+export function getAccountShape(): { live: boolean; leadCount: number } {
+  const s = getState()
+  return { live: s.live, leadCount: s.leads.length }
+}
+
 export function getMembers(): Member[] {
   return getState().members
 }

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  fitOf, getCampaigns, getGateSet, getLeadEvents, getLeadRow, listLeads, todayCount,
+  fitOf, getAccountShape, getCampaigns, getGateSet, getLeadEvents, getLeadRow, listLeads, todayCount,
   type LeadRow,
 } from '../data'
 import { useStore } from '../data/hooks'
@@ -350,7 +350,12 @@ export function Leads({ leadId, query: params }: { leadId: string | null; query:
    * until the filters change. Marking a lead contacted while the Contacted
    * filter is off would otherwise pull the row out from under the cursor.
    */
-  const ids = useMemo(() => listLeads(query).map((r) => r.lead.id), [signature])
+  // Recomputed when the filters change, and when the account underneath
+  // changes: the real account lands a second after the sample painted, and
+  // a list remembered from the sample finds none of its rows in it. A status
+  // change moves neither flag, so a row never vanishes under the cursor.
+  const { live, leadCount } = getAccountShape()
+  const ids = useMemo(() => listLeads(query).map((r) => r.lead.id), [signature, live, leadCount])
   const rows = ids.map((id) => getLeadRow(id)).filter((r): r is LeadRow => r !== null)
   const open = leadId ? getLeadRow(leadId) : null
   const today = todayCount(campaignId)
