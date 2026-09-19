@@ -74,6 +74,14 @@ export function forNiche(hard: HardRules, niche: Niche | undefined): HardRules {
 export interface Judgement {
   /** Which niche this person works in, from the campaign's list, or null. */
   niche?: string | null
+  /**
+   * Where they live and what they post in, read off the bio and the posts
+   * as two letter codes. The crawl never measures either, so without this
+   * a campaign asking for the US receives a trainer in Bangkok, which the
+   * first sourcing run did.
+   */
+  country?: string | null
+  language?: string | null
   knockouts: Record<string, { pass: boolean; note?: string }>
   criteria: Record<string, { score: number; note?: string }>
   reason: string

@@ -173,8 +173,8 @@ export function Admin() {
                     <td className="num">{c.passedBreakers}<small>{pct(c.passedBreakers)}</small></td>
                     <td className="num"><b>{c.qualified}</b><small>{pct(c.qualified)}</small></td>
                     <td className="num">{c.delivered}</td>
-                    <td className="num">{money(c.costCents, 'USD')}</td>
-                    <td className="num">{c.costPerQualifiedCents !== null ? money(c.costPerQualifiedCents, 'USD') : 'none yet'}</td>
+                    <td className="num">{money(c.costCents, 'USD', true)}</td>
+                    <td className="num">{c.costPerQualifiedCents !== null ? money(c.costPerQualifiedCents, 'USD', true) : 'none yet'}</td>
                     <td className={`num${dry ? ' warn' : ''}`}>
                       {c.held}
                       <small>{c.daysHeld !== null ? ` ${c.daysHeld} ${c.daysHeld === 1 ? 'day' : 'days'}` : ''}</small>
@@ -194,8 +194,8 @@ export function Admin() {
                       <td />
                       <td className="num"><b>{ch.qualified}</b><small>{pct(ch.qualified)}</small></td>
                       <td />
-                      <td className="num">{money(ch.costCents, 'USD')}</td>
-                      <td className="num">{ch.costPerQualifiedCents !== null ? money(ch.costPerQualifiedCents, 'USD') : 'none yet'}</td>
+                      <td className="num">{money(ch.costCents, 'USD', true)}</td>
+                      <td className="num">{ch.costPerQualifiedCents !== null ? money(ch.costPerQualifiedCents, 'USD', true) : 'none yet'}</td>
                       <td />
                     </tr>
                   )

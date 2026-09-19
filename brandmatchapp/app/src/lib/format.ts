@@ -115,10 +115,12 @@ export function nextRunLabel(runAt: string, now = new Date()): string {
 }
 
 /** Cents to a readable amount. Deals are typed by the client, so keep it exact. */
-export function money(cents: number, currency = 'EUR'): string {
+export function money(cents: number, currency = 'EUR', exact = false): string {
+  // Whole units on client screens. The cockpit asks for the cents: a crawl
+  // costs 34 cents and reads as nothing when rounded.
   return new Intl.NumberFormat('en-GB', {
     style: 'currency',
     currency,
-    maximumFractionDigits: 0,
+    maximumFractionDigits: exact ? 2 : 0,
   }).format(cents / 100)
 }

@@ -115,17 +115,34 @@ export const write = internalMutation({
     score: v.number(),
     reason: v.string(),
     model: v.optional(v.string()),
+    /** What the model read as the person's country and language, kept on the profile. */
+    country: v.optional(v.string()),
+    language: v.optional(v.string()),
   },
   returns: v.any(),
   handler: async (ctx, args) => {
+    const { country, language, ...row } = args
+    if (country || language) {
+      await ctx.db.patch(args.creatorId, {
+        ...(country ? { country } : {}), ...(language ? { language } : {}),
+      })
+    }
     const already = await ctx.db
       .query('evaluations')
       .withIndex('by_campaign_creator', (q) => q.eq('campaignId', args.campaignId).eq('creatorId', args.creatorId))
       .first()
     if (already) return already._id
-    return await ctx.db.insert('evaluations', { ...args, evaluatedAt: Date.now() })
+    return await ctx.db.insert('evaluations', { ...row, evaluatedAt: Date.now() })
   },
 })
+
+/** A two letter code or nothing. "GB" is written "UK", as the briefs say it. */
+function code(raw: unknown, upper: boolean): string | undefined {
+  const s = String(raw ?? '').trim()
+  if (!/^[A-Za-z]{2}$/.test(s)) return undefined
+  const c = upper ? s.toUpperCase() : s.toLowerCase()
+  return c === 'GB' ? 'UK' : c
+}
 
 /**
  * Runs the gates over one campaign's untouched profiles.
@@ -193,9 +210,16 @@ export const campaign = internalAction({
         lastError = answer.error
         continue
       }
-      const result = runGates(measured, gates, niches, answer.judgement, now)
+      // Country and language come back with the judgement and gate 1 reads
+      // them now, on the same pass. Unknown stays unknown and passes.
+      const country = code(answer.judgement.country, true)
+      const language = code(answer.judgement.language, false)
+      const placed = { ...measured, country: country ?? measured.country, language: language ?? measured.language }
+      const result = runGates(placed, gates, niches, answer.judgement, now)
       if (result.verdict === 'qualified') qualified++
       await ctx.runMutation(internal.evaluate.write, {
+        country,
+        language,
         creatorId: creator.id,
         campaignId: args.campaignId,
         accountId: batch.accountId,
@@ -231,8 +255,11 @@ async function ask(
   const schema = {
     type: 'object',
     additionalProperties: false,
-    required: [...(on.length ? ['niche'] : []), 'knockouts', 'criteria', 'reason'],
+    required: [...(on.length ? ['niche'] : []), 'country', 'language', 'knockouts', 'criteria', 'reason'],
     properties: {
+      // Two letter codes, so the gate can compare them. "unknown" passes.
+      country: { type: 'string' },
+      language: { type: 'string' },
       // Classification against a list the client controls, never a free guess.
       ...(on.length
         ? { niche: { type: 'string', enum: [...on.map((n) => n.id), 'other'] } }
@@ -293,6 +320,8 @@ async function ask(
     '',
     'Judge from the bio, the links, the numbers and the posts below. The posts are the last twelve, newest first, with their captions and their counts: read them for what the person sells, teaches, complains about, and how people respond. Never assume what the posts do not show. Write one plain sentence as the reason.',
     '',
+    'Also say where the person lives as a two letter country code (US, GB, AU, FR, TH) and the language they post in as a two letter code (en, fr, pt). Read them from the bio, the city, the currency, the captions. Answer "unknown" for either when the profile does not say.',
+    '',
     `Profile: ${JSON.stringify({ ...creator, posts: undefined })}`,
     '',
     'Their last posts, newest first:',
@@ -307,6 +336,10 @@ async function ask(
     body: JSON.stringify({
       model: process.env.OPENROUTER_MODEL ?? 'deepseek/deepseek-v4-flash',
       messages: [{ role: 'user', content: prompt }],
+      // The same profile should get the same verdict twice. Judged again
+      // after a rule change, one profile moved niche and another moved gate
+      // with nothing else changed.
+      temperature: 0,
       response_format: { type: 'json_schema', json_schema: { name: 'gates', strict: true, schema } },
     }),
   })
@@ -325,6 +358,28 @@ async function ask(
     return { error: `The model answered outside the schema: ${text.slice(0, 200)}` }
   }
 }
+
+/**
+ * Forgets the verdicts on the named handles, so the next run judges them
+ * again. Refused for a handle a lead already points at.
+ */
+export const rejudge = internalMutation({
+  args: { campaignId: v.id('campaigns'), handles: v.array(v.string()) },
+  returns: v.any(),
+  handler: async (ctx, { campaignId, handles }) => {
+    let forgotten = 0
+    const kept: string[] = []
+    for (const handle of handles.map((h) => h.toLowerCase())) {
+      const c = await ctx.db.query('creators').withIndex('by_handle', (q) => q.eq('platform', 'instagram').eq('handle', handle)).first()
+      if (!c) continue
+      const lead = await ctx.db.query('leads').withIndex('by_creator', (q) => q.eq('creatorId', c._id)).first()
+      if (lead) { kept.push(handle); continue }
+      const row = await ctx.db.query('evaluations').withIndex('by_campaign_creator', (q) => q.eq('campaignId', campaignId).eq('creatorId', c._id)).first()
+      if (row) { await ctx.db.delete(row._id); forgotten++ }
+    }
+    return { forgotten, kept }
+  },
+})
 
 /**
  * Forgets every verdict a campaign holds, so the next run judges everyone
