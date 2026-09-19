@@ -3,6 +3,7 @@ import type { OpsCampaign, OpsDay } from '../lib/api'
 import { account, subscription } from './account'
 import { campaigns } from './campaigns'
 import { evaluations, leads } from './pipeline'
+import { creators } from './creators'
 import { daysAgo } from './time'
 
 // Internal only. Cost per crawl, profiles analysed, fair use: none of it is
@@ -56,6 +57,25 @@ export const opsCampaigns: OpsCampaign[] = campaigns.map((c) => {
   const costCents = crawlRuns.filter((r) => r.campaignId === c.id).reduce((sum, r) => sum + r.costCents, 0)
   const perDay = c.dailyCap ?? subscription.tier
   const held = Math.max(0, qualified - delivered)
+  // Each way of searching on its own line. The sample splits the crawl cost
+  // in proportion to profiles analysed, since its runs carry no channel.
+  const channelOf = new Map(creators.map((cr) => [cr.id, cr.foundVia?.channel ?? 'search']))
+  const lines = new Map<string, { analysed: number; passedSize: number; passedNiche: number; qualified: number }>()
+  for (const e of mine) {
+    const key = channelOf.get(e.creatorId) ?? 'search'
+    const row = lines.get(key) ?? { analysed: 0, passedSize: 0, passedNiche: 0, qualified: 0 }
+    row.analysed++
+    if (e.verdict !== 'hard_fail') row.passedSize++
+    if (e.verdict !== 'hard_fail' && e.verdict !== 'off_niche') row.passedNiche++
+    if (e.verdict === 'qualified') row.qualified++
+    lines.set(key, row)
+  }
+  const channels = [...lines.entries()]
+    .map(([channel, row]) => {
+      const share = mine.length ? Math.round((costCents * row.analysed) / mine.length) : 0
+      return { channel, ...row, costCents: share, costPerQualifiedCents: row.qualified ? Math.round(share / row.qualified) : null }
+    })
+    .sort((a, b) => b.analysed - a.analysed)
   return {
     id: c.id,
     name: c.name,
@@ -72,6 +92,7 @@ export const opsCampaigns: OpsCampaign[] = campaigns.map((c) => {
     costPerQualifiedCents: qualified ? Math.round(costCents / qualified) : null,
     held,
     daysHeld: perDay ? Math.floor(held / perDay) : null,
+    channels,
   }
 })
 

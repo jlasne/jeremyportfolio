@@ -2,10 +2,13 @@ import { internalAction, internalMutation, internalQuery } from './_generated/se
 import { internal } from './_generated/api'
 import { v } from 'convex/values'
 
-// Sourcing, on apify/instagram-scraper.
+// The two Apify runs, on apify/instagram-scraper.
 //
 //   search  keywords go in, handles come out
 //   detail  those handles go in, the profile and its last 12 posts come out
+//
+// Which handles to ask for is decided in sourcing.ts. This file only knows
+// how to start a run and how to write down what it cost.
 //
 // Nothing here judges anything. A crawl writes measured facts and stops. The
 // gates run afterwards, in evaluate.ts, and delivery afterwards again, in
@@ -46,12 +49,12 @@ export function webhookParam(payload: Record<string, string>): string {
 
 export async function startRun(
   input: Record<string, unknown>,
-  meta: { phase: string; campaignId: string },
+  meta: { phase: string; campaignId: string; channel: string },
 ): Promise<{ runId: string } | { error: string }> {
   const token = process.env.APIFY_TOKEN
   if (!token) return { error: 'APIFY_TOKEN is not set' }
 
-  const hook = webhookParam({ phase: meta.phase, campaignId: meta.campaignId })
+  const hook = webhookParam({ phase: meta.phase, campaignId: meta.campaignId, channel: meta.channel })
   const res = await fetch(`${APIFY}/acts/${ACTOR}/runs?token=${token}&webhooks=${encodeURIComponent(hook)}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -65,8 +68,12 @@ export async function startRun(
 }
 
 /**
- * Starts a search for one campaign, inside its fair use budget. The budget is
- * an internal ceiling and is never quoted back to the client.
+ * Starts a hashtag search for one campaign, inside its fair use budget. The
+ * budget is an internal ceiling and is never quoted back to the client.
+ *
+ * Measured on the first real run: the posts under a tag come from small
+ * accounts, median 1.2k followers, and one in a hundred passed gate 1. It is
+ * the cheapest way to start and the worst way to continue.
  */
 export const search = internalAction({
   args: { campaignId: v.id('campaigns'), keywords: v.array(v.string()), limit: v.optional(v.number()) },
@@ -83,10 +90,10 @@ export const search = internalAction({
       resultsLimit: Math.min(args.limit ?? 120, budget.left),
       addParentData: false,
     }
-    const started = await startRun(input, { phase: 'search', campaignId: args.campaignId })
+    const started = await startRun(input, { phase: 'search', campaignId: args.campaignId, channel: 'search' })
     if ('error' in started) return started
     await ctx.runMutation(internal.crawl.noteRun, {
-      externalRunId: started.runId, phase: 'search', campaignId: args.campaignId,
+      externalRunId: started.runId, phase: 'search', campaignId: args.campaignId, channel: 'search',
     })
     return { runId: started.runId }
   },
@@ -98,11 +105,21 @@ export const campaignFor = internalQuery({
   handler: async (ctx, { campaignId }) => await ctx.db.get(campaignId),
 })
 
+/** The run a webhook names, with the handles and parents it was started on. */
+export const runByExternal = internalQuery({
+  args: { externalRunId: v.string() },
+  returns: v.any(),
+  handler: async (ctx, { externalRunId }) =>
+    await ctx.db.query('crawlRuns').withIndex('by_external', (q) => q.eq('externalRunId', externalRunId)).first(),
+})
+
 export const noteRun = internalMutation({
   args: {
     externalRunId: v.string(),
     phase: v.string(),
     campaignId: v.optional(v.id('campaigns')),
+    channel: v.optional(v.string()),
+    sources: v.optional(v.array(v.object({ handle: v.string(), parents: v.optional(v.array(v.string())) }))),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
@@ -111,6 +128,8 @@ export const noteRun = internalMutation({
       source: 'apify',
       externalRunId: args.externalRunId,
       phase: args.phase,
+      channel: args.channel,
+      sources: args.sources,
       status: 'RUNNING',
       profilesFetched: 0,
       profilesEvaluated: 0,
@@ -119,6 +138,18 @@ export const noteRun = internalMutation({
       startedAt: Date.now(),
     })
     return null
+  },
+})
+
+/** Names the channel on a run started before runs carried one. Operator only. */
+export const setChannel = internalMutation({
+  args: { externalRunId: v.string(), channel: v.string() },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    const run = await ctx.db.query('crawlRuns').withIndex('by_external', (q) => q.eq('externalRunId', args.externalRunId)).first()
+    if (!run) return { error: 'No such run' }
+    await ctx.db.patch(run._id, { channel: args.channel })
+    return { ok: true }
   },
 })
 

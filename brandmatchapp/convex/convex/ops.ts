@@ -60,6 +60,13 @@ export const overview = internalQuery({
     const evaluations = (await ctx.db.query('evaluations').collect()).filter((e) => e.evaluatedAt >= since)
     const allCampaigns = await ctx.db.query('campaigns').collect()
     const byAccount = new Map(accounts.map((a) => [a._id as string, a]))
+    // One read per profile, not one per evaluation.
+    const creatorCache = new Map<string, any>()
+    const creatorOf = async (id: any) => {
+      const key = String(id)
+      if (!creatorCache.has(key)) creatorCache.set(key, await ctx.db.get(id))
+      return creatorCache.get(key)
+    }
     const campaignRows = []
     for (const c of allCampaigns) {
       const mine = evaluations.filter((e) => e.campaignId === c._id)
@@ -71,6 +78,30 @@ export const overview = internalQuery({
         .reduce((sum, r) => sum + r.costCents, 0)
       const perDay = c.dailyCap ?? sub?.tier ?? 0
       const held = Math.max(0, qualified - delivered)
+
+      // Each way of searching, on its own line: what it cost and what came
+      // through. This is the number the sourcing work is steered by, and the
+      // only place it exists.
+      const byChannel = new Map<string, { analysed: number; passedSize: number; passedNiche: number; qualified: number; costCents: number }>()
+      const line = (key: string) => {
+        if (!byChannel.has(key)) byChannel.set(key, { analysed: 0, passedSize: 0, passedNiche: 0, qualified: 0, costCents: 0 })
+        return byChannel.get(key)!
+      }
+      for (const e of mine) {
+        const creator = await creatorOf(e.creatorId)
+        const row = line(creator?.foundVia?.channel ?? 'search')
+        row.analysed++
+        if (e.verdict !== 'hard_fail') row.passedSize++
+        if (e.verdict !== 'hard_fail' && e.verdict !== 'off_niche') row.passedNiche++
+        if (e.verdict === 'qualified') row.qualified++
+      }
+      for (const r of runs.filter((r) => r.campaignId === c._id && r.startedAt >= since)) {
+        line(r.channel ?? 'search').costCents += r.costCents
+      }
+      const channels = [...byChannel.entries()].map(([channel, r]) => ({
+        channel, ...r, costPerQualifiedCents: r.qualified ? Math.round(r.costCents / r.qualified) : null,
+      })).sort((a, b) => b.analysed - a.analysed)
+
       campaignRows.push({
         id: c._id,
         name: c.name,
@@ -87,6 +118,7 @@ export const overview = internalQuery({
         costPerQualifiedCents: qualified ? Math.round(costCents / qualified) : null,
         held,
         daysHeld: perDay ? Math.floor(held / perDay) : null,
+        channels,
       })
     }
 

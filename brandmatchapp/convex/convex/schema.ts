@@ -310,11 +310,19 @@ export default defineSchema({
       seed: v.optional(v.string()),
     })),
     /**
-     * The handles Instagram shows next to this one. Not looked at yet, not
-     * paid for: a list to draw the next detail run from, once this person
-     * has proved worth standing next to.
+     * The handles Instagram shows next to this one. Kept for the record and
+     * not drawn from: measured on the first real run, three profiles in 168
+     * carried any, and those pointed at brands.
      */
     related: v.optional(v.array(v.string())),
+    /**
+     * The handles this person mentions and tags in their posts. The neighbour
+     * channel reads this list, and only from people the gates let through:
+     * a coach's posts cite other coaches, and a bikini brand's posts cite
+     * bikini models, which is what the first neighbour run found when it read
+     * every big account instead. Written at measure time, free.
+     */
+    cited: v.optional(v.array(v.string())),
   })
     .index('by_handle', ['platform', 'handle'])
     .index('by_followers', ['followers'])
@@ -506,6 +514,14 @@ export default defineSchema({
     source: v.string(),
     externalRunId: v.optional(v.string()),
     phase: v.string(),
+    /** Which way of searching this run served: search, accounts, neighbour, seed. */
+    channel: v.optional(v.string()),
+    /**
+     * The handles a detail run was asked for, each with the accounts that
+     * pointed at it. Apify sends the run id back and nothing else, so this is
+     * where the parents wait until the profiles land.
+     */
+    sources: v.optional(v.array(v.object({ handle: v.string(), parents: v.optional(v.array(v.string())) }))),
     status: v.string(),
     profilesFetched: v.number(),
     profilesEvaluated: v.number(),

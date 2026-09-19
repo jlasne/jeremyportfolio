@@ -56,6 +56,10 @@ export const candidates = internalQuery({
         .first()
       for (const row of rows) {
         if (taken.has(row.creatorId as string)) continue
+        // A handle the client named themselves is not a lead to sell them. It
+        // was measured to find the people around it.
+        const creator = await ctx.db.get(row.creatorId)
+        if (creator?.foundVia?.channel === 'seed') continue
         out.push({
           evaluationId: row._id,
           creatorId: row.creatorId,

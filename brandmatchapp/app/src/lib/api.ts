@@ -180,6 +180,19 @@ export interface OpsCampaign {
   /** Found, qualified and not yet handed over. The part of the room we hold. */
   held: number
   daysHeld: number | null
+  /** Each way of searching on its own line. Steers the sourcing work. */
+  channels: OpsChannel[]
+}
+
+export interface OpsChannel {
+  /** search, accounts, neighbour or seed. */
+  channel: string
+  analysed: number
+  passedSize: number
+  passedNiche: number
+  qualified: number
+  costCents: number
+  costPerQualifiedCents: number | null
 }
 
 export interface OpsDay {

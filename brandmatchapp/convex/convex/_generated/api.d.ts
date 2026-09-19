@@ -26,6 +26,7 @@ import type * as leads from "../leads.js";
 import type * as ops from "../ops.js";
 import type * as opsApi from "../opsApi.js";
 import type * as quota from "../quota.js";
+import type * as sourcing from "../sourcing.js";
 import type * as templates from "../templates.js";
 import type * as waitlist from "../waitlist.js";
 
@@ -54,6 +55,7 @@ declare const fullApi: ApiFromModules<{
   ops: typeof ops;
   opsApi: typeof opsApi;
   quota: typeof quota;
+  sourcing: typeof sourcing;
   templates: typeof templates;
   waitlist: typeof waitlist;
 }>;

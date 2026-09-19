@@ -11,10 +11,19 @@ import { Info } from '../components/Info'
 // lib/api's `ops` object and from mock/ops, neither of which the client screens
 // touch.
 
+/** What each way of searching is called on the cockpit. */
+const CHANNEL_LABEL: Record<string, string> = {
+  search: 'Hashtag search',
+  accounts: 'Account search',
+  neighbour: 'Neighbours of good accounts',
+  seed: 'Client handles',
+}
+
 /**
  * The way in. One password, exchanged for the owner's key, which is then kept
  * in this browser like any other key. The server decides, not this screen.
  */
+
 function AdminDoor({ reason }: { reason: string }) {
   const [password, setPassword] = useState('')
   const [state, setState] = useState<'idle' | 'checking' | 'failed'>('idle')
@@ -130,7 +139,7 @@ export function Admin() {
       <div className="card">
         <h2>
           Each campaign, last 30 days
-          <Info text="Analysed is every profile the model or the free check looked at. The three passed columns are the funnel: size and activity, then niche, then deal breakers. Held is qualified people not yet handed over, and the days that buys at the campaign's pace. Cost is the crawl, attributed by campaign." />
+          <Info text="Analysed is every profile the model or the free check looked at. The three passed columns are the funnel: size and activity, then niche, then deal breakers. Held is qualified people not yet handed over, and the days that buys at the campaign's pace. Cost is the crawl, attributed by campaign. The lines under a campaign split it by the way each profile was found: a hashtag search, Instagram's account search, the neighbours of good accounts, or the client's own handles." />
         </h2>
         <div className="compare-scroll">
           <table className="compare cockpit">
@@ -165,13 +174,33 @@ export function Admin() {
                     <td className="num"><b>{c.qualified}</b><small>{pct(c.qualified)}</small></td>
                     <td className="num">{c.delivered}</td>
                     <td className="num">{money(c.costCents, 'USD')}</td>
-                    <td className="num">{c.costPerQualifiedCents !== null ? money(c.costPerQualifiedCents, 'USD') : '—'}</td>
+                    <td className="num">{c.costPerQualifiedCents !== null ? money(c.costPerQualifiedCents, 'USD') : 'none yet'}</td>
                     <td className={`num${dry ? ' warn' : ''}`}>
                       {c.held}
                       <small>{c.daysHeld !== null ? ` ${c.daysHeld} ${c.daysHeld === 1 ? 'day' : 'days'}` : ''}</small>
                     </td>
                   </tr>
                 )
+              }).flatMap((row, i) => {
+                const c = campaigns[i]
+                const lines = (c.channels ?? []).map((ch) => {
+                  const pct = (n: number) => (ch.analysed ? ` ${Math.round((n / ch.analysed) * 100)}%` : '')
+                  return (
+                    <tr key={`${c.id}-${ch.channel}`} className="channel">
+                      <th>{CHANNEL_LABEL[ch.channel] ?? ch.channel}</th>
+                      <td className="num">{ch.analysed}</td>
+                      <td className="num">{ch.passedSize}<small>{pct(ch.passedSize)}</small></td>
+                      <td className="num">{ch.passedNiche}<small>{pct(ch.passedNiche)}</small></td>
+                      <td />
+                      <td className="num"><b>{ch.qualified}</b><small>{pct(ch.qualified)}</small></td>
+                      <td />
+                      <td className="num">{money(ch.costCents, 'USD')}</td>
+                      <td className="num">{ch.costPerQualifiedCents !== null ? money(ch.costPerQualifiedCents, 'USD') : 'none yet'}</td>
+                      <td />
+                    </tr>
+                  )
+                })
+                return [row, ...lines]
               })}
               {campaigns.length === 0 && (
                 <tr><td colSpan={10} className="muted left">No campaign yet.</td></tr>

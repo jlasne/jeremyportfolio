@@ -3096,3 +3096,8 @@ body { background: var(--paper); }
   .ops-days li:nth-child(-n+7) { display: none; }
 }
 .compare td.left { text-align: left; }
+
+/* The cockpit's channel lines: one way of searching under its campaign. */
+.compare.cockpit tr.channel th { padding-left: 26px; font-weight: 400; color: var(--ink-2); font-size: 12px; }
+.compare.cockpit tr.channel td { font-size: 12px; color: var(--ink-2); }
+.compare.cockpit tr.channel td b { font-weight: 600; }

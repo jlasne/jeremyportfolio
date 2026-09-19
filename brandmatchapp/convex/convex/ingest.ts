@@ -1,7 +1,7 @@
 import { internalAction, internalMutation } from './_generated/server'
 import { internal } from './_generated/api'
 import { v } from 'convex/values'
-import { APIFY, ACTOR, webhookParam } from './crawl'
+import { APIFY, startRun } from './crawl'
 
 // What Apify sends back, turned into measured facts.
 //
@@ -29,6 +29,17 @@ function postsPerMonth(dates: number[]): number | undefined {
 }
 
 const EMAIL = /[\w.+-]+@[\w-]+\.[\w.]{2,}/
+const HANDLE = /^[a-z0-9._]{1,30}$/
+
+/** The handles a post points at: the people it mentions and the people it tags. */
+function citedIn(post: Record<string, unknown>): string[] {
+  const out: string[] = []
+  for (const m of Array.isArray(post.mentions) ? post.mentions : []) out.push(String(m))
+  for (const t of Array.isArray(post.taggedUsers) ? post.taggedUsers : []) {
+    out.push(String((t as { username?: string })?.username ?? t ?? ''))
+  }
+  return out.map((h) => h.toLowerCase().replace(/^@/, '')).filter((h) => HANDLE.test(h))
+}
 
 async function datasetItems(datasetId: string, token: string): Promise<Record<string, unknown>[]> {
   const res = await fetch(`${APIFY}/datasets/${datasetId}/items?token=${token}&clean=true&limit=2000`)
@@ -44,35 +55,36 @@ export const detailRun = internalAction({
   args: {
     handles: v.array(v.string()),
     campaignId: v.id('campaigns'),
-    /** How these handles were found: search, neighbour, seed or import. */
+    /** How these handles were found: search, accounts, neighbour or seed. */
     channel: v.optional(v.string()),
+    /** For a neighbour run, who pointed at each handle. */
+    sources: v.optional(v.array(v.object({ handle: v.string(), parents: v.optional(v.array(v.string())) }))),
   },
   returns: v.any(),
   handler: async (ctx, args): Promise<Record<string, unknown>> => {
-    const token = process.env.APIFY_TOKEN
-    if (!token) return { error: 'APIFY_TOKEN is not set' }
-    const handles = [...new Set(args.handles.map((h) => h.toLowerCase()))].filter(Boolean)
+    const handles = [...new Set(args.handles.map((h) => h.toLowerCase().replace(/^@/, '')))].filter(Boolean).slice(0, 300)
     if (!handles.length) return { handles: 0 }
+    const channel = args.channel ?? 'search'
 
-    // One builder for both phases. A second copy is a second thing to fix.
-    const hook = webhookParam({ phase: 'detail', campaignId: args.campaignId, channel: args.channel ?? 'search' })
     const input = {
-      directUrls: handles.slice(0, 300).map((h) => `https://www.instagram.com/${h}/`),
+      directUrls: handles.map((h) => `https://www.instagram.com/${h}/`),
       resultsType: 'details',
       // Fifteen, because the first three are usually pinned and years old,
       // and twelve typical posts is what the numbers are counted from.
       resultsLimit: 15,
       addParentData: false,
     }
-    const res = await fetch(`${APIFY}/acts/${ACTOR}/runs?token=${token}&webhooks=${encodeURIComponent(hook)}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input),
-    })
-    const started = (await res.json().catch(() => ({}))) as { data?: { id?: string } }
-    if (!res.ok || !started?.data?.id) return { error: `Apify replied ${res.status}`, handles: handles.length }
+    const started = await startRun(input, { phase: 'detail', campaignId: args.campaignId, channel })
+    if ('error' in started) return { ...started, handles: handles.length }
+    const asked = new Set(handles)
     await ctx.runMutation(internal.crawl.noteRun, {
-      externalRunId: started.data.id, phase: 'detail', campaignId: args.campaignId,
+      externalRunId: started.runId,
+      phase: 'detail',
+      campaignId: args.campaignId,
+      channel,
+      sources: (args.sources ?? []).filter((s) => asked.has(s.handle)),
     })
-    return { runId: started.data.id, handles: handles.length }
+    return { runId: started.runId, handles: handles.length }
   },
 })
 
@@ -109,17 +121,30 @@ export const fromApify = internalAction({
       ...(args.costUsd !== undefined ? { costCents: Math.round(args.costUsd * 100) } : {}),
     })
 
-    // Phase one: handles out of the posts, straight into a detail run --------
+    // Phase one: handles out of the results, straight into a detail run ------
+    // A hashtag search answers with posts, an account search with profiles.
+    // Both carry a handle, and the detail run is the same either way.
     if (args.phase === 'search') {
-      const handles = [...new Set(rows.map((r) => String(r.ownerUsername ?? '').toLowerCase()).filter(Boolean))]
+      const handles = [...new Set(
+        rows.map((r) => String(r.ownerUsername ?? r.username ?? '').toLowerCase()).filter(Boolean),
+      )]
       if (!handles.length) return { ok: true, handles: 0 }
       const run: Record<string, unknown> = await ctx.runAction(internal.ingest.detailRun, {
-        handles, campaignId: args.campaignId,
+        handles, campaignId: args.campaignId, channel: args.channel ?? 'search',
       })
       return { ok: true, handles: handles.length, detailRun: run.runId ?? null }
     }
 
     // Phase two: the measured facts land -------------------------------------
+    // The run record holds who pointed at each handle. Apify sends the run id
+    // back and nothing else, so the parents wait there.
+    const record = await ctx.runQuery(internal.crawl.runByExternal, { externalRunId: args.runId })
+    const parentsOf = new Map<string, string[]>()
+    for (const s of (record?.sources ?? []) as { handle: string; parents?: string[] }[]) {
+      if (s.parents?.length) parentsOf.set(s.handle, s.parents)
+    }
+    const channel = args.channel ?? record?.channel ?? 'search'
+
     const now = Date.now()
     const profiles = []
     for (const r of rows) {
@@ -175,9 +200,12 @@ export const fromApify = internalAction({
           language: undefined,
           links: [link, ...(Array.isArray(r.externalUrls)
             ? (r.externalUrls as { url?: string }[]).map((u) => u?.url ?? '') : [])].filter(Boolean),
-          foundVia: { channel: args.channel ?? 'search' },
+          foundVia: { channel, parents: parentsOf.get(handle) },
         },
         posts,
+        // Everyone this person points at, across every post we read. Pinned
+        // posts count here: an old collaboration still names a peer.
+        cited: [...new Set(latest.flatMap(citedIn))].slice(0, 200),
         // Apify hands back the accounts Instagram shows next to this one. That
         // is the neighbour channel, free, in the same response, and the one
         // way of searching that finds accounts like the good ones.
@@ -188,7 +216,7 @@ export const fromApify = internalAction({
     }
 
     const saved: { written: number; fresh: number } = await ctx.runMutation(internal.ingest.save, {
-      campaignId: args.campaignId, profiles: profiles.map(({ related, ...p }) => ({ ...p, related })),
+      campaignId: args.campaignId, profiles,
     })
 
     // Facts are in. The gates run next, and gate 1 costs nothing.
@@ -204,7 +232,12 @@ export const fromApify = internalAction({
 export const save = internalMutation({
   args: {
     campaignId: v.id('campaigns'),
-    profiles: v.array(v.object({ creator: v.any(), posts: v.array(v.any()), related: v.optional(v.array(v.string())) })),
+    profiles: v.array(v.object({
+      creator: v.any(),
+      posts: v.array(v.any()),
+      related: v.optional(v.array(v.string())),
+      cited: v.optional(v.array(v.string())),
+    })),
   },
   returns: v.object({ written: v.number(), fresh: v.number() }),
   handler: async (ctx, args) => {
@@ -220,12 +253,18 @@ export const save = internalMutation({
 
       let creatorId
       if (existing) {
-        // A re-measure keeps how the person was first found.
-        await ctx.db.patch(existing._id, { ...c, measuredAt: now, related: p.related })
+        // A re-measure keeps how the person was first found, and fills it in
+        // when the first measure never wrote it.
+        await ctx.db.patch(existing._id, {
+          ...c, measuredAt: now, related: p.related, cited: p.cited,
+          ...(existing.foundVia ? {} : { foundVia }),
+        })
         creatorId = existing._id
       } else {
         fresh++
-        creatorId = await ctx.db.insert('creators', { ...c, foundVia, related: p.related, measuredAt: now, firstSeenAt: now })
+        creatorId = await ctx.db.insert('creators', {
+          ...c, foundVia, related: p.related, cited: p.cited, measuredAt: now, firstSeenAt: now,
+        })
       }
 
       for (const post of p.posts) {
