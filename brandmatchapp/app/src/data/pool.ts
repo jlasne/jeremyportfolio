@@ -3,7 +3,7 @@ import { built } from '../mock/creators'
 import { evaluate, type GateResult, type Judgement } from './gates'
 import { activeNiches } from './niches'
 import { checkSeeds, usableSeeds } from './seeds'
-import { answersFor, creatorAt, qualifiedSet, SAMPLE_SIZE } from './simulate'
+import { answersFor, creatorAt, perDayOf, qualifiedSet, SAMPLE_SIZE } from './simulate'
 import { DIALS, settle, type DialKey } from './tuning'
 import { compact, COUNTRY_NAMES, daysSince, LANGUAGE_NAMES } from '../lib/format'
 
@@ -186,6 +186,8 @@ export interface Door {
   people: number
   /** Extra days of delivery that buys. */
   days: number
+  /** Extra leads a day, at the account's pace. */
+  perDay: number
   /** What it costs, in the numbers of the people it lets in. */
   cost: string
   /** The rules it writes. */
@@ -235,11 +237,11 @@ export interface Survey {
  * One entry point, because the doors are priced against the room and running
  * both separately would judge the whole sample twice for the same answer.
  */
-export function survey(campaign: Campaign, gates: GateSet, delivered: number, perDay: number): Survey {
+export function survey(campaign: Campaign, gates: GateSet, delivered: number, perDay: number, tier = 15): Survey {
   const niches = campaign.extracted.niches
   const answers = answersFor(gates, niches)
   const base = room(campaign, gates, niches, delivered, perDay, answers)
-  return { room: base, doors: doors(campaign, gates, delivered, perDay, base, answers) }
+  return { room: base, doors: doors(campaign, gates, delivered, perDay, base, answers, tier) }
 }
 
 /**
@@ -261,6 +263,7 @@ export function doors(
   perDay: number,
   base?: Room,
   answers?: Judgement[],
+  tier = 15,
 ): Door[] {
   const niches = campaign.extracted.niches
   const said = answers ?? answersFor(gates, niches)
@@ -287,7 +290,8 @@ export function doors(
     const people = after.left - from.left
     const days = after.days - from.days
     if (people <= 0) return
-    out.push({ id, title, move, label, people, days, cost: cost(extra), next })
+    const more = perDayOf(set.size, tier) - perDayOf(baseSet.size, tier)
+    out.push({ id, title, move, label, people, days, perDay: more, cost: cost(extra), next })
   }
 
   // One number at a time, so the client can see exactly what each one is worth.

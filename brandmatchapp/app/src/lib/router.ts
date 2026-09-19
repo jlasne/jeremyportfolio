@@ -8,12 +8,11 @@ import { useEffect, useState } from 'react'
 //   leads        who do I contact now
 //   brief        who do I want to reach, and what do I sell
 //   gates        which criteria decide
-//   feasibility  does it hold my quota
-//   room         how long these rules keep delivering
+//   feasibility  how many, for how long, and what if
 //
 // Two surfaces sit outside them: the account, and the internal admin.
 
-export type CampaignTab = 'brief' | 'gates' | 'feasibility' | 'room'
+export type CampaignTab = 'brief' | 'gates' | 'feasibility'
 
 export type Route =
   | { name: 'home' }
@@ -26,7 +25,7 @@ export type Route =
   | { name: 'outreach' }
   | { name: 'admin' }
 
-const TABS: CampaignTab[] = ['brief', 'gates', 'feasibility', 'room']
+const TABS: CampaignTab[] = ['brief', 'gates', 'feasibility']
 
 /** Whatever follows a question mark. The list screen reads a filter from it. */
 export type Query = Record<string, string>
@@ -50,7 +49,12 @@ export function parse(hash: string): Route {
     case 'campaign':
       if (id === 'new') return { name: 'newCampaign' }
       if (!id) return { name: 'campaigns' }
-      return { name: 'campaign', campaignId: id, tab: TABS.includes(third as CampaignTab) ? (third as CampaignTab) : 'brief' }
+      // "room" was its own tab once. Old links land on the test, where it lives now.
+      return {
+        name: 'campaign',
+        campaignId: id,
+        tab: third === 'room' ? 'feasibility' : TABS.includes(third as CampaignTab) ? (third as CampaignTab) : 'brief',
+      }
     case 'account':
     case 'settings':
       return { name: 'account' }

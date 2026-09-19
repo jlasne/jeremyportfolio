@@ -141,6 +141,11 @@ export function creatorAt(index: number): Creator {
 
 export const SAMPLE_SIZE = SAMPLE.length
 
+/** What a qualified count in the sample means a day, at this account's pace. */
+export function perDayOf(qualified: number, tier: number): number {
+  return Math.round((qualified / Math.max(1, SAMPLE_SIZE)) * scanRate(tier))
+}
+
 export function simulate(gates: GateSet, niches: Niche[], tier: number): SimResult {
   const out = walk(gates, niches, judgements(gates, niches), Date.now())
   out.estimatedPerDay = Math.round((out.funnel.qualified / Math.max(1, out.funnel.scanned)) * scanRate(tier))

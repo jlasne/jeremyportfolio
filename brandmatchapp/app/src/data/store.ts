@@ -500,6 +500,47 @@ export function acceptVolume(campaignId: string, perDay: number): void {
   }))
 }
 
+/** The split of the day between campaigns. Null means share whatever is left. */
+export function setDailyCap(campaignId: string, cap: number | null): void {
+  setState((s) => ({
+    campaigns: s.campaigns.map((c) =>
+      c.id === campaignId
+        ? { ...c, dailyCap: cap === null ? null : Math.max(0, Math.round(cap)), updatedAt: new Date().toISOString() }
+        : c,
+    ),
+  }))
+}
+
+/**
+ * More handles, from the client, after the campaign started. The highest
+ * value input there is, and the one way of searching that only the client
+ * can refill.
+ */
+export function addSeeds(campaignId: string, handles: string[]): void {
+  setState((s) => ({
+    campaigns: s.campaigns.map((c) => {
+      if (c.id !== campaignId) return c
+      const had = new Set(c.brief.seeds ?? [])
+      const fresh = handles.map((h) => h.replace(/^@/, '').trim().toLowerCase()).filter((h) => h && !had.has(h))
+      if (!fresh.length) return c
+      return { ...c, brief: { ...c.brief, seeds: [...(c.brief.seeds ?? []), ...fresh] }, updatedAt: new Date().toISOString() }
+    }),
+  }))
+}
+
+/**
+ * Back to an earlier version. Written as a new version, like any edit, so the
+ * history stays a straight line and a lead from last week still points at the
+ * rules it was judged by.
+ */
+export function restoreVersion(campaignId: string, gateSetId: string): void {
+  const old = getState().gateSets.find((g) => g.id === gateSetId && g.campaignId === campaignId)
+  if (!old) return
+  saveGateSet(campaignId, {
+    hard: old.hard, knockouts: old.knockouts, criteria: old.criteria, passScore: old.passScore, preset: old.preset,
+  })
+}
+
 /**
  * Swaps the sample account for a real one. Called on boot when a key is in
  * localStorage. A failure is not fatal: the app keeps the sample data and says

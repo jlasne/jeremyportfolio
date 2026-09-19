@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { getAccount, getCampaigns, getMembers, getQuota, getSubscription } from '../data'
+import { getAccount, getMembers, getQuota, getSubscription } from '../data'
 import { useStore } from '../data/hooks'
 import { getState } from '../data/store'
 import { TIERS } from '../mock/account'
@@ -55,7 +55,6 @@ export function Account() {
   const sub = getSubscription()
   const quota = getQuota()
   const members = getMembers()
-  const campaigns = getCampaigns()
   const topups = getState().topups
   const journal = getState()
     .quotaEntries.filter((e) => e.kind !== 'delivery')
@@ -92,19 +91,6 @@ export function Account() {
         <p className="hint">
           A quiet day is not lost. Whatever is left runs to the end of the month, and your campaigns share it.
         </p>
-      </div>
-
-      <div className="card">
-        <h2>Daily limit per campaign</h2>
-        <ul className="rules">
-          {campaigns.map((c) => (
-            <li key={c.id}>
-              <span>{c.name}</span>
-              <b className="num">{c.dailyCap ?? 'no limit'}</b>
-            </li>
-          ))}
-        </ul>
-        <p className="hint">This stops one campaign taking the whole day. Leave it empty and they share.</p>
       </div>
 
       <div className="card">
