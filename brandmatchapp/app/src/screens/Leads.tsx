@@ -9,9 +9,9 @@ import { LOST_LABEL, LOST_REASONS, nextLabel, nextStatus, STATUSES, STATUS_LABEL
 import { Avatar } from '../components/Avatar'
 import { Range } from '../components/Range'
 import { download, toCsv } from '../lib/csv'
-import { absolute, compact, money, relative } from '../lib/format'
+import { absolute, compact, COUNTRY_NAMES, LANGUAGE_NAMES, money, relative } from '../lib/format'
 import { navigate, type Query } from '../lib/router'
-import type { LeadStatus, LostReason } from '../types'
+import type { Creator, LeadStatus, LostReason } from '../types'
 
 // The daily screen, and the one the client lives in.
 //
@@ -214,6 +214,29 @@ function Row({
 }
 
 // ---------------------------------------------------------------------------
+/** The way this person was found, in the client's words. Four ways, one line. */
+function foundLine(row: LeadRow): string {
+  const via = row.creator.foundVia
+  const niche = row.campaign.extracted.niches?.find((n) => n.id === row.evaluation.niche)
+  const topic = niche ? niche.label.toLowerCase() : 'your niches'
+  if (!via || via.channel === 'accounts') return `Found by searching Instagram for ${topic}`
+  if (via.channel === 'search') return `Found posting under the hashtags of ${topic}`
+  if (via.channel === 'neighbour') {
+    const n = via.parents?.length ?? 1
+    return n > 1 ? `Mentioned by ${n} people who fit your rules` : 'Mentioned by someone who fits your rules'
+  }
+  if (via.channel === 'seed') return 'One step out from a handle you gave us'
+  return 'From the list you brought with you'
+}
+
+/** Where they live and what they post in, as the judge read them off the profile. */
+function whereLine(creator: Creator): string {
+  const where = creator.country ? (COUNTRY_NAMES[creator.country] ?? creator.country) : null
+  const lang = creator.language ? (LANGUAGE_NAMES[creator.language] ?? creator.language) : null
+  if (!where && !lang) return 'Country and language not shown on their profile'
+  return [where ? `Based in ${where}` : null, lang ? `posts in ${lang}` : null].filter(Boolean).join(', ')
+}
+
 // The panel. For deciding whether to write, not for getting anything done.
 // ---------------------------------------------------------------------------
 
@@ -265,6 +288,12 @@ function Panel({ row }: { row: LeadRow }) {
         <li className={creator.email ? 'yes' : 'no'}>{creator.email ?? 'No email on their profile'}</li>
       </ul>
       <p className="hint">Measured {relative(creator.measuredAt)}.</p>
+
+      <h2>How we found them</h2>
+      <ul className="facts">
+        <li className="yes">{foundLine(row)}</li>
+        <li className={creator.country || creator.language ? 'yes' : 'no'}>{whereLine(creator)}</li>
+      </ul>
 
       <h2>Why they reached you</h2>
       <p>

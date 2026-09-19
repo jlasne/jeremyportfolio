@@ -11,12 +11,12 @@ import { compact, COUNTRY_NAMES, daysSince, LANGUAGE_NAMES } from '../lib/format
 //
 // The honest version of a hard question. A set of rules does not search an
 // infinite world: Instagram publishes no list of everyone, so what we can reach
-// is what three ways of searching can turn up, and each of them runs down.
+// is what four ways of searching can turn up, and each of them runs down.
 //
 // Three rules hold this file together.
 //
 //   One way running dry is not the end. We say so, calmly, and carry on with
-//   the other two. The gauge only reads empty when every one of them is spent.
+//   the others. The gauge only reads empty when every one of them is spent.
 //
 //   Nothing is ever "exhausted". It is exhausted under the rules in force
 //   today, which is a different sentence and the only true one.
@@ -28,44 +28,55 @@ import { compact, COUNTRY_NAMES, daysSince, LANGUAGE_NAMES } from '../lib/format
 // And what comes through a door is marked for good, on every lead. A widening
 // nobody can see is a reply rate quietly falling with no explanation on screen.
 
-export type ChannelId = 'search' | 'neighbour' | 'seed' | 'import'
+export type ChannelId = 'accounts' | 'search' | 'neighbour' | 'seed' | 'import'
 
-const CHANNELS: ChannelId[] = ['search', 'neighbour', 'seed', 'import']
+/** In the order they matter. Measured on the first real runs, September 2026. */
+const CHANNELS: ChannelId[] = ['accounts', 'search', 'neighbour', 'seed']
 
 const CHANNEL_LABEL: Record<ChannelId, string> = {
-  search: 'Searching by topic',
-  neighbour: 'People next to your best leads',
+  accounts: 'Searching Instagram for your niches',
+  search: 'Posts under your niches\' hashtags',
+  neighbour: 'People your best leads mention',
   seed: 'The handles you gave us',
   import: 'Your own list',
 }
 
 const CHANNEL_NOTE: Record<ChannelId, string> = {
-  search: 'We search each of your niches, country by country.',
-  neighbour: 'Every lead that fits points at people who look like them.',
+  accounts: 'We ask Instagram for the accounts named for each of your niches.',
+  search: 'The people posting under the tags your niches use. Mostly small.',
+  neighbour: 'Every lead that fits points at the people they mention.',
   seed: 'One step out from the accounts you named yourself.',
   import: 'The people you brought with you.',
 }
 
-// The three numbers this file rests on. They are measured, not chosen, and a
-// real run will replace them with its own.
+// The numbers this file rests on. They are measured, not chosen, and every
+// real run replaces them with its own.
 
 /**
- * New accounts one topic search turns up before it starts handing back people
- * we already have. Measured over eleven days of a live run: a query stopped
- * producing anyone new at around 260.
+ * Accounts one niche turns up through Instagram's own account search. One
+ * wording of a niche returns 40 to 50 accounts, and a niche has about a dozen
+ * wordings: the job title, its specialities, the words people put in a name.
+ * Two in three of what comes back are above 10k followers.
+ */
+const ACCOUNTS_PER_NICHE = 600
+
+/**
+ * New accounts one hashtag turns up before it starts handing back people we
+ * already have. Measured at around 260, and one in a hundred is above the
+ * size a client asks for.
  */
 const PER_QUERY = 260
 
-/** New accounts one good lead points at. Measured at 14 on the same run. */
-const BRANCH = 14
+/** People one good lead mentions in their last posts. Measured at 5. */
+const BRANCH = 5
 
 /** A way of searching is spent once under a tenth of its reach is left. */
 const SPENT_UNDER = 0.1
 
 /** How far each way of searching has already been taken, across the sample. */
-const LOOKED: Record<ChannelId, number> = { search: 0, neighbour: 0, seed: 0, import: 0 }
+const LOOKED: Record<ChannelId, number> = { accounts: 0, search: 0, neighbour: 0, seed: 0, import: 0 }
 for (const b of built) {
-  LOOKED[(b.creator.foundVia?.channel ?? 'search') as ChannelId]++
+  LOOKED[(b.creator.foundVia?.channel ?? 'accounts') as ChannelId]++
 }
 
 export interface Channel {
@@ -99,11 +110,11 @@ export interface Room {
 /**
  * What each way of searching can still reach.
  *
- * Search is bounded by the query space: one query per niche per country, and
- * each query has a floor past which it repeats itself. Neighbours compound
- * instead, because every lead that fits opens its own branch, so that ceiling
- * grows every time the rules let someone through. Seeds are finite by
- * definition: the client gave us a list and it has an end.
+ * The two searches are bounded by the query space: one query per niche per
+ * country, and each query has a floor past which it repeats itself.
+ * Neighbours compound instead, because every lead that fits opens its own
+ * branch, so that ceiling grows every time the rules let someone through.
+ * Seeds are finite by definition: the client gave us a list and it has an end.
  */
 function capacityOf(campaign: Campaign, gates: GateSet, qualified: number): Record<ChannelId, number> {
   const slices = Math.max(1, activeNiches(campaign.extracted.niches).length)
@@ -113,6 +124,7 @@ function capacityOf(campaign: Campaign, gates: GateSet, qualified: number): Reco
     ? usableSeeds(checkSeeds(handles, gates, campaign.extracted.niches)).length
     : 0
   return {
+    accounts: slices * places * ACCOUNTS_PER_NICHE,
     search: slices * places * PER_QUERY,
     neighbour: qualified * BRANCH,
     seed: usable * BRANCH,

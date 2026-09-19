@@ -236,6 +236,7 @@ function shape(
     _id: string; handle: string; name: string; bio: string; avatar?: string; email?: string
     followers: number; medianViews?: number; medianComments?: number; postsPerMonth?: number
     lastPostAt?: number; country?: string; language?: string; links: string[]; measuredAt: number
+    foundVia?: { channel: string; parents?: string[]; seed?: string }
   },
   evaluation: {
     verdict: string; blockedBy?: string; score: number; reason: string; gateSetVersion: number
@@ -273,6 +274,11 @@ function shape(
       language: creator.language ?? null,
       links: creator.links,
       measuredAt: creator.measuredAt,
+      // How they were found: the way, and how many good accounts pointed at
+      // them. The parents' handles stay on the server.
+      foundVia: creator.foundVia
+        ? { channel: creator.foundVia.channel, parents: creator.foundVia.parents?.map(() => 'a lead') }
+        : null,
     },
     evaluation: {
       verdict: evaluation.verdict,

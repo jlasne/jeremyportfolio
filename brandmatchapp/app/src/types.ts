@@ -301,7 +301,7 @@ export interface Creator {
    * nothing to write and everything to add later.
    */
   foundVia?: {
-    channel: 'search' | 'neighbour' | 'seed' | 'import'
+    channel: 'accounts' | 'search' | 'neighbour' | 'seed' | 'import'
     /** The accounts that led us here. Their quality ranks this candidate. */
     parents?: string[]
     /** The handle the client gave us, when that is where it started. */

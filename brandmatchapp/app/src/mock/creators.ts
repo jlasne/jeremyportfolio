@@ -79,25 +79,27 @@ function maturedViews(posts: CreatorPost[], now: number): number {
 }
 
 /**
- * Where this profile came from. The mix mirrors what a real run produces: most
- * people arrive as the neighbour of someone already qualified, which is why a
- * good lead is worth more than the lead itself.
+ * Where this profile came from. The mix mirrors what the first real runs
+ * produced, September 2026: most people arrive through Instagram's own account
+ * search on the words of a niche, a quarter through hashtags, one in eight as
+ * someone a good lead mentioned, and a few from the handles the client gave.
  */
 function foundVia(index: number, rand: () => number): Creator['foundVia'] {
   const roll = rand()
   if (index % 97 === 3) {
     return { channel: 'seed', seed: `seed_${index}` }
   }
-  if (roll > 0.42) {
-    // One to three parents. More parents means a stronger candidate, which is
+  if (roll > 0.88) {
+    // One or two parents. More parents means a stronger candidate, which is
     // what the priority queue will read before paying to look at anyone.
-    const many = roll > 0.86 ? 3 : roll > 0.66 ? 2 : 1
+    const many = roll > 0.96 ? 2 : 1
     return {
       channel: 'neighbour',
       parents: Array.from({ length: many }, (_, i) => `cre_${String((index * 7 + i * 131) % 8_000).padStart(3, '0')}`),
     }
   }
-  return { channel: 'search' }
+  if (roll > 0.63) return { channel: 'search' }
+  return { channel: 'accounts' }
 }
 
 export interface Built {

@@ -189,7 +189,7 @@ function Lasting({ room }: { room: Room }) {
     <div className={`card room-card ${room.state}`}>
       <h2>
         How long this lasts
-        <Info text="Instagram publishes no list of everyone. This is everyone we can reach with three ways of searching, which is a large number and not every number. It is an estimate, and it moves every night." />
+        <Info text="Instagram publishes no list of everyone. This is everyone we can reach with four ways of searching, which is a large number and not every number. It is an estimate, and it moves every night." />
       </h2>
       <p className="room-big">
         About <b className="num">{about(room.left)}</b> more people fit these rules.{' '}

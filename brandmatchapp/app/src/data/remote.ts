@@ -141,6 +141,7 @@ export async function fetchAll(): Promise<Loaded> {
       links: c.links ?? [],
       measuredAt: iso(c.measuredAt),
       firstSeenAt: iso(c.measuredAt),
+      foundVia: c.foundVia ?? undefined,
     })
     const evaluationId = `evl_${row.id}`
     evaluations.push({
