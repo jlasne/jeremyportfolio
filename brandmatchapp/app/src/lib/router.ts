@@ -16,6 +16,7 @@ export type CampaignTab = 'brief' | 'gates' | 'feasibility'
 
 export type Route =
   | { name: 'home' }
+  | { name: 'demo' }
   | { name: 'dashboard' }
   | { name: 'newCampaign' }
   | { name: 'leads'; leadId: string | null; query: Query }
@@ -42,6 +43,10 @@ export function parse(hash: string): Route {
     case 'app':
     case 'dashboard':
       return { name: 'dashboard' }
+    // The sample, filled, at one address. For a visitor it is what they see
+    // anyway; for an account it swaps the data until the click back.
+    case 'demo':
+      return { name: 'demo' }
     case 'leads':
       return { name: 'leads', leadId: id, query }
     case 'campaigns':

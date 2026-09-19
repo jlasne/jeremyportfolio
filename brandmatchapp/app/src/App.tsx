@@ -2,6 +2,7 @@ import { useRoute } from './lib/router'
 import { Backdrop } from './components/Backdrop'
 import { SideNav } from './components/SideNav'
 import { isPreview, setPreview } from './lib/api'
+import { useEffect } from 'react'
 import { Account } from './screens/Account'
 import { Admin } from './screens/Admin'
 import { CampaignZone } from './screens/CampaignZone'
@@ -19,6 +20,7 @@ export function App() {
   const route = useRoute()
 
   if (route.name === 'home') return <Landing />
+  if (route.name === 'demo') return <Demo />
 
   return (
     <div className="shell">
@@ -48,4 +50,14 @@ export function App() {
       </main>
     </div>
   )
+}
+
+/** #/demo: the sample, filled. One address to send anyone who wants to see it. */
+function Demo() {
+  useEffect(() => {
+    setPreview(true)
+    window.location.replace('#/dashboard')
+    window.location.reload()
+  }, [])
+  return null
 }
