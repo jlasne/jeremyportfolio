@@ -106,6 +106,25 @@ function seed(): State {
   }
 }
 
+/**
+ * Sends a change to the server when this browser is on a real account.
+ *
+ * The screen has already moved: every mutation below writes to the local
+ * state first and calls this afterwards, so the list never waits on a
+ * network. A failure is swallowed on purpose, because the alternative is a
+ * row that silently jumps back under the cursor; the next load reads the
+ * server and the truth wins then.
+ *
+ * On the sample account this does nothing at all, and the sample is what a
+ * visitor without a key is looking at.
+ */
+function push(send: (api: typeof import('../lib/api').api) => Promise<unknown>): void {
+  void import('../lib/api').then(({ api, isLive }) => {
+    if (!isLive()) return
+    send(api).catch((e) => console.warn('brandmatch: that change did not reach the server.', e))
+  })
+}
+
 let state: State | null = null
 let version = 0
 const listeners = new Set<() => void>()
@@ -159,6 +178,7 @@ export function moveLead(leadId: string, to: LeadStatus, by = 'mem_1', lostReaso
       leadEvents: [...s.leadEvents, event],
     }
   })
+  push((api) => api.moveLead(leadId, to, lostReason))
 }
 
 /**
@@ -166,16 +186,19 @@ export function moveLead(leadId: string, to: LeadStatus, by = 'mem_1', lostReaso
  * list built for one click needs one click back out of it.
  */
 export function undoMove(leadId: string): void {
+  let undone = false
   setState((s) => {
     const events = s.leadEvents.filter((e) => e.leadId === leadId).sort((a, b) => a.at.localeCompare(b.at))
     const last = events[events.length - 1]
     // The delivery event is the lead existing at all. There is no undoing that.
     if (!last || !last.from) return {}
+    undone = true
     return {
       leads: s.leads.map((l) => (l.id === leadId ? { ...l, status: last.from!, statusAt: last.at } : l)),
       leadEvents: s.leadEvents.filter((e) => e.id !== last.id),
     }
   })
+  if (undone) push((api) => api.undoLead(leadId))
 }
 
 /**
@@ -313,18 +336,24 @@ export function tagLead(leadId: string, raw: string): void {
       l.id === leadId && !(l.tags ?? []).includes(tag) ? { ...l, tags: [...(l.tags ?? []), tag] } : l,
     ),
   }))
+  push((api) => api.tagLead(leadId, { add: [tag] }))
 }
 
 export function untagLead(leadId: string, tag: string): void {
   setState((s) => ({
     leads: s.leads.map((l) => (l.id === leadId ? { ...l, tags: (l.tags ?? []).filter((t) => t !== tag) } : l)),
   }))
+  push((api) => api.tagLead(leadId, { remove: [tag] }))
 }
 
 /** Renames a tag everywhere at once. A tag is one thing, in one place. */
 export function renameTag(from: string, raw: string): void {
   const to = cleanTag(raw)
   if (!to || to === from) return
+  for (const l of getState().leads) {
+    if (!(l.tags ?? []).includes(from)) continue
+    push((api) => api.tagLead(l.id, { add: [to], remove: [from] }))
+  }
   setState((s) => ({
     tags: [...new Set(s.tags.map((t) => (t === from ? to : t)))],
     leads: s.leads.map((l) =>
@@ -335,6 +364,9 @@ export function renameTag(from: string, raw: string): void {
 
 /** Deletes a tag, and takes it off every lead carrying it. */
 export function deleteTag(tag: string): void {
+  for (const l of getState().leads) {
+    if ((l.tags ?? []).includes(tag)) push((api) => api.tagLead(l.id, { remove: [tag] }))
+  }
   setState((s) => ({
     tags: s.tags.filter((t) => t !== tag),
     leads: s.leads.map((l) => ((l.tags ?? []).includes(tag) ? { ...l, tags: (l.tags ?? []).filter((t) => t !== tag) } : l)),
@@ -343,19 +375,24 @@ export function deleteTag(tag: string): void {
 
 /** Kept across campaigns. A plain flag: it says nothing about the deal. */
 export function toggleSaved(leadId: string): void {
-  setState((s) => ({
-    leads: s.leads.map((l) => (l.id === leadId ? { ...l, saved: !l.saved } : l)),
-  }))
+  let saved = false
+  setState((s) => {
+    saved = !s.leads.find((l) => l.id === leadId)?.saved
+    return { leads: s.leads.map((l) => (l.id === leadId ? { ...l, saved } : l)) }
+  })
+  push((api) => api.markLead(leadId, { saved }))
 }
 
 export function setNote(leadId: string, note: string): void {
   setState((s) => ({
     leads: s.leads.map((l) => (l.id === leadId ? { ...l, note } : l)),
   }))
+  push((api) => api.markLead(leadId, { note }))
 }
 
 /** A signed lead gets an amount. Kept separate: one lead can sign twice. */
 export function recordDeal(leadId: string, amountCents: number, note?: string): void {
+  push((api) => api.recordDeal(leadId, amountCents, note))
   setState((s) => {
     const lead = s.leads.find((l) => l.id === leadId)
     if (!lead) return {}

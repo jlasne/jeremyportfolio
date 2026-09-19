@@ -152,6 +152,10 @@ export const api = {
   /** Saved and notes. Plain fields, nothing to do with the deal. */
   markLead: (id: string, patch: { saved?: boolean; note?: string }) =>
     call<{ ok: true }>('/api', `/leads/${id}/mark`, { method: 'POST', body: JSON.stringify(patch) }),
+  /** The client's own labels. Add and remove in one call. */
+  tagLead: (id: string, patch: { add?: string[]; remove?: string[] }) =>
+    call<{ ok: true; tags: string[] }>('/api', `/leads/${id}/tags`, { method: 'POST', body: JSON.stringify(patch) }),
+  tags: () => call<{ tags: { name: string; leads: number }[] }>('/api', '/tags'),
   recordDeal: (id: string, amountCents: number, note?: string) =>
     call<{ ok: true }>('/api', `/leads/${id}/deal`, { method: 'POST', body: JSON.stringify({ amountCents, note }) }),
   waitlist: (email: string, website?: string) =>

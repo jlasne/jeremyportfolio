@@ -165,6 +165,55 @@ export const mark = internalMutation({
   },
 })
 
+/** A tag as it is stored: trimmed, one space between words, lower case. */
+export function cleanTag(raw: unknown): string {
+  return String(raw ?? '').trim().replace(/\s+/g, ' ').slice(0, 24).toLowerCase()
+}
+
+/**
+ * Adds and removes the client's own labels on one lead.
+ *
+ * Both lists in one call, because a model retagging a hundred leads sends one
+ * request a lead and not two. Unknown tags are made by being used: there is no
+ * register to keep in step with the leads.
+ */
+export const tag = internalMutation({
+  args: {
+    accountId: v.id('accounts'),
+    leadId: v.id('leads'),
+    add: v.optional(v.array(v.string())),
+    remove: v.optional(v.array(v.string())),
+  },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    const lead = await ctx.db.get(args.leadId)
+    if (!lead || lead.accountId !== args.accountId) return { error: 'No such lead' }
+    const gone = new Set((args.remove ?? []).map(cleanTag).filter(Boolean))
+    const tags = [
+      ...new Set([
+        ...(lead.tags ?? []).filter((t) => !gone.has(t)),
+        ...(args.add ?? []).map(cleanTag).filter(Boolean),
+      ]),
+    ].slice(0, 40)
+    await ctx.db.patch(args.leadId, { tags })
+    return { ok: true, tags }
+  },
+})
+
+/** Every tag this account uses, with how many leads carry each one. */
+export const tags = internalQuery({
+  args: { accountId: v.id('accounts') },
+  returns: v.any(),
+  handler: async (ctx, { accountId }) => {
+    const rows = await ctx.db.query('leads').withIndex('by_account', (q) => q.eq('accountId', accountId)).collect()
+    const count = new Map<string, number>()
+    for (const l of rows) for (const t of l.tags ?? []) count.set(t, (count.get(t) ?? 0) + 1)
+    return [...count.entries()]
+      .map(([name, leads]) => ({ name, leads }))
+      .sort((a, b) => b.leads - a.leads || a.name.localeCompare(b.name))
+  },
+})
+
 /** A signed lead gets an amount. Its own row: one lead can sign twice. */
 export const addDeal = internalMutation({
   args: {
@@ -228,7 +277,7 @@ export const overview = internalQuery({
 function shape(
   lead: {
     _id: string; campaignId: string; score: number; status: string
-    saved?: boolean; note?: string; refreshedAt?: number; lostReason?: string
+    saved?: boolean; note?: string; refreshedAt?: number; lostReason?: string; tags?: string[]
     reach?: string; beyond?: string
     deliveredAt: number; statusAt: number
   },
@@ -250,6 +299,7 @@ function shape(
     status: lead.status,
     saved: lead.saved ?? false,
     note: lead.note ?? '',
+    tags: lead.tags ?? [],
     lostReason: lead.lostReason ?? null,
     // Inside the rules the client first agreed to, or past them. The row says
     // so on screen for as long as the lead exists.

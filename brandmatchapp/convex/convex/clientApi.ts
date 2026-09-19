@@ -164,6 +164,11 @@ export const clientApi = httpAction(async (ctx, req) => {
       }
     }
 
+    // The client's own labels. Theirs to read and write, ours to store.
+    if (head === 'tags' && req.method === 'GET') {
+      return json({ tags: await ctx.runQuery(internal.leads.tags, { accountId: account._id }) })
+    }
+
     // Zone 2, the daily list -------------------------------------------------
     if (head === 'leads' && !parts[1] && req.method === 'GET') {
       const leads = await ctx.runQuery(internal.leads.list, {
@@ -197,6 +202,18 @@ export const clientApi = httpAction(async (ctx, req) => {
       // One click back out of the last change.
       if (parts[2] === 'undo' && req.method === 'POST') {
         const out = await ctx.runMutation(internal.leads.undo, { accountId: account._id, leadId })
+        if ('error' in out) return fail(String(out.error), 404)
+        return json(out)
+      }
+
+      // Add and remove in one call: a model retagging a list sends one
+      // request a lead, not two.
+      if (parts[2] === 'tags' && req.method === 'POST') {
+        const body = await req.json()
+        const list = (x: unknown) => (Array.isArray(x) ? x.map(String) : typeof x === 'string' ? [x] : undefined)
+        const out = await ctx.runMutation(internal.leads.tag, {
+          accountId: account._id, leadId, add: list(body.add), remove: list(body.remove),
+        })
         if ('error' in out) return fail(String(out.error), 404)
         return json(out)
       }

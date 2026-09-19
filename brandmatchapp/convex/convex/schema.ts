@@ -453,6 +453,13 @@ export default defineSchema({
     lostReason: v.optional(v.string()),
     /** Kept across campaigns, so a good one is not lost in a long list. */
     saved: v.optional(v.boolean()),
+    /**
+     * The client's own labels, beside our pipeline. A status says where
+     * someone is in the conversation and is ours; a tag says what the client
+     * thinks of them and is theirs. Written from the list or from the API,
+     * read by both, and never used by anything we decide.
+     */
+    tags: v.optional(v.array(v.string())),
     /** Whatever the client typed about them. Free text, theirs alone. */
     note: v.optional(v.string()),
     deliveredAt: v.number(),
