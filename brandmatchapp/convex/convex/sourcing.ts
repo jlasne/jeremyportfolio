@@ -114,12 +114,18 @@ export const neighbours = internalAction({
 })
 
 /**
- * Instagram's own account search, one run per query. The result rows carry a
- * handle each and go through the same detail run as a hashtag search.
+ * Instagram's own account search, one run per query. Asked for details, the
+ * actor answers with whole profiles, followers and last posts included, so
+ * the search run is the detail run: 0.23 cents a profile, measured, and no
+ * second run to pay for.
  *
  * Every limit is set by hand here. Left to its defaults the actor takes a
  * profile search as a request for a hundred posts from each account found,
  * and one probe of thirty accounts cost eleven dollars that way.
+ *
+ * Measured on the first query, "online personal trainer": 36 of 40 were
+ * named for the job, against 120 accounts for "fitness coach" of which 4
+ * were in a niche. The words of the niche are the query, never the topic.
  */
 export const accounts = internalAction({
   args: { campaignId: v.id('campaigns'), queries: v.optional(v.array(v.string())), perQuery: v.optional(v.number()) },
@@ -143,7 +149,7 @@ export const accounts = internalAction({
         searchType: 'user',
         searchLimit: Math.min(args.perQuery ?? 50, budget.left),
         resultsType: 'details',
-        resultsLimit: 1,
+        resultsLimit: 15,
       }
       const started = await startRun(input, { phase: 'search', campaignId: args.campaignId, channel: 'accounts' })
       if ('error' in started) { runs.push({ query, ...started }); continue }

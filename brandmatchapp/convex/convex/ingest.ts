@@ -122,9 +122,12 @@ export const fromApify = internalAction({
     })
 
     // Phase one: handles out of the results, straight into a detail run ------
-    // A hashtag search answers with posts, an account search with profiles.
-    // Both carry a handle, and the detail run is the same either way.
-    if (args.phase === 'search') {
+    // A hashtag search answers with posts, which carry a handle and nothing
+    // else. An account search answers with whole profiles, followers and
+    // last posts included, so those go straight to phase two: a detail run
+    // on them would pay for the same rows twice.
+    const wholeProfiles = rows.some((r) => r.username && typeof r.followersCount === 'number')
+    if (args.phase === 'search' && !wholeProfiles) {
       const handles = [...new Set(
         rows.map((r) => String(r.ownerUsername ?? r.username ?? '').toLowerCase()).filter(Boolean),
       )]
