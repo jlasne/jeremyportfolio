@@ -41,7 +41,12 @@ async function datasetItems(datasetId: string, token: string): Promise<Record<st
  * so a search engine and a hashtag crawl both end here.
  */
 export const detailRun = internalAction({
-  args: { handles: v.array(v.string()), campaignId: v.id('campaigns') },
+  args: {
+    handles: v.array(v.string()),
+    campaignId: v.id('campaigns'),
+    /** How these handles were found: search, neighbour, seed or import. */
+    channel: v.optional(v.string()),
+  },
   returns: v.any(),
   handler: async (ctx, args): Promise<Record<string, unknown>> => {
     const token = process.env.APIFY_TOKEN
@@ -50,11 +55,13 @@ export const detailRun = internalAction({
     if (!handles.length) return { handles: 0 }
 
     // One builder for both phases. A second copy is a second thing to fix.
-    const hook = webhookParam({ phase: 'detail', campaignId: args.campaignId })
+    const hook = webhookParam({ phase: 'detail', campaignId: args.campaignId, channel: args.channel ?? 'search' })
     const input = {
       directUrls: handles.slice(0, 300).map((h) => `https://www.instagram.com/${h}/`),
       resultsType: 'details',
-      resultsLimit: 12,
+      // Fifteen, because the first three are usually pinned and years old,
+      // and twelve typical posts is what the numbers are counted from.
+      resultsLimit: 15,
       addParentData: false,
     }
     const res = await fetch(`${APIFY}/acts/${ACTOR}/runs?token=${token}&webhooks=${encodeURIComponent(hook)}`, {
@@ -77,6 +84,10 @@ export const fromApify = internalAction({
     datasetId: v.optional(v.string()),
     phase: v.string(),
     campaignId: v.id('campaigns'),
+    /** What Apify says the run cost, in dollars. */
+    costUsd: v.optional(v.number()),
+    /** How the handles in this run were found. */
+    channel: v.optional(v.string()),
   },
   returns: v.any(),
   handler: async (ctx, args): Promise<Record<string, unknown>> => {
@@ -92,7 +103,10 @@ export const fromApify = internalAction({
 
     const rows = await datasetItems(args.datasetId, token)
     await ctx.runMutation(internal.crawl.finishRun, {
-      externalRunId: args.runId, status: 'SUCCEEDED', profilesFetched: rows.length,
+      externalRunId: args.runId,
+      status: 'SUCCEEDED',
+      profilesFetched: rows.length,
+      ...(args.costUsd !== undefined ? { costCents: Math.round(args.costUsd * 100) } : {}),
     })
 
     // Phase one: handles out of the posts, straight into a detail run --------
@@ -113,7 +127,7 @@ export const fromApify = internalAction({
       if (!handle) continue
 
       const latest = (Array.isArray(r.latestPosts) ? r.latestPosts : []) as Record<string, unknown>[]
-      const posts = latest.slice(0, 12).map((p) => ({
+      const posts = latest.slice(0, 15).map((p) => ({
         kind: p.type === 'Video' || p.videoViewCount ? 'reel' : 'post',
         url: String(p.url ?? ''),
         thumbnail: String(p.displayUrl ?? ''),
@@ -122,19 +136,26 @@ export const fromApify = internalAction({
         likes: Number(p.likesCount ?? 0),
         comments: Number(p.commentsCount ?? 0),
         postedAt: Date.parse(String(p.timestamp ?? '')) || 0,
+        pinned: Boolean(p.isPinned),
       })).filter((p) => p.url && p.postedAt)
+
+      // A pinned post is a chosen highlight and not a typical post. It sits
+      // first in the list and is often years old, so it is kept for the record
+      // and left out of every number. Without this, the first real run had a
+      // daily poster at 0.14 posts a month because of two pins from 2019.
+      const typical = posts.filter((p) => !p.pinned).slice(0, 12)
 
       // Views, counted only on posts that have had time to be seen. Someone
       // posting ten times a week has twelve posts four days old, and a post two
       // hours old has almost no views. Counting those punishes the most active
       // accounts for being active: measured on a real pipeline, at twenty one
       // posts a week it rejected 86% of them.
-      const ripe = posts.filter((p) => now - p.postedAt >= 48 * 3_600_000)
-      const forReach = ripe.length >= 6 ? ripe : posts
+      const ripe = typical.filter((p) => now - p.postedAt >= 48 * 3_600_000)
+      const forReach = ripe.length >= 6 ? ripe : typical
 
       const bio = String(r.biography ?? '')
       const link = String(r.externalUrl ?? '')
-      const dates = posts.map((p) => p.postedAt)
+      const dates = typical.map((p) => p.postedAt)
 
       profiles.push({
         creator: {
@@ -154,13 +175,20 @@ export const fromApify = internalAction({
           language: undefined,
           links: [link, ...(Array.isArray(r.externalUrls)
             ? (r.externalUrls as { url?: string }[]).map((u) => u?.url ?? '') : [])].filter(Boolean),
+          foundVia: { channel: args.channel ?? 'search' },
         },
         posts,
+        // Apify hands back the accounts Instagram shows next to this one. That
+        // is the neighbour channel, free, in the same response, and the one
+        // way of searching that finds accounts like the good ones.
+        related: (Array.isArray(r.relatedProfiles) ? r.relatedProfiles : [])
+          .map((x: any) => String(x?.username ?? '').toLowerCase())
+          .filter(Boolean),
       })
     }
 
     const saved: { written: number; fresh: number } = await ctx.runMutation(internal.ingest.save, {
-      campaignId: args.campaignId, profiles,
+      campaignId: args.campaignId, profiles: profiles.map(({ related, ...p }) => ({ ...p, related })),
     })
 
     // Facts are in. The gates run next, and gate 1 costs nothing.
@@ -176,7 +204,7 @@ export const fromApify = internalAction({
 export const save = internalMutation({
   args: {
     campaignId: v.id('campaigns'),
-    profiles: v.array(v.object({ creator: v.any(), posts: v.array(v.any()) })),
+    profiles: v.array(v.object({ creator: v.any(), posts: v.array(v.any()), related: v.optional(v.array(v.string())) })),
   },
   returns: v.object({ written: v.number(), fresh: v.number() }),
   handler: async (ctx, args) => {
@@ -184,7 +212,7 @@ export const save = internalMutation({
     let fresh = 0
 
     for (const p of args.profiles) {
-      const c = p.creator
+      const { foundVia, ...c } = p.creator
       const existing = await ctx.db
         .query('creators')
         .withIndex('by_handle', (q) => q.eq('platform', 'instagram').eq('handle', c.handle))
@@ -192,11 +220,12 @@ export const save = internalMutation({
 
       let creatorId
       if (existing) {
-        await ctx.db.patch(existing._id, { ...c, measuredAt: now })
+        // A re-measure keeps how the person was first found.
+        await ctx.db.patch(existing._id, { ...c, measuredAt: now, related: p.related })
         creatorId = existing._id
       } else {
         fresh++
-        creatorId = await ctx.db.insert('creators', { ...c, measuredAt: now, firstSeenAt: now })
+        creatorId = await ctx.db.insert('creators', { ...c, foundVia, related: p.related, measuredAt: now, firstSeenAt: now })
       }
 
       for (const post of p.posts) {

@@ -293,3 +293,21 @@ async function ask(
     return { error: `The model answered outside the schema: ${text.slice(0, 200)}` }
   }
 }
+
+/**
+ * Forgets every verdict a campaign holds, so the next run judges everyone
+ * again. For the operator, after a measurement or a rule changed under the
+ * profiles. Refused while a lead still points at one of them: a lead's audit
+ * trail is not something to delete.
+ */
+export const forget = internalMutation({
+  args: { campaignId: v.id('campaigns') },
+  returns: v.any(),
+  handler: async (ctx, { campaignId }) => {
+    const leads = await ctx.db.query('leads').withIndex('by_campaign', (q) => q.eq('campaignId', campaignId)).first()
+    if (leads) return { error: 'This campaign has leads, and their verdicts stay' }
+    const rows = await ctx.db.query('evaluations').withIndex('by_campaign', (q) => q.eq('campaignId', campaignId)).collect()
+    for (const r of rows) await ctx.db.delete(r._id)
+    return { forgotten: rows.length }
+  },
+})

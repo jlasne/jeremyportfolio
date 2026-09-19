@@ -57,12 +57,18 @@ http.route({
     if (!runId) return fail('No run id on the callback', 400)
     if (!/^[A-Z_-]+$/.test(status)) return fail(`Unreadable run status for ${runId}`, 400)
 
+    // Apify says what the run cost. That figure, and not an estimate, is
+    // what the cockpit shows: the estimate was off by a factor of two and a
+    // half on the first real run.
+    const usd = Number(run.usageTotalUsd)
     await ctx.scheduler.runAfter(0, internal.ingest.fromApify, {
       runId,
       status,
       datasetId: datasetId || undefined,
       phase: String(body.phase ?? 'detail'),
       campaignId: body.campaignId as Id<'campaigns'>,
+      costUsd: Number.isFinite(usd) ? usd : undefined,
+      channel: body.channel ? String(body.channel) : undefined,
     })
     return json({ ok: true })
   }),

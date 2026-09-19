@@ -309,6 +309,12 @@ export default defineSchema({
       parents: v.optional(v.array(v.string())),
       seed: v.optional(v.string()),
     })),
+    /**
+     * The handles Instagram shows next to this one. Not looked at yet, not
+     * paid for: a list to draw the next detail run from, once this person
+     * has proved worth standing next to.
+     */
+    related: v.optional(v.array(v.string())),
   })
     .index('by_handle', ['platform', 'handle'])
     .index('by_followers', ['followers'])
@@ -325,6 +331,13 @@ export default defineSchema({
     likes: v.number(),
     comments: v.number(),
     postedAt: v.number(),
+    /**
+     * Pinned by the owner. A pinned post is a chosen highlight, often years
+     * old, and it sits first in the list Instagram returns. Counted as a
+     * typical post it makes a daily poster look like one who posts twice a
+     * year, which is what the first real run reported for every big account.
+     */
+    pinned: v.optional(v.boolean()),
   })
     .index('by_creator', ['creatorId'])
     .index('by_creator_url', ['creatorId', 'url']),
