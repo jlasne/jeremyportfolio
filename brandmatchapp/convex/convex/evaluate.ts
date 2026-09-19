@@ -120,6 +120,11 @@ export const campaign = internalAction({
     let hardFail = 0
     let asked = 0
     let qualified = 0
+    // A model call that fails is not a verdict. The profile stays unjudged and
+    // is asked again next time, and the failure is said out loud, because a
+    // silent one would read as a hundred profiles too small to bother with.
+    let failed = 0
+    let lastError = ''
 
     for (const creator of batch.creators as Record<string, any>[]) {
       const measured = {
@@ -155,8 +160,13 @@ export const campaign = internalAction({
       }
 
       asked++
-      const judgement = await ask(creator, gates, niches, batch.brief as string)
-      const result = runGates(measured, gates, niches, judgement, now)
+      const answer = await ask(creator, gates, niches, batch.brief as string)
+      if ('error' in answer) {
+        failed++
+        lastError = answer.error
+        continue
+      }
+      const result = runGates(measured, gates, niches, answer.judgement, now)
       if (result.verdict === 'qualified') qualified++
       await ctx.runMutation(internal.evaluate.write, {
         creatorId: creator.id,
@@ -176,7 +186,7 @@ export const campaign = internalAction({
       })
     }
 
-    return { tested: (batch.creators as unknown[]).length, hardFail, asked, qualified }
+    return { tested: (batch.creators as unknown[]).length, hardFail, asked, qualified, failed, lastError }
   },
 })
 
@@ -186,9 +196,9 @@ async function ask(
   gates: GateSetShape,
   niches: Niche[],
   brief: string,
-): Promise<Judgement | null> {
+): Promise<{ judgement: Judgement } | { error: string }> {
   const key = process.env.OPENROUTER_API_KEY
-  if (!key) return null
+  if (!key) return { error: 'OPENROUTER_API_KEY is not set' }
 
   const on = niches.filter((n) => n.enabled)
   const schema = {
@@ -268,16 +278,18 @@ async function ask(
       response_format: { type: 'json_schema', json_schema: { name: 'gates', strict: true, schema } },
     }),
   })
-  if (!res.ok) return null
-  const body = (await res.json().catch(() => null)) as { choices?: { message?: { content?: string } }[] } | null
+  const raw = await res.text()
+  if (!res.ok) return { error: `OpenRouter replied ${res.status}: ${raw.slice(0, 300)}` }
+  let body: { choices?: { message?: { content?: string } }[]; error?: { message?: string } } | null = null
+  try { body = JSON.parse(raw) } catch { return { error: `OpenRouter sent something that is not JSON: ${raw.slice(0, 200)}` } }
   const text = body?.choices?.[0]?.message?.content
-  if (!text) return null
+  if (!text) return { error: body?.error?.message ?? `OpenRouter sent no answer: ${raw.slice(0, 200)}` }
   try {
     const parsed = JSON.parse(text) as Judgement
     // "other" is not a niche, it is the absence of one.
     if (parsed.niche === 'other') parsed.niche = null
-    return parsed
+    return { judgement: parsed }
   } catch {
-    return null
+    return { error: `The model answered outside the schema: ${text.slice(0, 200)}` }
   }
 }

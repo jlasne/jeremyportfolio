@@ -69,11 +69,21 @@ export const clientApi = httpAction(async (ctx, req) => {
 
     if (head === 'campaigns' && !parts[1] && req.method === 'POST') {
       const body = await req.json()
+      // The brief is two answers and an optional list of handles. The app
+      // sends them flat; an older caller may still send them under `brief`.
+      const raw = typeof body.brief === 'object' && body.brief ? body.brief : body
+      const seeds = Array.isArray(raw.seeds) ? raw.seeds.map((h: unknown) => String(h).replace(/^@/, '').trim().toLowerCase()).filter(Boolean) : undefined
+      const brief = {
+        audience: String(raw.audience ?? '').slice(0, 2000),
+        offer: String(raw.offer ?? '').slice(0, 2000),
+        ...(seeds?.length ? { seeds } : {}),
+      }
+      if (!brief.audience || !brief.offer) return fail('Say who you want to reach and what you sell them', 400)
       const campaign = await ctx.runMutation(internal.campaigns.create, {
         accountId: account._id,
-        name: body.name ?? 'New campaign',
-        brief: body.brief ?? '',
-        dailyCap: body.dailyCap,
+        name: String(body.name ?? 'New campaign').slice(0, 80),
+        brief,
+        dailyCap: body.dailyCap !== undefined ? Number(body.dailyCap) : undefined,
       })
       return json({ campaign })
     }

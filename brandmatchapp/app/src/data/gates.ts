@@ -110,12 +110,15 @@ export function runHard(creator: Creator, hard: HardRules, now = Date.now()): Ha
     }
     out.push({ key: read.key, value, pass: read.pass(value, limit) })
   }
-  if (hard.countries?.length) {
-    const ok = creator.country !== null && hard.countries.includes(creator.country)
+  // Where they are and what they post in are not measured by the crawl yet.
+  // An unknown is not a wrong answer, so a null passes here; the server does
+  // the same, and both go back to failing the day the crawl fills these in.
+  if (hard.countries?.length && creator.country !== null) {
+    const ok = hard.countries.includes(creator.country)
     out.push({ key: 'countries', value: ok ? 1 : 0, pass: ok })
   }
-  if (hard.languages?.length) {
-    const ok = creator.language !== null && hard.languages.includes(creator.language)
+  if (hard.languages?.length && creator.language !== null) {
+    const ok = hard.languages.includes(creator.language)
     out.push({ key: 'languages', value: ok ? 1 : 0, pass: ok })
   }
   return out

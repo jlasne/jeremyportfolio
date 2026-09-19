@@ -119,12 +119,16 @@ export function runHard(m: Measured, hard: HardRules, now = Date.now()): HardChe
     }
     out.push({ key: read.key, value, pass: read.pass(value, limit) })
   }
-  if (hard.countries?.length) {
-    const ok = Boolean(m.country && hard.countries.includes(m.country))
+  // Where they are and what they post in are not measured yet: the crawl
+  // writes neither. An unknown is not a wrong answer, so it passes here and
+  // the model reads the bio and the captions for it later. The day the crawl
+  // fills these in, a null goes back to failing, like every other number.
+  if (hard.countries?.length && m.country) {
+    const ok = hard.countries.includes(m.country)
     out.push({ key: 'countries', value: ok ? 1 : 0, pass: ok })
   }
-  if (hard.languages?.length) {
-    const ok = Boolean(m.language && hard.languages.includes(m.language))
+  if (hard.languages?.length && m.language) {
+    const ok = hard.languages.includes(m.language)
     out.push({ key: 'languages', value: ok ? 1 : 0, pass: ok })
   }
   return out

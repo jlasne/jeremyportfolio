@@ -144,10 +144,31 @@ export const gatesFromBrief = internalAction({
     // The library decides what gate 2 and gate 3 may be. The model only edits.
     const lib = template(draft.templateId)
     const kept = withinTemplate(lib, draft)
+
+    // Gate 1 starts from the library's balanced numbers. The model has no
+    // basis for a views floor or a posting rhythm, and asked for them it
+    // writes 500 views and three days, which is a filter that lets everyone
+    // through and then nobody. It may move the follower range, and only when
+    // the brief actually names a size.
+    const d = lib.defaults
+    const namesASize = /\d/.test(`${args.audience} ${args.offer}`)
+    const followersMin = namesASize && Number.isFinite(draft.hard?.followersMin) ? Number(draft.hard.followersMin) : d.followersMin
+    const followersMax = namesASize && Number.isFinite(draft.hard?.followersMax) ? Number(draft.hard.followersMax) : d.followersMax
+    const codes = (list: unknown) =>
+      Array.isArray(list) ? list.map((c) => String(c).toUpperCase().replace(/^GB$/, 'UK')).filter((c) => /^[A-Z]{2}$/.test(c)) : []
+    const countries = codes(draft.countries)
+    const languages = Array.isArray(draft.languages)
+      ? draft.languages.map((l: unknown) => String(l).toLowerCase()).filter((l: string) => /^[a-z]{2}$/.test(l))
+      : []
     const hard = {
-      ...draft.hard,
-      ...(Array.isArray(draft.countries) && draft.countries.length ? { countries: draft.countries } : {}),
-      ...(Array.isArray(draft.languages) && draft.languages.length ? { languages: draft.languages } : {}),
+      followersMin,
+      followersMax,
+      lastPostWithinDays: d.lastPostWithinDays,
+      postsPerMonthMin: d.postsPerMonthMin,
+      medianViewsMin: Math.round(followersMin * d.viewsShare),
+      medianCommentsMin: Math.round(followersMin * d.viewsShare * 0.002),
+      ...(countries.length ? { countries } : {}),
+      ...(languages.length ? { languages } : {}),
     }
 
     await ctx.runMutation(internal.campaigns.patch, {
@@ -156,8 +177,8 @@ export const gatesFromBrief = internalAction({
       name: draft.name ? String(draft.name).slice(0, 80) : undefined,
       brief: { audience: args.audience, offer: args.offer },
       extracted: {
-        countries: draft.countries ?? [],
-        languages: draft.languages ?? [],
+        countries,
+        languages,
         templateId: lib.id,
         // All switched on: a suggestion the client has to switch on is not a
         // suggestion. Each one can take its own numbers later.
@@ -169,6 +190,10 @@ export const gatesFromBrief = internalAction({
         extractedAt: Date.now(),
       },
     })
+    // The model was asked for a bar where one in six qualifies and, on a
+    // sixteen point scale, answered four. Under half the sentences true is not
+    // a fit by any reading, so the floor is half, whatever it said.
+    const passScore = Math.max(kept.passScore, Math.ceil(kept.criteria.length * 2 * 0.5))
     const gates = await ctx.runMutation(internal.campaigns.saveGates, {
       accountId: args.accountId,
       campaignId: args.campaignId,
@@ -177,7 +202,7 @@ export const gatesFromBrief = internalAction({
       hard,
       knockouts: kept.knockouts,
       criteria: kept.criteria,
-      passScore: kept.passScore,
+      passScore,
     })
     return { gates, name: draft.name, templateId: lib.id, usedLibrary: lib.name }
   },
