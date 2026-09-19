@@ -10,6 +10,7 @@ import { Info } from '../components/Info'
 import { LOST_LABEL, STATUS_LABEL } from '../data/status'
 import { download, toCsv } from '../lib/csv'
 import { money } from '../lib/format'
+import { hasKey, setPreview } from '../lib/api'
 
 // Zone 1. What the client shows their boss.
 //
@@ -147,6 +148,7 @@ function Starting({ leads, total, campaigns, days }: {
         <div className="verdict-actions">
           <a className="btn" href={`#/campaign/${campaigns[0].id}/gates`}>Read my rules</a>
           <a className="btn primary" href={`#/campaign/${campaigns[0].id}/feasibility`}>Test them</a>
+          <SeeItFilled />
         </div>
       </div>
     )
@@ -163,8 +165,27 @@ function Starting({ leads, total, campaigns, days }: {
       </p>
       <div className="verdict-actions">
         <a className="btn primary" href="#/leads">Work the list</a>
+        <SeeItFilled />
       </div>
     </div>
+  )
+}
+
+/**
+ * The way to see every screen with something on it. The account keeps its
+ * key and its data; only what the screens read changes, and a bar at the top
+ * says so until the one click back.
+ */
+function SeeItFilled() {
+  if (!hasKey()) return null
+  return (
+    <button
+      type="button"
+      className="btn quiet"
+      onClick={() => { setPreview(true); window.location.reload() }}
+    >
+      See it filled with sample data
+    </button>
   )
 }
 
@@ -234,7 +255,7 @@ export function Dashboard() {
     <div className="page">
       <div className="page-head">
         <h1>Today</h1>
-        <span className="count num">{deliveredToday(campaignId)} leads in</span>
+        <span className="count num">{deliveredToday(campaignId)} {deliveredToday(campaignId) === 1 ? 'lead' : 'leads'} in</span>
         <span className="spacer" />
         <select
           className="select head-select"
@@ -269,7 +290,7 @@ export function Dashboard() {
       <div className="tiles">
         <div className="tile">
           <b className="num">{rows.length}</b>
-          <span>leads in this period</span>
+          <span>{rows.length === 1 ? 'lead' : 'leads'} in this period</span>
         </div>
         <div className="tile">
           <b className="num">{quota.remaining}</b>

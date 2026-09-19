@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { api, isLive, ops, setKey, type OpsCampaign, type OpsDay, type OpsOverview, type OpsRun } from '../lib/api'
+import { api, hasKey, ops, setKey, setPreview, type OpsCampaign, type OpsDay, type OpsOverview, type OpsRun } from '../lib/api'
 import { analysisBudgetPerDay, analysedToday, crawlRuns, opsCampaigns, opsDays } from '../mock/ops'
 import { money, relative } from '../lib/format'
 import { Info } from '../components/Info'
@@ -87,12 +87,12 @@ export function Admin() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (!isLive()) return
+    if (!hasKey()) return
     ops.overview().then(setData).catch((e) => setError(e instanceof Error ? e.message : 'Could not read the ops view'))
     ops.runs().then((r) => setRuns(r.runs)).catch(() => { /* stay on the sample */ })
   }, [])
 
-  if (!isLive() || error) return <AdminDoor reason={error} />
+  if (!hasKey() || error) return <AdminDoor reason={error} />
 
   const spentCents = runs.reduce((sum, r) => sum + r.costCents, 0)
   const qualified = runs.reduce((sum, r) => sum + r.qualified, 0)
@@ -110,7 +110,7 @@ export function Admin() {
         <button
           type="button"
           className="btn small quiet"
-          onClick={() => { setKey(''); window.location.hash = '#/dashboard'; window.location.reload() }}
+          onClick={() => { setKey(''); setPreview(false); window.location.hash = '#/dashboard'; window.location.reload() }}
         >
           Sign out, back to the sample
         </button>

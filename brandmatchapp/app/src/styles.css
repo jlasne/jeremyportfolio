@@ -3101,3 +3101,13 @@ body { background: var(--paper); }
 .compare.cockpit tr.channel th { padding-left: 26px; font-weight: 400; color: var(--ink-2); font-size: 12px; }
 .compare.cockpit tr.channel td { font-size: 12px; color: var(--ink-2); }
 .compare.cockpit tr.channel td b { font-weight: 600; }
+
+/* Signed in, looking at the sample. Says so on every screen until the click back. */
+.preview-bar {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  margin: 0 0 12px; padding: 10px 16px;
+  background: var(--orange-soft, #ffe9dc); color: var(--ink);
+  border: 1px solid var(--orange, #ff5a1f); border-radius: 12px;
+  font-size: 13px;
+}

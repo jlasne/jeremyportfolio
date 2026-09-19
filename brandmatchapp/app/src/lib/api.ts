@@ -66,8 +66,39 @@ export function setKey(key: string): void {
   }
 }
 
-export function isLive(): boolean {
+/** A key is stored: this browser belongs to an account. */
+export function hasKey(): boolean {
   return Boolean(getKey())
+}
+
+/**
+ * Looking at the sample while signed in. An account with one lead has nothing
+ * for its charts to show, and a client deciding whether to keep paying wants
+ * to see the screens filled. The flag swaps the data and nothing else: the
+ * key stays, and one click brings the account back.
+ */
+const PREVIEW = 'brandmatch.preview'
+
+export function isPreview(): boolean {
+  try {
+    return hasKey() && window.localStorage.getItem(PREVIEW) === '1'
+  } catch {
+    return false
+  }
+}
+
+export function setPreview(on: boolean): void {
+  try {
+    if (on) window.localStorage.setItem(PREVIEW, '1')
+    else window.localStorage.removeItem(PREVIEW)
+  } catch {
+    /* storage off: the sample is all there is anyway */
+  }
+}
+
+/** The screens read the account's own data, not the sample. */
+export function isLive(): boolean {
+  return hasKey() && !isPreview()
 }
 
 async function call<T>(prefix: string, path: string, init: RequestInit = {}): Promise<T> {

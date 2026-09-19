@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { deliveredToday, getQuota } from '../data'
 import { useStore } from '../data/hooks'
-import { api, isLive } from '../lib/api'
+import { api, hasKey } from '../lib/api'
 import type { Route } from '../lib/router'
 import { Logo } from './Logo'
 
@@ -66,7 +66,7 @@ function useCollapsed(): [boolean, (v: boolean) => void] {
 function useOwner(): boolean {
   const [owner, setOwner] = useState(false)
   useEffect(() => {
-    if (!isLive()) return
+    if (!hasKey()) return
     api.me().then((m) => setOwner(m.role === 'owner')).catch(() => setOwner(false))
   }, [])
   return owner
