@@ -44,14 +44,24 @@ const WINDOWS: { id: Window; label: string }[] = [
 const W = 720
 const PAD_L = 40
 const PAD_R = 44
-const PAD_T = 18
-const PLOT_H = 190
-const H = PAD_T + PLOT_H + 24
+const PAD_T = 10
+const PLOT_H = 148
+const H = PAD_T + PLOT_H + 22
 
+/**
+ * A round ceiling that sits just above the data.
+ *
+ * The old one could put the top at half again the tallest bar, which left the
+ * upper half of the frame empty and made every bar look small. This walks a
+ * 1, 2, 5 ladder and stops at the first rung that clears the data.
+ */
 function niceTop(n: number): number {
   if (n <= 5) return 5
-  const step = Math.pow(10, Math.floor(Math.log10(n)))
-  return Math.ceil(n / (step / 2)) * (step / 2)
+  const mag = Math.pow(10, Math.floor(Math.log10(n)))
+  for (const step of [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8]) {
+    if (mag * step >= n) return mag * step
+  }
+  return mag * 10
 }
 
 function short(n: number): string {
@@ -87,13 +97,21 @@ export function Activity({
   if (totals.every((n) => n === 0)) return null
 
   const topBar = niceTop(Math.max(1, ...totals))
-  const topLine = Math.max(0.05, Math.min(1, Math.max(...lineSeries.flatMap((s) => s.values), 0.01) * 1.3))
+  // With one line the axis hugs it. With two, one of them is usually a
+  // setting and the other a rate, and they live decades apart: the axis then
+  // runs the whole way to a hundred so neither is stretched to fill a frame
+  // it does not fill.
+  const topLine = lineSeries.length > 1
+    ? 1
+    : Math.max(0.05, Math.min(1, Math.max(...lineSeries.flatMap((s) => s.values), 0.01) * 1.3))
   const plotW = W - PAD_L - PAD_R
   const band = plotW / days.length
   const x = (i: number) => PAD_L + band * (i + 0.5)
   const yBar = (v: number) => PAD_T + PLOT_H - (v / topBar) * PLOT_H
   const yLine = (v: number) => PAD_T + PLOT_H - (v / topLine) * PLOT_H
-  const barW = Math.max(2, Math.min(24, band - 5))
+  // Slimmer than the slot it sits in, and never fat: a bar wider than about a
+  // finger reads as a block of colour rather than as a measurement.
+  const barW = Math.max(3, Math.min(14, band * 0.56))
   const every = Math.max(1, Math.round(days.length / 7))
   const many = barSeries.length > 1
 
@@ -175,9 +193,6 @@ export function Activity({
                 </text>
               </g>
             ))}
-
-            <text x={PAD_L} y={11} className="chart-axis left">{barsLabel}</text>
-            <text x={W - PAD_R} y={11} className="chart-axis right" textAnchor="end">Share</text>
 
             {days.map((d, i) => {
               let base = yBar(0)

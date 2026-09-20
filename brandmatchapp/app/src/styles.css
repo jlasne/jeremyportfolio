@@ -3459,3 +3459,141 @@ body { background: var(--paper); }
   .desk-rows li { grid-template-columns: 34px minmax(0, 1fr); }
   .desk-rows .select { grid-column: 2; }
 }
+
+/* ===========================================================================
+   The app's surface, in one place.
+   ---------------------------------------------------------------------------
+   This block is last on purpose. Rules for the same thing had accumulated in
+   four places over the life of this file, so the winner was whichever came
+   later rather than whichever was meant; everything to do with the rhythm and
+   the surfaces of the app now lives here and nowhere else.
+
+   Two ideas hold it together.
+
+   One rhythm. Every block inside a page is separated by the same distance,
+   set once, instead of card-to-card having a margin and every other pair
+   having none. That was the collision: a chart card and the two lists under
+   it were not overlapping, they were touching, and a heading and its subhead
+   were overlapping by the six pixels one of them was pulled up by.
+
+   A hairline, not a shadow. On a light ground a 30% black shadow reads as
+   dirt under the card. The border carries the edge and the shadow is barely
+   there, which is what every dense product interface does.
+   =========================================================================== */
+
+:root {
+  /* Dense data surfaces want less curve than a marketing page. */
+  --radius-app: 16px;
+  --gap-block: 18px;
+  --shadow-app: 0 1px 2px rgba(29, 29, 31, 0.04);
+  --shadow-lift: 0 10px 30px rgba(29, 29, 31, 0.10), 0 2px 6px rgba(29, 29, 31, 0.05);
+}
+
+/* --- the rhythm ---------------------------------------------------------- */
+
+.page > * + * { margin-top: var(--gap-block); }
+/* A heading and the line under it are one thing, so they sit closer. */
+.page > .page-head + .subhead { margin-top: 2px; }
+.page > .subhead { margin-top: 2px; padding: 0; }
+.page-head { padding: 24px 0 0; margin-bottom: 0; }
+.page > .page-head:first-child { padding-top: 26px; }
+.card + .card { margin-top: var(--gap-block); }
+/* Ad hoc spacing set per screen, now that every pair has the same rule. */
+.campaign-list + .split-card, .split-card + .chart-card, .chart-card, .tiles { margin-top: var(--gap-block); }
+.tiles { margin-bottom: 0; }
+.two-up { gap: var(--gap-block); }
+
+/* --- the surfaces -------------------------------------------------------- */
+
+.card, .list, .tile, .idea, .crm, .drawer, .empty {
+  border-radius: var(--radius-app);
+  box-shadow: var(--shadow-app);
+}
+.card { padding: 20px 22px; border-color: var(--line); }
+.card h2 { margin-bottom: 14px; }
+.list, .crm { box-shadow: var(--shadow-app); }
+.sheet { border-radius: 20px; box-shadow: var(--shadow-lift); }
+.file-menu, .chart-tip { box-shadow: var(--shadow-lift); }
+
+/* --- the numbers --------------------------------------------------------- */
+
+/* Thirty four pixels is a headline, not a figure. A tile is read in a row of
+   five and the row has to scan as one line. */
+.tile { padding: 18px 20px; }
+.tile b { font-size: 27px; letter-spacing: -0.02em; }
+.tile span { font-size: 13px; margin-top: 4px; }
+.tile small { margin-top: 5px; font-size: 11px; color: var(--ink-3); }
+
+/* --- charts -------------------------------------------------------------- */
+
+.chart-card { padding-bottom: 14px; }
+.chart-head { align-items: center; gap: 12px; flex-wrap: wrap; }
+.chart-head h2 { margin-bottom: 0; }
+.chart-legend { margin: 14px 0 2px; gap: 18px; }
+.chart-grid { stroke: rgba(29, 29, 31, 0.07); }
+.chart-tick { font-size: 9.5px; }
+.chart-axis { font-size: 9.5px; letter-spacing: 0.06em; }
+.chart-wrap { margin-top: 2px; }
+
+/* --- controls ------------------------------------------------------------ */
+
+.filter-row { padding: 0; gap: 6px; }
+.table-tools { row-gap: 12px; }
+/* The two control rows belong to each other, so they sit closer than blocks. */
+.table-tools + .filter-row, .filter-row + .filter-row { margin-top: 10px; }
+.drawer { margin-top: 12px; }
+
+/* --- the rail ------------------------------------------------------------ */
+
+.sidenav { padding: 18px 12px; }
+.sidenav a, .nav-button { height: 36px; font-size: 13.5px; }
+.nav-foot { padding-top: 12px; margin-top: auto; }
+
+/* The legend names the series, so the axes only carry their numbers. The
+   colour on each side of the frame says which marks it belongs to. */
+.chart-legend { font-size: 12px; }
+.chart-legend b { margin-left: 2px; }
+.chart-tick.left { fill: var(--orange-deep); }
+.chart-tick.right { fill: var(--ink-3); }
+
+/* The detail panel beside the list.
+   It is taller than the screen on most people, and a sticky box taller than
+   the viewport hides its own foot: the page scrolls past it and the bottom of
+   the panel is unreachable. The panel scrolls inside itself instead, and the
+   Close above it stays put. */
+.panel-side {
+  position: sticky; top: 16px;
+  max-height: calc(100vh - 32px);
+  display: flex; flex-direction: column; gap: 8px; align-items: flex-end;
+}
+.lead-panel { overflow-y: auto; min-height: 0; overscroll-behavior: contain; }
+
+/* A focus ring belongs to the row, not to the half of it that took the click. */
+.contact .who:focus-visible, .campaign-row:focus-visible, .mini-list a:focus-visible {
+  outline: 2px solid var(--orange); outline-offset: 2px; border-radius: 10px;
+}
+.contact:focus-within { background: var(--paper); }
+
+/* --- the last details ---------------------------------------------------- */
+
+/* The help sheet's rows: the words take the room, the actions take what they
+   need, and neither wraps under the other. */
+.sheet { width: min(500px, 100%); }
+.help-ways li { align-items: center; gap: 20px; }
+.help-ways li > div:first-child { flex: 1 1 auto; min-width: 0; }
+.help-mail { flex: 0 0 auto; flex-wrap: nowrap; }
+.help-mail .btn { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+
+/* An idea is three short lines. It was wearing the padding of a page. */
+.idea { padding: 16px 20px; gap: 14px; grid-template-columns: 58px minmax(0, 1fr); }
+.idea-vote { padding: 8px 0; }
+.idea-vote b { font-size: 16px; }
+.idea-foot { margin-top: 8px; }
+
+/* A field that takes one email does not need the width of a page. */
+.invite-row { gap: 8px; }
+.invite-row .input { max-width: 300px; }
+
+/* Empty states sit inside a list, so they carry the list's own edge. */
+.empty { box-shadow: none; }
+.list .empty, .with-panel .empty { border: 0; }

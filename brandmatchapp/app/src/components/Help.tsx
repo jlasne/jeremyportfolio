@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 // Getting hold of us.
 //
@@ -6,6 +7,11 @@ import { useEffect, useRef, useState } from 'react'
 // greyed and labelled, because a help panel that hides what is coming is a
 // panel people stop opening. The one that works is an email address, answered
 // by the person who wrote this.
+//
+// It is drawn into the body rather than where it is written. The button that
+// opens it lives in the rail, and the rail is sticky, which makes it a
+// stacking context: a fixed panel inside one is trapped underneath the page,
+// and this one was coming up behind the dashboard's chart.
 
 const EMAIL = 'hey@jeremylasne.com'
 
@@ -21,7 +27,7 @@ export function Help({ onClose }: { onClose: () => void }) {
     return () => document.removeEventListener('keydown', key)
   }, [onClose])
 
-  return (
+  return createPortal(
     <div
       className="sheet-ground"
       role="dialog"
@@ -77,6 +83,7 @@ export function Help({ onClose }: { onClose: () => void }) {
           can vote for it.
         </p>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
