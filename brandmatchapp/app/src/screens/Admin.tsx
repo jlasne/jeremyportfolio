@@ -3,6 +3,7 @@ import { api, hasKey, isDemo, ops, setKey, setDemo, type OpsCampaign, type OpsDa
 import { analysisBudgetPerDay, analysedToday, crawlRuns, opsCampaigns, opsDays } from '../mock/ops'
 import { money, relative } from '../lib/format'
 import { Info } from '../components/Info'
+import { editIdea, listIdeas, STATE_LABEL, TAGS, type IdeaState } from '../data/ideas'
 
 // The internal screen, and the only one that reads the ops surface.
 //
@@ -233,6 +234,8 @@ export function Admin() {
         <p className="hint">Grey is analysed, orange is qualified, and the cost under each day is the crawl for that day.</p>
       </div>
 
+      <RoadmapDesk />
+
       <div className="card">
         <h2>Crawl runs</h2>
         <ul className="rules">
@@ -248,6 +251,53 @@ export function Admin() {
           ))}
         </ul>
       </div>
+    </div>
+  )
+}
+
+/**
+ * The roadmap from our side. The text belongs to whoever wrote it and is
+ * never rewritten here: what an operator owns is where an idea stands and
+ * what it is filed under, which is what a client reads the roadmap for.
+ */
+function RoadmapDesk() {
+  const [, bump] = useState(0)
+  const ideas = listIdeas().sort((a, b) => b.votes - a.votes)
+  const states: IdeaState[] = ['considering', 'planned', 'building', 'shipped']
+  return (
+    <div className="card">
+      <h2>
+        Roadmap
+        <Info text="Votes are the clients'. The state and the tag are yours, and a client sees them the moment you set them." />
+      </h2>
+      <ul className="desk-rows">
+        {ideas.map((idea) => (
+          <li key={idea.id}>
+            <span className="desk-votes num">{idea.votes}</span>
+            <span className="desk-title">
+              {idea.title}
+              <small className="muted">{idea.by}</small>
+            </span>
+            <select
+              className="select"
+              value={idea.state}
+              aria-label={`State of ${idea.title}`}
+              onChange={(e) => { editIdea(idea.id, { state: e.target.value as IdeaState }); bump((n) => n + 1) }}
+            >
+              {states.map((st) => <option key={st} value={st}>{STATE_LABEL[st]}</option>)}
+            </select>
+            <select
+              className="select"
+              value={TAGS.includes(idea.tag) ? idea.tag : TAGS[0]}
+              aria-label={`Tag of ${idea.title}`}
+              onChange={(e) => { editIdea(idea.id, { tag: e.target.value }); bump((n) => n + 1) }}
+            >
+              {TAGS.map((t) => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </li>
+        ))}
+      </ul>
+      <p className="hint">Kept in this browser until the roadmap has a server behind it.</p>
     </div>
   )
 }

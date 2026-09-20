@@ -21,16 +21,19 @@ import { Logo } from './Logo'
 
 interface Item { href: string; label: string; name: Route['name']; soon?: boolean }
 
+// The three numbered ones are a sequence: you write a campaign, it brings
+// leads, and your own AI works them. Numbering them says the order out loud
+// to somebody opening the product for the first time.
 const ITEMS: Item[] = [
   { href: '#/app', label: 'Dashboard', name: 'dashboard' },
-  { href: '#/campaigns', label: 'Campaigns', name: 'campaigns' },
-  { href: '#/leads', label: 'Leads', name: 'leads' },
-  { href: '#/ai', label: 'AI Connect', name: 'ai' },
+  { href: '#/campaigns', label: '1. Campaigns', name: 'campaigns' },
+  { href: '#/leads', label: '2. Leads', name: 'leads' },
+  { href: '#/ai', label: '3. AI Connect', name: 'ai' },
   { href: '#/outreach', label: 'Outreach', name: 'outreach', soon: true },
 ]
 
 const FOOT: Item[] = [
-  { href: '#/roadmap', label: 'Roadmap and Ideas', name: 'roadmap' },
+  { href: '#/roadmap', label: 'Roadmap', name: 'roadmap' },
   { href: '#/account', label: 'Account', name: 'account' },
 ]
 

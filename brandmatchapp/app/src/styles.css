@@ -3397,3 +3397,65 @@ body { background: var(--paper); }
 .table-tools .select { width: auto; min-width: 150px; max-width: 240px; align-self: center; }
 .table-tools .search-field { flex: 1 1 200px; min-width: 160px; max-width: 320px; align-self: center; }
 .table-tools .btn { align-self: center; }
+
+/* The campaign page reads top to bottom as three separate decisions, so the
+   cards are given room rather than stacked flush. */
+.campaign-list + .split-card { margin-top: 22px; }
+.split-card + .chart-card { margin-top: 22px; }
+
+/* The dashboard reads the other way: the two lists under the chart are one
+   row, so they finish at the same line however long each list is. */
+.two-up.level { align-items: stretch; }
+.two-up.level > .card { display: flex; flex-direction: column; }
+.two-up.level > .card .mini-list { flex: 1 1 auto; }
+
+.tiles.four { grid-template-columns: repeat(auto-fit, minmax(min(170px, 100%), 1fr)); }
+
+/* The window picker sits inside the chart's head. */
+.chart-range { display: flex; gap: 4px; }
+.chart-range .chip { font-size: 12px; padding: 3px 10px; }
+
+/* Left axis wears the bars' colour, right axis the lines'. Without that a
+   reader has no way to know which side a mark belongs to. */
+.chart-tick.left, .chart-axis.left { fill: var(--orange-deep); }
+.chart-tick.right, .chart-axis.right { fill: var(--ink-2); }
+.chart-legend i.dash { width: 14px; height: 2px; border-radius: 1px; }
+.chart-tip li i.dash { width: 10px; height: 2px; border-radius: 1px; }
+
+/* The CRM view: the same rows, as a table you can write in. */
+.crm { width: 100%; border-collapse: collapse; background: var(--panel); border-radius: var(--radius-card); overflow: hidden; }
+.crm th, .crm td { padding: 10px 14px; text-align: left; vertical-align: middle; border-bottom: 1px solid var(--line); }
+.crm thead th {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--ink-3); font-weight: 600; background: var(--paper-2); white-space: nowrap;
+}
+.crm tbody th { font-weight: 600; min-width: 170px; }
+.crm tbody th a { color: var(--ink); }
+.crm tbody th a:hover { color: var(--orange-deep); }
+.crm tbody th small { display: block; font-weight: 400; color: var(--ink-3); font-size: 11.5px; }
+.crm tbody tr:last-child th, .crm tbody tr:last-child td { border-bottom: 0; }
+.crm .select { width: auto; min-width: 128px; height: 32px; font-size: 13px; }
+.crm-tags { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; min-width: 150px; }
+.crm-tags .tag-chip { border: 1px solid var(--line); cursor: pointer; font: inherit; font-size: 11.5px; }
+.crm-tags .tag-chip:hover { border-color: var(--orange-line); color: var(--orange-darker); }
+.crm-tag-input { width: 110px; height: 28px; font-size: 12.5px; }
+.crm-note { width: 100%; min-width: 180px; height: 32px; font-size: 13px; }
+.crm-mail { font-size: 12.5px; color: var(--ink-2); white-space: nowrap; }
+.crm-mail a { color: var(--ink-2); }
+.crm-mail a:hover { color: var(--orange-deep); }
+
+/* The operator's roadmap desk: a vote, a title, and the two things we own. */
+.desk-rows { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; }
+.desk-rows li {
+  display: grid; grid-template-columns: 40px minmax(0, 1fr) 150px 140px; gap: 12px; align-items: center;
+  padding: 9px 0; border-top: 1px solid var(--line);
+}
+.desk-rows li:first-child { border-top: 0; }
+.desk-votes { font-weight: 600; color: var(--ink-2); }
+.desk-title { display: flex; flex-direction: column; min-width: 0; font-size: 13.5px; }
+.desk-title small { font-size: 11.5px; }
+.desk-rows .select { width: 100%; height: 32px; font-size: 13px; }
+@media (max-width: 860px) {
+  .desk-rows li { grid-template-columns: 34px minmax(0, 1fr); }
+  .desk-rows .select { grid-column: 2; }
+}

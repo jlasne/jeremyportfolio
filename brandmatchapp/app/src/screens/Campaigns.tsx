@@ -1,4 +1,4 @@
-import { deliveredToday, getActivity, getCampaigns, getDelivery, getSubscription } from '../data'
+import { deliveredToday, getActivity, getCampaigns, getDelivery, getFitHistory, getSubscription } from '../data'
 import { useStore } from '../data/hooks'
 import { setDailyCap } from '../data/store'
 import { Activity } from '../components/Activity'
@@ -16,57 +16,35 @@ import type { Campaign } from '../types'
 /**
  * How many leads a day each campaign may take.
  *
- * One line a campaign, one bar above them, and no prose. Everything a client
- * needs is the number they set and the number still free.
+ * One slider a campaign and the number beside it. No summary bar above them:
+ * with a handful of campaigns the sliders are the summary, and a second way
+ * of drawing the same split was a second thing to read.
+ *
+ * A slider stops at what the others have left, so the numbers can never add
+ * up to more than the plan. A control that lets you set something impossible
+ * and then explains why is a control that wasted your time.
  */
 function Split({ campaigns, tier }: { campaigns: Campaign[]; tier: number }) {
   if (campaigns.length < 2) return null
-  const set = campaigns.filter((c) => c.dailyCap !== null)
-  // Older accounts may hold numbers adding up to more than the plan, from
-  // before the sliders stopped at it. The bar reads against whichever is
-  // larger, so it never draws past its own end.
-  const spoken = set.reduce((n, c) => n + (c.dailyCap ?? 0), 0)
-  const sharing = campaigns.length - set.length
+  const taken = (except: string) =>
+    campaigns.filter((c) => c.id !== except).reduce((n, c) => n + (c.dailyCap ?? 0), 0)
+  const spoken = campaigns.reduce((n, c) => n + (c.dailyCap ?? 0), 0)
   const free = Math.max(0, tier - spoken)
-  const widest = Math.max(tier, spoken)
 
   return (
     <div className="card split-card tight">
       <div className="chart-head">
         <h2>
-          Your {tier} a day
-          <Info text="Each campaign takes at most its number, and the numbers cannot add up to more than your plan. A campaign left on the rest takes whatever the others leave that morning." />
+          How many leads a day
+          <Info text="Your plan is bought by the account and spent by the campaigns. Each slider stops at what the others have left, so the numbers always fit inside the plan." />
         </h2>
-        <span className="faint num">
-          {spoken} set{free > 0 ? `, ${free} free` : ''}{sharing > 0 ? `, shared by ${sharing}` : ''}
-        </span>
-      </div>
-
-      <div className="split-bar">
-        {campaigns.map((c, i) => {
-          const share = c.dailyCap === null ? free / Math.max(1, sharing) : c.dailyCap
-          return (
-            <i
-              key={c.id}
-              className={`s${i % 4}`}
-              style={{ width: `${Math.round((share / widest) * 100)}%` }}
-              title={`${c.name}: ${c.dailyCap ?? 'whatever is left'}`}
-            />
-          )
-        })}
-        {free > 0 && sharing === 0 && (
-          <i className="free" style={{ width: `${Math.round((free / widest) * 100)}%` }} title="Not asked for" />
-        )}
+        <span className="faint num">{spoken} of {tier} a day{free ? `, ${free} free` : ''}</span>
       </div>
 
       <ul className="split-rows">
         {campaigns.map((c, i) => {
-          // What the others have already taken decides this one's ceiling, so
-          // the sum can never pass the plan.
-          const others = campaigns
-            .filter((x) => x.id !== c.id)
-            .reduce((n, x) => n + (x.dailyCap ?? 0), 0)
-          const ceiling = Math.max(0, tier - others)
+          const ceiling = Math.max(0, tier - taken(c.id))
+          const value = Math.min(c.dailyCap ?? ceiling, ceiling)
           return (
             <li key={c.id}>
               <span className={`split-dot s${i % 4}`} aria-hidden="true" />
@@ -74,19 +52,12 @@ function Split({ campaigns, tier }: { campaigns: Campaign[]; tier: number }) {
               <input
                 type="range"
                 min={0}
-                max={ceiling}
-                value={Math.min(c.dailyCap ?? 0, ceiling)}
+                max={Math.max(1, ceiling)}
+                value={value}
                 aria-label={`${c.name}, leads a day`}
                 onChange={(e) => setDailyCap(c.id, Number(e.target.value))}
               />
-              <b className="num">{c.dailyCap === null ? 'the rest' : `${c.dailyCap} a day`}</b>
-              <button
-                type="button"
-                className="btn small quiet"
-                onClick={() => setDailyCap(c.id, c.dailyCap === null ? Math.min(ceiling, Math.floor(tier / campaigns.length)) : null)}
-              >
-                {c.dailyCap === null ? 'Set a number' : 'Take the rest'}
-              </button>
+              <b className="num">{value} a day</b>
             </li>
           )
         })}
@@ -99,16 +70,21 @@ export function Campaigns() {
   useStore()
   const campaigns = getCampaigns()
   const plan = getSubscription()
-  const activity = getActivity(30)
+  const activity = getActivity()
 
-  // The bars are what each campaign handed over; the line is how well the
-  // search itself did that day. Same dates, two questions.
+  // The bars are what each campaign handed over. One line says how well the
+  // search did that day, the other says what the client was asking for, so a
+  // drop can be read as the world changing or as the client changing the bar.
   const dates = activity.map((d) => d.date)
   const bars = campaigns.map((c) => {
     const rows = new Map(getDelivery(c.id).map((r) => [r.date, r.delivered]))
     return { id: c.id, name: c.name, values: dates.map((d) => rows.get(d) ?? 0) }
   })
-  const line = activity.map((d) => (d.scored ? d.qualified / d.scored : 0))
+  const first = campaigns[0]
+  const lines = [
+    { id: 'qualified', name: 'Share that qualified', values: activity.map((d) => (d.scored ? d.qualified / d.scored : 0)) },
+    ...(first ? [{ id: 'fit', name: 'Brand fit you asked for', values: getFitHistory(first.id, dates) }] : []),
+  ]
 
   return (
     <div className="page">
@@ -150,9 +126,8 @@ export function Campaigns() {
         title="What each campaign delivered this month"
         dates={dates}
         bars={bars}
-        barsLabel="Leads delivered a day"
-        line={line}
-        lineLabel="Share that qualified"
+        barsLabel="Leads delivered"
+        lines={lines}
       />
     </div>
   )

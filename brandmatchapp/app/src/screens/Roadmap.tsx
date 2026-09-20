@@ -102,7 +102,7 @@ export function Roadmap() {
   return (
     <div className="page">
       <div className="page-head">
-        <h1>Roadmap and Ideas</h1>
+        <h1>Roadmap</h1>
         <span className="spacer" />
         {tab === 'ideas' && !writing && (
           <button type="button" className="btn primary" onClick={() => setWriting(true)}>Add an idea</button>

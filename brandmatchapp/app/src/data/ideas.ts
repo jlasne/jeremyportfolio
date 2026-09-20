@@ -85,10 +85,29 @@ function write(key: string, value: unknown): void {
   try { window.localStorage.setItem(key, JSON.stringify(value)) } catch { /* storage off */ }
 }
 
+/**
+ * What the operator has changed about an idea: where it stands, and what it
+ * is about. The text belongs to whoever wrote it and is never rewritten from
+ * here; the state and the tag are ours to keep honest.
+ */
+const EDITS = 'brandmatch.ideaEdits'
+type Edit = { state?: IdeaState; tag?: string }
+
 export function listIdeas(): Idea[] {
   const mine = read<Idea[]>(MINE, [])
   const voted = read<string[]>(VOTED, [])
-  return [...mine, ...SEED].map((i) => ({ ...i, votes: i.votes + (voted.includes(i.id) ? 1 : 0) }))
+  const edits = read<Record<string, Edit>>(EDITS, {})
+  return [...mine, ...SEED].map((i) => ({
+    ...i,
+    ...edits[i.id],
+    votes: i.votes + (voted.includes(i.id) ? 1 : 0),
+  }))
+}
+
+/** Operator only. Moves an idea along, or files it under something else. */
+export function editIdea(id: string, patch: Edit): void {
+  const edits = read<Record<string, Edit>>(EDITS, {})
+  write(EDITS, { ...edits, [id]: { ...edits[id], ...patch } })
 }
 
 export function hasVoted(id: string): boolean {

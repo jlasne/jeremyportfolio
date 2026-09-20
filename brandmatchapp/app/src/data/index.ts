@@ -364,7 +364,7 @@ export interface ActivityDay {
  * A real account reads this from the server, which counts every profile
  * scored. The sample computes it from its own evaluations.
  */
-export function getActivity(days = 30): ActivityDay[] {
+export function getActivity(days = 365): ActivityDay[] {
   const s = getState()
   if (s.activity.length) return s.activity.slice(-days)
   const since = Date.now() - days * 86_400_000
@@ -408,16 +408,45 @@ export function getHotLeads(limit = 5): LeadRow[] {
     .slice(0, limit)
 }
 
-/** Campaigns by what they actually bring in a day, busiest first. */
-export function getCampaignRank(days = 30): { campaign: Campaign; perDay: number; delivered: number }[] {
+/**
+ * Campaigns by what they actually bring in a day, busiest first, with the
+ * whole count beside it. The rate says which one is carrying the account
+ * today; the total says which one has carried it.
+ */
+export function getCampaignRank(days = 30): {
+  campaign: Campaign
+  perDay: number
+  delivered: number
+  qualified: number
+}[] {
   const s = getState()
   const since = new Date(Date.now() - days * 86_400_000).toISOString()
   return s.campaigns
     .map((campaign) => {
-      const delivered = s.leads.filter((l) => l.campaignId === campaign.id && l.deliveredAt >= since).length
-      return { campaign, delivered, perDay: Math.round((delivered / days) * 10) / 10 }
+      const mine = s.leads.filter((l) => l.campaignId === campaign.id)
+      const delivered = mine.filter((l) => l.deliveredAt >= since).length
+      return { campaign, delivered, qualified: mine.length, perDay: Math.round((delivered / days) * 10) / 10 }
     })
-    .sort((a, b) => b.perDay - a.perDay)
+    .sort((a, b) => b.qualified - a.qualified)
+}
+
+/**
+ * The brand fit a campaign asked for, day by day.
+ *
+ * Read off the gate versions: each one records what it demanded and when it
+ * was written, so the line steps on the day the client moved it. Without it,
+ * a drop in what qualified reads as the world changing when it was the client
+ * changing their mind.
+ */
+export function getFitHistory(campaignId: string, dates: string[]): number[] {
+  const versions = getGateVersions(campaignId)
+    .slice()
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+  if (!versions.length) return dates.map(() => 0)
+  return dates.map((date) => {
+    const inForce = versions.filter((g) => g.createdAt.slice(0, 10) <= date).pop() ?? versions[0]
+    return inForce.passScore / Math.max(1, inForce.criteria.length * 2)
+  })
 }
 
 /**
@@ -431,4 +460,23 @@ export function nextBatchIn(): { hours: number; minutes: number } {
   if (next.getTime() <= now.getTime()) next.setUTCDate(next.getUTCDate() + 1)
   const ms = next.getTime() - now.getTime()
   return { hours: Math.floor(ms / 3_600_000), minutes: Math.floor((ms % 3_600_000) / 60_000) }
+}
+
+/**
+ * The brand fit a campaign asks for, as a percentage.
+ *
+ * With no campaign named, the average across the live ones, because that is
+ * the bar the list as a whole was filled against. The lead list starts there:
+ * a filter that starts at zero starts below anything the account would ever
+ * be sent, which reads as though the rules had not been applied.
+ */
+export function getFitFloor(campaignId?: string | null): number {
+  const s = getState()
+  const shares = s.campaigns
+    .filter((c) => (campaignId ? c.id === campaignId : true))
+    .map((c) => getGateSet(c.id))
+    .filter((g): g is GateSet => Boolean(g))
+    .map((g) => fitPercent(g.passScore, g.criteria.length * 2))
+  if (!shares.length) return 0
+  return Math.round(shares.reduce((n, v) => n + v, 0) / shares.length)
 }

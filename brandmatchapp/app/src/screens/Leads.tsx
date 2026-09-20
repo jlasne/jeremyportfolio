@@ -1,12 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  fitOf, getAccountShape, getCampaigns, getGateSet, getLeadEvents, getLeadRow, getTags, listLeads, todayCount,
-  type LeadRow,
+  fitOf, getAccountShape, getCampaigns, getFitFloor, getGateSet, getLeadEvents, getLeadRow, getTags, listLeads,
+  todayCount, type LeadRow,
 } from '../data'
 import { useStore } from '../data/hooks'
-import {
-  createTag, deleteTag, moveLead, recordDeal, renameTag, setNote, tagLead, toggleSaved, undoMove, untagLead,
-} from '../data/store'
+import { moveLead, recordDeal, setNote, tagLead, toggleSaved, undoMove, untagLead } from '../data/store'
 import { LOST_LABEL, LOST_REASONS, STATUSES, STATUS_LABEL } from '../data/status'
 import { Avatar } from '../components/Avatar'
 import { Range } from '../components/Range'
@@ -38,7 +36,6 @@ import type { Creator, LeadStatus } from '../types'
 
 /** The whole span a size range can cover. Nobody under 5k, no ceiling above 5M. */
 const SIZE_SPAN: [number, number] = [5_000, 5_000_000]
-const FIT_SPAN: [number, number] = [0, 100]
 const VIEW_SPAN: [number, number] = [0, 1_000_000]
 
 const ADDED: { days: number | null; label: string }[] = [
@@ -483,82 +480,124 @@ function FilterDrawer({ value, onChange }: { value: Filters; onChange: (next: Fi
   )
 }
 
-function TagDrawer({ picked, onPick }: { picked: string[]; onPick: (next: string[]) => void }) {
-  const tags = getTags()
-  const [fresh, setFresh] = useState('')
+/**
+ * The same rows, as a table you can write in.
+ *
+ * The list is for deciding who to contact; this is for filing what happened
+ * afterwards, which is a different job and wants different hands. Everything
+ * here saves as you leave the field, and every field has a route behind it,
+ * so a hundred rows edited by a model and three edited here end up in the
+ * same place.
+ */
+function Crm({ rows, onMoved }: { rows: LeadRow[]; onMoved: (id: string) => void }) {
+  const all = getTags()
   const [editing, setEditing] = useState<string | null>(null)
-  const [name, setName] = useState('')
+  const [fresh, setFresh] = useState('')
+
+  if (!rows.length) {
+    return (
+      <div className="empty">
+        <h2>Nothing matches</h2>
+        <p>Try a wider filter, or clear the search.</p>
+      </div>
+    )
+  }
 
   return (
-    <div className="card drawer">
-      <p className="drawer-label">
-        Your own labels, beside our pipeline. Filter on them here, write them on a lead in its last column, or let
-        your AI file a hundred at once through <a href="#/ai">the API</a>.
-      </p>
-      <ul className="tag-rows">
-        {tags.map((t) => (
-          <li key={t.name}>
-            {editing === t.name ? (
-              <>
-                <input
-                  className="input"
-                  autoFocus
-                  value={name}
-                  aria-label={`Rename ${t.name}`}
-                  onChange={(e) => setName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') { renameTag(t.name, name); setEditing(null) }
-                    if (e.key === 'Escape') setEditing(null)
-                  }}
-                />
-                <button type="button" className="btn small" onClick={() => { renameTag(t.name, name); setEditing(null) }}>
-                  Save
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  className={`chip${picked.includes(t.name) ? ' on' : ''}`}
-                  onClick={() => onPick(picked.includes(t.name) ? picked.filter((x) => x !== t.name) : [...picked, t.name])}
-                >
-                  {t.name}
-                </button>
-                <span className="faint num">{t.count}</span>
-                <button
-                  type="button"
-                  className="btn small quiet"
-                  onClick={() => { setEditing(t.name); setName(t.name) }}
-                >
-                  Rename
-                </button>
-                <button
-                  type="button"
-                  className="btn small quiet drop"
-                  aria-label={`Delete ${t.name}`}
-                  onClick={() => { deleteTag(t.name); onPick(picked.filter((x) => x !== t.name)) }}
-                >
-                  ✕
-                </button>
-              </>
-            )}
-          </li>
-        ))}
-        {tags.length === 0 && <li><span className="faint">No tags yet. Your first one goes below.</span></li>}
-      </ul>
-      <div className="file-new">
-        <input
-          className="input"
-          placeholder="Make a tag"
-          aria-label="Make a tag"
-          value={fresh}
-          onChange={(e) => setFresh(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter' && fresh.trim()) { createTag(fresh); setFresh('') } }}
-        />
-        <button type="button" className="btn small" disabled={!fresh.trim()} onClick={() => { createTag(fresh); setFresh('') }}>
-          Make it
-        </button>
-      </div>
+    <div className="compare-scroll">
+      <table className="crm">
+        <thead>
+          <tr>
+            <th>Who</th>
+            <th>Where they are</th>
+            <th>Tags</th>
+            <th>Your note</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => {
+            const { lead, creator } = row
+            const mine = lead.tags ?? []
+            return (
+              <tr key={lead.id}>
+                <th>
+                  <a href={`#/leads/${lead.id}`}>{creator.name}</a>
+                  <small>@{creator.handle} · {compact(creator.followers)} · {fitOf(row)}%</small>
+                </th>
+                <td>
+                  <select
+                    className="select"
+                    value={lead.status}
+                    aria-label={`Status of ${creator.name}`}
+                    onChange={(e) => {
+                      const to = e.target.value as LeadStatus
+                      moveLead(lead.id, to, 'mem_1', to === 'lost' ? 'no_answer' : undefined)
+                      onMoved(lead.id)
+                    }}
+                  >
+                    {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
+                  </select>
+                </td>
+                <td>
+                  <div className="crm-tags">
+                    {mine.map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        className="tag-chip"
+                        title={`Take ${t} off ${creator.name}`}
+                        onClick={() => untagLead(lead.id, t)}
+                      >
+                        {t} ✕
+                      </button>
+                    ))}
+                    {editing === lead.id ? (
+                      <input
+                        className="input crm-tag-input"
+                        autoFocus
+                        list="brandmatch-tags"
+                        placeholder="Tag"
+                        aria-label={`Add a tag to ${creator.name}`}
+                        value={fresh}
+                        onChange={(e) => setFresh(e.target.value)}
+                        onBlur={() => { if (fresh.trim()) tagLead(lead.id, fresh); setFresh(''); setEditing(null) }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') { if (fresh.trim()) tagLead(lead.id, fresh); setFresh(''); setEditing(null) }
+                          if (e.key === 'Escape') { setFresh(''); setEditing(null) }
+                        }}
+                      />
+                    ) : (
+                      <button
+                        type="button"
+                        className="tag-chip more"
+                        onClick={() => { setEditing(lead.id); setFresh('') }}
+                      >
+                        + tag
+                      </button>
+                    )}
+                  </div>
+                </td>
+                <td>
+                  <input
+                    className="input crm-note"
+                    defaultValue={lead.note ?? ''}
+                    placeholder="What you want to remember"
+                    aria-label={`Note about ${creator.name}`}
+                    onBlur={(e) => setNote(lead.id, e.target.value.trim())}
+                  />
+                </td>
+                <td className="crm-mail">
+                  {creator.email ? <a href={`mailto:${creator.email}`}>{creator.email}</a> : <small className="faint">none</small>}
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+      <datalist id="brandmatch-tags">
+        {all.map((t) => <option key={t.name} value={t.name} />)}
+      </datalist>
     </div>
   )
 }
@@ -570,10 +609,15 @@ export function Leads({ leadId, query: params }: { leadId: string | null; query:
   const campaigns = getCampaigns()
   const [campaignId, setCampaignId] = useState<string | null>(null)
   const [status, setStatus] = useState<LeadStatus | null>(null)
-  const [fit, setFit] = useState<[number, number]>(FIT_SPAN)
+  // The floor starts where the campaign's own rules are: a filter that starts
+  // at zero starts below anything this account would ever be sent, which
+  // reads as though the rules had not been applied at all.
+  const [fit, setFit] = useState<[number, number]>(() => [getFitFloor(null), 100])
   const [filters, setFilters] = useState<Filters>(NO_FILTERS)
   const [tags, setTags] = useState<string[]>([])
-  const [drawer, setDrawer] = useState<'filters' | 'tags' | null>(null)
+  const [drawer, setDrawer] = useState<'filters' | null>(null)
+  /** The list, or the same rows as a table you can write in. */
+  const [crm, setCrm] = useState(false)
   const [search, setSearch] = useState('')
   const [moved, setMoved] = useState<string | null>(null)
   const timer = useRef<number | null>(null)
@@ -585,6 +629,11 @@ export function Leads({ leadId, query: params }: { leadId: string | null; query:
     if (params.status && STATUSES.includes(params.status as LeadStatus)) setStatus(params.status as LeadStatus)
     if (params.campaign) setCampaignId(params.campaign)
   }, [incoming])
+
+  // Picking a campaign moves the floor to what that campaign asks for, and
+  // clearing it goes back to the average. Anything the client dragged
+  // themselves afterwards stays put until they change campaign again.
+  useEffect(() => { setFit([getFitFloor(campaignId), 100]) }, [campaignId])
 
   const query = {
     campaignId,
@@ -685,11 +734,11 @@ export function Leads({ leadId, query: params }: { leadId: string | null; query:
         </button>
         <button
           type="button"
-          className={`btn${drawer === 'tags' ? ' on' : ''}`}
-          aria-expanded={drawer === 'tags'}
-          onClick={() => setDrawer(drawer === 'tags' ? null : 'tags')}
+          className={`btn${crm ? ' on' : ''}`}
+          aria-pressed={crm}
+          onClick={() => { setCrm(!crm); setDrawer(null) }}
         >
-          CRM tags{tags.length ? ` · ${tags.length}` : ''}
+          CRM{tags.length ? ` · ${tags.length}` : ''}
         </button>
         <button type="button" className="btn" onClick={exportCsv} disabled={!rows.length}>Export</button>
         <input
@@ -700,30 +749,48 @@ export function Leads({ leadId, query: params }: { leadId: string | null; query:
         />
       </div>
 
-      <div className="filter-row">
-        <button type="button" className={`chip${status === null ? ' on' : ''}`} onClick={() => setStatus(null)}>
-          All
-        </button>
-        {STATUSES.map((s) => (
-          <button key={s} type="button" className={`chip${status === s ? ' on' : ''}`} onClick={() => setStatus(s)}>
-            {STATUS_LABEL[s]}
+      {crm && (
+        <div className="filter-row">
+          <button type="button" className={`chip${status === null ? ' on' : ''}`} onClick={() => setStatus(null)}>
+            All
           </button>
-        ))}
+          {STATUSES.map((s) => (
+            <button key={s} type="button" className={`chip${status === s ? ' on' : ''}`} onClick={() => setStatus(s)}>
+              {STATUS_LABEL[s]}
+            </button>
+          ))}
+          <span className="rule" />
+          {getTags().map((t) => (
+            <button
+              key={t.name}
+              type="button"
+              className={`chip${tags.includes(t.name) ? ' on' : ''}`}
+              onClick={() => setTags(tags.includes(t.name) ? tags.filter((x) => x !== t.name) : [...tags, t.name])}
+            >
+              {t.name} <span className="faint num">{t.count}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="filter-row">
+        <span className="faint num">{rows.length} shown</span>
         <span className="spacer" />
-        {(active > 0 || tags.length > 0 || fit[0] > 0 || fit[1] < 100 || search) && (
+        {(active > 0 || tags.length > 0 || status !== null || fit[0] !== getFitFloor(campaignId) || fit[1] < 100 || search) && (
           <button
             type="button"
             className="btn small quiet"
-            onClick={() => { setFilters(NO_FILTERS); setTags([]); setFit(FIT_SPAN); setSearch('') }}
+            onClick={() => {
+              setFilters(NO_FILTERS); setTags([]); setStatus(null)
+              setFit([getFitFloor(campaignId), 100]); setSearch('')
+            }}
           >
             Clear
           </button>
         )}
-        <span className="faint num">{rows.length} shown</span>
       </div>
 
       {drawer === 'filters' && <FilterDrawer value={filters} onChange={setFilters} />}
-      {drawer === 'tags' && <TagDrawer picked={tags} onPick={setTags} />}
       </>
       )}
 
@@ -733,7 +800,10 @@ export function Leads({ leadId, query: params }: { leadId: string | null; query:
         </p>
       )}
 
-      <div className={open ? 'with-panel' : undefined}>
+      <div className={open && !crm ? 'with-panel' : undefined}>
+        {crm ? (
+          <Crm rows={rows} onMoved={armUndo} />
+        ) : (
         <div className="list">
           {rows.map((row) => (
             <Row
@@ -746,12 +816,13 @@ export function Leads({ leadId, query: params }: { leadId: string | null; query:
           ))}
           {rows.length === 0 && (
             <Empty
-              waiting={!status && !search && !active && !tags.length && fit[0] === 0 && fit[1] === 100}
+              waiting={!status && !search && !active && !tags.length && fit[1] === 100}
               campaignId={campaignId}
             />
           )}
         </div>
-        {open && (
+        )}
+        {open && !crm && (
           <div className="panel-side">
             <button type="button" className="btn small quiet" onClick={() => navigate('leads')}>Close</button>
             <Panel row={open} />

@@ -1,6 +1,4 @@
-import {
-  fitOf, getActivity, getCampaignRank, getCrmUpdates, getHotLeads, getTags, nextBatchIn,
-} from '../data'
+import { fitOf, getActivity, getCampaignRank, getHotLeads, getTags, nextBatchIn } from '../data'
 import { useStore } from '../data/hooks'
 import { Activity } from '../components/Activity'
 import { Avatar } from '../components/Avatar'
@@ -40,18 +38,22 @@ function Tile({ big, label, note }: { big: string; label: string; note?: string 
 
 export function Dashboard() {
   useStore()
-  const activity = getActivity(DAYS)
+  const all = getActivity()
   const hot = getHotLeads(5)
   const rank = getCampaignRank(DAYS).slice(0, 5)
   const live = rank.filter((r) => r.campaign.status === 'live').length
-  const scored = activity.reduce((n, d) => n + d.scored, 0)
-  const qualified = activity.reduce((n, d) => n + d.qualified, 0)
-  const updates = getCrmUpdates(DAYS)
+  // The tiles read the last thirty days whatever the chart is showing: they
+  // are the account's state, not a view of it.
+  const recent = all.slice(-DAYS)
+  const scored = recent.reduce((n, d) => n + d.scored, 0)
+  const qualified = recent.reduce((n, d) => n + d.qualified, 0)
   const tags = getTags()
 
-  const dates = activity.map((d) => d.date)
-  const bars = [{ id: 'scored', name: 'Profiles read', values: activity.map((d) => d.scored) }]
-  const line = activity.map((d) => (d.scored ? d.qualified / d.scored : 0))
+  const dates = all.map((d) => d.date)
+  const bars = [{ id: 'scored', name: 'Profiles read', values: all.map((d) => d.scored) }]
+  const lines = [
+    { id: 'qualified', name: 'Share that qualified', values: all.map((d) => (d.scored ? d.qualified / d.scored : 0)) },
+  ]
 
   if (!rank.length) {
     return (
@@ -78,18 +80,12 @@ export function Dashboard() {
     <div className="page">
       <div className="page-head">
         <h1>Welcome</h1>
-        <span className="count num">{live} {live === 1 ? 'campaign' : 'campaigns'} running</span>
       </div>
-      <p className="subhead">
-        We read {scored.toLocaleString('en-GB')} profiles for you in the last {DAYS} days and kept{' '}
-        {qualified.toLocaleString('en-GB')}.
-      </p>
 
-      <div className="tiles five">
+      <div className="tiles four">
         <Tile big={untilNext()} label="until the next search" note="Every morning at 06:00 UTC" />
         <Tile big={qualified.toLocaleString('en-GB')} label="qualified leads" note={`Last ${DAYS} days`} />
         <Tile big={scored.toLocaleString('en-GB')} label="profiles scored" note={`Last ${DAYS} days`} />
-        <Tile big={updates.toLocaleString('en-GB')} label="CRM updates" note={`Last ${DAYS} days`} />
         <Tile big={String(live)} label="active campaigns" note={tags.length ? `${tags.length} tags in use` : undefined} />
       </div>
 
@@ -97,12 +93,11 @@ export function Dashboard() {
         title="Activity overview"
         dates={dates}
         bars={bars}
-        barsLabel="Profiles read a day"
-        line={line}
-        lineLabel="Share that qualified"
+        barsLabel="Profiles read"
+        lines={lines}
       />
 
-      <div className="two-up">
+      <div className="two-up level">
         <div className="card">
           <h2>
             Latest hot leads
@@ -135,20 +130,20 @@ export function Dashboard() {
         <div className="card">
           <h2>
             Your campaigns
-            <Info text="Ordered by what each one actually brings in a day over the last thirty, not by what it is allowed to take." />
+            <Info text="Every qualified lead a campaign has ever handed you, with what it is bringing a day right now beside it." />
           </h2>
           <ul className="mini-list">
-            {rank.map(({ campaign, perDay, delivered }, i) => (
+            {rank.map(({ campaign, perDay, qualified: total }, i) => (
               <li key={campaign.id}>
                 <a href={`#/campaign/${campaign.id}/brief`}>
                   <span className={`split-dot s${i % 4}`} aria-hidden="true" />
                   <span className="mini-who">
                     <span className="name">{campaign.name}</span>
                     <span className="handle">
-                      {campaign.status === 'live' ? `${delivered} in ${DAYS} days` : `Paused, ${delivered} in ${DAYS} days`}
+                      {campaign.status === 'live' ? `${perDay} a day` : `Paused, ${perDay} a day`}
                     </span>
                   </span>
-                  <b className="num">{perDay}<small>a day</small></b>
+                  <b className="num">{total.toLocaleString('en-GB')}<small>qualified leads</small></b>
                 </a>
               </li>
             ))}
