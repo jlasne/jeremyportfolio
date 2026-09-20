@@ -2010,7 +2010,9 @@ body.nav-shut .shell { grid-template-columns: 62px minmax(0, 1fr); }
 /* Inside a card there is room for the handle and its score. The word tag
    repeats what the stars already say, so it stands down here. */
 .step3 .viz-row { grid-template-columns: 22px minmax(0, 1fr) auto; }
-.step3 .viz-score .viz-row em, .step3 .viz-chips span:nth-child(n + 3) { display: none; }
+/* The step cards used to hide the third niche and the row chips to fit. The
+   visuals carry fewer cells now, so everything written is shown. */
+.step3 .viz-chips { flex-wrap: nowrap; }
 .step3 .viz-close .viz-row em { display: inline-flex; }
 .step3 .viz-brief p { -webkit-line-clamp: 3; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
 
@@ -3630,3 +3632,51 @@ body { background: var(--paper); }
 /* The pickers and the dials are two different kinds of answer. They were
    sharing an edge, which read as one long list. */
 .read-field + .dials { margin-top: 20px; }
+
+/* --- the landing, after the model changed -------------------------------- */
+
+/* The simulation, as a step visual. Four bands, and the last one is the
+   answer, so it is the one wearing the accent. */
+.viz-sim { display: flex; flex-direction: column; gap: 14px; }
+.viz-sim-head { font-size: 14px; color: var(--l-muted); }
+.viz-sim-head b { font-family: var(--hero); font-weight: 800; font-size: 22px; color: var(--l-ink); letter-spacing: -0.03em; margin-right: 6px; }
+.viz-sim ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.viz-sim li { display: grid; grid-template-columns: minmax(0, 1fr) 54px; grid-template-areas: 'label count' 'bar bar'; gap: 4px 10px; align-items: center; font-size: 12.5px; color: var(--l-muted); }
+.viz-sim li > span { grid-area: label; min-width: 0; }
+.viz-sim li > b { grid-area: count; text-align: right; font-weight: 600; color: var(--l-ink); font-size: 13px; }
+.viz-sim li > i { grid-area: bar; height: 8px; border-radius: 4px; background: var(--l-rule-firm); }
+.viz-sim li.last > i { background: var(--orange); }
+.viz-sim li.last > b { color: var(--orange); }
+
+/* The score is a ranking, said right under the filters that are not. */
+.tests-after { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--l-rule-firm); font-size: 14px; line-height: 1.55; color: var(--l-muted); }
+
+/* The category we are not in. Three of them, then us, wider and accented. */
+.versus { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin-top: 34px; }
+.versus-one { padding: 22px 26px 22px 0; border-top: 1px solid var(--l-rule-firm); }
+.versus-one + .versus-one { padding-left: 26px; }
+.versus-one b, .versus-us b { display: block; font-family: var(--display); font-weight: 500; font-size: 17px; color: var(--l-ink); letter-spacing: -0.01em; }
+.versus-meta { display: block; font-size: 12px; color: var(--l-faint); margin: 4px 0 9px; }
+.versus-one p, .versus-us p { font-size: 14px; line-height: 1.55; color: var(--l-muted); margin: 0; }
+.versus-us {
+  display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 10px 30px; align-items: start;
+  margin-top: 18px; padding: 24px 26px; border-radius: var(--radius-lg, 18px);
+  background: var(--orange-soft); border: 1px solid var(--orange-line);
+}
+.versus-us b { color: var(--orange); font-size: 19px; }
+.versus-us .versus-meta { margin-bottom: 0; color: var(--orange); opacity: 0.75; }
+.versus-us p { color: var(--l-ink); }
+@media (max-width: 900px) {
+  .versus { grid-template-columns: 1fr; }
+  .versus-one + .versus-one { padding-left: 0; }
+  .versus-us { grid-template-columns: 1fr; padding: 20px; }
+}
+
+/* The headline number is a capacity now, not a price, so it takes a longer
+   caption and has to stay on one line with it. */
+.price small { white-space: nowrap; }
+
+/* The morning list, as a step visual: three cells, not four. */
+.viz-score .viz-row { grid-template-columns: 26px minmax(0, 1fr) auto; }
+.viz-score .viz-stars { letter-spacing: 0; font-weight: 600; }
+.viz-score .viz-stars small { color: var(--l-faint); font-weight: 400; margin-left: 4px; }

@@ -15,12 +15,12 @@ import testsArt from '../art/tests.png'
 const VIDEO_URL = ''
 
 /** What the creators on your list have already done. The turn is the point. */
-const WHO = ['take deals', 'post weekly', 'highly perform', 'sell already', 'reply']
+const WHO = ['post this week', 'sell already', 'fit your size', 'work your niche', 'reply']
 
 /** What both prices include. Said once, under them. */
 const HAS = [
-  'Up to 500 scored leads a day',
-  'Email and Instagram handle on every row',
+  'A fresh search every night',
+  'Handle and email on every row',
   'Unlimited campaigns and agents',
   'API and MCP on the same key',
   'Every lead yours alone, forever',
@@ -28,7 +28,7 @@ const HAS = [
 ]
 
 /** Said in three, under the buttons, the way a launch says them. */
-const FACTS = ['Handle and email on every row', 'Searched fresh today', 'Yours alone, forever']
+const FACTS = ['Handle and email on every row', 'Up to 3,000 a day', 'Yours alone, forever']
 
 /** Paste this and an agent is connected. Shown on the landing as is. */
 const MCP_CONFIG = `{
@@ -47,44 +47,73 @@ const MCP_CONFIG = `{
  */
 const CTA = 'Get early access'
 
-/** What we check before a lead reaches you, and what each check is worth. */
+/**
+ * The four filters every profile has to clear. Pass all four and you are a
+ * qualified lead. Brand fit then scores that lead and orders the list, which
+ * is the line under the block: a score is a ranking, never a fifth filter.
+ */
 const TESTS: { name: string; means: string }[] = [
   {
-    name: 'In your niche',
-    means: 'Judged against your own words, not a category tag. The pitch you send already fits what they post.',
+    name: 'Size and activity',
+    means: 'Followers, views, comments, posting rhythm. Measured on their last 12 posts, never on what an account declares.',
   },
   {
-    name: 'Active this week',
-    means: 'They posted in the last few days. A dead account costs you the time to write and never answers.',
+    name: 'Where they are',
+    means: 'The country we read off the profile and the posts. Your list of countries, not ours.',
   },
   {
-    name: 'Big enough for you',
-    means: 'The follower range you set, not ours. Reach you can afford, at a size that moves your numbers.',
+    name: 'What they post in',
+    means: 'The language of their captions. Write to people who answer in the language you sell in.',
   },
   {
-    name: 'Already sells',
-    means: 'They have run a paid campaign and sold to their own audience. Creators who convert, twice as often.',
+    name: 'Their niche',
+    means: 'The slices of your market you want, one search each. Work in none of them and you are out.',
+  },
+]
+
+/**
+ * The category we are not in, named.
+ *
+ * Every line is about how the thing works, never about how good it is, and
+ * every number is the one they publish themselves. A comparison that invents
+ * a fault is a comparison a reader checks and stops trusting.
+ */
+const RIVALS: { name: string; meta: string; how: string }[] = [
+  {
+    name: 'Collabstr',
+    meta: '1M creators, opted in',
+    how: 'A marketplace of creators who signed up to be hired. You get the ones who put their hand up, and so does everyone else.',
+  },
+  {
+    name: 'Modash',
+    meta: '350M profiles, stored',
+    how: 'A stored index you search yourself. You read the profiles, you judge each one, and the emails arrive on a monthly allowance.',
+  },
+  {
+    name: 'TopYappers',
+    meta: '27M creators, exportable',
+    how: 'A file you can export by the thousand. A bigger file is still a file, and it is still you doing the vetting.',
   },
 ]
 
 const STEPS = [
   {
     n: '1/3',
-    title: 'You get your ideal buyer, not a category',
-    note: 'Your website goes in. We work out who actually fits what you sell, and you approve it before a single search runs.',
-    tick: 'One minute, once',
+    title: 'Two questions, and you have your filters',
+    note: 'Who you want to reach. What you sell them. We turn that into filters you can read, and you change every one.',
+    tick: 'Two minutes, once',
   },
   {
     n: '2/3',
-    title: 'You get a list searched today',
-    note: 'Instagram gets searched fresh every night against your criteria. Nothing here was scraped two years ago and left to rot.',
-    tick: 'New every morning',
+    title: 'You see the rate before you commit',
+    note: 'Run the simulation. It says how many searches it takes to produce one lead: 1 in 12, or 1 in 400. You widen a filter, or you take the number.',
+    tick: 'One run a day',
   },
   {
     n: '3/3',
-    title: 'You get the handle and the email',
-    note: 'Send a DM where they are already active, or the email for the rate card and the contract. Both sit on the row.',
-    tick: 'Two ways to reach every one',
+    title: 'The list is done when you wake up',
+    note: 'Qualified leads, ranked by brand fit, with the handle and the email on every row. Searched last night, not two years ago.',
+    tick: 'New every morning',
   },
 ]
 
@@ -93,51 +122,58 @@ function StepVisual({ n }: { n: string }) {
   if (n === '1/3') {
     return (
       <div className="viz viz-icp">
-        <div className="viz-input"><span className="viz-caret" />strongher.co</div>
+        <div className="viz-input"><span className="viz-caret" />Women lifting coaches</div>
         <div className="viz-arrow" aria-hidden="true" />
         <div className="viz-brief">
-          <span className="viz-label">Looking for</span>
-          <p>Women lifting coaches, sell an online program, technique content, audience of beginner women.</p>
+          <span className="viz-label">Your filters</span>
+          <p>15k to 400k followers, posted in the last 14 days, 12k views on a typical post, US and UK, English.</p>
           <div className="viz-chips">
-            <span>Technique coaches</span><span>Program sellers</span><span>Paid post watchers</span>
+            <span>Strength</span><span>Postnatal</span><span>Rehab</span>
           </div>
         </div>
       </div>
     )
   }
   if (n === '2/3') {
-    const rows = [
-      ['liftwithmaya', '3', 'high intent'],
-      ['jennakstrong', '2.5', 'high intent'],
-      ['sophie.souleve', '2', 'warm'],
-      ['priyalifts', '1', 'cold'],
+    // The simulation, in four bands. The last one is the answer: what a night
+    // of searching leaves standing.
+    const bands: [string, string, number][] = [
+      ['Searches run', '8,000', 100],
+      ['Big and active enough', '1,000', 46],
+      ['In a niche you want', '920', 42],
+      ['Qualified leads', '640', 29],
     ]
     return (
-      <div className="viz viz-score">
-        {rows.map(([h, st, tag]) => (
-          <div className="viz-row" key={h}>
-            <i>{h.slice(0, 2).toUpperCase()}</i>
-            <b>@{h}</b>
-            <span className="viz-stars">{'★'.repeat(Math.floor(Number(st)))}{Number(st) % 1 ? '½' : ''}<small> {st}</small></span>
-            <em className={tag.replace(' ', '-')}>{tag}</em>
-          </div>
-        ))}
+      <div className="viz viz-sim">
+        <p className="viz-sim-head"><b>1 in 12</b> searches becomes a lead</p>
+        <ul>
+          {bands.map(([label, count, width], i) => (
+            <li key={label} className={i === bands.length - 1 ? 'last' : undefined}>
+              <span>{label}</span>
+              <i style={{ width: `${width}%` }} aria-hidden="true" />
+              <b>{count}</b>
+            </li>
+          ))}
+        </ul>
       </div>
     )
   }
+  // The morning list: who, and how close they sit to the client's own words.
+  // The email lives on the row in the app, and the block under these steps
+  // says so. Squeezing it in here as a chip only cost the score its room.
   const rows = [
-    ['liftwithmaya', 'deal', true],
-    ['jennakstrong', 'replied', true],
-    ['sophie.souleve', 'contacted', true],
-    ['priyalifts', 'to contact', false],
+    ['liftwithmaya', '94'],
+    ['jennakstrong', '88'],
+    ['sophie.souleve', '76'],
+    ['priyalifts', '61'],
   ] as const
   return (
-    <div className="viz viz-close">
-      {rows.map(([h, stage, done]) => (
+    <div className="viz viz-score">
+      {rows.map(([h, fit]) => (
         <div className="viz-row" key={h}>
-          <i className={done ? 'done' : ''}>{done ? '✓' : ''}</i>
+          <i>{h.slice(0, 2).toUpperCase()}</i>
           <b>@{h}</b>
-          <em className={`stage ${stage.replace(' ', '-')}`}>{stage}</em>
+          <span className="viz-stars">{fit}%<small>brand fit</small></span>
         </div>
       ))}
     </div>
@@ -311,7 +347,7 @@ export function Landing() {
         <div className="land-banner">
           <span>Early access</span>
           <i aria-hidden="true" />
-          <span><b>500 scored leads a day</b> for $99 a month</span>
+          <span><b>3,000 fresh leads a day</b>, searched last night</span>
           <i aria-hidden="true" />
           <a href="#access">Get in →</a>
         </div>
@@ -335,8 +371,8 @@ export function Landing() {
             <div className="hero-copy">
               <h1>Find creators <br />who <TurningWord words={WHO} />.</h1>
               <p className="lede">
-                Every morning, creators who fit what you sell, post this week, and already take paid deals. Their
-                Instagram handle and their email, on every row.
+                You set the filters. We search Instagram every night. What passes is a qualified lead, ranked by how
+                close it sits to your own words. Handle and email on every row.
               </p>
               <EarlyAccess website="strongher.co" />
               <p className="hero-meta">
@@ -355,10 +391,10 @@ export function Landing() {
 
         <section className="land-section" id="how">
           <p className="eyebrow">How it works</p>
-          <h2 className="big">Not a database. <em>A search, run for you daily.</em></h2>
+          <h2 className="big">Not a database. <em>A search run for you every night.</em></h2>
           <p className="section-lede">
-            Every directory sells the same scraped list to everyone, and half of it is dead. We go looking for your
-            buyer instead, and we go again tonight.
+            Every directory sells the same scraped list to everyone. Half of it is dead. We go looking for your buyer
+            instead, and we go again tonight.
           </p>
 
           <div className="steps3">
@@ -394,7 +430,7 @@ export function Landing() {
 
           <div className="tests">
             <div className="tests-copy">
-              <p className="tests-head">Four checks. Fail one and it never reaches you.</p>
+              <p className="tests-head">Four hard filters. Fail one and we stop there.</p>
               <div className="tests-row">
                 {TESTS.map((t) => (
                   <div className="test" key={t.name}>
@@ -403,8 +439,42 @@ export function Landing() {
                   </div>
                 ))}
               </div>
+              <p className="tests-after">
+                Then a score, 0 to 100. It ranks your list by how close each one sits to your own words. It removes
+                nobody.
+              </p>
             </div>
             <img className="tests-art" src={testsArt} alt="" width={1774} height={887} />
+          </div>
+        </section>
+
+        <section className="land-section" id="versus">
+          <p className="eyebrow">The difference</p>
+          <h2 className="big">They sell the same rows to everyone. <em>We go and look tonight.</em></h2>
+          <p className="section-lede">
+            A stored index answers who exists. It never answers who to write to this morning. That is a different job,
+            and it is the one we do.
+          </p>
+
+          <div className="versus">
+            {RIVALS.map((r) => (
+              <article className="versus-one" key={r.name}>
+                <b>{r.name}</b>
+                <span className="versus-meta">{r.meta}</span>
+                <p>{r.how}</p>
+              </article>
+            ))}
+          </div>
+
+          <div className="versus-us">
+            <div>
+              <b>brandmatch</b>
+              <span className="versus-meta">Searched last night, against your filters</span>
+            </div>
+            <p>
+              We search Instagram tonight against the filters you set. What passes is on your list by 06:00, ranked,
+              with the handle and the email on the row. Your rows are yours alone.
+            </p>
           </div>
         </section>
 
@@ -414,7 +484,7 @@ export function Landing() {
               <p className="eyebrow">Connect your agent</p>
               <h2 className="big">Built for agents. <em>Yours drives it.</em></h2>
               <p className="section-lede">
-                brandmatch is built for an agent to drive. Yours reads the list, scores it, moves each lead along a
+                brandmatch is built for an agent to drive. Yours reads the list, tags it, moves each lead along a
                 stage and starts the next search, on your key. The app is the same account, for when you want to look.
               </p>
             </div>
@@ -431,41 +501,32 @@ export function Landing() {
           </div>
 
           <ul className="connect-notes">
-            <li>Ask in words: who fired a brand signal this week</li>
-            <li>Nine tools, one key: read, score, classify, create, approve, pause</li>
-            <li>What your agent writes is what the app shows, because the app is the CRM</li>
+            <li>Ask in words: who sells already and posted this week</li>
+            <li>Nine tools, one key: read, score, tag, move, create, pause</li>
+            <li>Status, tags and notes are all on the API. A model files 100 rows while you file 3</li>
           </ul>
         </section>
 
         <section className="land-section centred" id="pricing">
           <p className="eyebrow">Pricing</p>
-          <h2 className="big">One price. <em>Or a conversation.</em></h2>
+          <h2 className="big">Tell us your volume. <em>We price it.</em></h2>
           <p className="section-lede">
-            Everything, for every account, at one number. Three days free before it starts.
+            What you pay follows how many leads you want a day, and how many niches we search to find them.
           </p>
 
           <div className="one-price">
             <img className="price-art" src={priceArt} alt="" width={1254} height={1254} />
-            <p className="price"><span className="now">$99</span><small>a month</small></p>
+            <p className="price"><span className="now">3,000</span><small>fresh leads a day</small></p>
             <ul className="plan-has">
               {HAS.map((h) => <li key={h}>{h}</li>)}
             </ul>
-            <a className="btn primary" href="#access">{CTA}</a>
-            <p className="price-note">Three days free. No card to start.</p>
-          </div>
-
-          <div className="one-price more">
-            <span className="price-tag">More than 500 a day?</span>
-            <p className="price-more">Let's talk</p>
-            <p className="price-note">
-              Bigger volume, more niches, or a whole agency. Tell me the number and we size it together.
-            </p>
-            <a className="btn" href="mailto:hey@jeremylasne.com">Contact us</a>
+            <a className="btn primary" href="mailto:hey@jeremylasne.com">Contact us</a>
+            <p className="price-note">One call, then three days free. No card to start.</p>
           </div>
 
           <p className="section-lede compare">
-            A database at $120 to $400 a month sells you a search box. You still find, vet and score each one.
-            Here the list is done when you wake up.
+            A database sells you a search box, and every subscriber searches the same rows. You still find, vet and
+            score each one. Here the list is done when you wake up, and nobody else gets it.
           </p>
         </section>
 
