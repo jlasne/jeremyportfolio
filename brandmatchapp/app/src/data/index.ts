@@ -314,11 +314,25 @@ export function getFeasibility(campaignId: string) {
   )
 }
 
+/**
+ * When this campaign was last simulated, whatever rules it ran under.
+ *
+ * Read across versions on purpose: the limit of one run a day is about the
+ * work a run costs us, and saving a new version does not make that work
+ * cheaper.
+ */
+export function getLastRunAt(campaignId: string): string | null {
+  const runs = getState().feasibilityRuns.filter((f) => f.campaignId === campaignId)
+  if (!runs.length) return null
+  return runs.map((f) => f.ranAt).sort().pop() ?? null
+}
+
 export const VERDICTS: Verdict[] = ['qualified', 'below_threshold', 'knockout_fail', 'off_niche', 'hard_fail']
 
 export const VERDICT_LABEL: Record<Verdict, string> = {
   qualified: 'Became a lead',
-  below_threshold: 'Under your pass mark',
+  // Kept for rows judged before brand fit stopped being a gate.
+  below_threshold: 'Under an old pass mark',
   knockout_fail: 'Failed a deal breaker',
   off_niche: 'Not in a niche you want',
   hard_fail: 'Too small or too quiet',
@@ -431,22 +445,51 @@ export function getCampaignRank(days = 30): {
 }
 
 /**
- * The brand fit a campaign asked for, day by day.
+ * Qualified leads a day, split by the campaign that found them.
  *
- * Read off the gate versions: each one records what it demanded and when it
- * was written, so the line steps on the day the client moved it. Without it,
- * a drop in what qualified reads as the world changing when it was the client
- * changing their mind.
+ * A qualified lead is a person who passed every hard filter: the size and
+ * activity numbers, the country, the niche and the deal breakers. Brand fit
+ * scores them afterwards and never removes them, so a delivered lead is a
+ * qualified lead and this is a count of the real thing.
+ *
+ * The dates run day by day with no gaps, because a chart that skips a quiet
+ * Sunday draws a week that never happened.
  */
-export function getFitHistory(campaignId: string, dates: string[]): number[] {
-  const versions = getGateVersions(campaignId)
-    .slice()
-    .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
-  if (!versions.length) return dates.map(() => 0)
-  return dates.map((date) => {
-    const inForce = versions.filter((g) => g.createdAt.slice(0, 10) <= date).pop() ?? versions[0]
-    return inForce.passScore / Math.max(1, inForce.criteria.length * 2)
+export function getQualifiedByCampaign(days = 365): {
+  dates: string[]
+  series: { id: string; name: string; values: number[] }[]
+} {
+  const s = getState()
+  const today = new Date().toISOString().slice(0, 10)
+  const floor = new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 10)
+  const seen = s.leads.map((l) => l.deliveredAt.slice(0, 10)).filter((d) => d >= floor).sort()
+  if (!seen.length) return { dates: [], series: [] }
+
+  const dates: string[] = []
+  for (let at = new Date(seen[0] + 'T00:00:00Z'); ; at.setUTCDate(at.getUTCDate() + 1)) {
+    const day = at.toISOString().slice(0, 10)
+    dates.push(day)
+    if (day >= today || dates.length > 400) break
+  }
+
+  const slot = new Map(dates.map((d, i) => [d, i]))
+  const series = s.campaigns.map((campaign) => {
+    const values = dates.map(() => 0)
+    for (const lead of s.leads) {
+      if (lead.campaignId !== campaign.id) continue
+      const at = slot.get(lead.deliveredAt.slice(0, 10))
+      if (at !== undefined) values[at]++
+    }
+    return { id: campaign.id, name: campaign.name, values }
   })
+  // Busiest campaign first, which is the order the dashboard list beside the
+  // chart uses, so a colour means the same campaign in both.
+  return {
+    dates,
+    series: series
+      .filter((x) => x.values.some((v) => v > 0))
+      .sort((a, b) => b.values.reduce((n, v) => n + v, 0) - a.values.reduce((n, v) => n + v, 0)),
+  }
 }
 
 /**
@@ -463,20 +506,17 @@ export function nextBatchIn(): { hours: number; minutes: number } {
 }
 
 /**
- * The brand fit a campaign asks for, as a percentage.
+ * Where the brand fit filter should start for a campaign.
  *
- * With no campaign named, the average across the live ones, because that is
- * the bar the list as a whole was filled against. The lead list starts there:
- * a filter that starts at zero starts below anything the account would ever
- * be sent, which reads as though the rules had not been applied.
+ * The lowest fit actually in that campaign's list, rounded down to a five.
+ * Brand fit no longer decides who is handed over, so there is no bar to read
+ * off the rules: the honest floor is the worst score the client was sent. A
+ * filter that starts at zero when nothing below 40% exists reads as though it
+ * were hiding something.
  */
 export function getFitFloor(campaignId?: string | null): number {
-  const s = getState()
-  const shares = s.campaigns
-    .filter((c) => (campaignId ? c.id === campaignId : true))
-    .map((c) => getGateSet(c.id))
-    .filter((g): g is GateSet => Boolean(g))
-    .map((g) => fitPercent(g.passScore, g.criteria.length * 2))
-  if (!shares.length) return 0
-  return Math.round(shares.reduce((n, v) => n + v, 0) / shares.length)
+  const rows = allRows().filter((r) => (campaignId ? r.lead.campaignId === campaignId : true))
+  if (!rows.length) return 0
+  const low = Math.min(...rows.map((r) => fitOf(r)))
+  return Math.max(0, Math.floor(low / 5) * 5)
 }

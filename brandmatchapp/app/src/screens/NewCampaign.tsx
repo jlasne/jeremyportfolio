@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { CampaignBrief, TemplateId } from '../types'
 import {
   clarifications,
@@ -10,9 +10,9 @@ import {
   type Proposal,
 } from '../data/propose'
 import { ruleLabel } from '../data/gates'
-import { checkSeeds, cleanHandles, seedMismatch } from '../data/seeds'
+import { checkSeeds, cleanHandles, recommendedSeeds, seedMismatch, SEEDS_ENOUGH } from '../data/seeds'
 import { createCampaign } from '../data/store'
-import { compact } from '../lib/format'
+import { compact, COUNTRY_NAMES, LANGUAGE_NAMES } from '../lib/format'
 import { navigate } from '../lib/router'
 import { Sentences } from '../components/Sentences'
 
@@ -70,6 +70,13 @@ function BriefStep({ onDone }: { onDone: (brief: CampaignBrief) => void }) {
   const ready = second && offer.trim().length > 3
 
   const third = ready
+  const named = cleanHandles(seeds)
+  // Measured accounts, so the proposal can say what it found about each one
+  // rather than promise to look. Computed once the brief stops changing.
+  const suggestions = useMemo(
+    () => (third ? recommendedSeeds(audience, offer) : []),
+    [third, audience, offer],
+  )
   const audiencePlaceholder = useRotating(AUDIENCE_EXAMPLES, audience.length === 0)
   const offerPlaceholder = useRotating(OFFER_EXAMPLES, offer.length === 0)
   const seedPlaceholder = useRotating(SEED_EXAMPLES, seeds.length === 0)
@@ -118,7 +125,8 @@ function BriefStep({ onDone }: { onDone: (brief: CampaignBrief) => void }) {
         <h1>Know anyone already?</h1>
         <p className="ask-note">
           Optional, and the most useful thing you can give us. The people around a good account look like that
-          account, so a handful of names is the fastest way to a good first day.
+          account, so five names is the fastest way to a good first day. You have <b>{named.length} of
+          {' '}{SEEDS_ENOUGH}</b>.
         </p>
         <textarea
           className="textarea ask-field short"
@@ -128,6 +136,30 @@ function BriefStep({ onDone }: { onDone: (brief: CampaignBrief) => void }) {
           tabIndex={third ? 0 : -1}
           onChange={(e) => setSeeds(e.target.value)}
         />
+        {third && suggestions.length > 0 && (
+          <div className="seed-picks">
+            <span className="faint">Accounts we already hold that look like your brief:</span>
+            <div className="pill-row">
+              {suggestions.map((v) => (
+                <button
+                  key={v.handle}
+                  type="button"
+                  className={`chip${named.includes(v.handle) ? ' on' : ''}`}
+                  title={v.note}
+                  onClick={() =>
+                    setSeeds(
+                      named.includes(v.handle)
+                        ? named.filter((h) => h !== v.handle).map((h) => `@${h}`).join(' ')
+                        : [...named, v.handle].map((h) => `@${h}`).join(' '),
+                    )
+                  }
+                >
+                  @{v.handle}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </label>
 
       <div className={`ask-foot${second ? ' in' : ' out'}`}>
@@ -182,8 +214,9 @@ function AskStep({
 const STEPS = [
   'Reading your brief',
   'Setting the size and activity',
+  'Picking the niches to search',
   'Writing your deal breakers',
-  'Choosing the fit score',
+  'Writing the brand fit sentences',
 ]
 
 function BuildingStep({ onDone }: { onDone: () => void }) {
@@ -247,9 +280,11 @@ function ProposalStep({
   const fits = verdicts.filter((v) => v.state !== 'fails').length
   const mismatch = seedMismatch(verdicts, proposal.hard)
 
+  // Finishing lands on the campaign list. Nothing is simulated on the way
+  // out: a run costs us real work and the client did not ask for one yet.
   const create = (andEdit: boolean) => {
     const id = createCampaign(brief, proposal, name.trim() || proposal.name)
-    navigate(andEdit ? `campaign/${id}/gates` : `campaign/${id}/feasibility`)
+    navigate(andEdit ? `campaign/${id}/brief` : 'campaigns')
   }
 
   return (
@@ -287,22 +322,38 @@ function ProposalStep({
               <b className="num">{hardValue(key, proposal.hard)}</b>
             </li>
           ))}
-          {proposal.languages.length > 0 && (
-            <li><span>{ruleLabel('languages')}</span><b>{proposal.languages.join(', ')}</b></li>
-          )}
-          {proposal.countries.length > 0 && (
-            <li><span>{ruleLabel('countries')}</span><b>{proposal.countries.join(', ')}</b></li>
-          )}
+          <li>
+            <span>{ruleLabel('countries')}</span>
+            <b>{proposal.countries.map((c) => COUNTRY_NAMES[c] ?? c).join(', ') || 'Anywhere'}</b>
+          </li>
+          <li>
+            <span>{ruleLabel('languages')}</span>
+            <b>{proposal.languages.map((l) => LANGUAGE_NAMES[l] ?? l).join(', ') || 'Any language'}</b>
+          </li>
         </ul>
       </div>
 
       <div className="card gate-card">
-        <h2>2. Deal breakers</h2>
+        <h2>2. Niches</h2>
+        <p className="gate-lede">
+          The slices we search, one search each. Someone who works in none of them is dropped.
+        </p>
+        <div className="pill-row">
+          {proposal.niches.map((n) => <span key={n.id} className="tag-chip">{n.label}</span>)}
+          {proposal.niches.length === 0 && <span className="faint">None read out of your brief yet</span>}
+        </div>
+      </div>
+
+      <div className="card gate-card">
+        <h2>3. Deal breakers</h2>
         <p className="gate-lede">{proposal.summaries.gate2}</p>
         <ul className="rules stacked">
           {proposal.knockouts.map((k) => (
-            <li key={k.id}>
-              <b>{k.question}</b>
+            <li key={k.id} className="off">
+              <b>
+                {k.question}
+                <span className="seed-tag unknown">off</span>
+              </b>
               {k.why && <small className="muted">{k.why}</small>}
             </li>
           ))}
@@ -310,7 +361,7 @@ function ProposalStep({
       </div>
 
       <div className="card gate-card">
-        <h2>3. Brand fit</h2>
+        <h2>4. Brand fit</h2>
         <p className="gate-lede">{proposal.summaries.gate3}</p>
         <Sentences list={proposal.criteria} onChange={(criteria) => onProposal({ ...proposal, criteria })} />
         <div className="from-lib">
@@ -354,7 +405,7 @@ function ProposalStep({
                 <b>
                   @{v.handle}
                   <span className={`seed-tag ${v.state}`}>
-                    {v.state === 'fits' ? 'Fits' : v.state === 'fails' ? 'Does not fit' : 'New to us'}
+                    {v.state === 'fits' ? 'Fits' : v.state === 'fails' ? 'Does not fit' : 'Reading them'}
                   </span>
                 </b>
                 <small className="muted">{v.note}</small>
@@ -365,7 +416,7 @@ function ProposalStep({
       )}
 
       <div className="page-head">
-        <span className="hint">Nothing reaches you before you have tested these.</span>
+        <span className="hint">You can change every one of these afterwards.</span>
         <span className="spacer" />
         <button type="button" className="btn" onClick={() => create(true)}>Change something</button>
         <button type="button" className="btn primary" onClick={() => create(false)}>Looks right, create it</button>

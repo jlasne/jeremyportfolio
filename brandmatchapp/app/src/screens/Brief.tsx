@@ -1,59 +1,19 @@
 import { useState } from 'react'
 import { getCampaign, getGateSet } from '../data'
-import { LIBRARIES } from '../data/propose'
-import { checkSeeds, cleanHandles, seedMismatch } from '../data/seeds'
-import { addSeeds, removeSeed, setBrief, setExtracted } from '../data/store'
-import { COUNTRY_NAMES } from '../lib/format'
-import type { TemplateId } from '../types'
+import { checkSeeds, cleanHandles, seedMismatch, SEEDS_ENOUGH } from '../data/seeds'
+import { addSeeds, removeSeed, setBrief } from '../data/store'
+import { SizeAndActivity } from '../components/SizeAndActivity'
 
 // Zone 3. The two questions the campaign was born from, still in the client's
-// own words, plus the handful of things we read out of them.
+// own words, the accounts they named, and the first hard filter.
 //
-// Everything on this screen can be changed, because everything on it is either
-// something the client wrote or a machine's reading of it, and a machine's
-// reading of two sentences is the thing most worth being able to correct. What
-// cannot be changed here is the rules: rewriting an answer suggests new ones,
-// it never writes them.
+// Everything on this screen can be changed, because everything on it is
+// either something the client wrote or a measurement of the people they are
+// describing. Size and activity sits here and not with the rules because it
+// is part of the description: how big, how active, where, in what language.
 //
-// Niches are the one reading kept off this page. They carry their own numbers,
-// so they are edited where those numbers are.
-
-/** The countries we are willing to look in. Offered, not typed. */
-const PLACES = Object.keys(COUNTRY_NAMES)
-
-function Countries({ picked, onChange }: { picked: string[]; onChange: (next: string[]) => void }) {
-  const [open, setOpen] = useState(false)
-  return (
-    <>
-      <div className="pill-row">
-        {picked.map((code) => (
-          <button
-            key={code}
-            type="button"
-            className="chip on"
-            title={`Stop looking in ${COUNTRY_NAMES[code] ?? code}`}
-            onClick={() => onChange(picked.filter((c) => c !== code))}
-          >
-            {COUNTRY_NAMES[code] ?? code} <span aria-hidden="true">✕</span>
-          </button>
-        ))}
-        {picked.length === 0 && <span className="faint">Anywhere</span>}
-        <button type="button" className="chip" onClick={() => setOpen(!open)}>
-          {open ? 'Done' : 'Add a country'}
-        </button>
-      </div>
-      {open && (
-        <div className="pill-row pick-row">
-          {PLACES.filter((c) => !picked.includes(c)).map((code) => (
-            <button key={code} type="button" className="chip" onClick={() => onChange([...picked, code])}>
-              {COUNTRY_NAMES[code]}
-            </button>
-          ))}
-        </div>
-      )}
-    </>
-  )
-}
+// What is not here is the scoring. Rewriting an answer suggests new
+// sentences, it never writes them.
 
 export function Brief({ campaignId }: { campaignId: string }) {
   const campaign = getCampaign(campaignId)
@@ -65,6 +25,7 @@ export function Brief({ campaignId }: { campaignId: string }) {
   // given under. A rule change can turn a good seed into a bad one.
   const seeds = checkSeeds(brief.seeds ?? [], gates, extracted.niches)
   const mismatch = gates ? seedMismatch(seeds, gates.hard) : null
+  const short = Math.max(0, SEEDS_ENOUGH - seeds.length)
 
   return (
     <>
@@ -92,9 +53,12 @@ export function Brief({ campaignId }: { campaignId: string }) {
         <h2>Accounts you gave us</h2>
         <p className="muted">
           {seeds.length === 0
-            ? 'None yet. Name accounts you already know fit, and we look at the people around them.'
+            ? `None yet. Name ${SEEDS_ENOUGH} accounts you already know fit, and we look at the people around them.`
             : `${seeds.filter((v) => v.state !== 'fails').length} of ${seeds.length} hold up against your rules today. We follow those to find people like them, and leave the rest alone.`}
         </p>
+        {short > 0 && seeds.length > 0 && (
+          <p className="hint">{short} more would help. Five is where the people around them start to add up.</p>
+        )}
         {mismatch && <p className="notice warn">{mismatch}</p>}
         {seeds.length > 0 && (
           <ul className="rules stacked">
@@ -103,7 +67,7 @@ export function Brief({ campaignId }: { campaignId: string }) {
                 <b>
                   @{v.handle}
                   <span className={`seed-tag ${v.state}`}>
-                    {v.state === 'fits' ? 'Fits' : v.state === 'fails' ? 'Does not fit' : 'New to us'}
+                    {v.state === 'fits' ? 'Fits' : v.state === 'fails' ? 'Does not fit' : 'Reading them'}
                   </span>
                   <button
                     type="button"
@@ -143,41 +107,7 @@ export function Brief({ campaignId }: { campaignId: string }) {
         </div>
       </div>
 
-      <div className="card">
-        <h2>What we read out of it</h2>
-        <div className="read-field">
-          <span className="drawer-label">Countries we look in</span>
-          <Countries
-            picked={extracted.countries}
-            onChange={(countries) => setExtracted(campaignId, { countries })}
-          />
-        </div>
-        <div className="read-field">
-          <span className="drawer-label">Scoring started from</span>
-          <div className="pill-row">
-            {LIBRARIES.map((l) => (
-              <button
-                key={l.id}
-                type="button"
-                className={`chip${extracted.templateId === l.id ? ' on' : ''}`}
-                title={l.when}
-                onClick={() => setExtracted(campaignId, { templateId: l.id as TemplateId })}
-              >
-                {l.name}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="read-field">
-          <span className="drawer-label">Niches, set with your rules</span>
-          <div className="pill-row">
-            {extracted.niches.filter((n) => n.enabled).map((n) => (
-              <span key={n.id} className="tag-chip">{n.label}</span>
-            ))}
-            {extracted.niches.filter((n) => n.enabled).length === 0 && <span className="faint">None picked yet</span>}
-          </div>
-        </div>
-      </div>
+      <SizeAndActivity campaignId={campaignId} />
 
       <div className="page-head">
         <span className="spacer" />

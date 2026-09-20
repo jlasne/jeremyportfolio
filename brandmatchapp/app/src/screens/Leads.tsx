@@ -489,6 +489,33 @@ function FilterDrawer({ value, onChange }: { value: Filters; onChange: (next: Fi
  * so a hundred rows edited by a model and three edited here end up in the
  * same place.
  */
+/**
+ * A note you can read all of.
+ *
+ * It takes the height of its own text, measured rather than guessed: a row
+ * count computed from a character count is wrong at every column width, and
+ * what it gets wrong is the last line of what the client wrote.
+ */
+function Note({ lead, name, text }: { lead: string; name: string; text: string }) {
+  const fit = (el: HTMLTextAreaElement | null) => {
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${Math.min(160, Math.max(38, el.scrollHeight))}px`
+  }
+  return (
+    <textarea
+      ref={fit}
+      className="textarea crm-note"
+      rows={1}
+      defaultValue={text}
+      placeholder="What you want to remember"
+      aria-label={`Note about ${name}`}
+      onInput={(e) => fit(e.currentTarget)}
+      onBlur={(e) => setNote(lead, e.target.value.trim())}
+    />
+  )
+}
+
 function Crm({ rows, onMoved }: { rows: LeadRow[]; onMoved: (id: string) => void }) {
   const all = getTags()
   const [editing, setEditing] = useState<string | null>(null)
@@ -504,12 +531,17 @@ function Crm({ rows, onMoved }: { rows: LeadRow[]; onMoved: (id: string) => void
   }
 
   return (
-    <div className="compare-scroll">
+    <div className="crm-wrap">
+      <p className="notice">
+        A model runs this better than you do. Statuses, tags and notes are all on the API, so it can file a hundred
+        rows in the time it takes you to file three. <a href="#/ai">Point one at your leads</a>.
+      </p>
+      <div className="compare-scroll">
       <table className="crm">
         <thead>
           <tr>
             <th>Who</th>
-            <th>Where they are</th>
+            <th>Status</th>
             <th>Tags</th>
             <th>Your note</th>
             <th>Email</th>
@@ -579,13 +611,7 @@ function Crm({ rows, onMoved }: { rows: LeadRow[]; onMoved: (id: string) => void
                   </div>
                 </td>
                 <td>
-                  <input
-                    className="input crm-note"
-                    defaultValue={lead.note ?? ''}
-                    placeholder="What you want to remember"
-                    aria-label={`Note about ${creator.name}`}
-                    onBlur={(e) => setNote(lead.id, e.target.value.trim())}
-                  />
+                  <Note lead={lead.id} name={creator.name} text={lead.note ?? ''} />
                 </td>
                 <td className="crm-mail">
                   {creator.email ? <a href={`mailto:${creator.email}`}>{creator.email}</a> : <small className="faint">none</small>}
@@ -598,6 +624,7 @@ function Crm({ rows, onMoved }: { rows: LeadRow[]; onMoved: (id: string) => void
       <datalist id="brandmatch-tags">
         {all.map((t) => <option key={t.name} value={t.name} />)}
       </datalist>
+      </div>
     </div>
   )
 }

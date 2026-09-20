@@ -1,7 +1,8 @@
 import type { GateSet, HardRules, Niche } from '../types'
 import { built, creators } from '../mock/creators'
 import { judge } from '../mock/judge'
-import { evaluate, hardLabel, loosest, runHard } from './gates'
+import { evaluate, hardLabel, loosest, passesHard, runHard } from './gates'
+import { propose } from './propose'
 import { compact, fitPercent } from '../lib/format'
 
 // The accounts a client already knows.
@@ -45,7 +46,7 @@ export function checkSeeds(handles: string[], gates: GateSet | null, niches: Nic
       return {
         handle,
         state: 'unknown',
-        note: 'New to us. We will measure them before anything else.',
+        note: 'Reading their last 12 posts now. Measured before your first search.',
         followers: null,
       }
     }
@@ -62,7 +63,7 @@ export function checkSeeds(handles: string[], gates: GateSet | null, niches: Nic
     }
     const band = built[at].band
     const result = evaluate(creator, gates, niches, judge(at, band, gates, niches))
-    if (result.verdict === 'qualified' || result.verdict === 'below_threshold') {
+    if (result.verdict === 'qualified') {
       return {
         handle,
         state: 'fits',
@@ -120,4 +121,64 @@ export function seedMismatch(verdicts: SeedVerdict[], hard: HardRules): string |
 /** Only the ones that hold up are worth following. */
 export function usableSeeds(verdicts: SeedVerdict[]): string[] {
   return verdicts.filter((v) => v.state !== 'fails').map((v) => v.handle)
+}
+
+// ---------------------------------------------------------------------------
+// Accounts worth naming
+// ---------------------------------------------------------------------------
+
+/** How many named accounts is enough to be worth following. */
+export const SEEDS_ENOUGH = 5
+
+/**
+ * Accounts we already hold that match what the client just described.
+ *
+ * The point is not to fill the field for them. It is that a client staring at
+ * an empty box names nobody, and nobody is the worst answer: the people around
+ * a good account look like that account, so five names is the shortest route
+ * to a first day worth reading.
+ *
+ * Two rules. Every one of these is already measured, so the proposal can say
+ * what it found instead of promising to look. And every one clears the size
+ * and activity the brief is about to be given: recommending an account and
+ * then telling the client it does not fit their own rules is worse than
+ * recommending nothing.
+ */
+export function recommendedSeeds(audience: string, offer: string, want = SEEDS_ENOUGH): SeedVerdict[] {
+  const draft = propose({ audience, offer, writtenAt: new Date().toISOString() })
+  const bar = loosest(draft.hard, draft.niches)
+  const words = `${audience} ${offer}`
+    .toLowerCase()
+    .split(/[^a-z]+/)
+    .filter((w) => w.length > 3)
+
+  // Handles are generated, so the sample holds a few twice. A lookup by handle
+  // always lands on the first of them, so only the first is worth naming:
+  // otherwise we measure one account and the client is shown another.
+  const first = new Map<string, number>()
+  for (let index = 0; index < creators.length; index++) {
+    if (!first.has(creators[index].handle)) first.set(creators[index].handle, index)
+  }
+
+  const out: { index: number; hit: number }[] = []
+  for (let index = 0; index < built.length; index++) {
+    if (first.get(creators[index].handle) !== index) continue
+    if (!passesHard(runHard(creators[index], bar))) continue
+    const bio = `${creators[index].bio} ${creators[index].name}`.toLowerCase()
+    let hit = words.reduce((n, word) => n + (bio.includes(word) ? 2 : 0), 0)
+    // A strong account is one whose neighbours are worth opening. A thin one
+    // leads somewhere thin.
+    if (built[index].band === 'strong') hit += 1
+    out.push({ index, hit })
+  }
+
+  return out
+    .sort((a, b) => b.hit - a.hit || creators[b.index].followers - creators[a.index].followers)
+    .slice(0, want)
+    .map(({ index }) => ({
+      handle: creators[index].handle,
+      state: 'fits' as SeedState,
+      note: `${compact(creators[index].followers)} followers, ${creators[index].bio.split('.')[0]}.`,
+      followers: creators[index].followers,
+    }))
 }

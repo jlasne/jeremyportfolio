@@ -10,11 +10,22 @@ import type {
   Verdict,
 } from '../types'
 
-// The three gates, as one function.
+// The rules, as one function.
 //
-// Gate 1 reads measured numbers and costs nothing. Gate 2 and Gate 3 need a
-// model read, which is the expensive part, so Gate 1 runs first and a profile
-// that fails it never reaches the model. That ordering is the whole margin.
+// Three of them decide, and one describes. Size and activity, the niche, and
+// the deal breakers are hard filters: pass all three and you are a qualified
+// lead. Brand fit is then a score on that lead, from 0 to 100, and it sorts
+// the list. It never turns anyone away.
+//
+// That split is the product. A client who sets a pass mark on a score they
+// have not seen yet is guessing, and the guess costs them people they would
+// have wanted. The hard filters are facts they can state; the score is a
+// ranking they can read.
+//
+// Size and activity runs first because it reads measured numbers and costs
+// nothing. The niche and the deal breakers need a model read, which is the
+// expensive part, so a profile that fails the numbers never reaches the model.
+// That ordering is the whole margin.
 //
 // This file is shared with the backend on purpose. The judgement comes in as an
 // argument, so the same code runs against a mocked judgement here and against
@@ -223,12 +234,14 @@ export function evaluate(
     score: judgement.criteria[c.id]?.score ?? 0,
     note: judgement.criteria[c.id]?.note,
   }))
+  // Every hard filter held, so this is a lead. The brand fit is measured and
+  // carried, and it decides where they sit in the list, not whether they are
+  // in it.
   const score = criteriaScores.reduce((sum, c) => sum + c.score, 0)
-  const verdict: Verdict = score >= gates.passScore ? 'qualified' : 'below_threshold'
   return {
-    verdict,
+    verdict: 'qualified',
     niche: niche?.id ?? null,
-    blockedBy: verdict === 'qualified' ? null : 'score',
+    blockedBy: null,
     hardChecks,
     knockoutAnswers,
     criteriaScores,
@@ -237,7 +250,7 @@ export function evaluate(
   }
 }
 
-/** The ceiling of a gate version. Seven criteria at 2 each. */
+/** The ceiling of a gate version. Each sentence is worth 2. */
 export function maxScore(gates: GateSet): number {
   return gates.criteria.length * 2
 }

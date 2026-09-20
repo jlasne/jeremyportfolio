@@ -247,7 +247,10 @@ export function propose(brief: CampaignBrief, answers: Answers = {}): Proposal {
     name: nameFrom(brief),
     templateId: lib.id,
     hard,
-    knockouts: lib.knockouts,
+    // Off, every one of them. A deal breaker drops someone whatever else they
+    // score, so it is not a default: it is a decision the client makes once
+    // they have seen what the rest of the filters bring.
+    knockouts: lib.knockouts.map((k) => ({ ...k, enabled: false })),
     criteria: lib.criteria,
     passScore: lib.passScore,
     countries,
@@ -255,8 +258,8 @@ export function propose(brief: CampaignBrief, answers: Answers = {}): Proposal {
     niches: suggestNiches(brief.audience, brief.offer),
     summaries: {
       gate1: `We keep people with ${compact(followersMin)} to ${compact(followersMax)} followers, who posted in the last ${d.lastPostWithinDays} days and get about ${compact(medianViewsMin)} views on a typical post.`,
-      gate2: `${count(lib.knockouts.length)} yes or no questions about each person. One no and we drop them.`,
-      gate3: `Seven sentences about who you want. Each one is true, partly true or false about a person, and someone reaches you from ${Math.round((lib.passScore / (lib.criteria.length * 2)) * 100)}% brand fit. Change every word.`,
+      gate2: `${count(lib.knockouts.length)} yes or no questions about each person, and all of them start switched off. Switch one on and a no drops that person whatever else they score: it raises what you get and lowers how much of it there is.`,
+      gate3: `${count(lib.criteria.length)} sentences about who you want. Each one is true, partly true or false about a person, and that is their brand fit. It scores the leads you get and orders your list, it never drops anyone. Change every word.`,
     },
   }
 }
@@ -267,13 +270,16 @@ export function switchTemplate(proposal: Proposal, id: TemplateId): Proposal {
   return {
     ...proposal,
     templateId: id,
-    knockouts: lib.knockouts,
+    // Off, every one of them. A deal breaker drops someone whatever else they
+    // score, so it is not a default: it is a decision the client makes once
+    // they have seen what the rest of the filters bring.
+    knockouts: lib.knockouts.map((k) => ({ ...k, enabled: false })),
     criteria: lib.criteria,
     passScore: lib.passScore,
     summaries: {
       ...proposal.summaries,
-      gate2: `${count(lib.knockouts.length)} yes or no questions about each person. One no and we drop them.`,
-      gate3: `Seven sentences about who you want. Each one is true, partly true or false about a person, and someone reaches you from ${Math.round((lib.passScore / (lib.criteria.length * 2)) * 100)}% brand fit. Change every word.`,
+      gate2: `${count(lib.knockouts.length)} yes or no questions about each person, and all of them start switched off. Switch one on and a no drops that person whatever else they score: it raises what you get and lowers how much of it there is.`,
+      gate3: `${count(lib.criteria.length)} sentences about who you want. Each one is true, partly true or false about a person, and that is their brand fit. It scores the leads you get and orders your list, it never drops anyone. Change every word.`,
     },
   }
 }

@@ -672,7 +672,7 @@ export function setBrief(campaignId: string, patch: { audience?: string; offer?:
  */
 export function setExtracted(
   campaignId: string,
-  patch: { countries?: string[]; templateId?: TemplateId },
+  patch: { countries?: string[]; languages?: string[]; templateId?: TemplateId },
 ): void {
   setState((s) => ({
     campaigns: s.campaigns.map((c) =>

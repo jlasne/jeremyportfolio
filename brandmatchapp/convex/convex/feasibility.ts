@@ -69,7 +69,7 @@ interface Row {
  * the rate observed on the profiles that did go all the way. That is why every
  * figure on this screen is worded as an estimate.
  */
-function walk(rows: Row[], hard: HardRules, passScore: number): Walk {
+function walk(rows: Row[], hard: HardRules): Walk {
   const out: Walk = {
     scanned: rows.length,
     pastHard: 0,
@@ -86,9 +86,6 @@ function walk(rows: Row[], hard: HardRules, passScore: number): Walk {
     ? reached.filter((r) => r.verdict !== 'knockout_fail').length / reached.length
     : 0
   const scored = reached.filter((r) => r.verdict !== 'knockout_fail')
-  const qualifyRate = scored.length
-    ? scored.filter((r) => r.score >= passScore).length / scored.length
-    : 0
 
   let estimatedNew = 0
 
@@ -120,13 +117,15 @@ function walk(rows: Row[], hard: HardRules, passScore: number): Walk {
       continue
     }
     if (row.verdict === 'knockout_fail') continue
+    // Past the deal breakers is qualified. Brand fit scores the lead, it
+    // does not decide whether there is one.
     out.pastKnockouts++
+    out.qualified++
     out.histogram.set(row.score, (out.histogram.get(row.score) ?? 0) + 1)
-    if (row.score >= passScore) out.qualified++
   }
 
   out.pastKnockouts += Math.round(estimatedNew * knockoutRate)
-  out.qualified += Math.round(estimatedNew * knockoutRate * qualifyRate)
+  out.qualified += Math.round(estimatedNew * knockoutRate)
   return out
 }
 
@@ -156,7 +155,7 @@ export const run = internalMutation({
       .collect()
     if (!rows.length) return { error: 'Nothing has been tested against these gates yet' }
 
-    const out = walk(rows as unknown as Row[], gates.hard, gates.passScore)
+    const out = walk(rows as unknown as Row[], gates.hard)
     const estimatedPerDay = Math.round(
       (out.qualified / Math.max(1, out.scanned)) * scanRate(account.analysisBudgetPerDay),
     )
@@ -247,7 +246,7 @@ export const levers = internalQuery({
       .collect()) as unknown as Row[]
     if (!rows.length) return { levers: [] }
 
-    const base = walk(rows, gates.hard, gates.passScore)
+    const base = walk(rows, gates.hard)
     const from = Math.max(1, base.qualified)
     const out: Record<string, unknown>[] = []
 
@@ -257,7 +256,7 @@ export const levers = internalQuery({
       const loosened = settle({ ...gates.hard, [key]: NOTCH[key](value) })
       const after = (loosened as Record<string, unknown>)[key] as number
       if (after === value) continue
-      const gain = walk(rows, loosened, gates.passScore).qualified / from
+      const gain = walk(rows, loosened).qualified / from
       out.push({
         id: key,
         label: `${LABEL[key]}, ${value}`,
@@ -266,23 +265,6 @@ export const levers = internalQuery({
         next: { hard: loosened, passScore: gates.passScore },
         change: `${LABEL[key]}: ${value} to ${after}`,
         sole: base.blame.get(key)?.sole ?? 0,
-      })
-    }
-
-    // The score is a candidate like any other, and its gain is exact rather
-    // than estimated: lowering the bar by one admits exactly one bucket.
-    if (gates.passScore > 5) {
-      const next = gates.passScore - 1
-      const admitted = base.histogram.get(next) ?? 0
-      const gain = (base.qualified + admitted) / from
-      out.push({
-        id: 'passScore',
-        label: `Pass mark, ${gates.passScore} of ${gates.criteria.length * 2}`,
-        action: `Lowering it to ${next} ${phrase(gain)}.`,
-        gain,
-        next: { hard: gates.hard, passScore: next },
-        change: `Pass mark: ${gates.passScore} to ${next}`,
-        sole: 0,
       })
     }
 

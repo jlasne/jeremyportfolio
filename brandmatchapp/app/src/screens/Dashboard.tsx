@@ -1,4 +1,4 @@
-import { fitOf, getActivity, getCampaignRank, getHotLeads, getTags, nextBatchIn } from '../data'
+import { fitOf, getActivity, getCampaignRank, getHotLeads, getQualifiedByCampaign, getTags, nextBatchIn } from '../data'
 import { useStore } from '../data/hooks'
 import { Activity } from '../components/Activity'
 import { Avatar } from '../components/Avatar'
@@ -44,16 +44,22 @@ export function Dashboard() {
   const live = rank.filter((r) => r.campaign.status === 'live').length
   // The tiles read the last thirty days whatever the chart is showing: they
   // are the account's state, not a view of it.
-  const recent = all.slice(-DAYS)
-  const scored = recent.reduce((n, d) => n + d.scored, 0)
-  const qualified = recent.reduce((n, d) => n + d.qualified, 0)
+  const scored = all.slice(-DAYS).reduce((n, d) => n + d.scored, 0)
   const tags = getTags()
 
-  const dates = all.map((d) => d.date)
-  const bars = [{ id: 'scored', name: 'Profiles read', values: all.map((d) => d.scored) }]
-  const lines = [
-    { id: 'qualified', name: 'Share that qualified', values: all.map((d) => (d.scored ? d.qualified / d.scored : 0)) },
-  ]
+  // One bar a day, stacked by the campaign that found each lead. A qualified
+  // lead is someone who passed every hard filter, so the height of a day is
+  // the work that survived and each band says which campaign did it.
+  const delivered = getQualifiedByCampaign()
+  // The tile is the chart, added up. Counting qualified evaluations instead
+  // would put a bigger number above a smaller chart with the same name on it:
+  // a profile that clears the filters on a full day is a lead tomorrow, not
+  // one today.
+  const from = Math.max(0, delivered.dates.length - DAYS)
+  const qualified = delivered.series.reduce(
+    (n, s) => n + s.values.slice(from).reduce((m, v) => m + v, 0),
+    0,
+  )
 
   if (!rank.length) {
     return (
@@ -91,10 +97,9 @@ export function Dashboard() {
 
       <Activity
         title="Activity overview"
-        dates={dates}
-        bars={bars}
-        barsLabel="Profiles read"
-        lines={lines}
+        dates={delivered.dates}
+        bars={delivered.series}
+        barsLabel="Qualified leads"
       />
 
       <div className="two-up level">

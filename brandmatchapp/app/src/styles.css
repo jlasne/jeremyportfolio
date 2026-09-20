@@ -3597,3 +3597,36 @@ body { background: var(--paper); }
 /* Empty states sit inside a list, so they carry the list's own edge. */
 .empty { box-shadow: none; }
 .list .empty, .with-panel .empty { border: 0; }
+
+/* --- qualified means it passed the filters -------------------------------- */
+
+/* The split is a share of the day now, so a row carries a percentage and what
+   that percentage buys. Two lines in the same cell, the number leading. */
+.split-rows b.num { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.2; }
+.split-rows b.num small { font-weight: 400; font-size: 11px; color: var(--ink-3); white-space: nowrap; }
+.split-rows li { grid-template-columns: 10px minmax(120px, 220px) minmax(0, 1fr) 130px; }
+@media (max-width: 800px) { .split-rows li { grid-template-columns: 10px minmax(0, 1fr) 130px; } }
+
+/* Size and activity saves on its own now that it lives on the brief. The row
+   sits inside the card rather than on a bar across the page: it saves one
+   card, and a page-wide bar would claim the whole screen. */
+.card-foot { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+.card-foot .hint { margin: 0; }
+
+/* The accounts we can suggest, under the question that asks for them. */
+.seed-picks { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.seed-picks .pill-row { margin: 0; }
+
+/* A note you can read all of. It grows with the text and stops at six lines,
+   because a cell taller than the screen is a cell you scroll past. */
+.crm-note { min-height: 38px; overflow-y: auto; resize: none; font-size: 13px; line-height: 1.45; }
+.crm td:has(> .crm-note) { min-width: 240px; vertical-align: top; }
+
+/* The line above the CRM table. It says the thing out loud: a model files
+   faster than a person, and every field here is on the API. */
+.crm-wrap { display: flex; flex-direction: column; gap: 14px; }
+.crm-wrap > .notice { margin: 0; }
+
+/* The pickers and the dials are two different kinds of answer. They were
+   sharing an edge, which read as one long list. */
+.read-field + .dials { margin-top: 20px; }

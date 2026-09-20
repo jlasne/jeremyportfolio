@@ -12,10 +12,10 @@ import { DIALS, settle, type DialKey } from './tuning'
 // and nothing in data/index.ts is allowed to touch it.
 //
 // What leaves this file is a rate and an estimate. What never leaves it is how
-// many profiles we are willing to read to produce them.
+// many searches we are willing to run to produce them.
 
 /**
- * How many profiles a day we are willing to read for an account, by tier.
+ * How many searches a day we are willing to run for an account, by tier.
  * Internal. It shapes the estimate and is never named, shown or hinted at.
  */
 function scanRate(tier: number): number {
@@ -44,7 +44,7 @@ export interface SimResult {
   funnel: Funnel
   histogram: { score: number; count: number }[]
   blame: Blame[]
-  /** Qualified a day at the rate we are willing to read for this account. */
+  /** Qualified leads a day at the pace we are willing to run for this account. */
   estimatedPerDay: number
 }
 
@@ -92,6 +92,9 @@ function walk(gates: GateSet, niches: Niche[], answers: Judgement[], now: number
     if (result.verdict === 'off_niche') return
     inNiche++
     if (result.verdict === 'knockout_fail') return
+    // Past the deal breakers is a qualified lead. The histogram beside it is
+    // the spread of brand fit inside those leads, which is a ranking and not
+    // a second filter.
     pastKnockouts++
     histogram.set(result.score, (histogram.get(result.score) ?? 0) + 1)
     if (result.verdict === 'qualified') qualified++
@@ -221,21 +224,8 @@ export function levers(gates: GateSet, niches: Niche[]): Lever[] {
     })
   }
 
-  // The score is a candidate like any other, and its gain is exact rather than
-  // estimated: lowering the bar by one admits exactly one bucket.
-  if (gates.passScore > 5) {
-    const next = gates.passScore - 1
-    const admitted = base.histogram.find((h) => h.score === next)?.count ?? 0
-    const gain = (base.funnel.qualified + admitted) / from
-    candidates.push({
-      id: 'passScore',
-      label: `Pass mark, ${gates.passScore} of ${gates.criteria.length * 2}`,
-      action: `Lowering it to ${next} ${phrase(gain)}.`,
-      gain,
-      next: { hard: gates.hard, passScore: next },
-      change: `Pass mark: ${gates.passScore} to ${next}`,
-    })
-  }
+  // Brand fit is never a candidate. It scores a lead, it does not decide
+  // whether there is one, so there is no bar on it to lower.
 
   return candidates
     // Under a fifth more, it is not worth a click.

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { getCampaign, getFeasibility, getGateSet, getSubscription, getSurvey } from '../data'
+import { getCampaign, getFeasibility, getGateSet, getLastRunAt, getSubscription, getSurvey } from '../data'
 import { useStore } from '../data/hooks'
 import type { Door } from '../data/pool'
 import { about, simulate, verdictOf, type Funnel as Counts, type SimResult, type Verdict } from '../data/simulate'
@@ -7,18 +7,23 @@ import { acceptVolume, addSeeds, openDoor, runFeasibility } from '../data/store'
 import { cleanHandles } from '../data/seeds'
 import { Info } from '../components/Info'
 
-// Zone 5. One question, asked twice: how much do these rules filter, and what
-// would change if you opened one of them.
+// Zone 5. One question, asked twice: how many searches become qualified
+// leads, and what would change if you opened one of the filters.
 //
-// It is a simulation and it says so. We run the campaign's rules over a sample
-// of real accounts and count what survives each check. The number worth
-// reading is not how many died at a step, it is how much of the world these
-// rules keep: one in four hundred is a different business from one in ten, and
-// a client who has never seen that number tunes their rules blind.
+// It is a simulation and it says so. We run the campaign's filters over a
+// sample of real accounts and count what survives each one. The number worth
+// reading is not how many died at a step, it is how many searches it takes to
+// produce a lead: one in four hundred is a different business from one in ten,
+// and a client who has never seen that number tunes their filters blind.
+//
+// One run a day. A run reads a sample and that work is real, so the button
+// locks until tomorrow and the last result stays on screen. Saving new filters
+// re-runs it on its own, because a figure from filters you have changed is
+// worse than no figure.
 //
 // Nothing here says gate, knockout, median or threshold. And nothing here says
-// what a lead costs to produce: this screen negotiates volume and rules, never
-// the price.
+// what a run or a lead costs to produce: this screen negotiates volume and
+// filters, never the price.
 
 // ---------------------------------------------------------------------------
 // The wait
@@ -26,14 +31,13 @@ import { Info } from '../components/Info'
 
 const STAGES = [
   { at: 0, label: 'Searching your niches' },
-  { at: 1200, label: 'Counting views on their real posts' },
-  { at: 2200, label: 'Confirming what they work in' },
-  { at: 3200, label: 'Asking your deal breakers' },
-  { at: 4100, label: 'Scoring the fit' },
+  { at: 1400, label: 'Counting views on their real posts' },
+  { at: 2600, label: 'Confirming what they work in' },
+  { at: 3800, label: 'Asking your deal breakers' },
 ]
 const SCAN_MS = 5000
 
-function Scanning({ result, passScore, max, onDone }: { result: SimResult; passScore: number; max: number; onDone: () => void }) {
+function Scanning({ result, onDone }: { result: SimResult; onDone: () => void }) {
   const [elapsed, setElapsed] = useState(0)
   const started = useRef(performance.now())
 
@@ -70,8 +74,8 @@ function Scanning({ result, passScore, max, onDone }: { result: SimResult; passS
         ))}
       </ol>
       <div className="card gate-card">
-        <h2>How much your rules filter</h2>
-        <Funnel counts={result.funnel} passScore={passScore} max={max} upTo={stage} />
+        <h2>How many searches become leads</h2>
+        <Funnel counts={result.funnel} upTo={stage} />
       </div>
     </div>
   )
@@ -84,21 +88,22 @@ function Scanning({ result, passScore, max, onDone }: { result: SimResult; passS
 interface Band { label: string; count: number; width: number; kept: number }
 
 /**
- * Five steps, in the order a client thinks of them: we search their niches,
+ * Four steps, in the order a client thinks of them: we search their niches,
  * keep the big active ones, confirm what each person works in, ask the deal
- * breakers, score the fit. The size check runs before the niche is confirmed
- * because it is free and the confirmation is not.
+ * breakers. The size check runs before the niche is confirmed because it is
+ * free and the confirmation is not.
  *
- * Every row says what share of the people we started with is still standing.
+ * What comes out of the last one is a qualified lead. Brand fit is not a step
+ * here, because it scores the leads rather than deciding who is one.
+ *
+ * Every row says what share of the searches we started with is still standing.
  * The old version said how many were lost at each step, which reads as a list
  * of failures rather than as the shape of a filter.
  */
 function Funnel({
-  counts, passScore, max, upTo,
+  counts, upTo,
 }: {
   counts: Counts
-  passScore: number
-  max: number
   /** How many bands to show. Everything once the scan is done. */
   upTo?: number
 }) {
@@ -106,11 +111,10 @@ function Funnel({
   const top = Math.max(1, f.scanned)
   const widest = Math.max(1, f.pastHard)
   const rows: Band[] = [
-    { label: 'We look at', count: f.scanned, width: 1, kept: 1 },
+    { label: 'Searches we run', count: f.scanned, width: 1, kept: 1 },
     { label: 'Big and active enough', count: f.pastHard, width: f.pastHard / widest, kept: f.pastHard / top },
     { label: 'Working in a niche you want', count: f.inNiche, width: f.inNiche / widest, kept: f.inNiche / top },
-    { label: 'Past your deal breakers', count: f.pastKnockouts, width: f.pastKnockouts / widest, kept: f.pastKnockouts / top },
-    { label: `Brand fit ${Math.round((passScore / max) * 100)}% or more`, count: f.qualified, width: f.qualified / widest, kept: f.qualified / top },
+    { label: 'Qualified leads, past your deal breakers', count: f.qualified, width: f.qualified / widest, kept: f.qualified / top },
   ]
 
   const shown = upTo === undefined ? rows.length : Math.max(1, upTo + 1)
@@ -145,6 +149,16 @@ function oneIn(kept: number, total: number): string {
   if (kept <= 0) return 'nobody yet'
   const n = Math.round(total / kept)
   return `1 in ${n.toLocaleString('en-GB')}`
+}
+
+/** One run a day. Read off the last run, so a reload cannot buy another. */
+const DAY = 86_400_000
+
+function nextRun(lastRunAt: string | null): { open: boolean; inHours: number } {
+  if (!lastRunAt) return { open: true, inHours: 0 }
+  const since = Date.now() - new Date(lastRunAt).getTime()
+  if (since >= DAY) return { open: true, inHours: 0 }
+  return { open: false, inHours: Math.max(1, Math.ceil((DAY - since) / 3_600_000)) }
 }
 
 const VERDICT: Record<Verdict, (per: number, want: number) => string> = {
@@ -273,9 +287,9 @@ export function Feasibility({ campaignId }: { campaignId: string }) {
 
   if (!campaign || !gates) return null
   const niches = campaign.extracted.niches
-  const max = gates.criteria.length * 2
   // What this campaign may take in a day: its own cap, or the whole tier.
   const want = campaign.dailyCap ?? plan.tier
+  const again = nextRun(getLastRunAt(campaignId))
 
   const start = () => setScan(simulate(gates, niches, plan.tier))
   const finish = () => {
@@ -283,16 +297,22 @@ export function Feasibility({ campaignId }: { campaignId: string }) {
     setScan(null)
   }
 
-  if (scan) return <Scanning result={scan} passScore={gates.passScore} max={max} onDone={finish} />
+  if (scan) return <Scanning result={scan} onDone={finish} />
 
   if (!run) {
     return (
       <div className="empty">
-        <h2>Not tested yet</h2>
-        <p>We run your rules over a sample of real accounts and tell you how much of the world they keep, and how many leads a day that is.</p>
+        <h2>No simulation yet</h2>
+        <p>
+          We run your filters over a sample of real accounts and tell you how many searches it takes to produce a
+          qualified lead, and how many that is a day.
+        </p>
         <div className="actions">
-          <button type="button" className="btn primary" onClick={start}>Test my rules</button>
+          <button type="button" className="btn primary" disabled={!again.open} onClick={start}>
+            Run the simulation
+          </button>
         </div>
+        {!again.open && <p className="hint">One run a day. The next one opens in {again.inHours}h.</p>}
       </div>
     )
   }
@@ -309,15 +329,25 @@ export function Feasibility({ campaignId }: { campaignId: string }) {
       <div className="card gate-card">
         <div className="chart-head">
           <h2>
-            How much your rules filter
-            <Info text="A simulation over a sample of real accounts, run against the rules you have saved. It is a measurement of your rules, not a promise about next week." />
+            How many searches become leads
+            <Info text="A simulation over a sample of real accounts, run against the filters you have saved. It measures your filters, it does not promise a number for next week. One run a day." />
           </h2>
-          <button type="button" className="btn small" onClick={start}>Test again</button>
+          <button type="button" className="btn small" disabled={!again.open} onClick={start}>
+            Run it again
+          </button>
         </div>
         <p className="filter-headline">
-          Your rules keep <b className="num">{oneIn(run.qualified, run.sampleSize)}</b> of the people we look at.
+          {run.qualified > 0 ? (
+            <>
+              <b className="num">{oneIn(run.qualified, run.sampleSize)}</b> searches becomes a qualified lead: someone
+              past your size and activity, your niches and your deal breakers.
+            </>
+          ) : (
+            <>Nothing in the sample cleared your filters. Open something up below.</>
+          )}
         </p>
-        <Funnel counts={counts} passScore={gates.passScore} max={max} />
+        <Funnel counts={counts} />
+        {!again.open && <p className="hint">One run a day. The next one opens in {again.inHours}h.</p>}
         <p className={`verdict-line ${verdict}`}>{VERDICT[verdict](run.estimatedPerDay, want)}</p>
         {verdict !== 'feasible' && (
           <div className="verdict-actions">

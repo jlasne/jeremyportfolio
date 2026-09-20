@@ -2,12 +2,15 @@ import { useState } from 'react'
 
 // Volume, and the shares that explain it, in one frame.
 //
-// Two y axes, which is a thing to do carefully: a reader who cannot tell which
-// mark belongs to which side reads the chart backwards. So the sides are tied
-// to their marks by colour, the left axis is captioned in the bars' colour and
-// the right in the lines', and every line carries its name at its end. The
-// hover reads every series at once, which is the honest way to compare two
-// scales: by the numbers, not by where the marks happen to cross.
+// Counts on the left, and a second axis on the right only when a share is
+// drawn on top of them. Two y axes is a thing to do carefully: a reader who
+// cannot tell which mark belongs to which side reads the chart backwards. So
+// the sides are tied to their marks by colour, and the hover reads every
+// series at once, which is the honest way to compare two scales: by the
+// numbers, not by where the marks happen to cross.
+//
+// With no lines the right axis is not drawn at all, and the frame takes that
+// room back. An empty axis is a reader asking what it was for.
 //
 // The bars stack, so the height is the day's whole volume and each band is who
 // it was for. Two pixels of surface between bands, because two fills touching
@@ -44,6 +47,8 @@ const WINDOWS: { id: Window; label: string }[] = [
 const W = 720
 const PAD_L = 40
 const PAD_R = 44
+/** Nothing on the right when no share is drawn, so the bars get the room. */
+const PAD_R_BARE = 12
 const PAD_T = 10
 const PLOT_H = 148
 const H = PAD_T + PLOT_H + 22
@@ -71,14 +76,15 @@ function short(n: number): string {
 }
 
 export function Activity({
-  title, dates, bars, barsLabel, lines, windowed = true,
+  title, dates, bars, barsLabel, lines = [], windowed = true,
 }: {
   title: string
   /** ISO days, oldest first. */
   dates: string[]
   bars: BarSeries[]
   barsLabel: string
-  lines: LineSeries[]
+  /** Shares from 0 to 1, drawn on a second axis. None means no second axis. */
+  lines?: LineSeries[]
   /** False when the caller has already chosen the window. */
   windowed?: boolean
 }) {
@@ -104,7 +110,8 @@ export function Activity({
   const topLine = lineSeries.length > 1
     ? 1
     : Math.max(0.05, Math.min(1, Math.max(...lineSeries.flatMap((s) => s.values), 0.01) * 1.3))
-  const plotW = W - PAD_L - PAD_R
+  const padR = lineSeries.length ? PAD_R : PAD_R_BARE
+  const plotW = W - PAD_L - padR
   const band = plotW / days.length
   const x = (i: number) => PAD_L + band * (i + 0.5)
   const yBar = (v: number) => PAD_T + PLOT_H - (v / topBar) * PLOT_H
@@ -179,18 +186,20 @@ export function Activity({
         </div>
       ) : (
         <div className="chart-wrap">
-          <svg viewBox={`0 0 ${W} ${H}`} className="chart" role="img" aria-label={`${barsLabel} a day, with ${lineSeries.map((s) => s.name).join(' and ')}`}>
+          <svg viewBox={`0 0 ${W} ${H}`} className="chart" role="img" aria-label={lineSeries.length ? `${barsLabel} a day, with ${lineSeries.map((s) => s.name).join(' and ')}` : `${barsLabel} a day`}>
             {/* One set of rules, read left for the counts and right for the
                 shares. Each side is captioned in the colour of its own marks. */}
             {[0, 0.5, 1].map((f) => (
               <g key={`g${f}`}>
-                <line x1={PAD_L} x2={W - PAD_R} y1={yBar(topBar * f)} y2={yBar(topBar * f)} className="chart-grid" />
+                <line x1={PAD_L} x2={W - padR} y1={yBar(topBar * f)} y2={yBar(topBar * f)} className="chart-grid" />
                 <text x={PAD_L - 8} y={yBar(topBar * f) + 3} className="chart-tick left" textAnchor="end">
                   {short(topBar * f)}
                 </text>
-                <text x={W - PAD_R + 8} y={yBar(topBar * f) + 3} className="chart-tick right" textAnchor="start">
-                  {Math.round(topLine * f * 100)}%
-                </text>
+                {lineSeries.length > 0 && (
+                  <text x={W - padR + 8} y={yBar(topBar * f) + 3} className="chart-tick right" textAnchor="start">
+                    {Math.round(topLine * f * 100)}%
+                  </text>
+                )}
               </g>
             ))}
 

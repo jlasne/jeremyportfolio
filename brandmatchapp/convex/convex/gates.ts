@@ -234,12 +234,14 @@ export function evaluate(
     score: clamp(judgement.criteria[c.id]?.score ?? 0),
     note: judgement.criteria[c.id]?.note,
   }))
+  // Every hard filter held, so this is a lead. The brand fit is measured and
+  // carried, and it decides where they sit in the list, not whether they are
+  // in it. Mirrors app/src/data/gates.ts on purpose.
   const score = criteriaScores.reduce((sum, c) => sum + c.score, 0)
-  const qualified = score >= gates.passScore
   return {
-    verdict: qualified ? 'qualified' : 'below_threshold',
+    verdict: 'qualified',
     niche: niche?.id,
-    blockedBy: qualified ? undefined : 'score',
+    blockedBy: undefined,
     hardChecks,
     knockoutAnswers,
     criteriaScores,

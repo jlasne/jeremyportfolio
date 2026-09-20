@@ -12,9 +12,11 @@ import { template, TEMPLATE_IDS, withinTemplate } from './templates'
 //
 //   Gate 1  write the numbers. Only thresholds, so the risk is low and the
 //           brief has to move them or every campaign would filter the same.
-//   Gate 2  reword the library's questions, and add at most one.
-//   Gate 3  write the sentences for this offer, from the library's. Then set the bar. Never invent
-//           a criterion, never drop one. templates.ts enforces it.
+//   Gate 2  reword the library's questions, and add at most one. Every one is
+//           delivered switched off.
+//   Gate 3  write the sentences for this offer, from the library's. Never invent
+//           a criterion, never drop one. templates.ts enforces it. The score
+//           they produce orders the list; it never decides who is on it.
 
 const OPENROUTER = 'https://openrouter.ai/api/v1/chat/completions'
 
@@ -95,8 +97,8 @@ function instructions(): string {
     '',
     'Then adapt it to the brief.',
     'Gate 1: write thresholds for the target described. Reach is measured on real posts, never a declared figure. Keep the follower range the brief asks for when it gives one.',
-    'Gate 2: keep every knockout id of the library. Reword the questions for this offer. You may add at most one new knockout.',
-    'Gate 3: write four to nine sentences describing the ideal profile for this offer, starting from the library sentences and rewording them for the brief. Each sentence is a plain statement about a person that can be answered true, partly true or false from what the judge will see: the bio, the links, the follower count, and the last twelve posts with their captions, dates, likes, comments and views. Never write a sentence that needs what the judge cannot see, such as whether they reply to comments, how their reach moved over a year, or what their audience earns. Ids are short snake_case. Set passScore in points out of twice the number of sentences, so that roughly one profile in six reaching gate 3 qualifies.',
+    'Gate 2: keep every knockout id of the library. Reword the questions for this offer. You may add at most one new knockout. Every one of them is delivered switched off, so write them as questions worth losing people over rather than as defaults.',
+    'Gate 3: write four to nine sentences describing the ideal profile for this offer, starting from the library sentences and rewording them for the brief. Each sentence is a plain statement about a person that can be answered true, partly true or false from what the judge will see: the bio, the links, the follower count, and the last twelve posts with their captions, dates, likes, comments and views. Never write a sentence that needs what the judge cannot see, such as whether they reply to comments, how their reach moved over a year, or what their audience earns. Ids are short snake_case. Brand fit scores a lead and orders the list, it never drops anyone, so passScore is carried but decides nothing: set it to half of twice the number of sentences.',
     '',
     'Niches: four to seven slices of the target, the sub topics these people actually work in. A target is never one audience, and the slices do not answer at the same rate. Ids are short snake_case.',
     '',
@@ -190,17 +192,20 @@ export const gatesFromBrief = internalAction({
         extractedAt: Date.now(),
       },
     })
-    // The model was asked for a bar where one in six qualifies and, on a
-    // sixteen point scale, answered four. Under half the sentences true is not
-    // a fit by any reading, so the floor is half, whatever it said.
-    const passScore = Math.max(kept.passScore, Math.ceil(kept.criteria.length * 2 * 0.5))
+    // Carried, not applied. Brand fit scores a lead and never removes one, so
+    // this number decides nothing: it is kept at half the ceiling so an old
+    // row and a new one read the same way.
+    const passScore = Math.ceil(kept.criteria.length * 2 * 0.5)
     const gates = await ctx.runMutation(internal.campaigns.saveGates, {
       accountId: args.accountId,
       campaignId: args.campaignId,
       origin: 'generated',
       templateId: lib.id,
       hard,
-      knockouts: kept.knockouts,
+      // Delivered switched off, every one. A deal breaker drops someone
+      // whatever else they score, so it is a decision the client makes once
+      // they have seen what the rest of the filters bring, never a default.
+      knockouts: kept.knockouts.map((k) => ({ ...k, enabled: false })),
       criteria: kept.criteria,
       passScore,
     })

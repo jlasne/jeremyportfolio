@@ -8,24 +8,19 @@ import { saveGateSet, setNiches } from '../data/store'
 import { slug } from '../data/niches'
 import { SENTENCES_ENOUGH, suggest } from '../data/propose'
 import { template } from '../data/templates'
-import {
-  DIALS, fromPosition, perNicheKeys, pointsFor, presetOf, settle, shareOf, toPosition,
-  type Dial, type DialKey,
-} from '../data/tuning'
-import { compact } from '../lib/format'
+import { perNicheKeys, presetOf, settle } from '../data/tuning'
 
-// Zone 4. Four checks, in the order they run, and the client tunes them.
+// Zone 4. Three checks, in the order they run, and the client tunes them.
 //
-// Nothing on this screen says gate, knockout, threshold or median. The checks
-// are named for what they ask: how big and how active, which niches, what
-// would rule someone out, and how good a fit they are.
+// The first one, size and activity, lives on the brief: it describes who the
+// client is after. The three here decide. Niches and deal breakers are hard
+// filters, and someone who clears them is a qualified lead. Brand fit is then
+// a score on that lead, from 0 to 100, and it sorts the list. It never turns
+// anyone away, so there is no pass mark on this screen and nothing to guess.
 //
-// Two rules shape it. Every dial has limits, some fixed and some tied to
-// another dial, so nobody can ask for one view or for 500k views off a 15k
-// follower minimum; the limits are written next to the dial rather than
-// enforced silently. And every number is the campaign's, one number for
-// everyone: a threshold that moved per niche could not be stated in a
-// sentence, and this screen exists to state it in a sentence.
+// Nothing here says gate, knockout, threshold or median. The checks are named
+// for what they ask: which niches, what would rule someone out, and how good
+// a fit they are.
 //
 // Nothing is written until Save. An edit then writes the next version, never
 // over the old one, so a lead delivered last week still has its rules.
@@ -74,62 +69,6 @@ function same(a: Draft, b: Draft): boolean {
 
 // ---------------------------------------------------------------------------
 
-function Slider({
-  dial, hard, value, onChange,
-}: {
-  dial: Dial
-  hard: HardRules
-  value: number
-  onChange: (next: number) => void
-}) {
-  const { min, max } = dial.range(hard)
-  const atFloor = value <= min
-  const atCeiling = value >= max
-  return (
-    <div className="dial">
-      <div className="dial-head">
-        <span>{dial.label}</span>
-        <b className="num">{dial.format(value)}</b>
-      </div>
-      <input
-        type="range"
-        min={0}
-        max={1000}
-        value={toPosition(dial, hard, value)}
-        aria-label={dial.label}
-        onChange={(e) => onChange(fromPosition(dial, hard, Number(e.target.value)))}
-      />
-      <div className="dial-foot">
-        <span className={atFloor ? 'edge' : undefined}>{dial.format(min)}</span>
-        <span className="dial-limit">{atFloor || atCeiling ? dial.limit : ''}</span>
-        <span className={atCeiling ? 'edge' : undefined}>{dial.format(max)}</span>
-      </div>
-    </div>
-  )
-}
-
-/** The first check in one sentence, rewritten on every drag. */
-function gateOneLine(hard: HardRules): string {
-  const reach = [
-    hard.medianViewsMin ? `${compact(hard.medianViewsMin)} views` : null,
-    hard.medianCommentsMin ? `${hard.medianCommentsMin} comments` : null,
-  ].filter(Boolean)
-  const bits = [
-    `${compact(hard.followersMin ?? 0)} to ${hard.followersMax && hard.followersMax >= 5_000_000 ? 'any number of' : compact(hard.followersMax ?? 0)} followers`,
-    hard.postsPerMonthMin ? cadence(hard.postsPerMonthMin) : null,
-    reach.length ? `around ${reach.join(' and ')} on a typical post` : null,
-    hard.lastPostWithinDays ? `active in the last ${hard.lastPostWithinDays} days` : null,
-  ].filter(Boolean)
-  return `We keep people with ${bits.join(', ')}.`.replace('with .', 'with the numbers below.')
-}
-
-function cadence(perMonth: number): string {
-  if (perMonth >= 26) return 'posting daily'
-  if (perMonth >= 12) return 'posting several times a week'
-  if (perMonth >= 4) return 'posting at least weekly'
-  return `posting at least ${perMonth} times a month`
-}
-
 // ---------------------------------------------------------------------------
 // The niches. Which slices of the target we look in. A niche on this list is
 // searched; a niche off it does not exist. There is no third state, because a
@@ -152,7 +91,7 @@ function Niches({ niches, onChange }: { niches: Niche[]; onChange: (next: Niche[
     <div className="card gate-card">
       <h2>
         2. Niches
-        <Info text="The slices of your target we search in, one search each. Every number above applies to all of them. Remove one and we stop looking there; add one and we start the next morning." />
+        <Info text="A hard filter. The slices of your target we search in, one search each. Someone who works in none of them is dropped. Remove one and we stop looking there; add one and we start the next morning." />
       </h2>
       <p className="gate-lede">
         We search these {niches.length} {niches.length === 1 ? 'niche' : 'niches'}, one at a time, and someone who
@@ -216,16 +155,13 @@ export function Gates({ campaignId }: { campaignId: string }) {
   const dirty = !same(live, stored)
   const asking = live.knockouts.filter((k) => k.enabled !== false).length
   const written = live.criteria.filter((c) => c.text.trim()).length
-  const share = shareOf(live.passScore, live.criteria.length)
+  // Brand fit no longer decides anything, so the stored pass mark is carried
+  // untouched: an old number nobody reads is better than a migration that
+  // rewrites versions a delivered lead was judged under.
 
   const set = (patch: Partial<Draft>) => {
     setSaved(false)
     setDraft({ ...live, ...patch })
-  }
-  const setDial = (key: Dial['key'], value: number) => {
-    // Moving one dial moves what the others are allowed to be, so everything
-    // is pulled back inside its range on every change and not only on save.
-    set({ hard: settle({ ...live.hard, [key]: value }) })
   }
   const save = () => {
     const { niches, ...rules } = live
@@ -236,7 +172,7 @@ export function Gates({ campaignId }: { campaignId: string }) {
     if (JSON.stringify(niches) !== JSON.stringify(campaign.extracted.niches)) setNiches(campaignId, niches)
     saveGateSet(
       campaignId,
-      { ...rules, criteria: kept, passScore: pointsFor(share / 100, kept.length), preset: presetOf(rules.hard, rules.passScore, lib) },
+      { ...rules, criteria: kept, preset: presetOf(rules.hard, rules.passScore, lib) },
       'mem_1',
     )
     setDraft(null)
@@ -246,35 +182,17 @@ export function Gates({ campaignId }: { campaignId: string }) {
 
   return (
     <>
-      <div className="card gate-card">
-        <h2>
-          1. Size and activity
-          <Info text="Every number is counted from their last 12 posts, never from anything an account declares. One number for the whole campaign: every niche below is measured against these." />
-        </h2>
-        <p className="gate-lede">{gateOneLine(live.hard)}</p>
-        <div className="dials">
-          {DIALS.map((dial) => (
-            <Slider
-              key={dial.key}
-              dial={dial}
-              hard={live.hard}
-              value={(live.hard[dial.key as DialKey] as number) ?? dial.range(live.hard).min}
-              onChange={(v) => setDial(dial.key, v)}
-            />
-          ))}
-        </div>
-      </div>
-
       <Niches niches={live.niches} onChange={(niches) => set({ niches })} />
 
       <div className="card gate-card">
         <h2>
           3. Deal breakers
-          <Info text="Each one is a yes or no question about a person. One no and they are dropped, whatever else they score. They are the sharpest thing on this screen." />
+          <Info text="A hard filter, and the sharpest thing on this screen. Each one is a yes or no question about a person, and one no drops them whatever else they score. They start off: switch on the ones worth losing people over." />
         </h2>
         <p className="gate-lede">
-          {asking} of {live.knockouts.length} switched on. These cut hardest: one no drops someone however well they
-          score everywhere else. Switch on what you would genuinely refuse a call with, and leave the rest off.
+          {asking} of {live.knockouts.length} switched on. A campaign starts with all of them off. Each one you
+          switch on raises the quality of what you get and lowers how much of it there is: one no drops someone
+          whatever else they score. Switch on what you would genuinely refuse a call with.
         </p>
         <ul className="switches">
           {live.knockouts.map((k) => {
@@ -315,11 +233,12 @@ export function Gates({ campaignId }: { campaignId: string }) {
       <div className="card gate-card">
         <h2>
           4. Brand fit
-          <Info text="Describe the people you want, one sentence a line. For each person we answer every sentence: true, partly true, or false. That is their brand fit." />
+          <Info text="Describe the people you want, one sentence a line. For each qualified lead we answer every sentence: true, partly true, or false. That is their brand fit, and it sorts your list. It never drops anyone." />
         </h2>
         <p className="gate-lede">
-          {written} {written === 1 ? 'sentence' : 'sentences'} about who you want. Eight or more is where the score
-          starts telling people apart: under that, one sentence swings it by more than a tenth.
+          {written} {written === 1 ? 'sentence' : 'sentences'} about who you want. This scores the leads you get and
+          orders your list, it never removes anyone. Eight or more is where the score starts telling people apart:
+          under that, one sentence swings it by more than a tenth.
         </p>
         <Sentences
           list={live.criteria}
@@ -369,42 +288,6 @@ export function Gates({ campaignId }: { campaignId: string }) {
         )}
       </div>
 
-      <div className="card qualify-card">
-        <h2>
-          Qualified from
-          <Info text="The one setting that decides who reaches you. Everything above narrows who we look at; this decides who you are handed. Lower means more people and more sorting for you." />
-        </h2>
-        <div className="qualify-body">
-          <b className="qualify-num num">{share}%</b>
-          <div className="qualify-dial">
-            <input
-              type="range"
-              min={10}
-              max={100}
-              value={share}
-              aria-label="Brand fit needed to qualify"
-              onChange={(e) => set({ passScore: pointsFor(Number(e.target.value) / 100, live.criteria.length) })}
-            />
-            <div className="dial-foot">
-              <span>10%, almost everyone</span>
-              <span className="dial-limit">{band(share)}</span>
-              <span>100%, every sentence true</span>
-            </div>
-          </div>
-        </div>
-        <p className="gate-lede">
-          Someone is handed to you when they answer at least {share}% of your sentences. That is{' '}
-          <b>{live.passScore} of {live.criteria.length * 2} points</b>, counting two for a true and one for a partly.
-        </p>
-        <p className={`notice${share > 70 ? ' warn' : ''}`}>
-          {share > 70
-            ? `This is strict. Above 70% you are asking for someone who answers almost every sentence, and that is a handful of people a week. We recommend 50% to 70%.`
-            : share < 50
-              ? `Below 50% you will be sorting people yourself. We recommend 50% to 70%.`
-              : `Between 50% and 70% is where this works: enough people to fill your day, and few enough that you write to all of them.`}
-        </p>
-      </div>
-
       <div className="save-bar">
         {saved && (
           <span className="hint">
@@ -426,16 +309,8 @@ export function Gates({ campaignId }: { campaignId: string }) {
         <button type="button" className="btn primary" disabled={!dirty} onClick={save}>
           Save my rules
         </button>
-        <a className="btn" href={`#/campaign/${campaignId}/feasibility`}>Test them</a>
+        <a className="btn" href={`#/campaign/${campaignId}/feasibility`}>Run a simulation</a>
       </div>
     </>
   )
-}
-
-/** What a share means in words, so the number is not read alone. */
-function band(share: number): string {
-  if (share >= 85) return 'Very few people, and they will be exactly right'
-  if (share >= 65) return 'A good fit, and enough of them'
-  if (share >= 45) return 'Worth a look, and you will sort some out'
-  return 'Almost anyone your rules found'
 }

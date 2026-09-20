@@ -13,7 +13,7 @@ import { Gates } from './Gates'
 const TABS: { id: CampaignTab; label: string; question: string }[] = [
   { id: 'brief', label: 'Your brief', question: '' },
   { id: 'gates', label: 'Your rules', question: 'What makes someone a lead' },
-  { id: 'feasibility', label: 'Test it', question: 'What your rules let through, and what to open up' },
+  { id: 'feasibility', label: 'Simulation', question: 'How many searches become qualified leads, and what to open up' },
 ]
 
 export function CampaignZone({ campaignId, tab }: { campaignId: string; tab: CampaignTab }) {
