@@ -28,12 +28,19 @@ export interface Loaded {
   feasibilityRuns: FeasibilityRun[]
   /** Every tag the account's leads carry, so the drawer can list them. */
   tags: string[]
+  /** What was scored day by day. The server counts it; this browser cannot. */
+  activity: { date: string; scored: number; qualified: number }[]
+  /** Status changes the client made in the window. */
+  crmUpdates: number | null
 }
 
 /** Reads a whole account: the plan, the campaigns, their gates, the leads. */
 export async function fetchAll(): Promise<Loaded> {
   const me = (await api.me()) as any
   const accountId = me.account.id as string
+  // One extra read, and a failure costs the dashboard its chart and nothing
+  // else: the leads are what the client came for.
+  const overview = await api.overview(30).catch(() => null)
 
   const account: Account = {
     id: accountId,
@@ -200,5 +207,9 @@ export async function fetchAll(): Promise<Loaded> {
     feasibilityRuns,
     // Every tag the account has, whether or not a lead carries it today.
     tags: [...new Set(leads.flatMap((l) => l.tags ?? []))].sort(),
+    // The work behind the leads. Only the server has ever seen most of it, so
+    // a browser cannot count it, and a dashboard that guessed would be wrong.
+    activity: overview?.activity ?? [],
+    crmUpdates: typeof overview?.crmUpdates === 'number' ? overview.crmUpdates : null,
   }
 }

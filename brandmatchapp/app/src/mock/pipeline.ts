@@ -105,6 +105,19 @@ const firstRules = new Map<string, FirstRules | null>(
   ]),
 )
 
+/**
+ * Which day a profile was read on.
+ *
+ * An even spread with a slow wave over it, so the chart has a rhythm without
+ * any day being empty. Deterministic: the sample has to look the same twice.
+ */
+function scoredOn(index: number, total: number): number {
+  const days = Math.max(1, dayOfPeriod)
+  const at = (index / Math.max(1, total)) * days
+  const wave = Math.sin(index / 311) * 0.8
+  return Math.min(days - 1, Math.max(0, Math.round(days - 1 - at + wave)))
+}
+
 built.forEach((b, index) => {
   const campaign = b.niche === 'fitness' ? campaigns[0] : campaigns[1]
   const gates = gateSetById.get(campaign.gateSetId)!
@@ -129,7 +142,10 @@ built.forEach((b, index) => {
     criteriaScores: result.criteriaScores,
     score: result.score,
     reason: result.verdict === 'qualified' ? pick(rand, REASONS[campaign.id]) : result.reason,
-    evaluatedAt: daysAgo(Math.min(daysInPeriod - 1, Math.floor(index / 90))),
+    // Spread across the days we have been running, with the week's own
+    // rhythm on it. The old version put five sixths of the sample on a single
+    // day, which drew a chart with one bar and a flat line beside it.
+    evaluatedAt: daysAgo(scoredOn(index, built.length)),
   })
 
   if (result.verdict === 'qualified') {

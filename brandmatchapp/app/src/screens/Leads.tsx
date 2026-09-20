@@ -656,19 +656,13 @@ export function Leads({ leadId, query: params }: { leadId: string | null; query:
       <div className="page-head">
         <h1>Leads</h1>
         <span className="count num">{today.delivered} of {today.target} today</span>
-        <span className="spacer" />
-        <input
-          className="input search-field"
-          placeholder="Search a name or handle"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <button type="button" className="btn" onClick={exportCsv} disabled={!rows.length}>Export</button>
       </div>
 
       {anyLeads && (
       <>
-      <div className="filter-row">
+      {/* One line, in the order a list is narrowed: which campaign, how good a
+          fit, what we measured, what you called them, then out or find. */}
+      <div className="table-tools">
         {campaigns.length > 1 && (
           <select
             className="select"
@@ -680,20 +674,6 @@ export function Leads({ leadId, query: params }: { leadId: string | null; query:
             {campaigns.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         )}
-        <span className="rule" />
-        <button type="button" className={`chip${status === null ? ' on' : ''}`} onClick={() => setStatus(null)}>
-          All
-        </button>
-        {STATUSES.map((s) => (
-          <button key={s} type="button" className={`chip${status === s ? ' on' : ''}`} onClick={() => setStatus(s)}>
-            {STATUS_LABEL[s]}
-          </button>
-        ))}
-        <span className="spacer" />
-        <span className="faint num">{rows.length} shown</span>
-      </div>
-
-      <div className="table-tools">
         <Range label="Brand fit" min={0} max={100} value={fit} format={(n) => `${n}%`} onChange={setFit} />
         <button
           type="button"
@@ -709,17 +689,37 @@ export function Leads({ leadId, query: params }: { leadId: string | null; query:
           aria-expanded={drawer === 'tags'}
           onClick={() => setDrawer(drawer === 'tags' ? null : 'tags')}
         >
-          Tags{tags.length ? ` · ${tags.length}` : ''}
+          CRM tags{tags.length ? ` · ${tags.length}` : ''}
         </button>
-        {(active > 0 || tags.length > 0 || fit[0] > 0 || fit[1] < 100) && (
+        <button type="button" className="btn" onClick={exportCsv} disabled={!rows.length}>Export</button>
+        <input
+          className="input search-field"
+          placeholder="Search a name or handle"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
+
+      <div className="filter-row">
+        <button type="button" className={`chip${status === null ? ' on' : ''}`} onClick={() => setStatus(null)}>
+          All
+        </button>
+        {STATUSES.map((s) => (
+          <button key={s} type="button" className={`chip${status === s ? ' on' : ''}`} onClick={() => setStatus(s)}>
+            {STATUS_LABEL[s]}
+          </button>
+        ))}
+        <span className="spacer" />
+        {(active > 0 || tags.length > 0 || fit[0] > 0 || fit[1] < 100 || search) && (
           <button
             type="button"
-            className="btn quiet"
-            onClick={() => { setFilters(NO_FILTERS); setTags([]); setFit(FIT_SPAN) }}
+            className="btn small quiet"
+            onClick={() => { setFilters(NO_FILTERS); setTags([]); setFit(FIT_SPAN); setSearch('') }}
           >
             Clear
           </button>
         )}
+        <span className="faint num">{rows.length} shown</span>
       </div>
 
       {drawer === 'filters' && <FilterDrawer value={filters} onChange={setFilters} />}

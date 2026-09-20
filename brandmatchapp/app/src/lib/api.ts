@@ -156,6 +156,14 @@ export const api = {
   tagLead: (id: string, patch: { add?: string[]; remove?: string[] }) =>
     call<{ ok: true; tags: string[] }>('/api', `/leads/${id}/tags`, { method: 'POST', body: JSON.stringify(patch) }),
   tags: () => call<{ tags: { name: string; leads: number }[] }>('/api', '/tags'),
+  /** The dashboard's numbers: what was scored, what qualified, what moved. */
+  overview: (days = 30) =>
+    call<{
+      activity: { date: string; scored: number; qualified: number }[]
+      crmUpdates: number
+      activeCampaigns: number
+      deliveredToday: number
+    }>('/api', `/overview?days=${days}`),
   recordDeal: (id: string, amountCents: number, note?: string) =>
     call<{ ok: true }>('/api', `/leads/${id}/deal`, { method: 'POST', body: JSON.stringify({ amountCents, note }) }),
   waitlist: (email: string, website?: string) =>

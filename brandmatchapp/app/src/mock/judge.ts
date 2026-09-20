@@ -89,7 +89,10 @@ export function judge(index: number, band: string, gates: GateSet, niches: Niche
   for (const c of gates.criteria) {
     const roll = rand()
     const score: CriterionScore =
-      band === 'strong' ? (roll > 0.22 ? 2 : 1)
+      // A strong profile still misses a sentence now and then. Without that,
+      // one lead in ten answers every sentence and the top of the list is a
+      // row of hundreds with nothing to choose between.
+      band === 'strong' ? (roll > 0.3 ? 2 : roll > 0.06 ? 1 : 0)
         : band === 'fair' ? (roll > 0.6 ? 2 : roll > 0.24 ? 1 : 0)
           : (roll > 0.8 ? 1 : 0)
     const notes = CRITERION_NOTES[c.id] ?? ['No', 'Partly', 'Yes']

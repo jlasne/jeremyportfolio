@@ -69,7 +69,7 @@ export const campaigns: Campaign[] = [
     accountId: account.id,
     name: 'Finance educators, course platform',
     status: 'live',
-    dailyCap: 12,
+    dailyCap: 5,
     brief: {
       audience:
         'Finance educators who already run a paid community or cohort, publish every week, and whose audience has money to invest. Nobody giving regulated advice',

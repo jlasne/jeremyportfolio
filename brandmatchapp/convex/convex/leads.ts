@@ -253,7 +253,38 @@ export const overview = internalQuery({
       .withIndex('by_account_date', (q) => q.eq('accountId', args.accountId))
       .collect()
     const walk = ['new', 'contacted', 'replied', 'call', 'signed']
+
+    // What we looked at for this account, day by day. It is volume, not cost:
+    // the client is told how much work stands behind their leads, and never
+    // what that work is paid for. The ops surface keeps the money.
+    const days = args.days ?? 30
+    const since = Date.now() - days * 86_400_000
+    const campaigns = await ctx.db
+      .query('campaigns')
+      .withIndex('by_account', (q) => q.eq('accountId', args.accountId))
+      .collect()
+    const mine = new Set(campaigns.map((c) => c._id as string))
+    const evaluations = (await ctx.db.query('evaluations').collect()).filter(
+      (e) => mine.has(e.campaignId as string) && e.evaluatedAt >= since,
+    )
+    const byDay = new Map<string, { scored: number; qualified: number }>()
+    for (const e of evaluations) {
+      const date = new Date(e.evaluatedAt).toISOString().slice(0, 10)
+      const row = byDay.get(date) ?? { scored: 0, qualified: 0 }
+      row.scored++
+      if (e.verdict === 'qualified') row.qualified++
+      byDay.set(date, row)
+    }
+    const events = await ctx.db
+      .query('leadEvents')
+      .withIndex('by_account_at', (q) => q.eq('accountId', args.accountId).gte('at', since))
+      .collect()
+
     return {
+      activity: [...byDay.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([date, v]) => ({ date, ...v })),
+      /** Status changes the client made. Ours are written by "system". */
+      crmUpdates: events.filter((e) => e.by !== 'system').length,
+      activeCampaigns: campaigns.filter((c) => c.status === 'live').length,
       deliveredToday: leads.filter((l) => new Date(l.deliveredAt).toISOString().slice(0, 10) === today).length,
       funnel: walk.map((status) => ({
         status,

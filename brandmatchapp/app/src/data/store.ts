@@ -79,6 +79,15 @@ export interface State {
    * carries it and survives the last lead losing it.
    */
   tags: string[]
+  /**
+   * How much was looked at, day by day, and how much of it qualified. Empty
+   * on the sample, which counts its own evaluations instead; filled from the
+   * server on a real account, where most of what we scored never became a
+   * lead and so is not in this browser at all.
+   */
+  activity: import('./index').ActivityDay[]
+  /** Status changes the client made. Null means work it out locally. */
+  crmUpdates: number | null
 }
 
 function seed(): State {
@@ -103,6 +112,8 @@ function seed(): State {
     // The sample arrives filed the way an account files itself after a month
     // of use. An empty account starts with none and makes its own.
     tags: SAMPLE_TAGS,
+    activity: [],
+    crmUpdates: null,
   }
 }
 
@@ -683,7 +694,10 @@ export async function hydrate(): Promise<boolean> {
   try {
     const { fetchAll } = await import('./remote')
     const loaded = await fetchAll()
-    setState({ live: true, ...loaded, topups: [], quotaEntries: [], claims: [], tags: loaded.tags ?? [] })
+    setState({
+      live: true, ...loaded, topups: [], quotaEntries: [], claims: [],
+      tags: loaded.tags ?? [], activity: loaded.activity ?? [], crmUpdates: loaded.crmUpdates ?? null,
+    })
     return true
   } catch (e) {
     console.warn('brandmatch: staying on the sample account.', e)

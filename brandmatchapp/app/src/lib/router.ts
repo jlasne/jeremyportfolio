@@ -2,22 +2,24 @@ import { useEffect, useState } from 'react'
 
 // Hash routes. No library, no server config.
 //
-// Four product zones, each answering one question:
+// The zones, each answering one question:
 //
+//   dashboard    does today need me
+//   campaigns    what am I running, and how is the day shared
 //   leads        who do I contact now
 //   brief        who do I want to reach, and what do I sell
 //   gates        which criteria decide
-//   feasibility  how many, for how long, and what if
+//   feasibility  how much do my rules filter, and what would I open up
 //
-// Three surfaces sit outside them: the account, the API, and the internal
-// admin. There is no dashboard: the list is the screen people live in, and a
-// page of charts in front of it was one click between them and the work.
+// Four surfaces sit outside them: the account, the API, the roadmap, and the
+// internal admin.
 
 export type CampaignTab = 'brief' | 'gates' | 'feasibility'
 
 export type Route =
   | { name: 'home' }
   | { name: 'demo' }
+  | { name: 'dashboard' }
   | { name: 'newCampaign' }
   | { name: 'leads'; leadId: string | null; query: Query }
   | { name: 'campaigns' }
@@ -25,6 +27,7 @@ export type Route =
   | { name: 'account' }
   | { name: 'outreach' }
   | { name: 'ai' }
+  | { name: 'roadmap' }
   | { name: 'admin' }
 
 const TABS: CampaignTab[] = ['brief', 'gates', 'feasibility']
@@ -41,10 +44,9 @@ export function parse(hash: string): Route {
   switch (head) {
     case '':
       return { name: 'home' }
-    // The old dashboard. Everything it answered is answered on the list.
     case 'app':
     case 'dashboard':
-      return { name: 'leads', leadId: null, query }
+      return { name: 'dashboard' }
     // The sample, filled, at one address. For a visitor it is what they see
     // anyway; for an account it swaps the data until the click back.
     case 'demo':
@@ -69,6 +71,9 @@ export function parse(hash: string): Route {
       return { name: 'outreach' }
     case 'ai':
       return { name: 'ai' }
+    case 'roadmap':
+    case 'ideas':
+      return { name: 'roadmap' }
     case 'admin':
       return { name: 'admin' }
     default:

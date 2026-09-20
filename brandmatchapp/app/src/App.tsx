@@ -11,6 +11,8 @@ import { Landing } from './screens/Landing'
 import { Leads } from './screens/Leads'
 import { NewCampaign } from './screens/NewCampaign'
 import { Ai } from './screens/Ai'
+import { Dashboard } from './screens/Dashboard'
+import { Roadmap } from './screens/Roadmap'
 import { Outreach } from './screens/Outreach'
 
 // Five product zones, plus the account and the internal admin. The landing is
@@ -33,7 +35,9 @@ export function App() {
         {route.name === 'campaign' && <CampaignZone campaignId={route.campaignId} tab={route.tab} />}
         {route.name === 'account' && <Account />}
         {route.name === 'outreach' && <Outreach />}
+        {route.name === 'dashboard' && <Dashboard />}
         {route.name === 'ai' && <Ai />}
+        {route.name === 'roadmap' && <Roadmap />}
         {route.name === 'admin' && <Admin />}
       </main>
     </div>
@@ -44,7 +48,7 @@ export function App() {
 function Demo() {
   useEffect(() => {
     setDemo(true)
-    window.location.replace('#/leads')
+    window.location.replace('#/app')
     window.location.reload()
   }, [])
   return null

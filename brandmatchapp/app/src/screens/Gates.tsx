@@ -396,6 +396,13 @@ export function Gates({ campaignId }: { campaignId: string }) {
           Someone is handed to you when they answer at least {share}% of your sentences. That is{' '}
           <b>{live.passScore} of {live.criteria.length * 2} points</b>, counting two for a true and one for a partly.
         </p>
+        <p className={`notice${share > 70 ? ' warn' : ''}`}>
+          {share > 70
+            ? `This is strict. Above 70% you are asking for someone who answers almost every sentence, and that is a handful of people a week. We recommend 50% to 70%.`
+            : share < 50
+              ? `Below 50% you will be sorting people yourself. We recommend 50% to 70%.`
+              : `Between 50% and 70% is where this works: enough people to fill your day, and few enough that you write to all of them.`}
+        </p>
       </div>
 
       <div className="save-bar">

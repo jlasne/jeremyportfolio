@@ -342,3 +342,93 @@ export function getTags(): { name: string; count: number }[] {
   for (const l of s.leads) for (const t of l.tags ?? []) count.set(t, (count.get(t) ?? 0) + 1)
   return s.tags.map((name) => ({ name, count: count.get(name) ?? 0 }))
 }
+
+// ---------------------------------------------------------------------------
+// The dashboard
+// ---------------------------------------------------------------------------
+
+/** One day of work: how many profiles were scored, and how many qualified. */
+export interface ActivityDay {
+  date: string
+  scored: number
+  qualified: number
+}
+
+/**
+ * What we looked at for this account, day by day.
+ *
+ * Volume, never money. A client is owed the size of the search behind their
+ * leads, because thirty leads out of eight thousand profiles is the product;
+ * what those eight thousand cost to read is ours and stays on the ops surface.
+ *
+ * A real account reads this from the server, which counts every profile
+ * scored. The sample computes it from its own evaluations.
+ */
+export function getActivity(days = 30): ActivityDay[] {
+  const s = getState()
+  if (s.activity.length) return s.activity.slice(-days)
+  const since = Date.now() - days * 86_400_000
+  const byDay = new Map<string, ActivityDay>()
+  for (const e of s.evaluations) {
+    const at = new Date(e.evaluatedAt).getTime()
+    if (at < since) continue
+    const date = e.evaluatedAt.slice(0, 10)
+    const row = byDay.get(date) ?? { date, scored: 0, qualified: 0 }
+    row.scored++
+    if (e.verdict === 'qualified') row.qualified++
+    byDay.set(date, row)
+  }
+  return [...byDay.values()].sort((a, b) => a.date.localeCompare(b.date))
+}
+
+/** Status changes the client made. Ours are written by the system. */
+export function getCrmUpdates(days = 30): number {
+  const s = getState()
+  if (s.crmUpdates !== null) return s.crmUpdates
+  const since = new Date(Date.now() - days * 86_400_000).toISOString()
+  return s.leadEvents.filter((e) => e.at >= since && e.by !== 'system').length
+}
+
+/**
+ * The best of the last delivery, not the best of all time.
+ *
+ * A list of all-time favourites is the same five faces every morning. The
+ * question this answers is "what did last night bring", so it reads the most
+ * recent day anything arrived and takes the top of it.
+ */
+export function getHotLeads(limit = 5): LeadRow[] {
+  const rows = allRows()
+  if (!rows.length) return []
+  const last = rows.map((r) => r.lead.deliveredAt.slice(0, 10)).sort().pop()!
+  const batch = rows.filter((r) => r.lead.deliveredAt.slice(0, 10) === last)
+  // Ties on fit are common at the top of a batch, so the bigger audience wins
+  // them: between two people who answer every sentence, reach decides.
+  return batch
+    .sort((a, b) => fitOf(b) - fitOf(a) || b.creator.followers - a.creator.followers)
+    .slice(0, limit)
+}
+
+/** Campaigns by what they actually bring in a day, busiest first. */
+export function getCampaignRank(days = 30): { campaign: Campaign; perDay: number; delivered: number }[] {
+  const s = getState()
+  const since = new Date(Date.now() - days * 86_400_000).toISOString()
+  return s.campaigns
+    .map((campaign) => {
+      const delivered = s.leads.filter((l) => l.campaignId === campaign.id && l.deliveredAt >= since).length
+      return { campaign, delivered, perDay: Math.round((delivered / days) * 10) / 10 }
+    })
+    .sort((a, b) => b.perDay - a.perDay)
+}
+
+/**
+ * When the next search lands. Delivery runs at 06:00 UTC every morning, so
+ * this is a clock and not a guess.
+ */
+export function nextBatchIn(): { hours: number; minutes: number } {
+  const now = new Date()
+  const next = new Date(now)
+  next.setUTCHours(6, 0, 0, 0)
+  if (next.getTime() <= now.getTime()) next.setUTCDate(next.getUTCDate() + 1)
+  const ms = next.getTime() - now.getTime()
+  return { hours: Math.floor(ms / 3_600_000), minutes: Math.floor((ms % 3_600_000) / 60_000) }
+}

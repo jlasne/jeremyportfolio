@@ -3,22 +3,34 @@ import { deliveredToday } from '../data'
 import { useStore } from '../data/hooks'
 import { api, hasKey, isDemo } from '../lib/api'
 import type { Route } from '../lib/router'
+import { Help } from './Help'
 import { Logo } from './Logo'
 
-// Five places to go. The three campaign zones live inside a campaign, so
-// nothing nests here.
+// Two groups, and the gap between them is the point.
 //
-// The month's balance used to sit at the foot of this rail. It was a number
-// with nothing to do: it appears on the account page, where it is acted on.
+// The top five are the work, in the order it is done: see the morning, run the
+// campaigns, work the list, wire your own AI to it, and one day let us do the
+// writing. The bottom three are about the tool rather than the work, so they
+// sit at the foot where nobody looks for them by accident.
+//
+// The month's balance used to sit down there. It was a number with nothing to
+// do: it appears on the account page, where it is acted on.
 //
 // The rail collapses to its icons and the choice is remembered in this browser.
 // On a narrow screen it starts collapsed and every label is a tooltip.
 
-const ITEMS: { href: string; label: string; name: Route['name'] }[] = [
-  { href: '#/leads', label: 'Leads', name: 'leads' },
+interface Item { href: string; label: string; name: Route['name']; soon?: boolean }
+
+const ITEMS: Item[] = [
+  { href: '#/app', label: 'Dashboard', name: 'dashboard' },
   { href: '#/campaigns', label: 'Campaigns', name: 'campaigns' },
-  { href: '#/outreach', label: 'Outreach', name: 'outreach' },
-  { href: '#/ai', label: 'API and MCP', name: 'ai' },
+  { href: '#/leads', label: 'Leads', name: 'leads' },
+  { href: '#/ai', label: 'AI Connect', name: 'ai' },
+  { href: '#/outreach', label: 'Outreach', name: 'outreach', soon: true },
+]
+
+const FOOT: Item[] = [
+  { href: '#/roadmap', label: 'Roadmap and Ideas', name: 'roadmap' },
   { href: '#/account', label: 'Account', name: 'account' },
 ]
 
@@ -29,6 +41,15 @@ function Glyph({ name }: { name: string }) {
     width: 16, height: 16, viewBox: '0 0 16 16', fill: 'none',
     stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round' as const,
     strokeLinejoin: 'round' as const, 'aria-hidden': true,
+  }
+  if (name === 'dashboard') {
+    return <svg {...common}><path d="M2.5 10.5 6 6.5l3 2.5 4.5-5.5" /><path d="M2.5 13.5h11" /></svg>
+  }
+  if (name === 'roadmap') {
+    return <svg {...common}><path d="M8 2.5v11" /><path d="M8 3.5h5l-1.2 2L13 7.5H8" /></svg>
+  }
+  if (name === 'help') {
+    return <svg {...common}><circle cx="8" cy="8" r="5.5" /><path d="M6.6 6.4a1.4 1.4 0 1 1 1.9 1.3v1" /><path d="M8.5 11h-.01" /></svg>
   }
   if (name === 'ai') {
     return <svg {...common}><path d="M5.5 5.5 2.5 8l3 2.5" /><path d="M10.5 5.5 13.5 8l-3 2.5" /><path d="M9 3.5 7 12.5" /></svg>
@@ -80,18 +101,41 @@ export function SideNav({ route }: { route: Route }) {
   useStore()
   const owner = useOwner()
   const [shut, setShut] = useCollapsed()
+  const [helping, setHelping] = useState(false)
   const today = deliveredToday()
-  const items = owner ? [...ITEMS, { href: '#/admin', label: 'Admin', name: 'admin' as const }] : ITEMS
+  const foot = owner ? [{ href: '#/admin', label: 'Admin', name: 'admin' as const }, ...FOOT] : FOOT
 
   useEffect(() => {
     document.body.classList.toggle('nav-shut', shut)
     return () => document.body.classList.remove('nav-shut')
   }, [shut])
 
+  const link = (item: Item) => {
+    const on =
+      route.name === item.name ||
+      (item.name === 'campaigns' && (route.name === 'campaign' || route.name === 'newCampaign'))
+    const count = item.name === 'leads' && today ? today : null
+    return (
+      <li key={item.href}>
+        <a
+          href={item.href}
+          className={on ? 'on' : undefined}
+          aria-current={on ? 'page' : undefined}
+          title={shut ? item.label : undefined}
+        >
+          <i className="nav-glyph"><Glyph name={item.name} /></i>
+          <span className="nav-label">{item.label}</span>
+          {count ? <span className="pill num">{count}</span> : null}
+          {item.soon && !count ? <span className="soon">soon</span> : null}
+        </a>
+      </li>
+    )
+  }
+
   return (
     <nav className={`sidenav${shut ? ' shut' : ''}`} aria-label="Main">
       <div className="sidenav-top">
-        <a className="brand" href="#/leads" aria-label="brandmatch, back to the list">
+        <a className="brand" href="#/app" aria-label="brandmatch, back to the dashboard">
           <Logo size={26} />
         </a>
         <button
@@ -105,28 +149,25 @@ export function SideNav({ route }: { route: Route }) {
           <i aria-hidden="true" />
         </button>
       </div>
-      <ul>
-        {items.map((item) => {
-          const on =
-            route.name === item.name ||
-            (item.name === 'campaigns' && (route.name === 'campaign' || route.name === 'newCampaign'))
-          const count = item.name === 'leads' && today ? today : null
-          return (
-            <li key={item.href}>
-              <a
-                href={item.href}
-                className={on ? 'on' : undefined}
-                aria-current={on ? 'page' : undefined}
-                title={shut ? item.label : undefined}
-              >
-                <i className="nav-glyph"><Glyph name={item.name} /></i>
-                <span className="nav-label">{item.label}</span>
-                {count ? <span className="pill num">{count}</span> : null}
-              </a>
-            </li>
-          )
-        })}
+
+      <ul>{ITEMS.map(link)}</ul>
+
+      <ul className="nav-foot">
+        <li>
+          <button
+            type="button"
+            className="nav-button"
+            title={shut ? 'Help Center' : undefined}
+            onClick={() => setHelping(true)}
+          >
+            <i className="nav-glyph"><Glyph name="help" /></i>
+            <span className="nav-label">Help Center</span>
+          </button>
+        </li>
+        {foot.map(link)}
       </ul>
+
+      {helping && <Help onClose={() => setHelping(false)} />}
     </nav>
   )
 }
