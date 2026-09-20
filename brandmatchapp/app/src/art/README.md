@@ -23,11 +23,11 @@ Flat vector, 4px outlines, no fill, rounded caps, one element in #FF5C2B, no
 text in the image. Ask for a #F0F0F1 ground for a light placement and #1D1D1F
 for a dark one; the script strips either.
 
-| File | Where it shows |
-| --- | --- |
-| `stack.png` | The hero, beside the headline |
-| `connect.png` | Connect your agent, beside the heading |
-| `tests.png` | The dark tests band, beside the three tests |
-| `price-tag.png` | Pricing, hung on the top of the card |
-| `empty-tray.png` | Every empty list in the app |
-| `creator-cards.png` | Held for the social preview image |
+## What is here
+
+Nothing, for now. The landing was carrying 1.05 MB of drawings across six
+files, and every picture on it is drawn from the same parts as the app
+instead: DOM and CSS, sized by the layout, readable while the page loads.
+
+The pipeline above still stands. Drop a new drawing in, unmatte it, import it
+by name, and add a row here saying where it shows.

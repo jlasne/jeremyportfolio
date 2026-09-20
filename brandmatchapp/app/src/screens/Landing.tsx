@@ -3,43 +3,34 @@ import { Backdrop } from '../components/Backdrop'
 import { Logo } from '../components/Logo'
 import { HeroDemo } from '../components/HeroDemo'
 import { api } from '../lib/api'
-import stackArt from '../art/stack.png'
-import connectArt from '../art/connect.png'
-import priceArt from '../art/price-tag.png'
-import testsArt from '../art/tests.png'
 
-// The landing, in six blocks: hero, video, the four steps, the two ways in,
-// one price, one ask. Cream ground, one orange accent, wide corners.
+// The landing, in six blocks: hero, film, the three steps, why they answer,
+// what a database is instead, one ask. Cream ground, one orange accent, wide
+// corners, and no photography: every picture on this page is drawn from the
+// same parts as the app, so the page weighs a tenth of what it did and says
+// something true while it loads.
+//
+// Every line on it is an outcome. What the product does is on the page only
+// where it explains why the outcome happens.
 
 /** Drop the recording in here and the animation below steps aside for it. */
 const VIDEO_URL = ''
 
-/** What the creators on your list have already done. The turn is the point. */
-const WHO = ['post this week', 'sell already', 'fit your size', 'work your niche', 'reply']
+/** What the people on your list do, not what we did to find them. */
+const WHO = ['are ready to buy', 'already spend', 'post today', 'reply']
 
-/** What both prices include. Said once, under them. */
+/** What the money buys. Outcomes, in the order they happen. */
 const HAS = [
-  'A fresh search every night',
-  'Handle and email on every row',
-  'Unlimited campaigns and agents',
-  'API and MCP on the same key',
+  'A fresh search every night, run by agents',
+  'Every lead cleared against your own bar',
+  'The first message sent in your name',
+  'The follow up sent for you, on time',
   'Every lead yours alone, forever',
   'Cancel any morning',
 ]
 
 /** Said in three, under the buttons, the way a launch says them. */
-const FACTS = ['Handle and email on every row', 'Up to 3,000 a day', 'Yours alone, forever']
-
-/** Paste this and an agent is connected. Shown on the landing as is. */
-const MCP_CONFIG = `{
-  "mcpServers": {
-    "brandmatch": {
-      "type": "http",
-      "url": "https://www.brandmatch.app/api/mcp",
-      "headers": { "Authorization": "Bearer YOUR_KEY" }
-    }
-  }
-}`
+const FACTS = ['Searched last night', 'In your niche, active, spending', 'Yours alone, forever']
 
 /**
  * The one thing every button asks for, said the same way in every place.
@@ -48,26 +39,22 @@ const MCP_CONFIG = `{
 const CTA = 'Get early access'
 
 /**
- * The four filters every profile has to clear. Pass all four and you are a
- * qualified lead. Brand fit then scores that lead and orders the list, which
- * is the line under the block: a score is a ranking, never a fifth filter.
+ * The three bars every lead clears, said as the reason they answer. Each one
+ * carries the measurement behind it, because "highly relevant" is a word and
+ * "12k views on a typical post" is a fact.
  */
 const TESTS: { name: string; means: string }[] = [
   {
-    name: 'Size and activity',
-    means: 'Followers, views, comments, posting rhythm. Measured on their last 12 posts, never on what an account declares.',
+    name: 'In your niche',
+    means: 'Judged against your own two sentences. They sell to the audience you sell to, so your first line already fits.',
   },
   {
-    name: 'Where they are',
-    means: 'The country we read off the profile and the posts. Your list of countries, not ours.',
+    name: 'Active this week',
+    means: 'Posted in the last 14 days, around 12k views on a typical post. They open the app the day your message lands.',
   },
   {
-    name: 'What they post in',
-    means: 'The language of their captions. Write to people who answer in the language you sell in.',
-  },
-  {
-    name: 'Their niche',
-    means: 'The slices of your market you want, one search each. Work in none of them and you are out.',
+    name: 'Spending today',
+    means: 'A paid offer at a public price, tools in the bio, partnerships in the feed. The money is already moving when you arrive.',
   },
 ]
 
@@ -82,38 +69,38 @@ const RIVALS: { name: string; meta: string; how: string }[] = [
   {
     name: 'Collabstr',
     meta: '1M creators, opted in',
-    how: 'A marketplace of creators who signed up to be hired. You get the ones who put their hand up, and so does everyone else.',
+    how: 'The creators who signed up to be hired, shown to everyone who signs up to hire. Your competitor writes to the same person on the same day.',
   },
   {
     name: 'Modash',
     meta: '350M profiles, stored',
-    how: 'A stored index you search yourself. You read the profiles, you judge each one, and the emails arrive on a monthly allowance.',
+    how: 'A search box and 350 million rows behind it. The reading, the judging and the writing land on your morning, one profile at a time.',
   },
   {
     name: 'TopYappers',
     meta: '27M creators, exportable',
-    how: 'A file you can export by the thousand. A bigger file is still a file, and it is still you doing the vetting.',
+    how: 'Twenty seven million rows you can export by the thousand. A bigger file is a longer afternoon spent deciding who is worth a message.',
   },
 ]
 
 const STEPS = [
   {
     n: '1/3',
-    title: 'Two questions, and you have your filters',
-    note: 'Who you want to reach. What you sell them. We turn that into filters you can read, and you change every one.',
+    title: 'You tell us what you sell',
+    note: 'Who you want to reach, and what you sell them. Two sentences, in your own words. That is the whole of your part.',
     tick: 'Two minutes, once',
   },
   {
     n: '2/3',
-    title: 'You see the rate before you commit',
-    note: 'Run the simulation. It says how many searches it takes to produce one lead: 1 in 12, or 1 in 400. You widen a filter, or you take the number.',
-    tick: 'One run a day',
+    title: 'Agents go and find them tonight',
+    note: 'They search while you sleep, read the last twelve posts of everyone they find, and keep the ones who clear your bar.',
+    tick: 'New every morning',
   },
   {
     n: '3/3',
-    title: 'The list is done when you wake up',
-    note: 'Qualified leads, ranked by brand fit, with the handle and the email on every row. Searched last night, not two years ago.',
-    tick: 'New every morning',
+    title: 'We write first, and we follow up',
+    note: 'The opening message goes out in your name. The follow up goes out on time. You step in the moment somebody replies.',
+    tick: 'You step in at the reply',
   },
 ]
 
@@ -158,22 +145,21 @@ function StepVisual({ n }: { n: string }) {
       </div>
     )
   }
-  // The morning list: who, and how close they sit to the client's own words.
-  // The email lives on the row in the app, and the block under these steps
-  // says so. Squeezing it in here as a chip only cost the score its room.
+  // The third step is the part nobody wants to do, so the visual is the
+  // thread rather than the list: sent, chased, answered.
   const rows = [
-    ['liftwithmaya', '94'],
-    ['jennakstrong', '88'],
-    ['sophie.souleve', '76'],
-    ['priyalifts', '61'],
+    ['liftwithmaya', 'replied', true],
+    ['jennakstrong', 'followed up', true],
+    ['sophie.souleve', 'followed up', true],
+    ['priyalifts', 'sent', false],
   ] as const
   return (
-    <div className="viz viz-score">
-      {rows.map(([h, fit]) => (
+    <div className="viz viz-close">
+      {rows.map(([h, stage, done]) => (
         <div className="viz-row" key={h}>
-          <i>{h.slice(0, 2).toUpperCase()}</i>
+          <i className={done ? 'done' : ''}>{done ? '✓' : ''}</i>
           <b>@{h}</b>
-          <span className="viz-stars">{fit}%<small>brand fit</small></span>
+          <em className={`stage ${stage.replace(' ', '-')}`}>{stage}</em>
         </div>
       ))}
     </div>
@@ -347,7 +333,7 @@ export function Landing() {
         <div className="land-banner">
           <span>Early access</span>
           <i aria-hidden="true" />
-          <span><b>3,000 fresh leads a day</b>, searched last night</span>
+          <span>We open in batches of <b>20</b></span>
           <i aria-hidden="true" />
           <a href="#access">Get in →</a>
         </div>
@@ -359,7 +345,7 @@ export function Landing() {
           </a>
           <nav>
             <a href="#how">How it works</a>
-            <a href="#ways">API and MCP</a>
+            <a href="#why">Why they answer</a>
             <a href="#pricing">Pricing</a>
           </nav>
           <span className="spacer" />
@@ -369,10 +355,10 @@ export function Landing() {
         <div className="hero-block">
           <section className="hero">
             <div className="hero-copy">
-              <h1>Find creators <br />who <TurningWord words={WHO} />.</h1>
+              <h1>Daily qualified leads<br />who <TurningWord words={WHO} />.</h1>
               <p className="lede">
-                You set the filters. We search Instagram every night. What passes is a qualified lead, ranked by how
-                close it sits to your own words. Handle and email on every row.
+                Tell us what you sell. Agents search for your buyers every night, keep the ones worth your time, write
+                the first message and follow up. You step in when somebody replies.
               </p>
               <EarlyAccess website="strongher.co" />
               <p className="hero-meta">
@@ -381,7 +367,6 @@ export function Landing() {
                 ))}
               </p>
             </div>
-            <img className="hero-art" src={stackArt} alt="" width={1254} height={1254} />
           </section>
 
           <div className="video-wrap">
@@ -391,10 +376,9 @@ export function Landing() {
 
         <section className="land-section" id="how">
           <p className="eyebrow">How it works</p>
-          <h2 className="big">Not a database. <em>A search run for you every night.</em></h2>
+          <h2 className="big">You write two sentences. <em>We do the rest.</em></h2>
           <p className="section-lede">
-            Every directory sells the same scraped list to everyone. Half of it is dead. We go looking for your buyer
-            instead, and we go again tonight.
+            Three steps, and two of them are ours. Your morning starts at the reply.
           </p>
 
           <div className="steps3">
@@ -410,27 +394,18 @@ export function Landing() {
               </article>
             ))}
           </div>
+        </section>
 
-          <div className="reach">
-            <div className="reach-one">
-              <span className="reach-k">Instagram handle</span>
-              <p>
-                Where they already are, every day. A DM lands in the same place their work does, which is why it gets
-                answered far more often than a cold email to a brand address.
-              </p>
-            </div>
-            <div className="reach-one">
-              <span className="reach-k">Email</span>
-              <p>
-                For the part that is business. The rate card, the brief, the contract. One inbox, one thread, and
-                something you can forward to whoever signs.
-              </p>
-            </div>
-          </div>
+        <section className="land-section" id="why">
+          <p className="eyebrow">Why they answer</p>
+          <h2 className="big">Every lead clears three bars. <em>That is why they answer.</em></h2>
+          <p className="section-lede">
+            A name and a follower count is a guess. These three are measured on every person, the night before you
+            see them.
+          </p>
 
           <div className="tests">
             <div className="tests-copy">
-              <p className="tests-head">Four hard filters. Fail one and we stop there.</p>
               <div className="tests-row">
                 {TESTS.map((t) => (
                   <div className="test" key={t.name}>
@@ -440,20 +415,18 @@ export function Landing() {
                 ))}
               </div>
               <p className="tests-after">
-                Then a score, 0 to 100. It ranks your list by how close each one sits to your own words. It removes
-                nobody.
+                Then every one is scored from 0 to 100 against your own words, and your morning starts at the top of
+                that list.
               </p>
             </div>
-            <img className="tests-art" src={testsArt} alt="" width={1774} height={887} />
           </div>
         </section>
 
         <section className="land-section" id="versus">
           <p className="eyebrow">The difference</p>
-          <h2 className="big">They sell the same rows to everyone. <em>We go and look tonight.</em></h2>
+          <h2 className="big">A database hands you 350 million names. <em>We hand you ten.</em></h2>
           <p className="section-lede">
-            A stored index answers who exists. It never answers who to write to this morning. That is a different job,
-            and it is the one we do.
+            One is a search box you work every morning. The other is a morning that is already worked.
           </p>
 
           <div className="versus">
@@ -469,70 +442,41 @@ export function Landing() {
           <div className="versus-us">
             <div>
               <b>brandmatch</b>
-              <span className="versus-meta">Searched last night, against your filters</span>
+              <span className="versus-meta">Found last night, written to this morning</span>
             </div>
             <p>
-              We search Instagram tonight against the filters you set. What passes is on your list by 06:00, ranked,
-              with the handle and the email on the row. Your rows are yours alone.
+              Agents go looking tonight, for you alone. By 06:00 the people worth your time are on your list, the
+              first message is out, and the follow up is scheduled. Your rows stay yours.
             </p>
           </div>
         </section>
 
-        <section className="land-section" id="ways">
-          <div className="split">
-            <div>
-              <p className="eyebrow">Connect your agent</p>
-              <h2 className="big">Built for agents. <em>Yours drives it.</em></h2>
-              <p className="section-lede">
-                brandmatch is built for an agent to drive. Yours reads the list, tags it, moves each lead along a
-                stage and starts the next search, on your key. The app is the same account, for when you want to look.
-              </p>
-            </div>
-            <img className="connect-art" src={connectArt} alt="" width={1586} height={992} />
-          </div>
-
-          <div className="connect">
-            <div className="connect-code">
-              <pre><code>{MCP_CONFIG}</code></pre>
-            </div>
-            <div className="connect-side">
-              <a className="btn primary" href="#access">{CTA}</a>
-            </div>
-          </div>
-
-          <ul className="connect-notes">
-            <li>Ask in words: who sells already and posted this week</li>
-            <li>Nine tools, one key: read, score, tag, move, create, pause</li>
-            <li>Status, tags and notes are all on the API. A model files 100 rows while you file 3</li>
-          </ul>
-        </section>
-
         <section className="land-section centred" id="pricing">
           <p className="eyebrow">Pricing</p>
-          <h2 className="big">Tell us your volume. <em>We price it.</em></h2>
+          <h2 className="big">One number, built on your volume.</h2>
           <p className="section-lede">
-            What you pay follows how many leads you want a day, and how many niches we search to find them.
+            Up to 3,000 fresh leads a day. What you pay follows how many you take, and how wide we search to find
+            them.
           </p>
 
           <div className="one-price">
-            <img className="price-art" src={priceArt} alt="" width={1254} height={1254} />
             <p className="price"><span className="now">3,000</span><small>fresh leads a day</small></p>
             <ul className="plan-has">
               {HAS.map((h) => <li key={h}>{h}</li>)}
             </ul>
-            <a className="btn primary" href="mailto:hey@jeremylasne.com">Contact us</a>
-            <p className="price-note">One call, then three days free. No card to start.</p>
+            <a className="btn primary" href="mailto:hey@jeremylasne.com">Talk to us</a>
+            <p className="price-note">One call, then three days free.</p>
           </div>
 
           <p className="section-lede compare">
-            A database sells you a search box, and every subscriber searches the same rows. You still find, vet and
-            score each one. Here the list is done when you wake up, and nobody else gets it.
+            A subscription to a database buys you the same rows as everyone else on it. This buys you the mornings
+            back.
           </p>
         </section>
 
         <section className="land-cta" id="access">
           <h2>Your next deal <em>is already out there.</em></h2>
-          <p>Leave your email. We open in batches and write the morning yours is ready.</p>
+          <p>Leave your email. We open in batches of 20 and write the morning yours is ready.</p>
           <EarlyAccess />
         </section>
 
@@ -540,21 +484,21 @@ export function Landing() {
           <div>
             <span className="brand-word">brandmatch</span>
             <p className="muted" style={{ marginTop: 8 }}>
-              Creators for your brand, every morning. Instagram today, TikTok and YouTube next.
+              Daily qualified leads for your business. Instagram today, TikTok and YouTube next.
             </p>
           </div>
           <div>
             <h4>Product</h4>
             <a href="#how">How it works</a>
-            <a href="#ways">API and MCP</a>
+            <a href="#why">Why they answer</a>
             <a href="#pricing">Pricing</a>
           </div>
           <div>
             <h4>Get in</h4>
             <a href="#access">Early access</a>
-            <a href="mailto:hey@jeremylasne.com">Chat with me</a>
+            <a href="mailto:hey@jeremylasne.com">Talk to us</a>
           </div>
-          <p className="copy">© 2026 brandmatch. Creators for your brand, every morning.</p>
+          <p className="copy">© 2026 brandmatch. Daily qualified leads for your business.</p>
         </footer>
       </div>
     </>
