@@ -1,20 +1,16 @@
 import { useEffect, useState } from 'react'
 import { Backdrop } from '../components/Backdrop'
 import { Logo } from '../components/Logo'
-import { HeroDemo } from '../components/HeroDemo'
 import { api } from '../lib/api'
 
 // The landing, in three beats: a hero, a story, one ask.
 //
 // It used to be a page of sections, each with an eyebrow and a heading, which
 // is a brochure: the reader picks the part they want and leaves. A story has
-// no menu. It opens on the work we do, names the four platforms that took our
-// money, turns at the agent we built instead, and ends on the number that
-// makes the case. The thread down the left says there is one thing to read,
-// and the only thing to do is at the bottom of it.
-
-/** Drop the recording in here and the animation below steps aside for it. */
-const VIDEO_URL = ''
+// no menu. It opens on the agent we built, puts the four platforms that
+// failed us in a table you can read straight down, and ends on the number
+// that makes the case. The thread down the left says there is one thing to
+// read, and the only thing to do is at the bottom of it.
 
 /** The one thing every button asks for, said the same way in every place. */
 const CTA = 'Start my Campaign'
@@ -23,46 +19,43 @@ const CTA = 'Start my Campaign'
 const TRUST = 'Built for brands sick of searching manually and buying outdated datasets. We deliver fresh leads daily.'
 
 /**
- * The four bills, in the order we paid them.
+ * The four platforms, as a table rather than four cards.
  *
- * One number each, the one that ended the contract, because a number a reader
- * can hold beats a paragraph they skim. Every line is what the platform did,
- * never what we think of it: a complaint invites an argument, a receipt does
- * not.
+ * A table is the one shape that lets a reader compare without being told
+ * what to conclude: same columns, four rows, one result each. The result
+ * column carries the number that ended the contract, because a number a
+ * reader can hold beats a paragraph they skim. Every line is what the
+ * platform did, never what we think of it.
  */
-const FAILURES: { name: string; figure: string; unit: string; note: string }[] = [
+const FAILURES: { name: string; result: string; what: string }[] = [
   {
     name: 'Collabstr',
-    figure: '1',
-    unit: 'of 14 delivered on time',
-    note: 'The marketplace worked. Payment lagged. We picked 14 creators, 7 cancelled after the deadline, and we cancelled the rest.',
+    result: '1 of 14',
+    what: 'It worked, but payments lagged. We selected 14 creators. 1 delivered on time, 7 cancelled after the deadline. We cancelled the rest.',
   },
   {
     name: 'TopYappers',
-    figure: '27M',
-    unit: 'rows, sold to everyone',
-    note: 'An old export, priced per thousand. We paid for the same database every other brand downloads the same week.',
+    result: 'Same list',
+    what: 'It gave us an outdated list. We bought the same database everyone buys.',
   },
   {
     name: 'Heepsy',
-    figure: '86%',
-    unit: 'of numbers were dead',
-    note: 'Contacts arrived in bulk. 86% of numbers rang out, 70% of emails bounced, and the rest came with fields missing.',
+    result: '86% dead',
+    what: 'It gave us contacts. 86% of numbers were dead, 70% of emails wrong, information missing.',
   },
   {
     name: 'Modash',
-    figure: '0',
-    unit: 'deals from 50,000 names',
-    note: 'A list of 50,000 people, part of them in our niche. We worked it for weeks and closed nothing.',
+    result: '0 deals',
+    what: 'It sold us a list of 50,000 people, partially in our niche. It closed 0 deals.',
   },
 ]
 
 /** What the agent does between midnight and your coffee. */
-const LOOP: { verb: string; what: string }[] = [
-  { verb: 'Searches', what: 'New people, every night, in the places your buyers post.' },
-  { verb: 'Qualifies', what: 'Every profile read and scored against your own brief.' },
-  { verb: 'Reaches out', what: 'The first message goes out in your name, on time.' },
-  { verb: 'Logs', what: 'Every send, open and reply lands in your CRM.' },
+const LOOP = [
+  'Searches new people',
+  'Qualifies them against your need',
+  'Reaches out to them',
+  'Logs every interaction in the CRM',
 ]
 
 /**
@@ -73,15 +66,15 @@ const LOOP: { verb: string; what: string }[] = [
 const QUALIFIED: { name: string; means: string }[] = [
   {
     name: 'In your niche',
-    means: 'Matched to your offer on the requirements you write, past the point where a follower count stops telling you anything.',
+    means: 'Fits your offer on filters and specific requirements, past the classic follower count.',
   },
   {
     name: 'Active',
-    means: 'Posts on a schedule, and posted in the last 3 days. They open the app the day your message lands.',
+    means: 'Posts content regularly, and was active in the last 3 days.',
   },
   {
     name: 'Intent',
-    means: 'Runs the account as a business, already sells products or takes collabs. This is the bar that moves reply rate.',
+    means: 'Runs as a business, already does collabs or sells products. Reply rate climbs.',
   },
 ]
 
@@ -104,7 +97,6 @@ function Night() {
         <b>200</b>
         <span>qualified matches</span>
       </div>
-      <p className="night-ratio">1 in 15 survives the night</p>
     </div>
   )
 }
@@ -150,48 +142,6 @@ function EarlyAccess({ size = 'normal', website }: { size?: 'normal' | 'small'; 
       </button>
       {state === 'error' && <span className="waitlist-error">{message}</span>}
     </form>
-  )
-}
-
-/**
- * The product in one take, shown at the turn of the story rather than under
- * the headline. The reader meets it at the line where we stopped buying lists
- * and built the thing instead.
- *
- * Until the film exists, the frame holds the live demo behind a play button.
- * Drop the file in `app/src/video/` and set VIDEO_URL: the frame keeps its
- * shape and plays the real thing instead.
- */
-function ProductVideo() {
-  const [playing, setPlaying] = useState(false)
-
-  if (VIDEO_URL && playing) {
-    return (
-      <div className="film">
-        <video className="film-media" src={VIDEO_URL} controls autoPlay playsInline />
-      </div>
-    )
-  }
-
-  return (
-    <figure className="film">
-      <div className="film-frame">
-        <HeroDemo />
-        <button
-          type="button"
-          className="film-play"
-          onClick={() => setPlaying(true)}
-          disabled={!VIDEO_URL}
-          aria-label={VIDEO_URL ? 'Play the film' : 'The film is on its way'}
-        >
-          <span className="film-play-mark" aria-hidden="true" />
-          <span className="film-play-text">{VIDEO_URL ? 'Play the film' : 'Film on its way'}</span>
-        </button>
-      </div>
-      <figcaption className="film-cap">
-        {VIDEO_URL ? 'Sixty seconds, start to first lead.' : 'Sixty seconds, start to first lead. Recording now.'}
-      </figcaption>
-    </figure>
   )
 }
 
@@ -279,50 +229,49 @@ export function Landing() {
           <span className="thread" aria-hidden="true" />
 
           <div className="beat">
-            <p className="beat-lead">We build mobile apps with content creators.</p>
+            <h2>We built our dreamed <em>deal gen AI agent.</em></h2>
+            <p>Built by two engineers, after four platforms failed us.</p>
             <p>
-              Two engineers, shipping apps. Finding the right creators, and running the outreach behind every
-              launch, ate our weeks and our budget.
+              We build mobile apps with content creators. Finding the right ones, creating outreach campaigns
+              destroyed our time management and budget.
             </p>
           </div>
 
           <div className="beat">
             <h2>So we paid four platforms to fix it.</h2>
-            <ol className="bills">
-              {FAILURES.map((f) => (
-                <li className="debt" key={f.name}>
-                  <div className="debt-fig">
-                    <span className="debt-figure">{f.figure}</span>
-                    <span className="debt-unit">{f.unit}</span>
-                  </div>
-                  <div className="debt-body">
-                    <b>{f.name}</b>
-                    <p>{f.note}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-            <p className="beat-close">
-              Four invoices, four months, and still no repeatable way to reach one creator ready to sign.
-            </p>
+            <table className="ledger">
+              <thead>
+                <tr>
+                  <th scope="col">Platform</th>
+                  <th scope="col">Result</th>
+                  <th scope="col">What happened</th>
+                </tr>
+              </thead>
+              <tbody>
+                {FAILURES.map((f) => (
+                  <tr key={f.name}>
+                    <th scope="row">{f.name}</th>
+                    <td className="fig">{f.result}</td>
+                    <td className="what">{f.what}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
           <div className="beat">
             <h2>So we built our own agent.</h2>
-            <p>It runs the full loop, every day, while you sleep.</p>
+            <p>It runs the full loop, every day:</p>
 
             <ol className="loop">
-              {LOOP.map((l, i) => (
-                <li key={l.verb}>
+              {LOOP.map((step, i) => (
+                <li key={step}>
                   <span className="loop-n">{i + 1}</span>
-                  <b>{l.verb}</b>
-                  <p>{l.what}</p>
+                  <b>{step}</b>
                 </li>
               ))}
             </ol>
             <p className="loop-cycle"><i aria-hidden="true" />Repeats every day</p>
-
-            <ProductVideo />
           </div>
 
           <div className="beat">
@@ -349,9 +298,6 @@ export function Landing() {
           <h2>Your next deal <em>is tomorrow.</em></h2>
           <p>Let your agent find them.</p>
           <EarlyAccess />
-          <p className="cta-terms">
-            One call, then three days free. Cancel any morning. <a href="mailto:hey@jeremylasne.com">Talk to us</a>
-          </p>
         </section>
 
         <footer className="land-foot">
