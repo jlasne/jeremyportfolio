@@ -1,104 +1,96 @@
 import { useEffect, useState } from 'react'
-import { Backdrop } from '../components/Backdrop'
+import type { ReactNode } from 'react'
 import { Logo } from '../components/Logo'
 import { api } from '../lib/api'
 
-// The landing, in three beats: a hero, a story, one ask.
+// The landing, rebuilt to the brief: hero, story, one ask.
 //
-// It used to be a page of sections, each with an eyebrow and a heading, which
-// is a brochure: the reader picks the part they want and leaves. A story has
-// no menu. It opens on the agent we built, puts the four platforms that
-// failed us in a table you can read straight down, and ends on the number
-// that makes the case. The thread down the left says there is one thing to
-// read, and the only thing to do is at the bottom of it.
+// Cream ground, warm charcoal type, orange for the thing you click and purple
+// for the numbers. One face, Satoshi, at two sizes that do the work: the
+// display size the hero and the last ask share, and the reading size the
+// story runs at. No boxes around the story, no grid of cards, no numbered
+// steps. The page scrolls as one column of sentences, and the figures inside
+// them are the only thing that breaks the line.
 
-/** The one thing every button asks for, said the same way in every place. */
+const BADGE = 'New leads, scanned and scored every day'
+const HEADLINE = 'First AI Agent that finds creators ready to close.'
+const SUBHEAD = 'Describe the creator you want. Your agent scores every lead and delivers a fresh, qualified, ready-to-contact list, every day.'
+const BRIEF_HINT = 'e.g. Fitness creators, 50k+ followers, active this week'
+
+/** The one thing every button asks for, said the same way in both places. */
 const CTA = 'Start my Campaign'
 
-/** Under the hero, once. Who the page is for, in their own words. */
-const TRUST = 'Built for brands sick of searching manually and buying outdated datasets. We deliver fresh leads daily.'
+/** A figure in the story. Purple and a size up, so scrolling catches it. */
+function N({ children }: { children: ReactNode }) {
+  return <b className="n">{children}</b>
+}
 
 /**
- * The four platforms, as a table rather than four cards.
+ * The story, as paragraphs of lines.
  *
- * A table is the one shape that lets a reader compare without being told
- * what to conclude: same columns, four rows, one result each. The result
- * column carries the number that ended the contract, because a number a
- * reader can hold beats a paragraph they skim. Every line is what the
- * platform did, never what we think of it.
+ * The outer array is the paragraph, which sets the breathing. The inner array
+ * is the lines inside it, each on its own row, because a sentence that lands
+ * alone reads slower than the same sentence in a block.
  */
-const FAILURES: { name: string; result: string; what: string }[] = [
-  {
-    name: 'Collabstr',
-    result: '1 of 14',
-    what: 'It worked, but payments lagged. We selected 14 creators. 1 delivered on time, 7 cancelled after the deadline. We cancelled the rest.',
-  },
-  {
-    name: 'TopYappers',
-    result: 'Outdated list',
-    what: 'It gave us an outdated list. We bought the same database everyone buys.',
-  },
-  {
-    name: 'Heepsy',
-    result: '86% dead',
-    what: 'It gave us contacts. 86% of numbers were dead, 70% of emails wrong, information missing.',
-  },
-  {
-    name: 'Modash',
-    result: '0 deals',
-    what: 'It sold us a list of 50,000 people, partially in our niche. It closed 0 deals.',
-  },
+const STORY: ReactNode[][] = [
+  [<>Built by two engineers, after four platforms failed us.</>],
+  [
+    <>We build mobile apps with content creators.</>,
+    <>Finding the right one ate our week, every week.</>,
+  ],
+  [
+    <>Collabstr worked, but payments lagged.</>,
+    <><N>14</N> creators got paid, <N>1</N> on time, <N>13</N> waited more than <N>14</N> days.</>,
+  ],
+  [
+    <>Topyappers gave us a list stuck in the past.</>,
+    <>Leads sat there for months without a refresh.</>,
+  ],
+  [<>Heepsy gave us contacts. Some numbers were dead, some people gone.</>],
+  [<>Modash sold us a list of <N>50,000</N> people. It closed <N>0</N> deals.</>],
+  [
+    <>So we built our own agent.</>,
+    <>One subscription now runs the full loop: search, qualify, outreach, and CRM, all connected.</>,
+  ],
+  [<>The result: <N>3,000</N> profiles scanned a day turn into <N>200</N> qualified matches, already active and already earning from deals.</>],
+  [
+    <>Replies land in your inbox, drafted and ready.</>,
+    <>Calls get booked while you sleep.</>,
+    <>Deals close in days, not weeks.</>,
+  ],
 ]
 
-/** What the agent does between midnight and your coffee. */
-const LOOP = [
-  'Searches new people',
-  'Qualifies them against your need',
-  'Reaches out to them',
-  'Logs every interaction in the CRM',
-]
+/** The line the story lands on, set apart because it is the claim. */
+const CLOSE = 'This is the same agent we sell you.'
 
 /**
- * The three bars, said as the reason a reply comes back. Each one carries the
- * measurement behind it, because "highly relevant" is a word and "active in
- * the last 3 days" is a fact.
+ * The ask, in two moves.
+ *
+ * The field takes the brief first, because that is the thing a reader already
+ * has in their head and the cheapest thing to give. The address is asked for
+ * second, once they have shown up, and the button keeps its label through
+ * both so nothing moves under the cursor.
  */
-const QUALIFIED: { name: string; means: string }[] = [
-  {
-    name: 'In your niche',
-    means: 'Fits your offer on filters and specific requirements, past the classic follower count.',
-  },
-  {
-    name: 'Active',
-    means: 'Posts content regularly, and was active in the last 3 days.',
-  },
-  {
-    name: 'Intent',
-    means: 'Runs as a business, already does collabs or sells products. Reply rate climbs.',
-  },
-]
-
-/**
- * Every call to action asks for the same thing: an email. The list is the
- * product until the doors open, so the form is the only way in from here.
- */
-function EarlyAccess({ size = 'normal', website }: { size?: 'normal' | 'small'; website?: string }) {
+function Start({ id }: { id?: string }) {
+  const [step, setStep] = useState<'brief' | 'email'>('brief')
+  const [brief, setBrief] = useState('')
   const [email, setEmail] = useState('')
   const [state, setState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
   const [message, setMessage] = useState('')
 
   if (state === 'done') {
-    return <p className="waitlist-done">You are on the list. We write when your first batch is ready.</p>
+    return <p className="start-done">You are on the list. We write when your first batch is ready.</p>
   }
 
   return (
     <form
-      className={`waitlist${size === 'small' ? ' small' : ''}`}
+      className="start"
       onSubmit={async (e) => {
         e.preventDefault()
+        if (step === 'brief') { setStep('email'); return }
         setState('sending')
         try {
-          await api.waitlist(email, website)
+          await api.waitlist(email, brief)
           setState('done')
         } catch (err) {
           setState('error')
@@ -106,24 +98,41 @@ function EarlyAccess({ size = 'normal', website }: { size?: 'normal' | 'small'; 
         }
       }}
     >
-      <input
-        type="email"
-        required
-        placeholder="you@yourbrand.com"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        aria-label="Your email"
-      />
-      <button className="btn primary" type="submit" disabled={state === 'sending'}>
-        {state === 'sending' ? 'Sending' : CTA}
-      </button>
-      {state === 'error' && <span className="waitlist-error">{message}</span>}
+      <div className="start-field">
+        {step === 'brief' ? (
+          <input
+            id={id}
+            type="text"
+            required
+            placeholder={BRIEF_HINT}
+            value={brief}
+            onChange={(e) => setBrief(e.target.value)}
+            aria-label="The creator you want"
+          />
+        ) : (
+          <input
+            type="email"
+            required
+            autoFocus
+            placeholder="you@yourbrand.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            aria-label="Your email"
+          />
+        )}
+        <button className="start-go" type="submit" disabled={state === 'sending'}>
+          {state === 'sending' ? 'Sending' : CTA}
+        </button>
+      </div>
+      {step === 'email' && <p className="start-note">Where we send your first list.</p>}
+      {state === 'error' && <p className="start-error">{message}</p>}
+      {/* The social proof row belongs here, once there is a real one to show. */}
     </form>
   )
 }
 
 /** True once the page has scrolled past the hero. */
-function useFloated(after = 120): boolean {
+function useFloated(after = 40): boolean {
   const [past, setPast] = useState(false)
   useEffect(() => {
     const read = () => setPast(window.scrollY > after)
@@ -135,18 +144,18 @@ function useFloated(after = 120): boolean {
 }
 
 /**
- * A beat arrives when it is reached, so the page is told rather than dumped.
+ * A paragraph arrives as it is reached, so the story is told down the page.
  *
- * The class is what makes a beat visible, so anything that could keep the
- * observer from firing has to open them all instead: no observer in this
+ * The class is what makes a paragraph visible, so anything that could keep
+ * the observer from firing has to open them all instead: no observer in this
  * browser, and a reader who asked for stillness.
  */
 function useTold(): void {
   useEffect(() => {
-    const beats = Array.from(document.querySelectorAll('.beat'))
+    const said = Array.from(document.querySelectorAll('.said'))
     const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (still || !('IntersectionObserver' in window)) {
-      beats.forEach((b) => b.classList.add('in'))
+      said.forEach((s) => s.classList.add('in'))
       return
     }
     const io = new IntersectionObserver(
@@ -155,9 +164,9 @@ function useTold(): void {
         e.target.classList.add('in')
         io.unobserve(e.target)
       }),
-      { rootMargin: '0px 0px -10% 0px', threshold: 0.1 },
+      { rootMargin: '0px 0px -12% 0px', threshold: 0.2 },
     )
-    beats.forEach((b) => io.observe(b))
+    said.forEach((s) => io.observe(s))
     return () => io.disconnect()
   }, [])
 }
@@ -166,130 +175,46 @@ export function Landing() {
   const floated = useFloated()
   useTold()
   return (
-    <>
-      <Backdrop />
-      <div className="landing">
-        <div className="land-banner">
-          <span>Early access</span>
-          <i aria-hidden="true" />
-          <span>We open in batches of <b>20</b></span>
-          <i aria-hidden="true" />
-          <a href="#access">Get in →</a>
-        </div>
+    <div className="landing lp">
+      <header className={`lp-nav${floated ? ' floated' : ''}`}>
+        <a className="brand" href="#/">
+          <Logo size={22} />
+          brandmatch
+        </a>
+        <span className="spacer" />
+        <a className="lp-signin" href="#/signin">Sign in</a>
+      </header>
 
-        {/* No section links: there are no sections to jump to. */}
-        <header className={`land-nav${floated ? ' floated' : ''}`}>
-          <a className="brand" href="#/">
-            <Logo size={24} />
-            brandmatch
-          </a>
-          <span className="spacer" />
-          <a className="land-signin" href="#/signin">Sign in</a>
-          <a className="btn primary" href="#access">{CTA}</a>
-        </header>
+      <section className="lp-hero">
+        <p className="lp-badge">{BADGE}</p>
+        <h1>{HEADLINE}</h1>
+        <p className="lp-sub">{SUBHEAD}</p>
+        <Start id="start-brief" />
+      </section>
 
-        <div className="hero-block">
-          <section className="hero">
-            <div className="hero-copy">
-              <h1>Your AI agent finds content creators <em>ready to close a deal.</em></h1>
-              <p className="lede">
-                Describe the creator you want. Your agent scores every lead and delivers a fresh, qualified,
-                ready-to-contact list, every day.
-              </p>
-              <EarlyAccess website="strongher.co" />
-              <p className="hero-trust">{TRUST}</p>
-            </div>
-          </section>
-        </div>
+      <section className="lp-story">
+        {STORY.map((para, i) => (
+          <p className="said" key={i}>
+            {para.map((line, j) => <span key={j}>{line}</span>)}
+          </p>
+        ))}
+        <p className="said close">{CLOSE}</p>
+      </section>
 
-        <section className="story" id="story">
-          <span className="thread" aria-hidden="true" />
+      <section className="lp-ask">
+        <h2>Your next creator partner is already out there.</h2>
+        <p className="lp-sub">Let your agent find them.</p>
+        <Start />
+      </section>
 
-          <div className="beat">
-            <h2>We built our dreamed <em>deal gen AI agent.</em></h2>
-            <p>Built by two engineers, after four platforms failed us.</p>
-            <p>
-              We build mobile apps with content creators. Finding the right ones, creating outreach campaigns
-              destroyed our time management and budget.
-            </p>
-          </div>
-
-          <div className="beat">
-            <h2>We tried four platforms.</h2>
-            <table className="ledger">
-              <thead>
-                <tr>
-                  <th scope="col">Platform</th>
-                  <th scope="col">Result</th>
-                  <th scope="col">What happened</th>
-                </tr>
-              </thead>
-              <tbody>
-                {FAILURES.map((f) => (
-                  <tr key={f.name}>
-                    <th scope="row">{f.name}</th>
-                    <td className="fig">{f.result}</td>
-                    <td className="what">{f.what}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="beat">
-            <h2>So we built our own agent.</h2>
-            <p>It runs the full loop, every day:</p>
-
-            <ol className="loop">
-              {LOOP.map((step, i) => (
-                <li key={step}>
-                  <span className="loop-n">{i + 1}</span>
-                  <b>{step}</b>
-                </li>
-              ))}
-            </ol>
-            <p className="loop-cycle"><i aria-hidden="true" />Repeats every day</p>
-          </div>
-
-          <div className="beat">
-            <h2 className="soft">Every day we scan 3000 new people and qualify <em>200 high intent leads!</em></h2>
-
-            <div className="bars">
-              <p className="bars-head">What is qualified?</p>
-              <div className="bars-row">
-                {QUALIFIED.map((q) => (
-                  <div className="qual" key={q.name}>
-                    <b>{q.name}</b>
-                    <span>{q.means}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <p className="beat-close last">This is what brandmatch is about.</p>
-          </div>
-        </section>
-
-        <section className="land-cta" id="access">
-          <h2>Your next deal <em>is tomorrow.</em></h2>
-          <p>Let your agent find them.</p>
-          <EarlyAccess />
-        </section>
-
-        <footer className="land-foot">
-          <div className="foot-say">
-            <span className="brand-word">brandmatch</span>
-            <p className="foot-head">Your AI agent finds content creators <em>ready to close a deal.</em></p>
-          </div>
-          <div className="foot-links">
-            <h4>Get in</h4>
-            <a href="#access">Early access</a>
-            <a href="mailto:hey@jeremylasne.com">Talk to us</a>
-            <a href="#/signin">Sign in</a>
-          </div>
-          <p className="copy">© 2026 brandmatch. Daily qualified leads for your business.</p>
-        </footer>
-      </div>
-    </>
+      <footer className="lp-foot">
+        <span className="brand-word">brandmatch</span>
+        <nav>
+          <a href="mailto:hey@jeremylasne.com">Talk to us</a>
+          <a href="#/signin">Sign in</a>
+        </nav>
+        <p>© 2026 brandmatch</p>
+      </footer>
+    </div>
   )
 }

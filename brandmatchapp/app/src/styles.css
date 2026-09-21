@@ -3696,151 +3696,139 @@ body { background: var(--paper); }
 .land-signin:hover { color: var(--l-ink); }
 @media (max-width: 760px) { .land-signin { display: none; } }
 
-/* The story, told in beats ------------------------------------------------
-   The page stopped being a set of sections with a menu over them. A brochure
-   lets the reader pick a part and leave; a story has one order and one exit.
-   So: a hero, four beats on a single thread, one ask at the end of it. Each
-   beat arrives as it is reached, which is what makes the page feel told
-   rather than dumped. */
+/* The landing, to the brief -----------------------------------------------
+   Cream ground, warm charcoal type, orange for the thing you click, purple
+   for the numbers and nothing else. One face at two sizes that do the work:
+   the display size the hero and the last ask share, and the reading size the
+   story runs at. Everything here is scoped to .lp, so the app keeps the
+   palette and the display face it was built with. */
 
-/* The hero carries a sentence now, so it wraps and balances rather than
-   holding a break of its own. Nothing hangs under the form. */
-.hero h1 { white-space: normal; text-wrap: balance; max-width: 22ch; margin-left: auto; margin-right: auto; }
-.hero h1 em { font-style: normal; color: var(--orange); }
-.hero-trust { margin: 22px auto 0; max-width: 56ch; font-size: 14.5px; line-height: 1.55; color: var(--l-muted); }
-.hero { padding-bottom: 8px; }
+.landing.lp {
+  --l-ground: #faf6ec;
+  --l-card: #fffcf3;
+  --l-ink: #23211c;
+  --l-muted: #5f5a50;
+  --l-faint: #736c60;
+  --l-rule: #f0e4d2;
+  --l-rule-firm: #f5c6a0;
+  /* The three that carry meaning: click, figure, edge. */
+  --go: #f2711f;
+  --go-deep: #c9560d;
+  --acc: #8134af;
+  --peach: #f5c6a0;
+  /* The alias the global sheet colours links with. */
+  --blue: #c9560d;
+  min-height: 100vh;
+  background: var(--l-ground);
+  color: var(--l-ink);
+  font-family: var(--font);
+}
+/* One clean sans, so the display face the app uses stops here. */
+.landing.lp h1, .landing.lp h2, .landing.lp h3,
+.landing.lp .brand, .landing.lp .brand-word { font-family: var(--font); }
 
-.story { position: relative; max-width: 980px; margin: 0 auto; padding: 84px 24px 40px 92px; }
-/* The one line the whole page hangs off. It fades at both ends so it reads as
-   a thread rather than a rule. */
-.thread {
-  position: absolute; left: 33px; top: 104px; bottom: 116px; width: 2px;
-  background: linear-gradient(180deg, transparent 0, var(--l-rule-firm) 6%, var(--l-rule-firm) 82%, transparent 100%);
+.lp-nav {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center;
+  padding: 26px max(22px, calc((100% - 1120px) / 2));
+  background: rgba(250, 246, 236, 0.84); backdrop-filter: blur(12px);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s ease, padding 0.3s ease;
 }
-.beat { position: relative; padding-bottom: 76px; }
-.beat:last-child { padding-bottom: 8px; }
-.beat::before {
-  content: ''; position: absolute; left: -65px; top: 12px; width: 13px; height: 13px;
-  border-radius: 50%; background: var(--orange); box-shadow: 0 0 0 7px var(--l-ground);
-}
-.beat h2 {
-  font-family: var(--display); font-weight: 500; font-size: clamp(26px, 3.8vw, 42px);
-  line-height: 1.1; letter-spacing: -0.03em; color: var(--l-ink); max-width: 20ch;
-}
-.beat h2 em { font-style: normal; color: var(--orange); }
-/* The result line carries no argument of its own, the three bars under it do,
-   so it drops to a size that states rather than announces. Unbounded ships at
-   one weight, so size is the only lever this face has. */
-.beat h2.soft { font-size: clamp(21px, 2.6vw, 29px); line-height: 1.22; letter-spacing: -0.02em; max-width: 30ch; }
-.beat > p { margin-top: 16px; font-size: 17.5px; line-height: 1.6; color: var(--l-muted); max-width: 60ch; }
-.beat > p.beat-close {
-  margin-top: 34px; font-family: var(--display); font-weight: 500; font-size: clamp(20px, 2.4vw, 26px);
-  line-height: 1.3; letter-spacing: -0.025em; color: var(--l-ink); max-width: 42ch;
-}
-.beat > p.beat-close.last { color: var(--orange); }
+.lp-nav.floated { padding-top: 15px; padding-bottom: 15px; border-bottom-color: var(--l-rule); }
+.lp-nav .brand { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 700; letter-spacing: -0.03em; color: var(--l-ink); }
+.lp-nav .brand:hover { text-decoration: none; }
+.lp-nav .spacer { flex: 1; }
+.lp-signin { font-size: 15px; color: var(--l-muted); }
+.lp-signin:hover { color: var(--l-ink); text-decoration: none; }
 
-/* The four platforms, as a table. It is the one shape that lets a reader
-   compare four things without being told what to conclude: same columns,
-   four rows, one result each. The result column takes the size, so an eye
-   running down the page collects four numbers and reads the prose after. */
-.ledger { width: 100%; border-collapse: collapse; margin-top: 36px; }
-.ledger th, .ledger td { text-align: left; vertical-align: top; padding: 24px 30px 24px 0; border-top: 1px solid var(--l-rule); }
-.ledger thead th {
-  padding-top: 0; padding-bottom: 13px; border-top: 0; font-family: var(--font);
-  font-weight: 600; font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--l-faint);
+/* Hero. Badge, headline, one sentence, the field. Nothing else above the
+   fold, because the brief is the only thing the reader has to give. */
+.lp-hero { max-width: 1120px; margin: 0 auto; padding: 88px max(22px, 4vw) 104px; text-align: center; }
+.lp-badge {
+  display: inline-block; margin: 0 0 30px; padding: 7px 17px;
+  border: 1px solid var(--peach); border-radius: var(--pill);
+  background: var(--l-card); font-size: 13px; font-weight: 500; color: var(--l-muted);
 }
-.ledger tbody th {
-  width: 160px; font-family: var(--display); font-weight: 500; font-size: 17px;
-  letter-spacing: -0.02em; color: var(--l-ink);
+.lp-hero h1, .lp-ask h2 {
+  margin: 0 auto; max-width: 26ch; text-wrap: balance;
+  font-weight: 700; font-size: clamp(33px, 4.4vw, 54px); line-height: 1.06;
+  letter-spacing: -0.038em; color: var(--l-ink);
 }
-.ledger .fig {
-  width: 160px; font-family: var(--display); font-weight: 500; font-size: 25px;
-  line-height: 1.05; letter-spacing: -0.03em; color: var(--l-ink); white-space: nowrap;
-}
-.ledger .what { padding-right: 0; font-size: 15.5px; line-height: 1.6; color: var(--l-muted); }
-.ledger tbody tr:last-child th, .ledger tbody tr:last-child td { border-bottom: 1px solid var(--l-rule); }
+.lp-sub { margin: 26px auto 0; max-width: 58ch; font-size: 18px; line-height: 1.6; color: var(--l-muted); }
 
-/* Four steps on one dashed run, so the row reads as a circuit rather than a
-   list of features. */
-.loop { position: relative; list-style: none; margin: 34px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
-.loop::before {
-  content: ''; position: absolute; left: 6%; right: 6%; top: 19px; height: 1px;
-  background: repeating-linear-gradient(90deg, var(--l-rule-firm) 0 6px, transparent 6px 12px);
+/* The ask, in two moves: the brief they already have in their head, then the
+   address. The button keeps its label through both, so nothing moves under
+   the cursor. */
+.start { max-width: 620px; margin: 40px auto 0; }
+.start-field {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 7px 7px 24px; background: #fff;
+  border: 1px solid var(--peach); border-radius: var(--pill);
+  box-shadow: 0 1px 2px rgba(35, 33, 28, 0.04), 0 14px 32px rgba(35, 33, 28, 0.06);
 }
-.loop-n { position: relative; z-index: 1; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: var(--orange); color: #fff; font-family: var(--display); font-weight: 500; font-size: 15px; }
-.loop li b { display: block; margin-top: 16px; font-family: var(--display); font-weight: 500; font-size: 16px; line-height: 1.3; letter-spacing: -0.015em; color: var(--l-ink); }
-.beat > p.loop-cycle {
-  display: inline-flex; align-items: center; gap: 9px; max-width: none; margin-top: 26px;
-  padding: 7px 15px 7px 12px; border: 1px solid var(--orange-line); background: var(--orange-soft);
-  border-radius: var(--pill); font-size: 12.5px; color: var(--orange);
+.start-field input {
+  flex: 1; min-width: 0; padding: 0; border: 0; outline: none; background: none;
+  font: inherit; font-size: 16px; color: var(--l-ink); text-align: left;
 }
-.loop-cycle i { width: 7px; height: 7px; border-radius: 50%; background: var(--orange); }
+.start-field input::placeholder { color: var(--l-faint); }
+.start-go {
+  flex: none; height: 48px; padding: 0 26px; border: 0; border-radius: var(--pill);
+  background: var(--go); color: #fff; font-size: 16px; font-weight: 700; letter-spacing: -0.015em;
+  transition: background 0.2s ease;
+}
+.start-go:hover { background: var(--go-deep); }
+.start-go:disabled { opacity: 0.6; cursor: default; }
+.start-note { margin: 14px 0 0; font-size: 13.5px; color: var(--l-faint); }
+.start-error { margin: 14px 0 0; font-size: 13.5px; color: #b4341a; }
+.start-done {
+  max-width: 620px; margin: 40px auto 0; padding: 20px 28px;
+  border: 1px solid var(--peach); border-radius: var(--pill);
+  background: var(--l-card); font-size: 16px; color: var(--l-ink);
+}
 
-/* The three bars take the accent slab, because they are the answer the four
-   rows above them were asking for. */
-.bars { margin-top: 44px; padding: 34px 34px 30px; border-radius: var(--radius-slab); background: var(--orange); color: #fff; }
-.bars-head { font-family: var(--display); font-weight: 500; font-size: 21px; letter-spacing: -0.02em; margin-bottom: 24px; }
-.bars-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; }
-.qual { padding: 0 26px; border-left: 1px solid rgba(255, 255, 255, 0.28); }
-.qual:first-child { padding-left: 0; border-left: 0; }
-.qual:last-child { padding-right: 0; }
-.qual b { display: block; margin-bottom: 7px; font-family: var(--display); font-weight: 500; font-size: 17px; letter-spacing: -0.015em; color: #fff; }
-.qual span { font-size: 14px; line-height: 1.55; color: rgba(255, 255, 255, 0.84); }
+/* The story. One column of sentences, no box around any of them. A line that
+   lands alone reads slower than the same line inside a block, which is the
+   only rhythm this page has. */
+.lp-story { max-width: 760px; margin: 0 auto; padding: 16px max(22px, 4vw) 48px; }
+.said { margin: 0 0 46px; font-size: clamp(19px, 2.1vw, 22px); line-height: 1.5; color: var(--l-ink); }
+.said span { display: block; }
+/* The only purple on the page. It catches a scroll without stopping it. */
+.said .n { font-size: 1.24em; font-weight: 700; letter-spacing: -0.03em; color: var(--acc); }
+.said.close { margin-top: 62px; margin-bottom: 0; font-weight: 700; letter-spacing: -0.025em; }
 
-/* On the accent slab the orange accent has nowhere to go, so the emphasis
-   takes the ink instead. */
-.land-cta h2 em { font-style: normal; color: var(--ink); }
-
-/* A beat arrives when it is reached. A reader who asked for stillness gets
-   every beat open from the first paint, handled in the script. */
 @media (prefers-reduced-motion: no-preference) {
-  .beat { opacity: 0; transform: translateY(22px); transition: opacity 0.75s ease, transform 0.75s cubic-bezier(0.2, 0.8, 0.2, 1); }
-  .beat.in { opacity: 1; transform: none; }
+  .said { opacity: 0; transform: translateY(14px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .said.in { opacity: 1; transform: none; }
 }
 
-@media (max-width: 860px) {
-  .story { padding: 64px 22px 32px 62px; }
-  .thread { left: 20px; top: 84px; bottom: 96px; }
-  .beat { padding-bottom: 58px; }
-  .beat::before { left: -47px; width: 11px; height: 11px; box-shadow: 0 0 0 6px var(--l-ground); }
-  .loop { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 30px 16px; }
-  .loop::before { display: none; }
-  .bars-row { grid-template-columns: minmax(0, 1fr); }
-  .qual { padding: 18px 0; border-left: 0; border-top: 1px solid rgba(255, 255, 255, 0.28); }
-  .qual:first-child { padding-top: 0; border-top: 0; }
+/* The last ask carries the hero's weight, on the hero's ground. An accent
+   slab here would make it a banner, and a banner is the one thing a reader
+   has learned to scroll past. */
+.lp-ask {
+  max-width: 1120px; margin: 0 auto; padding: 104px max(22px, 4vw) 116px;
+  text-align: center; border-top: 1px solid var(--l-rule);
 }
 
-/* Three columns will not fit a phone, so the row becomes the unit: name and
-   result on one line, what happened under them. The head goes, because each
-   cell says what it is where it sits. */
-@media (max-width: 680px) {
-  .ledger thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  .ledger, .ledger tbody, .ledger tr, .ledger th, .ledger td { display: block; }
-  .ledger tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 2px 16px; padding: 22px 0; border-top: 1px solid var(--l-rule); }
-  .ledger th, .ledger td { padding: 0; border: 0; width: auto; }
-  .ledger .fig { text-align: right; }
-  .ledger .what { grid-column: 1 / -1; margin-top: 10px; }
-  .ledger tbody tr:last-child { border-bottom: 1px solid var(--l-rule); }
+.lp-foot {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 20px;
+  max-width: 1120px; margin: 0 auto; padding: 28px max(22px, 4vw) 52px;
+  border-top: 1px solid var(--l-rule); font-size: 14px;
 }
+.lp-foot .brand-word { font-size: 16px; font-weight: 700; letter-spacing: -0.03em; color: var(--l-ink); }
+.lp-foot nav { display: flex; gap: 22px; margin-left: auto; }
+.lp-foot a { color: var(--l-muted); }
+.lp-foot a:hover { color: var(--go-deep); text-decoration: none; }
+.lp-foot p { flex-basis: 100%; margin: 18px 0 0; font-size: 13px; color: var(--l-faint); }
 
-@media (max-width: 560px) {
-  .story { padding: 52px 20px 28px 52px; }
-  .thread { left: 16px; }
-  .beat::before { left: -41px; }
-  .loop { grid-template-columns: minmax(0, 1fr); gap: 24px; }
-  .bars { padding: 26px 22px 24px; }
+/* Below this the pill would leave the field about 180px, so the button takes
+   its own row rather than the placeholder being cut in half. */
+@media (max-width: 520px) {
+  .lp-hero { padding: 60px 22px 76px; }
+  .lp-ask { padding: 76px 22px 84px; }
+  .start-field { flex-direction: column; align-items: stretch; gap: 10px; padding: 12px; border-radius: 26px; }
+  .start-field input { padding: 6px 12px; }
+  .start-go { width: 100%; }
+  .start-done { border-radius: 26px; }
+  .said { margin-bottom: 38px; }
 }
-
-/* The footer says the headline once more, so the page ends on the promise it
-   opened with rather than on a column of links. */
-.land-foot { grid-template-columns: minmax(0, 1fr) auto; gap: 40px; align-items: start; }
-/* Unbounded ships at one weight, so the footer headline gets its weight from
-   size: near the hero's, which is the point of saying it twice. */
-.foot-head {
-  margin-top: 20px; font-family: var(--display); font-weight: 500;
-  font-size: clamp(26px, 3.4vw, 40px); line-height: 1.1; letter-spacing: -0.03em;
-  color: var(--l-ink); max-width: 24ch;
-}
-.foot-head em { font-style: normal; color: var(--orange); }
-.foot-links { min-width: 150px; }
-@media (max-width: 760px) { .land-foot { grid-template-columns: minmax(0, 1fr); gap: 32px; } }
