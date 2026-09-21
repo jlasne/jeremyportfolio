@@ -88,7 +88,7 @@ const STORY: Line[][] = [
 ]
 
 /** The line the story lands on, set apart because it is the claim. */
-const CLOSE = 'This is the same agent we sell you.'
+const CLOSE = 'This is what brandmatch is about.'
 
 /**
  * The ask, in two moves.
