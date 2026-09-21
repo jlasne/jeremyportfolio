@@ -242,18 +242,52 @@ export const SENTENCES_MAX = 12
  * The client's sentences, made safe: one to twelve, each a line of text with
  * an id that is a plain word. Null when nothing usable was sent.
  */
+/** The words a model reaches for when it answers the shape of the task. */
+const NOT_A_SENTENCE = new Set([
+  'thresholds', 'knockouts', 'criteria', 'niches', 'ideal_profile', 'gate1', 'gate2', 'gate3',
+  'hard', 'summary', 'profile', 'rules', 'filters',
+])
+
+/**
+ * The sentences, or nothing.
+ *
+ * A weak model answers a schema by summarising the task into it: one row
+ * called "thresholds" holding the numbers, one called "knockouts" holding the
+ * questions, one called "niches" holding the list. Every one of those is a
+ * paragraph, and every one scores at random against a person.
+ *
+ * So a row is kept only when it reads as one statement about somebody: short,
+ * no question mark, no ids carried in from another section. Fewer than four
+ * survive and the caller falls back to the library, which is at least made of
+ * sentences.
+ */
 export function cleanSentences(rows: unknown): { id: string; text: string }[] | null {
   if (!Array.isArray(rows)) return null
   const seen = new Set<string>()
   const out: { id: string; text: string }[] = []
   for (const row of rows) {
-    const text = String((row as any)?.text ?? (row as any)?.label ?? '').replace(/\s+/g, ' ').trim().slice(0, 240)
+    // A dash the model reached for is a dash the client did not write. House
+    // rule, and it is cheaper to enforce here than to ask for it every time.
+    const text = String((row as any)?.text ?? (row as any)?.label ?? '')
+      .replace(/\s*[\u2013\u2014]\s*/g, ', ')
+      .replace(/\u2011/g, '-')
+      .replace(/\s+/g, ' ')
+      .replace(/,\s*,/g, ',')
+      .trim()
     if (!text) continue
-    let id = String((row as any)?.id ?? '').replace(/[^a-z0-9_]/gi, '').slice(0, 40) || `c_${out.length + 1}`
+    const rawId = String((row as any)?.id ?? '').replace(/[^a-z0-9_]/gi, '').slice(0, 40)
+    // A statement, not a section: one idea, no question, nothing carried in.
+    if (text.length > 180) continue
+    if (NOT_A_SENTENCE.has(rawId.toLowerCase())) continue
+    if (text.includes('?')) continue
+    if (/\b[ckn]_[a-z0-9_]+\s*:/i.test(text)) continue
+    if (/\([ckn]_[a-z0-9_]+\)/i.test(text)) continue
+    if ((text.match(/:/g) ?? []).length > 1) continue
+    let id = rawId || `c_${out.length + 1}`
     while (seen.has(id)) id = `${id}_`
     seen.add(id)
     out.push({ id, text })
     if (out.length >= SENTENCES_MAX) break
   }
-  return out.length ? out : null
+  return out.length >= 4 ? out : null
 }
