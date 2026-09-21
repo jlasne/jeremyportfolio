@@ -50,6 +50,9 @@ export function publicGates(g: Doc<'gateSets'>) {
     origin: g.origin,
     templateId: g.templateId ?? null,
     hard: g.hard,
+    // The choices ride out with the demands. Left behind, the screen shows
+    // reach and rhythm as hard filters the client never set.
+    either: g.either ?? [],
     knockouts: g.knockouts,
     criteria: g.criteria,
     passScore: g.passScore,
