@@ -109,7 +109,6 @@ Décisions de Jeremy, 21/09/2026.
 | 2 | Ne jamais racheter un profil déjà mesuré, toujours le réévaluer | la mesure est universelle, le verdict est par campagne |
 | 3 | Mesurer la profondeur d'une requête avant d'en redemander | "street interviewer" plafonne à 6 comptes, "challenge creator" à 20 |
 | 4 | Google comme canal, le nombre d'abonnés est dans l'extrait | 99% de visée contre 15% |
-| 5 | Voisins Apify, livrés gratuitement avec chaque fiche | 68% de visée |
 | 6 | Suggestions Instagram depuis les graines, graines obligatoires | 60% de visée |
 | 22 | Les voisins de nos propres leads livrés | un lead qualifié est la meilleure graine |
 | 23 | Repasser les échecs de peu, pour la souplesse | un compte à 9 800 abonnés en aura 10 500 dans deux mois |
@@ -124,6 +123,26 @@ Décisions de Jeremy, 21/09/2026.
 | 14 | Faire écrire 50 requêtes par l'IA au lieu de 8 | volume réel gagné, chaque requête plafonnant vers 40 à 70 |
 | 15 | La qualité baisse-t-elle avec la profondeur d'une requête | si oui, large et peu profond bat étroit et profond |
 | 16 | Recherche de posts filtrée sur les likes | retenu seulement si moins cher et meilleur rendement |
+| 26 | **L'agent navigateur qui lit l'arbre d'accessibilité** | voir ci-dessous. Le test tranche en une heure et ne consomme aucun budget Apify. |
+
+#### L'agent navigateur, la piste la plus prometteuse
+
+Un agent pilote un navigateur distant et lit l'**arbre d'accessibilité** de la page, ce que lit un lecteur d'écran. Du texte structuré, pas des images, donc pas de modèle de vision.
+
+Annoncé par ses auteurs : une tâche de 8 étapes, connexion comprise, pour 0,001 $.
+
+| | coût par profil examiné |
+|---|---|
+| Agent navigateur, 4 étapes | 0,0005 $ |
+| Apify | 0,0023 $ |
+
+Quatre fois moins cher, si le chiffre tient hors de leur démonstration.
+
+Ce que ça débloque : le panneau "suggestions pour vous" est du texte affiché dans la page, donc présent dans l'arbre. C'est exactement la donnée qu'Apify ne rend plus et que l'API interne va chercher illégalement. Ici on la lit là où Instagram l'affiche.
+
+Quatre réserves : leur démonstration tourne sur un site de test alors qu'Instagram charge en continu et se défend ; le prix annoncé est celui du modèle, pas du navigateur distant ; un navigateur distant se détecte mieux qu'un vrai ; il faut toujours une session connectée, donc le risque de compte demeure.
+
+**Le test qui tranche** : ouvrir dix profils Instagram connus, vérifier que le panneau de suggestions sort dans l'arbre d'accessibilité, mesurer le coût réel. Si les suggestions n'y sont pas, l'idée meurt en une heure.
 
 ### Refusé
 
@@ -132,6 +151,7 @@ Décisions de Jeremy, 21/09/2026.
 | 20 | S'arrêter au plafond quotidien du client pour juger moins | on livre tout, quel que soit le forfait |
 | ancien 2 | Liste noire globale des comptes rejetés | un compte rejeté par une campagne peut convenir à une autre |
 | 7 | Co-auteurs de posts collab | mesuré, voir ci-dessous |
+| 5 | Voisins livrés avec la fiche Apify | le canal est mort, voir ci-dessous |
 
 #### Pourquoi les co-auteurs ne marchent pas
 
@@ -147,6 +167,25 @@ Mesuré sur 40 profils, 406 posts : 17 paires de co-auteurs, dont
 | Un pair plausible | 2 |
 
 Soit 0,4 paire par profil, dont 12% d'utilisable. Le collab sert à mettre en avant ses clients et son propre second compte, pas à se lier à ses pairs.
+
+#### Pourquoi le canal des voisins Apify est mort
+
+Il était classé deuxième meilleur canal, à 68% de visée. Ce chiffre est une archive.
+
+Le pipeline manuel, interrogé le 21/09 :
+
+| période | voisins récoltés |
+|---|---|
+| 8 au 11 septembre | 9 555 |
+| 12 au 20 septembre | 756 |
+
+Sur des graines de moins de 100k abonnés, ils mesurent aujourd'hui 94% de fiches sans aucun voisin. De notre côté : 1 fiche sur 40 en portait, et zéro sur 214 dans un run par adresse directe.
+
+Leur hypothèse, non vérifiée : Instagram a cessé de remplir ce champ pour les requêtes non connectées, que l'acteur Apify utilise.
+
+Ce qui marche encore chez eux est une API interne d'Instagram appelée depuis un navigateur connecté. Gratuite, 80 comptes par appel, 42 à 54 inédits par graine, 2 à 4% d'échec. Hors conditions d'utilisation, et sur un compte qui peut être suspendu.
+
+Un détail qui dit le danger : l'autre API interne, celle qui donnerait le nombre d'abonnés, bloque dès le premier appel. Testée deux fois, refusée deux fois.
 
 ### En attente d'arbitrage
 
