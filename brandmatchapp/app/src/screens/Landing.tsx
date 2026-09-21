@@ -4,14 +4,14 @@ import { Logo } from '../components/Logo'
 import { HeroDemo } from '../components/HeroDemo'
 import { api } from '../lib/api'
 
-// The landing, in five blocks: hero, film, the three steps, the story, one ask.
-// Cream ground, one orange accent, wide corners, and no photography: every
-// picture on this page is drawn from the same parts as the app.
+// The landing, in three beats: a hero, a story, one ask.
 //
-// The middle of the page is now a story rather than a feature list, because
-// proof that starts with pain converts better than a promise. Four platforms
-// took our money and our months. Each one is named, with the number it cost
-// us, and the agent lands after them as the answer to a bill already shown.
+// It used to be a page of sections, each with an eyebrow and a heading, which
+// is a brochure: the reader picks the part they want and leaves. A story has
+// no menu. It opens on the work we do, names the four platforms that took our
+// money, turns at the agent we built instead, and ends on the number that
+// makes the case. The thread down the left says there is one thing to read,
+// and the only thing to do is at the bottom of it.
 
 /** Drop the recording in here and the animation below steps aside for it. */
 const VIDEO_URL = ''
@@ -21,16 +21,6 @@ const CTA = 'Start my Campaign'
 
 /** Under the hero, once. Who the page is for, in their own words. */
 const TRUST = 'Built for brands sick of searching manually and buying outdated datasets. We deliver fresh leads daily.'
-
-/** What the money buys. Outcomes, in the order they happen. */
-const HAS = [
-  'A fresh search every night, run by agents',
-  'Every lead cleared against your own bar',
-  'The first message sent in your name',
-  'The follow up sent for you, on time',
-  'Every lead yours alone, forever',
-  'Cancel any morning',
-]
 
 /**
  * The four bills, in the order we paid them.
@@ -95,95 +85,12 @@ const QUALIFIED: { name: string; means: string }[] = [
   },
 ]
 
-const STEPS = [
-  {
-    n: '1/3',
-    title: 'You tell us what you sell',
-    note: 'Who you want to reach, and what you sell them. Two sentences, in your own words. That is the whole of your part.',
-    tick: 'Two minutes, once',
-  },
-  {
-    n: '2/3',
-    title: 'Agents go and find them tonight',
-    note: 'They search while you sleep, read the last twelve posts of everyone they find, and keep the ones who clear your bar.',
-    tick: 'New every morning',
-  },
-  {
-    n: '3/3',
-    title: 'We write first, and we follow up',
-    note: 'The opening message goes out in your name. The follow up goes out on time. You step in the moment somebody replies.',
-    tick: 'You step in at the reply',
-  },
-]
-
-/** One visual per step, built from the same parts as the app. */
-function StepVisual({ n }: { n: string }) {
-  if (n === '1/3') {
-    return (
-      <div className="viz viz-icp">
-        <div className="viz-input"><span className="viz-caret" />Women lifting coaches</div>
-        <div className="viz-arrow" aria-hidden="true" />
-        <div className="viz-brief">
-          <span className="viz-label">Your filters</span>
-          <p>15k to 400k followers, posted in the last 14 days, 12k views on a typical post, US and UK, English.</p>
-          <div className="viz-chips">
-            <span>Strength</span><span>Postnatal</span><span>Rehab</span>
-          </div>
-        </div>
-      </div>
-    )
-  }
-  if (n === '2/3') {
-    // The simulation, in four bands. The last one is the answer: what a night
-    // of searching leaves standing.
-    const bands: [string, string, number][] = [
-      ['Searches run', '8,000', 100],
-      ['Big and active enough', '1,000', 46],
-      ['In a niche you want', '920', 42],
-      ['Qualified leads', '640', 29],
-    ]
-    return (
-      <div className="viz viz-sim">
-        <p className="viz-sim-head"><b>1 in 12</b> searches becomes a lead</p>
-        <ul>
-          {bands.map(([label, count, width], i) => (
-            <li key={label} className={i === bands.length - 1 ? 'last' : undefined}>
-              <span>{label}</span>
-              <i style={{ width: `${width}%` }} aria-hidden="true" />
-              <b>{count}</b>
-            </li>
-          ))}
-        </ul>
-      </div>
-    )
-  }
-  // The third step is the part nobody wants to do, so the visual is the
-  // thread rather than the list: sent, chased, answered.
-  const rows = [
-    ['liftwithmaya', 'replied', true],
-    ['jennakstrong', 'followed up', true],
-    ['sophie.souleve', 'followed up', true],
-    ['priyalifts', 'sent', false],
-  ] as const
-  return (
-    <div className="viz viz-close">
-      {rows.map(([h, stage, done]) => (
-        <div className="viz-row" key={h}>
-          <i className={done ? 'done' : ''}>{done ? '✓' : ''}</i>
-          <b>@{h}</b>
-          <em className={`stage ${stage.replace(' ', '-')}`}>{stage}</em>
-        </div>
-      ))}
-    </div>
-  )
-}
-
 /**
- * A day of work, drawn. Wide at the top where the agents look, narrow at the
+ * A night of work, drawn. Wide at the top where the agents look, narrow at the
  * bottom where the list you actually read begins. The shape carries the ratio
  * on its own, so the numbers beside it only have to name the two ends.
  */
-function Funnel() {
+function Night() {
   return (
     <div className="night">
       <div className="night-end top">
@@ -247,12 +154,13 @@ function EarlyAccess({ size = 'normal', website }: { size?: 'normal' | 'small'; 
 }
 
 /**
- * The product in one take.
+ * The product in one take, shown at the turn of the story rather than under
+ * the headline. The reader meets it at the line where we stopped buying lists
+ * and built the thing instead.
  *
- * Until the film exists, the frame holds the live demo behind a play button,
- * so the slot reads as a video and still shows something moving. Drop the
- * file in `app/src/video/` and set VIDEO_URL: the frame keeps its shape and
- * plays the real thing instead.
+ * Until the film exists, the frame holds the live demo behind a play button.
+ * Drop the file in `app/src/video/` and set VIDEO_URL: the frame keeps its
+ * shape and plays the real thing instead.
  */
 function ProductVideo() {
   const [playing, setPlaying] = useState(false)
@@ -299,24 +207,37 @@ function useFloated(after = 120): boolean {
   return past
 }
 
-/** The nav links name sections, not routes. Take the page to them. */
-function useSectionScroll(): void {
+/**
+ * A beat arrives when it is reached, so the page is told rather than dumped.
+ *
+ * The class is what makes a beat visible, so anything that could keep the
+ * observer from firing has to open them all instead: no observer in this
+ * browser, and a reader who asked for stillness.
+ */
+function useTold(): void {
   useEffect(() => {
-    const go = () => {
-      const id = window.location.hash.replace(/^#\/?/, '')
-      if (!id || id.includes('/')) return
-      const el = document.getElementById(id)
-      if (el) window.requestAnimationFrame(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+    const beats = Array.from(document.querySelectorAll('.beat'))
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (still || !('IntersectionObserver' in window)) {
+      beats.forEach((b) => b.classList.add('in'))
+      return
     }
-    go()
-    window.addEventListener('hashchange', go)
-    return () => window.removeEventListener('hashchange', go)
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => {
+        if (!e.isIntersecting) return
+        e.target.classList.add('in')
+        io.unobserve(e.target)
+      }),
+      { rootMargin: '0px 0px -10% 0px', threshold: 0.1 },
+    )
+    beats.forEach((b) => io.observe(b))
+    return () => io.disconnect()
   }, [])
 }
 
 export function Landing() {
   const floated = useFloated()
-  useSectionScroll()
+  useTold()
   return (
     <>
       <Backdrop />
@@ -329,16 +250,12 @@ export function Landing() {
           <a href="#access">Get in →</a>
         </div>
 
+        {/* No section links: there are no sections to jump to. */}
         <header className={`land-nav${floated ? ' floated' : ''}`}>
           <a className="brand" href="#/">
             <Logo size={24} />
             brandmatch
           </a>
-          <nav>
-            <a href="#how">How it works</a>
-            <a href="#story">Our story</a>
-            <a href="#pricing">Pricing</a>
-          </nav>
           <span className="spacer" />
           <a className="land-signin" href="#/signin">Sign in</a>
           <a className="btn primary" href="#access">{CTA}</a>
@@ -356,107 +273,75 @@ export function Landing() {
               <p className="hero-trust">{TRUST}</p>
             </div>
           </section>
-
-          <div className="video-wrap">
-            <ProductVideo />
-          </div>
         </div>
 
-        <section className="land-section" id="how">
-          <p className="eyebrow">How it works</p>
-          <h2 className="big">You write two sentences. <em>We do the rest.</em></h2>
-          <p className="section-lede">
-            Three steps, and two of them are ours. Your morning starts at the reply.
-          </p>
+        <section className="story" id="story">
+          <span className="thread" aria-hidden="true" />
 
-          <div className="steps3">
-            {STEPS.map((st, i) => (
-              <article className="step3" key={st.n}>
-                <div className="step3-art">
-                  <StepVisual n={st.n} />
-                </div>
-                <span className="step3-n">{i + 1}</span>
-                <h3>{st.title}</h3>
-                <p>{st.note}</p>
-                <span className="step3-tick">{st.tick}</span>
-              </article>
-            ))}
+          <div className="beat">
+            <p className="beat-lead">We build mobile apps with content creators.</p>
+            <p>
+              Two engineers, shipping apps. Finding the right creators, and running the outreach behind every
+              launch, ate our weeks and our budget.
+            </p>
           </div>
-        </section>
 
-        <section className="land-section" id="story">
-          <p className="eyebrow">Our story</p>
-          <h2 className="big">We built our dreamed <em>deal gen AI agent.</em></h2>
-          <p className="section-lede">
-            Built by two engineers, after four platforms failed us. We build mobile apps with content creators.
-            Finding the right ones, and running the outreach, ate our time and our budget.
-          </p>
+          <div className="beat">
+            <h2>So we paid four platforms to fix it.</h2>
+            <ol className="bills">
+              {FAILURES.map((f) => (
+                <li className="debt" key={f.name}>
+                  <div className="debt-fig">
+                    <span className="debt-figure">{f.figure}</span>
+                    <span className="debt-unit">{f.unit}</span>
+                  </div>
+                  <div className="debt-body">
+                    <b>{f.name}</b>
+                    <p>{f.note}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <p className="beat-close">
+              Four invoices, four months, and still no repeatable way to reach one creator ready to sign.
+            </p>
+          </div>
 
-          <p className="ledger-head">Four platforms. Four bills.</p>
-          <ol className="ledger">
-            {FAILURES.map((f, i) => (
-              <li className="bill" key={f.name}>
-                <span className="bill-n">{String(i + 1).padStart(2, '0')}</span>
-                <b className="bill-name">{f.name}</b>
-                <span className="bill-figure">{f.figure}</span>
-                <span className="bill-unit">{f.unit}</span>
-                <p className="bill-note">{f.note}</p>
-              </li>
-            ))}
-          </ol>
-
-          <div className="turn-line">
-            <h3>So we built our own agent.</h3>
+          <div className="beat">
+            <h2>So we built our own agent.</h2>
             <p>It runs the full loop, every day, while you sleep.</p>
+
+            <ol className="loop">
+              {LOOP.map((l, i) => (
+                <li key={l.verb}>
+                  <span className="loop-n">{i + 1}</span>
+                  <b>{l.verb}</b>
+                  <p>{l.what}</p>
+                </li>
+              ))}
+            </ol>
+            <p className="loop-cycle"><i aria-hidden="true" />Repeats every day</p>
+
+            <ProductVideo />
           </div>
 
-          <ol className="loop">
-            {LOOP.map((l, i) => (
-              <li key={l.verb}>
-                <span className="loop-n">{i + 1}</span>
-                <b>{l.verb}</b>
-                <p>{l.what}</p>
-              </li>
-            ))}
-          </ol>
-          <p className="loop-cycle"><i aria-hidden="true" />Repeats every day</p>
+          <div className="beat">
+            <h2>3,000 profiles scanned a day turn into <em>200 qualified matches.</em></h2>
+            <Night />
 
-          <div className="result">
-            <div className="result-figure">
-              <p className="eyebrow">The result</p>
-              <h3>3,000 profiles scanned a day turn into <em>200 qualified matches.</em></h3>
-              <Funnel />
-            </div>
-            <div className="result-bars">
+            <div className="bars">
               <p className="bars-head">What is qualified?</p>
-              <div className="tests-row">
+              <div className="bars-row">
                 {QUALIFIED.map((q) => (
-                  <div className="test" key={q.name}>
+                  <div className="qual" key={q.name}>
                     <b>{q.name}</b>
                     <span>{q.means}</span>
                   </div>
                 ))}
               </div>
-              <p className="tests-after">This is what brandmatch is about.</p>
             </div>
-          </div>
-        </section>
 
-        <section className="land-section centred" id="pricing">
-          <p className="eyebrow">Pricing</p>
-          <h2 className="big">One number, built on your volume.</h2>
-          <p className="section-lede">
-            Up to 3,000 fresh leads a day. What you pay follows how many you take, and how wide we search to find
-            them.
-          </p>
-
-          <div className="one-price">
-            <p className="price"><span className="now">3,000</span><small>fresh leads a day</small></p>
-            <ul className="plan-has">
-              {HAS.map((h) => <li key={h}>{h}</li>)}
-            </ul>
-            <a className="btn primary" href="mailto:hey@jeremylasne.com">Talk to us</a>
-            <p className="price-note">One call, then three days free.</p>
+            <p className="beat-close last">This is what brandmatch is about.</p>
           </div>
         </section>
 
@@ -464,6 +349,9 @@ export function Landing() {
           <h2>Your next deal <em>is tomorrow.</em></h2>
           <p>Let your agent find them.</p>
           <EarlyAccess />
+          <p className="cta-terms">
+            One call, then three days free. Cancel any morning. <a href="mailto:hey@jeremylasne.com">Talk to us</a>
+          </p>
         </section>
 
         <footer className="land-foot">
@@ -474,15 +362,10 @@ export function Landing() {
             </p>
           </div>
           <div>
-            <h4>Product</h4>
-            <a href="#how">How it works</a>
-            <a href="#story">Our story</a>
-            <a href="#pricing">Pricing</a>
-          </div>
-          <div>
             <h4>Get in</h4>
             <a href="#access">Early access</a>
             <a href="mailto:hey@jeremylasne.com">Talk to us</a>
+            <a href="#/signin">Sign in</a>
           </div>
           <p className="copy">© 2026 brandmatch. Daily qualified leads for your business.</p>
         </footer>
