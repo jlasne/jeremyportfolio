@@ -1,18 +1,20 @@
 import { useEffect, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
+import GlyphPortal from '../components/GlyphPortal'
+import sky from '../art/bg.webp'
 import { api } from '../lib/api'
 
-// The landing, as one page: hero, six outcomes, one ask.
+// The landing, as one page you scroll into.
 //
-// Cream ground, warm charcoal type, one orange for the thing you click and
-// the thing you get. Satoshi at two sizes that do the work: the display size
-// the hero and the last ask share, and the reading size everything else runs
-// at. The six cards are what brandmatch gives back, one line of proof each,
-// and they arrive as they are reached so the page is read rather than
-// scanned. Nothing between the hero and them, and nothing above the hero,
-// because a reader who came for leads should meet the headline first and see
-// what they get straight after it. The only bar is the footer, and the only
-// button is the one in the hero.
+// The hero is the name, set as big as the screen allows, and the only things
+// beside it are one line and the field. Scrolling drives a camera into the
+// counter of a letter, and what is on the other side of it is the six cards
+// and the last ask, over the sunrise.
+//
+// The portal freezes whatever face is loaded at mount, so it waits for
+// Satoshi's heaviest cut before it goes up. Without that wait a fallback face
+// is measured, the camera aims at the wrong ink, and the component falls back
+// to a still frame.
 
 /**
  * The headline, word by word, so each one can rise on its own delay. `hot`
@@ -25,7 +27,7 @@ const HEADLINE: { w: string; hot?: true }[] = [
   { w: 'creators.' },
 ]
 
-const SUBHEAD = 'Describe the creators you want. Your agent learns and identifies them. Not generic and outdated: searched for you, active and high intent, every day.'
+const WORD = 'BRANDMATCH'
 const BRIEF_HINT = 'e.g. Fitness creators, 50k+ followers, active this week'
 
 /** The one thing every button asks for, said the same way in both places. */
@@ -159,8 +161,9 @@ function Start({ id }: { id?: string }) {
  * observer from firing has to open them all instead: no observer in this
  * browser, and a reader who asked for stillness.
  */
-function useTold(): void {
+function useTold(on: boolean): void {
   useEffect(() => {
+    if (!on) return
     const perks = Array.from(document.querySelectorAll('.perk'))
     const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (still || !('IntersectionObserver' in window)) {
@@ -177,38 +180,80 @@ function useTold(): void {
     )
     perks.forEach((c) => io.observe(c))
     return () => io.disconnect()
+  }, [on])
+}
+
+/** True once Satoshi's heaviest cut is measurable, or 1.8s has passed. */
+function useFace(): boolean {
+  const [ready, setReady] = useState(false)
+  useEffect(() => {
+    let done = false
+    const finish = () => { if (!done) { done = true; setReady(true) } }
+    const timeout = window.setTimeout(finish, 1800)
+    document.fonts.load('900 100px Satoshi', WORD).then(finish, finish)
+    return () => { done = true; window.clearTimeout(timeout) }
   }, [])
+  return ready
 }
 
 export function Landing() {
-  useTold()
+  const faced = useFace()
+  useTold(faced)
+  if (!faced) return <div className="landing lp lp-boot" />
   return (
     <div className="landing lp">
-      <section className="lp-hero">
-        <h1>
-          {HEADLINE.map((t, i) => (
-            <span key={i} className={t.hot ? 'hot' : undefined} style={{ ['--i' as string]: i } as CSSProperties}>{t.w}</span>
-          ))}
-        </h1>
-        <p className="lp-sub">{SUBHEAD}</p>
-        <Start id="start-brief" />
-      </section>
+      <GlyphPortal
+        className="lp-portal"
+        word={WORD}
+        focusChar="D"
+        fontFamily="'Satoshi', ui-sans-serif, system-ui, sans-serif"
+        fontWeight={900}
+        scrollLength={2.6}
+        enterLabel="See what you get"
+        background={<div className="lp-sky" style={{ backgroundImage: `url(${sky})` }} />}
+        style={{
+          '--gp-paper': '#faf6ec',
+          '--gp-ink': '#23211c',
+          '--gp-field': '#faf6ec',
+          '--gp-foreground': '#23211c',
+        }}
+        front={(
+          <div className="lp-front">
+            <div className="lp-front-ask">
+              <p className="lp-line">
+                {HEADLINE.map((t, i) => (
+                  <span key={i} className={t.hot ? 'hot' : undefined} style={{ ['--i' as string]: i } as CSSProperties}>{t.w}</span>
+                ))}
+              </p>
+              <Start id="start-brief" />
+            </div>
+          </div>
+        )}
+      >
+        <div className="lp-inside">
+          <section className="lp-grid">
+            {OUTCOMES.map((o, i) => (
+              <article className="perk" key={o.name} style={{ ['--i' as string]: i % 3 } as CSSProperties}>
+                <span className="perk-mark" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                    {ICONS[o.icon]}
+                  </svg>
+                </span>
+                <h3>{o.name}</h3>
+                <p>{o.what}</p>
+              </article>
+            ))}
+          </section>
 
-      <section className="lp-grid">
-        {OUTCOMES.map((o, i) => (
-          <article className="perk" key={o.name} style={{ ['--i' as string]: i % 3 } as CSSProperties}>
-            <span className="perk-mark" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                {ICONS[o.icon]}
-              </svg>
-            </span>
-            <h3>{o.name}</h3>
-            <p>{o.what}</p>
-          </article>
-        ))}
-      </section>
+          <p className="lp-proof">{PROOF}</p>
 
-      <p className="lp-proof">{PROOF}</p>
+          <section className="lp-ask">
+            <h2>Your next 10 deals are tomorrow.</h2>
+            <p className="lp-sub">Let your agent find them.</p>
+            <Start />
+          </section>
+        </div>
+      </GlyphPortal>
 
       <footer className="lp-foot">
         <span className="brand-word">brandmatch</span>

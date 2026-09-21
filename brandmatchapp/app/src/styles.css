@@ -3739,7 +3739,7 @@ body { background: var(--paper); }
   --peach: #f5c6a0;
   /* The alias the global sheet colours links with. */
   --blue: #c9560d;
-  min-height: 100vh;
+  min-height: 100vh; overflow-x: clip;
   background: var(--l-ground);
   color: var(--l-ink);
   font-family: var(--font);
@@ -3748,42 +3748,58 @@ body { background: var(--paper); }
 .landing.lp h1, .landing.lp h2, .landing.lp h3,
 .landing.lp .brand, .landing.lp .brand-word { font-family: var(--font); }
 
-/* The sky. A sunrise behind the hero, faded out before the cards, in the
-   brand's own cream, peach and orange. The file is 39KB, so it costs the
-   page nothing. */
-.landing.lp::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0;
-  height: min(880px, 98vh);
-  background: url('./art/bg.webp') center 42% / cover no-repeat;
-  -webkit-mask-image: linear-gradient(to bottom, #000 0 44%, rgba(0, 0, 0, 0.5) 74%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0 44%, rgba(0, 0, 0, 0.5) 74%, transparent 100%);
-  opacity: 0.85; pointer-events: none; z-index: 0;
+/* The portal: the name set as large as the screen allows, and a camera that
+   scrolls into the counter of its D. What is on the other side is the six
+   cards and the last ask, over the sunrise. */
+.lp-boot { min-height: 100svh; background: var(--l-ground); }
+.lp-portal { font-family: var(--font); }
+/* The image comes in as an inline background-image, so this sets only how it
+   is laid out. A shorthand with an empty url() would throw the whole rule. */
+.lp-sky {
+  position: absolute; inset: 0;
+  background-position: center 62%; background-size: cover; background-repeat: no-repeat;
+  transform: scale(var(--gp-field-scale, 1));
 }
-/* Everything the reader reads sits over it. */
-.lp-hero, .lp-grid, .lp-proof, .lp-foot { position: relative; z-index: 1; }
+.lp-sky::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(242, 113, 31, 0.26) 0%, rgba(242, 113, 31, 0.30) 52%, rgba(242, 113, 31, 0.07) 100%);
+}
 
-/* Hero. Badge, headline, one sentence, the field. Nothing else above the
-   fold, because the brief is the only thing the reader has to give. */
-.lp-hero { max-width: 1120px; margin: 0 auto; padding: 116px max(22px, 4vw) 72px; text-align: center; }
-.lp-hero h1 {
-  margin: 0 auto; max-width: 24ch; text-wrap: balance;
-  font-weight: 600; font-size: clamp(33px, 4.4vw, 54px); line-height: 1.06;
-  letter-spacing: -0.038em; color: var(--l-ink);
+/* The field is decorative, so the front has to let the form through it. */
+.lp-portal [data-gp-front] input,
+.lp-portal [data-gp-front] form,
+.lp-portal [data-gp-front] .lp-front-ask { pointer-events: var(--gp-caption-hit, auto); }
+.lp-portal [data-gp-hint] { display: none; }
+.lp-portal [data-gp-caption] { inset: auto 24px 5%; justify-content: center; font-family: var(--font); }
+.lp-portal [data-gp-enter] { gap: 10px; font-size: 13px; color: var(--l-faint); }
+.lp-portal [data-gp-enter]:hover { color: var(--go-deep); text-decoration: none; }
+/* With motion off the whole page is already laid out in reading order, so the
+   link into it is redundant, and the shorter pin drops it onto the field. */
+@media (prefers-reduced-motion: reduce) { .lp-portal [data-gp-caption] { display: none; } }
+
+.lp-front-ask {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  top: calc(var(--gp-word-bottom, 55%) + 34px);
+  width: min(660px, calc(100% - 44px)); text-align: center;
 }
-/* Word by word, each on its own delay, so the headline is delivered rather
-   than displayed. The three that say what nobody else sends take the colour. */
-.lp-hero h1 span { display: inline-block; margin-right: 0.24em; }
-.lp-hero h1 span:last-child { margin-right: 0; }
-.lp-hero h1 .hot { color: var(--go-deep); }
+.lp-line {
+  margin: 0 0 22px; font-size: clamp(16px, 1.5vw, 20px); line-height: 1.35;
+  font-weight: 500; letter-spacing: -0.02em; color: var(--l-muted); text-wrap: balance;
+}
+.lp-line .hot { color: var(--go-deep); }
+.lp-line span { display: inline-block; margin-right: 0.22em; }
+.lp-line span:last-child { margin-right: 0; }
 @media (prefers-reduced-motion: no-preference) {
-  .lp-hero h1 span {
+  .lp-line span {
     opacity: 0; transform: translateY(0.42em);
     animation: word-rise 0.72s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
     animation-delay: calc(var(--i, 0) * 70ms);
   }
 }
 @keyframes word-rise { to { opacity: 1; transform: none; } }
-.lp-sub { margin: 26px auto 0; max-width: 58ch; font-size: 18px; line-height: 1.6; color: var(--l-muted); }
+
+/* Everything behind the letter, on one column. */
+.lp-inside { width: 100%; max-width: 1180px; margin: 0 auto; }
 
 /* The ask, in two moves: the brief they already have in their head, then the
    address. The button keeps its label through both, so nothing moves under
@@ -3858,6 +3874,15 @@ body { background: var(--paper); }
   .perk.in { opacity: 1; transform: none; }
 }
 
+/* The last ask, at the end of what is behind the letter. */
+.lp-ask { margin: 76px auto 0; padding: 0 max(4px, 1vw); text-align: center; }
+.lp-ask h2 {
+  margin: 0 auto; max-width: 22ch; text-wrap: balance;
+  font-weight: 600; font-size: clamp(28px, 3.6vw, 44px); line-height: 1.08;
+  letter-spacing: -0.035em; color: var(--l-ink);
+}
+.lp-sub { margin: 18px auto 0; max-width: 46ch; font-size: 17px; line-height: 1.55; color: var(--l-muted); }
+
 .lp-foot {
   display: flex; align-items: center; flex-wrap: wrap; gap: 10px 20px;
   max-width: 1120px; margin: 64px auto 0; padding: 15px max(22px, 4vw) 18px;
@@ -3881,9 +3906,11 @@ body { background: var(--paper); }
   .perk-mark { width: 40px; height: 40px; margin-bottom: 15px; border-radius: 12px; }
   .lp-proof { margin-top: 40px; font-size: 14px; }
   .landing.lp::before { height: min(780px, 92vh); background-position: 68% 46%; }
-  .landing.lp::before { height: min(700px, 84vh); background-position: 68% 46%; }
-  .lp-hero { padding: 76px 20px 60px; }
-  .lp-sub { margin-top: 20px; font-size: 16.5px; }
+  .lp-sub { margin-top: 16px; font-size: 16px; }
+  .lp-front-ask { top: calc(var(--gp-word-bottom, 55%) + 26px); }
+  .lp-line { margin-bottom: 18px; font-size: 16px; }
+  .lp-ask { margin-top: 56px; }
+  .lp-sky { background-position: 68% 58%; }
   .start { margin-top: 32px; }
   .start-row { flex-direction: column; gap: 10px; }
   .start-box { height: 54px; padding: 0 18px; }
