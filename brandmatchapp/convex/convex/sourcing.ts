@@ -47,11 +47,101 @@ export const parents = internalQuery({
       if (hasNiches && !e.niche) continue
       const c = await ctx.db.get(e.creatorId)
       if (!c) continue
-      out.push({ handle: c.handle, verdict: e.verdict, score: e.score, niche: e.niche ?? null, cited: c.cited ?? [] })
+      out.push({
+        handle: c.handle,
+        verdict: e.verdict,
+        score: e.score,
+        niche: e.niche ?? null,
+        cited: c.cited ?? [],
+        related: c.related ?? [],
+      })
     }
     // Qualified first, then by fit. The order decides who gets cited first
     // when the run is capped.
     return out.sort((a, b) => Number(b.verdict === 'qualified') - Number(a.verdict === 'qualified') || b.score - a.score)
+  },
+})
+
+/**
+ * Everyone the good accounts point at, ranked, before a penny is spent.
+ *
+ * Two free signals sit on a profile we have already paid for:
+ *
+ *   related  the accounts Instagram itself shows beside this one. It computes
+ *            them on audience overlap, so the neighbours of a 900k account are
+ *            other 900k accounts. This is the only size signal we get without
+ *            paying, and it only comes back when the profile was fetched by
+ *            its own url: a search result does not carry it.
+ *   cited    the handles mentioned and tagged in their last posts. Plentiful
+ *            and much weaker: a coach tags their gym, their sponsor and their
+ *            friend as readily as a peer.
+ *
+ * So a suggestion counts for three and a mention for one, and a handle has to
+ * reach two before it is worth a profile. One suggestion clears it. One
+ * mention never does, which is the whole point: a handle two coaches both tag
+ * is a peer, a handle one of them tags once is usually a brand.
+ */
+export const candidates = internalQuery({
+  args: { campaignId: v.id('campaigns'), limit: v.optional(v.number()), floor: v.optional(v.number()) },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<Record<string, unknown>> => {
+    const list = (await ctx.runQuery(internal.sourcing.parents, { campaignId: args.campaignId })) as
+      | { handle: string; cited: string[]; related?: string[] }[]
+      | { error: string }
+    if ('error' in list) return list
+
+    const parentHandles = new Set(list.map((p) => p.handle))
+    const rows = new Map<string, { suggested: Set<string>; mentioned: Set<string> }>()
+    const put = (handle: string, parent: string, how: 'suggested' | 'mentioned') => {
+      if (!handle || parentHandles.has(handle)) return
+      if (!rows.has(handle)) rows.set(handle, { suggested: new Set(), mentioned: new Set() })
+      rows.get(handle)![how].add(parent)
+    }
+    for (const p of list) {
+      for (const h of p.related ?? []) put(h, p.handle, 'suggested')
+      for (const h of p.cited ?? []) put(h, p.handle, 'mentioned')
+    }
+
+    const floor = args.floor ?? 2
+    const scored = [...rows.entries()]
+      .map(([handle, v]) => ({
+        handle,
+        suggestedBy: [...v.suggested],
+        mentionedBy: [...v.mentioned],
+        score: v.suggested.size * 3 + v.mentioned.size,
+      }))
+      .sort((a, b) => b.score - a.score || b.suggestedBy.length - a.suggestedBy.length)
+
+    const worth = scored.filter((c) => c.score >= floor)
+    const handles = []
+    let known = 0
+    for (const c of worth) {
+      const seen = await ctx.db
+        .query('creators')
+        .withIndex('by_handle', (q) => q.eq('platform', 'instagram').eq('handle', c.handle))
+        .first()
+      if (seen) { known++; continue }
+      // One parent that both suggests and mentions a handle is still one
+      // parent. The list is what the lead shows as where it came from.
+      handles.push({
+        handle: c.handle,
+        parents: [...new Set([...c.suggestedBy, ...c.mentionedBy])],
+        score: c.score,
+      })
+      if (handles.length >= (args.limit ?? 300)) break
+    }
+
+    return {
+      parents: list.length,
+      /** Every distinct handle the parents point at, at any strength. */
+      seen: rows.size,
+      suggested: scored.filter((c) => c.suggestedBy.length).length,
+      mentionedTwice: scored.filter((c) => !c.suggestedBy.length && c.mentionedBy.length > 1).length,
+      worth: worth.length,
+      known,
+      fresh: handles.length,
+      handles,
+    }
   },
 })
 
@@ -100,16 +190,23 @@ export const neighbours = internalAction({
     const budget = await ctx.runQuery(internal.ops.budgetLeft, { accountId: campaign.accountId })
     if (budget.left <= 0) return { error: 'Fair use reached for today', internal: true }
 
-    const found = await ctx.runQuery(internal.sourcing.harvest, {
+    const found = await ctx.runQuery(internal.sourcing.candidates, {
       campaignId: args.campaignId, limit: Math.min(args.limit ?? 300, budget.left),
     })
     if ('error' in found) return found
     const sources = found.handles as { handle: string; parents: string[] }[]
     if (!sources.length) return { ...found, note: 'Nobody new to look at' }
     const run = await ctx.runAction(internal.ingest.detailRun, {
-      handles: sources.map((s) => s.handle), campaignId: args.campaignId, channel: 'neighbour', sources,
+      handles: sources.map((s) => s.handle),
+      campaignId: args.campaignId,
+      channel: 'neighbour',
+      // The rank is ours to decide with, never ours to store on the run.
+      sources: sources.map((s) => ({ handle: s.handle, parents: s.parents })),
     })
-    return { parents: found.parents, cited: found.cited, known: found.known, asked: sources.length, ...run }
+    return {
+      parents: found.parents, seen: found.seen, suggested: found.suggested,
+      worth: found.worth, known: found.known, asked: sources.length, ...run,
+    }
   },
 })
 
@@ -210,5 +307,54 @@ export const setCited = internalMutation({
       written++
     }
     return { written }
+  },
+})
+
+/**
+ * What one run actually bought.
+ *
+ * The channel figures on the ops screen mix every profile a channel ever
+ * found, across campaigns and across months. Comparing two ways of searching
+ * needs the batch each one paid for, on its own.
+ */
+export const cohort = internalQuery({
+  args: { externalRunId: v.string() },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<Record<string, unknown>> => {
+    const run = await ctx.db
+      .query('crawlRuns')
+      .withIndex('by_external', (q) => q.eq('externalRunId', args.externalRunId))
+      .first()
+    if (!run) return { error: 'No such run' }
+    const asked = (run.sources ?? []).map((s) => s.handle)
+    const out: Record<string, number> = {}
+    const sizes: number[] = []
+    let found = 0
+    for (const handle of asked) {
+      const creator = await ctx.db
+        .query('creators')
+        .withIndex('by_handle', (q) => q.eq('platform', 'instagram').eq('handle', handle))
+        .first()
+      if (!creator) { out.never_fetched = (out.never_fetched ?? 0) + 1; continue }
+      found++
+      sizes.push(creator.followers ?? 0)
+      const ev = await ctx.db
+        .query('evaluations')
+        .withIndex('by_campaign_creator', (q) =>
+          q.eq('campaignId', run.campaignId!).eq('creatorId', creator._id))
+        .first()
+      const key = ev ? `${ev.verdict}${ev.blockedBy ? ':' + ev.blockedBy : ''}` : 'not_scored'
+      out[key] = (out[key] ?? 0) + 1
+    }
+    sizes.sort((a, b) => a - b)
+    return {
+      asked: asked.length,
+      fetched: found,
+      medianFollowers: sizes.length ? sizes[Math.floor(sizes.length / 2)] : 0,
+      over100k: sizes.filter((n) => n >= 100_000).length,
+      verdicts: out,
+      costCents: run.costCents,
+      profilesFetched: run.profilesFetched,
+    }
   },
 })
