@@ -3763,6 +3763,21 @@ body { background: var(--paper); }
 .lp-signin { font-size: 15px; color: var(--l-muted); }
 .lp-signin:hover { color: var(--l-ink); text-decoration: none; }
 
+/* The sky. A sunrise behind the nav and the hero, faded out before the story
+   starts: the story is a column of sentences, and a picture under it would be
+   one more thing to read. The file is 39KB, so it costs the page nothing. */
+.landing.lp::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: min(980px, 104vh);
+  background: url('./art/bg.webp') center 42% / cover no-repeat;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0 44%, rgba(0, 0, 0, 0.5) 74%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0 44%, rgba(0, 0, 0, 0.5) 74%, transparent 100%);
+  opacity: 0.85; pointer-events: none; z-index: 0;
+}
+/* Everything the reader reads sits over it. The nav already carries its own
+   layer, so it stays where it is. */
+.lp-hero, .lp-story, .lp-ask, .lp-foot { position: relative; z-index: 1; }
+
 /* Hero. Badge, headline, one sentence, the field. Nothing else above the
    fold, because the brief is the only thing the reader has to give. */
 .lp-hero { max-width: 1120px; margin: 0 auto; padding: 88px max(22px, 4vw) 104px; text-align: center; }
@@ -3860,6 +3875,7 @@ body { background: var(--paper); }
 @media (max-width: 640px) {
   .lp-nav { padding: 20px 20px; }
   .lp-nav.floated { padding-top: 13px; padding-bottom: 13px; }
+  .landing.lp::before { height: min(780px, 92vh); background-position: 68% 46%; }
   .lp-hero { padding: 52px 20px 68px; }
   .lp-badge { margin-bottom: 24px; padding: 6px 14px; font-size: 12.5px; }
   .lp-sub { margin-top: 20px; font-size: 16.5px; }

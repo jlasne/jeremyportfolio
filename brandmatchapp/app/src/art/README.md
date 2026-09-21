@@ -25,9 +25,14 @@ for a dark one; the script strips either.
 
 ## What is here
 
-Nothing, for now. The landing was carrying 1.05 MB of drawings across six
-files, and every picture on it is drawn from the same parts as the app
-instead: DOM and CSS, sized by the layout, readable while the page loads.
+| File | Where it shows |
+|---|---|
+| `bg.webp` | The sunrise behind the nav and the hero, in `styles.css` |
+
+`bg.webp` arrived as a 1.6 MB PNG and left as 39 KB: it is a smooth gradient
+with no detail to lose, so `sharp` at 1600px wide and WebP quality 90 costs
+nothing and bands nowhere. Any new photograph here gets the same treatment
+before it is committed.
 
 The pipeline above still stands. Drop a new drawing in, unmatte it, import it
-by name, and add a row here saying where it shows.
+by name, and add a row to the table.
