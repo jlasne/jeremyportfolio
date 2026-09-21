@@ -175,8 +175,18 @@ export interface HardRules {
   medianViewsMin?: number
   medianCommentsMin?: number
   postsPerMonthMin?: number
+  /** Views on a typical post as a percentage of the follower count. */
+  viewRatioMin?: number
+  /** Views across a month: what a typical post gets, times how many. */
+  monthlyViewsMin?: number
   countries?: string[]
   languages?: string[]
+}
+
+/** A choice, where every rule above is a demand. One option holding is enough. */
+export interface EitherGroup {
+  label?: string
+  options: HardRules[]
 }
 
 /**
@@ -187,29 +197,88 @@ export interface HardRules {
  * The same numbers live in app/src/data/tuning.ts. They have to stay in step:
  * the screen promises a limit and this is where the promise is kept.
  */
-export function settle(hard: HardRules): HardRules {
+export function settle(hard: HardRules, either?: EitherGroup[]): HardRules {
   const out: HardRules = { ...hard }
   const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, Math.round(n)))
 
+  // A number a group decides is not filled in here as a demand as well. Filled
+  // in both places the demand always fires first, and the choice the client was
+  // shown never gets to matter.
+  const decided = new Set<string>()
+  for (const g of either ?? []) for (const o of g.options ?? []) for (const k of Object.keys(o ?? {})) decided.add(k)
+
   out.followersMin = clamp(out.followersMin ?? 15_000, 5_000, 500_000)
   out.followersMax = clamp(out.followersMax ?? 400_000, Math.max(25_000, out.followersMin * 3), 5_000_000)
-  out.lastPostWithinDays = clamp(out.lastPostWithinDays ?? 14, 3, 90)
-  out.postsPerMonthMin = clamp(out.postsPerMonthMin ?? 8, 2, 30)
+  const floor = out.followersMin
+  const viewBounds: [number, number] = [Math.max(500, Math.round(floor * 0.05)), Math.min(2_000_000, floor * 3)]
+
+  for (const key of decided) delete (out as Record<string, unknown>)[key]
+  if (!decided.has('lastPostWithinDays')) out.lastPostWithinDays = clamp(out.lastPostWithinDays ?? 14, 3, 90)
+  if (!decided.has('postsPerMonthMin')) out.postsPerMonthMin = clamp(out.postsPerMonthMin ?? 8, 2, 30)
   // Between 5% and 300% of the follower floor. Below it says nothing, above it
   // asks for a permanently viral account.
-  out.medianViewsMin = clamp(
-    out.medianViewsMin ?? Math.round(out.followersMin * 0.5),
-    Math.max(500, Math.round(out.followersMin * 0.05)),
-    Math.min(2_000_000, out.followersMin * 3),
-  )
+  if (!decided.has('medianViewsMin')) {
+    out.medianViewsMin = clamp(out.medianViewsMin ?? Math.round(floor * 0.5), ...viewBounds)
+  }
   // The cheapest signal to fake, so it can be off and it never passes 2% of the
-  // views floor, which would kill the campaign quietly.
-  out.medianCommentsMin = clamp(
-    out.medianCommentsMin ?? 0,
-    0,
-    Math.max(10, Math.min(2_000, Math.round(out.medianViewsMin * 0.02))),
-  )
+  // views floor, which would kill the campaign quietly. With reach decided by a
+  // group there is no floor here to read, so the loosest way through the group
+  // stands in for it.
+  if (!decided.has('medianCommentsMin')) {
+    const viewsFloor = out.medianViewsMin ?? loosestViews(either) ?? Math.round(floor * 0.5)
+    out.medianCommentsMin = clamp(
+      out.medianCommentsMin ?? 0,
+      0,
+      Math.max(10, Math.min(2_000, Math.round(viewsFloor * 0.02))),
+    )
+  }
   return out
+}
+
+/** The smallest views figure any way through the groups will accept. */
+function loosestViews(either?: EitherGroup[]): number | undefined {
+  const seen: number[] = []
+  for (const g of either ?? []) {
+    for (const o of g.options ?? []) {
+      if (typeof o?.medianViewsMin === 'number') seen.push(o.medianViewsMin)
+    }
+  }
+  return seen.length ? Math.min(...seen) : undefined
+}
+
+/**
+ * The same limits, applied inside a choice.
+ *
+ * A group is written by a model and edited by a client, so its numbers need the
+ * same bounds the dials have. An option left with nothing usable is dropped,
+ * and a group down to one option is not a choice any more, so it goes too.
+ */
+export function settleEither(either: unknown, followersMin: number): EitherGroup[] {
+  const bound: Record<string, [number, number]> = {
+    medianViewsMin: [Math.max(500, Math.round(followersMin * 0.05)), Math.min(2_000_000, followersMin * 3)],
+    medianCommentsMin: [1, 2_000],
+    postsPerMonthMin: [1, 30],
+    viewRatioMin: [1, 300],
+    monthlyViewsMin: [Math.max(1_000, Math.round(followersMin * 0.1)), 50_000_000],
+    lastPostWithinDays: [3, 90],
+  }
+  const out: EitherGroup[] = []
+  for (const g of Array.isArray(either) ? either : []) {
+    const options: HardRules[] = []
+    for (const o of Array.isArray((g as any)?.options) ? (g as any).options : []) {
+      const clean: Record<string, number> = {}
+      for (const [k, raw] of Object.entries(o ?? {})) {
+        const limits = bound[k]
+        const n = Number(raw)
+        if (!limits || !Number.isFinite(n) || n <= 0) continue
+        clean[k] = Math.min(limits[1], Math.max(limits[0], Math.round(n)))
+      }
+      if (Object.keys(clean).length) options.push(clean as HardRules)
+    }
+    if (options.length < 2) continue
+    out.push({ label: String((g as any)?.label ?? 'Either').slice(0, 40), options })
+  }
+  return out.slice(0, 4)
 }
 
 /** Locked knockouts come back on, whatever the request said. */

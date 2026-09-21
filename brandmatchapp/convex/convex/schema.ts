@@ -32,8 +32,24 @@ const hardRules = v.object({
   medianViewsMin: v.optional(v.number()),
   medianCommentsMin: v.optional(v.number()),
   postsPerMonthMin: v.optional(v.number()),
+  /** Views on a typical post as a percentage of the follower count. */
+  viewRatioMin: v.optional(v.number()),
+  /** Views across a month: a typical post times how many they publish. */
+  monthlyViewsMin: v.optional(v.number()),
   countries: v.optional(v.array(v.string())),
   languages: v.optional(v.array(v.string())),
+})
+
+/**
+ * A group where one alternative is enough, against the demands above.
+ *
+ * Reach is two different accounts wearing one number: 40k views on a tenth of
+ * their followers, or 100k views on a fiftieth. Both are worth writing to and
+ * a single threshold loses one of them.
+ */
+const eitherGroup = v.object({
+  label: v.optional(v.string()),
+  options: v.array(hardRules),
 })
 
 /** Gate 2. One no ends it. */
@@ -280,6 +296,7 @@ export default defineSchema({
     /** The library this version grew from. Kept so the source stays readable. */
     templateId: v.optional(v.string()),
     hard: hardRules,
+    either: v.optional(v.array(eitherGroup)),
     knockouts: v.array(knockout),
     criteria: v.array(criterion),
     /** Out of 14. A profile at or above this is qualified. */
@@ -436,7 +453,10 @@ export default defineSchema({
     /** The rule that ended it: a hard key, a knockout id, or absent. */
     blockedBy: v.optional(v.string()),
     hardChecks: v.array(
-      v.object({ key: v.string(), value: v.number(), pass: v.boolean() }),
+      // limit is what was asked. It is carried because a row from an either
+      // group is measured against a number that is not in hard, so the reason
+      // line has nowhere else to read it from.
+      v.object({ key: v.string(), value: v.number(), pass: v.boolean(), limit: v.optional(v.number()) }),
     ),
     knockoutAnswers: v.array(
       v.object({ id: v.string(), pass: v.boolean(), note: v.optional(v.string()) }),

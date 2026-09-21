@@ -3,8 +3,8 @@ import { ACTOR, APIFY } from './crawl'
 import { internal } from './_generated/api'
 import { v } from 'convex/values'
 import {
-  evaluate as runGates, loosest, passesHard, runHard,
-  type GateSetShape, type Judgement, type Niche, type Measured } from './gates'
+  evaluate as runGates, loosest, passesHard, runEither, runHard,
+  type EitherGroup, type GateSetShape, type HardRules, type Judgement, type Niche, type Measured } from './gates'
 
 // One profile through one campaign's gates.
 //
@@ -46,7 +46,15 @@ export const pending = internalQuery({
       accountId: campaign.accountId,
       gateSetId: gates._id,
       gateSetVersion: gates.version,
-      gates: { hard: gates.hard, knockouts: gates.knockouts, criteria: gates.criteria, passScore: gates.passScore },
+      gates: {
+        hard: gates.hard,
+        // Without this the batch runs the demands and none of the choices, so
+        // reach and rhythm come back as hard filters the client never set.
+        either: gates.either,
+        knockouts: gates.knockouts,
+        criteria: gates.criteria,
+        passScore: gates.passScore,
+      },
       niches: campaign.extracted.niches ?? [],
       brief: `${campaign.brief.audience}. They sell: ${campaign.brief.offer}`,
       extracted: campaign.extracted,
@@ -310,7 +318,10 @@ export const campaign = internalAction({
         country: creator.country,
         language: creator.language,
       }
-      const checks = runHard(measured, loosest(gates.hard, niches), now)
+      const checks = [
+        ...runHard(measured, loosest(gates.hard, niches), now),
+        ...runEither(measured, gates.either, now),
+      ]
 
       // Gate 1 decided. No model call, no cost.
       if (!passesHard(checks)) {
@@ -719,6 +730,66 @@ export const oneByHandle = internalQuery({
       email: c.email ? 'on the profile' : undefined,
       firstSeenAt: c.firstSeenAt,
       posts: typical,
+    }
+  },
+})
+
+/**
+ * Gate 1 over the whole pool, counted and never written.
+ *
+ * The numbers gate costs nothing to run, so the effect of moving it can be read
+ * before a single model call is paid for. It answers the one question that
+ * matters when a rule is loosened: how many more people reach the judge, and
+ * which rule was turning them away.
+ */
+export const numbersOnly = internalQuery({
+  args: {
+    campaignId: v.id('campaigns'),
+    sample: v.optional(v.number()),
+    /** Rules to try instead of the campaign's own, for comparing two versions. */
+    hard: v.optional(v.any()),
+    either: v.optional(v.any()),
+  },
+  returns: v.any(),
+  handler: async (ctx, { campaignId, sample, hard: tryHard, either: tryEither }) => {
+    const campaign = await ctx.db.get(campaignId)
+    if (!campaign) return { error: 'No such campaign' }
+    const sets = await ctx.db
+      .query('gateSets')
+      .withIndex('by_campaign', (q) => q.eq('campaignId', campaignId))
+      .collect()
+    const gates = sets.find((g) => g._id === campaign.gateSetId) ?? sets[sets.length - 1]
+    if (!gates) return { error: 'No rules on this campaign' }
+
+    const creators = await ctx.db.query('creators').take(sample ?? 2000)
+    const now = Date.now()
+    const blockedBy: Record<string, number> = {}
+    let kept = 0
+    for (const c of creators) {
+      const m = {
+        followers: c.followers ?? 0,
+        medianViews: c.medianViews,
+        medianComments: c.medianComments,
+        postsPerMonth: c.postsPerMonth,
+        lastPostAt: c.lastPostAt,
+        country: c.country,
+        language: c.language,
+      }
+      const checks = [
+        ...runHard(m, (tryHard ?? gates.hard) as HardRules, now),
+        ...runEither(m, (tryEither ?? gates.either) as EitherGroup[] | undefined, now),
+      ]
+      const first = checks.find((k) => !k.pass)
+      if (!first) kept += 1
+      else blockedBy[first.key] = (blockedBy[first.key] ?? 0) + 1
+    }
+    return {
+      version: tryHard || tryEither ? 'trial' : gates.version,
+      hard: tryHard ?? gates.hard,
+      either: tryEither ?? gates.either ?? [],
+      looked: creators.length,
+      kept,
+      blockedBy: Object.fromEntries(Object.entries(blockedBy).sort((a, b) => b[1] - a[1])),
     }
   },
 })

@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
-import type { HardRules } from '../types'
+import type { EitherGroup, HardRules } from '../types'
 import { getCampaign, getGateSet } from '../data'
 import { saveGateSet, setExtracted } from '../data/store'
-import { DIALS, fromPosition, settle, toPosition, type Dial, type DialKey } from '../data/tuning'
+import { cadence, DIALS, eitherLine, fromPosition, settle, toPosition, type Dial, type DialKey } from '../data/tuning'
 import { compact, COUNTRY_NAMES, LANGUAGE_NAMES } from '../lib/format'
 import { Info } from './Info'
 
@@ -102,7 +102,7 @@ function Slider({
 }
 
 /** The first check in one sentence, rewritten on every drag. */
-export function gateOneLine(hard: HardRules): string {
+export function gateOneLine(hard: HardRules, either?: EitherGroup[]): string {
   const reach = [
     hard.medianViewsMin ? `${compact(hard.medianViewsMin)} views` : null,
     hard.medianCommentsMin ? `${hard.medianCommentsMin} comments` : null,
@@ -112,15 +112,11 @@ export function gateOneLine(hard: HardRules): string {
     hard.postsPerMonthMin ? cadence(hard.postsPerMonthMin) : null,
     reach.length ? `around ${reach.join(' and ')} on a typical post` : null,
     hard.lastPostWithinDays ? `active in the last ${hard.lastPostWithinDays} days` : null,
+    // Reach and rhythm usually live in a group now, so the sentence would lose
+    // them here. Each group joins as the choice it is.
+    ...(either ?? []).map(eitherLine).filter(Boolean),
   ].filter(Boolean)
   return `We keep people with ${bits.join(', ')}.`.replace('with .', 'with the numbers below.')
-}
-
-function cadence(perMonth: number): string {
-  if (perMonth >= 26) return 'posting daily'
-  if (perMonth >= 12) return 'posting several times a week'
-  if (perMonth >= 4) return 'posting at least weekly'
-  return `posting at least ${perMonth} times a month`
 }
 
 export function SizeAndActivity({ campaignId }: { campaignId: string }) {
@@ -134,6 +130,11 @@ export function SizeAndActivity({ campaignId }: { campaignId: string }) {
 
   const hard = draft ?? stored
   const dirty = JSON.stringify(hard) !== JSON.stringify(stored)
+  // A number a group decides has no dial. Two controls on one rule would let a
+  // client tighten the demand and wonder why the choice below it changed
+  // nothing, which is the kind of screen people stop trusting.
+  const choices = gates.either ?? []
+  const decided = new Set<string>(choices.flatMap((g) => g.options.flatMap((o) => Object.keys(o))))
 
   const set = (next: HardRules) => { setSaved(false); setDraft(settle(next)) }
 
@@ -142,6 +143,7 @@ export function SizeAndActivity({ campaignId }: { campaignId: string }) {
       campaignId,
       {
         hard,
+        either: gates.either,
         knockouts: gates.knockouts,
         criteria: gates.criteria,
         passScore: gates.passScore,
@@ -160,7 +162,7 @@ export function SizeAndActivity({ campaignId }: { campaignId: string }) {
         1. Size and activity
         <Info text="A hard filter. Every number is counted from their last 12 posts, never from anything an account declares. Someone who misses one of these is never looked at again, so it costs nothing to run." />
       </h2>
-      <p className="gate-lede">{gateOneLine(hard)}</p>
+      <p className="gate-lede">{gateOneLine(hard, gates.either)}</p>
 
       <Picker
         label="Where they post from"
@@ -181,8 +183,24 @@ export function SizeAndActivity({ campaignId }: { campaignId: string }) {
         onChange={(languages) => set({ ...hard, languages })}
       />
 
+      {choices.length > 0 && (
+        <div className="choices">
+          {choices.map((group) => (
+            <div className="choice" key={group.label ?? group.options.map((o) => Object.keys(o).join()).join('|')}>
+              <span className="choice-label">{group.label}</span>
+              <span className="choice-ways">{eitherLine(group)}</span>
+            </div>
+          ))}
+          <p className="hint">
+            Each line is a choice: meeting one way through is enough. A creator who posts twice a
+            month to three million views a month is not dormant, and a posting count on its own says
+            they are.
+          </p>
+        </div>
+      )}
+
       <div className="dials">
-        {DIALS.map((dial) => (
+        {DIALS.filter((dial) => !decided.has(dial.key)).map((dial) => (
           <Slider
             key={dial.key}
             dial={dial}
