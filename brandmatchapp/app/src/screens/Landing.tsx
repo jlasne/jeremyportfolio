@@ -1,23 +1,26 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Backdrop } from '../components/Backdrop'
 import { Logo } from '../components/Logo'
 import { HeroDemo } from '../components/HeroDemo'
 import { api } from '../lib/api'
 
-// The landing, in six blocks: hero, film, the three steps, why they answer,
-// what a database is instead, one ask. Cream ground, one orange accent, wide
-// corners, and no photography: every picture on this page is drawn from the
-// same parts as the app, so the page weighs a tenth of what it did and says
-// something true while it loads.
+// The landing, in five blocks: hero, film, the three steps, the story, one ask.
+// Cream ground, one orange accent, wide corners, and no photography: every
+// picture on this page is drawn from the same parts as the app.
 //
-// Every line on it is an outcome. What the product does is on the page only
-// where it explains why the outcome happens.
+// The middle of the page is now a story rather than a feature list, because
+// proof that starts with pain converts better than a promise. Four platforms
+// took our money and our months. Each one is named, with the number it cost
+// us, and the agent lands after them as the answer to a bill already shown.
 
 /** Drop the recording in here and the animation below steps aside for it. */
 const VIDEO_URL = ''
 
-/** What the people on your list do, not what we did to find them. */
-const WHO = ['are ready to buy', 'already spend', 'post today', 'reply']
+/** The one thing every button asks for, said the same way in every place. */
+const CTA = 'Start my Campaign'
+
+/** Under the hero, once. Who the page is for, in their own words. */
+const TRUST = 'Built for brands sick of searching manually and buying outdated datasets. We deliver fresh leads daily.'
 
 /** What the money buys. Outcomes, in the order they happen. */
 const HAS = [
@@ -29,57 +32,66 @@ const HAS = [
   'Cancel any morning',
 ]
 
-/** Said in three, under the buttons, the way a launch says them. */
-const FACTS = ['Searched last night', 'In your niche, active, spending', 'Yours alone, forever']
-
 /**
- * The one thing every button asks for, said the same way in every place.
- * When the doors open this becomes 'Start for free' and the page follows.
- */
-const CTA = 'Get early access'
-
-/**
- * The three bars every lead clears, said as the reason they answer. Each one
- * carries the measurement behind it, because "highly relevant" is a word and
- * "12k views on a typical post" is a fact.
- */
-const TESTS: { name: string; means: string }[] = [
-  {
-    name: 'In your niche',
-    means: 'Judged against your own two sentences. They sell to the audience you sell to, so your first line already fits.',
-  },
-  {
-    name: 'Active this week',
-    means: 'Posted in the last 14 days, around 12k views on a typical post. They open the app the day your message lands.',
-  },
-  {
-    name: 'Spending today',
-    means: 'A paid offer at a public price, tools in the bio, partnerships in the feed. The money is already moving when you arrive.',
-  },
-]
-
-/**
- * The category we are not in, named.
+ * The four bills, in the order we paid them.
  *
- * Every line is about how the thing works, never about how good it is, and
- * every number is the one they publish themselves. A comparison that invents
- * a fault is a comparison a reader checks and stops trusting.
+ * One number each, the one that ended the contract, because a number a reader
+ * can hold beats a paragraph they skim. Every line is what the platform did,
+ * never what we think of it: a complaint invites an argument, a receipt does
+ * not.
  */
-const RIVALS: { name: string; meta: string; how: string }[] = [
+const FAILURES: { name: string; figure: string; unit: string; note: string }[] = [
   {
     name: 'Collabstr',
-    meta: '1M creators, opted in',
-    how: 'The creators who signed up to be hired, shown to everyone who signs up to hire. Your competitor writes to the same person on the same day.',
-  },
-  {
-    name: 'Modash',
-    meta: '350M profiles, stored',
-    how: 'A search box and 350 million rows behind it. The reading, the judging and the writing land on your morning, one profile at a time.',
+    figure: '1',
+    unit: 'of 14 delivered on time',
+    note: 'The marketplace worked. Payment lagged. We picked 14 creators, 7 cancelled after the deadline, and we cancelled the rest.',
   },
   {
     name: 'TopYappers',
-    meta: '27M creators, exportable',
-    how: 'Twenty seven million rows you can export by the thousand. A bigger file is a longer afternoon spent deciding who is worth a message.',
+    figure: '27M',
+    unit: 'rows, sold to everyone',
+    note: 'An old export, priced per thousand. We paid for the same database every other brand downloads the same week.',
+  },
+  {
+    name: 'Heepsy',
+    figure: '86%',
+    unit: 'of numbers were dead',
+    note: 'Contacts arrived in bulk. 86% of numbers rang out, 70% of emails bounced, and the rest came with fields missing.',
+  },
+  {
+    name: 'Modash',
+    figure: '0',
+    unit: 'deals from 50,000 names',
+    note: 'A list of 50,000 people, part of them in our niche. We worked it for weeks and closed nothing.',
+  },
+]
+
+/** What the agent does between midnight and your coffee. */
+const LOOP: { verb: string; what: string }[] = [
+  { verb: 'Searches', what: 'New people, every night, in the places your buyers post.' },
+  { verb: 'Qualifies', what: 'Every profile read and scored against your own brief.' },
+  { verb: 'Reaches out', what: 'The first message goes out in your name, on time.' },
+  { verb: 'Logs', what: 'Every send, open and reply lands in your CRM.' },
+]
+
+/**
+ * The three bars, said as the reason a reply comes back. Each one carries the
+ * measurement behind it, because "highly relevant" is a word and "active in
+ * the last 3 days" is a fact.
+ */
+const QUALIFIED: { name: string; means: string }[] = [
+  {
+    name: 'In your niche',
+    means: 'Matched to your offer on the requirements you write, past the point where a follower count stops telling you anything.',
+  },
+  {
+    name: 'Active',
+    means: 'Posts on a schedule, and posted in the last 3 days. They open the app the day your message lands.',
+  },
+  {
+    name: 'Intent',
+    means: 'Runs the account as a business, already sells products or takes collabs. This is the bar that moves reply rate.',
   },
 ]
 
@@ -167,6 +179,30 @@ function StepVisual({ n }: { n: string }) {
 }
 
 /**
+ * A day of work, drawn. Wide at the top where the agents look, narrow at the
+ * bottom where the list you actually read begins. The shape carries the ratio
+ * on its own, so the numbers beside it only have to name the two ends.
+ */
+function Funnel() {
+  return (
+    <div className="night">
+      <div className="night-end top">
+        <b>3,000</b>
+        <span>profiles scanned a day</span>
+      </div>
+      <div className="night-cone" aria-hidden="true">
+        <i /><i /><i /><i />
+      </div>
+      <div className="night-end bottom">
+        <b>200</b>
+        <span>qualified matches</span>
+      </div>
+      <p className="night-ratio">1 in 15 survives the night</p>
+    </div>
+  )
+}
+
+/**
  * Every call to action asks for the same thing: an email. The list is the
  * product until the doors open, so the form is the only way in from here.
  */
@@ -207,51 +243,6 @@ function EarlyAccess({ size = 'normal', website }: { size?: 'normal' | 'small'; 
       </button>
       {state === 'error' && <span className="waitlist-error">{message}</span>}
     </form>
-  )
-}
-
-/**
- * A word that turns every 2.4 seconds and holds still under reduced motion.
- * Each candidate sits in the same grid cell at its own width, and the box takes
- * the width of the word on show. So the line never leaves a hole where a longer
- * word used to be. The width changes with the word rather than easing into it:
- * a box easing open clips the incoming word mid-letter for the whole ease.
- */
-function TurningWord({ words, every = 2400 }: { words: readonly string[]; every?: number }) {
-  const still = typeof window !== 'undefined'
-    && window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  const [i, setI] = useState(0)
-  const box = useRef<HTMLSpanElement>(null)
-  const [width, setWidth] = useState<number | undefined>(undefined)
-
-  useEffect(() => {
-    if (still) return
-    const t = window.setInterval(() => setI((n) => (n + 1) % words.length), every)
-    return () => window.clearInterval(t)
-  }, [still, words, every])
-
-  // Measure the word on show. The display font arrives after the first paint
-  // and the headline resizes with the viewport, so measure again on both:
-  // a width taken from fallback metrics would clip the last letter.
-  useLayoutEffect(() => {
-    const live = box.current?.querySelector('.turn-word') as HTMLElement | null
-    if (!live) return
-    const measure = () => setWidth(Math.ceil(live.getBoundingClientRect().width))
-    measure()
-    const ro = new ResizeObserver(measure)
-    ro.observe(live)
-    window.addEventListener('resize', measure)
-    let gone = false
-    void document.fonts?.ready.then(() => { if (!gone) measure() })
-    return () => { gone = true; ro.disconnect(); window.removeEventListener('resize', measure) }
-  }, [i, words])
-
-  return (
-    <span className="turn" ref={box} style={width ? { width } : undefined} aria-label={words.join(', ')}>
-      {words.map((w, n) => (
-        <span key={w} className={n === i ? 'turn-word' : 'turn-ghost'} aria-hidden={n !== i}>{w}</span>
-      ))}
-    </span>
   )
 }
 
@@ -345,7 +336,7 @@ export function Landing() {
           </a>
           <nav>
             <a href="#how">How it works</a>
-            <a href="#why">Why they answer</a>
+            <a href="#story">Our story</a>
             <a href="#pricing">Pricing</a>
           </nav>
           <span className="spacer" />
@@ -356,17 +347,13 @@ export function Landing() {
         <div className="hero-block">
           <section className="hero">
             <div className="hero-copy">
-              <h1>Daily qualified leads<br />who <TurningWord words={WHO} />.</h1>
+              <h1>Your AI agent finds content creators <em>ready to close a deal.</em></h1>
               <p className="lede">
-                Tell us what you sell. Agents search for your buyers every night, keep the ones worth your time, write
-                the first message and follow up. You step in when somebody replies.
+                Describe the creator you want. Your agent scores every lead and delivers a fresh, qualified,
+                ready-to-contact list, every day.
               </p>
               <EarlyAccess website="strongher.co" />
-              <p className="hero-meta">
-                {FACTS.map((f, i) => (
-                  <span key={f}>{i > 0 && <i aria-hidden="true" />}{f}</span>
-                ))}
-              </p>
+              <p className="hero-trust">{TRUST}</p>
             </div>
           </section>
 
@@ -397,58 +384,61 @@ export function Landing() {
           </div>
         </section>
 
-        <section className="land-section" id="why">
-          <p className="eyebrow">Why they answer</p>
-          <h2 className="big">Every lead clears three bars. <em>That is why they answer.</em></h2>
+        <section className="land-section" id="story">
+          <p className="eyebrow">Our story</p>
+          <h2 className="big">We built our dreamed <em>deal gen AI agent.</em></h2>
           <p className="section-lede">
-            A name and a follower count is a guess. These three are measured on every person, the night before you
-            see them.
+            Built by two engineers, after four platforms failed us. We build mobile apps with content creators.
+            Finding the right ones, and running the outreach, ate our time and our budget.
           </p>
 
-          <div className="tests">
-            <div className="tests-copy">
+          <p className="ledger-head">Four platforms. Four bills.</p>
+          <ol className="ledger">
+            {FAILURES.map((f, i) => (
+              <li className="bill" key={f.name}>
+                <span className="bill-n">{String(i + 1).padStart(2, '0')}</span>
+                <b className="bill-name">{f.name}</b>
+                <span className="bill-figure">{f.figure}</span>
+                <span className="bill-unit">{f.unit}</span>
+                <p className="bill-note">{f.note}</p>
+              </li>
+            ))}
+          </ol>
+
+          <div className="turn-line">
+            <h3>So we built our own agent.</h3>
+            <p>It runs the full loop, every day, while you sleep.</p>
+          </div>
+
+          <ol className="loop">
+            {LOOP.map((l, i) => (
+              <li key={l.verb}>
+                <span className="loop-n">{i + 1}</span>
+                <b>{l.verb}</b>
+                <p>{l.what}</p>
+              </li>
+            ))}
+          </ol>
+          <p className="loop-cycle"><i aria-hidden="true" />Repeats every day</p>
+
+          <div className="result">
+            <div className="result-figure">
+              <p className="eyebrow">The result</p>
+              <h3>3,000 profiles scanned a day turn into <em>200 qualified matches.</em></h3>
+              <Funnel />
+            </div>
+            <div className="result-bars">
+              <p className="bars-head">What is qualified?</p>
               <div className="tests-row">
-                {TESTS.map((t) => (
-                  <div className="test" key={t.name}>
-                    <b>{t.name}</b>
-                    <span>{t.means}</span>
+                {QUALIFIED.map((q) => (
+                  <div className="test" key={q.name}>
+                    <b>{q.name}</b>
+                    <span>{q.means}</span>
                   </div>
                 ))}
               </div>
-              <p className="tests-after">
-                Then every one is scored from 0 to 100 against your own words, and your morning starts at the top of
-                that list.
-              </p>
+              <p className="tests-after">This is what brandmatch is about.</p>
             </div>
-          </div>
-        </section>
-
-        <section className="land-section" id="versus">
-          <p className="eyebrow">The difference</p>
-          <h2 className="big">A database hands you 350 million names. <em>We hand you ten.</em></h2>
-          <p className="section-lede">
-            One is a search box you work every morning. The other is a morning that is already worked.
-          </p>
-
-          <div className="versus">
-            {RIVALS.map((r) => (
-              <article className="versus-one" key={r.name}>
-                <b>{r.name}</b>
-                <span className="versus-meta">{r.meta}</span>
-                <p>{r.how}</p>
-              </article>
-            ))}
-          </div>
-
-          <div className="versus-us">
-            <div>
-              <b>brandmatch</b>
-              <span className="versus-meta">Found last night, written to this morning</span>
-            </div>
-            <p>
-              Agents go looking tonight, for you alone. By 06:00 the people worth your time are on your list, the
-              first message is out, and the follow up is scheduled. Your rows stay yours.
-            </p>
           </div>
         </section>
 
@@ -468,16 +458,11 @@ export function Landing() {
             <a className="btn primary" href="mailto:hey@jeremylasne.com">Talk to us</a>
             <p className="price-note">One call, then three days free.</p>
           </div>
-
-          <p className="section-lede compare">
-            A subscription to a database buys you the same rows as everyone else on it. This buys you the mornings
-            back.
-          </p>
         </section>
 
         <section className="land-cta" id="access">
-          <h2>Your next deal <em>is already out there.</em></h2>
-          <p>Leave your email. We open in batches of 20 and write the morning yours is ready.</p>
+          <h2>Your next deal <em>is tomorrow.</em></h2>
+          <p>Let your agent find them.</p>
           <EarlyAccess />
         </section>
 
@@ -491,7 +476,7 @@ export function Landing() {
           <div>
             <h4>Product</h4>
             <a href="#how">How it works</a>
-            <a href="#why">Why they answer</a>
+            <a href="#story">Our story</a>
             <a href="#pricing">Pricing</a>
           </div>
           <div>
