@@ -3772,24 +3772,6 @@ body { background: var(--paper); }
 }
 .loop-cycle i { width: 7px; height: 7px; border-radius: 50%; background: var(--orange); }
 
-/* A night of work, drawn as the profiles themselves. Four tapering bars was
-   a chart, and a chart asks to be read. A field of dots is the night: the ten
-   that come back orange are the ratio, shown rather than claimed, and they
-   arrive a beat after the grey ones so the eye is already on the field. */
-.night { margin: 36px 0 0; max-width: 660px; }
-.night-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px; }
-.night-line b { font-family: var(--display); font-weight: 500; font-size: clamp(30px, 3.6vw, 40px); line-height: 1; letter-spacing: -0.035em; color: var(--l-muted); }
-.night-line span { font-size: 13.5px; color: var(--l-faint); }
-.night-line.out b { font-size: clamp(42px, 5.4vw, 60px); color: var(--orange); }
-.night-line.out em { margin-left: auto; font-style: normal; font-size: 12px; color: var(--l-faint); }
-.night-field { display: grid; grid-template-columns: repeat(30, minmax(0, 1fr)); gap: 6px; margin: 24px 0 22px; }
-.night-field i { display: block; aspect-ratio: 1; border-radius: 50%; background: rgba(29, 29, 31, 0.13); }
-.night-field i.on { background: var(--orange); }
-@media (prefers-reduced-motion: no-preference) {
-  .night-field i.on { opacity: 0.2; transform: scale(0.35); transition: opacity 0.6s ease 0.45s, transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.45s; }
-  .beat.in .night-field i.on { opacity: 1; transform: none; }
-}
-
 /* The three bars take the accent slab, because they are the answer the four
    rows above them were asking for. */
 .bars { margin-top: 44px; padding: 34px 34px 30px; border-radius: var(--radius-slab); background: var(--orange); color: #fff; }
@@ -3857,8 +3839,3 @@ body { background: var(--paper); }
 .foot-say .muted { margin-top: 14px; font-size: 14px; }
 .foot-links { min-width: 150px; }
 @media (max-width: 760px) { .land-foot { grid-template-columns: minmax(0, 1fr); gap: 32px; } }
-
-@media (max-width: 560px) {
-  .night-field { grid-template-columns: repeat(25, minmax(0, 1fr)); gap: 4px; }
-  .night-line.out em { flex-basis: 100%; margin-left: 0; margin-top: 8px; }
-}

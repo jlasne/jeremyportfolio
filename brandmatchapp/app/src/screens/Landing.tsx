@@ -79,33 +79,6 @@ const QUALIFIED: { name: string; means: string }[] = [
 ]
 
 /**
- * A night of work, drawn as the profiles themselves.
- *
- * Four tapering bars was a chart, and a chart asks to be read. 150 dots is
- * the night: every one of them stands for 20 profiles, and the ten that come
- * back orange are the ratio, shown rather than claimed. The legend is there
- * because a field of 150 dots under the number 3,000 would otherwise be a
- * lie about the count.
- */
-function Night() {
-  const dots = Array.from({ length: 150 }, (_, i) => i)
-  return (
-    <figure className="night">
-      <figcaption className="night-line">
-        <b>3,000</b><span>profiles scanned a day</span>
-      </figcaption>
-      <div className="night-field" aria-hidden="true">
-        {dots.map((i) => <i key={i} className={i >= 140 ? 'on' : undefined} />)}
-      </div>
-      <p className="night-line out">
-        <b>200</b><span>qualified matches</span>
-        <em>Each dot is 20 profiles</em>
-      </p>
-    </figure>
-  )
-}
-
-/**
  * Every call to action asks for the same thing: an email. The list is the
  * product until the doors open, so the form is the only way in from here.
  */
@@ -242,7 +215,7 @@ export function Landing() {
           </div>
 
           <div className="beat">
-            <h2>So we tried four platforms.</h2>
+            <h2>We tried four platforms.</h2>
             <table className="ledger">
               <thead>
                 <tr>
@@ -279,8 +252,7 @@ export function Landing() {
           </div>
 
           <div className="beat">
-            <h2>3,000 profiles scanned a day turn into <em>200 qualified matches.</em></h2>
-            <Night />
+            <h2>The result: 3,000 profiles scanned/day turned into <em>200 qualified matches.</em></h2>
 
             <div className="bars">
               <p className="bars-head">What is qualified?</p>
