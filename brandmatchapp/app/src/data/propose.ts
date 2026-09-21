@@ -1,4 +1,4 @@
-import type { CampaignBrief, Criterion, HardRules, Knockout, Niche, TemplateId } from '../types'
+import type { CampaignBrief, Criterion, EitherGroup, HardRules, Knockout, Niche, TemplateId } from '../types'
 import { suggestNiches } from './niches'
 import { compact } from '../lib/format'
 import { template, TEMPLATES } from './templates'
@@ -27,6 +27,8 @@ export interface Proposal {
   name: string
   templateId: TemplateId
   hard: HardRules
+  /** Groups where one alternative is enough. */
+  either?: EitherGroup[]
   knockouts: Knockout[]
   criteria: Criterion[]
   passScore: number
@@ -382,6 +384,7 @@ export async function draftOnServer(brief: CampaignBrief): Promise<{ campaignId:
   const c = full.campaign ?? {}
   const g = full.gates ?? {}
   const hard: HardRules = g.hard ?? {}
+  const either: EitherGroup[] = g.either ?? []
   const criteria: Criterion[] = g.criteria ?? []
   const knockouts: Knockout[] = (g.knockouts ?? []).map((k: Knockout) => ({ ...k, enabled: k.enabled ?? false }))
 
@@ -391,6 +394,7 @@ export async function draftOnServer(brief: CampaignBrief): Promise<{ campaignId:
       name: c.name ?? nameFrom(brief),
       templateId: (c.extracted?.templateId ?? g.templateId ?? 'sell_to_creators') as TemplateId,
       hard,
+      either,
       knockouts,
       criteria,
       passScore: Number(g.passScore ?? Math.ceil(criteria.length)),
@@ -398,7 +402,9 @@ export async function draftOnServer(brief: CampaignBrief): Promise<{ campaignId:
       languages: c.extracted?.languages ?? [],
       niches: (c.extracted?.niches ?? []).map((n: Niche) => ({ ...n, enabled: n.enabled !== false })),
       summaries: {
-        gate1: `We keep people with ${compact(hard.followersMin ?? 0)} to ${compact(hard.followersMax ?? 0)} followers, who posted in the last ${hard.lastPostWithinDays ?? 0} days and get about ${compact(hard.medianViewsMin ?? 0)} views on a typical post.`,
+        // Reach and rhythm are a choice now, so they are listed below rather
+        // than read off a number that is no longer in hard.
+        gate1: `We keep people with ${compact(hard.followersMin ?? 0)} to ${compact(hard.followersMax ?? 0)} followers who posted in the last ${hard.lastPostWithinDays ?? 0} days. The rest is below, and every line is yours to move.`,
         gate2: `${count(knockouts.length)} yes or no questions about each person, and all of them start switched off. Switch one on and a no drops that person whatever else they score.`,
         gate3: `${count(criteria.length)} sentences about who you want. Each one is true, partly true or false about a person, and that is their brand fit. It orders your list.`,
       },

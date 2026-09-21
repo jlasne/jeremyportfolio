@@ -32,8 +32,24 @@ const hardRules = v.object({
   medianViewsMin: v.optional(v.number()),
   medianCommentsMin: v.optional(v.number()),
   postsPerMonthMin: v.optional(v.number()),
+  /** Views on a typical post as a percentage of the follower count. */
+  viewRatioMin: v.optional(v.number()),
+  /** Views across a month: a typical post times how many they publish. */
+  monthlyViewsMin: v.optional(v.number()),
   countries: v.optional(v.array(v.string())),
   languages: v.optional(v.array(v.string())),
+})
+
+/**
+ * A group where one alternative is enough, against the demands above.
+ *
+ * Reach is two different accounts wearing one number: 40k views on a tenth of
+ * their followers, or 100k views on a fiftieth. Both are worth writing to and
+ * a single threshold loses one of them.
+ */
+const eitherGroup = v.object({
+  label: v.optional(v.string()),
+  options: v.array(hardRules),
 })
 
 /** Gate 2. One no ends it. */
@@ -58,6 +74,29 @@ const knockout = v.object({
 const criterion = v.object({
   id: v.string(),
   text: v.string(),
+  /**
+   * What would settle it, and what nearly settles it and should not.
+   *
+   * A sentence alone leaves the judge to guess what counts as proof, and a
+   * guess is how "they already have their own app" passed a creator whose
+   * link page opens on a recipe app: nobody had told it that a subscription
+   * on a website is not the same thing as one in a store.
+   *
+   * Written once, by the model, at the same time as the sentence. The client
+   * edits it like anything else, and it is a far better thing to edit than a
+   * sentence, because it is where the argument actually is.
+   */
+  evidence: v.optional(v.string()),
+  /** The near miss that must not count. */
+  trap: v.optional(v.string()),
+  /** What a 2, a 1 and a 0 look like. Without it the model invents a scale. */
+  rubric: v.optional(v.string()),
+  /**
+   * What the judge needs in front of it to answer: profile, posts, links,
+   * images, comments, web. Only what is named here is fetched, so a campaign
+   * pays for the questions it asked and for nothing else.
+   */
+  needs: v.optional(v.array(v.string())),
 })
 
 export default defineSchema({
@@ -257,6 +296,7 @@ export default defineSchema({
     /** The library this version grew from. Kept so the source stays readable. */
     templateId: v.optional(v.string()),
     hard: hardRules,
+    either: v.optional(v.array(eitherGroup)),
     knockouts: v.array(knockout),
     criteria: v.array(criterion),
     /** Out of 14. A profile at or above this is qualified. */
@@ -326,6 +366,22 @@ export default defineSchema({
     linkText: v.optional(v.string()),
     linkReadAt: v.optional(v.number()),
     /**
+     * What the profile says about itself, beyond the bio.
+     *
+     * Apify hands all of this back with every fetch and it was being dropped.
+     * Each line answers a question a client writes and the judge was scoring
+     * zero on for lack of anything to read.
+     */
+    verified: v.optional(v.boolean()),
+    category: v.optional(v.string()),
+    follows: v.optional(v.number()),
+    postsLifetime: v.optional(v.number()),
+    highlights: v.optional(v.number()),
+    /** Share of the last twelve posts marked as a paid partnership. */
+    paidPosts: v.optional(v.number()),
+    /** How many of the last twelve are reels rather than photos. */
+    reelShare: v.optional(v.number()),
+    /**
      * The handles this person mentions and tags in their posts. The neighbour
      * channel reads this list, and only from people the gates let through:
      * a coach's posts cite other coaches, and a bikini brand's posts cite
@@ -344,6 +400,21 @@ export default defineSchema({
     kind: v.string(),
     url: v.string(),
     thumbnail: v.optional(v.string()),
+    /** Marked by Instagram as a paid partnership. They take brand money. */
+    paid: v.optional(v.boolean()),
+    /**
+     * The first comments under the post, the creator's own among them.
+     *
+     * The one place that answers whether they talk back, and what their
+     * audience actually asks for. Received on every fetch, dropped until now,
+     * and two criteria were being scored zero for want of it.
+     */
+    topComments: v.optional(v.array(v.object({
+      by: v.string(),
+      text: v.string(),
+      /** True when the account that posted is the one commenting. */
+      mine: v.optional(v.boolean()),
+    }))),
     caption: v.optional(v.string()),
     views: v.number(),
     likes: v.number(),
@@ -382,7 +453,10 @@ export default defineSchema({
     /** The rule that ended it: a hard key, a knockout id, or absent. */
     blockedBy: v.optional(v.string()),
     hardChecks: v.array(
-      v.object({ key: v.string(), value: v.number(), pass: v.boolean() }),
+      // limit is what was asked. It is carried because a row from an either
+      // group is measured against a number that is not in hard, so the reason
+      // line has nowhere else to read it from.
+      v.object({ key: v.string(), value: v.number(), pass: v.boolean(), limit: v.optional(v.number()) }),
     ),
     knockoutAnswers: v.array(
       v.object({ id: v.string(), pass: v.boolean(), note: v.optional(v.string()) }),

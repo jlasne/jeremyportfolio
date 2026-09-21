@@ -114,6 +114,7 @@ export async function fetchAll(): Promise<Loaded> {
         origin: g.origin,
         templateId: g.templateId ?? 'sell_to_creators',
         hard: g.hard,
+        either: g.either ?? [],
         knockouts: g.knockouts,
         criteria: g.criteria,
         passScore: g.passScore,

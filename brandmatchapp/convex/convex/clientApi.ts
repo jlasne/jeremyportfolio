@@ -141,6 +141,7 @@ export const clientApi = httpAction(async (ctx, req) => {
           origin: 'edited',
           templateId: body.templateId,
           hard: body.hard ?? {},
+          either: body.either,
           knockouts: body.knockouts ?? [],
           criteria: body.criteria ?? [],
           passScore: Number(body.passScore ?? 0),

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import type { HardRules } from '../types'
 import { getCampaign, getGateSet } from '../data'
 import { saveGateSet, setExtracted } from '../data/store'
-import { DIALS, fromPosition, settle, toPosition, type Dial, type DialKey } from '../data/tuning'
+import { cadence, DIALS, eitherLine, fromPosition, settle, toPosition, type Dial, type DialKey } from '../data/tuning'
 import { compact, COUNTRY_NAMES, LANGUAGE_NAMES } from '../lib/format'
 import { Info } from './Info'
 
@@ -116,13 +116,6 @@ export function gateOneLine(hard: HardRules): string {
   return `We keep people with ${bits.join(', ')}.`.replace('with .', 'with the numbers below.')
 }
 
-function cadence(perMonth: number): string {
-  if (perMonth >= 26) return 'posting daily'
-  if (perMonth >= 12) return 'posting several times a week'
-  if (perMonth >= 4) return 'posting at least weekly'
-  return `posting at least ${perMonth} times a month`
-}
-
 export function SizeAndActivity({ campaignId }: { campaignId: string }) {
   const campaign = getCampaign(campaignId)
   const gates = getGateSet(campaignId)
@@ -134,6 +127,11 @@ export function SizeAndActivity({ campaignId }: { campaignId: string }) {
 
   const hard = draft ?? stored
   const dirty = JSON.stringify(hard) !== JSON.stringify(stored)
+  // A number a group decides has no dial. Two controls on one rule would let a
+  // client tighten the demand and wonder why the choice below it changed
+  // nothing, which is the kind of screen people stop trusting.
+  const choices = gates.either ?? []
+  const decided = new Set<string>(choices.flatMap((g) => g.options.flatMap((o) => Object.keys(o))))
 
   const set = (next: HardRules) => { setSaved(false); setDraft(settle(next)) }
 
@@ -142,6 +140,7 @@ export function SizeAndActivity({ campaignId }: { campaignId: string }) {
       campaignId,
       {
         hard,
+        either: gates.either,
         knockouts: gates.knockouts,
         criteria: gates.criteria,
         passScore: gates.passScore,
@@ -181,8 +180,24 @@ export function SizeAndActivity({ campaignId }: { campaignId: string }) {
         onChange={(languages) => set({ ...hard, languages })}
       />
 
+      {choices.length > 0 && (
+        <div className="choices">
+          {choices.map((group) => (
+            <div className="choice" key={group.label ?? group.options.map((o) => Object.keys(o).join()).join('|')}>
+              <span className="choice-label">{group.label}</span>
+              <span className="choice-ways">{eitherLine(group)}</span>
+            </div>
+          ))}
+          <p className="hint">
+            Each line is a choice: meeting one way through is enough. A creator who posts twice a
+            month to three million views a month is not dormant, and a posting count on its own says
+            they are.
+          </p>
+        </div>
+      )}
+
       <div className="dials">
-        {DIALS.map((dial) => (
+        {DIALS.filter((dial) => !decided.has(dial.key)).map((dial) => (
           <Slider
             key={dial.key}
             dial={dial}

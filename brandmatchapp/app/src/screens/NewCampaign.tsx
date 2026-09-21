@@ -11,6 +11,7 @@ import {
   type Proposal,
 } from '../data/propose'
 import { ruleLabel } from '../data/gates'
+import { eitherLine } from '../data/tuning'
 import { checkSeeds, cleanHandles, recommendedSeeds, seedMismatch, SEEDS_ENOUGH } from '../data/seeds'
 import { createCampaign } from '../data/store'
 import { compact, COUNTRY_NAMES, LANGUAGE_NAMES } from '../lib/format'
@@ -282,6 +283,9 @@ function ProposalStep({
   const [showBrief, setShowBrief] = useState(false)
   const [switching, setSwitching] = useState(false)
   const library = LIBRARIES.find((l) => l.id === proposal.templateId)!
+  // A number a group decides is shown as the choice it is, once, and not also
+  // as a demand with no value behind it.
+  const decided = new Set<string>((proposal.either ?? []).flatMap((g) => g.options.flatMap((o) => Object.keys(o))))
   // The seeds go through the rules the client is about to accept, so the
   // verdict is about these rules and not about some general idea of quality.
   const verdicts = checkSeeds(brief.seeds ?? [], asGateSet(proposal), proposal.niches)
@@ -337,10 +341,18 @@ function ProposalStep({
         <h2>1. Size and activity</h2>
         <p className="gate-lede">{proposal.summaries.gate1}</p>
         <ul className="rules">
-          {HARD_ORDER.map((key) => (
+          {HARD_ORDER.filter((key) => !decided.has(key)).map((key) => (
             <li key={key}>
               <span>{ruleLabel(key)}</span>
               <b className="num">{hardValue(key, proposal.hard)}</b>
+            </li>
+          ))}
+          {/* A choice, not a demand. One way through it is enough, so it reads
+              as a line rather than a number the client could raise. */}
+          {(proposal.either ?? []).map((group) => (
+            <li className="rule-choice" key={group.label}>
+              <span>{group.label}, either</span>
+              <b>{eitherLine(group)}</b>
             </li>
           ))}
           <li>
@@ -460,6 +472,7 @@ function asGateSet(proposal: Proposal) {
     origin: 'generated' as const,
     templateId: proposal.templateId,
     hard: proposal.hard,
+    either: proposal.either,
     knockouts: proposal.knockouts,
     criteria: proposal.criteria,
     passScore: proposal.passScore,

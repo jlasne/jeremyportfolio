@@ -16,8 +16,29 @@ export interface HardRules {
   medianViewsMin?: number
   medianCommentsMin?: number
   postsPerMonthMin?: number
+  /** Views on a typical post as a percentage of the follower count. */
+  viewRatioMin?: number
+  /** Views across a month: what a typical post gets, times how many. */
+  monthlyViewsMin?: number
   countries?: string[]
   languages?: string[]
+}
+
+/**
+ * A choice, where every rule above is a demand.
+ *
+ * Reach is two different accounts wearing one number. Someone at 40k views on
+ * ten percent of their followers and someone at 100k views on two percent are
+ * both worth writing to, and a single threshold keeps one and loses the other.
+ * Same for rhythm: a daily poster and a weekly one who does a million views a
+ * month are both alive.
+ *
+ * So a group holds alternatives and the profile has to satisfy one of them.
+ * The label is what the reason line says when none of them holds.
+ */
+export interface EitherGroup {
+  label?: string
+  options: HardRules[]
 }
 
 export interface Measured {
@@ -32,6 +53,8 @@ export interface Measured {
 
 export interface GateSetShape {
   hard: HardRules
+  /** Groups where one alternative is enough. */
+  either?: EitherGroup[]
   knockouts: {
     id: string
     question: string
@@ -41,7 +64,14 @@ export interface GateSetShape {
     pass?: string
     enabled?: boolean
   }[]
-  criteria: { id: string; text: string }[]
+  criteria: {
+    id: string
+    text: string
+    evidence?: string
+    trap?: string
+    rubric?: string
+    needs?: string[]
+  }[]
   passScore: number
 }
 
@@ -95,7 +125,7 @@ export interface Judgement {
   reason: string
 }
 
-export interface HardCheck { key: string; value: number; pass: boolean }
+export interface HardCheck { key: string; value: number; pass: boolean; limit?: number }
 
 export interface GateResult {
   verdict: Verdict
@@ -115,6 +145,20 @@ const READS: { key: keyof HardRules; of: (m: Measured, now: number) => number | 
   { key: 'medianCommentsMin', of: (m) => m.medianComments, pass: (v, l) => v >= l },
   { key: 'postsPerMonthMin', of: (m) => m.postsPerMonth, pass: (v, l) => v >= l },
   {
+    key: 'viewRatioMin',
+    of: (m) => (m.followers > 0 && m.medianViews !== undefined
+      ? Math.round((m.medianViews / m.followers) * 100)
+      : undefined),
+    pass: (v, l) => v >= l,
+  },
+  {
+    key: 'monthlyViewsMin',
+    of: (m) => (m.medianViews !== undefined && m.postsPerMonth !== undefined
+      ? Math.round(m.medianViews * m.postsPerMonth)
+      : undefined),
+    pass: (v, l) => v >= l,
+  },
+  {
     key: 'lastPostWithinDays',
     of: (m, now) => (m.lastPostAt ? Math.floor((now - m.lastPostAt) / DAY) : undefined),
     pass: (v, l) => v <= l,
@@ -130,10 +174,10 @@ export function runHard(m: Measured, hard: HardRules, now = Date.now()): HardChe
     const value = read.of(m, now)
     // A number we never measured cannot pass a threshold on measured data.
     if (value === undefined) {
-      out.push({ key: read.key, value: -1, pass: false })
+      out.push({ key: read.key, value: -1, pass: false, limit })
       continue
     }
-    out.push({ key: read.key, value, pass: read.pass(value, limit) })
+    out.push({ key: read.key, value, pass: read.pass(value, limit), limit })
   }
   // Where they are and what they post in are not measured yet: the crawl
   // writes neither. An unknown is not a wrong answer, so it passes here and
@@ -154,6 +198,30 @@ export function passesHard(checks: HardCheck[]): boolean {
   return checks.every((c) => c.pass)
 }
 
+/**
+ * The groups where one alternative is enough.
+ *
+ * A group that holds returns nothing: there is no row to show for a rule
+ * nobody failed. A group that holds nowhere returns the closest attempt, so
+ * the reason line names the number they came nearest to rather than the first
+ * one in the list.
+ */
+export function runEither(m: Measured, groups: EitherGroup[] | undefined, now = Date.now()): HardCheck[] {
+  if (!groups?.length) return []
+  const out: HardCheck[] = []
+  for (const group of groups) {
+    const tries = (group.options ?? []).map((option) => runHard(m, option, now))
+    if (!tries.length) continue
+    if (tries.some((checks) => checks.length > 0 && passesHard(checks))) continue
+    // Nothing held. Keep the attempt that failed on the fewest rows.
+    const closest = tries
+      .map((checks) => checks.filter((c) => !c.pass))
+      .sort((a, b) => a.length - b.length)[0]
+    out.push(...(closest ?? []))
+  }
+  return out
+}
+
 /** The full run. The judgement is the model's answer, or null before we ask. */
 export function evaluate(
   m: Measured,
@@ -164,7 +232,7 @@ export function evaluate(
 ): GateResult {
   // The widest bar first, so anyone too small for every niche costs nothing.
   const wide = loosest(gates.hard, niches)
-  let hardChecks = runHard(m, wide, now)
+  let hardChecks = [...runHard(m, wide, now), ...runEither(m, gates.either, now)]
   const blocker = hardChecks.find((c) => !c.pass)
   if (blocker) {
     return {
@@ -198,7 +266,7 @@ export function evaluate(
 
   // Now the niche is known, its own numbers apply.
   const own = forNiche(gates.hard, niche)
-  hardChecks = runHard(m, own, now)
+  hardChecks = [...runHard(m, own, now), ...runEither(m, gates.either, now)]
   const short = hardChecks.find((c) => !c.pass)
   if (short) {
     return {
@@ -274,6 +342,8 @@ const LOOSER: Record<string, 'down' | 'up'> = {
   medianViewsMin: 'down',
   medianCommentsMin: 'down',
   postsPerMonthMin: 'down',
+  viewRatioMin: 'down',
+  monthlyViewsMin: 'down',
 }
 
 /**
@@ -321,6 +391,8 @@ const SAYS: Record<string, (n: number) => string> = {
   medianCommentsMin: (n) => `${n} comments on a typical post`,
   postsPerMonthMin: (n) => `${n} posts a month`,
   lastPostWithinDays: (n) => `last posted ${n} days ago`,
+  viewRatioMin: (n) => `${n}% of their followers watch a typical post`,
+  monthlyViewsMin: (n) => `${compact(n)} views a month`,
 }
 
 /**
@@ -336,8 +408,11 @@ export function beyondLine(result: GateResult, gates: GateSetShape): string {
   if (key === 'countries') return 'Posts from outside the countries you first picked'
   if (key === 'languages') return 'Posts in a language outside the ones you first picked'
   const say = key ? SAYS[key] : undefined
-  const limit = key ? (gates.hard as Record<string, unknown>)[key] : undefined
   const check = result.hardChecks.find((c) => c.key === key)
+  // The check carries what it was measured against. A row from an either group
+  // was measured against a number that never appears in hard, so reading hard
+  // for it would say nothing.
+  const limit = check?.limit ?? (key ? (gates.hard as Record<string, unknown>)[key] : undefined)
   if (!say || typeof limit !== 'number' || !check) return 'Outside the rules you started with'
   const asked = key === 'lastPostWithinDays' ? `${limit} days` : compact(limit)
   return `${say(check.value)}, your first rules asked ${asked}`

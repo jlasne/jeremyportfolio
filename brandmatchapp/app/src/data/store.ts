@@ -4,6 +4,7 @@ import type {
   CampaignBrief,
   Creator,
   Deal,
+  EitherGroup,
   Evaluation,
   GateSet,
   HardRules,
@@ -498,6 +499,7 @@ export async function createCampaign(
     await api.saveGates(id, {
       templateId: proposal.templateId,
       hard: proposal.hard,
+      either: proposal.either,
       knockouts: proposal.knockouts,
       criteria: proposal.criteria,
       passScore: proposal.passScore,
@@ -560,7 +562,7 @@ export async function createCampaign(
  */
 export function saveGateSet(
   campaignId: string,
-  draft: { hard: HardRules; knockouts: Knockout[]; criteria: Criterion[]; passScore: number; preset: PresetId },
+  draft: { hard: HardRules; either?: EitherGroup[]; knockouts: Knockout[]; criteria: Criterion[]; passScore: number; preset: PresetId },
   by = 'mem_1',
   /** True when the caller has already written the door down. */
   noted = false,
@@ -568,12 +570,14 @@ export function saveGateSet(
   const now = new Date().toISOString()
   let live = false
   let templateId: TemplateId | undefined
+  let carried: EitherGroup[] | undefined
   setState((s) => {
     const campaign = s.campaigns.find((c) => c.id === campaignId)
     const current = s.gateSets.find((g) => g.id === campaign?.gateSetId)
     if (!campaign || !current) return {}
     live = campaign.status === 'live'
     templateId = current.templateId
+    carried = draft.either ?? current.either
     const version = s.gateSets
       .filter((g) => g.campaignId === campaignId)
       .reduce((top, g) => Math.max(top, g.version), 0) + 1
@@ -586,6 +590,9 @@ export function saveGateSet(
       origin: 'edited',
       templateId: current.templateId,
       hard: draft.hard,
+      // The choices ride along untouched. Nothing on this screen edits them,
+      // and dropping them here would turn a choice back into a demand.
+      either: draft.either ?? current.either,
       knockouts: draft.knockouts,
       criteria: draft.criteria,
       passScore: draft.passScore,
@@ -618,6 +625,7 @@ export function saveGateSet(
   push((api) => api.saveGates(campaignId, {
     templateId,
     hard: draft.hard,
+    either: carried,
     knockouts: draft.knockouts,
     criteria: draft.criteria,
     passScore: draft.passScore,

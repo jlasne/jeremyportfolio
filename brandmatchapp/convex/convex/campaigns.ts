@@ -1,7 +1,7 @@
 import { internalMutation, internalQuery } from './_generated/server'
 import { v } from 'convex/values'
 import type { Doc } from './_generated/dataModel'
-import { cleanSentences, enforceLocks, settle, settleScore, template } from './templates'
+import { cleanSentences, enforceLocks, settle, settleEither, settleScore, template } from './templates'
 import { loosens, type Niche } from './gates'
 
 
@@ -50,6 +50,9 @@ export function publicGates(g: Doc<'gateSets'>) {
     origin: g.origin,
     templateId: g.templateId ?? null,
     hard: g.hard,
+    // The choices ride out with the demands. Left behind, the screen shows
+    // reach and rhythm as hard filters the client never set.
+    either: g.either ?? [],
     knockouts: g.knockouts,
     criteria: g.criteria,
     passScore: g.passScore,
@@ -196,6 +199,8 @@ export const saveGates = internalMutation({
     origin: v.union(v.literal('generated'), v.literal('edited')),
     templateId: v.optional(v.string()),
     hard: v.any(),
+    /** Groups where one alternative is enough. */
+    either: v.optional(v.any()),
     knockouts: v.any(),
     criteria: v.any(),
     passScore: v.number(),
@@ -221,7 +226,11 @@ export const saveGates = internalMutation({
     const criteria =
       cleanSentences(args.criteria) ?? existing.find((g) => g._id === campaign.gateSetId)?.criteria ?? lib.criteria
 
-    const hard = settle(args.hard ?? {})
+    // The choices are bounded first: settle needs to know which numbers a
+    // group decides before it fills the rest in as demands.
+    const asked = (args.hard ?? {}) as { followersMin?: number }
+    const either = settleEither(args.either, Number(asked.followersMin) > 0 ? Number(asked.followersMin) : 15_000)
+    const hard = settle(args.hard ?? {}, either)
     const passScore = settleScore(args.passScore, criteria.length)
 
     const gateSetId = await ctx.db.insert('gateSets', {
@@ -231,6 +240,7 @@ export const saveGates = internalMutation({
       origin: args.origin,
       templateId,
       hard,
+      ...(either.length ? { either } : {}),
       knockouts: enforceLocks(templateId, args.knockouts),
       criteria,
       passScore,

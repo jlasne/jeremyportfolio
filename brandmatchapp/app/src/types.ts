@@ -192,8 +192,29 @@ export interface HardRules {
   medianViewsMin?: number
   medianCommentsMin?: number
   postsPerMonthMin?: number
+  /** Views on a typical post as a percentage of the follower count. */
+  viewRatioMin?: number
+  /** Views across a month: what a typical post gets, times how many. */
+  monthlyViewsMin?: number
   countries?: string[]
   languages?: string[]
+}
+
+/**
+ * A choice, where every rule above is a demand.
+ *
+ * Reach is two different accounts wearing one number. Someone at 40k views on
+ * ten percent of their followers and someone at 100k views on two percent are
+ * both worth writing to, and a single threshold keeps one and loses the other.
+ * Same for rhythm: a daily poster and a weekly one who does a million views a
+ * month are both alive.
+ *
+ * So a group holds alternatives and the profile has to satisfy one of them.
+ * The label is what the reason line says when none of them holds.
+ */
+export interface EitherGroup {
+  label?: string
+  options: HardRules[]
 }
 
 /**
@@ -257,6 +278,8 @@ export interface GateSet {
   /** The library this version grew from. Kept so the source stays readable. */
   templateId: TemplateId
   hard: HardRules
+  /** Groups where one alternative is enough. */
+  either?: EitherGroup[]
   knockouts: Knockout[]
   criteria: Criterion[]
   /** Out of 14. At or above is qualified. */
@@ -326,6 +349,8 @@ export interface HardCheck {
   key: keyof HardRules
   value: number
   pass: boolean
+  /** What was asked. Carried because an either group's number is not in hard. */
+  limit?: number
 }
 
 export interface KnockoutAnswer {

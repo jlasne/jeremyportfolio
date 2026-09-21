@@ -2481,6 +2481,28 @@ body { background: var(--paper); }
 
 @media (prefers-reduced-motion: reduce) { .gauge-bar i { transition: none; } }
 
+/* The same choice inside the proposal's rule list, where the rows are a
+   label and a value rather than a card. */
+.rules .rule-choice b { font-weight: 500; text-align: right; max-width: 60%; }
+
+/* A choice. Reach and rhythm are two ways through, not two demands, so they
+   read as one line each and carry no dial. */
+.choices { display: flex; flex-direction: column; gap: 8px; margin: 2px 0 20px; }
+.choice {
+  display: flex; align-items: baseline; gap: 12px; padding: 10px 14px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--paper-2);
+}
+.choice-label {
+  flex: none; font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--ink-3);
+}
+.choice-ways { font-size: 14px; color: var(--ink); }
+.choices .hint { margin: 0; }
+
+@media (max-width: 640px) {
+  .choice { flex-direction: column; gap: 4px; }
+}
+
 /* One dial. Its value on the right, its limits underneath. */
 .dials { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px 28px; }
 .dial { display: flex; flex-direction: column; gap: 5px; }

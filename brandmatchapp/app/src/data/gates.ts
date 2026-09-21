@@ -3,6 +3,7 @@ import type {
   Niche,
   CriterionResult,
   CriterionScore,
+  EitherGroup,
   GateSet,
   HardCheck,
   HardRules,
@@ -46,6 +47,7 @@ export function loosest(hard: HardRules, niches: Niche[]): HardRules {
   // Higher is stricter on these, lower is stricter on the other two.
   const LOWER_IS_LOOSER: (keyof HardRules)[] = [
     'followersMin', 'medianViewsMin', 'medianCommentsMin', 'postsPerMonthMin',
+    'viewRatioMin', 'monthlyViewsMin',
   ]
   const out: HardRules = { ...hard }
   for (const key of [...LOWER_IS_LOOSER, 'followersMax', 'lastPostWithinDays'] as (keyof HardRules)[]) {
@@ -96,6 +98,23 @@ const READS: { key: keyof HardRules; of: (c: Creator) => number | null; pass: (v
   { key: 'medianViewsMin', of: (c) => c.medianViews, pass: (v, l) => v >= l },
   { key: 'medianCommentsMin', of: (c) => c.medianComments, pass: (v, l) => v >= l },
   { key: 'postsPerMonthMin', of: (c) => c.postsPerMonth, pass: (v, l) => v >= l },
+  // Two numbers nobody measures directly. They are the ratio and the month,
+  // and they exist so a group can offer reach on proportion as an alternative
+  // to reach in absolute terms.
+  {
+    key: 'viewRatioMin',
+    of: (c) => (c.followers > 0 && c.medianViews !== null
+      ? Math.round((c.medianViews / c.followers) * 100)
+      : null),
+    pass: (v, l) => v >= l,
+  },
+  {
+    key: 'monthlyViewsMin',
+    of: (c) => (c.medianViews !== null && c.postsPerMonth !== null
+      ? Math.round(c.medianViews * c.postsPerMonth)
+      : null),
+    pass: (v, l) => v >= l,
+  },
   { key: 'lastPostWithinDays', of: daysSinceLastPost, pass: (v, l) => v <= l },
 ]
 
@@ -116,10 +135,10 @@ export function runHard(creator: Creator, hard: HardRules, now = Date.now()): Ha
     const value = read.key === 'lastPostWithinDays' ? daysSinceLastPost(creator, now) : read.of(creator)
     // A number we never measured cannot pass a threshold on measured data.
     if (value === null) {
-      out.push({ key: read.key, value: -1, pass: false })
+      out.push({ key: read.key, value: -1, pass: false, limit })
       continue
     }
-    out.push({ key: read.key, value, pass: read.pass(value, limit) })
+    out.push({ key: read.key, value, pass: read.pass(value, limit), limit })
   }
   // Where they are and what they post in are not measured by the crawl yet.
   // An unknown is not a wrong answer, so a null passes here; the server does
@@ -141,6 +160,30 @@ export function passesHard(checks: HardCheck[]): boolean {
 }
 
 /**
+ * The groups where one alternative is enough.
+ *
+ * A group that holds returns nothing: there is no row to show for a rule
+ * nobody failed. A group that holds nowhere returns the closest attempt, so
+ * the reason line names the number they came nearest to rather than the first
+ * one in the list.
+ */
+export function runEither(creator: Creator, groups: EitherGroup[] | undefined, now = Date.now()): HardCheck[] {
+  if (!groups?.length) return []
+  const out: HardCheck[] = []
+  for (const group of groups) {
+    const tries = (group.options ?? []).map((option) => runHard(creator, option, now))
+    if (!tries.length) continue
+    if (tries.some((checks) => checks.length > 0 && passesHard(checks))) continue
+    // Nothing held. Keep the attempt that failed on the fewest rows.
+    const closest = tries
+      .map((checks) => checks.filter((c) => !c.pass))
+      .sort((a, b) => a.length - b.length)[0]
+    out.push(...(closest ?? []))
+  }
+  return out
+}
+
+/**
  * The full run. Hand it a judgement and it returns the verdict plus every
  * intermediate answer, which is what the evaluation row stores.
  */
@@ -153,7 +196,7 @@ export function evaluate(
 ): GateResult {
   // The widest bar first, so anyone too small for every niche costs nothing.
   const wide = loosest(gates.hard, niches)
-  let hardChecks = runHard(creator, wide, now)
+  let hardChecks = [...runHard(creator, wide, now), ...runEither(creator, gates.either, now)]
   const blocker = hardChecks.find((c) => !c.pass)
   if (blocker) {
     return {
@@ -191,7 +234,7 @@ export function evaluate(
 
   // Now the niche is known, its own numbers apply.
   const own = forNiche(gates.hard, niche)
-  hardChecks = runHard(creator, own, now)
+  hardChecks = [...runHard(creator, own, now), ...runEither(creator, gates.either, now)]
   const short = hardChecks.find((c) => !c.pass)
   if (short) {
     return {
@@ -268,6 +311,8 @@ const HARD_LABELS: Record<string, string> = {
   medianViewsMin: 'Not enough views on a typical post',
   medianCommentsMin: 'Not enough comments on a typical post',
   postsPerMonthMin: 'Not posting often enough',
+  viewRatioMin: 'Too few of their followers watch a typical post',
+  monthlyViewsMin: 'Not enough views across a month',
   lastPostWithinDays: 'Has not posted recently enough',
   countries: 'Not in a country you picked',
   languages: 'Not in a language you picked',
@@ -283,6 +328,8 @@ const FOUND_LABELS: Record<string, string> = {
   medianViewsMin: 'Views on a typical post',
   medianCommentsMin: 'Comments on a typical post',
   postsPerMonthMin: 'Posts a month',
+  viewRatioMin: 'Share of their followers who watch a post',
+  monthlyViewsMin: 'Views across a month',
   lastPostWithinDays: 'Days since their last post',
   countries: 'Country',
   languages: 'Language',
@@ -294,7 +341,7 @@ export function foundLabel(key: string): string {
 }
 
 function hardReason(check: HardCheck, hard: HardRules): string {
-  const limit = hard[check.key]
+  const limit = check.limit ?? hard[check.key]
   if (check.value < 0) return `${hardLabel(check.key)}, and we could not measure it`
   if (typeof limit === 'number') return `${hardLabel(check.key)}: ${check.value}, you asked for ${limit}`
   return hardLabel(check.key)
@@ -307,6 +354,8 @@ const RULE_LABELS: Record<string, string> = {
   medianViewsMin: 'Views on a typical post, at least',
   medianCommentsMin: 'Comments on a typical post, at least',
   postsPerMonthMin: 'Posts a month, at least',
+  viewRatioMin: 'Share of their followers watching a post, at least',
+  monthlyViewsMin: 'Views across a month, at least',
   lastPostWithinDays: 'Posted in the last',
   countries: 'Countries',
   languages: 'Languages',

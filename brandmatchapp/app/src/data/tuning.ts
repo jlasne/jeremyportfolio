@@ -1,4 +1,4 @@
-import type { HardRules, PresetId } from '../types'
+import type { EitherGroup, HardRules, PresetId } from '../types'
 import { compact } from '../lib/format'
 import type { GateTemplate } from './templates'
 
@@ -363,4 +363,47 @@ export function describeChanges(
     if (!criteria.after.some((x) => x.id === c.id)) lines.push(`Removed: ${c.text}`)
   }
   return lines
+}
+
+// A choice, said out loud.
+//
+// Once reach and rhythm are alternatives rather than demands, the panel has to
+// say so. "50k views on a typical post" is a rule a client can argue with.
+// "50k views on a typical post, or 100k views across a month" is the same rule
+// with the door the alternative opens, and it reads as one sentence.
+
+/** One number, named the way a client reads it rather than the way it is stored. */
+export function saysRule(key: keyof HardRules, n: number): string {
+  switch (key) {
+    case 'followersMin': return `${compact(n)} followers or more`
+    case 'followersMax': return `up to ${compact(n)} followers`
+    case 'medianViewsMin': return `${compact(n)} views on a typical post`
+    case 'medianCommentsMin': return `${n} comments on a typical post`
+    case 'postsPerMonthMin': return cadence(n)
+    case 'viewRatioMin': return `${n}% of their followers watching a post`
+    case 'monthlyViewsMin': return `${compact(n)} views across a month`
+    case 'lastPostWithinDays': return `a post in the last ${n} days`
+    default: return ''
+  }
+}
+
+export function cadence(perMonth: number): string {
+  if (perMonth >= 26) return 'posting daily'
+  if (perMonth >= 12) return 'posting several times a week'
+  if (perMonth >= 7) return 'posting at least twice a week'
+  if (perMonth >= 4) return 'posting at least weekly'
+  return `posting at least ${perMonth} times a month`
+}
+
+/** Every way through one group, joined by the word that makes it a choice. */
+export function eitherLine(group: EitherGroup): string {
+  const ways = (group.options ?? [])
+    .map((option) =>
+      (Object.keys(option) as (keyof HardRules)[])
+        .map((key) => (typeof option[key] === 'number' ? saysRule(key, option[key] as number) : ''))
+        .filter(Boolean)
+        .join(' and '),
+    )
+    .filter(Boolean)
+  return ways.join(', or ')
 }

@@ -23,7 +23,7 @@ const OPENROUTER = 'https://openrouter.ai/api/v1/chat/completions'
 const SCHEMA = {
   type: 'object',
   additionalProperties: false,
-  required: ['templateId', 'name', 'countries', 'languages', 'niches', 'hard', 'knockouts', 'criteria', 'passScore'],
+  required: ['templateId', 'name', 'countries', 'languages', 'niches', 'hard', 'either', 'knockouts', 'criteria', 'passScore'],
   properties: {
     templateId: { type: 'string', enum: TEMPLATE_IDS },
     name: { type: 'string' },
@@ -43,7 +43,7 @@ const SCHEMA = {
     hard: {
       type: 'object',
       additionalProperties: false,
-      required: ['followersMin', 'followersMax', 'lastPostWithinDays', 'medianViewsMin', 'medianCommentsMin', 'postsPerMonthMin'],
+      required: ['followersMin', 'followersMax', 'lastPostWithinDays', 'medianCommentsMin'],
       properties: {
         followersMin: { type: 'integer' },
         followersMax: { type: 'integer' },
@@ -51,6 +51,35 @@ const SCHEMA = {
         medianViewsMin: { type: 'integer' },
         medianCommentsMin: { type: 'integer' },
         postsPerMonthMin: { type: 'integer' },
+      },
+    },
+    either: {
+      type: 'array',
+      maxItems: 3,
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['label', 'options'],
+        properties: {
+          label: { type: 'string' },
+          options: {
+            type: 'array',
+            minItems: 2,
+            maxItems: 3,
+            items: {
+              type: 'object',
+              additionalProperties: false,
+              properties: {
+                medianViewsMin: { type: 'integer' },
+                medianCommentsMin: { type: 'integer' },
+                postsPerMonthMin: { type: 'integer' },
+                viewRatioMin: { type: 'integer' },
+                monthlyViewsMin: { type: 'integer' },
+                lastPostWithinDays: { type: 'integer' },
+              },
+            },
+          },
+        },
       },
     },
     knockouts: {
@@ -71,8 +100,18 @@ const SCHEMA = {
       items: {
         type: 'object',
         additionalProperties: false,
-        required: ['id', 'text'],
-        properties: { id: { type: 'string' }, text: { type: 'string' } },
+        required: ['id', 'text', 'evidence', 'trap', 'rubric', 'needs'],
+        properties: {
+          id: { type: 'string' },
+          text: { type: 'string' },
+          evidence: { type: 'string' },
+          trap: { type: 'string' },
+          rubric: { type: 'string' },
+          needs: {
+            type: 'array',
+            items: { type: 'string', enum: ['profile', 'posts', 'links', 'images', 'comments', 'web'] },
+          },
+        },
       },
     },
     passScore: { type: 'integer', minimum: 1, maximum: 18 },
@@ -97,6 +136,13 @@ function instructions(): string {
     '',
     'Then adapt it to the brief.',
     'Gate 1: write thresholds for the target described. Reach is measured on real posts, never a declared figure. Keep the follower range the brief asks for when it gives one.',
+    '  A threshold in hard is a demand: every one of them has to hold.',
+    '  A group in either is a choice: one of its options holding is enough.',
+    '  Reach and rhythm are already written as groups for you, so leave medianViewsMin and postsPerMonthMin out unless the brief names a figure for one.',
+    '  Write a group yourself only for a choice the brief spells out, in words like "or", "either", "unless".',
+    '  For "40k views with a ratio over 10%, or 100k views": one group labelled Reach, options {medianViewsMin: 40000, viewRatioMin: 10} and {medianViewsMin: 100000}.',
+    '  For "at least one post a week, or a million views a month": one group labelled Rhythm, options {postsPerMonthMin: 4} and {monthlyViewsMin: 1000000}.',
+    '  A group you write on reach or rhythm replaces the one written for you. A number in a group is left out of hard, or it is demanded twice.',
     'Gate 2: keep every knockout id of the library. Reword the questions for this offer. You may add at most one new knockout. Every one of them is delivered switched off, so write them as questions worth losing people over rather than as defaults.',
     'Gate 3: six to nine sentences describing one ideal person for this offer, starting from the library sentences and rewording them for the brief.',
     '  Each entry is ONE statement about a person, under 140 characters, written as a fact someone could agree or disagree with.',
@@ -105,6 +151,19 @@ function instructions(): string {
     '  Bad: "thresholds: 100k to 3M followers"  Bad: "Do they teach a method?"  Bad: "c_sells: ... c_method: ..."',
     '  It has to be answerable from what the judge sees: the bio, the links, the follower count, and the last twelve posts with their captions, dates, likes, comments and views. Nothing about replies, a year of growth, or what their audience earns.',
     '  Ids are short snake_case and say what the sentence is about. Set passScore to half of twice the number of sentences.',
+    '',
+    'For every sentence, also write how to settle it. This is the part that decides whether the answer is worth anything.',
+    '  evidence: what would prove it, named precisely. "A link to apps.apple.com or play.google.com", not "signs of an app".',
+    '  trap: the near miss that must not count. A subscription on their own website is not an app in a store. A cookbook is not a programme.',
+    '  rubric: what a 2, a 1 and a 0 look like, in one line each, so the scale is yours and not the judge\'s.',
+    '  needs: what has to be in front of the judge to answer. Pick from:',
+    '    profile   the bio, the numbers, the category, the badge',
+    '    posts     the last twelve captions, dates and counts',
+    '    links     the page their bio links to, read as text',
+    '    images    the last nine post pictures, looked at',
+    '    comments  the comments under their posts, and their replies',
+    '    web       a search of the open web for them',
+    '  Name only what the sentence actually needs. Everything named is fetched and paid for, and a sentence about what they sell needs links, not images.',
     '',
     'Niches: five to seven slices of the target. Each one is run as an Instagram account-name search, word for word, so write what these people put in their own bio or handle, which is the job they do. Never the topic they cover.',
     '  Measured: "online personal trainer" returned 36 people named for the job out of 40. "fitness coach" returned 4 in a niche out of 120.',
@@ -170,16 +229,106 @@ export const gatesFromBrief = internalAction({
     const languages = Array.isArray(draft.languages)
       ? draft.languages.map((l: unknown) => String(l).toLowerCase()).filter((l: string) => /^[a-z]{2}$/.test(l))
       : []
-    const hard = {
+    // The library's numbers are a starting point, not a ceiling. A brief that
+    // names a figure gets that figure: one client wrote "at least 100 comments
+    // on a typical post" and was handed twenty, because this took the library
+    // every time. The model only overrides what it actually returned, so a
+    // brief that says nothing still lands on the library.
+    //
+    // Only a figure the brief actually contains. Asked for a views floor with
+    // nothing to go on, the model writes one anyway: 50,000 on a 100,000
+    // follower brief that never mentions views, which is half the audience
+    // watching every post. So the model may carry a number across, and may not
+    // invent one.
+    const said = `${args.audience} ${args.offer}`
+    const namedInBrief = (n: number): boolean => {
+      const forms = [String(n)]
+      if (n % 1_000 === 0) forms.push(`${n / 1_000}k`)
+      if (n % 1_000_000 === 0) forms.push(`${n / 1_000_000}m`)
+      return forms.some((f) => new RegExp(`(?<![0-9])${f}(?![0-9])`, 'i').test(said))
+    }
+    const take = (key: string, fallback: number): number => {
+      const asked = Number(draft.hard?.[key])
+      return Number.isFinite(asked) && asked > 0 && namedInBrief(asked) ? Math.round(asked) : fallback
+    }
+    // What a typical post gets, as a share of the audience.
+    //
+    // The library's share was written for its own follower floor. Taken
+    // straight to a bigger one it asks for something nobody does: at 15,000
+    // followers half of them watching is normal, at 100,000 it is not. The
+    // five accounts one client named as his ideal clients came in at 5.4%,
+    // 5.7%, 8.4%, 28% and 188%, and a flat half would have refused three of
+    // them. So the share falls as the floor rises, and never climbs above the
+    // library's own.
+    const share = Math.min(d.viewsShare, d.viewsShare * Math.pow(d.followersMin / followersMin, 0.35))
+    const viewsBar = Math.round(followersMin * share)
+
+    const inGroups = new Set<string>()
+    const groups: { label: string; options: Record<string, number>[] }[] = []
+    for (const g of Array.isArray(draft.either) ? draft.either : []) {
+      const options = (Array.isArray(g?.options) ? g.options : [])
+        .map((o: any) => {
+          const clean: Record<string, number> = {}
+          for (const [k, v] of Object.entries(o ?? {})) {
+            const n = Number(v)
+            // Same rule as the thresholds above, and for the same reason: the
+            // two worked examples in the prompt came back word for word, 40,000
+            // views and 100,000 views on a brief that never mentions views.
+            // A ratio has no figure to name, so it rides on the option it sits
+            // in rather than on the brief.
+            if (!Number.isFinite(n) || n <= 0) continue
+            if (k !== 'viewRatioMin' && !namedInBrief(n)) continue
+            clean[k] = Math.round(n)
+          }
+          // A ratio alone is not a way through: it would take a 200 follower
+          // account with 20 views.
+          if (Object.keys(clean).length === 1 && clean.viewRatioMin !== undefined) return {}
+          return clean
+        })
+        .filter((o: Record<string, number>) => Object.keys(o).length > 0)
+      if (options.length < 2) continue
+      groups.push({ label: String(g.label ?? 'Either'), options })
+    }
+    const covers = (keys: string[]) => groups.some((g) => g.options.some((o) => keys.some((k) => k in o)))
+
+    // Reach, as a choice. Someone at the bar on absolute views and someone
+    // under it who a tenth of their audience turns out for are both worth
+    // writing to. One number keeps the first and loses the second.
+    if (!covers(['medianViewsMin', 'viewRatioMin'])) {
+      groups.push({
+        label: 'Reach',
+        options: [
+          { medianViewsMin: take('medianViewsMin', viewsBar) },
+          { medianViewsMin: Math.round(viewsBar * 0.4), viewRatioMin: 10 },
+        ],
+      })
+    }
+    // Rhythm, as a choice. A creator who posts twice a month to three million
+    // views a month is not dormant, and a posting count on its own says he is.
+    if (!covers(['postsPerMonthMin', 'monthlyViewsMin'])) {
+      groups.push({
+        label: 'Rhythm',
+        options: [
+          { postsPerMonthMin: take('postsPerMonthMin', d.postsPerMonthMin) },
+          { monthlyViewsMin: viewsBar * 4 },
+        ],
+      })
+    }
+    for (const g of groups) for (const o of g.options) for (const k of Object.keys(o)) inGroups.add(k)
+
+    const hard: Record<string, unknown> = {
       followersMin,
       followersMax,
-      lastPostWithinDays: d.lastPostWithinDays,
-      postsPerMonthMin: d.postsPerMonthMin,
-      medianViewsMin: Math.round(followersMin * d.viewsShare),
-      medianCommentsMin: Math.round(followersMin * d.viewsShare * 0.002),
+      lastPostWithinDays: take('lastPostWithinDays', d.lastPostWithinDays),
+      postsPerMonthMin: take('postsPerMonthMin', d.postsPerMonthMin),
+      medianViewsMin: take('medianViewsMin', viewsBar),
+      medianCommentsMin: take('medianCommentsMin', Math.round(viewsBar * 0.002)),
       ...(countries.length ? { countries } : {}),
       ...(languages.length ? { languages } : {}),
     }
+    // A number a group decides is not demanded here as well. Left in both, the
+    // hard copy always fires first and the choice never gets to matter.
+    for (const key of inGroups) delete hard[key]
 
     await ctx.runMutation(internal.campaigns.patch, {
       accountId: args.accountId,
@@ -212,6 +361,7 @@ export const gatesFromBrief = internalAction({
       origin: 'generated',
       templateId: lib.id,
       hard,
+      either: groups,
       // Delivered switched off, every one. A deal breaker drops someone
       // whatever else they score, so it is a decision the client makes once
       // they have seen what the rest of the filters bring, never a default.
