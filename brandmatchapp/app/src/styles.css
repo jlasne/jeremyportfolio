@@ -3728,6 +3728,10 @@ body { background: var(--paper); }
   line-height: 1.1; letter-spacing: -0.03em; color: var(--l-ink); max-width: 20ch;
 }
 .beat h2 em { font-style: normal; color: var(--orange); }
+/* The result line carries no argument of its own, the three bars under it do,
+   so it drops to a size that states rather than announces. Unbounded ships at
+   one weight, so size is the only lever this face has. */
+.beat h2.soft { font-size: clamp(21px, 2.6vw, 29px); line-height: 1.22; letter-spacing: -0.02em; max-width: 30ch; }
 .beat > p { margin-top: 16px; font-size: 17.5px; line-height: 1.6; color: var(--l-muted); max-width: 60ch; }
 .beat > p.beat-close {
   margin-top: 34px; font-family: var(--display); font-weight: 500; font-size: clamp(20px, 2.4vw, 26px);
@@ -3830,12 +3834,13 @@ body { background: var(--paper); }
 /* The footer says the headline once more, so the page ends on the promise it
    opened with rather than on a column of links. */
 .land-foot { grid-template-columns: minmax(0, 1fr) auto; gap: 40px; align-items: start; }
+/* Unbounded ships at one weight, so the footer headline gets its weight from
+   size: near the hero's, which is the point of saying it twice. */
 .foot-head {
-  margin-top: 18px; font-family: var(--display); font-weight: 500;
-  font-size: clamp(22px, 2.8vw, 32px); line-height: 1.14; letter-spacing: -0.025em;
-  color: var(--l-ink); max-width: 20ch;
+  margin-top: 20px; font-family: var(--display); font-weight: 500;
+  font-size: clamp(26px, 3.4vw, 40px); line-height: 1.1; letter-spacing: -0.03em;
+  color: var(--l-ink); max-width: 24ch;
 }
 .foot-head em { font-style: normal; color: var(--orange); }
-.foot-say .muted { margin-top: 14px; font-size: 14px; }
 .foot-links { min-width: 150px; }
 @media (max-width: 760px) { .land-foot { grid-template-columns: minmax(0, 1fr); gap: 32px; } }

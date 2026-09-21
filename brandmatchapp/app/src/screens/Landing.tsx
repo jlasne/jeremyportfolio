@@ -252,7 +252,7 @@ export function Landing() {
           </div>
 
           <div className="beat">
-            <h2>The result: 3,000 profiles scanned/day turned into <em>200 qualified matches.</em></h2>
+            <h2 className="soft">Every day we scan 3000 new people and qualify <em>200 high intent leads!</em></h2>
 
             <div className="bars">
               <p className="bars-head">What is qualified?</p>
@@ -280,7 +280,6 @@ export function Landing() {
           <div className="foot-say">
             <span className="brand-word">brandmatch</span>
             <p className="foot-head">Your AI agent finds content creators <em>ready to close a deal.</em></p>
-            <p className="muted">Instagram today, TikTok and YouTube next.</p>
           </div>
           <div className="foot-links">
             <h4>Get in</h4>
