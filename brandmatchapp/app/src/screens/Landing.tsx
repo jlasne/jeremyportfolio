@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import { Logo } from '../components/Logo'
 import { api } from '../lib/api'
 
 // The landing, as one page: hero, six outcomes, one ask.
@@ -10,8 +9,10 @@ import { api } from '../lib/api'
 // the hero and the last ask share, and the reading size everything else runs
 // at. The six cards are what brandmatch gives back, one line of proof each,
 // and they arrive as they are reached so the page is read rather than
-// scanned. Nothing between the hero and them, because a reader who came for
-// leads should see what they get before they see anything else.
+// scanned. Nothing between the hero and them, and nothing above the hero,
+// because a reader who came for leads should meet the headline first and see
+// what they get straight after it. The only bar is the footer, and the only
+// button is the one in the hero.
 
 const BADGE = 'New leads, scanned and scored every day'
 const HEADLINE = 'First AI Agent that finds creators ready to close.'
@@ -140,18 +141,6 @@ function Start({ id }: { id?: string }) {
   )
 }
 
-/** True once the page has scrolled past the hero. */
-function useFloated(after = 40): boolean {
-  const [past, setPast] = useState(false)
-  useEffect(() => {
-    const read = () => setPast(window.scrollY > after)
-    read()
-    window.addEventListener('scroll', read, { passive: true })
-    return () => window.removeEventListener('scroll', read)
-  }, [after])
-  return past
-}
-
 /**
  * A card arrives when it is reached, so the grid fills in as it is read.
  *
@@ -181,19 +170,9 @@ function useTold(): void {
 }
 
 export function Landing() {
-  const floated = useFloated()
   useTold()
   return (
     <div className="landing lp">
-      <header className={`lp-nav${floated ? ' floated' : ''}`}>
-        <a className="brand" href="#/">
-          <Logo size={22} />
-          brandmatch
-        </a>
-        <span className="spacer" />
-        <a className="lp-signin" href="#/signin">Sign in</a>
-      </header>
-
       <section className="lp-hero">
         <p className="lp-badge">{BADGE}</p>
         <h1>{HEADLINE}</h1>
@@ -217,19 +196,13 @@ export function Landing() {
 
       <p className="lp-proof">{PROOF}</p>
 
-      <section className="lp-ask">
-        <h2>Your next 10 deals are tomorrow.</h2>
-        <p className="lp-sub">Let your agent find them.</p>
-        <Start />
-      </section>
-
       <footer className="lp-foot">
         <span className="brand-word">brandmatch</span>
         <nav>
           <a href="mailto:hey@jeremylasne.com">Talk to us</a>
           <a href="#/signin">Sign in</a>
         </nav>
-        <p>© 2026 brandmatch</p>
+        <p>© 2026</p>
       </footer>
     </div>
   )
