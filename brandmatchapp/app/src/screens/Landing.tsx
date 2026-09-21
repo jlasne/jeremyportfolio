@@ -22,8 +22,8 @@ const BRIEF_HINT = 'e.g. Fitness creators, 50k+ followers, active this week'
 /** The one thing every button asks for, said the same way in both places. */
 const CTA = 'Start my Campaign'
 
-/** One line of the story. `out` marks what brandmatch does. */
-type Line = { say: ReactNode; out?: true }
+/** One line of the story. `out` marks what brandmatch does, `tag` names a bar. */
+type Line = { say: ReactNode; out?: true; tag?: true }
 
 /**
  * The story, as paragraphs of lines.
@@ -41,31 +41,49 @@ const STORY: Line[][] = [
   [{ say: <>Built by two engineers, after four platforms failed us.</> }],
   [
     { say: <>We build mobile apps with content creators.</> },
-    { say: <>Finding the right one ate our week, every week.</> },
+    { say: <>Finding the right one destroyed our budget and time schedule.</> },
   ],
   [
-    { say: <>Collabstr worked, but payments lagged.</> },
-    { say: <>14 creators got paid, 1 on time, 13 waited more than 14 days.</> },
+    { say: <>Collabstr worked.</> },
+    { say: <>14 creators got paid, 1 delivered, 7 cancelled after due date, 7 ghosted me.</> },
   ],
   [
-    { say: <>Topyappers gave us a list stuck in the past.</> },
-    { say: <>Leads sat there for months without a refresh.</> },
+    { say: <>Topyappers gave us an outdated list.</> },
+    { say: <>Leads collected years ago, sold as &ldquo;my ones&rdquo;.</> },
   ],
-  [{ say: <>Heepsy gave us contacts. Some numbers were dead, some people gone.</> }],
-  [{ say: <>Modash sold us a list of 50,000 people. It closed 0 deals.</> }],
+  [
+    { say: <>Heepsy sold me a contact list.</> },
+    { say: <>87% false phone numbers, 92% dead emails, some people gone.</> },
+  ],
+  [
+    { say: <>Modash sold us a list of 50,000 people, 30% in my niche.</> },
+    { say: <>I had 0 replies.</> },
+  ],
   [
     { say: <>So we built our own agent.</> },
-    { say: <>One subscription now runs the full loop:</>, out: true },
-    { say: <>search, qualify, outreach, and CRM, all connected.</> },
+    { say: <>One that covers the real needs:</>, out: true },
+    { say: <>search, qualify, outreach, and connect.</> },
   ],
   [
-    { say: <>The result: 3,000 profiles scanned a day turn into 200 qualified matches,</>, out: true },
-    { say: <>already active and already earning from deals.</> },
+    { say: <>I finally have qualified leads.</>, out: true },
+    { say: <>100% of my money and time is worth it now.</> },
+  ],
+  [{ say: <>What is a qualified lead?</>, out: true }],
+  [
+    { say: <>In your niche</>, tag: true },
+    { say: <>Filtered on your offer and your own requirements, past what a follower count says.</> },
   ],
   [
-    { say: <>Replies land in your inbox, drafted and ready.</>, out: true },
-    { say: <>Calls get booked while you sleep.</>, out: true },
-    { say: <>Deals close in days, not weeks.</>, out: true },
+    { say: <>Active</>, tag: true },
+    { say: <>Posts on a schedule, and was active in the last 3 days.</> },
+  ],
+  [
+    { say: <>Intent</>, tag: true },
+    { say: <>Runs the account as a business, already sells products or takes collabs. Reply rate climbs.</> },
+  ],
+  [
+    { say: <>Human filters</>, tag: true },
+    { say: <>Ask for creators whose dog is the star of the feed, the way you would brief a person.</> },
   ],
 ]
 
@@ -203,11 +221,11 @@ export function Landing() {
 
       <section className="lp-story">
         {STORY.map((para, i) => (
-          <p className="said" key={i}>
+          <p className={`said${para[0].tag ? ' item' : ''}`} key={i}>
             {para.map((line, j) => (
               <span
                 key={j}
-                className={line.out ? 'out' : undefined}
+                className={line.out ? 'out' : line.tag ? 'leadbar' : undefined}
                 style={{ '--i': j } as CSSProperties}
               >
                 {line.say}
@@ -219,7 +237,7 @@ export function Landing() {
       </section>
 
       <section className="lp-ask">
-        <h2>Your next creator partner is already out there.</h2>
+        <h2>Your next 10 deals are tomorrow.</h2>
         <p className="lp-sub">Let your agent find them.</p>
         <Start />
       </section>
