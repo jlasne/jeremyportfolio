@@ -35,7 +35,7 @@ const FAILURES: { name: string; result: string; what: string }[] = [
   },
   {
     name: 'TopYappers',
-    result: 'Same list',
+    result: 'Outdated list',
     what: 'It gave us an outdated list. We bought the same database everyone buys.',
   },
   {
@@ -79,25 +79,29 @@ const QUALIFIED: { name: string; means: string }[] = [
 ]
 
 /**
- * A night of work, drawn. Wide at the top where the agents look, narrow at the
- * bottom where the list you actually read begins. The shape carries the ratio
- * on its own, so the numbers beside it only have to name the two ends.
+ * A night of work, drawn as the profiles themselves.
+ *
+ * Four tapering bars was a chart, and a chart asks to be read. 150 dots is
+ * the night: every one of them stands for 20 profiles, and the ten that come
+ * back orange are the ratio, shown rather than claimed. The legend is there
+ * because a field of 150 dots under the number 3,000 would otherwise be a
+ * lie about the count.
  */
 function Night() {
+  const dots = Array.from({ length: 150 }, (_, i) => i)
   return (
-    <div className="night">
-      <div className="night-end top">
-        <b>3,000</b>
-        <span>profiles scanned a day</span>
+    <figure className="night">
+      <figcaption className="night-line">
+        <b>3,000</b><span>profiles scanned a day</span>
+      </figcaption>
+      <div className="night-field" aria-hidden="true">
+        {dots.map((i) => <i key={i} className={i >= 140 ? 'on' : undefined} />)}
       </div>
-      <div className="night-cone" aria-hidden="true">
-        <i /><i /><i /><i />
-      </div>
-      <div className="night-end bottom">
-        <b>200</b>
-        <span>qualified matches</span>
-      </div>
-    </div>
+      <p className="night-line out">
+        <b>200</b><span>qualified matches</span>
+        <em>Each dot is 20 profiles</em>
+      </p>
+    </figure>
   )
 }
 
@@ -238,7 +242,7 @@ export function Landing() {
           </div>
 
           <div className="beat">
-            <h2>So we paid four platforms to fix it.</h2>
+            <h2>So we tried four platforms.</h2>
             <table className="ledger">
               <thead>
                 <tr>
@@ -301,13 +305,12 @@ export function Landing() {
         </section>
 
         <footer className="land-foot">
-          <div>
+          <div className="foot-say">
             <span className="brand-word">brandmatch</span>
-            <p className="muted" style={{ marginTop: 8 }}>
-              Daily qualified leads for your business. Instagram today, TikTok and YouTube next.
-            </p>
+            <p className="foot-head">Your AI agent finds content creators <em>ready to close a deal.</em></p>
+            <p className="muted">Instagram today, TikTok and YouTube next.</p>
           </div>
-          <div>
+          <div className="foot-links">
             <h4>Get in</h4>
             <a href="#access">Early access</a>
             <a href="mailto:hey@jeremylasne.com">Talk to us</a>
