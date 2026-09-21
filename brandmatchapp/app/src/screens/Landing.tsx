@@ -9,8 +9,10 @@ import { api } from '../lib/api'
 // for the numbers. One face, Satoshi, at two sizes that do the work: the
 // display size the hero and the last ask share, and the reading size the
 // story runs at. No boxes around the story, no grid of cards, no numbered
-// steps. The page scrolls as one column of sentences, and the figures inside
-// them are the only thing that breaks the line.
+// steps. The page scrolls as one column of sentences, and three marks break
+// the line: the figures, what a platform cost us, and what the agent gives
+// back. The ground under the story turns from peach to purple at the sentence
+// where we stopped buying lists, which is the whole argument in one colour.
 
 const BADGE = 'New leads, scanned and scored every day'
 const HEADLINE = 'First AI Agent that finds creators ready to close.'
@@ -25,6 +27,16 @@ function N({ children }: { children: ReactNode }) {
   return <b className="n">{children}</b>
 }
 
+/** What a platform cost us. Peach behind it, the way a page gets marked up. */
+function P({ children }: { children: ReactNode }) {
+  return <mark className="pain">{children}</mark>
+}
+
+/** What the agent gives back. Purple, the colour every good number is in. */
+function O({ children }: { children: ReactNode }) {
+  return <mark className="win">{children}</mark>
+}
+
 /**
  * The story, as paragraphs of lines.
  *
@@ -33,30 +45,30 @@ function N({ children }: { children: ReactNode }) {
  * alone reads slower than the same sentence in a block.
  */
 const STORY: ReactNode[][] = [
-  [<>Built by two engineers, after four platforms failed us.</>],
+  [<>Built by two engineers, after <P>four platforms failed us.</P></>],
   [
     <>We build mobile apps with content creators.</>,
-    <>Finding the right one ate our week, every week.</>,
+    <>Finding the right one <P>ate our week, every week.</P></>,
   ],
   [
-    <>Collabstr worked, but payments lagged.</>,
+    <>Collabstr worked, but <P>payments lagged.</P></>,
     <><N>14</N> creators got paid, <N>1</N> on time, <N>13</N> waited more than <N>14</N> days.</>,
   ],
   [
-    <>Topyappers gave us a list stuck in the past.</>,
+    <>Topyappers gave us a list <P>stuck in the past.</P></>,
     <>Leads sat there for months without a refresh.</>,
   ],
-  [<>Heepsy gave us contacts. Some numbers were dead, some people gone.</>],
-  [<>Modash sold us a list of <N>50,000</N> people. It closed <N>0</N> deals.</>],
+  [<>Heepsy gave us contacts. <P>Some numbers were dead, some people gone.</P></>],
+  [<>Modash sold us a list of <N>50,000</N> people. <P>It closed <N>0</N> deals.</P></>],
   [
     <>So we built our own agent.</>,
-    <>One subscription now runs the full loop: search, qualify, outreach, and CRM, all connected.</>,
+    <>One subscription now <O>runs the full loop:</O> search, qualify, outreach, and CRM, all connected.</>,
   ],
-  [<>The result: <N>3,000</N> profiles scanned a day turn into <N>200</N> qualified matches, already active and already earning from deals.</>],
+  [<>The result: <N>3,000</N> profiles scanned a day turn into <N>200</N> qualified matches, <O>already active and already earning from deals.</O></>],
   [
     <>Replies land in your inbox, drafted and ready.</>,
     <>Calls get booked while you sleep.</>,
-    <>Deals close in days, not weeks.</>,
+    <><O>Deals close in days, not weeks.</O></>,
   ],
 ]
 

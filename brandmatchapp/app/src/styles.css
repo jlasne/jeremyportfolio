@@ -3817,6 +3817,17 @@ body { background: var(--paper); }
 .said span { display: block; }
 /* The only purple on the page. It catches a scroll without stopping it. */
 .said .n { font-size: 1.24em; font-weight: 700; letter-spacing: -0.03em; color: var(--acc); }
+
+/* Two marks, one per side of the story. Peach for what a platform cost us,
+   purple for what the agent gives back, so the ground under the sentences
+   turns colour at the line where we stopped buying lists. Both clone across
+   a wrap, or the second line loses its ground. */
+.said .pain, .said .win {
+  padding: 2px 6px; margin: 0 -2px; border-radius: 5px; font-weight: 600;
+  box-decoration-break: clone; -webkit-box-decoration-break: clone;
+}
+.said .pain { background: rgba(245, 198, 160, 0.58); color: var(--l-ink); }
+.said .win { background: rgba(129, 52, 175, 0.10); color: var(--acc); font-weight: 700; }
 .said.close { margin-top: 62px; margin-bottom: 0; font-weight: 700; letter-spacing: -0.025em; }
 
 @media (prefers-reduced-motion: no-preference) {
