@@ -185,7 +185,81 @@ Un profil périmé ne doit jamais être rejeté sur ses vieux chiffres. Il est s
 
 ---
 
-## 6. Ce qui ne marche pas, et pourquoi
+## 6. Le design itératif, par vagues
+
+Proposé par Jeremy, 21/09/2026. Remplace le run unique qui engage tout le budget avant de rien savoir.
+
+### Le principe
+
+Au lieu d'acheter 1000 profils d'un coup sur des requêtes décidées à l'avance, on avance par vagues. Chaque vague apprend de la précédente et réoriente la suivante.
+
+| vague | taille | ce qu'on fait |
+|---|---|---|
+| 1 | ~300 | Google seul. On lit le nombre d'abonnés dans l'extrait, on n'achète que ce qui est dans la fourchette. |
+| 2 | ~1000 | Google, plus les voisins des meilleurs qualifiés de la vague 1. |
+| 3 et suivantes | croissant | Même chose, les graines s'enrichissent à chaque tour. |
+
+### Pourquoi c'est meilleur qu'un run unique
+
+Trois raisons, chacune mesurée aujourd'hui.
+
+1. **On arrête ce qui ne rend rien.** Deux requêtes sur sept ont rendu zéro nouveau compte au second passage, et on a payé quand même.
+2. **On fabrique ses propres graines.** Le canal des voisins ne démarre pas sans comptes donnés par le client. Les deux campagnes créées aujourd'hui n'en avaient aucun, donc le deuxième meilleur canal n'a jamais tourné.
+3. **On réalloue vers ce qui marche pour cette campagne.** Le taux de visée d'un canal n'est pas le même d'une niche à l'autre.
+
+### Les graines s'étalent sur toute la fourchette
+
+Instagram calcule les comptes similaires sur le recouvrement d'audience. Une graine à 100k suggère des comptes à 100k. Si toutes les graines sont en haut de la fourchette, le bas n'est jamais exploré.
+
+Le mécanisme est confirmé par le pipeline manuel :
+
+| taille des graines | candidats trop petits |
+|---|---|
+| Sous 200k | 50% |
+| Au-dessus d'1M | 7 à 25% |
+
+Donc : une graine à plusieurs hauteurs de la fourchette, jamais toutes au même endroit.
+
+**Correction sur le découpage naïf.** Ne pas poser de graine au plancher. Une graine à 10k suggère des comptes sous 10k, donc hors cible. Pour une fourchette 10-100k, viser plutôt 20k, 45k, 70k, 100k. Décalé vers le haut.
+
+Une graine doit aussi être dans la niche, sinon ses voisins n'y sont pas non plus.
+
+### Ce que ça donnerait, estimé
+
+| | aujourd'hui | avec Google et l'itération |
+|---|---|---|
+| Taux de visée | 3% | ~36% |
+| Profils achetés pour 30 survivants | 1000 | 83 |
+| Coût du run | 2,46 $ | 0,53 $ |
+| Par lead | 0,35 $ | 0,08 $ |
+
+Les 36% viennent du manuel : 99% des fiches achetées via Google sont dans la fourchette d'abonnés, et 36% de celles-ci passent aussi les filtres d'activité.
+
+### La limite de Google
+
+Google ne donne que le nombre d'abonnés. Rien sur les vues, la cadence ou la date du dernier post.
+
+Donc il supprime 62% du gâchis, pas la totalité. Le reste se découvre après l'achat, comme aujourd'hui.
+
+### Le risque : la convergence
+
+Se semer soi-même fait converger. Vague après vague, tous les candidats ressemblent au premier lead qualifié. La cible se rétrécit sans que personne le voie.
+
+Il faut injecter du sang neuf à chaque vague, venu d'ailleurs que des vagues précédentes.
+
+### À clarifier : le ratio graines contre découverte neuve
+
+**Question ouverte, non tranchée.**
+
+Quelle part de chaque vague va aux voisins des bonnes graines, et quelle part à de la découverte qui ne vient pas de nous ?
+
+Une piste de départ : 70% de voisins, 30% de sang neuf. Mais rien ne le fonde encore.
+
+Ce réglage décide à lui seul si le système trouve de mieux en mieux, ou se referme sur lui-même. Il faut le mesurer sur plusieurs vagues avant de le fixer, et sans doute le laisser bouger : beaucoup d'exploration au début, davantage d'exploitation quand les graines sont bonnes.
+
+---
+
+## 7. Ce qui ne marche pas, et pourquoi
 
 ### Filtrer sur la taille avec l'API Instagram
 
@@ -205,7 +279,7 @@ Rien ne la voit. La date du dernier post arrive avec la fiche. Petite fuite : 3%
 
 ---
 
-## 7. Le pool partagé : un arbitrage à trancher
+## 8. Le pool partagé : un arbitrage à trancher
 
 Un profil payé par une campagne est relu gratuitement par toutes les autres. Bon pour l'argent, mauvais pour la lisibilité et pour la qualité.
 
@@ -217,20 +291,32 @@ Décision à prendre : garder le partage, avec la niche comme garde-fou, ou cloi
 
 ---
 
-## 8. Ordre proposé
+## 9. Ordre proposé
 
 1. Google comme canal de découverte, dès qu'on a la clé
-2. Co-auteurs et commentateurs : gratuits, les données sont déjà achetées
-3. Rendement et profondeur par requête
-4. Comptes exemples obligatoires
-5. Fraîcheur : rafraîchir une fiche de plus de 30 jours avant de juger dessus
-6. Filtres gratuits sur le nom et les comptes privés
+2. Le design itératif par vagues, qui a besoin de Google pour sa première vague
+3. Graines étalées sur la fourchette, décalées vers le haut
+4. Rendement et profondeur par requête
+5. Comptes exemples obligatoires, qui deviennent le sang neuf des vagues suivantes
+6. Fraîcheur : rafraîchir une fiche de plus de 30 jours avant de juger dessus
+7. Filtres gratuits sur le nom et les comptes privés
 
-Le point 1 seul fait la moitié du chemin.
+Le point 1 seul fait la moitié du chemin. Les points 1 à 3 forment un tout : l'itération sans Google n'a rien de bon à mettre dans sa première vague.
 
 ---
 
-## 9. Blocages en cours
+## 10. Les questions encore ouvertes
+
+| question | pourquoi elle compte |
+|---|---|
+| Le ratio graines contre découverte neuve à chaque vague | décide si le système s'améliore ou se referme sur lui-même |
+| Où placer les graines dans la fourchette | trop bas elles sortent de la cible, trop haut elles ratent le bas |
+| Garder le pool partagé ou cloisonner par campagne | change la lecture de toutes les statistiques |
+| Supprimer les librairies de règles | validé sur le principe, pas encore fait |
+
+---
+
+## 11. Blocages en cours
 
 - Apify à 69,81 $ sur un plafond mensuel de 69 $. Aucun run possible avant relèvement.
 - Pas de clé d'API de recherche web pour le canal Google.
