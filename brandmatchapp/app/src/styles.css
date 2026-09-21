@@ -3768,7 +3768,7 @@ body { background: var(--paper); }
    one more thing to read. The file is 39KB, so it costs the page nothing. */
 .landing.lp::before {
   content: ''; position: absolute; top: 0; left: 0; right: 0;
-  height: min(980px, 104vh);
+  height: min(880px, 98vh);
   background: url('./art/bg.webp') center 42% / cover no-repeat;
   -webkit-mask-image: linear-gradient(to bottom, #000 0 44%, rgba(0, 0, 0, 0.5) 74%, transparent 100%);
   mask-image: linear-gradient(to bottom, #000 0 44%, rgba(0, 0, 0, 0.5) 74%, transparent 100%);
@@ -3776,11 +3776,11 @@ body { background: var(--paper); }
 }
 /* Everything the reader reads sits over it. The nav already carries its own
    layer, so it stays where it is. */
-.lp-hero, .lp-story, .lp-ask, .lp-foot { position: relative; z-index: 1; }
+.lp-hero, .lp-grid, .lp-proof, .lp-ask, .lp-foot { position: relative; z-index: 1; }
 
 /* Hero. Badge, headline, one sentence, the field. Nothing else above the
    fold, because the brief is the only thing the reader has to give. */
-.lp-hero { max-width: 1120px; margin: 0 auto; padding: 88px max(22px, 4vw) 104px; text-align: center; }
+.lp-hero { max-width: 1120px; margin: 0 auto; padding: 88px max(22px, 4vw) 72px; text-align: center; }
 .lp-badge {
   display: inline-block; margin: 0 0 30px; padding: 7px 17px;
   border: 1px solid var(--peach); border-radius: var(--pill);
@@ -3823,39 +3823,51 @@ body { background: var(--paper); }
   background: var(--l-card); font-size: 16px; color: var(--l-ink);
 }
 
-/* The story. One column of sentences, no box around any of them. A line that
-   lands alone reads slower than the same line inside a block, which is the
-   only rhythm this page has. */
-.lp-story { max-width: 760px; margin: 0 auto; padding: 16px max(22px, 4vw) 48px; }
-.said { margin: 0 0 54px; font-size: clamp(21px, 2.3vw, 26px); line-height: 1.45; color: var(--l-ink); }
-.said span { display: block; }
-/* The one mark on the page, and it sits on the outcome. Bigger and orange,
-   because a page that marks its whole argument marks nothing. */
-.said span.out {
-  margin: 6px 0; font-size: clamp(26px, 3.1vw, 35px); line-height: 1.16;
-  font-weight: 600; letter-spacing: -0.025em; color: var(--go-deep);
+/* Six outcomes, one card each. Nothing sits between the hero and them,
+   because a reader who came for leads should see what they get before they
+   see anything else. */
+.lp-grid {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;
+  max-width: 1120px; margin: 0 auto; padding: 0 max(22px, 4vw);
 }
-.said.close { margin-top: 68px; margin-bottom: 0; font-weight: 600; letter-spacing: -0.025em; }
-.said span.leadbar { font-weight: 600; letter-spacing: -0.015em; color: var(--go-deep); }
-.said.item { margin-bottom: 30px; }
-.said.item + .said:not(.item) { margin-top: 54px; }
+.perk {
+  padding: 26px 26px 28px; background: var(--l-card);
+  border: 1px solid var(--peach); border-radius: 22px;
+  box-shadow: 0 1px 2px rgba(35, 33, 28, 0.03), 0 14px 30px rgba(35, 33, 28, 0.04);
+}
+/* Hover moves the edge and the shadow, never the card: the arrival below
+   already owns the transform. */
+.perk:hover { border-color: var(--go); box-shadow: 0 2px 4px rgba(35, 33, 28, 0.05), 0 20px 42px rgba(35, 33, 28, 0.08); }
+.perk-mark {
+  display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: 18px;
+  border-radius: 13px; background: rgba(242, 113, 31, 0.12); color: var(--go-deep);
+}
+.perk-mark svg { width: 22px; height: 22px; }
+.perk h3 { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; color: var(--l-ink); }
+.perk p { margin-top: 9px; font-size: 15px; line-height: 1.55; color: var(--l-muted); }
 
-/* The story is read rather than scanned, so a paragraph does not land whole:
-   its lines rise one after the next as it is reached. */
+/* The one line of the story that stayed: who wrote the page. */
+.lp-proof {
+  max-width: 1120px; margin: 52px auto 0; padding: 0 max(22px, 4vw);
+  text-align: center; font-size: 15px; color: var(--l-faint);
+}
+
+/* A row fills in as it is reached, left to right. */
 @media (prefers-reduced-motion: no-preference) {
-  .said span {
-    opacity: 0; transform: translateY(26px);
-    transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-    transition-delay: calc(var(--i, 0) * 110ms);
+  .perk {
+    opacity: 0; transform: translateY(22px);
+    transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
+                border-color 0.3s ease, box-shadow 0.3s ease;
+    transition-delay: calc(var(--i, 0) * 95ms);
   }
-  .said.in span { opacity: 1; transform: none; }
+  .perk.in { opacity: 1; transform: none; }
 }
 
 /* The last ask carries the hero's weight, on the hero's ground. An accent
    slab here would make it a banner, and a banner is the one thing a reader
    has learned to scroll past. */
 .lp-ask {
-  max-width: 1120px; margin: 0 auto; padding: 104px max(22px, 4vw) 116px;
+  max-width: 1120px; margin: 88px auto 0; padding: 92px max(22px, 4vw) 112px;
   text-align: center; border-top: 1px solid var(--l-rule);
 }
 
@@ -3872,19 +3884,22 @@ body { background: var(--paper); }
 
 /* Below this the pill would leave the field about 180px, so the button takes
    its own row rather than the placeholder being cut in half. */
+@media (max-width: 1000px) {
+  .lp-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .perk { --i: 0; }
+}
 @media (max-width: 640px) {
   .lp-nav { padding: 20px 20px; }
+  .lp-grid { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .perk { padding: 22px 22px 24px; border-radius: 20px; }
+  .perk-mark { width: 40px; height: 40px; margin-bottom: 15px; border-radius: 12px; }
+  .lp-proof { margin-top: 40px; font-size: 14px; }
   .lp-nav.floated { padding-top: 13px; padding-bottom: 13px; }
   .landing.lp::before { height: min(780px, 92vh); background-position: 68% 46%; }
   .lp-hero { padding: 52px 20px 68px; }
   .lp-badge { margin-bottom: 24px; padding: 6px 14px; font-size: 12.5px; }
   .lp-sub { margin-top: 20px; font-size: 16.5px; }
-  .lp-ask { padding: 72px 20px 80px; }
-  .lp-story { padding: 8px 20px 34px; }
-  .said { margin-bottom: 42px; font-size: 21px; line-height: 1.44; }
-  .said span.out { margin: 4px 0; font-size: 26px; line-height: 1.18; }
-  .said.close { margin-top: 52px; }
-  .said.item { margin-bottom: 26px; }
+  .lp-ask { margin-top: 64px; padding: 72px 20px 80px; }
   .start { margin-top: 32px; }
   .start-field { flex-direction: column; align-items: stretch; gap: 10px; padding: 12px; border-radius: 26px; }
   .start-field input { padding: 8px 12px; font-size: 16px; }
@@ -3894,5 +3909,5 @@ body { background: var(--paper); }
   .lp-foot nav { gap: 18px; margin-left: 0; flex-basis: 100%; }
 }
 @media (prefers-reduced-motion: no-preference) and (max-width: 640px) {
-  .said span { transform: translateY(18px); transition-duration: 0.66s; transition-delay: calc(var(--i, 0) * 90ms); }
+  .perk { transform: translateY(16px); transition-duration: 0.6s; transition-delay: 0s; }
 }

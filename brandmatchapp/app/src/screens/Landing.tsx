@@ -1,18 +1,17 @@
 import { useEffect, useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { Logo } from '../components/Logo'
 import { api } from '../lib/api'
 
-// The landing, rebuilt to the brief: hero, story, one ask.
+// The landing, as one page: hero, six outcomes, one ask.
 //
-// Cream ground, warm charcoal type, orange for the thing you click and purple
-// for the numbers. One face, Satoshi, at two sizes that do the work: the
-// display size the hero and the last ask share, and the reading size the
-// story runs at. No boxes around the story, no grid of cards, no numbered
-// steps. The page scrolls as one column of sentences that arrive a line at a
-// time, and one mark sits on the outcome: bigger, orange, what brandmatch
-// does. Everything before it is the same size and the same ink, because a
-// page that marks its whole argument marks nothing.
+// Cream ground, warm charcoal type, one orange for the thing you click and
+// the thing you get. Satoshi at two sizes that do the work: the display size
+// the hero and the last ask share, and the reading size everything else runs
+// at. The six cards are what brandmatch gives back, one line of proof each,
+// and they arrive as they are reached so the page is read rather than
+// scanned. Nothing between the hero and them, because a reader who came for
+// leads should see what they get before they see anything else.
 
 const BADGE = 'New leads, scanned and scored every day'
 const HEADLINE = 'First AI Agent that finds creators ready to close.'
@@ -22,73 +21,56 @@ const BRIEF_HINT = 'e.g. Fitness creators, 50k+ followers, active this week'
 /** The one thing every button asks for, said the same way in both places. */
 const CTA = 'Start my Campaign'
 
-/** One line of the story. `out` marks what brandmatch does, `tag` names a bar. */
-type Line = { say: ReactNode; out?: true; tag?: true }
+/** The line that says who wrote the page, kept when the story went. */
+const PROOF = 'Built by two engineers, after four platforms failed us.'
 
 /**
- * The story, as paragraphs of lines.
- *
- * The outer array is the paragraph, which sets the breathing. The inner array
- * is the lines inside it, each on its own row, because a sentence that lands
- * alone reads slower than the same sentence in a block. A line arrives as it
- * is reached, one after the next, so the page is read rather than scanned.
- *
- * There is one mark on the page and it sits on the outcome: bigger, orange,
- * what brandmatch does. Everything that came before it is the same size and
- * the same ink, because a page that marks its whole argument marks nothing.
+ * Six marks, drawn from the same parts as everything else on this page: one
+ * stroke weight, round caps, no fill. They label a card, so they carry no
+ * detail a reader would have to stop and work out.
  */
-const STORY: Line[][] = [
-  [{ say: <>Built by two engineers, after four platforms failed us.</> }],
-  [
-    { say: <>We build mobile apps with content creators.</> },
-    { say: <>Finding the right one destroyed our budget and time schedule.</> },
-  ],
-  [
-    { say: <>Collabstr worked.</> },
-    { say: <>14 creators got paid, 1 delivered, 7 cancelled after due date, 7 ghosted me.</> },
-  ],
-  [
-    { say: <>Topyappers gave us an outdated list.</> },
-    { say: <>Leads collected years ago, sold as &ldquo;my ones&rdquo;.</> },
-  ],
-  [
-    { say: <>Heepsy sold me a contact list.</> },
-    { say: <>87% false phone numbers, 92% dead emails, some people gone.</> },
-  ],
-  [
-    { say: <>Modash sold us a list of 50,000 people, 30% in my niche.</> },
-    { say: <>I had 0 replies.</> },
-  ],
-  [
-    { say: <>So we built our own agent.</> },
-    { say: <>One that covers the real needs:</>, out: true },
-    { say: <>search, qualify, outreach, and connect.</> },
-  ],
-  [
-    { say: <>I finally have qualified leads.</>, out: true },
-    { say: <>100% of my money and time is worth it now.</> },
-  ],
-  [{ say: <>What is a qualified lead?</>, out: true }],
-  [
-    { say: <>In your niche</>, tag: true },
-    { say: <>Filtered on your offer and your own requirements, past what a follower count says.</> },
-  ],
-  [
-    { say: <>Active</>, tag: true },
-    { say: <>Posts on a schedule, and was active in the last 3 days.</> },
-  ],
-  [
-    { say: <>Intent</>, tag: true },
-    { say: <>Runs the account as a business, already sells products or takes collabs. Reply rate climbs.</> },
-  ],
-  [
-    { say: <>Human filters</>, tag: true },
-    { say: <>Ask for creators whose dog is the star of the feed, the way you would brief a person.</> },
-  ],
-]
+const ICONS: Record<string, ReactNode> = {
+  fresh: <><path d="M20.5 12a8.5 8.5 0 1 1-2.6-6.1" /><path d="M20.5 3.5v5h-5" /></>,
+  reply: <><path d="M20.5 12.8a7.7 7.7 0 0 1-8.3 7.7L4 21.5l1-4.2A7.7 7.7 0 1 1 20.5 12.8Z" /><path d="m11.8 9.2-2.4 2.4 2.4 2.4" /><path d="M9.4 11.6h3.4a2.8 2.8 0 0 1 2.8 2.8" /></>,
+  niche: <><circle cx="12" cy="12" r="8.5" /><circle cx="12" cy="12" r="4" /><circle cx="12" cy="12" r="0.6" /></>,
+  human: <><path d="M3.5 4.5h17l-6.6 7.8v6.4l-3.8 2.3v-8.7Z" /><path d="M16.8 3 18 5.6 20.6 6.8 18 8l-1.2 2.6L15.6 8 13 6.8l2.6-1.2Z" /></>,
+  send: <><path d="m21 3.5-8.2 17-2.4-7-7-2.4Z" /><path d="m10.4 13.6 5.1-5.1" /></>,
+  wire: <><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /><circle cx="12" cy="5" r="2.5" /><path d="M7.4 16.7 10.6 7.2" /><path d="m13.4 7.2 3.2 9.5" /><path d="M8 18.5h8" /></>,
+}
 
-/** The line the story lands on, set apart because it is the claim. */
-const CLOSE = 'This is what brandmatch is about.'
+/** What the money buys, one card each, in the order a reader meets them. */
+const OUTCOMES: { icon: keyof typeof ICONS; name: string; what: string }[] = [
+  {
+    icon: 'fresh',
+    name: 'Fresh every day',
+    what: 'Scraped daily for you. Every lead was active in the last 3 days, so the list is alive when you write.',
+  },
+  {
+    icon: 'reply',
+    name: 'Higher reply rate',
+    what: 'People with intent, already selling products and taking collabs. That is the bar that moves replies.',
+  },
+  {
+    icon: 'niche',
+    name: 'In your niche',
+    what: 'Filtered on your offer and your own requirements, past what a follower count says about anyone.',
+  },
+  {
+    icon: 'human',
+    name: 'Human filters',
+    what: 'Write the filter as a sentence. "Influencer with a dog" is a valid one.',
+  },
+  {
+    icon: 'send',
+    name: 'Outreach included',
+    what: 'The first message and the follow up go out in your name. Every reply lands in your CRM.',
+  },
+  {
+    icon: 'wire',
+    name: 'AI, API and MCP',
+    what: 'Connect over API or MCP and drive the agent from your own AI subscription.',
+  },
+]
 
 /**
  * The ask, in two moves.
@@ -171,18 +153,18 @@ function useFloated(after = 40): boolean {
 }
 
 /**
- * A paragraph arrives as it is reached, so the story is told down the page.
+ * A card arrives when it is reached, so the grid fills in as it is read.
  *
- * The class is what makes a paragraph visible, so anything that could keep
- * the observer from firing has to open them all instead: no observer in this
+ * The class is what makes a card visible, so anything that could keep the
+ * observer from firing has to open them all instead: no observer in this
  * browser, and a reader who asked for stillness.
  */
 function useTold(): void {
   useEffect(() => {
-    const said = Array.from(document.querySelectorAll('.said'))
+    const perks = Array.from(document.querySelectorAll('.perk'))
     const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (still || !('IntersectionObserver' in window)) {
-      said.forEach((s) => s.classList.add('in'))
+      perks.forEach((c) => c.classList.add('in'))
       return
     }
     const io = new IntersectionObserver(
@@ -191,9 +173,9 @@ function useTold(): void {
         e.target.classList.add('in')
         io.unobserve(e.target)
       }),
-      { rootMargin: '0px 0px -12% 0px', threshold: 0.2 },
+      { rootMargin: '0px 0px -8% 0px', threshold: 0.15 },
     )
-    said.forEach((s) => io.observe(s))
+    perks.forEach((c) => io.observe(c))
     return () => io.disconnect()
   }, [])
 }
@@ -219,22 +201,21 @@ export function Landing() {
         <Start id="start-brief" />
       </section>
 
-      <section className="lp-story">
-        {STORY.map((para, i) => (
-          <p className={`said${para[0].tag ? ' item' : ''}`} key={i}>
-            {para.map((line, j) => (
-              <span
-                key={j}
-                className={line.out ? 'out' : line.tag ? 'leadbar' : undefined}
-                style={{ '--i': j } as CSSProperties}
-              >
-                {line.say}
-              </span>
-            ))}
-          </p>
+      <section className="lp-grid">
+        {OUTCOMES.map((o, i) => (
+          <article className="perk" key={o.name} style={{ ['--i' as string]: i % 3 }}>
+            <span className="perk-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                {ICONS[o.icon]}
+              </svg>
+            </span>
+            <h3>{o.name}</h3>
+            <p>{o.what}</p>
+          </article>
         ))}
-        <p className="said close">{CLOSE}</p>
       </section>
+
+      <p className="lp-proof">{PROOF}</p>
 
       <section className="lp-ask">
         <h2>Your next 10 deals are tomorrow.</h2>
