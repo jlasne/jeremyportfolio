@@ -164,10 +164,23 @@ export function withinTemplate(
  * turns one off is corrected on the way in, so the API cannot be used to get
  * around the screen.
  */
+/**
+ * The one question no campaign can switch off.
+ *
+ * There used to be a second per library, and each one was a guess about the
+ * offer that the library had no way to check. "Do they have a paid offer
+ * live today" is locked for anyone selling to creators, which is right when
+ * the creator pays and wrong when they are paid: it silently refused every
+ * entertainment creator on a campaign whose whole point was to represent
+ * them, and the client could not turn it off because the lock said so.
+ *
+ * A real person, rather than a repost page, is the only thing true of every
+ * offer anyone can write. Everything else is the client's to decide.
+ */
 export const LOCKED: Record<string, string[]> = {
-  recruit_partners: ['k_person', 'k_not_built'],
-  sell_to_creators: ['k_person', 'k_paid_offer'],
-  sponsorship: ['k_person', 'k_safe'],
+  recruit_partners: ['k_person'],
+  sell_to_creators: ['k_person'],
+  sponsorship: ['k_person'],
 }
 
 export function isLocked(templateId: string, knockoutId: string): boolean {
