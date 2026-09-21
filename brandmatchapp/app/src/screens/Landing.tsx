@@ -35,7 +35,7 @@ const FAILURES: { name: string; result: string; what: string }[] = [
   },
   {
     name: 'TopYappers',
-    result: 'Same list',
+    result: 'Outdated list',
     what: 'It gave us an outdated list. We bought the same database everyone buys.',
   },
   {
@@ -77,29 +77,6 @@ const QUALIFIED: { name: string; means: string }[] = [
     means: 'Runs as a business, already does collabs or sells products. Reply rate climbs.',
   },
 ]
-
-/**
- * A night of work, drawn. Wide at the top where the agents look, narrow at the
- * bottom where the list you actually read begins. The shape carries the ratio
- * on its own, so the numbers beside it only have to name the two ends.
- */
-function Night() {
-  return (
-    <div className="night">
-      <div className="night-end top">
-        <b>3,000</b>
-        <span>profiles scanned a day</span>
-      </div>
-      <div className="night-cone" aria-hidden="true">
-        <i /><i /><i /><i />
-      </div>
-      <div className="night-end bottom">
-        <b>200</b>
-        <span>qualified matches</span>
-      </div>
-    </div>
-  )
-}
 
 /**
  * Every call to action asks for the same thing: an email. The list is the
@@ -238,7 +215,7 @@ export function Landing() {
           </div>
 
           <div className="beat">
-            <h2>So we paid four platforms to fix it.</h2>
+            <h2>We tried four platforms.</h2>
             <table className="ledger">
               <thead>
                 <tr>
@@ -275,8 +252,7 @@ export function Landing() {
           </div>
 
           <div className="beat">
-            <h2>3,000 profiles scanned a day turn into <em>200 qualified matches.</em></h2>
-            <Night />
+            <h2 className="soft">Every day we scan 3000 new people and qualify <em>200 high intent leads!</em></h2>
 
             <div className="bars">
               <p className="bars-head">What is qualified?</p>
@@ -301,13 +277,11 @@ export function Landing() {
         </section>
 
         <footer className="land-foot">
-          <div>
+          <div className="foot-say">
             <span className="brand-word">brandmatch</span>
-            <p className="muted" style={{ marginTop: 8 }}>
-              Daily qualified leads for your business. Instagram today, TikTok and YouTube next.
-            </p>
+            <p className="foot-head">Your AI agent finds content creators <em>ready to close a deal.</em></p>
           </div>
-          <div>
+          <div className="foot-links">
             <h4>Get in</h4>
             <a href="#access">Early access</a>
             <a href="mailto:hey@jeremylasne.com">Talk to us</a>

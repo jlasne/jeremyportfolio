@@ -3728,6 +3728,10 @@ body { background: var(--paper); }
   line-height: 1.1; letter-spacing: -0.03em; color: var(--l-ink); max-width: 20ch;
 }
 .beat h2 em { font-style: normal; color: var(--orange); }
+/* The result line carries no argument of its own, the three bars under it do,
+   so it drops to a size that states rather than announces. Unbounded ships at
+   one weight, so size is the only lever this face has. */
+.beat h2.soft { font-size: clamp(21px, 2.6vw, 29px); line-height: 1.22; letter-spacing: -0.02em; max-width: 30ch; }
 .beat > p { margin-top: 16px; font-size: 17.5px; line-height: 1.6; color: var(--l-muted); max-width: 60ch; }
 .beat > p.beat-close {
   margin-top: 34px; font-family: var(--display); font-weight: 500; font-size: clamp(20px, 2.4vw, 26px);
@@ -3771,21 +3775,6 @@ body { background: var(--paper); }
   border-radius: var(--pill); font-size: 12.5px; color: var(--orange);
 }
 .loop-cycle i { width: 7px; height: 7px; border-radius: 50%; background: var(--orange); }
-
-/* A night of work, drawn: wide where the agents look, narrow where your list
-   begins. The shape carries the ratio, so the numbers only name the ends. */
-.night { margin-top: 36px; }
-.night-end { display: flex; align-items: baseline; gap: 12px; }
-.night-end b { font-family: var(--display); font-weight: 500; line-height: 1; letter-spacing: -0.035em; }
-.night-end.top b { font-size: clamp(34px, 4vw, 44px); color: var(--l-muted); }
-.night-end.bottom b { font-size: clamp(46px, 6vw, 68px); color: var(--orange); }
-.night-end span { font-size: 13.5px; color: var(--l-faint); }
-.night-cone { display: flex; flex-direction: column; align-items: center; gap: 9px; margin: 22px 0; }
-.night-cone i { display: block; height: 15px; border-radius: 5px; }
-.night-cone i:nth-child(1) { width: 100%; background: rgba(29, 29, 31, 0.13); }
-.night-cone i:nth-child(2) { width: 68%; background: rgba(255, 92, 43, 0.34); }
-.night-cone i:nth-child(3) { width: 40%; background: rgba(255, 92, 43, 0.64); }
-.night-cone i:nth-child(4) { width: 18%; background: var(--orange); }
 
 /* The three bars take the accent slab, because they are the answer the four
    rows above them were asking for. */
@@ -3841,3 +3830,17 @@ body { background: var(--paper); }
   .loop { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .bars { padding: 26px 22px 24px; }
 }
+
+/* The footer says the headline once more, so the page ends on the promise it
+   opened with rather than on a column of links. */
+.land-foot { grid-template-columns: minmax(0, 1fr) auto; gap: 40px; align-items: start; }
+/* Unbounded ships at one weight, so the footer headline gets its weight from
+   size: near the hero's, which is the point of saying it twice. */
+.foot-head {
+  margin-top: 20px; font-family: var(--display); font-weight: 500;
+  font-size: clamp(26px, 3.4vw, 40px); line-height: 1.1; letter-spacing: -0.03em;
+  color: var(--l-ink); max-width: 24ch;
+}
+.foot-head em { font-style: normal; color: var(--orange); }
+.foot-links { min-width: 150px; }
+@media (max-width: 760px) { .land-foot { grid-template-columns: minmax(0, 1fr); gap: 32px; } }
