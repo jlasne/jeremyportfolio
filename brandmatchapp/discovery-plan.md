@@ -259,7 +259,55 @@ Ce réglage décide à lui seul si le système trouve de mieux en mieux, ou se r
 
 ---
 
-## 7. Ce qui ne marche pas, et pourquoi
+## 7. Les designs alternatifs examinés
+
+Explorés le 21/09/2026, avec une recherche sur ce qui existe ailleurs.
+
+### Écarté : l'API Business Discovery de Meta
+
+Elle mesure un profil gratuitement et sa capacité grossit avec le nombre de clients connectés, 200 appels par heure et par utilisateur actif de l'app.
+
+**Écarté par Jeremy** : faire coexister l'API Meta et Apify pour mesurer donne deux chemins pour la même chose, avec deux pannes possibles et deux formats à réconcilier. Le gain ne paie pas cette complexité.
+
+Sa vraie faiblesse, au delà de la complexité : le compte visé doit être un compte professionnel public. On ne sait pas quelle part des créateurs 10-100k le sont, et un pipeline qui ignore silencieusement une partie de la cible est pire qu'un pipeline cher.
+
+### Écarté : construire un grand index d'un coup
+
+Le modèle Modash, 250 millions de profils crawlés en continu, une campagne devenant une simple requête en base.
+
+**Écarté par Jeremy** : gros investissement d'avance, et la fraîcheur condamne l'index à se périmer plus vite qu'on ne le remplit. L'index se construira tout seul, run après run, ce qui est déjà le cas.
+
+### Gardé comme piste, sans enthousiasme : acheter un index tiers
+
+Un abonnement Modash ou équivalent. Zéro découverte, filtres inclus, 250 millions de profils.
+
+Coût fixe, aucune dépense variable, mais rien qui nous appartienne et une dépendance totale.
+
+### Retenu : changer d'où viennent les pseudos, sans toucher au reste
+
+Le point qui distingue ces pistes des deux écartées : elles ne changent **que la source des pseudos**. La mesure reste Apify, un seul chemin, un seul format.
+
+| source | prix | dans la cible | vrai prix d'un candidat utile |
+|---|---|---|---|
+| Voisins en masse, acteur dédié | 0,0010 $ | 68% | 0,0015 $ |
+| Google | 0,0018 $ | 99% | 0,0018 $ |
+| Notre recherche par nom de compte | 0,0023 $ | 15% | 0,0153 $ |
+
+Un acteur dédié aux voisins rend environ 49 comptes similaires par graine, contre 8 livrés avec une fiche payée.
+
+Estimation à mesure inchangée, en achetant la fiche Apify de chaque candidat :
+
+| chemin | coût du run | par lead |
+|---|---|---|
+| Aujourd'hui | 2,46 $ | 0,35 $ |
+| Par les voisins en masse | 0,58 $ | 0,082 $ |
+| Par Google, en n'achetant que ce qui est dans la fourchette | 0,50 $ | 0,071 $ |
+
+Quatre à cinq fois moins cher, sans ajouter un deuxième système de mesure.
+
+---
+
+## 8. Ce qui ne marche pas, et pourquoi
 
 ### Filtrer sur la taille avec l'API Instagram
 
@@ -279,7 +327,7 @@ Rien ne la voit. La date du dernier post arrive avec la fiche. Petite fuite : 3%
 
 ---
 
-## 8. Le pool partagé : un arbitrage à trancher
+## 9. Le pool partagé : un arbitrage à trancher
 
 Un profil payé par une campagne est relu gratuitement par toutes les autres. Bon pour l'argent, mauvais pour la lisibilité et pour la qualité.
 
@@ -291,7 +339,7 @@ Décision à prendre : garder le partage, avec la niche comme garde-fou, ou cloi
 
 ---
 
-## 9. Ordre proposé
+## 10. Ordre proposé
 
 1. Google comme canal de découverte, dès qu'on a la clé
 2. Le design itératif par vagues, qui a besoin de Google pour sa première vague
@@ -305,7 +353,7 @@ Le point 1 seul fait la moitié du chemin. Les points 1 à 3 forment un tout : l
 
 ---
 
-## 10. Les questions encore ouvertes
+## 11. Les questions encore ouvertes
 
 | question | pourquoi elle compte |
 |---|---|
@@ -316,7 +364,7 @@ Le point 1 seul fait la moitié du chemin. Les points 1 à 3 forment un tout : l
 
 ---
 
-## 11. Blocages en cours
+## 12. Blocages en cours
 
 - Apify à 69,81 $ sur un plafond mensuel de 69 $. Aucun run possible avant relèvement.
 - Pas de clé d'API de recherche web pour le canal Google.
