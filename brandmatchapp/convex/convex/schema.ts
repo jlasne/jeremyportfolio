@@ -630,6 +630,15 @@ export default defineSchema({
     sources: v.optional(v.array(v.object({ handle: v.string(), parents: v.optional(v.array(v.string())) }))),
     status: v.string(),
     profilesFetched: v.number(),
+    /**
+     * How many of them we had never seen before.
+     *
+     * The same query returns the same accounts. One campaign asked for 504
+     * profiles across seven queries it had already run and 135 were new, so
+     * a run reported by what it fetched reads as five times the discovery it
+     * actually did.
+     */
+    profilesFresh: v.optional(v.number()),
     profilesEvaluated: v.number(),
     qualified: v.number(),
     costCents: v.number(),

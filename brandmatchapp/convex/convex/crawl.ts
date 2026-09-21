@@ -159,6 +159,7 @@ export const finishRun = internalMutation({
     externalRunId: v.string(),
     status: v.string(),
     profilesFetched: v.optional(v.number()),
+    profilesFresh: v.optional(v.number()),
     costCents: v.optional(v.number()),
     error: v.optional(v.string()),
   },
@@ -172,6 +173,7 @@ export const finishRun = internalMutation({
     await ctx.db.patch(run._id, {
       status: args.status,
       profilesFetched: args.profilesFetched ?? run.profilesFetched,
+      ...(args.profilesFresh !== undefined ? { profilesFresh: args.profilesFresh } : {}),
       // Measured on real runs: search plus detail lands near 0.6 cents a
       // profile. Both halves are paid to Apify. If the search half ever proves
       // to be most of that, a search engine answers the same question for less

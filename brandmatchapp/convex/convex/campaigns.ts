@@ -318,3 +318,86 @@ export const unwiden = internalMutation({
     return { cleared: true, leads: leads.length }
   },
 })
+
+/**
+ * One campaign, read on its own.
+ *
+ * The profile pool is shared: a profile bought for one campaign is read by
+ * every other one for free, which is the right way round for the money and
+ * the wrong way round for a report. Counting the pool told us an
+ * entertainment campaign had 44 profiles past its numbers when its own
+ * discovery had found one, and that its nine leads were its own when every
+ * one came from another campaign's spending.
+ *
+ * So everything here is read from rows that carry this campaignId: the runs
+ * it paid for, and the verdicts it wrote. Nothing scans the pool.
+ */
+export const report = internalQuery({
+  args: { campaignId: v.id('campaigns'), since: v.optional(v.number()) },
+  returns: v.any(),
+  handler: async (ctx, { campaignId, since }) => {
+    const campaign = await ctx.db.get(campaignId)
+    if (!campaign) return { error: 'No such campaign' }
+    const after = since ?? 0
+
+    const runs = (await ctx.db
+      .query('crawlRuns')
+      .withIndex('by_campaign', (q) => q.eq('campaignId', campaignId))
+      .collect()).filter((r) => r.startedAt >= after)
+
+    const byPhase: Record<string, { runs: number; fetched: number; fresh: number; cents: number }> = {}
+    for (const r of runs) {
+      const b = byPhase[r.phase] ?? (byPhase[r.phase] = { runs: 0, fetched: 0, fresh: 0, cents: 0 })
+      b.runs += 1
+      b.fetched += r.profilesFetched
+      b.fresh += r.profilesFresh ?? 0
+      b.cents += r.costCents
+    }
+
+    const rows = (await ctx.db
+      .query('evaluations')
+      .withIndex('by_campaign', (q) => q.eq('campaignId', campaignId))
+      .collect()).filter((e) => e._creationTime >= after)
+
+    const verdicts: Record<string, number> = {}
+    const blockedBy: Record<string, number> = {}
+    for (const e of rows) {
+      verdicts[e.verdict] = (verdicts[e.verdict] ?? 0) + 1
+      if (e.blockedBy) blockedBy[e.blockedBy] = (blockedBy[e.blockedBy] ?? 0) + 1
+    }
+
+    const leads = (await ctx.db
+      .query('leads')
+      .withIndex('by_campaign', (q) => q.eq('campaignId', campaignId))
+      .collect()).filter((l) => l._creationTime >= after)
+
+    // A model call is only paid for once the numbers have held. Measured at
+    // $0.0035 a profile with pictures, and a third of that without.
+    const judged = rows.filter((e) => e.verdict !== 'hard_fail').length
+    const apifyCents = runs.reduce((sum, r) => sum + r.costCents, 0)
+    const modelCents = Math.round(judged * 0.35)
+
+    return {
+      campaign: campaign.name,
+      discovery: {
+        byPhase,
+        fetched: runs.reduce((n, r) => n + r.profilesFetched, 0),
+        fresh: runs.reduce((n, r) => n + (r.profilesFresh ?? 0), 0),
+      },
+      funnel: {
+        evaluated: rows.length,
+        reachedTheJudge: judged,
+        qualified: verdicts.qualified ?? 0,
+        delivered: leads.length,
+      },
+      verdicts,
+      blockedBy: Object.fromEntries(Object.entries(blockedBy).sort((a, b) => b[1] - a[1])),
+      costUsd: {
+        apify: apifyCents / 100,
+        model: modelCents / 100,
+        total: (apifyCents + modelCents) / 100,
+        perLead: leads.length ? (apifyCents + modelCents) / 100 / leads.length : null,
+      },
+    }
+  },
+})
