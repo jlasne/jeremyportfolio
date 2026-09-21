@@ -316,6 +316,16 @@ export default defineSchema({
      */
     related: v.optional(v.array(v.string())),
     /**
+     * The words on the page their bio links to, read once and kept.
+     *
+     * A linktree is where a creator lists what they actually sell, and it is
+     * the only place an app of their own is named when the bio does not name
+     * it. Without it the judge was passing a creator whose link page opens on
+     * "Try my recipe app free for 7 days".
+     */
+    linkText: v.optional(v.string()),
+    linkReadAt: v.optional(v.number()),
+    /**
      * The handles this person mentions and tags in their posts. The neighbour
      * channel reads this list, and only from people the gates let through:
      * a coach's posts cite other coaches, and a bikini brand's posts cite

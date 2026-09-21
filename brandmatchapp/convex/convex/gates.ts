@@ -32,7 +32,15 @@ export interface Measured {
 
 export interface GateSetShape {
   hard: HardRules
-  knockouts: { id: string; question: string; why?: string; enabled?: boolean }[]
+  knockouts: {
+    id: string
+    question: string
+    why?: string
+    /** The disqualifying fact, written plainly. What the judge is asked. */
+    fail?: string
+    pass?: string
+    enabled?: boolean
+  }[]
   criteria: { id: string; text: string }[]
   passScore: number
 }

@@ -87,12 +87,56 @@ export const pending = internalQuery({
           country: c.country,
           language: c.language,
           links: c.links,
+          linkPage: c.linkReadAt ? (c.linkText ?? '') : undefined,
           email: c.email ? 'on the profile' : undefined,
           firstSeenAt: c.firstSeenAt,
           posts: typical,
         }
       })),
     }
+  },
+})
+
+/**
+ * The words on the page a bio links to.
+ *
+ * A creator lists what they sell on a linktree, not in 150 characters of
+ * bio. One page, the first link only, tags stripped, two thousand characters
+ * kept: enough for the judge to read an app, a price and a product name.
+ *
+ * It fails quietly. A page that times out or refuses us is an empty string,
+ * which is stored so the next pass does not try again, and the judge is told
+ * nothing rather than told wrongly.
+ */
+async function readLink(links: string[] | undefined): Promise<string | null> {
+  const url = (links ?? []).find((u) => /^https?:\/\//i.test(u))
+  if (!url) return null
+  try {
+    const res = await fetch(url, {
+      redirect: 'follow',
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; brandmatch/1.0)' },
+    })
+    if (!res.ok) return ''
+    const html = await res.text()
+    return html
+      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&[a-z]+;/gi, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 2000)
+  } catch {
+    return ''
+  }
+}
+
+export const keepLink = internalMutation({
+  args: { creatorId: v.id('creators'), text: v.string() },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.creatorId, { linkText: args.text, linkReadAt: Date.now() })
+    return null
   },
 })
 
@@ -203,6 +247,15 @@ export const campaign = internalAction({
         continue
       }
 
+      // Gate 1 held. Read the page behind their link before asking, because
+      // that is where a creator lists what they actually sell, and the model
+      // gets one look at everything.
+      if (creator.linkPage === undefined) {
+        const text = await readLink(creator.links as string[] | undefined)
+        await ctx.runMutation(internal.evaluate.keepLink, { creatorId: creator.id, text: text ?? '' })
+        creator.linkPage = text ?? ''
+      }
+
       asked++
       const answer = await ask(creator, gates, niches, batch.brief as string)
       if ('error' in answer) {
@@ -274,8 +327,13 @@ async function ask(
             {
               type: 'object',
               additionalProperties: false,
-              required: ['pass', 'note'],
-              properties: { pass: { type: 'boolean' }, note: { type: 'string' } },
+              // The model is asked whether the disqualifying fact is TRUE of
+              // the profile, and has to quote the words it read it in. A
+              // knockout asked the other way round is a double negative, and
+              // a model answering one writes "no evidence of an app; they
+              // promote a recipe app" and passes them.
+              required: ['found', 'quote'],
+              properties: { found: { type: 'boolean' }, quote: { type: 'string' } },
             },
           ]),
         ),
@@ -304,8 +362,9 @@ async function ask(
     'You qualify Instagram profiles for a business.',
     `What the business sells: ${brief}`,
     '',
-    'Answer every knockout with true or false. One false eliminates the profile.',
-    ...gates.knockouts.map((k) => `- ${k.id}: ${k.question}${k.why ? ` (${k.why})` : ''}`),
+    'Below are facts that disqualify a profile. For each one, answer found: true when it is true of this profile, and quote the exact words you read it in, from the bio, a caption or the page behind their link. Answer found: false only when nothing in front of you says it, and quote the empty string.',
+    'A quote you cannot point at in the text above is a wrong answer. When in doubt, found: true.',
+    ...gates.knockouts.map((k) => `- ${k.id}: ${k.fail || k.question}${k.why ? ` (${k.why})` : ''}`),
     '',
     'Then read each sentence below against the profile. Answer 2 when it is true of them, 1 when it is partly true, 0 when it is false or you cannot tell. Give one line of evidence as the note.',
     ...gates.criteria.map((c) => `- ${c.id}: ${c.text}`),
@@ -318,7 +377,7 @@ async function ask(
         ]
       : []),
     '',
-    'Judge from the bio, the links, the numbers and the posts below. The posts are the last twelve, newest first, with their captions and their counts: read them for what the person sells, teaches, complains about, and how people respond. Never assume what the posts do not show. Write one plain sentence as the reason.',
+    'Judge from the bio, the link page, the numbers and the posts below. The posts are the last twelve, newest first, with their captions and their counts: read them for what the person sells, teaches, complains about, and how people respond. Never assume what the posts do not show. Write one plain sentence as the reason.',
     '',
     'Also say where the person lives as a two letter country code (US, GB, AU, FR, TH) and the language they post in as a two letter code (en, fr, pt). Read them from the bio, the city, the currency, the captions. Answer "unknown" for either when the profile does not say.',
     '',
@@ -350,7 +409,17 @@ async function ask(
   const text = body?.choices?.[0]?.message?.content
   if (!text) return { error: body?.error?.message ?? `OpenRouter sent no answer: ${raw.slice(0, 200)}` }
   try {
-    const parsed = JSON.parse(text) as Judgement
+    const raw2 = JSON.parse(text) as Record<string, any>
+    // The model answered the disqualifying fact. The engine reads a pass, so
+    // the two are flipped here and nowhere else. A found fact with no quote
+    // still drops the profile: the quote is evidence, never permission.
+    const knockouts: Record<string, { pass: boolean; note?: string }> = {}
+    for (const [id, a] of Object.entries(raw2.knockouts ?? {})) {
+      const found = Boolean((a as Record<string, unknown>)?.found)
+      const quote = String((a as Record<string, unknown>)?.quote ?? '').replace(/\s+/g, ' ').trim()
+      knockouts[id] = { pass: !found, ...(found ? { note: quote || 'Found it, quoted nothing' } : {}) }
+    }
+    const parsed = { ...raw2, knockouts } as Judgement
     // "other" is not a niche, it is the absence of one.
     if (parsed.niche === 'other') parsed.niche = null
     return { judgement: parsed }
@@ -396,5 +465,110 @@ export const forget = internalMutation({
     const rows = await ctx.db.query('evaluations').withIndex('by_campaign', (q) => q.eq('campaignId', campaignId)).collect()
     for (const r of rows) await ctx.db.delete(r._id)
     return { forgotten: rows.length }
+  },
+})
+
+/**
+ * Judges named handles again and writes nothing.
+ *
+ * A lead's verdict is its audit trail and is not something to overwrite while
+ * measuring a change to the judge. This runs the new one over profiles we
+ * already paid for and says what it would have decided, so a change to the
+ * questions can be priced in leads kept and leads dropped before it touches
+ * anybody's list.
+ */
+export const tryOn = internalAction({
+  args: { campaignId: v.id('campaigns'), handles: v.array(v.string()) },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<Record<string, unknown>> => {
+    const batch = await ctx.runQuery(internal.evaluate.pending, { campaignId: args.campaignId, limit: 0 })
+    if ('error' in batch) return batch as Record<string, unknown>
+    const gates = batch.gates as GateSetShape
+    const niches = (batch.niches ?? []) as Niche[]
+    const now = Date.now()
+    const out = []
+
+    for (const handle of args.handles.map((h) => h.toLowerCase().replace(/^@/, ''))) {
+      const creator = await ctx.runQuery(internal.evaluate.oneByHandle, { handle })
+      if (!creator) { out.push({ handle, error: 'never measured' }); continue }
+      const measured = {
+        followers: creator.followers,
+        medianViews: creator.medianViews,
+        medianComments: creator.medianComments,
+        postsPerMonth: creator.postsPerMonth,
+        lastPostAt: creator.lastPostAt,
+        country: creator.country,
+        language: creator.language,
+      }
+      if (creator.linkPage === undefined) {
+        const text = await readLink(creator.links as string[] | undefined)
+        await ctx.runMutation(internal.evaluate.keepLink, { creatorId: creator.id, text: text ?? '' })
+        creator.linkPage = text ?? ''
+      }
+      const answer = await ask(creator, gates, niches, batch.brief as string)
+      if ('error' in answer) { out.push({ handle, error: answer.error }); continue }
+      const country = code(answer.judgement.country, true)
+      const language = code(answer.judgement.language, false)
+      const result = runGates(
+        { ...measured, country: country ?? measured.country, language: language ?? measured.language },
+        gates, niches, answer.judgement, now,
+      )
+      out.push({
+        handle,
+        verdict: result.verdict,
+        blockedBy: result.blockedBy,
+        score: result.score,
+        linkChars: String(creator.linkPage ?? '').length,
+        dropped: result.knockoutAnswers.filter((k) => !k.pass).map((k) => `${k.id}: ${k.note ?? ''}`),
+        reason: result.reason,
+      })
+    }
+    return { judged: out.length, out }
+  },
+})
+
+/** One measured profile, shaped the way the judge reads it. */
+export const oneByHandle = internalQuery({
+  args: { handle: v.string() },
+  returns: v.any(),
+  handler: async (ctx, { handle }) => {
+    const c = await ctx.db
+      .query('creators')
+      .withIndex('by_handle', (q) => q.eq('platform', 'instagram').eq('handle', handle))
+      .first()
+    if (!c) return null
+    const posts = await ctx.db
+      .query('creatorPosts')
+      .withIndex('by_creator', (q) => q.eq('creatorId', c._id))
+      .collect()
+    const typical = posts
+      .sort((a, b) => b.postedAt - a.postedAt)
+      .slice(0, 12)
+      .map((p) => ({
+        date: new Date(p.postedAt).toISOString().slice(0, 10),
+        kind: p.kind,
+        views: p.views,
+        likes: p.likes,
+        comments: p.comments,
+        caption: Array.from((p.caption ?? '').replace(/\s+/g, ' ')).slice(0, 280).join(''),
+      }))
+    return {
+      id: c._id,
+      handle: c.handle,
+      name: c.name,
+      bio: c.bio,
+      followers: c.followers,
+      medianViews: c.medianViews,
+      medianComments: c.medianComments,
+      postsPerMonth: c.postsPerMonth,
+      lastPostAt: c.lastPostAt,
+      country: c.country,
+      language: c.language,
+      links: c.links,
+      linkPage: c.linkReadAt ? (c.linkText ?? '') : undefined,
+      email: c.email ? 'on the profile' : undefined,
+      firstSeenAt: c.firstSeenAt,
+      posts: typical,
+    }
   },
 })
