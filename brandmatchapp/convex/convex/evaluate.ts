@@ -97,6 +97,11 @@ export const pending = internalQuery({
           language: c.language,
           links: c.links,
           linkPage: c.linkReadAt ? (c.linkText ?? '') : undefined,
+          // Already bought, so never bought again. Without this the most
+          // expensive fetch we make ran in full on every pass over the pool.
+          hasComments: c.commentsReadAt !== undefined,
+          audience: c.topComments,
+          paidPosts: c.paidPosts,
           verified: c.verified,
           category: c.category,
           follows: c.follows,
@@ -171,7 +176,10 @@ async function readComments(handles: string[]): Promise<Map<string, { paid: bool
       body: JSON.stringify({
         directUrls: handles.slice(0, 40).map((h) => `https://www.instagram.com/${h}/`),
         resultsType: 'posts',
-        resultsLimit: 6,
+        // Two posts, not six. The question a client asks of comments is what
+        // kind of people answer, and the first two posts answer it. Six cost
+        // three times as much and said the same thing.
+        resultsLimit: 2,
         addParentData: false,
       }),
     })
@@ -214,10 +222,20 @@ async function readComments(handles: string[]): Promise<Map<string, { paid: bool
 }
 
 export const keepComments = internalMutation({
-  args: { creatorId: v.id('creators'), paidPercent: v.number() },
+  args: {
+    creatorId: v.id('creators'),
+    paidPercent: v.optional(v.number()),
+    comments: v.optional(v.array(v.object({ by: v.string(), text: v.string() }))),
+  },
   returns: v.null(),
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.creatorId, { paidPosts: args.paidPercent })
+    await ctx.db.patch(args.creatorId, {
+      ...(args.paidPercent !== undefined ? { paidPosts: args.paidPercent } : {}),
+      ...(args.comments ? { topComments: args.comments.slice(0, 40) } : {}),
+      // Stamped even when nothing came back, so a profile whose comments are
+      // off is not bought again every night.
+      commentsReadAt: Date.now(),
+    })
     return null
   },
 })
@@ -359,28 +377,60 @@ export const campaign = internalAction({
         creator.linkPage = text ?? ''
       }
     }
-    if (needs.has('comments')) {
-      const want = survivors.filter((c) => !c.hasComments).map((c) => c.handle as string)
+
+    /**
+     * Buys the comments for a set of profiles, once each, ever.
+     *
+     * Six times the price of a profile fetch, and the most expensive thing
+     * this pipeline does. Measured on one run: 345 profiles for $4.72, next
+     * to $0.55 for discovering all of them.
+     */
+    const buyComments = async (people: Record<string, any>[]) => {
+      const want = people.filter((c) => !c.hasComments).map((c) => c.handle as string)
+      if (!want.length) return
       const found = await readComments(want)
-      for (const creator of survivors) {
+      for (const creator of people) {
+        if (creator.hasComments) continue
         const rows = found.get(creator.handle as string)
-        if (!rows?.length) continue
-        creator.audience = rows.flatMap((r) => r.comments).slice(0, 40)
-        creator.paidPosts = Math.round((rows.filter((r) => r.paid).length / rows.length) * 100)
+        const comments = (rows ?? []).flatMap((r) => r.comments).slice(0, 40)
+        creator.audience = comments
+        if (rows?.length) creator.paidPosts = Math.round((rows.filter((r) => r.paid).length / rows.length) * 100)
+        creator.hasComments = true
         await ctx.runMutation(internal.evaluate.keepComments, {
-          creatorId: creator.id, paidPercent: creator.paidPosts,
+          creatorId: creator.id,
+          ...(creator.paidPosts !== undefined ? { paidPercent: creator.paidPosts } : {}),
+          comments,
         })
       }
     }
 
-    for (const creator of survivors) {
+    /**
+     * Comments are bought last, and only for whoever is still standing.
+     *
+     * A deal breaker throws away most of a batch, and it is answered from the
+     * bio, the captions and the pictures, all of which are already paid for.
+     * Buying comments before that pays for everybody to settle a question that
+     * only matters for the few who survive. On the dog run that was 57 bought
+     * where 6 were left at the end.
+     *
+     * The price is a second model call for those few, a fifth of what the
+     * comments they skipped would have cost. A campaign whose deal breakers
+     * themselves need comments has nothing to sort on first, so it buys up
+     * front as before.
+     */
+    const askedKnockouts = gates.knockouts.filter((k) => k.enabled !== false)
+    const sortFirst = needs.has('comments') && !askedKnockouts.some((k) => k.needs?.includes('comments'))
+    if (needs.has('comments') && !sortFirst) await buyComments(survivors)
+
+    /** One profile, judged and written down. Returns whether it is still alive. */
+    const judge = async (creator: Record<string, any>): Promise<boolean> => {
       const measured = creator.measured as Measured
       asked++
       const answer = await ask(creator, gates, niches, batch.brief as string)
       if ('error' in answer) {
         failed++
         lastError = answer.error
-        continue
+        return false
       }
       // Country and language come back with the judgement and gate 1 reads
       // them now, on the same pass. Unknown stays unknown and passes.
@@ -388,7 +438,6 @@ export const campaign = internalAction({
       const language = code(answer.judgement.language, false)
       const placed = { ...measured, country: country ?? measured.country, language: language ?? measured.language }
       const result = runGates(placed, gates, niches, answer.judgement, now)
-      if (result.verdict === 'qualified') qualified++
       await ctx.runMutation(internal.evaluate.write, {
         country,
         language,
@@ -407,6 +456,23 @@ export const campaign = internalAction({
         reason: result.reason,
         model: process.env.OPENROUTER_MODEL ?? 'deepseek/deepseek-v4-flash',
       })
+      return result.verdict === 'qualified'
+    }
+
+    const standing: Record<string, any>[] = []
+    for (const creator of survivors) {
+      if (await judge(creator)) standing.push(creator)
+    }
+
+    // The sort is done. Only these few are worth the comments, and only they
+    // are judged a second time, on an answer that now has them.
+    if (sortFirst && standing.length) {
+      await buyComments(standing)
+      for (const creator of standing) {
+        if (await judge(creator)) qualified++
+      }
+    } else {
+      qualified += standing.length
     }
 
     return { tested: (batch.creators as unknown[]).length, hardFail, asked, qualified, failed, lastError }

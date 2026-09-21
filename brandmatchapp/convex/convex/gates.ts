@@ -72,6 +72,12 @@ export interface GateSetShape {
      */
     need?: string
     pass?: string
+    /**
+     * What the judge needs in front of it to answer this one, same words as a
+     * sentence uses. A deal breaker that names comments is answered before
+     * anything is sorted, so its campaign buys them up front.
+     */
+    needs?: string[]
     enabled?: boolean
   }[]
   criteria: {

@@ -64,6 +64,8 @@ const knockout = v.object({
   fail: v.optional(v.string()),
   /** The fact that has to be there. Absent, it drops the profile. */
   need: v.optional(v.string()),
+  /** What the judge needs to answer it. Naming comments makes them a cost. */
+  needs: v.optional(v.array(v.string())),
   /** Off means the question is not asked. Locked ones can never be off. */
   enabled: v.optional(v.boolean()),
 })
@@ -381,6 +383,17 @@ export default defineSchema({
     highlights: v.optional(v.number()),
     /** Share of the last twelve posts marked as a paid partnership. */
     paidPosts: v.optional(v.number()),
+    /**
+     * When the comments were bought, and what came back.
+     *
+     * Comments are the most expensive thing we fetch, six times a profile,
+     * and they were being bought again on every run because nothing recorded
+     * that we already had them. The stamp is written whether or not anything
+     * came back: a profile with no comments to read is still a profile we
+     * have already paid to look at.
+     */
+    commentsReadAt: v.optional(v.number()),
+    topComments: v.optional(v.array(v.object({ by: v.string(), text: v.string() }))),
     /** How many of the last twelve are reels rather than photos. */
     reelShare: v.optional(v.number()),
     /**

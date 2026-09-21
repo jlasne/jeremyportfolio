@@ -137,6 +137,7 @@ export function withinTemplate(
           // about the absence of something.
           fail: original?.fail ?? (k.fail ? String(k.fail).slice(0, 240) : undefined),
           need: k.need ? String(k.need).slice(0, 240) : undefined,
+          needs: Array.isArray(k.needs) ? k.needs.map((n: unknown) => String(n)) : undefined,
           enabled: true,
         }
       }).filter((k) => k.question)
