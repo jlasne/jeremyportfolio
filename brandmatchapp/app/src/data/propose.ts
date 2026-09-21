@@ -2,7 +2,6 @@ import type { CampaignBrief, Criterion, EitherGroup, HardRules, Knockout, Niche,
 import { suggestNiches } from './niches'
 import { compact } from '../lib/format'
 import { template, TEMPLATES } from './templates'
-import { eitherLine } from './tuning'
 
 // The brief becomes a proposal.
 //
@@ -403,14 +402,9 @@ export async function draftOnServer(brief: CampaignBrief): Promise<{ campaignId:
       languages: c.extracted?.languages ?? [],
       niches: (c.extracted?.niches ?? []).map((n: Niche) => ({ ...n, enabled: n.enabled !== false })),
       summaries: {
-        gate1: [
-          `We keep people with ${compact(hard.followersMin ?? 0)} to ${compact(hard.followersMax ?? 0)} followers`,
-          `who posted in the last ${hard.lastPostWithinDays ?? 0} days`,
-          // Reach and rhythm are a choice now, so they are read off the groups
-          // and not off a number that is no longer in hard.
-          ...either.map(eitherLine).filter(Boolean),
-          hard.medianViewsMin ? `getting about ${compact(hard.medianViewsMin)} views on a typical post` : '',
-        ].filter(Boolean).join(', ') + '.',
+        // Reach and rhythm are a choice now, so they are listed below rather
+        // than read off a number that is no longer in hard.
+        gate1: `We keep people with ${compact(hard.followersMin ?? 0)} to ${compact(hard.followersMax ?? 0)} followers who posted in the last ${hard.lastPostWithinDays ?? 0} days. The rest is below, and every line is yours to move.`,
         gate2: `${count(knockouts.length)} yes or no questions about each person, and all of them start switched off. Switch one on and a no drops that person whatever else they score.`,
         gate3: `${count(criteria.length)} sentences about who you want. Each one is true, partly true or false about a person, and that is their brand fit. It orders your list.`,
       },

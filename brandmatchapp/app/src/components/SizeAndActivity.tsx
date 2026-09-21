@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import type { EitherGroup, HardRules } from '../types'
+import type { HardRules } from '../types'
 import { getCampaign, getGateSet } from '../data'
 import { saveGateSet, setExtracted } from '../data/store'
 import { cadence, DIALS, eitherLine, fromPosition, settle, toPosition, type Dial, type DialKey } from '../data/tuning'
@@ -102,7 +102,7 @@ function Slider({
 }
 
 /** The first check in one sentence, rewritten on every drag. */
-export function gateOneLine(hard: HardRules, either?: EitherGroup[]): string {
+export function gateOneLine(hard: HardRules): string {
   const reach = [
     hard.medianViewsMin ? `${compact(hard.medianViewsMin)} views` : null,
     hard.medianCommentsMin ? `${hard.medianCommentsMin} comments` : null,
@@ -112,9 +112,6 @@ export function gateOneLine(hard: HardRules, either?: EitherGroup[]): string {
     hard.postsPerMonthMin ? cadence(hard.postsPerMonthMin) : null,
     reach.length ? `around ${reach.join(' and ')} on a typical post` : null,
     hard.lastPostWithinDays ? `active in the last ${hard.lastPostWithinDays} days` : null,
-    // Reach and rhythm usually live in a group now, so the sentence would lose
-    // them here. Each group joins as the choice it is.
-    ...(either ?? []).map(eitherLine).filter(Boolean),
   ].filter(Boolean)
   return `We keep people with ${bits.join(', ')}.`.replace('with .', 'with the numbers below.')
 }
@@ -162,7 +159,7 @@ export function SizeAndActivity({ campaignId }: { campaignId: string }) {
         1. Size and activity
         <Info text="A hard filter. Every number is counted from their last 12 posts, never from anything an account declares. Someone who misses one of these is never looked at again, so it costs nothing to run." />
       </h2>
-      <p className="gate-lede">{gateOneLine(hard, gates.either)}</p>
+      <p className="gate-lede">{gateOneLine(hard)}</p>
 
       <Picker
         label="Where they post from"

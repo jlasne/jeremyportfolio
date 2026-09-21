@@ -390,6 +390,7 @@ export function saysRule(key: keyof HardRules, n: number): string {
 export function cadence(perMonth: number): string {
   if (perMonth >= 26) return 'posting daily'
   if (perMonth >= 12) return 'posting several times a week'
+  if (perMonth >= 7) return 'posting at least twice a week'
   if (perMonth >= 4) return 'posting at least weekly'
   return `posting at least ${perMonth} times a month`
 }
