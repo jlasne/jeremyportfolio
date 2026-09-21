@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import GlyphPortal from '../components/GlyphPortal'
-import sky from '../art/bg.webp'
+import { Sky } from '../art/Sky'
 import { api } from '../lib/api'
 
 // The landing, as one page you scroll into.
@@ -221,7 +221,7 @@ export function Landing() {
         fontWeight={900}
         scrollLength={1.6}
         enterLabel="See what you get"
-        background={<div className="lp-sky" style={{ backgroundImage: `url(${sky})` }} />}
+        background={<div className="lp-sky"><Sky /></div>}
         style={{
           '--gp-paper': '#faf6ec',
           '--gp-ink': '#23211c',

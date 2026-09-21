@@ -3753,16 +3753,26 @@ body { background: var(--paper); }
    cards and the last ask, over the sunrise. */
 .lp-boot { min-height: 100svh; background: var(--l-ground); }
 .lp-portal { font-family: var(--font); }
-/* The image comes in as an inline background-image, so this sets only how it
-   is laid out. A shorthand with an empty url() would throw the whole rule. */
+/* The sunrise is drawn in Sky.tsx, so it holds its own colour and needs no
+   wash over it. The scale is the camera creeping in as the dive starts. */
 .lp-sky {
   position: absolute; inset: 0;
-  background-position: center 62%; background-size: cover; background-repeat: no-repeat;
   transform: scale(var(--gp-field-scale, 1));
+  /* Its own layer, so the scale composites a ready texture instead of redrawing
+     the blurs on every frame of the dive. */
+  will-change: transform;
 }
-.lp-sky::before {
+/* slice crops the drawing to the viewport, the way cover crops an image. The
+   sun keeps the middle, which is the band the word is cut out of. */
+.lp-sky-art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* The dive ends on a full-strength sunrise, which the cards then have to be
+   read over. GlyphPortal runs --gp-reveal from 0 to 1 across the same stretch
+   the cards fade in on, so cream comes up on that curve. At rest it measures
+   5.1 for the muted text and 14 for the headings, against 1.07 unveiled. */
+.lp-sky::after {
   content: ''; position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(242, 113, 31, 0.26) 0%, rgba(242, 113, 31, 0.30) 52%, rgba(242, 113, 31, 0.07) 100%);
+  background: var(--l-ground);
+  opacity: calc(var(--gp-reveal, 0) * 0.86);
 }
 
 /* The field is decorative, so the front has to let the form through it. */
@@ -3858,7 +3868,7 @@ body { background: var(--paper); }
 /* The one line of the story that stayed: who wrote the page. */
 .lp-proof {
   max-width: 1120px; margin: 52px auto 0; padding: 0 max(22px, 4vw);
-  text-align: center; font-size: 15px; color: var(--l-faint);
+  text-align: center; font-size: 15px; color: var(--l-muted);
 }
 
 /* A row fills in as it is reached, left to right. */
@@ -3908,7 +3918,6 @@ body { background: var(--paper); }
   .lp-front-ask { top: calc(var(--gp-word-bottom, 55%) + 26px); }
   .lp-line { margin-bottom: 18px; font-size: 15px; max-width: 42ch; }
   .lp-ask { margin-top: 56px; }
-  .lp-sky { background-position: 68% 58%; }
   .start { margin-top: 32px; }
   .start-row { flex-direction: column; gap: 10px; }
   .start-box { height: 54px; padding: 0 18px; }
