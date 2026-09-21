@@ -282,9 +282,22 @@ function ProposalStep({
 
   // Finishing lands on the campaign list. Nothing is simulated on the way
   // out: a run costs us real work and the client did not ask for one yet.
-  const create = (andEdit: boolean) => {
-    const id = createCampaign(brief, proposal, name.trim() || proposal.name)
-    navigate(andEdit ? `campaign/${id}/brief` : 'campaigns')
+  //
+  // The campaign is written on the server before the screen moves, because
+  // the id it comes back with is what every later call addresses. Moving
+  // first would navigate to a campaign the server has never heard of.
+  const [making, setMaking] = useState(false)
+  const [failed, setFailed] = useState('')
+  const create = async (andEdit: boolean) => {
+    setMaking(true)
+    setFailed('')
+    try {
+      const id = await createCampaign(brief, proposal, name.trim() || proposal.name)
+      navigate(andEdit ? `campaign/${id}/brief` : 'campaigns')
+    } catch (err) {
+      setMaking(false)
+      setFailed(err instanceof Error ? err.message : 'That did not reach the server')
+    }
   }
 
   return (
@@ -416,10 +429,14 @@ function ProposalStep({
       )}
 
       <div className="page-head">
-        <span className="hint">You can change every one of these afterwards.</span>
+        <span className="hint">{failed || 'You can change every one of these afterwards.'}</span>
         <span className="spacer" />
-        <button type="button" className="btn" onClick={() => create(true)}>Change something</button>
-        <button type="button" className="btn primary" onClick={() => create(false)}>Looks right, create it</button>
+        <button type="button" className="btn" disabled={making} onClick={() => void create(true)}>
+          Change something
+        </button>
+        <button type="button" className="btn primary" disabled={making} onClick={() => void create(false)}>
+          {making ? 'Creating' : 'Looks right, create it'}
+        </button>
       </div>
     </>
   )

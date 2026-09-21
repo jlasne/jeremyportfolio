@@ -136,6 +136,28 @@ function push(send: (api: typeof import('../lib/api').api) => Promise<unknown>):
   })
 }
 
+/**
+ * The whole brief, after a change to any part of it.
+ *
+ * The server takes the two answers and the handles together, so a change to
+ * one of them sends all three. Reading them back out of the state rather than
+ * passing them in keeps the four callers honest: whatever the screen shows is
+ * what the server is told.
+ */
+function pushBrief(campaignId: string): void {
+  push((api) => {
+    const campaign = getState().campaigns.find((c) => c.id === campaignId)
+    if (!campaign) return Promise.resolve()
+    return api.patchCampaign(campaignId, {
+      brief: {
+        audience: campaign.brief.audience,
+        offer: campaign.brief.offer,
+        ...(campaign.brief.seeds?.length ? { seeds: campaign.brief.seeds } : {}),
+      },
+    })
+  })
+}
+
 let state: State | null = null
 let version = 0
 const listeners = new Set<() => void>()
@@ -241,6 +263,9 @@ function noteDoor(s: State, campaignId: string, id: string, label: string, niche
  */
 export function setNiches(campaignId: string, niches: Niche[]): void {
   const now = new Date().toISOString()
+  // The niches are the search queries. A change that stays in this browser
+  // changes nothing about what gets looked for tonight.
+  push((api) => api.patchCampaign(campaignId, { niches }))
   setState((s) => {
     const campaign = s.campaigns.find((c) => c.id === campaignId)
     if (!campaign) return {}
@@ -426,10 +451,53 @@ export function recordDeal(leadId: string, amountCents: number, note?: string): 
  * The version is written as `generated`, so the first edit becomes version 2
  * and the history says plainly which rules the client wrote and which we did.
  */
-export function createCampaign(brief: CampaignBrief, proposal: Proposal, name: string): string {
+/**
+ * A campaign, on the server when there is one.
+ *
+ * The ids come from the server, because everything written afterwards, the
+ * rules, the niches, the handles, addresses the campaign by id. A local id
+ * would make every one of those calls answer 404 while the screen looked
+ * perfectly correct: the campaign would live in one browser and the pipeline
+ * would never hear about it.
+ *
+ * On the sample the ids are made here, as they always were.
+ */
+export async function createCampaign(brief: CampaignBrief, proposal: Proposal, name: string): Promise<string> {
   const now = new Date().toISOString()
-  const id = `cmp_${Math.random().toString(36).slice(2, 9)}`
-  const gateSetId = `gate_${id}_v1`
+  let id = `cmp_${Math.random().toString(36).slice(2, 9)}`
+  let gateSetId = `gate_${id}_v1`
+
+  const { api, isLive } = await import('../lib/api')
+  if (isLive()) {
+    const made = await api.createCampaign({
+      name,
+      audience: brief.audience,
+      offer: brief.offer,
+      ...(brief.seeds?.length ? { seeds: brief.seeds } : {}),
+    })
+    id = made.campaign.id
+    gateSetId = `${id}_v1`
+    // The rules and the readings, in the order the server stores them.
+    await api.patchCampaign(id, {
+      status: 'live',
+      extracted: {
+        countries: proposal.countries,
+        languages: proposal.languages,
+        templateId: proposal.templateId,
+      },
+      niches: proposal.niches,
+    })
+    await api.saveGates(id, {
+      templateId: proposal.templateId,
+      hard: proposal.hard,
+      knockouts: proposal.knockouts,
+      criteria: proposal.criteria,
+      passScore: proposal.passScore,
+      preset: 'balanced',
+      changes: ['Proposed from the brief'],
+    })
+  }
+
   setState((s) => ({
     campaigns: [
       ...s.campaigns,
@@ -491,11 +559,13 @@ export function saveGateSet(
 ): void {
   const now = new Date().toISOString()
   let live = false
+  let templateId: TemplateId | undefined
   setState((s) => {
     const campaign = s.campaigns.find((c) => c.id === campaignId)
     const current = s.gateSets.find((g) => g.id === campaign?.gateSetId)
     if (!campaign || !current) return {}
     live = campaign.status === 'live'
+    templateId = current.templateId
     const version = s.gateSets
       .filter((g) => g.campaignId === campaignId)
       .reduce((top, g) => Math.max(top, g.version), 0) + 1
@@ -537,6 +607,15 @@ export function saveGateSet(
       campaigns: campaigns.map((c) => (c.id === campaignId ? { ...c, gateSetId: id, updatedAt: now } : c)),
     }
   })
+  push((api) => api.saveGates(campaignId, {
+    templateId,
+    hard: draft.hard,
+    knockouts: draft.knockouts,
+    criteria: draft.criteria,
+    passScore: draft.passScore,
+    preset: draft.preset,
+    by,
+  }))
   if (live) runFeasibility(campaignId)
 }
 
@@ -573,6 +652,9 @@ export function runFeasibility(campaignId: string, precomputed?: SimResult): voi
     }
     return { feasibilityRuns: [...s.feasibilityRuns, run] }
   })
+  // The server runs the same walk over the real pool. On a live account its
+  // answer is the one worth keeping, and it is the one the next load reads.
+  push((api) => api.feasibility(campaignId))
 }
 
 /**
@@ -619,6 +701,7 @@ export function setDailyCap(campaignId: string, cap: number | null): void {
         : c,
     ),
   }))
+  push((api) => api.patchCampaign(campaignId, { dailyCap: cap }))
 }
 
 /**
@@ -636,6 +719,9 @@ export function addSeeds(campaignId: string, handles: string[]): void {
       return { ...c, brief: { ...c.brief, seeds: [...(c.brief.seeds ?? []), ...fresh] }, updatedAt: new Date().toISOString() }
     }),
   }))
+  // The handles are what the neighbour search walks out from, so they belong
+  // on the server before tonight, not in this tab.
+  pushBrief(campaignId)
 }
 
 /** Drops a handle the client gave us. Nothing else about the campaign moves. */
@@ -647,6 +733,7 @@ export function removeSeed(campaignId: string, handle: string): void {
         : c,
     ),
   }))
+  pushBrief(campaignId)
 }
 
 /**
@@ -661,6 +748,7 @@ export function setBrief(campaignId: string, patch: { audience?: string; offer?:
         : c,
     ),
   }))
+  pushBrief(campaignId)
 }
 
 /**
@@ -681,6 +769,16 @@ export function setExtracted(
         : c,
     ),
   }))
+  push((api) => {
+    const campaign = getState().campaigns.find((c) => c.id === campaignId)
+    return api.patchCampaign(campaignId, {
+      extracted: {
+        countries: campaign?.extracted.countries ?? [],
+        languages: campaign?.extracted.languages ?? [],
+        templateId: campaign?.extracted.templateId,
+      },
+    })
+  })
 }
 
 /**

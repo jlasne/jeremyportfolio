@@ -125,9 +125,24 @@ export const api = {
   /** The account, its plan and the month's balance. No volume, no cost. */
   me: () => call<ClientMe>('/api', '/me'),
   campaigns: () => call<{ campaigns: unknown[] }>('/api', '/campaigns'),
-  createCampaign: (body: { name?: string; audience: string; offer: string; dailyCap?: number }) =>
+  createCampaign: (body: { name?: string; audience: string; offer: string; seeds?: string[]; dailyCap?: number }) =>
     call<{ campaign: { id: string } }>('/api', '/campaigns', { method: 'POST', body: JSON.stringify(body) }),
   campaign: (id: string) => call<{ campaign: unknown; gates: unknown }>('/api', `/campaigns/${id}`),
+  /**
+   * Everything about a campaign that is not its rules: the two answers, the
+   * handles, the countries and languages, the niches, the share of the day.
+   */
+  patchCampaign: (
+    id: string,
+    patch: {
+      name?: string
+      status?: string
+      dailyCap?: number | null
+      brief?: { audience: string; offer: string; seeds?: string[] }
+      extracted?: Record<string, unknown>
+      niches?: unknown
+    },
+  ) => call<{ campaign: unknown }>('/api', `/campaigns/${id}`, { method: 'PATCH', body: JSON.stringify(patch) }),
   /**
    * The two questions in, a full proposal out. The server picks the Gate 3
    * library and the model only edits inside it, so the answer is always one of
