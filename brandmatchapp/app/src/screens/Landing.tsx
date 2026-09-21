@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { api } from '../lib/api'
 
 // The landing, as one page: hero, six outcomes, one ask.
@@ -14,16 +14,25 @@ import { api } from '../lib/api'
 // what they get straight after it. The only bar is the footer, and the only
 // button is the one in the hero.
 
-const BADGE = 'New leads, scanned and scored every day'
-const HEADLINE = 'First AI Agent that finds creators ready to close.'
-const SUBHEAD = 'Describe the creator you want. Your agent scores every lead and delivers a fresh, qualified, ready-to-contact list, every day.'
+/**
+ * The headline, word by word, so each one can rise on its own delay. `hot`
+ * marks the three that say what nobody else delivers, and they take the
+ * page's one colour.
+ */
+const HEADLINE: { w: string; hot?: true }[] = [
+  { w: 'Your' }, { w: 'AI' }, { w: 'agent' }, { w: 'finds' },
+  { w: 'high', hot: true }, { w: 'intent,', hot: true }, { w: 'active', hot: true },
+  { w: 'creators.' },
+]
+
+const SUBHEAD = 'Describe the creators you want. Your agent learns and identifies them. Not generic and outdated: searched for you, active and high intent, every day.'
 const BRIEF_HINT = 'e.g. Fitness creators, 50k+ followers, active this week'
 
 /** The one thing every button asks for, said the same way in both places. */
 const CTA = 'Start my Campaign'
 
 /** The line that says who wrote the page, kept when the story went. */
-const PROOF = 'Built by two engineers, after four platforms failed us.'
+const PROOF = 'Built by two engineers, after four platforms gave us generic outdated leads.'
 
 /**
  * Six marks, drawn from the same parts as everything else on this page: one
@@ -108,28 +117,30 @@ function Start({ id }: { id?: string }) {
         }
       }}
     >
-      <div className="start-field">
-        {step === 'brief' ? (
-          <input
-            id={id}
-            type="text"
-            required
-            placeholder={BRIEF_HINT}
-            value={brief}
-            onChange={(e) => setBrief(e.target.value)}
-            aria-label="The creator you want"
-          />
-        ) : (
-          <input
-            type="email"
-            required
-            autoFocus
-            placeholder="you@yourbrand.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            aria-label="Your email"
-          />
-        )}
+      <div className="start-row">
+        <div className="start-box">
+          {step === 'brief' ? (
+            <input
+              id={id}
+              type="text"
+              required
+              placeholder={BRIEF_HINT}
+              value={brief}
+              onChange={(e) => setBrief(e.target.value)}
+              aria-label="The creators you want"
+            />
+          ) : (
+            <input
+              type="email"
+              required
+              autoFocus
+              placeholder="you@yourbrand.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              aria-label="Your email"
+            />
+          )}
+        </div>
         <button className="start-go" type="submit" disabled={state === 'sending'}>
           {state === 'sending' ? 'Sending' : CTA}
         </button>
@@ -174,15 +185,18 @@ export function Landing() {
   return (
     <div className="landing lp">
       <section className="lp-hero">
-        <p className="lp-badge">{BADGE}</p>
-        <h1>{HEADLINE}</h1>
+        <h1>
+          {HEADLINE.map((t, i) => (
+            <span key={i} className={t.hot ? 'hot' : undefined} style={{ ['--i' as string]: i } as CSSProperties}>{t.w}</span>
+          ))}
+        </h1>
         <p className="lp-sub">{SUBHEAD}</p>
         <Start id="start-brief" />
       </section>
 
       <section className="lp-grid">
         {OUTCOMES.map((o, i) => (
-          <article className="perk" key={o.name} style={{ ['--i' as string]: i % 3 }}>
+          <article className="perk" key={o.name} style={{ ['--i' as string]: i % 3 } as CSSProperties}>
             <span className="perk-mark" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
                 {ICONS[o.icon]}
