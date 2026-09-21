@@ -3746,3 +3746,9 @@ body { background: var(--paper); }
   .film-frame .demo { height: auto; padding: 20px 18px 62px; }
   .film-frame::after { background: none; }
 }
+
+/* The way back in for an account that already has a key. Quiet: most people
+   reading this page do not have one yet. */
+.land-signin { font-size: 15px; color: var(--l-muted); margin-right: 18px; white-space: nowrap; }
+.land-signin:hover { color: var(--l-ink); }
+@media (max-width: 760px) { .land-signin { display: none; } }

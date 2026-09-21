@@ -14,6 +14,7 @@ import { Ai } from './screens/Ai'
 import { Dashboard } from './screens/Dashboard'
 import { Roadmap } from './screens/Roadmap'
 import { Outreach } from './screens/Outreach'
+import { SignIn } from './screens/SignIn'
 
 // Five product zones, plus the account and the internal admin. The landing is
 // its own page with its own ground.
@@ -39,6 +40,7 @@ export function App() {
         {route.name === 'ai' && <Ai />}
         {route.name === 'roadmap' && <Roadmap />}
         {route.name === 'admin' && <Admin />}
+        {route.name === 'signin' && <SignIn />}
       </main>
     </div>
   )

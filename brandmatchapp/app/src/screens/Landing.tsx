@@ -349,6 +349,7 @@ export function Landing() {
             <a href="#pricing">Pricing</a>
           </nav>
           <span className="spacer" />
+          <a className="land-signin" href="#/signin">Sign in</a>
           <a className="btn primary" href="#access">{CTA}</a>
         </header>
 
