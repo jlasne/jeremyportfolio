@@ -40,13 +40,23 @@ export const parents = internalQuery({
     const campaign = await ctx.db.get(campaignId)
     if (!campaign) return { error: 'No such campaign' }
     const hasNiches = (campaign.extracted.niches ?? []).some((n) => n.enabled)
+    // A handle the client named is a parent whatever the rules said about it.
+    // They are telling us who they want; an account that misses the follower
+    // ceiling by a hair still stands among exactly the right people, and its
+    // neighbourhood is the neighbourhood we are looking for.
+    const named = new Set((campaign.brief.seeds ?? []).map((h) => h.toLowerCase()))
     const rows = await ctx.db.query('evaluations').withIndex('by_campaign', (q) => q.eq('campaignId', campaignId)).collect()
     const out = []
+    const seen = new Set<string>()
     for (const e of rows) {
-      if (!PARENT_VERDICTS.has(e.verdict)) continue
-      if (hasNiches && !e.niche) continue
       const c = await ctx.db.get(e.creatorId)
       if (!c) continue
+      const isNamed = named.has(c.handle)
+      if (!isNamed) {
+        if (!PARENT_VERDICTS.has(e.verdict)) continue
+        if (hasNiches && !e.niche) continue
+      }
+      seen.add(c.handle)
       out.push({
         handle: c.handle,
         verdict: e.verdict,
@@ -55,6 +65,15 @@ export const parents = internalQuery({
         cited: c.cited ?? [],
         related: c.related ?? [],
       })
+    }
+    for (const handle of named) {
+      if (seen.has(handle)) continue
+      const c = await ctx.db
+        .query('creators')
+        .withIndex('by_handle', (q) => q.eq('platform', 'instagram').eq('handle', handle))
+        .first()
+      if (!c) continue
+      out.push({ handle: c.handle, verdict: 'named', score: 0, niche: null, cited: c.cited ?? [], related: c.related ?? [] })
     }
     // Qualified first, then by fit. The order decides who gets cited first
     // when the run is capped.
@@ -246,7 +265,8 @@ export const accounts = internalAction({
         searchType: 'user',
         searchLimit: Math.min(args.perQuery ?? 50, budget.left),
         resultsType: 'details',
-        resultsLimit: 15,
+        // Same payload as fifteen. See ingest.detailRun.
+        resultsLimit: 1,
       }
       const started = await startRun(input, { phase: 'search', campaignId: args.campaignId, channel: 'accounts' })
       if ('error' in started) { runs.push({ query, ...started }); continue }
@@ -318,15 +338,24 @@ export const setCited = internalMutation({
  * needs the batch each one paid for, on its own.
  */
 export const cohort = internalQuery({
-  args: { externalRunId: v.string() },
+  args: {
+    externalRunId: v.optional(v.string()),
+    handles: v.optional(v.array(v.string())),
+    campaignId: v.optional(v.id('campaigns')),
+  },
   returns: v.any(),
   handler: async (ctx, args): Promise<Record<string, unknown>> => {
-    const run = await ctx.db
-      .query('crawlRuns')
-      .withIndex('by_external', (q) => q.eq('externalRunId', args.externalRunId))
-      .first()
-    if (!run) return { error: 'No such run' }
-    const asked = (run.sources ?? []).map((s) => s.handle)
+    const run = args.externalRunId
+      ? await ctx.db
+          .query('crawlRuns')
+          .withIndex('by_external', (q) => q.eq('externalRunId', args.externalRunId!))
+          .first()
+      : null
+    if (args.externalRunId && !run) return { error: 'No such run' }
+    const asked = args.handles?.length
+      ? args.handles.map((h) => h.toLowerCase().replace(/^@/, ''))
+      : (run?.sources ?? []).map((s) => s.handle)
+    const campaignId = run?.campaignId ?? args.campaignId
     const out: Record<string, number> = {}
     const sizes: number[] = []
     let found = 0
@@ -341,7 +370,7 @@ export const cohort = internalQuery({
       const ev = await ctx.db
         .query('evaluations')
         .withIndex('by_campaign_creator', (q) =>
-          q.eq('campaignId', run.campaignId!).eq('creatorId', creator._id))
+          q.eq('campaignId', campaignId!).eq('creatorId', creator._id))
         .first()
       const key = ev ? `${ev.verdict}${ev.blockedBy ? ':' + ev.blockedBy : ''}` : 'not_scored'
       out[key] = (out[key] ?? 0) + 1
@@ -353,8 +382,8 @@ export const cohort = internalQuery({
       medianFollowers: sizes.length ? sizes[Math.floor(sizes.length / 2)] : 0,
       over100k: sizes.filter((n) => n >= 100_000).length,
       verdicts: out,
-      costCents: run.costCents,
-      profilesFetched: run.profilesFetched,
+      costCents: run?.costCents,
+      profilesFetched: run?.profilesFetched,
     }
   },
 })

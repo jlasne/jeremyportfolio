@@ -69,9 +69,15 @@ export const detailRun = internalAction({
     const input = {
       directUrls: handles.map((h) => `https://www.instagram.com/${h}/`),
       resultsType: 'details',
-      // Fifteen, because the first three are usually pinned and years old,
-      // and twelve typical posts is what the numbers are counted from.
-      resultsLimit: 15,
+      // One. The actor hands back the twelve posts a profile shows anyway,
+      // with their views, comments, likes and the related profiles, so asking
+      // for fifteen asks for nothing more.
+      //
+      // It is not cheaper. Five profiles at one cost 0.138 cents each against
+      // 0.23 at fifteen, which read as a 40% saving until eighty profiles at
+      // one came back at 0.225. The actor charges for the profile, and a run
+      // of five is too short to measure anything but its own startup.
+      resultsLimit: 1,
       addParentData: false,
     }
     const started = await startRun(input, { phase: 'detail', campaignId: args.campaignId, channel })
