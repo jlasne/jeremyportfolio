@@ -16,21 +16,19 @@ import { api } from '../lib/api'
 // is measured, the camera aims at the wrong ink, and the component falls back
 // to a still frame.
 
-/**
- * The headline, word by word, so each one can rise on its own delay. `hot`
- * marks the three that say what nobody else delivers, and they take the
- * page's one colour.
- */
-const HEADLINE: { w: string; hot?: true }[] = [
-  { w: 'Your' }, { w: 'AI' }, { w: 'agent' }, { w: 'finds' },
-  { w: 'high', hot: true }, { w: 'intent,', hot: true }, { w: 'active', hot: true },
-  { w: 'creators.' },
-]
-
+/** The tagline the portal is set in. 41 characters, so 63px on a desktop. */
+const TAGLINE = 'Your AI agent finds high intent creators.'
+/** A phone gives the tagline 17px, which is a caption. It gets the name. */
 const WORD = 'BRANDMATCH'
 const BRIEF_HINT = 'e.g. Fitness creators, 50k+ followers, active this week'
 
-/** The one thing every button asks for, said the same way in both places. */
+/** Under the word, once. The two words the whole page turns on take colour. */
+const SUBTAG = [
+  { w: 'Describe the creators you want. Your agent learns and identifies them. Not generic and outdated: searched for you, ' },
+  { w: 'active and high intent', hot: true },
+  { w: ', every day.' },
+]
+
 const CTA = 'Start my Campaign'
 
 /** The line that says who wrote the page, kept when the story went. */
@@ -190,25 +188,38 @@ function useFace(): boolean {
     let done = false
     const finish = () => { if (!done) { done = true; setReady(true) } }
     const timeout = window.setTimeout(finish, 1800)
-    document.fonts.load('900 100px Satoshi', WORD).then(finish, finish)
+    document.fonts.load('900 100px Satoshi', WORD + TAGLINE).then(finish, finish)
     return () => { done = true; window.clearTimeout(timeout) }
   }, [])
   return ready
 }
 
+/** True on the widths where the tagline would render at caption size. */
+function useNarrow(): boolean {
+  const [narrow, setNarrow] = useState(() => window.matchMedia('(max-width: 640px)').matches)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 640px)')
+    const read = () => setNarrow(mq.matches)
+    mq.addEventListener('change', read)
+    return () => mq.removeEventListener('change', read)
+  }, [])
+  return narrow
+}
+
 export function Landing() {
   const faced = useFace()
+  const narrow = useNarrow()
   useTold(faced)
   if (!faced) return <div className="landing lp lp-boot" />
   return (
     <div className="landing lp">
       <GlyphPortal
         className="lp-portal"
-        word={WORD}
-        focusChar="D"
+        word={narrow ? WORD : TAGLINE}
+        focusChar={narrow ? 'D' : 'o'}
         fontFamily="'Satoshi', ui-sans-serif, system-ui, sans-serif"
         fontWeight={900}
-        scrollLength={2.6}
+        scrollLength={1.6}
         enterLabel="See what you get"
         background={<div className="lp-sky" style={{ backgroundImage: `url(${sky})` }} />}
         style={{
@@ -221,8 +232,8 @@ export function Landing() {
           <div className="lp-front">
             <div className="lp-front-ask">
               <p className="lp-line">
-                {HEADLINE.map((t, i) => (
-                  <span key={i} className={t.hot ? 'hot' : undefined} style={{ ['--i' as string]: i } as CSSProperties}>{t.w}</span>
+                {SUBTAG.map((t, i) => (
+                  <span key={i} className={t.hot ? 'hot' : undefined}>{t.w}</span>
                 ))}
               </p>
               <Start id="start-brief" />
