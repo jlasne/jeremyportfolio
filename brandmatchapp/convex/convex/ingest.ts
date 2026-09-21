@@ -242,6 +242,11 @@ export const fromApify = internalAction({
     const saved: { written: number; fresh: number } = await ctx.runMutation(internal.ingest.save, {
       campaignId: args.campaignId, profiles,
     })
+    // Written back on the run, so a campaign can be read by the discovery it
+    // actually did rather than by the rows it paid to see again.
+    await ctx.runMutation(internal.crawl.finishRun, {
+      externalRunId: args.runId, status: 'SUCCEEDED', profilesFresh: saved.fresh,
+    })
 
     // Facts are in. The gates run next, and gate 1 costs nothing.
     await ctx.scheduler.runAfter(0, internal.evaluate.campaign, { campaignId: args.campaignId })
