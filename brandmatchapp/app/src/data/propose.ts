@@ -365,7 +365,19 @@ export async function draftOnServer(brief: CampaignBrief): Promise<{ campaignId:
   })
   const campaignId = made.campaign.id
   await api.draftGates(campaignId, brief.audience, brief.offer)
-  const full = (await api.campaign(campaignId)) as any
+
+  // The model takes over a minute on a brief this size, so the draft runs
+  // behind the request and this watches the campaign until its rules land.
+  // Three minutes is the ceiling: past that the browser falls back to the
+  // library rather than holding a screen nobody can leave.
+  let full: any = null
+  for (let waited = 0; waited < 180_000; waited += 3_000) {
+    await new Promise((r) => setTimeout(r, 3_000))
+    full = (await api.campaign(campaignId)) as any
+    if (full?.gates?.criteria?.length) break
+    full = null
+  }
+  if (!full) throw new Error('The rules are taking longer than usual')
 
   const c = full.campaign ?? {}
   const g = full.gates ?? {}

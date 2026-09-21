@@ -115,16 +115,21 @@ export const clientApi = httpAction(async (ctx, req) => {
       }
 
       // Zone 3 into zone 4: the brief becomes a first set of gates.
+      //
+      // The model reads a brief and writes a whole rule set, which takes it
+      // over a minute. Held inside this request it outlives the connection
+      // and the browser is told the draft failed while the server is still
+      // writing it. So it is scheduled, and the caller watches the campaign
+      // until its rules appear.
       if (tail === 'gates' && parts[3] === 'draft' && req.method === 'POST') {
         const { audience, offer } = await req.json()
-        const out = await ctx.runAction(internal.drafting.gatesFromBrief, {
+        await ctx.scheduler.runAfter(0, internal.drafting.gatesFromBrief, {
           accountId: account._id,
           campaignId,
           audience: String(audience ?? ''),
           offer: String(offer ?? ''),
         })
-        if (out.error) return fail(String(out.error), 502)
-        return json(out)
+        return json({ drafting: true })
       }
 
       // Zone 4. An edit writes the next version, it never overwrites one.
