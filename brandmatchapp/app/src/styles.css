@@ -3733,10 +3733,9 @@ body { background: var(--paper); }
   --l-faint: #736c60;
   --l-rule: #f0e4d2;
   --l-rule-firm: #f5c6a0;
-  /* The three that carry meaning: click, figure, edge. */
+  /* The two that carry meaning: click, and edge. */
   --go: #f2711f;
   --go-deep: #c9560d;
-  --acc: #8134af;
   --peach: #f5c6a0;
   /* The alias the global sheet colours links with. */
   --blue: #c9560d;
@@ -3813,26 +3812,25 @@ body { background: var(--paper); }
    lands alone reads slower than the same line inside a block, which is the
    only rhythm this page has. */
 .lp-story { max-width: 760px; margin: 0 auto; padding: 16px max(22px, 4vw) 48px; }
-.said { margin: 0 0 46px; font-size: clamp(19px, 2.1vw, 22px); line-height: 1.5; color: var(--l-ink); }
+.said { margin: 0 0 54px; font-size: clamp(21px, 2.3vw, 26px); line-height: 1.45; color: var(--l-ink); }
 .said span { display: block; }
-/* The only purple on the page. It catches a scroll without stopping it. */
-.said .n { font-size: 1.24em; font-weight: 700; letter-spacing: -0.03em; color: var(--acc); }
-
-/* Two marks, one per side of the story. Peach for what a platform cost us,
-   purple for what the agent gives back, so the ground under the sentences
-   turns colour at the line where we stopped buying lists. Both clone across
-   a wrap, or the second line loses its ground. */
-.said .pain, .said .win {
-  padding: 2px 6px; margin: 0 -2px; border-radius: 5px; font-weight: 600;
-  box-decoration-break: clone; -webkit-box-decoration-break: clone;
+/* The one mark on the page, and it sits on the outcome. Bigger and orange,
+   because a page that marks its whole argument marks nothing. */
+.said span.out {
+  margin: 6px 0; font-size: clamp(26px, 3.1vw, 35px); line-height: 1.16;
+  font-weight: 700; letter-spacing: -0.025em; color: var(--go-deep);
 }
-.said .pain { background: rgba(245, 198, 160, 0.58); color: var(--l-ink); }
-.said .win { background: rgba(129, 52, 175, 0.10); color: var(--acc); font-weight: 700; }
-.said.close { margin-top: 62px; margin-bottom: 0; font-weight: 700; letter-spacing: -0.025em; }
+.said.close { margin-top: 68px; margin-bottom: 0; font-weight: 700; letter-spacing: -0.025em; }
 
+/* The story is read rather than scanned, so a paragraph does not land whole:
+   its lines rise one after the next as it is reached. */
 @media (prefers-reduced-motion: no-preference) {
-  .said { opacity: 0; transform: translateY(14px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
-  .said.in { opacity: 1; transform: none; }
+  .said span {
+    opacity: 0; transform: translateY(26px);
+    transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition-delay: calc(var(--i, 0) * 110ms);
+  }
+  .said.in span { opacity: 1; transform: none; }
 }
 
 /* The last ask carries the hero's weight, on the hero's ground. An accent
@@ -3856,12 +3854,25 @@ body { background: var(--paper); }
 
 /* Below this the pill would leave the field about 180px, so the button takes
    its own row rather than the placeholder being cut in half. */
-@media (max-width: 520px) {
-  .lp-hero { padding: 60px 22px 76px; }
-  .lp-ask { padding: 76px 22px 84px; }
+@media (max-width: 640px) {
+  .lp-nav { padding: 20px 20px; }
+  .lp-nav.floated { padding-top: 13px; padding-bottom: 13px; }
+  .lp-hero { padding: 52px 20px 68px; }
+  .lp-badge { margin-bottom: 24px; padding: 6px 14px; font-size: 12.5px; }
+  .lp-sub { margin-top: 20px; font-size: 16.5px; }
+  .lp-ask { padding: 72px 20px 80px; }
+  .lp-story { padding: 8px 20px 34px; }
+  .said { margin-bottom: 42px; font-size: 21px; line-height: 1.44; }
+  .said span.out { margin: 4px 0; font-size: 26px; line-height: 1.18; }
+  .said.close { margin-top: 52px; }
+  .start { margin-top: 32px; }
   .start-field { flex-direction: column; align-items: stretch; gap: 10px; padding: 12px; border-radius: 26px; }
-  .start-field input { padding: 6px 12px; }
-  .start-go { width: 100%; }
-  .start-done { border-radius: 26px; }
-  .said { margin-bottom: 38px; }
+  .start-field input { padding: 8px 12px; font-size: 16px; }
+  .start-go { width: 100%; height: 50px; }
+  .start-done { padding: 18px 22px; border-radius: 26px; }
+  .lp-foot { padding: 26px 20px 44px; gap: 16px; }
+  .lp-foot nav { gap: 18px; margin-left: 0; flex-basis: 100%; }
+}
+@media (prefers-reduced-motion: no-preference) and (max-width: 640px) {
+  .said span { transform: translateY(18px); transition-duration: 0.66s; transition-delay: calc(var(--i, 0) * 90ms); }
 }

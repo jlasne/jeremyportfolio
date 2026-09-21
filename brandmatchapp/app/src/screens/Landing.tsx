@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { Logo } from '../components/Logo'
 import { api } from '../lib/api'
 
@@ -9,10 +9,10 @@ import { api } from '../lib/api'
 // for the numbers. One face, Satoshi, at two sizes that do the work: the
 // display size the hero and the last ask share, and the reading size the
 // story runs at. No boxes around the story, no grid of cards, no numbered
-// steps. The page scrolls as one column of sentences, and three marks break
-// the line: the figures, what a platform cost us, and what the agent gives
-// back. The ground under the story turns from peach to purple at the sentence
-// where we stopped buying lists, which is the whole argument in one colour.
+// steps. The page scrolls as one column of sentences that arrive a line at a
+// time, and one mark sits on the outcome: bigger, orange, what brandmatch
+// does. Everything before it is the same size and the same ink, because a
+// page that marks its whole argument marks nothing.
 
 const BADGE = 'New leads, scanned and scored every day'
 const HEADLINE = 'First AI Agent that finds creators ready to close.'
@@ -22,53 +22,50 @@ const BRIEF_HINT = 'e.g. Fitness creators, 50k+ followers, active this week'
 /** The one thing every button asks for, said the same way in both places. */
 const CTA = 'Start my Campaign'
 
-/** A figure in the story. Purple and a size up, so scrolling catches it. */
-function N({ children }: { children: ReactNode }) {
-  return <b className="n">{children}</b>
-}
-
-/** What a platform cost us. Peach behind it, the way a page gets marked up. */
-function P({ children }: { children: ReactNode }) {
-  return <mark className="pain">{children}</mark>
-}
-
-/** What the agent gives back. Purple, the colour every good number is in. */
-function O({ children }: { children: ReactNode }) {
-  return <mark className="win">{children}</mark>
-}
+/** One line of the story. `out` marks what brandmatch does. */
+type Line = { say: ReactNode; out?: true }
 
 /**
  * The story, as paragraphs of lines.
  *
  * The outer array is the paragraph, which sets the breathing. The inner array
  * is the lines inside it, each on its own row, because a sentence that lands
- * alone reads slower than the same sentence in a block.
+ * alone reads slower than the same sentence in a block. A line arrives as it
+ * is reached, one after the next, so the page is read rather than scanned.
+ *
+ * There is one mark on the page and it sits on the outcome: bigger, orange,
+ * what brandmatch does. Everything that came before it is the same size and
+ * the same ink, because a page that marks its whole argument marks nothing.
  */
-const STORY: ReactNode[][] = [
-  [<>Built by two engineers, after <P>four platforms failed us.</P></>],
+const STORY: Line[][] = [
+  [{ say: <>Built by two engineers, after four platforms failed us.</> }],
   [
-    <>We build mobile apps with content creators.</>,
-    <>Finding the right one <P>ate our week, every week.</P></>,
+    { say: <>We build mobile apps with content creators.</> },
+    { say: <>Finding the right one ate our week, every week.</> },
   ],
   [
-    <>Collabstr worked, but <P>payments lagged.</P></>,
-    <><N>14</N> creators got paid, <N>1</N> on time, <N>13</N> waited more than <N>14</N> days.</>,
+    { say: <>Collabstr worked, but payments lagged.</> },
+    { say: <>14 creators got paid, 1 on time, 13 waited more than 14 days.</> },
   ],
   [
-    <>Topyappers gave us a list <P>stuck in the past.</P></>,
-    <>Leads sat there for months without a refresh.</>,
+    { say: <>Topyappers gave us a list stuck in the past.</> },
+    { say: <>Leads sat there for months without a refresh.</> },
   ],
-  [<>Heepsy gave us contacts. <P>Some numbers were dead, some people gone.</P></>],
-  [<>Modash sold us a list of <N>50,000</N> people. <P>It closed <N>0</N> deals.</P></>],
+  [{ say: <>Heepsy gave us contacts. Some numbers were dead, some people gone.</> }],
+  [{ say: <>Modash sold us a list of 50,000 people. It closed 0 deals.</> }],
   [
-    <>So we built our own agent.</>,
-    <>One subscription now <O>runs the full loop:</O> search, qualify, outreach, and CRM, all connected.</>,
+    { say: <>So we built our own agent.</> },
+    { say: <>One subscription now runs the full loop:</>, out: true },
+    { say: <>search, qualify, outreach, and CRM, all connected.</> },
   ],
-  [<>The result: <N>3,000</N> profiles scanned a day turn into <N>200</N> qualified matches, <O>already active and already earning from deals.</O></>],
   [
-    <>Replies land in your inbox, drafted and ready.</>,
-    <>Calls get booked while you sleep.</>,
-    <><O>Deals close in days, not weeks.</O></>,
+    { say: <>The result: 3,000 profiles scanned a day turn into 200 qualified matches,</>, out: true },
+    { say: <>already active and already earning from deals.</> },
+  ],
+  [
+    { say: <>Replies land in your inbox, drafted and ready.</>, out: true },
+    { say: <>Calls get booked while you sleep.</>, out: true },
+    { say: <>Deals close in days, not weeks.</>, out: true },
   ],
 ]
 
@@ -207,7 +204,15 @@ export function Landing() {
       <section className="lp-story">
         {STORY.map((para, i) => (
           <p className="said" key={i}>
-            {para.map((line, j) => <span key={j}>{line}</span>)}
+            {para.map((line, j) => (
+              <span
+                key={j}
+                className={line.out ? 'out' : undefined}
+                style={{ '--i': j } as CSSProperties}
+              >
+                {line.say}
+              </span>
+            ))}
           </p>
         ))}
         <p className="said close">{CLOSE}</p>
