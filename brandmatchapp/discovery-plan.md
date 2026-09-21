@@ -97,64 +97,80 @@ Une même requête rend les mêmes comptes. Demander 504 profils sur des requêt
 
 ---
 
-## 4. Les pistes retenues
+## 4. Les pistes, et ce qui a été décidé
 
-### 4.1 Ajouter Google comme canal de découverte
+Décisions de Jeremy, 21/09/2026.
 
-**Le levier principal.** 99% de visée contre 15% aujourd'hui.
+### Validé, à faire
 
-Principe : chercher `site:instagram.com "<niche>" "Followers"`, par pays et par langue. L'extrait Google affiche le nombre d'abonnés, par exemple « 312K Followers ».
+| # | piste | preuve ou raison |
+|---|---|---|
+| 1 | Retenir le rendement de chaque requête et arrêter celles qui plafonnent | 62% de rachat mesuré sur un second passage |
+| 2 | Ne jamais racheter un profil déjà mesuré, toujours le réévaluer | la mesure est universelle, le verdict est par campagne |
+| 3 | Mesurer la profondeur d'une requête avant d'en redemander | "street interviewer" plafonne à 6 comptes, "challenge creator" à 20 |
+| 4 | Google comme canal, le nombre d'abonnés est dans l'extrait | 99% de visée contre 15% |
+| 5 | Voisins Apify, livrés gratuitement avec chaque fiche | 68% de visée |
+| 6 | Suggestions Instagram depuis les graines, graines obligatoires | 60% de visée |
+| 22 | Les voisins de nos propres leads livrés | un lead qualifié est la meilleure graine |
+| 23 | Repasser les échecs de peu, pour la souplesse | un compte à 9 800 abonnés en aura 10 500 dans deux mois |
+| 24 | Graines croisées entre campagnes, si la niche correspond | un créateur qualifié sert à la campagne suivante |
+| 25 | L'index qui compose, chaque profil acheté reste en base | voir la section fraîcheur ci-dessous |
 
-On connaît donc la taille **avant** d'acheter la fiche. C'est la seule façon connue d'arrêter de payer à l'aveugle.
+### À tester avant de décider
 
-Coût : 0,0018 $ la page, contre 0,0023 $ la fiche. Moins cher que ce qu'on gaspille.
+| # | piste | ce qu'il faut mesurer |
+|---|---|---|
+| 10 | Fiches publiques des marketplaces, indexées par Google | taux de visée et coût par compte |
+| 14 | Faire écrire 50 requêtes par l'IA au lieu de 8 | volume réel gagné, chaque requête plafonnant vers 40 à 70 |
+| 15 | La qualité baisse-t-elle avec la profondeur d'une requête | si oui, large et peu profond bat étroit et profond |
+| 16 | Recherche de posts filtrée sur les likes | retenu seulement si moins cher et meilleur rendement |
 
-Effet attendu : le coût par lead passe de 0,35 $ à environ 0,06 $.
+### Refusé
 
-**Bloqué par** : il faut une clé d'API de recherche web. Jeremy ne l'a pas encore fournie.
+| # | piste | raison |
+|---|---|---|
+| 20 | S'arrêter au plafond quotidien du client pour juger moins | on livre tout, quel que soit le forfait |
+| ancien 2 | Liste noire globale des comptes rejetés | un compte rejeté par une campagne peut convenir à une autre |
 
-### 4.2 Rendre les comptes exemples obligatoires
+### En attente d'arbitrage
 
-Aujourd'hui une campagne peut se créer sans aucun compte exemple. Les deux campagnes créées aujourd'hui n'en avaient aucun, donc le canal lookalike n'a jamais tourné.
-
-Les comptes exemples sont la graine de tout le canal des suggestions, qui est le deuxième meilleur canal mesuré.
-
-À faire : bloquer la création d'une campagne sans au moins trois comptes exemples, et expliquer pourquoi à l'écran.
-
-### 4.3 Monter le seuil de citations de 2 à 3
-
-Donnée du pipeline manuel :
-
-| cité par | passe les filtres |
-|---|---|
-| 3 graines ou plus | 15% |
-| 1 seule graine | 6% |
-
-Notre code compte aujourd'hui une suggestion pour 3 points, une mention pour 1, et exige 2 points. Une seule suggestion suffit donc.
-
-À faire : exiger 3 graines distinctes, pas 3 points.
-
-### 4.4 La taille des graines : relative, jamais absolue
-
-Le pipeline manuel dit que des graines sous 200k donnent 50% de candidats trop petits, contre 7 à 25% pour des graines au-dessus d'1M.
-
-**Mais une règle absolue ne marche pas.** Une campagne qui vise des petits créateurs a besoin de petites graines. Une graine à 1M ne suggère que des comptes à 1M.
-
-À faire : juger la graine par rapport à la fenêtre d'abonnés de la campagne, jamais dans l'absolu. Une bonne graine est une graine qui vit au milieu de la cible.
-
-Reste à définir : quelle position dans la fenêtre. Le milieu, le haut ?
-
-### 4.5 Les filtres gratuits avant de payer, repris du manuel
-
-Trois tris qui ne coûtent rien et qu'on n'applique pas encore :
-
-- **Nom suspect** : official, shop, store, magazine, app, club, studio, news, media, memes, ®, ™. Ces comptes ne sont jamais des personnes.
-- **Compte privé** : inutilisable, et visible gratuitement.
-- **Déjà connu** : premier filtre du manuel, 73% des candidats. Nous l'avons déjà.
+| # | piste | pourquoi elle n'est pas tranchée |
+|---|---|---|
+| 7 | Co-auteurs de posts collab | gratuit, les données sont déjà achetées |
+| 8 | Créateurs qui commentent, pseudos dans les commentaires achetés | gratuit, les données sont déjà achetées |
+| 9 | Articles de listes, "top 50 comedy creators" | non discuté |
+| 11 | TikTok et YouTube comme index | non discuté |
+| 17 | Compter les graines distinctes qui citent un candidat | 3 graines : 15% passent, 1 graine : 6% |
+| 18 | Écarter les noms de marques avant de payer | official, shop, app, media, memes |
+| 19 | Écarter les comptes privés | visible gratuitement |
+| 21 | Plusieurs profils dans un seul appel modèle | faible enjeu, le jugement pèse 5% |
 
 ---
 
-## 5. Ce qui ne marche pas, et pourquoi
+## 5. La fraîcheur des données
+
+Soulevé par Jeremy. L'index qui compose n'a de valeur que si ce qu'il contient est encore vrai.
+
+Un profil mesuré il y a six mois porte un nombre d'abonnés faux, une cadence fausse et une date de dernier post périmée. Le filtre chiffré appliqué dessus rejette ou accepte pour de mauvaises raisons.
+
+### La règle proposée
+
+| âge de la mesure | ce qu'on en fait |
+|---|---|
+| Moins de 30 jours | on lui fait confiance, aucune dépense |
+| Plus de 30 jours | il sert de candidat, jamais de verdict. On rachète la fiche avant de juger. |
+
+Ainsi l'index reste presque gratuit : on ne repaie que pour les profils qui méritent un examen, jamais pour l'ensemble.
+
+Sans cette règle, l'index devient un piège : plus il grossit, plus il ment.
+
+### Ce que ça implique
+
+Un profil périmé ne doit jamais être rejeté sur ses vieux chiffres. Il est soit rafraîchi, soit ignoré, jamais jugé sur du faux.
+
+---
+
+## 6. Ce qui ne marche pas, et pourquoi
 
 ### Filtrer sur la taille avec l'API Instagram
 
@@ -174,7 +190,7 @@ Rien ne la voit. La date du dernier post arrive avec la fiche. Petite fuite : 3%
 
 ---
 
-## 6. Le pool partagé : un arbitrage à trancher
+## 7. Le pool partagé : un arbitrage à trancher
 
 Un profil payé par une campagne est relu gratuitement par toutes les autres. Bon pour l'argent, mauvais pour la lisibilité et pour la qualité.
 
@@ -186,19 +202,20 @@ Décision à prendre : garder le partage, avec la niche comme garde-fou, ou cloi
 
 ---
 
-## 7. Ordre proposé
+## 8. Ordre proposé
 
 1. Google comme canal de découverte, dès qu'on a la clé
-2. Comptes exemples obligatoires
-3. Seuil de citations à 3 graines distinctes
-4. Taille des graines relative à la cible
-5. Filtres gratuits sur le nom et les comptes privés
+2. Co-auteurs et commentateurs : gratuits, les données sont déjà achetées
+3. Rendement et profondeur par requête
+4. Comptes exemples obligatoires
+5. Fraîcheur : rafraîchir une fiche de plus de 30 jours avant de juger dessus
+6. Filtres gratuits sur le nom et les comptes privés
 
 Le point 1 seul fait la moitié du chemin.
 
 ---
 
-## 8. Blocages en cours
+## 9. Blocages en cours
 
 - Apify à 69,81 $ sur un plafond mensuel de 69 $. Aucun run possible avant relèvement.
 - Pas de clé d'API de recherche web pour le canal Google.
