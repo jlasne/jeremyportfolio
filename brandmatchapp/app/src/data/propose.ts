@@ -339,3 +339,57 @@ export function suggest(brief: CampaignBrief, templateId: TemplateId, have: Crit
 
   return out.slice(0, Math.max(0, SENTENCES_ENOUGH - have.filter((c) => c.text.trim()).length))
 }
+
+// ---------------------------------------------------------------------------
+// The model's proposal, from the server
+// ---------------------------------------------------------------------------
+
+/**
+ * The same proposal, written by the model instead of by the library above.
+ *
+ * The server needs a campaign before it can draft against it, so this creates
+ * one, asks the model to write the rules into it, and reads the whole thing
+ * back. The campaign it leaves behind is a draft: nothing is searched for
+ * until the client accepts it.
+ *
+ * What comes back is the same shape the local proposal has, so the screen
+ * that corrects it does not know which of the two wrote it.
+ */
+export async function draftOnServer(brief: CampaignBrief): Promise<{ campaignId: string; proposal: Proposal }> {
+  const { api } = await import('../lib/api')
+  const made = await api.createCampaign({
+    name: nameFrom(brief),
+    audience: brief.audience,
+    offer: brief.offer,
+    ...(brief.seeds?.length ? { seeds: brief.seeds } : {}),
+  })
+  const campaignId = made.campaign.id
+  await api.draftGates(campaignId, brief.audience, brief.offer)
+  const full = (await api.campaign(campaignId)) as any
+
+  const c = full.campaign ?? {}
+  const g = full.gates ?? {}
+  const hard: HardRules = g.hard ?? {}
+  const criteria: Criterion[] = g.criteria ?? []
+  const knockouts: Knockout[] = (g.knockouts ?? []).map((k: Knockout) => ({ ...k, enabled: k.enabled ?? false }))
+
+  return {
+    campaignId,
+    proposal: {
+      name: c.name ?? nameFrom(brief),
+      templateId: (c.extracted?.templateId ?? g.templateId ?? 'sell_to_creators') as TemplateId,
+      hard,
+      knockouts,
+      criteria,
+      passScore: Number(g.passScore ?? Math.ceil(criteria.length)),
+      countries: c.extracted?.countries ?? [],
+      languages: c.extracted?.languages ?? [],
+      niches: (c.extracted?.niches ?? []).map((n: Niche) => ({ ...n, enabled: n.enabled !== false })),
+      summaries: {
+        gate1: `We keep people with ${compact(hard.followersMin ?? 0)} to ${compact(hard.followersMax ?? 0)} followers, who posted in the last ${hard.lastPostWithinDays ?? 0} days and get about ${compact(hard.medianViewsMin ?? 0)} views on a typical post.`,
+        gate2: `${count(knockouts.length)} yes or no questions about each person, and all of them start switched off. Switch one on and a no drops that person whatever else they score.`,
+        gate3: `${count(criteria.length)} sentences about who you want. Each one is true, partly true or false about a person, and that is their brand fit. It orders your list.`,
+      },
+    },
+  }
+}

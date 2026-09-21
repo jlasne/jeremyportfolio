@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { CampaignBrief, TemplateId } from '../types'
 import {
   clarifications,
+  draftOnServer,
   propose,
   switchTemplate,
   LIBRARIES,
@@ -219,16 +220,20 @@ const STEPS = [
   'Writing the brand fit sentences',
 ]
 
-function BuildingStep({ onDone }: { onDone: () => void }) {
+function BuildingStep({ ready, onDone }: { ready: boolean; onDone: () => void }) {
   const [at, setAt] = useState(0)
+  // The list walks itself, and holds on the last step until the rules are
+  // actually back. A wait that ends before the work does is a wait that
+  // shows an empty screen.
   useEffect(() => {
     if (at >= STEPS.length) {
+      if (!ready) return
       const t = window.setTimeout(onDone, 350)
       return () => window.clearTimeout(t)
     }
     const t = window.setTimeout(() => setAt((n) => n + 1), at === 0 ? 500 : 620)
     return () => window.clearTimeout(t)
-  }, [at, onDone])
+  }, [at, ready, onDone])
 
   return (
     <div className="building" role="status" aria-live="polite">
@@ -262,11 +267,14 @@ function hardValue(key: (typeof HARD_ORDER)[number], hard: Proposal['hard']): st
 function ProposalStep({
   brief,
   proposal,
+  draftId,
   onProposal,
   onRestart,
 }: {
   brief: CampaignBrief
   proposal: Proposal
+  /** The draft the model wrote on the server, when this browser is live. */
+  draftId: string | null
   onProposal: (p: Proposal) => void
   onRestart: () => void
 }) {
@@ -292,7 +300,7 @@ function ProposalStep({
     setMaking(true)
     setFailed('')
     try {
-      const id = await createCampaign(brief, proposal, name.trim() || proposal.name)
+      const id = await createCampaign(brief, proposal, name.trim() || proposal.name, draftId ?? undefined)
       navigate(andEdit ? `campaign/${id}/brief` : 'campaigns')
     } catch (err) {
       setMaking(false)
@@ -470,10 +478,29 @@ export function NewCampaign() {
   const [queue, setQueue] = useState<Clarification[]>([])
   const [answers, setAnswers] = useState<Answers>({})
   const [proposal, setProposal] = useState<Proposal | null>(null)
+  const [draftId, setDraftId] = useState<string | null>(null)
+  const [failed, setFailed] = useState('')
 
+  // The model writes the rules on the server, against the real brief. The
+  // library in the browser is what the sample account uses, and what a
+  // visitor without a key sees.
   const startBuilding = (b: CampaignBrief, a: Answers) => {
-    setProposal(propose(b, a))
     setPhase('building')
+    void (async () => {
+      const { isLive } = await import('../lib/api')
+      if (!isLive()) {
+        setProposal(propose(b, a))
+        return
+      }
+      try {
+        const out = await draftOnServer(b)
+        setDraftId(out.campaignId)
+        setProposal(out.proposal)
+      } catch (err) {
+        setFailed(err instanceof Error ? err.message : 'The rules did not come back')
+        setProposal(propose(b, a))
+      }
+    })()
   }
 
   const onBrief = (b: CampaignBrief) => {
@@ -503,6 +530,8 @@ export function NewCampaign() {
     setPhase('brief')
     setBrief(null)
     setProposal(null)
+    setDraftId(null)
+    setFailed('')
     setAnswers({})
     setQueue([])
   }
@@ -513,9 +542,18 @@ export function NewCampaign() {
       {phase === 'asking' && queue.length > 0 && (
         <AskStep question={queue[0]} left={queue.length - 1} onAnswer={onAnswer} />
       )}
-      {phase === 'building' && <BuildingStep onDone={() => setPhase('proposal')} />}
+      {phase === 'building' && <BuildingStep ready={Boolean(proposal)} onDone={() => setPhase('proposal')} />}
       {phase === 'proposal' && brief && proposal && (
-        <ProposalStep brief={brief} proposal={proposal} onProposal={setProposal} onRestart={restart} />
+        <>
+          {failed && <p className="notice warn">{failed}</p>}
+          <ProposalStep
+            brief={brief}
+            proposal={proposal}
+            draftId={draftId}
+            onProposal={setProposal}
+            onRestart={restart}
+          />
+        </>
       )}
     </div>
   )

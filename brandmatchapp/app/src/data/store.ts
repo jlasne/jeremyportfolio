@@ -462,23 +462,31 @@ export function recordDeal(leadId: string, amountCents: number, note?: string): 
  *
  * On the sample the ids are made here, as they always were.
  */
-export async function createCampaign(brief: CampaignBrief, proposal: Proposal, name: string): Promise<string> {
+export async function createCampaign(
+  brief: CampaignBrief,
+  proposal: Proposal,
+  name: string,
+  /** The draft the model already wrote on the server, when there is one. */
+  serverId?: string,
+): Promise<string> {
   const now = new Date().toISOString()
   let id = `cmp_${Math.random().toString(36).slice(2, 9)}`
   let gateSetId = `gate_${id}_v1`
 
   const { api, isLive } = await import('../lib/api')
   if (isLive()) {
-    const made = await api.createCampaign({
+    // The model already wrote this campaign and its first rules while the
+    // client was reading them. What is left is whatever they corrected on
+    // the way past, and the switch from draft to live.
+    id = serverId ?? (await api.createCampaign({
       name,
       audience: brief.audience,
       offer: brief.offer,
       ...(brief.seeds?.length ? { seeds: brief.seeds } : {}),
-    })
-    id = made.campaign.id
+    })).campaign.id
     gateSetId = `${id}_v1`
-    // The rules and the readings, in the order the server stores them.
     await api.patchCampaign(id, {
+      name,
       status: 'live',
       extracted: {
         countries: proposal.countries,
@@ -494,7 +502,7 @@ export async function createCampaign(brief: CampaignBrief, proposal: Proposal, n
       criteria: proposal.criteria,
       passScore: proposal.passScore,
       preset: 'balanced',
-      changes: ['Proposed from the brief'],
+      changes: [serverId ? 'Corrected before it went live' : 'Proposed from the brief'],
     })
   }
 
