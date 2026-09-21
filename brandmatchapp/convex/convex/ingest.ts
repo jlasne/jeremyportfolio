@@ -171,6 +171,10 @@ export const fromApify = internalAction({
         comments: Number(p.commentsCount ?? 0),
         postedAt: Date.parse(String(p.timestamp ?? '')) || 0,
         pinned: Boolean(p.isPinned),
+        // Paid partnership and the comments under a post are not in a profile
+        // fetch. They come from a post run of their own, so they arrive when a
+        // criterion asks for them and are priced there.
+        ...(p.paidPartnership !== undefined ? { paid: Boolean(p.paidPartnership) } : {}),
       })).filter((p) => p.url && p.postedAt)
 
       // A pinned post is a chosen highlight and not a typical post. It sits
@@ -207,6 +211,17 @@ export const fromApify = internalAction({
           email: String(r.publicEmail ?? r.businessEmail ?? '') || bio.match(EMAIL)?.[0] || undefined,
           country: undefined,
           language: undefined,
+          // What the profile says about itself. All of it arrives with every
+          // fetch and was being dropped, and each line answers a question the
+          // judge was scoring zero on for want of anything to read.
+          verified: Boolean(r.verified) || undefined,
+          category: String(r.businessCategoryName ?? '') || undefined,
+          follows: Number(r.followsCount ?? 0) || undefined,
+          postsLifetime: Number(r.postsCount ?? 0) || undefined,
+          highlights: Number(r.highlightReelCount ?? 0) || undefined,
+          reelShare: typical.length
+            ? Math.round((typical.filter((p) => p.kind === 'reel').length / typical.length) * 100)
+            : undefined,
           links: [link, ...(Array.isArray(r.externalUrls)
             ? (r.externalUrls as { url?: string }[]).map((u) => u?.url ?? '') : [])].filter(Boolean),
           foundVia: { channel, parents: parentsOf.get(handle) },

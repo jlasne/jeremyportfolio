@@ -1,10 +1,10 @@
 import { internalAction, internalMutation, internalQuery } from './_generated/server'
+import { ACTOR, APIFY } from './crawl'
 import { internal } from './_generated/api'
 import { v } from 'convex/values'
 import {
   evaluate as runGates, loosest, passesHard, runHard,
-  type GateSetShape, type Judgement, type Niche,
-} from './gates'
+  type GateSetShape, type Judgement, type Niche, type Measured } from './gates'
 
 // One profile through one campaign's gates.
 //
@@ -73,6 +73,7 @@ export const pending = internalQuery({
             // of an emoji leaves half a surrogate pair, and that is a value
             // the runtime refuses to serialise. The first re-judge died on it.
             caption: Array.from((p.caption ?? '').replace(/\s+/g, ' ')).slice(0, 280).join(''),
+            image: p.thumbnail,
           }))
         return {
           id: c._id,
@@ -88,6 +89,12 @@ export const pending = internalQuery({
           language: c.language,
           links: c.links,
           linkPage: c.linkReadAt ? (c.linkText ?? '') : undefined,
+          verified: c.verified,
+          category: c.category,
+          follows: c.follows,
+          postsLifetime: c.postsLifetime,
+          highlights: c.highlights,
+          reelSharePercent: c.reelShare,
           email: c.email ? 'on the profile' : undefined,
           firstSeenAt: c.firstSeenAt,
           posts: typical,
@@ -130,6 +137,82 @@ async function readLink(links: string[] | undefined): Promise<string | null> {
     return ''
   }
 }
+
+
+/**
+ * The comments under a survivor's posts, and whether the post was paid.
+ *
+ * A profile fetch does not carry either. They come from a run of their own,
+ * so this only happens when a sentence asked for comments, and only for the
+ * handful of profiles that already cleared the numbers. Around one centime a
+ * creator, against a fifth of that for the profile itself, which is why it
+ * is never spent on someone who was going to fail on their follower count.
+ *
+ * Started and waited on here rather than through the webhook, because the
+ * judge is about to read them and a verdict written without them would have
+ * to be thrown away.
+ */
+async function readComments(handles: string[]): Promise<Map<string, { paid: boolean; comments: { by: string; text: string }[] }[]>> {
+  const out = new Map<string, { paid: boolean; comments: { by: string; text: string }[] }[]>()
+  const token = process.env.APIFY_TOKEN
+  if (!token || !handles.length) return out
+  try {
+    const started = await fetch(`${APIFY}/acts/${ACTOR}/runs?token=${token}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        directUrls: handles.slice(0, 40).map((h) => `https://www.instagram.com/${h}/`),
+        resultsType: 'posts',
+        resultsLimit: 6,
+        addParentData: false,
+      }),
+    })
+    const run = (await started.json()) as { data?: { id?: string; defaultDatasetId?: string } }
+    const id = run?.data?.id
+    if (!id) return out
+
+    // Apify takes a minute or two. Past four, the judge goes ahead without
+    // them rather than holding a batch open.
+    let dataset = ''
+    for (let waited = 0; waited < 240_000; waited += 8_000) {
+      await new Promise((r) => setTimeout(r, 8_000))
+      const res = await fetch(`${APIFY}/actor-runs/${id}?token=${token}`)
+      const body = (await res.json()) as { data?: { status?: string; defaultDatasetId?: string } }
+      if (body?.data?.status === 'SUCCEEDED') { dataset = String(body.data.defaultDatasetId ?? ''); break }
+      if (body?.data?.status && !['RUNNING', 'READY'].includes(body.data.status)) return out
+    }
+    if (!dataset) return out
+
+    const items = (await (await fetch(`${APIFY}/datasets/${dataset}/items?token=${token}&clean=true&limit=500`)).json()) as Record<string, unknown>[]
+    for (const post of items) {
+      const who = String(post.ownerUsername ?? '').toLowerCase()
+      if (!who) continue
+      if (!out.has(who)) out.set(who, [])
+      out.get(who)!.push({
+        paid: Boolean(post.paidPartnership),
+        comments: (Array.isArray(post.latestComments) ? post.latestComments : [])
+          .slice(0, 12)
+          .map((c) => ({
+            by: String((c as Record<string, unknown>)?.ownerUsername ?? ''),
+            text: String((c as Record<string, unknown>)?.text ?? '').replace(/\s+/g, ' ').slice(0, 160),
+          }))
+          .filter((c) => c.text),
+      })
+    }
+  } catch {
+    /* the judge goes ahead with what it has */
+  }
+  return out
+}
+
+export const keepComments = internalMutation({
+  args: { creatorId: v.id('creators'), paidPercent: v.number() },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.creatorId, { paidPosts: args.paidPercent })
+    return null
+  },
+})
 
 export const keepLink = internalMutation({
   args: { creatorId: v.id('creators'), text: v.string() },
@@ -214,6 +297,9 @@ export const campaign = internalAction({
     let failed = 0
     let lastError = ''
 
+    // Pass one, on the numbers alone. Nothing is fetched and nothing is paid
+    // for: whoever fails here never costs a link, a comment or a look.
+    const survivors: Record<string, any>[] = []
     for (const creator of batch.creators as Record<string, any>[]) {
       const measured = {
         followers: creator.followers,
@@ -247,15 +333,37 @@ export const campaign = internalAction({
         continue
       }
 
-      // Gate 1 held. Read the page behind their link before asking, because
-      // that is where a creator lists what they actually sell, and the model
-      // gets one look at everything.
-      if (creator.linkPage === undefined) {
+      creator.measured = measured
+      survivors.push(creator)
+    }
+
+    // Pass two. Only the sentences decide what is fetched, so a campaign that
+    // never asks about comments never pays for one.
+    const needs = new Set(gates.criteria.flatMap((c) => c.needs ?? []))
+    if (needs.has('links')) {
+      for (const creator of survivors) {
+        if (creator.linkPage !== undefined) continue
         const text = await readLink(creator.links as string[] | undefined)
         await ctx.runMutation(internal.evaluate.keepLink, { creatorId: creator.id, text: text ?? '' })
         creator.linkPage = text ?? ''
       }
+    }
+    if (needs.has('comments')) {
+      const want = survivors.filter((c) => !c.hasComments).map((c) => c.handle as string)
+      const found = await readComments(want)
+      for (const creator of survivors) {
+        const rows = found.get(creator.handle as string)
+        if (!rows?.length) continue
+        creator.audience = rows.flatMap((r) => r.comments).slice(0, 40)
+        creator.paidPosts = Math.round((rows.filter((r) => r.paid).length / rows.length) * 100)
+        await ctx.runMutation(internal.evaluate.keepComments, {
+          creatorId: creator.id, paidPercent: creator.paidPosts,
+        })
+      }
+    }
 
+    for (const creator of survivors) {
+      const measured = creator.measured as Measured
       asked++
       const answer = await ask(creator, gates, niches, batch.brief as string)
       if ('error' in answer) {
@@ -366,8 +474,14 @@ async function ask(
     'A quote you cannot point at in the text above is a wrong answer. When in doubt, found: true.',
     ...gates.knockouts.map((k) => `- ${k.id}: ${k.fail || k.question}${k.why ? ` (${k.why})` : ''}`),
     '',
-    'Then read each sentence below against the profile. Answer 2 when it is true of them, 1 when it is partly true, 0 when it is false or you cannot tell. Give one line of evidence as the note.',
-    ...gates.criteria.map((c) => `- ${c.id}: ${c.text}`),
+    'Then read each sentence below against the profile. Answer 2 when it is true of them, 1 when it is partly true, 0 when it is false or you cannot tell. Quote what you read it in as the note.',
+    'Each sentence carries how to settle it. Proof is what the evidence line names. The trap is the near miss that scores 0, however much it looks like the thing.',
+    ...gates.criteria.flatMap((c) => [
+      `- ${c.id}: ${c.text}`,
+      ...(c.evidence ? [`    proof: ${c.evidence}`] : []),
+      ...(c.trap ? [`    not this: ${c.trap}`] : []),
+      ...(c.rubric ? [`    scale: ${c.rubric}`] : []),
+    ]),
     '',
     ...(on.length
       ? [
@@ -377,6 +491,16 @@ async function ask(
         ]
       : []),
     '',
+    ...(gates.criteria.some((c) => c.needs?.includes('images'))
+      ? ['The pictures attached are the last nine posts, newest first. Look at them for anything a sentence asks you to look at: how it is shot, how it is lit, whether it holds together as one look, whether a person is on camera.', '']
+      : []),
+    ...((creator.audience as unknown[] | undefined)?.length
+      ? [
+          'Comments under their recent posts, their own replies among them:',
+          ...((creator.audience as { by: string; text: string }[]).map((c) => `- ${c.by}: ${c.text}`)),
+          '',
+        ]
+      : []),
     'Judge from the bio, the link page, the numbers and the posts below. The posts are the last twelve, newest first, with their captions and their counts: read them for what the person sells, teaches, complains about, and how people respond. Never assume what the posts do not show. Write one plain sentence as the reason.',
     '',
     'Also say where the person lives as a two letter country code (US, GB, AU, FR, TH) and the language they post in as a two letter code (en, fr, pt). Read them from the bio, the city, the currency, the captions. Answer "unknown" for either when the profile does not say.',
@@ -389,12 +513,31 @@ async function ask(
     ),
   ].join('\n')
 
+  // A sentence that asked to see the work gets a model that can look, and
+  // the last nine pictures ride with the question. Nobody asked, nobody
+  // pays: the text model answers and no image is ever fetched.
+  const wantsEyes = gates.criteria.some((c) => c.needs?.includes('images'))
+  const shots = wantsEyes
+    ? ((creator.posts as Record<string, unknown>[] | undefined) ?? [])
+        .map((p) => String(p.image ?? ''))
+        .filter(Boolean)
+        .slice(0, 9)
+    : []
+  const content = shots.length
+    ? [
+        { type: 'text', text: prompt },
+        ...shots.map((url) => ({ type: 'image_url', image_url: { url } })),
+      ]
+    : prompt
+
   const res = await fetch(OPENROUTER, {
     method: 'POST',
     headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: process.env.OPENROUTER_MODEL ?? 'deepseek/deepseek-v4-flash',
-      messages: [{ role: 'user', content: prompt }],
+      model: shots.length
+        ? (process.env.OPENROUTER_VISION_MODEL ?? 'google/gemini-2.5-flash')
+        : (process.env.OPENROUTER_MODEL ?? 'deepseek/deepseek-v4-flash'),
+      messages: [{ role: 'user', content }],
       // The same profile should get the same verdict twice. Judged again
       // after a rule change, one profile moved niche and another moved gate
       // with nothing else changed.
@@ -551,6 +694,7 @@ export const oneByHandle = internalQuery({
         likes: p.likes,
         comments: p.comments,
         caption: Array.from((p.caption ?? '').replace(/\s+/g, ' ')).slice(0, 280).join(''),
+        image: p.thumbnail,
       }))
     return {
       id: c._id,
@@ -566,6 +710,12 @@ export const oneByHandle = internalQuery({
       language: c.language,
       links: c.links,
       linkPage: c.linkReadAt ? (c.linkText ?? '') : undefined,
+      verified: c.verified,
+      category: c.category,
+      follows: c.follows,
+      postsLifetime: c.postsLifetime,
+      highlights: c.highlights,
+      reelSharePercent: c.reelShare,
       email: c.email ? 'on the profile' : undefined,
       firstSeenAt: c.firstSeenAt,
       posts: typical,

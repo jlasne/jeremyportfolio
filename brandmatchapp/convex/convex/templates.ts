@@ -261,7 +261,17 @@ const NOT_A_SENTENCE = new Set([
  * survive and the caller falls back to the library, which is at least made of
  * sentences.
  */
-export function cleanSentences(rows: unknown): { id: string; text: string }[] | null {
+/** What a sentence may ask to have in front of the judge. */
+export const EVIDENCE = ['profile', 'posts', 'links', 'images', 'comments', 'web']
+
+export function cleanSentences(rows: unknown): {
+  id: string
+  text: string
+  evidence?: string
+  trap?: string
+  rubric?: string
+  needs?: string[]
+}[] | null {
   if (!Array.isArray(rows)) return null
   const seen = new Set<string>()
   const out: { id: string; text: string }[] = []
@@ -286,7 +296,25 @@ export function cleanSentences(rows: unknown): { id: string; text: string }[] | 
     let id = rawId || `c_${out.length + 1}`
     while (seen.has(id)) id = `${id}_`
     seen.add(id)
-    out.push({ id, text })
+    // The method rides with the sentence. A sentence whose evidence was
+    // dropped on the way in is a sentence the judge has to guess about.
+    const line = (k: string) => {
+      const v = String((row as Record<string, unknown>)?.[k] ?? '').replace(/\s+/g, ' ').trim()
+      return v ? v.slice(0, 400) : undefined
+    }
+    const needs = Array.isArray((row as Record<string, unknown>)?.needs)
+      ? ((row as Record<string, unknown>).needs as unknown[])
+          .map((n) => String(n))
+          .filter((n) => EVIDENCE.includes(n))
+      : undefined
+    out.push({
+      id,
+      text,
+      ...(line('evidence') ? { evidence: line('evidence') } : {}),
+      ...(line('trap') ? { trap: line('trap') } : {}),
+      ...(line('rubric') ? { rubric: line('rubric') } : {}),
+      ...(needs?.length ? { needs } : {}),
+    })
     if (out.length >= SENTENCES_MAX) break
   }
   return out.length >= 4 ? out : null

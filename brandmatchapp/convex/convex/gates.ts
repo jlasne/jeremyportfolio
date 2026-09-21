@@ -41,7 +41,14 @@ export interface GateSetShape {
     pass?: string
     enabled?: boolean
   }[]
-  criteria: { id: string; text: string }[]
+  criteria: {
+    id: string
+    text: string
+    evidence?: string
+    trap?: string
+    rubric?: string
+    needs?: string[]
+  }[]
   passScore: number
 }
 
