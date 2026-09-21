@@ -904,6 +904,8 @@ export const verdicts = internalQuery({
       return {
         handle: c?.handle ?? '?',
         followers: c?.followers,
+        firstSeenAt: c?.firstSeenAt,
+        foundVia: c?.foundVia?.channel,
         verdict: r.verdict,
         score: r.score,
         blockedBy: r.blockedBy,
