@@ -131,13 +131,28 @@ Décisions de Jeremy, 21/09/2026.
 |---|---|---|
 | 20 | S'arrêter au plafond quotidien du client pour juger moins | on livre tout, quel que soit le forfait |
 | ancien 2 | Liste noire globale des comptes rejetés | un compte rejeté par une campagne peut convenir à une autre |
+| 7 | Co-auteurs de posts collab | mesuré, voir ci-dessous |
+
+#### Pourquoi les co-auteurs ne marchent pas
+
+Hypothèse testée : deux créateurs sur un même post sont des pairs de taille voisine.
+
+Mesuré sur 40 profils, 406 posts : 17 paires de co-auteurs, dont
+
+| ce que c'était | nombre |
+|---|---|
+| Le compte co-auteur de lui-même | 5 |
+| Le deuxième compte de la même marque | 4 |
+| Un client ou un élève du créateur | 6 |
+| Un pair plausible | 2 |
+
+Soit 0,4 paire par profil, dont 12% d'utilisable. Le collab sert à mettre en avant ses clients et son propre second compte, pas à se lier à ses pairs.
 
 ### En attente d'arbitrage
 
 | # | piste | pourquoi elle n'est pas tranchée |
 |---|---|---|
-| 7 | Co-auteurs de posts collab | gratuit, les données sont déjà achetées |
-| 8 | Créateurs qui commentent, pseudos dans les commentaires achetés | gratuit, les données sont déjà achetées |
+| 8 | Créateurs qui commentent, pseudos dans les commentaires achetés | gratuit, mais le préjugé est mauvais : un commentateur est presque toujours un membre de l'audience, pas un pair |
 | 9 | Articles de listes, "top 50 comedy creators" | non discuté |
 | 11 | TikTok et YouTube comme index | non discuté |
 | 17 | Compter les graines distinctes qui citent un candidat | 3 graines : 15% passent, 1 graine : 6% |
