@@ -822,12 +822,14 @@ export const numbersOnly = internalQuery({
   args: {
     campaignId: v.id('campaigns'),
     sample: v.optional(v.number()),
+    /** Only profiles first seen after this, so one run can be read on its own. */
+    since: v.optional(v.number()),
     /** Rules to try instead of the campaign's own, for comparing two versions. */
     hard: v.optional(v.any()),
     either: v.optional(v.any()),
   },
   returns: v.any(),
-  handler: async (ctx, { campaignId, sample, hard: tryHard, either: tryEither }) => {
+  handler: async (ctx, { campaignId, sample, since, hard: tryHard, either: tryEither }) => {
     const campaign = await ctx.db.get(campaignId)
     if (!campaign) return { error: 'No such campaign' }
     const sets = await ctx.db
@@ -837,9 +839,15 @@ export const numbersOnly = internalQuery({
     const gates = sets.find((g) => g._id === campaign.gateSetId) ?? sets[sets.length - 1]
     if (!gates) return { error: 'No rules on this campaign' }
 
-    const creators = await ctx.db.query('creators').take(sample ?? 2000)
+    const all = await ctx.db.query('creators').take(sample ?? 3000)
+    const creators = since ? all.filter((c) => (c.firstSeenAt ?? 0) >= since) : all
     const now = Date.now()
     const blockedBy: Record<string, number> = {}
+    // Every rule each profile misses, not only the first one it hits. The
+    // first alone hides the rest: everybody under the follower floor dies
+    // there and never gets counted against the views or the rhythm.
+    const alsoMissed: Record<string, number> = {}
+    const sizes: number[] = []
     let kept = 0
     for (const c of creators) {
       const m = {
@@ -855,11 +863,19 @@ export const numbersOnly = internalQuery({
         ...runHard(m, (tryHard ?? gates.hard) as HardRules, now),
         ...runEither(m, (tryEither ?? gates.either) as EitherGroup[] | undefined, now),
       ]
+      sizes.push(m.followers)
       const first = checks.find((k) => !k.pass)
       if (!first) kept += 1
       else blockedBy[first.key] = (blockedBy[first.key] ?? 0) + 1
+      for (const k of checks) if (!k.pass) alsoMissed[k.key] = (alsoMissed[k.key] ?? 0) + 1
     }
+    sizes.sort((a, b) => a - b)
+    const at = (share: number) => sizes[Math.floor(sizes.length * share)] ?? 0
     return {
+      followers: sizes.length
+        ? { p10: at(0.1), median: at(0.5), p90: at(0.9), under10k: sizes.filter((n) => n < 10_000).length }
+        : null,
+      alsoMissed: Object.fromEntries(Object.entries(alsoMissed).sort((a, b) => b[1] - a[1])),
       version: tryHard || tryEither ? 'trial' : gates.version,
       hard: tryHard ?? gates.hard,
       either: tryEither ?? gates.either ?? [],
