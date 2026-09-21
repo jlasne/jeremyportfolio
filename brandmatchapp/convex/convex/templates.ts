@@ -131,7 +131,12 @@ export function withinTemplate(
           question: String(k.question ?? original?.question ?? ''),
           why: k.why ? String(k.why) : original?.why,
           pass: original?.pass,
-          fail: original?.fail,
+          // The library's definition wins for its own questions. A knockout the
+          // model added has none, so its own disqualifying fact stands in, and
+          // without one the judge would be left reading a question that asks
+          // about the absence of something.
+          fail: original?.fail ?? (k.fail ? String(k.fail).slice(0, 240) : undefined),
+          need: k.need ? String(k.need).slice(0, 240) : undefined,
           enabled: true,
         }
       }).filter((k) => k.question)

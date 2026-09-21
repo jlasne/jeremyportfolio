@@ -59,8 +59,18 @@ export interface GateSetShape {
     id: string
     question: string
     why?: string
-    /** The disqualifying fact, written plainly. What the judge is asked. */
+    /** The disqualifying fact, written plainly. Present, it drops the profile. */
     fail?: string
+    /**
+     * The required fact. Absent, it drops the profile.
+     *
+     * Both are asked of the judge the same way, as something it has to find
+     * and quote. An absence cannot be quoted: asked whether "no dog appears"
+     * is true, a model finds no words saying so and answers no, which passes
+     * every profile without a dog. So a rule about something that has to be
+     * there is written as the thing, and the engine turns it round.
+     */
+    need?: string
     pass?: string
     enabled?: boolean
   }[]

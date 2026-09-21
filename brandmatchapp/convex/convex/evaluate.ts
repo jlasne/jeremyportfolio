@@ -481,9 +481,11 @@ async function ask(
     'You qualify Instagram profiles for a business.',
     `What the business sells: ${brief}`,
     '',
-    'Below are facts that disqualify a profile. For each one, answer found: true when it is true of this profile, and quote the exact words you read it in, from the bio, a caption or the page behind their link. Answer found: false only when nothing in front of you says it, and quote the empty string.',
-    'A quote you cannot point at in the text above is a wrong answer. When in doubt, found: true.',
-    ...gates.knockouts.map((k) => `- ${k.id}: ${k.fail || k.question}${k.why ? ` (${k.why})` : ''}`),
+    'Below are facts to check against this profile. For each one, answer found: true when it is true of this profile, and quote the exact words or the image you read it in, from the bio, a caption, a post picture or the page behind their link. Answer found: false when nothing in front of you says it, and quote the empty string.',
+    'Every one is written as something to look for, never as something missing. Some drop the profile when they are there and some when they are not, which is decided after your answer and is no concern of yours: answer what you see.',
+    'found: true needs the fact in front of you. The quote has to be the words that say it. A quote that does not say it is a wrong answer, and so is a quote you cannot point at above.',
+    'A profile where nothing says the fact is found: false, whatever it says about anything else. One account was disqualified as a dog account on the words "Coach to the World\'s Strongest Man", which say the opposite.',
+    ...gates.knockouts.map((k) => `- ${k.id}: ${k.need || k.fail || k.question}${k.why ? ` (${k.why})` : ''}`),
     '',
     'Then read each sentence below against the profile. Answer 2 when it is true of them, 1 when it is partly true, 0 when it is false or you cannot tell. Quote what you read it in as the note.',
     'Each sentence carries how to settle it. Proof is what the evidence line names. The trap is the near miss that scores 0, however much it looks like the thing.',
@@ -571,7 +573,15 @@ async function ask(
     for (const [id, a] of Object.entries(raw2.knockouts ?? {})) {
       const found = Boolean((a as Record<string, unknown>)?.found)
       const quote = String((a as Record<string, unknown>)?.quote ?? '').replace(/\s+/g, ' ').trim()
-      knockouts[id] = { pass: !found, ...(found ? { note: quote || 'Found it, quoted nothing' } : {}) }
+      // A required fact passes when it is found. A disqualifying one passes
+      // when it is not. Either way the model was asked for the same thing: a
+      // fact it can point at.
+      const wanted = Boolean(gates.knockouts.find((k) => k.id === id)?.need)
+      const pass = wanted ? found : !found
+      const note = wanted
+        ? (found ? undefined : 'Nothing on the profile shows it')
+        : (found ? quote || 'Found it, quoted nothing' : undefined)
+      knockouts[id] = { pass, ...(note ? { note } : {}) }
     }
     const parsed = { ...raw2, knockouts } as Judgement
     // "other" is not a niche, it is the absence of one.
@@ -791,5 +801,34 @@ export const numbersOnly = internalQuery({
       kept,
       blockedBy: Object.fromEntries(Object.entries(blockedBy).sort((a, b) => b[1] - a[1])),
     }
+  },
+})
+
+/** What a campaign decided, newest first, for reading a run without delivering it. */
+export const verdicts = internalQuery({
+  args: { campaignId: v.id('campaigns'), limit: v.optional(v.number()), judgedOnly: v.optional(v.boolean()) },
+  returns: v.any(),
+  handler: async (ctx, { campaignId, limit, judgedOnly }) => {
+    const all = await ctx.db
+      .query('evaluations')
+      .withIndex('by_campaign', (q) => q.eq('campaignId', campaignId))
+      .order('desc')
+      .take(limit ?? 40)
+    // A profile the numbers turned away never reached the model, so it has
+    // nothing to read. Dropping those is what lets one call cover a whole run.
+    const rows = judgedOnly ? all.filter((r) => r.verdict !== 'hard_fail') : all
+    return Promise.all(rows.map(async (r) => {
+      const c = await ctx.db.get(r.creatorId)
+      return {
+        handle: c?.handle ?? '?',
+        followers: c?.followers,
+        verdict: r.verdict,
+        score: r.score,
+        blockedBy: r.blockedBy,
+        reason: r.reason,
+        criteria: r.criteriaScores,
+        knockouts: r.knockoutAnswers,
+      }
+    }))
   },
 })
