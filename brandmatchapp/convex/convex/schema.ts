@@ -62,6 +62,8 @@ const knockout = v.object({
   /** What a yes looks like, and what a no looks like. One line each. */
   pass: v.optional(v.string()),
   fail: v.optional(v.string()),
+  /** The fact that has to be there. Absent, it drops the profile. */
+  need: v.optional(v.string()),
   /** Off means the question is not asked. Locked ones can never be off. */
   enabled: v.optional(v.boolean()),
 })

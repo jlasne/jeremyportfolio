@@ -89,8 +89,16 @@ const SCHEMA = {
       items: {
         type: 'object',
         additionalProperties: false,
-        required: ['id', 'question', 'why'],
-        properties: { id: { type: 'string' }, question: { type: 'string' }, why: { type: 'string' } },
+        required: ['id', 'question', 'why', 'fail', 'need'],
+        properties: {
+          id: { type: 'string' },
+          question: { type: 'string' },
+          why: { type: 'string' },
+          /** The fact that disqualifies, stated. Never the question turned around. */
+          fail: { type: 'string' },
+          /** The fact that has to be there. Empty string when the rule is a fail. */
+          need: { type: 'string' },
+        },
       },
     },
     criteria: {
@@ -144,7 +152,15 @@ function instructions(): string {
     '  For "at least one post a week, or a million views a month": one group labelled Rhythm, options {postsPerMonthMin: 4} and {monthlyViewsMin: 1000000}.',
     '  A group you write on reach or rhythm replaces the one written for you. A number in a group is left out of hard, or it is demanded twice.',
     'Gate 2: keep every knockout id of the library. Reword the questions for this offer. You may add at most one new knockout. Every one of them is delivered switched off, so write them as questions worth losing people over rather than as defaults.',
-    'Gate 3: six to nine sentences describing one ideal person for this offer, starting from the library sentences and rewording them for the brief.',
+    '  Spend that one new knockout when the brief names something that disqualifies a person and no library question catches it. A brief asking for people whose content is about anything but dogs needs a question about a dog, because no library has one.',
+    '  A knockout is one fact the judge has to find and quote, and it cuts one of two ways.',
+    '    fail: the fact that disqualifies. "The account is about dogs: dog training, dog rescue, dog grooming." Found, the profile is dropped. Leave need as an empty string.',
+    '    need: the fact that has to be there. "A dog appears in their photos or videos." Missing, the profile is dropped. Leave fail as an empty string.',
+    '  Never write either as an absence. "No dog appears" cannot be quoted, so a model finds nothing, answers no, and every profile without a dog walks through. Write the thing, and let need decide which way it cuts.',
+    'Gate 3: six to nine sentences describing one ideal person for this offer.',
+    '  Start with what the brief spends the most words on. That is what the client is buying, and sentences that leave it out describe somebody else.',
+    '  Write one sentence for each thing the brief insists on, in the words the brief uses, before you touch the library. Then fill the rest from the library sentences, reworded for this offer.',
+    '  Asked for creators with a dog in shot whose content is about something else, the first two sentences are about the dog and about what the account is otherwise for. The library has neither, so neither can be reworded into them.',
     '  Each entry is ONE statement about a person, under 140 characters, written as a fact someone could agree or disagree with.',
     '  Write a statement, never a question, never a heading, never a list, never a number range, and never a summary of anything else in this answer.',
     '  Good: "They sell a paid programme at a price shown in their bio."  Good: "They film themselves teaching, face on camera."',
