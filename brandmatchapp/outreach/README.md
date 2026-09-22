@@ -34,6 +34,31 @@ anything is clicked.
 leaves it there for a human to read. `--send` sends. `--send --approve` asks
 in the terminal, one message at a time.
 
+**What the page already answers is read, not asked.** Instagram's search for
+`sylv.putz` returns `sylvi.putz`, `sylviputz`, `sylvia.putz`, `sylvie.putz`
+and four more. Asked to choose, the model spread itself across the lot at 28%
+confidence and picked the search box. The handle is in the row and it is
+exact, so one row carrying it whole is read straight off the page, for free.
+Two rows carrying it, or none, and the model gets the question after all.
+
+**With nothing to type, a box is not an option.** It used to be offered at
+every step, and a text box the loop had no text for counted as arriving. That
+is how a message went into a search bar.
+
+**A conversation is an address, never a label.** Instagram's new-message
+search box is named for messaging, so a test for "somewhere you can type"
+matches it. That cost a whole run: the agent decided it had arrived the
+moment it got to the search screen, skipped opening the chat, wrote the
+message into the search bar, and reported a draft. Nothing is written now
+until the address says `/direct/t/`, and the box is read back afterwards. A
+false success is worse than a failure.
+
+**A shrug is not a dead end.** A decisions model answers with a spread over
+every option, so "nothing here serves the goal" at 19% confidence is not a
+finding. Below `minConfidence` the spread underneath decides instead: the
+best real option it scored beats a word it barely chose. On a real lead that
+19% was the difference between a written message and a failed one.
+
 **A click that does nothing loses its place in the list.** Not an argument
 with the model, a removal. Shown a dead button again it answers the same way
 at the same price, which is how the first real run spent four calls a profile
@@ -131,14 +156,25 @@ Flags: `--account`, `--campaign`, `--limit`, `--templates`.
 
 | | default |
 | --- | --- |
-| Between two messages | 20 to 90 seconds, drawn each time |
+| Between two messages | 15 to 30 seconds, drawn each time |
 | On the profile before writing | 3 to 9 seconds |
-| Between two characters | 40 to 160 ms |
+| Message goes in | pasted at once (`entry: "type"` for keystrokes) |
+| Between two characters | 40 to 160 ms, when typing |
 | Per account per day | 50 |
 
 Two failed leads in a row stop the run. Instagram answers a run it dislikes by
 changing the page, so two dead leads mean the page is not what the agent
 thinks it is, and carrying on only costs the account.
+
+## Not built yet
+
+The target list is every lead on the account with the configured status. A
+campaign can be named, nothing else can.
+
+What it should be, from the Outreach screen rather than a config file: pick
+the campaign or campaigns to write to, and narrow by the client's own tags.
+The tags are already on the lead and already returned by the API; nothing
+reads them here.
 
 ## Tests
 

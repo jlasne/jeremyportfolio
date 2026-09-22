@@ -22,9 +22,22 @@ export function fieldsFor(t: Target): Record<string, string> {
   return {
     handle: t.handle,
     name,
-    firstName: (name.split(/[\s._-]+/)[0] ?? name).trim(),
+    firstName: capitalised((name.split(/[\s._-]+/)[0] ?? name).trim()),
     followers: t.followers ? compact(t.followers) : '',
   }
+}
+
+/**
+ * The first word of a cold message, written the way a person would write it.
+ *
+ * Instagram names arrive however their owner typed them, so "sylvie | online
+ * fitness coach" gives "sylvie" and the message opened "Hi sylvie". A name
+ * that already carries a capital anywhere is left alone, which keeps McKenzie
+ * and d'Arcy intact.
+ */
+function capitalised(word: string): string {
+  if (!word || word !== word.toLowerCase()) return word
+  return word[0]!.toUpperCase() + word.slice(1)
 }
 
 export function render(template: Template, t: Target): { message: string; missing: string[] } {

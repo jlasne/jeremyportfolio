@@ -17,6 +17,7 @@ export class Browser {
   private constructor(
     private readonly sh: InstanceType<typeof Stagehand>,
     private readonly typing: [number, number],
+    private readonly entry: 'paste' | 'type',
   ) {}
 
   static async open(s: Settings, userDataDir: string): Promise<Browser> {
@@ -60,7 +61,7 @@ export class Browser {
       }
       throw err
     }
-    return new Browser(sh, s.instagram.typing)
+    return new Browser(sh, s.instagram.typing, s.instagram.entry)
   }
 
   get page() {
@@ -160,12 +161,19 @@ export class Browser {
   }
 
   /**
-   * Types into a box, one character at a time, with a different pause between
-   * each. The model never supplies this text: it chooses where to type, the
-   * caller decides what.
+   * Puts text into a box. The model never supplies it: it chooses where the
+   * text goes, the caller decides what the text is.
+   *
+   * Pasting is the default. A box the page rebuilds while you type loses
+   * keystrokes, and a prepared message arriving at once is what a person
+   * pasting one looks like anyway.
    */
   async type(i: number, text: string): Promise<void> {
     await this.page.locator(`[data-bm-i="${i}"]`).click({ timeout: 10_000 })
+    if (this.entry === 'paste') {
+      await this.page.keyboard.insertText(text)
+      return
+    }
     for (const ch of text) {
       await this.page.keyboard.type(ch)
       await sleep(pick(this.typing))

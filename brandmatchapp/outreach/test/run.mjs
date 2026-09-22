@@ -13,18 +13,24 @@ import { DailyCap } from '../dist/instagram/limiter.js'
 const NEW = `<!doctype html><html><body>
 <h1>New message</h1>
 <nav><a href="#" role="link">Home</a><a href="#" role="link">Explore</a></nav>
-<input aria-label="Search input" placeholder="Search..." id="q">
+<input aria-label="Search for a message recipient" placeholder="Search..." id="q">
 <div id="results"></div>
 <button aria-label="Chat" id="chat" style="display:none">Chat</button>
 <script>
 const q = document.getElementById('q')
 q.addEventListener('input', () => {
   const v = q.value.trim()
-  document.getElementById('results').innerHTML = v
-    ? '<div role="button" id="hit">' + v + '</div>'
-    : ''
-  const hit = document.getElementById('hit')
-  if (hit) hit.onclick = () => { document.getElementById('chat').style.display = 'block' }
+  if (!v) { document.getElementById('results').innerHTML = ''; return }
+  // Near-identical handles, the way Instagram answers a real search. Only one
+  // of these is the account asked for.
+  const rows = ['Someone ' + v + '2', 'Another ' + v.replace('.', '') , 'The one ' + v, 'Not it ' + v + '_x']
+  document.getElementById('results').innerHTML = rows
+    .map((r, n) => '<div role="button" data-n="' + n + '">' + r + '</div>').join('')
+  for (const el of document.querySelectorAll('#results div')) {
+    el.onclick = () => {
+      if (el.textContent.startsWith('The one ')) window.location.href = '/direct/t/1'
+    }
+  }
 })
 document.getElementById('chat').onclick = () => { window.location.href = '/direct/t/1' }
 </script></body></html>`
@@ -63,6 +69,7 @@ function pickKey(goal, options) {
   return entry(/click "Message"/)?.[0]
 }
 
+let unsureOnce = true
 let decisionCalls = 0
 let chatCalls = 0
 const model = http.createServer((req, res) => {
@@ -80,6 +87,17 @@ const model = http.createServer((req, res) => {
       }
       assert.equal(payload.questions.next.type, 'choice')
       const key = pickKey(payload.state.goal, payload.questions.next.criteria) ?? 'stuck'
+
+      // On the message box, answer the way Jev did on a real lead: "nothing
+      // here", barely chosen, with the right option scored underneath.
+      if (unsureOnce && /box where a new message is typed/.test(payload.state.goal)) {
+        unsureOnce = false
+        return res.end(JSON.stringify({
+          answers: { next: { choice: 'stuck', confidence: 0.19, probabilities: { stuck: 0.19, [key]: 0.31 } } },
+          usage: { prompt_tokens: 300, completion_tokens: 0 },
+        }))
+      }
+
       return res.end(JSON.stringify({
         answers: { next: { choice: key, confidence: 0.91, probabilities: { [key]: 0.91 } } },
         usage: { prompt_tokens: 300, completion_tokens: 0 },
@@ -124,10 +142,10 @@ const api = http.createServer((req, res) => {
 
 const logDir = join(mkdtempSync(join(tmpdir(),'bm-run-')),'logs')
 const base = {
-  openrouter: { apiKey:'k', baseUrl:'http://127.0.0.1:8122',
+  openrouter: { apiKey:'k', baseUrl:'http://127.0.0.1:8122', minConfidence:0.35,
     decide:{model:'typesafe/jev-1.13',endpoint:'decisions',priceIn:0.042,priceOut:0,fallbacks:[{model:'deepseek/deepseek-v4-flash-0731',endpoint:'chat',priceIn:0.04,priceOut:0.64}]}, vision:{enabled:false,model:'deepseek/deepseek-v4-flash-vision-exp',priceIn:0.22,priceOut:0.66} },
   brandmatch: { apiBase:'http://127.0.0.1:8123', apiKey:'bm-key', status:'new', savedOnly:false, markAs:'contacted' },
-  instagram: { account:'test.hq', baseUrl:'http://127.0.0.1:8121', openWith:'direct', dailyCap:50, betweenDms:[1,1], afterProfile:[0,0], typing:[1,2] },
+  instagram: { account:'test.hq', baseUrl:'http://127.0.0.1:8121', openWith:'direct', entry:'paste', dailyCap:50, betweenDms:[1,1], afterProfile:[0,0], typing:[1,2] },
   browser: { headless:true, viewport:{width:1000,height:800}, sessionRoot:'', executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome' },
   costs: { browserUsdPerHour: 0 },
   limits: { maxStepsPerGoal: 6 },
@@ -147,7 +165,29 @@ try {
   // 1. dry run
   const dry = await run(s, log, templates, { send:false, approve:false })
   console.log('dry:', JSON.stringify(dry))
-  assert.equal(dry.drafted, 2, 'both usable leads must be drafted')
+  // A draft only counts from inside a conversation. If the agent had written
+  // into the search box, whose name mentions messaging, this is where it shows.
+  assert.equal(dry.drafted, 2, `both usable leads must be drafted, got ${JSON.stringify(dry)}`)
+
+  // Drafted is not enough: it has to have been drafted in a conversation.
+  // The search box on the new-message screen is named for messaging, so a
+  // loose test for "somewhere you can type" writes the message into it and
+  // still reports a draft. The address is what cannot be faked by a label.
+  const steps = readFileSync(join(logDir, `steps-${new Date().toLocaleDateString('en-CA')}.jsonl`), 'utf8')
+    .split('\n').filter(Boolean).map((l) => JSON.parse(l))
+  const writing = steps.filter((x) => /box where a new message is typed/.test(x.goal))
+  assert.ok(writing.length > 0, 'the run must have looked for a message box')
+
+  // The account is picked by reading the handle, not by asking. Four rows
+  // carry it as a substring and exactly one carries it whole.
+  const picking = steps.filter((x) => /Pick the account/.test(x.goal) && x.decision)
+  assert.ok(picking.length > 0, 'the run must have picked an account')
+  assert.equal(picking[0].decision.why, 'matched by rule', 'the exact handle must be read, not guessed')
+  assert.equal(picking[0].decision.usage.usd, 0, 'reading the page costs nothing')
+  for (const step of writing) {
+    assert.match(step.url, /\/direct\/t\//, `the message box was looked for at ${step.url}, not in a conversation`)
+  }
+  assert.equal(unsureOnce, false, 'the low-confidence shrug must have been served')
   assert.equal(dry.sent, 0, 'a dry run must never send')
   assert.equal(marked.length, 0, 'a dry run must not move a lead')
   assert.equal(new DailyCap(logDir, 50).sentToday('test.hq'), 0, 'a draft must not spend the daily cap')

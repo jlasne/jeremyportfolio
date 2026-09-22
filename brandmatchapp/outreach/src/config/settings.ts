@@ -47,6 +47,14 @@ export type Settings = {
   openrouter: {
     apiKey: string
     baseUrl: string
+    /**
+     * Below this, a decision model saying "nothing here" is not believed.
+     *
+     * It answers with a spread over every option, so a 19% "nothing serves
+     * the goal" is a shrug, not a finding, and the real options it scored
+     * underneath are better evidence than the word on top.
+     */
+    minConfidence: number
     /** Reads the page as text and picks one action. Runs on every step. */
     decide: ModelSettings
     /**
@@ -89,8 +97,18 @@ export type Settings = {
     betweenDms: Range
     /** Seconds on the profile before opening the composer. */
     afterProfile: Range
-    /** Milliseconds between two characters. */
+    /** Milliseconds between two characters, when typing one at a time. */
     typing: Range
+    /**
+     * How the message gets into the box.
+     *
+     * 'paste' puts it in at once, the way a person pasting a prepared message
+     * does, and is far less fragile than keystrokes into a box the page
+     * rebuilds as you type. 'type' sends it character by character with a
+     * different pause after each, which takes about twelve seconds a message
+     * and looks like someone writing it there and then.
+     */
+    entry: 'paste' | 'type'
   }
   browser: {
     headless: boolean
@@ -121,6 +139,7 @@ const DEFAULTS: Settings = {
   openrouter: {
     apiKey: '',
     baseUrl: 'https://openrouter.ai/api/v1',
+    minConfidence: 0.35,
     // Jev is a decision model: it answers with a typed choice, which is
     // exactly the shape of every question this loop asks. Its output is free,
     // so a step costs only what the page description costs to read.
@@ -152,9 +171,10 @@ const DEFAULTS: Settings = {
     baseUrl: 'https://www.instagram.com',
     openWith: 'direct',
     dailyCap: 50,
-    betweenDms: [20, 90],
+    betweenDms: [15, 30],
     afterProfile: [3, 9],
     typing: [40, 160],
+    entry: 'paste',
   },
   browser: {
     headless: false,

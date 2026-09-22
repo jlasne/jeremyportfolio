@@ -1626,6 +1626,37 @@ body.nav-shut .shell { grid-template-columns: 62px minmax(0, 1fr); }
 .sidenav.shut .sidenav-foot { display: none; }
 .sidenav.shut .nav-glyph { width: 18px; height: 18px; }
 
+/*
+ * Below 900px the rail is a bar across the top, so there is no rail to
+ * collapse.
+ *
+ * The collapsed width above outranks the narrow-screen rule and so won at
+ * every size: the bar was laid out across 62px while holding 251px of links,
+ * which left four of the five scrolled out of sight behind a scrollbar drawn
+ * over the top of the page. The toggle goes too, since there is nothing left
+ * for it to do here.
+ */
+@media (max-width: 900px) {
+  body.nav-shut .shell { grid-template-columns: minmax(0, 1fr); }
+  .sidenav.shut { padding: 8px 12px; }
+  .sidenav.shut .brand { display: flex; }
+  .sidenav.shut .nav-label { display: inline; }
+  .sidenav.shut .pill { display: inline; }
+  .sidenav.shut a { justify-content: flex-start; padding: 8px 12px; gap: 8px; }
+  .sidenav.shut .sidenav-top { justify-content: flex-start; }
+  .sidenav .nav-toggle { display: none; }
+  .sidenav-top { padding-bottom: 0; }
+  /* The links wrap onto a second line rather than scrolling. Five links and
+     990px of them do not fit on a phone either way, and a link you have to
+     find by swiping a bar with no scrollbar is a link nobody finds. */
+  .sidenav { flex-wrap: wrap; row-gap: 4px; overflow-x: visible; }
+  .sidenav ul { flex-wrap: wrap; row-gap: 4px; }
+  /* Wrapped onto three lines on a phone it stands 174px tall, and sticking
+     that to the top costs a quarter of the screen on every page. It scrolls
+     away with everything else instead. */
+  .sidenav { position: static; }
+}
+
 /* An agent's fields say what each one is for. */
 .agent-field { display: flex; align-items: center; gap: 10px; }
 .agent-field > span { flex: none; width: 74px; font-size: 12px; color: var(--ink-2); }

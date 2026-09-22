@@ -22,13 +22,47 @@ const GOAL_BOX = 'Find the box where a new message is typed.'
 const goalStart = (handle: string) => `Pick the account @${handle} from the results and open the chat with them.`
 
 /**
- * The conversation is open when the thread has its own address, or when a
- * composer is sitting on top of whatever page we were on. A box named for
- * messaging is the second one; Instagram's search box carries no name, so it
- * cannot be mistaken for it.
+ * The result that is this exact account, by reading rather than by asking.
+ *
+ * A search for sylv.putz returns sylvi.putz, sylviputz, sylvia.putz,
+ * sylvie.putz and four more. Asked to choose, the model spread itself over
+ * the lot at 28% and took the search box. The handle is right there in the
+ * row and it is exact, so this is a thing to read, not a judgement to make.
+ *
+ * Only a single match counts. Two rows carrying the same handle is not a
+ * case for guessing, and the model gets it instead.
  */
-const composerOpen = (page: { url: string; candidates: { editable: boolean; name: string }[] }) =>
-  page.url.includes('/direct/t/') || page.candidates.some((c) => c.editable && /message/i.test(c.name))
+export function exactMatch(handle: string) {
+  const needle = handle.toLowerCase()
+  return (state: { candidates: { i: number; name: string; editable: boolean }[] }): number | null => {
+    const hits = state.candidates.filter((c) => !c.editable && holds(c.name.toLowerCase(), needle))
+    return hits.length === 1 ? hits[0]!.i : null
+  }
+}
+
+/** The handle as a whole word, so sylv.putz never matches inside sylv.putz2. */
+function holds(haystack: string, needle: string): boolean {
+  const edge = (ch: string | undefined) => ch === undefined || !/[a-z0-9._]/.test(ch)
+  let at = haystack.indexOf(needle)
+  while (at !== -1) {
+    if (edge(haystack[at - 1]) && edge(haystack[at + needle.length])) return true
+    at = haystack.indexOf(needle, at + 1)
+  }
+  return false
+}
+
+/**
+ * The conversation is open when the thread has its own address. Nothing else
+ * counts.
+ *
+ * Accepting "a box whose name mentions messaging" as proof cost a whole run:
+ * the new-message search box qualifies, so the agent decided it had arrived
+ * the moment it got there, skipped opening the chat, and wrote the message
+ * into the search bar. It reported that as a draft. A false success is worse
+ * than a failure, so the test is now the one thing that cannot be faked by a
+ * label.
+ */
+const inThread = (page: { url: string }) => page.url.includes('/direct/t/')
 
 export type RunOptions = {
   /** False writes the message and stops. True presses the key. */
@@ -173,12 +207,31 @@ async function one(
 
     await browser.settle(1500)
 
+    // Never write into a page that is not a conversation. The one time this
+    // was assumed rather than checked, the message went into a search box.
+    const landed = await browser.state()
+    if (!inThread(landed)) {
+      return close({ outcome: 'failed', reason: `not in a conversation, at ${landed.url}`, message }, usage, steps, calls)
+    }
+
     const write = await pursue(browser, GOAL_BOX, s, log, { text: message })
     usage = addUsage(usage, write.usage)
     steps += write.steps
     calls = { d: calls.d + write.decideCalls, v: calls.v + write.visionCalls }
     if (!write.reached || write.lastBox === null) {
       return close({ outcome: 'failed', reason: `could not write the message: ${write.why}`, message }, usage, steps, calls)
+    }
+
+    // And read it back. A draft this run never checked is a draft that may be
+    // sitting in the wrong box, which is exactly how this went wrong before.
+    const inBox = (await browser.textOf(write.lastBox)).trim()
+    if (!inBox.includes(message.slice(0, 30))) {
+      return close(
+        { outcome: 'failed', reason: `the message is not in the box: it holds "${inBox.slice(0, 60)}"`, message },
+        usage,
+        steps,
+        calls,
+      )
     }
 
     // The default stops here. The message sits in the box, unsent, for a human
@@ -229,7 +282,10 @@ async function viaInbox(browser: Browser, s: Settings, log: Log, handle: string)
   // The results need a moment, and they arrive without a page change.
   await browser.settle(2500)
 
-  const start = await pursue(browser, goalStart(handle), s, log, { until: composerOpen })
+  const start = await pursue(browser, goalStart(handle), s, log, {
+    until: inThread,
+    prefer: exactMatch(handle),
+  })
   return {
     ...start,
     steps: search.steps + start.steps,
@@ -244,7 +300,7 @@ async function viaProfile(browser: Browser, s: Settings, log: Log, handle: strin
   await browser.goto(`${s.instagram.baseUrl}/${handle}/`)
   await browser.settle(1500)
   await pause(s.instagram.afterProfile)
-  return await pursue(browser, GOAL_OPEN, s, log, { until: composerOpen })
+  return await pursue(browser, GOAL_OPEN, s, log, { until: inThread })
 }
 
 function line(r: DmRecord): string {

@@ -86,9 +86,8 @@ async function askDecisions(goal: string, state: PageState, s: Settings, model: 
   })
 
   const answer = (body as DecisionsBody).answers?.next
-  const picked = pickedFrom(answer)
   return {
-    choice: asChoice(picked, state, answer?.confidence),
+    choice: readAnswer(answer, state, s.openrouter.minConfidence),
     usage: price(usageOf(body), model),
     raw: JSON.stringify(answer ?? body).slice(0, 400),
   }
@@ -122,6 +121,43 @@ function pickedFrom(answer: Answer | undefined): string | null {
     if (best === null || weight > (p[best] ?? -1)) best = key
   }
   return best
+}
+
+/**
+ * The answer, and what to do when the model is not sure of it.
+ *
+ * "Nothing here serves the goal" ends a lead, so it is worth believing only
+ * when the model means it. Under the threshold the spread underneath decides
+ * instead: the best real option it scored beats a word it barely chose.
+ */
+function readAnswer(answer: Answer | undefined, state: PageState, min: number): Choice | null {
+  const picked = pickedFrom(answer)
+  const confidence = answer?.confidence
+
+  if ((picked === STUCK || picked === DONE) && confidence !== undefined && confidence < min) {
+    const best = bestReal(answer?.probabilities, state)
+    if (best) return best
+  }
+  return asChoice(picked, state, confidence)
+}
+
+/** The highest scored option that is an actual thing on the page. */
+function bestReal(probabilities: Record<string, number> | undefined, state: PageState): Choice | null {
+  if (!probabilities) return null
+  let best: { key: string; weight: number } | null = null
+  for (const [key, weight] of Object.entries(probabilities)) {
+    if (key === STUCK || key === DONE) continue
+    if (!state.candidates.some((c) => String(c.i) === key)) continue
+    if (!best || weight > best.weight) best = { key, weight }
+  }
+  if (!best) return null
+  const found = state.candidates.find((c) => String(c.i) === best!.key)
+  if (!found) return null
+  return {
+    kind: found.editable ? 'type' : 'click',
+    i: found.i,
+    why: `unsure, best of the rest at ${Math.round(best.weight * 100)}%`,
+  }
 }
 
 function asChoice(picked: string | null, state: PageState, confidence?: number): Choice | null {
