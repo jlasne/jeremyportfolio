@@ -9,11 +9,15 @@ on, which it is not by default.
 ## What it does in one pass
 
 1. Reads leads from the brandmatch client API, best first.
-2. Opens each profile in a Chrome that is already logged in.
-3. Asks the model where to click, from a list of what is on the page.
+2. Opens the new-message screen in a Chrome that is already logged in.
+3. Searches the handle, picks the account, opens the chat.
 4. Types the message one character at a time.
 5. Stops there. Sending needs `--send`, every run.
 6. Moves the lead to `contacted` and logs the cost.
+
+Step 2 used to open the profile and press its Message button. On a real
+account that button changed neither the address nor anything on the page, so
+`openWith` now defaults to `direct`. Set it to `profile` to use the old route.
 
 ## Four rules built into the shape of it
 
@@ -29,6 +33,11 @@ anything is clicked.
 **The default does not send.** A run writes the message into the box and
 leaves it there for a human to read. `--send` sends. `--send --approve` asks
 in the terminal, one message at a time.
+
+**A click that does nothing loses its place in the list.** Not an argument
+with the model, a removal. Shown a dead button again it answers the same way
+at the same price, which is how the first real run spent four calls a profile
+pressing Message. Only an empty list ends the lead.
 
 **The cap lives on disk.** 50 a day per account, counted in `logs/counters.json`,
 so a crash mid run does not reset it. A draft costs nothing against the cap,
@@ -66,10 +75,17 @@ Edit both. Then the keys:
     export OPENROUTER_API_KEY=sk-or-...
     export BRANDMATCH_API_KEY=...        # the same key the app keeps under brandmatch.key
 
-The two model slugs default to the ones the brandmatch backend already runs,
-`deepseek/deepseek-v4-flash` and `google/gemini-2.5-flash`, so a first run
-works before anything is tuned. A slug is always `vendor/model`: a bare name
-fails the call and does not fall back.
+Three models, and a slug is always `vendor/model`. A bare name fails the call.
+
+| | model | in | out |
+| --- | --- | --- | --- |
+| Decide | `typesafe/jev-1.13` | $0.042/M | free |
+| If that errors | `deepseek/deepseek-v4-flash-0731` | $0.04/M | $0.64/M |
+| Vision, off | `deepseek/deepseek-v4-flash-vision-exp` | $0.22/M | $0.66/M |
+
+Jev answers with a typed choice rather than prose, which is the shape of every
+question this loop asks, and its output costs nothing. The fallback list is
+walked by OpenRouter itself, so an error costs no second request.
 
 `OPENROUTER_MODEL` and `OPENROUTER_VISION_MODEL` override them, the same two
 names the backend reads.

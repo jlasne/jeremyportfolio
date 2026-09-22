@@ -1,7 +1,19 @@
 {
   "openrouter": {
-    "decide": { "model": "deepseek/deepseek-v4-flash", "priceIn": 0.1, "priceOut": 0.3 },
-    "vision": { "enabled": false, "model": "google/gemini-2.5-flash" }
+    "decide": {
+      "model": "typesafe/jev-1.13",
+      "fallbacks": [
+        "deepseek/deepseek-v4-flash-0731"
+      ],
+      "priceIn": 0.042,
+      "priceOut": 0
+    },
+    "vision": {
+      "enabled": false,
+      "model": "deepseek/deepseek-v4-flash-vision-exp",
+      "priceIn": 0.22,
+      "priceOut": 0.66
+    }
   },
   "brandmatch": {
     "apiBase": "https://limitless-ladybug-747.eu-west-1.convex.site",
@@ -10,11 +22,25 @@
   },
   "instagram": {
     "account": "brandmatch.hq",
+    "openWith": "direct",
     "dailyCap": 50,
-    "betweenDms": [20, 90],
-    "afterProfile": [3, 9],
-    "typing": [40, 160]
+    "betweenDms": [
+      20,
+      90
+    ],
+    "afterProfile": [
+      3,
+      9
+    ],
+    "typing": [
+      40,
+      160
+    ]
   },
-  "browser": { "headless": false },
-  "limits": { "maxStepsPerGoal": 8 }
+  "browser": {
+    "headless": false
+  },
+  "limits": {
+    "maxStepsPerGoal": 8
+  }
 }

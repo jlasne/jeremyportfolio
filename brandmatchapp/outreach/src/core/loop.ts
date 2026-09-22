@@ -54,26 +54,41 @@ export async function pursue(
   // untouched did nothing, and asking a model to pick again gets the same
   // answer at the same price. Eight steps of that is how the first real run
   // burned four calls a profile and moved nowhere.
-  let before: { signature: string; did: string } | null = null
+  let before: { signature: string; did: string; label: string } | null = null
   let settled = false
 
-  for (let step = 0; step < max; step++) {
-    let state = await browser.state()
+  /**
+   * Things on this page that were clicked and did nothing.
+   *
+   * They are taken off the list rather than argued about. A model shown the
+   * same dead button answers the same way at the same price, which is how the
+   * first real run spent four calls a profile pressing Message. Removed, it
+   * has to find another way in, and only an empty list ends the goal.
+   */
+  const dead = new Set<string>()
 
-    if (before && signatureOf(state) === before.signature) {
+  for (let step = 0; step < max; step++) {
+    let full = await browser.state()
+
+    if (before && signatureOf(full) === before.signature) {
       if (!settled) {
         // One more wait first: a page can be slow rather than unmoved.
         settled = true
         await browser.settle(2500)
-        state = await browser.state()
+        full = await browser.state()
       }
-      if (signatureOf(state) === before.signature) {
-        const why = `${before.did} changed nothing on the page`
-        log.step({ at: new Date().toISOString(), goal, url: state.url, candidates: state.candidates.length, decision: null, error: why })
-        return { reached: false, why, steps: step + 1, decideCalls, visionCalls, usage, lastBox }
-      }
+      if (signatureOf(full) === before.signature) dead.add(before.label)
     }
     settled = false
+
+    const state: PageState = { ...full, candidates: full.candidates.filter((c) => !dead.has(c.name)) }
+    if (state.candidates.length === 0) {
+      const why = dead.size
+        ? `nothing left to try: ${[...dead].map((d) => `"${d}"`).join(', ')} changed nothing`
+        : 'the page offers nothing to click or type into'
+      log.step({ at: new Date().toISOString(), goal, url: state.url, candidates: 0, decision: null, error: why })
+      return { reached: false, why, steps: step + 1, decideCalls, visionCalls, usage, lastBox }
+    }
     const record: Step = {
       at: new Date().toISOString(),
       goal,
@@ -81,7 +96,8 @@ export async function pursue(
       candidates: state.candidates.length,
       decision: null,
       saw: state.candidates.map((c) => `${c.i}) [${c.editable ? 'type' : 'click'}] ${c.name}`),
-      ...(state.found > state.candidates.length ? { truncated: true } : {}),
+      ...(full.found > full.candidates.length ? { truncated: true } : {}),
+      ...(dead.size ? { dropped: [...dead] } : {}),
     }
 
     if (opts.until?.(state)) {
@@ -131,7 +147,7 @@ export async function pursue(
       if (choice.kind === 'click') {
         const label = state.candidates.find((c) => c.i === choice.i)?.name ?? `item ${choice.i}`
         await browser.click(choice.i)
-        before = { signature: signatureOf(state), did: `clicking "${label}"` }
+        before = { signature: signatureOf(full), did: `clicking "${label}"`, label }
       } else {
         lastBox = choice.i
         if (opts.text === undefined) {

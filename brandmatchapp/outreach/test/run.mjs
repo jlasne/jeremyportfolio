@@ -1,30 +1,78 @@
 import http from 'node:http'
 import assert from 'node:assert/strict'
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdtempSync, rmSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { run } from '../dist/instagram/outreach.js'
 import { Log } from '../dist/core/log.js'
 import { DailyCap } from '../dist/instagram/limiter.js'
 
-const PAGE = `<!doctype html><html><body>
-<h1>profile</h1><button aria-label="Message">Message</button>
-<div id="t" style="display:none"><div contenteditable="true" aria-label="Message..." id="box" style="width:400px;height:60px;border:1px solid #000"></div></div>
+// Instagram's new-message screen, near enough to test the route that uses it:
+// a search box, results that appear as you type, a person to pick, and a
+// button that opens the thread at its own address.
+const NEW = `<!doctype html><html><body>
+<h1>New message</h1>
+<nav><a href="#" role="link">Home</a><a href="#" role="link">Explore</a></nav>
+<input aria-label="Search input" placeholder="Search..." id="q">
+<div id="results"></div>
+<button aria-label="Chat" id="chat" style="display:none">Chat</button>
 <script>
-document.querySelector('button').onclick = () => { document.getElementById('t').style.display='block' }
-document.getElementById('box').addEventListener('keydown', e => { if (e.key==='Enter'){ e.preventDefault(); e.target.innerText='' } })
+const q = document.getElementById('q')
+q.addEventListener('input', () => {
+  const v = q.value.trim()
+  document.getElementById('results').innerHTML = v
+    ? '<div role="button" id="hit">' + v + '</div>'
+    : ''
+  const hit = document.getElementById('hit')
+  if (hit) hit.onclick = () => { document.getElementById('chat').style.display = 'block' }
+})
+document.getElementById('chat').onclick = () => { window.location.href = '/direct/t/1' }
 </script></body></html>`
 
-const site = http.createServer((_, res) => { res.setHeader('content-type','text/html'); res.end(PAGE) }).listen(8121)
+// The thread. Its address is what proves the conversation is open.
+const THREAD = `<!doctype html><html><body>
+<h1>Conversation</h1>
+<div contenteditable="true" aria-label="Message..." id="box" style="width:400px;height:60px;border:1px solid #000"></div>
+<script>
+document.getElementById('box').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); e.target.innerText = '' }
+})
+</script></body></html>`
+
+const PAGE = `<!doctype html><html><body>
+<h1>profile</h1><button aria-label="Message">Message</button>
+</body></html>`
+
+const site = http.createServer((req, res) => {
+  res.setHeader('content-type', 'text/html')
+  if (req.url.startsWith('/direct/new')) return res.end(NEW)
+  if (req.url.startsWith('/direct/t/')) return res.end(THREAD)
+  res.end(PAGE)
+}).listen(8121)
 
 const model = http.createServer((req, res) => {
   let b=''; req.on('data',c=>b+=c); req.on('end',()=>{
     const prompt = JSON.parse(b).messages.map(m=>m.content).join('\n')
     const lines = prompt.split('\n').filter(l=>/^\d+\) \[/.test(l))
-    const hit = lines.find(l=>/\[type\]/.test(l)) ?? lines.find(l=>/\[click\].*Message$/.test(l))
+    const goal = (prompt.match(/Goal: (.*)/) ?? [])[1] ?? ''
+    const typable = lines.find(l => /\[type\]/.test(l))
+    const named = (re) => lines.find(l => /\[click\]/.test(l) && re.test(l))
+
+    let hit = null
+    let action = 'click'
+    if (/search for a person|box where a new message is typed/.test(goal)) {
+      hit = typable; action = 'type'
+    } else if (/Pick the account/.test(goal)) {
+      const handle = (goal.match(/@([\w.]+)/) ?? [])[1] ?? ''
+      hit = named(new RegExp(handle.replace(/\./g, '\\.'))) ?? named(/Chat/)
+      // Deliberately stubborn: it keeps offering the person it already picked.
+      // The loop has to notice that click does nothing and move on to Chat.
+    } else {
+      hit = named(/Message/)
+    }
     const answer = hit
-      ? { action: /\[type\]/.test(hit) ? 'type' : 'click', i: Number(hit.split(')')[0]), why: 'x' }
-      : { action: 'stuck', why: 'nothing' }
+      ? { action, i: Number(hit.split(')')[0]), why: 'x' }
+      : { action: 'stuck', why: 'nothing on this page' }
     res.setHeader('content-type','application/json')
     res.end(JSON.stringify({ choices:[{message:{content:JSON.stringify(answer)}}], usage:{prompt_tokens:300,completion_tokens:16} }))
   })
@@ -54,7 +102,7 @@ const base = {
   openrouter: { apiKey:'k', baseUrl:'http://127.0.0.1:8122',
     decide:{model:'stub',priceIn:0.1,priceOut:0.3}, vision:{enabled:false,model:'v',priceIn:0.3,priceOut:0.9} },
   brandmatch: { apiBase:'http://127.0.0.1:8123', apiKey:'bm-key', status:'new', savedOnly:false, markAs:'contacted' },
-  instagram: { account:'test.hq', baseUrl:'http://127.0.0.1:8121', dailyCap:50, betweenDms:[1,1], afterProfile:[0,0], typing:[1,2] },
+  instagram: { account:'test.hq', baseUrl:'http://127.0.0.1:8121', openWith:'direct', dailyCap:50, betweenDms:[1,1], afterProfile:[0,0], typing:[1,2] },
   browser: { headless:true, viewport:{width:1000,height:800}, sessionRoot:'', executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome' },
   costs: { browserUsdPerHour: 0 },
   limits: { maxStepsPerGoal: 6 },
@@ -107,6 +155,12 @@ try {
   const noProfile = { ...s, instagram: { ...s.instagram, account: 'never.logged.in' } }
   const stopped = await run(noProfile, log, templates, { send: false, approve: false })
   assert.equal(stopped.attempted, 0, 'a fresh profile must send the user to the login command')
+
+  // The message must be the only thing in the box. The handle typed into the
+  // search on the way here must not have ridden along into the conversation.
+  const firstDm = JSON.parse(readFileSync(join(logDir, `dms-${new Date().toLocaleDateString('en-CA')}.jsonl`), 'utf8').split('\n')[0])
+  assert.equal(firstDm.message, 'Hey Ana, 24.3k strong. Two briefs fit you.')
+  assert.ok(!firstDm.message.includes('ana.lifts'), 'the searched handle must not end up in the message')
 
   console.log('day totals:', JSON.stringify(log.day()))
   console.log('full run passed')

@@ -51,5 +51,7 @@ export type Step = {
   replied?: string
   /** The page had more than the list could hold, so the answer may be off it. */
   truncated?: boolean
+  /** Options withheld from the model because clicking them did nothing. */
+  dropped?: string[]
   error?: string
 }

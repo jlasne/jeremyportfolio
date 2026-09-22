@@ -1,7 +1,7 @@
 import { createInterface } from 'node:readline/promises'
 import type { Settings } from '../config/settings.js'
 import { Browser } from '../core/browser.js'
-import { pursue } from '../core/loop.js'
+import { pursue, type Outcome } from '../core/loop.js'
 import { addUsage, ZERO, round, type DmRecord, type Log } from '../core/log.js'
 import { DailyCap } from './limiter.js'
 import { Leads, type Target } from './leads.js'
@@ -17,7 +17,18 @@ import { render, rotate, type Template } from './template.js'
 // not what we think it is, and carrying on just burns the account.
 
 const GOAL_OPEN = 'Open the direct message conversation with the person whose profile this is.'
+const GOAL_SEARCH = 'Find the box where you search for a person to send a new message to.'
 const GOAL_BOX = 'Find the box where a new message is typed.'
+const goalStart = (handle: string) => `Pick the account @${handle} from the results and open the chat with them.`
+
+/**
+ * The conversation is open when the thread has its own address, or when a
+ * composer is sitting on top of whatever page we were on. A box named for
+ * messaging is the second one; Instagram's search box carries no name, so it
+ * cannot be mistaken for it.
+ */
+const composerOpen = (page: { url: string; candidates: { editable: boolean; name: string }[] }) =>
+  page.url.includes('/direct/t/') || page.candidates.some((c) => c.editable && /message/i.test(c.name))
 
 export type RunOptions = {
   /** False writes the message and stops. True presses the key. */
@@ -148,24 +159,11 @@ async function one(
   }
 
   try {
-    await browser.goto(`${s.instagram.baseUrl}/${target.handle}/`)
-    await browser.settle(1500)
-    await pause(s.instagram.afterProfile)
+    const open =
+      s.instagram.openWith === 'profile'
+        ? await viaProfile(browser, s, log, target.handle)
+        : await viaInbox(browser, s, log, target.handle)
 
-    // The conversation has its own address. Asked as a fact about the page, so
-    // the model is not paid to confirm what the URL already says.
-    //
-    // The first version of this asked whether anything on the page could be
-    // typed into. Instagram's search box answers yes on every page, so every
-    // profile looked like an open conversation and Message was never clicked.
-    const open = await pursue(browser, GOAL_OPEN, s, log, {
-      // Two ways the conversation can be open: its own address, or a composer
-      // on top of the profile. A box named for messaging is the second one;
-      // the search box carries no name, so it cannot be mistaken for it.
-      until: (page) =>
-        page.url.includes('/direct/') ||
-        page.candidates.some((c) => c.editable && /message/i.test(c.name)),
-    })
     let usage = open.usage
     let steps = open.steps
     let calls = { d: open.decideCalls, v: open.visionCalls }
@@ -210,6 +208,43 @@ async function one(
   } catch (err) {
     return close({ outcome: 'failed', reason: String(err), message })
   }
+}
+
+/**
+ * Start at the new-message screen and search for the handle.
+ *
+ * The profile route pressed a Message button that, on a real account, changed
+ * neither the address nor a single thing on the page. The inbox asks for a
+ * name and hands back a conversation, which is a far shorter path with one
+ * fewer thing to go wrong.
+ */
+async function viaInbox(browser: Browser, s: Settings, log: Log, handle: string): Promise<Outcome> {
+  await browser.goto(`${s.instagram.baseUrl}/direct/new/`)
+  await browser.settle(2500)
+  await pause(s.instagram.afterProfile)
+
+  const search = await pursue(browser, GOAL_SEARCH, s, log, { text: handle })
+  if (!search.reached) return { ...search, why: `no search box: ${search.why}` }
+
+  // The results need a moment, and they arrive without a page change.
+  await browser.settle(2500)
+
+  const start = await pursue(browser, goalStart(handle), s, log, { until: composerOpen })
+  return {
+    ...start,
+    steps: search.steps + start.steps,
+    decideCalls: search.decideCalls + start.decideCalls,
+    visionCalls: search.visionCalls + start.visionCalls,
+    usage: addUsage(search.usage, start.usage),
+  }
+}
+
+/** The original route: open the profile, press its Message button. */
+async function viaProfile(browser: Browser, s: Settings, log: Log, handle: string): Promise<Outcome> {
+  await browser.goto(`${s.instagram.baseUrl}/${handle}/`)
+  await browser.settle(1500)
+  await pause(s.instagram.afterProfile)
+  return await pursue(browser, GOAL_OPEN, s, log, { until: composerOpen })
 }
 
 function line(r: DmRecord): string {

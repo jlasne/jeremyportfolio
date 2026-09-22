@@ -27,7 +27,6 @@ document.getElementById('box').addEventListener('keydown', (e) => {
 // a stale number sent the click to the wrong element.
 const DEAD = `<!doctype html><html><body>
 <h1>ana.lifts</h1>
-<a href="#" role="link">Follow</a>
 <button aria-label="Message">Message</button>
 </body></html>`
 
@@ -113,7 +112,10 @@ try {
   const callsBefore = calls
   const stuck = await pursue(browser, 'Open the direct message conversation with the person whose profile this is.', settings, log, { until: (p) => p.url.includes('/direct/') })
   assert.equal(stuck.reached, false)
-  assert.match(stuck.why, /changed nothing/, `expected a no-progress stop, got: ${stuck.why}`)
+  // Message is the only way in. Clicking it does nothing, so it is dropped,
+  // the list empties, and the goal ends naming what was tried.
+  assert.match(stuck.why, /nothing left to try/, `expected a dead-end stop, got: ${stuck.why}`)
+  assert.match(stuck.why, /Message/, 'the stop must name what it tried')
   assert.ok(stuck.steps <= 3, `a dead click must stop early, took ${stuck.steps} steps`)
   console.log(`dead page stopped after ${stuck.steps} steps and ${calls - callsBefore} calls: ${stuck.why}`)
 

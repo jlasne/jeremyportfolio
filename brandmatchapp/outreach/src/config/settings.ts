@@ -21,6 +21,11 @@ export type ModelSettings = {
    */
   model: string
   /**
+   * Tried in order when the first one errors, by OpenRouter itself rather
+   * than by a retry here. One request, one bill, no second round trip.
+   */
+  fallbacks?: string[]
+  /**
    * USD per million tokens. This feeds the cost log and nothing else: the
    * bill is whatever OpenRouter charges, whatever is written here. Copy the
    * two numbers off the model's page so the log matches the invoice.
@@ -60,6 +65,15 @@ export type Settings = {
     account: string
     /** Where profiles are opened. Moved only to point a test at a local page. */
     baseUrl: string
+    /**
+     * How a conversation gets opened.
+     *
+     * 'direct' starts at the new-message screen and searches for the handle.
+     * 'profile' opens the profile and presses its Message button, which on a
+     * real account did nothing at all: the button changed neither the address
+     * nor anything on the page.
+     */
+    openWith: 'direct' | 'profile'
     /** Messages a day, per account. The run stops at it and resumes tomorrow. */
     dailyCap: number
     /** Seconds between two messages. */
@@ -98,8 +112,21 @@ const DEFAULTS: Settings = {
   openrouter: {
     apiKey: '',
     baseUrl: 'https://openrouter.ai/api/v1',
-    decide: { model: 'deepseek/deepseek-v4-flash', priceIn: 0.1, priceOut: 0.3 },
-    vision: { enabled: false, model: 'google/gemini-2.5-flash', priceIn: 0.3, priceOut: 0.9 },
+    // Jev is a decision model: it answers with a typed choice, which is
+    // exactly the shape of every question this loop asks. Its output is free,
+    // so a step costs only what the page description costs to read.
+    decide: {
+      model: 'typesafe/jev-1.13',
+      fallbacks: ['deepseek/deepseek-v4-flash-0731'],
+      priceIn: 0.042,
+      priceOut: 0,
+    },
+    vision: {
+      enabled: false,
+      model: 'deepseek/deepseek-v4-flash-vision-exp',
+      priceIn: 0.22,
+      priceOut: 0.66,
+    },
   },
   brandmatch: {
     apiBase: 'https://limitless-ladybug-747.eu-west-1.convex.site',
@@ -111,6 +138,7 @@ const DEFAULTS: Settings = {
   instagram: {
     account: 'default',
     baseUrl: 'https://www.instagram.com',
+    openWith: 'direct',
     dailyCap: 50,
     betweenDms: [20, 90],
     afterProfile: [3, 9],

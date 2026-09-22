@@ -26,7 +26,7 @@ export async function fallback(
   const lines = state.candidates.map((c) => `${c.i}) [${c.editable ? 'type' : 'click'}] ${c.name}`).join('\n')
   const image = await shot()
 
-  const res = await call(s, s.openrouter.vision.model, [
+  const res = await call(s, s.openrouter.vision, [
     {
       role: 'system',
       content:

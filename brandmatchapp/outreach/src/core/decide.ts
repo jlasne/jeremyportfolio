@@ -32,7 +32,7 @@ export async function decide(goal: string, state: PageState, s: Settings): Promi
     lines || '(nothing on this page can be clicked or typed into)',
   ].join('\n')
 
-  const res = await call(s, s.openrouter.decide.model, [
+  const res = await call(s, s.openrouter.decide, [
     { role: 'system', content: SYSTEM },
     { role: 'user', content: user },
   ])
@@ -42,7 +42,9 @@ export async function decide(goal: string, state: PageState, s: Settings): Promi
   return {
     decision: choice ? { ...choice, source: 'text', usage } : null,
     usage,
-    raw: res.text,
+    // On a refused answer the log gets the whole reply envelope, so a model
+    // that puts its choice somewhere unexpected says so on the first run.
+    raw: choice ? res.text : `${res.text} || shape: ${res.shape ?? ''}`,
   }
 }
 
@@ -51,9 +53,44 @@ export type Message = {
   content: string | Array<{ type: 'text'; text: string } | { type: 'image_url'; image_url: { url: string } }>
 }
 
-export type Raw = { text: string; tokensIn: number; tokensOut: number }
+export type Raw = { text: string; tokensIn: number; tokensOut: number; shape?: string }
 
-export async function call(s: Settings, model: string, messages: Message[]): Promise<Raw> {
+type Body = {
+  choices?: { message?: { content?: unknown; reasoning?: unknown }; text?: unknown }[]
+  usage?: { prompt_tokens?: number; completion_tokens?: number }
+  error?: { message?: string }
+}
+
+export async function call(s: Settings, cfg: { model: string; fallbacks?: string[] }, messages: Message[]): Promise<Raw> {
+  // Jev declares no supported parameters, so the tuning knobs go out on the
+  // first try and are dropped if the provider objects to them. One retry,
+  // never a loop: a model that rejects a bare request is not going to answer.
+  let body = await post(s, cfg, messages, true)
+  if (typeof body === 'string') {
+    if (!/parameter|unsupported|unrecognized/i.test(body)) throw new Error(`OpenRouter: ${body.slice(0, 300)}`)
+    const bare = await post(s, cfg, messages, false)
+    if (typeof bare === 'string') throw new Error(`OpenRouter: ${bare.slice(0, 300)}`)
+    body = bare
+  }
+
+  if (body.error?.message) throw new Error(`OpenRouter: ${body.error.message.slice(0, 300)}`)
+
+  return {
+    text: textOf(body),
+    tokensIn: body.usage?.prompt_tokens ?? 0,
+    tokensOut: body.usage?.completion_tokens ?? 0,
+    // Kept for the log so a model whose reply sits somewhere else says where,
+    // rather than looking like a model that answered nothing.
+    shape: JSON.stringify(body.choices?.[0] ?? body).slice(0, 400),
+  }
+}
+
+async function post(
+  s: Settings,
+  cfg: { model: string; fallbacks?: string[] },
+  messages: Message[],
+  tuned: boolean,
+): Promise<Body | string> {
   const res = await fetch(`${s.openrouter.baseUrl}/chat/completions`, {
     method: 'POST',
     headers: {
@@ -61,20 +98,34 @@ export async function call(s: Settings, model: string, messages: Message[]): Pro
       'content-type': 'application/json',
       'x-title': 'brandmatch outreach',
     },
-    body: JSON.stringify({ model, messages, max_tokens: 120, temperature: 0 }),
+    body: JSON.stringify({
+      model: cfg.model,
+      // OpenRouter walks this list itself when one errors, so a fallback costs
+      // no second request and no waiting.
+      ...(cfg.fallbacks?.length ? { models: [cfg.model, ...cfg.fallbacks] } : {}),
+      messages,
+      ...(tuned ? { max_tokens: 120, temperature: 0 } : {}),
+    }),
   })
+  if (!res.ok) return `${res.status} ${(await res.text()).slice(0, 300)}`
+  return (await res.json()) as Body
+}
 
-  if (!res.ok) throw new Error(`OpenRouter ${res.status}: ${(await res.text()).slice(0, 300)}`)
-
-  const body = (await res.json()) as {
-    choices?: { message?: { content?: string } }[]
-    usage?: { prompt_tokens?: number; completion_tokens?: number }
-  }
-  return {
-    text: body.choices?.[0]?.message?.content ?? '',
-    tokensIn: body.usage?.prompt_tokens ?? 0,
-    tokensOut: body.usage?.completion_tokens ?? 0,
-  }
+/**
+ * The answer, wherever the model put it.
+ *
+ * A decision model returns a typed choice rather than prose, so its reply can
+ * arrive as an object instead of a string. Both are read the same way here,
+ * and anything else is handed on as JSON for the parser to try.
+ */
+function textOf(body: Body): string {
+  const choice = body.choices?.[0]
+  const content = choice?.message?.content ?? choice?.text
+  if (typeof content === 'string') return content
+  if (content !== undefined && content !== null) return JSON.stringify(content)
+  const reasoning = choice?.message?.reasoning
+  if (typeof reasoning === 'string') return reasoning
+  return ''
 }
 
 export function price(r: Raw, priceIn: number, priceOut: number): Usage {
