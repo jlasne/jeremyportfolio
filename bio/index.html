@@ -280,47 +280,54 @@ h2 {
 .legend b.off { background: rgba(95, 168, 211, .22); }
 .legend b.miss { background: var(--bad); }
 
-/* ── what moved each metric ─────────────────────────────────────────── */
-.fsum { margin: 0 0 16px; color: var(--ice-70); }
+/* ── the matrix: every measure against every result ─────────────────── */
+.fsum { margin: 0 0 14px; color: var(--ice-70); }
 .fsum b { color: var(--ice); font-weight: 500; }
-.fgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(460px, 100%), 1fr)); gap: 14px; }
-.fcard { border: 1px solid var(--line); background: rgba(5, 11, 22, .46); display: flex; flex-direction: column; }
-.fhead { display: flex; align-items: center; gap: 10px; padding: 14px 16px 12px; border-bottom: 1px solid var(--line); }
-.fhead em { font-style: normal; font-size: 20px; line-height: 1; }
-.fhead .fname { font: 400 28px/1 var(--display); letter-spacing: .03em; }
-.fhead .favg { margin-left: auto; color: var(--ice-45); white-space: nowrap; }
-.frows { padding: 6px 0; }
-.frow {
-  display: grid; grid-template-columns: minmax(0, 1fr) auto 70px 78px; align-items: center;
-  gap: 12px; padding: 9px 16px;
+.mxlegend { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+.mxlegend .lv { cursor: default; }
+.mxdetail {
+  border: 1px solid var(--line); background: rgba(5, 11, 22, .6); padding: 12px 14px; margin: 0 0 14px;
+  font-size: 14.5px; color: var(--ice-70); min-height: 48px;
 }
-.fl { min-width: 0; }
-.fl b { display: block; font-weight: 500; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fl b em { font-style: normal; margin-right: 8px; }
-.fl small { display: block; color: var(--ice-45); font-size: 12.5px; line-height: 1.35; margin-top: 3px; padding-left: 27px; }
-.fd { font: 400 26px/1 var(--display); letter-spacing: .02em; text-align: right; white-space: nowrap; }
-.fd i { font: 500 9.5px/1 var(--mono); font-style: normal; letter-spacing: .1em; margin-left: 4px; color: var(--ice-45); }
-.fbar { height: 6px; background: rgba(95, 168, 211, .14); border-radius: 3px; overflow: hidden; }
-.fbar i { display: block; height: 100%; border-radius: 3px; background: var(--ice-45); }
-.flab { font: 500 9.5px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; text-align: right; color: var(--ice-45); white-space: nowrap; }
-.frow.good .fd, .frow.good .flab { color: var(--good); }
-.frow.good .fbar i { background: var(--good); }
-.frow.bad .fd, .frow.bad .flab { color: var(--bad); }
-.frow.bad .fbar i { background: var(--bad); }
-.frow.neutral .fd, .frow.neutral .flab { color: var(--blue); }
-.frow.neutral .fbar i { background: var(--blue); }
-.frow.flat .fd { color: var(--ice-45); }
-.fnone { padding: 14px 16px; color: var(--ice-45); font-size: 14px; }
-.fweak { border-top: 1px solid rgba(95, 168, 211, .1); margin-top: auto; }
-.fweak summary {
-  list-style: none; cursor: pointer; padding: 11px 16px; color: var(--ice-45);
-  font: 500 10px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase;
+.mxdetail b { color: var(--ice); font-weight: 500; }
+.mxwrap { overflow-x: auto; border: 1px solid var(--line); background: rgba(5, 11, 22, .5); }
+.mxhint { display: none; color: var(--blue); margin: 0 0 8px; text-align: right; }
+.mx { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 760px; }
+.mx th, .mx td { padding: 6px 6px; text-align: center; border-bottom: 1px solid rgba(95, 168, 211, .08); }
+.mx thead th {
+  font: 500 10px/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ice-70);
+  padding: 12px 6px 10px; border-bottom: 1px solid var(--line); vertical-align: bottom;
 }
-.fweak summary::-webkit-details-marker { display: none; }
-.fweak summary::before { content: '+ '; color: var(--blue); }
-.fweak[open] summary::before { content: '− '; }
-.fweak summary:hover { color: var(--ice); }
-.fweak .frow { opacity: .7; }
+.mx thead th em { display: block; font-style: normal; font-size: 18px; margin-bottom: 5px; letter-spacing: 0; }
+.mx thead th small { display: block; color: var(--ice-45); font-size: 9px; margin-top: 4px; letter-spacing: .08em; }
+.mx .rh {
+  position: sticky; left: 0; z-index: 1; background: #07111f; text-align: left; white-space: nowrap;
+  font: 500 14px/1.2 var(--sans); padding-left: 14px; min-width: 190px; border-right: 1px solid var(--line);
+}
+.mx thead .rh { z-index: 2; font: 500 10px/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.mx .rh em { font-style: normal; margin-right: 8px; }
+.mx tr.sec th {
+  position: sticky; left: 0; background: #0a1a2c; text-align: left; padding: 10px 14px 8px;
+  font: 400 20px/1 var(--display); letter-spacing: .04em; color: var(--ice); border-bottom: 1px solid var(--line);
+}
+.mx tr.sec th em { font-style: normal; font-size: 16px; margin-right: 8px; }
+/* one impact: five steps, plus up/down for a result with no better direction */
+.lv {
+  display: inline-grid; gap: 3px; justify-items: center; min-width: 88px; padding: 6px 6px 5px; border-radius: 4px;
+  border: 1px solid transparent; background: none; cursor: pointer; font: 500 9.5px/1 var(--mono);
+  letter-spacing: .08em; text-transform: uppercase; color: var(--ice-45);
+}
+.lv small { font: 400 17px/1 var(--display); letter-spacing: .02em; text-transform: none; }
+.lv.neutral { color: rgba(234, 244, 251, .3); }
+.lv.good { color: var(--good); border-color: rgba(110, 231, 168, .4); background: var(--good-bg); }
+.lv.vgood { color: #04140b; background: var(--good); border-color: var(--good); }
+.lv.bad { color: var(--bad); border-color: rgba(255, 158, 158, .4); background: var(--bad-bg); }
+.lv.vbad { color: #1e0707; background: var(--bad); border-color: var(--bad); }
+.lv.up, .lv.down { color: var(--blue); border-color: rgba(95, 168, 211, .45); background: rgba(95, 168, 211, .1); }
+.lv.vup, .lv.vdown { color: var(--ink); background: var(--blue); border-color: var(--blue); }
+.lv.thin, .lv.self { cursor: default; color: rgba(234, 244, 251, .22); min-width: 0; }
+.lv:not(.thin):not(.self):hover { outline: 1px solid var(--ice-45); }
+.lv[aria-pressed="true"] { outline: 2px solid var(--ice); outline-offset: 1px; }
 
 .locked { border: 1px solid var(--line); background: rgba(5, 11, 22, .46); padding: clamp(24px, 5vw, 44px); text-align: center; }
 .locked .big { font: 400 clamp(56px, 12vw, 120px)/.9 var(--display); letter-spacing: .02em; color: var(--blue); }
@@ -396,9 +403,10 @@ body.editing { padding-bottom: 88px; }
   .times { padding-left: 0; }
   .snums .sdel { margin-left: auto; }
   .tapr .lbl i { display: none; }
-  .frow { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; }
-  .fbar { grid-column: 1; }
-  .flab { grid-column: 2; }
+  .mx .rh { min-width: 136px; font-size: 13px; padding-left: 10px; white-space: normal; }
+  .mxhint { display: block; }
+  .lv { min-width: 72px; }
+  .lv small { font-size: 15px; }
   .count { width: 40px; font-size: 30px; }
   .row { flex-wrap: wrap; }
   .row label, .pass, .row .status { flex-basis: 100%; }
@@ -449,7 +457,7 @@ body.editing { padding-bottom: 88px; }
     <div class="head">
       <span class="n mono">03</span>
       <h2>Correlations <span class="pill" id="mxPill"></span></h2>
-      <p class="tag">Six things my body reports, and for each one, what moved it the morning after. Strongest first, in the metric's own unit.</p>
+      <p class="tag">Every measure against every result. A row is one thing I measured, a column one thing I look for, and each cell its impact: very bad, bad, neutral, good or very good. Tap a cell for the numbers.</p>
     </div>
     <div id="mxbox"></div>
   </section>
@@ -462,9 +470,9 @@ body.editing { padding-bottom: 88px; }
     <ul class="notes">
       <li><b>The morning after</b>A day is judged by the night that follows it: a late coffee on Tuesday is scored against Wednesday's sleep. The night itself (bedtime, wake-up, hours slept) is scored against the morning it ends.</li>
       <li><b>More against less, later against earlier</b>An on/off thing splits on itself. A count or a clock time splits at my own median, so "a later last coffee" means later than my usual.</li>
-      <li><b>Green is good, not positive</b>A resting heart rate going down is a win, so it turns green while the number falls. Weight stays blue: without a weight goal there is no good direction.</li>
+      <li><b>Five steps</b>Very bad, bad, neutral, good, very good. Good means good for that result, not a bigger number: a resting heart rate going down is good. "Very" means a large gap (Cohen's d of 0.8 or more). Weight shows up or down until it has a goal.</li>
       <li><b>The strength label</b>How far apart the two groups sit, measured against how much that number swings day to day anyway. A big percent on a wild metric says less than a small one on a steady metric.</li>
-      <li><b>What stays hidden</b>A link needs 4 days on each side before it prints. Over a hundred links are tested, so some look real by luck: a finding must clear a false-discovery check, which keeps luck to at most 1 in 10 of what is shown. The rest wait behind a toggle. Everything stays shut until 21 days carry both what I did and what the body said.</li>
+      <li><b>When a cell is neutral</b>Over a hundred links are tested, so some look real by luck. A cell leaves neutral only when it clears a false-discovery check, which keeps luck to at most 1 in 10 of what is coloured. A dot means fewer than 4 days on one side so far. The whole matrix stays shut until 21 days carry both what I did and what the body said.</li>
       <li><b>Linked things move together</b>A late third meal is also more calories, so "a later last meal" and "more calories eaten" can both claim the same kilo. When two rows tell one story, change one of them alone for a week.</li>
       <li><b>One month only</b>1 to 31 October 2026. Thirty-one days, one video a day, then the table stands as it is.</li>
     </ul>
@@ -494,7 +502,7 @@ body.editing { padding-bottom: 88px; }
 <noscript><p style="text-align:center;padding:40px">The live numbers need JavaScript.</p></noscript>
 
 <script type="module">
-import { SPEC, inGroup, dateKey, shift, daysBetween, allDays, clean, analyze, average, isFinding, readyDays, isLogged, hasBody, goalMet, sportList } from '/bio/spec.js';
+import { SPEC, inGroup, dateKey, shift, daysBetween, allDays, clean, analyze, average, impact, readyDays, isLogged, hasBody, goalMet, sportList } from '/bio/spec.js';
 
 const $ = id => document.getElementById(id);
 const API = 'https://fiery-eel-944.eu-west-1.convex.site/overlap';
@@ -944,39 +952,60 @@ function drawStrip() {
   $('monthPill').textContent = `${done} of 31 complete`;
 }
 
-/* ── what moved each metric ─────────────────────────────────────────── */
-/* One card per thing the body reports, each listing what moved it: the
-   move in the metric's own unit, a bar for how clearly the two groups sit
-   apart, and the label. Weak links fold away under the card. */
+/* ── the matrix: every measure against every result ─────────────────── */
+/* A row per measure, grouped as the card is, and a column per result. Each
+   cell is the impact on five steps; the move in the result's own unit sits
+   under the word. Tapping a cell spells it out above the grid, which a
+   phone cannot do with a hover. */
 const fmtMove = (o, x) => {
   const k = 10 ** (o.digits || 0);
   const r = Math.round(x * k) / k;
-  return { flat: r === 0, text: r === 0 ? '0' : `${r > 0 ? '+' : '−'}${Math.abs(r).toFixed(o.digits || 0)}` };
+  return r === 0 ? '0' : `${r > 0 ? '+' : '−'}${Math.abs(r).toFixed(o.digits || 0)}`;
 };
 const fmtAvg = (o, x) => o.id === 'sleepMin' ? fmtMinutes(x) : `${x.toFixed(o.digits || 0)} ${o.unit}`;
-/* Where a counted factor was split, in its own terms: "over 17:10". */
+/* Where a counted measure was split, in its own terms: "over 17:10". */
 function fmtCut(f, x) {
   if (x == null || !f.fmt) return '';
   const v = f.fmt === 'clock' ? hhmm(x) : f.fmt === 'dur' ? fmtMinutes(x)
     : f.fmt === 'steps' ? `${Math.round(x / 100) * 100} steps` : `${Math.round(x * 10) / 10} ${f.fmt}`;
-  return ` · over ${v}`;
+  return ` (over ${v})`;
+}
+/* The class and the word for one impact. */
+function levelOf({ level, very }) {
+  if (level === 'neutral') return { cls: 'neutral', word: 'Neutral' };
+  if (level === 'up' || level === 'down') {
+    const arrow = level === 'up' ? '▲' : '▼';
+    return { cls: (very ? 'v' : '') + level, word: `${very ? arrow + arrow : arrow} ${level === 'up' ? 'Up' : 'Down'}` };
+  }
+  const word = level === 'good' ? 'good' : 'bad';
+  return very ? { cls: 'v' + level, word: `Very ${word}` } : { cls: level, word: word[0].toUpperCase() + word.slice(1) };
 }
 
-function findingRow(o, { factor, link }) {
-  const r = document.createElement('div');
-  const move = fmtMove(o, link.diff);
-  const tone = move.flat ? 'flat' : link.good == null ? 'neutral' : link.good ? 'good' : 'bad';
-  r.className = `frow ${tone}`;
-  r.title = `${link.nOn} of ${link.n} days after ${factor.on}; ${link.delta > 0 ? '+' : ''}${link.delta.toFixed(1)}% against the rest; p ${link.p.toFixed(3)}, q ${link.q.toFixed(3)}`;
-  r.innerHTML =
-    `<div class="fl"><b><em>${factor.icon}</em>${factor.name}</b><small>after ${factor.on}${fmtCut(factor, link.cut)}</small></div>` +
-    `<div class="fd">${move.text}<i>${o.unit}</i></div>` +
-    `<div class="fbar"><i style="width:${Math.round(Math.min(1, link.d / 1.5) * 100)}%"></i></div>` +
-    `<div class="flab">${link.label}</div>`;
-  return r;
+function cellEl(factor, o, link) {
+  const td = document.createElement('td');
+  if (factor.id === o.id) { td.innerHTML = '<span class="lv self" aria-label="same measure">—</span>'; return td; }
+  if (!link) { td.innerHTML = '<span class="lv thin" title="Not enough days on each side yet">·</span>'; return td; }
+  const imp = impact(link), { cls, word } = levelOf(imp);
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = `lv ${cls}`;
+  b.innerHTML = `${word}${imp.level === 'neutral' ? '' : `<small>${fmtMove(o, link.diff)} ${o.unit}</small>`}`;
+  b.setAttribute('aria-label', `${factor.name} on ${o.name}: ${word}`);
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.mx .lv[aria-pressed="true"]').forEach(x => x.setAttribute('aria-pressed', 'false'));
+    b.setAttribute('aria-pressed', 'true');
+    const clear = imp.level !== 'neutral'
+      ? `Clear of luck (q ${link.q.toFixed(3)}).`
+      : link.q > SPEC.maxLuck ? `Not clear of luck (q ${link.q.toFixed(2)}), so neutral.` : 'Gap too small to matter, so neutral.';
+    $('mxdetail').innerHTML =
+      `<b>${factor.icon} ${factor.name} → ${o.icon} ${o.name}: ${word}.</b> ` +
+      `${fmtMove(o, link.diff)} ${o.unit} after ${factor.on}${fmtCut(factor, link.cut)}, ` +
+      `${link.nOn} of ${link.n} days. ${clear}`;
+  });
+  td.append(b);
+  return td;
 }
 
-function drawFindings() {
+function drawMatrix() {
   const ready = readyDays(state.log);
   $('mxPill').textContent = ready < SPEC.minDays ? `${ready} of ${SPEC.minDays} days` : `${ready} days in`;
   if (ready < SPEC.minDays) {
@@ -984,55 +1013,66 @@ function drawFindings() {
     box.className = 'locked';
     box.innerHTML =
       `<div class="big">${ready} / ${SPEC.minDays}</div>` +
-      `<p>The correlations open on day ${SPEC.minDays}. Under that, a correlation is a coin toss wearing a percentage, so the page keeps them shut.</p>` +
+      `<p>The matrix opens on day ${SPEC.minDays}. Under that, a correlation is a coin toss wearing a percentage, so the page keeps it shut.</p>` +
       `<div class="meter"><i style="width:${Math.round(ready / SPEC.minDays * 100)}%"></i></div>`;
     $('mxbox').replaceChildren(box);
     return;
   }
-  const grid = document.createElement('div');
-  grid.className = 'fgrid';
-  const { byOutcome, tested } = analyze(state.log);
-  let found = 0;
-  for (const o of SPEC.outcomes) {
-    const all = byOutcome[o.id];
-    const shown = all.filter(x => isFinding(x.link));
-    const weak = all.filter(x => !isFinding(x.link));
-    found += shown.length;
-    const avg = average(state.log, o);
+  const { rows, tested } = analyze(state.log);
+  const found = rows.reduce((n, r) => n + r.cells.filter(l => l && impact(l).level !== 'neutral').length, 0);
 
-    const card = document.createElement('article');
-    card.className = 'fcard';
-    card.innerHTML =
-      `<div class="fhead"><em>${o.icon}</em><span class="fname">${o.name}</span>` +
-      `<span class="favg mono">${avg == null ? '' : `avg ${fmtAvg(o, avg)}`}</span></div>`;
-    const rows = document.createElement('div');
-    rows.className = 'frows';
-    if (shown.length) rows.append(...shown.map(x => findingRow(o, x)));
-    else rows.innerHTML = '<div class="fnone">Nothing stands out yet.</div>';
-    card.append(rows);
-    if (weak.length) {
-      const d = document.createElement('details');
-      d.className = 'fweak';
-      d.innerHTML = `<summary>${weak.length} more link${weak.length > 1 ? 's' : ''}, not clear of luck</summary>`;
-      d.append(...weak.map(x => findingRow(o, x)));
-      card.append(d);
-    }
-    grid.append(card);
-  }
   const sum = document.createElement('p');
   sum.className = 'fsum mono';
-  sum.innerHTML = `<b>${found}</b> finding${found === 1 ? '' : 's'} out of <b>${tested}</b> links tested · at most 1 in ${Math.round(1 / SPEC.maxLuck)} is luck`;
-  $('mxbox').replaceChildren(sum, grid);
+  sum.innerHTML = `<b>${found}</b> impact${found === 1 ? '' : 's'} found · <b>${tested}</b> links tested · at most 1 in ${Math.round(1 / SPEC.maxLuck)} is luck`;
+
+  const legend = document.createElement('div');
+  legend.className = 'mxlegend';
+  legend.innerHTML = ['vbad Very bad', 'bad Bad', 'neutral Neutral', 'good Good', 'vgood Very good', 'up ▲▼ Weight, no goal yet']
+    .map(x => { const i = x.indexOf(' '); return `<span class="lv ${x.slice(0, i)}">${x.slice(i + 1)}</span>`; }).join('');
+
+  const detail = document.createElement('div');
+  detail.className = 'mxdetail'; detail.id = 'mxdetail';
+  detail.textContent = 'Tap a cell to see what it measured.';
+
+  const t = document.createElement('table');
+  t.className = 'mx';
+  t.innerHTML = '<thead><tr><th class="rh">Measure</th>' + SPEC.outcomes.map(o => {
+    const avg = average(state.log, o);
+    return `<th><em>${o.icon}</em>${o.name}${avg == null ? '' : `<small>avg ${fmtAvg(o, avg)}</small>`}</th>`;
+  }).join('') + '</tr></thead>';
+  const body = document.createElement('tbody');
+  for (const g of SPEC.groups) {
+    const mine = rows.filter(r => r.factor.group === g.id);
+    if (!mine.length) continue;
+    const sec = document.createElement('tr');
+    sec.className = 'sec';
+    sec.innerHTML = `<th colspan="${SPEC.outcomes.length + 1}"><em>${g.icon}</em>${g.name}</th>`;
+    body.append(sec);
+    for (const r of mine) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<th class="rh" scope="row"><em>${r.factor.icon}</em>${r.factor.name}</th>`;
+      SPEC.outcomes.forEach((o, i) => tr.append(cellEl(r.factor, o, r.cells[i])));
+      body.append(tr);
+    }
+  }
+  t.append(body);
+  const wrap = document.createElement('div');
+  wrap.className = 'mxwrap';
+  wrap.append(t);
+  const hint = document.createElement('p');
+  hint.className = 'mxhint mono';
+  hint.textContent = `Swipe the grid for all ${SPEC.outcomes.length} results →`;
+  $('mxbox').replaceChildren(sum, legend, detail, hint, wrap);
 }
 
-function draw() { drawCard(); drawStrip(); drawFindings(); }
+function draw() { drawCard(); drawStrip(); drawMatrix(); }
 
 /* ── saving ─────────────────────────────────────────────────────────── */
 const say = (msg, bad) => { const s = $('saved'); if (!s) return; s.textContent = msg; s.className = `saved mono${bad ? ' bad' : msg === 'Saved' ? ' on' : ''}`; };
 
 function touch() {
   dirty = true;
-  drawStrip(); drawFindings();
+  drawStrip(); drawMatrix();
   say('Saving…');
   clearTimeout(timer);
   timer = setTimeout(push, 900);

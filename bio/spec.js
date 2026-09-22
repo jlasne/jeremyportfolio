@@ -17,6 +17,9 @@ export const SPEC = {
   minPerSide: 4,
   /* The share of shown findings allowed to be luck: 1 in 10. */
   maxLuck: 0.1,
+  /* A finding at least this far apart (Cohen's d, "large") is very good or
+     very bad. */
+  veryAt: 0.8,
 
   /* What a day is made of, in the order it is logged. */
   groups: [
@@ -99,29 +102,37 @@ export const SPEC = {
 
      `lag` is the gap between the factor and what it is tested against. A
      day's doings (lag 1) are read against the night and morning after. The
-     night itself (bedtime, wake-up, hours slept, logged on the morning it
-     ended) is read against that same morning (lag 0). */
+     night itself and the morning's own numbers (bedtime, wake-up, hours
+     slept, sleep score, weight, HRV, resting HR, recovery, all logged on the
+     morning the night ended) are read against that same morning (lag 0).
+     Every measure is a row and every outcome a column; a measure is never
+     read against itself. `group` is the section the row sits under. */
   factors: [
-    { id: 'coffee',      name: 'Coffee',           icon: '☕️', split: 'median', on: 'more coffee', fmt: 'cups' },
-    { id: 'coffeeFirst', name: 'First coffee',     icon: '☕️', split: 'median', from: 'coffee', on: 'a later first coffee', fmt: 'clock' },
-    { id: 'coffeeLast',  name: 'Last coffee',      icon: '☕️', split: 'median', from: 'coffee', on: 'a later last coffee', fmt: 'clock' },
-    { id: 'coffeeLate',  name: 'Afternoon coffee', icon: '☕️', split: 'flag',   from: 'coffee', on: 'coffee after 14:00' },
-    { id: 'water',       name: 'Water',            icon: '💧', split: 'median', on: 'more water', fmt: '×50cl' },
-    { id: 'eaten',       name: 'Calories eaten',   icon: '🍽️', split: 'median', from: 'meals', on: 'more calories eaten', fmt: 'kcal' },
-    { id: 'mealFirst',   name: 'First meal',       icon: '🥐', split: 'median', from: 'meals', on: 'a later first meal', fmt: 'clock' },
-    { id: 'mealLast',    name: 'Last meal',        icon: '🍝', split: 'median', from: 'meals', on: 'a later last meal', fmt: 'clock' },
-    { id: 'mealWindow',  name: 'Eating window',    icon: '⏳', split: 'median', from: 'meals', on: 'a longer eating window', fmt: 'dur' },
-    { id: 'sportAny',    name: 'Training day',     icon: '🏃', split: 'flag',   from: 'sessions', on: 'a training day, against a rest day' },
-    { id: 'sportMin',    name: 'Session length',   icon: '⏱️', split: 'median', from: 'sessions', on: 'a longer session', fmt: 'min' },
-    { id: 'sportHard',   name: 'Intensity',        icon: '🔥', split: 'median', from: 'sessions', on: 'a harder session', fmt: '/10' },
-    { id: 'sportKcal',   name: 'Sport calories',   icon: '⚡️', split: 'median', from: 'sessions', on: 'more calories burned', fmt: 'kcal' },
-    { id: 'sportLate',   name: 'Session time',     icon: '🕒', split: 'median', from: 'sessions', on: 'a later session', fmt: 'clock' },
-    { id: 'steps',       name: 'Steps',            icon: '👟', split: 'median', on: 'more steps', fmt: 'steps' },
-    { id: 'sun',         name: 'Sun',              icon: '☀️', split: 'median', on: 'more sun', fmt: 'min' },
-    { id: 'deep',        name: 'Deep work',        icon: '🧠', split: 'median', on: 'more deep work', fmt: 'h' },
-    { id: 'bed',         name: 'Bedtime',          icon: '🌙', split: 'median', lag: 0, on: 'a later bedtime', fmt: 'clock' },
-    { id: 'wake',        name: 'Wake-up',          icon: '🌅', split: 'median', lag: 0, on: 'a later wake-up', fmt: 'clock' },
-    { id: 'sleepMin',    name: 'Hours slept',      icon: '🛌', split: 'median', lag: 0, on: 'more sleep', fmt: 'dur' },
+    { group: 'intake', id: 'coffee',      name: 'Coffee',           icon: '☕️', split: 'median', on: 'more coffee', fmt: 'cups' },
+    { group: 'intake', id: 'coffeeFirst', name: 'First coffee',     icon: '☕️', split: 'median', from: 'coffee', on: 'a later first coffee', fmt: 'clock' },
+    { group: 'intake', id: 'coffeeLast',  name: 'Last coffee',      icon: '☕️', split: 'median', from: 'coffee', on: 'a later last coffee', fmt: 'clock' },
+    { group: 'intake', id: 'coffeeLate',  name: 'Afternoon coffee', icon: '☕️', split: 'flag',   from: 'coffee', on: 'coffee after 14:00' },
+    { group: 'intake', id: 'water',       name: 'Water',            icon: '💧', split: 'median', on: 'more water', fmt: '×50cl' },
+    { group: 'intake', id: 'eaten',       name: 'Calories eaten',   icon: '🍽️', split: 'median', from: 'meals', on: 'more calories eaten', fmt: 'kcal' },
+    { group: 'intake', id: 'mealFirst',   name: 'First meal',       icon: '🥐', split: 'median', from: 'meals', on: 'a later first meal', fmt: 'clock' },
+    { group: 'intake', id: 'mealLast',    name: 'Last meal',        icon: '🍝', split: 'median', from: 'meals', on: 'a later last meal', fmt: 'clock' },
+    { group: 'intake', id: 'mealWindow',  name: 'Eating window',    icon: '⏳', split: 'median', from: 'meals', on: 'a longer eating window', fmt: 'dur' },
+    { group: 'sport', id: 'sportAny',    name: 'Training day',     icon: '🏃', split: 'flag',   from: 'sessions', on: 'a training day, against a rest day' },
+    { group: 'sport', id: 'sportMin',    name: 'Session length',   icon: '⏱️', split: 'median', from: 'sessions', on: 'a longer session', fmt: 'min' },
+    { group: 'sport', id: 'sportHard',   name: 'Intensity',        icon: '🔥', split: 'median', from: 'sessions', on: 'a harder session', fmt: '/10' },
+    { group: 'sport', id: 'sportKcal',   name: 'Sport calories',   icon: '⚡️', split: 'median', from: 'sessions', on: 'more calories burned', fmt: 'kcal' },
+    { group: 'sport', id: 'sportLate',   name: 'Session time',     icon: '🕒', split: 'median', from: 'sessions', on: 'a later session', fmt: 'clock' },
+    { group: 'sport', id: 'steps',       name: 'Steps',            icon: '👟', split: 'median', on: 'more steps', fmt: 'steps' },
+    { group: 'levers', id: 'sun',         name: 'Sun',              icon: '☀️', split: 'median', on: 'more sun', fmt: 'min' },
+    { group: 'levers', id: 'deep',        name: 'Deep work',        icon: '🧠', split: 'median', on: 'more deep work', fmt: 'h' },
+    { group: 'sleep', id: 'bed',         name: 'Bedtime',          icon: '🌙', split: 'median', lag: 0, on: 'a later bedtime', fmt: 'clock' },
+    { group: 'sleep', id: 'wake',        name: 'Wake-up',          icon: '🌅', split: 'median', lag: 0, on: 'a later wake-up', fmt: 'clock' },
+    { group: 'sleep', id: 'sleepMin',    name: 'Hours slept',      icon: '🛌', split: 'median', lag: 0, on: 'more sleep', fmt: 'dur' },
+    { group: 'sleep',   id: 'sleepScore', name: 'Sleep score', icon: '💤', split: 'median', lag: 0, on: 'a higher sleep score', fmt: 'pts' },
+    { group: 'observe', id: 'weight',     name: 'Weight',      icon: '⚖️', split: 'median', lag: 0, on: 'a heavier morning', fmt: 'kg' },
+    { group: 'observe', id: 'hrv',        name: 'HRV',         icon: '📈', split: 'median', lag: 0, on: 'a higher HRV', fmt: 'ms' },
+    { group: 'observe', id: 'rhr',        name: 'Resting HR',  icon: '❤️', split: 'median', lag: 0, on: 'a higher resting HR', fmt: 'bpm' },
+    { group: 'observe', id: 'readiness',  name: 'Recovery',    icon: '🔋', split: 'median', lag: 0, on: 'a higher recovery', fmt: 'pts' },
   ],
 };
 
@@ -417,7 +428,7 @@ export function sportList(log) {
 export function factorsFor(log) {
   const sports = [...sportCounts(log).entries()]
     .filter(([, c]) => c >= SPEC.minPerSide)
-    .map(([name]) => ({ id: `sport:${name}`, name, icon: '🏅', split: 'flag', from: 'sessions', sport: name, on: `${name.toLowerCase()}, against my other sports` }));
+    .map(([name]) => ({ group: 'sport', id: `sport:${name}`, name, icon: '🏅', split: 'flag', from: 'sessions', sport: name, on: `${name.toLowerCase()}, against my other sports` }));
   return [...SPEC.factors, ...sports];
 }
 
@@ -428,7 +439,9 @@ export function factorsFor(log) {
    findings at that level expected to be luck. A finding needs
    q <= SPEC.maxLuck, however many factors are tracked.
 
-   Returns each outcome's links, strongest first, and how many were tested. */
+   Returns one row per measure with a link per outcome (null when the days
+   are too few, or the measure is the outcome itself), and how many links
+   were tested. */
 export function analyze(log) {
   const all = [];
   for (const outcome of SPEC.outcomes)
@@ -442,10 +455,11 @@ export function analyze(log) {
     q = Math.min(q, byP[i].link.p * byP.length / (i + 1));
     byP[i].link.q = q;
   }
-  const byOutcome = Object.fromEntries(SPEC.outcomes.map(o => [o.id, []]));
-  for (const x of all) byOutcome[x.outcome.id].push(x);
-  for (const id in byOutcome) byOutcome[id].sort((a, b) => b.link.d - a.link.d);
-  return { byOutcome, tested: all.length };
+  const rows = factorsFor(log).map(factor => ({
+    factor,
+    cells: SPEC.outcomes.map(o => all.find(x => x.factor === factor && x.outcome === o)?.link ?? null),
+  }));
+  return { rows, tested: all.length };
 }
 
 /* The outcome's own average over the month, as a reference for a move. */
@@ -455,8 +469,21 @@ export function average(log, outcome) {
 }
 
 /* A finding survives the false-discovery check and is at least a medium
-   gap. The rest wait behind a toggle. */
+   gap. */
 export const isFinding = link => link.q <= SPEC.maxLuck && link.d >= 0.3;
+
+/* The impact of one link on the five-step scale. Anything that is not a
+   finding is neutral. A finding is good or bad by what the outcome counts
+   as better, and "very" once the gap is large (d >= SPEC.veryAt, Cohen's
+   large). An outcome with no better direction (weight, until it has a
+   goal) reports "up" or "down" instead. */
+export function impact(link) {
+  if (!link) return null;
+  if (!isFinding(link)) return { level: 'neutral', very: false };
+  const very = link.d >= SPEC.veryAt;
+  if (link.good == null) return { level: link.diff > 0 ? 'up' : 'down', very };
+  return { level: link.good ? 'good' : 'bad', very };
+}
 
 /* Days with both halves on them: what the matrix actually runs on. */
 export function readyDays(log) {

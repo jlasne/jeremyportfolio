@@ -56,12 +56,23 @@ day that caused them, because a night is what answers a day.
 
 ## The correlations
 
-One card per thing the body reports: **recovery, sleep score, sleep
-duration, weight, HRV and resting HR**. Each card lists what moved that
-metric, strongest first, in its own unit: "−5 pts after a later last coffee ·
-over 13:23".
+One grid: **every measure against every result**. A row is one thing
+measured, a column one thing looked for (recovery, sleep score, sleep
+duration, weight, HRV, resting HR), and each cell the impact on five steps:
 
-**Everything logged is tested**, 20 factors plus one line per sport:
+| Very bad | Bad | Neutral | Good | Very good |
+| --- | --- | --- | --- | --- |
+| a finding, large gap, the wrong way | a finding, the wrong way | not a finding | a finding, the right way | a finding, large gap, the right way |
+
+"Right way" follows what the result counts as better, so a falling resting
+HR is good. "Large" is Cohen's d of 0.8 or more. Weight has no better
+direction until it has a goal, so its column shows ▲ up or ▼ down. The move
+in the result's own unit sits under the word, and tapping a cell spells the
+link out above the grid: "Last coffee → Sleep score: Very bad. −5 pts after
+a later last coffee (over 13:23), 15 of 30 days. Clear of luck (q 0.005)."
+A dot means fewer than 4 days on one side; a dash, a measure against itself.
+
+**Everything logged is a row**, 25 measures plus one line per sport:
 
 | From | Factors |
 | --- | --- |
@@ -69,22 +80,21 @@ over 13:23".
 | Meals | calories eaten, first meal time, last meal time, eating window |
 | Sport | training day vs rest day; then, against my other sessions: sport, length, intensity, kcal burned, start time |
 | Day | water, steps, sun, deep work |
-| Night | bedtime, wake-up, hours slept |
+| Night | bedtime, wake-up, hours slept, sleep score |
+| Morning | weight, HRV, resting HR, recovery |
 
 - A day's doings are read against the night and morning **after** them. The
-  night's own bedtime, wake-up and hours slept are read against the morning
-  it ended.
+  night and the morning's own numbers are read against that same morning.
 - An on/off factor splits on itself; a count or a clock time splits at its
   **own median**, and the line says where: "over 17:10".
 - Sport is read one dimension at a time, so "a harder session" means harder
   than my usual session, not harder than resting.
-- The bar is Cohen's *d*, how far apart the two groups sit.
 
 **The luck check.** Over a hundred links are tested each month, so some look
 real by chance, and the more that is tracked the more of them there are.
 Each link gets a Welch t-test p-value, then a Benjamini-Hochberg q-value
-across every link tested together. A finding needs q ≤ 0.1 (at most 1 in 10
-findings is luck) and at least a medium gap. The rest fold behind a toggle.
+across every link tested together. A cell leaves neutral only with q ≤ 0.1
+(at most 1 in 10 coloured cells is luck) and at least a medium gap.
 
 Measured on 20 simulated months with no real effect in them: the old
 strength-only rule showed 17.2 false findings a month, the luck check 0.55.
