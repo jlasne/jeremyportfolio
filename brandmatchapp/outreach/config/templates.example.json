@@ -1,4 +1,5 @@
 [
-  "Hey {{firstName}}, saw your {{niche}} posts. We match brands with creators and you fit two briefs open right now. Want the details?",
-  "Hi {{firstName}}, we run paid brand matches for creators your size. Two briefs fit you this week. Interested?"
+  "Hey {{firstName}}, we match brands with creators and two briefs open this week fit you. Want the details?",
+  "Hi {{firstName}}, we run paid brand matches for creators around {{followers}}. Two briefs fit you right now. Interested?",
+  "Hey {{firstName}}, a brand in your space is booking creators this month and you came up. Want me to send the brief?"
 ]

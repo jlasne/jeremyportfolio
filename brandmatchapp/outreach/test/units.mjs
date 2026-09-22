@@ -61,4 +61,13 @@ const chrome = findChrome()
 assert.ok(chrome === undefined || existsSync(chrome), 'a detected Chrome must exist on disk')
 console.log('chrome detected:', chrome ?? 'none, Playwright will use its own')
 
+// The shipped examples must render. One unknown placeholder in there skips
+// every lead that gets that template, silently, in production.
+import { readFileSync } from 'node:fs'
+for (const shipped of JSON.parse(readFileSync(new URL('../config/templates.example.json', import.meta.url), 'utf8'))) {
+  const out = render(shipped, t)
+  assert.deepEqual(out.missing, [], `shipped template needs ${out.missing.join(', ')}: ${shipped}`)
+}
+console.log('shipped templates all render')
+
 console.log('all assertions passed')
