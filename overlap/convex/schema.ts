@@ -212,6 +212,22 @@ export default defineSchema({
       }),
     ),
     draftsAt: v.optional(v.number()),
+    /* The questions on the feed. Optional because the first days were
+       written before the feed existed. `beat` is which of the story's
+       parts the question is after; `from` is set when the question is a
+       follow-up dug out of a vague answer. */
+    asks: v.optional(
+      v.array(
+        v.object({
+          id: v.string(),
+          at: v.number(),
+          text: v.string(),
+          beat: v.string(),
+          answered: v.boolean(),
+          from: v.optional(v.string()),
+        }),
+      ),
+    ),
     /* which of the three daily mails already went out: "10", "14", "17" */
     mailed: v.array(v.string()),
     updatedAt: v.number(),

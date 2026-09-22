@@ -116,18 +116,29 @@ button, input, textarea, select { font: inherit; color: inherit; }
 }
 
 /* ── composer ───────────────────────────────────────────────────────── */
-/* the interview: one question at a time, given the room to be read */
-.stage { padding: 30px 16px 24px; border-bottom: 1px solid var(--line); }
-.stage .lead { color: var(--dim); margin: 0 0 18px; }
-.stage .askq { font: 700 24px/1.32 var(--sans); letter-spacing: -.01em; margin: 8px 0 18px; }
-.stage textarea {
+/* the feed: every open question is a card you can answer in place */
+.bar-top { padding: 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.beats { display: flex; gap: 5px; flex: 1; min-width: 160px; }
+.beats i { height: 4px; flex: 1; border-radius: 2px; background: var(--line); }
+.beats i.on { background: var(--blue); }
+.bar-top .say { color: var(--dim); font-size: 13px; white-space: nowrap; }
+.bar-top.ready .say { color: var(--good); }
+
+.ask { border-bottom: 1px solid var(--line); padding: 16px; }
+.ask .beat { font: 500 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--dim); margin: 0 0 8px; display: flex; gap: 8px; align-items: center; }
+.ask .beat b { color: var(--blue); font-weight: 500; }
+.ask .qt { font: 700 19px/1.35 var(--sans); letter-spacing: -.005em; margin: 0 0 12px; }
+.ask textarea {
   width: 100%; background: transparent; border: 1px solid var(--line); border-radius: 14px;
-  resize: none; font-size: 17px; line-height: 1.5; min-height: 98px; padding: 14px; outline: none;
+  resize: none; font-size: 16px; line-height: 1.5; min-height: 46px; padding: 12px 14px; outline: none;
 }
-.stage textarea:focus { border-color: var(--blue); }
-.stage textarea::placeholder { color: var(--dim); }
-.stage .bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 12px 0 0; }
-.stage .bar .right { display: flex; gap: 8px; align-items: center; }
+.ask textarea:focus { border-color: var(--blue); }
+.ask textarea::placeholder { color: var(--dim); }
+.ask .bar { display: flex; justify-content: flex-end; gap: 8px; margin: 10px 0 0; }
+.ask.busy { opacity: .45; pointer-events: none; }
+
+.stage { padding: 26px 16px; border-bottom: 1px solid var(--line); }
+.stage .lead { color: var(--dim); margin: 0 0 18px; }
 .stage .rowbtns { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .btn.big { font-size: 17px; padding: 15px 30px; }
 .thinking { display: flex; gap: 10px; align-items: center; color: var(--dim); }
@@ -324,20 +335,28 @@ async function refresh() {
 
 /* ── the interview ──────────────────────────────────────────────────── */
 
-/* The whole conversation state. The transcript lives on the server, so
-   this only holds the question waiting to be answered. */
-let chat = { question: null, done: false, busy: false, asked: 0 };
+/* The feed lives on the server. This only tracks what is in flight, so a
+   card can grey itself out while the model reads the answer. */
+let busy = { fill: false, ask: null };
 
-async function nextQuestion() {
-  chat.busy = true; draw();
-  try {
-    const r = await call("x.next", { day: state.today });
-    chat = { question: r.question, done: r.done, busy: false, asked: r.asked };
-  } catch (err) {
-    chat.busy = false; toast(err.message);
-  }
-  draw();
+async function fillFeed() {
+  busy.fill = true; draw();
+  try { state = { ...state, ...(await call("x.fill", { day: state.today })) }; }
+  catch (err) { toast(err.message); }
+  busy.fill = false; draw();
 }
+
+async function answer(askId, text) {
+  busy.ask = askId; draw();
+  try { state = { ...state, ...(await call("x.reply", { day: state.today, askId, text })) }; }
+  catch (err) { toast(err.message); }
+  busy.ask = null; draw();
+}
+
+const openAsks = () => (state.asks || []).filter((a) => !a.answered);
+/* A beat counts once one of its questions has an answer. */
+const beatsDone = () => new Set((state.asks || []).filter((a) => a.answered).map((a) => a.beat));
+const ready = () => beatsDone().size >= (state.readyAt || 5);
 
 /* ── drawing ────────────────────────────────────────────────────────── */
 
@@ -354,52 +373,66 @@ function draw() {
 }
 
 function today() {
-  const n = state.entries.length;
-  let stage;
+  const open = openAsks();
+  const done = beatsDone();
+  const beats = state.beats || [];
+  const is = ready();
 
-  if (chat.busy) {
-    stage = `<div class="stage"><div class="thinking"><span class="spin"></span> Reading your day…</div></div>`;
-  } else if (chat.question) {
-    stage = `
-      <div class="stage">
-        <p class="mono">Question ${chat.asked + 1}</p>
-        <h3 class="askq">${esc(chat.question)}</h3>
-        <textarea id="box" placeholder="Say it the way you would say it out loud."></textarea>
-        <div class="bar">
-          <span class="mono">cmd + enter to send</span>
-          <span class="right">
-            <button class="btn ghost sm" id="stop">Stop</button>
-            <button class="btn blue" id="send">Send</button>
-          </span>
-        </div>
-      </div>`;
-  } else if (chat.done) {
-    stage = `
-      <div class="stage">
-        <p class="lead">Covered. ${n} ${n === 1 ? "answer" : "answers"} on the record.</p>
-        <div class="rowbtns">
-          <button class="btn blue big" id="writeNow">Write the day</button>
-          <button class="btn ghost sm" id="more">Keep going</button>
-        </div>
-      </div>`;
-  } else {
-    stage = `
-      <div class="stage">
-        <p class="lead">${n ? `${n} ${n === 1 ? "thing" : "things"} logged so far.` : "Nothing logged today."}</p>
-        <div class="rowbtns">
-          <button class="btn blue big" id="start">${n ? "Keep going" : "Start"}</button>
-          <button class="btn ghost sm" id="note">Write a note instead</button>
-        </div>
-      </div>`;
-  }
+  /* The bar: one mark per beat, and what it wants next. */
+  const bar = `
+    <div class="bar-top ${is ? "ready" : ""}">
+      <span class="beats">${beats.map((b) => `<i class="${done.has(b.id) ? "on" : ""}" title="${esc(b.label)}"></i>`).join("")}</span>
+      <span class="say">${done.size} of ${beats.length} covered${is ? " · enough to write" : ""}</span>
+      ${is ? `<button class="btn blue sm" id="writeNow">Write the day</button>` : ""}
+    </div>`;
+
+  /* The questions, oldest first, so a follow-up sits under what it dug into. */
+  const feed = open
+    .map((a) => {
+      const label = beats.find((b) => b.id === a.beat)?.label || a.beat;
+      return `
+        <article class="ask ${busy.ask === a.id ? "busy" : ""}" data-ask="${esc(a.id)}">
+          <p class="beat">${a.from ? `<b>digging</b> ·` : ""} ${esc(label)}</p>
+          <p class="qt">${esc(a.text)}</p>
+          <textarea rows="1" placeholder="Say it the way you would say it out loud."></textarea>
+          <div class="bar"><button class="btn blue sm">Answer</button></div>
+        </article>`;
+    })
+    .join("");
+
+  /* Nothing to answer: either the feed has never been filled, or he has
+     cleared it. Both want the same button, with a different sentence. */
+  const empty = !open.length
+    ? `<div class="stage">
+         <p class="lead">${busy.fill ? "" : state.entries.length ? "Feed clear. Top it up, or write the day." : "The feed is empty."}</p>
+         ${busy.fill
+           ? `<div class="thinking"><span class="spin"></span> Writing your questions…</div>`
+           : `<div class="rowbtns">
+                ${is
+                  ? `<button class="btn blue big" id="writeBig">Write the day</button>
+                     <button class="btn ghost sm" id="fill">More questions</button>`
+                  : `<button class="btn blue big" id="fill">${state.entries.length ? "More questions" : "Start"}</button>`}
+                <button class="btn ghost sm" id="note">Write a note instead</button>
+              </div>`}
+       </div>`
+    : busy.fill
+      ? `<div class="stage"><div class="thinking"><span class="spin"></span> Writing more questions…</div></div>`
+      : `<div class="stage">
+           <div class="rowbtns">
+             <button class="btn ghost sm" id="fill">More questions</button>
+             <button class="btn ghost sm" id="note">Write a note instead</button>
+           </div>
+         </div>`;
 
   return `
-    ${stage}
+    ${bar}
+    ${feed}
+    ${empty}
 
     <div class="compose hide" id="noteBox">
       <textarea id="freeBox" placeholder="What's happening?" rows="2"></textarea>
       <div class="bar">
-        <span class="mono">off the record of the interview</span>
+        <span class="mono">nobody asked, you just said it</span>
         <button class="btn sm" id="saveNote">Log it</button>
       </div>
     </div>
@@ -419,9 +452,7 @@ function today() {
           ${e.q ? `<p class="qline">${esc(e.q)}</p>` : ""}
           <div class="body">${esc(e.text)}</div>
         </article>`).join("")
-      : chat.question
-        ? ""
-        : `<p class="empty">Press Start.<br>It asks, you answer, it digs where you were vague.</p>`}
+      : ""}
   `;
 }
 
@@ -506,39 +537,35 @@ function wire() {
   const v = $("#view");
 
   /* Both textareas grow with what is typed and send on cmd+enter. */
-  const grow = (el, go) => {
+  const grow = (el, go, focus = true) => {
     if (!el) return;
-    el.focus();
+    if (focus) el.focus();
     el.addEventListener("input", () => { el.style.height = "auto"; el.style.height = el.scrollHeight + "px"; });
     el.addEventListener("keydown", (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); go(); }
     });
   };
 
-  $("#start")?.addEventListener("click", nextQuestion);
-  $("#more")?.addEventListener("click", () => { chat.done = false; nextQuestion(); });
-  $("#stop")?.addEventListener("click", () => { chat = { question: null, done: true, busy: false, asked: chat.asked }; draw(); });
+  $("#fill")?.addEventListener("click", fillFeed);
   $("#writeNow")?.addEventListener("click", () => $("#write").click());
-
+  $("#writeBig")?.addEventListener("click", () => $("#write").click());
   $("#note")?.addEventListener("click", () => {
     $("#noteBox").classList.remove("hide");
     $("#freeBox").focus();
   });
 
-  /* Answer the question on screen. The question rides along on the entry,
-     so the transcript reads as the conversation it was. */
-  const send = async () => {
-    const text = $("#box").value.trim();
-    if (!text) return;
-    $("#send").disabled = true;
-    try {
-      await call("x.log", { day: state.today, text, slot: "chat", q: chat.question });
-      state = await call("x.day");
-      await nextQuestion();
-    } catch (err) { toast(err.message); $("#send").disabled = false; }
-  };
-  $("#send")?.addEventListener("click", send);
-  grow($("#box"), send);
+  /* Every card answers itself. */
+  v.querySelectorAll(".ask").forEach((card) => {
+    const box = card.querySelector("textarea");
+    const go = () => {
+      const text = box.value.trim();
+      if (text) answer(card.dataset.ask, text);
+    };
+    grow(box, go, false);
+    card.querySelector("button").addEventListener("click", go);
+  });
+  /* Put the cursor in the first open question, not in every one of them. */
+  v.querySelector(".ask textarea")?.focus();
 
   const saveNote = async () => {
     const text = $("#freeBox").value.trim();

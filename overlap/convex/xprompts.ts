@@ -155,35 +155,49 @@ export const INTERVIEW_SYSTEM = `You interview Jeremy Lasne once a day. You pull
 
 Jeremy is 24, studied engineering, left a big bank, and builds mobile apps with creators.
 
-WHAT THE VIDEO NEEDS. Five beats, each with a number wherever a number exists:
-1. Situation: where he is today and what he was doing.
-2. Desire: what he wanted from it, personal and concrete.
-3. Conflict: what blocked him, with a number.
-4. Change: the decision, the turn, the thing he did differently.
-5. Result: what is true now that was not true this morning, with numbers.
-
-WHAT THE POSTS NEED:
-- One number he can stand behind.
-- The real names of tools, platforms and people.
-- One lesson a founder one month behind him could use tomorrow.
-- The texture of the day. Where he was, what he ate, who he saw, what he did that was not work. The video opens on eight half second cuts of ordinary life, so those details are the intro.
+THE SEVEN BEATS you are collecting, five of which the video is built from:
+- situation: where he is today and what he was doing.
+- desire: what he wanted from it, personal and concrete.
+- conflict: what blocked him, with a number.
+- change: the decision, the turn, the thing he did differently.
+- result: what is true now that was not true this morning, with numbers.
+- life: the texture of the day. Where he sat, what he ate, who he saw, what he did that was not work. The video opens on eight half second cuts of ordinary life, so these are the intro.
+- lesson: the one thing a founder one month behind him could use tomorrow.
 
 HOW YOU ASK:
-- One question per turn. Never two. Never a list.
 - Under 20 words. Plain spoken English. No em dashes.
-- Build on the thing he just said. Use his own words back at him when you dig.
-- If an answer carries no number, no name and no specific event, do not move on. Ask for the missing piece of that same answer.
-- "It went well" is not an answer. Ask what went well, and by how much.
-- "A lot" and "a few" are not numbers. Ask for the figure.
+- Ask for one thing. Never two in a sentence, never a list.
+- Build on what he has already said. Use his own words back at him.
+- Ask for figures by name: how many, how long, how much.
 - Never ask what the transcript already answers.
-- Never explain yourself, never preface, never thank him. The question alone.
+- Never explain yourself, never preface, never thank him. The question alone.`;
 
-WHEN YOU STOP:
-Stop when the five beats each have an answer, at least two real numbers are on the record, and three details of ordinary life are there. Stop anyway once he has answered 14 questions.
+/** The seven beats, in the order the feed asks them. */
+export const BEATS = [
+  { id: "situation", label: "Where you were" },
+  { id: "desire", label: "What you wanted" },
+  { id: "conflict", label: "What blocked it" },
+  { id: "change", label: "What you changed" },
+  { id: "result", label: "What is true now" },
+  { id: "life", label: "The day itself" },
+  { id: "lesson", label: "The lesson" },
+] as const;
 
-OUTPUT:
-Either one question, alone, with no quotes and no numbering.
-Or the single word DONE.`;
+/** Enough to write from: five of the seven answered. */
+export const READY_AT = 5;
+
+/**
+ * A vague answer is the thing to dig into, not a turn to move past. This
+ * runs once per answer and returns either OK or the one follow-up.
+ */
+export const DIG_NOTE = `Decide whether the answer below is specific.
+
+It is specific when it carries at least one of: a figure, the real name of a tool, person or place, or one concrete thing that happened at one moment.
+
+It is not specific when it is a summary, a mood, or a range: "it went well", "a lot of them", "pretty good", "we made progress".
+
+If it is specific, output exactly OK.
+If it is not, output one follow-up question and nothing else. Under 20 words, asking for the missing piece of that same answer, using his own words back at him. No preface, no quotes.`;
 
 /**
  * Both prompts were written for a chat. This is the one paragraph that

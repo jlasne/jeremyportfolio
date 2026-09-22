@@ -19,32 +19,44 @@ The mail questions come from a bank of three sets per slot that rotates by
 date, so the same three do not arrive every morning for a month. They follow
 the five beats the video script needs.
 
-## The interview
+## The feed
 
-The page itself does not use that bank. You press **Start** and it asks one
-question, reads your answer, and asks the next one from what you actually
-said. A vague answer is not a turn to move on from: "it went well" gets
-"well by how much", and it stays on that thread until there is a figure.
+Press **Start** and the feed fills with one question per beat. They sit
+there like posts, each with its own box, and you answer them in any order.
 
-It is looking for five things, because the video script is built from them:
-where you were and what you were doing, what you wanted, what blocked you
-with a number, what you changed, and what is true now with numbers. It also
-asks what you ate, where you sat and who you saw, because the video opens on
-eight half second cuts of ordinary life.
+A vague answer does not pass. When an answer carries no figure, no name and
+no one concrete moment, a follow-up lands on the feed underneath it, marked
+**digging**, asking for the missing piece in your own words. One level deep,
+because two is an interrogation about one sentence.
 
-It stops when the five beats are answered, two real numbers are on the
-record and three details of ordinary life are there. It stops anyway at 14
-questions. **Stop** ends it early, **Keep going** restarts it.
+The bar at the top is seven marks, one per beat. A mark lights when that
+beat has an answer. At five of seven the bar turns green and offers to write
+the day. **More questions** tops the feed back up at any point.
 
-Nothing about the conversation is stored except the transcript: each answer
-carries the question that produced it. Reload mid-interview and the next
-question is worked out again from the same transcript.
+### The seven beats
+
+| Beat | What it is after |
+| --- | --- |
+| Where you were | the situation, the room, what you were doing |
+| What you wanted | the desire, personal and concrete |
+| What blocked it | the conflict, with a number |
+| What you changed | the decision, the turn |
+| What is true now | the result, with numbers |
+| The day itself | food, place, people, anything that was not work |
+| The lesson | what a founder one month behind could use |
+
+The first five are the video's five lines. The sixth is the intro: eight
+half second cuts of ordinary life need ordinary life to cut from. The
+seventh is what makes a post worth saving.
+
+Nothing about the conversation lives outside the day: each answer carries
+the question that produced it, and the feed is a list on the same document.
 
 ## The screens
 
-- **Today.** One Start button, then the conversation. The /bio tick for the
-  30 day challenge. Then the day, newest first. "Write a note instead" drops
-  a thought in without being asked.
+- **Today.** The bar, the feed of open questions, then the day answered so
+  far, newest first. The /bio tick for the 30 day challenge. "Write a note
+  instead" drops a thought in without being asked.
 - **Drafts.** Three posts and one script. Character count against 280 on
   each post, Copy on each, and a link that opens X or YouTube Studio with
   the text ready.
@@ -85,8 +97,14 @@ output formats:
    story, the number, the lesson.
 2. The video prompt gets the same brief and writes the 60 second script.
 
-A third prompt, `INTERVIEW_SYSTEM`, runs the conversation. One call per
-question, at a cooler temperature than the two writers.
+The posts and the video are not the same width. A post is about one thing
+that happened today, named and numbered: a post that could have run on any
+other day is the wrong post. The video pulls back, and treats today as the
+evidence rather than the subject, so a stranger can follow it.
+
+A third prompt, `INTERVIEW_SYSTEM`, runs the feed: one call to write a batch
+of questions, one call per answer to decide whether to dig. Both cooler than
+the two writers.
 
 Both prompts were written for a chat where Jeremy answers questions. One
 paragraph, `RUN_NOTE`, turns them into a batch job: the log has already

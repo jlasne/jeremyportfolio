@@ -17,6 +17,9 @@ import {
   SLOTS,
   SLOT_TITLE,
   INTERVIEW_SYSTEM,
+  BEATS,
+  READY_AT,
+  DIG_NOTE,
   questionsFor,
 } from "./xprompts";
 
@@ -84,6 +87,7 @@ const blank = (day: string) => ({
   day,
   bioDone: false,
   entries: [] as DayDoc["entries"],
+  asks: [] as NonNullable<DayDoc["asks"]>,
   drafts: [] as DayDoc["drafts"],
   draftsAt: undefined as number | undefined,
   mailed: [] as string[],
@@ -96,6 +100,7 @@ const pub = (d: DayDoc | null, day: string) =>
         day: d.day,
         bioDone: d.bioDone,
         entries: d.entries,
+        asks: d.asks ?? [],
         drafts: d.drafts,
         draftsAt: d.draftsAt,
         mailed: d.mailed,
@@ -135,6 +140,9 @@ export const day = query({
       hour: now.hour,
       ...pub(await find(ctx, key), key),
       facts: await facts(ctx),
+      /* the beat list and the bar, so the page does not keep its own copy */
+      beats: BEATS.map((b) => ({ id: b.id, label: b.label })),
+      readyAt: READY_AT,
       questions: Object.fromEntries(SLOTS.map((s) => [s, questionsFor(s, key)])),
     };
   },
@@ -179,7 +187,29 @@ async function upsert(ctx: { db: any }, day: string, patch: Partial<DayDoc>) {
   return pub(await find(ctx, day), day);
 }
 
-/** Log something. `q` is set when the text answers one of the questions. */
+/** Append one entry. The only path anything takes into the day's record. */
+async function append(
+  ctx: { db: any },
+  day: string,
+  a: { text: string; slot?: string; q?: string },
+) {
+  if (!isDay(day)) throw new Error("Send the day as YYYY-MM-DD");
+  const text = a.text.trim().slice(0, MAX_ENTRY);
+  if (!text) throw new Error("Nothing to log");
+  const old = await find(ctx, day);
+  const entries = [
+    ...(old?.entries ?? []),
+    {
+      at: Date.now(),
+      slot: a.slot === "chat" || (a.slot && SLOTS.includes(a.slot as any)) ? a.slot : "free",
+      q: a.q?.trim().slice(0, 300) || undefined,
+      text,
+    },
+  ].slice(-MAX_ENTRIES);
+  return await upsert(ctx, day, { entries });
+}
+
+/** The note box: something said without being asked. */
 export const log = mutation({
   args: {
     passphrase: v.string(),
@@ -190,20 +220,16 @@ export const log = mutation({
   },
   handler: async (ctx, a) => {
     mustBeJeremy(a.passphrase);
-    if (!isDay(a.day)) throw new Error("Send the day as YYYY-MM-DD");
-    const text = a.text.trim().slice(0, MAX_ENTRY);
-    if (!text) throw new Error("Nothing to log");
-    const old = await find(ctx, a.day);
-    const entries = [
-      ...(old?.entries ?? []),
-      {
-        at: Date.now(),
-        slot: a.slot && SLOTS.includes(a.slot as any) ? a.slot : "free",
-        q: a.q?.trim().slice(0, 300) || undefined,
-        text,
-      },
-    ].slice(-MAX_ENTRIES);
-    return await upsert(ctx, a.day, { entries });
+    return await append(ctx, a.day, a);
+  },
+});
+
+/** The same, for the feed, which answers from an action. */
+export const logEntry = internalMutation({
+  args: { day: v.string(), text: v.string(), slot: v.optional(v.string()), q: v.optional(v.string()) },
+  handler: async (ctx, a) => {
+    await append(ctx, a.day, a);
+    return null;
   },
 });
 
@@ -382,6 +408,9 @@ export const make = internalAction({
     const postsRaw = await ask(
       POST_SYSTEM,
       `${b}\n\nWrite 3 posts from today, one per angle:\n${angles}\n\n` +
+        `Each post is about one specific thing that happened today. Name the tool, quote the figure, ` +
+        `say what happened at what moment. A post that could have been written on any other day is the ` +
+        `wrong post.\n\n` +
         `Output the 3 finished posts in order, plain text, separated by a line containing only ===. ` +
         `No code block, no titles, no commentary.`,
     );
@@ -390,7 +419,13 @@ export const make = internalAction({
       .map((p) => unfence(p))
       .filter(Boolean);
 
-    const script = await ask(SCRIPT_SYSTEM, `${b}\n\nWrite today's 60 second script from this log.`);
+    const script = await ask(
+      SCRIPT_SYSTEM,
+      `${b}\n\nWrite the 60 second script from this log.\n\n` +
+        `The video is wider than the posts. Today is the evidence, not the subject: pull back to the ` +
+        `arc a stranger can follow with no idea who Jeremy is, and use today's numbers to prove it. ` +
+        `Somebody who has never seen the channel should understand it on its own.`,
+    );
 
     const at = Date.now();
     const drafts = [
@@ -407,41 +442,138 @@ export const make = internalAction({
   },
 });
 
+/* ── the feed of questions ──────────────────────────────────────────── */
+
+const rid = () => Math.random().toString(36).slice(2, 10);
+
+export const putAsks = internalMutation({
+  args: {
+    day: v.string(),
+    asks: v.array(
+      v.object({
+        id: v.string(),
+        at: v.number(),
+        text: v.string(),
+        beat: v.string(),
+        answered: v.boolean(),
+        from: v.optional(v.string()),
+      }),
+    ),
+  },
+  handler: async (ctx, { day, asks }) => {
+    await upsert(ctx, day, { asks });
+    return null;
+  },
+});
+
+/** The day's transcript, written the way the model reads it. */
+function transcriptOf(entries: { q?: string; text: string }[]) {
+  return entries.length
+    ? entries.map((e) => (e.q ? `Q: ${e.q}\nA: ${e.text}` : `He said: ${e.text}`)).join("\n\n")
+    : "(nothing yet)";
+}
+
+const sheetOf = (facts: { label: string; value: string }[]) =>
+  facts.length
+    ? "\n\nALREADY ON RECORD, do not ask for these:\n" + facts.map((f) => `- ${f.label}: ${f.value}`).join("\n")
+    : "";
+
 /**
- * One turn of the interview: read the day so far, return the next question.
+ * Fill the feed.
  *
- * Nothing is stored here. The question comes back to the page, and it is
- * saved on the entry that answers it, so the transcript is the only state
- * the conversation has. Reload mid-interview and the next question is
- * worked out again from the same transcript.
+ * One question per beat that has no answered question yet, written against
+ * whatever he has already said. Beats that are covered are left alone, so
+ * pressing this again tops the feed up rather than starting over.
  */
-export const next = action({
+export const fill = action({
   args: { passphrase: v.string(), day: v.optional(v.string()) },
-  handler: async (ctx, a): Promise<{ done: boolean; question: string | null; asked: number }> => {
+  handler: async (ctx, a): Promise<unknown> => {
     mustBeJeremy(a.passphrase);
     const key = a.day && isDay(a.day) ? a.day : paris().day;
+    const d = await ctx.runQuery(internal.x.dayFor, { day: key });
     const c = await ctx.runQuery(internal.x.context, { day: key });
+    const asks: NonNullable<DayDoc["asks"]> = d.asks ?? [];
 
-    const entries: { q?: string; text: string }[] = c.entries;
-    const sheet: { label: string; value: string }[] = c.facts;
+    const open = new Set(asks.filter((x) => !x.answered).map((x) => x.beat));
+    const done = new Set(asks.filter((x) => x.answered).map((x) => x.beat));
+    const wanted = BEATS.filter((b) => !open.has(b.id) && !done.has(b.id));
+    if (!wanted.length) return await ctx.runQuery(internal.x.dayFor, { day: key });
 
-    const transcript = entries.length
-      ? entries.map((e) => (e.q ? `Q: ${e.q}\nA: ${e.text}` : `He said: ${e.text}`)).join("\n\n")
-      : "(nothing yet, this is the first question of the day)";
-    const known = sheet.length
-      ? "\n\nFACTS ALREADY ON RECORD, do not ask for these:\n" + sheet.map((f) => `- ${f.label}: ${f.value}`).join("\n")
-      : "";
-
-    const asked = entries.filter((e) => e.q).length;
     const said = await ask(
       INTERVIEW_SYSTEM,
-      `DATE: ${key}\n\nTHE DAY SO FAR:\n${transcript}${known}\n\nHe has answered ${asked} questions. Give the next one, or DONE.`,
-      0.6,
+      `DATE: ${key}\n\nTHE DAY SO FAR:\n${transcriptOf(c.entries)}${sheetOf(c.facts)}\n\n` +
+        `Write one question for each of these beats, in this order: ${wanted.map((b) => b.id).join(", ")}.\n` +
+        `One per line, in the form beat|question. Nothing else, no numbering, no blank lines.`,
+      0.7,
     );
 
-    const line = said.replace(/^["'\s]+|["'\s]+$/g, "").split("\n")[0].trim();
-    if (/^done\b/i.test(line) || asked >= 14) return { done: true, question: null, asked };
-    return { done: false, question: line.slice(0, 300), asked };
+    const ids = new Set(BEATS.map((b) => b.id as string));
+    const fresh = said
+      .split("\n")
+      .map((l) => l.trim().replace(/^[-*\d.)\s]+/, ""))
+      .filter(Boolean)
+      .map((l) => {
+        const cut = l.indexOf("|");
+        if (cut < 0) return null;
+        const beat = l.slice(0, cut).trim().toLowerCase();
+        const text = l.slice(cut + 1).trim().replace(/^["']|["']$/g, "");
+        if (!ids.has(beat) || !text) return null;
+        return { id: rid(), at: Date.now(), text: text.slice(0, 300), beat, answered: false };
+      })
+      .filter((x): x is NonNullable<typeof x> => x !== null)
+      .filter((x, i, all) => all.findIndex((y) => y.beat === x.beat) === i);
+
+    if (fresh.length) await ctx.runMutation(internal.x.putAsks, { day: key, asks: [...asks, ...fresh] });
+    return await ctx.runQuery(internal.x.dayFor, { day: key });
+  },
+});
+
+/**
+ * Answer one question on the feed.
+ *
+ * The answer is logged against the question that produced it, the question
+ * is struck off, and the model reads the pair. A vague answer earns a
+ * follow-up on the same beat, which lands on the feed under it.
+ */
+export const reply = action({
+  args: { passphrase: v.string(), day: v.string(), askId: v.string(), text: v.string() },
+  handler: async (ctx, a): Promise<unknown> => {
+    mustBeJeremy(a.passphrase);
+    if (!isDay(a.day)) throw new Error("Send the day as YYYY-MM-DD");
+    const text = a.text.trim();
+    if (!text) throw new Error("Nothing to log");
+
+    const d = await ctx.runQuery(internal.x.dayFor, { day: a.day });
+    const asks: NonNullable<DayDoc["asks"]> = d.asks ?? [];
+    const target = asks.find((x) => x.id === a.askId);
+    if (!target) throw new Error("That question is no longer on the feed");
+
+    await ctx.runMutation(internal.x.logEntry, {
+      day: a.day,
+      text: text.slice(0, MAX_ENTRY),
+      slot: "chat",
+      q: target.text,
+    });
+    let next = asks.map((x) => (x.id === a.askId ? { ...x, answered: true } : x));
+
+    /* Dig, but never on a follow-up: one level, or it becomes an
+       interrogation about one sentence. */
+    if (!target.from) {
+      try {
+        const said = await ask(INTERVIEW_SYSTEM, `${DIG_NOTE}\n\nQUESTION: ${target.text}\nANSWER: ${text}`, 0.5);
+        const line = said.split("\n")[0].trim().replace(/^["']|["']$/g, "");
+        if (line && !/^ok\b/i.test(line) && line.length > 8)
+          next = [
+            ...next,
+            { id: rid(), at: Date.now(), text: line.slice(0, 300), beat: target.beat, answered: false, from: target.id },
+          ];
+      } catch (e) {
+        console.error("x: could not dig into that answer", e);
+      }
+    }
+
+    await ctx.runMutation(internal.x.putAsks, { day: a.day, asks: next });
+    return await ctx.runQuery(internal.x.dayFor, { day: a.day });
   },
 });
 
