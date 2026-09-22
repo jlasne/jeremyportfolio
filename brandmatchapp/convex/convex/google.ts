@@ -147,6 +147,22 @@ export const search = internalAction({
     maxQueries: v.optional(v.number()),
     /** How many of the campaign's countries to read the results from. */
     maxPlaces: v.optional(v.number()),
+    /**
+     * Read the results from these markets instead of the campaign's own.
+     *
+     * A campaign that names no country still has a world to search. This is
+     * also how a run is widened without touching the rules a client saved:
+     * where Google reads from is ours to choose, who qualifies is theirs.
+     */
+    markets: v.optional(v.array(v.string())),
+    /**
+     * Stop after this many searches.
+     *
+     * A search is a tenth of a cent and a run is asked for in searches, not
+     * in query shapes, so the ceiling belongs here rather than in arithmetic
+     * done beforehand. The run stops mid-list and says how far it got.
+     */
+    maxSearches: v.optional(v.number()),
     /** Buy the profiles found. Off by default, so a first look costs one cent. */
     buy: v.optional(v.boolean()),
   },
@@ -171,12 +187,16 @@ export const search = internalAction({
     // The country the results are read from. Google answers the same words
     // differently per market, so a campaign selling into five countries has
     // five indexes to read rather than one, at no extra cost per country.
-    const places = ((plan.countries ?? []) as string[]).map((c) => c.toLowerCase()).slice(0, args.maxPlaces ?? 2)
+    const places = (args.markets?.length ? args.markets : ((plan.countries ?? []) as string[]))
+      .map((c) => c.toLowerCase())
+      .slice(0, args.maxPlaces ?? 2)
     const markets = places.length ? places : ['us']
+    const ceiling = args.maxSearches ?? Number.MAX_SAFE_INTEGER
 
     const found = new Map<string, number | null>()
     const perQuery: Record<string, unknown>[] = []
     let searches = 0
+    let tried = 0
 
     // Asked in batches rather than one after another.
     //
@@ -189,16 +209,27 @@ export const search = internalAction({
     for (const q of asks) for (const gl of markets) jobs.push({ q, gl })
 
     const WIDTH = 8
+    let stopped = false
     for (let at = 0; at < jobs.length; at += WIDTH) {
+      if (searches >= ceiling) { stopped = true; break }
+      // A run whose key is dead stops rather than hammering a refusal 600 times.
+      if (tried >= 40 && searches === 0) { stopped = true; break }
       const batch = jobs.slice(at, at + WIDTH)
       const answers = await Promise.all(batch.map(async (job) => {
-        const out: { rows: { handle: string; followers: number | null }[]; searches: number; error?: string } =
-          { rows: [], searches: 0 }
+        const out: {
+          rows: { handle: string; followers: number | null }[]
+          searches: number; tried: number; error?: string
+        } = { rows: [], searches: 0, tried: 0 }
         const here = new Set<string>()
         for (let p = 1; p <= pages; p++) {
           const got = await page(key, job.q, { page: p, gl: job.gl })
-          out.searches++
+          out.tried++
+          // A refused call is not a search. Serper charges for answers, and
+          // when the credits ran out mid-run it answered 576 times with
+          // "not enough credits": counting those as searches billed the
+          // campaign 69 cents for 11 cents of work.
           if (got.error) { out.error = got.error; break }
+          out.searches++
           let newHere = 0
           for (const row of got.rows) {
             if (here.has(row.handle)) continue
@@ -215,6 +246,7 @@ export const search = internalAction({
 
       for (const { job, out } of answers) {
         searches += out.searches
+        tried += out.tried
         if (out.error) { perQuery.push({ query: job.q, gl: job.gl, error: out.error }); continue }
         let fresh = 0
         let sized = 0
@@ -257,6 +289,12 @@ export const search = internalAction({
       queries: asks.length,
       markets,
       searches,
+      /** Calls made, answered or refused. Only the answered ones are paid for. */
+      tried,
+      refused: tried - searches,
+      /** True when the search ceiling ended it before the list did. */
+      stoppedAtCeiling: stopped,
+      askedOf: jobs.length,
       /** What Google said each kept handle was, so it can be held to it. */
       sizes: Object.fromEntries([...found.entries()].filter(([, n]) => n !== null && n >= lo && n <= hi)),
       costCents: Math.round(searches * CENTS_PER_SEARCH * 100) / 100,
