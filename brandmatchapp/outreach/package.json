@@ -1,0 +1,22 @@
+{
+  "name": "brandmatch-outreach",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Instagram outreach agent. A local browser, the page read as text, and a small model picking one action per step.",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/cli.js",
+    "run": "npm run build && node dist/cli.js run",
+    "status": "npm run build && node dist/cli.js status",
+    "test": "npm run build && node test/units.mjs && node test/loop.mjs && node test/run.mjs"
+  },
+  "dependencies": {
+    "@browserbasehq/stagehand": "^2.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.3",
+    "typescript": "^5.6.3"
+  }
+}

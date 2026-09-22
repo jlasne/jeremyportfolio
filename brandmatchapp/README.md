@@ -111,6 +111,22 @@ answer a deep link like `brandmatch.app/#/campaign`.
 | `app/src/components/` | Stars, Signal, the detail panel, the filter chips and slide bars, the daily chart stacked by agent, the hero animation, the grid backdrop |
 | `app/src/data/score.ts` | The scoring rule, in one place |
 | `app/src/lib/` | Formatting, CSV, hash router, placeholder images drawn on the device |
+| `outreach/` | The outreach agent: a local Chrome writing DMs to delivered leads. Its own `npm install`, its own README |
+
+## Outreach
+
+`outreach/` writes the Instagram DMs, on the client's own machine.
+
+A local Chrome, already logged in, reads each page as a list of things that can
+be clicked or typed into. A small model picks one of them per step. The message
+comes from a templates file, never from the model. Measured on the test page:
+2 model calls and $0.000074 a message.
+
+Three things it will not do: send without `--send`, pass 50 messages a day per
+account, or keep going after two failed leads in a row.
+
+The lead it writes to moves to `contacted` through the same client API the app
+uses, so the pipeline matches what actually went out. See `outreach/README.md`.
 
 ## Screens
 

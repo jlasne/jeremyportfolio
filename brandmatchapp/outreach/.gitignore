@@ -1,0 +1,8 @@
+node_modules/
+dist/
+sessions/
+logs/*.jsonl
+logs/counters.json
+config/settings.json
+.env
+config/templates.json

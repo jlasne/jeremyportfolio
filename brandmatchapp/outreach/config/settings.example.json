@@ -1,0 +1,20 @@
+{
+  "openrouter": {
+    "decide": { "model": "jev-1.13", "priceIn": 0.1, "priceOut": 0.3 },
+    "vision": { "enabled": false, "model": "deepseek-v4-flash-vision-exp" }
+  },
+  "brandmatch": {
+    "apiBase": "https://limitless-ladybug-747.eu-west-1.convex.site",
+    "status": "new",
+    "savedOnly": false
+  },
+  "instagram": {
+    "account": "brandmatch.hq",
+    "dailyCap": 50,
+    "betweenDms": [20, 90],
+    "afterProfile": [3, 9],
+    "typing": [40, 160]
+  },
+  "browser": { "headless": false },
+  "limits": { "maxStepsPerGoal": 8 }
+}
