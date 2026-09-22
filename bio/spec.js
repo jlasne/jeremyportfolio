@@ -75,14 +75,15 @@ export const SPEC = {
   /* What the body reports. Each gets its own list of what moved it. Each
      is read the morning AFTER the factor, because a night is what answers a
      day. `better` says which direction is a win, so a finding is coloured
-     by what it means, not by its sign; weight has no better direction until
-     there is a goal for it, so it is shown without a verdict. `unit` and
-     `digits` say how a difference is spoken: "-7 ms", "+0.4 kg". */
+     by what it means, not by its sign. For weight lower is better: the goal
+     is a leaner body, though a heavier morning after more water is water,
+     not fat. `unit` and `digits` say how a difference is spoken: "-7 ms",
+     "+0.4 kg". */
   outcomes: [
     { id: 'readiness',  name: 'Recovery',       icon: '🔋', unit: 'pts', better: 'high' },
     { id: 'sleepScore', name: 'Sleep score',    icon: '💤', unit: 'pts', better: 'high' },
     { id: 'sleepMin',   name: 'Sleep duration', icon: '🛌', unit: 'min', better: 'high' },
-    { id: 'weight',     name: 'Weight',         icon: '⚖️', unit: 'kg',  better: null, digits: 1 },
+    { id: 'weight',     name: 'Weight',         icon: '⚖️', unit: 'kg',  better: 'low', digits: 1 },
     { id: 'hrv',        name: 'HRV',            icon: '📈', unit: 'ms',  better: 'high' },
     { id: 'rhr',        name: 'Resting HR',     icon: '❤️', unit: 'bpm', better: 'low' },
   ],
@@ -363,7 +364,7 @@ export function cell(log, factor, outcome) {
   if (!base) return null;
   const diff = mean(on) - base;
   const delta = diff / base * 100;
-  const good = outcome.better == null ? null : outcome.better === 'high' ? diff > 0 : diff < 0;
+  const good = outcome.better === 'high' ? diff > 0 : diff < 0;
   return { diff, delta, d: s.d, label: s.label, good, base, cut, p: welchP(on, off), n: on.length + off.length, nOn: on.length };
 }
 
@@ -472,17 +473,14 @@ export function average(log, outcome) {
    gap. */
 export const isFinding = link => link.q <= SPEC.maxLuck && link.d >= 0.3;
 
-/* The impact of one link on the five-step scale. Anything that is not a
-   finding is neutral. A finding is good or bad by what the outcome counts
-   as better, and "very" once the gap is large (d >= SPEC.veryAt, Cohen's
-   large). An outcome with no better direction (weight, until it has a
-   goal) reports "up" or "down" instead. */
+/* The impact of one link on the five-step scale, very bad to very good
+   with neutral in the middle. Anything that is not a finding is neutral. A
+   finding is good or bad by what the outcome counts as better, and "very"
+   once the gap is large (d >= SPEC.veryAt, Cohen's large). */
 export function impact(link) {
   if (!link) return null;
   if (!isFinding(link)) return { level: 'neutral', very: false };
-  const very = link.d >= SPEC.veryAt;
-  if (link.good == null) return { level: link.diff > 0 ? 'up' : 'down', very };
-  return { level: link.good ? 'good' : 'bad', very };
+  return { level: link.good ? 'good' : 'bad', very: link.d >= SPEC.veryAt };
 }
 
 /* Days with both halves on them: what the matrix actually runs on. */

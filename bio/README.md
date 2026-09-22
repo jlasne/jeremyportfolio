@@ -65,8 +65,8 @@ duration, weight, HRV, resting HR), and each cell the impact on five steps:
 | a finding, large gap, the wrong way | a finding, the wrong way | not a finding | a finding, the right way | a finding, large gap, the right way |
 
 "Right way" follows what the result counts as better, so a falling resting
-HR is good. "Large" is Cohen's d of 0.8 or more. Weight has no better
-direction until it has a goal, so its column shows ▲ up or ▼ down. The move
+HR is good, and so is a lower weight (a heavier morning after more water is
+water, not fat). "Large" is Cohen's d of 0.8 or more. The move
 in the result's own unit sits under the word, and tapping a cell spells the
 link out above the grid: "Last coffee → Sleep score: Very bad. −5 pts after
 a later last coffee (over 13:23), 15 of 30 days. Clear of luck (q 0.005)."

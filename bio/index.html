@@ -311,7 +311,7 @@ h2 {
   font: 400 20px/1 var(--display); letter-spacing: .04em; color: var(--ice); border-bottom: 1px solid var(--line);
 }
 .mx tr.sec th em { font-style: normal; font-size: 16px; margin-right: 8px; }
-/* one impact: five steps, plus up/down for a result with no better direction */
+/* one impact on five steps: very bad, bad, neutral, good, very good */
 .lv {
   display: inline-grid; gap: 3px; justify-items: center; min-width: 88px; padding: 6px 6px 5px; border-radius: 4px;
   border: 1px solid transparent; background: none; cursor: pointer; font: 500 9.5px/1 var(--mono);
@@ -323,8 +323,6 @@ h2 {
 .lv.vgood { color: #04140b; background: var(--good); border-color: var(--good); }
 .lv.bad { color: var(--bad); border-color: rgba(255, 158, 158, .4); background: var(--bad-bg); }
 .lv.vbad { color: #1e0707; background: var(--bad); border-color: var(--bad); }
-.lv.up, .lv.down { color: var(--blue); border-color: rgba(95, 168, 211, .45); background: rgba(95, 168, 211, .1); }
-.lv.vup, .lv.vdown { color: var(--ink); background: var(--blue); border-color: var(--blue); }
 .lv.thin, .lv.self { cursor: default; color: rgba(234, 244, 251, .22); min-width: 0; }
 .lv:not(.thin):not(.self):hover { outline: 1px solid var(--ice-45); }
 .lv[aria-pressed="true"] { outline: 2px solid var(--ice); outline-offset: 1px; }
@@ -470,7 +468,7 @@ body.editing { padding-bottom: 88px; }
     <ul class="notes">
       <li><b>The morning after</b>A day is judged by the night that follows it: a late coffee on Tuesday is scored against Wednesday's sleep. The night itself (bedtime, wake-up, hours slept) is scored against the morning it ends.</li>
       <li><b>More against less, later against earlier</b>An on/off thing splits on itself. A count or a clock time splits at my own median, so "a later last coffee" means later than my usual.</li>
-      <li><b>Five steps</b>Very bad, bad, neutral, good, very good. Good means good for that result, not a bigger number: a resting heart rate going down is good. "Very" means a large gap (Cohen's d of 0.8 or more). Weight shows up or down until it has a goal.</li>
+      <li><b>Five steps</b>Very bad, bad, neutral, good, very good. Good means good for that result, not a bigger number: a resting heart rate going down is good. "Very" means a large gap (Cohen's d of 0.8 or more). For weight, lower is good; a heavier morning after more water is water, not fat.</li>
       <li><b>The strength label</b>How far apart the two groups sit, measured against how much that number swings day to day anyway. A big percent on a wild metric says less than a small one on a steady metric.</li>
       <li><b>When a cell is neutral</b>Over a hundred links are tested, so some look real by luck. A cell leaves neutral only when it clears a false-discovery check, which keeps luck to at most 1 in 10 of what is coloured. A dot means fewer than 4 days on one side so far. The whole matrix stays shut until 21 days carry both what I did and what the body said.</li>
       <li><b>Linked things move together</b>A late third meal is also more calories, so "a later last meal" and "more calories eaten" can both claim the same kilo. When two rows tell one story, change one of them alone for a week.</li>
@@ -973,10 +971,6 @@ function fmtCut(f, x) {
 /* The class and the word for one impact. */
 function levelOf({ level, very }) {
   if (level === 'neutral') return { cls: 'neutral', word: 'Neutral' };
-  if (level === 'up' || level === 'down') {
-    const arrow = level === 'up' ? '▲' : '▼';
-    return { cls: (very ? 'v' : '') + level, word: `${very ? arrow + arrow : arrow} ${level === 'up' ? 'Up' : 'Down'}` };
-  }
   const word = level === 'good' ? 'good' : 'bad';
   return very ? { cls: 'v' + level, word: `Very ${word}` } : { cls: level, word: word[0].toUpperCase() + word.slice(1) };
 }
@@ -1027,7 +1021,7 @@ function drawMatrix() {
 
   const legend = document.createElement('div');
   legend.className = 'mxlegend';
-  legend.innerHTML = ['vbad Very bad', 'bad Bad', 'neutral Neutral', 'good Good', 'vgood Very good', 'up ▲▼ Weight, no goal yet']
+  legend.innerHTML = ['vbad Very bad', 'bad Bad', 'neutral Neutral', 'good Good', 'vgood Very good']
     .map(x => { const i = x.indexOf(' '); return `<span class="lv ${x.slice(0, i)}">${x.slice(i + 1)}</span>`; }).join('');
 
   const detail = document.createElement('div');
