@@ -354,9 +354,9 @@ Puis la boucle s'est fermée toute seule : la requête lancée a rendu **zéro n
 
 ---
 
-## Chantier 4 : Google — CODE ÉCRIT, ATTEND UNE CLÉ
+## Chantier 4 : Google — LIVRÉ ET MESURÉ
 
-**Tout est construit et déployé. Il manque `SERPER_API_KEY`.**
+**Visée 96%, contre 24% pour la recherche de comptes. Mais 17% moins cher seulement, pas 5x.**
 
 ### Le principe
 
@@ -398,11 +398,62 @@ Deux garde-fous. Une page qui ne rend rien de neuf arrête la requête : les pag
 
 Le canal apparaît dans `channels.plan` uniquement si la clé existe. Sans clé il n'est ni proposé au client ni lançable.
 
-### Vérifié par
+### Vérifié par : 592 recherches, 94 fiches achetées
 
-100 pages Google sur une niche connue. Combien de handles sortis, combien dans la fourchette, coût réel par candidat utile.
+| | mesuré |
+|---|---|
+| Formes de requête | 96, sur 4 marchés (us, uk, ca, au) |
+| Recherches | 592, coût 0,59 $ |
+| Handles trouvés | 519 |
+| Taille lisible | 487, soit **94%** |
+| Dans la fenêtre 10k-100k | 109 |
+| Achetés | 94 neufs, 15 déjà en base (chantier 1.2) |
+| **Dans la fenêtre après achat** | **90 sur 94, soit 96%** |
 
-**Serper donne 2 500 recherches gratuites.** La vérification coûte zéro euro.
+Médiane à 38 558 abonnés. Un seul au-dessus du plafond.
+
+### Le chiffre de Google est juste à 3%
+
+Recoupement de 17 handles entre ce que Google annonçait et ce qu'Apify a ensuite mesuré :
+
+| handle | Google | mesuré |
+|---|---|---|
+| grifjames | 16 000 | 16 017 |
+| hanktina | 78 000 | 77 920 |
+| olganamer | 78 000 | 78 305 |
+| joeypagecomedy | 25 000 | 24 643 |
+
+Les 9 que Google avait chiffrés sont **tous** dans la fenêtre. Les 8 qu'il n'avait pas chiffrés sont **tous** sous le plancher, de 1 698 à 8 633.
+
+**J'avais codé l'inverse.** Je gardais les handles sans taille lisible, au motif que les jeter biaiserait le pool vers ce que Google tronque. C'était faux : Google tronque les petits comptes. Les jeter fait passer la visée de 63% à 96%.
+
+### Le vrai gain : la qualité, pas le prix
+
+| | Google | recherche de comptes |
+|---|---|---|
+| Visée | **96%** | 24% |
+| Coût par candidat dans la fenêtre | **0,0080 $** | 0,0096 $ |
+
+**17% moins cher, pas 5x.** La raison : l'index Google d'un `site:` sous une expression fait **9 résultats de profondeur**, pas un de plus. Mesuré à 1, 3, 6 et 10 pages : toujours 9. Donc chaque recherche achète peu, et le coût de recherche pèse autant que celui des fiches.
+
+Le gain réel est ailleurs : un pool 4x plus pur. Tout ce qui suit coûte moins et rend plus.
+
+### Serper contre l'acteur Google d'Apify, comparés
+
+| | coût pour 100 résultats |
+|---|---|
+| **Serper** | **0,011 $** |
+| Acteur Google Apify | 0,026 $ |
+
+Apify vend la page à 1,80 $ les mille et accepte 100 résultats par page. Sur le papier il gagne. En vrai, Google ne rend que 9 résultats pour ces requêtes, et Apify facture la page entière quand même. Mesuré : 24 pages demandées à 100, **214 résultats** rendus.
+
+**Serper gagne, 2,4x.** Et le plafond de 10 résultats de son offre gratuite ne coûte rien, puisque Google n'en a que 9 à donner.
+
+### Deux bugs trouvés en route
+
+**Collision de clé.** `detailRun` renvoie aussi un champ `handles`, qui écrasait celui de Google en l'étalant à plat. Le rapport affichait 30 handles trouvés là où il y en avait 126.
+
+**592 appels en série.** La première tentative sur le jeu complet est morte sans rien rendre : une fonction ne vit pas assez longtemps pour 592 allers-retours d'une seconde. Les requêtes ne dépendent pas les unes des autres, elles partent désormais par paquets de 8.
 
 ---
 
@@ -447,16 +498,18 @@ Les plus proches : @theposinginstitute à 9 479 abonnés pour 10 000 demandés, 
 | 1bis | Un canal par fenêtre de cible | 0 | **livré, canal réfuté** |
 | 2 | Les graines | rien | **livré** |
 | 3 | Les vagues | 1 | **livré** |
-| 4 | Google | rien | **code écrit, attend la clé** |
+| 4 | Google | rien | **livré** |
 | 5 | Les échecs de peu | 1 | **livré** |
 
-Tout est fait sauf le 4, qui attend une clé de recherche web.
+**Tous les chantiers sont livrés.**
 
 ### Ce qui reste ouvert
 
-La fenêtre 10k-100k plafonne à 24% de visée. Le canal hashtag est mort, les voisins n'y portent pas. Le chantier 4 est la seule piste sérieuse pour ce trou, et il est bloqué.
+La fenêtre 10k-100k est réglée pour la visée : Google y vise 96% contre 24%. Elle ne l'est pas pour le volume. 96 formes de requête sur 4 marchés rendent 109 candidats dans la fenêtre, parce que l'index Google d'un `site:` fait 9 résultats de profondeur. Pour des centaines par jour il faut des centaines de formes, et elles sont gratuites à écrire.
 
-Coût total des cinq chantiers : **4,04 $**, dont 3,20 $ d'une erreur de limite par URL.
+**La prochaine mesure** : le coût par lead livré, une fois ces 94 profils jugés. C'est le seul chiffre qui compte et le seul qu'on n'a pas encore.
+
+Coût total des six chantiers : **4,90 $**, dont 3,20 $ d'une erreur de limite par URL.
 
 ---
 
@@ -476,5 +529,5 @@ Coût total des cinq chantiers : **4,04 $**, dont 3,20 $ d'une erreur de limite 
 
 ## Blocages en cours
 
-- **Pas de clé de recherche web.** Le chantier 4 est écrit et déployé, il refuse de tourner tant que `SERPER_API_KEY` est absente. Serper, 2 500 recherches gratuites, puis 50 $ pour 50 000 valables 6 mois. Brave coûte 5x plus, SerpApi 15x plus.
+- **Volume Google.** 96 formes de requête rendent 109 candidats. Il en faut des centaines de formes pour tenir un rythme quotidien. Écrire des formes ne coûte rien, c'est du travail de liste.
 - **Budget Apify partagé avec le pipeline manuel.** 4,62 $ restants sur le cycle qui finit le 07/10, dont 3 $ réservés au manuel. `startRun` refuse en dessous de cette réserve.
