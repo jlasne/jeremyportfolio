@@ -128,6 +128,8 @@ async function answer(ctx: ActionCtx, request: Request): Promise<Response> {
         return ok(await ctx.runMutation(api.x.bio, args));
       case "x.setFacts":
         return ok(await ctx.runMutation(api.x.setFacts, args));
+      case "x.next":
+        return ok(await ctx.runAction(api.x.next, args));
       case "x.generate":
         return ok(await ctx.runAction(api.x.generate, args));
       case "x.testMail":

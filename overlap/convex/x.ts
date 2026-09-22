@@ -16,6 +16,7 @@ import {
   POST_ANGLES,
   SLOTS,
   SLOT_TITLE,
+  INTERVIEW_SYSTEM,
   questionsFor,
 } from "./xprompts";
 
@@ -334,7 +335,7 @@ function brief(c: {
    Override with X_MODEL to try another. */
 const MODEL = () => process.env.X_MODEL || "deepseek/deepseek-v4-flash";
 
-async function ask(system: string, user: string): Promise<string> {
+async function ask(system: string, user: string, temperature = 0.8): Promise<string> {
   const key = process.env.OPENROUTER_API_KEY;
   if (!key) throw new Error("Set OPENROUTER_API_KEY in the Convex dashboard first");
   const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -347,7 +348,7 @@ async function ask(system: string, user: string): Promise<string> {
     },
     body: JSON.stringify({
       model: MODEL(),
-      temperature: 0.8,
+      temperature,
       max_tokens: 2000,
       messages: [
         { role: "system", content: system + "\n\n" + RUN_NOTE },
@@ -403,6 +404,44 @@ export const make = internalAction({
     ];
     await ctx.runMutation(internal.x.putDrafts, { day, drafts });
     return drafts;
+  },
+});
+
+/**
+ * One turn of the interview: read the day so far, return the next question.
+ *
+ * Nothing is stored here. The question comes back to the page, and it is
+ * saved on the entry that answers it, so the transcript is the only state
+ * the conversation has. Reload mid-interview and the next question is
+ * worked out again from the same transcript.
+ */
+export const next = action({
+  args: { passphrase: v.string(), day: v.optional(v.string()) },
+  handler: async (ctx, a): Promise<{ done: boolean; question: string | null; asked: number }> => {
+    mustBeJeremy(a.passphrase);
+    const key = a.day && isDay(a.day) ? a.day : paris().day;
+    const c = await ctx.runQuery(internal.x.context, { day: key });
+
+    const entries: { q?: string; text: string }[] = c.entries;
+    const sheet: { label: string; value: string }[] = c.facts;
+
+    const transcript = entries.length
+      ? entries.map((e) => (e.q ? `Q: ${e.q}\nA: ${e.text}` : `He said: ${e.text}`)).join("\n\n")
+      : "(nothing yet, this is the first question of the day)";
+    const known = sheet.length
+      ? "\n\nFACTS ALREADY ON RECORD, do not ask for these:\n" + sheet.map((f) => `- ${f.label}: ${f.value}`).join("\n")
+      : "";
+
+    const asked = entries.filter((e) => e.q).length;
+    const said = await ask(
+      INTERVIEW_SYSTEM,
+      `DATE: ${key}\n\nTHE DAY SO FAR:\n${transcript}${known}\n\nHe has answered ${asked} questions. Give the next one, or DONE.`,
+      0.6,
+    );
+
+    const line = said.replace(/^["'\s]+|["'\s]+$/g, "").split("\n")[0].trim();
+    if (/^done\b/i.test(line) || asked >= 14) return { done: true, question: null, asked };
+    return { done: false, question: line.slice(0, 300), asked };
   },
 });
 

@@ -15,21 +15,45 @@ three mails ask for more, and at 17:00 the day becomes three X posts and one
 Every mail carries the whole day back: the questions, the entries, the
 drafts. The inbox is the archive, whatever happens to the database.
 
-Nine questions a day, drawn from a bank of three sets per slot that rotates
-by date, so the same three do not arrive every morning for a month. A
-question you have answered drops off the dashboard. A question you skip
-comes back tomorrow.
+The mail questions come from a bank of three sets per slot that rotates by
+date, so the same three do not arrive every morning for a month. They follow
+the five beats the video script needs.
+
+## The interview
+
+The page itself does not use that bank. You press **Start** and it asks one
+question, reads your answer, and asks the next one from what you actually
+said. A vague answer is not a turn to move on from: "it went well" gets
+"well by how much", and it stays on that thread until there is a figure.
+
+It is looking for five things, because the video script is built from them:
+where you were and what you were doing, what you wanted, what blocked you
+with a number, what you changed, and what is true now with numbers. It also
+asks what you ate, where you sat and who you saw, because the video opens on
+eight half second cuts of ordinary life.
+
+It stops when the five beats are answered, two real numbers are on the
+record and three details of ordinary life are there. It stops anyway at 14
+questions. **Stop** ends it early, **Keep going** restarts it.
+
+Nothing about the conversation is stored except the transcript: each answer
+carries the question that produced it. Reload mid-interview and the next
+question is worked out again from the same transcript.
 
 ## The screens
 
-- **Today.** A composer that opens on the next unanswered question. The /bio
-  tick for the 30 day challenge. Then the day, newest first.
+- **Today.** One Start button, then the conversation. The /bio tick for the
+  30 day challenge. Then the day, newest first. "Write a note instead" drops
+  a thought in without being asked.
 - **Drafts.** Three posts and one script. Character count against 280 on
   each post, Copy on each, and a link that opens X or YouTube Studio with
   the text ready.
 - **Archive.** Every day logged, with its entries and its drafts.
-- **Facts.** The only numbers either prompt may claim: deals signed, deals
-  in negotiation, MRR. Everything else gets `[X]` rather than a guess.
+- **Facts.** The standing numbers, the ones true every day rather than only
+  today: deals signed, deals in negotiation, MRR. Three jobs. The writers
+  may claim these and nothing else, so a post cannot invent a figure.
+  The interviewer reads them so it stops asking what it already knows.
+  And they go stale silently, so they are worth a look each week.
 
 ## Stack
 
@@ -56,10 +80,13 @@ comes back tomorrow.
 Two calls to OpenRouter, because the two prompts are two voices and two
 output formats:
 
-1. The X prompt gets the facts sheet, the day's log, and the first line of
+1. The X prompt gets the facts sheet, the transcript, and the first line of
    every post from the last 3 days, then writes 3 posts from 3 angles: the
    story, the number, the lesson.
 2. The video prompt gets the same brief and writes the 60 second script.
+
+A third prompt, `INTERVIEW_SYSTEM`, runs the conversation. One call per
+question, at a cooler temperature than the two writers.
 
 Both prompts were written for a chat where Jeremy answers questions. One
 paragraph, `RUN_NOTE`, turns them into a batch job: the log has already

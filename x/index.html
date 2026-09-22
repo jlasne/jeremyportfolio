@@ -7,8 +7,9 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#000000">
 <meta name="color-scheme" content="dark">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -115,6 +116,22 @@ button, input, textarea, select { font: inherit; color: inherit; }
 }
 
 /* ── composer ───────────────────────────────────────────────────────── */
+/* the interview: one question at a time, given the room to be read */
+.stage { padding: 30px 16px 24px; border-bottom: 1px solid var(--line); }
+.stage .lead { color: var(--dim); margin: 0 0 18px; }
+.stage .askq { font: 700 24px/1.32 var(--sans); letter-spacing: -.01em; margin: 8px 0 18px; }
+.stage textarea {
+  width: 100%; background: transparent; border: 1px solid var(--line); border-radius: 14px;
+  resize: none; font-size: 17px; line-height: 1.5; min-height: 98px; padding: 14px; outline: none;
+}
+.stage textarea:focus { border-color: var(--blue); }
+.stage textarea::placeholder { color: var(--dim); }
+.stage .bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 12px 0 0; }
+.stage .bar .right { display: flex; gap: 8px; align-items: center; }
+.stage .rowbtns { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.btn.big { font-size: 17px; padding: 15px 30px; }
+.thinking { display: flex; gap: 10px; align-items: center; color: var(--dim); }
+
 .compose { border-bottom: 1px solid var(--line); padding: 14px 16px; }
 .compose textarea {
   width: 100%; background: transparent; border: 0; resize: none; font-size: 19px; line-height: 1.4;
@@ -214,10 +231,6 @@ button, input, textarea, select { font: inherit; color: inherit; }
 
   <aside class="aside">
     <div class="box">
-      <h3>The day</h3>
-      <div id="side"></div>
-    </div>
-    <div class="box">
       <h3>The rhythm</h3>
       <div class="stat"><span>10:00 Paris</span><span>what you're after</span></div>
       <div class="stat"><span>14:00 Paris</span><span>what happened</span></div>
@@ -309,26 +322,21 @@ async function refresh() {
   draw();
 }
 
-/* ── which questions are due ────────────────────────────────────────── */
+/* ── the interview ──────────────────────────────────────────────────── */
 
-/** The slot whose questions are on screen: the last one that has come round. */
-function slotNow() {
-  const h = state?.hour ?? 0;
-  return h >= 17 ? "17" : h >= 14 ? "14" : h >= 10 ? "10" : "10";
-}
+/* The whole conversation state. The transcript lives on the server, so
+   this only holds the question waiting to be answered. */
+let chat = { question: null, done: false, busy: false, asked: 0 };
 
-/* Skipped questions are put aside for the session, not written down: the
-   log is what the model reads, and "(skipped)" is not a thing Jeremy said. */
-const SKIP = "x.skip." + new Date().toISOString().slice(0, 10);
-const skipped = new Set(JSON.parse(sessionStorage.getItem(SKIP) || "[]"));
-
-/** A question already answered, or put aside, drops off the list. */
-function dueQuestions() {
-  const slot = slotNow();
-  const asked = new Set((state.entries || []).filter((e) => e.q).map((e) => e.q));
-  return (state.questions?.[slot] || [])
-    .filter((q) => !asked.has(q) && !skipped.has(q))
-    .map((q) => ({ q, slot }));
+async function nextQuestion() {
+  chat.busy = true; draw();
+  try {
+    const r = await call("x.next", { day: state.today });
+    chat = { question: r.question, done: r.done, busy: false, asked: r.asked };
+  } catch (err) {
+    chat.busy = false; toast(err.message);
+  }
+  draw();
 }
 
 /* ── drawing ────────────────────────────────────────────────────────── */
@@ -342,23 +350,57 @@ function draw() {
   if (tab === "drafts") { $("#title").textContent = "Drafts"; $("#sub").textContent = state.draftsAt ? "written " + clock(state.draftsAt) : "not written yet"; v.innerHTML = drafts(state.drafts); }
   if (tab === "archive") { $("#title").textContent = "Archive"; $("#sub").textContent = "every day logged"; v.innerHTML = archiveView(); }
   if (tab === "facts") { $("#title").textContent = "Facts"; $("#sub").textContent = "what both prompts are allowed to claim"; v.innerHTML = factsView(); }
-  side();
   wire();
 }
 
 function today() {
-  const due = dueQuestions();
-  const q = due[0];
+  const n = state.entries.length;
+  let stage;
+
+  if (chat.busy) {
+    stage = `<div class="stage"><div class="thinking"><span class="spin"></span> Reading your day…</div></div>`;
+  } else if (chat.question) {
+    stage = `
+      <div class="stage">
+        <p class="mono">Question ${chat.asked + 1}</p>
+        <h3 class="askq">${esc(chat.question)}</h3>
+        <textarea id="box" placeholder="Say it the way you would say it out loud."></textarea>
+        <div class="bar">
+          <span class="mono">cmd + enter to send</span>
+          <span class="right">
+            <button class="btn ghost sm" id="stop">Stop</button>
+            <button class="btn blue" id="send">Send</button>
+          </span>
+        </div>
+      </div>`;
+  } else if (chat.done) {
+    stage = `
+      <div class="stage">
+        <p class="lead">Covered. ${n} ${n === 1 ? "answer" : "answers"} on the record.</p>
+        <div class="rowbtns">
+          <button class="btn blue big" id="writeNow">Write the day</button>
+          <button class="btn ghost sm" id="more">Keep going</button>
+        </div>
+      </div>`;
+  } else {
+    stage = `
+      <div class="stage">
+        <p class="lead">${n ? `${n} ${n === 1 ? "thing" : "things"} logged so far.` : "Nothing logged today."}</p>
+        <div class="rowbtns">
+          <button class="btn blue big" id="start">${n ? "Keep going" : "Start"}</button>
+          <button class="btn ghost sm" id="note">Write a note instead</button>
+        </div>
+      </div>`;
+  }
+
   return `
-    <div class="compose">
-      ${q ? `<p class="q"><b>${esc(q.slot)}:00</b> ${esc(q.q)}</p>` : ""}
-      <textarea id="box" placeholder="${q ? "Answer it." : "What's happening?"}" rows="2"></textarea>
+    ${stage}
+
+    <div class="compose hide" id="noteBox">
+      <textarea id="freeBox" placeholder="What's happening?" rows="2"></textarea>
       <div class="bar">
-        <span class="mono" id="hint">${due.length ? due.length + " question" + (due.length > 1 ? "s" : "") + " left" : "all answered"}</span>
-        <span style="display:flex;gap:8px">
-          ${q ? `<button class="btn ghost sm" id="skip">Skip</button>` : ""}
-          <button class="btn sm" id="save" data-q="${q ? esc(q.q) : ""}" data-slot="${q ? esc(q.slot) : "free"}">Log it</button>
-        </span>
+        <span class="mono">off the record of the interview</span>
+        <button class="btn sm" id="saveNote">Log it</button>
       </div>
     </div>
 
@@ -372,13 +414,14 @@ function today() {
         <article class="row">
           <div class="meta">
             <span class="mono">${clock(e.at)}</span>
-            ${e.slot !== "free" ? `<span class="mono" style="color:var(--blue)">${esc(e.slot)}:00</span>` : ""}
             <button class="kill" data-at="${e.at}" aria-label="Delete">✕</button>
           </div>
           ${e.q ? `<p class="qline">${esc(e.q)}</p>` : ""}
           <div class="body">${esc(e.text)}</div>
         </article>`).join("")
-      : `<p class="empty">Nothing logged yet.<br>Answer the question above, or write whatever happened.</p>`}
+      : chat.question
+        ? ""
+        : `<p class="empty">Press Start.<br>It asks, you answer, it digs where you were vague.</p>`}
   `;
 }
 
@@ -457,48 +500,55 @@ function factsView() {
     </div>`;
 }
 
-function side() {
-  const words = state.entries.reduce((n, e) => n + e.text.trim().split(/\s+/).filter(Boolean).length, 0);
-  $("#side").innerHTML = `
-    <div class="stat"><span>Entries</span><span>${state.entries.length}</span></div>
-    <div class="stat"><span>Words</span><span>${words}</span></div>
-    <div class="stat"><span>Questions left</span><span>${dueQuestions().length}</span></div>
-    <div class="stat"><span>/bio</span><span style="color:${state.bioDone ? "var(--good)" : "var(--dim)"}">${state.bioDone ? "filled" : "open"}</span></div>
-    <div class="stat"><span>Mails sent</span><span>${state.mailed.length} / 3</span></div>
-    <div class="stat"><span>Drafts</span><span>${state.drafts.length}</span></div>`;
-}
-
 /* ── wiring, redone on every draw ───────────────────────────────────── */
 
 function wire() {
   const v = $("#view");
 
-  const box = $("#box");
-  if (box) {
-    box.focus();
-    box.addEventListener("input", () => { box.style.height = "auto"; box.style.height = box.scrollHeight + "px"; });
-    box.addEventListener("keydown", (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); $("#save").click(); }
+  /* Both textareas grow with what is typed and send on cmd+enter. */
+  const grow = (el, go) => {
+    if (!el) return;
+    el.focus();
+    el.addEventListener("input", () => { el.style.height = "auto"; el.style.height = el.scrollHeight + "px"; });
+    el.addEventListener("keydown", (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); go(); }
     });
-  }
+  };
 
-  $("#save")?.addEventListener("click", async (e) => {
+  $("#start")?.addEventListener("click", nextQuestion);
+  $("#more")?.addEventListener("click", () => { chat.done = false; nextQuestion(); });
+  $("#stop")?.addEventListener("click", () => { chat = { question: null, done: true, busy: false, asked: chat.asked }; draw(); });
+  $("#writeNow")?.addEventListener("click", () => $("#write").click());
+
+  $("#note")?.addEventListener("click", () => {
+    $("#noteBox").classList.remove("hide");
+    $("#freeBox").focus();
+  });
+
+  /* Answer the question on screen. The question rides along on the entry,
+     so the transcript reads as the conversation it was. */
+  const send = async () => {
     const text = $("#box").value.trim();
     if (!text) return;
-    const b = e.currentTarget;
-    b.disabled = true;
+    $("#send").disabled = true;
     try {
-      await call("x.log", { day: state.today, text, slot: b.dataset.slot, q: b.dataset.q || undefined });
-      await refresh();
-      toast("Logged");
-    } catch (err) { toast(err.message); b.disabled = false; }
-  });
+      await call("x.log", { day: state.today, text, slot: "chat", q: chat.question });
+      state = await call("x.day");
+      await nextQuestion();
+    } catch (err) { toast(err.message); $("#send").disabled = false; }
+  };
+  $("#send")?.addEventListener("click", send);
+  grow($("#box"), send);
 
-  $("#skip")?.addEventListener("click", () => {
-    skipped.add($("#save").dataset.q);
-    sessionStorage.setItem(SKIP, JSON.stringify([...skipped]));
-    draw();
-  });
+  const saveNote = async () => {
+    const text = $("#freeBox").value.trim();
+    if (!text) return;
+    $("#saveNote").disabled = true;
+    try { await call("x.log", { day: state.today, text }); await refresh(); toast("Logged"); }
+    catch (err) { toast(err.message); $("#saveNote").disabled = false; }
+  };
+  $("#saveNote")?.addEventListener("click", saveNote);
+  grow($("#freeBox"), saveNote);
 
   $("#bio")?.addEventListener("click", async (e) => {
     const on = e.currentTarget.getAttribute("aria-pressed") === "true";

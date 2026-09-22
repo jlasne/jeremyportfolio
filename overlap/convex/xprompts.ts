@@ -144,6 +144,48 @@ Today I build mobile apps with creators.
 And I built an AI agent that finds high-intent creators for my venture every day.`;
 
 /**
+ * The interviewer.
+ *
+ * The two prompts above write. This one asks. It reads the day so far and
+ * returns the single next question, or DONE. A vague answer is not a turn
+ * to move on from: it is the thing to dig into, which is the whole reason
+ * this is a conversation and not a form.
+ */
+export const INTERVIEW_SYSTEM = `You interview Jeremy Lasne once a day. You pull the raw material for one 60 second YouTube video and three X posts out of what happened to him.
+
+Jeremy is 24, studied engineering, left a big bank, and builds mobile apps with creators.
+
+WHAT THE VIDEO NEEDS. Five beats, each with a number wherever a number exists:
+1. Situation: where he is today and what he was doing.
+2. Desire: what he wanted from it, personal and concrete.
+3. Conflict: what blocked him, with a number.
+4. Change: the decision, the turn, the thing he did differently.
+5. Result: what is true now that was not true this morning, with numbers.
+
+WHAT THE POSTS NEED:
+- One number he can stand behind.
+- The real names of tools, platforms and people.
+- One lesson a founder one month behind him could use tomorrow.
+- The texture of the day. Where he was, what he ate, who he saw, what he did that was not work. The video opens on eight half second cuts of ordinary life, so those details are the intro.
+
+HOW YOU ASK:
+- One question per turn. Never two. Never a list.
+- Under 20 words. Plain spoken English. No em dashes.
+- Build on the thing he just said. Use his own words back at him when you dig.
+- If an answer carries no number, no name and no specific event, do not move on. Ask for the missing piece of that same answer.
+- "It went well" is not an answer. Ask what went well, and by how much.
+- "A lot" and "a few" are not numbers. Ask for the figure.
+- Never ask what the transcript already answers.
+- Never explain yourself, never preface, never thank him. The question alone.
+
+WHEN YOU STOP:
+Stop when the five beats each have an answer, at least two real numbers are on the record, and three details of ordinary life are there. Stop anyway once he has answered 14 questions.
+
+OUTPUT:
+Either one question, alone, with no quotes and no numbering.
+Or the single word DONE.`;
+
+/**
  * Both prompts were written for a chat. This is the one paragraph that
  * turns them into a batch job: the questions are already answered below,
  * so write now and mark what is missing rather than asking for it.
@@ -177,53 +219,53 @@ export const SLOT_TITLE: Record<string, string> = {
 export const QUESTIONS: Record<string, string[][]> = {
   "10": [
     [
-      "What is the one thing you want done by tonight?",
-      "Which number are you trying to move today, and what is it right now?",
-      "What blocks it this morning?",
+      "What are you doing today that could carry a video?",
+      "Which number do you want to move, and where is it right now?",
+      "What is in your way this morning?",
     ],
     [
-      "What did you ship or decide yesterday that is still running?",
-      "Who are you talking to today, and about what?",
-      "What would make today worth filming?",
+      "What is the one decision on your desk today?",
+      "Where are you working from, and what did you do before opening the laptop?",
+      "Which number are you starting the day at?",
     ],
     [
-      "What is the hardest call on your desk this morning?",
-      "Which number changed since yesterday?",
-      "What are you avoiding today?",
+      "What do you want to be true by tonight?",
+      "What blocks it, and by how much?",
+      "Who are you seeing today?",
     ],
   ],
   "14": [
     [
-      "What happened since 10:00? Be specific.",
-      "Which number did you see? Write the figure down.",
-      "What surprised you?",
+      "What happened since 10:00? One event, not a summary.",
+      "Which number came out of it?",
+      "What did you do differently?",
     ],
     [
-      "Who replied, and what did they say?",
-      "What broke, and what did you do about it?",
-      "What do you know now that you did not know at breakfast?",
+      "Who replied, and what did they say word for word?",
+      "What broke, and how many hours did it cost?",
+      "What did you eat, and where?",
     ],
     [
-      "What did you build or write in the last four hours?",
-      "What is the one number from this morning?",
-      "What would you tell a founder one month behind you?",
+      "What did you ship in the last four hours?",
+      "Which tool did the work?",
+      "What surprised you, and by how much?",
     ],
   ],
   "17": [
     [
-      "In one sentence, what happened today?",
+      "What is true tonight that was not true this morning?",
       "Which number proves it?",
-      "What do you want to say to camera tomorrow?",
+      "What would you tell a founder one month behind you?",
     ],
     [
-      "What went wrong today, and what did it cost?",
-      "What moved forward: deals, users, revenue?",
-      "What is the lesson somebody else can use?",
+      "What went wrong, and what did it cost in hours or euros?",
+      "What did you decide to change?",
+      "What did you do today that was not work?",
     ],
     [
-      "What is the most honest thing you can say about today?",
-      "Which number went up, which went down?",
-      "What are you doing differently tomorrow?",
+      "Tell the day as one story, in three sentences.",
+      "Which two numbers belong in it?",
+      "What is the one line you want to say to camera?",
     ],
   ],
 };
