@@ -47,8 +47,9 @@ comes back tomorrow.
   nothing away.
 - **Data** is two tables on the Overlap deployment: `xDays`, one document
   per day, and `xFacts`, one document.
-- **Auth** is a passphrase, `X_PASSPHRASE`, asked once per device and kept
-  in `localStorage`. No accounts, because there is exactly one author.
+- **Auth** is a passphrase, the same `BIO_PASSPHRASE` that writes /bio,
+  asked once per device and kept in `localStorage`. No accounts, because
+  there is exactly one author.
 
 ## How a day gets written
 
@@ -74,22 +75,24 @@ Set these on the Convex deployment (Settings, then Environment Variables):
 
 | Name | What it is |
 | --- | --- |
-| `X_PASSPHRASE` | the one password that opens the page |
 | `OPENROUTER_API_KEY` | writes the posts and the script |
 | `RESEND_API_KEY` | sends the three mails |
+| `BIO_PASSPHRASE` | already set for /bio, and it opens this page too |
+| `X_PASSPHRASE` | optional, only to give this page a password of its own |
 | `X_MODEL` | optional, defaults to `deepseek/deepseek-v4-flash`, which OpenRouter lists as DeepSeek V4 Flash 0423 |
-| `X_MAIL_FROM` | optional, defaults to `hey@jeremylasne.com`, which must be a sender on a domain verified in Resend |
+| `X_MAIL_FROM` | optional, defaults to `hello@kaught.app`, which must be a sender on a domain verified in Resend |
 | `X_MAIL_TO` | optional, defaults to `jeremylasne0@gmail.com`, comma separated for several |
 | `X_SITE_URL` | optional, defaults to `https://x.jeremylasne.com` |
 
-Three are required. The rest have the right answer built in.
+Two are new. The rest are either already set or have the right answer
+built in.
 
 If `OVERLAP_ALLOW_ORIGIN` is set, add `https://x.jeremylasne.com` to it.
 
 ## Deploy
 
-1. `cd overlap && npx convex deploy`.
-2. Set the variables above in the Convex dashboard.
+1. Set `OPENROUTER_API_KEY` and `RESEND_API_KEY` in the Convex dashboard.
+2. `cd overlap && npx convex deploy`.
 3. In Vercel, add a project pointing at this repository with **Root
    Directory** set to `x`, the way `brand` and `brandmatchapp` are set up,
    and give it the domain `x.jeremylasne.com`.

@@ -40,9 +40,14 @@ const KEEP_DRAFT_DAYS = 3; /* how much recent work the model is shown */
 
 /* ── the door ───────────────────────────────────────────────────────── */
 
+/**
+ * The same passphrase that writes /bio, because it is the same person and
+ * one password is one thing to remember. X_PASSPHRASE splits them again if
+ * that is ever wanted.
+ */
 function mustBeJeremy(passphrase: string) {
-  const want = process.env.X_PASSPHRASE;
-  if (!want) throw new Error("Set X_PASSPHRASE in the Convex dashboard first");
+  const want = process.env.X_PASSPHRASE || process.env.BIO_PASSPHRASE;
+  if (!want) throw new Error("Set BIO_PASSPHRASE in the Convex dashboard first");
   if (passphrase !== want) throw new Error("Wrong passphrase");
 }
 
@@ -527,7 +532,7 @@ async function resend(subject: string, html: string, text: string) {
   const key = process.env.RESEND_API_KEY;
   /* The two addresses are settled, so they are defaults rather than setup.
      X_MAIL_FROM and X_MAIL_TO still win if either ever moves. */
-  const from = process.env.X_MAIL_FROM || "hey@jeremylasne.com";
+  const from = process.env.X_MAIL_FROM || "hello@kaught.app";
   const to = process.env.X_MAIL_TO || "jeremylasne0@gmail.com";
   if (!key) throw new Error("Set RESEND_API_KEY in the Convex dashboard first");
   const res = await fetch("https://api.resend.com/emails", {
