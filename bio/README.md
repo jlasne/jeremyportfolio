@@ -9,17 +9,23 @@ passphrase writes it.
 
 | Group | Fields | Goal |
 | --- | --- | --- |
-| 🍽️ Intake | coffee, water, eaten (kcal) | coffee **max 2 cups**, water **4 L** (8 × 50cl) |
-| 🏃 Sport | sessions (sport, minutes, intensity 1–10), steps | |
-| 😴 Sleep | sleep score, sleep hours | |
+| 🍽️ Intake | coffee (a time per cup), water, meals (time + kcal each) | coffee **max 2 cups**, water **4 L** (8 × 50cl) |
+| 🏃 Sport | sessions (sport, start time, minutes, kcal burned, intensity 1–10), steps | |
+| 😴 Sleep | sleep score, hours slept, bedtime, wake-up | |
 | 📊 Observing | weight, HRV, resting HR, recovery | |
-| 🌿 Levers | cold shower, bath, sun, deep work | |
+| 🌿 Levers | sun, deep work | |
 
 A goal points one way: coffee is a ceiling, met by staying under it, water
 is a floor, met by reaching it. The card shows each goal beside its row and
 the day's count of goals met in its corner.
 
-A **session** is a sport, its minutes and how hard it felt. Up to four a day.
+Times are kept as minutes after midnight. Tapping a coffee today stamps the
+time of the tap, and a new meal today starts at the time it was added; every
+time stays editable. A bedtime after midnight is kept past 24:00 (00:40 is
+1480), so a later night always sorts later.
+
+A **session** is a sport, when it started, its minutes, the calories it
+burned and how hard it felt. Up to four a day.
 The sport field suggests every sport already typed and takes a new name as
 it is, so the list grows by using it. A session without a sport stays on
 screen as a draft and is left out of the save until it has one.
@@ -52,26 +58,44 @@ day that caused them, because a night is what answers a day.
 
 One card per thing the body reports: **recovery, sleep score, sleep
 duration, weight, HRV and resting HR**. Each card lists what moved that
-metric the morning after, strongest first.
+metric, strongest first, in its own unit: "−5 pts after a later last coffee ·
+over 13:23".
 
-- A line reads "**−9 pts** after a harder session": the move in the metric's
-  own unit (pts, min, kg, ms, bpm), then what caused it.
-- An on/off factor (cold shower, a sport) splits on itself. A counted one
-  splits at its **own median**, so "more coffee" means more than my usual.
-- Strength is Cohen's *d*: how far apart the two groups sit, measured in the
-  spread of the days themselves. The bar shows it; the label names it (0.6
-  strong, 1.0 very strong).
-- **Only strong links count as findings.** Six metrics against a dozen
-  factors is some 80 tests over 31 days, and a medium gap turns up by luck
-  in several of them. Fainter links wait behind a toggle on each card.
-- Colour follows meaning: a resting heart rate going **down** is green.
-  Weight stays blue until it has a goal, because until then no direction is
-  better.
-- Sessions become total sport minutes, the hardest effort, and one line per
-  sport done on 4 days. These overlap by nature (a hard padel day is also a
-  sport-minutes day), so read them together.
-- A link needs 4 days on each side, and the whole section stays shut until
-  21 days carry both halves of the day.
+**Everything logged is tested**, 20 factors plus one line per sport:
+
+| From | Factors |
+| --- | --- |
+| Coffee | cups, first cup time, last cup time, any cup after 14:00 |
+| Meals | calories eaten, first meal time, last meal time, eating window |
+| Sport | training day vs rest day; then, against my other sessions: sport, length, intensity, kcal burned, start time |
+| Day | water, steps, sun, deep work |
+| Night | bedtime, wake-up, hours slept |
+
+- A day's doings are read against the night and morning **after** them. The
+  night's own bedtime, wake-up and hours slept are read against the morning
+  it ended.
+- An on/off factor splits on itself; a count or a clock time splits at its
+  **own median**, and the line says where: "over 17:10".
+- Sport is read one dimension at a time, so "a harder session" means harder
+  than my usual session, not harder than resting.
+- The bar is Cohen's *d*, how far apart the two groups sit.
+
+**The luck check.** Over a hundred links are tested each month, so some look
+real by chance, and the more that is tracked the more of them there are.
+Each link gets a Welch t-test p-value, then a Benjamini-Hochberg q-value
+across every link tested together. A finding needs q ≤ 0.1 (at most 1 in 10
+findings is luck) and at least a medium gap. The rest fold behind a toggle.
+
+Measured on 20 simulated months with no real effect in them: the old
+strength-only rule showed 17.2 false findings a month, the luck check 0.55.
+On 20 months with planted effects it found 6.3 of them a month.
+
+**Linked things move together.** A late third meal is also more calories, so
+two rows can claim the same kilo. When two rows tell one story, change one
+of them alone for a week.
+
+A link needs 4 days on each side, and the whole section stays shut until 21
+days carry both halves of the day.
 
 ## Filling the body numbers
 

@@ -15,50 +15,59 @@ export const SPEC = {
   minDays: 21,
   /* Days needed on each side of a split before that one cell is read. */
   minPerSide: 4,
+  /* The share of shown findings allowed to be luck: 1 in 10. */
+  maxLuck: 0.1,
 
   /* What a day is made of, in the order it is logged. */
   groups: [
     { id: 'intake',  name: 'Intake',    icon: '🍽️', when: 'Tap it as it happens' },
     { id: 'sport',   name: 'Sport',     icon: '🏃',  when: 'After the session' },
-    { id: 'sleep',   name: 'Sleep',     icon: '😴',  when: 'Each morning' },
+    { id: 'sleep',   name: 'Sleep',     icon: '😴',  when: 'Each morning, the night just ended' },
     { id: 'observe', name: 'Observing', icon: '📊',  when: 'Each morning, off the watch' },
-    { id: 'levers',  name: 'Levers',    icon: '🌿',  when: 'Tonight, 20 seconds' },
+    { id: 'levers',  name: 'Levers',    icon: '🌿',  when: 'Tonight, 10 seconds' },
   ],
 
   /* Every field on a day. `kind` drives the control: tap is a counter,
-     flag is on/off, num is typed. `goal` is the daily target and `goalDir`
+     flag is on/off, num is typed, time is a clock time kept as minutes after
+     midnight. `goal` is the daily target and `goalDir`
      says which way it points, so 2 cups of coffee is a ceiling while 4
      litres of water is a floor. `scale` turns the count into what the goal
      is spoken in: eight bottles of 50cl read as 4 L. `max` is the ceiling a
      save is clamped to. */
   fields: [
     { id: 'coffee', group: 'intake', name: 'Coffee', unit: 'cups', kind: 'tap', max: 12, icon: '☕️',
-      goal: 2, goalDir: 'max' },
+      goal: 2, goalDir: 'max', times: 'coffeeAt' },
     { id: 'water', group: 'intake', name: 'Water', unit: '×50cl', kind: 'tap', max: 16, icon: '💧',
       goal: 8, goalDir: 'min', scale: 0.5, scaleUnit: 'L' },
-    { id: 'eaten', group: 'intake', name: 'Eaten', unit: 'kcal', kind: 'num', max: 12000, icon: '🍽️', src: 'Yazio' },
 
     { id: 'steps', group: 'sport', name: 'Steps', unit: '', kind: 'num', max: 100000, icon: '👟', src: 'Fitbit' },
 
     { id: 'sleepScore', group: 'sleep', name: 'Sleep score', unit: '/100', kind: 'num', max: 100, icon: '💤', src: 'Fitbit' },
     { id: 'sleepMin', group: 'sleep', name: 'Sleep', unit: '', kind: 'num', max: 960, icon: '🛌', src: 'Fitbit', clock: true },
+    { id: 'bed', group: 'sleep', name: 'Went to bed', unit: '', kind: 'time', max: 2159, icon: '🌙', src: 'Fitbit', night: true },
+    { id: 'wake', group: 'sleep', name: 'Woke up', unit: '', kind: 'time', max: 1439, icon: '🌅', src: 'Fitbit' },
 
     { id: 'weight', group: 'observe', name: 'Weight', unit: 'kg', kind: 'num', max: 250, step: 0.1, icon: '⚖️', src: 'Scale' },
     { id: 'hrv', group: 'observe', name: 'HRV', unit: 'ms', kind: 'num', max: 300, icon: '📈', src: 'Fitbit' },
     { id: 'rhr', group: 'observe', name: 'Resting HR', unit: 'bpm', kind: 'num', max: 140, icon: '❤️', src: 'Fitbit' },
     { id: 'readiness', group: 'observe', name: 'Recovery', unit: '/100', kind: 'num', max: 100, icon: '🔋', src: 'Fitbit' },
 
-    { id: 'cold', group: 'levers', name: 'Cold shower', kind: 'flag', max: 1, icon: '🧊' },
-    { id: 'bath', group: 'levers', name: 'Bath', unit: 'min', kind: 'num', max: 180, icon: '🛁' },
     { id: 'sun', group: 'levers', name: 'Sun', unit: 'min', kind: 'num', max: 600, icon: '☀️' },
     { id: 'deep', group: 'levers', name: 'Deep work', unit: 'h', kind: 'num', max: 16, step: 0.5, icon: '🧠' },
   ],
 
-  /* A session is a sport, its minutes and how hard it felt, 1 to 10. Up to
-     four a day. The list only seeds the picker: any name typed once joins
+  /* A session is a sport, when it started, its minutes, the calories it
+     burned and how hard it felt, 1 to 10. Up to four a day. The list only seeds the picker: any name typed once joins
      it, and a sport logged often enough earns its own row in the matrix. */
   sports: ['Run', 'Gym', 'Bike', 'Swim', 'Yoga', 'Hike', 'Football', 'Tennis', 'Climb'],
-  session: { perDay: 4, minutes: 600, hard: 10, name: 24 },
+  session: { perDay: 4, minutes: 600, hard: 10, kcal: 5000, name: 24 },
+
+  /* A meal is when I ate and how many calories it held, from Yazio. The
+     day's calories are the sum of its meals. */
+  meal: { perDay: 8, kcal: 5000 },
+
+  /* A cup after this time, in minutes after midnight, counts as a late one. */
+  lateCoffee: 14 * 60,
 
   /* What the body reports. Each gets its own list of what moved it. Each
      is read the morning AFTER the factor, because a night is what answers a
@@ -75,22 +84,44 @@ export const SPEC = {
     { id: 'rhr',        name: 'Resting HR',     icon: '❤️', unit: 'bpm', better: 'low' },
   ],
 
-  /* What I do, each tested against every outcome. A flag splits on itself,
-     `zero` splits did-it against did-not, and `median` splits at the field's
-     own median across the logged days, so "more" always means more for me.
-     `on` is how the factor reads in a sentence: "-16 pts after a harder
-     session". */
+  /* Everything logged, each tested against every outcome. A flag splits on
+     itself, `zero` splits did-it against did-not, and `median` splits at the
+     field's own median across the logged days, so "more" always means more
+     for me, and "later" later than my usual. `on` is how the factor reads in
+     a sentence: "-16 pts after a harder session", and `fmt` how its median
+     is spoken: "over 17:10", "over 45 min".
+
+     Sport is read one dimension at a time. A training day is set against a
+     rest day; everything else about a session (its sport, length,
+     intensity, calories, start time) is set against my other sessions, so
+     "a harder session" means harder than my usual session, not harder than
+     resting.
+
+     `lag` is the gap between the factor and what it is tested against. A
+     day's doings (lag 1) are read against the night and morning after. The
+     night itself (bedtime, wake-up, hours slept, logged on the morning it
+     ended) is read against that same morning (lag 0). */
   factors: [
-    { id: 'sportMin',  name: 'Sport minutes', icon: '🏃', split: 'median', from: 'sessions', on: 'more sport minutes' },
-    { id: 'sportHard', name: 'Hard session',  icon: '🔥', split: 'median', from: 'sessions', on: 'a harder session' },
-    { id: 'coffee',    name: 'Coffee',        icon: '☕️', split: 'median', on: 'more coffee' },
-    { id: 'water',     name: 'Water',         icon: '💧', split: 'median', on: 'more water' },
-    { id: 'eaten',     name: 'Calories',      icon: '🍽️', split: 'median', on: 'more calories' },
-    { id: 'steps',     name: 'Steps',         icon: '👟', split: 'median', on: 'more steps' },
-    { id: 'cold',      name: 'Cold shower',   icon: '🧊', split: 'flag',   on: 'a cold shower' },
-    { id: 'bath',      name: 'Bath',          icon: '🛁', split: 'zero',   on: 'a bath' },
-    { id: 'sun',       name: 'Sun',           icon: '☀️', split: 'median', on: 'more sun' },
-    { id: 'deep',      name: 'Deep work',     icon: '🧠', split: 'median', on: 'more deep work' },
+    { id: 'coffee',      name: 'Coffee',           icon: '☕️', split: 'median', on: 'more coffee', fmt: 'cups' },
+    { id: 'coffeeFirst', name: 'First coffee',     icon: '☕️', split: 'median', from: 'coffee', on: 'a later first coffee', fmt: 'clock' },
+    { id: 'coffeeLast',  name: 'Last coffee',      icon: '☕️', split: 'median', from: 'coffee', on: 'a later last coffee', fmt: 'clock' },
+    { id: 'coffeeLate',  name: 'Afternoon coffee', icon: '☕️', split: 'flag',   from: 'coffee', on: 'coffee after 14:00' },
+    { id: 'water',       name: 'Water',            icon: '💧', split: 'median', on: 'more water', fmt: '×50cl' },
+    { id: 'eaten',       name: 'Calories eaten',   icon: '🍽️', split: 'median', from: 'meals', on: 'more calories eaten', fmt: 'kcal' },
+    { id: 'mealFirst',   name: 'First meal',       icon: '🥐', split: 'median', from: 'meals', on: 'a later first meal', fmt: 'clock' },
+    { id: 'mealLast',    name: 'Last meal',        icon: '🍝', split: 'median', from: 'meals', on: 'a later last meal', fmt: 'clock' },
+    { id: 'mealWindow',  name: 'Eating window',    icon: '⏳', split: 'median', from: 'meals', on: 'a longer eating window', fmt: 'dur' },
+    { id: 'sportAny',    name: 'Training day',     icon: '🏃', split: 'flag',   from: 'sessions', on: 'a training day, against a rest day' },
+    { id: 'sportMin',    name: 'Session length',   icon: '⏱️', split: 'median', from: 'sessions', on: 'a longer session', fmt: 'min' },
+    { id: 'sportHard',   name: 'Intensity',        icon: '🔥', split: 'median', from: 'sessions', on: 'a harder session', fmt: '/10' },
+    { id: 'sportKcal',   name: 'Sport calories',   icon: '⚡️', split: 'median', from: 'sessions', on: 'more calories burned', fmt: 'kcal' },
+    { id: 'sportLate',   name: 'Session time',     icon: '🕒', split: 'median', from: 'sessions', on: 'a later session', fmt: 'clock' },
+    { id: 'steps',       name: 'Steps',            icon: '👟', split: 'median', on: 'more steps', fmt: 'steps' },
+    { id: 'sun',         name: 'Sun',              icon: '☀️', split: 'median', on: 'more sun', fmt: 'min' },
+    { id: 'deep',        name: 'Deep work',        icon: '🧠', split: 'median', on: 'more deep work', fmt: 'h' },
+    { id: 'bed',         name: 'Bedtime',          icon: '🌙', split: 'median', lag: 0, on: 'a later bedtime', fmt: 'clock' },
+    { id: 'wake',        name: 'Wake-up',          icon: '🌅', split: 'median', lag: 0, on: 'a later wake-up', fmt: 'clock' },
+    { id: 'sleepMin',    name: 'Hours slept',      icon: '🛌', split: 'median', lag: 0, on: 'more sleep', fmt: 'dur' },
   ],
 };
 
@@ -131,18 +162,41 @@ const clampNum = (raw, max, floor = 0) => {
   return Math.min(max, Math.max(floor, Math.round(n * 100) / 100));
 };
 
-/* One session, or nothing: a sport with a name, and minutes and intensity
-   inside their range. A session without a sport is half-typed, not data. */
+/* One session, or nothing: a sport with a name, and a start time, minutes,
+   calories and intensity inside their range. A session without a sport is
+   half-typed, not data. */
 function cleanSession(s) {
   if (!s || typeof s !== 'object') return undefined;
   const name = typeof s.s === 'string' ? s.s.trim().slice(0, SPEC.session.name) : '';
   if (!name) return undefined;
   const out = { s: name };
+  const t = clampNum(s.t, 1439);
+  if (t !== undefined) out.t = Math.round(t);
   const m = clampNum(s.m, SPEC.session.minutes);
   if (m !== undefined) out.m = m;
+  const k = clampNum(s.k, SPEC.session.kcal);
+  if (k !== undefined) out.k = Math.round(k);
   const i = clampNum(s.i, SPEC.session.hard, 1);
   if (i !== undefined) out.i = i;
   return out;
+}
+
+/* One meal, or nothing: a time, calories, or both. */
+function cleanMeal(m) {
+  if (!m || typeof m !== 'object') return undefined;
+  const out = {};
+  const t = clampNum(m.t, 1439);
+  if (t !== undefined) out.t = Math.round(t);
+  const k = clampNum(m.k, SPEC.meal.kcal);
+  if (k !== undefined) out.k = Math.round(k);
+  return Object.keys(out).length ? out : undefined;
+}
+
+/* The times of the day's cups, earliest first, never more than the cups. */
+function cleanTimes(raw, count) {
+  if (!Array.isArray(raw)) return [];
+  return raw.map(x => clampNum(x, 1439)).filter(x => x !== undefined)
+    .map(Math.round).sort((a, b) => a - b).slice(0, count);
 }
 
 /* Decided once for both sides: only days inside the challenge and not
@@ -162,11 +216,19 @@ export function clean(input, today) {
       const raw = day[f.id];
       if (f.kind === 'flag') { if (raw === true) entry[f.id] = true; continue; }
       const v = clampNum(raw, f.max);
-      if (v !== undefined) entry[f.id] = v;
+      if (v !== undefined) entry[f.id] = f.kind === 'time' ? Math.round(v) : v;
+      if (f.times) {
+        const times = cleanTimes(day[f.times], entry[f.id] ?? (Array.isArray(day[f.times]) ? day[f.times].length : 0));
+        if (times.length) { entry[f.times] = times; entry[f.id] ??= times.length; }
+      }
     }
     const sessions = (Array.isArray(day.sessions) ? day.sessions : [])
       .map(cleanSession).filter(Boolean).slice(0, SPEC.session.perDay);
     if (sessions.length) entry.sessions = sessions;
+    const meals = (Array.isArray(day.meals) ? day.meals : [])
+      .map(cleanMeal).filter(Boolean).slice(0, SPEC.meal.perDay)
+      .sort((a, b) => (a.t ?? 1e9) - (b.t ?? 1e9));
+    if (meals.length) entry.meals = meals;
     const note = typeof day.note === 'string' ? day.note.trim().slice(0, 120) : '';
     if (note) entry.note = note;
     if (Object.keys(entry).length) log[key] = entry;
@@ -178,7 +240,7 @@ export function clean(input, today) {
    each decided once so the strip and the matrix agree on what is missing. */
 const IN = new Set(['intake', 'levers']);
 export const isLogged = day =>
-  !!day && (SPEC.fields.some(f => IN.has(f.group) && day[f.id] != null) || !!day.sessions?.length);
+  !!day && (SPEC.fields.some(f => IN.has(f.group) && day[f.id] != null) || !!day.sessions?.length || !!day.coffeeAt?.length || !!day.meals?.length);
 export const hasBody = day =>
   !!day && SPEC.fields.some(f => !IN.has(f.group) && day[f.id] != null);
 
@@ -205,10 +267,34 @@ const median = xs => {
 export function valueOf(day, f) {
   if (!day) return undefined;
   if (f.from === 'sessions') {
-    const ss = Array.isArray(day.sessions) ? day.sessions : [];
+    const ss = Array.isArray(day.sessions) ? day.sessions.filter(s => s?.s) : [];
+    if (f.id === 'sportAny') return ss.length ? 1 : 0;
+    /* everything else describes a session, so a rest day has no value, and
+       a detail I did not log is unknown, not zero */
+    if (!ss.length) return undefined;
     if (f.sport) return ss.some(s => s.s === f.sport) ? 1 : 0;
-    if (f.id === 'sportHard') return ss.length ? Math.max(...ss.map(s => s.i || 0)) : 0;
-    return ss.reduce((a, s) => a + (s.m || 0), 0);
+    const got = key => ss.map(s => s[key]).filter(Number.isFinite);
+    const sum = xs => xs.length ? xs.reduce((a, b) => a + b, 0) : undefined;
+    if (f.id === 'sportMin') return sum(got('m'));
+    if (f.id === 'sportKcal') return sum(got('k'));
+    if (f.id === 'sportHard') { const xs = got('i'); return xs.length ? Math.max(...xs) : undefined; }
+    if (f.id === 'sportLate') { const xs = got('t'); return xs.length ? Math.max(...xs) : undefined; }
+    return undefined;
+  }
+  if (f.from === 'meals') {
+    const ms = Array.isArray(day.meals) ? day.meals : [];
+    const ks = ms.map(m => m.k).filter(Number.isFinite), ts = ms.map(m => m.t).filter(Number.isFinite);
+    if (f.id === 'eaten') return ks.length ? ks.reduce((a, b) => a + b, 0) : undefined;
+    if (f.id === 'mealFirst') return ts.length ? Math.min(...ts) : undefined;
+    if (f.id === 'mealLast') return ts.length ? Math.max(...ts) : undefined;
+    if (f.id === 'mealWindow') return ts.length >= 2 ? Math.max(...ts) - Math.min(...ts) : undefined;
+    return undefined;
+  }
+  if (f.from === 'coffee') {
+    const cups = day.coffee ?? 0, ts = Array.isArray(day.coffeeAt) ? day.coffeeAt : [];
+    if (f.id === 'coffeeLate') return ts.some(t => t >= SPEC.lateCoffee) ? 1 : ts.length || !cups ? 0 : undefined;
+    if (!ts.length) return undefined;
+    return f.id === 'coffeeFirst' ? Math.min(...ts) : Math.max(...ts);
   }
   const v = day[f.id];
   if (v === true) return 1;
@@ -236,9 +322,11 @@ function strength(on, off) {
    the outcome's own unit, `delta` the same move as a percent of the
    baseline, `d` how far apart the two groups sit. */
 export function cell(log, factor, outcome) {
+  if (factor.id === outcome.id) return null;
+  const lag = factor.lag ?? 1;
   const pairs = [];
   for (const key of allDays()) {
-    const d = log[key], next = log[shift(key, 1)];
+    const d = log[key], next = log[shift(key, lag)];
     if (!d || !next) continue;
     const y = next[outcome.id];
     if (!Number.isFinite(y)) continue;
@@ -248,9 +336,9 @@ export function cell(log, factor, outcome) {
   }
   if (pairs.length < SPEC.minPerSide * 2) return null;
 
-  let on, off;
+  let on, off, cut = null;
   if (factor.split === 'median') {
-    const cut = median(pairs.map(p => p.x));
+    cut = median(pairs.map(p => p.x));
     on = pairs.filter(p => p.x > cut).map(p => p.y);
     off = pairs.filter(p => p.x <= cut).map(p => p.y);
   } else {
@@ -265,7 +353,47 @@ export function cell(log, factor, outcome) {
   const diff = mean(on) - base;
   const delta = diff / base * 100;
   const good = outcome.better == null ? null : outcome.better === 'high' ? diff > 0 : diff < 0;
-  return { diff, delta, d: s.d, label: s.label, good, base, n: on.length + off.length, nOn: on.length };
+  return { diff, delta, d: s.d, label: s.label, good, base, cut, p: welchP(on, off), n: on.length + off.length, nOn: on.length };
+}
+
+/* Two-sided p-value of Welch's t-test: how often a gap this size would turn
+   up between two groups drawn from the same days. The t distribution is
+   read through the regularised incomplete beta function. */
+export function welchP(a, b) {
+  const va = sd(a) ** 2 / a.length, vb = sd(b) ** 2 / b.length, se = Math.sqrt(va + vb);
+  const gap = Math.abs(mean(a) - mean(b));
+  if (!se) return gap ? 0 : 1;
+  const t = gap / se;
+  const df = (va + vb) ** 2 / (va ** 2 / (a.length - 1) + vb ** 2 / (b.length - 1));
+  return ibeta(df / (df + t * t), df / 2, 0.5);
+}
+function ibeta(x, a, b) {
+  if (x <= 0) return 0;
+  if (x >= 1) return 1;
+  const front = Math.exp(Math.log(x) * a + Math.log(1 - x) * b + lgamma(a + b) - lgamma(a) - lgamma(b));
+  return x < (a + 1) / (a + b + 2) ? front * betacf(x, a, b) / a : 1 - front * betacf(1 - x, b, a) / b;
+}
+function betacf(x, a, b) {
+  const tiny = 1e-30, fix = v => Math.abs(v) < tiny ? tiny : v;
+  let c = 1, d = 1 / fix(1 - (a + b) * x / (a + 1)), h = d;
+  for (let m = 1; m <= 200; m++) {
+    const m2 = 2 * m;
+    let aa = m * (b - m) * x / ((a + m2 - 1) * (a + m2));
+    d = 1 / fix(1 + aa * d); c = fix(1 + aa / c); h *= d * c;
+    aa = -(a + m) * (a + b + m) * x / ((a + m2) * (a + m2 + 1));
+    d = 1 / fix(1 + aa * d); c = fix(1 + aa / c);
+    const del = d * c;
+    h *= del;
+    if (Math.abs(del - 1) < 3e-12) break;
+  }
+  return h;
+}
+function lgamma(z) {
+  const g = [76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5];
+  let y = z, tmp = z + 5.5, ser = 1.000000000190015;
+  tmp -= (z + 0.5) * Math.log(tmp);
+  for (const c of g) ser += c / ++y;
+  return -tmp + Math.log(2.5066282746310005 * ser / z);
 }
 
 /* Every sport typed so far with how many days it was done, most first. */
@@ -289,18 +417,35 @@ export function sportList(log) {
 export function factorsFor(log) {
   const sports = [...sportCounts(log).entries()]
     .filter(([, c]) => c >= SPEC.minPerSide)
-    .map(([name]) => ({ id: `sport:${name}`, name, icon: '🏅', split: 'flag', from: 'sessions', sport: name, on: `a ${name.toLowerCase()} day` }));
+    .map(([name]) => ({ id: `sport:${name}`, name, icon: '🏅', split: 'flag', from: 'sessions', sport: name, on: `${name.toLowerCase()}, against my other sports` }));
   return [...SPEC.factors, ...sports];
 }
 
-/* What moved one outcome: every readable link, strongest first. The label
-   is what ranks them, not the size of the move, because a big move on a
-   noisy metric says less than a small one on a steady metric. */
-export function findings(log, outcome) {
-  return factorsFor(log)
-    .map(factor => ({ factor, link: cell(log, factor, outcome) }))
-    .filter(x => x.link)
-    .sort((a, b) => b.link.d - a.link.d);
+/* Every factor against every outcome, at once. Testing a hundred links
+   over 31 days guarantees some look real by luck, and the more that is
+   tracked the more of them there are. So each link gets a q-value
+   (Benjamini-Hochberg over all the links tested together): the share of
+   findings at that level expected to be luck. A finding needs
+   q <= SPEC.maxLuck, however many factors are tracked.
+
+   Returns each outcome's links, strongest first, and how many were tested. */
+export function analyze(log) {
+  const all = [];
+  for (const outcome of SPEC.outcomes)
+    for (const factor of factorsFor(log)) {
+      const link = cell(log, factor, outcome);
+      if (link) all.push({ outcome, factor, link });
+    }
+  const byP = [...all].sort((a, b) => a.link.p - b.link.p);
+  let q = 1;
+  for (let i = byP.length - 1; i >= 0; i--) {
+    q = Math.min(q, byP[i].link.p * byP.length / (i + 1));
+    byP[i].link.q = q;
+  }
+  const byOutcome = Object.fromEntries(SPEC.outcomes.map(o => [o.id, []]));
+  for (const x of all) byOutcome[x.outcome.id].push(x);
+  for (const id in byOutcome) byOutcome[id].sort((a, b) => b.link.d - a.link.d);
+  return { byOutcome, tested: all.length };
 }
 
 /* The outcome's own average over the month, as a reference for a move. */
@@ -309,11 +454,9 @@ export function average(log, outcome) {
   return xs.length ? mean(xs) : null;
 }
 
-/* Which links count as a finding. Six metrics against a dozen factors is
-   some 80 tests over 31 days, and a medium gap turns up by luck in several
-   of them, so only strong and very strong links are shown as findings. The
-   rest wait behind a toggle. */
-export const isFinding = link => link.d >= 0.6;
+/* A finding survives the false-discovery check and is at least a medium
+   gap. The rest wait behind a toggle. */
+export const isFinding = link => link.q <= SPEC.maxLuck && link.d >= 0.3;
 
 /* Days with both halves on them: what the matrix actually runs on. */
 export function readyDays(log) {

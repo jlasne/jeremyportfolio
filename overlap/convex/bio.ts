@@ -55,7 +55,9 @@ export const save = mutation({
     /* Anything the page sends; `clean` decides what survives. */
     log: v.record(v.string(), v.record(v.string(), v.union(
       v.float64(), v.boolean(), v.string(),
-      v.array(v.object({ s: v.string(), m: v.optional(v.float64()), i: v.optional(v.float64()) })),
+      v.array(v.object({ s: v.string(), t: v.optional(v.float64()), m: v.optional(v.float64()), k: v.optional(v.float64()), i: v.optional(v.float64()) })),
+      v.array(v.float64()),
+      v.array(v.object({ t: v.optional(v.float64()), k: v.optional(v.float64()) })),
     ))),
   },
   handler: async (ctx, { passphrase, today, ...input }) => {

@@ -139,19 +139,38 @@ h2 {
   flex: 1 1 160px; min-width: 0; background: rgba(23, 61, 89, .3); border: 1px solid var(--line);
   padding: 9px 11px; font: 500 15px/1.2 var(--sans);
 }
-.snums { display: flex; gap: 8px; align-items: center; flex: none; }
-.smin, .shard {
+.snums { display: flex; gap: 10px; align-items: center; flex: none; }
+.sf { display: flex; align-items: center; gap: 6px; }
+.smin, .skcal, .shard {
+  height: 44px;
   background: rgba(23, 61, 89, .3); border: 1px solid var(--line); padding: 8px 8px 7px;
   font: 400 22px/1 var(--display); letter-spacing: .02em; text-align: right;
   appearance: textfield; -moz-appearance: textfield;
 }
 .smin { width: 64px; }
-.smin::-webkit-outer-spin-button, .smin::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.skcal { width: 74px; }
+.stime, .ctime {
+  background: rgba(23, 61, 89, .3); border: 1px solid var(--line); color: var(--ice);
+  font: 500 15px/1 var(--mono); padding: 9px 8px; min-width: 0;
+}
+.stime { width: 128px; flex: none; }
+.stime:focus, .ctime:focus { outline: none; border-color: var(--blue); }
+.stime:disabled, .ctime:disabled { background: transparent; border-color: transparent; opacity: 1; }
+.stime::-webkit-calendar-picker-indicator, .ctime::-webkit-calendar-picker-indicator { filter: invert(.8); }
+.nf input[type="time"] { width: 136px; font: 400 22px/1 var(--display); }
+.nf input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(.8); }
+/* the times of the day's cups, under the counter */
+.tapr { flex-wrap: wrap; }
+.times { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 6px; padding: 2px 0 4px 34px; }
+.times[hidden] { display: none; }
+.ctime { width: 118px; font-size: 13px; padding: 6px 6px; }
+.smin::-webkit-outer-spin-button, .smin::-webkit-inner-spin-button,
+.skcal::-webkit-outer-spin-button, .skcal::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .shard { width: 58px; appearance: none; -webkit-appearance: none; text-align: center; cursor: pointer; }
 .shard option { background: var(--ink); color: var(--ice); font-family: var(--sans); font-size: 15px; }
-.sname:focus, .smin:focus, .shard:focus { outline: none; border-color: var(--blue); }
-.sname:disabled, .smin:disabled, .shard:disabled { background: transparent; border-color: transparent; opacity: 1; }
-.sname::placeholder, .smin::placeholder { color: var(--ice-45); }
+.sname:focus, .smin:focus, .skcal:focus, .shard:focus { outline: none; border-color: var(--blue); }
+.sname:disabled, .smin:disabled, .skcal:disabled, .shard:disabled { background: transparent; border-color: transparent; opacity: 1; }
+.sname::placeholder, .smin::placeholder, .skcal::placeholder { color: var(--ice-45); }
 .sunit { font-size: 9.5px; color: var(--blue); letter-spacing: .1em; }
 .sdel {
   width: 36px; height: 36px; border: 1px solid var(--line); background: none; border-radius: 50%;
@@ -165,6 +184,14 @@ h2 {
   padding: 11px 14px 10px; cursor: pointer; width: 100%;
 }
 .addsess:hover { background: rgba(95, 168, 211, .12); }
+.meals { padding: 10px 16px 4px; }
+.mhead { display: flex; align-items: center; gap: 10px; font-size: 15px; padding-bottom: 8px; }
+.mhead em { font-style: normal; font-size: 19px; width: 24px; text-align: center; }
+.mtotal { margin-left: auto; color: var(--blue); }
+.mrows { display: grid; gap: 8px; }
+.mrow { display: flex; align-items: center; gap: 10px; }
+.mrow .mkcal { width: 96px; }
+.mrow .sdel { margin-left: auto; }
 .addsess[hidden] { display: none; }
 
 /* a tap row: label left, minus, the number, plus */
@@ -270,7 +297,7 @@ h2 {
 .fl { min-width: 0; }
 .fl b { display: block; font-weight: 500; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fl b em { font-style: normal; margin-right: 8px; }
-.fl small { display: block; color: var(--ice-45); font-size: 12.5px; margin-top: 2px; padding-left: 27px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fl small { display: block; color: var(--ice-45); font-size: 12.5px; line-height: 1.35; margin-top: 3px; padding-left: 27px; }
 .fd { font: 400 26px/1 var(--display); letter-spacing: .02em; text-align: right; white-space: nowrap; }
 .fd i { font: 500 9.5px/1 var(--mono); font-style: normal; letter-spacing: .1em; margin-left: 4px; color: var(--ice-45); }
 .fbar { height: 6px; background: rgba(95, 168, 211, .14); border-radius: 3px; overflow: hidden; }
@@ -354,8 +381,19 @@ body.editing { padding-bottom: 88px; }
   .pm { width: 42px; height: 42px; }
   .gtitle .gwhen { flex-basis: 100%; margin-left: 30px; }
   .srow { gap: 8px; }
-  .sname { flex-basis: 100%; }
-  .snums { width: 100%; }
+  .sname { flex: 1 1 0; }
+  .snums { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: 8px; align-items: start; }
+  .sf { flex-direction: column; align-items: stretch; gap: 4px; }
+  .sf .smin, .sf .skcal, .sf .shard { width: 100%; }
+  .sf .sunit { text-align: center; }
+  .stime { width: 130px; }
+  .tapr .lbl { display: grid; grid-template-columns: 24px minmax(0, 1fr); column-gap: 10px; row-gap: 5px; }
+  .tapr .lbl .goal { grid-column: 2; justify-self: start; }
+  .mrow { gap: 6px; }
+  .mrow .stime { width: auto; flex: 1 1 0; min-width: 0; }
+  .mrow .mkcal { width: 82px; }
+  .mrow .sunit { display: none; }
+  .times { padding-left: 0; }
   .snums .sdel { margin-left: auto; }
   .tapr .lbl i { display: none; }
   .frow { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; }
@@ -387,7 +425,7 @@ body.editing { padding-bottom: 88px; }
     <div class="head">
       <span class="n mono">01</span>
       <h2>Today <span class="pill live" id="dayPill">Day 0 of 31</span></h2>
-      <p class="tag">Intake, sport, sleep, and what the watch observes. Two goals, under two minutes a day, every day of October, then the page reads what moved.</p>
+      <p class="tag">Intake, sport, sleep, and what the watch observes, with the time of each coffee, each session and each night. Two goals, every day of October, then the page reads what moved.</p>
     </div>
     <div class="card" id="card"></div>
   </section>
@@ -422,11 +460,12 @@ body.editing { padding-bottom: 88px; }
       <h2>How to read it</h2>
     </div>
     <ul class="notes">
-      <li><b>The morning after</b>A day is judged by the night that follows it. A drink on Tuesday is scored against Wednesday's sleep, never Tuesday's.</li>
-      <li><b>More against less</b>An on/off thing splits on itself. A counted thing splits at my own median, so "more coffee" means more than my usual.</li>
+      <li><b>The morning after</b>A day is judged by the night that follows it: a late coffee on Tuesday is scored against Wednesday's sleep. The night itself (bedtime, wake-up, hours slept) is scored against the morning it ends.</li>
+      <li><b>More against less, later against earlier</b>An on/off thing splits on itself. A count or a clock time splits at my own median, so "a later last coffee" means later than my usual.</li>
       <li><b>Green is good, not positive</b>A resting heart rate going down is a win, so it turns green while the number falls. Weight stays blue: without a weight goal there is no good direction.</li>
       <li><b>The strength label</b>How far apart the two groups sit, measured against how much that number swings day to day anyway. A big percent on a wild metric says less than a small one on a steady metric.</li>
-      <li><b>What stays hidden</b>A link needs 4 days on each side before it prints. Only strong links count as findings: with some 80 tests, a medium one turns up by luck. The rest wait behind a toggle. Everything stays shut until 21 days carry both what I did and what the body said.</li>
+      <li><b>What stays hidden</b>A link needs 4 days on each side before it prints. Over a hundred links are tested, so some look real by luck: a finding must clear a false-discovery check, which keeps luck to at most 1 in 10 of what is shown. The rest wait behind a toggle. Everything stays shut until 21 days carry both what I did and what the body said.</li>
+      <li><b>Linked things move together</b>A late third meal is also more calories, so "a later last meal" and "more calories eaten" can both claim the same kilo. When two rows tell one story, change one of them alone for a week.</li>
       <li><b>One month only</b>1 to 31 October 2026. Thirty-one days, one video a day, then the table stands as it is.</li>
     </ul>
   </section>
@@ -455,7 +494,7 @@ body.editing { padding-bottom: 88px; }
 <noscript><p style="text-align:center;padding:40px">The live numbers need JavaScript.</p></noscript>
 
 <script type="module">
-import { SPEC, inGroup, dateKey, shift, daysBetween, allDays, clean, findings, average, isFinding, readyDays, isLogged, hasBody, goalMet, sportList } from '/bio/spec.js';
+import { SPEC, inGroup, dateKey, shift, daysBetween, allDays, clean, analyze, average, isFinding, readyDays, isLogged, hasBody, goalMet, sportList } from '/bio/spec.js';
 
 const $ = id => document.getElementById(id);
 const API = 'https://fiery-eel-944.eu-west-1.convex.site/overlap';
@@ -497,6 +536,11 @@ function toMinutes(str) {
   return n <= 24 ? Math.round(n * 60) : Math.round(n);
 }
 const fmtMinutes = n => `${Math.floor(n / 60)}h${String(Math.round(n % 60)).padStart(2, '0')}`;
+/* A clock time kept as minutes after midnight, and back. A bedtime after
+   midnight is kept past 24:00 (00:30 is 1470), so later always sorts later. */
+const hhmm = n => `${String(Math.floor(n / 60) % 24).padStart(2, '0')}:${String(Math.round(n % 60)).padStart(2, '0')}`;
+const fromHhmm = str => { const m = /^(\d{1,2}):(\d{2})$/.exec(str || ''); return m ? +m[1] * 60 + +m[2] : null; };
+const nowMinutes = () => { const d = new Date(); return d.getHours() * 60 + d.getMinutes(); };
 
 /* ── the card ───────────────────────────────────────────────────────── */
 /* One object per day, shared by every control on the card: while a day is
@@ -560,6 +604,7 @@ function groupEl(g, day, open) {
     else if (f.kind === 'flag') box.append(flagRow(f, day, open));
     else nums.append(numField(f, day, open));
   }
+  if (g.id === 'intake') box.append(mealsEl(day, open));
   if (nums.childElementCount) box.append(nums);
   return box;
 }
@@ -597,11 +642,48 @@ function tapRow(f, day, open) {
       badge.className = `goal mono ${ok ? 'ok' : f.goalDir === 'max' ? 'over' : ''}`;
     }
   };
-  const bump = d => { day[f.id] = Math.max(0, Math.min(f.max, Number(day[f.id] ?? 0) + d)); paint(); paintGoals(day); touch(); };
+  /* A counter with `times` keeps the clock time of each tap. Tapping today
+     stamps the time now; a past day gets an empty slot to fill. Removing one
+     drops the latest time. Every time stays editable. */
+  const strip = f.times ? document.createElement('div') : null;
+  const sorted = () => (Array.isArray(day[f.times]) ? day[f.times] : []).slice().sort((a, b) => a - b);
+  const setTimes = ts => { if (ts.length) day[f.times] = ts.sort((a, b) => a - b); else delete day[f.times]; };
+  const paintTimes = () => {
+    if (!strip) return;
+    const n = Number(day[f.id] ?? 0), ts = sorted();
+    strip.className = 'times';
+    strip.hidden = !n;
+    strip.replaceChildren(...Array.from({ length: n }, (_, i) => {
+      const inp = document.createElement('input');
+      inp.type = 'time'; inp.className = 'ctime'; inp.disabled = !open;
+      inp.value = ts[i] != null ? hhmm(ts[i]) : '';
+      inp.setAttribute('aria-label', `Time of ${f.name.toLowerCase()} ${i + 1}`);
+      inp.addEventListener('change', () => {
+        const cur = sorted(), v = fromHhmm(inp.value);
+        if (i < cur.length) { if (v == null) cur.splice(i, 1); else cur[i] = v; }
+        else if (v != null) cur.push(v);
+        setTimes(cur); paintTimes(); touch();
+      });
+      return inp;
+    }));
+  };
+  const bump = d => {
+    const next = Math.max(0, Math.min(f.max, Number(day[f.id] ?? 0) + d));
+    if (next === Number(day[f.id] ?? 0)) return;
+    day[f.id] = next;
+    if (f.times) {
+      const ts = sorted();
+      if (d > 0 && sel === today) ts.push(nowMinutes());
+      while (ts.length > next) ts.pop();
+      setTimes(ts);
+    }
+    paint(); paintTimes(); paintGoals(day); touch();
+  };
   minus.addEventListener('click', () => bump(-1));
   plus.addEventListener('click', () => bump(1));
   paint();
   r.append(minus, out, plus);
+  if (strip) { paintTimes(); r.append(strip); }
   return r;
 }
 
@@ -632,17 +714,20 @@ function numField(f, day, open) {
   const id = `f_${f.id}`;
   w.innerHTML = `<label for="${id}"><em>${f.icon}</em>${f.name}</label>`;
   const i = document.createElement('input');
-  i.id = id; i.type = f.clock ? 'text' : 'number'; i.inputMode = 'decimal';
+  i.id = id; i.type = f.kind === 'time' ? 'time' : f.clock ? 'text' : 'number';
+  if (f.kind !== 'time') i.inputMode = 'decimal';
   i.placeholder = '—'; i.disabled = !open;
-  if (!f.clock) { i.min = '0'; i.max = String(f.max); i.step = String(f.step || 1); }
+  if (!f.clock && f.kind !== 'time') { i.min = '0'; i.max = String(f.max); i.step = String(f.step || 1); }
   const show = () => {
     const v = day[f.id];
-    i.value = v == null ? '' : f.clock ? fmtMinutes(v) : String(v);
+    i.value = v == null ? '' : f.kind === 'time' ? hhmm(v) : f.clock ? fmtMinutes(v) : String(v);
   };
   i.addEventListener('input', () => {
     const raw = i.value.trim();
     if (!raw) { delete day[f.id]; touch(); return; }
-    const n = f.clock ? toMinutes(raw) : Number(raw.replace(',', '.'));
+    let n = f.kind === 'time' ? fromHhmm(raw) : f.clock ? toMinutes(raw) : Number(raw.replace(',', '.'));
+    /* before noon, a bedtime is the small hours of the same night */
+    if (f.kind === 'time' && f.night && n != null && n < 720) n += 1440;
     if (!Number.isFinite(n)) return;
     day[f.id] = Math.min(f.max, Math.max(0, Math.round(n * 100) / 100));
     touch();
@@ -653,6 +738,81 @@ function numField(f, day, open) {
   u.textContent = f.unit || '';
   w.append(i, u);
   return w;
+}
+
+/* ── meals ──────────────────────────────────────────────────────────── */
+/* When I ate and how many calories, one line a meal. Adding one today
+   stamps the time now; the calories come from Yazio. The day's total is
+   the sum, shown as it grows. */
+function mealsEl(day, open) {
+  const wrap = document.createElement('div');
+  wrap.className = 'meals';
+  const head = document.createElement('div');
+  head.className = 'mhead';
+  head.innerHTML = '<em>🍽️</em><span>Meals</span>';
+  const total = document.createElement('span');
+  total.className = 'mtotal mono';
+  head.append(total);
+  const rows = document.createElement('div');
+  rows.className = 'mrows';
+  const add = document.createElement('button');
+  add.type = 'button'; add.className = 'addsess mono';
+  add.textContent = '+ Add a meal';
+
+  const list = () => (Array.isArray(day.meals) ? day.meals : []);
+  const paintTotal = () => {
+    const ks = list().map(m => m.k).filter(Number.isFinite);
+    total.textContent = ks.length ? `${ks.reduce((a, b) => a + b, 0)} kcal` : '';
+  };
+  const render = () => {
+    const ms = list();
+    rows.replaceChildren(...ms.map((m, idx) => {
+      const r = document.createElement('div');
+      r.className = 'mrow';
+      const at = document.createElement('input');
+      at.type = 'time'; at.className = 'stime'; at.disabled = !open;
+      at.value = m.t != null ? hhmm(m.t) : '';
+      at.setAttribute('aria-label', `Time of meal ${idx + 1}`);
+      at.addEventListener('change', () => { const v = fromHhmm(at.value); if (v == null) delete m.t; else m.t = v; touch(); });
+      const k = document.createElement('input');
+      k.type = 'number'; k.inputMode = 'numeric'; k.className = 'skcal mkcal';
+      k.min = '0'; k.max = String(SPEC.meal.kcal); k.placeholder = 'kcal';
+      k.value = m.k ?? ''; k.disabled = !open;
+      k.setAttribute('aria-label', `Calories of meal ${idx + 1}`);
+      k.addEventListener('input', () => {
+        const n = Number(k.value);
+        if (k.value === '' || !Number.isFinite(n)) delete m.k; else m.k = Math.min(SPEC.meal.kcal, Math.max(0, Math.round(n)));
+        paintTotal(); touch();
+      });
+      const u = document.createElement('span'); u.className = 'sunit mono'; u.textContent = 'kcal';
+      const del = document.createElement('button');
+      del.type = 'button'; del.className = 'sdel'; del.textContent = '×'; del.disabled = !open;
+      del.setAttribute('aria-label', `Remove meal ${idx + 1}`);
+      del.addEventListener('click', () => {
+        day.meals.splice(idx, 1);
+        if (!day.meals.length) delete day.meals;
+        render(); touch();
+      });
+      r.append(at, k, u, del);
+      return r;
+    }));
+    if (!ms.length) {
+      const none = document.createElement('div');
+      none.className = 'snone';
+      none.textContent = open ? 'No meal yet.' : 'No meal logged';
+      rows.append(none);
+    }
+    add.hidden = !open || ms.length >= SPEC.meal.perDay;
+    paintTotal();
+  };
+  add.addEventListener('click', () => {
+    (day.meals ||= []).push(sel === today ? { t: nowMinutes() } : {});
+    render(); touch();
+    rows.querySelector('.mrow:last-child .mkcal')?.focus();
+  });
+  render();
+  wrap.append(head, rows, add);
+  return wrap;
 }
 
 /* ── sport sessions ─────────────────────────────────────────────────── */
@@ -699,16 +859,27 @@ function sessionsEl(day, open) {
     name.setAttribute('aria-label', 'Sport');
     name.addEventListener('input', () => { s.s = name.value.trim(); touch(); });
 
-    const min = document.createElement('input');
-    min.type = 'number'; min.inputMode = 'numeric'; min.className = 'smin';
-    min.min = '0'; min.max = String(SPEC.session.minutes); min.placeholder = '—';
-    min.value = s.m ?? ''; min.disabled = !open;
-    min.setAttribute('aria-label', 'Minutes');
-    min.addEventListener('input', () => {
-      const n = Number(min.value);
-      if (min.value === '' || !Number.isFinite(n)) delete s.m; else s.m = Math.min(SPEC.session.minutes, Math.max(0, Math.round(n)));
-      touch();
-    });
+    const at = document.createElement('input');
+    at.type = 'time'; at.className = 'stime'; at.disabled = !open;
+    at.value = s.t != null ? hhmm(s.t) : '';
+    at.setAttribute('aria-label', 'Start time');
+    at.addEventListener('change', () => { const v = fromHhmm(at.value); if (v == null) delete s.t; else s.t = v; touch(); });
+
+    const numIn = (key, max, cls, label) => {
+      const x = document.createElement('input');
+      x.type = 'number'; x.inputMode = 'numeric'; x.className = cls;
+      x.min = '0'; x.max = String(max); x.placeholder = '—';
+      x.value = s[key] ?? ''; x.disabled = !open;
+      x.setAttribute('aria-label', label);
+      x.addEventListener('input', () => {
+        const n = Number(x.value);
+        if (x.value === '' || !Number.isFinite(n)) delete s[key]; else s[key] = Math.min(max, Math.max(0, Math.round(n)));
+        touch();
+      });
+      return x;
+    };
+    const min = numIn('m', SPEC.session.minutes, 'smin', 'Minutes');
+    const kcal = numIn('k', SPEC.session.kcal, 'skcal', 'Calories burned');
 
     const hard = document.createElement('select');
     hard.className = 'shard'; hard.disabled = !open;
@@ -726,12 +897,15 @@ function sessionsEl(day, open) {
       render(); touch();
     });
 
-    const lm = document.createElement('label'); lm.className = 'sunit mono'; lm.textContent = 'min';
-    const lh = document.createElement('label'); lh.className = 'sunit mono'; lh.textContent = '/10';
+    const field = (el, t) => {
+      const w = document.createElement('label'); w.className = 'sf';
+      const u = document.createElement('span'); u.className = 'sunit mono'; u.textContent = t;
+      w.append(el, u); return w;
+    };
     const nums = document.createElement('div');
     nums.className = 'snums';
-    nums.append(min, lm, hard, lh, del);
-    r.append(name, nums);
+    nums.append(field(min, 'min'), field(kcal, 'kcal'), field(hard, '/10'), del);
+    r.append(name, at, nums);
     return r;
   }
 
@@ -780,15 +954,22 @@ const fmtMove = (o, x) => {
   return { flat: r === 0, text: r === 0 ? '0' : `${r > 0 ? '+' : '−'}${Math.abs(r).toFixed(o.digits || 0)}` };
 };
 const fmtAvg = (o, x) => o.id === 'sleepMin' ? fmtMinutes(x) : `${x.toFixed(o.digits || 0)} ${o.unit}`;
+/* Where a counted factor was split, in its own terms: "over 17:10". */
+function fmtCut(f, x) {
+  if (x == null || !f.fmt) return '';
+  const v = f.fmt === 'clock' ? hhmm(x) : f.fmt === 'dur' ? fmtMinutes(x)
+    : f.fmt === 'steps' ? `${Math.round(x / 100) * 100} steps` : `${Math.round(x * 10) / 10} ${f.fmt}`;
+  return ` · over ${v}`;
+}
 
 function findingRow(o, { factor, link }) {
   const r = document.createElement('div');
   const move = fmtMove(o, link.diff);
   const tone = move.flat ? 'flat' : link.good == null ? 'neutral' : link.good ? 'good' : 'bad';
   r.className = `frow ${tone}`;
-  r.title = `${link.nOn} of ${link.n} days after ${factor.on}; ${link.delta > 0 ? '+' : ''}${link.delta.toFixed(1)}% against the rest`;
+  r.title = `${link.nOn} of ${link.n} days after ${factor.on}; ${link.delta > 0 ? '+' : ''}${link.delta.toFixed(1)}% against the rest; p ${link.p.toFixed(3)}, q ${link.q.toFixed(3)}`;
   r.innerHTML =
-    `<div class="fl"><b><em>${factor.icon}</em>${factor.name}</b><small>after ${factor.on}</small></div>` +
+    `<div class="fl"><b><em>${factor.icon}</em>${factor.name}</b><small>after ${factor.on}${fmtCut(factor, link.cut)}</small></div>` +
     `<div class="fd">${move.text}<i>${o.unit}</i></div>` +
     `<div class="fbar"><i style="width:${Math.round(Math.min(1, link.d / 1.5) * 100)}%"></i></div>` +
     `<div class="flab">${link.label}</div>`;
@@ -810,9 +991,10 @@ function drawFindings() {
   }
   const grid = document.createElement('div');
   grid.className = 'fgrid';
+  const { byOutcome, tested } = analyze(state.log);
   let found = 0;
   for (const o of SPEC.outcomes) {
-    const all = findings(state.log, o);
+    const all = byOutcome[o.id];
     const shown = all.filter(x => isFinding(x.link));
     const weak = all.filter(x => !isFinding(x.link));
     found += shown.length;
@@ -831,7 +1013,7 @@ function drawFindings() {
     if (weak.length) {
       const d = document.createElement('details');
       d.className = 'fweak';
-      d.innerHTML = `<summary>${weak.length} more link${weak.length > 1 ? 's' : ''}, too faint to count</summary>`;
+      d.innerHTML = `<summary>${weak.length} more link${weak.length > 1 ? 's' : ''}, not clear of luck</summary>`;
       d.append(...weak.map(x => findingRow(o, x)));
       card.append(d);
     }
@@ -839,7 +1021,7 @@ function drawFindings() {
   }
   const sum = document.createElement('p');
   sum.className = 'fsum mono';
-  sum.innerHTML = `<b>${found}</b> link${found === 1 ? '' : 's'} found across <b>${SPEC.outcomes.length}</b> metrics`;
+  sum.innerHTML = `<b>${found}</b> finding${found === 1 ? '' : 's'} out of <b>${tested}</b> links tested · at most 1 in ${Math.round(1 / SPEC.maxLuck)} is luck`;
   $('mxbox').replaceChildren(sum, grid);
 }
 
@@ -928,17 +1110,21 @@ $('gate').addEventListener('submit', async e => {
 $('csv').addEventListener('click', () => {
   const cols = SPEC.fields;
   const q = x => `"${String(x).replace(/"/g, '""')}"`;
-  const head = ['date', ...cols.map(c => c.id), 'sessions', 'sport_min', 'sport_hardest', 'note'];
+  const head = ['date', ...cols.map(c => c.id), 'coffee_times', 'meals', 'eaten_kcal', 'sessions', 'sport_min', 'sport_kcal', 'sport_hardest', 'note'];
   const lines = [head.join(',')];
   for (const key of DAYS) {
     const d = state.log[key] || {};
     const ss = (d.sessions || []).filter(x => x.s);
     lines.push([key, ...cols.map(c => {
       const v = d[c.id];
-      return v === true ? '1' : v == null ? (c.kind === 'flag' ? '0' : '') : String(v);
+      return v === true ? '1' : v == null ? (c.kind === 'flag' ? '0' : '') : c.kind === 'time' ? hhmm(v) : String(v);
     }),
-    q(ss.map(x => `${x.s}${x.m != null ? ` ${x.m}min` : ''}${x.i != null ? ` ${x.i}/10` : ''}`).join('; ')),
+    q((d.coffeeAt || []).map(hhmm).join(' ')),
+    q((d.meals || []).map(m => `${m.t != null ? hhmm(m.t) : '?'} ${m.k ?? '?'}kcal`).join('; ')),
+    (d.meals || []).some(m => Number.isFinite(m.k)) ? d.meals.reduce((a, m) => a + (m.k || 0), 0) : '',
+    q(ss.map(x => `${x.s}${x.t != null ? ` @${hhmm(x.t)}` : ''}${x.m != null ? ` ${x.m}min` : ''}${x.k != null ? ` ${x.k}kcal` : ''}${x.i != null ? ` ${x.i}/10` : ''}`).join('; ')),
     ss.length ? ss.reduce((a, x) => a + (x.m || 0), 0) : '',
+    ss.length ? ss.reduce((a, x) => a + (x.k || 0), 0) : '',
     ss.length ? Math.max(...ss.map(x => x.i || 0)) || '' : '',
     q(d.note || '')].join(','));
   }
