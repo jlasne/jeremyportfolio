@@ -60,31 +60,37 @@ export const SPEC = {
   sports: ['Run', 'Gym', 'Bike', 'Swim', 'Yoga', 'Hike', 'Football', 'Tennis', 'Climb'],
   session: { perDay: 4, minutes: 600, hard: 10, name: 24 },
 
-  /* The four columns of the matrix. `better` says which direction is a win,
-     so a cell is coloured by what it means, not by its sign. Each one is
-     read the morning AFTER the factor, because a night is what answers a
-     day. */
+  /* What the body reports. Each gets its own list of what moved it. Each
+     is read the morning AFTER the factor, because a night is what answers a
+     day. `better` says which direction is a win, so a finding is coloured
+     by what it means, not by its sign; weight has no better direction until
+     there is a goal for it, so it is shown without a verdict. `unit` and
+     `digits` say how a difference is spoken: "-7 ms", "+0.4 kg". */
   outcomes: [
-    { id: 'readiness',  name: 'Recovery',    better: 'high' },
-    { id: 'rhr',        name: 'Resting HR',  better: 'low' },
-    { id: 'hrv',        name: 'HRV',         better: 'high' },
-    { id: 'sleepScore', name: 'Sleep score', better: 'high' },
+    { id: 'readiness',  name: 'Recovery',       icon: '🔋', unit: 'pts', better: 'high' },
+    { id: 'sleepScore', name: 'Sleep score',    icon: '💤', unit: 'pts', better: 'high' },
+    { id: 'sleepMin',   name: 'Sleep duration', icon: '🛌', unit: 'min', better: 'high' },
+    { id: 'weight',     name: 'Weight',         icon: '⚖️', unit: 'kg',  better: null, digits: 1 },
+    { id: 'hrv',        name: 'HRV',            icon: '📈', unit: 'ms',  better: 'high' },
+    { id: 'rhr',        name: 'Resting HR',     icon: '❤️', unit: 'bpm', better: 'low' },
   ],
 
-  /* The fixed rows of the matrix. A flag splits on itself, `zero` splits
-     did-it against did-not, and `median` splits at the field's own median
-     across the logged days, so "high" always means high for me. */
+  /* What I do, each tested against every outcome. A flag splits on itself,
+     `zero` splits did-it against did-not, and `median` splits at the field's
+     own median across the logged days, so "more" always means more for me.
+     `on` is how the factor reads in a sentence: "-16 pts after a harder
+     session". */
   factors: [
-    { id: 'sportMin',  name: 'Sport minutes', icon: '🏃', split: 'median', from: 'sessions' },
-    { id: 'sportHard', name: 'Hard session',  icon: '🔥', split: 'median', from: 'sessions' },
-    { id: 'coffee',    name: 'Coffee',        icon: '☕️', split: 'median' },
-    { id: 'water',     name: 'Water',         icon: '💧', split: 'median' },
-    { id: 'eaten',     name: 'Calories',      icon: '🍽️', split: 'median' },
-    { id: 'steps',     name: 'Steps',         icon: '👟', split: 'median' },
-    { id: 'cold',      name: 'Cold shower',   icon: '🧊', split: 'flag' },
-    { id: 'bath',      name: 'Bath',          icon: '🛁', split: 'zero' },
-    { id: 'sun',       name: 'Sun',           icon: '☀️', split: 'median' },
-    { id: 'deep',      name: 'Deep work',     icon: '🧠', split: 'median' },
+    { id: 'sportMin',  name: 'Sport minutes', icon: '🏃', split: 'median', from: 'sessions', on: 'more sport minutes' },
+    { id: 'sportHard', name: 'Hard session',  icon: '🔥', split: 'median', from: 'sessions', on: 'a harder session' },
+    { id: 'coffee',    name: 'Coffee',        icon: '☕️', split: 'median', on: 'more coffee' },
+    { id: 'water',     name: 'Water',         icon: '💧', split: 'median', on: 'more water' },
+    { id: 'eaten',     name: 'Calories',      icon: '🍽️', split: 'median', on: 'more calories' },
+    { id: 'steps',     name: 'Steps',         icon: '👟', split: 'median', on: 'more steps' },
+    { id: 'cold',      name: 'Cold shower',   icon: '🧊', split: 'flag',   on: 'a cold shower' },
+    { id: 'bath',      name: 'Bath',          icon: '🛁', split: 'zero',   on: 'a bath' },
+    { id: 'sun',       name: 'Sun',           icon: '☀️', split: 'median', on: 'more sun' },
+    { id: 'deep',      name: 'Deep work',     icon: '🧠', split: 'median', on: 'more deep work' },
   ],
 };
 
@@ -225,8 +231,10 @@ function strength(on, off) {
   return { d, label };
 }
 
-/* One cell: the factor on day D against the outcome the morning after.
-   Returns null while either side is too thin to read. */
+/* One link: the factor on day D against the outcome the morning after.
+   Returns null while either side is too thin to read. `diff` is the move in
+   the outcome's own unit, `delta` the same move as a percent of the
+   baseline, `d` how far apart the two groups sit. */
 export function cell(log, factor, outcome) {
   const pairs = [];
   for (const key of allDays()) {
@@ -254,9 +262,10 @@ export function cell(log, factor, outcome) {
 
   const base = mean(off);
   if (!base) return null;
-  const delta = (mean(on) - base) / base * 100;
-  const good = outcome.better === 'high' ? delta > 0 : delta < 0;
-  return { delta, label: s.label, good, n: on.length + off.length, nOn: on.length };
+  const diff = mean(on) - base;
+  const delta = diff / base * 100;
+  const good = outcome.better == null ? null : outcome.better === 'high' ? diff > 0 : diff < 0;
+  return { diff, delta, d: s.d, label: s.label, good, base, n: on.length + off.length, nOn: on.length };
 }
 
 /* Every sport typed so far with how many days it was done, most first. */
@@ -275,20 +284,36 @@ export function sportList(log) {
   return [...new Set([...mine, ...SPEC.sports])];
 }
 
-/* The whole matrix, rows ordered by the loudest thing they say. A sport
-   done on enough days joins the fixed rows as its own line. */
-export function matrix(log) {
+/* Every factor worth testing: the fixed ones, plus each sport done on
+   enough days to stand as its own line. */
+export function factorsFor(log) {
   const sports = [...sportCounts(log).entries()]
     .filter(([, c]) => c >= SPEC.minPerSide)
-    .map(([name]) => ({ id: `sport:${name}`, name, icon: '🏅', split: 'flag', from: 'sessions', sport: name }));
-  const rows = [...SPEC.factors, ...sports].map(f => {
-    const cells = SPEC.outcomes.map(o => cell(log, f, o));
-    const loudest = Math.max(0, ...cells.filter(Boolean).map(c => Math.abs(c.delta)));
-    return { factor: f, cells, loudest };
-  });
-  rows.sort((a, b) => b.loudest - a.loudest);
-  return rows;
+    .map(([name]) => ({ id: `sport:${name}`, name, icon: '🏅', split: 'flag', from: 'sessions', sport: name, on: `a ${name.toLowerCase()} day` }));
+  return [...SPEC.factors, ...sports];
 }
+
+/* What moved one outcome: every readable link, strongest first. The label
+   is what ranks them, not the size of the move, because a big move on a
+   noisy metric says less than a small one on a steady metric. */
+export function findings(log, outcome) {
+  return factorsFor(log)
+    .map(factor => ({ factor, link: cell(log, factor, outcome) }))
+    .filter(x => x.link)
+    .sort((a, b) => b.link.d - a.link.d);
+}
+
+/* The outcome's own average over the month, as a reference for a move. */
+export function average(log, outcome) {
+  const xs = allDays().map(k => log[k]?.[outcome.id]).filter(Number.isFinite);
+  return xs.length ? mean(xs) : null;
+}
+
+/* Which links count as a finding. Six metrics against a dozen factors is
+   some 80 tests over 31 days, and a medium gap turns up by luck in several
+   of them, so only strong and very strong links are shown as findings. The
+   rest wait behind a toggle. */
+export const isFinding = link => link.d >= 0.6;
 
 /* Days with both halves on them: what the matrix actually runs on. */
 export function readyDays(log) {

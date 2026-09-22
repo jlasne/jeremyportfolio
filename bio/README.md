@@ -1,9 +1,9 @@
 # jeremylasne.com/bio
 
 October 2026, 31 days. Intake, sport, sleep and what the watch observes,
-measured every day, then a matrix of what actually moved my recovery,
-resting heart rate, HRV and sleep score. Everyone reads it. One passphrase
-writes it.
+measured every day, then what actually moved my recovery, sleep score,
+sleep duration, weight, HRV and resting heart rate. Everyone reads it. One
+passphrase writes it.
 
 ## The shape of it
 
@@ -48,32 +48,30 @@ day that caused them, because a night is what answers a day.
   saves itself about a second after the last change. There is no Save
   button. A failed save keeps the change on screen and retries.
 
-## The matrix
+## The correlations
 
-A row is something I did, a column is what the body said the next morning:
-recovery, resting heart rate, HRV and sleep score.
+One card per thing the body reports: **recovery, sleep score, sleep
+duration, weight, HRV and resting HR**. Each card lists what moved that
+metric the morning after, strongest first.
 
-Sessions become three kinds of row: total sport minutes, the hardest
-effort of the day, and one row per sport once it has been done on 4 days.
-Sport rows overlap by nature (a hard padel day is also a sport-minutes day),
-so read them together, not as separate findings.
-
-- An on/off row (gym, cold shower) splits on itself. A counted row splits at
-  its **own median** across the logged days, so "high coffee" means high for
-  me, not against a table.
-- The percent is how far the average moved between the two groups.
-- The label is Cohen's *d*: how far apart the groups sit, measured in the
-  spread of the days themselves. A big percent on a wild metric says less
-  than a small one on a steady metric. Under 0.3 weak, 0.6 medium, 1.0
-  strong, above that very strong.
-- Colour follows meaning, not sign: a resting heart rate going **down** is
-  green, because `better: 'low'` says so in `spec.js`.
-- A cell needs 4 days on each side before it prints, and the whole matrix
-  stays shut until 21 days carry both the taps and the body numbers. Under
-  that a correlation is a coin toss wearing a percentage.
-
-Rows are ordered by the loudest thing they say, so the strongest finding is
-always the top line.
+- A line reads "**−9 pts** after a harder session": the move in the metric's
+  own unit (pts, min, kg, ms, bpm), then what caused it.
+- An on/off factor (cold shower, a sport) splits on itself. A counted one
+  splits at its **own median**, so "more coffee" means more than my usual.
+- Strength is Cohen's *d*: how far apart the two groups sit, measured in the
+  spread of the days themselves. The bar shows it; the label names it (0.6
+  strong, 1.0 very strong).
+- **Only strong links count as findings.** Six metrics against a dozen
+  factors is some 80 tests over 31 days, and a medium gap turns up by luck
+  in several of them. Fainter links wait behind a toggle on each card.
+- Colour follows meaning: a resting heart rate going **down** is green.
+  Weight stays blue until it has a goal, because until then no direction is
+  better.
+- Sessions become total sport minutes, the hardest effort, and one line per
+  sport done on 4 days. These overlap by nature (a hard padel day is also a
+  sport-minutes day), so read them together.
+- A link needs 4 days on each side, and the whole section stays shut until
+  21 days carry both halves of the day.
 
 ## Filling the body numbers
 

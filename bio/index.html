@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>31 days of measuring | Jeremy Lasne</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="October 2026: intake, sport, sleep and the watch, measured every day, then the matrix of what actually moves my recovery, resting heart rate, HRV and sleep.">
+<meta name="description" content="October 2026: intake, sport, sleep and the watch, measured every day, then what actually moved my recovery, sleep, weight, HRV and resting heart rate.">
 <meta name="theme-color" content="#050b16">
 <meta name="color-scheme" content="dark">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -14,7 +14,7 @@
 <meta property="og:site_name" content="Jeremy Lasne">
 <meta property="og:url" content="https://www.jeremylasne.com/bio/">
 <meta property="og:title" content="31 days of measuring">
-<meta property="og:description" content="A month of measuring intake, sport and sleep every day, then the matrix of what actually moves the body.">
+<meta property="og:description" content="A month of measuring intake, sport and sleep every day, then what actually moved the body.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -253,27 +253,47 @@ h2 {
 .legend b.off { background: rgba(95, 168, 211, .22); }
 .legend b.miss { background: var(--bad); }
 
-/* ── the matrix ─────────────────────────────────────────────────────── */
-.mxwrap { overflow-x: auto; border: 1px solid var(--line); background: rgba(5, 11, 22, .46); }
-.mx { width: 100%; border-collapse: collapse; min-width: 620px; }
-.mx th, .mx td { padding: 11px 10px; text-align: center; }
-.mx thead th { font: 500 10px/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ice-45); border-bottom: 1px solid var(--line); font-weight: 500; }
-.mx thead th:first-child { text-align: left; }
-.mx tbody tr { border-bottom: 1px solid rgba(95, 168, 211, .1); }
-.mx tbody tr:last-child { border-bottom: 0; }
-.mx td.f { text-align: left; white-space: nowrap; font-size: 15px; }
-.mx td.f em { font-style: normal; margin-right: 9px; }
-.cellv { display: inline-grid; gap: 3px; justify-items: center; padding: 6px 10px; border: 1px solid transparent; border-radius: 4px; min-width: 76px; }
-.cellv u { text-decoration: none; font: 400 21px/1 var(--display); letter-spacing: .02em; }
-.cellv s { text-decoration: none; font: 500 8.5px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ice-45); }
-.cellv.good u { color: var(--good); }
-.cellv.bad u { color: var(--bad); }
-.cellv.lit.good { border-color: rgba(110, 231, 168, .45); background: var(--good-bg); }
-.cellv.lit.bad { border-color: rgba(255, 158, 158, .42); background: var(--bad-bg); }
-.cellv.lit s { color: inherit; }
-.cellv.lit.good s { color: var(--good); }
-.cellv.lit.bad s { color: var(--bad); }
-.cellv.thin u, .cellv.flat u { color: var(--ice-45); }
+/* ── what moved each metric ─────────────────────────────────────────── */
+.fsum { margin: 0 0 16px; color: var(--ice-70); }
+.fsum b { color: var(--ice); font-weight: 500; }
+.fgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(460px, 100%), 1fr)); gap: 14px; }
+.fcard { border: 1px solid var(--line); background: rgba(5, 11, 22, .46); display: flex; flex-direction: column; }
+.fhead { display: flex; align-items: center; gap: 10px; padding: 14px 16px 12px; border-bottom: 1px solid var(--line); }
+.fhead em { font-style: normal; font-size: 20px; line-height: 1; }
+.fhead .fname { font: 400 28px/1 var(--display); letter-spacing: .03em; }
+.fhead .favg { margin-left: auto; color: var(--ice-45); white-space: nowrap; }
+.frows { padding: 6px 0; }
+.frow {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto 70px 78px; align-items: center;
+  gap: 12px; padding: 9px 16px;
+}
+.fl { min-width: 0; }
+.fl b { display: block; font-weight: 500; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fl b em { font-style: normal; margin-right: 8px; }
+.fl small { display: block; color: var(--ice-45); font-size: 12.5px; margin-top: 2px; padding-left: 27px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fd { font: 400 26px/1 var(--display); letter-spacing: .02em; text-align: right; white-space: nowrap; }
+.fd i { font: 500 9.5px/1 var(--mono); font-style: normal; letter-spacing: .1em; margin-left: 4px; color: var(--ice-45); }
+.fbar { height: 6px; background: rgba(95, 168, 211, .14); border-radius: 3px; overflow: hidden; }
+.fbar i { display: block; height: 100%; border-radius: 3px; background: var(--ice-45); }
+.flab { font: 500 9.5px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; text-align: right; color: var(--ice-45); white-space: nowrap; }
+.frow.good .fd, .frow.good .flab { color: var(--good); }
+.frow.good .fbar i { background: var(--good); }
+.frow.bad .fd, .frow.bad .flab { color: var(--bad); }
+.frow.bad .fbar i { background: var(--bad); }
+.frow.neutral .fd, .frow.neutral .flab { color: var(--blue); }
+.frow.neutral .fbar i { background: var(--blue); }
+.frow.flat .fd { color: var(--ice-45); }
+.fnone { padding: 14px 16px; color: var(--ice-45); font-size: 14px; }
+.fweak { border-top: 1px solid rgba(95, 168, 211, .1); margin-top: auto; }
+.fweak summary {
+  list-style: none; cursor: pointer; padding: 11px 16px; color: var(--ice-45);
+  font: 500 10px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase;
+}
+.fweak summary::-webkit-details-marker { display: none; }
+.fweak summary::before { content: '+ '; color: var(--blue); }
+.fweak[open] summary::before { content: '− '; }
+.fweak summary:hover { color: var(--ice); }
+.fweak .frow { opacity: .7; }
 
 .locked { border: 1px solid var(--line); background: rgba(5, 11, 22, .46); padding: clamp(24px, 5vw, 44px); text-align: center; }
 .locked .big { font: 400 clamp(56px, 12vw, 120px)/.9 var(--display); letter-spacing: .02em; color: var(--blue); }
@@ -338,6 +358,9 @@ body.editing { padding-bottom: 88px; }
   .snums { width: 100%; }
   .snums .sdel { margin-left: auto; }
   .tapr .lbl i { display: none; }
+  .frow { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; }
+  .fbar { grid-column: 1; }
+  .flab { grid-column: 2; }
   .count { width: 40px; font-size: 30px; }
   .row { flex-wrap: wrap; }
   .row label, .pass, .row .status { flex-basis: 100%; }
@@ -364,7 +387,7 @@ body.editing { padding-bottom: 88px; }
     <div class="head">
       <span class="n mono">01</span>
       <h2>Today <span class="pill live" id="dayPill">Day 0 of 31</span></h2>
-      <p class="tag">Intake, sport, sleep, and what the watch observes. Two goals, under two minutes a day, every day of October, then the matrix reads what moved.</p>
+      <p class="tag">Intake, sport, sleep, and what the watch observes. Two goals, under two minutes a day, every day of October, then the page reads what moved.</p>
     </div>
     <div class="card" id="card"></div>
   </section>
@@ -388,7 +411,7 @@ body.editing { padding-bottom: 88px; }
     <div class="head">
       <span class="n mono">03</span>
       <h2>Correlations <span class="pill" id="mxPill"></span></h2>
-      <p class="tag">Each row is something I did. Each column is what my body said the morning after. The number is how far the average moved, the label how far apart the two groups really sit.</p>
+      <p class="tag">Six things my body reports, and for each one, what moved it the morning after. Strongest first, in the metric's own unit.</p>
     </div>
     <div id="mxbox"></div>
   </section>
@@ -400,10 +423,10 @@ body.editing { padding-bottom: 88px; }
     </div>
     <ul class="notes">
       <li><b>The morning after</b>A day is judged by the night that follows it. A drink on Tuesday is scored against Wednesday's sleep, never Tuesday's.</li>
-      <li><b>High against low</b>An on/off thing splits on itself. A counted thing splits at my own median, so "high coffee" means high for me.</li>
-      <li><b>Green is good, not positive</b>A resting heart rate going down is a win, so it turns green while the number falls.</li>
+      <li><b>More against less</b>An on/off thing splits on itself. A counted thing splits at my own median, so "more coffee" means more than my usual.</li>
+      <li><b>Green is good, not positive</b>A resting heart rate going down is a win, so it turns green while the number falls. Weight stays blue: without a weight goal there is no good direction.</li>
       <li><b>The strength label</b>How far apart the two groups sit, measured against how much that number swings day to day anyway. A big percent on a wild metric says less than a small one on a steady metric.</li>
-      <li><b>What stays hidden</b>A cell needs 4 days on each side before it prints. The whole matrix stays shut until 21 days carry both the taps and the body numbers.</li>
+      <li><b>What stays hidden</b>A link needs 4 days on each side before it prints. Only strong links count as findings: with some 80 tests, a medium one turns up by luck. The rest wait behind a toggle. Everything stays shut until 21 days carry both what I did and what the body said.</li>
       <li><b>One month only</b>1 to 31 October 2026. Thirty-one days, one video a day, then the table stands as it is.</li>
     </ul>
   </section>
@@ -432,7 +455,7 @@ body.editing { padding-bottom: 88px; }
 <noscript><p style="text-align:center;padding:40px">The live numbers need JavaScript.</p></noscript>
 
 <script type="module">
-import { SPEC, inGroup, dateKey, shift, daysBetween, allDays, clean, matrix, readyDays, isLogged, hasBody, goalMet, sportList } from '/bio/spec.js';
+import { SPEC, inGroup, dateKey, shift, daysBetween, allDays, clean, findings, average, isFinding, readyDays, isLogged, hasBody, goalMet, sportList } from '/bio/spec.js';
 
 const $ = id => document.getElementById(id);
 const API = 'https://fiery-eel-944.eu-west-1.convex.site/overlap';
@@ -747,8 +770,32 @@ function drawStrip() {
   $('monthPill').textContent = `${done} of 31 complete`;
 }
 
-/* ── the matrix ─────────────────────────────────────────────────────── */
-function drawMatrix() {
+/* ── what moved each metric ─────────────────────────────────────────── */
+/* One card per thing the body reports, each listing what moved it: the
+   move in the metric's own unit, a bar for how clearly the two groups sit
+   apart, and the label. Weak links fold away under the card. */
+const fmtMove = (o, x) => {
+  const k = 10 ** (o.digits || 0);
+  const r = Math.round(x * k) / k;
+  return { flat: r === 0, text: r === 0 ? '0' : `${r > 0 ? '+' : '−'}${Math.abs(r).toFixed(o.digits || 0)}` };
+};
+const fmtAvg = (o, x) => o.id === 'sleepMin' ? fmtMinutes(x) : `${x.toFixed(o.digits || 0)} ${o.unit}`;
+
+function findingRow(o, { factor, link }) {
+  const r = document.createElement('div');
+  const move = fmtMove(o, link.diff);
+  const tone = move.flat ? 'flat' : link.good == null ? 'neutral' : link.good ? 'good' : 'bad';
+  r.className = `frow ${tone}`;
+  r.title = `${link.nOn} of ${link.n} days after ${factor.on}; ${link.delta > 0 ? '+' : ''}${link.delta.toFixed(1)}% against the rest`;
+  r.innerHTML =
+    `<div class="fl"><b><em>${factor.icon}</em>${factor.name}</b><small>after ${factor.on}</small></div>` +
+    `<div class="fd">${move.text}<i>${o.unit}</i></div>` +
+    `<div class="fbar"><i style="width:${Math.round(Math.min(1, link.d / 1.5) * 100)}%"></i></div>` +
+    `<div class="flab">${link.label}</div>`;
+  return r;
+}
+
+function drawFindings() {
   const ready = readyDays(state.log);
   $('mxPill').textContent = ready < SPEC.minDays ? `${ready} of ${SPEC.minDays} days` : `${ready} days in`;
   if (ready < SPEC.minDays) {
@@ -756,53 +803,54 @@ function drawMatrix() {
     box.className = 'locked';
     box.innerHTML =
       `<div class="big">${ready} / ${SPEC.minDays}</div>` +
-      `<p>The matrix opens on day ${SPEC.minDays}. Under that, a correlation is a coin toss wearing a percentage, so the page keeps it shut.</p>` +
+      `<p>The correlations open on day ${SPEC.minDays}. Under that, a correlation is a coin toss wearing a percentage, so the page keeps them shut.</p>` +
       `<div class="meter"><i style="width:${Math.round(ready / SPEC.minDays * 100)}%"></i></div>`;
     $('mxbox').replaceChildren(box);
     return;
   }
-  const rows = matrix(state.log);
-  const t = document.createElement('table');
-  t.className = 'mx';
-  t.innerHTML =
-    '<thead><tr><th>Factor</th>' +
-    SPEC.outcomes.map(o => `<th>Δ ${o.name}</th>`).join('') +
-    '</tr></thead>';
-  const body = document.createElement('tbody');
-  for (const r of rows) {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td class="f"><em>${r.factor.icon}</em>${r.factor.name}</td>`;
-    for (const c of r.cells) {
-      const td = document.createElement('td');
-      if (!c) td.innerHTML = '<span class="cellv thin"><u>—</u><s>Thin</s></span>';
-      else {
-        const lit = c.label === 'medium' || c.label === 'strong' || c.label === 'v. strong';
-        /* under half a percent rounds to nothing, so it says nothing */
-        const flat = Math.round(c.delta) === 0;
-        const tone = flat ? 'flat' : c.good ? 'good' : 'bad';
-        td.innerHTML =
-          `<span class="cellv ${tone}${lit && !flat ? ' lit' : ''}" title="${c.nOn} of ${c.n} days on the high side">` +
-          `<u>${flat ? '0' : (c.delta > 0 ? '+' : '') + c.delta.toFixed(0)}%</u><s>${c.label}</s></span>`;
-      }
-      tr.append(td);
+  const grid = document.createElement('div');
+  grid.className = 'fgrid';
+  let found = 0;
+  for (const o of SPEC.outcomes) {
+    const all = findings(state.log, o);
+    const shown = all.filter(x => isFinding(x.link));
+    const weak = all.filter(x => !isFinding(x.link));
+    found += shown.length;
+    const avg = average(state.log, o);
+
+    const card = document.createElement('article');
+    card.className = 'fcard';
+    card.innerHTML =
+      `<div class="fhead"><em>${o.icon}</em><span class="fname">${o.name}</span>` +
+      `<span class="favg mono">${avg == null ? '' : `avg ${fmtAvg(o, avg)}`}</span></div>`;
+    const rows = document.createElement('div');
+    rows.className = 'frows';
+    if (shown.length) rows.append(...shown.map(x => findingRow(o, x)));
+    else rows.innerHTML = '<div class="fnone">Nothing stands out yet.</div>';
+    card.append(rows);
+    if (weak.length) {
+      const d = document.createElement('details');
+      d.className = 'fweak';
+      d.innerHTML = `<summary>${weak.length} more link${weak.length > 1 ? 's' : ''}, too faint to count</summary>`;
+      d.append(...weak.map(x => findingRow(o, x)));
+      card.append(d);
     }
-    body.append(tr);
+    grid.append(card);
   }
-  t.append(body);
-  const wrap = document.createElement('div');
-  wrap.className = 'mxwrap';
-  wrap.append(t);
-  $('mxbox').replaceChildren(wrap);
+  const sum = document.createElement('p');
+  sum.className = 'fsum mono';
+  sum.innerHTML = `<b>${found}</b> link${found === 1 ? '' : 's'} found across <b>${SPEC.outcomes.length}</b> metrics`;
+  $('mxbox').replaceChildren(sum, grid);
 }
 
-function draw() { drawCard(); drawStrip(); drawMatrix(); }
+function draw() { drawCard(); drawStrip(); drawFindings(); }
 
 /* ── saving ─────────────────────────────────────────────────────────── */
 const say = (msg, bad) => { const s = $('saved'); if (!s) return; s.textContent = msg; s.className = `saved mono${bad ? ' bad' : msg === 'Saved' ? ' on' : ''}`; };
 
 function touch() {
   dirty = true;
-  drawStrip(); drawMatrix();
+  drawStrip(); drawFindings();
   say('Saving…');
   clearTimeout(timer);
   timer = setTimeout(push, 900);
