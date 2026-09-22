@@ -6,6 +6,7 @@ import { render, rotate } from '../dist/instagram/template.js'
 import { parse } from '../dist/core/decide.js'
 import { DailyCap } from '../dist/instagram/limiter.js'
 import { pick } from '../dist/instagram/pacing.js'
+import { findChrome } from '../dist/config/settings.js'
 
 const t = { leadId: 'l1', handle: 'ana.lifts', name: 'Ana Ruiz', followers: 24300, bio: '', note: '', tags: [], score: 2.5 }
 
@@ -54,4 +55,10 @@ for (let n = 0; n < 200; n++) {
   const v = pick([20, 90])
   assert.ok(v >= 20 && v <= 90)
 }
+// Chrome detection: either it found one that is really there, or none.
+import { existsSync } from 'node:fs'
+const chrome = findChrome()
+assert.ok(chrome === undefined || existsSync(chrome), 'a detected Chrome must exist on disk')
+console.log('chrome detected:', chrome ?? 'none, Playwright will use its own')
+
 console.log('all assertions passed')

@@ -83,7 +83,14 @@ once per account, not once per run:
     npm run build
     node dist/cli.js login --account yourhandle
 
-To drive the Chrome you already use, set `CHROME_PATH` to its binary.
+The agent finds the Chrome already installed and drives that. Playwright
+stopped shipping a browser on install, so without one there is nothing to
+drive. `node dist/cli.js status` prints which one it found.
+
+Two ways out if it finds none: set `CHROME_PATH` to the binary, or run
+`npx playwright install chromium` for a separate 150MB copy. The first is
+better. The account then runs on the build, the fonts and the version it has
+always logged in from.
 
 ## Running
 

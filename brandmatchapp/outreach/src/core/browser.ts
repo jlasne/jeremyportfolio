@@ -38,7 +38,19 @@ export class Browser {
         executablePath: s.browser.executablePath,
       },
     })
-    await sh.init()
+    try {
+      await sh.init()
+    } catch (err) {
+      // The one failure everybody hits on a fresh machine, answered with the
+      // two ways out rather than with Playwright's own message.
+      if (/Executable doesn't exist|playwright install/i.test(String(err))) {
+        throw new Error(
+          'No browser to drive. Either point CHROME_PATH at the Chrome on this machine, ' +
+            'or run: npx playwright install chromium',
+        )
+      }
+      throw err
+    }
     return new Browser(sh, s.instagram.typing)
   }
 

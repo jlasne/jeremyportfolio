@@ -1,6 +1,7 @@
 import { readFileSync, existsSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { platform, homedir } from 'node:os'
 
 // Every knob in one place, and one rule about where a value comes from:
 // defaults, then config/settings.json, then the environment. The environment
@@ -149,8 +150,42 @@ export function load(file = resolve(ROOT, 'config', 'settings.json')): Settings 
   s.openrouter.vision.model = process.env.OPENROUTER_VISION_MODEL ?? s.openrouter.vision.model
   s.brandmatch.apiKey = process.env.BRANDMATCH_API_KEY ?? s.brandmatch.apiKey
   s.brandmatch.apiBase = (process.env.BRANDMATCH_API ?? s.brandmatch.apiBase).replace(/\/$/, '')
-  s.browser.executablePath = process.env.CHROME_PATH ?? s.browser.executablePath
+  s.browser.executablePath = process.env.CHROME_PATH ?? s.browser.executablePath ?? findChrome()
   return s
+}
+
+/**
+ * The Chrome already on this machine.
+ *
+ * Playwright stopped downloading a browser on install, so without this the
+ * first run dies on a missing binary. The Chrome someone already browses with
+ * is the better one to drive anyway: it is the build, the fonts and the
+ * version Instagram has seen this person use.
+ *
+ * Absent, Playwright is left to find its own, which is what `npx playwright
+ * install chromium` provides.
+ */
+export function findChrome(): string | undefined {
+  const home = homedir()
+  const candidates: Record<string, string[]> = {
+    win32: [
+      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+      resolve(home, 'AppData', 'Local', 'Google', 'Chrome', 'Application', 'chrome.exe'),
+      'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+    ],
+    darwin: [
+      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+      '/Applications/Chromium.app/Contents/MacOS/Chromium',
+    ],
+    linux: [
+      '/usr/bin/google-chrome',
+      '/usr/bin/google-chrome-stable',
+      '/usr/bin/chromium',
+      '/usr/bin/chromium-browser',
+    ],
+  }
+  return (candidates[platform()] ?? []).find((p) => existsSync(p))
 }
 
 /** What the run cannot start without. Said once, in full, rather than crashing later. */

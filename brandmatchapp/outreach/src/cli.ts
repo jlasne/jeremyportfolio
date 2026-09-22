@@ -61,6 +61,8 @@ async function main(): Promise<number> {
     console.log(`leads touched  ${day.dms}`)
     console.log(`cost today     $${day.usd.toFixed(4)}`)
     console.log(`vision         ${s.openrouter.vision.enabled ? 'on' : 'off'}`)
+    console.log(`chrome         ${s.browser.executablePath ?? "Playwright's own"}`)
+    console.log(`profile        ${sessionFor(s.browser.sessionRoot, s.instagram.account).dir}`)
     return 0
   }
 
