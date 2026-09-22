@@ -19,6 +19,7 @@ import type * as drafting from "../drafting.js";
 import type * as evaluate from "../evaluate.js";
 import type * as feasibility from "../feasibility.js";
 import type * as gates from "../gates.js";
+import type * as google from "../google.js";
 import type * as http from "../http.js";
 import type * as httpUtil from "../httpUtil.js";
 import type * as ingest from "../ingest.js";
@@ -49,6 +50,7 @@ declare const fullApi: ApiFromModules<{
   evaluate: typeof evaluate;
   feasibility: typeof feasibility;
   gates: typeof gates;
+  google: typeof google;
   http: typeof http;
   httpUtil: typeof httpUtil;
   ingest: typeof ingest;

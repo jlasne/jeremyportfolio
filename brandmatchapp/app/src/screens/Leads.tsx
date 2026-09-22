@@ -275,6 +275,7 @@ function foundLine(row: LeadRow): string {
   const niche = row.campaign.extracted.niches?.find((n) => n.id === row.evaluation.niche)
   const topic = niche ? niche.label.toLowerCase() : 'your niches'
   if (!via || via.channel === 'accounts') return `Found by searching Instagram for ${topic}`
+  if (via.channel === 'google') return `Found on a public page for ${topic}, and their size read before we opened them`
   if (via.channel === 'search') return `Found posting under the hashtags of ${topic}`
   if (via.channel === 'neighbour') {
     const n = via.parents?.length ?? 1

@@ -28,7 +28,7 @@ import { compact, COUNTRY_NAMES, daysSince, LANGUAGE_NAMES } from '../lib/format
 // And what comes through a door is marked for good, on every lead. A widening
 // nobody can see is a reply rate quietly falling with no explanation on screen.
 
-export type ChannelId = 'accounts' | 'search' | 'neighbour' | 'seed' | 'import'
+export type ChannelId = 'accounts' | 'search' | 'neighbour' | 'seed' | 'import' | 'google'
 
 /** In the order they matter. Measured on the first real runs, September 2026. */
 const CHANNELS: ChannelId[] = ['accounts', 'search', 'neighbour', 'seed']
@@ -38,6 +38,7 @@ const CHANNEL_LABEL: Record<ChannelId, string> = {
   search: 'Posts under your niches\' hashtags',
   neighbour: 'People your best leads mention',
   seed: 'The handles you gave us',
+  google: 'Public pages, read for size before we open anyone',
   import: 'Your own list',
 }
 
@@ -46,6 +47,7 @@ const CHANNEL_NOTE: Record<ChannelId, string> = {
   search: 'The people posting under the tags your niches use. Mostly small.',
   neighbour: 'Every lead that fits points at the people they mention.',
   seed: 'One step out from the accounts you named yourself.',
+  google: 'A profile page says how many followers it has. We read that first, and only open the ones your size.',
   import: 'The people you brought with you.',
 }
 
@@ -74,7 +76,7 @@ const BRANCH = 5
 const SPENT_UNDER = 0.1
 
 /** How far each way of searching has already been taken, across the sample. */
-const LOOKED: Record<ChannelId, number> = { accounts: 0, search: 0, neighbour: 0, seed: 0, import: 0 }
+const LOOKED: Record<ChannelId, number> = { accounts: 0, search: 0, neighbour: 0, seed: 0, google: 0, import: 0 }
 for (const b of built) {
   LOOKED[(b.creator.foundVia?.channel ?? 'accounts') as ChannelId]++
 }
@@ -128,6 +130,10 @@ function capacityOf(campaign: Campaign, gates: GateSet, qualified: number): Reco
     search: slices * places * PER_QUERY,
     neighbour: qualified * BRANCH,
     seed: usable * BRANCH,
+    // Public pages are not a pool we can exhaust the way an account index is,
+    // and what they hold is only known once a key is searching them. Nothing
+    // is claimed here until it has been measured.
+    google: 0,
     import: 0,
   }
 }

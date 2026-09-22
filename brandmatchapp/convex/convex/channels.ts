@@ -109,7 +109,7 @@ export type ChannelPlan = { channel: string; rank: number; why: string }
  * The reasons are written for the client to read on the screen. They say what
  * the channel does and what it is worth, never how it is implemented.
  */
-export function channelsFor(hard: HardRules | undefined, seeds: number): ChannelPlan[] {
+export function channelsFor(hard: HardRules | undefined, seeds: number, hasSearchKey = false): ChannelPlan[] {
   const lo = hard?.followersMin ?? 0
   const hi = hard?.followersMax ?? Number.MAX_SAFE_INTEGER
   const out: ChannelPlan[] = []
@@ -143,6 +143,19 @@ export function channelsFor(hard: HardRules | undefined, seeds: number): Channel
   // Instagram hashtags are not where creators worth buying post. The dial is
   // kept and validated; the channel stays off until there is a cheap source
   // of posts by real creators to point it at.
+
+  // Google, when there is a key for it. It is the only channel that reads a
+  // follower count before a profile is paid for: Instagram writes the count
+  // into its own page description, so the search result carries it. That puts
+  // the size filter in front of the money instead of behind it, which is
+  // where three quarters of the waste sits.
+  if (hasSearchKey) {
+    out.push({
+      channel: 'google',
+      rank: hi < 500_000 ? 1 : 2,
+      why: 'Public profile pages, read for their follower count before we look at anyone. Only the right sizes are ever opened.',
+    })
+  }
 
   out.push({
     channel: 'accounts',
@@ -245,7 +258,9 @@ export const plan = internalQuery({
       window: { followersMin: hard.followersMin ?? null, followersMax: hard.followersMax ?? null },
       band,
       seeds,
-      channels: channelsFor(hard, seeds),
+      channels: channelsFor(hard, seeds, Boolean(process.env.SERPER_API_KEY)),
+      /** Where the campaign sells, so a search can be read from each market. */
+      countries: campaign.extracted.countries ?? [],
       /** The words a post search runs on. Niches first, topics after. */
       topics: (campaign.extracted.niches ?? [])
         .filter((n: { enabled: boolean }) => n.enabled)
