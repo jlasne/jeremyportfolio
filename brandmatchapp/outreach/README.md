@@ -34,6 +34,14 @@ anything is clicked.
 leaves it there for a human to read. `--send` sends. `--send --approve` asks
 in the terminal, one message at a time.
 
+**A conversation is an address, never a label.** Instagram's new-message
+search box is named for messaging, so a test for "somewhere you can type"
+matches it. That cost a whole run: the agent decided it had arrived the
+moment it got to the search screen, skipped opening the chat, wrote the
+message into the search bar, and reported a draft. Nothing is written now
+until the address says `/direct/t/`, and the box is read back afterwards. A
+false success is worse than a failure.
+
 **A shrug is not a dead end.** A decisions model answers with a spread over
 every option, so "nothing here serves the goal" at 19% confidence is not a
 finding. Below `minConfidence` the spread underneath decides instead: the
@@ -139,7 +147,8 @@ Flags: `--account`, `--campaign`, `--limit`, `--templates`.
 | --- | --- |
 | Between two messages | 15 to 30 seconds, drawn each time |
 | On the profile before writing | 3 to 9 seconds |
-| Between two characters | 40 to 160 ms |
+| Message goes in | pasted at once (`entry: "type"` for keystrokes) |
+| Between two characters | 40 to 160 ms, when typing |
 | Per account per day | 50 |
 
 Two failed leads in a row stop the run. Instagram answers a run it dislikes by

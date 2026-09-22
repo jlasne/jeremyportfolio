@@ -43,7 +43,8 @@
     "typing": [
       40,
       160
-    ]
+    ],
+    "entry": "paste"
   },
   "browser": {
     "headless": false

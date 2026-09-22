@@ -13,7 +13,7 @@ import { DailyCap } from '../dist/instagram/limiter.js'
 const NEW = `<!doctype html><html><body>
 <h1>New message</h1>
 <nav><a href="#" role="link">Home</a><a href="#" role="link">Explore</a></nav>
-<input aria-label="Search input" placeholder="Search..." id="q">
+<input aria-label="Search for a message recipient" placeholder="Search..." id="q">
 <div id="results"></div>
 <button aria-label="Chat" id="chat" style="display:none">Chat</button>
 <script>
@@ -139,7 +139,7 @@ const base = {
   openrouter: { apiKey:'k', baseUrl:'http://127.0.0.1:8122', minConfidence:0.35,
     decide:{model:'typesafe/jev-1.13',endpoint:'decisions',priceIn:0.042,priceOut:0,fallbacks:[{model:'deepseek/deepseek-v4-flash-0731',endpoint:'chat',priceIn:0.04,priceOut:0.64}]}, vision:{enabled:false,model:'deepseek/deepseek-v4-flash-vision-exp',priceIn:0.22,priceOut:0.66} },
   brandmatch: { apiBase:'http://127.0.0.1:8123', apiKey:'bm-key', status:'new', savedOnly:false, markAs:'contacted' },
-  instagram: { account:'test.hq', baseUrl:'http://127.0.0.1:8121', openWith:'direct', dailyCap:50, betweenDms:[1,1], afterProfile:[0,0], typing:[1,2] },
+  instagram: { account:'test.hq', baseUrl:'http://127.0.0.1:8121', openWith:'direct', entry:'paste', dailyCap:50, betweenDms:[1,1], afterProfile:[0,0], typing:[1,2] },
   browser: { headless:true, viewport:{width:1000,height:800}, sessionRoot:'', executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome' },
   costs: { browserUsdPerHour: 0 },
   limits: { maxStepsPerGoal: 6 },
@@ -159,7 +159,21 @@ try {
   // 1. dry run
   const dry = await run(s, log, templates, { send:false, approve:false })
   console.log('dry:', JSON.stringify(dry))
-  assert.equal(dry.drafted, 2, 'both usable leads must be drafted')
+  // A draft only counts from inside a conversation. If the agent had written
+  // into the search box, whose name mentions messaging, this is where it shows.
+  assert.equal(dry.drafted, 2, `both usable leads must be drafted, got ${JSON.stringify(dry)}`)
+
+  // Drafted is not enough: it has to have been drafted in a conversation.
+  // The search box on the new-message screen is named for messaging, so a
+  // loose test for "somewhere you can type" writes the message into it and
+  // still reports a draft. The address is what cannot be faked by a label.
+  const steps = readFileSync(join(logDir, `steps-${new Date().toLocaleDateString('en-CA')}.jsonl`), 'utf8')
+    .split('\n').filter(Boolean).map((l) => JSON.parse(l))
+  const writing = steps.filter((x) => /box where a new message is typed/.test(x.goal))
+  assert.ok(writing.length > 0, 'the run must have looked for a message box')
+  for (const step of writing) {
+    assert.match(step.url, /\/direct\/t\//, `the message box was looked for at ${step.url}, not in a conversation`)
+  }
   assert.equal(unsureOnce, false, 'the low-confidence shrug must have been served')
   assert.equal(dry.sent, 0, 'a dry run must never send')
   assert.equal(marked.length, 0, 'a dry run must not move a lead')

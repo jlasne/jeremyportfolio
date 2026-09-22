@@ -69,7 +69,7 @@ const settings = {
     vision: { enabled: false, model: 'deepseek/deepseek-v4-flash-vision-exp', priceIn: 0.22, priceOut: 0.66 },
   },
   brandmatch: { apiBase: '', apiKey: '', status: 'new', savedOnly: false, markAs: 'contacted' },
-  instagram: { account: 'test', dailyCap: 50, betweenDms: [1, 1], afterProfile: [0, 0], typing: [1, 3] },
+  instagram: { account: 'test', dailyCap: 50, betweenDms: [1, 1], afterProfile: [0, 0], typing: [1, 3], entry: 'paste' },
   browser: { headless: true, viewport: { width: 1000, height: 800 }, sessionRoot: '', executablePath: process.env.CHROME_PATH },
   costs: { browserUsdPerHour: 0 },
   limits: { maxStepsPerGoal: 6 },

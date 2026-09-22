@@ -97,8 +97,18 @@ export type Settings = {
     betweenDms: Range
     /** Seconds on the profile before opening the composer. */
     afterProfile: Range
-    /** Milliseconds between two characters. */
+    /** Milliseconds between two characters, when typing one at a time. */
     typing: Range
+    /**
+     * How the message gets into the box.
+     *
+     * 'paste' puts it in at once, the way a person pasting a prepared message
+     * does, and is far less fragile than keystrokes into a box the page
+     * rebuilds as you type. 'type' sends it character by character with a
+     * different pause after each, which takes about twelve seconds a message
+     * and looks like someone writing it there and then.
+     */
+    entry: 'paste' | 'type'
   }
   browser: {
     headless: boolean
@@ -164,6 +174,7 @@ const DEFAULTS: Settings = {
     betweenDms: [15, 30],
     afterProfile: [3, 9],
     typing: [40, 160],
+    entry: 'paste',
   },
   browser: {
     headless: false,
