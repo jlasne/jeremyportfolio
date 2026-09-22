@@ -16,7 +16,7 @@ Jeremy donne le GO entre chaque. Aucun chantier ne démarre sans lui.
 
 ## Chantier 0 : le canal des voisins est-il vivant
 
-**Coût : une heure, zéro dépense. C'est le seul chantier qui décide des autres.**
+**Fait le 22/09/2026. Coût réel : 0,025 $.**
 
 ### Le problème
 
@@ -39,9 +39,49 @@ Deux lectures s'opposent. Le pipeline manuel parle d'épuisement de ses graines.
 | Le champ est vide partout | les vagues n'ont que Google comme moteur, chantier 4 devient bloquant |
 | Un réglage l'active | on le met et on continue |
 
-### Vérifié par
+### Résultat, 22/09/2026
 
-Un tableau : taille de la graine, champ présent, nombre de voisins, part de nouveaux. Sur 20 profils.
+**Le canal est vivant. Jeremy avait raison, je l'avais enterré trop vite.**
+
+Mesuré sur les 1 345 profils déjà achetés, sans rien dépenser :
+
+| taille du compte | profils | portent des voisins |
+|---|---|---|
+| sous 10k | 7 | 0% |
+| 10k à 100k | 33 | 6% |
+| 100k à 500k | 28 | 18% |
+| 500k à 1M | 25 | 40% |
+| plus d'1M | 39 | **51%** |
+
+Ces chiffres sont ceux des fiches achetées par adresse directe. Une fiche venue d'une recherche par mot-clé en porte deux à trois fois moins à taille égale.
+
+Ils recoupent ceux du pipeline manuel, qui mesure 90% de vide sous 100k et 36 à 63% au-dessus d'1M.
+
+Mon "zéro sur 214" venait d'un run composé surtout de petits comptes. L'échantillon n'était pas représentatif et la conclusion était fausse.
+
+### Le champ est une propriété du compte, pas un aléa
+
+Douze gros comptes sans voisins ont été rachetés pour 0,025 $. **Zéro s'est rempli.**
+
+Un compte qui ne porte pas de voisins n'en portera pas au second achat. Inutile d'insister, et inutile de le rafraîchir pour ça.
+
+### Le carburant réel, aujourd'hui
+
+| | |
+|---|---|
+| Comptes en base | 1 115 |
+| Porteurs de voisins | 58 |
+| Voisins distincts cités | 787 |
+| Dont inconnus de nous | **662** |
+
+Soit 11,4 candidats neufs par porteur. Les 40 porteurs au-dessus de 500k en fournissent 624 à eux seuls.
+
+### Ce que ça décide
+
+1. **Les vagues ont un moteur**, mais seulement au-dessus de 500k. Le chantier 3 tient.
+2. **Une graine se choisit sur ce qu'elle porte**, pas seulement sur sa taille. On le sait gratuitement une fois sa fiche achetée, et c'est définitif.
+3. **Pour une campagne visant 10k à 100k, ce canal ne marche pas.** Les graines de la bonne taille portent 6%, et celles qui portent suggèrent des comptes trop gros. Cette campagne-là dépend de Google, donc du chantier 4.
+4. **662 candidats neufs dorment déjà en base**, gratuits. Ils ne demandent qu'à être achetés.
 
 ---
 
@@ -61,10 +101,14 @@ Avant de lancer une recherche de fiches, on retire les handles mesurés il y a m
 
 La mesure est universelle, le verdict est par campagne. Un profil rejeté par une campagne est réévalué par la suivante, jamais racheté.
 
-**1.3 La fraîcheur.**
+**1.3 La fraîcheur, et l'index qui compose.**
 Un profil mesuré il y a plus de 30 jours devient un candidat, jamais un verdict. On rachète sa fiche avant de le juger.
 
 Un profil périmé n'est jamais rejeté sur ses vieux chiffres. Il est rafraîchi ou ignoré.
+
+C'est cette règle qui rend l'index utilisable. Chaque profil acheté reste en base pour toujours, et une campagne y trouve des candidats sans rien dépenser. Sans la règle de fraîcheur, plus l'index grossit et plus il ment. Avec elle, on ne repaie que les profils qui méritent un examen.
+
+Aujourd'hui : 1 576 comptes en base. À 100 000, une campagne y trouve 3 000 candidats gratuits.
 
 ### Vérifié par
 
@@ -91,7 +135,11 @@ Jamais de graine au plancher. Une graine à 10k suggère des comptes sous 10k, d
 L'écran montre où chaque graine tombe dans la fourchette, et signale un trou.
 
 **2.3 Les voisins de nos propres leads.**
-Un lead qualifié devient une graine de la campagne. C'est la meilleure graine possible et elle est gratuite, sa fiche est déjà payée.
+Un lead qualifié devient une graine de la campagne. Sa fiche est déjà payée, donc la graine est gratuite.
+
+Corrigé par le chantier 0 : un lead ne devient une graine que **s'il porte des voisins**. On le sait au moment où sa fiche arrive, et c'est définitif. Un lead qui n'en porte pas est un bon lead et une mauvaise graine.
+
+Il y a déjà 662 candidats neufs cités par nos 58 porteurs actuels, et personne ne les a achetés.
 
 **2.4 Graines croisées entre campagnes.**
 Un créateur qualifié pour une campagne sert de graine à une autre campagne de la même niche. Jamais hors niche.
@@ -186,7 +234,7 @@ Le nombre de profils repassés et le nombre qui passent au second essai.
 
 | # | chantier | dépend de | bloqué par |
 |---|---|---|---|
-| 0 | Le canal des voisins | rien | rien |
+| 0 | Le canal des voisins | rien | **fait le 22/09** |
 | 1 | Ne jamais payer deux fois | rien | rien |
 | 2 | Les graines | rien pour construire | rien |
 | 3 | Les vagues | 1 | rien |
