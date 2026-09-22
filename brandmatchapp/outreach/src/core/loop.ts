@@ -34,6 +34,14 @@ export type PursueOptions = {
    * and stops on a fact instead of on an opinion.
    */
   until?: (state: PageState) => boolean
+  /**
+   * A rule tried before the model, returning the option to take or null.
+   *
+   * Where the page already holds the answer, asking is worse than reading:
+   * it costs a call and it can be wrong. Picking a person out of a list of
+   * near-identical handles is the case that proved it.
+   */
+  prefer?: (state: PageState) => number | null
 }
 
 export async function pursue(
@@ -81,14 +89,12 @@ export async function pursue(
     }
     settled = false
 
-    const state: PageState = { ...full, candidates: full.candidates.filter((c) => !dead.has(c.name)) }
-    if (state.candidates.length === 0) {
-      const why = dead.size
-        ? `nothing left to try: ${[...dead].map((d) => `"${d}"`).join(', ')} changed nothing`
-        : 'the page offers nothing to click or type into'
-      log.step({ at: new Date().toISOString(), goal, url: state.url, candidates: 0, decision: null, error: why })
-      return { reached: false, why, steps: step + 1, decideCalls, visionCalls, usage, lastBox }
-    }
+    // With nothing to type, a box is not an option. Offered one anyway, a
+    // model asked to pick a person out of eight near-identical handles took
+    // the search box instead, and a text box the loop had no text for used to
+    // count as arriving.
+    const usable = full.candidates.filter((c) => !dead.has(c.name) && (opts.text !== undefined || !c.editable))
+    const state: PageState = { ...full, candidates: usable }
     const record: Step = {
       at: new Date().toISOString(),
       goal,
@@ -100,10 +106,35 @@ export async function pursue(
       ...(dead.size ? { dropped: [...dead] } : {}),
     }
 
-    if (opts.until?.(state)) {
+    // Asked of the whole page, never of the shortened list of options. What is
+    // true of the page does not change because an option was withheld.
+    if (opts.until?.(full)) {
       record.reachedWithoutModel = true
       log.step(record)
       return { reached: true, why: 'the page already shows the goal', steps: step, decideCalls, visionCalls, usage, lastBox }
+    }
+
+    if (state.candidates.length === 0) {
+      const why = dead.size
+        ? `nothing left to try: ${[...dead].map((d) => `"${d}"`).join(', ')} changed nothing`
+        : 'the page offers nothing to click or type into'
+      log.step({ at: new Date().toISOString(), goal, url: state.url, candidates: 0, decision: null, error: why })
+      return { reached: false, why, steps: step + 1, decideCalls, visionCalls, usage, lastBox }
+    }
+
+    const ruled = opts.prefer?.(state)
+    if (ruled !== null && ruled !== undefined && state.candidates.some((c) => c.i === ruled)) {
+      const label = state.candidates.find((c) => c.i === ruled)?.name ?? `item ${ruled}`
+      record.decision = { kind: 'click', i: ruled, why: 'matched by rule', source: 'text', usage: ZERO }
+      log.step(record)
+      try {
+        await browser.click(ruled)
+      } catch (err) {
+        return { reached: false, why: `action failed: ${err}`, steps: step + 1, decideCalls, visionCalls, usage, lastBox }
+      }
+      before = { signature: signatureOf(full), did: `clicking "${label}"`, label }
+      await browser.settle(2500)
+      continue
     }
 
     let choice
@@ -150,10 +181,7 @@ export async function pursue(
         before = { signature: signatureOf(full), did: `clicking "${label}"`, label }
       } else {
         lastBox = choice.i
-        if (opts.text === undefined) {
-          return { reached: true, why: 'text box found', steps: step + 1, decideCalls, visionCalls, usage, lastBox }
-        }
-        await browser.type(choice.i, opts.text)
+        await browser.type(choice.i, opts.text!)
         return { reached: true, why: 'text written', steps: step + 1, decideCalls, visionCalls, usage, lastBox }
       }
     } catch (err) {

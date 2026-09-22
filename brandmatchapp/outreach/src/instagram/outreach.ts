@@ -22,6 +22,36 @@ const GOAL_BOX = 'Find the box where a new message is typed.'
 const goalStart = (handle: string) => `Pick the account @${handle} from the results and open the chat with them.`
 
 /**
+ * The result that is this exact account, by reading rather than by asking.
+ *
+ * A search for sylv.putz returns sylvi.putz, sylviputz, sylvia.putz,
+ * sylvie.putz and four more. Asked to choose, the model spread itself over
+ * the lot at 28% and took the search box. The handle is right there in the
+ * row and it is exact, so this is a thing to read, not a judgement to make.
+ *
+ * Only a single match counts. Two rows carrying the same handle is not a
+ * case for guessing, and the model gets it instead.
+ */
+export function exactMatch(handle: string) {
+  const needle = handle.toLowerCase()
+  return (state: { candidates: { i: number; name: string; editable: boolean }[] }): number | null => {
+    const hits = state.candidates.filter((c) => !c.editable && holds(c.name.toLowerCase(), needle))
+    return hits.length === 1 ? hits[0]!.i : null
+  }
+}
+
+/** The handle as a whole word, so sylv.putz never matches inside sylv.putz2. */
+function holds(haystack: string, needle: string): boolean {
+  const edge = (ch: string | undefined) => ch === undefined || !/[a-z0-9._]/.test(ch)
+  let at = haystack.indexOf(needle)
+  while (at !== -1) {
+    if (edge(haystack[at - 1]) && edge(haystack[at + needle.length])) return true
+    at = haystack.indexOf(needle, at + 1)
+  }
+  return false
+}
+
+/**
  * The conversation is open when the thread has its own address. Nothing else
  * counts.
  *
@@ -252,7 +282,10 @@ async function viaInbox(browser: Browser, s: Settings, log: Log, handle: string)
   // The results need a moment, and they arrive without a page change.
   await browser.settle(2500)
 
-  const start = await pursue(browser, goalStart(handle), s, log, { until: inThread })
+  const start = await pursue(browser, goalStart(handle), s, log, {
+    until: inThread,
+    prefer: exactMatch(handle),
+  })
   return {
     ...start,
     steps: search.steps + start.steps,

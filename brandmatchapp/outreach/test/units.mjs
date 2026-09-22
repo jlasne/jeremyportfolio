@@ -7,6 +7,7 @@ import { parse } from '../dist/core/decide.js'
 import { DailyCap } from '../dist/instagram/limiter.js'
 import { pick } from '../dist/instagram/pacing.js'
 import { findChrome } from '../dist/config/settings.js'
+import { exactMatch } from '../dist/instagram/outreach.js'
 
 const t = { leadId: 'l1', handle: 'ana.lifts', name: 'Ana Ruiz', followers: 24300, bio: '', note: '', tags: [], score: 2.5 }
 
@@ -55,6 +56,40 @@ for (let n = 0; n < 200; n++) {
   const v = pick([20, 90])
   assert.ok(v >= 20 && v <= 90)
 }
+// Picking the right account out of Instagram's own search results. This is
+// the exact list it returned for sylv.putz, on which the model spread itself
+// across eight near-identical handles at 28% and took the search box.
+const rows = [
+  'jeremy_lasne', 'Back', 'Search', 'Clear search',
+  'sylvie | online fitness coach sylv.putz i like the gym & helping women build the',
+  'Sylvi sylvi.putz', 'Sylvi Putz sylviputz', 'Sylvia Putz sylvia.putz Humorvoll',
+  'Sylvie Pütz sylvie.putz', 'Sylvia Pütz sylvia.puetz62', 'Sylvia Pütz sylvia2.3',
+  'Sylvia Pütz sylvia.puetz', 'Send message',
+]
+const results = { candidates: rows.map((name, i) => ({ i, name, editable: i === 2 })) }
+assert.equal(exactMatch('sylv.putz')(results), 4, 'the one row carrying the exact handle')
+
+// The single-result case, from the same run.
+const onlyOne = {
+  candidates: ['jeremy_lasne', 'Back', 'Search', 'Clear search',
+    'Alassane MAIGA pheno_la_legende Fitness Atthlete - Fitness model Core & Aestheti',
+    'Send message'].map((name, i) => ({ i, name, editable: i === 2 })),
+}
+assert.equal(exactMatch('pheno_la_legende')(onlyOne), 4)
+
+// A handle that is a prefix of another must not match it.
+const prefix = { candidates: [{ i: 0, name: 'Someone sylv.putz2', editable: false }] }
+assert.equal(exactMatch('sylv.putz')(prefix), null, 'sylv.putz must not match inside sylv.putz2')
+
+// Nothing there, and two of the same, both go back to the model.
+assert.equal(exactMatch('nobody.here')(results), null)
+const twice = { candidates: [
+  { i: 0, name: 'A sylv.putz', editable: false },
+  { i: 1, name: 'B sylv.putz', editable: false },
+]}
+assert.equal(exactMatch('sylv.putz')(twice), null, 'two rows with one handle is not a case for guessing')
+console.log('account matching holds on the real search results')
+
 // Chrome detection: either it found one that is really there, or none.
 import { existsSync } from 'node:fs'
 const chrome = findChrome()

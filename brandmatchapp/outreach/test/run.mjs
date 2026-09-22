@@ -20,11 +20,17 @@ const NEW = `<!doctype html><html><body>
 const q = document.getElementById('q')
 q.addEventListener('input', () => {
   const v = q.value.trim()
-  document.getElementById('results').innerHTML = v
-    ? '<div role="button" id="hit">' + v + '</div>'
-    : ''
-  const hit = document.getElementById('hit')
-  if (hit) hit.onclick = () => { document.getElementById('chat').style.display = 'block' }
+  if (!v) { document.getElementById('results').innerHTML = ''; return }
+  // Near-identical handles, the way Instagram answers a real search. Only one
+  // of these is the account asked for.
+  const rows = ['Someone ' + v + '2', 'Another ' + v.replace('.', '') , 'The one ' + v, 'Not it ' + v + '_x']
+  document.getElementById('results').innerHTML = rows
+    .map((r, n) => '<div role="button" data-n="' + n + '">' + r + '</div>').join('')
+  for (const el of document.querySelectorAll('#results div')) {
+    el.onclick = () => {
+      if (el.textContent.startsWith('The one ')) window.location.href = '/direct/t/1'
+    }
+  }
 })
 document.getElementById('chat').onclick = () => { window.location.href = '/direct/t/1' }
 </script></body></html>`
@@ -171,6 +177,13 @@ try {
     .split('\n').filter(Boolean).map((l) => JSON.parse(l))
   const writing = steps.filter((x) => /box where a new message is typed/.test(x.goal))
   assert.ok(writing.length > 0, 'the run must have looked for a message box')
+
+  // The account is picked by reading the handle, not by asking. Four rows
+  // carry it as a substring and exactly one carries it whole.
+  const picking = steps.filter((x) => /Pick the account/.test(x.goal) && x.decision)
+  assert.ok(picking.length > 0, 'the run must have picked an account')
+  assert.equal(picking[0].decision.why, 'matched by rule', 'the exact handle must be read, not guessed')
+  assert.equal(picking[0].decision.usage.usd, 0, 'reading the page costs nothing')
   for (const step of writing) {
     assert.match(step.url, /\/direct\/t\//, `the message box was looked for at ${step.url}, not in a conversation`)
   }

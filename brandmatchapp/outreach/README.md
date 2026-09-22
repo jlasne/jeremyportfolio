@@ -34,6 +34,17 @@ anything is clicked.
 leaves it there for a human to read. `--send` sends. `--send --approve` asks
 in the terminal, one message at a time.
 
+**What the page already answers is read, not asked.** Instagram's search for
+`sylv.putz` returns `sylvi.putz`, `sylviputz`, `sylvia.putz`, `sylvie.putz`
+and four more. Asked to choose, the model spread itself across the lot at 28%
+confidence and picked the search box. The handle is in the row and it is
+exact, so one row carrying it whole is read straight off the page, for free.
+Two rows carrying it, or none, and the model gets the question after all.
+
+**With nothing to type, a box is not an option.** It used to be offered at
+every step, and a text box the loop had no text for counted as arriving. That
+is how a message went into a search bar.
+
 **A conversation is an address, never a label.** Instagram's new-message
 search box is named for messaging, so a test for "somewhere you can type"
 matches it. That cost a whole run: the agent decided it had arrived the
