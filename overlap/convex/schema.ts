@@ -161,4 +161,45 @@ export default defineSchema({
     today: v.string(),
     updatedAt: v.number(),
   }).index("by_key", ["key"]),
+
+  /* x.jeremylasne.com — the content manager. One document per day: what
+     Jeremy logged, the answers he gave the questions, whether he filled
+     /bio, and the drafts the day produced. Written only with the
+     passphrase in X_PASSPHRASE; there is exactly one author. */
+  xDays: defineTable({
+    day: v.string(),
+    /* the 30-day /bio challenge, ticked on the dashboard */
+    bioDone: v.boolean(),
+    /* everything said today, oldest first. `q` is the question it answers
+       when the entry came from a prompt rather than a free note. */
+    entries: v.array(
+      v.object({
+        at: v.number(),
+        slot: v.string(),
+        q: v.optional(v.string()),
+        text: v.string(),
+      }),
+    ),
+    /* three X posts and one video script, written from the entries */
+    drafts: v.array(
+      v.object({
+        at: v.number(),
+        kind: v.string(),
+        label: v.string(),
+        body: v.string(),
+      }),
+    ),
+    draftsAt: v.optional(v.number()),
+    /* which of the three daily mails already went out: "10", "14", "17" */
+    mailed: v.array(v.string()),
+    updatedAt: v.number(),
+  }).index("by_day", ["day"]),
+
+  /* The facts sheet both prompts read: "1 deal signed", "2 in
+     negotiation". One document, key "facts". Edited on the dashboard. */
+  xFacts: defineTable({
+    key: v.string(),
+    items: v.array(v.object({ label: v.string(), value: v.string() })),
+    updatedAt: v.number(),
+  }).index("by_key", ["key"]),
 });

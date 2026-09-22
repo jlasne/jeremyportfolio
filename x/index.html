@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>x · content manager</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* ── X's own palette: black, one blue, the greys between ────────────── */
+:root {
+  --bg: #000;
+  --card: #16181c;
+  --hover: #1d1f23;
+  --line: #2f3336;
+  --ink: #e7e9ea;
+  --dim: #71767b;
+  --blue: #1d9bf0;
+  --blue-dark: #1a8cd8;
+  --good: #00ba7c;
+  --bad: #f4212e;
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html { background: var(--bg); color-scheme: dark; -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 15px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button, input, textarea, select { font: inherit; color: inherit; }
+::selection { background: var(--blue); color: #fff; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.mono { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.hide { display: none !important; }
+
+/* ── pill buttons ───────────────────────────────────────────────────── */
+.btn {
+  background: var(--ink); color: #000; border: 0; border-radius: 9999px;
+  font: 700 15px/1 var(--sans); padding: 12px 20px; cursor: pointer; transition: opacity .15s;
+}
+.btn:hover { opacity: .85; }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn.blue { background: var(--blue); color: #fff; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn.ghost:hover { background: var(--hover); opacity: 1; }
+.btn.sm { font-size: 13px; padding: 8px 14px; }
+
+/* ── the gate ───────────────────────────────────────────────────────── */
+#gate { min-height: 100dvh; display: grid; place-items: center; padding: 24px; }
+#gate .inner { width: 100%; max-width: 330px; }
+.logo { font: 800 44px/1 var(--sans); letter-spacing: -.03em; margin: 0 0 28px; }
+#gate h1 { font: 800 28px/1.2 var(--sans); letter-spacing: -.02em; margin: 0 0 24px; }
+.field {
+  width: 100%; background: transparent; border: 1px solid var(--line); border-radius: 6px;
+  padding: 16px 12px; font-size: 16px; margin: 0 0 14px;
+}
+.field:focus { border-color: var(--blue); outline: none; }
+#gate .btn { width: 100%; padding: 14px; }
+.err { color: var(--bad); font-size: 13px; min-height: 18px; margin: 10px 0 0; }
+.shake { animation: shake .3s; }
+@keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+/* ── shell: rail, column, aside ─────────────────────────────────────── */
+#app { display: grid; grid-template-columns: 1fr minmax(0, 600px) 1fr; max-width: 1280px; margin: 0 auto; }
+.rail { padding: 10px 12px; position: sticky; top: 0; height: 100dvh; display: flex; flex-direction: column; }
+.rail .logo { font-size: 30px; padding: 6px 12px; margin: 0 0 10px; }
+.nav { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.nav button {
+  background: transparent; border: 0; border-radius: 9999px; cursor: pointer;
+  font: 500 19px/1 var(--sans); padding: 12px 16px; color: var(--ink); display: flex; gap: 14px; align-items: center;
+}
+.nav button:hover { background: var(--hover); }
+.nav svg { width: 25px; height: 25px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.nav button[aria-current="page"] svg { stroke-width: 2.4; }
+.nav button[aria-current="page"] { font-weight: 800; }
+.nav .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--blue); }
+.rail .foot { margin-top: auto; padding: 12px 16px; }
+
+.col { border-left: 1px solid var(--line); border-right: 1px solid var(--line); min-height: 100dvh; }
+.top {
+  position: sticky; top: 0; z-index: 5; backdrop-filter: blur(12px);
+  background: rgba(0, 0, 0, .72); border-bottom: 1px solid var(--line); padding: 14px 16px;
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+}
+.top h2 { font: 800 20px/1.2 var(--sans); letter-spacing: -.01em; margin: 0; }
+.top .sub { font-size: 13px; color: var(--dim); margin: 2px 0 0; }
+
+.aside { padding: 12px 16px; position: sticky; top: 0; height: 100dvh; overflow: auto; }
+.aside .box { background: var(--card); border-radius: 16px; padding: 14px 16px; margin: 0 0 16px; }
+.aside h3 { font: 800 19px/1.2 var(--sans); margin: 0 0 12px; }
+
+@media (max-width: 1000px) {
+  #app { grid-template-columns: 88px minmax(0, 1fr); }
+  .rail .nav button span { display: none; }
+  .aside { display: none; }
+}
+@media (max-width: 620px) {
+  #app { grid-template-columns: 1fr; }
+  .rail {
+    position: fixed; bottom: 0; left: 0; right: 0; top: auto; height: auto; z-index: 20;
+    background: rgba(0, 0, 0, .92); backdrop-filter: blur(12px); border-top: 1px solid var(--line); padding: 6px;
+  }
+  .rail .logo, .rail .foot { display: none; }
+  .nav { flex-direction: row; justify-content: space-around; }
+  .nav button { font-size: 12px; flex-direction: column; gap: 4px; padding: 8px 10px; }
+  .nav button span { display: block !important; }
+  .col { border: 0; padding-bottom: 78px; }
+}
+
+/* ── composer ───────────────────────────────────────────────────────── */
+.compose { border-bottom: 1px solid var(--line); padding: 14px 16px; }
+.compose textarea {
+  width: 100%; background: transparent; border: 0; resize: none; font-size: 19px; line-height: 1.4;
+  min-height: 56px; padding: 6px 0; outline: none;
+}
+.compose textarea::placeholder { color: var(--dim); }
+.compose .bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 0 0; border-top: 1px solid var(--line); }
+.q { font: 500 14px/1.4 var(--sans); color: var(--blue); margin: 0 0 8px; display: flex; gap: 8px; }
+.q b { color: var(--blue); font-weight: 700; }
+
+/* ── cards and rows ─────────────────────────────────────────────────── */
+.row { border-bottom: 1px solid var(--line); padding: 14px 16px; }
+.row:hover { background: #08090a; }
+.row .meta { display: flex; gap: 8px; align-items: center; margin: 0 0 4px; min-height: 22px; }
+.row .body { white-space: pre-wrap; word-break: break-word; }
+.row .qline { font-size: 13px; color: var(--dim); margin: 0 0 6px; }
+.row .kill { background: transparent; border: 0; color: var(--dim); cursor: pointer; font-size: 13px; padding: 4px 8px; border-radius: 9999px; margin-left: auto; opacity: 0; transition: opacity .15s; }
+.row:hover .kill, .row .kill:focus-visible { opacity: 1; }
+@media (hover: none) { .row .kill { opacity: 1; } }
+.row .kill:hover { color: var(--bad); background: rgba(244, 33, 46, .1); }
+
+.check { display: flex; gap: 12px; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.check .tick {
+  width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--line); background: transparent;
+  cursor: pointer; display: grid; place-items: center; flex: none; color: transparent; font-size: 13px; font-weight: 800;
+}
+.check .tick[aria-pressed="true"] { background: var(--good); border-color: var(--good); color: #000; }
+.check .t { flex: 1; }
+.check .t b { display: block; font-weight: 700; }
+.check .t small { color: var(--dim); }
+
+.draft { border-bottom: 1px solid var(--line); padding: 16px; }
+.draft .head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 0 0 10px; }
+.draft .label { font: 700 12px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--blue); }
+.draft pre {
+  margin: 0; white-space: pre-wrap; word-break: break-word; font: 400 16px/1.55 var(--sans);
+  background: var(--card); border-radius: 14px; padding: 14px 16px;
+}
+.draft .tools { display: flex; gap: 8px; align-items: center; margin: 10px 0 0; }
+.count { font: 500 12px/1 var(--mono); color: var(--dim); }
+.count.over { color: var(--bad); }
+
+.empty { padding: 40px 16px; text-align: center; color: var(--dim); }
+.fact { display: flex; gap: 8px; margin: 0 0 8px; }
+.fact input { flex: 1; min-width: 0; background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: 9px 10px; font-size: 14px; }
+.fact input:focus { border-color: var(--blue); outline: none; }
+.fact .kill { background: transparent; border: 0; color: var(--dim); cursor: pointer; padding: 0 6px; }
+.fact .kill:hover { color: var(--bad); }
+.stat { display: flex; justify-content: space-between; padding: 7px 0; font-size: 14px; }
+.stat span:last-child { font-family: var(--mono); font-size: 13px; }
+.toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 50;
+  background: var(--blue); color: #fff; font: 500 14px/1 var(--sans); padding: 13px 20px; border-radius: 6px;
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.toast.on { opacity: 1; }
+.spin { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3); border-top-color: currentColor; border-radius: 50%; animation: sp .7s linear infinite; }
+@keyframes sp { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+
+<!-- ── the gate ─────────────────────────────────────────────────────── -->
+<section id="gate">
+  <div class="inner">
+    <div class="logo">𝕏</div>
+    <h1>The content manager.</h1>
+    <form id="gateForm">
+      <input class="field" id="pass" type="password" placeholder="Passphrase" autocomplete="current-password" required>
+      <button class="btn" type="submit">Log in</button>
+      <p class="err" id="gateErr"></p>
+    </form>
+  </div>
+</section>
+
+<!-- ── the app ──────────────────────────────────────────────────────── -->
+<main id="app" class="hide">
+  <nav class="rail">
+    <div class="logo">𝕏</div>
+    <div class="nav" id="nav">
+      <button data-tab="today" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg><span>Today</span></button>
+      <button data-tab="drafts"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.1 5.3L19.5 10l-5.4 1.7L12 17l-2.1-5.3L4.5 10l5.4-1.7z"/><path d="M18.5 15.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg><span>Drafts</span></button>
+      <button data-tab="archive"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h7l2 2.5h9V19H3z"/><path d="M3 10h18"/></svg><span>Archive</span></button>
+      <button data-tab="facts"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16l-7-4-7 4z"/></svg><span>Facts</span></button>
+    </div>
+    <div class="foot"><button class="btn ghost sm" id="out">Log out</button></div>
+  </nav>
+
+  <section class="col">
+    <header class="top">
+      <div><h2 id="title">Today</h2><p class="sub" id="sub"></p></div>
+      <button class="btn blue sm" id="write">Write the day</button>
+    </header>
+    <div id="view"></div>
+  </section>
+
+  <aside class="aside">
+    <div class="box">
+      <h3>The day</h3>
+      <div id="side"></div>
+    </div>
+    <div class="box">
+      <h3>The rhythm</h3>
+      <div class="stat"><span>10:00 Paris</span><span>what you're after</span></div>
+      <div class="stat"><span>14:00 Paris</span><span>what happened</span></div>
+      <div class="stat"><span>17:00 Paris</span><span>the day + drafts</span></div>
+      <p style="color:var(--dim);font-size:13px;margin:10px 0 0">Every mail carries the whole day. The inbox is the archive.</p>
+      <button class="btn ghost sm" id="test" style="margin:12px 0 0">Send a test mail</button>
+    </div>
+  </aside>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="config.js"></script>
+<script type="module">
+/* ─────────────────────────────────────────────────────────────────────
+   x.jeremylasne.com — one page, no build step.
+
+   Everything goes through the same Convex door /overlap uses: {op, args}
+   in, {ok, value} out. The passphrase rides on every call and lives in
+   localStorage, because there is one author and one device at a time.
+   ───────────────────────────────────────────────────────────────────── */
+
+const URL_ = window.X_CONVEX_URL || "";
+const KEY = "x.pass";
+const $ = (s, r = document) => r.querySelector(s);
+
+let pass = localStorage.getItem(KEY) || "";
+let state = null;          /* today, from x.day */
+let tab = "today";
+let archive = null;        /* the history list, loaded once per visit */
+let open_ = null;          /* a past day being read */
+
+async function call(op, args = {}) {
+  if (!URL_) throw new Error("Set window.X_CONVEX_URL in config.js");
+  const res = await fetch(URL_ + "/overlap", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ op, args: { passphrase: pass, ...args } }),
+  });
+  const body = await res.json().catch(() => ({ ok: false, error: "The server answered something unreadable" }));
+  if (!body.ok) throw new Error(body.error || "Something went wrong");
+  return body.value;
+}
+
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const clock = (at) => new Date(at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });
+const longDate = (day) => new Date(day + "T12:00:00Z").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
+
+let toastT;
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg; t.classList.add("on");
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 2200);
+}
+
+/* ── the gate ───────────────────────────────────────────────────────── */
+
+$("#gateForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const tried = $("#pass").value;
+  $("#gateErr").textContent = "";
+  try {
+    pass = tried;
+    await call("x.unlock");
+    localStorage.setItem(KEY, tried);
+    await start();
+  } catch (err) {
+    pass = "";
+    $("#gateErr").textContent = err.message;
+    $("#gate .inner").classList.remove("shake");
+    void $("#gate .inner").offsetWidth;
+    $("#gate .inner").classList.add("shake");
+  }
+});
+
+$("#out").addEventListener("click", () => {
+  localStorage.removeItem(KEY);
+  location.reload();
+});
+
+async function start() {
+  $("#gate").classList.add("hide");
+  $("#app").classList.remove("hide");
+  await refresh();
+}
+
+async function refresh() {
+  state = await call("x.day");
+  draw();
+}
+
+/* ── which questions are due ────────────────────────────────────────── */
+
+/** The slot whose questions are on screen: the last one that has come round. */
+function slotNow() {
+  const h = state?.hour ?? 0;
+  return h >= 17 ? "17" : h >= 14 ? "14" : h >= 10 ? "10" : "10";
+}
+
+/* Skipped questions are put aside for the session, not written down: the
+   log is what the model reads, and "(skipped)" is not a thing Jeremy said. */
+const SKIP = "x.skip." + new Date().toISOString().slice(0, 10);
+const skipped = new Set(JSON.parse(sessionStorage.getItem(SKIP) || "[]"));
+
+/** A question already answered, or put aside, drops off the list. */
+function dueQuestions() {
+  const slot = slotNow();
+  const asked = new Set((state.entries || []).filter((e) => e.q).map((e) => e.q));
+  return (state.questions?.[slot] || [])
+    .filter((q) => !asked.has(q) && !skipped.has(q))
+    .map((q) => ({ q, slot }));
+}
+
+/* ── drawing ────────────────────────────────────────────────────────── */
+
+function draw() {
+  $("#nav").querySelectorAll("button").forEach((b) =>
+    b.setAttribute("aria-current", b.dataset.tab === tab ? "page" : "false"));
+  $("#write").classList.toggle("hide", tab !== "today" && tab !== "drafts");
+  const v = $("#view");
+  if (tab === "today") { $("#title").textContent = "Today"; $("#sub").textContent = longDate(state.today); v.innerHTML = today(); }
+  if (tab === "drafts") { $("#title").textContent = "Drafts"; $("#sub").textContent = state.draftsAt ? "written " + clock(state.draftsAt) : "not written yet"; v.innerHTML = drafts(state.drafts); }
+  if (tab === "archive") { $("#title").textContent = "Archive"; $("#sub").textContent = "every day logged"; v.innerHTML = archiveView(); }
+  if (tab === "facts") { $("#title").textContent = "Facts"; $("#sub").textContent = "what both prompts are allowed to claim"; v.innerHTML = factsView(); }
+  side();
+  wire();
+}
+
+function today() {
+  const due = dueQuestions();
+  const q = due[0];
+  return `
+    <div class="compose">
+      ${q ? `<p class="q"><b>${esc(q.slot)}:00</b> ${esc(q.q)}</p>` : ""}
+      <textarea id="box" placeholder="${q ? "Answer it." : "What's happening?"}" rows="2"></textarea>
+      <div class="bar">
+        <span class="mono" id="hint">${due.length ? due.length + " question" + (due.length > 1 ? "s" : "") + " left" : "all answered"}</span>
+        <span style="display:flex;gap:8px">
+          ${q ? `<button class="btn ghost sm" id="skip">Skip</button>` : ""}
+          <button class="btn sm" id="save" data-q="${q ? esc(q.q) : ""}" data-slot="${q ? esc(q.slot) : "free"}">Log it</button>
+        </span>
+      </div>
+    </div>
+
+    <div class="check">
+      <button class="tick" id="bio" aria-pressed="${state.bioDone}" aria-label="Mark /bio filled">✓</button>
+      <div class="t"><b>Fill /bio today</b><small>30 day challenge · <a href="https://www.jeremylasne.com/bio/" target="_blank" rel="noopener">open the tracker</a></small></div>
+    </div>
+
+    ${state.entries.length
+      ? [...state.entries].reverse().map((e) => `
+        <article class="row">
+          <div class="meta">
+            <span class="mono">${clock(e.at)}</span>
+            ${e.slot !== "free" ? `<span class="mono" style="color:var(--blue)">${esc(e.slot)}:00</span>` : ""}
+            <button class="kill" data-at="${e.at}" aria-label="Delete">✕</button>
+          </div>
+          ${e.q ? `<p class="qline">${esc(e.q)}</p>` : ""}
+          <div class="body">${esc(e.text)}</div>
+        </article>`).join("")
+      : `<p class="empty">Nothing logged yet.<br>Answer the question above, or write whatever happened.</p>`}
+  `;
+}
+
+function drafts(list, readOnly = false) {
+  if (!list || !list.length)
+    return `<p class="empty">No drafts yet.<br>${readOnly ? "This day was never written." : "Log your day, then hit <b>Write the day</b>."}</p>`;
+  return list.map((d, i) => {
+    const n = [...d.body].length;
+    const over = d.kind === "post" && n > 280;
+    return `
+      <article class="draft">
+        <div class="head">
+          <span class="label">${esc(d.label)}</span>
+          <span class="count ${over ? "over" : ""}">${d.kind === "post" ? n + " / 280" : n + " chars"}</span>
+        </div>
+        <pre id="d${i}">${esc(d.body)}</pre>
+        <div class="tools">
+          <button class="btn sm copy" data-i="${i}">Copy</button>
+          ${d.kind === "post"
+            ? `<a class="btn ghost sm" style="text-decoration:none" target="_blank" rel="noopener" href="https://x.com/compose/post?text=${encodeURIComponent(d.body)}">Open in X</a>`
+            : `<a class="btn ghost sm" style="text-decoration:none" target="_blank" rel="noopener" href="https://studio.youtube.com">Open Studio</a>`}
+        </div>
+      </article>`;
+  }).join("");
+}
+
+function archiveView() {
+  if (open_) {
+    return `
+      <div class="row" style="display:flex;justify-content:space-between;align-items:center">
+        <b>${esc(longDate(open_.day))}</b>
+        <button class="btn ghost sm" id="back">Back</button>
+      </div>
+      ${open_.entries.length
+        ? open_.entries.map((e) => `
+          <article class="row">
+            <div class="meta"><span class="mono">${clock(e.at)}</span></div>
+            ${e.q ? `<p class="qline">${esc(e.q)}</p>` : ""}
+            <div class="body">${esc(e.text)}</div>
+          </article>`).join("")
+        : `<p class="empty">Nothing was logged that day.</p>`}
+      ${drafts(open_.drafts, true)}
+    `;
+  }
+  if (!archive) return `<p class="empty">Loading…</p>`;
+  if (!archive.length) return `<p class="empty">Nothing yet. Today is day one.</p>`;
+  return archive.map((d) => `
+    <article class="row" style="cursor:pointer" data-day="${esc(d.day)}">
+      <div class="meta">
+        <b>${esc(longDate(d.day))}</b>
+        <span class="mono">${d.entries} logged · ${d.words} words</span>
+        ${d.bioDone ? `<span class="mono" style="color:var(--good)">bio ✓</span>` : ""}
+        ${d.drafts ? `<span class="mono" style="color:var(--blue)">${d.drafts} drafts</span>` : ""}
+      </div>
+      <div class="body" style="color:var(--dim)">${esc(d.first)}</div>
+    </article>`).join("");
+}
+
+function factsView() {
+  const rows = (state.facts.length ? state.facts : [{ label: "", value: "" }]);
+  return `
+    <div class="row">
+      <p style="color:var(--dim);margin:0 0 14px">The only numbers the prompts may claim. Everything else gets a placeholder.</p>
+      <div id="rows">
+        ${rows.map((f, i) => `
+          <div class="fact">
+            <input placeholder="Deals signed" value="${esc(f.label)}" data-k="label" data-i="${i}">
+            <input placeholder="1" value="${esc(f.value)}" data-k="value" data-i="${i}">
+            <button class="kill" data-del="${i}" aria-label="Remove">✕</button>
+          </div>`).join("")}
+      </div>
+      <div style="display:flex;gap:8px;margin:14px 0 0">
+        <button class="btn ghost sm" id="addFact">Add a fact</button>
+        <button class="btn sm" id="saveFacts">Save</button>
+      </div>
+    </div>`;
+}
+
+function side() {
+  const words = state.entries.reduce((n, e) => n + e.text.trim().split(/\s+/).filter(Boolean).length, 0);
+  $("#side").innerHTML = `
+    <div class="stat"><span>Entries</span><span>${state.entries.length}</span></div>
+    <div class="stat"><span>Words</span><span>${words}</span></div>
+    <div class="stat"><span>Questions left</span><span>${dueQuestions().length}</span></div>
+    <div class="stat"><span>/bio</span><span style="color:${state.bioDone ? "var(--good)" : "var(--dim)"}">${state.bioDone ? "filled" : "open"}</span></div>
+    <div class="stat"><span>Mails sent</span><span>${state.mailed.length} / 3</span></div>
+    <div class="stat"><span>Drafts</span><span>${state.drafts.length}</span></div>`;
+}
+
+/* ── wiring, redone on every draw ───────────────────────────────────── */
+
+function wire() {
+  const v = $("#view");
+
+  const box = $("#box");
+  if (box) {
+    box.focus();
+    box.addEventListener("input", () => { box.style.height = "auto"; box.style.height = box.scrollHeight + "px"; });
+    box.addEventListener("keydown", (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); $("#save").click(); }
+    });
+  }
+
+  $("#save")?.addEventListener("click", async (e) => {
+    const text = $("#box").value.trim();
+    if (!text) return;
+    const b = e.currentTarget;
+    b.disabled = true;
+    try {
+      await call("x.log", { day: state.today, text, slot: b.dataset.slot, q: b.dataset.q || undefined });
+      await refresh();
+      toast("Logged");
+    } catch (err) { toast(err.message); b.disabled = false; }
+  });
+
+  $("#skip")?.addEventListener("click", () => {
+    skipped.add($("#save").dataset.q);
+    sessionStorage.setItem(SKIP, JSON.stringify([...skipped]));
+    draw();
+  });
+
+  $("#bio")?.addEventListener("click", async (e) => {
+    const on = e.currentTarget.getAttribute("aria-pressed") === "true";
+    try { await call("x.bio", { day: state.today, done: !on }); await refresh(); toast(on ? "/bio reopened" : "/bio ticked"); }
+    catch (err) { toast(err.message); }
+  });
+
+  v.querySelectorAll(".row .kill[data-at]").forEach((b) =>
+    b.addEventListener("click", async () => {
+      try { await call("x.unlog", { day: state.today, at: Number(b.dataset.at) }); await refresh(); }
+      catch (err) { toast(err.message); }
+    }));
+
+  v.querySelectorAll(".copy").forEach((b) =>
+    b.addEventListener("click", async () => {
+      const list = open_ ? open_.drafts : state.drafts;
+      try { await navigator.clipboard.writeText(list[Number(b.dataset.i)].body); toast("Copied"); }
+      catch { toast("Select it and copy by hand"); }
+    }));
+
+  v.querySelectorAll("[data-day]").forEach((r) =>
+    r.addEventListener("click", async () => {
+      try { open_ = await call("x.readDay", { day: r.dataset.day }); draw(); }
+      catch (err) { toast(err.message); }
+    }));
+
+  $("#back")?.addEventListener("click", () => { open_ = null; draw(); });
+
+  $("#addFact")?.addEventListener("click", () => {
+    state.facts = [...readFacts(), { label: "", value: "" }];
+    draw();
+  });
+  v.querySelectorAll("[data-del]").forEach((b) =>
+    b.addEventListener("click", () => {
+      const f = readFacts(); f.splice(Number(b.dataset.del), 1);
+      state.facts = f.length ? f : [{ label: "", value: "" }];
+      draw();
+    }));
+  $("#saveFacts")?.addEventListener("click", async () => {
+    try { state.facts = await call("x.setFacts", { items: readFacts() }); draw(); toast("Facts saved"); }
+    catch (err) { toast(err.message); }
+  });
+}
+
+function readFacts() {
+  const out = [];
+  document.querySelectorAll("#rows .fact").forEach((r) => {
+    const [a, b] = r.querySelectorAll("input");
+    out.push({ label: a.value, value: b.value });
+  });
+  return out;
+}
+
+/* ── the chrome ─────────────────────────────────────────────────────── */
+
+$("#nav").addEventListener("click", async (e) => {
+  const b = e.target.closest("button[data-tab]");
+  if (!b) return;
+  tab = b.dataset.tab;
+  open_ = null;
+  draw();
+  if (tab === "archive" && !archive) {
+    try { archive = await call("x.history", { limit: 60 }); draw(); }
+    catch (err) { toast(err.message); }
+  }
+});
+
+$("#write").addEventListener("click", async (e) => {
+  const b = e.currentTarget;
+  const was = b.textContent;
+  b.disabled = true; b.innerHTML = '<span class="spin"></span>';
+  try {
+    await call("x.generate", { day: state.today });
+    await refresh();
+    archive = null;
+    tab = "drafts"; draw();
+    toast("Written");
+  } catch (err) { toast(err.message); }
+  finally { b.disabled = false; b.textContent = was; }
+});
+
+$("#test").addEventListener("click", async (e) => {
+  const b = e.currentTarget;
+  b.disabled = true;
+  try { toast(await call("x.testMail")); await refresh(); }
+  catch (err) { toast(err.message); }
+  finally { b.disabled = false; }
+});
+
+/* A known passphrase walks straight in. */
+if (pass) start().catch(() => { pass = ""; localStorage.removeItem(KEY); });
+</script>
+</body>
+</html>

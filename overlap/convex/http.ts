@@ -112,6 +112,26 @@ async function answer(ctx: ActionCtx, request: Request): Promise<Response> {
         return ok(await ctx.runQuery(api.bio.unlock, args));
       case "bio.save":
         return ok(await ctx.runMutation(api.bio.save, args));
+      case "x.unlock":
+        return ok(await ctx.runQuery(api.x.unlock, args));
+      case "x.day":
+        return ok(await ctx.runQuery(api.x.day, args));
+      case "x.readDay":
+        return ok(await ctx.runQuery(api.x.readDay, args));
+      case "x.history":
+        return ok(await ctx.runQuery(api.x.history, args));
+      case "x.log":
+        return ok(await ctx.runMutation(api.x.log, args));
+      case "x.unlog":
+        return ok(await ctx.runMutation(api.x.unlog, args));
+      case "x.bio":
+        return ok(await ctx.runMutation(api.x.bio, args));
+      case "x.setFacts":
+        return ok(await ctx.runMutation(api.x.setFacts, args));
+      case "x.generate":
+        return ok(await ctx.runAction(api.x.generate, args));
+      case "x.testMail":
+        return ok(await ctx.runAction(api.x.testMail, args));
       default:
         return bad("Unknown operation");
     }
