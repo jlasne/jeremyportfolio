@@ -91,11 +91,17 @@ function Niches({ niches, onChange }: { niches: Niche[]; onChange: (next: Niche[
     <div className="card gate-card">
       <h2>
         2. Niches
-        <Info text="A hard filter. The slices of your target we search in, one search each. Someone who works in none of them is dropped. Remove one and we stop looking there; add one and we start the next morning." />
+        <Info
+          title="Niches"
+          text={[
+            'The slices of your target we search in, one search each. Anything you would say yes to belongs here.',
+            'This one is a hard filter. Somebody who works in none of them is dropped before anything else is asked, which is what stops another campaign\'s people arriving in your list wearing the wrong job.',
+            'Remove one and we stop looking there tonight. Add one and we start the next morning.',
+          ]}
+        />
       </h2>
       <p className="gate-lede">
-        We search these {niches.length} {niches.length === 1 ? 'niche' : 'niches'}, one at a time, and someone who
-        works in none of them is dropped. Anything you would say yes to belongs here.
+        We search these {niches.length} {niches.length === 1 ? 'niche' : 'niches'}, one at a time.
       </p>
       <ul className="niche-list">
         {niches.map((n) => (
@@ -186,17 +192,19 @@ export function Gates({ campaignId }: { campaignId: string }) {
       <div className="card gate-card">
         <h2>
           3. Who you want
-          <Info text="Describe the people you want, one sentence a line. For each qualified lead we answer every sentence: true, partly true, or false. That is their brand fit, and it sorts your list. It never drops anyone." />
+          <Info
+            title="Who you want"
+            text={[
+              'One sentence a line, in your own words. We answer each one about every lead: true, partly true, or false. That is their brand fit, and it orders your list without removing anyone.',
+              'Eight sentences or more is where the score starts telling people apart. Under that, one sentence swings it by more than a tenth.',
+              'Mark up to three as must have. A marked sentence leaves the score, because a rule you will not argue about is not a matter of degree.',
+              'A must have still removes nobody. A lead that plainly misses one arrives marked, and you decide what to do about it. Partly true is not a miss.',
+            ]}
+          />
         </h2>
         <p className="gate-lede">
-          {written} {written === 1 ? 'sentence' : 'sentences'} about who you want. We answer each one about every
-          lead: true, partly true, or false. That is their brand fit, and it orders your list without removing
-          anyone. Eight or more is where the score starts telling people apart.
-        </p>
-        <p className="gate-lede">
-          Mark up to three as <b>must have</b>. A marked sentence leaves the score, because a rule you will not
-          argue about is not a matter of degree. It still removes nobody: a lead that plainly misses one arrives
-          marked, and you decide.
+          {written} {written === 1 ? 'sentence' : 'sentences'} about who you want, and{' '}
+          {live.criteria.filter((c) => c.breaker).length} of them marked must have.
         </p>
         <Sentences
           list={live.criteria}

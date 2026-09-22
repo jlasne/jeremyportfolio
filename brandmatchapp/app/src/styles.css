@@ -3021,10 +3021,13 @@ body { background: var(--paper); }
   vertical-align: middle;
 }
 .info-mark:hover, .info-mark.on { border-color: var(--orange); color: var(--orange-deep); }
-.info-text {
-  display: block; margin: 8px 0 4px; padding: 9px 12px; border-radius: 10px; background: var(--paper-2);
-  color: var(--ink-2); font-size: 12.5px; line-height: 1.5; font-weight: 400; text-transform: none; letter-spacing: 0;
+/* The explanation opens over the page in the app's one dialog, so a heading
+   and the controls under it never move apart while somebody reads. */
+.info-sheet p {
+  margin: 14px 0 0; color: var(--ink-2); font-size: 14px; line-height: 1.6;
+  font-weight: 400; text-transform: none; letter-spacing: 0;
 }
+.info-sheet p:last-child { margin-bottom: 2px; }
 
 /* The dashboard's own funnel. Not `.steps`: the landing owns that name and
    paints it twelve pixels and grey. The last cell holds a share and a trend. */

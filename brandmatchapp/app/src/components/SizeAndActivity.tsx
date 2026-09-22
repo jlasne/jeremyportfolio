@@ -157,7 +157,14 @@ export function SizeAndActivity({ campaignId }: { campaignId: string }) {
     <div className="card gate-card">
       <h2>
         1. Size and activity
-        <Info text="A hard filter. Every number is counted from their last 12 posts, never from anything an account declares. Someone who misses one of these is never looked at again, so it costs nothing to run." />
+        <Info
+          title="Size and activity"
+          text={[
+            'The numbers a profile has to meet. Every one of them is counted from their last twelve posts, never from anything an account declares about itself.',
+            'This is a hard filter and it runs first. Somebody who misses it is never looked at again, and nothing is paid for them, which is what makes the rest affordable.',
+            'A line marked with or is a choice: meeting one way through it is enough. Reach and rhythm are written that way, because a creator who posts twice a month to three million views a month is not dormant and a posting count on its own says they are.',
+          ]}
+        />
       </h2>
       <p className="gate-lede">{gateOneLine(hard)}</p>
 
@@ -188,11 +195,6 @@ export function SizeAndActivity({ campaignId }: { campaignId: string }) {
               <span className="choice-ways">{eitherLine(group)}</span>
             </div>
           ))}
-          <p className="hint">
-            Each line is a choice: meeting one way through is enough. A creator who posts twice a
-            month to three million views a month is not dormant, and a posting count on its own says
-            they are.
-          </p>
         </div>
       )}
 

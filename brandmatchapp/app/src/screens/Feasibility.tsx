@@ -200,11 +200,14 @@ function Doors({ list, dry, campaignId, seeds, onOpen }: {
     <div className={`card exits-card${dry ? ' urgent' : ''}`}>
       <h2>
         {dry ? 'What we would change to keep it going' : 'What we would change to get you more'}
-        <Info text="Each line is measured by running your whole sample again with that one change, so the gain and the cost are counted, not guessed." />
+        <Info
+          title="What we would change"
+          text={[
+            'The rules costing you the most people, in the order they cost them. Written from your own numbers, never from a general idea of what works.',
+            'Each line is measured by running your whole sample again with that one change, so the gain and the cost are counted rather than guessed.',
+          ]}
+        />
       </h2>
-      <p className="gate-lede">
-        Written from your own numbers: these are the rules costing you the most people, in the order they cost them.
-      </p>
       <ul className="exits">
         {list.map((door) => (
           <li key={door.id}>
@@ -330,7 +333,13 @@ export function Feasibility({ campaignId }: { campaignId: string }) {
         <div className="chart-head">
           <h2>
             How many searches become leads
-            <Info text="A simulation over a sample of real accounts, run against the filters you have saved. It measures your filters, it does not promise a number for next week. One run a day." />
+            <Info
+              title="The simulation"
+              text={[
+                'A run over a sample of real accounts, against the filters you have saved.',
+                'It measures your filters. It does not promise a number for next week, because the world changes and your sample does not. One run a day.',
+              ]}
+            />
           </h2>
           <button type="button" className="btn small" disabled={!again.open} onClick={start}>
             Run it again

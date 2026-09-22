@@ -39,7 +39,14 @@ function Split({ campaigns, tier }: { campaigns: Campaign[]; tier: number }) {
       <div className="chart-head">
         <h2>
           How the searching is shared
-          <Info text="Your plan buys a day of searching, and the campaigns split it. Each slider stops at what the others have left, so the shares always fit inside one day. How many leads a share brings is the rules and the world, not a setting." />
+          <Info
+            title="How the day is shared"
+            text={[
+              'Your plan buys a day of searching, and your campaigns split it between them.',
+              'Each slider stops at what the others have left, so the shares always fit inside one day.',
+              'How many leads a share brings back is your rules and the world, never a setting. A bigger share searches more and promises nothing.',
+            ]}
+          />
         </h2>
         <span className="faint num">{spoken}% of the day spoken for{free ? `, ${free}% free` : ''}</span>
       </div>

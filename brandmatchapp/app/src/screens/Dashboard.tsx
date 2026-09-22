@@ -106,7 +106,13 @@ export function Dashboard() {
         <div className="card">
           <h2>
             Latest hot leads
-            <Info text="The best of the most recent delivery, by brand fit. Not the best of all time: that would be the same five faces every morning." />
+            <Info
+              title="Latest hot leads"
+              text={[
+                'The best of the most recent delivery, ordered by brand fit.',
+                'Not the best of all time. That would be the same five faces every morning, and you would stop reading it by the third day.',
+              ]}
+            />
           </h2>
           {hot.length === 0 ? (
             <p className="muted">Nothing delivered yet. The first batch lands tomorrow morning.</p>
@@ -135,7 +141,13 @@ export function Dashboard() {
         <div className="card">
           <h2>
             Your campaigns
-            <Info text="Every qualified lead a campaign has ever handed you, with what it is bringing a day right now beside it." />
+            <Info
+              title="Your campaigns"
+              text={[
+                'Every qualified lead a campaign has ever handed you.',
+                'Beside it, what it is bringing a day right now. A campaign that was good in March and quiet this week shows both numbers rather than only the flattering one.',
+              ]}
+            />
           </h2>
           <ul className="mini-list">
             {rank.map(({ campaign, perDay, qualified: total }, i) => (

@@ -141,7 +141,15 @@ export function Admin() {
       <div className="card">
         <h2>
           Each campaign, last 30 days
-          <Info text="Analysed is every profile the model or the free check looked at. The three passed columns are the funnel: size and activity, then niche, then deal breakers. Held is qualified people not yet handed over, and the days that buys at the campaign's pace. Cost is the crawl, attributed by campaign. The lines under a campaign split it by the way each profile was found: a hashtag search, Instagram's account search, the neighbours of good accounts, or the client's own handles." />
+          <Info
+            title="Reading this table"
+            text={[
+              'Analysed is every profile the model or the free numbers check looked at.',
+              'The passed columns are the funnel, in order: size and activity, then niche.',
+              'Held is qualified people not yet handed over, and the days that buys at the campaign\'s current pace.',
+              'Cost is the crawl, attributed by campaign. The lines under a campaign split it by how each profile was found: a hashtag search, Instagram\'s account search, the neighbours of good accounts, or the client\'s own handles.',
+            ]}
+          />
         </h2>
         <div className="compare-scroll">
           <table className="compare cockpit">
@@ -268,7 +276,13 @@ function RoadmapDesk() {
     <div className="card">
       <h2>
         Roadmap
-        <Info text="Votes are the clients'. The state and the tag are yours, and a client sees them the moment you set them." />
+        <Info
+          title="The roadmap"
+          text={[
+            'The votes are the clients\'. The state and the tag are yours.',
+            'A client sees both the moment you set them, so nothing here is a private note.',
+          ]}
+        />
       </h2>
       <ul className="desk-rows">
         {ideas.map((idea) => (
