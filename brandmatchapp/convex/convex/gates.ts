@@ -226,6 +226,49 @@ export function passesHard(checks: HardCheck[]): boolean {
 }
 
 /**
+ * Whether this profile missed by so little that it is worth looking again.
+ *
+ * An account at 9,800 followers against a floor of 10,000 is not a bad
+ * account, it is an early one. Someone who last posted 65 days ago against a
+ * 60 day rule may have posted this morning. A verdict written today on either
+ * of them is a verdict about a moment, and we keep it for ever.
+ *
+ * Only rules a person can grow into count. A floor, a rhythm, a view or
+ * comment count all move upwards on their own. A ceiling does not: an account
+ * above a follower ceiling only ever gets further above it, and marking it
+ * for a second look would buy the same rejection twice for ever.
+ *
+ * Every failing check has to be near. Missing the floor by 2% while posting
+ * a third as often as asked is not a near miss, it is two problems.
+ */
+const GROWS_INTO = new Set([
+  'followersMin', 'medianViewsMin', 'medianCommentsMin', 'postsPerMonthMin', 'lastPostWithinDays',
+])
+
+export function nearMiss(
+  checks: HardCheck[],
+  margin = 0.15,
+): { key: string; value: number; limit: number; offBy: number } | null {
+  const failed = checks.filter((c) => !c.pass)
+  if (!failed.length) return null
+
+  let worst: { key: string; value: number; limit: number; offBy: number } | null = null
+  for (const c of failed) {
+    if (!GROWS_INTO.has(c.key) || typeof c.limit !== 'number' || c.limit <= 0) return null
+    // Days since the last post is the one read where being over is the
+    // failure. Everywhere else the value has to climb to the limit.
+    const offBy = c.key === 'lastPostWithinDays'
+      ? (c.value - c.limit) / c.limit
+      : (c.limit - c.value) / c.limit
+    if (offBy > margin) return null
+    if (!worst || offBy > worst.offBy) {
+      worst = { key: c.key, value: c.value, limit: c.limit, offBy: Math.round(offBy * 1000) / 1000 }
+    }
+  }
+  return worst
+}
+
+/**
  * The groups where one alternative is enough.
  *
  * A group that holds returns nothing: there is no row to show for a rule

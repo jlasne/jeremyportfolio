@@ -494,11 +494,16 @@ export const stale = internalQuery({
   returns: v.any(),
   handler: async (ctx, args) => {
     const cutoff = Date.now() - FRESH_MS
+    const now = Date.now()
     const done = await ctx.db
       .query('evaluations')
       .withIndex('by_campaign', (q) => q.eq('campaignId', args.campaignId))
       .collect()
-    const judged = new Set(done.map((e) => e.creatorId))
+    // A verdict due for a second look is not a verdict. Those profiles are
+    // exactly the ones worth buying again: we already know they were close.
+    const judged = new Set(
+      done.filter((e) => !(e.retryAfter !== undefined && e.retryAfter <= now)).map((e) => e.creatorId),
+    )
 
     // Oldest measurement first, so the walk stops at the first fresh row.
     const rows = await ctx.db.query('creators').withIndex('by_measured').order('asc').take(2_000)
@@ -611,6 +616,99 @@ export const aim = internalQuery({
       .sort((a, b) => b.aim - a.aim)
 
     return { window: { followersMin: lo, followersMax: hard.followersMax ?? null }, channels }
+  },
+})
+
+/**
+ * One wave of discovery, spending what the wave before it learned.
+ *
+ * A run used to commit its whole budget at once, to a fixed list of queries,
+ * before a single profile had come back. Everything it could have learned
+ * arrived too late to change anything: which queries were spent, which
+ * channel was aiming, which accounts had turned out to carry neighbours.
+ *
+ * A wave is small enough that the next one can act on it. Between two waves,
+ * four things are already decided by the rest of the system and need no
+ * arbitration here:
+ *
+ *   spent queries   retired by queryYield, on one empty run
+ *   new seeds       every creator qualified in this campaign is a parent
+ *   re-buys         refused by detailRun inside the freshness window
+ *   the best aim    neighbours, wherever the window allows them
+ *
+ * The split between following our good accounts and looking for new ones was
+ * the open question in the plan, proposed at 70/30 with nothing behind it.
+ * It turns out not to be a question. The neighbour channel is limited by
+ * supply, not by budget: our carriers bear 7 to 16 unbought candidates, so a
+ * wave of 400 could not spend 70% there if it tried. So this takes every
+ * neighbour going, because they aim best, and fills the rest with the
+ * account index. The split is whatever supply says it is, and it is reported
+ * rather than set.
+ */
+export const wave = internalAction({
+  args: {
+    campaignId: v.id('campaigns'),
+    /** Profiles this wave may buy. Kept small on purpose. */
+    size: v.optional(v.number()),
+    /** Words for the account index. Empty takes the campaign's niches. */
+    queries: v.optional(v.array(v.string())),
+  },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<Record<string, unknown>> => {
+    const campaign = await ctx.runQuery(internal.crawl.campaignFor, { campaignId: args.campaignId })
+    if (!campaign) return { error: 'No such campaign' }
+
+    // The day's allowance, in profiles. A wave never exceeds what is left of
+    // it, and a campaign that has already met the day stops here rather than
+    // buying a wave nobody asked for.
+    const budget = await ctx.runQuery(internal.ops.budgetLeft, { accountId: campaign.accountId })
+    if (budget.left <= 0) {
+      return { done: true, why: 'The day\'s allowance is spent', spent: budget.spent, budget: budget.budget }
+    }
+    const size = Math.min(args.size ?? 200, budget.left)
+
+    const plan = await ctx.runQuery(internal.channels.plan, { campaignId: args.campaignId })
+    const allowed = new Set<string>((plan.channels ?? []).map((c: { channel: string }) => c.channel))
+    const steps: Record<string, unknown>[] = []
+    let taken = 0
+
+    // Neighbours first, always, and all of them. Best aim, smallest supply.
+    if (allowed.has('neighbour')) {
+      const got = await ctx.runAction(internal.sourcing.neighbours, {
+        campaignId: args.campaignId, limit: size,
+      })
+      const asked = Number(got.asked ?? 0)
+      taken += asked
+      steps.push({ channel: 'neighbour', asked, ...(got.error ? { error: got.error } : {}) })
+    }
+
+    // Whatever the neighbours could not fill goes to the account index, which
+    // is the only channel with unlimited supply. Retired queries cost nothing
+    // and are refused inside accounts.
+    const room = size - taken
+    if (room > 0 && allowed.has('accounts')) {
+      const queries = args.queries?.length ? args.queries : (plan.topics ?? [])
+      const live = queries.length
+      const got = await ctx.runAction(internal.sourcing.accounts, {
+        campaignId: args.campaignId,
+        queries,
+        // Spread the room across the words rather than pile it on the first.
+        perQuery: Math.max(5, Math.floor(room / Math.max(1, live))),
+      })
+      const runs = (got.runs ?? []) as { runId?: string; retired?: string }[]
+      const started = runs.filter((r) => r.runId).length
+      const retired = runs.filter((r) => r.retired).length
+      steps.push({ channel: 'accounts', queries: live, started, retired })
+    }
+
+    return {
+      size,
+      dayLeft: budget.left,
+      window: plan.window,
+      channels: [...allowed],
+      steps,
+      note: 'Results land by webhook. Read the next wave against sourcing.aim.',
+    }
   },
 })
 

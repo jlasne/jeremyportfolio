@@ -307,9 +307,9 @@ Les graines croisées exigent un **libellé de niche identique** entre deux camp
 
 ---
 
-## Chantier 3 : les vagues
+## Chantier 3 : les vagues — LIVRÉ
 
-**Dépend de 1. Meilleur avec 0 et 4.**
+**Le réglage non tranché n'était pas une question.**
 
 ### Le principe
 
@@ -328,19 +328,29 @@ Un run n'engage plus tout son budget d'un coup. Il avance par vagues, chacune ap
 - Le budget restant va vers le canal qui a le mieux visé sur cette campagne
 - Le run s'arrête tôt si la cible du jour est atteinte
 
-### Le réglage à trancher, non tranché
+### Le réglage 70/30 : la question se dissout
 
-Quelle part de chaque vague va aux voisins des bonnes graines, et quelle part à de la découverte neuve.
+Le canal voisins est limité par l'offre, pas par le budget. Nos porteurs portent 7 à 16 candidats non achetés. Une vague de 400 ne pourrait pas y mettre 70% même en essayant.
 
-Départ proposé : 70% voisins, 30% neuf. Rien ne le fonde encore.
+Donc : **tous les voisins disponibles, toujours** (meilleure visée, offre minuscule), puis le reste à la recherche de comptes. La répartition est celle que l'offre impose, et elle est rapportée au lieu d'être réglée.
 
-Trop peu de sang neuf et le pool converge sur le premier lead qualifié. La cible se rétrécit sans que personne le voie.
+Le risque de convergence du pool disparaît avec : la découverte neuve n'est pas un réglage, c'est le remplissage par défaut.
 
-Ce réglage se mesure sur trois vagues avant d'être fixé, et il bouge sans doute : beaucoup d'exploration au début, plus d'exploitation quand les graines sont bonnes.
+### Les décisions entre deux vagues, toutes automatiques
 
-### Vérifié par
+| décision | par quoi |
+|---|---|
+| Retirer les requêtes épuisées | `queryYield`, dès un run vide |
+| Les qualifiés deviennent graines | `parents`, déjà |
+| Ne pas racheter | `detailRun`, fenêtre 30 jours |
+| Budget au meilleur canal | les voisins d'abord, quand la fenêtre le permet |
+| Arrêt si la cible du jour est atteinte | `budgetLeft` |
 
-Un run de 3000 en vagues contre un run de 3000 d'un coup, sur la même campagne, coût et leads comparés.
+### Vérifié par : une vague de 12
+
+3 requêtes passées, **2 retirées et refusées sans coût**, 1 lancée. Canal voisins correctement exclu (plafond 100k, en dessous des 500k qui portent).
+
+Puis la boucle s'est fermée toute seule : la requête lancée a rendu **zéro nouveau** et **s'est retirée d'elle-même**. Personne n'a touché à rien.
 
 ---
 
@@ -373,17 +383,35 @@ Google ne donne que le nombre d'abonnés. Rien sur les vues, la cadence ou la da
 
 ---
 
-## Chantier 5 : repasser les échecs de peu
+## Chantier 5 : repasser les échecs de peu — LIVRÉ
 
-**Dépend de 1. Petit chantier.**
+**Plus petit que prévu : 14 profils sur trois campagnes.**
 
 Un compte à 9 800 abonnés en aura 10 500 dans deux mois. Un compte inactif depuis 15 jours peut reposter demain.
 
 Les profils qui ratent une règle de peu sont marqués et repassés au bout d'un délai, sans nouvelle découverte. Leur fiche est rachetée, c'est tout.
 
-### Vérifié par
+### Ce qui a été construit
 
-Le nombre de profils repassés et le nombre qui passent au second essai.
+Un rejet porte déjà les règles ratées et de combien. Aucun champ nouveau, aucune dépense : `nearMiss` lit le dossier.
+
+Deux garde-fous. **Toutes** les règles ratées doivent être proches : rater le plancher de 2% en postant trois fois moins souvent que demandé, ce sont deux problèmes, pas un timing. Et seules comptent les règles dans lesquelles on grandit. Un plafond d'abonnés, jamais : un compte au-dessus ne fait que s'en éloigner.
+
+La date du second regard est celle où la mesure expire, 30 jours. Les deux sont le même évènement : la fiche est rachetée de toute façon, et c'est le seul verdict qui mérite d'être relu à ce moment-là.
+
+### Vérifié par : mesuré, et petit
+
+| campagne | rejets durs | échecs de peu |
+|---|---|---|
+| Divertissement | 1 583 | 6 (0%) |
+| Fitness | 1 013 | 1 (0%) |
+| Chien | 1 012 | 7 (1%) |
+
+Les plus proches : @theposinginstitute à 9 479 abonnés pour 10 000 demandés, @comediansteviej à 15 jours pour 14 demandés.
+
+Élargir la marge ne sauve rien : à 50% d'écart on monte à 0-4%, et à 80% ce n'est plus un échec de peu. La plupart des rejets ratent plusieurs règles, largement.
+
+**Verdict : ça coûte zéro et ça rapporte peu aujourd'hui.** Sa valeur est qu'elle compose : elle empêche de re-rejeter à vie quelqu'un qui a grandi, et la part grandit avec l'index.
 
 ---
 
@@ -391,16 +419,21 @@ Le nombre de profils repassés et le nombre qui passent au second essai.
 
 | # | chantier | dépend de | bloqué par |
 |---|---|---|---|
-| 0 | Le canal des voisins | rien | **fait le 22/09** |
-| 1 | Ne jamais payer deux fois | rien | rien |
-| 1bis | Un canal par fenêtre de cible | 0 | rien |
-| 2 | Les graines | rien pour construire | rien |
-| 3 | Les vagues | 1 | rien |
-| 4 | Google | rien pour construire | la clé de recherche |
-| 5 | Les échecs de peu | 1 | rien |
+| 0 | Le canal des voisins | rien | **livré** |
+| 1 | Ne jamais payer deux fois | rien | **livré** |
+| 1bis | Un canal par fenêtre de cible | 0 | **livré, canal réfuté** |
+| 2 | Les graines | rien | **livré** |
+| 3 | Les vagues | 1 | **livré** |
+| 4 | Google | rien pour construire | **la clé de recherche** |
+| 5 | Les échecs de peu | 1 | **livré** |
 
-Le 0 en premier parce qu'il coûte une heure et décide du reste.
-Le 1 ensuite parce qu'il rapporte sans rien débloquer.
+Tout est fait sauf le 4, qui attend une clé de recherche web.
+
+### Ce qui reste ouvert
+
+La fenêtre 10k-100k plafonne à 24% de visée. Le canal hashtag est mort, les voisins n'y portent pas. Le chantier 4 est la seule piste sérieuse pour ce trou, et il est bloqué.
+
+Coût total des cinq chantiers : **4,04 $**, dont 3,20 $ d'une erreur de limite par URL.
 
 ---
 
@@ -420,5 +453,5 @@ Le 1 ensuite parce qu'il rapporte sans rien débloquer.
 
 ## Blocages en cours
 
-- Apify à 69,81 $ sur un plafond mensuel de 69 $. Aucun run possible avant relèvement.
-- Pas de clé de recherche web, ce qui bloque le chantier 4.
+- **Pas de clé de recherche web.** Bloque le chantier 4, la seule piste restante pour la fenêtre 10k-100k.
+- **Budget Apify partagé avec le pipeline manuel.** 4,62 $ restants sur le cycle qui finit le 07/10, dont 3 $ réservés au manuel. `startRun` refuse en dessous de cette réserve.

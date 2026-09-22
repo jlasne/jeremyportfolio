@@ -3,7 +3,7 @@ import { ACTOR, APIFY, FRESH_MS } from './crawl'
 import { internal } from './_generated/api'
 import { v } from 'convex/values'
 import {
-  evaluate as runGates, loosest, outOf, passesHard, runEither, runHard,
+  evaluate as runGates, loosest, nearMiss, outOf, passesHard, runEither, runHard,
   type EitherGroup, type GateSetShape, type HardRules, type Judgement, type Niche, type Measured } from './gates'
 
 // One profile through one campaign's gates.
@@ -28,7 +28,14 @@ export const pending = internalQuery({
       .query('evaluations')
       .withIndex('by_campaign', (q) => q.eq('campaignId', args.campaignId))
       .collect()
-    const seen = new Set(done.map((e) => e.creatorId))
+    // A near miss whose date has come stops counting as judged, so the pool
+    // picks it up again. It is still stale by then, so the freshness rule
+    // below holds it back until its profile has been bought again.
+    const nowAt = Date.now()
+    const seen = new Set(
+      done.filter((e) => !(e.retryAfter !== undefined && e.retryAfter <= nowAt)).map((e) => e.creatorId),
+    )
+    const retrying = done.filter((e) => e.retryAfter !== undefined && e.retryAfter <= nowAt).length
 
     // Exclusivity is against the kind of offer, so a profile held by a client
     // selling something else is still worth looking at for this one.
@@ -57,6 +64,8 @@ export const pending = internalQuery({
       gateSetVersion: gates.version,
       /** Waiting, but on numbers too old to rule on. Re-buy them first. */
       expired: expired.length,
+      /** Verdicts that missed by a hair and whose second look is due. */
+      retrying,
       gates: {
         hard: gates.hard,
         // Without this the batch runs the demands and none of the choices, so
@@ -292,12 +301,34 @@ export const write = internalMutation({
         ...(country ? { country } : {}), ...(language ? { language } : {}),
       })
     }
+    const now = Date.now()
+
+    // A profile that missed by a hair on a rule it can grow into comes back.
+    // The date is the same one its measurement expires on, because the two
+    // are the same event: the profile is bought again at thirty days anyway,
+    // and this is the one verdict worth re-reading when it is.
+    const near = args.verdict === 'hard_fail' ? nearMiss(args.hardChecks) : null
+    const retryAfter = near ? now + FRESH_MS : undefined
+
     const already = await ctx.db
       .query('evaluations')
       .withIndex('by_campaign_creator', (q) => q.eq('campaignId', args.campaignId).eq('creatorId', args.creatorId))
       .first()
-    if (already) return already._id
-    return await ctx.db.insert('evaluations', { ...row, evaluatedAt: Date.now() })
+    if (already) {
+      // A verdict stands unless it was marked for a second look and the date
+      // has come. Then it is replaced, and the count says how many tries it
+      // took, so a profile cannot be re-judged for ever on our own optimism.
+      const due = already.retryAfter !== undefined && already.retryAfter <= now
+      if (!due) return already._id
+      await ctx.db.replace(already._id, {
+        ...row,
+        evaluatedAt: now,
+        retryAfter,
+        attempts: (already.attempts ?? 1) + 1,
+      })
+      return already._id
+    }
+    return await ctx.db.insert('evaluations', { ...row, evaluatedAt: now, retryAfter, attempts: 1 })
   },
 })
 
@@ -878,5 +909,84 @@ export const verdicts = internalQuery({
         knockouts: r.knockoutAnswers,
       }
     }))
+  },
+})
+
+/**
+ * The profiles that missed by a hair, and when each comes back.
+ *
+ * Every number here was already paid for. A rejection carries the checks it
+ * failed and by how much, so this reads the file rather than the platform,
+ * and it answers the only question worth asking about a hard fail: was the
+ * person wrong, or were we early.
+ */
+export const nearMisses = internalQuery({
+  args: { campaignId: v.id('campaigns'), margin: v.optional(v.number()) },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    const now = Date.now()
+    const rows = await ctx.db
+      .query('evaluations')
+      .withIndex('by_campaign', (q) => q.eq('campaignId', args.campaignId))
+      .collect()
+
+    const fails = rows.filter((e) => e.verdict === 'hard_fail')
+    const byRule: Record<string, number> = {}
+    const out = []
+    let due = 0
+    for (const e of fails) {
+      const near = nearMiss(e.hardChecks, args.margin)
+      if (!near) continue
+      byRule[near.key] = (byRule[near.key] ?? 0) + 1
+      const ready = e.retryAfter !== undefined && e.retryAfter <= now
+      if (ready) due++
+      const c = await ctx.db.get(e.creatorId)
+      out.push({
+        handle: c?.handle ?? '?',
+        rule: near.key,
+        had: near.value,
+        asked: near.limit,
+        offByPercent: Math.round(near.offBy * 100),
+        attempts: e.attempts ?? 1,
+        retryAfter: e.retryAfter ?? null,
+        ready,
+      })
+    }
+
+    return {
+      hardFails: fails.length,
+      nearMisses: out.length,
+      /** The share of rejections that were a matter of timing, not of fit. */
+      sharePercent: fails.length ? Math.round((out.length / fails.length) * 100) : 0,
+      dueNow: due,
+      byRule,
+      sample: out.sort((a, b) => a.offByPercent - b.offByPercent).slice(0, 20),
+    }
+  },
+})
+
+/**
+ * Dates the near misses written before they carried a date.
+ *
+ * Reads the checks already on file, so nothing is paid for and no verdict
+ * changes. A profile judged before this existed gets its second look thirty
+ * days after it was judged, which for most of them is already behind us.
+ */
+export const backfillRetries = internalMutation({
+  args: { campaignId: v.id('campaigns') },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    const rows = await ctx.db
+      .query('evaluations')
+      .withIndex('by_campaign', (q) => q.eq('campaignId', args.campaignId))
+      .collect()
+    let marked = 0
+    for (const e of rows) {
+      if (e.retryAfter !== undefined || e.verdict !== 'hard_fail') continue
+      if (!nearMiss(e.hardChecks)) continue
+      await ctx.db.patch(e._id, { retryAfter: e.evaluatedAt + FRESH_MS, attempts: e.attempts ?? 1 })
+      marked++
+    }
+    return { judged: rows.length, marked }
   },
 })

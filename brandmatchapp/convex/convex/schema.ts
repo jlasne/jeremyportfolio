@@ -483,6 +483,18 @@ export default defineSchema({
     niche: v.optional(v.string()),
     /** The rule that ended it: a hard key, a knockout id, or absent. */
     blockedBy: v.optional(v.string()),
+    /**
+     * When this verdict is worth taking again, for a profile that missed by
+     * a hair on a rule it can grow into.
+     *
+     * Set to the moment the measurement behind it expires, because the two
+     * are the same event: a profile older than thirty days is bought again
+     * anyway, and a near miss is the one case where buying it again is worth
+     * more than the profile costs. Absent on every other verdict.
+     */
+    retryAfter: v.optional(v.number()),
+    /** How many times this pair has been judged. One, unless retried. */
+    attempts: v.optional(v.number()),
     hardChecks: v.array(
       // limit is what was asked. It is carried because a row from an either
       // group is measured against a number that is not in hard, so the reason
