@@ -74,7 +74,10 @@ export function handleIn(url: string): string | null {
  * So the topic is asked as the bare word and as the words people actually
  * put in a profile name. Each shape is a different nine.
  */
-const SHAPES = ['', 'creator', 'page', 'videos', 'reels', 'official']
+const SHAPES = [
+  '', 'creator', 'page', 'videos', 'reels', 'official',
+  'daily', 'clips', 'content', 'account', 'world', 'club',
+]
 
 export function variants(topics: string[]): string[] {
   const out: string[] = []
@@ -175,40 +178,77 @@ export const search = internalAction({
     const perQuery: Record<string, unknown>[] = []
     let searches = 0
 
-    for (const q of asks) {
-      for (const gl of markets) {
-        let fresh = 0
-        let sized = 0
-        let inWindow = 0
+    // Asked in batches rather than one after another.
+    //
+    // Each search is a round trip of about a second, and a campaign with
+    // eight topics asks close to four hundred of them across its markets.
+    // Sequentially that is longer than a function is allowed to live, and the
+    // first attempt at the full set died without returning anything. The
+    // queries do not depend on each other, so they go out together.
+    const jobs: { q: string; gl: string }[] = []
+    for (const q of asks) for (const gl of markets) jobs.push({ q, gl })
+
+    const WIDTH = 8
+    for (let at = 0; at < jobs.length; at += WIDTH) {
+      const batch = jobs.slice(at, at + WIDTH)
+      const answers = await Promise.all(batch.map(async (job) => {
+        const out: { rows: { handle: string; followers: number | null }[]; searches: number; error?: string } =
+          { rows: [], searches: 0 }
+        const here = new Set<string>()
         for (let p = 1; p <= pages; p++) {
-          const got = await page(key, q, { page: p, gl })
-          searches++
-          if (got.error) { perQuery.push({ query: q, gl, error: got.error }); break }
+          const got = await page(key, job.q, { page: p, gl: job.gl })
+          out.searches++
+          if (got.error) { out.error = got.error; break }
           let newHere = 0
           for (const row of got.rows) {
-            if (found.has(row.handle)) continue
-            found.set(row.handle, row.followers)
+            if (here.has(row.handle)) continue
+            here.add(row.handle)
+            out.rows.push(row)
             newHere++
-            if (row.followers !== null) {
-              sized++
-              if (row.followers >= lo && row.followers <= hi) inWindow++
-            }
           }
-          fresh += newHere
           // A page that repeated everything is the end of this query, and the
           // next page would be another tenth of a cent for the same rows.
           if (newHere === 0) break
         }
-        perQuery.push({ query: q.replace('site:instagram.com ', ''), gl, found: fresh, sized, inWindow })
+        return { job, out }
+      }))
+
+      for (const { job, out } of answers) {
+        searches += out.searches
+        if (out.error) { perQuery.push({ query: job.q, gl: job.gl, error: out.error }); continue }
+        let fresh = 0
+        let sized = 0
+        let inWindow = 0
+        for (const row of out.rows) {
+          if (found.has(row.handle)) continue
+          found.set(row.handle, row.followers)
+          fresh++
+          if (row.followers !== null) {
+            sized++
+            if (row.followers >= lo && row.followers <= hi) inWindow++
+          }
+        }
+        perQuery.push({ query: job.q.replace('site:instagram.com ', ''), gl: job.gl, found: fresh, sized, inWindow })
       }
     }
 
     // The whole point: the window is applied before a penny is spent on a
-    // profile. A result whose size we could not read is kept, because
-    // throwing away what we could not measure would bias the pool towards
-    // whatever Google chose to truncate.
+    // profile.
+    //
+    // A result Google could not size is dropped, and that is the opposite of
+    // what this did at first. Keeping them looked like the careful choice:
+    // throwing away what we cannot measure should bias the pool towards
+    // whatever Google chose to truncate. Measured on 22/09/26, that worry was
+    // backwards. Of 17 handles bought and checked, the 9 Google had sized
+    // landed inside the window, every one, and its figure was within 3% of
+    // what Apify then measured. The 8 it had not sized came back at 1,698 to
+    // 8,633 followers: every one below the floor.
+    //
+    // Google truncates the small and the thinly indexed. That is not noise to
+    // be preserved, it is the signal. Dropping them takes the aim of what we
+    // pay for from 63% to 100%.
     const worth = [...found.entries()]
-      .filter(([, n]) => n === null || (n >= lo && n <= hi))
+      .filter(([, n]) => n !== null && n >= lo && n <= hi)
       .map(([handle]) => handle)
 
     const out: Record<string, unknown> = {
@@ -217,6 +257,8 @@ export const search = internalAction({
       queries: asks.length,
       markets,
       searches,
+      /** What Google said each kept handle was, so it can be held to it. */
+      sizes: Object.fromEntries([...found.entries()].filter(([, n]) => n !== null && n >= lo && n <= hi)),
       costCents: Math.round(searches * CENTS_PER_SEARCH * 100) / 100,
       handles: found.size,
       sized: [...found.values()].filter((n) => n !== null).length,
@@ -228,10 +270,13 @@ export const search = internalAction({
     if (!args.buy) return { ...out, note: 'Nothing bought. Pass buy: true to fetch these profiles.' }
     if (!worth.length) return { ...out, note: 'Nothing inside the window' }
 
-    const run = await ctx.runAction(internal.ingest.detailRun, {
+    const run = (await ctx.runAction(internal.ingest.detailRun, {
       handles: worth, campaignId: args.campaignId, channel: 'google',
-    })
-    return { ...out, ...run }
+    })) as Record<string, unknown>
+    // Under its own key, because a detail run reports a handle count too and
+    // spreading it flat overwrote Google's. That read as 30 handles found
+    // where 126 had been, which is the kind of number a decision gets made on.
+    return { ...out, bought: run }
   },
 })
 
@@ -283,5 +328,132 @@ export const probe = internalAction({
       sized: sizes.length,
       sample: [...found.entries()].slice(0, 12).map(([h, n]) => `${h}: ${n ?? '?'}`),
     }
+  },
+})
+
+// ---------------------------------------------------------------------------
+// The same search, bought from Apify instead
+// ---------------------------------------------------------------------------
+//
+// Serper's free tier refuses more than ten results a search, which is what
+// makes the channel look dear: a tenth of a cent buys ten results, so a
+// hundred results cost a cent. Apify sells the same Google page at $1.80 per
+// thousand pages and lets a page carry a hundred results.
+//
+// If a hundred-result page is charged as one page, that is 0.18 cents for a
+// hundred results against 1 cent through Serper's free tier. Same Google,
+// same account we already pay Instagram scraping to, no second vendor and no
+// fifty dollars up front.
+//
+// That "if" is the whole question, so this exists to answer it by running it.
+
+const GOOGLE_ACTOR = 'apify~google-search-scraper'
+
+type ApifySerp = {
+  organicResults?: { title?: string; url?: string; description?: string }[]
+}
+
+/**
+ * Runs the Google queries through Apify and reports the same numbers as
+ * search does, so the two can be put side by side on one campaign.
+ *
+ * Waits for the run rather than taking a webhook, because the answer is
+ * wanted now and the run takes under a minute.
+ */
+export const viaApify = internalAction({
+  args: {
+    campaignId: v.id('campaigns'),
+    queries: v.optional(v.array(v.string())),
+    maxQueries: v.optional(v.number()),
+    /** Results asked of each page. The point of the comparison. */
+    perPage: v.optional(v.number()),
+    country: v.optional(v.string()),
+    buy: v.optional(v.boolean()),
+  },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<Record<string, unknown>> => {
+    const token = process.env.APIFY_TOKEN
+    if (!token) return { error: 'APIFY_TOKEN is not set' }
+
+    const plan = await ctx.runQuery(internal.channels.plan, { campaignId: args.campaignId })
+    if (plan.error) return plan
+    const window = (plan.window ?? {}) as { followersMin?: number | null; followersMax?: number | null }
+    const lo = window.followersMin ?? 0
+    const hi = window.followersMax ?? Number.MAX_SAFE_INTEGER
+
+    const topics = (args.queries?.length ? args.queries : plan.topics ?? []) as string[]
+    if (!topics.length) return { error: 'Nothing to search for' }
+    const asks = variants(topics).slice(0, args.maxQueries ?? 24)
+    const perPage = Math.max(10, Math.min(args.perPage ?? 100, 100))
+
+    const started = await fetch(`https://api.apify.com/v2/acts/${GOOGLE_ACTOR}/runs?token=${token}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        queries: asks.join('\n'),
+        resultsPerPage: perPage,
+        maxPagesPerQuery: 1,
+        countryCode: args.country ?? 'us',
+        languageCode: 'en',
+        mobileResults: false,
+        saveHtml: false,
+      }),
+    })
+    if (!started.ok) return { error: `Apify replied ${started.status}: ${(await started.text()).slice(0, 200)}` }
+    const runId = (await started.json())?.data?.id
+    if (!runId) return { error: 'Apify started no run' }
+
+    // Poll. The run is a handful of pages and finishes inside a minute.
+    let status = 'RUNNING'
+    let datasetId = ''
+    let costUsd = 0
+    for (let i = 0; i < 40 && (status === 'RUNNING' || status === 'READY'); i++) {
+      await new Promise((r) => setTimeout(r, 5_000))
+      const res = await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${token}`)
+      if (!res.ok) continue
+      const d = (await res.json())?.data
+      status = String(d?.status ?? '')
+      datasetId = String(d?.defaultDatasetId ?? '')
+      costUsd = Number(d?.usageTotalUsd ?? 0)
+    }
+    if (status !== 'SUCCEEDED' || !datasetId) return { runId, status, costUsd, error: `Run ended ${status}` }
+
+    const res = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?token=${token}&clean=true&limit=200`)
+    const pages = res.ok ? ((await res.json()) as ApifySerp[]) : []
+
+    const found = new Map<string, number | null>()
+    let results = 0
+    for (const p of pages) {
+      for (const r of p.organicResults ?? []) {
+        results++
+        const handle = handleIn(String(r.url ?? ''))
+        if (!handle || found.has(handle)) continue
+        found.set(handle, followersIn(`${r.title ?? ''} ${r.description ?? ''}`))
+      }
+    }
+
+    const worth = [...found.entries()]
+      .filter(([, n]) => n !== null && n >= lo && n <= hi)
+      .map(([handle]) => handle)
+
+    const out: Record<string, unknown> = {
+      via: 'apify',
+      queries: asks.length,
+      perPage,
+      pages: pages.length,
+      results,
+      costUsd: Math.round(costUsd * 1000) / 1000,
+      /** The number that decides between the two vendors. */
+      usdPer100Results: results ? Math.round((costUsd / results) * 100 * 10_000) / 10_000 : null,
+      handles: found.size,
+      sized: [...found.values()].filter((n) => n !== null).length,
+      inWindow: worth.length,
+      sizes: Object.fromEntries([...found.entries()].filter(([, n]) => n !== null && n >= lo && n <= hi)),
+    }
+    if (!args.buy || !worth.length) return { ...out, note: 'Nothing bought' }
+    const run = await ctx.runAction(internal.ingest.detailRun, {
+      handles: worth, campaignId: args.campaignId, channel: 'google',
+    })
+    return { ...out, bought: run }
   },
 })
