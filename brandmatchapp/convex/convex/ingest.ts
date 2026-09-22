@@ -1,7 +1,7 @@
-import { internalAction, internalMutation } from './_generated/server'
+import { internalAction, internalMutation, internalQuery } from './_generated/server'
 import { internal } from './_generated/api'
 import { v } from 'convex/values'
-import { APIFY, startRun } from './crawl'
+import { APIFY, FRESH_MS, startRun } from './crawl'
 
 // What Apify sends back, turned into measured facts.
 //
@@ -47,6 +47,83 @@ async function datasetItems(datasetId: string, token: string): Promise<Record<st
 }
 
 /**
+ * Writes the median likes on profiles measured before likes were kept.
+ *
+ * The posts are already in base with their like counts, so this reads what we
+ * hold and computes. Nothing is paid for. Walks oldest first, a page at a
+ * time, and hands back the cursor for the next page.
+ */
+export const backfillLikes = internalMutation({
+  args: { after: v.optional(v.number()), limit: v.optional(v.number()) },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    const rows = await ctx.db
+      .query('creators')
+      .withIndex('by_measured', (q) => q.gt('measuredAt', args.after ?? 0))
+      .order('asc')
+      .take(args.limit ?? 200)
+    let written = 0
+    let last = args.after ?? 0
+    for (const c of rows) {
+      last = c.measuredAt
+      if (c.medianLikes !== undefined) continue
+      const posts = await ctx.db
+        .query('creatorPosts')
+        .withIndex('by_creator', (q) => q.eq('creatorId', c._id))
+        .collect()
+      const likes = median(posts.filter((p) => !p.pinned).map((p) => p.likes))
+      if (likes === undefined) continue
+      await ctx.db.patch(c._id, { medianLikes: likes })
+      written++
+    }
+    return { seen: rows.length, written, next: rows.length ? last : null }
+  },
+})
+
+/**
+ * Which of these handles we already hold a recent measurement of.
+ *
+ * Read before every detail run. The profile behind a handle costs 0.23 cents
+ * whether or not we bought it last week, and Instagram's account search hands
+ * back the same accounts for the same words every time, so a campaign that
+ * searches twice pays twice for the same rows unless someone checks.
+ */
+export const alreadyFresh = internalQuery({
+  args: { handles: v.array(v.string()) },
+  returns: v.array(v.string()),
+  handler: async (ctx, { handles }) => {
+    const cutoff = Date.now() - FRESH_MS
+    const out: string[] = []
+    for (const handle of handles) {
+      const c = await ctx.db
+        .query('creators')
+        .withIndex('by_handle', (q) => q.eq('platform', 'instagram').eq('handle', handle))
+        .first()
+      if (c && (c.measuredAt ?? 0) > cutoff) out.push(handle)
+    }
+    return out
+  },
+})
+
+/** How many of these handles were first seen inside a window. */
+export const firstSeenIn = internalQuery({
+  args: { handles: v.array(v.string()), from: v.number(), to: v.number() },
+  returns: v.number(),
+  handler: async (ctx, { handles, from, to }) => {
+    let n = 0
+    for (const handle of handles) {
+      const c = await ctx.db
+        .query('creators')
+        .withIndex('by_handle', (q) => q.eq('platform', 'instagram').eq('handle', handle))
+        .first()
+      const seen = c?.firstSeenAt ?? 0
+      if (seen >= from && seen <= to) n++
+    }
+    return n
+  },
+})
+
+/**
  * Pay Apify for what only Apify has: the profile behind a handle, its bio, its
  * email and its last posts. Where the handles came from is not its business,
  * so a search engine and a hashtag crawl both end here.
@@ -57,13 +134,30 @@ export const detailRun = internalAction({
     campaignId: v.id('campaigns'),
     /** How these handles were found: search, accounts, neighbour or seed. */
     channel: v.optional(v.string()),
+    /** The words that found them, when a search did. Kept so a query can be judged. */
+    query: v.optional(v.string()),
+    /**
+     * Buy these profiles again even though we hold a recent measurement.
+     *
+     * The one reason to: the measurement has gone stale and the profile is
+     * being brought back for judging. Every other caller leaves this off.
+     */
+    refresh: v.optional(v.boolean()),
     /** For a neighbour run, who pointed at each handle. */
     sources: v.optional(v.array(v.object({ handle: v.string(), parents: v.optional(v.array(v.string())) }))),
   },
   returns: v.any(),
   handler: async (ctx, args): Promise<Record<string, unknown>> => {
-    const handles = [...new Set(args.handles.map((h) => h.toLowerCase().replace(/^@/, '')))].filter(Boolean).slice(0, 300)
-    if (!handles.length) return { handles: 0 }
+    const asked = [...new Set(args.handles.map((h) => h.toLowerCase().replace(/^@/, '')))].filter(Boolean)
+    // Nobody is bought twice inside the window. The cap is applied after, so
+    // a run of 300 is 300 profiles we do not hold rather than 300 rows of
+    // which 200 are already on file.
+    const held = args.refresh
+      ? []
+      : ((await ctx.runQuery(internal.ingest.alreadyFresh, { handles: asked })) as string[])
+    const skip = new Set(held)
+    const handles = asked.filter((h) => !skip.has(h)).slice(0, 300)
+    if (!handles.length) return { handles: 0, asked: asked.length, skipped: skip.size }
     const channel = args.channel ?? 'search'
 
     const input = {
@@ -82,15 +176,16 @@ export const detailRun = internalAction({
     }
     const started = await startRun(input, { phase: 'detail', campaignId: args.campaignId, channel })
     if ('error' in started) return { ...started, handles: handles.length }
-    const asked = new Set(handles)
+    const bought = new Set(handles)
     await ctx.runMutation(internal.crawl.noteRun, {
       externalRunId: started.runId,
       phase: 'detail',
       campaignId: args.campaignId,
       channel,
-      sources: (args.sources ?? []).filter((s) => asked.has(s.handle)),
+      query: args.query,
+      sources: (args.sources ?? []).filter((s) => bought.has(s.handle)),
     })
-    return { runId: started.runId, handles: handles.length }
+    return { runId: started.runId, handles: handles.length, asked: asked.length, skipped: skip.size }
   },
 })
 
@@ -134,14 +229,39 @@ export const fromApify = internalAction({
     // on them would pay for the same rows twice.
     const wholeProfiles = rows.some((r) => r.username && typeof r.followersCount === 'number')
     if (args.phase === 'search' && !wholeProfiles) {
-      const handles = [...new Set(
-        rows.map((r) => String(r.ownerUsername ?? r.username ?? '').toLowerCase()).filter(Boolean),
-      )]
-      if (!handles.length) return { ok: true, handles: 0 }
+      // The words carry over. A hashtag search pays for the handles here and
+      // for the profiles in the next run, and only the second run knows how
+      // many of them were new, so the query has to travel with them. The run
+      // also carries the band, and this is the moment it has to be applied:
+      // the posts are paid for, the profiles behind them are not.
+      const asked = await ctx.runQuery(internal.crawl.runByExternal, { externalRunId: args.runId })
+      const band = asked?.band as { min: number; max: number } | undefined
+
+      // One author can have several posts in the results. Their best post is
+      // the one to judge them on: a band set on a bad day's post would throw
+      // away the right person for the wrong reason.
+      const best = new Map<string, number>()
+      for (const r of rows) {
+        const handle = String(r.ownerUsername ?? r.username ?? '').toLowerCase()
+        if (!handle) continue
+        const likes = Number(r.likesCount ?? 0)
+        if (likes > (best.get(handle) ?? -1)) best.set(handle, likes)
+      }
+      const seen = best.size
+      const handles = [...best.entries()]
+        .filter(([, likes]) => !band || (likes >= band.min && (!band.max || likes <= band.max)))
+        .map(([handle]) => handle)
+
+      if (!handles.length) return { ok: true, posts: rows.length, authors: seen, handles: 0, band }
       const run: Record<string, unknown> = await ctx.runAction(internal.ingest.detailRun, {
-        handles, campaignId: args.campaignId, channel: args.channel ?? 'search',
+        handles, campaignId: args.campaignId, channel: args.channel ?? 'search', query: asked?.query,
       })
-      return { ok: true, handles: handles.length, detailRun: run.runId ?? null }
+      return {
+        ok: true, posts: rows.length, authors: seen, band,
+        /** Authors the band kept, and so the only ones a profile is paid for. */
+        inBand: handles.length,
+        detailRun: run.runId ?? null, skipped: run.skipped ?? 0,
+      }
     }
 
     // Phase two: the measured facts land -------------------------------------
@@ -206,6 +326,9 @@ export const fromApify = internalAction({
           // Gate 1 reads these three. All computed, none declared.
           medianViews: median(forReach.filter((p) => p.kind === 'reel').map((p) => p.views)),
           medianComments: median(forReach.map((p) => p.comments)),
+          // Not judged on. It is the dial the post channel reads: likes are
+          // free and arrive before the profile is paid for.
+          medianLikes: median(forReach.map((p) => p.likes)),
           postsPerMonth: postsPerMonth(dates),
           lastPostAt: dates.length ? Math.max(...dates) : undefined,
           email: String(r.publicEmail ?? r.businessEmail ?? '') || bio.match(EMAIL)?.[0] || undefined,

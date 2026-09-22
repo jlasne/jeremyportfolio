@@ -131,6 +131,49 @@ export function usableSeeds(verdicts: SeedVerdict[]): string[] {
 export const SEEDS_ENOUGH = 5
 
 /**
+ * How few we refuse to start on. Three.
+ *
+ * It used to be optional, and the two campaigns created on 21/09 named none.
+ * What that cost was not the discovery, which has other ways in. It was the
+ * check: a brief describing 100k accounts while the client is thinking of
+ * 30k ones reads as a perfectly good brief, and the mismatch only shows up
+ * when three real names are put next to the rules. It needs three, because
+ * the check is on the middle one.
+ */
+export const SEEDS_REQUIRED = 3
+
+/**
+ * The size above which an account carries suggestions worth following.
+ *
+ * Instagram shows suggested accounts beside a profile, computed on audience
+ * overlap, and they are the best-aimed candidates we can get. Measured across
+ * 1,345 profiles: above this line an account carries them, below it almost
+ * none do, and it does not improve with better seeds.
+ */
+export const CARRIES_FROM = 500_000
+
+/**
+ * The two jobs a named account does, and whether this campaign gets both.
+ *
+ * Every campaign gets the first: a real name next to the rules is what
+ * catches a brief that describes one person and means another, and it is
+ * what the judge reads to know what a good one looks like.
+ *
+ * Only a campaign whose ceiling reaches 500k gets the second, because only
+ * accounts that size carry neighbours. Telling a client hunting 10k creators
+ * that better seeds will find them more people would be a lie.
+ */
+export function seedJobs(hard: HardRules): { drives: boolean; note: string } {
+  const drives = (hard.followersMax ?? Infinity) >= CARRIES_FROM
+  return {
+    drives,
+    note: drives
+      ? 'Accounts this size carry suggestions from Instagram itself, and those are the best-aimed candidates we can buy. Name a few of the biggest and we follow them.'
+      : 'At this size Instagram suggests almost nobody beside an account, so these names tell the judge what a good one looks like rather than lead us to more.',
+  }
+}
+
+/**
  * Accounts we already hold that match what the client just described.
  *
  * The point is not to fill the field for them. It is that a client staring at

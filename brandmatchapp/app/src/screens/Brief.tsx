@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { getCampaign, getGateSet } from '../data'
-import { checkSeeds, cleanHandles, seedMismatch, SEEDS_ENOUGH } from '../data/seeds'
+import { checkSeeds, cleanHandles, seedJobs, seedMismatch, SEEDS_ENOUGH } from '../data/seeds'
 import { addSeeds, removeSeed, setBrief } from '../data/store'
 import { SizeAndActivity } from '../components/SizeAndActivity'
 
@@ -26,6 +26,10 @@ export function Brief({ campaignId }: { campaignId: string }) {
   const seeds = checkSeeds(brief.seeds ?? [], gates, extracted.niches)
   const mismatch = gates ? seedMismatch(seeds, gates.hard) : null
   const short = Math.max(0, SEEDS_ENOUGH - seeds.length)
+  // Below a 500k ceiling these names cannot lead anywhere: Instagram suggests
+  // almost nobody beside an account that size. They still hold the rules to
+  // something real, which is the job worth asking for.
+  const jobs = gates ? seedJobs(gates.hard) : null
 
   return (
     <>
@@ -53,10 +57,13 @@ export function Brief({ campaignId }: { campaignId: string }) {
         <h2>Accounts you gave us</h2>
         <p className="muted">
           {seeds.length === 0
-            ? `None yet. Name ${SEEDS_ENOUGH} accounts you already know fit, and we look at the people around them.`
-            : `${seeds.filter((v) => v.state !== 'fails').length} of ${seeds.length} hold up against your rules today. We follow those to find people like them, and leave the rest alone.`}
+            ? `None yet. Name ${SEEDS_ENOUGH} accounts you already know fit, and we hold your rules against them.`
+            : `${seeds.filter((v) => v.state !== 'fails').length} of ${seeds.length} hold up against your rules today.${
+                jobs?.drives ? ' We follow those to find people like them, and leave the rest alone.' : ''
+              }`}
         </p>
-        {short > 0 && seeds.length > 0 && (
+        {jobs && <p className="muted">{jobs.note}</p>}
+        {short > 0 && seeds.length > 0 && jobs?.drives && (
           <p className="hint">{short} more would help. Five is where the people around them start to add up.</p>
         )}
         {mismatch && <p className="notice warn">{mismatch}</p>}

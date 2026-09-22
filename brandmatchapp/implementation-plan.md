@@ -85,14 +85,14 @@ Soit 11,4 candidats neufs par porteur. Les 40 porteurs au-dessus de 500k en four
 
 ---
 
-## Chantier 1 : ne jamais payer deux fois
+## Chantier 1 : ne jamais payer deux fois — LIVRÉ
 
-**Aucune dépendance. Gain mesuré : 62% de rachat évité sur un second passage.**
+**Aucune dépendance. Mesuré après coup : 31% de rachat sur la campagne divertissement, plus 0,70 $ de runs tués par le plafond Apify.**
 
 ### Trois choses, indépendantes les unes des autres
 
 **1.1 Le rendement par requête.**
-Chaque recherche retient ce qu'elle a rendu : profils vus, profils nouveaux, coût. Une requête qui rend zéro nouveau deux fois de suite est retirée de la campagne.
+Chaque recherche retient ce qu'elle a rendu : profils vus, profils nouveaux, coût. Une requête qui rend zéro nouveau une fois est retirée de la campagne. Une seule fois, pas deux : la recherche de comptes Instagram est déterministe, les mêmes mots rendent la même liste. Un run qui n'a rien acheté ne compte pas comme preuve. `accounts` accepte `force` pour rouvrir une requête retirée.
 
 Mesuré : "street interviewer" plafonne à 6 comptes, "challenge creator" à 20. Les relancer à 72 achète 40 comptes déjà connus pour en gagner zéro.
 
@@ -112,13 +112,31 @@ Aujourd'hui : 1 576 comptes en base. À 100 000, une campagne y trouve 3 000 can
 
 ### Vérifié par
 
-Un run sur une campagne existante. Le rapport doit montrer zéro profil racheté, et le nombre de requêtes retirées.
+Mesuré sur les trois campagnes vivantes, sans dépenser un centime de plus.
+
+| campagne | fiches achetées | nouvelles | rachat | perdu | $ / lead |
+|---|---|---|---|---|---|
+| Divertissement | 730 | 506 | 31% | 0,70 $ | 0,52 $ |
+| Chien | 258 | 236 | 9% | 0 | 0,29 $ |
+| Fitness 100k-3M | 353 | 312 | 12% | 0 | 0,31 $ |
+
+Requêtes retirées : `challenge creator` et `street interviewer` sur divertissement, `fitness ebook author` sur fitness. Relancées, elles répondent « retirée », sans run et sans coût.
+
+Rachat : six handles déjà mesurés ce mois-ci, demandés à `detailRun`, donnent `asked 6, handles 0, skipped 6`. Aucun run lancé.
+
+Fraîcheur : zéro profil de la base dépasse 30 jours. La règle est posée et dort.
+
+### Deux choses trouvées en chemin, corrigées
+
+**Quatorze runs tués par le plafond Apify.** Apify ne refuse pas un run quand le compte a atteint son plafond mensuel : il le lance, le laisse travailler trois minutes, puis le tue — et facture les trois minutes. 0,70 $ perdus, 14% de la facture de la campagne. `startRun` lit désormais le solde du cycle avant chaque run et refuse en dessous de 3 $, réserve laissée au pipeline manuel qui partage le même compte.
+
+**Quatorze runs jamais refermés.** Le webhook n'était jamais arrivé, donc la campagne s'affichait à 2,21 $ au lieu de 5,08 $ et à 0,23 $ le lead au lieu de 0,52 $. `sourcing.reconcile` demande à Apify ce qui s'est vraiment passé et referme. Un run qui a réussi et dont on n'a jamais lu les lignes reste ouvert : les refermer perdrait ce qu'on a payé.
 
 ---
 
-## Chantier 1bis : un canal par fenêtre de cible
+## Chantier 1bis : un canal par fenêtre de cible — LIVRÉ, CANAL RÉFUTÉ
 
-**Né du chantier 0. C'est l'adaptation qui rend le produit valable pour n'importe quelle campagne.**
+**Le cadran de taille est validé en conditions réelles. Le canal qui devait l'alimenter est mort. Coût de la mesure : 3,82 $.**
 
 ### Ce que le chantier 0 a révélé
 
@@ -176,17 +194,62 @@ Google fonctionne partout et reste la colonne vertébrale. Les voisins sont un c
 3. La recherche de posts arrive comme canal, avec une bande de likes calculée depuis la fenêtre.
 4. Chaque run enregistre la visée réelle par canal, et le prochain run rééquilibre vers celui qui vise le mieux sur cette campagne.
 
-### Vérifié par
+### Ce qui a été construit
 
-Une campagne à 10k-100k et une campagne à 100k-3M, chacune 300 profils, visée comparée par canal.
+`channels.ts` : la table likes → abonnés, l'inversion sur échelle log, la bande pour n'importe quelle fenêtre, et `bandCheck` qui mesure gratuitement la visée d'une bande sur notre propre base.
 
-Le seuil de succès : battre nos 15% actuels sur les deux fenêtres.
+`channels.plan` : la fenêtre de la campagne choisit ses canaux, avec la raison écrite pour le client.
+
+`sourcing.aim` : la visée réelle par canal **par campagne**. L'écran ops mélangeait toutes les campagnes, ce qui répond à une question que personne ne pose.
+
+### Le réglage de la bande : mesuré, pas deviné
+
+J'avais serré les bords de 35%. Mesuré sur nos 1 273 comptes, c'était une erreur.
+
+| bords | visée | portée |
+|---|---|---|
+| bruts | 39% | 37% |
+| serrés 35% | 41% | 23% |
+| serrés 100% | 46% | 7% |
+
+Deux points de visée contre trente de portée. Bords bruts, aucune constante à régler.
+
+### Vérifié par : un vrai run, 3,82 $
+
+**Le cadran marche.** Sur les 23 auteurs retenus par la bande, 10 sont dans la fenêtre 10k-100k. **43% de visée**, contre 41% prédits depuis notre base et 24% pour la recherche de comptes. La meilleure visée de tous nos canaux.
+
+**Le canal est inabordable.** Un post coûte 0,23 centime, exactement le prix d'une fiche. Et 81% des 1 225 auteurs sous huit hashtags de sujet font moins de 50 likes, médiane 1.
+
+| canal | coût par candidat dans la fenêtre |
+|---|---|
+| posts sous hashtag, avec bande | **0,38 $** |
+| recherche de comptes | **0,01 $** |
+
+Les hashtags Instagram ne sont pas l'endroit où postent les créateurs qui valent 38 centimes. Canal coupé. Le cadran est gardé et validé : il attend une source de posts de vrais créateurs.
+
+### Visée réelle par canal, mesurée
+
+| campagne | fenêtre | voisins | comptes | hashtags |
+|---|---|---|---|---|
+| Divertissement | 10k-100k | 26% | 24% | 13% |
+| Fitness | 100k-3M | 32% | 26% | 3% |
+| Chien | 20k-1M | 40% | 47% | 10% |
+
+Le canal hashtag non filtré est le pire des trois, partout.
+
+### Ce qui reste ouvert
+
+La fenêtre 10k-100k n'a toujours pas de bon canal. Les voisins y visent 26%, la recherche de comptes 24%. Le chantier 4 (Google) est la prochaine piste, et il est bloqué faute de clé.
+
+### Une erreur qui a coûté 3,20 $
+
+`resultsLimit` d'Apify est **par URL**, pas par run. Huit hashtags à 200 posts font 1 600 posts. J'ai demandé 200 et payé 1 600. Corrigé : la limite est divisée par le nombre d'URL, le chiffre passé est le nombre de posts payés.
 
 ---
 
-## Chantier 2 : les graines
+## Chantier 2 : les graines — LIVRÉ
 
-**Dépend de 0 pour son utilité. Peut être construit avant.**
+**Coût de la vérification : 0,05 $.**
 
 ### Quatre choses
 
@@ -222,7 +285,25 @@ Un créateur qualifié pour une campagne sert de graine à une autre campagne de
 
 ### Vérifié par
 
-Une campagne créée sans graine doit être refusée. Une campagne avec quatre graines étalées doit montrer sa couverture de fourchette.
+**Refus, côté API et pas seulement côté écran.** Zéro graine et deux graines reviennent en 400 avec la raison écrite. Trois graines passent, dédoublonnées et nettoyées du `@`.
+
+**Le vrai motif du refus n'est pas la découverte.** C'est le contrôle. Un brief qui décrit des comptes à 100k écrit par quelqu'un qui pense à 30k se lit parfaitement. Seuls trois vrais noms posés à côté des règles le révèlent. Il en faut trois parce que le contrôle porte sur celui du milieu.
+
+**Les deux métiers, mesurés par campagne.**
+
+| campagne | fenêtre | parents | qui portent |
+|---|---|---|---|
+| Divertissement | 10k-100k | 12 | **1** |
+| Fitness | 100k-3M | 12 | **9** |
+| Chien | 20k-1M | 51 | 15 |
+
+Le chantier 0 mesuré campagne par campagne. Sous 100k, presque rien ne porte, et aucune meilleure graine n'y changera rien. L'écran le dit maintenant au lieu de vendre un canal mort.
+
+**Les candidats gratuits, achetés.** 23 profils cités par nos porteurs, jamais payés jusqu'ici. 0,053 $. La visée du canal voisins sur fitness passe de 32% à 34%.
+
+### 2.4 : construit, jamais déclenché
+
+Les graines croisées exigent un **libellé de niche identique** entre deux campagnes. Nos trois campagnes n'en partagent aucun : « comedy » d'un côté, « training program coach » de l'autre. Le code est posé et attend deux campagnes de la même niche. Assouplir la correspondance ferait semer une campagne comédie par du fitness. Règle stricte gardée.
 
 ---
 

@@ -18,6 +18,23 @@ import { v } from 'convex/values'
 export const ACTOR = 'apify~instagram-scraper'
 export const APIFY = 'https://api.apify.com/v2'
 
+/**
+ * How long one measurement stands: thirty days.
+ *
+ * It cuts both ways, and both ways cost money.
+ *
+ * Inside the window, paying Apify again for a profile buys nothing. One
+ * campaign bought 730 profiles and 224 of them were already on file,
+ * measured days earlier by the same words: 31% of its search budget spent on
+ * rows it already had.
+ *
+ * Outside it, the numbers on file describe a person who has since changed:
+ * followers, median views and posting rhythm all move. So a profile older
+ * than this is a candidate again, never a verdict. It is re-bought before it
+ * is judged.
+ */
+export const FRESH_MS = 30 * 24 * 3_600_000
+
 /** base64 without Buffer, so this stays off the Node runtime. */
 export function toBase64(text: string): string {
   const bytes = new TextEncoder().encode(text)
@@ -47,12 +64,55 @@ export function webhookParam(payload: Record<string, string>): string {
   }]))
 }
 
+/**
+ * What is left of the month's Apify budget, in dollars.
+ *
+ * Apify does not refuse a run when the account is out of budget. It starts
+ * it, lets it work, and kills it a few minutes in with "you've reached the
+ * maximum usage for your current billing cycle" — and charges for the minutes.
+ * One campaign lost 70 cents that way across 14 runs that returned nothing,
+ * 14% of its whole crawl bill, because the loop that started them had no way
+ * of knowing the first one had already failed.
+ *
+ * The check is free and takes one call. It runs before every run we start.
+ */
+async function budgetLeftUsd(token: string): Promise<number | null> {
+  try {
+    const res = await fetch(`${APIFY}/users/me/limits?token=${token}`)
+    if (!res.ok) return null
+    const d = (await res.json())?.data
+    const cap = Number(d?.limits?.maxMonthlyUsageUsd)
+    const used = Number(d?.current?.monthlyUsageUsd)
+    if (!Number.isFinite(cap) || !Number.isFinite(used)) return null
+    return Math.round((cap - used) * 100) / 100
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Dollars of the Apify cycle left untouched by anything automatic.
+ *
+ * The account is shared: the manual pipeline pulls leads through the same
+ * token, at the same time, against the same monthly cap. A crawl that spends
+ * the last dollar does not only kill its own next run, it kills theirs. So
+ * the automated side stops with a reserve still on the meter and says so.
+ */
+const FLOOR_USD = 3
+
 export async function startRun(
   input: Record<string, unknown>,
   meta: { phase: string; campaignId: string; channel: string },
 ): Promise<{ runId: string } | { error: string }> {
   const token = process.env.APIFY_TOKEN
   if (!token) return { error: 'APIFY_TOKEN is not set' }
+
+  const left = await budgetLeftUsd(token)
+  if (left !== null && left < FLOOR_USD) {
+    return {
+      error: `Apify has $${left.toFixed(2)} left this cycle, under the $${FLOOR_USD} kept for the manual pipeline. Nothing started.`,
+    }
+  }
 
   const hook = webhookParam({ phase: meta.phase, campaignId: meta.campaignId, channel: meta.channel })
   const res = await fetch(`${APIFY}/acts/${ACTOR}/runs?token=${token}&webhooks=${encodeURIComponent(hook)}`, {
@@ -76,7 +136,15 @@ export async function startRun(
  * the cheapest way to start and the worst way to continue.
  */
 export const search = internalAction({
-  args: { campaignId: v.id('campaigns'), keywords: v.array(v.string()), limit: v.optional(v.number()) },
+  args: {
+    campaignId: v.id('campaigns'),
+    /** The tags to look under. Empty takes the campaign's own niches. */
+    keywords: v.array(v.string()),
+    /** Posts to buy in total, across every tag. Not per tag. */
+    limit: v.optional(v.number()),
+    /** Overrides the band the window would choose. For measuring one. */
+    band: v.optional(v.object({ min: v.number(), max: v.number() })),
+  },
   returns: v.any(),
   handler: async (ctx, args): Promise<Record<string, unknown>> => {
     const campaign = await ctx.runQuery(internal.crawl.campaignFor, { campaignId: args.campaignId })
@@ -84,18 +152,38 @@ export const search = internalAction({
     const budget = await ctx.runQuery(internal.ops.budgetLeft, { accountId: campaign.accountId })
     if (budget.left <= 0) return { error: 'Fair use reached for today', internal: true }
 
+    // The size dial. A post carries its like count and its author's name, and
+    // the likes say how big the author is, so the run that costs 0.23 cents a
+    // profile can be asked only for the authors worth having. Without it this
+    // channel buys whoever posted under the tag: measured on the first real
+    // run, a median of 1.2k followers and one in a hundred through gate 1.
+    const plan = await ctx.runQuery(internal.channels.plan, { campaignId: args.campaignId })
+    const band = args.band ?? (plan.error ? null : plan.band)
+    const words = args.keywords.length ? args.keywords : (plan.topics ?? [])
+    if (!words.length) return { error: 'Nothing to search for' }
+
+    const urls = words.slice(0, 20).map((k: string) =>
+      `https://www.instagram.com/explore/tags/${encodeURIComponent(k.replace(/[^a-z0-9]/gi, ''))}/`)
+
+    // resultsLimit is per url, not per run. Eight tags at 200 is 1,600 posts,
+    // and a post costs 0.23 cents, the same as a profile. Asking for 200 and
+    // being charged for 1,600 cost 3.67 dollars once. The limit is divided
+    // here so that the number passed in is the number of posts paid for.
+    const perUrl = Math.max(1, Math.floor((args.limit ?? 120) / urls.length))
+
     const input = {
-      directUrls: args.keywords.slice(0, 20).map((k) => `https://www.instagram.com/explore/tags/${encodeURIComponent(k)}/`),
+      directUrls: urls,
       resultsType: 'posts',
-      resultsLimit: Math.min(args.limit ?? 120, budget.left),
+      resultsLimit: perUrl,
       addParentData: false,
     }
     const started = await startRun(input, { phase: 'search', campaignId: args.campaignId, channel: 'search' })
     if ('error' in started) return started
     await ctx.runMutation(internal.crawl.noteRun, {
       externalRunId: started.runId, phase: 'search', campaignId: args.campaignId, channel: 'search',
+      ...(band ? { band } : {}),
     })
-    return { runId: started.runId }
+    return { runId: started.runId, band, topics: words.slice(0, 20), posts: perUrl * urls.length }
   },
 })
 
@@ -119,6 +207,8 @@ export const noteRun = internalMutation({
     phase: v.string(),
     campaignId: v.optional(v.id('campaigns')),
     channel: v.optional(v.string()),
+    query: v.optional(v.string()),
+    band: v.optional(v.object({ min: v.number(), max: v.number() })),
     sources: v.optional(v.array(v.object({ handle: v.string(), parents: v.optional(v.array(v.string())) }))),
   },
   returns: v.null(),
@@ -129,6 +219,8 @@ export const noteRun = internalMutation({
       externalRunId: args.externalRunId,
       phase: args.phase,
       channel: args.channel,
+      query: args.query,
+      band: args.band,
       sources: args.sources,
       status: 'RUNNING',
       profilesFetched: 0,
@@ -151,6 +243,26 @@ export const setChannel = internalMutation({
     await ctx.db.patch(run._id, { channel: args.channel })
     return { ok: true }
   },
+})
+
+/** Names the words a run searched for, on a run started before runs kept them. */
+export const setQuery = internalMutation({
+  args: { externalRunId: v.string(), query: v.string() },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    const run = await ctx.db.query('crawlRuns').withIndex('by_external', (q) => q.eq('externalRunId', args.externalRunId)).first()
+    if (!run) return { error: 'No such run' }
+    await ctx.db.patch(run._id, { query: args.query })
+    return { ok: true }
+  },
+})
+
+/** Every run of one campaign, for the operator queries that read them. */
+export const runsFor = internalQuery({
+  args: { campaignId: v.id('campaigns') },
+  returns: v.any(),
+  handler: async (ctx, { campaignId }) =>
+    await ctx.db.query('crawlRuns').withIndex('by_campaign', (q) => q.eq('campaignId', campaignId)).collect(),
 })
 
 /** Closes a run and writes what it cost. The cost never leaves this table. */

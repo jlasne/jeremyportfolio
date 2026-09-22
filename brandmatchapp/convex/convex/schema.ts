@@ -340,6 +340,14 @@ export default defineSchema({
     /** Median over the posts in creatorPosts, not a declared number. */
     medianViews: v.optional(v.number()),
     medianComments: v.optional(v.number()),
+    /**
+     * Likes on a typical post.
+     *
+     * Not a gate. It is the size dial: a post search hands back likes and an
+     * author name before anything is paid for, and the likes say how big the
+     * author is. See channels.ts for the measured table.
+     */
+    medianLikes: v.optional(v.number()),
     postsPerMonth: v.optional(v.number()),
     lastPostAt: v.optional(v.number()),
     country: v.optional(v.string()),
@@ -642,6 +650,24 @@ export default defineSchema({
     phase: v.string(),
     /** Which way of searching this run served: search, accounts, neighbour, seed. */
     channel: v.optional(v.string()),
+    /**
+     * The likes a post had to carry for its author to be worth a profile.
+     *
+     * Written on a post search, read when its results land. The filter has to
+     * happen between the two: the posts are already paid for by then, and the
+     * profiles behind them are not.
+     */
+    band: v.optional(v.object({ min: v.number(), max: v.number() })),
+    /**
+     * The words searched for, when this run was a search.
+     *
+     * Kept so a query can be judged on what it returns. Instagram's account
+     * search is deterministic: the same words give the same accounts in the
+     * same order, so a query that returned nothing new will return nothing
+     * new again. Two queries in seven did exactly that and were paid for
+     * twice.
+     */
+    query: v.optional(v.string()),
     /**
      * The handles a detail run was asked for, each with the accounts that
      * pointed at it. Apify sends the run id back and nothing else, so this is
