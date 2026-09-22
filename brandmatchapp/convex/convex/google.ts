@@ -267,6 +267,23 @@ export const search = internalAction({
       aim: found.size ? Math.round((worth.length / found.size) * 100) : 0,
       perQuery,
     }
+    // The searching is written down as a run of its own.
+    //
+    // Only the profile fetches were being recorded, so a campaign's report
+    // showed what Apify had charged and nothing of what Google had, and this
+    // channel spends more on searching than on fetching. A cost nobody
+    // records is a cost nobody compares.
+    const searchRunId = `serper:${Date.now()}`
+    await ctx.runMutation(internal.crawl.noteRun, {
+      externalRunId: searchRunId, phase: 'search', campaignId: args.campaignId,
+      channel: 'google', query: topics.join(', '),
+    })
+    await ctx.runMutation(internal.crawl.finishRun, {
+      externalRunId: searchRunId, status: 'SUCCEEDED',
+      profilesFetched: found.size, profilesFresh: worth.length,
+      costCents: Math.round(searches * CENTS_PER_SEARCH),
+    })
+
     if (!args.buy) return { ...out, note: 'Nothing bought. Pass buy: true to fetch these profiles.' }
     if (!worth.length) return { ...out, note: 'Nothing inside the window' }
 
