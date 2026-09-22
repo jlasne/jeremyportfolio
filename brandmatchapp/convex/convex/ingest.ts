@@ -47,6 +47,40 @@ async function datasetItems(datasetId: string, token: string): Promise<Record<st
 }
 
 /**
+ * Writes the median likes on profiles measured before likes were kept.
+ *
+ * The posts are already in base with their like counts, so this reads what we
+ * hold and computes. Nothing is paid for. Walks oldest first, a page at a
+ * time, and hands back the cursor for the next page.
+ */
+export const backfillLikes = internalMutation({
+  args: { after: v.optional(v.number()), limit: v.optional(v.number()) },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    const rows = await ctx.db
+      .query('creators')
+      .withIndex('by_measured', (q) => q.gt('measuredAt', args.after ?? 0))
+      .order('asc')
+      .take(args.limit ?? 200)
+    let written = 0
+    let last = args.after ?? 0
+    for (const c of rows) {
+      last = c.measuredAt
+      if (c.medianLikes !== undefined) continue
+      const posts = await ctx.db
+        .query('creatorPosts')
+        .withIndex('by_creator', (q) => q.eq('creatorId', c._id))
+        .collect()
+      const likes = median(posts.filter((p) => !p.pinned).map((p) => p.likes))
+      if (likes === undefined) continue
+      await ctx.db.patch(c._id, { medianLikes: likes })
+      written++
+    }
+    return { seen: rows.length, written, next: rows.length ? last : null }
+  },
+})
+
+/**
  * Which of these handles we already hold a recent measurement of.
  *
  * Read before every detail run. The profile behind a handle costs 0.23 cents
@@ -195,18 +229,39 @@ export const fromApify = internalAction({
     // on them would pay for the same rows twice.
     const wholeProfiles = rows.some((r) => r.username && typeof r.followersCount === 'number')
     if (args.phase === 'search' && !wholeProfiles) {
-      const handles = [...new Set(
-        rows.map((r) => String(r.ownerUsername ?? r.username ?? '').toLowerCase()).filter(Boolean),
-      )]
-      if (!handles.length) return { ok: true, handles: 0 }
       // The words carry over. A hashtag search pays for the handles here and
       // for the profiles in the next run, and only the second run knows how
-      // many of them were new, so the query has to travel with them.
+      // many of them were new, so the query has to travel with them. The run
+      // also carries the band, and this is the moment it has to be applied:
+      // the posts are paid for, the profiles behind them are not.
       const asked = await ctx.runQuery(internal.crawl.runByExternal, { externalRunId: args.runId })
+      const band = asked?.band as { min: number; max: number } | undefined
+
+      // One author can have several posts in the results. Their best post is
+      // the one to judge them on: a band set on a bad day's post would throw
+      // away the right person for the wrong reason.
+      const best = new Map<string, number>()
+      for (const r of rows) {
+        const handle = String(r.ownerUsername ?? r.username ?? '').toLowerCase()
+        if (!handle) continue
+        const likes = Number(r.likesCount ?? 0)
+        if (likes > (best.get(handle) ?? -1)) best.set(handle, likes)
+      }
+      const seen = best.size
+      const handles = [...best.entries()]
+        .filter(([, likes]) => !band || (likes >= band.min && (!band.max || likes <= band.max)))
+        .map(([handle]) => handle)
+
+      if (!handles.length) return { ok: true, posts: rows.length, authors: seen, handles: 0, band }
       const run: Record<string, unknown> = await ctx.runAction(internal.ingest.detailRun, {
         handles, campaignId: args.campaignId, channel: args.channel ?? 'search', query: asked?.query,
       })
-      return { ok: true, handles: handles.length, detailRun: run.runId ?? null, skipped: run.skipped ?? 0 }
+      return {
+        ok: true, posts: rows.length, authors: seen, band,
+        /** Authors the band kept, and so the only ones a profile is paid for. */
+        inBand: handles.length,
+        detailRun: run.runId ?? null, skipped: run.skipped ?? 0,
+      }
     }
 
     // Phase two: the measured facts land -------------------------------------
@@ -271,6 +326,9 @@ export const fromApify = internalAction({
           // Gate 1 reads these three. All computed, none declared.
           medianViews: median(forReach.filter((p) => p.kind === 'reel').map((p) => p.views)),
           medianComments: median(forReach.map((p) => p.comments)),
+          // Not judged on. It is the dial the post channel reads: likes are
+          // free and arrive before the profile is paid for.
+          medianLikes: median(forReach.map((p) => p.likes)),
           postsPerMonth: postsPerMonth(dates),
           lastPostAt: dates.length ? Math.max(...dates) : undefined,
           email: String(r.publicEmail ?? r.businessEmail ?? '') || bio.match(EMAIL)?.[0] || undefined,

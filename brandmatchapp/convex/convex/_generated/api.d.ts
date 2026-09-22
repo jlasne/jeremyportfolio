@@ -10,6 +10,7 @@
 
 import type * as accounts from "../accounts.js";
 import type * as campaigns from "../campaigns.js";
+import type * as channels from "../channels.js";
 import type * as clientApi from "../clientApi.js";
 import type * as crawl from "../crawl.js";
 import type * as crons from "../crons.js";
@@ -39,6 +40,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   accounts: typeof accounts;
   campaigns: typeof campaigns;
+  channels: typeof channels;
   clientApi: typeof clientApi;
   crawl: typeof crawl;
   crons: typeof crons;

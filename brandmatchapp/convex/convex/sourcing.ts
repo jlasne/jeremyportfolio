@@ -2,6 +2,7 @@ import { internalAction, internalMutation, internalQuery } from './_generated/se
 import { internal } from './_generated/api'
 import { v } from 'convex/values'
 import { FRESH_MS, startRun } from './crawl'
+import { loosest } from './gates'
 
 // Where the handles come from.
 //
@@ -438,6 +439,80 @@ export const refresh = internalAction({
       handles: found.handles, campaignId: args.campaignId, channel: 'refresh', refresh: true,
     })
     return { stale: found.stale, asked: found.handles.length, ...run }
+  },
+})
+
+/**
+ * How well each channel aims, on this campaign.
+ *
+ * The ops screen mixes every profile a channel ever found, across campaigns
+ * and across months. That answers which channel is good in general, which is
+ * not a question anyone has. The question is which channel is good for this
+ * client, whose follower window is their own, and the answer changes with it:
+ * a channel that lands 63% for someone hunting 500k accounts lands near
+ * nothing for someone hunting 10k ones.
+ *
+ * Aim is the share of what a channel bought that fell inside the window.
+ * Everything else follows from it: the profile costs the same whoever found
+ * it, so cost per candidate in the target is the profile price divided by aim.
+ */
+export const aim = internalQuery({
+  args: { campaignId: v.id('campaigns') },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<Record<string, unknown>> => {
+    const campaign = await ctx.db.get(args.campaignId)
+    if (!campaign) return { error: 'No such campaign' }
+    const gates = campaign.gateSetId ? await ctx.db.get(campaign.gateSetId) : null
+    if (!gates) return { error: 'This campaign has no gates yet' }
+    const hard = loosest(gates.hard, campaign.extracted.niches ?? [])
+    const lo = hard.followersMin ?? 0
+    const hi = hard.followersMax ?? Number.MAX_SAFE_INTEGER
+
+    const rows = await ctx.db
+      .query('evaluations')
+      .withIndex('by_campaign', (q) => q.eq('campaignId', args.campaignId))
+      .collect()
+
+    type Line = { bought: number; inWindow: number; qualified: number }
+    const by = new Map<string, Line>()
+    for (const e of rows) {
+      const c = await ctx.db.get(e.creatorId)
+      if (!c) continue
+      const key = c.foundVia?.channel ?? 'search'
+      const line = by.get(key) ?? { bought: 0, inWindow: 0, qualified: 0 }
+      line.bought++
+      const n = c.followers ?? 0
+      if (n >= lo && n <= hi) line.inWindow++
+      if (e.verdict === 'qualified') line.qualified++
+      by.set(key, line)
+    }
+
+    // What each channel was paid. A run belongs to one channel, so this is
+    // the one number that does not need a join.
+    const runs = await ctx.db
+      .query('crawlRuns')
+      .withIndex('by_campaign', (q) => q.eq('campaignId', args.campaignId))
+      .collect()
+    const cents = new Map<string, number>()
+    for (const r of runs) {
+      const key = r.channel ?? 'search'
+      cents.set(key, (cents.get(key) ?? 0) + r.costCents)
+    }
+
+    const channels = [...by.entries()]
+      .map(([channel, l]) => ({
+        channel,
+        bought: l.bought,
+        inWindow: l.inWindow,
+        /** The share that landed inside the window. The number to compare. */
+        aim: l.bought ? Math.round((l.inWindow / l.bought) * 100) : 0,
+        qualified: l.qualified,
+        costCents: cents.get(channel) ?? 0,
+        centsPerInWindow: l.inWindow ? Math.round(((cents.get(channel) ?? 0) / l.inWindow) * 100) / 100 : null,
+      }))
+      .sort((a, b) => b.aim - a.aim)
+
+    return { window: { followersMin: lo, followersMax: hard.followersMax ?? null }, channels }
   },
 })
 

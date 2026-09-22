@@ -136,7 +136,15 @@ export async function startRun(
  * the cheapest way to start and the worst way to continue.
  */
 export const search = internalAction({
-  args: { campaignId: v.id('campaigns'), keywords: v.array(v.string()), limit: v.optional(v.number()) },
+  args: {
+    campaignId: v.id('campaigns'),
+    /** The tags to look under. Empty takes the campaign's own niches. */
+    keywords: v.array(v.string()),
+    /** Posts to buy in total, across every tag. Not per tag. */
+    limit: v.optional(v.number()),
+    /** Overrides the band the window would choose. For measuring one. */
+    band: v.optional(v.object({ min: v.number(), max: v.number() })),
+  },
   returns: v.any(),
   handler: async (ctx, args): Promise<Record<string, unknown>> => {
     const campaign = await ctx.runQuery(internal.crawl.campaignFor, { campaignId: args.campaignId })
@@ -144,18 +152,38 @@ export const search = internalAction({
     const budget = await ctx.runQuery(internal.ops.budgetLeft, { accountId: campaign.accountId })
     if (budget.left <= 0) return { error: 'Fair use reached for today', internal: true }
 
+    // The size dial. A post carries its like count and its author's name, and
+    // the likes say how big the author is, so the run that costs 0.23 cents a
+    // profile can be asked only for the authors worth having. Without it this
+    // channel buys whoever posted under the tag: measured on the first real
+    // run, a median of 1.2k followers and one in a hundred through gate 1.
+    const plan = await ctx.runQuery(internal.channels.plan, { campaignId: args.campaignId })
+    const band = args.band ?? (plan.error ? null : plan.band)
+    const words = args.keywords.length ? args.keywords : (plan.topics ?? [])
+    if (!words.length) return { error: 'Nothing to search for' }
+
+    const urls = words.slice(0, 20).map((k: string) =>
+      `https://www.instagram.com/explore/tags/${encodeURIComponent(k.replace(/[^a-z0-9]/gi, ''))}/`)
+
+    // resultsLimit is per url, not per run. Eight tags at 200 is 1,600 posts,
+    // and a post costs 0.23 cents, the same as a profile. Asking for 200 and
+    // being charged for 1,600 cost 3.67 dollars once. The limit is divided
+    // here so that the number passed in is the number of posts paid for.
+    const perUrl = Math.max(1, Math.floor((args.limit ?? 120) / urls.length))
+
     const input = {
-      directUrls: args.keywords.slice(0, 20).map((k) => `https://www.instagram.com/explore/tags/${encodeURIComponent(k)}/`),
+      directUrls: urls,
       resultsType: 'posts',
-      resultsLimit: Math.min(args.limit ?? 120, budget.left),
+      resultsLimit: perUrl,
       addParentData: false,
     }
     const started = await startRun(input, { phase: 'search', campaignId: args.campaignId, channel: 'search' })
     if ('error' in started) return started
     await ctx.runMutation(internal.crawl.noteRun, {
       externalRunId: started.runId, phase: 'search', campaignId: args.campaignId, channel: 'search',
+      ...(band ? { band } : {}),
     })
-    return { runId: started.runId }
+    return { runId: started.runId, band, topics: words.slice(0, 20), posts: perUrl * urls.length }
   },
 })
 
@@ -180,6 +208,7 @@ export const noteRun = internalMutation({
     campaignId: v.optional(v.id('campaigns')),
     channel: v.optional(v.string()),
     query: v.optional(v.string()),
+    band: v.optional(v.object({ min: v.number(), max: v.number() })),
     sources: v.optional(v.array(v.object({ handle: v.string(), parents: v.optional(v.array(v.string())) }))),
   },
   returns: v.null(),
@@ -191,6 +220,7 @@ export const noteRun = internalMutation({
       phase: args.phase,
       channel: args.channel,
       query: args.query,
+      band: args.band,
       sources: args.sources,
       status: 'RUNNING',
       profilesFetched: 0,

@@ -134,9 +134,9 @@ Fraîcheur : zéro profil de la base dépasse 30 jours. La règle est posée et 
 
 ---
 
-## Chantier 1bis : un canal par fenêtre de cible
+## Chantier 1bis : un canal par fenêtre de cible — LIVRÉ, CANAL RÉFUTÉ
 
-**Né du chantier 0. C'est l'adaptation qui rend le produit valable pour n'importe quelle campagne.**
+**Le cadran de taille est validé en conditions réelles. Le canal qui devait l'alimenter est mort. Coût de la mesure : 3,82 $.**
 
 ### Ce que le chantier 0 a révélé
 
@@ -194,11 +194,56 @@ Google fonctionne partout et reste la colonne vertébrale. Les voisins sont un c
 3. La recherche de posts arrive comme canal, avec une bande de likes calculée depuis la fenêtre.
 4. Chaque run enregistre la visée réelle par canal, et le prochain run rééquilibre vers celui qui vise le mieux sur cette campagne.
 
-### Vérifié par
+### Ce qui a été construit
 
-Une campagne à 10k-100k et une campagne à 100k-3M, chacune 300 profils, visée comparée par canal.
+`channels.ts` : la table likes → abonnés, l'inversion sur échelle log, la bande pour n'importe quelle fenêtre, et `bandCheck` qui mesure gratuitement la visée d'une bande sur notre propre base.
 
-Le seuil de succès : battre nos 15% actuels sur les deux fenêtres.
+`channels.plan` : la fenêtre de la campagne choisit ses canaux, avec la raison écrite pour le client.
+
+`sourcing.aim` : la visée réelle par canal **par campagne**. L'écran ops mélangeait toutes les campagnes, ce qui répond à une question que personne ne pose.
+
+### Le réglage de la bande : mesuré, pas deviné
+
+J'avais serré les bords de 35%. Mesuré sur nos 1 273 comptes, c'était une erreur.
+
+| bords | visée | portée |
+|---|---|---|
+| bruts | 39% | 37% |
+| serrés 35% | 41% | 23% |
+| serrés 100% | 46% | 7% |
+
+Deux points de visée contre trente de portée. Bords bruts, aucune constante à régler.
+
+### Vérifié par : un vrai run, 3,82 $
+
+**Le cadran marche.** Sur les 23 auteurs retenus par la bande, 10 sont dans la fenêtre 10k-100k. **43% de visée**, contre 41% prédits depuis notre base et 24% pour la recherche de comptes. La meilleure visée de tous nos canaux.
+
+**Le canal est inabordable.** Un post coûte 0,23 centime, exactement le prix d'une fiche. Et 81% des 1 225 auteurs sous huit hashtags de sujet font moins de 50 likes, médiane 1.
+
+| canal | coût par candidat dans la fenêtre |
+|---|---|
+| posts sous hashtag, avec bande | **0,38 $** |
+| recherche de comptes | **0,01 $** |
+
+Les hashtags Instagram ne sont pas l'endroit où postent les créateurs qui valent 38 centimes. Canal coupé. Le cadran est gardé et validé : il attend une source de posts de vrais créateurs.
+
+### Visée réelle par canal, mesurée
+
+| campagne | fenêtre | voisins | comptes | hashtags |
+|---|---|---|---|---|
+| Divertissement | 10k-100k | 26% | 24% | 13% |
+| Fitness | 100k-3M | 32% | 26% | 3% |
+| Chien | 20k-1M | 40% | 47% | 10% |
+
+Le canal hashtag non filtré est le pire des trois, partout.
+
+### Ce qui reste ouvert
+
+La fenêtre 10k-100k n'a toujours pas de bon canal. Les voisins y visent 26%, la recherche de comptes 24%. Le chantier 4 (Google) est la prochaine piste, et il est bloqué faute de clé.
+
+### Une erreur qui a coûté 3,20 $
+
+`resultsLimit` d'Apify est **par URL**, pas par run. Huit hashtags à 200 posts font 1 600 posts. J'ai demandé 200 et payé 1 600. Corrigé : la limite est divisée par le nombre d'URL, le chiffre passé est le nombre de posts payés.
 
 ---
 
