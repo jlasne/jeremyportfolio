@@ -12,7 +12,6 @@ import { Leads } from './screens/Leads'
 import { NewCampaign } from './screens/NewCampaign'
 import { Ai } from './screens/Ai'
 import { Dashboard } from './screens/Dashboard'
-import { Roadmap } from './screens/Roadmap'
 import { Outreach } from './screens/Outreach'
 import { SignIn } from './screens/SignIn'
 
@@ -38,7 +37,6 @@ export function App() {
         {route.name === 'outreach' && <Outreach />}
         {route.name === 'dashboard' && <Dashboard />}
         {route.name === 'ai' && <Ai />}
-        {route.name === 'roadmap' && <Roadmap />}
         {route.name === 'admin' && <Admin />}
         {route.name === 'signin' && <SignIn />}
       </main>

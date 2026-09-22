@@ -14,7 +14,7 @@ import { ruleLabel } from '../data/gates'
 import { eitherLine } from '../data/tuning'
 import { checkSeeds, cleanHandles, recommendedSeeds, seedJobs, seedMismatch, SEEDS_ENOUGH, SEEDS_REQUIRED } from '../data/seeds'
 import { createCampaign } from '../data/store'
-import { compact, COUNTRY_NAMES, LANGUAGE_NAMES } from '../lib/format'
+import { compact, LANGUAGE_NAMES } from '../lib/format'
 import { navigate } from '../lib/router'
 import { Sentences } from '../components/Sentences'
 
@@ -368,10 +368,6 @@ function ProposalStep({
               <b>{eitherLine(group)}</b>
             </li>
           ))}
-          <li>
-            <span>{ruleLabel('countries')}</span>
-            <b>{proposal.countries.map((c) => COUNTRY_NAMES[c] ?? c).join(', ') || 'Anywhere'}</b>
-          </li>
           <li>
             <span>{ruleLabel('languages')}</span>
             <b>{proposal.languages.map((l) => LANGUAGE_NAMES[l] ?? l).join(', ') || 'Any language'}</b>

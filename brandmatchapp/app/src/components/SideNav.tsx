@@ -10,8 +10,8 @@ import { Logo } from './Logo'
 //
 // The top five are the work, in the order it is done: see the morning, run the
 // campaigns, work the list, wire your own AI to it, and one day let us do the
-// writing. The bottom three are about the tool rather than the work, so they
-// sit at the foot where nobody looks for them by accident.
+// writing. The bottom two are about the tool rather than the work, so they sit
+// at the foot where nobody looks for them by accident.
 //
 // The month's balance used to sit down there. It was a number with nothing to
 // do: it appears on the account page, where it is acted on.
@@ -33,7 +33,6 @@ const ITEMS: Item[] = [
 ]
 
 const FOOT: Item[] = [
-  { href: '#/roadmap', label: 'Roadmap', name: 'roadmap' },
   { href: '#/account', label: 'Account', name: 'account' },
 ]
 
@@ -47,9 +46,6 @@ function Glyph({ name }: { name: string }) {
   }
   if (name === 'dashboard') {
     return <svg {...common}><path d="M2.5 10.5 6 6.5l3 2.5 4.5-5.5" /><path d="M2.5 13.5h11" /></svg>
-  }
-  if (name === 'roadmap') {
-    return <svg {...common}><path d="M8 2.5v11" /><path d="M8 3.5h5l-1.2 2L13 7.5H8" /></svg>
   }
   if (name === 'help') {
     return <svg {...common}><circle cx="8" cy="8" r="5.5" /><path d="M6.6 6.4a1.4 1.4 0 1 1 1.9 1.3v1" /><path d="M8.5 11h-.01" /></svg>

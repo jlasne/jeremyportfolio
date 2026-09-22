@@ -226,7 +226,9 @@ export function propose(brief: CampaignBrief, answers: Answers = {}): Proposal {
   // Reach is read off real posts, so the floor hangs off the follower floor and
   // not off anything the profile declares.
   const medianViewsMin = round(followersMin * d.viewsShare)
-  const medianCommentsMin = Math.max(10, round(medianViewsMin * 0.002))
+  // Comments have three settings and nothing between them, so a brief starts
+  // on the middle one rather than on a figure read off the views floor.
+  const medianCommentsMin = 5
 
   const countries = listFrom(`${brief.audience} ${brief.offer}`, COUNTRY_WORDS)
   const languages = listFrom(`${brief.audience} ${brief.offer}`, LANGUAGE_WORDS)
@@ -241,7 +243,9 @@ export function propose(brief: CampaignBrief, answers: Answers = {}): Proposal {
     medianViewsMin,
     medianCommentsMin,
     postsPerMonthMin: d.postsPerMonthMin,
-    ...(countries.length ? { countries } : {}),
+    // Where they post from is read out of the brief and kept on the campaign,
+    // but it is not a filter: nothing in the product lets a client edit it, and
+    // a rule nobody can see is a rule nobody can trust.
     ...(languages.length ? { languages } : {}),
   }
 

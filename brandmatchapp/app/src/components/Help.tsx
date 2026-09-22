@@ -3,10 +3,10 @@ import { createPortal } from 'react-dom'
 
 // Getting hold of us.
 //
-// Three ways, and two of them do not exist yet. They are on the card anyway,
-// greyed and labelled, because a help panel that hides what is coming is a
-// panel people stop opening. The one that works is an email address, answered
-// by the person who wrote this.
+// One way, and it works: an email address, answered by the person who wrote
+// this. The panel used to list two more that did not exist yet, greyed and
+// labelled soon. A help panel is opened by somebody who needs an answer now,
+// and two thirds of it being unavailable is what makes them close it.
 //
 // It is drawn into the body rather than where it is written. The button that
 // opens it lives in the rail, and the rail is sticky, which makes it a
@@ -42,20 +42,6 @@ export function Help({ onClose }: { onClose: () => void }) {
         </div>
 
         <ul className="help-ways">
-          <li className="soon-row">
-            <div>
-              <b>Book a call with us</b>
-              <small className="muted">Twenty minutes, screen shared, on your own rules.</small>
-            </div>
-            <span className="soon">soon</span>
-          </li>
-          <li className="soon-row">
-            <div>
-              <b>Ask the AI</b>
-              <small className="muted">It reads your campaigns and answers about them.</small>
-            </div>
-            <span className="soon">soon</span>
-          </li>
           <li>
             <div>
               <b>Send me an email</b>
@@ -77,11 +63,6 @@ export function Help({ onClose }: { onClose: () => void }) {
             </div>
           </li>
         </ul>
-
-        <p className="hint">
-          Something you want built? Put it on <a href="#/roadmap" onClick={onClose}>the roadmap</a> and other people
-          can vote for it.
-        </p>
       </div>
     </div>,
     document.body,

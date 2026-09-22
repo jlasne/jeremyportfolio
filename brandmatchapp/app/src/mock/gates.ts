@@ -24,7 +24,7 @@ const tuned = settle({
   ...WHERE,
   lastPostWithinDays: 14,
   medianViewsMin: 12_000,
-  medianCommentsMin: 25,
+  medianCommentsMin: 15,
   postsPerMonthMin: 8,
 })
 
@@ -69,7 +69,7 @@ export const gateSets: GateSet[] = [
     by: 'mem_1',
     changes: [
       'Views on a typical post, at least: 7.5k to 12k',
-      'Comments on a typical post, at least: 15 to 25',
+      'Comments on a typical post, at least: 5 to 15',
     ],
     createdAt: daysAgo(31),
   },
@@ -104,7 +104,7 @@ export const gateSets: GateSet[] = [
       followersMax: 600_000,
       lastPostWithinDays: 7,
       medianViewsMin: 90_000,
-      medianCommentsMin: 300,
+      medianCommentsMin: 15,
       postsPerMonthMin: 18,
     }),
     knockouts: lib.knockouts.map((k) => ({ ...k, enabled: true })),

@@ -236,30 +236,20 @@ export function settle(hard: HardRules, either?: EitherGroup[]): HardRules {
   if (!decided.has('medianViewsMin')) {
     out.medianViewsMin = clamp(out.medianViewsMin ?? Math.round(floor * 0.5), ...viewBounds)
   }
-  // The cheapest signal to fake, so it can be off and it never passes 2% of the
-  // views floor, which would kill the campaign quietly. With reach decided by a
-  // group there is no floor here to read, so the loosest way through the group
-  // stands in for it.
+  // The cheapest signal to fake and the most uneven by niche, so it holds three
+  // settings and nothing between them: off, a light floor, a real one. A model
+  // writing 47 here is writing precision the measurement does not have.
   if (!decided.has('medianCommentsMin')) {
-    const viewsFloor = out.medianViewsMin ?? loosestViews(either) ?? Math.round(floor * 0.5)
-    out.medianCommentsMin = clamp(
-      out.medianCommentsMin ?? 0,
-      0,
-      Math.max(10, Math.min(2_000, Math.round(viewsFloor * 0.02))),
-    )
+    out.medianCommentsMin = snapComments(out.medianCommentsMin ?? 0)
   }
   return out
 }
 
-/** The smallest views figure any way through the groups will accept. */
-function loosestViews(either?: EitherGroup[]): number | undefined {
-  const seen: number[] = []
-  for (const g of either ?? []) {
-    for (const o of g.options ?? []) {
-      if (typeof o?.medianViewsMin === 'number') seen.push(o.medianViewsMin)
-    }
-  }
-  return seen.length ? Math.min(...seen) : undefined
+/** Off, a light floor, a real one. Mirrors COMMENT_STEPS in app/src/data/tuning.ts. */
+export const COMMENT_STEPS = [0, 5, 15]
+
+function snapComments(n: number): number {
+  return COMMENT_STEPS.reduce((best, step) => (Math.abs(step - n) < Math.abs(best - n) ? step : best))
 }
 
 /**
@@ -272,7 +262,7 @@ function loosestViews(either?: EitherGroup[]): number | undefined {
 export function settleEither(either: unknown, followersMin: number): EitherGroup[] {
   const bound: Record<string, [number, number]> = {
     medianViewsMin: [Math.max(500, Math.round(followersMin * 0.05)), Math.min(2_000_000, followersMin * 3)],
-    medianCommentsMin: [1, 2_000],
+    medianCommentsMin: [0, 15],
     postsPerMonthMin: [1, 30],
     viewRatioMin: [1, 300],
     monthlyViewsMin: [Math.max(1_000, Math.round(followersMin * 0.1)), 50_000_000],
