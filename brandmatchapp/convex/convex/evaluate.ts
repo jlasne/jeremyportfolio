@@ -3,7 +3,7 @@ import { ACTOR, APIFY } from './crawl'
 import { internal } from './_generated/api'
 import { v } from 'convex/values'
 import {
-  evaluate as runGates, loosest, passesHard, runEither, runHard,
+  evaluate as runGates, loosest, outOf, passesHard, runEither, runHard,
   type EitherGroup, type GateSetShape, type HardRules, type Judgement, type Niche, type Measured } from './gates'
 
 // One profile through one campaign's gates.
@@ -51,7 +51,6 @@ export const pending = internalQuery({
         // Without this the batch runs the demands and none of the choices, so
         // reach and rhythm come back as hard filters the client never set.
         either: gates.either,
-        knockouts: gates.knockouts,
         criteria: gates.criteria,
         passScore: gates.passScore,
       },
@@ -265,6 +264,8 @@ export const write = internalMutation({
     hardChecks: v.any(),
     knockoutAnswers: v.any(),
     criteriaScores: v.any(),
+    /** Deal breaker sentences that came back false. */
+    flags: v.optional(v.array(v.string())),
     score: v.number(),
     reason: v.string(),
     model: v.optional(v.string()),
@@ -405,22 +406,18 @@ export const campaign = internalAction({
     }
 
     /**
-     * Comments are bought last, and only for whoever is still standing.
+     * Comments are bought for everyone the numbers let through.
      *
-     * A deal breaker throws away most of a batch, and it is answered from the
-     * bio, the captions and the pictures, all of which are already paid for.
-     * Buying comments before that pays for everybody to settle a question that
-     * only matters for the few who survive. On the dog run that was 57 bought
-     * where 6 were left at the end.
+     * They used to be bought after a first judging pass, for the few left
+     * standing, because deal breakers threw away most of a batch: 57 judged
+     * and 6 surviving on one run, so 51 profiles' comments went unbought.
      *
-     * The price is a second model call for those few, a fifth of what the
-     * comments they skipped would have cost. A campaign whose deal breakers
-     * themselves need comments has nothing to sort on first, so it buys up
-     * front as before.
+     * Deal breakers no longer remove anybody. Almost everyone judged is now
+     * delivered, so deferring would buy the same comments a pass later and
+     * pay a second model call for the privilege. Priced on that same run:
+     * 51 extra calls at $0.0035 against 6 sets of comments at $0.0046.
      */
-    const askedKnockouts = gates.knockouts.filter((k) => k.enabled !== false)
-    const sortFirst = needs.has('comments') && !askedKnockouts.some((k) => k.needs?.includes('comments'))
-    if (needs.has('comments') && !sortFirst) await buyComments(survivors)
+    if (needs.has('comments')) await buyComments(survivors)
 
     /** One profile, judged and written down. Returns whether it is still alive. */
     const judge = async (creator: Record<string, any>): Promise<boolean> => {
@@ -452,6 +449,7 @@ export const campaign = internalAction({
         hardChecks: result.hardChecks,
         knockoutAnswers: result.knockoutAnswers,
         criteriaScores: result.criteriaScores,
+        flags: result.flags,
         score: result.score,
         reason: result.reason,
         model: process.env.OPENROUTER_MODEL ?? 'deepseek/deepseek-v4-flash',
@@ -459,20 +457,8 @@ export const campaign = internalAction({
       return result.verdict === 'qualified'
     }
 
-    const standing: Record<string, any>[] = []
     for (const creator of survivors) {
-      if (await judge(creator)) standing.push(creator)
-    }
-
-    // The sort is done. Only these few are worth the comments, and only they
-    // are judged a second time, on an answer that now has them.
-    if (sortFirst && standing.length) {
-      await buyComments(standing)
-      for (const creator of standing) {
-        if (await judge(creator)) qualified++
-      }
-    } else {
-      qualified += standing.length
+      if (await judge(creator)) qualified++
     }
 
     return { tested: (batch.creators as unknown[]).length, hardFail, asked, qualified, failed, lastError }
@@ -493,7 +479,7 @@ async function ask(
   const schema = {
     type: 'object',
     additionalProperties: false,
-    required: [...(on.length ? ['niche'] : []), 'country', 'language', 'knockouts', 'criteria', 'reason'],
+    required: [...(on.length ? ['niche'] : []), 'country', 'language', 'criteria', 'reason'],
     properties: {
       // Two letter codes, so the gate can compare them. "unknown" passes.
       country: { type: 'string' },
@@ -502,27 +488,6 @@ async function ask(
       ...(on.length
         ? { niche: { type: 'string', enum: [...on.map((n) => n.id), 'other'] } }
         : {}),
-      knockouts: {
-        type: 'object',
-        additionalProperties: false,
-        required: gates.knockouts.map((k) => k.id),
-        properties: Object.fromEntries(
-          gates.knockouts.map((k) => [
-            k.id,
-            {
-              type: 'object',
-              additionalProperties: false,
-              // The model is asked whether the disqualifying fact is TRUE of
-              // the profile, and has to quote the words it read it in. A
-              // knockout asked the other way round is a double negative, and
-              // a model answering one writes "no evidence of an app; they
-              // promote a recipe app" and passes them.
-              required: ['found', 'quote'],
-              properties: { found: { type: 'boolean' }, quote: { type: 'string' } },
-            },
-          ]),
-        ),
-      },
       criteria: {
         type: 'object',
         additionalProperties: false,
@@ -547,16 +512,12 @@ async function ask(
     'You qualify Instagram profiles for a business.',
     `What the business sells: ${brief}`,
     '',
-    'Below are facts to check against this profile. For each one, answer found: true when it is true of this profile, and quote the exact words or the image you read it in, from the bio, a caption, a post picture or the page behind their link. Answer found: false when nothing in front of you says it, and quote the empty string.',
-    'Every one is written as something to look for, never as something missing. Some drop the profile when they are there and some when they are not, which is decided after your answer and is no concern of yours: answer what you see.',
-    'found: true needs the fact in front of you. The quote has to be the words that say it. A quote that does not say it is a wrong answer, and so is a quote you cannot point at above.',
-    'A profile where nothing says the fact is found: false, whatever it says about anything else. One account was disqualified as a dog account on the words "Coach to the World\'s Strongest Man", which say the opposite.',
-    ...gates.knockouts.map((k) => `- ${k.id}: ${k.need || k.fail || k.question}${k.why ? ` (${k.why})` : ''}`),
-    '',
-    'Then read each sentence below against the profile. Answer 2 when it is true of them, 1 when it is partly true, 0 when it is false or you cannot tell. Quote what you read it in as the note.',
+    'Read each sentence below against the profile. Answer 2 when it is true of them, 1 when it is partly true, 0 when it is false or you cannot tell. Quote what you read it in as the note.',
+    'A 0 means you looked and it is not there. Say in the note what you looked at, so a zero for absence reads differently from a zero for lack of data.',
+    'Some sentences are marked non negotiable. They are scored exactly like the rest, and the difference is what the client does with the answer afterwards, which is no concern of yours. Answer what you see.',
     'Each sentence carries how to settle it. Proof is what the evidence line names. The trap is the near miss that scores 0, however much it looks like the thing.',
     ...gates.criteria.flatMap((c) => [
-      `- ${c.id}: ${c.text}`,
+      `- ${c.id}: ${c.text}${c.breaker ? '  [non negotiable]' : ''}`,
       ...(c.evidence ? [`    proof: ${c.evidence}`] : []),
       ...(c.trap ? [`    not this: ${c.trap}`] : []),
       ...(c.rubric ? [`    scale: ${c.rubric}`] : []),
@@ -635,21 +596,11 @@ async function ask(
     // The model answered the disqualifying fact. The engine reads a pass, so
     // the two are flipped here and nowhere else. A found fact with no quote
     // still drops the profile: the quote is evidence, never permission.
-    const knockouts: Record<string, { pass: boolean; note?: string }> = {}
-    for (const [id, a] of Object.entries(raw2.knockouts ?? {})) {
-      const found = Boolean((a as Record<string, unknown>)?.found)
-      const quote = String((a as Record<string, unknown>)?.quote ?? '').replace(/\s+/g, ' ').trim()
-      // A required fact passes when it is found. A disqualifying one passes
-      // when it is not. Either way the model was asked for the same thing: a
-      // fact it can point at.
-      const wanted = Boolean(gates.knockouts.find((k) => k.id === id)?.need)
-      const pass = wanted ? found : !found
-      const note = wanted
-        ? (found ? undefined : 'Nothing on the profile shows it')
-        : (found ? quote || 'Found it, quoted nothing' : undefined)
-      knockouts[id] = { pass, ...(note ? { note } : {}) }
-    }
-    const parsed = { ...raw2, knockouts } as Judgement
+    // There is one list of sentences now, and every one of them is scored.
+    // A deal breaker is a sentence the client marked, not a second kind of
+    // question: the flipping and the quoting that a knockout needed are gone
+    // with it, and so are the double negatives they kept producing.
+    const parsed = { ...raw2, knockouts: {} } as Judgement
     // "other" is not a niche, it is the absence of one.
     if (parsed.niche === 'other') parsed.niche = null
     return { judgement: parsed }
@@ -748,8 +699,10 @@ export const tryOn = internalAction({
         verdict: result.verdict,
         blockedBy: result.blockedBy,
         score: result.score,
+        outOf: outOf(gates),
+        flags: result.flags ?? [],
         linkChars: String(creator.linkPage ?? '').length,
-        dropped: result.knockoutAnswers.filter((k) => !k.pass).map((k) => `${k.id}: ${k.note ?? ''}`),
+        scores: result.criteriaScores.map((c) => `${c.id} ${c.score}`),
         reason: result.reason,
       })
     }

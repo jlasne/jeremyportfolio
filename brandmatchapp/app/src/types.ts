@@ -266,6 +266,14 @@ export interface Knockout {
 export interface Criterion {
   id: string
   text: string
+  /**
+   * Turned into a deal breaker by the client. Three at most.
+   *
+   * It stops counting towards the brand fit, because a rule made non
+   * negotiable is no longer a matter of degree. It removes nobody either: the
+   * lead arrives carrying the breakers it missed, and the client decides.
+   */
+  breaker?: boolean
 }
 
 /** One version of a campaign's three gates. Edits write a new version. */

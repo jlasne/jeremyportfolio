@@ -80,6 +80,8 @@ export interface Judgement {
 
 export interface GateResult {
   verdict: Verdict
+  /** Ids of the deal breaker sentences this profile missed. */
+  flags?: string[]
   /** The niche this person matched, once we know it. */
   niche: string | null
   /** The rule that ended it. Null when nothing blocked. */
@@ -249,53 +251,47 @@ export function evaluate(
     }
   }
 
-  // A knockout the client switched off is not asked at all. It is not asked
-  // and answered yes: an unasked question has no answer to show on the lead.
-  const asked = gates.knockouts.filter((k) => k.enabled !== false)
-  const knockoutAnswers: KnockoutAnswer[] = asked.map((k) => ({
-    id: k.id,
-    pass: judgement.knockouts[k.id]?.pass ?? false,
-    note: judgement.knockouts[k.id]?.note,
-  }))
-  const failed = knockoutAnswers.find((a) => !a.pass)
-  if (failed) {
-    const question = gates.knockouts.find((k) => k.id === failed.id)
-    return {
-      verdict: 'knockout_fail',
-      niche: niche?.id ?? null,
-      blockedBy: failed.id,
-      hardChecks,
-      knockoutAnswers,
-      criteriaScores: [],
-      score: 0,
-      reason: failed.note ?? `No on: ${question?.question ?? failed.id}`,
-    }
-  }
-
   const criteriaScores: CriterionResult[] = gates.criteria.map((c) => ({
     id: c.id,
     score: judgement.criteria[c.id]?.score ?? 0,
     note: judgement.criteria[c.id]?.note,
   }))
-  // Every hard filter held, so this is a lead. The brand fit is measured and
-  // carried, and it decides where they sit in the list, not whether they are
-  // in it.
-  const score = criteriaScores.reduce((sum, c) => sum + c.score, 0)
+
+  // Every hard filter held, so this is a lead.
+  //
+  // Two things happen to the sentences. The ones the client left alone are
+  // the brand fit: they score, they order the list, and they turn nobody
+  // away. The ones they marked as deal breakers are out of that score, and a
+  // profile that plainly fails one is flagged rather than dropped.
+  //
+  // Flagged means the sentence came back false, a zero. One means partly
+  // true, and a rule partly met is not a rule that was broken, so it shows
+  // and does not flag. Mirrors convex/convex/gates.ts on purpose.
+  const breakers = new Set(gates.criteria.filter((c) => c.breaker).map((c) => c.id))
+  const flags = criteriaScores.filter((c) => breakers.has(c.id) && c.score === 0).map((c) => c.id)
+  const score = criteriaScores.filter((c) => !breakers.has(c.id)).reduce((sum, c) => sum + c.score, 0)
   return {
     verdict: 'qualified',
     niche: niche?.id ?? null,
     blockedBy: null,
+    flags,
     hardChecks,
-    knockoutAnswers,
+    knockoutAnswers: [],
     criteriaScores,
     score,
     reason: judgement.reason,
   }
 }
 
-/** The ceiling of a gate version. Each sentence is worth 2. */
+/**
+ * The ceiling of a gate version. Each sentence is worth 2.
+ *
+ * A sentence the client turned into a deal breaker is out of the score, so it
+ * is out of the ceiling too. Eight sentences with two marked are read out of
+ * twelve, and a lead that scores nine is at three quarters, not at half.
+ */
 export function maxScore(gates: GateSet): number {
-  return gates.criteria.length * 2
+  return gates.criteria.filter((c) => !c.breaker).length * 2
 }
 
 // Three ways to name the same rule, because a rule reads differently depending

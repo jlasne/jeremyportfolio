@@ -378,23 +378,7 @@ function ProposalStep({
       </div>
 
       <div className="card gate-card">
-        <h2>3. Deal breakers</h2>
-        <p className="gate-lede">{proposal.summaries.gate2}</p>
-        <ul className="rules stacked">
-          {proposal.knockouts.map((k) => (
-            <li key={k.id} className="off">
-              <b>
-                {k.question}
-                <span className="seed-tag unknown">off</span>
-              </b>
-              {k.why && <small className="muted">{k.why}</small>}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="card gate-card">
-        <h2>4. Brand fit</h2>
+        <h2>3. Who you want</h2>
         <p className="gate-lede">{proposal.summaries.gate3}</p>
         <Sentences list={proposal.criteria} onChange={(criteria) => onProposal({ ...proposal, criteria })} />
         <div className="from-lib">

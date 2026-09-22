@@ -101,6 +101,14 @@ const criterion = v.object({
    * pays for the questions it asked and for nothing else.
    */
   needs: v.optional(v.array(v.string())),
+  /**
+   * Turned into a deal breaker by the client. Three at most.
+   *
+   * It stops counting towards the brand fit, because a rule made non
+   * negotiable is no longer a matter of degree. It removes nobody either: the
+   * lead is delivered carrying the breakers it missed, and the client decides.
+   */
+  breaker: v.optional(v.boolean()),
 })
 
 export default defineSchema({
@@ -476,6 +484,8 @@ export default defineSchema({
     knockoutAnswers: v.array(
       v.object({ id: v.string(), pass: v.boolean(), note: v.optional(v.string()) }),
     ),
+    /** Deal breaker criteria that came back false. Empty is the clean case. */
+    flags: v.optional(v.array(v.string())),
     criteriaScores: v.array(
       v.object({ id: v.string(), score: v.number(), note: v.optional(v.string()) }),
     ),
@@ -542,6 +552,16 @@ export default defineSchema({
     reach: v.optional(v.union(v.literal('core'), v.literal('wider'))),
     /** When wider: the one line they miss. "7.9k followers, you asked 15k" */
     beyond: v.optional(v.string()),
+    /**
+     * The deal breakers this lead missed, by criterion id, and how many.
+     *
+     * A breaker no longer removes anybody, so the list has to say it out loud.
+     * Zero is the clean case and is still delivered the same way, which is the
+     * point: the client sorts and filters on this rather than never seeing
+     * the person at all.
+     */
+    flags: v.optional(v.array(v.string())),
+    flagged: v.optional(v.number()),
     /** Which member is on it. Absent means nobody has taken it. */
     ownerId: v.optional(v.id('members')),
     /**

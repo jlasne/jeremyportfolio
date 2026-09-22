@@ -2485,6 +2485,34 @@ body { background: var(--paper); }
    label and a value rather than a card. */
 .rules .rule-choice b { font-weight: 500; text-align: right; max-width: 60%; }
 
+/* A sentence the client will not compromise on. It leaves the score and
+   marks the leads that miss it, so it has to read as heavier than the rest
+   without shouting. */
+.sentence-list li.breaker .sentence { border-color: var(--orange-deep); }
+.breaker-toggle { flex: none; white-space: nowrap; }
+.breaker-toggle.on {
+  background: var(--orange-deep); border-color: var(--orange-deep); color: #fff; font-weight: 600;
+}
+.must-tag {
+  margin-left: 8px; padding: 1px 7px; border-radius: 999px; font-size: 10.5px;
+  font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase;
+  background: var(--paper-2); color: var(--ink-3); vertical-align: middle;
+}
+.missed-line {
+  margin: 10px 0 0; padding: 10px 14px; border-radius: 10px;
+  border: 1px solid var(--orange-deep); background: var(--paper-2); font-size: 14px;
+}
+.lead-flag {
+  flex: none; padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 600;
+  background: var(--orange-deep); color: #fff;
+}
+.sentence-foot .spacer { flex: 1; }
+
+@media (max-width: 640px) {
+  .sentence-list li { flex-wrap: wrap; }
+  .breaker-toggle { order: 3; }
+}
+
 /* A choice. Reach and rhythm are two ways through, not two demands, so they
    read as one line each and carry no dial. */
 .choices { display: flex; flex-direction: column; gap: 8px; margin: 2px 0 20px; }

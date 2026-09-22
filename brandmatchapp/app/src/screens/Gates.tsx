@@ -153,7 +153,6 @@ export function Gates({ campaignId }: { campaignId: string }) {
   if (!gates || !live || !lib || !campaign || !stored) return null
 
   const dirty = !same(live, stored)
-  const asking = live.knockouts.filter((k) => k.enabled !== false).length
   const written = live.criteria.filter((c) => c.text.trim()).length
   // Brand fit no longer decides anything, so the stored pass mark is carried
   // untouched: an old number nobody reads is better than a migration that
@@ -186,53 +185,7 @@ export function Gates({ campaignId }: { campaignId: string }) {
 
       <div className="card gate-card">
         <h2>
-          3. Deal breakers
-          <Info text="A hard filter, and the sharpest thing on this screen. Each one is a yes or no question about a person, and one no drops them whatever else they score. They start off: switch on the ones worth losing people over." />
-        </h2>
-        <p className="gate-lede">
-          {asking} of {live.knockouts.length} switched on. A campaign starts with all of them off. Each one you
-          switch on raises the quality of what you get and lowers how much of it there is: one no drops someone
-          whatever else they score. Switch on what you would genuinely refuse a call with.
-        </p>
-        <ul className="switches">
-          {live.knockouts.map((k) => {
-            const on = k.enabled !== false
-            return (
-              <li key={k.id} className={on ? undefined : 'off'}>
-                <button
-                  type="button"
-                  className={`gate-switch${on ? ' on' : ''}`}
-                  aria-pressed={on}
-                  aria-label={k.question}
-                  onClick={() =>
-                    set({
-                      knockouts: live.knockouts.map((x) => (x.id === k.id ? { ...x, enabled: !on } : x)),
-                    })
-                  }
-                >
-                  <i aria-hidden="true" />
-                </button>
-                <div className="switch-body">
-                  <b>
-                    {k.question}
-                    <Info
-                      text={[
-                        k.why,
-                        k.pass ? `A yes looks like: ${k.pass}` : '',
-                        k.fail ? `A no looks like: ${k.fail}` : '',
-                      ].filter(Boolean).join(' ')}
-                    />
-                  </b>
-                </div>
-              </li>
-            )
-          })}
-        </ul>
-      </div>
-
-      <div className="card gate-card">
-        <h2>
-          4. Brand fit
+          3. Who you want
           <Info text="Describe the people you want, one sentence a line. For each qualified lead we answer every sentence: true, partly true, or false. That is their brand fit, and it sorts your list. It never drops anyone." />
         </h2>
         <p className="gate-lede">

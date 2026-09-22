@@ -91,10 +91,10 @@ function walk(gates: GateSet, niches: Niche[], answers: Judgement[], now: number
     const result = evaluate(s.creator, gates, niches, answers[i], now)
     if (result.verdict === 'off_niche') return
     inNiche++
-    if (result.verdict === 'knockout_fail') return
-    // Past the deal breakers is a qualified lead. The histogram beside it is
-    // the spread of brand fit inside those leads, which is a ranking and not
-    // a second filter.
+    // Nothing else removes anybody. A sentence the client made non negotiable
+    // marks a lead rather than hiding it, so in the niche and qualified are
+    // now the same count, and the histogram beside them is the spread of
+    // brand fit inside the list.
     pastKnockouts++
     histogram.set(result.score, (histogram.get(result.score) ?? 0) + 1)
     if (result.verdict === 'qualified') qualified++

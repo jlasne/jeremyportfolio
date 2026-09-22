@@ -23,7 +23,7 @@ const OPENROUTER = 'https://openrouter.ai/api/v1/chat/completions'
 const SCHEMA = {
   type: 'object',
   additionalProperties: false,
-  required: ['templateId', 'name', 'countries', 'languages', 'niches', 'hard', 'either', 'knockouts', 'criteria', 'passScore'],
+  required: ['templateId', 'name', 'countries', 'languages', 'niches', 'hard', 'either', 'criteria', 'passScore'],
   properties: {
     templateId: { type: 'string', enum: TEMPLATE_IDS },
     name: { type: 'string' },
@@ -82,25 +82,6 @@ const SCHEMA = {
         },
       },
     },
-    knockouts: {
-      type: 'array',
-      minItems: 4,
-      maxItems: 6,
-      items: {
-        type: 'object',
-        additionalProperties: false,
-        required: ['id', 'question', 'why', 'fail', 'need'],
-        properties: {
-          id: { type: 'string' },
-          question: { type: 'string' },
-          why: { type: 'string' },
-          /** The fact that disqualifies, stated. Never the question turned around. */
-          fail: { type: 'string' },
-          /** The fact that has to be there. Empty string when the rule is a fail. */
-          need: { type: 'string' },
-        },
-      },
-    },
     criteria: {
       type: 'array',
       minItems: 4,
@@ -131,7 +112,6 @@ function instructions(): string {
     const lib = template(id)
     return [
       `${lib.id}: ${lib.name}. ${lib.when}`,
-      '  knockouts: ' + lib.knockouts.map((k) => `${k.id} (${k.question})`).join('; '),
       '  sentences: ' + lib.criteria.map((c) => `${c.id} (${c.text})`).join('; '),
     ].join('\n')
   }).join('\n')
@@ -157,18 +137,13 @@ function instructions(): string {
     '  For "40k views with a ratio over 10%, or 100k views": one group labelled Reach, options {medianViewsMin: 40000, viewRatioMin: 10} and {medianViewsMin: 100000}.',
     '  For "at least one post a week, or a million views a month": one group labelled Rhythm, options {postsPerMonthMin: 4} and {monthlyViewsMin: 1000000}.',
     '  A group you write on reach or rhythm replaces the one written for you. A number in a group is left out of hard, or it is demanded twice.',
-    'Gate 2: keep every knockout id of the library. Reword the questions for this offer. You may add at most one new knockout. Every one of them is delivered switched off, so write them as questions worth losing people over rather than as defaults.',
-    '  Spend that one new knockout when the brief names something that disqualifies a person and no library question catches it. A brief asking for people whose content is about anything but dogs needs a question about a dog, because no library has one.',
-    '  A knockout is one fact the judge has to find and quote, and it cuts one of two ways.',
-    '    fail: the fact that disqualifies. "The account is about dogs: dog training, dog rescue, dog grooming." Found, the profile is dropped. Leave need as an empty string.',
-    '    need: the fact that has to be there. "A dog appears in their photos or videos." Missing, the profile is dropped. Leave fail as an empty string.',
-    '  Never write either as an absence. "No dog appears" cannot be quoted, so a model finds nothing, answers no, and every profile without a dog walks through. Write the thing, and let need decide which way it cuts.',
-    'Gate 3: six to nine sentences describing one ideal person for this offer.',
+    'Gate 2: six to nine sentences describing one ideal person for this offer.',
     '  Start with what the brief spends the most words on. That is what the client is buying, and sentences that leave it out describe somebody else.',
     '  Write one sentence for each thing the brief insists on, in the words the brief uses, before you touch the library. Then fill the rest from the library sentences, reworded for this offer.',
     '  Asked for creators with a dog in shot whose content is about something else, the first two sentences are about the dog and about what the account is otherwise for. The library has neither, so neither can be reworded into them.',
     '  Each entry is ONE statement about a person, under 140 characters, written as a fact someone could agree or disagree with.',
     '  Write a statement, never a question, never a heading, never a list, never a number range, and never a summary of anything else in this answer.',
+    '  Write the ones the client cannot compromise on first, because those are the ones they will turn into deal breakers. A deal breaker is one of these sentences the client marks, never a separate question you write.',
     '  Good: "They sell a paid programme at a price shown in their bio."  Good: "They film themselves teaching, face on camera."',
     '  Bad: "thresholds: 100k to 3M followers"  Bad: "Do they teach a method?"  Bad: "c_sells: ... c_method: ..."',
     '  It has to be answerable from what the judge sees: the bio, the links, the follower count, and the last twelve posts with their captions, dates, likes, comments and views. Nothing about replies, a year of growth, or what their audience earns.',
@@ -389,7 +364,10 @@ export const gatesFromBrief = internalAction({
       // Delivered switched off, every one. A deal breaker drops someone
       // whatever else they score, so it is a decision the client makes once
       // they have seen what the rest of the filters bring, never a default.
-      knockouts: kept.knockouts.map((k) => ({ ...k, enabled: false })),
+      // Gate 2 used to be a list of its own, written from a library and
+      // delivered switched off. There is one list now. A sentence becomes a
+      // deal breaker when the client marks it, and never before.
+      knockouts: [],
       criteria: kept.criteria,
       passScore,
     })

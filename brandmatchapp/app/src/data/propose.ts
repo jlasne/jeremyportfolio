@@ -37,7 +37,7 @@ export interface Proposal {
   /** The slices of the target we suggest looking in. All switched on. */
   niches: Niche[]
   /** One plain sentence per gate, for the card headers. */
-  summaries: { gate1: string; gate2: string; gate3: string }
+  summaries: { gate1: string; gate3: string }
 }
 
 /** A question worth asking. Never more than two, and always skippable. */
@@ -260,8 +260,7 @@ export function propose(brief: CampaignBrief, answers: Answers = {}): Proposal {
     niches: suggestNiches(brief.audience, brief.offer),
     summaries: {
       gate1: `We keep people with ${compact(followersMin)} to ${compact(followersMax)} followers, who posted in the last ${d.lastPostWithinDays} days and get about ${compact(medianViewsMin)} views on a typical post.`,
-      gate2: `${count(lib.knockouts.length)} yes or no questions about each person, and all of them start switched off. Switch one on and a no drops that person whatever else they score: it raises what you get and lowers how much of it there is.`,
-      gate3: `${count(lib.criteria.length)} sentences about who you want. Each one is true, partly true or false about a person, and that is their brand fit. It scores the leads you get and orders your list, it never drops anyone. Change every word.`,
+      gate3: `${count(lib.criteria.length)} sentences about who you want. Each one is true, partly true or false about a person, and that is their brand fit. Mark up to three as non negotiable: those leave the score, and a lead that misses one arrives marked rather than hidden. Change every word.`,
     },
   }
 }
@@ -280,7 +279,6 @@ export function switchTemplate(proposal: Proposal, id: TemplateId): Proposal {
     passScore: lib.passScore,
     summaries: {
       ...proposal.summaries,
-      gate2: `${count(lib.knockouts.length)} yes or no questions about each person, and all of them start switched off. Switch one on and a no drops that person whatever else they score: it raises what you get and lowers how much of it there is.`,
       gate3: `${count(lib.criteria.length)} sentences about who you want. Each one is true, partly true or false about a person, and that is their brand fit. It scores the leads you get and orders your list, it never drops anyone. Change every word.`,
     },
   }
@@ -405,8 +403,7 @@ export async function draftOnServer(brief: CampaignBrief): Promise<{ campaignId:
         // Reach and rhythm are a choice now, so they are listed below rather
         // than read off a number that is no longer in hard.
         gate1: `We keep people with ${compact(hard.followersMin ?? 0)} to ${compact(hard.followersMax ?? 0)} followers who posted in the last ${hard.lastPostWithinDays ?? 0} days. The rest is below, and every line is yours to move.`,
-        gate2: `${count(knockouts.length)} yes or no questions about each person, and all of them start switched off. Switch one on and a no drops that person whatever else they score.`,
-        gate3: `${count(criteria.length)} sentences about who you want. Each one is true, partly true or false about a person, and that is their brand fit. It orders your list.`,
+        gate3: `${count(criteria.length)} sentences about who you want. Each one is true, partly true or false about a person, and that is their brand fit. Mark up to three as non negotiable.`,
       },
     },
   }

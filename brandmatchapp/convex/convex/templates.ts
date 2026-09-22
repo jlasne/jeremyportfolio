@@ -165,23 +165,20 @@ export function withinTemplate(
  * around the screen.
  */
 /**
- * The one question no campaign can switch off.
+ * Nothing is locked any more.
  *
- * There used to be a second per library, and each one was a guess about the
- * offer that the library had no way to check. "Do they have a paid offer
- * live today" is locked for anyone selling to creators, which is right when
- * the creator pays and wrong when they are paid: it silently refused every
- * entertainment creator on a campaign whose whole point was to represent
- * them, and the client could not turn it off because the lock said so.
+ * There used to be a list of questions a campaign could not switch off, one
+ * per library, each a guess about the offer that the library had no way to
+ * check. "Do they have a paid offer live today" was locked for anyone selling
+ * to creators, which is right when the creator pays and wrong when they are
+ * paid, and it silently refused every entertainment creator on a campaign
+ * built to represent them.
  *
- * A real person, rather than a repost page, is the only thing true of every
- * offer anyone can write. Everything else is the client's to decide.
+ * There is one list of sentences now and the client marks the three they will
+ * not compromise on. A rule they chose needs no lock, and a rule they did not
+ * choose has no business being there.
  */
-export const LOCKED: Record<string, string[]> = {
-  recruit_partners: ['k_person'],
-  sell_to_creators: ['k_person'],
-  sponsorship: ['k_person'],
-}
+export const LOCKED: Record<string, string[]> = {}
 
 export function isLocked(templateId: string, knockoutId: string): boolean {
   return LOCKED[templateId]?.includes(knockoutId) ?? false
@@ -301,20 +298,17 @@ export function settleEither(either: unknown, followersMin: number): EitherGroup
 }
 
 /** Locked knockouts come back on, whatever the request said. */
-export function enforceLocks(templateId: string, knockouts: any[]): any[] {
-  const lib = template(templateId)
-  const rows = Array.isArray(knockouts) && knockouts.length ? knockouts : lib.knockouts
-  const out = rows.map((k) => ({
-    ...k,
-    enabled: isLocked(templateId, String(k.id)) ? true : k.enabled !== false,
-  }))
-  // A locked question that was dropped from the list is put back.
-  for (const locked of LOCKED[templateId] ?? []) {
-    if (out.some((k) => String(k.id) === locked)) continue
-    const original = lib.knockouts.find((k) => k.id === locked)
-    if (original) out.push({ ...original, enabled: true })
-  }
-  return out
+/**
+ * Gate 2 is gone, and an empty list stays empty.
+ *
+ * It used to refill itself from the library whenever nothing was sent, which
+ * is what a default is for while there is a gate to default. There is not any
+ * more: a deal breaker is a sentence the client marked. A version saved today
+ * carries no questions, and the ones on older versions stay where they are
+ * because a delivered lead was judged under them.
+ */
+export function enforceLocks(_templateId: string, knockouts: any[]): any[] {
+  return Array.isArray(knockouts) ? knockouts : []
 }
 
 /** Under 5 out of 14 the score stops deciding anything. */
@@ -352,6 +346,9 @@ const NOT_A_SENTENCE = new Set([
 /** What a sentence may ask to have in front of the judge. */
 export const EVIDENCE = ['profile', 'posts', 'links', 'images', 'comments', 'web']
 
+/** How many sentences a client may make non negotiable. */
+export const BREAKERS_MAX = 3
+
 export function cleanSentences(rows: unknown): {
   id: string
   text: string
@@ -359,10 +356,15 @@ export function cleanSentences(rows: unknown): {
   trap?: string
   rubric?: string
   needs?: string[]
+  breaker?: boolean
 }[] | null {
   if (!Array.isArray(rows)) return null
   const seen = new Set<string>()
-  const out: { id: string; text: string }[] = []
+  const out: { id: string; text: string; breaker?: boolean }[] = []
+  // Three deal breakers, and the fourth mark is ignored rather than refused.
+  // A client who marks everything has written no rules at all, and the point
+  // of the cap is that these three are the ones worth arguing about.
+  let breakers = 0
   for (const row of rows) {
     // A dash the model reached for is a dash the client did not write. House
     // rule, and it is cheaper to enforce here than to ask for it every time.
@@ -390,6 +392,8 @@ export function cleanSentences(rows: unknown): {
       const v = String((row as Record<string, unknown>)?.[k] ?? '').replace(/\s+/g, ' ').trim()
       return v ? v.slice(0, 400) : undefined
     }
+    const breaker = Boolean((row as Record<string, unknown>)?.breaker) && breakers < BREAKERS_MAX
+    if (breaker) breakers += 1
     const needs = Array.isArray((row as Record<string, unknown>)?.needs)
       ? ((row as Record<string, unknown>).needs as unknown[])
           .map((n) => String(n))
@@ -402,6 +406,7 @@ export function cleanSentences(rows: unknown): {
       ...(line('trap') ? { trap: line('trap') } : {}),
       ...(line('rubric') ? { rubric: line('rubric') } : {}),
       ...(needs?.length ? { needs } : {}),
+      ...(breaker ? { breaker: true } : {}),
     })
     if (out.length >= SENTENCES_MAX) break
   }

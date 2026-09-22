@@ -65,14 +65,17 @@ export const candidates = internalQuery({
           creatorId: row.creatorId,
           campaignId: campaign._id,
           score: row.score,
+          flags: row.flags ?? [],
           offerKey,
           cap: campaign.dailyCap ?? null,
           deliveredToday: deliveredToday?.delivered ?? 0,
         })
       }
     }
-    // Best first, across every campaign. The account's quota, not the campaign's.
-    return out.sort((a, b) => b.score - a.score)
+    // Clean first, then best first. A lead carrying no deal breaker outranks
+    // one that does, whatever they score, because the client marked those
+    // three sentences as the ones they are not willing to argue about.
+    return out.sort((a, b) => a.flags.length - b.flags.length || b.score - a.score)
   },
 })
 
@@ -93,8 +96,17 @@ export const today = internalMutation({
     if (!sub) return { error: 'No subscription on this account' }
 
     const today = new Date().toISOString().slice(0, 10)
-    // A day never spends more than the tier, even when the month has a surplus.
-    const room = Math.min(args.max ?? sub.tier, balance.remaining)
+    // Everything qualified is delivered.
+    //
+    // The plan used to be a number of leads a month, so a day could not spend
+    // past the tier and the balance was a ceiling. What is sold now is a
+    // number of profiles analysed a day, which is the fair use budget in
+    // ops.ts, and what comes out the far end of that analysis belongs to the
+    // client. A lead held back would be one they paid to find and never saw.
+    //
+    // The journal still records every delivery, so the ledger stays whole and
+    // the old reports keep working. It just stops being a gate.
+    const room = args.max ?? Number.MAX_SAFE_INTEGER
     const takenPerCampaign = new Map<string, number>()
     let delivered = 0
     const now = Date.now()
@@ -118,6 +130,8 @@ export const today = internalMutation({
         status: 'new',
         reach: side.reach,
         beyond: side.beyond,
+        flags: row.flags,
+        flagged: (row.flags ?? []).length,
         deliveredAt: now,
         statusAt: now,
       })

@@ -299,6 +299,12 @@ function Panel({ row }: { row: LeadRow }) {
   const { lead, creator, evaluation, campaign, deal } = row
   const gates = getGateSet(campaign.id)
   const events = getLeadEvents(lead.id)
+  // Read off the scores rather than off the lead, so a lead delivered before
+  // a sentence was marked non negotiable reads against the rules as they are
+  // now, and one delivered before any of this existed reads as clean.
+  const missed = evaluation.criteriaScores
+    .filter((c) => c.score === 0 && gates?.criteria.find((k) => k.id === c.id)?.breaker)
+    .map((c) => c.id)
   const [note, setLocal] = useState(lead.note ?? '')
 
   useEffect(() => setLocal(lead.note ?? ''), [lead.id, lead.note])
@@ -352,15 +358,25 @@ function Panel({ row }: { row: LeadRow }) {
 
       <h2>Why they reached you</h2>
       <p>
-        <b className="num">{fitOf(row)}% brand fit</b>, {lead.score} of {evaluation.criteriaScores.length * 2} on your
-        criteria. {evaluation.reason}
+        <b className="num">{fitOf(row)}% brand fit</b>, {lead.score} of{' '}
+        {evaluation.criteriaScores.filter((c) => !gates?.criteria.find((k) => k.id === c.id)?.breaker).length * 2} on
+        your criteria. {evaluation.reason}
       </p>
+      {missed.length > 0 && (
+        <p className="missed-line">
+          <b>{missed.length === 1 ? 'Misses one thing you said was non negotiable' : `Misses ${missed.length} things you said were non negotiable`}</b>
+          {': '}
+          {missed.map((m) => (gates?.criteria.find((k) => k.id === m)?.text ?? m).replace(/[.]+$/, '')).join('. ')}.
+        </p>
+      )}
       <ul className="facts">
         {evaluation.criteriaScores.map((c) => {
           const criterion = gates?.criteria.find((k) => k.id === c.id)
+          const must = Boolean(criterion?.breaker)
           return (
             <li key={c.id} className={c.score === 2 ? 'yes' : c.score === 1 ? 'half' : 'no'}>
               <b>{c.score === 2 ? 'True' : c.score === 1 ? 'Partly' : 'False'}</b>: {(criterion?.text ?? c.id).replace(/[.]+$/, '')}.
+              {must && <span className="must-tag">non negotiable</span>}
               {c.note ? <span className="muted"> {c.note}</span> : null}
             </li>
           )
