@@ -151,12 +151,34 @@ export default defineSchema({
     key: v.string(),
     /* kept from an earlier shape; nothing writes it now */
     values: v.optional(v.record(v.string(), v.number())),
-    /* one entry per logged day, keyed YYYY-MM-DD: the nine things tapped
+    /* One entry per logged day, keyed YYYY-MM-DD: the nine things tapped
        by hand, the nine the watch and the scale know, and a note. Which
        ids may appear and what range each may take is decided by `clean`
        in bio/spec.js, which the page imports too, so the field list lives
-       in one file and this only says what a value may be. */
-    log: v.record(v.string(), v.record(v.string(), v.union(v.float64(), v.boolean(), v.string()))),
+       in one file and this only says what a value may be.
+
+       The union is tolerance, not a shape anything writes. A deploy
+       validates every document in the table, and the habit log written
+       before this one still sits here under its own key, nesting one
+       level differently. `clean` never produces these, and `bio.save`
+       still refuses them at the door. */
+    log: v.record(
+      v.string(),
+      v.union(
+        v.record(
+          v.string(),
+          v.union(
+            v.float64(),
+            v.boolean(),
+            v.string(),
+            v.record(v.string(), v.union(v.float64(), v.boolean(), v.string())),
+          ),
+        ),
+        v.float64(),
+        v.boolean(),
+        v.string(),
+      ),
+    ),
     /* the page's local date at the last save */
     today: v.string(),
     updatedAt: v.number(),
