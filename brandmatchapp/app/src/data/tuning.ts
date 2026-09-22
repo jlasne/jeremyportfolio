@@ -12,7 +12,8 @@ import type { GateTemplate } from './templates'
 //             account by anyone's definition.
 //   coupled   a dial bounded by another dial. Views only mean something next to
 //             the follower minimum, so they are held between 5% and 300% of it.
-//             Comments are held under 2% of the views minimum.
+//   stepped   a dial with three settings and nothing between them. Comments are
+//             too easy to fake and too uneven by niche to be worth a slider.
 //
 // The coupled ones matter more than the fixed ones. 500,000 views is not absurd
 // on its own. It is absurd next to a follower minimum of 15,000.
@@ -29,6 +30,8 @@ export interface Dial {
   label: string
   /** Log for anything spanning orders of magnitude, linear for the rest. */
   scale: 'log' | 'linear'
+  /** A dial with steps is a choice between them rather than a slide. */
+  steps?: number[]
   /** Live floor and ceiling. Some depend on the other dials. */
   range: (hard: HardRules) => { min: number; max: number }
   format: (value: number) => string
@@ -37,10 +40,9 @@ export interface Dial {
 }
 
 const floorOf = (hard: HardRules) => hard.followersMin ?? 15_000
-// When views live under the niches the campaign carries no number for them,
-// so the comments cap leans on half the follower floor, which is where a
-// balanced views setting sits anyway.
-const viewsOf = (hard: HardRules) => hard.medianViewsMin ?? Math.round(floorOf(hard) * 0.5)
+
+/** Off, a light floor, a real one. Nothing between them means anything. */
+export const COMMENT_STEPS = [0, 5, 15]
 
 // In the order a client reads them: how big, how often, how far they reach.
 export const DIALS: Dial[] = [
@@ -94,11 +96,13 @@ export const DIALS: Dial[] = [
     key: 'medianCommentsMin',
     label: 'Comments on a typical post, at least',
     scale: 'linear',
-    // The cheapest signal to fake and the most variable by niche, so it can be
-    // switched off and it can never grow past 2% of the views minimum.
-    range: (h) => ({ min: 0, max: Math.max(10, Math.min(2_000, Math.round(viewsOf(h) * 0.02))) }),
+    // The cheapest signal to fake and the most variable by niche, so it is
+    // three settings and not a slider: off, a light floor, a real one. A
+    // number a client picks off a dial here reads as precision we do not have.
+    steps: COMMENT_STEPS,
+    range: () => ({ min: 0, max: 15 }),
     format: (v) => (v <= 0 ? 'off' : String(v)),
-    limit: 'Capped at 2% of your views setting. Higher and it quietly empties your list.',
+    limit: 'Above 15 it quietly empties your list.',
   },
 ]
 
@@ -109,6 +113,13 @@ export const dialByKey = new Map(DIALS.map((d) => [d.key, d]))
 // ---------------------------------------------------------------------------
 
 const STEPS = 1000
+
+/** The nearest setting a stepped dial holds. */
+export function snap(dial: Dial, value: number): number {
+  if (!dial.steps?.length) return value
+  return dial.steps.reduce((best, step) =>
+    Math.abs(step - value) < Math.abs(best - value) ? step : best)
+}
 
 export function toPosition(dial: Dial, hard: HardRules, value: number): number {
   const { min, max } = dial.range(hard)
@@ -144,7 +155,7 @@ export function settle(hard: HardRules): HardRules {
     const { min, max } = dial.range(out)
     const value = out[dial.key]
     if (typeof value !== 'number') continue
-    out[dial.key] = Math.min(max, Math.max(min, value)) as never
+    out[dial.key] = snap(dial, Math.min(max, Math.max(min, value))) as never
   }
   return out
 }
@@ -167,7 +178,8 @@ const PRESETS: Record<Exclude<PresetId, 'custom'>, {
   recency: number
   viewsShare: number
   cadence: number
-  commentsShare: number
+  /** One of the three comment settings, not a share of anything. */
+  comments: number
   /** Brand fit needed, as a share of the ceiling. Works for any number of sentences. */
   passShare: number
 }> = {
@@ -175,19 +187,19 @@ const PRESETS: Record<Exclude<PresetId, 'custom'>, {
     label: 'Strict',
     blurb: 'Fewer people, better ones. Only accounts already doing well.',
     followersFloor: 2, followersCeiling: 1, recency: 0.5, viewsShare: 1, cadence: 1.5,
-    commentsShare: 0.004, passShare: 0.86,
+    comments: 15, passShare: 0.86,
   },
   balanced: {
     label: 'Balanced',
     blurb: 'Where most people start. Decent reach, posting regularly.',
     followersFloor: 1, followersCeiling: 1, recency: 1, viewsShare: 0.5, cadence: 1,
-    commentsShare: 0.002, passShare: 0.64,
+    comments: 5, passShare: 0.64,
   },
   broad: {
     label: 'Broad',
     blurb: 'More people every day. You do more of the sorting.',
     followersFloor: 0.5, followersCeiling: 1.5, recency: 2, viewsShare: 0.25, cadence: 0.5,
-    commentsShare: 0, passShare: 0.5,
+    comments: 0, passShare: 0.5,
   },
 }
 
@@ -237,7 +249,7 @@ export function preset(id: Exclude<PresetId, 'custom'>, lib: GateTemplate, keep:
     lastPostWithinDays: Math.round(d.lastPostWithinDays * p.recency),
     medianViewsMin,
     postsPerMonthMin: Math.round(d.postsPerMonthMin * p.cadence),
-    medianCommentsMin: tidy(medianViewsMin * p.commentsShare),
+    medianCommentsMin: p.comments,
     // A preset moves the numbers. Where the client sells stays where it was.
     ...(keep.countries ? { countries: keep.countries } : {}),
     ...(keep.languages ? { languages: keep.languages } : {}),

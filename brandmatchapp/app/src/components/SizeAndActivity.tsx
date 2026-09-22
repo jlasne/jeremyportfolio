@@ -3,15 +3,15 @@ import type { HardRules } from '../types'
 import { getCampaign, getGateSet } from '../data'
 import { saveGateSet, setExtracted } from '../data/store'
 import { cadence, DIALS, eitherLine, fromPosition, settle, toPosition, type Dial, type DialKey } from '../data/tuning'
-import { compact, COUNTRY_NAMES, LANGUAGE_NAMES } from '../lib/format'
+import { compact, LANGUAGE_NAMES } from '../lib/format'
 import { Info } from './Info'
 
 // The first hard filter, and the one that costs nothing to run.
 //
 // It lives on the brief because it is a description of who the client is
-// after, not a setting they tune against a score: how big, how active, where
-// they are, what they post in. Everything here is measured off the last twelve
-// posts, never off anything an account declares.
+// after, not a setting they tune against a score: how big, how active, what
+// they post in. Everything here is measured off the last twelve posts, never
+// off anything an account declares.
 //
 // Pass this, work in a niche that is on, and clear the deal breakers, and you
 // are a qualified lead. Brand fit then scores that lead. It never removes one.
@@ -19,7 +19,6 @@ import { Info } from './Info'
 // Nothing is written until Save, and a save writes the next version rather
 // than over the old one, so a lead delivered last week still has its rules.
 
-const PLACES = Object.keys(COUNTRY_NAMES)
 const TONGUES = Object.keys(LANGUAGE_NAMES)
 
 function Picker({
@@ -101,6 +100,43 @@ function Slider({
   )
 }
 
+/**
+ * A dial with three settings and nothing between them.
+ *
+ * Comments are the cheapest number on a profile to buy, so an exact figure
+ * would be false precision. Off, a light floor, or a real one says everything
+ * the filter can honestly carry.
+ */
+function Steps({
+  dial, value, onChange,
+}: {
+  dial: Dial
+  value: number
+  onChange: (next: number) => void
+}) {
+  return (
+    <div className="dial">
+      <div className="dial-head">
+        <span>{dial.label}</span>
+        <b className="num">{dial.format(value)}</b>
+      </div>
+      <div className="pill-row" role="group" aria-label={dial.label}>
+        {(dial.steps ?? []).map((step) => (
+          <button
+            key={step}
+            type="button"
+            className={`chip${step === value ? ' on' : ''}`}
+            aria-pressed={step === value}
+            onClick={() => onChange(step)}
+          >
+            {dial.format(step)}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 /** The first check in one sentence, rewritten on every drag. */
 export function gateOneLine(hard: HardRules): string {
   const reach = [
@@ -169,16 +205,7 @@ export function SizeAndActivity({ campaignId }: { campaignId: string }) {
       <p className="gate-lede">{gateOneLine(hard)}</p>
 
       <Picker
-        label="Where they post from"
-        help="Read from what the judge sees on the profile and the posts. Nobody outside your list reaches you. Leave it empty to look anywhere."
-        picked={hard.countries ?? []}
-        all={PLACES}
-        name={(c) => COUNTRY_NAMES[c] ?? c}
-        none="Anywhere"
-        onChange={(countries) => set({ ...hard, countries })}
-      />
-      <Picker
-        label="What they post in"
+        label="Language"
         help="The language of their captions, read from their last 12 posts. A creator who posts in a language you do not sell in is dropped before anything else is asked."
         picked={hard.languages ?? []}
         all={TONGUES}
@@ -199,15 +226,13 @@ export function SizeAndActivity({ campaignId }: { campaignId: string }) {
       )}
 
       <div className="dials">
-        {DIALS.filter((dial) => !decided.has(dial.key)).map((dial) => (
-          <Slider
-            key={dial.key}
-            dial={dial}
-            hard={hard}
-            value={(hard[dial.key as DialKey] as number) ?? dial.range(hard).min}
-            onChange={(v) => set({ ...hard, [dial.key]: v })}
-          />
-        ))}
+        {DIALS.filter((dial) => !decided.has(dial.key)).map((dial) => {
+          const value = (hard[dial.key as DialKey] as number) ?? dial.range(hard).min
+          const onChange = (v: number) => set({ ...hard, [dial.key]: v })
+          return dial.steps
+            ? <Steps key={dial.key} dial={dial} value={value} onChange={onChange} />
+            : <Slider key={dial.key} dial={dial} hard={hard} value={value} onChange={onChange} />
+        })}
       </div>
 
       <div className="card-foot">
