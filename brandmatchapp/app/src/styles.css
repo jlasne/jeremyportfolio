@@ -3527,6 +3527,11 @@ body { background: var(--paper); }
 .campaign-list + .split-card, .split-card + .chart-card, .chart-card, .tiles { margin-top: var(--gap-block); }
 .tiles { margin-bottom: 0; }
 .two-up { gap: var(--gap-block); }
+/* Cards stacked down a page are spaced by the rule above. Side by side in a
+   grid they are not stacked, and that margin was eating the second card's
+   height: both ended on the same line and the right one started 18px lower.
+   The split grid already carried this exception. */
+.two-up > .card + .card { margin-top: 0; }
 
 /* --- the surfaces -------------------------------------------------------- */
 
