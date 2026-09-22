@@ -2485,14 +2485,40 @@ body { background: var(--paper); }
    label and a value rather than a card. */
 .rules .rule-choice b { font-weight: 500; text-align: right; max-width: 60%; }
 
-/* A sentence the client will not compromise on. It leaves the score and
-   marks the leads that miss it, so it has to read as heavier than the rest
-   without shouting. */
-.sentence-list li.breaker .sentence { border-color: var(--orange-deep); }
-.breaker-toggle { flex: none; white-space: nowrap; }
+/* A sentence the client will not compromise on.
+   It leaves the score and marks the leads that miss it, so the control has to
+   be visible on every row rather than hidden behind a hover: it is the only
+   place this exists now that the deal breaker list is gone. The label never
+   changes width between states, so nothing shifts when a row is toggled. */
+.breaker-toggle {
+  display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
+  height: 34px; padding: 0 13px 0 11px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--paper);
+  font: inherit; font-size: 12.5px; color: var(--ink-2); cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.breaker-toggle i {
+  width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid var(--ink-3);
+  flex: none; position: relative; transition: inherit;
+}
+.breaker-toggle:hover:not(:disabled) { border-color: var(--ink-3); color: var(--ink); }
+.breaker-toggle:disabled { opacity: 0.4; cursor: not-allowed; }
 .breaker-toggle.on {
   background: var(--orange-deep); border-color: var(--orange-deep); color: #fff; font-weight: 600;
 }
+.breaker-toggle.on i { background: #fff; border-color: #fff; }
+.breaker-toggle.on i::after {
+  content: ''; position: absolute; left: 4px; top: 1px; width: 3px; height: 7px;
+  border: solid var(--orange-deep); border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
+
+/* The row itself says so too, quietly: a bar down the side of the field. */
+.sentence-list li.breaker .sentence {
+  border-color: var(--orange-deep);
+  box-shadow: inset 3px 0 0 var(--orange-deep);
+}
+
+/* On a lead, the same sentence carries the same word. */
 .must-tag {
   margin-left: 8px; padding: 1px 7px; border-radius: 999px; font-size: 10.5px;
   font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase;
@@ -2505,12 +2531,6 @@ body { background: var(--paper); }
 .lead-flag {
   flex: none; padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 600;
   background: var(--orange-deep); color: #fff;
-}
-.sentence-foot .spacer { flex: 1; }
-
-@media (max-width: 640px) {
-  .sentence-list li { flex-wrap: wrap; }
-  .breaker-toggle { order: 3; }
 }
 
 /* A choice. Reach and rhythm are two ways through, not two demands, so they
@@ -3080,11 +3100,26 @@ body { background: var(--paper); }
 /* The sentences that describe who the client wants. */
 .sentences { margin: 6px 0 16px; }
 .sentence-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.sentence-list li { display: grid; grid-template-columns: 22px minmax(0, 1fr) 30px; gap: 8px; align-items: start; }
+/* Four things on a row: the number, the sentence, the must toggle, the cross.
+   The grid was written for three, and the fourth child wrapped onto a second
+   row: the cross fell under the number and the toggle overflowed the card. */
+.sentence-list li {
+  display: grid; grid-template-columns: 22px minmax(0, 1fr) auto 28px;
+  gap: 10px; align-items: start;
+}
 .sentence-n { color: var(--ink-3); font-size: 12px; padding-top: 10px; text-align: right; }
 .textarea.sentence { border-radius: 14px; min-height: 40px; resize: vertical; line-height: 1.4; }
-.sentence-list .drop { margin-top: 4px; }
-.sentence-foot { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+/* Both controls sit on the first line of the field, whatever it grows to. */
+.sentence-list .breaker-toggle, .sentence-list .drop { margin-top: 3px; }
+.sentence-foot { display: flex; align-items: center; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
+.sentence-foot .spacer { flex: 1; }
+
+/* Narrow: the toggle drops to its own line under the field rather than
+   squeezing the sentence, and keeps the cross beside it. */
+@media (max-width: 720px) {
+  .sentence-list li { grid-template-columns: 22px minmax(0, 1fr) 28px; row-gap: 6px; }
+  .sentence-list li .breaker-toggle { grid-column: 2 / 4; justify-self: start; margin-top: 0; }
+}
 
 /* A dial that lives under the niches, and the way there and back. */
 .dial-wrap { display: flex; flex-direction: column; gap: 2px; }

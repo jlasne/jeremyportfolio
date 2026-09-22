@@ -48,19 +48,20 @@ export function Sentences({ list, onChange }: { list: Criterion[]; onChange: (ne
               />
               <button
                 type="button"
-                className={`btn small breaker-toggle${on ? ' on' : ''}`}
+                className={`breaker-toggle${on ? ' on' : ''}`}
                 aria-pressed={on}
                 disabled={!on && (full || !c.text.trim())}
                 title={
                   on
-                    ? 'Non negotiable. Out of the score, and leads that miss it arrive marked.'
+                    ? 'Non negotiable. It leaves the brand fit score, and a lead that misses it arrives marked.'
                     : full
                       ? `You already have ${BREAKERS_MAX}. Unmark one to mark this.`
-                      : 'Make this non negotiable'
+                      : 'Make this non negotiable. It leaves the score, and leads that miss it arrive marked.'
                 }
                 onClick={() => onChange(list.map((x) => (x.id === c.id ? { ...x, breaker: !on } : x)))}
               >
-                {on ? 'Non negotiable' : 'Make it a must'}
+                <i aria-hidden="true" />
+                Must have
               </button>
               <button
                 type="button"
