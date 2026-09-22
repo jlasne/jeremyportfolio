@@ -2,17 +2,24 @@
   "openrouter": {
     "decide": {
       "model": "typesafe/jev-1.13",
-      "fallbacks": [
-        "deepseek/deepseek-v4-flash-0731"
-      ],
+      "endpoint": "decisions",
       "priceIn": 0.042,
-      "priceOut": 0
+      "priceOut": 0,
+      "fallbacks": [
+        {
+          "model": "deepseek/deepseek-v4-flash-0731",
+          "endpoint": "chat",
+          "priceIn": 0.04,
+          "priceOut": 0.64
+        }
+      ]
     },
     "vision": {
       "enabled": false,
       "model": "deepseek/deepseek-v4-flash-vision-exp",
       "priceIn": 0.22,
-      "priceOut": 0.66
+      "priceOut": 0.66,
+      "endpoint": "chat"
     }
   },
   "brandmatch": {

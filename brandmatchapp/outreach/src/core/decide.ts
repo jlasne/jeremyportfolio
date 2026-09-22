@@ -1,20 +1,29 @@
-import type { Settings } from '../config/settings.js'
+import type { ModelSettings, Settings } from '../config/settings.js'
 import { round } from './log.js'
 import type { Choice, Decision, PageState, Usage } from './types.js'
 
 // The decision model. It sees the goal and a numbered list, and answers with
-// one line of JSON.
+// one of the options it was given.
 //
 // The question is deliberately a multiple choice, not an open instruction. A
-// model that can only return a number from a list it was given cannot invent a
+// model that can only return one of the options it was handed cannot invent a
 // selector, cannot navigate somewhere nobody asked for, and cannot write the
 // message. Those are three whole classes of failure removed by the shape of
-// the prompt rather than by a check afterwards.
+// the question rather than by a check afterwards.
+//
+// Two doors lead to a model, and the shape of the question is the same at
+// both. A decisions model answers with the option's own name and nothing
+// else. A chat model answers with a line of JSON that has to be read, and
+// checked against the list it was given.
+
+const ASK = 'Pick the one action that best serves the goal.'
+const DONE = 'done'
+const STUCK = 'stuck'
 
 const SYSTEM = [
   'You drive a web browser one step at a time.',
   'You get a goal and a numbered list of things on the page.',
-  'Answer with JSON only: {"action":"click"|"type"|"done"|"stuck","i":<number>,"why":"<8 words>"}.',
+  `Answer with JSON only: {"action":"click"|"type"|"${DONE}"|"${STUCK}","i":<number>,"why":"<8 words>"}.`,
   'Use "i" only for click and type. Use "done" when the goal is already reached.',
   'Use "stuck" when nothing in the list can serve the goal.',
   'Never explain outside the JSON.',
@@ -23,6 +32,113 @@ const SYSTEM = [
 export type CallResult = { decision: Decision | null; usage: Usage; raw: string }
 
 export async function decide(goal: string, state: PageState, s: Settings): Promise<CallResult> {
+  const tries = [s.openrouter.decide, ...(s.openrouter.decide.fallbacks ?? [])]
+  const failures: string[] = []
+
+  for (const model of tries) {
+    try {
+      const { choice, usage, raw } = await ask(goal, state, s, model)
+      return { decision: choice ? { ...choice, source: 'text', usage } : null, usage, raw }
+    } catch (err) {
+      // A model that errors is stepped over, not retried. The next one on the
+      // list is a different model at a possibly different door, which is the
+      // only reason a second attempt is worth anything.
+      failures.push(`${model.model}: ${String(err).slice(0, 200)}`)
+    }
+  }
+  throw new Error(failures.join(' | '))
+}
+
+async function ask(
+  goal: string,
+  state: PageState,
+  s: Settings,
+  model: ModelSettings,
+): Promise<{ choice: Choice | null; usage: Usage; raw: string }> {
+  return model.endpoint === 'decisions'
+    ? await askDecisions(goal, state, s, model)
+    : await askChat(goal, state, s, model)
+}
+
+// ---------------------------------------------------------------------------
+// The decisions door
+// ---------------------------------------------------------------------------
+
+/**
+ * One question, one typed answer.
+ *
+ * The options carry their own names, so the pick comes back as a name from
+ * the list and there is nothing to parse and nothing to validate: an answer
+ * that was not on the list cannot be returned in the first place.
+ */
+async function askDecisions(goal: string, state: PageState, s: Settings, model: ModelSettings) {
+  const criteria: Record<string, string> = {}
+  for (const c of state.candidates) {
+    criteria[String(c.i)] = c.editable ? `type into the box named "${c.name}"` : `click "${c.name}"`
+  }
+  criteria[DONE] = 'the goal is already reached on this page'
+  criteria[STUCK] = 'nothing on this page can serve the goal'
+
+  const body = await post(s, `${s.openrouter.baseUrl.replace(/\/v1$/, '')}/alpha/decisions`, {
+    model: model.model,
+    state: { goal, url: state.url, page: state.title },
+    questions: { next: { type: 'choice', instructions: `${ASK} Goal: ${goal}`, criteria } },
+  })
+
+  const answer = (body as DecisionsBody).answers?.next
+  const picked = pickedFrom(answer)
+  return {
+    choice: asChoice(picked, state, answer?.confidence),
+    usage: price(usageOf(body), model),
+    raw: JSON.stringify(answer ?? body).slice(0, 400),
+  }
+}
+
+type Answer = {
+  choice?: unknown
+  value?: unknown
+  selected?: unknown
+  answer?: unknown
+  confidence?: number
+  probabilities?: Record<string, number>
+}
+type DecisionsBody = { answers?: Record<string, Answer> }
+
+/**
+ * The chosen option, under whichever name this endpoint gives it.
+ *
+ * The probabilities are the fallback and the safest reading of the two: the
+ * highest one is the pick whatever the field beside it happens to be called.
+ */
+function pickedFrom(answer: Answer | undefined): string | null {
+  if (!answer) return null
+  for (const direct of [answer.choice, answer.value, answer.selected, answer.answer]) {
+    if (typeof direct === 'string' && direct) return direct
+  }
+  const p = answer.probabilities
+  if (!p) return null
+  let best: string | null = null
+  for (const [key, weight] of Object.entries(p)) {
+    if (best === null || weight > (p[best] ?? -1)) best = key
+  }
+  return best
+}
+
+function asChoice(picked: string | null, state: PageState, confidence?: number): Choice | null {
+  if (!picked) return null
+  const why = confidence === undefined ? 'chosen' : `confidence ${Math.round(confidence * 100)}%`
+  if (picked === DONE) return { kind: 'done', why }
+  if (picked === STUCK) return { kind: 'stuck', why }
+  const found = state.candidates.find((c) => String(c.i) === picked)
+  if (!found) return null
+  return { kind: found.editable ? 'type' : 'click', i: found.i, why }
+}
+
+// ---------------------------------------------------------------------------
+// The chat door
+// ---------------------------------------------------------------------------
+
+async function askChat(goal: string, state: PageState, s: Settings, model: ModelSettings) {
   const lines = state.candidates.map((c) => `${c.i}) [${c.editable ? 'type' : 'click'}] ${c.name}`).join('\n')
   const user = [
     `Goal: ${goal}`,
@@ -32,108 +148,39 @@ export async function decide(goal: string, state: PageState, s: Settings): Promi
     lines || '(nothing on this page can be clicked or typed into)',
   ].join('\n')
 
-  const res = await call(s, s.openrouter.decide, [
-    { role: 'system', content: SYSTEM },
-    { role: 'user', content: user },
-  ])
+  const body = (await post(s, `${s.openrouter.baseUrl}/chat/completions`, {
+    model: model.model,
+    messages: [
+      { role: 'system', content: SYSTEM },
+      { role: 'user', content: user },
+    ],
+    max_tokens: 120,
+    temperature: 0,
+  })) as ChatBody
 
-  const usage = price(res, s.openrouter.decide.priceIn, s.openrouter.decide.priceOut)
-  const choice = parse(res.text, state)
+  const text = textOf(body)
+  const choice = parse(text, state)
   return {
-    decision: choice ? { ...choice, source: 'text', usage } : null,
-    usage,
-    // On a refused answer the log gets the whole reply envelope, so a model
-    // that puts its choice somewhere unexpected says so on the first run.
-    raw: choice ? res.text : `${res.text} || shape: ${res.shape ?? ''}`,
+    choice,
+    usage: price(usageOf(body), model),
+    // A refused answer takes the whole envelope into the log, so a model that
+    // puts its reply somewhere unexpected says so on the first run.
+    raw: choice ? text : `${text} || shape: ${JSON.stringify(body.choices?.[0] ?? body).slice(0, 300)}`,
   }
 }
 
-export type Message = {
-  role: 'system' | 'user'
-  content: string | Array<{ type: 'text'; text: string } | { type: 'image_url'; image_url: { url: string } }>
-}
-
-export type Raw = { text: string; tokensIn: number; tokensOut: number; shape?: string }
-
-type Body = {
+type ChatBody = {
   choices?: { message?: { content?: unknown; reasoning?: unknown }; text?: unknown }[]
-  usage?: { prompt_tokens?: number; completion_tokens?: number }
-  error?: { message?: string }
 }
 
-export async function call(s: Settings, cfg: { model: string; fallbacks?: string[] }, messages: Message[]): Promise<Raw> {
-  // Jev declares no supported parameters, so the tuning knobs go out on the
-  // first try and are dropped if the provider objects to them. One retry,
-  // never a loop: a model that rejects a bare request is not going to answer.
-  let body = await post(s, cfg, messages, true)
-  if (typeof body === 'string') {
-    if (!/parameter|unsupported|unrecognized/i.test(body)) throw new Error(`OpenRouter: ${body.slice(0, 300)}`)
-    const bare = await post(s, cfg, messages, false)
-    if (typeof bare === 'string') throw new Error(`OpenRouter: ${bare.slice(0, 300)}`)
-    body = bare
-  }
-
-  if (body.error?.message) throw new Error(`OpenRouter: ${body.error.message.slice(0, 300)}`)
-
-  return {
-    text: textOf(body),
-    tokensIn: body.usage?.prompt_tokens ?? 0,
-    tokensOut: body.usage?.completion_tokens ?? 0,
-    // Kept for the log so a model whose reply sits somewhere else says where,
-    // rather than looking like a model that answered nothing.
-    shape: JSON.stringify(body.choices?.[0] ?? body).slice(0, 400),
-  }
-}
-
-async function post(
-  s: Settings,
-  cfg: { model: string; fallbacks?: string[] },
-  messages: Message[],
-  tuned: boolean,
-): Promise<Body | string> {
-  const res = await fetch(`${s.openrouter.baseUrl}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      authorization: `Bearer ${s.openrouter.apiKey}`,
-      'content-type': 'application/json',
-      'x-title': 'brandmatch outreach',
-    },
-    body: JSON.stringify({
-      model: cfg.model,
-      // OpenRouter walks this list itself when one errors, so a fallback costs
-      // no second request and no waiting.
-      ...(cfg.fallbacks?.length ? { models: [cfg.model, ...cfg.fallbacks] } : {}),
-      messages,
-      ...(tuned ? { max_tokens: 120, temperature: 0 } : {}),
-    }),
-  })
-  if (!res.ok) return `${res.status} ${(await res.text()).slice(0, 300)}`
-  return (await res.json()) as Body
-}
-
-/**
- * The answer, wherever the model put it.
- *
- * A decision model returns a typed choice rather than prose, so its reply can
- * arrive as an object instead of a string. Both are read the same way here,
- * and anything else is handed on as JSON for the parser to try.
- */
-function textOf(body: Body): string {
+/** The answer, wherever the model put it. */
+function textOf(body: ChatBody): string {
   const choice = body.choices?.[0]
   const content = choice?.message?.content ?? choice?.text
   if (typeof content === 'string') return content
   if (content !== undefined && content !== null) return JSON.stringify(content)
   const reasoning = choice?.message?.reasoning
-  if (typeof reasoning === 'string') return reasoning
-  return ''
-}
-
-export function price(r: Raw, priceIn: number, priceOut: number): Usage {
-  return {
-    tokensIn: r.tokensIn,
-    tokensOut: r.tokensOut,
-    usd: round((r.tokensIn / 1e6) * priceIn + (r.tokensOut / 1e6) * priceOut),
-  }
+  return typeof reasoning === 'string' ? reasoning : ''
 }
 
 /** Reads the answer, and refuses anything that is not an option we offered. */
@@ -152,8 +199,8 @@ export function parse(text: string, state: PageState): Choice | null {
 
   const why = typeof raw.why === 'string' ? raw.why.slice(0, 120) : ''
   const action = String(raw.action ?? '')
-  if (action === 'done') return { kind: 'done', why }
-  if (action === 'stuck') return { kind: 'stuck', why }
+  if (action === DONE) return { kind: 'done', why }
+  if (action === STUCK) return { kind: 'stuck', why }
   if (action !== 'click' && action !== 'type') return null
 
   const i = Number(raw.i)
@@ -163,4 +210,58 @@ export function parse(text: string, state: PageState): Choice | null {
   // thread. The list already said which is which.
   if (action === 'type' && !found.editable) return null
   return { kind: action, i, why }
+}
+
+// ---------------------------------------------------------------------------
+// Shared
+// ---------------------------------------------------------------------------
+
+export type Message = {
+  role: 'system' | 'user'
+  content: string | Array<{ type: 'text'; text: string } | { type: 'image_url'; image_url: { url: string } }>
+}
+
+export async function post(s: Settings, url: string, payload: unknown): Promise<unknown> {
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${s.openrouter.apiKey}`,
+      'content-type': 'application/json',
+      'x-title': 'brandmatch outreach',
+    },
+    body: JSON.stringify(payload),
+  })
+  const body: unknown = await res.json().catch(() => null)
+  const message = (body as { error?: { message?: string } } | null)?.error?.message
+  if (!res.ok || message) throw new Error(`OpenRouter ${res.status}: ${message ?? JSON.stringify(body).slice(0, 300)}`)
+  return body
+}
+
+type Counted = { usage?: { prompt_tokens?: number; completion_tokens?: number; input_tokens?: number; output_tokens?: number } }
+
+export function usageOf(body: unknown): { tokensIn: number; tokensOut: number } {
+  const u = (body as Counted).usage
+  return {
+    tokensIn: u?.prompt_tokens ?? u?.input_tokens ?? 0,
+    tokensOut: u?.completion_tokens ?? u?.output_tokens ?? 0,
+  }
+}
+
+export function price(t: { tokensIn: number; tokensOut: number }, model: { priceIn: number; priceOut: number }): Usage {
+  return {
+    tokensIn: t.tokensIn,
+    tokensOut: t.tokensOut,
+    usd: round((t.tokensIn / 1e6) * model.priceIn + (t.tokensOut / 1e6) * model.priceOut),
+  }
+}
+
+/** The chat door, for the vision fallback, which only ever sends a picture. */
+export async function chat(s: Settings, model: ModelSettings, messages: Message[]): Promise<{ text: string; usage: Usage }> {
+  const body = (await post(s, `${s.openrouter.baseUrl}/chat/completions`, {
+    model: model.model,
+    messages,
+    max_tokens: 120,
+    temperature: 0,
+  })) as ChatBody
+  return { text: textOf(body), usage: price(usageOf(body), model) }
 }

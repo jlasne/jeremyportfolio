@@ -50,30 +50,55 @@ const site = http.createServer((req, res) => {
   res.end(PAGE)
 }).listen(8121)
 
+// Decides the way the real one is asked to: pick one key out of the options
+// it was handed. Deliberately stubborn on the account step, so the loop has
+// to notice that its click does nothing and move on to Chat.
+function pickKey(goal, options) {
+  const entry = (re) => Object.entries(options).find(([, text]) => re.test(text))
+  if (/search for a person|box where a new message is typed/.test(goal)) return entry(/^type into/)?.[0]
+  if (/Pick the account/.test(goal)) {
+    const handle = (goal.match(/@([\w.]+)/) ?? [])[1] ?? ''
+    return (entry(new RegExp('click "' + handle.replace(/\./g, '\\.') + '"')) ?? entry(/click "Chat"/))?.[0]
+  }
+  return entry(/click "Message"/)?.[0]
+}
+
+let decisionCalls = 0
+let chatCalls = 0
 const model = http.createServer((req, res) => {
   let b=''; req.on('data',c=>b+=c); req.on('end',()=>{
-    const prompt = JSON.parse(b).messages.map(m=>m.content).join('\n')
-    const lines = prompt.split('\n').filter(l=>/^\d+\) \[/.test(l))
-    const goal = (prompt.match(/Goal: (.*)/) ?? [])[1] ?? ''
-    const typable = lines.find(l => /\[type\]/.test(l))
-    const named = (re) => lines.find(l => /\[click\]/.test(l) && re.test(l))
-
-    let hit = null
-    let action = 'click'
-    if (/search for a person|box where a new message is typed/.test(goal)) {
-      hit = typable; action = 'type'
-    } else if (/Pick the account/.test(goal)) {
-      const handle = (goal.match(/@([\w.]+)/) ?? [])[1] ?? ''
-      hit = named(new RegExp(handle.replace(/\./g, '\\.'))) ?? named(/Chat/)
-      // Deliberately stubborn: it keeps offering the person it already picked.
-      // The loop has to notice that click does nothing and move on to Chat.
-    } else {
-      hit = named(/Message/)
-    }
-    const answer = hit
-      ? { action, i: Number(hit.split(')')[0]), why: 'x' }
-      : { action: 'stuck', why: 'nothing on this page' }
+    const payload = JSON.parse(b)
     res.setHeader('content-type','application/json')
+
+    // The decisions door: a state, one typed question, one named answer back.
+    if (req.url.includes('/alpha/decisions')) {
+      decisionCalls++
+      // One model that is simply down, to prove the fallback is reached.
+      if (payload.model === 'broken/model') {
+        res.statusCode = 502
+        return res.end(JSON.stringify({ error: { message: 'model is down', code: 502 } }))
+      }
+      assert.equal(payload.questions.next.type, 'choice')
+      const key = pickKey(payload.state.goal, payload.questions.next.criteria) ?? 'stuck'
+      return res.end(JSON.stringify({
+        answers: { next: { choice: key, confidence: 0.91, probabilities: { [key]: 0.91 } } },
+        usage: { prompt_tokens: 300, completion_tokens: 0 },
+      }))
+    }
+
+    // The chat door, where the fallback answers.
+    chatCalls++
+    const prompt = payload.messages.map(m=>m.content).join('\n')
+    const goal = (prompt.match(/Goal: (.*)/) ?? [])[1] ?? ''
+    const options = {}
+    for (const l of prompt.split('\n')) {
+      const m = l.match(/^(\d+)\) \[(type|click)\] (.*)$/)
+      if (m) options[m[1]] = m[2] === 'type' ? 'type into the box named "' + m[3] + '"' : 'click "' + m[3] + '"'
+    }
+    const key = pickKey(goal, options)
+    const answer = key
+      ? { action: /^type into/.test(options[key]) ? 'type' : 'click', i: Number(key), why: 'x' }
+      : { action: 'stuck', why: 'nothing on this page' }
     res.end(JSON.stringify({ choices:[{message:{content:JSON.stringify(answer)}}], usage:{prompt_tokens:300,completion_tokens:16} }))
   })
 }).listen(8122)
@@ -100,7 +125,7 @@ const api = http.createServer((req, res) => {
 const logDir = join(mkdtempSync(join(tmpdir(),'bm-run-')),'logs')
 const base = {
   openrouter: { apiKey:'k', baseUrl:'http://127.0.0.1:8122',
-    decide:{model:'typesafe/jev-1.13',priceIn:0.042,priceOut:0}, vision:{enabled:false,model:'deepseek/deepseek-v4-flash-vision-exp',priceIn:0.22,priceOut:0.66} },
+    decide:{model:'typesafe/jev-1.13',endpoint:'decisions',priceIn:0.042,priceOut:0,fallbacks:[{model:'deepseek/deepseek-v4-flash-0731',endpoint:'chat',priceIn:0.04,priceOut:0.64}]}, vision:{enabled:false,model:'deepseek/deepseek-v4-flash-vision-exp',priceIn:0.22,priceOut:0.66} },
   brandmatch: { apiBase:'http://127.0.0.1:8123', apiKey:'bm-key', status:'new', savedOnly:false, markAs:'contacted' },
   instagram: { account:'test.hq', baseUrl:'http://127.0.0.1:8121', openWith:'direct', dailyCap:50, betweenDms:[1,1], afterProfile:[0,0], typing:[1,2] },
   browser: { headless:true, viewport:{width:1000,height:800}, sessionRoot:'', executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome' },
@@ -161,6 +186,35 @@ try {
   const firstDm = JSON.parse(readFileSync(join(logDir, `dms-${new Date().toLocaleDateString('en-CA')}.jsonl`), 'utf8').split('\n')[0])
   assert.equal(firstDm.message, 'Hey Ana, 24.3k strong. Two briefs fit you.')
   assert.ok(!firstDm.message.includes('ana.lifts'), 'the searched handle must not end up in the message')
+
+  // 6. a primary that is down falls through to the model behind it, at the
+  //    other door. The two sit at different endpoints, so this cannot be left
+  //    to OpenRouter's own routing.
+  const before = { d: decisionCalls, c: chatCalls }
+  const broken = {
+    ...s,
+    openrouter: {
+      ...s.openrouter,
+      decide: {
+        model: 'broken/model',
+        endpoint: 'decisions',
+        priceIn: 0,
+        priceOut: 0,
+        fallbacks: [{ model: 'deepseek/deepseek-v4-flash-0731', endpoint: 'chat', priceIn: 0.04, priceOut: 0.64 }],
+      },
+    },
+    instagram: { ...s.instagram, account: 'fallback.hq' },
+  }
+  mkdirSync(join(sessionRoot, 'fallback.hq'), { recursive: true })
+  const fell = await run(broken, log, templates, { send: false, approve: false, limit: 1 })
+  assert.equal(fell.drafted, 1, `the fallback must carry the lead, got ${JSON.stringify(fell)}`)
+  assert.ok(decisionCalls > before.d, 'the broken primary must still be tried')
+  assert.ok(chatCalls > before.c, 'the fallback must answer at the chat door')
+  console.log(`fallback: ${decisionCalls - before.d} decisions attempts, ${chatCalls - before.c} chat answers`)
+
+  assert.ok(decisionCalls > 0, 'the decisions door must be the one used')
+  assert.equal(before.c, 0, 'the chat fallback must stay unused while decisions answers')
+  console.log(`decisions calls ${decisionCalls}, chat calls ${chatCalls}`)
 
   console.log('day totals:', JSON.stringify(log.day()))
   console.log('full run passed')

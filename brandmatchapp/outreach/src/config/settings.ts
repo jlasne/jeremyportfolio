@@ -21,10 +21,19 @@ export type ModelSettings = {
    */
   model: string
   /**
-   * Tried in order when the first one errors, by OpenRouter itself rather
-   * than by a retry here. One request, one bill, no second round trip.
+   * Which door it answers at.
+   *
+   * 'chat' is the usual completions endpoint, and the answer arrives as text
+   * to be read as JSON. 'decisions' is for models that return a typed choice:
+   * the options go up as a question and the pick comes back named, with no
+   * prose in between and nothing to parse.
    */
-  fallbacks?: string[]
+  endpoint?: 'chat' | 'decisions'
+  /**
+   * Tried in order when the first one errors. They can sit at different doors,
+   * which is why this is a list of models and not a list of names.
+   */
+  fallbacks?: Omit<ModelSettings, 'fallbacks'>[]
   /**
    * USD per million tokens. This feeds the cost log and nothing else: the
    * bill is whatever OpenRouter charges, whatever is written here. Copy the
@@ -117,9 +126,12 @@ const DEFAULTS: Settings = {
     // so a step costs only what the page description costs to read.
     decide: {
       model: 'typesafe/jev-1.13',
-      fallbacks: ['deepseek/deepseek-v4-flash-0731'],
+      endpoint: 'decisions',
       priceIn: 0.042,
       priceOut: 0,
+      fallbacks: [
+        { model: 'deepseek/deepseek-v4-flash-0731', endpoint: 'chat', priceIn: 0.04, priceOut: 0.64 },
+      ],
     },
     vision: {
       enabled: false,

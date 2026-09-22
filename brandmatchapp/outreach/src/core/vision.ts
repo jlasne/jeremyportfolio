@@ -1,5 +1,5 @@
 import type { Settings } from '../config/settings.js'
-import { call, parse, price } from './decide.js'
+import { chat, parse } from './decide.js'
 import { ZERO } from './log.js'
 import type { Decision, PageState, Usage } from './types.js'
 
@@ -26,7 +26,7 @@ export async function fallback(
   const lines = state.candidates.map((c) => `${c.i}) [${c.editable ? 'type' : 'click'}] ${c.name}`).join('\n')
   const image = await shot()
 
-  const res = await call(s, s.openrouter.vision, [
+  const res = await chat(s, s.openrouter.vision, [
     {
       role: 'system',
       content:
@@ -42,7 +42,6 @@ export async function fallback(
     },
   ])
 
-  const usage = price(res, s.openrouter.vision.priceIn, s.openrouter.vision.priceOut)
   const choice = parse(res.text, state)
-  return { decision: choice ? { ...choice, source: 'vision', usage } : null, usage, skipped: false, raw: res.text }
+  return { decision: choice ? { ...choice, source: 'vision', usage: res.usage } : null, usage: res.usage, skipped: false, raw: res.text }
 }

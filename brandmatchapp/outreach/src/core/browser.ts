@@ -20,6 +20,12 @@ export class Browser {
   ) {}
 
   static async open(s: Settings, userDataDir: string): Promise<Browser> {
+    // Stagehand still wires up a default provider it will never be asked to
+    // use, and complains at startup about the key for it. Nothing here calls a
+    // model, so a placeholder keeps that noise out of a run's output. It is
+    // set on this process only and reaches nothing outside it.
+    if (!process.env.OPENAI_API_KEY) process.env.OPENAI_API_KEY = 'unused-by-this-agent'
+
     const sh = new Stagehand({
       env: 'LOCAL',
       verbose: 0,

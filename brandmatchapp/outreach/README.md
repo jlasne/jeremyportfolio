@@ -77,15 +77,25 @@ Edit both. Then the keys:
 
 Three models, and a slug is always `vendor/model`. A bare name fails the call.
 
-| | model | in | out |
-| --- | --- | --- | --- |
-| Decide | `typesafe/jev-1.13` | $0.042/M | free |
-| If that errors | `deepseek/deepseek-v4-flash-0731` | $0.04/M | $0.64/M |
-| Vision, off | `deepseek/deepseek-v4-flash-vision-exp` | $0.22/M | $0.66/M |
+| | model | door | in | out |
+| --- | --- | --- | --- | --- |
+| Decide | `typesafe/jev-1.13` | decisions | $0.042/M | free |
+| If that errors | `deepseek/deepseek-v4-flash-0731` | chat | $0.04/M | $0.64/M |
+| Vision, off | `deepseek/deepseek-v4-flash-vision-exp` | chat | $0.22/M | $0.66/M |
 
-Jev answers with a typed choice rather than prose, which is the shape of every
-question this loop asks, and its output costs nothing. The fallback list is
-walked by OpenRouter itself, so an error costs no second request.
+Two doors, and the question is the same at both.
+
+Jev is a decisions model and answers at `/api/alpha/decisions`, not at chat
+completions, which refuses it outright. The options go up as one typed
+question and the pick comes back named. Nothing is parsed and nothing has to
+be validated: an answer that was not on the list cannot be returned. Its
+output is free, so a step costs only what the page costs to describe.
+
+A chat model answers with a line of JSON, which is read and then checked
+against the list it was given.
+
+Because the two sit at different endpoints, the fallback is walked here
+rather than by OpenRouter's own routing.
 
 `OPENROUTER_MODEL` and `OPENROUTER_VISION_MODEL` override them, the same two
 names the backend reads.
