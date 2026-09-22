@@ -354,9 +354,9 @@ Puis la boucle s'est fermée toute seule : la requête lancée a rendu **zéro n
 
 ---
 
-## Chantier 4 : Google
+## Chantier 4 : Google — CODE ÉCRIT, ATTEND UNE CLÉ
 
-**Dépend d'une clé de recherche web que nous n'avons pas.**
+**Tout est construit et déployé. Il manque `SERPER_API_KEY`.**
 
 ### Le principe
 
@@ -364,22 +364,45 @@ Chercher `site:instagram.com "<niche>" "Followers"`, par pays et par langue. L'e
 
 On connaît donc la taille avant d'acheter la fiche. On n'achète que ce qui est dans la fourchette.
 
-| | visée |
+### Vérifié à la main le 22/09/26, sans clé
+
+Recherche `site:instagram.com comedy creator "Followers" "Posts"` : **8 résultats sur 10** sont des profils avec un nombre d'abonnés lisible, de 65 à 6M.
+
+La prémisse tient. Instagram écrit le compteur dans la description de sa propre page, donc Google le rend.
+
+| | visée de ce qu'on achète |
 |---|---|
-| Google | 99% |
-| Notre recherche par nom de compte | 15% |
+| Google | ~100%, le filtre passe avant la dépense |
+| Notre recherche par nom de compte | 24% mesuré |
 
-### Ce que ça change
+### Ce que ça change, recalculé sur nos chiffres
 
-Le coût par lead passe de 0,35 $ à environ 0,07 $. C'est la moitié du chemin à lui seul.
+| canal | coût par candidat dans la fenêtre |
+|---|---|
+| Recherche de comptes | 0,0096 $ (0,0023 ÷ 24% de visée) |
+| **Google** | **0,0033 $** (0,001 de recherche + 0,0023 de fiche) |
+
+**3x moins cher**, pas 5x comme annoncé. Le gain vient de ne plus acheter les 76% hors fenêtre.
 
 ### La limite à connaître
 
 Google ne donne que le nombre d'abonnés. Rien sur les vues, la cadence ou la date du dernier post. On supprime 62% du gâchis, pas la totalité.
 
+### Ce qui est déjà construit
+
+`google.ts` : lecture du compteur d'abonnés dans les titres et extraits (`6M`, `24K`, `7,332`), extraction du handle, filtre par la fenêtre **avant** l'achat, puis passage à `detailRun`.
+
+Deux garde-fous. Une page qui ne rend rien de neuf arrête la requête : les pages profondes de Google se répètent, exactement comme l'index de comptes. Et un résultat dont la taille est illisible est **gardé**, jamais jeté : l'écarter biaiserait le pool vers ce que Google a choisi de tronquer.
+
+`search` ne dépense rien par défaut. Il faut `buy: true` pour acheter les fiches. Un premier coup d'œil coûte un centime.
+
+Le canal apparaît dans `channels.plan` uniquement si la clé existe. Sans clé il n'est ni proposé au client ni lançable.
+
 ### Vérifié par
 
 100 pages Google sur une niche connue. Combien de handles sortis, combien dans la fourchette, coût réel par candidat utile.
+
+**Serper donne 2 500 recherches gratuites.** La vérification coûte zéro euro.
 
 ---
 
@@ -424,7 +447,7 @@ Les plus proches : @theposinginstitute à 9 479 abonnés pour 10 000 demandés, 
 | 1bis | Un canal par fenêtre de cible | 0 | **livré, canal réfuté** |
 | 2 | Les graines | rien | **livré** |
 | 3 | Les vagues | 1 | **livré** |
-| 4 | Google | rien pour construire | **la clé de recherche** |
+| 4 | Google | rien | **code écrit, attend la clé** |
 | 5 | Les échecs de peu | 1 | **livré** |
 
 Tout est fait sauf le 4, qui attend une clé de recherche web.
@@ -453,5 +476,5 @@ Coût total des cinq chantiers : **4,04 $**, dont 3,20 $ d'une erreur de limite 
 
 ## Blocages en cours
 
-- **Pas de clé de recherche web.** Bloque le chantier 4, la seule piste restante pour la fenêtre 10k-100k.
+- **Pas de clé de recherche web.** Le chantier 4 est écrit et déployé, il refuse de tourner tant que `SERPER_API_KEY` est absente. Serper, 2 500 recherches gratuites, puis 50 $ pour 50 000 valables 6 mois. Brave coûte 5x plus, SerpApi 15x plus.
 - **Budget Apify partagé avec le pipeline manuel.** 4,62 $ restants sur le cycle qui finit le 07/10, dont 3 $ réservés au manuel. `startRun` refuse en dessous de cette réserve.
