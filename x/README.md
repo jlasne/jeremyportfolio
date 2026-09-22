@@ -11,9 +11,15 @@ three mails ask for more, and at 17:00 the day becomes three X posts and one
 | 10:00 | 3 questions on what you are going after, plus the /bio nudge |
 | 14:00 | 3 questions on what happened since 10:00 |
 | 17:00 | 3 questions, then the 3 posts and the script, written from the log |
+| 18:00 to 23:00 | one an hour while the drafts sit untouched, each carrying them in full |
 
 Every mail carries the whole day back: the questions, the entries, the
 drafts. The inbox is the archive, whatever happens to the database.
+
+The evening nudge is the exception, and asks for one thing. Once the drafts
+are written and none of them is ticked used, one lands every hour from 18:00
+with the posts in full, so one can go out from the phone. Ticking any draft
+stops the rest of the evening, and so does midnight.
 
 The mail questions come from a bank of three sets per slot that rotates by
 date, so the same three do not arrive every morning for a month. They follow
@@ -69,11 +75,12 @@ the question that produced it, and the feed is a list on the same document.
   archive says what actually shipped. While the day is being written the
   screen says so and offers nothing else.
 - **Archive.** Every day logged, with its entries and its drafts.
-- **Facts.** The standing numbers, the ones true every day rather than only
-  today: deals signed, deals in negotiation, MRR. Three jobs. The writers
-  may claim these and nothing else, so a post cannot invent a figure.
-  The interviewer reads them so it stops asking what it already knows.
-  And they go stale silently, so they are worth a look each week.
+- **Facts.** The numbers that are true every day rather than only today:
+  deals signed, deals in negotiation, apps live, MRR. Three jobs. The
+  writers may claim these and nothing else, so a post cannot invent a
+  figure, and anything they need and cannot find here comes out as `[X]`.
+  The interview reads them so it stops asking what it already knows.
+  Nothing updates them on its own, so they are worth a look each week.
 
 ## Stack
 

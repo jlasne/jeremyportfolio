@@ -252,7 +252,8 @@ button, input, textarea, select { font: inherit; color: inherit; }
       <div class="stat"><span>10:00 Paris</span><span>what you're after</span></div>
       <div class="stat"><span>14:00 Paris</span><span>what happened</span></div>
       <div class="stat"><span>17:00 Paris</span><span>the day + drafts</span></div>
-      <p style="color:var(--dim);font-size:13px;margin:10px 0 0">Every mail carries the whole day. The inbox is the archive.</p>
+      <div class="stat"><span>18:00 to 23:00</span><span>until you post one</span></div>
+      <p style="color:var(--dim);font-size:13px;margin:10px 0 0">Every mail carries the whole day. The inbox is the archive. Tick a draft used and the evening nudges stop.</p>
       <button class="btn ghost sm" id="test" style="margin:12px 0 0">Send a test mail</button>
     </div>
   </aside>
@@ -377,7 +378,7 @@ function draw() {
   if (tab === "today") { $("#title").textContent = "Today"; $("#sub").textContent = longDate(state.today); v.innerHTML = today(); }
   if (tab === "drafts") { $("#title").textContent = "Drafts"; $("#sub").textContent = state.draftsAt ? "written " + clock(state.draftsAt) : "not written yet"; v.innerHTML = drafts(state.drafts); }
   if (tab === "archive") { $("#title").textContent = "Archive"; $("#sub").textContent = "every day logged"; v.innerHTML = archiveView(); }
-  if (tab === "facts") { $("#title").textContent = "Facts"; $("#sub").textContent = "what both prompts are allowed to claim"; v.innerHTML = factsView(); }
+  if (tab === "facts") { $("#title").textContent = "Facts"; $("#sub").textContent = "the only numbers a post may claim"; v.innerHTML = factsView(); }
   wire();
 }
 
@@ -506,15 +507,23 @@ function archiveView() {
 }
 
 function factsView() {
-  const rows = (state.facts.length ? state.facts : [{ label: "", value: "" }]);
+  const rows = state.facts.length ? state.facts : [{ label: "", value: "" }];
+  const stale = state.facts.length === 0;
   return `
     <div class="row">
-      <p style="color:var(--dim);margin:0 0 14px">The only numbers the prompts may claim. Everything else gets a placeholder.</p>
+      <p class="lead" style="margin:0 0 6px">The numbers that are true every day, not just today.</p>
+      <p style="color:var(--dim);font-size:14px;margin:0 0 18px">
+        Deals signed. Deals in negotiation. Apps live. MRR.<br>
+        Both writers may claim these and nothing else, so a post cannot invent a figure.
+        Anything they need and cannot find here comes out as <b style="color:var(--ink)">[X]</b>.
+        The interview reads them too, so it stops asking what it already knows.
+      </p>
+      ${stale ? `<p style="color:var(--blue);font-size:14px;margin:0 0 18px">Empty right now, so every post about a deal will say [X]. Two minutes fixes it.</p>` : ""}
       <div id="rows">
         ${rows.map((f, i) => `
           <div class="fact">
-            <input placeholder="Deals signed" value="${esc(f.label)}" data-k="label" data-i="${i}">
-            <input placeholder="1" value="${esc(f.value)}" data-k="value" data-i="${i}">
+            <input placeholder="${i === 0 ? "Deals signed" : i === 1 ? "In negotiation" : "What it is"}" value="${esc(f.label)}" data-k="label" data-i="${i}">
+            <input placeholder="${i === 0 ? "1" : i === 1 ? "2" : "The number"}" value="${esc(f.value)}" data-k="value" data-i="${i}">
             <button class="kill" data-del="${i}" aria-label="Remove">✕</button>
           </div>`).join("")}
       </div>
@@ -522,6 +531,7 @@ function factsView() {
         <button class="btn ghost sm" id="addFact">Add a fact</button>
         <button class="btn sm" id="saveFacts">Save</button>
       </div>
+      <p style="color:var(--dim);font-size:13px;margin:18px 0 0">Nothing updates these on its own. Worth a look each week.</p>
     </div>`;
 }
 

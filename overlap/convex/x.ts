@@ -41,6 +41,11 @@ const FACTS_KEY = "facts";
 const MAX_ENTRY = 4000;
 const MAX_ENTRIES = 200;
 const KEEP_DRAFT_DAYS = 3; /* how much recent work the model is shown */
+/* After the drafts land at 17:00, an hourly nudge until one is ticked off.
+   It stops at midnight either way: a reminder nobody acts on at 01:00 is
+   not a reminder, it is noise. */
+const NUDGE_FROM = 18;
+const NUDGE_TO = 23;
 
 /* ── the door ───────────────────────────────────────────────────────── */
 
@@ -724,6 +729,64 @@ function mailBody(day: string, slot: string, d: ReturnType<typeof blank> | any) 
   return { html, text, subject: `x · ${longDate(day)} · ${SLOT_TITLE[slot] ?? slot}` };
 }
 
+/**
+ * The nudge: written drafts, none of them ticked off yet.
+ *
+ * Shorter than the three daily mails, because it asks for one thing. Each
+ * post is here in full, so it can be posted from the phone without opening
+ * anything, and ticking one on the page stops the rest of the evening.
+ */
+function nudgeBody(day: string, hour: number, left: { kind: string; label: string; body: string }[]) {
+  const posts = left.filter((d) => d.kind === "post").length;
+  const box = (inner: string) =>
+    `<div style="background:${C.card};border:1px solid ${C.line};border-radius:16px;padding:18px 20px;margin:0 0 14px">${inner}</div>`;
+  const font = "-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif";
+
+  const html =
+    `<div style="background:${C.bg};margin:0;padding:28px 16px"><div style="max-width:620px;margin:0 auto">` +
+    `<div style="font:700 26px/1 ${font};color:${C.ink};margin:0 0 4px">x</div>` +
+    `<div style="font:400 14px/1.4 ${font};color:${C.dim};margin:0 0 20px">${esc(longDate(day))} · ${hour}:00 Paris</div>` +
+    box(
+      `<div style="font:700 19px/1.35 ${font};color:${C.ink};margin:0 0 8px">${left.length} written, nothing posted.</div>` +
+      `<div style="font:400 15px/1.5 ${font};color:${C.dim}">${posts} ${posts === 1 ? "post" : "posts"} and the script have been sitting since 17:00. ` +
+      `Tick one as used on the page and these stop.</div>` +
+      `<div style="margin:18px 0 0"><a href="${SITE()}" style="display:inline-block;background:${C.ink};color:${C.bg};text-decoration:none;font:700 15px/1 ${font};padding:13px 22px;border-radius:9999px">Open the drafts</a></div>`,
+    ) +
+    left
+      .map((d) =>
+        box(
+          `<div style="font:500 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.1em;text-transform:uppercase;color:${C.blue};margin:0 0 9px">${esc(d.label)}</div>` +
+          `<div style="font:400 15px/1.55 ${font};color:${C.ink};white-space:pre-wrap">${esc(d.body)}</div>`,
+        ),
+      )
+      .join("") +
+    `</div></div>`;
+
+  const text = [
+    `x · ${longDate(day)} · ${hour}:00 Paris`,
+    "",
+    `${left.length} written, nothing posted. Tick one as used and these stop.`,
+    SITE(),
+    "",
+    ...left.map((d) => `--- ${d.label} ---\n${d.body}`),
+  ].join("\n");
+
+  return { subject: `x · ${left.length} drafts still unposted · ${hour}:00`, html, text };
+}
+
+export const sendNudge = internalAction({
+  args: { day: v.string(), hour: v.number() },
+  handler: async (ctx, { day, hour }) => {
+    const d = await ctx.runQuery(internal.x.dayFor, { day });
+    const left = d.drafts.filter((x: { used?: boolean }) => !x.used);
+    if (!left.length) return null;
+    const { subject, html, text } = nudgeBody(day, hour, left);
+    await resend(subject, html, text);
+    await ctx.runMutation(internal.x.markMailed, { day, slot: `nudge${hour}` });
+    return null;
+  },
+});
+
 async function resend(subject: string, html: string, text: string) {
   const key = process.env.RESEND_API_KEY;
   /* The two addresses are settled, so they are defaults rather than setup.
@@ -772,10 +835,19 @@ export const tick = internalAction({
   handler: async (ctx) => {
     const { day, hour } = paris();
     const slot = String(hour);
-    if (!SLOTS.includes(slot as any)) return null;
     const d = await ctx.runQuery(internal.x.dayFor, { day });
-    if (d.mailed.includes(slot)) return null;
-    await ctx.runAction(internal.x.sendSlot, { day, slot });
+
+    if (SLOTS.includes(slot as any)) {
+      if (!d.mailed.includes(slot)) await ctx.runAction(internal.x.sendSlot, { day, slot });
+      return null;
+    }
+
+    /* Drafts written and none of them ticked off: nudge, once an hour,
+       until one is used or the evening runs out. */
+    if (hour < NUDGE_FROM || hour > NUDGE_TO) return null;
+    if (!d.drafts.length || d.drafts.some((x: { used?: boolean }) => x.used)) return null;
+    if (d.mailed.includes(`nudge${hour}`)) return null;
+    await ctx.runAction(internal.x.sendNudge, { day, hour });
     return null;
   },
 });
