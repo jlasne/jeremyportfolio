@@ -1,4 +1,5 @@
 import { existsSync } from 'node:fs'
+import { createInterface } from 'node:readline/promises'
 import { resolve } from 'node:path'
 import { load, missing, ROOT, type Settings } from './config/settings.js'
 import { Browser } from './core/browser.js'
@@ -71,8 +72,17 @@ async function main(): Promise<number> {
     const session = sessionFor(s.browser.sessionRoot, s.instagram.account)
     const browser = await Browser.open({ ...s, browser: { ...s.browser, headless: false } }, session.dir)
     await browser.goto(`${s.instagram.baseUrl}/`)
-    console.log(`Log in as ${s.instagram.account}, then close the window. The profile is kept at ${session.dir}.`)
-    // The browser stays open until it is closed by hand: that is the point.
+    console.log(`Log in as ${s.instagram.account} in the window that opened.`)
+    console.log(`The profile is kept at ${session.dir} and reused every run.`)
+
+    // The window has to outlive this line. Closing the browser is what writes
+    // the profile to disk, and exiting here would take the window with it
+    // before anything was typed into it.
+    const wait = createInterface({ input: process.stdin, output: process.stdout })
+    await wait.question('\nPress Enter once you are logged in. ')
+    wait.close()
+    await browser.close()
+    console.log('Saved. Run a dry pass next: node dist/cli.js run --limit 3')
     return 0
   }
 

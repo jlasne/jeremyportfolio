@@ -103,6 +103,11 @@ try {
   const one = await run(savedOnly, log, templates, { send:false, approve:false, limit: 5 })
   assert.equal(one.drafted, 1, 'savedOnly must keep only the saved lead')
 
+  // 5. a profile nobody logged in stops before the browser opens
+  const noProfile = { ...s, instagram: { ...s.instagram, account: 'never.logged.in' } }
+  const stopped = await run(noProfile, log, templates, { send: false, approve: false })
+  assert.equal(stopped.attempted, 0, 'a fresh profile must send the user to the login command')
+
   console.log('day totals:', JSON.stringify(log.day()))
   console.log('full run passed')
   rmSync(sessionRoot, { recursive: true, force: true })

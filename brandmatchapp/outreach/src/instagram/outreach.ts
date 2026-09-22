@@ -57,9 +57,12 @@ export async function run(s: Settings, log: Log, templates: Template[], opts: Ru
     return summary
   }
 
+  // A profile nobody has logged in yet cannot send anything, and opening a
+  // browser to say so only costs a launch. The login command exists for this.
   const session = sessionFor(s.browser.sessionRoot, account)
   if (session.fresh) {
-    console.log(`${account}: new browser profile. Log in by hand in the window that opens, then run again.`)
+    console.log(`${account}: no browser profile yet. Run: node dist/cli.js login --account ${account}`)
+    return summary
   }
 
   const browser = await Browser.open(s, session.dir)
@@ -67,12 +70,6 @@ export async function run(s: Settings, log: Log, templates: Template[], opts: Ru
   let consecutiveFailures = 0
 
   try {
-    if (session.fresh) {
-      await browser.goto(`${s.instagram.baseUrl}/`)
-      await browser.settle(2000)
-      return summary
-    }
-
     for (const [index, target] of targets.entries()) {
       if (cap.remaining(account) === 0) {
         console.log(`${account}: daily cap reached mid run. Stopping.`)
