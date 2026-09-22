@@ -178,10 +178,22 @@ async function main(): Promise<number> {
 // functions, as the tests do, it must not quietly start a run and then take
 // the process down with it a tick later.
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  main()
-    .then((code) => process.exit(code))
-    .catch((err) => {
-      console.error(err)
-      process.exit(1)
-    })
+  main().then(finish).catch((err) => {
+    console.error(err)
+    finish(1)
+  })
+}
+
+/**
+ * End, without killing the process out from under its own sockets.
+ *
+ * Calling process.exit while a connection is still closing aborts Node on
+ * Windows with a libuv assertion, printed after the run's own summary as if
+ * something had gone wrong. Setting the code and letting the loop drain ends
+ * cleanly. The timer is the backstop for anything that will not close, and is
+ * unreferenced so it cannot hold the process open by itself.
+ */
+function finish(code: number): void {
+  process.exitCode = code
+  setTimeout(() => process.exit(code), 5000).unref()
 }
