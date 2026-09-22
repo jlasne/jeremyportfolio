@@ -6,8 +6,9 @@ import { clean, daysBetween, dateKey, isKey } from "../../bio/spec.js";
 /**
  * jeremylasne.com/bio: one document, read by everyone, written by one person.
  *
- * October 2026, 31 days: nine things logged by hand and nine read off the
- * watch, the scale and Yazio, one entry a day. A write carries the passphrase
+ * October 2026, 31 days, one entry a day: intake and levers logged by hand,
+ * sport as a list of sessions, sleep and the rest read off the watch, the
+ * scale and Yazio. A write carries the passphrase
  * set as BIO_PASSPHRASE in the Convex dashboard; there are no accounts because
  * there is exactly one author. What a write may contain (days inside the
  * challenge and not after today, the known field ids, every number in range)
@@ -52,7 +53,10 @@ export const save = mutation({
     /* the page's local date: days after it are refused */
     today: v.string(),
     /* Anything the page sends; `clean` decides what survives. */
-    log: v.record(v.string(), v.record(v.string(), v.union(v.float64(), v.boolean(), v.string()))),
+    log: v.record(v.string(), v.record(v.string(), v.union(
+      v.float64(), v.boolean(), v.string(),
+      v.array(v.object({ s: v.string(), m: v.optional(v.float64()), i: v.optional(v.float64()) })),
+    ))),
   },
   handler: async (ctx, { passphrase, today, ...input }) => {
     mustBeJeremy(passphrase);

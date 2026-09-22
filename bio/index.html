@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>31 days of measuring | Jeremy Lasne</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="October 2026: 18 things measured every day, then the matrix of what actually moves my recovery, resting heart rate and sleep.">
+<meta name="description" content="October 2026: intake, sport, sleep and the watch, measured every day, then the matrix of what actually moves my recovery, resting heart rate, HRV and sleep.">
 <meta name="theme-color" content="#050b16">
 <meta name="color-scheme" content="dark">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -14,7 +14,7 @@
 <meta property="og:site_name" content="Jeremy Lasne">
 <meta property="og:url" content="https://www.jeremylasne.com/bio/">
 <meta property="og:title" content="31 days of measuring">
-<meta property="og:description" content="18 things measured every day for a month, then the matrix of what actually moves the body.">
+<meta property="og:description" content="A month of measuring intake, sport and sleep every day, then the matrix of what actually moves the body.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -111,8 +111,61 @@ h2 {
 
 .group { border-bottom: 1px solid var(--line); padding: 4px 0 14px; }
 .group:last-child { border-bottom: 0; }
-.gtitle { color: var(--ice-45); padding: 14px 16px 10px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
-.gtitle b { color: var(--blue); font-weight: 500; }
+.gtitle { padding: 16px 16px 8px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.gtitle em { font-style: normal; font-size: 20px; line-height: 1; }
+.gtitle .gname { font: 400 26px/1 var(--display); letter-spacing: .03em; color: var(--ice); }
+.gtitle .gwhen { color: var(--ice-45); font-size: 10px; margin-left: auto; }
+
+/* the corner of the card: goals met, then the save state */
+.cright { display: grid; gap: 6px; justify-items: end; }
+.goals { color: var(--ice-45); }
+.goals.all { color: var(--good); }
+
+/* a goal next to its label: grey while on the way, green once met, red
+   once a ceiling is broken */
+.goal {
+  font-size: 9.5px; letter-spacing: .1em; padding: 4px 6px 3px; border: 1px solid var(--line);
+  color: var(--ice-45); white-space: nowrap; flex: none;
+}
+.goal.ok { color: var(--good); border-color: rgba(110, 231, 168, .45); background: var(--good-bg); }
+.goal.over { color: var(--bad); border-color: rgba(255, 158, 158, .42); background: var(--bad-bg); }
+.nf label em { font-style: normal; margin-right: 7px; }
+
+/* sport sessions: sport name, then minutes, intensity and remove */
+.sessions { padding: 2px 16px 6px; }
+.srows { display: grid; gap: 8px; }
+.srow { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 4px 0; }
+.sname {
+  flex: 1 1 160px; min-width: 0; background: rgba(23, 61, 89, .3); border: 1px solid var(--line);
+  padding: 9px 11px; font: 500 15px/1.2 var(--sans);
+}
+.snums { display: flex; gap: 8px; align-items: center; flex: none; }
+.smin, .shard {
+  background: rgba(23, 61, 89, .3); border: 1px solid var(--line); padding: 8px 8px 7px;
+  font: 400 22px/1 var(--display); letter-spacing: .02em; text-align: right;
+  appearance: textfield; -moz-appearance: textfield;
+}
+.smin { width: 64px; }
+.smin::-webkit-outer-spin-button, .smin::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.shard { width: 58px; appearance: none; -webkit-appearance: none; text-align: center; cursor: pointer; }
+.shard option { background: var(--ink); color: var(--ice); font-family: var(--sans); font-size: 15px; }
+.sname:focus, .smin:focus, .shard:focus { outline: none; border-color: var(--blue); }
+.sname:disabled, .smin:disabled, .shard:disabled { background: transparent; border-color: transparent; opacity: 1; }
+.sname::placeholder, .smin::placeholder { color: var(--ice-45); }
+.sunit { font-size: 9.5px; color: var(--blue); letter-spacing: .1em; }
+.sdel {
+  width: 36px; height: 36px; border: 1px solid var(--line); background: none; border-radius: 50%;
+  color: var(--ice-45); font-size: 18px; line-height: 1; cursor: pointer; flex: none;
+}
+.sdel:hover:not(:disabled) { color: var(--bad); border-color: var(--bad); }
+.sdel:disabled { visibility: hidden; }
+.snone { color: var(--ice-45); font-size: 14px; padding: 6px 0; }
+.addsess {
+  margin-top: 10px; border: 1px dashed var(--blue); background: none; color: var(--blue);
+  padding: 11px 14px 10px; cursor: pointer; width: 100%;
+}
+.addsess:hover { background: rgba(95, 168, 211, .12); }
+.addsess[hidden] { display: none; }
 
 /* a tap row: label left, minus, the number, plus */
 .tapr { display: flex; align-items: center; gap: 12px; padding: 6px 16px; }
@@ -154,7 +207,7 @@ h2 {
 .toggle:disabled { opacity: .4; cursor: default; }
 
 /* the typed numbers, two or three across */
-.nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(198px, 1fr)); gap: 2px 16px; padding: 4px 16px 0; }
+.nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 2px 20px; padding: 4px 16px 0; }
 .nf { display: flex; align-items: baseline; gap: 8px; padding: 7px 0; border-bottom: 1px solid rgba(95, 168, 211, .1); }
 .nf label { flex: 1; min-width: 0; font-size: 14px; color: var(--ice-70); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nf input {
@@ -220,7 +273,7 @@ h2 {
 .cellv.lit s { color: inherit; }
 .cellv.lit.good s { color: var(--good); }
 .cellv.lit.bad s { color: var(--bad); }
-.cellv.thin u { color: var(--ice-45); }
+.cellv.thin u, .cellv.flat u { color: var(--ice-45); }
 
 .locked { border: 1px solid var(--line); background: rgba(5, 11, 22, .46); padding: clamp(24px, 5vw, 44px); text-align: center; }
 .locked .big { font: 400 clamp(56px, 12vw, 120px)/.9 var(--display); letter-spacing: .02em; color: var(--blue); }
@@ -270,7 +323,7 @@ body.editing { padding-bottom: 88px; }
 
 /* ── small screens ──────────────────────────────────────────────────── */
 @media (max-width: 560px) {
-  .nums { grid-template-columns: 1fr 1fr; gap: 0 14px; }
+  .nums { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .nf input { width: 66px; font-size: 21px; }
   .nf label { font-size: 13px; }
   .nf i { width: 28px; font-size: 9px; }
@@ -279,6 +332,12 @@ body.editing { padding-bottom: 88px; }
   .toggle::after { width: 30px; height: 30px; }
   .toggle[aria-pressed="true"]::after { transform: translateX(40px); }
   .pm { width: 42px; height: 42px; }
+  .gtitle .gwhen { flex-basis: 100%; margin-left: 30px; }
+  .srow { gap: 8px; }
+  .sname { flex-basis: 100%; }
+  .snums { width: 100%; }
+  .snums .sdel { margin-left: auto; }
+  .tapr .lbl i { display: none; }
   .count { width: 40px; font-size: 30px; }
   .row { flex-wrap: wrap; }
   .row label, .pass, .row .status { flex-basis: 100%; }
@@ -305,7 +364,7 @@ body.editing { padding-bottom: 88px; }
     <div class="head">
       <span class="n mono">01</span>
       <h2>Today <span class="pill live" id="dayPill">Day 0 of 31</span></h2>
-      <p class="tag">Nine things I tap, nine the watch already knows. Under two minutes a day, every day of October, then the matrix reads what moved.</p>
+      <p class="tag">Intake, sport, sleep, and what the watch observes. Two goals, under two minutes a day, every day of October, then the matrix reads what moved.</p>
     </div>
     <div class="card" id="card"></div>
   </section>
@@ -373,7 +432,7 @@ body.editing { padding-bottom: 88px; }
 <noscript><p style="text-align:center;padding:40px">The live numbers need JavaScript.</p></noscript>
 
 <script type="module">
-import { SPEC, dateKey, shift, daysBetween, allDays, clean, matrix, readyDays, isLogged, hasBody } from '/bio/spec.js';
+import { SPEC, inGroup, dateKey, shift, daysBetween, allDays, clean, matrix, readyDays, isLogged, hasBody, goalMet, sportList } from '/bio/spec.js';
 
 const $ = id => document.getElementById(id);
 const API = 'https://fiery-eel-944.eu-west-1.convex.site/overlap';
@@ -388,11 +447,11 @@ const clampDay = k => k < SPEC.start ? SPEC.start : k > SPEC.end ? SPEC.end : k;
 const state = { log: {}, updatedAt: 0 };
 let sel = clampDay(today);
 let pass = '';
-let dirty = false, saving = false, timer = 0;
+let dirty = false, saving = false, timer = 0, loaded = false;
 
 const at = key => (state.log[key] ||= {});
 const pretty = key => { const [y, m, d] = key.split('-').map(Number); return `${DOW[new Date(y, m - 1, d).getDay()]} ${d} ${MON[m - 1]}`; };
-const editable = key => !!pass && key <= today && key >= SPEC.start && key <= SPEC.end;
+const editable = key => loaded && !!pass && key <= today && key >= SPEC.start && key <= SPEC.end;
 
 /* ── the door ───────────────────────────────────────────────────────── */
 function api(op, args) {
@@ -417,57 +476,86 @@ function toMinutes(str) {
 const fmtMinutes = n => `${Math.floor(n / 60)}h${String(Math.round(n % 60)).padStart(2, '0')}`;
 
 /* ── the card ───────────────────────────────────────────────────────── */
+/* One object per day, shared by every control on the card: while a day is
+   open it is the entry in the log itself, so a tap lands in exactly one
+   place and a save in flight cannot drop it. */
 function drawCard() {
-  const day = state.log[sel] || {};
   const open = editable(sel);
+  const day = open ? at(sel) : (state.log[sel] || {});
   const n = daysBetween(SPEC.start, sel) + 1;
   const el = document.createElement('div');
 
   const head = document.createElement('div');
   head.className = 'chead';
   head.innerHTML = `<div class="when">${pretty(sel)}${sel === today ? '<small>Today</small>' : ''}</div>`;
+  const right = document.createElement('div');
+  right.className = 'cright';
+  const goals = document.createElement('div');
+  goals.className = 'goals mono'; goals.id = 'goals';
   const saved = document.createElement('div');
   saved.className = 'saved mono'; saved.id = 'saved';
-  saved.textContent = open ? '' : sel > today ? 'Not yet' : 'Read only';
-  head.append(saved);
+  saved.textContent = open ? '' : !loaded ? 'Loading' : sel > today ? 'Not yet' : 'Read only';
+  right.append(goals, saved);
+  head.append(right);
   el.append(head);
 
-  el.append(group('Tap it as it happens', 'four things', SPEC.manual.filter(f => f.kind === 'tap'), day, open));
-  el.append(group('Tonight, 30 seconds', 'five things', SPEC.manual.filter(f => f.kind !== 'tap'), day, open));
-  el.append(bodyGroup(day, open));
+  for (const g of SPEC.groups) el.append(groupEl(g, day, open));
 
   const note = document.createElement('div');
   note.className = 'group notef';
   const ni = document.createElement('input');
-  ni.type = 'text'; ni.maxLength = 120; ni.placeholder = 'Anything worth remembering about this day';
+  ni.type = 'text'; ni.maxLength = 120; ni.placeholder = 'A note about today';
   ni.value = day.note || ''; ni.disabled = !open;
-  ni.addEventListener('input', () => { const v = ni.value.trim(); if (v) at(sel).note = v; else delete at(sel).note; touch(); });
+  ni.addEventListener('input', () => { const v = ni.value.trim(); if (v) day.note = v; else delete day.note; touch(); });
   note.append(ni);
   el.append(note);
 
   $('card').replaceChildren(...el.childNodes);
   $('dayPill').textContent = `Day ${Math.max(0, Math.min(31, n))} of 31`;
+  paintGoals(day);
 }
 
-function group(title, sub, fields, day, open) {
-  const g = document.createElement('div');
-  g.className = 'group';
-  g.innerHTML = `<div class="gtitle mono">${title} <b>${sub}</b></div>`;
+/* The day's score against its goals, in the card's corner. */
+function paintGoals(day) {
+  const set = SPEC.fields.filter(f => f.goal != null);
+  const met = set.filter(f => goalMet(f, day[f.id] ?? 0)).length;
+  const g = $('goals');
+  if (!g) return;
+  g.textContent = `${met} of ${set.length} goals`;
+  g.classList.toggle('all', met === set.length);
+}
+
+function groupEl(g, day, open) {
+  const box = document.createElement('div');
+  box.className = 'group';
+  box.innerHTML = `<div class="gtitle"><em>${g.icon}</em><span class="gname">${g.name}</span><span class="gwhen mono">${g.when}</span></div>`;
+  if (g.id === 'sport') box.append(sessionsEl(day, open));
   const nums = document.createElement('div');
   nums.className = 'nums';
-  for (const f of fields) {
-    if (f.kind === 'tap') g.append(tapRow(f, day, open));
-    else if (f.kind === 'flag') g.append(flagRow(f, day, open));
+  for (const f of inGroup(g.id)) {
+    if (f.kind === 'tap') box.append(tapRow(f, day, open));
+    else if (f.kind === 'flag') box.append(flagRow(f, day, open));
     else nums.append(numField(f, day, open));
   }
-  if (nums.childElementCount) g.append(nums);
-  return g;
+  if (nums.childElementCount) box.append(nums);
+  return box;
+}
+
+/* The goal, said the way it is meant: a ceiling as "max 2", a floor as how
+   far along the day is, in the goal's own unit. */
+const fmtAmount = x => String(Math.round(x * 10) / 10);
+function goalText(f, v) {
+  if (f.goalDir === 'max') return `max ${f.goal}`;
+  const k = f.scale || 1, u = f.scaleUnit ? ` ${f.scaleUnit}` : '';
+  return `${fmtAmount((v || 0) * k)} / ${fmtAmount(f.goal * k)}${u}`;
 }
 
 function tapRow(f, day, open) {
   const r = document.createElement('div');
   r.className = 'tapr';
   r.innerHTML = `<div class="lbl"><em>${f.icon}</em><span>${f.name}</span>${f.unit ? `<i>${f.unit}</i>` : ''}</div>`;
+  const badge = document.createElement('span');
+  if (f.goal != null) { badge.className = 'goal mono'; r.querySelector('.lbl').append(badge); }
   const minus = document.createElement('button'), out = document.createElement('div'), plus = document.createElement('button');
   minus.type = plus.type = 'button';
   minus.className = plus.className = 'pm';
@@ -480,8 +568,13 @@ function tapRow(f, day, open) {
     out.classList.toggle('zero', !v);
     minus.disabled = !open || v <= 0;
     plus.disabled = !open || v >= f.max;
+    if (f.goal != null) {
+      const ok = goalMet(f, v);
+      badge.textContent = goalText(f, v);
+      badge.className = `goal mono ${ok ? 'ok' : f.goalDir === 'max' ? 'over' : ''}`;
+    }
   };
-  const bump = d => { const v = Math.max(0, Math.min(f.max, Number(day[f.id] ?? 0) + d)); at(sel)[f.id] = v; day[f.id] = v; paint(); touch(); };
+  const bump = d => { day[f.id] = Math.max(0, Math.min(f.max, Number(day[f.id] ?? 0) + d)); paint(); paintGoals(day); touch(); };
   minus.addEventListener('click', () => bump(-1));
   plus.addEventListener('click', () => bump(1));
   paint();
@@ -502,8 +595,7 @@ function flagRow(f, day, open) {
     t.querySelector('span').textContent = on ? 'Yes' : 'No';
   };
   t.addEventListener('click', () => {
-    const on = day[f.id] !== true;
-    if (on) { at(sel)[f.id] = true; day[f.id] = true; } else { delete at(sel)[f.id]; delete day[f.id]; }
+    if (day[f.id] === true) delete day[f.id]; else day[f.id] = true;
     paint(); touch();
   });
   paint();
@@ -515,7 +607,7 @@ function numField(f, day, open) {
   const w = document.createElement('div');
   w.className = 'nf';
   const id = `f_${f.id}`;
-  w.innerHTML = `<label for="${id}">${f.name}</label>`;
+  w.innerHTML = `<label for="${id}"><em>${f.icon}</em>${f.name}</label>`;
   const i = document.createElement('input');
   i.id = id; i.type = f.clock ? 'text' : 'number'; i.inputMode = 'decimal';
   i.placeholder = '—'; i.disabled = !open;
@@ -526,11 +618,11 @@ function numField(f, day, open) {
   };
   i.addEventListener('input', () => {
     const raw = i.value.trim();
-    if (!raw) { delete at(sel)[f.id]; delete day[f.id]; touch(); return; }
+    if (!raw) { delete day[f.id]; touch(); return; }
     const n = f.clock ? toMinutes(raw) : Number(raw.replace(',', '.'));
     if (!Number.isFinite(n)) return;
-    const v = Math.min(f.max, Math.max(0, Math.round(n * 100) / 100));
-    at(sel)[f.id] = v; day[f.id] = v; touch();
+    day[f.id] = Math.min(f.max, Math.max(0, Math.round(n * 100) / 100));
+    touch();
   });
   i.addEventListener('blur', show);
   show();
@@ -540,15 +632,94 @@ function numField(f, day, open) {
   return w;
 }
 
-function bodyGroup(day, open) {
-  const g = document.createElement('div');
-  g.className = 'group';
-  g.innerHTML = `<div class="gtitle mono">From the watch, each morning <b>nine numbers</b></div>`;
-  const nums = document.createElement('div');
-  nums.className = 'nums';
-  for (const f of SPEC.body) nums.append(numField(f, day, open));
-  g.append(nums);
-  return g;
+/* ── sport sessions ─────────────────────────────────────────────────── */
+/* A sport, its minutes, how hard it felt. The sport field suggests every
+   sport already typed and takes a new name as it is, so the list grows by
+   using it. A session with no sport yet stays on screen as a draft and is
+   left out of the save until it has one. */
+const SPORTS_ID = 'sportsList';
+function sessionsEl(day, open) {
+  const wrap = document.createElement('div');
+  wrap.className = 'sessions';
+  const list = document.createElement('datalist');
+  list.id = SPORTS_ID;
+  for (const name of sportList(state.log)) { const o = document.createElement('option'); o.value = name; list.append(o); }
+  wrap.append(list);
+
+  const rows = document.createElement('div');
+  rows.className = 'srows';
+  wrap.append(rows);
+
+  const add = document.createElement('button');
+  add.type = 'button'; add.className = 'addsess mono';
+  add.textContent = '+ Add a session';
+
+  const ss = () => (day.sessions ||= []);
+  const render = () => {
+    const have = Array.isArray(day.sessions) ? day.sessions : [];
+    rows.replaceChildren(...have.map((s, idx) => sessionRow(s, idx)));
+    if (!have.length) {
+      const none = document.createElement('div');
+      none.className = 'snone';
+      none.textContent = open ? 'No session yet. A rest day counts.' : 'No session';
+      rows.append(none);
+    }
+    add.hidden = !open || have.length >= SPEC.session.perDay;
+  };
+
+  function sessionRow(s, idx) {
+    const r = document.createElement('div');
+    r.className = 'srow';
+    const name = document.createElement('input');
+    name.type = 'text'; name.className = 'sname'; name.setAttribute('list', SPORTS_ID);
+    name.placeholder = 'Sport'; name.maxLength = SPEC.session.name; name.value = s.s || ''; name.disabled = !open;
+    name.setAttribute('aria-label', 'Sport');
+    name.addEventListener('input', () => { s.s = name.value.trim(); touch(); });
+
+    const min = document.createElement('input');
+    min.type = 'number'; min.inputMode = 'numeric'; min.className = 'smin';
+    min.min = '0'; min.max = String(SPEC.session.minutes); min.placeholder = '—';
+    min.value = s.m ?? ''; min.disabled = !open;
+    min.setAttribute('aria-label', 'Minutes');
+    min.addEventListener('input', () => {
+      const n = Number(min.value);
+      if (min.value === '' || !Number.isFinite(n)) delete s.m; else s.m = Math.min(SPEC.session.minutes, Math.max(0, Math.round(n)));
+      touch();
+    });
+
+    const hard = document.createElement('select');
+    hard.className = 'shard'; hard.disabled = !open;
+    hard.setAttribute('aria-label', 'Intensity, 1 to 10');
+    hard.innerHTML = '<option value="">—</option>' + Array.from({ length: SPEC.session.hard }, (_, k) => `<option>${k + 1}</option>`).join('');
+    hard.value = s.i ?? '';
+    hard.addEventListener('change', () => { if (hard.value) s.i = Number(hard.value); else delete s.i; touch(); });
+
+    const del = document.createElement('button');
+    del.type = 'button'; del.className = 'sdel'; del.textContent = '×'; del.disabled = !open;
+    del.setAttribute('aria-label', 'Remove this session');
+    del.addEventListener('click', () => {
+      day.sessions.splice(idx, 1);
+      if (!day.sessions.length) delete day.sessions;
+      render(); touch();
+    });
+
+    const lm = document.createElement('label'); lm.className = 'sunit mono'; lm.textContent = 'min';
+    const lh = document.createElement('label'); lh.className = 'sunit mono'; lh.textContent = '/10';
+    const nums = document.createElement('div');
+    nums.className = 'snums';
+    nums.append(min, lm, hard, lh, del);
+    r.append(name, nums);
+    return r;
+  }
+
+  add.addEventListener('click', () => {
+    ss().push({ s: '' });
+    render();
+    rows.querySelector('.srow:last-child .sname')?.focus();
+  });
+  render();
+  wrap.append(add);
+  return wrap;
 }
 
 /* ── the month strip ────────────────────────────────────────────────── */
@@ -579,7 +750,7 @@ function drawStrip() {
 /* ── the matrix ─────────────────────────────────────────────────────── */
 function drawMatrix() {
   const ready = readyDays(state.log);
-  $('mxPill').textContent = `${ready} of ${SPEC.minDays} days`;
+  $('mxPill').textContent = ready < SPEC.minDays ? `${ready} of ${SPEC.minDays} days` : `${ready} days in`;
   if (ready < SPEC.minDays) {
     const box = document.createElement('div');
     box.className = 'locked';
@@ -606,10 +777,12 @@ function drawMatrix() {
       if (!c) td.innerHTML = '<span class="cellv thin"><u>—</u><s>Thin</s></span>';
       else {
         const lit = c.label === 'medium' || c.label === 'strong' || c.label === 'v. strong';
-        const sign = c.delta > 0 ? '+' : '';
+        /* under half a percent rounds to nothing, so it says nothing */
+        const flat = Math.round(c.delta) === 0;
+        const tone = flat ? 'flat' : c.good ? 'good' : 'bad';
         td.innerHTML =
-          `<span class="cellv ${c.good ? 'good' : 'bad'}${lit ? ' lit' : ''}" title="${c.nOn} of ${c.n} days on the high side">` +
-          `<u>${sign}${c.delta.toFixed(0)}%</u><s>${c.label}</s></span>`;
+          `<span class="cellv ${tone}${lit && !flat ? ' lit' : ''}" title="${c.nOn} of ${c.n} days on the high side">` +
+          `<u>${flat ? '0' : (c.delta > 0 ? '+' : '') + c.delta.toFixed(0)}%</u><s>${c.label}</s></span>`;
       }
       tr.append(td);
     }
@@ -638,17 +811,22 @@ function touch() {
 async function push() {
   if (!pass || saving || !dirty) return;
   saving = true; dirty = false;
+  let failedSave = false;
   try {
     const out = await api('bio.save', { passphrase: pass, today, ...clean(state, today) });
-    state.log = out.log; state.updatedAt = out.updatedAt;
-    say('Saved');
+    /* The page holds the author's copy. Taking the reply's log here would
+       drop any tap made while this save was in flight. */
+    state.updatedAt = out.updatedAt;
+    say(dirty ? 'Saving…' : 'Saved');
     stamp();
   } catch (e) {
-    dirty = true;
+    dirty = failedSave = true;
     say(e.message, true);
   } finally {
     saving = false;
-    if (dirty) { clearTimeout(timer); timer = setTimeout(push, 2500); }
+    /* A tap that landed mid-flight goes out on the normal beat; a failure
+       waits longer before trying again. */
+    if (dirty) { clearTimeout(timer); timer = setTimeout(push, failedSave ? 2500 : 900); }
   }
 }
 
@@ -700,15 +878,21 @@ $('gate').addEventListener('submit', async e => {
 
 /* ── the CSV, one row a day ─────────────────────────────────────────── */
 $('csv').addEventListener('click', () => {
-  const cols = [...SPEC.manual, ...SPEC.body];
-  const head = ['date', ...cols.map(c => c.id), 'note'];
+  const cols = SPEC.fields;
+  const q = x => `"${String(x).replace(/"/g, '""')}"`;
+  const head = ['date', ...cols.map(c => c.id), 'sessions', 'sport_min', 'sport_hardest', 'note'];
   const lines = [head.join(',')];
   for (const key of DAYS) {
     const d = state.log[key] || {};
+    const ss = (d.sessions || []).filter(x => x.s);
     lines.push([key, ...cols.map(c => {
       const v = d[c.id];
       return v === true ? '1' : v == null ? (c.kind === 'flag' ? '0' : '') : String(v);
-    }), `"${String(d.note || '').replace(/"/g, '""')}"`].join(','));
+    }),
+    q(ss.map(x => `${x.s}${x.m != null ? ` ${x.m}min` : ''}${x.i != null ? ` ${x.i}/10` : ''}`).join('; ')),
+    ss.length ? ss.reduce((a, x) => a + (x.m || 0), 0) : '',
+    ss.length ? Math.max(...ss.map(x => x.i || 0)) || '' : '',
+    q(d.note || '')].join(','));
   }
   const url = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' }));
   const a = document.createElement('a');
@@ -727,10 +911,20 @@ addEventListener('scroll', dim, { passive: true }); dim();
 /* ── start ──────────────────────────────────────────────────────────── */
 try { pass = localStorage.getItem('bio.pass') || ''; } catch {}
 draw();
-api('bio.get')
-  .then(d => { if (d) { state.log = d.log || {}; state.updatedAt = d.updatedAt || 0; } })
-  .catch(() => {})
-  .finally(() => { draw(); stamp(); });
+/* Only a log that actually arrived opens the page for writing. A save sends
+   the whole month, so writing on top of a failed load would replace October
+   with whatever this one screen holds. */
+function load() {
+  api('bio.get')
+    .then(d => {
+      if (d) { state.log = d.log || {}; state.updatedAt = d.updatedAt || 0; }
+      loaded = true;
+    })
+    .catch(e => { failed = e.message; })
+    .finally(() => { draw(); stamp(); if (failed) say(`${failed}. Logging is paused so nothing gets overwritten.`, true); });
+}
+let failed = '';
+load();
 </script>
 </body>
 </html>

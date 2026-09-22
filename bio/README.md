@@ -1,24 +1,31 @@
 # jeremylasne.com/bio
 
-October 2026, 31 days. Eighteen things measured every day, then a matrix of
-what actually moved my recovery, resting heart rate and sleep. Everyone
-reads it. One passphrase writes it.
+October 2026, 31 days. Intake, sport, sleep and what the watch observes,
+measured every day, then a matrix of what actually moved my recovery,
+resting heart rate, HRV and sleep score. Everyone reads it. One passphrase
+writes it.
 
 ## The shape of it
 
-Nine things are tapped by hand, nine are read off the watch, the scale and
-Yazio. The four things the body answers with (recovery, resting heart rate,
-sleep, sleep score) are read **the morning after** the day that caused them,
-because a night is what answers a day. A drink on Tuesday is scored against
-Wednesday.
+| Group | Fields | Goal |
+| --- | --- | --- |
+| 🍽️ Intake | coffee, water, eaten (kcal) | coffee **max 2 cups**, water **4 L** (8 × 50cl) |
+| 🏃 Sport | sessions (sport, minutes, intensity 1–10), steps | |
+| 😴 Sleep | sleep score, sleep hours | |
+| 📊 Observing | weight, HRV, resting HR, recovery | |
+| 🌿 Levers | cold shower, bath, sun, deep work | |
 
-| Group | Fields |
-| --- | --- |
-| Tap as it happens | coffee, water, alcohol, showers |
-| Tonight, 30 seconds | cold shower, gym, bath, sun, deep work |
-| From the watch, each morning | sleep score, sleep, recovery, resting HR, HRV, steps, zone minutes, weight, eaten |
+A goal points one way: coffee is a ceiling, met by staying under it, water
+is a floor, met by reaching it. The card shows each goal beside its row and
+the day's count of goals met in its corner.
 
-Under two minutes a day.
+A **session** is a sport, its minutes and how hard it felt. Up to four a day.
+The sport field suggests every sport already typed and takes a new name as
+it is, so the list grows by using it. A session without a sport stays on
+screen as a draft and is left out of the save until it has one.
+
+The four things the body answers with are read **the morning after** the
+day that caused them, because a night is what answers a day.
 
 ## Stack
 
@@ -43,7 +50,13 @@ Under two minutes a day.
 
 ## The matrix
 
-A row is something I did, a column is what the body said the next morning.
+A row is something I did, a column is what the body said the next morning:
+recovery, resting heart rate, HRV and sleep score.
+
+Sessions become three kinds of row: total sport minutes, the hardest
+effort of the day, and one row per sport once it has been done on 4 days.
+Sport rows overlap by nature (a hard padel day is also a sport-minutes day),
+so read them together, not as separate findings.
 
 - An on/off row (gym, cold shower) splits on itself. A counted row splits at
   its **own median** across the logged days, so "high coffee" means high for
@@ -93,6 +106,20 @@ The server side needs one deploy and one setting:
 
 The document key moved to `oct26` for this shape, so the habit log from
 before it sits untouched under `v2` rather than being half-read as this one.
+
+**Deploy the server before the page** whenever the day's shape changes. The
+server's validator is a superset of what older pages send, so a new server
+with an old page is safe; a new page with an old server has its saves
+refused.
+
+## Safety
+
+- The page is the author's copy of the month. A save's reply only dates it,
+  so a tap made while a save is in flight is kept and goes out on the next
+  beat.
+- Logging stays shut until the stored log has loaded. A save sends the whole
+  month, so writing on top of a failed load would replace October with
+  whatever one screen holds.
 
 ## Run locally
 

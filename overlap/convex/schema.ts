@@ -151,8 +151,8 @@ export default defineSchema({
     key: v.string(),
     /* kept from an earlier shape; nothing writes it now */
     values: v.optional(v.record(v.string(), v.number())),
-    /* One entry per logged day, keyed YYYY-MM-DD: the nine things tapped
-       by hand, the nine the watch and the scale know, and a note. Which
+    /* One entry per logged day, keyed YYYY-MM-DD: intake, the sport
+       sessions, sleep, what the watch observed, and a note. Which
        ids may appear and what range each may take is decided by `clean`
        in bio/spec.js, which the page imports too, so the field list lives
        in one file and this only says what a value may be.
@@ -172,6 +172,8 @@ export default defineSchema({
             v.boolean(),
             v.string(),
             v.record(v.string(), v.union(v.float64(), v.boolean(), v.string())),
+            /* the day's sport sessions: a sport, its minutes, how hard */
+            v.array(v.object({ s: v.string(), m: v.optional(v.float64()), i: v.optional(v.float64()) })),
           ),
         ),
         v.float64(),
