@@ -13,11 +13,17 @@ export type Range = [number, number]
 
 export type ModelSettings = {
   /**
-   * The OpenRouter slug. Check it against the model list before the first run:
-   * a wrong slug fails the call, it does not fall back to something else.
+   * The OpenRouter slug, always `vendor/model`. A bare name is rejected.
+   *
+   * The defaults are the two the brandmatch backend already runs, so a first
+   * run works before anything is tuned. Swap them for whatever judges best.
    */
   model: string
-  /** USD per million tokens, for the cost log. */
+  /**
+   * USD per million tokens. This feeds the cost log and nothing else: the
+   * bill is whatever OpenRouter charges, whatever is written here. Copy the
+   * two numbers off the model's page so the log matches the invoice.
+   */
   priceIn: number
   priceOut: number
 }
@@ -91,8 +97,8 @@ const DEFAULTS: Settings = {
   openrouter: {
     apiKey: '',
     baseUrl: 'https://openrouter.ai/api/v1',
-    decide: { model: 'jev-1.13', priceIn: 0.1, priceOut: 0.3 },
-    vision: { enabled: false, model: 'deepseek-v4-flash-vision-exp', priceIn: 0.3, priceOut: 0.9 },
+    decide: { model: 'deepseek/deepseek-v4-flash', priceIn: 0.1, priceOut: 0.3 },
+    vision: { enabled: false, model: 'google/gemini-2.5-flash', priceIn: 0.3, priceOut: 0.9 },
   },
   brandmatch: {
     apiBase: 'https://limitless-ladybug-747.eu-west-1.convex.site',
@@ -138,6 +144,9 @@ export function load(file = resolve(ROOT, 'config', 'settings.json')): Settings 
   const s = merge(DEFAULTS, onDisk)
 
   s.openrouter.apiKey = process.env.OPENROUTER_API_KEY ?? s.openrouter.apiKey
+  // The same two names the Convex backend reads, so one export covers both.
+  s.openrouter.decide.model = process.env.OPENROUTER_MODEL ?? s.openrouter.decide.model
+  s.openrouter.vision.model = process.env.OPENROUTER_VISION_MODEL ?? s.openrouter.vision.model
   s.brandmatch.apiKey = process.env.BRANDMATCH_API_KEY ?? s.brandmatch.apiKey
   s.brandmatch.apiBase = (process.env.BRANDMATCH_API ?? s.brandmatch.apiBase).replace(/\/$/, '')
   s.browser.executablePath = process.env.CHROME_PATH ?? s.browser.executablePath

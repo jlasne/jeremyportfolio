@@ -66,8 +66,16 @@ Edit both. Then the keys:
     export OPENROUTER_API_KEY=sk-or-...
     export BRANDMATCH_API_KEY=...        # the same key the app keeps under brandmatch.key
 
-Check the model slugs in `config/settings.json` against the OpenRouter model
-list before the first run. A wrong slug fails the call, it does not fall back.
+The two model slugs default to the ones the brandmatch backend already runs,
+`deepseek/deepseek-v4-flash` and `google/gemini-2.5-flash`, so a first run
+works before anything is tuned. A slug is always `vendor/model`: a bare name
+fails the call and does not fall back.
+
+`OPENROUTER_MODEL` and `OPENROUTER_VISION_MODEL` override them, the same two
+names the backend reads.
+
+The `priceIn` and `priceOut` numbers feed the cost log and nothing else. Copy
+them off the model's page on OpenRouter so the log matches the invoice.
 
 Log the account in once. The profile is kept between runs, so this is done
 once per account, not once per run:
