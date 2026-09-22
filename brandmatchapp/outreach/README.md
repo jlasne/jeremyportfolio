@@ -166,6 +166,16 @@ Two failed leads in a row stop the run. Instagram answers a run it dislikes by
 changing the page, so two dead leads mean the page is not what the agent
 thinks it is, and carrying on only costs the account.
 
+## Not built yet
+
+The target list is every lead on the account with the configured status. A
+campaign can be named, nothing else can.
+
+What it should be, from the Outreach screen rather than a config file: pick
+the campaign or campaigns to write to, and narrow by the client's own tags.
+The tags are already on the lead and already returned by the API; nothing
+reads them here.
+
 ## Tests
 
     npm test

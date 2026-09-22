@@ -20,7 +20,13 @@ const bad = render('Hey {{firstName}}, your {{niche}} posts.', t)
 assert.deepEqual(bad.missing, ['niche'])
 
 const noName = render('Hi {{firstName}}', { ...t, name: '' })
-assert.equal(noName.message, 'Hi ana')
+assert.equal(noName.message, 'Hi Ana')
+
+// A lowercase Instagram name still opens the message properly.
+assert.equal(render('Hi {{firstName}}', { ...t, name: 'sylvie | online fitness coach' }).message, 'Hi Sylvie')
+// One that already carries a capital is left exactly as written.
+assert.equal(render('Hi {{firstName}}', { ...t, name: 'McKenzie Westmore' }).message, 'Hi McKenzie')
+assert.equal(render('Hi {{firstName}}', { ...t, name: "d'Arcy Flynn" }).message, "Hi d'Arcy")
 
 assert.equal(rotate(['a', 'b'], 0), 'a')
 assert.equal(rotate(['a', 'b'], 3), 'b')
