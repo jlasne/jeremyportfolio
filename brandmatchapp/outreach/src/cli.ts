@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs'
 import { createInterface } from 'node:readline/promises'
 import { resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { load, missing, ROOT, type Settings } from './config/settings.js'
 import { Browser } from './core/browser.js'
 import { Log } from './core/log.js'
@@ -20,7 +21,8 @@ brandmatch outreach
 
   npm run build
   node dist/cli.js run                 write the message, stop before sending
-  node dist/cli.js run --send          send, at the configured pace
+  node dist/cli.js run --send          send, whatever the config says
+  node dist/cli.js run --dry           never send, whatever the config says
   node dist/cli.js run --send --approve   ask in the terminal before each send
   node dist/cli.js status              what was sent today, and what it cost
   node dist/cli.js login               open the browser to log the account in
@@ -32,6 +34,19 @@ Flags
   --limit <n>           stop after n leads this run
   --templates <path>    messages file, default config/templates.json
 `
+
+/**
+ * Whether this run sends, and what decided it.
+ *
+ * Either the flag or the setting, so a launch with nothing typed does the
+ * same thing every time and the gate sits in a file somebody opened on
+ * purpose. `--dry` overrules both, for a look before a real pass.
+ */
+export function sending(argv: string[], s: Settings): { send: boolean; from: string } {
+  if (argv.includes('--dry')) return { send: false, from: '--dry' }
+  if (argv.includes('--send')) return { send: true, from: '--send' }
+  return { send: s.instagram.send, from: 'config/settings.json' }
+}
 
 async function main(): Promise<number> {
   const argv = process.argv.slice(2)
@@ -140,9 +155,12 @@ async function main(): Promise<number> {
   const templates = loadTemplates(file)
   const log = new Log(s.paths.logs, s.costs.browserUsdPerHour)
   const limitRaw = Number(flag('limit'))
-  const send = has('send')
-
-  console.log(send ? 'SENDING. Messages will leave the account.' : 'Dry run. The message is written and left unsent.')
+  const { send, from } = sending(argv, s)
+  console.log(
+    send
+      ? `SENDING, per ${from}. Messages will leave @${s.instagram.account}.`
+      : 'Dry run. The message is written and left unsent. Set "send": true in config/settings.json to send.',
+  )
 
   const summary = await run(s, log, templates, {
     send,
@@ -156,9 +174,14 @@ async function main(): Promise<number> {
   return summary.failed > 0 && summary.sent === 0 && summary.drafted === 0 ? 1 : 0
 }
 
-main()
-  .then((code) => process.exit(code))
-  .catch((err) => {
-    console.error(err)
-    process.exit(1)
-  })
+// Only when this file is the thing that was run. Imported for one of its
+// functions, as the tests do, it must not quietly start a run and then take
+// the process down with it a tick later.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main()
+    .then((code) => process.exit(code))
+    .catch((err) => {
+      console.error(err)
+      process.exit(1)
+    })
+}

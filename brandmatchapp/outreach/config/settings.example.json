@@ -31,6 +31,7 @@
   "instagram": {
     "account": "brandmatch.hq",
     "openWith": "direct",
+    "send": false,
     "dailyCap": 50,
     "betweenDms": [
       15,

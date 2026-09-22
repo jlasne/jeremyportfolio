@@ -96,6 +96,18 @@ const twice = { candidates: [
 assert.equal(exactMatch('sylv.putz')(twice), null, 'two rows with one handle is not a case for guessing')
 console.log('account matching holds on the real search results')
 
+// What decides whether a launch sends. The setting is the one that matters:
+// a launch with nothing typed has to do the same thing every time.
+import { sending } from '../dist/cli.js'
+const off = { instagram: { send: false } }
+const on = { instagram: { send: true } }
+assert.deepEqual(sending([], off), { send: false, from: 'config/settings.json' })
+assert.deepEqual(sending([], on), { send: true, from: 'config/settings.json' })
+assert.deepEqual(sending(['--send'], off), { send: true, from: '--send' })
+assert.deepEqual(sending(['--dry'], on), { send: false, from: '--dry' }, 'a look must beat the setting')
+assert.deepEqual(sending(['--send', '--dry'], off), { send: false, from: '--dry' }, 'the safe one wins a tie')
+console.log('the send gate holds')
+
 // Chrome detection: either it found one that is really there, or none.
 import { existsSync } from 'node:fs'
 const chrome = findChrome()

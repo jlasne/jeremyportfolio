@@ -97,6 +97,15 @@ export type Settings = {
     betweenDms: Range
     /** Seconds on the profile before opening the composer. */
     afterProfile: Range
+    /**
+     * Whether a launch sends, with no flag typed.
+     *
+     * False writes each message and leaves it unsent. It stays false until
+     * somebody opens this file and changes it, which is a deliberate act and
+     * the point: the gate is here rather than in a flag nobody remembers.
+     * `--send` still forces it for one run.
+     */
+    send: boolean
     /** Milliseconds between two characters, when typing one at a time. */
     typing: Range
     /**
@@ -175,6 +184,7 @@ const DEFAULTS: Settings = {
     afterProfile: [3, 9],
     typing: [40, 160],
     entry: 'paste',
+    send: false,
   },
   browser: {
     headless: false,

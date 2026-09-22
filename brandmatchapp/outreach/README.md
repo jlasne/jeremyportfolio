@@ -30,9 +30,10 @@ string cannot produce a string you did not approve.
 read off the page a moment earlier. An index nobody offered is refused before
 anything is clicked.
 
-**The default does not send.** A run writes the message into the box and
-leaves it there for a human to read. `--send` sends. `--send --approve` asks
-in the terminal, one message at a time.
+**Sending is a decision made in a file, not in a flag.** `"send": false`
+ships, and a launch writes each message and leaves it unsent until somebody
+changes that line. `--dry` overrules it for a look, `--send` for a real pass,
+and `--send --approve` asks in the terminal one message at a time.
 
 **What the page already answers is read, not asked.** Instagram's search for
 `sylv.putz` returns `sylvi.putz`, `sylviputz`, `sylvia.putz`, `sylvie.putz`
@@ -145,12 +146,28 @@ always logged in from.
 
 ## Running
 
-    node dist/cli.js run                      # writes the message, stops
-    node dist/cli.js run --send               # sends, at the configured pace
-    node dist/cli.js run --send --approve     # asks before each one
+Double-click `start.cmd`, or `./start.sh` on macOS and Linux. It installs what
+is missing, builds, and runs. Nothing to type and nothing to remember.
+
+Whether a launch sends is decided once, in `config/settings.json`:
+
+    "send": false
+
+False writes each message and leaves it unsent. It stays false until somebody
+opens that file and changes it, which is the point: the gate sits in a file
+opened on purpose rather than in a flag nobody remembers. So a launch does the
+same thing every time, and a launcher needs no arguments.
+
+The commands underneath, for a one-off:
+
+    node dist/cli.js run                      # whatever the config says
+    node dist/cli.js run --send               # send, whatever it says
+    node dist/cli.js run --dry                # never send, whatever it says
+    node dist/cli.js run --send --approve     # ask before each one
     node dist/cli.js status                   # sent today, and what it cost
 
-Flags: `--account`, `--campaign`, `--limit`, `--templates`.
+Flags: `--account`, `--campaign`, `--limit`, `--templates`. They work on the
+launcher too: `start.cmd --limit 3`.
 
 ## Pacing
 
