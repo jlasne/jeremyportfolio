@@ -76,11 +76,13 @@ Set these on the Convex deployment (Settings, then Environment Variables):
 | --- | --- |
 | `X_PASSPHRASE` | the one password that opens the page |
 | `OPENROUTER_API_KEY` | writes the posts and the script |
-| `X_MODEL` | optional, defaults to `anthropic/claude-sonnet-5` |
 | `RESEND_API_KEY` | sends the three mails |
-| `X_MAIL_FROM` | a sender on a domain verified in Resend, e.g. `x@jeremylasne.com` |
-| `X_MAIL_TO` | where the mails land, comma separated for several |
+| `X_MODEL` | optional, defaults to `deepseek/deepseek-v4-flash`, which OpenRouter lists as DeepSeek V4 Flash 0423 |
+| `X_MAIL_FROM` | optional, defaults to `hey@jeremylasne.com`, which must be a sender on a domain verified in Resend |
+| `X_MAIL_TO` | optional, defaults to `jeremylasne0@gmail.com`, comma separated for several |
 | `X_SITE_URL` | optional, defaults to `https://x.jeremylasne.com` |
+
+Three are required. The rest have the right answer built in.
 
 If `OVERLAP_ALLOW_ORIGIN` is set, add `https://x.jeremylasne.com` to it.
 

@@ -325,7 +325,9 @@ function brief(c: {
 
 /* ── OpenRouter ─────────────────────────────────────────────────────── */
 
-const MODEL = () => process.env.X_MODEL || "anthropic/claude-sonnet-5";
+/* DeepSeek V4 Flash 0423, which OpenRouter lists as `deepseek/deepseek-v4-flash`.
+   Override with X_MODEL to try another. */
+const MODEL = () => process.env.X_MODEL || "deepseek/deepseek-v4-flash";
 
 async function ask(system: string, user: string): Promise<string> {
   const key = process.env.OPENROUTER_API_KEY;
@@ -523,10 +525,11 @@ function mailBody(day: string, slot: string, d: ReturnType<typeof blank> | any) 
 
 async function resend(subject: string, html: string, text: string) {
   const key = process.env.RESEND_API_KEY;
-  const from = process.env.X_MAIL_FROM;
-  const to = process.env.X_MAIL_TO;
+  /* The two addresses are settled, so they are defaults rather than setup.
+     X_MAIL_FROM and X_MAIL_TO still win if either ever moves. */
+  const from = process.env.X_MAIL_FROM || "hey@jeremylasne.com";
+  const to = process.env.X_MAIL_TO || "jeremylasne0@gmail.com";
   if (!key) throw new Error("Set RESEND_API_KEY in the Convex dashboard first");
-  if (!from || !to) throw new Error("Set X_MAIL_FROM and X_MAIL_TO in the Convex dashboard first");
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
@@ -586,6 +589,6 @@ export const testMail = action({
     const d = await ctx.runQuery(internal.x.dayFor, { day });
     const { subject, html, text } = mailBody(day, slot, d);
     await resend(subject, html, text);
-    return `Sent the ${slot}:00 mail to ${process.env.X_MAIL_TO}`;
+    return `Sent the ${slot}:00 mail to ${process.env.X_MAIL_TO || "jeremylasne0@gmail.com"}`;
   },
 });
