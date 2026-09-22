@@ -2512,11 +2512,9 @@ body { background: var(--paper); }
   border: solid var(--orange-deep); border-width: 0 2px 2px 0; transform: rotate(45deg);
 }
 
-/* The row itself says so too, quietly: a bar down the side of the field. */
-.sentence-list li.breaker .sentence {
-  border-color: var(--orange-deep);
-  box-shadow: inset 3px 0 0 var(--orange-deep);
-}
+/* The toggle carries the state on its own. The field used to take a border
+   and a bar down its side as well, which said the same thing three times and
+   made a marked row read as an error. */
 
 /* On a lead, the same sentence carries the same word. */
 .must-tag {
