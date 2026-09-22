@@ -185,6 +185,15 @@ export const gatesFromBrief = internalAction({
     const key = process.env.OPENROUTER_API_KEY
     if (!key) return { error: 'OPENROUTER_API_KEY is not set' }
 
+    // No brief, no rules. Asked with empty strings the model still answers,
+    // because the schema demands four niches and seven sentences and it has
+    // to put something there. What came back was named default_1 to
+    // default_5, with the sentences of whichever library it picked, and it
+    // was written to a real campaign as if it meant something.
+    if (!args.audience.trim() || !args.offer.trim()) {
+      return { error: 'Nothing to draft from: the brief is empty' }
+    }
+
     const res = await fetch(OPENROUTER, {
       method: 'POST',
       headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },

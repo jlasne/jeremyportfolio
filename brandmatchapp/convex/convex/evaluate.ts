@@ -151,9 +151,17 @@ async function readLink(links: string[] | undefined): Promise<string | null> {
   const url = (links ?? []).find((u) => /^https?:\/\//i.test(u))
   if (!url) return null
   try {
+    // Five seconds and no more.
+    //
+    // This reads a page nobody vetted, on a host nobody chose, and it had no
+    // deadline. A batch judged one profile whose linktree never answered and
+    // held the whole run open until the platform killed it, which surfaces as
+    // "fetch failed" with nothing to say which profile did it. A page that
+    // cannot answer in five seconds has nothing to tell the judge.
     const res = await fetch(url, {
       redirect: 'follow',
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; brandmatch/1.0)' },
+      signal: AbortSignal.timeout(5_000),
     })
     if (!res.ok) return ''
     const html = await res.text()
@@ -206,10 +214,12 @@ async function readComments(handles: string[]): Promise<Map<string, { paid: bool
     const id = run?.data?.id
     if (!id) return out
 
-    // Apify takes a minute or two. Past four, the judge goes ahead without
-    // them rather than holding a batch open.
+    // Apify takes a minute or two. Past ninety seconds the judge goes ahead
+    // without them rather than holding a batch open: four minutes of waiting
+    // was most of the time a batch is allowed to live, and the batch died
+    // before it could write what it had already worked out.
     let dataset = ''
-    for (let waited = 0; waited < 240_000; waited += 8_000) {
+    for (let waited = 0; waited < 90_000; waited += 8_000) {
       await new Promise((r) => setTimeout(r, 8_000))
       const res = await fetch(`${APIFY}/actor-runs/${id}?token=${token}`)
       const body = (await res.json()) as { data?: { status?: string; defaultDatasetId?: string } }
@@ -612,22 +622,49 @@ async function ask(
       ]
     : prompt
 
-  const res = await fetch(OPENROUTER, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: shots.length
-        ? (process.env.OPENROUTER_VISION_MODEL ?? 'google/gemini-2.5-flash')
-        : (process.env.OPENROUTER_MODEL ?? 'deepseek/deepseek-v4-flash'),
-      messages: [{ role: 'user', content }],
-      // The same profile should get the same verdict twice. Judged again
-      // after a rule change, one profile moved niche and another moved gate
-      // with nothing else changed.
-      temperature: 0,
-      response_format: { type: 'json_schema', json_schema: { name: 'gates', strict: true, schema } },
-    }),
+  const payload = JSON.stringify({
+    model: shots.length
+      ? (process.env.OPENROUTER_VISION_MODEL ?? 'google/gemini-2.5-flash')
+      : (process.env.OPENROUTER_MODEL ?? 'deepseek/deepseek-v4-flash'),
+    messages: [{ role: 'user', content }],
+    // The same profile should get the same verdict twice. Judged again
+    // after a rule change, one profile moved niche and another moved gate
+    // with nothing else changed.
+    temperature: 0,
+    response_format: { type: 'json_schema', json_schema: { name: 'gates', strict: true, schema } },
   })
-  const raw = await res.text()
+
+  // One profile's network trouble is not the batch's.
+  //
+  // This call used to be bare. A dropped connection threw out of the whole
+  // run with "fetch failed", and everything not yet written was lost: a
+  // batch of 400 died twice that way after writing a few hundred verdicts,
+  // and there was nothing to say which profile had done it. A failure here
+  // is now one profile's failure, tried twice and then reported.
+  let res: Response | null = null
+  let reached: string | null = null
+  for (let go = 0; go < 2 && !res; go++) {
+    if (go) await new Promise((r) => setTimeout(r, 1_500))
+    try {
+      res = await fetch(OPENROUTER, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+        body: payload,
+        // A judge that never answers is a batch that never ends.
+        signal: AbortSignal.timeout(60_000),
+      })
+    } catch (e) {
+      reached = e instanceof Error ? e.message : String(e)
+    }
+  }
+  if (!res) return { error: `Could not reach OpenRouter: ${reached ?? 'unknown'}` }
+
+  let raw: string
+  try {
+    raw = await res.text()
+  } catch (e) {
+    return { error: `OpenRouter cut the answer short: ${e instanceof Error ? e.message : String(e)}` }
+  }
   if (!res.ok) return { error: `OpenRouter replied ${res.status}: ${raw.slice(0, 300)}` }
   let body: { choices?: { message?: { content?: string } }[]; error?: { message?: string } } | null = null
   try { body = JSON.parse(raw) } catch { return { error: `OpenRouter sent something that is not JSON: ${raw.slice(0, 200)}` } }

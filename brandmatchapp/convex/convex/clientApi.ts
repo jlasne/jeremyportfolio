@@ -125,12 +125,22 @@ export const clientApi = httpAction(async (ctx, req) => {
       // writing it. So it is scheduled, and the caller watches the campaign
       // until its rules appear.
       if (tail === 'gates' && parts[3] === 'draft' && req.method === 'POST') {
-        const { audience, offer } = await req.json()
+        const body = await req.json().catch(() => ({}))
+        // The campaign already holds the brief, so a caller that sends none
+        // is asking us to draft from what it wrote when it was created, not
+        // from nothing. Sending nothing used to draft from nothing: the model
+        // met the schema with placeholder niches named default_1 to
+        // default_5 and a set of fitness coaching sentences, on a brief about
+        // food. Nothing said it had happened.
+        const held = await ctx.runQuery(internal.campaigns.get, { accountId: account._id, campaignId })
+        const brief = (held as { campaign?: { brief?: { audience?: string; offer?: string } } })?.campaign?.brief
+        const audience = String(body.audience ?? '').trim() || String(brief?.audience ?? '').trim()
+        const offer = String(body.offer ?? '').trim() || String(brief?.offer ?? '').trim()
+        if (!audience || !offer) {
+          return fail('Say who you want to reach and what you sell them before asking for rules', 400)
+        }
         await ctx.scheduler.runAfter(0, internal.drafting.gatesFromBrief, {
-          accountId: account._id,
-          campaignId,
-          audience: String(audience ?? ''),
-          offer: String(offer ?? ''),
+          accountId: account._id, campaignId, audience, offer,
         })
         return json({ drafting: true })
       }
