@@ -91,6 +91,9 @@ export const get = internalQuery({
   },
 })
 
+/** How few named accounts we refuse to start a campaign on. See the handler. */
+const SEEDS_REQUIRED = 3
+
 export const create = internalMutation({
   args: {
     accountId: v.id('accounts'),
@@ -104,13 +107,30 @@ export const create = internalMutation({
   },
   returns: v.any(),
   handler: async (ctx, args) => {
+    // Three names or nothing, enforced here and not only on the screen.
+    //
+    // Not for the discovery, which has other ways in. For the check: a brief
+    // describing 100k accounts written by someone picturing 30k ones reads
+    // perfectly well, and the only thing that catches it is three real names
+    // put beside the rules. The two campaigns created on 21/09 named none.
+    const seeds = [...new Set((args.brief.seeds ?? [])
+      .map((h) => h.trim().toLowerCase().replace(/^@/, ''))
+      .filter((h) => /^[a-z0-9._]{2,30}$/.test(h)))]
+    if (seeds.length < SEEDS_REQUIRED) {
+      return {
+        error: `A campaign starts with at least ${SEEDS_REQUIRED} accounts you already want more of. `
+          + `We hold your rules against them, which is what catches rules that describe someone `
+          + `other than the person you meant. You gave ${seeds.length}.`,
+      }
+    }
+
     const now = Date.now()
     const campaignId = await ctx.db.insert('campaigns', {
       accountId: args.accountId,
       name: args.name,
       status: 'draft',
       dailyCap: args.dailyCap,
-      brief: { ...args.brief, writtenAt: now },
+      brief: { ...args.brief, seeds, writtenAt: now },
       extracted: {},
       createdAt: now,
       updatedAt: now,

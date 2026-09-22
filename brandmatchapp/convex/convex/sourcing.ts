@@ -1,4 +1,5 @@
 import { internalAction, internalMutation, internalQuery } from './_generated/server'
+import type { Doc } from './_generated/dataModel'
 import { internal } from './_generated/api'
 import { v } from 'convex/values'
 import { FRESH_MS, startRun } from './crawl'
@@ -53,38 +54,59 @@ const RETIRE_AFTER = 1
  * coach who sells their own app still stands among nutrition coaches.
  */
 export const parents = internalQuery({
-  args: { campaignId: v.id('campaigns') },
+  args: { campaignId: v.id('campaigns'), crossCampaign: v.optional(v.boolean()) },
   returns: v.any(),
-  handler: async (ctx, { campaignId }) => {
+  handler: async (ctx, { campaignId, crossCampaign }) => {
     const campaign = await ctx.db.get(campaignId)
     if (!campaign) return { error: 'No such campaign' }
-    const hasNiches = (campaign.extracted.niches ?? []).some((n) => n.enabled)
+    const niches = (campaign.extracted.niches ?? []).filter((n) => n.enabled)
+    const hasNiches = niches.length > 0
     // A handle the client named is a parent whatever the rules said about it.
     // They are telling us who they want; an account that misses the follower
     // ceiling by a hair still stands among exactly the right people, and its
     // neighbourhood is the neighbourhood we are looking for.
     const named = new Set((campaign.brief.seeds ?? []).map((h) => h.toLowerCase()))
-    const rows = await ctx.db.query('evaluations').withIndex('by_campaign', (q) => q.eq('campaignId', campaignId)).collect()
-    const out = []
+
+    type Parent = {
+      handle: string; verdict: string; score: number; niche: string | null
+      from: string; carries: number; cited: string[]; related: string[]
+    }
+    const out: Parent[] = []
     const seen = new Set<string>()
-    for (const e of rows) {
-      const c = await ctx.db.get(e.creatorId)
-      if (!c) continue
-      const isNamed = named.has(c.handle)
-      if (!isNamed) {
-        if (!PARENT_VERDICTS.has(e.verdict)) continue
-        if (hasNiches && !e.niche) continue
-      }
+    const take = (c: Doc<'creators'>, verdict: string, score: number, niche: string | null, from: string) => {
+      if (seen.has(c.handle)) return
       seen.add(c.handle)
       out.push({
         handle: c.handle,
-        verdict: e.verdict,
-        score: e.score,
-        niche: e.niche ?? null,
+        verdict,
+        score,
+        niche,
+        from,
+        // Whether this account can drive discovery at all.
+        //
+        // Instagram only shows suggested accounts beside a profile big enough
+        // to have them. Measured on 1,345 profiles: a carrier hands back
+        // neighbours of its own size, and an account that carries none today
+        // will carry none tomorrow. So a parent that carries nothing is a
+        // good lead and a dead engine, and pretending otherwise spends the
+        // neighbour budget on handles pulled out of captions.
+        carries: (c.related ?? []).length,
         cited: c.cited ?? [],
         related: c.related ?? [],
       })
     }
+
+    const rows = await ctx.db.query('evaluations').withIndex('by_campaign', (q) => q.eq('campaignId', campaignId)).collect()
+    for (const e of rows) {
+      const c = await ctx.db.get(e.creatorId)
+      if (!c) continue
+      if (!named.has(c.handle)) {
+        if (!PARENT_VERDICTS.has(e.verdict)) continue
+        if (hasNiches && !e.niche) continue
+      }
+      take(c, e.verdict, e.score, e.niche ?? null, 'own')
+    }
+
     for (const handle of named) {
       if (seen.has(handle)) continue
       const c = await ctx.db
@@ -92,11 +114,87 @@ export const parents = internalQuery({
         .withIndex('by_handle', (q) => q.eq('platform', 'instagram').eq('handle', handle))
         .first()
       if (!c) continue
-      out.push({ handle: c.handle, verdict: 'named', score: 0, niche: null, cited: c.cited ?? [], related: c.related ?? [] })
+      take(c, 'named', 0, null, 'named')
     }
+
+    // The neighbours of someone else's good lead.
+    //
+    // A creator another campaign qualified in a niche this campaign also
+    // works is exactly the account we would have paid to find. Their profile
+    // is already bought, so standing next to them is free, and the niche is
+    // what keeps it honest: a qualified fitness coach says nothing about a
+    // comedy campaign's neighbourhood.
+    if (crossCampaign !== false && hasNiches) {
+      const ours = new Set(niches.map((n) => n.label.toLowerCase()))
+      const others = await ctx.db
+        .query('campaigns')
+        .withIndex('by_account', (q) => q.eq('accountId', campaign.accountId))
+        .collect()
+      for (const other of others) {
+        if (other._id === campaignId) continue
+        const shares = (other.extracted.niches ?? []).some((n) => n.enabled && ours.has(n.label.toLowerCase()))
+        if (!shares) continue
+        const theirs = await ctx.db
+          .query('evaluations')
+          .withIndex('by_campaign', (q) => q.eq('campaignId', other._id))
+          .collect()
+        for (const e of theirs) {
+          if (e.verdict !== 'qualified') continue
+          const c = await ctx.db.get(e.creatorId)
+          if (!c) continue
+          take(c, 'qualified', e.score, e.niche ?? null, 'other campaign')
+        }
+      }
+    }
+
     // Qualified first, then by fit. The order decides who gets cited first
     // when the run is capped.
     return out.sort((a, b) => Number(b.verdict === 'qualified') - Number(a.verdict === 'qualified') || b.score - a.score)
+  },
+})
+
+/**
+ * Which of this campaign's good accounts can actually drive discovery.
+ *
+ * Two jobs get confused under one word. A seed shows the judge what a good
+ * one looks like, and for that it only has to be in the target. A seed drives
+ * discovery by carrying neighbours, and for that it has to be big enough for
+ * Instagram to suggest anyone beside it, which measured out at 500k.
+ *
+ * A campaign hunting 10k accounts has seeds that do the first job and none
+ * that do the second, and there is no fixing that with better seeds. Saying
+ * so is the point of this query.
+ */
+export const carriers = internalQuery({
+  args: { campaignId: v.id('campaigns') },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<Record<string, unknown>> => {
+    const list = (await ctx.runQuery(internal.sourcing.parents, { campaignId: args.campaignId })) as
+      | { handle: string; carries: number; from: string; related?: string[] }[]
+      | { error: string }
+    if ('error' in list) return list
+
+    const carrying = list.filter((p) => p.carries > 0)
+    const byOrigin: Record<string, { parents: number; carrying: number }> = {}
+    for (const p of list) {
+      const row = byOrigin[p.from] ?? (byOrigin[p.from] = { parents: 0, carrying: 0 })
+      row.parents++
+      if (p.carries > 0) row.carrying++
+    }
+    const borne = carrying.reduce((n, p) => n + p.carries, 0)
+
+    return {
+      parents: list.length,
+      carrying: carrying.length,
+      /** Suggestions per carrier. Stable per account, so this forecasts. */
+      perCarrier: carrying.length ? Math.round((borne / carrying.length) * 10) / 10 : 0,
+      borne,
+      byOrigin,
+      top: carrying
+        .sort((a, b) => b.carries - a.carries)
+        .slice(0, 10)
+        .map((p) => ({ handle: p.handle, carries: p.carries, from: p.from })),
+    }
   },
 })
 

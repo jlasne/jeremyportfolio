@@ -12,7 +12,7 @@ import {
 } from '../data/propose'
 import { ruleLabel } from '../data/gates'
 import { eitherLine } from '../data/tuning'
-import { checkSeeds, cleanHandles, recommendedSeeds, seedMismatch, SEEDS_ENOUGH } from '../data/seeds'
+import { checkSeeds, cleanHandles, recommendedSeeds, seedJobs, seedMismatch, SEEDS_ENOUGH, SEEDS_REQUIRED } from '../data/seeds'
 import { createCampaign } from '../data/store'
 import { compact, COUNTRY_NAMES, LANGUAGE_NAMES } from '../lib/format'
 import { navigate } from '../lib/router'
@@ -69,10 +69,15 @@ function BriefStep({ onDone }: { onDone: (brief: CampaignBrief) => void }) {
   // The second question appears once the first has an answer. One thing at a
   // time, without a page turn, so the first stays readable while writing it.
   const second = audience.trim().length > 3
-  const ready = second && offer.trim().length > 3
+  const written = second && offer.trim().length > 3
 
-  const third = ready
+  const third = written
   const named = cleanHandles(seeds)
+  // Three names or we do not start. Not for the discovery, which has other
+  // ways in, but for the check: a brief describing 100k accounts written by
+  // someone picturing 30k ones reads perfectly well, and only real names put
+  // next to the rules catch it.
+  const ready = written && named.length >= SEEDS_REQUIRED
   // Measured accounts, so the proposal can say what it found about each one
   // rather than promise to look. Computed once the brief stops changing.
   const suggestions = useMemo(
@@ -124,11 +129,11 @@ function BriefStep({ onDone }: { onDone: (brief: CampaignBrief) => void }) {
       </label>
 
       <label className={`ask-block${third ? ' in' : ' out'}`} aria-hidden={!third}>
-        <h1>Know anyone already?</h1>
+        <h1>Name three accounts you already want more of</h1>
         <p className="ask-note">
-          Optional, and the most useful thing you can give us. The people around a good account look like that
-          account, so five names is the fastest way to a good first day. You have <b>{named.length} of
-          {' '}{SEEDS_ENOUGH}</b>.
+          Three at least, five is better. We run them through the rules we are about to write, so you see
+          straight away whether the rules and the people you actually want agree. You have{' '}
+          <b>{named.length} of {SEEDS_ENOUGH}</b>.
         </p>
         <textarea
           className="textarea ask-field short"
@@ -168,7 +173,11 @@ function BriefStep({ onDone }: { onDone: (brief: CampaignBrief) => void }) {
         <button type="submit" className="btn primary" disabled={!ready}>
           Write my rules
         </button>
-        <span className="hint">You can change every rule after.</span>
+        <span className="hint">
+          {written && named.length < SEEDS_REQUIRED
+            ? `${SEEDS_REQUIRED - named.length} more ${named.length === SEEDS_REQUIRED - 1 ? 'name' : 'names'} and we start.`
+            : 'You can change every rule after.'}
+        </span>
       </div>
     </form>
   )
@@ -291,6 +300,10 @@ function ProposalStep({
   const verdicts = checkSeeds(brief.seeds ?? [], asGateSet(proposal), proposal.niches)
   const fits = verdicts.filter((v) => v.state !== 'fails').length
   const mismatch = seedMismatch(verdicts, proposal.hard)
+  // What named accounts can actually do for this campaign. Below 500k they
+  // hold the rules honest and nothing more, and saying otherwise sells a
+  // channel that measured out at near zero.
+  const jobs = seedJobs(proposal.hard)
 
   // Finishing lands on the campaign list. Nothing is simulated on the way
   // out: a run costs us real work and the client did not ask for one yet.
@@ -412,9 +425,12 @@ function ProposalStep({
         <div className="card gate-card">
           <h2>The accounts you gave us</h2>
           <p className="gate-lede">
-            {fits} of {brief.seeds.length} hold up against these rules. We follow the ones that do, and leave the rest
-            alone: their neighbours would be off target too.
+            {fits} of {brief.seeds.length} hold up against these rules.{' '}
+            {jobs.drives
+              ? 'We follow the ones that do, and leave the rest alone: their neighbours would be off target too.'
+              : 'They hold the rules to something real. Finding more people like them is a separate job, and at this size it is not theirs.'}
           </p>
+          <p className="gate-lede muted">{jobs.note}</p>
           {mismatch && <p className="notice warn">{mismatch}</p>}
           <ul className="rules stacked">
             {verdicts.map((v) => (

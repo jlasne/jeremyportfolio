@@ -85,6 +85,9 @@ export const clientApi = httpAction(async (ctx, req) => {
         brief,
         dailyCap: body.dailyCap !== undefined ? Number(body.dailyCap) : undefined,
       })
+      // Too few named accounts is the caller's mistake, so it comes back as
+      // one rather than as a campaign object carrying an error inside it.
+      if (campaign && 'error' in campaign) return fail(String(campaign.error), 400)
       return json({ campaign })
     }
 

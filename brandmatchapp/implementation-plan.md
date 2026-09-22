@@ -247,9 +247,9 @@ La fenêtre 10k-100k n'a toujours pas de bon canal. Les voisins y visent 26%, la
 
 ---
 
-## Chantier 2 : les graines
+## Chantier 2 : les graines — LIVRÉ
 
-**Dépend de 0 pour son utilité. Peut être construit avant.**
+**Coût de la vérification : 0,05 $.**
 
 ### Quatre choses
 
@@ -285,7 +285,25 @@ Un créateur qualifié pour une campagne sert de graine à une autre campagne de
 
 ### Vérifié par
 
-Une campagne créée sans graine doit être refusée. Une campagne avec quatre graines étalées doit montrer sa couverture de fourchette.
+**Refus, côté API et pas seulement côté écran.** Zéro graine et deux graines reviennent en 400 avec la raison écrite. Trois graines passent, dédoublonnées et nettoyées du `@`.
+
+**Le vrai motif du refus n'est pas la découverte.** C'est le contrôle. Un brief qui décrit des comptes à 100k écrit par quelqu'un qui pense à 30k se lit parfaitement. Seuls trois vrais noms posés à côté des règles le révèlent. Il en faut trois parce que le contrôle porte sur celui du milieu.
+
+**Les deux métiers, mesurés par campagne.**
+
+| campagne | fenêtre | parents | qui portent |
+|---|---|---|---|
+| Divertissement | 10k-100k | 12 | **1** |
+| Fitness | 100k-3M | 12 | **9** |
+| Chien | 20k-1M | 51 | 15 |
+
+Le chantier 0 mesuré campagne par campagne. Sous 100k, presque rien ne porte, et aucune meilleure graine n'y changera rien. L'écran le dit maintenant au lieu de vendre un canal mort.
+
+**Les candidats gratuits, achetés.** 23 profils cités par nos porteurs, jamais payés jusqu'ici. 0,053 $. La visée du canal voisins sur fitness passe de 32% à 34%.
+
+### 2.4 : construit, jamais déclenché
+
+Les graines croisées exigent un **libellé de niche identique** entre deux campagnes. Nos trois campagnes n'en partagent aucun : « comedy » d'un côté, « training program coach » de l'autre. Le code est posé et attend deux campagnes de la même niche. Assouplir la correspondance ferait semer une campagne comédie par du fitness. Règle stricte gardée.
 
 ---
 
