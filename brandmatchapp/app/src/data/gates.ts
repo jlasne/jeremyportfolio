@@ -354,7 +354,7 @@ const RULE_LABELS: Record<string, string> = {
   monthlyViewsMin: 'Views across a month, at least',
   lastPostWithinDays: 'Posted in the last',
   countries: 'Countries',
-  languages: 'Languages',
+  languages: 'Language',
 }
 
 export function ruleLabel(key: string): string {

@@ -11,8 +11,8 @@ import { useEffect, useState } from 'react'
 //   gates        which criteria decide
 //   feasibility  how much do my rules filter, and what would I open up
 //
-// Five surfaces sit outside them: the sign in, the account, the API, the
-// roadmap, and the internal admin.
+// Four surfaces sit outside them: the sign in, the account, the API, and the
+// internal admin.
 
 export type CampaignTab = 'brief' | 'gates' | 'feasibility'
 
@@ -27,7 +27,6 @@ export type Route =
   | { name: 'account' }
   | { name: 'outreach' }
   | { name: 'ai' }
-  | { name: 'roadmap' }
   | { name: 'admin' }
   | { name: 'signin' }
 
@@ -72,9 +71,6 @@ export function parse(hash: string): Route {
       return { name: 'outreach' }
     case 'ai':
       return { name: 'ai' }
-    case 'roadmap':
-    case 'ideas':
-      return { name: 'roadmap' }
     case 'admin':
       return { name: 'admin' }
     case 'signin':

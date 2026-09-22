@@ -3353,7 +3353,7 @@ body { background: var(--paper); }
 .filter-headline b { font-weight: 600; color: var(--orange-deep); }
 
 /* ---------------------------------------------------------------------------
-   The morning page, the help sheet, and the roadmap.
+   The morning page and the help sheet.
    --------------------------------------------------------------------------- */
 
 /* Five tiles across on a wide screen, two on a phone. */
@@ -3414,35 +3414,6 @@ body { background: var(--paper); }
 .help-ways .soon-row { opacity: 0.6; }
 .help-ways .soon-row .soon { margin-left: 0; }
 .help-mail { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
-
-/* The roadmap: a vote, a card, and where it stands. */
-.ideas { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
-.idea {
-  display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 16px; align-items: start;
-  padding: 18px 20px; background: var(--panel); border: 1px solid var(--line);
-  border-radius: var(--radius-card); box-shadow: var(--shadow);
-}
-.idea-vote {
-  display: flex; flex-direction: column; align-items: center; gap: 1px;
-  padding: 10px 0; background: var(--paper-2); border: 1px solid var(--line);
-  border-radius: 14px; cursor: pointer; font: inherit; color: var(--ink);
-}
-.idea-vote:hover { border-color: var(--orange-line); }
-.idea-vote.on { background: var(--orange-soft); border-color: var(--orange-line); color: var(--orange-darker); }
-.idea-vote b { font-size: 17px; font-weight: 600; }
-.idea-vote small { font-size: 10px; color: var(--ink-3); }
-.idea-vote.on small { color: var(--orange-deep); }
-.idea-body h3 { margin: 0 0 4px; font-size: 15px; font-weight: 600; }
-.idea-body p { margin: 0; color: var(--ink-2); font-size: 13.5px; line-height: 1.5; }
-.idea-foot { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-.state { padding: 2px 9px; border-radius: var(--pill); font-size: 11.5px; font-weight: 500; }
-.state.considering { background: var(--paper-2); color: var(--ink-2); }
-.state.planned { background: rgba(42, 120, 214, 0.12); color: #1c5cab; }
-.state.building { background: var(--orange-soft); color: var(--orange-darker); }
-.state.shipped { background: rgba(25, 158, 112, 0.14); color: #12724f; }
-
-.notes { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
-.notes h2 { margin: 4px 0 6px; }
 
 /* A page that exists to say one thing. */
 .soon-card { text-align: center; padding: 56px 24px; }
@@ -3505,22 +3476,6 @@ body { background: var(--paper); }
 .crm-mail a { color: var(--ink-2); }
 .crm-mail a:hover { color: var(--orange-deep); }
 
-/* The operator's roadmap desk: a vote, a title, and the two things we own. */
-.desk-rows { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; }
-.desk-rows li {
-  display: grid; grid-template-columns: 40px minmax(0, 1fr) 150px 140px; gap: 12px; align-items: center;
-  padding: 9px 0; border-top: 1px solid var(--line);
-}
-.desk-rows li:first-child { border-top: 0; }
-.desk-votes { font-weight: 600; color: var(--ink-2); }
-.desk-title { display: flex; flex-direction: column; min-width: 0; font-size: 13.5px; }
-.desk-title small { font-size: 11.5px; }
-.desk-rows .select { width: 100%; height: 32px; font-size: 13px; }
-@media (max-width: 860px) {
-  .desk-rows li { grid-template-columns: 34px minmax(0, 1fr); }
-  .desk-rows .select { grid-column: 2; }
-}
-
 /* ===========================================================================
    The app's surface, in one place.
    ---------------------------------------------------------------------------
@@ -3571,7 +3526,7 @@ body { background: var(--paper); }
 
 /* --- the surfaces -------------------------------------------------------- */
 
-.card, .list, .tile, .idea, .crm, .drawer, .empty {
+.card, .list, .tile, .crm, .drawer, .empty {
   border-radius: var(--radius-app);
   box-shadow: var(--shadow-app);
 }
@@ -3649,12 +3604,6 @@ body { background: var(--paper); }
 .help-ways li > div:first-child { flex: 1 1 auto; min-width: 0; }
 .help-mail { flex: 0 0 auto; flex-wrap: nowrap; }
 .help-mail .btn { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
-
-/* An idea is three short lines. It was wearing the padding of a page. */
-.idea { padding: 16px 20px; gap: 14px; grid-template-columns: 58px minmax(0, 1fr); }
-.idea-vote { padding: 8px 0; }
-.idea-vote b { font-size: 16px; }
-.idea-foot { margin-top: 8px; }
 
 /* A field that takes one email does not need the width of a page. */
 .invite-row { gap: 8px; }
