@@ -3767,7 +3767,12 @@ body { background: var(--paper); }
   --peach: #f5c6a0;
   /* The alias the global sheet colours links with. */
   --blue: #c9560d;
-  min-height: 100vh;
+  /* The sunrise stays at full strength behind the cards, so the lines that sit
+     straight on it cannot use the muted grey the rest of the page uses. That
+     measured 3.13 over the hills, against the 4.5 small text needs. This
+     measures 4.6 on the brightest crest the lines cross and 8.3 at rest. */
+  --l-on-sky: #2e2a23;
+  min-height: 100vh; overflow-x: clip;
   background: var(--l-ground);
   color: var(--l-ink);
   font-family: var(--font);
@@ -3776,69 +3781,80 @@ body { background: var(--paper); }
 .landing.lp h1, .landing.lp h2, .landing.lp h3,
 .landing.lp .brand, .landing.lp .brand-word { font-family: var(--font); }
 
-.lp-nav {
-  position: sticky; top: 0; z-index: 10;
-  display: flex; align-items: center;
-  padding: 26px max(22px, calc((100% - 1120px) / 2));
-  background: rgba(250, 246, 236, 0.84); backdrop-filter: blur(12px);
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.3s ease, padding 0.3s ease;
+/* The portal: the name set as large as the screen allows, and a camera that
+   scrolls into the counter of its D. What is on the other side is the six
+   cards and the last ask, over the sunrise. */
+.lp-boot { min-height: 100svh; background: var(--l-ground); }
+.lp-portal { font-family: var(--font); }
+/* The sunrise is drawn in Sky.tsx, so it holds its own colour and needs no
+   wash over it. The scale is the camera creeping in as the dive starts. */
+.lp-sky {
+  position: absolute; inset: 0;
+  transform: scale(var(--gp-field-scale, 1));
+  /* Its own layer, so the scale composites a ready texture instead of redrawing
+     the blurs on every frame of the dive. */
+  will-change: transform;
 }
-.lp-nav.floated { padding-top: 15px; padding-bottom: 15px; border-bottom-color: var(--l-rule); }
-.lp-nav .brand { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 600; letter-spacing: -0.03em; color: var(--l-ink); }
-.lp-nav .brand:hover { text-decoration: none; }
-.lp-nav .spacer { flex: 1; }
-.lp-signin { font-size: 15px; color: var(--l-muted); }
-.lp-signin:hover { color: var(--l-ink); text-decoration: none; }
+/* slice crops the drawing to the viewport, the way cover crops an image. The
+   sun keeps the middle, which is the band the word is cut out of. */
+.lp-sky-art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 
-/* The sky. A sunrise behind the nav and the hero, faded out before the story
-   starts: the story is a column of sentences, and a picture under it would be
-   one more thing to read. The file is 39KB, so it costs the page nothing. */
-.landing.lp::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0;
-  height: min(980px, 104vh);
-  background: url('./art/bg.webp') center 42% / cover no-repeat;
-  -webkit-mask-image: linear-gradient(to bottom, #000 0 44%, rgba(0, 0, 0, 0.5) 74%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0 44%, rgba(0, 0, 0, 0.5) 74%, transparent 100%);
-  opacity: 0.85; pointer-events: none; z-index: 0;
-}
-/* Everything the reader reads sits over it. The nav already carries its own
-   layer, so it stays where it is. */
-.lp-hero, .lp-story, .lp-ask, .lp-foot { position: relative; z-index: 1; }
 
-/* Hero. Badge, headline, one sentence, the field. Nothing else above the
-   fold, because the brief is the only thing the reader has to give. */
-.lp-hero { max-width: 1120px; margin: 0 auto; padding: 88px max(22px, 4vw) 104px; text-align: center; }
-.lp-badge {
-  display: inline-block; margin: 0 0 30px; padding: 7px 17px;
-  border: 1px solid var(--peach); border-radius: var(--pill);
-  background: var(--l-card); font-size: 13px; font-weight: 500; color: var(--l-muted);
+/* The field is decorative, so the front has to let the form through it. */
+.lp-portal [data-gp-front] input,
+.lp-portal [data-gp-front] form,
+.lp-portal [data-gp-front] .lp-front-ask { pointer-events: var(--gp-caption-hit, auto); }
+.lp-portal [data-gp-hint] { display: none; }
+.lp-portal [data-gp-caption] { inset: auto 24px 5%; justify-content: center; font-family: var(--font); }
+.lp-portal [data-gp-enter] { gap: 10px; font-size: 13px; color: var(--l-faint); }
+.lp-portal [data-gp-enter]:hover { color: var(--go-deep); text-decoration: none; }
+/* With motion off the whole page is already laid out in reading order, so the
+   link into it is redundant, and the shorter pin drops it onto the field. */
+@media (prefers-reduced-motion: reduce) { .lp-portal [data-gp-caption] { display: none; } }
+
+.lp-front-ask {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  top: calc(var(--gp-word-bottom, 55%) + 34px);
+  width: min(660px, calc(100% - 44px)); text-align: center;
 }
-.lp-hero h1, .lp-ask h2 {
-  margin: 0 auto; max-width: 26ch; text-wrap: balance;
-  font-weight: 600; font-size: clamp(33px, 4.4vw, 54px); line-height: 1.06;
-  letter-spacing: -0.038em; color: var(--l-ink);
+.lp-line {
+  margin: 0 auto 24px; max-width: 58ch;
+  font-size: clamp(15px, 1.35vw, 18px); line-height: 1.5;
+  font-weight: 400; letter-spacing: 0; color: var(--l-muted); text-wrap: pretty;
 }
-.lp-sub { margin: 26px auto 0; max-width: 58ch; font-size: 18px; line-height: 1.6; color: var(--l-muted); }
+.lp-line .hot { color: var(--go-deep); font-weight: 600; }
+@media (prefers-reduced-motion: no-preference) {
+  .lp-line {
+    opacity: 0; transform: translateY(0.5em);
+    animation: word-rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.25s forwards;
+  }
+}
+@keyframes word-rise { to { opacity: 1; transform: none; } }
+
+/* Everything behind the letter, on one column. */
+.lp-inside { width: 100%; max-width: 1180px; margin: 0 auto; }
 
 /* The ask, in two moves: the brief they already have in their head, then the
    address. The button keeps its label through both, so nothing moves under
    the cursor. */
-.start { max-width: 620px; margin: 40px auto 0; }
-.start-field {
-  display: flex; align-items: center; gap: 8px;
-  padding: 7px 7px 7px 24px; background: #fff;
-  border: 1px solid var(--peach); border-radius: var(--pill);
-  box-shadow: 0 1px 2px rgba(35, 33, 28, 0.04), 0 14px 32px rgba(35, 33, 28, 0.06);
+.start { max-width: 660px; margin: 40px auto 0; }
+.start-row { display: flex; align-items: stretch; gap: 10px; }
+.start-box {
+  display: flex; align-items: center; flex: 1; min-width: 0;
+  height: 56px; padding: 0 20px; background: #fff;
+  border: 1px solid var(--peach); border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(35, 33, 28, 0.04), 0 12px 28px rgba(35, 33, 28, 0.05);
 }
-.start-field input {
+.start-box:focus-within { border-color: var(--go); }
+.start-box input {
   flex: 1; min-width: 0; padding: 0; border: 0; outline: none; background: none;
   font: inherit; font-size: 16px; color: var(--l-ink); text-align: left;
 }
-.start-field input::placeholder { color: var(--l-faint); }
+.start-box input::placeholder { color: var(--l-faint); }
 .start-go {
-  flex: none; height: 48px; padding: 0 26px; border: 0; border-radius: var(--pill);
+  flex: none; height: 56px; padding: 0 26px; border: 0; border-radius: 14px;
   background: var(--go); color: #fff; font-size: 16px; font-weight: 600; letter-spacing: -0.015em;
+  box-shadow: 0 1px 2px rgba(35, 33, 28, 0.04), 0 12px 28px rgba(242, 113, 31, 0.18);
   transition: background 0.2s ease;
 }
 .start-go:hover { background: var(--go-deep); }
@@ -3846,81 +3862,95 @@ body { background: var(--paper); }
 .start-note { margin: 14px 0 0; font-size: 13.5px; color: var(--l-faint); }
 .start-error { margin: 14px 0 0; font-size: 13.5px; color: #b4341a; }
 .start-done {
-  max-width: 620px; margin: 40px auto 0; padding: 20px 28px;
-  border: 1px solid var(--peach); border-radius: var(--pill);
+  max-width: 660px; margin: 40px auto 0; padding: 20px 28px;
+  border: 1px solid var(--peach); border-radius: 14px;
   background: var(--l-card); font-size: 16px; color: var(--l-ink);
 }
 
-/* The story. One column of sentences, no box around any of them. A line that
-   lands alone reads slower than the same line inside a block, which is the
-   only rhythm this page has. */
-.lp-story { max-width: 760px; margin: 0 auto; padding: 16px max(22px, 4vw) 48px; }
-.said { margin: 0 0 54px; font-size: clamp(21px, 2.3vw, 26px); line-height: 1.45; color: var(--l-ink); }
-.said span { display: block; }
-/* The one mark on the page, and it sits on the outcome. Bigger and orange,
-   because a page that marks its whole argument marks nothing. */
-.said span.out {
-  margin: 6px 0; font-size: clamp(26px, 3.1vw, 35px); line-height: 1.16;
-  font-weight: 600; letter-spacing: -0.025em; color: var(--go-deep);
+/* Six outcomes, one card each. Nothing sits between the hero and them,
+   because a reader who came for leads should see what they get before they
+   see anything else. */
+.lp-grid {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;
+  max-width: 1120px; margin: 0 auto; padding: 0 max(22px, 4vw);
 }
-.said.close { margin-top: 68px; margin-bottom: 0; font-weight: 600; letter-spacing: -0.025em; }
-.said span.leadbar { font-weight: 600; letter-spacing: -0.015em; color: var(--go-deep); }
-.said.item { margin-bottom: 30px; }
-.said.item + .said:not(.item) { margin-top: 54px; }
+.perk {
+  padding: 26px 26px 28px; background: var(--l-card);
+  border: 1px solid var(--peach); border-radius: 22px;
+  box-shadow: 0 1px 2px rgba(35, 33, 28, 0.03), 0 14px 30px rgba(35, 33, 28, 0.04);
+}
+/* Hover moves the edge and the shadow, never the card: the arrival below
+   already owns the transform. */
+.perk:hover { border-color: var(--go); box-shadow: 0 2px 4px rgba(35, 33, 28, 0.05), 0 20px 42px rgba(35, 33, 28, 0.08); }
+.perk-mark {
+  display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: 18px;
+  border-radius: 13px; background: rgba(242, 113, 31, 0.12); color: var(--go-deep);
+}
+.perk-mark svg { width: 22px; height: 22px; }
+.perk h3 { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; color: var(--l-ink); }
+.perk p { margin-top: 9px; font-size: 15px; line-height: 1.55; color: var(--l-muted); }
 
-/* The story is read rather than scanned, so a paragraph does not land whole:
-   its lines rise one after the next as it is reached. */
+/* The one line of the story that stayed: who wrote the page. */
+.lp-proof {
+  max-width: 1120px; margin: 52px auto 0; padding: 0 max(22px, 4vw);
+  text-align: center; font-size: 15px; color: var(--l-on-sky);
+}
+
+/* A row fills in as it is reached, left to right. */
 @media (prefers-reduced-motion: no-preference) {
-  .said span {
-    opacity: 0; transform: translateY(26px);
-    transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-    transition-delay: calc(var(--i, 0) * 110ms);
+  .perk {
+    opacity: 0; transform: translateY(22px);
+    transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
+                border-color 0.3s ease, box-shadow 0.3s ease;
+    transition-delay: calc(var(--i, 0) * 95ms);
   }
-  .said.in span { opacity: 1; transform: none; }
+  .perk.in { opacity: 1; transform: none; }
 }
 
-/* The last ask carries the hero's weight, on the hero's ground. An accent
-   slab here would make it a banner, and a banner is the one thing a reader
-   has learned to scroll past. */
-.lp-ask {
-  max-width: 1120px; margin: 0 auto; padding: 104px max(22px, 4vw) 116px;
-  text-align: center; border-top: 1px solid var(--l-rule);
+/* The last ask, at the end of what is behind the letter. */
+.lp-ask { margin: 76px auto 0; padding: 0 max(4px, 1vw); text-align: center; }
+.lp-ask h2 {
+  margin: 0 auto; max-width: 22ch; text-wrap: balance;
+  font-weight: 600; font-size: clamp(28px, 3.6vw, 44px); line-height: 1.08;
+  letter-spacing: -0.035em; color: var(--l-ink);
 }
+.lp-sub { margin: 18px auto 0; max-width: 46ch; font-size: 17px; line-height: 1.55; color: var(--l-on-sky); }
 
 .lp-foot {
-  display: flex; align-items: center; flex-wrap: wrap; gap: 20px;
-  max-width: 1120px; margin: 0 auto; padding: 28px max(22px, 4vw) 52px;
-  border-top: 1px solid var(--l-rule); font-size: 14px;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 10px 20px;
+  max-width: 1120px; margin: 64px auto 0; padding: 15px max(22px, 4vw) 18px;
+  border-top: 1px solid var(--l-rule); font-size: 13.5px;
 }
-.lp-foot .brand-word { font-size: 16px; font-weight: 600; letter-spacing: -0.03em; color: var(--l-ink); }
-.lp-foot nav { display: flex; gap: 22px; margin-left: auto; }
+.lp-foot .brand-word { font-size: 15px; font-weight: 600; letter-spacing: -0.03em; color: var(--l-ink); }
+.lp-foot nav { display: flex; gap: 20px; margin-left: auto; }
 .lp-foot a { color: var(--l-muted); }
 .lp-foot a:hover { color: var(--go-deep); text-decoration: none; }
-.lp-foot p { flex-basis: 100%; margin: 18px 0 0; font-size: 13px; color: var(--l-faint); }
+.lp-foot p { margin: 0; font-size: 13px; color: var(--l-faint); }
 
 /* Below this the pill would leave the field about 180px, so the button takes
    its own row rather than the placeholder being cut in half. */
+@media (max-width: 1000px) {
+  .lp-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .perk { --i: 0; }
+}
 @media (max-width: 640px) {
-  .lp-nav { padding: 20px 20px; }
-  .lp-nav.floated { padding-top: 13px; padding-bottom: 13px; }
+  .lp-grid { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .perk { padding: 22px 22px 24px; border-radius: 20px; }
+  .perk-mark { width: 40px; height: 40px; margin-bottom: 15px; border-radius: 12px; }
+  .lp-proof { margin-top: 40px; font-size: 14px; }
   .landing.lp::before { height: min(780px, 92vh); background-position: 68% 46%; }
-  .lp-hero { padding: 52px 20px 68px; }
-  .lp-badge { margin-bottom: 24px; padding: 6px 14px; font-size: 12.5px; }
-  .lp-sub { margin-top: 20px; font-size: 16.5px; }
-  .lp-ask { padding: 72px 20px 80px; }
-  .lp-story { padding: 8px 20px 34px; }
-  .said { margin-bottom: 42px; font-size: 21px; line-height: 1.44; }
-  .said span.out { margin: 4px 0; font-size: 26px; line-height: 1.18; }
-  .said.close { margin-top: 52px; }
-  .said.item { margin-bottom: 26px; }
+  .lp-sub { margin-top: 16px; font-size: 16px; }
+  .lp-front-ask { top: calc(var(--gp-word-bottom, 55%) + 26px); }
+  .lp-line { margin-bottom: 18px; font-size: 15px; max-width: 42ch; }
+  .lp-ask { margin-top: 56px; }
   .start { margin-top: 32px; }
-  .start-field { flex-direction: column; align-items: stretch; gap: 10px; padding: 12px; border-radius: 26px; }
-  .start-field input { padding: 8px 12px; font-size: 16px; }
-  .start-go { width: 100%; height: 50px; }
-  .start-done { padding: 18px 22px; border-radius: 26px; }
-  .lp-foot { padding: 26px 20px 44px; gap: 16px; }
-  .lp-foot nav { gap: 18px; margin-left: 0; flex-basis: 100%; }
+  .start-row { flex-direction: column; gap: 10px; }
+  .start-box { height: 54px; padding: 0 18px; }
+  .start-go { width: 100%; height: 54px; }
+  .start-done { padding: 18px 22px; }
+  .lp-foot { margin-top: 48px; padding: 14px 20px 18px; gap: 8px 16px; }
+  .lp-foot nav { gap: 16px; }
 }
 @media (prefers-reduced-motion: no-preference) and (max-width: 640px) {
-  .said span { transform: translateY(18px); transition-duration: 0.66s; transition-delay: calc(var(--i, 0) * 90ms); }
+  .perk { transform: translateY(16px); transition-duration: 0.6s; transition-delay: 0s; }
 }

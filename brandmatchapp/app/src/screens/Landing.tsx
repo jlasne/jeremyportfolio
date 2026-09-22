@@ -1,94 +1,86 @@
 import { useEffect, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
-import { Logo } from '../components/Logo'
+import GlyphPortal from '../components/GlyphPortal'
+import { Sky } from '../art/Sky'
 import { api } from '../lib/api'
 
-// The landing, rebuilt to the brief: hero, story, one ask.
+// The landing, as one page you scroll into.
 //
-// Cream ground, warm charcoal type, orange for the thing you click and purple
-// for the numbers. One face, Satoshi, at two sizes that do the work: the
-// display size the hero and the last ask share, and the reading size the
-// story runs at. No boxes around the story, no grid of cards, no numbered
-// steps. The page scrolls as one column of sentences that arrive a line at a
-// time, and one mark sits on the outcome: bigger, orange, what brandmatch
-// does. Everything before it is the same size and the same ink, because a
-// page that marks its whole argument marks nothing.
+// The hero is the name, set as big as the screen allows, and the only things
+// beside it are one line and the field. Scrolling drives a camera into the
+// counter of a letter, and what is on the other side of it is the six cards
+// and the last ask, over the sunrise.
+//
+// The portal freezes whatever face is loaded at mount, so it waits for
+// Satoshi's heaviest cut before it goes up. Without that wait a fallback face
+// is measured, the camera aims at the wrong ink, and the component falls back
+// to a still frame.
 
-const BADGE = 'New leads, scanned and scored every day'
-const HEADLINE = 'First AI Agent that finds creators ready to close.'
-const SUBHEAD = 'Describe the creator you want. Your agent scores every lead and delivers a fresh, qualified, ready-to-contact list, every day.'
+/** The tagline the portal is set in. 41 characters, so 63px on a desktop. */
+const TAGLINE = 'Your AI agent finds high intent creators.'
+/** A phone gives the tagline 17px, which is a caption. It gets the name. */
+const WORD = 'BRANDMATCH'
 const BRIEF_HINT = 'e.g. Fitness creators, 50k+ followers, active this week'
 
-/** The one thing every button asks for, said the same way in both places. */
-const CTA = 'Start my Campaign'
-
-/** One line of the story. `out` marks what brandmatch does, `tag` names a bar. */
-type Line = { say: ReactNode; out?: true; tag?: true }
-
-/**
- * The story, as paragraphs of lines.
- *
- * The outer array is the paragraph, which sets the breathing. The inner array
- * is the lines inside it, each on its own row, because a sentence that lands
- * alone reads slower than the same sentence in a block. A line arrives as it
- * is reached, one after the next, so the page is read rather than scanned.
- *
- * There is one mark on the page and it sits on the outcome: bigger, orange,
- * what brandmatch does. Everything that came before it is the same size and
- * the same ink, because a page that marks its whole argument marks nothing.
- */
-const STORY: Line[][] = [
-  [{ say: <>Built by two engineers, after four platforms failed us.</> }],
-  [
-    { say: <>We build mobile apps with content creators.</> },
-    { say: <>Finding the right one destroyed our budget and time schedule.</> },
-  ],
-  [
-    { say: <>Collabstr worked.</> },
-    { say: <>14 creators got paid, 1 delivered, 7 cancelled after due date, 7 ghosted me.</> },
-  ],
-  [
-    { say: <>Topyappers gave us an outdated list.</> },
-    { say: <>Leads collected years ago, sold as &ldquo;my ones&rdquo;.</> },
-  ],
-  [
-    { say: <>Heepsy sold me a contact list.</> },
-    { say: <>87% false phone numbers, 92% dead emails, some people gone.</> },
-  ],
-  [
-    { say: <>Modash sold us a list of 50,000 people, 30% in my niche.</> },
-    { say: <>I had 0 replies.</> },
-  ],
-  [
-    { say: <>So we built our own agent.</> },
-    { say: <>One that covers the real needs:</>, out: true },
-    { say: <>search, qualify, outreach, and connect.</> },
-  ],
-  [
-    { say: <>I finally have qualified leads.</>, out: true },
-    { say: <>100% of my money and time is worth it now.</> },
-  ],
-  [{ say: <>What is a qualified lead?</>, out: true }],
-  [
-    { say: <>In your niche</>, tag: true },
-    { say: <>Filtered on your offer and your own requirements, past what a follower count says.</> },
-  ],
-  [
-    { say: <>Active</>, tag: true },
-    { say: <>Posts on a schedule, and was active in the last 3 days.</> },
-  ],
-  [
-    { say: <>Intent</>, tag: true },
-    { say: <>Runs the account as a business, already sells products or takes collabs. Reply rate climbs.</> },
-  ],
-  [
-    { say: <>Human filters</>, tag: true },
-    { say: <>Ask for creators whose dog is the star of the feed, the way you would brief a person.</> },
-  ],
+/** Under the word, once. The two words the whole page turns on take colour. */
+const SUBTAG = [
+  { w: 'Describe the creators you want. Your agent learns and identifies them. Not generic and outdated: searched for you, ' },
+  { w: 'active and high intent', hot: true },
+  { w: ', every day.' },
 ]
 
-/** The line the story lands on, set apart because it is the claim. */
-const CLOSE = 'This is what brandmatch is about.'
+const CTA = 'Start my Campaign'
+
+/** The line that says who wrote the page, kept when the story went. */
+const PROOF = 'Built by two engineers, after four platforms gave us generic outdated leads.'
+
+/**
+ * Six marks, drawn from the same parts as everything else on this page: one
+ * stroke weight, round caps, no fill. They label a card, so they carry no
+ * detail a reader would have to stop and work out.
+ */
+const ICONS: Record<string, ReactNode> = {
+  fresh: <><path d="M20.5 12a8.5 8.5 0 1 1-2.6-6.1" /><path d="M20.5 3.5v5h-5" /></>,
+  reply: <><path d="M20.5 12.8a7.7 7.7 0 0 1-8.3 7.7L4 21.5l1-4.2A7.7 7.7 0 1 1 20.5 12.8Z" /><path d="m11.8 9.2-2.4 2.4 2.4 2.4" /><path d="M9.4 11.6h3.4a2.8 2.8 0 0 1 2.8 2.8" /></>,
+  niche: <><circle cx="12" cy="12" r="8.5" /><circle cx="12" cy="12" r="4" /><circle cx="12" cy="12" r="0.6" /></>,
+  human: <><path d="M3.5 4.5h17l-6.6 7.8v6.4l-3.8 2.3v-8.7Z" /><path d="M16.8 3 18 5.6 20.6 6.8 18 8l-1.2 2.6L15.6 8 13 6.8l2.6-1.2Z" /></>,
+  send: <><path d="m21 3.5-8.2 17-2.4-7-7-2.4Z" /><path d="m10.4 13.6 5.1-5.1" /></>,
+  wire: <><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /><circle cx="12" cy="5" r="2.5" /><path d="M7.4 16.7 10.6 7.2" /><path d="m13.4 7.2 3.2 9.5" /><path d="M8 18.5h8" /></>,
+}
+
+/** What the money buys, one card each, in the order a reader meets them. */
+const OUTCOMES: { icon: keyof typeof ICONS; name: string; what: string }[] = [
+  {
+    icon: 'fresh',
+    name: 'Fresh every day',
+    what: 'Scraped daily for you. Every lead was active in the last 3 days, so the list is alive when you write.',
+  },
+  {
+    icon: 'reply',
+    name: 'Higher reply rate',
+    what: 'People with intent, already selling products and taking collabs. That is the bar that moves replies.',
+  },
+  {
+    icon: 'niche',
+    name: 'In your niche',
+    what: 'Filtered on your offer and your own requirements, past what a follower count says about anyone.',
+  },
+  {
+    icon: 'human',
+    name: 'Human filters',
+    what: 'Write the filter as a sentence. "Influencer with a dog" is a valid one.',
+  },
+  {
+    icon: 'send',
+    name: 'Outreach included',
+    what: 'The first message and the follow up go out in your name. Every reply lands in your CRM.',
+  },
+  {
+    icon: 'wire',
+    name: 'AI, API and MCP',
+    what: 'Connect over API or MCP and drive the agent from your own AI subscription.',
+  },
+]
 
 /**
  * The ask, in two moves.
@@ -125,28 +117,30 @@ function Start({ id }: { id?: string }) {
         }
       }}
     >
-      <div className="start-field">
-        {step === 'brief' ? (
-          <input
-            id={id}
-            type="text"
-            required
-            placeholder={BRIEF_HINT}
-            value={brief}
-            onChange={(e) => setBrief(e.target.value)}
-            aria-label="The creator you want"
-          />
-        ) : (
-          <input
-            type="email"
-            required
-            autoFocus
-            placeholder="you@yourbrand.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            aria-label="Your email"
-          />
-        )}
+      <div className="start-row">
+        <div className="start-box">
+          {step === 'brief' ? (
+            <input
+              id={id}
+              type="text"
+              required
+              placeholder={BRIEF_HINT}
+              value={brief}
+              onChange={(e) => setBrief(e.target.value)}
+              aria-label="The creators you want"
+            />
+          ) : (
+            <input
+              type="email"
+              required
+              autoFocus
+              placeholder="you@yourbrand.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              aria-label="Your email"
+            />
+          )}
+        </div>
         <button className="start-go" type="submit" disabled={state === 'sending'}>
           {state === 'sending' ? 'Sending' : CTA}
         </button>
@@ -158,31 +152,20 @@ function Start({ id }: { id?: string }) {
   )
 }
 
-/** True once the page has scrolled past the hero. */
-function useFloated(after = 40): boolean {
-  const [past, setPast] = useState(false)
-  useEffect(() => {
-    const read = () => setPast(window.scrollY > after)
-    read()
-    window.addEventListener('scroll', read, { passive: true })
-    return () => window.removeEventListener('scroll', read)
-  }, [after])
-  return past
-}
-
 /**
- * A paragraph arrives as it is reached, so the story is told down the page.
+ * A card arrives when it is reached, so the grid fills in as it is read.
  *
- * The class is what makes a paragraph visible, so anything that could keep
- * the observer from firing has to open them all instead: no observer in this
+ * The class is what makes a card visible, so anything that could keep the
+ * observer from firing has to open them all instead: no observer in this
  * browser, and a reader who asked for stillness.
  */
-function useTold(): void {
+function useTold(on: boolean): void {
   useEffect(() => {
-    const said = Array.from(document.querySelectorAll('.said'))
+    if (!on) return
+    const perks = Array.from(document.querySelectorAll('.perk'))
     const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (still || !('IntersectionObserver' in window)) {
-      said.forEach((s) => s.classList.add('in'))
+      perks.forEach((c) => c.classList.add('in'))
       return
     }
     const io = new IntersectionObserver(
@@ -191,56 +174,97 @@ function useTold(): void {
         e.target.classList.add('in')
         io.unobserve(e.target)
       }),
-      { rootMargin: '0px 0px -12% 0px', threshold: 0.2 },
+      { rootMargin: '0px 0px -8% 0px', threshold: 0.15 },
     )
-    said.forEach((s) => io.observe(s))
+    perks.forEach((c) => io.observe(c))
     return () => io.disconnect()
+  }, [on])
+}
+
+/** True once Satoshi's heaviest cut is measurable, or 1.8s has passed. */
+function useFace(): boolean {
+  const [ready, setReady] = useState(false)
+  useEffect(() => {
+    let done = false
+    const finish = () => { if (!done) { done = true; setReady(true) } }
+    const timeout = window.setTimeout(finish, 1800)
+    document.fonts.load('900 100px Satoshi', WORD + TAGLINE).then(finish, finish)
+    return () => { done = true; window.clearTimeout(timeout) }
   }, [])
+  return ready
+}
+
+/** True on the widths where the tagline would render at caption size. */
+function useNarrow(): boolean {
+  const [narrow, setNarrow] = useState(() => window.matchMedia('(max-width: 640px)').matches)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 640px)')
+    const read = () => setNarrow(mq.matches)
+    mq.addEventListener('change', read)
+    return () => mq.removeEventListener('change', read)
+  }, [])
+  return narrow
 }
 
 export function Landing() {
-  const floated = useFloated()
-  useTold()
+  const faced = useFace()
+  const narrow = useNarrow()
+  useTold(faced)
+  if (!faced) return <div className="landing lp lp-boot" />
   return (
     <div className="landing lp">
-      <header className={`lp-nav${floated ? ' floated' : ''}`}>
-        <a className="brand" href="#/">
-          <Logo size={22} />
-          brandmatch
-        </a>
-        <span className="spacer" />
-        <a className="lp-signin" href="#/signin">Sign in</a>
-      </header>
-
-      <section className="lp-hero">
-        <p className="lp-badge">{BADGE}</p>
-        <h1>{HEADLINE}</h1>
-        <p className="lp-sub">{SUBHEAD}</p>
-        <Start id="start-brief" />
-      </section>
-
-      <section className="lp-story">
-        {STORY.map((para, i) => (
-          <p className={`said${para[0].tag ? ' item' : ''}`} key={i}>
-            {para.map((line, j) => (
-              <span
-                key={j}
-                className={line.out ? 'out' : line.tag ? 'leadbar' : undefined}
-                style={{ '--i': j } as CSSProperties}
-              >
-                {line.say}
-              </span>
+      <GlyphPortal
+        className="lp-portal"
+        word={narrow ? WORD : TAGLINE}
+        focusChar={narrow ? 'D' : 'o'}
+        fontFamily="'Satoshi', ui-sans-serif, system-ui, sans-serif"
+        fontWeight={900}
+        scrollLength={1.6}
+        enterLabel="See what you get"
+        background={<div className="lp-sky"><Sky /></div>}
+        style={{
+          '--gp-paper': '#faf6ec',
+          '--gp-ink': '#23211c',
+          '--gp-field': '#faf6ec',
+          '--gp-foreground': '#23211c',
+        }}
+        front={(
+          <div className="lp-front">
+            <div className="lp-front-ask">
+              <p className="lp-line">
+                {SUBTAG.map((t, i) => (
+                  <span key={i} className={t.hot ? 'hot' : undefined}>{t.w}</span>
+                ))}
+              </p>
+              <Start id="start-brief" />
+            </div>
+          </div>
+        )}
+      >
+        <div className="lp-inside">
+          <section className="lp-grid">
+            {OUTCOMES.map((o, i) => (
+              <article className="perk" key={o.name} style={{ ['--i' as string]: i % 3 } as CSSProperties}>
+                <span className="perk-mark" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                    {ICONS[o.icon]}
+                  </svg>
+                </span>
+                <h3>{o.name}</h3>
+                <p>{o.what}</p>
+              </article>
             ))}
-          </p>
-        ))}
-        <p className="said close">{CLOSE}</p>
-      </section>
+          </section>
 
-      <section className="lp-ask">
-        <h2>Your next 10 deals are tomorrow.</h2>
-        <p className="lp-sub">Let your agent find them.</p>
-        <Start />
-      </section>
+          <p className="lp-proof">{PROOF}</p>
+
+          <section className="lp-ask">
+            <h2>Your next 10 deals are tomorrow.</h2>
+            <p className="lp-sub">Let your agent find them.</p>
+            <Start />
+          </section>
+        </div>
+      </GlyphPortal>
 
       <footer className="lp-foot">
         <span className="brand-word">brandmatch</span>
@@ -248,7 +272,7 @@ export function Landing() {
           <a href="mailto:hey@jeremylasne.com">Talk to us</a>
           <a href="#/signin">Sign in</a>
         </nav>
-        <p>© 2026 brandmatch</p>
+        <p>© 2026</p>
       </footer>
     </div>
   )
