@@ -1027,3 +1027,86 @@ export const backfillRetries = internalMutation({
     return { judged: rows.length, marked }
   },
 })
+
+/**
+ * What each sentence is actually worth, and what dropping some would do.
+ *
+ * Every judged profile carries its score on every sentence, so this reads the
+ * file and costs nothing. It answers two questions a client cannot answer by
+ * reading their own rules.
+ *
+ * Which sentence is dead weight: one that nearly everybody scores zero on is
+ * not a filter, it is a tax on every profile, and one nearly everybody scores
+ * two on is not a filter either.
+ *
+ * And what a shorter list would deliver. The pass mark is a share of the
+ * total, so cutting sentences without moving it changes the bar: seven
+ * sentences at 44% is a different campaign from nine at 44%. Both are held
+ * here, so the trade is visible rather than guessed.
+ */
+export const sentenceWeight = internalQuery({
+  args: {
+    campaignId: v.id('campaigns'),
+    /** Try this subset instead of all of them. Ids, as the gate set names them. */
+    keep: v.optional(v.array(v.string())),
+    /** The share of the possible total a profile must reach. Default: as saved. */
+    passShare: v.optional(v.number()),
+  },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<Record<string, unknown>> => {
+    const campaign = await ctx.db.get(args.campaignId)
+    if (!campaign?.gateSetId) return { error: 'This campaign has no gates yet' }
+    const gates = await ctx.db.get(campaign.gateSetId)
+    if (!gates) return { error: 'The gate version is missing' }
+
+    const rows = await ctx.db
+      .query('evaluations')
+      .withIndex('by_campaign', (q) => q.eq('campaignId', args.campaignId))
+      .collect()
+    // Only the profiles the judge actually read. A profile stopped by the
+    // numbers has no opinion on any sentence.
+    const judged = rows.filter((e) => e.verdict !== 'hard_fail' && e.verdict !== 'off_niche')
+    if (!judged.length) return { error: 'Nobody has reached the judge yet' }
+
+    const breakers = new Set(gates.criteria.filter((c) => c.breaker).map((c) => c.id))
+    const scored = gates.criteria.filter((c) => !breakers.has(c.id))
+    const keep = new Set(args.keep ?? scored.map((c) => c.id))
+
+    // Per sentence, how the judged population answered it.
+    const perSentence = scored.map((c) => {
+      const marks = judged.map((e) => e.criteriaScores.find((s) => s.id === c.id)?.score ?? 0)
+      const zero = marks.filter((n) => n === 0).length
+      const two = marks.filter((n) => n === 2).length
+      return {
+        id: c.id,
+        text: c.text,
+        kept: keep.has(c.id),
+        averageOf2: Math.round((marks.reduce((a, b) => a + b, 0) / marks.length) * 100) / 100,
+        zeroPercent: Math.round((zero / marks.length) * 100),
+        fullPercent: Math.round((two / marks.length) * 100),
+      }
+    })
+
+    const possible = keep.size * 2
+    const share = args.passShare ?? (gates.passScore / Math.max(1, scored.length * 2))
+    const bar = Math.round(possible * share)
+
+    let pass = 0
+    for (const e of judged) {
+      const total = e.criteriaScores
+        .filter((s) => keep.has(s.id))
+        .reduce((sum, s) => sum + s.score, 0)
+      if (total >= bar) pass++
+    }
+
+    return {
+      judged: judged.length,
+      sentencesKept: keep.size,
+      possible,
+      passShare: Math.round(share * 100) / 100,
+      bar,
+      qualified: pass,
+      perSentence: perSentence.sort((a, b) => a.averageOf2 - b.averageOf2),
+    }
+  },
+})

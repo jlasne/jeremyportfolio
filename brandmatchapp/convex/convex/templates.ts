@@ -308,7 +308,29 @@ export function settleScore(passScore: number, criteriaCount: number): number {
   return Math.min(max, Math.max(1, Math.round(passScore)))
 }
 
+/**
+ * How many sentences a campaign may carry. Twelve.
+ *
+ * It was cut to five, on the reading that the first food campaign's nine said
+ * one thing four ways. The cut was reverted once the sentences were measured
+ * properly: the score gates nothing, it ranks, so a sentence can never make a
+ * campaign stricter and cutting the list never returns a single extra lead.
+ * Nine sentences and five delivered the same nine leads on the same pool.
+ *
+ * What the list length does change is the resolution of the ranking. Nine
+ * sentences sort a lead out of eighteen, five out of ten, so fewer sentences
+ * is a coarser list for no gain at all.
+ *
+ * The real waste is not the count, it is a sentence that says nothing: on
+ * that campaign's own leads, 94% scored zero on two of the nine and every
+ * single profile scored exactly one on two others. Four of nine ordered
+ * nothing. evaluate.sentenceWeight names them, from evaluations already paid
+ * for, which is a better tool than a ceiling.
+ */
 export const SENTENCES_MAX = 12
+
+/** Fewer than this and there is nothing to rank a lead on. */
+export const SENTENCES_MIN = 3
 
 /**
  * The client's sentences, made safe: one to twelve, each a line of text with

@@ -17,8 +17,17 @@ import type { Criterion } from '../types'
 // count of what it missed. There used to be a separate list of deal breaker
 // questions, written from a library, where a locked one could refuse a whole
 // campaign's target without the client ever being able to switch it off.
+//
+// Twelve sentences, not five. The cap was briefly cut on the reading that a
+// long list made a campaign strict. It does not: the score ranks and gates
+// nobody, so nine sentences and five delivered the same nine leads on the
+// same pool, and five sorted them out of ten where nine sorted them out of
+// eighteen. A shorter list is a blunter list for nothing.
 
 export const SENTENCES_MAX = 12
+
+/** Fewer than this and there is nothing to rank a lead on. */
+export const SENTENCES_MIN = 3
 
 /** How many sentences a client may make non negotiable. */
 export const BREAKERS_MAX = 3
@@ -86,7 +95,10 @@ export function Sentences({ list, onChange }: { list: Criterion[]; onChange: (ne
         >
           Add a sentence
         </button>
-        <span className="faint num">{list.length} of {SENTENCES_MAX}</span>
+        <span className="faint num">
+          {list.length} of {SENTENCES_MAX}
+          {list.length < SENTENCES_MIN ? `, ${SENTENCES_MIN - list.length} more to go` : ''}
+        </span>
         <span className="spacer" />
         <span className="faint num">{marked} of {BREAKERS_MAX} non negotiable</span>
       </div>
