@@ -11,27 +11,26 @@ import type { Criterion } from '../types'
 // used to be filtered out by the screen above on every change, which meant
 // Add a sentence added a line and the same keystroke threw it away.
 //
-// Any line can be made non negotiable, two at most. A marked line leaves the
-// score, because a rule you refuse to compromise on is not a matter of
+// Any line can be made non negotiable, three at most. A marked line leaves
+// the score, because a rule you refuse to compromise on is not a matter of
 // degree, and it stops removing anybody: the lead is delivered carrying the
 // count of what it missed. There used to be a separate list of deal breaker
 // questions, written from a library, where a locked one could refuse a whole
 // campaign's target without the client ever being able to switch it off.
 //
-// Three to five sentences, not twelve. The first real food campaign was
-// drafted with nine, and read back they said one thing four ways and then
-// asked for things nobody could see: on the profiles it delivered, 94% scored
-// zero on "their audience actually cooks the recipes and says so". A sentence
-// nearly everybody fails is noise in the ranking and a line the client reads
-// every single time.
+// Twelve sentences, not five. The cap was briefly cut on the reading that a
+// long list made a campaign strict. It does not: the score ranks and gates
+// nobody, so nine sentences and five delivered the same nine leads on the
+// same pool, and five sorted them out of ten where nine sorted them out of
+// eighteen. A shorter list is a blunter list for nothing.
 
-export const SENTENCES_MAX = 5
+export const SENTENCES_MAX = 12
 
 /** Fewer than this and there is nothing to rank a lead on. */
 export const SENTENCES_MIN = 3
 
 /** How many sentences a client may make non negotiable. */
-export const BREAKERS_MAX = 2
+export const BREAKERS_MAX = 3
 
 function newId(): string {
   return `c_${Math.random().toString(36).slice(2, 8)}`

@@ -309,20 +309,25 @@ export function settleScore(passScore: number, criteriaCount: number): number {
 }
 
 /**
- * How many sentences a campaign may carry. Three to five.
+ * How many sentences a campaign may carry. Twelve.
  *
- * It was twelve, and the first real food campaign was drafted with nine. Read
- * back, nine sentences said one thing four ways and then asked for things the
- * judge could not see: measured on the profiles it delivered, "their audience
- * actually cooks the recipes and says so" scored zero on 94% of them, and so
- * did "they are open to flat-fee sponsored reels".
+ * It was cut to five, on the reading that the first food campaign's nine said
+ * one thing four ways. The cut was reverted once the sentences were measured
+ * properly: the score gates nothing, it ranks, so a sentence can never make a
+ * campaign stricter and cutting the list never returns a single extra lead.
+ * Nine sentences and five delivered the same nine leads on the same pool.
  *
- * A sentence nearly everybody fails is not a filter, because the score turns
- * nobody away. It is noise in the ranking and a line the client has to read
- * every time. Five is the ceiling and three the floor: below three there is
- * nothing to rank on.
+ * What the list length does change is the resolution of the ranking. Nine
+ * sentences sort a lead out of eighteen, five out of ten, so fewer sentences
+ * is a coarser list for no gain at all.
+ *
+ * The real waste is not the count, it is a sentence that says nothing: on
+ * that campaign's own leads, 94% scored zero on two of the nine and every
+ * single profile scored exactly one on two others. Four of nine ordered
+ * nothing. evaluate.sentenceWeight names them, from evaluations already paid
+ * for, which is a better tool than a ceiling.
  */
-export const SENTENCES_MAX = 5
+export const SENTENCES_MAX = 12
 
 /** Fewer than this and there is nothing to rank a lead on. */
 export const SENTENCES_MIN = 3
@@ -353,14 +358,8 @@ const NOT_A_SENTENCE = new Set([
 /** What a sentence may ask to have in front of the judge. */
 export const EVIDENCE = ['profile', 'posts', 'links', 'images', 'comments', 'web']
 
-/**
- * How many sentences a client may make non negotiable. Two.
- *
- * A deal breaker does not remove a lead, it flags one, so a third is a third
- * badge on the same row and the row stops meaning anything. Two is what a
- * person reads at a glance.
- */
-export const BREAKERS_MAX = 2
+/** How many sentences a client may make non negotiable. */
+export const BREAKERS_MAX = 3
 
 export function cleanSentences(rows: unknown): {
   id: string
