@@ -37,13 +37,20 @@ const CENTS_PER_SEARCH = 0.1
  * "7,332 Followers", "337 Followers". The count is what matters and the case
  * and separators are noise.
  *
+ * And "1.1K+ followers", which is the shape Google writes when it rounds, and
+ * which this missed. Reading Instagram results through Apify instead of
+ * Serper, only 22% of handles came back with a size, against 94% through
+ * Serper. The counts were there the whole time, in a form the pattern refused:
+ * a plus sign between the K and the word. Same Google, same page, different
+ * rounding in the snippet each one hands over.
+ *
  * Returns null rather than zero when there is nothing to read, because a
  * result we cannot size is a result we must not judge: dropping it silently
  * as too small would throw away exactly the accounts whose snippet Google
  * happened to truncate.
  */
 export function followersIn(text: string): number | null {
-  const m = text.match(/([\d][\d.,\s]*)\s*([KkMmBb])?\s*followers/i)
+  const m = text.match(/([\d][\d.,\s]*?)\s*([KkMmBb])?\s*\+?\s*followers/i)
   if (!m) return null
   const digits = m[1].replace(/[,\s]/g, '')
   const n = Number(digits)
@@ -423,6 +430,19 @@ export const viaApify = internalAction({
     /** Results asked of each page. The point of the comparison. */
     perPage: v.optional(v.number()),
     country: v.optional(v.string()),
+    /** The market to read from. One per run: the actor takes one country. */
+    markets: v.optional(v.array(v.string())),
+    /** Stop after this many pages. A page is 0.23 cents, whatever it returns. */
+    maxPages: v.optional(v.number()),
+    /**
+     * Take `queries` as whole Google queries rather than topics to wrap.
+     *
+     * Apify charges by the page and not by the result, so the shape of the
+     * query is the whole economics of this route: a shape that fills a page
+     * with a hundred results costs the same as one that returns nine. This
+     * is how shapes are compared before one is chosen.
+     */
+    raw: v.optional(v.boolean()),
     buy: v.optional(v.boolean()),
   },
   returns: v.any(),
@@ -438,17 +458,34 @@ export const viaApify = internalAction({
 
     const topics = (args.queries?.length ? args.queries : plan.topics ?? []) as string[]
     if (!topics.length) return { error: 'Nothing to search for' }
-    const asks = variants(topics).slice(0, args.maxQueries ?? 24)
+    const asks = (args.raw ? topics : variants(topics)).slice(0, args.maxQueries ?? 24)
     const perPage = Math.max(10, Math.min(args.perPage ?? 100, 100))
+
+    // One country per run, and one run.
+    //
+    // The actor takes the country as a setting for the whole run, not per
+    // query. An attempt to get four markets out of one run by appending
+    // "&gl=us" to each query put those five characters inside the search
+    // itself: Google was asked for `site:instagram.com "strength athlete"
+    // reels "Followers" "Posts"&gl=us` a thousand times, returned nothing a
+    // thousand times, and the thousand pages were charged for. $2.50 for 366
+    // results where eight pages had returned 78.
+    //
+    // Several markets means several runs, started one at a time by the
+    // caller. There is no way to fold them into one, and inventing one costs
+    // real money.
+    const market = (args.markets?.[0] ?? args.country ?? 'us').toLowerCase()
+    const ceiling = args.maxPages ?? Number.MAX_SAFE_INTEGER
+    const forRun = asks.slice(0, ceiling)
 
     const started = await fetch(`https://api.apify.com/v2/acts/${GOOGLE_ACTOR}/runs?token=${token}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        queries: asks.join('\n'),
+        queries: forRun.join('\n'),
         resultsPerPage: perPage,
         maxPagesPerQuery: 1,
-        countryCode: args.country ?? 'us',
+        countryCode: market,
         languageCode: 'en',
         mobileResults: false,
         saveHtml: false,
@@ -462,7 +499,7 @@ export const viaApify = internalAction({
     let status = 'RUNNING'
     let datasetId = ''
     let costUsd = 0
-    for (let i = 0; i < 40 && (status === 'RUNNING' || status === 'READY'); i++) {
+    for (let i = 0; i < 90 && (status === 'RUNNING' || status === 'READY'); i++) {
       await new Promise((r) => setTimeout(r, 5_000))
       const res = await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${token}`)
       if (!res.ok) continue
@@ -471,9 +508,13 @@ export const viaApify = internalAction({
       datasetId = String(d?.defaultDatasetId ?? '')
       costUsd = Number(d?.usageTotalUsd ?? 0)
     }
-    if (status !== 'SUCCEEDED' || !datasetId) return { runId, status, costUsd, error: `Run ended ${status}` }
+    if (status !== 'SUCCEEDED' || !datasetId) {
+      // The run is paid for whether or not we waited long enough, so the way
+      // back to it goes in the answer. google.readApify picks it up later.
+      return { runId, datasetId, status, costUsd, error: `Run ended ${status}`, readLater: true }
+    }
 
-    const res = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?token=${token}&clean=true&limit=200`)
+    const res = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?token=${token}&clean=true&limit=2000`)
     const pages = res.ok ? ((await res.json()) as ApifySerp[]) : []
 
     const found = new Map<string, number | null>()
@@ -493,7 +534,10 @@ export const viaApify = internalAction({
 
     const out: Record<string, unknown> = {
       via: 'apify',
-      queries: asks.length,
+      queries: forRun.length,
+      market,
+      usdPerPage: pages.length ? Math.round((costUsd / pages.length) * 10_000) / 10_000 : null,
+      handlesPerPage: pages.length ? Math.round((found.size / pages.length) * 10) / 10 : null,
       perPage,
       pages: pages.length,
       results,
@@ -504,6 +548,67 @@ export const viaApify = internalAction({
       sized: [...found.values()].filter((n) => n !== null).length,
       inWindow: worth.length,
       sizes: Object.fromEntries([...found.entries()].filter(([, n]) => n !== null && n >= lo && n <= hi)),
+    }
+    if (!args.buy || !worth.length) return { ...out, note: 'Nothing bought' }
+    const run = await ctx.runAction(internal.ingest.detailRun, {
+      handles: worth, campaignId: args.campaignId, channel: 'google',
+    })
+    return { ...out, bought: run }
+  },
+})
+
+/**
+ * Reads a Google run that finished after we stopped waiting.
+ *
+ * A run of a thousand queries outlives the function that started it. The
+ * pages are bought either way, so this takes the run id back and does the
+ * half that costs nothing: read the results, size them, and buy the profiles
+ * inside the window.
+ */
+export const readApify = internalAction({
+  args: { campaignId: v.id('campaigns'), runId: v.string(), buy: v.optional(v.boolean()) },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<Record<string, unknown>> => {
+    const token = process.env.APIFY_TOKEN
+    if (!token) return { error: 'APIFY_TOKEN is not set' }
+    const plan = await ctx.runQuery(internal.channels.plan, { campaignId: args.campaignId })
+    if (plan.error) return plan
+    const window = (plan.window ?? {}) as { followersMin?: number | null; followersMax?: number | null }
+    const lo = window.followersMin ?? 0
+    const hi = window.followersMax ?? Number.MAX_SAFE_INTEGER
+
+    const meta = await fetch(`https://api.apify.com/v2/actor-runs/${args.runId}?token=${token}`)
+    if (!meta.ok) return { error: `Apify replied ${meta.status}` }
+    const d = (await meta.json())?.data
+    const status = String(d?.status ?? '')
+    const datasetId = String(d?.defaultDatasetId ?? '')
+    const costUsd = Number(d?.usageTotalUsd ?? 0)
+    if (status === 'RUNNING' || status === 'READY') return { runId: args.runId, status, costUsd, note: 'Still running' }
+    if (!datasetId) return { runId: args.runId, status, costUsd, error: 'No dataset' }
+
+    const res = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?token=${token}&clean=true&limit=3000`)
+    const pages = res.ok ? ((await res.json()) as ApifySerp[]) : []
+
+    const found = new Map<string, number | null>()
+    let results = 0
+    for (const p of pages) {
+      for (const r of p.organicResults ?? []) {
+        results++
+        const handle = handleIn(String(r.url ?? ''))
+        if (!handle || found.has(handle)) continue
+        found.set(handle, followersIn(`${r.title ?? ''} ${r.description ?? ''}`))
+      }
+    }
+    const worth = [...found.entries()]
+      .filter(([, n]) => n !== null && n >= lo && n <= hi)
+      .map(([handle]) => handle)
+
+    const out: Record<string, unknown> = {
+      runId: args.runId, status, costUsd: Math.round(costUsd * 1000) / 1000,
+      pages: pages.length, results,
+      handles: found.size,
+      sized: [...found.values()].filter((n) => n !== null).length,
+      inWindow: worth.length,
     }
     if (!args.buy || !worth.length) return { ...out, note: 'Nothing bought' }
     const run = await ctx.runAction(internal.ingest.detailRun, {
