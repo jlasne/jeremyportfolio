@@ -81,6 +81,11 @@ export class Browser {
         '[role="textbox"]',
       ].join(',')
 
+      // Last scan's numbers are cleared first. Instagram rebuilds the page
+      // constantly, so a number left behind from an earlier scan can end up on
+      // a different element, and a click on it lands somewhere nobody chose.
+      for (const old of Array.from(document.querySelectorAll('[data-bm-i]'))) old.removeAttribute('data-bm-i')
+
       const seen = new Set<string>()
       const out: { i: number; role: string; name: string; editable: boolean }[] = []
       let i = 0
@@ -143,7 +148,9 @@ export class Browser {
   }
 
   async click(i: number): Promise<void> {
-    await this.page.click(`[data-bm-i="${i}"]`, { timeout: 10_000 })
+    // Strict: two elements wearing one number is a bug, and picking the first
+    // of them quietly is how a run spends eight steps clicking nothing.
+    await this.page.locator(`[data-bm-i="${i}"]`).click({ timeout: 10_000 })
   }
 
   /**
@@ -152,7 +159,7 @@ export class Browser {
    * caller decides what.
    */
   async type(i: number, text: string): Promise<void> {
-    await this.page.click(`[data-bm-i="${i}"]`, { timeout: 10_000 })
+    await this.page.locator(`[data-bm-i="${i}"]`).click({ timeout: 10_000 })
     for (const ch of text) {
       await this.page.keyboard.type(ch)
       await sleep(pick(this.typing))

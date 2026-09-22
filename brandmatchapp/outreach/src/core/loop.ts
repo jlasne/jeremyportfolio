@@ -49,8 +49,31 @@ export async function pursue(
   let visionCalls = 0
   let lastBox: number | null = null
 
+  // What the page looked like before the last action, and what that action
+  // was. An action that leaves both the address and every name on the page
+  // untouched did nothing, and asking a model to pick again gets the same
+  // answer at the same price. Eight steps of that is how the first real run
+  // burned four calls a profile and moved nowhere.
+  let before: { signature: string; did: string } | null = null
+  let settled = false
+
   for (let step = 0; step < max; step++) {
-    const state = await browser.state()
+    let state = await browser.state()
+
+    if (before && signatureOf(state) === before.signature) {
+      if (!settled) {
+        // One more wait first: a page can be slow rather than unmoved.
+        settled = true
+        await browser.settle(2500)
+        state = await browser.state()
+      }
+      if (signatureOf(state) === before.signature) {
+        const why = `${before.did} changed nothing on the page`
+        log.step({ at: new Date().toISOString(), goal, url: state.url, candidates: state.candidates.length, decision: null, error: why })
+        return { reached: false, why, steps: step + 1, decideCalls, visionCalls, usage, lastBox }
+      }
+    }
+    settled = false
     const record: Step = {
       at: new Date().toISOString(),
       goal,
@@ -106,7 +129,9 @@ export async function pursue(
 
     try {
       if (choice.kind === 'click') {
+        const label = state.candidates.find((c) => c.i === choice.i)?.name ?? `item ${choice.i}`
         await browser.click(choice.i)
+        before = { signature: signatureOf(state), did: `clicking "${label}"` }
       } else {
         lastBox = choice.i
         if (opts.text === undefined) {
@@ -121,8 +146,13 @@ export async function pursue(
       return { reached: false, why: `action failed: ${err}`, steps: step + 1, decideCalls, visionCalls, usage, lastBox }
     }
 
-    await browser.settle()
+    await browser.settle(2500)
   }
 
   return { reached: false, why: `gave up after ${max} steps`, steps: max, decideCalls, visionCalls, usage, lastBox }
+}
+
+/** The address plus every name on the page. Two equal ones mean nothing moved. */
+function signatureOf(state: PageState): string {
+  return `${state.url}||${state.candidates.map((c) => c.name).join('|')}`
 }

@@ -159,7 +159,12 @@ async function one(
     // typed into. Instagram's search box answers yes on every page, so every
     // profile looked like an open conversation and Message was never clicked.
     const open = await pursue(browser, GOAL_OPEN, s, log, {
-      until: (page) => page.url.includes('/direct/'),
+      // Two ways the conversation can be open: its own address, or a composer
+      // on top of the profile. A box named for messaging is the second one;
+      // the search box carries no name, so it cannot be mistaken for it.
+      until: (page) =>
+        page.url.includes('/direct/') ||
+        page.candidates.some((c) => c.editable && /message/i.test(c.name)),
     })
     let usage = open.usage
     let steps = open.steps

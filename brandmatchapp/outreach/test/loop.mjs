@@ -23,7 +23,18 @@ document.getElementById('box').addEventListener('keydown', (e) => {
 })
 </script></body></html>`
 
-const site = http.createServer((_, res) => { res.setHeader('content-type', 'text/html'); res.end(PAGE) }).listen(8111)
+// A page whose button does nothing, which is what Instagram looked like when
+// a stale number sent the click to the wrong element.
+const DEAD = `<!doctype html><html><body>
+<h1>ana.lifts</h1>
+<a href="#" role="link">Follow</a>
+<button aria-label="Message">Message</button>
+</body></html>`
+
+const site = http.createServer((req, res) => {
+  res.setHeader('content-type', 'text/html')
+  res.end(req.url.startsWith('/dead') ? DEAD : PAGE)
+}).listen(8111)
 
 // A stub for OpenRouter. It reads the numbered list out of the prompt and
 // answers the way the real model is asked to: one option, as JSON.
@@ -94,6 +105,17 @@ try {
   await browser.settle(300)
   const after = (await browser.textOf(write.lastBox)).trim()
   assert.equal(after, '', 'after Enter the box must be empty, which is how a send is confirmed')
+
+  // A click that moves nothing stops the goal, instead of paying for the same
+  // answer until the step ceiling.
+  await browser.goto('http://127.0.0.1:8111/dead')
+  await browser.settle(300)
+  const callsBefore = calls
+  const stuck = await pursue(browser, 'Open the direct message conversation with the person whose profile this is.', settings, log, { until: (p) => p.url.includes('/direct/') })
+  assert.equal(stuck.reached, false)
+  assert.match(stuck.why, /changed nothing/, `expected a no-progress stop, got: ${stuck.why}`)
+  assert.ok(stuck.steps <= 3, `a dead click must stop early, took ${stuck.steps} steps`)
+  console.log(`dead page stopped after ${stuck.steps} steps and ${calls - callsBefore} calls: ${stuck.why}`)
 
   const usd = open.usage.usd + write.usage.usd
   console.log(`steps ${open.steps + write.steps}, model calls ${calls}, cost $${usd.toFixed(6)}`)
