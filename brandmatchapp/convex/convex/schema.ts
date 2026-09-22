@@ -643,6 +643,16 @@ export default defineSchema({
     /** Which way of searching this run served: search, accounts, neighbour, seed. */
     channel: v.optional(v.string()),
     /**
+     * The words searched for, when this run was a search.
+     *
+     * Kept so a query can be judged on what it returns. Instagram's account
+     * search is deterministic: the same words give the same accounts in the
+     * same order, so a query that returned nothing new will return nothing
+     * new again. Two queries in seven did exactly that and were paid for
+     * twice.
+     */
+    query: v.optional(v.string()),
+    /**
      * The handles a detail run was asked for, each with the accounts that
      * pointed at it. Apify sends the run id back and nothing else, so this is
      * where the parents wait until the profiles land.

@@ -1,5 +1,5 @@
 import { internalAction, internalMutation, internalQuery } from './_generated/server'
-import { ACTOR, APIFY } from './crawl'
+import { ACTOR, APIFY, FRESH_MS } from './crawl'
 import { internal } from './_generated/api'
 import { v } from 'convex/values'
 import {
@@ -40,12 +40,23 @@ export const pending = internalQuery({
     )
 
     const creators = await ctx.db.query('creators').withIndex('by_measured').order('desc').take(1_500)
-    const fresh = creators.filter((c) => !seen.has(c._id) && !claimed.has(c._id)).slice(0, args.limit ?? 200)
+    const waiting = creators.filter((c) => !seen.has(c._id) && !claimed.has(c._id))
+
+    // A measurement older than thirty days is not judged. Followers, median
+    // views and posting rhythm all move, and a verdict written on last
+    // quarter's numbers describes a person who no longer exists. Those
+    // profiles go back to being candidates: sourcing.refresh buys them again,
+    // and they arrive here on the next pass with numbers from today.
+    const cutoff = Date.now() - FRESH_MS
+    const expired = waiting.filter((c) => (c.measuredAt ?? 0) <= cutoff)
+    const fresh = waiting.filter((c) => (c.measuredAt ?? 0) > cutoff).slice(0, args.limit ?? 200)
 
     return {
       accountId: campaign.accountId,
       gateSetId: gates._id,
       gateSetVersion: gates.version,
+      /** Waiting, but on numbers too old to rule on. Re-buy them first. */
+      expired: expired.length,
       gates: {
         hard: gates.hard,
         // Without this the batch runs the demands and none of the choices, so

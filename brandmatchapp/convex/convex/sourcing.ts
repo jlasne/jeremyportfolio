@@ -1,7 +1,7 @@
 import { internalAction, internalMutation, internalQuery } from './_generated/server'
 import { internal } from './_generated/api'
 import { v } from 'convex/values'
-import { startRun } from './crawl'
+import { FRESH_MS, startRun } from './crawl'
 
 // Where the handles come from.
 //
@@ -25,6 +25,24 @@ import { startRun } from './crawl'
 // is about the child.
 
 const PARENT_VERDICTS = new Set(['qualified', 'below_threshold', 'knockout_fail'])
+
+/**
+ * Empty runs in a row before a query is retired. One.
+ *
+ * The plan said two. Two is right for a well that refills and wrong for a
+ * list, and Instagram's account search is a list: the same words hand back
+ * the same accounts in the same order, so a run that found nothing new found
+ * nothing new for a reason that will still hold next week. Measured on this
+ * campaign, two queries came back with 26 profiles and zero new between them
+ * on their second run; waiting for a third would buy that twice more.
+ *
+ * A run that fetched no profiles at all is not evidence and does not count.
+ * That is a budget cap or a failed actor talking, not the query.
+ *
+ * Retirement is reversible: accounts takes force, for the day a query is
+ * worth asking deeper than it was asked before.
+ */
+const RETIRE_AFTER = 1
 
 /**
  * The accounts worth standing next to, and everyone they point at.
@@ -230,6 +248,69 @@ export const neighbours = internalAction({
 })
 
 /**
+ * What each set of words has actually given this campaign.
+ *
+ * Instagram's account search is deterministic: the same words hand back the
+ * same accounts in the same order. So a query is not a well, it is a list,
+ * and once the list is on file it returns nothing however often it is paid
+ * for. Measured on one campaign: seven queries, 504 profiles bought, 135 of
+ * them new, and two of the seven gave zero twice in a row.
+ *
+ * A query that gave zero new profiles on each of its last two finished runs
+ * is retired. Two, not one, because a first run capped by the daily budget
+ * can come back empty for a reason that has nothing to do with the words.
+ *
+ * Only finished runs count. A run that failed says nothing about the query.
+ */
+export const queryYield = internalQuery({
+  args: { campaignId: v.id('campaigns') },
+  returns: v.any(),
+  handler: async (ctx, { campaignId }) => {
+    const runs = await ctx.db
+      .query('crawlRuns')
+      .withIndex('by_campaign', (q) => q.eq('campaignId', campaignId))
+      .collect()
+
+    type Row = { query: string; runs: number; fetched: number; fresh: number; cents: number; recent: number[] }
+    const by = new Map<string, Row>()
+    for (const r of [...runs].sort((a, b) => a.startedAt - b.startedAt)) {
+      if (!r.query) continue
+      const key = r.query.trim().toLowerCase()
+      if (!by.has(key)) by.set(key, { query: r.query, runs: 0, fetched: 0, fresh: 0, cents: 0, recent: [] })
+      const row = by.get(key)!
+      row.runs++
+      row.fetched += r.profilesFetched
+      row.cents += r.costCents
+      if (r.status !== 'SUCCEEDED' || r.profilesFresh === undefined) continue
+      row.fresh += r.profilesFresh
+      // Only a run that bought something has an opinion on the query.
+      if (r.profilesFetched > 0) row.recent.push(r.profilesFresh)
+    }
+
+    const rows = [...by.values()]
+      .map((r) => ({
+        query: r.query,
+        runs: r.runs,
+        fetched: r.fetched,
+        fresh: r.fresh,
+        /** The share of what it bought that it had never seen before. */
+        freshShare: r.fetched ? Math.round((r.fresh / r.fetched) * 100) : 0,
+        costCents: r.cents,
+        centsPerFresh: r.fresh ? Math.round((r.cents / r.fresh) * 100) / 100 : null,
+        retired: r.recent.length >= RETIRE_AFTER && r.recent.slice(-RETIRE_AFTER).every((n) => n === 0),
+      }))
+      .sort((a, b) => b.fresh - a.fresh)
+
+    return {
+      rows,
+      retired: rows.filter((r) => r.retired).map((r) => r.query.trim().toLowerCase()),
+      fetched: rows.reduce((n, r) => n + r.fetched, 0),
+      fresh: rows.reduce((n, r) => n + r.fresh, 0),
+    }
+  },
+})
+
+/**
  * Instagram's own account search, one run per query. Asked for details, the
  * actor answers with whole profiles, followers and last posts included, so
  * the search run is the detail run: 0.23 cents a profile, measured, and no
@@ -244,7 +325,13 @@ export const neighbours = internalAction({
  * were in a niche. The words of the niche are the query, never the topic.
  */
 export const accounts = internalAction({
-  args: { campaignId: v.id('campaigns'), queries: v.optional(v.array(v.string())), perQuery: v.optional(v.number()) },
+  args: {
+    campaignId: v.id('campaigns'),
+    queries: v.optional(v.array(v.string())),
+    perQuery: v.optional(v.number()),
+    /** Run a retired query anyway. For measuring whether it has come back. */
+    force: v.optional(v.boolean()),
+  },
   returns: v.any(),
   handler: async (ctx, args): Promise<Record<string, unknown>> => {
     const campaign = await ctx.runQuery(internal.crawl.campaignFor, { campaignId: args.campaignId })
@@ -258,8 +345,19 @@ export const accounts = internalAction({
     ).map((q: string) => q.trim()).filter(Boolean).slice(0, 10)
     if (!queries.length) return { error: 'Nothing to search for' }
 
+    // A query that has already given this campaign everything it has is not
+    // asked a third time. See queryYield for the rule and what it is worth.
+    const yields = (await ctx.runQuery(internal.sourcing.queryYield, {
+      campaignId: args.campaignId,
+    })) as { retired: string[] }
+    const spent = new Set(args.force ? [] : yields.retired)
+
     const runs = []
     for (const query of queries) {
+      if (spent.has(query.toLowerCase())) {
+        runs.push({ query, retired: 'gave nothing new the last time it was paid for' })
+        continue
+      }
       const input = {
         search: query,
         searchType: 'user',
@@ -269,13 +367,77 @@ export const accounts = internalAction({
         resultsLimit: 1,
       }
       const started = await startRun(input, { phase: 'search', campaignId: args.campaignId, channel: 'accounts' })
-      if ('error' in started) { runs.push({ query, ...started }); continue }
+      if ('error' in started) {
+        runs.push({ query, ...started })
+        // Out of Apify budget stops the whole loop. Nine more refusals tell
+        // us nothing the first one did not.
+        if (started.error.includes('left this cycle')) break
+        continue
+      }
       await ctx.runMutation(internal.crawl.noteRun, {
         externalRunId: started.runId, phase: 'search', campaignId: args.campaignId, channel: 'accounts',
+        query,
       })
       runs.push({ query, runId: started.runId })
     }
-    return { runs }
+    return { runs, retired: [...spent] }
+  },
+})
+
+/**
+ * The profiles on file whose numbers have gone stale, oldest first.
+ *
+ * Only ones this campaign has never judged. A profile it has already ruled on
+ * is a verdict, and a verdict is not re-opened by the clock.
+ */
+export const stale = internalQuery({
+  args: { campaignId: v.id('campaigns'), limit: v.optional(v.number()) },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    const cutoff = Date.now() - FRESH_MS
+    const done = await ctx.db
+      .query('evaluations')
+      .withIndex('by_campaign', (q) => q.eq('campaignId', args.campaignId))
+      .collect()
+    const judged = new Set(done.map((e) => e.creatorId))
+
+    // Oldest measurement first, so the walk stops at the first fresh row.
+    const rows = await ctx.db.query('creators').withIndex('by_measured').order('asc').take(2_000)
+    const handles: string[] = []
+    let held = 0
+    for (const c of rows) {
+      if ((c.measuredAt ?? 0) > cutoff) break
+      held++
+      if (judged.has(c._id)) continue
+      if (handles.length < (args.limit ?? 200)) handles.push(c.handle)
+    }
+    return { stale: held, handles }
+  },
+})
+
+/**
+ * Buys the stale profiles again, so they can be judged on today's numbers.
+ *
+ * This is the one caller that is allowed past the freshness check, because
+ * the whole point of the run is that the measurement has expired.
+ */
+export const refresh = internalAction({
+  args: { campaignId: v.id('campaigns'), limit: v.optional(v.number()) },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<Record<string, unknown>> => {
+    const campaign = await ctx.runQuery(internal.crawl.campaignFor, { campaignId: args.campaignId })
+    if (!campaign) return { error: 'No such campaign' }
+    const budget = await ctx.runQuery(internal.ops.budgetLeft, { accountId: campaign.accountId })
+    if (budget.left <= 0) return { error: 'Fair use reached for today', internal: true }
+
+    const found = await ctx.runQuery(internal.sourcing.stale, {
+      campaignId: args.campaignId, limit: Math.min(args.limit ?? 200, budget.left),
+    })
+    if (!found.handles.length) return { ...found, note: 'Every profile on file was measured inside the window' }
+    const run = await ctx.runAction(internal.ingest.detailRun, {
+      handles: found.handles, campaignId: args.campaignId, channel: 'refresh', refresh: true,
+    })
+    return { stale: found.stale, asked: found.handles.length, ...run }
   },
 })
 
@@ -289,6 +451,150 @@ export const seeds = internalAction({
     const handles = (campaign.brief.seeds ?? []) as string[]
     if (!handles.length) return { error: 'This campaign names no accounts' }
     return await ctx.runAction(internal.ingest.detailRun, { handles, campaignId: args.campaignId, channel: 'seed' })
+  },
+})
+
+/**
+ * Asks Apify what really happened to every run still marked as running.
+ *
+ * A run is written down when it starts and closed by the webhook when it
+ * ends. When the webhook never arrives the row stays open for ever: it reads
+ * as zero profiles and zero cost, so a campaign that paid for a run looks
+ * like a campaign that never made it. Thirteen runs of one campaign sat that
+ * way.
+ *
+ * Report first. Closing a run is free; re-reading its dataset writes profiles
+ * and sets the judge going, which costs money, so that half is asked for.
+ */
+export const reconcile = internalAction({
+  args: { campaignId: v.id('campaigns'), ingest: v.optional(v.boolean()) },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<Record<string, unknown>> => {
+    const token = process.env.APIFY_TOKEN
+    if (!token) return { error: 'APIFY_TOKEN is not set' }
+    const runs = (await ctx.runQuery(internal.crawl.runsFor, { campaignId: args.campaignId })) as {
+      externalRunId?: string; phase: string; status: string; query?: string; channel?: string
+    }[]
+
+    const out: Record<string, unknown>[] = []
+    let closed = 0
+    let rows = 0
+    for (const r of runs) {
+      if (r.status !== 'RUNNING' || !r.externalRunId) continue
+      const meta = await fetch(`https://api.apify.com/v2/actor-runs/${r.externalRunId}?token=${token}`)
+      if (!meta.ok) continue
+      const data = (await meta.json())?.data
+      const status = String(data?.status ?? '')
+      if (status === 'RUNNING' || status === 'READY') { out.push({ query: r.query, status }); continue }
+      const costUsd = Number(data?.usageTotalUsd ?? 0)
+      const datasetId = String(data?.defaultDatasetId ?? '')
+
+      let held = 0
+      if (status === 'SUCCEEDED' && datasetId) {
+        const res = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?token=${token}&clean=true&limit=2000`)
+        held = res.ok ? ((await res.json()) as unknown[]).length : 0
+      }
+      rows += held
+      out.push({ query: r.query, status, costUsd, held })
+
+      if (status === 'SUCCEEDED' && held) {
+        // Rows we paid for and never read. Closing the run would lose them,
+        // so it stays open until someone asks for them to be taken in.
+        if (!args.ingest) continue
+        await ctx.runAction(internal.ingest.fromApify, {
+          runId: r.externalRunId, status, datasetId, phase: r.phase,
+          campaignId: args.campaignId, costUsd, channel: r.channel,
+        })
+        closed++
+        continue
+      }
+      await ctx.runMutation(internal.crawl.finishRun, {
+        externalRunId: r.externalRunId,
+        status,
+        ...(costUsd ? { costCents: Math.round(costUsd * 100) } : { costCents: 0 }),
+        ...(status === 'SUCCEEDED' ? {} : { error: `Apify run ${status}` }),
+      })
+      closed++
+    }
+    return { open: out.length, closed, rowsWaiting: rows, ingested: Boolean(args.ingest), runs: out }
+  },
+})
+
+/**
+ * Counts what each finished run actually discovered, on runs that finished
+ * before the count existed.
+ *
+ * A profile carries the moment it was first seen. A run carries the window it
+ * ran in. Every profile first seen inside a run's window was discovered by
+ * that run, so the number is recoverable without paying Apify anything.
+ */
+export const backfillFresh = internalAction({
+  args: { campaignId: v.id('campaigns') },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<Record<string, unknown>> => {
+    const token = process.env.APIFY_TOKEN
+    if (!token) return { error: 'APIFY_TOKEN is not set' }
+    const runs = (await ctx.runQuery(internal.crawl.runsFor, { campaignId: args.campaignId })) as {
+      externalRunId?: string; status: string; query?: string
+      profilesFresh?: number; startedAt: number; finishedAt?: number
+    }[]
+    const out = []
+    for (const r of runs) {
+      if (!r.externalRunId || r.status !== 'SUCCEEDED' || r.profilesFresh !== undefined) continue
+      const meta = await fetch(`https://api.apify.com/v2/actor-runs/${r.externalRunId}?token=${token}`)
+      if (!meta.ok) continue
+      const datasetId = String((await meta.json())?.data?.defaultDatasetId ?? '')
+      if (!datasetId) continue
+      const res = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?token=${token}&clean=true&limit=2000&fields=username`)
+      if (!res.ok) continue
+      const handles = [...new Set(((await res.json()) as { username?: string }[])
+        .map((x) => String(x?.username ?? '').toLowerCase()).filter(Boolean))]
+      const fresh = (await ctx.runQuery(internal.ingest.firstSeenIn, {
+        handles, from: r.startedAt, to: (r.finishedAt ?? r.startedAt) + 300_000,
+      })) as number
+      await ctx.runMutation(internal.crawl.finishRun, {
+        externalRunId: r.externalRunId, status: 'SUCCEEDED', profilesFresh: fresh,
+      })
+      out.push({ query: r.query, fetched: handles.length, fresh })
+    }
+    return { written: out.length, runs: out }
+  },
+})
+
+/**
+ * Writes the words on runs started before runs kept them.
+ *
+ * Apify still holds the input of every run it has ever executed, so the query
+ * is recoverable for free: the run record names a key-value store, and the
+ * store holds the INPUT the run was started with. Without this, the retirement
+ * rule would begin with no history and this campaign would pay a third time
+ * for the two queries that have already given it everything they have.
+ */
+export const backfillQueries = internalAction({
+  args: { campaignId: v.id('campaigns') },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<Record<string, unknown>> => {
+    const token = process.env.APIFY_TOKEN
+    if (!token) return { error: 'APIFY_TOKEN is not set' }
+    const runs = (await ctx.runQuery(internal.crawl.runsFor, { campaignId: args.campaignId })) as {
+      externalRunId?: string; phase: string; query?: string
+    }[]
+    let written = 0
+    let missing = 0
+    for (const r of runs) {
+      if (!r.externalRunId || r.query || r.phase !== 'search') continue
+      const meta = await fetch(`https://api.apify.com/v2/actor-runs/${r.externalRunId}?token=${token}`)
+      if (!meta.ok) { missing++; continue }
+      const store = (await meta.json())?.data?.defaultKeyValueStoreId
+      if (!store) { missing++; continue }
+      const res = await fetch(`https://api.apify.com/v2/key-value-stores/${store}/records/INPUT?token=${token}`)
+      if (!res.ok) { missing++; continue }
+      const query = String((await res.json())?.search ?? '')
+      if (!query) { missing++; continue }
+      await ctx.runMutation(internal.crawl.setQuery, { externalRunId: r.externalRunId, query })
+      written++
+    }
+    return { runs: runs.length, written, missing }
   },
 })
 

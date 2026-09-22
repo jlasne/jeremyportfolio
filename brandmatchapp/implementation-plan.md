@@ -85,14 +85,14 @@ Soit 11,4 candidats neufs par porteur. Les 40 porteurs au-dessus de 500k en four
 
 ---
 
-## Chantier 1 : ne jamais payer deux fois
+## Chantier 1 : ne jamais payer deux fois — LIVRÉ
 
-**Aucune dépendance. Gain mesuré : 62% de rachat évité sur un second passage.**
+**Aucune dépendance. Mesuré après coup : 31% de rachat sur la campagne divertissement, plus 0,70 $ de runs tués par le plafond Apify.**
 
 ### Trois choses, indépendantes les unes des autres
 
 **1.1 Le rendement par requête.**
-Chaque recherche retient ce qu'elle a rendu : profils vus, profils nouveaux, coût. Une requête qui rend zéro nouveau deux fois de suite est retirée de la campagne.
+Chaque recherche retient ce qu'elle a rendu : profils vus, profils nouveaux, coût. Une requête qui rend zéro nouveau une fois est retirée de la campagne. Une seule fois, pas deux : la recherche de comptes Instagram est déterministe, les mêmes mots rendent la même liste. Un run qui n'a rien acheté ne compte pas comme preuve. `accounts` accepte `force` pour rouvrir une requête retirée.
 
 Mesuré : "street interviewer" plafonne à 6 comptes, "challenge creator" à 20. Les relancer à 72 achète 40 comptes déjà connus pour en gagner zéro.
 
@@ -112,7 +112,25 @@ Aujourd'hui : 1 576 comptes en base. À 100 000, une campagne y trouve 3 000 can
 
 ### Vérifié par
 
-Un run sur une campagne existante. Le rapport doit montrer zéro profil racheté, et le nombre de requêtes retirées.
+Mesuré sur les trois campagnes vivantes, sans dépenser un centime de plus.
+
+| campagne | fiches achetées | nouvelles | rachat | perdu | $ / lead |
+|---|---|---|---|---|---|
+| Divertissement | 730 | 506 | 31% | 0,70 $ | 0,52 $ |
+| Chien | 258 | 236 | 9% | 0 | 0,29 $ |
+| Fitness 100k-3M | 353 | 312 | 12% | 0 | 0,31 $ |
+
+Requêtes retirées : `challenge creator` et `street interviewer` sur divertissement, `fitness ebook author` sur fitness. Relancées, elles répondent « retirée », sans run et sans coût.
+
+Rachat : six handles déjà mesurés ce mois-ci, demandés à `detailRun`, donnent `asked 6, handles 0, skipped 6`. Aucun run lancé.
+
+Fraîcheur : zéro profil de la base dépasse 30 jours. La règle est posée et dort.
+
+### Deux choses trouvées en chemin, corrigées
+
+**Quatorze runs tués par le plafond Apify.** Apify ne refuse pas un run quand le compte a atteint son plafond mensuel : il le lance, le laisse travailler trois minutes, puis le tue — et facture les trois minutes. 0,70 $ perdus, 14% de la facture de la campagne. `startRun` lit désormais le solde du cycle avant chaque run et refuse en dessous de 3 $, réserve laissée au pipeline manuel qui partage le même compte.
+
+**Quatorze runs jamais refermés.** Le webhook n'était jamais arrivé, donc la campagne s'affichait à 2,21 $ au lieu de 5,08 $ et à 0,23 $ le lead au lieu de 0,52 $. `sourcing.reconcile` demande à Apify ce qui s'est vraiment passé et referme. Un run qui a réussi et dont on n'a jamais lu les lignes reste ouvert : les refermer perdrait ce qu'on a payé.
 
 ---
 

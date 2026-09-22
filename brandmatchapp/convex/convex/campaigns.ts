@@ -377,12 +377,20 @@ export const report = internalQuery({
     const apifyCents = runs.reduce((sum, r) => sum + r.costCents, 0)
     const modelCents = Math.round(judged * 0.35)
 
+    const fetched = runs.reduce((n, r) => n + r.profilesFetched, 0)
+    const fresh = runs.reduce((n, r) => n + (r.profilesFresh ?? 0), 0)
+    const lost = runs.filter((r) => r.status !== 'SUCCEEDED' && r.status !== 'RUNNING')
+
     return {
       campaign: campaign.name,
       discovery: {
         byPhase,
-        fetched: runs.reduce((n, r) => n + r.profilesFetched, 0),
-        fresh: runs.reduce((n, r) => n + (r.profilesFresh ?? 0), 0),
+        fetched,
+        fresh,
+        /** The share of what was bought that had never been seen before. */
+        freshShare: fetched ? Math.round((fresh / fetched) * 100) : 0,
+        /** Runs that were paid for and returned nothing. */
+        lost: { runs: lost.length, cents: lost.reduce((n, r) => n + r.costCents, 0) },
       },
       funnel: {
         evaluated: rows.length,
