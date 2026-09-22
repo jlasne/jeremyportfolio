@@ -116,6 +116,74 @@ Un run sur une campagne existante. Le rapport doit montrer zéro profil racheté
 
 ---
 
+## Chantier 1bis : un canal par fenêtre de cible
+
+**Né du chantier 0. C'est l'adaptation qui rend le produit valable pour n'importe quelle campagne.**
+
+### Ce que le chantier 0 a révélé
+
+Notre seul canal de découverte vise à 15%. Le canal des voisins, qui aurait pu le remplacer, ne marche qu'au-dessus de 500k abonnés.
+
+Une campagne qui vise des créateurs de 10k à 100k n'avait donc rien. C'est exactement la campagne divertissement, et c'est un type de client courant.
+
+### La troisième voie, mesurée le 22/09
+
+Une recherche de posts rend les likes et le nom de l'auteur. Les likes trahissent la taille du compte.
+
+Mesuré sur nos 1 075 comptes ayant des likes lisibles :
+
+| likes sur un post type | abonnés médians |
+|---|---|
+| 0 à 50 | 1 083 |
+| 50 à 150 | 8 987 |
+| 150 à 400 | 25 931 |
+| 400 à 800 | 128 140 |
+| 800 à 1 500 | 227 128 |
+| 1 500 à 3 000 | 433 760 |
+| 3 000 à 8 000 | 469 021 |
+| 8 000 et plus | 1 214 549 |
+
+La progression est monotone. Une bande de likes est un cadran de taille.
+
+### Ce que ça donne par fenêtre de cible
+
+| cible | bande de likes | dans la cible |
+|---|---|---|
+| 10k à 100k | 100 à 400 | **43%** |
+| 100k à 3M | 1 000 à 20 000 | **81%** |
+| 500k et plus | 5 000 et plus | 62% |
+
+Contre 26% sans filtre sur la même population, et 15% pour notre recherche par nom de compte.
+
+**Réserve à connaître** : ces parts sont mesurées sur des comptes que nos canaux actuels ont déjà trouvés. C'est la puissance du filtre sur une population connue, pas une mesure du canal en conditions réelles. Le mécanisme, lui, est solidement établi.
+
+### La règle de choix
+
+La fenêtre d'abonnés de la campagne décide des canaux, et l'écran le dit au client.
+
+| fenêtre visée | canal principal | canal d'appoint |
+|---|---|---|
+| sous 50k | posts, bande 50 à 200 likes | Google |
+| 50k à 500k | Google | posts, bande 200 à 1 500 likes |
+| 500k et plus | voisins des graines porteuses | Google, posts bande haute |
+
+Google fonctionne partout et reste la colonne vertébrale. Les voisins sont un canal de qualité, jamais de volume : 11 candidats neufs par porteur.
+
+### Ce qu'on construit
+
+1. Chaque canal devient une source nommée, avec son coût et sa visée mesurés par campagne.
+2. La campagne choisit ses canaux d'après sa fenêtre, et le client voit lesquels et pourquoi.
+3. La recherche de posts arrive comme canal, avec une bande de likes calculée depuis la fenêtre.
+4. Chaque run enregistre la visée réelle par canal, et le prochain run rééquilibre vers celui qui vise le mieux sur cette campagne.
+
+### Vérifié par
+
+Une campagne à 10k-100k et une campagne à 100k-3M, chacune 300 profils, visée comparée par canal.
+
+Le seuil de succès : battre nos 15% actuels sur les deux fenêtres.
+
+---
+
 ## Chantier 2 : les graines
 
 **Dépend de 0 pour son utilité. Peut être construit avant.**
@@ -127,12 +195,20 @@ Une campagne ne se crée plus sans au moins trois comptes exemples. L'écran dit
 
 Les deux campagnes créées le 21/09 n'en avaient aucune. Le canal voisins n'a donc jamais tourné.
 
-**2.2 Étalées sur la fourchette.**
-Les graines se jugent par rapport à la fenêtre d'abonnés de la campagne, jamais dans l'absolu. Pour 10-100k : viser 20k, 45k, 70k, 100k.
+**2.2 Une graine a deux métiers, et il faut les séparer.**
 
-Jamais de graine au plancher. Une graine à 10k suggère des comptes sous 10k, donc hors cible.
+Corrigé par le chantier 0. Une graine sert à deux choses qui n'ont pas les mêmes exigences.
 
-L'écran montre où chaque graine tombe dans la fourchette, et signale un trou.
+| métier | ce qu'il demande | pour quelles campagnes |
+|---|---|---|
+| Moteur de découverte | porter des voisins, donc peser plus de 500k | les campagnes qui visent haut |
+| Montrer au juge à quoi ressemble un bon | être dans la cible, rien d'autre | toutes |
+
+Pour une campagne qui vise 10k à 100k, aucune graine ne fera moteur : celles de la bonne taille portent 6%, et celles qui portent suggèrent des comptes trop gros.
+
+Ses graines servent alors uniquement le second métier, et sa découverte passe par le chantier 1bis.
+
+L'écran demande donc des graines dans la cible pour tout le monde, et propose en plus des graines hautes quand la campagne vise au-dessus de 500k.
 
 **2.3 Les voisins de nos propres leads.**
 Un lead qualifié devient une graine de la campagne. Sa fiche est déjà payée, donc la graine est gratuite.
@@ -236,6 +312,7 @@ Le nombre de profils repassés et le nombre qui passent au second essai.
 |---|---|---|---|
 | 0 | Le canal des voisins | rien | **fait le 22/09** |
 | 1 | Ne jamais payer deux fois | rien | rien |
+| 1bis | Un canal par fenêtre de cible | 0 | rien |
 | 2 | Les graines | rien pour construire | rien |
 | 3 | Les vagues | 1 | rien |
 | 4 | Google | rien pour construire | la clé de recherche |
