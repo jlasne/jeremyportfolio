@@ -189,9 +189,14 @@ export function Gates({ campaignId }: { campaignId: string }) {
           <Info text="Describe the people you want, one sentence a line. For each qualified lead we answer every sentence: true, partly true, or false. That is their brand fit, and it sorts your list. It never drops anyone." />
         </h2>
         <p className="gate-lede">
-          {written} {written === 1 ? 'sentence' : 'sentences'} about who you want. This scores the leads you get and
-          orders your list, it never removes anyone. Eight or more is where the score starts telling people apart:
-          under that, one sentence swings it by more than a tenth.
+          {written} {written === 1 ? 'sentence' : 'sentences'} about who you want. We answer each one about every
+          lead: true, partly true, or false. That is their brand fit, and it orders your list without removing
+          anyone. Eight or more is where the score starts telling people apart.
+        </p>
+        <p className="gate-lede">
+          Mark up to three as <b>must have</b>. A marked sentence leaves the score, because a rule you will not
+          argue about is not a matter of degree. It still removes nobody: a lead that plainly misses one arrives
+          marked, and you decide.
         </p>
         <Sentences
           list={live.criteria}
