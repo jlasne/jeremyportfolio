@@ -100,7 +100,7 @@ const api = http.createServer((req, res) => {
 const logDir = join(mkdtempSync(join(tmpdir(),'bm-run-')),'logs')
 const base = {
   openrouter: { apiKey:'k', baseUrl:'http://127.0.0.1:8122',
-    decide:{model:'stub',priceIn:0.1,priceOut:0.3}, vision:{enabled:false,model:'v',priceIn:0.3,priceOut:0.9} },
+    decide:{model:'typesafe/jev-1.13',priceIn:0.042,priceOut:0}, vision:{enabled:false,model:'deepseek/deepseek-v4-flash-vision-exp',priceIn:0.22,priceOut:0.66} },
   brandmatch: { apiBase:'http://127.0.0.1:8123', apiKey:'bm-key', status:'new', savedOnly:false, markAs:'contacted' },
   instagram: { account:'test.hq', baseUrl:'http://127.0.0.1:8121', openWith:'direct', dailyCap:50, betweenDms:[1,1], afterProfile:[0,0], typing:[1,2] },
   browser: { headless:true, viewport:{width:1000,height:800}, sessionRoot:'', executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome' },

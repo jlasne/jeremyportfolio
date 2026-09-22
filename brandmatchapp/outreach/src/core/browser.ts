@@ -23,13 +23,13 @@ export class Browser {
     const sh = new Stagehand({
       env: 'LOCAL',
       verbose: 0,
-      // Stagehand needs a model for its own helpers. It is the same cheap one
-      // the loop uses, so a stray call cannot quietly cost more than a step.
-      modelName: s.openrouter.decide.model,
-      // Stagehand wants a key on the way in even when nothing will ask a model,
-      // which is the case for the login pass. A placeholder satisfies it, and
-      // the loop never reads this: it calls OpenRouter itself.
-      modelClientOptions: { apiKey: s.openrouter.apiKey || 'unused', baseURL: s.openrouter.baseUrl },
+      // No model is named here on purpose.
+      //
+      // Stagehand checks the name against its own list of providers before it
+      // opens anything, and ours is not on it, so naming the loop's model
+      // stopped the browser from starting at all. Nothing in this file asks a
+      // model: act, extract and observe are never called, and the loop talks
+      // to OpenRouter itself.
       localBrowserLaunchOptions: {
         userDataDir,
         // Without this Stagehand deletes the profile folder when it closes, and

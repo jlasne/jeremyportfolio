@@ -65,8 +65,8 @@ const model = http.createServer((req, res) => {
 const settings = {
   openrouter: {
     apiKey: 'test', baseUrl: 'http://127.0.0.1:8112',
-    decide: { model: 'stub', priceIn: 0.1, priceOut: 0.3 },
-    vision: { enabled: false, model: 'stub-vision', priceIn: 0.3, priceOut: 0.9 },
+    decide: { model: 'typesafe/jev-1.13', priceIn: 0.042, priceOut: 0 },
+    vision: { enabled: false, model: 'deepseek/deepseek-v4-flash-vision-exp', priceIn: 0.22, priceOut: 0.66 },
   },
   brandmatch: { apiBase: '', apiKey: '', status: 'new', savedOnly: false, markAs: 'contacted' },
   instagram: { account: 'test', dailyCap: 50, betweenDms: [1, 1], afterProfile: [0, 0], typing: [1, 3] },
