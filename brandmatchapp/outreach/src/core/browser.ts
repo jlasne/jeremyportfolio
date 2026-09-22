@@ -26,7 +26,10 @@ export class Browser {
       // Stagehand needs a model for its own helpers. It is the same cheap one
       // the loop uses, so a stray call cannot quietly cost more than a step.
       modelName: s.openrouter.decide.model,
-      modelClientOptions: { apiKey: s.openrouter.apiKey, baseURL: s.openrouter.baseUrl },
+      // Stagehand wants a key on the way in even when nothing will ask a model,
+      // which is the case for the login pass. A placeholder satisfies it, and
+      // the loop never reads this: it calls OpenRouter itself.
+      modelClientOptions: { apiKey: s.openrouter.apiKey || 'unused', baseURL: s.openrouter.baseUrl },
       localBrowserLaunchOptions: {
         userDataDir,
         // Without this Stagehand deletes the profile folder when it closes, and

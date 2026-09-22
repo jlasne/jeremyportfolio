@@ -67,10 +67,8 @@ async function main(): Promise<number> {
   }
 
   if (command === 'login') {
-    if (!s.openrouter.apiKey) {
-      console.error('OPENROUTER_API_KEY is not set. The browser needs it even to open.')
-      return 1
-    }
+    // No key is needed to log in. Opening a browser and typing a password is
+    // not a decision, so no model is asked and none has to be paid for.
     const session = sessionFor(s.browser.sessionRoot, s.instagram.account)
     const browser = await Browser.open({ ...s, browser: { ...s.browser, headless: false } }, session.dir)
     await browser.goto(`${s.instagram.baseUrl}/`)
