@@ -127,6 +127,7 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .ask { border-bottom: 1px solid var(--line); padding: 16px; }
 .ask .beat { font: 500 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--dim); margin: 0 0 8px; display: flex; gap: 8px; align-items: center; }
 .ask .beat b { color: var(--blue); font-weight: 500; }
+.ask .hint { color: var(--dim); font-size: 13px; margin: 0 0 8px; }
 .ask .qt { font: 700 19px/1.35 var(--sans); letter-spacing: -.005em; margin: 0 0 12px; }
 .ask textarea {
   width: 100%; background: transparent; border: 1px solid var(--line); border-radius: 14px;
@@ -165,11 +166,14 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .row .kill:hover { color: var(--bad); background: rgba(244, 33, 46, .1); }
 
 .check { display: flex; gap: 12px; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--line); }
-.check .tick {
+/* One tick, wherever it is asked for: the /bio row and each draft. */
+.tick {
   width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--line); background: transparent;
   cursor: pointer; display: grid; place-items: center; flex: none; color: transparent; font-size: 13px; font-weight: 800;
+  transition: border-color .15s;
 }
-.check .tick[aria-pressed="true"] { background: var(--good); border-color: var(--good); color: #000; }
+.tick:hover { border-color: var(--dim); }
+.tick[aria-pressed="true"] { background: var(--good); border-color: var(--good); color: #000; }
 .check .t { flex: 1; }
 .check .t b { display: block; font-weight: 700; }
 .check .t small { color: var(--dim); }
@@ -181,7 +185,9 @@ button, input, textarea, select { font: inherit; color: inherit; }
   margin: 0; white-space: pre-wrap; word-break: break-word; font: 400 16px/1.55 var(--sans);
   background: var(--card); border-radius: 14px; padding: 14px 16px;
 }
-.draft .tools { display: flex; gap: 8px; align-items: center; margin: 10px 0 0; }
+.draft .tools { display: flex; gap: 8px; align-items: center; margin: 10px 0 0; flex-wrap: wrap; }
+.draft.used pre { opacity: .5; }
+.tick.sm { width: 32px; height: 32px; font-size: 15px; }
 .count { font: 500 12px/1 var(--mono); color: var(--dim); }
 .count.over { color: var(--bad); }
 
@@ -235,7 +241,7 @@ button, input, textarea, select { font: inherit; color: inherit; }
   <section class="col">
     <header class="top">
       <div><h2 id="title">Today</h2><p class="sub" id="sub"></p></div>
-      <button class="btn blue sm" id="write">Write the day</button>
+      <button class="btn ghost sm hide" id="write">Write again</button>
     </header>
     <div id="view"></div>
   </section>
@@ -338,6 +344,7 @@ async function refresh() {
 /* The feed lives on the server. This only tracks what is in flight, so a
    card can grey itself out while the model reads the answer. */
 let busy = { fill: false, ask: null };
+let writing = false;
 
 async function fillFeed() {
   busy.fill = true; draw();
@@ -363,7 +370,9 @@ const ready = () => beatsDone().size >= (state.readyAt || 5);
 function draw() {
   $("#nav").querySelectorAll("button").forEach((b) =>
     b.setAttribute("aria-current", b.dataset.tab === tab ? "page" : "false"));
-  $("#write").classList.toggle("hide", tab !== "today" && tab !== "drafts");
+  /* One Write button at a time: the bar offers it on Today once the day is
+     covered, and the header offers a rewrite on Drafts once one exists. */
+  $("#write").classList.toggle("hide", tab !== "drafts" || writing || !state.drafts.length);
   const v = $("#view");
   if (tab === "today") { $("#title").textContent = "Today"; $("#sub").textContent = longDate(state.today); v.innerHTML = today(); }
   if (tab === "drafts") { $("#title").textContent = "Drafts"; $("#sub").textContent = state.draftsAt ? "written " + clock(state.draftsAt) : "not written yet"; v.innerHTML = drafts(state.drafts); }
@@ -378,21 +387,21 @@ function today() {
   const beats = state.beats || [];
   const is = ready();
 
-  /* The bar: one mark per beat, and what it wants next. */
   const bar = `
     <div class="bar-top ${is ? "ready" : ""}">
       <span class="beats">${beats.map((b) => `<i class="${done.has(b.id) ? "on" : ""}" title="${esc(b.label)}"></i>`).join("")}</span>
       <span class="say">${done.size} of ${beats.length} covered${is ? " · enough to write" : ""}</span>
-      ${is ? `<button class="btn blue sm" id="writeNow">Write the day</button>` : ""}
+      ${is && !writing ? `<button class="btn blue sm" id="writeNow">Write the day</button>` : ""}
+      ${writing ? `<span class="thinking"><span class="spin"></span> writing</span>` : ""}
     </div>`;
 
-  /* The questions, oldest first, so a follow-up sits under what it dug into. */
   const feed = open
     .map((a) => {
-      const label = beats.find((b) => b.id === a.beat)?.label || a.beat;
+      const b = beats.find((x) => x.id === a.beat);
       return `
         <article class="ask ${busy.ask === a.id ? "busy" : ""}" data-ask="${esc(a.id)}">
-          <p class="beat">${a.from ? `<b>digging</b> ·` : ""} ${esc(label)}</p>
+          <p class="beat">${a.from ? `<b>digging</b> · ` : ""}${esc(b?.label || a.beat)}</p>
+          ${b?.hint && !a.from ? `<p class="hint">${esc(b.hint)}</p>` : ""}
           <p class="qt">${esc(a.text)}</p>
           <textarea rows="1" placeholder="Say it the way you would say it out loud."></textarea>
           <div class="bar"><button class="btn blue sm">Answer</button></div>
@@ -400,42 +409,19 @@ function today() {
     })
     .join("");
 
-  /* Nothing to answer: either the feed has never been filled, or he has
-     cleared it. Both want the same button, with a different sentence. */
-  const empty = !open.length
-    ? `<div class="stage">
-         <p class="lead">${busy.fill ? "" : state.entries.length ? "Feed clear. Top it up, or write the day." : "The feed is empty."}</p>
-         ${busy.fill
-           ? `<div class="thinking"><span class="spin"></span> Writing your questions…</div>`
-           : `<div class="rowbtns">
-                ${is
-                  ? `<button class="btn blue big" id="writeBig">Write the day</button>
-                     <button class="btn ghost sm" id="fill">More questions</button>`
-                  : `<button class="btn blue big" id="fill">${state.entries.length ? "More questions" : "Start"}</button>`}
-                <button class="btn ghost sm" id="note">Write a note instead</button>
-              </div>`}
-       </div>`
-    : busy.fill
-      ? `<div class="stage"><div class="thinking"><span class="spin"></span> Writing more questions…</div></div>`
+  const stage = busy.fill
+    ? `<div class="stage"><div class="thinking"><span class="spin"></span> Writing your questions…</div></div>`
+    : open.length
+      ? `<div class="stage"><button class="btn ghost sm" id="fill">More questions</button></div>`
       : `<div class="stage">
-           <div class="rowbtns">
-             <button class="btn ghost sm" id="fill">More questions</button>
-             <button class="btn ghost sm" id="note">Write a note instead</button>
-           </div>
+           <p class="lead">${state.entries.length ? "Feed clear." : "The feed is empty."}</p>
+           <button class="btn ${state.entries.length ? "ghost sm" : "blue big"}" id="fill">${state.entries.length ? "More questions" : "Start"}</button>
          </div>`;
 
   return `
     ${bar}
     ${feed}
-    ${empty}
-
-    <div class="compose hide" id="noteBox">
-      <textarea id="freeBox" placeholder="What's happening?" rows="2"></textarea>
-      <div class="bar">
-        <span class="mono">nobody asked, you just said it</span>
-        <button class="btn sm" id="saveNote">Log it</button>
-      </div>
-    </div>
+    ${stage}
 
     <div class="check">
       <button class="tick" id="bio" aria-pressed="${state.bioDone}" aria-label="Mark /bio filled">✓</button>
@@ -457,23 +443,31 @@ function today() {
 }
 
 function drafts(list, readOnly = false) {
+  /* While the day is being written, the screen says so and offers nothing
+     else: half a set of drafts is worse than none. */
+  if (writing && !readOnly)
+    return `<div class="stage"><div class="thinking"><span class="spin"></span> Writing three posts and the script…</div>
+            <p class="lead" style="margin:16px 0 0">Two calls to the model. About twenty seconds.</p></div>`;
   if (!list || !list.length)
-    return `<p class="empty">No drafts yet.<br>${readOnly ? "This day was never written." : "Log your day, then hit <b>Write the day</b>."}</p>`;
+    return `<p class="empty">No drafts yet.<br>${readOnly ? "This day was never written." : "Cover the day, then hit <b>Write the day</b>."}</p>`;
+
   return list.map((d, i) => {
     const n = [...d.body].length;
     const over = d.kind === "post" && n > 280;
     return `
-      <article class="draft">
+      <article class="draft ${d.used ? "used" : ""}">
         <div class="head">
           <span class="label">${esc(d.label)}</span>
           <span class="count ${over ? "over" : ""}">${d.kind === "post" ? n + " / 280" : n + " chars"}</span>
         </div>
-        <pre id="d${i}">${esc(d.body)}</pre>
+        <pre>${esc(d.body)}</pre>
         <div class="tools">
+          ${readOnly ? "" : `<button class="tick sm mark" data-i="${i}" aria-pressed="${!!d.used}" aria-label="Mark used">✓</button>`}
           <button class="btn sm copy" data-i="${i}">Copy</button>
           ${d.kind === "post"
             ? `<a class="btn ghost sm" style="text-decoration:none" target="_blank" rel="noopener" href="https://x.com/compose/post?text=${encodeURIComponent(d.body)}">Open in X</a>`
             : `<a class="btn ghost sm" style="text-decoration:none" target="_blank" rel="noopener" href="https://studio.youtube.com">Open Studio</a>`}
+          ${d.used ? `<span class="mono" style="color:var(--good)">used</span>` : ""}
         </div>
       </article>`;
   }).join("");
@@ -547,12 +541,7 @@ function wire() {
   };
 
   $("#fill")?.addEventListener("click", fillFeed);
-  $("#writeNow")?.addEventListener("click", () => $("#write").click());
-  $("#writeBig")?.addEventListener("click", () => $("#write").click());
-  $("#note")?.addEventListener("click", () => {
-    $("#noteBox").classList.remove("hide");
-    $("#freeBox").focus();
-  });
+  $("#writeNow")?.addEventListener("click", writeDay);
 
   /* Every card answers itself. */
   v.querySelectorAll(".ask").forEach((card) => {
@@ -567,16 +556,6 @@ function wire() {
   /* Put the cursor in the first open question, not in every one of them. */
   v.querySelector(".ask textarea")?.focus();
 
-  const saveNote = async () => {
-    const text = $("#freeBox").value.trim();
-    if (!text) return;
-    $("#saveNote").disabled = true;
-    try { await call("x.log", { day: state.today, text }); await refresh(); toast("Logged"); }
-    catch (err) { toast(err.message); $("#saveNote").disabled = false; }
-  };
-  $("#saveNote")?.addEventListener("click", saveNote);
-  grow($("#freeBox"), saveNote);
-
   $("#bio")?.addEventListener("click", async (e) => {
     const on = e.currentTarget.getAttribute("aria-pressed") === "true";
     try { await call("x.bio", { day: state.today, done: !on }); await refresh(); toast(on ? "/bio reopened" : "/bio ticked"); }
@@ -587,6 +566,15 @@ function wire() {
     b.addEventListener("click", async () => {
       try { await call("x.unlog", { day: state.today, at: Number(b.dataset.at) }); await refresh(); }
       catch (err) { toast(err.message); }
+    }));
+
+  v.querySelectorAll(".mark").forEach((b) =>
+    b.addEventListener("click", async () => {
+      const d = state.drafts[Number(b.dataset.i)];
+      try {
+        await call("x.useDraft", { day: state.today, at: d.at, label: d.label, used: !d.used });
+        await refresh();
+      } catch (err) { toast(err.message); }
     }));
 
   v.querySelectorAll(".copy").forEach((b) =>
@@ -643,19 +631,24 @@ $("#nav").addEventListener("click", async (e) => {
   }
 });
 
-$("#write").addEventListener("click", async (e) => {
-  const b = e.currentTarget;
-  const was = b.textContent;
-  b.disabled = true; b.innerHTML = '<span class="spin"></span>';
+async function writeDay() {
+  if (writing) return;
+  writing = true;
+  tab = "drafts"; open_ = null;
+  draw();
   try {
     await call("x.generate", { day: state.today });
+    writing = false;
     await refresh();
     archive = null;
-    tab = "drafts"; draw();
     toast("Written");
-  } catch (err) { toast(err.message); }
-  finally { b.disabled = false; b.textContent = was; }
-});
+  } catch (err) {
+    writing = false;
+    draw();
+    toast(err.message);
+  }
+}
+$("#write").addEventListener("click", writeDay);
 
 $("#test").addEventListener("click", async (e) => {
   const b = e.currentTarget;

@@ -141,7 +141,7 @@ export const day = query({
       ...pub(await find(ctx, key), key),
       facts: await facts(ctx),
       /* the beat list and the bar, so the page does not keep its own copy */
-      beats: BEATS.map((b) => ({ id: b.id, label: b.label })),
+      beats: BEATS.map((b) => ({ id: b.id, label: b.label, hint: b.hint })),
       readyAt: READY_AT,
       questions: Object.fromEntries(SLOTS.map((s) => [s, questionsFor(s, key)])),
     };
@@ -254,6 +254,20 @@ export const bio = mutation({
   },
 });
 
+/** Tick a draft off: posted, or filmed. */
+export const useDraft = mutation({
+  args: { passphrase: v.string(), day: v.string(), at: v.number(), label: v.string(), used: v.boolean() },
+  handler: async (ctx, a) => {
+    mustBeJeremy(a.passphrase);
+    const d = await find(ctx, a.day);
+    if (!d) throw new Error("No such day");
+    const drafts = d.drafts.map((x) =>
+      x.at === a.at && x.label === a.label ? { ...x, used: a.used } : x,
+    );
+    return await upsert(ctx, a.day, { drafts });
+  },
+});
+
 /** The facts sheet both prompts read. */
 export const setFacts = mutation({
   args: {
@@ -303,7 +317,15 @@ export const context = internalQuery({
 export const putDrafts = internalMutation({
   args: {
     day: v.string(),
-    drafts: v.array(v.object({ at: v.number(), kind: v.string(), label: v.string(), body: v.string() })),
+    drafts: v.array(
+      v.object({
+        at: v.number(),
+        kind: v.string(),
+        label: v.string(),
+        body: v.string(),
+        used: v.optional(v.boolean()),
+      }),
+    ),
   },
   handler: async (ctx, { day, drafts }) => {
     await upsert(ctx, day, { drafts, draftsAt: Date.now() });
@@ -399,7 +421,7 @@ const unfence = (s: string) => s.replace(/^```[a-z]*\n?/i, "").replace(/\n?```$/
  */
 export const make = internalAction({
   args: { day: v.string() },
-  handler: async (ctx, { day }): Promise<{ at: number; kind: string; label: string; body: string }[]> => {
+  handler: async (ctx, { day }): Promise<{ at: number; kind: string; label: string; body: string; used: boolean }[]> => {
     const c = await ctx.runQuery(internal.x.context, { day });
     if (!c.entries.length) throw new Error("Log something first: there is nothing to write from");
     const b = brief(c, day);
@@ -422,9 +444,11 @@ export const make = internalAction({
     const script = await ask(
       SCRIPT_SYSTEM,
       `${b}\n\nWrite the 60 second script from this log.\n\n` +
-        `The video is wider than the posts. Today is the evidence, not the subject: pull back to the ` +
-        `arc a stranger can follow with no idea who Jeremy is, and use today's numbers to prove it. ` +
-        `Somebody who has never seen the channel should understand it on its own.`,
+        `Build the five lines out of today: the Situation is where he was today, the Desire is what he ` +
+        `wanted from it, the Conflict is what blocked it, the Change is the decision he took today, and ` +
+        `the Result is what is true tonight that was not true this morning. The Change and the Result are ` +
+        `what stops every video sounding like the last one, so they carry today's specifics and today's ` +
+        `numbers. Only the Situation may lean on who Jeremy is, and one line of it is enough.`,
     );
 
     const at = Date.now();
@@ -434,8 +458,9 @@ export const make = internalAction({
         kind: "post",
         label: POST_ANGLES[i]?.label ?? `Post ${i + 1}`,
         body,
+        used: false,
       })),
-      { at, kind: "script", label: "60s video", body: script },
+      { at, kind: "script", label: "60s video", body: script, used: false },
     ];
     await ctx.runMutation(internal.x.putDrafts, { day, drafts });
     return drafts;
@@ -580,7 +605,7 @@ export const reply = action({
 /** The Write button on the dashboard. */
 export const generate = action({
   args: { passphrase: v.string(), day: v.optional(v.string()) },
-  handler: async (ctx, a): Promise<{ at: number; kind: string; label: string; body: string }[]> => {
+  handler: async (ctx, a): Promise<{ at: number; kind: string; label: string; body: string; used: boolean }[]> => {
     mustBeJeremy(a.passphrase);
     const key = a.day && isDay(a.day) ? a.day : paris().day;
     return await ctx.runAction(internal.x.make, { day: key });

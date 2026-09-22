@@ -202,13 +202,15 @@ export default defineSchema({
         text: v.string(),
       }),
     ),
-    /* three X posts and one video script, written from the entries */
+    /* three X posts and one video script, written from the entries.
+       `used` is ticked by hand once one has been posted or filmed. */
     drafts: v.array(
       v.object({
         at: v.number(),
         kind: v.string(),
         label: v.string(),
         body: v.string(),
+        used: v.optional(v.boolean()),
       }),
     ),
     draftsAt: v.optional(v.number()),

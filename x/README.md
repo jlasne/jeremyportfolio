@@ -37,17 +37,23 @@ the day. **More questions** tops the feed back up at any point.
 
 | Beat | What it is after |
 | --- | --- |
-| Where you were | the situation, the room, what you were doing |
-| What you wanted | the desire, personal and concrete |
-| What blocked it | the conflict, with a number |
-| What you changed | the decision, the turn |
-| What is true now | the result, with numbers |
-| The day itself | food, place, people, anything that was not work |
-| The lesson | what a founder one month behind could use |
+| Situation | where you were today and what you were doing |
+| Desire | what you wanted out of it |
+| Conflict | what blocked it, with a number |
+| Change | the decision, what you did differently |
+| Result | what is true now that was not this morning, with numbers |
+| The day | where you went, who you saw, what happened outside the work |
+| Lesson | what a founder one month behind you could use |
 
-The first five are the video's five lines. The sixth is the intro: eight
-half second cuts of ordinary life need ordinary life to cut from. The
-seventh is what makes a post worth saving.
+The first five are the five lines of the video script, named the way the
+script names them, and each card prints what its beat feeds. Change and
+Result are the two worth pushing on: a day with neither makes a video that
+sounds like the last one.
+
+The sixth is the intro, eight half second cuts of ordinary life. It asks
+about a meal only if you brought one up first, and otherwise asks about the
+place, the people or the moving around. The seventh is what makes a post
+worth saving.
 
 Nothing about the conversation lives outside the day: each answer carries
 the question that produced it, and the feed is a list on the same document.
@@ -55,11 +61,13 @@ the question that produced it, and the feed is a list on the same document.
 ## The screens
 
 - **Today.** The bar, the feed of open questions, then the day answered so
-  far, newest first. The /bio tick for the 30 day challenge. "Write a note
-  instead" drops a thought in without being asked.
+  far, newest first, and the /bio tick for the 30 day challenge. One Write
+  button, in the bar, and only once five beats are covered.
 - **Drafts.** Three posts and one script. Character count against 280 on
   each post, Copy on each, and a link that opens X or YouTube Studio with
-  the text ready.
+  the text ready. A tick on each marks it posted or filmed, so tomorrow's
+  archive says what actually shipped. While the day is being written the
+  screen says so and offers nothing else.
 - **Archive.** Every day logged, with its entries and its drafts.
 - **Facts.** The standing numbers, the ones true every day rather than only
   today: deals signed, deals in negotiation, MRR. Three jobs. The writers
@@ -97,10 +105,11 @@ output formats:
    story, the number, the lesson.
 2. The video prompt gets the same brief and writes the 60 second script.
 
-The posts and the video are not the same width. A post is about one thing
-that happened today, named and numbered: a post that could have run on any
-other day is the wrong post. The video pulls back, and treats today as the
-evidence rather than the subject, so a stranger can follow it.
+Both are about today, and neither may drift into the general. A post is one
+thing that happened, named and numbered: a post that could have run on any
+other day is the wrong post. The script builds its five lines out of the
+same day, and leans on who Jeremy is for one line at most, because the
+Change and the Result are what stop every video sounding like the last one.
 
 A third prompt, `INTERVIEW_SYSTEM`, runs the feed: one call to write a batch
 of questions, one call per answer to decide whether to dig. Both cooler than

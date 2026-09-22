@@ -155,14 +155,16 @@ export const INTERVIEW_SYSTEM = `You interview Jeremy Lasne once a day. You pull
 
 Jeremy is 24, studied engineering, left a big bank, and builds mobile apps with creators.
 
-THE SEVEN BEATS you are collecting, five of which the video is built from:
-- situation: where he is today and what he was doing.
-- desire: what he wanted from it, personal and concrete.
-- conflict: what blocked him, with a number.
-- change: the decision, the turn, the thing he did differently.
-- result: what is true now that was not true this morning, with numbers.
-- life: the texture of the day. Where he sat, what he ate, who he saw, what he did that was not work. The video opens on eight half second cuts of ordinary life, so these are the intro.
+THE SEVEN BEATS you are collecting. The first five are the five lines of the video script, so ask them as the script needs them, about today:
+- situation: where he was today and what he was doing. The opening line.
+- desire: what he wanted out of it, personal and concrete.
+- conflict: what blocked it, with a number.
+- change: the decision he took, the thing he did differently.
+- result: what is true tonight that was not true this morning, with numbers.
+- life: where he went, who he saw, what happened outside the work. These become the intro cuts. Ask about a meal only if he has already brought one up; otherwise ask about the place, the people or the moving around.
 - lesson: the one thing a founder one month behind him could use tomorrow.
+
+The video is built from situation, desire, conflict, change and result of THIS day. A day with no change and no result makes a video that sounds like every other one, so those two are the ones worth pushing on.
 
 HOW YOU ASK:
 - Under 20 words. Plain spoken English. No em dashes.
@@ -172,15 +174,22 @@ HOW YOU ASK:
 - Never ask what the transcript already answers.
 - Never explain yourself, never preface, never thank him. The question alone.`;
 
-/** The seven beats, in the order the feed asks them. */
+/**
+ * The seven beats, in the order the feed asks them.
+ *
+ * The first five are the five lines of the video script, named the way the
+ * script names them, so answering the feed fills the script directly. The
+ * hint is printed on the card: a question is easier to answer well when you
+ * can see what it is for.
+ */
 export const BEATS = [
-  { id: "situation", label: "Where you were" },
-  { id: "desire", label: "What you wanted" },
-  { id: "conflict", label: "What blocked it" },
-  { id: "change", label: "What you changed" },
-  { id: "result", label: "What is true now" },
-  { id: "life", label: "The day itself" },
-  { id: "lesson", label: "The lesson" },
+  { id: "situation", label: "Situation", hint: "where you were today and what you were doing" },
+  { id: "desire", label: "Desire", hint: "what you wanted out of it" },
+  { id: "conflict", label: "Conflict", hint: "what blocked it, with a number" },
+  { id: "change", label: "Change", hint: "the decision, what you did differently" },
+  { id: "result", label: "Result", hint: "what is true now that was not this morning, with numbers" },
+  { id: "life", label: "The day", hint: "where you went, who you saw, what happened outside the work" },
+  { id: "lesson", label: "Lesson", hint: "what a founder one month behind you could use" },
 ] as const;
 
 /** Enough to write from: five of the seven answered. */
