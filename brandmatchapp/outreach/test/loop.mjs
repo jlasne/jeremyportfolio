@@ -64,7 +64,7 @@ const model = http.createServer((req, res) => {
 
 const settings = {
   openrouter: {
-    apiKey: 'test', baseUrl: 'http://127.0.0.1:8112',
+    apiKey: 'test', baseUrl: 'http://127.0.0.1:8112', minConfidence: 0.35,
     decide: { model: 'typesafe/jev-1.13', priceIn: 0.042, priceOut: 0 },
     vision: { enabled: false, model: 'deepseek/deepseek-v4-flash-vision-exp', priceIn: 0.22, priceOut: 0.66 },
   },

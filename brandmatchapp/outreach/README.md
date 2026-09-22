@@ -34,6 +34,12 @@ anything is clicked.
 leaves it there for a human to read. `--send` sends. `--send --approve` asks
 in the terminal, one message at a time.
 
+**A shrug is not a dead end.** A decisions model answers with a spread over
+every option, so "nothing here serves the goal" at 19% confidence is not a
+finding. Below `minConfidence` the spread underneath decides instead: the
+best real option it scored beats a word it barely chose. On a real lead that
+19% was the difference between a written message and a failed one.
+
 **A click that does nothing loses its place in the list.** Not an argument
 with the model, a removal. Shown a dead button again it answers the same way
 at the same price, which is how the first real run spent four calls a profile
@@ -131,7 +137,7 @@ Flags: `--account`, `--campaign`, `--limit`, `--templates`.
 
 | | default |
 | --- | --- |
-| Between two messages | 20 to 90 seconds, drawn each time |
+| Between two messages | 15 to 30 seconds, drawn each time |
 | On the profile before writing | 3 to 9 seconds |
 | Between two characters | 40 to 160 ms |
 | Per account per day | 50 |

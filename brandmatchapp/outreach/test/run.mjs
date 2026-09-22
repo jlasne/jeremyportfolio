@@ -63,6 +63,7 @@ function pickKey(goal, options) {
   return entry(/click "Message"/)?.[0]
 }
 
+let unsureOnce = true
 let decisionCalls = 0
 let chatCalls = 0
 const model = http.createServer((req, res) => {
@@ -80,6 +81,17 @@ const model = http.createServer((req, res) => {
       }
       assert.equal(payload.questions.next.type, 'choice')
       const key = pickKey(payload.state.goal, payload.questions.next.criteria) ?? 'stuck'
+
+      // On the message box, answer the way Jev did on a real lead: "nothing
+      // here", barely chosen, with the right option scored underneath.
+      if (unsureOnce && /box where a new message is typed/.test(payload.state.goal)) {
+        unsureOnce = false
+        return res.end(JSON.stringify({
+          answers: { next: { choice: 'stuck', confidence: 0.19, probabilities: { stuck: 0.19, [key]: 0.31 } } },
+          usage: { prompt_tokens: 300, completion_tokens: 0 },
+        }))
+      }
+
       return res.end(JSON.stringify({
         answers: { next: { choice: key, confidence: 0.91, probabilities: { [key]: 0.91 } } },
         usage: { prompt_tokens: 300, completion_tokens: 0 },
@@ -124,7 +136,7 @@ const api = http.createServer((req, res) => {
 
 const logDir = join(mkdtempSync(join(tmpdir(),'bm-run-')),'logs')
 const base = {
-  openrouter: { apiKey:'k', baseUrl:'http://127.0.0.1:8122',
+  openrouter: { apiKey:'k', baseUrl:'http://127.0.0.1:8122', minConfidence:0.35,
     decide:{model:'typesafe/jev-1.13',endpoint:'decisions',priceIn:0.042,priceOut:0,fallbacks:[{model:'deepseek/deepseek-v4-flash-0731',endpoint:'chat',priceIn:0.04,priceOut:0.64}]}, vision:{enabled:false,model:'deepseek/deepseek-v4-flash-vision-exp',priceIn:0.22,priceOut:0.66} },
   brandmatch: { apiBase:'http://127.0.0.1:8123', apiKey:'bm-key', status:'new', savedOnly:false, markAs:'contacted' },
   instagram: { account:'test.hq', baseUrl:'http://127.0.0.1:8121', openWith:'direct', dailyCap:50, betweenDms:[1,1], afterProfile:[0,0], typing:[1,2] },
@@ -148,6 +160,7 @@ try {
   const dry = await run(s, log, templates, { send:false, approve:false })
   console.log('dry:', JSON.stringify(dry))
   assert.equal(dry.drafted, 2, 'both usable leads must be drafted')
+  assert.equal(unsureOnce, false, 'the low-confidence shrug must have been served')
   assert.equal(dry.sent, 0, 'a dry run must never send')
   assert.equal(marked.length, 0, 'a dry run must not move a lead')
   assert.equal(new DailyCap(logDir, 50).sentToday('test.hq'), 0, 'a draft must not spend the daily cap')
