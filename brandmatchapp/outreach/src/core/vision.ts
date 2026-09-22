@@ -13,7 +13,7 @@ import type { Decision, PageState, Usage } from './types.js'
 // Once per step, never twice. A model that cannot read the page twice in a row
 // will not read it on the third try either.
 
-export type Fallback = { decision: Decision | null; usage: Usage; skipped: boolean }
+export type Fallback = { decision: Decision | null; usage: Usage; skipped: boolean; raw: string }
 
 export async function fallback(
   goal: string,
@@ -21,7 +21,7 @@ export async function fallback(
   shot: () => Promise<string>,
   s: Settings,
 ): Promise<Fallback> {
-  if (!s.openrouter.vision.enabled) return { decision: null, usage: ZERO, skipped: true }
+  if (!s.openrouter.vision.enabled) return { decision: null, usage: ZERO, skipped: true, raw: '' }
 
   const lines = state.candidates.map((c) => `${c.i}) [${c.editable ? 'type' : 'click'}] ${c.name}`).join('\n')
   const image = await shot()
@@ -44,5 +44,5 @@ export async function fallback(
 
   const usage = price(res, s.openrouter.vision.priceIn, s.openrouter.vision.priceOut)
   const choice = parse(res.text, state)
-  return { decision: choice ? { ...choice, source: 'vision', usage } : null, usage, skipped: false }
+  return { decision: choice ? { ...choice, source: 'vision', usage } : null, usage, skipped: false, raw: res.text }
 }

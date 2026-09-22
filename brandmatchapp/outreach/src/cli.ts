@@ -24,6 +24,7 @@ brandmatch outreach
   node dist/cli.js run --send --approve   ask in the terminal before each send
   node dist/cli.js status              what was sent today, and what it cost
   node dist/cli.js login               open the browser to log the account in
+  node dist/cli.js probe <handle>      print a page as the agent reads it, free
 
 Flags
   --account <name>      which Instagram account, and which browser profile
@@ -83,6 +84,39 @@ async function main(): Promise<number> {
     wait.close()
     await browser.close()
     console.log('Saved. Run a dry pass next: node dist/cli.js run --limit 3')
+    return 0
+  }
+
+  // Shows the page exactly as the agent reads it, and asks nothing of any
+  // model. When a run fails on a real page the first question is always what
+  // it could see, and paying a model to find that out is the slow way round.
+  if (command === 'probe') {
+    const handle = (argv[1] ?? '').replace(/^@/, '')
+    if (!handle) {
+      console.error('Which profile? node dist/cli.js probe <handle>')
+      return 1
+    }
+    const session = sessionFor(s.browser.sessionRoot, s.instagram.account)
+    const browser = await Browser.open({ ...s, browser: { ...s.browser, headless: false } }, session.dir)
+    const show = async (label: string) => {
+      const page = await browser.state()
+      console.log(`\n--- ${label} ---`)
+      console.log(`url    ${page.url}`)
+      console.log(`found  ${page.found}${page.found > page.candidates.length ? ` (list cut to ${page.candidates.length})` : ''}`)
+      for (const c of page.candidates) console.log(`  ${c.i}) [${c.editable ? 'type' : 'click'}] ${c.name}`)
+    }
+    try {
+      await browser.goto(`${s.instagram.baseUrl}/${handle}/`)
+      await browser.settle(3000)
+      await show('the profile, as the agent reads it')
+
+      const wait = createInterface({ input: process.stdin, output: process.stdout })
+      await wait.question('\nOpen the message box by hand in that window, then press Enter. ')
+      wait.close()
+      await show('wherever you landed')
+    } finally {
+      await browser.close()
+    }
     return 0
   }
 

@@ -17,6 +17,8 @@ export type PageState = {
   url: string
   title: string
   candidates: Candidate[]
+  /** How many the page really had. More than `candidates` means it was cut. */
+  found: number
 }
 
 export type Usage = { tokensIn: number; tokensOut: number; usd: number }
@@ -39,5 +41,15 @@ export type Step = {
   visionSkipped?: boolean
   /** Set when the page answered the goal itself and no model was asked. */
   reachedWithoutModel?: boolean
+  /**
+   * What the model was shown, and what it said back.
+   *
+   * Written on every step. A rejected answer used to leave nothing behind but
+   * "the page settled nothing", which says what happened and never why.
+   */
+  saw?: string[]
+  replied?: string
+  /** The page had more than the list could hold, so the answer may be off it. */
+  truncated?: boolean
   error?: string
 }

@@ -84,9 +84,9 @@ export class Browser {
       const seen = new Set<string>()
       const out: { i: number; role: string; name: string; editable: boolean }[] = []
       let i = 0
+      let found = 0
 
       for (const node of Array.from(document.querySelectorAll(sel))) {
-        if (i >= cap) break
         const el = node as HTMLElement
         const style = window.getComputedStyle(el)
         if (style.visibility === 'hidden' || style.display === 'none' || Number(style.opacity) === 0) continue
@@ -122,17 +122,23 @@ export class Browser {
         if (seen.has(key)) continue
         seen.add(key)
 
+        found++
+        // Counted before the cap, so the log can say the list was cut rather
+        // than leaving a missing button looking like a missing button.
+        if (i >= cap) continue
+
         el.setAttribute('data-bm-i', String(i))
         out.push({ i, role, name: name || '(empty text box)', editable })
         i++
       }
-      return out
+      return { list: out, found }
     }, MAX_CANDIDATES)
 
     return {
       url: this.page.url(),
       title: await this.page.title(),
-      candidates: candidates.map((c): Candidate => ({ i: c.i, role: asRole(c.role, c.editable), name: c.name, editable: c.editable })),
+      candidates: candidates.list.map((c): Candidate => ({ i: c.i, role: asRole(c.role, c.editable), name: c.name, editable: c.editable })),
+      found: candidates.found,
     }
   }
 

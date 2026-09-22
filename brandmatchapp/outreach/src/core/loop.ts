@@ -51,7 +51,15 @@ export async function pursue(
 
   for (let step = 0; step < max; step++) {
     const state = await browser.state()
-    const record: Step = { at: new Date().toISOString(), goal, url: state.url, candidates: state.candidates.length, decision: null }
+    const record: Step = {
+      at: new Date().toISOString(),
+      goal,
+      url: state.url,
+      candidates: state.candidates.length,
+      decision: null,
+      saw: state.candidates.map((c) => `${c.i}) [${c.editable ? 'type' : 'click'}] ${c.name}`),
+      ...(state.found > state.candidates.length ? { truncated: true } : {}),
+    }
 
     if (opts.until?.(state)) {
       record.reachedWithoutModel = true
@@ -65,6 +73,7 @@ export async function pursue(
       decideCalls++
       usage = addUsage(usage, first.usage)
       choice = first.decision
+      record.replied = first.raw.slice(0, 300)
 
       if (!choice) {
         const second = await fallback(goal, state, () => browser.screenshot(), s)
@@ -72,6 +81,7 @@ export async function pursue(
         else {
           visionCalls++
           usage = addUsage(usage, second.usage)
+          record.replied = `${record.replied ?? ''} | vision: ${second.raw.slice(0, 300)}`
         }
         choice = second.decision
       }

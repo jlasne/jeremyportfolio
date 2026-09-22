@@ -152,10 +152,14 @@ async function one(
     await browser.settle(1500)
     await pause(s.instagram.afterProfile)
 
-    // The composer on screen is the proof the conversation is open. Asked as a
-    // fact about the page, so the model is not paid to confirm what is visible.
+    // The conversation has its own address. Asked as a fact about the page, so
+    // the model is not paid to confirm what the URL already says.
+    //
+    // The first version of this asked whether anything on the page could be
+    // typed into. Instagram's search box answers yes on every page, so every
+    // profile looked like an open conversation and Message was never clicked.
     const open = await pursue(browser, GOAL_OPEN, s, log, {
-      until: (page) => page.candidates.some((c) => c.editable),
+      until: (page) => page.url.includes('/direct/'),
     })
     let usage = open.usage
     let steps = open.steps
