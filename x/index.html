@@ -192,11 +192,6 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .count.over { color: var(--bad); }
 
 .empty { padding: 40px 16px; text-align: center; color: var(--dim); }
-.fact { display: flex; gap: 8px; margin: 0 0 8px; }
-.fact input { flex: 1; min-width: 0; background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: 9px 10px; font-size: 14px; }
-.fact input:focus { border-color: var(--blue); outline: none; }
-.fact .kill { background: transparent; border: 0; color: var(--dim); cursor: pointer; padding: 0 6px; }
-.fact .kill:hover { color: var(--bad); }
 .stat { display: flex; justify-content: space-between; padding: 7px 0; font-size: 14px; }
 .stat span:last-child { font-family: var(--mono); font-size: 13px; }
 .toast {
@@ -233,7 +228,6 @@ button, input, textarea, select { font: inherit; color: inherit; }
       <button data-tab="today" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg><span>Today</span></button>
       <button data-tab="drafts"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.1 5.3L19.5 10l-5.4 1.7L12 17l-2.1-5.3L4.5 10l5.4-1.7z"/><path d="M18.5 15.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg><span>Drafts</span></button>
       <button data-tab="archive"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h7l2 2.5h9V19H3z"/><path d="M3 10h18"/></svg><span>Archive</span></button>
-      <button data-tab="facts"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16l-7-4-7 4z"/></svg><span>Facts</span></button>
     </div>
     <div class="foot"><button class="btn ghost sm" id="out">Log out</button></div>
   </nav>
@@ -378,7 +372,6 @@ function draw() {
   if (tab === "today") { $("#title").textContent = "Today"; $("#sub").textContent = longDate(state.today); v.innerHTML = today(); }
   if (tab === "drafts") { $("#title").textContent = "Drafts"; $("#sub").textContent = state.draftsAt ? "written " + clock(state.draftsAt) : "not written yet"; v.innerHTML = drafts(state.drafts); }
   if (tab === "archive") { $("#title").textContent = "Archive"; $("#sub").textContent = "every day logged"; v.innerHTML = archiveView(); }
-  if (tab === "facts") { $("#title").textContent = "Facts"; $("#sub").textContent = "the only numbers a post may claim"; v.innerHTML = factsView(); }
   wire();
 }
 
@@ -506,35 +499,6 @@ function archiveView() {
     </article>`).join("");
 }
 
-function factsView() {
-  const rows = state.facts.length ? state.facts : [{ label: "", value: "" }];
-  const stale = state.facts.length === 0;
-  return `
-    <div class="row">
-      <p class="lead" style="margin:0 0 6px">The numbers that are true every day, not just today.</p>
-      <p style="color:var(--dim);font-size:14px;margin:0 0 18px">
-        Deals signed. Deals in negotiation. Apps live. MRR.<br>
-        Both writers may claim these and nothing else, so a post cannot invent a figure.
-        Anything they need and cannot find here comes out as <b style="color:var(--ink)">[X]</b>.
-        The interview reads them too, so it stops asking what it already knows.
-      </p>
-      ${stale ? `<p style="color:var(--blue);font-size:14px;margin:0 0 18px">Empty right now, so every post about a deal will say [X]. Two minutes fixes it.</p>` : ""}
-      <div id="rows">
-        ${rows.map((f, i) => `
-          <div class="fact">
-            <input placeholder="${i === 0 ? "Deals signed" : i === 1 ? "In negotiation" : "What it is"}" value="${esc(f.label)}" data-k="label" data-i="${i}">
-            <input placeholder="${i === 0 ? "1" : i === 1 ? "2" : "The number"}" value="${esc(f.value)}" data-k="value" data-i="${i}">
-            <button class="kill" data-del="${i}" aria-label="Remove">✕</button>
-          </div>`).join("")}
-      </div>
-      <div style="display:flex;gap:8px;margin:14px 0 0">
-        <button class="btn ghost sm" id="addFact">Add a fact</button>
-        <button class="btn sm" id="saveFacts">Save</button>
-      </div>
-      <p style="color:var(--dim);font-size:13px;margin:18px 0 0">Nothing updates these on its own. Worth a look each week.</p>
-    </div>`;
-}
-
 /* ── wiring, redone on every draw ───────────────────────────────────── */
 
 function wire() {
@@ -601,30 +565,6 @@ function wire() {
     }));
 
   $("#back")?.addEventListener("click", () => { open_ = null; draw(); });
-
-  $("#addFact")?.addEventListener("click", () => {
-    state.facts = [...readFacts(), { label: "", value: "" }];
-    draw();
-  });
-  v.querySelectorAll("[data-del]").forEach((b) =>
-    b.addEventListener("click", () => {
-      const f = readFacts(); f.splice(Number(b.dataset.del), 1);
-      state.facts = f.length ? f : [{ label: "", value: "" }];
-      draw();
-    }));
-  $("#saveFacts")?.addEventListener("click", async () => {
-    try { state.facts = await call("x.setFacts", { items: readFacts() }); draw(); toast("Facts saved"); }
-    catch (err) { toast(err.message); }
-  });
-}
-
-function readFacts() {
-  const out = [];
-  document.querySelectorAll("#rows .fact").forEach((r) => {
-    const [a, b] = r.querySelectorAll("input");
-    out.push({ label: a.value, value: b.value });
-  });
-  return out;
 }
 
 /* ── the chrome ─────────────────────────────────────────────────────── */

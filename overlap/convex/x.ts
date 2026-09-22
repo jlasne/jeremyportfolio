@@ -37,7 +37,6 @@ import {
  * posts nothing to X or YouTube, ever.
  */
 
-const FACTS_KEY = "facts";
 const MAX_ENTRY = 4000;
 const MAX_ENTRIES = 200;
 const KEEP_DRAFT_DAYS = 3; /* how much recent work the model is shown */
@@ -116,14 +115,6 @@ const pub = (d: DayDoc | null, day: string) =>
 const find = (ctx: { db: any }, day: string) =>
   ctx.db.query("xDays").withIndex("by_day", (q: any) => q.eq("day", day)).unique() as Promise<DayDoc | null>;
 
-async function facts(ctx: { db: any }) {
-  const d = await ctx.db
-    .query("xFacts")
-    .withIndex("by_key", (q: any) => q.eq("key", FACTS_KEY))
-    .unique();
-  return (d?.items ?? []) as { label: string; value: string }[];
-}
-
 /** Answers before the inputs unlock, so a wrong passphrase costs nothing. */
 export const unlock = query({
   args: { passphrase: v.string() },
@@ -133,7 +124,7 @@ export const unlock = query({
   },
 });
 
-/** Everything one screen needs: the day, the facts, and the questions due. */
+/** Everything one screen needs: the day, its feed, and the beat list. */
 export const day = query({
   args: { passphrase: v.string(), day: v.optional(v.string()) },
   handler: async (ctx, a) => {
@@ -144,7 +135,6 @@ export const day = query({
       today: now.day,
       hour: now.hour,
       ...pub(await find(ctx, key), key),
-      facts: await facts(ctx),
       /* the beat list and the bar, so the page does not keep its own copy */
       beats: BEATS.map((b) => ({ id: b.id, label: b.label, hint: b.hint })),
       readyAt: READY_AT,
@@ -273,35 +263,12 @@ export const useDraft = mutation({
   },
 });
 
-/** The facts sheet both prompts read. */
-export const setFacts = mutation({
-  args: {
-    passphrase: v.string(),
-    items: v.array(v.object({ label: v.string(), value: v.string() })),
-  },
-  handler: async (ctx, { passphrase, items }) => {
-    mustBeJeremy(passphrase);
-    const clean = items
-      .map((i) => ({ label: i.label.trim().slice(0, 80), value: i.value.trim().slice(0, 120) }))
-      .filter((i) => i.label && i.value)
-      .slice(0, 20);
-    const old = await ctx.db
-      .query("xFacts")
-      .withIndex("by_key", (q: any) => q.eq("key", FACTS_KEY))
-      .unique();
-    const doc = { key: FACTS_KEY, items: clean, updatedAt: Date.now() };
-    if (old) await ctx.db.replace(old._id, doc);
-    else await ctx.db.insert("xFacts", doc);
-    return clean;
-  },
-});
-
 /* ── what the model is shown ────────────────────────────────────────── */
 
 /**
- * The brief, assembled on the server: the facts sheet, everything logged
- * today, and the last few days of posts so the model can see what has
- * already been said and avoid saying it twice.
+ * The brief, assembled on the server: everything logged today, and the
+ * last few days of posts so the model can see what has already been said
+ * and avoid saying it twice.
  */
 export const context = internalQuery({
   args: { day: v.string() },
@@ -309,7 +276,6 @@ export const context = internalQuery({
     const today = await find(ctx, day);
     const recent = await ctx.db.query("xDays").withIndex("by_day").order("desc").take(KEEP_DRAFT_DAYS + 1);
     return {
-      facts: await facts(ctx),
       entries: today?.entries ?? [],
       previous: recent
         .filter((d) => d.day !== day)
@@ -354,7 +320,6 @@ export const dayFor = internalQuery({
 });
 
 function brief(c: {
-  facts: { label: string; value: string }[];
   entries: { at: number; slot: string; q?: string; text: string }[];
   previous: { day: string; posts: string[] }[];
 }, day: string) {
@@ -364,10 +329,6 @@ function brief(c: {
   };
   const lines: string[] = [];
   lines.push(`DATE: ${day}`);
-  if (c.facts.length) {
-    lines.push("", "FACTS SHEET (current, use these numbers and no others):");
-    for (const f of c.facts) lines.push(`- ${f.label}: ${f.value}`);
-  }
   lines.push("", "TODAY'S LOG (what Jeremy said, in order):");
   if (!c.entries.length) lines.push("- (nothing logged)");
   for (const e of c.entries) {
@@ -416,6 +377,33 @@ async function ask(system: string, user: string, temperature = 0.8): Promise<str
   return text.trim();
 }
 
+/**
+ * How a post is laid out, which matters as much as what it says.
+ *
+ * Left alone the model returns one block of prose at whatever length it
+ * lands on. A post is read on a phone: the hook has to stand alone and 280
+ * is a wall, not a target.
+ */
+const FORMAT = `FORMAT. This matters as much as the words:
+- 280 characters at most, counting the line breaks. This is a wall, not a target. Count before you answer.
+- Never one block of prose. The hook is its own line, then a blank line, then the rest.
+- Two to four short blocks, separated by blank lines.
+- No line longer than twelve words.
+- A list is one item per line, each starting with "- ".
+- No hashtags. No emoji.
+
+The shape, not the content:
+
+41 creators scored before breakfast.
+
+6 cleared the line. Last week it was 2.
+
+The change was one line in the brief.
+Score what they already sell, not follower count.`;
+
+/** Count the way X counts, so an emoji is one character and not two. */
+const len = (s: string) => [...s].length;
+
 /** The X prompt answers in a code block. Take what is inside it. */
 const unfence = (s: string) => s.replace(/^```[a-z]*\n?/i, "").replace(/\n?```$/, "").trim();
 
@@ -437,7 +425,7 @@ export const make = internalAction({
       `${b}\n\nWrite 3 posts from today, one per angle:\n${angles}\n\n` +
         `Each post is about one specific thing that happened today. Name the tool, quote the figure, ` +
         `say what happened at what moment. A post that could have been written on any other day is the ` +
-        `wrong post.\n\n` +
+        `wrong post.\n\n${FORMAT}\n\n` +
         `Output the 3 finished posts in order, plain text, separated by a line containing only ===. ` +
         `No code block, no titles, no commentary.`,
     );
@@ -445,6 +433,29 @@ export const make = internalAction({
       .split(/^\s*={3,}\s*$/m)
       .map((p) => unfence(p))
       .filter(Boolean);
+
+    /* One repair pass on whatever came back too long. Cheap, and the
+       alternative is a post he cannot send. */
+    const posts = await Promise.all(
+      parts.slice(0, POST_ANGLES.length).map(async (body) => {
+        if (len(body) <= 280) return body;
+        try {
+          const cut = unfence(
+            await ask(
+              POST_SYSTEM,
+              `This post is ${len(body)} characters. Cut it to 280 or fewer.\n\n` +
+                `Keep the hook, keep every number, keep the line breaks. Drop whole sentences rather ` +
+                `than trimming words out of all of them.\n\n${FORMAT}\n\n` +
+                `Output the post alone, plain text, no commentary.\n\n---\n${body}`,
+              0.4,
+            ),
+          );
+          return cut && len(cut) < len(body) ? cut : body;
+        } catch {
+          return body;
+        }
+      }),
+    );
 
     const script = await ask(
       SCRIPT_SYSTEM,
@@ -458,7 +469,7 @@ export const make = internalAction({
 
     const at = Date.now();
     const drafts = [
-      ...parts.slice(0, POST_ANGLES.length).map((body, i) => ({
+      ...posts.map((body, i) => ({
         at,
         kind: "post",
         label: POST_ANGLES[i]?.label ?? `Post ${i + 1}`,
@@ -503,11 +514,6 @@ function transcriptOf(entries: { q?: string; text: string }[]) {
     : "(nothing yet)";
 }
 
-const sheetOf = (facts: { label: string; value: string }[]) =>
-  facts.length
-    ? "\n\nALREADY ON RECORD, do not ask for these:\n" + facts.map((f) => `- ${f.label}: ${f.value}`).join("\n")
-    : "";
-
 /**
  * Fill the feed.
  *
@@ -531,7 +537,7 @@ export const fill = action({
 
     const said = await ask(
       INTERVIEW_SYSTEM,
-      `DATE: ${key}\n\nTHE DAY SO FAR:\n${transcriptOf(c.entries)}${sheetOf(c.facts)}\n\n` +
+      `DATE: ${key}\n\nTHE DAY SO FAR:\n${transcriptOf(c.entries)}\n\n` +
         `Write one question for each of these beats, in this order: ${wanted.map((b) => b.id).join(", ")}.\n` +
         `One per line, in the form beat|question. Nothing else, no numbering, no blank lines.`,
       0.7,
@@ -687,11 +693,14 @@ function mailBody(day: string, slot: string, d: ReturnType<typeof blank> | any) 
     ),
   );
 
-  if (d.drafts.length)
+  /* Only what is still unposted: a draft already ticked used is finished
+     business, and repeating it buries the one that still needs sending. */
+  const left = d.drafts.filter((x: { used?: boolean }) => !x.used);
+  if (left.length)
     parts.push(
       box(
-        h("today's drafts") +
-          d.drafts
+        h(`still to post · ${left.length} of ${d.drafts.length}`) +
+          left
             .map(
               (x: any) =>
                 `<div style="margin:0 0 16px">` +
@@ -723,7 +732,9 @@ function mailBody(day: string, slot: string, d: ReturnType<typeof blank> | any) 
     ...(d.entries.length
       ? d.entries.map((e: any) => `[${clock(e.at)}]${e.q ? " " + e.q : ""}\n${e.text}`)
       : ["Nothing yet."]),
-    ...(d.drafts.length ? ["", "TODAY'S DRAFTS", ...d.drafts.map((x: any) => `--- ${x.label} ---\n${x.body}`)] : []),
+    ...(left.length
+      ? ["", `STILL TO POST (${left.length} of ${d.drafts.length})`, ...left.map((x: any) => `--- ${x.label} ---\n${x.body}`)]
+      : []),
   ].join("\n");
 
   return { html, text, subject: `x · ${longDate(day)} · ${SLOT_TITLE[slot] ?? slot}` };

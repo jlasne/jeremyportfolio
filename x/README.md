@@ -13,8 +13,10 @@ three mails ask for more, and at 17:00 the day becomes three X posts and one
 | 17:00 | 3 questions, then the 3 posts and the script, written from the log |
 | 18:00 to 23:00 | one an hour while the drafts sit untouched, each carrying them in full |
 
-Every mail carries the whole day back: the questions, the entries, the
-drafts. The inbox is the archive, whatever happens to the database.
+Every mail carries the whole day back: the questions, the entries, and
+whatever is still unposted. A draft you have ticked used drops out, so the
+mail never buries the one that still needs sending. The inbox is the
+archive, whatever happens to the database.
 
 The evening nudge is the exception, and asks for one thing. Once the drafts
 are written and none of them is ticked used, one lands every hour from 18:00
@@ -75,13 +77,6 @@ the question that produced it, and the feed is a list on the same document.
   archive says what actually shipped. While the day is being written the
   screen says so and offers nothing else.
 - **Archive.** Every day logged, with its entries and its drafts.
-- **Facts.** The numbers that are true every day rather than only today:
-  deals signed, deals in negotiation, apps live, MRR. Three jobs. The
-  writers may claim these and nothing else, so a post cannot invent a
-  figure, and anything they need and cannot find here comes out as `[X]`.
-  The interview reads them so it stops asking what it already knows.
-  Nothing updates them on its own, so they are worth a look each week.
-
 ## Stack
 
 - **`index.html`** is the page, hand written, no build step. X's own palette:
@@ -91,13 +86,14 @@ the question that produced it, and the feed is a list on the same document.
 - **`config.js`** holds the Convex HTTP Actions URL, the same door
   `/overlap` and `/bio` use.
 - **[`overlap/convex/x.ts`](../overlap/convex/x.ts)** is the server: the
-  passphrase, the day, the facts, the generation and the three mails.
+  passphrase, the day, the feed, the generation and the mails.
 - **[`overlap/convex/xprompts.ts`](../overlap/convex/xprompts.ts)** holds
   Jeremy's two system prompts word for word, plus the question bank. They
   live on the server, so the voice is a deploy and the page source gives
   nothing away.
-- **Data** is two tables on the Overlap deployment: `xDays`, one document
-  per day, and `xFacts`, one document.
+- **Data** is one table on the Overlap deployment: `xDays`, one document
+  per day. (`xFacts` is retired and stays declared only so a deploy cannot
+  trip over a document left in it.)
 - **Auth** is a passphrase, the same `BIO_PASSPHRASE` that writes /bio,
   asked once per device and kept in `localStorage`. No accounts, because
   there is exactly one author.
@@ -107,9 +103,9 @@ the question that produced it, and the feed is a list on the same document.
 Two calls to OpenRouter, because the two prompts are two voices and two
 output formats:
 
-1. The X prompt gets the facts sheet, the transcript, and the first line of
-   every post from the last 3 days, then writes 3 posts from 3 angles: the
-   story, the number, the lesson.
+1. The X prompt gets the transcript and the first line of every post from
+   the last 3 days, then writes 3 posts from 3 angles: the story, the
+   number, the lesson.
 2. The video prompt gets the same brief and writes the 60 second script.
 
 Both are about today, and neither may drift into the general. A post is one
@@ -117,6 +113,13 @@ thing that happened, named and numbered: a post that could have run on any
 other day is the wrong post. The script builds its five lines out of the
 same day, and leans on who Jeremy is for one line at most, because the
 Change and the Result are what stop every video sounding like the last one.
+
+Layout is specified separately from voice, because the model left alone
+returns one block of prose at whatever length it lands on. A post is read on
+a phone: the hook stands on its own line, two to four short blocks follow,
+no line runs past twelve words, and 280 characters is a wall. Anything that
+comes back over it gets one repair call that drops whole sentences rather
+than shaving words off all of them.
 
 A third prompt, `INTERVIEW_SYSTEM`, runs the feed: one call to write a batch
 of questions, one call per answer to decide whether to dig. Both cooler than
@@ -157,8 +160,8 @@ If `OVERLAP_ALLOW_ORIGIN` is set, add `https://x.jeremylasne.com` to it.
 3. In Vercel, add a project pointing at this repository with **Root
    Directory** set to `x`, the way `brand` and `brandmatchapp` are set up,
    and give it the domain `x.jeremylasne.com`.
-4. Open the page, enter the passphrase, fill the Facts screen, then press
-   **Send a test mail** to check Resend before 10:00.
+4. Open the page, enter the passphrase, and press **Send a test mail** to
+   check Resend before 10:00.
 
 The cron runs hourly and reads the Paris clock itself, because Convex
 schedules on UTC and Paris moves twice a year. Twenty one hours out of

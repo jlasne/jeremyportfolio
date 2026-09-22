@@ -235,8 +235,11 @@ export default defineSchema({
     updatedAt: v.number(),
   }).index("by_day", ["day"]),
 
-  /* The facts sheet both prompts read: "1 deal signed", "2 in
-     negotiation". One document, key "facts". Edited on the dashboard. */
+  /* Retired. The facts sheet was a second place to keep numbers that the
+     interview already pulls out of the day, so nothing reads or writes
+     this now. The table stays declared because a deploy validates every
+     document, and dropping a table that still holds one stops the deploy.
+     Empty it in the dashboard and this can go. */
   xFacts: defineTable({
     key: v.string(),
     items: v.array(v.object({ label: v.string(), value: v.string() })),
