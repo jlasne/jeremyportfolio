@@ -84,8 +84,8 @@ const SCHEMA = {
     },
     criteria: {
       type: 'array',
-      minItems: 4,
-      maxItems: 9,
+      minItems: 3,
+      maxItems: 5,
       items: {
         type: 'object',
         additionalProperties: false,

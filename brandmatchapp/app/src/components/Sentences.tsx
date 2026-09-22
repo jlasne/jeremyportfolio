@@ -11,17 +11,27 @@ import type { Criterion } from '../types'
 // used to be filtered out by the screen above on every change, which meant
 // Add a sentence added a line and the same keystroke threw it away.
 //
-// Any line can be made non negotiable, three at most. A marked line leaves
-// the score, because a rule you refuse to compromise on is not a matter of
+// Any line can be made non negotiable, two at most. A marked line leaves the
+// score, because a rule you refuse to compromise on is not a matter of
 // degree, and it stops removing anybody: the lead is delivered carrying the
 // count of what it missed. There used to be a separate list of deal breaker
 // questions, written from a library, where a locked one could refuse a whole
 // campaign's target without the client ever being able to switch it off.
+//
+// Three to five sentences, not twelve. The first real food campaign was
+// drafted with nine, and read back they said one thing four ways and then
+// asked for things nobody could see: on the profiles it delivered, 94% scored
+// zero on "their audience actually cooks the recipes and says so". A sentence
+// nearly everybody fails is noise in the ranking and a line the client reads
+// every single time.
 
-export const SENTENCES_MAX = 12
+export const SENTENCES_MAX = 5
+
+/** Fewer than this and there is nothing to rank a lead on. */
+export const SENTENCES_MIN = 3
 
 /** How many sentences a client may make non negotiable. */
-export const BREAKERS_MAX = 3
+export const BREAKERS_MAX = 2
 
 function newId(): string {
   return `c_${Math.random().toString(36).slice(2, 8)}`
@@ -86,7 +96,10 @@ export function Sentences({ list, onChange }: { list: Criterion[]; onChange: (ne
         >
           Add a sentence
         </button>
-        <span className="faint num">{list.length} of {SENTENCES_MAX}</span>
+        <span className="faint num">
+          {list.length} of {SENTENCES_MAX}
+          {list.length < SENTENCES_MIN ? `, ${SENTENCES_MIN - list.length} more to go` : ''}
+        </span>
         <span className="spacer" />
         <span className="faint num">{marked} of {BREAKERS_MAX} non negotiable</span>
       </div>

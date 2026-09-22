@@ -308,7 +308,24 @@ export function settleScore(passScore: number, criteriaCount: number): number {
   return Math.min(max, Math.max(1, Math.round(passScore)))
 }
 
-export const SENTENCES_MAX = 12
+/**
+ * How many sentences a campaign may carry. Three to five.
+ *
+ * It was twelve, and the first real food campaign was drafted with nine. Read
+ * back, nine sentences said one thing four ways and then asked for things the
+ * judge could not see: measured on the profiles it delivered, "their audience
+ * actually cooks the recipes and says so" scored zero on 94% of them, and so
+ * did "they are open to flat-fee sponsored reels".
+ *
+ * A sentence nearly everybody fails is not a filter, because the score turns
+ * nobody away. It is noise in the ranking and a line the client has to read
+ * every time. Five is the ceiling and three the floor: below three there is
+ * nothing to rank on.
+ */
+export const SENTENCES_MAX = 5
+
+/** Fewer than this and there is nothing to rank a lead on. */
+export const SENTENCES_MIN = 3
 
 /**
  * The client's sentences, made safe: one to twelve, each a line of text with
@@ -336,8 +353,14 @@ const NOT_A_SENTENCE = new Set([
 /** What a sentence may ask to have in front of the judge. */
 export const EVIDENCE = ['profile', 'posts', 'links', 'images', 'comments', 'web']
 
-/** How many sentences a client may make non negotiable. */
-export const BREAKERS_MAX = 3
+/**
+ * How many sentences a client may make non negotiable. Two.
+ *
+ * A deal breaker does not remove a lead, it flags one, so a third is a third
+ * badge on the same row and the row stops meaning anything. Two is what a
+ * person reads at a glance.
+ */
+export const BREAKERS_MAX = 2
 
 export function cleanSentences(rows: unknown): {
   id: string
