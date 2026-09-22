@@ -62,6 +62,33 @@ export function handleIn(url: string): string | null {
   return NOT_PEOPLE.has(handle) ? null : handle
 }
 
+/**
+ * The shapes one topic is asked in.
+ *
+ * A single `site:instagram.com "comedy" "Followers" "Posts"` returns nine
+ * handles and then repeats: page two carried nothing new, measured. That is
+ * not a reason to drop the channel, it is a reason to ask more questions.
+ * Google's index of a site is shallow per query and wide across queries, and
+ * a query costs a tenth of a cent while the profile behind it costs 0.23.
+ *
+ * So the topic is asked as the bare word and as the words people actually
+ * put in a profile name. Each shape is a different nine.
+ */
+const SHAPES = ['', 'creator', 'page', 'videos', 'reels', 'official']
+
+export function variants(topics: string[]): string[] {
+  const out: string[] = []
+  for (const topic of topics) {
+    const word = topic.trim()
+    if (!word) continue
+    for (const shape of SHAPES) {
+      const term = shape ? `"${word}" ${shape}` : `"${word}"`
+      out.push(`site:instagram.com ${term} "Followers" "Posts"`)
+    }
+  }
+  return [...new Set(out)]
+}
+
 type Organic = { title?: string; link?: string; snippet?: string }
 
 /**
@@ -75,13 +102,16 @@ async function page(
   key: string,
   q: string,
   opts: { gl?: string; hl?: string; num?: number; page?: number },
-): Promise<{ rows: { handle: string; followers: number | null }[]; error?: string }> {
+): Promise<{ rows: { handle: string; followers: number | null }[]; results?: number; error?: string }> {
   const res = await fetch(SERPER, {
     method: 'POST',
     headers: { 'X-API-KEY': key, 'Content-Type': 'application/json' },
     body: JSON.stringify({ q, gl: opts.gl ?? 'us', hl: opts.hl ?? 'en', num: opts.num ?? 10, page: opts.page ?? 1 }),
   })
-  if (!res.ok) return { rows: [], error: `Serper replied ${res.status}` }
+  if (!res.ok) {
+    const why = await res.text().catch(() => '')
+    return { rows: [], error: `Serper replied ${res.status}${why ? `: ${why.slice(0, 200)}` : ''}` }
+  }
   const body = (await res.json()) as { organic?: Organic[] }
   const rows: { handle: string; followers: number | null }[] = []
   const seen = new Set<string>()
@@ -91,7 +121,7 @@ async function page(
     seen.add(handle)
     rows.push({ handle, followers: followersIn(`${r.title ?? ''} ${r.snippet ?? ''}`) })
   }
-  return { rows }
+  return { rows, results: (body.organic ?? []).length }
 }
 
 /**
@@ -110,6 +140,10 @@ export const search = internalAction({
     queries: v.optional(v.array(v.string())),
     /** Result pages per query. Each one is a search and costs a tenth of a cent. */
     pages: v.optional(v.number()),
+    /** How many query shapes to ask. Each topic makes six. */
+    maxQueries: v.optional(v.number()),
+    /** How many of the campaign's countries to read the results from. */
+    maxPlaces: v.optional(v.number()),
     /** Buy the profiles found. Off by default, so a first look costs one cent. */
     buy: v.optional(v.boolean()),
   },
@@ -126,42 +160,47 @@ export const search = internalAction({
     const lo = window.followersMin ?? 0
     const hi = window.followersMax ?? Number.MAX_SAFE_INTEGER
 
-    const words = (args.queries?.length ? args.queries : plan.topics ?? []).slice(0, 10)
-    if (!words.length) return { error: 'Nothing to search for' }
-    const pages = Math.max(1, Math.min(args.pages ?? 3, 10))
+    const topics = (args.queries?.length ? args.queries : plan.topics ?? []) as string[]
+    if (!topics.length) return { error: 'Nothing to search for' }
+    const asks = variants(topics).slice(0, args.maxQueries ?? 60)
+    const pages = Math.max(1, Math.min(args.pages ?? 2, 10))
+
+    // The country the results are read from. Google answers the same words
+    // differently per market, so a campaign selling into five countries has
+    // five indexes to read rather than one, at no extra cost per country.
+    const places = ((plan.countries ?? []) as string[]).map((c) => c.toLowerCase()).slice(0, args.maxPlaces ?? 2)
+    const markets = places.length ? places : ['us']
 
     const found = new Map<string, number | null>()
     const perQuery: Record<string, unknown>[] = []
     let searches = 0
 
-    for (const word of words) {
-      // Profile pages only, and only the ones whose description carries the
-      // count we are about to filter on. Asking for it in the query is what
-      // makes the snippet carry it.
-      const q = `site:instagram.com "${word}" "Followers" "Posts"`
-      let fresh = 0
-      let sized = 0
-      let inWindow = 0
-      for (let p = 1; p <= pages; p++) {
-        const got = await page(key, q, { page: p })
-        searches++
-        if (got.error) { perQuery.push({ query: word, error: got.error }); break }
-        let newHere = 0
-        for (const row of got.rows) {
-          if (found.has(row.handle)) continue
-          found.set(row.handle, row.followers)
-          newHere++
-          if (row.followers !== null) {
-            sized++
-            if (row.followers >= lo && row.followers <= hi) inWindow++
+    for (const q of asks) {
+      for (const gl of markets) {
+        let fresh = 0
+        let sized = 0
+        let inWindow = 0
+        for (let p = 1; p <= pages; p++) {
+          const got = await page(key, q, { page: p, gl })
+          searches++
+          if (got.error) { perQuery.push({ query: q, gl, error: got.error }); break }
+          let newHere = 0
+          for (const row of got.rows) {
+            if (found.has(row.handle)) continue
+            found.set(row.handle, row.followers)
+            newHere++
+            if (row.followers !== null) {
+              sized++
+              if (row.followers >= lo && row.followers <= hi) inWindow++
+            }
           }
+          fresh += newHere
+          // A page that repeated everything is the end of this query, and the
+          // next page would be another tenth of a cent for the same rows.
+          if (newHere === 0) break
         }
-        fresh += newHere
-        // A page that repeated everything is the end of this query, and the
-        // next page would be another tenth of a cent for the same rows.
-        if (newHere === 0) break
+        perQuery.push({ query: q.replace('site:instagram.com ', ''), gl, found: fresh, sized, inWindow })
       }
-      perQuery.push({ query: word, found: fresh, sized, inWindow })
     }
 
     // The whole point: the window is applied before a penny is spent on a
@@ -174,7 +213,9 @@ export const search = internalAction({
 
     const out: Record<string, unknown> = {
       window,
-      queries: words.length,
+      topics: topics.length,
+      queries: asks.length,
+      markets,
       searches,
       costCents: Math.round(searches * CENTS_PER_SEARCH * 100) / 100,
       handles: found.size,
@@ -191,5 +232,56 @@ export const search = internalAction({
       handles: worth, campaignId: args.campaignId, channel: 'google',
     })
     return { ...out, ...run }
+  },
+})
+
+/**
+ * One raw query, reported and never bought from.
+ *
+ * The shape of the query decides everything this channel is worth, and it is
+ * not guessable: quoting the words Instagram puts in its description sounds
+ * right and returns almost nothing, because Google matches quoted terms
+ * against the indexed document rather than the description it renders.
+ *
+ * So the shapes are measured against each other before one is chosen. Each
+ * page is one search, which is a tenth of a cent, and Serper gives 2,500 of
+ * them away.
+ */
+export const probe = internalAction({
+  args: {
+    q: v.string(), pages: v.optional(v.number()), num: v.optional(v.number()),
+    gl: v.optional(v.string()), hl: v.optional(v.string()),
+  },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<Record<string, unknown>> => {
+    const key = process.env.SERPER_API_KEY
+    if (!key) return { error: 'SERPER_API_KEY is not set', blocked: true }
+    const pages = Math.max(1, Math.min(args.pages ?? 1, 10))
+
+    const found = new Map<string, number | null>()
+    let searches = 0
+    for (let p = 1; p <= pages; p++) {
+      const got = await page(key, args.q, { page: p, num: args.num, gl: args.gl, hl: args.hl })
+      searches++
+      if (got.error) return { q: args.q, searches, error: got.error }
+      let newHere = 0
+      for (const row of got.rows) {
+        if (found.has(row.handle)) continue
+        found.set(row.handle, row.followers)
+        newHere++
+      }
+      if (newHere === 0) break
+    }
+
+    const sizes = [...found.values()].filter((n): n is number => n !== null)
+    return {
+      q: args.q,
+      searches,
+      /** Serper charges two credits for a page of more than ten results. */
+      credits: searches * ((args.num ?? 10) > 10 ? 2 : 1),
+      handles: found.size,
+      sized: sizes.length,
+      sample: [...found.entries()].slice(0, 12).map(([h, n]) => `${h}: ${n ?? '?'}`),
+    }
   },
 })

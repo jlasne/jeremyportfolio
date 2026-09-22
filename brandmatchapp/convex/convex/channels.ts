@@ -259,6 +259,8 @@ export const plan = internalQuery({
       band,
       seeds,
       channels: channelsFor(hard, seeds, Boolean(process.env.SERPER_API_KEY)),
+      /** Where the campaign sells, so a search can be read from each market. */
+      countries: campaign.extracted.countries ?? [],
       /** The words a post search runs on. Niches first, topics after. */
       topics: (campaign.extracted.niches ?? [])
         .filter((n: { enabled: boolean }) => n.enabled)
