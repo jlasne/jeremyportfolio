@@ -181,7 +181,15 @@ Le pipeline manuel, interrogé le 21/09 :
 
 Sur des graines de moins de 100k abonnés, ils mesurent aujourd'hui 94% de fiches sans aucun voisin. De notre côté : 1 fiche sur 40 en portait, et zéro sur 214 dans un run par adresse directe.
 
-Leur hypothèse, non vérifiée : Instagram a cessé de remplir ce champ pour les requêtes non connectées, que l'acteur Apify utilise.
+Deux lectures possibles, et elles ne mènent pas au même endroit.
+
+**L'épuisement, avancé par Jeremy.** Ils ont récolté les voisins de leurs graines en quatre jours. Ensuite les mêmes graines rendaient les mêmes comptes, déjà connus, donc comptés comme zéro nouveau. Le canal marcherait encore, il n'aurait plus rien à donner sur ces graines-là.
+
+**Le champ vide, ce que nos runs mesurent.** Chez nous, 1 fiche sur 40 portait des voisins, et zéro sur 214 dans un run par adresse directe. Ce n'est pas un doublon compté à zéro, c'est un champ absent. Sur des profils qu'on voyait pour la première fois.
+
+Les deux peuvent être vraies en même temps : le champ se vide chez nous, et leurs graines sont épuisées chez eux.
+
+**Tranché en chantier 0.** Le coût est nul et la réponse décide si les vagues ont un moteur.
 
 Ce qui marche encore chez eux est une API interne d'Instagram appelée depuis un navigateur connecté. Gratuite, 80 comptes par appel, 42 à 54 inédits par graine, 2 à 4% d'échec. Hors conditions d'utilisation, et sur un compte qui peut être suspendu.
 
