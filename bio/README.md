@@ -9,26 +9,33 @@ passphrase writes it.
 
 | Group | Fields | Goal |
 | --- | --- | --- |
-| 🍽️ Intake | coffee (a time per cup), water, meals (time + kcal each) | coffee **max 2 cups**, water **4 L** (8 × 50cl) |
-| 🏃 Sport | sessions (sport, start time, minutes, kcal burned, intensity 1–10), steps | |
+| 🍽️ Intake | coffee (start → end per cup), water, meals (start → end + kcal each) | coffee **max 2 cups**, water **4 L** (8 × 50cl) |
+| 🏃 Sport | sessions (sport, intensity light / moderate / high, start → end, kcal burned), steps | |
 | 😴 Sleep | sleep score, hours slept, bedtime, wake-up | |
 | 📊 Observing | weight, HRV, resting HR, recovery | |
-| 🌿 Levers | sun, deep work | |
+| 🌿 Levers | sun | |
 
 A goal points one way: coffee is a ceiling, met by staying under it, water
 is a floor, met by reaching it. The card shows each goal beside its row and
 the day's count of goals met in its corner.
 
-Times are kept as minutes after midnight. Tapping a coffee today stamps the
-time of the tap, and a new meal today starts at the time it was added; every
-time stays editable. A bedtime after midnight is kept past 24:00 (00:40 is
-1480), so a later night always sorts later.
+Anything that takes time (a cup, a meal, a session) is a **span**: when it
+started and when it finished, kept as minutes after midnight, with its
+length shown beside it. A span may run past midnight; its end is then read
+as the next day. On today, one **Now** button fills the first empty end:
+tapping + on coffee starts the cup, *End now* closes it. A new meal today
+starts now; a session starts empty, since it is logged after. A bedtime
+after midnight is kept past 24:00 (00:40 is 1480).
 
-A **session** is a sport, when it started, its minutes, the calories it
-burned and how hard it felt. Up to four a day.
-The sport field suggests every sport already typed and takes a new name as
-it is, so the list grows by using it. A session without a sport stays on
-screen as a draft and is left out of the save until it has one.
+A **session** is a sport, how hard it was (light, moderate, high, kept as
+1–3), its span and the calories it burned. Up to four a day. The sport field
+suggests every sport already typed and takes a new name as it is, so the
+list grows by using it. A session without a sport stays on screen as a draft
+and is left out of the save until it has one.
+
+**Practice days.** The 14 days before 1 October can be filled in to learn
+the page. They are saved like any day, marked *Practice · not counted*, and
+never read by the matrix or shown in the month.
 
 The four things the body answers with are read **the morning after** the
 day that caused them, because a night is what answers a day.
@@ -52,7 +59,9 @@ day that caused them, because a night is what answers a day.
 - **Auth** — a passphrase, `BIO_PASSPHRASE` on the Convex deployment.
   *Log* asks for it once per device (kept in `localStorage`), then every tap
   saves itself about a second after the last change. There is no Save
-  button. A failed save keeps the change on screen and retries.
+  button. A failed save keeps the change on screen and retries. The bar says
+  why a day cannot be filled in (not come yet, still loading), and *Lock*
+  forgets the passphrase on that device.
 
 ## The correlations
 
@@ -72,14 +81,14 @@ link out above the grid: "Last coffee → Sleep score: Very bad. −5 pts after
 a later last coffee (over 13:23), 15 of 30 days. Clear of luck (q 0.005)."
 A dot means fewer than 4 days on one side; a dash, a measure against itself.
 
-**Everything logged is a row**, 25 measures plus one line per sport:
+**Everything logged is a row**, 26 measures plus one line per sport:
 
 | From | Factors |
 | --- | --- |
-| Coffee | cups, first cup time, last cup time, any cup after 14:00 |
-| Meals | calories eaten, first meal time, last meal time, eating window |
-| Sport | training day vs rest day; then, against my other sessions: sport, length, intensity, kcal burned, start time |
-| Day | water, steps, sun, deep work |
+| Coffee | cups, first cup start, last cup end, any cup after 14:00 |
+| Meals | calories eaten, first meal start, last meal end, eating window, time at the table |
+| Sport | training day vs rest day; then, against my other sessions: sport, intensity, length, start, finish, kcal burned |
+| Day | water, steps, sun |
 | Night | bedtime, wake-up, hours slept, sleep score |
 | Morning | weight, HRV, resting HR, recovery |
 

@@ -172,12 +172,10 @@ export default defineSchema({
             v.boolean(),
             v.string(),
             v.record(v.string(), v.union(v.float64(), v.boolean(), v.string())),
-            /* the day's sport sessions: a sport, start, minutes, kcal, how hard */
-            v.array(v.object({ s: v.string(), t: v.optional(v.float64()), m: v.optional(v.float64()), k: v.optional(v.float64()), i: v.optional(v.float64()) })),
-            /* the time of each coffee, in minutes after midnight */
-            v.array(v.float64()),
-            /* the day's meals: when, and how many calories */
-            v.array(v.object({ t: v.optional(v.float64()), k: v.optional(v.float64()) })),
+            /* the day's sport sessions: a sport, start, end, kcal, how hard (1-3) */
+            v.array(v.object({ s: v.string(), t: v.optional(v.float64()), e: v.optional(v.float64()), k: v.optional(v.float64()), i: v.optional(v.float64()) })),
+            /* the day's cups and meals: start, end, and a meal's calories */
+            v.array(v.object({ t: v.optional(v.float64()), e: v.optional(v.float64()), k: v.optional(v.float64()) })),
           ),
         ),
         v.float64(),

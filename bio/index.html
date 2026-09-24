@@ -131,46 +131,30 @@ h2 {
 .goal.over { color: var(--bad); border-color: rgba(255, 158, 158, .42); background: var(--bad-bg); }
 .nf label em { font-style: normal; margin-right: 7px; }
 
-/* sport sessions: sport name, then minutes, intensity and remove */
+/* sport sessions, meals and cups: shared inputs */
 .sessions { padding: 2px 16px 6px; }
 .srows { display: grid; gap: 8px; }
-.srow { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 4px 0; }
 .sname {
   flex: 1 1 160px; min-width: 0; background: rgba(23, 61, 89, .3); border: 1px solid var(--line);
   padding: 9px 11px; font: 500 15px/1.2 var(--sans);
 }
-.snums { display: flex; gap: 10px; align-items: center; flex: none; }
-.sf { display: flex; align-items: center; gap: 6px; }
-.smin, .skcal, .shard {
-  height: 44px;
-  background: rgba(23, 61, 89, .3); border: 1px solid var(--line); padding: 8px 8px 7px;
-  font: 400 22px/1 var(--display); letter-spacing: .02em; text-align: right;
+.skcal {
+  height: 40px; width: 78px; background: rgba(23, 61, 89, .3); border: 1px solid var(--line); padding: 8px 8px 7px;
+  font: 400 21px/1 var(--display); letter-spacing: .02em; text-align: right;
   appearance: textfield; -moz-appearance: textfield;
 }
-.smin { width: 64px; }
-.skcal { width: 74px; }
-.stime, .ctime {
+.skcal::-webkit-outer-spin-button, .skcal::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.stime {
   background: rgba(23, 61, 89, .3); border: 1px solid var(--line); color: var(--ice);
-  font: 500 15px/1 var(--mono); padding: 9px 8px; min-width: 0;
+  font: 500 14px/1 var(--mono); padding: 9px 7px; min-width: 0; flex: none;
 }
-.stime { width: 128px; flex: none; }
-.stime:focus, .ctime:focus { outline: none; border-color: var(--blue); }
-.stime:disabled, .ctime:disabled { background: transparent; border-color: transparent; opacity: 1; }
-.stime::-webkit-calendar-picker-indicator, .ctime::-webkit-calendar-picker-indicator { filter: invert(.8); }
+.stime::-webkit-calendar-picker-indicator { filter: invert(.8); }
 .nf input[type="time"] { width: 136px; font: 400 22px/1 var(--display); }
 .nf input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(.8); }
-/* the times of the day's cups, under the counter */
 .tapr { flex-wrap: wrap; }
-.times { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 6px; padding: 2px 0 4px 34px; }
-.times[hidden] { display: none; }
-.ctime { width: 118px; font-size: 13px; padding: 6px 6px; }
-.smin::-webkit-outer-spin-button, .smin::-webkit-inner-spin-button,
-.skcal::-webkit-outer-spin-button, .skcal::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.shard { width: 58px; appearance: none; -webkit-appearance: none; text-align: center; cursor: pointer; }
-.shard option { background: var(--ink); color: var(--ice); font-family: var(--sans); font-size: 15px; }
-.sname:focus, .smin:focus, .skcal:focus, .shard:focus { outline: none; border-color: var(--blue); }
-.sname:disabled, .smin:disabled, .skcal:disabled, .shard:disabled { background: transparent; border-color: transparent; opacity: 1; }
-.sname::placeholder, .smin::placeholder, .skcal::placeholder { color: var(--ice-45); }
+.sname:focus, .skcal:focus, .stime:focus { outline: none; border-color: var(--blue); }
+.sname:disabled, .skcal:disabled, .stime:disabled { background: transparent; border-color: transparent; opacity: 1; }
+.sname::placeholder, .skcal::placeholder { color: var(--ice-45); }
 .sunit { font-size: 9.5px; color: var(--blue); letter-spacing: .1em; }
 .sdel {
   width: 36px; height: 36px; border: 1px solid var(--line); background: none; border-radius: 50%;
@@ -184,14 +168,44 @@ h2 {
   padding: 11px 14px 10px; cursor: pointer; width: 100%;
 }
 .addsess:hover { background: rgba(95, 168, 211, .12); }
+/* start → end, with Now and the length */
+.span { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; }
+.span .stime { width: 128px; }
+.sarrow { color: var(--ice-45); }
+.snow {
+  border: 1px solid var(--blue); background: rgba(95, 168, 211, .12); color: var(--blue);
+  padding: 8px 9px 7px; font-size: 9.5px; letter-spacing: .1em; cursor: pointer; white-space: nowrap;
+}
+.snow:hover { background: var(--blue); color: var(--ink); }
+.snow[hidden] { display: none; }
+.slen { color: var(--ice-45); font-size: 10px; white-space: nowrap; }
+.chead .when small.practice { color: var(--good); }
+/* coffee: one line per cup under the counter */
+.cups { flex-basis: 100%; display: grid; gap: 6px; padding: 4px 0 4px 34px; }
+.cups[hidden] { display: none; }
+.cup { display: flex; align-items: center; gap: 8px; }
+.cupn { color: var(--ice-45); font-size: 10px; width: 22px; flex: none; }
+/* meals and sessions: the span, then the numbers */
+.mrow, .sbottom { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: space-between; }
+.mnums { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.srow { display: grid; gap: 8px; padding: 10px 0; border-bottom: 1px dashed rgba(95, 168, 211, .14); }
+.srow:last-child { border-bottom: 0; }
+.stop { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.slevels { display: flex; gap: 4px; flex: none; }
+.slevel {
+  border: 1px solid var(--line); background: rgba(23, 61, 89, .3); color: var(--ice-70);
+  padding: 10px 10px 9px; font-size: 10px; letter-spacing: .1em; cursor: pointer;
+}
+.slevel:disabled { cursor: default; opacity: .5; }
+.slevel:disabled[aria-pressed="true"] { opacity: 1; }
+.slevel.l1[aria-pressed="true"] { background: rgba(110, 231, 168, .18); border-color: var(--good); color: var(--good); }
+.slevel.l2[aria-pressed="true"] { background: rgba(95, 168, 211, .2); border-color: var(--blue); color: var(--blue); }
+.slevel.l3[aria-pressed="true"] { background: rgba(255, 158, 158, .18); border-color: var(--bad); color: var(--bad); }
 .meals { padding: 10px 16px 4px; }
 .mhead { display: flex; align-items: center; gap: 10px; font-size: 15px; padding-bottom: 8px; }
 .mhead em { font-style: normal; font-size: 19px; width: 24px; text-align: center; }
 .mtotal { margin-left: auto; color: var(--blue); }
 .mrows { display: grid; gap: 8px; }
-.mrow { display: flex; align-items: center; gap: 10px; }
-.mrow .mkcal { width: 96px; }
-.mrow .sdel { margin-left: auto; }
 .addsess[hidden] { display: none; }
 
 /* a tap row: label left, minus, the number, plus */
@@ -387,19 +401,14 @@ body.editing { padding-bottom: 88px; }
   .gtitle .gwhen { flex-basis: 100%; margin-left: 30px; }
   .srow { gap: 8px; }
   .sname { flex: 1 1 0; }
-  .snums { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: 8px; align-items: start; }
-  .sf { flex-direction: column; align-items: stretch; gap: 4px; }
-  .sf .smin, .sf .skcal, .sf .shard { width: 100%; }
-  .sf .sunit { text-align: center; }
-  .stime { width: 130px; }
   .tapr .lbl { display: grid; grid-template-columns: 24px minmax(0, 1fr); column-gap: 10px; row-gap: 5px; }
   .tapr .lbl .goal { grid-column: 2; justify-self: start; }
-  .mrow { gap: 6px; }
-  .mrow .stime { width: auto; flex: 1 1 0; min-width: 0; }
-  .mrow .mkcal { width: 82px; }
-  .mrow .sunit { display: none; }
-  .times { padding-left: 0; }
-  .snums .sdel { margin-left: auto; }
+  .span .stime { width: 122px; }
+  .cups { padding-left: 0; }
+  .mnums .sunit { display: none; }
+  .mnums .skcal { width: 82px; }
+  .slevels { width: 100%; }
+  .slevel { flex: 1 1 0; }
   .tapr .lbl i { display: none; }
   .mx .rh { min-width: 136px; font-size: 13px; padding-left: 10px; white-space: normal; }
   .mxhint { display: block; }
@@ -493,14 +502,15 @@ body.editing { padding-bottom: 88px; }
   </form>
   <div class="row" id="tools" hidden>
     <span class="status mono" id="status">Logging. Every change saves itself.</span>
-    <button class="btn" type="button" data-cancel>Done</button>
+    <button class="btn" type="button" id="lock">Lock</button>
+    <button class="btn solid" type="button" data-cancel>Done</button>
   </div>
 </div>
 
 <noscript><p style="text-align:center;padding:40px">The live numbers need JavaScript.</p></noscript>
 
 <script type="module">
-import { SPEC, inGroup, dateKey, shift, daysBetween, allDays, clean, analyze, average, impact, readyDays, isLogged, hasBody, goalMet, sportList } from '/bio/spec.js';
+import { SPEC, inGroup, dateKey, shift, daysBetween, allDays, clean, analyze, average, impact, readyDays, isLogged, hasBody, goalMet, sportList, firstDay, isPractice, spanMin } from '/bio/spec.js';
 
 const $ = id => document.getElementById(id);
 const API = 'https://fiery-eel-944.eu-west-1.convex.site/overlap';
@@ -510,7 +520,7 @@ const DAYS = allDays();
 const today = dateKey();
 /* Before the first and after the last, the card lands on the nearest day
    inside the month, so the page is never blank. */
-const clampDay = k => k < SPEC.start ? SPEC.start : k > SPEC.end ? SPEC.end : k;
+const clampDay = k => k < firstDay() ? SPEC.start : k > SPEC.end ? SPEC.end : k;
 
 const state = { log: {}, updatedAt: 0 };
 let sel = clampDay(today);
@@ -519,7 +529,7 @@ let dirty = false, saving = false, timer = 0, loaded = false;
 
 const at = key => (state.log[key] ||= {});
 const pretty = key => { const [y, m, d] = key.split('-').map(Number); return `${DOW[new Date(y, m - 1, d).getDay()]} ${d} ${MON[m - 1]}`; };
-const editable = key => loaded && !!pass && key <= today && key >= SPEC.start && key <= SPEC.end;
+const editable = key => loaded && !!pass && key <= today && key >= firstDay() && key <= SPEC.end;
 
 /* ── the door ───────────────────────────────────────────────────────── */
 function api(op, args) {
@@ -560,14 +570,15 @@ function drawCard() {
 
   const head = document.createElement('div');
   head.className = 'chead';
-  head.innerHTML = `<div class="when">${pretty(sel)}${sel === today ? '<small>Today</small>' : ''}</div>`;
+  head.innerHTML = `<div class="when">${pretty(sel)}${sel === today ? '<small>Today</small>' : ''}` +
+    `${isPractice(sel) ? '<small class="practice">Practice · not counted</small>' : ''}</div>`;
   const right = document.createElement('div');
   right.className = 'cright';
   const goals = document.createElement('div');
   goals.className = 'goals mono'; goals.id = 'goals';
   const saved = document.createElement('div');
   saved.className = 'saved mono'; saved.id = 'saved';
-  saved.textContent = open ? '' : !loaded ? 'Loading' : sel > today ? 'Not yet' : 'Read only';
+  saved.textContent = open ? '' : !loaded ? 'Loading' : sel > today ? 'Not yet' : pass ? 'Read only' : 'Tap Log to fill in';
   right.append(goals, saved);
   head.append(right);
   el.append(head);
@@ -584,7 +595,8 @@ function drawCard() {
   el.append(note);
 
   $('card').replaceChildren(...el.childNodes);
-  $('dayPill').textContent = `Day ${Math.max(0, Math.min(31, n))} of 31`;
+  $('dayPill').textContent = isPractice(sel) ? `Practice · starts ${pretty(SPEC.start)}` : `Day ${Math.max(0, Math.min(31, n))} of 31`;
+  paintStatus();
   paintGoals(day);
 }
 
@@ -648,48 +660,40 @@ function tapRow(f, day, open) {
       badge.className = `goal mono ${ok ? 'ok' : f.goalDir === 'max' ? 'over' : ''}`;
     }
   };
-  /* A counter with `times` keeps the clock time of each tap. Tapping today
-     stamps the time now; a past day gets an empty slot to fill. Removing one
-     drops the latest time. Every time stays editable. */
-  const strip = f.times ? document.createElement('div') : null;
-  const sorted = () => (Array.isArray(day[f.times]) ? day[f.times] : []).slice().sort((a, b) => a - b);
-  const setTimes = ts => { if (ts.length) day[f.times] = ts.sort((a, b) => a - b); else delete day[f.times]; };
-  const paintTimes = () => {
-    if (!strip) return;
-    const n = Number(day[f.id] ?? 0), ts = sorted();
-    strip.className = 'times';
-    strip.hidden = !n;
-    strip.replaceChildren(...Array.from({ length: n }, (_, i) => {
-      const inp = document.createElement('input');
-      inp.type = 'time'; inp.className = 'ctime'; inp.disabled = !open;
-      inp.value = ts[i] != null ? hhmm(ts[i]) : '';
-      inp.setAttribute('aria-label', `Time of ${f.name.toLowerCase()} ${i + 1}`);
-      inp.addEventListener('change', () => {
-        const cur = sorted(), v = fromHhmm(inp.value);
-        if (i < cur.length) { if (v == null) cur.splice(i, 1); else cur[i] = v; }
-        else if (v != null) cur.push(v);
-        setTimes(cur); paintTimes(); touch();
-      });
-      return inp;
+  /* A counter with `spans` keeps a start and an end for each tap: one line
+     per cup. Tapping + today starts the cup now; on another day it adds an
+     empty line to fill. Tapping − removes the last cup. */
+  const list = f.spans ? document.createElement('div') : null;
+  const cups = () => (day[f.spans] ||= []);
+  const paintCups = () => {
+    if (!list) return;
+    const all = Array.isArray(day[f.spans]) ? day[f.spans] : [];
+    list.className = 'cups';
+    list.hidden = !all.length;
+    list.replaceChildren(...all.map((c, i) => {
+      const row = document.createElement('div');
+      row.className = 'cup';
+      const n = document.createElement('span'); n.className = 'cupn mono'; n.textContent = `#${i + 1}`;
+      row.append(n, spanEl(c, open, `${f.name} ${i + 1}`, () => paintGoals(day)));
+      return row;
     }));
   };
   const bump = d => {
-    const next = Math.max(0, Math.min(f.max, Number(day[f.id] ?? 0) + d));
-    if (next === Number(day[f.id] ?? 0)) return;
-    day[f.id] = next;
-    if (f.times) {
-      const ts = sorted();
-      if (d > 0 && sel === today) ts.push(nowMinutes());
-      while (ts.length > next) ts.pop();
-      setTimes(ts);
+    const now = Number(day[f.id] ?? 0), next = Math.max(0, Math.min(f.max, now + d));
+    if (next === now) return;
+    if (f.spans) {
+      if (d > 0) cups().push(sel === today ? { t: nowMinutes() } : {});
+      else cups().pop();
+      if (!cups().length) delete day[f.spans];
     }
-    paint(); paintTimes(); paintGoals(day); touch();
+    day[f.id] = next;
+    paint(); paintCups(); paintGoals(day); touch();
   };
   minus.addEventListener('click', () => bump(-1));
   plus.addEventListener('click', () => bump(1));
   paint();
   r.append(minus, out, plus);
-  if (strip) { paintTimes(); r.append(strip); }
+  if (list) { paintCups(); r.append(list); }
   return r;
 }
 
@@ -746,10 +750,48 @@ function numField(f, day, open) {
   return w;
 }
 
+/* ── start and end ──────────────────────────────────────────────────── */
+/* Anything that takes time: when it started, when it finished, and how
+   long that was. On today one "Now" button fills the first empty end of
+   the pair, so a cup, a meal or a session is logged live in two taps. */
+const fmtLen = n => n == null ? '' : n < 60 ? `${n} min` : fmtMinutes(n);
+function spanEl(x, open, label, onChange = () => {}) {
+  const w = document.createElement('div');
+  w.className = 'span';
+  const input = (key, what) => {
+    const i = document.createElement('input');
+    i.type = 'time'; i.className = 'stime'; i.disabled = !open;
+    i.value = x[key] != null ? hhmm(x[key]) : '';
+    i.setAttribute('aria-label', `${label}, ${what}`);
+    i.addEventListener('change', () => { const v = fromHhmm(i.value); if (v == null) delete x[key]; else x[key] = v; paint(); onChange(); touch(); });
+    return i;
+  };
+  const start = input('t', 'start'), end = input('e', 'end');
+  const arrow = document.createElement('span'); arrow.className = 'sarrow'; arrow.textContent = '→';
+  const now = document.createElement('button');
+  now.type = 'button'; now.className = 'snow mono';
+  now.addEventListener('click', () => {
+    const key = x.t == null ? 't' : 'e';
+    x[key] = nowMinutes();
+    (key === 't' ? start : end).value = hhmm(x[key]);
+    paint(); onChange(); touch();
+  });
+  const len = document.createElement('span'); len.className = 'slen mono';
+  const paint = () => {
+    now.hidden = !open || sel !== today || (x.t != null && x.e != null);
+    now.textContent = x.t == null ? 'Start now' : 'End now';
+    now.setAttribute('aria-label', `${label}: ${now.textContent.toLowerCase()}`);
+    len.textContent = fmtLen(spanMin(x));
+  };
+  paint();
+  w.append(start, arrow, end, now, len);
+  return w;
+}
+
 /* ── meals ──────────────────────────────────────────────────────────── */
-/* When I ate and how many calories, one line a meal. Adding one today
-   stamps the time now; the calories come from Yazio. The day's total is
-   the sum, shown as it grows. */
+/* One line a meal: when it started, when it finished, its calories from
+   Yazio. Adding one today starts it now. The day's total shows as it
+   grows. */
 function mealsEl(day, open) {
   const wrap = document.createElement('div');
   wrap.className = 'meals';
@@ -775,11 +817,6 @@ function mealsEl(day, open) {
     rows.replaceChildren(...ms.map((m, idx) => {
       const r = document.createElement('div');
       r.className = 'mrow';
-      const at = document.createElement('input');
-      at.type = 'time'; at.className = 'stime'; at.disabled = !open;
-      at.value = m.t != null ? hhmm(m.t) : '';
-      at.setAttribute('aria-label', `Time of meal ${idx + 1}`);
-      at.addEventListener('change', () => { const v = fromHhmm(at.value); if (v == null) delete m.t; else m.t = v; touch(); });
       const k = document.createElement('input');
       k.type = 'number'; k.inputMode = 'numeric'; k.className = 'skcal mkcal';
       k.min = '0'; k.max = String(SPEC.meal.kcal); k.placeholder = 'kcal';
@@ -799,7 +836,10 @@ function mealsEl(day, open) {
         if (!day.meals.length) delete day.meals;
         render(); touch();
       });
-      r.append(at, k, u, del);
+      const nums = document.createElement('div');
+      nums.className = 'mnums';
+      nums.append(k, u, del);
+      r.append(spanEl(m, open, `Meal ${idx + 1}`), nums);
       return r;
     }));
     if (!ms.length) {
@@ -822,28 +862,26 @@ function mealsEl(day, open) {
 }
 
 /* ── sport sessions ─────────────────────────────────────────────────── */
-/* A sport, its minutes, how hard it felt. The sport field suggests every
-   sport already typed and takes a new name as it is, so the list grows by
-   using it. A session with no sport yet stays on screen as a draft and is
-   left out of the save until it has one. */
+/* A sport and how hard it was (light, moderate, high), then when it
+   started and finished and the calories it burned. The sport field
+   suggests every sport already typed and takes a new name as it is. A
+   session with no sport yet stays on screen as a draft and is left out of
+   the save until it has one. */
 const SPORTS_ID = 'sportsList';
 function sessionsEl(day, open) {
   const wrap = document.createElement('div');
   wrap.className = 'sessions';
-  const list = document.createElement('datalist');
-  list.id = SPORTS_ID;
-  for (const name of sportList(state.log)) { const o = document.createElement('option'); o.value = name; list.append(o); }
-  wrap.append(list);
-
+  const dl = document.createElement('datalist');
+  dl.id = SPORTS_ID;
+  for (const name of sportList(state.log)) { const o = document.createElement('option'); o.value = name; dl.append(o); }
+  wrap.append(dl);
   const rows = document.createElement('div');
   rows.className = 'srows';
   wrap.append(rows);
-
   const add = document.createElement('button');
   add.type = 'button'; add.className = 'addsess mono';
   add.textContent = '+ Add a session';
 
-  const ss = () => (day.sessions ||= []);
   const render = () => {
     const have = Array.isArray(day.sessions) ? day.sessions : [];
     rows.replaceChildren(...have.map((s, idx) => sessionRow(s, idx)));
@@ -859,41 +897,40 @@ function sessionsEl(day, open) {
   function sessionRow(s, idx) {
     const r = document.createElement('div');
     r.className = 'srow';
+    const top = document.createElement('div');
+    top.className = 'stop';
     const name = document.createElement('input');
     name.type = 'text'; name.className = 'sname'; name.setAttribute('list', SPORTS_ID);
     name.placeholder = 'Sport'; name.maxLength = SPEC.session.name; name.value = s.s || ''; name.disabled = !open;
     name.setAttribute('aria-label', 'Sport');
     name.addEventListener('input', () => { s.s = name.value.trim(); touch(); });
 
-    const at = document.createElement('input');
-    at.type = 'time'; at.className = 'stime'; at.disabled = !open;
-    at.value = s.t != null ? hhmm(s.t) : '';
-    at.setAttribute('aria-label', 'Start time');
-    at.addEventListener('change', () => { const v = fromHhmm(at.value); if (v == null) delete s.t; else s.t = v; touch(); });
+    /* intensity as three buttons, one tap, no menu */
+    const lv = document.createElement('div');
+    lv.className = 'slevels'; lv.setAttribute('role', 'group'); lv.setAttribute('aria-label', 'Intensity');
+    const paintLevels = () => lv.querySelectorAll('button').forEach((b, k) => b.setAttribute('aria-pressed', String(s.i === k + 1)));
+    SPEC.levels.forEach((word, k) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = `slevel l${k + 1} mono`; b.textContent = word; b.disabled = !open;
+      b.addEventListener('click', () => { if (s.i === k + 1) delete s.i; else s.i = k + 1; paintLevels(); touch(); });
+      lv.append(b);
+    });
+    paintLevels();
+    top.append(name, lv);
 
-    const numIn = (key, max, cls, label) => {
-      const x = document.createElement('input');
-      x.type = 'number'; x.inputMode = 'numeric'; x.className = cls;
-      x.min = '0'; x.max = String(max); x.placeholder = '—';
-      x.value = s[key] ?? ''; x.disabled = !open;
-      x.setAttribute('aria-label', label);
-      x.addEventListener('input', () => {
-        const n = Number(x.value);
-        if (x.value === '' || !Number.isFinite(n)) delete s[key]; else s[key] = Math.min(max, Math.max(0, Math.round(n)));
-        touch();
-      });
-      return x;
-    };
-    const min = numIn('m', SPEC.session.minutes, 'smin', 'Minutes');
-    const kcal = numIn('k', SPEC.session.kcal, 'skcal', 'Calories burned');
-
-    const hard = document.createElement('select');
-    hard.className = 'shard'; hard.disabled = !open;
-    hard.setAttribute('aria-label', 'Intensity, 1 to 10');
-    hard.innerHTML = '<option value="">—</option>' + Array.from({ length: SPEC.session.hard }, (_, k) => `<option>${k + 1}</option>`).join('');
-    hard.value = s.i ?? '';
-    hard.addEventListener('change', () => { if (hard.value) s.i = Number(hard.value); else delete s.i; touch(); });
-
+    const bottom = document.createElement('div');
+    bottom.className = 'sbottom';
+    const kcal = document.createElement('input');
+    kcal.type = 'number'; kcal.inputMode = 'numeric'; kcal.className = 'skcal';
+    kcal.min = '0'; kcal.max = String(SPEC.session.kcal); kcal.placeholder = 'kcal';
+    kcal.value = s.k ?? ''; kcal.disabled = !open;
+    kcal.setAttribute('aria-label', 'Calories burned');
+    kcal.addEventListener('input', () => {
+      const n = Number(kcal.value);
+      if (kcal.value === '' || !Number.isFinite(n)) delete s.k; else s.k = Math.min(SPEC.session.kcal, Math.max(0, Math.round(n)));
+      touch();
+    });
+    const u = document.createElement('span'); u.className = 'sunit mono'; u.textContent = 'kcal';
     const del = document.createElement('button');
     del.type = 'button'; del.className = 'sdel'; del.textContent = '×'; del.disabled = !open;
     del.setAttribute('aria-label', 'Remove this session');
@@ -902,21 +939,16 @@ function sessionsEl(day, open) {
       if (!day.sessions.length) delete day.sessions;
       render(); touch();
     });
-
-    const field = (el, t) => {
-      const w = document.createElement('label'); w.className = 'sf';
-      const u = document.createElement('span'); u.className = 'sunit mono'; u.textContent = t;
-      w.append(el, u); return w;
-    };
     const nums = document.createElement('div');
-    nums.className = 'snums';
-    nums.append(field(min, 'min'), field(kcal, 'kcal'), field(hard, '/10'), del);
-    r.append(name, at, nums);
+    nums.className = 'mnums';
+    nums.append(kcal, u, del);
+    bottom.append(spanEl(s, open, `Session ${idx + 1}`), nums);
+    r.append(top, bottom);
     return r;
   }
 
   add.addEventListener('click', () => {
-    ss().push({ s: '' });
+    (day.sessions ||= []).push({ s: '' });
     render();
     rows.querySelector('.srow:last-child .sname')?.focus();
   });
@@ -965,6 +997,7 @@ const fmtAvg = (o, x) => o.id === 'sleepMin' ? fmtMinutes(x) : `${x.toFixed(o.di
 function fmtCut(f, x) {
   if (x == null || !f.fmt) return '';
   const v = f.fmt === 'clock' ? hhmm(x) : f.fmt === 'dur' ? fmtMinutes(x)
+    : f.fmt === 'level' ? SPEC.levels[Math.max(0, Math.min(SPEC.levels.length - 1, Math.floor(x) - 1))].toLowerCase()
     : f.fmt === 'steps' ? `${Math.round(x / 100) * 100} steps` : `${Math.round(x * 10) / 10} ${f.fmt}`;
   return ` (over ${v})`;
 }
@@ -1103,7 +1136,24 @@ function stamp() {
 }
 
 /* ── the unlock bar ─────────────────────────────────────────────────── */
+/* What the bar says once unlocked: logging, or why this day is shut. */
+function paintStatus() {
+  const st = $('status');
+  if (!st || !pass) return;
+  st.classList.remove('bad');
+  st.textContent = editable(sel) ? (isPractice(sel) ? 'Practice day. Saved, never counted.' : 'Logging. Every change saves itself.')
+    : !loaded ? 'Loading the log first.'
+    : sel > today ? `${pretty(sel)} has not come yet. Pick today to log.`
+    : 'This day is outside the log.';
+}
+/* Lock forgets the password on this device; Log asks for it again. */
+$('lock').addEventListener('click', () => {
+  pass = '';
+  try { localStorage.removeItem('bio.pass'); } catch {}
+  closeBar(); draw();
+});
 function openBar(unlocked) {
+  paintStatus();
   $('bar').hidden = false;
   document.body.classList.add('editing');
   $('gate').hidden = unlocked; $('tools').hidden = !unlocked;
@@ -1144,22 +1194,25 @@ $('gate').addEventListener('submit', async e => {
 $('csv').addEventListener('click', () => {
   const cols = SPEC.fields;
   const q = x => `"${String(x).replace(/"/g, '""')}"`;
-  const head = ['date', ...cols.map(c => c.id), 'coffee_times', 'meals', 'eaten_kcal', 'sessions', 'sport_min', 'sport_kcal', 'sport_hardest', 'note'];
+  const head = ['date', 'practice', ...cols.map(c => c.id), 'coffee_cups', 'meals', 'eaten_kcal', 'sessions', 'sport_min', 'sport_kcal', 'sport_hardest', 'note'];
   const lines = [head.join(',')];
-  for (const key of DAYS) {
+  const span = x => `${x.t != null ? hhmm(x.t) : '?'}-${x.e != null ? hhmm(x.e) : '?'}`;
+  const keys = [...new Set([...Object.keys(state.log).filter(k => k < SPEC.start), ...DAYS])].sort();
+  for (const key of keys) {
     const d = state.log[key] || {};
     const ss = (d.sessions || []).filter(x => x.s);
-    lines.push([key, ...cols.map(c => {
+    const mins = ss.map(spanMin).filter(Number.isFinite);
+    lines.push([key, isPractice(key) ? '1' : '0', ...cols.map(c => {
       const v = d[c.id];
       return v === true ? '1' : v == null ? (c.kind === 'flag' ? '0' : '') : c.kind === 'time' ? hhmm(v) : String(v);
     }),
-    q((d.coffeeAt || []).map(hhmm).join(' ')),
-    q((d.meals || []).map(m => `${m.t != null ? hhmm(m.t) : '?'} ${m.k ?? '?'}kcal`).join('; ')),
+    q((d.cups || []).map(span).join(' ')),
+    q((d.meals || []).map(m => `${span(m)} ${m.k ?? '?'}kcal`).join('; ')),
     (d.meals || []).some(m => Number.isFinite(m.k)) ? d.meals.reduce((a, m) => a + (m.k || 0), 0) : '',
-    q(ss.map(x => `${x.s}${x.t != null ? ` @${hhmm(x.t)}` : ''}${x.m != null ? ` ${x.m}min` : ''}${x.k != null ? ` ${x.k}kcal` : ''}${x.i != null ? ` ${x.i}/10` : ''}`).join('; ')),
-    ss.length ? ss.reduce((a, x) => a + (x.m || 0), 0) : '',
+    q(ss.map(x => `${x.s} ${span(x)}${x.i ? ` ${SPEC.levels[x.i - 1]}` : ''}${x.k != null ? ` ${x.k}kcal` : ''}`).join('; ')),
+    mins.length ? mins.reduce((a, b) => a + b, 0) : '',
     ss.length ? ss.reduce((a, x) => a + (x.k || 0), 0) : '',
-    ss.length ? Math.max(...ss.map(x => x.i || 0)) || '' : '',
+    ss.some(x => x.i) ? SPEC.levels[Math.max(...ss.map(x => x.i || 0)) - 1] : '',
     q(d.note || '')].join(','));
   }
   const url = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' }));

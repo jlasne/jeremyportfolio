@@ -6,9 +6,13 @@
    JavaScript on purpose: the page has no build step. */
 
 export const SPEC = {
-  /* The challenge. 31 days, nothing outside them is shown or saved. */
+  /* The challenge. 31 days; only these are shown in the month and read by
+     the matrix. */
   start: '2026-10-01',
   end: '2026-10-31',
+  /* Days before the start that can be filled in to learn the page. They
+     are saved like any day and never counted. */
+  practice: 14,
 
   /* Days of data before the matrix will show a cell. Under this the
      numbers are noise dressed as a finding. */
@@ -32,14 +36,15 @@ export const SPEC = {
 
   /* Every field on a day. `kind` drives the control: tap is a counter,
      flag is on/off, num is typed, time is a clock time kept as minutes after
-     midnight. `goal` is the daily target and `goalDir`
+     midnight. A counter with `spans` keeps a start and an end for each tap
+     (each cup of coffee). `goal` is the daily target and `goalDir`
      says which way it points, so 2 cups of coffee is a ceiling while 4
      litres of water is a floor. `scale` turns the count into what the goal
      is spoken in: eight bottles of 50cl read as 4 L. `max` is the ceiling a
      save is clamped to. */
   fields: [
     { id: 'coffee', group: 'intake', name: 'Coffee', unit: 'cups', kind: 'tap', max: 12, icon: '☕️',
-      goal: 2, goalDir: 'max', times: 'coffeeAt' },
+      goal: 2, goalDir: 'max', spans: 'cups' },
     { id: 'water', group: 'intake', name: 'Water', unit: '×50cl', kind: 'tap', max: 16, icon: '💧',
       goal: 8, goalDir: 'min', scale: 0.5, scaleUnit: 'L' },
 
@@ -56,20 +61,26 @@ export const SPEC = {
     { id: 'readiness', group: 'observe', name: 'Recovery', unit: '/100', kind: 'num', max: 100, icon: '🔋', src: 'Fitbit' },
 
     { id: 'sun', group: 'levers', name: 'Sun', unit: 'min', kind: 'num', max: 600, icon: '☀️' },
-    { id: 'deep', group: 'levers', name: 'Deep work', unit: 'h', kind: 'num', max: 16, step: 0.5, icon: '🧠' },
   ],
 
-  /* A session is a sport, when it started, its minutes, the calories it
-     burned and how hard it felt, 1 to 10. Up to four a day. The list only seeds the picker: any name typed once joins
-     it, and a sport logged often enough earns its own row in the matrix. */
-  sports: ['Run', 'Gym', 'Bike', 'Swim', 'Yoga', 'Hike', 'Football', 'Tennis', 'Climb'],
-  session: { perDay: 4, minutes: 600, hard: 10, kcal: 5000, name: 24 },
+  /* Anything that takes time (a cup, a meal, a session) is a span: when it
+     started and when it finished, minutes after midnight. A span may end
+     after midnight; its end is then read as the next day.
 
-  /* A meal is when I ate and how many calories it held, from Yazio. The
-     day's calories are the sum of its meals. */
+     A session is a sport, its span, the calories it burned and how hard it
+     was: light, moderate or high, kept as 1, 2, 3. Up to four a day. The
+     sport list only seeds the picker: any name typed once joins it, and a
+     sport logged often enough earns its own row in the matrix. */
+  sports: ['Run', 'Gym', 'Bike', 'Swim', 'Yoga', 'Hike', 'Football', 'Tennis', 'Climb'],
+  levels: ['Light', 'Moderate', 'High'],
+  session: { perDay: 4, kcal: 5000, name: 24 },
+
+  /* A meal is its span and the calories it held, from Yazio. The day's
+     calories are the sum of its meals. */
   meal: { perDay: 8, kcal: 5000 },
 
-  /* A cup after this time, in minutes after midnight, counts as a late one. */
+  /* A cup still going after this time, in minutes after midnight, counts as
+     a late one. */
   lateCoffee: 14 * 60,
 
   /* What the body reports. Each gets its own list of what moved it. Each
@@ -96,8 +107,8 @@ export const SPEC = {
      is spoken: "over 17:10", "over 45 min".
 
      Sport is read one dimension at a time. A training day is set against a
-     rest day; everything else about a session (its sport, length,
-     intensity, calories, start time) is set against my other sessions, so
+     rest day; everything else about a session (its sport, intensity,
+     length, start, finish, calories) is set against my other sessions, so
      "a harder session" means harder than my usual session, not harder than
      resting.
 
@@ -118,22 +129,23 @@ export const SPEC = {
     { group: 'intake', id: 'mealFirst',   name: 'First meal',       icon: '🥐', split: 'median', from: 'meals', on: 'a later first meal', fmt: 'clock' },
     { group: 'intake', id: 'mealLast',    name: 'Last meal',        icon: '🍝', split: 'median', from: 'meals', on: 'a later last meal', fmt: 'clock' },
     { group: 'intake', id: 'mealWindow',  name: 'Eating window',    icon: '⏳', split: 'median', from: 'meals', on: 'a longer eating window', fmt: 'dur' },
-    { group: 'sport', id: 'sportAny',    name: 'Training day',     icon: '🏃', split: 'flag',   from: 'sessions', on: 'a training day, against a rest day' },
-    { group: 'sport', id: 'sportMin',    name: 'Session length',   icon: '⏱️', split: 'median', from: 'sessions', on: 'a longer session', fmt: 'min' },
-    { group: 'sport', id: 'sportHard',   name: 'Intensity',        icon: '🔥', split: 'median', from: 'sessions', on: 'a harder session', fmt: '/10' },
-    { group: 'sport', id: 'sportKcal',   name: 'Sport calories',   icon: '⚡️', split: 'median', from: 'sessions', on: 'more calories burned', fmt: 'kcal' },
-    { group: 'sport', id: 'sportLate',   name: 'Session time',     icon: '🕒', split: 'median', from: 'sessions', on: 'a later session', fmt: 'clock' },
-    { group: 'sport', id: 'steps',       name: 'Steps',            icon: '👟', split: 'median', on: 'more steps', fmt: 'steps' },
+    { group: 'intake', id: 'mealTime',    name: 'Time at the table', icon: '🍴', split: 'median', from: 'meals', on: 'more time spent eating', fmt: 'min' },
+    { group: 'sport',  id: 'sportAny',    name: 'Training day',     icon: '🏃', split: 'flag',   from: 'sessions', on: 'a training day, against a rest day' },
+    { group: 'sport',  id: 'sportHard',   name: 'Intensity',        icon: '🔥', split: 'median', from: 'sessions', on: 'a harder session', fmt: 'level' },
+    { group: 'sport',  id: 'sportMin',    name: 'Session length',   icon: '⏱️', split: 'median', from: 'sessions', on: 'a longer session', fmt: 'min' },
+    { group: 'sport',  id: 'sportStart',  name: 'Session start',    icon: '🕒', split: 'median', from: 'sessions', on: 'a later start', fmt: 'clock' },
+    { group: 'sport',  id: 'sportEnd',    name: 'Session end',      icon: '🏁', split: 'median', from: 'sessions', on: 'a later finish', fmt: 'clock' },
+    { group: 'sport',  id: 'sportKcal',   name: 'Sport calories',   icon: '⚡️', split: 'median', from: 'sessions', on: 'more calories burned', fmt: 'kcal' },
+    { group: 'sport',  id: 'steps',       name: 'Steps',            icon: '👟', split: 'median', on: 'more steps', fmt: 'steps' },
+    { group: 'sleep',  id: 'bed',         name: 'Bedtime',          icon: '🌙', split: 'median', lag: 0, on: 'a later bedtime', fmt: 'clock' },
+    { group: 'sleep',  id: 'wake',        name: 'Wake-up',          icon: '🌅', split: 'median', lag: 0, on: 'a later wake-up', fmt: 'clock' },
+    { group: 'sleep',  id: 'sleepMin',    name: 'Hours slept',      icon: '🛌', split: 'median', lag: 0, on: 'more sleep', fmt: 'dur' },
+    { group: 'sleep',  id: 'sleepScore',  name: 'Sleep score',      icon: '💤', split: 'median', lag: 0, on: 'a higher sleep score', fmt: 'pts' },
+    { group: 'observe', id: 'weight',     name: 'Weight',           icon: '⚖️', split: 'median', lag: 0, on: 'a heavier morning', fmt: 'kg' },
+    { group: 'observe', id: 'hrv',        name: 'HRV',              icon: '📈', split: 'median', lag: 0, on: 'a higher HRV', fmt: 'ms' },
+    { group: 'observe', id: 'rhr',        name: 'Resting HR',       icon: '❤️', split: 'median', lag: 0, on: 'a higher resting HR', fmt: 'bpm' },
+    { group: 'observe', id: 'readiness',  name: 'Recovery',         icon: '🔋', split: 'median', lag: 0, on: 'a higher recovery', fmt: 'pts' },
     { group: 'levers', id: 'sun',         name: 'Sun',              icon: '☀️', split: 'median', on: 'more sun', fmt: 'min' },
-    { group: 'levers', id: 'deep',        name: 'Deep work',        icon: '🧠', split: 'median', on: 'more deep work', fmt: 'h' },
-    { group: 'sleep', id: 'bed',         name: 'Bedtime',          icon: '🌙', split: 'median', lag: 0, on: 'a later bedtime', fmt: 'clock' },
-    { group: 'sleep', id: 'wake',        name: 'Wake-up',          icon: '🌅', split: 'median', lag: 0, on: 'a later wake-up', fmt: 'clock' },
-    { group: 'sleep', id: 'sleepMin',    name: 'Hours slept',      icon: '🛌', split: 'median', lag: 0, on: 'more sleep', fmt: 'dur' },
-    { group: 'sleep',   id: 'sleepScore', name: 'Sleep score', icon: '💤', split: 'median', lag: 0, on: 'a higher sleep score', fmt: 'pts' },
-    { group: 'observe', id: 'weight',     name: 'Weight',      icon: '⚖️', split: 'median', lag: 0, on: 'a heavier morning', fmt: 'kg' },
-    { group: 'observe', id: 'hrv',        name: 'HRV',         icon: '📈', split: 'median', lag: 0, on: 'a higher HRV', fmt: 'ms' },
-    { group: 'observe', id: 'rhr',        name: 'Resting HR',  icon: '❤️', split: 'median', lag: 0, on: 'a higher resting HR', fmt: 'bpm' },
-    { group: 'observe', id: 'readiness',  name: 'Recovery',    icon: '🔋', split: 'median', lag: 0, on: 'a higher recovery', fmt: 'pts' },
   ],
 };
 
@@ -158,6 +170,10 @@ export const isKey = key => typeof key === 'string' && !Number.isNaN(utcOf(key))
 export const shift = (key, n) => new Date(utcOf(key) + n * 86400000).toISOString().slice(0, 10);
 export const daysBetween = (from, to) => Math.round((utcOf(to) - utcOf(from)) / 86400000);
 
+/* The first day that may be filled in: the practice days before the start. */
+export const firstDay = () => shift(SPEC.start, -SPEC.practice);
+export const isPractice = key => key < SPEC.start;
+
 /* The 31 days of the challenge, first to last. */
 export const allDays = () => {
   const out = [];
@@ -174,51 +190,53 @@ const clampNum = (raw, max, floor = 0) => {
   return Math.min(max, Math.max(floor, Math.round(n * 100) / 100));
 };
 
-/* One session, or nothing: a sport with a name, and a start time, minutes,
-   calories and intensity inside their range. A session without a sport is
-   half-typed, not data. */
+/* A span's start and end, each kept when it is a clock time. */
+function cleanSpan(x, out = {}) {
+  for (const key of ['t', 'e']) {
+    const v = clampNum(x?.[key], 1439);
+    if (v !== undefined) out[key] = Math.round(v);
+  }
+  return out;
+}
+
+/* One session, or nothing: a sport with a name, its span, calories and
+   intensity. A session without a sport is half-typed, not data. */
 function cleanSession(s) {
   if (!s || typeof s !== 'object') return undefined;
   const name = typeof s.s === 'string' ? s.s.trim().slice(0, SPEC.session.name) : '';
   if (!name) return undefined;
-  const out = { s: name };
-  const t = clampNum(s.t, 1439);
-  if (t !== undefined) out.t = Math.round(t);
-  const m = clampNum(s.m, SPEC.session.minutes);
-  if (m !== undefined) out.m = m;
+  const out = cleanSpan(s, { s: name });
   const k = clampNum(s.k, SPEC.session.kcal);
   if (k !== undefined) out.k = Math.round(k);
-  const i = clampNum(s.i, SPEC.session.hard, 1);
-  if (i !== undefined) out.i = i;
+  const i = clampNum(s.i, SPEC.levels.length, 1);
+  if (i !== undefined) out.i = Math.round(i);
   return out;
 }
 
-/* One meal, or nothing: a time, calories, or both. */
+/* One meal, or nothing: its span, its calories, or both. */
 function cleanMeal(m) {
   if (!m || typeof m !== 'object') return undefined;
-  const out = {};
-  const t = clampNum(m.t, 1439);
-  if (t !== undefined) out.t = Math.round(t);
+  const out = cleanSpan(m);
   const k = clampNum(m.k, SPEC.meal.kcal);
   if (k !== undefined) out.k = Math.round(k);
   return Object.keys(out).length ? out : undefined;
 }
 
-/* The times of the day's cups, earliest first, never more than the cups. */
-function cleanTimes(raw, count) {
-  if (!Array.isArray(raw)) return [];
-  return raw.map(x => clampNum(x, 1439)).filter(x => x !== undefined)
-    .map(Math.round).sort((a, b) => a - b).slice(0, count);
-}
+/* When a span ends, as minutes after the day's midnight: past 24:00 when
+   it ran over midnight, the start when no end was logged. */
+export const spanEnd = x => x?.e == null ? x?.t : x.t != null && x.e < x.t ? x.e + 1440 : x.e;
+/* How long a span lasted, when both ends are known. */
+export const spanMin = x => x?.t == null || x?.e == null ? undefined : (x.e - x.t + 1440) % 1440;
 
-/* Decided once for both sides: only days inside the challenge and not
-   after today, only known fields, every number finite and inside range.
-   Flags are booleans, sessions a short list, everything else a number. */
+/* Decided once for both sides: only days from the first practice day to
+   the end, and not after today; only known fields; every number finite and
+   inside range. Flags are booleans, cups, meals and sessions short lists of
+   spans, everything else a number. */
 export function clean(input, today) {
   const log = {};
   const last = today < SPEC.end ? today : SPEC.end;
   const keys = Object.keys(input?.log ?? {})
-    .filter(k => isKey(k) && k >= SPEC.start && k <= last)
+    .filter(k => isKey(k) && k >= firstDay() && k <= last)
     .sort();
   for (const key of keys) {
     const day = input.log[key];
@@ -227,12 +245,17 @@ export function clean(input, today) {
     for (const f of SPEC.fields) {
       const raw = day[f.id];
       if (f.kind === 'flag') { if (raw === true) entry[f.id] = true; continue; }
+      if (f.spans) {
+        /* the spans are the taps: one per cup, timed or not, and the count
+           is how many there are */
+        const list = Array.isArray(day[f.spans]) ? day[f.spans].slice(0, f.max).map(x => cleanSpan(x))
+          : Array.from({ length: clampNum(raw, f.max) ?? 0 }, () => ({}));
+        if (list.length || raw === 0) entry[f.id] = list.length;
+        if (list.length) entry[f.spans] = list;
+        continue;
+      }
       const v = clampNum(raw, f.max);
       if (v !== undefined) entry[f.id] = f.kind === 'time' ? Math.round(v) : v;
-      if (f.times) {
-        const times = cleanTimes(day[f.times], entry[f.id] ?? (Array.isArray(day[f.times]) ? day[f.times].length : 0));
-        if (times.length) { entry[f.times] = times; entry[f.id] ??= times.length; }
-      }
     }
     const sessions = (Array.isArray(day.sessions) ? day.sessions : [])
       .map(cleanSession).filter(Boolean).slice(0, SPEC.session.perDay);
@@ -252,7 +275,7 @@ export function clean(input, today) {
    each decided once so the strip and the matrix agree on what is missing. */
 const IN = new Set(['intake', 'levers']);
 export const isLogged = day =>
-  !!day && (SPEC.fields.some(f => IN.has(f.group) && day[f.id] != null) || !!day.sessions?.length || !!day.coffeeAt?.length || !!day.meals?.length);
+  !!day && (SPEC.fields.some(f => IN.has(f.group) && day[f.id] != null) || !!day.sessions?.length || !!day.meals?.length);
 export const hasBody = day =>
   !!day && SPEC.fields.some(f => !IN.has(f.group) && day[f.id] != null);
 
@@ -278,6 +301,9 @@ const median = xs => {
    without any of that being a field on the form. */
 export function valueOf(day, f) {
   if (!day) return undefined;
+  const has = xs => xs.length > 0;
+  const sum = xs => has(xs) ? xs.reduce((a, b) => a + b, 0) : undefined;
+  const nums = xs => xs.filter(Number.isFinite);
   if (f.from === 'sessions') {
     const ss = Array.isArray(day.sessions) ? day.sessions.filter(s => s?.s) : [];
     if (f.id === 'sportAny') return ss.length ? 1 : 0;
@@ -285,28 +311,29 @@ export function valueOf(day, f) {
        a detail I did not log is unknown, not zero */
     if (!ss.length) return undefined;
     if (f.sport) return ss.some(s => s.s === f.sport) ? 1 : 0;
-    const got = key => ss.map(s => s[key]).filter(Number.isFinite);
-    const sum = xs => xs.length ? xs.reduce((a, b) => a + b, 0) : undefined;
-    if (f.id === 'sportMin') return sum(got('m'));
-    if (f.id === 'sportKcal') return sum(got('k'));
-    if (f.id === 'sportHard') { const xs = got('i'); return xs.length ? Math.max(...xs) : undefined; }
-    if (f.id === 'sportLate') { const xs = got('t'); return xs.length ? Math.max(...xs) : undefined; }
+    if (f.id === 'sportMin') return sum(nums(ss.map(spanMin)));
+    if (f.id === 'sportKcal') return sum(nums(ss.map(s => s.k)));
+    if (f.id === 'sportHard') { const xs = nums(ss.map(s => s.i)); return has(xs) ? Math.max(...xs) : undefined; }
+    if (f.id === 'sportStart') { const xs = nums(ss.map(s => s.t)); return has(xs) ? Math.max(...xs) : undefined; }
+    if (f.id === 'sportEnd') { const xs = nums(ss.map(spanEnd)); return has(xs) ? Math.max(...xs) : undefined; }
     return undefined;
   }
   if (f.from === 'meals') {
     const ms = Array.isArray(day.meals) ? day.meals : [];
-    const ks = ms.map(m => m.k).filter(Number.isFinite), ts = ms.map(m => m.t).filter(Number.isFinite);
-    if (f.id === 'eaten') return ks.length ? ks.reduce((a, b) => a + b, 0) : undefined;
-    if (f.id === 'mealFirst') return ts.length ? Math.min(...ts) : undefined;
-    if (f.id === 'mealLast') return ts.length ? Math.max(...ts) : undefined;
-    if (f.id === 'mealWindow') return ts.length >= 2 ? Math.max(...ts) - Math.min(...ts) : undefined;
+    const starts = nums(ms.map(m => m.t)), ends = nums(ms.map(spanEnd));
+    if (f.id === 'eaten') return sum(nums(ms.map(m => m.k)));
+    if (f.id === 'mealFirst') return has(starts) ? Math.min(...starts) : undefined;
+    if (f.id === 'mealLast') return has(ends) ? Math.max(...ends) : undefined;
+    if (f.id === 'mealWindow') return has(starts) && has(ends) ? Math.max(0, Math.max(...ends) - Math.min(...starts)) : undefined;
+    if (f.id === 'mealTime') return sum(nums(ms.map(spanMin)));
     return undefined;
   }
   if (f.from === 'coffee') {
-    const cups = day.coffee ?? 0, ts = Array.isArray(day.coffeeAt) ? day.coffeeAt : [];
-    if (f.id === 'coffeeLate') return ts.some(t => t >= SPEC.lateCoffee) ? 1 : ts.length || !cups ? 0 : undefined;
-    if (!ts.length) return undefined;
-    return f.id === 'coffeeFirst' ? Math.min(...ts) : Math.max(...ts);
+    const cups = Array.isArray(day.cups) ? day.cups : [];
+    const starts = nums(cups.map(c => c.t)), ends = nums(cups.map(spanEnd));
+    if (f.id === 'coffeeLate') return ends.some(t => t >= SPEC.lateCoffee) ? 1 : has(ends) || !(day.coffee ?? 0) ? 0 : undefined;
+    if (f.id === 'coffeeFirst') return has(starts) ? Math.min(...starts) : undefined;
+    return has(ends) ? Math.max(...ends) : undefined;
   }
   const v = day[f.id];
   if (v === true) return 1;
