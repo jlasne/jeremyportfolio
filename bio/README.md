@@ -79,7 +79,26 @@ water, not fat). "Large" is Cohen's d of 0.8 or more. The move
 in the result's own unit sits under the word, and tapping a cell spells the
 link out above the grid: "Last coffee → Sleep score: Very bad. −5 pts after
 a later last coffee (over 13:23), 15 of 30 days. Clear of luck (q 0.005)."
-A dot means fewer than 4 days on one side; a dash, a measure against itself.
+A dash is a measure against itself.
+
+**The grid opens on day 2** and fills in as the days add up. A cell still
+gathering data shows how far it has come ("2/6": two comparable days of the
+six it needs); a dot has the days but fewer than 3 on one side. Until day 21
+a line above the grid says it is early. A neutral cell with a medium gap that
+would pass on its own (p < 0.05) shows a faint dashed **lean**, "Leaning bad"
+or "Leaning good": it has not cleared the luck check, and on simulated
+months with no real effect about 7 of 150 cells lean by chance, so it is
+something to watch, never a verdict.
+
+Measured on 20 simulated months, cut at each point in the month:
+
+| Day | False impacts, no real effect | Real impacts, planted effects | Cells readable |
+| --- | --- | --- | --- |
+| 2 | 0 | 0 | 0% |
+| 7 | 0.05 | 0 | 62% |
+| 14 | 0.30 | 1.6 | 85% |
+| 21 | 0.20 | 4.3 | 87% |
+| 31 | 0.40 | 8.7 | 86% |
 
 **Everything logged is a row**, 26 measures plus one line per sport:
 
@@ -113,8 +132,7 @@ On 20 months with planted effects it found 6.3 of them a month.
 two rows can claim the same kilo. When two rows tell one story, change one
 of them alone for a week.
 
-A link needs 4 days on each side, and the whole section stays shut until 21
-days carry both halves of the day.
+A cell needs 6 comparable days with at least 3 on each side.
 
 ## Filling the body numbers
 

@@ -14,11 +14,15 @@ export const SPEC = {
      are saved like any day and never counted. */
   practice: 14,
 
-  /* Days of data before the matrix will show a cell. Under this the
-     numbers are noise dressed as a finding. */
-  minDays: 21,
+  /* Days with both halves logged before the grid shows, so it can be
+     watched from day 2. Each cell still waits for its own days (minPerSide),
+     and the luck check keeps early noise neutral. */
+  minDays: 2,
+  /* Days before the colours can be trusted as a whole. Until then the page
+     says it is early, and most cells stay neutral anyway. */
+  reliableAt: 21,
   /* Days needed on each side of a split before that one cell is read. */
-  minPerSide: 4,
+  minPerSide: 3,
   /* The share of shown findings allowed to be luck: 1 in 10. */
   maxLuck: 0.1,
   /* A finding at least this far apart (Cohen's d, "large") is very good or
@@ -360,8 +364,9 @@ function strength(on, off) {
    Returns null while either side is too thin to read. `diff` is the move in
    the outcome's own unit, `delta` the same move as a percent of the
    baseline, `d` how far apart the two groups sit. */
-export function cell(log, factor, outcome) {
-  if (factor.id === outcome.id) return null;
+/* The days that can be compared for one factor and one outcome: the factor
+   on a day, the outcome `lag` days later, both logged. */
+export function pairsOf(log, factor, outcome) {
   const lag = factor.lag ?? 1;
   const pairs = [];
   for (const key of allDays()) {
@@ -373,7 +378,15 @@ export function cell(log, factor, outcome) {
     if (!Number.isFinite(x)) continue;
     pairs.push({ x, y });
   }
-  if (pairs.length < SPEC.minPerSide * 2) return null;
+  return pairs;
+}
+/* How many comparable days a cell needs before it is read. */
+export const needPairs = () => SPEC.minPerSide * 2;
+
+export function cell(log, factor, outcome) {
+  if (factor.id === outcome.id) return null;
+  const pairs = pairsOf(log, factor, outcome);
+  if (pairs.length < needPairs()) return null;
 
   let on, off, cut = null;
   if (factor.split === 'median') {
@@ -486,6 +499,8 @@ export function analyze(log) {
   const rows = factorsFor(log).map(factor => ({
     factor,
     cells: SPEC.outcomes.map(o => all.find(x => x.factor === factor && x.outcome === o)?.link ?? null),
+    /* comparable days so far, for the cells still waiting */
+    counts: SPEC.outcomes.map(o => factor.id === o.id ? 0 : pairsOf(log, factor, o).length),
   }));
   return { rows, tested: all.length };
 }
@@ -506,9 +521,16 @@ export const isFinding = link => link.q <= SPEC.maxLuck && link.d >= 0.3;
    once the gap is large (d >= SPEC.veryAt, Cohen's large). */
 export function impact(link) {
   if (!link) return null;
-  if (!isFinding(link)) return { level: 'neutral', very: false };
+  if (!isFinding(link)) return { level: 'neutral', very: false, lean: leanOf(link) };
   return { level: link.good ? 'good' : 'bad', very: link.d >= SPEC.veryAt };
 }
+
+/* Which way a neutral link is heading before it is clear of luck. A lean
+   needs a medium gap that would pass on its own (p < 0.05); it has not
+   passed the check across all links, so it is shown faint and never as a
+   verdict. On simulated months with no real effect about 7 cells of 150
+   lean by chance, so a lean is a thing to watch, not a finding. */
+const leanOf = link => link.p < 0.05 && link.d >= 0.3 ? (link.good ? 'good' : 'bad') : null;
 
 /* Days with both halves on them: what the matrix actually runs on. */
 export function readyDays(log) {

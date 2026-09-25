@@ -333,11 +333,19 @@ h2 {
 }
 .lv small { font: 400 17px/1 var(--display); letter-spacing: .02em; text-transform: none; }
 .lv.neutral { color: rgba(234, 244, 251, .3); }
+/* a neutral cell heading somewhere: faint, dashed, never a verdict */
+.lv.lean-good { border: 1px dashed rgba(110, 231, 168, .3); }
+.lv.lean-bad { border: 1px dashed rgba(255, 158, 158, .3); }
+.lv.lean-good, .lv.lean-good small { color: rgba(110, 231, 168, .62); }
+.lv.lean-bad, .lv.lean-bad small { color: rgba(255, 158, 158, .62); }
+.mxearly { margin: 0 0 14px; color: var(--ice-70); font-size: 14px; max-width: 72ch; }
+.mxearly b { color: var(--ice); font-weight: 500; }
+.mxearly[hidden] { display: none; }
 .lv.good { color: var(--good); border-color: rgba(110, 231, 168, .4); background: var(--good-bg); }
 .lv.vgood { color: #04140b; background: var(--good); border-color: var(--good); }
 .lv.bad { color: var(--bad); border-color: rgba(255, 158, 158, .4); background: var(--bad-bg); }
 .lv.vbad { color: #1e0707; background: var(--bad); border-color: var(--bad); }
-.lv.thin, .lv.self { cursor: default; color: rgba(234, 244, 251, .22); min-width: 0; }
+.lv.thin, .lv.self { cursor: default; color: rgba(234, 244, 251, .22); min-width: 0; font-size: 10px; letter-spacing: .06em; }
 .lv:not(.thin):not(.self):hover { outline: 1px solid var(--ice-45); }
 .lv[aria-pressed="true"] { outline: 2px solid var(--ice); outline-offset: 1px; }
 
@@ -479,7 +487,7 @@ body.editing { padding-bottom: 88px; }
       <li><b>More against less, later against earlier</b>An on/off thing splits on itself. A count or a clock time splits at my own median, so "a later last coffee" means later than my usual.</li>
       <li><b>Five steps</b>Very bad, bad, neutral, good, very good. Good means good for that result, not a bigger number: a resting heart rate going down is good. "Very" means a large gap (Cohen's d of 0.8 or more). For weight, lower is good; a heavier morning after more water is water, not fat.</li>
       <li><b>The strength label</b>How far apart the two groups sit, measured against how much that number swings day to day anyway. A big percent on a wild metric says less than a small one on a steady metric.</li>
-      <li><b>When a cell is neutral</b>Over a hundred links are tested, so some look real by luck. A cell leaves neutral only when it clears a false-discovery check, which keeps luck to at most 1 in 10 of what is coloured. A dot means fewer than 4 days on one side so far. The whole matrix stays shut until 21 days carry both what I did and what the body said.</li>
+      <li><b>When a cell is neutral</b>Over a hundred links are tested, so some look real by luck. A cell leaves neutral only when it clears a false-discovery check, which keeps luck to at most 1 in 10 of what is coloured. A fraction like 2/6 is a cell still gathering comparable days; a dot, one with enough days but fewer than 3 on one side. The grid opens on day 2 and fills in as the days add up; a faint dashed colour shows which way a neutral cell is leaning, before it is clear of luck.</li>
       <li><b>Linked things move together</b>A late third meal is also more calories, so "a later last meal" and "more calories eaten" can both claim the same kilo. When two rows tell one story, change one of them alone for a week.</li>
       <li><b>One month only</b>1 to 31 October 2026. Thirty-one days, one video a day, then the table stands as it is.</li>
     </ul>
@@ -510,7 +518,7 @@ body.editing { padding-bottom: 88px; }
 <noscript><p style="text-align:center;padding:40px">The live numbers need JavaScript.</p></noscript>
 
 <script type="module">
-import { SPEC, inGroup, dateKey, shift, daysBetween, allDays, clean, analyze, average, impact, readyDays, isLogged, hasBody, goalMet, sportList, firstDay, isPractice, spanMin } from '/bio/spec.js';
+import { SPEC, inGroup, dateKey, shift, daysBetween, allDays, clean, analyze, average, impact, needPairs, readyDays, isLogged, hasBody, goalMet, sportList, firstDay, isPractice, spanMin } from '/bio/spec.js';
 
 const $ = id => document.getElementById(id);
 const API = 'https://fiery-eel-944.eu-west-1.convex.site/overlap';
@@ -1008,20 +1016,31 @@ function levelOf({ level, very }) {
   return very ? { cls: 'v' + level, word: `Very ${word}` } : { cls: level, word: word[0].toUpperCase() + word.slice(1) };
 }
 
-function cellEl(factor, o, link) {
+function cellEl(factor, o, link, count) {
   const td = document.createElement('td');
   if (factor.id === o.id) { td.innerHTML = '<span class="lv self" aria-label="same measure">—</span>'; return td; }
-  if (!link) { td.innerHTML = '<span class="lv thin" title="Not enough days on each side yet">·</span>'; return td; }
-  const imp = impact(link), { cls, word } = levelOf(imp);
+  if (!link) {
+    /* still waiting: how many comparable days it has, out of what it needs,
+       so the grid moves every day from the first */
+    const need = needPairs(), have = Math.min(count, need);
+    td.innerHTML = have < need
+      ? `<span class="lv thin" title="${have} of ${need} comparable days so far">${have}/${need}</span>`
+      : `<span class="lv thin" title="Enough days, but fewer than ${SPEC.minPerSide} on one side">·</span>`;
+    return td;
+  }
+  const imp = impact(link), { cls } = levelOf(imp);
+  /* a lean says so; the verdict itself stays neutral */
+  const word = imp.lean ? 'Leaning' : levelOf(imp).word;
   const b = document.createElement('button');
-  b.type = 'button'; b.className = `lv ${cls}`;
-  b.innerHTML = `${word}${imp.level === 'neutral' ? '' : `<small>${fmtMove(o, link.diff)} ${o.unit}</small>`}`;
+  b.type = 'button'; b.className = `lv ${cls}${imp.lean ? ` lean-${imp.lean}` : ''}`;
+  b.innerHTML = `${word}${imp.level === 'neutral' && !imp.lean ? '' : `<small>${fmtMove(o, link.diff)} ${o.unit}</small>`}`;
   b.setAttribute('aria-label', `${factor.name} on ${o.name}: ${word}`);
   b.addEventListener('click', () => {
     document.querySelectorAll('.mx .lv[aria-pressed="true"]').forEach(x => x.setAttribute('aria-pressed', 'false'));
     b.setAttribute('aria-pressed', 'true');
     const clear = imp.level !== 'neutral'
       ? `Clear of luck (q ${link.q.toFixed(3)}).`
+      : imp.lean ? `Leaning ${imp.lean}, but not clear of luck yet (q ${link.q.toFixed(2)}): a lean can still be chance, so neutral for now.`
       : link.q > SPEC.maxLuck ? `Not clear of luck (q ${link.q.toFixed(2)}), so neutral.` : 'Gap too small to matter, so neutral.';
     $('mxdetail').innerHTML =
       `<b>${factor.icon} ${factor.name} → ${o.icon} ${o.name}: ${word}.</b> ` +
@@ -1034,13 +1053,13 @@ function cellEl(factor, o, link) {
 
 function drawMatrix() {
   const ready = readyDays(state.log);
-  $('mxPill').textContent = ready < SPEC.minDays ? `${ready} of ${SPEC.minDays} days` : `${ready} days in`;
+  $('mxPill').textContent = `${ready} day${ready === 1 ? '' : 's'} in`;
   if (ready < SPEC.minDays) {
     const box = document.createElement('div');
     box.className = 'locked';
     box.innerHTML =
       `<div class="big">${ready} / ${SPEC.minDays}</div>` +
-      `<p>The matrix opens on day ${SPEC.minDays}. Under that, a correlation is a coin toss wearing a percentage, so the page keeps it shut.</p>` +
+      `<p>The grid opens on day ${SPEC.minDays}, once two days carry both what I did and what the body said, then fills in as the days add up.</p>` +
       `<div class="meter"><i style="width:${Math.round(ready / SPEC.minDays * 100)}%"></i></div>`;
     $('mxbox').replaceChildren(box);
     return;
@@ -1054,8 +1073,15 @@ function drawMatrix() {
 
   const legend = document.createElement('div');
   legend.className = 'mxlegend';
-  legend.innerHTML = ['vbad Very bad', 'bad Bad', 'neutral Neutral', 'good Good', 'vgood Very good']
-    .map(x => { const i = x.indexOf(' '); return `<span class="lv ${x.slice(0, i)}">${x.slice(i + 1)}</span>`; }).join('');
+  legend.innerHTML = [['vbad', 'Very bad'], ['bad', 'Bad'], ['neutral', 'Neutral'], ['good', 'Good'], ['vgood', 'Very good'],
+    ['neutral lean-bad', 'Leaning bad'], ['neutral lean-good', 'Leaning good']]
+    .map(([cls, word]) => `<span class="lv ${cls}">${word}</span>`).join('');
+
+  const early = document.createElement('p');
+  early.className = 'mxearly';
+  early.hidden = ready >= SPEC.reliableAt;
+  early.innerHTML = `<b>Early days: ${ready} of ${DAYS.length}.</b> "2/${needPairs()}" is a cell still gathering comparable days; it opens at ${needPairs()}. ` +
+    `Most cells stay neutral until about day ${SPEC.reliableAt}. A faint dashed colour is a lean: heading somewhere, not yet clear of luck, and sometimes just chance.`;
 
   const detail = document.createElement('div');
   detail.className = 'mxdetail'; detail.id = 'mxdetail';
@@ -1078,7 +1104,7 @@ function drawMatrix() {
     for (const r of mine) {
       const tr = document.createElement('tr');
       tr.innerHTML = `<th class="rh" scope="row"><em>${r.factor.icon}</em>${r.factor.name}</th>`;
-      SPEC.outcomes.forEach((o, i) => tr.append(cellEl(r.factor, o, r.cells[i])));
+      SPEC.outcomes.forEach((o, i) => tr.append(cellEl(r.factor, o, r.cells[i], r.counts[i])));
       body.append(tr);
     }
   }
@@ -1089,7 +1115,7 @@ function drawMatrix() {
   const hint = document.createElement('p');
   hint.className = 'mxhint mono';
   hint.textContent = `Swipe the grid for all ${SPEC.outcomes.length} results →`;
-  $('mxbox').replaceChildren(sum, legend, detail, hint, wrap);
+  $('mxbox').replaceChildren(sum, early, legend, detail, hint, wrap);
 }
 
 function draw() { drawCard(); drawStrip(); drawMatrix(); }
