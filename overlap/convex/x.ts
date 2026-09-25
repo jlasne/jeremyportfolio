@@ -14,6 +14,8 @@ import {
   SCRIPT_SYSTEM,
   RUN_NOTE,
   POST_ANGLES,
+  REPLY_SYSTEM,
+  REPLY_ANGLES,
   SLOTS,
   SLOT_TITLE,
   INTERVIEW_SYSTEM,
@@ -280,7 +282,12 @@ export const context = internalQuery({
       previous: recent
         .filter((d) => d.day !== day)
         .slice(0, KEEP_DRAFT_DAYS)
-        .map((d) => ({ day: d.day, posts: d.drafts.filter((x) => x.kind === "post").map((x) => x.body) })),
+        .map((d) => ({
+          day: d.day,
+          posts: d.drafts
+            .filter((x) => x.kind === "post")
+            .map((x) => ({ label: x.label, body: x.body })),
+        })),
     };
   },
 });
@@ -321,7 +328,7 @@ export const dayFor = internalQuery({
 
 function brief(c: {
   entries: { at: number; slot: string; q?: string; text: string }[];
-  previous: { day: string; posts: string[] }[];
+  previous: { day: string; posts: { label: string; body: string }[] }[];
 }, day: string) {
   const when = (at: number) => {
     const d = new Date(at + parisOffset(at) * 3_600_000);
@@ -335,10 +342,20 @@ function brief(c: {
     lines.push(e.q ? `- ${when(e.at)} Q: ${e.q}` : `- ${when(e.at)}`);
     lines.push(`  ${e.text.replace(/\n/g, "\n  ")}`);
   }
-  const said = c.previous.filter((p) => p.posts.length);
-  if (said.length) {
-    lines.push("", "ALREADY POSTED IN THE LAST FEW DAYS (do not repeat these angles):");
-    for (const p of said) for (const body of p.posts) lines.push(`- [${p.day}] ${body.split("\n")[0].slice(0, 140)}`);
+  /* Two piles, because they are read for opposite reasons. The stories and
+     the numbers are there so today's are different. The lessons are there
+     so today's is the same one, said again with new evidence. */
+  const flat = c.previous.flatMap((p) => p.posts.map((x) => ({ ...x, day: p.day })));
+  const lessons = flat.filter((x) => /lesson/i.test(x.label));
+  const rest = flat.filter((x) => !/lesson/i.test(x.label));
+
+  if (rest.length) {
+    lines.push("", "ALREADY SAID IN THE LAST FEW DAYS (today's story and number must be different):");
+    for (const x of rest) lines.push(`- [${x.day}] ${x.body.split("\n")[0].slice(0, 140)}`);
+  }
+  if (lessons.length) {
+    lines.push("", "RUNNING LESSON (the point he is building. Say it again with today's evidence, in new words):");
+    for (const x of lessons) lines.push(`- [${x.day}] ${x.body.split("\n")[0].slice(0, 180)}`);
   }
   return lines.join("\n");
 }
@@ -422,7 +439,7 @@ export const make = internalAction({
     const angles = POST_ANGLES.map((a, i) => `${i + 1}. ${a.label}: ${a.ask}`).join("\n");
     const postsRaw = await ask(
       POST_SYSTEM,
-      `${b}\n\nWrite 3 posts from today, one per angle:\n${angles}\n\n` +
+      `${b}\n\nWrite ${POST_ANGLES.length} posts from today, one per angle, in this order:\n${angles}\n\n` +
         `Each post is about one specific thing that happened today. Name the tool, quote the figure, ` +
         `say what happened at what moment. A post that could have been written on any other day is the ` +
         `wrong post.\n\n${FORMAT}\n\n` +
@@ -434,11 +451,17 @@ export const make = internalAction({
       .map((p) => unfence(p))
       .filter(Boolean);
 
+    /* An optional angle that answered NONE wrote nothing, and an empty
+       draft is worse than a missing one. */
+    const kept = POST_ANGLES.map((a, i) => ({ angle: a, body: parts[i] ?? "" })).filter(
+      (x) => x.body && !(x.angle.optional && /^none\b/i.test(x.body)),
+    );
+
     /* One repair pass on whatever came back too long. Cheap, and the
        alternative is a post he cannot send. */
     const posts = await Promise.all(
-      parts.slice(0, POST_ANGLES.length).map(async (body) => {
-        if (len(body) <= 280) return body;
+      kept.map(async ({ angle, body }) => {
+        if (len(body) <= 280) return { angle, body };
         try {
           const cut = unfence(
             await ask(
@@ -450,9 +473,9 @@ export const make = internalAction({
               0.4,
             ),
           );
-          return cut && len(cut) < len(body) ? cut : body;
+          return { angle, body: cut && len(cut) < len(body) ? cut : body };
         } catch {
-          return body;
+          return { angle, body };
         }
       }),
     );
@@ -469,10 +492,10 @@ export const make = internalAction({
 
     const at = Date.now();
     const drafts = [
-      ...posts.map((body, i) => ({
+      ...posts.map(({ angle, body }) => ({
         at,
         kind: "post",
-        label: POST_ANGLES[i]?.label ?? `Post ${i + 1}`,
+        label: angle.label,
         body,
         used: false,
       })),
@@ -610,6 +633,52 @@ export const reply = action({
 
     await ctx.runMutation(internal.x.putAsks, { day: a.day, asks: next });
     return await ctx.runQuery(internal.x.dayFor, { day: a.day });
+  },
+});
+
+/**
+ * Replies.
+ *
+ * X is a room before it is a stage. Paste somebody's post, get three ways
+ * in: one that answers with something from Jeremy's own work, one that
+ * asks, one that takes the other side. Nothing is stored, because a reply
+ * is worth something in the next ten minutes and nothing the day after.
+ */
+export const replies = action({
+  args: { passphrase: v.string(), post: v.string(), note: v.optional(v.string()) },
+  handler: async (ctx, a): Promise<{ label: string; body: string }[]> => {
+    mustBeJeremy(a.passphrase);
+    const post = a.post.trim().slice(0, 4000);
+    if (!post) throw new Error("Paste the post you want to reply to");
+
+    /* Today's log, so a reply can carry a real number rather than an
+       opinion. It is context, never the subject. */
+    const c = await ctx.runQuery(internal.x.context, { day: paris().day });
+    const mine = c.entries.length
+      ? `\n\nWHAT HAPPENED TO JEREMY TODAY, usable as evidence but never the subject:\n` +
+        c.entries.map((e: { text: string }) => `- ${e.text}`).join("\n")
+      : "";
+    const steer = a.note?.trim() ? `\n\nJEREMY WANTS THE REPLY TO GO HERE: ${a.note.trim().slice(0, 500)}` : "";
+
+    const angles = REPLY_ANGLES.map((r, i) => `${i + 1}. ${r.label}: ${r.ask}`).join("\n");
+    const said = await ask(
+      REPLY_SYSTEM,
+      `THE POST HE IS REPLYING TO:\n"""\n${post}\n"""${mine}${steer}\n\n` +
+        `Write ${REPLY_ANGLES.length} replies, one per angle, in this order:\n${angles}\n\n` +
+        `Each under 280 characters, two to four short lines, no preface.\n` +
+        `Output them in order separated by a line containing only ===. No code block, no titles, no commentary.`,
+      0.75,
+    );
+
+    const parts = unfence(said)
+      .split(/^\s*={3,}\s*$/m)
+      .map((p) => unfence(p))
+      .filter(Boolean);
+    if (!parts.length) throw new Error("Nothing came back. Try again.");
+    return parts.slice(0, REPLY_ANGLES.length).map((body, i) => ({
+      label: REPLY_ANGLES[i]?.label ?? `Reply ${i + 1}`,
+      body,
+    }));
   },
 });
 

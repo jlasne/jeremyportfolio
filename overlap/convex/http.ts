@@ -132,6 +132,8 @@ async function answer(ctx: ActionCtx, request: Request): Promise<Response> {
         return ok(await ctx.runAction(api.x.fill, args));
       case "x.reply":
         return ok(await ctx.runAction(api.x.reply, args));
+      case "x.replies":
+        return ok(await ctx.runAction(api.x.replies, args));
       case "x.generate":
         return ok(await ctx.runAction(api.x.generate, args));
       case "x.testMail":

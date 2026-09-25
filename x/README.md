@@ -71,7 +71,13 @@ the question that produced it, and the feed is a list on the same document.
 - **Today.** The bar, the feed of open questions, then the day answered so
   far, newest first, and the /bio tick for the 30 day challenge. One Write
   button, in the bar, and only once five beats are covered.
-- **Drafts.** Three posts and one script. Character count against 280 on
+- **Replies.** Paste somebody else's post and get three ways in: one that
+  answers with something from your own day, one that asks what they are
+  building, one that takes the other side. X is a room before it is a
+  stage, and a reply is cheaper than a post and lands closer to the person.
+  Nothing is stored: a reply is worth something in the next ten minutes and
+  nothing the day after.
+- **Drafts.** Three posts, sometimes a fourth, and one script. Character count against 280 on
   each post, Copy on each, and a link that opens X or YouTube Studio with
   the text ready. A tick on each marks it posted or filmed, so tomorrow's
   archive says what actually shipped. While the day is being written the
@@ -88,7 +94,8 @@ the question that produced it, and the feed is a list on the same document.
 - **[`overlap/convex/x.ts`](../overlap/convex/x.ts)** is the server: the
   passphrase, the day, the feed, the generation and the mails.
 - **[`overlap/convex/xprompts.ts`](../overlap/convex/xprompts.ts)** holds
-  Jeremy's two system prompts word for word, plus the question bank. They
+  Jeremy's two system prompts word for word, the interviewer, the reply
+  voice and the question bank. They
   live on the server, so the voice is a deploy and the page source gives
   nothing away.
 - **Data** is one table on the Overlap deployment: `xDays`, one document
@@ -103,9 +110,8 @@ the question that produced it, and the feed is a list on the same document.
 Two calls to OpenRouter, because the two prompts are two voices and two
 output formats:
 
-1. The X prompt gets the transcript and the first line of every post from
-   the last 3 days, then writes 3 posts from 3 angles: the story, the
-   number, the lesson.
+1. The X prompt gets the transcript and the last 3 days of posts, then
+   writes the story, the number, the lesson, and sometimes a milestone.
 2. The video prompt gets the same brief and writes the 60 second script.
 
 Both are about today, and neither may drift into the general. A post is one
@@ -132,6 +138,23 @@ inventing one.
 
 A generation failure never eats the 17:00 mail. The questions and the day go
 out either way, and **Write the day** on the dashboard retries.
+
+### The four angles
+
+**The story** and **the number** must be new. The last three days of both
+are in the brief under a line saying today's has to be different.
+
+**The lesson** is the opposite, and is the one thing built to repeat. The
+last few lessons are in the brief under RUNNING LESSON, with an instruction
+to say the same point again in new words with today's evidence. A point made
+once is a post. A point made ten times is a position. It starts a new one
+only when the day genuinely taught something else.
+
+**The milestone** is conditional. It is written only when the day carries a
+real number worth marking: a first, a round number crossed, a personal
+record, or a figure that is a multiple of what it was. Otherwise the model
+answers NONE and no fourth draft appears. A manufactured milestone is what
+makes a feed sound like somebody talking to himself.
 
 ## Settings
 
