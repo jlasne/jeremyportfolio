@@ -14,10 +14,6 @@ export const SPEC = {
      are saved like any day and never counted. */
   practice: 14,
 
-  /* Days with both halves logged before the grid shows, so it can be
-     watched from day 2. Each cell still waits for its own days (minPerSide),
-     and the luck check keeps early noise neutral. */
-  minDays: 2,
   /* Days before the colours can be trusted as a whole. Until then the page
      says it is early, and most cells stay neutral anyway. */
   reliableAt: 21,

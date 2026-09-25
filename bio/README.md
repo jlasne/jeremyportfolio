@@ -81,7 +81,7 @@ link out above the grid: "Last coffee → Sleep score: Very bad. −5 pts after
 a later last coffee (over 13:23), 15 of 30 days. Clear of luck (q 0.005)."
 A dash is a measure against itself.
 
-**The grid opens on day 2** and fills in as the days add up. A cell still
+**The grid shows from the start**, empty, and fills in as the days add up. A cell still
 gathering data shows how far it has come ("2/6": two comparable days of the
 six it needs); a dot has the days but fewer than 3 on one side. Until day 21
 a line above the grid says it is early. A neutral cell with a medium gap that

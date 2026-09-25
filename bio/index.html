@@ -349,11 +349,6 @@ h2 {
 .lv:not(.thin):not(.self):hover { outline: 1px solid var(--ice-45); }
 .lv[aria-pressed="true"] { outline: 2px solid var(--ice); outline-offset: 1px; }
 
-.locked { border: 1px solid var(--line); background: rgba(5, 11, 22, .46); padding: clamp(24px, 5vw, 44px); text-align: center; }
-.locked .big { font: 400 clamp(56px, 12vw, 120px)/.9 var(--display); letter-spacing: .02em; color: var(--blue); }
-.locked p { margin: 14px auto 0; max-width: 46ch; color: var(--ice-70); }
-.meter { height: 3px; background: rgba(95, 168, 211, .18); margin: 26px auto 0; max-width: 420px; }
-.meter i { display: block; height: 100%; background: var(--blue); }
 
 /* ── how it works ───────────────────────────────────────────────────── */
 .notes { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px 32px; }
@@ -487,7 +482,7 @@ body.editing { padding-bottom: 88px; }
       <li><b>More against less, later against earlier</b>An on/off thing splits on itself. A count or a clock time splits at my own median, so "a later last coffee" means later than my usual.</li>
       <li><b>Five steps</b>Very bad, bad, neutral, good, very good. Good means good for that result, not a bigger number: a resting heart rate going down is good. "Very" means a large gap (Cohen's d of 0.8 or more). For weight, lower is good; a heavier morning after more water is water, not fat.</li>
       <li><b>The strength label</b>How far apart the two groups sit, measured against how much that number swings day to day anyway. A big percent on a wild metric says less than a small one on a steady metric.</li>
-      <li><b>When a cell is neutral</b>Over a hundred links are tested, so some look real by luck. A cell leaves neutral only when it clears a false-discovery check, which keeps luck to at most 1 in 10 of what is coloured. A fraction like 2/6 is a cell still gathering comparable days; a dot, one with enough days but fewer than 3 on one side. The grid opens on day 2 and fills in as the days add up; a faint dashed colour shows which way a neutral cell is leaning, before it is clear of luck.</li>
+      <li><b>When a cell is neutral</b>Over a hundred links are tested, so some look real by luck. A cell leaves neutral only when it clears a false-discovery check, which keeps luck to at most 1 in 10 of what is coloured. A fraction like 2/6 is a cell still gathering comparable days; a dot, one with enough days but fewer than 3 on one side. The grid shows from the start, empty, and fills in as the days add up; a faint dashed colour shows which way a neutral cell is leaning, before it is clear of luck.</li>
       <li><b>Linked things move together</b>A late third meal is also more calories, so "a later last meal" and "more calories eaten" can both claim the same kilo. When two rows tell one story, change one of them alone for a week.</li>
       <li><b>One month only</b>1 to 31 October 2026. Thirty-one days, one video a day, then the table stands as it is.</li>
     </ul>
@@ -1054,16 +1049,6 @@ function cellEl(factor, o, link, count) {
 function drawMatrix() {
   const ready = readyDays(state.log);
   $('mxPill').textContent = `${ready} day${ready === 1 ? '' : 's'} in`;
-  if (ready < SPEC.minDays) {
-    const box = document.createElement('div');
-    box.className = 'locked';
-    box.innerHTML =
-      `<div class="big">${ready} / ${SPEC.minDays}</div>` +
-      `<p>The grid opens on day ${SPEC.minDays}, once two days carry both what I did and what the body said, then fills in as the days add up.</p>` +
-      `<div class="meter"><i style="width:${Math.round(ready / SPEC.minDays * 100)}%"></i></div>`;
-    $('mxbox').replaceChildren(box);
-    return;
-  }
   const { rows, tested } = analyze(state.log);
   const found = rows.reduce((n, r) => n + r.cells.filter(l => l && impact(l).level !== 'neutral').length, 0);
 
@@ -1080,7 +1065,10 @@ function drawMatrix() {
   const early = document.createElement('p');
   early.className = 'mxearly';
   early.hidden = ready >= SPEC.reliableAt;
-  early.innerHTML = `<b>Early days: ${ready} of ${DAYS.length}.</b> "2/${needPairs()}" is a cell still gathering comparable days; it opens at ${needPairs()}. ` +
+  early.innerHTML = (today < SPEC.start
+      ? `<b>Starts ${pretty(SPEC.start)}.</b> The grid is empty until then. `
+      : `<b>Early days: ${ready} of ${DAYS.length}.</b> `) +
+    `"2/${needPairs()}" is a cell still gathering comparable days; it opens at ${needPairs()}. ` +
     `Most cells stay neutral until about day ${SPEC.reliableAt}. A faint dashed colour is a lean: heading somewhere, not yet clear of luck, and sometimes just chance.`;
 
   const detail = document.createElement('div');

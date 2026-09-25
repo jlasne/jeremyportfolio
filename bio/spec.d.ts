@@ -2,36 +2,74 @@
 
 /** One field on a day: what it is called, what it may hold, how it is shown. */
 export interface Field {
-  id: string; name: string; unit?: string;
-  kind?: 'tap' | 'flag' | 'num';
-  max: number; step?: number; icon?: string; why?: string;
-  src?: string; clock?: boolean;
+  id: string; group: string; name: string; unit?: string;
+  kind: 'tap' | 'flag' | 'num' | 'time';
+  max: number; step?: number; icon: string; src?: string;
+  clock?: boolean; night?: boolean; spans?: string;
+  goal?: number; goalDir?: 'min' | 'max'; scale?: number; scaleUnit?: string;
 }
-export interface Outcome { id: string; name: string; better: 'high' | 'low' }
-export interface Factor { id: string; name: string; icon: string; split: 'flag' | 'zero' | 'median' }
+export interface Group { id: string; name: string; icon: string; when: string }
+export interface Outcome { id: string; name: string; icon: string; unit: string; better: 'high' | 'low'; digits?: number }
+export interface Factor {
+  id: string; group: string; name: string; icon: string;
+  split: 'flag' | 'zero' | 'median'; on: string;
+  from?: 'coffee' | 'meals' | 'sessions'; lag?: number; fmt?: string; sport?: string;
+}
 
-/** A logged day: field id to value. Flags are true, everything else a number. */
-export type Day = Record<string, number | boolean | string>;
+/** Something that takes time: start and end, minutes after midnight. */
+export interface Span { t?: number; e?: number }
+export interface Meal extends Span { k?: number }
+export interface Session extends Span { s: string; k?: number; i?: number }
+
+/** A logged day: field id to value, plus cups, meals and sessions. */
+export type Day = Record<string, number | boolean | string | Span[] | Meal[] | Session[]>;
 export interface Payload { log: Record<string, Day> }
 
 export const SPEC: {
-  start: string; end: string;
-  minDays: number; minPerSide: number;
-  manual: Field[]; body: Field[];
+  start: string; end: string; practice: number;
+  reliableAt: number; minPerSide: number; maxLuck: number; veryAt: number;
+  groups: Group[]; fields: Field[];
+  sports: string[]; levels: string[];
+  session: { perDay: number; kcal: number; name: number };
+  meal: { perDay: number; kcal: number };
+  lateCoffee: number;
   outcomes: Outcome[]; factors: Factor[];
 };
 export const FIELDS: Map<string, Field>;
+export function inGroup(id: string): Field[];
 
 export function dateKey(d?: Date): string;
 export function isKey(key: unknown): key is string;
 export function shift(key: string, n: number): string;
 export function daysBetween(from: string, to: string): number;
+export function firstDay(): string;
+export function isPractice(key: string): boolean;
 export function allDays(): string[];
-export function clean(input: Partial<Payload> | undefined, today: string): Payload;
+
+export function spanEnd(x?: Span): number | undefined;
+export function spanMin(x?: Span): number | undefined;
+/** Accepts anything the page may send; returns only what a day may hold. */
+export function clean(input: { log?: Record<string, unknown> } | undefined, today: string): Payload;
 export function isLogged(day?: Day): boolean;
 export function hasBody(day?: Day): boolean;
+export function goalMet(f: Field, v: number | null | undefined): boolean | null;
 
-export interface Cell { delta: number; label: string; good: boolean; n: number; nOn: number }
-export function cell(log: Record<string, Day>, factor: Factor, outcome: Outcome): Cell | null;
-export function matrix(log: Record<string, Day>): { factor: Factor; cells: (Cell | null)[]; loudest: number }[];
+export interface Link {
+  diff: number; delta: number; d: number; label: string; good: boolean; base: number;
+  cut: number | null; p: number; q?: number; n: number; nOn: number;
+}
+export function valueOf(day: Day | undefined, f: Factor): number | undefined;
+export function pairsOf(log: Record<string, Day>, factor: Factor, outcome: Outcome): { x: number; y: number }[];
+export function needPairs(): number;
+export function cell(log: Record<string, Day>, factor: Factor, outcome: Outcome): Link | null;
+export function welchP(a: number[], b: number[]): number;
+export function sportList(log: Record<string, Day>): string[];
+export function factorsFor(log: Record<string, Day>): Factor[];
+export function analyze(log: Record<string, Day>): {
+  rows: { factor: Factor; cells: (Link | null)[]; counts: number[] }[];
+  tested: number;
+};
+export function average(log: Record<string, Day>, outcome: Outcome): number | null;
+export function isFinding(link: Link): boolean;
+export function impact(link: Link | null): { level: 'neutral' | 'good' | 'bad'; very: boolean; lean?: 'good' | 'bad' | null } | null;
 export function readyDays(log: Record<string, Day>): number;
