@@ -141,6 +141,8 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .stage { padding: 26px 16px; border-bottom: 1px solid var(--line); }
 .stage .lead { color: var(--dim); margin: 0 0 18px; }
 .stage .rowbtns { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.stage textarea, .stage .field { width: 100%; }
+.stage .field { margin: 0; border-radius: 14px; padding: 12px 14px; font-size: 15px; }
 .btn.big { font-size: 17px; padding: 15px 30px; }
 .thinking { display: flex; gap: 10px; align-items: center; color: var(--dim); }
 
@@ -226,6 +228,7 @@ button, input, textarea, select { font: inherit; color: inherit; }
     <div class="logo">𝕏</div>
     <div class="nav" id="nav">
       <button data-tab="today" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg><span>Today</span></button>
+      <button data-tab="replies"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15a3 3 0 0 1-3 3H8l-4 3V6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3z"/></svg><span>Replies</span></button>
       <button data-tab="drafts"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.1 5.3L19.5 10l-5.4 1.7L12 17l-2.1-5.3L4.5 10l5.4-1.7z"/><path d="M18.5 15.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg><span>Drafts</span></button>
       <button data-tab="archive"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h7l2 2.5h9V19H3z"/><path d="M3 10h18"/></svg><span>Archive</span></button>
     </div>
@@ -340,6 +343,19 @@ async function refresh() {
    card can grey itself out while the model reads the answer. */
 let busy = { fill: false, ask: null };
 let writing = false;
+/* Replies are not stored: what is on screen is the whole of it. */
+let rep = { post: "", note: "", out: [], busy: false };
+
+async function makeReplies() {
+  const post = $("#repPost").value.trim();
+  if (!post) return;
+  rep.post = post;
+  rep.note = $("#repNote").value.trim();
+  rep.busy = true; draw();
+  try { rep.out = await call("x.replies", { post: rep.post, note: rep.note || undefined }); }
+  catch (err) { toast(err.message); }
+  rep.busy = false; draw();
+}
 
 async function fillFeed() {
   busy.fill = true; draw();
@@ -371,6 +387,7 @@ function draw() {
   const v = $("#view");
   if (tab === "today") { $("#title").textContent = "Today"; $("#sub").textContent = longDate(state.today); v.innerHTML = today(); }
   if (tab === "drafts") { $("#title").textContent = "Drafts"; $("#sub").textContent = state.draftsAt ? "written " + clock(state.draftsAt) : "not written yet"; v.innerHTML = drafts(state.drafts); }
+  if (tab === "replies") { $("#title").textContent = "Replies"; $("#sub").textContent = "reply to almost everyone"; v.innerHTML = repliesView(); }
   if (tab === "archive") { $("#title").textContent = "Archive"; $("#sub").textContent = "every day logged"; v.innerHTML = archiveView(); }
   wire();
 }
@@ -467,6 +484,40 @@ function drafts(list, readOnly = false) {
   }).join("");
 }
 
+function repliesView() {
+  return `
+    <div class="stage">
+      <p class="lead">Paste what you are replying to. X is a room before it is a stage.</p>
+      <textarea id="repPost" rows="4" placeholder="Paste their post here.">${esc(rep.post)}</textarea>
+      <input id="repNote" class="field" style="margin:10px 0 0" placeholder="Optional: where you want the reply to go" value="${esc(rep.note)}">
+      <div class="bar">
+        <span class="mono">${rep.busy ? "writing" : "3 ways in"}</span>
+        <span class="right">
+          ${rep.out.length && !rep.busy ? `<button class="btn ghost sm" id="repClear">Clear</button>` : ""}
+          <button class="btn blue" id="repGo" ${rep.busy ? "disabled" : ""}>${rep.busy ? '<span class="spin"></span>' : rep.out.length ? "Again" : "Write replies"}</button>
+        </span>
+      </div>
+    </div>
+
+    ${rep.busy
+      ? `<div class="stage"><div class="thinking"><span class="spin"></span> Reading their post…</div></div>`
+      : rep.out.length
+        ? rep.out.map((r, i) => {
+            const n = [...r.body].length;
+            return `
+              <article class="draft">
+                <div class="head">
+                  <span class="label">${esc(r.label)}</span>
+                  <span class="count ${n > 280 ? "over" : ""}">${n} / 280</span>
+                </div>
+                <pre>${esc(r.body)}</pre>
+                <div class="tools"><button class="btn sm repcopy" data-i="${i}">Copy</button></div>
+              </article>`;
+          }).join("")
+        : `<p class="empty">Nothing yet.<br>Paste a post and it gives you three replies in your voice.</p>`}
+  `;
+}
+
 function archiveView() {
   if (open_) {
     return `
@@ -515,6 +566,18 @@ function wire() {
   };
 
   $("#fill")?.addEventListener("click", fillFeed);
+
+  if ($("#repPost")) {
+    grow($("#repPost"), makeReplies, !rep.out.length && !rep.busy);
+    $("#repGo").addEventListener("click", makeReplies);
+    $("#repClear")?.addEventListener("click", () => { rep = { post: "", note: "", out: [], busy: false }; draw(); });
+    v.querySelectorAll(".repcopy").forEach((b) =>
+      b.addEventListener("click", async () => {
+        try { await navigator.clipboard.writeText(rep.out[Number(b.dataset.i)].body); toast("Copied"); }
+        catch { toast("Select it and copy by hand"); }
+      }));
+  }
+
   $("#writeNow")?.addEventListener("click", writeDay);
 
   /* Every card answers itself. */

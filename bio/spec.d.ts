@@ -21,7 +21,11 @@ export interface Span { t?: number; e?: number }
 export interface Meal extends Span { k?: number }
 export interface Session extends Span { s: string; k?: number; i?: number }
 
-/** A logged day: field id to value, plus cups, meals and sessions. */
+/**
+ * A logged day: field id to value, plus the lists `clean` writes: `cups`,
+ * `meals` and `sessions`. The Convex validator on `bio.save` allows exactly
+ * these, so the two have to agree or the save will not typecheck.
+ */
 export type Day = Record<string, number | boolean | string | Span[] | Meal[] | Session[]>;
 export interface Payload { log: Record<string, Day> }
 
