@@ -10,8 +10,20 @@ export interface Field {
 export interface Outcome { id: string; name: string; better: 'high' | 'low' }
 export interface Factor { id: string; name: string; icon: string; split: 'flag' | 'zero' | 'median' }
 
-/** A logged day: field id to value. Flags are true, everything else a number. */
-export type Day = Record<string, number | boolean | string>;
+/** One sport session: the sport, start, end, calories, how hard (1-3). */
+export interface Session { s: string; t?: number; e?: number; k?: number; i?: number }
+/** One cup or one meal: start, end, and a meal's calories. */
+export interface Span { t?: number; e?: number; k?: number }
+
+/**
+ * A logged day: field id to value.
+ *
+ * Flags are true and the rest are numbers, except the two lists `clean`
+ * writes: `sessions` and the spans behind a tapped field, such as `cups`
+ * and `meals`. The Convex validator on `bio.save` allows exactly these,
+ * so the two have to agree or the save will not typecheck.
+ */
+export type Day = Record<string, number | boolean | string | Session[] | Span[]>;
 export interface Payload { log: Record<string, Day> }
 
 export const SPEC: {
