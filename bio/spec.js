@@ -528,6 +528,76 @@ export function impact(link) {
    lean by chance, so a lean is a thing to watch, not a finding. */
 const leanOf = link => link.p < 0.05 && link.d >= 0.3 ? (link.good ? 'good' : 'bad') : null;
 
+/* ── the best time ──────────────────────────────────────────────────── */
+
+/* The measures that are a time of day. For each, my own days are split
+   into three equal windows (early, middle, late) by when I did it, and each
+   outcome is averaged per window. The window with the best average is the
+   best time. */
+export const TIMING = ['sportStart', 'mealFirst', 'mealLast', 'coffeeLast', 'bed', 'wake'];
+const WINDOWS = 3;
+/* Comparable days a timing cell needs: every window at least minPerSide. */
+export const needTimed = () => SPEC.minPerSide * WINDOWS;
+
+/* One timing cell. The days are split by rank into three windows; days at
+   the same minute never straddle two windows. The luck test is a one-way
+   ANOVA across the three at once (F-test), because naming the best of
+   three and then testing it alone would find a "best time" in pure noise.
+   `diff` and `d` compare the best window with the other two. */
+export function bestTime(log, factor, outcome) {
+  if (factor.id === outcome.id) return null;
+  const pairs = pairsOf(log, factor, outcome).sort((a, b) => a.x - b.x);
+  const n = pairs.length;
+  if (n < needTimed()) return null;
+  const groups = Array.from({ length: WINDOWS }, () => []);
+  pairs.forEach((q, i) => groups[Math.min(WINDOWS - 1, Math.floor(i * WINDOWS / n))].push(q));
+  for (let g = 0; g < WINDOWS - 1; g++)
+    while (groups[g + 1].length && groups[g].length && groups[g + 1][0].x === groups[g][groups[g].length - 1].x)
+      groups[g].push(groups[g + 1].shift());
+  if (groups.some(g => g.length < SPEC.minPerSide)) return null;
+
+  const ys = groups.map(g => g.map(q => q.y));
+  const means = ys.map(mean), grand = mean(pairs.map(q => q.y));
+  const ssb = ys.reduce((a, g, i) => a + g.length * (means[i] - grand) ** 2, 0);
+  const ssw = ys.reduce((a, g, i) => a + g.reduce((b, y) => b + (y - means[i]) ** 2, 0), 0);
+  const d1 = WINDOWS - 1, d2 = n - WINDOWS;
+  const p = !ssw ? (ssb ? 0 : 1) : !ssb ? 1 : ibeta(d2 / (d2 + ssb / ssw * d2), d2 / 2, d1 / 2);
+
+  const sign = outcome.better === 'high' ? 1 : -1;
+  const best = means.reduce((bi, m, i) => m * sign > means[bi] * sign ? i : bi, 0);
+  const on = ys[best], off = ys.filter((_, i) => i !== best).flat();
+  const s = strength(on, off);
+  return {
+    windows: groups.map((g, i) => ({ from: g[0].x, to: g[g.length - 1].x, n: g.length, mean: means[i] })),
+    best, diff: mean(on) - mean(off), d: s ? s.d : 0, p, n,
+  };
+}
+
+/* Every timing measure against every outcome, with a q-value across these
+   links (their own family, apart from the grid of everything). */
+export function bestTimes(log) {
+  const factors = TIMING.map(id => SPEC.factors.find(f => f.id === id));
+  const rows = factors.map(factor => ({
+    factor,
+    cells: SPEC.outcomes.map(o => bestTime(log, factor, o)),
+    counts: SPEC.outcomes.map(o => factor.id === o.id ? 0 : pairsOf(log, factor, o).length),
+  }));
+  const all = rows.flatMap(r => r.cells).filter(Boolean).sort((a, b) => a.p - b.p);
+  let q = 1;
+  for (let i = all.length - 1; i >= 0; i--) { q = Math.min(q, all[i].p * all.length / (i + 1)); all[i].q = q; }
+  return { rows, tested: all.length };
+}
+
+/* A best time on the same scale as the grid: the best window is good, very
+   good once far ahead; a best time not yet clear of luck is a lean; no
+   difference between windows is neutral. The best window is by definition
+   the good side, so a best time never reads as bad. */
+export function timingImpact(res) {
+  if (!res) return null;
+  if (res.q <= SPEC.maxLuck && res.d >= 0.3) return { level: 'good', very: res.d >= SPEC.veryAt };
+  return { level: 'neutral', very: false, lean: res.p < 0.05 && res.d >= 0.3 ? 'good' : null };
+}
+
 /* Days with both halves on them: what the matrix actually runs on. */
 export function readyDays(log) {
   return allDays().filter(k => isLogged(log[k]) && hasBody(log[k])).length;

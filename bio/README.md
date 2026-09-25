@@ -100,6 +100,20 @@ Measured on 20 simulated months, cut at each point in the month:
 | 21 | 0.20 | 4.3 | 87% |
 | 31 | 0.40 | 8.7 | 86% |
 
+**The best time** comes first. For each thing timed (session start, first
+meal, last meal, last coffee, bedtime, wake-up) my own days are split by rank
+into three equal windows, early, middle and late, with their real edges
+("07:10–09:30"). Each result is averaged per window, and the cell names the
+window with the best average and how far ahead of the other two it is:
+"Best · +5 pts, 22:36–23:15". Tapping it lists all three windows.
+
+The luck test is a one-way ANOVA across the three windows at once, not the
+best window against the rest: picking the best of three and then testing it
+alone finds a "best time" in pure noise. The F-test p-values get their own
+Benjamini-Hochberg q-values. A cell opens at 9 comparable days, 3 per
+window. On 20 simulated months: 0.25 false best times a month with no real
+effect, 4.3 real ones found with planted effects (1.6 by day 14).
+
 **Everything logged is a row**, 26 measures plus one line per sport:
 
 | From | Factors |

@@ -77,3 +77,15 @@ export function average(log: Record<string, Day>, outcome: Outcome): number | nu
 export function isFinding(link: Link): boolean;
 export function impact(link: Link | null): { level: 'neutral' | 'good' | 'bad'; very: boolean; lean?: 'good' | 'bad' | null } | null;
 export function readyDays(log: Record<string, Day>): number;
+
+/** The best time: three windows of my own days, early, middle, late. */
+export interface Window { from: number; to: number; n: number; mean: number }
+export interface BestTime { windows: Window[]; best: number; diff: number; d: number; p: number; q?: number; n: number }
+export const TIMING: string[];
+export function needTimed(): number;
+export function bestTime(log: Record<string, Day>, factor: Factor, outcome: Outcome): BestTime | null;
+export function bestTimes(log: Record<string, Day>): {
+  rows: { factor: Factor; cells: (BestTime | null)[]; counts: number[] }[];
+  tested: number;
+};
+export function timingImpact(res: BestTime | null): { level: 'neutral' | 'good'; very: boolean; lean?: 'good' | null } | null;
