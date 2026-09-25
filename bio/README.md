@@ -1,24 +1,44 @@
 # jeremylasne.com/bio
 
-October 2026, 31 days. Eighteen things measured every day, then a matrix of
-what actually moved my recovery, resting heart rate and sleep. Everyone
-reads it. One passphrase writes it.
+October 2026, 31 days. Intake, sport, sleep and what the watch observes,
+measured every day, then what actually moved my recovery, sleep score,
+sleep duration, weight, HRV and resting heart rate. Everyone reads it. One
+passphrase writes it.
 
 ## The shape of it
 
-Nine things are tapped by hand, nine are read off the watch, the scale and
-Yazio. The four things the body answers with (recovery, resting heart rate,
-sleep, sleep score) are read **the morning after** the day that caused them,
-because a night is what answers a day. A drink on Tuesday is scored against
-Wednesday.
+| Group | Fields | Goal |
+| --- | --- | --- |
+| 🍽️ Intake | coffee (start → end per cup), water, meals (start → end + kcal each) | coffee **max 2 cups**, water **4 L** (8 × 50cl) |
+| 🏃 Sport | sessions (sport, intensity light / moderate / high, start → end, kcal burned), steps | |
+| 😴 Sleep | sleep score, hours slept, bedtime, wake-up | |
+| 📊 Observing | weight, HRV, resting HR, recovery | |
+| 🌿 Levers | sun | |
 
-| Group | Fields |
-| --- | --- |
-| Tap as it happens | coffee, water, alcohol, showers |
-| Tonight, 30 seconds | cold shower, gym, bath, sun, deep work |
-| From the watch, each morning | sleep score, sleep, recovery, resting HR, HRV, steps, zone minutes, weight, eaten |
+A goal points one way: coffee is a ceiling, met by staying under it, water
+is a floor, met by reaching it. The card shows each goal beside its row and
+the day's count of goals met in its corner.
 
-Under two minutes a day.
+Anything that takes time (a cup, a meal, a session) is a **span**: when it
+started and when it finished, kept as minutes after midnight, with its
+length shown beside it. A span may run past midnight; its end is then read
+as the next day. On today, one **Now** button fills the first empty end:
+tapping + on coffee starts the cup, *End now* closes it. A new meal today
+starts now; a session starts empty, since it is logged after. A bedtime
+after midnight is kept past 24:00 (00:40 is 1480).
+
+A **session** is a sport, how hard it was (light, moderate, high, kept as
+1–3), its span and the calories it burned. Up to four a day. The sport field
+suggests every sport already typed and takes a new name as it is, so the
+list grows by using it. A session without a sport stays on screen as a draft
+and is left out of the save until it has one.
+
+**Practice days.** The 14 days before 1 October can be filled in to learn
+the page. They are saved like any day, marked *Practice · not counted*, and
+never read by the matrix or shown in the month.
+
+The four things the body answers with are read **the morning after** the
+day that caused them, because a night is what answers a day.
 
 ## Stack
 
@@ -39,28 +59,62 @@ Under two minutes a day.
 - **Auth** — a passphrase, `BIO_PASSPHRASE` on the Convex deployment.
   *Log* asks for it once per device (kept in `localStorage`), then every tap
   saves itself about a second after the last change. There is no Save
-  button. A failed save keeps the change on screen and retries.
+  button. A failed save keeps the change on screen and retries. The bar says
+  why a day cannot be filled in (not come yet, still loading), and *Lock*
+  forgets the passphrase on that device.
 
-## The matrix
+## The correlations
 
-A row is something I did, a column is what the body said the next morning.
+One grid: **every measure against every result**. A row is one thing
+measured, a column one thing looked for (recovery, sleep score, sleep
+duration, weight, HRV, resting HR), and each cell the impact on five steps:
 
-- An on/off row (gym, cold shower) splits on itself. A counted row splits at
-  its **own median** across the logged days, so "high coffee" means high for
-  me, not against a table.
-- The percent is how far the average moved between the two groups.
-- The label is Cohen's *d*: how far apart the groups sit, measured in the
-  spread of the days themselves. A big percent on a wild metric says less
-  than a small one on a steady metric. Under 0.3 weak, 0.6 medium, 1.0
-  strong, above that very strong.
-- Colour follows meaning, not sign: a resting heart rate going **down** is
-  green, because `better: 'low'` says so in `spec.js`.
-- A cell needs 4 days on each side before it prints, and the whole matrix
-  stays shut until 21 days carry both the taps and the body numbers. Under
-  that a correlation is a coin toss wearing a percentage.
+| Very bad | Bad | Neutral | Good | Very good |
+| --- | --- | --- | --- | --- |
+| a finding, large gap, the wrong way | a finding, the wrong way | not a finding | a finding, the right way | a finding, large gap, the right way |
 
-Rows are ordered by the loudest thing they say, so the strongest finding is
-always the top line.
+"Right way" follows what the result counts as better, so a falling resting
+HR is good, and so is a lower weight (a heavier morning after more water is
+water, not fat). "Large" is Cohen's d of 0.8 or more. The move
+in the result's own unit sits under the word, and tapping a cell spells the
+link out above the grid: "Last coffee → Sleep score: Very bad. −5 pts after
+a later last coffee (over 13:23), 15 of 30 days. Clear of luck (q 0.005)."
+A dot means fewer than 4 days on one side; a dash, a measure against itself.
+
+**Everything logged is a row**, 26 measures plus one line per sport:
+
+| From | Factors |
+| --- | --- |
+| Coffee | cups, first cup start, last cup end, any cup after 14:00 |
+| Meals | calories eaten, first meal start, last meal end, eating window, time at the table |
+| Sport | training day vs rest day; then, against my other sessions: sport, intensity, length, start, finish, kcal burned |
+| Day | water, steps, sun |
+| Night | bedtime, wake-up, hours slept, sleep score |
+| Morning | weight, HRV, resting HR, recovery |
+
+- A day's doings are read against the night and morning **after** them. The
+  night and the morning's own numbers are read against that same morning.
+- An on/off factor splits on itself; a count or a clock time splits at its
+  **own median**, and the line says where: "over 17:10".
+- Sport is read one dimension at a time, so "a harder session" means harder
+  than my usual session, not harder than resting.
+
+**The luck check.** Over a hundred links are tested each month, so some look
+real by chance, and the more that is tracked the more of them there are.
+Each link gets a Welch t-test p-value, then a Benjamini-Hochberg q-value
+across every link tested together. A cell leaves neutral only with q ≤ 0.1
+(at most 1 in 10 coloured cells is luck) and at least a medium gap.
+
+Measured on 20 simulated months with no real effect in them: the old
+strength-only rule showed 17.2 false findings a month, the luck check 0.55.
+On 20 months with planted effects it found 6.3 of them a month.
+
+**Linked things move together.** A late third meal is also more calories, so
+two rows can claim the same kilo. When two rows tell one story, change one
+of them alone for a week.
+
+A link needs 4 days on each side, and the whole section stays shut until 21
+days carry both halves of the day.
 
 ## Filling the body numbers
 
@@ -93,6 +147,20 @@ The server side needs one deploy and one setting:
 
 The document key moved to `oct26` for this shape, so the habit log from
 before it sits untouched under `v2` rather than being half-read as this one.
+
+**Deploy the server before the page** whenever the day's shape changes. The
+server's validator is a superset of what older pages send, so a new server
+with an old page is safe; a new page with an old server has its saves
+refused.
+
+## Safety
+
+- The page is the author's copy of the month. A save's reply only dates it,
+  so a tap made while a save is in flight is kept and goes out on the next
+  beat.
+- Logging stays shut until the stored log has loaded. A save sends the whole
+  month, so writing on top of a failed load would replace October with
+  whatever one screen holds.
 
 ## Run locally
 

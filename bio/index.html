@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>31 days of measuring | Jeremy Lasne</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="October 2026: 18 things measured every day, then the matrix of what actually moves my recovery, resting heart rate and sleep.">
+<meta name="description" content="October 2026: intake, sport, sleep and the watch, measured every day, then what actually moved my recovery, sleep, weight, HRV and resting heart rate.">
 <meta name="theme-color" content="#050b16">
 <meta name="color-scheme" content="dark">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -14,7 +14,7 @@
 <meta property="og:site_name" content="Jeremy Lasne">
 <meta property="og:url" content="https://www.jeremylasne.com/bio/">
 <meta property="og:title" content="31 days of measuring">
-<meta property="og:description" content="18 things measured every day for a month, then the matrix of what actually moves the body.">
+<meta property="og:description" content="A month of measuring intake, sport and sleep every day, then what actually moved the body.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -111,8 +111,102 @@ h2 {
 
 .group { border-bottom: 1px solid var(--line); padding: 4px 0 14px; }
 .group:last-child { border-bottom: 0; }
-.gtitle { color: var(--ice-45); padding: 14px 16px 10px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
-.gtitle b { color: var(--blue); font-weight: 500; }
+.gtitle { padding: 16px 16px 8px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.gtitle em { font-style: normal; font-size: 20px; line-height: 1; }
+.gtitle .gname { font: 400 26px/1 var(--display); letter-spacing: .03em; color: var(--ice); }
+.gtitle .gwhen { color: var(--ice-45); font-size: 10px; margin-left: auto; }
+
+/* the corner of the card: goals met, then the save state */
+.cright { display: grid; gap: 6px; justify-items: end; }
+.goals { color: var(--ice-45); }
+.goals.all { color: var(--good); }
+
+/* a goal next to its label: grey while on the way, green once met, red
+   once a ceiling is broken */
+.goal {
+  font-size: 9.5px; letter-spacing: .1em; padding: 4px 6px 3px; border: 1px solid var(--line);
+  color: var(--ice-45); white-space: nowrap; flex: none;
+}
+.goal.ok { color: var(--good); border-color: rgba(110, 231, 168, .45); background: var(--good-bg); }
+.goal.over { color: var(--bad); border-color: rgba(255, 158, 158, .42); background: var(--bad-bg); }
+.nf label em { font-style: normal; margin-right: 7px; }
+
+/* sport sessions, meals and cups: shared inputs */
+.sessions { padding: 2px 16px 6px; }
+.srows { display: grid; gap: 8px; }
+.sname {
+  flex: 1 1 160px; min-width: 0; background: rgba(23, 61, 89, .3); border: 1px solid var(--line);
+  padding: 9px 11px; font: 500 15px/1.2 var(--sans);
+}
+.skcal {
+  height: 40px; width: 78px; background: rgba(23, 61, 89, .3); border: 1px solid var(--line); padding: 8px 8px 7px;
+  font: 400 21px/1 var(--display); letter-spacing: .02em; text-align: right;
+  appearance: textfield; -moz-appearance: textfield;
+}
+.skcal::-webkit-outer-spin-button, .skcal::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.stime {
+  background: rgba(23, 61, 89, .3); border: 1px solid var(--line); color: var(--ice);
+  font: 500 14px/1 var(--mono); padding: 9px 7px; min-width: 0; flex: none;
+}
+.stime::-webkit-calendar-picker-indicator { filter: invert(.8); }
+.nf input[type="time"] { width: 136px; font: 400 22px/1 var(--display); }
+.nf input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(.8); }
+.tapr { flex-wrap: wrap; }
+.sname:focus, .skcal:focus, .stime:focus { outline: none; border-color: var(--blue); }
+.sname:disabled, .skcal:disabled, .stime:disabled { background: transparent; border-color: transparent; opacity: 1; }
+.sname::placeholder, .skcal::placeholder { color: var(--ice-45); }
+.sunit { font-size: 9.5px; color: var(--blue); letter-spacing: .1em; }
+.sdel {
+  width: 36px; height: 36px; border: 1px solid var(--line); background: none; border-radius: 50%;
+  color: var(--ice-45); font-size: 18px; line-height: 1; cursor: pointer; flex: none;
+}
+.sdel:hover:not(:disabled) { color: var(--bad); border-color: var(--bad); }
+.sdel:disabled { visibility: hidden; }
+.snone { color: var(--ice-45); font-size: 14px; padding: 6px 0; }
+.addsess {
+  margin-top: 10px; border: 1px dashed var(--blue); background: none; color: var(--blue);
+  padding: 11px 14px 10px; cursor: pointer; width: 100%;
+}
+.addsess:hover { background: rgba(95, 168, 211, .12); }
+/* start → end, with Now and the length */
+.span { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; }
+.span .stime { width: 128px; }
+.sarrow { color: var(--ice-45); }
+.snow {
+  border: 1px solid var(--blue); background: rgba(95, 168, 211, .12); color: var(--blue);
+  padding: 8px 9px 7px; font-size: 9.5px; letter-spacing: .1em; cursor: pointer; white-space: nowrap;
+}
+.snow:hover { background: var(--blue); color: var(--ink); }
+.snow[hidden] { display: none; }
+.slen { color: var(--ice-45); font-size: 10px; white-space: nowrap; }
+.chead .when small.practice { color: var(--good); }
+/* coffee: one line per cup under the counter */
+.cups { flex-basis: 100%; display: grid; gap: 6px; padding: 4px 0 4px 34px; }
+.cups[hidden] { display: none; }
+.cup { display: flex; align-items: center; gap: 8px; }
+.cupn { color: var(--ice-45); font-size: 10px; width: 22px; flex: none; }
+/* meals and sessions: the span, then the numbers */
+.mrow, .sbottom { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: space-between; }
+.mnums { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.srow { display: grid; gap: 8px; padding: 10px 0; border-bottom: 1px dashed rgba(95, 168, 211, .14); }
+.srow:last-child { border-bottom: 0; }
+.stop { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.slevels { display: flex; gap: 4px; flex: none; }
+.slevel {
+  border: 1px solid var(--line); background: rgba(23, 61, 89, .3); color: var(--ice-70);
+  padding: 10px 10px 9px; font-size: 10px; letter-spacing: .1em; cursor: pointer;
+}
+.slevel:disabled { cursor: default; opacity: .5; }
+.slevel:disabled[aria-pressed="true"] { opacity: 1; }
+.slevel.l1[aria-pressed="true"] { background: rgba(110, 231, 168, .18); border-color: var(--good); color: var(--good); }
+.slevel.l2[aria-pressed="true"] { background: rgba(95, 168, 211, .2); border-color: var(--blue); color: var(--blue); }
+.slevel.l3[aria-pressed="true"] { background: rgba(255, 158, 158, .18); border-color: var(--bad); color: var(--bad); }
+.meals { padding: 10px 16px 4px; }
+.mhead { display: flex; align-items: center; gap: 10px; font-size: 15px; padding-bottom: 8px; }
+.mhead em { font-style: normal; font-size: 19px; width: 24px; text-align: center; }
+.mtotal { margin-left: auto; color: var(--blue); }
+.mrows { display: grid; gap: 8px; }
+.addsess[hidden] { display: none; }
 
 /* a tap row: label left, minus, the number, plus */
 .tapr { display: flex; align-items: center; gap: 12px; padding: 6px 16px; }
@@ -154,7 +248,7 @@ h2 {
 .toggle:disabled { opacity: .4; cursor: default; }
 
 /* the typed numbers, two or three across */
-.nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(198px, 1fr)); gap: 2px 16px; padding: 4px 16px 0; }
+.nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 2px 20px; padding: 4px 16px 0; }
 .nf { display: flex; align-items: baseline; gap: 8px; padding: 7px 0; border-bottom: 1px solid rgba(95, 168, 211, .1); }
 .nf label { flex: 1; min-width: 0; font-size: 14px; color: var(--ice-70); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nf input {
@@ -200,27 +294,52 @@ h2 {
 .legend b.off { background: rgba(95, 168, 211, .22); }
 .legend b.miss { background: var(--bad); }
 
-/* ── the matrix ─────────────────────────────────────────────────────── */
-.mxwrap { overflow-x: auto; border: 1px solid var(--line); background: rgba(5, 11, 22, .46); }
-.mx { width: 100%; border-collapse: collapse; min-width: 620px; }
-.mx th, .mx td { padding: 11px 10px; text-align: center; }
-.mx thead th { font: 500 10px/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ice-45); border-bottom: 1px solid var(--line); font-weight: 500; }
-.mx thead th:first-child { text-align: left; }
-.mx tbody tr { border-bottom: 1px solid rgba(95, 168, 211, .1); }
-.mx tbody tr:last-child { border-bottom: 0; }
-.mx td.f { text-align: left; white-space: nowrap; font-size: 15px; }
-.mx td.f em { font-style: normal; margin-right: 9px; }
-.cellv { display: inline-grid; gap: 3px; justify-items: center; padding: 6px 10px; border: 1px solid transparent; border-radius: 4px; min-width: 76px; }
-.cellv u { text-decoration: none; font: 400 21px/1 var(--display); letter-spacing: .02em; }
-.cellv s { text-decoration: none; font: 500 8.5px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ice-45); }
-.cellv.good u { color: var(--good); }
-.cellv.bad u { color: var(--bad); }
-.cellv.lit.good { border-color: rgba(110, 231, 168, .45); background: var(--good-bg); }
-.cellv.lit.bad { border-color: rgba(255, 158, 158, .42); background: var(--bad-bg); }
-.cellv.lit s { color: inherit; }
-.cellv.lit.good s { color: var(--good); }
-.cellv.lit.bad s { color: var(--bad); }
-.cellv.thin u { color: var(--ice-45); }
+/* ── the matrix: every measure against every result ─────────────────── */
+.fsum { margin: 0 0 14px; color: var(--ice-70); }
+.fsum b { color: var(--ice); font-weight: 500; }
+.mxlegend { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+.mxlegend .lv { cursor: default; }
+.mxdetail {
+  border: 1px solid var(--line); background: rgba(5, 11, 22, .6); padding: 12px 14px; margin: 0 0 14px;
+  font-size: 14.5px; color: var(--ice-70); min-height: 48px;
+}
+.mxdetail b { color: var(--ice); font-weight: 500; }
+.mxwrap { overflow-x: auto; border: 1px solid var(--line); background: rgba(5, 11, 22, .5); }
+.mxhint { display: none; color: var(--blue); margin: 0 0 8px; text-align: right; }
+.mx { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 760px; }
+.mx th, .mx td { padding: 6px 6px; text-align: center; border-bottom: 1px solid rgba(95, 168, 211, .08); }
+.mx thead th {
+  font: 500 10px/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ice-70);
+  padding: 12px 6px 10px; border-bottom: 1px solid var(--line); vertical-align: bottom;
+}
+.mx thead th em { display: block; font-style: normal; font-size: 18px; margin-bottom: 5px; letter-spacing: 0; }
+.mx thead th small { display: block; color: var(--ice-45); font-size: 9px; margin-top: 4px; letter-spacing: .08em; }
+.mx .rh {
+  position: sticky; left: 0; z-index: 1; background: #07111f; text-align: left; white-space: nowrap;
+  font: 500 14px/1.2 var(--sans); padding-left: 14px; min-width: 190px; border-right: 1px solid var(--line);
+}
+.mx thead .rh { z-index: 2; font: 500 10px/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.mx .rh em { font-style: normal; margin-right: 8px; }
+.mx tr.sec th {
+  position: sticky; left: 0; background: #0a1a2c; text-align: left; padding: 10px 14px 8px;
+  font: 400 20px/1 var(--display); letter-spacing: .04em; color: var(--ice); border-bottom: 1px solid var(--line);
+}
+.mx tr.sec th em { font-style: normal; font-size: 16px; margin-right: 8px; }
+/* one impact on five steps: very bad, bad, neutral, good, very good */
+.lv {
+  display: inline-grid; gap: 3px; justify-items: center; min-width: 88px; padding: 6px 6px 5px; border-radius: 4px;
+  border: 1px solid transparent; background: none; cursor: pointer; font: 500 9.5px/1 var(--mono);
+  letter-spacing: .08em; text-transform: uppercase; color: var(--ice-45);
+}
+.lv small { font: 400 17px/1 var(--display); letter-spacing: .02em; text-transform: none; }
+.lv.neutral { color: rgba(234, 244, 251, .3); }
+.lv.good { color: var(--good); border-color: rgba(110, 231, 168, .4); background: var(--good-bg); }
+.lv.vgood { color: #04140b; background: var(--good); border-color: var(--good); }
+.lv.bad { color: var(--bad); border-color: rgba(255, 158, 158, .4); background: var(--bad-bg); }
+.lv.vbad { color: #1e0707; background: var(--bad); border-color: var(--bad); }
+.lv.thin, .lv.self { cursor: default; color: rgba(234, 244, 251, .22); min-width: 0; }
+.lv:not(.thin):not(.self):hover { outline: 1px solid var(--ice-45); }
+.lv[aria-pressed="true"] { outline: 2px solid var(--ice); outline-offset: 1px; }
 
 .locked { border: 1px solid var(--line); background: rgba(5, 11, 22, .46); padding: clamp(24px, 5vw, 44px); text-align: center; }
 .locked .big { font: 400 clamp(56px, 12vw, 120px)/.9 var(--display); letter-spacing: .02em; color: var(--blue); }
@@ -270,7 +389,7 @@ body.editing { padding-bottom: 88px; }
 
 /* ── small screens ──────────────────────────────────────────────────── */
 @media (max-width: 560px) {
-  .nums { grid-template-columns: 1fr 1fr; gap: 0 14px; }
+  .nums { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .nf input { width: 66px; font-size: 21px; }
   .nf label { font-size: 13px; }
   .nf i { width: 28px; font-size: 9px; }
@@ -279,6 +398,22 @@ body.editing { padding-bottom: 88px; }
   .toggle::after { width: 30px; height: 30px; }
   .toggle[aria-pressed="true"]::after { transform: translateX(40px); }
   .pm { width: 42px; height: 42px; }
+  .gtitle .gwhen { flex-basis: 100%; margin-left: 30px; }
+  .srow { gap: 8px; }
+  .sname { flex: 1 1 0; }
+  .tapr .lbl { display: grid; grid-template-columns: 24px minmax(0, 1fr); column-gap: 10px; row-gap: 5px; }
+  .tapr .lbl .goal { grid-column: 2; justify-self: start; }
+  .span .stime { width: 122px; }
+  .cups { padding-left: 0; }
+  .mnums .sunit { display: none; }
+  .mnums .skcal { width: 82px; }
+  .slevels { width: 100%; }
+  .slevel { flex: 1 1 0; }
+  .tapr .lbl i { display: none; }
+  .mx .rh { min-width: 136px; font-size: 13px; padding-left: 10px; white-space: normal; }
+  .mxhint { display: block; }
+  .lv { min-width: 72px; }
+  .lv small { font-size: 15px; }
   .count { width: 40px; font-size: 30px; }
   .row { flex-wrap: wrap; }
   .row label, .pass, .row .status { flex-basis: 100%; }
@@ -305,7 +440,7 @@ body.editing { padding-bottom: 88px; }
     <div class="head">
       <span class="n mono">01</span>
       <h2>Today <span class="pill live" id="dayPill">Day 0 of 31</span></h2>
-      <p class="tag">Nine things I tap, nine the watch already knows. Under two minutes a day, every day of October, then the matrix reads what moved.</p>
+      <p class="tag">Intake, sport, sleep, and what the watch observes, with the time of each coffee, each session and each night. Two goals, every day of October, then the page reads what moved.</p>
     </div>
     <div class="card" id="card"></div>
   </section>
@@ -329,7 +464,7 @@ body.editing { padding-bottom: 88px; }
     <div class="head">
       <span class="n mono">03</span>
       <h2>Correlations <span class="pill" id="mxPill"></span></h2>
-      <p class="tag">Each row is something I did. Each column is what my body said the morning after. The number is how far the average moved, the label how far apart the two groups really sit.</p>
+      <p class="tag">Every measure against every result. A row is one thing I measured, a column one thing I look for, and each cell its impact: very bad, bad, neutral, good or very good. Tap a cell for the numbers.</p>
     </div>
     <div id="mxbox"></div>
   </section>
@@ -340,11 +475,12 @@ body.editing { padding-bottom: 88px; }
       <h2>How to read it</h2>
     </div>
     <ul class="notes">
-      <li><b>The morning after</b>A day is judged by the night that follows it. A drink on Tuesday is scored against Wednesday's sleep, never Tuesday's.</li>
-      <li><b>High against low</b>An on/off thing splits on itself. A counted thing splits at my own median, so "high coffee" means high for me.</li>
-      <li><b>Green is good, not positive</b>A resting heart rate going down is a win, so it turns green while the number falls.</li>
+      <li><b>The morning after</b>A day is judged by the night that follows it: a late coffee on Tuesday is scored against Wednesday's sleep. The night itself (bedtime, wake-up, hours slept) is scored against the morning it ends.</li>
+      <li><b>More against less, later against earlier</b>An on/off thing splits on itself. A count or a clock time splits at my own median, so "a later last coffee" means later than my usual.</li>
+      <li><b>Five steps</b>Very bad, bad, neutral, good, very good. Good means good for that result, not a bigger number: a resting heart rate going down is good. "Very" means a large gap (Cohen's d of 0.8 or more). For weight, lower is good; a heavier morning after more water is water, not fat.</li>
       <li><b>The strength label</b>How far apart the two groups sit, measured against how much that number swings day to day anyway. A big percent on a wild metric says less than a small one on a steady metric.</li>
-      <li><b>What stays hidden</b>A cell needs 4 days on each side before it prints. The whole matrix stays shut until 21 days carry both the taps and the body numbers.</li>
+      <li><b>When a cell is neutral</b>Over a hundred links are tested, so some look real by luck. A cell leaves neutral only when it clears a false-discovery check, which keeps luck to at most 1 in 10 of what is coloured. A dot means fewer than 4 days on one side so far. The whole matrix stays shut until 21 days carry both what I did and what the body said.</li>
+      <li><b>Linked things move together</b>A late third meal is also more calories, so "a later last meal" and "more calories eaten" can both claim the same kilo. When two rows tell one story, change one of them alone for a week.</li>
       <li><b>One month only</b>1 to 31 October 2026. Thirty-one days, one video a day, then the table stands as it is.</li>
     </ul>
   </section>
@@ -366,14 +502,15 @@ body.editing { padding-bottom: 88px; }
   </form>
   <div class="row" id="tools" hidden>
     <span class="status mono" id="status">Logging. Every change saves itself.</span>
-    <button class="btn" type="button" data-cancel>Done</button>
+    <button class="btn" type="button" id="lock">Lock</button>
+    <button class="btn solid" type="button" data-cancel>Done</button>
   </div>
 </div>
 
 <noscript><p style="text-align:center;padding:40px">The live numbers need JavaScript.</p></noscript>
 
 <script type="module">
-import { SPEC, dateKey, shift, daysBetween, allDays, clean, matrix, readyDays, isLogged, hasBody } from '/bio/spec.js';
+import { SPEC, inGroup, dateKey, shift, daysBetween, allDays, clean, analyze, average, impact, readyDays, isLogged, hasBody, goalMet, sportList, firstDay, isPractice, spanMin } from '/bio/spec.js';
 
 const $ = id => document.getElementById(id);
 const API = 'https://fiery-eel-944.eu-west-1.convex.site/overlap';
@@ -383,16 +520,16 @@ const DAYS = allDays();
 const today = dateKey();
 /* Before the first and after the last, the card lands on the nearest day
    inside the month, so the page is never blank. */
-const clampDay = k => k < SPEC.start ? SPEC.start : k > SPEC.end ? SPEC.end : k;
+const clampDay = k => k < firstDay() ? SPEC.start : k > SPEC.end ? SPEC.end : k;
 
 const state = { log: {}, updatedAt: 0 };
 let sel = clampDay(today);
 let pass = '';
-let dirty = false, saving = false, timer = 0;
+let dirty = false, saving = false, timer = 0, loaded = false;
 
 const at = key => (state.log[key] ||= {});
 const pretty = key => { const [y, m, d] = key.split('-').map(Number); return `${DOW[new Date(y, m - 1, d).getDay()]} ${d} ${MON[m - 1]}`; };
-const editable = key => !!pass && key <= today && key >= SPEC.start && key <= SPEC.end;
+const editable = key => loaded && !!pass && key <= today && key >= firstDay() && key <= SPEC.end;
 
 /* ── the door ───────────────────────────────────────────────────────── */
 function api(op, args) {
@@ -415,59 +552,96 @@ function toMinutes(str) {
   return n <= 24 ? Math.round(n * 60) : Math.round(n);
 }
 const fmtMinutes = n => `${Math.floor(n / 60)}h${String(Math.round(n % 60)).padStart(2, '0')}`;
+/* A clock time kept as minutes after midnight, and back. A bedtime after
+   midnight is kept past 24:00 (00:30 is 1470), so later always sorts later. */
+const hhmm = n => `${String(Math.floor(n / 60) % 24).padStart(2, '0')}:${String(Math.round(n % 60)).padStart(2, '0')}`;
+const fromHhmm = str => { const m = /^(\d{1,2}):(\d{2})$/.exec(str || ''); return m ? +m[1] * 60 + +m[2] : null; };
+const nowMinutes = () => { const d = new Date(); return d.getHours() * 60 + d.getMinutes(); };
 
 /* ── the card ───────────────────────────────────────────────────────── */
+/* One object per day, shared by every control on the card: while a day is
+   open it is the entry in the log itself, so a tap lands in exactly one
+   place and a save in flight cannot drop it. */
 function drawCard() {
-  const day = state.log[sel] || {};
   const open = editable(sel);
+  const day = open ? at(sel) : (state.log[sel] || {});
   const n = daysBetween(SPEC.start, sel) + 1;
   const el = document.createElement('div');
 
   const head = document.createElement('div');
   head.className = 'chead';
-  head.innerHTML = `<div class="when">${pretty(sel)}${sel === today ? '<small>Today</small>' : ''}</div>`;
+  head.innerHTML = `<div class="when">${pretty(sel)}${sel === today ? '<small>Today</small>' : ''}` +
+    `${isPractice(sel) ? '<small class="practice">Practice · not counted</small>' : ''}</div>`;
+  const right = document.createElement('div');
+  right.className = 'cright';
+  const goals = document.createElement('div');
+  goals.className = 'goals mono'; goals.id = 'goals';
   const saved = document.createElement('div');
   saved.className = 'saved mono'; saved.id = 'saved';
-  saved.textContent = open ? '' : sel > today ? 'Not yet' : 'Read only';
-  head.append(saved);
+  saved.textContent = open ? '' : !loaded ? 'Loading' : sel > today ? 'Not yet' : pass ? 'Read only' : 'Tap Log to fill in';
+  right.append(goals, saved);
+  head.append(right);
   el.append(head);
 
-  el.append(group('Tap it as it happens', 'four things', SPEC.manual.filter(f => f.kind === 'tap'), day, open));
-  el.append(group('Tonight, 30 seconds', 'five things', SPEC.manual.filter(f => f.kind !== 'tap'), day, open));
-  el.append(bodyGroup(day, open));
+  for (const g of SPEC.groups) el.append(groupEl(g, day, open));
 
   const note = document.createElement('div');
   note.className = 'group notef';
   const ni = document.createElement('input');
-  ni.type = 'text'; ni.maxLength = 120; ni.placeholder = 'Anything worth remembering about this day';
+  ni.type = 'text'; ni.maxLength = 120; ni.placeholder = 'A note about today';
   ni.value = day.note || ''; ni.disabled = !open;
-  ni.addEventListener('input', () => { const v = ni.value.trim(); if (v) at(sel).note = v; else delete at(sel).note; touch(); });
+  ni.addEventListener('input', () => { const v = ni.value.trim(); if (v) day.note = v; else delete day.note; touch(); });
   note.append(ni);
   el.append(note);
 
   $('card').replaceChildren(...el.childNodes);
-  $('dayPill').textContent = `Day ${Math.max(0, Math.min(31, n))} of 31`;
+  $('dayPill').textContent = isPractice(sel) ? `Practice · starts ${pretty(SPEC.start)}` : `Day ${Math.max(0, Math.min(31, n))} of 31`;
+  paintStatus();
+  paintGoals(day);
 }
 
-function group(title, sub, fields, day, open) {
-  const g = document.createElement('div');
-  g.className = 'group';
-  g.innerHTML = `<div class="gtitle mono">${title} <b>${sub}</b></div>`;
+/* The day's score against its goals, in the card's corner. */
+function paintGoals(day) {
+  const set = SPEC.fields.filter(f => f.goal != null);
+  const met = set.filter(f => goalMet(f, day[f.id] ?? 0)).length;
+  const g = $('goals');
+  if (!g) return;
+  g.textContent = `${met} of ${set.length} goals`;
+  g.classList.toggle('all', met === set.length);
+}
+
+function groupEl(g, day, open) {
+  const box = document.createElement('div');
+  box.className = 'group';
+  box.innerHTML = `<div class="gtitle"><em>${g.icon}</em><span class="gname">${g.name}</span><span class="gwhen mono">${g.when}</span></div>`;
+  if (g.id === 'sport') box.append(sessionsEl(day, open));
   const nums = document.createElement('div');
   nums.className = 'nums';
-  for (const f of fields) {
-    if (f.kind === 'tap') g.append(tapRow(f, day, open));
-    else if (f.kind === 'flag') g.append(flagRow(f, day, open));
+  for (const f of inGroup(g.id)) {
+    if (f.kind === 'tap') box.append(tapRow(f, day, open));
+    else if (f.kind === 'flag') box.append(flagRow(f, day, open));
     else nums.append(numField(f, day, open));
   }
-  if (nums.childElementCount) g.append(nums);
-  return g;
+  if (g.id === 'intake') box.append(mealsEl(day, open));
+  if (nums.childElementCount) box.append(nums);
+  return box;
+}
+
+/* The goal, said the way it is meant: a ceiling as "max 2", a floor as how
+   far along the day is, in the goal's own unit. */
+const fmtAmount = x => String(Math.round(x * 10) / 10);
+function goalText(f, v) {
+  if (f.goalDir === 'max') return `max ${f.goal}`;
+  const k = f.scale || 1, u = f.scaleUnit ? ` ${f.scaleUnit}` : '';
+  return `${fmtAmount((v || 0) * k)} / ${fmtAmount(f.goal * k)}${u}`;
 }
 
 function tapRow(f, day, open) {
   const r = document.createElement('div');
   r.className = 'tapr';
   r.innerHTML = `<div class="lbl"><em>${f.icon}</em><span>${f.name}</span>${f.unit ? `<i>${f.unit}</i>` : ''}</div>`;
+  const badge = document.createElement('span');
+  if (f.goal != null) { badge.className = 'goal mono'; r.querySelector('.lbl').append(badge); }
   const minus = document.createElement('button'), out = document.createElement('div'), plus = document.createElement('button');
   minus.type = plus.type = 'button';
   minus.className = plus.className = 'pm';
@@ -480,12 +654,46 @@ function tapRow(f, day, open) {
     out.classList.toggle('zero', !v);
     minus.disabled = !open || v <= 0;
     plus.disabled = !open || v >= f.max;
+    if (f.goal != null) {
+      const ok = goalMet(f, v);
+      badge.textContent = goalText(f, v);
+      badge.className = `goal mono ${ok ? 'ok' : f.goalDir === 'max' ? 'over' : ''}`;
+    }
   };
-  const bump = d => { const v = Math.max(0, Math.min(f.max, Number(day[f.id] ?? 0) + d)); at(sel)[f.id] = v; day[f.id] = v; paint(); touch(); };
+  /* A counter with `spans` keeps a start and an end for each tap: one line
+     per cup. Tapping + today starts the cup now; on another day it adds an
+     empty line to fill. Tapping − removes the last cup. */
+  const list = f.spans ? document.createElement('div') : null;
+  const cups = () => (day[f.spans] ||= []);
+  const paintCups = () => {
+    if (!list) return;
+    const all = Array.isArray(day[f.spans]) ? day[f.spans] : [];
+    list.className = 'cups';
+    list.hidden = !all.length;
+    list.replaceChildren(...all.map((c, i) => {
+      const row = document.createElement('div');
+      row.className = 'cup';
+      const n = document.createElement('span'); n.className = 'cupn mono'; n.textContent = `#${i + 1}`;
+      row.append(n, spanEl(c, open, `${f.name} ${i + 1}`, () => paintGoals(day)));
+      return row;
+    }));
+  };
+  const bump = d => {
+    const now = Number(day[f.id] ?? 0), next = Math.max(0, Math.min(f.max, now + d));
+    if (next === now) return;
+    if (f.spans) {
+      if (d > 0) cups().push(sel === today ? { t: nowMinutes() } : {});
+      else cups().pop();
+      if (!cups().length) delete day[f.spans];
+    }
+    day[f.id] = next;
+    paint(); paintCups(); paintGoals(day); touch();
+  };
   minus.addEventListener('click', () => bump(-1));
   plus.addEventListener('click', () => bump(1));
   paint();
   r.append(minus, out, plus);
+  if (list) { paintCups(); r.append(list); }
   return r;
 }
 
@@ -502,8 +710,7 @@ function flagRow(f, day, open) {
     t.querySelector('span').textContent = on ? 'Yes' : 'No';
   };
   t.addEventListener('click', () => {
-    const on = day[f.id] !== true;
-    if (on) { at(sel)[f.id] = true; day[f.id] = true; } else { delete at(sel)[f.id]; delete day[f.id]; }
+    if (day[f.id] === true) delete day[f.id]; else day[f.id] = true;
     paint(); touch();
   });
   paint();
@@ -515,22 +722,25 @@ function numField(f, day, open) {
   const w = document.createElement('div');
   w.className = 'nf';
   const id = `f_${f.id}`;
-  w.innerHTML = `<label for="${id}">${f.name}</label>`;
+  w.innerHTML = `<label for="${id}"><em>${f.icon}</em>${f.name}</label>`;
   const i = document.createElement('input');
-  i.id = id; i.type = f.clock ? 'text' : 'number'; i.inputMode = 'decimal';
+  i.id = id; i.type = f.kind === 'time' ? 'time' : f.clock ? 'text' : 'number';
+  if (f.kind !== 'time') i.inputMode = 'decimal';
   i.placeholder = '—'; i.disabled = !open;
-  if (!f.clock) { i.min = '0'; i.max = String(f.max); i.step = String(f.step || 1); }
+  if (!f.clock && f.kind !== 'time') { i.min = '0'; i.max = String(f.max); i.step = String(f.step || 1); }
   const show = () => {
     const v = day[f.id];
-    i.value = v == null ? '' : f.clock ? fmtMinutes(v) : String(v);
+    i.value = v == null ? '' : f.kind === 'time' ? hhmm(v) : f.clock ? fmtMinutes(v) : String(v);
   };
   i.addEventListener('input', () => {
     const raw = i.value.trim();
-    if (!raw) { delete at(sel)[f.id]; delete day[f.id]; touch(); return; }
-    const n = f.clock ? toMinutes(raw) : Number(raw.replace(',', '.'));
+    if (!raw) { delete day[f.id]; touch(); return; }
+    let n = f.kind === 'time' ? fromHhmm(raw) : f.clock ? toMinutes(raw) : Number(raw.replace(',', '.'));
+    /* before noon, a bedtime is the small hours of the same night */
+    if (f.kind === 'time' && f.night && n != null && n < 720) n += 1440;
     if (!Number.isFinite(n)) return;
-    const v = Math.min(f.max, Math.max(0, Math.round(n * 100) / 100));
-    at(sel)[f.id] = v; day[f.id] = v; touch();
+    day[f.id] = Math.min(f.max, Math.max(0, Math.round(n * 100) / 100));
+    touch();
   });
   i.addEventListener('blur', show);
   show();
@@ -540,15 +750,211 @@ function numField(f, day, open) {
   return w;
 }
 
-function bodyGroup(day, open) {
-  const g = document.createElement('div');
-  g.className = 'group';
-  g.innerHTML = `<div class="gtitle mono">From the watch, each morning <b>nine numbers</b></div>`;
-  const nums = document.createElement('div');
-  nums.className = 'nums';
-  for (const f of SPEC.body) nums.append(numField(f, day, open));
-  g.append(nums);
-  return g;
+/* ── start and end ──────────────────────────────────────────────────── */
+/* Anything that takes time: when it started, when it finished, and how
+   long that was. On today one "Now" button fills the first empty end of
+   the pair, so a cup, a meal or a session is logged live in two taps. */
+const fmtLen = n => n == null ? '' : n < 60 ? `${n} min` : fmtMinutes(n);
+function spanEl(x, open, label, onChange = () => {}) {
+  const w = document.createElement('div');
+  w.className = 'span';
+  const input = (key, what) => {
+    const i = document.createElement('input');
+    i.type = 'time'; i.className = 'stime'; i.disabled = !open;
+    i.value = x[key] != null ? hhmm(x[key]) : '';
+    i.setAttribute('aria-label', `${label}, ${what}`);
+    i.addEventListener('change', () => { const v = fromHhmm(i.value); if (v == null) delete x[key]; else x[key] = v; paint(); onChange(); touch(); });
+    return i;
+  };
+  const start = input('t', 'start'), end = input('e', 'end');
+  const arrow = document.createElement('span'); arrow.className = 'sarrow'; arrow.textContent = '→';
+  const now = document.createElement('button');
+  now.type = 'button'; now.className = 'snow mono';
+  now.addEventListener('click', () => {
+    const key = x.t == null ? 't' : 'e';
+    x[key] = nowMinutes();
+    (key === 't' ? start : end).value = hhmm(x[key]);
+    paint(); onChange(); touch();
+  });
+  const len = document.createElement('span'); len.className = 'slen mono';
+  const paint = () => {
+    now.hidden = !open || sel !== today || (x.t != null && x.e != null);
+    now.textContent = x.t == null ? 'Start now' : 'End now';
+    now.setAttribute('aria-label', `${label}: ${now.textContent.toLowerCase()}`);
+    len.textContent = fmtLen(spanMin(x));
+  };
+  paint();
+  w.append(start, arrow, end, now, len);
+  return w;
+}
+
+/* ── meals ──────────────────────────────────────────────────────────── */
+/* One line a meal: when it started, when it finished, its calories from
+   Yazio. Adding one today starts it now. The day's total shows as it
+   grows. */
+function mealsEl(day, open) {
+  const wrap = document.createElement('div');
+  wrap.className = 'meals';
+  const head = document.createElement('div');
+  head.className = 'mhead';
+  head.innerHTML = '<em>🍽️</em><span>Meals</span>';
+  const total = document.createElement('span');
+  total.className = 'mtotal mono';
+  head.append(total);
+  const rows = document.createElement('div');
+  rows.className = 'mrows';
+  const add = document.createElement('button');
+  add.type = 'button'; add.className = 'addsess mono';
+  add.textContent = '+ Add a meal';
+
+  const list = () => (Array.isArray(day.meals) ? day.meals : []);
+  const paintTotal = () => {
+    const ks = list().map(m => m.k).filter(Number.isFinite);
+    total.textContent = ks.length ? `${ks.reduce((a, b) => a + b, 0)} kcal` : '';
+  };
+  const render = () => {
+    const ms = list();
+    rows.replaceChildren(...ms.map((m, idx) => {
+      const r = document.createElement('div');
+      r.className = 'mrow';
+      const k = document.createElement('input');
+      k.type = 'number'; k.inputMode = 'numeric'; k.className = 'skcal mkcal';
+      k.min = '0'; k.max = String(SPEC.meal.kcal); k.placeholder = 'kcal';
+      k.value = m.k ?? ''; k.disabled = !open;
+      k.setAttribute('aria-label', `Calories of meal ${idx + 1}`);
+      k.addEventListener('input', () => {
+        const n = Number(k.value);
+        if (k.value === '' || !Number.isFinite(n)) delete m.k; else m.k = Math.min(SPEC.meal.kcal, Math.max(0, Math.round(n)));
+        paintTotal(); touch();
+      });
+      const u = document.createElement('span'); u.className = 'sunit mono'; u.textContent = 'kcal';
+      const del = document.createElement('button');
+      del.type = 'button'; del.className = 'sdel'; del.textContent = '×'; del.disabled = !open;
+      del.setAttribute('aria-label', `Remove meal ${idx + 1}`);
+      del.addEventListener('click', () => {
+        day.meals.splice(idx, 1);
+        if (!day.meals.length) delete day.meals;
+        render(); touch();
+      });
+      const nums = document.createElement('div');
+      nums.className = 'mnums';
+      nums.append(k, u, del);
+      r.append(spanEl(m, open, `Meal ${idx + 1}`), nums);
+      return r;
+    }));
+    if (!ms.length) {
+      const none = document.createElement('div');
+      none.className = 'snone';
+      none.textContent = open ? 'No meal yet.' : 'No meal logged';
+      rows.append(none);
+    }
+    add.hidden = !open || ms.length >= SPEC.meal.perDay;
+    paintTotal();
+  };
+  add.addEventListener('click', () => {
+    (day.meals ||= []).push(sel === today ? { t: nowMinutes() } : {});
+    render(); touch();
+    rows.querySelector('.mrow:last-child .mkcal')?.focus();
+  });
+  render();
+  wrap.append(head, rows, add);
+  return wrap;
+}
+
+/* ── sport sessions ─────────────────────────────────────────────────── */
+/* A sport and how hard it was (light, moderate, high), then when it
+   started and finished and the calories it burned. The sport field
+   suggests every sport already typed and takes a new name as it is. A
+   session with no sport yet stays on screen as a draft and is left out of
+   the save until it has one. */
+const SPORTS_ID = 'sportsList';
+function sessionsEl(day, open) {
+  const wrap = document.createElement('div');
+  wrap.className = 'sessions';
+  const dl = document.createElement('datalist');
+  dl.id = SPORTS_ID;
+  for (const name of sportList(state.log)) { const o = document.createElement('option'); o.value = name; dl.append(o); }
+  wrap.append(dl);
+  const rows = document.createElement('div');
+  rows.className = 'srows';
+  wrap.append(rows);
+  const add = document.createElement('button');
+  add.type = 'button'; add.className = 'addsess mono';
+  add.textContent = '+ Add a session';
+
+  const render = () => {
+    const have = Array.isArray(day.sessions) ? day.sessions : [];
+    rows.replaceChildren(...have.map((s, idx) => sessionRow(s, idx)));
+    if (!have.length) {
+      const none = document.createElement('div');
+      none.className = 'snone';
+      none.textContent = open ? 'No session yet. A rest day counts.' : 'No session';
+      rows.append(none);
+    }
+    add.hidden = !open || have.length >= SPEC.session.perDay;
+  };
+
+  function sessionRow(s, idx) {
+    const r = document.createElement('div');
+    r.className = 'srow';
+    const top = document.createElement('div');
+    top.className = 'stop';
+    const name = document.createElement('input');
+    name.type = 'text'; name.className = 'sname'; name.setAttribute('list', SPORTS_ID);
+    name.placeholder = 'Sport'; name.maxLength = SPEC.session.name; name.value = s.s || ''; name.disabled = !open;
+    name.setAttribute('aria-label', 'Sport');
+    name.addEventListener('input', () => { s.s = name.value.trim(); touch(); });
+
+    /* intensity as three buttons, one tap, no menu */
+    const lv = document.createElement('div');
+    lv.className = 'slevels'; lv.setAttribute('role', 'group'); lv.setAttribute('aria-label', 'Intensity');
+    const paintLevels = () => lv.querySelectorAll('button').forEach((b, k) => b.setAttribute('aria-pressed', String(s.i === k + 1)));
+    SPEC.levels.forEach((word, k) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = `slevel l${k + 1} mono`; b.textContent = word; b.disabled = !open;
+      b.addEventListener('click', () => { if (s.i === k + 1) delete s.i; else s.i = k + 1; paintLevels(); touch(); });
+      lv.append(b);
+    });
+    paintLevels();
+    top.append(name, lv);
+
+    const bottom = document.createElement('div');
+    bottom.className = 'sbottom';
+    const kcal = document.createElement('input');
+    kcal.type = 'number'; kcal.inputMode = 'numeric'; kcal.className = 'skcal';
+    kcal.min = '0'; kcal.max = String(SPEC.session.kcal); kcal.placeholder = 'kcal';
+    kcal.value = s.k ?? ''; kcal.disabled = !open;
+    kcal.setAttribute('aria-label', 'Calories burned');
+    kcal.addEventListener('input', () => {
+      const n = Number(kcal.value);
+      if (kcal.value === '' || !Number.isFinite(n)) delete s.k; else s.k = Math.min(SPEC.session.kcal, Math.max(0, Math.round(n)));
+      touch();
+    });
+    const u = document.createElement('span'); u.className = 'sunit mono'; u.textContent = 'kcal';
+    const del = document.createElement('button');
+    del.type = 'button'; del.className = 'sdel'; del.textContent = '×'; del.disabled = !open;
+    del.setAttribute('aria-label', 'Remove this session');
+    del.addEventListener('click', () => {
+      day.sessions.splice(idx, 1);
+      if (!day.sessions.length) delete day.sessions;
+      render(); touch();
+    });
+    const nums = document.createElement('div');
+    nums.className = 'mnums';
+    nums.append(kcal, u, del);
+    bottom.append(spanEl(s, open, `Session ${idx + 1}`), nums);
+    r.append(top, bottom);
+    return r;
+  }
+
+  add.addEventListener('click', () => {
+    (day.sessions ||= []).push({ s: '' });
+    render();
+    rows.querySelector('.srow:last-child .sname')?.focus();
+  });
+  render();
+  wrap.append(add);
+  return wrap;
 }
 
 /* ── the month strip ────────────────────────────────────────────────── */
@@ -576,10 +982,59 @@ function drawStrip() {
   $('monthPill').textContent = `${done} of 31 complete`;
 }
 
-/* ── the matrix ─────────────────────────────────────────────────────── */
+/* ── the matrix: every measure against every result ─────────────────── */
+/* A row per measure, grouped as the card is, and a column per result. Each
+   cell is the impact on five steps; the move in the result's own unit sits
+   under the word. Tapping a cell spells it out above the grid, which a
+   phone cannot do with a hover. */
+const fmtMove = (o, x) => {
+  const k = 10 ** (o.digits || 0);
+  const r = Math.round(x * k) / k;
+  return r === 0 ? '0' : `${r > 0 ? '+' : '−'}${Math.abs(r).toFixed(o.digits || 0)}`;
+};
+const fmtAvg = (o, x) => o.id === 'sleepMin' ? fmtMinutes(x) : `${x.toFixed(o.digits || 0)} ${o.unit}`;
+/* Where a counted measure was split, in its own terms: "over 17:10". */
+function fmtCut(f, x) {
+  if (x == null || !f.fmt) return '';
+  const v = f.fmt === 'clock' ? hhmm(x) : f.fmt === 'dur' ? fmtMinutes(x)
+    : f.fmt === 'level' ? SPEC.levels[Math.max(0, Math.min(SPEC.levels.length - 1, Math.floor(x) - 1))].toLowerCase()
+    : f.fmt === 'steps' ? `${Math.round(x / 100) * 100} steps` : `${Math.round(x * 10) / 10} ${f.fmt}`;
+  return ` (over ${v})`;
+}
+/* The class and the word for one impact. */
+function levelOf({ level, very }) {
+  if (level === 'neutral') return { cls: 'neutral', word: 'Neutral' };
+  const word = level === 'good' ? 'good' : 'bad';
+  return very ? { cls: 'v' + level, word: `Very ${word}` } : { cls: level, word: word[0].toUpperCase() + word.slice(1) };
+}
+
+function cellEl(factor, o, link) {
+  const td = document.createElement('td');
+  if (factor.id === o.id) { td.innerHTML = '<span class="lv self" aria-label="same measure">—</span>'; return td; }
+  if (!link) { td.innerHTML = '<span class="lv thin" title="Not enough days on each side yet">·</span>'; return td; }
+  const imp = impact(link), { cls, word } = levelOf(imp);
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = `lv ${cls}`;
+  b.innerHTML = `${word}${imp.level === 'neutral' ? '' : `<small>${fmtMove(o, link.diff)} ${o.unit}</small>`}`;
+  b.setAttribute('aria-label', `${factor.name} on ${o.name}: ${word}`);
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.mx .lv[aria-pressed="true"]').forEach(x => x.setAttribute('aria-pressed', 'false'));
+    b.setAttribute('aria-pressed', 'true');
+    const clear = imp.level !== 'neutral'
+      ? `Clear of luck (q ${link.q.toFixed(3)}).`
+      : link.q > SPEC.maxLuck ? `Not clear of luck (q ${link.q.toFixed(2)}), so neutral.` : 'Gap too small to matter, so neutral.';
+    $('mxdetail').innerHTML =
+      `<b>${factor.icon} ${factor.name} → ${o.icon} ${o.name}: ${word}.</b> ` +
+      `${fmtMove(o, link.diff)} ${o.unit} after ${factor.on}${fmtCut(factor, link.cut)}, ` +
+      `${link.nOn} of ${link.n} days. ${clear}`;
+  });
+  td.append(b);
+  return td;
+}
+
 function drawMatrix() {
   const ready = readyDays(state.log);
-  $('mxPill').textContent = `${ready} of ${SPEC.minDays} days`;
+  $('mxPill').textContent = ready < SPEC.minDays ? `${ready} of ${SPEC.minDays} days` : `${ready} days in`;
   if (ready < SPEC.minDays) {
     const box = document.createElement('div');
     box.className = 'locked';
@@ -590,36 +1045,51 @@ function drawMatrix() {
     $('mxbox').replaceChildren(box);
     return;
   }
-  const rows = matrix(state.log);
+  const { rows, tested } = analyze(state.log);
+  const found = rows.reduce((n, r) => n + r.cells.filter(l => l && impact(l).level !== 'neutral').length, 0);
+
+  const sum = document.createElement('p');
+  sum.className = 'fsum mono';
+  sum.innerHTML = `<b>${found}</b> impact${found === 1 ? '' : 's'} found · <b>${tested}</b> links tested · at most 1 in ${Math.round(1 / SPEC.maxLuck)} is luck`;
+
+  const legend = document.createElement('div');
+  legend.className = 'mxlegend';
+  legend.innerHTML = ['vbad Very bad', 'bad Bad', 'neutral Neutral', 'good Good', 'vgood Very good']
+    .map(x => { const i = x.indexOf(' '); return `<span class="lv ${x.slice(0, i)}">${x.slice(i + 1)}</span>`; }).join('');
+
+  const detail = document.createElement('div');
+  detail.className = 'mxdetail'; detail.id = 'mxdetail';
+  detail.textContent = 'Tap a cell to see what it measured.';
+
   const t = document.createElement('table');
   t.className = 'mx';
-  t.innerHTML =
-    '<thead><tr><th>Factor</th>' +
-    SPEC.outcomes.map(o => `<th>Δ ${o.name}</th>`).join('') +
-    '</tr></thead>';
+  t.innerHTML = '<thead><tr><th class="rh">Measure</th>' + SPEC.outcomes.map(o => {
+    const avg = average(state.log, o);
+    return `<th><em>${o.icon}</em>${o.name}${avg == null ? '' : `<small>avg ${fmtAvg(o, avg)}</small>`}</th>`;
+  }).join('') + '</tr></thead>';
   const body = document.createElement('tbody');
-  for (const r of rows) {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td class="f"><em>${r.factor.icon}</em>${r.factor.name}</td>`;
-    for (const c of r.cells) {
-      const td = document.createElement('td');
-      if (!c) td.innerHTML = '<span class="cellv thin"><u>—</u><s>Thin</s></span>';
-      else {
-        const lit = c.label === 'medium' || c.label === 'strong' || c.label === 'v. strong';
-        const sign = c.delta > 0 ? '+' : '';
-        td.innerHTML =
-          `<span class="cellv ${c.good ? 'good' : 'bad'}${lit ? ' lit' : ''}" title="${c.nOn} of ${c.n} days on the high side">` +
-          `<u>${sign}${c.delta.toFixed(0)}%</u><s>${c.label}</s></span>`;
-      }
-      tr.append(td);
+  for (const g of SPEC.groups) {
+    const mine = rows.filter(r => r.factor.group === g.id);
+    if (!mine.length) continue;
+    const sec = document.createElement('tr');
+    sec.className = 'sec';
+    sec.innerHTML = `<th colspan="${SPEC.outcomes.length + 1}"><em>${g.icon}</em>${g.name}</th>`;
+    body.append(sec);
+    for (const r of mine) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<th class="rh" scope="row"><em>${r.factor.icon}</em>${r.factor.name}</th>`;
+      SPEC.outcomes.forEach((o, i) => tr.append(cellEl(r.factor, o, r.cells[i])));
+      body.append(tr);
     }
-    body.append(tr);
   }
   t.append(body);
   const wrap = document.createElement('div');
   wrap.className = 'mxwrap';
   wrap.append(t);
-  $('mxbox').replaceChildren(wrap);
+  const hint = document.createElement('p');
+  hint.className = 'mxhint mono';
+  hint.textContent = `Swipe the grid for all ${SPEC.outcomes.length} results →`;
+  $('mxbox').replaceChildren(sum, legend, detail, hint, wrap);
 }
 
 function draw() { drawCard(); drawStrip(); drawMatrix(); }
@@ -638,17 +1108,22 @@ function touch() {
 async function push() {
   if (!pass || saving || !dirty) return;
   saving = true; dirty = false;
+  let failedSave = false;
   try {
     const out = await api('bio.save', { passphrase: pass, today, ...clean(state, today) });
-    state.log = out.log; state.updatedAt = out.updatedAt;
-    say('Saved');
+    /* The page holds the author's copy. Taking the reply's log here would
+       drop any tap made while this save was in flight. */
+    state.updatedAt = out.updatedAt;
+    say(dirty ? 'Saving…' : 'Saved');
     stamp();
   } catch (e) {
-    dirty = true;
+    dirty = failedSave = true;
     say(e.message, true);
   } finally {
     saving = false;
-    if (dirty) { clearTimeout(timer); timer = setTimeout(push, 2500); }
+    /* A tap that landed mid-flight goes out on the normal beat; a failure
+       waits longer before trying again. */
+    if (dirty) { clearTimeout(timer); timer = setTimeout(push, failedSave ? 2500 : 900); }
   }
 }
 
@@ -661,7 +1136,24 @@ function stamp() {
 }
 
 /* ── the unlock bar ─────────────────────────────────────────────────── */
+/* What the bar says once unlocked: logging, or why this day is shut. */
+function paintStatus() {
+  const st = $('status');
+  if (!st || !pass) return;
+  st.classList.remove('bad');
+  st.textContent = editable(sel) ? (isPractice(sel) ? 'Practice day. Saved, never counted.' : 'Logging. Every change saves itself.')
+    : !loaded ? 'Loading the log first.'
+    : sel > today ? `${pretty(sel)} has not come yet. Pick today to log.`
+    : 'This day is outside the log.';
+}
+/* Lock forgets the password on this device; Log asks for it again. */
+$('lock').addEventListener('click', () => {
+  pass = '';
+  try { localStorage.removeItem('bio.pass'); } catch {}
+  closeBar(); draw();
+});
 function openBar(unlocked) {
+  paintStatus();
   $('bar').hidden = false;
   document.body.classList.add('editing');
   $('gate').hidden = unlocked; $('tools').hidden = !unlocked;
@@ -700,15 +1192,28 @@ $('gate').addEventListener('submit', async e => {
 
 /* ── the CSV, one row a day ─────────────────────────────────────────── */
 $('csv').addEventListener('click', () => {
-  const cols = [...SPEC.manual, ...SPEC.body];
-  const head = ['date', ...cols.map(c => c.id), 'note'];
+  const cols = SPEC.fields;
+  const q = x => `"${String(x).replace(/"/g, '""')}"`;
+  const head = ['date', 'practice', ...cols.map(c => c.id), 'coffee_cups', 'meals', 'eaten_kcal', 'sessions', 'sport_min', 'sport_kcal', 'sport_hardest', 'note'];
   const lines = [head.join(',')];
-  for (const key of DAYS) {
+  const span = x => `${x.t != null ? hhmm(x.t) : '?'}-${x.e != null ? hhmm(x.e) : '?'}`;
+  const keys = [...new Set([...Object.keys(state.log).filter(k => k < SPEC.start), ...DAYS])].sort();
+  for (const key of keys) {
     const d = state.log[key] || {};
-    lines.push([key, ...cols.map(c => {
+    const ss = (d.sessions || []).filter(x => x.s);
+    const mins = ss.map(spanMin).filter(Number.isFinite);
+    lines.push([key, isPractice(key) ? '1' : '0', ...cols.map(c => {
       const v = d[c.id];
-      return v === true ? '1' : v == null ? (c.kind === 'flag' ? '0' : '') : String(v);
-    }), `"${String(d.note || '').replace(/"/g, '""')}"`].join(','));
+      return v === true ? '1' : v == null ? (c.kind === 'flag' ? '0' : '') : c.kind === 'time' ? hhmm(v) : String(v);
+    }),
+    q((d.cups || []).map(span).join(' ')),
+    q((d.meals || []).map(m => `${span(m)} ${m.k ?? '?'}kcal`).join('; ')),
+    (d.meals || []).some(m => Number.isFinite(m.k)) ? d.meals.reduce((a, m) => a + (m.k || 0), 0) : '',
+    q(ss.map(x => `${x.s} ${span(x)}${x.i ? ` ${SPEC.levels[x.i - 1]}` : ''}${x.k != null ? ` ${x.k}kcal` : ''}`).join('; ')),
+    mins.length ? mins.reduce((a, b) => a + b, 0) : '',
+    ss.length ? ss.reduce((a, x) => a + (x.k || 0), 0) : '',
+    ss.some(x => x.i) ? SPEC.levels[Math.max(...ss.map(x => x.i || 0)) - 1] : '',
+    q(d.note || '')].join(','));
   }
   const url = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' }));
   const a = document.createElement('a');
@@ -727,10 +1232,20 @@ addEventListener('scroll', dim, { passive: true }); dim();
 /* ── start ──────────────────────────────────────────────────────────── */
 try { pass = localStorage.getItem('bio.pass') || ''; } catch {}
 draw();
-api('bio.get')
-  .then(d => { if (d) { state.log = d.log || {}; state.updatedAt = d.updatedAt || 0; } })
-  .catch(() => {})
-  .finally(() => { draw(); stamp(); });
+/* Only a log that actually arrived opens the page for writing. A save sends
+   the whole month, so writing on top of a failed load would replace October
+   with whatever this one screen holds. */
+function load() {
+  api('bio.get')
+    .then(d => {
+      if (d) { state.log = d.log || {}; state.updatedAt = d.updatedAt || 0; }
+      loaded = true;
+    })
+    .catch(e => { failed = e.message; })
+    .finally(() => { draw(); stamp(); if (failed) say(`${failed}. Logging is paused so nothing gets overwritten.`, true); });
+}
+let failed = '';
+load();
 </script>
 </body>
 </html>
