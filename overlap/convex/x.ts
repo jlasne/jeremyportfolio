@@ -42,11 +42,10 @@ import {
 const MAX_ENTRY = 4000;
 const MAX_ENTRIES = 200;
 const KEEP_DRAFT_DAYS = 3; /* how much recent work the model is shown */
-/* After the drafts land at 17:00, an hourly nudge until one is ticked off.
-   It stops at midnight either way: a reminder nobody acts on at 01:00 is
-   not a reminder, it is noise. */
-const NUDGE_FROM = 18;
-const NUDGE_TO = 23;
+/* One nudge, at 20:00, three hours after the drafts land, and only while
+   none of them has been ticked off. One mail that gets read beats six that
+   get filtered. */
+const NUDGE_AT = 20;
 
 /* ── the door ───────────────────────────────────────────────────────── */
 
@@ -813,8 +812,8 @@ function mailBody(day: string, slot: string, d: ReturnType<typeof blank> | any) 
  * The nudge: written drafts, none of them ticked off yet.
  *
  * Shorter than the three daily mails, because it asks for one thing. Each
- * post is here in full, so it can be posted from the phone without opening
- * anything, and ticking one on the page stops the rest of the evening.
+ * post is here in full, so it can go out from the phone without opening
+ * anything else.
  */
 function nudgeBody(day: string, hour: number, left: { kind: string; label: string; body: string }[]) {
   const posts = left.filter((d) => d.kind === "post").length;
@@ -828,8 +827,7 @@ function nudgeBody(day: string, hour: number, left: { kind: string; label: strin
     `<div style="font:400 14px/1.4 ${font};color:${C.dim};margin:0 0 20px">${esc(longDate(day))} · ${hour}:00 Paris</div>` +
     box(
       `<div style="font:700 19px/1.35 ${font};color:${C.ink};margin:0 0 8px">${left.length} written, nothing posted.</div>` +
-      `<div style="font:400 15px/1.5 ${font};color:${C.dim}">${posts} ${posts === 1 ? "post" : "posts"} and the script have been sitting since 17:00. ` +
-      `Tick one as used on the page and these stop.</div>` +
+      `<div style="font:400 15px/1.5 ${font};color:${C.dim}">${posts} ${posts === 1 ? "post" : "posts"} and the script have been sitting since 17:00.</div>` +
       `<div style="margin:18px 0 0"><a href="${SITE()}" style="display:inline-block;background:${C.ink};color:${C.bg};text-decoration:none;font:700 15px/1 ${font};padding:13px 22px;border-radius:9999px">Open the drafts</a></div>`,
     ) +
     left
@@ -845,13 +843,13 @@ function nudgeBody(day: string, hour: number, left: { kind: string; label: strin
   const text = [
     `x · ${longDate(day)} · ${hour}:00 Paris`,
     "",
-    `${left.length} written, nothing posted. Tick one as used and these stop.`,
+    `${left.length} written, nothing posted. Sitting since 17:00.`,
     SITE(),
     "",
     ...left.map((d) => `--- ${d.label} ---\n${d.body}`),
   ].join("\n");
 
-  return { subject: `x · ${left.length} drafts still unposted · ${hour}:00`, html, text };
+  return { subject: `x · ${left.length} drafts still unposted`, html, text };
 }
 
 export const sendNudge = internalAction({
@@ -862,7 +860,7 @@ export const sendNudge = internalAction({
     if (!left.length) return null;
     const { subject, html, text } = nudgeBody(day, hour, left);
     await resend(subject, html, text);
-    await ctx.runMutation(internal.x.markMailed, { day, slot: `nudge${hour}` });
+    await ctx.runMutation(internal.x.markMailed, { day, slot: "nudge" });
     return null;
   },
 });
@@ -922,11 +920,10 @@ export const tick = internalAction({
       return null;
     }
 
-    /* Drafts written and none of them ticked off: nudge, once an hour,
-       until one is used or the evening runs out. */
-    if (hour < NUDGE_FROM || hour > NUDGE_TO) return null;
+    /* Drafts written and none of them ticked off: one nudge at 20:00. */
+    if (hour !== NUDGE_AT) return null;
     if (!d.drafts.length || d.drafts.some((x: { used?: boolean }) => x.used)) return null;
-    if (d.mailed.includes(`nudge${hour}`)) return null;
+    if (d.mailed.includes("nudge")) return null;
     await ctx.runAction(internal.x.sendNudge, { day, hour });
     return null;
   },

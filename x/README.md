@@ -11,17 +11,18 @@ three mails ask for more, and at 17:00 the day becomes three X posts and one
 | 10:00 | 3 questions on what you are going after, plus the /bio nudge |
 | 14:00 | 3 questions on what happened since 10:00 |
 | 17:00 | 3 questions, then the 3 posts and the script, written from the log |
-| 18:00 to 23:00 | one an hour while the drafts sit untouched, each carrying them in full |
+| 20:00 | one mail if nothing has been posted, carrying the drafts in full |
 
 Every mail carries the whole day back: the questions, the entries, and
 whatever is still unposted. A draft you have ticked used drops out, so the
 mail never buries the one that still needs sending. The inbox is the
 archive, whatever happens to the database.
 
-The evening nudge is the exception, and asks for one thing. Once the drafts
-are written and none of them is ticked used, one lands every hour from 18:00
-with the posts in full, so one can go out from the phone. Ticking any draft
-stops the rest of the evening, and so does midnight.
+The evening nudge is the exception, and asks for one thing. At 20:00, three
+hours after the drafts land, one mail goes out if none of them has been
+ticked used, carrying the posts in full so one can go out from the phone.
+Tick any draft before 20:00 and it never comes. One mail that gets read
+beats six that get filtered.
 
 The mail questions come from a bank of three sets per slot that rotates by
 date, so the same three do not arrive every morning for a month. They follow
