@@ -101,9 +101,11 @@
   }
 
   // ---- the composer pill -> sent bubble ----
-  const morphP = t => R.prog(t, T_SEND, T_REPLY);
+  // a stiff UI spring from rest (omega 18.2, zeta 0.69, ~5% overshoot; 7.2): outBack(1.6) left SEND at slope 4.6,
+  // ~180 px on the first frame, which smeared the text into mush; the spring peaks near 4,600 px/s mid-move
+  const morphE = t => t < T_SEND ? 0 : R.spring(t - T_SEND, 330, 25);
   function pillRect(t) {
-    const e = E.outBack(morphP(t), 1.6);
+    const e = morphE(t);
     const r = PILL.map((v, i) => R.lerp(v, BUBBLE[i], e));
     r[4] = Math.max(0, Math.min(r[4], (r[3] - r[1]) / 2, (r[2] - r[0]) / 2));
     return r;
@@ -158,7 +160,7 @@
   // BLUE fill, so the outline is gone by 6.2& and never smears into rings during the fast part of the morph
   const fillA = t => E.outQuad(R.prog(t, T_SENDA, T_SEND + 0.16));
   const strokeA = t => 1 - E.outQuad(R.prog(t, T_SENDA, T_SEND));
-  const textPos = t => { const e = E.outBack(morphP(t), 1.6); return [R.lerp(TX, TX2, e), R.lerp(TY, TY2, e)]; };
+  const textPos = t => { const e = morphE(t); return [R.lerp(TX, TX2, e), R.lerp(TY, TY2, e)]; };
   // the sent bubble as ONE flat path (rect + tail, nonzero union) so its samples can be averaged
   function bubbleShape(ctx, t) {
     const rect = pillRect(t), [x0, y0, x1, y1, r] = rect;
@@ -186,7 +188,7 @@
       return;
     }
     bubbleShape(ctx, t);
-    const [px, py] = textPos(t);            // the text rides the bubble: same outBack as the rect
+    const [px, py] = textPos(t);            // the text rides the bubble: same spring as the rect
     drawText(ctx, t, px, py);
   }
 
@@ -194,7 +196,7 @@
   // shape: n vector samples of the one flat path, averaged ('lighter' at 1/n is an exact average for a single flat
   // shape). text: rendered once, then box-blurred along its motion vector by log-doubling (2^m taps <= 1.25 px
   // apart), which is smooth at any speed for ~2m blits. No blur under 1.5 px of motion.
-  const MORPH_SHUTTER = 1 / 90;
+  const MORPH_SHUTTER = 1 / 90, TEXT_SMEAR = 10;
   const dev = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
   function region(x0, y0, x1, y1) {
     const rs = R.rs, bx = dev(Math.floor(x0 * rs), 0, R.rw), by = dev(Math.floor(y0 * rs), 0, R.rh);
@@ -235,7 +237,13 @@
     if (gs[2] > 0 && gs[3] > 0) ctx.drawImage(S.canvas, gs[0], gs[1], gs[2], gs[3], gs[0], gs[1], gs[2], gs[3]);
     ctx.restore();
     // text
-    const pa = textPos(ta), pb = textPos(tb), dx = pb[0] - pa[0], dy = pb[1] - pa[1];
+    // the text's smear is capped at 10 px around its frame-time position, so the sentence stays legible as it is sent
+    // (the bubble shape keeps its full vector blur)
+    const pa0 = textPos(ta), pb0 = textPos(tb), pc0 = textPos(t);
+    let dx = pb0[0] - pa0[0], dy = pb0[1] - pa0[1];
+    const L0 = Math.hypot(dx, dy);
+    if (L0 > TEXT_SMEAR) { dx *= TEXT_SMEAR / L0; dy *= TEXT_SMEAR / L0; }
+    const pa = [pc0[0] - dx / 2, pc0[1] - dy / 2], pb = [pc0[0] + dx / 2, pc0[1] + dy / 2];
     if (Math.hypot(dx, dy) < 1.5) { const p = textPos(t); drawText(ctx, t, p[0], p[1]); return; }
     const T = R.layer('s5:tx');
     const gt = region(Math.min(pa[0], pb[0]) - 8, Math.min(pa[1], pb[1]) - 62, Math.max(pa[0], pb[0]) + G.width + 8, Math.max(pa[1], pb[1]) + 22);
@@ -322,10 +330,13 @@
   // ---- the flying dot: iris centre -> knob ----
   function drawFlyingDot(c, tt) {
     tt = Math.min(tt, T_LAND - 1e-6);
-    const h = hop(Math.max(tt, T0), T0, T_LAND, 960, 540, KNOB_OFF, KNOB_Y, 160);
-    const u = R.prog(tt, T0, T_LAND), d = R.lerp(48, KNOB_D, E.inOutSine(u));
+    // same parabola and endpoints, but time along it eases in (uw = u^1.35): the dot leaves H4 from rest instead of
+    // at 2,900 px/s on its first frame, and arrives 1.35x faster into the knob's landing squash
+    const u = R.prog(tt, T0, T_LAND), uw = Math.pow(u, 1.35), g = u > 0 ? 1.35 * Math.pow(u, 0.35) : 0;
+    const h = hop(T0 + uw * (T_LAND - T0), T0, T_LAND, 960, 540, KNOB_OFF, KNOB_Y, 160);
+    const d = R.lerp(48, KNOB_D, E.inOutSine(u));
     const kw = E.outQuad(R.prog(tt, T0, T0 + S32));     // H4: round at 9.375, stretch ramps in
-    drawDot(c, h.x, h.y, d, h.vx, h.vy, 1, 1, RED, false, 1.6, kw);
+    drawDot(c, h.x, h.y, d, h.vx * g, h.vy * g, 1, 1, RED, false, 1.6, kw);
   }
 
   // ---- metaball neck (Paper.js technique): tangent-point Bezier bridge between two circles ----
@@ -523,7 +534,8 @@
     drawToggleRow(ctx, t, hx);
     drawReply(ctx, t);
     // the composer group; motion-blurred while the morph moves (drawComposerBlurred is sharp when it is slow)
-    if (t >= T_SEND && t < T_REPLY + MORPH_SHUTTER) drawComposerBlurred(ctx, t);
+    // (the spring still drifts ~4 px / frame just after 6.3, so the blur window runs a 16th past it)
+    if (t >= T_SEND && t < T_REPLY + S16) drawComposerBlurred(ctx, t);
     else drawComposer(ctx, t, hx);
     drawSend(ctx, t, hx);
     if (t >= T_DROP && t < T_WHIP) drawDrop(ctx, t);

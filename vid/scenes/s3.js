@@ -14,7 +14,9 @@
   const TDROP = 7.5;                // 5.1  snap
   const TEND = 7.6171875;           // 5.1e handoff (H3)
   const SNAP_END = TEND - 1 / 60;   // frame rule: the end state holds on the last drawn frame
-  const TBLINK0 = 7.44140625, TBLINK1 = 7.5078125;
+  // pickup blink: 4 frames (f446-f449) ending before the 5.1 drop, so it leads into the hit instead of being split by
+  // s4's drop chroma/zoom on f450 (starts ~8 ms before the 7.4414 audio tick)
+  const TBLINK0 = 7.425, TBLINK1 = TDROP;
   const tapeU = t => R.clamp((t - TS0) / TSD);
   const tapeSource = t => { const u = tapeU(t); return TSD * (u - u * u / 2); };
   // local explosion clock (tape-remapped), frozen at 0.64453125 from 7.3828125
@@ -219,8 +221,10 @@
         c.lineTo(it.pb[0] - nx * hb, it.pb[1] - ny * hb);
         c.lineTo(it.pa[0] - nx * ha, it.pa[1] - ny * ha);
         c.closePath();
-        if (it.cap) { const rc = w / 2 * it.cap[2]; c.moveTo(it.cap[0] + rc, it.cap[1]); c.arc(it.cap[0], it.cap[1], rc, 0, TAU); }
         c.fill();
+        // the end disc is its own path: added to the quad's path with the opposite winding, nonzero fill punched
+        // its inner half out (H2's capsule must have solid round ends)
+        if (it.cap) { const rc = w / 2 * it.cap[2]; c.beginPath(); c.arc(it.cap[0], it.cap[1], rc, 0, TAU); c.fill(); }
         continue;
       }
       const f = it.facing;
@@ -491,6 +495,7 @@
   }
   const SNAP_LMAX = 190;
   function drawSnap(c, t) {
+    const rs = R.rs, sp = v => Math.round(v * rs) / rs;
     const pe = E.outExpo(R.prog(t, TDROP, SNAP_END)), pp = E.outExpo(R.prog(t - FR, TDROP, SNAP_END));
     const pe4 = pe ** 4;   // squares grow to 8 px late, so the one-frame streaks stay thin
     // ICE->ICE, BLUE->ICE, RED->RED: the same p for every particle, so three colours
@@ -501,7 +506,10 @@
       qBegin(c);
       for (let n = 0; n < idx.length; n++) {
         const i = idx[n];
-        const x = R.lerp(FX[i], SLX[i], pe), y = R.lerp(FY[i], SLY[i], pe);
+        // blend in s4's device-pixel snap as the particles land (lit y; RED x and y), so pe = 1 is s4's frame exactly
+        // at any render width (0 at rs 1)
+        const oy = (sp(SLY[i] - 4) - (SLY[i] - 4)) * pe, ox = k === 2 ? (sp(SLX[i] - 4) - (SLX[i] - 4)) * pe : 0;
+        const x = R.lerp(FX[i], SLX[i], pe) + ox, y = R.lerp(FY[i], SLY[i], pe) + oy;
         const s = R.lerp(SZ[i], 8, pe4);
         if (pe > pp) {
           let x0 = R.lerp(FX[i], SLX[i], pp), y0 = R.lerp(FY[i], SLY[i], pp);
@@ -555,7 +563,7 @@
     R.flash(t, T0, { amount: 0.12, decay: 25, color: ICE });
     if (t >= TEXP) {
       const tx = tauX(Math.min(t, TDEAD));          // explosion envelopes run on the tape clock
-      R.flash(TEXP + tx, TEXP, { amount: 0.25, decay: 12, color: ICE });
+      R.flash(TEXP + tx, TEXP, { amount: 0.25, decay: 26, color: ICE });   // same peak, gone in ~4 frames (decay 12 read as a grey veil)
       R.impact(TEXP + tx, TEXP, { amount: 22, decay: 7 });
       f.chroma = 10 * Math.exp(-22 * tx);   // spec 10·e^(−6τ) splits 2-5 px particles into RGB confetti (report)
       f.bloom += 0.9 * Math.exp(-4 * tx);
@@ -595,7 +603,8 @@
         // Adaptive sample count: sub-frame copies never more than ~BLUR_STEP px apart (capped at BLUR_MAX),
         // and the blur stays on until the fastest glyph moves less than ~BLUR_STEP px across the shutter.
         const travel = motionPx(t) * BLUR_SH;
-        const NSMP = R.quality < 1 || travel < 6 ? 1 : R.clamp(Math.ceil(travel / BLUR_STEP) + 1, 3, BLUR_MAX);
+        // off once the last drum has locked and its wobble has died (the slow camera settle needs no blur)
+        const NSMP = R.quality < 1 || travel < 6 || t >= 6.15234375 + 0.1 ? 1 : R.clamp(Math.ceil(travel / BLUR_STEP) + 1, 3, BLUR_MAX);
         if (NSMP < 2) { drawCryptex(ctx, t); return; }
         const SH = BLUR_SH, bb = blurBox(t - SH / 2, t + SH / 2);
         const Acc = R.layer('s3:mbA'), S = R.layer('s3:mbS'), a = Acc.ctx;

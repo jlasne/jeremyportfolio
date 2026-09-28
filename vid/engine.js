@@ -504,7 +504,7 @@ void main(){
   vec3 b = textureLod(T, uv, 3.).rgb * .25 + textureLod(T, uv, 4.5).rgb * .35 + textureLod(T, uv, 6.).rgb * .4;
   float bl = dot(b, vec3(.2126, .7152, .0722));
   b *= max(bl - thresh, 0.) / max(bl * (1. - thresh), .001);   // threshold on luminance, so saturated red does not bloom
-  col += b * bloom;
+  col += max(b - col, 0.) * bloom;   // halo only: lifts the dark surround towards the glow, never the inside of a flat bright shape (no clipping)
   col *= expo;
   col = (col - .5) * con + .5;
   float l = dot(col, vec3(.2126, .7152, .0722));
@@ -512,7 +512,7 @@ void main(){
   if (scan > 0.) col *= 1. - scan * (.5 + .5 * sin(v.y * res.y * 3.14159));
   vec2 q = (v - .5) * vec2(aspect, 1.);
   col = min(col, vec3(1.));
-  col *= mix(1., smoothstep(1.25, .35, length(q)), vign);
+  col *= mix(1., smoothstep(1.35, .75, length(q)), vign);   // falls off outside the 72..1848 measure, so red at the bookends stays true
   col += (hash(v * res + fract(time * 7.31) * 517.) - .5) * grain;
   col = mix(col, flashCol, clamp(flash, 0., 1.));
   o = vec4(col, 1.);

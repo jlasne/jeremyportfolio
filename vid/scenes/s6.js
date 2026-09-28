@@ -96,13 +96,14 @@
   // (kick + sub): spec count and seed, but bigger and faster than the spec's r 4-8 / 300-700 so the crown clearly
   // leaves the window, spawned on a rim with outward velocity. Splashes 2 and 3 land in the open L2 and U stem
   // windows, so they get smaller crowns too.
-  const CROWN_SPEC = [[0, 8, 722, 460, 900, 250, 6, 11, 22], [1, 5, 700, 400, 820, 110, 4, 7, 12], [2, 5, 640, 400, 820, 110, 4, 7, 12]];
-  const G = 2600, CROWN_SHRINK = 0.09;
+  // crown gravity matches drop 1; up-speeds scaled by sqrt(6570 / 2600) so the apex heights are unchanged
+  const CROWN_SPEC = [[0, 8, 722, 731, 1431, 250, 6, 11, 22], [1, 5, 700, 636, 1303, 110, 4, 7, 12], [2, 5, 640, 636, 1303, 110, 4, 7, 12]];
+  const G = 6570, CROWN_SHRINK = 0.09;
   const crownPos = (c, tt) => { const tau = tt - c.t0; return [c.x0 + c.vx * tau, c.y0 - c.vy * tau + 0.5 * G * tau * tau, c.vx, -c.vy + G * tau]; };
 
   // ---- the drops ----
   const DROP1_R = 26, DROP2_R = 23, DROP3_R = 21, SPLAT_R = [DROP1_R, DROP2_R, DROP3_R];
-  const G2 = 11500, SHUT = 1 / 60;
+  const G2 = 11500, SHUT = 1 / 60, D1_SMEAR = 64;
   const T_D2 = T_S2 - Math.sqrt(2 * (699.2 + 60) / G2);    // 11.1210: lands on the 25% level on 7.1&
   const T_D3 = T_S3 - Math.sqrt(2 * (638.5 + 60) / G2);    // 11.3702: lands on the 50% level on 7.2
   // where drop 1 enters the L1 window: the foot's top edge, measured from the raster in setup() (spec 676, real 685)
@@ -294,7 +295,16 @@
         const m = pos(t), r = r0 || m.r;
         // s5 hands drop 1 over crisp: its shutter opens over the whip's first two frames so the texture carries
         const sh = SHUT * (i === 0 ? R.smoothstep(T0, T0 + 2 / 60, t) : 1);
-        const a = pos(Math.max(ta, t - sh / 2)), b = pos(Math.min(tb - 1e-4, t + sh / 2));
+        // the eye tracks the protagonist through the whip-in: at the whip's peak (f657-f658, ~180 px per frame) a
+        // 1/60 s smear is 110-140 px on a 65 px drop and thins it to a salmon ghost, so during the whip-in its
+        // shutter is shortened to cap the smear at D1_SMEAR px (about its own height: a solid vermilion core, still
+        // a streak against the world's 1/60 s whip smear). Elsewhere, and on every slower frame, it stays 1/60 s.
+        const span = s => [pos(Math.max(ta, t - s / 2)), pos(Math.min(tb - 1e-4, t + s / 2))];
+        let [a, b] = span(sh);
+        if (i === 0 && t < T_LAND) {
+          const D0 = Math.abs(b.y - a.y);
+          if (D0 > D1_SMEAR) [a, b] = span(sh * D1_SMEAR / D0);
+        }
         const ry = r * m.k, rx = r / Math.sqrt(m.k), ylo = Math.min(a.y, b.y), D = Math.abs(b.y - a.y);
         smearY(L.ctx, c => { c.beginPath(); c.ellipse(m.x, ylo, rx, ry, 0, 0, R.TAU); c.fillStyle = RED; c.fill(); },
           m.x - rx, m.x + rx, ylo - ry, ylo + ry, D);
@@ -490,8 +500,14 @@
       // ---- post-FX (s6 owns 10.8984375 -> 12.0703125) ----
       if (t < T_PINCH) {
         const fx = R.fx;
-        fx.bloom = 0.15; fx.threshold = 0.8; fx.vignette = 0.35; fx.grain = 0.045;
-        if (t < T_LAND) { fx.chroma = 12 * Math.sin(Math.PI * w1(t)); fx.chromaAngle = Math.PI / 2; }
+        // Full ink baseline (1.8), set explicitly every frame so nothing is inherited from s5. During the whip-in
+        // it is reached with the camera: w1 is also the share of the frame that is already ink, so the still ice
+        // frame on the first whip frames keeps s5's ice values (bloom 0, vignette 0.12, grain 0.03) instead of
+        // blowing out to white with grey corners before anything has moved. Bloom waits until the ice has almost
+        // left the frame (the last whip frames): on the smeared ice band it clips the tint to neutral white.
+        const wi = t < T_LAND ? w1(t) : 1;
+        fx.bloom = 0.15 * R.smoothstep(0.8, 1, wi); fx.threshold = 0.8; fx.vignette = R.lerp(0.12, 0.35, wi); fx.grain = R.lerp(0.03, 0.045, wi);
+        if (t < T_LAND) { fx.chroma = 12 * Math.sin(Math.PI * wi); fx.chromaAngle = Math.PI / 2; }
         for (const [tb] of SPL) R.impact(t, tb, { amount: 5, decay: 16 });
       }
 

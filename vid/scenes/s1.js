@@ -123,17 +123,19 @@
   // ---- the grid ----
   const VP = [[948, 972], [822, 1098], [798, 1122], [672, 1248], [648, 1272], [522, 1398], [498, 1422], [372, 1548], [348, 1572], [222, 1698], [198, 1722], [72, 1848]];
   const HP = [[528, 552], [392, 688], [368, 712], [232, 848], [208, 872], [72, 1008]];
-  const GROW = 0.3515625, SETTLE = 0.234375;
+  const GROW = 0.3515625, SETTLE = 0.234375, S256 = B / 64;
   const snapPos = (v, w) => { const rs = R.rs, dw = Math.max(1, Math.round(w * rs)); return [Math.round(v * rs) / rs + (dw % 2 ? 0.5 / rs : 0), dw / rs]; };
 
   function drawGrid(ctx, t) {
     if (t >= T_H1) return;
     const lock = t >= T_NL && t < T_NL + 3 / 60 ? 0.35 : 0.16;
-    const line = (vertical, pos, n, t0) => {
+    const line = (vertical, pos, n, t0, t1) => {
       const p = R.prog(t, t0, t0 + GROW);
       if (p <= 0) return;
       const half = vertical ? 468 : 888, ctr = vertical ? 540 : 960;
-      const L = half * E.outExpo(p);
+      // centre-in retract (1.5) before the dive, so nothing is left to pop on f211
+      const L = half * E.outExpo(p) * (1 - inExpoN(R.prog(t, t1, t1 + S16)));
+      if (L < 0.25) return;
       const s = E.outCubic(R.prog(t, t0 + GROW, t0 + GROW + SETTLE));
       const w = R.lerp(2.5, 1.5, s), a = R.lerp(0.5, lock, s);
       const [c, dw] = snapPos(pos, w);
@@ -148,8 +150,10 @@
         else { ctx.fillRect(ctr - L, pos - hw / 2, hl, hw); ctx.fillRect(ctr + L - hl, pos - hw / 2, hl, hw); }
       }
     };
-    for (let n = 0; n < VP.length; n++) for (const x of VP[n]) line(true, x, n, n * S64);
-    for (let n = 0; n < HP.length; n++) for (const y of HP[n]) line(false, y, n, B + n * S64);
+    // retract: pairs counted from the outside (m = 11 - n, 5 - n), pair m starts at T_DROP + m * S256, lasts S16;
+    // the last vertical pair reaches length 0 at 3.4790 (gone on f209), the last horizontal at 3.4351
+    for (let n = 0; n < VP.length; n++) for (const x of VP[n]) line(true, x, n, n * S64, T_DROP + (11 - n) * S256);
+    for (let n = 0; n < HP.length; n++) for (const y of HP[n]) line(false, y, n, B + n * S64, T_DROP + (5 - n) * S256);
   }
 
   // ---- count-in modules, numerals, the rule ----
@@ -611,13 +615,16 @@
         const rate = tt => 960 * 1.2 * 4 * R.prog(tt, T_C - S16, T_C) ** 3 / S16;
         const cap = tt => Math.min(1 / 60, 9 * 15 / Math.max(1e-6, rate(Math.min(tt, T_C))));
         const sh = cap(t + cap(t) / 2);
-        blur(ctx, t, (c, tt) => drawWordWhole(c, Math.min(tt, T_C - 1e-4)), 10, sh, 's1:word');
+        // 2 interleaved sub-samples per sample at half weight: 20 positions, the same smear as CLAUDE's slam in s7
+        const q4 = sh / 36, subs = R.quality < 1 ? [0] : [-q4, q4];
+        blur(ctx, t, (c, tt) => { c.globalAlpha /= subs.length; for (const d of subs) drawWordWhole(c, Math.min(tt + d, T_C - 1e-4)); }, 10, sh, 's1:word');
       } else if (t >= T_C && t < T_PUSHE) drawWordWhole(ctx, t);
       else if (t >= T_PUSHE && t < T_STR) {
         // the halves slam shut (inExpo): blurred, same 15 px sample spacing cap, never past the closed state
         const rate = tt => 298 * 10 * Math.LN2 * E.inExpo(R.prog(Math.min(tt, T_STR), T_PUSHE, T_STR)) / (T_STR - T_PUSHE);
         const sh = Math.min(1 / 60, 9 * 15 / Math.max(1e-6, rate(t + 1 / 120)));
-        blur(ctx, t, (c, tt) => drawWordWhole(c, Math.min(tt, T_STR - 1e-4)), 10, sh, 's1:word');
+        const q4 = sh / 36, subs = R.quality < 1 ? [0] : [-q4, q4];
+        blur(ctx, t, (c, tt) => { c.globalAlpha /= subs.length; for (const d of subs) drawWordWhole(c, Math.min(tt + d, T_STR - 1e-4)); }, 10, sh, 's1:word');
       } else if (t >= T_STR && t < T_DROP) {
         ctx.fillStyle = ICE; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
         for (let i = 0; i < 6; i++) drawLetter(ctx, i, letterAt(i, t));

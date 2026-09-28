@@ -361,10 +361,18 @@
       if (t >= T31) {
         const fx = R.fx;
         fx.bloom = 0.15; fx.threshold = 0.8; fx.vignette = 0.35; fx.grain = 0.045;
+        // H1 lens release: s1's dive peaks on f224 (distort 0.25, chroma 12); s2 lets it go over 3 frames
+        // (outCubic from f224's time) instead of snapping straight on f225
+        if (t < T31 + S32) {
+          const r = 1 - E.outCubic(R.prog(t, GRID_ON_E, T31 + S32));
+          fx.distort = 0.25 * r; fx.chroma = 12 * r; fx.chromaAngle = 0;
+        }
         const wa = TC[2] + CW, wb = TC[3] - CW;
         if (t >= wa && t < wb) { fx.chroma = 3 * Math.sin(Math.PI * R.prog(t, wa, wb)); fx.chromaAngle = 0; }
         if (t >= TC[4]) fx.bloom += 0.3 * Math.exp(-8 * (t - TC[4]));
-        if (t >= T_AX) { fx.chroma = 4; fx.chromaAngle = 0; }
+        if (t >= T_AX) {                                 // chroma follows the stretch speed: 0 by f336, as s3's f338
+          fx.chroma = 4 * (1 - E.outQuart(R.prog(t, T_AX, T_AXE))); fx.chromaAngle = 0;
+        }
       }
       const xo = xOff(t);
       drawGrid(ctx, t, xo);

@@ -33,7 +33,9 @@
   const slotX = (c, j) => XC[c] - 49 + 14 * j;         // c 0-based here
   const slotY = r => 923 - 14 * r;
   const CNT_X = 72, CNT_Y = 250, CNT_CLIP = 285;
-  const LAB_X = 76, LAB_Y = 312, LAB_CLIP = 330;
+  // label at 64 px (spec 44): the chapter's joke must read on a phone (~12 px tall at 360 px wide); cap top ~296
+  // clears the counter ink (277), descenders stay above the clip at 364
+  const LAB_X = 76, LAB_Y = 342, LAB_CLIP = 364, LAB_PX = 64;
   const LABEL = 'points. 0 misses.';
   let LAB_W = 330;                                      // measured in setup
   const COL_Y = 976, COL_CLIP = 990;
@@ -312,13 +314,17 @@
   // Scene-local motion blur for the curl, the spin and the collapse. Each sample renders the whole opaque world
   // (ink, grid, iris disc, chart group) in painter's order, and the samples are combined as a running mean
   // (source-over at 1/(i+1)), so the colours are exact and the 8-bit error does not grow with n. At most 10
-  // samples, shutter 1/120; the count follows the travel of the fastest point (~1 sample per 8 px).
+  // samples, shutter 1/120; the count follows the travel of the fastest point (~1 sample per 3 px, so the
+  // collapse smears instead of showing 4 separate copies). One sanctioned exception: the spin's peak-speed
+  // frames (over 15 deg per frame, f549-f550) take 16 samples so the notch and rings smear, not strobe.
   // the collapse uses half that shutter so the contracting red line stays solid rather than a radial haze
+  const SPIN_FAST = 15 * Math.PI / 180;
   const shutter = t => t >= T_IRIS ? 1 / 240 : 1 / 120;
   function blurSamples(t) {
     const SH = shutter(t), a = t - SH / 2, b = t + SH / 2;
     const px = Math.abs(curlS(b) - curlS(a)) * 1100 + Math.abs(spinA(b) - spinA(a)) * 470 + Math.abs(shrink(b) - shrink(a)) * 470;
-    return Math.min(10, Math.ceil(px / 8));
+    const spinStep = Math.abs(spinA(t + FR / 2) - spinA(t - FR / 2));
+    return Math.min(spinStep > SPIN_FAST ? 16 : 10, Math.ceil(px / 3));
   }
   function drawWorld(c, t, tf) {        // tf: the frame time; the iris disc stays sharp (drawn at tf)
     c.fillStyle = R.bg; c.fillRect(0, 0, 1920, 1080);
@@ -354,13 +360,13 @@
       R.font(ctx, 170, 'mono', 500); ctx.fillStyle = ICE;
       ctx.fillText(fmt(v), CNT_X, CNT_Y + 170 * ex);
       ctx.restore();
-      // label: clip-wipe in left -> right, exits sinking 60 px behind a clip at y 330
+      // label: clip-wipe in left -> right, exits sinking 80 px behind a clip at y 364
       const w = E.outExpo(R.prog(t, T_DOTS, T_LVL));
       if (w > 0) {
         ctx.save();
         ctx.beginPath(); ctx.rect(0, 0, LAB_X - 4 + (LAB_W + 8) * w, LAB_CLIP); ctx.clip();
-        R.font(ctx, 44, 'sans', 700); ctx.fillStyle = BLUE;
-        ctx.fillText(LABEL, LAB_X, LAB_Y + 60 * ex);
+        R.font(ctx, LAB_PX, 'sans', 700); ctx.fillStyle = BLUE;
+        ctx.fillText(LABEL, LAB_X, LAB_Y + 80 * ex);
         ctx.restore();
       }
     }
@@ -400,12 +406,12 @@
   function fx(t) {
     const f = R.fx, tau = t - T0;
     f.bloom = 0.15; f.threshold = 0.8; f.vignette = 0.35; f.grain = 0.045;
-    // the drop's bloom, flash and chroma decay faster than the spec (tau .1 / 14 / e^-10t) so the precision hold
-    // (7.6172 -> 7.7344) is still on screen, not only before post-FX: chroma .36 px, flash .02, bloom +.1 there
+    // the drop's bloom and flash decay faster than the spec (tau .1 / 14) so the precision hold (7.6172 -> 7.7344)
+    // is still on screen, not only before post-FX: flash .02, bloom +.1 there. No chroma on the drop: on top of
+    // 2,800 streaks it split every streak into R, G, B (a rainbow curtain); the streaks and shake carry the hit
     f.bloom += 1.0 * Math.exp(-tau / 0.05);
     R.flash(t, T0, { amount: 0.30, decay: 22, color: ICE });
     R.impact(t, T0, { amount: 12, decay: 18 });
-    f.chroma = 12 * Math.exp(-30 * tau);
     let z = 1 + 0.06 * (1 - E.outExpo(R.prog(t, T0, T0 + 3 * S32)));
     for (const kt of [KICKS[1], KICKS[2], T_CURL]) if (t >= kt) z += 0.012 * Math.exp(-12 * (t - kt));
     f.zoom = z;
@@ -425,7 +431,7 @@
     id: 's4', name: 'Data', start: T0, end: T_END, layer: 1,
     setup(R) {
       const c = document.createElement('canvas').getContext('2d');
-      R.font(c, 44, 'sans', 700);
+      R.font(c, LAB_PX, 'sans', 700);
       LAB_W = c.measureText(LABEL).width;
     },
     draw(ctx, t) {

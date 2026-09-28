@@ -24,7 +24,8 @@
   // the final hit, driven hardest, is the one that sets the reel's peak
   const MASTER = .3;
   // extra drive: the 5.1 downbeat, bar 5 after it, the 4.3 lock explosion, the final hit
-  const DROP_IN = 1.05, DROP = 1.25, LOCK = 1.2, FINAL = 3.4;
+  // (5.1 outranks 4.3, as in the picture's flash order: .30 against .25; 8.1 stays the biggest)
+  const DROP_IN = 1.2, DROP = 1.25, LOCK = 1.0, FINAL = 3.4;
   const PEAK = -1.0;                                  // dBTP: the finished buffer is trimmed to this true peak
   const PRE = 0.25;                                   // s of silent pre-roll per pass (compressor settles)
   const SPLIT = 7.5;                                  // bars 5-8 are rendered from here
@@ -114,7 +115,7 @@
       S.tick(n * S64, { freq: 3200, gain: .035, pan: -d / 960 });
       S.tick(n * S64, { freq: 3200, gain: .035, pan: d / 960 });
     });
-    for (let n = 0; n < 16; n++) S.hat(n * S16, { gain: .025 + .006 * n, pan: n % 2 ? .2 : -.2 });
+    for (let n = 0; n < 16; n++) S.hat(n * S16, { gain: .015 + .003 * n, pan: n % 2 ? .2 : -.2 });   // under the count, so '1 2 3 .' reads on a phone
     woodblock(at(1, 2), 'Ab5'); thump(at(1, 2));
     const hd = [12, 148, 172, 308, 332, 468];
     hd.forEach((d, n) => {
@@ -123,7 +124,7 @@
     });
     S.riser(at(1, 2), at(2, 1), { gain: .12, from: 200, to: 1800, noiseGain: .22, rev: .2 });
     woodblock(at(1, 3), 'C6'); thump(at(1, 3));
-    S.blip(at(1, 3, 2), 'C6', { drop: 2.5, dur: .35, gain: .06 });
+    S.blip(at(1, 3, 2), 'C6', { drop: 2.5, dur: .8, gain: .06 });   // glide .32 s: whistles over the whole visible fall
     S.bell(at(1, 4), 'Eb6', { dur: 1.0, ratio: 3.5, index: 2.5, gain: .16, rev: .5 }); thump(at(1, 4));
     S.whoosh(at(1, 4, 3), .234, { gain: .16, from: 400, to: 3200, pan: [-.5, .5], peak: .7 });
     S.blip(at(1, 4, 3), 'F5', { drop: .5, dur: .12, gain: .08 });
@@ -148,7 +149,7 @@
     for (let k = 2; k <= 4; k++) S.tick(at(2, 2, k), { freq: 5200, gain: .03 });
     S.reverse(at(2, 3), S16, { gain: .14 });
     S.kick(at(2, 3), { gain: .9 }); S.clap(at(2, 3), { gain: .5 });
-    S.blip(at(2, 3), 'A5', { drop: .25, dur: .32, gain: .13 });
+    S.blip(at(2, 3), 'A5', { drop: .25, dur: .45, gain: .3 });   // rubber gliss: the stretch's only voice
     S.tick(at(2, 3, 3), { freq: 6000, gain: .05 });
     S.tick(at(2, 3, 3) + S128, { freq: 6000, gain: .04 });
     S.pluck(at(2, 3, 3), 'C5', { type: 'triangle', gain: .09 });   // the dot lands on the N at 2.3&
@@ -174,17 +175,18 @@
     [[at(3, 1, 3), 'F4'], [at(3, 2), 'Ab4'], [at(3, 2, 3), 'C5'], [at(3, 3), 'Eb5']].forEach(([t, n]) => {
       plock(t, n); S.tick(t, { freq: 8000, gain: .02 });
     });
-    S.whoosh(at(3, 2, 3), .234, { gain: .18, from: 600, to: 4500, pan: [-.4, .6], peak: .6 });
+    S.whoosh(at(3, 2, 3), .234, { gain: .3, from: 600, to: 4500, pan: [-.4, .6], peak: .6 });
     S.blip(at(3, 3), 'C5', { drop: .5, dur: .25, gain: .06 });
     S.bell(at(3, 4), 'F6', { dur: 1.3, ratio: 2.76, index: 1.6, gain: .14, rev: .65 });
     for (let k = 0; k < 12; k++) {                   // 16ths up to 3.4 (the reading hold is dry)
       const t = at(3, 1) + k * S16;
+      if (k === 6) continue;                         // 3.2&: the whip-hop whoosh owns this 16th
       if (k % 4 === 2) S.hat(t, { gain: .12, open: true }); else S.hat(t, { gain: .05 });
     }
-    S.blip(at(3, 4, 3), 'C6', { drop: .5, dur: .1, gain: .07 });
+    S.blip(at(3, 4, 3) + S64, 'C6', { drop: .5, dur: .1, gain: .07 });   // take-off at s2's T_FLY (the Ab1 marks the sink)
     S.blip(at(3, 4, 4), 'F6', { drop: .25, dur: .11, gain: .08 });
     S.whoosh(at(3, 4, 4), S16, { gain: .12, from: 2000, to: 9000, pan: [-.8, .8] });
-    S.reverse(at(4, 1), .469, { gain: .2 });
+    S.reverse(at(4, 1), .469, { gain: .1 });   // resolves UP into 4.1, not down
 
     // ---- bar 4 · depth, particles, tape stop ----
     S.kick(at(4, 1), { gain: 1.0 }); S.impact(at(4, 1), { gain: .35, size: .5, to: S.hz('Db1') });
@@ -194,11 +196,15 @@
     S.sub(at(4, 2), 'F1', .42, { gain: .45 });
     for (let n = 0; n < 8; n++) S.tick(at(4, 1) + n * S64, { freq: 2200, gain: .05 });
     const arp = ['Db4', 'F4', 'Ab4', 'C5', 'Eb5', 'C5', 'Ab4', 'F4'];
-    for (let k = 0; k < 8; k++) S.pluck(at(4, 1) + k * S16, arp[k], { type: 'square', dur: .1, cutoff: 2200, gain: .06, del: .3 });
+    for (let k = 0; k < 8; k++) {
+      if (k >= 2 && k <= 4) continue;               // the ratchet locks take over the arp's square voice here
+      S.pluck(at(4, 1) + k * S16, arp[k], { type: 'square', dur: .1, cutoff: 2200, gain: .06, del: .3 });
+    }
     ['C5', 'Eb5', 'F5', 'G5', 'Ab5', 'C6'].forEach((n, i) => {
       const t = at(4, 1, 3) + i * S32;
-      S.tick(t, { freq: 1800, gain: .12 });
-      S.pluck(t, n, { type: 'square', dur: .07, cutoff: 3000, gain: .1, pan: -.6 + 1.2 * i / 5 });
+      const last = i === 5;                          // M completes 128 BPM: accented over the 4.2 clap tail
+      S.tick(t, { freq: 1800, gain: last ? .45 : .22 });
+      S.pluck(t, n, { type: 'square', dur: .07, cutoff: 3000, gain: last ? .3 : .14, pan: -.6 + 1.2 * i / 5 });
     });
     S.kick(at(4, 2), { gain: .95 }); S.clap(at(4, 2), { gain: .4 });
     S.whoosh(at(4, 2), .469, { gain: .15, from: 300, to: 2600, pan: [-.8, .8] });
@@ -248,26 +254,27 @@
     S.clap(at(5, 2), { gain: .7 }); S.clap(at(5, 4), { gain: .7 });
     for (let k = 0; k < 16; k++) {
       const t = t51 + k * S16;
+      if (k === 14) continue;                        // 5.4&: the spin tick owns this 16th
       if (k % 4 === 2) S.hat(t, { gain: .16, open: true }); else S.hat(t, { gain: .1 });
     }
     // the pump: opened up (cutoff 500 -> 900) so the line has harmonics a small speaker can play
     const pump = [['F1', 'F1', 'F1'], ['F1', 'F1', 'Ab1'], ['F1', 'F1', 'F1'], ['C2', 'Bb1', 'Ab1']];
     pump.forEach((ns, b) => ns.forEach((n, j) => S.bass(at(5, b + 1, j + 2), n, .09, { gain: .36, cutoff: 900, env: 2600 })));
-    for (let b = 1; b <= 3; b++) S.stab(at(5, b, 3), CH.Fm9, .14, { gain: .24 });
+    for (let b = 1; b <= 3; b++) S.stab(at(5, b, 3), CH.Fm9, .14, { gain: b === 3 ? .12 : .24 });   // 5.3&: under the ring pops
     for (let n = 1; n <= 15; n++) S.tick(t51 + B * (-Math.log2(1 - n / 16) / 10), { freq: 4200, gain: .03 - .015 * (n - 1) / 14 });
     S.riser(at(5, 3), at(5, 3) + 3 * S32, { gain: .15, from: 400, to: 3200, noiseGain: .08 });   // the zip: 8.4375 -> 8.6133
     const rings = ['C6', 'Eb6', 'F6', 'Ab6'];
-    for (let c = 0; c < 12; c++) S.pluck(at(5, 3, 2) + c * S128, rings[c % 4], { type: 'sine', dur: .06, gain: .04, pan: -.6 + 1.2 * c / 11 });
+    for (let c = 0; c < 12; c++) S.pluck(at(5, 3, 2) + c * S128, rings[c % 4], { type: 'triangle', dur: .06, gain: .1, pan: -.6 + 1.2 * c / 11 });
     S.blip(at(5, 4), 'F6', { drop: .5, dur: .3, gain: .09 });
     S.whoosh(at(5, 4), .352, { gain: .16, from: 500, to: 3500, pan: [.7, -.7] });
-    S.tick(at(5, 4, 3), { freq: 3000, gain: .06 });
+    S.tick(at(5, 4, 3), { freq: 1800, gain: .25 });
     S.whoosh(at(5, 4, 4), S16, { gain: .2, from: 800, to: 7000, peak: .95 });
-    S.reverse(at(6, 1), .234, { gain: .28 });
+    S.reverse(at(6, 1), .234, { gain: .14 });
 
     // ---- bar 6 · interface ----
     const t61 = at(6, 1);
     S.kick(t61, { gain: .9 });
-    S.pad(t61, CH.Dbmaj9, 1.3, { gain: .1, attack: .03, cutoff: 3000 });
+    S.pad(t61, CH.Dbmaj9, 1.3, { gain: .05, attack: .03, cutoff: 3000 });   // bar 6 bed pulled back: the UI foley carries s5
     S.sub(t61, 'Db1', .9);
     { // typing (s5): words start on 16ths, visible characters every 128th
       const words = ['Make', 'me', 'a', 'showreel.'];
@@ -279,17 +286,17 @@
     S.pluck(at(6, 1, 3), 'F4', { type: 'sine', dur: .08, gain: .16 });
     S.tick(at(6, 1, 3), { freq: 900, gain: .08, pan: .5 });
     const t62 = at(6, 2);
-    S.tick(t62, { freq: 3000, gain: .12, pan: .5 });
-    S.tick(t62 + S128, { freq: 1300, gain: .1, pan: .5 });
-    ['F5', 'Ab5', 'C6'].forEach((n, i) => S.blip(t62 + i * S64, n, { drop: .8, dur: .05, gain: .09, pan: .5 }));
-    S.bass(t62, 'F2', .1, { cutoff: 250, env: 300, gain: .16 });
-    S.tick(at(6, 2, 3) - S32, { freq: 1500, gain: .05, pan: .5 });
-    S.whoosh(at(6, 2, 3), .234, { gain: .18, from: 500, to: 5000, pan: [.8, .5] });
-    S.blip(at(6, 2, 3), 'C6', { drop: .4, dur: .06, gain: .1 });
+    S.tick(t62, { freq: 3000, gain: .3, pan: .5 });
+    S.tick(t62 + S128, { freq: 1300, gain: .25, pan: .5 });
+    ['F5', 'Ab5', 'C6'].forEach((n, i) => S.blip(t62 + i * S64, n, { drop: .8, dur: .05, gain: .18, pan: .5 }));
+    S.bass(t62, 'F2', .1, { cutoff: 700, env: 300, gain: .4 });   // the haptic buzz: the switch's weight
+    S.tick(at(6, 2, 3) - S32, { freq: 1500, gain: .12, pan: .5 });
+    S.whoosh(at(6, 2, 3), .234, { gain: .29, from: 500, to: 5000, pan: [.8, .5] });
+    S.blip(at(6, 2, 3), 'C6', { drop: .4, dur: .06, gain: .2 });
     const t63 = at(6, 3);
     S.kick(t63, { gain: .8 });
     S.blip(t63, 'F5', { drop: .5, dur: .06, gain: .12, pan: -.5 });
-    S.pad(t63, CH.Eb, .9, { gain: .08 });
+    S.pad(t63, CH.Eb, .9, { gain: .04 });
     S.sub(t63, 'Eb1', .45, { gain: .4 });
     ['Ab5', 'C6', 'Eb6'].forEach((n, i) => S.pluck(at(6, 3, i + 2), n, { type: 'triangle', dur: .09, gain: .1, pan: -.4 }));
     S.reverse(at(6, 4), S16, { gain: .2 });
@@ -297,10 +304,11 @@
     const t64 = at(6, 4);
     S.kick(t64, { gain: .8 });
     S.blip(t64, 'C5', { drop: 2.4, dur: .09, gain: .15, pan: -.4 });
-    S.blip(t64 + S32, 'C6', { drop: .4, dur: .05, gain: .08, pan: -.4 });
-    S.whoosh(at(6, 4, 2), .2, { gain: .24, from: 6000, to: 300, peak: .4, pan: [0, 0] });
+    S.blip(t64 + S32, 'C6', { drop: .4, dur: .05, gain: .2, pan: -.4 });
+    // whip down: peaks while the band is still up where noise has energy, and settles low instead of sweeping back up
+    S.whoosh(at(6, 4, 2), .2, { gain: .4, from: 6000, to: 900, end: 500, peak: .4, pan: [0, 0] });
     S.filterRamp(at(6, 4, 2), at(6, 4, 3), 18000, 700);
-    for (let k = 0; k < 8; k++) S.hat(t61 + k * B / 2, { gain: .06 });
+    for (let k = 0; k < 8; k++) S.hat(t61 + k * B / 2, { gain: .036 });
 
     // ---- bar 7 · liquid -> end card ----
     const t71 = at(7, 1);
@@ -318,7 +326,7 @@
     { const r = R.rng(71);
       for (let i = 0; i < 6; i++) S.blip(11.3 + r() * .6, r() < .5 ? 'A6' : 'C7', { gain: .02, dur: .05, pan: r() * 1.2 - .6 }); }
     S.reverse(at(7, 2, 3), S16, { gain: .12 });
-    S.blip(at(7, 2, 3), 'F5', { drop: .35, dur: .12, gain: .12, pan: .7 });
+    S.blip(at(7, 2, 3), 'F5', { drop: .35, dur: .29, gain: .28, pan: .7 });   // glide .116 s: rises with the jet to the pinch
     const t72a = at(7, 2, 4);
     S.pluck(t72a, 'C6', { type: 'triangle', dur: .08, gain: .1, pan: .8 });
     S.whoosh(t72a, S16, { gain: .22, from: 400, to: 7500, peak: .95, pan: [.6, .8] });
@@ -358,12 +366,16 @@
     // leaves a hole; the boom (tuned to F1) carries the root into the fade instead
     S.sub(t81, 'F1', .45, { gain: .5 });
     // after the hit the drive eases back so the tails sit under the drop bar
-    S.masterGain(at(8, 1, 3), MASTER * FINAL); S.masterGain(at(8, 1, 3), MASTER * .8, .5);
-    S.tick(at(8, 3), { freq: 2600, gain: .05 });
-    S.tick(at(8, 3, 3), { freq: 2600, gain: .035 });
-    S.tick(at(8, 4), { freq: 2600, gain: .05 });
+    // eased in dB, not in gain (a linear gain ramp is steepest in dB at its end and collapsed the F6 bell's tail):
+    // x3.4 -> x.8 at a constant ~0.6 dB per 50 ms, in 11 short linear pieces, ending 14.459 (before the 8.4 anchor)
+    { const t0 = at(8, 1, 3), D = 1.1, N = 11;
+      S.masterGain(t0, MASTER * FINAL);
+      for (let i = 1; i <= N; i++) S.masterGain(t0, MASTER * FINAL * Math.pow(.8 / FINAL, i / N), D * i / N); }
+    S.tick(at(8, 3), { freq: 2600, gain: .065 });   // blink gains even out the drive easing and the fade
+    S.tick(at(8, 3, 3), { freq: 2600, gain: .06 });
+    S.tick(at(8, 4), { freq: 2600, gain: .1 });
     S.whoosh(at(8, 4), .44, { gain: .05, from: 2500, to: 500 });
-    S.tick(at(8, 4, 3), { freq: 2600, gain: .035 });
+    S.tick(at(8, 4, 3), { freq: 2600, gain: .15 });   // rides over the fade (master x.48 by here)
     S.masterGain(at(8, 4), MASTER * .8);
     S.masterGain(at(8, 4), 0, 0.45);                       // true silence from 14.98125
   }

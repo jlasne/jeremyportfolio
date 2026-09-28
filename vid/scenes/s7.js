@@ -27,10 +27,11 @@
   let CODE_KERN = 0;                  // the mono period sits centred in its cell: pulled in (measured in setup)
   const DOT_X = 1804.42, DOT_Y = 490.24, DOT_D = 87.16, FLOOR = DOT_Y + DOT_D / 2;   // 533.82
   const RULE_Y = 544, RULE_H = 18, GAPS = [294, 516, 738, 960, 1182, 1348.5, 1515];
-  const MD_Y = 690, MD_CLIP = 720, LN_Y = 796, LN_CLIP = 810;
+  const MD_Y = 690, MD_CLIP = 720, LN_Y = 812, LN_CLIP = 830;   // line at 68 px (spec 56): readable in the phone player
   let MD_X = [78, 407.28];            // Motion, Designer origins (ink aligned to x 72)
   let LN_X = [75, 0, 0, 0];           // Every, frame, was, code. origins
-  let CODE_W = 134.4;                 // advance of `code` in JetBrains Mono 700 56 px
+  let CODE_W = 163.2;                 // advance of `code` in JetBrains Mono 700 68 px
+  const LN_FS = 68, LN_RISE = 86;
   const LN_W = ['Every', 'frame', 'was'];
   const xTrue = t => 72 + 1776 * t / 15;
 
@@ -135,12 +136,20 @@
     if (st.k === 1 && st.m3 === 0) { c.beginPath(); c.arc(0, 0, r, 0, R.TAU); }
     else R.traceSmooth(c, shapePts(st, r), true);
     c.fill();
-    if (st.spec > 0.003) {                                  // 2 px ice specular arc, upper left, 6 px inside
-      const pts = shapePts(st, r - 6), i0 = Math.round(N_BLOB * 0.56), i1 = Math.round(N_BLOB * 0.70);
-      c.beginPath(); c.moveTo(pts[i0][0], pts[i0][1]);
-      for (let i = i0 + 1; i <= i1; i++) c.lineTo(pts[i][0], pts[i][1]);
-      c.strokeStyle = R.rgba(ICE, st.spec); c.lineWidth = 2; c.lineCap = 'round'; c.stroke();
-    }
+    c.restore();
+    drawSpec(c, st);
+  }
+  function drawSpec(c, st) {                                // 2 px ice specular arc, upper left, 6 px inside
+    if (!st.on || st.spec <= 0.003) return;
+    const r = st.d / 2;
+    c.save();
+    c.translate(st.x, st.bottom ? st.y + r : st.y);
+    c.scale(st.sx, st.sy);
+    if (st.bottom) c.translate(0, -r);
+    const pts = shapePts(st, r - 6), i0 = Math.round(N_BLOB * 0.56), i1 = Math.round(N_BLOB * 0.70);
+    c.beginPath(); c.moveTo(pts[i0][0], pts[i0][1]);
+    for (let i = i0 + 1; i <= i1; i++) c.lineTo(pts[i][0], pts[i][1]);
+    c.strokeStyle = R.rgba(ICE, st.spec); c.lineWidth = 2; c.lineCap = 'round'; c.stroke();
     c.restore();
   }
 
@@ -245,9 +254,9 @@
     for (let k = 0; k < 4; k++) {
       const t0 = T_LINE + k * S64;
       if (t < t0) continue;
-      const y = LN_Y + 70 * (1 - E.outExpo(R.prog(t, t0, t0 + RISE_D)));
-      if (k < 3) { R.font(ctx, 56, 'sans', 500); ctx.fillStyle = ICE; ctx.fillText(LN_W[k], LN_X[k], y); }
-      else { R.font(ctx, 56, 'mono', 700); ctx.fillStyle = LIME; ctx.fillText('code', LN_X[3], y); ctx.fillText('.', LN_X[3] + CODE_W - CODE_KERN, y); }
+      const y = LN_Y + LN_RISE * (1 - E.outExpo(R.prog(t, t0, t0 + RISE_D)));
+      if (k < 3) { R.font(ctx, LN_FS, 'sans', 500); ctx.fillStyle = ICE; ctx.fillText(LN_W[k], LN_X[k], y); }
+      else { R.font(ctx, LN_FS, 'mono', 700); ctx.fillStyle = LIME; ctx.fillText('code', LN_X[3], y); ctx.fillText('.', LN_X[3] + CODE_W - CODE_KERN, y); }
     }
     ctx.restore();
   }
@@ -288,16 +297,16 @@
       R.font(c, 120, 'serif', 400, 'italic');
       const mdL = c.measureText('Motion').actualBoundingBoxLeft;
       MD_X = [72 + mdL, 72 + mdL + c.measureText('Motion ').width];
-      R.font(c, 56, 'sans', 500);
+      R.font(c, LN_FS, 'sans', 500);
       const eL = c.measureText('E').actualBoundingBoxLeft;       // negative: ink starts right of the origin
       const x0 = 72 + eL;
       LN_X = [x0, x0 + c.measureText('Every ').width, x0 + c.measureText('Every frame ').width, x0 + c.measureText('Every frame was ').width];
-      R.font(c, 56, 'mono', 700);
+      R.font(c, LN_FS, 'mono', 700);
       const mc = c.measureText('code'), md = c.measureText('.');
       CODE_W = mc.width;
       // air between the e's ink and the period's ink, brought down to a proportional face's ~5 px
       const air = (CODE_W - md.actualBoundingBoxLeft) - mc.actualBoundingBoxRight;
-      CODE_KERN = R.clamp(air - 5, 0, 14);
+      CODE_KERN = R.clamp(air - 5 * LN_FS / 56, 0, 17);
     },
     draw(ctx, t, lt, R) {
       // ---- post (s7 owns FX for its whole window) ----
@@ -318,7 +327,7 @@
         fx.bloom += 0.5 * Math.exp(-6 * th);
         // trimmed from the spec's zoom 1.04 / flash 0.35: the landing is carried by local motion, the type stays still
         fx.zoom = Math.max(fx.zoom, 1 + 0.015 * (1 - E.outExpo(R.prog(t, T_HIT, T_HIT + 0.234375))));
-        R.flash(t, T_HIT, { amount: 0.18, decay: 16, color: ICE });
+        R.flash(t, T_HIT, { amount: 0.18, decay: 32, color: ICE });   // gone in 3 frames: no grey veil on the card
         R.impact(t, T_HIT, { amount: 8, decay: 16 });
       }
       fx.chroma = chroma; fx.chromaAngle = Math.PI / 2;
@@ -328,27 +337,50 @@
 
       // grid (world; it only draws after the whip has landed)
       drawGrid(ctx, t);
-      // rule with its chapter gaps
-      drawRule(ctx, t, ruleDy);
-      // CLAUDE: blurred through the approach only (as s1), crisp from the contact frame
+      // rule with its chapter gaps (crisp from the contact frame; through the whip it rides CLAUDE's shutter below)
+      if (t >= T_C) drawRule(ctx, t, ruleDy);
+      // CLAUDE and the rule: blurred through the approach only (as s1), crisp from the contact frame
       if (t < T_C) {
         const sh = claudeShutter(t), last = Math.min(t + sh / 2, T_C - 1e-4);
         // nothing on canvas yet: skip (an empty blur layer can blit stale pixels in Chromium)
-        // each of the 10 samples draws 2 interleaved sub-samples at half weight: 20 positions, <= ~6 px apart
+        // each of the 10 samples draws 2 interleaved sub-samples at half weight: 20 positions, <= ~6 px apart.
+        // The rule (y 544 + worldY) never overlaps the letters (bottom 530 + dy + worldY, dy <= 0), so 'lighter' stays exact.
         const q4 = sh / 36;                                  // a quarter of the sample spacing (sh / 9)
-        if (baseY(last) > -12) R.motionBlur(ctx, t, (c, tt) => {
-          c.globalAlpha *= 0.5;
-          for (const d of [-q4, q4]) { c.save(); drawClaude(c, Math.min(tt + d, T_C - 1e-4)); c.restore(); }
+        // (R.quality < 1: motionBlur draws once, straight onto the frame, so draw a single opaque pass)
+        const subs = R.quality < 1 ? [0] : [-q4, q4];
+        if (baseY(last) > -12 || RULE_Y + worldY(last) > -RULE_H) R.motionBlur(ctx, t, (c, tt) => {
+          c.globalAlpha /= subs.length;
+          for (const d of subs) {
+            const u = Math.min(tt + d, T_C - 1e-4);
+            c.save(); drawRule(c, u, worldY(u)); c.restore();
+            c.save(); drawClaude(c, u); c.restore();
+          }
         }, { samples: 10, shutter: sh, name: 's7:mbC' });
       } else { ctx.save(); drawClaude(ctx, t); ctx.restore(); }
       drawRisers(ctx, t);
       drawPlayhead(ctx, t, ruleDy);
       drawRipple(ctx, t);
       // the dot (screen space during the whip)
-      const fast = t < T_C || (t >= T_DROP && t < T_HIT);
-      if (fast) {
-        const lim = t < T_C ? T_C - 1e-4 : T_HIT - 1e-4;   // samples never cross a contact (no pre-echo)
-        R.motionBlur(ctx, t, (c, tt) => drawDrop(c, dotAt(Math.min(tt, lim))), { samples: 8, shutter: dropShutter(t, lim), name: 's7:mbD' });
+      if (t < T_C) {
+        // the flung drop: s6's 1/60 shutter (clamped at the contact), 10 x 2 interleaved sub-samples = 20 positions
+        // ~4 px apart, so it reads as the same continuous smear as s6's jet tip on f724. The specular is drawn once,
+        // crisp, with s6's specArc rule (it fades as the smear outgrows the drop).
+        const lim = T_C - 1e-4, sh = Math.min(1 / 60, 2 * (lim - t)), q4 = sh / 36, subs = R.quality < 1 ? [0] : [-q4, q4];
+        R.motionBlur(ctx, t, (c, tt) => {
+          c.globalAlpha /= subs.length;
+          for (const d of subs) { const st = dotAt(Math.min(tt + d, lim)); st.spec = 0; drawDrop(c, st); }
+        }, { samples: 10, shutter: sh, name: 's7:mbD' });
+        const st = dotAt(t), a = dotAt(Math.min(t - sh / 2, lim)), b = dotAt(Math.min(t + sh / 2, lim));
+        const travel = Math.hypot(b.x - a.x, b.y - a.y);
+        st.spec = 0.6 * Math.min(1, st.d * st.k / Math.max(travel, 1e-6));
+        drawSpec(ctx, st);
+      } else if (t >= T_DROP && t < T_HIT) {
+        // samples never cross a contact (no pre-echo); 10 x 2 interleaved sub-samples, a smear instead of onion skins
+        const lim = T_HIT - 1e-4, sh = dropShutter(t, lim), q4 = sh / 36, subs = R.quality < 1 ? [0] : [-q4, q4];
+        R.motionBlur(ctx, t, (c, tt) => {
+          c.globalAlpha /= subs.length;
+          for (const d of subs) drawDrop(c, dotAt(Math.min(tt + d, lim)));
+        }, { samples: 10, shutter: sh, name: 's7:mbD' });
       }
       else drawDrop(ctx, dotAt(t));
     },
@@ -363,7 +395,7 @@
   const CH_L = ['00 / COUNT-IN', '01 / TYPE', '02 / TIMING', '03 / DEPTH', '04 / PARTICLES', '05 / DATA', '06 / INTERFACE', '07 / LIQUID', ''];
   const TYPE0 = [S16, S16 + S64, S16 + 2 * S64];   // TL, TR, BR type-on starts
   const ROLL_CH = S16, ROLL_BEAT = 0.08, STAG = 0.01, ROLL_DY = 34;
-  const TS0 = 7.03125, TS_DEAD = 7.3828125, PICK = 7.44140625, PICK_E = PICK + 4 / 60, T51 = R.at(5, 1);
+  const TS0 = 7.03125, TS_DEAD = 7.3828125, PICK = 7.425, PICK_E = 7.5, T51 = R.at(5, 1);
   const w1 = t => E.whip(R.prog(t, 10.8984375, 11.015625));
 
   const barLabel = n => `BAR ${Math.floor(n / 4) + 1}.${n % 4 + 1}`;
@@ -404,6 +436,7 @@
     if (clipped) ctx.restore();
   }
 
+  const hudOff = [0, 0, 0];                        // TL, TR, BR vertical insets, set by the hud scene each frame
   function drawHud(ctx, t, onIce) {
     const base = onIce ? INK60 : ICE55;
     const plain = () => base;
@@ -412,13 +445,17 @@
 
     // top-left: chapter
     let i = 0; while (i + 1 < CH_T.length && t >= CH_T[i + 1]) i++;
+    ctx.save(); ctx.translate(0, hudOff[0]);
     if (i === 0) typeOn(ctx, CH_L[0], 72, 46, TYPE0[0], t, plain);
     else roll(ctx, CH_L[i - 1], CH_L[i], 72, 46, CH_T[i], ROLL_CH, t, plain);
+    ctx.restore();
 
     // top-right: SMPTE timecode (keeps ticking through everything, dims on the end card)
     const tc = timecode(t), tcx = 1848 - (tc.length * ADV - 1);
     const tcCol = t >= T_PINCH && !onIce ? R.rgba(ICE, 0.55 - 0.15 * R.prog(t, T_PINCH, T_PINCH + S16)) : base;
+    ctx.save(); ctx.translate(0, hudOff[1]);
     typeOn(ctx, tc, tcx, 46, TYPE0[1], t, () => tcCol);
+    ctx.restore();
 
     // bottom-right: BAR b.k
     const n = Math.floor(t / B + 1e-7), cur = barLabel(n), bx = 1848 - (cur.length * ADV - 1);
@@ -430,9 +467,11 @@
       if (t >= T51 && t < T51 + 0.2 && which === 0) return R.rgba(LIME, limeA);   // 4.4 rolling out
       return base;
     };
+    ctx.save(); ctx.translate(0, hudOff[2]);
     if (n === 0) typeOn(ctx, cur, bx, 1052, TYPE0[2], t, plain);
     else if (t >= T_PINCH) roll(ctx, cur, '', bx, 1052, T_PINCH, ROLL_CH, t, colBR);
     else roll(ctx, barLabel(n - 1), cur, bx, 1052, n * B, ROLL_BEAT, t, colBR);
+    ctx.restore();
   }
 
   // where the frame under the HUD is ice: s4's iris, s5's field, s5 whipping away
@@ -454,6 +493,18 @@
   Reel.scene({
     id: 'hud', start: 0, end: 15, layer: 10,
     draw(ctx, t) {
+      // s3's tape stop rolls the lens (-0.035 rad, held until 7.5): keep the margins level so the ticking timecode
+      // (the proof that the freeze is live code) stays on the frame. Shakes and the other lens effects still apply.
+      // The roll pulls two source edges into the frame (lens edge clamp beyond them), so the two corners under those
+      // edges step in just enough to stay on real pixels (about 11 px at TL, 7 px at BR, at the full roll).
+      hudOff[0] = hudOff[1] = hudOff[2] = 0;
+      const rot = t >= 7.03125 && t < 7.5 ? R.fx.rot : 0;
+      if (rot) {
+        ctx.translate(960, 540); ctx.rotate(-rot); ctx.translate(-960, -540);
+        const lift = 888 * Math.abs(rot);                  // how far in the lens pulls a source edge at x 72 / 1848
+        if (rot < 0) { hudOff[0] = Math.max(0, lift - 20); hudOff[2] = -Math.max(0, lift - 24); }
+        else hudOff[1] = Math.max(0, lift - 20);
+      }
       const ice = icePath(t);
       if (!ice) return drawHud(ctx, t, false);
       if (ice === 'all') return drawHud(ctx, t, true);
