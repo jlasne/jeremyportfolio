@@ -211,7 +211,7 @@
   R.mixArr = (a, b, t) => { const A = hex(a), B = hex(b); return [lerp(A[0], B[0], t), lerp(A[1], B[1], t), lerp(A[2], B[2], t)]; };
   R.hsl = (h, s, l, a = 1) => `hsla(${h},${s}%,${l}%,${a})`;
   // the site's palette; scenes add the storyboard's accents
-  R.C = { ink: '#050b16', blue: '#5fa8d3', ice: '#eaf4fb' };
+  R.C = { ink: '#050b16', blue: '#5fa8d3', ice: '#eaf4fb', red: '#ff4b1f', lime: '#d7ff3a', ink2: '#0c1628', redDeep: '#b8260c' };
 
   // ---- type ----
   R.F = { display: 'Unbounded', sans: 'Inter Tight', grot: 'Space Grotesk', serif: 'Instrument Serif', mono: 'JetBrains Mono' };
