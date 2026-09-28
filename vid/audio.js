@@ -86,19 +86,32 @@
       w.curve = c; return w;
     };
 
+    // stereo spread: returns det -> node; negative detunes pan left, positive right, 0 centre (spread 0: all into dest)
+    const spreader = (dest, spread) => {
+      if (!spread) return () => dest;
+      const side = p => { const n = ctx.createStereoPanner(); n.pan.value = p; n.connect(dest); return n; };
+      const Lp = side(-spread), Rp = side(spread);
+      return det => det < 0 ? Lp : det > 0 ? Rp : dest;
+    };
+
     const S = { ctx, hz, midi, at: R.at, BEAT: R.BEAT, BAR: R.BAR, rng };
 
     // sidechain pump on the music bus
+    // S.pumpAttack (seconds, default 0 = the original hard step): glide into the duck instead of stepping, so
+    // sustained notes under the kick do not click
+    S.pumpAttack = 0;
     S.pump = (t, depth = .55, rel = .22) => {
-      duck.gain.setValueAtTime(1 - depth, t);
+      if (S.pumpAttack > 0) duck.gain.setTargetAtTime(1 - depth, t, S.pumpAttack);
+      else duck.gain.setValueAtTime(1 - depth, t);
       duck.gain.setTargetAtTime(1, t + .01, rel / 3);
     };
-    S.kick = (t, { gain = 1, tone = 48, punch = 170, decay = .42, click = .35, pump = .5 } = {}) => {
+    // drive: saturation of the body (default 2.2, the original); more drive = more harmonics small speakers can play
+    S.kick = (t, { gain = 1, tone = 48, punch = 170, decay = .42, click = .35, pump = .5, drive = 2.2 } = {}) => {
       const o = osc('sine', punch, t, decay + .2);
       o.frequency.setValueAtTime(punch, t);
       o.frequency.exponentialRampToValueAtTime(tone, t + .07);
       const g = ctx.createGain(); env(g, t, .002, gain, decay);
-      const sh = shaper(2.2);
+      const sh = shaper(drive);
       o.connect(sh); sh.connect(g); out(g, drums);
       if (click) {
         const n = noise(t, .02, 3), hp = ctx.createBiquadFilter(), cg = ctx.createGain();
@@ -106,6 +119,12 @@
         n.connect(hp); hp.connect(cg); out(cg, drums);
       }
       if (pump) S.pump(t, pump);
+    };
+    // knock: a short saturated body tone (the 150-400 Hz 'punch' of a kick) that laptop and phone speakers can play
+    S.knock = (t, { gain = .3, freq = 180, decay = .06, drive = 2.5, pan = 0 } = {}) => {
+      const o = osc('triangle', freq * 2, t, decay + .1), g = ctx.createGain(), sh = shaper(drive);
+      o.frequency.exponentialRampToValueAtTime(freq, t + .012);
+      env(g, t, .001, gain, decay); o.connect(sh); sh.connect(g); out(g, drums, { pan });
     };
     S.snare = (t, { gain = .7, tone = 190, decay = .2, rev = .25 } = {}) => {
       const n = noise(t, decay + .1, 7), bp = ctx.createBiquadFilter(), g = ctx.createGain();
@@ -123,10 +142,11 @@
       g.gain.setValueAtTime(gain * .8, t + .034); g.gain.setTargetAtTime(0, t + .035, .05);
       n.connect(bp); bp.connect(g); out(g, drums, { rev });
     };
-    S.hat = (t, { gain = .22, open = false, pan = 0 } = {}) => {
-      const d = open ? .28 : .045;
+    // decay / hp: optional overrides (defaults keep the original .045 closed, .28 open, 7500 Hz)
+    S.hat = (t, { gain = .22, open = false, pan = 0, decay = null, hp: hpf = 7500 } = {}) => {
+      const d = decay ?? (open ? .28 : .045);
       const n = noise(t, d + .05, 13 + t * 3), hp = ctx.createBiquadFilter(), g = ctx.createGain();
-      hp.type = 'highpass'; hp.frequency.value = 7500; env(g, t, .0008, gain, d);
+      hp.type = 'highpass'; hp.frequency.value = hpf; env(g, t, .0008, gain, d);
       n.connect(hp); hp.connect(g); out(g, drums, { pan });
     };
     S.shaker = (t, { gain = .12, pan = 0 } = {}) => {
@@ -135,7 +155,8 @@
       g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(gain, t + .02); g.gain.setTargetAtTime(0, t + .025, .015);
       n.connect(bp); bp.connect(g); out(g, drums, { pan });
     };
-    S.bass = (t, note, dur, { gain = .5, cutoff = 700, env: fe = 2200, res = 5, glideFrom = null } = {}) => {
+    // sub: level of the sine layer; subRatio: its pitch relative to the note (.5 = octave below, the original voicing)
+    S.bass = (t, note, dur, { gain = .5, cutoff = 700, env: fe = 2200, res = 5, glideFrom = null, sub = .9, subRatio = .5 } = {}) => {
       const f = hz(note), g = ctx.createGain(), lp = ctx.createBiquadFilter();
       lp.type = 'lowpass'; lp.Q.value = res;
       lp.frequency.setValueAtTime(cutoff + fe, t); lp.frequency.setTargetAtTime(cutoff, t, .06);
@@ -144,8 +165,10 @@
         if (glideFrom) o.frequency.exponentialRampToValueAtTime(f, t + .08);
         og.gain.value = .5; o.connect(og); og.connect(lp);
       }
-      const so = osc('sine', f / 2, t, dur + .1), sg = ctx.createGain();
-      sg.gain.value = .9; so.connect(sg); sg.connect(g);
+      if (sub) {
+        const so = osc('sine', f * subRatio, t, dur + .1), sg = ctx.createGain();
+        sg.gain.value = sub; so.connect(sg); sg.connect(g);
+      }
       lp.connect(g);
       env(g, t, .004, gain, .3, .75, .06, dur);
       out(g, music);
@@ -154,39 +177,43 @@
       const o = osc('sine', hz(note), t, dur + .1), g = ctx.createGain();
       env(g, t, .01, gain, .2, .9, .08, dur); o.connect(g); out(g, music);
     };
-    S.stab = (t, notes, dur = .25, { gain = .22, cutoff = 900, bright = 5200, rev = .35, del = .15, pan = 0 } = {}) => {
+    // spread: pans the detuned voices apart (0 = mono, the original); det: detune in cents
+    S.stab = (t, notes, dur = .25, { gain = .22, cutoff = 900, bright = 5200, rev = .35, del = .15, pan = 0, spread = 0, det: dt = 9 } = {}) => {
       const g = ctx.createGain(), lp = ctx.createBiquadFilter();
       lp.type = 'lowpass'; lp.Q.value = 2;
       lp.frequency.setValueAtTime(bright, t); lp.frequency.setTargetAtTime(cutoff, t, dur / 3);
-      for (const n of notes) for (const det of [-9, 0, 9]) {
+      const side = spreader(lp, spread);
+      for (const n of notes) for (const det of [-dt, 0, dt]) {
         const o = osc('sawtooth', hz(n), t, dur + .3, det), og = ctx.createGain(); og.gain.value = 1 / (notes.length * 2.2);
-        o.connect(og); og.connect(lp);
+        o.connect(og); og.connect(side(det));
       }
       lp.connect(g); env(g, t, .003, gain, dur * .8, .3, .12, dur);
       out(g, music, { rev, del, pan });
     };
-    S.pad = (t, notes, dur, { gain = .12, attack = .6, release = .8, cutoff = 1400, rev = .6 } = {}) => {
+    S.pad = (t, notes, dur, { gain = .12, attack = .6, release = .8, cutoff = 1400, rev = .6, spread = 0 } = {}) => {
       const g = ctx.createGain(), lp = ctx.createBiquadFilter();
       lp.type = 'lowpass'; lp.frequency.setValueAtTime(cutoff * .5, t); lp.frequency.linearRampToValueAtTime(cutoff, t + dur);
+      const side = spreader(lp, spread);
       for (const n of notes) for (const det of [-14, -5, 5, 14]) {
         const o = osc('sawtooth', hz(n), t, dur + release + .2, det), og = ctx.createGain(); og.gain.value = 1 / (notes.length * 3);
-        o.connect(og); og.connect(lp);
+        o.connect(og); og.connect(side(det));
       }
       lp.connect(g);
       g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(gain, t + attack);
       g.gain.setValueAtTime(gain, t + dur); g.gain.setTargetAtTime(0, t + dur, release / 4);
       out(g, music, { rev });
     };
-    S.pluck = (t, note, { gain = .2, dur = .25, type = 'square', cutoff = 5000, rev = .25, del = .3, pan = 0 } = {}) => {
+    // duck: false routes the voice to the fx bus (not ducked by the kick, not under the music filter)
+    S.pluck = (t, note, { gain = .2, dur = .25, type = 'square', cutoff = 5000, rev = .25, del = .3, pan = 0, duck: dk = true } = {}) => {
       const o = osc(type, hz(note), t, dur + .2), lp = ctx.createBiquadFilter(), g = ctx.createGain();
       lp.type = 'lowpass'; lp.frequency.setValueAtTime(cutoff, t); lp.frequency.setTargetAtTime(400, t, dur / 4);
-      env(g, t, .002, gain, dur); o.connect(lp); lp.connect(g); out(g, music, { rev, del, pan });
+      env(g, t, .002, gain, dur); o.connect(lp); lp.connect(g); out(g, dk ? music : fx, { rev, del, pan });
     };
-    S.bell = (t, note, { gain = .18, dur = 1.2, ratio = 3.5, index = 2.5, rev = .5, pan = 0 } = {}) => {
+    S.bell = (t, note, { gain = .18, dur = 1.2, ratio = 3.5, index = 2.5, rev = .5, pan = 0, duck: dk = true } = {}) => {
       const f = hz(note), car = osc('sine', f, t, dur), mod = osc('sine', f * ratio, t, dur), mg = ctx.createGain(), g = ctx.createGain();
       mg.gain.setValueAtTime(f * index, t); mg.gain.setTargetAtTime(0, t, dur / 5);
       mod.connect(mg); mg.connect(car.frequency);
-      env(g, t, .002, gain, dur); car.connect(g); out(g, music, { rev, pan });
+      env(g, t, .002, gain, dur); car.connect(g); out(g, dk ? music : fx, { rev, pan });
     };
     S.blip = (t, note = 'A5', { gain = .12, dur = .06, drop = 1.5, pan = 0 } = {}) => {
       const f = hz(note), o = osc('sine', f * drop, t, dur + .05), g = ctx.createGain();
@@ -211,18 +238,21 @@
       const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(600, t0); lp.frequency.exponentialRampToValueAtTime(12000, t1);
       g.connect(lp); out(lp, fx, { rev });
     };
-    S.whoosh = (t, dur = .5, { gain = .35, from = 300, to = 5000, pan = [-.8, .8], rev = .25, peak = .6 } = {}) => {
-      const n = noise(t, dur, 29 + t), bp = ctx.createBiquadFilter(), g = ctx.createGain(), p = ctx.createStereoPanner();
+    // seed: noise offset (default 29 + t, the original); end: where the band settles (default from * 1.5, the original)
+    S.whoosh = (t, dur = .5, { gain = .35, from = 300, to = 5000, pan = [-.8, .8], rev = .25, peak = .6, seed = null, end = null } = {}) => {
+      const n = noise(t, dur, seed ?? 29 + t), bp = ctx.createBiquadFilter(), g = ctx.createGain(), p = ctx.createStereoPanner();
       bp.type = 'bandpass'; bp.Q.value = 1.2; bp.frequency.setValueAtTime(from, t); bp.frequency.exponentialRampToValueAtTime(to, t + dur * peak);
-      bp.frequency.exponentialRampToValueAtTime(from * 1.5, t + dur);
+      bp.frequency.exponentialRampToValueAtTime(end ?? from * 1.5, t + dur);
       g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t + dur * peak); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
       p.pan.setValueAtTime(pan[0], t); p.pan.linearRampToValueAtTime(pan[1], t + dur);
       n.connect(bp); bp.connect(g); g.connect(p); out(p, fx, { rev });
     };
-    S.impact = (t, { gain = .8, size = 1, rev = .6 } = {}) => {
+    // to: where the boom's pitch settles in Hz (default 32); tune it to the root so it does not beat against the sub
+    // from: where the sweep starts (default 110 Hz); drive: saturation of the boom (default 3)
+    S.impact = (t, { gain = .8, size = 1, rev = .6, to = 32, from = 110, drive = 3 } = {}) => {
       const o = osc('sine', 90, t, 1.6 * size), g = ctx.createGain();
-      o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(32, t + .5 * size);
-      env(g, t, .002, gain, 1.2 * size); const sh = shaper(3); o.connect(sh); sh.connect(g); out(g, drums);
+      o.frequency.setValueAtTime(from, t); o.frequency.exponentialRampToValueAtTime(to, t + .5 * size);
+      env(g, t, .002, gain, 1.2 * size); const sh = shaper(drive); o.connect(sh); sh.connect(g); out(g, drums);
       const n = noise(t, .6 * size, 31), lp = ctx.createBiquadFilter(), ng = ctx.createGain();
       lp.type = 'lowpass'; lp.frequency.setValueAtTime(6000, t); lp.frequency.exponentialRampToValueAtTime(200, t + .5 * size);
       env(ng, t, .001, gain * .5, .5 * size); n.connect(lp); lp.connect(ng); out(ng, fx, { rev });
@@ -270,8 +300,9 @@
   // the score is a function (S) => void, set by score.js
   A.score = null;
 
-  A.render = async () => {
-    const len = Math.round(R.DUR * SR);
+  // dur: seconds to render (default the whole reel)
+  A.render = async (dur = R.DUR) => {
+    const len = Math.round(dur * SR);
     const ctx = new OfflineAudioContext(2, len, SR);
     const S = studio(ctx);
     if (A.score) A.score(S);

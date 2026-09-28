@@ -378,6 +378,9 @@
     L.ctx.globalCompositeOperation = 'source-over';
     L.ctx.filter = 'none';
     L.ctx.clearRect(0, 0, R.rw, R.rh);
+    // Chromium can present a stale snapshot of a canvas that was only cleared; one real draw prevents it
+    L.ctx.fillStyle = 'rgba(0,0,0,0.004)';
+    L.ctx.fillRect(0, 0, 1, 1);
     L.ctx.setTransform(R.rs, 0, 0, R.rs, 0, 0);
     return L;
   };
@@ -448,7 +451,8 @@
   R.setRenderSize = w => {
     w = Math.round(Math.max(320, Math.min(w, 3840)));
     const h = Math.round(w * H / W);
-    if (!cv) { cv = document.createElement('canvas'); cx = cv.getContext('2d', { alpha: false }); R.canvas = cv; R.ctx = cx; }
+    // alpha: true keeps text antialiasing greyscale (an opaque canvas gets LCD subpixel text, which fringes through the lens)
+    if (!cv) { cv = document.createElement('canvas'); cx = cv.getContext('2d'); R.canvas = cv; R.ctx = cx; }
     if (cv.width !== w) { cv.width = w; cv.height = h; }
     R.rw = w; R.rh = h; R.rs = w / W;
   };
@@ -462,6 +466,8 @@
     ctx.globalCompositeOperation = 'source-over';
     ctx.fillStyle = R.bg;
     ctx.fillRect(0, 0, R.rw, R.rh);
+    ctx.fillStyle = 'rgba(0,0,0,0.004)';
+    ctx.fillRect(0, 0, 1, 1);
     ctx.setTransform(R.rs, 0, 0, R.rs, 0, 0);
     for (const s of R.scenes) {
       if (t < s.start || t >= s.end) continue;
@@ -496,7 +502,8 @@ void main(){
   vec2 d = vec2(cos(chromaAng), sin(chromaAng)) * chroma + (uv - .5) * chroma * .6;
   vec3 col = vec3(texture(T, uv + d).r, texture(T, uv).g, texture(T, uv - d).b);
   vec3 b = textureLod(T, uv, 3.).rgb * .25 + textureLod(T, uv, 4.5).rgb * .35 + textureLod(T, uv, 6.).rgb * .4;
-  b = max(b - thresh, 0.) / max(1. - thresh, .001);
+  float bl = dot(b, vec3(.2126, .7152, .0722));
+  b *= max(bl - thresh, 0.) / max(bl * (1. - thresh), .001);   // threshold on luminance, so saturated red does not bloom
   col += b * bloom;
   col *= expo;
   col = (col - .5) * con + .5;
@@ -504,6 +511,7 @@ void main(){
   col = mix(vec3(l), col, sat);
   if (scan > 0.) col *= 1. - scan * (.5 + .5 * sin(v.y * res.y * 3.14159));
   vec2 q = (v - .5) * vec2(aspect, 1.);
+  col = min(col, vec3(1.));
   col *= mix(1., smoothstep(1.25, .35, length(q)), vign);
   col += (hash(v * res + fract(time * 7.31) * 517.) - .5) * grain;
   col = mix(col, flashCol, clamp(flash, 0., 1.));
