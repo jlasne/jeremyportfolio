@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Set in Motion · Claude, Motion Reel 2026</title>
+<meta name="description" content="A 15 second motion design reel, drawn live in the browser: 900 frames, 1 canvas, 1 shader, 1 synth.">
+<link rel="canonical" href="https://www.jeremylasne.com/vid/">
+<meta name="theme-color" content="#050b16">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="video.other">
+<meta property="og:url" content="https://www.jeremylasne.com/vid/">
+<meta property="og:title" content="Set in Motion · Claude, Motion Reel 2026">
+<meta property="og:description" content="15 seconds, 900 frames, drawn live in the browser.">
+<meta property="og:image" content="https://www.jeremylasne.com/vid/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.jeremylasne.com/vid/og.png">
+<link rel="preload" href="/vid/fonts/unbounded.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/vid/fonts/inter-tight.woff2" as="font" type="font/woff2" crossorigin>
+
+<style>
+  @font-face { font-family: "Unbounded"; src: url(/vid/fonts/unbounded.woff2) format("woff2"); font-weight: 200 900; font-display: block; }
+  @font-face { font-family: "Inter Tight"; src: url(/vid/fonts/inter-tight.woff2) format("woff2"); font-weight: 100 900; font-display: block; }
+  @font-face { font-family: "Space Grotesk"; src: url(/vid/fonts/space-grotesk.woff2) format("woff2"); font-weight: 300 700; font-display: block; }
+  @font-face { font-family: "Instrument Serif"; src: url(/vid/fonts/instrument-serif.woff2) format("woff2"); font-weight: 400; font-style: normal; font-display: block; }
+  @font-face { font-family: "Instrument Serif"; src: url(/vid/fonts/instrument-serif-italic.woff2) format("woff2"); font-weight: 400; font-style: italic; font-display: block; }
+  @font-face { font-family: "JetBrains Mono"; src: url(/vid/fonts/jetbrains-mono.woff2) format("woff2"); font-weight: 100 800; font-display: block; }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --ink: #050b16;
+    --blue: #5fa8d3;
+    --ice: #eaf4fb;
+    --ice-70: rgba(234, 244, 251, .72);
+    --ice-45: rgba(234, 244, 251, .56);
+    --ice-20: rgba(234, 244, 251, .2);
+    --line: rgba(95, 168, 211, .18);
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --ease: cubic-bezier(.22, 1, .36, 1);
+  }
+  html { background: var(--ink); color-scheme: dark; }
+  body {
+    min-height: 100dvh; display: flex; flex-direction: column;
+    font-family: "Inter Tight", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--ice); background: var(--ink); -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--blue); color: var(--ink); }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  button:focus-visible, a:focus-visible, .scrub:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+  header {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+    padding: max(16px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) 0 max(20px, env(safe-area-inset-left));
+    font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ice-45);
+  }
+  header a { color: inherit; text-decoration: none; }
+  header a:hover { color: var(--blue); }
+  header b { color: var(--ice); font-weight: 600; }
+
+  main {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 20px max(16px, env(safe-area-inset-right)) 12px max(16px, env(safe-area-inset-left));
+  }
+  .player { width: min(100%, calc((100dvh - 200px) * 16 / 9)); min-width: min(100%, 320px); }
+
+  .stage {
+    position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 10px;
+    background: var(--ink);
+    box-shadow: 0 0 0 1px rgba(234, 244, 251, .08), 0 30px 90px -30px rgba(95, 168, 211, .35);
+  }
+  .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+  /* the chip that turns the sound on; it breathes on the beat */
+  .chip {
+    position: absolute; left: 14px; bottom: 14px; z-index: 3;
+    display: flex; align-items: center; gap: 8px; padding: 8px 14px 8px 11px; border-radius: 999px;
+    font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink); background: rgba(234, 244, 251, .94);
+    box-shadow: 0 8px 30px -8px rgba(5, 11, 22, .7);
+    transition: opacity .3s var(--ease), transform .3s var(--ease), visibility 0s, background .2s;
+  }
+  .chip svg { width: 16px; height: 16px; }
+  .chip .eq { display: flex; gap: 2px; align-items: flex-end; height: 12px; }
+  .chip .eq i { width: 2px; background: var(--ink); border-radius: 1px; height: 30%; transition: height .08s linear; }
+  /* hidden chips fade out, then leave the tab order and the accessibility tree (visibility) */
+  .chip[hidden] { display: flex; opacity: 0; transform: translateY(8px); pointer-events: none; visibility: hidden;
+    transition: opacity .3s var(--ease), transform .3s var(--ease), visibility 0s .3s; }
+  /* after the count-in, on stages too small for the label to fit the reel's 72 px bottom margin: icon only */
+  .chip.mini { left: 6px; bottom: 6px; padding: 5px; gap: 0; }
+  .chip.mini > span { display: none; }
+  /* on the s5 ice field the chip goes ink, like the HUD, so it never reads as one of the reel's own pills */
+  .chip.ink { background: rgba(5, 11, 22, .88); color: var(--ice); }
+  .chip.ink .eq i { background: var(--ice); }
+  #replay { left: auto; right: 14px; }
+  @media (hover: hover) { .chip:hover { background: var(--blue); } }
+
+  /* reduced motion: the poster is the content, so no dimming; the button sits in the end card's empty right-hand area */
+  .big { position: absolute; inset: 0; z-index: 2; display: none; background: none; }
+  .big span {
+    position: absolute; left: 78%; top: 74%; width: clamp(44px, 6.75%, 84px); aspect-ratio: 1; border-radius: 50%;
+    display: grid; place-items: center; transform: translate(-50%, -50%);
+    background: rgba(234, 244, 251, .94); color: var(--ink); box-shadow: 0 10px 40px -10px rgba(5, 11, 22, .8);
+    transition: transform .25s var(--ease);
+  }
+  .big svg { width: 36%; height: 36%; margin-left: 8%; }
+  .big.on { display: block; }
+  .big:focus-visible { outline-offset: -4px; }
+  @media (hover: hover) { .big:hover span { transform: translate(-50%, -50%) scale(1.06); } }
+
+  /* guides: title safe, action safe, thirds, and the frame counter */
+  .guides { position: absolute; inset: 0; z-index: 1; pointer-events: none; display: none; }
+  .guides.on { display: block; }
+  .guides svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* one line in the empty top-centre margin, clear of the reel's own HUD corners */
+  .guides .hud {
+    position: absolute; left: 50%; top: 1.1%; transform: translateX(-50%); text-align: center;
+    font-family: var(--mono); font-size: clamp(9px, 1.1vw, 12px);
+    line-height: 1.5; color: var(--blue); text-shadow: 0 0 4px var(--ink); white-space: pre;
+  }
+
+  /* fullscreen: the screen is rarely 16:9, so letterbox the reel instead of stretching it */
+  .stage:fullscreen { border-radius: 0; box-shadow: none; overflow: hidden; }
+  .stage:-webkit-full-screen { border-radius: 0; box-shadow: none; overflow: hidden; }
+  .stage:fullscreen canvas { object-fit: contain; border-radius: 0; }
+  .stage:-webkit-full-screen canvas { object-fit: contain; border-radius: 0; }
+  .stage:fullscreen .guides, .stage:fullscreen .big { inset: 0; margin: auto; width: min(100vw, 177.778vh); height: min(56.25vw, 100vh); }
+  .stage:-webkit-full-screen .guides, .stage:-webkit-full-screen .big { inset: 0; margin: auto; width: min(100vw, 177.778vh); height: min(56.25vw, 100vh); }
+
+  /* the transport */
+  .bar { display: flex; align-items: center; gap: 6px; margin-top: 12px; font-family: var(--mono); font-size: 12px; }
+  .btn {
+    width: 36px; height: 36px; flex: none; display: grid; place-items: center; border-radius: 8px; color: var(--ice-70);
+    transition: color .2s, background .2s;
+  }
+  .btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .btn .fill { fill: currentColor; stroke: none; }
+  .btn[hidden] { display: none; }
+  .btn[aria-pressed="true"] { color: var(--blue); }
+  @media (hover: hover) { .btn:hover { color: var(--ice); background: rgba(234, 244, 251, .06); } }
+  .btn .alt { display: none; }
+  .btn[data-state="on"] .main { display: none; }
+  .btn[data-state="on"] .alt { display: block; }
+  .tc { flex: none; min-width: 11.5ch; color: var(--ice-70); font-variant-numeric: tabular-nums; padding: 0 6px; }
+  .tc b { color: var(--ice); font-weight: 600; }
+
+  .scrub { position: relative; flex: 1; height: 36px; cursor: pointer; touch-action: none; border-radius: 6px; }
+  .scrub .track { position: absolute; left: 0; right: 0; top: 50%; height: 4px; margin-top: -2px; border-radius: 2px; background: var(--ice-20); overflow: hidden; }
+  .scrub .fillbar { position: absolute; inset: 0; transform-origin: 0 50%; background: var(--blue); transform: scaleX(0); }
+  .scrub .tick { position: absolute; top: 50%; width: 1px; height: 12px; margin-top: -6px; background: var(--ice-20); }
+  .scrub .tick.beat { height: 6px; margin-top: -3px; background: rgba(234, 244, 251, .1); }
+  .scrub .seg { position: absolute; top: 3px; font-size: 9px; letter-spacing: .06em; text-transform: uppercase; color: var(--ice-45); white-space: nowrap; overflow: hidden; text-overflow: clip; padding-left: 3px; pointer-events: none; }
+  .scrub .head { position: absolute; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--ice); box-shadow: 0 0 0 3px rgba(95, 168, 211, .35); left: 0; }
+
+  footer {
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px;
+    padding: 4px max(20px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+    font-family: var(--mono); font-size: 11px; line-height: 1.6; letter-spacing: .03em; color: var(--ice-45);
+  }
+  footer a { color: var(--ice-70); text-decoration: none; border-bottom: 1px solid var(--line); }
+  footer a:hover { color: var(--blue); }
+  kbd { font: inherit; color: var(--ice-70); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+  .keys span { margin-right: 12px; white-space: nowrap; }
+
+  /* scene labels need ~517 px of scrubber (INTERFACE, 56.5 px, in a 46 px segment otherwise) */
+  @media (max-width: 860px) { .scrub .seg { display: none; } }
+
+  @media (max-width: 640px) {
+    .scrub .seg, .scrub .tick.beat { display: none; }
+    .keys { display: none; }
+    .tc { min-width: 0; font-size: 11px; }
+    .btn { width: 32px; }
+    .hide-sm { display: none; }
+    header { font-size: 11px; letter-spacing: .04em; }
+    main { padding-top: 12px; }
+    /* phones: the chips live in a row under the picture, never over it (the stage clips with the canvas's own radius) */
+    .stage { overflow: visible; margin-bottom: 40px; }
+    .stage canvas { border-radius: inherit; }
+    .chip, .chip.mini { top: calc(100% + 8px); bottom: auto; left: 0; padding: 6px 12px 6px 9px; font-size: 11px; gap: 7px; }
+    .chip.mini > span { display: inline; }
+    .chip.mini > .eq { display: flex; }
+    #replay { left: auto; right: 0; }
+    .chip svg { width: 14px; height: 14px; }
+    .chip .eq { height: 10px; }
+    .chip.ink { background: rgba(234, 244, 251, .94); color: var(--ink); }
+    .chip.ink .eq i { background: var(--ink); }
+  }
+
+  /* phones in landscape: the picture gets the height, the header goes, the footer scrolls */
+  @media (orientation: landscape) and (max-height: 500px) {
+    header { display: none; }
+    main {
+      min-height: 100dvh;
+      padding: max(8px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    }
+    .player { width: min(100%, calc((100dvh - 64px) * 16 / 9)); }
+    .bar { margin-top: 6px; }
+    .scrub .seg, .scrub .tick.beat, .keys, .hide-sm { display: none; }
+    .stage { overflow: hidden; margin-bottom: 0; }
+    .chip { top: auto; bottom: 8px; left: 8px; padding: 5px 10px 5px 8px; font-size: 10px; gap: 6px; }
+    .chip.mini { left: 6px; bottom: 6px; padding: 5px; gap: 0; }
+    .chip.mini > span, .chip.mini > .eq { display: none; }
+    #replay { left: auto; right: 8px; }
+    .chip svg { width: 13px; height: 13px; }
+    .chip .eq { height: 9px; }
+  }
+
+  /* fullscreen chips sit in the screen corners (the letterbox), whatever the viewport rules above said */
+  .stage:fullscreen .chip { top: auto; bottom: 14px; left: 14px; }
+  .stage:fullscreen #replay { left: auto; right: 14px; }
+  .stage:-webkit-full-screen .chip { top: auto; bottom: 14px; left: 14px; }
+  .stage:-webkit-full-screen #replay { left: auto; right: 14px; }
+
+  /* export: exactly 1920x1080, nothing else */
+  body.export { display: block; overflow: hidden; }
+  body.export header, body.export footer, body.export .bar, body.export .chip, body.export .big { display: none !important; }
+  body.export main { padding: 0; display: block; }
+  body.export .player { width: 1920px; }
+  body.export .stage { width: 1920px; height: 1080px; border-radius: 0; box-shadow: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1 style="font: inherit; letter-spacing: inherit"><b>Claude</b> / Motion Reel 2026</h1>
+  <a href="/">jeremylasne.com</a>
+</header>
+
+<main>
+  <div class="player">
+    <div class="stage" id="stage">
+      <canvas id="out" role="img" aria-label="A 15 second motion design reel, drawn live in code."></canvas>
+      <div class="guides" id="guides" aria-hidden="true">
+        <svg viewBox="0 0 1920 1080" preserveAspectRatio="none" fill="none" stroke="#5fa8d3" stroke-width="1.5" vector-effect="non-scaling-stroke">
+          <rect x="67" y="38" width="1786" height="1004" stroke-opacity=".5" vector-effect="non-scaling-stroke"/>
+          <rect x="96" y="54" width="1728" height="972" stroke-dasharray="8 8" stroke-opacity=".7" vector-effect="non-scaling-stroke"/>
+          <path d="M640 0V1080M1280 0V1080M0 360H1920M0 720H1920" stroke-opacity=".22" vector-effect="non-scaling-stroke"/>
+          <path d="M930 540H990M960 510V570" stroke-opacity=".8" vector-effect="non-scaling-stroke"/>
+        </svg>
+        <div class="hud" id="hud"></div>
+      </div>
+      <button class="big" id="big" type="button" aria-label="Play">
+        <span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg></span>
+      </button>
+      <button class="chip" id="replay" type="button" hidden aria-label="Replay">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10a5.5 5.5 0 1 0 1.8-4.1"/><path d="M4 3.5v3.4h3.4"/></svg>
+        <span>Replay</span>
+      </button>
+      <button class="chip" id="chip" type="button" hidden aria-label="Sound on, play from the start">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5h3l4-3.5v12l-4-3.5H3z" fill="currentColor" stroke="none"/><path d="M13 7a4.2 4.2 0 0 1 0 6M15.5 4.5a7.8 7.8 0 0 1 0 11"/></svg>
+        <span>Sound on</span>
+        <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      </button>
+    </div>
+
+    <div class="bar" role="group" aria-label="Transport">
+      <button class="btn" id="play" type="button" aria-label="Pause" data-state="on">
+        <svg class="main" viewBox="0 0 20 20"><path class="fill" d="M5.5 3.5v13l11-6.5z"/></svg>
+        <svg class="alt" viewBox="0 0 20 20"><path class="fill" d="M5 3.5h3.2v13H5zM11.8 3.5H15v13h-3.2z"/></svg>
+      </button>
+      <div class="tc" id="tc" aria-live="off"><b>00.00</b> / 15.00 s</div>
+      <div class="scrub" id="scrub" tabindex="0" role="slider" aria-label="Scrub the reel" aria-valuemin="0" aria-valuemax="15" aria-valuenow="0">
+        <div class="track"><div class="fillbar" id="fillbar"></div></div>
+        <div class="head" id="head"></div>
+      </div>
+      <button class="btn" id="snd" type="button" aria-label="Sound" aria-pressed="false">
+        <svg viewBox="0 0 20 20"><path class="fill" d="M3 7.5h3l4-3.5v12l-4-3.5H3z"/><path class="alt-on" d="M13 7a4.2 4.2 0 0 1 0 6M15.5 4.5a7.8 7.8 0 0 1 0 11" style="display:none"/><path class="alt-off" d="M13 7.5l5 5M18 7.5l-5 5"/></svg>
+      </button>
+      <button class="btn hide-sm" id="loop" type="button" aria-label="Loop" aria-pressed="false">
+        <svg viewBox="0 0 20 20"><path d="M4 9V8a3 3 0 0 1 3-3h9l-2.5-2.5M16 11v1a3 3 0 0 1-3 3H4l2.5 2.5"/></svg>
+      </button>
+      <button class="btn hide-sm" id="grid" type="button" aria-label="Guides" aria-pressed="false">
+        <svg viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="12" rx="1.5"/><path d="M7.7 4v12M12.3 4v12M3 8h14M3 12h14" stroke-opacity=".6"/></svg>
+      </button>
+      <button class="btn" id="fs" type="button" aria-label="Full screen">
+        <svg viewBox="0 0 20 20"><path d="M3.5 7.5v-4h4M16.5 7.5v-4h-4M3.5 12.5v4h4M16.5 12.5v4h-4"/></svg>
+      </button>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <span>15 s · 900 frames · 128 BPM. Drawn live in your browser: 1 canvas, 1 shader, 1 synth, 0 video files. <a id="dl" href="/vid/showreel.mp4" download="claude-motion-reel-2026.mp4">Download MP4 (1080p60, 8.6 MB)</a></span>
+  <span class="keys"><span><kbd>Space</kbd> play</span><span><kbd>←</kbd><kbd>→</kbd> frame</span><span><kbd>⇧</kbd>+<kbd>←</kbd><kbd>→</kbd> beat</span><span><kbd>G</kbd> guides</span><span><kbd>M</kbd> sound</span></span>
+</footer>
+
+<script src="/vid/engine.js"></script>
+<script src="/vid/audio.js"></script>
+<script>
+// paths are absolute: the host serves /vid without a trailing slash, where relative ones would resolve to /
+// the reel, in play order; each file registers its scenes with Reel.scene()
+const FILES = ['score.js', 'scenes/s1.js', 'scenes/s2.js', 'scenes/s3.js', 'scenes/s4.js', 'scenes/s5.js', 'scenes/s6.js', 'scenes/s7.js'];
+</script>
+<script>
+(() => {
+  'use strict';
+  const R = Reel, A = ReelAudio, q = new URLSearchParams(location.search);
+  const EXPORT = q.has('export');
+  const only = q.get('only');           // ?only=s3 loads just that scene (and the score)
+  const $ = id => document.getElementById(id);
+  const stage = $('stage'), out = $('out');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (EXPORT) document.body.classList.add('export');
+
+  const load = src => new Promise(res => {
+    const s = document.createElement('script');
+    s.src = src; s.async = false; s.onload = res;
+    s.onerror = () => { console.warn('missing', src); res(); };
+    document.head.appendChild(s);
+  });
+
+  const fonts = [['Unbounded', 900], ['Unbounded', 400], ['Inter Tight', 800], ['Inter Tight', 400], ['Space Grotesk', 700],
+    ['Instrument Serif', 400], ['Instrument Serif', 400, 'italic'], ['JetBrains Mono', 500]];
+
+  // ---- sizes: render at the displayed resolution, capped ----
+  const CAP = q.has('hq') ? 2560 : 1920;
+  let scale = 1, stageW = 1920;
+  function resize() {
+    const r = stage.getBoundingClientRect(), dpr = EXPORT ? 1 : Math.min(devicePixelRatio || 1, 2);
+    stageW = Math.min(r.width, r.height * 16 / 9) || r.width;   // the picture's CSS width (letterboxed in fullscreen)
+    const w = EXPORT ? 1920 : Math.max(320, Math.round(stageW * dpr));
+    out.width = Math.min(w, CAP); out.height = Math.round(out.width * 9 / 16);
+    R.setRenderSize(Math.min(w, CAP) * scale);
+    dirty = true; lastUI = -1;
+  }
+
+  // ---- clock ----
+  let t = 0, playing = !reduced && !EXPORT, loop = q.has('loop'), sound = false, dirty = true, last = -1, lastUI = -1;
+  const FR = 1 / R.FPS, D = R.DUR;
+  const snap = x => Math.round(x * R.FPS) / R.FPS;
+  if (q.has('t')) { t = Math.max(0, Math.min(D - FR, +q.get('t') || 0)); playing = false; }
+
+  function setPlaying(v) {
+    playing = v;
+    $('play').dataset.state = v ? 'on' : 'off';
+    $('play').setAttribute('aria-label', v ? 'Pause' : 'Play');
+    if (v) $('big').classList.remove('on');
+    if (sound) { if (v) A.start(t, loop); else A.stop(); }
+    last = -1;   // the next rAF re-anchors the clock (dt 0): never step t backwards
+  }
+  function seek(x) {
+    t = Math.max(0, Math.min(D - FR, x));
+    if (t < D - FR * 1.5) $('replay').hidden = true;
+    if (sound && playing) A.start(t, loop);
+    dirty = true;
+  }
+
+  // feedback is immediate (chip goes, button lights, the reel parks on frame 0); playback starts once the score is rendered
+  let soundReq = 0;
+  const sndIcon = on => {
+    $('snd').setAttribute('aria-pressed', on ? 'true' : 'false');
+    $('snd').querySelector('.alt-on').style.display = on ? '' : 'none';
+    $('snd').querySelector('.alt-off').style.display = on ? 'none' : '';
+  };
+  async function soundOn(fromStart) {
+    const c = A.context();                                   // created and resumed inside the user gesture
+    const resumed = c.state !== 'running' ? c.resume() : null;
+    const my = ++soundReq;
+    sndIcon(true);
+    if (fromStart) { $('chip').hidden = true; $('replay').hidden = true; setPlaying(false); t = 0; dirty = true; }
+    await resumed; await window.__reel.ready; await audioReady;
+    if (my !== soundReq || !A.buffer) { if (my === soundReq) sndIcon(false); return; }
+    sound = true;
+    $('chip').hidden = true;
+    setPlaying(fromStart || playing);                        // a sound toggle never changes the play state
+  }
+  function soundOff() {
+    ++soundReq;
+    sound = false; A.stop();
+    $('snd').setAttribute('aria-pressed', 'false');
+    $('snd').querySelector('.alt-on').style.display = 'none';
+    $('snd').querySelector('.alt-off').style.display = '';
+  }
+
+  // ---- adaptive quality: drop resolution if frames are slow ----
+  // fed the real rAF interval while playing (renderAt's JS time misses the GPU raster, which is the actual cost).
+  // Slow = under 25 fps, so a display or battery mode capped at 30 Hz is not mistaken for a struggling device.
+  // Down after 1 s spent in slow frames; up only after 600 consecutive fast frames (no oscillation at the vsync cap).
+  let slowMs = 0, fast = 0;
+  function adapt(ms) {
+    if (EXPORT || ms > 2000) return;                         // a background tab, not a slow frame
+    // each slow frame counts at most 200 ms, so one hitch (GC, first paint) never downgrades on its own
+    if (ms > 40) { slowMs += Math.min(ms, 200); fast = 0; }
+    else { slowMs = Math.max(0, slowMs - ms); if (ms < 20) fast++; }
+    if (slowMs > 1000 && scale > .5) { scale = Math.max(.5, scale - .25); R.quality = scale < 1 ? 0 : 1; slowMs = 0; fast = 0; resize(); }
+    if (fast > 600 && scale < 1) { scale = Math.min(1, scale + .25); R.quality = scale < 1 ? 0 : 1; fast = 0; resize(); }
+  }
+
+  // ---- UI ----
+  const scrub = $('scrub'), fillbar = $('fillbar'), head = $('head'), tc = $('tc'), hud = $('hud');
+  const pad2 = n => String(n).padStart(2, '0');
+  const code = x => { const f = Math.round(x * R.FPS); return pad2(Math.floor(f / R.FPS)) + ':' + pad2(f % R.FPS); };
+  const secs = x => (Math.round(x * R.FPS) / R.FPS).toFixed(2).padStart(5, '0');
+  function buildScrub() {
+    for (let b = 0; b <= 32; b++) {
+      const el = document.createElement('i');
+      el.className = 'tick' + (b % 4 ? ' beat' : '');
+      el.style.left = (b * R.BEAT / D * 100) + '%';
+      scrub.appendChild(el);
+    }
+    const seen = new Set();
+    for (const s of R.scenes) {
+      if (!s.name || seen.has(s.name)) continue;
+      seen.add(s.name);
+      const el = document.createElement('span');
+      el.className = 'seg';
+      el.textContent = s.name;
+      el.style.left = (s.start / D * 100) + '%';
+      el.style.width = ((s.end - s.start) / D * 100) + '%';
+      scrub.appendChild(el);
+    }
+  }
+  function ui() {
+    const f = Math.round(t * R.FPS);
+    if (f === lastUI) return;
+    lastUI = f;
+    const p = t / (D - FR);
+    fillbar.style.transform = `scaleX(${p})`;
+    head.style.left = (p * 100) + '%';
+    tc.innerHTML = `<b>${secs(t)}</b> / ${secs(D)} s`;
+    scrub.setAttribute('aria-valuenow', t.toFixed(2));
+    scrub.setAttribute('aria-valuetext', secs(t) + ' of 15 seconds');
+    if ($('guides').classList.contains('on')) {
+      const beat = Math.floor(t / R.BEAT), sc = R.scenes.filter(s => t >= s.start && t < s.end).map(s => s.id).join(' + ');
+      hud.textContent = `${code(t)}  F ${String(f).padStart(3, '0')}   BAR ${Math.floor(beat / 4) + 1}.${beat % 4 + 1}  ${R.BPM} BPM   ${sc}`;
+    }
+    // the chip: icon only after the count-in when the label would cover the picture; ink on the s5 ice field
+    $('chip').classList.toggle('mini', stageW < 1228 && t >= R.at(3, 1));
+    $('chip').classList.toggle('ink', t >= 9.375 && t < 11.015625);
+    // the chip's meter breathes on the beat
+    const bars = $('chip').querySelectorAll('.eq i'), ph = (t / R.BEAT) % 1;
+    bars.forEach((b, i) => { const k = Math.exp(-((ph + i * .13) % 1) * 5); b.style.height = (25 + 75 * k) + '%'; });
+  }
+
+  let dragging = false, wasPlaying = false;
+  const fromEvent = e => { const r = scrub.getBoundingClientRect(); return snap(Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * D); };
+  scrub.addEventListener('pointerdown', e => {
+    dragging = true; wasPlaying = playing; scrub.setPointerCapture(e.pointerId);
+    if (playing) setPlaying(false);
+    seek(fromEvent(e));
+  });
+  scrub.addEventListener('pointermove', e => { if (dragging) seek(fromEvent(e)); });
+  const endDrag = () => { if (!dragging) return; dragging = false; if (wasPlaying) setPlaying(true); };
+  scrub.addEventListener('pointerup', endDrag);
+  scrub.addEventListener('pointercancel', endDrag);
+
+  const replay = () => { $('replay').hidden = true; t = 0; setPlaying(true); };
+  $('play').onclick = () => {
+    if (!playing && $('big').classList.contains('on')) return $('big').click();   // reduced motion: start from 0, like the poster button
+    if (!playing && t >= D - FR * 1.5) return replay();
+    setPlaying(!playing);
+  };
+  $('replay').onclick = replay;
+  $('big').onclick = () => { $('big').classList.remove('on'); soundOn(true); };
+  $('chip').onclick = () => soundOn(true);
+  $('snd').onclick = () => $('snd').getAttribute('aria-pressed') === 'true' ? soundOff() : soundOn(false);
+  // re-anchor the source at the current (wrapped) t: flipping src.loop mid-pass would unwrap A.time() past 15 s
+  $('loop').onclick = () => { loop = !loop; $('loop').setAttribute('aria-pressed', loop); if (sound && playing) A.start(t, loop); else A.setLoop(loop); };
+  $('grid').onclick = () => { const on = $('guides').classList.toggle('on'); $('grid').setAttribute('aria-pressed', on); lastUI = -1; dirty = true; };
+  $('fs').onclick = () => {
+    const el = stage;
+    if (document.fullscreenElement || document.webkitFullscreenElement) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    else { const go = el.requestFullscreen || el.webkitRequestFullscreen; if (go) { const p = go.call(el); if (p && p.catch) p.catch(() => {}); } }
+  };
+  document.addEventListener('fullscreenchange', resize);
+  document.addEventListener('webkitfullscreenchange', resize);
+  // click the picture: play/pause (delayed so a double click can mean fullscreen instead)
+  // A button hides itself on the first click, so a double click on it lands its second half on the canvas: ignore that too.
+  let clickT = 0, btnAt = -1e9;
+  stage.addEventListener('click', e => { if (e.target.closest('button')) btnAt = e.timeStamp; });
+  out.addEventListener('click', e => {
+    clearTimeout(clickT);
+    if (e.timeStamp - btnAt < 600) return;
+    clickT = setTimeout(() => $('play').click(), 250);
+  });
+  stage.addEventListener('dblclick', e => { clearTimeout(clickT); if (e.target.closest('button') || e.timeStamp - btnAt < 600) return; $('fs').click(); });
+
+  addEventListener('keydown', e => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === ' ' && e.target.closest && e.target.closest('button, a')) return;   // Space activates the focused control
+    const k = e.key;
+    if (k === ' ' || k === 'k' || k === 'K') { e.preventDefault(); $('play').click(); }
+    else if (k === 'ArrowRight' || k === 'ArrowLeft') {
+      e.preventDefault();
+      if (playing) setPlaying(false);
+      const dir = k === 'ArrowRight' ? 1 : -1;
+      if (e.shiftKey) {
+        // next/previous beat, landing on the first frame that shows the hit: ceil(T * 60)
+        const f = Math.round(t * R.FPS), BF = R.BEAT * R.FPS, hf = b => Math.ceil(b * BF - 1e-9);
+        let b = Math.floor(f / BF);
+        if (dir > 0) while (hf(b) <= f) b++; else while (b > 0 && hf(b) >= f) b--;
+        seek(hf(b) / R.FPS);
+      }
+      else seek(snap(t + dir * FR));
+    }
+    else if (k === 'Home') { e.preventDefault(); seek(0); }
+    else if (k === 'End') { e.preventDefault(); seek(D - FR); }
+    else if (k === 'm' || k === 'M') $('snd').click();
+    else if (k === 'g' || k === 'G') $('grid').click();
+    else if (k === 'f' || k === 'F') $('fs').click();
+    else if (k === 'l' || k === 'L') $('loop').click();
+    else if (/^[0-9]$/.test(k)) seek(snap(+k / 10 * D));
+  });
+
+  // ---- the loop ----
+  let prevFrame = 0;
+  function tick(now) {
+    requestAnimationFrame(tick);
+    const dt = last < 0 ? 0 : Math.min(.1, Math.max(0, (now - last) / 1000));
+    last = now;
+    if (playing && !dragging) {
+      const at = sound ? A.time() : null;
+      if (at !== null && at !== undefined) t = at;
+      else t += dt;
+      if (t >= D) {
+        if (loop) t %= D;
+        else { t = D - FR; setPlaying(false); $('replay').hidden = false; }
+      }
+      dirty = true;
+    }
+    if (!dirty) { prevFrame = 0; return; }
+    dirty = false;
+    R.renderAt(t);
+    if (playing && !dragging && prevFrame) adapt(now - prevFrame);
+    prevFrame = playing ? now : 0;
+    ui();
+  }
+
+  let audioReady;
+  window.__reel = {
+    ready: (async () => {
+      await Promise.all(fonts.map(([f, w, st]) => document.fonts.load(`${st ? st + ' ' : ''}${w} 64px "${f}"`)));
+      for (const f of FILES) {
+        if (only && f.startsWith('scenes/') && !only.split(',').some(o => f.includes(o + '.js'))) continue;
+        await load('/vid/' + f);
+      }
+      audioReady = A.render().catch(e => console.warn('audio', e));   // the offline render overlaps shader compile and setup
+      R.initOutput(out, { preserve: EXPORT });
+      resize();
+      R.setup();
+      if (EXPORT) return true;
+      buildScrub();
+      addEventListener('resize', resize);
+      new ResizeObserver(resize).observe(stage);
+      setPlaying(playing);
+      $('chip').hidden = reduced;
+      $('fs').hidden = !(document.fullscreenEnabled || document.webkitFullscreenEnabled);   // iPhone: no element fullscreen
+      if (reduced && !q.has('t')) { t = R.poster || 14.5; $('big').classList.add('on'); }
+      requestAnimationFrame(tick);
+      return true;
+    })(),
+    // export hooks: render one exact frame; get the soundtrack as base64 WAV
+    seek(x) { t = x; R.renderAt(x); return true; },
+    async wav() {
+      await audioReady;
+      const b = new Uint8Array(A.wav());
+      let s = ''; for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000));
+      return btoa(s);
+    },
+    get t() { return t; },
+  };
+})();
+</script>
+</body>
+</html>
