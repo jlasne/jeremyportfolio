@@ -218,6 +218,8 @@ export default defineSchema({
       }),
     ),
     draftsAt: v.optional(v.number()),
+    /* When the day was last read into the brain. Absent means never. */
+    digestedAt: v.optional(v.number()),
     /* The questions on the feed. Optional because the first days were
        written before the feed existed. `beat` is which of the story's
        parts the question is after; `from` is set when the question is a
@@ -238,6 +240,34 @@ export default defineSchema({
     mailed: v.array(v.string()),
     updatedAt: v.number(),
   }).index("by_day", ["day"]),
+
+  /* The brain of Jeremy. One document per concept: something he does,
+     believes or has learned. `position` is what is true of him now and is
+     rewritten by each digest, never appended. `evidence` is the dated
+     things he actually said, newest last, twelve kept. The daily log is the
+     source; this is what it has taught. */
+  xBrain: defineTable({
+    slug: v.string(),
+    name: v.string(),
+    position: v.string(),
+    evidence: v.array(v.object({ day: v.string(), text: v.string() })),
+    /* set when a day contradicted the old position, cleared by hand */
+    conflict: v.optional(v.string()),
+    updatedAt: v.number(),
+  }).index("by_slug", ["slug"]),
+
+  /* A video idea and what the brain made of it: a talking structure, the
+     script in the daily vlog format, the concepts it drew on, and the
+     questions the brain could not answer yet. */
+  xIdeas: defineTable({
+    idea: v.string(),
+    structure: v.string(),
+    script: v.string(),
+    concepts: v.array(v.string()),
+    gaps: v.array(v.string()),
+    used: v.optional(v.boolean()),
+    createdAt: v.number(),
+  }),
 
   /* Retired. The facts sheet was a second place to keep numbers that the
      interview already pulls out of the day, so nothing reads or writes

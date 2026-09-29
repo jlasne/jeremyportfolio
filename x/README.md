@@ -53,6 +53,7 @@ the day. **More questions** tops the feed back up at any point.
 | Result | what is true now that was not this morning, with numbers |
 | The day | where you went, who you saw, what happened outside the work |
 | Lesson | what a founder one month behind you could use |
+| You | what the day says about how you think, or a belief it tested. Feeds the brain |
 
 The first five are the five lines of the video script, named the way the
 script names them, and each card prints what its beat feeds. Change and
@@ -67,11 +68,59 @@ worth saving.
 Nothing about the conversation lives outside the day: each answer carries
 the question that produced it, and the feed is a list on the same document.
 
+## The brain
+
+The daily log answers today. The brain is what the days add up to.
+
+It is modelled on the notes-and-syntheses brain in `/brain`, and follows the
+same two rules. A day is read once, and the log itself is never edited. A
+position is rewritten each time a day touches it, never appended to.
+
+A **concept** is something you do, believe or have learned: cold outreach,
+why you left the bank, how you score creators. Each holds a **position**, what
+is true of you now in the first person, and up to twelve pieces of **dated
+evidence**, the things you actually said. Every claim traces back to the day
+you said it.
+
+When you press Write the day, or the 17:00 mail writes it, the day is read into
+the brain in the background. If a day contradicts an old position, the position
+is rewritten to what is true now and the concept is flagged **conflict** with
+one sentence naming what changed, until you press Settled. **Feed the brain**
+reads any days it has not read yet, five per press, oldest first so a newer
+position overrides an older one. Reading a day twice replaces what it said and
+never doubles it.
+
+The eighth beat on the feed, **You**, is how the brain learns you. It is given
+what the brain already holds and asks where it is thin: a belief, a method or a
+mistake the day touched. There is no separate interview.
+
+## Ideas
+
+Type one line, like "Why I stopped cold DMing", and press Build. It picks up to
+six concepts the idea needs, then writes two things from the same material at
+once:
+
+- **A talking structure.** The angle, two ways to open, five to seven beats,
+  and a close. For each beat: the point, what you have on it from your own days
+  with its date, and a question that makes you tell it your way. No sentences
+  to read out. A beat with nothing behind it says GAP rather than inventing.
+- **A 60 second script in the daily vlog format.** Intro cuts, the five lines,
+  outro, sound design. Built from what the brain holds on the idea, not from
+  today.
+
+Every GAP becomes a question on today's feed under You. That is the loop: an
+idea the brain cannot fill tells you what to answer tomorrow, and the answer
+thickens the brain for the next idea. Tick an idea once it is filmed.
+
 ## The screens
 
 - **Today.** The bar, the feed of open questions, then the day answered so
   far, newest first, and the /bio tick for the 30 day challenge. One Write
   button, in the bar, and only once five beats are covered.
+- **Ideas.** The field, the two outputs, the concepts it drew on, the
+  questions it added, and every earlier idea.
+- **Brain.** Every concept with its position and dated evidence, conflicts in
+  red, and the Feed the brain button.
 - **X-Replies.** Paste somebody else's post and get three ways in: one that
   answers with something from your own day, one that asks what they are
   building, one that takes the other side. X is a room before it is a
@@ -99,8 +148,8 @@ the question that produced it, and the feed is a list on the same document.
   voice and the question bank. They
   live on the server, so the voice is a deploy and the page source gives
   nothing away.
-- **Data** is one table on the Overlap deployment: `xDays`, one document
-  per day. (`xFacts` is retired and stays declared only so a deploy cannot
+- **Data** is three tables on the Overlap deployment: `xDays`, one document
+  per day, `xBrain`, one per concept, and `xIdeas`, one per idea. (`xFacts` is retired and stays declared only so a deploy cannot
   trip over a document left in it.)
 - **Auth** is a passphrase, the same `BIO_PASSPHRASE` that writes /bio,
   asked once per device and kept in `localStorage`. No accounts, because

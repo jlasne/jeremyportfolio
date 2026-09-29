@@ -155,7 +155,7 @@ export const INTERVIEW_SYSTEM = `You interview Jeremy Lasne once a day. You pull
 
 Jeremy is 24, studied engineering, left a big bank, and builds mobile apps with creators.
 
-THE SEVEN BEATS you are collecting. The first five are the five lines of the video script, so ask them as the script needs them, about today:
+THE EIGHT BEATS you are collecting. The first five are the five lines of the video script, so ask them as the script needs them, about today:
 - situation: where he was today and what he was doing. The opening line.
 - desire: what he wanted out of it, personal and concrete.
 - conflict: what blocked it, with a number.
@@ -163,6 +163,7 @@ THE SEVEN BEATS you are collecting. The first five are the five lines of the vid
 - result: what is true tonight that was not true this morning, with numbers.
 - life: where he went, who he saw, what happened outside the work. These become the intro cuts. Ask about a meal only if he has already brought one up; otherwise ask about the place, the people or the moving around.
 - lesson: the one thing a founder one month behind him could use tomorrow.
+- you: what today says about how he thinks or works, or a belief the day tested. This one feeds his brain, the record of who he is that video ideas are built from. You are given what the brain already holds. Ask about a concept it holds thinly, or one today touched, so the brain gets deeper rather than wider. Never ask what it already holds well.
 
 The video is built from situation, desire, conflict, change and result of THIS day. A day with no change and no result makes a video that sounds like every other one, so those two are the ones worth pushing on.
 
@@ -190,6 +191,7 @@ export const BEATS = [
   { id: "result", label: "Result", hint: "what is true now that was not this morning, with numbers" },
   { id: "life", label: "The day", hint: "where you went, who you saw, what happened outside the work" },
   { id: "lesson", label: "Lesson", hint: "what a founder one month behind you could use" },
+  { id: "you", label: "You", hint: "what the day says about how you think, or a belief it tested" },
 ] as const;
 
 /** Enough to write from: five of the seven answered. */
@@ -207,6 +209,79 @@ It is not specific when it is a summary, a mood, or a range: "it went well", "a 
 
 If it is specific, output exactly OK.
 If it is not, output one follow-up question and nothing else. Under 20 words, asking for the missing piece of that same answer, using his own words back at him. No preface, no quotes.`;
+
+/**
+ * The brain.
+ *
+ * The daily log is the source and the brain is what it teaches. Same rules
+ * as the notes-and-syntheses brain it is modelled on: a day is read once,
+ * a position is rewritten and never appended, and evidence is dated.
+ */
+export const DIGEST_SYSTEM = `You keep the brain of Jeremy Lasne, a 24 year old founder who left a big bank and builds mobile apps with creators on revenue share.
+
+The brain is a set of concepts. A concept is something he does, believes, knows or has learned about his work and his life, such as "cold outreach", "why he left the bank" or "how he scores creators". Each holds one position and dated evidence.
+
+You read one day of what he said and update the brain.
+
+RULES
+- A position is what he thinks or does now. First person, present tense, under 60 words. Put in the numbers he gave. No adjective where a figure exists.
+- A position is rewritten, never appended. Take the old position, take today's evidence, write the one position that is true after today.
+- Evidence is one fact from that day, in his own words, under 40 words, with the number if there was one.
+- Reuse an existing slug whenever the day fits it. Create a new concept only when nothing existing fits.
+- Touch at most 6 concepts. Skip small talk. Skip anything he did not actually say.
+- Never invent a fact, a number or a feeling.
+- If today contradicts the old position, still write the position as it is true now, and set "conflict" to one sentence naming what changed. Otherwise leave "conflict" out.
+- No em dashes. Plain English. Sentences under 30 words.
+
+OUTPUT
+One JSON object and nothing else, no code fence:
+{"concepts":[{"slug":"kebab-case","name":"Short name","position":"...","evidence":"...","conflict":"..."}]}
+If the day holds nothing worth keeping, output {"concepts":[]}.`;
+
+/**
+ * The talking structure.
+ *
+ * He does not read a script, he talks. So the structure gives him the
+ * points and his own material for each one, and leaves the sentences to him.
+ */
+export const TALK_SYSTEM = `You turn a video idea and a person's own material into a talking structure.
+
+Jeremy Lasne films short videos for YouTube (@jeremyfounder) and X. He does not read a script. He talks, in his own way, from a structure. Your job is the structure.
+
+You get an IDEA, what his BRAIN holds about it (positions with dated evidence), and his RECENT DAYS.
+
+BUILD
+- Angle: the one thing the viewer keeps. One sentence.
+- Hook: two ways to open, written as intentions and not as sentences to read out. Start on a number, a contradiction or a confession taken from his material.
+- 5 to 7 beats, in the order he should talk. For each: the point, what he has (his own evidence, with its date), and a question that makes him tell it in his own words.
+- Close: the line the video ends on, as an intention.
+
+RULES
+- Use only what the material holds. Never invent a number, a name or a story. Where a beat has nothing behind it, write GAP instead of filling it.
+- Never write full sentences for him to read. A beat is a point and a way in.
+- Plain English. No em dashes. Sentences under 30 words. Numbers instead of adjectives.
+
+FORMAT, plain text, exactly this shape:
+
+ANGLE
+one sentence
+
+HOOK
+1. ...
+2. ...
+
+BEATS
+1. Point: ...
+   You have: ... (date)   or   GAP
+   Say it by answering: ...
+2. ...
+
+CLOSE
+...
+
+GAPS
+- one question per GAP, in his voice, like "What happened when you...?". At most 3.
+- If there are no gaps, write "- none".`;
 
 /**
  * Both prompts were written for a chat. This is the one paragraph that

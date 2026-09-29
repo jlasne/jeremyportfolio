@@ -19,6 +19,8 @@ import {
   SLOTS,
   SLOT_TITLE,
   INTERVIEW_SYSTEM,
+  DIGEST_SYSTEM,
+  TALK_SYSTEM,
   BEATS,
   READY_AT,
   DIG_NOTE,
@@ -369,7 +371,12 @@ function brief(c: {
    Override with X_MODEL to try another. */
 const MODEL = () => process.env.X_MODEL || "deepseek/deepseek-v4-flash";
 
-async function ask(system: string, user: string, temperature = 0.8): Promise<string> {
+async function ask(
+  system: string,
+  user: string,
+  temperature = 0.8,
+  opts: { note?: boolean; max?: number } = {},
+): Promise<string> {
   const key = process.env.OPENROUTER_API_KEY;
   if (!key) throw new Error("Set OPENROUTER_API_KEY in the Convex dashboard first");
   const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -383,9 +390,9 @@ async function ask(system: string, user: string, temperature = 0.8): Promise<str
     body: JSON.stringify({
       model: MODEL(),
       temperature,
-      max_tokens: 2000,
+      max_tokens: opts.max ?? 2000,
       messages: [
-        { role: "system", content: system + "\n\n" + RUN_NOTE },
+        { role: "system", content: opts.note === false ? system : system + "\n\n" + RUN_NOTE },
         { role: "user", content: user },
       ],
     }),
@@ -561,9 +568,16 @@ export const fill = action({
     const wanted = BEATS.filter((b) => !open.has(b.id) && !done.has(b.id));
     if (!wanted.length) return await ctx.runQuery(internal.x.dayFor, { day: key });
 
+    const held = await ctx.runQuery(internal.x.concepts, {});
+    const brainNote = held.length
+      ? "WHAT HIS BRAIN ALREADY HOLDS (for the 'you' beat: ask where it is thin, never where it is full):\n" +
+        held.map((h: { name: string; position: string; evidence: unknown[] }) =>
+          `- ${h.name} (${h.evidence.length} pieces of evidence): ${h.position.slice(0, 110)}`).join("\n")
+      : "HIS BRAIN IS EMPTY. For the 'you' beat, ask about who he is: a belief, a method, or a mistake this day touched.";
+
     const said = await ask(
       INTERVIEW_SYSTEM,
-      `DATE: ${key}\n\nTHE DAY SO FAR:\n${transcriptOf(c.entries)}\n\n` +
+      `DATE: ${key}\n\nTHE DAY SO FAR:\n${transcriptOf(c.entries)}\n\n${brainNote}\n\n` +
         `Write one question for each of these beats, in this order: ${wanted.map((b) => b.id).join(", ")}.\n` +
         `One per line, in the form beat|question. Nothing else, no numbering, no blank lines.`,
       0.7,
@@ -691,7 +705,409 @@ export const generate = action({
   handler: async (ctx, a): Promise<{ at: number; kind: string; label: string; body: string; used: boolean }[]> => {
     mustBeJeremy(a.passphrase);
     const key = a.day && isDay(a.day) ? a.day : paris().day;
-    return await ctx.runAction(internal.x.make, { day: key });
+    const drafts = await ctx.runAction(internal.x.make, { day: key });
+    /* Off to the side: the button should not wait on the brain. */
+    await ctx.scheduler.runAfter(0, internal.x.digest, { day: key });
+    return drafts;
+  },
+});
+
+/* ── the brain ──────────────────────────────────────────────────────── */
+
+/**
+ * The brain of Jeremy, grown from the daily log.
+ *
+ * Same rules as the notes-and-syntheses brain it is modelled on. A day is
+ * read once, so the daily log is the source and is never edited. A position
+ * is rewritten each time a day touches it, never appended to. Evidence is
+ * dated, so a claim can always be traced to the day he said it.
+ */
+
+const MAX_CONCEPTS = 80;
+const MAX_EVIDENCE = 12;
+
+const slugify = (s: string) =>
+  s.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40);
+
+/** The model is asked for JSON and sometimes fences it. Take the object. */
+function parseJson(raw: string): any {
+  const t = unfence(raw);
+  const a = t.indexOf("{");
+  const b = t.lastIndexOf("}");
+  if (a < 0 || b < a) throw new Error("The model did not return anything readable");
+  return JSON.parse(t.slice(a, b + 1));
+}
+
+type Concept = Doc<"xBrain">;
+
+export const concepts = internalQuery({
+  args: {},
+  handler: async (ctx) => (await ctx.db.query("xBrain").collect()) as Concept[],
+});
+
+/** Days with something in them that the brain has not read yet, oldest first. */
+async function waitingDays(ctx: { db: any }) {
+  const days = (await ctx.db.query("xDays").withIndex("by_day").order("desc").take(120)) as DayDoc[];
+  return days
+    .filter((d) => {
+      if (!d.entries.length) return false;
+      const last = Math.max(...d.entries.map((e) => e.at));
+      return d.digestedAt == null || last > d.digestedAt;
+    })
+    .map((d) => d.day)
+    .sort();
+}
+
+export const waiting = internalQuery({
+  args: {},
+  handler: async (ctx) => await waitingDays(ctx),
+});
+
+/** The last few days that have anything in them, as fresh material. */
+export const recent = internalQuery({
+  args: { n: v.number() },
+  handler: async (ctx, { n }) => {
+    const days = (await ctx.db.query("xDays").withIndex("by_day").order("desc").take(30)) as DayDoc[];
+    return days
+      .filter((d) => d.entries.length)
+      .slice(0, n)
+      .map((d) => ({ day: d.day, entries: d.entries.map((e) => ({ q: e.q, text: e.text })) }));
+  },
+});
+
+/** The Brain screen. */
+export const brain = query({
+  args: { passphrase: v.string() },
+  handler: async (ctx, { passphrase }) => {
+    mustBeJeremy(passphrase);
+    const all = ((await ctx.db.query("xBrain").collect()) as Concept[]).sort((a, b) => b.updatedAt - a.updatedAt);
+    const seen = new Set<string>();
+    for (const c of all) for (const e of c.evidence) seen.add(e.day);
+    return {
+      concepts: all.map((c) => ({
+        slug: c.slug,
+        name: c.name,
+        position: c.position,
+        evidence: c.evidence,
+        conflict: c.conflict,
+        updatedAt: c.updatedAt,
+      })),
+      days: seen.size,
+      waiting: (await waitingDays(ctx)).length,
+    };
+  },
+});
+
+export const applyDigest = internalMutation({
+  args: {
+    day: v.string(),
+    updates: v.array(
+      v.object({
+        slug: v.string(),
+        name: v.string(),
+        position: v.string(),
+        evidence: v.string(),
+        conflict: v.optional(v.string()),
+      }),
+    ),
+  },
+  handler: async (ctx, { day, updates }) => {
+    const all = (await ctx.db.query("xBrain").collect()) as Concept[];
+
+    /* Strip this day's evidence everywhere first, so reading a day twice
+       replaces what it said instead of doubling it. */
+    for (const c of all) {
+      if (c.evidence.some((e) => e.day === day))
+        await ctx.db.patch(c._id, { evidence: c.evidence.filter((e) => e.day !== day) });
+    }
+    const bySlug = new Map(all.map((c) => [c.slug, c]));
+    let count = all.length;
+
+    for (const u of updates.slice(0, 6)) {
+      const slug = slugify(u.slug || u.name);
+      const position = u.position.trim().slice(0, 500);
+      const text = u.evidence.trim().slice(0, 300);
+      if (!slug || !position || !text) continue;
+      const ev = { day, text };
+      const conflict = u.conflict?.trim().slice(0, 240) || undefined;
+      const hit = bySlug.get(slug);
+
+      if (hit) {
+        const evidence = [...hit.evidence.filter((e) => e.day !== day), ev]
+          .sort((a, b) => a.day.localeCompare(b.day))
+          .slice(-MAX_EVIDENCE);
+        await ctx.db.patch(hit._id, {
+          name: u.name.trim().slice(0, 60) || hit.name,
+          position,
+          evidence,
+          conflict: conflict ?? hit.conflict,
+          updatedAt: Date.now(),
+        });
+      } else if (count < MAX_CONCEPTS) {
+        await ctx.db.insert("xBrain", {
+          slug,
+          name: u.name.trim().slice(0, 60) || slug,
+          position,
+          evidence: [ev],
+          conflict,
+          updatedAt: Date.now(),
+        });
+        count++;
+      }
+    }
+
+    /* A position with no evidence behind it is a claim nobody made. */
+    for (const c of (await ctx.db.query("xBrain").collect()) as Concept[])
+      if (!c.evidence.length) await ctx.db.delete(c._id);
+    return null;
+  },
+});
+
+export const markDigested = internalMutation({
+  args: { day: v.string() },
+  handler: async (ctx, { day }) => {
+    const d = await find(ctx, day);
+    if (d) await ctx.db.patch(d._id, { digestedAt: Date.now() });
+    return null;
+  },
+});
+
+/** Read one day into the brain. */
+export const digest = internalAction({
+  args: { day: v.string() },
+  handler: async (ctx, { day }): Promise<number> => {
+    const c = await ctx.runQuery(internal.x.context, { day });
+    const entries: { q?: string; text: string }[] = c.entries;
+    if (!entries.length) return 0;
+
+    const held: Concept[] = await ctx.runQuery(internal.x.concepts, {});
+    const index = held.length
+      ? held.map((h) => `- ${h.slug} | ${h.name} | ${h.position.slice(0, 300)}`).join("\n")
+      : "(the brain is empty, so every concept below is new)";
+
+    const raw = await ask(
+      DIGEST_SYSTEM,
+      `DATE: ${day}\n\nTHE BRAIN NOW (slug | name | position):\n${index}\n\n` +
+        `WHAT HE SAID THIS DAY:\n${transcriptOf(entries)}\n\nUpdate the brain.`,
+      0.3,
+      { note: false, max: 3000 },
+    );
+    const parsed = parseJson(raw);
+    const list = Array.isArray(parsed?.concepts) ? parsed.concepts : [];
+    const updates = list
+      .filter((u: any) => u && typeof u.position === "string" && typeof u.evidence === "string")
+      .map((u: any) => ({
+        slug: String(u.slug ?? u.name ?? ""),
+        name: String(u.name ?? u.slug ?? ""),
+        position: u.position,
+        evidence: u.evidence,
+        conflict: typeof u.conflict === "string" && u.conflict.trim() ? u.conflict : undefined,
+      }));
+    await ctx.runMutation(internal.x.applyDigest, { day, updates });
+    await ctx.runMutation(internal.x.markDigested, { day });
+    return updates.length;
+  },
+});
+
+/**
+ * The Feed the brain button: read every day it has not read, oldest first so
+ * a newer position overrides an older one. Five at a time, so one press stays
+ * well inside how long a request may take.
+ */
+export const feed = action({
+  args: { passphrase: v.string() },
+  handler: async (ctx, a): Promise<{ fed: number; failed: number; left: number; error?: string }> => {
+    mustBeJeremy(a.passphrase);
+    const todo: string[] = await ctx.runQuery(internal.x.waiting, {});
+    const batch = todo.slice(0, 5);
+    let fed = 0;
+    let failed = 0;
+    let error: string | undefined;
+    for (const day of batch) {
+      try {
+        await ctx.runAction(internal.x.digest, { day });
+        fed++;
+      } catch (e) {
+        failed++;
+        error = e instanceof Error ? e.message : String(e);
+        console.error("x: could not read a day into the brain", day, e);
+      }
+    }
+    return { fed, failed, left: Math.max(0, todo.length - fed), error };
+  },
+});
+
+export const settle = mutation({
+  args: { passphrase: v.string(), slug: v.string() },
+  handler: async (ctx, { passphrase, slug }) => {
+    mustBeJeremy(passphrase);
+    const c = await ctx.db.query("xBrain").withIndex("by_slug", (q: any) => q.eq("slug", slug)).unique();
+    if (c) await ctx.db.patch(c._id, { conflict: undefined });
+    return null;
+  },
+});
+
+export const dropConcept = mutation({
+  args: { passphrase: v.string(), slug: v.string() },
+  handler: async (ctx, { passphrase, slug }) => {
+    mustBeJeremy(passphrase);
+    const c = await ctx.db.query("xBrain").withIndex("by_slug", (q: any) => q.eq("slug", slug)).unique();
+    if (c) await ctx.db.delete(c._id);
+    return null;
+  },
+});
+
+/* ── video ideas ────────────────────────────────────────────────────── */
+
+export const putIdea = internalMutation({
+  args: {
+    idea: v.string(),
+    structure: v.string(),
+    script: v.string(),
+    concepts: v.array(v.string()),
+    gaps: v.array(v.string()),
+  },
+  handler: async (ctx, a) => {
+    const id = await ctx.db.insert("xIdeas", { ...a, createdAt: Date.now() });
+    return id;
+  },
+});
+
+/** Questions the brain could not answer land on today's feed, under "You". */
+export const addAsks = internalMutation({
+  args: { day: v.string(), questions: v.array(v.string()) },
+  handler: async (ctx, { day, questions }) => {
+    const old = await find(ctx, day);
+    const asks = old?.asks ?? [];
+    const have = new Set(asks.map((x) => x.text));
+    const fresh = questions
+      .filter((q) => !have.has(q))
+      .map((text) => ({ id: rid(), at: Date.now(), text: text.slice(0, 300), beat: "you", answered: false }));
+    if (fresh.length) await upsert(ctx, day, { asks: [...asks, ...fresh] });
+    return fresh.length;
+  },
+});
+
+const ideaOut = (d: Doc<"xIdeas">) => ({
+  id: d._id,
+  idea: d.idea,
+  structure: d.structure,
+  script: d.script,
+  concepts: d.concepts,
+  gaps: d.gaps,
+  used: !!d.used,
+  createdAt: d.createdAt,
+});
+
+export const ideas = query({
+  args: { passphrase: v.string() },
+  handler: async (ctx, { passphrase }) => {
+    mustBeJeremy(passphrase);
+    return (await ctx.db.query("xIdeas").order("desc").take(30)).map(ideaOut);
+  },
+});
+
+export const useIdea = mutation({
+  args: { passphrase: v.string(), id: v.id("xIdeas"), used: v.boolean() },
+  handler: async (ctx, { passphrase, id, used }) => {
+    mustBeJeremy(passphrase);
+    await ctx.db.patch(id, { used });
+    return null;
+  },
+});
+
+/**
+ * One idea in, two things out.
+ *
+ * It picks the concepts the idea needs, then writes a talking structure and a
+ * script in the daily vlog format from the same material, in parallel. What
+ * the brain could not answer comes back as questions and lands on today's feed,
+ * which is how a thin brain gets thicker.
+ */
+export const build = action({
+  args: { passphrase: v.string(), idea: v.string() },
+  handler: async (ctx, a): Promise<ReturnType<typeof ideaOut>> => {
+    mustBeJeremy(a.passphrase);
+    const idea = a.idea.trim().slice(0, 300);
+    if (!idea) throw new Error("Type the idea first");
+
+    const held: Concept[] = await ctx.runQuery(internal.x.concepts, {});
+    const days: { day: string; entries: { q?: string; text: string }[] }[] = await ctx.runQuery(internal.x.recent, { n: 3 });
+    if (!held.length && !days.length)
+      throw new Error("The brain is empty. Answer today's questions, or press Feed the brain.");
+
+    /* Which parts of the brain does this idea need? */
+    let picked: Concept[] = [];
+    if (held.length) {
+      const index = held.map((c) => `${c.slug} | ${c.name} | ${c.position.slice(0, 140)}`).join("\n");
+      const said = await ask(
+        "You pick which parts of a person's brain a video idea needs. You answer with slugs only.",
+        `IDEA: ${idea}\n\nCONCEPTS (slug | name | position):\n${index}\n\n` +
+          `Reply with up to 6 slugs that hold material for this idea, comma separated, most relevant first. ` +
+          `If none do, reply NONE.`,
+        0.2,
+        { note: false, max: 200 },
+      );
+      const want = said.toLowerCase().split(/[^a-z0-9-]+/).filter(Boolean);
+      picked = want
+        .map((w) => held.find((c) => c.slug === w))
+        .filter((c): c is Concept => !!c)
+        .filter((c, i, all) => all.indexOf(c) === i)
+        .slice(0, 6);
+    }
+
+    const material =
+      `IDEA: ${idea}\n\n` +
+      (picked.length
+        ? "WHAT HIS BRAIN HOLDS ON THIS:\n" +
+          picked
+            .map(
+              (c) =>
+                `## ${c.name}\nPosition: ${c.position}\n` +
+                c.evidence.slice(-6).map((e) => `- [${e.day}] ${e.text}`).join("\n") +
+                (c.conflict ? `\nOpen conflict: ${c.conflict}` : ""),
+            )
+            .join("\n\n")
+        : "WHAT HIS BRAIN HOLDS ON THIS: nothing yet.") +
+      (days.length
+        ? "\n\nRECENT DAYS (fresh material, use it only where it fits the idea):\n" +
+          days.map((d) => `[${d.day}]\n${transcriptOf(d.entries)}`).join("\n\n")
+        : "");
+
+    const [structure, script] = await Promise.all([
+      ask(TALK_SYSTEM, `${material}\n\nBuild the talking structure.`, 0.7, { note: false, max: 2500 }),
+      ask(
+        SCRIPT_SYSTEM,
+        `${material}\n\nWrite the 60 second script for this idea.\n\n` +
+          `This video is about the idea, not about today. Build the five lines from what his brain holds: ` +
+          `the Situation is where he stands on this idea, the Desire is what he wants from it, the Conflict is ` +
+          `what blocks it, the Change is the decision he took, and the Result is what is true now. The Change and ` +
+          `the Result carry his dated specifics. Only the Situation may lean on who Jeremy is. ` +
+          `Where the material is thin, write [X] and list what you needed at the end.`,
+        0.7,
+        { max: 2500 },
+      ),
+    ]);
+
+    /* The GAPS block becomes questions for tomorrow's feed. */
+    const gapBlock = structure.split(/^\s*GAPS\s*$/m)[1] ?? "";
+    const gaps = gapBlock
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l.startsWith("-"))
+      .map((l) => l.replace(/^-+\s*/, "").trim())
+      .filter((l) => l && !/^none\b/i.test(l))
+      .slice(0, 3);
+    if (gaps.length) await ctx.runMutation(internal.x.addAsks, { day: paris().day, questions: gaps });
+
+    const id = await ctx.runMutation(internal.x.putIdea, {
+      idea,
+      structure,
+      script,
+      concepts: picked.map((c) => c.name),
+      gaps,
+    });
+    return { id, idea, structure, script, concepts: picked.map((c) => c.name), gaps, used: false, createdAt: Date.now() };
   },
 });
 
@@ -903,6 +1319,7 @@ export const sendSlot = internalAction({
           console.error("x: could not write the drafts", e);
         }
       }
+      await ctx.scheduler.runAfter(0, internal.x.digest, { day });
     }
     const d = await ctx.runQuery(internal.x.dayFor, { day });
     const { subject, html, text } = mailBody(day, slot, d);

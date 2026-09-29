@@ -110,9 +110,11 @@ button, input, textarea, select { font: inherit; color: inherit; }
   }
   .rail .logo, .rail .foot { display: none; }
   .nav { flex-direction: row; justify-content: space-around; }
-  .nav button { font-size: 12px; flex-direction: column; gap: 4px; padding: 8px 10px; }
+  .nav button { font-size: 11px; flex-direction: column; gap: 4px; padding: 8px 4px; }
+  .nav svg { width: 22px; height: 22px; }
   .nav button span { display: block !important; }
   .col { border: 0; padding-bottom: 78px; }
+  .toast { bottom: 88px; }
 }
 
 /* ── composer ───────────────────────────────────────────────────────── */
@@ -141,7 +143,25 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .stage { padding: 26px 16px; border-bottom: 1px solid var(--line); }
 .stage .lead { color: var(--dim); margin: 0 0 18px; }
 .stage .rowbtns { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.stage .bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 12px 0 0; }
+.stage .bar .right { display: flex; gap: 8px; align-items: center; }
 .stage textarea, .stage .field { width: 100%; }
+.concept { border-bottom: 1px solid var(--line); }
+.concept summary { list-style: none; cursor: pointer; padding: 14px 16px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.concept summary::-webkit-details-marker { display: none; }
+.concept summary:hover { background: #08090a; }
+.concept summary b { font-weight: 700; font-size: 16px; }
+.concept .body { padding: 6px 16px 16px; }
+.concept .pos { margin: 0 0 12px; white-space: pre-wrap; }
+.concept ul { list-style: none; margin: 0 0 12px; padding: 0; }
+.concept li { color: var(--dim); font-size: 14px; padding: 5px 0; border-top: 1px solid var(--line); }
+.concept li .mono { margin-right: 8px; }
+.concept .conf { color: var(--bad); font-size: 14px; margin: 0 0 10px; }
+.concept .acts { display: flex; gap: 8px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0 0; }
+.chip { font: 500 11px/1 var(--mono); letter-spacing: .06em; color: var(--blue); border: 1px solid var(--line); border-radius: 9999px; padding: 5px 9px; }
+.pastidea { cursor: pointer; }
+.pastidea.on b { color: var(--blue); }
 .stage .field { margin: 0; border-radius: 14px; padding: 12px 14px; font-size: 15px; }
 .btn.big { font-size: 17px; padding: 15px 30px; }
 .thinking { display: flex; gap: 10px; align-items: center; color: var(--dim); }
@@ -228,6 +248,8 @@ button, input, textarea, select { font: inherit; color: inherit; }
     <div class="logo">𝕏</div>
     <div class="nav" id="nav">
       <button data-tab="today" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg><span>Today</span></button>
+      <button data-tab="ideas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg><span>Ideas</span></button>
+      <button data-tab="brain"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="7" r="2.2"/><circle cx="18" cy="7" r="2.2"/><circle cx="12" cy="17" r="2.2"/><path d="M8 8.2l3 7M16 8.2l-3 7M8.2 7h7.6"/></svg><span>Brain</span></button>
       <button data-tab="replies"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15a3 3 0 0 1-3 3H8l-4 3V6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3z"/></svg><span>X-Replies</span></button>
       <button data-tab="drafts"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.1 5.3L19.5 10l-5.4 1.7L12 17l-2.1-5.3L4.5 10l5.4-1.7z"/><path d="M18.5 15.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg><span>Drafts</span></button>
       <button data-tab="archive"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h7l2 2.5h9V19H3z"/><path d="M3 10h18"/></svg><span>Archive</span></button>
@@ -343,6 +365,47 @@ async function refresh() {
    card can grey itself out while the model reads the answer. */
 let busy = { fill: false, ask: null };
 let writing = false;
+/* Ideas and the brain load when their tab opens. */
+let ideas = null;          /* past video ideas, newest first */
+let ideaOpen = 0;          /* which one is on screen */
+let ideaBusy = false;
+let ideaText = "";
+let brainData = null;      /* { concepts, days, waiting } */
+let feeding = false;
+let sure = null;           /* slug waiting on a second click to be removed */
+const openC = new Set();   /* concepts left open, so a redraw does not fold them shut */
+
+async function loadIdeas() {
+  try { ideas = await call("x.ideas"); } catch (err) { toast(err.message); ideas = []; }
+  draw();
+}
+async function loadBrain() {
+  try { brainData = await call("x.brain"); } catch (err) { toast(err.message); brainData = { concepts: [], days: 0, waiting: 0 }; }
+  draw();
+}
+async function buildIdea() {
+  const text = ($("#ideaText")?.value || "").trim();
+  if (!text || ideaBusy) return;
+  ideaText = text; ideaBusy = true; draw();
+  try {
+    const made = await call("x.build", { idea: text });
+    ideas = [made, ...(ideas || [])]; ideaOpen = 0; ideaText = "";
+    state = await call("x.day");
+    if (made.gaps.length) toast(`${made.gaps.length} ${made.gaps.length === 1 ? "question" : "questions"} added to Today`);
+  } catch (err) { toast(err.message); }
+  ideaBusy = false; draw();
+}
+async function feedBrain() {
+  if (feeding) return;
+  feeding = true; draw();
+  try {
+    const r = await call("x.feed");
+    toast(r.failed && !r.fed ? r.error || "Could not read the days" : `${r.fed} ${r.fed === 1 ? "day" : "days"} read${r.left ? `, ${r.left} left` : ""}`);
+  } catch (err) { toast(err.message); }
+  feeding = false;
+  await loadBrain();
+}
+
 /* Replies are not stored: what is on screen is the whole of it. */
 let rep = { post: "", note: "", out: [], busy: false };
 
@@ -387,6 +450,8 @@ function draw() {
   const v = $("#view");
   if (tab === "today") { $("#title").textContent = "Today"; $("#sub").textContent = longDate(state.today); v.innerHTML = today(); }
   if (tab === "drafts") { $("#title").textContent = "Drafts"; $("#sub").textContent = state.draftsAt ? "written " + clock(state.draftsAt) : "not written yet"; v.innerHTML = drafts(state.drafts); }
+  if (tab === "ideas") { $("#title").textContent = "Ideas"; $("#sub").textContent = "a video from what you know"; v.innerHTML = ideasView(); }
+  if (tab === "brain") { $("#title").textContent = "Brain"; $("#sub").textContent = "what your days have taught it"; v.innerHTML = brainView(); }
   if (tab === "replies") { $("#title").textContent = "X-Replies"; $("#sub").textContent = "reply to almost everyone"; v.innerHTML = repliesView(); }
   if (tab === "archive") { $("#title").textContent = "Archive"; $("#sub").textContent = "every day logged"; v.innerHTML = archiveView(); }
   wire();
@@ -484,6 +549,78 @@ function drafts(list, readOnly = false) {
   }).join("");
 }
 
+function ideasView() {
+  const cur = ideas && ideas[ideaOpen];
+  const held = brainData ? brainData.concepts.length : null;
+  const box = `
+    <div class="stage">
+      <p class="lead">One line. It builds from your brain and your last three days.</p>
+      <input id="ideaText" class="field" placeholder="Why I stopped cold DMing" value="${esc(ideaText)}" ${ideaBusy ? "disabled" : ""}>
+      <div class="bar">
+        <span class="mono">${held == null ? "" : held + " concepts in your brain"}</span>
+        <button class="btn blue" id="ideaGo" ${ideaBusy ? "disabled" : ""}>${ideaBusy ? '<span class="spin"></span>' : "Build"}</button>
+      </div>
+    </div>`;
+  if (ideaBusy)
+    return box + `<div class="stage"><div class="thinking"><span class="spin"></span> Reading your brain, then writing two things…</div></div>`;
+  if (ideas == null) return box + `<p class="empty">Loading…</p>`;
+  if (!cur) return box + `<p class="empty">No ideas yet.<br>Type one above. You get a talking structure and a script in your daily vlog format.</p>`;
+
+  const card = (label, body, k) => `
+    <article class="draft">
+      <div class="head"><span class="label">${label}</span><span class="count">${[...body].length} chars</span></div>
+      <pre>${esc(body)}</pre>
+      <div class="tools"><button class="btn sm ideacopy" data-k="${k}">Copy</button></div>
+    </article>`;
+
+  return box + `
+    <div class="row">
+      <div class="meta"><b style="font-size:17px">${esc(cur.idea)}</b>
+        <button class="tick sm ideamark" aria-pressed="${!!cur.used}" aria-label="Mark filmed" style="margin-left:auto">✓</button>
+      </div>
+      <div class="chips">${cur.concepts.length
+        ? cur.concepts.map((c) => `<span class="chip">${esc(c)}</span>`).join("")
+        : `<span class="mono">built from your recent days only</span>`}</div>
+    </div>
+    ${card("Talking structure", cur.structure, "structure")}
+    ${card("60s vlog script", cur.script, "script")}
+    ${cur.gaps.length ? `<div class="row"><p class="mono" style="margin:0 0 8px">Added to today's questions</p>${cur.gaps.map((g) => `<p style="margin:0 0 6px">${esc(g)}</p>`).join("")}</div>` : ""}
+    ${ideas.length > 1 ? `<div class="row"><p class="mono" style="margin:0 0 10px">Earlier ideas</p>${ideas.map((d, i) => i === ideaOpen ? "" : `<p class="pastidea" data-i="${i}" style="margin:0 0 8px">${esc(d.idea)} <span class="mono">${d.used ? "filmed" : ""}</span></p>`).join("")}</div>` : ""}`;
+}
+
+function brainView() {
+  if (!brainData) return `<p class="empty">Loading…</p>`;
+  const { concepts, days, waiting } = brainData;
+  const top = `
+    <div class="stage">
+      <p class="lead">${concepts.length
+        ? `${concepts.length} ${concepts.length === 1 ? "concept" : "concepts"} from ${days} ${days === 1 ? "day" : "days"}.`
+        : "The brain is empty. It fills from your daily answers."}</p>
+      ${feeding
+        ? `<div class="thinking"><span class="spin"></span> Reading your days…</div>`
+        : waiting
+          ? `<button class="btn blue" id="feedBrain">Feed the brain · ${waiting} ${waiting === 1 ? "day" : "days"} waiting</button>`
+          : `<span class="mono">every day is read</span>`}
+    </div>`;
+  if (!concepts.length) return top;
+  return top + concepts.map((c) => `
+    <details class="concept" data-slug="${esc(c.slug)}" ${openC.has(c.slug) ? "open" : ""}>
+      <summary><b>${esc(c.name)}</b>
+        <span class="mono">${c.evidence.length} ${c.evidence.length === 1 ? "proof" : "proofs"} · ${esc(c.evidence[c.evidence.length - 1]?.day || "")}</span>
+        ${c.conflict ? `<span class="mono" style="color:var(--bad)">conflict</span>` : ""}
+      </summary>
+      <div class="body">
+        <p class="pos">${esc(c.position)}</p>
+        ${c.conflict ? `<p class="conf">${esc(c.conflict)}</p>` : ""}
+        <ul>${[...c.evidence].reverse().map((e) => `<li><span class="mono">${esc(e.day)}</span>${esc(e.text)}</li>`).join("")}</ul>
+        <div class="acts">
+          ${c.conflict ? `<button class="btn ghost sm settle" data-slug="${esc(c.slug)}">Settled</button>` : ""}
+          <button class="btn ghost sm dropc" data-slug="${esc(c.slug)}">${sure === c.slug ? "Sure?" : "Remove"}</button>
+        </div>
+      </div>
+    </details>`).join("");
+}
+
 function repliesView() {
   return `
     <div class="stage">
@@ -568,6 +705,41 @@ function wire() {
 
   $("#fill")?.addEventListener("click", fillFeed);
 
+  if ($("#ideaText")) {
+    const el = $("#ideaText");
+    el.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); buildIdea(); } });
+    $("#ideaGo").addEventListener("click", buildIdea);
+    if (!ideaBusy && !(ideas && ideas.length)) el.focus();
+    v.querySelectorAll(".ideacopy").forEach((b) =>
+      b.addEventListener("click", async () => {
+        try { await navigator.clipboard.writeText(ideas[ideaOpen][b.dataset.k]); toast("Copied"); }
+        catch { toast("Select it and copy by hand"); }
+      }));
+    v.querySelectorAll(".pastidea").forEach((p) =>
+      p.addEventListener("click", () => { ideaOpen = Number(p.dataset.i); draw(); }));
+    $(".ideamark")?.addEventListener("click", async () => {
+      const cur = ideas[ideaOpen];
+      try { await call("x.useIdea", { id: cur.id, used: !cur.used }); cur.used = !cur.used; draw(); }
+      catch (err) { toast(err.message); }
+    });
+  }
+
+  $("#feedBrain")?.addEventListener("click", feedBrain);
+  v.querySelectorAll("details.concept").forEach((d) =>
+    d.addEventListener("toggle", () => { d.open ? openC.add(d.dataset.slug) : openC.delete(d.dataset.slug); }));
+  v.querySelectorAll(".settle").forEach((b) =>
+    b.addEventListener("click", async () => {
+      try { await call("x.settle", { slug: b.dataset.slug }); await loadBrain(); }
+      catch (err) { toast(err.message); }
+    }));
+  v.querySelectorAll(".dropc").forEach((b) =>
+    b.addEventListener("click", async () => {
+      if (sure !== b.dataset.slug) { sure = b.dataset.slug; b.textContent = "Sure?"; return; }
+      sure = null;
+      try { await call("x.dropConcept", { slug: b.dataset.slug }); await loadBrain(); }
+      catch (err) { toast(err.message); }
+    }));
+
   if ($("#repPost")) {
     grow($("#repPost"), makeReplies, !rep.out.length && !rep.busy);
     $("#repGo").addEventListener("click", makeReplies);
@@ -639,6 +811,8 @@ $("#nav").addEventListener("click", async (e) => {
   tab = b.dataset.tab;
   open_ = null;
   draw();
+  if (tab === "ideas") { if (!brainData) loadBrain(); if (!ideas) loadIdeas(); }
+  if (tab === "brain") loadBrain();
   if (tab === "archive" && !archive) {
     try { archive = await call("x.history", { limit: 60 }); draw(); }
     catch (err) { toast(err.message); }
