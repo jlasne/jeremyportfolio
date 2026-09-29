@@ -1,4 +1,5 @@
 import {
+  type ActionCtx,
   action,
   internalAction,
   internalMutation,
@@ -19,6 +20,8 @@ import {
   SLOTS,
   SLOT_TITLE,
   INTERVIEW_SYSTEM,
+  DIGEST_SYSTEM,
+  TALK_SYSTEM,
   BEATS,
   READY_AT,
   DIG_NOTE,
@@ -41,11 +44,14 @@ import {
 
 const MAX_ENTRY = 4000;
 const MAX_ENTRIES = 200;
-const KEEP_DRAFT_DAYS = 3; /* how much recent work the model is shown */
+const KEEP_DRAFT_DAYS = 5; /* how much recent work the model is shown */
 /* One nudge, at 20:00, three hours after the drafts land, and only while
    none of them has been ticked off. One mail that gets read beats six that
    get filtered. */
 const NUDGE_AT = 20;
+/* Whatever the day left unread goes into the brain at 23:00, so it is fed
+   daily whether or not the day was ever written. */
+const DIGEST_AT = 23;
 
 /* ── the door ───────────────────────────────────────────────────────── */
 
@@ -150,7 +156,11 @@ export const history = query({
   handler: async (ctx, { passphrase, limit }) => {
     mustBeJeremy(passphrase);
     const n = Math.min(Math.max(limit ?? 30, 1), 120);
-    const days = await ctx.db.query("xDays").withIndex("by_day").order("desc").take(n);
+    /* A day exists the moment a mail is marked sent or /bio is ticked, so
+       many are empty. The archive is for days with something in them. */
+    const days = (await ctx.db.query("xDays").withIndex("by_day").order("desc").take(n * 3))
+      .filter((d) => d.entries.length > 0 || d.drafts.length > 0)
+      .slice(0, n);
     return days.map((d) => ({
       day: d.day,
       bioDone: d.bioDone,
@@ -286,6 +296,7 @@ export const context = internalQuery({
           posts: d.drafts
             .filter((x) => x.kind === "post")
             .map((x) => ({ label: x.label, body: x.body })),
+          script: d.drafts.find((x) => x.kind === "script")?.body ?? "",
         })),
     };
   },
@@ -327,7 +338,7 @@ export const dayFor = internalQuery({
 
 function brief(c: {
   entries: { at: number; slot: string; q?: string; text: string }[];
-  previous: { day: string; posts: { label: string; body: string }[] }[];
+  previous: { day: string; posts: { label: string; body: string }[]; script?: string }[];
 }, day: string) {
   const when = (at: number) => {
     const d = new Date(at + parisOffset(at) * 3_600_000);
@@ -365,7 +376,12 @@ function brief(c: {
    Override with X_MODEL to try another. */
 const MODEL = () => process.env.X_MODEL || "deepseek/deepseek-v4-flash";
 
-async function ask(system: string, user: string, temperature = 0.8): Promise<string> {
+async function ask(
+  system: string,
+  user: string,
+  temperature = 0.8,
+  opts: { note?: boolean; max?: number } = {},
+): Promise<string> {
   const key = process.env.OPENROUTER_API_KEY;
   if (!key) throw new Error("Set OPENROUTER_API_KEY in the Convex dashboard first");
   const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -379,9 +395,9 @@ async function ask(system: string, user: string, temperature = 0.8): Promise<str
     body: JSON.stringify({
       model: MODEL(),
       temperature,
-      max_tokens: 2000,
+      max_tokens: opts.max ?? 2000,
       messages: [
-        { role: "system", content: system + "\n\n" + RUN_NOTE },
+        { role: "system", content: opts.note === false ? system : system + "\n\n" + RUN_NOTE },
         { role: "user", content: user },
       ],
     }),
@@ -391,6 +407,22 @@ async function ask(system: string, user: string, temperature = 0.8): Promise<str
   const text = body?.choices?.[0]?.message?.content;
   if (typeof text !== "string" || !text.trim()) throw new Error("OpenRouter returned nothing");
   return text.trim();
+}
+
+/**
+ * The Situation lines of the scripts already written.
+ *
+ * A script opens on the same line every day unless it is shown the last few,
+ * and the fix for "I'm in Cork" every video is to say what the earlier ones
+ * said and ask for different. Best effort: the script is free text, so the
+ * line is found by its label and anything that does not parse is skipped.
+ */
+function situationOf(script: string): string {
+  for (const m of script.matchAll(/Situation\W*([\s\S]*?)\W*Desire/gi)) {
+    const line = m[1].replace(/\s+/g, " ").trim();
+    if (line.length > 15) return line.slice(0, 220);
+  }
+  return "";
 }
 
 /**
@@ -479,14 +511,22 @@ export const make = internalAction({
       }),
     );
 
+    const opened = (c.previous as { script?: string }[]).map((p) => situationOf(p.script ?? "")).filter(Boolean);
     const script = await ask(
       SCRIPT_SYSTEM,
       `${b}\n\nWrite the 60 second script from this log.\n\n` +
-        `Build the five lines out of today: the Situation is where he was today, the Desire is what he ` +
-        `wanted from it, the Conflict is what blocked it, the Change is the decision he took today, and ` +
-        `the Result is what is true tonight that was not true this morning. The Change and the Result are ` +
-        `what stops every video sounding like the last one, so they carry today's specifics and today's ` +
-        `numbers. Only the Situation may lean on who Jeremy is, and one line of it is enough.`,
+        `Build the five lines out of today. The Situation says he is 25, then where he is right now and ` +
+        `what he is doing, taken from the log: a desk, a train, a gym, a call, a beach. It is today's, so ` +
+        `it is different every day. Do not name his city or country unless the log says he is somewhere new ` +
+        `or unusual today, and never open with "I'm in" and a place. The Desire is what he wanted from ` +
+        `today, the Conflict is what blocked it, the Change is the decision he took today, and the Result ` +
+        `is what is true tonight that was not true this morning. The Change and the Result are what stops ` +
+        `every video sounding like the last one, so they carry today's specifics and today's numbers. ` +
+        `Only the Situation may lean on who Jeremy is, and one to two lines of it is enough.` +
+        (opened.length
+          ? `\n\nSITUATION LINES ALREADY USED IN EARLIER VIDEOS. Open differently: other words, ` +
+            `another place or another activity.\n` + opened.map((o: string) => `- ${o}`).join("\n")
+          : ""),
     );
 
     const at = Date.now();
@@ -520,6 +560,7 @@ export const putAsks = internalMutation({
         beat: v.string(),
         answered: v.boolean(),
         from: v.optional(v.string()),
+        concept: v.optional(v.string()),
       }),
     ),
   },
@@ -548,6 +589,8 @@ export const fill = action({
   handler: async (ctx, a): Promise<unknown> => {
     mustBeJeremy(a.passphrase);
     const key = a.day && isDay(a.day) ? a.day : paris().day;
+    /* A contradiction the brain is still holding is the first question. */
+    await ctx.runMutation(internal.x.queueConflicts, { day: key });
     const d = await ctx.runQuery(internal.x.dayFor, { day: key });
     const c = await ctx.runQuery(internal.x.context, { day: key });
     const asks: NonNullable<DayDoc["asks"]> = d.asks ?? [];
@@ -557,9 +600,16 @@ export const fill = action({
     const wanted = BEATS.filter((b) => !open.has(b.id) && !done.has(b.id));
     if (!wanted.length) return await ctx.runQuery(internal.x.dayFor, { day: key });
 
+    const held = await ctx.runQuery(internal.x.concepts, {});
+    const brainNote = held.length
+      ? "WHAT HIS BRAIN ALREADY HOLDS (for the 'you' beat: ask where it is thin, never where it is full):\n" +
+        held.map((h: { name: string; position: string; evidence: unknown[] }) =>
+          `- ${h.name} (${h.evidence.length} pieces of evidence): ${h.position.slice(0, 110)}`).join("\n")
+      : "HIS BRAIN IS EMPTY. For the 'you' beat, ask about who he is: a belief, a method, or a mistake this day touched.";
+
     const said = await ask(
       INTERVIEW_SYSTEM,
-      `DATE: ${key}\n\nTHE DAY SO FAR:\n${transcriptOf(c.entries)}\n\n` +
+      `DATE: ${key}\n\nTHE DAY SO FAR:\n${transcriptOf(c.entries)}\n\n${brainNote}\n\n` +
         `Write one question for each of these beats, in this order: ${wanted.map((b) => b.id).join(", ")}.\n` +
         `One per line, in the form beat|question. Nothing else, no numbering, no blank lines.`,
       0.7,
@@ -631,6 +681,9 @@ export const reply = action({
     }
 
     await ctx.runMutation(internal.x.putAsks, { day: a.day, asks: next });
+    /* An answer to a settling question is read at once, so the position is
+       rewritten now and not at 23:00. */
+    if (target.concept) await ctx.scheduler.runAfter(0, internal.x.digest, { day: a.day });
     return await ctx.runQuery(internal.x.dayFor, { day: a.day });
   },
 });
@@ -687,7 +740,417 @@ export const generate = action({
   handler: async (ctx, a): Promise<{ at: number; kind: string; label: string; body: string; used: boolean }[]> => {
     mustBeJeremy(a.passphrase);
     const key = a.day && isDay(a.day) ? a.day : paris().day;
-    return await ctx.runAction(internal.x.make, { day: key });
+    const drafts = await ctx.runAction(internal.x.make, { day: key });
+    /* Off to the side: the button should not wait on the brain. */
+    await ctx.scheduler.runAfter(0, internal.x.digest, { day: key });
+    return drafts;
+  },
+});
+
+/* ── the brain ──────────────────────────────────────────────────────── */
+
+/**
+ * The brain of Jeremy, grown from the daily log.
+ *
+ * Same rules as the notes-and-syntheses brain it is modelled on. A day is
+ * read once, so the daily log is the source and is never edited. A position
+ * is rewritten each time a day touches it, never appended to. Evidence is
+ * dated, so a claim can always be traced to the day he said it.
+ */
+
+const MAX_CONCEPTS = 80;
+const MAX_EVIDENCE = 12;
+
+const slugify = (s: string) =>
+  s.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40);
+
+/** The model is asked for JSON and sometimes fences it. Take the object. */
+function parseJson(raw: string): any {
+  const t = unfence(raw);
+  const a = t.indexOf("{");
+  const b = t.lastIndexOf("}");
+  if (a < 0 || b < a) throw new Error("The model did not return anything readable");
+  return JSON.parse(t.slice(a, b + 1));
+}
+
+type Concept = Doc<"xBrain">;
+
+export const concepts = internalQuery({
+  args: {},
+  handler: async (ctx) => (await ctx.db.query("xBrain").collect()) as Concept[],
+});
+
+/** Days with something in them that the brain has not read yet, oldest first. */
+async function waitingDays(ctx: { db: any }) {
+  const days = (await ctx.db.query("xDays").withIndex("by_day").order("desc").take(120)) as DayDoc[];
+  return days
+    .filter((d) => {
+      if (!d.entries.length) return false;
+      const last = Math.max(...d.entries.map((e) => e.at));
+      return d.digestedAt == null || last > d.digestedAt;
+    })
+    .map((d) => d.day)
+    .sort();
+}
+
+export const waiting = internalQuery({
+  args: {},
+  handler: async (ctx) => await waitingDays(ctx),
+});
+
+export const applyDigest = internalMutation({
+  args: {
+    day: v.string(),
+    updates: v.array(
+      v.object({
+        slug: v.string(),
+        name: v.string(),
+        position: v.string(),
+        evidence: v.string(),
+        conflict: v.optional(v.string()),
+        question: v.optional(v.string()),
+        settled: v.optional(v.boolean()),
+      }),
+    ),
+  },
+  handler: async (ctx, { day, updates }) => {
+    const all = (await ctx.db.query("xBrain").collect()) as Concept[];
+
+    /* Strip this day's evidence everywhere first, so reading a day twice
+       replaces what it said instead of doubling it. */
+    for (const c of all) {
+      if (c.evidence.some((e) => e.day === day))
+        await ctx.db.patch(c._id, { evidence: c.evidence.filter((e) => e.day !== day) });
+    }
+    const bySlug = new Map(all.map((c) => [c.slug, c]));
+    let count = all.length;
+
+    for (const u of updates.slice(0, 6)) {
+      const slug = slugify(u.slug || u.name);
+      const position = u.position.trim().slice(0, 500);
+      const text = u.evidence.trim().slice(0, 300);
+      if (!slug || !position || !text) continue;
+      const ev = { day, text };
+      const hit = bySlug.get(slug);
+
+      /* A contradiction becomes a question, and stays one until an answer
+         settles it. Nothing is asked twice: a conflict already open is kept
+         as it is unless a new one replaces it. */
+      const said = u.conflict?.trim().slice(0, 240) || undefined;
+      const conflict = u.settled === true ? undefined : said ?? hit?.conflict;
+      const conflictQ =
+        u.settled === true
+          ? undefined
+          : said
+            ? (u.question?.trim() || `${said} Which is true now, and why?`).slice(0, 300)
+            : hit?.conflictQ;
+
+      if (hit) {
+        const evidence = [...hit.evidence.filter((e) => e.day !== day), ev]
+          .sort((a, b) => a.day.localeCompare(b.day))
+          .slice(-MAX_EVIDENCE);
+        await ctx.db.patch(hit._id, {
+          name: u.name.trim().slice(0, 60) || hit.name,
+          position,
+          evidence,
+          conflict,
+          conflictQ,
+          updatedAt: Date.now(),
+        });
+      } else if (count < MAX_CONCEPTS) {
+        await ctx.db.insert("xBrain", {
+          slug,
+          name: u.name.trim().slice(0, 60) || slug,
+          position,
+          evidence: [ev],
+          conflict: said,
+          conflictQ: said ? (u.question?.trim() || `${said} Which is true now, and why?`).slice(0, 300) : undefined,
+          updatedAt: Date.now(),
+        });
+        count++;
+      }
+    }
+
+    /* A position with no evidence behind it is a claim nobody made. */
+    for (const c of (await ctx.db.query("xBrain").collect()) as Concept[])
+      if (!c.evidence.length) await ctx.db.delete(c._id);
+    return null;
+  },
+});
+
+/**
+ * A contradiction in the brain is settled by asking, not by a screen.
+ *
+ * Every concept holding an open conflict gets its question onto the day's
+ * feed under Why, at most two a day so a bad week does not bury the real
+ * questions. It is idempotent, so it can run after every digest and every
+ * time a feed is filled, and a question is never put on a day twice. It
+ * comes back every day until an answer settles it.
+ */
+export const queueConflicts = internalMutation({
+  args: { day: v.string() },
+  handler: async (ctx, { day }) => {
+    const open = ((await ctx.db.query("xBrain").collect()) as Concept[]).filter((c) => c.conflictQ);
+    if (!open.length) return 0;
+    const old = await find(ctx, day);
+    const asks = old?.asks ?? [];
+    const on = new Set(asks.filter((x) => x.concept).map((x) => x.concept));
+    const room = Math.max(0, 2 - on.size);
+    const fresh = open
+      .filter((c) => !on.has(c.slug))
+      .slice(0, room)
+      .map((c) => ({ id: rid(), at: Date.now(), text: c.conflictQ as string, beat: "you", answered: false, concept: c.slug }));
+    if (fresh.length) await upsert(ctx, day, { asks: [...asks, ...fresh] });
+    return fresh.length;
+  },
+});
+
+export const markDigested = internalMutation({
+  args: { day: v.string() },
+  handler: async (ctx, { day }) => {
+    const d = await find(ctx, day);
+    if (d) await ctx.db.patch(d._id, { digestedAt: Date.now() });
+    return null;
+  },
+});
+
+/** Read one day into the brain. */
+export const digest = internalAction({
+  args: { day: v.string() },
+  handler: async (ctx, { day }): Promise<number> => {
+    const c = await ctx.runQuery(internal.x.context, { day });
+    const entries: { q?: string; text: string }[] = c.entries;
+    if (!entries.length) return 0;
+
+    const held: Concept[] = await ctx.runQuery(internal.x.concepts, {});
+    const index = held.length
+      ? held.map((h) => `- ${h.slug} | ${h.name} | ${h.position.slice(0, 300)}`).join("\n")
+      : "(the brain is empty, so every concept below is new)";
+    const opened = held.filter((h) => h.conflictQ);
+    const conflicts = opened.length
+      ? `\n\nOPEN CONFLICTS (slug | the question he was asked):\n` + opened.map((h) => `- ${h.slug} | ${h.conflictQ}`).join("\n")
+      : "";
+
+    const raw = await ask(
+      DIGEST_SYSTEM,
+      `DATE: ${day}\n\nTHE BRAIN NOW (slug | name | position):\n${index}${conflicts}\n\n` +
+        `WHAT HE SAID THIS DAY:\n${transcriptOf(entries)}\n\nUpdate the brain.`,
+      0.3,
+      { note: false, max: 3000 },
+    );
+    const parsed = parseJson(raw);
+    const list = Array.isArray(parsed?.concepts) ? parsed.concepts : [];
+    const updates = list
+      .filter((u: any) => u && typeof u.position === "string" && typeof u.evidence === "string")
+      .map((u: any) => ({
+        slug: String(u.slug ?? u.name ?? ""),
+        name: String(u.name ?? u.slug ?? ""),
+        position: u.position,
+        evidence: u.evidence,
+        conflict: typeof u.conflict === "string" && u.conflict.trim() ? u.conflict : undefined,
+        question: typeof u.question === "string" && u.question.trim() ? u.question : undefined,
+        settled: u.settled === true ? true : undefined,
+      }));
+    await ctx.runMutation(internal.x.applyDigest, { day, updates });
+    await ctx.runMutation(internal.x.markDigested, { day });
+    /* Whatever this day left contradictory is asked about on today's feed. */
+    await ctx.runMutation(internal.x.queueConflicts, { day: paris().day });
+    return updates.length;
+  },
+});
+
+/**
+ * Read every day the brain has not read, oldest first so a newer position
+ * overrides an older one. Five at a time, so one run stays well inside how
+ * long a request may take.
+ */
+async function readWaiting(ctx: ActionCtx) {
+  const todo: string[] = await ctx.runQuery(internal.x.waiting, {});
+  let fed = 0;
+  let failed = 0;
+  let error: string | undefined;
+  for (const day of todo.slice(0, 5)) {
+    try {
+      await ctx.runAction(internal.x.digest, { day });
+      fed++;
+    } catch (e) {
+      failed++;
+      error = e instanceof Error ? e.message : String(e);
+      console.error("x: could not read a day into the brain", day, e);
+    }
+  }
+  return { fed, failed, left: Math.max(0, todo.length - fed), error };
+}
+
+/** The page calls this on its own when it opens with days waiting. */
+export const feed = action({
+  args: { passphrase: v.string() },
+  handler: async (ctx, a): Promise<{ fed: number; failed: number; left: number; error?: string }> => {
+    mustBeJeremy(a.passphrase);
+    return await readWaiting(ctx);
+  },
+});
+
+/** The night run: whatever the day left unread goes in at 23:00. */
+export const catchUp = internalAction({
+  args: {},
+  handler: async (ctx) => {
+    await readWaiting(ctx);
+    return null;
+  },
+});
+
+/* ── video ideas ────────────────────────────────────────────────────── */
+
+export const putIdea = internalMutation({
+  args: {
+    idea: v.string(),
+    structure: v.string(),
+    script: v.string(),
+    concepts: v.array(v.string()),
+    gaps: v.array(v.string()),
+  },
+  handler: async (ctx, a) => {
+    const id = await ctx.db.insert("xIdeas", { ...a, createdAt: Date.now() });
+    return id;
+  },
+});
+
+/** Questions the brain could not answer land on today's feed, under "You". */
+export const addAsks = internalMutation({
+  args: { day: v.string(), questions: v.array(v.string()) },
+  handler: async (ctx, { day, questions }) => {
+    const old = await find(ctx, day);
+    const asks = old?.asks ?? [];
+    const have = new Set(asks.map((x) => x.text));
+    const fresh = questions
+      .filter((q) => !have.has(q))
+      .map((text) => ({ id: rid(), at: Date.now(), text: text.slice(0, 300), beat: "you", answered: false }));
+    if (fresh.length) await upsert(ctx, day, { asks: [...asks, ...fresh] });
+    return fresh.length;
+  },
+});
+
+const ideaOut = (d: Doc<"xIdeas">) => ({
+  id: d._id,
+  idea: d.idea,
+  structure: d.structure,
+  script: d.script,
+  concepts: d.concepts,
+  gaps: d.gaps,
+  used: !!d.used,
+  createdAt: d.createdAt,
+});
+
+export const ideas = query({
+  args: { passphrase: v.string() },
+  handler: async (ctx, { passphrase }) => {
+    mustBeJeremy(passphrase);
+    return {
+      list: (await ctx.db.query("xIdeas").order("desc").take(30)).map(ideaOut),
+      concepts: (await ctx.db.query("xBrain").collect()).length,
+    };
+  },
+});
+
+export const useIdea = mutation({
+  args: { passphrase: v.string(), id: v.id("xIdeas"), used: v.boolean() },
+  handler: async (ctx, { passphrase, id, used }) => {
+    mustBeJeremy(passphrase);
+    await ctx.db.patch(id, { used });
+    return null;
+  },
+});
+
+/**
+ * One idea in, two things out.
+ *
+ * It picks the concepts the idea needs, then writes a talking structure and a
+ * script in the daily vlog format from the same material, in parallel. The
+ * material is the brain and nothing else: the daily log reaches it only by
+ * being read in. What the brain could not answer comes back as questions and
+ * lands on today's feed, which is how a thin brain gets thicker.
+ */
+export const build = action({
+  args: { passphrase: v.string(), idea: v.string() },
+  handler: async (ctx, a): Promise<ReturnType<typeof ideaOut>> => {
+    mustBeJeremy(a.passphrase);
+    const idea = a.idea.trim().slice(0, 300);
+    if (!idea) throw new Error("Type the idea first");
+
+    const held: Concept[] = await ctx.runQuery(internal.x.concepts, {});
+    if (!held.length)
+      throw new Error("The brain is empty. It fills from your daily answers.");
+
+    /* Which parts of the brain does this idea need? */
+    let picked: Concept[] = [];
+    {
+      const index = held.map((c) => `${c.slug} | ${c.name} | ${c.position.slice(0, 140)}`).join("\n");
+      const said = await ask(
+        "You pick which parts of a person's brain a video idea needs. You answer with slugs only.",
+        `IDEA: ${idea}\n\nCONCEPTS (slug | name | position):\n${index}\n\n` +
+          `Reply with up to 6 slugs that hold material for this idea, comma separated, most relevant first. ` +
+          `If none do, reply NONE.`,
+        0.2,
+        { note: false, max: 200 },
+      );
+      const want = said.toLowerCase().split(/[^a-z0-9-]+/).filter(Boolean);
+      picked = want
+        .map((w) => held.find((c) => c.slug === w))
+        .filter((c): c is Concept => !!c)
+        .filter((c, i, all) => all.indexOf(c) === i)
+        .slice(0, 6);
+    }
+
+    const material =
+      `IDEA: ${idea}\n\n` +
+      (picked.length
+        ? "WHAT HIS BRAIN HOLDS ON THIS:\n" +
+          picked
+            .map(
+              (c) =>
+                `## ${c.name}\nPosition: ${c.position}\n` +
+                c.evidence.slice(-6).map((e) => `- [${e.day}] ${e.text}`).join("\n") +
+                (c.conflict ? `\nOpen conflict: ${c.conflict}` : ""),
+            )
+            .join("\n\n")
+        : "WHAT HIS BRAIN HOLDS ON THIS: nothing yet. Every beat is a GAP.");
+
+    const [structure, script] = await Promise.all([
+      ask(TALK_SYSTEM, `${material}\n\nBuild the talking structure.`, 0.7, { note: false, max: 2500 }),
+      ask(
+        SCRIPT_SYSTEM,
+        `${material}\n\nWrite the 60 second script for this idea.\n\n` +
+          `This video is about the idea, not about today. Build the five lines from what his brain holds: ` +
+          `the Situation says he is 25 and where he stands on this idea, the Desire is what he wants from it, ` +
+          `the Conflict is what blocks it, the Change is the decision he took, and the Result is what is true ` +
+          `now. Name no city or country. The Change and the Result carry his dated specifics. Only the ` +
+          `Situation may lean on who Jeremy is. ` +
+          `Where the material is thin, write [X] and list what you needed at the end.`,
+        0.7,
+        { max: 2500 },
+      ),
+    ]);
+
+    /* The GAPS block becomes questions for tomorrow's feed. */
+    const gapBlock = structure.split(/^\s*GAPS\s*$/m)[1] ?? "";
+    const gaps = gapBlock
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l.startsWith("-"))
+      .map((l) => l.replace(/^-+\s*/, "").trim())
+      .filter((l) => l && !/^none\b/i.test(l))
+      .slice(0, 3);
+    if (gaps.length) await ctx.runMutation(internal.x.addAsks, { day: paris().day, questions: gaps });
+
+    const id = await ctx.runMutation(internal.x.putIdea, {
+      idea,
+      structure,
+      script,
+      concepts: picked.map((c) => c.name),
+      gaps,
+    });
+    return { id, idea, structure, script, concepts: picked.map((c) => c.name), gaps, used: false, createdAt: Date.now() };
   },
 });
 
@@ -888,12 +1351,18 @@ async function resend(subject: string, html: string, text: string) {
 export const sendSlot = internalAction({
   args: { day: v.string(), slot: v.string(), mark: v.optional(v.boolean()) },
   handler: async (ctx, { day, slot, mark }) => {
+    /* Write the day at 17:00, but never over drafts that already exist:
+       writing replaces the set, and with it every used tick. */
     if (slot === "17") {
-      try {
-        await ctx.runAction(internal.x.make, { day });
-      } catch (e) {
-        console.error("x: could not write the drafts", e);
+      const before = await ctx.runQuery(internal.x.dayFor, { day });
+      if (!before.drafts.length) {
+        try {
+          await ctx.runAction(internal.x.make, { day });
+        } catch (e) {
+          console.error("x: could not write the drafts", e);
+        }
       }
+      await ctx.scheduler.runAfter(0, internal.x.digest, { day });
     }
     const d = await ctx.runQuery(internal.x.dayFor, { day });
     const { subject, html, text } = mailBody(day, slot, d);
@@ -917,6 +1386,11 @@ export const tick = internalAction({
 
     if (SLOTS.includes(slot as any)) {
       if (!d.mailed.includes(slot)) await ctx.runAction(internal.x.sendSlot, { day, slot });
+      return null;
+    }
+
+    if (hour === DIGEST_AT) {
+      await ctx.runAction(internal.x.catchUp, {});
       return null;
     }
 

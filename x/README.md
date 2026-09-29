@@ -53,6 +53,7 @@ the day. **More questions** tops the feed back up at any point.
 | Result | what is true now that was not this morning, with numbers |
 | The day | where you went, who you saw, what happened outside the work |
 | Lesson | what a founder one month behind you could use |
+| Why | why you do it that way, or the belief behind it. Feeds the brain |
 
 The first five are the five lines of the video script, named the way the
 script names them, and each card prints what its beat feeds. Change and
@@ -67,23 +68,78 @@ worth saving.
 Nothing about the conversation lives outside the day: each answer carries
 the question that produced it, and the feed is a list on the same document.
 
+## The brain
+
+The daily log answers today. The brain is what the days add up to.
+
+It is modelled on the notes-and-syntheses brain in `/brain`, and follows the
+same two rules. A day is read once, and the log itself is never edited. A
+position is rewritten each time a day touches it, never appended to.
+
+A **concept** is something you do, believe or have learned: cold outreach,
+why you left the bank, how you score creators. Each holds a **position**, what
+is true of you now in the first person, and up to twelve pieces of **dated
+evidence**, the things you actually said. Every claim traces back to the day
+you said it.
+
+Nobody presses anything to feed it, and there is no screen for it. A day is read
+into the brain when it is written, by the button or by the 17:00 mail, and again
+at 23:00 for anything the day left unread, so it is fed daily whether or not the
+day was ever written. When the page opens it also reads any older days it has
+not read, silently, five at a time, oldest first so a newer position overrides
+an older one. Reading a day twice replaces what it said and never doubles it.
+
+**A contradiction is settled by a question, not a screen.** If a day contradicts
+an old position, the position is rewritten to what is true now, and one question
+goes onto the feed under Why, marked **settling**, naming both sides with their
+dates: "On 22 Sep you said volume wins on outreach. On 25 Sep you said replies
+beat DMs. Which is true now, and why?" It comes back every day until an answer
+settles it, at most two a day so a bad week does not bury the real questions.
+Answering it reads the day at once, and the position is rewritten from your
+answer.
+
+The eighth beat on the feed, **Why**, is how the brain learns you. It is asked
+as a follow-up to something you actually said that day, in your own words, and
+it prefers concepts the brain holds thinly. There is no separate interview.
+
+## Ideas
+
+Type one line, like "Why I stopped cold DMing", and press Build. It builds from
+the brain and nothing else: the daily log reaches it only by having been read
+in. It picks up to six concepts the idea needs, then writes two things from the
+same material at once:
+
+- **A talking structure.** The angle, two ways to open, five to seven beats,
+  and a close. For each beat: the point, what you have on it from your own days
+  with its date, and a question that makes you tell it your way. No sentences
+  to read out. A beat with nothing behind it says GAP rather than inventing.
+- **A 60 second script in the daily vlog format.** Intro cuts, the five lines,
+  outro, sound design. Built from what the brain holds on the idea, not from
+  today.
+
+Every GAP becomes a question on today's feed under Why. That is the loop: an
+idea the brain cannot fill tells you what to answer tomorrow, and the answer
+thickens the brain for the next idea. Tick an idea once it is filmed.
+
 ## The screens
 
-- **Today.** The bar, the feed of open questions, then the day answered so
-  far, newest first, and the /bio tick for the 30 day challenge. One Write
-  button, in the bar, and only once five beats are covered.
-- **Replies.** Paste somebody else's post and get three ways in: one that
+- **Today.** The bar, then, once the day is written, the drafts right under
+  it: three posts, sometimes a fourth, and the script. Character count
+  against 280 on each post, Copy, a link that opens X or YouTube Studio with
+  the text ready, and a tick to mark it posted or filmed. While the day is
+  being written the screen says so and offers nothing else. Below the drafts
+  are the open questions, the /bio tick and the day answered so far. One
+  Write button, in the bar, and only once five beats are covered.
+- **Ideas.** The field, the two outputs, the concepts it drew on, the
+  questions it added, and every earlier idea. If the brain is still empty it
+  says so before you type.
+- **X-Replies.** Paste somebody else's post and get three ways in: one that
   answers with something from your own day, one that asks what they are
   building, one that takes the other side. X is a room before it is a
   stage, and a reply is cheaper than a post and lands closer to the person.
   Nothing is stored: a reply is worth something in the next ten minutes and
   nothing the day after.
-- **Drafts.** Three posts, sometimes a fourth, and one script. Character count against 280 on
-  each post, Copy on each, and a link that opens X or YouTube Studio with
-  the text ready. A tick on each marks it posted or filmed, so tomorrow's
-  archive says what actually shipped. While the day is being written the
-  screen says so and offers nothing else.
-- **Archive.** Every day logged, with its entries and its drafts.
+- **Archive.** Every day with something in it. Days that only exist because a mail went out are not shown.
 ## Stack
 
 - **`index.html`** is the page, hand written, no build step. X's own palette:
@@ -99,8 +155,9 @@ the question that produced it, and the feed is a list on the same document.
   voice and the question bank. They
   live on the server, so the voice is a deploy and the page source gives
   nothing away.
-- **Data** is one table on the Overlap deployment: `xDays`, one document
-  per day. (`xFacts` is retired and stays declared only so a deploy cannot
+- **Data** is three tables on the Overlap deployment: `xDays`, one document
+  per day, `xBrain`, one per concept, and `xIdeas`, one per idea. Nothing
+  reads `xBrain` on screen: to look inside, use the Convex dashboard. (`xFacts` is retired and stays declared only so a deploy cannot
   trip over a document left in it.)
 - **Auth** is a passphrase, the same `BIO_PASSPHRASE` that writes /bio,
   asked once per device and kept in `localStorage`. No accounts, because
@@ -120,6 +177,13 @@ thing that happened, named and numbered: a post that could have run on any
 other day is the wrong post. The script builds its five lines out of the
 same day, and leans on who Jeremy is for one line at most, because the
 Change and the Result are what stop every video sounding like the last one.
+
+The Situation line is the one that repeats if nobody stops it. It says he is
+25, then where he is right now and what he is doing, taken from the log, so it
+changes every day. A city or country is named only when it is new or unusual
+that day, never as a habit. The brief also shows the model the Situation lines
+of the last five scripts and asks for different words and a different place or
+activity, which is what actually breaks the pattern.
 
 Layout is specified separately from voice, because the model left alone
 returns one block of prose at whatever length it lands on. A post is read on
