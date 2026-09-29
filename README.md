@@ -7,8 +7,8 @@ the site behind that, plus everything else I keep in public.
 The landing page is one screen: a portrait, a name, three lists.
 
 - **Projects.** [CreatorMatch](https://creatormatch.app) is the door in: I
-  build mobile apps with influencers. BrandMatch finds you deals, not leads,
-  marked coming soon until it ships
+  build mobile apps with influencers. wlns.shp is the link-in-bio shop for
+  wellness creators, marked coming soon until it ships
 - **Mobile app portfolio.** [i dare you](https://www.idareyou.lol) sends a
   dare: film it, or dare them back, built with
   [@ayade369](https://www.tiktok.com/@ayade369). [Kaught](https://kaught.app)
@@ -17,7 +17,7 @@ The landing page is one screen: a portrait, a name, three lists.
   datacenters, an astronomy blog), Social folded away (YouTube
   [@jerandmax](https://www.youtube.com/@jerandmax), X
   [@jeremylasne](https://x.com/jeremylasne), email), the Bio tracker and
-  Octopus
+  [Brain](https://brain.jeremylasne.com)
 
 ## Stack
 
