@@ -128,6 +128,16 @@
     display: inline-block; margin: -9px 0 0 38px; padding: 0 0 2px;
     font-size: 13px; line-height: 20px; color: var(--ice-45); text-decoration: none;
   }
+  /* the app portfolio: one line per app; the credit rides the right end of its row, ahead of the arrow */
+  .apps li { position: relative; }
+  .apps .item { flex-wrap: nowrap; }
+  .apps .desc { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: var(--cw, 0px); }
+  .apps .credit { position: absolute; top: 0; bottom: 0; right: 30px; display: flex; align-items: center; margin: 0; padding: 0; font-size: 13px; white-space: nowrap; }
+  .apps .soon .name { color: var(--ice-70); }
+  @media (max-width: 520px) {
+    .apps .item { row-gap: 0; }
+    .apps .item .desc, .apps .credit { display: none; }
+  }
   @media (hover: hover) { a.credit:hover { color: var(--blue); } }
   a.credit:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 6px; }
   @keyframes foldIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
@@ -220,8 +230,8 @@
 
     <section class="reveal" style="--d:220">
       <h2>Mobile app portfolio</h2>
-      <ul>
-        <li>
+      <ul class="apps">
+        <li style="--cw:108px">
           <a class="item" href="https://www.idareyou.lol" target="_blank" rel="noopener">
             <img class="logo" src="media/logos/idareyou.webp" alt="" width="24" height="24">
             <span class="name">i dare you</span>
@@ -230,15 +240,23 @@
           </a>
           <a class="credit" href="https://www.tiktok.com/@ayade369" target="_blank" rel="noopener">With @ayade369</a>
         </li>
-        <li>
+        <li style="--cw:118px">
           <a class="item" href="https://kaught.app" target="_blank" rel="noopener">
             <img class="logo" src="media/logos/kaught.webp" alt="" width="24" height="24">
             <span class="name">Kaught</span>
             <span class="desc">Name any wild animal with your camera.</span>
             <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
           </a>
-          <span class="credit">Looking for a creator to partner with</span>
+          <span class="credit">Creator wanted</span>
         </li>
+        <li><span class="item soon">
+          <img class="logo" src="media/logos/soon.svg" alt="" width="24" height="24">
+          <span class="name">Soon</span>
+        </span></li>
+        <li><span class="item soon">
+          <img class="logo" src="media/logos/soon.svg" alt="" width="24" height="24">
+          <span class="name">Soon</span>
+        </span></li>
       </ul>
     </section>
 
