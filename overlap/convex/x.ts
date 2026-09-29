@@ -1,4 +1,5 @@
 import {
+  type ActionCtx,
   action,
   internalAction,
   internalMutation,
@@ -48,6 +49,9 @@ const KEEP_DRAFT_DAYS = 3; /* how much recent work the model is shown */
    none of them has been ticked off. One mail that gets read beats six that
    get filtered. */
 const NUDGE_AT = 20;
+/* Whatever the day left unread goes into the brain at 23:00, so it is fed
+   daily whether or not the day was ever written. */
+const DIGEST_AT = 23;
 
 /* ── the door ───────────────────────────────────────────────────────── */
 
@@ -763,18 +767,6 @@ export const waiting = internalQuery({
   handler: async (ctx) => await waitingDays(ctx),
 });
 
-/** The last few days that have anything in them, as fresh material. */
-export const recent = internalQuery({
-  args: { n: v.number() },
-  handler: async (ctx, { n }) => {
-    const days = (await ctx.db.query("xDays").withIndex("by_day").order("desc").take(30)) as DayDoc[];
-    return days
-      .filter((d) => d.entries.length)
-      .slice(0, n)
-      .map((d) => ({ day: d.day, entries: d.entries.map((e) => ({ q: e.q, text: e.text })) }));
-  },
-});
-
 /** The Brain screen. */
 export const brain = query({
   args: { passphrase: v.string() },
@@ -910,30 +902,43 @@ export const digest = internalAction({
 });
 
 /**
- * The Feed the brain button: read every day it has not read, oldest first so
- * a newer position overrides an older one. Five at a time, so one press stays
- * well inside how long a request may take.
+ * Read every day the brain has not read, oldest first so a newer position
+ * overrides an older one. Five at a time, so one run stays well inside how
+ * long a request may take.
  */
+async function readWaiting(ctx: ActionCtx) {
+  const todo: string[] = await ctx.runQuery(internal.x.waiting, {});
+  let fed = 0;
+  let failed = 0;
+  let error: string | undefined;
+  for (const day of todo.slice(0, 5)) {
+    try {
+      await ctx.runAction(internal.x.digest, { day });
+      fed++;
+    } catch (e) {
+      failed++;
+      error = e instanceof Error ? e.message : String(e);
+      console.error("x: could not read a day into the brain", day, e);
+    }
+  }
+  return { fed, failed, left: Math.max(0, todo.length - fed), error };
+}
+
+/** The page calls this on its own when it opens with days waiting. */
 export const feed = action({
   args: { passphrase: v.string() },
   handler: async (ctx, a): Promise<{ fed: number; failed: number; left: number; error?: string }> => {
     mustBeJeremy(a.passphrase);
-    const todo: string[] = await ctx.runQuery(internal.x.waiting, {});
-    const batch = todo.slice(0, 5);
-    let fed = 0;
-    let failed = 0;
-    let error: string | undefined;
-    for (const day of batch) {
-      try {
-        await ctx.runAction(internal.x.digest, { day });
-        fed++;
-      } catch (e) {
-        failed++;
-        error = e instanceof Error ? e.message : String(e);
-        console.error("x: could not read a day into the brain", day, e);
-      }
-    }
-    return { fed, failed, left: Math.max(0, todo.length - fed), error };
+    return await readWaiting(ctx);
+  },
+});
+
+/** The night run: whatever the day left unread goes in at 23:00. */
+export const catchUp = internalAction({
+  args: {},
+  handler: async (ctx) => {
+    await readWaiting(ctx);
+    return null;
   },
 });
 
@@ -1020,9 +1025,10 @@ export const useIdea = mutation({
  * One idea in, two things out.
  *
  * It picks the concepts the idea needs, then writes a talking structure and a
- * script in the daily vlog format from the same material, in parallel. What
- * the brain could not answer comes back as questions and lands on today's feed,
- * which is how a thin brain gets thicker.
+ * script in the daily vlog format from the same material, in parallel. The
+ * material is the brain and nothing else: the daily log reaches it only by
+ * being read in. What the brain could not answer comes back as questions and
+ * lands on today's feed, which is how a thin brain gets thicker.
  */
 export const build = action({
   args: { passphrase: v.string(), idea: v.string() },
@@ -1032,13 +1038,12 @@ export const build = action({
     if (!idea) throw new Error("Type the idea first");
 
     const held: Concept[] = await ctx.runQuery(internal.x.concepts, {});
-    const days: { day: string; entries: { q?: string; text: string }[] }[] = await ctx.runQuery(internal.x.recent, { n: 3 });
-    if (!held.length && !days.length)
-      throw new Error("The brain is empty. Answer today's questions, or press Feed the brain.");
+    if (!held.length)
+      throw new Error("The brain is empty. It fills from your daily answers.");
 
     /* Which parts of the brain does this idea need? */
     let picked: Concept[] = [];
-    if (held.length) {
+    {
       const index = held.map((c) => `${c.slug} | ${c.name} | ${c.position.slice(0, 140)}`).join("\n");
       const said = await ask(
         "You pick which parts of a person's brain a video idea needs. You answer with slugs only.",
@@ -1068,11 +1073,7 @@ export const build = action({
                 (c.conflict ? `\nOpen conflict: ${c.conflict}` : ""),
             )
             .join("\n\n")
-        : "WHAT HIS BRAIN HOLDS ON THIS: nothing yet.") +
-      (days.length
-        ? "\n\nRECENT DAYS (fresh material, use it only where it fits the idea):\n" +
-          days.map((d) => `[${d.day}]\n${transcriptOf(d.entries)}`).join("\n\n")
-        : "");
+        : "WHAT HIS BRAIN HOLDS ON THIS: nothing yet. Every beat is a GAP.");
 
     const [structure, script] = await Promise.all([
       ask(TALK_SYSTEM, `${material}\n\nBuild the talking structure.`, 0.7, { note: false, max: 2500 }),
@@ -1343,6 +1344,11 @@ export const tick = internalAction({
 
     if (SLOTS.includes(slot as any)) {
       if (!d.mailed.includes(slot)) await ctx.runAction(internal.x.sendSlot, { day, slot });
+      return null;
+    }
+
+    if (hour === DIGEST_AT) {
+      await ctx.runAction(internal.x.catchUp, {});
       return null;
     }
 

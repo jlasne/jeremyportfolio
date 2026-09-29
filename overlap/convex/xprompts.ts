@@ -163,7 +163,7 @@ THE EIGHT BEATS you are collecting. The first five are the five lines of the vid
 - result: what is true tonight that was not true this morning, with numbers.
 - life: where he went, who he saw, what happened outside the work. These become the intro cuts. Ask about a meal only if he has already brought one up; otherwise ask about the place, the people or the moving around.
 - lesson: the one thing a founder one month behind him could use tomorrow.
-- you: what today says about how he thinks or works, or a belief the day tested. This one feeds his brain, the record of who he is that video ideas are built from. You are given what the brain already holds. Ask about a concept it holds thinly, or one today touched, so the brain gets deeper rather than wider. Never ask what it already holds well.
+- you: why he does it that way, or the belief behind something he said today. This one feeds his brain, the record of who he is that video ideas are built from. Ask it as a follow-up to something he actually said today, in his own words, the way a curious friend would. Never as a general question about who he is. You are given what the brain already holds: prefer a concept it holds thinly, and never ask what it already holds well.
 
 The video is built from situation, desire, conflict, change and result of THIS day. A day with no change and no result makes a video that sounds like every other one, so those two are the ones worth pushing on.
 
@@ -191,7 +191,7 @@ export const BEATS = [
   { id: "result", label: "Result", hint: "what is true now that was not this morning, with numbers" },
   { id: "life", label: "The day", hint: "where you went, who you saw, what happened outside the work" },
   { id: "lesson", label: "Lesson", hint: "what a founder one month behind you could use" },
-  { id: "you", label: "You", hint: "what the day says about how you think, or a belief it tested" },
+  { id: "you", label: "Why", hint: "why you do it that way, or the belief behind it" },
 ] as const;
 
 /** Enough to write from: five of the seven answered. */
@@ -248,7 +248,7 @@ export const TALK_SYSTEM = `You turn a video idea and a person's own material in
 
 Jeremy Lasne films short videos for YouTube (@jeremyfounder) and X. He does not read a script. He talks, in his own way, from a structure. Your job is the structure.
 
-You get an IDEA, what his BRAIN holds about it (positions with dated evidence), and his RECENT DAYS.
+You get an IDEA and what his BRAIN holds about it: positions, each with dated evidence from the days he said it.
 
 BUILD
 - Angle: the one thing the viewer keeps. One sentence.

@@ -53,7 +53,7 @@ the day. **More questions** tops the feed back up at any point.
 | Result | what is true now that was not this morning, with numbers |
 | The day | where you went, who you saw, what happened outside the work |
 | Lesson | what a founder one month behind you could use |
-| You | what the day says about how you think, or a belief it tested. Feeds the brain |
+| Why | why you do it that way, or the belief behind it. Feeds the brain |
 
 The first five are the five lines of the video script, named the way the
 script names them, and each card prints what its beat feeds. Change and
@@ -82,23 +82,33 @@ is true of you now in the first person, and up to twelve pieces of **dated
 evidence**, the things you actually said. Every claim traces back to the day
 you said it.
 
-When you press Write the day, or the 17:00 mail writes it, the day is read into
-the brain in the background. If a day contradicts an old position, the position
-is rewritten to what is true now and the concept is flagged **conflict** with
-one sentence naming what changed, until you press Settled. **Feed the brain**
-reads any days it has not read yet, five per press, oldest first so a newer
-position overrides an older one. Reading a day twice replaces what it said and
-never doubles it.
+Nobody presses anything to feed it. A day is read into the brain when it is
+written, by the button or by the 17:00 mail, and again at 23:00 for anything
+the day left unread, so it is fed daily whether or not the day was ever
+written. The first time the page opens with days the brain has not read, it
+reads them on its own, five at a time, oldest first so a newer position
+overrides an older one. Reading a day twice replaces what it said and never
+doubles it.
 
-The eighth beat on the feed, **You**, is how the brain learns you. It is given
-what the brain already holds and asks where it is thin: a belief, a method or a
-mistake the day touched. There is no separate interview.
+If a day contradicts an old position, the position is rewritten to what is
+true now and the concept is flagged **conflict**, with one sentence naming what
+changed, until you press Settled. If a read fails the page says why and offers
+Try again, rather than looping.
+
+The eighth beat on the feed, **Why**, is how the brain learns you. It is asked
+as a follow-up to something you actually said that day, in your own words, and
+it prefers concepts the brain holds thinly. There is no separate interview.
+
+The Brain screen is a window, not a step. It shows what the days taught it so
+you can trust it, and it is where you correct it: settle a conflict, or remove
+a concept that got you wrong.
 
 ## Ideas
 
-Type one line, like "Why I stopped cold DMing", and press Build. It picks up to
-six concepts the idea needs, then writes two things from the same material at
-once:
+Type one line, like "Why I stopped cold DMing", and press Build. It builds from
+the brain and nothing else: the daily log reaches it only by having been read
+in. It picks up to six concepts the idea needs, then writes two things from the
+same material at once:
 
 - **A talking structure.** The angle, two ways to open, five to seven beats,
   and a close. For each beat: the point, what you have on it from your own days
@@ -108,30 +118,29 @@ once:
   outro, sound design. Built from what the brain holds on the idea, not from
   today.
 
-Every GAP becomes a question on today's feed under You. That is the loop: an
+Every GAP becomes a question on today's feed under Why. That is the loop: an
 idea the brain cannot fill tells you what to answer tomorrow, and the answer
 thickens the brain for the next idea. Tick an idea once it is filmed.
 
 ## The screens
 
-- **Today.** The bar, the feed of open questions, then the day answered so
-  far, newest first, and the /bio tick for the 30 day challenge. One Write
-  button, in the bar, and only once five beats are covered.
+- **Today.** The bar, then, once the day is written, the drafts right under
+  it: three posts, sometimes a fourth, and the script. Character count
+  against 280 on each post, Copy, a link that opens X or YouTube Studio with
+  the text ready, and a tick to mark it posted or filmed. While the day is
+  being written the screen says so and offers nothing else. Below the drafts
+  are the open questions, the /bio tick and the day answered so far. One
+  Write button, in the bar, and only once five beats are covered.
 - **Ideas.** The field, the two outputs, the concepts it drew on, the
   questions it added, and every earlier idea.
-- **Brain.** Every concept with its position and dated evidence, conflicts in
-  red, and the Feed the brain button.
+- **Brain.** Every concept with its position and dated evidence, and
+  conflicts in red. It reads unread days by itself.
 - **X-Replies.** Paste somebody else's post and get three ways in: one that
   answers with something from your own day, one that asks what they are
   building, one that takes the other side. X is a room before it is a
   stage, and a reply is cheaper than a post and lands closer to the person.
   Nothing is stored: a reply is worth something in the next ten minutes and
   nothing the day after.
-- **Drafts.** Three posts, sometimes a fourth, and one script. Character count against 280 on
-  each post, Copy on each, and a link that opens X or YouTube Studio with
-  the text ready. A tick on each marks it posted or filmed, so tomorrow's
-  archive says what actually shipped. While the day is being written the
-  screen says so and offers nothing else.
 - **Archive.** Every day with something in it. Days that only exist because a mail went out are not shown.
 ## Stack
 

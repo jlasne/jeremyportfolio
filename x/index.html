@@ -251,7 +251,6 @@ button, input, textarea, select { font: inherit; color: inherit; }
       <button data-tab="ideas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg><span>Ideas</span></button>
       <button data-tab="brain"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="7" r="2.2"/><circle cx="18" cy="7" r="2.2"/><circle cx="12" cy="17" r="2.2"/><path d="M8 8.2l3 7M16 8.2l-3 7M8.2 7h7.6"/></svg><span>Brain</span></button>
       <button data-tab="replies"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15a3 3 0 0 1-3 3H8l-4 3V6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3z"/></svg><span>X-Replies</span></button>
-      <button data-tab="drafts"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.1 5.3L19.5 10l-5.4 1.7L12 17l-2.1-5.3L4.5 10l5.4-1.7z"/><path d="M18.5 15.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg><span>Drafts</span></button>
       <button data-tab="archive"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h7l2 2.5h9V19H3z"/><path d="M3 10h18"/></svg><span>Archive</span></button>
     </div>
     <div class="foot"><button class="btn ghost sm" id="out">Log out</button></div>
@@ -260,7 +259,6 @@ button, input, textarea, select { font: inherit; color: inherit; }
   <section class="col">
     <header class="top">
       <div><h2 id="title">Today</h2><p class="sub" id="sub"></p></div>
-      <button class="btn ghost sm hide" id="write">Write again</button>
     </header>
     <div id="view"></div>
   </section>
@@ -372,6 +370,8 @@ let ideaBusy = false;
 let ideaText = "";
 let brainData = null;      /* { concepts, days, waiting } */
 let feeding = false;
+let feedError = null;      /* set when a read failed, so it does not loop */
+let feedRounds = 0;        /* five days a round, and never more than six rounds a visit */
 let sure = null;           /* slug waiting on a second click to be removed */
 const openC = new Set();   /* concepts left open, so a redraw does not fold them shut */
 
@@ -382,6 +382,9 @@ async function loadIdeas() {
 async function loadBrain() {
   try { brainData = await call("x.brain"); } catch (err) { toast(err.message); brainData = { concepts: [], days: 0, waiting: 0 }; }
   draw();
+  /* Days it has not read are read without being asked: the button is gone.
+     It stops on the first failure and says why, rather than looping. */
+  if (brainData.waiting > 0 && !feeding && !feedError && feedRounds < 6) { feedRounds++; feedBrain(); }
 }
 async function buildIdea() {
   const text = ($("#ideaText")?.value || "").trim();
@@ -397,11 +400,11 @@ async function buildIdea() {
 }
 async function feedBrain() {
   if (feeding) return;
-  feeding = true; draw();
+  feeding = true; feedError = null; draw();
   try {
     const r = await call("x.feed");
-    toast(r.failed && !r.fed ? r.error || "Could not read the days" : `${r.fed} ${r.fed === 1 ? "day" : "days"} read${r.left ? `, ${r.left} left` : ""}`);
-  } catch (err) { toast(err.message); }
+    if (r.failed && !r.fed) feedError = r.error || "Could not read the days";
+  } catch (err) { feedError = err.message; }
   feeding = false;
   await loadBrain();
 }
@@ -444,12 +447,8 @@ const ready = () => beatsDone().size >= (state.readyAt || 5);
 function draw() {
   $("#nav").querySelectorAll("button").forEach((b) =>
     b.setAttribute("aria-current", b.dataset.tab === tab ? "page" : "false"));
-  /* One Write button at a time: the bar offers it on Today once the day is
-     covered, and the header offers a rewrite on Drafts once one exists. */
-  $("#write").classList.toggle("hide", tab !== "drafts" || writing || !state.drafts.length);
   const v = $("#view");
   if (tab === "today") { $("#title").textContent = "Today"; $("#sub").textContent = longDate(state.today); v.innerHTML = today(); }
-  if (tab === "drafts") { $("#title").textContent = "Drafts"; $("#sub").textContent = state.draftsAt ? "written " + clock(state.draftsAt) : "not written yet"; v.innerHTML = drafts(state.drafts); }
   if (tab === "ideas") { $("#title").textContent = "Ideas"; $("#sub").textContent = "a video from what you know"; v.innerHTML = ideasView(); }
   if (tab === "brain") { $("#title").textContent = "Brain"; $("#sub").textContent = "what your days have taught it"; v.innerHTML = brainView(); }
   if (tab === "replies") { $("#title").textContent = "X-Replies"; $("#sub").textContent = "reply to almost everyone"; v.innerHTML = repliesView(); }
@@ -458,18 +457,33 @@ function draw() {
 }
 
 function today() {
+  /* While the day is being written the screen says so and offers nothing
+     else: half a set of drafts is worse than none. */
+  if (writing)
+    return `<div class="stage"><div class="thinking"><span class="spin"></span> Writing your posts and the script…</div>
+            <p class="lead" style="margin:16px 0 0">Two calls to the model. About twenty seconds.</p></div>`;
+
   const open = openAsks();
   const done = beatsDone();
   const beats = state.beats || [];
   const is = ready();
+  const written = state.drafts.length > 0;
 
   const bar = `
     <div class="bar-top ${is ? "ready" : ""}">
       <span class="beats">${beats.map((b) => `<i class="${done.has(b.id) ? "on" : ""}" title="${esc(b.label)}"></i>`).join("")}</span>
       <span class="say">${done.size} of ${beats.length} covered${is ? " · enough to write" : ""}</span>
-      ${is && !writing ? `<button class="btn blue sm" id="writeNow">Write the day</button>` : ""}
-      ${writing ? `<span class="thinking"><span class="spin"></span> writing</span>` : ""}
+      ${is && !written ? `<button class="btn blue sm" id="writeNow">Write the day</button>` : ""}
     </div>`;
+
+  /* The drafts sit right under the bar: once the day is done, what to post
+     is the first thing on the page. */
+  const ready_ = written
+    ? `<div class="row" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+         <span><b>Ready to post</b>${state.draftsAt ? ` <span class="mono">written ${clock(state.draftsAt)}</span>` : ""}</span>
+         <button class="btn ghost sm" id="writeAgain">Write again</button>
+       </div>${drafts(state.drafts)}`
+    : "";
 
   const feed = open
     .map((a) => {
@@ -496,6 +510,7 @@ function today() {
 
   return `
     ${bar}
+    ${ready_}
     ${feed}
     ${stage}
 
@@ -554,17 +569,17 @@ function ideasView() {
   const held = brainData ? brainData.concepts.length : null;
   const box = `
     <div class="stage">
-      <p class="lead">One line. It builds from your brain and your last three days.</p>
+      <p class="lead">One line. It builds from your brain.</p>
       <input id="ideaText" class="field" placeholder="Why I stopped cold DMing" value="${esc(ideaText)}" ${ideaBusy ? "disabled" : ""}>
       <div class="bar">
-        <span class="mono">${held == null ? "" : held + " concepts in your brain"}</span>
+        <span class="mono">${held == null ? "" : held + (held === 1 ? " concept" : " concepts") + " in your brain"}</span>
         <button class="btn blue" id="ideaGo" ${ideaBusy ? "disabled" : ""}>${ideaBusy ? '<span class="spin"></span>' : "Build"}</button>
       </div>
     </div>`;
   if (ideaBusy)
     return box + `<div class="stage"><div class="thinking"><span class="spin"></span> Reading your brain, then writing two things…</div></div>`;
   if (ideas == null) return box + `<p class="empty">Loading…</p>`;
-  if (!cur) return box + `<p class="empty">No ideas yet.<br>Type one above. You get a talking structure and a script in your daily vlog format.</p>`;
+  if (!cur) return box + `<p class="empty">No ideas yet.<br>Type one above. You get a talking structure and a script in your daily vlog format, built from what your days taught the brain.</p>`;
 
   const card = (label, body, k) => `
     <article class="draft">
@@ -580,7 +595,7 @@ function ideasView() {
       </div>
       <div class="chips">${cur.concepts.length
         ? cur.concepts.map((c) => `<span class="chip">${esc(c)}</span>`).join("")
-        : `<span class="mono">built from your recent days only</span>`}</div>
+        : `<span class="mono">your brain held nothing on this yet</span>`}</div>
     </div>
     ${card("Talking structure", cur.structure, "structure")}
     ${card("60s vlog script", cur.script, "script")}
@@ -595,11 +610,11 @@ function brainView() {
     <div class="stage">
       <p class="lead">${concepts.length
         ? `${concepts.length} ${concepts.length === 1 ? "concept" : "concepts"} from ${days} ${days === 1 ? "day" : "days"}.`
-        : "The brain is empty. It fills from your daily answers."}</p>
+        : "The brain is empty. It reads your days by itself, and again every night."}</p>
       ${feeding
-        ? `<div class="thinking"><span class="spin"></span> Reading your days…</div>`
-        : waiting
-          ? `<button class="btn blue" id="feedBrain">Feed the brain · ${waiting} ${waiting === 1 ? "day" : "days"} waiting</button>`
+        ? `<div class="thinking"><span class="spin"></span> Reading your days${waiting > 1 ? ` · ${waiting} left` : ""}…</div>`
+        : feedError
+          ? `<p style="color:var(--bad);margin:0 0 12px">${esc(feedError)}</p><button class="btn ghost sm" id="feedRetry">Try again</button>`
           : `<span class="mono">every day is read</span>`}
     </div>`;
   if (!concepts.length) return top;
@@ -724,7 +739,7 @@ function wire() {
     });
   }
 
-  $("#feedBrain")?.addEventListener("click", feedBrain);
+  $("#feedRetry")?.addEventListener("click", () => { feedError = null; feedBrain(); });
   v.querySelectorAll("details.concept").forEach((d) =>
     d.addEventListener("toggle", () => { d.open ? openC.add(d.dataset.slug) : openC.delete(d.dataset.slug); }));
   v.querySelectorAll(".settle").forEach((b) =>
@@ -752,6 +767,11 @@ function wire() {
   }
 
   $("#writeNow")?.addEventListener("click", writeDay);
+  $("#writeAgain")?.addEventListener("click", (e) => {
+    const b = e.currentTarget;
+    if (b.dataset.sure !== "1") { b.dataset.sure = "1"; b.textContent = "Replace these?"; return; }
+    writeDay();
+  });
 
   /* Every card answers itself. */
   v.querySelectorAll(".ask").forEach((card) => {
@@ -822,7 +842,7 @@ $("#nav").addEventListener("click", async (e) => {
 async function writeDay() {
   if (writing) return;
   writing = true;
-  tab = "drafts"; open_ = null;
+  tab = "today"; open_ = null;
   draw();
   try {
     await call("x.generate", { day: state.today });
@@ -836,7 +856,6 @@ async function writeDay() {
     toast(err.message);
   }
 }
-$("#write").addEventListener("click", writeDay);
 
 $("#test").addEventListener("click", async (e) => {
   const b = e.currentTarget;
