@@ -11,10 +11,10 @@
 
   // ---- constants of the mix ----
   const MASTER = .4;                                  // engine master level the mixer sets; the hits ride on top of it
-  const PEAK = -.7;                                   // dBTP of the finished buffer
+  const PEAK = -.75;                                  // dBTP of the finished buffer
   const PRE = .25;                                    // s of silent pre-roll (compressor at rest at the first hit)
   const HOLE = [at(3, 4, 4), at(4, 1)];               // 5.5078125 .. 5.625, the one digital silence
-  const PREGAIN = 1.9;                                // drive into the mastering limiter (pre-map)
+  const PREGAIN = 1.6;                                // drive into the mastering limiter (pre-map)
   const KNOCK = 0;                                    // 0: no knock layer under the kick (5.1); raise for small speakers
 
   // ---- chords (5.1): the A minor pentatonic is also the C major pentatonic ----
@@ -32,18 +32,17 @@
 
   // ---- the re-cast principal hits (5.2): ONE object, so the voices of every hit change in one place ----
   const HIT = {
-    kick: { punch: 215, decay: .34, click: .62, pump: .45, drive: 2.8 },
+    kick: { punch: 500, decay: .34, click: .9, pump: .45, drive: 3.2 },
     snare: { tone: 430, decay: .085, rev: .2 },
     clap: { rev: .55 },
-    stab: { cutoff: 3000, bright: 10000 },
-    impact: { size: .6 },
+    stab: { cutoff: 1800, bright: 9000 },
     crash: { from: 12000, to: 7000, end: 6000, peak: .008, rev: .45 },
   };
 
   // ---- the mixer: per-instrument trims on top of the cue-sheet gains (the sheet's gains are starting points) ----
   const TRIM = {
-    kick: .9, snare: 2.0, clap: 2.4, hat: 3.2, bass: .9, sub: .15, stab: 8, pad: 8, pluck: 3, bell: 1.5,
-    blip: 1.4, tick: 1.8, riser: 1.7, whoosh: 2.2, impact: .3, reverse: 1.4, glitch: 1.3, knock: 1, swell: 1,
+    kick: .9, snare: 2.0, clap: 2.4, hat: 2.4, bass: .9, sub: .15, stab: 8, pad: 8, pluck: 3, bell: 1.5,
+    blip: 1.4, tick: 1.8, riser: 1.7, whoosh: 2.2, impact: .9, reverse: 1.4, glitch: 1.3, knock: 1, swell: 1,
   };
   // where each instrument takes its options object, and its default gain
   const SIG = {
@@ -122,7 +121,7 @@
 
   // ---- the loudness map, applied to the rendered buffer: a per-bar base level plus a pulse on each principal hit (dB) ----
   const LEVEL = {
-    base: [[0, -4.8], [at(2, 1), -4.8], [at(3, 1), -4.8], [at(4, 1), -4.4], [at(5, 1), -4.8], [at(6, 1), -5.6], [at(7, 1), -5.6], [at(7, 3), -4.6], [at(8, 1), -4.6]],
+    base: [[0, -4.8], [at(2, 1), -4.8], [at(3, 1), -4.8], [at(3, 3, 3), -4.2], [at(3, 4), -3.0], [at(3, 4, 3), -2.4], [at(3, 4, 4), -1.8], [at(4, 1), -4.4], [at(5, 1), -4.8], [at(6, 1), -5.0], [at(7, 1), -5.0], [at(7, 1, 4), -3.8], [at(7, 2, 3), -2.8], [at(7, 3), -4.6], [at(8, 1), -4.6]],
     // [time, peak dB, hold, release]: the final hit, the drop, the landing, the flip, the lock, in that order
     pulse: [[at(2, 1), -2.9, .12, .4], [at(3, 3), -4.0, .1, .3], [at(4, 1), -.8, .15, .3], [at(7, 3), -1.9, .15, .3], [at(8, 1), 0, .3, .9]],
   };
@@ -156,7 +155,7 @@
       a0 = (A_ + 1) - (A_ - 1) * c + sq; a1 = 2 * ((A_ - 1) - (A_ + 1) * c); a2 = (A_ + 1) - (A_ - 1) * c - sq; }
     return [b0 / a0, b1 / a0, b2 / a0, a1 / a0, a2 / a0];
   };
-  const EQ = [['hp', 30, .7, 0], ['peak', 70, .8, 2], ['peak', 400, .8, -1.5], ['peak', 1200, .7, -3.5], ['peak', 2800, .6, 4], ['shelf', 5000, .8, 1]];
+  const EQ = [['hp', 30, .7, 0], ['peak', 70, .8, 2], ['peak', 400, .8, -1.5], ['peak', 1200, .7, -3.5], ['peak', 2800, .6, 1.5], ['shelf', 5000, .8, -2]];
   const runEQ = (chans, SR, from, to) => {
     const cf = EQ.map(([t, f, q, g]) => biquad(t, f, q, g, SR));
     for (const d of chans) {
@@ -213,8 +212,8 @@
     const Ho = (t, g) => S.hat(t, { gain: g, open: true, pan: Math.round(t / S16) % 2 ? .2 : -.2 });
     const Glass = (t, n, g, o = {}) => S.bell(t, n, { dur: .9, ratio: 3.5, index: 1.6, gain: g, rev: .5, ...o });
     const Marimba = (t, n, g) => {
-      S.pluck(t, n, { type: 'sine', dur: .18, gain: g, cutoff: 4000, rev: .3, del: .25 });
-      S.bell(t, n, { dur: .35, ratio: 4, index: 1.0, gain: g * .55, rev: .2 });
+      S.pluck(t, n, { type: 'sine', dur: .18, gain: g, cutoff: 4000, rev: .3, del: .25, duck: false });
+      S.bell(t, n, { dur: .35, ratio: 4, index: 1.0, gain: g * .55, rev: .2, duck: false });
     };
     const Pl = (t, n, g) => S.pluck(t, n, { type: 'triangle', dur: .10, gain: g, del: .2 });
     const Tk = (t, f, g, pan = 0) => S.tick(t, { freq: f, gain: g, pan });
@@ -251,7 +250,8 @@
     { const t = at(2, 1);                                                                       // MATCH CUT 1: the flip
       K(t, 1.15); S.impact(t, { gain: .7, size: .6, rev: .4 }); Clap(t, .6); Sn(t, .45);
       Stab(t, 'Am9', .2, .26); S.sub(t, 'A1', 1.7, { gain: .5 }); Glass(t, 'A4', .16, { dur: 1.0 });
-      S.blip(t, 'C5', { gain: .07, drop: 1.5, dur: .09, pan: -.5 }); Tk(t, 4600, .05); }
+      S.blip(t, 'C5', { gain: .07, drop: 1.5, dur: .09, pan: -.5 }); Tk(t, 4600, .05);
+      S.bell(t + S32, 'C5', { dur: .5, ratio: 4, index: 1, gain: .14, duck: false, rev: .25 }); }
     [at(2, 2), at(2, 3), at(2, 4)].forEach(t => K(t, .95));
     [at(2, 2), at(2, 4)].forEach(t => Clap(t, .5));
     sixteenths(2, 0, 16, (t, k) => { if (k % 4 === 2) Ho(t, .10); else H(t, .05); });
@@ -267,7 +267,7 @@
     // ================================================= bar 3 · 3.75 -> 5.625 · Fmaj9 · tension, the match, the silence
     { const t = at(3, 1);
       K(t, 1);
-      S.pad(t, CH.Fmaj9, 1.875, { gain: .10, attack: .3, cutoff: 3600, spread: .55 });
+      S.pad(t, CH.Fmaj9, 1.875, { gain: .10, attack: .3, cutoff: 2400, spread: .55 });
       S.sub(t, 'F1', 1.5, { gain: .5 });
       S.riser(t, HOLE[0], { gain: .4, from: 180, to: 1600, noiseGain: .6, rev: .3 });
       S.filterRamp(t, HOLE[0], 3000, 9000);
@@ -288,10 +288,10 @@
 
     // ================================================= bar 4 · 5.625 -> 7.5 · Cmaj9 · THE DROP, i dare you
     { const t = at(4, 1);
-      K(t, 1.25, 'C2'); S.impact(t, { gain: .95, size: .6, rev: .5, to: S.hz('C1') });
+      K(t, 1.25, 'C2'); S.impact(t, { gain: .95, size: .9, rev: .5, to: S.hz('C2') });
       crash(t, 1.4, { gain: .3 }); Clap(t, .7);
       Stab(t, 'Cmaj9', .3, .26);
-      S.pad(t, CH.Cmaj9, 1.8, { gain: .10, attack: .06, cutoff: 5000, spread: .55 });
+      S.pad(t, CH.Cmaj9, 1.8, { gain: .10, attack: .06, cutoff: 3200, spread: .55 });
       S.sub(t, 'C1', 1.7, { gain: .5 });
       S.glitch(t, .0586, { gain: .09, step: .0037, seed: 11 });
       S.filter(t, 20000); }
@@ -357,7 +357,7 @@
     [[at(7, 1, 4), .32], [at(7, 2), .42], [at(7, 2, 2), .52], [at(7, 2, 3), .65], [at(7, 2, 3) + S32, .65], [at(7, 2, 3) + S32 + S64, .65]].forEach(([t, g]) => Sn(t, g));
     // 7.2a -> 7.3: the air. The riser has stopped, kicks and hats stay out; the G6/9 pad and its reverb ring through the 900 Hz low-pass
     { const t = at(7, 3);                                                                       // THE LANDING
-      K(t, 1.15, 'C2'); S.impact(t, { gain: .7, size: .6, rev: .5, to: S.hz('C1') }); Clap(t, .6); Sn(t, .45);
+      K(t, 1.15, 'C2'); S.impact(t, { gain: .7, size: .8, rev: .5, to: S.hz('C2') }); Clap(t, .6); Sn(t, .45);
       Stab(t, 'C69', .3, .24, { rev: .5 });
       S.pad(t, CH.C69, 3.0, { gain: .09, attack: .02, release: 1.0 });
       S.sub(t, 'C1', 1.7, { gain: .5 });
@@ -372,7 +372,7 @@
 
     // ================================================= bar 8 · 13.125 -> 15.000 · C6/9 · the final hit and the tail
     { const t = at(8, 1);
-      K(t, 1.3, 'C2', { decay: .6, pump: 0 }); S.impact(t, { gain: 1.0, size: .6, rev: .7, to: S.hz('C1') });
+      K(t, 1.3, 'C2', { decay: .6, pump: 0 }); S.impact(t, { gain: 1.0, size: 1.1, rev: .7, to: S.hz('C2') });
       crash(t, 2.2, { gain: .30 }); Clap(t, .7);
       Stab(t, 'C69', 1.4, .26, { rev: .6 });
       S.pad(t, CH.C69, 1.5, { gain: .08, attack: .02, release: 1.0 });

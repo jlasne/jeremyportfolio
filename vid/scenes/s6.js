@@ -10,7 +10,7 @@
   const q = (tau, k = 320, c = 15) => tau < 0 ? 0 : 1 - R.spring(tau, k, c);      // impact ring: 1 at contact, rings to 0
 
   // ---- colours ----
-  const ICE = '#eaf4fb', BLUE = '#5fa8d3', ACID = '#c8ff3d', SHOP = '#0a0a0a', CM = '#070a12', CMW = '#eff0ee', PINK = '#F5C9D1', BROWN = '#A8704E';
+  const ICE = '#eaf4fb', BLUE = '#5fa8d3', URLC = '#9ecae5', ACID = '#c8ff3d', SHOP = '#0a0a0a', CM = '#070a12', CMW = '#eff0ee', PINK = '#F5C9D1', BROWN = '#A8704E';
 
   // ---- Y(t): the page scroll, copied verbatim into s5 and s6 (contract H5) ----
   const T_A = 11.484375, T_W = 11.6015625, T_L = 12.1875, DIST = 4320;
@@ -46,11 +46,21 @@
 
   // ---- the hero (drawn twice: once into the sprite, once live) ----
   const NAME = 'Jeremy Lasne', URL = 'jeremylasne.com', CREDIT = 'Motion design by Claude';
-  let NG = null, UG = null;                                   // glyph tables of the name and the URL, measured in setup
+  let NG = null, UG = null, HALO = null;                      // glyph tables of the name and the URL, and one soft halo sprite per glyph (setup)
+  const HP = 30, HB = 250, HH = 330;                          // halo sprite padding, baseline row and height
   function measureHero() {
     const c = document.createElement('canvas').getContext('2d');
     R.font(c, 220, 'sans', 700); NG = R.glyphs(c, NAME, -5.5);
     R.font(c, 100, 'sans', 500); UG = R.glyphs(c, URL, -1);
+    // the glint's halo is static per glyph (only the hop and the squash move), so it is stroked once here, never per frame
+    HALO = NG.chars.map(g => {
+      if (g.ch === ' ') return null;
+      const cv = mkCanvas(Math.ceil(g.w) + 2 * HP, HH), x = cv.getContext('2d');
+      R.font(x, 220, 'sans', 700); x.textBaseline = 'alphabetic'; x.lineJoin = 'round';
+      x.strokeStyle = 'rgba(200,230,255,.30)'; x.lineWidth = 22; x.strokeText(g.ch, HP, HB);
+      x.strokeStyle = 'rgba(215,236,255,.50)'; x.lineWidth = 8; x.strokeText(g.ch, HP, HB);
+      return cv;
+    });
   }
   function heroGlow(c, dy, k) {
     const a = .40 * k;
@@ -70,21 +80,26 @@
   function heroName(c, dy, hop, fill, halo) {
     R.font(c, 220, 'sans', 700); c.textBaseline = 'alphabetic'; c.textAlign = 'left'; c.fillStyle = fill;
     const left = 960 - NG.width / 2, base = 650 + dy;
-    for (const g of NG.chars) {
-      if (g.ch === ' ') continue;
-      if (!hop) { c.fillText(g.ch, left + g.x, base); continue; }
+    NG.chars.forEach((g, k) => {
+      if (g.ch === ' ') return;
+      if (!hop) { c.fillText(g.ch, left + g.x, base); return; }
       const h = hop(g);
       c.save(); c.translate(left + g.x + g.w / 2, base - h.lift); c.scale(h.sx, h.sy);
-      if (halo) { c.lineJoin = 'round'; c.strokeStyle = 'rgba(120,190,240,.22)'; c.lineWidth = 34; c.strokeText(g.ch, -g.w / 2, 0); c.strokeStyle = 'rgba(120,190,240,.45)'; c.lineWidth = 14; c.strokeText(g.ch, -g.w / 2, 0); }
+      if (halo) c.drawImage(HALO[k], -g.w / 2 - HP, -HB);
       c.fillText(g.ch, -g.w / 2, 0); c.restore();
-    }
+    });
   }
   function heroUrl(c, dy) {
-    R.font(c, 100, 'sans', 500); c.textBaseline = 'alphabetic'; c.fillStyle = BLUE;
+    R.font(c, 100, 'sans', 500); c.textBaseline = 'alphabetic'; c.fillStyle = URLC;
     R.text(c, URL, 960, 815 + dy, { align: 'center', tracking: -1 });
   }
-  function drawHeroStatic(c, dy) {                            // the sprite's hero: glow, avatar, name, URL (no underline, no credit)
-    heroGlow(c, dy, 1); heroAvatar(c, dy); heroName(c, dy, null, ICE); heroUrl(c, dy);
+  function heroScrim(c, dy) {                                 // contrast for the URL and the credit over the night
+    const sg = c.createLinearGradient(0, 560 + dy, 0, 1000 + dy);
+    sg.addColorStop(0, 'rgba(5,11,22,0)'); sg.addColorStop(1, 'rgba(5,11,22,.40)');
+    c.fillStyle = sg; c.fillRect(0, 560 + dy, 1920, 1200);
+  }
+  function drawHeroStatic(c, dy) {                            // the sprite's hero: scrim, glow, avatar, name, URL (no underline, no credit)
+    heroScrim(c, dy); heroGlow(c, dy, 1); heroAvatar(c, dy); heroName(c, dy, null, ICE); heroUrl(c, dy);
   }
 
   // ---- the panels of the page (stand-ins for the four upper ones: they are motion-blurred, so right colours in the right places) ----
@@ -168,10 +183,10 @@
   const LV = [0, 30, 90, 200, 380];                           // smear in full-resolution px; 0 is the sprite itself
   let levels = null, heroFull = null;
   function mkCanvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
-  // vertical box blur of `px` sprite px as 2^k equally spaced copies, made by doubling (k draws, never stacked copies).
+  // vertical box blur of `px` sprite px as 2^k equally spaced copies (about 1.5 px apart or less), made by doubling (k draws, never stacked copies).
   // Two scratch canvases are ping-ponged and reused for every level so phones never hold more than the finals plus two.
   function smear(src, px, scr) {
-    const k = Math.max(3, Math.ceil(Math.log2(px / 3))), d = px / ((1 << k) - 1);
+    const k = Math.max(4, Math.ceil(Math.log2(px / 1.5))), d = px / ((1 << k) - 1);
     let cur = src, nxt = scr[0];
     for (let i = 0; i < k; i++) {
       const x = nxt.getContext('2d');
@@ -202,10 +217,12 @@
   }
 
   // ---- the sprite window: the page as it is on this frame, panel by panel, two smear levels blended ----
-  // lower level at alpha 1, upper at w (alphas 1 - w and w would leave the frame w (1 - w) transparent).
+  // The two levels are ADDED ('lighter') at alphas 1 - w and w into a layer, so coverage interpolates: opaque panels stay at coverage 1 and
+  // translucent pixels (plate, halo, glow) keep their own opacity instead of being composited twice (source-over at 1 and w reaches 2x).
   function drawRows(ctx, im, scale, r0, r1, sy0, alpha) {     // sprite rows [r0, r1) of the window that starts at sprite row sy0
     const a = Math.max(r0, sy0), b = Math.min(r1, sy0 + 540);
     if (b <= a || alpha <= 0) return;
+    ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = alpha;
     ctx.drawImage(im, 0, a * scale, 960 * scale, (b - a) * scale, 0, (a - sy0) * 2, 1920, (b - a) * 2);
     ctx.globalAlpha = 1;
@@ -216,26 +233,26 @@
     const w = R.clamp((S - LV[i]) / (LV[i + 1] - LV[i]));
     const wo = i === 0 ? Math.min(1, S / 10) : w;              // every panel but the hero is never drawn unsmeared above about 10 px per frame
     ctx.save(); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'low';
-    if (doOther) { drawRows(ctx, levels[i], 1, 540, 2700, sy0, 1); drawRows(ctx, levels[i + 1], 1, 540, 2700, sy0, wo); }
+    if (doOther) { drawRows(ctx, levels[i], 1, 540, 2700, sy0, 1 - wo); drawRows(ctx, levels[i + 1], 1, 540, 2700, sy0, wo); }
     if (doHero) {
-      if (i === 0) drawRows(ctx, heroFull, 2, 0, 540, sy0, 1); else drawRows(ctx, levels[i], 1, 0, 540, sy0, 1);
+      if (i === 0) drawRows(ctx, heroFull, 2, 0, 540, sy0, 1 - w); else drawRows(ctx, levels[i], 1, 0, 540, sy0, 1 - w);
       drawRows(ctx, levels[i + 1], 1, 0, 540, sy0, w);
     }
     ctx.restore();
   }
 
   // ---- the live hero ----
-  const hopOf = (t) => (g) => {                               // each letter hops as the glint passes it
-    const Ti = T_FINAL + .35 * g.x / 1346.7;
-    const p = R.prog(t, Ti, Ti + .176), lift = 12 * Math.sin(Math.PI * p), l = q(t - (Ti + .176), 320, 15);
-    return { lift, sx: 1 + .04 * l, sy: 1 - .06 * l };
+  // One clock for glint and hop: the band's centre moves LINEARLY at the spec's own hop-wave speed (1346.7 px in .35 s), from 60 px left of the name,
+  // and each glyph lifts as the centre reaches its left edge, so the light and the letter it lifts travel together.
+  const SWEEP = 1346.7 / .35, LIFT = 20;
+  const hopOf = (t) => (g) => {
+    const Ti = T_FINAL + (g.x + 60) / SWEEP;
+    const p = R.prog(t, Ti, Ti + .176), lift = LIFT * Math.sin(Math.PI * p), l = q(t - (Ti + .176), 320, 15);
+    return { lift, sx: 1 + .06 * l, sy: 1 - .10 * l };
   };
   function drawLive(ctx, t, dy, a) {
     ctx.save(); ctx.globalAlpha = a;
-    // scrim: contrast for the URL and the credit over the night
-    const sg = ctx.createLinearGradient(0, 560 + dy, 0, 1000 + dy);
-    sg.addColorStop(0, 'rgba(5,11,22,0)'); sg.addColorStop(1, 'rgba(5,11,22,.40)');
-    ctx.fillStyle = sg; ctx.fillRect(0, 560 + dy, 1920, 1200);
+    if (a >= 1 || t >= T_L) heroScrim(ctx, dy);                 // (before the swap completes the sprite underneath carries the scrim and the glow)
     let gk = 1 + .06 * Math.sin(R.TAU * (t - T_L) / 1.875);
     if (t >= T_L) gk *= 1 + .5 * Math.exp(-(t - T_L) / .25);
     if (a >= 1 || t >= T_L) heroGlow(ctx, dy, gk);              // (before the swap completes the sprite underneath carries the glow)
@@ -255,9 +272,8 @@
     ctx.restore();
   }
   function drawGlint(ctx, t, dy) {
-    const p = R.prog(t, T_FINAL, T_FINAL + .35);
-    if (t < T_FINAL || p >= 1) return;
-    const left = 960 - NG.width / 2, xc = R.lerp(left - 200, left + NG.width + 200, E.swift(p));
+    const left = 960 - NG.width / 2, xc = left - 60 + SWEEP * (t - T_FINAL);
+    if (t < T_FINAL || xc > left + NG.width + 200) return;
     const L = R.layer('s6:glint'), c = L.ctx;
     heroName(c, dy, hopOf(t), '#fff', true);   // the halo is what makes a glint read on letters that are already near white
     c.globalCompositeOperation = 'destination-in';
@@ -318,11 +334,9 @@
         const A = R.prog(t, T_F0, T_F1);
         const swap = R.prog(t, T_SW0, T_SW1);                  // 0 -> 1 across frames 728 to 730
         const heroRows = swap < 1;
-        if (A < 1) {                                           // the two-frame hand-off from s5's crisp panel: one layer, one alpha, no coverage dip
-          const L = R.layer('s6:win');
-          windowPass(L.ctx, t, true, heroRows);
-          R.blit(ctx, L, A);
-        } else windowPass(ctx, t, true, heroRows);
+        const L = R.layer('s6:win');                           // always through a layer ('lighter' must not touch the world); A is the two-frame hand-off from s5
+        windowPass(L.ctx, t, true, heroRows);
+        R.blit(ctx, L, A);
         if (swap > 0) drawLive(ctx, t, dy, swap);
       } else if (t >= T_L) {
         drawLive(ctx, t, dy, 1);

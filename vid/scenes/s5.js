@@ -72,7 +72,7 @@
   // door mapping about the inner edge (viewBox x = 32): a foreshortened, tapered face
   const mapPt = (x, y, th, dx) => {
     const s = Math.sin(th), c = Math.cos(th), ax = Math.abs(x - 32) / 32;
-    return [32 + (x - 32) * c + dx, 32 + (y - 32) * (1 + .05 * s * ax)];
+    return [32 + (x - 32) * c + dx, 32 + (y - 32) * (1 + .13 * s * ax)];
   };
   function tracePath(ctx, P, th, dx) {
     let p = mapPt(P.start[0], P.start[1], th, dx);
@@ -92,8 +92,12 @@
     { name: 'Brain', desc: ['A folder that gets smarter', 'every time you feed it.'], trail: 'arrow' },
   ];
   let subX = null;                                   // handle x per sub row, measured after fonts load
-  const spr = (t, T) => t < T ? 0 : R.spring(t - T, 260, 24);
-  const focus = t => spr(t, T_SNAP[0]) + spr(t, T_SNAP[1]) + spr(t, T_SNAP[2]);
+  // snap 1 is the spec's picker spring (260, 24); snaps 2 and 3 are stiffer (560, 34: 3.7 percent overshoot, half way in .05 s) so Bio Tracker
+  // is readable for ~.1 s before Brain takes over, and the dot pulse, ripple and icon pop share the screen with their row (LAG after the hit)
+  const SPK = [[260, 24], [560, 34], [560, 34]], LAG = .045;
+  const sprN = (t, n) => { const T = T_SNAP[n]; return t < T ? 0 : R.spring(t - T, SPK[n][0], SPK[n][1]); };
+  const spr = (t, T) => sprN(t, T_SNAP.indexOf(T));
+  const focus = t => sprN(t, 0) + sprN(t, 1) + sprN(t, 2);
   const rowA = d => d < 1 ? 1 - .75 * d : Math.max(0, .25 * (2 - d));
 
   // fold envelopes (three per fold, so text is never drawn over text)
@@ -125,12 +129,12 @@
           const qq = q(tau, 500, 16); sx = 1 + .4 * qq; sy = 1 - .35 * qq;
           if (tau < .3) {                                                   // the landing ring, readable on a phone
             const u = tau / .3;
-            c.save(); c.globalAlpha = a * .5 * (1 - u); c.strokeStyle = ICE; c.lineWidth = 3;
+            c.save(); c.globalAlpha = a * .7 * (1 - u); c.strokeStyle = ICE; c.lineWidth = 5;
             c.beginPath(); c.arc(cx, cy, R.lerp(15, 96, E.outExpo(u)), 0, R.TAU); c.stroke(); c.restore();
           }
         }
       } else if (k === 2) {
-        const tau = t - T_SNAP[1];
+        const tau = t - T_SNAP[1] - LAG;
         if (tau >= 0) {
           r = 14.5 * (1 + .7 * (1 - R.spring(tau, 400, 14)));
           const m = E.outCubic(R.prog(tau, 0, .12)) * (1 - E.outCubic(R.prog(t, T_SNAP[2], T_SNAP[2] + .2)));
@@ -147,8 +151,9 @@
     } else {
       const im = R.img('brain');
       if (im && im.naturalWidth) {
-        const pop = 1 + .2 * q(t - T_SNAP[2], 320, 15);
-        c.save(); c.translate(256, RT + 108); c.scale(pop, pop);
+        const pop = 1 + .2 * q(t - T_SNAP[2] - LAG, 320, 15);
+        c.save(); c.globalAlpha = a * Math.min(1, foc * 3);                 // pink appears at the Brain snap, not on the ghost row before it
+        c.translate(256, RT + 108); c.scale(pop, pop);
         c.drawImage(im, -58, -50.75, 116, 101.5); c.restore();
       }
     }
@@ -169,6 +174,7 @@
     ROWS[k].desc.forEach((s, i) => {
       const base = RT + 232 + 96 * i;
       const dr = k === 0 ? 44 * (1 - E.outExpo(R.prog(t, FOLD[0].open, FOLD[0].open + .176))) : 0;
+      if (k === 0 && t < FOLD[0].open) return;
       if (dr > .01) { c.save(); c.beginPath(); c.rect(340, base - 84, 1300, 84 + 24); c.clip(); c.fillText(s, 382, base + dr); c.restore(); }
       else c.fillText(s, 382, base);
     });
@@ -177,7 +183,7 @@
     {
       let alpha = 1, scl = 1, trailF = foc, accentC = BLUE;
       if (k === 0) { const p = E.outCubic(R.prog(t, FOLD[0].open, FOLD[0].open + .117)); alpha = p; scl = .6 + .4 * p; }
-      if (k === 3) { trailF = 0; }                    // Brain's arrow stays ICE .46 at rest (the sprite in s6 draws it so)
+      if (k === 3) trailF = R.clamp(sprN(t, 2), 0, 1) * (1 - E.inOutCubic(R.prog(t, 10.95, 11.25)));   // hover accent and nudge, released to ICE .46 by 11.25 (s6's sprite draws it at rest)
       c.save();
       c.translate(1700, RT + 108); c.scale(4.8 * scl, 4.8 * scl); c.translate(-8, -8);
       if (ROWS[k].trail === 'chev') { c.translate(8, 8); c.rotate(Math.PI * (k <= 1 ? chevOpen(t, k) : 0)); c.translate(-8, -8); }
@@ -212,16 +218,20 @@
   function drawBrain(ctx, t) {
     if (t < T_BRAIN_IN) return;
     const tau = t - T_BRAIN_IN;
-    const w = 1 - E.outBack(R.prog(t, T_DOOR, T_DOOR_END), 1.4);
+    // the doors: an ease-in-out close that MEETS on the doors beat (10.8398, with the bloom pulse), then a small ringing overshoot through the clap.
+    // (the spec's outBack(1.4) closes 94 percent of the gap in 4 frames and clapped 6 frames before the beat)
+    const dT = t - T_DOOR_END;
+    const w = t < T_DOOR_END ? 1 - E.inOutCubic(R.prog(t, T_DOOR, T_DOOR_END)) : -.09 * Math.exp(-dT / .05) * Math.sin(dT * 45);
     let s = .6 + .4 * R.spring(tau, 260, 19);
     for (const A of FEED_ARR) s *= 1 + .045 * q(t - A, 400, 14);
-    const alpha = R.prog(tau, 0, .1);
+    const alpha = R.prog(tau, 0, .04);
+    const cq = q(dT, 400, 14);                                                          // the clap squashes the brain 3 percent
     const k = 380 / 64 * s, th = 52 * Math.PI / 180 * w, g = 34 * w / (380 / 64 * s) ;
     const cosT = Math.cos(th);
-    const shade = R.mix('#000000', PINK, .75 + .25 * cosT);
+    const shade = R.mix('#000000', PINK, .45 + .55 * cosT);
     ctx.save();
     ctx.globalAlpha = alpha;
-    ctx.translate(1500 - 32 * k, 514 - 32 * k); ctx.scale(k, k);
+    ctx.translate(1500, 514); ctx.scale(1 + .02 * cq, 1 - .03 * cq); ctx.translate(-32 * k, -32 * k); ctx.scale(k, k);
     ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     for (const [P, dx, th2] of [[P_HL, -g, th], [P_HR, g, -th]]) {
       tracePath(ctx, P, th2, dx); ctx.fillStyle = shade; ctx.fill();
@@ -252,19 +262,26 @@
     return [v * v * p0x + 2 * u * v * cx + u * u * p2x, v * v * p0y + 2 * u * v * cy + u * u * p2y,
       2 * v * (cx - p0x) + 2 * u * (p2x - cx), 2 * v * (cy - p0y) + 2 * u * (p2y - cy)];
   }
+  // a feed dot's position at time tt: quadratic curve, eased so it is on screen soon and still accelerates into the brain
+  function feedAt(n, tt) {
+    const t0 = FEED_ARR[n] - .2344, pr = R.prog(tt, t0, FEED_ARR[n]);
+    return feedPos(n, .35 * pr + .65 * pr * pr);
+  }
   function drawFeed(ctx, t) {
     for (let n = 0; n < 4; n++) {
       const t0 = FEED_ARR[n] - .2344;
       if (t < t0 || t >= FEED_ARR[n]) continue;
-      const pr = R.prog(t, t0, FEED_ARR[n]), u = E.inQuad(pr), du = 2 * pr / .2344;
-      const [x, y, dx, dy] = feedPos(n, u), speed = Math.hypot(dx, dy) * du;
-      const k = Math.min(2, 1 + speed / 3000), ang = Math.atan2(dy, dx);
-      ctx.save(); ctx.translate(x, y); ctx.rotate(ang);
-      const gl = ctx.createRadialGradient(0, 0, 0, 0, 0, 34 * k);
-      gl.addColorStop(0, 'rgba(245,201,209,.38)'); gl.addColorStop(1, 'rgba(245,201,209,0)');
-      ctx.fillStyle = gl; ctx.fillRect(-34 * k, -34 * k, 68 * k, 68 * k);
-      ctx.fillStyle = BROWN; ctx.beginPath(); ctx.ellipse(0, 0, 14 * k, 14 / Math.sqrt(k), 0, 0, R.TAU); ctx.fill();
-      ctx.restore();
+      const [x, y] = feedAt(n, t), tail = feedAt(n, Math.max(t0, t - 1 / 70));         // a capsule from where it was to where it is: motion blur without copies
+      const len = Math.hypot(x - tail[0], y - tail[1]);
+      const gr = ctx.createRadialGradient(x, y, 0, x, y, 40);
+      gr.addColorStop(0, 'rgba(245,201,209,.42)'); gr.addColorStop(1, 'rgba(245,201,209,0)');
+      ctx.fillStyle = gr; ctx.fillRect(x - 40, y - 40, 80, 80);
+      ctx.lineCap = 'round';
+      for (const [wd, col] of [[38, '#E6B592'], [31, BROWN]]) {
+        if (len > .5) { const lg = ctx.createLinearGradient(tail[0], tail[1], x, y); lg.addColorStop(0, R.mix(col, col, 0, .25)); lg.addColorStop(1, col); ctx.strokeStyle = lg; }
+        else ctx.strokeStyle = col;
+        ctx.lineWidth = wd; ctx.beginPath(); ctx.moveTo(tail[0], tail[1]); ctx.lineTo(x + .01, y); ctx.stroke();
+      }
     }
   }
 
@@ -315,12 +332,21 @@
       c.fillStyle = g; c.fillRect(0, 0, 1920, 1080);
       c.globalCompositeOperation = 'source-over';
       const vpf = 332 * Math.abs(focus(t + 1 / 120) - focus(t - 1 / 120));         // row speed in px per frame
-      if (vpf > 20 && R.quality >= 1) {
-        const S = R.layer('s5:smear'), sc = S.ctx;
-        sc.setTransform(1, 0, 0, 1, 0, 0); sc.globalCompositeOperation = 'lighter'; sc.globalAlpha = 1 / 8;
-        for (let i = 0; i < 8; i++) sc.drawImage(L.canvas, 0, (i / 7 - .5) * vpf * R.rs);
-        sc.globalAlpha = 1; sc.globalCompositeOperation = 'source-over';
-        R.blit(ctx, S);
+      const spread = vpf * R.smoothstep(3, 9, vpf);                                // no cliff: the smear grows in with the speed
+      if (spread > .5 && R.quality >= 1) {
+        // doubling comb: 4 passes of 2 draws = 16 evenly spaced taps for 8 drawImage calls (never stacked copies)
+        const K = 4, px = spread * R.rs, d = px / ((1 << K) - 1);
+        const SA = R.layer('s5:smearA'), SB = R.layer('s5:smearB');
+        let cur = L, nxt = SA;
+        for (let i = 0; i < K; i++) {
+          const x = nxt.ctx;
+          x.setTransform(1, 0, 0, 1, 0, 0); x.globalCompositeOperation = 'source-over'; x.globalAlpha = 1; x.clearRect(0, 0, R.rw, R.rh);
+          x.globalCompositeOperation = 'lighter'; x.globalAlpha = .5;
+          x.drawImage(cur.canvas, 0, 0); x.drawImage(cur.canvas, 0, d * (1 << i));
+          x.globalAlpha = 1; x.globalCompositeOperation = 'source-over';
+          cur = nxt; nxt = nxt === SA ? SB : SA;
+        }
+        ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(cur.canvas, 0, -px / 2); ctx.restore();
       } else R.blit(ctx, L);
 
       ctx.save(); ctx.translate(0, y);

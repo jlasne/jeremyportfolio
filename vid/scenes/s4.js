@@ -35,12 +35,6 @@
     ctx.lineTo(x, y + a); if (a) ctx.arcTo(x, y, x + a, y, a); else ctx.lineTo(x, y);
     ctx.closePath();
   }
-  // a true parabola between two contact points; h = bump height above the chord at its midpoint
-  function hop(t, t0, t1, x0, y0, x1, y1, h) {
-    const Tt = t1 - t0, u = R.clamp((t - t0) / Tt);
-    return { x: x0 + (x1 - x0) * u, y: y0 + (y1 - y0) * u - 4 * h * u * (1 - u),
-             vx: (x1 - x0) / Tt, vy: ((y1 - y0) - 4 * h * (1 - 2 * u)) / Tt };
-  }
   // a flat shape blurred as a white coverage mask, coloured afterwards (dark or translucent colours cannot go through R.motionBlur in 8 bits)
   function maskBlur(ctx, t, draw, colour, { samples = 10, subs = 2, shutter, name }) {
     const L = R.layer(name), c = L.ctx, gap = shutter / (samples - 1);
@@ -78,6 +72,7 @@
     const [a, b] = SL[i];
     return t < a ? 0 : R.spring(t - a, 260, 19) * (1 - E.outQuad(R.prog(t, b - S16, b)));
   };
+  const SOON_DIM = .5;                                   // the two Soon tiles take half the dimming: their question marks must stay waiting, not disabled
   const mergeM = t => E.inOutCubic(R.prog(t, T_MERGE, T_MEND));
   const dimAlpha = (t, f1, fi, m) =>
     (.18 + .12 * Math.min(1, f1)) * Math.max(0, 1 - fi) * E.outQuad(R.prog(t, T_CLAP, T_CLAP + .1171875)) * (1 - m);
@@ -159,7 +154,7 @@
       if (t >= RV[i] + S32) iconContent(ctx, i, t, false);
       ringStroke(ctx, -T / 2, -T / 2, T, T, [RAD, RAD, RAD, RAD], 1);
     }
-    const da = dimAlpha(t, f1, f, 0);
+    const da = dimAlpha(t, f1, f, 0) * (i >= 2 ? SOON_DIM : 1);
     if (da > .002) { ctx.fillStyle = `rgba(5,11,22,${da.toFixed(3)})`; ctx.beginPath(); rr4(ctx, -T / 2, -T / 2, T, T, [RAD, RAD, RAD, RAD]); ctx.fill(); }
     ctx.restore();
     return { s, cy };
@@ -167,6 +162,13 @@
 
   /* ---- the merge: four opaque slabs become the plate ---- */
   const PLATE = [140, 299, 1640, 322];
+  function slab(i, m) {                                                  // slice i of the merge at m: rect and the four radii
+    const x0 = R.lerp(XS[i] - 160, 140 + 410 * i, m), x1 = R.lerp(XS[i] + 160, 140 + 410 * (i + 1), m);
+    const y0 = R.lerp(290, 299, m), y1 = R.lerp(610, 621, m);
+    const ro = R.lerp(RAD, 67, m), ri = R.lerp(RAD, 0, m);
+    return { x0, x1, y0, y1, radii: [i === 0 ? ro : ri, i === 3 ? ro : ri, i === 3 ? ro : ri, i === 0 ? ro : ri] };
+  }
+  const iconScale = (i, m) => 1 - E.inBack(R.prog(m, .04 * (3 - i), .5 + .04 * (3 - i)), 1.2);
   function drawPlate(ctx, borderA) {
     ctx.beginPath(); rr4(ctx, PLATE[0], PLATE[1], PLATE[2], PLATE[3], [67, 67, 67, 67]);
     ctx.fillStyle = 'rgba(234,244,251,.10)'; ctx.fill();
@@ -175,15 +177,9 @@
   function drawMerge(ctx, t, f1) {
     const m = mergeM(t);
     if (m >= .999) { drawPlate(ctx, 1); return; }
-    const edge = R.lerp(100, 1860, E.inOutCubic(R.prog(m, .40, 1)));
+    const edge = R.lerp(100, 1860, R.prog(m, .40, 1));      // m is already an inOutCubic of time: one ease, so the wipe is seen crossing the row (about 10 frames)
     for (let i = 0; i < 4; i++) drawShadow(ctx, XS[i], YC, 1, .40 * (1 - R.prog(m, 0, .4)));
-    const geo = [];
-    for (let i = 0; i < 4; i++) {
-      const x0 = R.lerp(XS[i] - 160, 140 + 410 * i, m), x1 = R.lerp(XS[i] + 160, 140 + 410 * (i + 1), m);
-      const y0 = R.lerp(290, 299, m), y1 = R.lerp(610, 621, m);
-      const ro = R.lerp(RAD, 67, m), ri = R.lerp(RAD, 0, m);
-      geo.push({ x0, x1, y0, y1, radii: [i === 0 ? ro : ri, i === 3 ? ro : ri, i === 3 ? ro : ri, i === 0 ? ro : ri] });
-    }
+    const geo = [0, 1, 2, 3].map(i => slab(i, m));
     // the plate-style fill (ICE .10) behind the wipe, as ONE path so abutting slabs never show a seam; 40 px feather
     if (edge + 20 > 140) {
       const g = ctx.createLinearGradient(edge - 20, 0, edge + 20, 0);
@@ -200,14 +196,14 @@
         g.addColorStop(0, R.rgba(BASE[i], 0)); g.addColorStop(1, R.rgba(BASE[i], 1));
         ctx.fillStyle = g; ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
       }
-      // the icon shrinks (opaque, right to left) about the tile's own centre; it never fades
-      const sc = 1 - E.inBack(R.prog(m, .04 * (3 - i), .5 + .04 * (3 - i)), 1.2);
+      // the icon shrinks (opaque, right to left) about the centre of its own slab, so it stays centred while the slab widens; it never fades
+      const sc = iconScale(i, m);
       if (sc > .003) {
-        ctx.save(); ctx.translate(XS[i], YC); ctx.scale(sc, sc);
+        ctx.save(); ctx.translate((x0 + x1) / 2, (y0 + y1) / 2); ctx.scale(sc, sc);
         iconContent(ctx, i, t, i === 3 && t >= T_DOT);
         ctx.restore();
       }
-      const da = dimAlpha(t, f1, 0, m);
+      const da = dimAlpha(t, f1, 0, m) * (i >= 2 ? SOON_DIM : 1);
       if (da > .002) { ctx.fillStyle = `rgba(5,11,22,${da.toFixed(3)})`; ctx.fillRect(x0, y0, x1 - x0, y1 - y0); }
       if (i >= 2) { const a = 1 - R.prog(m, 0, .55); if (a > .004) ringStroke(ctx, x0, y0, x1 - x0, y1 - y0, radii, a); }
       ctx.restore();
@@ -216,10 +212,7 @@
     const ba = R.prog(m, .85, 1);
     if (ba > .004) {
       for (let i = 0; i < 4; i++) {
-        const x0 = R.lerp(XS[i] - 160, 140 + 410 * i, m), x1 = R.lerp(XS[i] + 160, 140 + 410 * (i + 1), m);
-        const y0 = R.lerp(290, 299, m), y1 = R.lerp(610, 621, m);
-        const ro = R.lerp(RAD, 67, m), ri = R.lerp(RAD, 0, m);
-        const radii = [i === 0 ? ro : ri, i === 3 ? ro : ri, i === 3 ? ro : ri, i === 0 ? ro : ri];
+        const { x0, x1, y0, y1, radii } = slab(i, m);
         ctx.save();
         ctx.beginPath(); ctx.rect(i > 0 ? x0 + 1.5 : 0, 0, (i < 3 ? x1 - 1.5 : 1920) - (i > 0 ? x0 + 1.5 : 0), 1080); ctx.clip();
         ctx.beginPath(); rr4(ctx, x0, y0, x1 - x0, y1 - y0, radii);
@@ -230,10 +223,19 @@
   }
 
   /* ---- the dot: leaves its tile, flies along a hop, lands as the first bullet ---- */
-  const P0 = [1620, 531.4], P1 = [256, 407];
-  const dotU = t => R.prog(t, T_DOT, T_MEND);
-  const dotPos = t => hop(t, T_DOT, T_MEND, P0[0], P0[1], P1[0], P1[1], 90);
-  const dotRad = u => u > .8 ? R.lerp(22, 14.5, E.inOutQuad(R.prog(u, .8, 1))) : R.lerp(15.8, 22, E.outQuad(R.prog(u, 0, .25)));
+  // where the dot sits inside its own (shrinking, re-centred) icon when it detaches: continuous with the merge, whatever the slab does
+  const M_DOT = mergeM(T_DOT), S_DOT = slab(3, M_DOT), SC_DOT = iconScale(3, M_DOT);
+  const P0 = [(S_DOT.x0 + S_DOT.x1) / 2, (S_DOT.y0 + S_DOT.y1) / 2 + 77.5 * SC_DOT], P1 = [256, 407], HOP_H = 90;
+  const FLY = T_MEND - T_DOT;
+  const dotU = t => R.prog(t, T_DOT, T_MEND);                            // linear: radius, alpha, shutter and wake schedules
+  // the position rides an inOutSine of u (it leaves the icon gently, is fastest mid-flight, and settles into the bullet); the arc is the same parabola
+  function dotPos(t) {
+    const u = dotU(t), ue = E.inOutSine(u), dudt = u > 0 && u < 1 ? Math.PI / 2 * Math.sin(Math.PI * u) / FLY : 0;
+    const dx = P1[0] - P0[0], dy = P1[1] - P0[1];
+    return { x: P0[0] + dx * ue, y: P0[1] + dy * ue - 4 * HOP_H * ue * (1 - ue),
+             vx: dx * dudt, vy: (dy - 4 * HOP_H * (1 - 2 * ue)) * dudt };
+  }
+  const dotRad = u => u > .8 ? R.lerp(22, 14.5, E.inOutQuad(R.prog(u, .8, 1))) : R.lerp(15 * SC_DOT, 22, E.outQuad(R.prog(u, 0, .25)));
   const dotStretch = tt => {
     const p = dotPos(tt), u = dotU(tt), sp = Math.hypot(p.vx, p.vy);
     return 1 + (Math.min(2.2, 1 + sp / 2500) - 1) * (1 - E.inQuad(R.prog(u, .85, 1)));
@@ -253,7 +255,7 @@
     const head = pts[0], tail = pts[N];
     if (Math.hypot(head[0] - tail[0], head[1] - tail[1]) < 3) return;
     const g = ctx.createLinearGradient(head[0], head[1], tail[0], tail[1]);
-    g.addColorStop(0, R.rgba(BLUE, .5 * fade)); g.addColorStop(1, R.rgba(BLUE, 0));
+    g.addColorStop(0, R.rgba(BLUE, 0)); g.addColorStop(.12, R.rgba(BLUE, .5 * fade)); g.addColorStop(1, R.rgba(BLUE, 0));   // fades in from the head: no seam behind the dot
     ctx.save(); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(L[0][0], L[0][1]);
     for (let k = 1; k <= N; k++) ctx.lineTo(L[k][0], L[k][1]);
     for (let k = N; k >= 0; k--) ctx.lineTo(Rr[k][0], Rr[k][1]);
@@ -268,7 +270,7 @@
       const pp = dotPos(tt), r = dotRad(dotU(tt)), k = dotStretch(tt);
       c.translate(pp.x, pp.y); c.rotate(Math.atan2(pp.vy, pp.vx)); c.scale(k, 1);
       c.beginPath(); c.arc(0, 0, r, 0, TAU); c.fill();
-    }, `rgba(234,244,251,${alpha.toFixed(3)})`, { shutter, name: 's4:mbDot' });
+    }, `rgba(234,244,251,${alpha.toFixed(3)})`, { samples: 10, subs: 3, shutter, name: 's4:mbDot' });
   }
 
   /* ---- the gust of leaves (Kaught) ---- */
@@ -283,7 +285,7 @@
     }
     return out;
   })();
-  function drawLeaf(ctx, l, t, a = 1) {                  // t = the time this copy is drawn at (smear copies pass t - 1/180, t - 2/180)
+  function drawLeaf(ctx, l, t, a = 1) {                  // t = the time this copy is drawn at (smear copies pass t - k/480)
     const tau = t - T_BASS - l.d; if (tau < 0) return;
     const x = l.x0 + l.vx * tau, y = l.y0 + l.vy * tau + l.sw * Math.sin(l.w * tau + l.ph); if (x > 2300) return;
     const al = .96 * a * gustFade(t) * (l.z >= .5 ? frontFade(t) : 1); if (al <= .003) return;
@@ -297,11 +299,14 @@
     ctx.strokeStyle = 'rgba(12,36,16,.5)'; ctx.lineWidth = Math.max(1.5, l.L * .012);
     ctx.beginPath(); ctx.moveTo(l.L * .04, 0); ctx.lineTo(l.L * .9, 0); ctx.stroke(); ctx.restore();
   }
+  // eight copies 1/480 s apart (about 5 px on the fastest leaf) so the smear is a continuous streak, not three stacked outlines;
+  // weights are per-copy alphas that composite to about .95 in the leaf's body and fall off softly at the head and tail
+  const SMEAR = [.50, .46, .42, .38, .34, .30, .26, .22];
   function drawLeaves(ctx, t, front) {
     if (t < T_BASS || t > 8.9) return;
     for (const l of LEAVES) {
       if ((l.z >= .5) !== front) continue;
-      if (l.z > .6) { drawLeaf(ctx, l, t, .5); drawLeaf(ctx, l, t - 1 / 180, .3); drawLeaf(ctx, l, t - 2 / 180, .2); }   // near leaves smear
+      if (l.z > .6) for (let k = SMEAR.length - 1; k >= 0; k--) drawLeaf(ctx, l, t - k / 480, SMEAR[k]);   // near leaves smear: oldest copy first, the crisp one on top
       else drawLeaf(ctx, l, t);
     }
   }
@@ -352,7 +357,7 @@
     const f = R.fx, tau = t - T_DROP, kr = E.inOutCubic(R.prog(t, 9.125, T_MEND));
     f.bloom = R.lerp(.25, .30, kr); f.threshold = R.lerp(.70, .62, kr); f.vignette = .30;
     // the drop lights the hushed picture: a hard step to colour and light
-    R.flash(t, T_DROP, { amount: .30, decay: 34 });
+    R.flash(t, T_DROP, { amount: .30, decay: 34, color: ICE });
     R.impact(t, T_DROP, { amount: 14, decay: 12, freq: 30, rot: .012 });
     f.chroma = 10 * Math.exp(-tau / .045); f.chromaAngle = 0;
     f.bloom += .5 * Math.exp(-8 * tau);
@@ -369,14 +374,14 @@
   Reel.scene({
     id: 's4', name: 'Four apps',
     start: T_DROP, end: T_END, layer: 2,
-    setup() { shadow = buildShadow(); },
+    setup() { shadow = buildShadow(); R.layer('s4:mbDot'); },
     draw(ctx, t) {
       fx(t);
       const fs = [0, 1, 2, 3].map(i => foc(i, t)), f1 = fs[1];
       const merging = t >= T_MERGE;
 
       // auras (behind the tiles)
-      const AUR = [['#FFA51F', .42], ['#78BE5A', .38], [ICE, .20], [ICE, .20]];
+      const AUR = [['#FFA51F', .55], ['#78BE5A', .50], [ICE, .30], [ICE, .30]];
       for (let i = 0; i < 4; i++) {
         const a = Math.min(1, fs[i]) * AUR[i][1]; if (a <= .004) continue;
         const g = ctx.createRadialGradient(XS[i], 436, 0, XS[i], 436, 400);
@@ -402,7 +407,7 @@
       drawPill(ctx, 'With @ayade369', 300, t, R.at(4, 3), R.at(5, 1) - S16, R.at(5, 1));
       drawPill(ctx, 'Creator wanted', 740, t, R.at(5, 1), R.at(5, 3) - S32, R.at(5, 3) + S32);
       drawReader(ctx, t, 'Film the dare, or dare them back.', T_CLAP + 2 * S64, T_BASS - S32, T_BASS + S32);
-      drawReader(ctx, t, 'Name any wild animal with your camera.', R.at(5, 1) - 3 * S64, R.at(5, 3) - S32, R.at(5, 3) + S32);
+      drawReader(ctx, t, 'Name any wild animal with your camera.', R.at(5, 1) - 3 * S32, R.at(5, 3) - S32, R.at(5, 3) + S32);
 
       // reveal rings (additive)
       ctx.save(); ctx.globalCompositeOperation = 'lighter';
