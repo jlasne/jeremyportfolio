@@ -178,6 +178,13 @@ other day is the wrong post. The script builds its five lines out of the
 same day, and leans on who Jeremy is for one line at most, because the
 Change and the Result are what stop every video sounding like the last one.
 
+The Situation line is the one that repeats if nobody stops it. It says he is
+25, then where he is right now and what he is doing, taken from the log, so it
+changes every day. A city or country is named only when it is new or unusual
+that day, never as a habit. The brief also shows the model the Situation lines
+of the last five scripts and asks for different words and a different place or
+activity, which is what actually breaks the pattern.
+
 Layout is specified separately from voice, because the model left alone
 returns one block of prose at whatever length it lands on. A post is read on
 a phone: the hook stands on its own line, two to four short blocks follow,

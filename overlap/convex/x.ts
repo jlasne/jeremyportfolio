@@ -44,7 +44,7 @@ import {
 
 const MAX_ENTRY = 4000;
 const MAX_ENTRIES = 200;
-const KEEP_DRAFT_DAYS = 3; /* how much recent work the model is shown */
+const KEEP_DRAFT_DAYS = 5; /* how much recent work the model is shown */
 /* One nudge, at 20:00, three hours after the drafts land, and only while
    none of them has been ticked off. One mail that gets read beats six that
    get filtered. */
@@ -296,6 +296,7 @@ export const context = internalQuery({
           posts: d.drafts
             .filter((x) => x.kind === "post")
             .map((x) => ({ label: x.label, body: x.body })),
+          script: d.drafts.find((x) => x.kind === "script")?.body ?? "",
         })),
     };
   },
@@ -337,7 +338,7 @@ export const dayFor = internalQuery({
 
 function brief(c: {
   entries: { at: number; slot: string; q?: string; text: string }[];
-  previous: { day: string; posts: { label: string; body: string }[] }[];
+  previous: { day: string; posts: { label: string; body: string }[]; script?: string }[];
 }, day: string) {
   const when = (at: number) => {
     const d = new Date(at + parisOffset(at) * 3_600_000);
@@ -406,6 +407,22 @@ async function ask(
   const text = body?.choices?.[0]?.message?.content;
   if (typeof text !== "string" || !text.trim()) throw new Error("OpenRouter returned nothing");
   return text.trim();
+}
+
+/**
+ * The Situation lines of the scripts already written.
+ *
+ * A script opens on the same line every day unless it is shown the last few,
+ * and the fix for "I'm in Cork" every video is to say what the earlier ones
+ * said and ask for different. Best effort: the script is free text, so the
+ * line is found by its label and anything that does not parse is skipped.
+ */
+function situationOf(script: string): string {
+  for (const m of script.matchAll(/Situation\W*([\s\S]*?)\W*Desire/gi)) {
+    const line = m[1].replace(/\s+/g, " ").trim();
+    if (line.length > 15) return line.slice(0, 220);
+  }
+  return "";
 }
 
 /**
@@ -494,14 +511,22 @@ export const make = internalAction({
       }),
     );
 
+    const opened = (c.previous as { script?: string }[]).map((p) => situationOf(p.script ?? "")).filter(Boolean);
     const script = await ask(
       SCRIPT_SYSTEM,
       `${b}\n\nWrite the 60 second script from this log.\n\n` +
-        `Build the five lines out of today: the Situation is where he was today, the Desire is what he ` +
-        `wanted from it, the Conflict is what blocked it, the Change is the decision he took today, and ` +
-        `the Result is what is true tonight that was not true this morning. The Change and the Result are ` +
-        `what stops every video sounding like the last one, so they carry today's specifics and today's ` +
-        `numbers. Only the Situation may lean on who Jeremy is, and one line of it is enough.`,
+        `Build the five lines out of today. The Situation says he is 25, then where he is right now and ` +
+        `what he is doing, taken from the log: a desk, a train, a gym, a call, a beach. It is today's, so ` +
+        `it is different every day. Do not name his city or country unless the log says he is somewhere new ` +
+        `or unusual today, and never open with "I'm in" and a place. The Desire is what he wanted from ` +
+        `today, the Conflict is what blocked it, the Change is the decision he took today, and the Result ` +
+        `is what is true tonight that was not true this morning. The Change and the Result are what stops ` +
+        `every video sounding like the last one, so they carry today's specifics and today's numbers. ` +
+        `Only the Situation may lean on who Jeremy is, and one to two lines of it is enough.` +
+        (opened.length
+          ? `\n\nSITUATION LINES ALREADY USED IN EARLIER VIDEOS. Open differently: other words, ` +
+            `another place or another activity.\n` + opened.map((o: string) => `- ${o}`).join("\n")
+          : ""),
     );
 
     const at = Date.now();
@@ -1097,9 +1122,10 @@ export const build = action({
         SCRIPT_SYSTEM,
         `${material}\n\nWrite the 60 second script for this idea.\n\n` +
           `This video is about the idea, not about today. Build the five lines from what his brain holds: ` +
-          `the Situation is where he stands on this idea, the Desire is what he wants from it, the Conflict is ` +
-          `what blocks it, the Change is the decision he took, and the Result is what is true now. The Change and ` +
-          `the Result carry his dated specifics. Only the Situation may lean on who Jeremy is. ` +
+          `the Situation says he is 25 and where he stands on this idea, the Desire is what he wants from it, ` +
+          `the Conflict is what blocks it, the Change is the decision he took, and the Result is what is true ` +
+          `now. Name no city or country. The Change and the Result carry his dated specifics. Only the ` +
+          `Situation may lean on who Jeremy is. ` +
           `Where the material is thin, write [X] and list what you needed at the end.`,
         0.7,
         { max: 2500 },
