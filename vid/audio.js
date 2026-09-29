@@ -278,6 +278,18 @@
       g.gain.setValueAtTime(gain, t); g.gain.linearRampToValueAtTime(0, t + dur);
       o.connect(lp); lp.connect(g); out(g, fx);
     };
+    // swell: a reversed glass cluster. FM bells whose level and brightness climb into tEnd, then stop dead on it.
+    // (additive: the first reel does not call it)
+    S.swell = (tEnd, notes, dur = .47, { gain = .3, ratio = 3.5, index = 1.6, rev = .3, pan = 0, duck: dk = false } = {}) => {
+      const t0 = tEnd - dur, g = ctx.createGain(), each = 1 / Math.max(1, notes.length * .6);
+      g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(gain, tEnd - .004); g.gain.linearRampToValueAtTime(0, tEnd);
+      for (const n of notes) {
+        const f = hz(n), car = osc('sine', f, t0, dur), mod = osc('sine', f * ratio, t0, dur), mg = ctx.createGain(), cg = ctx.createGain();
+        mg.gain.setValueAtTime(f * index * .05, t0); mg.gain.exponentialRampToValueAtTime(f * index, tEnd - .004); mg.gain.setValueAtTime(0, tEnd);
+        mod.connect(mg); mg.connect(car.frequency); cg.gain.value = each; car.connect(cg); cg.connect(g);
+      }
+      out(g, dk ? music : fx, { rev, pan });
+    };
     // automation on the music bus
     S.filter = (t, freq, ramp = 0) => {
       if (ramp) { musicFilter.frequency.setValueAtTime(musicFilter.frequency.value, t); musicFilter.frequency.exponentialRampToValueAtTime(freq, t + ramp); }
