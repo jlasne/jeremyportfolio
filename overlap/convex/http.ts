@@ -134,14 +134,8 @@ async function answer(ctx: ActionCtx, request: Request): Promise<Response> {
         return ok(await ctx.runAction(api.x.reply, args));
       case "x.replies":
         return ok(await ctx.runAction(api.x.replies, args));
-      case "x.brain":
-        return ok(await ctx.runQuery(api.x.brain, args));
       case "x.feed":
         return ok(await ctx.runAction(api.x.feed, args));
-      case "x.settle":
-        return ok(await ctx.runMutation(api.x.settle, args));
-      case "x.dropConcept":
-        return ok(await ctx.runMutation(api.x.dropConcept, args));
       case "x.ideas":
         return ok(await ctx.runQuery(api.x.ideas, args));
       case "x.useIdea":

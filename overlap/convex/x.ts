@@ -535,6 +535,7 @@ export const putAsks = internalMutation({
         beat: v.string(),
         answered: v.boolean(),
         from: v.optional(v.string()),
+        concept: v.optional(v.string()),
       }),
     ),
   },
@@ -563,6 +564,8 @@ export const fill = action({
   handler: async (ctx, a): Promise<unknown> => {
     mustBeJeremy(a.passphrase);
     const key = a.day && isDay(a.day) ? a.day : paris().day;
+    /* A contradiction the brain is still holding is the first question. */
+    await ctx.runMutation(internal.x.queueConflicts, { day: key });
     const d = await ctx.runQuery(internal.x.dayFor, { day: key });
     const c = await ctx.runQuery(internal.x.context, { day: key });
     const asks: NonNullable<DayDoc["asks"]> = d.asks ?? [];
@@ -653,6 +656,9 @@ export const reply = action({
     }
 
     await ctx.runMutation(internal.x.putAsks, { day: a.day, asks: next });
+    /* An answer to a settling question is read at once, so the position is
+       rewritten now and not at 23:00. */
+    if (target.concept) await ctx.scheduler.runAfter(0, internal.x.digest, { day: a.day });
     return await ctx.runQuery(internal.x.dayFor, { day: a.day });
   },
 });
@@ -767,29 +773,6 @@ export const waiting = internalQuery({
   handler: async (ctx) => await waitingDays(ctx),
 });
 
-/** The Brain screen. */
-export const brain = query({
-  args: { passphrase: v.string() },
-  handler: async (ctx, { passphrase }) => {
-    mustBeJeremy(passphrase);
-    const all = ((await ctx.db.query("xBrain").collect()) as Concept[]).sort((a, b) => b.updatedAt - a.updatedAt);
-    const seen = new Set<string>();
-    for (const c of all) for (const e of c.evidence) seen.add(e.day);
-    return {
-      concepts: all.map((c) => ({
-        slug: c.slug,
-        name: c.name,
-        position: c.position,
-        evidence: c.evidence,
-        conflict: c.conflict,
-        updatedAt: c.updatedAt,
-      })),
-      days: seen.size,
-      waiting: (await waitingDays(ctx)).length,
-    };
-  },
-});
-
 export const applyDigest = internalMutation({
   args: {
     day: v.string(),
@@ -800,6 +783,8 @@ export const applyDigest = internalMutation({
         position: v.string(),
         evidence: v.string(),
         conflict: v.optional(v.string()),
+        question: v.optional(v.string()),
+        settled: v.optional(v.boolean()),
       }),
     ),
   },
@@ -821,8 +806,19 @@ export const applyDigest = internalMutation({
       const text = u.evidence.trim().slice(0, 300);
       if (!slug || !position || !text) continue;
       const ev = { day, text };
-      const conflict = u.conflict?.trim().slice(0, 240) || undefined;
       const hit = bySlug.get(slug);
+
+      /* A contradiction becomes a question, and stays one until an answer
+         settles it. Nothing is asked twice: a conflict already open is kept
+         as it is unless a new one replaces it. */
+      const said = u.conflict?.trim().slice(0, 240) || undefined;
+      const conflict = u.settled === true ? undefined : said ?? hit?.conflict;
+      const conflictQ =
+        u.settled === true
+          ? undefined
+          : said
+            ? (u.question?.trim() || `${said} Which is true now, and why?`).slice(0, 300)
+            : hit?.conflictQ;
 
       if (hit) {
         const evidence = [...hit.evidence.filter((e) => e.day !== day), ev]
@@ -832,7 +828,8 @@ export const applyDigest = internalMutation({
           name: u.name.trim().slice(0, 60) || hit.name,
           position,
           evidence,
-          conflict: conflict ?? hit.conflict,
+          conflict,
+          conflictQ,
           updatedAt: Date.now(),
         });
       } else if (count < MAX_CONCEPTS) {
@@ -841,7 +838,8 @@ export const applyDigest = internalMutation({
           name: u.name.trim().slice(0, 60) || slug,
           position,
           evidence: [ev],
-          conflict,
+          conflict: said,
+          conflictQ: said ? (u.question?.trim() || `${said} Which is true now, and why?`).slice(0, 300) : undefined,
           updatedAt: Date.now(),
         });
         count++;
@@ -852,6 +850,33 @@ export const applyDigest = internalMutation({
     for (const c of (await ctx.db.query("xBrain").collect()) as Concept[])
       if (!c.evidence.length) await ctx.db.delete(c._id);
     return null;
+  },
+});
+
+/**
+ * A contradiction in the brain is settled by asking, not by a screen.
+ *
+ * Every concept holding an open conflict gets its question onto the day's
+ * feed under Why, at most two a day so a bad week does not bury the real
+ * questions. It is idempotent, so it can run after every digest and every
+ * time a feed is filled, and a question is never put on a day twice. It
+ * comes back every day until an answer settles it.
+ */
+export const queueConflicts = internalMutation({
+  args: { day: v.string() },
+  handler: async (ctx, { day }) => {
+    const open = ((await ctx.db.query("xBrain").collect()) as Concept[]).filter((c) => c.conflictQ);
+    if (!open.length) return 0;
+    const old = await find(ctx, day);
+    const asks = old?.asks ?? [];
+    const on = new Set(asks.filter((x) => x.concept).map((x) => x.concept));
+    const room = Math.max(0, 2 - on.size);
+    const fresh = open
+      .filter((c) => !on.has(c.slug))
+      .slice(0, room)
+      .map((c) => ({ id: rid(), at: Date.now(), text: c.conflictQ as string, beat: "you", answered: false, concept: c.slug }));
+    if (fresh.length) await upsert(ctx, day, { asks: [...asks, ...fresh] });
+    return fresh.length;
   },
 });
 
@@ -876,10 +901,14 @@ export const digest = internalAction({
     const index = held.length
       ? held.map((h) => `- ${h.slug} | ${h.name} | ${h.position.slice(0, 300)}`).join("\n")
       : "(the brain is empty, so every concept below is new)";
+    const opened = held.filter((h) => h.conflictQ);
+    const conflicts = opened.length
+      ? `\n\nOPEN CONFLICTS (slug | the question he was asked):\n` + opened.map((h) => `- ${h.slug} | ${h.conflictQ}`).join("\n")
+      : "";
 
     const raw = await ask(
       DIGEST_SYSTEM,
-      `DATE: ${day}\n\nTHE BRAIN NOW (slug | name | position):\n${index}\n\n` +
+      `DATE: ${day}\n\nTHE BRAIN NOW (slug | name | position):\n${index}${conflicts}\n\n` +
         `WHAT HE SAID THIS DAY:\n${transcriptOf(entries)}\n\nUpdate the brain.`,
       0.3,
       { note: false, max: 3000 },
@@ -894,9 +923,13 @@ export const digest = internalAction({
         position: u.position,
         evidence: u.evidence,
         conflict: typeof u.conflict === "string" && u.conflict.trim() ? u.conflict : undefined,
+        question: typeof u.question === "string" && u.question.trim() ? u.question : undefined,
+        settled: u.settled === true ? true : undefined,
       }));
     await ctx.runMutation(internal.x.applyDigest, { day, updates });
     await ctx.runMutation(internal.x.markDigested, { day });
+    /* Whatever this day left contradictory is asked about on today's feed. */
+    await ctx.runMutation(internal.x.queueConflicts, { day: paris().day });
     return updates.length;
   },
 });
@@ -938,26 +971,6 @@ export const catchUp = internalAction({
   args: {},
   handler: async (ctx) => {
     await readWaiting(ctx);
-    return null;
-  },
-});
-
-export const settle = mutation({
-  args: { passphrase: v.string(), slug: v.string() },
-  handler: async (ctx, { passphrase, slug }) => {
-    mustBeJeremy(passphrase);
-    const c = await ctx.db.query("xBrain").withIndex("by_slug", (q: any) => q.eq("slug", slug)).unique();
-    if (c) await ctx.db.patch(c._id, { conflict: undefined });
-    return null;
-  },
-});
-
-export const dropConcept = mutation({
-  args: { passphrase: v.string(), slug: v.string() },
-  handler: async (ctx, { passphrase, slug }) => {
-    mustBeJeremy(passphrase);
-    const c = await ctx.db.query("xBrain").withIndex("by_slug", (q: any) => q.eq("slug", slug)).unique();
-    if (c) await ctx.db.delete(c._id);
     return null;
   },
 });
@@ -1008,7 +1021,10 @@ export const ideas = query({
   args: { passphrase: v.string() },
   handler: async (ctx, { passphrase }) => {
     mustBeJeremy(passphrase);
-    return (await ctx.db.query("xIdeas").order("desc").take(30)).map(ideaOut);
+    return {
+      list: (await ctx.db.query("xIdeas").order("desc").take(30)).map(ideaOut),
+      concepts: (await ctx.db.query("xBrain").collect()).length,
+    };
   },
 });
 

@@ -230,13 +230,14 @@ RULES
 - Reuse an existing slug whenever the day fits it. Create a new concept only when nothing existing fits.
 - Touch at most 6 concepts. Skip small talk. Skip anything he did not actually say.
 - Never invent a fact, a number or a feeling.
-- If today contradicts the old position, still write the position as it is true now, and set "conflict" to one sentence naming what changed. Otherwise leave "conflict" out.
+- If today contradicts the old position, still write the position as it is true now, and set "conflict" to one sentence naming what changed. Also set "question": one question in his voice, under 25 words, that names both sides with their dates and asks which is true now and why. Example: "On 22 Sep you said volume wins on outreach. On 25 Sep you said replies beat DMs. Which is true now, and why?" Otherwise leave both out.
+- You may be given OPEN CONFLICTS: a concept and the question he was asked to settle it. If what he said this day answers that question, rewrite the position from his answer and set "settled": true. If it does not, leave that concept alone.
 - No em dashes. Plain English. Sentences under 30 words.
 
 OUTPUT
 One JSON object and nothing else, no code fence:
-{"concepts":[{"slug":"kebab-case","name":"Short name","position":"...","evidence":"...","conflict":"..."}]}
-If the day holds nothing worth keeping, output {"concepts":[]}.`;
+{"concepts":[{"slug":"kebab-case","name":"Short name","position":"...","evidence":"...","conflict":"...","question":"...","settled":true}]}
+Leave out "conflict", "question" and "settled" when they do not apply. If the day holds nothing worth keeping, output {"concepts":[]}.`;
 
 /**
  * The talking structure.

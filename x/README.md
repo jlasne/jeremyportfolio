@@ -82,26 +82,25 @@ is true of you now in the first person, and up to twelve pieces of **dated
 evidence**, the things you actually said. Every claim traces back to the day
 you said it.
 
-Nobody presses anything to feed it. A day is read into the brain when it is
-written, by the button or by the 17:00 mail, and again at 23:00 for anything
-the day left unread, so it is fed daily whether or not the day was ever
-written. The first time the page opens with days the brain has not read, it
-reads them on its own, five at a time, oldest first so a newer position
-overrides an older one. Reading a day twice replaces what it said and never
-doubles it.
+Nobody presses anything to feed it, and there is no screen for it. A day is read
+into the brain when it is written, by the button or by the 17:00 mail, and again
+at 23:00 for anything the day left unread, so it is fed daily whether or not the
+day was ever written. When the page opens it also reads any older days it has
+not read, silently, five at a time, oldest first so a newer position overrides
+an older one. Reading a day twice replaces what it said and never doubles it.
 
-If a day contradicts an old position, the position is rewritten to what is
-true now and the concept is flagged **conflict**, with one sentence naming what
-changed, until you press Settled. If a read fails the page says why and offers
-Try again, rather than looping.
+**A contradiction is settled by a question, not a screen.** If a day contradicts
+an old position, the position is rewritten to what is true now, and one question
+goes onto the feed under Why, marked **settling**, naming both sides with their
+dates: "On 22 Sep you said volume wins on outreach. On 25 Sep you said replies
+beat DMs. Which is true now, and why?" It comes back every day until an answer
+settles it, at most two a day so a bad week does not bury the real questions.
+Answering it reads the day at once, and the position is rewritten from your
+answer.
 
 The eighth beat on the feed, **Why**, is how the brain learns you. It is asked
 as a follow-up to something you actually said that day, in your own words, and
 it prefers concepts the brain holds thinly. There is no separate interview.
-
-The Brain screen is a window, not a step. It shows what the days taught it so
-you can trust it, and it is where you correct it: settle a conflict, or remove
-a concept that got you wrong.
 
 ## Ideas
 
@@ -132,9 +131,8 @@ thickens the brain for the next idea. Tick an idea once it is filmed.
   are the open questions, the /bio tick and the day answered so far. One
   Write button, in the bar, and only once five beats are covered.
 - **Ideas.** The field, the two outputs, the concepts it drew on, the
-  questions it added, and every earlier idea.
-- **Brain.** Every concept with its position and dated evidence, and
-  conflicts in red. It reads unread days by itself.
+  questions it added, and every earlier idea. If the brain is still empty it
+  says so before you type.
 - **X-Replies.** Paste somebody else's post and get three ways in: one that
   answers with something from your own day, one that asks what they are
   building, one that takes the other side. X is a room before it is a
@@ -158,7 +156,8 @@ thickens the brain for the next idea. Tick an idea once it is filmed.
   live on the server, so the voice is a deploy and the page source gives
   nothing away.
 - **Data** is three tables on the Overlap deployment: `xDays`, one document
-  per day, `xBrain`, one per concept, and `xIdeas`, one per idea. (`xFacts` is retired and stays declared only so a deploy cannot
+  per day, `xBrain`, one per concept, and `xIdeas`, one per idea. Nothing
+  reads `xBrain` on screen: to look inside, use the Convex dashboard. (`xFacts` is retired and stays declared only so a deploy cannot
   trip over a document left in it.)
 - **Auth** is a passphrase, the same `BIO_PASSPHRASE` that writes /bio,
   asked once per device and kept in `localStorage`. No accounts, because

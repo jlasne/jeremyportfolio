@@ -233,6 +233,9 @@ export default defineSchema({
           beat: v.string(),
           answered: v.boolean(),
           from: v.optional(v.string()),
+          /* set when the question exists to settle a contradiction in the
+             brain: the slug of the concept it is about */
+          concept: v.optional(v.string()),
         }),
       ),
     ),
@@ -251,8 +254,11 @@ export default defineSchema({
     name: v.string(),
     position: v.string(),
     evidence: v.array(v.object({ day: v.string(), text: v.string() })),
-    /* set when a day contradicted the old position, cleared by hand */
+    /* set when a day contradicted the old position: what changed, and the
+       question that asks him which is true now. Both clear when a later
+       answer settles it. */
     conflict: v.optional(v.string()),
+    conflictQ: v.optional(v.string()),
     updatedAt: v.number(),
   }).index("by_slug", ["slug"]),
 
