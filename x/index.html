@@ -228,7 +228,7 @@ button, input, textarea, select { font: inherit; color: inherit; }
     <div class="logo">𝕏</div>
     <div class="nav" id="nav">
       <button data-tab="today" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg><span>Today</span></button>
-      <button data-tab="replies"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15a3 3 0 0 1-3 3H8l-4 3V6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3z"/></svg><span>Replies</span></button>
+      <button data-tab="replies"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15a3 3 0 0 1-3 3H8l-4 3V6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3z"/></svg><span>X-Replies</span></button>
       <button data-tab="drafts"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.1 5.3L19.5 10l-5.4 1.7L12 17l-2.1-5.3L4.5 10l5.4-1.7z"/><path d="M18.5 15.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg><span>Drafts</span></button>
       <button data-tab="archive"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h7l2 2.5h9V19H3z"/><path d="M3 10h18"/></svg><span>Archive</span></button>
     </div>
@@ -387,7 +387,7 @@ function draw() {
   const v = $("#view");
   if (tab === "today") { $("#title").textContent = "Today"; $("#sub").textContent = longDate(state.today); v.innerHTML = today(); }
   if (tab === "drafts") { $("#title").textContent = "Drafts"; $("#sub").textContent = state.draftsAt ? "written " + clock(state.draftsAt) : "not written yet"; v.innerHTML = drafts(state.drafts); }
-  if (tab === "replies") { $("#title").textContent = "Replies"; $("#sub").textContent = "reply to almost everyone"; v.innerHTML = repliesView(); }
+  if (tab === "replies") { $("#title").textContent = "X-Replies"; $("#sub").textContent = "reply to almost everyone"; v.innerHTML = repliesView(); }
   if (tab === "archive") { $("#title").textContent = "Archive"; $("#sub").textContent = "every day logged"; v.innerHTML = archiveView(); }
   wire();
 }
@@ -537,8 +537,9 @@ function archiveView() {
     `;
   }
   if (!archive) return `<p class="empty">Loading…</p>`;
-  if (!archive.length) return `<p class="empty">Nothing yet. Today is day one.</p>`;
-  return archive.map((d) => `
+  const full = archive.filter((d) => d.entries > 0 || d.drafts > 0);
+  if (!full.length) return `<p class="empty">Nothing yet. Today is day one.</p>`;
+  return full.map((d) => `
     <article class="row" style="cursor:pointer" data-day="${esc(d.day)}">
       <div class="meta">
         <b>${esc(longDate(d.day))}</b>

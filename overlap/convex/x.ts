@@ -150,7 +150,11 @@ export const history = query({
   handler: async (ctx, { passphrase, limit }) => {
     mustBeJeremy(passphrase);
     const n = Math.min(Math.max(limit ?? 30, 1), 120);
-    const days = await ctx.db.query("xDays").withIndex("by_day").order("desc").take(n);
+    /* A day exists the moment a mail is marked sent or /bio is ticked, so
+       many are empty. The archive is for days with something in them. */
+    const days = (await ctx.db.query("xDays").withIndex("by_day").order("desc").take(n * 3))
+      .filter((d) => d.entries.length > 0 || d.drafts.length > 0)
+      .slice(0, n);
     return days.map((d) => ({
       day: d.day,
       bioDone: d.bioDone,
@@ -888,11 +892,16 @@ async function resend(subject: string, html: string, text: string) {
 export const sendSlot = internalAction({
   args: { day: v.string(), slot: v.string(), mark: v.optional(v.boolean()) },
   handler: async (ctx, { day, slot, mark }) => {
+    /* Write the day at 17:00, but never over drafts that already exist:
+       writing replaces the set, and with it every used tick. */
     if (slot === "17") {
-      try {
-        await ctx.runAction(internal.x.make, { day });
-      } catch (e) {
-        console.error("x: could not write the drafts", e);
+      const before = await ctx.runQuery(internal.x.dayFor, { day });
+      if (!before.drafts.length) {
+        try {
+          await ctx.runAction(internal.x.make, { day });
+        } catch (e) {
+          console.error("x: could not write the drafts", e);
+        }
       }
     }
     const d = await ctx.runQuery(internal.x.dayFor, { day });

@@ -72,7 +72,7 @@ the question that produced it, and the feed is a list on the same document.
 - **Today.** The bar, the feed of open questions, then the day answered so
   far, newest first, and the /bio tick for the 30 day challenge. One Write
   button, in the bar, and only once five beats are covered.
-- **Replies.** Paste somebody else's post and get three ways in: one that
+- **X-Replies.** Paste somebody else's post and get three ways in: one that
   answers with something from your own day, one that asks what they are
   building, one that takes the other side. X is a room before it is a
   stage, and a reply is cheaper than a post and lands closer to the person.
@@ -83,7 +83,7 @@ the question that produced it, and the feed is a list on the same document.
   the text ready. A tick on each marks it posted or filmed, so tomorrow's
   archive says what actually shipped. While the day is being written the
   screen says so and offers nothing else.
-- **Archive.** Every day logged, with its entries and its drafts.
+- **Archive.** Every day with something in it. Days that only exist because a mail went out are not shown.
 ## Stack
 
 - **`index.html`** is the page, hand written, no build step. X's own palette:
