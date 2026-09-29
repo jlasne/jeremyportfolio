@@ -211,7 +211,8 @@
   R.mixArr = (a, b, t) => { const A = hex(a), B = hex(b); return [lerp(A[0], B[0], t), lerp(A[1], B[1], t), lerp(A[2], B[2], t)]; };
   R.hsl = (h, s, l, a = 1) => `hsla(${h},${s}%,${l}%,${a})`;
   // the site's palette; scenes add the storyboard's accents
-  R.C = { ink: '#050b16', blue: '#5fa8d3', ice: '#eaf4fb', red: '#ff4b1f', lime: '#d7ff3a', ink2: '#0c1628', redDeep: '#b8260c' };
+  R.C = { ink: '#050b16', blue: '#5fa8d3', ice: '#eaf4fb', red: '#ff4b1f', lime: '#d7ff3a', ink2: '#0c1628', redDeep: '#b8260c',
+    acid: '#c8ff3d', shopInk: '#0a0a0a', brainPink: '#F5C9D1', brainBrown: '#A8704E' };
 
   // ---- type ----
   R.F = { display: 'Unbounded', sans: 'Inter Tight', grot: 'Space Grotesk', serif: 'Instrument Serif', mono: 'JetBrains Mono' };
@@ -396,19 +397,59 @@
 
   // Real motion blur: average `samples` sub-frames across the shutter.
   // draw(ctx, tt) must draw the moving thing at time tt. shutter in seconds (1/48 = 180deg at 24fps).
-  R.motionBlur = (ctx, t, draw, { samples = 8, shutter = 1 / 48, name = '_mb' } = {}) => {
+  // Option subs (default 1): draw each sample `subs` times, interleaved between its neighbours, at 1/subs weight.
+  // subs: 2 with samples: 10 gives 20 positions: a smooth smear instead of stacked copies on fast moves.
+  // The callback must NOT divide globalAlpha itself when subs is used.
+  R.motionBlur = (ctx, t, draw, { samples = 8, shutter = 1 / 48, name = '_mb', subs = 1 } = {}) => {
     if (samples <= 1 || R.quality < 1) { draw(ctx, t); return; }
-    const L = R.layer(name);
+    const L = R.layer(name), gap = shutter / (samples - 1);
     L.ctx.globalCompositeOperation = 'lighter';
     for (let i = 0; i < samples; i++) {
-      const tt = t - shutter * (i / (samples - 1) - .5);
-      L.ctx.save();
-      L.ctx.globalAlpha = 1 / samples;
-      draw(L.ctx, tt);
-      L.ctx.restore();
+      for (let j = 0; j < subs; j++) {
+        const tt = t - shutter * (i / (samples - 1) - .5) + gap * ((j + .5) / subs - .5);
+        L.ctx.save();
+        L.ctx.globalAlpha = 1 / (samples * subs);
+        draw(L.ctx, tt);
+        L.ctx.restore();
+      }
     }
     R.blit(ctx, L);
   };
+  // the longest shutter (s) that keeps neighbouring samples <= maxGap px apart, for something moving at speed px/s
+  R.shutterFor = (speed, samples = 10, maxGap = 14, cap = 1 / 60) => Math.min(cap, (samples - 1) * maxGap / Math.max(1e-6, Math.abs(speed)));
+
+  // ---- images: real logos and photos. A scene file asks at load time; the player waits before setup() ----
+  //   Reel.preload({ cm: '/vid/assets/creatormatch.svg', fox: '/vid/assets/kaught-512.png' });  then  Reel.img('fox')
+  const imgs = new Map(), waiting = [];
+  R.preload = map => {
+    for (const [k, url] of Object.entries(map)) {
+      if (imgs.has(k)) continue;
+      const im = new Image();
+      waiting.push(new Promise(res => { im.onload = res; im.onerror = () => { console.warn('missing image', url); res(); }; }));
+      im.src = url; imgs.set(k, im);
+    }
+  };
+  R.assetsReady = async () => { await Promise.all(waiting); await Promise.all([...imgs.values()].map(i => (i.decode ? i.decode().catch(() => {}) : 0))); };
+  R.img = k => imgs.get(k);
+  // an app icon: the image clipped to a rounded square (iOS-like radius), centred at cx, cy
+  R.drawIcon = (ctx, key, cx, cy, size, { radius = .2237, alpha = 1, rot = 0, sx = 1, sy = 1 } = {}) => {
+    const im = imgs.get(key);
+    if (!im || !im.naturalWidth) return;
+    ctx.save();
+    ctx.translate(cx, cy); if (rot) ctx.rotate(rot); ctx.scale(sx, sy); ctx.globalAlpha *= alpha;
+    R.roundRect(ctx, -size / 2, -size / 2, size, size, size * radius); ctx.clip();
+    ctx.drawImage(im, -size / 2, -size / 2, size, size);
+    ctx.restore();
+  };
+  // an image scaled to cover the box x, y, w, h (crop the overflow); focus 0..1 picks the crop centre
+  R.drawCover = (ctx, key, x, y, w, h, fx = .5, fy = .5) => {
+    const im = imgs.get(key);
+    if (!im || !im.naturalWidth) return;
+    const k = Math.max(w / im.naturalWidth, h / im.naturalHeight), sw = w / k, sh = h / k;
+    ctx.drawImage(im, (im.naturalWidth - sw) * fx, (im.naturalHeight - sh) * fy, sw, sh, x, y, w, h);
+  };
+  // the font size (px) at which str is width px wide
+  R.fit = (ctx, str, family, weight, width, style = '') => { R.font(ctx, 100, family, weight, style); return 100 * width / ctx.measureText(str).width; };
 
   // ---- post-FX parameters: scenes set these every frame; the engine resets them ----
   const FX0 = {
