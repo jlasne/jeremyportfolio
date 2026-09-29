@@ -212,7 +212,8 @@
   R.hsl = (h, s, l, a = 1) => `hsla(${h},${s}%,${l}%,${a})`;
   // the site's palette; scenes add the storyboard's accents
   R.C = { ink: '#050b16', blue: '#5fa8d3', ice: '#eaf4fb', red: '#ff4b1f', lime: '#d7ff3a', ink2: '#0c1628', redDeep: '#b8260c',
-    acid: '#c8ff3d', shopInk: '#0a0a0a', brainPink: '#F5C9D1', brainBrown: '#A8704E' };
+    acid: '#c8ff3d', shopInk: '#0a0a0a', brainPink: '#F5C9D1', brainBrown: '#A8704E',
+    cm: '#070a12', cmw: '#eff0ee', orange: '#FFA51F', leaf: '#78BE5A', kground: '#487041' };
 
   // ---- type ----
   R.F = { display: 'Unbounded', sans: 'Inter Tight', grot: 'Space Grotesk', serif: 'Instrument Serif', mono: 'JetBrains Mono' };

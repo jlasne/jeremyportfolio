@@ -133,7 +133,7 @@
     }
     // the chip: icon only after the count-in when the label would cover the picture; ink on the s5 ice field
     $('chip').classList.toggle('mini', stageW < 1228 && t >= R.at(3, 1));
-    $('chip').classList.toggle('ink', t >= 9.375 && t < 11.015625);
+    $('chip').classList.toggle('ink', (CFG.ink || [[9.375, 11.015625]]).some(([a, b]) => t >= a && t < b));
     // the chip's meter breathes on the beat
     const bars = $('chip').querySelectorAll('.eq i'), ph = (t / R.BEAT) % 1;
     bars.forEach((b, i) => { const k = Math.exp(-((ph + i * .13) % 1) * 5); b.style.height = (25 + 75 * k) + '%'; });
@@ -241,6 +241,7 @@
         if (only && /\/scenes\//.test(f) && !only.split(',').some(o => f.endsWith('/' + o + '.js'))) continue;
         await load(f);
       }
+      for (const f of (q.get('extra') || '').split(',').filter(Boolean)) await load(f);   // test stand-ins for unbuilt neighbours
       audioReady = A.render().catch(e => console.warn('audio', e));   // the offline render overlaps shader compile and setup
       await R.assetsReady();                                   // images the scenes asked for (Reel.preload)
       R.initOutput(out, { preserve: EXPORT });
