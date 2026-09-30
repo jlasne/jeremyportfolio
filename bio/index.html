@@ -49,6 +49,12 @@ button, input, select { font: inherit; color: inherit; }
 ::selection { background: var(--blue); color: var(--ink); }
 :focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
 .mono { font: 500 11px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; }
+.demo {
+  margin: 0 0 8px; padding: 12px 14px 11px; border: 1px dashed var(--blue); color: var(--blue);
+  background: rgba(95, 168, 211, .08); line-height: 1.5;
+}
+.demo[hidden] { display: none; }
+.demo a { color: var(--ice); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* ── the ridge behind the page ──────────────────────────────────────── */
@@ -185,6 +191,9 @@ h2 {
 .cups[hidden] { display: none; }
 .cup { display: flex; align-items: center; gap: 8px; }
 .cupn { color: var(--ice-45); font-size: 10px; width: 22px; flex: none; }
+.flagr .lbl i { font: 500 10px/1 var(--mono); letter-spacing: .1em; color: var(--ice-45); font-style: normal; }
+.flagr .fat { width: 116px; }
+.flagr .fat[hidden] { display: none; }
 /* meals and sessions: the span, then the numbers */
 .mrow, .sbottom { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: space-between; }
 .mnums { display: flex; align-items: center; gap: 8px; margin-left: auto; }
@@ -246,6 +255,8 @@ h2 {
 .toggle[aria-pressed="true"]::after { transform: translateX(46px); background: var(--blue); }
 .toggle[aria-pressed="true"] span { right: auto; left: 14px; color: var(--blue); }
 .toggle:disabled { opacity: .4; cursor: default; }
+/* read-only, a Yes must still read as Yes */
+.toggle:disabled[aria-pressed="true"] { opacity: 1; }
 
 /* the typed numbers, two or three across */
 .nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 2px 20px; padding: 4px 16px 0; }
@@ -445,11 +456,12 @@ body.editing { padding-bottom: 88px; }
 </header>
 
 <main>
+  <p class="demo mono" id="demo" hidden>Demo · a made-up October, not my data · <a href="/bio">the real log →</a></p>
   <section id="today">
     <div class="head">
       <span class="n mono">01</span>
       <h2>Today <span class="pill live" id="dayPill">Day 0 of 31</span></h2>
-      <p class="tag">Intake, sport, sleep, and what the watch observes, with the time of each coffee, each session and each night. Two goals, every day of October, then the page reads what moved.</p>
+      <p class="tag">Intake, sport, sleep, and what the watch observes, with the time of each coffee, each session and each night. Five goals a day (morning sun, coffee, water, creatine, collagen), every day of October, then the page reads what moved.</p>
     </div>
     <div class="card" id="card"></div>
   </section>
@@ -527,7 +539,11 @@ const API = 'https://fiery-eel-944.eu-west-1.convex.site/overlap';
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const DAYS = allDays();
-const today = dateKey();
+/* /bio/demo is this same page on a made-up October (bio/demo.js): it reads
+   as the evening of the last day, never talks to the server, and cannot be
+   logged into. */
+const DEMO = /\/bio\/demo\/?$/.test(location.pathname);
+const today = DEMO ? SPEC.end : dateKey();
 /* Before the first and after the last, the card lands on the nearest day
    inside the month, so the page is never blank. */
 const clampDay = k => k < firstDay() ? SPEC.start : k > SPEC.end ? SPEC.end : k;
@@ -588,7 +604,7 @@ function drawCard() {
   goals.className = 'goals mono'; goals.id = 'goals';
   const saved = document.createElement('div');
   saved.className = 'saved mono'; saved.id = 'saved';
-  saved.textContent = open ? '' : !loaded ? 'Loading' : sel > today ? 'Not yet' : pass ? 'Read only' : 'Tap Log to fill in';
+  saved.textContent = DEMO ? 'Demo · read only' : open ? '' : !loaded ? 'Loading' : sel > today ? 'Not yet' : pass ? 'Read only' : 'Tap Log to fill in';
   right.append(goals, saved);
   head.append(right);
   el.append(head);
@@ -630,6 +646,7 @@ function groupEl(g, day, open) {
   for (const f of inGroup(g.id)) {
     if (f.kind === 'tap') box.append(tapRow(f, day, open));
     else if (f.kind === 'flag') box.append(flagRow(f, day, open));
+    else if (f.kind === 'span') box.append(spanRow(f, day, open));
     else nums.append(numField(f, day, open));
   }
   if (g.id === 'intake') box.append(mealsEl(day, open));
@@ -707,10 +724,18 @@ function tapRow(f, day, open) {
   return r;
 }
 
+/* On or off. A flag with `at` keeps when it was ticked: ticking it today
+   stamps the time now, and the time stays editable beside the switch. */
 function flagRow(f, day, open) {
   const r = document.createElement('div');
   r.className = 'flagr';
-  r.innerHTML = `<div class="lbl"><em>${f.icon}</em><span>${f.name}</span></div>`;
+  r.innerHTML = `<div class="lbl"><em>${f.icon}</em><span>${f.name}</span>${f.unit ? `<i>${f.unit}</i>` : ''}</div>`;
+  const at = f.at ? document.createElement('input') : null;
+  if (at) {
+    at.type = 'time'; at.className = 'stime fat'; at.disabled = !open;
+    at.setAttribute('aria-label', `${f.name}, time taken`);
+    at.addEventListener('change', () => { const v = fromHhmm(at.value); if (v == null) delete day[f.at]; else day[f.at] = v; touch(); });
+  }
   const t = document.createElement('button');
   t.type = 'button'; t.className = 'toggle'; t.disabled = !open;
   t.innerHTML = '<span>No</span>';
@@ -718,13 +743,46 @@ function flagRow(f, day, open) {
     const on = day[f.id] === true;
     t.setAttribute('aria-pressed', String(on));
     t.querySelector('span').textContent = on ? 'Yes' : 'No';
+    if (at) { at.hidden = !on; at.value = day[f.at] != null ? hhmm(day[f.at]) : ''; }
   };
   t.addEventListener('click', () => {
-    if (day[f.id] === true) delete day[f.id]; else day[f.id] = true;
-    paint(); touch();
+    if (day[f.id] === true) { delete day[f.id]; if (f.at) delete day[f.at]; }
+    else { day[f.id] = true; if (f.at && sel === today) day[f.at] = nowMinutes(); }
+    paint(); paintGoals(day); touch();
   });
   paint();
+  if (at) r.append(at);
   r.append(t);
+  return r;
+}
+
+/* One start and end whose length is the value, with its goal: the morning
+   sun. "Start now" when stepping out, "End now" when back. */
+function spanRow(f, day, open) {
+  const r = document.createElement('div');
+  r.className = 'tapr spanr';
+  r.innerHTML = `<div class="lbl"><em>${f.icon}</em><span>${f.name}</span></div>`;
+  const badge = document.createElement('span');
+  if (f.goal != null) { badge.className = 'goal mono'; r.querySelector('.lbl').append(badge); }
+  /* the day's span: the log's own object when the day is open, a loose
+     copy when it is read-only so viewing never writes */
+  const list = Array.isArray(day[f.spans]) ? day[f.spans] : null;
+  const x = list?.[0] ?? {};
+  if (open && !list) day[f.spans] = [x];
+  const paint = () => {
+    const len = spanMin(x);
+    /* an empty span leaves a minutes value typed before spans existed alone */
+    if (open) { if (len !== undefined) day[f.id] = Math.min(f.max, len); else if (x.t != null || x.e != null) delete day[f.id]; }
+    const v = open ? day[f.id] : len ?? day[f.id];
+    badge.textContent = `${v ?? 0} / ${f.goal} min`;
+    badge.className = `goal mono ${goalMet(f, v) ? 'ok' : ''}`;
+    paintGoals(day);
+  };
+  const wrap = document.createElement('div');
+  wrap.className = 'cups';
+  wrap.append(spanEl(x, open, f.name, paint));
+  paint();
+  r.append(wrap);
   return r;
 }
 
@@ -1208,11 +1266,17 @@ async function push() {
   saving = true; dirty = false;
   let failedSave = false;
   try {
-    const out = await api('bio.save', { passphrase: pass, today, ...clean(state, today) });
+    const sent = clean(state, today);
+    const out = await api('bio.save', { passphrase: pass, today, ...sent });
     /* The page holds the author's copy. Taking the reply's log here would
        drop any tap made while this save was in flight. */
     state.updatedAt = out.updatedAt;
-    say(dirty ? 'Saving…' : 'Saved');
+    /* A server running older rules keeps less than it was sent, and says
+       nothing. Name what it dropped instead of letting it vanish on reload. */
+    const lost = new Set();
+    for (const [k, d] of Object.entries(sent.log)) for (const f of Object.keys(d)) if (!(f in (out.log?.[k] ?? {}))) lost.add(f);
+    if (lost.size) say(`The server did not keep: ${[...lost].join(', ')}. Deploy the server, then save again.`, true);
+    else say(dirty ? 'Saving…' : 'Saved');
     stamp();
   } catch (e) {
     dirty = failedSave = true;
@@ -1292,7 +1356,7 @@ $('gate').addEventListener('submit', async e => {
 $('csv').addEventListener('click', () => {
   const cols = SPEC.fields;
   const q = x => `"${String(x).replace(/"/g, '""')}"`;
-  const head = ['date', 'practice', ...cols.map(c => c.id), 'coffee_cups', 'meals', 'eaten_kcal', 'sessions', 'sport_min', 'sport_kcal', 'sport_hardest', 'note'];
+  const head = ['date', 'practice', ...cols.map(c => c.id), 'sun_span', 'creatine_at', 'collagen_at', 'coffee_cups', 'meals', 'eaten_kcal', 'sessions', 'sport_min', 'sport_kcal', 'sport_hardest', 'note'];
   const lines = [head.join(',')];
   const span = x => `${x.t != null ? hhmm(x.t) : '?'}-${x.e != null ? hhmm(x.e) : '?'}`;
   const keys = [...new Set([...Object.keys(state.log).filter(k => k < SPEC.start), ...DAYS])].sort();
@@ -1304,6 +1368,9 @@ $('csv').addEventListener('click', () => {
       const v = d[c.id];
       return v === true ? '1' : v == null ? (c.kind === 'flag' ? '0' : '') : c.kind === 'time' ? hhmm(v) : String(v);
     }),
+    q((d.sunlight || []).map(span).join(' ')),
+    d.creatineAt != null ? hhmm(d.creatineAt) : '',
+    d.collagenAt != null ? hhmm(d.collagenAt) : '',
     q((d.cups || []).map(span).join(' ')),
     q((d.meals || []).map(m => `${span(m)} ${m.k ?? '?'}kcal`).join('; ')),
     (d.meals || []).some(m => Number.isFinite(m.k)) ? d.meals.reduce((a, m) => a + (m.k || 0), 0) : '',
@@ -1328,7 +1395,7 @@ const dim = () => { veil.style.opacity = Math.min(1, scrollY / (innerHeight * .4
 addEventListener('scroll', dim, { passive: true }); dim();
 
 /* ── start ──────────────────────────────────────────────────────────── */
-try { pass = localStorage.getItem('bio.pass') || ''; } catch {}
+if (!DEMO) try { pass = localStorage.getItem('bio.pass') || ''; } catch {}
 draw();
 /* Only a log that actually arrived opens the page for writing. A save sends
    the whole month, so writing on top of a failed load would replace October
@@ -1343,7 +1410,15 @@ function load() {
     .finally(() => { draw(); stamp(); if (failed) say(`${failed}. Logging is paused so nothing gets overwritten.`, true); });
 }
 let failed = '';
-load();
+if (DEMO) {
+  document.title = `Demo · ${document.title}`;
+  const robots = document.createElement('meta');
+  robots.name = 'robots'; robots.content = 'noindex';
+  document.head.append(robots);
+  $('demo').hidden = false;
+  $('edit').hidden = true;
+  import('/bio/demo.js').then(m => { state.log = m.demoMonth(); loaded = true; state.updatedAt = 0; draw(); });
+} else load();
 </script>
 </body>
 </html>

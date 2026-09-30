@@ -3,17 +3,17 @@
 /** One field on a day: what it is called, what it may hold, how it is shown. */
 export interface Field {
   id: string; group: string; name: string; unit?: string;
-  kind: 'tap' | 'flag' | 'num' | 'time';
+  kind: 'tap' | 'flag' | 'num' | 'time' | 'span';
   max: number; step?: number; icon: string; src?: string;
-  clock?: boolean; night?: boolean; spans?: string;
-  goal?: number; goalDir?: 'min' | 'max'; scale?: number; scaleUnit?: string;
+  clock?: boolean; night?: boolean; spans?: string; at?: string;
+  goal?: number | boolean; goalDir?: 'min' | 'max' | 'yes'; scale?: number; scaleUnit?: string;
 }
 export interface Group { id: string; name: string; icon: string; when: string }
 export interface Outcome { id: string; name: string; icon: string; unit: string; better: 'high' | 'low'; digits?: number }
 export interface Factor {
   id: string; group: string; name: string; icon: string;
   split: 'flag' | 'zero' | 'median'; on: string;
-  from?: 'coffee' | 'meals' | 'sessions'; lag?: number; fmt?: string; sport?: string;
+  from?: 'sun' | 'coffee' | 'meals' | 'sessions'; lag?: number; fmt?: string; sport?: string;
 }
 
 /** Something that takes time: start and end, minutes after midnight. */
@@ -56,7 +56,7 @@ export function spanMin(x?: Span): number | undefined;
 export function clean(input: { log?: Record<string, unknown> } | undefined, today: string): Payload;
 export function isLogged(day?: Day): boolean;
 export function hasBody(day?: Day): boolean;
-export function goalMet(f: Field, v: number | null | undefined): boolean | null;
+export function goalMet(f: Field, v: number | boolean | null | undefined): boolean | null;
 
 export interface Link {
   diff: number; delta: number; d: number; label: string; good: boolean; base: number;

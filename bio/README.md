@@ -9,11 +9,10 @@ passphrase writes it.
 
 | Group | Fields | Goal |
 | --- | --- | --- |
-| 🍽️ Intake | coffee (start → end per cup), water, meals (start → end + kcal each) | coffee **max 2 cups**, water **4 L** (8 × 50cl) |
+| 🍽️ Intake | morning sun (start → end), coffee (start → end per cup), water, creatine, collagen (each with the time taken), meals (start → end + kcal each) | sun **15 min**, coffee **max 2 cups**, water **4 L** (8 × 50cl), creatine **5 g**, collagen |
 | 🏃 Sport | sessions (sport, intensity light / moderate / high, start → end, kcal burned), steps | |
 | 😴 Sleep | sleep score, hours slept, bedtime, wake-up | |
 | 📊 Observing | weight, HRV, resting HR, recovery | |
-| 🌿 Levers | sun | |
 
 A goal points one way: coffee is a ceiling, met by staying under it, water
 is a floor, met by reaching it. The card shows each goal beside its row and
@@ -40,6 +39,18 @@ never read by the matrix or shown in the month.
 The four things the body answers with are read **the morning after** the
 day that caused them, because a night is what answers a day.
 
+## The demo
+
+**/bio/demo** is this same page on a made-up October (`demo.js`), so the grids
+can be seen full before the real month fills them. `vercel.json` rewrites
+`/bio/demo` to `/bio/index.html`; the page sees the path, reads as the evening
+of 31 October, loads the simulated month, never calls the server, hides *Log*
+and says it is a demo. The month is seeded, so every visit sees the same one,
+and it plants a few effects (early morning sun and an early bedtime help the
+night, a late coffee and a late dinner hurt it, a hard or late session costs
+the next morning, calories move the scale) while creatine and collagen do
+nothing, to show a neutral row.
+
 ## Stack
 
 - **`index.html`** — the page, hand-written, no build step. Bebas Neue for
@@ -56,6 +67,10 @@ day that caused them, because a night is what answers a day.
 - **Data** — one document in the Overlap Convex deployment (table `bio`, key
   `oct26`), through the same `/overlap` door Founder City uses. Three
   operations: `bio.get`, `bio.unlock`, `bio.save`.
+- **Save check** — the server runs its own copy of `clean`, from the
+  `spec.js` it was deployed with. After each save the page compares what it
+  sent with what the server kept, and names anything dropped ("The server
+  did not keep: creatine"), which means the server needs a deploy.
 - **Auth** — a passphrase, `BIO_PASSPHRASE` on the Convex deployment.
   *Log* asks for it once per device (kept in `localStorage`), then every tap
   saves itself about a second after the last change. There is no Save
