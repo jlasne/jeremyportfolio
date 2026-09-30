@@ -124,8 +124,6 @@ async function answer(ctx: ActionCtx, request: Request): Promise<Response> {
         return ok(await ctx.runMutation(api.x.log, args));
       case "x.unlog":
         return ok(await ctx.runMutation(api.x.unlog, args));
-      case "x.bio":
-        return ok(await ctx.runMutation(api.x.bio, args));
       case "x.useDraft":
         return ok(await ctx.runMutation(api.x.useDraft, args));
       case "x.fill":

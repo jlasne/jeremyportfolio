@@ -177,8 +177,7 @@ button, input, textarea, select { font: inherit; color: inherit; }
 @media (hover: none) { .row .kill { opacity: 1; } }
 .row .kill:hover { color: var(--bad); background: rgba(244, 33, 46, .1); }
 
-.check { display: flex; gap: 12px; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--line); }
-/* One tick, wherever it is asked for: the /bio row and each draft. */
+/* One tick, wherever it is asked for: each draft and each idea. */
 .tick {
   width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--line); background: transparent;
   cursor: pointer; display: grid; place-items: center; flex: none; color: transparent; font-size: 13px; font-weight: 800;
@@ -186,9 +185,6 @@ button, input, textarea, select { font: inherit; color: inherit; }
 }
 .tick:hover { border-color: var(--dim); }
 .tick[aria-pressed="true"] { background: var(--good); border-color: var(--good); color: #000; }
-.check .t { flex: 1; }
-.check .t b { display: block; font-weight: 700; }
-.check .t small { color: var(--dim); }
 
 .draft { border-bottom: 1px solid var(--line); padding: 16px; }
 .draft .head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 0 0 10px; }
@@ -506,11 +502,6 @@ function today() {
     ${feed}
     ${stage}
 
-    <div class="check">
-      <button class="tick" id="bio" aria-pressed="${state.bioDone}" aria-label="Mark /bio filled">✓</button>
-      <div class="t"><b>Fill /bio today</b><small>30 day challenge · <a href="https://www.jeremylasne.com/bio/" target="_blank" rel="noopener">open the tracker</a></small></div>
-    </div>
-
     ${state.entries.length
       ? [...state.entries].reverse().map((e) => `
         <article class="row">
@@ -656,7 +647,6 @@ function archiveView() {
       <div class="meta">
         <b>${esc(longDate(d.day))}</b>
         <span class="mono">${d.entries} logged · ${d.words} words</span>
-        ${d.bioDone ? `<span class="mono" style="color:var(--good)">bio ✓</span>` : ""}
         ${d.drafts ? `<span class="mono" style="color:var(--blue)">${d.drafts} drafts</span>` : ""}
       </div>
       <div class="body" style="color:var(--dim)">${esc(d.first)}</div>
@@ -737,12 +727,6 @@ function wire() {
   });
   /* Put the cursor in the first open question, not in every one of them. */
   v.querySelector(".ask textarea")?.focus();
-
-  $("#bio")?.addEventListener("click", async (e) => {
-    const on = e.currentTarget.getAttribute("aria-pressed") === "true";
-    try { await call("x.bio", { day: state.today, done: !on }); await refresh(); toast(on ? "/bio reopened" : "/bio ticked"); }
-    catch (err) { toast(err.message); }
-  });
 
   v.querySelectorAll(".row .kill[data-at]").forEach((b) =>
     b.addEventListener("click", async () => {

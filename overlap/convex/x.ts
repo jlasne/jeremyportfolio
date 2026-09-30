@@ -98,7 +98,6 @@ type DayDoc = Doc<"xDays">;
 
 const blank = (day: string) => ({
   day,
-  bioDone: false,
   entries: [] as DayDoc["entries"],
   asks: [] as NonNullable<DayDoc["asks"]>,
   drafts: [] as DayDoc["drafts"],
@@ -111,7 +110,6 @@ const pub = (d: DayDoc | null, day: string) =>
   d
     ? {
         day: d.day,
-        bioDone: d.bioDone,
         entries: d.entries,
         asks: d.asks ?? [],
         drafts: d.drafts,
@@ -158,14 +156,12 @@ export const history = query({
   handler: async (ctx, { passphrase, limit }) => {
     mustBeJeremy(passphrase);
     const n = Math.min(Math.max(limit ?? 30, 1), 120);
-    /* A day exists the moment a mail is marked sent or /bio is ticked, so
-       many are empty. The archive is for days with something in them. */
+    /* A day exists the moment a mail is marked sent, so many are empty. The archive is for days with something in them. */
     const days = (await ctx.db.query("xDays").withIndex("by_day").order("desc").take(n * 3))
       .filter((d) => d.entries.length > 0 || d.drafts.length > 0)
       .slice(0, n);
     return days.map((d) => ({
       day: d.day,
-      bioDone: d.bioDone,
       entries: d.entries.length,
       drafts: d.drafts.length,
       words: d.entries.reduce((n, e) => n + e.text.trim().split(/\s+/).filter(Boolean).length, 0),
@@ -249,16 +245,6 @@ export const unlog = mutation({
     const old = await find(ctx, a.day);
     if (!old) throw new Error("No such day");
     return await upsert(ctx, a.day, { entries: old.entries.filter((e) => e.at !== a.at) });
-  },
-});
-
-/** The 30 day /bio challenge, ticked on the dashboard. */
-export const bio = mutation({
-  args: { passphrase: v.string(), day: v.string(), done: v.boolean() },
-  handler: async (ctx, a) => {
-    mustBeJeremy(a.passphrase);
-    if (!isDay(a.day)) throw new Error("Send the day as YYYY-MM-DD");
-    return await upsert(ctx, a.day, { bioDone: a.done });
   },
 });
 
@@ -1230,15 +1216,6 @@ function mailBody(day: string, slot: string, d: ReturnType<typeof blank> | any) 
     ),
   );
 
-  if (!d.bioDone)
-    parts.push(
-      box(
-        `<div style="font:400 15px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:${C.ink}">` +
-          `<b>/bio is not filled today.</b> 30 day challenge. ` +
-          `<a href="https://www.jeremylasne.com/bio/" style="color:${C.blue};text-decoration:none">Fill it now</a>.</div>`,
-      ),
-    );
-
   parts.push(
     box(
       h(`today so far · ${d.entries.length} ${d.entries.length === 1 ? "entry" : "entries"}`) +
@@ -1288,7 +1265,6 @@ function mailBody(day: string, slot: string, d: ReturnType<typeof blank> | any) 
     ...qs.map((q, i) => `${i + 1}. ${q}`),
     "",
     SITE(),
-    ...(d.bioDone ? [] : ["", "/bio is not filled today. 30 day challenge. https://www.jeremylasne.com/bio/"]),
     "",
     `TODAY SO FAR (${d.entries.length})`,
     ...(d.entries.length
