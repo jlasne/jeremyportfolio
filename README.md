@@ -41,12 +41,8 @@ Open it and edit it.
 | --- | --- |
 | `/` | the landing |
 | `/wealth` | **Wealth Architecture** — *Era, Season, Compass*: a research note on holding money when the world order turns, the principles on one page, and the country map, thirty-two countries read three ways |
-| `/overlap` | **Overlap** — landing page and live world clock |
-| `/overlap/team` · `/plan` · `/next` | the app: the team, the meeting, and what to build next |
-| `/foundercity` | **Founder City** — product metrics as a pixel skyline at night, one tower per app |
 | `/bio` | **Bio** — a fifteen-day daily log of five habits and sleep, then one number per training discipline, live |
 | `/brain` | **brain**: a self-tidying knowledge brain in plain markdown, open source. How it works, the folder it makes, the full skill file, and the repo link |
-| `/games` | **Guild** — six stats (Strength, Speed, Endurance, Health, Social, Brain), no cap, plus an overall level that is the six added up. A pixel character per friend that changes shape with its levels, all of them standing round one campfire in a scene that follows the clock: night, dawn, day, dusk, with the water reflecting the camp. XP is effort, the same formula for every sport: minutes × (RPE² ÷ 20), minutes past sixty at half value, a personal best worth two sessions. Signup spends 40 levels across the six, 10 to a stat; everything above is earned inside. Level N costs 50 × N² XP. A fatigue gauge (the last 7 calendar days over the 28-day average) scales physical XP, with a burn line Health moves up. Three screens: CARD (guild card, stats ranked by level, a six-axis web scaled to your own best, and a detail box for whichever stat or the gauge you tap), LOG (any activity, minutes and RPE, one rest day and one sleep per calendar day), and TEAM (growth board, biggest movers, guild XP, and five weekly goals — distance, tonnage, sessions, hours slept and people talked to — each one set to last week's number, so the guild has to beat itself). Manual log, honor system, everything in `localStorage`; the demo seeds four friends with six weeks of history. Forty activities are built in; the model call that splits any other activity is the one thing left to wire |
 | `/brandmatchapp` | **brandmatch** · a daily feed of Instagram creators ready for a brand deal, ranked by intent and match stars, live at [brandmatch.app](https://brandmatch.app). Apify crawls the profiles, OpenRouter reads them against the brief, and Convex holds a creator pool shared across every campaign. A second Vercel project builds this repo with `brandmatchapp` as its root directory, so the folder stays here even though nothing on the landing links to it. The source is Vite and React under `brandmatchapp/app`; `npm run build` there commits the built app to the folder that project serves. See [`brandmatchapp/README.md`](brandmatchapp/README.md) |
 | `/brand` | **CreatorMatch** · the offer, live at [creatormatch.app](https://creatormatch.app). A second Vercel project builds this repo with `brand` as its root directory, so the folder stays here even though nothing on the landing links to it |
 | `/vid` | **Jeremy Lasne · Motion Reel 2026** · a 15 second film about this site, drawn live in the browser: 900 frames at 60 fps, 128 BPM, 1 canvas, 1 WebGL pass for the lens, 1 synth for the score. *Match Cut*: every transition is a shape matching into the next. wlns.shop opens on lime, the CreatorMatch mark opens into the four mobile apps (i dare you, Kaught and the two Soon slots), the personal projects run as the landing's own list, and the page scrolls back to the top and lands on the name. Copy is the landing's, verbatim; the icons are the real ones in `vid/assets`. Plays once and holds the end card; `G` shows guides, arrows step frames. `showreel.mp4` is the same film at 1080p60. Scenes in `vid/scenes`, score in `vid/score.js`, shared engine `vid/engine.js` and player `vid/player.js` |
@@ -61,42 +57,6 @@ landing: a different audience and a different voice. The note is set in
 Source Serif and Instrument Serif over the same ridge and snow as the
 landing; every figure is inline SVG, and the country map at the end is my
 own reading of thirty-two countries, refreshed by hand.
-
-**Overlap** is the one page here that is a product rather than a piece of
-writing. Three steps — Team, Plan, Next — with the overlap drawn the
-WorldTimeBuddy way: one row per person, hours running left to right, every
-column the same instant on a different clock. It runs with no backend at all
-(team in `localStorage`, shared by link); connecting Convex adds accounts,
-teams and invite links. See [`overlap/README.md`](overlap/README.md).
-
-**Founder City** draws product metrics as a skyline, scrolling left and
-right and nothing else: the tallest tower always fills the screen. Height is
-MRR on a power curve so a $40k app and a $400k app share one frame. The
-building's size, floors times width, is active users, so the width is
-whatever the audience needs at that height: a free app with a big crowd is a
-wide low block, a premium app with a few hundred customers is a thin spire.
-Lit windows are the subscribers among those users, with each floor keeping
-its own mood so the lights come in bands. The dark floors at the top are
-subscribers lost this month; a crane means the week was up; the crowd at the
-door is free trials; the sign on the facade is the app's name and logo, its
-colour lifetime revenue from white through cyan and amber to gold. Rank one
-stands in the middle and the others alternate outward, so rank reads as
-distance from downtown. A band along the top totals the city, a wire along
-the bottom carries the latest activity. Everything static bakes once; per
-frame the page moves cars, people, clouds, two searchlights and a few dozen
-windows. Demo data lives in the `SEED` array at the top of the file; replace
-it with a fetch to wire it to real accounts.
-
-Founder City reads RevenueCat from the browser: RevenueCat's API answers
-cross-origin requests from this domain, so "Break ground" makes one call to
-the overview metrics endpoint with the founder's own key and project id and
-keeps the six numbers. The tower and the key then go to the Overlap Convex
-deployment (`overlap/convex/city.ts`, table `towers`, ops `city.towers` and
-`city.breakGround` on the same `/overlap` door); a cron re-reads every tower
-at 04:00 UTC and keeps thirty days of history, and the key never leaves the
-server. If the door cannot be reached the tower stays in that browser's
-storage. Deploy with
-`cd overlap && npx convex deploy`.
 
 ## Run locally
 
