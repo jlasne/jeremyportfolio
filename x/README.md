@@ -127,7 +127,11 @@ thickens the brain for the next idea. Tick an idea once it is filmed.
   it: three posts, sometimes a fourth, and the script. Character count
   against 280 on each post, Copy, a link that opens X or YouTube Studio with
   the text ready, and a tick to mark it posted or filmed. While the day is
-  being written the screen says so and offers nothing else. Below the drafts
+  being written the screen says so and offers nothing else. If a write fails,
+  the reason stays on screen above the old drafts until the next try, because
+  the old drafts look exactly like a fresh set. Write again rewrites on one
+  click, and asks first only when a draft is ticked used, since a rewrite
+  loses the ticks. Below the drafts
   are the open questions and the day answered so far. One Write button, in
   the bar, and only once five beats are covered.
 - **Ideas.** The field, the two outputs, the concepts it drew on, the

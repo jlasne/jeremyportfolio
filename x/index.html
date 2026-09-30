@@ -349,6 +349,7 @@ async function refresh() {
    card can grey itself out while the model reads the answer. */
 let busy = { fill: false, ask: null };
 let writing = false;
+let writeError = null;     /* why the last write failed, kept on screen until the next try */
 /* Ideas and the brain load when their tab opens. */
 let ideas = null;          /* past video ideas, newest first */
 let ideaOpen = 0;          /* which one is on screen */
@@ -466,8 +467,11 @@ function today() {
 
   /* The drafts sit right under the bar: once the day is done, what to post
      is the first thing on the page. */
+  const failed = writeError
+    ? `<div class="row"><p style="color:var(--bad);margin:0 0 4px"><b>The day was not written.</b> The drafts below are the old ones.</p><p style="color:var(--dim);margin:0;font-size:14px">${esc(writeError)}</p></div>`
+    : "";
   const ready_ = written
-    ? `<div class="row" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+    ? failed + `<div class="row" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
          <span><b>Ready to post</b>${state.draftsAt ? ` <span class="mono">written ${clock(state.draftsAt)}</span>` : ""}</span>
          <button class="btn ghost sm" id="writeAgain">Write again</button>
        </div>${drafts(state.drafts)}`
@@ -498,6 +502,7 @@ function today() {
 
   return `
     ${bar}
+    ${written ? "" : failed}
     ${ready_}
     ${feed}
     ${stage}
@@ -711,7 +716,12 @@ function wire() {
   $("#writeNow")?.addEventListener("click", writeDay);
   $("#writeAgain")?.addEventListener("click", (e) => {
     const b = e.currentTarget;
-    if (b.dataset.sure !== "1") { b.dataset.sure = "1"; b.textContent = "Replace these?"; return; }
+    /* Replacing the set loses the used ticks, so ask, but only when a tick
+       exists. With none, one click rewrites: a second click that changes
+       nothing visible looks like a button that does not work. */
+    if (state.drafts.some((d) => d.used) && b.dataset.sure !== "1") {
+      b.dataset.sure = "1"; b.textContent = "Replace ticked drafts?"; return;
+    }
     writeDay();
   });
 
@@ -776,7 +786,7 @@ $("#nav").addEventListener("click", async (e) => {
 
 async function writeDay() {
   if (writing) return;
-  writing = true;
+  writing = true; writeError = null;
   tab = "today"; open_ = null;
   draw();
   try {
@@ -786,9 +796,12 @@ async function writeDay() {
     archive = null;
     toast("Written");
   } catch (err) {
+    /* The old drafts come back after a failure, and they look exactly like a
+       fresh set. A message that fades in two seconds is how a failed write
+       gets mistaken for a write that changed nothing, so this one stays. */
     writing = false;
+    writeError = err.message;
     draw();
-    toast(err.message);
   }
 }
 
