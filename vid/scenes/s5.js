@@ -92,18 +92,24 @@
     { name: 'Brain', desc: ['A folder that gets smarter', 'every time you feed it.'], trail: 'arrow' },
   ];
   let subX = null;                                   // handle x per sub row, measured after fonts load
+  // glyph origins with the kern pair BEFORE each glyph included: origin i = width(prefix through i) - width(i) + i * tracking
+  // (R.glyphs measures the prefix that excludes glyph i, so every kern pair lands one glyph late)
+  const kernGlyphs = (c, str, tr) => { const ch = Array.from(str), w = s => c.measureText(s).width; let pre = '';
+    return { chars: ch.map((g, i) => { pre += g; return { ch: g, x: w(pre) - w(g) + i * tr, w: w(g), i }; }), width: w(str) + (ch.length - 1) * tr }; };
+  let nameG = null;                                  // kern-correct glyph origins of the four row names (setup)
   // snap 1 is the spec's picker spring (260, 24); snaps 2 and 3 are stiffer (560, 34: 3.7 percent overshoot, half way in .05 s) so Bio Tracker
   // is readable for ~.1 s before Brain takes over, and the dot pulse, ripple and icon pop share the screen with their row (LAG after the hit)
   const SPK = [[260, 24], [560, 34], [560, 34]], LAG = .045;
-  const sprN = (t, n) => { const T = T_SNAP[n]; return t < T ? 0 : R.spring(t - T, SPK[n][0], SPK[n][1]); };
+  const EARLY = [0, .05, 0];   // the Bio snap is released 0.05 s before its beat, so the row has landed and is crisp when the beat is heard
+  const sprN = (t, n) => { const T = T_SNAP[n] - EARLY[n]; return t < T ? 0 : R.spring(t - T, SPK[n][0], SPK[n][1]); };
   const spr = (t, T) => sprN(t, T_SNAP.indexOf(T));
   const focus = t => sprN(t, 0) + sprN(t, 1) + sprN(t, 2);
   const rowA = d => d < 1 ? 1 - .75 * d : Math.max(0, .25 * (2 - d));
 
   // fold envelopes (three per fold, so text is never drawn over text)
   const chevOpen = (t, k) => { const F = FOLD[k]; return t < F.close ? E.outCubic(R.prog(t, F.open, F.open + .25)) : 1 - E.inQuad(R.prog(t, F.close, F.close + .2)); };
-  const subOut = (t, k) => 1 - E.outCubic(R.prog(t, FOLD[k].close - .017, FOLD[k].close + .033));
-  const nextF = (t, k) => { const F = FOLD[k]; return t < F.close ? (k === 0 ? 0 : 1 - E.outCubic(R.prog(t, F.open, F.open + .06))) : E.outCubic(R.prog(t, F.close + .017, F.close + .083)); };
+  const subOut = (t, k) => { const c = FOLD[k].close - (k === 1 ? EARLY[1] : 0); return 1 - E.outCubic(R.prog(t, c - .017, c + .033)); };
+  const nextF = (t, k) => { const F = FOLD[k], c = F.close - (k === 1 ? EARLY[1] : 0); return t < c ? (k === 0 ? 0 : 1 - E.outCubic(R.prog(t, F.open, F.open + .06))) : E.outCubic(R.prog(t, c + .017, c + .083)); };
 
   const DOT_C = [234, 244, 251, .30], BLUE_C = [95, 168, 211, .95];
   const dotColor = (m) => `rgba(${Math.round(R.lerp(DOT_C[0], BLUE_C[0], m))},${Math.round(R.lerp(DOT_C[1], BLUE_C[1], m))},${Math.round(R.lerp(DOT_C[2], BLUE_C[2], m))},${R.lerp(DOT_C[3], BLUE_C[3], m).toFixed(3)})`;
@@ -167,10 +173,10 @@
     if (rise > .01) { c.beginPath(); c.rect(340, nameBase - 96, 900, 96 + 26); c.clip(); }
     R.font(c, 84, 'sans', 700);
     c.fillStyle = R.mix(ICE, accent, foc);
-    R.text(c, ROWS[k].name, 382, nameBase + rise, { tracking: -.84 });
+    c.textAlign = 'left'; for (const g of nameG[k].chars) c.fillText(g.ch, 382 + g.x, nameBase + rise);
     c.restore();
     R.font(c, 72, 'sans', 400);
-    c.fillStyle = 'rgba(234,244,251,.72)';
+    c.fillStyle = 'rgba(234,244,251,.84)';
     ROWS[k].desc.forEach((s, i) => {
       const base = RT + 232 + 96 * i;
       const dr = k === 0 ? 44 * (1 - E.outExpo(R.prog(t, FOLD[0].open, FOLD[0].open + .176))) : 0;
@@ -309,6 +315,7 @@
     id: 's5', name: 'Personal', start: T0, end: END, layer: 2,
     setup() {
       const mc = document.createElement('canvas').getContext('2d');
+      R.font(mc, 84, 'sans', 700); nameG = ROWS.map(r => kernGlyphs(mc, r.name, -.84));
       subX = ROWS.map(r => (r.subs || []).map(s => { if (!s[1]) return 0; R.font(mc, 76, 'sans', 500); return 440 + mc.measureText(s[0]).width + 40; }));
     },
     draw(ctx, t) {
@@ -317,6 +324,7 @@
       const nx = [nextF(t, 0), nextF(t, 1)];
 
       ctx.save(); ctx.translate(0, y);
+      ctx.globalAlpha = 1 - R.prog(t, 698 / 60, 700 / 60);   // the translucent halo and plate hand over to s6's sprite window 1, .5, 0: no one-frame doubling
       drawHalo(ctx, t, bk);
       drawPlate(ctx, t, bk, f);
       ctx.restore();

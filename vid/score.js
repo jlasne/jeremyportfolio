@@ -11,7 +11,7 @@
 
   // ---- constants of the mix ----
   const MASTER = .4;                                  // engine master level the mixer sets; the hits ride on top of it
-  const PEAK = -.75;                                  // dBTP of the finished buffer
+  const PEAK = -1.05;                                  // dBTP of the finished buffer
   const PRE = .25;                                    // s of silent pre-roll (compressor at rest at the first hit)
   const HOLE = [at(3, 4, 4), at(4, 1)];               // 5.5078125 .. 5.625, the one digital silence
   const PREGAIN = 1.6;                                // drive into the mastering limiter (pre-map)
@@ -251,7 +251,7 @@
       K(t, 1.15); S.impact(t, { gain: .7, size: .6, rev: .4 }); Clap(t, .6); Sn(t, .45);
       Stab(t, 'Am9', .2, .26); S.sub(t, 'A1', 1.7, { gain: .5 }); Glass(t, 'A4', .16, { dur: 1.0 });
       S.blip(t, 'C5', { gain: .07, drop: 1.5, dur: .09, pan: -.5 }); Tk(t, 4600, .05);
-      S.bell(t + S32, 'C5', { dur: .5, ratio: 4, index: 1, gain: .14, duck: false, rev: .25 }); }
+      S.bell(at(2, 1, 2), 'C5', { dur: .5, ratio: 4, index: 1, gain: .14, duck: false, rev: .25 }); }
     [at(2, 2), at(2, 3), at(2, 4)].forEach(t => K(t, .95));
     [at(2, 2), at(2, 4)].forEach(t => Clap(t, .5));
     sixteenths(2, 0, 16, (t, k) => { if (k % 4 === 2) Ho(t, .10); else H(t, .05); });
@@ -341,7 +341,7 @@
     [['G4', 0], ['A4', 1], ['C5', 2]].forEach(([n, i]) => { const t = at(6, 2) + S32 + i * S32; Pl(t, n, .09); Tk(t, 3600, .04); });
     { const t = at(6, 3);
       K(t, .85); S.pad(t, CH.G69, 1.875, { gain: .10, attack: .04, spread: .55 }); S.sub(t, 'G1', .94, { gain: .45 });
-      Glass(t, 'E5', .12); Bp(t, 'E6', .10, 2, .10); }
+      Glass(t, 'E5', .12); Bp(t + 3 * S64, 'E6', .10, 2, .10); }
     { const t = at(6, 3, 3);
       Sn(t, .3); Sn(t + S64, .3); Clap(t, .5); Glass(t, 'G5', .12); S.reverse(t, .30, { gain: .16 }); }
     Bp(at(6, 3, 4), 'A5', .12, 1.4, .18); Glass(at(6, 3, 4), 'A5', .10, { dur: 1.2 });
@@ -353,7 +353,7 @@
     K(at(7, 1), .8, 'G1'); S.sub(at(7, 1), 'G1', .94, { gain: .45 });
     S.riser(at(7, 1, 3), at(7, 2, 4), { gain: .45, from: 250, to: 3500, noiseGain: .6, rev: .25 });
     S.filterRamp(at(7, 1, 3), at(7, 2, 4), 12000, 900);
-    S.whoosh(at(7, 1, 4), .47, { gain: .7, from: 800, to: 6000, pan: [-.6, .6], peak: .22, end: 1500 });   // the page whip: fast attack, long fall
+    S.whoosh(at(7, 1, 4), .5859375, { gain: .7, from: 800, to: 6000, pan: [-.6, .6], peak: .5, end: 1500 });   // the page whip: fast attack, long fall
     [[at(7, 1, 4), .32], [at(7, 2), .42], [at(7, 2, 2), .52], [at(7, 2, 3), .65], [at(7, 2, 3) + S32, .65], [at(7, 2, 3) + S32 + S64, .65]].forEach(([t, g]) => Sn(t, g));
     // 7.2a -> 7.3: the air. The riser has stopped, kicks and hats stay out; the G6/9 pad and its reverb ring through the 900 Hz low-pass
     { const t = at(7, 3);                                                                       // THE LANDING
@@ -366,8 +366,8 @@
     Bp(at(7, 3, 2), 'C7', .05, 1.5, .08); Tk(at(7, 3, 2), 6400, .04); Tk(at(7, 3, 2), 3000, .05);
     { const t = at(7, 4);
       K(t, .85, 'C2');
-      S.reverse(at(8, 1), .469, { gain: .30 });
-      S.swell(at(8, 1), ['A5', 'C6', 'E6', 'G6'], .469, { gain: .22, ratio: 3.5, index: 1.6, rev: .4 }); }
+      S.reverse(at(8, 1), .469, { gain: .8 });
+      S.swell(at(8, 1), ['A5', 'C6', 'E6', 'G6'], .469, { gain: 1.2, ratio: 3.5, index: 1.6, rev: .4 }); }
     sixteenths(7, 8, 16, (t, k) => H(t, .04 + .08 * (k - 8) / 7));
 
     // ================================================= bar 8 · 13.125 -> 15.000 · C6/9 · the final hit and the tail

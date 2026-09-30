@@ -301,12 +301,12 @@
   }
   // eight copies 1/480 s apart (about 5 px on the fastest leaf) so the smear is a continuous streak, not three stacked outlines;
   // weights are per-copy alphas that composite to about .95 in the leaf's body and fall off softly at the head and tail
-  const SMEAR = [.50, .46, .42, .38, .34, .30, .26, .22];
+  const SMEAR = Array.from({ length: 16 }, (_, k) => .40 - .22 * k / 15);   // 16 copies 1/960 s apart (2.7 px on the fastest leaf): no visible steps
   function drawLeaves(ctx, t, front) {
     if (t < T_BASS || t > 8.9) return;
     for (const l of LEAVES) {
       if ((l.z >= .5) !== front) continue;
-      if (l.z > .6) for (let k = SMEAR.length - 1; k >= 0; k--) drawLeaf(ctx, l, t - k / 480, SMEAR[k]);   // near leaves smear: oldest copy first, the crisp one on top
+      if (l.z > .6) for (let k = SMEAR.length - 1; k >= 0; k--) drawLeaf(ctx, l, t - k / 960, SMEAR[k]);   // near leaves smear: oldest copy first, the crisp one on top
       else drawLeaf(ctx, l, t);
     }
   }

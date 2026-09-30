@@ -46,12 +46,16 @@
 
   // ---- the hero (drawn twice: once into the sprite, once live) ----
   const NAME = 'Jeremy Lasne', URL = 'jeremylasne.com', CREDIT = 'Motion design by Claude';
+  // glyph origins with the kern pair BEFORE each glyph included: origin i = width(prefix through i) - width(i) + i * tracking
+  // (R.glyphs measures the prefix that excludes glyph i, so every kern pair lands one glyph late)
+  const kernGlyphs = (c, str, tr) => { const ch = Array.from(str), w = s => c.measureText(s).width; let pre = '';
+    return { chars: ch.map((g, i) => { pre += g; return { ch: g, x: w(pre) - w(g) + i * tr, w: w(g), i }; }), width: w(str) + (ch.length - 1) * tr }; };
   let NG = null, UG = null, HALO = null;                      // glyph tables of the name and the URL, and one soft halo sprite per glyph (setup)
   const HP = 30, HB = 250, HH = 330;                          // halo sprite padding, baseline row and height
   function measureHero() {
     const c = document.createElement('canvas').getContext('2d');
-    R.font(c, 220, 'sans', 700); NG = R.glyphs(c, NAME, -5.5);
-    R.font(c, 100, 'sans', 500); UG = R.glyphs(c, URL, -1);
+    R.font(c, 220, 'sans', 700); NG = kernGlyphs(c, NAME, -5.5);
+    R.font(c, 100, 'sans', 500); UG = kernGlyphs(c, URL, -1);
     // the glint's halo is static per glyph (only the hop and the squash move), so it is stroked once here, never per frame
     HALO = NG.chars.map(g => {
       if (g.ch === ' ') return null;
@@ -90,8 +94,8 @@
     });
   }
   function heroUrl(c, dy) {
-    R.font(c, 100, 'sans', 500); c.textBaseline = 'alphabetic'; c.fillStyle = URLC;
-    R.text(c, URL, 960, 815 + dy, { align: 'center', tracking: -1 });
+    R.font(c, 100, 'sans', 500); c.textBaseline = 'alphabetic'; c.textAlign = 'left'; c.fillStyle = URLC;
+    const x0 = 960 - UG.width / 2; for (const g of UG.chars) c.fillText(g.ch, x0 + g.x, 815 + dy);
   }
   function heroScrim(c, dy) {                                 // contrast for the URL and the credit over the night
     const sg = c.createLinearGradient(0, 560 + dy, 0, 1000 + dy);
@@ -167,8 +171,8 @@
     const im = R.img('brain');
     if (im && im.naturalWidth) c.drawImage(im, 256 - 58, 407 - 50.75, 116, 101.5);
     c.textBaseline = 'alphabetic';
-    R.font(c, 84, 'sans', 700); c.fillStyle = PINK; R.text(c, 'Brain', 382, 427, { tracking: -.84 });
-    R.font(c, 72, 'sans', 400); c.fillStyle = 'rgba(234,244,251,.72)';
+    R.font(c, 84, 'sans', 700); c.fillStyle = PINK; c.textAlign = 'left'; for (const g of kernGlyphs(c, 'Brain', -.84).chars) c.fillText(g.ch, 382 + g.x, 427);
+    R.font(c, 72, 'sans', 400); c.fillStyle = 'rgba(234,244,251,.84)';
     c.fillText('A folder that gets smarter', 382, 531); c.fillText('every time you feed it.', 382, 627);
     c.save(); c.translate(1700, 407); c.scale(4.8, 4.8); c.translate(-8, -8); c.fillStyle = 'rgba(234,244,251,.46)'; c.fill(ARR, 'evenodd'); c.restore();
     // the big brain, joined, all six folds
@@ -244,17 +248,18 @@
   // ---- the live hero ----
   // One clock for glint and hop: the band's centre moves LINEARLY at the spec's own hop-wave speed (1346.7 px in .35 s), from 60 px left of the name,
   // and each glyph lifts as the centre reaches its left edge, so the light and the letter it lifts travel together.
-  const SWEEP = 1346.7 / .35, LIFT = 20;
+  const SWEEP = 1346.7 / .35, LIFT = 32;
   const hopOf = (t) => (g) => {
     const Ti = T_FINAL + (g.x + 60) / SWEEP;
     const p = R.prog(t, Ti, Ti + .176), lift = LIFT * Math.sin(Math.PI * p), l = q(t - (Ti + .176), 320, 15);
-    return { lift, sx: 1 + .06 * l, sy: 1 - .10 * l };
+    return { lift, sx: 1 + .07 * l, sy: 1 - .13 * l };
   };
   function drawLive(ctx, t, dy, a) {
     ctx.save(); ctx.globalAlpha = a;
     if (a >= 1 || t >= T_L) heroScrim(ctx, dy);                 // (before the swap completes the sprite underneath carries the scrim and the glow)
     let gk = 1 + .06 * Math.sin(R.TAU * (t - T_L) / 1.875);
     if (t >= T_L) gk *= 1 + .5 * Math.exp(-(t - T_L) / .25);
+    if (t >= 12.65625) gk *= 1 + .45 * E.inQuad(R.prog(t, 12.65625, T_FINAL)) * (t < T_FINAL ? 1 : Math.exp(-(t - T_FINAL) / .18));   // the glow swells with the reverse swell, releases on the hit
     if (a >= 1 || t >= T_L) heroGlow(ctx, dy, gk);              // (before the swap completes the sprite underneath carries the glow)
     heroAvatar(ctx, dy);
     heroName(ctx, dy, t >= T_FINAL ? hopOf(t) : null, ICE);
@@ -282,13 +287,13 @@
     g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(.38, 'rgba(255,255,255,1)'); g.addColorStop(.62, 'rgba(255,255,255,1)'); g.addColorStop(1, 'rgba(255,255,255,0)');
     c.fillStyle = g; c.fillRect(-95, -300, 190, 420); c.restore();
     c.globalCompositeOperation = 'source-over';
-    R.blit(ctx, L, .55, 'lighter');
+    R.blit(ctx, L, .85, 'lighter');
   }
   function drawRing(ctx, t, dy) {
     const tau = t - T_FINAL;
     if (tau < 0 || tau >= .5) return;
-    ctx.save(); ctx.strokeStyle = ICE; ctx.lineWidth = 3; ctx.globalAlpha = .5 * (1 - tau / .5);
-    ctx.beginPath(); ctx.arc(960, 250 + dy, 140 + 160 * E.outExpo(tau / .5), 0, R.TAU); ctx.stroke(); ctx.restore();
+    ctx.save(); ctx.strokeStyle = ICE; ctx.lineWidth = 5 * (1 - tau / .5) + 1; ctx.globalAlpha = .85 * (1 - tau / .5);
+    ctx.beginPath(); ctx.arc(960, 250 + dy, 140 + 300 * E.outExpo(tau / .5), 0, R.TAU); ctx.stroke(); ctx.restore();
   }
 
   // ---- post-FX ----
@@ -309,8 +314,9 @@
       f.bloom += .5 * Math.exp(-8 * tau);
       zoom += .04 * (1 - E.outExpo(R.prog(t, T_L, 12.4219)));
     }
+    if (t >= 12.65625 && t < T_FINAL) f.bloom += .12 * E.inQuad(R.prog(t, 12.65625, T_FINAL));   // build-up: bloom rises with the swell
     if (t >= T_FINAL) {                                        // the final hit: a soft bloom pulse and a small kick, no flash, shake or chroma
-      f.bloom += .18 * Math.sin(Math.PI * R.prog(t, T_FINAL, T_FINAL + .5));
+      f.bloom += .30 * Math.sin(Math.PI * R.prog(t, T_FINAL, T_FINAL + .5));
       zoom += .03 * (1 - E.outExpo(R.prog(t, T_FINAL, T_FINAL + .234)));
     }
     if (t >= T_HOLD) zoom += .03 * E.inOutSine(R.prog(t, T_HOLD, T_END));

@@ -18,7 +18,7 @@
   const T_INK = R.at(1, 3), T_WAVE = R.at(1, 3, 3);             // 0.9375, 1.1719
   const T_TAG = [R.at(1, 1, 4), R.at(1, 2), R.at(1, 2, 2)];     // 0.3516 0.4688 0.5859 tagline chunks
 
-  const X0 = 273, BASE = 520, TAG_BASE = 660;
+  const X0 = 313, BASE = 520, TAG_BASE = 660;
   const WORD = 'WLNS.SHOP';
   // measured with R.glyphs at 195 px in the real font (the spec's table, replaced by the measurement in setup / first draw)
   let ORG = [0, 271.0, 423.3, 617.4, 787.0, 851.0, 1020.6, 1207.0, 1397.4], ADV = [271.0, 152.3, 194.0, 169.6, 64.0, 169.6, 186.4, 190.3, 163.2];
@@ -28,15 +28,15 @@
   function measure() {
     if (measured) return;
     const c = document.createElement('canvas').getContext('2d');
-    R.font(c, 195, 'display', 900);
+    R.font(c, 190, 'display', 900);
     const g = R.glyphs(c, WORD, 0);
     if (g && g.chars.length === 9 && g.width > 1000) { ORG = g.chars.map(k => k.x); ADV = g.chars.map(k => k.w); }
-    R.font(c, 79.5, 'sans', 700);
+    R.font(c, 77.5, 'sans', 700);
     const w = CH.map(k => c.measureText(k.s).width), sp = c.measureText(' ').width;
     if (w.every(v => v > 100)) {
       CH[0].x = 0; CH[0].w = w[0];
       CH[1].x = w[0] + sp; CH[1].w = w[1];
-      CH[2].x = CH[1].x + w[1] + 40; CH[2].w = w[2];                       // the 40 px gap that houses the ink bar's rounded end
+      CH[2].x = CH[1].x + w[1] + 39; CH[2].w = w[2];                       // the 40 px gap that houses the ink bar's rounded end
       BAR_L = X0 + CH[2].x - 18; BAR_R = X0 + CH[2].x + CH[2].w + 18;
     }
     CH.forEach((k, i) => { k.T = T_TAG[i]; k.fall = T_FALL + (2 - i) * S128 * 2.0; });
@@ -152,7 +152,7 @@
     c.save();
     if (!falling) { c.beginPath(); c.rect(X0 + ch.x - 20, 580, ch.w + 40, 106); c.clip(); }   // the baseline mask
     c.transform(1, 0, -k, 1, k * TAG_BASE, 0);
-    R.font(c, 79.5, 'sans', 700);
+    R.font(c, 77.5, 'sans', 700);
     c.fillStyle = col; c.textAlign = 'left'; c.textBaseline = 'alphabetic';
     c.fillText(ch.s, X0 + ch.x, TAG_BASE + rise + fall);
     c.restore();
@@ -179,7 +179,7 @@
     }
     lc.globalAlpha = 1;
     // wordmark
-    R.font(lc, 195, 'display', 900);
+    R.font(lc, 190, 'display', 900);
     for (let i = 0; i < 9; i++) {
       const s = glyphState(i, t);
       if (s.yo > 1200 || s.yo < -1000) continue;

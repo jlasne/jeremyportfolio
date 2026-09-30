@@ -40,7 +40,8 @@
   // the four alpha buckets (edges .30 + .1375 i). Gentler than the first cut (the near flakes read as hyphens beside 72 px type):
   // alpha .34 / .46 / .58 / .66, stroke width 1.2 / 1.7 / 2.5 / 3.4 px, streak length speed * .035 (none longer than 19 px).
   // Each bucket is drawn at three quiet levels (x1, x.6, x.3): flakes thin out over the chip and the label band, never a hard edge.
-  const BUCKET_A = [.34, .46, .58, .66], BUCKET_W = [1.2, 1.7, 2.5, 3.4], LEVEL = [1, .6, .3], STREAK = .035;
+  const BUCKET_A = [.34, .46, .58, .66], BUCKET_W = [1.4, 2.0, 2.9, 4.0], LEVEL = Array.from({ length: 12 }, (_, i) => 1 - .7 * i / 11);
+  const STREAK_V0 = 110, STREAK_K = .034, STREAK_MAX = 15;   // round dots at rest; a faint tapered tail only above 110 px/s, never longer than 15 px
   for (const f of FLAKES) f.b = Math.min(3, Math.floor((f.a - .30) / .1375));
   const gust = (t, ph) => t + .55 * (6.3 / TAU) * (1 - Math.cos(TAU * t / 6.3 + ph));   // integral of 1 + .55 sin(2 pi t / 6.3 + ph)
 
@@ -114,37 +115,43 @@
     }
   }
 
-  // flakes thin out where type sits: a smooth 0..1 "quiet" field (chip, identity tag, label band), quantised to three levels
+  // flakes thin out where type sits: a smooth 0..1 "quiet" field (chip, identity tag, label band), in twelve levels, so the snow thins smoothly (no pop in the held picture)
   const sm = (a, b, x) => { const u = R.clamp((x - a) / (b - a), 0, 1); return u * u * (3 - 2 * u); };
   const box = (x, y, x0, x1, y0, y1, r) => sm(x0 - r, x0, x) * (1 - sm(x1, x1 + r, x)) * sm(y0 - r, y0, y) * (1 - sm(y1, y1 + r, y));
-  const paths = Array.from({ length: 12 }, () => []);
+  const paths = Array.from({ length: 48 }, () => []);   // 4 buckets x 12 quiet levels
   function drawSnow(ctx, t) {
     const qc = R.prog(t, 1.8, 1.95) * (1 - R.prog(t, 11.4, 11.55));      // the chip is up
     const qt = R.prog(t, 1.8, 1.95) * (1 - R.prog(t, 3.7, 3.85));        // the identity tag is up
-    const ql = R.prog(t, 5.5, 5.7) * (1 - R.prog(t, 8.9, 9.1));          // the four labels are up
+    const ql = R.prog(t, 5.30, 5.50) * (1 - R.prog(t, 8.9, 9.1));          // the four labels are up
+    const qe = R.prog(t, 12.25, 12.45);                                    // the end card's URL and credit are up
     ctx.save();
     ctx.lineCap = 'round';
-    for (let i = 0; i < 12; i++) paths[i].length = 0;
+    for (let i = 0; i < 48; i++) paths[i].length = 0;
     for (const f of FLAKES) {
       const x = mod(f.x0 + f.vx * gust(t, f.ph * .2) + 90, 2100) - 90;
       const y = mod(f.y0 + f.vy * t + 14 * Math.sin(t * f.sw * 2 + f.ph) + 90, 1260) - 90;
       const vx = f.vx * (1 + .55 * Math.sin(TAU * t / 6.3 + f.ph * .2)), sp = Math.hypot(vx, f.vy);
-      const len = Math.max(2 * f.r, sp * STREAK), k = len / sp;
+      const len = Math.min(STREAK_MAX, Math.max(.05, (sp - STREAK_V0) * STREAK_K)), k = len / sp;
       let q = 0;
-      if (qc > 0 || qt > 0 || ql > 0) {
-        q = Math.max(qc * box(x, y, 96, 760, 92, 178, 44), qt * box(x, y, 1380, 1830, 92, 178, 44), ql * box(x, y, 0, 1920, 616, 764, 50));
+      if (qc > 0 || qt > 0 || ql > 0 || qe > 0) {
+        q = Math.max(qc * box(x, y, 96, 760, 92, 178, 44), qt * box(x, y, 1380, 1830, 92, 178, 44), ql * box(x, y, 0, 1920, 616, 764, 50), qe * box(x, y, 540, 1380, 725, 1000, 50));
       }
-      const lv = q < .1 ? 0 : q < .6 ? 1 : 2;
-      paths[f.b * 3 + lv].push(x, y, x - vx * k, y - f.vy * k);
+      const lv = Math.min(11, Math.round(q * 11));
+      paths[f.b * 12 + lv].push(x, y, x - vx * k, y - f.vy * k);
     }
     for (let b = 0; b < 4; b++) {
-      ctx.lineWidth = BUCKET_W[b];
-      for (let lv = 0; lv < 3; lv++) {
-        const p = paths[b * 3 + lv];
+      for (let lv = 0; lv < 12; lv++) {
+        const p = paths[b * 12 + lv];
         if (!p.length) continue;
-        ctx.strokeStyle = `rgba(255,255,255,${(BUCKET_A[b] * LEVEL[lv]).toFixed(3)})`;
+        const a = BUCKET_A[b] * LEVEL[lv];
+        // pass 1: the whole streak, wide and faint (the tail and a soft halo round the dot); pass 2: the head 35 percent at full width (the comet's head)
+        ctx.lineWidth = BUCKET_W[b] * 1.9; ctx.strokeStyle = `rgba(255,255,255,${(a * .22).toFixed(3)})`;
         ctx.beginPath();
         for (let i = 0; i < p.length; i += 4) { ctx.moveTo(p[i], p[i + 1]); ctx.lineTo(p[i + 2], p[i + 3]); }
+        ctx.stroke();
+        ctx.lineWidth = BUCKET_W[b]; ctx.strokeStyle = `rgba(255,255,255,${a.toFixed(3)})`;
+        ctx.beginPath();
+        for (let i = 0; i < p.length; i += 4) { ctx.moveTo(p[i], p[i + 1]); ctx.lineTo(p[i] + (p[i + 2] - p[i]) * .35, p[i + 1] + (p[i + 3] - p[i + 1]) * .35); }
         ctx.stroke();
       }
     }

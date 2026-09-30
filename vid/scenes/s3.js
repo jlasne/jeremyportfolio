@@ -80,7 +80,9 @@
   // the shutter rotation of ALL FOUR petals about O (same sense, like the blades of a lens): 0 at T_OPEN and 0 from 5.3203
   const theta = t => 14 * Math.PI / 180 * E.outCubic(R.prog(t, T_OPEN, T_TRAVEL)) * (1 - E.inOutCubic(R.prog(t, T_TRAVEL, 5.3203125)));
   const mixAt = t => E.inOutQuad(R.prog(t, T_KICK, T_SETTLE));
-  const fillOf = (t, qn) => R.mix(CMW, BASE[qn], mixAt(t));
+  const mixLit = t => E.outCubic(R.prog(t, 5.0625, 5.3125));           // orange and green take their colour with the travel, so they land in colour
+  const HUSH_DARK = '#2c374d';                                          // the two dark cards stay light until the sky covers them, then settle on dark glass (the grade crushes #070a12 to 0,0,0)
+  const fillOf = (t, qn) => DARK[qn] ? R.mix(CMW, R.mixArr(BASE[qn], HUSH_DARK, E.inQuad(R.prog(t, 5.28, T_SETTLE))), mixAt(t)) : R.mix(CMW, BASE[qn], mixLit(t));
   function geom(t, qn) {
     const [sx, sy] = SIGN[qn], [tx, ty] = SLOT[qn];
     const dr = E.outQuad(R.prog(t, T_OPEN, T_TRAVEL));                                   // drift along the diagonal: 110 -> 196 from O
@@ -219,7 +221,7 @@
     f.zoom = 1 + .06 * E.inCubic(R.prog(t, T_TRAVEL, T_SETTLE));
     f.distort = .05 * E.inQuad(R.prog(t, 5.2, T_SETTLE));
     const g = E.inQuad(R.prog(t, 5.28, T_SETTLE));
-    f.exposure = 1 - .30 * g; f.saturation = 1 - .60 * g; f.contrast = 1 + .10 * g;
+    f.exposure = 1 - .22 * g; f.saturation = 1 - .45 * g; f.contrast = 1 + .04 * g;
   }
 
   Reel.scene({

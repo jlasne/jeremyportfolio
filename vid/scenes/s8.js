@@ -7,7 +7,8 @@
   // ---- time on the grid ----
   const B = 0.46875, S16 = B / 4, S32 = B / 8, S128 = B / 32, S256 = B / 64, S512 = B / 128;
   const T = {
-    chip: R.at(1, 1) + S32,                 // 0.0586  the chip and the tag enter
+    chip: R.at(1, 1) + S32,                 // 0.0586  the chip enters
+    tagIn: R.at(1, 2),                      // 0.4688  the tag enters after the last landing (the falling H, O and P used to cross it)
     fall: R.at(1, 4),                       // 1.40625 they fall away with the type
     flip: R.at(2, 1),                       // 1.875   the world flips: ICE, `2 projects`
     plural2: R.at(2, 1, 2),                 // 1.9922  the `s` of `2 projects`
@@ -30,13 +31,17 @@
   //   glyph index i: 0 = the digit slot, 1..L = the letters of the word (spaces skipped), L + 1 = the plural `s`
   const SECTIONS = [
     { word: 'project', plural: false, digit: 1, enter: T.chip, exit: { kind: 'fall', at: T.fall }, end: T.fall + .2 },
-    { word: 'project', plural: true, digit: 2, enter: T.flip, pop: T.plural2, exit: { kind: 'up', at: T.apps }, end: T.apps + .35 },
+    { word: 'project', plural: true, digit: 2, enter: T.flip + 1 / 60, pop: T.plural2, exit: { kind: 'up', at: T.apps }, end: T.apps + .35 },
     { word: 'mobile app', plural: true, digit: 1, enter: T.apps, pop: T.appTick[0], ticks: T.appTick, roll: .109375, exit: { kind: 'up', at: T.pers }, end: T.pers + .35 },
     { word: 'personal project', plural: true, digit: 1, enter: T.pers, pop: T.persTick[0], ticks: T.persTick, roll: .15625, exit: { kind: 'fallR', at: T.chipOut }, end: T.end },
   ];
   // the section 0 line is drawn from its own start; the window a section occupies on screen
   SECTIONS[0].from = T.chip; SECTIONS[1].from = T.flip; SECTIONS[2].from = T.apps; SECTIONS[3].from = T.pers;
 
+  // glyph origins with the kern pair BEFORE each glyph included: origin i = width(prefix through i) - width(i) + i * tracking
+  // (R.glyphs measures the prefix that excludes glyph i, so every kern pair lands one glyph late)
+  const kernGlyphs = (c, str, tr) => { const ch = Array.from(str), w = s => c.measureText(s).width; let pre = '';
+    return { chars: ch.map((g, i) => { pre += g; return { ch: g, x: w(pre) - w(g) + i * tr, w: w(g), i }; }), width: w(str) + (ch.length - 1) * tr }; };
   let placed = null;      // glyph x positions per section (measured after fonts load)
   const measure = () => {
     if (placed) return;
@@ -44,7 +49,7 @@
     placed = SECTIONS.map(sec => {
       R.font(c, 72, 'sans', 700);
       const full = sec.word + 's';
-      const g = R.glyphs(c, full, 0);
+      const g = kernGlyphs(c, full, 0);
       const letters = [];
       g.chars.forEach(ch => { if (ch.ch !== ' ') letters.push({ ch: ch.ch, x: WORD_X + ch.x }); });
       // letters: the word's glyphs, then the `s` (last)
@@ -59,7 +64,7 @@
   };
 
   // ---- pieces of motion ----
-  const rise = (t, t0) => 90 * (1 - E.outExpo(R.prog(t, t0, t0 + .18)));
+  const rise = (t, t0) => 112 * (1 - E.outExpo(R.prog(t, t0, t0 + .18)));
 
   // vertical offset of glyph i of a section from the arrival and the exit of its line (px, + = down)
   function lineOffset(sec, i, n, t) {
@@ -67,7 +72,7 @@
     y += rise(t, sec.enter + Math.min(i, n) * .014);                // the plural `s` (i = n + 1) is drawn only by its pop and rides with the last letter
     const ex = sec.exit;
     if (ex.kind === 'fall') y += 90 * E.inQuart(R.prog(t, ex.at + (n - i) * S128, ex.at + (n - i) * S128 + .09));   // right to left, n = 8 glyphs (0..7)
-    else if (ex.kind === 'up') y -= 112 * E.outQuart(R.prog(t, ex.at + i * S512, ex.at + i * S512 + .11));   // fast start: the old glyph is a full line height clear of the arriving one on every frame
+    else if (ex.kind === 'up') y -= 112 * E.outQuart(R.prog(t, ex.at, ex.at + .11));   // fast start: the old glyph is a full line height clear of the arriving one on every frame
     else y += 90 * E.inQuart(R.prog(t, ex.at + i * S256, ex.at + i * S256 + .09));
     return y;
   }
@@ -102,6 +107,12 @@
     ctx.save();
     ctx.beginPath(); ctx.rect(CLIP.x, CLIP.y, CLIP.w, CLIP.h); ctx.clip();
     ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+    // 5.13 to 5.27: the cream TL petal of s3 passes behind the last letters of `2 projects`; a dark rim keeps them readable
+    const rim = R.prog(t, 5.1328, 5.1445) * (1 - R.prog(t, 5.2617, 5.2734));
+    const put = (str, x, y) => {
+      if (rim > .01) { const a = ctx.globalAlpha; ctx.globalAlpha = a * .8 * rim; ctx.strokeStyle = '#050b16'; ctx.lineWidth = 9; ctx.lineJoin = 'round'; ctx.strokeText(str, x, y); ctx.globalAlpha = a; }
+      ctx.fillText(str, x, y);
+    };
     for (let k = 0; k < SECTIONS.length; k++) {
       const sec = SECTIONS[k];
       if (t < sec.from || t >= sec.end) continue;
@@ -113,7 +124,7 @@
       const base = lineOffset(sec, 0, n, t);
       for (const ds of digitStates(sec, t)) {
         ctx.globalAlpha = ds.a;
-        ctx.fillText(String(ds.d), LEFT + (DIGIT_BOX - P.dig[ds.d]) / 2, BASE + base + ds.y);
+        put(String(ds.d), LEFT + (DIGIT_BOX - P.dig[ds.d]) / 2, BASE + base + ds.y);
       }
       // the word
       R.font(ctx, 72, 'sans', 700);
@@ -121,7 +132,7 @@
       for (let i = 0; i < L; i++) {
         const y = lineOffset(sec, i + 1, n, t);
         if (y > 100 || y < -100) continue;
-        ctx.fillText(P.word[i].ch, P.word[i].x, BASE + y);
+        put(P.word[i].ch, P.word[i].x, BASE + y);
       }
       // the plural `s`: only its pop, then it travels with the line
       if (sec.plural) {
@@ -129,7 +140,7 @@
         if (t >= sec.pop) {
           const sc = E.outBack(p, 1.6), y = lineOffset(sec, L + 1, n, t);
           ctx.save(); ctx.translate(P.s.x, BASE + y); ctx.scale(sc, sc);
-          ctx.fillText(P.s.ch, 0, 0);
+          put(P.s.ch, 0, 0);
           ctx.restore();
         }
       }
@@ -140,8 +151,8 @@
   function drawTag(ctx, t) {
     let y, a = 1;
     if (t < T.flip) {
-      if (t < T.chip || t >= T.fall + .1) return;
-      y = 90 * (1 - E.outExpo(R.prog(t, T.chip, T.chip + .18))) + 90 * E.inQuart(R.prog(t, T.fall, T.fall + .0898));
+      if (t < T.tagIn || t >= T.fall + .1) return;
+      y = 90 * (1 - E.outExpo(R.prog(t, T.tagIn, T.tagIn + .18))) + 90 * E.inQuart(R.prog(t, T.fall, T.fall + .0898));
     } else {
       if (t >= T.tagSink + .09) return;
       const q = R.prog(t, T.tagSink, T.tagSink + .09);

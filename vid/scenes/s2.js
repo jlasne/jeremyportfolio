@@ -95,7 +95,7 @@
   const TAGW = ['I build', 'mobile apps', 'with influencers.'];
   let slot = [], tagX = [399.65, 599.65, 999.65], tagW = [184.6, 383.5, 520.6];
   const wFont = (ctx, w) => R.font(ctx, 170, 'sans', w);
-  const TR = -3.4;                                                                 // -.02em: Inter Tight 800 fuses at -.03em (e/a shared 22 px of ink)
+  const TR = -1.7;                                                                 // -.02em: Inter Tight 800 fuses at -.03em (e/a shared 22 px of ink)
   function measure() {
     const c = document.createElement('canvas').getContext('2d');
     wFont(c, 800);
