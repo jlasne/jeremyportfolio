@@ -87,7 +87,7 @@
   // ---- the list ----
   const ROWS = [
     { name: 'Private equity', desc: ['Three positions of my own.'], trail: 'chev', subs: [['SaaS Health'], ['H100 datacenters'], ['Astronomy blog']] },
-    { name: 'Social', desc: ['Where to find me.'], trail: 'chev', subs: [['YouTube', '@jerandmax'], ['X', '@jeremylasne'], ['Email', 'hey@jeremylasne.com']] },
+    { name: 'Social', desc: ['Where to find me.'], trail: 'chev', subs: [['YouTube', '@jeremyfounder'], ['X', '@jeremylasne'], ['Email', 'hey@jeremylasne.com']] },
     { name: 'Bio Tracker', desc: ['An energized and performing life, tracked.'], trail: 'arrow' },
     { name: 'Brain', desc: ['A folder that gets smarter', 'every time you feed it.'], trail: 'arrow' },
   ];

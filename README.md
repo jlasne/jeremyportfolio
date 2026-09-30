@@ -15,7 +15,7 @@ The landing page is one screen: a portrait, a name, three lists.
   names any wild animal with your camera, and its creator seat is open
 - **Personal.** Three private equity positions (SaaS health, H100
   datacenters, an astronomy blog), Social folded away (YouTube
-  [@jerandmax](https://www.youtube.com/@jerandmax), X
+  [@jeremyfounder](https://www.youtube.com/@jeremyfounder), X
   [@jeremylasne](https://x.com/jeremylasne), email), the Bio tracker and
   [Brain](https://brain.jeremylasne.com)
 
