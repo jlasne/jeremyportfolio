@@ -251,12 +251,17 @@ Ideas are not part of a series. The road to a goal belongs to the daily video.
 
 For the daily video:
 
-- **The opening sentence is the series.** One natural spoken sentence that mixes
-  three things: that he is 25, where he is right now and what he is doing, and
-  the road he is on, to `SERIES_GOAL` in `xprompts.ts`, currently $10k a month,
-  in his own words and adapted slightly each day. It is never a slogan and never
-  starts with "Road to". It hints at the day's tension without giving the answer
-  away, taken from the log and never invented. It is also given as on-screen text.
+- **The opening sentence is the series.** It follows a fixed shape: "Day 14
+  working towards my first $10k a month. I'm Jeremy, I'm 25, currently in Cork,
+  Ireland." The day number, the goal, his name and his age stay exactly. The
+  words around them vary a little from day to day. A second short sentence says
+  what he is doing right now, taken from the log, and can hint at the day's
+  tension without giving the answer away. It is also given as on-screen text.
+- **Where the numbers come from.** The day number is counted in code and handed
+  to the model, never guessed. Day 1 is `SERIES_START` in `xprompts.ts`, or, when
+  that is empty, the first day anything was logged. The goal is `SERIES_GOAL`.
+  The place is where the log says he is that day, and `SERIES_HOME` when it does
+  not; empty it to leave the place out.
 - **One exit line** after the Result: one thing the viewer can do, or the next
   step tomorrow's video takes.
 - The brief shows the model the openings of the last five scripts, so the

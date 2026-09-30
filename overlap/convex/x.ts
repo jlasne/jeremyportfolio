@@ -23,6 +23,8 @@ import {
   DIGEST_SYSTEM,
   TALK_SYSTEM,
   SERIES_GOAL,
+  SERIES_HOME,
+  SERIES_START,
   CRAFT,
   BEATS,
   READY_AT,
@@ -501,20 +503,21 @@ export const make = internalAction({
     );
 
     const opened = (c.previous as { script?: string }[]).map((p) => situationOf(p.script ?? "")).filter(Boolean);
+    const dayNo: number = await ctx.runQuery(internal.x.seriesDay, { day });
     const script = await ask(
       SCRIPT_SYSTEM,
       `${b}\n\nWrite the 60 second script from this log.\n\n` +
-        `THE SITUATION opens the talking script. It is one to two spoken sentences, natural, the way he would ` +
-        `say it to a friend. Its first sentence mixes three things: that he is 25, where he is right now and ` +
-        `what he is doing, taken from the log (a desk, a train, a gym, a call, a beach), and the road he is on, ` +
-        `to ${SERIES_GOAL}, in his own words and adapted slightly each day. He can open on his name and age or ` +
-        `on his age alone, so it varies. The shape only, not the content: "I'm 25, I'm building toward ` +
-        `${SERIES_GOAL} with creators, and right now I'm [place] [doing something]." It is not a slogan: never ` +
-        `start with "Road to". It is today's, so it changes every day. It hints at the tension of today without ` +
-        `giving the answer away, and it takes that tension from the log, never invented. Do not name his city ` +
-        `or country unless the log says he is somewhere new or unusual today, and never open with "I'm in" and ` +
-        `a place. Never state a current figure for the road that the log does not give. Give that first ` +
-        `sentence also as on-screen text, under 8 words, on its own line labelled "On screen", straight after it.\n\n` +
+        `THE SITUATION opens the talking script, in this shape: "Day ${dayNo} working towards my first ` +
+        `${SERIES_GOAL}. I'm Jeremy, I'm 25, currently in ${SERIES_HOME || "[place]"}." Keep the day number, ` +
+        `the goal, his name and his age exactly. Vary the wording of the words around them a little from day ` +
+        `to day, for example "Day ${dayNo} of building to my first ${SERIES_GOAL}". The place is where the log ` +
+        `says he is today` +
+        (SERIES_HOME ? `; when the log does not say, he is in ${SERIES_HOME}` : "") +
+        `. After that, one short sentence on what he is doing right now, taken from the log (a desk, a call, a ` +
+        `train, a gym), which can hint at the tension of today without giving the answer away. Take it from ` +
+        `the log, never invented. Never state a current figure for the road that the log does not give. Give ` +
+        `the first sentence also as on-screen text, under 8 words, on its own line labelled "On screen", ` +
+        `straight after it.\n\n` +
         `THE REST OF THE STORY, out of today. The Desire is what he wanted from today, the Conflict is what ` +
         `blocked it, the Change is the decision he took today, and the Result is what is true tonight that was ` +
         `not true this morning. The Change and the Result are what stops every video sounding like the last ` +
@@ -522,8 +525,8 @@ export const make = internalAction({
         `is. After the Result, add one exit line, under 15 words: one thing the viewer can do, or the next step ` +
         `tomorrow's video takes.` +
         (opened.length
-          ? `\n\nOPENINGS ALREADY USED IN EARLIER VIDEOS. Open differently: other words, ` +
-            `another hook, another place or another activity.\n` + opened.map((o: string) => `- ${o}`).join("\n")
+          ? `\n\nOPENINGS ALREADY USED IN EARLIER VIDEOS. Keep the shape, but vary the wording a little ` +
+            `and say something different in the second sentence.\n` + opened.map((o: string) => `- ${o}`).join("\n")
           : ""),
     );
 
@@ -794,6 +797,25 @@ async function waitingDays(ctx: { db: any }) {
 export const waiting = internalQuery({
   args: {},
   handler: async (ctx) => await waitingDays(ctx),
+});
+
+/**
+ * Which day of the road a date is: Day 1 is SERIES_START, or, when that is
+ * empty, the first day anything was logged. Counted here so the script says a
+ * number that is true instead of one the model made up.
+ */
+export const seriesDay = internalQuery({
+  args: { day: v.string() },
+  handler: async (ctx, { day }) => {
+    const first =
+      SERIES_START && isDay(SERIES_START)
+        ? SERIES_START
+        : ((await ctx.db.query("xDays").withIndex("by_day").order("asc").take(400)) as DayDoc[]).find(
+            (d) => d.entries.length,
+          )?.day ?? day;
+    const gap = Math.round((Date.parse(day + "T00:00:00Z") - Date.parse(first + "T00:00:00Z")) / 86_400_000);
+    return Math.max(1, gap + 1);
+  },
 });
 
 export const applyDigest = internalMutation({

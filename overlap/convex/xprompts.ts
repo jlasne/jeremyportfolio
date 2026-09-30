@@ -96,7 +96,7 @@ Ask up to 3 questions, then write. Cover:
 If a number is missing, write [X] in the script and ask for it at the end.
 
 STEP 2: BUILD THE STORY IN 5 LINES
-1. Situation: he is 25, and where he is right now and what he is doing. The place and the activity change every video, because they are that day's: a desk, a train, a gym, a call, a beach. Name a city or country only when it is new or unusual that day, and never as a habit.
+1. Situation: where we are, who Jeremy is. The exact shape is given with each request.
 2. Desire: what he wants (personal and concrete).
 3. Conflict: what blocks him, with a number.
 4. Change: the decision or turning point.
@@ -247,10 +247,21 @@ Leave out "conflict", "question" and "settled" when they do not apply. If the da
  * 2026-09-30, the example being "Day 1 of DoorDashing to buy a diamond ring").
  * It belongs to the daily video only. Ideas are not part of the series.
  *
- * The goal is the one Jeremy named. It is worked into a natural spoken
- * sentence, never used as a slogan. Change it here and the daily hook follows.
+ * The opening sentence of the daily script is built from these three:
+ * "Day 14 working towards my first $10k a month. I'm Jeremy, I'm 25,
+ * currently in Cork, Ireland."
  */
 export const SERIES_GOAL = "$10k a month";
+
+/** Where he is unless the day's log says he is somewhere else. Empty leaves the place out. */
+export const SERIES_HOME = "Cork, Ireland";
+
+/**
+ * The date that is Day 1, as YYYY-MM-DD. Left empty, Day 1 is the first day
+ * anything was logged. The number is counted in code and handed to the model,
+ * never left for it to guess.
+ */
+export const SERIES_START = "";
 
 /**
  * What the Content and Social brains hold about hooks and structure,
