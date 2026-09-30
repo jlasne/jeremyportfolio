@@ -417,6 +417,63 @@ function situationOf(script: string): string {
 }
 
 /**
+ * The opening of the daily script, built in code.
+ *
+ * Told the shape and asked to follow it, the model wrote its own opening and
+ * left out the day and the goal. So the model is only asked for the two blanks
+ * it can actually fill from the log, where he is if it is not home, and what he
+ * is trying to do today, and everything else is fixed: the day number, the
+ * goal, his name and his age. The result is written into the script, so it
+ * does not depend on the model obeying anything.
+ */
+async function openingFor(brief: string, dayNo: number, earlier: string[]) {
+  let place = "";
+  let doing = "";
+  try {
+    const raw = await ask(
+      "You read one day of a founder's log and fill in two blanks. You answer with JSON only.",
+      `${brief}\n\n` +
+        `Fill in two blanks from the log above. Reply with one JSON object and nothing else:\n` +
+        `{"place":"","doing":""}\n` +
+        `"place": the city or country he is in today, ONLY if the log says he is somewhere other than ` +
+        `${SERIES_HOME || "home"}. Otherwise an empty string.\n` +
+        `"doing": what he is trying to do today, starting with the words "trying to", 8 to 12 words, from the ` +
+        `log. Never invent it. If the log does not say, an empty string.` +
+        (earlier.length
+          ? `\n\nEARLIER OPENINGS. Do not repeat these clauses:\n${earlier.map((o) => `- ${o}`).join("\n")}`
+          : ""),
+      0.3,
+      { note: false, max: 300 },
+    );
+    const got = parseJson(raw);
+    if (typeof got?.place === "string") place = got.place.trim().replace(/[.,;]+$/, "").slice(0, 40);
+    if (typeof got?.doing === "string" && /^trying to\b/i.test(got.doing.trim()))
+      doing = got.doing.trim().replace(/[.,;]+$/, "").slice(0, 100);
+  } catch (e) {
+    console.error("x: could not fill the opening blanks", e);
+  }
+  const where = place || SERIES_HOME;
+  const opening =
+    `Day ${dayNo} working towards my first ${SERIES_GOAL}. ` +
+    `I'm Jeremy, I'm 25${where ? `, currently in ${where}` : ""}${doing ? ` ${doing}` : ""}.`;
+  return { opening, onScreen: `Day ${dayNo}: my first ${SERIES_GOAL}` };
+}
+
+/**
+ * Put the opening into the script, over whatever the model wrote there.
+ *
+ * The Situation block is found by its label at the start of a line and runs to
+ * the Desire label. If the layout is one this does not recognise, the opening
+ * goes on top under its own label instead, so it is always there.
+ */
+function withOpening(script: string, opening: string, onScreen: string): string {
+  const block = `${opening}\n*On screen: "${onScreen}"*`;
+  const re = /^([ \t]*[*#>_\s-]*Situation[^\n]{0,40})\n[\s\S]*?(?=\n+[ \t]*[*#>_-]*\s*Desire)/im;
+  if (re.test(script)) return script.replace(re, (_m, head: string) => `${head}\n${block}`);
+  return `**Opening**\n${block}\n\n${script}`;
+}
+
+/**
  * How a post is laid out, which matters as much as what it says.
  *
  * Left alone the model returns one block of prose at whatever length it
@@ -504,31 +561,20 @@ export const make = internalAction({
 
     const opened = (c.previous as { script?: string }[]).map((p) => situationOf(p.script ?? "")).filter(Boolean);
     const dayNo: number = await ctx.runQuery(internal.x.seriesDay, { day });
-    const script = await ask(
+    const { opening, onScreen } = await openingFor(b, dayNo, opened);
+    const scriptRaw = await ask(
       SCRIPT_SYSTEM,
       `${b}\n\nWrite the 60 second script from this log.\n\n` +
-        `THE SITUATION opens the talking script, in this shape: "Day ${dayNo} working towards my first ` +
-        `${SERIES_GOAL}. I'm Jeremy, I'm 25, currently in ${SERIES_HOME || "[place]"}." Keep the day number, ` +
-        `the goal, his name and his age exactly. Vary the wording of the words around them a little from day ` +
-        `to day, for example "Day ${dayNo} of building to my first ${SERIES_GOAL}". The place is where the log ` +
-        `says he is today` +
-        (SERIES_HOME ? `; when the log does not say, he is in ${SERIES_HOME}` : "") +
-        `. After that, one short sentence on what he is doing right now, taken from the log (a desk, a call, a ` +
-        `train, a gym), which can hint at the tension of today without giving the answer away. Take it from ` +
-        `the log, never invented. Never state a current figure for the road that the log does not give. Give ` +
-        `the first sentence also as on-screen text, under 8 words, on its own line labelled "On screen", ` +
-        `straight after it.\n\n` +
+        `THE SITUATION IS FIXED. The block labelled Situation says exactly this, word for word, and nothing ` +
+        `else:\n"${opening}"\nWrite the rest of the script to continue from it. Never state a current figure ` +
+        `for the road that the log does not give.\n\n` +
         `THE REST OF THE STORY, out of today. The Desire is what he wanted from today, the Conflict is what ` +
         `blocked it, the Change is the decision he took today, and the Result is what is true tonight that was ` +
         `not true this morning. The Change and the Result are what stops every video sounding like the last ` +
-        `one, so they carry today's specifics and today's numbers. Only the Situation may lean on who Jeremy ` +
-        `is. After the Result, add one exit line, under 15 words: one thing the viewer can do, or the next step ` +
-        `tomorrow's video takes.` +
-        (opened.length
-          ? `\n\nOPENINGS ALREADY USED IN EARLIER VIDEOS. Keep the shape, but vary the wording a little ` +
-            `and say something different in the second sentence.\n` + opened.map((o: string) => `- ${o}`).join("\n")
-          : ""),
+        `one, so they carry today's specifics and today's numbers. After the Result, add one exit line, under ` +
+        `15 words: one thing the viewer can do, or the next step tomorrow's video takes.`,
     );
+    const script = withOpening(scriptRaw, opening, onScreen);
 
     const at = Date.now();
     const drafts = [

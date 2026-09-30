@@ -251,16 +251,20 @@ Ideas are not part of a series. The road to a goal belongs to the daily video.
 
 For the daily video:
 
-- **The opening sentence is the series.** It follows a fixed shape: "Day 14
-  working towards my first $10k a month. I'm Jeremy, I'm 25, currently in Cork,
-  Ireland." The day number, the goal, his name and his age stay exactly. The
-  words around them vary a little from day to day. A second short sentence says
-  what he is doing right now, taken from the log, and can hint at the day's
-  tension without giving the answer away. It is also given as on-screen text.
-- **Where the numbers come from.** The day number is counted in code and handed
-  to the model, never guessed. Day 1 is `SERIES_START` in `xprompts.ts`, or, when
-  that is empty, the first day anything was logged. The goal is `SERIES_GOAL`.
-  The place is where the log says he is that day, and `SERIES_HOME` when it does
+- **The opening sentence is the series, and it is built in code.** "Day 14
+  working towards my first $10k a month. I'm Jeremy, I'm 25, currently in Ireland
+  trying to sign my second deal." Told the shape and asked to follow it, the
+  model wrote its own opening and left out the day and the goal. So the model is
+  now asked only for the two blanks it can fill from the log, where he is if it
+  is not home and what he is trying to do today, and everything else is fixed.
+  The result is written into the Situation block over whatever the model wrote,
+  with its on-screen text, "Day 14: my first $10k a month". If the layout is one
+  it does not recognise, the opening goes on top under its own label, so it is
+  always there.
+- **Where the numbers come from.** The day number is counted in code, never
+  guessed. Day 1 is `SERIES_START` in `xprompts.ts`, or, when that is empty, the
+  first day anything was logged. The goal is `SERIES_GOAL`. The place is where
+  the log says he is that day, and `SERIES_HOME`, currently Ireland, when it does
   not; empty it to leave the place out.
 - **One exit line** after the Result: one thing the viewer can do, or the next
   step tomorrow's video takes.

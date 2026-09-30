@@ -249,12 +249,12 @@ Leave out "conflict", "question" and "settled" when they do not apply. If the da
  *
  * The opening sentence of the daily script is built from these three:
  * "Day 14 working towards my first $10k a month. I'm Jeremy, I'm 25,
- * currently in Cork, Ireland."
+ * currently in Ireland trying to sign my second deal."
  */
 export const SERIES_GOAL = "$10k a month";
 
 /** Where he is unless the day's log says he is somewhere else. Empty leaves the place out. */
-export const SERIES_HOME = "Cork, Ireland";
+export const SERIES_HOME = "Ireland";
 
 /**
  * The date that is Day 1, as YYYY-MM-DD. Left empty, Day 1 is the first day
