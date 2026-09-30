@@ -366,6 +366,17 @@ function brief(c: {
    Override with X_MODEL to try another. */
 const MODEL = () => process.env.X_MODEL || "deepseek/deepseek-v4-flash";
 
+/**
+ * One call to the model.
+ *
+ * DeepSeek V4 Flash reasons before it answers, and that reasoning is paid out
+ * of the same token budget as the answer. A tight max_tokens is spent on the
+ * thinking and the answer comes back empty, which surfaced as "OpenRouter
+ * returned nothing". So every call gets room to think on top of the answer it
+ * asks for, asks for low effort, and is tried once more with more room before
+ * it gives up. The message it gives up with says why, so the next failure is
+ * not a guess.
+ */
 async function ask(
   system: string,
   user: string,
@@ -374,29 +385,49 @@ async function ask(
 ): Promise<string> {
   const key = process.env.OPENROUTER_API_KEY;
   if (!key) throw new Error("Set OPENROUTER_API_KEY in the Convex dashboard first");
-  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-      "HTTP-Referer": process.env.X_SITE_URL || "https://x.jeremylasne.com",
-      "X-Title": "x.jeremylasne.com",
-    },
-    body: JSON.stringify({
-      model: MODEL(),
-      temperature,
-      max_tokens: opts.max ?? 2000,
-      messages: [
-        { role: "system", content: opts.note === false ? system : system + "\n\n" + RUN_NOTE },
-        { role: "user", content: user },
-      ],
-    }),
-  });
-  if (!res.ok) throw new Error(`OpenRouter said ${res.status}: ${(await res.text()).slice(0, 200)}`);
-  const body = (await res.json()) as any;
-  const text = body?.choices?.[0]?.message?.content;
-  if (typeof text !== "string" || !text.trim()) throw new Error("OpenRouter returned nothing");
-  return text.trim();
+  const want = opts.max ?? 2000;
+
+  const send = async (room: number) => {
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": process.env.X_SITE_URL || "https://x.jeremylasne.com",
+        "X-Title": "x.jeremylasne.com",
+      },
+      body: JSON.stringify({
+        model: MODEL(),
+        temperature,
+        max_tokens: want + room,
+        reasoning: { effort: "low" },
+        messages: [
+          { role: "system", content: opts.note === false ? system : system + "\n\n" + RUN_NOTE },
+          { role: "user", content: user },
+        ],
+      }),
+    });
+    if (!res.ok) throw new Error(`OpenRouter said ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    const body = (await res.json()) as any;
+    /* A 200 can still carry an error, and some providers return the content as parts. */
+    if (body?.error) throw new Error(`OpenRouter said: ${String(body.error.message ?? body.error).slice(0, 200)}`);
+    const choice = body?.choices?.[0];
+    const c = choice?.message?.content;
+    const text = typeof c === "string" ? c : Array.isArray(c) ? c.map((x: any) => x?.text ?? "").join("") : "";
+    const why =
+      `finish_reason ${choice?.finish_reason ?? "none"}` +
+      (choice?.message?.reasoning ? ", it returned reasoning but no answer" : "") +
+      `, budget ${want + room}`;
+    return { text: text.trim(), why };
+  };
+
+  let out = await send(4000);
+  if (!out.text) {
+    console.error("x: empty answer, trying once more with more room", out.why);
+    out = await send(12000);
+  }
+  if (!out.text) throw new Error(`OpenRouter returned nothing (${out.why})`);
+  return out.text;
 }
 
 /**

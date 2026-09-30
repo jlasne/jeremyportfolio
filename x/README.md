@@ -275,6 +275,17 @@ For the daily video:
 - The brief shows the model the openings of the last five scripts, so the
   opening varies from day to day.
 
+### Why a call can come back empty
+
+DeepSeek V4 Flash reasons before it answers, and the reasoning is paid out of
+the same token budget as the answer. A tight budget is spent on the thinking
+and the answer comes back empty, which showed up as "OpenRouter returned
+nothing". Every call now asks for low reasoning effort, gets its answer budget
+plus 4,000 tokens of room, and is tried once more with 12,000 if it still
+comes back empty. If it fails after that, the message says why: the finish
+reason, whether reasoning came back, and the budget. To leave a reasoning
+model altogether, set `X_MODEL` to a plain chat model.
+
 ## Settings
 
 Set these on the Convex deployment (Settings, then Environment Variables):
