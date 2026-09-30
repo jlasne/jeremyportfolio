@@ -240,48 +240,41 @@ One JSON object and nothing else, no code fence:
 Leave out "conflict", "question" and "settled" when they do not apply. If the day holds nothing worth keeping, output {"concepts":[]}.`;
 
 /**
- * The series every video belongs to.
+ * The road the daily video is on.
  *
- * The Content brain holds this as series-style storytelling: link every video
- * to one overarching goal, make each video its own story, and repeat the hook
- * frame (Mino Lee, 2026-09-30, the example being "Day 1 of DoorDashing to buy a
- * diamond ring"). The goal is the one Jeremy named. Change it here and every
- * hook changes with it.
+ * The Content brain holds this as series-style storytelling: link each video to
+ * one overarching goal and make each video its own story (Mino Lee,
+ * 2026-09-30, the example being "Day 1 of DoorDashing to buy a diamond ring").
+ * It belongs to the daily video only. Ideas are not part of the series.
+ *
+ * The goal is the one Jeremy named. It is worked into a natural spoken
+ * sentence, never used as a slogan. Change it here and the daily hook follows.
  */
-export const SERIES = {
-  goal: "$10k a month",
-  frame: "Road to $10k a month",
-};
+export const SERIES_GOAL = "$10k a month";
 
 /**
  * What the Content and Social brains hold about hooks and structure,
- * distilled into rules the writers can follow. A snapshot, not a live link:
- * the app cannot reach Octopus, so this is where its positions live.
+ * distilled into rules for the talking structure and the idea script. A
+ * snapshot, not a live link: the app cannot reach Octopus, so this is where
+ * its positions live. The daily video does not use it and is written as it
+ * was, apart from its opening sentence.
  *
  * Sources, all read 2026-09-30 from the Content brain unless noted:
  * hook writing (Chris Goor 2026-09-29, Mino Lee 2026-09-30), HIDE and
- * scripting (Chris Goor 2026-09-29), series storytelling and specific
- * outcome (Mino Lee 2026-09-30), authenticity (Mino Lee 2026-09-30, Thomas
- * 2026-09-29), clarity (Thomas 2026-09-29), angle types and the what, why,
- * when, how questions (2026-09-29), and the five opening hooks from the
- * Social brain (2026-09-18).
+ * scripting (Chris Goor 2026-09-29), specific outcome (Mino Lee 2026-09-30),
+ * authenticity (Mino Lee 2026-09-30, Thomas 2026-09-29), clarity (Thomas
+ * 2026-09-29), angle types and the what, why, when, how questions
+ * (2026-09-29), and the five opening hooks from the Social brain (2026-09-18).
  */
 export const CRAFT = `CRAFT RULES, taken from what he has studied:
 - The hook lands in the first 3 seconds. It makes a promise and does not give the answer away.
 - The hook also exists as on-screen text, because many people watch on silent.
 - There are five kinds of hook: a question, a surprising statement, a story, a big promise, a visual action. Pick one and vary it from video to video.
 - Lead with the promise, then handle the objection the viewer is already thinking, in one line, like "I know you're probably thinking...".
-- Every video belongs to one series: "${SERIES.frame}". Each video is still its own story, and the series frame is repeated in the hook, adapted slightly to that video. Never state a current figure for the series unless it is given.
 - Specific and vulnerable beats general. A detail he would rather not say, and other people go through too, is what makes it stand out.
 - Clarity beats cleverness. State the outcome directly. One core message.
 - Even a talking video needs its hook and its intrigue scripted word for word. Scripting is what stops rambling.`;
 
-/**
- * The talking structure.
- *
- * He does not read a script, he talks. So the structure gives him the
- * points and his own material for each one, and leaves the sentences to him.
- */
 export const TALK_SYSTEM = `You turn a video idea and a person's own material into a talking structure.
 
 Jeremy Lasne films short videos for YouTube (@jeremyfounder) and X. He talks in his own way from a structure. Your job is the structure.
@@ -296,7 +289,6 @@ WRITE AS POINTS: the delivery. Each beat is a point and a way in. He says it his
 RULES
 - Use only what the material holds. Never invent a number, a name or a story. Where a beat has nothing behind it, write GAP instead of filling it.
 - Prefer his specific and vulnerable details. Include one beat for the detail he would rather not say, drawn from the evidence. If the evidence holds none, that beat is a GAP.
-- Never state a figure for the series ("${SERIES.frame}") that the material does not hold.
 - Plain English. No em dashes. Sentences under 30 words. Numbers instead of adjectives.
 
 ${CRAFT}

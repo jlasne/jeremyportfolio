@@ -22,7 +22,7 @@ import {
   INTERVIEW_SYSTEM,
   DIGEST_SYSTEM,
   TALK_SYSTEM,
-  SERIES,
+  SERIES_GOAL,
   CRAFT,
   BEATS,
   READY_AT,
@@ -518,24 +518,23 @@ export const make = internalAction({
     const script = await ask(
       SCRIPT_SYSTEM,
       `${b}\n\nWrite the 60 second script from this log.\n\n` +
-        `THE HOOK. The first sentence of the block labelled Situation is a storytelling hook. It is the ` +
-        `series frame, "${SERIES.frame}", adapted slightly to today, followed by the open loop of today: the ` +
-        `tension the rest of the video pays off. It lands in 3 seconds, promises without giving the answer ` +
-        `away, and is under 20 words. Take the open loop from today's Conflict or Change in the log, never ` +
-        `invent one. Vary the wording and the kind of hook from day to day. Also give the hook as on-screen ` +
-        `text, under 8 words, on its own line labelled "On screen", straight after it. Never state a current ` +
-        `figure for the series that the log does not give.\n\n` +
-        `${CRAFT}\n\n` +
-        `THE FIVE LINES, out of today. The rest of the Situation, after the hook, says he is 25, then where he is right ` +
-        `now and what he is doing, taken from the log: a desk, a train, a gym, a call, a beach. It is today's, ` +
-        `so it is different every day. Do not name his city or country unless the log says he is somewhere new ` +
-        `or unusual today, and never open with "I'm in" and a place. The Desire is what he wanted from ` +
-        `today, the Conflict is what blocked it, the Change is the decision he took today, and the Result ` +
-        `is what is true tonight that was not true this morning. The Change and the Result are what stops ` +
-        `every video sounding like the last one, so they carry today's specifics and today's numbers. ` +
-        `Only the Situation may lean on who Jeremy is, and one to two lines of it is enough. ` +
-        `After the Result, add one exit line, under 15 words: one thing the viewer can do, or the next step ` +
-        `on the road that tomorrow's video takes.` +
+        `THE SITUATION opens the talking script. It is one to two spoken sentences, natural, the way he would ` +
+        `say it to a friend. Its first sentence mixes three things: that he is 25, where he is right now and ` +
+        `what he is doing, taken from the log (a desk, a train, a gym, a call, a beach), and the road he is on, ` +
+        `to ${SERIES_GOAL}, in his own words and adapted slightly each day. He can open on his name and age or ` +
+        `on his age alone, so it varies. The shape only, not the content: "I'm 25, I'm building toward ` +
+        `${SERIES_GOAL} with creators, and right now I'm [place] [doing something]." It is not a slogan: never ` +
+        `start with "Road to". It is today's, so it changes every day. It hints at the tension of today without ` +
+        `giving the answer away, and it takes that tension from the log, never invented. Do not name his city ` +
+        `or country unless the log says he is somewhere new or unusual today, and never open with "I'm in" and ` +
+        `a place. Never state a current figure for the road that the log does not give. Give that first ` +
+        `sentence also as on-screen text, under 8 words, on its own line labelled "On screen", straight after it.\n\n` +
+        `THE REST OF THE STORY, out of today. The Desire is what he wanted from today, the Conflict is what ` +
+        `blocked it, the Change is the decision he took today, and the Result is what is true tonight that was ` +
+        `not true this morning. The Change and the Result are what stops every video sounding like the last ` +
+        `one, so they carry today's specifics and today's numbers. Only the Situation may lean on who Jeremy ` +
+        `is. After the Result, add one exit line, under 15 words: one thing the viewer can do, or the next step ` +
+        `tomorrow's video takes.` +
         (opened.length
           ? `\n\nOPENINGS ALREADY USED IN EARLIER VIDEOS. Open differently: other words, ` +
             `another hook, another place or another activity.\n` + opened.map((o: string) => `- ${o}`).join("\n")
@@ -1136,12 +1135,11 @@ export const build = action({
       ask(
         SCRIPT_SYSTEM,
         `${material}\n\nWrite the 60 second script for this idea.\n\n` +
-          `This video is about the idea, not about today. Build the five lines from what his brain holds: ` +
-          `THE HOOK. The first sentence of the block labelled Situation is a storytelling hook: the series ` +
-          `frame, "${SERIES.frame}", adapted slightly to this idea, then the open loop of the idea, taken from ` +
-          `the Conflict or the Change in the material. It lands in 3 seconds, promises without giving the ` +
-          `answer away, and is under 20 words. Give it also as on-screen text, under 8 words, on its own line ` +
-          `labelled "On screen". Never state a current figure for the series that the material does not give.\n\n` +
+          `This video is about the idea, not about today. Build it from what his brain holds.\n\n` +
+          `THE HOOK. The first sentence of the block labelled Situation is a storytelling hook for this idea: ` +
+          `the open loop of the idea, taken from the Conflict or the Change in the material. It lands in 3 ` +
+          `seconds, promises without giving the answer away, and is under 20 words. Give it also as on-screen ` +
+          `text, under 8 words, on its own line labelled "On screen".\n\n` +
           `${CRAFT}\n\n` +
           `THE FIVE LINES. The rest of the Situation says he is 25 and where he stands on this idea, the Desire ` +
           `is what he wants from it, the Conflict is what blocks it, the Change is the decision he took, and ` +

@@ -223,21 +223,20 @@ makes a feed sound like somebody talking to himself.
 
 ## Craft, and where it comes from
 
-The two writers and the talking structure follow rules taken from the Content
+The talking structure and the idea script follow rules taken from the Content
 and Social brains in Octopus, read on 2026-09-30. The app cannot reach Octopus
 while it runs, so the rules are a snapshot in `xprompts.ts` under `CRAFT`, each
 with its source in the comment above it. Re-read the brain and update them when
-it has learned something new.
+it has learned something new. **The daily video does not use them.** It is
+written as it was, apart from its opening sentence and one exit line.
+
+For Ideas:
 
 - **Hook.** The first 3 seconds make a promise and do not give the answer away.
   The hook also exists as on-screen text for people watching on silent. There
   are five kinds: a question, a surprising statement, a story, a big promise, a
   visual action. Lead with the promise, then handle the objection the viewer is
   already thinking.
-- **Series.** Every video belongs to one series, `SERIES` in `xprompts.ts`,
-  currently "Road to $10k a month". Each video is still its own story, and the
-  hook repeats the frame adapted slightly to that video. Change the goal in one
-  place and every hook follows.
 - **HIDE.** The talking structure is Hook, Intrigue, Delivery, Exit, 30 to 60
   seconds. The hook, the objection, the intrigue and the exit are written word
   for word, because even a talking video needs those scripted or it rambles. The
@@ -248,10 +247,20 @@ it has learned something new.
   result, with the keywords. Three next angles on the same material, fastest way,
   new way and niche context, one tap from becoming the next idea.
 
-The daily script follows the same rules. Its first sentence is a storytelling
-hook: the series frame adapted to today, then the open loop of the day, taken
-from the log and never invented. It ends on one exit line. The brief shows the
-model the openings of the last five scripts so the hook varies too.
+Ideas are not part of a series. The road to a goal belongs to the daily video.
+
+For the daily video:
+
+- **The opening sentence is the series.** One natural spoken sentence that mixes
+  three things: that he is 25, where he is right now and what he is doing, and
+  the road he is on, to `SERIES_GOAL` in `xprompts.ts`, currently $10k a month,
+  in his own words and adapted slightly each day. It is never a slogan and never
+  starts with "Road to". It hints at the day's tension without giving the answer
+  away, taken from the log and never invented. It is also given as on-screen text.
+- **One exit line** after the Result: one thing the viewer can do, or the next
+  step tomorrow's video takes.
+- The brief shows the model the openings of the last five scripts, so the
+  opening varies from day to day.
 
 ## Settings
 
