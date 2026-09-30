@@ -228,8 +228,9 @@ makes a feed sound like somebody talking to himself.
 ## Craft, and where it comes from
 
 The talking structure and the idea script follow rules taken from the Content
-and Social brains in Octopus, read on 2026-09-30. The app cannot reach Octopus
-while it runs, so the rules are a snapshot in `xprompts.ts` under `CRAFT`, each
+and Social brains in Octopus, read on 2026-09-30. Those rules are a snapshot in
+`xprompts.ts` under `CRAFT`, used by Ideas and the video. The posts are the
+exception: when `OCTOPUS_MCP_URL` is set, Write reads the brains live (see below). Each
 with its source in the comment above it. Re-read the brain and update them when
 it has learned something new. **The daily video does not use them.** It is
 written as it was, apart from its opening sentence and one exit line.
@@ -266,7 +267,8 @@ For the daily video:
   it does not recognise, the opening goes on top under its own label, so it is
   always there.
 - **Where the numbers come from.** The day number is counted in code, never
-  guessed. Day 1 is `SERIES_START` in `xprompts.ts`, or, when that is empty, the
+  guessed. Day 1 is `X_SERIES_START` or `SERIES_START` in `xprompts.ts`, currently
+  2026-09-30, or, when both are empty, the
   first day anything was logged. The goal is `SERIES_GOAL`. The place is where
   the log says he is that day, and `SERIES_HOME`, currently Ireland, when it does
   not; empty it to leave the place out.
@@ -274,6 +276,26 @@ For the daily video:
   step tomorrow's video takes.
 - The brief shows the model the openings of the last five scripts, so the
   opening varies from day to day.
+
+### Writing the posts with Octopus
+
+When `OCTOPUS_MCP_URL` is set, Write reads the founder's Octopus brains while it
+prepares the posts. It asks the `x` and `content` brains what makes a strong X
+post, keeps each concept's title, position and newest dated evidence, and hands
+them to the post writer as reference notes: advice from studied sources, never
+facts about his day. Every fact still comes from the log.
+
+The rules for writing an answer that the brain returns with its retrieval are
+left out, so the model gets notes to use and no instructions to obey.
+
+It never blocks a day. If Octopus is unset, slow (20 seconds), down, or empty,
+the posts are written without notes and the reason is logged. The drafts say
+"with 9 notes from Octopus" when it worked. **Test Octopus** in the rhythm box
+reads the brains once and says what happened. Only the posts use this: the
+video and Ideas do not.
+
+The address carries its own signature, so it is a secret. It lives in the Convex
+dashboard, never in the repository.
 
 ### Why a call can come back empty
 
@@ -300,6 +322,9 @@ Set these on the Convex deployment (Settings, then Environment Variables):
 | `X_MAIL_FROM` | optional, defaults to `hello@kaught.app`, which must be a sender on a domain verified in Resend |
 | `X_MAIL_TO` | optional, defaults to `jeremylasne0@gmail.com`, comma separated for several |
 | `X_SITE_URL` | optional, defaults to `https://x.jeremylasne.com` |
+| `OCTOPUS_MCP_URL` | optional, the Octopus MCP address, the same one the Octopus connector uses. Turns on live brain notes for the posts. A secret |
+| `OCTOPUS_BRAINS` | optional, the brains Write reads, as slugs separated by commas. Defaults to `x,content` |
+| `X_SERIES_START` | optional, the date that is Day 1, as YYYY-MM-DD. Overrides `SERIES_START` in `xprompts.ts` without a deploy |
 
 Two are new. The rest are either already set or have the right answer
 built in.

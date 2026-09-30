@@ -259,9 +259,10 @@ export const SERIES_HOME = "Ireland";
 /**
  * The date that is Day 1, as YYYY-MM-DD. Left empty, Day 1 is the first day
  * anything was logged. The number is counted in code and handed to the model,
- * never left for it to guess.
+ * never left for it to guess. The Convex setting X_SERIES_START overrides this
+ * without a deploy, so a wrong date is a one-line fix in the dashboard.
  */
-export const SERIES_START = "";
+export const SERIES_START = "2026-09-30";
 
 /**
  * What the Content and Social brains hold about hooks and structure,

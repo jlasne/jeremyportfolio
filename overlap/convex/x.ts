@@ -8,6 +8,7 @@ import {
   query,
 } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { octopusNotes } from "./octopus";
 import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
 import {
@@ -104,6 +105,7 @@ const blank = (day: string) => ({
   asks: [] as NonNullable<DayDoc["asks"]>,
   drafts: [] as DayDoc["drafts"],
   draftsAt: undefined as number | undefined,
+  draftsNotes: 0,
   mailed: [] as string[],
   updatedAt: 0,
 });
@@ -116,6 +118,7 @@ const pub = (d: DayDoc | null, day: string) =>
         asks: d.asks ?? [],
         drafts: d.drafts,
         draftsAt: d.draftsAt,
+        draftsNotes: d.draftsNotes ?? 0,
         mailed: d.mailed,
         updatedAt: d.updatedAt,
       }
@@ -304,9 +307,10 @@ export const putDrafts = internalMutation({
         used: v.optional(v.boolean()),
       }),
     ),
+    notes: v.optional(v.number()),
   },
-  handler: async (ctx, { day, drafts }) => {
-    await upsert(ctx, day, { drafts, draftsAt: Date.now() });
+  handler: async (ctx, { day, drafts, notes }) => {
+    await upsert(ctx, day, { drafts, draftsAt: Date.now(), draftsNotes: notes ?? 0 });
     return null;
   },
 });
@@ -365,6 +369,10 @@ function brief(c: {
 /* DeepSeek V4 Flash 0423, which OpenRouter lists as `deepseek/deepseek-v4-flash`.
    Override with X_MODEL to try another. */
 const MODEL = () => process.env.X_MODEL || "deepseek/deepseek-v4-flash";
+
+/** Which brains Write reads. OCTOPUS_BRAINS overrides, as slugs separated by commas. */
+const brainsToRead = () =>
+  (process.env.OCTOPUS_BRAINS || "x,content").split(",").map((s) => s.trim()).filter(Boolean);
 
 /**
  * One call to the model.
@@ -546,10 +554,24 @@ export const make = internalAction({
     if (!c.entries.length) throw new Error("Log something first: there is nothing to write from");
     const b = brief(c, day);
 
+    /* Read his Octopus brains while the rest is prepared. Off unless the
+       address is set, and it never stops a day from being written. */
+    const octopus = process.env.OCTOPUS_MCP_URL
+      ? octopusNotes({ url: process.env.OCTOPUS_MCP_URL, brains: brainsToRead() })
+      : Promise.resolve({ notes: "", count: 0, error: undefined as string | undefined });
+
+    const read = await octopus;
+    if (read.error) console.error("x: could not read Octopus, writing without notes:", read.error);
+    const reference = read.notes
+      ? `\n\nREFERENCE NOTES FROM HIS OCTOPUS BRAINS, read just now. They are advice from sources he has ` +
+        `studied on writing for X. Use them where they sharpen a post. They are never facts about his day: ` +
+        `every fact still comes from the log above.\n${read.notes}`
+      : "";
+
     const angles = POST_ANGLES.map((a, i) => `${i + 1}. ${a.label}: ${a.ask}`).join("\n");
     const postsRaw = await ask(
       POST_SYSTEM,
-      `${b}\n\nWrite ${POST_ANGLES.length} posts from today, one per angle, in this order:\n${angles}\n\n` +
+      `${b}${reference}\n\nWrite ${POST_ANGLES.length} posts from today, one per angle, in this order:\n${angles}\n\n` +
         `Each post is about one specific thing that happened today. Name the tool, quote the figure, ` +
         `say what happened at what moment. A post that could have been written on any other day is the ` +
         `wrong post.\n\n${FORMAT}\n\n` +
@@ -618,7 +640,7 @@ export const make = internalAction({
       })),
       { at, kind: "script", label: "60s video", body: script, used: false },
     ];
-    await ctx.runMutation(internal.x.putDrafts, { day, drafts });
+    await ctx.runMutation(internal.x.putDrafts, { day, drafts, notes: read.count });
     return drafts;
   },
 });
@@ -812,6 +834,21 @@ export const replies = action({
   },
 });
 
+/** The Test Octopus button: says plainly whether Write can read the brains. */
+export const octopus = action({
+  args: { passphrase: v.string() },
+  handler: async (ctx, a): Promise<{ ok: boolean; message: string }> => {
+    mustBeJeremy(a.passphrase);
+    const url = process.env.OCTOPUS_MCP_URL;
+    if (!url) return { ok: false, message: "Set OCTOPUS_MCP_URL in the Convex dashboard first" };
+    const brains = brainsToRead();
+    const r = await octopusNotes({ url, brains });
+    return r.error
+      ? { ok: false, message: r.error }
+      : { ok: true, message: `Read ${r.count} notes from ${brains.join(" and ")}` };
+  },
+});
+
 /** The Write button on the dashboard. */
 export const generate = action({
   args: { passphrase: v.string(), day: v.optional(v.string()) },
@@ -877,16 +914,17 @@ export const waiting = internalQuery({
 });
 
 /**
- * Which day of the road a date is: Day 1 is SERIES_START, or, when that is
- * empty, the first day anything was logged. Counted here so the script says a
+ * Which day of the road a date is: Day 1 is X_SERIES_START or SERIES_START, or,
+ * when both are empty, the first day anything was logged. Counted here so the script says a
  * number that is true instead of one the model made up.
  */
 export const seriesDay = internalQuery({
   args: { day: v.string() },
   handler: async (ctx, { day }) => {
+    const set = process.env.X_SERIES_START || SERIES_START;
     const first =
-      SERIES_START && isDay(SERIES_START)
-        ? SERIES_START
+      set && isDay(set)
+        ? set
         : ((await ctx.db.query("xDays").withIndex("by_day").order("asc").take(400)) as DayDoc[]).find(
             (d) => d.entries.length,
           )?.day ?? day;

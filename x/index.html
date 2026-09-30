@@ -256,7 +256,10 @@ button, input, textarea, select { font: inherit; color: inherit; }
       <div class="stat"><span>17:00 Paris</span><span>the day + drafts</span></div>
       <div class="stat"><span>20:00 Paris</span><span>if nothing is posted</span></div>
       <p style="color:var(--dim);font-size:13px;margin:10px 0 0">Every mail carries the whole day. The inbox is the archive. Tick a draft used before 20:00 and the last one does not come.</p>
-      <button class="btn ghost sm" id="test" style="margin:12px 0 0">Send a test mail</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 0">
+        <button class="btn ghost sm" id="test">Send a test mail</button>
+        <button class="btn ghost sm" id="octo">Test Octopus</button>
+      </div>
     </div>
   </aside>
 </main>
@@ -472,7 +475,7 @@ function today() {
     : "";
   const ready_ = written
     ? failed + `<div class="row" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
-         <span><b>Ready to post</b>${state.draftsAt ? ` <span class="mono">written ${clock(state.draftsAt)}</span>` : ""}</span>
+         <span><b>Ready to post</b>${state.draftsAt ? ` <span class="mono">written ${clock(state.draftsAt)}${state.draftsNotes ? ` · with ${state.draftsNotes} notes from Octopus` : ""}</span>` : ""}</span>
          <button class="btn ghost sm" id="writeAgain">Write again</button>
        </div>${drafts(state.drafts)}`
     : "";
@@ -804,6 +807,16 @@ async function writeDay() {
     draw();
   }
 }
+
+$("#octo").addEventListener("click", async (e) => {
+  const b = e.currentTarget;
+  b.disabled = true;
+  try {
+    const r = await call("x.octopus");
+    toast(r.ok ? r.message : "Octopus: " + r.message);
+  } catch (err) { toast(err.message); }
+  finally { b.disabled = false; }
+});
 
 $("#test").addEventListener("click", async (e) => {
   const b = e.currentTarget;

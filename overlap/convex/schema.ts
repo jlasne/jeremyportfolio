@@ -219,6 +219,9 @@ export default defineSchema({
       }),
     ),
     draftsAt: v.optional(v.number()),
+    /* How many notes the drafts were written with from the Octopus brains.
+       Absent or 0 means Octopus was not read, which the page shows. */
+    draftsNotes: v.optional(v.number()),
     /* When the day was last read into the brain. Absent means never. */
     digestedAt: v.optional(v.number()),
     /* The questions on the feed. Optional because the first days were
