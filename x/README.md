@@ -8,7 +8,7 @@ three mails ask for more, and at 17:00 the day becomes three X posts and one
 
 | Time (Paris) | What lands |
 | --- | --- |
-| 10:00 | 3 questions on what you are going after, plus the /bio nudge |
+| 10:00 | 3 questions on what you are going after |
 | 14:00 | 3 questions on what happened since 10:00 |
 | 17:00 | 3 questions, then the 3 posts and the script, written from the log |
 | 20:00 | one mail if nothing has been posted, carrying the drafts in full |
@@ -128,8 +128,8 @@ thickens the brain for the next idea. Tick an idea once it is filmed.
   against 280 on each post, Copy, a link that opens X or YouTube Studio with
   the text ready, and a tick to mark it posted or filmed. While the day is
   being written the screen says so and offers nothing else. Below the drafts
-  are the open questions, the /bio tick and the day answered so far. One
-  Write button, in the bar, and only once five beats are covered.
+  are the open questions and the day answered so far. One Write button, in
+  the bar, and only once five beats are covered.
 - **Ideas.** The field, the two outputs, the concepts it drew on, the
   questions it added, and every earlier idea. If the brain is still empty it
   says so before you type.

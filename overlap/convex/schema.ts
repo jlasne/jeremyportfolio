@@ -194,8 +194,9 @@ export default defineSchema({
      passphrase in X_PASSPHRASE; there is exactly one author. */
   xDays: defineTable({
     day: v.string(),
-    /* the 30-day /bio challenge, ticked on the dashboard */
-    bioDone: v.boolean(),
+    /* Retired: the dashboard used to tick the /bio challenge. Optional, and
+       nothing reads or writes it, so the days that already carry it stay valid. */
+    bioDone: v.optional(v.boolean()),
     /* everything said today, oldest first. `q` is the question it answers
        when the entry came from a prompt rather than a free note. */
     entries: v.array(
