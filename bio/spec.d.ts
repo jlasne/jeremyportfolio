@@ -3,7 +3,7 @@
 /** One field on a day: what it is called, what it may hold, how it is shown. */
 export interface Field {
   id: string; group: string; name: string; unit?: string;
-  kind: 'tap' | 'flag' | 'num' | 'time' | 'span';
+  kind: 'tap' | 'flag' | 'num' | 'time';
   max: number; step?: number; icon: string; src?: string;
   clock?: boolean; night?: boolean; spans?: string; at?: string;
   goal?: number | boolean; goalDir?: 'min' | 'max' | 'yes'; scale?: number; scaleUnit?: string;
@@ -13,7 +13,7 @@ export interface Outcome { id: string; name: string; icon: string; unit: string;
 export interface Factor {
   id: string; group: string; name: string; icon: string;
   split: 'flag' | 'zero' | 'median'; on: string;
-  from?: 'sun' | 'coffee' | 'meals' | 'sessions'; lag?: number; fmt?: string; sport?: string;
+  from?: 'coffee' | 'meals' | 'sessions'; lag?: number; fmt?: string; sport?: string;
 }
 
 /** Something that takes time: start and end, minutes after midnight. */
@@ -36,7 +36,6 @@ export const SPEC: {
   sports: string[]; levels: string[];
   session: { perDay: number; kcal: number; name: number };
   meal: { perDay: number; kcal: number };
-  lateCoffee: number;
   outcomes: Outcome[]; factors: Factor[];
 };
 export const FIELDS: Map<string, Field>;

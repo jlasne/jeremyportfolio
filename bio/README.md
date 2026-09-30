@@ -9,7 +9,7 @@ passphrase writes it.
 
 | Group | Fields | Goal |
 | --- | --- | --- |
-| 🍽️ Intake | morning sun (start → end), coffee (start → end per cup), water, creatine, collagen (each with the time taken), meals (start → end + kcal each) | sun **15 min**, coffee **max 2 cups**, water **4 L** (8 × 50cl), creatine **5 g**, collagen |
+| 🍽️ Intake | morning sun (minutes, 0 allowed), coffee (start → end per cup, no cap), water, creatine, collagen (each with the time taken), meals (start → end + kcal each) | water **4 L** (8 × 50cl), creatine **5 g**, collagen |
 | 🏃 Sport | sessions (sport, intensity light / moderate / high, start → end, kcal burned), steps | |
 | 😴 Sleep | sleep score, hours slept, bedtime, wake-up | |
 | 📊 Observing | weight, HRV, resting HR, recovery | |
@@ -115,8 +115,13 @@ Measured on 20 simulated months, cut at each point in the month:
 | 21 | 0.20 | 4.3 | 87% |
 | 31 | 0.40 | 8.7 | 86% |
 
-**The best time** comes first. For each thing timed (session start, first
-meal, last meal, last coffee, bedtime, wake-up) my own days are split by rank
+**Two grids.** Time-related measures (first and last coffee, first and last
+meal, the eating window, session start and end, bedtime, wake-up) are read
+by window in the first; everything else (amounts and yes-or-no) is read as
+more against less in the second. A measure sits in exactly one of them, and
+each grid has its own false-discovery check.
+
+**The best time** comes first. For each time-related measure my own days are split by rank
 into three equal windows, early, middle and late, with their real edges
 ("07:10–09:30"). Each result is averaged per window, and the cell names the
 window with the best average and how far ahead of the other two it is:

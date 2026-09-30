@@ -461,7 +461,7 @@ body.editing { padding-bottom: 88px; }
     <div class="head">
       <span class="n mono">01</span>
       <h2>Today <span class="pill live" id="dayPill">Day 0 of 31</span></h2>
-      <p class="tag">Intake, sport, sleep, and what the watch observes, with the time of each coffee, each session and each night. Five goals a day (morning sun, coffee, water, creatine, collagen), every day of October, then the page reads what moved.</p>
+      <p class="tag">Intake, sport, sleep, and what the watch observes, with the time of each coffee, each session and each night. Three goals a day (water, creatine, collagen), every day of October, then the page reads what moved.</p>
     </div>
     <div class="card" id="card"></div>
   </section>
@@ -485,7 +485,7 @@ body.editing { padding-bottom: 88px; }
     <div class="head">
       <span class="n mono">03</span>
       <h2>Correlations <span class="pill" id="mxPill"></span></h2>
-      <p class="tag">Every measure against every result. A row is one thing I measured, a column one thing I look for, and each cell its impact: very bad, bad, neutral, good or very good. Tap a cell for the numbers.</p>
+      <p class="tag">Two grids against the same six results. The first asks when: the best time for each thing I time. The second asks how much: the impact of everything else, from very bad to very good. Tap a cell for the numbers.</p>
     </div>
     <div id="mxbox"></div>
   </section>
@@ -500,7 +500,7 @@ body.editing { padding-bottom: 88px; }
       <li><b>More against less, later against earlier</b>An on/off thing splits on itself. A count or a clock time splits at my own median, so "a later last coffee" means later than my usual.</li>
       <li><b>Five steps</b>Very bad, bad, neutral, good, very good. Good means good for that result, not a bigger number: a resting heart rate going down is good. "Very" means a large gap (Cohen's d of 0.8 or more). For weight, lower is good; a heavier morning after more water is water, not fat.</li>
       <li><b>The strength label</b>How far apart the two groups sit, measured against how much that number swings day to day anyway. A big percent on a wild metric says less than a small one on a steady metric.</li>
-      <li><b>The best time</b>Each thing I time (training, first and last meal, last coffee, bedtime, wake-up) splits my days into three equal windows by when I did it. A cell names the window with the best result. All three windows are tested together first, so naming the best of three cannot turn noise into a finding.</li>
+      <li><b>Two grids</b>What is a time of day (first and last coffee, first and last meal, the eating window, session start and end, bedtime, wake-up) is read by window: my days split into three equal windows by when I did it. A cell names the window with the best result. All three windows are tested together first, so naming the best of three cannot turn noise into a finding.</li>
       <li><b>When a cell is neutral</b>Over a hundred links are tested, so some look real by luck. A cell leaves neutral only when it clears a false-discovery check, which keeps luck to at most 1 in 10 of what is coloured. A fraction like 2/6 is a cell still gathering comparable days; a dot, one with enough days but fewer than 3 on one side. The grid shows from the start, empty, and fills in as the days add up; a faint dashed colour shows which way a neutral cell is leaning, before it is clear of luck.</li>
       <li><b>Linked things move together</b>A late third meal is also more calories, so "a later last meal" and "more calories eaten" can both claim the same kilo. When two rows tell one story, change one of them alone for a week.</li>
       <li><b>One month only</b>1 to 31 October 2026. Thirty-one days, one video a day, then the table stands as it is.</li>
@@ -641,16 +641,19 @@ function groupEl(g, day, open) {
   box.className = 'group';
   box.innerHTML = `<div class="gtitle"><em>${g.icon}</em><span class="gname">${g.name}</span><span class="gwhen mono">${g.when}</span></div>`;
   if (g.id === 'sport') box.append(sessionsEl(day, open));
-  const nums = document.createElement('div');
-  nums.className = 'nums';
+  /* fields in the order the spec lists them; typed numbers next to each
+     other share one grid */
+  let nums = null;
   for (const f of inGroup(g.id)) {
-    if (f.kind === 'tap') box.append(tapRow(f, day, open));
-    else if (f.kind === 'flag') box.append(flagRow(f, day, open));
-    else if (f.kind === 'span') box.append(spanRow(f, day, open));
-    else nums.append(numField(f, day, open));
+    if (f.kind === 'tap' || f.kind === 'flag') {
+      nums = null;
+      box.append(f.kind === 'tap' ? tapRow(f, day, open) : flagRow(f, day, open));
+      continue;
+    }
+    if (!nums) { nums = document.createElement('div'); nums.className = 'nums'; box.append(nums); }
+    nums.append(numField(f, day, open));
   }
   if (g.id === 'intake') box.append(mealsEl(day, open));
-  if (nums.childElementCount) box.append(nums);
   return box;
 }
 
@@ -753,36 +756,6 @@ function flagRow(f, day, open) {
   paint();
   if (at) r.append(at);
   r.append(t);
-  return r;
-}
-
-/* One start and end whose length is the value, with its goal: the morning
-   sun. "Start now" when stepping out, "End now" when back. */
-function spanRow(f, day, open) {
-  const r = document.createElement('div');
-  r.className = 'tapr spanr';
-  r.innerHTML = `<div class="lbl"><em>${f.icon}</em><span>${f.name}</span></div>`;
-  const badge = document.createElement('span');
-  if (f.goal != null) { badge.className = 'goal mono'; r.querySelector('.lbl').append(badge); }
-  /* the day's span: the log's own object when the day is open, a loose
-     copy when it is read-only so viewing never writes */
-  const list = Array.isArray(day[f.spans]) ? day[f.spans] : null;
-  const x = list?.[0] ?? {};
-  if (open && !list) day[f.spans] = [x];
-  const paint = () => {
-    const len = spanMin(x);
-    /* an empty span leaves a minutes value typed before spans existed alone */
-    if (open) { if (len !== undefined) day[f.id] = Math.min(f.max, len); else if (x.t != null || x.e != null) delete day[f.id]; }
-    const v = open ? day[f.id] : len ?? day[f.id];
-    badge.textContent = `${v ?? 0} / ${f.goal} min`;
-    badge.className = `goal mono ${goalMet(f, v) ? 'ok' : ''}`;
-    paintGoals(day);
-  };
-  const wrap = document.createElement('div');
-  wrap.className = 'cups';
-  wrap.append(spanEl(x, open, f.name, paint));
-  paint();
-  r.append(wrap);
   return r;
 }
 
@@ -1124,9 +1097,11 @@ function cellEl(factor, o, link, count) {
 /* One cell per timed measure and result: the window of my own days with
    the best result, "07:10–09:30", and how far ahead it is. Tapping it lays
    out all three windows. */
-const fmtWin = w => w.from === w.to ? hhmm(w.from) : `${hhmm(w.from)}–${hhmm(w.to)}`;
+/* a window in the row's own terms: clock times, or lengths for the eating window */
+const fmtWin = (f, w) => { const t = f.fmt === 'dur' ? fmtMinutes : hhmm; return w.from === w.to ? t(w.from) : `${t(w.from)}–${t(w.to)}`; };
 const fmtVal = (o, x) => o.id === 'sleepMin' ? fmtMinutes(x) : `${x.toFixed(o.digits || 0)} ${o.unit}`;
 const WIN_NAMES = ['Early', 'Middle', 'Late'];
+const DUR_NAMES = ['Short', 'Middle', 'Long'];
 function whenCell(factor, o, res, count) {
   const td = document.createElement('td');
   if (!res) {
@@ -1142,15 +1117,16 @@ function whenCell(factor, o, res, count) {
   b.className = `lv when ${imp.level === 'good' ? (imp.very ? 'vgood' : 'good') : 'neutral'}${imp.lean ? ' lean-good' : ''}`;
   const found = imp.level === 'good' || imp.lean;
   b.innerHTML = found
-    ? `${imp.lean ? 'Leaning' : 'Best'} · ${fmtMove(o, res.diff)} ${o.unit}<small>${fmtWin(w)}</small>`
+    ? `${imp.lean ? 'Leaning' : 'Best'} · ${fmtMove(o, res.diff)} ${o.unit}<small>${fmtWin(factor, w)}</small>`
     : 'No clear best';
-  b.setAttribute('aria-label', `${factor.name} for ${o.name}: ${found ? `best ${fmtWin(w)}` : 'no clear best time'}`);
+  b.setAttribute('aria-label', `${factor.name} for ${o.name}: ${found ? `best ${fmtWin(factor, w)}` : 'no clear best time'}`);
+  const NAMES = factor.fmt === 'dur' ? DUR_NAMES : WIN_NAMES;
   b.addEventListener('click', () => {
     const list = res.windows.map((x, i) =>
-      `${i === res.best && found ? '<b>' : ''}${WIN_NAMES[i]} ${fmtWin(x)}: ${fmtVal(o, x.mean)} (${x.n} days)${i === res.best && found ? '</b>' : ''}`).join(' · ');
+      `${i === res.best && found ? '<b>' : ''}${NAMES[i]} ${fmtWin(factor, x)}: ${fmtVal(o, x.mean)} (${x.n} days)${i === res.best && found ? '</b>' : ''}`).join(' · ');
     const verdict = imp.level === 'good'
-      ? `The ${WIN_NAMES[res.best].toLowerCase()} window is ${fmtMove(o, res.diff)} ${o.unit} against the other two. Clear of luck (q ${res.q.toFixed(3)}).`
-      : imp.lean ? `Leaning to the ${WIN_NAMES[res.best].toLowerCase()} window, ${fmtMove(o, res.diff)} ${o.unit}, but not clear of luck yet (q ${res.q.toFixed(2)}).`
+      ? `The ${NAMES[res.best].toLowerCase()} window is ${fmtMove(o, res.diff)} ${o.unit} against the other two. Clear of luck (q ${res.q.toFixed(3)}).`
+      : imp.lean ? `Leaning to the ${NAMES[res.best].toLowerCase()} window, ${fmtMove(o, res.diff)} ${o.unit}, but not clear of luck yet (q ${res.q.toFixed(2)}).`
       : `The windows are not far enough apart to name a best time yet (q ${res.q.toFixed(2)}).`;
     showDetail(b, `<b>${factor.icon} ${factor.name} → ${o.icon} ${o.name}.</b> ${list}. ${verdict}`);
   });
@@ -1239,11 +1215,11 @@ function drawMatrix() {
   hint.textContent = `Swipe the grid for all ${SPEC.outcomes.length} results →`;
   const h1 = document.createElement('div');
   h1.className = 'mxh';
-  h1.innerHTML = `<h3><em>⏰</em>The best time</h3><p>For each thing I time, my own days split into three equal windows by when I did it: early, middle, late. ` +
+  h1.innerHTML = `<h3><em>⏰</em>Time-related: the best time</h3><p>Everything that is a time of day, plus the eating window. My own days split into three equal windows by when I did it: early, middle, late. ` +
     `The cell names the window with the best result and how far ahead of the other two it is. A cell opens at ${needTimed()} days, 3 per window.</p>`;
   const h2 = document.createElement('div');
   h2.className = 'mxh';
-  h2.innerHTML = `<h3><em>🔗</em>Everything against everything</h3><p>Every measure against every result, more against less, later against earlier.</p>`;
+  h2.innerHTML = `<h3><em>📏</em>Not time-related: how much, and whether</h3><p>Amounts and yes-or-no: cups, water, calories, morning sun, creatine, collagen, the sport and the body's own numbers. More against less, done against not, on the five steps from very bad to very good.</p>`;
   const hint2 = hint.cloneNode(true);
   $('mxbox').replaceChildren(sum, early, legend, detail, h1, hint, when.wrap, h2, hint2, wrap);
 }
@@ -1356,7 +1332,7 @@ $('gate').addEventListener('submit', async e => {
 $('csv').addEventListener('click', () => {
   const cols = SPEC.fields;
   const q = x => `"${String(x).replace(/"/g, '""')}"`;
-  const head = ['date', 'practice', ...cols.map(c => c.id), 'sun_span', 'creatine_at', 'collagen_at', 'coffee_cups', 'meals', 'eaten_kcal', 'sessions', 'sport_min', 'sport_kcal', 'sport_hardest', 'note'];
+  const head = ['date', 'practice', ...cols.map(c => c.id), 'creatine_at', 'collagen_at', 'coffee_cups', 'meals', 'eaten_kcal', 'sessions', 'sport_min', 'sport_kcal', 'sport_hardest', 'note'];
   const lines = [head.join(',')];
   const span = x => `${x.t != null ? hhmm(x.t) : '?'}-${x.e != null ? hhmm(x.e) : '?'}`;
   const keys = [...new Set([...Object.keys(state.log).filter(k => k < SPEC.start), ...DAYS])].sort();
@@ -1368,7 +1344,6 @@ $('csv').addEventListener('click', () => {
       const v = d[c.id];
       return v === true ? '1' : v == null ? (c.kind === 'flag' ? '0' : '') : c.kind === 'time' ? hhmm(v) : String(v);
     }),
-    q((d.sunlight || []).map(span).join(' ')),
     d.creatineAt != null ? hhmm(d.creatineAt) : '',
     d.collagenAt != null ? hhmm(d.collagenAt) : '',
     q((d.cups || []).map(span).join(' ')),

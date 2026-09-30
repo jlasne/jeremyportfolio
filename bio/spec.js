@@ -36,18 +36,14 @@ export const SPEC = {
   /* Every field on a day. `kind` drives the control: tap is a counter,
      flag is on/off, num is typed, time is a clock time kept as minutes after
      midnight. A counter with `spans` keeps a start and an end for each tap
-     (each cup of coffee); a `span` field is one start and end whose length
-     is the value (the morning sun). A flag with `at` keeps the time it was
-     ticked. `goal` is the daily target and `goalDir`
-     says which way it points, so 2 cups of coffee is a ceiling while 4
-     litres of water is a floor, and `yes` means done at all. `scale` turns the count into what the goal
+     (each cup of coffee). A flag with `at` keeps the time it was ticked. `goal` is the daily target and `goalDir`
+     says which way it points: 4 litres of water is a floor, and `yes`
+     means done at all. `scale` turns the count into what the goal
      is spoken in: eight bottles of 50cl read as 4 L. `max` is the ceiling a
      save is clamped to. */
   fields: [
-    { id: 'sun', group: 'intake', name: 'Morning sun', unit: 'min', kind: 'span', spans: 'sunlight', max: 600, icon: '☀️',
-      goal: 15, goalDir: 'min' },
-    { id: 'coffee', group: 'intake', name: 'Coffee', unit: 'cups', kind: 'tap', max: 12, icon: '☕️',
-      goal: 2, goalDir: 'max', spans: 'cups' },
+    { id: 'sun', group: 'intake', name: 'Morning sun', unit: 'min', kind: 'num', max: 600, icon: '☀️' },
+    { id: 'coffee', group: 'intake', name: 'Coffee', unit: 'cups', kind: 'tap', max: 20, icon: '☕️', spans: 'cups' },
     { id: 'water', group: 'intake', name: 'Water', unit: '×50cl', kind: 'tap', max: 16, icon: '💧',
       goal: 8, goalDir: 'min', scale: 0.5, scaleUnit: 'L' },
     { id: 'creatine', group: 'intake', name: 'Creatine', unit: '5 g', kind: 'flag', max: 1, icon: '💊', at: 'creatineAt',
@@ -84,10 +80,6 @@ export const SPEC = {
   /* A meal is its span and the calories it held, from Yazio. The day's
      calories are the sum of its meals. */
   meal: { perDay: 8, kcal: 5000 },
-
-  /* A cup still going after this time, in minutes after midnight, counts as
-     a late one. */
-  lateCoffee: 14 * 60,
 
   /* What the body reports. Each gets its own list of what moved it. Each
      is read the morning AFTER the factor, because a night is what answers a
@@ -127,11 +119,9 @@ export const SPEC = {
      read against itself. `group` is the section the row sits under. */
   factors: [
     { group: 'intake', id: 'sun',         name: 'Morning sun',      icon: '☀️', split: 'median', on: 'more morning sun', fmt: 'min' },
-    { group: 'intake', id: 'sunStart',    name: 'Sun time',         icon: '🌤️', split: 'median', from: 'sun', on: 'later morning sun', fmt: 'clock' },
     { group: 'intake', id: 'coffee',      name: 'Coffee',           icon: '☕️', split: 'median', on: 'more coffee', fmt: 'cups' },
     { group: 'intake', id: 'coffeeFirst', name: 'First coffee',     icon: '☕️', split: 'median', from: 'coffee', on: 'a later first coffee', fmt: 'clock' },
     { group: 'intake', id: 'coffeeLast',  name: 'Last coffee',      icon: '☕️', split: 'median', from: 'coffee', on: 'a later last coffee', fmt: 'clock' },
-    { group: 'intake', id: 'coffeeLate',  name: 'Afternoon coffee', icon: '☕️', split: 'flag',   from: 'coffee', on: 'coffee after 14:00' },
     { group: 'intake', id: 'water',       name: 'Water',            icon: '💧', split: 'median', on: 'more water', fmt: '×50cl' },
     { group: 'intake', id: 'creatine',    name: 'Creatine',         icon: '💊', split: 'flag',   on: 'a creatine day' },
     { group: 'intake', id: 'collagen',    name: 'Collagen',         icon: '🦴', split: 'flag',   on: 'a collagen day' },
@@ -261,20 +251,6 @@ export function clean(input, today) {
         }
         continue;
       }
-      if (f.kind === 'span') {
-        /* the span is the truth and its length the value; a bare number with
-           no span (typed before spans existed) is kept as it is */
-        const list = (Array.isArray(day[f.spans]) ? day[f.spans] : []).slice(0, 1).map(x => cleanSpan(x)).filter(x => Object.keys(x).length);
-        if (list.length) {
-          entry[f.spans] = list;
-          const len = spanMin(list[0]);
-          if (len !== undefined) entry[f.id] = Math.min(f.max, len);
-        } else {
-          const v = clampNum(raw, f.max);
-          if (v !== undefined) entry[f.id] = v;
-        }
-        continue;
-      }
       if (f.spans) {
         /* the spans are the taps: one per cup, timed or not, and the count
            is how many there are */
@@ -359,14 +335,9 @@ export function valueOf(day, f) {
     if (f.id === 'mealTime') return sum(nums(ms.map(spanMin)));
     return undefined;
   }
-  if (f.from === 'sun') {
-    const t = (Array.isArray(day.sunlight) ? day.sunlight : [])[0]?.t;
-    return Number.isFinite(t) ? t : undefined;
-  }
   if (f.from === 'coffee') {
     const cups = Array.isArray(day.cups) ? day.cups : [];
     const starts = nums(cups.map(c => c.t)), ends = nums(cups.map(spanEnd));
-    if (f.id === 'coffeeLate') return ends.some(t => t >= SPEC.lateCoffee) ? 1 : has(ends) || !(day.coffee ?? 0) ? 0 : undefined;
     if (f.id === 'coffeeFirst') return has(starts) ? Math.min(...starts) : undefined;
     return has(ends) ? Math.max(...ends) : undefined;
   }
@@ -516,8 +487,9 @@ export function factorsFor(log) {
    were tested. */
 export function analyze(log) {
   const all = [];
+  const untimed = factorsFor(log).filter(f => !TIMING.includes(f.id));
   for (const outcome of SPEC.outcomes)
-    for (const factor of factorsFor(log)) {
+    for (const factor of untimed) {
       const link = cell(log, factor, outcome);
       if (link) all.push({ outcome, factor, link });
     }
@@ -527,7 +499,7 @@ export function analyze(log) {
     q = Math.min(q, byP[i].link.p * byP.length / (i + 1));
     byP[i].link.q = q;
   }
-  const rows = factorsFor(log).map(factor => ({
+  const rows = untimed.map(factor => ({
     factor,
     cells: SPEC.outcomes.map(o => all.find(x => x.factor === factor && x.outcome === o)?.link ?? null),
     /* comparable days so far, for the cells still waiting */
@@ -565,11 +537,13 @@ const leanOf = link => link.p < 0.05 && link.d >= 0.3 ? (link.good ? 'good' : 'b
 
 /* ── the best time ──────────────────────────────────────────────────── */
 
-/* The measures that are a time of day. For each, my own days are split
-   into three equal windows (early, middle, late) by when I did it, and each
-   outcome is averaged per window. The window with the best average is the
-   best time. */
-export const TIMING = ['sunStart', 'sportStart', 'mealFirst', 'mealLast', 'coffeeLast', 'bed', 'wake'];
+/* The time-related measures: a time of day, or the span between two (the
+   eating window). They have their own grid. For each, my own days are split
+   into three equal windows (early, middle, late, or short to long) by when
+   I did it, and each outcome is averaged per window. The window with the
+   best average is the best time. Every other measure sits in the grid of
+   everything else, read as more against less. */
+export const TIMING = ['coffeeFirst', 'coffeeLast', 'mealFirst', 'mealLast', 'mealWindow', 'sportStart', 'sportEnd', 'bed', 'wake'];
 const WINDOWS = 3;
 /* Comparable days a timing cell needs: every window at least minPerSide. */
 export const needTimed = () => SPEC.minPerSide * WINDOWS;
