@@ -271,6 +271,9 @@ export default defineSchema({
     script: v.string(),
     concepts: v.array(v.string()),
     gaps: v.array(v.string()),
+    /* three other angles on the same material, one click from becoming the
+       next idea. Optional because the first ideas were written without. */
+    angles: v.optional(v.array(v.string())),
     used: v.optional(v.boolean()),
     createdAt: v.number(),
   }),

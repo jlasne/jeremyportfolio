@@ -148,6 +148,8 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .stage textarea, .stage .field { width: 100%; }
 .chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0 0; }
 .chip { font: 500 11px/1 var(--mono); letter-spacing: .06em; color: var(--blue); border: 1px solid var(--line); border-radius: 9999px; padding: 5px 9px; }
+.angle { cursor: pointer; margin: 0 0 8px; }
+.angle:hover { color: var(--blue); }
 .pastidea { cursor: pointer; }
 .pastidea.on b { color: var(--blue); }
 .stage .field { margin: 0; border-radius: 14px; padding: 12px 14px; font-size: 15px; }
@@ -589,6 +591,7 @@ function ideasView() {
     </div>
     ${card("Talking structure", cur.structure, "structure")}
     ${card("60s vlog script", cur.script, "script")}
+    ${cur.angles && cur.angles.length ? `<div class="row"><p class="mono" style="margin:0 0 10px">Next angles on the same material · tap one to start it</p>${cur.angles.map((a, i) => `<p class="angle" data-a="${i}">${esc(a)}</p>`).join("")}</div>` : ""}
     ${cur.gaps.length ? `<div class="row"><p class="mono" style="margin:0 0 8px">Added to today's questions</p>${cur.gaps.map((g) => `<p style="margin:0 0 6px">${esc(g)}</p>`).join("")}</div>` : ""}
     ${ideas.length > 1 ? `<div class="row"><p class="mono" style="margin:0 0 10px">Earlier ideas</p>${ideas.map((d, i) => i === ideaOpen ? "" : `<p class="pastidea" data-i="${i}" style="margin:0 0 8px">${esc(d.idea)} <span class="mono">${d.used ? "filmed" : ""}</span></p>`).join("")}</div>` : ""}`;
 }
@@ -686,6 +689,13 @@ function wire() {
       b.addEventListener("click", async () => {
         try { await navigator.clipboard.writeText(ideas[ideaOpen][b.dataset.k]); toast("Copied"); }
         catch { toast("Select it and copy by hand"); }
+      }));
+    v.querySelectorAll(".angle").forEach((p) =>
+      p.addEventListener("click", () => {
+        ideaText = ideas[ideaOpen].angles[Number(p.dataset.a)];
+        draw();
+        $("#ideaText")?.focus();
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }));
     v.querySelectorAll(".pastidea").forEach((p) =>
       p.addEventListener("click", () => { ideaOpen = Number(p.dataset.i); draw(); }));

@@ -240,6 +240,43 @@ One JSON object and nothing else, no code fence:
 Leave out "conflict", "question" and "settled" when they do not apply. If the day holds nothing worth keeping, output {"concepts":[]}.`;
 
 /**
+ * The series every video belongs to.
+ *
+ * The Content brain holds this as series-style storytelling: link every video
+ * to one overarching goal, make each video its own story, and repeat the hook
+ * frame (Mino Lee, 2026-09-30, the example being "Day 1 of DoorDashing to buy a
+ * diamond ring"). The goal is the one Jeremy named. Change it here and every
+ * hook changes with it.
+ */
+export const SERIES = {
+  goal: "$10k a month",
+  frame: "Road to $10k a month",
+};
+
+/**
+ * What the Content and Social brains hold about hooks and structure,
+ * distilled into rules the writers can follow. A snapshot, not a live link:
+ * the app cannot reach Octopus, so this is where its positions live.
+ *
+ * Sources, all read 2026-09-30 from the Content brain unless noted:
+ * hook writing (Chris Goor 2026-09-29, Mino Lee 2026-09-30), HIDE and
+ * scripting (Chris Goor 2026-09-29), series storytelling and specific
+ * outcome (Mino Lee 2026-09-30), authenticity (Mino Lee 2026-09-30, Thomas
+ * 2026-09-29), clarity (Thomas 2026-09-29), angle types and the what, why,
+ * when, how questions (2026-09-29), and the five opening hooks from the
+ * Social brain (2026-09-18).
+ */
+export const CRAFT = `CRAFT RULES, taken from what he has studied:
+- The hook lands in the first 3 seconds. It makes a promise and does not give the answer away.
+- The hook also exists as on-screen text, because many people watch on silent.
+- There are five kinds of hook: a question, a surprising statement, a story, a big promise, a visual action. Pick one and vary it from video to video.
+- Lead with the promise, then handle the objection the viewer is already thinking, in one line, like "I know you're probably thinking...".
+- Every video belongs to one series: "${SERIES.frame}". Each video is still its own story, and the series frame is repeated in the hook, adapted slightly to that video. Never state a current figure for the series unless it is given.
+- Specific and vulnerable beats general. A detail he would rather not say, and other people go through too, is what makes it stand out.
+- Clarity beats cleverness. State the outcome directly. One core message.
+- Even a talking video needs its hook and its intrigue scripted word for word. Scripting is what stops rambling.`;
+
+/**
  * The talking structure.
  *
  * He does not read a script, he talks. So the structure gives him the
@@ -247,38 +284,58 @@ Leave out "conflict", "question" and "settled" when they do not apply. If the da
  */
 export const TALK_SYSTEM = `You turn a video idea and a person's own material into a talking structure.
 
-Jeremy Lasne films short videos for YouTube (@jeremyfounder) and X. He does not read a script. He talks, in his own way, from a structure. Your job is the structure.
+Jeremy Lasne films short videos for YouTube (@jeremyfounder) and X. He talks in his own way from a structure. Your job is the structure.
 
 You get an IDEA and what his BRAIN holds about it: positions, each with dated evidence from the days he said it.
 
-BUILD
-- Angle: the one thing the viewer keeps. One sentence.
-- Hook: two ways to open, written as intentions and not as sentences to read out. Start on a number, a contradiction or a confession taken from his material.
-- 5 to 7 beats, in the order he should talk. For each: the point, what he has (his own evidence, with its date), and a question that makes him tell it in his own words.
-- Close: the line the video ends on, as an intention.
+The structure follows HIDE: Hook, Intrigue, Delivery, Exit. It runs 30 to 60 seconds.
+
+WRITE WORD FOR WORD: the hook, the objection handle, the intrigue and the exit. A talking video still needs these scripted, or it rambles. Write them as lines he says aloud.
+WRITE AS POINTS: the delivery. Each beat is a point and a way in. He says it his way.
 
 RULES
 - Use only what the material holds. Never invent a number, a name or a story. Where a beat has nothing behind it, write GAP instead of filling it.
-- Never write full sentences for him to read. A beat is a point and a way in.
+- Prefer his specific and vulnerable details. Include one beat for the detail he would rather not say, drawn from the evidence. If the evidence holds none, that beat is a GAP.
+- Never state a figure for the series ("${SERIES.frame}") that the material does not hold.
 - Plain English. No em dashes. Sentences under 30 words. Numbers instead of adjectives.
+
+${CRAFT}
 
 FORMAT, plain text, exactly this shape:
 
 ANGLE
-one sentence
+one sentence: the one thing the viewer keeps
+
+TITLES
+1. a title that names the exact viewer and the exciting result, with the specific keywords
+2. ...
+3. ...
 
 HOOK
-1. ...
-2. ...
+1. [type] a spoken line, under 12 words, that makes a promise without giving the answer away
+2. [type] ...
+3. [type] ...
+On screen: the best hook as text, under 8 words
 
-BEATS
+OBJECTION
+one line that handles what the viewer is thinking
+
+INTRIGUE
+one line that makes the viewer feel the problem
+
+DELIVERY
 1. Point: ...
    You have: ... (date)   or   GAP
    Say it by answering: ...
-2. ...
+(3 to 5 beats. One of them is the detail he would rather not say.)
 
-CLOSE
-...
+EXIT
+one line that gives the viewer something to do
+
+MORE ANGLES
+- fastest way: a video idea, one line
+- new way: a video idea, one line
+- niche context: a video idea, one line
 
 GAPS
 - one question per GAP, in his voice, like "What happened when you...?". At most 3.

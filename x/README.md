@@ -221,6 +221,38 @@ record, or a figure that is a multiple of what it was. Otherwise the model
 answers NONE and no fourth draft appears. A manufactured milestone is what
 makes a feed sound like somebody talking to himself.
 
+## Craft, and where it comes from
+
+The two writers and the talking structure follow rules taken from the Content
+and Social brains in Octopus, read on 2026-09-30. The app cannot reach Octopus
+while it runs, so the rules are a snapshot in `xprompts.ts` under `CRAFT`, each
+with its source in the comment above it. Re-read the brain and update them when
+it has learned something new.
+
+- **Hook.** The first 3 seconds make a promise and do not give the answer away.
+  The hook also exists as on-screen text for people watching on silent. There
+  are five kinds: a question, a surprising statement, a story, a big promise, a
+  visual action. Lead with the promise, then handle the objection the viewer is
+  already thinking.
+- **Series.** Every video belongs to one series, `SERIES` in `xprompts.ts`,
+  currently "Road to $10k a month". Each video is still its own story, and the
+  hook repeats the frame adapted slightly to that video. Change the goal in one
+  place and every hook follows.
+- **HIDE.** The talking structure is Hook, Intrigue, Delivery, Exit, 30 to 60
+  seconds. The hook, the objection, the intrigue and the exit are written word
+  for word, because even a talking video needs those scripted or it rambles. The
+  delivery stays as points, said your way.
+- **Specific and vulnerable.** One beat is the detail you would rather not say,
+  drawn from your own evidence. When the brain holds none it becomes a question.
+- **Packaging and angles.** Three titles that name the exact viewer and the
+  result, with the keywords. Three next angles on the same material, fastest way,
+  new way and niche context, one tap from becoming the next idea.
+
+The daily script follows the same rules. Its first sentence is a storytelling
+hook: the series frame adapted to today, then the open loop of the day, taken
+from the log and never invented. It ends on one exit line. The brief shows the
+model the openings of the last five scripts so the hook varies too.
+
 ## Settings
 
 Set these on the Convex deployment (Settings, then Environment Variables):
