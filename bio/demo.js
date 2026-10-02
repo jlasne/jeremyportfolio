@@ -38,6 +38,7 @@ export function demoMonth(seed = 20261027) {
       const i = 1 + Math.floor(rnd() * 3), len = 45 + rnd() * 50;
       d.sessions = [{ s: pick(['Padel', 'Gym', 'Run']), ...span(420 + rnd() * 780, len), k: Math.round(len * (5 + i * 2.5)), i }];
     }
+    if (rnd() < .5) d.partner = true;                          // the night into this morning
     d.bed = 1335 + Math.floor(rnd() * 150);                     // 22:15–00:45, for the night into this morning
     log[k] = d;
   }

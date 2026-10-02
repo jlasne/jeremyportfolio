@@ -57,6 +57,7 @@ export const SPEC = {
     { id: 'sleepMin', group: 'sleep', name: 'Sleep', unit: '', kind: 'num', max: 960, icon: '🛌', src: 'Fitbit', clock: true },
     { id: 'bed', group: 'sleep', name: 'Went to bed', unit: '', kind: 'time', max: 2159, icon: '🌙', src: 'Fitbit', night: true },
     { id: 'wake', group: 'sleep', name: 'Woke up', unit: '', kind: 'time', max: 1439, icon: '🌅', src: 'Fitbit' },
+    { id: 'partner', group: 'sleep', name: 'Night with my girlfriend', kind: 'flag', max: 1, icon: '💑' },
 
     { id: 'weight', group: 'observe', name: 'Weight', unit: 'kg', kind: 'num', max: 250, step: 0.1, icon: '⚖️', src: 'Scale' },
     { id: 'hrv', group: 'observe', name: 'HRV', unit: 'ms', kind: 'num', max: 300, icon: '📈', src: 'Fitbit' },
@@ -139,6 +140,7 @@ export const SPEC = {
     { group: 'sport',  id: 'steps',       name: 'Steps',            icon: '👟', split: 'median', on: 'more steps', fmt: 'steps' },
     { group: 'sleep',  id: 'bed',         name: 'Bedtime',          icon: '🌙', split: 'median', lag: 0, on: 'a later bedtime', fmt: 'clock' },
     { group: 'sleep',  id: 'wake',        name: 'Wake-up',          icon: '🌅', split: 'median', lag: 0, on: 'a later wake-up', fmt: 'clock' },
+    { group: 'sleep',  id: 'partner',     name: 'With my girlfriend', icon: '💑', split: 'flag', lag: 0, on: 'a night with my girlfriend' },
     { group: 'sleep',  id: 'sleepMin',    name: 'Hours slept',      icon: '🛌', split: 'median', lag: 0, on: 'more sleep', fmt: 'dur' },
     { group: 'sleep',  id: 'sleepScore',  name: 'Sleep score',      icon: '💤', split: 'median', lag: 0, on: 'a higher sleep score', fmt: 'pts' },
     { group: 'observe', id: 'weight',     name: 'Weight',           icon: '⚖️', split: 'median', lag: 0, on: 'a heavier morning', fmt: 'kg' },

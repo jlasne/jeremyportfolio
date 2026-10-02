@@ -11,7 +11,7 @@ passphrase writes it.
 | --- | --- | --- |
 | 🍽️ Intake | morning sun (minutes, 0 allowed), coffee (start → end per cup, no cap), water, creatine, collagen (each with the time taken), meals (start → end + kcal each) | water **4 L** (8 × 50cl), creatine **5 g**, collagen |
 | 🏃 Sport | sessions (sport, intensity light / moderate / high, start → end, kcal burned), steps | |
-| 😴 Sleep | sleep score, hours slept, bedtime, wake-up | |
+| 😴 Sleep | sleep score, hours slept, bedtime, wake-up, night with my girlfriend | |
 | 📊 Observing | weight, HRV, resting HR, recovery | |
 
 A goal points one way: coffee is a ceiling, met by staying under it, water
@@ -67,6 +67,10 @@ nothing, to show a neutral row.
 - **Data** — one document in the Overlap Convex deployment (table `bio`, key
   `oct26`), through the same `/overlap` door Founder City uses. Three
   operations: `bio.get`, `bio.unlock`, `bio.save`.
+- **Two pages open** — a save fetches the server's copy first and writes
+  only the days this page changed on top of it, so a second open page (the
+  laptop left on, an old tab) cannot wipe what this one logged. Coming back
+  to the tab reloads the server's copy when nothing is waiting to save.
 - **Save check** — the server runs its own copy of `clean`, from the
   `spec.js` it was deployed with. After each save the page compares what it
   sent with what the server kept, and names anything dropped ("The server

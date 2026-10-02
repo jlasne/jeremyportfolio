@@ -1229,6 +1229,31 @@ function draw() { drawCard(); drawStrip(); drawMatrix(); }
 /* ── saving ─────────────────────────────────────────────────────────── */
 const say = (msg, bad) => { const s = $('saved'); if (!s) return; s.textContent = msg; s.className = `saved mono${bad ? ' bad' : msg === 'Saved' ? ' on' : ''}`; };
 
+/* The log as it stood at the last sync with the server. A save merges field
+   by field: what this page changed since then wins, everything else comes
+   from the server's current copy. So a second open page (the laptop left
+   on, an old tab) cannot wipe what this one logged, even on the same day. */
+let base = {};
+const copy = x => JSON.parse(JSON.stringify(x ?? {}));
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+function syncBase() { base = copy(state.log); }
+/* Lay the server's copy under my changes, keeping each day the very object
+   the card edits. Returns whether the open day took anything from it. */
+function mergeIn(server) {
+  let touchedOpen = false;
+  for (const k of new Set([...Object.keys(server), ...Object.keys(state.log)])) {
+    const mine = state.log[k], was = base[k] || {}, theirs = server[k] || {};
+    const day = mine || {};
+    for (const f of new Set([...Object.keys(day), ...Object.keys(was), ...Object.keys(theirs)])) {
+      if (!same(day[f], was[f])) continue;              // changed here: mine wins
+      if (same(day[f], theirs[f])) continue;
+      if (theirs[f] === undefined) delete day[f]; else day[f] = copy({ v: theirs[f] }).v;
+      if (k === sel) touchedOpen = true;
+    }
+    if (!mine && Object.keys(day).length) state.log[k] = day;
+  }
+  return touchedOpen;
+}
 function touch() {
   dirty = true;
   drawStrip(); drawMatrix();
@@ -1242,11 +1267,16 @@ async function push() {
   saving = true; dirty = false;
   let failedSave = false;
   try {
+    const latest = await api('bio.get');
+    /* the open day took something from elsewhere: show it, unless I am typing in it */
+    if (mergeIn(latest?.log ?? {}) && !$('card').contains(document.activeElement)) drawCard();
     const sent = clean(state, today);
     const out = await api('bio.save', { passphrase: pass, today, ...sent });
     /* The page holds the author's copy. Taking the reply's log here would
        drop any tap made while this save was in flight. */
     state.updatedAt = out.updatedAt;
+    /* what the server now holds is the new common ground */
+    base = copy(out.log);
     /* A server running older rules keeps less than it was sent, and says
        nothing. Name what it dropped instead of letting it vanish on reload. */
     const lost = new Set();
@@ -1379,11 +1409,22 @@ function load() {
   api('bio.get')
     .then(d => {
       if (d) { state.log = d.log || {}; state.updatedAt = d.updatedAt || 0; }
+      syncBase();
       loaded = true;
     })
     .catch(e => { failed = e.message; })
     .finally(() => { draw(); stamp(); if (failed) say(`${failed}. Logging is paused so nothing gets overwritten.`, true); });
 }
+/* Back on this tab after a while: another page may have logged since, so
+   take the server's copy, unless this page has changes still to send. */
+document.addEventListener('visibilitychange', () => {
+  if (DEMO || document.hidden || !loaded || dirty || saving) return;
+  api('bio.get').then(d => {
+    if (!d || dirty || saving) return;
+    state.log = d.log || {}; state.updatedAt = d.updatedAt || 0;
+    syncBase(); draw(); stamp();
+  }).catch(() => {});
+});
 let failed = '';
 if (DEMO) {
   document.title = `Demo · ${document.title}`;
