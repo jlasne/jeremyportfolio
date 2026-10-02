@@ -767,7 +767,7 @@ function numField(f, day, open) {
   const i = document.createElement('input');
   i.id = id; i.type = f.kind === 'time' ? 'time' : f.clock ? 'text' : 'number';
   if (f.kind !== 'time') i.inputMode = 'decimal';
-  i.placeholder = '—'; i.disabled = !open;
+  i.placeholder = f.clock ? '7h20' : '—'; i.disabled = !open;
   if (!f.clock && f.kind !== 'time') { i.min = '0'; i.max = String(f.max); i.step = String(f.step || 1); }
   const show = () => {
     const v = day[f.id];

@@ -54,7 +54,7 @@ export const SPEC = {
     { id: 'steps', group: 'sport', name: 'Steps', unit: '', kind: 'num', max: 100000, icon: '👟', src: 'Fitbit' },
 
     { id: 'sleepScore', group: 'sleep', name: 'Sleep score', unit: '/100', kind: 'num', max: 100, icon: '💤', src: 'Fitbit' },
-    { id: 'sleepMin', group: 'sleep', name: 'Sleep', unit: '', kind: 'num', max: 960, icon: '🛌', src: 'Fitbit', clock: true },
+    { id: 'sleepMin', group: 'sleep', name: 'Time asleep', unit: '', kind: 'num', max: 960, icon: '🛌', src: 'Fitbit', clock: true },
     { id: 'bed', group: 'sleep', name: 'Went to bed', unit: '', kind: 'time', max: 2159, icon: '🌙', src: 'Fitbit', night: true },
     { id: 'wake', group: 'sleep', name: 'Woke up', unit: '', kind: 'time', max: 1439, icon: '🌅', src: 'Fitbit' },
     { id: 'partner', group: 'sleep', name: 'Night with my girlfriend', kind: 'flag', max: 1, icon: '💑' },
