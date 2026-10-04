@@ -30,7 +30,7 @@ export const SPEC = {
     { id: 'intake',  name: 'Intake',    icon: '🍽️', when: 'Tap it as it happens' },
     { id: 'sport',   name: 'Sport',     icon: '🏃',  when: 'After the session' },
     { id: 'sleep',   name: 'Sleep',     icon: '😴',  when: 'Each morning, the night just ended' },
-    { id: 'observe', name: 'Observing', icon: '📊',  when: 'Each morning, off the watch' },
+    { id: 'observe', name: 'Observing', icon: '📊',  when: 'Each morning, from the same night, off the watch' },
   ],
 
   /* Every field on a day. `kind` drives the control: tap is a counter,
@@ -387,10 +387,14 @@ export function pairsOf(log, factor, outcome) {
 /* How many comparable days a cell needs before it is read. */
 export const needPairs = () => SPEC.minPerSide * 2;
 
-export function cell(log, factor, outcome) {
+/* A first look (`preview`) takes whatever days there are, from two, and
+   returns only the raw move with `early: true`: no strength, no p-value, no
+   verdict. It exists so the grid can be read from the first days, and it
+   never feeds the luck check or a colour. */
+export function cell(log, factor, outcome, { preview = false } = {}) {
   if (factor.id === outcome.id) return null;
   const pairs = pairsOf(log, factor, outcome);
-  if (pairs.length < needPairs()) return null;
+  if (pairs.length < (preview ? 2 : needPairs())) return null;
 
   let on, off, cut = null;
   if (factor.split === 'median') {
@@ -401,14 +405,16 @@ export function cell(log, factor, outcome) {
     on = pairs.filter(p => p.x > 0).map(p => p.y);
     off = pairs.filter(p => p.x <= 0).map(p => p.y);
   }
+  if (!on.length || !off.length) return null;
   const s = strength(on, off);
-  if (!s) return null;
+  if (!s && !preview) return null;
 
   const base = mean(off);
-  if (!base) return null;
   const diff = mean(on) - base;
-  const delta = diff / base * 100;
   const good = outcome.better === 'high' ? diff > 0 : diff < 0;
+  if (!s) return { diff, delta: base ? diff / base * 100 : 0, good, base, cut, early: true, n: on.length + off.length, nOn: on.length };
+  if (!base) return null;
+  const delta = diff / base * 100;
   return { diff, delta, d: s.d, label: s.label, good, base, cut, p: welchP(on, off), n: on.length + off.length, nOn: on.length };
 }
 
@@ -503,7 +509,8 @@ export function analyze(log) {
   }
   const rows = untimed.map(factor => ({
     factor,
-    cells: SPEC.outcomes.map(o => all.find(x => x.factor === factor && x.outcome === o)?.link ?? null),
+    /* a proven-enough link, else a first look, else nothing yet */
+    cells: SPEC.outcomes.map(o => all.find(x => x.factor === factor && x.outcome === o)?.link ?? cell(log, factor, o, { preview: true })),
     /* comparable days so far, for the cells still waiting */
     counts: SPEC.outcomes.map(o => factor.id === o.id ? 0 : pairsOf(log, factor, o).length),
   }));
@@ -526,7 +533,11 @@ export const isFinding = link => link.q <= SPEC.maxLuck && link.d >= 0.3;
    once the gap is large (d >= SPEC.veryAt, Cohen's large). */
 export function impact(link) {
   if (!link) return null;
-  if (!isFinding(link)) return { level: 'neutral', very: false, lean: leanOf(link) };
+  /* `hint` is the raw direction of the move, shown faint when the page is
+     asked to show unproven numbers; it is never a verdict. */
+  const hint = link.diff === 0 ? null : link.good ? 'good' : 'bad';
+  if (link.early) return { level: 'neutral', very: false, early: true, hint };
+  if (!isFinding(link)) return { level: 'neutral', very: false, lean: leanOf(link), hint };
   return { level: link.good ? 'good' : 'bad', very: link.d >= SPEC.veryAt };
 }
 
@@ -555,17 +566,22 @@ export const needTimed = () => SPEC.minPerSide * WINDOWS;
    ANOVA across the three at once (F-test), because naming the best of
    three and then testing it alone would find a "best time" in pure noise.
    `diff` and `d` compare the best window with the other two. */
-export function bestTime(log, factor, outcome) {
+export function bestTime(log, factor, outcome, { preview = false } = {}) {
   if (factor.id === outcome.id) return null;
   const pairs = pairsOf(log, factor, outcome).sort((a, b) => a.x - b.x);
   const n = pairs.length;
-  if (n < needTimed()) return null;
-  const groups = Array.from({ length: WINDOWS }, () => []);
-  pairs.forEach((q, i) => groups[Math.min(WINDOWS - 1, Math.floor(i * WINDOWS / n))].push(q));
-  for (let g = 0; g < WINDOWS - 1; g++)
+  if (n < (preview ? 2 : needTimed())) return null;
+  /* a first look from just two days has two windows, early and late */
+  const W = Math.min(WINDOWS, n);
+  const groups = Array.from({ length: W }, () => []);
+  pairs.forEach((q, i) => groups[Math.min(W - 1, Math.floor(i * W / n))].push(q));
+  for (let g = 0; g < W - 1; g++)
     while (groups[g + 1].length && groups[g].length && groups[g + 1][0].x === groups[g][groups[g].length - 1].x)
       groups[g].push(groups[g + 1].shift());
-  if (groups.some(g => g.length < SPEC.minPerSide)) return null;
+  if (groups.some(g => g.length < 1)) return null;
+  /* a first look: a window holds fewer days than a real test needs */
+  const early = groups.some(g => g.length < SPEC.minPerSide);
+  if (early && !preview) return null;
 
   const ys = groups.map(g => g.map(q => q.y));
   const means = ys.map(mean), grand = mean(pairs.map(q => q.y));
@@ -578,10 +594,9 @@ export function bestTime(log, factor, outcome) {
   const best = means.reduce((bi, m, i) => m * sign > means[bi] * sign ? i : bi, 0);
   const on = ys[best], off = ys.filter((_, i) => i !== best).flat();
   const s = strength(on, off);
-  return {
-    windows: groups.map((g, i) => ({ from: g[0].x, to: g[g.length - 1].x, n: g.length, mean: means[i] })),
-    best, diff: mean(on) - mean(off), d: s ? s.d : 0, p, n,
-  };
+  const windows = groups.map((g, i) => ({ from: g[0].x, to: g[g.length - 1].x, n: g.length, mean: means[i] }));
+  if (early) return { windows, best, diff: mean(on) - mean(off), early: true, n };
+  return { windows, best, diff: mean(on) - mean(off), d: s ? s.d : 0, p, n };
 }
 
 /* Every timing measure against every outcome, with a q-value across these
@@ -590,10 +605,10 @@ export function bestTimes(log) {
   const factors = TIMING.map(id => SPEC.factors.find(f => f.id === id));
   const rows = factors.map(factor => ({
     factor,
-    cells: SPEC.outcomes.map(o => bestTime(log, factor, o)),
+    cells: SPEC.outcomes.map(o => bestTime(log, factor, o) ?? bestTime(log, factor, o, { preview: true })),
     counts: SPEC.outcomes.map(o => factor.id === o.id ? 0 : pairsOf(log, factor, o).length),
   }));
-  const all = rows.flatMap(r => r.cells).filter(Boolean).sort((a, b) => a.p - b.p);
+  const all = rows.flatMap(r => r.cells).filter(c => c && !c.early).sort((a, b) => a.p - b.p);
   let q = 1;
   for (let i = all.length - 1; i >= 0; i--) { q = Math.min(q, all[i].p * all.length / (i + 1)); all[i].q = q; }
   return { rows, tested: all.length };
@@ -605,8 +620,11 @@ export function bestTimes(log) {
    the good side, so a best time never reads as bad. */
 export function timingImpact(res) {
   if (!res) return null;
+  /* the best window is by definition the good side; no gap, no hint */
+  const hint = res.diff === 0 ? null : 'good';
+  if (res.early) return { level: 'neutral', very: false, early: true, hint };
   if (res.q <= SPEC.maxLuck && res.d >= 0.3) return { level: 'good', very: res.d >= SPEC.veryAt };
-  return { level: 'neutral', very: false, lean: res.p < 0.05 && res.d >= 0.3 ? 'good' : null };
+  return { level: 'neutral', very: false, lean: res.p < 0.05 && res.d >= 0.3 ? 'good' : null, hint };
 }
 
 /* Days with both halves on them: what the matrix actually runs on. */

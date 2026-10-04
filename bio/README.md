@@ -37,7 +37,9 @@ the page. They are saved like any day, marked *Practice · not counted*, and
 never read by the matrix or shown in the month.
 
 The four things the body answers with are read **the morning after** the
-day that caused them, because a night is what answers a day.
+day that caused them, because a night is what answers a day. The Observing
+numbers (weight, HRV, resting HR, recovery) come from that same night, so the
+previous day's habits are scored against them just like against Sleep.
 
 ## The demo
 
@@ -119,6 +121,14 @@ Measured on 20 simulated months, cut at each point in the month:
 | 21 | 0.20 | 4.3 | 87% |
 | 31 | 0.40 | 8.7 | 86% |
 
+**First looks.** The grids fill from the first days instead of waiting for a
+proven result. A cell with at least two comparable days shows the raw move in faint type with no verdict: *First look* when there
+are too few days to test, *Unproven* when there are enough but the link is not
+clear of luck. They never reach the luck check, a colour or the counts of
+impacts and tested links. With over a hundred cells about half point the
+wrong way by chance, so they are for watching the grid come alive, not for
+acting on. A switch above the grids hides them (remembered on the device).
+
 **Two grids.** Time-related measures (first and last coffee, first and last
 meal, the eating window, session start and end, bedtime, wake-up) are read
 by window in the first; everything else (amounts and yes-or-no) is read as
@@ -150,7 +160,8 @@ effect, 4.3 real ones found with planted effects (1.6 by day 14).
 | Morning | weight, HRV, resting HR, recovery |
 
 - A day's doings are read against the night and morning **after** them. The
-  night and the morning's own numbers are read against that same morning.
+  night and the morning's own numbers (Sleep and Observing alike) are read
+  against that same morning.
 - An on/off factor splits on itself; a count or a clock time splits at its
   **own median**, and the line says where: "over 17:10".
 - Sport is read one dimension at a time, so "a harder session" means harder

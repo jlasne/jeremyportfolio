@@ -61,30 +61,32 @@ export interface Link {
   diff: number; delta: number; d: number; label: string; good: boolean; base: number;
   cut: number | null; p: number; q?: number; n: number; nOn: number;
 }
+/** A first look: the raw move from few days, with no test behind it. */
+export interface FirstLook { diff: number; delta: number; good: boolean; base: number; cut: number | null; early: true; n: number; nOn: number }
 export function valueOf(day: Day | undefined, f: Factor): number | undefined;
 export function pairsOf(log: Record<string, Day>, factor: Factor, outcome: Outcome): { x: number; y: number }[];
 export function needPairs(): number;
-export function cell(log: Record<string, Day>, factor: Factor, outcome: Outcome): Link | null;
+export function cell(log: Record<string, Day>, factor: Factor, outcome: Outcome, opts?: { preview?: boolean }): Link | FirstLook | null;
 export function welchP(a: number[], b: number[]): number;
 export function sportList(log: Record<string, Day>): string[];
 export function factorsFor(log: Record<string, Day>): Factor[];
 export function analyze(log: Record<string, Day>): {
-  rows: { factor: Factor; cells: (Link | null)[]; counts: number[] }[];
+  rows: { factor: Factor; cells: (Link | FirstLook | null)[]; counts: number[] }[];
   tested: number;
 };
 export function average(log: Record<string, Day>, outcome: Outcome): number | null;
 export function isFinding(link: Link): boolean;
-export function impact(link: Link | null): { level: 'neutral' | 'good' | 'bad'; very: boolean; lean?: 'good' | 'bad' | null } | null;
+export function impact(link: Link | FirstLook | null): { level: 'neutral' | 'good' | 'bad'; very: boolean; lean?: 'good' | 'bad' | null; early?: true; hint?: 'good' | 'bad' | null } | null;
 export function readyDays(log: Record<string, Day>): number;
 
 /** The best time: three windows of my own days, early, middle, late. */
 export interface Window { from: number; to: number; n: number; mean: number }
-export interface BestTime { windows: Window[]; best: number; diff: number; d: number; p: number; q?: number; n: number }
+export interface BestTime { windows: Window[]; best: number; diff: number; d?: number; p?: number; q?: number; n: number; early?: true }
 export const TIMING: string[];
 export function needTimed(): number;
-export function bestTime(log: Record<string, Day>, factor: Factor, outcome: Outcome): BestTime | null;
+export function bestTime(log: Record<string, Day>, factor: Factor, outcome: Outcome, opts?: { preview?: boolean }): BestTime | null;
 export function bestTimes(log: Record<string, Day>): {
   rows: { factor: Factor; cells: (BestTime | null)[]; counts: number[] }[];
   tested: number;
 };
-export function timingImpact(res: BestTime | null): { level: 'neutral' | 'good'; very: boolean; lean?: 'good' | null } | null;
+export function timingImpact(res: BestTime | null): { level: 'neutral' | 'good'; very: boolean; lean?: 'good' | null; early?: true; hint?: 'good' | null } | null;

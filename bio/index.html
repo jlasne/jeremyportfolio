@@ -355,6 +355,16 @@ h2 {
 .lv.lean-bad { border: 1px dashed rgba(255, 158, 158, .3); }
 .lv.lean-good, .lv.lean-good small { color: rgba(110, 231, 168, .62); }
 .lv.lean-bad, .lv.lean-bad small { color: rgba(255, 158, 158, .62); }
+.lv.raw { border: 1px solid transparent; }
+.lv.raw small { font-size: 15px; }
+.lv.raw-good, .lv.raw-good small { color: rgba(110, 231, 168, .42); }
+.lv.raw-bad, .lv.raw-bad small { color: rgba(255, 158, 158, .42); }
+.rawtoggle {
+  margin-left: auto; border: 1px solid var(--line); background: rgba(5, 11, 22, .4); color: var(--ice-70);
+  padding: 8px 10px 7px; cursor: pointer; font-size: 10px; letter-spacing: .1em;
+}
+.rawtoggle:hover { border-color: var(--blue); color: var(--ice); }
+.rawtoggle[aria-pressed="true"] { border-color: var(--blue); color: var(--blue); }
 .mxearly { margin: 0 0 14px; color: var(--ice-70); font-size: 14px; max-width: 72ch; }
 .mxearly b { color: var(--ice); font-weight: 500; }
 .mxearly[hidden] { display: none; }
@@ -496,12 +506,12 @@ body.editing { padding-bottom: 88px; }
       <h2>How to read it</h2>
     </div>
     <ul class="notes">
-      <li><b>The morning after</b>A day is judged by the night that follows it: a late coffee on Tuesday is scored against Wednesday's sleep. The night itself (bedtime, wake-up, hours slept) is scored against the morning it ends.</li>
+      <li><b>The morning after</b>A day is judged by the night that follows it: a late coffee on Tuesday is scored against Wednesday's sleep and against the Observing numbers (weight, HRV, resting HR, recovery), which come from that same night. The night itself (bedtime, wake-up, hours slept, a night with my girlfriend) is scored against the morning it ends.</li>
       <li><b>More against less, later against earlier</b>An on/off thing splits on itself. A count or a clock time splits at my own median, so "a later last coffee" means later than my usual.</li>
       <li><b>Five steps</b>Very bad, bad, neutral, good, very good. Good means good for that result, not a bigger number: a resting heart rate going down is good. "Very" means a large gap (Cohen's d of 0.8 or more). For weight, lower is good; a heavier morning after more water is water, not fat.</li>
       <li><b>The strength label</b>How far apart the two groups sit, measured against how much that number swings day to day anyway. A big percent on a wild metric says less than a small one on a steady metric.</li>
       <li><b>Two grids</b>What is a time of day (first and last coffee, first and last meal, the eating window, session start and end, bedtime, wake-up) is read by window: my days split into three equal windows by when I did it. A cell names the window with the best result. All three windows are tested together first, so naming the best of three cannot turn noise into a finding.</li>
-      <li><b>When a cell is neutral</b>Over a hundred links are tested, so some look real by luck. A cell leaves neutral only when it clears a false-discovery check, which keeps luck to at most 1 in 10 of what is coloured. A fraction like 2/6 is a cell still gathering comparable days; a dot, one with enough days but fewer than 3 on one side. The grid shows from the start, empty, and fills in as the days add up; a faint dashed colour shows which way a neutral cell is leaning, before it is clear of luck.</li>
+      <li><b>First looks</b>The grids fill from the first days. A faint number is the raw move so far, with no verdict: "First look" when there are too few days to test, "Unproven" when there are enough but it is not clear of luck. With over a hundred cells, about half point the wrong way by chance, so do not act on them. A cell leaves neutral only when it clears a false-discovery check, which keeps luck to at most 1 in 10 of what is coloured. The switch above the grids hides the faint numbers.</li>
       <li><b>Linked things move together</b>A late third meal is also more calories, so "a later last meal" and "more calories eaten" can both claim the same kilo. When two rows tell one story, change one of them alone for a week.</li>
       <li><b>One month only</b>1 to 31 October 2026. Thirty-one days, one video a day, then the table stands as it is.</li>
     </ul>
@@ -550,6 +560,10 @@ const clampDay = k => k < firstDay() ? SPEC.start : k > SPEC.end ? SPEC.end : k;
 
 const state = { log: {}, updatedAt: 0 };
 let sel = clampDay(today);
+/* Raw numbers that are not proven (a first look from few days, or a link not
+   clear of luck) are shown faint and carry no verdict. This hides them. */
+let showRaw = true;
+try { showRaw = localStorage.getItem('bio.raw') !== '0'; } catch {}
 let pass = '';
 let dirty = false, saving = false, timer = 0, loaded = false;
 
@@ -1060,30 +1074,44 @@ function levelOf({ level, very }) {
   return very ? { cls: 'v' + level, word: `Very ${word}` } : { cls: level, word: word[0].toUpperCase() + word.slice(1) };
 }
 
+/* A cell still gathering days: how many it has out of what it needs. */
+function waitingCell(td, have, need, why) {
+  /* with first looks shown, two comparable days are enough to try; a cell
+     that still shows nothing then has days but nothing to compare yet */
+  const enough = showRaw ? Math.min(need, 2) : need;
+  td.innerHTML = have < enough
+    ? `<span class="lv thin" title="${have} of ${need} comparable days so far; a first look from 2, proven from ${need}">${have}/${need}</span>`
+    : `<span class="lv thin" title="${why}">·</span>`;
+  return td;
+}
+/* Is this neutral cell worth showing its raw number? A first look, or a
+   link that is clear of nothing but has a direction that rounds to a move. */
+const isRaw = (imp, o, diff) => showRaw && !!imp && (imp.early || (imp.level === 'neutral' && !imp.lean && !!imp.hint)) && fmtMove(o, diff) !== '0';
+
 function cellEl(factor, o, link, count) {
   const td = document.createElement('td');
   if (factor.id === o.id) { td.innerHTML = '<span class="lv self" aria-label="same measure">—</span>'; return td; }
-  if (!link) {
-    /* still waiting: how many comparable days it has, out of what it needs,
-       so the grid moves every day from the first */
-    const need = needPairs(), have = Math.min(count, need);
-    td.innerHTML = have < need
-      ? `<span class="lv thin" title="${have} of ${need} comparable days so far">${have}/${need}</span>`
-      : `<span class="lv thin" title="Enough days, but fewer than ${SPEC.minPerSide} on one side">·</span>`;
-    return td;
-  }
-  const imp = impact(link), { cls } = levelOf(imp);
-  /* a lean says so; the verdict itself stays neutral */
-  const word = imp.lean ? 'Leaning' : levelOf(imp).word;
+  const imp = link ? impact(link) : null;
+  if (!link || (imp.early && !showRaw))
+    return waitingCell(td, Math.min(count, needPairs()), needPairs(), count >= needPairs() ? `Enough days, but fewer than ${SPEC.minPerSide} on one side` : 'Days logged, but the same value on every one so far: nothing to compare yet');
+  const { cls } = levelOf(imp);
+  const raw = isRaw(imp, o, link.diff);
+  /* a lean or a first look says so; the verdict itself stays neutral */
+  const word = imp.lean ? 'Leaning' : imp.early ? 'First look' : raw ? 'Unproven' : levelOf(imp).word;
+  const showMove = imp.level !== 'neutral' || imp.lean || raw;
   const b = document.createElement('button');
-  b.type = 'button'; b.className = `lv ${cls}${imp.lean ? ` lean-${imp.lean}` : ''}`;
-  b.innerHTML = `${word}${imp.level === 'neutral' && !imp.lean ? '' : `<small>${fmtMove(o, link.diff)} ${o.unit}</small>`}`;
+  b.type = 'button';
+  b.className = `lv ${cls}${imp.lean ? ` lean-${imp.lean}` : ''}${raw && !imp.lean ? ` raw raw-${imp.hint}` : ''}`;
+  b.innerHTML = `${word}${showMove ? `<small>${fmtMove(o, link.diff)} ${o.unit}</small>` : ''}`;
   b.setAttribute('aria-label', `${factor.name} on ${o.name}: ${word}`);
   b.addEventListener('click', () => {
-    const clear = imp.level !== 'neutral'
-      ? `Clear of luck (q ${link.q.toFixed(3)}).`
-      : imp.lean ? `Leaning ${imp.lean}, but not clear of luck yet (q ${link.q.toFixed(2)}): a lean can still be chance, so neutral for now.`
-      : link.q > SPEC.maxLuck ? `Not clear of luck (q ${link.q.toFixed(2)}), so neutral.` : 'Gap too small to matter, so neutral.';
+    const clear = imp.early
+      ? `First look only: ${link.n} comparable day${link.n === 1 ? '' : 's'} so far, far too few to tell this from chance, so no verdict.`
+      : imp.level !== 'neutral'
+        ? `Clear of luck (q ${link.q.toFixed(3)}).`
+        : imp.lean ? `Leaning ${imp.lean}, but not clear of luck yet (q ${link.q.toFixed(2)}): a lean can still be chance, so neutral for now.`
+        : raw ? `Unproven: the average moved this way, but not clear of luck (q ${link.q.toFixed(2)}), so it stays neutral.`
+        : link.q > SPEC.maxLuck ? `Not clear of luck (q ${link.q.toFixed(2)}), so neutral.` : 'Gap too small to matter, so neutral.';
     showDetail(b,
       `<b>${factor.icon} ${factor.name} → ${o.icon} ${o.name}: ${word}.</b> ` +
       `${fmtMove(o, link.diff)} ${o.unit} after ${factor.on}${fmtCut(factor, link.cut)}, ` +
@@ -1104,30 +1132,32 @@ const WIN_NAMES = ['Early', 'Middle', 'Late'];
 const DUR_NAMES = ['Short', 'Middle', 'Long'];
 function whenCell(factor, o, res, count) {
   const td = document.createElement('td');
-  if (!res) {
-    const need = needTimed(), have = Math.min(count, need);
-    td.innerHTML = have < need
-      ? `<span class="lv thin" title="${have} of ${need} comparable days so far">${have}/${need}</span>`
-      : `<span class="lv thin" title="Enough days, but one window has fewer than ${SPEC.minPerSide}">·</span>`;
-    return td;
-  }
-  const imp = timingImpact(res), w = res.windows[res.best];
+  const imp = res ? timingImpact(res) : null;
+  if (!res || (imp.early && !showRaw))
+    return waitingCell(td, Math.min(count, needTimed()), needTimed(), count >= needTimed() ? `Enough days, but one window has fewer than ${SPEC.minPerSide}` : 'Days logged, but at the same time every day so far: nothing to split yet');
+  const w = res.windows[res.best];
+  const raw = isRaw(imp, o, res.diff);
+  const found = imp.level === 'good' || !!imp.lean || raw;
+  const label = imp.lean ? 'Leaning' : imp.early ? 'First look' : raw ? 'Unproven' : 'Best';
   const b = document.createElement('button');
   b.type = 'button';
-  b.className = `lv when ${imp.level === 'good' ? (imp.very ? 'vgood' : 'good') : 'neutral'}${imp.lean ? ' lean-good' : ''}`;
-  const found = imp.level === 'good' || imp.lean;
+  b.className = `lv when ${imp.level === 'good' ? (imp.very ? 'vgood' : 'good') : 'neutral'}${imp.lean ? ' lean-good' : ''}${raw && !imp.lean ? ' raw raw-good' : ''}`;
   b.innerHTML = found
-    ? `${imp.lean ? 'Leaning' : 'Best'} · ${fmtMove(o, res.diff)} ${o.unit}<small>${fmtWin(factor, w)}</small>`
+    ? `${label} · ${fmtMove(o, res.diff)} ${o.unit}<small>${fmtWin(factor, w)}</small>`
     : 'No clear best';
-  b.setAttribute('aria-label', `${factor.name} for ${o.name}: ${found ? `best ${fmtWin(factor, w)}` : 'no clear best time'}`);
-  const NAMES = factor.fmt === 'dur' ? DUR_NAMES : WIN_NAMES;
+  b.setAttribute('aria-label', `${factor.name} for ${o.name}: ${found ? `${label.toLowerCase()} ${fmtWin(factor, w)}` : 'no clear best time'}`);
+  const two = res.windows.length === 2;
+  const NAMES = factor.fmt === 'dur' ? (two ? ['Short', 'Long'] : DUR_NAMES) : (two ? ['Early', 'Late'] : WIN_NAMES);
   b.addEventListener('click', () => {
     const list = res.windows.map((x, i) =>
-      `${i === res.best && found ? '<b>' : ''}${NAMES[i]} ${fmtWin(factor, x)}: ${fmtVal(o, x.mean)} (${x.n} days)${i === res.best && found ? '</b>' : ''}`).join(' · ');
-    const verdict = imp.level === 'good'
-      ? `The ${NAMES[res.best].toLowerCase()} window is ${fmtMove(o, res.diff)} ${o.unit} against the other two. Clear of luck (q ${res.q.toFixed(3)}).`
-      : imp.lean ? `Leaning to the ${NAMES[res.best].toLowerCase()} window, ${fmtMove(o, res.diff)} ${o.unit}, but not clear of luck yet (q ${res.q.toFixed(2)}).`
-      : `The windows are not far enough apart to name a best time yet (q ${res.q.toFixed(2)}).`;
+      `${i === res.best && found ? '<b>' : ''}${NAMES[i]} ${fmtWin(factor, x)}: ${fmtVal(o, x.mean)} (${x.n} day${x.n === 1 ? '' : 's'})${i === res.best && found ? '</b>' : ''}`).join(' · ');
+    const verdict = imp.early
+      ? `First look only: ${res.n} comparable days in ${two ? 'two windows' : 'three windows'}, far too few to tell this from chance, so no verdict.`
+      : imp.level === 'good'
+        ? `The ${NAMES[res.best].toLowerCase()} window is ${fmtMove(o, res.diff)} ${o.unit} against the other two. Clear of luck (q ${res.q.toFixed(3)}).`
+        : imp.lean ? `Leaning to the ${NAMES[res.best].toLowerCase()} window, ${fmtMove(o, res.diff)} ${o.unit}, but not clear of luck yet (q ${res.q.toFixed(2)}).`
+        : raw ? `The ${NAMES[res.best].toLowerCase()} window is ahead by ${fmtMove(o, res.diff)} ${o.unit}, but not clear of luck (q ${res.q.toFixed(2)}), so no best time is claimed.`
+        : `The windows are not far enough apart to name a best time yet (q ${res.q.toFixed(2)}).`;
     showDetail(b, `<b>${factor.icon} ${factor.name} → ${o.icon} ${o.name}.</b> ${list}. ${verdict}`);
   });
   td.append(b);
@@ -1169,17 +1199,27 @@ function drawMatrix() {
   const legend = document.createElement('div');
   legend.className = 'mxlegend';
   legend.innerHTML = [['vbad', 'Very bad'], ['bad', 'Bad'], ['neutral', 'Neutral'], ['good', 'Good'], ['vgood', 'Very good'],
-    ['neutral lean-bad', 'Leaning bad'], ['neutral lean-good', 'Leaning good']]
+    ['neutral lean-bad', 'Leaning bad'], ['neutral lean-good', 'Leaning good'],
+    ['neutral raw raw-good', 'First look, good way'], ['neutral raw raw-bad', 'First look, bad way']]
     .map(([cls, word]) => `<span class="lv ${cls}">${word}</span>`).join('');
+  const tog = document.createElement('button');
+  tog.type = 'button'; tog.className = 'rawtoggle mono';
+  tog.setAttribute('aria-pressed', String(showRaw));
+  tog.textContent = showRaw ? 'Unproven numbers: shown' : 'Unproven numbers: hidden';
+  tog.addEventListener('click', () => {
+    showRaw = !showRaw;
+    try { localStorage.setItem('bio.raw', showRaw ? '1' : '0'); } catch {}
+    drawMatrix();
+  });
+  legend.append(tog);
 
   const early = document.createElement('p');
   early.className = 'mxearly';
-  early.hidden = ready >= SPEC.reliableAt;
   early.innerHTML = (today < SPEC.start
-      ? `<b>Starts ${pretty(SPEC.start)}.</b> The grid is empty until then. `
-      : `<b>Early days: ${ready} of ${DAYS.length}.</b> `) +
-    `"2/${needPairs()}" is a cell still gathering comparable days; it opens at ${needPairs()}. ` +
-    `Most cells stay neutral until about day ${SPEC.reliableAt}. A faint dashed colour is a lean: heading somewhere, not yet clear of luck, and sometimes just chance.`;
+      ? `<b>Starts ${pretty(SPEC.start)}.</b> The grids are empty until then. `
+      : ready < SPEC.reliableAt ? `<b>Early days: ${ready} of ${DAYS.length}.</b> ` : '') +
+    `Faint numbers are <b>first looks</b>: the raw move from the days so far, however few. "First look" means too few days to test; "Unproven" means enough days, but not clear of luck. ` +
+    `Neither is a verdict, and about half will point the wrong way by chance. Only the five coloured steps are proven. A fraction such as "1/${needPairs()}" is a cell with fewer than two comparable days; a dot, one with days but nothing to compare yet.`;
 
   const detail = document.createElement('div');
   detail.className = 'mxdetail'; detail.id = 'mxdetail';
@@ -1216,12 +1256,14 @@ function drawMatrix() {
   const h1 = document.createElement('div');
   h1.className = 'mxh';
   h1.innerHTML = `<h3><em>⏰</em>Time-related: the best time</h3><p>Everything that is a time of day, plus the eating window. My own days split into three equal windows by when I did it: early, middle, late. ` +
-    `The cell names the window with the best result and how far ahead of the other two it is. A cell opens at ${needTimed()} days, 3 per window.</p>`;
+    `The cell names the window with the best result and how far ahead of the other two it is. A cell is proven from ${needTimed()} days, 3 per window; before that it shows a first look from two or more days.</p>`;
   const h2 = document.createElement('div');
   h2.className = 'mxh';
   h2.innerHTML = `<h3><em>📏</em>Not time-related: how much, and whether</h3><p>Amounts and yes-or-no: cups, water, calories, morning sun, creatine, collagen, the sport and the body's own numbers. More against less, done against not, on the five steps from very bad to very good.</p>`;
   const hint2 = hint.cloneNode(true);
   $('mxbox').replaceChildren(sum, early, legend, detail, h1, hint, when.wrap, h2, hint2, wrap);
+  const looks = $('mxbox').querySelectorAll('.mx .lv.raw').length;
+  sum.innerHTML += looks ? ` · <b>${looks}</b> first look${looks === 1 ? '' : 's'}` : '';
 }
 
 function draw() { drawCard(); drawStrip(); drawMatrix(); }
