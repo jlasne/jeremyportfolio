@@ -144,8 +144,6 @@ async function answer(ctx: ActionCtx, request: Request): Promise<Response> {
         return ok(await ctx.runAction(api.x.octopus, args));
       case "x.generate":
         return ok(await ctx.runAction(api.x.generate, args));
-      case "x.testMail":
-        return ok(await ctx.runAction(api.x.testMail, args));
       default:
         return bad("Unknown operation");
     }

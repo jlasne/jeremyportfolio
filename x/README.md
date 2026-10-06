@@ -1,32 +1,27 @@
 # x.jeremylasne.com
 
 The content manager. One person logs what happened to them during the day,
-three mails ask for more, and at 17:00 the day becomes three X posts and one
-60 second video script. Drafts only. Nothing is posted anywhere.
+the page asks for more, and the day becomes three X posts and one 60 second
+video script. Drafts only. Nothing is posted anywhere, and nothing is sent by
+mail.
 
 ## The day
 
-| Time (Paris) | What lands |
+Two things happen by themselves, once an hour check on the Paris clock. Neither
+sends mail.
+
+| Time (Paris) | What happens |
 | --- | --- |
-| 10:00 | 3 questions on what you are going after |
-| 14:00 | 3 questions on what happened since 10:00 |
-| 17:00 | 3 questions, then the 3 posts and the script, written from the log |
-| 20:00 | one mail if nothing has been posted, carrying the drafts in full |
+| 17:00 | the day is written into drafts, if it has answers and no drafts yet |
+| 23:00 | anything the day left unread goes into the brain |
 
-Every mail carries the whole day back: the questions, the entries, and
-whatever is still unposted. A draft you have ticked used drops out, so the
-mail never buries the one that still needs sending. The inbox is the
-archive, whatever happens to the database.
+Writing replaces the whole set of drafts, and with it every used tick, so the
+17:00 write never touches drafts that already exist. You can write the day at
+any time from Today.
 
-The evening nudge is the exception, and asks for one thing. At 20:00, three
-hours after the drafts land, one mail goes out if none of them has been
-ticked used, carrying the posts in full so one can go out from the phone.
-Tick any draft before 20:00 and it never comes. One mail that gets read
-beats six that get filtered.
-
-The mail questions come from a bank of three sets per slot that rotates by
-date, so the same three do not arrive every morning for a month. They follow
-the five beats the video script needs.
+There used to be mails: three a day of questions and a nudge at 20:00 for
+unposted drafts. They are gone, along with the Resend setup and the test button.
+The question bank behind them is still in `xprompts.ts`, unused.
 
 ## The feed
 
@@ -83,7 +78,7 @@ evidence**, the things you actually said. Every claim traces back to the day
 you said it.
 
 Nobody presses anything to feed it, and there is no screen for it. A day is read
-into the brain when it is written, by the button or by the 17:00 mail, and again
+into the brain when it is written, by the button or at 17:00, and again
 at 23:00 for anything the day left unread, so it is fed daily whether or not the
 day was ever written. When the page opens it also reads any older days it has
 not read, silently, five at a time, oldest first so a newer position overrides
@@ -143,7 +138,7 @@ thickens the brain for the next idea. Tick an idea once it is filmed.
   stage, and a reply is cheaper than a post and lands closer to the person.
   Nothing is stored: a reply is worth something in the next ten minutes and
   nothing the day after.
-- **Archive.** Every day with something in it. Days that only exist because a mail went out are not shown.
+- **Archive.** Every day with something in it. Days with nothing in them are not shown.
 ## Stack
 
 - **`index.html`** is the page, hand written, no build step. X's own palette:
@@ -153,7 +148,7 @@ thickens the brain for the next idea. Tick an idea once it is filmed.
 - **`config.js`** holds the Convex HTTP Actions URL, the same door
   `/overlap` and `/bio` use.
 - **[`overlap/convex/x.ts`](../overlap/convex/x.ts)** is the server: the
-  passphrase, the day, the feed, the generation and the mails.
+  passphrase, the day, the feed, the generation and the schedule.
 - **[`overlap/convex/xprompts.ts`](../overlap/convex/xprompts.ts)** holds
   Jeremy's two system prompts word for word, the interviewer, the reply
   voice and the question bank. They
@@ -205,8 +200,8 @@ paragraph, `RUN_NOTE`, turns them into a batch job: the log has already
 answered, so write now, and mark a missing number `[X]` rather than
 inventing one.
 
-A generation failure never eats the 17:00 mail. The questions and the day go
-out either way, and **Write the day** on the dashboard retries.
+A generation failure at 17:00 is logged and nothing else happens. **Write the
+day** on Today retries, and says why if it fails again.
 
 ### The four angles
 
@@ -315,36 +310,32 @@ Set these on the Convex deployment (Settings, then Environment Variables):
 | Name | What it is |
 | --- | --- |
 | `OPENROUTER_API_KEY` | writes the posts and the script |
-| `RESEND_API_KEY` | sends the three mails |
 | `BIO_PASSPHRASE` | already set for /bio, and it opens this page too |
 | `X_PASSPHRASE` | optional, only to give this page a password of its own |
 | `X_MODEL` | optional, defaults to `deepseek/deepseek-v4-flash`, which OpenRouter lists as DeepSeek V4 Flash 0423 |
-| `X_MAIL_FROM` | optional, defaults to `hello@kaught.app`, which must be a sender on a domain verified in Resend |
-| `X_MAIL_TO` | optional, defaults to `jeremylasne0@gmail.com`, comma separated for several |
 | `X_SITE_URL` | optional, defaults to `https://x.jeremylasne.com` |
 | `OCTOPUS_MCP_URL` | optional, the Octopus MCP address, the same one the Octopus connector uses. Turns on live brain notes for the posts. A secret |
 | `OCTOPUS_BRAINS` | optional, the brains Write reads, as slugs separated by commas. Defaults to `x,content` |
 | `X_SERIES_START` | optional, the date that is Day 1, as YYYY-MM-DD. Overrides `SERIES_START` in `xprompts.ts` without a deploy |
 
-Two are new. The rest are either already set or have the right answer
-built in.
+`RESEND_API_KEY`, `X_MAIL_FROM` and `X_MAIL_TO` are no longer read. They can be
+deleted from the dashboard.
 
 If `OVERLAP_ALLOW_ORIGIN` is set, add `https://x.jeremylasne.com` to it.
 
 ## Deploy
 
-1. Set `OPENROUTER_API_KEY` and `RESEND_API_KEY` in the Convex dashboard.
+1. Set `OPENROUTER_API_KEY` in the Convex dashboard.
 2. `cd overlap && npx convex deploy`.
 3. In Vercel, add a project pointing at this repository with **Root
    Directory** set to `x`, the way `brand` and `brandmatchapp` are set up,
    and give it the domain `x.jeremylasne.com`.
-4. Open the page, enter the passphrase, and press **Send a test mail** to
-   check Resend before 10:00.
+4. Open the page, enter the passphrase, and press **Test Octopus** if the
+   Octopus address is set.
 
 The cron runs hourly and reads the Paris clock itself, because Convex
-schedules on UTC and Paris moves twice a year. Twenty one hours out of
-twenty four it returns immediately. `mailed` on each day makes a double fire
-harmless.
+schedules on UTC and Paris moves twice a year. Twenty two hours out of
+twenty four it returns immediately.
 
 The folder also answers at `jeremylasne.com/x/` on the main project, since
 Vercel serves the repository as it is. The passphrase covers both, and the

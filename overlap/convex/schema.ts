@@ -243,8 +243,9 @@ export default defineSchema({
         }),
       ),
     ),
-    /* which of the three daily mails already went out: "10", "14", "17" */
-    mailed: v.array(v.string()),
+    /* Retired: which mails had gone out. Nothing sends mail now. Optional, and
+       nothing reads or writes it, so the days that already carry it stay valid. */
+    mailed: v.optional(v.array(v.string())),
     updatedAt: v.number(),
   }).index("by_day", ["day"]),
 

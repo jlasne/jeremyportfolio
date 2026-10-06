@@ -250,14 +250,11 @@ button, input, textarea, select { font: inherit; color: inherit; }
 
   <aside class="aside">
     <div class="box">
-      <h3>The rhythm</h3>
-      <div class="stat"><span>10:00 Paris</span><span>what you're after</span></div>
-      <div class="stat"><span>14:00 Paris</span><span>what happened</span></div>
-      <div class="stat"><span>17:00 Paris</span><span>the day + drafts</span></div>
-      <div class="stat"><span>20:00 Paris</span><span>if nothing is posted</span></div>
-      <p style="color:var(--dim);font-size:13px;margin:10px 0 0">Every mail carries the whole day. The inbox is the archive. Tick a draft used before 20:00 and the last one does not come.</p>
+      <h3>The schedule</h3>
+      <div class="stat"><span>17:00 Paris</span><span>the day is written</span></div>
+      <div class="stat"><span>23:00 Paris</span><span>the brain reads it</span></div>
+      <p style="color:var(--dim);font-size:13px;margin:10px 0 0">Nothing is sent by mail.</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 0">
-        <button class="btn ghost sm" id="test">Send a test mail</button>
         <button class="btn ghost sm" id="octo">Test Octopus</button>
       </div>
     </div>
@@ -815,14 +812,6 @@ $("#octo").addEventListener("click", async (e) => {
     const r = await call("x.octopus");
     toast(r.ok ? r.message : "Octopus: " + r.message);
   } catch (err) { toast(err.message); }
-  finally { b.disabled = false; }
-});
-
-$("#test").addEventListener("click", async (e) => {
-  const b = e.currentTarget;
-  b.disabled = true;
-  try { toast(await call("x.testMail")); await refresh(); }
-  catch (err) { toast(err.message); }
   finally { b.disabled = false; }
 });
 

@@ -19,7 +19,6 @@ import {
   REPLY_SYSTEM,
   REPLY_ANGLES,
   SLOTS,
-  SLOT_TITLE,
   INTERVIEW_SYSTEM,
   DIGEST_SYSTEM,
   TALK_SYSTEM,
@@ -50,10 +49,10 @@ import {
 const MAX_ENTRY = 4000;
 const MAX_ENTRIES = 200;
 const KEEP_DRAFT_DAYS = 5; /* how much recent work the model is shown */
-/* One nudge, at 20:00, three hours after the drafts land, and only while
-   none of them has been ticked off. One mail that gets read beats six that
-   get filtered. */
-const NUDGE_AT = 20;
+/* The day is written at 17:00 if it has answers and no drafts yet. Nothing
+   in this app sends mail: this is the only thing that happens by itself at
+   that hour. */
+const WRITE_AT = 17;
 /* Whatever the day left unread goes into the brain at 23:00, so it is fed
    daily whether or not the day was ever written. */
 const DIGEST_AT = 23;
@@ -106,7 +105,6 @@ const blank = (day: string) => ({
   drafts: [] as DayDoc["drafts"],
   draftsAt: undefined as number | undefined,
   draftsNotes: 0,
-  mailed: [] as string[],
   updatedAt: 0,
 });
 
@@ -119,7 +117,6 @@ const pub = (d: DayDoc | null, day: string) =>
         drafts: d.drafts,
         draftsAt: d.draftsAt,
         draftsNotes: d.draftsNotes ?? 0,
-        mailed: d.mailed,
         updatedAt: d.updatedAt,
       }
     : blank(day);
@@ -311,16 +308,6 @@ export const putDrafts = internalMutation({
   },
   handler: async (ctx, { day, drafts, notes }) => {
     await upsert(ctx, day, { drafts, draftsAt: Date.now(), draftsNotes: notes ?? 0 });
-    return null;
-  },
-});
-
-export const markMailed = internalMutation({
-  args: { day: v.string(), slot: v.string() },
-  handler: async (ctx, { day, slot }) => {
-    const old = await find(ctx, day);
-    const mailed = Array.from(new Set([...(old?.mailed ?? []), slot]));
-    await upsert(ctx, day, { mailed });
     return null;
   },
 });
@@ -1308,198 +1295,26 @@ export const build = action({
   },
 });
 
-/* ── the three mails ────────────────────────────────────────────────── */
-
-const esc = (s: string) =>
-  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-
-const SITE = () => process.env.X_SITE_URL || "https://x.jeremylasne.com";
-
-/* X's own colours: black, the one blue, and the grey between. */
-const C = { bg: "#000000", card: "#16181c", line: "#2f3336", ink: "#e7e9ea", dim: "#71767b", blue: "#1d9bf0" };
-
-function longDate(day: string) {
-  const d = new Date(day + "T12:00:00Z");
-  return d.toLocaleDateString("en-GB", {
-    weekday: "long", day: "numeric", month: "long", timeZone: "UTC",
-  });
-}
-
-function mailBody(day: string, slot: string, d: ReturnType<typeof blank> | any) {
-  const qs = questionsFor(slot, day);
-  const clock = (at: number) => {
-    const t = new Date(at + parisOffset(at) * 3_600_000);
-    return `${String(t.getUTCHours()).padStart(2, "0")}:${String(t.getUTCMinutes()).padStart(2, "0")}`;
-  };
-  const box = (inner: string) =>
-    `<div style="background:${C.card};border:1px solid ${C.line};border-radius:16px;padding:18px 20px;margin:0 0 14px">${inner}</div>`;
-  const h = (t: string) =>
-    `<div style="font:600 13px/1 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:${C.dim};margin:0 0 12px">${esc(t)}</div>`;
-
-  const parts: string[] = [];
-
-  parts.push(
-    box(
-      h(SLOT_TITLE[slot] ?? slot) +
-        qs
-          .map(
-            (q, i) =>
-              `<div style="display:block;margin:0 0 ${i === qs.length - 1 ? 0 : 12}px">` +
-              `<span style="color:${C.blue};font:700 15px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">${i + 1}.</span> ` +
-              `<span style="color:${C.ink};font:400 15px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">${esc(q)}</span></div>`,
-          )
-          .join("") +
-        `<div style="margin:18px 0 0"><a href="${SITE()}" style="display:inline-block;background:${C.ink};color:${C.bg};text-decoration:none;font:700 15px/1 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;padding:13px 22px;border-radius:9999px">Answer on the platform</a></div>`,
-    ),
-  );
-
-  parts.push(
-    box(
-      h(`today so far · ${d.entries.length} ${d.entries.length === 1 ? "entry" : "entries"}`) +
-        (d.entries.length
-          ? d.entries
-              .map(
-                (e: any) =>
-                  `<div style="margin:0 0 14px">` +
-                  `<div style="font:500 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.1em;color:${C.dim};margin:0 0 5px">${clock(e.at)}${e.q ? " · " + esc(e.q) : ""}</div>` +
-                  `<div style="font:400 15px/1.55 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:${C.ink};white-space:pre-wrap">${esc(e.text)}</div></div>`,
-              )
-              .join("")
-          : `<div style="font:400 15px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:${C.dim}">Nothing yet. The questions above are the fastest way in.</div>`),
-    ),
-  );
-
-  /* Only what is still unposted: a draft already ticked used is finished
-     business, and repeating it buries the one that still needs sending. */
-  const left = d.drafts.filter((x: { used?: boolean }) => !x.used);
-  if (left.length)
-    parts.push(
-      box(
-        h(`still to post · ${left.length} of ${d.drafts.length}`) +
-          left
-            .map(
-              (x: any) =>
-                `<div style="margin:0 0 16px">` +
-                `<div style="font:500 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.1em;text-transform:uppercase;color:${C.blue};margin:0 0 7px">${esc(x.label)}</div>` +
-                `<div style="font:400 15px/1.55 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:${C.ink};white-space:pre-wrap;background:${C.bg};border:1px solid ${C.line};border-radius:12px;padding:14px 16px">${esc(x.body)}</div></div>`,
-            )
-            .join(""),
-      ),
-    );
-
-  const html =
-    `<div style="background:${C.bg};margin:0;padding:28px 16px"><div style="max-width:620px;margin:0 auto">` +
-    `<div style="font:700 26px/1 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:${C.ink};margin:0 0 4px">x</div>` +
-    `<div style="font:400 14px/1.4 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:${C.dim};margin:0 0 20px">${esc(longDate(day))} · ${esc(slot)}:00 Paris</div>` +
-    parts.join("") +
-    `<div style="font:400 12px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:${C.dim};padding:6px 4px 0">Every mail carries the whole day, so this inbox is the archive.</div>` +
-    `</div></div>`;
-
-  const text = [
-    `x · ${longDate(day)} · ${slot}:00 Paris`,
-    "",
-    (SLOT_TITLE[slot] ?? slot).toUpperCase(),
-    ...qs.map((q, i) => `${i + 1}. ${q}`),
-    "",
-    SITE(),
-    "",
-    `TODAY SO FAR (${d.entries.length})`,
-    ...(d.entries.length
-      ? d.entries.map((e: any) => `[${clock(e.at)}]${e.q ? " " + e.q : ""}\n${e.text}`)
-      : ["Nothing yet."]),
-    ...(left.length
-      ? ["", `STILL TO POST (${left.length} of ${d.drafts.length})`, ...left.map((x: any) => `--- ${x.label} ---\n${x.body}`)]
-      : []),
-  ].join("\n");
-
-  return { html, text, subject: `x · ${longDate(day)} · ${SLOT_TITLE[slot] ?? slot}` };
-}
+/* ── the schedule ───────────────────────────────────────────────────── */
 
 /**
- * The nudge: written drafts, none of them ticked off yet.
+ * Every hour, on the hour. Convex crons run on UTC and Paris moves twice a
+ * year, so the hour is worked out here rather than written into the schedule.
  *
- * Shorter than the three daily mails, because it asks for one thing. Each
- * post is here in full, so it can go out from the phone without opening
- * anything else.
+ * Two things happen by themselves, and neither sends mail:
+ * - 17:00 Paris: the day is written, if it has answers and no drafts yet.
+ *   Writing replaces the whole set, so existing drafts, and their used ticks,
+ *   are never touched.
+ * - 23:00 Paris: whatever the day left unread goes into the brain.
  */
-function nudgeBody(day: string, hour: number, left: { kind: string; label: string; body: string }[]) {
-  const posts = left.filter((d) => d.kind === "post").length;
-  const box = (inner: string) =>
-    `<div style="background:${C.card};border:1px solid ${C.line};border-radius:16px;padding:18px 20px;margin:0 0 14px">${inner}</div>`;
-  const font = "-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif";
+export const tick = internalAction({
+  args: {},
+  handler: async (ctx) => {
+    const { day, hour } = paris();
 
-  const html =
-    `<div style="background:${C.bg};margin:0;padding:28px 16px"><div style="max-width:620px;margin:0 auto">` +
-    `<div style="font:700 26px/1 ${font};color:${C.ink};margin:0 0 4px">x</div>` +
-    `<div style="font:400 14px/1.4 ${font};color:${C.dim};margin:0 0 20px">${esc(longDate(day))} · ${hour}:00 Paris</div>` +
-    box(
-      `<div style="font:700 19px/1.35 ${font};color:${C.ink};margin:0 0 8px">${left.length} written, nothing posted.</div>` +
-      `<div style="font:400 15px/1.5 ${font};color:${C.dim}">${posts} ${posts === 1 ? "post" : "posts"} and the script have been sitting since 17:00.</div>` +
-      `<div style="margin:18px 0 0"><a href="${SITE()}" style="display:inline-block;background:${C.ink};color:${C.bg};text-decoration:none;font:700 15px/1 ${font};padding:13px 22px;border-radius:9999px">Open the drafts</a></div>`,
-    ) +
-    left
-      .map((d) =>
-        box(
-          `<div style="font:500 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.1em;text-transform:uppercase;color:${C.blue};margin:0 0 9px">${esc(d.label)}</div>` +
-          `<div style="font:400 15px/1.55 ${font};color:${C.ink};white-space:pre-wrap">${esc(d.body)}</div>`,
-        ),
-      )
-      .join("") +
-    `</div></div>`;
-
-  const text = [
-    `x · ${longDate(day)} · ${hour}:00 Paris`,
-    "",
-    `${left.length} written, nothing posted. Sitting since 17:00.`,
-    SITE(),
-    "",
-    ...left.map((d) => `--- ${d.label} ---\n${d.body}`),
-  ].join("\n");
-
-  return { subject: `x · ${left.length} drafts still unposted`, html, text };
-}
-
-export const sendNudge = internalAction({
-  args: { day: v.string(), hour: v.number() },
-  handler: async (ctx, { day, hour }) => {
-    const d = await ctx.runQuery(internal.x.dayFor, { day });
-    const left = d.drafts.filter((x: { used?: boolean }) => !x.used);
-    if (!left.length) return null;
-    const { subject, html, text } = nudgeBody(day, hour, left);
-    await resend(subject, html, text);
-    await ctx.runMutation(internal.x.markMailed, { day, slot: "nudge" });
-    return null;
-  },
-});
-
-async function resend(subject: string, html: string, text: string) {
-  const key = process.env.RESEND_API_KEY;
-  /* The two addresses are settled, so they are defaults rather than setup.
-     X_MAIL_FROM and X_MAIL_TO still win if either ever moves. */
-  const from = process.env.X_MAIL_FROM || "hello@kaught.app";
-  const to = process.env.X_MAIL_TO || "jeremylasne0@gmail.com";
-  if (!key) throw new Error("Set RESEND_API_KEY in the Convex dashboard first");
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from, to: to.split(",").map((s) => s.trim()).filter(Boolean), subject, html, text }),
-  });
-  if (!res.ok) throw new Error(`Resend said ${res.status}: ${(await res.text()).slice(0, 200)}`);
-}
-
-/**
- * One mail. At 17:00 the day is written first, so the evening mail carries
- * the three posts and the script. A generation failure never eats the mail:
- * the questions and the day still go out.
- */
-export const sendSlot = internalAction({
-  args: { day: v.string(), slot: v.string(), mark: v.optional(v.boolean()) },
-  handler: async (ctx, { day, slot, mark }) => {
-    /* Write the day at 17:00, but never over drafts that already exist:
-       writing replaces the set, and with it every used tick. */
-    if (slot === "17") {
-      const before = await ctx.runQuery(internal.x.dayFor, { day });
-      if (!before.drafts.length) {
+    if (hour === WRITE_AT) {
+      const d = await ctx.runQuery(internal.x.dayFor, { day });
+      if (d.entries.length && !d.drafts.length) {
         try {
           await ctx.runAction(internal.x.make, { day });
         } catch (e) {
@@ -1507,56 +1322,10 @@ export const sendSlot = internalAction({
         }
       }
       await ctx.scheduler.runAfter(0, internal.x.digest, { day });
-    }
-    const d = await ctx.runQuery(internal.x.dayFor, { day });
-    const { subject, html, text } = mailBody(day, slot, d);
-    await resend(subject, html, text);
-    if (mark !== false) await ctx.runMutation(internal.x.markMailed, { day, slot });
-    return null;
-  },
-});
-
-/**
- * Every hour, on the hour. Convex crons run on UTC and Paris moves twice a
- * year, so the hour is worked out here rather than written into the
- * schedule. `mailed` on the day makes a double fire harmless.
- */
-export const tick = internalAction({
-  args: {},
-  handler: async (ctx) => {
-    const { day, hour } = paris();
-    const slot = String(hour);
-    const d = await ctx.runQuery(internal.x.dayFor, { day });
-
-    if (SLOTS.includes(slot as any)) {
-      if (!d.mailed.includes(slot)) await ctx.runAction(internal.x.sendSlot, { day, slot });
       return null;
     }
 
-    if (hour === DIGEST_AT) {
-      await ctx.runAction(internal.x.catchUp, {});
-      return null;
-    }
-
-    /* Drafts written and none of them ticked off: one nudge at 20:00. */
-    if (hour !== NUDGE_AT) return null;
-    if (!d.drafts.length || d.drafts.some((x: { used?: boolean }) => x.used)) return null;
-    if (d.mailed.includes("nudge")) return null;
-    await ctx.runAction(internal.x.sendNudge, { day, hour });
+    if (hour === DIGEST_AT) await ctx.runAction(internal.x.catchUp, {});
     return null;
-  },
-});
-
-/** Send one of today's mails by hand, to check the wiring. */
-export const testMail = action({
-  args: { passphrase: v.string(), slot: v.optional(v.string()) },
-  handler: async (ctx, a): Promise<string> => {
-    mustBeJeremy(a.passphrase);
-    const { day, hour } = paris();
-    const slot = a.slot && SLOTS.includes(a.slot as any) ? a.slot : hour < 12 ? "10" : hour < 16 ? "14" : "17";
-    const d = await ctx.runQuery(internal.x.dayFor, { day });
-    const { subject, html, text } = mailBody(day, slot, d);
-    await resend(subject, html, text);
-    return `Sent the ${slot}:00 mail to ${process.env.X_MAIL_TO || "jeremylasne0@gmail.com"}`;
   },
 });

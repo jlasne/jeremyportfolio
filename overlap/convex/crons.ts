@@ -5,9 +5,9 @@ import { internal } from "./_generated/api";
 const crons = cronJobs();
 crons.daily("founder city refresh", { hourUTC: 4, minuteUTC: 0 }, internal.city.refreshAll, {});
 
-/* x.jeremylasne.com: three mails a day at 10:00, 14:00 and 17:00 Paris.
-   The schedule is hourly because Paris moves twice a year and Convex runs
-   on UTC; `x.tick` looks at the Paris clock and returns immediately on the
-   twenty-one hours that are not a slot. */
+/* x.jeremylasne.com: writes the day at 17:00 Paris and reads the unread days
+   into the brain at 23:00. No mail. The schedule is hourly because Paris moves
+   twice a year and Convex runs on UTC; `x.tick` looks at the Paris clock and
+   returns at once on the hours that are not one of those two. */
 crons.hourly("x content manager", { minuteUTC: 0 }, internal.x.tick, {});
 export default crons;
