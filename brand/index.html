@@ -263,16 +263,32 @@ h1, h2 { font-family: var(--display); font-weight: 900; letter-spacing: -0.045em
 .hx-chart .ar { fill: rgba(7,10,18,.08); opacity: 0; animation: fadeUp .8s var(--ease) 2.4s forwards; }
 .hx-chart .dot { fill: var(--midnight); opacity: 0; animation: fadeUp .4s var(--ease) 3.05s forwards; }
 @keyframes draw { to { stroke-dashoffset: 0; } }
-.hx-rows { list-style: none; margin-top: auto; display: grid; gap: 2.4cqw; }
+.hx-big { position: relative; }
+.hx-plus { position: absolute; right: 0; top: -7cqw; font-family: var(--mono); font-size: 3.4cqw; font-weight: 500; letter-spacing: .04em; padding: 1cqw 2cqw; border-radius: 99px; background: var(--midnight); color: var(--lime); pointer-events: none; animation: plus 1.3s var(--ease) forwards; }
+@keyframes plus { 0% { opacity: 0; transform: translateY(6px) scale(.9); } 20% { opacity: 1; transform: none; } 75% { opacity: 1; } 100% { opacity: 0; transform: translateY(-14px); } }
+.hx-chart .dot.ping { animation: ping .9s var(--ease); opacity: 1; }
+@keyframes ping { 0% { r: 4; } 30% { r: 7; } 100% { r: 4; } }
+.hx-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 2.4cqw; margin-top: 5cqw; }
+.hx-tiles div { padding: 3cqw 3.4cqw 3.4cqw; border-radius: 4cqw; background: var(--midnight); color: var(--lime); }
+.hx-tiles div > span { display: block; font-family: var(--mono); font-size: 2.5cqw; letter-spacing: .14em; text-transform: uppercase; color: rgba(212,255,63,.62); }
+.hx-tiles b { display: inline-flex; margin-top: 1.6cqw; font-family: var(--display); font-weight: 900; font-size: 7cqw; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+.hx-rows { list-style: none; margin-top: auto; display: grid; gap: 2.4cqw; overflow: hidden; }
 .hx-rows li { display: flex; align-items: center; gap: 2.6cqw; padding: 3cqw 3.4cqw; border-radius: 4cqw; background: rgba(7,10,18,.08); font-weight: 700; font-size: 3.6cqw; opacity: 0; transform: translateY(8px); animation: fadeUp .5s var(--ease) forwards; animation-delay: calc(2.5s + var(--r) * 260ms); }
 .hx-rows li svg { width: 5cqw; height: 5cqw; flex: none; padding: .9cqw; border-radius: 50%; background: var(--midnight); color: var(--lime); }
+.hx-rows li { max-height: 16cqw; }
+.hx-rows li.live { opacity: 1; transform: none; animation: none; }
+.hx-rows li.add { animation: row-add .7s var(--ease) both; }
+.hx-rows li.drop { animation: row-drop .7s var(--ease) forwards; }
+@keyframes row-add { from { max-height: 0; padding-block: 0; margin-bottom: -2.4cqw; opacity: 0; transform: translateY(-8px); background: rgba(7,10,18,.2); } to { max-height: 16cqw; opacity: 1; transform: none; } }
+@keyframes row-drop { from { max-height: 16cqw; opacity: 1; transform: none; } to { max-height: 0; padding-block: 0; margin-top: -2.4cqw; opacity: 0; transform: none; } }
+.hx-rows li i { font-style: normal; font-family: var(--mono); font-weight: 500; font-size: 2.6cqw; letter-spacing: .08em; text-transform: uppercase; opacity: .5; }
 .hx-rows li em { margin-left: auto; font-style: normal; font-family: var(--mono); font-weight: 500; font-size: 3cqw; }
 
 .hx-chip { position: absolute; z-index: 4; display: inline-flex; align-items: center; gap: 8px; padding: 9px 15px; border-radius: 99px; font-family: var(--mono); font-size: 11.5px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; opacity: 0; animation: chip .55s cubic-bezier(.34,1.56,.64,1) forwards; }
 @keyframes chip { from { opacity: 0; transform: translateY(10px) scale(.86); } to { opacity: 1; transform: none; } }
-.hx-chip--no { left: max(0px, calc(50% - 320px)); top: 52%; color: var(--coral); border: 1px solid rgba(255,90,78,.7); background: rgba(7,10,18,.7); animation-delay: 2.2s; }
+.hx-chip--no { left: max(0px, calc(50% - 320px)); top: 63%; color: var(--coral); border: 1px solid rgba(255,90,78,.7); background: rgba(7,10,18,.7); animation-delay: 2.2s; }
 .hx-chip--no s { text-decoration-thickness: 1px; }
-.hx-chip--yes { right: max(0px, calc(50% - 320px)); top: 61%; color: var(--midnight); background: var(--lime); box-shadow: 0 12px 30px -10px rgba(212,255,63,.55); animation-delay: 2.75s; }
+.hx-chip--yes { right: max(0px, calc(50% - 320px)); top: 72%; color: var(--midnight); background: var(--lime); box-shadow: 0 12px 30px -10px rgba(212,255,63,.55); animation-delay: 2.75s; }
 
 @media (max-width: 880px) {
   .hx { grid-template-columns: 1fr; text-align: center; }
@@ -527,7 +543,7 @@ h1, h2 { font-family: var(--display); font-weight: 900; letter-spacing: -0.045em
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
   .reveal, .reveal-up, .hero-in { opacity: 1; transform: none; }
-  .hw > span, .hx-phone, .hx-screen > *, .hx-rows li, .hx-chip, .hx-chart .ar, .hx-chart .dot { opacity: 1; transform: none; animation: none; }
+  .hw > span, .hx-phone, .hx-screen > *, .hx-tiles, .hx-rows li, .hx-chip, .hx-chart .ar, .hx-chart .dot { opacity: 1; transform: none; animation: none; }
   .hx-chart .ln { stroke-dashoffset: 0; animation: none; }
   .hx-icon, .hx-spark { display: none; }
   .nav.away { transform: translate3d(0, 0, 0); }
@@ -772,7 +788,8 @@ h1 .it, h2 .it, h3 .it, .pd-head .it, .pd-title .it { color: var(--violet); font
             <div class="hx-big" style="--s:3"><span class="od" id="hx-od" data-to="$50,000">$50,000</span><small>/mo</small></div>
             <div class="hx-ex" style="--s:4">Example &middot; 10,000 members &times; $5</div>
             <svg class="hx-chart" viewBox="0 0 200 70" style="--s:5"><path class="ar" d="M4 62 C 30 60, 44 54, 64 50 S 104 40, 124 30 S 168 12, 196 6 L196 70 L4 70Z"/><path class="ln" d="M4 62 C 30 60, 44 54, 64 50 S 104 40, 124 30 S 168 12, 196 6"/><circle class="dot" cx="196" cy="6" r="4"/></svg>
-            <ul class="hx-rows" style="--s:6">
+            <div class="hx-tiles" style="--s:6"><div><span>Members</span><b class="od" id="hx-mem" data-to="10,000">10,000</b></div><div><span>Paid to you</span><b>Monthly</b></div></div>
+            <ul class="hx-rows" id="hx-rows" style="--s:7">
               <li style="--r:0"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#bm-check"/></svg>New member<em>+$5</em></li>
               <li style="--r:1"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#bm-check"/></svg>New member<em>+$5</em></li>
               <li style="--r:2"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#bm-check"/></svg>Renewed<em>+$5</em></li>
@@ -1274,23 +1291,86 @@ h1 .it, h2 .it, h3 .it, .pd-head .it, .pd-title .it { color: var(--violet); font
     paint();
   })();
 
-  /* ═══ the hero: the month rolls up like an odometer, the frame keeps time ═══ */
+  /* ═══ the hero: the month rolls up like an odometer, then the app stays live ═══ */
 
   (function () {
-    var od = document.getElementById('hx-od');
-    if (od && !reduced) {
-      var to = od.getAttribute('data-to'), strips = [], n = 0;
-      od.setAttribute('aria-label', to); od.textContent = '';
-      to.split('').forEach(function (ch) {
-        if (!/\d/.test(ch)) { var c = document.createElement('span'); c.textContent = ch; od.appendChild(c); return; }
+    /* an odometer on any text: digits roll forward only, the strip resets out of sight */
+    function odometer(el) {
+      var text = el.getAttribute('data-to'), cols = [];
+      el.setAttribute('aria-label', text); el.textContent = '';
+      text.split('').forEach(function (ch, i) {
+        if (!/\d/.test(ch)) { var c = document.createElement('span'); c.textContent = ch; el.appendChild(c); cols.push(null); return; }
         var d = document.createElement('span'); d.className = 'od-d';
         var st = document.createElement('span'); st.className = 'od-s';
-        for (var k = 0; k < 20; k++) { var x = document.createElement('span'); x.textContent = k % 10; st.appendChild(x); }
-        st.style.setProperty('--dl', (n++ * 0.09) + 's');
-        d.appendChild(st); od.appendChild(d); strips.push([st, +ch]);
+        for (var k = 0; k < 40; k++) { var x = document.createElement('span'); x.textContent = k % 10; st.appendChild(x); }
+        d.appendChild(st); el.appendChild(d); cols.push({ st: st, pos: 0, d: 0, i: i });
       });
-      setTimeout(function () { strips.forEach(function (p) { p[0].style.transform = 'translateY(-' + (10 + p[1]) + 'em)'; }); }, 1650);
+      return function set(t, spin, dur) {
+        el.setAttribute('aria-label', t);
+        cols.forEach(function (c, i) {
+          if (!c) return;
+          var nd = +t.charAt(i), step = (nd - c.d + 10) % 10 + (spin ? 10 : 0);
+          if (!step) return;
+          if (c.pos + step > 39) { c.st.style.transition = 'none'; c.pos %= 10; c.st.style.transform = 'translateY(-' + c.pos + 'em)'; void c.st.offsetWidth; c.st.style.transition = ''; }
+          c.pos += step; c.d = nd;
+          c.st.style.transitionDuration = dur + 's';
+          c.st.style.transitionDelay = spin ? (c.i * 0.09) + 's' : '0s';
+          c.st.style.transform = 'translateY(-' + c.pos + 'em)';
+        });
+      };
     }
+    var od = document.getElementById('hx-od'), mem = document.getElementById('hx-mem');
+    if (!od || !mem || reduced) return;
+    var setRev = odometer(od), setMem = odometer(mem);
+    setTimeout(function () { setRev(od.getAttribute('data-to'), true, 1.7); }, 1650);
+    setTimeout(function () { setMem(mem.getAttribute('data-to'), true, 1.5); }, 2000);
+
+    /* the live app: a member joins every few seconds, the month ticks up by $5,
+       the chart redraws, the oldest row leaves. Paused while the hero is off screen */
+    var rev = 50000, members = 10000, rows = document.getElementById('hx-rows'),
+        big = od.parentNode, ln = document.querySelector('.hx-chart .ln'), ar = document.querySelector('.hx-chart .ar'), dot = document.querySelector('.hx-chart .dot'),
+        hero = document.getElementById('top'), seen = true, series = [], v = 100;
+    for (var i = 0; i < 10; i++) { series.push(v); v += 2 + Math.pow(i, 1.6) * .9; }
+    if (window.IntersectionObserver) new IntersectionObserver(function (es) { seen = es[0].isIntersecting; }).observe(hero);
+    function fmt(n) { return n.toLocaleString('en-US'); }
+    function path() {
+      var lo = Math.min.apply(null, series), hi = Math.max.apply(null, series), pts = series.map(function (y, i) { return [4 + i * 192 / (series.length - 1), 62 - (y - lo) / (hi - lo || 1) * 56]; });
+      var d = 'M' + pts[0][0] + ' ' + pts[0][1].toFixed(1);
+      for (var i = 0; i < pts.length - 1; i++) {
+        var p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+        d += ' C' + (p1[0] + (p2[0] - p0[0]) / 6).toFixed(1) + ' ' + (p1[1] + (p2[1] - p0[1]) / 6).toFixed(1) + ', ' + (p2[0] - (p3[0] - p1[0]) / 6).toFixed(1) + ' ' + (p2[1] - (p3[1] - p1[1]) / 6).toFixed(1) + ', ' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1);
+      }
+      ln.setAttribute('d', d); ar.setAttribute('d', d + ' L196 70 L4 70Z');
+      var last = pts[pts.length - 1]; dot.setAttribute('cx', last[0]); dot.setAttribute('cy', last[1].toFixed(1));
+    }
+    function row(label) {
+      var li = document.createElement('li');
+      li.className = 'add';
+      li.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#bm-check"/></svg>' + label + ' <i>now</i><em>+$5</em>';
+      rows.insertBefore(li, rows.firstChild);
+      var all = rows.querySelectorAll('li:not(.drop)'), old = all[all.length - 1];
+      if (all.length > 3) { old.classList.add('drop'); setTimeout(function () { old.remove(); }, 720); }
+      [].forEach.call(rows.querySelectorAll('li i'), function (t, k) { if (k) t.textContent = (k * 3) + 's ago'; });
+    }
+    function tick() {
+      if (seen && !document.hidden) {
+        rev += 5; members += 1;
+        setRev('$' + fmt(rev), false, .65); setMem(fmt(members), false, .65);
+        series.shift(); v += 3 + Math.random() * 7; series.push(v); path();
+        dot.classList.remove('ping'); void dot.getBBox(); dot.classList.add('ping');
+        var plus = document.createElement('span'); plus.className = 'hx-plus'; plus.textContent = '+$5'; big.appendChild(plus);
+        setTimeout(function () { plus.remove(); }, 1350);
+        row('New member');
+      }
+      setTimeout(tick, 2200 + Math.random() * 1400);
+    }
+    setTimeout(function () {
+      [].forEach.call(rows.querySelectorAll('li'), function (li) { li.classList.add('live'); });
+      tick();
+    }, 4200);
+  })();
+
+  (function () {
     var tc = document.getElementById('hx-tc');
     if (tc && !reduced) {
       var t0 = performance.now(), pad = function (v) { return (v < 10 ? '0' : '') + v; };
