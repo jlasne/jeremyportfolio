@@ -43,15 +43,15 @@
 
 
 :root {
-  --ink:     #f2f3f7;
-  --muted:   #a2a7b6;
-  --faint:   #989daa;
-  --ink-2:   #8d92a2;
-  --rule:      rgba(255, 255, 255, 0.10);
-  --rule-firm: rgba(255, 255, 255, 0.18);
-  --card:      rgba(255, 255, 255, 0.045);
+  --ink:     #f3efe6;
+  --muted:   #b3afa6;
+  --faint:   #8e8b84;
+  --ink-2:   #7c7a75;
+  --rule:      rgba(243, 239, 230, 0.10);
+  --rule-firm: rgba(243, 239, 230, 0.18);
+  --card:      rgba(243, 239, 230, 0.04);
   --bg:        #070a12;
-  --bg-sunk:   rgba(255, 255, 255, 0.06);
+  --bg-sunk:   rgba(243, 239, 230, 0.06);
   --lift:    none;
   --lift-lg: none;
 
@@ -72,29 +72,30 @@
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
 }
-/* past the crossover the ink goes the other way; black cards on the light
-   ground re-point the same tokens back */
+/* the film's one white page: cream ground, midnight ink. The portal sits on
+   it, the nav follows it while it is under the nav, everything else is dark */
 .tone--light {
-  --ink: #0d1017; --muted: #4b4f5d; --faint: #5d6270; --ink-2: #9aa0ad;
-  --rule: rgba(0, 0, 0, 0.10); --rule-firm: rgba(0, 0, 0, 0.17);
-  --card: rgba(255, 255, 255, 0.66); --bg-sunk: rgba(0, 0, 0, 0.05); --bg: #f4f5f8;
+  --ink: #070a12; --muted: #48453f; --faint: #5c5850; --ink-2: #8f8a80;
+  --rule: rgba(7, 10, 18, 0.10); --rule-firm: rgba(7, 10, 18, 0.18);
+  --card: rgba(255, 255, 255, 0.55); --bg-sunk: rgba(7, 10, 18, 0.05); --bg: #f3efe6;
   --lift: 0 1px 2px rgba(0,0,0,.04), 0 8px 22px -14px rgba(0,0,0,.12);
   --lift-lg: 0 1px 2px rgba(0,0,0,.05), 0 24px 56px -26px rgba(0,0,0,.20);
   color: var(--ink);
 }
 .tone--dark {
-  --ink: #f2f3f7; --muted: #a2a7b6; --faint: #989daa; --ink-2: #8d92a2;
-  --rule: rgba(255, 255, 255, 0.10); --rule-firm: rgba(255, 255, 255, 0.18);
-  --card: rgba(255, 255, 255, 0.045); --bg-sunk: rgba(255, 255, 255, 0.06); --bg: #070a12;
+  --ink: #f3efe6; --muted: #b3afa6; --faint: #8e8b84; --ink-2: #7c7a75;
+  --rule: rgba(243, 239, 230, 0.10); --rule-firm: rgba(243, 239, 230, 0.18);
+  --card: rgba(243, 239, 230, 0.04); --bg-sunk: rgba(243, 239, 230, 0.06); --bg: #070a12;
   --lift: none; --lift-lg: none;
   color: var(--ink);
 }
 
-/* one ramp down the whole page; the script re-samples it against the layout */
-.page { background: linear-gradient(180deg, #05070d 0%, #0d111a 20%, #171d27 27%, #434a57 33%, #8b919d 37%, #ced2d9 41%, #e6e8ec 55%, #f1f2f5 80%, #ffffff 100%); }
-/* the crossover: the ramp turns from the dark strip to the light ground over
-   this zone, and nothing sits in it, because no ink reads on the mid greys */
-#whatis { --zone: clamp(320px, 50vh, 560px); padding-top: var(--zone); }
+/* midnight down the whole page, with the film's one cream page around the
+   portal; the script draws the ramp against the layout */
+.page { background: var(--midnight); }
+/* the crossovers: midnight to cream above the portal, cream to midnight below
+   it; nothing sits in either, because no ink reads on the mid tones */
+#whatis { --zone: clamp(320px, 50vh, 560px); --zone-out: clamp(200px, 32vh, 380px); padding-top: var(--zone); padding-bottom: var(--zone-out); }
 
 /* film grain, 4.5% over everything: it hides the bands in the ramp */
 html.grain body::after { content: ""; position: fixed; inset: 0; z-index: 200; pointer-events: none; opacity: .045; mix-blend-mode: overlay; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
@@ -153,7 +154,7 @@ h1, h2 { font-family: var(--display); font-weight: 900; letter-spacing: -0.045em
 /* ── nav ────────────────────────────────────────────────────────────────── */
 .nav { position: fixed; inset: 0 0 auto 0; z-index: 90; height: 68px; display: flex; align-items: center; border-bottom: 1px solid transparent; padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); transform: translate3d(0, 0, 0); transition: background .5s var(--ease-soft), border-color .5s var(--ease-soft), transform .4s var(--ease); }
 .nav.stuck { background: rgba(7, 10, 18, 0.66); border-bottom-color: var(--rule); backdrop-filter: saturate(180%) blur(18px); -webkit-backdrop-filter: saturate(180%) blur(18px); }
-.nav.tone--light.stuck { background: rgba(250, 250, 252, 0.72); }
+.nav.tone--light.stuck { background: rgba(243, 239, 230, 0.74); }
 .nav .shell { display: flex; align-items: center; gap: 18px; min-width: 0; }
 .brand { display: flex; align-items: center; gap: 10px; min-width: 0; flex: none; color: var(--ink); }
 .brand-name { font-family: var(--display); font-weight: 900; font-size: 15px; letter-spacing: -0.03em; }
@@ -219,8 +220,8 @@ h1, h2 { font-family: var(--display); font-weight: 900; letter-spacing: -0.045em
 .hero h1 .ln { display: block; }
 .hero h1 .it { font-size: 1.08em; letter-spacing: -0.02em; color: var(--violet); line-height: .9; }
 /* text rises from behind a mask, word by word */
-.w { display: inline-block; overflow: hidden; vertical-align: top; padding: 0 .04em .08em; margin: 0 -.04em -.08em; }
-.w > span { display: inline-block; transform: translateY(108%); animation: rise .9s var(--ease) forwards; animation-delay: calc(120ms + var(--i) * 70ms); }
+.hw { display: inline-block; overflow: hidden; vertical-align: top; padding: 0 .04em .08em; margin: 0 -.04em -.08em; }
+.hw > span { display: inline-block; transform: translateY(108%); animation: rise .9s var(--ease) forwards; animation-delay: calc(120ms + var(--i) * 70ms); }
 @keyframes rise { to { transform: none; } }
 .hero .sub { font-size: clamp(1.02rem, 1.4vw, 1.2rem); line-height: 1.55; color: rgba(243,239,230,.66); max-width: 31em; margin: 0 0 30px; }
 .hero .sub b { color: var(--cream); font-weight: 800; }
@@ -526,7 +527,7 @@ h1, h2 { font-family: var(--display); font-weight: 900; letter-spacing: -0.045em
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
   .reveal, .reveal-up, .hero-in { opacity: 1; transform: none; }
-  .w > span, .hx-phone, .hx-screen > *, .hx-rows li, .hx-chip, .hx-chart .ar, .hx-chart .dot { opacity: 1; transform: none; animation: none; }
+  .hw > span, .hx-phone, .hx-screen > *, .hx-rows li, .hx-chip, .hx-chart .ar, .hx-chart .dot { opacity: 1; transform: none; animation: none; }
   .hx-chart .ln { stroke-dashoffset: 0; animation: none; }
   .hx-icon, .hx-spark { display: none; }
   .nav.away { transform: translate3d(0, 0, 0); }
@@ -626,10 +627,77 @@ h1, h2 { font-family: var(--display); font-weight: 900; letter-spacing: -0.045em
 }
 .pd.has-video .pd-rc { opacity: clamp(0, calc((var(--p) * 2.8 - .5) * .35), .35); }
 
+/* ══ the film's brand, page-wide ══════════════════════════════════════════
+   lime where the money is, violet for feeling, mono for labels, the dot grid
+   under everything dark. Last in the sheet so it wins without !important. */
+.page::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background-image: radial-gradient(rgba(243,239,230,.07) 1px, transparent 1.4px); background-size: 24px 24px; }
+.eyebrow { color: var(--lime); font-weight: 500; letter-spacing: .2em; }
+.tone--light .eyebrow { color: var(--faint); }
+h1 .it, h2 .it, h3 .it, .pd-head .it, .pd-title .it { color: var(--violet); font-size: 1.06em; }
+.it.money, h3 .it.money { color: var(--lime); }
+.tone--light .btn, .nav.tone--light .btn { background: var(--midnight); color: var(--lime); }
+.nav-menu { background: var(--cream); color: var(--midnight); }
+.nav-menu-cta .btn { background: var(--midnight); color: var(--lime); }
+.nav-menu-cta .btn--ghost { background: transparent; color: var(--midnight); border-color: rgba(7,10,18,.2); }
+
+/* proof: the money in lime, the dates as mono chips */
+.tb-card { background: rgba(243,239,230,.025); }
+.tb-card .n { color: var(--lime); }
+.tb-card .w { font-family: var(--mono); font-size: 10.5px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; background: rgba(212,255,63,.1); color: var(--lime); }
+.tb-card .go { color: var(--cream); }
+
+/* the portal on the cream page: warm steps out of midnight, a lime glow behind */
+.pd::before { content: ""; position: absolute; inset: -22%; z-index: 0; pointer-events: none; border-radius: 50%; background: radial-gradient(closest-side, rgba(212,255,63,.42), rgba(212,255,63,0)); opacity: calc(.35 + var(--p) * .65); }
+.pd-r1 { background: #1c1f27; } .pd-r2 { background: #3a3c43; } .pd-r3 { background: #6c6a66; } .pd-r4 { background: #a5a198; } .pd-r5 { background: #d1ccc1; }
+.pd-core { background: var(--midnight); }
+.pd-head { color: var(--midnight); }
+.pd-rc .n { color: var(--lime); }
+.pd-rc .k, .pd-rc .n small { color: rgba(243,239,230,.6); }
+.pd-cap { color: rgba(243,239,230,.7); }
+
+/* lists: lime checks for wins, violet squares for the rest */
+.checks svg { width: 22px; height: 22px; padding: 4px; border-radius: 50%; background: var(--lime); color: var(--midnight); }
+.checks.dots li::before { background: var(--violet); }
+.tone--dark .checks li { color: var(--cream); }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+.pill { padding: 8px 13px; border-radius: 99px; background: var(--lime); color: var(--midnight); font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; }
+
+/* how it works: a lime line that fills as you read, the steps as acts */
+#how { background: radial-gradient(42% 280px at 50% 320px, rgba(115,87,255,.17), transparent 100%); }
+.cv-no { color: var(--lime); }
+.cv-fill { background: var(--lime); box-shadow: 0 0 14px rgba(212,255,63,.55); }
+.cv-dot { background: var(--lime); border-color: var(--midnight); box-shadow: 0 0 0 6px rgba(212,255,63,.14), 0 0 26px rgba(212,255,63,.6); }
+.chat .b { background: rgba(243,239,230,.06); border: 1px solid var(--rule); }
+.chat .b.me { background: var(--lime); color: var(--midnight); border-color: transparent; font-weight: 700; }
+.asset .r:first-child b { color: var(--lime); }
+.cv-close a { color: var(--lime); }
+
+/* niches: outlined pills, mono, gliding */
+.chip { background: transparent; border-color: var(--rule-firm); box-shadow: none; color: var(--muted); font-weight: 600; }
+
+/* the call: the hero's ground and frame again */
+.fn-box { background: var(--midnight); }
+.fn-box > .fn-rings { position: absolute; z-index: 0; }
+.fn-rings { background: radial-gradient(46% 60% at 50% 46%, rgba(115,87,255,.30), transparent 70%), radial-gradient(30% 34% at 50% 70%, rgba(212,255,63,.08), transparent 70%); }
+.fn-rings::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(243,239,230,.09) 1px, transparent 1.4px); background-size: 24px 24px; -webkit-mask: radial-gradient(70% 70% at 50% 50%, #000 30%, transparent 100%); mask: radial-gradient(70% 70% at 50% 50%, #000 30%, transparent 100%); }
+.fn-box .hx-frame { position: absolute; inset: 22px clamp(14px, 2.4vw, 32px); z-index: 0; }
+.fn-box .lede { color: var(--muted); }
+.slots { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--lime); background: rgba(212,255,63,.08); border-color: rgba(212,255,63,.4); }
+.slots i { background: var(--lime); animation-name: slots-lime; }
+@keyframes slots-lime { 0% { box-shadow: 0 0 0 0 rgba(212,255,63,.6); } 100% { box-shadow: 0 0 0 10px rgba(212,255,63,0); } }
+
+/* faq and foot */
+.faq summary::after { color: var(--lime); }
+.foot { background: #05070d; border-top: 1px solid var(--rule); }
+.foot .copy, .foot-links a { color: var(--faint); }
+.film-dialog form { position: absolute; }
+@media (max-width: 880px) { .fn-box .hx-frame span { display: none; } }
+
 </style>
 <noscript><style>
   .reveal, .reveal-up, .hero-in { opacity: 1; transform: none; }
   .scr:first-child { opacity: 1; transform: none; }
+  #whatis { background: #f3efe6; }
 </style></noscript>
 </head>
 <body>
@@ -683,8 +751,8 @@ h1, h2 { font-family: var(--display); font-weight: 900; letter-spacing: -0.045em
       <div class="hero-copy" id="hero-copy">
         <span class="hx-label hero-in" style="--d:80ms">Creators &middot; 100k+ followers</span>
         <h1>
-          <span class="ln"><span class="w"><span style="--i:0">Turn</span></span> <span class="w"><span style="--i:1">your</span></span> <span class="w"><span style="--i:2">audience</span></span></span>
-          <span class="ln it"><span class="w"><span style="--i:3">into</span></span> <span class="w"><span style="--i:4">an</span></span> <span class="w"><span style="--i:5">app.</span></span></span>
+          <span class="ln"><span class="hw"><span style="--i:0">Turn</span></span> <span class="hw"><span style="--i:1">your</span></span> <span class="hw"><span style="--i:2">audience</span></span></span>
+          <span class="ln it"><span class="hw"><span style="--i:3">into</span></span> <span class="hw"><span style="--i:4">an</span></span> <span class="hw"><span style="--i:5">app.</span></span></span>
         </h1>
         <p class="sub hero-in" style="--d:620ms">Paid posts, ebooks and courses pay once. <b>Your own app pays you</b> <span class="it">every month.</span> We build it, we run it, you keep posting.</p>
         <div class="btn-row hero-in" style="--d:780ms">
@@ -732,10 +800,10 @@ h1, h2 { font-family: var(--display); font-weight: 900; letter-spacing: -0.045em
   <div class="pin" id="portal">
     <div class="pin-stage">
       <div class="pd" id="pd">
-        <p class="pd-head">Creator apps in your niches, public numbers.</p>
+        <p class="pd-head">Creator apps in your niches, <span class="it">public numbers.</span></p>
         <span class="pd-ring pd-r5"></span><span class="pd-ring pd-r4"></span><span class="pd-ring pd-r3"></span><span class="pd-ring pd-r2"></span><span class="pd-ring pd-r1"></span>
         <div class="pd-core" id="pd-core">
-          <div class="pd-title">Your audience&rsquo;s app.</div>
+          <div class="pd-title"><span>Your audience&rsquo;s <span class="it">app.</span></span></div>
           <div class="pd-rc" aria-label="The receipts">
             <div><img src="media/creators/hhpriestess.webp" alt=""><div class="n">$340k<small>/mo</small></div><div class="k"><b>Stella</b><br>2 months after launch</div></div>
             <div><img src="media/creators/clavicular0.webp" alt=""><div class="n">$80k<small>/mo</small></div><div class="k"><b>Face Harmony</b><br>1 month after launch</div></div>
@@ -752,12 +820,12 @@ h1, h2 { font-family: var(--display); font-weight: 900; letter-spacing: -0.045em
 
 <!-- ── how it works: the line fills as you read ─────────────────────────── -->
 <!-- ── what you get, and your side ─────────────────────────────────────── -->
-<section class="band tone--light" id="get">
+<section class="band tone--dark" id="get">
   <div class="shell">
     <div class="two">
       <div class="reveal-up">
-        <span class="eyebrow">What you get</span>
-        <h3 class="h-section">Your app, done for you.</h3>
+        <span class="eyebrow">02 &middot; What you get</span>
+        <h3 class="h-section">Your app, <span class="it">done for you.</span></h3>
         <ul class="checks">
           <li><svg aria-hidden="true"><use href="#bm-check"/></svg>Your own app on both stores, with your name and your face.</li>
           <li><svg aria-hidden="true"><use href="#bm-check"/></svg>Build, updates and support by us. You pay $0, at every step.</li>
@@ -768,23 +836,23 @@ h1, h2 { font-family: var(--display); font-weight: 900; letter-spacing: -0.045em
       </div>
       <div class="reveal-up" style="--d:120ms">
         <span class="eyebrow">Your side</span>
-        <h3 class="h-section">What you do.</h3>
+        <h3 class="h-section">What you <span class="it">do.</span></h3>
         <ul class="checks dots">
           <li>You continue your posting schedule.</li>
           <li>You mention the app once a week.</li>
           <li>You add the link in your store or bio.</li>
         </ul>
-        <p class="close">Zero cost. Zero code. Zero new content format.</p>
+        <div class="pills"><span class="pill">$0 cost</span><span class="pill">0 code</span><span class="pill">0 new format</span></div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="band tone--light" id="how">
+<section class="band tone--dark" id="how">
   <div class="shell">
     <div class="head head--center reveal-up">
-      <span class="eyebrow">How it works</span>
-      <h2 class="h-section xl">Your audience already told you what they want.</h2>
+      <span class="eyebrow">03 &middot; How it works</span>
+      <h2 class="h-section xl">Your audience already told you <span class="it">what they want.</span></h2>
       <p class="lede">We make it, we keep it running. You keep posting.</p>
     </div>
 
@@ -835,7 +903,7 @@ h1, h2 { font-family: var(--display); font-weight: 900; letter-spacing: -0.045em
       <div class="cv-row rev reveal-up">
         <div class="cv-txt">
           <div class="cv-no">03</div>
-          <h3 class="cv-tt">You earn every month</h3>
+          <h3 class="cv-tt">You earn <span class="it money">every month</span></h3>
         </div>
         <div class="cv-fig"><div class="fig asset">
           <div class="r"><span>Every month</span><b>They pay you</b></div>
@@ -850,7 +918,7 @@ h1, h2 { font-family: var(--display); font-weight: 900; letter-spacing: -0.045em
 </section>
 
 <!-- ── why an app: hidden. Drop the hidden attribute to bring it back. ── -->
-<section class="band tone--light" id="why" hidden>
+<section class="band tone--dark" id="why" hidden>
   <div class="shell">
     <div class="head head--center reveal-up">
       <span class="eyebrow">Why an app</span>
@@ -871,7 +939,7 @@ h1, h2 { font-family: var(--display); font-weight: 900; letter-spacing: -0.045em
 </section>
 
 <!-- ── the niches glide past between the steps and the call ──────────────── -->
-<div class="co-band tone--light" aria-hidden="true">
+<div class="co-band tone--dark" aria-hidden="true">
   <div class="co-rows">
     <div class="co-row" id="co-a" data-dir="-1"><div class="co-track"></div></div>
     <div class="co-row" id="co-b" data-dir="1"><div class="co-track"></div></div>
@@ -883,8 +951,9 @@ h1, h2 { font-family: var(--display); font-weight: 900; letter-spacing: -0.045em
 <section id="final">
   <div class="fn-box">
     <div class="fn-rings" aria-hidden="true"></div>
+    <div class="hx-frame" aria-hidden="true"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i><span class="l"><b class="rec"></b>04 &middot; Your call</span><span class="r">creatormatch.app</span></div>
     <span class="slots reveal-up" style="--d:180ms"><i></i>2 slots left</span>
-    <h2 class="h-section xl">Limited spots.</h2>
+    <h2 class="h-section xl">Limited <span class="it">spots.</span></h2>
     <p class="lede">20 minutes for a <span style="white-space:nowrap">life-changing</span> collab. We tell you if it fits and what your app would be.</p>
     <div class="btn-row">
       <a class="btn" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call <span class="arr">&rarr;</span></a>
@@ -894,11 +963,11 @@ h1, h2 { font-family: var(--display); font-weight: 900; letter-spacing: -0.045em
 </section>
 
 <!-- ── faq ──────────────────────────────────────────────────────────────── -->
-<section class="band tone--light" id="faq">
+<section class="band tone--dark" id="faq">
   <div class="shell">
     <div class="head head--center reveal-up">
-      <span class="eyebrow">FAQ</span>
-      <h2 class="h-section xl">5 questions creators ask.</h2>
+      <span class="eyebrow">05 &middot; FAQ</span>
+      <h2 class="h-section xl">5 questions <span class="it">creators ask.</span></h2>
     </div>
     <div class="faq reveal-up">
       <details><summary>Do I need to change my content?</summary><p>No. Same posts, same rhythm. Mention the app once a week and keep the link in your bio.</p></details>
@@ -995,18 +1064,22 @@ h1, h2 { font-family: var(--display); font-weight: 900; letter-spacing: -0.045em
     }
     function build() {
       var H = document.documentElement.scrollHeight; if (!H) return;
-      var zone = parseFloat(getComputedStyle(whatis).paddingTop) || 0, w0 = top(whatis);
+      var cs = getComputedStyle(whatis), zone = parseFloat(cs.paddingTop) || 0, out = parseFloat(cs.paddingBottom) || 0,
+          w0 = top(whatis), w1 = w0 + whatis.offsetHeight, M = [7, 10, 18], C = [243, 239, 230];
+      function mix(t) { return M.map(function (m, i) { return m + (C[i] - m) * t; }); }
       var anchors = [
-        [0,                 [  5,   7,  13]],
-        [top(document.getElementById('trust')), [ 12,  15,  24]],
-        [w0,                [ 16,  20,  32]],
-        [w0 + zone * .35,   [ 67,  74,  87]],
-        [w0 + zone * .5,    [139, 145, 157]],
-        [w0 + zone * .65,   [206, 210, 217]],
-        [w0 + zone,         [236, 238, 242]],
-        [top(how),          [241, 242, 245]],
-        [top(fin),          [252, 252, 253]],
-        [H,                 [255, 255, 255]]
+        [0,                 M],
+        [w0,                M],
+        [w0 + zone * .35,   mix(.18)],
+        [w0 + zone * .5,    mix(.5)],
+        [w0 + zone * .65,   mix(.84)],
+        [w0 + zone,         C],
+        [w1 - out,          C],
+        [w1 - out * .65,    mix(.84)],
+        [w1 - out * .5,     mix(.5)],
+        [w1 - out * .35,    mix(.18)],
+        [w1,                M],
+        [H,                 M]
       ].filter(function (a, i, all) { return i === 0 || a[0] > all[i - 1][0]; });
       if (anchors.length < 4) return;
       var xs = anchors.map(function (a) { return a[0]; });
@@ -1016,7 +1089,7 @@ h1, h2 { font-family: var(--display); font-weight: 900; letter-spacing: -0.045em
         var v = ch.map(function (c) { return Math.max(0, Math.min(255, Math.round(at(xs, c.ys, c.m, y)))); });
         stops.push('rgb(' + v[0] + ',' + v[1] + ',' + v[2] + ') ' + (y / H * 100).toFixed(3) + '%');
       }
-      stops.push('rgb(255,255,255) 100%');
+      stops.push('rgb(7,10,18) 100%');
       page.style.background = 'linear-gradient(180deg,' + stops.join(',') + ')';
     }
     var pending;
@@ -1030,17 +1103,19 @@ h1, h2 { font-family: var(--display); font-weight: 900; letter-spacing: -0.045em
   /* ═══ nav: stick, progress, retreat, tone ════════════════════════════════ */
 
   var nav = document.getElementById('nav'), progress = document.getElementById('progress');
-  var ticking = false, lastY = window.scrollY || 0, holdUntil = 0, lightAt = null;
+  var ticking = false, lastY = window.scrollY || 0, holdUntil = 0, lightAt = null, darkAt = null;
   function measureNav() {
-    var w = document.getElementById('whatis');
-    lightAt = w ? w.offsetTop + (parseFloat(getComputedStyle(w).paddingTop) || 0) * .5 - nav.offsetHeight : null;
+    var w = document.getElementById('whatis'); if (!w) return;
+    var cs = getComputedStyle(w);
+    lightAt = w.offsetTop + (parseFloat(cs.paddingTop) || 0) * .5 - nav.offsetHeight;
+    darkAt = w.offsetTop + w.offsetHeight - (parseFloat(cs.paddingBottom) || 0) * .5 - nav.offsetHeight;
   }
   function onScroll() {
     ticking = false;
     var max = document.documentElement.scrollHeight - window.innerHeight, y = window.scrollY || 0;
     if (y < 0) y = 0; else if (max > 0 && y > max) y = max;
     nav.classList.toggle('stuck', y > 30);
-    if (lightAt !== null) nav.classList.toggle('tone--light', y > lightAt);
+    if (lightAt !== null) nav.classList.toggle('tone--light', y > lightAt && y < darkAt);
     progress.style.setProperty('--p', max > 0 ? Math.min(1, y / max) : 0);
     var moved = y - lastY;
     if (Math.abs(moved) > 10) {
