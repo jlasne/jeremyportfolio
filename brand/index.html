@@ -485,6 +485,16 @@ h1, h2 { font-family: var(--display); font-weight: 900; letter-spacing: -0.045em
 .mail-dialog .btn--ghost { background: rgba(255,255,255,.06); color: #f2f3f7; border-color: rgba(255,255,255,.18); }
 .mail-close { position: absolute; top: 12px; right: 12px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,.18); background: transparent; color: #f2f3f7; font-size: 22px; line-height: 1; cursor: pointer; }
 .mail-close:hover { background: rgba(255,255,255,.08); }
+
+/* ── the film: 16:9 on wide screens, 9:16 on tall ones, loaded on the click ── */
+.film-dialog { position: fixed; inset: 0; margin: auto; width: 100vw; height: 100svh; max-width: none; max-height: none; padding: 0; border: 0; background: transparent; display: grid; place-items: center; opacity: 0; transition: opacity .35s var(--ease), display .35s allow-discrete, overlay .35s allow-discrete; }
+.film-dialog:not([open]) { display: none; }
+.film-dialog[open] { opacity: 1; }
+@starting-style { .film-dialog[open] { opacity: 0; } }
+.film-dialog::backdrop { background: rgba(7,10,18,.9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.film-dialog video { display: block; width: min(92vw, calc((100svh - 120px) * 16 / 9)); aspect-ratio: 16 / 9; border-radius: 18px; background: var(--midnight); box-shadow: 0 0 0 1px rgba(243,239,230,.12), 0 40px 120px -30px rgba(115,87,255,.55); }
+.film-dialog.tall video { width: auto; height: min(calc(100svh - 96px), calc(92vw * 16 / 9)); aspect-ratio: 9 / 16; }
+.film-dialog .mail-close { position: fixed; top: max(14px, env(safe-area-inset-top)); right: 14px; z-index: 2; background: rgba(7,10,18,.6); }
 .mail-note { min-height: 22px; margin: 14px 0 0; }
 .copied { display: none; opacity: 0; translate: 0 -6px; margin-left: 10px; font-size: 13.5px; font-weight: 700; color: #f2f3f7; transition: display .2s allow-discrete, opacity .2s var(--ease-soft), translate .2s var(--ease-soft); }
 .copied[data-open] { display: inline-block; opacity: 1; translate: 0 0; }
@@ -679,7 +689,7 @@ h1, h2 { font-family: var(--display); font-weight: 900; letter-spacing: -0.045em
         <p class="sub hero-in" style="--d:620ms">Paid posts, ebooks and courses pay once. <b>Your own app pays you</b> <span class="it">every month.</span> We build it, we run it, you keep posting.</p>
         <div class="btn-row hero-in" style="--d:780ms">
           <a class="btn" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener">Book a call <span class="arr">&rarr;</span></a>
-          <a class="btn btn--ghost" href="#how"><span class="btn-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.5v7l6-3.5z"/></svg></span>See how it works</a>
+          <a class="btn btn--ghost" href="#how" data-film><span class="btn-play"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.5v7l6-3.5z"/></svg></span>See how it works</a>
         </div>
       </div>
 
@@ -910,6 +920,11 @@ h1, h2 { font-family: var(--display); font-weight: 900; letter-spacing: -0.045em
     </div>
   </div>
 </footer>
+
+<dialog class="film-dialog" id="film-dialog" aria-label="CreatorMatch in 33 seconds">
+  <form method="dialog"><button class="mail-close" aria-label="Close">&times;</button></form>
+  <video controls playsinline preload="none"></video>
+</dialog>
 
 <dialog class="mail-dialog" id="mail-dialog" aria-labelledby="mail-title">
   <form method="dialog"><button class="mail-close" aria-label="Close">&times;</button></form>
@@ -1210,6 +1225,25 @@ h1, h2 { font-family: var(--display); font-weight: 900; letter-spacing: -0.045em
         if (s < 600) requestAnimationFrame(tick);
       })(t0);
     }
+  })();
+
+  /* ═══ the film: the button opens it, the screen's shape picks the cut ═══ */
+
+  (function () {
+    var dlg = document.getElementById('film-dialog'); if (!dlg || !dlg.showModal) return;
+    var v = dlg.querySelector('video');
+    document.querySelectorAll('[data-film]').forEach(function (el) {
+      el.addEventListener('click', function (e) {
+        e.preventDefault();
+        var cut = window.innerWidth / window.innerHeight < 1 ? '9x16' : '16x9';
+        dlg.classList.toggle('tall', cut === '9x16');
+        if (v.getAttribute('data-cut') !== cut) { v.setAttribute('data-cut', cut); v.poster = 'media/film-' + cut + '.webp'; v.src = 'media/film-' + cut + '.mp4'; }
+        dlg.showModal();
+        var p = v.play(); if (p && p.catch) p.catch(function () {});
+      });
+    });
+    dlg.addEventListener('close', function () { v.pause(); });
+    dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
   })();
 
   /* ═══ copy the address ═══════════════════════════════════════════════════ */
