@@ -8,16 +8,14 @@ The landing page is one screen: a portrait, a name, three lists.
 
 - **Projects.** [CreatorMatch](https://creatormatch.app) is the door in: I
   build mobile apps with influencers. [wlns.shop](https://wlns.shop) is the
-  link-in-bio shop for wellness creators
-- **Mobile app portfolio.** [i dare you](https://www.idareyou.lol) sends a
-  dare: film it, or dare them back, built with
-  [@ayade369](https://www.tiktok.com/@ayade369). [Kaught](https://kaught.app)
-  names any wild animal with your camera, and its creator seat is open
+  shop for wellness creators
+- **Mobile app portfolio.** [Kaught](https://kaught.app) names any wild
+  animal with your camera, and its creator seat is open
 - **Personal.** Three private equity positions (SaaS health, H100
   datacenters, an astronomy blog), Social folded away (YouTube
   [@jeremyfounder](https://www.youtube.com/@jeremyfounder), X
   [@jeremylasne](https://x.com/jeremylasne), email), the Bio tracker and
-  [Brain](https://brain.jeremylasne.com)
+  [tasu](https://brain.jeremylasne.com), AI knowledge and memory
 
 ## Stack
 
