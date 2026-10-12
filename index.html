@@ -112,7 +112,7 @@
   }
   .card:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
-  /* ---- the mobile app bento: a tile is the page itself. Under a mouse it pops out and goes live ---- */
+  /* ---- the mobile app bento: each tile plays its page by itself; under a mouse it pops out ---- */
   .bento { display: grid; grid-template-columns: 1fr 1.12fr; gap: 10px; }
   .tile {
     --pop: 1.06;
@@ -126,11 +126,12 @@
   .tile .still { position: absolute; inset: 0; display: block; }
   .tile .still img { display: block; width: 100%; height: 100%; object-fit: cover; }
   .tile.tall .still img { object-position: 50% 40%; }
-  /* the live layer: a page in a frame, or the reel, fading in over the still once it can show */
-  .tile .shot iframe, .tile .shot video { position: absolute; border: 0; opacity: 0; transition: opacity .35s; }
-  .tile .shot iframe { top: 0; left: 0; transform-origin: 0 0; background: #fff; }
-  .tile .shot video { inset: 0; width: 100%; height: 100%; object-fit: cover; background: #000; }
-  .tile .shot .ready { opacity: 1; }
+  /* each tile plays by itself: a video fades in over the still once its first frame shows */
+  .tile .shot video {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0;
+    opacity: 0; transition: opacity .5s; pointer-events: none;
+  }
+  .tile .shot video.ready { opacity: 1; }
   .tile .cap {
     display: flex; align-items: baseline; gap: 8px; min-width: 0; padding: 12px 14px;
     white-space: nowrap; text-decoration: none; color: inherit;
@@ -141,10 +142,10 @@
     margin-left: 6px; vertical-align: 1px; font-size: 10px; font-weight: 600; letter-spacing: .06em;
     color: var(--ice-70); background: rgba(234,244,251,.12); border-radius: 999px; padding: 1px 6px;
   }
-  .tile.on .t-name, .tile .cap:hover .t-name { color: var(--blue); }
+  .tile:hover .t-name, .tile .cap:hover .t-name { color: var(--blue); }
   .tile .cap:focus-visible, .tile .still:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
   @media (hover: hover) and (pointer: fine) {
-    .tile.on { z-index: 5; transform: scale(var(--pop)); background: var(--ink); box-shadow: 0 36px 80px -20px rgba(0,0,0,.75); }
+    .tile:not(.wide):hover { z-index: 5; transform: scale(var(--pop)); background: var(--ink); box-shadow: 0 36px 80px -20px rgba(0,0,0,.75); }
   }
   @media (hover: hover) and (pointer: fine) and (min-width: 900px) {
     .tile { --pop: 1.3; }
@@ -249,25 +250,28 @@
 
     <section class="reveal" style="--d:220" aria-label="Mobile app portfolio">
       <div class="bento">
-        <div class="tile tall" data-live="https://www.maximehouel.com/dana/" data-vw="420" data-title="Dr. Dana">
+        <div class="tile tall">
           <div class="shot">
             <a class="still" href="https://www.maximehouel.com/dana/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true"><img src="media/apps/dana.webp" alt="" width="720" height="1011" loading="lazy" decoding="async"></a>
+            <video src="media/apps/dana.mp4" muted loop playsinline preload="none" tabindex="-1" aria-hidden="true"></video>
           </div>
           <a class="cap" href="https://www.maximehouel.com/dana/" target="_blank" rel="noopener">
             <span class="t-name">Dr. Dana</span><span class="t-desc">The best health class for women</span>
           </a>
         </div>
-        <div class="tile" data-video="https://www.kaught.app/assets/reel/reel.mp4">
+        <div class="tile">
           <div class="shot">
             <a class="still" href="https://www.kaught.app/vid" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true"><img src="media/apps/kaught.webp" alt="" width="1100" height="619" loading="lazy" decoding="async"></a>
+            <video src="media/apps/kaught.mp4" muted loop playsinline preload="none" tabindex="-1" aria-hidden="true"></video>
           </div>
           <a class="cap" href="https://www.kaught.app/vid" target="_blank" rel="noopener">
             <span class="t-name">Kaught</span><span class="t-desc">Animal Identifier</span>
           </a>
         </div>
-        <div class="tile" data-live="https://www.maximehouel.com/kivenro/" data-vw="900" data-title="Kivenro">
+        <div class="tile">
           <div class="shot">
             <a class="still" href="https://www.maximehouel.com/kivenro/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true"><img src="media/apps/kivenro.webp" alt="" width="1100" height="578" loading="lazy" decoding="async"></a>
+            <video src="media/apps/kivenro.mp4" muted loop playsinline preload="none" tabindex="-1" aria-hidden="true"></video>
           </div>
           <a class="cap" href="https://www.maximehouel.com/kivenro/" target="_blank" rel="noopener" hreflang="fr">
             <span class="t-name">Kivenro<span class="tag">FR</span></span><span class="t-desc">Flexibility</span>
@@ -302,50 +306,24 @@
     paint(); b.hidden = false; blow();
   })();
 
-  /* The tiles go live under a mouse. The tile pops out (CSS, class "on"), and a beat later
-     its page loads in a frame, or the Kaught reel starts, over the still. Leave and the frame
-     is dropped, so the page starts from its top the next time and nothing keeps running.
-     Touch screens have no hover: they keep the still, and a tap opens the page. */
+  /* The tiles play by themselves: Dr. Dana and Kivenro as a recording of the page scrolling
+     (media/apps/record.mjs makes it), Kaught as its reel. Muted and looping, each plays while it
+     is on screen and rests when it is not. The still shows until the first frame; a visitor who
+     asks for less motion keeps the still. Hover only pops the tile out, in CSS. */
   (function () {
-    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
-    Array.prototype.forEach.call(document.querySelectorAll(".tile[data-live], .tile[data-video]"), function (tile) {
-      var shot = tile.querySelector(".shot"), live = null, enterT, leaveT;
-      function mount() {
-        if (live) return;
-        if (tile.dataset.video) {
-          live = document.createElement("video");
-          live.muted = true; live.loop = true; live.playsInline = true; live.preload = "auto";
-          live.setAttribute("aria-hidden", "true"); live.tabIndex = -1;
-          live.addEventListener("playing", function () { live.classList.add("ready"); });
-          live.src = tile.dataset.video;
-          shot.appendChild(live);
-          var p = live.play(); if (p && p.catch) p.catch(function () {});
-        } else {
-          // the page lays out at its own width, then the frame is scaled down to the tile
-          var vw = +tile.dataset.vw || 1000, k = shot.clientWidth / vw;
-          live = document.createElement("iframe");
-          live.title = tile.dataset.title || ""; live.tabIndex = -1;
-          live.width = vw; live.height = Math.ceil(shot.clientHeight / k);
-          live.style.transform = "scale(" + k + ")";
-          live.addEventListener("load", function () { live.classList.add("ready"); });
-          live.src = tile.dataset.live;
-          shot.appendChild(live);
-        }
-      }
-      function drop() {
-        if (!live) return;
-        if (live.pause) { live.pause(); live.removeAttribute("src"); live.load(); }
-        live.remove(); live = null;
-      }
-      tile.addEventListener("pointerenter", function (e) {
-        if (e.pointerType !== "mouse") return;
-        clearTimeout(leaveT); tile.classList.add("on");
-        enterT = setTimeout(mount, 160);
+    var vids = document.querySelectorAll(".tile video");
+    if (!vids.length || !("IntersectionObserver" in window)) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var seen = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        var v = e.target;
+        if (e.isIntersecting) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+        else v.pause();
       });
-      tile.addEventListener("pointerleave", function () {
-        clearTimeout(enterT); tile.classList.remove("on");
-        leaveT = setTimeout(drop, 500);
-      });
+    }, { threshold: 0.3 });
+    Array.prototype.forEach.call(vids, function (v) {
+      v.addEventListener("playing", function () { v.classList.add("ready"); });
+      seen.observe(v);
     });
   })();
 

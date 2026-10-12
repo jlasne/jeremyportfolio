@@ -19,12 +19,17 @@ blocks with no titles. Solid fills, no outlines, one line per row.
   Identifier) and [Kivenro](https://www.maximehouel.com/kivenro/) (Flexibility,
   in French) sit beside it. The full-width bar closes the bento: *Contact me:
   hey@jeremylasne.com, you want yours?*
-- **Hover.** Under a mouse a tile pops out and goes live. Dr. Dana and Kivenro
-  load their page in a frame you can scroll; Kaught plays its reel
-  (`reel.mp4` from kaught.app, muted). Leave the tile and the frame is
-  dropped, so nothing keeps running and the page restarts from its top. Touch
-  screens keep the still image and a tap opens the page. The frame loads the
-  real page, so each hover is one visit to it
+- **Autoplay.** The three tiles play by themselves as soon as they are on
+  screen, muted and looping, on phones too. Dr. Dana and Kivenro show a
+  recording of their page scrolling by itself, eased in and out; Kaught shows
+  its reel. A tile rests when it leaves the screen, and a visitor who asks for
+  less motion keeps the still image. Under a mouse a tile pops out larger and
+  keeps playing
+- **Re-recording.** The videos in `media/apps` are made by `media/apps/record.mjs`
+  (`NODE_PATH=$(npm root -g) node media/apps/record.mjs [dana] [kivenro] [kaught]`).
+  It needs playwright and ffmpeg. Run it again when either page changes; each
+  video is a loop whose end melts into its start. Together the three weigh
+  about 3.4 MB and load only when their tile comes into view
 
 ## Stack
 
@@ -36,7 +41,7 @@ Open it and edit it.
 - The ridge photo from `/bio` blurred behind everything (9.5px); snow drawn on a
   canvas by `snow.js`; the wind looping from `media/wind.mp3` with one mute
   button top right. Mute once and it stays muted on the next visit
-- The CreatorMatch logo is in `media/logos`, the same file as `brand/favicon.svg`. The still images are in `media/apps`: the share cards of Kaught and Kivenro, and a phone-width screenshot of the Dr. Dana page
+- The CreatorMatch logo is in `media/logos`, the same file as `brand/favicon.svg`. The still images under the videos are in `media/apps`: the share cards of Kaught and Kivenro, and a phone-width screenshot of the Dr. Dana page
 - Rows reveal on load; `prefers-reduced-motion` turns that off
 - `og-image.png` is generated, not hand-drawn: render the hero at 1200×630
   and screenshot it. The source is not checked in, so redraw it to match if
