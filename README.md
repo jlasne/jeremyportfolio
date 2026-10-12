@@ -17,8 +17,8 @@ blocks with no titles. Solid fills, no outlines, one line per row.
   [Dr. Dana](https://www.maximehouel.com/dana/) (The best health class for
   women) is the big tile; [Kaught](https://www.kaught.app/vid) (Animal
   Identifier) and [Kivenro](https://www.maximehouel.com/kivenro/) (Flexibility,
-  in French) sit beside it. The full-width bar closes the bento: *Contact me:
-  hey@jeremylasne.com, you want yours?*
+  in French) sit beside it. The full-width bar closes the bento: *You're a
+  wellness creator? Contact me* and the address, hey@jeremylasne.com
 - **Autoplay.** The three tiles play by themselves as soon as they are on
   screen, muted and looping, on phones too. Dr. Dana and Kivenro show a
   recording of their page scrolling by itself, eased in and out; Kaught shows

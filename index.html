@@ -158,8 +158,8 @@
     padding: 17px 22px; background: var(--ice); color: var(--ink); text-decoration: none;
     transition: background .25s;
   }
+  a.tile.wide .t-desc { font-size: 15px; line-height: 24px; color: rgba(5,11,22,.72); white-space: normal; overflow: visible; }
   a.tile.wide .t-name { font-size: 16px; line-height: 24px; color: var(--ink); }
-  a.tile.wide .t-desc { font-size: 15px; line-height: 24px; color: rgba(5,11,22,.62); }
   @media (hover: hover) { a.tile.wide:hover { background: var(--blue); } }
   a.tile.wide:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
@@ -278,7 +278,7 @@
           </a>
         </div>
         <a class="tile wide" href="mailto:hey@jeremylasne.com" data-mail>
-          <span class="t-name">Contact me: hey@jeremylasne.com</span><span class="t-desc">You want yours?</span>
+          <span class="t-desc">You're a wellness creator? Contact me</span><span class="t-name">hey@jeremylasne.com</span>
         </a>
       </div>
     </section>
@@ -309,21 +309,37 @@
   /* The tiles play by themselves: Dr. Dana and Kivenro as a recording of the page scrolling
      (media/apps/record.mjs makes it), Kaught as its reel. Muted and looping, each plays while it
      is on screen and rests when it is not. The still shows until the first frame; a visitor who
-     asks for less motion keeps the still. Hover only pops the tile out, in CSS. */
+     asks for less motion keeps the still. A browser that refuses autoplay (low-power mode, data
+     saver) gets one more try at the first touch, key or scroll. Nothing needs a hover. */
   (function () {
     var vids = document.querySelectorAll(".tile video");
     if (!vids.length || !("IntersectionObserver" in window)) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    var seen = new IntersectionObserver(function (entries) {
+    var gestures = ["pointerdown", "touchstart", "keydown", "wheel", "scroll"], waiting = false;
+    function go(v) {
+      var p = v.play();
+      if (p && p.catch) p.catch(function () {
+        if (waiting) return;
+        waiting = true;
+        gestures.forEach(function (g) { addEventListener(g, retry, { once: true, passive: true }); });
+      });
+    }
+    function retry() {
+      waiting = false;
+      gestures.forEach(function (g) { removeEventListener(g, retry); });
+      Array.prototype.forEach.call(vids, function (v) { if (v.seen && v.paused) go(v); });
+    }
+    var watch = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         var v = e.target;
-        if (e.isIntersecting) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
-        else v.pause();
+        v.seen = e.isIntersecting;
+        if (v.seen) go(v); else v.pause();
       });
     }, { threshold: 0.3 });
     Array.prototype.forEach.call(vids, function (v) {
+      v.muted = v.defaultMuted = true;
       v.addEventListener("playing", function () { v.classList.add("ready"); });
-      seen.observe(v);
+      watch.observe(v);
     });
   })();
 
