@@ -316,21 +316,6 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 .get .ic svg{width:20px;height:20px}
 .get p{font-size:16.5px;line-height:1.45;color:var(--on-plum)}
 .get p span{display:block;margin-top:3px;font-size:14px;color:var(--on-plum-3)}
-.effort{margin-top:8px;padding:20px 18px;border-radius:24px;background:var(--cream);color:var(--plum)}
-.effort-top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:16px}
-.effort-top .big{font:800 clamp(40px,11vw,56px)/.9 var(--num);letter-spacing:-.03em}
-.effort-top .big small{font:600 16px/1 var(--sans);letter-spacing:0;margin-left:4px}
-.effort-top p{font-size:14.5px;line-height:1.4;color:var(--ink-2);max-width:24ch;text-align:right}
-.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;max-width:330px}
-.days i{aspect-ratio:1;border-radius:9px;box-shadow:inset 0 0 0 1.5px var(--line-2);background:transparent}
-.days i.you{background:var(--coral);box-shadow:none}
-.js .days i.you{transform:scale(.4);opacity:0;transition:transform .55s var(--spring),opacity .3s;transition-delay:calc(var(--k) * 160ms + 200ms)}
-.js .effort.in .days i.you{transform:none;opacity:1}
-.days-legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:14px;font:500 13.5px/1.3 var(--sans);color:var(--ink-2)}
-.days-legend span{display:inline-flex;align-items:center;gap:8px}
-.days-legend i{width:14px;height:14px;border-radius:4px;box-shadow:inset 0 0 0 1.5px var(--line-2)}
-.days-legend i.you{background:var(--coral);box-shadow:none}
-.days-weeks{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;font:700 10.5px/1 var(--num);color:var(--ink-3);text-align:center}
 .coown{display:flex;align-items:center;gap:18px;margin-top:6px;padding:18px;border-radius:22px;background:rgba(255,248,240,.06);box-shadow:inset 0 0 0 1px var(--plum-line)}
 .coown svg{width:76px;height:76px;flex:none}
 .coown p{font-size:16px;line-height:1.45;color:var(--on-plum-2)}
@@ -594,7 +579,10 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 .pcard{position:relative;border-radius:26px;overflow:hidden;background:var(--plum-d);box-shadow:inset 0 0 0 1px var(--plum-line);display:flex;flex-direction:column}
 .pcard .media{position:relative;aspect-ratio:4/3;background:#1a0f22;overflow:hidden}
 .pcard .media video,.pcard .media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center}
-.pcard[data-proof="kivenro"] .media{aspect-ratio:900/472}
+.pcard[data-proof="kivenro"] .media,.pcard[data-proof="kaught"] .media{aspect-ratio:900/472}
+.pcard[data-proof="kivenro"] .media video{object-position:center}
+.dark .tag.done{background:var(--butter);color:var(--plum)}
+.dark .tag.wip{background:var(--coral);color:var(--plum)}
 .pcard .body{padding:18px 18px 20px;display:grid;gap:8px}
 .pcard .meta{display:flex;flex-wrap:wrap;gap:6px}
 .pcard h3{font-size:24px}
@@ -605,8 +593,6 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 .pcard[data-cleared="no"]{display:none}
 .review .pcard[data-cleared="no"]{display:flex}
 .review .pcard[data-cleared="no"]::after{content:"Not cleared for public display. Hidden on creatormatch.app.";position:absolute;left:12px;top:12px;right:12px;z-index:3;padding:9px 12px;border-radius:12px;background:var(--butter);color:var(--plum);font:600 12.5px/1.3 var(--sans);box-shadow:0 8px 20px -8px rgba(0,0,0,.5)}
-.slotcard{display:none;border-radius:26px;padding:22px;box-shadow:inset 0 0 0 1.5px var(--plum-line);border:1.5px dashed rgba(255,248,240,.3);color:var(--on-plum-3);font:500 14.5px/1.45 var(--sans)}
-.review .slotcard{display:block}
 .sub-h{margin:0 0 16px}
 .market{margin-top:44px;display:grid;gap:4px}
 .mrow{display:grid;gap:12px}
@@ -630,7 +616,6 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 .slot2 .you{position:absolute;right:0;bottom:0;width:64%;height:64%;border-radius:28%;background:var(--plum);transition:transform 1s var(--spring),opacity .4s;transition-delay:calc(var(--k) * 200ms)}
 .slot2 .lb{position:absolute;left:-10px;right:-10px;bottom:-32px;text-align:center;font:700 13px/1 var(--num);letter-spacing:.04em;text-transform:uppercase}
 .js .spots-sec:not(.in) .slot2 .you{transform:translate(24px,24px) scale(.8);opacity:0}
-.start{display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:10px 14px;border-radius:12px;background:rgba(59,31,74,.08);font:600 14.5px/1.2 var(--sans)}
 
 /* ── 12. faq ──────────────────────────────────────────────────────────── */
 .faq{display:grid;gap:10px}
@@ -680,7 +665,7 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 .faces img+img{margin-left:-16px}
 .faces p{font:500 15px/1.45 var(--sans);color:var(--on-plum-2)}
 .faces p b{color:var(--on-plum);font-weight:600}
-.contacts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.contacts{display:grid;grid-template-columns:1fr;gap:8px}
 .contact{display:flex;align-items:center;gap:10px;min-height:56px;padding:8px 14px 8px 8px;border-radius:16px;background:rgba(255,248,240,.07);box-shadow:inset 0 0 0 1px var(--plum-line);text-decoration:none;color:var(--on-plum);transition:background-color .2s}
 .contact:hover{background:rgba(255,248,240,.12)}
 .contact .ci{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:rgba(255,248,240,.1);flex:none;overflow:hidden}
@@ -688,7 +673,6 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 .contact .ci svg{width:18px;height:18px}
 .contact b{display:block;font:600 14px/1.2 var(--sans)}
 .contact span{display:block;font:500 12.5px/1.25 var(--sans);color:var(--on-plum-3);overflow-wrap:anywhere}
-.contact.wide{grid-column:1/-1}
 
 .foot{background:var(--plum-dd);color:var(--on-plum-3);padding:34px 0 calc(34px + var(--bar-h))}
 .foot .wrap{display:grid;gap:18px}
@@ -706,8 +690,8 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
   .trio{grid-template-columns:repeat(3,1fr)}
   .proof-grid{grid-template-columns:1fr 1fr}
   .mrow{grid-template-columns:1fr 1fr}
+  .pcard.feat{grid-column:1/-1}
   .terms{grid-template-columns:1fr 1fr}
-  .contact.wide{grid-column:auto}
 }
 @media (min-width:960px){
   :root{--gut:40px}
@@ -773,6 +757,11 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
   .tl-side{position:sticky;top:120px}
   .tl h3{font-size:26px}
   .proof-grid{grid-template-columns:repeat(2,1fr)}
+  .pcard.feat{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);align-items:center}
+  .pcard.feat .media{height:100%}
+  .pcard.feat .body{padding:28px 32px}
+  .pcard.feat h3{font-size:32px}
+  .pcard[data-proof="dana"] .media,.pcard[data-proof="kivenro"] .media{aspect-ratio:16/10}
   .spots-grid{grid-template-columns:1fr auto;gap:60px}
   .slot2{width:170px;height:170px}
   .faq-grid{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:60px;align-items:start}
@@ -976,22 +965,6 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
         <div class="get" data-rv><span class="ic"><svg aria-hidden="true"><use href="#i-cal"/></svg></span><p>Your audience gets a daily place to follow you.<span>One session a day, on their phone.</span></p></div>
         <div class="get" data-rv style="--d:80"><span class="ic"><svg aria-hidden="true"><use href="#i-book"/></svg></span><p>Your ebook gets a daily habit.<span>Each chapter becomes a day-by-day step.</span></p></div>
         <div class="get" data-rv style="--d:160"><span class="ic"><svg aria-hidden="true"><use href="#i-chat"/></svg></span><p>Your coaching clients get you between sessions.<span>Your videos and check-ins, 7 days a week.</span></p></div>
-      </div>
-
-      <div class="effort" id="effort" data-rv>
-        <div class="effort-top">
-          <span class="big num">4<small>days</small></span>
-          <p>Your time over the 6 weeks. We do the other <span class="num">38</span>.</p>
-        </div>
-        <div class="days" role="img" aria-label="42 days over 6 weeks. 4 of them need you: the mockup call, the content pick, the test and the launch plan.">
-          <i class="you" style="--k:0"></i><i></i><i></i><i></i><i></i><i></i><i></i>
-          <i></i><i class="you" style="--k:1"></i><i></i><i></i><i></i><i></i><i></i>
-          <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-          <i></i><i></i><i class="you" style="--k:2"></i><i></i><i></i><i></i><i></i>
-          <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-          <i></i><i class="you" style="--k:3"></i><i></i><i></i><i></i><i></i><i></i>
-        </div>
-        <div class="days-legend"><span><i class="you"></i>You: mockup call, content pick, test, launch plan</span><span><i></i>Us: everything else</span></div>
       </div>
 
       <div class="coown" data-rv>
@@ -1236,27 +1209,35 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
       <p class="lead" data-rv style="--d:120">Every number links to its source and says if it is reported or estimated.</p>
     </div>
     <div id="mockups">
-    <h3 class="h3 sub-h" data-rv>Mockups we built for creators</h3>
+    <h3 class="h3 sub-h" data-rv>Our work: <span class="num">1</span> app in the stores, <span class="num">2</span> in progress</h3>
     <div class="proof-grid">
-      <article class="pcard" data-proof="dana" data-cleared="no">
+      <article class="pcard feat" data-proof="kaught" data-cleared="yes">
+        <div class="media"><video muted playsinline loop preload="none" poster="media/cm/proof/kaught.webp" data-src="media/cm/proof/kaught.mp4"></video></div>
+        <div class="body">
+          <div class="meta"><span class="tag done">In the stores</span><span class="tag est">iPhone and Android</span></div>
+          <h3>Kaught</h3>
+          <p>Animal identifier. Take a photo of a wild animal, get its name in about a second. Built, submitted and run by us.</p>
+          <a class="go" href="https://www.kaught.app/" target="_blank" rel="noopener">Open kaught.app <svg aria-hidden="true"><use href="#i-ext"/></svg></a>
+        </div>
+      </article>
+      <article class="pcard" data-proof="dana" data-cleared="yes">
         <div class="media"><video muted playsinline loop preload="none" poster="media/cm/proof/dana.webp" data-src="media/cm/proof/dana.mp4"></video></div>
         <div class="body">
-          <div class="meta"><span class="tag">Women's health</span><span class="tag est">Mockup</span></div>
+          <div class="meta"><span class="tag wip">Work preview · WiP</span><span class="tag est">Women's health</span></div>
           <h3>Dr. Dana's Health Class</h3>
           <p>A urologist's Reels, organized into a 6-week program with a daily exercise.</p>
-          <a class="go" href="https://www.maximehouel.com/dana/" target="_blank" rel="noopener">Open the page <svg aria-hidden="true"><use href="#i-ext"/></svg></a>
+          <a class="go" href="https://www.maximehouel.com/dana/" target="_blank" rel="noopener">Open the preview <svg aria-hidden="true"><use href="#i-ext"/></svg></a>
         </div>
       </article>
-      <article class="pcard" data-proof="kivenro" data-cleared="no">
+      <article class="pcard" data-proof="kivenro" data-cleared="yes">
         <div class="media"><video muted playsinline loop preload="none" poster="media/cm/proof/kivenro.webp" data-src="media/cm/proof/kivenro.mp4"></video></div>
         <div class="body">
-          <div class="meta"><span class="tag">Flexibility</span><span class="tag est">Mockup</span><span class="tag est">In French</span></div>
+          <div class="meta"><span class="tag wip">Work preview · WiP</span><span class="tag est">Flexibility</span><span class="tag est">In French</span></div>
           <h3>Kivenro</h3>
           <p>A flexibility coach's Reels, organized into levels 1 to 10 and a daily session.</p>
-          <a class="go" href="https://www.maximehouel.com/kivenro/" target="_blank" rel="noopener">Open the page <svg aria-hidden="true"><use href="#i-ext"/></svg></a>
+          <a class="go" href="https://www.maximehouel.com/kivenro/" target="_blank" rel="noopener" hreflang="fr">Open the preview <svg aria-hidden="true"><use href="#i-ext"/></svg></a>
         </div>
       </article>
-      <div class="slotcard">Slot for the app previews you attach. Each one shows here after you clear it for public display.</div>
     </div>
     </div>
 
@@ -1296,7 +1277,6 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
       <p class="eyebrow" style="color:var(--plum)"><svg class="gx" aria-hidden="true" style="--gx-o:#FFF8F0"><use href="#gx"/></svg>Scarcity</p>
       <h2 class="h2" id="h-spots">We take 2 more creators.</h2>
       <p class="lead">We start an app only when we are sure it works.</p>
-      <p class="start" id="start-date" hidden></p>
       <div><a class="btn" href="#start" data-cta style="margin-top:8px">Get my free app mockup <span class="arr"><svg><use href="#i-arr"/></svg></span></a></div>
     </div>
     <div class="slots" aria-hidden="true">
@@ -1318,7 +1298,7 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
       <details><summary>Does my current business change?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>Your coaching, programs and ebooks keep running exactly as today. Their revenue stays <b>100% yours</b>. The app adds a new income line next to them.</p></div></details>
       <details><summary>Who owns the app?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>We own it together. You bring your content and your audience. We bring the build, the upkeep and the growth.</p></div></details>
       <details><summary>What if I leave?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>You owe <b>nothing</b> to leave after version 1. We carry the risk.</p></div></details>
-      <details><summary>How much time do I need?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>About <b>4 days</b> over 6 weeks. You approve the mockup, pick the content, test the app and plan the launch with us. We handle the rest.</p></div></details>
+      <details><summary>How much time do I need?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>You approve the mockup, pick the content, test the app and plan the launch with us. We handle the rest.</p></div></details>
       <details><summary>When is it submitted?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p><b>6 weeks</b> after we start, we submit it to the App Store and Google Play. Apple and Google then review it.</p></div></details>
     </div>
   </div>
@@ -1336,9 +1316,8 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
       <div class="faces" data-rv><span class="pair"><img src="media/cm/team/jer.webp" alt="Jeremy" width="64" height="64" loading="lazy"><img src="media/cm/team/max.webp" alt="Maxime" width="64" height="64" loading="lazy"></span><p><b>Jeremy and Maxime.</b> We read every request and run every call.</p></div>
       <div class="contacts" data-rv>
         <a class="contact" href="https://ig.me/m/jeremy_lasne" target="_blank" rel="noopener"><span class="ci"><img src="media/cm/team/jer.webp" alt="" loading="lazy"></span><span><b>Instagram DM</b><span>@jeremy_lasne</span></span></a>
-        <a class="contact" href="https://ig.me/m/max_lambda" target="_blank" rel="noopener"><span class="ci"><img src="media/cm/team/max.webp" alt="" loading="lazy"></span><span><b>Instagram DM</b><span>@max_lambda</span></span></a>
-        <a class="contact wide" href="mailto:hey@jeremylasne.com?subject=My%20app%20mockup"><span class="ci"><svg aria-hidden="true"><use href="#i-mail"/></svg></span><span><b>Email</b><span>hey@jeremylasne.com</span></span></a>
-        <a class="contact wide" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener"><span class="ci"><svg aria-hidden="true"><use href="#i-cal"/></svg></span><span><b>Booking calendar</b><span>Pick a time</span></span></a>
+        <a class="contact" href="mailto:hey@jeremylasne.com?subject=My%20app%20mockup"><span class="ci"><svg aria-hidden="true"><use href="#i-mail"/></svg></span><span><b>Email</b><span>hey@jeremylasne.com</span></span></a>
+        <a class="contact" href="https://cal.com/jeremy-lasne/app-partnership-call?overlayCalendar=true" target="_blank" rel="noopener"><span class="ci"><svg aria-hidden="true"><use href="#i-cal"/></svg></span><span><b>Booking calendar</b><span>Pick a time</span></span></a>
       </div>
     </div>
 
@@ -1411,8 +1390,6 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 
 /* ── settings Jeremy edits ───────────────────────────────────────────── */
 const CONFIG = {
-  // optional line in the scarcity block, for example 'Next start: 3 November'. Empty hides it.
-  startDate: '',
   // the booking calendar. The form adds its answers to the booking notes.
   calendar: 'https://cal.com/jeremy-lasne/app-partnership-call',
   // a silent copy of every form. FormSubmit asks hey@jeremylasne.com to confirm once, on the first request.
@@ -1439,7 +1416,6 @@ if (review) html.classList.add('review')
 const mockups = $('#mockups')
 if (mockups && !review && !$$('.pcard', mockups).some((c) => c.dataset.cleared === 'yes')) mockups.hidden = true
 
-if (CONFIG.startDate) { const s = $('#start-date'); s.textContent = CONFIG.startDate; s.hidden = false }
 
 /* ── entrances, once ──────────────────────────────────────────────────── */
 const once = (els, fn, opts) => {
