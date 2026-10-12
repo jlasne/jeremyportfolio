@@ -195,6 +195,7 @@ html:not(.js) .stage .mosaic{display:none}
 .stage.played .replay{display:grid}
 .stage.played:not(.done) .replay{opacity:.45;pointer-events:none}
 .vp.hero-vp{top:56px;bottom:auto;right:var(--gut);background:var(--cream);color:var(--plum);box-shadow:inset 0 0 0 1.5px var(--line-2);-webkit-backdrop-filter:none;backdrop-filter:none}
+@media (max-width:329px){.replay,.vp.hero-vp{right:calc(var(--gut) - 6px)}}
 .stage-glow{position:absolute;left:50%;top:56%;width:min(560px,130vw);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(closest-side,rgba(255,214,107,.55),rgba(255,214,107,.18) 55%,transparent 72%);z-index:0;pointer-events:none}
 
 /* ── phone ────────────────────────────────────────────────────────────── */
@@ -296,7 +297,7 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 .bar{position:relative;display:flex;flex-direction:column;justify-content:flex-end;height:100%}
 .bar i{display:block;height:var(--h);border-radius:12px 12px 4px 4px;background:rgba(255,248,240,.16);box-shadow:inset 0 0 0 1px rgba(255,248,240,.12)}
 .bar.app i{background:linear-gradient(180deg,#FF7A5C,var(--coral));box-shadow:0 0 0 0 rgba(255,90,54,0),0 18px 40px -16px rgba(255,90,54,.7);transform-origin:bottom}
-.js .bar.app i{transform:scaleY(0);transition:transform 1.3s var(--ease-io) .25s}
+.js .bar.app i{transform:scaleY(0);transition:transform 1.3s var(--ease) .25s}
 .js .bars.in .bar.app i{transform:none}
 .bar .still{position:absolute;left:50%;bottom:calc(var(--h) + 8px);transform:translateX(-50%);font:600 10.5px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--on-plum-3);white-space:nowrap}
 .bar.app .still{color:var(--butter)}
@@ -476,6 +477,8 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 .out-tbl .v{justify-content:flex-end;padding-left:14px}
 .out-tbl .h+.h{padding-left:14px}
 .out-tbl.long .v,.out-tbl.long .net .v{font-size:14px}
+.out-tbl.tight .v,.out-tbl.tight .h+.h{padding-left:8px}
+.out-tbl.tight .c{font-size:13px}
 .hero-out{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--plum-line)}
 .hero-out .k{font:600 12px/1.3 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--on-plum-3)}
 .hero-out .big{font:800 clamp(40px,12vw,64px)/.95 var(--num);letter-spacing:-.035em;color:var(--coral);margin-top:8px}
@@ -532,7 +535,7 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 .cmp-c.ag .v{color:var(--ink-2)}
 .cmp-c.us .v{color:var(--coral)}
 .cmp-c .d{font:500 13.5px/1.4 var(--sans)}
-.cmp-c .srcs{display:flex;flex-wrap:wrap;gap:2px 10px}
+.cmp-c .srcs{display:flex;flex-wrap:wrap;gap:24px 10px}
 .cmp-r{background:linear-gradient(90deg,var(--cream-2) 50%,#fff 50%)}
 .cost{margin-top:18px;padding:18px;border-radius:22px;background:var(--cream-2)}
 .cost .k{font:600 12px/1.3 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
@@ -791,7 +794,7 @@ html:not(.js) .pcard .media video{display:none}
   .pcard.feat .body{padding:28px 32px}
   .pcard.feat h4{font-size:32px}
   .pcard[data-proof="dana"] .media,.pcard[data-proof="kivenro"] .media{aspect-ratio:900/472}
-  .pcard[data-proof="dana"] .media{background:#F6EFE8}
+  .pcard[data-proof="dana"] .media{background:#F7F1EA}
   .pcard[data-proof="dana"] .media video,.pcard[data-proof="dana"] .media img{object-fit:contain;object-position:center}
   .spots-grid{grid-template-columns:1fr auto;gap:60px}
   .slot2{width:170px;height:170px}
@@ -995,7 +998,7 @@ html:not(.js) .pcard .media video{display:none}
       <div class="chart" id="chart">
         <div class="chart-top">
           <span class="k">App revenue after store fees</span>
-          <span class="v num"><span data-count="8492" data-fmt="$" data-plus>+$8,492</span><small>a month, before the split between you and us</small></span>
+          <span class="v num"><span class="vh">+$8,492</span><span data-count="8492" data-fmt="$" data-plus aria-hidden="true">+$8,492</span><small>a month, before the split between you and us</small></span>
         </div>
         <div class="bars" role="img" aria-label="Coaching, programs and ebooks stay the same. A new bar, your app, earns 8,492 dollars a month after store fees in this scenario, before the split between you and us.">
           <div class="bar" style="--h:64%"><span class="still">As today</span><i></i></div>
@@ -1182,19 +1185,19 @@ html:not(.js) .pcard .media video{display:none}
       <div class="cmp-r" role="row">
         <div class="cmp-k" role="rowheader">Upfront</div>
         <div class="cmp-c ag" role="cell">
-          <span class="v num">From $15,000</span><span class="d">for a basic fitness app</span><span class="srcs"><a class="src" href="https://solguruz.com/blog/fitness-app-development-cost/" target="_blank" rel="noopener">Source: fitness app cost guide</a></span>
-          <span class="v num" style="margin-top:8px">$30,000 to $120,000+</span><span class="d">for a typical US agency build</span><span class="srcs"><a class="src" href="https://theswiftk.it.com/cost-to-build/fitness-app" target="_blank" rel="noopener">Source: US build cost guide</a></span>
+          <span class="v num">From $15,000</span><span class="d">for a basic fitness app</span><span class="srcs"><a class="src" href="https://solguruz.com/blog/fitness-app-development-cost/" target="_blank" rel="noopener">Source: cost guide</a></span>
+          <span class="v num" style="margin-top:8px">$30,000 to $120,000+</span><span class="d">for a typical US agency build</span><span class="srcs"><a class="src" href="https://theswiftk.it.com/cost-to-build/fitness-app" target="_blank" rel="noopener">Source: build guide</a></span>
         </div>
         <div class="cmp-c us" role="cell"><span class="v num">$0</span><span class="d">We carry build and store costs.</span></div>
       </div>
       <div class="cmp-r" role="row">
         <div class="cmp-k" role="rowheader">Time</div>
-        <div class="cmp-c ag" role="cell"><span class="v num">3 to 4 months</span><span class="d">to build a first version</span><span class="srcs"><a class="src" href="https://attractgroup.com/blog/how-much-does-it-cost-to-make-a-fitness-app-everything-you-need-to-know/" target="_blank" rel="noopener">Source: build time guide</a></span></div>
+        <div class="cmp-c ag" role="cell"><span class="v num">3 to 4 months</span><span class="d">to build a first version</span><span class="srcs"><a class="src" href="https://attractgroup.com/blog/how-much-does-it-cost-to-make-a-fitness-app-everything-you-need-to-know/" target="_blank" rel="noopener">Source: time guide</a></span></div>
         <div class="cmp-c us" role="cell"><span class="v num">6 weeks</span><span class="d">to store submission</span></div>
       </div>
       <div class="cmp-r" role="row">
         <div class="cmp-k" role="rowheader">Upkeep</div>
-        <div class="cmp-c ag" role="cell"><span class="v num">15% to 20%</span><span class="d">of the build cost, every year</span><span class="srcs"><a class="src" href="https://www.cubix.co/blog/cost-of-mobile-app-maintenance/" target="_blank" rel="noopener">Source: upkeep cost guide</a><a class="src" href="https://www.spaceotechnologies.com/blog/how-much-does-it-cost-to-maintain-app/" target="_blank" rel="noopener">Source 2: upkeep cost guide</a></span></div>
+        <div class="cmp-c ag" role="cell"><span class="v num">15% to 20%</span><span class="d">of the build cost, every year</span><span class="srcs"><a class="src" href="https://www.cubix.co/blog/cost-of-mobile-app-maintenance/" target="_blank" rel="noopener">Upkeep guide</a><a class="src" href="https://www.spaceotechnologies.com/blog/how-much-does-it-cost-to-maintain-app/" target="_blank" rel="noopener">Guide 2</a></span></div>
         <div class="cmp-c us" role="cell"><span class="v num">$0</span><span class="d">We maintain it.</span></div>
       </div>
       <div class="cmp-r" role="row">
@@ -1270,7 +1273,7 @@ html:not(.js) .pcard .media video{display:none}
         </div>
       </article>
       <article class="pcard" data-proof="dana" data-cleared="yes">
-        <div class="media"><video muted playsinline loop preload="none" aria-hidden="true" tabindex="-1" data-poster="media/cm/proof/dana.webp" data-src="media/cm/proof/dana-v2.mp4"></video><noscript><img src="media/cm/proof/dana.webp" alt="" width="720" height="1011" loading="lazy" decoding="async"></noscript><button class="vp" type="button" aria-pressed="false" aria-label="Pause the Dr. Dana video"><svg class="pa" aria-hidden="true"><use href="#i-pause"/></svg><svg class="pl" aria-hidden="true"><use href="#i-play"/></svg></button></div>
+        <div class="media"><video muted playsinline loop preload="none" aria-hidden="true" tabindex="-1" data-poster="media/cm/proof/dana.webp" data-src="media/cm/proof/dana-v2.mp4"></video><noscript><img src="media/cm/proof/dana.webp" alt="" width="630" height="852" loading="lazy" decoding="async"></noscript><button class="vp" type="button" aria-pressed="false" aria-label="Pause the Dr. Dana video"><svg class="pa" aria-hidden="true"><use href="#i-pause"/></svg><svg class="pl" aria-hidden="true"><use href="#i-play"/></svg></button></div>
         <div class="body">
           <div class="meta"><span class="tag wip">Work preview · WiP</span><span class="tag est">Women’s health</span></div>
           <h4>Dr. Dana’s Health Class</h4>
@@ -1501,7 +1504,16 @@ once($$('.stats [data-count]'), (el) => count(el), { threshold: 0.6 })
 // the app bar and its number start together, when the bars are on screen
 const cn = $('#chart [data-count]')
 if (!RM && 'IntersectionObserver' in window) { cn.dataset.end = cn.textContent; cn.textContent = '+$0' }
-once([$('#chart .bars')], (el) => { el.classList.add('in'); count(cn, 1300, 250) }, { threshold: 0.95, rootMargin: '0px 0px -90px 0px' })
+const bars = $('#chart .bars')
+const grow = () => { bars.classList.add('in'); count(cn, 1300, 250) }
+if (!('IntersectionObserver' in window)) grow()
+else {
+  const bio = new IntersectionObserver((es) => es.forEach((e) => {
+    if (e.isIntersecting && e.rootBounds && e.intersectionRect.height >= 0.95 * Math.min(e.boundingClientRect.height, e.rootBounds.height)) { bio.unobserve(bars); grow() }
+  }), { threshold: Array.from({ length: 101 }, (_, i) => i / 100), rootMargin: '0px 0px -90px 0px' })
+  bio.observe(bars)
+}
+addEventListener('beforeprint', () => { if (cn.dataset.end) cn.textContent = cn.dataset.end })
 const ig = $('#ig')
 if (RM) ig.classList.add('sorted')
 once([ig], () => {
@@ -1705,7 +1717,7 @@ const NICHES = [
       (n) => hd(n, 'Hip opener flow · 3 of 8', 'Knees to chest') + `<div class="a-body">
         <div class="a-media" style="height:15em">${img(M + 'kevin/routine.webp')}<span class="ov"></span><span class="cap2"><span>Hold</span><b style="font:800 1.8em/1 var(--num)">0:45</b></span></div>
         <div class="a-prog" style="--p:37%"><i></i></div>
-        <div class="a-chips"><span class="on">Intensity 6/10</span><span>Left side</span></div>
+        <div class="a-chips"><span class="on">Intensity 6/10</span><span>Both knees</span></div>
         <p class="a-quote">Breathe out. Pull the knees 2 cm closer.</p>
         <span class="a-btn" data-tap>Next pose ${I('i-arr')}</span></div>` + tabs(0),
       (n) => hd(n, 'Session done', 'Day 9 streak', `${I('i-flame')}9`) + `<div class="a-body">
@@ -1931,9 +1943,10 @@ function calc() {
 }
 function fitTbl() {
   const t = $('.out-tbl'), box = t.parentElement
-  t.classList.remove('long')
+  t.classList.remove('long', 'tight')
   const edge = box.getBoundingClientRect().right - parseFloat(getComputedStyle(box).paddingRight)
-  t.classList.toggle('long', t.scrollWidth > t.clientWidth + 1 || t.getBoundingClientRect().right > edge + 1)
+  const over = () => t.scrollWidth > t.clientWidth + 1 || t.getBoundingClientRect().right > edge + 1
+  if (over()) { t.classList.add('long'); if (over()) t.classList.add('tight') }
 }
 let fitT
 addEventListener('resize', () => { clearTimeout(fitT); fitT = setTimeout(fitTbl, 150) })
@@ -2019,11 +2032,13 @@ form.addEventListener('submit', async (e) => {
   e.preventDefault()
   if (form.classList.contains('busy')) return
   const raw = $('#f-ig').value.trim().replace(/^@+/, '')
-  const rest = raw.replace(/^(?:https?:\/\/)?(?:www\.|m\.)?(?:instagram\.com|instagr\.am)\//i, '').replace(/^@+/, '')
+  const igPrefix = /^(?:https?:\/\/)?(?:www\.|m\.)?(?:instagram\.com|instagr\.am)\//i
+  const hadIg = igPrefix.test(raw)
+  const rest = raw.replace(igPrefix, '').replace(/^@+/, '')
   const seg = rest.split(/[/?#]/)
   const handle = /^stories$/i.test(seg[0]) && seg[1] ? seg[1] : seg[0]
   const reserved = /^(p|reel|reels|tv|s|stories|explore|accounts|direct)$/i
-  const foreign = /^[a-z][a-z0-9+.-]*:/i.test(rest) || /^[^/?#]*\.[^/?#]*\/[^/?#]/.test(rest)
+  const foreign = /^[a-z][a-z0-9+.-]*:/i.test(rest) || (!hadIg && /^[^/?#]*\.[^/?#]*\/[^/?#]/.test(rest))
   const niche = (form.querySelector('[name=niche]:checked') || {}).value
   const sells = $$('[name=sell]:checked', form).map((i) => i.value)
   const revenue = (form.querySelector('[name=revenue]:checked') || {}).value
