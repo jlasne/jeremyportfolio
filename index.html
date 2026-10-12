@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Jeremy Lasne</title>
-<meta name="description" content="I build mobile apps with influencers. CreatorMatch, Kaught, Kivenro, Dr. Dana.">
+<meta name="description" content="I build mobile apps with influencers. CreatorMatch, wlns.shop, Kaught, Kivenro, Dr. Dana, Ruff Diesel.">
 <link rel="canonical" href="https://www.jeremylasne.com/">
 <meta name="theme-color" content="#050b16">
 <link rel="icon" href="favicon.ico" sizes="any">
@@ -96,7 +96,7 @@
   section { width: 100%; margin-top: 10px; text-align: left; }
   .socials + section { margin-top: 36px; }
 
-  /* ---- CreatorMatch: one filled shape, one line, centred ---- */
+  /* ---- the projects: one filled shape each, one line, centred ---- */
   .card {
     display: flex; align-items: center; justify-content: center; flex-wrap: wrap; column-gap: 12px; row-gap: 2px;
     padding: 16px 20px; border-radius: 12px; text-align: center; text-decoration: none; color: inherit;
@@ -111,21 +111,29 @@
     .card:hover .name { color: var(--blue); }
   }
   .card:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .card + .card { margin-top: 10px; }
 
   /* ---- the mobile app bento: each tile plays its page by itself; under a mouse it pops out ---- */
-  .bento { display: grid; grid-template-columns: 1fr 1.12fr; gap: 10px; }
+  section.apps { container-type: inline-size; }
+  /* four tiles staggered over three equal rows: Dr. Dana tall on the left, Ruff Diesel tall on the right */
+  .bento {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    grid-template-rows: repeat(3, 232px); grid-template-rows: repeat(3, 34cqw);
+  }
+  .tile.dana { grid-column: 1; grid-row: 1 / span 2; }
+  .tile.kaught { grid-column: 2; grid-row: 1; }
+  .tile.terrence { grid-column: 2; grid-row: 2 / span 2; }
+  .tile.kivenro { grid-column: 1; grid-row: 3; }
   .tile {
     --pop: 1.06;
     position: relative; display: flex; flex-direction: column; overflow: hidden; min-width: 0;
     border-radius: 12px; background: rgba(5,11,22,.62);
     transition: transform .4s cubic-bezier(.22,1,.36,1), box-shadow .4s cubic-bezier(.22,1,.36,1);
   }
-  .tile.tall { grid-row: span 2; }
-  .tile .shot { position: relative; overflow: hidden; aspect-ratio: 1200 / 630; background: rgba(234,244,251,.04); }
-  .tile.tall .shot { aspect-ratio: auto; flex: 1 1 0; min-height: 0; }
+  .tile .shot { position: relative; overflow: hidden; flex: 1 1 0; min-height: 0; background: rgba(234,244,251,.04); }
   .tile .still { position: absolute; inset: 0; display: block; }
   .tile .still img { display: block; width: 100%; height: 100%; object-fit: cover; }
-  .tile.tall .still img { object-position: 50% 40%; }
+  .tile.tall .still img { object-position: 50% 35%; }
   /* each tile plays by itself: a video fades in over the still once its first frame shows */
   .tile .shot video {
     position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0;
@@ -165,9 +173,10 @@
 
   @media (min-width: 640px) { h1 { font-size: 34px; } }
   @media (max-width: 520px) {
-    .bento { grid-template-columns: 1fr; }
-    .tile.tall { grid-row: auto; }
-    .tile.tall .shot { flex: none; aspect-ratio: 5 / 7; }
+    .bento { grid-template-columns: 1fr; grid-template-rows: none; }
+    .tile.dana, .tile.kaught, .tile.terrence, .tile.kivenro { grid-column: auto; grid-row: auto; }
+    .tile .shot { flex: none; aspect-ratio: 1200 / 630; }
+    .tile.tall .shot { aspect-ratio: 3 / 4; }
     a.tile.wide { flex-wrap: wrap; justify-content: center; gap: 0 12px; padding: 16px 18px; text-align: center; }
     a.tile.wide .t-name { font-size: 16px; }
   }
@@ -246,11 +255,18 @@
         </span>
         <span class="desc">I build mobile apps with influencers.</span>
       </a>
+      <a class="card" href="https://wlns.shop/" target="_blank" rel="noopener">
+        <span class="head">
+          <img class="logo" src="media/logos/wlnsshop.svg" alt="" width="26" height="26">
+          <span class="name">wlns.shop</span>
+        </span>
+        <span class="desc">The shop for wellness creators.</span>
+      </a>
     </section>
 
-    <section class="reveal" style="--d:220" aria-label="Mobile app portfolio">
+    <section class="reveal apps" style="--d:220" aria-label="Mobile app portfolio">
       <div class="bento">
-        <div class="tile tall">
+        <div class="tile tall dana">
           <div class="shot">
             <a class="still" href="https://www.maximehouel.com/dana/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true"><img src="media/apps/dana.webp" alt="" width="720" height="1011" loading="lazy" decoding="async"></a>
             <video src="media/apps/dana.mp4" muted loop playsinline preload="none" tabindex="-1" aria-hidden="true"></video>
@@ -259,7 +275,7 @@
             <span class="t-name">Dr. Dana</span><span class="t-desc">The best health class for women</span>
           </a>
         </div>
-        <div class="tile">
+        <div class="tile kaught">
           <div class="shot">
             <a class="still" href="https://www.kaught.app/vid" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true"><img src="media/apps/kaught.webp" alt="" width="1100" height="619" loading="lazy" decoding="async"></a>
             <video src="media/apps/kaught.mp4" muted loop playsinline preload="none" tabindex="-1" aria-hidden="true"></video>
@@ -268,7 +284,16 @@
             <span class="t-name">Kaught</span><span class="t-desc">Animal Identifier</span>
           </a>
         </div>
-        <div class="tile">
+        <div class="tile tall terrence">
+          <div class="shot">
+            <a class="still" href="https://www.maximehouel.com/terrence/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true"><img src="media/apps/terrence.webp" alt="" width="630" height="804" loading="lazy" decoding="async"></a>
+            <video src="media/apps/terrence.mp4" muted loop playsinline preload="none" tabindex="-1" aria-hidden="true"></video>
+          </div>
+          <a class="cap" href="https://www.maximehouel.com/terrence/" target="_blank" rel="noopener">
+            <span class="t-name">Ruff Diesel</span><span class="t-desc">IFBB Pro, classic physique</span>
+          </a>
+        </div>
+        <div class="tile kivenro">
           <div class="shot">
             <a class="still" href="https://www.maximehouel.com/kivenro/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true"><img src="media/apps/kivenro.webp" alt="" width="1100" height="578" loading="lazy" decoding="async"></a>
             <video src="media/apps/kivenro.mp4" muted loop playsinline preload="none" tabindex="-1" aria-hidden="true"></video>

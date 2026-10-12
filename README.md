@@ -11,27 +11,31 @@ blocks with no titles. Solid fills, no outlines, one line per row.
   X [@jeremylasne](https://x.com/jeremylasne), Instagram
   [@creatormatch.app](https://www.instagram.com/creatormatch.app/) and email,
   as four icons under the name. The email icons also copy the address
-- **CreatorMatch.** One centred bar: [CreatorMatch](https://creatormatch.app),
-  I build mobile apps with influencers
-- **Mobile app portfolio.** A bento of three live pages and a contact bar.
-  [Dr. Dana](https://www.maximehouel.com/dana/) (The best health class for
-  women) is the big tile; [Kaught](https://www.kaught.app/vid) (Animal
-  Identifier) and [Kivenro](https://www.maximehouel.com/kivenro/) (Flexibility,
-  in French) sit beside it. The full-width bar closes the bento: *You're a
-  wellness creator? Contact me* and the address, hey@jeremylasne.com
-- **Autoplay.** The three tiles play by themselves as soon as they are on
-  screen, muted and looping, on phones too. Dr. Dana and Kivenro show a
+- **Projects.** Two centred bars: [CreatorMatch](https://creatormatch.app),
+  I build mobile apps with influencers, and [wlns.shop](https://wlns.shop),
+  the shop for wellness creators
+- **Mobile app portfolio.** A bento of four live pages and a contact bar,
+  staggered over three rows. [Dr. Dana](https://www.maximehouel.com/dana/)
+  (The best health class for women) is tall on the left, [Ruff
+  Diesel](https://www.maximehouel.com/terrence/) (IFBB Pro, classic physique)
+  tall on the right; [Kaught](https://www.kaught.app/vid) (Animal Identifier)
+  and [Kivenro](https://www.maximehouel.com/kivenro/) (Flexibility, in French)
+  fill the other two cells. The full-width bar closes the bento: *You're a
+  wellness creator? Contact me* and the address, hey@jeremylasne.com. On a
+  phone the tiles stack
+- **Autoplay.** The four tiles play by themselves as soon as they are on
+  screen, muted and looping, on phones too. Dr. Dana, Ruff Diesel and Kivenro show a
   recording of their page scrolling by itself, eased in and out; Kaught shows
   its reel. A tile rests when it leaves the screen, and a visitor who asks for
   less motion keeps the still image. Under a mouse a tile pops out larger and
   keeps playing
 - **Re-recording.** The videos in `media/apps` are made by `media/apps/record.mjs`
-  (`NODE_PATH=$(npm root -g) node media/apps/record.mjs [dana] [kivenro] [kaught]`).
-  It needs playwright and ffmpeg. Run it again when either page changes. It
+  (`NODE_PATH=$(npm root -g) node media/apps/record.mjs [dana] [kivenro] [terrence] [kaught]`).
+  It needs playwright and ffmpeg. Run it again when a page changes. It
   photographs the page frame by frame, then speeds the video up where the page
   barely moves while the scroll goes on (up to 24x), so the recording never
   seems to stop. Each video is a loop whose end melts into its start. Together
-  the three weigh about 3 MB and load only when their tile comes into view
+  the four weigh about 4 MB and load only when their tile comes into view
 
 ## Stack
 
@@ -43,7 +47,7 @@ Open it and edit it.
 - The ridge photo from `/bio` blurred behind everything (9.5px); snow drawn on a
   canvas by `snow.js`; the wind looping from `media/wind.mp3` with one mute
   button top right. Mute once and it stays muted on the next visit
-- The CreatorMatch logo is in `media/logos`, the same file as `brand/favicon.svg`. The still images under the videos are in `media/apps`: the share cards of Kaught and Kivenro, and a phone-width screenshot of the Dr. Dana page
+- The CreatorMatch logo is in `media/logos`, the same file as `brand/favicon.svg`. The still images under the videos are in `media/apps`: the share cards of Kaught and Kivenro, and the first frame of the Dr. Dana and Ruff Diesel recordings
 - Rows reveal on load; `prefers-reduced-motion` turns that off
 - `og-image.png` is generated, not hand-drawn: render the hero at 1200×630
   and screenshot it. The source is not checked in, so redraw it to match if
