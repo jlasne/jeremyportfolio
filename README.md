@@ -4,18 +4,19 @@ I build mobile apps with influencers. A creator brings the audience, I bring
 the whole build and run it, and we split what it earns. This repository is
 the site behind that, plus everything else I keep in public.
 
-The landing page is one screen: a portrait, a name, three lists.
+The landing page is one screen: a portrait, a name, social icons, two blocks.
 
-- **Projects.** [CreatorMatch](https://creatormatch.app) is the door in: I
-  build mobile apps with influencers. [wlns.shop](https://wlns.shop) is the
-  shop for wellness creators
-- **Mobile app portfolio.** [Kaught](https://kaught.app) names any wild
-  animal with your camera, and its creator seat is open
-- **Personal.** Three private equity positions (SaaS health, H100
-  datacenters, an astronomy blog), Social folded away (YouTube
-  [@jeremyfounder](https://www.youtube.com/@jeremyfounder), X
-  [@jeremylasne](https://x.com/jeremylasne), email), the Bio tracker and
-  [tasu](https://brain.jeremylasne.com), AI knowledge and memory
+- **Socials.** YouTube [@jeremyfounder](https://www.youtube.com/@jeremyfounder),
+  X [@jeremylasne](https://x.com/jeremylasne) and email, as three icons under
+  the name. The email icon also copies the address
+- **Projects.** [CreatorMatch](https://creatormatch.app): I build mobile apps
+  with influencers
+- **Mobile app portfolio.** A bento of three live pages. Each tile shows the
+  page's own share card from `media/apps`, with its name under it:
+  [Kaught](https://www.kaught.app/vid) (Animal Identifier),
+  [Kivenro](https://www.maximehouel.com/kivenro/) (Flexibility, in French) and
+  [Dr. Dana](https://www.maximehouel.com/dana/) (The best health class for
+  women). Kaught is the tall tile; on a phone the three tiles stack
 
 ## Stack
 
@@ -24,10 +25,10 @@ Open it and edit it.
 
 - System font stack, dark ink, one blue accent, and the greys of ice
   between. `/wealth` shares the palette, the ridge and the snow
-- The ridge photo from `/bio` blurred behind everything; snow drawn on a
+- The ridge photo from `/bio` blurred behind everything (9.5px); snow drawn on a
   canvas by `snow.js`; the wind looping from `media/wind.mp3` with one mute
   button top right. Mute once and it stays muted on the next visit
-- Project logos are the real icons from each site, in `media/logos`
+- The CreatorMatch logo is in `media/logos`, the same file as `brand/favicon.svg`. Tile images are the share cards of the three pages, in `media/apps`
 - Rows reveal on load; `prefers-reduced-motion` turns that off
 - `og-image.png` is generated, not hand-drawn: render the hero at 1200×630
   and screenshot it. The source is not checked in, so redraw it to match if
@@ -39,9 +40,9 @@ Open it and edit it.
 | --- | --- |
 | `/` | the landing |
 | `/wealth` | **Wealth Architecture** — *Era, Season, Compass*: a research note on holding money when the world order turns, the principles on one page, and the country map, thirty-two countries read three ways |
-| `/bio` | **Bio** — a fifteen-day daily log of five habits and sleep, then one number per training discipline, live |
+| `/bio` | **Bio** — a fifteen-day daily log of five habits and sleep, then one number per training discipline, live. Not linked from the landing |
 | `/invest` | **Invest** · *compose the portfolio, see what breaks it*. One loop in 3 steps: compose a mix from 102 assets (stocks, bonds and currency for 32 countries, plus 6 sectors), read the 4 portfolio checks live while the weights move, then save it or share it. The allocation bar has draggable dividers and 5 lenses (weight, danger, fragility, square fit, season test); Gave's square tests the mix in each season and names the 3 assets least tied to the mix for any season left uncovered; the correlation heatmap flags pairs at 0.70 or more. Explore plots the 32 countries on the square and lists every asset. The mix lives in the link (`#m=id.weight,…`); notes, verdicts and saved mixes stay in the browser. Data inline in `invest/index.html`, read 2 Oct 2026. Not linked from the landing |
-| `/brain` | **brain**: a self-tidying knowledge brain in plain markdown, open source. How it works, the folder it makes, the full skill file, and the repo link |
+| `/brain` | **brain**: a self-tidying knowledge brain in plain markdown, open source. How it works, the folder it makes, the full skill file, and the repo link. Not linked from the landing |
 | `/brandmatchapp` | **brandmatch** · a daily feed of Instagram creators ready for a brand deal, ranked by intent and match stars, live at [brandmatch.app](https://brandmatch.app). Apify crawls the profiles, OpenRouter reads them against the brief, and Convex holds a creator pool shared across every campaign. A second Vercel project builds this repo with `brandmatchapp` as its root directory, so the folder stays here even though nothing on the landing links to it. The source is Vite and React under `brandmatchapp/app`; `npm run build` there commits the built app to the folder that project serves. See [`brandmatchapp/README.md`](brandmatchapp/README.md) |
 | `/brand` | **CreatorMatch** · the offer, live at [creatormatch.app](https://creatormatch.app). Same brand as the launch film: midnight ground, lime only where the money is, violet for feeling, coral for what blocks; Inter Display Black, Instrument Serif italic and JetBrains Mono, served from `brand/fonts`. The hero is the film's opening drawn live: the app icon turns into the phone and the monthly revenue rolls up. The whole page is midnight with the film's one cream page around the portal; the 33 second film (`media/film-16x9.mp4`, `media/film-9x16.mp4`) opens from See how it works, the cut picked by the screen's shape. A second Vercel project builds this repo with `brand` as its root directory, so the folder stays here even though nothing on the landing links to it |
 | `/vid` | **Jeremy Lasne · Motion Reel 2026** · a 15 second film about this site, drawn live in the browser: 900 frames at 60 fps, 128 BPM, 1 canvas, 1 WebGL pass for the lens, 1 synth for the score. *Match Cut*: every transition is a shape matching into the next. wlns.shop opens on lime, the CreatorMatch mark opens into the four mobile apps (i dare you, Kaught and the two Soon slots), the personal projects run as the landing's own list, and the page scrolls back to the top and lands on the name. Copy is the landing's, verbatim; the icons are the real ones in `vid/assets`. Plays once and holds the end card; `G` shows guides, arrows step frames. `showreel.mp4` is the same film at 1080p60. Scenes in `vid/scenes`, score in `vid/score.js`, shared engine `vid/engine.js` and player `vid/player.js` |

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Jeremy Lasne</title>
-<meta name="description" content="I build mobile apps with influencers. CreatorMatch, wlns.shop, Kaught.">
+<meta name="description" content="I build mobile apps with influencers. CreatorMatch, Kaught, Kivenro, Dr. Dana.">
 <link rel="canonical" href="https://www.jeremylasne.com/">
 <meta name="theme-color" content="#050b16">
 <link rel="icon" href="favicon.ico" sizes="any">
@@ -51,7 +51,7 @@
   .bg {
     position: fixed; top: -6%; left: -6%; width: 112%; height: 112%; z-index: 0; pointer-events: none;
     object-fit: cover; object-position: 50% 42%;
-    filter: blur(10px) brightness(.5) saturate(.9);
+    filter: blur(9.5px) brightness(.5) saturate(.9);
   }
   #snow { position: fixed; inset: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; }
 
@@ -79,69 +79,36 @@
 
   h1 { font-size: 30px; font-weight: 600; letter-spacing: -.025em; text-wrap: balance; }
 
+  /* ---- the socials, just under the name ---- */
+  .socials { display: flex; gap: 10px; margin-top: 18px; }
+  .socials a {
+    width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%;
+    color: var(--ice-70); border: 1px solid var(--line); background: rgba(5,11,22,.35);
+    transition: color .2s, border-color .2s, background .2s, transform .25s cubic-bezier(.22,1,.36,1);
+  }
+  .socials svg { width: 20px; height: 20px; fill: currentColor; }
+  .socials svg.line { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
+  @media (hover: hover) {
+    .socials a:hover { color: var(--blue); border-color: rgba(95,168,211,.5); background: rgba(234,244,251,.06); transform: translateY(-2px); }
+  }
+  .socials a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
   section { width: 100%; margin-top: 40px; text-align: left; }
   h2 {
     font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
     color: var(--ice-45); padding: 0 0 6px;
   }
   ul { list-style: none; }
-  li + li .item { border-top: 1px solid var(--line); }
 
   .item {
     display: flex; align-items: center; gap: 14px;
     padding: 15px 14px; margin: 0 -14px; border-radius: 14px;
     text-decoration: none; color: inherit;
   }
-  .item .logo { width: 24px; height: 24px; border-radius: 6px; flex: none; }
-  .item .logo.round { border-radius: 50%; object-fit: cover; }
-  .item .logo.mail { fill: none; stroke: var(--ice-70); stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; padding: 2px; }
-  .item .dot { width: 24px; height: 24px; flex: none; display: grid; place-items: center; }
-  .item .dot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: rgba(234,244,251,.3); }
+  .item .logo { width: 24px; height: 24px; flex: none; }
   .item .name { font-size: 16px; line-height: 24px; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; flex: none; }
   .item .desc { font-size: 15px; line-height: 24px; color: var(--ice-70); flex: 1 1 auto; min-width: 0; }
-  .item .arrow { width: 16px; height: 16px; flex: none; fill: var(--ice-45); transition: transform .25s cubic-bezier(.22,1,.36,1), fill .2s; }
-  .item .tag {
-    flex: none; margin-left: auto; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
-    color: var(--ice-45); border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px;
-  }
-  span.item { cursor: default; }
-
-  /* ---- the fold: one row that opens into its list ---- */
-  .fold summary { cursor: pointer; list-style: none; }
-  .fold summary::-webkit-details-marker { display: none; }
-  .fold .chev { width: 16px; height: 16px; flex: none; fill: var(--ice-45); transition: transform .25s cubic-bezier(.22,1,.36,1), fill .2s; }
-  .fold[open] .chev { transform: rotate(180deg); }
-  @media (hover: hover) {
-    .fold summary:hover { background: rgba(234,244,251,.06); }
-    .fold summary:hover .name, .fold summary:hover .chev { color: var(--blue); fill: var(--blue); }
-  }
-  .fold summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
-  .sub { padding: 0 0 8px 38px; }
-  .sub .item { padding: 7px 14px; gap: 10px; }
-  .sub .item::before { content: ""; width: 4px; height: 4px; border-radius: 50%; background: rgba(234,244,251,.3); flex: none; }
-  .sub .name { font-weight: 500; color: var(--ice-70); }
-  .sub .desc { flex: 0 1 auto; }
-  .sub li + li .item { border-top: 0; }
-
-  /* ---- the credit under an app row: who the app is built with ---- */
-  .credit {
-    display: inline-block; margin: -9px 0 0 38px; padding: 0 0 2px;
-    font-size: 13px; line-height: 20px; color: var(--ice-45); text-decoration: none;
-  }
-  /* the app portfolio: one line per app; the credit rides the right end of its row, ahead of the arrow */
-  .apps li { position: relative; }
-  .apps .item { flex-wrap: nowrap; }
-  .apps .desc { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: var(--cw, 0px); }
-  .apps .credit { position: absolute; top: 0; bottom: 0; right: 30px; display: flex; align-items: center; margin: 0; padding: 0; font-size: 13px; white-space: nowrap; }
-  .apps .soon .name { color: var(--ice-70); }
-  @media (max-width: 520px) {
-    .apps .item { row-gap: 0; }
-    .apps .item .desc, .apps .credit { display: none; }
-  }
-  @media (hover: hover) { a.credit:hover { color: var(--blue); } }
-  a.credit:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 6px; }
-  @keyframes foldIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
-  .fold[open] .sub { animation: foldIn .25s ease both; }
+  .arrow { width: 16px; height: 16px; flex: none; fill: var(--ice-45); transition: transform .25s cubic-bezier(.22,1,.36,1), fill .2s; }
   @media (hover: hover) {
     a.item:hover { background: rgba(234,244,251,.06); }
     a.item:hover .name { color: var(--blue); }
@@ -149,15 +116,48 @@
   }
   a.item:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
+  /* ---- the mobile app bento: each tile shows the page through its own share card, the caption sits under it ---- */
+  .bento { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .tile {
+    display: flex; flex-direction: column; overflow: hidden; min-width: 0;
+    border-radius: 18px; border: 1px solid var(--line); background: rgba(5,11,22,.55);
+    text-decoration: none; color: inherit;
+    transition: border-color .25s, transform .25s cubic-bezier(.22,1,.36,1);
+  }
+  .tile.tall { grid-row: span 2; }
+  .tile .shot { position: relative; overflow: hidden; aspect-ratio: 1200 / 630; background: rgba(234,244,251,.04); }
+  .tile.tall .shot { aspect-ratio: auto; flex: 1 1 0; min-height: 0; }
+  .tile .shot img {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    transition: transform .6s cubic-bezier(.22,1,.36,1);
+  }
+  .tile.tall .shot img { object-position: 77% 50%; }
+  .tile .cap { display: flex; align-items: center; gap: 10px; padding: 11px 14px 12px; border-top: 1px solid var(--line); }
+  .tile .txt { flex: 1 1 auto; min-width: 0; }
+  .tile .t-name { display: block; font-size: 15px; line-height: 20px; font-weight: 600; letter-spacing: -.01em; }
+  .tile .t-desc { display: block; font-size: 13px; line-height: 18px; color: var(--ice-70); }
+  .tile .tag {
+    margin-left: 6px; vertical-align: 1px; font-size: 10px; font-weight: 600; letter-spacing: .06em;
+    color: var(--ice-45); border: 1px solid var(--line); border-radius: 999px; padding: 1px 6px;
+  }
+  @media (hover: hover) {
+    .tile:hover { border-color: rgba(95,168,211,.5); }
+    .tile:hover .shot img { transform: scale(1.04); }
+    .tile:hover .t-name { color: var(--blue); }
+    .tile:hover .arrow { fill: var(--blue); transform: translate(2px,-2px); }
+  }
+  .tile:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
   @media (min-width: 640px) { h1 { font-size: 34px; } }
   @media (max-width: 520px) {
     .item { flex-wrap: wrap; row-gap: 3px; padding: 13px 12px; margin: 0 -12px; }
     .item .name { flex: 1 1 auto; }
-    .item .arrow, .item .tag { order: 2; }
+    .item .arrow { order: 2; }
     .item .desc { flex-basis: 100%; order: 3; padding-left: 38px; line-height: 1.5; }
-    .sub .item { flex-wrap: nowrap; }
-    .sub .item .desc { flex-basis: auto; order: 0; padding-left: 0; }
+    .bento { grid-template-columns: 1fr; }
+    .tile.tall { grid-row: auto; }
+    .tile.tall .shot { flex: none; aspect-ratio: 16 / 9; }
+    .tile.tall .shot img { object-position: 50% 50%; }
   }
   @media (prefers-reduced-motion: reduce) { .reveal { animation: none; } }
 
@@ -210,6 +210,19 @@
       <img class="avatar" src="media/avatar.webp" alt="Jeremy Lasne" width="104" height="104">
     </div>
     <h1 class="reveal" style="--d:60">Jeremy Lasne</h1>
+
+    <nav class="socials reveal" style="--d:110" aria-label="Social links">
+      <a href="https://www.youtube.com/@jeremyfounder" target="_blank" rel="noopener" aria-label="YouTube, @jeremyfounder" title="YouTube @jeremyfounder">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+      </a>
+      <a href="https://x.com/jeremylasne" target="_blank" rel="noopener" aria-label="X, @jeremylasne" title="X @jeremylasne">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>
+      </a>
+      <a id="mail" href="mailto:hey@jeremylasne.com" aria-label="Email, hey@jeremylasne.com" title="hey@jeremylasne.com">
+        <svg class="line" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4.5 8 7.5 5.5L19.5 8"/></svg>
+      </a>
+    </nav>
+
     <section class="reveal" style="--d:160">
       <h2>Projects</h2>
       <ul>
@@ -219,89 +232,34 @@
           <span class="desc">I build mobile apps with influencers.</span>
           <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
         </a></li>
-        <li><a class="item" href="https://wlns.shop/" target="_blank" rel="noopener">
-          <img class="logo" src="media/logos/wlnsshop.svg" alt="" width="24" height="24">
-          <span class="name">wlns.shop</span>
-          <span class="desc">The shop for wellness creators.</span>
-          <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
-        </a></li>
       </ul>
     </section>
 
     <section class="reveal" style="--d:220">
       <h2>Mobile app portfolio</h2>
-      <ul class="apps">
-        <li style="--cw:118px">
-          <a class="item" href="https://kaught.app" target="_blank" rel="noopener">
-            <img class="logo" src="media/logos/kaught.webp" alt="" width="24" height="24">
-            <span class="name">Kaught</span>
-            <span class="desc">Name any wild animal with your camera.</span>
+      <div class="bento">
+        <a class="tile tall" href="https://www.kaught.app/vid" target="_blank" rel="noopener">
+          <span class="shot"><img src="media/apps/kaught.webp" alt="" width="1100" height="619" loading="lazy" decoding="async"></span>
+          <span class="cap">
+            <span class="txt"><span class="t-name">Kaught</span><span class="t-desc">Animal Identifier</span></span>
             <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
-          </a>
-          <span class="credit">Creator wanted</span>
-        </li>
-        <li><span class="item soon">
-          <img class="logo" src="media/logos/soon.svg" alt="" width="24" height="24">
-          <span class="name">Soon</span>
-        </span></li>
-        <li><span class="item soon">
-          <img class="logo" src="media/logos/soon.svg" alt="" width="24" height="24">
-          <span class="name">Soon</span>
-        </span></li>
-      </ul>
-    </section>
-
-    <section class="reveal" style="--d:280">
-      <h2>Personal</h2>
-      <ul>
-        <li><details class="fold">
-          <summary class="item">
-            <span class="dot"></span>
-            <span class="name">Private equity</span>
-            <span class="desc">Three positions of my own.</span>
-            <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
-          </summary>
-          <ul class="sub">
-            <li><span class="item"><span class="name">SaaS Health</span></span></li>
-            <li><span class="item"><span class="name">H100 datacenters</span></span></li>
-            <li><span class="item"><span class="name">Astronomy blog</span></span></li>
-          </ul>
-        </details></li>
-        <li><details class="fold">
-          <summary class="item">
-            <span class="dot"></span>
-            <span class="name">Social</span>
-            <span class="desc">Where to find me.</span>
-            <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
-          </summary>
-          <ul class="sub">
-            <li><a class="item" href="https://www.youtube.com/@jeremyfounder" target="_blank" rel="noopener">
-              <span class="name">YouTube</span>
-              <span class="desc">@jeremyfounder</span>
-            </a></li>
-            <li><a class="item" href="https://x.com/jeremylasne" target="_blank" rel="noopener">
-              <span class="name">X</span>
-              <span class="desc">@jeremylasne</span>
-            </a></li>
-            <li><a class="item" id="mail" href="mailto:hey@jeremylasne.com">
-              <span class="name">Email</span>
-              <span class="desc">hey@jeremylasne.com</span>
-            </a></li>
-          </ul>
-        </details></li>
-        <li><a class="item" href="/bio/">
-          <span class="dot"></span>
-          <span class="name">Bio Tracker</span>
-          <span class="desc">An energized and performing life, tracked.</span>
-          <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
-        </a></li>
-        <li><a class="item" href="https://brain.jeremylasne.com/" target="_blank" rel="noopener">
-          <img class="logo" src="media/logos/brain.svg" alt="" width="24" height="24">
-          <span class="name">tasu</span>
-          <span class="desc">AI Knowledge and memory</span>
-          <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
-        </a></li>
-      </ul>
+          </span>
+        </a>
+        <a class="tile" href="https://www.maximehouel.com/kivenro/" target="_blank" rel="noopener" hreflang="fr">
+          <span class="shot"><img src="media/apps/kivenro.webp" alt="" width="1100" height="578" loading="lazy" decoding="async"></span>
+          <span class="cap">
+            <span class="txt"><span class="t-name">Kivenro<span class="tag">FR</span></span><span class="t-desc">Flexibility</span></span>
+            <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
+          </span>
+        </a>
+        <a class="tile" href="https://www.maximehouel.com/dana/" target="_blank" rel="noopener">
+          <span class="shot"><img src="media/apps/dana.webp" alt="" width="1100" height="578" loading="lazy" decoding="async"></span>
+          <span class="cap">
+            <span class="txt"><span class="t-name">Dr. Dana</span><span class="t-desc">The best health class for women</span></span>
+            <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
+          </span>
+        </a>
+      </div>
     </section>
 
   </div>
