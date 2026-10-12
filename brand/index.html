@@ -49,7 +49,7 @@
   --cream:#FFF8F0; --cream-2:#F8EEE2; --cream-3:#F0E2D2;
   --plum:#3B1F4A; --plum-d:#2E173B; --plum-dd:#22102C;
   --ink-2:rgba(59,31,74,.78); --ink-3:rgba(59,31,74,.66);
-  --line:rgba(59,31,74,.13); --line-2:rgba(59,31,74,.22);
+  --line:rgba(59,31,74,.13); --line-2:rgba(59,31,74,.22); --line-field:rgba(59,31,74,.55);
   --on-plum:#FFF8F0; --on-plum-2:rgba(255,248,240,.78); --on-plum-3:rgba(255,248,240,.62); --plum-line:rgba(255,248,240,.16);
   --coral:#FF5A36; --butter:#FFD66B;
   --serif:'Fraunces Soft','Recoleta',Georgia,'Times New Roman',serif;
@@ -89,7 +89,7 @@ ol,ul{margin:0;padding:0;list-style:none}
 /* ── type ─────────────────────────────────────────────────────────────── */
 .h1{font-size:clamp(40px,10.8vw,84px);line-height:1;letter-spacing:-.028em}
 .h2{font-size:clamp(33px,8.6vw,62px);line-height:1.04;letter-spacing:-.022em;text-wrap:balance}
-.h3{font-size:clamp(22px,5.6vw,28px);line-height:1.15;letter-spacing:-.012em}
+.h3{font-size:clamp(22px,5.6vw,28px);line-height:1.15;letter-spacing:-.012em;text-wrap:balance}
 .lead{font-size:clamp(18px,4.6vw,21px);line-height:1.5;color:var(--ink-2);text-wrap:pretty}
 .small{font-size:15px;line-height:1.5;color:var(--ink-2)}
 .eyebrow{display:inline-flex;align-items:center;gap:10px;font:600 13px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
@@ -138,9 +138,9 @@ ol,ul{margin:0;padding:0;list-style:none}
 .nav .btn .arr{width:36px;height:36px}
 .nav .spots,.nav .btn{display:none}
 
-.dock{position:fixed;left:0;right:0;bottom:0;z-index:60;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(255,248,240,.9);-webkit-backdrop-filter:saturate(1.4) blur(16px);backdrop-filter:saturate(1.4) blur(16px);border-top:1px solid var(--line);display:flex;align-items:center;gap:12px;transform:translateY(110%);transition:transform .45s var(--ease)}
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:60;padding:10px clamp(12px,calc((100vw - 330px) / 3),20px) calc(10px + env(safe-area-inset-bottom));background:rgba(255,248,240,.96);-webkit-backdrop-filter:saturate(1.4) blur(16px);backdrop-filter:saturate(1.4) blur(16px);border-top:1px solid var(--line);display:flex;align-items:center;gap:12px;transform:translateY(110%);transition:transform .45s var(--ease)}
 .dock.on{transform:none}
-.dock .spots{flex:none;flex-direction:column;align-items:flex-start;gap:3px;font-size:12.5px;line-height:1.15;white-space:normal;width:78px;padding-left:4px}
+.dock .spots{flex:none;flex-direction:column;align-items:flex-start;gap:3px;font-size:12.5px;line-height:1.15;white-space:normal;width:78px;padding-left:0}
 .dock .spots .row{display:flex;align-items:center;gap:7px}
 .dock .btn{flex:1;min-width:0;min-height:54px;font-size:15.5px;padding:0 6px 0 16px;gap:10px;white-space:nowrap}
 .dock .btn .arr{width:40px;height:40px}
@@ -192,8 +192,9 @@ html:not(.js) .stage .mosaic{display:none}
 .replay{position:absolute;right:var(--gut);top:-2px;z-index:4;display:none;place-items:center;width:48px;height:48px;padding:0;border-radius:50%;border:1.5px solid var(--line-2);background:var(--cream);color:var(--plum);transition:border-color .2s,transform .4s var(--ease)}
 .replay:hover{border-color:var(--plum);transform:rotate(-40deg)}
 .replay svg{width:18px;height:18px}
-.stage.done .replay{display:grid}
-.hero-vp{top:-2px;bottom:auto;right:calc(var(--gut) + 58px);background:var(--cream);color:var(--plum);box-shadow:inset 0 0 0 1.5px var(--line-2);-webkit-backdrop-filter:none;backdrop-filter:none}
+.stage.played .replay{display:grid}
+.stage.played:not(.done) .replay{opacity:.45;pointer-events:none}
+.vp.hero-vp{top:56px;bottom:auto;right:var(--gut);background:var(--cream);color:var(--plum);box-shadow:inset 0 0 0 1.5px var(--line-2);-webkit-backdrop-filter:none;backdrop-filter:none}
 .stage-glow{position:absolute;left:50%;top:56%;width:min(560px,130vw);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(closest-side,rgba(255,214,107,.55),rgba(255,214,107,.18) 55%,transparent 72%);z-index:0;pointer-events:none}
 
 /* ── phone ────────────────────────────────────────────────────────────── */
@@ -208,7 +209,7 @@ html:not(.js) .stage .mosaic{display:none}
 .sbar i s{display:block;width:.9em;height:.6em;background:linear-gradient(90deg,currentColor 20%,transparent 20% 30%,currentColor 30% 50%,transparent 50% 60%,currentColor 60% 80%,transparent 80% 90%,currentColor 90%);clip-path:polygon(0 100%,100% 0,100% 100%);opacity:.9}
 
 /* hero app home (Reels organized) */
-.home{--s-bg:#FFF8F0;--s-fg:#2B1638;--s-mut:rgba(43,22,56,.6);--s-acc:#FF5A36;--s-card:#F3E6D7}
+.home{--s-bg:#FFF8F0;--s-fg:#2B1638;--s-mut:rgba(43,22,56,.68);--s-acc:#FF5A36;--s-card:#F3E6D7}
 .home .hd{display:flex;align-items:center;gap:.6em;padding:.3em 1em .7em}
 .home .av{width:2.3em;height:2.3em;border-radius:50%;overflow:hidden;background:var(--s-card);flex:none}
 .home .av img{width:100%;height:100%;object-fit:cover}
@@ -290,6 +291,7 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 .chart-top .k{font:600 12px/1.2 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--on-plum-3)}
 .chart-top .v{font:800 clamp(30px,8.6vw,44px)/1 var(--num);color:var(--coral);letter-spacing:-.02em;text-align:right}
 .chart-top .v small{display:block;margin-top:6px;font:500 12.5px/1.2 var(--sans);color:var(--on-plum-3);letter-spacing:0}
+.chart-top .k,.chart-top .v small{text-wrap:balance}
 .bars{position:relative;display:grid;grid-template-columns:repeat(4,1fr);align-items:end;gap:10px;height:230px;padding-top:8px;border-bottom:1px solid var(--plum-line)}
 .bar{position:relative;display:flex;flex-direction:column;justify-content:flex-end;height:100%}
 .bar i{display:block;height:var(--h);border-radius:12px 12px 4px 4px;background:rgba(255,248,240,.16);box-shadow:inset 0 0 0 1px rgba(255,248,240,.12)}
@@ -349,7 +351,7 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 .scr-dots button[aria-current="true"] i{width:22px;background:var(--plum)}
 
 /* screens: the niche skins live in the phone only */
-.tour .screen{--s-bg:#FFF4EA;--s-fg:#2A1B12;--s-mut:rgba(42,27,18,.58);--s-acc:#FF7A1A;--s-on:#2A1B12;--s-card:#FFFFFF;--s-line:rgba(42,27,18,.1);background:var(--s-bg);color:var(--s-fg);transition:background-color .4s var(--ease),color .4s var(--ease);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.tour .screen{--s-bg:#FFF4EA;--s-fg:#2A1B12;--s-mut:rgba(42,27,18,.68);--s-acc:#FF7A1A;--s-on:#2A1B12;--s-card:#FFFFFF;--s-line:rgba(42,27,18,.1);background:var(--s-bg);color:var(--s-fg);transition:background-color .4s var(--ease),color .4s var(--ease);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .scr{position:absolute;inset:0;padding-top:2.6em;display:flex;flex-direction:column;transition:opacity .2s linear,transform .4s var(--ease)}
 .scr.out{opacity:0;transform:scale(.97)}
 .scr.enter{opacity:0;transform:scale(1.03)}
@@ -439,18 +441,18 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 .cust{font:800 clamp(34px,9.6vw,46px)/1 var(--num);letter-spacing:-.025em}
 .cust small{font:600 15px/1 var(--sans);letter-spacing:0;margin-left:6px;color:var(--ink-2)}
 .range{position:relative;padding:10px 0 4px}
-.range input{-webkit-appearance:none;appearance:none;width:100%;height:48px;margin:0;background:transparent;cursor:pointer;position:relative;z-index:2;touch-action:pan-y}
+.range input{-webkit-appearance:none;appearance:none;display:block;width:100%;height:48px;margin:0;background:transparent;cursor:pointer;position:relative;z-index:2;touch-action:pan-y}
 .range input::-webkit-slider-runnable-track{height:8px;border-radius:4px;background:transparent}
 .range input::-moz-range-track{height:8px;border-radius:4px;background:transparent}
 .range input::-webkit-slider-thumb{-webkit-appearance:none;width:34px;height:34px;margin-top:-13px;border-radius:50%;background:var(--plum);border:5px solid #fff;box-shadow:0 0 0 1.5px var(--plum),0 6px 16px -4px rgba(59,31,74,.5)}
 .range input::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--plum);border:5px solid #fff;box-shadow:0 0 0 1.5px var(--plum),0 6px 16px -4px rgba(59,31,74,.5)}
 .range .track{position:absolute;left:17px;right:17px;top:30px;height:8px;border-radius:4px;background:var(--cream-3);z-index:1;pointer-events:none}
 .range .track i{position:absolute;left:0;top:0;bottom:0;width:var(--p,50%);border-radius:4px;background:var(--plum);transition:width .35s var(--ease)}
-.ticks{display:flex;justify-content:space-between;margin:2px 3px 0}
-.ticks button{min-width:48px;min-height:48px;border:0;background:transparent;padding:0;font:700 13px/1 var(--num);color:var(--ink-3);display:grid;justify-items:center;gap:6px}
+.ticks{display:flex;justify-content:space-between;margin:-4px -7px 0}
+.ticks button{min-width:48px;min-height:48px;border:0;background:transparent;padding:0;font:700 13px/1 var(--num);color:var(--ink-3);display:grid;justify-items:center;align-content:start;gap:6px}
 .ticks button::before{content:"";width:2px;height:6px;border-radius:1px;background:var(--line-2)}
 .ticks button[aria-pressed="true"]{color:var(--plum)}
-.price{display:flex;align-items:center;gap:0;min-height:56px;border-radius:16px;box-shadow:inset 0 0 0 1.5px var(--line-2);background:var(--cream);padding:0 16px;transition:box-shadow .2s}
+.price{display:flex;align-items:center;gap:0;min-height:56px;border-radius:16px;box-shadow:inset 0 0 0 1.5px var(--line-field);background:var(--cream);padding:0 16px;transition:box-shadow .2s}
 .price:focus-within{box-shadow:inset 0 0 0 2px var(--plum)}
 .price span{font:800 22px/1 var(--num);color:var(--ink-3)}
 .price input{flex:1;min-width:0;width:0;border:0;background:transparent;outline:none;font:800 24px/1 var(--num);padding:14px 6px;color:var(--plum)}
@@ -469,6 +471,10 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 .out-tbl .fee .v{color:var(--on-plum-3)}
 .out-tbl .net .c{color:var(--on-plum);font-weight:600}
 .out-tbl .net .v{color:var(--coral);font-size:clamp(20px,5.6vw,26px)}
+.out-tbl{column-gap:0;align-items:stretch}
+.out-tbl .c,.out-tbl .v{display:flex;align-items:center}
+.out-tbl .v{justify-content:flex-end;padding-left:14px}
+.out-tbl .h+.h{padding-left:14px}
 .out-tbl.long .v,.out-tbl.long .net .v{font-size:14px}
 .hero-out{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--plum-line)}
 .hero-out .k{font:600 12px/1.3 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--on-plum-3)}
@@ -489,8 +495,9 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 .info summary svg{width:18px;height:18px;flex:none;color:var(--butter)}
 .info summary .chev{margin-left:auto;transition:transform .3s var(--ease);width:16px;height:16px;color:var(--on-plum-3)}
 .info[open] summary .chev{transform:rotate(180deg)}
-.info .in-b{padding:0 14px 14px;display:grid;gap:10px;font:500 13.5px/1.5 var(--sans);color:var(--on-plum-2)}
-.info .in-b a{color:var(--butter);padding:14px 4px;margin:-14px -4px}
+.info .in-b{padding:14px 14px 14px;display:grid;gap:10px;font:500 13.5px/1.5 var(--sans);color:var(--on-plum-2)}
+.info .in-b a{position:relative;color:var(--butter);padding:14px 4px;margin:0 -4px}
+.info .in-b a::after{content:"";position:absolute;left:50%;top:50%;width:max(100%,48px);height:48px;transform:translate(-50%,-50%)}
 
 /* ── 6. zero risk ────────────────────────────────────────────────────── */
 .risk{overflow:hidden;overflow:clip}
@@ -517,7 +524,7 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 .cmp-h .ag{color:var(--ink-2);background:var(--cream-2)}
 .cmp-h .us{background:var(--plum);color:var(--on-plum);display:flex;align-items:center;gap:8px}
 .cmp-h .us img{width:18px;height:18px}
-.cmp-k{grid-column:1/-1;padding:16px 14px 0;font:600 11.5px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);border-top:1px solid var(--line)}
+.cmp-k{grid-column:1/-1;padding:16px 14px 10px;font:600 11.5px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);border-top:1px solid var(--line)}
 .cmp-r:first-of-type .cmp-k{border-top:0}
 .cmp-c{padding:10px 14px 16px;display:grid;gap:6px;align-content:start}
 .cmp-c.ag{color:var(--ink-2)}
@@ -527,7 +534,6 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 .cmp-c .d{font:500 13.5px/1.4 var(--sans)}
 .cmp-c .srcs{display:flex;flex-wrap:wrap;gap:2px 10px}
 .cmp-r{background:linear-gradient(90deg,var(--cream-2) 50%,#fff 50%)}
-.cmp-r .cmp-k{background:#fff}
 .cost{margin-top:18px;padding:18px;border-radius:22px;background:var(--cream-2)}
 .cost .k{font:600 12px/1.3 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
 .cost-row{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:center;margin-top:12px}
@@ -547,6 +553,7 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 .cost-axis div span:nth-child(3){left:50%}
 .cost-axis div span:nth-child(4){left:75%}
 .cost-axis div span:nth-child(5){left:100%;transform:translateX(-100%)}
+@media (max-width:479px){.cost-axis div span:nth-child(4){display:none}}
 .cost-key{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:14px;font:500 12.5px/1.3 var(--sans);color:var(--ink-2)}
 .cost-key span{display:inline-flex;align-items:center;gap:7px}
 .cost-key i{width:14px;height:10px;border-radius:3px}
@@ -566,9 +573,8 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 .tl .wk{font:700 12px/1 var(--num);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);padding-top:6px}
 .tl h3{font-size:22px;line-height:1.2;margin-top:6px}
 .tl p{margin-top:6px;font-size:15.5px;line-height:1.45;color:var(--ink-2)}
-.tl li.sub .dt{background:var(--plum);color:var(--cream);box-shadow:none}
-.tl li.sub.on .dt{background:var(--butter);color:var(--plum)}
-.tl .flag{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:7px 10px;border-radius:10px;background:var(--butter);font:600 13px/1.2 var(--sans)}
+.tl li.sub:not(.on) .dt{background:var(--plum);color:var(--cream);box-shadow:none}
+.tl .flag{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:7px 10px;border-radius:10px;background:var(--butter);font:600 13px/1.2 var(--sans);text-wrap:balance}
 
 /* ── 9. build maintain grow ──────────────────────────────────────────── */
 .trio{display:grid;gap:12px}
@@ -587,8 +593,10 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 .pcard .media{position:relative;aspect-ratio:4/3;background:#1a0f22;overflow:hidden}
 .pcard .media video,.pcard .media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center}
 .pcard[data-proof="kivenro"] .media,.pcard[data-proof="kaught"] .media{aspect-ratio:900/472}
-.pcard[data-proof="kivenro"] .media video{object-position:center}
-.pcard[data-proof="dana"] .media video{object-position:center 52%}
+.pcard[data-proof="kivenro"] .media video,.pcard[data-proof="kivenro"] .media img{object-position:center}
+.pcard[data-proof="dana"] .media video,.pcard[data-proof="dana"] .media img{object-position:center 52%}
+html:not(.js) .pcard .media video{display:none}
+.pcard[data-proof="kivenro"] .vp{top:10px;bottom:auto}
 .dark .tag.done{background:var(--butter);color:var(--plum)}
 .dark .tag.wip{background:transparent;color:var(--butter);box-shadow:inset 0 0 0 1.5px var(--butter)}
 .vp{position:absolute;right:10px;bottom:10px;z-index:3;display:none;place-items:center;width:48px;height:48px;padding:0;border:0;border-radius:50%;background:rgba(20,10,26,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#fff}
@@ -656,18 +664,19 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 .q+.q{margin-top:22px}
 .q legend,.q>label{display:flex;align-items:center;gap:10px;font:600 15.5px/1.3 var(--sans);margin-bottom:10px;padding:0}
 .q .qn{display:grid;place-items:center;width:24px;height:24px;border-radius:8px;background:var(--plum);color:var(--cream);font:800 12px/1 var(--num);flex:none}
-.handle{display:flex;align-items:center;min-height:56px;border-radius:16px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line-2);padding:0 16px;transition:box-shadow .2s}
+.handle{display:flex;align-items:center;min-height:56px;border-radius:16px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line-field);padding:0 16px;transition:box-shadow .2s}
 .handle:focus-within{box-shadow:inset 0 0 0 2px var(--plum)}
 .handle span{font:600 18px/1 var(--sans);color:var(--ink-3)}
 .handle input{flex:1;min-width:0;width:0;border:0;outline:none;background:transparent;padding:14px 4px;font:500 17px/1 var(--sans)}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{position:relative}
 .chip input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
-.chip span{display:inline-flex;align-items:center;gap:6px;min-height:48px;padding:0 15px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line-2);font:500 15px/1 var(--sans);transition:background-color .2s,box-shadow .2s,color .2s}
+.chip span{display:inline-flex;align-items:center;gap:6px;min-height:48px;padding:0 18px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line-field);font:500 15px/1 var(--sans);transition:background-color .2s,box-shadow .2s,color .2s}
 .chip input:checked+span{background:var(--plum);color:var(--cream);box-shadow:none}
 .chip input:focus-visible+span{outline:3px solid var(--plum);outline-offset:2px}
 .chip span svg{width:14px;height:14px;display:none}
 .chip input:checked+span svg{display:block}
+.chip input:checked+span{padding:0 8px}
 .form .btn{margin-top:26px}
 .form .after{margin-top:12px;display:flex;gap:8px;align-items:flex-start;font:500 13.5px/1.45 var(--sans);color:var(--ink-2)}
 .form .after svg{width:16px;height:16px;flex:none;margin-top:2px}
@@ -690,7 +699,7 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 .contact .ci img{width:100%;height:100%;object-fit:cover}
 .contact .ci svg{width:18px;height:18px}
 .contact b{display:block;font:600 14px/1.2 var(--sans)}
-.contact span{display:block;font:500 12.5px/1.25 var(--sans);color:var(--on-plum-3);overflow-wrap:anywhere}
+.contact b+span{display:block;font:500 12.5px/1.25 var(--sans);color:var(--on-plum-3);overflow-wrap:anywhere}
 
 .foot{background:var(--plum-dd);color:var(--on-plum-3);padding:34px 0 calc(34px + env(safe-area-inset-bottom))}
 .foot .wrap{display:grid;gap:18px}
@@ -698,7 +707,7 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 .foot p{font:500 13.5px/1.5 var(--sans)}
 .foot a{color:var(--on-plum-2)}
 .foot .links{display:flex;flex-wrap:wrap;gap:6px 18px}
-.foot .links a{min-height:48px;display:inline-flex;align-items:center;text-decoration:none;border-bottom:1px solid var(--plum-line)}
+.foot .links a{min-height:48px;display:inline-flex;align-items:center;font:500 14.5px/1.2 var(--sans);text-decoration:underline;text-decoration-color:var(--plum-line);text-decoration-thickness:1px;text-underline-offset:5px}
 
 /* ── tablet and desktop ───────────────────────────────────────────────── */
 @media (min-width:700px){
@@ -710,6 +719,7 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
   .mrow{grid-template-columns:1fr 1fr}
   .pcard.feat{grid-column:1/-1}
   .terms{grid-template-columns:1fr 1fr}
+  .term{grid-template-columns:1fr;gap:10px;align-content:start}
 }
 @media (min-width:960px){
   :root{--gut:40px}
@@ -721,18 +731,18 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
   .dock{display:none}
   .sec{padding:120px 0}
   .sec-head{margin-bottom:52px}
-  .hero{padding:40px 0 90px}
+  .hero{padding:24px 0 90px}
   .hero-grid{grid-template-columns:minmax(0,1.02fr) minmax(0,1fr);align-items:center;gap:40px;min-height:min(calc(100vh - 76px),860px)}
-  .hero h1{max-width:12.5ch;font-size:clamp(56px,5.6vw,84px)}
+  .hero h1{max-width:12.5ch;font-size:clamp(56px,5.6vw,80px)}
   .hero .lead{max-width:34ch}
-  .stage{--sh:clamp(600px,calc(100vh - 110px),720px);--sh:clamp(600px,calc(100svh - 110px),720px);margin:0}
+  .stage{--sh:clamp(560px,calc(100vh - 134px),720px);--sh:clamp(560px,calc(100svh - 134px),720px);margin:0}
   .mosaic{inset:58px 0 10px;gap:14px;padding:0 6px}
   .tile{border-radius:16px}
   .tile .views{font-size:12.5px;left:8px;bottom:8px;padding:5px 8px 5px 6px}
   .stage-phone{inset:60px 0 0}
   .stage-cap{left:0;right:0}
   .replay{right:0}
-  .hero-vp{right:58px}
+  .vp.hero-vp{top:-2px;right:58px}
   .reels-grid{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:64px;align-items:center}
   .ig{padding:18px 14px 14px}
   .ig-grid{grid-template-columns:repeat(4,1fr);gap:4px}
@@ -770,7 +780,7 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
   .boat{width:300px}
   .boat-lbl{width:228px}
   .cmp-h>div{padding:20px 26px;font-size:15px}
-  .cmp-k{padding:20px 26px 0}
+  .cmp-k{padding:20px 26px 10px}
   .cmp-c{padding:10px 26px 22px}
   .tl-grid{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:64px;align-items:start}
   .tl-side{position:sticky;top:120px}
@@ -781,11 +791,12 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
   .pcard.feat .body{padding:28px 32px}
   .pcard.feat h4{font-size:32px}
   .pcard[data-proof="dana"] .media,.pcard[data-proof="kivenro"] .media{aspect-ratio:900/472}
-  .pcard[data-proof="dana"] .media video{object-position:center 61%}
+  .pcard[data-proof="dana"] .media{background:#F6EFE8}
+  .pcard[data-proof="dana"] .media video,.pcard[data-proof="dana"] .media img{object-fit:contain;object-position:center}
   .spots-grid{grid-template-columns:1fr auto;gap:60px}
   .slot2{width:170px;height:170px}
   .faq-grid{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:60px;align-items:start}
-  .final-grid{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);grid-template-areas:"head form" "team form";gap:30px 60px;align-items:start}
+  .final-grid{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);grid-template-rows:auto 1fr;grid-template-areas:"head form" "team form";gap:30px 60px;align-items:start}
   .form{padding:32px}
   .foot .wrap{grid-template-columns:auto 1fr auto;align-items:center}
 }
@@ -794,6 +805,18 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
   .tour-left .h2,.tour-left .lead,.tour-left .eyebrow{display:none}
   .tour-right{display:contents}
   .tour-left{display:contents}
+}
+@media (max-width:959px) and (max-height:700px){
+  .scr-dots{display:none}
+  .tour-stage{--pw:min(262px,calc((100vh - var(--bar-h) - 14px - 58px - 48px - 22px) * .466));--pw:min(262px,calc((100svh - var(--bar-h) - 14px - 58px - 48px - 22px) * .466))}
+}
+@media (min-width:960px) and (max-height:900px){
+  .tour-sticky{padding-top:92px;padding-bottom:20px}
+  .tour-left{gap:16px}
+  .tour-left .eyebrow{display:none}
+  .tour-left .h2{font-size:clamp(30px,5.2vh,44px)}
+  .niche-list{gap:2px}
+  .niche-list button{min-height:52px;padding-top:4px;padding-bottom:4px}
 }
 
 @media (prefers-reduced-motion:reduce){
@@ -856,7 +879,7 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
   <div class="wrap hero-grid">
     <div class="hero-copy">
       <p class="eyebrow"><svg class="gx" aria-hidden="true"><use href="#gx"/></svg>Apps for wellness creators</p>
-      <h1 class="h1" id="h-hero">Your own app, on top of what you <span class="it">already</span> sell.</h1>
+      <h1 class="h1" id="h-hero">Your own app, on&nbsp;top of what you <span class="it">already</span> sell.</h1>
       <p class="lead">Submitted to the stores in <b class="num">6</b> weeks. <b class="num">$0</b>&nbsp;from&nbsp;you. We own it together.</p>
       <div class="hero-cta">
         <a class="btn" href="#start" data-cta id="hero-cta">Get my free app mockup <span class="arr"><svg><use href="#i-arr"/></svg></span></a>
@@ -913,7 +936,7 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
         </div>
       </div>
       <button class="replay" type="button" id="replay" aria-label="Replay the animation" title="Replay"><svg aria-hidden="true"><use href="#i-replay"/></svg></button>
-      <button class="vp hero-vp" type="button" id="hero-vp" aria-pressed="false" aria-label="Pause video"><svg class="pa" aria-hidden="true"><use href="#i-pause"/></svg><svg class="pl" aria-hidden="true"><use href="#i-play"/></svg></button>
+      <button class="vp hero-vp" type="button" id="hero-vp" aria-pressed="false" aria-label="Pause the app preview video"><svg class="pa" aria-hidden="true"><use href="#i-pause"/></svg><svg class="pl" aria-hidden="true"><use href="#i-play"/></svg></button>
     </div>
   </div>
 </section>
@@ -932,7 +955,7 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
         <div class="stat"><span class="n num" data-count="2" data-fmt="M">2M</span><span class="l">followers</span></div>
         <div class="stat"><span class="n num" data-count="591">591</span><span class="l">videos already online</span></div>
       </div>
-      <p class="reels-note">Example: a flexibility coach we built a mockup for. Numbers from the coach's Instagram profile.</p>
+      <p class="reels-note">Example: a flexibility coach we built a mockup for. Numbers from the coach’s Instagram profile.</p>
       <div class="organize"><svg class="gx" aria-hidden="true" style="--gx-b:#FFF8F0"><use href="#gx"/></svg><p><b>We organize them.</b> Hips, splits, back bends, balance. Levels 1 to 10. One session a day.</p></div>
     </div>
 
@@ -1091,7 +1114,7 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
           <span class="lab" id="fee-lab">Store fee</span>
           <div class="seg" role="group" aria-labelledby="fee-lab">
             <button type="button" data-fee="15" aria-pressed="true">15%<small>Apple Small Business, Google</small></button>
-            <button type="button" data-fee="30" aria-pressed="false">30%<small>Some Apple subscribers, year 1</small></button>
+            <button type="button" data-fee="30" aria-pressed="false">30%<small>Apple above $1M, first year</small></button>
           </div>
         </div>
       </form>
@@ -1113,9 +1136,9 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
           <details class="info">
             <summary><svg aria-hidden="true"><use href="#i-info"/></svg>How store fees work<svg class="chev" aria-hidden="true"><use href="#i-chev"/></svg></summary>
             <div class="in-b">
-              <p>Apple Small Business Program: <span class="num">15%</span>. <a href="https://developer.apple.com/app-store/small-business-program/" target="_blank" rel="noopener">Apple</a></p>
+              <p>Apple Small Business Program, up to <span class="num">$1M</span> a year in proceeds: <span class="num">15%</span>. <a href="https://developer.apple.com/app-store/small-business-program/" target="_blank" rel="noopener">Apple</a></p>
               <p>Google Play subscriptions: <span class="num">15%</span> in total. In the US, that is a <span class="num">10%</span> service fee plus a <span class="num">5%</span> billing fee. <a href="https://support.google.com/googleplay/android-developer/answer/112622" target="_blank" rel="noopener">Google</a></p>
-              <p>Apple subscribers outside the program: <span class="num">30%</span> in their first year, then <span class="num">15%</span>. <a href="https://developer.apple.com/app-store/subscriptions/" target="_blank" rel="noopener">Apple</a></p>
+              <p>Apple apps above <span class="num">$1M</span> a year: <span class="num">30%</span> in each subscriber’s first year, then <span class="num">15%</span>. <a href="https://developer.apple.com/app-store/subscriptions/" target="_blank" rel="noopener">Apple</a></p>
               <p>Checked on 12 Oct 2026 on the official pages. We check again before launch.</p>
             </div>
           </details>
@@ -1159,19 +1182,19 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
       <div class="cmp-r" role="row">
         <div class="cmp-k" role="rowheader">Upfront</div>
         <div class="cmp-c ag" role="cell">
-          <span class="v num">From $15,000</span><span class="d">for a basic fitness app</span><span class="srcs"><a class="src" href="https://solguruz.com/blog/fitness-app-development-cost/" target="_blank" rel="noopener">Source: SolGuruz</a></span>
-          <span class="v num" style="margin-top:8px">$30,000 to $120,000+</span><span class="d">for a typical US agency build</span><span class="srcs"><a class="src" href="https://theswiftk.it.com/cost-to-build/fitness-app" target="_blank" rel="noopener">Source: The Swift Kit</a></span>
+          <span class="v num">From $15,000</span><span class="d">for a basic fitness app</span><span class="srcs"><a class="src" href="https://solguruz.com/blog/fitness-app-development-cost/" target="_blank" rel="noopener">Source: fitness app cost guide</a></span>
+          <span class="v num" style="margin-top:8px">$30,000 to $120,000+</span><span class="d">for a typical US agency build</span><span class="srcs"><a class="src" href="https://theswiftk.it.com/cost-to-build/fitness-app" target="_blank" rel="noopener">Source: US build cost guide</a></span>
         </div>
         <div class="cmp-c us" role="cell"><span class="v num">$0</span><span class="d">We carry build and store costs.</span></div>
       </div>
       <div class="cmp-r" role="row">
         <div class="cmp-k" role="rowheader">Time</div>
-        <div class="cmp-c ag" role="cell"><span class="v num">3 to 4 months</span><span class="d">to build a first version</span><span class="srcs"><a class="src" href="https://attractgroup.com/blog/how-much-does-it-cost-to-make-a-fitness-app-everything-you-need-to-know/" target="_blank" rel="noopener">Source: Attract Group</a></span></div>
+        <div class="cmp-c ag" role="cell"><span class="v num">3 to 4 months</span><span class="d">to build a first version</span><span class="srcs"><a class="src" href="https://attractgroup.com/blog/how-much-does-it-cost-to-make-a-fitness-app-everything-you-need-to-know/" target="_blank" rel="noopener">Source: build time guide</a></span></div>
         <div class="cmp-c us" role="cell"><span class="v num">6 weeks</span><span class="d">to store submission</span></div>
       </div>
       <div class="cmp-r" role="row">
         <div class="cmp-k" role="rowheader">Upkeep</div>
-        <div class="cmp-c ag" role="cell"><span class="v num">15% to 20%</span><span class="d">of the build cost, every year</span><span class="srcs"><a class="src" href="https://www.cubix.co/blog/cost-of-mobile-app-maintenance/" target="_blank" rel="noopener">Source: Cubix</a><a class="src" href="https://www.spaceotechnologies.com/blog/how-much-does-it-cost-to-maintain-app/" target="_blank" rel="noopener">Space-O</a></span></div>
+        <div class="cmp-c ag" role="cell"><span class="v num">15% to 20%</span><span class="d">of the build cost, every year</span><span class="srcs"><a class="src" href="https://www.cubix.co/blog/cost-of-mobile-app-maintenance/" target="_blank" rel="noopener">Source: upkeep cost guide</a><a class="src" href="https://www.spaceotechnologies.com/blog/how-much-does-it-cost-to-maintain-app/" target="_blank" rel="noopener">Source 2: upkeep cost guide</a></span></div>
         <div class="cmp-c us" role="cell"><span class="v num">$0</span><span class="d">We maintain it.</span></div>
       </div>
       <div class="cmp-r" role="row">
@@ -1201,7 +1224,7 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
       </div>
     </div>
     <ol class="tl" id="tl">
-      <li><span class="dt">1</span><div><p class="wk">Before our first call</p><h3>Benchmark and mockup</h3><p>Your top competitors' apps, side by side. Your own app, on screen.</p></div></li>
+      <li><span class="dt">1</span><div><p class="wk">Before our first call</p><h3>Benchmark and mockup</h3><p>Your top competitors’ apps, side by side. Your own app, on screen.</p></div></li>
       <li><span class="dt">2</span><div><p class="wk">Weeks 1 to 2</p><h3>Content</h3><p>We sort your Reels, programs and ebook into sessions and levels.</p></div></li>
       <li><span class="dt">3</span><div><p class="wk">Weeks 2 to 4</p><h3>Build</h3><p>We build the app in your colors, with your name on it.</p></div></li>
       <li><span class="dt">4</span><div><p class="wk">Week 5</p><h3>Test</h3><p>You test it on your phone. We fix what you flag.</p></div></li>
@@ -1238,7 +1261,7 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
     <h3 class="h3 sub-h">Our work: <span class="num">1</span> app in the stores, <span class="num">2</span> in progress</h3>
     <div class="proof-grid">
       <article class="pcard feat" data-proof="kaught" data-cleared="yes">
-        <div class="media"><video muted playsinline loop preload="none" aria-hidden="true" tabindex="-1" data-poster="media/cm/proof/kaught.webp" data-src="media/cm/proof/kaught.mp4"></video><button class="vp" type="button" aria-pressed="false" aria-label="Pause video"><svg class="pa" aria-hidden="true"><use href="#i-pause"/></svg><svg class="pl" aria-hidden="true"><use href="#i-play"/></svg></button></div>
+        <div class="media"><video muted playsinline loop preload="none" aria-hidden="true" tabindex="-1" data-poster="media/cm/proof/kaught-poster.webp" data-src="media/cm/proof/kaught-v2.mp4"></video><noscript><img src="media/cm/proof/kaught-poster.webp" alt="" width="900" height="472" loading="lazy" decoding="async"></noscript><button class="vp" type="button" aria-pressed="false" aria-label="Pause the Kaught video"><svg class="pa" aria-hidden="true"><use href="#i-pause"/></svg><svg class="pl" aria-hidden="true"><use href="#i-play"/></svg></button></div>
         <div class="body">
           <div class="meta"><span class="tag done">In the stores</span><span class="tag est">iPhone and Android</span></div>
           <h4>Kaught</h4>
@@ -1247,20 +1270,20 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
         </div>
       </article>
       <article class="pcard" data-proof="dana" data-cleared="yes">
-        <div class="media"><video muted playsinline loop preload="none" aria-hidden="true" tabindex="-1" data-poster="media/cm/proof/dana.webp" data-src="media/cm/proof/dana.mp4"></video><button class="vp" type="button" aria-pressed="false" aria-label="Pause video"><svg class="pa" aria-hidden="true"><use href="#i-pause"/></svg><svg class="pl" aria-hidden="true"><use href="#i-play"/></svg></button></div>
+        <div class="media"><video muted playsinline loop preload="none" aria-hidden="true" tabindex="-1" data-poster="media/cm/proof/dana.webp" data-src="media/cm/proof/dana-v2.mp4"></video><noscript><img src="media/cm/proof/dana.webp" alt="" width="720" height="1011" loading="lazy" decoding="async"></noscript><button class="vp" type="button" aria-pressed="false" aria-label="Pause the Dr. Dana video"><svg class="pa" aria-hidden="true"><use href="#i-pause"/></svg><svg class="pl" aria-hidden="true"><use href="#i-play"/></svg></button></div>
         <div class="body">
-          <div class="meta"><span class="tag wip">Work preview · WiP</span><span class="tag est">Women's health</span></div>
-          <h4>Dr. Dana's Health Class</h4>
-          <p>A urologist's Reels, organized into a 6-week program with a daily exercise.</p>
+          <div class="meta"><span class="tag wip">Work preview · WiP</span><span class="tag est">Women’s health</span></div>
+          <h4>Dr. Dana’s Health Class</h4>
+          <p>A urologist’s Reels, organized into a 6-week program with a daily exercise.</p>
           <a class="go" href="https://www.maximehouel.com/dana/" target="_blank" rel="noopener">Open the preview <svg aria-hidden="true"><use href="#i-ext"/></svg></a>
         </div>
       </article>
       <article class="pcard" data-proof="kivenro" data-cleared="yes">
-        <div class="media"><video muted playsinline loop preload="none" aria-hidden="true" tabindex="-1" data-poster="media/cm/proof/kivenro.webp" data-src="media/cm/proof/kivenro.mp4"></video><button class="vp" type="button" aria-pressed="false" aria-label="Pause video"><svg class="pa" aria-hidden="true"><use href="#i-pause"/></svg><svg class="pl" aria-hidden="true"><use href="#i-play"/></svg></button></div>
+        <div class="media"><video muted playsinline loop preload="none" aria-hidden="true" tabindex="-1" data-poster="media/cm/proof/kivenro.webp" data-src="media/cm/proof/kivenro-v2.mp4"></video><noscript><img src="media/cm/proof/kivenro.webp" alt="" width="1100" height="578" loading="lazy" decoding="async"></noscript><button class="vp" type="button" aria-pressed="false" aria-label="Pause the Kivenro video"><svg class="pa" aria-hidden="true"><use href="#i-pause"/></svg><svg class="pl" aria-hidden="true"><use href="#i-play"/></svg></button></div>
         <div class="body">
           <div class="meta"><span class="tag wip">Work preview · WiP</span><span class="tag est">Flexibility</span><span class="tag est">In French</span></div>
           <h4>Kivenro</h4>
-          <p>A flexibility coach's Reels, organized into levels 1 to 10 and a daily session.</p>
+          <p>A flexibility coach’s Reels, organized into levels 1 to 10 and a daily session.</p>
           <a class="go" href="https://www.maximehouel.com/kivenro/" target="_blank" rel="noopener" hreflang="fr">Open the preview <svg aria-hidden="true"><use href="#i-ext"/></svg></a>
         </div>
       </article>
@@ -1284,10 +1307,10 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
           </div>
         </article>
         <article class="mcard">
-          <div class="who"><h4>Bend</h4><span>Stretching · studio app</span></div>
+          <div class="who"><h4>Bend</h4><span>Stretching · app company</span></div>
           <div class="fact">
             <span class="v num">$700K<small>a month</small></span>
-            <p>US revenue in September 2026. A stretching app run by a studio. Your app adds your face and your audience.</p>
+            <p>US revenue in September 2026. Your app adds your face and your audience.</p>
             <div class="row"><span class="tag est">Estimated</span><a class="src" href="https://app.sensortower.com/overview/1513988468?country=US" target="_blank" rel="noopener">Source: Sensor Tower</a></div>
           </div>
         </article>
@@ -1301,7 +1324,7 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
   <div class="wrap spots-grid">
     <div class="sec-head" style="margin-bottom:0">
       <p class="eyebrow" style="color:var(--plum)"><svg class="gx" aria-hidden="true" style="--gx-o:#FFF8F0"><use href="#gx"/></svg>Open spots</p>
-      <h2 class="h2" id="h-spots">We take 2 more creators.</h2>
+      <h2 class="h2" id="h-spots">We take 2&nbsp;more creators.</h2>
       <p class="lead">We start an app only when we are sure it works.</p>
       <div><a class="btn" href="#start" data-cta style="margin-top:8px">Get my free app mockup <span class="arr"><svg><use href="#i-arr"/></svg></span></a></div>
     </div>
@@ -1324,7 +1347,7 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
       <details><summary>Does my current business change?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>Your coaching, programs and ebooks keep running exactly as today. Their revenue stays <b>100% yours</b>. The app adds a new income line next to them.</p></div></details>
       <details><summary>Who owns the app?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>We own it together. You bring your content and your audience. We bring the build, the upkeep and the growth.</p></div></details>
       <details><summary>What if I leave?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>You owe <b>nothing</b> to leave after version 1. We carry the risk.</p></div></details>
-      <details><summary>How much time do I need?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>You approve the mockup, pick the content, test the app and plan the launch with us. We handle the rest.</p></div></details>
+      <details><summary>What do you need from me?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>You approve the mockup, pick the content, test the app and plan the launch with us. We handle the rest.</p></div></details>
       <details><summary>When is it submitted?<span class="pm" aria-hidden="true"></span></summary><div class="ans"><p><b>6 weeks</b> after we start, we submit it to the App Store and Google Play. Apple and Google then review it.</p></div></details>
     </div>
   </div>
@@ -1399,14 +1422,14 @@ html:not(.js) .ig-grid .kind{opacity:1;transform:none}
 <footer class="foot">
   <div class="wrap">
     <img src="logo/lockup-cream.svg" alt="CreatorMatch" width="158" height="24">
-    <p>We build, maintain and grow apps with wellness creators. © 2026 CreatorMatch.</p>
+    <p>We build, maintain and grow apps with wellness creators. ©&nbsp;2026 CreatorMatch.</p>
     <div class="links"><a href="https://www.instagram.com/creatormatch.app/" target="_blank" rel="noopener">Instagram</a><a href="mailto:hey@jeremylasne.com">hey@jeremylasne.com</a></div>
   </div>
 </footer>
 
 <!-- 0. mobile dock, shown after the hero button leaves the screen -->
 <div class="dock" id="dock">
-  <span class="spots"><span class="row"><i class="dot" aria-hidden="true"></i><b>2</b></span><span>creator spots left</span></span>
+  <span class="spots"><span class="row"><i class="dot" aria-hidden="true"></i><span><b>2</b> creator</span></span><span>spots left</span></span>
   <a class="btn" href="#start" data-cta>Get my free app mockup <span class="arr"><svg><use href="#i-arr"/></svg></span></a>
 </div>
 
@@ -1449,7 +1472,8 @@ const once = (els, fn, opts) => {
   const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { io.unobserve(e.target); fn(e.target) } }), opts)
   els.forEach((el) => io.observe(el))
 }
-once($$('[data-in]'), (el) => el.classList.add('in'), { threshold: 0.35 })
+if (RM) $$('[data-in]').forEach((el) => el.classList.add('in'))
+else once($$('[data-in]'), (el) => el.classList.add('in'), { threshold: 0.35 })
 
 /* ── numbers count up once, then hold ─────────────────────────────────── */
 function fmt(v, kind, to, plus) {
@@ -1460,7 +1484,7 @@ function fmt(v, kind, to, plus) {
 }
 function count(el, dur = 1600, delay = 0) {
   const to = parseFloat(el.dataset.count), kind = el.dataset.fmt, plus = el.hasAttribute('data-plus')
-  const end = el.textContent
+  const end = el.dataset.end || el.textContent
   if (RM) return Promise.resolve()
   return new Promise((res) => {
     const t0 = performance.now() + delay
@@ -1473,10 +1497,13 @@ function count(el, dur = 1600, delay = 0) {
     requestAnimationFrame(step)
   })
 }
-once($$('.stats [data-count], .chart [data-count]'), (el) => count(el), { threshold: 0.6 })
-// the app bar grows when the bars themselves are on screen
-once([$('#chart .bars')], (el) => el.classList.add('in'), { threshold: 0.95, rootMargin: '0px 0px -90px 0px' })
+once($$('.stats [data-count]'), (el) => count(el), { threshold: 0.6 })
+// the app bar and its number start together, when the bars are on screen
+const cn = $('#chart [data-count]')
+if (!RM && 'IntersectionObserver' in window) { cn.dataset.end = cn.textContent; cn.textContent = '+$0' }
+once([$('#chart .bars')], (el) => { el.classList.add('in'); count(cn, 1300, 250) }, { threshold: 0.95, rootMargin: '0px 0px -90px 0px' })
 const ig = $('#ig')
+if (RM) ig.classList.add('sorted')
 once([ig], () => {
   const cells = $$('[data-count]', ig)
   Promise.all(cells.map((el, i) => count(el, 1400, i * 60))).then(() => setTimeout(() => ig.classList.add('sorted'), 150))
@@ -1498,9 +1525,8 @@ if ('IntersectionObserver' in window) {
 } else $$('video[data-poster]').forEach((v) => { v.poster = v.dataset.poster })
 function toggleVideo(v, b) {
   const pause = !v.paused
-  if (pause) { v.dataset.userPaused = '1'; v.pause() } else { delete v.dataset.userPaused; v.play().catch(() => {}) }
+  if (pause) { v.dataset.userPaused = '1'; v.pause() } else { delete v.dataset.userPaused; v.classList.add('on'); v.play().catch(() => {}) }
   b.setAttribute('aria-pressed', pause ? 'true' : 'false')
-  b.setAttribute('aria-label', pause ? 'Play video' : 'Pause video')
 }
 $$('.pcard .vp').forEach((b) => b.addEventListener('click', () => toggleVideo(b.parentElement.querySelector('video'), b)))
 
@@ -1531,17 +1557,19 @@ let heroRunning = false
 
 function heroEnd() {
   stage.classList.remove('flying')
-  stage.classList.add('done')
-  if (!RM && !SAVE && !todayVid.dataset.userPaused) {
-    if (!todayVid.src) { todayVid.src = todayVid.dataset.src; todayVid.load() }
-    const p = todayVid.play(); if (p) p.then(() => { todayVid.classList.add('on'); $('#hero-vp').classList.add('on') }).catch(() => {})
-  }
+  stage.classList.add('done', 'played')
+  $('#replay').removeAttribute('aria-disabled')
+  if (RM || SAVE) return
+  const show = () => { todayVid.classList.add('on'); $('#hero-vp').classList.add('on') }
+  if (todayVid.dataset.userPaused) { if (todayVid.src) show(); return }
+  if (!todayVid.src) { todayVid.src = todayVid.dataset.src; todayVid.load() }
+  const p = todayVid.play(); if (p) p.then(show).catch(() => {})
 }
 
 async function heroRun() {
   if (heroRunning) return
   heroRunning = true
-  const refocus = document.activeElement === $('#replay')
+  $('#replay').setAttribute('aria-disabled', 'true')
   todayVid.pause(); todayVid.classList.remove('on'); $('#hero-vp').classList.remove('on')
   stage.classList.remove('done', 'flying')
   tiles.forEach((t, i) => { t.getAnimations().forEach((a) => a.cancel()); t.className = 'tile'; t.setAttribute('style', tileStyle[i]) })
@@ -1589,7 +1617,6 @@ async function heroRun() {
   await Promise.all(anims.map((a) => a.finished.catch(() => {})))
   heroEnd()
   heroRunning = false
-  if (refocus) $('#replay').focus()
 }
 
 function heroStart() {
@@ -1628,9 +1655,9 @@ const M = 'media/cm/'
 
 const NICHES = [
   { name: 'Fitness', line: 'Your workouts as a 30-day plan with a daily streak.', icon: 'n-fit',
-    pal: { bg: '#FFF3E8', fg: '#2A1B12', mut: 'rgba(42,27,18,.6)', acc: '#FF7A1A', on: '#2A1B12', card: '#FFFFFF', line: 'rgba(42,27,18,.1)' }, glow: 'rgba(255,122,26,.32)',
+    pal: { bg: '#FFF3E8', fg: '#2A1B12', mut: 'rgba(42,27,18,.68)', acc: '#FF7A1A', on: '#2A1B12', card: '#FFFFFF', line: 'rgba(42,27,18,.1)' },
     pages: [
-      (n) => hd(n, 'Week 3 · Day 2', 'Strong in 20', `${I('i-flame')}12`) + `<div class="a-body">
+      (n) => hd(n, 'Week 2 · Day 5', 'Strong in 20', `${I('i-flame')}12`) + `<div class="a-body">
         <div class="a-card a-row">${ring(40, '12', 'of 30')}<span><span class="a-k">Your plan</span><span class="a-t" style="display:block">30-day plan</span><span class="a-s" style="display:block">12 workouts done</span></span></div>
         <div class="a-card"><span class="a-k">Today</span><p class="a-t">Full body burn</p><p class="a-s">20 min · 6 moves · no equipment</p></div>
         <div class="a-list">${li(I('n-fit'), 'Squat to press', '0:40 · 3 sets')}${li(I('n-fit'), 'Push-up', '0:40 · 3 sets')}${li(I('n-fit'), 'Reverse lunge', '0:40 · 3 sets')}</div>
@@ -1643,15 +1670,15 @@ const NICHES = [
         <span class="a-btn" data-tap>Next move ${I('i-arr')}</span></div>` + tabs(0),
       (n) => hd(n, 'Workout done', 'Day 12 of 30', `${I('i-flame')}12`) + `<div class="a-body">
         <div class="a-card" style="display:grid;grid-template-columns:1fr 1fr;gap:.6em"><span><span class="a-k">Time</span><span class="a-big" style="display:block;margin-top:.15em;font-size:1.9em">20<small>min</small></span></span><span><span class="a-k">Moves</span><span class="a-big" style="display:block;margin-top:.15em;font-size:1.9em">6<small>of 6</small></span></span></div>
-        <div class="a-card"><span class="a-k">Streak</span><p class="a-big" style="margin:.2em 0 .5em;font-size:2em">12<small>days</small></p>${week(5, 5)}</div>
+        <div class="a-card"><span class="a-k">Streak</span><p class="a-big" style="margin:.2em 0 .5em;font-size:2em">12<small>days</small></p>${week(6, 5)}</div>
         <div class="a-card"><span class="a-k">Tomorrow</span><p class="a-t">Lower body, 22 min</p></div>
         <span class="a-btn" data-tap>${I('i-ig')}Share to Instagram</span></div>` + tabs(2),
     ] },
   { name: 'Bodybuilding', line: 'Your splits, sets and PRs, logged set by set.', icon: 'n-bb',
-    pal: { bg: '#0B0B0C', fg: '#F4F4EE', mut: 'rgba(244,244,238,.56)', acc: '#D4FF3A', on: '#0B0B0C', card: '#18181B', line: 'rgba(255,255,255,.1)' }, glow: 'rgba(212,255,58,.34)',
+    pal: { bg: '#0B0B0C', fg: '#F4F4EE', mut: 'rgba(244,244,238,.56)', acc: '#D4FF3A', on: '#0B0B0C', card: '#18181B', line: 'rgba(255,255,255,.1)' },
     pages: [
       (n) => hd(n, 'Week 6 · Push day', 'Mass Protocol', `${I('n-bb')}PR 120`) + `<div class="a-body">
-        <div class="a-card"><span class="a-k">Today's session</span><p class="a-t">Push day A</p><p class="a-s">5 exercises · 62 min</p>
+        <div class="a-card"><span class="a-k">Today’s session</span><p class="a-t">Push day A</p><p class="a-s">5 exercises · 62 min</p>
           <div class="a-table" style="margin-top:.8em"><span class="h">Exercise</span><span class="h">Sets</span><span class="h" style="text-align:right">Load</span>
           <span>Bench press</span><span class="n">4×8</span><span class="n">100 kg</span><span>Incline press</span><span class="n">3×10</span><span class="n">32 kg</span><span>Dips</span><span class="n">3×12</span><span class="n">+10 kg</span><span>Lateral raise</span><span class="n">4×15</span><span class="n">12 kg</span><span>Rope pushdown</span><span class="n">3×12</span><span class="n">25 kg</span></div></div>
         <div class="a-card a-row"><span style="flex:1"><span class="a-k">This week</span><span class="a-t" style="display:block;font-family:var(--num);font-weight:800">18,400 kg</span><span class="a-s" style="display:block">total volume, +6%</span></span>${ring(60, '3', 'of 5')}</div>
@@ -1668,27 +1695,27 @@ const NICHES = [
         <span class="a-btn" data-tap>Next: Pull day B ${I('i-arr')}</span></div>` + tabs(2),
     ] },
   { name: 'Flexibility', line: 'Your Reels as guided sessions, level 1 to 10.', icon: 'n-flex',
-    pal: { bg: '#F2F0FC', fg: '#1F1B3A', mut: 'rgba(31,27,58,.6)', acc: '#5B4FE0', on: '#FFFFFF', card: '#FFFFFF', line: 'rgba(31,27,58,.1)' }, glow: 'rgba(91,79,224,.28)',
+    pal: { bg: '#F2F0FC', fg: '#1F1B3A', mut: 'rgba(31,27,58,.68)', acc: '#5B4FE0', on: '#FFFFFF', card: '#FFFFFF', line: 'rgba(31,27,58,.1)' },
     pages: [
       (n) => hd(n, 'Level 4 of 10', 'Flexibility Unlock', `${I('i-flame')}9`) + `<div class="a-body">
         <div class="a-media" style="height:11.5em">${img(M + 'kevin/tutorial.webp')}<span class="ov"></span><span class="cap2"><span>Today · 30 min</span><b>Hip opener flow</b></span></div>
         <div><span class="a-k">Your path</span><div class="a-chips" style="margin-top:.45em">${[1, 2, 3, 4, 5, 6, 7].map((l) => `<span class="${l < 4 ? 'on' : ''}"${l === 4 ? ' style="box-shadow:inset 0 0 0 2px var(--s-acc)"' : ''}>L${l}</span>`).join('')}</div></div>
-        <div class="a-list">${li(img(M + 'kevin/hip-opener.webp'), 'Pancake prep', '12 min · level 4')}${li(img(M + 'kevin/seated-fold.webp'), 'Seated fold', '8 min · level 3', ck(1))}</div>
+        <div class="a-list">${li(img(M + 'kevin/hip-opener.webp'), 'Leg cradle', '12 min · level 4')}${li(img(M + 'kevin/seated-fold.webp'), 'Seated fold', '8 min · level 3', ck(1))}</div>
         <span class="a-btn" data-tap>${I('i-play')}Start session</span></div>` + tabs(0),
-      (n) => hd(n, 'Hip opener flow · 3 of 8', 'Lizard stretch') + `<div class="a-body">
+      (n) => hd(n, 'Hip opener flow · 3 of 8', 'Knees to chest') + `<div class="a-body">
         <div class="a-media" style="height:15em">${img(M + 'kevin/routine.webp')}<span class="ov"></span><span class="cap2"><span>Hold</span><b style="font:800 1.8em/1 var(--num)">0:45</b></span></div>
         <div class="a-prog" style="--p:37%"><i></i></div>
         <div class="a-chips"><span class="on">Intensity 6/10</span><span>Left side</span></div>
-        <p class="a-quote">Breathe out. Sink the hips 2 cm lower.</p>
+        <p class="a-quote">Breathe out. Pull the knees 2 cm closer.</p>
         <span class="a-btn" data-tap>Next pose ${I('i-arr')}</span></div>` + tabs(0),
       (n) => hd(n, 'Session done', 'Day 9 streak', `${I('i-flame')}9`) + `<div class="a-body">
         <div class="a-card a-row">${ring(80, '2', 'to go')}<span><span class="a-k">Next level</span><span class="a-t" style="display:block">Level 5</span><span class="a-s" style="display:block">2 sessions left</span></span></div>
         <div class="a-card"><span class="a-k">Poses unlocked · 3 of 12</span><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.4em;margin-top:.55em">${['chick', 'manna', 'pistol'].map((p) => `<span class="a-media" style="aspect-ratio:3/4">${img(M + 'kevin/' + p + '.webp')}</span>`).join('')}</div></div>
-        ${week(4, 4)}
+        ${week(5, 4)}
         <span class="a-btn" data-tap>Share my progress</span></div>` + tabs(2),
     ] },
   { name: 'Hair care', line: 'Your wash-day routine as a step-by-step timer.', icon: 'n-hair',
-    pal: { bg: '#FBF0E6', fg: '#3A2216', mut: 'rgba(58,34,22,.6)', acc: '#B8662F', on: '#FFFFFF', card: '#FFFFFF', line: 'rgba(58,34,22,.1)' }, glow: 'rgba(184,102,47,.3)',
+    pal: { bg: '#FBF0E6', fg: '#3A2216', mut: 'rgba(58,34,22,.68)', acc: '#B8662F', on: '#FFFFFF', card: '#FFFFFF', line: 'rgba(58,34,22,.1)' },
     pages: [
       (n) => hd(n, 'Type 3B · high porosity', 'Curl Lab', `${I('n-hair')}2 days`) + `<div class="a-body">
         <div class="a-card"><span class="a-k">Next wash day</span><p class="a-t">Saturday</p><p class="a-s">4 steps · 75 min</p></div>
@@ -1704,10 +1731,10 @@ const NICHES = [
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.4em">${['March', 'May', 'June'].map((m, i) => `<span class="a-media" style="aspect-ratio:3/4;display:grid;place-items:center;background:linear-gradient(160deg,hsl(${24 + i * 6} 45% ${86 - i * 8}%),hsl(${20 + i * 4} 40% ${70 - i * 8}%));color:#fff">${I('n-hair').replace('aria-hidden="true"', 'aria-hidden="true" style="width:2em;height:2em;opacity:.8"')}<span style="position:absolute;left:.5em;bottom:.45em;font:700 .55em var(--sans)">${m}</span></span>`).join('')}</div>
         <div class="a-card"><span class="a-k">Length</span><p class="a-big" style="margin-top:.15em">+2.5<small>cm since March</small></p></div>
         <div class="a-card"><span class="a-k">Wash days kept</span><div class="a-bars" style="height:3.4em;margin-top:.5em">${[60, 80, 70, 100, 90, 100, 100, 85].map((h, i) => `<i class="${i > 4 ? 'on' : ''}" style="--h:${h}%"></i>`).join('')}</div></div>
-        <span class="a-btn" data-tap>Add today's photo</span></div>` + tabs(2),
+        <span class="a-btn" data-tap>Add today’s photo</span></div>` + tabs(2),
     ] },
   { name: 'Health', line: 'Your lessons as a 6-week program with a daily exercise.', icon: 'n-health',
-    pal: { bg: '#FCF2F1', fg: '#3A1820', mut: 'rgba(58,24,32,.6)', acc: '#D0466A', on: '#FFFFFF', card: '#FFFFFF', line: 'rgba(58,24,32,.1)' }, glow: 'rgba(208,70,106,.28)',
+    pal: { bg: '#FCF2F1', fg: '#3A1820', mut: 'rgba(58,24,32,.68)', acc: '#D0466A', on: '#FFFFFF', card: '#FFFFFF', line: 'rgba(58,24,32,.1)' },
     pages: [
       (n) => hd(n, 'Bladder leaks · 6 weeks', 'Health Class', '<span class="num">W2</span>') + `<div class="a-body">
         <div class="a-card"><span class="a-k">Week 2 · Today</span><p class="a-t">Why leaks happen when you laugh</p><p class="a-s">Lesson 3 · 6 min</p><div class="a-prog" style="--p:33%;margin-top:.6em"><i></i></div></div>
@@ -1717,8 +1744,8 @@ const NICHES = [
         <div class="a-media" style="height:13em">${img(M + 'dana/reel-3.webp')}<span class="ov"></span><span style="position:absolute;inset:0;display:grid;place-items:center"><span class="a-ic" style="width:3em;height:3em;border-radius:50%">${I('i-play')}</span></span></div>
         <span class="a-k">3 things to remember</span>
         <div class="a-list">${li('<b style="font:800 .9em var(--num)">1</b>', 'Laughing pushes pressure down')}${li('<b style="font:800 .9em var(--num)">2</b>', 'A strong floor holds it')}${li('<b style="font:800 .9em var(--num)">3</b>', 'Squeeze before you sneeze')}</div>
-        <span class="a-btn" data-tap>Do today's exercise ${I('i-arr')}</span></div>` + tabs(1),
-      (n) => hd(n, 'Day 9 of 42', "Today's exercise") + `<div class="a-body">
+        <span class="a-btn" data-tap>Do today’s exercise ${I('i-arr')}</span></div>` + tabs(1),
+      (n) => hd(n, 'Day 9 of 42', "Today’s exercise") + `<div class="a-body">
         <div class="a-card"><p class="a-t" style="margin-top:0">Quick flicks</p><p class="a-s">10 squeezes · 1 second each · 3 sets</p></div>
         <div style="display:grid;place-items:center">${ring(70, '7', 'of 10', 8.4)}</div>
         <div class="a-list">${li('<b style="font:800 .9em var(--num)">1</b>', 'Set 1', '10 squeezes', ck(1))}${li('<b style="font:800 .9em var(--num)">2</b>', 'Set 2', 'In progress', ck(0))}</div>
@@ -1726,16 +1753,17 @@ const NICHES = [
         <span class="a-btn" data-tap>Mark set done</span></div>` + tabs(2),
     ] },
   { name: 'Coaching', line: 'Daily check-ins and your voice notes between sessions.', icon: 'n-coach',
-    pal: { bg: '#EEF5F1', fg: '#10291F', mut: 'rgba(16,41,31,.6)', acc: '#1F7A5A', on: '#FFFFFF', card: '#FFFFFF', line: 'rgba(16,41,31,.1)' }, glow: 'rgba(31,122,90,.28)',
+    pal: { bg: '#EEF5F1', fg: '#10291F', mut: 'rgba(16,41,31,.68)', acc: '#1F7A5A', on: '#FFFFFF', card: '#FFFFFF', line: 'rgba(16,41,31,.1)' },
     pages: [
       (n) => hd(n, 'Good morning, Sam', 'Daily Edge', '<span class="num">Day 23</span>') + `<div class="a-body">
-        <div class="a-card a-row">${ring(80, '4', 'of 5')}<span><span class="a-k">Today's habits</span><span class="a-t" style="display:block">4 of 5 done</span><span class="a-s" style="display:block">1 left before 23:00</span></span></div>
+        <div class="a-card a-row">${ring(80, '4', 'of 5')}<span><span class="a-k">Today’s habits</span><span class="a-t" style="display:block">4 of 5 done</span><span class="a-s" style="display:block">1 left before 23:00</span></span></div>
         <div class="a-list">${li(I('n-coach'), 'Morning walk', '30 min', ck(1))}${li(I('n-coach'), 'Protein at each meal', '3 of 3', ck(1))}${li(I('n-coach'), 'Lights out by 23:00', 'Tonight', ck(0))}</div>
         <div class="a-card"><span class="a-k">Next call</span><p class="a-t">Thursday, 18:00</p><p class="a-s">1:1 with your coach · 30 min</p></div>
         <span class="a-btn" data-tap>Check in</span></div>` + tabs(0),
       (n) => hd(n, 'Your coach replied', 'Voice note') + `<div class="a-body">
-        <div class="a-card a-row" style="padding:.6em .8em .6em .6em"><span class="a-ic" style="border-radius:50%">${I('i-play')}</span><span class="a-wave" style="flex:1">${[30, 60, 45, 80, 100, 70, 50, 85, 60, 40, 75, 55, 35, 65, 45, 25].map((h, i) => `<i class="${i > 9 ? 'dim' : ''}" style="--h:${h}%"></i>`).join('')}</span><b style="font:800 .7em var(--num)">1:12</b></div>
+        <div class="a-card"><span class="a-k">Your check-in · Monday</span><div class="a-table" style="margin-top:.6em;grid-template-columns:1fr auto"><span>Sleep</span><span class="n">5.5 h</span><span>Energy</span><span class="n">4 / 10</span><span>Walks</span><span class="n">6 of 7</span></div></div>
         <div class="a-card" style="margin-left:2em;background:var(--s-acc);color:var(--s-on);box-shadow:none"><p class="a-quote">Hard week. Slept 5 hours twice.</p></div>
+        <div class="a-card a-row" style="padding:.6em .8em .6em .6em;margin-right:2em"><span class="a-ic" style="border-radius:50%">${I('i-play')}</span><span class="a-wave" style="flex:1">${[30, 60, 45, 80, 100, 70, 50, 85, 60, 40, 75, 55, 35, 65, 45, 25].map((h, i) => `<i class="${i > 9 ? 'dim' : ''}" style="--h:${h}%"></i>`).join('')}</span><b style="font:800 .7em var(--num)">1:12</b></div>
         <div class="a-card" style="margin-right:2em"><p class="a-quote">Keep the walk. Move lights out to 22:30 this week. Talk Thursday.</p></div>
         <span class="a-btn" data-tap>Reply</span></div>` + tabs(1),
       (n) => hd(n, 'Week 12 review', 'Your score') + `<div class="a-body">
@@ -1755,7 +1783,6 @@ function paint(n) {
   const p = n.pal, s = screen.style
   s.setProperty('--s-bg', p.bg); s.setProperty('--s-fg', p.fg); s.setProperty('--s-mut', p.mut); s.setProperty('--s-acc', p.acc)
   s.setProperty('--s-on', p.on); s.setProperty('--s-card', p.card); s.setProperty('--s-line', p.line)
-  tour.style.setProperty('--n-acc', p.acc); tour.style.setProperty('--n-on', p.on); tour.style.setProperty('--n-glow', n.glow)
 }
 function render(animate) {
   const n = NICHES[niche]
@@ -1899,9 +1926,17 @@ function calc() {
   cust.setAttribute('aria-valuetext', n.toLocaleString('en-US') + ' customers')
   ticks.forEach((t, i) => t.setAttribute('aria-pressed', i === +cust.value ? 'true' : 'false'))
   $('#ctx').textContent = `${n.toLocaleString('en-US')} customers is 1% of ${(n * 100).toLocaleString('en-US')} followers.`
-  $('.out-tbl').classList.toggle('long', money(revY).length > 10)
+  fitTbl()
   return { n, netM, netY }
 }
+function fitTbl() {
+  const t = $('.out-tbl'), box = t.parentElement
+  t.classList.remove('long')
+  const edge = box.getBoundingClientRect().right - parseFloat(getComputedStyle(box).paddingRight)
+  t.classList.toggle('long', t.scrollWidth > t.clientWidth + 1 || t.getBoundingClientRect().right > edge + 1)
+}
+let fitT
+addEventListener('resize', () => { clearTimeout(fitT); fitT = setTimeout(fitTbl, 150) })
 let sayT
 function say() {
   clearTimeout(sayT)
@@ -1918,7 +1953,11 @@ priceIn.addEventListener('input', () => {
   const v = parsePrice()
   if (isFinite(v) && v >= 0.01) { price = Math.min(Math.round(v * 100) / 100, 999); calc(); say() }
 })
-priceIn.addEventListener('blur', () => { priceIn.value = price.toFixed(2) })
+priceIn.addEventListener('blur', () => {
+  const v = parsePrice()
+  if (!(isFinite(v) && v >= 0.01) && price !== 9.99) { price = 9.99; calc(); say() }
+  priceIn.value = price.toFixed(2)
+})
 feeBtns.forEach((b) => b.addEventListener('click', () => {
   fee = +b.dataset.fee
   feeBtns.forEach((x) => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'))
@@ -1934,10 +1973,10 @@ function onTimeline() {
   const line = innerHeight * 0.62
   const first = tlItems[0].querySelector('.dt').getBoundingClientRect(), last = tlItems[tlItems.length - 1].querySelector('.dt').getBoundingClientRect()
   const span = (last.top + last.height / 2) - (first.top + first.height / 2)
-  const p = clamp((line - (first.top + first.height / 2)) / span, 0, 1)
+  const p = RM ? 1 : clamp((line - (first.top + first.height / 2)) / span, 0, 1)
   tl.style.setProperty('--span', span.toFixed(1) + 'px')
   tl.style.setProperty('--tp', p.toFixed(4))
-  tlItems.forEach((li) => { const d = li.querySelector('.dt').getBoundingClientRect(); li.classList.toggle('on', d.top + d.height / 2 <= line + 1) })
+  tlItems.forEach((li) => { const d = li.querySelector('.dt').getBoundingClientRect(); li.classList.toggle('on', RM || d.top + d.height / 2 <= line + 1) })
 }
 
 /* ── one scroll loop ───────────────────────────────────────────────────── */
@@ -1981,12 +2020,16 @@ form.addEventListener('submit', async (e) => {
   if (form.classList.contains('busy')) return
   const raw = $('#f-ig').value.trim().replace(/^@+/, '')
   const rest = raw.replace(/^(?:https?:\/\/)?(?:www\.|m\.)?(?:instagram\.com|instagr\.am)\//i, '').replace(/^@+/, '')
-  const handle = rest.replace(/[/?#].*$/, '')
+  const seg = rest.split(/[/?#]/)
+  const handle = /^stories$/i.test(seg[0]) && seg[1] ? seg[1] : seg[0]
+  const reserved = /^(p|reel|reels|tv|s|stories|explore|accounts|direct)$/i
   const foreign = /^[a-z][a-z0-9+.-]*:/i.test(rest) || /^[^/?#]*\.[^/?#]*\/[^/?#]/.test(rest)
   const niche = (form.querySelector('[name=niche]:checked') || {}).value
   const sells = $$('[name=sell]:checked', form).map((i) => i.value)
   const revenue = (form.querySelector('[name=revenue]:checked') || {}).value
-  const bad = { 'q-ig': foreign || !/^[A-Za-z0-9._]{1,30}$/.test(handle), 'q-niche': !niche, 'q-sell': !sells.length, 'q-rev': !revenue }
+  const igBad = foreign || reserved.test(handle) || !/^[A-Za-z0-9._]{1,30}$/.test(handle)
+  $('#err-ig').textContent = !raw ? 'Add your Instagram handle so we can build your mockup.' : foreign || reserved.test(handle) ? 'Paste your Instagram handle or your instagram.com profile link.' : 'Use letters, numbers, dots or underscores, like jane.doe.'
+  const bad = { 'q-ig': igBad, 'q-niche': !niche, 'q-sell': !sells.length, 'q-rev': !revenue }
   Object.entries(bad).forEach(([id, b]) => markBad(id, b))
   const firstBad = Object.keys(bad).find((k) => bad[k])
   if (firstBad) { const el = $('#' + firstBad + ' input'); el && el.focus(); return }
