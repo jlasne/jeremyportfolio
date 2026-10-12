@@ -27,9 +27,11 @@ blocks with no titles. Solid fills, no outlines, one line per row.
   keeps playing
 - **Re-recording.** The videos in `media/apps` are made by `media/apps/record.mjs`
   (`NODE_PATH=$(npm root -g) node media/apps/record.mjs [dana] [kivenro] [kaught]`).
-  It needs playwright and ffmpeg. Run it again when either page changes; each
-  video is a loop whose end melts into its start. Together the three weigh
-  about 3.4 MB and load only when their tile comes into view
+  It needs playwright and ffmpeg. Run it again when either page changes. It
+  photographs the page frame by frame, then speeds the video up where the page
+  barely moves while the scroll goes on (up to 24x), so the recording never
+  seems to stop. Each video is a loop whose end melts into its start. Together
+  the three weigh about 3 MB and load only when their tile comes into view
 
 ## Stack
 
