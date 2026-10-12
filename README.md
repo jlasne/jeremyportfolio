@@ -4,19 +4,22 @@ I build mobile apps with influencers. A creator brings the audience, I bring
 the whole build and run it, and we split what it earns. This repository is
 the site behind that, plus everything else I keep in public.
 
-The landing page is one screen: a portrait, a name, social icons, two blocks.
+The landing page is one screen: a portrait, a name, social icons, then two
+blocks with no titles.
 
 - **Socials.** YouTube [@jeremyfounder](https://www.youtube.com/@jeremyfounder),
-  X [@jeremylasne](https://x.com/jeremylasne) and email, as three icons under
-  the name. The email icon also copies the address
-- **Projects.** [CreatorMatch](https://creatormatch.app): I build mobile apps
-  with influencers
-- **Mobile app portfolio.** A bento of three live pages. Each tile shows the
-  page's own share card from `media/apps`, with its name under it:
-  [Kaught](https://www.kaught.app/vid) (Animal Identifier),
-  [Kivenro](https://www.maximehouel.com/kivenro/) (Flexibility, in French) and
+  X [@jeremylasne](https://x.com/jeremylasne), Instagram
+  [@creatormatch.app](https://www.instagram.com/creatormatch.app/) and email,
+  as four icons under the name. The email icons also copy the address
+- **CreatorMatch.** One centred card: [CreatorMatch](https://creatormatch.app),
+  I build mobile apps with influencers
+- **Mobile app portfolio.** A bento of three live pages and a contact tile.
   [Dr. Dana](https://www.maximehouel.com/dana/) (The best health class for
-  women). Kaught is the tall tile; on a phone the three tiles stack
+  women) is the big tile; [Kaught](https://www.kaught.app/vid) (Animal
+  Identifier) and [Kivenro](https://www.maximehouel.com/kivenro/) (Flexibility,
+  in French) sit beside it. The full-length tile closes the bento:
+  *Contact me: hey@jeremylasne.com, you want yours?*. On a phone the tiles
+  stack. kaught.app/vid plays its reel on its own, muted, once it opens
 
 ## Stack
 
@@ -28,7 +31,7 @@ Open it and edit it.
 - The ridge photo from `/bio` blurred behind everything (9.5px); snow drawn on a
   canvas by `snow.js`; the wind looping from `media/wind.mp3` with one mute
   button top right. Mute once and it stays muted on the next visit
-- The CreatorMatch logo is in `media/logos`, the same file as `brand/favicon.svg`. Tile images are the share cards of the three pages, in `media/apps`
+- The CreatorMatch logo is in `media/logos`, the same file as `brand/favicon.svg`. Tile images are in `media/apps`: the share cards of Kaught and Kivenro, and a phone-width screenshot of the Dr. Dana page
 - Rows reveal on load; `prefers-reduced-motion` turns that off
 - `og-image.png` is generated, not hand-drawn: render the hero at 1200×630
   and screenshot it. The source is not checked in, so redraw it to match if

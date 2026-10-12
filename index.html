@@ -93,45 +93,43 @@
   }
   .socials a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
-  section { width: 100%; margin-top: 40px; text-align: left; }
-  h2 {
-    font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-    color: var(--ice-45); padding: 0 0 6px;
-  }
-  ul { list-style: none; }
-
-  .item {
-    display: flex; align-items: center; gap: 14px;
-    padding: 15px 14px; margin: 0 -14px; border-radius: 14px;
-    text-decoration: none; color: inherit;
-  }
-  .item .logo { width: 24px; height: 24px; flex: none; }
-  .item .name { font-size: 16px; line-height: 24px; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; flex: none; }
-  .item .desc { font-size: 15px; line-height: 24px; color: var(--ice-70); flex: 1 1 auto; min-width: 0; }
+  section { width: 100%; margin-top: 10px; text-align: left; }
+  .socials + section { margin-top: 36px; }
   .arrow { width: 16px; height: 16px; flex: none; fill: var(--ice-45); transition: transform .25s cubic-bezier(.22,1,.36,1), fill .2s; }
-  @media (hover: hover) {
-    a.item:hover { background: rgba(234,244,251,.06); }
-    a.item:hover .name { color: var(--blue); }
-    a.item:hover .arrow { fill: var(--blue); transform: translate(2px,-2px); }
-  }
-  a.item:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
-  /* ---- the mobile app bento: each tile shows the page through its own share card, the caption sits under it ---- */
-  .bento { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-  .tile {
-    display: flex; flex-direction: column; overflow: hidden; min-width: 0;
+  /* ---- the shape both blocks share: a rounded card on the ridge ---- */
+  .card, .tile {
     border-radius: 18px; border: 1px solid var(--line); background: rgba(5,11,22,.55);
-    text-decoration: none; color: inherit;
-    transition: border-color .25s, transform .25s cubic-bezier(.22,1,.36,1);
+    text-decoration: none; color: inherit; transition: border-color .25s;
   }
+  @media (hover: hover) {
+    .card:hover, .tile:hover { border-color: rgba(95,168,211,.5); }
+    .card:hover .name, .tile:hover .t-name { color: var(--blue); }
+    .card:hover .arrow, .tile:hover .arrow { fill: var(--blue); transform: translate(2px,-2px); }
+  }
+  .card:focus-visible, .tile:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+  /* ---- CreatorMatch: one card, its content centred ---- */
+  .card { position: relative; display: flex; align-items: center; justify-content: center; gap: 14px; padding: 18px 48px; text-align: center; }
+  .card .head { display: flex; align-items: center; gap: 12px; }
+  .card .logo { width: 28px; height: 28px; flex: none; }
+  .card .name { font-size: 17px; line-height: 24px; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; }
+  .card .desc { font-size: 15px; line-height: 24px; color: var(--ice-70); }
+  .card .arrow { position: absolute; top: 50%; right: 18px; margin-top: -8px; }
+
+  /* ---- the mobile app bento: each tile shows its page, the caption sits under it ---- */
+  .bento { display: grid; grid-template-columns: 1fr 1.12fr; gap: 10px; }
+  .tile { display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
   .tile.tall { grid-row: span 2; }
+  .tile.wide { grid-column: 1 / -1; }
   .tile .shot { position: relative; overflow: hidden; aspect-ratio: 1200 / 630; background: rgba(234,244,251,.04); }
   .tile.tall .shot { aspect-ratio: auto; flex: 1 1 0; min-height: 0; }
   .tile .shot img {
     position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
     transition: transform .6s cubic-bezier(.22,1,.36,1);
   }
-  .tile.tall .shot img { object-position: 77% 50%; }
+  .tile.tall .shot img { object-position: 50% 40%; }
+  @media (hover: hover) { .tile:hover .shot img { transform: scale(1.04); } }
   .tile .cap { display: flex; align-items: center; gap: 10px; padding: 11px 14px 12px; border-top: 1px solid var(--line); }
   .tile .txt { flex: 1 1 auto; min-width: 0; }
   .tile .t-name { display: block; font-size: 15px; line-height: 20px; font-weight: 600; letter-spacing: -.01em; }
@@ -140,24 +138,19 @@
     margin-left: 6px; vertical-align: 1px; font-size: 10px; font-weight: 600; letter-spacing: .06em;
     color: var(--ice-45); border: 1px solid var(--line); border-radius: 999px; padding: 1px 6px;
   }
-  @media (hover: hover) {
-    .tile:hover { border-color: rgba(95,168,211,.5); }
-    .tile:hover .shot img { transform: scale(1.04); }
-    .tile:hover .t-name { color: var(--blue); }
-    .tile:hover .arrow { fill: var(--blue); transform: translate(2px,-2px); }
-  }
-  .tile:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  /* the full-length tile closing the bento: no picture, the address is the point */
+  .tile.wide .cap { border-top: 0; padding: 18px 20px 18px 22px; }
+  .tile.wide .t-name { font-size: 17px; line-height: 24px; overflow-wrap: anywhere; }
+  .tile.wide .t-desc { font-size: 14px; line-height: 20px; }
 
   @media (min-width: 640px) { h1 { font-size: 34px; } }
   @media (max-width: 520px) {
-    .item { flex-wrap: wrap; row-gap: 3px; padding: 13px 12px; margin: 0 -12px; }
-    .item .name { flex: 1 1 auto; }
-    .item .arrow { order: 2; }
-    .item .desc { flex-basis: 100%; order: 3; padding-left: 38px; line-height: 1.5; }
+    .card { flex-direction: column; gap: 4px; padding: 18px 40px; }
     .bento { grid-template-columns: 1fr; }
     .tile.tall { grid-row: auto; }
-    .tile.tall .shot { flex: none; aspect-ratio: 16 / 9; }
-    .tile.tall .shot img { object-position: 50% 50%; }
+    .tile.tall .shot { flex: none; aspect-ratio: 5 / 7; }
+    .tile.wide .cap { padding: 16px 16px 16px 18px; }
+    .tile.wide .t-name { font-size: 16px; }
   }
   @media (prefers-reduced-motion: reduce) { .reveal { animation: none; } }
 
@@ -218,27 +211,35 @@
       <a href="https://x.com/jeremylasne" target="_blank" rel="noopener" aria-label="X, @jeremylasne" title="X @jeremylasne">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>
       </a>
-      <a id="mail" href="mailto:hey@jeremylasne.com" aria-label="Email, hey@jeremylasne.com" title="hey@jeremylasne.com">
+      <a href="https://www.instagram.com/creatormatch.app/" target="_blank" rel="noopener" aria-label="Instagram, @creatormatch.app" title="Instagram @creatormatch.app">
+        <svg class="line" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r=".7" fill="currentColor" stroke="none"/></svg>
+      </a>
+      <a href="mailto:hey@jeremylasne.com" data-mail aria-label="Email, hey@jeremylasne.com" title="hey@jeremylasne.com">
         <svg class="line" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4.5 8 7.5 5.5L19.5 8"/></svg>
       </a>
     </nav>
 
-    <section class="reveal" style="--d:160">
-      <h2>Projects</h2>
-      <ul>
-        <li><a class="item" href="https://creatormatch.app" target="_blank" rel="noopener">
-          <img class="logo" src="media/logos/creatormatch.svg" alt="" width="24" height="24">
+    <section class="reveal" style="--d:160" aria-label="Projects">
+      <a class="card" href="https://creatormatch.app" target="_blank" rel="noopener">
+        <span class="head">
+          <img class="logo" src="media/logos/creatormatch.svg" alt="" width="28" height="28">
           <span class="name">CreatorMatch</span>
-          <span class="desc">I build mobile apps with influencers.</span>
-          <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
-        </a></li>
-      </ul>
+        </span>
+        <span class="desc">I build mobile apps with influencers.</span>
+        <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
+      </a>
     </section>
 
-    <section class="reveal" style="--d:220">
-      <h2>Mobile app portfolio</h2>
+    <section class="reveal" style="--d:220" aria-label="Mobile app portfolio">
       <div class="bento">
-        <a class="tile tall" href="https://www.kaught.app/vid" target="_blank" rel="noopener">
+        <a class="tile tall" href="https://www.maximehouel.com/dana/" target="_blank" rel="noopener">
+          <span class="shot"><img src="media/apps/dana.webp" alt="" width="720" height="1011" loading="lazy" decoding="async"></span>
+          <span class="cap">
+            <span class="txt"><span class="t-name">Dr. Dana</span><span class="t-desc">The best health class for women</span></span>
+            <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
+          </span>
+        </a>
+        <a class="tile" href="https://www.kaught.app/vid" target="_blank" rel="noopener">
           <span class="shot"><img src="media/apps/kaught.webp" alt="" width="1100" height="619" loading="lazy" decoding="async"></span>
           <span class="cap">
             <span class="txt"><span class="t-name">Kaught</span><span class="t-desc">Animal Identifier</span></span>
@@ -252,10 +253,9 @@
             <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
           </span>
         </a>
-        <a class="tile" href="https://www.maximehouel.com/dana/" target="_blank" rel="noopener">
-          <span class="shot"><img src="media/apps/dana.webp" alt="" width="1100" height="578" loading="lazy" decoding="async"></span>
+        <a class="tile wide" href="mailto:hey@jeremylasne.com" data-mail>
           <span class="cap">
-            <span class="txt"><span class="t-name">Dr. Dana</span><span class="t-desc">The best health class for women</span></span>
+            <span class="txt"><span class="t-name">Contact me: hey@jeremylasne.com</span><span class="t-desc">You want yours?</span></span>
             <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><use href="#ar"/></svg>
           </span>
         </a>
@@ -289,21 +289,23 @@
     paint(); b.hidden = false; blow();
   })();
 
-  /* The Email row copies the address too: on a machine with no mail app,
+  /* The email links copy the address too: on a machine with no mail app,
      mailto: alone does nothing visible. The mail app still opens where one exists. */
   (function () {
-    var a = document.getElementById("mail"), t = document.getElementById("toast"), timer;
-    var email = a.getAttribute("href").slice("mailto:".length);
+    var t = document.getElementById("toast"), timer;
     function show() {
       t.innerHTML = "<b>Address copied.</b> Do send me an email.";
       t.setAttribute("data-open", "");
       clearTimeout(timer);
       timer = setTimeout(function () { t.removeAttribute("data-open"); }, 2600);
     }
-    function ask() { window.prompt("Copy the address:", email); }
-    a.addEventListener("click", function () {
-      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(email).then(show, ask);
-      else ask();
+    Array.prototype.forEach.call(document.querySelectorAll("[data-mail]"), function (a) {
+      var email = a.getAttribute("href").slice("mailto:".length);
+      function ask() { window.prompt("Copy the address:", email); }
+      a.addEventListener("click", function () {
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(email).then(show, ask);
+        else ask();
+      });
     });
   })();
 </script>
