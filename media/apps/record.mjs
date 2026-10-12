@@ -6,8 +6,10 @@
 //
 // dana, kivenro: opens the live page at the tile's shape, scrolls it top to
 //   bottom the way a hand would (eased in and out, one steady pace between),
-//   records what the screen shows, and cuts it into a loop: the end fades into
-//   the start, so the video never jumps.
+//   photographs it frame by frame, then cuts out every stretch where the page
+//   stands still while the scroll goes on (a pinned scene, a stall), so the
+//   video never stops by itself. The end fades into the start, so it loops
+//   without a jump.
 // kaught: takes the 15 second reel from kaught.app, cropped to the tile.
 //
 // Why a recording and not the page in a frame: a page on another site can't
@@ -57,70 +59,45 @@ async function recordPage(name, cfg) {
   await page.waitForTimeout(5000) // the page's own intro plays out first
   const dist = await page.evaluate((h) => document.documentElement.scrollHeight - h, h)
 
-  const frames = []
-  if (cfg.scale > 1) {
-    // Full resolution: Chromium's screencast only hands back css pixels, so the page is parked
-    // at where the scroll would be, frame by frame, and photographed. Steady 30 frames a second
-    // whatever the machine's speed. The page's own timers run a little slower than the video.
-    const at = pace(dist, cfg.run)
-    const hold = Math.round(cfg.hold * FPS), run = Math.round(cfg.run * FPS)
-    for (let i = 0; i < hold + run + hold; i++) {
-      const y = at(Math.min(Math.max(i - hold, 0), run) / FPS)
-      await page.evaluate((y) => new Promise((done) => {
-        scrollTo({ top: y, behavior: 'instant' })
-        requestAnimationFrame(() => requestAnimationFrame(done))
-      }), y)
-      const buf = await page.screenshot({ type: 'jpeg', quality: 90, scale: 'device' })
-      frames.push({ t: i / FPS, data: buf.toString('base64') })
-    }
-  } else {
-    // The screencast is smooth (50+ frames a second): scroll in real time and let it watch
-    const cdp = await ctx.newCDPSession(page)
-    cdp.on('Page.screencastFrame', (f) => {
-      frames.push({ t: f.metadata.timestamp, data: f.data })
-      cdp.send('Page.screencastFrameAck', { sessionId: f.sessionId }).catch(() => {})
-    })
-    await cdp.send('Page.startScreencast', { format: 'jpeg', quality: 92, everyNthFrame: 1 })
-    await page.waitForTimeout(cfg.hold * 1000)
-    await page.evaluate(({ dist, T, src }) => new Promise((done) => {
-      const at = new Function('return ' + src)()(dist, T), t0 = performance.now()
-      const step = (now) => {
-        const t = (now - t0) / 1000
-        scrollTo({ top: at(t), behavior: 'instant' })
-        t < T ? requestAnimationFrame(step) : done()
-      }
-      requestAnimationFrame(step)
-    }), { dist, T: cfg.run, src: pace.toString() })
-    await page.waitForTimeout(cfg.hold * 1000)
-    await cdp.send('Page.stopScreencast')
+  // Frame by frame: park the page where the scroll would be, then photograph it. A steady
+  // 30 frames a second whatever the machine's speed, and no hiccup is ever recorded.
+  const at = pace(dist, cfg.run)
+  const hold = Math.round(cfg.hold * FPS), run = Math.round(cfg.run * FPS), n = hold + run + hold
+  for (let i = 0; i < n; i++) {
+    const y = at(Math.min(Math.max(i - hold, 0), run) / FPS)
+    await page.evaluate((y) => new Promise((done) => {
+      scrollTo({ top: y, behavior: 'instant' })
+      requestAnimationFrame(() => requestAnimationFrame(done))
+    }), y)
+    const buf = await page.screenshot({ type: 'jpeg', quality: 90, scale: 'device' })
+    writeFileSync(join(work, `f${String(i).padStart(5, '0')}.jpg`), buf)
   }
   await browser.close()
+  console.log(`${name}: ${n} frames, page ${dist}px`)
+  if (process.env.FRAMES_ONLY) { console.log(`${name}: frames in ${work}`); return }
 
-  // frames arrive when the screen changes: write each with how long it stayed up
-  const list = []
-  frames.forEach((f, i) => {
-    const file = join(work, `f${String(i).padStart(5, '0')}.jpg`)
-    writeFileSync(file, Buffer.from(f.data, 'base64'))
-    const next = frames[i + 1] ? frames[i + 1].t : f.t + 1 / FPS
-    list.push(`file '${file}'`, `duration ${Math.max(next - f.t, 1 / 120).toFixed(5)}`)
-  })
-  list.push(`file '${join(work, `f${String(frames.length - 1).padStart(5, '0')}.jpg`)}'`)
-  writeFileSync(join(work, 'list.txt'), list.join('\n'))
-  const span = frames.at(-1).t - frames[0].t
-  console.log(`${name}: ${frames.length} frames over ${span.toFixed(1)}s (${(frames.length / span).toFixed(0)} per second), page ${dist}px`)
+  // Cut the stills. The two holds stay whole (a beat to read the first and last screen);
+  // inside the scroll every frame that equals the one before it is dropped, then the
+  // rest is re-timed to a steady 30 a second.
+  const seq = join(work, 'seq.mp4')
+  sh('ffmpeg', ['-y', '-framerate', String(FPS), '-i', join(work, 'f%05d.jpg'), '-filter_complex',
+    `[0:v]scale=trunc(iw/2)*2:trunc(ih/2)*2,format=yuv420p,split=3[a][b][c];` +
+    `[a]trim=end_frame=${hold},setpts=PTS-STARTPTS[head];` +
+    `[b]trim=start_frame=${hold}:end_frame=${hold + run},setpts=PTS-STARTPTS,mpdecimate,setpts=N/${FPS}/TB[mid];` +
+    `[c]trim=start_frame=${hold + run},setpts=PTS-STARTPTS[tail];` +
+    `[head][mid][tail]concat=n=3:v=1:a=0[v]`,
+    '-map', '[v]', '-r', String(FPS), '-c:v', 'libx264', '-crf', '14', '-preset', 'veryfast', seq])
+  const T = Number(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', seq]).toString())
 
-  // constant frame rate, then loop it: the last FADE seconds dissolve into the first
-  const cfr = join(work, 'cfr.mp4')
-  sh('ffmpeg', ['-y', '-f', 'concat', '-safe', '0', '-i', join(work, 'list.txt'), '-vf', `fps=${FPS},scale=trunc(iw/2)*2:trunc(ih/2)*2,format=yuv420p`,
-    '-c:v', 'libx264', '-crf', '14', '-preset', 'veryfast', cfr])
-  const T = span + 1 / FPS
+  // loop it: the last FADE seconds dissolve into the first
   const out = join(here, `${name}.mp4`)
-  sh('ffmpeg', ['-y', '-i', cfr, '-filter_complex',
+  sh('ffmpeg', ['-y', '-i', seq, '-filter_complex',
     `[0:v]trim=start=${FADE},setpts=PTS-STARTPTS[body];[0:v]trim=end=${FADE},setpts=PTS-STARTPTS[head];` +
     `[body][head]xfade=transition=fade:duration=${FADE}:offset=${(T - 2 * FADE).toFixed(3)},format=yuv420p[v]`,
     '-map', '[v]', '-an', '-c:v', 'libx264', '-crf', String(cfg.crf), '-preset', 'slow', '-movflags', '+faststart', out])
-  rmSync(work, { recursive: true, force: true })
-  console.log(`${name}.mp4 ${kb(out)}`)
+  if (process.env.KEEP_FRAMES) console.log(`${name}: frames kept in ${work}`)
+  else rmSync(work, { recursive: true, force: true })
+  console.log(`${name}.mp4 ${T.toFixed(1)}s before the loop fade, ${kb(out)}`)
 }
 
 function recordReel() {
