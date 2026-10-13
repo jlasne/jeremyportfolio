@@ -1,10 +1,10 @@
 // Re-records the three bento videos on the landing.
 //
-//   NODE_PATH=$(npm root -g) node media/apps/record.mjs [dana] [kivenro] [terrence] [kaught]
+//   NODE_PATH=$(npm root -g) node media/apps/record.mjs [dana] [kivenro] [terrence] [lenny] [kaught]
 //
 // Needs playwright (with its chromium) and ffmpeg with libx264 on the path.
 //
-// dana, kivenro, terrence: opens the live page at the tile's shape, scrolls it top to
+// dana, kivenro, terrence, lenny: opens the live page at the tile's shape, scrolls it top to
 //   bottom the way a hand would (eased in and out, one steady pace between),
 //   and photographs it frame by frame. Then the time is bent: where the page
 //   barely moves while the scroll goes on (a pinned scene, a slow fade) the
@@ -35,9 +35,10 @@ const FADE = 0.9 // seconds the end of the scroll melts into the start
 // view: the page's own width and height, as it lays out inside the tile.
 // scale: device pixels per css pixel, so the video is sharp at the popped size.
 const PAGES = {
-  dana: { url: 'https://www.maximehouel.com/dana/', view: [420, 568], scale: 1.5, run: 24, hold: 1.4, crf: 29 },
-  kivenro: { url: 'https://www.maximehouel.com/kivenro/', view: [900, 472], scale: 1, run: 20, hold: 1.2, crf: 28 },
-  terrence: { url: 'https://www.maximehouel.com/terrence/', view: [420, 536], scale: 1.5, run: 24, hold: 1.4, crf: 29 },
+  dana: { url: 'https://www.creatormatch.app/dana/', view: [420, 568], scale: 1.5, run: 24, hold: 1.4, crf: 29 },
+  kivenro: { url: 'https://www.creatormatch.app/kivenro/', view: [900, 472], scale: 1, run: 20, hold: 1.2, crf: 28 },
+  terrence: { url: 'https://www.creatormatch.app/terrence/', view: [420, 536], scale: 1.5, run: 24, hold: 1.4, crf: 29 },
+  lenny: { url: 'https://www.creatormatch.app/lenny/', view: [420, 536], scale: 1.5, run: 24, hold: 1.4, crf: 29 },
 }
 const REEL = 'https://www.kaught.app/assets/reel/reel.mp4'
 
@@ -154,7 +155,7 @@ function recordReel() {
 }
 
 const want = process.argv.slice(2)
-const all = want.length ? want : ['dana', 'kivenro', 'terrence', 'kaught']
+const all = want.length ? want : ['dana', 'kivenro', 'terrence', 'lenny', 'kaught']
 for (const name of all) {
   if (name === 'kaught') recordReel()
   else if (PAGES[name]) await recordPage(name, PAGES[name])
