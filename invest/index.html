@@ -653,9 +653,13 @@ details.more>div{margin-top:8px}
   <div class="card">
     <div class="ch">
       <div><div class="eyebrow ac">All assets</div><h2>One line per asset</h2></div>
-      <button class="btn sm" id="t-csv" type="button">Download CSV</button>
+      <div class="chips" role="group" aria-label="Export the table">
+        <button class="btn sm primary" id="t-xlsx" type="button">Export Excel</button>
+        <button class="btn sm" id="t-csv" type="button">CSV</button>
+        <button class="btn sm" id="t-copy" type="button">Copy</button>
+      </div>
     </div>
-    <p class="lede">Every stock index, bond market and cash currency of 32 countries, plus energy producers, oil, nuclear, gold, silver and copper. Each line holds the 4 checks, 5-year figures, rates and country macro. Click a header to sort. Click a line for its sheet. Season codes: IB inflationary boom, IX inflationary bust, DB deflationary boom, DX deflationary bust.</p>
+    <p class="lede">Every stock index, bond market and cash currency of 32 countries, plus energy producers, oil, nuclear, gold, silver and copper. Each line holds the 4 checks, 5-year figures, rates and country macro. Click a header to sort. Click a line for its sheet. Exports follow your filters and sort. Season codes: IB inflationary boom, IX inflationary bust, DB deflationary boom, DX deflationary bust.</p>
     <div class="filters">
       <input class="search" id="t-q" type="search" placeholder="Search the table: country, currency, ticker, gold, oil…" autocomplete="off" aria-label="Search the table">
       <div class="chips" id="t-cls" role="group" aria-label="Asset type"></div>
@@ -1450,15 +1454,37 @@ function renderTable(){
   $("#t-state").innerHTML=`<span class="num">${rows.length} of ${A.length} assets</span>`;
   $("#t-foot").textContent=`${cnt("Stocks")} stocks, ${cnt("Bonds")} bonds, ${cnt("Currency")} cash, ${cnt("Sectors")} sectors. 5-year figures cover ${Object.keys(STATS).length} of ${A.length} assets (US-listed ETFs, USD). Country columns repeat on the 3 lines of one country. · means no data.`;
 }
+function tData(){
+  const head=["Asset",...TCOLS.map(c=>c[2]),"Closed"];
+  const rows=tRows().map(a=>[a.name,...TCOLS.map(c=>{const v=tv(a,c[1]);return v==null?"":typeof v==="number"?Math.round(v*1e4)/1e4:v}),a.closed?"yes":""]);
+  return [head,...rows];
+}
+function tSave(blob,name){const url=URL.createObjectURL(blob);const l=document.createElement("a");l.href=url;l.download=name;document.body.append(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+const tStamp=()=>"invest-assets-"+new Date().toISOString().slice(0,10);
 function tCSV(){
   const q=s=>{s=String(s??"");return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
-  const head=["Asset",...TCOLS.map(c=>c[2]),"Closed"];
-  const out=[head.map(q).join(",")].concat(tRows().map(a=>[a.name,...TCOLS.map(c=>{const v=tv(a,c[1]);return v==null?"":typeof v==="number"?Math.round(v*1e4)/1e4:v}),a.closed?"yes":""].map(q).join(",")));
-  const url=URL.createObjectURL(new Blob(["﻿"+out.join("\n")],{type:"text/csv;charset=utf-8"}));
-  const l=document.createElement("a");l.href=url;l.download="invest-assets.csv";document.body.append(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  tSave(new Blob(["﻿"+tData().map(r=>r.map(q).join(",")).join("\n")],{type:"text/csv;charset=utf-8"}),tStamp()+".csv");
+  toast("CSV downloaded: "+(tData().length-1)+" lines");
+}
+let xlsxP;
+function loadXlsx(){return window.XLSX?Promise.resolve():xlsxP||(xlsxP=new Promise((ok,no)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";s.onload=ok;s.onerror=()=>{xlsxP=null;no()};document.head.append(s)}))}
+async function tXLSX(){
+  const btn=$("#t-xlsx");btn.disabled=true;
+  try{await loadXlsx();const d=tData(),ws=XLSX.utils.aoa_to_sheet(d);
+    ws["!cols"]=d[0].map((h,i)=>({wch:Math.min(34,Math.max(String(h).length,...d.slice(1).map(r=>String(r[i]).length))+2)}));
+    ws["!freeze"]={xSplit:1,ySplit:1};ws["!autofilter"]={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:d.length-1,c:d[0].length-1}})};
+    const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Assets");XLSX.writeFile(wb,tStamp()+".xlsx");
+    toast("Excel downloaded: "+(d.length-1)+" lines")}
+  catch(e){toast("Excel library blocked. Use CSV")}
+  btn.disabled=false;
+}
+async function tCopy(){
+  const txt=tData().map(r=>r.join("\t")).join("\n");
+  try{await navigator.clipboard.writeText(txt);toast("Copied. Paste in Sheets or Excel")}
+  catch(e){const ta=document.createElement("textarea");ta.value=txt;document.body.append(ta);ta.select();let ok=false;try{ok=document.execCommand("copy")}catch(_){}ta.remove();toast(ok?"Copied. Paste in Sheets or Excel":"Copy blocked. Use CSV")}
 }
 $("#t-q").addEventListener("input",renderTable);
-$("#t-csv").onclick=tCSV;
+$("#t-csv").onclick=tCSV;$("#t-xlsx").onclick=tXLSX;$("#t-copy").onclick=tCopy;
 $("#t-cls").addEventListener("click",e=>{const b=e.target.closest("[data-c]");if(b){tcls=b.dataset.c;renderTable()}});
 $("#t-rg").addEventListener("click",e=>{const b=e.target.closest("[data-r]");if(b){trg=b.dataset.r;renderTable()}});
 $("#t-tbl").addEventListener("click",e=>{
