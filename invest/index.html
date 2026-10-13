@@ -23,7 +23,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* One loop on one page: compose a mix (Build, step 1), read what breaks it (step 2), keep it (step 3).
-   Explore holds the 102 assets and the country map; Method holds the rules.
+   Explore holds the 102 assets and the country map; Table lays all 102 out one line each; Method holds the rules.
    The look is a market terminal: black ground, one monospace face, amber for labels and the
    accent, white for figures, thin grey rules, square corners, no photo, no blur, no shadow.
    Negative correlation reads blue, positive red. Season hues are the ones on /wealth, lifted
@@ -104,7 +104,7 @@ nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:12;display:fle
 .sq4 i{width:8px;height:8px;border-radius:0;background:var(--faint)}
 .sq4 i.ok{background:var(--ok)} .sq4 i.warn{background:var(--warn)} .sq4 i.bad{background:var(--bad)}
 .navst b{font-weight:600;color:var(--accent)}
-@media (max-width:480px){.tabset button{padding:9px 8px;font-size:11px;letter-spacing:.02em}.navst{padding:9px 8px;gap:6px}.navst .tot{display:none}}
+@media (max-width:480px){.tabset button{padding:9px 6px;font-size:10.5px;letter-spacing:0}.tabset button::before{content:none}.navst{padding:9px 8px;gap:6px}.navst .tot{display:none}}
 @media (max-width:420px){.navst .lbl{display:none}}
 
 /* ---------- panels: a title band, then the figures ---------- */
@@ -497,6 +497,33 @@ details.more>div{margin-top:8px}
 .study .q{color:var(--mute);font-size:11.5px;margin-top:3px}
 .verdictc{display:flex;gap:4px;flex-wrap:wrap}
 
+
+/* ---------- table ---------- */
+.tbig{max-height:calc(100vh - 150px);min-height:320px;overflow:auto;border:1px solid var(--line);overscroll-behavior:contain}
+.xtbl{border-collapse:separate;border-spacing:0;font-size:11.5px;width:max-content;min-width:100%}
+.xtbl th,.xtbl td{padding:5px 8px;border-bottom:1px solid var(--line);white-space:nowrap;text-align:right;background:var(--panel)}
+.xtbl .l{text-align:left}
+.xtbl thead th{position:sticky;z-index:3;background:#000;color:var(--accent);font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;border-bottom:1px solid var(--line2);cursor:pointer;user-select:none}
+.xtbl thead tr.band th{top:0;height:22px;cursor:default;color:var(--mute);border-left:1px solid var(--line2);text-align:left;font-size:10px}
+.xtbl thead tr.cols th{top:22px}
+.xtbl thead th:hover{color:#fff}
+.xtbl thead th[aria-sort]::after{content:" ▲";font-size:8px}
+.xtbl thead th[aria-sort=descending]::after{content:" ▼"}
+.xtbl .sk{position:sticky;left:0;z-index:2;background:var(--panel);box-shadow:1px 0 0 var(--line2)}
+.xtbl thead th.sk{z-index:5;background:#000}
+.xtbl tbody tr{cursor:pointer}
+.xtbl tbody tr:hover td{background:var(--sunk2)}
+.xtbl tbody tr.cut td{border-top:1px solid var(--line2)}
+.xtbl tbody tr.cl td{opacity:.45}
+.xtbl .nm{display:flex;gap:8px;align-items:center;min-width:190px}
+.xtbl .nm b{font-weight:600}
+.xtbl .nm small{display:block;color:var(--mute);font-size:10px;margin:0}
+.xtbl .gb{border-left:1px solid var(--line2)}
+.xtbl .na{color:var(--faint)}
+.xtbl .add{padding:2px 8px;font-size:10.5px}
+.tblp{min-width:0}
+@media (max-width:560px){.xtbl .nm{min-width:130px}.xtbl .nm .ico{display:none}.tbig{max-height:calc(100vh - 110px)}}
+
 /* ---------- tooltip & toast ---------- */
 .tip{position:fixed;z-index:60;pointer-events:none;max-width:260px;padding:7px 9px;border-radius:0;background:#000;border:1px solid var(--accent);font-size:11.5px;display:grid;gap:3px}
 .tip .v{font-family:var(--f-mono);font-size:14px;font-weight:600;color:var(--ink)}
@@ -526,6 +553,7 @@ details.more>div{margin-top:8px}
   <div class="tabset" role="tablist">
     <button role="tab" id="t-build" aria-controls="p-build" aria-selected="true" data-tab="build" type="button">Build</button>
     <button role="tab" id="t-explore" aria-controls="p-explore" aria-selected="false" data-tab="explore" tabindex="-1" type="button">Explore</button>
+    <button role="tab" id="t-table" aria-controls="p-table" aria-selected="false" data-tab="table" tabindex="-1" type="button">Table</button>
     <button role="tab" id="t-method" aria-controls="p-method" aria-selected="false" data-tab="method" tabindex="-1" type="button">Method</button>
   </div>
   <button class="navst" id="navst" type="button"></button>
@@ -617,6 +645,25 @@ details.more>div{margin-top:8px}
       <div class="fstate" id="fstate"></div>
     </div>
     <div class="card"><div class="list" id="alist"></div></div>
+  </div>
+</section>
+
+<!-- ============ TABLE ============ -->
+<section id="p-table" class="tblp" role="tabpanel" aria-labelledby="t-table" hidden>
+  <div class="card">
+    <div class="ch">
+      <div><div class="eyebrow ac">All assets</div><h2>One line per asset</h2></div>
+      <button class="btn sm" id="t-csv" type="button">Download CSV</button>
+    </div>
+    <p class="lede">Every stock index, bond market and cash currency of 32 countries, plus energy producers, oil, nuclear, gold, silver and copper. Each line holds the 4 checks, 5-year figures, rates and country macro. Click a header to sort. Click a line for its sheet. Season codes: IB inflationary boom, IX inflationary bust, DB deflationary boom, DX deflationary bust.</p>
+    <div class="filters">
+      <input class="search" id="t-q" type="search" placeholder="Search the table: country, currency, ticker, gold, oil…" autocomplete="off" aria-label="Search the table">
+      <div class="chips" id="t-cls" role="group" aria-label="Asset type"></div>
+      <div class="chips" id="t-rg" role="group" aria-label="Country season"></div>
+      <div class="fstate" id="t-state"></div>
+    </div>
+    <div class="tw tbig" id="t-wrap"><table class="xtbl" id="t-tbl"></table></div>
+    <p class="mute sm" id="t-foot"></p>
   </div>
 </section>
 
@@ -1297,13 +1344,127 @@ function openSheet(id){
 function closeSheet(){if($("#sheet").hidden)return;$("#sheet").hidden=true;document.body.classList.remove("lock");sheetId=null;if(lastFocus&&lastFocus.isConnected)lastFocus.focus({preventScroll:true})}
 $("#sheet").addEventListener("click",e=>{
   if(e.target.id==="sheet"||e.target.closest("[data-close]")){closeSheet();return}
-  const b=e.target.closest("[data-sadd]");if(b){const id=b.dataset.sadd;toggleLine(id);openSheet(id);if(!$("#p-explore").hidden){renderList();renderMap()}return}
-  const v=e.target.closest("[data-vd]");if(v){const cur=store("vd:"+v.dataset.c);store("vd:"+v.dataset.c,cur===v.dataset.vd?"":v.dataset.vd);renderLines();report();openSheet(sheetId);if(!$("#p-explore").hidden)renderList()}});
+  const b=e.target.closest("[data-sadd]");if(b){const id=b.dataset.sadd;toggleLine(id);openSheet(id);if(!$("#p-explore").hidden){renderList();renderMap()}if(!$("#p-table").hidden)renderTable();return}
+  const v=e.target.closest("[data-vd]");if(v){const cur=store("vd:"+v.dataset.c);store("vd:"+v.dataset.c,cur===v.dataset.vd?"":v.dataset.vd);renderLines();report();openSheet(sheetId);if(!$("#p-explore").hidden)renderList();if(!$("#p-table").hidden)renderTable()}});
 $("#sheet").addEventListener("input",e=>{if(e.target.id==="nt")store("nt:"+e.target.dataset.c,e.target.value)});
 document.addEventListener("keydown",e=>{
   if(e.key==="Escape"&&!$("#sheet").hidden){closeSheet();return}
   if(e.key==="Tab"&&!$("#sheet").hidden){const f=[...$("#sheet-in").querySelectorAll("button,textarea,input,[tabindex]:not([tabindex='-1'])")];if(!f.length)return;
     const first=f[0],last=f[f.length-1];if(e.shiftKey&&(document.activeElement===first||document.activeElement===$("#sheet-in"))){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}});
+
+/* ============ TABLE ============ */
+const TCL={Stocks:"Stocks",Bonds:"Bonds",Currency:"Cash",Sectors:"Sector"}, TORD={Sectors:0,Stocks:1,Bonds:2,Currency:3};
+let tcls="All", trg="All", tsort={k:"",d:1};
+const num=v=>v==null?null:+v;
+const real=a=>{const c=CM[a.country];if(!c||c.cpi==null)return null;return a.cls==="Bonds"?(c.y10==null?null:c.y10-c.cpi):a.cls==="Currency"?(c.rate==null?null:c.rate-c.cpi):null};
+const cv=(a,k)=>{const c=a.country?CM[a.country]:null;return c?c[k]:null};
+// band, key, header, title, align-left?, value, html
+const TCOLS=[
+ ["Asset","cls","Type","Stocks, bonds, cash (the currency) or sector",1,a=>TCL[a.cls]],
+ ["Asset","veh","Vehicle","ETF or ticker used to hold it",1,a=>a.veh],
+ ["Asset","ctry","Country","",1,a=>a.country?CM[a.country].name:"World"],
+ ["Asset","cur","Cur.","Currency code",1,a=>a.country?CM[a.country].cur:""],
+ ["4 checks","season","Season now","Gave season of its country",1,a=>RGN[regimeOf(a)]],
+ ["4 checks","heading","Heading","Season the country is heading to",1,a=>{const c=a.country?CM[a.country]:null;return c&&c.heading?RGN[c.heading]||c.heading:""}],
+ ["4 checks","danger","Danger","Check 2: 0 to 100, can the money go to zero. Low up to 15, medium to 35, high above",0,a=>a.danger],
+ ["4 checks","frag","Fragility","Check 1: fragile, robust or antifragile against world shocks",1,a=>a.af[0]],
+ ["4 checks","fit","Square fit","Check 3: does its country's season favour this asset type",1,a=>a.square],
+ ["4 checks","wins","Wins in","Seasons where this asset type wins",1,a=>a.seasons.map(s=>SK[s].toUpperCase()).join(" ")],
+ ["5 years","ret","Return %/yr","Annual return over 5 years, USD",0,a=>num(STATS[a.id]?.ret)],
+ ["5 years","vol","Swing %","Yearly volatility",0,a=>num(STATS[a.id]?.vol)],
+ ["5 years","dd","Worst drop %","Max drawdown",0,a=>num(STATS[a.id]?.dd)],
+ ["5 years","may","Since 29 May %","Move since 29 May 2026",0,a=>num(STATS[a.id]?.may)],
+ ["5 years","beta","Beta","Move versus the world index",0,a=>num(STATS[a.id]?.beta)],
+ ["Rates","rate","Policy rate %","Central bank rate: the cash yield",0,a=>cv(a,"rate")],
+ ["Rates","y10","10Y yield %","10-year government bond yield",0,a=>cv(a,"y10")],
+ ["Rates","y10chg","10Y chg pts","10-year yield change, 12 months",0,a=>cv(a,"y10chg")],
+ ["Rates","cpi","CPI %","Inflation",0,a=>cv(a,"cpi")],
+ ["Rates","tgt","CPI target %","",0,a=>cv(a,"tgt")],
+ ["Rates","real","Real yield %","Bonds: 10-year minus CPI. Cash: policy rate minus CPI",0,real],
+ ["Rates","fxe","FX vs EUR %","Currency move against the euro, 12 months",0,a=>cv(a,"fxEur")],
+ ["Country","gdp","GDP %","GDP growth",0,a=>cv(a,"gdp")],
+ ["Country","pmi","PMI","Purchasing managers index, 50 is the line between growth and contraction",0,a=>cv(a,"pmi")],
+ ["Country","debt","Debt % GDP","",0,a=>cv(a,"debt")],
+ ["Country","fh","Held abroad %","Share of debt held by foreigners",0,a=>cv(a,"fh")],
+ ["Country","ca","Curr. acct % GDP","Current account balance",0,a=>cv(a,"ca")],
+ ["Country","res","Reserves $bn","",0,a=>cv(a,"res")],
+ ["Country","bond","Bond risk","",1,a=>cv(a,"bond")||""],
+ ["Country","energy","Energy","",1,a=>cv(a,"energy")||""],
+ ["Country","G","Growth dial","",0,a=>cv(a,"G")],
+ ["Country","I","Inflation dial","",0,a=>cv(a,"I")]
+];
+const TK=Object.fromEntries(TCOLS.map((c,i)=>[c[1],i]));
+const tv=(a,k)=>TCOLS[TK[k]][5](a);
+const sgn=(v,d=1)=>(v>0?"+":"")+(+v).toFixed(d);
+function tcell(a,k){const v=tv(a,k),na=`<span class="na">·</span>`;
+  const nz=(x,d=1)=>x==null?na:(+x).toFixed(d);
+  const sc=(x,d=1)=>x==null?na:`<span class="${x>0?"ok":x<0?"bad":""}">${sgn(x,d)}</span>`;
+  switch(k){
+   case "cls":return v;
+   case "ctry":return v;
+   case "season":{const s=regimeOf(a);return `<span class="rg q-${SK[s]}">${esc(v)}</span>`}
+   case "heading":{const c=a.country?CM[a.country]:null;return c&&c.heading?`<span class="rg q-${SK[c.heading]||"ib"}">${esc(v)}</span>`:na}
+   case "danger":{const d=sDanger(a);return `<span class="${d.s}">${v}</span>`}
+   case "frag":{const f=sAF(a);return `<span class="${f.s}">${esc(v)}</span>`}
+   case "fit":{const q=sSq(a);return `<span class="${q.s}">${esc(q.t)}</span>`}
+   case "wins":return v.split(" ").map(s=>`<span class="sname q-${s.toLowerCase()}">${s}</span>`).join(" ");
+   case "ret":case "may":return sc(v,1);
+   case "dd":return v==null?na:`<span class="bad">${(+v).toFixed(1)}</span>`;
+   case "vol":case "rate":case "cpi":case "tgt":case "debt":case "fh":return nz(v,1);
+   case "beta":return nz(v,2);
+   case "y10":return nz(v,2);
+   case "y10chg":case "real":case "fxe":case "gdp":case "ca":return sc(v,1);
+   case "pmi":return v==null?na:`<span class="${v>=50?"ok":"bad"}">${(+v).toFixed(1)}</span>`;
+   case "res":return v==null?na:Math.round(v).toLocaleString("en-US");
+   case "G":case "I":return v==null?na:sgn(v,2);
+   case "bond":return v?`<span class="${v==="low"?"ok":v==="medium"?"warn":"bad"}">${esc(v)}</span>`:na;
+   default:return v==null||v===""?na:esc(v)}
+}
+function tRows(){
+  const q=$("#t-q").value.trim().toLowerCase();
+  const hits=A.filter(a=>(tcls==="All"||a.cls===tcls)&&(trg==="All"||regimeOf(a)===trg)&&
+    (!q||(a.name+" "+a.veh+" "+(a.country?CM[a.country].name+" "+CM[a.country].cur:"")+" "+a.tags.join(" ")+" "+TCL[a.cls]).toLowerCase().includes(q)));
+  const cn=x=>x.country?CM[x.country].name:"";
+  const base=(x,y)=>((y.cls==="Sectors")-(x.cls==="Sectors"))||cn(x).localeCompare(cn(y))||TORD[x.cls]-TORD[y.cls]||x.name.localeCompare(y.name);
+  const k=tsort.k;
+  if(!k)return hits.sort(base);
+  return hits.sort((x,y)=>{const a=tv(x,k),b=tv(y,k);
+    if(a==null||a==="")return (b==null||b==="")?base(x,y):1;if(b==null||b==="")return -1;
+    const r=typeof a==="number"?a-b:String(a).localeCompare(String(b));return r?r*tsort.d:base(x,y)});
+}
+function renderTable(){
+  $("#t-cls").innerHTML=["All","Stocks","Bonds","Currency","Sectors"].map(c=>`<button type="button" class="chip" data-c="${c}" aria-pressed="${tcls===c}">${c==="Currency"?"Cash":c}</button>`).join("");
+  $("#t-rg").innerHTML=[["All","All seasons"],...SQ.map(s=>[s,RGN[s]])].map(([k,l])=>`<button type="button" class="chip${SK[k]?" q-"+SK[k]:""}" data-r="${k}" aria-pressed="${trg===k}">${SK[k]?`<span class="dot"></span>`:""}${l}</button>`).join("");
+  const rows=tRows();
+  let bands=[];TCOLS.forEach(c=>{const b=bands[bands.length-1];if(b&&b[0]===c[0])b[1]++;else bands.push([c[0],1])});
+  const firstOf=new Set();let i=0;bands.forEach(b=>{firstOf.add(i);i+=b[1]});
+  const gb=i=>firstOf.has(i)&&i>0?" gb":"";
+  let h=`<thead><tr class="band"><th class="sk l"></th>${bands.map(b=>`<th class="l" colspan="${b[1]}">${b[0]}</th>`).join("")}<th></th></tr>
+   <tr class="cols"><th class="sk l">Asset</th>${TCOLS.map((c,j)=>`<th class="${c[4]?"l":""}${gb(j)}" data-k="${c[1]}" title="${esc(c[3]||c[2])}"${tsort.k===c[1]?` aria-sort="${tsort.d>0?"ascending":"descending"}"`:""}>${c[2]}</th>`).join("")}<th></th></tr></thead>`;
+  let prev=null;
+  h+="<tbody>"+rows.map(a=>{const key=a.country||"~",cut=prev!==null&&prev!==key;prev=key;const inL=lines.some(l=>l.id===a.id);
+    return `<tr class="${cut&&!tsort.k?"cut":""}${a.closed?" cl":""}" data-open="${a.id}"><td class="sk l"><div class="nm">${ico(a)}<span><b>${esc(a.name)}</b><small>${TCL[a.cls]}${a.closed?" · closed":""}</small></span></div></td>${
+      TCOLS.map((c,j)=>`<td class="${c[4]?"l":""}${gb(j)}">${tcell(a,c[1])}</td>`).join("")}<td>${a.closed?pill("bad","Closed"):`<button type="button" class="btn sm add${inL?" on":""}" data-tadd="${a.id}" aria-label="${inL?"Remove from":"Add to"} your mix: ${esc(a.name)}">${inL?"✓":"+"}</button>`}</td></tr>`}).join("")+"</tbody>";
+  $("#t-tbl").innerHTML=h;
+  const cnt=k=>A.filter(a=>a.cls===k).length;
+  $("#t-state").innerHTML=`<span class="num">${rows.length} of ${A.length} assets</span>`;
+  $("#t-foot").textContent=`${cnt("Stocks")} stocks, ${cnt("Bonds")} bonds, ${cnt("Currency")} cash, ${cnt("Sectors")} sectors. 5-year figures cover ${Object.keys(STATS).length} of ${A.length} assets (US-listed ETFs, USD). Country columns repeat on the 3 lines of one country. · means no data.`;
+}
+function tCSV(){
+  const q=s=>{s=String(s??"");return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
+  const head=["Asset",...TCOLS.map(c=>c[2]),"Closed"];
+  const out=[head.map(q).join(",")].concat(tRows().map(a=>[a.name,...TCOLS.map(c=>{const v=tv(a,c[1]);return v==null?"":typeof v==="number"?Math.round(v*1e4)/1e4:v}),a.closed?"yes":""].map(q).join(",")));
+  const url=URL.createObjectURL(new Blob(["﻿"+out.join("\n")],{type:"text/csv;charset=utf-8"}));
+  const l=document.createElement("a");l.href=url;l.download="invest-assets.csv";document.body.append(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+$("#t-q").addEventListener("input",renderTable);
+$("#t-csv").onclick=tCSV;
+$("#t-cls").addEventListener("click",e=>{const b=e.target.closest("[data-c]");if(b){tcls=b.dataset.c;renderTable()}});
+$("#t-rg").addEventListener("click",e=>{const b=e.target.closest("[data-r]");if(b){trg=b.dataset.r;renderTable()}});
+$("#t-tbl").addEventListener("click",e=>{
+  const h=e.target.closest("th[data-k]");if(h){const k=h.dataset.k;tsort=tsort.k!==k?{k,d:1}:tsort.d>0?{k,d:-1}:{k:"",d:1};renderTable();return}
+  const b=e.target.closest("[data-tadd]");if(b){e.stopPropagation();toggleLine(b.dataset.tadd);renderTable();return}
+  const r=e.target.closest("[data-open]");if(r)openSheet(r.dataset.open)});
 
 /* ---------- tooltip ---------- */
 const tip=$("#tip");
@@ -1314,14 +1475,14 @@ function hideTip(){tip.hidden=true}
 addEventListener("scroll",hideTip,{passive:true});
 
 /* ---------- tabs ---------- */
-const TABS=["build","explore","method"];
+const TABS=["build","explore","table","method"];
 function showTab(t){
   TABS.forEach(x=>{const b=$("#t-"+x),on=x===t;b.setAttribute("aria-selected",on);b.tabIndex=on?0:-1;$("#p-"+x).hidden=!on});
-  hideTip();if(t==="explore"){renderList();renderMap()}
+  hideTip();if(t==="explore"){renderList();renderMap()}if(t==="table")renderTable();
 }
 document.querySelector(".tabset").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(b)showTab(b.dataset.tab)});
 document.querySelector(".tabset").addEventListener("keydown",e=>{if(e.key!=="ArrowRight"&&e.key!=="ArrowLeft")return;const cur=TABS.findIndex(x=>$("#t-"+x).getAttribute("aria-selected")==="true");
-  const nx=TABS[(cur+(e.key==="ArrowRight"?1:-1)+3)%3];showTab(nx);$("#t-"+nx).focus()});
+  const nx=TABS[(cur+(e.key==="ArrowRight"?1:-1)+TABS.length)%TABS.length];showTab(nx);$("#t-"+nx).focus()});
 let rsT;addEventListener("resize",()=>{clearTimeout(rsT);rsT=setTimeout(()=>{updateBar();if(!$("#p-explore").hidden)renderMap()},120)});
 
 /* ---------- method: the static square ---------- */
