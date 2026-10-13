@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Jeremy Lasne</title>
-<meta name="description" content="I build mobile apps with influencers. CreatorMatch, wlns.shop, Kaught, Kivenro, Dr. Dana, Ruff Diesel.">
+<meta name="description" content="I build mobile apps with influencers. CreatorMatch, wlns.shop, Kaught, Kivenro, Dr. Dana, Ruff Diesel, Lenny.">
 <link rel="canonical" href="https://www.jeremylasne.com/">
 <meta name="theme-color" content="#050b16">
 <link rel="icon" href="favicon.ico" sizes="any">
@@ -115,15 +115,16 @@
 
   /* ---- the mobile app bento: each tile plays its page by itself; under a mouse it pops out ---- */
   section.apps { container-type: inline-size; }
-  /* four tiles staggered over three equal rows: Dr. Dana tall on the left, Ruff Diesel tall on the right */
+  /* five tiles staggered over four equal rows: three tall (Dr. Dana, Ruff Diesel, Lenny) zigzag with two wide */
   .bento {
     display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-    grid-template-rows: repeat(3, 232px); grid-template-rows: repeat(3, 34cqw);
+    grid-template-rows: repeat(4, 232px); grid-template-rows: repeat(4, 34cqw);
   }
   .tile.dana { grid-column: 1; grid-row: 1 / span 2; }
   .tile.kaught { grid-column: 2; grid-row: 1; }
   .tile.terrence { grid-column: 2; grid-row: 2 / span 2; }
-  .tile.kivenro { grid-column: 1; grid-row: 3; }
+  .tile.lenny { grid-column: 1; grid-row: 3 / span 2; }
+  .tile.kivenro { grid-column: 2; grid-row: 4; }
   .tile {
     --pop: 1.06;
     position: relative; display: flex; flex-direction: column; overflow: hidden; min-width: 0;
@@ -174,7 +175,7 @@
   @media (min-width: 640px) { h1 { font-size: 34px; } }
   @media (max-width: 520px) {
     .bento { grid-template-columns: 1fr; grid-template-rows: none; }
-    .tile.dana, .tile.kaught, .tile.terrence, .tile.kivenro { grid-column: auto; grid-row: auto; }
+    .tile.dana, .tile.kaught, .tile.terrence, .tile.lenny, .tile.kivenro { grid-column: auto; grid-row: auto; }
     .tile .shot { flex: none; aspect-ratio: 1200 / 630; }
     .tile.tall .shot { aspect-ratio: 3 / 4; }
     a.tile.wide { flex-wrap: wrap; justify-content: center; gap: 0 12px; padding: 16px 18px; text-align: center; }
@@ -291,6 +292,15 @@
           </div>
           <a class="cap" href="https://www.creatormatch.app/terrence/" target="_blank" rel="noopener">
             <span class="t-name">Ruff Diesel</span><span class="t-desc">IFBB Pro, classic physique</span>
+          </a>
+        </div>
+        <div class="tile tall lenny">
+          <div class="shot">
+            <a class="still" href="https://www.creatormatch.app/lenny/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true"><img src="media/apps/lenny.webp" alt="" width="630" height="804" loading="lazy" decoding="async"></a>
+            <video src="media/apps/lenny.mp4" muted loop playsinline preload="none" tabindex="-1" aria-hidden="true"></video>
+          </div>
+          <a class="cap" href="https://www.creatormatch.app/lenny/" target="_blank" rel="noopener">
+            <span class="t-name">Lenny</span><span class="t-desc">Fitness &amp; mobility coach</span>
           </a>
         </div>
         <div class="tile kivenro">
