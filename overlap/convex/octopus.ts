@@ -86,16 +86,23 @@ async function session(url: string, timeoutMs: number, calls: { name: string; ar
     timeoutMs,
   );
   await send(url, { jsonrpc: "2.0", method: "notifications/initialized" }, init.sid, timeoutMs);
-  const out: string[] = [];
+  /* One failing call, such as a brain that no longer exists, must not take
+     the others down: each call keeps its own text or its own error. */
+  const out: { text: string; error?: string }[] = [];
   for (const c of calls) {
-    const r = await send(
-      url,
-      { jsonrpc: "2.0", id: id++, method: "tools/call", params: { name: c.name, arguments: c.args } },
-      init.sid,
-      timeoutMs,
-    );
-    const parts = r.message?.result?.content;
-    out.push(Array.isArray(parts) ? parts.map((p: any) => (typeof p?.text === "string" ? p.text : "")).join("\n") : "");
+    try {
+      const r = await send(
+        url,
+        { jsonrpc: "2.0", id: id++, method: "tools/call", params: { name: c.name, arguments: c.args } },
+        init.sid,
+        timeoutMs,
+      );
+      const parts = r.message?.result?.content;
+      out.push({ text: Array.isArray(parts) ? parts.map((p: any) => (typeof p?.text === "string" ? p.text : "")).join("\n") : "" });
+    } catch (e) {
+      if (e instanceof Error && e.name === "AbortError") throw e;
+      out.push({ text: "", error: e instanceof Error ? e.message : String(e) });
+    }
   }
   return out;
 }
@@ -132,36 +139,48 @@ const QUESTION =
   "What makes a strong X post? Hooks, clear writing, specific details, story, volume, audience, replies.";
 const TERMS = ["hook", "writing", "posts", "specific", "story", "audience", "volume", "clarity"];
 
-/** Read the brains. Never throws. */
+/**
+ * Read the brains. Never throws.
+ *
+ * Each brain is read on its own, so one that is missing or empty costs only
+ * itself. `skipped` names the brains that gave nothing and why, so the Test
+ * button can say which one to fix.
+ */
 export async function octopusNotes(opts: {
   url: string;
   brains?: string[];
   timeoutMs?: number;
-}): Promise<{ notes: string; count: number; error?: string }> {
-  const brains = opts.brains?.length ? opts.brains : ["x", "content"];
+}): Promise<{ notes: string; count: number; error?: string; skipped: string[] }> {
+  const brains = opts.brains?.length ? opts.brains : ["content"];
   try {
-    const texts = await session(
+    const results = await session(
       opts.url,
       opts.timeoutMs ?? 20_000,
       brains.map((brain) => ({ name: "ask", args: { question: QUESTION, brain, terms: TERMS } })),
     );
+    const skipped: string[] = [];
     const seen = new Set<string>();
-    const lines = texts
-      .flatMap((t) => parseNotes(t))
-      .filter((l) => {
+    const lines: string[] = [];
+    results.forEach((r, i) => {
+      const found = r.error ? [] : parseNotes(r.text);
+      if (!found.length) skipped.push(`${brains[i]} (${r.error ?? "holds nothing on this"})`);
+      for (const l of found) {
         const key = l.split(":")[0];
-        if (seen.has(key)) return false;
+        if (seen.has(key)) continue;
         seen.add(key);
-        return true;
-      })
-      .slice(0, 12);
-    if (!lines.length) return { notes: "", count: 0, error: "Octopus answered, but it held nothing on writing for X" };
-    return { notes: lines.join("\n"), count: lines.length };
+        lines.push(l);
+      }
+    });
+    const kept = lines.slice(0, 12);
+    if (!kept.length)
+      return { notes: "", count: 0, skipped, error: `Octopus gave nothing: ${skipped.join("; ") || "no brains asked"}` };
+    return { notes: kept.join("\n"), count: kept.length, skipped };
   } catch (e) {
     const aborted = e instanceof Error && e.name === "AbortError";
     return {
       notes: "",
       count: 0,
+      skipped: [],
       error: aborted ? "Octopus did not answer in time" : e instanceof Error ? e.message : String(e),
     };
   }

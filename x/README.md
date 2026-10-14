@@ -275,7 +275,7 @@ For the daily video:
 ### Writing the posts with Octopus
 
 When `OCTOPUS_MCP_URL` is set, Write reads the founder's Octopus brains while it
-prepares the posts. It asks the `x` and `content` brains what makes a strong X
+prepares the posts. It asks the `content` brain what makes a strong X
 post, keeps each concept's title, position and newest dated evidence, and hands
 them to the post writer as reference notes: advice from studied sources, never
 facts about his day. Every fact still comes from the log.
@@ -291,6 +291,32 @@ video and Ideas do not.
 
 The address carries its own signature, so it is a secret. It lives in the Convex
 dashboard, never in the repository.
+
+### Your days in Octopus
+
+The daily log can feed your Octopus brains, and you stay the one who decides what
+goes in. Today, and every past day in the Archive, shows a **For Octopus** row
+with **Copy** and **Download .md**. It builds one source from that day: your own
+answers, word for word, each under the beat its question belonged to, with you as
+author and the day as the date. No drafts and no model text go into it, and
+nothing is sent anywhere. You drop it into Octopus yourself and rule on any clash
+there.
+
+Octopus can file one source into several brains, and each brain's scope line
+decides which parts it keeps. So one daily source can feed two brains at once:
+a content maker brain that holds everything you log, and a personal brain that
+keeps only what says who you are. The app does not create either of them.
+
+Suggested scope lines for the two brains:
+
+- **Content maker:** what I do, decide, measure and learn each day while building
+  and making content, with the numbers.
+- **Me:** who I am: what I believe, how I work, what I have changed my mind on,
+  and why.
+
+The app's own brain is separate and untouched. Pushing days into Octopus
+automatically is possible later, and would go through the same Octopus filing
+steps, with clashes left for you to rule on.
 
 ### Why a call can come back empty
 
@@ -315,7 +341,7 @@ Set these on the Convex deployment (Settings, then Environment Variables):
 | `X_MODEL` | optional, defaults to `deepseek/deepseek-v4-flash`, which OpenRouter lists as DeepSeek V4 Flash 0423 |
 | `X_SITE_URL` | optional, defaults to `https://x.jeremylasne.com` |
 | `OCTOPUS_MCP_URL` | optional, the Octopus MCP address, the same one the Octopus connector uses. Turns on live brain notes for the posts. A secret |
-| `OCTOPUS_BRAINS` | optional, the brains Write reads, as slugs separated by commas. Defaults to `x,content` |
+| `OCTOPUS_BRAINS` | optional, the brains Write reads, as slugs separated by commas. Defaults to `content`. A brain that is missing or empty is skipped and named by **Test Octopus**, and never costs the others |
 | `X_SERIES_START` | optional, the date that is Day 1, as YYYY-MM-DD. Overrides `SERIES_START` in `xprompts.ts` without a deploy |
 
 `RESEND_API_KEY`, `X_MAIL_FROM` and `X_MAIL_TO` are no longer read. They can be

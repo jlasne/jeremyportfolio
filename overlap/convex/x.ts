@@ -359,7 +359,7 @@ const MODEL = () => process.env.X_MODEL || "deepseek/deepseek-v4-flash";
 
 /** Which brains Write reads. OCTOPUS_BRAINS overrides, as slugs separated by commas. */
 const brainsToRead = () =>
-  (process.env.OCTOPUS_BRAINS || "x,content").split(",").map((s) => s.trim()).filter(Boolean);
+  (process.env.OCTOPUS_BRAINS || "content").split(",").map((s) => s.trim()).filter(Boolean);
 
 /**
  * One call to the model.
@@ -830,9 +830,9 @@ export const octopus = action({
     if (!url) return { ok: false, message: "Set OCTOPUS_MCP_URL in the Convex dashboard first" };
     const brains = brainsToRead();
     const r = await octopusNotes({ url, brains });
-    return r.error
-      ? { ok: false, message: r.error }
-      : { ok: true, message: `Read ${r.count} notes from ${brains.join(" and ")}` };
+    if (r.error) return { ok: false, message: r.error };
+    const skipped = r.skipped.length ? `. Skipped: ${r.skipped.join("; ")}` : "";
+    return { ok: true, message: `Read ${r.count} notes from ${brains.join(" and ")}${skipped}` };
   },
 });
 

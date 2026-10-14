@@ -343,6 +343,53 @@ async function refresh() {
   draw();
 }
 
+/* ── a day as a source for Octopus ─────────────────────────────────────
+
+   Octopus files a source by reading it, and it keeps the exact words of a
+   quote, so this is his own answers and nothing else: no drafts, no model
+   output. Each answer sits under the beat its question belonged to, which is
+   how the day is already structured. Built here, in the page, so it needs no
+   server and nothing is sent anywhere until he drops it in himself. */
+function sourceOf(d) {
+  const day = d.day || d.today;
+  const asks = d.asks || [];
+  const beatOf = new Map(asks.map((a) => [(a.text || "").trim(), a.beat]));
+  const order = [...(state.beats || []).map((b) => ({ id: b.id, label: b.label })), { id: "other", label: "Other" }];
+  const groups = new Map(order.map((b) => [b.id, []]));
+  for (const e of d.entries || []) {
+    const id = beatOf.get((e.q || "").trim());
+    (groups.get(groups.has(id) ? id : "other")).push(e);
+  }
+  const out = [
+    `# Daily log, ${day}`,
+    "",
+    "Author: Jeremy Lasne",
+    `Date: ${day}`,
+    "Kind: my own account of one day, in my own words",
+  ];
+  for (const b of order) {
+    const list = groups.get(b.id);
+    if (!list.length) continue;
+    out.push("", `## ${b.label}`);
+    for (const e of list) out.push("", e.q ? `Question: ${e.q}` : "Note:", e.q ? `Answer: ${e.text}` : e.text);
+  }
+  return out.join("\n") + "\n";
+}
+
+/* The row that offers it, on Today and on a past day. */
+function sourceRow(d) {
+  if (!(d.entries || []).length) return "";
+  const n = d.entries.length;
+  return `
+    <div class="row" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <span><b>For Octopus</b> <span class="mono">${n} ${n === 1 ? "answer" : "answers"} as one source</span></span>
+      <span style="display:flex;gap:8px">
+        <button class="btn ghost sm" id="srcCopy">Copy</button>
+        <button class="btn ghost sm" id="srcDl">Download .md</button>
+      </span>
+    </div>`;
+}
+
 /* ── the interview ──────────────────────────────────────────────────── */
 
 /* The feed lives on the server. This only tracks what is in flight, so a
@@ -507,6 +554,8 @@ function today() {
     ${feed}
     ${stage}
 
+    ${sourceRow(state)}
+
     ${state.entries.length
       ? [...state.entries].reverse().map((e) => `
         <article class="row">
@@ -633,6 +682,7 @@ function archiveView() {
         <b>${esc(longDate(open_.day))}</b>
         <button class="btn ghost sm" id="back">Back</button>
       </div>
+      ${sourceRow(open_)}
       ${open_.entries.length
         ? open_.entries.map((e) => `
           <article class="row">
@@ -714,6 +764,21 @@ function wire() {
   }
 
   $("#writeNow")?.addEventListener("click", writeDay);
+  /* Today, or the past day being read: whichever is on screen. */
+  const shown = () => (open_ || state);
+  $("#srcCopy")?.addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(sourceOf(shown())); toast("Copied. Drop it in Octopus."); }
+    catch { toast("Select it and copy by hand"); }
+  });
+  $("#srcDl")?.addEventListener("click", () => {
+    const d = shown();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([sourceOf(d)], { type: "text/markdown" }));
+    a.download = `daily-log-${d.day || d.today}.md`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  });
+
   $("#writeAgain")?.addEventListener("click", (e) => {
     const b = e.currentTarget;
     /* Replacing the set loses the used ticks, so ask, but only when a tick
