@@ -59,7 +59,8 @@ Open it and edit it.
 | Path | What it is |
 | --- | --- |
 | `/` | the landing |
-| `/wealth` | **Wealth Architecture** — *Era, Season, Compass*: a research note on holding money when the world order turns, the principles on one page, and the country map, thirty-two countries read three ways |
+| `/wealth` | **Wealth Layers** · map your wealth in three layers. A cash pillow held by you (a comfort amount; the excess moves to the fat layer on a fixed day each month), one liquid fat layer in one broker (built from the 102 /invest assets, planned weights, rebalanced every 6 months), and the investments outside the strategy, with debts linked to an asset or to you. One table fills the diagram, where every box and block is sized by value and debt shows hatched. Below: recommendations, the /invest portfolio checks plus "one place", the decorrelation map, risk (volatility) against danger (odds of zero), and the crash ladder from country to world plus energy and war shocks. Each row keeps its own currency; totals in one display currency (ECB rates, 14 Oct 2026). Data stays in the browser, with a copy and paste backup. Same palette, ridge and snow as the landing. Not linked from the landing |
+| `/wealth/principles` | **Wealth Architecture** — *Era, Season, Compass*: a research note on holding money when the world order turns, the principles on one page, and the country map, thirty-two countries read three ways |
 | `/bio` | **Bio** — a fifteen-day daily log of five habits and sleep, then one number per training discipline, live. Not linked from the landing |
 | `/invest` | **Invest** · *compose the portfolio, see what breaks it*. One loop in 3 steps: compose a mix from 102 assets (stocks, bonds and currency for 32 countries, plus 6 sectors), read the 4 portfolio checks live while the weights move, then save it or share it. The allocation bar has draggable dividers and 5 lenses (weight, danger, fragility, square fit, season test); Gave's square tests the mix in each season and names the 3 assets least tied to the mix for any season left uncovered; the correlation heatmap flags pairs at 0.70 or more. Explore plots the 32 countries on the square and lists every asset. The mix lives in the link (`#m=id.weight,…`); notes, verdicts and saved mixes stay in the browser. Data inline in `invest/index.html`, read 2 Oct 2026. Styled as a market terminal: black ground, one monospace face (IBM Plex Mono), amber labels, white figures, square corners, ISO codes instead of flags, correlation from blue (apart) to red (together). Not linked from the landing |
 | `/brain` | **brain**: a self-tidying knowledge brain in plain markdown, open source. How it works, the folder it makes, the full skill file, and the repo link. Not linked from the landing |
@@ -71,7 +72,7 @@ Open it and edit it.
 **Bio** keeps its numbers in the Overlap Convex deployment behind a
 passphrase; see [`bio/README.md`](bio/README.md).
 
-**Wealth Architecture** is one page, and deliberately not linked from the
+**Wealth Architecture** (`/wealth/principles`) is one page, and deliberately not linked from the
 landing: a different audience and a different voice. The note is set in
 Source Serif and Instrument Serif over the same ridge and snow as the
 landing; every figure is inline SVG, and the country map at the end is my
