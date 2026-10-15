@@ -210,6 +210,75 @@
   .toast[data-open] { opacity: 1; transform: none; }
   .toast b { font-weight: 700; }
   @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+
+  /* ---- the climb so far, at the bottom: a pixel goat walks my life up a mountain (climb.js) ---- */
+  section.climb { width: 100vw; margin-top: 56px; text-align: center; }
+  .climb-stage {
+    --edge: max(24px, calc((100% - 680px) / 2));
+    position: relative; height: clamp(420px, 62vh, 620px); overflow: hidden; outline: none;
+    cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  }
+  .climb-stage:focus-visible::after {
+    content: ""; position: absolute; inset: 20% var(--edge); border: 2px solid var(--blue); border-radius: 12px; pointer-events: none;
+  }
+  /* the sky stays empty, so the ridge and the snow show through; top and bottom melt into the page */
+  .climb-canvas {
+    position: absolute; left: 0; top: 0; display: block; image-rendering: crisp-edges; image-rendering: pixelated;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22%, #000 80%, transparent 100%);
+            mask-image: linear-gradient(to bottom, transparent 0, #000 22%, #000 80%, transparent 100%);
+  }
+  .climb-card, .climb-end {
+    position: absolute; top: 18%; left: var(--edge); z-index: 2; width: min(340px, calc(100% - 2 * var(--edge)));
+    display: flex; gap: 14px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; text-align: left;
+    background: rgba(5,11,22,.74); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    pointer-events: none; animation: riseIn .5s cubic-bezier(.22,1,.36,1) both;
+  }
+  .climb-end { flex-direction: column; gap: 8px; pointer-events: auto; }
+  .climb-icon { flex: none; width: 40px; height: 40px; }
+  .climb-year, .climb-kicker { font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--blue); }
+  .climb-title { margin-top: 3px; font-size: 16px; line-height: 22px; font-weight: 600; letter-spacing: -.01em; }
+  .climb-line { margin-top: 3px; font-size: 14px; line-height: 20px; color: var(--ice-70); }
+  .climb-end-title { font-size: 19px; line-height: 26px; font-weight: 600; letter-spacing: -.015em; margin-bottom: 6px; }
+  .climb-button {
+    font: inherit; font-size: 14px; line-height: 20px; font-weight: 600; padding: 9px 16px; border: 0; border-radius: 999px;
+    background: var(--ice); color: var(--ink); cursor: pointer; transition: background .25s;
+  }
+  @media (hover: hover) { .climb-button:hover { background: var(--blue); } }
+  .climb-button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .climb-start { position: absolute; left: 50%; top: 50%; z-index: 3; translate: -50% -50%; }
+  .climb-hud {
+    position: absolute; left: var(--edge); right: var(--edge); bottom: 13%; z-index: 2; pointer-events: none;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+  }
+  .climb-count { padding: 4px 10px; border-radius: 999px; background: rgba(5,11,22,.74); color: var(--ice); }
+  .climb-hint { color: var(--ice-45); }
+  .climb-marker {
+    position: absolute; z-index: 2; translate: -50% calc(-100% - 8px); padding: 3px 9px; border-radius: 999px; white-space: nowrap;
+    font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+    background: rgba(5,11,22,.8); color: var(--ice); pointer-events: none;
+  }
+  .climb-marker::after { content: ""; position: absolute; left: 50%; top: 100%; translate: -50% 0; border: 5px solid transparent; border-top-color: rgba(5,11,22,.8); }
+  .climb-marker-peak { translate: 12px -50%; }
+  .climb-marker-peak::after { left: auto; right: 100%; top: 50%; translate: 0 -50%; border-top-color: transparent; border-right-color: rgba(5,11,22,.8); }
+  .climb-card[hidden], .climb-end[hidden], .climb-hud[hidden], .climb-marker[hidden], .climb-button[hidden] { display: none; }
+  .climb-steps { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 680px; margin: 2px auto 0; padding: 0 24px; }
+  .climb-step {
+    font: inherit; font-size: 13px; line-height: 18px; font-weight: 600; padding: 6px 12px; border: 0; border-radius: 999px; cursor: pointer;
+    background: rgba(234,244,251,.09); color: var(--ice-45); transition: background .25s, color .2s;
+  }
+  .climb-step.done { color: var(--ice-70); }
+  .climb-step.now { background: var(--ice); color: var(--ink); }
+  @media (hover: hover) { .climb-step:not(.now):hover { background: rgba(234,244,251,.15); color: var(--blue); } }
+  .climb-step:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .climb-list { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  @media (max-width: 640px) {
+    .climb-stage { --edge: 16px; height: 460px; }
+    .climb-card { top: 13%; right: var(--edge); width: auto; padding: 12px 14px; gap: 12px; }
+    .climb-icon { width: 32px; height: 32px; }
+    .climb-end { top: auto; bottom: 4%; right: var(--edge); width: auto; }
+  }
+  @media (prefers-reduced-motion: reduce) { .climb-card, .climb-end { animation: none; } }
 </style>
 </head>
 <body>
@@ -319,11 +388,30 @@
     </section>
 
   </div>
+
+  <section class="climb reveal" style="--d:280" id="climb" aria-label="The climb so far">
+    <div class="climb-stage" role="button" tabindex="0" aria-label="The climb so far. Press space to hop.">
+      <canvas class="climb-canvas" aria-hidden="true"></canvas>
+    </div>
+    <div class="climb-steps" aria-label="Checkpoints"></div>
+    <ol class="climb-list">
+      <li data-year="2001" data-icon="heart"><b>Hello, world</b> Born at base camp. Altitude 0.</li>
+      <li data-year="2017" data-icon="medal"><b>National swimming championship</b> Swam at the national level at 16.</li>
+      <li data-year="2017" data-icon="chart"><b>Discovered investing</b> First look at the markets. Still hooked 9 years later.</li>
+      <li data-year="2019" data-icon="pi"><b>Prépa, Spé Maths</b> 2 years of intensive maths to reach the top engineering schools.</li>
+      <li data-year="2021" data-icon="gear"><b>Engineering school</b> Admitted after 2 years of prépa.</li>
+      <li data-year="2023" data-icon="robot"><b>First AI projects</b> Started building my own products with AI.</li>
+      <li data-year="2024" data-icon="cap"><b>Engineering diploma</b> Graduated after an internship at a bank.</li>
+      <li data-year="2025" data-icon="case"><b>Wealth advisor</b> Helping individuals manage their wealth.</li>
+      <li data-year="2026" data-icon="phone"><b>Mobile apps &amp; CreatorMatch</b> Shipping mobile apps. Building CreatorMatch.</li>
+    </ol>
+  </section>
 </main>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="snow.js" defer></script>
+<script src="climb.js" defer></script>
 <script>
   /* The wind plays on arrival and loops, wrapping just before the recording's
      silent tail. Browsers that refuse sound before a gesture get it on the

@@ -37,6 +37,15 @@ blocks with no titles. Solid fills, no outlines, one line per row.
   barely moves while the scroll goes on (up to 24x), so the recording never
   seems to stop. Each video is a loop whose end melts into its start. Together
   the five weigh about 5 MB and load only when their tile comes into view
+- **The climb so far.** At the bottom, full width: a pixel goat walks up a 2D
+  mountain by itself, one flag per checkpoint of my life, from 2001 to 2026.
+  At each flag a card gives the year, my age and one line; a tap makes the goat
+  hop and hurry, and the years under the scene jump to any flag. At the top
+  the camera pulls back and the hill is the foot of a range far taller. The
+  sky is left empty so the ridge and the snow show through. The checkpoints
+  are the list inside `#climb` in `index.html`; `climb.js` draws the rest. It
+  runs only while on screen, and a visitor who asks for less motion gets a
+  start button instead of autoplay
 
 ## Stack
 
