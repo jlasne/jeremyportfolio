@@ -36,16 +36,12 @@ export const SPEC = {
   /* Every field on a day. `kind` drives the control: tap is a counter,
      flag is on/off, num is typed, time is a clock time kept as minutes after
      midnight. A counter with `spans` keeps a start and an end for each tap
-     (each cup of coffee). A flag with `at` keeps the time it was ticked. `goal` is the daily target and `goalDir`
-     says which way it points: 4 litres of water is a floor, and `yes`
-     means done at all. `scale` turns the count into what the goal
-     is spoken in: eight bottles of 50cl read as 4 L. `max` is the ceiling a
-     save is clamped to. */
+     (each cup of coffee). A flag with `at` keeps the time it was ticked.
+     `goal` is the daily target and `goalDir` says which way it points: `yes`
+     means done at all. `max` is the ceiling a save is clamped to. */
   fields: [
     { id: 'sun', group: 'intake', name: 'Morning sun', unit: 'min', kind: 'num', max: 600, icon: '☀️' },
     { id: 'coffee', group: 'intake', name: 'Coffee', unit: 'cups', kind: 'tap', max: 20, icon: '☕️', spans: 'cups' },
-    { id: 'water', group: 'intake', name: 'Water', unit: '×50cl', kind: 'tap', max: 16, icon: '💧',
-      goal: 8, goalDir: 'min', scale: 0.5, scaleUnit: 'L' },
     { id: 'creatine', group: 'intake', name: 'Creatine', unit: '5 g', kind: 'flag', max: 1, icon: '💊', at: 'creatineAt',
       goal: true, goalDir: 'yes' },
     { id: 'collagen', group: 'intake', name: 'Collagen', unit: '', kind: 'flag', max: 1, icon: '🦴', at: 'collagenAt',
@@ -70,24 +66,21 @@ export const SPEC = {
      started and when it finished, minutes after midnight. A span may end
      after midnight; its end is then read as the next day.
 
-     A session is a sport, its span, the calories it burned and how hard it
-     was: light, moderate or high, kept as 1, 2, 3. Up to four a day. The
+     A session is a sport, its span and how hard it was: light, moderate or high, kept as 1, 2, 3. Up to four a day. The
      sport list only seeds the picker: any name typed once joins it, and a
      sport logged often enough earns its own row in the matrix. */
   sports: ['Run', 'Gym', 'Bike', 'Swim', 'Yoga', 'Hike', 'Football', 'Tennis', 'Climb'],
   levels: ['Light', 'Moderate', 'High'],
-  session: { perDay: 4, kcal: 5000, name: 24 },
+  session: { perDay: 4, name: 24 },
 
-  /* A meal is its span and the calories it held, from Yazio. The day's
-     calories are the sum of its meals. */
-  meal: { perDay: 8, kcal: 5000 },
+  /* A meal is its span: when it started and when it finished. */
+  meal: { perDay: 8 },
 
   /* What the body reports. Each gets its own list of what moved it. Each
      is read the morning AFTER the factor, because a night is what answers a
      day. `better` says which direction is a win, so a finding is coloured
      by what it means, not by its sign. For weight lower is better: the goal
-     is a leaner body, though a heavier morning after more water is water,
-     not fat. `unit` and `digits` say how a difference is spoken: "-7 ms",
+     is a leaner body. `unit` and `digits` say how a difference is spoken: "-7 ms",
      "+0.4 kg". */
   outcomes: [
     { id: 'readiness',  name: 'Recovery',       icon: '🔋', unit: 'pts', better: 'high' },
@@ -107,7 +100,7 @@ export const SPEC = {
 
      Sport is read one dimension at a time. A training day is set against a
      rest day; everything else about a session (its sport, intensity,
-     length, start, finish, calories) is set against my other sessions, so
+     length, start, finish) is set against my other sessions, so
      "a harder session" means harder than my usual session, not harder than
      resting.
 
@@ -123,10 +116,8 @@ export const SPEC = {
     { group: 'intake', id: 'coffee',      name: 'Coffee',           icon: '☕️', split: 'median', on: 'more coffee', fmt: 'cups' },
     { group: 'intake', id: 'coffeeFirst', name: 'First coffee',     icon: '☕️', split: 'median', from: 'coffee', on: 'a later first coffee', fmt: 'clock' },
     { group: 'intake', id: 'coffeeLast',  name: 'Last coffee',      icon: '☕️', split: 'median', from: 'coffee', on: 'a later last coffee', fmt: 'clock' },
-    { group: 'intake', id: 'water',       name: 'Water',            icon: '💧', split: 'median', on: 'more water', fmt: '×50cl' },
     { group: 'intake', id: 'creatine',    name: 'Creatine',         icon: '💊', split: 'flag',   on: 'a creatine day' },
     { group: 'intake', id: 'collagen',    name: 'Collagen',         icon: '🦴', split: 'flag',   on: 'a collagen day' },
-    { group: 'intake', id: 'eaten',       name: 'Calories eaten',   icon: '🍽️', split: 'median', from: 'meals', on: 'more calories eaten', fmt: 'kcal' },
     { group: 'intake', id: 'mealFirst',   name: 'First meal',       icon: '🥐', split: 'median', from: 'meals', on: 'a later first meal', fmt: 'clock' },
     { group: 'intake', id: 'mealLast',    name: 'Last meal',        icon: '🍝', split: 'median', from: 'meals', on: 'a later last meal', fmt: 'clock' },
     { group: 'intake', id: 'mealWindow',  name: 'Eating window',    icon: '⏳', split: 'median', from: 'meals', on: 'a longer eating window', fmt: 'dur' },
@@ -136,7 +127,6 @@ export const SPEC = {
     { group: 'sport',  id: 'sportMin',    name: 'Session length',   icon: '⏱️', split: 'median', from: 'sessions', on: 'a longer session', fmt: 'min' },
     { group: 'sport',  id: 'sportStart',  name: 'Session start',    icon: '🕒', split: 'median', from: 'sessions', on: 'a later start', fmt: 'clock' },
     { group: 'sport',  id: 'sportEnd',    name: 'Session end',      icon: '🏁', split: 'median', from: 'sessions', on: 'a later finish', fmt: 'clock' },
-    { group: 'sport',  id: 'sportKcal',   name: 'Sport calories',   icon: '⚡️', split: 'median', from: 'sessions', on: 'more calories burned', fmt: 'kcal' },
     { group: 'sport',  id: 'steps',       name: 'Steps',            icon: '👟', split: 'median', on: 'more steps', fmt: 'steps' },
     { group: 'sleep',  id: 'bed',         name: 'Bedtime',          icon: '🌙', split: 'median', lag: 0, on: 'a later bedtime', fmt: 'clock' },
     { group: 'sleep',  id: 'wake',        name: 'Wake-up',          icon: '🌅', split: 'median', lag: 0, on: 'a later wake-up', fmt: 'clock' },
@@ -200,26 +190,21 @@ function cleanSpan(x, out = {}) {
   return out;
 }
 
-/* One session, or nothing: a sport with a name, its span, calories and
-   intensity. A session without a sport is half-typed, not data. */
+/* One session, or nothing: a sport with a name, its span and intensity. A session without a sport is half-typed, not data. */
 function cleanSession(s) {
   if (!s || typeof s !== 'object') return undefined;
   const name = typeof s.s === 'string' ? s.s.trim().slice(0, SPEC.session.name) : '';
   if (!name) return undefined;
   const out = cleanSpan(s, { s: name });
-  const k = clampNum(s.k, SPEC.session.kcal);
-  if (k !== undefined) out.k = Math.round(k);
   const i = clampNum(s.i, SPEC.levels.length, 1);
   if (i !== undefined) out.i = Math.round(i);
   return out;
 }
 
-/* One meal, or nothing: its span, its calories, or both. */
+/* One meal, or nothing: its start, its end, or both. */
 function cleanMeal(m) {
   if (!m || typeof m !== 'object') return undefined;
   const out = cleanSpan(m);
-  const k = clampNum(m.k, SPEC.meal.kcal);
-  if (k !== undefined) out.k = Math.round(k);
   return Object.keys(out).length ? out : undefined;
 }
 
@@ -321,7 +306,6 @@ export function valueOf(day, f) {
     if (!ss.length) return undefined;
     if (f.sport) return ss.some(s => s.s === f.sport) ? 1 : 0;
     if (f.id === 'sportMin') return sum(nums(ss.map(spanMin)));
-    if (f.id === 'sportKcal') return sum(nums(ss.map(s => s.k)));
     if (f.id === 'sportHard') { const xs = nums(ss.map(s => s.i)); return has(xs) ? Math.max(...xs) : undefined; }
     if (f.id === 'sportStart') { const xs = nums(ss.map(s => s.t)); return has(xs) ? Math.max(...xs) : undefined; }
     if (f.id === 'sportEnd') { const xs = nums(ss.map(spanEnd)); return has(xs) ? Math.max(...xs) : undefined; }
@@ -330,7 +314,6 @@ export function valueOf(day, f) {
   if (f.from === 'meals') {
     const ms = Array.isArray(day.meals) ? day.meals : [];
     const starts = nums(ms.map(m => m.t)), ends = nums(ms.map(spanEnd));
-    if (f.id === 'eaten') return sum(nums(ms.map(m => m.k)));
     if (f.id === 'mealFirst') return has(starts) ? Math.min(...starts) : undefined;
     if (f.id === 'mealLast') return has(ends) ? Math.max(...ends) : undefined;
     if (f.id === 'mealWindow') return has(starts) && has(ends) ? Math.max(0, Math.max(...ends) - Math.min(...starts)) : undefined;

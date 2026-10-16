@@ -34,8 +34,8 @@ export const SPEC: {
   reliableAt: number; minPerSide: number; maxLuck: number; veryAt: number;
   groups: Group[]; fields: Field[];
   sports: string[]; levels: string[];
-  session: { perDay: number; kcal: number; name: number };
-  meal: { perDay: number; kcal: number };
+  session: { perDay: number; name: number };
+  meal: { perDay: number };
   outcomes: Outcome[]; factors: Factor[];
 };
 export const FIELDS: Map<string, Field>;

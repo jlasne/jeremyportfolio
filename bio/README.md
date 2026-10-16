@@ -9,13 +9,12 @@ passphrase writes it.
 
 | Group | Fields | Goal |
 | --- | --- | --- |
-| 🍽️ Intake | morning sun (minutes, 0 allowed), coffee (start → end per cup, no cap), water, creatine, collagen (each with the time taken), meals (start → end + kcal each) | water **4 L** (8 × 50cl), creatine **5 g**, collagen |
-| 🏃 Sport | sessions (sport, intensity light / moderate / high, start → end, kcal burned), steps | |
+| 🍽️ Intake | morning sun (minutes, 0 allowed), coffee (start → end per cup, no cap), creatine, collagen (each with the time taken), meals (start → end each) | creatine **5 g**, collagen |
+| 🏃 Sport | sessions (sport, intensity light / moderate / high, start → end), steps | |
 | 😴 Sleep | sleep score, hours slept, bedtime, wake-up, night with my girlfriend | |
 | 📊 Observing | weight, HRV, resting HR, recovery | |
 
-A goal points one way: coffee is a ceiling, met by staying under it, water
-is a floor, met by reaching it. The card shows each goal beside its row and
+A goal is met by doing it that day. The card shows each goal beside its row and
 the day's count of goals met in its corner.
 
 Anything that takes time (a cup, a meal, a session) is a **span**: when it
@@ -27,7 +26,7 @@ starts now; a session starts empty, since it is logged after. A bedtime
 after midnight is kept past 24:00 (00:40 is 1480).
 
 A **session** is a sport, how hard it was (light, moderate, high, kept as
-1–3), its span and the calories it burned. Up to four a day. The sport field
+1–3) and its span. Up to four a day. The sport field
 suggests every sport already typed and takes a new name as it is, so the
 list grows by using it. A session without a sport stays on screen as a draft
 and is left out of the save until it has one.
@@ -50,7 +49,7 @@ of 31 October, loads the simulated month, never calls the server, hides *Log*
 and says it is a demo. The month is seeded, so every visit sees the same one,
 and it plants a few effects (early morning sun and an early bedtime help the
 night, a late coffee and a late dinner hurt it, a hard or late session costs
-the next morning, calories move the scale) while creatine and collagen do
+the next morning, a late dinner moves the scale) while creatine and collagen do
 nothing, to show a neutral row.
 
 ## Stack
@@ -95,8 +94,7 @@ duration, weight, HRV, resting HR), and each cell the impact on five steps:
 | a finding, large gap, the wrong way | a finding, the wrong way | not a finding | a finding, the right way | a finding, large gap, the right way |
 
 "Right way" follows what the result counts as better, so a falling resting
-HR is good, and so is a lower weight (a heavier morning after more water is
-water, not fat). "Large" is Cohen's d of 0.8 or more. The move
+HR is good, and so is a lower weight. "Large" is Cohen's d of 0.8 or more. The move
 in the result's own unit sits under the word, and tapping a cell spells the
 link out above the grid: "Last coffee → Sleep score: Very bad. −5 pts after
 a later last coffee (over 13:23), 15 of 30 days. Clear of luck (q 0.005)."
@@ -135,7 +133,7 @@ by window in the first; everything else (amounts and yes-or-no) is read as
 more against less in the second. A measure sits in exactly one of them, and
 each grid has its own false-discovery check.
 
-**The best time** comes first. For each time-related measure my own days are split by rank
+**When: the best time, and its impact** comes first. For each time-related measure my own days are split by rank
 into three equal windows, early, middle and late, with their real edges
 ("07:10–09:30"). Each result is averaged per window, and the cell names the
 window with the best average and how far ahead of the other two it is:
@@ -148,14 +146,14 @@ Benjamini-Hochberg q-values. A cell opens at 9 comparable days, 3 per
 window. On 20 simulated months: 0.25 false best times a month with no real
 effect, 4.3 real ones found with planted effects (1.6 by day 14).
 
-**Everything logged is a row**, 26 measures plus one line per sport:
+**Everything logged is a row**, 25 measures plus one line per sport:
 
 | From | Factors |
 | --- | --- |
 | Coffee | cups, first cup start, last cup end, any cup after 14:00 |
-| Meals | calories eaten, first meal start, last meal end, eating window, time at the table |
-| Sport | training day vs rest day; then, against my other sessions: sport, intensity, length, start, finish, kcal burned |
-| Day | water, steps, sun |
+| Meals | first meal start, last meal end, eating window, time at the table |
+| Sport | training day vs rest day; then, against my other sessions: sport, intensity, length, start, finish |
+| Day | steps, sun |
 | Night | bedtime, wake-up, hours slept, sleep score |
 | Morning | weight, HRV, resting HR, recovery |
 
@@ -177,8 +175,8 @@ Measured on 20 simulated months with no real effect in them: the old
 strength-only rule showed 17.2 false findings a month, the luck check 0.55.
 On 20 months with planted effects it found 6.3 of them a month.
 
-**Linked things move together.** A late third meal is also more calories, so
-two rows can claim the same kilo. When two rows tell one story, change one
+**Linked things move together.** A late dinner often means a late bedtime,
+so two rows can claim the same lost sleep points. When two rows tell one story, change one
 of them alone for a week.
 
 A cell needs 6 comparable days with at least 3 on each side.

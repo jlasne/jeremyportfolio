@@ -144,12 +144,6 @@ h2 {
   flex: 1 1 160px; min-width: 0; background: rgba(23, 61, 89, .3); border: 1px solid var(--line);
   padding: 9px 11px; font: 500 15px/1.2 var(--sans);
 }
-.skcal {
-  height: 40px; width: 78px; background: rgba(23, 61, 89, .3); border: 1px solid var(--line); padding: 8px 8px 7px;
-  font: 400 21px/1 var(--display); letter-spacing: .02em; text-align: right;
-  appearance: textfield; -moz-appearance: textfield;
-}
-.skcal::-webkit-outer-spin-button, .skcal::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .stime {
   background: rgba(23, 61, 89, .3); border: 1px solid var(--line); color: var(--ice);
   font: 500 14px/1 var(--mono); padding: 9px 7px; min-width: 0; flex: none;
@@ -158,10 +152,9 @@ h2 {
 .nf input[type="time"] { width: 136px; font: 400 22px/1 var(--display); }
 .nf input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(.8); }
 .tapr { flex-wrap: wrap; }
-.sname:focus, .skcal:focus, .stime:focus { outline: none; border-color: var(--blue); }
-.sname:disabled, .skcal:disabled, .stime:disabled { background: transparent; border-color: transparent; opacity: 1; }
-.sname::placeholder, .skcal::placeholder { color: var(--ice-45); }
-.sunit { font-size: 9.5px; color: var(--blue); letter-spacing: .1em; }
+.sname:focus, .stime:focus { outline: none; border-color: var(--blue); }
+.sname:disabled, .stime:disabled { background: transparent; border-color: transparent; opacity: 1; }
+.sname::placeholder { color: var(--ice-45); }
 .sdel {
   width: 36px; height: 36px; border: 1px solid var(--line); background: none; border-radius: 50%;
   color: var(--ice-45); font-size: 18px; line-height: 1; cursor: pointer; flex: none;
@@ -195,8 +188,10 @@ h2 {
 .flagr .fat { width: 116px; }
 .flagr .fat[hidden] { display: none; }
 /* meals and sessions: the span, then the numbers */
-.mrow, .sbottom { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: space-between; }
+.mrow, .sbottom { display: flex; align-items: center; gap: 10px; justify-content: space-between; }
+.mrow .span, .sbottom .span { flex: 1 1 auto; }
 .mnums { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.mnums .sdel:disabled { display: none; }
 .srow { display: grid; gap: 8px; padding: 10px 0; border-bottom: 1px dashed rgba(95, 168, 211, .14); }
 .srow:last-child { border-bottom: 0; }
 .stop { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
@@ -213,7 +208,6 @@ h2 {
 .meals { padding: 10px 16px 4px; }
 .mhead { display: flex; align-items: center; gap: 10px; font-size: 15px; padding-bottom: 8px; }
 .mhead em { font-style: normal; font-size: 19px; width: 24px; text-align: center; }
-.mtotal { margin-left: auto; color: var(--blue); }
 .mrows { display: grid; gap: 8px; }
 .addsess[hidden] { display: none; }
 
@@ -435,8 +429,6 @@ body.editing { padding-bottom: 88px; }
   .tapr .lbl .goal { grid-column: 2; justify-self: start; }
   .span .stime { width: 122px; }
   .cups { padding-left: 0; }
-  .mnums .sunit { display: none; }
-  .mnums .skcal { width: 82px; }
   .slevels { width: 100%; }
   .slevel { flex: 1 1 0; }
   .tapr .lbl i { display: none; }
@@ -471,7 +463,7 @@ body.editing { padding-bottom: 88px; }
     <div class="head">
       <span class="n mono">01</span>
       <h2>Today <span class="pill live" id="dayPill">Day 0 of 31</span></h2>
-      <p class="tag">Intake, sport, sleep, and what the watch observes, with the time of each coffee, each session and each night. Three goals a day (water, creatine, collagen), every day of October, then the page reads what moved.</p>
+      <p class="tag">Intake, sport, sleep, and what the watch observes, with the time of each coffee, each session and each night. Two goals a day (creatine, collagen), every day of October, then the page reads what moved.</p>
     </div>
     <div class="card" id="card"></div>
   </section>
@@ -508,11 +500,11 @@ body.editing { padding-bottom: 88px; }
     <ul class="notes">
       <li><b>The morning after</b>A day is judged by the night that follows it: a late coffee on Tuesday is scored against Wednesday's sleep and against the Observing numbers (weight, HRV, resting HR, recovery), which come from that same night. The night itself (bedtime, wake-up, hours slept, a night with my girlfriend) is scored against the morning it ends.</li>
       <li><b>More against less, later against earlier</b>An on/off thing splits on itself. A count or a clock time splits at my own median, so "a later last coffee" means later than my usual.</li>
-      <li><b>Five steps</b>Very bad, bad, neutral, good, very good. Good means good for that result, not a bigger number: a resting heart rate going down is good. "Very" means a large gap (Cohen's d of 0.8 or more). For weight, lower is good; a heavier morning after more water is water, not fat.</li>
+      <li><b>Five steps</b>Very bad, bad, neutral, good, very good. Good means good for that result, not a bigger number: a resting heart rate going down is good. "Very" means a large gap (Cohen's d of 0.8 or more). For weight, lower is good.</li>
       <li><b>The strength label</b>How far apart the two groups sit, measured against how much that number swings day to day anyway. A big percent on a wild metric says less than a small one on a steady metric.</li>
       <li><b>Two grids</b>What is a time of day (first and last coffee, first and last meal, the eating window, session start and end, bedtime, wake-up) is read by window: my days split into three equal windows by when I did it. A cell names the window with the best result. All three windows are tested together first, so naming the best of three cannot turn noise into a finding.</li>
       <li><b>First looks</b>The grids fill from the first days. A faint number is the raw move so far, with no verdict: "First look" when there are too few days to test, "Unproven" when there are enough but it is not clear of luck. With over a hundred cells, about half point the wrong way by chance, so do not act on them. A cell leaves neutral only when it clears a false-discovery check, which keeps luck to at most 1 in 10 of what is coloured. The switch above the grids hides the faint numbers.</li>
-      <li><b>Linked things move together</b>A late third meal is also more calories, so "a later last meal" and "more calories eaten" can both claim the same kilo. When two rows tell one story, change one of them alone for a week.</li>
+      <li><b>Linked things move together</b>A late dinner often means a late bedtime, so "a later last meal" and "a later bedtime" can both claim the same lost sleep points. When two rows tell one story, change one of them alone for a week.</li>
       <li><b>One month only</b>1 to 31 October 2026. Thirty-one days, one video a day, then the table stands as it is.</li>
     </ul>
   </section>
@@ -844,18 +836,14 @@ function spanEl(x, open, label, onChange = () => {}) {
 }
 
 /* ── meals ──────────────────────────────────────────────────────────── */
-/* One line a meal: when it started, when it finished, its calories from
-   Yazio. Adding one today starts it now. The day's total shows as it
-   grows. */
+/* One line a meal: when it started and when it finished. Adding one
+   today starts it now. */
 function mealsEl(day, open) {
   const wrap = document.createElement('div');
   wrap.className = 'meals';
   const head = document.createElement('div');
   head.className = 'mhead';
   head.innerHTML = '<em>🍽️</em><span>Meals</span>';
-  const total = document.createElement('span');
-  total.className = 'mtotal mono';
-  head.append(total);
   const rows = document.createElement('div');
   rows.className = 'mrows';
   const add = document.createElement('button');
@@ -863,26 +851,11 @@ function mealsEl(day, open) {
   add.textContent = '+ Add a meal';
 
   const list = () => (Array.isArray(day.meals) ? day.meals : []);
-  const paintTotal = () => {
-    const ks = list().map(m => m.k).filter(Number.isFinite);
-    total.textContent = ks.length ? `${ks.reduce((a, b) => a + b, 0)} kcal` : '';
-  };
   const render = () => {
     const ms = list();
     rows.replaceChildren(...ms.map((m, idx) => {
       const r = document.createElement('div');
       r.className = 'mrow';
-      const k = document.createElement('input');
-      k.type = 'number'; k.inputMode = 'numeric'; k.className = 'skcal mkcal';
-      k.min = '0'; k.max = String(SPEC.meal.kcal); k.placeholder = 'kcal';
-      k.value = m.k ?? ''; k.disabled = !open;
-      k.setAttribute('aria-label', `Calories of meal ${idx + 1}`);
-      k.addEventListener('input', () => {
-        const n = Number(k.value);
-        if (k.value === '' || !Number.isFinite(n)) delete m.k; else m.k = Math.min(SPEC.meal.kcal, Math.max(0, Math.round(n)));
-        paintTotal(); touch();
-      });
-      const u = document.createElement('span'); u.className = 'sunit mono'; u.textContent = 'kcal';
       const del = document.createElement('button');
       del.type = 'button'; del.className = 'sdel'; del.textContent = '×'; del.disabled = !open;
       del.setAttribute('aria-label', `Remove meal ${idx + 1}`);
@@ -893,7 +866,7 @@ function mealsEl(day, open) {
       });
       const nums = document.createElement('div');
       nums.className = 'mnums';
-      nums.append(k, u, del);
+      nums.append(del);
       r.append(spanEl(m, open, `Meal ${idx + 1}`), nums);
       return r;
     }));
@@ -904,12 +877,11 @@ function mealsEl(day, open) {
       rows.append(none);
     }
     add.hidden = !open || ms.length >= SPEC.meal.perDay;
-    paintTotal();
   };
   add.addEventListener('click', () => {
     (day.meals ||= []).push(sel === today ? { t: nowMinutes() } : {});
     render(); touch();
-    rows.querySelector('.mrow:last-child .mkcal')?.focus();
+    rows.querySelector('.mrow:last-child .stime')?.focus();
   });
   render();
   wrap.append(head, rows, add);
@@ -918,7 +890,7 @@ function mealsEl(day, open) {
 
 /* ── sport sessions ─────────────────────────────────────────────────── */
 /* A sport and how hard it was (light, moderate, high), then when it
-   started and finished and the calories it burned. The sport field
+   started and finished. The sport field
    suggests every sport already typed and takes a new name as it is. A
    session with no sport yet stays on screen as a draft and is left out of
    the save until it has one. */
@@ -975,17 +947,6 @@ function sessionsEl(day, open) {
 
     const bottom = document.createElement('div');
     bottom.className = 'sbottom';
-    const kcal = document.createElement('input');
-    kcal.type = 'number'; kcal.inputMode = 'numeric'; kcal.className = 'skcal';
-    kcal.min = '0'; kcal.max = String(SPEC.session.kcal); kcal.placeholder = 'kcal';
-    kcal.value = s.k ?? ''; kcal.disabled = !open;
-    kcal.setAttribute('aria-label', 'Calories burned');
-    kcal.addEventListener('input', () => {
-      const n = Number(kcal.value);
-      if (kcal.value === '' || !Number.isFinite(n)) delete s.k; else s.k = Math.min(SPEC.session.kcal, Math.max(0, Math.round(n)));
-      touch();
-    });
-    const u = document.createElement('span'); u.className = 'sunit mono'; u.textContent = 'kcal';
     const del = document.createElement('button');
     del.type = 'button'; del.className = 'sdel'; del.textContent = '×'; del.disabled = !open;
     del.setAttribute('aria-label', 'Remove this session');
@@ -996,7 +957,7 @@ function sessionsEl(day, open) {
     });
     const nums = document.createElement('div');
     nums.className = 'mnums';
-    nums.append(kcal, u, del);
+    nums.append(del);
     bottom.append(spanEl(s, open, `Session ${idx + 1}`), nums);
     r.append(top, bottom);
     return r;
@@ -1255,11 +1216,13 @@ function drawMatrix() {
   hint.textContent = `Swipe the grid for all ${SPEC.outcomes.length} results →`;
   const h1 = document.createElement('div');
   h1.className = 'mxh';
-  h1.innerHTML = `<h3><em>⏰</em>Time-related: the best time</h3><p>Everything that is a time of day, plus the eating window. My own days split into three equal windows by when I did it: early, middle, late. ` +
-    `The cell names the window with the best result and how far ahead of the other two it is. A cell is proven from ${needTimed()} days, 3 per window; before that it shows a first look from two or more days.</p>`;
+  h1.innerHTML = `<h3><em>⏰</em>When: the best time, and its impact</h3><p>For each thing done at a time of day, my days split into three equal windows: early, middle, late (short to long for the eating window). ` +
+    `<b>When</b> is the window with the best result, under the number. <b>Impact</b> is its gap against the other two windows, in the result's own unit. ` +
+    `"Best · +5 pts, 22:36–23:15" on bedtime and sleep score reads: in bed between 22:36 and 23:15, the sleep score ran 5 points above the other nights. ` +
+    `A cell is proven from ${needTimed()} days, ${SPEC.minPerSide} per window; before that it shows a first look from 2 days.</p>`;
   const h2 = document.createElement('div');
   h2.className = 'mxh';
-  h2.innerHTML = `<h3><em>📏</em>Not time-related: how much, and whether</h3><p>Amounts and yes-or-no: cups, water, calories, morning sun, creatine, collagen, the sport and the body's own numbers. More against less, done against not, on the five steps from very bad to very good.</p>`;
+  h2.innerHTML = `<h3><em>📏</em>How much: the impact of everything else</h3><p>Amounts and yes-or-no: cups, morning sun, creatine, collagen, the sport and the body's own numbers. More against less, done against not, on the five steps from very bad to very good.</p>`;
   const hint2 = hint.cloneNode(true);
   $('mxbox').replaceChildren(sum, early, legend, detail, h1, hint, when.wrap, h2, hint2, wrap);
   const looks = $('mxbox').querySelectorAll('.mx .lv.raw').length;
@@ -1404,7 +1367,7 @@ $('gate').addEventListener('submit', async e => {
 $('csv').addEventListener('click', () => {
   const cols = SPEC.fields;
   const q = x => `"${String(x).replace(/"/g, '""')}"`;
-  const head = ['date', 'practice', ...cols.map(c => c.id), 'creatine_at', 'collagen_at', 'coffee_cups', 'meals', 'eaten_kcal', 'sessions', 'sport_min', 'sport_kcal', 'sport_hardest', 'note'];
+  const head = ['date', 'practice', ...cols.map(c => c.id), 'creatine_at', 'collagen_at', 'coffee_cups', 'meals', 'sessions', 'sport_min', 'sport_hardest', 'note'];
   const lines = [head.join(',')];
   const span = x => `${x.t != null ? hhmm(x.t) : '?'}-${x.e != null ? hhmm(x.e) : '?'}`;
   const keys = [...new Set([...Object.keys(state.log).filter(k => k < SPEC.start), ...DAYS])].sort();
@@ -1419,11 +1382,9 @@ $('csv').addEventListener('click', () => {
     d.creatineAt != null ? hhmm(d.creatineAt) : '',
     d.collagenAt != null ? hhmm(d.collagenAt) : '',
     q((d.cups || []).map(span).join(' ')),
-    q((d.meals || []).map(m => `${span(m)} ${m.k ?? '?'}kcal`).join('; ')),
-    (d.meals || []).some(m => Number.isFinite(m.k)) ? d.meals.reduce((a, m) => a + (m.k || 0), 0) : '',
-    q(ss.map(x => `${x.s} ${span(x)}${x.i ? ` ${SPEC.levels[x.i - 1]}` : ''}${x.k != null ? ` ${x.k}kcal` : ''}`).join('; ')),
+    q((d.meals || []).map(span).join('; ')),
+    q(ss.map(x => `${x.s} ${span(x)}${x.i ? ` ${SPEC.levels[x.i - 1]}` : ''}`).join('; ')),
     mins.length ? mins.reduce((a, b) => a + b, 0) : '',
-    ss.length ? ss.reduce((a, x) => a + (x.k || 0), 0) : '',
     ss.some(x => x.i) ? SPEC.levels[Math.max(...ss.map(x => x.i || 0)) - 1] : '',
     q(d.note || '')].join(','));
   }
