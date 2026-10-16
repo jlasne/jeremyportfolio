@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>Wellness | Jeremy Lasne</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Experiments on my own body. One question each, measured every day, then the data says what moved.">
+<meta name="description" content="Experiments on my own body. One question each, measured every day, then the data says what moved and by how much.">
 <meta name="theme-color" content="#050b16">
 <meta name="color-scheme" content="dark">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -14,130 +14,1750 @@
 <meta property="og:site_name" content="Jeremy Lasne">
 <meta property="og:url" content="https://www.jeremylasne.com/wellness/">
 <meta property="og:title" content="Wellness · experiments on myself">
-<meta property="og:description" content="One question each, measured every day, then the data says what moved.">
+<meta property="og:description" content="One question each, measured every day, then the data says what moved and by how much. Exp 0 runs 1–31 October 2026.">
+<meta property="og:image" content="https://www.jeremylasne.com/og-image.png?v=4">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Jeremy Lasne. I build mobile apps with influencers.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.jeremylasne.com/og-image.png?v=4">
+<link rel="canonical" href="https://www.jeremylasne.com/wellness/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="preload" as="image" href="/wellness/bg.jpg" fetchpriority="high">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Serif:ital@1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-/* ── tokens, the same as /wellness/exp0 ─────────────────────────────── */
+/* ── tokens: the site's ink, blue and ice, warmed toward the end by the dawn ── */
 :root {
   --ink: #050b16;
+  --night: #0a1a33;
   --blue: #5fa8d3;
+  --sky: #8cc4e6;
+  --mist: #b9dcf1;
   --ice: #eaf4fb;
-  --ice-70: rgba(234, 244, 251, .72);
-  --ice-45: rgba(234, 244, 251, .46);
-  --line: rgba(95, 168, 211, .18);
-  --good: #6ee7a8;
+  --lilac: #b7aee0;
+  --peach: #f6c0a0;
+  --dawn: #ffc493;
+  --rose: #f0a59a;
+  --ice-80: rgba(234, 244, 251, .86);
+  --ice-70: rgba(234, 244, 251, .76);
+  --ice-60: rgba(234, 244, 251, .64);
+  --ice-30: rgba(234, 244, 251, .3);
+  --hair: rgba(234, 244, 251, .1);
+  --hair-2: rgba(234, 244, 251, .17);
   --display: 'Bebas Neue', 'Oswald', Impact, 'Arial Narrow', sans-serif;
+  --serif: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;
   --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --pad: clamp(16px, 5vw, 56px);
-  --w: 1080px;
+  --pad: clamp(16px, 5vw, 64px);
+  --w: 1240px;
+  --breath: 10.909s; /* 60 s / 5.5 breaths */
+  --sine: cubic-bezier(.37, 0, .63, 1);
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --mh: max(230px, 27.5vw);            /* the massif at the foot of the page */
+  --sr: clamp(560px, 96vw, 1500px);    /* the sun behind it */
 }
 * { box-sizing: border-box; }
-html { background: var(--ink); color-scheme: dark; -webkit-text-size-adjust: 100%; }
+html { background: var(--ink); color-scheme: dark; -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
-  margin: 0; min-height: 100vh; background: transparent; color: var(--ice);
-  font: 400 16px/1.55 var(--sans); -webkit-font-smoothing: antialiased;
+  margin: 0; position: relative; z-index: 0; min-height: 100vh; overflow-x: hidden; overflow-x: clip;
+  color: var(--ice); font: 400 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  /* night at the top; the dawn builds on the way down */
+  background:
+    linear-gradient(180deg, #0a1a33 0, #071327 900px, var(--ink) 1500px, #060d1d 26%, #08122a 40%, #0d1734 52%, #151a3b 64%, #201d40 75%, #2d2445 86%, #3a2a48 94%, #422f4a 100%) no-repeat,
+    var(--ink);
 }
 a { color: inherit; }
-:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
-.mono { font: 500 11px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; }
+p, h1, h2, h3 { text-wrap: pretty; }
+.legend p, #nights .tag { text-wrap: balance; }
+::selection { background: var(--sky); color: var(--ink); }
+:focus-visible { outline: 2px solid var(--sky); outline-offset: 3px; border-radius: 6px; }
+.mono { font: 500 11px/1.4 var(--mono); letter-spacing: .16em; text-transform: uppercase; }
+.nw { white-space: nowrap; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+[hidden] { display: none !important; }
+.wrap { max-width: var(--w); margin: 0 auto; padding: 0 var(--pad); }
+.skip { position: absolute; left: 16px; top: -80px; z-index: 30; padding: 12px 16px; border-radius: 999px; background: var(--ice); color: var(--ink); text-decoration: none; }
+.skip:focus { top: 14px; }
 
-/* the ridge, blurred and darkened; a gradient while it loads */
-.bg {
-  position: fixed; top: -6%; left: -6%; width: 112%; height: 112%; z-index: -2; pointer-events: none;
-  object-fit: cover; object-position: 50% 42%; filter: blur(16px) brightness(.45) saturate(.9);
+/* the three states of the live log: loading, ready, off */
+body[data-state="loading"] .live-only, body[data-state="off"] .live-only { display: none !important; }
+
+/* ── the sky behind the hero: the site's ridge, out of focus ───────── */
+.sky {
+  position: absolute; left: 0; right: 0; top: 0; z-index: -1; height: clamp(980px, 128vh, 1360px);
+  overflow: hidden; pointer-events: none;
 }
-.fallback {
-  position: fixed; inset: 0; z-index: -3; pointer-events: none;
+/* 140 % wide, so the photo's moon falls past the right edge: it rises sharp in the Exp 0 vista instead */
+.sky .ridge {
+  position: absolute; left: -6%; top: -40px; width: 140%; height: calc(100% + 40px);
+  object-fit: cover; object-position: 0% 26%;
+  filter: blur(15px) brightness(.58) saturate(.95);
+  -webkit-mask-image: linear-gradient(180deg, #000 44%, rgba(0, 0, 0, .55) 72%, transparent 100%);
+          mask-image: linear-gradient(180deg, #000 44%, rgba(0, 0, 0, .55) 72%, transparent 100%);
+}
+.sky .veil {
+  position: absolute; inset: 0;
   background:
-    radial-gradient(120% 70% at 50% 0%, rgba(23, 61, 89, .55), transparent 70%),
-    linear-gradient(180deg, #08152a, var(--ink) 60%);
+    radial-gradient(56% 46% at 76% 40%, rgba(95, 168, 211, .16), transparent 70%),
+    radial-gradient(40% 40% at 10% 70%, rgba(95, 168, 211, .07), transparent 70%),
+    linear-gradient(180deg, rgba(5, 11, 22, .28), rgba(5, 11, 22, .06) 38%, rgba(5, 11, 22, .6) 82%, var(--ink));
+}
+.grain {
+  position: absolute; inset: 0; opacity: .45;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
 }
 
+/* ── top bar ───────────────────────────────────────────────────────── */
 .top {
   max-width: var(--w); margin: 0 auto; display: flex; justify-content: space-between; align-items: center;
-  gap: 12px; padding: calc(var(--pad) * .6) var(--pad);
+  gap: 12px; padding: max(18px, env(safe-area-inset-top)) var(--pad) 0;
 }
-.top a { text-decoration: none; color: var(--ice-70); }
-.top a:hover { color: var(--ice); }
+.brand { text-decoration: none; color: var(--ice-70); display: inline-flex; align-items: center; gap: 10px; padding: 8px 0; transition: color .3s; }
+.brand:hover { color: var(--ice); }
+.brand i { width: 7px; height: 7px; border-radius: 50%; background: var(--sky); box-shadow: 0 0 12px var(--blue); }
+.crumb { color: var(--ice-60); }
 
-main { max-width: var(--w); margin: 0 auto; padding: clamp(24px, 6vw, 72px) var(--pad) clamp(40px, 6vw, 80px); }
-.kicker { color: var(--blue); display: block; margin-bottom: 14px; }
-h1 { margin: 0; font: 400 clamp(52px, 10vw, 128px)/.92 var(--display); letter-spacing: .012em; }
-.lede { margin: 16px 0 0; max-width: 52ch; font-size: clamp(16px, 1.8vw, 19px); color: var(--ice-70); }
-
-.exps { list-style: none; margin: clamp(32px, 5vw, 56px) 0 0; padding: 0; display: grid; gap: 14px; }
-.exp {
-  border: 1px solid var(--line); background: rgba(5, 11, 22, .46);
-  padding: clamp(18px, 3vw, 28px); display: grid; gap: 12px;
+/* ── hero ──────────────────────────────────────────────────────────── */
+.hero {
+  position: relative; max-width: var(--w); margin: 0 auto;
+  padding: clamp(18px, 3vw, 36px) var(--pad) clamp(24px, 3vw, 40px);
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.04fr);
+  grid-template-areas: ". orbit" "intro orbit" "read orbit" "cta orbit" ". orbit" "toc toc";
+  grid-template-rows: 1fr auto auto auto 1fr auto;
+  column-gap: clamp(40px, 6vw, 96px);
+  min-height: min(calc(100svh - 58px), 900px);
+  overflow-x: clip;
 }
-.exp.next { background: rgba(5, 11, 22, .28); border-style: dashed; }
-.meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; color: var(--ice-45); }
-.meta .id { color: var(--blue); }
-.pill { padding: 6px 8px 5px; border: 1px solid var(--line); color: var(--ice-70); white-space: nowrap; }
-.pill.live { border-color: var(--good); color: var(--good); }
-.exp h2 { margin: 0; font: 400 clamp(34px, 5vw, 56px)/.95 var(--display); letter-spacing: .015em; }
-.exp.next h2 { color: var(--ice-70); }
-.exp p { margin: 0; max-width: 60ch; color: var(--ice-70); }
-.links { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
-.links a {
-  text-decoration: none; padding: 11px 14px 10px; border: 1px solid var(--line); color: var(--ice);
-  background: rgba(5, 11, 22, .4); transition: border-color .2s, color .2s;
+.intro { grid-area: intro; position: relative; z-index: 1; }
+.kicker { color: var(--sky); margin: 0 0 18px; display: flex; align-items: center; gap: 12px; }
+.kicker::before, .kick::before { content: ""; width: 28px; height: 1px; background: linear-gradient(90deg, transparent, currentColor); }
+h1 { margin: 0; font-weight: 400; line-height: .86; }
+h1 .a { display: block; font: 400 clamp(58px, 19vw, 124px)/.86 var(--display); letter-spacing: .01em; color: var(--ice); }
+h1 .b {
+  display: block; font: italic 400 clamp(52px, 17vw, 114px)/.95 var(--serif); letter-spacing: -.01em;
+  margin: .02em 0 0 -.04em; padding: 0 .06em .1em .04em; width: fit-content;
+  background: linear-gradient(95deg, var(--sky) 0%, #d6eaf7 46%, var(--peach) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
 }
-.links a:first-child { border-color: var(--blue); color: var(--blue); }
-.links a:hover { border-color: var(--ice); color: var(--ice); }
+.lede { margin: 18px 0 0; max-width: 40ch; font-size: clamp(17px, 1.45vw, 19px); line-height: 1.6; color: var(--ice-80); }
 
-footer { max-width: var(--w); margin: 0 auto; padding: 0 var(--pad) 32px; color: var(--ice-45); }
-footer a { text-decoration: none; }
-footer a:hover { color: var(--ice); }
+/* the orb, its ring of 31 days, and the key under it */
+.orbit { grid-area: orbit; align-self: center; justify-self: center; width: min(100%, 560px); position: relative; }
+.stage { position: relative; width: 100%; aspect-ratio: 1 / 1; container-type: inline-size; border-radius: 50%; touch-action: manipulation; }
+/* focus: a sky ring between the beads and the date labels */
+.stage:focus-visible { outline: none; }
+.stage::after { content: ""; position: absolute; inset: 4.75%; border-radius: 50%; border: 2px solid var(--sky); opacity: 0; pointer-events: none; }
+.stage:focus-visible::after { opacity: 1; }
+.stage > * { position: absolute; pointer-events: none; }
+.halo { left: -24%; top: -24%; width: 148%; height: 148%; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(110, 178, 222, .42), rgba(95, 168, 211, .2) 36%, rgba(95, 168, 211, .07) 62%, transparent 100%); }
+.warm { left: 22%; top: 34%; width: 72%; height: 72%; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(246, 176, 150, .26), rgba(246, 176, 150, .08) 55%, transparent 100%); }
+#ring { inset: 0; width: 100%; height: 100%; }
+.orb, .echo, .wave { left: 23.5%; top: 23.5%; width: 53%; height: 53%; border-radius: 50%; }
+.orb { overflow: hidden; background: radial-gradient(circle at 34% 30%, #f5faff 0%, #d4e9f7 22%, #9dcbea 52%, #6fb0dc 80%, #5199c8 100%);
+  box-shadow: 0 0 60px -10px rgba(140, 196, 230, .55); transform: scale(.9); }
+.orb canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.orb::after { content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background:
+    radial-gradient(circle at 33% 28%, rgba(255, 255, 255, .7) 0, rgba(255, 255, 255, .24) 13%, transparent 31%),
+    radial-gradient(circle at 50% 50%, transparent 64%, rgba(12, 40, 68, .3) 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .55), inset 0 -22px 44px -24px rgba(246, 176, 150, .5); }
+.echo { left: 20.5%; top: 20.5%; width: 59%; height: 59%; border: 1px solid rgba(185, 220, 241, .16); }
+.wave { border: 1.25px solid rgba(214, 236, 250, .55); opacity: 0; }
+.today { width: 18cqi; height: 18cqi; margin: -9cqi 0 0 -9cqi; opacity: 0; transition: opacity 1.4s var(--ease); }
+.today.on { opacity: 1; }
+.today::before, .today::after { content: ""; position: absolute; border-radius: 50%; }
+.today::before { inset: 0; background: radial-gradient(closest-side, rgba(255, 214, 186, .8), rgba(252, 196, 162, .32) 34%, rgba(252, 196, 162, .08) 62%, transparent 100%); }
+.today::after { left: 50%; top: 50%; width: 5cqi; height: 5cqi; margin: -2.5cqi 0 0 -2.5cqi; border: 1px solid rgba(252, 196, 162, .7); }
+.core { inset: 0; display: grid; place-content: center; justify-items: center; text-align: center; color: #0a2238; }
+.core .t, .core .s { font: 500 max(11px, 2.1cqi)/1 var(--mono); letter-spacing: .22em; text-transform: uppercase; color: rgba(10, 34, 56, .78); }
+.core b { font: 400 clamp(54px, 18.5cqi, 112px)/.86 var(--display); letter-spacing: .01em; margin: .1em 0 .06em; }
+.core b.word { font-size: clamp(40px, 11.5cqi, 74px); }
+/* on the smallest ring the orb's lines draw in, so they stay inside it at the bottom of the breath */
+@container (max-width: 330px) { .core .t, .core .s { letter-spacing: .14em; } }
+.cue { left: 50%; top: 84.4%; transform: translate(-50%, -50%); margin: 0; display: grid; place-items: center;
+  font: italic 400 clamp(17px, 3.9cqi, 23px)/1 var(--serif); color: var(--ice); white-space: nowrap; }
+/* a day's tip covers the cue, so the cue steps aside */
+.stage.tipping .cue { visibility: hidden; }
+/* the legend and the cue describe what the module draws; without it they stay out */
+body:not([data-phase]) .legend { visibility: hidden; }
+body:not(.breathing) .cue, body[data-phase]:not(.breathing) .k-breath { display: none; }
+.cue span { grid-area: 1 / 1; }
+.cue span:last-child { opacity: 0; }
+.tip {
+  z-index: 3; transform: translate(-50%, calc(-100% - 18px)); padding: 10px 13px 9px; border-radius: 14px; white-space: nowrap; text-align: left;
+  background: rgba(7, 16, 30, .94); border: 1px solid var(--hair-2); box-shadow: 0 18px 44px -18px rgba(0, 0, 0, .85);
+  font: 500 11px/1.6 var(--mono); letter-spacing: .04em; color: var(--ice-70); opacity: 0; transition: opacity .25s;
+}
+.tip.below { transform: translate(-50%, 18px); }
+.tip.on { opacity: 1; }
+.tip b { display: block; margin-bottom: 2px; color: var(--ice); font-weight: 500; letter-spacing: .14em; text-transform: uppercase; }
+.legend { margin: clamp(6px, 1.6vw, 14px) 0 0; display: grid; justify-items: center; gap: 10px; text-align: center; }
+.legend p { margin: 0; color: var(--ice-70); font-size: 14px; max-width: 46ch; }
+.keys { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 18px; color: var(--ice-60); }
+.keys span { display: inline-flex; align-items: center; gap: 8px; }
+.keys i { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.keys .k-full { background: radial-gradient(circle at 35% 35%, #fff, var(--sky)); box-shadow: 0 0 10px rgba(140, 196, 230, .85); }
+.keys .k-sport { width: 5px; height: 5px; background: var(--dawn); box-shadow: 0 0 8px rgba(255, 196, 147, .8); }
+.keys .k-today { background: #ffd9bf; box-shadow: 0 0 0 3px rgba(246, 192, 160, .25), 0 0 12px rgba(246, 192, 160, .9); }
+.keys .k-part { width: 6px; height: 6px; background: rgba(140, 196, 230, .75); box-shadow: 0 0 7px rgba(140, 196, 230, .6); }
+.keys .k-miss { border: 1px solid var(--ice-60); background: linear-gradient(135deg, transparent calc(50% - .75px), var(--ice-60) calc(50% - .75px) calc(50% + .75px), transparent calc(50% + .75px)); }
+.keys .k-past { width: 6px; height: 6px; background: rgba(234, 244, 251, .5); }
+.keys .k-open { border: 1px solid var(--ice-30); }
+/* one control stops every breathing part of the page */
+.hold {
+  display: inline-flex; align-items: center; gap: 9px; min-height: 36px; margin-top: 2px; padding: 9px 15px 8px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--hair-2); background: rgba(234, 244, 251, .04); color: var(--ice-70); transition: color .3s, border-color .3s;
+}
+.hold i { position: relative; width: 8px; height: 9px; flex: none; border-left: 2px solid currentColor; border-right: 2px solid currentColor; }
+.hold[data-held="true"] i { width: 0; height: 0; border-style: solid; border-color: transparent; border-width: 5px 0 5px 8px; border-left-color: currentColor; border-right: 0; }
+@media (hover: hover) { .hold:hover { color: var(--sky); border-color: rgba(140, 196, 230, .5); } }
+/* the keys that need the log stay out while it loads, then fade in */
+body[data-state="loading"] .keys .lk { display: none; }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+body:not([data-state="loading"]) .keys .lk { animation: fade .9s var(--ease) both; }
+
+/* breathing: CSS on the compositor, every part on one clock.
+   0 to 50 % is the in-breath, 50 to 100 % the out-breath. */
+@keyframes b-orb { 0%, 100% { transform: scale(.8); } 50% { transform: scale(1); } }
+@keyframes b-halo { 0%, 100% { transform: scale(.84); opacity: .55; } 50% { transform: scale(1); opacity: 1; } }
+@keyframes b-warm { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
+@keyframes b-echo { 0%, 100% { transform: scale(.8); opacity: .35; } 50% { transform: scale(1); opacity: 1; } }
+@keyframes b-wave { 0%, 50% { transform: scale(1); opacity: 0; animation-timing-function: var(--ease); } 53% { opacity: .5; } 100% { transform: scale(1.82); opacity: 0; } }
+@keyframes b-in { 0% { opacity: 0; transform: translateY(4px); } 6%, 43% { opacity: 1; transform: none; } 49%, 100% { opacity: 0; transform: translateY(-4px); } }
+@keyframes b-out { 0%, 50% { opacity: 0; transform: translateY(4px); } 56%, 93% { opacity: 1; transform: none; } 99%, 100% { opacity: 0; transform: translateY(-4px); } }
+@keyframes b-glow { 0%, 100% { transform: scale(.66); opacity: .6; } 50% { transform: scale(1); opacity: 1; } }
+@keyframes b-ring { 0%, 100% { transform: scale(.75); opacity: .75; } 50% { transform: scale(1.6); opacity: .25; } }
+@keyframes b-dot { 0%, 100% { transform: scale(.7); opacity: .55; } 50% { transform: scale(1.15); opacity: 1; } }
+@keyframes b-sun { 0%, 100% { transform: scale(.94); opacity: .8; } 50% { transform: scale(1.04); opacity: 1; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+.breathing .orb { animation: b-orb var(--breath) var(--sine) infinite; }
+.breathing .halo { animation: b-halo var(--breath) var(--sine) infinite; }
+.breathing .warm { animation: b-warm var(--breath) var(--sine) infinite; }
+.breathing .echo { animation: b-echo var(--breath) var(--sine) infinite; }
+.breathing .wave { animation: b-wave var(--breath) linear infinite; }
+.breathing .cue span:first-child { animation: b-in var(--breath) ease-in-out infinite; }
+.breathing .cue span:last-child { animation: b-out var(--breath) ease-in-out infinite; }
+.breathing .today::before { animation: b-glow var(--breath) var(--sine) infinite; }
+.breathing .today::after { animation: b-ring var(--breath) var(--sine) infinite; }
+.breathing .orb canvas { animation: spin 140s linear infinite; }
+.breathing .sun { animation: b-sun var(--breath) var(--sine) infinite; }
+.breathing .pause i, .breathing .pill.live::before, .breathing .toc .s.live::before { animation: b-dot var(--breath) var(--sine) infinite; }
+/* pausing is done in JS, per group, with Animation.pause() and play() */
+
+/* last night, read off the watch. The box keeps one size in every state:
+   quiet dashes while the log loads, the figures once it lands, one line if it cannot */
+.read { grid-area: read; margin-top: clamp(24px, 3vw, 34px); position: relative; z-index: 1; }
+.ph { color: var(--ice-30); }
+.roff { display: none; }
+body[data-state="off"] .read .rc, .read.empty .rc { visibility: hidden; }
+body[data-state="off"] .read .roff, .read.empty .roff {
+  display: grid; position: absolute; inset: 0; place-content: center; justify-items: center; gap: 14px; padding: 22px; text-align: center;
+  background: radial-gradient(60% 70% at 50% 50%, rgba(95, 168, 211, .12), transparent 72%);
+  animation: fade .9s var(--ease) both;
+}
+.roff i { width: 9px; height: 9px; border-radius: 50%; background: radial-gradient(circle at 36% 32%, #fff, #cfe6f5 45%, var(--sky)); box-shadow: 0 0 16px 3px rgba(140, 196, 230, .45); }
+.roff p { margin: 0; max-width: 30ch; color: var(--ice-80); font: italic 400 clamp(21px, 2vw, 25px)/1.35 var(--serif); }
+.roff a { color: var(--peach); text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.rgrid {
+  position: relative;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: hidden;
+  border-radius: 24px; border: 1px solid var(--hair-2);
+  background: linear-gradient(160deg, rgba(22, 42, 68, .82), rgba(9, 20, 36, .76) 55%, rgba(16, 32, 56, .8));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), 0 40px 100px -50px rgba(0, 0, 0, .9);
+}
+.rc { padding: 16px 18px 15px; border-right: 1px solid var(--hair); border-bottom: 1px solid var(--hair); margin: 0 -1px -1px 0; min-width: 0; }
+.rc.cap { display: flex; flex-direction: column; justify-content: center; gap: 7px; }
+.rc.cap h2 { margin: 0; font: italic 400 28px/1 var(--serif); color: var(--ice); }
+.rc.cap p { margin: 0; color: var(--ice-60); }
+.lbl { display: block; color: var(--ice-60); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.val { display: block; margin-top: 9px; font: 400 clamp(32px, 2.9vw, 40px)/.9 var(--display); letter-spacing: .02em; color: var(--ice); white-space: nowrap; }
+.val small, .num small, .big small, .nstats small { font: 500 11px/1 var(--mono); letter-spacing: .06em; color: var(--ice-60); margin-left: 4px; text-transform: none; }
+/* the h of a duration sits tight between its digits: "8h01" reads as one figure */
+.val small.u, .num small.u, .big small.u, .nstats small.u { margin: 0 .05em; padding: 0; letter-spacing: 0; font-size: .38em; }
+.rc .when { display: block; margin-top: 6px; color: var(--ice-60); }
+
+/* buttons */
+.cta { grid-area: cta; display: flex; flex-wrap: wrap; gap: 12px; margin-top: clamp(22px, 2.6vw, 30px); position: relative; z-index: 1; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 12px; padding: 16px 22px 15px; border-radius: 999px; min-height: 48px;
+  font: 500 11.5px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; text-decoration: none;
+  transition: transform .5s var(--ease), box-shadow .5s var(--ease), background .3s, border-color .3s, color .3s;
+}
+.btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; transition: transform .5s var(--ease); }
+.btn.solid { color: #04131f; background: linear-gradient(120deg, #f4faff, #d3e8f6 55%, #f8dccb); box-shadow: 0 14px 44px -16px rgba(140, 196, 230, .8), inset 0 1px 0 #fff; }
+.btn.ghost { color: var(--ice); border: 1px solid var(--hair-2); background: rgba(234, 244, 251, .05); }
+@media (hover: hover) {
+  .btn.solid:hover { transform: translateY(-2px); box-shadow: 0 20px 54px -16px rgba(140, 196, 230, .95), inset 0 1px 0 #fff; }
+  .btn.solid:hover svg { transform: translateX(3px); }
+  .btn.ghost:hover { border-color: var(--sky); color: var(--sky); }
+}
+
+/* contents, with dotted leaders */
+.toc { grid-area: toc; margin-top: clamp(30px, 3.6vw, 44px); position: relative; z-index: 1; }
+.toc-h { display: flex; justify-content: space-between; gap: 12px; color: var(--ice-60); margin: 0; padding-bottom: 10px; border-bottom: 1px solid var(--ice-30); }
+.toc ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr); column-gap: clamp(24px, 3vw, 40px); }
+.toc a {
+  display: grid; grid-template-columns: 28px auto minmax(14px, 1fr) auto; align-items: baseline; gap: 10px;
+  padding: 13px 0 12px; border-bottom: 1px solid var(--hair); text-decoration: none; color: var(--ice); transition: color .3s;
+}
+.toc .n { font: 500 11px/1 var(--mono); letter-spacing: .1em; color: var(--ice-60); }
+.toc li:first-child .n { color: var(--peach); }
+.toc .t { font: 500 16px/1.25 var(--sans); }
+.toc .lead { border-bottom: 1px dotted var(--ice-30); transform: translateY(-4px); }
+.toc .s { color: var(--ice-60); white-space: nowrap; display: inline-flex; align-items: center; gap: 8px; }
+.toc .s.live { color: var(--sky); }
+.toc .s.live::before, .pill.live::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--sky); box-shadow: 0 0 10px var(--blue); }
+@media (hover: hover) { .toc a:hover .t { color: var(--sky); } }
+
+/* arrival: a slow rise, then the light */
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes bloom { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: none; } }
+.intro > *, .cta, .toc { animation: rise 1.1s var(--ease) both; }
+.intro > :nth-child(2) { animation-delay: .08s; }
+.intro > :nth-child(3) { animation-delay: .16s; }
+.cta { animation-delay: .26s; }
+.toc { animation-delay: .4s; }
+.stage { animation: bloom 2.2s var(--ease) both; }
+
+/* ── sections ──────────────────────────────────────────────────────── */
+.sec { position: relative; isolation: isolate; padding: clamp(32px, 5vw, 64px) 0 0; }
+.sec::before { content: ""; position: absolute; z-index: -1; inset: -10% 0 -10%; pointer-events: none; }
+.head { margin-bottom: clamp(26px, 4vw, 46px); }
+.kick { color: var(--sky); margin: 0 0 16px; display: flex; align-items: center; gap: 12px; }
+h2.big { margin: 0; font: 400 clamp(52px, 8vw, 112px)/.88 var(--display); letter-spacing: .012em; }
+.soft { display: block; font: italic 400 .96em/.98 var(--serif); letter-spacing: -.01em; padding: 0 .06em .08em 0; margin-left: -.02em; width: fit-content;
+  background: linear-gradient(95deg, #ffe2cc, var(--dawn) 50%, var(--rose)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.tag { margin: 18px 0 0; max-width: 54ch; font-size: clamp(16px, 1.4vw, 18px); color: var(--ice-70); }
+.pill { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px 6px; border-radius: 999px; border: 1px solid var(--hair-2); color: var(--ice-70); white-space: nowrap; }
+.pill.live { color: var(--sky); border-color: rgba(140, 196, 230, .45); background: rgba(95, 168, 211, .1); }
+.glass {
+  position: relative; border-radius: 30px; border: 1px solid var(--hair);
+  background: linear-gradient(160deg, rgba(22, 38, 64, .6), rgba(8, 17, 32, .52) 50%, rgba(20, 28, 54, .56));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 40px 90px -60px rgba(0, 0, 0, .75);
+}
+.glass::before {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; pointer-events: none;
+  background: linear-gradient(135deg, rgba(255, 255, 255, .24), rgba(255, 255, 255, 0) 30%, rgba(140, 196, 230, 0) 70%, rgba(246, 192, 160, .26));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+          mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.fig { margin: 18px 0 0; max-width: 78ch; color: var(--ice-70); font-size: 14px; line-height: 1.6; }
+.fig b { font: italic 400 17px/1 var(--serif); color: var(--peach); margin-right: 2px; font-weight: 400; }
+
+/* a pause between chapters: one pearl, breathing on the same clock */
+.pause { display: flex; align-items: center; justify-content: center; gap: 18px; max-width: 420px; margin: clamp(72px, 10vw, 132px) auto 0; padding: 0 var(--pad); }
+.pause::before, .pause::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(185, 220, 241, .34)); }
+.pause::after { transform: scaleX(-1); }
+.pause i { width: 9px; height: 9px; border-radius: 50%; flex: none;
+  background: radial-gradient(circle at 36% 32%, #fff, #cfe6f5 45%, var(--sky)); box-shadow: 0 0 16px 3px rgba(140, 196, 230, .45); }
+.pause.warm-p i { background: radial-gradient(circle at 36% 32%, #fff, #ffe2cc 45%, var(--dawn)); box-shadow: 0 0 16px 3px rgba(255, 196, 147, .45); }
+
+/* ── Exp 0: the ridge comes into focus ─────────────────────────────── */
+.exp0 { position: relative; isolation: isolate; padding-top: clamp(130px, 17vw, 230px); }
+.vista {
+  position: absolute; left: 0; right: 0; top: 0; height: clamp(660px, 74vw, 1060px); z-index: -1; overflow: hidden; pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 22%, #000 50%, rgba(0, 0, 0, .4) 76%, transparent 100%);
+          mask-image: linear-gradient(180deg, transparent 0, #000 22%, #000 50%, rgba(0, 0, 0, .4) 76%, transparent 100%);
+}
+.vista img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 58% 34%; filter: blur(1px) brightness(.62) saturate(.92); transform: scale(1.03); }
+.vista::after { content: ""; position: absolute; inset: 0;
+  background:
+    linear-gradient(90deg, rgba(5, 11, 22, .8) 0%, rgba(5, 11, 22, .46) 42%, rgba(5, 11, 22, .08) 72%, rgba(5, 11, 22, 0) 100%),
+    linear-gradient(180deg, rgba(5, 11, 22, 0) 40%, rgba(5, 11, 22, .55) 100%); }
+.e-top { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); column-gap: clamp(32px, 6vw, 96px); align-items: end; }
+.meta { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 14px; color: var(--ice-60); margin: 0 0 24px; }
+.meta .id { color: var(--sky); }
+.goal { color: var(--ice-60); margin: 0 0 12px; }
+.exp0 h2 { margin: 0; font: 400 clamp(62px, 9.4vw, 136px)/.86 var(--display); letter-spacing: .01em; text-shadow: 0 2px 40px rgba(5, 11, 22, .5); }
+.exp0 h2 em { font-style: normal; display: block; color: transparent; width: fit-content; text-shadow: none; background: linear-gradient(95deg, #f4faff, #d2e9f7 55%, #a6d3ee); -webkit-background-clip: text; background-clip: text; }
+.e-body { margin: 22px 0 0; max-width: 46ch; color: var(--ice-80); font-size: clamp(16px, 1.35vw, 18px); }
+.e-facts { padding-bottom: 6px; }
+.trio { display: flex; gap: clamp(22px, 4vw, 44px); margin: 0; padding: 0; }
+.trio div { display: grid; gap: 6px; }
+.trio dd { margin: 0; order: -1; font: 400 clamp(48px, 5vw, 66px)/.85 var(--display); color: var(--ice); }
+.trio dt { color: var(--ice-70); }
+.chips { list-style: none; margin: 24px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.chips li { padding: 8px 13px 7px; border-radius: 999px; border: 1px solid var(--hair-2); background: rgba(5, 11, 22, .42); font-size: 14px; color: var(--ice-80); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.note { margin: 22px 0 0; color: var(--ice-70); font-size: 14.5px; line-height: 1.6; padding-left: 14px; border-left: 1px solid rgba(140, 196, 230, .5); max-width: 48ch; }
+
+/* so far: a frosted pane over the foot of the ridge */
+.sofar { margin-top: clamp(56px, 7vw, 96px); padding: clamp(22px, 3.6vw, 44px); }
+.sf-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px 20px; flex-wrap: wrap; padding-bottom: 16px; border-bottom: 1px solid var(--hair-2); }
+.sf-head h3 { margin: 0; font: italic 400 clamp(30px, 3vw, 38px)/1 var(--serif); }
+.sf-head p { margin: 0; color: var(--ice-60); }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; }
+.stat { padding: 22px 22px 22px 0; display: grid; gap: 4px; align-content: start; border-bottom: 1px solid var(--hair); }
+.stat + .stat { padding-left: 22px; border-left: 1px solid var(--hair); }
+.stat dd { margin: 0; }
+.stat .num { order: -1; font: 400 clamp(48px, 4.6vw, 64px)/.9 var(--display); letter-spacing: .01em; color: var(--ice); }
+.stat .num small { font-size: 13px; }
+.stat dt { color: var(--ice-80); font-size: 15px; font-weight: 500; margin-top: 4px; }
+.stat .s { color: var(--ice-60); font-size: 14px; line-height: 1.45; }
+/* what moved and what to watch side by side, sport under the first */
+.grid2 {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto 1fr; grid-template-areas: "found lean" "sport lean";
+  gap: 44px clamp(32px, 5vw, 72px); margin-top: clamp(30px, 4vw, 44px); align-items: start;
+}
+.grid2.nolean { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); grid-template-rows: auto; grid-template-areas: "found sport"; }
+.grid2 .found { grid-area: found; }
+.grid2 .watch { grid-area: lean; }
+.grid2 .sport { grid-area: sport; }
+.colh { color: var(--ice-60); margin: 0 0 14px; font-weight: 500; }
+.flist { list-style: none; margin: 0; padding: 0; counter-reset: f; }
+.flist li { counter-increment: f; display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 2px 10px; padding: 14px 0; border-top: 1px solid var(--hair); }
+.flist li::before { content: counter(f, decimal-leading-zero); font: italic 400 20px/1.2 var(--serif); color: var(--peach); grid-row: span 2; }
+.flist p { margin: 0; color: var(--ice-80); font-size: 15.5px; line-height: 1.5; }
+.flist b { color: var(--ice); font-weight: 600; }
+.flist .tag2 { justify-self: start; margin-top: 7px; padding: 5px 10px 4px; border-radius: 999px; border: 1px solid var(--hair-2); color: var(--ice-70); }
+.flist .tag2 i { font-style: normal; text-transform: none; }
+.flist .good .tag2 { color: var(--sky); border-color: rgba(140, 196, 230, .4); }
+.flist .bad .tag2 { color: var(--peach); border-color: rgba(246, 192, 160, .4); }
+/* to watch: a lean that passes alone, not yet clear of the luck check; neither good nor bad */
+.flist.lean li::before { color: var(--ice-60); }
+.flist.lean .tag2 { color: var(--ice-70); border-style: dashed; }
+.flist li.more::before { content: "+"; }
+.flist li.more a { color: var(--ice); text-underline-offset: 4px; text-decoration-color: rgba(234, 244, 251, .4); }
+.fnote { margin: 0; padding-top: 14px; border-top: 1px solid var(--hair); color: var(--ice-70); font-size: 14.5px; }
+.fwatch { margin: 0; padding: 12px 0 14px 44px; border-top: 1px solid var(--hair); color: var(--ice-70); font-size: 14.5px; line-height: 1.55; }
+.sline { margin: 0 0 16px; color: var(--ice-80); font-size: 15.5px; }
+.sline b { font: 400 42px/.9 var(--display); color: var(--ice); font-weight: 400; vertical-align: -5px; }
+.sbars { list-style: none; margin: 0; padding: 0; }
+.sbars li { display: grid; grid-template-columns: minmax(56px, auto) minmax(40px, 1fr) auto; align-items: center; gap: 14px; padding: 12px 0; border-top: 1px solid var(--hair); font-size: 15px; }
+.sbars .tr { height: 4px; border-radius: 9px; background: rgba(234, 244, 251, .08); overflow: hidden; }
+.sbars .tr i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--sky), var(--peach)); }
+.sbars .c { color: var(--ice-70); font: 500 12px/1 var(--mono); letter-spacing: .04em; white-space: nowrap; }
+.e-link { display: none; margin: 24px 0 0; }
+.e-link a { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: var(--sky); text-decoration: underline; text-underline-offset: 5px; text-decoration-color: rgba(140, 196, 230, .45); }
+.e-link svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* how the log reads: the spec's own rules, as margin notes */
+.rules { margin-top: clamp(44px, 5.4vw, 72px); }
+.rules h3 { margin: 0 0 6px; color: var(--ice-60); font-weight: 500; }
+.rules ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: clamp(24px, 3vw, 40px); counter-reset: r; }
+.rules li { counter-increment: r; padding: 16px 0 16px 32px; position: relative; border-top: 1px solid var(--hair); color: var(--ice-70); font-size: 14.5px; line-height: 1.6; }
+.rules li::before { content: counter(r); position: absolute; left: 2px; top: 14px; font: italic 400 20px/1.2 var(--serif); color: var(--sky); }
+
+/* ── night by night: six results on one October axis ─────────────── */
+#trends::before { background: radial-gradient(46% 40% at 82% 34%, rgba(95, 168, 211, .1), transparent 72%), radial-gradient(40% 36% at 8% 78%, rgba(183, 174, 224, .07), transparent 72%); }
+.head.split { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: clamp(32px, 6vw, 96px); align-items: end; }
+.head.split .tag { justify-self: end; max-width: 44ch; }
+.head.split .tag { margin: 0; }
+.strands { position: relative; border-radius: 22px; outline-offset: 8px; }
+.srow { display: grid; grid-template-columns: 290px minmax(0, 1fr); column-gap: clamp(20px, 3vw, 44px); align-items: center; }
+.srow.ax { padding-bottom: 8px; }
+.srow.ax .plot { height: 18px; }
+.srow.ax .plot span { position: absolute; top: 0; transform: translateX(-50%); color: var(--ice-60); white-space: nowrap; }
+.srow.ax .plot span.first { transform: none; }
+.srow.ax .plot span.last { transform: translateX(-100%); }
+.srow.ax .plot span.now { color: var(--peach); }
+.pax { display: none; }
+.pax span { position: absolute; top: 0; transform: translateX(-50%); color: var(--ice-60); white-space: nowrap; }
+.pax span.first { transform: none; }
+.pax span.last { transform: translateX(-100%); }
+.pax span.now { color: var(--peach); }
+.strand { padding: 20px 0 18px; border-top: 1px solid var(--hair); }
+.strand:last-child { border-bottom: 1px solid var(--hair); }
+.slab { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; align-items: end; }
+.slab h3 { margin: 0; grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; color: var(--ice-80); }
+.slab h3 i { width: 7px; height: 7px; border-radius: 50%; background: var(--c); box-shadow: 0 0 10px var(--c); flex: none; }
+.slab h3 em { font-style: normal; color: var(--ice-60); letter-spacing: .1em; }
+.slab .big { margin: 8px 0 0; font: 400 clamp(44px, 3.6vw, 52px)/.88 var(--display); letter-spacing: .01em; color: var(--ice); white-space: nowrap; }
+.slab .sub { margin: 0 0 3px; color: var(--ice-60); text-align: right; }
+.slab .ln { grid-column: 1 / -1; margin: 8px 0 0; color: var(--ice-70); font-size: 14px; line-height: 1.5; }
+.slab .ln b { color: var(--ice); font-weight: 500; }
+.dl { color: var(--ice); font-weight: 500; }
+.dl.good { color: var(--sky); }
+.dl.bad { color: var(--peach); }
+.plot { position: relative; height: 84px; }
+.plot svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.plot .cur { position: absolute; top: -6px; bottom: -6px; width: 1px; margin-left: -.5px; background: rgba(234, 244, 251, .5); opacity: 0; }
+.plot .pt { position: absolute; width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px; border-radius: 50%; border: 1.5px solid var(--ice); background: var(--ink); opacity: 0; }
+.strands.scrub .cur, .strands.scrub .pt { opacity: 1; }
+.strands.scrub .pt.na { opacity: 0; }
+
+/* ── bed to wake: one capsule per night, in the colours of the sky ─── */
+#nights::before { background: radial-gradient(44% 36% at 14% 40%, rgba(183, 174, 224, .1), transparent 72%), radial-gradient(40% 34% at 88% 72%, rgba(242, 179, 124, .07), transparent 72%); }
+#nights .head { text-align: center; margin-left: auto; margin-right: auto; max-width: 720px; }
+#nights .head .kick { justify-content: center; }
+#nights .head .kick::after { content: ""; width: 28px; height: 1px; background: linear-gradient(270deg, transparent, currentColor); }
+#nights .head .tag { margin-left: auto; margin-right: auto; }
+.nights { padding: clamp(22px, 4vw, 48px); }
+.nstats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; margin: 0 0 clamp(26px, 3.4vw, 40px); }
+.nstats div { display: grid; gap: 4px; }
+.nstats dt { color: var(--ice-60); order: 1; }
+.nstats dd { margin: 0; }
+.nstats dd.v { font: 400 clamp(40px, 4vw, 54px)/.9 var(--display); color: var(--ice); white-space: nowrap; }
+.nstats dd.s { order: 2; font: 400 14px/1.4 var(--sans); color: var(--ice-60); }
+.chart { position: relative; display: grid; gap: 8px; }
+/* the sky from 21:00 to 11:00, faint, behind the tracks */
+.chart::before { content: ""; position: absolute; top: 24px; bottom: -8px; left: 52px; right: 62px; pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 10%, #000 90%, transparent); mask-image: linear-gradient(180deg, transparent, #000 10%, #000 90%, transparent);
+  background: linear-gradient(90deg, rgba(95, 168, 211, .1) 0%, rgba(40, 70, 130, .08) 14%, rgba(10, 16, 40, 0) 42%, rgba(141, 132, 189, .07) 60%, rgba(242, 179, 124, .11) 72%, rgba(248, 211, 164, .07) 86%, rgba(140, 196, 230, .09) 100%); }
+.row { position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr) 50px; align-items: center; gap: 12px; }
+.row .d, .row .z { font: 500 11px/1 var(--mono); letter-spacing: .06em; color: var(--ice-60); }
+.row .z { text-align: right; color: var(--ice-70); }
+.track {
+  position: relative; height: 12px;
+  background: repeating-linear-gradient(90deg, transparent 0 calc(100% / 14), rgba(234, 244, 251, .06) calc(100% / 14) calc(100% / 14 + 1px), transparent calc(100% / 14 + 1px) calc(100% / 7));
+}
+.track::after { content: ""; position: absolute; top: -4px; bottom: -4px; left: calc(300% / 14); width: 1px; background: rgba(234, 244, 251, .16); }
+.bar {
+  position: absolute; top: 1px; bottom: 1px; border-radius: 99px;
+  background: linear-gradient(90deg, #8cc4e6 0%, #5fa8d3 21.4%, #3f6fae 46.4%, #8d84bd 64.3%, #dc9f8e 75%, #f2b37c 85.7%, #f8d3a4 100%);
+  box-shadow: 0 0 18px -4px rgba(140, 196, 230, .45);
+  transform-origin: left center;
+}
+.bar::after, .pin { content: ""; position: absolute; top: 50%; width: 11px; height: 11px; margin-top: -5.5px; border-radius: 50%; background: #ffe3cc; box-shadow: 0 0 12px 2px rgba(246, 192, 160, .8); }
+.bar::after { right: -1px; }
+.pin { margin-left: -5.5px; }
+@keyframes grow { from { transform: scaleX(.02); opacity: 0; } to { transform: none; opacity: 1; } }
+.chart.go .bar { animation: grow 1.3s var(--ease) both; animation-delay: calc(var(--i) * 40ms); }
+.chart.wait .bar { opacity: 0; }
+.row.ax { margin-bottom: 4px; }
+.row.ax .track { background: none; height: 14px; }
+.row.ax .track::after { display: none; }
+.row.ax .track span { position: absolute; transform: translateX(-50%); font: 500 11px/1 var(--mono); letter-spacing: .04em; color: var(--ice-60); white-space: nowrap; }
+.nfoot { margin: clamp(20px, 3vw, 30px) 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px; color: var(--ice-60); }
+.nfoot .grad { display: inline-flex; align-items: center; gap: 10px; }
+.nfoot .grad i { width: 96px; height: 6px; border-radius: 9px; background: linear-gradient(90deg, #8cc4e6, #5fa8d3 21.4%, #3f6fae 46.4%, #8d84bd 64.3%, #dc9f8e 75%, #f2b37c 85.7%, #f8d3a4); }
+
+/* the ledger: every figure as a table */
+.ledger { margin-top: clamp(28px, 4vw, 44px); border-top: 1px solid var(--hair-2); border-bottom: 1px solid var(--hair-2); }
+.ledger summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 18px 2px; color: var(--ice-80); border-radius: 8px; }
+.ledger summary::-webkit-details-marker { display: none; }
+.ledger summary .t { font: italic 400 23px/1.3 var(--serif); color: var(--ice); }
+.ledger summary .p { font: 400 20px/1 var(--mono); color: var(--peach); transition: transform .4s var(--ease); }
+.ledger[open] summary .p { transform: rotate(45deg); }
+@media (hover: hover) { .ledger summary:hover .t { color: var(--sky); } }
+.scroll { overflow-x: auto; padding-bottom: 18px; -webkit-overflow-scrolling: touch; }
+.scroll table { border-collapse: collapse; width: 100%; min-width: 880px; font: 400 13px/1.4 var(--mono); color: var(--ice-80); }
+.scroll th { text-align: left; font: 500 11px/1.35 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ice-60); padding: 10px 12px 10px 0; border-bottom: 1px solid var(--hair-2); white-space: nowrap; }
+.scroll th small { display: block; font-size: 11px; letter-spacing: .04em; text-transform: none; color: var(--ice-60); font-weight: 400; }
+.scroll tbody th { font: 400 13px/1.4 var(--sans); letter-spacing: 0; text-transform: none; color: var(--ice-80); border-bottom-color: var(--hair); }
+.scroll td { padding: 9px 12px 9px 0; border-bottom: 1px solid var(--hair); white-space: nowrap; }
+.scroll td.na { color: var(--ice-60); }
+.lkey { margin: 0; padding: 0 0 18px; color: var(--ice-60); font-size: 13.5px; }
+
+/* ── after Exp 0: the sun behind the massif ───────────────────────── */
+.close { z-index: 1; padding-bottom: calc(var(--mh) * .52); }
+.close .head { max-width: 760px; }
+.nexts { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: clamp(12px, 1.8vw, 22px); }
+.nx { padding: clamp(24px, 3.4vw, 40px); display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 24px; align-items: start; align-content: start; scroll-margin-top: 40px;
+  background: linear-gradient(165deg, rgba(34, 34, 68, .62), rgba(16, 18, 40, .58)); }
+.nx .seed {
+  grid-row: span 3; position: relative; width: clamp(60px, 6.4vw, 82px); aspect-ratio: 1; border-radius: 50%; margin-top: 2px;
+  border: 2px dotted rgba(234, 244, 251, .34); background: radial-gradient(circle at 50% 50%, rgba(140, 196, 230, .16), transparent 62%);
+}
+.nx .seed::after {
+  content: ""; position: absolute; inset: 30%; border-radius: 50%;
+  background: radial-gradient(circle at 36% 32%, rgba(248, 252, 255, .9), rgba(169, 210, 236, .55) 45%, rgba(95, 168, 211, .25) 100%);
+  box-shadow: 0 0 22px 2px rgba(140, 196, 230, .32);
+}
+.nx.later .seed::after { background: radial-gradient(circle at 36% 32%, rgba(255, 246, 238, .9), rgba(246, 192, 160, .5) 45%, rgba(240, 165, 154, .22) 100%); box-shadow: 0 0 22px 2px rgba(246, 192, 160, .3); }
+.nx .meta { margin: 0 0 6px; }
+.nx h3 { margin: 0; font: 400 clamp(46px, 4.6vw, 64px)/.9 var(--display); letter-spacing: .015em; }
+.nx p { margin: 8px 0 0; color: var(--ice-70); max-width: 40ch; }
+.nx .so { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--hair); font-size: 14.5px; }
+.nx .so b { color: var(--ice); font-weight: 500; }
+
+.scene { position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--mh) * 3.6); z-index: 0; overflow: hidden; pointer-events: none; }
+.scene .glow { position: absolute; left: -10%; right: -10%; bottom: calc(var(--mh) * .3); height: calc(var(--mh) * 3.2);
+  background: radial-gradient(52% 48% at 50% 100%, rgba(255, 184, 140, .2), rgba(243, 169, 166, .07) 55%, transparent 76%); }
+.sunpos { position: absolute; left: 50%; bottom: calc(var(--mh) * .75); width: 0; height: 0; }
+.sun { position: absolute; width: var(--sr); height: var(--sr); left: calc(var(--sr) / -2); top: calc(var(--sr) / -2); border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 236, 214, .95), rgba(255, 200, 152, .72) 11%, rgba(243, 169, 166, .32) 32%, rgba(156, 111, 154, .12) 60%, rgba(61, 43, 69, 0) 100%); }
+.massif { position: absolute; left: 0; bottom: 0; width: 100%; height: var(--mh); display: block; }
+
+footer.foot {
+  position: relative; z-index: 1; max-width: var(--w); margin: 0 auto; padding: clamp(40px, 6vw, 72px) var(--pad) max(36px, env(safe-area-inset-bottom));
+  display: grid; justify-items: center; gap: 14px; text-align: center; color: var(--ice-60);
+}
+.foot .seal { width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle at 36% 32%, #fff, #d3e8f6 30%, var(--sky) 62%, rgba(140, 196, 230, 0) 72%); box-shadow: 0 0 40px 6px rgba(246, 192, 160, .35); }
+.foot a { color: var(--ice); text-decoration: none; padding: 10px 6px; }
+@media (hover: hover) { .foot a:hover { color: var(--peach); } }
+.foot p { margin: 0; }
+
+/* ── widths ────────────────────────────────────────────────────────── */
+@media (min-width: 960px) {
+  h1 .a { font-size: clamp(60px, 8.4vw, 122px); }
+  h1 .b { font-size: clamp(56px, 7.7vw, 112px); }
+}
+@media (max-width: 1100px) {
+  .rules ol { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+/* beside the orb at these widths, three cells are too narrow for "Sleep duration": the panel takes two */
+@media (min-width: 960px) and (max-width: 1199px) {
+  .rgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 959px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr); grid-template-areas: "intro" "orbit" "read" "cta" "toc";
+    grid-template-rows: auto; min-height: 0; padding-top: clamp(26px, 6vw, 48px);
+  }
+  .orbit { width: min(100%, 520px); margin-top: clamp(26px, 6vw, 52px); }
+  .lede { max-width: 46ch; }
+  .toc ol { grid-template-columns: minmax(0, 1fr); }
+  .e-top { grid-template-columns: minmax(0, 1fr); }
+  .e-facts { margin-top: 40px; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stat:nth-child(3) { padding-left: 0; border-left: 0; }
+  .grid2 { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto; grid-template-areas: "found" "lean" "sport"; row-gap: 40px; }
+  .grid2.nolean { grid-template-columns: minmax(0, 1fr); grid-template-areas: "found" "sport"; }
+  .head.split { grid-template-columns: minmax(0, 1fr); }
+  .head.split .tag { margin-top: 18px; justify-self: start; }
+  .nstats { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 24px; }
+  .nexts { grid-template-columns: 1fr; }
+  /* one pair of buttons in the first screens: the hero keeps it, Exp 0 gets a text link */
+  .exp0 .cta { display: none; }
+  .e-link { display: block; }
+}
+@media (max-width: 959px) {
+  .srow { grid-template-columns: minmax(0, 1fr); }
+  /* one row of dates under each line, in place of the shared axis far above */
+  .srow.ax { display: none; }
+  .strand .plot { margin-top: 14px; margin-bottom: 24px; height: 76px; }
+  .pax { display: block; position: absolute; left: 0; right: 0; top: calc(100% + 9px); height: 14px; }
+  /* the caption sits beside the figure it describes */
+  .slab { grid-template-columns: auto auto; justify-content: start; column-gap: 24px; }
+  .slab .sub { text-align: left; }
+}
+@media (max-width: 720px) {
+  .strand .plot { height: 70px; }
+  .rules ol { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  /* the key holds the two lines the live log needs, so it never jumps */
+  body:not([data-state="ready"]) .keys { min-height: 38.8px; align-content: flex-start; }
+  .rgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); border-radius: 22px; }
+  .rc { padding: 15px 16px 14px; }
+  .cta { flex-direction: column; align-items: stretch; }
+  .trio { justify-content: space-between; }
+  .glass { border-radius: 24px; }
+  .sofar { padding: 22px 18px; }
+  .row { grid-template-columns: 24px minmax(0, 1fr) 40px; gap: 8px; }
+  .chart::before { left: 32px; right: 48px; }
+  .row.ax .track span.odd { display: none; }
+  .stat { padding: 18px 14px 18px 0; }
+  .stat + .stat { padding-left: 14px; }
+  .stat:nth-child(3) { padding-left: 0; }
+  .nx { grid-template-columns: minmax(0, 1fr); }
+  .nx .seed { grid-row: auto; width: 56px; margin-bottom: 8px; }
+}
+/* the keys pair up two by two, so none sits alone under the orb */
+@media (max-width: 480px) {
+  .keys { display: grid; grid-template-columns: repeat(2, auto); justify-content: center; column-gap: 18px; }
+}
+@media (max-width: 360px) {
+  .rc { padding: 14px 12px 13px; }
+  .val { font-size: 29px; }
+  .lbl { letter-spacing: .1em; }
+  .trio dd { font-size: 44px; }
+  .keys { gap: 8px 14px; }
+  .toc a { grid-template-columns: 24px minmax(0, 1fr); gap: 6px 8px; }
+  .toc .lead { display: none; }
+  .toc .s { grid-column: 2; }
+  .toc .t { font-size: 15px; }
+  .stat .num { font-size: 44px; }
+  .sofar { padding: 20px 14px; }
+  .nights { padding: 20px 14px; }
+}
+/* a kicker's date takes its own line rather than leave a lone "· 1–16 Oct" */
+@media (max-width: 400px) {
+  .kick .ksep { display: none; }
+  .kick .kd { display: block; }
+  .kick::before, #nights .head .kick::after { align-self: flex-start; margin-top: 7px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .cue, .k-breath, .hold { display: none !important; }
+}
 </style>
+<noscript><style>body[data-state] .live-only, .legend, .cue { display: none !important; } body[data-state] .read .rc { visibility: hidden; } body[data-state] .read .roff { display: grid; position: absolute; inset: 0; place-content: center; justify-items: center; gap: 14px; padding: 22px; text-align: center; }</style></noscript>
 </head>
-<body>
-<div class="fallback"></div>
-<img class="bg" src="/wellness/bg.jpg" alt="" fetchpriority="high">
+<body data-state="loading">
+<a class="skip mono" href="#exp0">Skip to Exp 0</a>
+<div class="sky" aria-hidden="true">
+  <img class="ridge" src="/wellness/bg.jpg" alt="" fetchpriority="high">
+  <div class="veil"></div>
+  <div class="grain"></div>
+</div>
 
 <header class="top">
-  <a class="mono" href="https://jeremylasne.com">Jeremy Lasne</a>
-  <span class="mono" style="color: var(--ice-45)">Wellness</span>
+  <a class="brand mono" href="https://jeremylasne.com"><i aria-hidden="true"></i>Jeremy Lasne</a>
+  <span class="crumb mono">Wellness</span>
 </header>
 
 <main>
-  <span class="kicker mono">Wellness</span>
-  <h1>Experiments on myself</h1>
-  <p class="lede">One question per experiment. I measure every day, then the data says what moved and by how much.</p>
+  <section class="hero" aria-labelledby="pageT">
+    <div class="intro">
+      <p class="kicker mono">Wellness · 3 experiments</p>
+      <h1 id="pageT"><span class="a">Experiments</span> <span class="b">on myself</span></h1>
+      <p class="lede">One question per experiment. I&nbsp;measure it every day, then the data says what moved and by how much.</p>
+    </div>
 
-  <ol class="exps">
-    <li class="exp">
-      <div class="meta mono"><span class="id">Exp 0</span><span>1 to 31 October 2026</span><span class="pill" id="exp0Status">31 days</span></div>
-      <h2>Learn and get better</h2>
-      <p>The first pass: log everything, find what matters. Intake, sport, sleep and the watch, every day. 25 measures against 6 results: recovery, sleep score, sleep duration, weight, HRV and resting heart rate.</p>
-      <div class="links mono"><a href="/wellness/exp0">Open the log →</a><a href="/wellness/exp0/demo">See the demo</a></div>
-    </li>
-    <li class="exp next">
-      <div class="meta mono"><span class="id">Exp 1</span><span class="pill">Next</span></div>
-      <h2>Sport</h2>
-      <p>A narrower question on training, built on what Exp 0 finds.</p>
-    </li>
-    <li class="exp next">
-      <div class="meta mono"><span class="id">Exp 2</span><span class="pill">Later</span></div>
-      <h2>Sleep</h2>
-      <p>A narrower question on sleep, built on what Exp 0 finds.</p>
-    </li>
-  </ol>
+    <div class="orbit">
+      <div class="stage" id="stage" role="group" aria-roledescription="bead ring" aria-label="October 2026, one bead per day. Use the arrow keys to read each day." tabindex="0">
+        <div class="halo"></div>
+        <div class="warm"></div>
+        <canvas id="ring" aria-hidden="true"></canvas>
+        <div class="wave"></div>
+        <div class="echo"></div>
+        <div class="orb"><canvas id="aur" aria-hidden="true"></canvas></div>
+        <div class="today" id="todayMark" hidden></div>
+        <div class="core" aria-hidden="true"><span class="t" id="coreT">Exp 0</span><b id="coreN">31</b><span class="s" id="coreS">days</span></div>
+        <p class="cue" aria-hidden="true"><span>Breathe in</span><span>Breathe out</span></p>
+        <div class="tip" id="tip" aria-hidden="true"></div>
+      </div>
+      <p class="sr" id="beadLive" aria-live="polite"></p>
+      <div class="legend">
+        <p>31 beads, one per day of October.<span class="k-breath"> Breathe with the orb: 5.5 breaths a minute, 5.5&nbsp;s in and 5.5&nbsp;s out.</span></p>
+        <div class="keys mono" aria-hidden="true">
+          <span class="lk" id="keyFull" hidden><i class="k-full"></i>Fully logged</span>
+          <span class="lk" id="keyPart" hidden><i class="k-part"></i>Half logged</span>
+          <span class="lk" id="keyMiss" hidden><i class="k-miss"></i>Empty day</span>
+          <span class="lk" id="keySport" hidden><i class="k-sport"></i>Training day</span>
+          <span class="lk" id="keyPast" hidden><i class="k-past"></i>Past day</span>
+          <span id="keyToday"><i class="k-today"></i>Today</span>
+          <span id="keyFuture"><i class="k-open"></i>To come</span>
+        </div>
+        <button class="hold mono" id="hold" type="button"><i aria-hidden="true"></i><span>Pause the breathing</span></button>
+      </div>
+    </div>
+
+    <section class="read" id="read" aria-labelledby="readT">
+      <div class="rgrid">
+        <div class="rc cap"><h2 id="readT">Last night</h2><p class="mono" id="readWhen">From the watch</p></div>
+        <div class="rc" data-m="sleepMin"><span class="lbl mono">Sleep duration</span><b class="val"><span class="ph" aria-hidden="true">–</span></b></div>
+        <div class="rc" data-m="sleepScore"><span class="lbl mono">Sleep score</span><b class="val"><span class="ph" aria-hidden="true">–</span></b></div>
+        <div class="rc" data-m="readiness"><span class="lbl mono">Recovery</span><b class="val"><span class="ph" aria-hidden="true">–</span></b></div>
+        <div class="rc" data-m="hrv"><span class="lbl mono">HRV</span><b class="val"><span class="ph" aria-hidden="true">–</span></b></div>
+        <div class="rc" data-m="rhr"><span class="lbl mono">Resting HR</span><b class="val"><span class="ph" aria-hidden="true">–</span></b></div>
+        <div class="roff"><i aria-hidden="true"></i><p id="offNote">The daily figures live in the Exp 0 log.</p><a id="offLink" href="/wellness/exp0/demo" hidden>See the Exp 0 demo</a></div>
+      </div>
+    </section>
+
+    <div class="cta">
+      <a class="btn solid" href="/wellness/exp0"><span>Open the log<span class="sr"> of Exp 0</span></span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4"/></svg></a>
+      <a class="btn ghost" href="/wellness/exp0/demo"><span>See the demo<span class="sr"> of Exp 0</span></span></a>
+    </div>
+
+    <nav class="toc" aria-labelledby="tocT">
+      <p class="toc-h mono"><span id="tocT">Contents</span></p>
+      <ol>
+        <li><a href="#exp0"><span class="n" aria-hidden="true">00</span><span class="t"><span class="sr">Exp 0: </span>Learn and get better</span><i class="lead" aria-hidden="true"></i><span class="s mono" id="toc0">1–31 Oct</span></a></li>
+        <li><a href="#exp1"><span class="n" aria-hidden="true">01</span><span class="t"><span class="sr">Exp 1: </span>Sport</span><i class="lead" aria-hidden="true"></i><span class="s mono">Next</span></a></li>
+        <li><a href="#exp2"><span class="n" aria-hidden="true">02</span><span class="t"><span class="sr">Exp 2: </span>Sleep</span><i class="lead" aria-hidden="true"></i><span class="s mono">Later</span></a></li>
+      </ol>
+    </nav>
+  </section>
+
+  <section class="exp0" id="exp0" aria-labelledby="exp0T">
+    <div class="vista" aria-hidden="true"><img src="/wellness/bg.jpg" alt="" decoding="async"></div>
+    <div class="wrap">
+      <div class="e-top">
+        <div class="e-main">
+          <div class="meta mono"><span class="id">Exp 0</span><span>1–31 Oct 2026</span><span class="pill" id="pill">31 days</span></div>
+          <p class="goal mono">The goal, in my words</p>
+          <h2 id="exp0T">Learn and <em>get better</em></h2>
+          <p class="e-body">The question: which of 25&nbsp;daily measures move my 6&nbsp;results? Intake, sport, sleep and the watch, every day for 31&nbsp;days.</p>
+          <div class="cta">
+            <a class="btn solid" href="/wellness/exp0"><span>Open the log<span class="sr"> of Exp 0</span></span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4"/></svg></a>
+            <a class="btn ghost" href="/wellness/exp0/demo"><span>See the demo<span class="sr"> of Exp 0</span></span></a>
+          </div>
+          <p class="e-link mono"><a href="/wellness/exp0">Open the Exp 0 log<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4"/></svg></a></p>
+        </div>
+        <div class="e-facts">
+          <dl class="trio">
+            <div><dt class="mono">Days</dt><dd>31</dd></div>
+            <div><dt class="mono">Measures</dt><dd>25</dd></div>
+            <div><dt class="mono">Results</dt><dd>6</dd></div>
+          </dl>
+          <ul class="chips" aria-label="The 6 results">
+            <li>Recovery</li><li>Sleep score</li><li>Sleep duration</li><li>Weight</li><li>HRV</li><li>Resting HR</li>
+          </ul>
+          <p class="note">Each of the 25 measures is tested against every result but itself. A link opens once each side holds <span data-side>3</span>&nbsp;days; the 9&nbsp;timing measures need 3&nbsp;windows of <span data-side>3</span>&nbsp;days.</p>
+        </div>
+      </div>
+
+      <div class="glass sofar live-only">
+        <div class="sf-head"><h3 id="soFarH">So far</h3><p class="mono" id="soFarT"></p></div>
+        <dl class="stats" id="stats"></dl>
+        <div class="grid2 nolean" id="grid2">
+          <div class="found">
+            <h4 class="mono colh">What moved</h4>
+            <ol class="flist" id="flist"></ol>
+            <p class="fwatch" id="fwatch" hidden></p>
+            <p class="fnote" id="fread"></p>
+          </div>
+          <div class="watch" id="leanBox" hidden>
+            <h4 class="mono colh">To watch</h4>
+            <ol class="flist lean" id="llist"></ol>
+            <p class="fnote" id="fnote"></p>
+          </div>
+          <div class="sport">
+            <h4 class="mono colh">Sport</h4>
+            <p class="sline" id="sline"></p>
+            <ul class="sbars" id="sbars"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="rules">
+        <h3 class="mono" id="rulesT">How the log reads</h3>
+        <ol>
+          <li>Intake and sport are read against the night and the morning after. Sleep and the watch are read against the same morning.</li>
+          <li>Each side of a comparison, and each of the 3 time windows, needs <span data-side>3</span>&nbsp;days. A finding then clears a luck check that holds chance findings to 1&nbsp;in&nbsp;<span id="rLuck">10</span> on average.</li>
+          <li>Cohen’s d is the gap between the two sides, in day-to-day spreads. A finding needs a d of 0.3 or more. From <span id="rVery">0.8</span>, the gap is large.</li>
+          <li>For weight and resting HR, lower is better. For the other four results, higher is better.</li>
+          <li>The Exp 0 log’s grids read as a whole from <span id="rReady">21</span> fully logged days, with intake and body both in. Until then, each read is early.</li>
+          <li>Sleep, recovery, HRV and resting HR come from the watch (Fitbit) each morning. Weight comes from the scale.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <div class="pause live-only" aria-hidden="true"><i></i></div>
+
+  <section class="sec live-only" id="trends" aria-labelledby="trendsT">
+    <div class="wrap">
+      <div class="head split">
+        <div>
+          <p class="kick mono" id="trendsK">Exp 0 · six results</p>
+          <h2 class="big" id="trendsT">Night by night</h2>
+        </div>
+        <p class="tag">Six results on one October axis. Point at a day, or focus the chart and use the arrow keys, to read all six at once.</p>
+      </div>
+      <div class="strands" id="strands" tabindex="0" role="group" aria-roledescription="chart" aria-label="Six results across October. Use the arrow keys to step through the days."></div>
+      <p class="sr" id="strandLive" aria-live="polite"></p>
+      <p class="fig" id="fig1"></p>
+    </div>
+  </section>
+
+  <div class="pause live-only" aria-hidden="true"><i></i></div>
+
+  <section class="sec live-only" id="nights" aria-labelledby="nightsT">
+    <div class="wrap">
+      <div class="head">
+        <p class="kick mono" id="nightsK">Exp 0 · sleep</p>
+        <h2 class="big" id="nightsT">Bed to wake</h2>
+        <p class="tag">One capsule per night, from bedtime to wake‑up, on a 21:00 to 11:00 clock.</p>
+      </div>
+      <div class="glass nights">
+        <dl class="nstats" id="nstats"></dl>
+        <div class="chart wait" id="chart" aria-hidden="true"></div>
+        <p class="sr" id="chartSr"></p>
+        <div class="nfoot"><span class="grad mono"><i aria-hidden="true"></i>Bed → wake</span></div>
+        <p class="fig" id="fig2"></p>
+      </div>
+      <details class="ledger">
+        <summary><span class="t">Every logged day, in numbers</span><span class="p" aria-hidden="true">+</span></summary>
+        <div class="scroll" id="ledger" tabindex="0" role="region" aria-label="Every logged day of Exp 0, newest first"></div>
+        <p class="lkey" id="ledgerKey" aria-hidden="true"></p>
+      </details>
+    </div>
+  </section>
+
+  <div class="pause warm-p" aria-hidden="true"><i></i></div>
+
+  <section class="sec close" id="next" aria-labelledby="nextT">
+    <div class="wrap">
+      <div class="head">
+        <p class="kick mono">After Exp 0</p>
+        <h2 class="big" id="nextT">Sport, <span class="soft">then sleep</span></h2>
+        <p class="tag">The next two experiments get more specific: Exp&nbsp;1 on sport, Exp&nbsp;2 on sleep.</p>
+      </div>
+      <ol class="nexts">
+        <li class="glass nx" id="exp1">
+          <span class="seed" aria-hidden="true"></span>
+          <div class="meta mono"><span class="id">Exp 1</span><span class="pill">Next</span></div>
+          <h3>Sport</h3>
+          <p class="so live-only" id="so1"></p>
+        </li>
+        <li class="glass nx later" id="exp2">
+          <span class="seed" aria-hidden="true"></span>
+          <div class="meta mono"><span class="id">Exp 2</span><span class="pill">Later</span></div>
+          <h3>Sleep</h3>
+          <p class="so live-only" id="so2"></p>
+        </li>
+      </ol>
+    </div>
+  </section>
 </main>
 
-<footer class="mono"><a href="https://jeremylasne.com">jeremylasne.com</a></footer>
+<footer class="foot">
+  <span class="seal" aria-hidden="true"></span>
+  <a class="mono" href="https://jeremylasne.com">jeremylasne.com</a>
+  <p class="mono" id="upd">Exp 0 · 1–31 Oct 2026</p>
+</footer>
 
+<div class="scene" id="scene" aria-hidden="true">
+  <div class="glow"></div>
+  <div class="sunpos"><div class="sun"></div></div>
+  <svg class="massif" viewBox="0 0 1600 440" preserveAspectRatio="xMidYMax slice">
+    <defs>
+      <linearGradient id="rock" x1="0" x2="0" y1="58" y2="440" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#1c2444"/><stop offset=".2" stop-color="#10172d"/><stop offset=".62" stop-color="#080e1d"/><stop offset="1" stop-color="#050b16"/>
+      </linearGradient>
+      <linearGradient id="rim" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0" stop-color="#f3a9a6" stop-opacity=".2"/><stop offset=".5" stop-color="#ffc493" stop-opacity=".95"/><stop offset="1" stop-color="#f3a9a6" stop-opacity=".2"/>
+      </linearGradient>
+      <linearGradient id="snow" x1="0" x2="0" y1="58" y2="200" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#ffe9d6" stop-opacity=".62"/><stop offset=".45" stop-color="#f6b9a6" stop-opacity=".22"/><stop offset="1" stop-color="#f3a9a6" stop-opacity="0"/>
+      </linearGradient>
+      <filter id="soft" x="-5%" y="-30%" width="110%" height="160%"><feGaussianBlur stdDeviation="10"/></filter>
+      <path id="crest" d="M-30 336L-5 327L20 325L45 313L70 304L97 305L123 312L150 316L173 304L195 289L218 280L240 266L266 274L292 276L318 282L341 268L364 248L387 238L410 224L437 232L465 235L492 240L516 222L539 209L563 188L586 172L611 175L635 184L660 190L677 171L694 156L711 134L728 114L746 98L764 85L782 74L800 58L819 73L839 83L858 100L888 98L918 90L938 105L957 117L977 134L996 150L1023 147L1051 143L1078 138L1099 152L1119 171L1140 181L1160 196L1189 186L1217 185L1246 180L1267 195L1288 211L1309 225L1330 238L1359 234L1389 229L1418 226L1439 238L1459 245L1480 261L1500 272L1526 276L1552 268L1578 269L1604 267L1630 262"/>
+      <clipPath id="inside"><path d="M-30 336L-5 327L20 325L45 313L70 304L97 305L123 312L150 316L173 304L195 289L218 280L240 266L266 274L292 276L318 282L341 268L364 248L387 238L410 224L437 232L465 235L492 240L516 222L539 209L563 188L586 172L611 175L635 184L660 190L677 171L694 156L711 134L728 114L746 98L764 85L782 74L800 58L819 73L839 83L858 100L888 98L918 90L938 105L957 117L977 134L996 150L1023 147L1051 143L1078 138L1099 152L1119 171L1140 181L1160 196L1189 186L1217 185L1246 180L1267 195L1288 211L1309 225L1330 238L1359 234L1389 229L1418 226L1439 238L1459 245L1480 261L1500 272L1526 276L1552 268L1578 269L1604 267L1630 262L1630 460L-30 460Z"/></clipPath>
+    </defs>
+    <path fill="url(#rock)" d="M-30 336L-5 327L20 325L45 313L70 304L97 305L123 312L150 316L173 304L195 289L218 280L240 266L266 274L292 276L318 282L341 268L364 248L387 238L410 224L437 232L465 235L492 240L516 222L539 209L563 188L586 172L611 175L635 184L660 190L677 171L694 156L711 134L728 114L746 98L764 85L782 74L800 58L819 73L839 83L858 100L888 98L918 90L938 105L957 117L977 134L996 150L1023 147L1051 143L1078 138L1099 152L1119 171L1140 181L1160 196L1189 186L1217 185L1246 180L1267 195L1288 211L1309 225L1330 238L1359 234L1389 229L1418 226L1439 238L1459 245L1480 261L1500 272L1526 276L1552 268L1578 269L1604 267L1630 262L1630 460L-30 460Z"/>
+    <g clip-path="url(#inside)">
+      <rect x="0" y="58" width="1600" height="150" fill="url(#snow)"/>
+      <use href="#crest" fill="none" stroke="#ffc493" stroke-opacity=".5" stroke-width="22" filter="url(#soft)"/>
+      <g fill="none" stroke="rgba(234,244,251,.065)" stroke-width="1">
+        <path d="M-30 378L20 366L70 331L123 349L173 348L218 310L266 306L318 327L364 283L410 252L465 278L516 262L563 215L611 213L660 233L694 185L728 147L764 130L800 91L839 112L888 141L938 143L977 161L1023 187L1078 181L1119 199L1160 231L1217 230L1267 226L1309 255L1359 278L1418 263L1459 272L1500 313L1552 310L1604 294"/>
+        <path d="M-30 417L20 396L70 368L123 390L173 380L218 343L266 348L318 362L364 313L410 293L465 316L516 292L563 252L611 254L660 264L694 219L728 189L764 164L800 122L839 154L888 179L938 173L977 199L1023 227L1078 211L1119 234L1160 273L1217 263L1267 258L1309 297L1359 315L1418 293L1459 311L1500 353L1552 340L1604 330"/>
+        <path d="M-30 452L20 426L70 409L123 429L173 409L218 380L266 389L318 393L364 347L410 335L465 350L516 323L563 294L611 292L660 294L694 257L728 230L764 194L800 157L839 196L888 212L938 205L977 241L1023 264L1078 241L1119 274L1160 312L1217 293L1267 294L1309 339L1359 347L1418 325L1459 353L1500 388L1552 370L1604 370"/>
+        <path d="M-30 483L20 460L70 451L123 463L173 440L218 421L266 427L318 423L364 386L410 376L465 381L516 357L563 336L611 325L660 326L694 299L728 267L764 224L800 196L839 236L888 242L938 241L977 283L1023 296L1078 273L1119 316L1160 348L1217 324L1267 334L1309 378L1359 377L1418 362L1459 395L1500 420L1552 403L1604 412"/>
+        <path d="M-30 513L20 498L70 492L123 494L173 475L218 464L266 460L318 454L364 427L410 413L465 411L516 396L563 376L611 356L660 361L694 341L728 300L764 257L800 238L839 272L888 272L938 280L977 322L1023 326L1078 310L1119 357L1160 380L1217 357L1267 376L1309 413L1359 407L1418 402L1459 434L1500 450L1552 441L1604 454"/>
+      </g>
+    </g>
+    <use href="#crest" fill="none" stroke="url(#rim)" stroke-width="1.4" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+  </svg>
+</div>
+
+<script>
+/* if the module never runs, settle the page in its calm static state */
+setTimeout(function () {
+  if (document.body.dataset.state !== 'loading') return;
+  document.body.dataset.state = 'off';
+  var t = document.getElementById('readT'); if (t) t.textContent = 'Exp 0 log';
+}, 12000);
+</script>
 <script type="module">
-/* Exp 0's status from its own dates: starts, day n of 31, or done. */
-import { SPEC, dateKey, daysBetween } from '/wellness/exp0/spec.js';
-const el = document.getElementById('exp0Status');
-const today = dateKey(), total = daysBetween(SPEC.start, SPEC.end) + 1;
-if (today < SPEC.start) el.textContent = 'Starts 1 Oct';
-else if (today > SPEC.end) el.textContent = 'Done';
-else { el.textContent = `Live · day ${daysBetween(SPEC.start, today) + 1} of ${total}`; el.classList.add('live'); }
+import { SPEC, dateKey, daysBetween, shift, allDays, isLogged, hasBody, readyDays, analyze, impact, bestTimes, timingImpact, average, clean, spanMin } from '/wellness/exp0/spec.js';
+
+const API = 'https://fiery-eel-944.eu-west-1.convex.site/overlap';
+const TAU = Math.PI * 2;
+const $ = id => document.getElementById(id);
+const body = document.body;
+const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTH = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const ymd = k => k.split('-').map(Number);
+const fmtDay = k => { const [, m, d] = ymd(k); return `${d} ${MON[m - 1]}`; };
+const dayName = k => { const [y, m, d] = ymd(k); return `${DOW[new Date(y, m - 1, d).getDay()]} ${d} ${MON[m - 1]}`; };
+const fmtRange = (a, b) => {
+  if (a === b) return fmtDay(a);
+  const [, ma, da] = ymd(a), [, mb, db] = ymd(b);
+  return ma === mb ? `${da}–${db} ${MON[mb - 1]}` : `${fmtDay(a)}–${fmtDay(b)}`;
+};
+const hm = n => { n = Math.round(n); return `${Math.floor(n / 60)}h${String(n % 60).padStart(2, '0')}`; };
+/* a session's length: "55 min" under the hour, "1h05" from it */
+const lenOf = n => Math.round(n) < 60 ? `${Math.round(n)} min` : hm(n);
+/* a duration in big type, in the same form as the text: "8h01", the h in small type */
+const hmHTML = n => { n = Math.round(n); return `${Math.floor(n / 60)}<small class="u">h</small>${String(n % 60).padStart(2, '0')}`; };
+const hhmm = n => { n = Math.round(n); return `${String(Math.floor(n / 60) % 24).padStart(2, '0')}:${String(n % 60).padStart(2, '0')}`; };
+/* a count never parts from its noun at a line end */
+const plural = (n, w, ws = `${w}s`) => `${n}\u00a0${n === 1 ? w : ws}`;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const num = v => typeof v === 'number' && Number.isFinite(v);
+const mean = xs => xs.reduce((a, b) => a + b, 0) / xs.length;
+const fmtDays = ks => {
+  const same = ks.every(k => ymd(k)[1] === ymd(ks[0])[1]);
+  const xs = same ? ks.map(k => String(ymd(k)[2])) : ks.map(fmtDay);
+  const list = xs.length > 1 ? `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}` : xs[0];
+  return same ? `${list} ${MON[ymd(ks[0])[1] - 1]}` : list;
+};
+
+/* ── the month, from the spec's own dates ─────────────────────────── */
+const today = dateKey();
+const DAYS = allDays();
+const TOTAL = DAYS.length;
+const phase = today < SPEC.start ? 'before' : today > SPEC.end ? 'done' : 'live';
+const dayN = phase === 'live' ? daysBetween(SPEC.start, today) + 1 : phase === 'done' ? TOTAL : 0;
+const lastKey = phase === 'done' ? SPEC.end : today;
+const counted = DAYS.filter(k => k <= lastKey);
+const todayIdx = phase === 'live' ? dayN - 1 : -1;
+body.dataset.phase = phase;
+
+const pill = $('pill'), toc0 = $('toc0');
+const status = phase === 'before' ? `Starts ${fmtDay(SPEC.start)}` : phase === 'done' ? 'Done' : `Live · day ${dayN} of ${TOTAL}`;
+pill.textContent = status;
+pill.classList.toggle('live', phase === 'live');
+/* the contents list gives the dates: the orb and the pill already count the days */
+toc0.textContent = phase === 'live' ? fmtRange(SPEC.start, SPEC.end) : status;
+toc0.classList.toggle('live', phase === 'live');
+if (phase === 'live') { $('coreT').textContent = 'Day'; $('coreN').textContent = dayN; $('coreS').textContent = `of ${TOTAL}`; }
+else if (phase === 'before') { $('coreT').textContent = 'Starts'; $('coreN').textContent = fmtDay(SPEC.start); $('coreN').classList.add('word'); $('coreS').textContent = `${TOTAL} days`; }
+else { $('coreT').textContent = 'Exp 0'; $('coreN').textContent = 'Done'; $('coreN').classList.add('word'); $('coreS').textContent = `${TOTAL} days`; }
+for (const el of document.querySelectorAll('[data-side]')) el.textContent = SPEC.minPerSide;
+$('rLuck').textContent = Math.round(1 / SPEC.maxLuck);
+$('rVery').textContent = SPEC.veryAt;
+$('rReady').textContent = SPEC.reliableAt;
+/* the one line the hero panel holds when there are no figures to show. The
+   panel's heading follows it, so the region is named for what it holds. A link
+   comes only when it adds a place the buttons below do not: the demo, before 1 Oct */
+const offLine = (text, title = 'Exp 0 log', href = null, label = '') => {
+  $('offNote').textContent = text;
+  $('readT').textContent = title;
+  const a = $('offLink'); a.hidden = !href;
+  if (href) { a.href = href; a.textContent = label; }
+};
+if (phase === 'before') {
+  const [y, m, d] = ymd(SPEC.start);
+  offLine(`Exp 0 starts on ${DOW[new Date(y, m - 1, d).getDay()]} ${d} ${MONTH[m - 1]} ${y}.`, `Exp 0 starts ${fmtDay(SPEC.start)}`, '/wellness/exp0/demo', 'See the Exp 0 demo');
+}
+
+/* ── breathing: CSS on the compositor, every part on one clock ────── */
+const stage = $('stage'), scene = $('scene');
+const NAMES = /^b-|^spin$/;
+let onScreen = true, sceneOn = false;
+/* the small breathing marks of the page (the pearls between chapters, the
+   live dots of the pill and the contents) each run only while in view */
+const marks = [...document.querySelectorAll('.pause, #pill, .toc')];
+const inView = new Map(marks.map(el => [el, true]));
+/* groups: the ring, the sun at the foot, and each mark. A group runs only
+   while it is on screen and the tab is visible. Running ones restart on one
+   shared clock (start time 0), so every part breathes together; the others
+   are paused through the Web Animations API. */
+const groupOf = el => el?.closest?.('#stage') ? 'stage' : el?.closest?.('#scene') ? 'scene' : el?.closest?.('.pause, #pill, .toc') || 'page';
+const sync = () => {
+  const vis = !document.hidden;
+  const runs = g => vis && (g === 'stage' ? onScreen : g === 'scene' ? sceneOn : g === 'page' ? true : inView.get(g) !== false);
+  try {
+    document.getAnimations().forEach(a => {
+      if (!NAMES.test(a.animationName || '')) return;
+      if (runs(groupOf(a.effect?.target))) { if (a.playState !== 'running' || a.startTime !== 0) a.startTime = 0; }
+      else if (a.playState !== 'paused') a.pause();
+    });
+  } catch {}
+};
+const setPaused = sync;
+/* one button stops every breathing part, and the choice is kept for the next visit */
+const hold = $('hold');
+let held = false;
+try { held = localStorage.getItem('wellness.hold') === '1'; } catch {}
+const breathe = on => {
+  body.classList.toggle('breathing', on);
+  /* the label says what a press does next */
+  hold.dataset.held = String(!on);
+  hold.querySelector('span').textContent = on ? 'Pause the breathing' : 'Resume the breathing';
+  if (on) sync();
+};
+if (!still) {
+  breathe(!held);
+  hold.addEventListener('click', () => {
+    held = !held;
+    try { localStorage.setItem('wellness.hold', held ? '1' : '0'); } catch {}
+    breathe(!held);
+  });
+  document.addEventListener('visibilitychange', setPaused);
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(es => { onScreen = es[es.length - 1].isIntersecting; setPaused(); }).observe(stage);
+    new IntersectionObserver(es => { sceneOn = es[es.length - 1].isIntersecting; setPaused(); }).observe(scene);
+    const io = new IntersectionObserver(es => { for (const e of es) inView.set(e.target, e.isIntersecting); setPaused(); });
+    marks.forEach(el => io.observe(el));
+  } else sceneOn = true;
+}
+
+/* ── the ring: 31 beads on one canvas, drawn only when something changes ── */
+const ring = (() => {
+  const cv = $('ring'), ctx = cv.getContext('2d'), aur = $('aur');
+  const tip = $('tip'), live = $('beadLive'), mark = $('todayMark');
+  let S = 0, D = 1, sp = null, sel = -1, raf = 0, t0 = 0, order = null;
+  let states = DAYS.map(k => k > lastKey ? 'future' : 'past');
+  let sport = DAYS.map(() => false);
+  let info = i => `<b>Day ${i + 1} · ${dayName(DAYS[i])}</b>${DAYS[i] > lastKey ? 'To come' : i === todayIdx ? 'Today' : ''}`;
+  const STAG = 60, DUR = 760;
+
+  function soft(rgb, px, stops) {
+    const c = document.createElement('canvas'); c.width = c.height = px;
+    const g = c.getContext('2d'), gr = g.createRadialGradient(px / 2, px / 2, 0, px / 2, px / 2, px / 2);
+    for (const [at, a] of stops) gr.addColorStop(at, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})`);
+    g.fillStyle = gr; g.fillRect(0, 0, px, px);
+    return c;
+  }
+  const FALL = [[0, 1], [.22, .8], [.45, .4], [.7, .1], [1, 0]];
+  const put = (g, img, x, y, r) => g.drawImage(img, x - r, y - r, r * 2, r * 2);
+  const RR = () => S * .43, C = () => S / 2;
+  const beadXY = i => { const a = -Math.PI / 2 + i * TAU / TOTAL; return [C() + Math.cos(a) * RR(), C() + Math.sin(a) * RR()]; };
+  const beadR = () => Math.max(3.2, S * .0105);
+
+  /* the pearl's inner aurora, drawn once and turned slowly by CSS */
+  function pearl() {
+    const px = Math.round(S * .53 * D); if (!px) return;
+    aur.width = aur.height = px;
+    const g = aur.getContext('2d'), r = px / 2;
+    const blobs = [
+      [252, 190, 156, .08, .46, .82, .84], /* dawn, low */
+      [150, 216, 222, -.4, .12, .66, .5],  /* a breath of mint */
+      [95, 168, 211, .34, -.12, .8, .6],   /* the site's blue */
+      [190, 176, 232, -.06, -.44, .62, .5],/* lilac, high */
+      [255, 255, 255, -.36, -.3, .44, .4],
+    ];
+    for (const [cr, cg, cb, ox, oy, s, al] of blobs) {
+      g.globalAlpha = al; put(g, soft([cr, cg, cb], 128, FALL), r + ox * r, r + oy * r, r * s);
+    }
+    g.globalAlpha = 1;
+  }
+
+  const ease = p => 1 - (1 - p) ** 3;
+  function draw(now = performance.now()) {
+    if (!S || !sp) return false;
+    const g = ctx; g.setTransform(D, 0, 0, D, 0, 0); g.clearRect(0, 0, S, S);
+    const rr = RR(), br = beadR(), c = C();
+    g.beginPath(); g.arc(c, c, rr, 0, TAU); g.strokeStyle = 'rgba(234,244,251,.1)'; g.lineWidth = 1; g.stroke();
+    const t = now - t0;
+    let busy = false;
+    states.forEach((st, i) => {
+      const [x, y] = beadXY(i);
+      let k = 1;
+      if (order && order[i] >= 0) { k = Math.max(0, Math.min(1, (t - order[i] * STAG) / DUR)); if (k < 1) busy = true; k = ease(k); }
+      if (i === todayIdx) {
+        g.beginPath(); g.arc(x, y, br * 1.15, 0, TAU); g.fillStyle = '#ffe0c9'; g.fill();
+      } else if (st === 'full' || st === 'part') {
+        const full = st === 'full';
+        if (k < 1) { g.beginPath(); g.arc(x, y, br * .62, 0, TAU); g.fillStyle = `rgba(234,244,251,${(.42 * (1 - k)).toFixed(3)})`; g.fill(); }
+        g.globalAlpha = k * (full ? .85 : .35); put(g, sp.bead, x, y, br * (full ? 4.4 : 3.4)); g.globalAlpha = k;
+        g.beginPath(); g.arc(x, y, br * (full ? 1 : .8) * (.6 + .4 * k), 0, TAU);
+        if (full) { const gr = g.createRadialGradient(x - br * .35, y - br * .35, 0, x, y, br); gr.addColorStop(0, '#ffffff'); gr.addColorStop(.55, '#dcedf8'); gr.addColorStop(1, '#8cc4e6'); g.fillStyle = gr; }
+        else g.fillStyle = 'rgba(140,196,230,.6)';
+        g.fill(); g.globalAlpha = 1;
+      } else if (st === 'miss') {
+        /* an empty day: a hollow ring, struck through, so it never reads as a day to come */
+        const r0 = br * .9, q = r0 * .62;
+        g.beginPath(); g.arc(x, y, r0, 0, TAU); g.fillStyle = '#07121f'; g.fill();
+        g.strokeStyle = 'rgba(234,244,251,.64)'; g.lineWidth = 1.1; g.stroke();
+        g.beginPath(); g.moveTo(x - q, y + q); g.lineTo(x + q, y - q); g.stroke();
+      } else if (st === 'past') {
+        g.beginPath(); g.arc(x, y, br * .62, 0, TAU); g.fillStyle = 'rgba(234,244,251,.42)'; g.fill();
+      } else {
+        g.beginPath(); g.arc(x, y, br * .7, 0, TAU); g.fillStyle = '#07121f'; g.fill(); g.strokeStyle = 'rgba(234,244,251,.22)'; g.lineWidth = 1; g.stroke();
+      }
+      /* a training day: a small dawn spark just inside its bead */
+      if (sport[i]) {
+        const a = -Math.PI / 2 + i * TAU / TOTAL, ri = rr - br * 3.1;
+        g.globalAlpha = k; g.beginPath(); g.arc(c + Math.cos(a) * ri, c + Math.sin(a) * ri, Math.max(1.6, br * .42), 0, TAU); g.fillStyle = '#ffc493'; g.fill(); g.globalAlpha = 1;
+      }
+    });
+    const fs = Math.max(11, Math.round(S * .02));
+    g.font = `500 ${fs}px "JetBrains Mono", ui-monospace, monospace`;
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    try { g.letterSpacing = '1.5px'; } catch {}
+    /* week labels; one within 2 beads of today makes way for today's own number, in peach */
+    const labels = [0, 7, 14, 21, 28].filter(i => todayIdx < 0 || i === 0 || Math.abs(i - todayIdx) > 2);
+    if (todayIdx > 0) labels.push(todayIdx);
+    for (const i of labels) {
+      const a = -Math.PI / 2 + i * TAU / TOTAL, rl = Math.min(rr + S * .056, c - fs * .7);
+      g.fillStyle = i === todayIdx ? '#ffd9bf' : 'rgba(234,244,251,.82)';
+      g.fillText(i === 0 ? '1 OCT' : String(i + 1), c + Math.cos(a) * rl, c + Math.sin(a) * rl);
+    }
+    if (sel >= 0) {
+      const [x, y] = beadXY(sel);
+      g.beginPath(); g.arc(x, y, br * 2.4, 0, TAU); g.lineWidth = 1.3; g.strokeStyle = 'rgba(234,244,251,.9)'; g.stroke();
+    }
+    return busy;
+  }
+  /* the intro plays once, then the loop stops and the canvas rests */
+  function loop(now) { raf = 0; if (draw(now) && !document.hidden) raf = requestAnimationFrame(loop); else { order = null; draw(); } }
+
+  function resize() {
+    const s = stage.clientWidth;
+    if (!s || Math.abs(s - S) < 1) return;
+    S = s; D = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.round(S * D); cv.height = Math.round(S * D);
+    if (!sp) sp = { bead: soft([140, 196, 230], 64, FALL) };
+    pearl(); if (!raf) draw();
+  }
+  /* the key under the ring lists only the marks the ring shows */
+  const KEY = { keyFull: 'full', keyPart: 'part', keyMiss: 'miss', keyPast: 'past', keyFuture: 'future' };
+  function legend() {
+    const has = new Set(states.filter((_, i) => i !== todayIdx));
+    for (const [id, st] of Object.entries(KEY)) $(id).hidden = !has.has(st);
+    $('keySport').hidden = !sport.some(Boolean);
+    $('keyToday').hidden = todayIdx < 0;
+  }
+  legend();
+  new ResizeObserver(resize).observe(stage);
+  resize();
+  document.fonts?.ready.then(() => { if (!raf) draw(); });
+
+  /* the today bead breathes with the orb */
+  if (todayIdx >= 0) {
+    const a = -Math.PI / 2 + todayIdx * TAU / TOTAL;
+    mark.style.left = `${50 + Math.cos(a) * 43}%`; mark.style.top = `${50 + Math.sin(a) * 43}%`;
+    mark.hidden = false;
+    requestAnimationFrame(() => { mark.classList.add('on'); sync(); });
+  }
+
+  /* point at a bead, or step through them with the keys */
+  const plain = html => html.replace(/<br>/g, '. ').replace(/<b>(.*?)<\/b>/, '$1. ').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  function choose(i, announce) {
+    if (i === sel) return;
+    sel = i;
+    stage.classList.toggle('tipping', i >= 0);
+    if (i < 0) tip.classList.remove('on');
+    else {
+      const a = -Math.PI / 2 + i * TAU / TOTAL;
+      tip.innerHTML = info(i);
+      /* keep the whole tip inside the ring's box */
+      const tw = tip.offsetWidth, bx = S * (.5 + Math.cos(a) * .43);
+      const x = tw >= S ? S / 2 : Math.max(tw / 2, Math.min(S - tw / 2, bx));
+      tip.style.left = `${x}px`; tip.style.top = `${50 + Math.sin(a) * 43}%`;
+      tip.classList.toggle('below', Math.sin(a) < -.55);
+      tip.classList.add('on');
+      if (announce) live.textContent = plain(info(i));
+    }
+    if (!raf) draw();
+  }
+  function pick(e) {
+    const r = stage.getBoundingClientRect(), x = e.clientX - r.left - r.width / 2, y = e.clientY - r.top - r.height / 2;
+    if (Math.abs(Math.hypot(x, y) - r.width * .43) > Math.max(16, r.width * .055)) return -1;
+    let a = Math.atan2(y, x) + Math.PI / 2; if (a < 0) a += TAU;
+    return Math.round(a / (TAU / TOTAL)) % TOTAL;
+  }
+  let tipTimer = 0;
+  stage.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') choose(pick(e)); });
+  stage.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse' && document.activeElement !== stage) choose(-1); });
+  stage.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'mouse') return;
+    choose(pick(e)); clearTimeout(tipTimer); tipTimer = setTimeout(() => choose(-1), 3600);
+  });
+  const home = () => todayIdx >= 0 ? todayIdx : phase === 'done' ? TOTAL - 1 : 0;
+  stage.addEventListener('focus', () => { if (stage.matches(':focus-visible') && sel < 0) choose(home(), true); });
+  stage.addEventListener('blur', () => choose(-1));
+  stage.addEventListener('keydown', e => {
+    const k = e.key, cur = sel < 0 ? home() : sel;
+    let to = null;
+    if (k === 'ArrowRight' || k === 'ArrowDown') to = Math.min(TOTAL - 1, cur + 1);
+    else if (k === 'ArrowLeft' || k === 'ArrowUp') to = Math.max(0, cur - 1);
+    else if (k === 'Home') to = 0;
+    else if (k === 'End') to = home();
+    else if (k === 'Escape') { choose(-1); return; }
+    else return;
+    e.preventDefault(); choose(to, true);
+  });
+
+  return {
+    set(next, train, fn) {
+      states = next; sport = train; info = fn; legend();
+      /* the logged days light up in order, 1 Oct to today, then the canvas rests */
+      if (!still && S) {
+        let n = 0; order = states.map((st, i) => (st === 'full' || st === 'part') && i !== todayIdx ? n++ : -1);
+        t0 = performance.now(); if (!raf) raf = requestAnimationFrame(loop);
+      } else draw();
+      if (sel >= 0) tip.innerHTML = info(sel);
+    },
+  };
+})();
+
+/* ── the live log ──────────────────────────────────────────────────── */
+async function load() {
+  const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 9000);
+  try {
+    const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ op: 'bio.get', args: {} }), signal: ctl.signal });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const j = await r.json();
+    if (!j || !j.ok || !j.value || typeof j.value.log !== 'object') throw new Error('no log');
+    return j.value;
+  } finally { clearTimeout(timer); }
+}
+
+const OUT = Object.fromEntries(SPEC.outcomes.map(o => [o.id, o]));
+/* each result takes a colour from the page's own sky, night blue to dawn */
+const LOOK = {
+  readiness:  { unit: '/100', per: ['night', 'nights'], floor: 40, c: '#5fa8d3' },
+  sleepScore: { unit: '/100', per: ['night', 'nights'], floor: 24, c: '#8cc4e6' },
+  sleepMin:   { unit: '',     per: ['night', 'nights'], floor: 180, c: '#b9dcf1' },
+  weight:     { unit: 'kg',   per: ['morning', 'mornings'], floor: 4, c: '#c3b8e4' },
+  hrv:        { unit: 'ms',   per: ['night', 'nights'], floor: 40, c: '#eab3b4' },
+  rhr:        { unit: 'bpm',  per: ['night', 'nights'], floor: 8, c: '#f6c0a0' },
+};
+const digitsOf = id => OUT[id]?.digits || 0;
+const valHTML = (id, v) => id === 'sleepMin' ? hmHTML(v) : `${v.toFixed(digitsOf(id))}${LOOK[id].unit ? `<small>${LOOK[id].unit}</small>` : ''}`;
+const valText = (id, v) => id === 'sleepMin' ? hm(v) : `${v.toFixed(digitsOf(id))}${LOOK[id].unit === '/100' ? '/100' : LOOK[id].unit ? ` ${LOOK[id].unit}` : ''}`;
+/* a signed move in the result's own unit: "+25 ms", "−1 pt", "+0.4 kg" */
+const move = (o, x) => {
+  const k = 10 ** (o.digits || 0), r = Math.round(x * k) / k;
+  const unit = o.unit === 'pts' && Math.abs(r) === 1 ? 'pt' : o.unit;
+  return `${r > 0 ? '+' : r < 0 ? '−' : '±'}${Math.abs(r).toFixed(o.digits || 0)}\u00a0${unit}`;
+};
+const nightOf = k => fmtRange(shift(k, -1), k);
+
+function offline(reason) {
+  /* before 1 Oct the panel already holds the start date */
+  if (phase === 'before') { body.dataset.state = 'off'; return; }
+  /* the log answered, but holds no October day yet */
+  if (reason === 'empty') {
+    offLine(`0 of ${plural(counted.length, 'day')} logged${phase === 'done' ? '' : ' so far'}.`);
+    /* every day so far is known to be empty, so the ring says so */
+    ring.set(DAYS.map(k => k > lastKey ? 'future' : 'miss'), DAYS.map(() => false),
+      i => `<b>Day ${i + 1} · ${dayName(DAYS[i])}</b>${DAYS[i] > lastKey ? 'To come' : `Empty day${i === todayIdx ? ' · today' : ''}`}`);
+  }
+  /* the panel's heading names what the panel now holds */
+  else $('readT').textContent = 'Exp 0 log';
+  body.dataset.state = 'off';
+}
+/* a section with nothing to draw leaves, and takes its pearl divider with it */
+const hideSec = id => {
+  const el = $(id); el.hidden = true;
+  const p = el.previousElementSibling; if (p?.classList.contains('pause')) p.hidden = true;
+};
+
+function live(value) {
+  const log = clean({ log: value?.log || {} }, today).log;
+  /* only the 31 days count; practice days before 1 Oct stay out */
+  for (const k of Object.keys(log)) if (k < SPEC.start || k > lastKey) delete log[k];
+  const days = counted.filter(k => log[k]);
+  if (!days.length) return offline('empty');
+  const at = (k, id) => { const v = log[k]?.[id]; return num(v) ? v : undefined; };
+  const latestOf = id => [...counted].reverse().find(k => at(k, id) !== undefined);
+  const stateOf = d => isLogged(d) && hasBody(d) ? 'full' : isLogged(d) || hasBody(d) ? 'part' : 'miss';
+  const sessionsOf = k => (log[k]?.sessions || []).filter(s => s?.s);
+  const done = phase === 'done';
+  /* once the month is over, the orb gives the days that hold a log */
+  if (done) { $('coreT').textContent = 'Done'; $('coreN').textContent = days.length; $('coreN').classList.remove('word'); $('coreS').textContent = `of ${TOTAL} logged`; }
+  const span = fmtRange(SPEC.start, lastKey);
+  const spanNW = `<span class="nw">${span}</span>`;
+
+  /* the ring */
+  const STATE = { full: 'Fully logged', part: 'Half logged', miss: 'Empty day' };
+  const train = DAYS.map(k => k <= lastKey && sessionsOf(k).length > 0);
+  ring.set(DAYS.map(k => k > lastKey ? 'future' : stateOf(log[k])), train, i => {
+    const k = DAYS[i], head = `<b>Day ${i + 1} · ${dayName(k)}</b>`;
+    if (k > lastKey) return `${head}To come`;
+    const d = log[k], bits = [];
+    if (num(d?.sleepMin)) bits.push(`Sleep duration ${hm(d.sleepMin)}`);
+    if (num(d?.readiness)) bits.push(`Recovery ${d.readiness}/100`);
+    const ss = sessionsOf(k).map(s => s.s);
+    return `${head}${STATE[stateOf(d)]}${k === today ? ' · today' : ''}${bits.length ? `<br>${bits.join(' · ')}` : ''}${ss.length ? `<br>${esc(ss.join(' + '))} ${ss.length === 1 ? 'session' : 'sessions'}` : ''}`;
+  });
+  const ready = readyDays(log);
+
+  /* last night */
+  const NIGHT = ['sleepMin', 'sleepScore', 'readiness', 'hrv', 'rhr'];
+  const night = [...counted].reverse().find(k => NIGHT.some(id => at(k, id) !== undefined));
+  if (night) {
+    $('readT').textContent = night === today ? 'Last night' : done && night === SPEC.end ? 'Final night' : 'Latest night';
+    $('readWhen').innerHTML = `${nightOf(night)}<br>Fitbit`;
+    for (const el of document.querySelectorAll('.rc[data-m]')) {
+      const id = el.dataset.m, k = at(night, id) !== undefined ? night : latestOf(id);
+      el.querySelector('.when')?.remove();
+      if (!k) { el.querySelector('.val').innerHTML = '<small>Missing</small>'; continue; }
+      el.querySelector('.val').innerHTML = valHTML(id, at(k, id));
+      if (k !== night) el.insertAdjacentHTML('beforeend', `<span class="when mono">${fmtDay(k)}</span>`);
+    }
+  } else {
+    /* days logged, but no night off the watch yet: the panel keeps its size and says so */
+    offLine(`0 of ${plural(counted.length, 'night')} logged${done ? '' : ' so far'}.`);
+    $('read').classList.add('empty');
+  }
+
+  /* so far */
+  const bySport = new Map(); let sessions = 0, minutes = 0, timed = 0;
+  for (const k of counted) for (const s of sessionsOf(k)) {
+    sessions++;
+    const e = bySport.get(s.s) || { n: 0, min: 0 };
+    e.n++; const m = spanMin(s); if (num(m)) { e.min += m; minutes += m; timed++; }
+    bySport.set(s.s, e);
+  }
+  const trainDays = counted.filter(k => sessionsOf(k).length).length;
+  const restDays = days.length - trainDays;
+  /* minutes come from the timed sessions only, and the line says so when some have no times */
+  const dur = minutes > 0 ? timed < sessions ? `${lenOf(minutes)} over ${plural(timed, 'timed session')}` : `${lenOf(minutes)} in total` : '';
+
+  /* the analysis skips the bedtimes Fig. 2 skips: a value past 06:00 is bad data */
+  const alog = structuredClone(log);
+  for (const d of Object.values(alog)) if (bedOf(d) === null) delete d.bed;
+  const A = analyze(alog), B = bestTimes(alog);
+  /* findings clear the luck check; leans pass when tested alone and wait for more days */
+  const found = [], leaning = [];
+  A.rows.forEach(r => r.cells.forEach((c, i) => { const im = c && impact(c); if (!im) return; const x = { f: r.factor, o: SPEC.outcomes[i], c, im }; if (im.level !== 'neutral') found.push(x); else if (im.lean) leaning.push(x); }));
+  B.rows.forEach(r => r.cells.forEach((c, i) => { const im = c && timingImpact(c); if (!im) return; const x = { f: r.factor, o: SPEC.outcomes[i], c, im, timed: true }; if (im.level === 'good') found.push(x); else if (im.lean) leaning.push(x); }));
+  const tested = A.tested + B.tested;
+  const byGap = (a, b) => (b.c.d || 0) - (a.c.d || 0);
+  found.sort(byGap); leaning.sort(byGap);
+  /* the lists: one entry per pair (the larger gap of A on B and B on A, marked
+     when both ways clear), and what I do (intake, sport, sleep timing) before
+     two watch readings of the same night, which move together by the watch's own build */
+  const WATCH = new Set(['readiness', 'hrv', 'rhr', 'sleepScore', 'sleepMin']);
+  const watchPair = x => WATCH.has(x.f.id) && WATCH.has(x.o.id);
+  const pairKey = x => [x.f.id, x.o.id].sort().join('|');
+  const perPair = xs => {
+    const m = new Map();
+    for (const x of xs) { const k = pairKey(x); if (m.has(k)) m.get(k).both = true; else m.set(k, { ...x, both: false }); }
+    return [...m.values()];
+  };
+  const shown = perPair(found).sort((a, b) => watchPair(a) - watchPair(b));
+  const top = shown.slice(0, 4);
+  const watchTop = top.filter(watchPair);
+  const allWatch = top.length > 0 && watchTop.length === top.length;
+  /* to watch: a lean on a pair that is not a finding yet, and only on what I do */
+  const foundKeys = new Set(found.map(pairKey));
+  const leans = perPair(leaning.filter(x => !foundKeys.has(pairKey(x)) && !watchPair(x)));
+  const LEANS = 3, leanTop = leans.slice(0, LEANS);
+
+  const left = TOTAL - dayN;
+  const sports = [...bySport.entries()].sort((a, b) => b[1].n - a[1].n);
+  $('soFarT').textContent = `${span} · ${plural(counted.length, 'day')}`;
+  if (done) $('soFarH').textContent = 'The month';
+  const stat = (n, k, s) => `<div class="stat"><dt>${esc(k)}</dt><dd class="num">${n}</dd><dd class="s">${s}</dd></div>`;
+  /* the count is of links; when one pair holds both ways, the line says how the 2 lists add up */
+  const findSub = !tested ? `Links are tested from ${SPEC.minPerSide * 2} logged days`
+    : found.length > shown.length ? `${plural(found.length, 'link')} in ${plural(shown.length, 'pair')}${allWatch ? ' of watch readings' : ''}, of ${plural(tested, 'link')} tested`
+    : allWatch ? `${plural(shown.length, 'pair')} of watch readings, of ${plural(tested, 'link')} tested`
+    : `Clear of the luck check, of ${plural(tested, 'link')} tested`;
+  $('stats').innerHTML = [
+    stat(`${ready}<small>/${counted.length}</small>`, 'Days fully logged', 'Intake and body both in'),
+    stat(sessions, sessions === 1 ? 'Sport session' : 'Sport sessions', sessions
+      ? [dur, ...sports.map(([n, e]) => `<span class="nw">${e.n} ${esc(n)}</span>`)].filter(Boolean).join(' · ')
+      : `In ${spanNW}`),
+    stat(found.length, found.length === 1 ? 'Finding' : 'Findings', esc(findSub)),
+    phase !== 'live' ? stat(TOTAL, 'Days', `<span class="nw">${fmtRange(SPEC.start, SPEC.end)}</span>`)
+      : left === 0 ? stat(`Day ${dayN}`, 'Last day', 'Ends today')
+      : stat(left, left === 1 ? 'Day to go' : 'Days to go', `Ends ${fmtDay(SPEC.end)}`),
+  ].join('');
+
+  /* what moved, with the split point or the days it rests on, and the size of the gap */
+  const cutOf = (f, x) => {
+    if (x == null || !f.fmt) return '';
+    const v = f.fmt === 'clock' ? hhmm(x) : f.fmt === 'dur' ? hm(x)
+      : f.fmt === 'level' ? SPEC.levels[Math.max(0, Math.min(SPEC.levels.length - 1, Math.round(x) - 1))].toLowerCase()
+      : f.fmt === 'steps' ? `${(Math.round(x / 100) * 100).toLocaleString('en-GB')} steps`
+      : f.fmt === 'cups' ? plural(Math.round(x * 10) / 10, 'cup')
+      : `${Math.round(x * 10) / 10} ${f.fmt}`;
+    return ` (over ${String(v).replace(/ /g, ' ')})`;
+  };
+  const lineOf = ({ f, o, c, timed: isTimed }) => {
+    if (isTimed) {
+      const w = c.windows[c.best], long = f.fmt === 'dur', t = long ? hm : hhmm, name = f.name.toLowerCase();
+      return `<b>${esc(o.name)} ${move(o, c.diff)}</b> with ${/^[aeiou]/.test(name) ? 'an' : 'a'} ${esc(name)} ${long ? 'of' : 'in'} <span class="nw">${w.from === w.to ? t(w.from) : `${t(w.from)}–${t(w.to)}`}</span> (${plural(w.n, 'day')})`;
+    }
+    const link = f.group === 'observe' ? 'on mornings with' : 'after';
+    const rest = f.split === 'flag' && num(c.nOn) ? ` (${plural(c.nOn, f.group === 'sleep' ? 'night' : 'day')})` : cutOf(f, c.cut);
+    return `<b>${esc(o.name)} ${move(o, c.diff)}</b> ${link} ${esc(f.on)}${esc(rest)}`;
+  };
+  const tagOf = (word, d, both) => `${word} · <i>d</i> ${num(d) ? d.toFixed(1) : '0.0'}${both ? ' · both ways' : ''}`;
+  const flist = $('flist');
+  if (top.length) {
+    flist.innerHTML = top.map(x => {
+      const word = x.timed ? 'Best time' : x.im.level === 'bad' ? 'Bad' : 'Good';
+      return `<li class="${x.im.level === 'bad' ? 'bad' : 'good'}"><p>${lineOf(x)}</p><span class="tag2 mono">${tagOf(word, x.c.d, x.both)}</span></li>`;
+    }).join('') + (shown.length > 4 ? `<li class="more"><p><a href="/wellness/exp0">${plural(shown.length - 4, 'more finding')} in the Exp 0 log</a></p></li>` : '');
+  } else {
+    flist.innerHTML = !tested
+      ? `<li><p>The first links are tested once ${SPEC.minPerSide * 2} days are logged.</p></li>`
+      : done ? `<li><p>${plural(tested, 'link')} tested. None cleared the luck check.</p></li>`
+      : `<li><p>${plural(tested, 'link')} tested so far. Each one needs more days before it counts as a finding.</p></li>`;
+  }
+  /* a pair of watch readings is named for what it is */
+  if (watchTop.length) {
+    const n = watchTop.length, rec = watchTop.some(x => x.f.id === 'readiness' || x.o.id === 'readiness');
+    const lead = allWatch ? (n === 1 ? 'This pair links' : n === 2 ? 'Both pairs link' : `All ${n} pairs link`) : (n === 1 ? 'The last pair links' : `The last ${n} pairs link`);
+    $('fwatch').textContent = `${lead} two watch readings from the same night${rec ? ', and Fitbit builds recovery from HRV, resting HR and sleep' : ''}. ${n === 1 ? 'It shows' : 'They show'} how the watch works.`;
+    $('fwatch').hidden = false;
+  }
+  /* to watch: the largest leans, in the same form, tagged neither good nor bad */
+  if (leanTop.length) {
+    $('llist').innerHTML = leanTop.map(x => `<li><p>${lineOf(x)}</p><span class="tag2 mono">${tagOf('To watch', x.c.d, x.both)}</span></li>`).join('');
+    $('leanBox').hidden = false; $('grid2').classList.remove('nolean');
+  }
+  const toGo = SPEC.reliableAt - ready;
+  const nL = leans.length, good = leans.filter(x => x.im.lean === 'good').length, bad = nL - good;
+  const split = !bad ? (nL === 1 ? 'good' : 'all good') : !good ? (nL === 1 ? 'bad' : 'all bad') : `${good} good, ${bad} bad`;
+  $('fnote').textContent = !nL ? '' : [
+    `${plural(nL, `${found.length ? 'more ' : ''}pair`)} ${nL === 1 ? 'passes' : 'pass'} when tested alone (${split}).`,
+    nL > LEANS ? `The ${LEANS} with the largest gap are above.` : '',
+    `${nL === 1 ? 'It' : 'They'} ${done ? `${nL === 1 ? 'stays' : 'stay'} short of the luck check.` : `${nL === 1 ? 'needs' : 'need'} more days to clear the luck check.`}`,
+  ].filter(Boolean).join(' ');
+  $('fread').textContent = [
+    toGo > 0 && done ? `Final read: ${ready} fully logged ${ready === 1 ? 'day' : 'days'} of the ${SPEC.reliableAt} the log needs to read as a whole. Each read stays early.`
+    : toGo > 0 ? `Early read: ${ready} fully logged ${ready === 1 ? 'day' : 'days'} of the ${SPEC.reliableAt} the log needs, ${toGo} to go.`
+      : `${ready} fully logged days: the log’s grids now read as a whole.`,
+  ].filter(Boolean).join(' ');
+
+  /* sport */
+  if (sessions) {
+    const avg = timed ? minutes / timed : 0;
+    $('sline').innerHTML = `<b>${trainDays}</b> ${trainDays === 1 ? 'training day' : 'training days'}, ${plural(restDays, 'rest day')}${avg > 0 ? ` · <span class="nw">avg ${timed < sessions ? 'timed ' : ''}session ${lenOf(avg)}</span>` : ''}.`;
+    const most = Math.max(...sports.map(([, e]) => e.n));
+    $('sbars').innerHTML = sports.map(([name, e]) => `<li><span>${esc(name)}</span><span class="tr" aria-hidden="true"><i style="width:${(e.n / most * 100).toFixed(1)}%"></i></span><span class="c">${e.n}×${e.min ? ` · ${lenOf(e.min)}` : ''}</span></li>`).join('');
+  } else {
+    $('sline').textContent = 'Each session lands here with its sport, its length and how hard it was.';
+  }
+
+  strands(log, night || days[days.length - 1], at, latestOf);
+  nightsChart(log);
+  ledger(log);
+  $('nightsK').innerHTML = `<span>Exp 0 · sleep<span class="ksep"> · </span><span class="nw kd">${span}</span></span>`;
+
+  /* what Exp 0 holds so far on the two next topics */
+  const soWord = done ? 'Exp&nbsp;0 logged' : 'Exp&nbsp;0 so far';
+  if (sessions) $('so1').innerHTML = `${soWord}: <b>${plural(sessions, 'session')}</b>${dur ? `, ${dur}` : ''}, ${spanNW}.`;
+  else $('so1').hidden = true;
+  const mins = counted.map(k => at(k, 'sleepMin')).filter(num);
+  if (mins.length) $('so2').innerHTML = `${soWord}: <b>${hm(mean(mins))}</b> avg sleep duration, ${plural(mins.length, 'night')}, ${spanNW}.`;
+  else $('so2').hidden = true;
+
+  if (num(value.updatedAt)) {
+    const u = new Date(value.updatedAt);
+    $('upd').textContent = `Exp 0 log updated ${fmtDay(dateKey(u))}, ${String(u.getHours()).padStart(2, '0')}:${String(u.getMinutes()).padStart(2, '0')}`;
+  }
+  body.dataset.state = 'ready';
+  requestAnimationFrame(sync);
+}
+
+/* ── night by night: six results on one October axis ───────────── */
+const SP_W = 600, SP_H = 84, SP_PX = 6, SP_PY = 12;
+/* a result with fewer readings than this is drawn as dots: a curve over a few days reads as a glitch */
+const SPARSE = 7;
+const X = i => SP_PX + i * (SP_W - 2 * SP_PX) / (TOTAL - 1);
+const pct = i => (X(i) / SP_W * 100).toFixed(3);
+function strands(log, end, at, latestOf) {
+  const box = $('strands');
+  const from = shift(end, -6) < SPEC.start ? SPEC.start : shift(end, -6);
+  const win = counted.filter(k => k >= from && k <= end);
+  $('trendsK').innerHTML = `<span>Exp 0 · six results<span class="ksep"> · </span><span class="nw kd">${fmtRange(SPEC.start, lastKey)}</span></span>`;
+  /* week ticks, the last day, and today; a tick too close to today makes way for it */
+  let idx = [0, 7, 14, 21, TOTAL - 1];
+  if (todayIdx >= 0) idx = [...new Set([...idx.filter(i => Math.abs(i - todayIdx) > 2 || i === todayIdx), todayIdx])].sort((a, b) => a - b);
+  const tick = i => `<span class="mono${i === todayIdx ? ' now' : ''}${i === 0 ? ' first' : ''}${i === TOTAL - 1 ? ' last' : ''}" style="left:${i === 0 ? 0 : i === TOTAL - 1 ? 100 : pct(i)}%">${i === 0 ? '1 Oct' : i + 1}</span>`;
+  const ticks = idx.map(tick).join('');
+  /* on phones each line carries its own short date row: 1 Oct, today, 31 */
+  let near = [0, TOTAL - 1];
+  if (todayIdx >= 0) near = [...new Set([...near.filter(i => Math.abs(i - todayIdx) > 3 || i === todayIdx), todayIdx])].sort((a, b) => a - b);
+  const pax = `<div class="pax" aria-hidden="true">${near.map(tick).join('')}</div>`;
+  const rows = [];
+  const model = [];
+  for (const o of SPEC.outcomes) {
+    const L = LOOK[o.id];
+    const series = DAYS.map(k => k <= lastKey ? at(k, o.id) : undefined);
+    const got = series.filter(v => v !== undefined);
+    if (!got.length) continue;
+    const last = latestOf(o.id), lastV = at(last, o.id), avg = average(log, o);
+    /* the 7 days to the latest night, or this result's own latest 7 days when it has none there */
+    let wk = win.filter(k => at(k, o.id) !== undefined);
+    if (!wk.length) { const wf = shift(last, -6) < SPEC.start ? SPEC.start : shift(last, -6); wk = counted.filter(k => k >= wf && k <= last && at(k, o.id) !== undefined); }
+    const w = wk.map(k => at(k, o.id)), head = mean(w);
+    /* the window is printed from its first reading to its last; when it holds
+       every reading of the month, it is the October average, said once */
+    const all = wk.length === got.length, range = fmtRange(wk[0], wk[wk.length - 1]);
+    const capA = all ? 'Oct avg' : w.length === 7 ? `7-${L.per[0]} avg` : `Avg of ${plural(w.length, L.per[0], L.per[1])}`;
+    const capB = all ? `${plural(w.length, L.per[0], L.per[1])}, ${range}` : range;
+    const dv = lastV - head;
+    const good = o.better === 'high' ? dv > 0 : dv < 0;
+    const dlTxt = Math.abs(dv) < 10 ** -(o.digits || 0) / 2 ? 'level with that avg' : `<span class="dl ${good ? 'good' : 'bad'}">${move(o, dv)}</span> vs that avg`;
+    /* the scale keeps a floor, so a 1 kg wobble stays a wobble */
+    let lo = Math.min(...got), hi = Math.max(...got);
+    if (hi - lo < L.floor) { const mid = (hi + lo) / 2; lo = mid - L.floor / 2; hi = mid + L.floor / 2; }
+    const Y = v => SP_PY + (1 - (v - lo) / (hi - lo)) * (SP_H - 2 * SP_PY);
+    model.push({ o, series, Y, last, lastV, avg, n: got.length, L });
+    rows.push(`<div class="srow strand">
+      <div class="slab">
+        <h3 class="mono"><i style="--c:${L.c}" aria-hidden="true"></i>${esc(o.name)}${o.better === 'low' ? '<em> · lower is better</em>' : ''}</h3>
+        <p class="big">${valHTML(o.id, head)}</p>
+        <p class="sub mono">${esc(capA)}<br>${esc(capB)}</p>
+        <p class="ln">Latest <b>${valText(o.id, lastV)}</b> · ${fmtDay(last)} · <span class="nw">${dlTxt}</span>${all ? '' : `<br>Oct avg <b>${valText(o.id, avg)}</b> · ${plural(got.length, L.per[0], L.per[1])}`}</p>
+      </div>
+      <div class="plot">${spark(series, Y, avg, o, L.c, got.length < SPARSE)}<i class="cur"></i><i class="pt"></i>${pax}</div>
+    </div>`);
+  }
+  /* no result has a reading yet: the section leaves rather than draw a bare axis */
+  if (!rows.length) { hideSec('trends'); return; }
+  box.innerHTML = `<div class="srow ax" aria-hidden="true"><span class="lab"></span><div class="plot">${ticks}</div></div>` + rows.join('');
+  const few = model.filter(m => m.n < SPARSE).map(m => m.o.name);
+  const andList = xs => xs.length > 1 ? `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}` : xs[0];
+  $('fig1').innerHTML = `<b>Fig. 1</b> ${esc([
+    'The axis runs 1 to 31 October; each line ends on its own latest reading.',
+    few.length ? `${andList(few)} ${few.length === 1 ? 'has' : 'have'} under ${SPARSE} readings, so ${few.length === 1 ? 'it shows' : 'they show'} as dots.` : '',
+    `Dashed: the October average${phase === 'live' ? ' so far' : ''}.`,
+    todayIdx >= 0 ? `Peach: today, ${fmtDay(today)}.` : '',
+    'The big figure is the average over the window printed beside it.',
+  ].filter(Boolean).join(' '))}`;
+
+  /* one cursor for all six lines */
+  const els = [...box.querySelectorAll('.strand')].map(el => ({ big: el.querySelector('.big'), sub: el.querySelector('.sub'), ln: el.querySelector('.ln'), cur: el.querySelector('.cur'), pt: el.querySelector('.pt') }));
+  const rest = els.map(e => ({ big: e.big.innerHTML, sub: e.sub.innerHTML, ln: e.ln.innerHTML }));
+  const say = $('strandLive');
+  let sel = -1;
+  const lastIdx = DAYS.indexOf(lastKey), soFar = phase === 'live' ? ' so far' : '';
+  function show(i, announce) {
+    if (i === sel) return;
+    sel = i;
+    box.classList.toggle('scrub', i >= 0);
+    const parts = [];
+    els.forEach((e, j) => {
+      if (i < 0) { e.big.innerHTML = rest[j].big; e.sub.innerHTML = rest[j].sub; e.ln.innerHTML = rest[j].ln; return; }
+      const m = model[j], v = m.series[i];
+      e.cur.style.left = `${pct(i)}%`;
+      e.big.innerHTML = v === undefined ? '<small>Missing</small>' : valHTML(m.o.id, v);
+      e.sub.innerHTML = `Day ${i + 1}<br>${esc(dayName(DAYS[i]))}`;
+      if (v !== undefined) {
+        e.pt.classList.remove('na');
+        e.pt.style.left = `${pct(i)}%`; e.pt.style.top = `${(m.Y(v) / SP_H * 100).toFixed(3)}%`;
+        const dv = v - m.avg, good = m.o.better === 'high' ? dv > 0 : dv < 0;
+        e.ln.innerHTML = `<span class="dl ${good ? 'good' : 'bad'}">${move(m.o, dv)}</span> vs the Oct avg of <b>${valText(m.o.id, m.avg)}</b><br>${plural(m.n, m.L.per[0], m.L.per[1])} logged${soFar}`;
+        parts.push(`${m.o.name} ${valText(m.o.id, v)}`);
+      } else {
+        e.pt.classList.add('na');
+        e.ln.innerHTML = `Oct avg <b>${valText(m.o.id, m.avg)}</b><br>${plural(m.n, m.L.per[0], m.L.per[1])} logged${soFar}`;
+        parts.push(`${m.o.name} missing`);
+      }
+    });
+    if (announce && i >= 0) say.textContent = `${dayName(DAYS[i])}: ${parts.join(', ')}.`;
+  }
+  const idxAt = e => {
+    const plot = box.querySelector('.strand .plot'); if (!plot) return -1;
+    const r = plot.getBoundingClientRect();
+    const t = ((e.clientX - r.left) / r.width * SP_W - SP_PX) / (SP_W - 2 * SP_PX) * (TOTAL - 1);
+    return Math.max(0, Math.min(lastIdx, Math.round(t)));
+  };
+  box.addEventListener('pointermove', e => { if (e.pointerType === 'mouse' && e.target.closest('.plot')) show(idxAt(e)); });
+  box.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse' && document.activeElement !== box) show(-1); });
+  box.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse' && e.target.closest('.plot')) show(idxAt(e)); });
+  box.addEventListener('keydown', e => {
+    const k = e.key, cur = sel < 0 ? lastIdx : sel;
+    let to = null;
+    if (k === 'ArrowRight' || k === 'ArrowDown') to = Math.min(lastIdx, cur + 1);
+    else if (k === 'ArrowLeft' || k === 'ArrowUp') to = Math.max(0, cur - 1);
+    else if (k === 'Home') to = 0;
+    else if (k === 'End') to = lastIdx;
+    else if (k === 'Escape') { show(-1); return; }
+    else return;
+    e.preventDefault(); show(to, true);
+  });
+  box.addEventListener('focus', () => { if (box.matches(':focus-visible') && sel < 0) show(lastIdx, true); });
+  box.addEventListener('blur', () => show(-1));
+}
+
+/* one result across October: a soft line, the average dashed, the latest lit */
+let sparkN = 0;
+function spark(series, Y, avg, o, hex, sparse = false) {
+  const W = SP_W, H = SP_H, id = `g${++sparkN}`;
+  const pts = []; series.forEach((v, i) => v !== undefined && pts.push([i, v]));
+  const P = pts.map(([i, v]) => [X(i), Y(v)]);
+  const f = n => n.toFixed(1);
+  let d = `M${f(P[0][0])},${f(P[0][1])}`;
+  if (P.length === 2) d += ` L${f(P[1][0])},${f(P[1][1])}`;
+  else if (P.length > 2) {
+    /* monotone cubic: smooth, and never overshoots a real value */
+    const n = P.length, dx = [], m = [];
+    for (let i = 0; i < n - 1; i++) { dx[i] = P[i + 1][0] - P[i][0]; m[i] = (P[i + 1][1] - P[i][1]) / dx[i]; }
+    const t = [m[0]];
+    for (let i = 1; i < n - 1; i++) t[i] = m[i - 1] * m[i] <= 0 ? 0 : 3 * (dx[i - 1] + dx[i]) / ((2 * dx[i] + dx[i - 1]) / m[i - 1] + (dx[i] + 2 * dx[i - 1]) / m[i]);
+    t[n - 1] = m[n - 2];
+    for (let i = 0; i < n - 1; i++) {
+      const h = dx[i] / 3;
+      d += ` C${f(P[i][0] + h)},${f(P[i][1] + h * t[i])} ${f(P[i + 1][0] - h)},${f(P[i + 1][1] - h * t[i + 1])} ${f(P[i + 1][0])},${f(P[i + 1][1])}`;
+    }
+  }
+  const [lx, ly] = P[P.length - 1];
+  const area = P.length > 1 && !sparse ? `<path d="${d} L${f(lx)},${H} L${f(P[0][0])},${H} Z" fill="url(#${id})"/>` : '';
+  const ay = avg == null ? null : Y(avg);
+  const dot = (x, y, w, c, a) => `<path d="M${f(x)},${f(y)}h0" stroke="${c}" stroke-opacity="${a}" stroke-width="${w}" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`;
+  const vs = pts.map(p => p[1]);
+  const desc = `${o.name}, ${pts.length} readings in October, from ${valText(o.id, Math.min(...vs))} to ${valText(o.id, Math.max(...vs))}, October average ${valText(o.id, avg)}`;
+  const tx = todayIdx >= 0 ? X(todayIdx) : null;
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="${esc(desc)}">
+    <defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${hex}" stop-opacity=".26"/><stop offset="1" stop-color="${hex}" stop-opacity="0"/></linearGradient></defs>
+    <line x1="${SP_PX}" x2="${W - SP_PX}" y1="${H - .5}" y2="${H - .5}" stroke="rgba(234,244,251,.1)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+    ${tx == null ? '' : `<line x1="${f(tx)}" x2="${f(tx)}" y1="0" y2="${H}" stroke="#f6c0a0" stroke-opacity=".55" stroke-width="1" stroke-dasharray="2 3" vector-effect="non-scaling-stroke"/>`}
+    ${ay == null ? '' : `<line x1="${SP_PX}" x2="${W - SP_PX}" y1="${f(ay)}" y2="${f(ay)}" stroke="rgba(234,244,251,.38)" stroke-width="1" stroke-dasharray="2 4" vector-effect="non-scaling-stroke"/>`}
+    ${area}
+    ${P.length > 1 && !sparse ? `<path d="${d}" fill="none" stroke="${hex}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>` : ''}
+    ${sparse && P.length > 1 ? `<path d="M${P.map(([x, y]) => `${f(x)},${f(y)}`).join(' L')}" fill="none" stroke="${hex}" stroke-opacity=".4" stroke-width="1" stroke-dasharray="2 4" vector-effect="non-scaling-stroke"/>` : ''}
+    ${P.slice(0, -1).map(([x, y]) => dot(x, y, sparse ? 7 : 3.4, hex, sparse ? 1 : .85)).join('')}
+    ${dot(lx, ly, 16, hex, .24)}${dot(lx, ly, sparse ? 9 : 7, '#f4fbff', 1)}
+  </svg>`;
+}
+
+/* ── bed to wake: one capsule per night on a 21:00 to 11:00 clock ── */
+const bedOf = d => {
+  if (!num(d?.bed)) return undefined;
+  let b = d.bed; if (b < 720) b += 1440;          /* 01:10 typed as 70 */
+  return b > 1800 ? null : b;                        /* past 06:00: bad data */
+};
+function nightsChart(log) {
+  const A0 = 21 * 60, A1 = 35 * 60, span = A1 - A0;
+  const pos = m => Math.max(0, Math.min(100, (m - A0) / span * 100));
+  const rows = [], beds = [], wakes = [], skipped = [], asleep = [];
+  for (const k of counted) {
+    const d = log[k]; if (!d) continue;
+    let bed = bedOf(d);
+    if (bed === null) { skipped.push(k); bed = undefined; }
+    const wake = num(d.wake) ? d.wake + 1440 : undefined;
+    if (bed === undefined && wake === undefined) continue;
+    if (bed !== undefined) beds.push(bed);
+    if (wake !== undefined) wakes.push(wake);
+    if (num(d.sleepMin)) asleep.push([k, d.sleepMin]);
+    rows.push({ k, bed, wake, min: num(d.sleepMin) ? d.sleepMin : undefined });
+  }
+  /* no bed or wake time yet: the chart leaves, the table of every logged day stays */
+  if (!rows.length) { $('nights').querySelector('.glass.nights').hidden = true; $('nights').querySelector('.head .tag').hidden = true; return; }
+  const stats = [];
+  if (beds.length) stats.push(['Avg bedtime', hhmm(mean(beds)), plural(beds.length, 'night')]);
+  if (wakes.length) stats.push(['Avg wake-up', hhmm(mean(wakes)), plural(wakes.length, 'morning')]);
+  if (asleep.length) {
+    const lo = asleep.reduce((a, b) => b[1] < a[1] ? b : a), hi = asleep.reduce((a, b) => b[1] > a[1] ? b : a);
+    /* least and most need two nights apart; one night, or nights all alike, give one figure */
+    if (asleep.length >= 2 && lo[1] !== hi[1]) stats.push(['Least sleep', hm(lo[1]), `Woke ${dayName(lo[0])}`, hmHTML(lo[1])], ['Most sleep', hm(hi[1]), `Woke ${dayName(hi[0])}`, hmHTML(hi[1])]);
+    else if (asleep.length === 1) stats.push(['Sleep duration', hm(lo[1]), `Woke ${dayName(lo[0])}`, hmHTML(lo[1])]);
+    else stats.push(['Sleep duration', hm(lo[1]), `Each of ${plural(asleep.length, 'night')}`, hmHTML(lo[1])]);
+  }
+  $('nstats').innerHTML = stats.map(([t, v, s, html]) => `<div><dt class="mono">${t}</dt><dd class="v">${html || v}</dd><dd class="s">${esc(s)}</dd></div>`).join('');
+
+  const ticks = [22, 24, 26, 28, 30, 32, 34].map(h => `<span class="${(h - 24) % 4 ? 'odd' : ''}" style="left:${pos(h * 60)}%">${String(h % 24).padStart(2, '0')}:00</span>`).join('');
+  let html = `<div class="row ax"><span class="d mono">Oct</span><div class="track">${ticks}</div><span class="z mono">Asleep</span></div>`;
+  rows.forEach(({ k, bed, wake, min }, i) => {
+    let mark = '';
+    if (bed !== undefined && wake !== undefined && wake > bed) {
+      const l = pos(bed), w = Math.max(1, pos(wake) - l);
+      const bp = w >= 99.9 ? 0 : l / (100 - w) * 100;
+      mark = `<span class="bar" style="--i:${i};left:${l.toFixed(2)}%;width:${w.toFixed(2)}%;background-size:${(100 / w * 100).toFixed(1)}% 100%;background-position:${bp.toFixed(2)}% 0"></span>`;
+    } else if (wake !== undefined) mark = `<span class="pin" style="left:${pos(wake).toFixed(2)}%"></span>`;
+    html += `<div class="row"><span class="d">${ymd(k)[2]}</span><div class="track">${mark}</div><span class="z">${min === undefined ? '' : hm(min)}</span></div>`;
+  });
+  const chart = $('chart');
+  chart.innerHTML = html;
+  $('chartSr').textContent = `${plural(rows.length, 'night')} from ${fmtDay(rows[0].k)} to ${fmtDay(rows[rows.length - 1].k)}. ` + stats.map(([t, v, s]) => `${t} ${v}, ${s[0].toLowerCase()}${s.slice(1)}.`).join(' ') + ' The table below lists every night.';
+  $('fig2').innerHTML = `<b>Fig. 2</b> ${esc(`Each row is one night, dated by the morning it ended; the right column gives its sleep duration.${skipped.length ? ` Bedtime skipped on ${fmtDays(skipped)}: the logged value reads past 06:00. Those rows show the wake-up only.` : ''}`)}`;
+  /* the capsules grow from bedtime to wake-up once, when they come into view */
+  if (still || !('IntersectionObserver' in window)) chart.classList.remove('wait');
+  else {
+    const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { chart.classList.remove('wait'); chart.classList.add('go'); io.disconnect(); } }, { threshold: .15 });
+    io.observe(chart);
+  }
+}
+
+/* ── the ledger: every logged day, newest first ─────────────────── */
+function ledger(log) {
+  const cols = [['Morning', null], ['Bed', 'bed'], ['Up', 'wake'], ['Sleep duration', 'sleepMin'], ['Sleep score', 'sleepScore', '/100'], ['Recovery', 'readiness', '/100'], ['HRV', 'hrv', 'ms'], ['Resting HR', 'rhr', 'bpm'], ['Weight', 'weight', 'kg'], ['Coffee', 'coffee', 'cups'], ['Sport', 'sport']];
+  const skipped = [];
+  const rows = counted.filter(k => log[k]).reverse().map(k => {
+    const d = log[k];
+    return `<tr>${cols.map(([, id]) => {
+      if (!id) return `<th scope="row">${esc(dayName(k))}</th>`;
+      if (id === 'bed') { const b = bedOf(d); if (b === null) skipped.push(k); return b === null ? '<td class="na">skipped</td>' : b === undefined ? '<td class="na">·</td>' : `<td>${hhmm(b)}</td>`; }
+      if (id === 'wake') return num(d.wake) ? `<td>${hhmm(d.wake)}</td>` : '<td class="na">·</td>';
+      if (id === 'sport') { const ss = (d.sessions || []).filter(s => s?.s).map(s => `${s.s}${num(spanMin(s)) ? ` ${lenOf(spanMin(s))}` : ''}`); return ss.length ? `<td>${esc(ss.join(', '))}</td>` : '<td class="na">·</td>'; }
+      const v = d[id];
+      if (!num(v)) return '<td class="na">·</td>';
+      return `<td>${id === 'sleepMin' ? hm(v) : v.toFixed(digitsOf(id))}</td>`;
+    }).join('')}</tr>`;
+  }).join('');
+  const key = `A dot marks an empty value.${skipped.length ? ` Bed on ${fmtDays(skipped.reverse())} is skipped: the logged value reads past 06:00.` : ''}`;
+  $('ledger').innerHTML = `<table><caption class="sr">Every logged day of Exp 0, newest first. ${esc(key)}</caption><thead><tr>${cols.map(([n, , u]) => `<th scope="col">${esc(n)}${u ? `<small>${esc(u)}</small>` : ''}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;
+  $('ledgerKey').textContent = key;
+}
+
+if (phase === 'before') offline();
+else load().then(v => { try { live(v); } catch (e) { console.warn('Wellness: the live blocks could not be drawn.', e); offline(); } }).catch(offline);
 </script>
 </body>
 </html>
