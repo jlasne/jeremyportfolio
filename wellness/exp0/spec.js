@@ -1,6 +1,6 @@
-/* jeremylasne.com/bio: the one place the log's rules live.
+/* jeremylasne.com/wellness/exp0: the one place the log's rules live.
 
-   Imported by the page (bio/index.html) and by the server
+   Imported by the page (wellness/exp0/index.html) and by the server
    (overlap/convex/bio.ts), so the two agree on which fields exist, what a
    saved day may contain, and how a correlation is worked out. Plain
    JavaScript on purpose: the page has no build step. */

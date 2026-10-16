@@ -146,7 +146,7 @@ thickens the brain for the next idea. Tick an idea once it is filmed.
   that becomes a bottom bar under 620px. Inter and JetBrains Mono from
   Google Fonts.
 - **`config.js`** holds the Convex HTTP Actions URL, the same door
-  `/overlap` and `/bio` use.
+  `/overlap` and `/wellness/exp0` use.
 - **[`overlap/convex/x.ts`](../overlap/convex/x.ts)** is the server: the
   passphrase, the day, the feed, the generation and the schedule.
 - **[`overlap/convex/xprompts.ts`](../overlap/convex/xprompts.ts)** holds
@@ -158,7 +158,7 @@ thickens the brain for the next idea. Tick an idea once it is filmed.
   per day, `xBrain`, one per concept, and `xIdeas`, one per idea. Nothing
   reads `xBrain` on screen: to look inside, use the Convex dashboard. (`xFacts` is retired and stays declared only so a deploy cannot
   trip over a document left in it.)
-- **Auth** is a passphrase, the same `BIO_PASSPHRASE` that writes /bio,
+- **Auth** is a passphrase, the same `BIO_PASSPHRASE` that writes /wellness/exp0,
   asked once per device and kept in `localStorage`. No accounts, because
   there is exactly one author.
 
@@ -336,7 +336,7 @@ Set these on the Convex deployment (Settings, then Environment Variables):
 | Name | What it is |
 | --- | --- |
 | `OPENROUTER_API_KEY` | writes the posts and the script |
-| `BIO_PASSPHRASE` | already set for /bio, and it opens this page too |
+| `BIO_PASSPHRASE` | already set for /wellness/exp0, and it opens this page too |
 | `X_PASSPHRASE` | optional, only to give this page a password of its own |
 | `X_MODEL` | optional, defaults to `deepseek/deepseek-v4-flash`, which OpenRouter lists as DeepSeek V4 Flash 0423 |
 | `X_SITE_URL` | optional, defaults to `https://x.jeremylasne.com` |

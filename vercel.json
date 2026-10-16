@@ -1,6 +1,11 @@
 {
+  "redirects": [
+    { "source": "/bio/bg.jpg", "destination": "/wellness/bg.jpg", "permanent": true },
+    { "source": "/bio", "destination": "/wellness/exp0", "permanent": true },
+    { "source": "/bio/:path*", "destination": "/wellness/exp0/:path*", "permanent": true }
+  ],
   "rewrites": [
-    { "source": "/bio/demo", "destination": "/bio/index.html" },
-    { "source": "/bio/demo/", "destination": "/bio/index.html" }
+    { "source": "/wellness/exp0/demo", "destination": "/wellness/exp0/index.html" },
+    { "source": "/wellness/exp0/demo/", "destination": "/wellness/exp0/index.html" }
   ]
 }

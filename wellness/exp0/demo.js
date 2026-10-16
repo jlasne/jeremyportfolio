@@ -1,4 +1,4 @@
-/* jeremylasne.com/bio/demo: a made-up October, so the page can be seen full.
+/* jeremylasne.com/wellness/exp0/demo: a made-up October, so the page can be seen full.
 
    Only the demo loads this. It writes the same shape of day the real log
    does, with a handful of effects planted so the grids have something to
@@ -8,7 +8,7 @@
    nothing here, so they show what a neutral row looks like. Seeded, so every visit sees
    the same month. */
 
-import { SPEC, allDays, shift } from '/bio/spec.js';
+import { SPEC, allDays, shift } from '/wellness/exp0/spec.js';
 
 export function demoMonth(seed = 20261027) {
   let s = seed;

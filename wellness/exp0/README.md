@@ -1,4 +1,6 @@
-# jeremylasne.com/bio
+# jeremylasne.com/wellness/exp0
+
+Experiment 0 of [/wellness](../index.html). Goal: learn and get better.
 
 October 2026, 31 days. Intake, sport, sleep and what the watch observes,
 measured every day, then what actually moved my recovery, sleep score,
@@ -42,9 +44,9 @@ previous day's habits are scored against them just like against Sleep.
 
 ## The demo
 
-**/bio/demo** is this same page on a made-up October (`demo.js`), so the grids
+**/wellness/exp0/demo** is this same page on a made-up October (`demo.js`), so the grids
 can be seen full before the real month fills them. `vercel.json` rewrites
-`/bio/demo` to `/bio/index.html`; the page sees the path, reads as the evening
+`/wellness/exp0/demo` to `/wellness/exp0/index.html`; the page sees the path, reads as the evening
 of 31 October, loads the simulated month, never calls the server, hides *Log*
 and says it is a demo. The month is seeded, so every visit sees the same one,
 and it plants a few effects (early morning sun and an early bedtime help the
@@ -56,13 +58,13 @@ nothing, to show a neutral row.
 
 - **`index.html`** — the page, hand-written, no build step. Bebas Neue for
   headings and the big numbers, Inter for body, JetBrains Mono for labels,
-  all from Google Fonts. The background is `bg.jpg`, fixed, blurred and
+  all from Google Fonts. The background is `/wellness/bg.jpg`, fixed, blurred and
   darkened by CSS, and the page darkens it further as it scrolls; without
   that file a gradient stands in.
 - **`spec.js`** — the single source of truth: the field list, the ranges a
   number may take, what a save may contain, and the correlation itself. The
   page imports it and so does the server
-  ([`overlap/convex/bio.ts`](../overlap/convex/bio.ts)), so the two agree on
+  ([`overlap/convex/bio.ts`](../../overlap/convex/bio.ts)), so the two agree on
   which fields exist and what a day may hold. `spec.d.ts` is its types for
   `tsc`.
 - **Data** — one document in the Overlap Convex deployment (table `bio`, key
@@ -200,7 +202,7 @@ each group, and the ranges. Changing the month means changing `start` and
 
 ## Deploy
 
-The page ships with the main site: it lives at `/bio` on the
+The page ships with the main site: it lives at `/wellness/exp0` on the
 `jeremyportfolio` Vercel project, and Vercel serves the folder as is.
 
 The server side needs one deploy and one setting:
@@ -218,6 +220,10 @@ server's validator is a superset of what older pages send, so a new server
 with an old page is safe; a new page with an old server has its saves
 refused.
 
+**The old path.** `/bio` and everything under it redirect for good to
+`/wellness/exp0`. The Convex names stay as they were (table `bio`, key
+`oct26`, `BIO_PASSPHRASE`), so the move touches no data.
+
 ## Safety
 
 - The page is the author's copy of the month. A save's reply only dates it,
@@ -231,8 +237,8 @@ refused.
 
 ```bash
 python -m http.server 8000
-# → http://localhost:8000/bio/
+# → http://localhost:8000/wellness/exp0/
 ```
 
-Serve from the repository root: the page imports `/bio/spec.js` by absolute
+Serve from the repository root: the page imports `/wellness/exp0/spec.js` by absolute
 path, the way Vercel serves it.

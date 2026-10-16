@@ -144,9 +144,9 @@ export default defineSchema({
     createdAt: v.number(),
   }),
 
-  /* jeremylasne.com/bio — one document, the numbers on the page. Written
+  /* jeremylasne.com/wellness/exp0 — one document, the numbers on the page. Written
      only with the passphrase in BIO_PASSPHRASE; what it may contain is
-     decided in bio/spec.js, which the page imports too. */
+     decided in wellness/exp0/spec.js, which the page imports too. */
   bio: defineTable({
     key: v.string(),
     /* kept from an earlier shape; nothing writes it now */
@@ -154,7 +154,7 @@ export default defineSchema({
     /* One entry per logged day, keyed YYYY-MM-DD: intake, the sport
        sessions, sleep, what the watch observed, and a note. Which
        ids may appear and what range each may take is decided by `clean`
-       in bio/spec.js, which the page imports too, so the field list lives
+       in wellness/exp0/spec.js, which the page imports too, so the field list lives
        in one file and this only says what a value may be.
 
        The union is tolerance, not a shape anything writes. A deploy
@@ -190,11 +190,11 @@ export default defineSchema({
 
   /* x.jeremylasne.com — the content manager. One document per day: what
      Jeremy logged, the answers he gave the questions, whether he filled
-     /bio, and the drafts the day produced. Written only with the
+     /wellness/exp0, and the drafts the day produced. Written only with the
      passphrase in X_PASSPHRASE; there is exactly one author. */
   xDays: defineTable({
     day: v.string(),
-    /* Retired: the dashboard used to tick the /bio challenge. Optional, and
+    /* Retired: the dashboard used to tick the /wellness/exp0 challenge. Optional, and
        nothing reads or writes it, so the days that already carry it stay valid. */
     bioDone: v.optional(v.boolean()),
     /* everything said today, oldest first. `q` is the question it answers

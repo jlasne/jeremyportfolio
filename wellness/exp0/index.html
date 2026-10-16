@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>31 days of measuring | Jeremy Lasne</title>
+<title>Exp 0 · 31 days of measuring | Jeremy Lasne</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="October 2026: intake, sport, sleep and the watch, measured every day, then what actually moved my recovery, sleep, weight, HRV and resting heart rate.">
 <meta name="theme-color" content="#050b16">
@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Jeremy Lasne">
-<meta property="og:url" content="https://www.jeremylasne.com/bio/">
+<meta property="og:url" content="https://www.jeremylasne.com/wellness/exp0/">
 <meta property="og:title" content="31 days of measuring">
 <meta property="og:description" content="A month of measuring intake, sport and sleep every day, then what actually moved the body.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -447,18 +447,18 @@ body.editing { padding-bottom: 88px; }
 </head>
 <body>
 
-<img class="bg" id="bg" src="/bio/bg.jpg" alt="">
+<img class="bg" id="bg" src="/wellness/bg.jpg" alt="">
 <div class="fallback"></div>
 <div class="veil" id="veil"></div>
 
 <header class="top">
-  <a class="brand mono" href="https://jeremylasne.com">Jeremy Lasne</a>
+  <a class="brand mono" href="/wellness">Jeremy Lasne · Wellness</a>
   <h1 class="sr">31 days of measuring, October 2026</h1>
   <button class="edit mono" id="edit" type="button">Log</button>
 </header>
 
 <main>
-  <p class="demo mono" id="demo" hidden>Demo · a made-up October, not my data · <a href="/bio">the real log →</a></p>
+  <p class="demo mono" id="demo" hidden>Demo · a made-up October, not my data · <a href="/wellness/exp0">the real log →</a></p>
   <section id="today">
     <div class="head">
       <span class="n mono">01</span>
@@ -534,17 +534,17 @@ body.editing { padding-bottom: 88px; }
 <noscript><p style="text-align:center;padding:40px">The live numbers need JavaScript.</p></noscript>
 
 <script type="module">
-import { SPEC, inGroup, dateKey, shift, daysBetween, allDays, clean, analyze, average, impact, needPairs, bestTimes, timingImpact, needTimed, readyDays, isLogged, hasBody, goalMet, sportList, firstDay, isPractice, spanMin } from '/bio/spec.js';
+import { SPEC, inGroup, dateKey, shift, daysBetween, allDays, clean, analyze, average, impact, needPairs, bestTimes, timingImpact, needTimed, readyDays, isLogged, hasBody, goalMet, sportList, firstDay, isPractice, spanMin } from '/wellness/exp0/spec.js';
 
 const $ = id => document.getElementById(id);
 const API = 'https://fiery-eel-944.eu-west-1.convex.site/overlap';
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const DAYS = allDays();
-/* /bio/demo is this same page on a made-up October (bio/demo.js): it reads
+/* /wellness/exp0/demo is this same page on a made-up October (demo.js): it reads
    as the evening of the last day, never talks to the server, and cannot be
    logged into. */
-const DEMO = /\/bio\/demo\/?$/.test(location.pathname);
+const DEMO = /\/exp0\/demo\/?$/.test(location.pathname);
 const today = DEMO ? SPEC.end : dateKey();
 /* Before the first and after the last, the card lands on the nearest day
    inside the month, so the page is never blank. */
@@ -1436,7 +1436,7 @@ if (DEMO) {
   document.head.append(robots);
   $('demo').hidden = false;
   $('edit').hidden = true;
-  import('/bio/demo.js').then(m => { state.log = m.demoMonth(); loaded = true; state.updatedAt = 0; draw(); });
+  import('/wellness/exp0/demo.js').then(m => { state.log = m.demoMonth(); loaded = true; state.updatedAt = 0; draw(); });
 } else load();
 </script>
 </body>

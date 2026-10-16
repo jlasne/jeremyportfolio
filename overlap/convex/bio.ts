@@ -1,10 +1,10 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
-import { clean, daysBetween, dateKey, isKey } from "../../bio/spec.js";
+import { clean, daysBetween, dateKey, isKey } from "../../wellness/exp0/spec.js";
 
 /**
- * jeremylasne.com/bio: one document, read by everyone, written by one person.
+ * jeremylasne.com/wellness/exp0: one document, read by everyone, written by one person.
  *
  * October 2026, 31 days, one entry a day: intake and levers logged by hand,
  * sport as a list of sessions, sleep and the rest read off the watch, the
@@ -12,7 +12,7 @@ import { clean, daysBetween, dateKey, isKey } from "../../bio/spec.js";
  * set as BIO_PASSPHRASE in the Convex dashboard; there are no accounts because
  * there is exactly one author. What a write may contain (days inside the
  * challenge and not after today, the known field ids, every number in range)
- * is decided by `clean` in bio/spec.js, the same file the page imports, so the
+ * is decided by `clean` in wellness/exp0/spec.js, the same file the page imports, so the
  * two sides cannot drift apart.
  *
  * The key is bumped for the new shape, so the habit log from before it sits

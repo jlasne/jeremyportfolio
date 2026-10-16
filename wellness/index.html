@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Wellness | Jeremy Lasne</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Experiments on my own body. One question each, measured every day, then the data says what moved.">
+<meta name="theme-color" content="#050b16">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Jeremy Lasne">
+<meta property="og:url" content="https://www.jeremylasne.com/wellness/">
+<meta property="og:title" content="Wellness · experiments on myself">
+<meta property="og:description" content="One question each, measured every day, then the data says what moved.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* ── tokens, the same as /wellness/exp0 ─────────────────────────────── */
+:root {
+  --ink: #050b16;
+  --blue: #5fa8d3;
+  --ice: #eaf4fb;
+  --ice-70: rgba(234, 244, 251, .72);
+  --ice-45: rgba(234, 244, 251, .46);
+  --line: rgba(95, 168, 211, .18);
+  --good: #6ee7a8;
+  --display: 'Bebas Neue', 'Oswald', Impact, 'Arial Narrow', sans-serif;
+  --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --pad: clamp(16px, 5vw, 56px);
+  --w: 1080px;
+}
+* { box-sizing: border-box; }
+html { background: var(--ink); color-scheme: dark; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; min-height: 100vh; background: transparent; color: var(--ice);
+  font: 400 16px/1.55 var(--sans); -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.mono { font: 500 11px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; }
+
+/* the ridge, blurred and darkened; a gradient while it loads */
+.bg {
+  position: fixed; top: -6%; left: -6%; width: 112%; height: 112%; z-index: -2; pointer-events: none;
+  object-fit: cover; object-position: 50% 42%; filter: blur(16px) brightness(.45) saturate(.9);
+}
+.fallback {
+  position: fixed; inset: 0; z-index: -3; pointer-events: none;
+  background:
+    radial-gradient(120% 70% at 50% 0%, rgba(23, 61, 89, .55), transparent 70%),
+    linear-gradient(180deg, #08152a, var(--ink) 60%);
+}
+
+.top {
+  max-width: var(--w); margin: 0 auto; display: flex; justify-content: space-between; align-items: center;
+  gap: 12px; padding: calc(var(--pad) * .6) var(--pad);
+}
+.top a { text-decoration: none; color: var(--ice-70); }
+.top a:hover { color: var(--ice); }
+
+main { max-width: var(--w); margin: 0 auto; padding: clamp(24px, 6vw, 72px) var(--pad) clamp(40px, 6vw, 80px); }
+.kicker { color: var(--blue); display: block; margin-bottom: 14px; }
+h1 { margin: 0; font: 400 clamp(52px, 10vw, 128px)/.92 var(--display); letter-spacing: .012em; }
+.lede { margin: 16px 0 0; max-width: 52ch; font-size: clamp(16px, 1.8vw, 19px); color: var(--ice-70); }
+
+.exps { list-style: none; margin: clamp(32px, 5vw, 56px) 0 0; padding: 0; display: grid; gap: 14px; }
+.exp {
+  border: 1px solid var(--line); background: rgba(5, 11, 22, .46);
+  padding: clamp(18px, 3vw, 28px); display: grid; gap: 12px;
+}
+.exp.next { background: rgba(5, 11, 22, .28); border-style: dashed; }
+.meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; color: var(--ice-45); }
+.meta .id { color: var(--blue); }
+.pill { padding: 6px 8px 5px; border: 1px solid var(--line); color: var(--ice-70); white-space: nowrap; }
+.pill.live { border-color: var(--good); color: var(--good); }
+.exp h2 { margin: 0; font: 400 clamp(34px, 5vw, 56px)/.95 var(--display); letter-spacing: .015em; }
+.exp.next h2 { color: var(--ice-70); }
+.exp p { margin: 0; max-width: 60ch; color: var(--ice-70); }
+.links { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+.links a {
+  text-decoration: none; padding: 11px 14px 10px; border: 1px solid var(--line); color: var(--ice);
+  background: rgba(5, 11, 22, .4); transition: border-color .2s, color .2s;
+}
+.links a:first-child { border-color: var(--blue); color: var(--blue); }
+.links a:hover { border-color: var(--ice); color: var(--ice); }
+
+footer { max-width: var(--w); margin: 0 auto; padding: 0 var(--pad) 32px; color: var(--ice-45); }
+footer a { text-decoration: none; }
+footer a:hover { color: var(--ice); }
+</style>
+</head>
+<body>
+<div class="fallback"></div>
+<img class="bg" src="/wellness/bg.jpg" alt="" fetchpriority="high">
+
+<header class="top">
+  <a class="mono" href="https://jeremylasne.com">Jeremy Lasne</a>
+  <span class="mono" style="color: var(--ice-45)">Wellness</span>
+</header>
+
+<main>
+  <span class="kicker mono">Wellness</span>
+  <h1>Experiments on myself</h1>
+  <p class="lede">One question per experiment. I measure every day, then the data says what moved and by how much.</p>
+
+  <ol class="exps">
+    <li class="exp">
+      <div class="meta mono"><span class="id">Exp 0</span><span>1 to 31 October 2026</span><span class="pill" id="exp0Status">31 days</span></div>
+      <h2>Learn and get better</h2>
+      <p>The first pass: log everything, find what matters. Intake, sport, sleep and the watch, every day. 25 measures against 6 results: recovery, sleep score, sleep duration, weight, HRV and resting heart rate.</p>
+      <div class="links mono"><a href="/wellness/exp0">Open the log →</a><a href="/wellness/exp0/demo">See the demo</a></div>
+    </li>
+    <li class="exp next">
+      <div class="meta mono"><span class="id">Exp 1</span><span class="pill">Next</span></div>
+      <h2>Sport</h2>
+      <p>A narrower question on training, built on what Exp 0 finds.</p>
+    </li>
+    <li class="exp next">
+      <div class="meta mono"><span class="id">Exp 2</span><span class="pill">Later</span></div>
+      <h2>Sleep</h2>
+      <p>A narrower question on sleep, built on what Exp 0 finds.</p>
+    </li>
+  </ol>
+</main>
+
+<footer class="mono"><a href="https://jeremylasne.com">jeremylasne.com</a></footer>
+
+<script type="module">
+/* Exp 0's status from its own dates: starts, day n of 31, or done. */
+import { SPEC, dateKey, daysBetween } from '/wellness/exp0/spec.js';
+const el = document.getElementById('exp0Status');
+const today = dateKey(), total = daysBetween(SPEC.start, SPEC.end) + 1;
+if (today < SPEC.start) el.textContent = 'Starts 1 Oct';
+else if (today > SPEC.end) el.textContent = 'Done';
+else { el.textContent = `Live · day ${daysBetween(SPEC.start, today) + 1} of ${total}`; el.classList.add('live'); }
+</script>
+</body>
+</html>

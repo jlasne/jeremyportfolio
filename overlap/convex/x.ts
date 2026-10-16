@@ -60,7 +60,7 @@ const DIGEST_AT = 23;
 /* ── the door ───────────────────────────────────────────────────────── */
 
 /**
- * The same passphrase that writes /bio, because it is the same person and
+ * The same passphrase that writes /wellness/exp0, because it is the same person and
  * one password is one thing to remember. X_PASSPHRASE splits them again if
  * that is ever wanted.
  */
