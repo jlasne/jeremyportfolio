@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Jeremy Lasne</title>
-<meta name="description" content="I build mobile apps with influencers. CreatorMatch, wlns.shop, Kaught, Kivenro, Dr. Dana, Ruff Diesel, Lenny.">
+<meta name="description" content="I build mobile apps with influencers. CreatorMatch, and our work for 11 wellness creators.">
 <link rel="canonical" href="https://www.jeremylasne.com/">
 <meta name="theme-color" content="#050b16">
 <link rel="icon" href="favicon.ico" sizes="any">
@@ -111,77 +111,66 @@
     .card:hover .name { color: var(--blue); }
   }
   .card:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
-  .card + .card { margin-top: 10px; }
 
-  /* ---- the mobile app bento: each tile plays its page by itself; under a mouse it pops out ---- */
-  section.apps { container-type: inline-size; }
-  /* five tiles staggered over four equal rows: three tall (Dr. Dana, Ruff Diesel, Lenny) zigzag with two wide */
-  .bento {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-    grid-template-rows: repeat(4, 232px); grid-template-rows: repeat(4, 34cqw);
+  /* ---- our work: one phone per app, the one in the middle large, the others smaller and fainter
+     the further they sit from it. Each plays its page by itself; a click, a swipe or an arrow
+     brings the next one to the middle ---- */
+  section.work { width: 100vw; margin-top: 44px; text-align: center; }
+  .work-kicker { font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--blue); }
+  .deck {
+    --w: min(56vw, 228px); --bez: 7px;
+    position: relative; margin-top: 20px; height: calc(var(--w) * 844 / 390 + 2 * var(--bez));
+    overflow-x: clip; overflow-y: visible; outline: none;
+    touch-action: pan-y; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
   }
-  .tile.dana { grid-column: 1; grid-row: 1 / span 2; }
-  .tile.kaught { grid-column: 2; grid-row: 1; }
-  .tile.terrence { grid-column: 2; grid-row: 2 / span 2; }
-  .tile.lenny { grid-column: 1; grid-row: 3 / span 2; }
-  .tile.kivenro { grid-column: 2; grid-row: 4; }
-  .tile {
-    --pop: 1.06;
-    position: relative; display: flex; flex-direction: column; overflow: hidden; min-width: 0;
-    border-radius: 12px; background: rgba(5,11,22,.62);
-    transition: transform .4s cubic-bezier(.22,1,.36,1), box-shadow .4s cubic-bezier(.22,1,.36,1);
+  .phone {
+    position: absolute; left: 50%; top: 0; width: var(--w); list-style: none;
+    transform: translateX(calc(-50% + var(--x, 0) * var(--w))) scale(var(--s, 1));
+    opacity: var(--o, 1);
+    transition: transform .6s cubic-bezier(.22,1,.36,1), opacity .45s cubic-bezier(.22,1,.36,1);
   }
-  .tile .shot { position: relative; overflow: hidden; flex: 1 1 0; min-height: 0; background: rgba(234,244,251,.04); }
-  .tile .still { position: absolute; inset: 0; display: block; }
-  .tile .still img { display: block; width: 100%; height: 100%; object-fit: cover; }
-  .tile.tall .still img { object-position: 50% 35%; }
-  /* each tile plays by itself: a video fades in over the still once its first frame shows */
-  .tile .shot video {
-    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0;
-    opacity: 0; transition: opacity .5s; pointer-events: none;
+  .deck.dragging .phone, .phone.jump { transition: none; }
+  .phone a {
+    display: block; padding: var(--bez); border-radius: calc(var(--w) * .17);
+    background: #0a1119; box-shadow: 0 0 0 1px rgba(234,244,251,.14), 0 34px 70px -26px rgba(0,0,0,.85);
+    -webkit-user-drag: none; cursor: pointer;
   }
-  .tile .shot video.ready { opacity: 1; }
-  .tile .cap {
-    display: flex; align-items: baseline; gap: 8px; min-width: 0; padding: 12px 14px;
-    white-space: nowrap; text-decoration: none; color: inherit;
-  }
-  .tile .t-name { flex: none; font-size: 14px; line-height: 20px; font-weight: 600; letter-spacing: -.01em; transition: color .2s; }
-  .tile .t-desc { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 13px; line-height: 20px; color: var(--ice-70); }
-  .tile .tag {
-    margin-left: 6px; vertical-align: 1px; font-size: 10px; font-weight: 600; letter-spacing: .06em;
-    color: var(--ice-70); background: rgba(234,244,251,.12); border-radius: 999px; padding: 1px 6px;
-  }
-  .tile:hover .t-name, .tile .cap:hover .t-name { color: var(--blue); }
-  .tile .cap:focus-visible, .tile .still:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
-  @media (hover: hover) and (pointer: fine) {
-    .tile:not(.wide):hover { z-index: 5; transform: scale(var(--pop)); background: var(--ink); box-shadow: 0 36px 80px -20px rgba(0,0,0,.75); }
-  }
-  @media (hover: hover) and (pointer: fine) and (min-width: 900px) {
-    .tile { --pop: 1.3; }
-    .tile.tall { --pop: 1.12; }
-  }
+  .phone .screen { position: relative; display: block; aspect-ratio: 390 / 844; overflow: hidden; border-radius: calc(var(--w) * .17 - var(--bez)); background: rgba(234,244,251,.05); }
+  .phone img, .phone video { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; pointer-events: none; }
+  .phone video { opacity: 0; transition: opacity .5s; }
+  .phone video.ready { opacity: 1; }
+  .phone .island { position: absolute; z-index: 1; top: 1.4%; left: 50%; width: 28%; height: 2.9%; translate: -50% 0; border-radius: 999px; background: #000; }
+  .phone.on a:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+  @media (hover: hover) and (pointer: fine) { .deck { cursor: grab; } .deck.dragging, .deck.dragging .phone a { cursor: grabbing; } }
 
-  /* ---- the contact bar closing the bento: solid, one line ---- */
-  a.tile.wide {
-    grid-column: 1 / -1; flex-direction: row; align-items: baseline; justify-content: center; gap: 14px;
-    padding: 17px 22px; background: var(--ice); color: var(--ink); text-decoration: none;
-    transition: background .25s;
+  /* ---- under the phones: the arrows either side of the name of the one in the middle ---- */
+  .work-bar { display: flex; align-items: center; justify-content: center; gap: 14px; max-width: 460px; margin: 26px auto 0; padding: 0 16px; }
+  .work-cap { flex: 1; min-width: 0; min-height: 66px; }
+  .cap-app { font-size: 17px; line-height: 24px; font-weight: 600; letter-spacing: -.01em; color: var(--ice); text-decoration: none; transition: color .2s; }
+  .cap-app::after { content: " \2197"; color: var(--ice-45); }
+  .cap-app:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 4px; }
+  .cap-who { margin-top: 2px; font-size: 14px; line-height: 20px; color: var(--ice-70); }
+  .cap-line { font-size: 13px; line-height: 20px; color: var(--ice-45); }
+  .step {
+    flex: none; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 50%; cursor: pointer;
+    color: var(--ice-70); background: rgba(234,244,251,.1); transition: color .2s, background .2s;
   }
-  a.tile.wide .t-desc { font-size: 15px; line-height: 24px; color: rgba(5,11,22,.72); white-space: normal; overflow: visible; }
-  a.tile.wide .t-name { font-size: 16px; line-height: 24px; color: var(--ink); }
-  @media (hover: hover) { a.tile.wide:hover { background: var(--blue); } }
-  a.tile.wide:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .step svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  @media (hover: hover) {
+    .cap-app:hover { color: var(--blue); }
+    .step:hover { color: var(--blue); background: rgba(234,244,251,.17); }
+  }
+  .step:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .work-count { margin-top: 10px; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .06em; color: var(--ice-45); font-variant-numeric: tabular-nums; }
 
-  @media (min-width: 640px) { h1 { font-size: 34px; } }
-  @media (max-width: 520px) {
-    .bento { grid-template-columns: 1fr; grid-template-rows: none; }
-    .tile.dana, .tile.kaught, .tile.terrence, .tile.lenny, .tile.kivenro { grid-column: auto; grid-row: auto; }
-    .tile .shot { flex: none; aspect-ratio: 1200 / 630; }
-    .tile.tall .shot { aspect-ratio: 3 / 4; }
-    a.tile.wide { flex-wrap: wrap; justify-content: center; gap: 0 12px; padding: 16px 18px; text-align: center; }
-    a.tile.wide .t-name { font-size: 16px; }
+  @media (min-width: 640px) {
+    h1 { font-size: 34px; }
+    .deck { --w: 236px; --bez: 8px; }
   }
-  @media (prefers-reduced-motion: reduce) { .reveal { animation: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { animation: none; }
+    .phone, .phone video { transition: none; }
+  }
 
   /* ---- the wind, and the one control for it, top right ---- */
   .mute {
@@ -210,75 +199,6 @@
   .toast[data-open] { opacity: 1; transform: none; }
   .toast b { font-weight: 700; }
   @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
-
-  /* ---- the climb so far, at the bottom: a pixel goat walks my life up a mountain (climb.js) ---- */
-  section.climb { width: 100vw; margin-top: 56px; text-align: center; }
-  .climb-stage {
-    --edge: max(24px, calc((100% - 680px) / 2));
-    position: relative; height: clamp(420px, 62vh, 620px); overflow: hidden; outline: none;
-    cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
-  }
-  .climb-stage:focus-visible::after {
-    content: ""; position: absolute; inset: 20% var(--edge); border: 2px solid var(--blue); border-radius: 12px; pointer-events: none;
-  }
-  /* the sky stays empty, so the ridge and the snow show through; top and bottom melt into the page */
-  .climb-canvas {
-    position: absolute; left: 0; top: 0; display: block; image-rendering: crisp-edges; image-rendering: pixelated;
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22%, #000 80%, transparent 100%);
-            mask-image: linear-gradient(to bottom, transparent 0, #000 22%, #000 80%, transparent 100%);
-  }
-  .climb-card, .climb-end {
-    position: absolute; top: 18%; left: var(--edge); z-index: 2; width: min(340px, calc(100% - 2 * var(--edge)));
-    display: flex; gap: 14px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; text-align: left;
-    background: rgba(5,11,22,.74); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
-    pointer-events: none; animation: riseIn .5s cubic-bezier(.22,1,.36,1) both;
-  }
-  .climb-end { flex-direction: column; gap: 8px; pointer-events: auto; }
-  .climb-icon { flex: none; width: 40px; height: 40px; }
-  .climb-year, .climb-kicker { font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--blue); }
-  .climb-title { margin-top: 3px; font-size: 16px; line-height: 22px; font-weight: 600; letter-spacing: -.01em; }
-  .climb-line { margin-top: 3px; font-size: 14px; line-height: 20px; color: var(--ice-70); }
-  .climb-end-title { font-size: 19px; line-height: 26px; font-weight: 600; letter-spacing: -.015em; margin-bottom: 6px; }
-  .climb-button {
-    font: inherit; font-size: 14px; line-height: 20px; font-weight: 600; padding: 9px 16px; border: 0; border-radius: 999px;
-    background: var(--ice); color: var(--ink); cursor: pointer; transition: background .25s;
-  }
-  @media (hover: hover) { .climb-button:hover { background: var(--blue); } }
-  .climb-button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
-  .climb-start { position: absolute; left: 50%; top: 50%; z-index: 3; translate: -50% -50%; }
-  .climb-hud {
-    position: absolute; left: var(--edge); right: var(--edge); bottom: 13%; z-index: 2; pointer-events: none;
-    display: flex; justify-content: space-between; align-items: center;
-    font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
-  }
-  .climb-count { padding: 4px 10px; border-radius: 999px; background: rgba(5,11,22,.74); color: var(--ice); }
-  .climb-hint { color: var(--ice-45); }
-  .climb-marker {
-    position: absolute; z-index: 2; translate: -50% calc(-100% - 8px); padding: 3px 9px; border-radius: 999px; white-space: nowrap;
-    font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
-    background: rgba(5,11,22,.8); color: var(--ice); pointer-events: none;
-  }
-  .climb-marker::after { content: ""; position: absolute; left: 50%; top: 100%; translate: -50% 0; border: 5px solid transparent; border-top-color: rgba(5,11,22,.8); }
-  .climb-marker-peak { translate: 12px -50%; }
-  .climb-marker-peak::after { left: auto; right: 100%; top: 50%; translate: 0 -50%; border-top-color: transparent; border-right-color: rgba(5,11,22,.8); }
-  .climb-card[hidden], .climb-end[hidden], .climb-hud[hidden], .climb-marker[hidden], .climb-button[hidden] { display: none; }
-  .climb-steps { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 680px; margin: 2px auto 0; padding: 0 24px; }
-  .climb-step {
-    font: inherit; font-size: 13px; line-height: 18px; font-weight: 600; padding: 6px 12px; border: 0; border-radius: 999px; cursor: pointer;
-    background: rgba(234,244,251,.09); color: var(--ice-45); transition: background .25s, color .2s;
-  }
-  .climb-step.done { color: var(--ice-70); }
-  .climb-step.now { background: var(--ice); color: var(--ink); }
-  @media (hover: hover) { .climb-step:not(.now):hover { background: rgba(234,244,251,.15); color: var(--blue); } }
-  .climb-step:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
-  .climb-list { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  @media (max-width: 640px) {
-    .climb-stage { --edge: 16px; height: 460px; }
-    .climb-card { top: 13%; right: var(--edge); width: auto; padding: 12px 14px; gap: 12px; }
-    .climb-icon { width: 32px; height: 32px; }
-    .climb-end { top: auto; bottom: 4%; right: var(--edge); width: auto; }
-  }
-  @media (prefers-reduced-motion: reduce) { .climb-card, .climb-end { animation: none; } }
 </style>
 </head>
 <body>
@@ -325,93 +245,65 @@
         </span>
         <span class="desc">I build mobile apps with influencers.</span>
       </a>
-      <a class="card" href="https://wlns.shop/" target="_blank" rel="noopener">
-        <span class="head">
-          <img class="logo" src="media/logos/wlnsshop.svg" alt="" width="26" height="26">
-          <span class="name">wlns.shop</span>
-        </span>
-        <span class="desc">The shop for wellness creators.</span>
-      </a>
-    </section>
-
-    <section class="reveal apps" style="--d:220" aria-label="Mobile app portfolio">
-      <div class="bento">
-        <div class="tile tall dana">
-          <div class="shot">
-            <a class="still" href="https://www.creatormatch.app/dana/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true"><img src="media/apps/dana.webp" alt="" width="720" height="1011" loading="lazy" decoding="async"></a>
-            <video src="media/apps/dana.mp4" muted loop playsinline preload="none" tabindex="-1" aria-hidden="true"></video>
-          </div>
-          <a class="cap" href="https://www.creatormatch.app/dana/" target="_blank" rel="noopener">
-            <span class="t-name">Dr. Dana</span><span class="t-desc">The best health class for women</span>
-          </a>
-        </div>
-        <div class="tile kaught">
-          <div class="shot">
-            <a class="still" href="https://www.kaught.app/vid" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true"><img src="media/apps/kaught.webp" alt="" width="1100" height="619" loading="lazy" decoding="async"></a>
-            <video src="media/apps/kaught.mp4" muted loop playsinline preload="none" tabindex="-1" aria-hidden="true"></video>
-          </div>
-          <a class="cap" href="https://www.kaught.app/vid" target="_blank" rel="noopener">
-            <span class="t-name">Kaught</span><span class="t-desc">Animal Identifier</span>
-          </a>
-        </div>
-        <div class="tile tall terrence">
-          <div class="shot">
-            <a class="still" href="https://www.creatormatch.app/terrence/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true"><img src="media/apps/terrence.webp" alt="" width="630" height="804" loading="lazy" decoding="async"></a>
-            <video src="media/apps/terrence.mp4" muted loop playsinline preload="none" tabindex="-1" aria-hidden="true"></video>
-          </div>
-          <a class="cap" href="https://www.creatormatch.app/terrence/" target="_blank" rel="noopener">
-            <span class="t-name">Ruff Diesel</span><span class="t-desc">IFBB Pro, classic physique</span>
-          </a>
-        </div>
-        <div class="tile tall lenny">
-          <div class="shot">
-            <a class="still" href="https://www.creatormatch.app/lenny/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true"><img src="media/apps/lenny.webp" alt="" width="630" height="804" loading="lazy" decoding="async"></a>
-            <video src="media/apps/lenny.mp4" muted loop playsinline preload="none" tabindex="-1" aria-hidden="true"></video>
-          </div>
-          <a class="cap" href="https://www.creatormatch.app/lenny/" target="_blank" rel="noopener">
-            <span class="t-name">Lenny</span><span class="t-desc">Fitness &amp; mobility coach</span>
-          </a>
-        </div>
-        <div class="tile kivenro">
-          <div class="shot">
-            <a class="still" href="https://www.creatormatch.app/kivenro/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true"><img src="media/apps/kivenro.webp" alt="" width="1100" height="578" loading="lazy" decoding="async"></a>
-            <video src="media/apps/kivenro.mp4" muted loop playsinline preload="none" tabindex="-1" aria-hidden="true"></video>
-          </div>
-          <a class="cap" href="https://www.creatormatch.app/kivenro/" target="_blank" rel="noopener" hreflang="fr">
-            <span class="t-name">Kivenro<span class="tag">FR</span></span><span class="t-desc">Flexibility</span>
-          </a>
-        </div>
-        <a class="tile wide" href="mailto:hey@jeremylasne.com" data-mail>
-          <span class="t-desc">You're a wellness creator? Contact me</span><span class="t-name">hey@jeremylasne.com</span>
-        </a>
-      </div>
     </section>
 
   </div>
 
-  <section class="climb reveal" style="--d:280" id="climb" aria-label="The climb so far">
-    <div class="climb-stage" role="button" tabindex="0" aria-label="The climb so far. Press space to hop.">
-      <canvas class="climb-canvas" aria-hidden="true"></canvas>
+  <section class="work reveal" style="--d:220" aria-label="Our work" aria-roledescription="carousel">
+    <p class="work-kicker">Our work</p>
+    <div class="deck" tabindex="-1">
+      <ul class="phones">
+        <li class="phone" data-app="EDEN" data-who="Hannah Eden · Hybrid athlete" data-line="470K followers. 100K+ people transformed.">
+          <a href="https://www.creatormatch.app/hannaheden/" target="_blank" rel="noopener" draggable="false" aria-label="EDEN, our work for Hannah Eden"><span class="screen"><img src="media/apps/hannaheden.webp" alt="" width="546" height="1182" loading="lazy" decoding="async" draggable="false"><video data-src="media/apps/hannaheden.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><span class="island"></span></span></a>
+        </li>
+        <li class="phone" data-app="REBOOT" data-who="Fiona Judd · Midlife fat loss coach" data-line="471K followers. 3K+ women helped.">
+          <a href="https://www.creatormatch.app/fitfionaj/" target="_blank" rel="noopener" draggable="false" aria-label="REBOOT, our work for Fiona Judd"><span class="screen"><img src="media/apps/fitfionaj.webp" alt="" width="546" height="1182" loading="lazy" decoding="async" draggable="false"><video data-src="media/apps/fitfionaj.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><span class="island"></span></span></a>
+        </li>
+        <li class="phone" data-app="Imane Lifts" data-who="Imane · Streetlifting athlete" data-line="4 French records in one meet. 12/12 lifts.">
+          <a href="https://www.creatormatch.app/imane/" target="_blank" rel="noopener" draggable="false" aria-label="Imane Lifts, our work for Imane"><span class="screen"><img src="media/apps/imane.webp" alt="" width="546" height="1182" loading="lazy" decoding="async" draggable="false"><video data-src="media/apps/imane.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><span class="island"></span></span></a>
+        </li>
+        <li class="phone" data-app="ADAMANTIUM" data-who="Ludovic Adamantium · Streetlifting athlete" data-line="57.6K on Instagram. Weighted pull-up +130 kg.">
+          <a href="https://www.creatormatch.app/ludo/" target="_blank" rel="noopener" draggable="false" aria-label="ADAMANTIUM, our work for Ludovic Adamantium"><span class="screen"><img src="media/apps/ludo.webp" alt="" width="546" height="1182" loading="lazy" decoding="async" draggable="false"><video data-src="media/apps/ludo.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><span class="island"></span></span></a>
+        </li>
+        <li class="phone" data-app="BE SOMEBODY." data-who="Wes Kitts · Olympic weightlifter" data-line="Two-time Olympian. 5 American records.">
+          <a href="https://www.creatormatch.app/wes/" target="_blank" rel="noopener" draggable="false" aria-label="BE SOMEBODY., our work for Wes Kitts"><span class="screen"><img src="media/apps/wes.webp" alt="" width="546" height="1182" loading="lazy" decoding="async" draggable="false"><video data-src="media/apps/wes.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><span class="island"></span></span></a>
+        </li>
+        <li class="phone" data-app="Nutrition with Grace" data-who="Grace Macena · Nutritionist" data-line="380K followers. Fat loss for women 30+.">
+          <a href="https://www.creatormatch.app/grace/" target="_blank" rel="noopener" draggable="false" aria-label="Nutrition with Grace, our work for Grace Macena"><span class="screen"><img src="media/apps/grace.webp" alt="" width="546" height="1182" loading="lazy" decoding="async" draggable="false"><video data-src="media/apps/grace.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><span class="island"></span></span></a>
+        </li>
+        <li class="phone" data-app="Solange Fitness" data-who="Coach Solange · Fitness coach" data-line="703K on Instagram. 26 reels past 1M views.">
+          <a href="https://www.creatormatch.app/solange/" target="_blank" rel="noopener" draggable="false" aria-label="Solange Fitness, our work for Coach Solange"><span class="screen"><img src="media/apps/solange.webp" alt="" width="546" height="1182" loading="lazy" decoding="async" draggable="false"><video data-src="media/apps/solange.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><span class="island"></span></span></a>
+        </li>
+        <li class="phone" data-app="Ruff Diesel" data-who="Terrence Ruffin · IFBB Pro" data-line="Classic Physique pro. Training, nutrition, posing.">
+          <a href="https://www.creatormatch.app/terrence/" target="_blank" rel="noopener" draggable="false" aria-label="Ruff Diesel, our work for Terrence Ruffin"><span class="screen"><img src="media/apps/terrence.webp" alt="" width="546" height="1182" loading="lazy" decoding="async" draggable="false"><video data-src="media/apps/terrence.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><span class="island"></span></span></a>
+        </li>
+        <li class="phone" data-app="Dr. Dana’s Health Class" data-who="Dr. Dana · Urologist" data-line="Her Reels as a 6-week program.">
+          <a href="https://www.creatormatch.app/dana/" target="_blank" rel="noopener" draggable="false" aria-label="Dr. Dana’s Health Class, our work for Dr. Dana"><span class="screen"><img src="media/apps/dana.webp" alt="" width="546" height="1182" loading="lazy" decoding="async" draggable="false"><video data-src="media/apps/dana.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><span class="island"></span></span></a>
+        </li>
+        <li class="phone" data-app="Kivenro" data-who="Kévin · Flexibility coach" data-line="591 videos as levels 1 to 10.">
+          <a href="https://www.creatormatch.app/kivenro/" target="_blank" rel="noopener" hreflang="fr" draggable="false" aria-label="Kivenro, our work for Kévin"><span class="screen"><img src="media/apps/kivenro.webp" alt="" width="546" height="1182" loading="lazy" decoding="async" draggable="false"><video data-src="media/apps/kivenro.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><span class="island"></span></span></a>
+        </li>
+        <li class="phone" data-app="MOVE" data-who="Lenny · Calisthenics coach" data-line="One coach, 1.35 million students.">
+          <a href="https://www.creatormatch.app/lenny/" target="_blank" rel="noopener" draggable="false" aria-label="MOVE, our work for Lenny"><span class="screen"><img src="media/apps/lenny.webp" alt="" width="546" height="1182" loading="lazy" decoding="async" draggable="false"><video data-src="media/apps/lenny.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><span class="island"></span></span></a>
+        </li>
+      </ul>
     </div>
-    <div class="climb-steps" aria-label="Checkpoints"></div>
-    <ol class="climb-list">
-      <li data-year="2001" data-icon="heart"><b>Hello, world</b> Born at base camp. Altitude 0.</li>
-      <li data-year="2017" data-icon="medal"><b>National swimming championship</b> Swam at the national level at 16.</li>
-      <li data-year="2017" data-icon="chart"><b>Discovered investing</b> First look at the markets. Still hooked 9 years later.</li>
-      <li data-year="2019" data-icon="pi"><b>Prépa, Spé Maths</b> 2 years of intensive maths to reach the top engineering schools.</li>
-      <li data-year="2021" data-icon="gear"><b>Engineering school</b> Admitted after 2 years of prépa.</li>
-      <li data-year="2023" data-icon="robot"><b>First AI projects</b> Started building my own products with AI.</li>
-      <li data-year="2024" data-icon="cap"><b>Engineering diploma</b> Graduated after an internship at a bank.</li>
-      <li data-year="2025" data-icon="case"><b>Wealth advisor</b> Helping individuals manage their wealth.</li>
-      <li data-year="2026" data-icon="phone"><b>Mobile apps &amp; CreatorMatch</b> Shipping mobile apps. Building CreatorMatch.</li>
-    </ol>
+    <div class="work-bar">
+      <button class="step" type="button" data-step="-1" aria-label="Previous app"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg></button>
+      <div class="work-cap" aria-live="polite">
+        <a class="cap-app" href="https://www.creatormatch.app/hannaheden/" target="_blank" rel="noopener">EDEN</a>
+        <div class="cap-who">Hannah Eden · Hybrid athlete</div>
+        <div class="cap-line">470K followers. 100K+ people transformed.</div>
+      </div>
+      <button class="step" type="button" data-step="1" aria-label="Next app"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 4.5 13 10l-5.5 5.5"/></svg></button>
+    </div>
+    <p class="work-count">1 / 11</p>
   </section>
 </main>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="snow.js" defer></script>
-<script src="climb.js" defer></script>
 <script>
   /* The wind plays on arrival and loops, wrapping just before the recording's
      silent tail. Browsers that refuse sound before a gesture get it on the
@@ -429,17 +321,31 @@
     paint(); b.hidden = false; blow();
   })();
 
-  /* The tiles play by themselves: Dr. Dana and Kivenro as a recording of the page scrolling
-     (media/apps/record.mjs makes it), Kaught as its reel. Muted and looping, each plays while it
-     is on screen and rests when it is not. The still shows until the first frame; a visitor who
-     asks for less motion keeps the still. A browser that refuses autoplay (low-power mode, data
-     saver) gets one more try at the first touch, key or scroll. Nothing needs a hover. */
+  /* Our work: the phones sit in a ring, the one in the middle large, each step away smaller
+     and fainter. A click on a side phone, a swipe, a sideways trackpad scroll, the arrow keys or
+     the two buttons bring the next one to the middle; a click on the middle one opens its page.
+     The videos are recordings of each page scrolling by itself (media/apps/record.mjs makes
+     them): every phone in sight plays, muted and looping, while the deck is on screen. The still
+     shows until the first frame; a visitor who asks for less motion keeps the stills. A browser
+     that refuses autoplay (low-power mode, data saver) gets one more try at the first touch,
+     key or scroll. */
   (function () {
-    var vids = document.querySelectorAll(".tile video");
-    if (!vids.length || !("IntersectionObserver" in window)) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var root = document.querySelector("section.work");
+    if (!root) return;
+    var deck = root.querySelector(".deck");
+    var phones = Array.prototype.slice.call(deck.querySelectorAll(".phone"));
+    var n = phones.length, pos = 0, inView = false, dragged = false, drag = null;
+    var still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var cap = root.querySelector(".work-cap"), count = root.querySelector(".work-count");
+    // by steps from the middle: where a phone sits (in phone widths), how large, how faint
+    var X = [0, .86, 1.52, 2.06, 2.5, 2.9], S = [1, .82, .67, .55, .45, .38], O = [1, .92, .72, .45, 0, 0];
+    function at(t, a) { var k = Math.min(Math.floor(a), t.length - 2); return t[k] + (t[k + 1] - t[k]) * Math.min(a - k, 1); }
+    function wrap(d) { d = ((d % n) + n) % n; return d > n / 2 ? d - n : d; }
+    function index() { return ((Math.round(pos) % n) + n) % n; }
+
     var gestures = ["pointerdown", "touchstart", "keydown", "wheel", "scroll"], waiting = false;
-    function go(v) {
+    function start(v) {
+      if (!v.getAttribute("src")) v.src = v.dataset.src;
       var p = v.play();
       if (p && p.catch) p.catch(function () {
         if (waiting) return;
@@ -450,20 +356,128 @@
     function retry() {
       waiting = false;
       gestures.forEach(function (g) { removeEventListener(g, retry); });
-      Array.prototype.forEach.call(vids, function (v) { if (v.seen && v.paused) go(v); });
+      play();
     }
-    var watch = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        var v = e.target;
-        v.seen = e.isIntersecting;
-        if (v.seen) go(v); else v.pause();
+    function play() {
+      phones.forEach(function (p) {
+        var v = p.querySelector("video");
+        if (inView && p.seen && !still) { if (v.paused) start(v); }
+        else if (!v.paused) v.pause();
       });
-    }, { threshold: 0.3 });
-    Array.prototype.forEach.call(vids, function (v) {
+    }
+
+    function layout() {
+      var w = phones[0].offsetWidth, half = deck.clientWidth / 2;
+      phones.forEach(function (p, i) {
+        var d = wrap(i - pos), a = Math.abs(d), x = (d < 0 ? -1 : 1) * at(X, a), s = at(S, a);
+        // a phone that goes round the back of the ring jumps there instead of crossing the screen
+        var jump = p.d !== undefined && Math.abs(d - p.d) > n / 2;
+        if (jump) p.classList.add("jump");
+        p.d = d;
+        p.style.setProperty("--x", x.toFixed(4));
+        p.style.setProperty("--s", s.toFixed(4));
+        p.style.setProperty("--o", at(O, a).toFixed(4));
+        p.style.zIndex = 20 - Math.round(a * 2);
+        p.style.visibility = a > 3.6 ? "hidden" : "";
+        p.seen = a < 2.6 && (Math.abs(x) - s / 2) * w < half;
+        var on = a < .5;
+        p.classList.toggle("on", on);
+        p.querySelector("a").tabIndex = on ? 0 : -1;
+        if (jump) { void p.offsetWidth; p.classList.remove("jump"); }
+      });
+      play();
+    }
+
+    function caption() {
+      var p = phones[index()], a = p.querySelector("a"), name = cap.querySelector(".cap-app");
+      name.textContent = p.dataset.app;
+      name.href = a.href;
+      if (a.hreflang) name.hreflang = a.hreflang; else name.removeAttribute("hreflang");
+      cap.querySelector(".cap-who").textContent = p.dataset.who;
+      cap.querySelector(".cap-line").textContent = p.dataset.line;
+      count.textContent = (index() + 1) + " / " + n;
+    }
+
+    function go(k) {
+      var focused = deck.contains(document.activeElement);
+      pos = k;
+      layout();
+      caption();
+      if (focused) phones[index()].querySelector("a").focus({ preventScroll: true });
+    }
+    function step(by) { go(Math.round(pos) + by); }
+
+    root.querySelectorAll(".step").forEach(function (b) {
+      b.addEventListener("click", function () { step(+b.dataset.step); });
+    });
+    root.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowLeft") { e.preventDefault(); step(-1); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); step(1); }
+    });
+
+    // a side phone comes to the middle; the one in the middle opens its page
+    phones.forEach(function (p, i) {
+      p.querySelector("a").addEventListener("click", function (e) {
+        if (dragged) { e.preventDefault(); return; }
+        var d = Math.round(wrap(i - pos));
+        if (d) { e.preventDefault(); step(d); }
+      });
+    });
+
+    // swipe or drag: the ring follows the finger, then settles on the nearest phone
+    deck.addEventListener("pointerdown", function (e) {
+      if (e.button !== 0) return;
+      drag = { x: e.clientX, y: e.clientY, from: Math.round(pos), id: e.pointerId, moved: false };
+    });
+    deck.addEventListener("pointermove", function (e) {
+      if (!drag || e.pointerId !== drag.id) return;
+      var dx = e.clientX - drag.x;
+      if (!drag.moved) {
+        if (Math.abs(dx) < 8) return;
+        if (Math.abs(e.clientY - drag.y) > Math.abs(dx)) { drag = null; return; }
+        drag.moved = true;
+        deck.classList.add("dragging");
+        try { deck.setPointerCapture(e.pointerId); } catch (_) {}
+      }
+      pos = drag.from - dx / (phones[0].offsetWidth * X[1]);
+      layout();
+    });
+    function end(e) {
+      if (!drag || e.pointerId !== drag.id) return;
+      if (drag.moved) {
+        deck.classList.remove("dragging");
+        // the click that ends a drag opens nothing
+        dragged = true;
+        setTimeout(function () { dragged = false; }, 60);
+        var k = Math.round(pos);
+        if (k === drag.from && Math.abs(pos - drag.from) > .15) k += pos > drag.from ? 1 : -1;
+        go(k);
+      }
+      drag = null;
+    }
+    deck.addEventListener("pointerup", end);
+    deck.addEventListener("pointercancel", end);
+
+    // a sideways two-finger scroll on a trackpad turns the ring one phone at a time
+    var pushed = 0, rest = 0;
+    deck.addEventListener("wheel", function (e) {
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+      e.preventDefault();
+      if (e.timeStamp < rest) return;
+      pushed += e.deltaX;
+      if (Math.abs(pushed) > 40) { step(pushed > 0 ? 1 : -1); pushed = 0; rest = e.timeStamp + 450; }
+    }, { passive: false });
+
+    phones.forEach(function (p) {
+      var v = p.querySelector("video");
       v.muted = v.defaultMuted = true;
       v.addEventListener("playing", function () { v.classList.add("ready"); });
-      watch.observe(v);
     });
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (es) { inView = es[0].isIntersecting; play(); }, { threshold: .2 }).observe(deck);
+    } else inView = true;
+    addEventListener("resize", layout);
+    layout();
   })();
 
   /* The email links copy the address too: on a machine with no mail app,

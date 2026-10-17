@@ -2,7 +2,17 @@
   "redirects": [
     { "source": "/bio/bg.jpg", "destination": "/wellness/bg.jpg", "permanent": true },
     { "source": "/bio", "destination": "/wellness/exp0", "permanent": true },
-    { "source": "/bio/:path*", "destination": "/wellness/exp0/:path*", "permanent": true }
+    { "source": "/bio/:path*", "destination": "/wellness/exp0/:path*", "permanent": true },
+    { "source": "/invest", "destination": "/wealth", "permanent": false },
+    { "source": "/invest/:path*", "destination": "/wealth", "permanent": false },
+    { "source": "/wealth/principles", "destination": "/wealth", "permanent": false },
+    { "source": "/wealth/principles/:path*", "destination": "/wealth", "permanent": false },
+    { "source": "/vid", "destination": "/", "permanent": false },
+    { "source": "/vid/:path*", "destination": "/", "permanent": false },
+    { "source": "/brain", "destination": "/", "permanent": false },
+    { "source": "/brain/:path*", "destination": "/", "permanent": false },
+    { "source": "/x", "destination": "/", "permanent": false },
+    { "source": "/x/:path*", "destination": "/", "permanent": false }
   ],
   "rewrites": [
     { "source": "/wellness/exp0/demo", "destination": "/wellness/exp0/index.html" },

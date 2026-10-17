@@ -68,7 +68,6 @@ h1,h2,h3,h4{margin:0;font-weight:600;text-wrap:balance;letter-spacing:-.02em}
 .top{max-width:1180px;margin:0 auto;padding-block:max(14px,env(safe-area-inset-top,0px)) 0;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .top a{text-decoration:none;font-size:13px;color:var(--mute);padding:6px 12px;border-radius:999px;transition:color .2s,background .2s}
 .top a:hover{color:var(--accent);background:var(--sunk)}
-.top nav{display:flex;gap:4px}
 .wrap{max-width:1180px;margin:0 auto;padding-block:20px 56px;display:grid;gap:14px}
 .eyebrow{font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--accent)}
 .eyebrow.c1,.eyebrow.c2,.eyebrow.c3,.eyebrow.c4{color:var(--lc)}
@@ -393,7 +392,6 @@ td.ro{color:var(--mute);font-size:12px;white-space:nowrap;text-align:right;paddi
 <div class="layer">
 <div class="gut"><div class="top">
   <a href="/">← Jeremy Lasne</a>
-  <nav><a href="/invest/">Invest</a><a href="/wealth/principles/">Principles</a></nav>
 </div></div>
 
 <main class="gut"><div class="wrap">
@@ -461,7 +459,7 @@ td.ro{color:var(--mute);font-size:12px;white-space:nowrap;text-align:right;paddi
 </div></main>
 
 <footer class="foot gut">
-  <p>Study tool for your own structure, not investment advice. Asset, country and correlation readings come from /invest, read 2 Oct 2026. Exchange rates: ECB reference, 14 Oct 2026; <span id="estCur"></span> are estimates.</p>
+  <p>Study tool for your own structure, not investment advice. Asset, country and correlation readings date from 2 Oct 2026. Exchange rates: ECB reference, 14 Oct 2026; <span id="estCur"></span> are estimates.</p>
   <p>Country groups for the crash ladder and the war list are a working reading and can be argued with.</p>
 </footer>
 </div>
@@ -1314,7 +1312,7 @@ function fatReadings(X){
   return `<section class="card"><div class="ch"><div><div class="eyebrow">Fat layer</div><h2>What to do in the portfolio</h2></div><div class="rt">${simTag()}<span class="note">${R.filter(r=>r.s==="bad").length} to fix · ${R.filter(r=>r.s==="warn").length} to review</span></div></div><div class="recs">${R.map(recHTML).join("")}</div></section>
   ${rebalHTML(X)}
   <div class="two">
-    <section class="card"><div class="ch"><div><div class="eyebrow">The /invest rules</div><h2>Portfolio checks</h2></div><div class="score"><span class="n">${X.L.length?F.pass:0}<small>/4</small></span></div></div>
+    <section class="card"><div class="ch"><div><div class="eyebrow">The four rules</div><h2>Portfolio checks</h2></div><div class="score"><span class="n">${X.L.length?F.pass:0}<small>/4</small></span></div></div>
       <div class="checks">${F.rows.map(([k,n,t])=>`<div class="chk"><b><span class="st ${F.st[k]}">${word[F.st[k]]}</span> ${n}</b><span class="t">${esc(t)}</span></div>`).join("")}${M.shared.length?`<div class="chk"><b><span class="st mute">Info</span> Shared reasons</b><span class="t">${esc(M.shared.slice(0,4).map(s=>s.t.replace("Country: ","")+" ("+s.g.map(l=>short(l.a)).join(", ")+")").join(" · "))}</span></div>`:""}</div></section>
     ${sqCard(X)}
   </div>

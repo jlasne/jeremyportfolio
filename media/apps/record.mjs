@@ -1,21 +1,20 @@
-// Re-records the three bento videos on the landing.
+// Re-records the phone videos of the work carousel on the landing, one per page of
+// creatormatch.app/work, plus the still each phone shows before its video starts.
 //
-//   NODE_PATH=$(npm root -g) node media/apps/record.mjs [dana] [kivenro] [terrence] [lenny] [kaught]
+//   NODE_PATH=$(npm root -g) node media/apps/record.mjs [hannaheden] [dana] ...
 //
-// Needs playwright (with its chromium) and ffmpeg with libx264 on the path.
+// No names records all eleven. Needs playwright (with its chromium) and ffmpeg with libx264
+// on the path.
 //
-// dana, kivenro, terrence, lenny: opens the live page at the tile's shape, scrolls it top to
-//   bottom the way a hand would (eased in and out, one steady pace between),
-//   and photographs it frame by frame. Then the time is bent: where the page
-//   barely moves while the scroll goes on (a pinned scene, a slow fade) the
-//   video runs faster, up to 24x, so it never seems to stop; where it moves
-//   fast it runs as it was. The end fades into the start, so it loops
-//   without a jump.
-// kaught: takes the 15 second reel from kaught.app, cropped to the tile.
+// Opens the live page at a phone's size, scrolls it top to bottom the way a hand would
+// (eased in and out, one steady pace between), and photographs it frame by frame. Then the
+// time is bent: where the page barely moves while the scroll goes on (a pinned scene, a slow
+// fade) the video runs faster, up to 24x, so it never seems to stop; where it moves fast it
+// runs as it was. The end fades into the start, so it loops without a jump.
 //
-// Why a recording and not the page in a frame: a page on another site can't
-// be scrolled from here, and a recording starts by itself on every screen,
-// phones included, without loading three third-party pages.
+// Why a recording and not the page in a frame: a page on another site can't be scrolled from
+// here, and a recording starts by itself on every screen, phones included, without loading
+// eleven third-party pages.
 //
 // Dev switches: USE_FRAMES=<dir> re-cuts frames kept from an earlier run
 // (one page at a time); KEEP_FRAMES=1 keeps them; FRAMES_ONLY=1 stops after capture.
@@ -32,15 +31,11 @@ const here = dirname(fileURLToPath(import.meta.url))
 const FPS = 30
 const FADE = 0.9 // seconds the end of the scroll melts into the start
 
-// view: the page's own width and height, as it lays out inside the tile.
-// scale: device pixels per css pixel, so the video is sharp at the popped size.
-const PAGES = {
-  dana: { url: 'https://www.creatormatch.app/dana/', view: [420, 568], scale: 1.5, run: 24, hold: 1.4, crf: 29 },
-  kivenro: { url: 'https://www.creatormatch.app/kivenro/', view: [900, 472], scale: 1, run: 20, hold: 1.2, crf: 28 },
-  terrence: { url: 'https://www.creatormatch.app/terrence/', view: [420, 536], scale: 1.5, run: 24, hold: 1.4, crf: 29 },
-  lenny: { url: 'https://www.creatormatch.app/lenny/', view: [420, 536], scale: 1.5, run: 24, hold: 1.4, crf: 29 },
-}
-const REEL = 'https://www.kaught.app/assets/reel/reel.mp4'
+// One phone: the page lays out at 390 x 844 css pixels, like an iPhone, photographed at 1.4
+// device pixels per css pixel so the centre phone stays sharp.
+const PHONE = { view: [390, 844], scale: 1.4, run: 24, hold: 1.4, crf: 30 }
+const SLUGS = ['hannaheden', 'fitfionaj', 'imane', 'ludo', 'wes', 'grace', 'solange', 'terrence', 'dana', 'kivenro', 'lenny']
+const PAGES = Object.fromEntries(SLUGS.map((s) => [s, { ...PHONE, url: `https://www.creatormatch.app/${s}/` }]))
 
 const sh = (cmd, args) => execFileSync(cmd, args, { stdio: ['ignore', 'ignore', 'inherit'] })
 const kb = (f) => `${Math.round(statSync(f).size / 1024)} KB`
@@ -140,24 +135,15 @@ async function recordPage(name, cfg) {
   if (process.env.KEEP_FRAMES || process.env.USE_FRAMES) console.log(`${name}: frames kept in ${work}`)
   else rmSync(work, { recursive: true, force: true })
   console.log(`${name}.mp4 ${T.toFixed(1)}s before the loop fade, ${kb(out)}`)
-}
 
-function recordReel() {
-  const work = mkdtempSync(join(tmpdir(), 'rec-kaught-'))
-  const src = join(work, 'reel.mp4')
-  sh('curl', ['-sSL', '--fail', '-o', src, REEL])
-  const out = join(here, 'kaught.mp4')
-  // 16:9 reel into the tile's 1200:630 shape: scale to the width, trim the height evenly
-  sh('ffmpeg', ['-y', '-i', src, '-vf', 'scale=900:-2,crop=900:472,fps=30,format=yuv420p', '-an',
-    '-c:v', 'libx264', '-crf', '27', '-preset', 'slow', '-movflags', '+faststart', out])
-  rmSync(work, { recursive: true, force: true })
-  console.log(`kaught.mp4 ${kb(out)}`)
+  // the still: the video's first frame, shown until the video plays
+  const still = join(here, `${name}.webp`)
+  sh('ffmpeg', ['-y', '-loglevel', 'error', '-i', out, '-frames:v', '1', '-c:v', 'libwebp', '-quality', '72', still])
+  console.log(`${name}.webp ${kb(still)}`)
 }
 
 const want = process.argv.slice(2)
-const all = want.length ? want : ['dana', 'kivenro', 'terrence', 'lenny', 'kaught']
-for (const name of all) {
-  if (name === 'kaught') recordReel()
-  else if (PAGES[name]) await recordPage(name, PAGES[name])
-  else console.log('unknown tile', name)
+for (const name of want.length ? want : SLUGS) {
+  if (PAGES[name]) await recordPage(name, PAGES[name])
+  else console.log('unknown page', name)
 }
