@@ -188,7 +188,10 @@ export default defineSchema({
     updatedAt: v.number(),
   }).index("by_key", ["key"]),
 
-  /* x.jeremylasne.com — the content manager. One document per day: what
+  /* Retired with x.jeremylasne.com: nothing reads or writes these four tables
+     any more. They stay declared so a deploy keeps their rows valid; empty them
+     in the Convex dashboard, then they can go from here too.
+     x.jeremylasne.com — the content manager. One document per day: what
      Jeremy logged, the answers he gave the questions, whether he filled
      /wellness/exp0, and the drafts the day produced. Written only with the
      passphrase in X_PASSPHRASE; there is exactly one author. */

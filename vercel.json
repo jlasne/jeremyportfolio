@@ -3,7 +3,6 @@
     { "src": "^/bio/bg\\.jpg$", "status": 308, "headers": { "Location": "/wellness/bg.jpg" } },
     { "src": "^/bio/?$", "status": 308, "headers": { "Location": "/wellness/exp0" } },
     { "src": "^/bio/(.*)$", "status": 308, "headers": { "Location": "/wellness/exp0/$1" } },
-    { "src": "^/x(?:/.*)?$", "status": 404, "dest": "/404" },
     { "handle": "filesystem" },
     { "src": "^/wellness/exp0/demo/?$", "dest": "/wellness/exp0/index.html" }
   ]
