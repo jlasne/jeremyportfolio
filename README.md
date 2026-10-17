@@ -58,13 +58,10 @@ Open it and edit it.
 | `/wellness` | **Wellness** · experiments on my own body, one question each. Not linked from the landing |
 | `/wellness/exp0` | **Exp 0 · Learn and get better** · October 2026, 31 days: intake, sport, sleep and the watch logged daily, then two grids of what moved recovery, sleep, weight, HRV and resting HR. `/bio` redirects here. Not linked from the landing |
 | `/brandmatchapp` | **brandmatch** · a daily feed of Instagram creators ready for a brand deal, ranked by intent and match stars, live at [brandmatch.app](https://brandmatch.app). Apify crawls the profiles, OpenRouter reads them against the brief, and Convex holds a creator pool shared across every campaign. A second Vercel project builds this repo with `brandmatchapp` as its root directory, so the folder stays here even though nothing on the landing links to it. The source is Vite and React under `brandmatchapp/app`; `npm run build` there commits the built app to the folder that project serves. See [`brandmatchapp/README.md`](brandmatchapp/README.md) |
-| `x.jeremylasne.com` | **the content manager**, served from `x/` at [x.jeremylasne.com](https://x.jeremylasne.com) only (`jeremylasne.com/x` redirects to the landing), behind one passphrase. Jeremy logs his day; three mails at 10:00, 14:00 and 17:00 Paris ask nine questions and carry the whole day back, so the inbox is the archive. At 17:00 the log becomes three X posts and one 60 second video script, written by his own two system prompts. Drafts only: nothing is posted. Data and crons sit on the Overlap Convex deployment. A third Vercel project builds this repo with `x` as its root directory. See [`x/README.md`](x/README.md) |
+| `x.jeremylasne.com` | **the content manager**, served from `x/` at [x.jeremylasne.com](https://x.jeremylasne.com) only (`.vercelignore` keeps it off `jeremylasne.com/x`), behind one passphrase. Jeremy logs his day; three mails at 10:00, 14:00 and 17:00 Paris ask nine questions and carry the whole day back, so the inbox is the archive. At 17:00 the log becomes three X posts and one 60 second video script, written by his own two system prompts. Drafts only: nothing is posted. Data and crons sit on the Overlap Convex deployment. A third Vercel project builds this repo with `x` as its root directory. See [`x/README.md`](x/README.md) |
 
 **Exp 0** keeps its numbers in the Overlap Convex deployment behind a
 passphrase; see [`wellness/exp0/README.md`](wellness/exp0/README.md).
-
-**Removed pages.** `/invest` and `/wealth/principles` redirect to `/wealth`;
-`/vid`, `/brain` and `/x` redirect to the landing. The redirects are in `vercel.json`.
 
 ## Run locally
 
