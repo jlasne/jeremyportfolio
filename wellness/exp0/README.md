@@ -64,11 +64,11 @@ nothing, to show a neutral row.
 - **`spec.js`** — the single source of truth: the field list, the ranges a
   number may take, what a save may contain, and the correlation itself. The
   page imports it and so does the server
-  ([`overlap/convex/bio.ts`](../../overlap/convex/bio.ts)), so the two agree on
+  ([`wellness-api/convex/bio.ts`](../../wellness-api/convex/bio.ts)), so the two agree on
   which fields exist and what a day may hold. `spec.d.ts` is its types for
   `tsc`.
-- **Data** — one document in the Overlap Convex deployment (table `bio`, key
-  `oct26`), through the same `/overlap` door Founder City uses. Three
+- **Data** — one document in the wellness-api Convex deployment (table `bio`, key
+  `oct26`), through the `/overlap` door of `wellness-api`. Three
   operations: `bio.get`, `bio.unlock`, `bio.save`.
 - **Two pages open** — a save fetches the server's copy first and writes
   only the days this page changed on top of it, so a second open page (the
@@ -207,7 +207,7 @@ The page ships with the main site: it lives at `/wellness/exp0` on the
 
 The server side needs one deploy and one setting:
 
-1. `cd overlap && npx convex deploy` from a checkout that has this code.
+1. `cd wellness-api && npx convex deploy` from a checkout that has this code.
 2. In the Convex dashboard (Settings → Environment Variables) set
    `BIO_PASSPHRASE`. If `OVERLAP_ALLOW_ORIGIN` is set, list every origin the
    page is served from, comma-separated.

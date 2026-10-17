@@ -2,17 +2,13 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 /**
- * Overlap — the whole data model.
+ * The data behind /wellness/exp0: one live table, `bio`.
  *
- * A meeting is the unit. You sign in with Google, you answer for yourself
- * once, and that answer — timezone, working day, bedtime — lives on your
- * user and is reused by every meeting after. A participant is your row in
- * one meeting: your hours as they were when you joined, plus whatever you
- * crossed out and whatever your calendar says is already taken.
- *
- * There is no team table. "People you have met with" is a question you can
- * answer from the meetings you already share, and one fewer thing to name,
- * rename, join and leave.
+ * Every other table is retired: Overlap (users, sessions, meetings,
+ * participants, feedback), Founder City (towers) and x.jeremylasne.com
+ * (xDays, xBrain, xIdeas, xFacts). Nothing reads or writes them. They stay
+ * declared so a deploy keeps their old rows valid; empty them in the Convex
+ * dashboard, then delete them from here.
  */
 export default defineSchema({
   users: defineTable({

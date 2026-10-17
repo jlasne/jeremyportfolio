@@ -3,7 +3,7 @@ import { httpAction, type ActionCtx } from "./_generated/server";
 import { api } from "./_generated/api";
 
 /**
- * One endpoint for the whole app.
+ * One endpoint for /wellness and /wellness/exp0.
  *
  * The client is a static HTML page on another origin, so it cannot use the
  * websocket client and needs CORS. Rather than open up Convex's generic
@@ -70,42 +70,6 @@ async function answer(ctx: ActionCtx, request: Request): Promise<Response> {
 
   try {
     switch (op) {
-      case "me":
-        return ok(await ctx.runQuery(api.meet.me, args));
-      case "auth.google":
-        return ok(await ctx.runAction(api.auth.google, args));
-      case "auth.signOut":
-        return ok(await ctx.runMutation(api.auth.signOut, args));
-      case "meet.profile":
-        return ok(await ctx.runMutation(api.meet.profile, args));
-      case "meet.create":
-        return ok(await ctx.runMutation(api.meet.create, args));
-      case "meet.peek":
-        return ok(await ctx.runQuery(api.meet.peek, args));
-      case "meet.join":
-        return ok(await ctx.runMutation(api.meet.join, args));
-      case "meet.hours":
-        return ok(await ctx.runMutation(api.meet.hours, args));
-      case "meet.rename":
-        return ok(await ctx.runMutation(api.meet.rename, args));
-      case "meet.leave":
-        return ok(await ctx.runMutation(api.meet.leave, args));
-      case "meet.setHandle":
-        return ok(await ctx.runMutation(api.meet.setHandle, args));
-      case "meet.limits":
-        return ok(await ctx.runMutation(api.meet.limits, args));
-      case "meet.host":
-        return ok(await ctx.runQuery(api.meet.host, args));
-      case "meet.bookWith":
-        return ok(await ctx.runMutation(api.meet.bookWith, args));
-      case "meet.book":
-        return ok(await ctx.runMutation(api.meet.book, args));
-      case "feedback.send":
-        return ok(await ctx.runMutation(api.feedback.send, args));
-      case "city.towers":
-        return ok(await ctx.runQuery(api.city.towers, args));
-      case "city.breakGround":
-        return ok(await ctx.runMutation(api.city.breakGround, args));
       case "bio.get":
         return ok(await ctx.runQuery(api.bio.get, args));
       case "bio.unlock":
