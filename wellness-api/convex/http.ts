@@ -76,6 +76,10 @@ async function answer(ctx: ActionCtx, request: Request): Promise<Response> {
         return ok(await ctx.runQuery(api.bio.unlock, args));
       case "bio.save":
         return ok(await ctx.runMutation(api.bio.save, args));
+      case "days.list":
+        return ok(await ctx.runQuery(api.days.list, args));
+      case "days.save":
+        return ok(await ctx.runMutation(api.days.save, args));
       default:
         return bad("Unknown operation");
     }

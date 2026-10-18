@@ -184,6 +184,36 @@ export default defineSchema({
     updatedAt: v.number(),
   }).index("by_key", ["key"]),
 
+  /* jeremylasne.com/wellness: one document per day. The night that ended
+     that morning and the day's sport sessions; what each may hold is
+     decided by `cleanDay` in wellness/spec.js. */
+  days: defineTable({
+    day: v.string(),
+    sleep: v.optional(v.object({
+      score: v.optional(v.float64()),
+      hrv: v.optional(v.float64()),
+      rhr: v.optional(v.float64()),
+      ready: v.optional(v.float64()),
+      min: v.optional(v.float64()),
+      bed: v.optional(v.float64()),
+      wake: v.optional(v.float64()),
+    })),
+    sessions: v.optional(v.array(v.object({
+      s: v.string(),
+      f: v.optional(v.string()),
+      t: v.optional(v.float64()),
+      e: v.optional(v.float64()),
+      hr: v.optional(v.float64()),
+      m: v.optional(v.float64()),
+      sec: v.optional(v.float64()),
+      lift: v.optional(v.string()),
+      kg: v.optional(v.float64()),
+      reps: v.optional(v.float64()),
+    }))),
+    note: v.optional(v.string()),
+    updatedAt: v.number(),
+  }).index("by_day", ["day"]),
+
   /* Retired with x.jeremylasne.com: nothing reads or writes these four tables
      any more. They stay declared so a deploy keeps their rows valid; empty them
      in the Convex dashboard, then they can go from here too.
