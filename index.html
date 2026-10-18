@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Jeremy Lasne</title>
-<meta name="description" content="I build mobile apps with influencers. CreatorMatch, and our work for 11 wellness creators.">
+<meta name="description" content="I build mobile apps with influencers. CreatorMatch and our work for 11 wellness creators, plus Wellness, tasu.ai and Kaught.">
 <link rel="canonical" href="https://www.jeremylasne.com/">
 <meta name="theme-color" content="#050b16">
 <link rel="icon" href="favicon.ico" sizes="any">
@@ -93,13 +93,10 @@
   }
   .socials a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
-  section { width: 100%; margin-top: 10px; text-align: left; }
-  .socials + section { margin-top: 36px; }
-
-  /* ---- the projects: one filled shape each, one line, centred ---- */
+  /* ---- CreatorMatch: one panel, its bar on top and its work under it ---- */
   .card {
     display: flex; align-items: center; justify-content: center; flex-wrap: wrap; column-gap: 12px; row-gap: 2px;
-    padding: 16px 20px; border-radius: 12px; text-align: center; text-decoration: none; color: inherit;
+    margin: 8px 8px 0; padding: 16px 20px; border-radius: 18px; text-align: center; text-decoration: none; color: inherit;
     background: rgba(234,244,251,.09); transition: background .25s;
   }
   .card .head { display: flex; align-items: center; gap: 12px; }
@@ -115,8 +112,12 @@
   /* ---- our work: one phone per app, the one in the middle large, the others smaller and fainter
      the further they sit from it. Each plays its page by itself; a click, a swipe or an arrow
      brings the next one to the middle ---- */
-  section.work { width: 100vw; margin-top: 44px; text-align: center; }
-  .work-kicker { font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--blue); }
+  section.work {
+    width: calc(100vw - 24px); max-width: 1120px; margin-top: 36px; padding-bottom: 26px; text-align: center;
+    border-radius: 26px; background: rgba(234,244,251,.06); overflow: clip;
+  }
+  .work-kicker { margin-top: 26px; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--blue); }
+  .work-kicker span { color: var(--ice-45); }
   .deck {
     --w: min(56vw, 228px); --bez: 7px;
     position: relative; margin-top: 20px; height: calc(var(--w) * 844 / 390 + 2 * var(--bez));
@@ -163,9 +164,34 @@
   .step:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
   .work-count { margin-top: 10px; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .06em; color: var(--ice-45); font-variant-numeric: tabular-nums; }
 
+  /* ---- personal projects: three tiles under the panel, a column on phones, a row from 760px ---- */
+  section.personal { width: calc(100vw - 24px); max-width: 1120px; margin-top: 44px; }
+  .personal h2 { font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--blue); text-align: center; }
+  .tiles { display: grid; gap: 10px; margin-top: 16px; list-style: none; }
+  .tile {
+    display: flex; align-items: center; gap: 14px; height: 100%; padding: 16px 18px; border-radius: 18px;
+    text-decoration: none; color: inherit; background: rgba(234,244,251,.09); transition: background .25s;
+  }
+  .tile .logo { width: 36px; height: 36px; flex: none; border-radius: 9px; object-fit: contain; }
+  .tile .glyph { display: grid; place-items: center; background: rgba(95,168,211,.18); color: var(--blue); }
+  .tile .glyph svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .tile .text { flex: 1; min-width: 0; }
+  .tile .name { display: block; font-size: 16px; line-height: 22px; font-weight: 600; letter-spacing: -.01em; transition: color .2s; }
+  .tile .desc { display: block; margin-top: 2px; font-size: 14px; line-height: 20px; color: var(--ice-70); }
+  .tile .go { flex: none; font-size: 15px; color: var(--ice-45); }
+  @media (hover: hover) {
+    .tile:hover { background: rgba(234,244,251,.15); }
+    .tile:hover .name { color: var(--blue); }
+  }
+  .tile:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
   @media (min-width: 640px) {
     h1 { font-size: 34px; }
     .deck { --w: 236px; --bez: 8px; }
+  }
+  @media (min-width: 760px) {
+    section.work, section.personal { width: calc(100vw - 48px); }
+    .tiles { grid-template-columns: repeat(3, 1fr); }
   }
   @media (prefers-reduced-motion: reduce) {
     .reveal { animation: none; }
@@ -237,20 +263,17 @@
       </a>
     </nav>
 
-    <section class="reveal" style="--d:160" aria-label="Projects">
-      <a class="card" href="https://creatormatch.app" target="_blank" rel="noopener">
-        <span class="head">
-          <img class="logo" src="media/logos/creatormatch.svg" alt="" width="26" height="26">
-          <span class="name">CreatorMatch</span>
-        </span>
-        <span class="desc">I build mobile apps with influencers.</span>
-      </a>
-    </section>
-
   </div>
 
-  <section class="work reveal" style="--d:220" aria-label="Our work" aria-roledescription="carousel">
-    <p class="work-kicker">Our work</p>
+  <section class="work reveal" style="--d:160" aria-label="CreatorMatch, our work" aria-roledescription="carousel">
+    <a class="card" href="https://creatormatch.app" target="_blank" rel="noopener">
+      <span class="head">
+        <img class="logo" src="media/logos/creatormatch.svg" alt="" width="26" height="26">
+        <span class="name">CreatorMatch</span>
+      </span>
+      <span class="desc">I build mobile apps with influencers.</span>
+    </a>
+    <p class="work-kicker">Our work <span>· 11 apps, 11 creators</span></p>
     <div class="deck" tabindex="-1">
       <ul class="phones">
         <li class="phone" data-app="EDEN" data-who="Hannah Eden · Hybrid athlete" data-line="470K followers. 100K+ people transformed.">
@@ -298,6 +321,27 @@
       <button class="step" type="button" data-step="1" aria-label="Next app"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 4.5 13 10l-5.5 5.5"/></svg></button>
     </div>
     <p class="work-count">1 / 11</p>
+  </section>
+
+  <section class="personal reveal" style="--d:220" aria-labelledby="personal-title">
+    <h2 id="personal-title">Personal projects</h2>
+    <ul class="tiles">
+      <li><a class="tile" href="/wellness/">
+        <span class="logo glyph" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M2 10.5h3.5l2-4.5 3 9 2.5-6 1.5 1.5H18"/></svg></span>
+        <span class="text"><span class="name">Wellness</span><span class="desc">Experiments on myself to feel alive.</span></span>
+        <span class="go" aria-hidden="true">&rarr;</span>
+      </a></li>
+      <li><a class="tile" href="https://tasu.ai" target="_blank" rel="noopener">
+        <img class="logo" src="media/logos/brain.svg" alt="" width="36" height="36" loading="lazy">
+        <span class="text"><span class="name">tasu.ai</span><span class="desc">My homemade AI interface.</span></span>
+        <span class="go" aria-hidden="true">&nearr;</span>
+      </a></li>
+      <li><a class="tile" href="https://kaught.app" target="_blank" rel="noopener">
+        <img class="logo" src="media/logos/kaught.webp" alt="" width="36" height="36" loading="lazy">
+        <span class="text"><span class="name">kaught.app</span><span class="desc">Animal identifier. Live on mobile.</span></span>
+        <span class="go" aria-hidden="true">&nearr;</span>
+      </a></li>
+    </ul>
   </section>
 </main>
 
