@@ -49,7 +49,7 @@ Open it and edit it.
 - The ridge photo (`wellness/bg.jpg`) blurred behind everything (9.5px); snow drawn on a
   canvas by `snow.js`; the wind looping from `media/wind.mp3` with one mute
   button top right. Mute once and it stays muted on the next visit
-- The CreatorMatch, tasu (`brain.svg`) and Kaught logos are in `media/logos`. The CreatorMatch one is the same file as `favicon.svg` in [jlasne/creatormatch](https://github.com/jlasne/creatormatch). The still under each video is in `media/apps`: the first frame of its recording
+- The CreatorMatch, tasu (`tasu.svg`, the same file as tasu.ai/brand/tasu.svg) and Kaught logos are in `media/logos`. The CreatorMatch one is the same file as `favicon.svg` in [jlasne/creatormatch](https://github.com/jlasne/creatormatch). The still under each video is in `media/apps`: the first frame of its recording
 - Rows reveal on load; `prefers-reduced-motion` turns that off
 - `og-image.png` is generated, not hand-drawn: render the hero at 1200×630
   and screenshot it. The source is not checked in, so redraw it to match if
