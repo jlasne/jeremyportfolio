@@ -4,24 +4,23 @@ I build mobile apps with influencers. A creator brings the audience, I bring
 the whole build and run it, and we split what it earns. This repository is
 the site behind that, plus everything else I keep in public.
 
-The landing page: a portrait, a name, social icons, one CreatorMatch panel
-(its bar on top, our work as a row of phones under it), then three personal
-projects. Solid fills, no outlines.
+The landing page: a portrait, a name, social icons, CreatorMatch with our
+work as a row of phones under it, then three personal projects as app icons.
+Everything sits straight on the ridge, with no panels.
 
 - **Socials.** YouTube [@jeremyfounder](https://www.youtube.com/@jeremyfounder),
   X [@jeremylasne](https://x.com/jeremylasne), Instagram
   [@creatormatch.app](https://www.instagram.com/creatormatch.app/) and email,
   as four icons under the name. The email icons also copy the address
-- **CreatorMatch.** One panel, up to 1120px wide. On top, the bar:
-  [CreatorMatch](https://creatormatch.app), I build mobile apps with influencers
-- **Our work.** Under the bar, inside the panel, one phone per page of
+- **CreatorMatch.** One centred line, no fill: the logo,
+  [CreatorMatch](https://creatormatch.app) and "I build mobile apps with influencers"
+- **Our work.** Under it, full width, one phone per page of
   [creatormatch.app/work](https://www.creatormatch.app/work/): 11 apps made for
   11 wellness creators. The phone in the middle is the largest; each step away
   it gets smaller and fainter. A click on a side phone, a swipe, a sideways
   trackpad scroll, the arrow keys or the two buttons bring the next one to the
   middle, round and round. A click on the middle phone opens its page. Under
-  the phones: the app's name, the creator and one line of figures, plus the
-  count (1 / 11)
+  the phones: the two arrows, no caption
 - **Autoplay.** Every phone in sight plays its page scrolling by itself, muted
   and looping, eased in and out, on phones too. The deck rests when it leaves
   the screen, and a visitor who asks for less motion keeps the stills
@@ -33,10 +32,12 @@ projects. Solid fills, no outlines.
   where the page barely moves while the scroll goes on (up to 24x), so the recording never
   seems to stop. Each video is a loop whose end melts into its start, about 0.8 to 1.2 MB, and
   loads only when its phone comes into sight
-- **Personal projects.** Under the panel, three tiles: [Wellness](/wellness/),
-  experiments on myself to feel alive; [tasu.ai](https://tasu.ai), my homemade
-  AI interface; [kaught.app](https://kaught.app), the animal identifier, live
-  on mobile. A column on phones, a row of three from 760px
+- **Personal projects.** Three app icons, each with a halo in its own colour,
+  the name, one line and the address: [Wellness](/wellness/), experiments on
+  myself to feel alive (its icon is the ridge with a pulse line);
+  [tasu](https://tasu.ai), my homemade AI interface;
+  [Kaught](https://kaught.app), the animal identifier, with a Live badge. One
+  under the other on phones, three across from 560px. A hover lifts the icon
 
 ## Stack
 

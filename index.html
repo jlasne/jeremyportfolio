@@ -93,31 +93,23 @@
   }
   .socials a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
-  /* ---- CreatorMatch: one panel, its bar on top and its work under it ---- */
+  /* ---- CreatorMatch: its name, then its work, straight on the ridge ---- */
   .card {
-    display: flex; align-items: center; justify-content: center; flex-wrap: wrap; column-gap: 12px; row-gap: 2px;
-    margin: 8px 8px 0; padding: 16px 20px; border-radius: 18px; text-align: center; text-decoration: none; color: inherit;
-    background: rgba(234,244,251,.09); transition: background .25s;
+    display: flex; align-items: center; justify-content: center; flex-wrap: wrap; column-gap: 12px; row-gap: 4px;
+    width: max-content; max-width: calc(100% - 32px); margin: 0 auto; text-align: center; text-decoration: none; color: inherit;
   }
   .card .head { display: flex; align-items: center; gap: 12px; }
-  .card .logo { width: 26px; height: 26px; flex: none; }
-  .card .name { font-size: 17px; line-height: 24px; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; transition: color .2s; }
-  .card .desc { font-size: 15px; line-height: 24px; color: var(--ice-70); }
-  @media (hover: hover) {
-    .card:hover { background: rgba(234,244,251,.15); }
-    .card:hover .name { color: var(--blue); }
-  }
-  .card:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .card .logo { width: 30px; height: 30px; flex: none; }
+  .card .name { font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: -.015em; white-space: nowrap; transition: color .2s; }
+  .card .desc { font-size: 16px; line-height: 28px; color: var(--ice-70); }
+  @media (hover: hover) { .card:hover .name { color: var(--blue); } }
+  .card:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; border-radius: 8px; }
 
   /* ---- our work: one phone per app, the one in the middle large, the others smaller and fainter
      the further they sit from it. Each plays its page by itself; a click, a swipe or an arrow
      brings the next one to the middle ---- */
-  section.work {
-    width: calc(100vw - 24px); max-width: 1120px; margin-top: 36px; padding-bottom: 26px; text-align: center;
-    border-radius: 26px; background: rgba(234,244,251,.06); overflow: clip;
-  }
-  .work-kicker { margin-top: 26px; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--blue); }
-  .work-kicker span { color: var(--ice-45); }
+  section.work { width: 100vw; margin-top: 48px; text-align: center; }
+  .work-kicker { margin-top: 22px; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--blue); }
   .deck {
     --w: min(56vw, 228px); --bez: 7px;
     position: relative; margin-top: 20px; height: calc(var(--w) * 844 / 390 + 2 * var(--bez));
@@ -144,58 +136,63 @@
   .phone.on a:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
   @media (hover: hover) and (pointer: fine) { .deck { cursor: grab; } .deck.dragging, .deck.dragging .phone a { cursor: grabbing; } }
 
-  /* ---- under the phones: the arrows either side of the name of the one in the middle ---- */
-  .work-bar { display: flex; align-items: center; justify-content: center; gap: 14px; max-width: 460px; margin: 26px auto 0; padding: 0 16px; }
-  .work-cap { flex: 1; min-width: 0; min-height: 66px; }
-  .cap-app { font-size: 17px; line-height: 24px; font-weight: 600; letter-spacing: -.01em; color: var(--ice); text-decoration: none; transition: color .2s; }
-  .cap-app::after { content: " \2197"; color: var(--ice-45); }
-  .cap-app:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 4px; }
-  .cap-who { margin-top: 2px; font-size: 14px; line-height: 20px; color: var(--ice-70); }
-  .cap-line { font-size: 13px; line-height: 20px; color: var(--ice-45); }
+  /* ---- under the phones: the two arrows ---- */
+  .work-bar { display: flex; justify-content: center; gap: 12px; margin-top: 18px; }
   .step {
     flex: none; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 50%; cursor: pointer;
     color: var(--ice-70); background: rgba(234,244,251,.1); transition: color .2s, background .2s;
   }
   .step svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-  @media (hover: hover) {
-    .cap-app:hover { color: var(--blue); }
-    .step:hover { color: var(--blue); background: rgba(234,244,251,.17); }
-  }
+  @media (hover: hover) { .step:hover { color: var(--blue); background: rgba(234,244,251,.17); } }
   .step:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
-  .work-count { margin-top: 10px; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .06em; color: var(--ice-45); font-variant-numeric: tabular-nums; }
 
-  /* ---- personal projects: three tiles under the panel, a column on phones, a row from 760px ---- */
-  section.personal { width: calc(100vw - 24px); max-width: 1120px; margin-top: 44px; }
+  /* ---- personal projects: one app icon each with a halo in its own colour, the name and one line
+     under it. One under the other on phones, three across from 560px ---- */
+  section.personal { width: 100%; max-width: 880px; margin-top: 72px; }
   .personal h2 { font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--blue); text-align: center; }
-  .tiles { display: grid; gap: 10px; margin-top: 16px; list-style: none; }
-  .tile {
-    display: flex; align-items: center; gap: 14px; height: 100%; padding: 16px 18px; border-radius: 18px;
-    text-decoration: none; color: inherit; background: rgba(234,244,251,.09); transition: background .25s;
+  .tiles { display: grid; gap: 14px; margin-top: 28px; list-style: none; }
+  .tile { display: flex; align-items: center; gap: 18px; text-decoration: none; color: inherit; -webkit-tap-highlight-color: transparent; }
+  .icon { position: relative; isolation: isolate; flex: none; width: 64px; height: 64px; transition: transform .4s cubic-bezier(.22,1,.36,1); }
+  .icon::before {
+    content: ""; position: absolute; inset: 4px; z-index: -1; border-radius: 50%;
+    background: var(--glow); filter: blur(22px); opacity: .4; transition: opacity .4s;
   }
-  .tile .logo { width: 36px; height: 36px; flex: none; border-radius: 9px; object-fit: contain; }
-  .tile .glyph { display: grid; place-items: center; background: rgba(95,168,211,.18); color: var(--blue); }
-  .tile .glyph svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-  .tile .text { flex: 1; min-width: 0; }
-  .tile .name { display: block; font-size: 16px; line-height: 22px; font-weight: 600; letter-spacing: -.01em; transition: color .2s; }
+  .art {
+    display: grid; place-items: center; width: 100%; height: 100%; overflow: hidden; border-radius: 27%; object-fit: cover;
+    box-shadow: 0 0 0 1px rgba(234,244,251,.16), 0 16px 32px -14px rgba(0,0,0,.8);
+  }
+  .art.wellness { background: url(wellness/bg.jpg) 58% 46% / 340% auto; color: #fff; }
+  .art.wellness svg { width: 58%; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 1px 3px rgba(5,11,22,.6)); }
+  .art.tasu { background: #fbf1ec; }
+  .art.tasu img { width: 70%; }
+  .tile .text { min-width: 0; }
+  .tile .name { display: block; font-size: 17px; line-height: 24px; font-weight: 600; letter-spacing: -.01em; transition: color .2s; }
   .tile .desc { display: block; margin-top: 2px; font-size: 14px; line-height: 20px; color: var(--ice-70); }
-  .tile .go { flex: none; font-size: 15px; color: var(--ice-45); }
+  .tile .url { display: inline-flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .02em; color: var(--ice-45); transition: color .2s; }
+  .live { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px 2px 6px; border-radius: 999px; background: rgba(74,222,128,.14); color: #86efac; letter-spacing: .04em; text-transform: uppercase; font-size: 10px; }
+  .live::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 0 0 rgba(74,222,128,.6); animation: ping 2s infinite; }
+  @keyframes ping { 70%, 100% { box-shadow: 0 0 0 6px rgba(74,222,128,0); } }
   @media (hover: hover) {
-    .tile:hover { background: rgba(234,244,251,.15); }
-    .tile:hover .name { color: var(--blue); }
+    .tile:hover .icon { transform: translateY(-4px); }
+    .tile:hover .icon::before { opacity: .85; }
+    .tile:hover .name, .tile:hover .url { color: var(--blue); }
   }
-  .tile:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .tile:focus-visible { outline: none; }
+  .tile:focus-visible .art { outline: 2px solid var(--blue); outline-offset: 3px; }
 
+  @media (min-width: 560px) {
+    .tiles { grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .tile { flex-direction: column; gap: 16px; text-align: center; }
+    .icon { width: 84px; height: 84px; }
+  }
   @media (min-width: 640px) {
     h1 { font-size: 34px; }
     .deck { --w: 236px; --bez: 8px; }
   }
-  @media (min-width: 760px) {
-    section.work, section.personal { width: calc(100vw - 48px); }
-    .tiles { grid-template-columns: repeat(3, 1fr); }
-  }
   @media (prefers-reduced-motion: reduce) {
     .reveal { animation: none; }
-    .phone, .phone video { transition: none; }
+    .phone, .phone video, .icon { transition: none; }
+    .live::before { animation: none; }
   }
 
   /* ---- the wind, and the one control for it, top right ---- */
@@ -273,7 +270,7 @@
       </span>
       <span class="desc">I build mobile apps with influencers.</span>
     </a>
-    <p class="work-kicker">Our work <span>· 11 apps, 11 creators</span></p>
+    <p class="work-kicker">Our work</p>
     <div class="deck" tabindex="-1">
       <ul class="phones">
         <li class="phone" data-app="EDEN" data-who="Hannah Eden · Hybrid athlete" data-line="470K followers. 100K+ people transformed.">
@@ -313,33 +310,24 @@
     </div>
     <div class="work-bar">
       <button class="step" type="button" data-step="-1" aria-label="Previous app"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg></button>
-      <div class="work-cap" aria-live="polite">
-        <a class="cap-app" href="https://www.creatormatch.app/hannaheden/" target="_blank" rel="noopener">EDEN</a>
-        <div class="cap-who">Hannah Eden · Hybrid athlete</div>
-        <div class="cap-line">470K followers. 100K+ people transformed.</div>
-      </div>
       <button class="step" type="button" data-step="1" aria-label="Next app"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 4.5 13 10l-5.5 5.5"/></svg></button>
     </div>
-    <p class="work-count">1 / 11</p>
   </section>
 
   <section class="personal reveal" style="--d:220" aria-labelledby="personal-title">
     <h2 id="personal-title">Personal projects</h2>
     <ul class="tiles">
-      <li><a class="tile" href="/wellness/">
-        <span class="logo glyph" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M2 10.5h3.5l2-4.5 3 9 2.5-6 1.5 1.5H18"/></svg></span>
-        <span class="text"><span class="name">Wellness</span><span class="desc">Experiments on myself to feel alive.</span></span>
-        <span class="go" aria-hidden="true">&rarr;</span>
+      <li><a class="tile" href="/wellness/" style="--glow:#5fa8d3">
+        <span class="icon" aria-hidden="true"><span class="art wellness"><svg viewBox="0 0 24 24"><path d="M2 12.5h4l2.5-5.5 3.5 11 3-7.5 2 2H22"/></svg></span></span>
+        <span class="text"><span class="name">Wellness</span><span class="desc">Experiments on myself to feel alive.</span><span class="url">/wellness &rarr;</span></span>
       </a></li>
-      <li><a class="tile" href="https://tasu.ai" target="_blank" rel="noopener">
-        <img class="logo" src="media/logos/brain.svg" alt="" width="36" height="36" loading="lazy">
-        <span class="text"><span class="name">tasu.ai</span><span class="desc">My homemade AI interface.</span></span>
-        <span class="go" aria-hidden="true">&nearr;</span>
+      <li><a class="tile" href="https://tasu.ai" target="_blank" rel="noopener" style="--glow:#f5a3b5">
+        <span class="icon" aria-hidden="true"><span class="art tasu"><img src="media/logos/brain.svg" alt="" width="64" height="56" loading="lazy"></span></span>
+        <span class="text"><span class="name">tasu</span><span class="desc">My homemade AI interface.</span><span class="url">tasu.ai &nearr;</span></span>
       </a></li>
-      <li><a class="tile" href="https://kaught.app" target="_blank" rel="noopener">
-        <img class="logo" src="media/logos/kaught.webp" alt="" width="36" height="36" loading="lazy">
-        <span class="text"><span class="name">kaught.app</span><span class="desc">Animal identifier. Live on mobile.</span></span>
-        <span class="go" aria-hidden="true">&nearr;</span>
+      <li><a class="tile" href="https://kaught.app" target="_blank" rel="noopener" style="--glow:#f07a2c">
+        <span class="icon" aria-hidden="true"><img class="art" src="media/logos/kaught.webp" alt="" width="128" height="128" loading="lazy"></span>
+        <span class="text"><span class="name">Kaught</span><span class="desc">Animal identifier, on mobile.</span><span class="url"><span class="live">Live</span>kaught.app &nearr;</span></span>
       </a></li>
     </ul>
   </section>
@@ -380,7 +368,6 @@
     var phones = Array.prototype.slice.call(deck.querySelectorAll(".phone"));
     var n = phones.length, pos = 0, inView = false, dragged = false, drag = null;
     var still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    var cap = root.querySelector(".work-cap"), count = root.querySelector(".work-count");
     // by steps from the middle: where a phone sits (in phone widths), how large, how faint
     var X = [0, .86, 1.52, 2.06, 2.5, 2.9], S = [1, .82, .67, .55, .45, .38], O = [1, .92, .72, .45, 0, 0];
     function at(t, a) { var k = Math.min(Math.floor(a), t.length - 2); return t[k] + (t[k + 1] - t[k]) * Math.min(a - k, 1); }
@@ -432,21 +419,10 @@
       play();
     }
 
-    function caption() {
-      var p = phones[index()], a = p.querySelector("a"), name = cap.querySelector(".cap-app");
-      name.textContent = p.dataset.app;
-      name.href = a.href;
-      if (a.hreflang) name.hreflang = a.hreflang; else name.removeAttribute("hreflang");
-      cap.querySelector(".cap-who").textContent = p.dataset.who;
-      cap.querySelector(".cap-line").textContent = p.dataset.line;
-      count.textContent = (index() + 1) + " / " + n;
-    }
-
     function go(k) {
       var focused = deck.contains(document.activeElement);
       pos = k;
       layout();
-      caption();
       if (focused) phones[index()].querySelector("a").focus({ preventScroll: true });
     }
     function step(by) { go(Math.round(pos) + by); }
