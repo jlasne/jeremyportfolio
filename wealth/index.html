@@ -160,6 +160,7 @@ select option,select optgroup{background:#0b1626;color:var(--ink)}
 .map svg{display:block;width:100%;height:auto;user-select:none;-webkit-user-select:none}
 .dhint{position:absolute;z-index:2;top:12px;left:50%;transform:translateX(-50%);max-width:calc(100% - 24px);background:var(--accent);color:var(--page);font-size:13px;font-weight:650;padding:7px 16px;border-radius:999px;pointer-events:none;box-shadow:0 10px 30px -10px rgba(0,0,0,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dhint.idle{background:rgba(5,11,22,.85);color:var(--ink2);border:1px solid var(--line2)}
+.stage.solo{grid-template-columns:minmax(0,1fr)}
 .insp{position:sticky;top:max(14px,env(safe-area-inset-top,0px));align-content:start}
 @media (max-width:1000px){.insp{position:static}}
 
@@ -242,12 +243,6 @@ select option,select optgroup{background:#0b1626;color:var(--ink)}
 .kv dt{color:var(--mute)} .kv dd{margin:0;text-align:right}
 .acts{display:grid;gap:8px}
 .acts .btn{justify-content:center;width:100%}
-.olist{display:grid;gap:6px}
-.orow{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:10px;border:0;background:var(--sunk);border-radius:12px;padding:10px 12px;text-align:left;color:var(--ink);transition:background .2s}
-button.orow:hover{background:var(--sunk2)}
-.orow i{width:10px;height:10px;border-radius:50%;background:var(--lc)}
-.orow b{font-weight:600}
-.orow em{font-style:normal;color:var(--mute);font-size:12px;min-width:34px;text-align:right}
 .tips{display:grid;gap:6px;font-size:12.5px;color:var(--ink2);background:var(--sunk);border-radius:12px;padding:10px 12px}
 .tips b{color:var(--ink)}
 .slider{display:grid;gap:6px}
@@ -543,7 +538,7 @@ function load(){try{const t=localStorage.getItem(KEY);if(t){const s=JSON.parse(t
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 {const ld=load();S=ld&&!ld.example?ld:fixEx(example())}
 const SC={moves:[],notes:[]};
-const UI={mode:"map",view:"macro",sel:null,stress:30,flow:false,lens:"class",ladSel:{},rbSrc:null,rbAmt:0};
+const UI={mode:"map",view:"macro",sel:null,stress:30,lens:"class",ladSel:{},rbSrc:null,rbAmt:0};
 try{const v=+localStorage.getItem(KEY+"-stress");if(v>=10&&v<=80)UI.stress=v}catch(e){}
 
 /* ---------- the model ---------- */
@@ -798,27 +793,6 @@ function macroModel(X,XB){
     {key:"fat",name:"FAT LAYER",col:"l2",total:T.fat,share:shareOf(T.fat,T.assets),was:was(XB.T.fat,T.fat),chips:fc,nodes:nodes.filter(n=>n.band==="fat"),minH:104},
     {key:"inv",name:"INVESTMENTS",col:"l3",total:T.inv,share:shareOf(T.inv,T.assets),was:was(XB.T.inv,T.inv),chips:ic,nodes:nodes.filter(n=>n.band==="inv").sort(ord),minH:124}]};
 }
-/* the same map, sized by money a year: income from the bets, what lands in the bank, what moves on */
-function flowModel(X,XB){
-  const C=X.cur,sc=SC.moves.length>0,T=X.T,TB=XB.T,nodes=[],z=(a,b)=>!(a>0)&&!(b>0);
-  const sf=Math.max(0,-X.excess),sfB=Math.max(0,-XB.excess),on=Math.max(0,T.income-sf),onB=Math.max(0,TB.income-sfB);
-  nodes.push({id:"m:cash",kind:"cash",band:"cash",col:"l1",vb:TB.income,vv:T.income,zero:z(T.income,TB.income),name:"Into the bank",val:compact(T.income)+" "+C+" a year",sub:T.income>0?`${compact(T.income/12)} a month`:""});
-  nodes.push({id:"m:fat",kind:"fat",band:"fat",col:"l2",vb:onB,vv:on,zero:z(on,onB),name:"Moves on",val:compact(on)+" "+C+" a year",sub:sf>0&&T.income>0?`after a ${compact(Math.min(sf,T.income))} refill`:"pillow is full"});
-  const ids=[...new Set([...XB.by.inv.map(r=>r.id),...X.by.inv.map(r=>r.id)])];
-  ids.forEach(id=>{const rb=XB.by.inv.find(r=>r.id===id),rv=X.by.inv.find(r=>r.id===id),r=rv||rb,ib=rb?XB.incOf(rb):0,iv=rv?X.incOf(rv):0,v=rv?X.V(rv):0;
-    nodes.push({id:"m:"+id,rid:id,kind:"inv",band:"inv",col:"l3",vb:ib,vv:iv,zero:z(ib,iv),name:r.name||r.type||"Investment",val:(iv>0||ib>0)?compact(iv||ib)+" "+C+" a year":"No income",
-      sub:!rv?"sold":iv>0&&v>0?`${(iv/v*100).toFixed(1)}% of ${compact(v)}`:""})});
-  if(!ids.length)nodes.push({id:"m:invph",kind:"invph",band:"inv",col:"l3",vb:0,vv:0,ph:true,name:"Add a bet",val:"",sub:""});
-  nodes.forEach(n=>{n.labW=labW(n);n.aria=n.name+(n.val?", "+n.val:"")});
-  const was=(b,v)=>sc&&Math.abs(b-v)>0.5?compact(b):"";
-  const months=X.target>0&&T.income>0?X.target/(T.income/12):null;
-  const cc=months?[{text:`Fills the comfort amount in ${months.toFixed(1)} months`,short:`${months.toFixed(1)} months`}]:[];
-  const ic=T.income>0&&T.inv>0?[{text:`${pct(T.income/T.inv*100,1)} of ${compact(T.inv)} invested`,short:pct(T.income/T.inv*100,1)}]:[{text:"Add the income each bet pays",short:"Add income",act:"editInv"}];
-  return {nodes,bands:[
-    {key:"cash",name:"CASH PILLOW",col:"l1",total:T.income,unit:" a year",share:"lands here",was:was(TB.income,T.income),chips:cc,nodes:nodes.filter(n=>n.band==="cash"),minH:104},
-    {key:"fat",name:"FAT LAYER",col:"l2",total:on,unit:" a year",share:"moves on",was:was(onB,on),chips:[],nodes:nodes.filter(n=>n.band==="fat"),minH:104},
-    {key:"inv",name:"INVESTMENTS",col:"l3",total:T.income,unit:" a year",share:"paid out",was:was(TB.income,T.income),chips:ic,nodes:nodes.filter(n=>n.band==="inv").sort(ord),minH:124}]};
-}
 function fatModel(X,XB,H){
   const C=X.cur,sc=SC.moves.length>0,ps=X.planSum;
   const ids=[...new Set([...XB.L.map(l=>l.id),...X.L.map(l=>l.id)])];
@@ -845,7 +819,7 @@ function initDefs(){
 }
 function renderMap(X,XB,opt){
   const box=$("#map"),W=Math.max(300,Math.round(box.clientWidth||760)),H=W<560?500:W<820?540:580;
-  const model=UI.view==="fat"?fatModel(X,XB,H):UI.flow?flowModel(X,XB):macroModel(X,XB);
+  const model=UI.view==="fat"?fatModel(X,XB,H):macroModel(X,XB);
   const L=layout(model.bands,W,H),Ht=Math.max(H,Math.ceil(L.height));
   const svg=d3.select("#msvg").attr("viewBox",`0 0 ${W} ${Ht}`);
   const dur=REDUCED||opt.instant?0:(opt.fast?150:DUR);
@@ -910,7 +884,7 @@ function drawNodes(svg,model,k,X,dur,opt){
   all.select(".ring").transition("r").duration(dur).ease(d3.easeCubicInOut).attr("r",d=>d.rr);
   all.select(".halo").attr("r",d=>d.R+6);
   all.select(".cv").text("");
-  all.select(".moon").style("fill","url(#g-ac)").each(function(d){const m=d3.select(this),show=!UI.flow&&UI.view!=="fat"&&d.kind==="inv"&&d.inc>0&&d.vv>0;
+  all.select(".moon").style("fill","url(#g-ac)").each(function(d){const m=d3.select(this),show=UI.view!=="fat"&&d.kind==="inv"&&d.inc>0&&d.vv>0;
     d.rm=show?Math.max(5,k*Math.sqrt(d.inc)):0;const dist=d.rv+d.rm*0.25;d.mx=dist*0.7071;d.my=-dist*0.7071;
     (dur?m.transition("r").duration(dur).ease(d3.easeCubicInOut):m).attr("cx",d.mx).attr("cy",d.my).attr("r",d.rm)});
   all.select(".inc").each(function(d){const b=d3.select(this),show=d.rm>0&&d.yl>0;b.style("display",show?null:"none");if(!show)return;
@@ -954,7 +928,7 @@ function closeFat(){if(UI.view!=="fat")return;closePop();UI.view="macro";UI.sel=
 
 /* ---------- map: dragging = simulating ---------- */
 let DRAG=null;
-function canDrag(d){if(d.ph||d.zero)return false;if(UI.view==="fat")return d.kind==="line"&&d.vv>0;if(UI.flow)return false;return (d.kind==="cash"||d.kind==="fat"||d.kind==="inv")&&d.vv>0}
+function canDrag(d){if(d.ph||d.zero)return false;if(UI.view==="fat")return d.kind==="line"&&d.vv>0;return (d.kind==="cash"||d.kind==="fat"||d.kind==="inv")&&d.vv>0}
 const DROPS={cash:["fat"],fat:["cash","inv"],inv:["fat","cash"]};
 const HINT={"cash>fat":"Drop to move cash into the fat layer","fat>cash":"Drop to refill the cash pillow","fat>inv":"Drop to fund a new bet","inv>fat":"Drop to sell into the fat layer","inv>cash":"Drop to sell into the bank"};
 function dropTarget(d,x,y){
@@ -1107,22 +1081,14 @@ function renderScenario(X,XB){
 function renderInspector(X,XB){
   let h;
   if(UI.view==="fat")h=UI.sel?inspLine(X,XB,UI.sel.slice(2)):inspFat(X);
-  else if(!UI.sel)h=inspOverview(X);
+  else if(!UI.sel)h="";
   else if(UI.sel==="m:cash")h=inspCash(X);
   else if(UI.sel==="m:pdebt")h=inspDebt(X);
   else h=inspInv(X,XB,UI.sel.slice(2));
   $("#insp").innerHTML=h;
+  /* nothing picked: no panel, the map takes the whole width */
+  $("#insp").hidden=!h;$("#stage").classList.toggle("solo",!h);
 }
-function inspOverview(X){const C=X.cur,T=X.T;
-  return `<div class="ih"><div class="eyebrow">Overview</div><h3>${money(T.net,C)}</h3><p class="mute sm">Net worth: ${money(T.assets,C)} of assets, ${money(T.debt,C)} of debt.</p></div>
-  <div class="olist">
-    <button class="orow c1" type="button" data-act="sel" data-id="m:cash"><i></i><span>Cash pillow</span><b>${compact(T.cash)}</b><em>${shareOf(T.cash,T.assets)}</em></button>
-    <button class="orow c2" type="button" data-act="open"><i></i><span>Fat layer</span><b>${compact(T.fat)}</b><em>${shareOf(T.fat,T.assets)}</em></button>
-    <button class="orow c3" type="button" data-act="selInv"><i></i><span>Investments</span><b>${compact(T.inv)}</b><em>${shareOf(T.inv,T.assets)}</em></button>
-    ${T.debt>0?`<div class="orow c4"><i></i><span>Debt</span><b>${compact(T.debt)}</b><em>${shareOf(T.debt,T.assets)}</em></div>`:""}
-    ${T.income>0?`<div class="orow"><i style="background:var(--accent)"></i><span>Income from bets</span><b>${compact(T.income)}</b><em>a year</em></div>`:""}
-  </div>
-  <div class="tips"><p><b>Tap</b> a bubble to see it.</p><p><b>Drag</b> a bubble onto another layer to simulate a sale or a move.</p><p><b>Tap the fat layer</b> to open its lines.</p></div>`}
 function inspCash(X){const C=X.cur,T=X.T,nm=nextMove(X.st);
   const acc=X.by.cash.map(r=>`<div><span>${esc(r.name||"Account")} <i class="mute">${esc(cname(r.country||"OT"))}</i></span><b>${money(X.V(r),C)}</b></div>`).join("")||`<p class="mute">No account yet.</p>`;
   return `<div class="ih"><div class="eyebrow c1">Cash pillow · held by you</div><h3>${money(T.cash,C)}</h3><p class="mute sm">${shareOf(T.cash,T.assets)} of assets</p></div>
@@ -1134,7 +1100,7 @@ function inspCash(X){const C=X.cur,T=X.T,nm=nextMove(X.st);
   <div class="acts">${T.cash>0?`<button class="btn pri" type="button" data-act="popCashToFat">Move cash into the fat layer</button>`:""}${X.excess<-0.5&&T.fat>0?`<button class="btn" type="button" data-act="popFatToCash">Refill from the fat layer</button>`:""}<button class="btn ghost" type="button" data-act="edit" data-layer="cash">Edit accounts and comfort</button></div>`}
 function inspInv(X,XB,id){
   const C=X.cur,rv=X.by.inv.find(r=>r.id===id),rb=XB.by.inv.find(r=>r.id===id),r=rv||rb;
-  if(!r)return inspOverview(X);
+  if(!r)return "";
   if(!rv){const mi=SC.moves.findIndex(m=>m.type==="sellInv"&&m.id===id);
     return `<div class="ih"><div class="eyebrow c3">Investment · sold in this simulation</div><h3>${esc(r.name||r.type)}</h3><p class="mute sm">Worth ${money(XB.V(rb),C)} before the sale.</p></div><div class="acts">${mi>=0?`<button class="btn" type="button" data-act="rmMove" data-i="${mi}">Cancel this sale</button>`:""}</div>`}
   const v=X.V(rv),dv=X.debtOn(id),c=CM[rv.country],rev=SC.moves.find(m=>m.type==="revalue"&&m.id===id),pv=rev?rev.pct:0,inc=X.incOf(rv),r0=S.rows.find(x=>x.id===id);
@@ -1331,8 +1297,8 @@ function renderCrumbs(){
     $("#mhint").innerHTML=`<span class="mleg2">${leg}</span><span>Drag a line onto another to move money. Dashed ring: the plan.${sim}</span>`;
   }else{
     $("#crumbs").innerHTML=`<span class="here">All layers</span>`;
-    $("#mctl").innerHTML=seg("flow",UI.flow?"flow":"assets",[["assets","Assets"],["flow","Cash flow"]]);
-    $("#mhint").textContent=UI.flow?`Each bubble is money a year. Income lands in the bank; above comfort it moves on to the fat layer.${sim}`:`Tap a bubble. Drag it onto another layer to simulate. Blue moons: the income each bet pays a year.${sim}`;
+    $("#mctl").innerHTML="";
+    $("#mhint").textContent=`Tap a bubble. Drag it onto another layer to simulate. Blue moons: the income each bet pays a year.${sim}`;
   }
 }
 /* ---------- edit mode: your real numbers ---------- */
@@ -1452,7 +1418,6 @@ document.addEventListener("click",e=>{
     case "simRebalance":addMove({type:"rebalance"},null);break;
     case "toRebal":{const t=$("#rebal");if(t)t.scrollIntoView({behavior:REDUCED?"auto":"smooth",block:"start"});break}
     case "editInv":goEdit("inv");break;
-    case "flow":UI.flow=b.dataset.v==="flow";closePop();renderAll();break;
     case "lens":UI.lens=b.dataset.v;renderAll();break;
     case "rbsrc":UI.rbSrc=b.dataset.v;renderReadings(XV,XBASE);if(UI.rbSrc==="other"){const i=$("#rbAmt");if(i)i.focus()}break;
     case "rbsim":{const src=rbSources(X),N=UI.rbSrc==="other"?Math.max(0,+UI.rbAmt||0):(src.find(x=>x.k===UI.rbSrc)||{}).v||0,P=rbPlan(X,N),o=b.dataset.o;if(!P)break;
