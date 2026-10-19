@@ -24,7 +24,7 @@
 <link rel="canonical" href="https://www.jeremylasne.com/wellness/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Tiny5&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=DotGothic16&display=swap">
 <style>
 /* ── tokens: the site's ink, blue and ice, plus one colour per sport ── */
 :root {
@@ -41,8 +41,8 @@
   --run: #fbbf24;
   --swim: #38bdf8;
   --lift: #f472b6;
-  /* one pixel face, one weight: every digit stays distinct, 5 never reads as S */
-  --px: "Tiny5", ui-monospace, monospace;
+  /* one pixel face on a 16-pixel grid: fine steps, and every digit stays distinct */
+  --px: "DotGothic16", ui-monospace, monospace;
   --ease: cubic-bezier(.22, 1, .36, 1);
 }
 * { box-sizing: border-box; }
@@ -76,8 +76,8 @@ button, input { font: inherit; color: inherit; }
 .phase { display: inline-flex; align-items: center; gap: 8px; margin: 0; font: 500 13px/1 var(--px); letter-spacing: .08em; text-transform: uppercase; color: var(--blue); }
 .phase::before { content: ""; width: 8px; height: 8px; background: var(--good); box-shadow: 0 0 0 3px rgba(110, 231, 183, .2); animation: blink 2.4s steps(2, jump-none) infinite; }
 @keyframes blink { 50% { opacity: .35; } }
-h1 { margin: 10px 0 0; font: 700 clamp(48px, 9vw, 92px)/.9 var(--px); letter-spacing: .02em; text-shadow: 0 4px 0 rgba(5, 11, 22, .55); }
-.lede { margin: 12px 0 0; max-width: 34em; color: var(--ice-70); font-size: 16px; }
+h1 { margin: 10px 0 0; font: 400 clamp(52px, 9.6vw, 100px)/.9 var(--px); letter-spacing: -.06em; text-shadow: 0 4px 0 rgba(5, 11, 22, .55); }
+.lede { margin: 18px 0 0; max-width: 34em; color: var(--ice-70); font-size: 16px; }
 .counts { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 16px 0 0; padding: 0; list-style: none; font: 500 14px/1 var(--px); color: var(--ice-45); }
 .counts b { font-weight: 700; color: var(--ice); font-size: 18px; margin-right: 4px; }
 
@@ -85,7 +85,7 @@ h1 { margin: 10px 0 0; font: 700 clamp(48px, 9vw, 92px)/.9 var(--px); letter-spa
 main { max-width: 1000px; margin: 0 auto; padding: 8px 20px 64px; }
 .sec { margin-top: 64px; }
 .kick { margin: 0; font: 500 12px/16px var(--px); letter-spacing: .1em; text-transform: uppercase; color: var(--blue); }
-h2 { margin: 6px 0 0; font: 600 clamp(28px, 4.4vw, 40px)/1.05 var(--px); letter-spacing: .01em; }
+h2 { margin: 6px 0 0; font: 400 clamp(28px, 4.4vw, 40px)/1.05 var(--px); letter-spacing: -.03em; }
 h2 .soft { color: var(--ice-45); }
 .note { margin: 10px 0 0; max-width: 40em; color: var(--ice-45); font-size: 14px; }
 
@@ -98,7 +98,7 @@ h2 .soft { color: var(--ice-45); }
 .tile .vs { margin: 6px 0 0; font: 500 14px/1.2 var(--px); color: var(--ice-45); }
 .vs.good { color: var(--good); }
 .vs.bad { color: var(--bad); }
-.meter { display: grid; grid-template-columns: repeat(16, 1fr); gap: 2px; margin-top: 10px; height: 8px; }
+.meter { display: grid; grid-template-columns: repeat(32, 1fr); gap: 1px; margin-top: 10px; height: 6px; }
 .meter i { background: var(--ice-08); }
 .meter i.band { background: rgba(95, 168, 211, .3); }
 .meter i.me { background: var(--ice); box-shadow: 0 0 10px rgba(234, 244, 251, .5); }
@@ -368,9 +368,9 @@ const sky = (() => {
   const cv = $('sky'), ctx = cv.getContext('2d');
   let W = 0, H = 0, bg = null, stars = [], flakes = [], clouds = [], mood = 'calm', raf = 0, last = 0, seen = true;
   const MOODS = {
-    clear:  { sky: ['#030712', '#0a1a3a', '#173a6b', '#2b5d8f'], stars: 90, ridge: ['#3b5a86', '#22395c', '#0b1528'] },
-    calm:   { sky: ['#050b16', '#0d1d38', '#1d3557', '#35577a'], stars: 60, ridge: ['#3a557c', '#213656', '#0b1426'] },
-    cloudy: { sky: ['#0b0f1a', '#1c2233', '#2c3347', '#454b5f'], stars: 18, ridge: ['#4a5266', '#2a3142', '#0d1220'] },
+    clear:  { sky: ['#030712', '#0a1a3a', '#173a6b', '#2b5d8f'], stars: 220, ridge: ['#3b5a86', '#22395c', '#0b1528'] },
+    calm:   { sky: ['#050b16', '#0d1d38', '#1d3557', '#35577a'], stars: 150, ridge: ['#3a557c', '#213656', '#0b1426'] },
+    cloudy: { sky: ['#0b0f1a', '#1c2233', '#2c3347', '#454b5f'], stars: 40, ridge: ['#4a5266', '#2a3142', '#0d1220'] },
   };
   const BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]];
   const rng = seed => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
@@ -405,7 +405,7 @@ const sky = (() => {
           /* snow on the high parts of the two far ridges, thicker near the peak */
           if (l < 2) {
             const reach = (H * (l ? .1 : .14)) - (top - peak[l]);
-            if (reach > 0 && y - top < 1 + reach * .35 && (y - top < 2 || BAYER[y % 4][x % 4] < 10)) px = snow;
+            if (reach > 0 && y - top < 2 + reach * .35 && (y - top < 3 || BAYER[y % 4][x % 4] < 10)) px = snow;
           }
         }
       }
@@ -413,12 +413,12 @@ const sky = (() => {
       bg.data[o] = px[0]; bg.data[o + 1] = px[1]; bg.data[o + 2] = px[2]; bg.data[o + 3] = 255;
     }
     stars = Array.from({ length: m.stars }, () => ({ x: Math.floor(r() * W), y: Math.floor(r() * H * .5), p: r() * 6.28, s: .5 + r() * 2 }))
-      .filter(s => s.y < r1[s.x] - 3);
-    flakes = Array.from({ length: Math.round(W * H / 260) }, () => ({ x: r() * W, y: r() * H, v: 3 + r() * 6, p: r() * 6.28 }));
-    clouds = mood === 'cloudy' ? Array.from({ length: 4 }, () => ({ x: r() * W, y: 6 + r() * H * .3, w: 14 + Math.floor(r() * 16), v: .6 + r() })) : [];
+      .filter(s => s.y < r1[s.x] - 4);
+    flakes = Array.from({ length: Math.round(W * H / 700) }, () => ({ x: r() * W, y: r() * H, v: 6 + r() * 12, p: r() * 6.28 }));
+    clouds = mood === 'cloudy' ? Array.from({ length: 4 }, () => ({ x: r() * W, y: 12 + r() * H * .3, w: 28 + Math.floor(r() * 32), v: 1.2 + r() * 2 })) : [];
   }
   function size() {
-    const rect = cv.getBoundingClientRect(), s = rect.width < 640 ? 3 : 4;
+    const rect = cv.getBoundingClientRect(), s = 2;
     W = Math.max(1, Math.ceil(rect.width / s)); H = Math.max(1, Math.ceil(rect.height / s));
     cv.width = W; cv.height = H;
     build(); frame(performance.now());
@@ -431,15 +431,15 @@ const sky = (() => {
       ctx.fillStyle = `rgba(234,244,251,${a.toFixed(2)})`; ctx.fillRect(s.x, s.y, 1, 1);
     }
     /* the moon */
-    const mx = Math.round(W * .8), my = Math.round(H * .2), R = Math.max(4, Math.round(H / 18));
+    const mx = Math.round(W * .8), my = Math.round(H * .2), R = Math.max(8, Math.round(H / 18));
     ctx.fillStyle = mood === 'cloudy' ? '#9aa3b5' : '#f3efd9';
     for (let y = -R; y <= R; y++) { const w = Math.round(Math.sqrt(R * R - y * y)); ctx.fillRect(mx - w, my + y, w * 2 + 1, 1); }
-    ctx.fillStyle = 'rgba(5,11,22,.12)'; ctx.fillRect(mx - 2, my - 1, 2, 2); ctx.fillRect(mx + 2, my + 2, 1, 1);
+    ctx.fillStyle = 'rgba(5,11,22,.12)'; ctx.fillRect(mx - 4, my - 2, 4, 3); ctx.fillRect(mx + 3, my + 3, 2, 2); ctx.fillRect(mx - 1, my + 5, 2, 2);
     for (const c of clouds) {
       c.x = (c.x + c.v * dt * 2) % (W + c.w * 2);
       const x = Math.round(c.x - c.w), y = Math.round(c.y);
       ctx.fillStyle = 'rgba(120,128,148,.55)';
-      ctx.fillRect(x, y + 2, c.w, 3); ctx.fillRect(x + 3, y, c.w - 8, 3); ctx.fillRect(x + 6, y - 2, c.w - 14, 3);
+      ctx.fillRect(x, y + 4, c.w, 6); ctx.fillRect(x + 6, y, c.w - 16, 6); ctx.fillRect(x + 12, y - 4, c.w - 28, 6);
     }
     ctx.fillStyle = 'rgba(234,244,251,.85)';
     for (const f of flakes) {
@@ -499,9 +499,9 @@ function drawLast() {
     }
     let meter = '';
     if (nm) {
-      const span = (nm.max - nm.min) || 1, seg = x => Math.max(0, Math.min(15, Math.floor((x - nm.min) / span * 16)));
+      const span = (nm.max - nm.min) || 1, seg = x => Math.max(0, Math.min(31, Math.floor((x - nm.min) / span * 32)));
       const a = seg(nm.q1), b = seg(nm.q3), me = v === undefined ? -1 : seg(v);
-      meter = `<div class="meter" aria-hidden="true">${Array.from({ length: 16 }, (_, i) => `<i class="${i === me ? 'me' : i >= a && i <= b ? 'band' : ''}"></i>`).join('')}</div>`;
+      meter = `<div class="meter" aria-hidden="true">${Array.from({ length: 32 }, (_, i) => `<i class="${i === me ? 'me' : i >= a && i <= b ? 'band' : ''}"></i>`).join('')}</div>`;
     }
     return `<div class="tile"><p class="k">${f.name}</p><p class="big">${v === undefined ? '–' : Math.round(v)}<small>${f.unit === 'ms' || f.unit === 'bpm' ? f.unit : '/100'}</small></p><p class="vs ${cls}">${vs}</p>${meter}</div>`;
   }).join('');
@@ -527,7 +527,7 @@ $('metricChips').addEventListener('click', e => {
 let nightGeo = null;
 function drawNights(animate) {
   const cv = $('nightsC'), keys = allKeys(), n = keys.length;
-  const ROWS = 18, PITCH = 8, BH = 6, MARK = 14, H = ROWS * PITCH + MARK;
+  const ROWS = 34, PITCH = 5, BH = 4, MARK = 12, H = ROWS * PITCH + MARK;
   const { ctx, w } = prep(cv, H);
   const nm = normal(metric);
   const vals = keys.map(k => val(k, metric));
@@ -535,7 +535,7 @@ function drawNights(animate) {
   const hi = got.length ? Math.max(...got) : 1, loRaw = got.length ? Math.min(...got) : 0;
   const lo = Math.max(0, loRaw - (hi - loRaw || hi * .2) * .35);
   const rowsOf = v => Math.max(1, Math.round((v - lo) / ((hi - lo) || 1) * ROWS));
-  const colW = w / n, gap = colW > 8 ? 2 : 1;
+  const colW = w / n, gap = colW > 12 ? 3 : colW > 6 ? 2 : 1;
   const x0 = i => Math.floor(i * colW), cw = i => Math.max(1, Math.floor((i + 1) * colW) - Math.floor(i * colW) - gap);
   nightGeo = { colW, n, keys };
   const draw = p => {
@@ -546,7 +546,7 @@ function drawNights(animate) {
       ctx.fillRect(0, (ROWS - b) * PITCH, w, (b - a + 1) * PITCH);
       const my = (ROWS - rowsOf(nm.med)) * PITCH + BH / 2 - 1;
       ctx.fillStyle = 'rgba(234,244,251,.35)';
-      for (let x = 0; x < w; x += 8) ctx.fillRect(x, my, 3, 2);
+      for (let x = 0; x < w; x += 6) ctx.fillRect(x, my, 2, 1);
     }
     keys.forEach((k, i) => {
       const v = vals[i];
@@ -568,7 +568,7 @@ function drawNights(animate) {
       const prev = sessionsOf(shift(k, -1));
       prev.slice(0, 2).forEach((s, j) => {
         ctx.fillStyle = COLOR[s.s];
-        const sz = Math.min(6, cw(i));
+        const sz = Math.min(5, cw(i));
         ctx.fillRect(x0(i) + j * (sz + 1), ROWS * PITCH + 4, sz, sz);
       });
     });
@@ -602,9 +602,9 @@ let bedGeo = null;
 function drawBed(animate) {
   const cv = $('bedC');
   const keys = allKeys().filter(k => val(k, 'bed') !== undefined && val(k, 'wake') !== undefined).slice(-21);
-  const PITCH = 10, BH = 7, H = Math.max(1, keys.length) * PITCH;
+  const PITCH = 8, BH = 5, H = Math.max(1, keys.length) * PITCH;
   const { ctx, w } = prep(cv, H);
-  const FROM = 1260, TO = 2100, STEP = 15, cells = (TO - FROM) / STEP, cell = w / cells;
+  const FROM = 1260, TO = 2100, STEP = 5, cells = (TO - FROM) / STEP, cell = w / cells;
   const nm = normal('score');
   bedGeo = { keys, PITCH };
   const draw = p => {
