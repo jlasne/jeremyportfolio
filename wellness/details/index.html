@@ -56,6 +56,14 @@
     <div class="axis bed-axis"><span>21:00</span><span>00:00</span><span>03:00</span><span>06:00</span><span>09:00</span><span>12:00</span></div>
     <ul class="nights" id="nights"></ul>
   </section>
+
+  <section class="sec" id="sport" aria-labelledby="sportT">
+    <p class="kick">Every session</p>
+    <h2 id="sportT">Sport <span class="soft">log</span></h2>
+    <p class="note">Form compares a session with my best of its kind: 100 % is the best. Effort is the average heart rate against a maximum of <span id="hrMax"></span> bpm.</p>
+    <div class="cal" id="cal" aria-label="Sessions by day"></div>
+    <ul class="list" id="sessList"></ul>
+  </section>
 </main>
 
 <footer>
@@ -64,8 +72,8 @@
 </footer>
 
 <script type="module">
-import { SLEEP } from '/wellness/spec.js';
-import { today, COLOR, dayName, short, clock, hm, esc, label, fmtVal, unitOf, allKeys, monthKeys, val, sportBefore, load, spread, normal, verdict, tone, INDICATORS, nightScores } from '/wellness/data.js';
+import { SPEC, SLEEP, SPORT, bests, form, effort } from '/wellness/spec.js';
+import { measure, formCls, cap, weekday, sessionsOf, allSessions, today, COLOR, dayName, short, clock, hm, esc, label, fmtVal, unitOf, allKeys, monthKeys, val, sportBefore, load, spread, normal, verdict, tone, INDICATORS, nightScores } from '/wellness/data.js';
 import { blockChart } from '/wellness/charts.js';
 
 const $ = id => document.getElementById(id);
@@ -140,7 +148,26 @@ function drawBed() {
   }).join('') || '<li><span class="v">No night with both times yet.</span></li>';
 }
 
-function drawAll(animate) { drawMeasures(); drawChips(); drawNights(animate); drawBed(); }
+/* ── every session, newest first, and a calendar of the days ───────── */
+function drawLog() {
+  $('hrMax').textContent = SPEC.hrMax;
+  const keys = allKeys(), lead = (weekday(keys[0]) + 6) % 7;
+  let html = ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(x => `<span class="dow">${x}</span>`).join('') + '<i class="off"></i>'.repeat(lead);
+  for (const k of keys) {
+    const ss = sessionsOf(k);
+    html += `<i class="${k === today ? 'today ' : ''}${ss.length > 1 ? 'two' : ''}"${ss.length ? ` style="background:${COLOR[ss[0].s]}"` : ''} title="${dayName(k)}${ss.length ? ' · ' + esc(ss.map(label).join(', ')) : ''}"></i>`;
+  }
+  $('cal').innerHTML = html;
+  const all = allSessions(), best = bests(all);
+  $('sessList').innerHTML = [...all].reverse().map(s => {
+    const f = form(s, best), e = effort(s), mz = measure(s);
+    const span = s.t != null ? `${clock(s.t)}${s.e != null ? '–' + clock(s.e) : ''}` : '';
+    const bits = [s.f ? cap(s.f) : '', span, mz, s.hr ? `${s.hr} bpm · ${Math.round(e * 100)} % effort` : ''].filter(Boolean);
+    return `<li style="--c:var(--${s.s})"><span class="when">${short(s.day)}</span><span class="what"><b>${esc(label(s))}</b>${bits.join(' · ')}${mz || s.s === 'other' ? '' : ' <em>· not measured</em>'}</span><span class="form ${formCls(f)}">${f === undefined ? '–' : Math.round(f * 100) + ' %'}<small>form</small></span></li>`;
+  }).join('') || '<li><span class="what">No session yet.</span></li>';
+}
+
+function drawAll(animate) { drawMeasures(); drawChips(); drawNights(animate); drawBed(); drawLog(); }
 let rs = 0;
 addEventListener('resize', () => { cancelAnimationFrame(rs); rs = requestAnimationFrame(() => drawNights(false)); });
 drawAll(false);

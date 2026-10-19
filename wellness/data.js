@@ -4,7 +4,7 @@
    day this device still holds because the server could not take it yet.
    Imported by /wellness and /wellness/details. */
 
-import { SPEC, SLEEP, SPORT, dateKey, shift, fromExp0 } from '/wellness/spec.js';
+import { SPEC, SLEEP, SPORT, dateKey, shift, fromExp0, bests, form, effort } from '/wellness/spec.js';
 
 export const API = 'https://fiery-eel-944.eu-west-1.convex.site/overlap';
 export const today = dateKey();
@@ -123,3 +123,29 @@ export function nightScores(keys = monthKeys()) {
   }
   return out;
 }
+
+/* ── sport ─────────────────────────────────────────────────────────── */
+/* What a session measured, in words: distance, time and pace, or the top set. */
+export function measure(s) {
+  if (s.s === 'lift') return s.kg && s.reps ? `${s.lift ? cap(s.lift) + ' ' : ''}${s.kg} kg × ${s.reps}` : '';
+  if (!s.m || !s.sec) return '';
+  const pace = s.s === 'run' ? `${mmss(s.sec / (s.m / 1000))}/km` : `${mmss(s.sec / (s.m / 100))}/100 m`;
+  return `${s.s === 'run' ? (s.m / 1000).toFixed(2).replace(/\.?0+$/, '') + ' km' : s.m + ' m'} · ${mmss(s.sec)} · ${pace}`;
+}
+export const formCls = f => f === undefined ? 'f-none' : f >= .97 ? 'f-good' : f >= .9 ? 'f-mid' : 'f-bad';
+const avg = v => (v.length ? v.reduce((a, b) => a + b, 0) / v.length : undefined);
+
+/* The sport score, the same idea as the night score: a session from 0 to
+   100 as the average of its effort (average heart rate against the
+   maximum) and its form (against my best of its kind), whichever of the
+   two it has. A day's score is the average of its sessions. */
+export const sessionScore = (s, best) => avg([effort(s), form(s, best)].filter(x => x !== undefined).map(x => Math.min(100, x * 100)));
+export function dayScores(keys = monthKeys()) {
+  const best = bests(allSessions()), out = {};
+  for (const k of keys) {
+    const v = avg(sessionsOf(k).map(s => sessionScore(s, best)).filter(x => x !== undefined));
+    if (v !== undefined) out[k] = v;
+  }
+  return out;
+}
+export { avg };

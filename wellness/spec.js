@@ -24,7 +24,7 @@ export const SPEC = {
   sleep: [
     { id: 'score', name: 'Sleep score', short: 'Score', unit: '/100', max: 100, better: 'high' },
     { id: 'hrv',   name: 'HRV',         short: 'HRV',   unit: 'ms',   max: 300, better: 'high' },
-    { id: 'rhr',   name: 'Night heart rate', short: 'Night HR', unit: 'bpm', max: 140, better: 'low' },
+    { id: 'rhr',   name: 'RHR', short: 'RHR', unit: 'bpm', max: 140, better: 'low' }, /* resting heart rate, read at night */
     { id: 'ready', name: 'Readiness',   short: 'Ready', unit: '/100', max: 100, better: 'high' },
     { id: 'min',   name: 'Time asleep', short: 'Asleep', unit: 'min', max: 960, better: 'high' },
     { id: 'bed',   name: 'Bedtime',     short: 'Bed',   unit: 'clock', max: 2159 },

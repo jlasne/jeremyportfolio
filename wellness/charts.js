@@ -25,7 +25,8 @@ export function play(draw, ms = 700) {
 const FILL = { good: COLOR.good, bad: COLOR.bad, mid: COLOR.blue };
 
 /* One column of thin blocks per day. `value(k)` is the day's number,
-   `tone(v)` its colour, `band` the normal range drawn behind, `lo` and `hi`
+   `tone(v)` its colour (or `fill(k)` a colour of its own, `empty(k)` the
+   colour of a day with no number), `band` the normal range drawn behind, `lo` and `hi`
    a fixed scale (otherwise the data's own), `marks(k)` the sessions shown
    as small squares under the column, `read(i)` what to say about a column
    (null: the default line). A tap pins a column, a second tap lets go. */
@@ -58,7 +59,7 @@ export function blockChart(cv, opts) {
         const v = vals[i];
         if (v !== undefined) {
           const rows = rowsOf(v), show = Math.round(rows * Math.max(0, Math.min(1, p * 1.7 - i / n * .7)));
-          ctx.fillStyle = FILL[o.tone(v)];
+          ctx.fillStyle = o.fill ? o.fill(k) : FILL[o.tone(v)];
           const dim = pick !== null && pick !== i;
           for (let r = 0; r < show; r++) {
             ctx.globalAlpha = (dim ? .35 : 1) * (r === rows - 1 ? 1 : .78);
@@ -66,8 +67,12 @@ export function blockChart(cv, opts) {
           }
           ctx.globalAlpha = 1;
         } else {
-          ctx.fillStyle = 'rgba(234,244,251,.06)';
+          /* nothing to measure: a faint base, in the day's colour when it has one */
+          const c = o.empty && o.empty(k);
+          ctx.fillStyle = c || 'rgba(234,244,251,.06)';
+          ctx.globalAlpha = c ? .45 : 1;
           ctx.fillRect(x0(i), (ROWS - 1) * PITCH, cw(i), BH);
+          ctx.globalAlpha = 1;
         }
         (marks ? marks(k) : []).slice(0, 2).forEach((s, j) => {
           const sz = Math.min(5, cw(i));
