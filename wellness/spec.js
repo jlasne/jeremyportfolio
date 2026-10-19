@@ -32,12 +32,17 @@ export const SPEC = {
   ],
 
   /* The sports, and what one session of each is measured by.
-     Run and swim: a distance and a time. Lift: the top set of one lift. */
+     Run and swim: a distance and a time. Lift: the top set of one lift.
+     Other: any other activity, named when logged (padel, yoga, a hike),
+     with its time and heart rate but no form. */
   sports: [
-    { id: 'run',  name: 'Run',  focus: 'endurance' },
-    { id: 'swim', name: 'Swim', focus: 'endurance' },
-    { id: 'lift', name: 'Lift', focus: 'strength' },
+    { id: 'run',   name: 'Run',   focus: 'endurance' },
+    { id: 'swim',  name: 'Swim',  focus: 'endurance' },
+    { id: 'lift',  name: 'Lift',  focus: 'strength' },
+    { id: 'other', name: 'Other', focus: 'endurance' },
   ],
+  /* the longest name an Other session may carry */
+  nameMax: 24,
   lifts: ['squat', 'bench', 'deadlift'],
   focus: ['speed', 'strength', 'endurance'],
   perDay: 4,
@@ -72,7 +77,7 @@ const word = (raw, list) => (typeof raw === 'string' && list.includes(raw) ? raw
    what was measured. `t` and `e` are when it started and ended (minutes
    after midnight), `hr` its average heart rate, `m` its distance in metres
    and `sec` its time in seconds (run, swim), `lift`, `kg` and `reps` the
-   top set (lift). */
+   top set (lift), `n` the name of the activity (other). */
 function cleanSession(s) {
   if (!s || typeof s !== 'object') return undefined;
   const sport = word(s.s, SPEC.sports.map(x => x.id));
@@ -84,7 +89,10 @@ function cleanSession(s) {
   if (out.t !== undefined) out.t = Math.round(out.t);
   if (out.e !== undefined) out.e = Math.round(out.e);
   put('hr', num(s.hr, 230));
-  if (sport === 'lift') {
+  if (sport === 'other') {
+    const n = typeof s.n === 'string' ? s.n.trim().slice(0, SPEC.nameMax) : '';
+    if (n) out.n = n;
+  } else if (sport === 'lift') {
     put('lift', word(s.lift, SPEC.lifts));
     put('kg', num(s.kg, 500));
     put('reps', num(s.reps, 30, 1));
@@ -127,7 +135,8 @@ export function fixBed(bed) {
 }
 
 /* An Exp 0 day in this page's shape: the night as it is, and its sessions
-   with Gym read as lifting. Intake and meals stay in Exp 0. */
+   with Gym read as lifting and any other sport as Other under its own
+   name. Intake and meals stay in Exp 0. */
 const OLD_SPORT = { Run: 'run', Swim: 'swim', Gym: 'lift' };
 export function fromExp0(d) {
   if (!d || typeof d !== 'object') return null;
@@ -136,9 +145,10 @@ export function fromExp0(d) {
   for (const [from, to] of Object.entries(map)) if (typeof d[from] === 'number') sleep[to] = d[from];
   if (sleep.bed !== undefined) sleep.bed = fixBed(sleep.bed);
   const sessions = (d.sessions || []).map(s => {
-    const id = OLD_SPORT[s.s];
-    if (!id) return null;
+    if (typeof s?.s !== 'string' || !s.s) return null;
+    const id = OLD_SPORT[s.s] || 'other';
     const out = { s: id, f: SPORT.get(id).focus };
+    if (id === 'other') out.n = s.s.slice(0, SPEC.nameMax);
     if (s.t != null) out.t = s.t;
     if (s.e != null) out.e = s.e;
     return out;

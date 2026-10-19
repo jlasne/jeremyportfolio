@@ -41,6 +41,7 @@
   --run: #fbbf24;
   --swim: #38bdf8;
   --lift: #f472b6;
+  --other: #a78bfa;
   /* one pixel face on a 16-pixel grid: fine steps, and every digit stays distinct */
   --px: "DotGothic16", ui-monospace, monospace;
   --ease: cubic-bezier(.22, 1, .36, 1);
@@ -126,7 +127,8 @@ h2 .soft { color: var(--ice-45); }
 
 /* ── sport ── */
 .sports { display: grid; gap: 28px; margin-top: 26px; }
-@media (min-width: 760px) { .sports { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 560px) { .sports { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 900px) { .sports { grid-template-columns: repeat(4, 1fr); } }
 .sport { border-top: 4px solid var(--c); padding-top: 14px; }
 .sport h3 { margin: 0; display: flex; align-items: baseline; justify-content: space-between; font: 600 22px/1 var(--px); }
 .sport h3 span { font-size: 14px; font-weight: 500; color: var(--ice-45); }
@@ -200,6 +202,7 @@ fieldset h3 span { font-size: 13px; font-weight: 500; color: var(--ice-45); marg
 .sess-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .sess-head b { font: 600 18px/1 var(--px); color: var(--c); }
 .sess-head button { border: 0; background: none; cursor: pointer; color: var(--ice-45); font-size: 13px; padding: 6px 0; }
+.sess-name { margin-top: 10px; }
 .sess-calc { margin: 10px 0 0; font: 500 14px/1.4 var(--px); color: var(--ice-70); min-height: 20px; }
 .adds { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
 .adds .chip { --c: var(--ice); }
@@ -250,7 +253,7 @@ footer a { color: var(--ice-70); text-decoration: none; }
       <li><i style="background:var(--good)"></i>Better than normal</li>
       <li><i style="background:var(--blue)"></i>Normal</li>
       <li><i style="background:var(--bad)"></i>Below normal</li>
-      <li><i style="background:var(--run)"></i><i style="background:var(--swim);margin-left:-4px"></i><i style="background:var(--lift);margin-left:-4px"></i>Sport the day before</li>
+      <li><i style="background:var(--run)"></i><i style="background:var(--swim);margin-left:-4px"></i><i style="background:var(--lift);margin-left:-4px"></i><i style="background:var(--other);margin-left:-4px"></i>Sport the day before</li>
     </ul>
   </section>
 
@@ -264,7 +267,7 @@ footer a { color: var(--ice-70); text-decoration: none; }
 
   <section class="sec" aria-labelledby="sportT">
     <p class="kick">Sport</p>
-    <h2 id="sportT">Run, swim, <span class="soft">lift</span></h2>
+    <h2 id="sportT">Run, swim, lift <span class="soft">and more</span></h2>
     <p class="note">Form compares a session with my best of its kind: 100 % is the best. Runs are scaled to a 5 km time and swims to a 400 m time, so any distance counts. A lift counts as its estimated one-rep max. Effort is the average heart rate against a maximum of <span id="hrMax"></span> bpm.</p>
     <div class="sports" id="sports"></div>
     <div class="cal" id="cal" aria-label="Sessions by day"></div>
@@ -318,7 +321,7 @@ const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const today = dateKey();
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const COLOR = { run: '#fbbf24', swim: '#38bdf8', lift: '#f472b6', good: '#6ee7b7', bad: '#fb7185', blue: '#5fa8d3' };
+const COLOR = { run: '#fbbf24', swim: '#38bdf8', lift: '#f472b6', other: '#a78bfa', good: '#6ee7b7', bad: '#fb7185', blue: '#5fa8d3' };
 const pad = n => String(n).padStart(2, '0');
 const ymd = k => k.split('-').map(Number);
 const dayName = k => { const [y, m, d] = ymd(k); return `${DOW[new Date(y, m - 1, d).getDay()]} ${d} ${MON[m - 1]}`; };
@@ -327,6 +330,9 @@ const clock = n => `${pad(Math.floor(n / 60) % 24)}:${pad(Math.round(n % 60))}`;
 const hm = n => `${Math.floor(n / 60)}h${pad(Math.round(n % 60))}`;
 const mmss = s => { s = Math.round(s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return h ? `${h}:${pad(m)}:${pad(x)}` : `${m}:${pad(x)}`; };
 const cap = s => s[0].toUpperCase() + s.slice(1);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+/* what a session is called: Other sessions go by the name I gave them */
+const label = s => s.s === 'other' && s.n ? s.n : SPORT.get(s.s).name;
 const copy = x => JSON.parse(JSON.stringify(x ?? {}));
 
 /* ── the data: Exp 0's October, then this page's own days on top ──── */
@@ -583,7 +589,7 @@ function readNight(i) {
   if (i === null || !nightGeo) { $('nightRead').textContent = nm ? `Normal ${fmtVal(metric, nm.med)} ${unitOf(metric)}` : 'No nights yet'; return; }
   const k = nightGeo.keys[i], v = val(k, metric);
   const prev = sessionsOf(shift(k, -1));
-  const after = prev.length ? ` · after a ${prev.map(s => SPORT.get(s.s).name.toLowerCase()).join(' and a ')}${prev[0].e != null ? ` ending ${clock(prev[prev.length - 1].e)}` : ''}` : ' · after a rest day';
+  const after = prev.length ? ` · after ${prev.map(s => esc(label(s).toLowerCase())).join(' and ')}${prev[0].e != null ? ` ending ${clock(prev[prev.length - 1].e)}` : ''}` : ' · after a rest day';
   $('nightRead').innerHTML = v === undefined
     ? `${dayName(k)} · not logged`
     : `${dayName(k)} · <b>${fmtVal(metric, v)} ${unitOf(metric)}</b> ${f.short.toLowerCase()}${nm ? ` (normal ${fmtVal(metric, nm.med)})` : ''}${after}`;
@@ -656,12 +662,16 @@ function drawSport() {
     if (sp.id === 'lift') {
       for (const l of SPEC.lifts) if (best[`lift:${l}`]) rows.push([`Best ${l}`, `${Math.round(best[`lift:${l}`])} kg <small style="color:var(--ice-45)">1RM</small>`]);
     } else if (best[sp.id]) rows.push([`Best ${sp.id === 'run' ? '5 km' : '400 m'}`, mmss(best[sp.id])]);
+    if (sp.id === 'other') {
+      const names = [...new Set(list.map(s => s.n).filter(Boolean))];
+      if (names.length) rows.push(['Activities', esc(names.slice(0, 4).join(', '))]);
+    }
     const last = [...list].reverse().find(s => form(s, best) !== undefined);
     if (last) rows.push(['Last form', `${Math.round(form(last, best) * 100)} %`]);
     if (efforts.length) rows.push(['Avg effort', `${Math.round(efforts.reduce((a, b) => a + b, 0) / efforts.length * 100)} %`]);
     const body = rows.length
       ? `<dl>${rows.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl>`
-      : `<p class="empty">${list.length ? 'Not measured yet. Add ' + (sp.id === 'lift' ? 'the top set' : 'distance and time') + ' when logging.' : 'No session yet.'}</p>`;
+      : `<p class="empty">${!list.length ? 'No session yet.' : sp.id === 'other' ? 'Name it and add the heart rate when logging.' : 'Not measured yet. Add ' + (sp.id === 'lift' ? 'the top set' : 'distance and time') + ' when logging.'}</p>`;
     return `<div class="sport" style="--c:var(--${sp.id})"><h3>${sp.name}<span>${list.length} session${list.length === 1 ? '' : 's'}</span></h3>${body}</div>`;
   }).join('');
 
@@ -672,7 +682,7 @@ function drawSport() {
   for (const k of keys) {
     const ss = sessionsOf(k);
     const style = ss.length ? ` style="background:${COLOR[ss[0].s]}"` : '';
-    html += `<i class="${k === today ? 'today ' : ''}${ss.length > 1 ? 'two' : ''}"${style} title="${dayName(k)}${ss.length ? ' · ' + ss.map(s => SPORT.get(s.s).name).join(', ') : ''}"></i>`;
+    html += `<i class="${k === today ? 'today ' : ''}${ss.length > 1 ? 'two' : ''}"${style} title="${dayName(k)}${ss.length ? ' · ' + esc(ss.map(label).join(', ')) : ''}"></i>`;
   }
   $('cal').innerHTML = html;
 
@@ -680,7 +690,7 @@ function drawSport() {
     const f = form(s, best), e = effort(s), mz = measure(s);
     const span = s.t != null ? `${clock(s.t)}${s.e != null ? '–' + clock(s.e) : ''}` : '';
     const bits = [s.f ? cap(s.f) : '', span, mz, s.hr ? `${s.hr} bpm · ${Math.round(e * 100)} % effort` : ''].filter(Boolean);
-    return `<li style="--c:var(--${s.s})"><span class="when">${short(s.day)}</span><span class="what"><b>${SPORT.get(s.s).name}</b>${bits.join(' · ')}${mz ? '' : ' <em>· not measured</em>'}</span><span class="form ${formCls(f)}">${f === undefined ? '–' : Math.round(f * 100) + ' %'}<small>form</small></span></li>`;
+    return `<li style="--c:var(--${s.s})"><span class="when">${short(s.day)}</span><span class="what"><b>${esc(label(s))}</b>${bits.join(' · ')}${mz || s.s === 'other' ? '' : ' <em>· not measured</em>'}</span><span class="form ${formCls(f)}">${f === undefined ? '–' : Math.round(f * 100) + ' %'}<small>form</small></span></li>`;
   }).join('') || '<li><span class="what">No session yet.</span></li>';
 }
 
@@ -707,7 +717,14 @@ function drawPairs() {
 /* ── the log ───────────────────────────────────────────────────────── */
 let sel = today, cur = null, pass = '', dirty = false, dirtyDay = null, saving = false, timer = 0;
 try { pass = localStorage.getItem('bio.pass') || ''; } catch {}
-const canLog = () => !!pass && state.server;
+const canLog = () => !!pass;
+/* Days saved on this device while the server cannot take them (before its
+   update, or offline). They show on the page at once and go up by themselves
+   the next time the server answers. */
+const HELD = 'wellness.held';
+const held = (() => { try { return JSON.parse(localStorage.getItem(HELD) || '{}') || {}; } catch { return {}; } })();
+const keepHeld = () => { try { localStorage.setItem(HELD, JSON.stringify(held)); } catch {} };
+Object.assign(state.days, held);
 const say = (msg, err) => { $('status').textContent = msg; $('status').classList.toggle('err', !!err); };
 
 /* 7:30, 7h30, 730 and 7.5 all read as 450 minutes */
@@ -745,10 +762,11 @@ $('nextDay').addEventListener('click', () => openDay(shift(sel, 1)));
 
 function drawLock() {
   $('form').disabled = !canLog();
-  $('unlockF').hidden = !!pass || !state.server;
-  $('lockMsg').innerHTML = !state.server
-    ? 'Reading Exp 0 for now. The server needs one deploy before this page can save.'
-    : pass ? `Unlocked on this device. Every change saves itself. <button class="btn ghost" id="lockB" type="button" style="height:32px;margin-left:8px">Lock</button>` : 'Everyone can read this page. Only I can log.';
+  $('unlockF').hidden = !!pass;
+  const lockB = `<button class="btn ghost" id="lockB" type="button" style="height:32px;margin-left:8px">Lock</button>`;
+  $('lockMsg').innerHTML = !pass ? 'Everyone can read this page. Only I can log.'
+    : state.server ? `Unlocked on this device. Every change saves itself. ${lockB}`
+    : `Unlocked. Each day saves on this device for now and goes to the server by itself once it is updated. ${lockB}`;
   $('lockB')?.addEventListener('click', () => { pass = ''; try { localStorage.removeItem('bio.pass'); } catch {} drawLock(); });
 }
 $('unlockF').addEventListener('submit', async e => {
@@ -802,9 +820,11 @@ function drawSessions() {
     const inp = (k, label, val, attrs = '') => `<label class="field"><span>${label}</span><input class="in" data-i="${i}" data-k="${k}" value="${val ?? ''}" ${attrs}></label>`;
     let grid = inp('t', 'Start', timeVal(s.t), 'type="time"') + inp('e', 'End', timeVal(s.e), 'type="time"') + inp('hr', 'Avg heart rate', s.hr, 'type="number" inputmode="numeric" placeholder="bpm"');
     if (s.s === 'lift') grid += inp('kg', 'Top set kg', s.kg, 'type="number" inputmode="decimal" step="0.5"') + inp('reps', 'Reps', s.reps, 'type="number" inputmode="numeric"');
+    else if (s.s === 'other') grid += '';
     else grid += inp('m', s.s === 'run' ? 'Distance km' : 'Distance m', s.m == null ? '' : s.s === 'run' ? s.m / 1000 : s.m, 'type="number" inputmode="decimal" step="0.01"') + inp('sec', 'Time (mm:ss)', s.sec == null ? '' : mmss(s.sec), 'type="text" inputmode="decimal" placeholder="25:30"');
+    const named = s.s === 'other' ? `<input class="in sess-name" data-i="${i}" data-k="n" value="${esc(s.n ?? '')}" maxlength="${SPEC.nameMax}" placeholder="Name it: padel, yoga, hike…" aria-label="Name of the activity">` : '';
     return `<div class="sess" style="--c:var(--${s.s})"><div class="sess-head"><b>${sp.name}</b><button type="button" data-del="${i}">Remove</button></div>
-      ${chips('f', SPEC.focus, s.f)}${s.s === 'lift' ? chips('lift', SPEC.lifts, s.lift) : ''}
+      ${named}${chips('f', SPEC.focus, s.f)}${s.s === 'lift' ? chips('lift', SPEC.lifts, s.lift) : ''}
       <div class="grid">${grid}</div><p class="sess-calc" id="calc${i}">${sessCalc(s)}</p></div>`;
   }).join('');
 }
@@ -823,6 +843,7 @@ $('sessBox').addEventListener('input', e => {
   const k = e.target.dataset.k; if (!k || e.target.classList.contains('chip')) return;
   const i = +e.target.dataset.i, s = cur.sessions[i], raw = e.target.value;
   let v;
+  if (k === 'n') { const n = raw.trim(); if (n) s.n = n; else delete s.n; touch(); return; }
   if (k === 't' || k === 'e') v = fromTime(raw);
   else if (k === 'sec') v = toSeconds(raw);
   else if (k === 'm') v = raw === '' ? undefined : Number(raw) * (s.s === 'run' ? 1000 : 1);
@@ -845,13 +866,27 @@ async function push() {
   if (!canLog() || saving || !dirty) return;
   saving = true; dirty = false;
   const day = dirtyDay, sent = copy(state.days[day]);
+  const at = clock(new Date().getHours() * 60 + new Date().getMinutes());
   let failed = false;
+  if (!state.server) {
+    held[day] = sent; keepHeld();
+    saving = false;
+    say(`Saved on this device ${at}`);
+    return;
+  }
   try {
     const out = await api('days.save', { passphrase: pass, today, day, entry: sent });
     /* the open day keeps what I am typing; any other day takes the server's copy */
     if (day !== sel) state.days[day] = out;
-    say(dirty ? 'Saving…' : `Saved ${clock(new Date().getHours() * 60 + new Date().getMinutes())}`);
+    if (held[day]) { delete held[day]; keepHeld(); }
+    say(dirty ? 'Saving…' : `Saved ${at}`);
   } catch (e) {
+    if (e.message === 'Unknown operation') {
+      /* the server is older than the page: keep the day here instead */
+      state.server = false; held[day] = sent; keepHeld();
+      say(`Saved on this device ${at}`); drawLock();
+      return;
+    }
     dirty = failed = true; dirtyDay = day;
     say(e.message, true);
     if (/Wrong passphrase/.test(e.message)) { pass = ''; try { localStorage.removeItem('bio.pass'); } catch {} drawLock(); }
@@ -874,13 +909,20 @@ async function load() {
   if (old.status === 'fulfilled' && old.value?.log) {
     for (const [k, d] of Object.entries(old.value.log)) if (k >= SPEC.start && k <= today) { const x = fromExp0(d); if (x) state.exp0[k] = x; }
   }
-  if (days.status === 'fulfilled') for (const d of days.value || []) state.days[d.day] = d;
-  else {
-    /* before the deploy the door does not know days.list yet: read Exp 0 and wait */
+  if (days.status === 'fulfilled') {
+    for (const d of days.value || []) state.days[d.day] = d;
+    /* what this device held while the server could not take it is newer: send it up */
+    for (const [k, d] of Object.entries(held)) {
+      state.days[k] = d;
+      if (pass) api('days.save', { passphrase: pass, today, day: k, entry: d })
+        .then(() => { delete held[k]; keepHeld(); }, () => {});
+    }
+  } else {
+    /* before the update the door does not know days.list yet: read Exp 0, keep days here */
     state.server = false;
     if (days.reason?.message !== 'Unknown operation') say(days.reason?.message || 'Something went wrong', true);
   }
-  drawAll(true); drawLock(); openDay(today);
+  drawAll(true); drawLock(); if (!dirty) openDay(sel);
 }
 drawAll(false); drawLock(); openDay(today);
 load();

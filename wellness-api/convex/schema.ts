@@ -209,6 +209,8 @@ export default defineSchema({
       lift: v.optional(v.string()),
       kg: v.optional(v.float64()),
       reps: v.optional(v.float64()),
+      /* the name of an Other session: padel, yoga, a hike */
+      n: v.optional(v.string()),
     }))),
     note: v.optional(v.string()),
     updatedAt: v.number(),
