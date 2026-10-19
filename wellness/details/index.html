@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Details | Wellness | Jeremy Lasne</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Every measure of my nights against my normal, and every night from bed to wake.">
+<meta name="theme-color" content="#050b16">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="canonical" href="https://www.jeremylasne.com/wellness/details/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=DotGothic16&display=swap">
+<link rel="stylesheet" href="/wellness/wellness.css">
+</head>
+<body>
+
+<header class="page-head">
+  <span style="display:flex;align-items:center;gap:18px">
+    <a class="logbtn" href="/wellness/#log"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>Log</a>
+    <a class="back" href="/wellness/">← Wellness</a>
+  </span>
+  <a class="back" href="/">Jeremy Lasne</a>
+</header>
+
+<main>
+  <section class="sec reveal" style="margin-top:40px" aria-labelledby="measT">
+    <p class="kick">Details</p>
+    <h1 style="font-size:clamp(44px,8vw,80px);letter-spacing:-.01em">Each <span style="color:var(--ice-45)">measure</span></h1>
+    <p class="note">Last night, the average of the last 7 nights, my normal (the middle night of all), then the best and the worst of the last 30 days.</p>
+    <div class="measures-wrap"><table class="measures" id="measures"></table></div>
+  </section>
+
+  <section class="sec" aria-labelledby="nightsT">
+    <p class="kick">Every night</p>
+    <h2 id="nightsT">Night <span class="soft">by night</span></h2>
+    <div class="chips" id="metricChips" role="group" aria-label="Measure"></div>
+    <p class="readout" id="nightRead" aria-live="polite"></p>
+    <div class="chart"><canvas id="nightsC" aria-label="One column per night"></canvas></div>
+    <div class="axis" id="nightsAxis"></div>
+    <ul class="legend">
+      <li><i style="background:var(--good)"></i>Better than normal</li>
+      <li><i style="background:var(--blue)"></i>Normal</li>
+      <li><i style="background:var(--bad)"></i>Below normal</li>
+      <li><i style="background:var(--run)"></i><i style="background:var(--swim);margin-left:-4px"></i><i style="background:var(--lift);margin-left:-4px"></i><i style="background:var(--other);margin-left:-4px"></i>Sport the day before</li>
+    </ul>
+  </section>
+
+  <section class="sec" aria-labelledby="bedT">
+    <p class="kick">Last 30 nights</p>
+    <h2 id="bedT">Bed <span class="soft">to wake</span></h2>
+    <p class="readout" id="bedNormal"></p>
+    <div class="axis bed-axis"><span>21:00</span><span>00:00</span><span>03:00</span><span>06:00</span><span>09:00</span><span>12:00</span></div>
+    <ul class="nights" id="nights"></ul>
+  </section>
+</main>
+
+<footer>
+  <span>Phase 0 started on 1 October 2026 with the nights of <a href="/wellness/exp0">Exp 0</a>.</span>
+  <a href="/wellness/">Wellness</a>
+</footer>
+
+<script type="module">
+import { SLEEP } from '/wellness/spec.js';
+import { today, COLOR, dayName, short, clock, hm, esc, label, fmtVal, unitOf, allKeys, monthKeys, val, sportBefore, load, spread, normal, verdict, tone, INDICATORS, nightScores } from '/wellness/data.js';
+import { blockChart } from '/wellness/charts.js';
+
+const $ = id => document.getElementById(id);
+const mean = v => v.length ? v.reduce((a, b) => a + b, 0) / v.length : undefined;
+const last = () => allKeys().reverse().find(k => INDICATORS.some(id => val(k, id) !== undefined));
+
+/* ── each measure ──────────────────────────────────────────────────── */
+function drawMeasures() {
+  const ns = nightScores(), month = monthKeys(), k = last();
+  const week = allKeys().filter(x => x <= (k || today)).slice(-7);
+  const rows = [
+    { name: 'Night score', get: x => ns[x]?.score, better: 'high', fmt: v => `${Math.round(v)}<small>/100</small>`, nm: spread(Object.values(ns).map(n => n.score)) },
+    ...['score', 'hrv', 'rhr', 'ready', 'min', 'bed', 'wake'].map(id => ({
+      name: SLEEP.get(id).name, get: x => val(x, id), better: SLEEP.get(id).better, id,
+      fmt: v => `${fmtVal(id, v)}${unitOf(id) ? `<small>${unitOf(id)}</small>` : ''}`, nm: normal(id),
+    })),
+  ];
+  const head = '<thead><tr><th></th><th>Last night</th><th>7 nights</th><th>Normal</th><th class="wide">Best 30 d</th><th class="wide">Worst 30 d</th></tr></thead>';
+  $('measures').innerHTML = head + '<tbody>' + rows.map(r => {
+    const v = k ? r.get(k) : undefined;
+    const w = mean(week.map(r.get).filter(x => x !== undefined));
+    const m = month.map(r.get).filter(x => x !== undefined);
+    const best = r.better && m.length ? (r.better === 'high' ? Math.max(...m) : Math.min(...m)) : undefined;
+    const worst = r.better && m.length ? (r.better === 'high' ? Math.min(...m) : Math.max(...m)) : undefined;
+    const t = x => (x === undefined ? '–' : r.fmt(x));
+    const cls = v === undefined || !r.better ? '' : { good: 'f-good', bad: 'f-bad', mid: '' }[tone(v, r.nm, r.better)];
+    return `<tr><th scope="row">${r.name}</th><td class="${cls}">${t(v)}</td><td>${t(w)}</td><td>${t(r.nm?.med)}</td><td class="wide">${t(best)}</td><td class="wide">${t(worst)}</td></tr>`;
+  }).join('') + '</tbody>';
+}
+
+/* ── night by night, one measure at a time ─────────────────────────── */
+const METRICS = INDICATORS;
+let metric = 'hrv';
+function drawChips() {
+  $('metricChips').innerHTML = METRICS.map(id => `<button class="chip" type="button" data-m="${id}" aria-pressed="${id === metric}">${SLEEP.get(id).short}</button>`).join('');
+}
+$('metricChips').addEventListener('click', e => {
+  const b = e.target.closest('[data-m]'); if (!b) return;
+  metric = b.dataset.m; chart.reset(); drawChips(); drawNights(true);
+});
+const chart = blockChart($('nightsC'), () => {
+  const nm = normal(metric);
+  return { keys: allKeys(), value: k => val(k, metric), tone: v => verdict(metric, v, nm), band: nm, marks: sportBefore, read: i => readNight(i, nm) };
+});
+function readNight(i, nm) {
+  const f = SLEEP.get(metric);
+  if (i === null) { $('nightRead').textContent = nm ? `Normal ${fmtVal(metric, nm.med)} ${unitOf(metric)}` : 'No nights yet'; return; }
+  const k = allKeys()[i], v = val(k, metric), prev = sportBefore(k);
+  const after = prev.length ? `after ${esc(prev.map(label).join(' and ').toLowerCase())}${prev[prev.length - 1].e != null ? ` ending ${clock(prev[prev.length - 1].e)}` : ''}` : 'after a rest day';
+  $('nightRead').innerHTML = v === undefined ? `${dayName(k)} · not logged`
+    : `${dayName(k)} · <b>${fmtVal(metric, v)} ${unitOf(metric)}</b> ${f.short.toLowerCase()}${nm ? ` (normal ${fmtVal(metric, nm.med)})` : ''} · ${after}`;
+}
+function drawNights(animate) {
+  chart.draw(animate);
+  const keys = allKeys(), n = keys.length;
+  $('nightsAxis').innerHTML = [keys[0], keys[Math.floor((n - 1) / 2)], keys[n - 1]].map(k => `<span>${short(k)}</span>`).join('');
+}
+
+/* ── bed to wake, newest first ─────────────────────────────────────── */
+function drawBed() {
+  const FROM = 1260, TO = 2160, pos = m => Math.max(0, Math.min(100, (m - FROM) / (TO - FROM) * 100));
+  const ns = nightScores(), band = spread(Object.values(ns).map(n => n.score));
+  const keys = monthKeys().filter(k => val(k, 'bed') !== undefined && val(k, 'wake') !== undefined).reverse();
+  const nb = normal('bed'), nw = normal('wake'), nmin = normal('min');
+  $('bedNormal').innerHTML = nb && nw ? `Normal: bed <b>${clock(nb.med)}</b> → wake <b>${clock(nw.med)}</b>${nmin ? ` · <b>${hm(nmin.med)}</b> asleep` : ''} · colour = night score` : 'Not enough nights yet';
+  $('nights').innerHTML = keys.map(k => {
+    const bed = val(k, 'bed'), wake = val(k, 'wake') + 1440, min = val(k, 'min'), x = ns[k];
+    const c = COLOR[{ good: 'good', bad: 'bad', mid: 'blue' }[x ? tone(x.score, band) : 'mid']];
+    const ticks = [1440, 1800].map(m => `<span class="tick" style="left:${pos(m)}%"></span>`).join('');
+    return `<li><span class="d">${short(k)}</span><span class="track">${ticks}<i style="--c:${c};left:${pos(bed)}%;width:${pos(wake) - pos(bed)}%"></i></span>
+      <span class="v"><b>${clock(bed)}</b> → <b>${clock(wake)}</b>${min !== undefined ? ` · ${hm(min)} asleep` : ''}${x ? ` · night score <b>${Math.round(x.score)}</b>` : ''}</span></li>`;
+  }).join('') || '<li><span class="v">No night with both times yet.</span></li>';
+}
+
+function drawAll(animate) { drawMeasures(); drawChips(); drawNights(animate); drawBed(); }
+let rs = 0;
+addEventListener('resize', () => { cancelAnimationFrame(rs); rs = requestAnimationFrame(() => drawNights(false)); });
+drawAll(false);
+let pass = ''; try { pass = localStorage.getItem('bio.pass') || ''; } catch {}
+load(pass).then(() => drawAll(true));
+</script>
+</body>
+</html>

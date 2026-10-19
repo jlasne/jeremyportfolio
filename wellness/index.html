@@ -25,206 +25,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=DotGothic16&display=swap">
-<style>
-/* ── tokens: the site's ink, blue and ice, plus one colour per sport ── */
-:root {
-  --ink: #050b16;
-  --ink-2: #0b1526;
-  --blue: #5fa8d3;
-  --ice: #eaf4fb;
-  --ice-70: rgba(234, 244, 251, .72);
-  --ice-45: rgba(234, 244, 251, .46);
-  --ice-20: rgba(234, 244, 251, .2);
-  --ice-08: rgba(234, 244, 251, .08);
-  --good: #6ee7b7;
-  --bad: #fb7185;
-  --run: #fbbf24;
-  --swim: #38bdf8;
-  --lift: #f472b6;
-  --other: #a78bfa;
-  /* one pixel face on a 16-pixel grid: fine steps, and every digit stays distinct */
-  --px: "DotGothic16", ui-monospace, monospace;
-  --ease: cubic-bezier(.22, 1, .36, 1);
-}
-* { box-sizing: border-box; }
-html { background: var(--ink); color-scheme: dark; }
-body {
-  margin: 0; background: var(--ink); color: var(--ice);
-  font: 400 15px/1.5 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  -webkit-font-smoothing: antialiased; overflow-x: hidden;
-  font-synthesis: none;
-}
-::selection { background: var(--blue); color: var(--ink); }
-a { color: inherit; }
-button, input { font: inherit; color: inherit; }
-.px { font-family: var(--px); }
-[hidden] { display: none !important; }
-.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-
-@keyframes riseIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-.reveal { animation: riseIn .7s var(--ease) both; animation-delay: calc(var(--d, 0) * 1ms); }
-
-/* ── the sky: a pixel mountain at night, drawn small and scaled up crisp.
-   It follows last night: clear after a good sleep, clouds after a poor one ── */
-.hero { position: relative; height: clamp(420px, 58vh, 480px); }
-@media (min-width: 760px) { .hero { height: clamp(360px, 50vh, 480px); } }
-#sky { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
-.hero::after { content: ""; position: absolute; inset: auto 0 0; height: 40%; background: linear-gradient(transparent, var(--ink)); pointer-events: none; }
-.top { position: absolute; z-index: 2; top: max(16px, env(safe-area-inset-top)); left: 0; right: 0; display: flex; justify-content: space-between; padding: 0 20px; font-size: 13px; }
-.top a { color: var(--ice-70); text-decoration: none; transition: color .2s; }
-@media (hover: hover) { .top a:hover { color: var(--blue); } }
-.hero-text { position: absolute; z-index: 2; left: 0; right: 0; bottom: 18px; padding: 0 20px; max-width: 1000px; margin: 0 auto; }
-.phase { display: inline-flex; align-items: center; gap: 8px; margin: 0; font: 500 13px/1 var(--px); letter-spacing: .08em; text-transform: uppercase; color: var(--blue); }
-.phase::before { content: ""; width: 8px; height: 8px; background: var(--good); box-shadow: 0 0 0 3px rgba(110, 231, 183, .2); animation: blink 2.4s steps(2, jump-none) infinite; }
-@keyframes blink { 50% { opacity: .35; } }
-h1 { margin: 10px 0 0; font: 400 clamp(52px, 9.6vw, 100px)/.9 var(--px); letter-spacing: -.06em; text-shadow: 0 4px 0 rgba(5, 11, 22, .55); }
-.lede { margin: 18px 0 0; max-width: 34em; color: var(--ice-70); font-size: 16px; }
-.counts { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 16px 0 0; padding: 0; list-style: none; font: 500 14px/1 var(--px); color: var(--ice-45); }
-.counts b { font-weight: 700; color: var(--ice); font-size: 18px; margin-right: 4px; }
-
-/* ── page sections: no panels, straight on the ink ── */
-main { max-width: 1000px; margin: 0 auto; padding: 8px 20px 64px; }
-.sec { margin-top: 64px; }
-.kick { margin: 0; font: 500 12px/16px var(--px); letter-spacing: .1em; text-transform: uppercase; color: var(--blue); }
-h2 { margin: 6px 0 0; font: 400 clamp(28px, 4.4vw, 40px)/1.05 var(--px); letter-spacing: -.03em; }
-h2 .soft { color: var(--ice-45); }
-.note { margin: 10px 0 0; max-width: 40em; color: var(--ice-45); font-size: 14px; }
-
-/* ── last night: four big numbers, each against my normal ── */
-.tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px 20px; margin-top: 26px; }
-@media (min-width: 760px) { .tiles { grid-template-columns: repeat(4, 1fr); } }
-.tile .k { margin: 0; font-size: 13px; color: var(--ice-45); }
-.tile .big { margin: 4px 0 0; font: 700 52px/1 var(--px); font-variant-numeric: tabular-nums; }
-.tile .big small { margin-left: 4px; font-size: 16px; font-weight: 500; color: var(--ice-45); }
-.tile .vs { margin: 6px 0 0; font: 500 14px/1.2 var(--px); color: var(--ice-45); }
-.vs.good { color: var(--good); }
-.vs.bad { color: var(--bad); }
-.meter { display: grid; grid-template-columns: repeat(32, 1fr); gap: 1px; margin-top: 10px; height: 6px; }
-.meter i { background: var(--ice-08); }
-.meter i.band { background: rgba(95, 168, 211, .3); }
-.meter i.me { background: var(--ice); box-shadow: 0 0 10px rgba(234, 244, 251, .5); }
-.night-line { margin: 26px 0 0; font: 500 16px/1.4 var(--px); color: var(--ice-70); }
-.night-line b { color: var(--ice); font-weight: 600; }
-
-/* ── charts: blocks on a canvas, one column per night ── */
-.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
-.chip {
-  padding: 7px 12px; border: 0; border-radius: 0; cursor: pointer; background: var(--ice-08); color: var(--ice-70);
-  font: 500 14px/1 var(--px); transition: background .2s, color .2s;
-  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .25);
-}
-.chip[aria-pressed="true"] { background: var(--blue); color: var(--ink); }
-@media (hover: hover) { .chip:hover:not([aria-pressed="true"]) { background: var(--ice-20); color: var(--ice); } }
-.chip:focus-visible, .btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
-.readout { min-height: 24px; margin: 18px 0 0; font: 500 16px/1.4 var(--px); color: var(--ice-70); }
-.readout b { color: var(--ice); font-weight: 600; }
-.chart { position: relative; margin-top: 10px; }
-.chart canvas { display: block; width: 100%; touch-action: pan-y; cursor: crosshair; }
-.axis { display: flex; justify-content: space-between; margin-top: 8px; font: 400 12px/1 var(--px); color: var(--ice-45); }
-.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 12px 0 0; padding: 0; list-style: none; font-size: 13px; color: var(--ice-45); }
-.legend li { display: flex; align-items: center; gap: 7px; }
-.legend i { width: 10px; height: 10px; flex: none; }
-
-/* ── sport ── */
-.sports { display: grid; gap: 28px; margin-top: 26px; }
-@media (min-width: 560px) { .sports { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 900px) { .sports { grid-template-columns: repeat(4, 1fr); } }
-.sport { border-top: 4px solid var(--c); padding-top: 14px; }
-.sport h3 { margin: 0; display: flex; align-items: baseline; justify-content: space-between; font: 600 22px/1 var(--px); }
-.sport h3 span { font-size: 14px; font-weight: 500; color: var(--ice-45); }
-.sport dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 14px 0 0; font-size: 14px; }
-.sport dt { color: var(--ice-45); }
-.sport dd { margin: 0; text-align: right; font: 500 15px/1.35 var(--px); font-variant-numeric: tabular-nums; }
-.sport .empty { margin: 14px 0 0; font-size: 14px; color: var(--ice-45); }
-
-.cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; max-width: 280px; margin-top: 30px; }
-.cal .dow { font: 400 11px/1 var(--px); color: var(--ice-45); text-align: center; padding-bottom: 4px; }
-.cal i { aspect-ratio: 1; background: var(--ice-08); position: relative; }
-.cal i.off { background: none; }
-.cal i.today { outline: 2px solid var(--ice-45); outline-offset: -2px; }
-.cal i.two::after { content: ""; position: absolute; right: 2px; top: 2px; width: 4px; height: 4px; background: var(--ink); }
-
-.list { margin: 30px 0 0; padding: 0; list-style: none; }
-.list li { display: grid; grid-template-columns: 74px 1fr auto; gap: 4px 14px; align-items: baseline; padding: 12px 0; border-top: 1px solid var(--ice-08); }
-.list .when { font: 500 13px/1.3 var(--px); color: var(--ice-45); }
-.list .what { font-size: 14px; color: var(--ice-70); }
-.list .what b { font: 600 15px/1 var(--px); color: var(--c); margin-right: 8px; }
-.list .what em { font-style: normal; color: var(--ice-45); }
-.list .form { font: 700 18px/1 var(--px); text-align: right; }
-.list .form small { display: block; margin-top: 4px; font: 400 11px/1 Inter, sans-serif; color: var(--ice-45); }
-.f-good { color: var(--good); }
-.f-mid { color: var(--blue); }
-.f-bad { color: var(--bad); }
-.f-none { color: var(--ice-20); }
-
-/* ── sleep and sport side by side ── */
-.pairs { margin: 26px 0 0; padding: 0; list-style: none; }
-.pairs li { display: grid; grid-template-columns: 1fr auto auto; gap: 4px 22px; align-items: baseline; padding: 12px 0; border-top: 1px solid var(--ice-08); }
-.pairs .q { font-size: 14px; color: var(--ice-70); }
-.pairs .a { font: 600 18px/1 var(--px); font-variant-numeric: tabular-nums; text-align: right; }
-.pairs .a small { display: block; margin-top: 4px; font: 400 11px/1 Inter, sans-serif; color: var(--ice-45); }
-
-/* ── the log ── */
-.daynav { display: flex; align-items: center; gap: 12px; margin-top: 22px; }
-.daynav p { margin: 0; min-width: 9.5em; text-align: center; font: 600 20px/1 var(--px); }
-.step {
-  width: 40px; height: 40px; display: grid; place-items: center; border: 0; cursor: pointer;
-  background: var(--ice-08); color: var(--ice-70); box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .25); transition: background .2s, color .2s;
-}
-.step:disabled { opacity: .3; cursor: default; }
-.step svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: square; }
-@media (hover: hover) { .step:not(:disabled):hover { background: var(--ice-20); color: var(--ice); } }
-.lock { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-top: 20px; }
-.lock form { display: flex; gap: 8px; }
-.lock p { margin: 0; font-size: 14px; color: var(--ice-45); }
-.field { display: flex; flex-direction: column; gap: 6px; }
-.field span { font-size: 12px; color: var(--ice-45); }
-.in {
-  width: 100%; min-width: 0; height: 42px; padding: 0 12px; border: 0; border-radius: 0; background: var(--ink-2);
-  box-shadow: inset 0 0 0 2px var(--ice-08); font: 500 17px/1 var(--px); font-variant-numeric: tabular-nums; transition: box-shadow .2s;
-}
-.in:focus { outline: none; box-shadow: inset 0 0 0 2px var(--blue); }
-.in::placeholder { color: var(--ice-20); }
-.in::-webkit-calendar-picker-indicator { filter: invert(.8); }
-.btn {
-  height: 42px; padding: 0 16px; border: 0; cursor: pointer; background: var(--blue); color: var(--ink);
-  font: 600 15px/1 var(--px); box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .25); transition: filter .2s;
-}
-.btn.ghost { background: var(--ice-08); color: var(--ice-70); }
-@media (hover: hover) { .btn:hover { filter: brightness(1.12); } }
-fieldset { margin: 26px 0 0; padding: 0; border: 0; min-width: 0; }
-fieldset:disabled { opacity: .55; }
-fieldset h3 { margin: 0; font: 600 18px/1 var(--px); }
-fieldset h3 span { font-size: 13px; font-weight: 500; color: var(--ice-45); margin-left: 6px; }
-.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 14px; }
-@media (min-width: 560px) { .grid { grid-template-columns: repeat(4, 1fr); } }
-.sess { margin-top: 18px; padding: 14px 0 0; border-top: 4px solid var(--c); }
-.sess-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-.sess-head b { font: 600 18px/1 var(--px); color: var(--c); }
-.sess-head button { border: 0; background: none; cursor: pointer; color: var(--ice-45); font-size: 13px; padding: 6px 0; }
-.sess-name { margin-top: 10px; }
-.sess-calc { margin: 10px 0 0; font: 500 14px/1.4 var(--px); color: var(--ice-70); min-height: 20px; }
-.adds { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
-.adds .chip { --c: var(--ice); }
-.adds .chip::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 8px; background: var(--c); }
-.status { min-height: 20px; margin: 18px 0 0; font: 500 14px/1.3 var(--px); color: var(--ice-45); }
-.status.err { color: var(--bad); }
-
-footer { max-width: 1000px; margin: 0 auto; padding: 28px 20px max(36px, env(safe-area-inset-bottom)); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--ice-45); border-top: 1px solid var(--ice-08); }
-footer a { color: var(--ice-70); text-decoration: none; }
-@media (hover: hover) { footer a:hover { color: var(--blue); } }
-
-@media (prefers-reduced-motion: reduce) {
-  .reveal { animation: none; }
-  .phase::before { animation: none; }
-}
-</style>
+<link rel="stylesheet" href="/wellness/wellness.css">
 </head>
 <body>
 
 <header class="hero">
   <canvas id="sky" aria-hidden="true"></canvas>
-  <nav class="top"><a href="/">Jeremy Lasne</a><a href="#log">Log</a></nav>
+  <nav class="top"><button class="logbtn" id="logOpen" type="button" aria-haspopup="dialog"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>Log</button><a href="/">Jeremy Lasne</a></nav>
   <div class="hero-text">
     <p class="phase reveal">Phase 0 · Normal</p>
     <h1 class="reveal" style="--d:60">Wellness</h1>
@@ -237,17 +44,18 @@ footer a { color: var(--ice-70); text-decoration: none; }
   <section class="sec reveal" style="--d:200" aria-labelledby="lastT">
     <p class="kick" id="lastWhen">Last night</p>
     <h2 id="lastT">Last night</h2>
+    <div class="ns" id="ns"></div>
     <div class="tiles" id="tiles"></div>
     <p class="night-line" id="nightLine"></p>
     <p class="note">Normal is the middle half of my nights so far, the lit band on each meter. Green beats it, red falls short of it.</p>
   </section>
 
   <section class="sec" aria-labelledby="nightsT">
-    <p class="kick">Every night</p>
+    <p class="kick">Last 30 nights</p>
     <h2 id="nightsT">Night <span class="soft">by night</span></h2>
-    <div class="chips" id="metricChips" role="group" aria-label="Measure"></div>
+    <p class="note">One score per night, from 0 to 100: the average of sleep score, HRV, night heart rate, readiness and time asleep, each set against my last 30 days. 100 is the best of the month on every measure.</p>
     <p class="readout" id="nightRead" aria-live="polite"></p>
-    <div class="chart"><canvas id="nightsC" height="170" aria-label="One column per night"></canvas></div>
+    <div class="chart"><canvas id="nightsC" aria-label="Night score, one column per night"></canvas></div>
     <div class="axis" id="nightsAxis"></div>
     <ul class="legend">
       <li><i style="background:var(--good)"></i>Better than normal</li>
@@ -255,14 +63,7 @@ footer a { color: var(--ice-70); text-decoration: none; }
       <li><i style="background:var(--bad)"></i>Below normal</li>
       <li><i style="background:var(--run)"></i><i style="background:var(--swim);margin-left:-4px"></i><i style="background:var(--lift);margin-left:-4px"></i><i style="background:var(--other);margin-left:-4px"></i>Sport the day before</li>
     </ul>
-  </section>
-
-  <section class="sec" aria-labelledby="bedT">
-    <p class="kick">Every night</p>
-    <h2 id="bedT">Bed <span class="soft">to wake</span></h2>
-    <p class="readout" id="bedRead" aria-live="polite"></p>
-    <div class="chart"><canvas id="bedC" aria-label="Bedtime to wake-up, one row per night"></canvas></div>
-    <div class="axis"><span>21:00</span><span>00:00</span><span>03:00</span><span>06:00</span><span>09:00</span><span>11:00</span></div>
+    <a class="more" href="/wellness/details/">Each measure, and bed to wake <span aria-hidden="true">→</span></a>
   </section>
 
   <section class="sec" aria-labelledby="sportT">
@@ -275,15 +76,17 @@ footer a { color: var(--ice-70); text-decoration: none; }
   </section>
 
   <section class="sec" aria-labelledby="pairsT">
-    <p class="kick">Sleep and sport</p>
-    <h2 id="pairsT">What normal <span class="soft">shows so far</span></h2>
-    <p class="note">Each line compares two kinds of nights on my own data. With so few nights it is a hint to test later, not a proof. A line appears once each side has 3 nights.</p>
-    <ul class="pairs" id="pairs"></ul>
+    <p class="kick">Sleep and sport · last 30 nights</p>
+    <h2 id="pairsT">After sport, <span class="soft">or not</span></h2>
+    <p class="note">The average night after a day with a session, against the average night after a rest day. A hint to test later, not a proof.</p>
+    <div class="vs2" id="pairs"></div>
   </section>
+</main>
 
-  <section class="sec" id="log" aria-labelledby="logT">
-    <p class="kick">Log</p>
-    <h2 id="logT">One day, <span class="soft">30 seconds</span></h2>
+
+<dialog class="sheet" id="logD" aria-labelledby="logT">
+  <div class="sheet-in">
+    <div class="sheet-head"><h2 id="logT">Log <span class="soft">one day</span></h2><button class="x" id="logClose" type="button" aria-label="Close the log"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div>
     <div class="daynav">
       <button class="step" id="prevDay" type="button" aria-label="Day before"><svg viewBox="0 0 20 20"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg></button>
       <p id="dayT"></p>
@@ -304,8 +107,8 @@ footer a { color: var(--ice-70); text-decoration: none; }
       <div class="adds" id="adds"></div>
     </fieldset>
     <p class="status" id="status" role="status"></p>
-  </section>
-</main>
+  </div>
+</dialog>
 
 <footer>
   <span>Phase 0 started on 1 October 2026 with the nights of <a href="/wellness/exp0">Exp 0</a>.</span>
@@ -313,61 +116,11 @@ footer a { color: var(--ice-70); text-decoration: none; }
 </footer>
 
 <script type="module">
-import { SPEC, SLEEP, SPORT, dateKey, shift, daysBetween, fromExp0, bests, form, effort, REF, e1rm } from '/wellness/spec.js';
+import { SPEC, SLEEP, SPORT, shift, daysBetween, bests, form, effort, e1rm } from '/wellness/spec.js';
+import { today, COLOR, pad, dayName, short, weekday, clock, hm, mmss, cap, esc, copy, label, fmtVal, state, entry, allKeys, monthKeys, val, sessionsOf, allSessions, sportBefore, held, keepHeld, api, load as loadData, spread, normal, verdict, tone, INDICATORS, nightScores, unitOf } from '/wellness/data.js';
+import { still, blockChart } from '/wellness/charts.js';
 
-const API = 'https://fiery-eel-944.eu-west-1.convex.site/overlap';
 const $ = id => document.getElementById(id);
-const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const today = dateKey();
-const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const COLOR = { run: '#fbbf24', swim: '#38bdf8', lift: '#f472b6', other: '#a78bfa', good: '#6ee7b7', bad: '#fb7185', blue: '#5fa8d3' };
-const pad = n => String(n).padStart(2, '0');
-const ymd = k => k.split('-').map(Number);
-const dayName = k => { const [y, m, d] = ymd(k); return `${DOW[new Date(y, m - 1, d).getDay()]} ${d} ${MON[m - 1]}`; };
-const short = k => { const [, m, d] = ymd(k); return `${d} ${MON[m - 1]}`; };
-const clock = n => `${pad(Math.floor(n / 60) % 24)}:${pad(Math.round(n % 60))}`;
-const hm = n => `${Math.floor(n / 60)}h${pad(Math.round(n % 60))}`;
-const mmss = s => { s = Math.round(s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return h ? `${h}:${pad(m)}:${pad(x)}` : `${m}:${pad(x)}`; };
-const cap = s => s[0].toUpperCase() + s.slice(1);
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
-/* what a session is called: Other sessions go by the name I gave them */
-const label = s => s.s === 'other' && s.n ? s.n : SPORT.get(s.s).name;
-const copy = x => JSON.parse(JSON.stringify(x ?? {}));
-
-/* ── the data: Exp 0's October, then this page's own days on top ──── */
-const state = { exp0: {}, days: {}, server: true };
-const entry = k => state.days[k] || state.exp0[k] || null;
-const allKeys = () => { const out = []; for (let k = SPEC.start; k <= today; k = shift(k, 1)) out.push(k); return out; };
-const val = (k, id) => { const v = entry(k)?.sleep?.[id]; return typeof v === 'number' ? v : undefined; };
-const sessionsOf = k => entry(k)?.sessions || [];
-const allSessions = () => allKeys().flatMap(k => sessionsOf(k).map(s => ({ ...s, day: k })));
-
-function api(op, args) {
-  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 9000);
-  return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ op, args: args || {} }), signal: ctl.signal })
-    .then(r => r.json())
-    .then(j => { clearTimeout(t); if (j && j.ok) return j.value; throw new Error((j && j.error) || 'Something went wrong'); },
-          e => { clearTimeout(t); throw new Error(e.name === 'AbortError' ? 'The server timed out after 9 seconds' : 'The server is unreachable right now'); });
-}
-
-/* ── normal: the middle half of my nights ──────────────────────────── */
-function quant(sorted, q) { const i = (sorted.length - 1) * q, lo = Math.floor(i), hi = Math.ceil(i); return sorted[lo] + (sorted[hi] - sorted[lo]) * (i - lo); }
-function normal(id) {
-  const v = allKeys().map(k => val(k, id)).filter(x => x !== undefined).sort((a, b) => a - b);
-  if (v.length < 3) return null;
-  return { n: v.length, min: v[0], max: v[v.length - 1], q1: quant(v, .25), med: quant(v, .5), q3: quant(v, .75) };
-}
-/* good, bad or normal, by which way the measure is better */
-function verdict(id, v, nm = normal(id)) {
-  const f = SLEEP.get(id);
-  if (!nm || v === undefined || !f.better) return 'mid';
-  if (v > nm.q3) return f.better === 'high' ? 'good' : 'bad';
-  if (v < nm.q1) return f.better === 'high' ? 'bad' : 'good';
-  return 'mid';
-}
-const fmtVal = (id, v) => id === 'min' ? hm(v) : id === 'bed' || id === 'wake' ? clock(v) : String(Math.round(v));
-const unitOf = id => ({ score: '', hrv: 'ms', rhr: 'bpm', ready: '', min: '' })[id] ?? '';
 
 /* ── the sky ──────────────────────────────────────────────────────── */
 const sky = (() => {
@@ -461,23 +214,6 @@ const sky = (() => {
   return { setMood(m) { if (m !== mood) { mood = m; build(); frame(performance.now()); } } };
 })();
 
-/* ── a canvas sized to its box, drawn in CSS pixels ─────────────────── */
-function prep(cv, h) {
-  const dpr = Math.max(1, Math.round(devicePixelRatio || 1)), w = cv.clientWidth;
-  cv.style.height = h + 'px';
-  cv.width = w * dpr; cv.height = h * dpr;
-  const ctx = cv.getContext('2d');
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  return { ctx, w, h };
-}
-/* animate a drawing from 0 to 1 once, or draw it whole */
-function play(draw, ms = 700) {
-  if (still) return draw(1);
-  const t0 = performance.now();
-  const tick = t => { const p = Math.min(1, (t - t0) / ms); draw(1 - Math.pow(1 - p, 3)); if (p < 1) requestAnimationFrame(tick); };
-  requestAnimationFrame(tick);
-}
-
 /* ── hero counts and the sky's mood ─────────────────────────────────── */
 function drawHero() {
   const keys = allKeys();
@@ -491,8 +227,18 @@ function drawHero() {
 const lastNight = () => allKeys().reverse().find(k => val(k, 'score') !== undefined || val(k, 'hrv') !== undefined);
 
 /* ── last night ────────────────────────────────────────────────────── */
+/* 32 steps from lo to hi: the normal band lit, my value bright */
+function meter(lo, hi, nm, v) {
+  if (!nm) return '';
+  const span = (hi - lo) || 1, seg = x => Math.max(0, Math.min(31, Math.floor((x - lo) / span * 32)));
+  const a = seg(nm.q1), b = seg(nm.q3), me = v === undefined ? -1 : seg(v);
+  return `<div class="meter" aria-hidden="true">${Array.from({ length: 32 }, (_, i) => `<i class="${i === me ? 'me' : i >= a && i <= b ? 'band' : ''}"></i>`).join('')}</div>`;
+}
 function drawLast() {
   const k = lastNight();
+  const ns = nightScores(), x = k ? ns[k] : undefined, band = spread(Object.values(ns).map(n => n.score));
+  $('ns').innerHTML = `<p class="k">Night score</p><p class="big">${x ? Math.round(x.score) : '–'}<small>/100</small></p>
+    <p class="vs ${x ? tone(x.score, band) : ''}">${x ? `${band ? `Normal ${Math.round(band.med)} · ` : ''}100 = the best of my last 30 days` : 'Needs 3 of the 5 measures'}</p>${meter(0, 100, band, x?.score)}`;
   $('lastWhen').textContent = k === today ? 'Last night' : 'Last night logged';
   $('lastT').textContent = k ? (k === today ? 'This morning' : dayName(k)) : 'No night yet';
   $('tiles').innerHTML = ['score', 'hrv', 'rhr', 'ready'].map(id => {
@@ -503,13 +249,7 @@ function drawLast() {
       cls = verdict(id, v, nm);
       vs = d === 0 ? 'Right on normal' : `${d > 0 ? '+' : '−'}${Math.abs(d)} vs normal ${Math.round(nm.med)}`;
     }
-    let meter = '';
-    if (nm) {
-      const span = (nm.max - nm.min) || 1, seg = x => Math.max(0, Math.min(31, Math.floor((x - nm.min) / span * 32)));
-      const a = seg(nm.q1), b = seg(nm.q3), me = v === undefined ? -1 : seg(v);
-      meter = `<div class="meter" aria-hidden="true">${Array.from({ length: 32 }, (_, i) => `<i class="${i === me ? 'me' : i >= a && i <= b ? 'band' : ''}"></i>`).join('')}</div>`;
-    }
-    return `<div class="tile"><p class="k">${f.name}</p><p class="big">${v === undefined ? '–' : Math.round(v)}<small>${f.unit === 'ms' || f.unit === 'bpm' ? f.unit : '/100'}</small></p><p class="vs ${cls}">${vs}</p>${meter}</div>`;
+    return `<div class="tile"><p class="k">${f.name}</p><p class="big">${v === undefined ? '–' : Math.round(v)}<small>${f.unit === 'ms' || f.unit === 'bpm' ? f.unit : '/100'}</small></p><p class="vs ${cls}">${vs}</p>${nm ? meter(nm.min, nm.max, nm, v) : ''}</div>`;
   }).join('');
   const bed = k ? val(k, 'bed') : undefined, wake = k ? val(k, 'wake') : undefined, min = k ? val(k, 'min') : undefined;
   const parts = [];
@@ -520,129 +260,24 @@ function drawLast() {
   $('nightLine').innerHTML = parts.join(' · ');
 }
 
-/* ── night by night ────────────────────────────────────────────────── */
-const METRICS = ['hrv', 'rhr', 'score', 'ready', 'min'];
-let metric = 'hrv', pick = null;
-function drawChips() {
-  $('metricChips').innerHTML = METRICS.map(id => `<button class="chip" type="button" data-m="${id}" aria-pressed="${id === metric}">${SLEEP.get(id).short}</button>`).join('');
-}
-$('metricChips').addEventListener('click', e => {
-  const b = e.target.closest('[data-m]'); if (!b) return;
-  metric = b.dataset.m; pick = null; drawChips(); drawNights(true);
+/* ── night by night: the night score of the last 30 days ────────────── */
+const nightC = blockChart($('nightsC'), () => {
+  const ns = nightScores(), band = spread(Object.values(ns).map(x => x.score));
+  return { keys: monthKeys(), value: k => ns[k]?.score, tone: v => tone(v, band), band, lo: 0, hi: 100, marks: sportBefore, read: i => readNight(i, ns, band) };
 });
-let nightGeo = null;
+function readNight(i, ns, band) {
+  if (i === null) { $('nightRead').textContent = band ? `Normal ${Math.round(band.med)}` : 'Not enough nights yet'; return; }
+  const k = monthKeys()[i], x = ns[k], prev = sportBefore(k);
+  const after = prev.length ? `after ${esc(prev.map(label).join(' and ').toLowerCase())}` : 'after a rest day';
+  if (!x) { $('nightRead').innerHTML = `${dayName(k)} · not enough measures · ${after}`; return; }
+  const bits = INDICATORS.filter(id => val(k, id) !== undefined).map(id => `${SLEEP.get(id).short.toLowerCase()} ${fmtVal(id, val(k, id))}`);
+  $('nightRead').innerHTML = `${dayName(k)} · <b>${Math.round(x.score)}</b>/100 · ${bits.join(', ')} · ${after}`;
+}
 function drawNights(animate) {
-  const cv = $('nightsC'), keys = allKeys(), n = keys.length;
-  const ROWS = 34, PITCH = 5, BH = 4, MARK = 12, H = ROWS * PITCH + MARK;
-  const { ctx, w } = prep(cv, H);
-  const nm = normal(metric);
-  const vals = keys.map(k => val(k, metric));
-  const got = vals.filter(v => v !== undefined);
-  const hi = got.length ? Math.max(...got) : 1, loRaw = got.length ? Math.min(...got) : 0;
-  const lo = Math.max(0, loRaw - (hi - loRaw || hi * .2) * .35);
-  const rowsOf = v => Math.max(1, Math.round((v - lo) / ((hi - lo) || 1) * ROWS));
-  const colW = w / n, gap = colW > 12 ? 3 : colW > 6 ? 2 : 1;
-  const x0 = i => Math.floor(i * colW), cw = i => Math.max(1, Math.floor((i + 1) * colW) - Math.floor(i * colW) - gap);
-  nightGeo = { colW, n, keys };
-  const draw = p => {
-    ctx.clearRect(0, 0, w, H);
-    if (nm) {
-      const a = rowsOf(nm.q1), b = rowsOf(nm.q3);
-      ctx.fillStyle = 'rgba(95,168,211,.09)';
-      ctx.fillRect(0, (ROWS - b) * PITCH, w, (b - a + 1) * PITCH);
-      const my = (ROWS - rowsOf(nm.med)) * PITCH + BH / 2 - 1;
-      ctx.fillStyle = 'rgba(234,244,251,.35)';
-      for (let x = 0; x < w; x += 6) ctx.fillRect(x, my, 2, 1);
-    }
-    keys.forEach((k, i) => {
-      const v = vals[i];
-      if (v !== undefined) {
-        const rows = rowsOf(v), show = Math.round(rows * Math.max(0, Math.min(1, p * 1.7 - i / n * .7)));
-        const c = COLOR[{ good: 'good', bad: 'bad', mid: 'blue' }[verdict(metric, v, nm)]];
-        const dim = pick !== null && pick !== i;
-        for (let r = 0; r < show; r++) {
-          ctx.globalAlpha = (dim ? .35 : 1) * (r === rows - 1 ? 1 : .78);
-          ctx.fillStyle = c;
-          ctx.fillRect(x0(i), (ROWS - 1 - r) * PITCH, cw(i), BH);
-        }
-        ctx.globalAlpha = 1;
-      } else {
-        ctx.fillStyle = 'rgba(234,244,251,.06)';
-        ctx.fillRect(x0(i), (ROWS - 1) * PITCH, cw(i), BH);
-      }
-      /* the sport of the day before: a night answers the day that led to it */
-      const prev = sessionsOf(shift(k, -1));
-      prev.slice(0, 2).forEach((s, j) => {
-        ctx.fillStyle = COLOR[s.s];
-        const sz = Math.min(5, cw(i));
-        ctx.fillRect(x0(i) + j * (sz + 1), ROWS * PITCH + 4, sz, sz);
-      });
-    });
-  };
-  animate ? play(draw) : draw(1);
-  const ax = [keys[0], keys[Math.floor((n - 1) / 2)], keys[n - 1]].map(short);
-  $('nightsAxis').innerHTML = ax.map(a => `<span>${a}</span>`).join('');
-  readNight(pick ?? keys.map((k, i) => (vals[i] !== undefined ? i : -1)).filter(i => i >= 0).pop() ?? null);
+  nightC.draw(animate);
+  const keys = monthKeys(), n = keys.length;
+  $('nightsAxis').innerHTML = [keys[0], keys[Math.floor((n - 1) / 2)], keys[n - 1]].map(k => `<span>${short(k)}</span>`).join('');
 }
-function readNight(i) {
-  const f = SLEEP.get(metric), nm = normal(metric);
-  if (i === null || !nightGeo) { $('nightRead').textContent = nm ? `Normal ${fmtVal(metric, nm.med)} ${unitOf(metric)}` : 'No nights yet'; return; }
-  const k = nightGeo.keys[i], v = val(k, metric);
-  const prev = sessionsOf(shift(k, -1));
-  const after = prev.length ? ` · after ${prev.map(s => esc(label(s).toLowerCase())).join(' and ')}${prev[0].e != null ? ` ending ${clock(prev[prev.length - 1].e)}` : ''}` : ' · after a rest day';
-  $('nightRead').innerHTML = v === undefined
-    ? `${dayName(k)} · not logged`
-    : `${dayName(k)} · <b>${fmtVal(metric, v)} ${unitOf(metric)}</b> ${f.short.toLowerCase()}${nm ? ` (normal ${fmtVal(metric, nm.med)})` : ''}${after}`;
-}
-function pointAt(e) {
-  if (!nightGeo) return null;
-  const r = $('nightsC').getBoundingClientRect();
-  return Math.max(0, Math.min(nightGeo.n - 1, Math.floor((e.clientX - r.left) / nightGeo.colW)));
-}
-$('nightsC').addEventListener('pointermove', e => { if (e.pointerType === 'mouse') readNight(pointAt(e)); });
-$('nightsC').addEventListener('pointerleave', () => { if (pick === null) drawNights(false); });
-$('nightsC').addEventListener('click', e => { const i = pointAt(e); pick = pick === i ? null : i; drawNights(false); if (pick !== null) readNight(pick); });
-
-/* ── bed to wake ───────────────────────────────────────────────────── */
-let bedGeo = null;
-function drawBed(animate) {
-  const cv = $('bedC');
-  const keys = allKeys().filter(k => val(k, 'bed') !== undefined && val(k, 'wake') !== undefined).slice(-21);
-  const PITCH = 8, BH = 5, H = Math.max(1, keys.length) * PITCH;
-  const { ctx, w } = prep(cv, H);
-  const FROM = 1260, TO = 2100, STEP = 5, cells = (TO - FROM) / STEP, cell = w / cells;
-  const nm = normal('score');
-  bedGeo = { keys, PITCH };
-  const draw = p => {
-    ctx.clearRect(0, 0, w, H);
-    /* midnight and 06:00 as faint columns */
-    ctx.fillStyle = 'rgba(234,244,251,.06)';
-    for (const m of [1440, 1800]) ctx.fillRect(Math.floor((m - FROM) / STEP * cell), 0, 1, H);
-    keys.forEach((k, r) => {
-      const bed = val(k, 'bed'), wake = val(k, 'wake') + 1440;
-      const a = Math.max(0, Math.round((bed - FROM) / STEP)), b = Math.min(cells, Math.round((wake - FROM) / STEP));
-      const s = val(k, 'score'), v = s === undefined ? 'mid' : verdict('score', s, nm);
-      const show = a + Math.round((b - a) * Math.max(0, Math.min(1, p * 1.6 - r / keys.length * .6)));
-      ctx.fillStyle = COLOR[{ good: 'good', bad: 'bad', mid: 'blue' }[v]];
-      for (let c = a; c < show; c++) {
-        ctx.globalAlpha = c === a || c === b - 1 ? 1 : .72;
-        ctx.fillRect(Math.floor(c * cell), r * PITCH, Math.max(1, Math.floor((c + 1) * cell) - Math.floor(c * cell) - 1), BH);
-      }
-      ctx.globalAlpha = 1;
-    });
-  };
-  animate ? play(draw) : draw(1);
-  const nb = normal('bed'), nw = normal('wake'), ns = normal('min');
-  $('bedRead').innerHTML = nb && nw ? `Normal: bed <b>${clock(nb.med)}</b> → wake <b>${clock(nw.med)}</b>${ns ? ` · <b>${hm(ns.med)}</b> asleep` : ''} · colour = sleep score` : 'Not enough nights yet';
-}
-$('bedC').addEventListener('pointermove', e => {
-  if (!bedGeo || !bedGeo.keys.length) return;
-  const r = $('bedC').getBoundingClientRect(), i = Math.floor((e.clientY - r.top) / bedGeo.PITCH), k = bedGeo.keys[i];
-  if (!k) return;
-  const s = val(k, 'score'), m = val(k, 'min');
-  $('bedRead').innerHTML = `${dayName(k)} · <b>${clock(val(k, 'bed'))}</b> → <b>${clock(val(k, 'wake'))}</b>${m !== undefined ? ` · ${hm(m)} asleep` : ''}${s !== undefined ? ` · score ${s}` : ''}`;
-});
-$('bedC').addEventListener('pointerleave', () => drawBed(false));
 
 /* ── sport ─────────────────────────────────────────────────────────── */
 const formCls = f => f === undefined ? 'f-none' : f >= .97 ? 'f-good' : f >= .9 ? 'f-mid' : 'f-bad';
@@ -676,8 +311,8 @@ function drawSport() {
   }).join('');
 
   /* the calendar, Monday first */
-  const keys = allKeys(), [y, m, d] = ymd(keys[0]);
-  const lead = (new Date(y, m - 1, d).getDay() + 6) % 7;
+  const keys = allKeys();
+  const lead = (weekday(keys[0]) + 6) % 7;
   let html = ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(x => `<span class="dow">${x}</span>`).join('') + '<i class="off"></i>'.repeat(lead);
   for (const k of keys) {
     const ss = sessionsOf(k);
@@ -694,37 +329,29 @@ function drawSport() {
   }).join('') || '<li><span class="what">No session yet.</span></li>';
 }
 
-/* ── sleep and sport side by side ──────────────────────────────────── */
+/* ── after sport, or not: two columns ─────────────────────────────── */
 function drawPairs() {
-  const nights = allKeys().filter(k => entry(k)?.sleep);
-  const groups = [
-    { q: 'After a training day, against a rest day', a: k => sessionsOf(shift(k, -1)).length > 0, la: 'training', lb: 'rest' },
-    { q: 'Training ended after 19:00, against earlier', a: k => sessionsOf(shift(k, -1)).some(s => s.e >= 1140), b: k => sessionsOf(shift(k, -1)).length > 0 && sessionsOf(shift(k, -1)).every(s => s.e != null && s.e < 1140), la: 'late', lb: 'earlier' },
-    { q: 'Bed before 23:30, against later', a: k => val(k, 'bed') !== undefined && val(k, 'bed') < 1410, b: k => val(k, 'bed') >= 1410, la: 'early bed', lb: 'later' },
+  const keys = monthKeys(), ns = nightScores(keys);
+  const nights = keys.filter(k => entry(k)?.sleep);
+  const A = nights.filter(k => sportBefore(k).length), B = nights.filter(k => !sportBefore(k).length);
+  const avg = (ks, f) => { const v = ks.map(f).filter(x => x !== undefined); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : undefined; };
+  const rows = [
+    { name: 'Night score', f: k => ns[k]?.score, better: 'high', fmt: v => `${Math.round(v)}` },
+    ...INDICATORS.map(id => ({ name: SLEEP.get(id).name, f: k => val(k, id), better: SLEEP.get(id).better, fmt: v => `${fmtVal(id, v)}${unitOf(id) ? ' ' + unitOf(id) : ''}` })),
   ];
-  const out = [];
-  for (const g of groups) for (const id of ['hrv', 'rhr', 'score']) {
-    const A = nights.filter(g.a), B = nights.filter(g.b || (k => !g.a(k)));
-    const av = ks => { const v = ks.map(k => val(k, id)).filter(x => x !== undefined); return v.length >= 3 ? { m: v.reduce((a, b) => a + b, 0) / v.length, n: v.length } : null; };
-    const a = av(A), b = av(B);
-    if (!a || !b) continue;
-    const f = SLEEP.get(id), d = a.m - b.m, better = f.better === 'high' ? d > 0 : d < 0;
-    out.push(`<li><span class="q">${g.q} · ${f.name}</span><span class="a ${Math.abs(d) < 1 ? '' : better ? 'f-good' : 'f-bad'}">${Math.round(a.m)} ${unitOf(id)}<small>${g.la}, ${a.n} nights</small></span><span class="a">${Math.round(b.m)} ${unitOf(id)}<small>${g.lb}, ${b.n} nights</small></span></li>`);
-  }
-  $('pairs').innerHTML = out.join('') || '<li><span class="q">Not enough nights on both sides yet.</span></li>';
+  const head = `<div class="vs2-row head"><span></span><span>After sport<small>${A.length} nights</small></span><span>After rest<small>${B.length} nights</small></span></div>`;
+  if (A.length < 3 || B.length < 3) { $('pairs').innerHTML = head + '<p class="note">Needs 3 nights on each side.</p>'; return; }
+  $('pairs').innerHTML = head + rows.map(r => {
+    const a = avg(A, r.f), b = avg(B, r.f);
+    const win = a === undefined || b === undefined || a === b ? '' : (r.better === 'high') === (a > b) ? 'a' : 'b';
+    return `<div class="vs2-row"><span>${r.name}</span><span class="${win === 'a' ? 'f-good' : ''}">${a === undefined ? '–' : r.fmt(a)}</span><span class="${win === 'b' ? 'f-good' : ''}">${b === undefined ? '–' : r.fmt(b)}</span></div>`;
+  }).join('');
 }
 
 /* ── the log ───────────────────────────────────────────────────────── */
 let sel = today, cur = null, pass = '', dirty = false, dirtyDay = null, saving = false, timer = 0;
 try { pass = localStorage.getItem('bio.pass') || ''; } catch {}
 const canLog = () => !!pass;
-/* Days saved on this device while the server cannot take them (before its
-   update, or offline). They show on the page at once and go up by themselves
-   the next time the server answers. */
-const HELD = 'wellness.held';
-const held = (() => { try { return JSON.parse(localStorage.getItem(HELD) || '{}') || {}; } catch { return {}; } })();
-const keepHeld = () => { try { localStorage.setItem(HELD, JSON.stringify(held)); } catch {} };
-Object.assign(state.days, held);
 const say = (msg, err) => { $('status').textContent = msg; $('status').classList.toggle('err', !!err); };
 
 /* 7:30, 7h30, 730 and 7.5 all read as 450 minutes */
@@ -899,32 +526,30 @@ addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.retur
 
 /* ── draw everything that reads the data ───────────────────────────── */
 function drawAll(animate) {
-  drawHero(); drawLast(); drawChips(); drawNights(animate); drawBed(animate); drawSport(); drawPairs();
+  drawHero(); drawLast(); drawNights(animate); drawSport(); drawPairs();
 }
 let rs = 0;
-addEventListener('resize', () => { cancelAnimationFrame(rs); rs = requestAnimationFrame(() => { drawNights(false); drawBed(false); }); });
+addEventListener('resize', () => { cancelAnimationFrame(rs); rs = requestAnimationFrame(() => drawNights(false)); });
+
+/* ── the log opens over the page, from the button top left ────────── */
+const dlg = $('logD');
+const openLog = () => { openDay(sel); if (!dlg.open) dlg.showModal(); };
+$('logOpen').addEventListener('click', openLog);
+$('logClose').addEventListener('click', () => dlg.close());
+/* a click on the dimmed page around the panel closes it */
+dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+dlg.addEventListener('close', () => {
+  if (dirty) { clearTimeout(timer); push(); }
+  if (location.hash === '#log') history.replaceState(null, '', location.pathname);
+});
 
 async function load() {
-  const [old, days] = await Promise.allSettled([api('bio.get'), api('days.list')]);
-  if (old.status === 'fulfilled' && old.value?.log) {
-    for (const [k, d] of Object.entries(old.value.log)) if (k >= SPEC.start && k <= today) { const x = fromExp0(d); if (x) state.exp0[k] = x; }
-  }
-  if (days.status === 'fulfilled') {
-    for (const d of days.value || []) state.days[d.day] = d;
-    /* what this device held while the server could not take it is newer: send it up */
-    for (const [k, d] of Object.entries(held)) {
-      state.days[k] = d;
-      if (pass) api('days.save', { passphrase: pass, today, day: k, entry: d })
-        .then(() => { delete held[k]; keepHeld(); }, () => {});
-    }
-  } else {
-    /* before the update the door does not know days.list yet: read Exp 0, keep days here */
-    state.server = false;
-    if (days.reason?.message !== 'Unknown operation') say(days.reason?.message || 'Something went wrong', true);
-  }
+  const err = await loadData(pass);
+  if (err) say(err, true);
   drawAll(true); drawLock(); if (!dirty) openDay(sel);
 }
 drawAll(false); drawLock(); openDay(today);
+if (location.hash === '#log') openLog();
 load();
 </script>
 </body>
