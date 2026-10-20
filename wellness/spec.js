@@ -27,8 +27,8 @@ export const SPEC = {
   ],
 
   /* The sports, and what one session of each is measured by. Every
-     session: a target, an effort level from 1 to 5, its times and its
-     average and peak heart rate. Run: a distance and a time on top. Lift:
+     session: a target, an effort level from 1 to 5, how long it lasted and
+     its average and peak heart rate. Run: a distance on top. Lift:
      the top set of one lift. Swim: a training, nothing more. Other: any
      other activity, named when logged (padel, yoga, a hike). */
   sports: [
@@ -79,7 +79,8 @@ const word = (raw, list) => (typeof raw === 'string' && list.includes(raw) ? raw
 
 /* One session, or nothing. A session needs a sport; everything else is
    what was measured. `t` and `e` are when it started and ended (minutes
-   after midnight), `f` its target, `lv` the effort I felt from 1 to 5,
+   after midnight) in sessions logged before `d`, how long it lasted in
+   minutes, `f` its target, `lv` the effort I felt from 1 to 5,
    `hr` and `pk` its average and peak heart rate, `m` its distance in metres
    and `sec` its time in seconds (run), `lift`, `kg` and `reps` the top set
    (lift), `n` the name of the activity (other). A target kept as
@@ -94,6 +95,9 @@ function cleanSession(s) {
   put('t', num(s.t, 1439)); put('e', num(s.e, 1439));
   if (out.t !== undefined) out.t = Math.round(out.t);
   if (out.e !== undefined) out.e = Math.round(out.e);
+  put('d', num(s.d, 1440));
+  if (out.d !== undefined) out.d = Math.round(out.d) || undefined;
+  if (out.d === undefined) delete out.d;
   put('hr', num(s.hr, 230));
   put('pk', num(s.pk, 230));
   put('lv', num(s.lv, SPEC.levels, 1));
@@ -171,9 +175,11 @@ export function fromExp0(d) {
 /* ── performance ────────────────────────────────────────────────────── */
 
 /* A run at any distance, as the time it would take over 5 km (Riegel:
-   T2 = T1 x (D2/D1)^1.06), so a 3 km and an 8 km run can be compared. */
+   T2 = T1 x (D2/D1)^1.06), so a 3 km and an 8 km run can be compared. The
+   time is how long the session lasted (or the time kept on older runs). */
 export const REF = { run: 5000 };
-export const equivalent = s => (REF[s.s] && s.m > 0 && s.sec > 0 ? s.sec * Math.pow(REF[s.s] / s.m, 1.06) : undefined);
+export const runSec = s => s.sec > 0 ? s.sec : minutes(s) ? minutes(s) * 60 : undefined;
+export const equivalent = s => (REF[s.s] && s.m > 0 && runSec(s) ? runSec(s) * Math.pow(REF[s.s] / s.m, 1.06) : undefined);
 /* The most a lift could be done once, from a set of several (Epley). */
 export const e1rm = s => (s.kg > 0 && s.reps > 0 ? (s.reps === 1 ? s.kg : s.kg * (1 + s.reps / 30)) : undefined);
 /* My maximum heart rate: the highest peak (or average) of all my sessions,
@@ -195,8 +201,9 @@ export function effort(s, top) {
   const w = parts.reduce((a, [m]) => a + m, 0);
   return w ? Math.min(1, parts.reduce((a, [m, v]) => a + m * v, 0) / w) : undefined;
 }
-/* How long a session lasted, in minutes, from its start and end. */
-export const minutes = s => (s.t != null && s.e != null ? (s.e - s.t + 1440) % 1440 || undefined : undefined);
+/* How long a session lasted, in minutes: as logged, or from the start and
+   end of older sessions. */
+export const minutes = s => (s.d > 0 ? s.d : s.t != null && s.e != null ? (s.e - s.t + 1440) % 1440 || undefined : undefined);
 /* Load: minutes times effort. 60 minutes at 80 % is 48. A day's load is the
    sum of its sessions, so every sport adds to the same number. */
 export function load(s, top) {

@@ -72,7 +72,7 @@
 </footer>
 
 <script type="module">
-import { SPEC, SLEEP, SPORT, bests, form, effort, load as loadOf } from '/wellness/spec.js';
+import { SPEC, SLEEP, SPORT, bests, form, effort, minutes, load as loadOf } from '/wellness/spec.js';
 import { top, measure, formCls, cap, weekday, sessionsOf, allSessions, today, COLOR, dayName, short, clock, hm, esc, label, fmtVal, unitOf, allKeys, monthKeys, val, sportBefore, load, spread, normal, verdict, tone, INDICATORS, nightScores } from '/wellness/data.js';
 import { blockChart } from '/wellness/charts.js';
 
@@ -162,7 +162,7 @@ function drawLog() {
   const all = allSessions(), best = bests(all);
   $('sessList').innerHTML = [...all].reverse().map(s => {
     const f = form(s, best), e = effort(s, t), ld = loadOf(s, t), mz = measure(s);
-    const span = s.t != null ? `${clock(s.t)}${s.e != null ? '–' + clock(s.e) : ''}` : '';
+    const span = minutes(s) ? `${minutes(s)} min` : '';
     const hr = [s.hr && `avg ${s.hr}`, s.pk && `peak ${s.pk}`].filter(Boolean).join(' / ');
     const bits = [s.f ? cap(s.f) : '', s.lv ? `level ${s.lv}/5` : '', span, mz, hr ? `${hr} bpm` : '', e !== undefined ? `${Math.round(e * 100)} % effort` : '', ld !== undefined ? `load ${Math.round(ld)}` : ''].filter(Boolean);
     return `<li style="--c:var(--${s.s})"><span class="when">${short(s.day)}</span><span class="what"><b>${esc(label(s))}</b>${bits.join(' · ')}${mz || (s.s !== 'run' && s.s !== 'lift') ? '' : ' <em>· not measured</em>'}</span><span class="form ${formCls(f)}">${f === undefined ? '–' : Math.round(f * 100) + ' %'}<small>form</small></span></li>`;

@@ -62,7 +62,7 @@
     <p class="kick">Last 30 days</p>
     <h2 id="sportT">Sport <span class="soft">by day</span></h2>
     <div class="ns" id="sportNow"></div>
-    <p class="note">One load per day: each session's minutes times its effort, all sports added up and stacked. Effort mixes the average and peak heart rate against my highest so far (<span id="hrMax"></span> bpm) with the level I felt out of 5. The target sets the mix: cardio leans on the average, speed on the peak, strength on the level.</p>
+    <p class="note">One load per day: how long each session lasted, in minutes, times its effort, all sports added up and stacked. Effort mixes the average and peak heart rate against my highest so far (<span id="hrMax"></span> bpm) with the level I felt out of 5. The target sets the mix: cardio leans on the average, speed on the peak, strength on the level.</p>
     <p class="readout" id="sportRead" aria-live="polite"></p>
     <div class="chart"><canvas id="sportC" aria-label="Sport load, one column per day, stacked by sport"></canvas></div>
     <div class="axis" id="sportAxis"></div>
@@ -71,7 +71,7 @@
       <li><i style="background:var(--swim)"></i>Swim</li>
       <li><i style="background:var(--lift)"></i>Lift</li>
       <li><i style="background:var(--other)"></i>Other</li>
-      <li><i style="background:var(--ice-20)"></i>A thin block: logged without times, or without heart rate and level</li>
+      <li><i style="background:var(--ice-20)"></i>A thin block: logged without how long, or without heart rate and level</li>
     </ul>
     <div class="sports" id="sports"></div>
     <a class="more" href="/wellness/details/#sport">The full sport log <span aria-hidden="true">→</span></a>
@@ -277,7 +277,7 @@ const sportC = blockChart($('sportC'), () => {
 const totals = dl => Object.values(dl).map(x => x.total);
 function readSport(i, dl) {
   const keys = monthKeys(), got = totals(dl);
-  if (i === null) { $('sportRead').textContent = got.length ? `Average load ${Math.round(avg(got))} per day of sport` : 'No session with times and an effort yet'; return; }
+  if (i === null) { $('sportRead').textContent = got.length ? `Average load ${Math.round(avg(got))} per day of sport` : 'No session with a length and an effort yet'; return; }
   const k = keys[i], ss = sessionsOf(k);
   if (!ss.length) { $('sportRead').textContent = `${dayName(k)} · rest`; return; }
   const t = top();
@@ -299,7 +299,7 @@ function drawSport(animate) {
   const v = lastDay ? dl[lastDay]?.total : undefined;
   $('sportNow').innerHTML = `<p class="k">${lastDay ? `Last session · ${dayName(lastDay)} · ${esc(sessionsOf(lastDay).map(label).join(', '))}` : 'No session yet'}</p>
     <p class="big">${v === undefined ? '–' : Math.round(v)}<small> load</small></p>
-    <p class="vs">${v === undefined ? 'Add the start and end, and a heart rate or a level, when logging' : `Average ${Math.round(avg(got))} over ${got.length} day${got.length === 1 ? '' : 's'} of sport`}</p>`;
+    <p class="vs">${v === undefined ? 'Add how long, and a heart rate or a level, when logging' : `Average ${Math.round(avg(got))} over ${got.length} day${got.length === 1 ? '' : 's'} of sport`}</p>`;
 
   /* each sport over the month: load, effort, form, no list */
   const month = new Set(keys), all = allSessions(), best = bests(all), t = top();
@@ -355,12 +355,11 @@ function toMinutes(str) {
   if (/^\d{3,4}$/.test(t) && n % 100 < 60) return Math.floor(n / 100) * 60 + (n % 100);
   return n <= 24 ? Math.round(n * 60) : Math.round(n);
 }
-/* 25:30 is 25 min 30 s, 1:05:30 an hour and five, 25 alone is 25 minutes */
-function toSeconds(str) {
-  const p = String(str).trim().split(':').map(x => x.trim());
-  if (!p[0] || p.some(x => !/^\d+([.,]\d+)?$/.test(x))) return undefined;
-  const n = p.map(x => Number(x.replace(',', '.')));
-  return n.length === 3 ? n[0] * 3600 + n[1] * 60 + n[2] : n.length === 2 ? n[0] * 60 + n[1] : n[0] * 60;
+/* how long: 1:15 and 1h15 are 75 minutes, 45 alone is 45 minutes */
+function toDuration(str) {
+  const t = String(str).trim().toLowerCase(); let m;
+  if ((m = /^(\d{1,2})\s*[:h]\s*(\d{1,2})?$/.exec(t))) return +m[1] * 60 + Math.min(59, +(m[2] || 0));
+  return /^\d+$/.test(t) ? +t : undefined;
 }
 const timeVal = n => n == null ? '' : clock(n);
 const fromTime = (str, night) => { const m = /^(\d{1,2}):(\d{2})$/.exec(str || ''); if (!m) return undefined; const v = +m[1] * 60 + +m[2]; return night && v < 720 ? v + 1440 : v; };
@@ -438,10 +437,10 @@ function drawSessions() {
     const sp = SPORT.get(s.s);
     const chips = (name, list, on) => `<div class="chips" style="margin-top:12px" role="group" aria-label="${name}">${list.map(x => `<button class="chip" type="button" data-i="${i}" data-k="${name}" data-v="${x}" aria-pressed="${on === x}">${cap(x)}</button>`).join('')}</div>`;
     const inp = (k, label, val, attrs = '') => `<label class="field"><span>${label}</span><input class="in" data-i="${i}" data-k="${k}" value="${val ?? ''}" ${attrs}></label>`;
-    let grid = inp('t', 'Start', timeVal(s.t), 'type="time"') + inp('e', 'End', timeVal(s.e), 'type="time"')
+    let grid = inp('d', 'How long (h:mm)', minutes(s) == null ? '' : `${Math.floor(minutes(s) / 60)}:${pad(minutes(s) % 60)}`, 'type="text" inputmode="decimal" placeholder="0:45"')
       + inp('hr', 'Avg heart rate', s.hr, 'type="number" inputmode="numeric" placeholder="bpm"') + inp('pk', 'Peak heart rate', s.pk, 'type="number" inputmode="numeric" placeholder="bpm"');
     if (s.s === 'lift') grid += inp('kg', 'Top set kg', s.kg, 'type="number" inputmode="decimal" step="0.5"') + inp('reps', 'Reps', s.reps, 'type="number" inputmode="numeric"');
-    else if (s.s === 'run') grid += inp('m', 'Distance km', s.m == null ? '' : s.m / 1000, 'type="number" inputmode="decimal" step="0.01"') + inp('sec', 'Time (mm:ss)', s.sec == null ? '' : mmss(s.sec), 'type="text" inputmode="decimal" placeholder="25:30"');
+    else if (s.s === 'run') grid += inp('m', 'Distance km', s.m == null ? '' : s.m / 1000, 'type="number" inputmode="decimal" step="0.01"');
     const levels = `<div class="chips" style="margin-top:12px" role="group" aria-label="Effort level, 1 to ${SPEC.levels}"><span class="chips-k">Effort</span>${Array.from({ length: SPEC.levels }, (_, j) => j + 1).map(x => `<button class="chip" type="button" data-i="${i}" data-k="lv" data-v="${x}" aria-pressed="${s.lv === x}">${x}</button>`).join('')}</div>`;
     const named = s.s === 'other' ? `<input class="in sess-name" data-i="${i}" data-k="n" value="${esc(s.n ?? '')}" maxlength="${SPEC.nameMax}" placeholder="Name it: padel, yoga, hike…" aria-label="Name of the activity">` : '';
     return `<div class="sess" style="--c:var(--${s.s})"><div class="sess-head"><b>${sp.name}</b><button type="button" data-del="${i}">Remove</button></div>
@@ -465,8 +464,7 @@ $('sessBox').addEventListener('input', e => {
   const i = +e.target.dataset.i, s = cur.sessions[i], raw = e.target.value;
   let v;
   if (k === 'n') { const n = raw.trim(); if (n) s.n = n; else delete s.n; touch(); return; }
-  if (k === 't' || k === 'e') v = fromTime(raw);
-  else if (k === 'sec') v = toSeconds(raw);
+  if (k === 'd') { v = toDuration(raw); delete s.t; delete s.e; delete s.sec; }
   else if (k === 'm') v = raw === '' ? undefined : Number(raw) * (s.s === 'run' ? 1000 : 1);
   else v = raw === '' ? undefined : Number(raw);
   if (v === undefined || Number.isNaN(v)) delete s[k]; else s[k] = Math.round(v * 100) / 100;

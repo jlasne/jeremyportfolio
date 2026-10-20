@@ -4,7 +4,7 @@
    day this device still holds because the server could not take it yet.
    Imported by /wellness and /wellness/details. */
 
-import { SPEC, SLEEP, SPORT, dateKey, shift, fromExp0, bests, form, effort, hrTop, minutes, load as loadOf } from '/wellness/spec.js';
+import { SPEC, SLEEP, SPORT, dateKey, shift, fromExp0, bests, form, effort, hrTop, minutes, runSec, load as loadOf } from '/wellness/spec.js';
 
 export const API = 'https://fiery-eel-944.eu-west-1.convex.site/overlap';
 export const today = dateKey();
@@ -131,8 +131,9 @@ export function nightScores(keys = monthKeys()) {
 /* What a session measured, in words: distance, time and pace, or the top set. */
 export function measure(s) {
   if (s.s === 'lift') return s.kg && s.reps ? `${s.lift ? cap(s.lift) + ' ' : ''}${s.kg} kg × ${s.reps}` : '';
-  if (s.s !== 'run' || !s.m || !s.sec) return '';
-  return `${(s.m / 1000).toFixed(2).replace(/\.?0+$/, '')} km · ${mmss(s.sec)} · ${mmss(s.sec / (s.m / 1000))}/km`;
+  const sec = runSec(s);
+  if (s.s !== 'run' || !s.m || !sec) return '';
+  return `${(s.m / 1000).toFixed(2).replace(/\.?0+$/, '')} km · ${mmss(sec)} · ${mmss(sec / (s.m / 1000))}/km`;
 }
 export const formCls = f => f === undefined ? 'f-none' : f >= .97 ? 'f-good' : f >= .9 ? 'f-mid' : 'f-bad';
 const avg = v => (v.length ? v.reduce((a, b) => a + b, 0) / v.length : undefined);
@@ -179,7 +180,7 @@ export function csv() {
     for (const s of ss) {
       const e = s && effort(s, t), f = s && form(s, best);
       rows.push([k, ...night, ...(s ? [s.s, s.n, s.f, s.lv, hhmm(s.t), hhmm(s.e), minutes(s), s.hr, s.pk, s.hr || s.pk ? t : '',
-        e === undefined ? '' : Math.round(e * 100), r1(loadOf(s, t)), s.m, s.sec, s.lift, s.kg, s.reps, f === undefined ? '' : Math.round(f * 100)]
+        e === undefined ? '' : Math.round(e * 100), r1(loadOf(s, t)), s.m, s.s === 'run' ? runSec(s) : '', s.lift, s.kg, s.reps, f === undefined ? '' : Math.round(f * 100)]
         : Array(18).fill('')), d.note]);
     }
   }

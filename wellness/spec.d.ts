@@ -5,7 +5,7 @@ export interface Sport { id: 'run' | 'swim' | 'lift' | 'other'; name: string; fo
 
 /** One session as kept: a sport, then what was measured. */
 export interface Session {
-  s: 'run' | 'swim' | 'lift' | 'other'; f?: string; t?: number; e?: number; hr?: number; pk?: number; lv?: number;
+  s: 'run' | 'swim' | 'lift' | 'other'; f?: string; t?: number; e?: number; hr?: number; pk?: number; lv?: number; d?: number;
   m?: number; sec?: number; lift?: string; kg?: number; reps?: number; n?: string;
 }
 export interface Sleep { score?: number; hrv?: number; rhr?: number; ready?: number; min?: number; bed?: number; wake?: number }
@@ -28,6 +28,7 @@ export function cleanDay(day: string, input: unknown, today: string): Day | null
 export function fixBed(bed: number | undefined): number | undefined;
 export function fromExp0(d: unknown): Omit<Day, 'day'> | null;
 export const REF: { run: number };
+export function runSec(s: Session): number | undefined;
 export function equivalent(s: Session): number | undefined;
 export function e1rm(s: Session): number | undefined;
 export function hrTop(sessions: Session[]): number | undefined;
