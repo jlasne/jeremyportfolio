@@ -69,7 +69,7 @@
     <ul class="legend">
       <li><i style="background:var(--run)"></i>Run</li>
       <li><i style="background:var(--swim)"></i>Swim</li>
-      <li><i style="background:var(--lift)"></i>Lift</li>
+      <li><i style="background:var(--lift)"></i>Gym</li>
       <li><i style="background:var(--other)"></i>Other</li>
       <li><i style="background:var(--ice-20)"></i>A thin block: logged without how long, or without heart rate and level</li>
     </ul>
@@ -107,6 +107,7 @@
       <h3 style="margin-top:30px">Sport <span>that day</span></h3>
       <div id="sessBox"></div>
       <div class="adds" id="adds"></div>
+      <datalist id="exNames"></datalist>
       <h3 style="margin-top:30px">My max <span>the most I did, any day</span></h3>
       <div id="maxBox"></div>
       <div class="adds"><button class="chip" id="addMax" type="button">Add a max</button></div>
@@ -122,7 +123,7 @@
 </footer>
 
 <script type="module">
-import { SPEC, SLEEP, SPORT, shift, daysBetween, bests, form, effort, e1rm, minutes, hrTop, load as loadOf } from '/wellness/spec.js';
+import { SPEC, SLEEP, SPORT, shift, daysBetween, exercises, bests, form, effort, minutes, hrTop, load as loadOf } from '/wellness/spec.js';
 import { maxText, keepMax, avg, dayLoads, top, kept, csv, measure, today, COLOR, pad, dayName, short, weekday, clock, hm, mmss, cap, esc, copy, label, fmtVal, state, entry, allKeys, monthKeys, val, sessionsOf, allSessions, sportBefore, held, keepHeld, api, load as loadData, spread, normal, verdict, tone, INDICATORS, nightScores, unitOf } from '/wellness/data.js';
 import { still, blockChart } from '/wellness/charts.js';
 
@@ -314,7 +315,13 @@ function drawSport(animate) {
     if (loads.length) rows.push(['Total load', `${Math.round(loads.reduce((a, b) => a + b, 0))}`]);
     if (e !== undefined) rows.push(['Avg effort', `${Math.round(e * 100)} %`]);
     if (f !== undefined) rows.push(['Avg form', `${Math.round(f * 100)} %`]);
-    if (sp.id === 'lift') { for (const l of SPEC.lifts) if (best[`lift:${l}`]) rows.push([`Best ${l}`, `${Math.round(best[`lift:${l}`])} kg`]); }
+    if (sp.id === 'lift') {
+      /* the best 1RM of the three exercises done most this month */
+      const seen = {};
+      for (const s of list) for (const x of exercises(s)) { const k = x.n.toLowerCase(); seen[k] ||= { n: x.n, c: 0 }; seen[k].c++; }
+      Object.entries(seen).sort((a, b) => b[1].c - a[1].c).filter(([k]) => best[`lift:${k}`]).slice(0, 3)
+        .forEach(([k, x]) => rows.push([`Best ${esc(x.n)}`, `${Math.round(best[`lift:${k}`])} kg`]));
+    }
     else if (best[sp.id]) rows.push(['Best 5 km', mmss(best[sp.id])]);
     if (sp.id === 'other') { const names = [...new Set(list.map(s => s.n).filter(Boolean))]; if (names.length) rows.push(['Activities', esc(names.slice(0, 3).join(', '))]); }
     const body = rows.length ? `<dl>${rows.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl>`
@@ -427,7 +434,6 @@ $('adds').addEventListener('click', e => {
 function sessCalc(s) {
   const best = bests([...allSessions().filter(x => x.day !== sel), ...cur.sessions]);
   const bits = [measure(s)];
-  if (s.s === 'lift' && e1rm(s)) bits.push(`1RM about ${Math.round(e1rm(s))} kg`);
   const t = hrTop([...allSessions().filter(x => x.day !== sel), ...cur.sessions]), e = effort(s, t), l = loadOf(s, t);
   if (e !== undefined) bits.push(`${Math.round(e * 100)} % effort`);
   if (l !== undefined) bits.push(`load ${Math.round(l)}`);
@@ -435,6 +441,22 @@ function sessCalc(s) {
   if (f !== undefined) bits.push(`form ${Math.round(f * 100)} %`);
   return bits.filter(Boolean).join(' · ');
 }
+/* A Gym session's exercises: any name, then sets, reps and kg */
+function exBox(s, i) {
+  const xs = exercises(s);
+  const num = (j, k, label, v, step) => `<label class="field"><span>${label}</span><input class="in" type="number" inputmode="decimal" min="0" step="${step}" data-i="${i}" data-x="${j}" data-xk="${k}" value="${v ?? ''}"></label>`;
+  return xs.map((x, j) => `<div class="ex"><div class="sess-head"><input class="in" data-i="${i}" data-x="${j}" data-xk="n" value="${esc(x.n ?? '')}" maxlength="${SPEC.nameMax}" list="exNames" placeholder="Exercise: bench, pull-ups, row…" aria-label="Name of the exercise"><button type="button" data-i="${i}" data-xdel="${j}">Remove</button></div>
+    <div class="grid ex-grid">${num(j, 'sets', 'Sets', x.sets, 1)}${num(j, 'reps', 'Reps', x.reps, 1)}${num(j, 'kg', 'Weight kg', x.kg, 'any')}</div></div>`).join('')
+    + (xs.length < SPEC.exMax ? `<div class="adds"><button class="chip" type="button" data-xadd="${i}">Add an exercise</button></div>` : '');
+}
+/* the names already used, offered as I type */
+const exNames = () => {
+  const seen = new Map();
+  for (const s of [...allSessions(), ...cur.sessions]) for (const x of exercises(s)) if (x.n) seen.set(x.n.toLowerCase(), x.n);
+  $('exNames').innerHTML = [...seen.values()].map(n => `<option value="${esc(n)}">`).join('');
+};
+/* a first Gym session keeps its top set until I edit it, then it becomes exercises */
+const exOf = s => { if (!s.x) { s.x = exercises(s).map(x => ({ ...x })); delete s.lift; delete s.kg; delete s.reps; } return s.x; };
 function drawSessions() {
   $('sessBox').innerHTML = cur.sessions.map((s, i) => {
     const sp = SPORT.get(s.s);
@@ -442,18 +464,28 @@ function drawSessions() {
     const inp = (k, label, val, attrs = '') => `<label class="field"><span>${label}</span><input class="in" data-i="${i}" data-k="${k}" value="${val ?? ''}" ${attrs}></label>`;
     let grid = inp('d', 'How long (h:mm)', minutes(s) == null ? '' : `${Math.floor(minutes(s) / 60)}:${pad(minutes(s) % 60)}`, 'type="text" inputmode="decimal" placeholder="0:45"')
       + inp('hr', 'Avg heart rate', s.hr, 'type="number" inputmode="numeric" placeholder="bpm"') + inp('pk', 'Peak heart rate', s.pk, 'type="number" inputmode="numeric" placeholder="bpm"');
-    if (s.s === 'lift') grid += inp('kg', 'Top set kg', s.kg, 'type="number" inputmode="decimal" step="0.5"') + inp('reps', 'Reps', s.reps, 'type="number" inputmode="numeric"');
-    else if (s.s === 'run') grid += inp('m', 'Distance km', s.m == null ? '' : s.m / 1000, 'type="number" inputmode="decimal" step="0.01"');
+    if (s.s === 'run') grid += inp('m', 'Distance km', s.m == null ? '' : s.m / 1000, 'type="number" inputmode="decimal" step="0.01"');
     const levels = `<div class="chips" style="margin-top:12px" role="group" aria-label="Effort level, 1 to ${SPEC.levels}"><span class="chips-k">Effort</span>${Array.from({ length: SPEC.levels }, (_, j) => j + 1).map(x => `<button class="chip" type="button" data-i="${i}" data-k="lv" data-v="${x}" aria-pressed="${s.lv === x}">${x}</button>`).join('')}</div>`;
     const named = s.s === 'other' ? `<input class="in sess-name" data-i="${i}" data-k="n" value="${esc(s.n ?? '')}" maxlength="${SPEC.nameMax}" placeholder="Name it: padel, yoga, hike…" aria-label="Name of the activity">` : '';
     return `<div class="sess" style="--c:var(--${s.s})"><div class="sess-head"><b>${sp.name}</b><button type="button" data-del="${i}">Remove</button></div>
-      ${named}${chips('f', SPEC.focus, s.f)}${levels}${s.s === 'lift' ? chips('lift', SPEC.lifts, s.lift) : ''}
-      <div class="grid">${grid}</div><p class="sess-calc" id="calc${i}">${sessCalc(s)}</p></div>`;
+      ${named}${chips('f', SPEC.focus, s.f)}${levels}
+      <div class="grid">${grid}</div>${s.s === 'lift' ? exBox(s, i) : ''}<p class="sess-calc" id="calc${i}">${sessCalc(s)}</p></div>`;
   }).join('');
+  exNames();
 }
 $('sessBox').addEventListener('click', e => {
   const del = e.target.closest('[data-del]');
   if (del) { cur.sessions.splice(+del.dataset.del, 1); drawSessions(); touch(); return; }
+  const xadd = e.target.closest('[data-xadd]');
+  if (xadd) {
+    const s = cur.sessions[+xadd.dataset.xadd], xs = exOf(s);
+    if (xs.length < SPEC.exMax) xs.push({ n: '' });
+    drawSessions();
+    $('sessBox').querySelector(`[data-i="${xadd.dataset.xadd}"][data-x="${xs.length - 1}"][data-xk="n"]`)?.focus();
+    return;
+  }
+  const xdel = e.target.closest('[data-xdel]');
+  if (xdel) { const s = cur.sessions[+xdel.dataset.i]; exOf(s).splice(+xdel.dataset.xdel, 1); if (!s.x.length) delete s.x; drawSessions(); touch(); return; }
   const c = e.target.closest('.chip[data-k]'); if (!c) return;
   const s = cur.sessions[+c.dataset.i], k = c.dataset.k, v = k === 'lv' ? +c.dataset.v : c.dataset.v;
   s[k] = s[k] === v ? undefined : v;
@@ -463,9 +495,16 @@ $('sessBox').addEventListener('click', e => {
   touch();
 });
 $('sessBox').addEventListener('input', e => {
-  const k = e.target.dataset.k; if (!k || e.target.classList.contains('chip')) return;
+  const k = e.target.dataset.k; if ((!k && e.target.dataset.x === undefined) || e.target.classList.contains('chip')) return;
   const i = +e.target.dataset.i, s = cur.sessions[i], raw = e.target.value;
   let v;
+  if (e.target.dataset.x !== undefined) {
+    const x = exOf(s)[+e.target.dataset.x], xk = e.target.dataset.xk;
+    if (xk === 'n') { const n = raw.trim(); if (n) x.n = n; else delete x.n; }
+    else { v = raw === '' ? undefined : Number(raw); if (v === undefined || Number.isNaN(v)) delete x[xk]; else x[xk] = Math.round(v * 100) / 100; }
+    $('calc' + i).textContent = sessCalc(s);
+    touch(); return;
+  }
   if (k === 'n') { const n = raw.trim(); if (n) s.n = n; else delete s.n; touch(); return; }
   if (k === 'd') { v = toDuration(raw); delete s.t; delete s.e; delete s.sec; }
   else if (k === 'm') v = raw === '' ? undefined : Number(raw) * (s.s === 'run' ? 1000 : 1);

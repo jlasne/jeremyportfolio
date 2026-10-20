@@ -28,18 +28,21 @@ export const SPEC = {
 
   /* The sports, and what one session of each is measured by. Every
      session: a target, an effort level from 1 to 5, how long it lasted and
-     its average and peak heart rate. Run: a distance on top. Lift:
-     the top set of one lift. Swim: a training, nothing more. Other: any
+     its average and peak heart rate. Run: a distance on top. Gym:
+     any exercises, each named, with sets, reps and weight. Swim: a training, nothing more. Other: any
      other activity, named when logged (padel, yoga, a hike). */
   sports: [
     { id: 'run',   name: 'Run',   focus: 'cardio' },
     { id: 'swim',  name: 'Swim',  focus: 'cardio' },
-    { id: 'lift',  name: 'Lift',  focus: 'strength' },
+    { id: 'lift',  name: 'Gym',   focus: 'strength' },
     { id: 'other', name: 'Other', focus: 'cardio' },
   ],
   /* the longest name an Other session may carry */
   nameMax: 24,
+  /* the lifts of the first Gym sessions, kept as one top set each */
   lifts: ['squat', 'bench', 'deadlift'],
+  /* the most exercises one Gym session may hold */
+  exMax: 12,
   focus: ['strength', 'speed', 'cardio'],
   /* How much each part counts in a session's effort, by target: the
      average heart rate, the peak heart rate and the level I felt. */
@@ -94,8 +97,9 @@ const word = (raw, list) => (typeof raw === 'string' && list.includes(raw) ? raw
    after midnight) in sessions logged before `d`, how long it lasted in
    minutes, `f` its target, `lv` the effort I felt from 1 to 5,
    `hr` and `pk` its average and peak heart rate, `m` its distance in metres
-   and `sec` its time in seconds (run), `lift`, `kg` and `reps` the top set
-   (lift), `n` the name of the activity (other). A target kept as
+   and `sec` its time in seconds (run), `x` the exercises
+   (gym: a name, sets, reps and kg each; the first sessions kept one top
+   set as `lift`, `kg` and `reps`), `n` the name of the activity (other). A target kept as
    "endurance" before is read as cardio. */
 function cleanSession(s) {
   if (!s || typeof s !== 'object') return undefined;
@@ -118,6 +122,8 @@ function cleanSession(s) {
     const n = typeof s.n === 'string' ? s.n.trim().slice(0, SPEC.nameMax) : '';
     if (n) out.n = n;
   } else if (sport === 'lift') {
+    const x = (Array.isArray(s.x) ? s.x : []).map(cleanExercise).filter(Boolean).slice(0, SPEC.exMax);
+    if (x.length) out.x = x;
     put('lift', word(s.lift, SPEC.lifts));
     put('kg', num(s.kg, 500));
     put('reps', num(s.reps, 30, 1));
@@ -126,6 +132,19 @@ function cleanSession(s) {
     put('m', num(s.m, 100000));
     put('sec', num(s.sec, 86400));
   }
+  return out;
+}
+
+/* One exercise of a Gym session: a name, then sets, reps and kg. */
+function cleanExercise(e) {
+  if (!e || typeof e !== 'object') return undefined;
+  const n = typeof e.n === 'string' ? e.n.trim().slice(0, SPEC.nameMax) : '';
+  if (!n) return undefined;
+  const out = { n };
+  const sets = num(e.sets, 50, 1), reps = num(e.reps, 1000, 1), kg = num(e.kg, 1000);
+  if (sets !== undefined) out.sets = Math.round(sets);
+  if (reps !== undefined) out.reps = Math.round(reps);
+  if (kg !== undefined) out.kg = kg;
   return out;
 }
 
@@ -210,6 +229,8 @@ export function fromExp0(d) {
 export const REF = { run: 5000 };
 export const runSec = s => s.sec > 0 ? s.sec : minutes(s) ? minutes(s) * 60 : undefined;
 export const equivalent = s => (REF[s.s] && s.m > 0 && runSec(s) ? runSec(s) * Math.pow(REF[s.s] / s.m, 1.06) : undefined);
+/* The exercises of a Gym session; a first session's top set reads as one. */
+export const exercises = s => s.x?.length ? s.x : s.lift ? [{ n: s.lift[0].toUpperCase() + s.lift.slice(1), kg: s.kg, reps: s.reps }] : [];
 /* The most a lift could be done once, from a set of several (Epley). */
 export const e1rm = s => (s.kg > 0 && s.reps > 0 ? (s.reps === 1 ? s.kg : s.kg * (1 + s.reps / 30)) : undefined);
 /* My maximum heart rate: the highest peak (or average) of all my sessions,
@@ -241,27 +262,26 @@ export function load(s, top) {
   return m && e !== undefined ? m * e : undefined;
 }
 
-/* The one number of a session and the key its best is kept under: lower
-   is better for times, higher for lifts. */
-export function score(s) {
-  if (s.s === 'lift') { const v = e1rm(s); return v && s.lift ? { key: `lift:${s.lift}`, v, high: true } : null; }
+/* The numbers of a session and the key each best is kept under: lower is
+   better for times, higher for lifts. A Gym session has one per exercise
+   with a weight and reps, keyed by its name. */
+export function scores(s) {
+  if (s.s === 'lift') return exercises(s).map(e => { const v = e1rm(e); return v ? { key: `lift:${e.n.toLowerCase()}`, v, high: true } : null; }).filter(Boolean);
   const v = equivalent(s);
-  return v ? { key: s.s, v, high: false } : null;
+  return v ? [{ key: s.s, v, high: false }] : [];
 }
 
 /* Form: a session against the best of its kind so far, best = 100 %. */
 export function bests(sessions) {
   const best = {};
-  for (const s of sessions) {
-    const r = score(s);
-    if (!r) continue;
+  for (const s of sessions) for (const r of scores(s)) {
     const b = best[r.key];
     if (b === undefined || (r.high ? r.v > b : r.v < b)) best[r.key] = r.v;
   }
   return best;
 }
+/* A Gym session's form is the average of its exercises'. */
 export function form(s, best) {
-  const r = score(s);
-  if (!r || !best[r.key]) return undefined;
-  return r.high ? r.v / best[r.key] : best[r.key] / r.v;
+  const f = scores(s).filter(r => best[r.key]).map(r => r.high ? r.v / best[r.key] : best[r.key] / r.v);
+  return f.length ? f.reduce((a, b) => a + b, 0) / f.length : undefined;
 }

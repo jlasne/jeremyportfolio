@@ -211,6 +211,13 @@ export default defineSchema({
       m: v.optional(v.float64()),
       sec: v.optional(v.float64()),
       lift: v.optional(v.string()),
+      /* a Gym session's exercises: a name, sets, reps and kg each */
+      x: v.optional(v.array(v.object({
+        n: v.string(),
+        sets: v.optional(v.float64()),
+        reps: v.optional(v.float64()),
+        kg: v.optional(v.float64()),
+      }))),
       kg: v.optional(v.float64()),
       reps: v.optional(v.float64()),
       /* the name of an Other session: padel, yoga, a hike */

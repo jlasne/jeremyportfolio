@@ -4,7 +4,7 @@
    day this device still holds because the server could not take it yet.
    Imported by /wellness and /wellness/details. */
 
-import { SPEC, SLEEP, SPORT, dateKey, shift, fromExp0, bests, form, effort, hrTop, minutes, runSec, load as loadOf } from '/wellness/spec.js';
+import { SPEC, SLEEP, SPORT, dateKey, shift, fromExp0, exercises, bests, form, effort, hrTop, minutes, runSec, load as loadOf } from '/wellness/spec.js';
 
 export const API = 'https://fiery-eel-944.eu-west-1.convex.site/overlap';
 export const today = dateKey();
@@ -146,9 +146,12 @@ export function nightScores(keys = monthKeys()) {
 }
 
 /* ── sport ─────────────────────────────────────────────────────────── */
+/* One exercise in words: Bench 3 × 8 60 kg, or Squat 5 reps 100 kg */
+export const exText = e => [e.n, e.sets && e.reps ? `${e.sets} × ${e.reps}` : e.reps ? `${e.reps} reps` : e.sets ? `${e.sets} sets` : '', e.kg ? `${e.kg} kg` : ''].filter(Boolean).join(' ');
+
 /* What a session measured, in words: distance, time and pace, or the top set. */
 export function measure(s) {
-  if (s.s === 'lift') return s.kg && s.reps ? `${s.lift ? cap(s.lift) + ' ' : ''}${s.kg} kg × ${s.reps}` : '';
+  if (s.s === 'lift') return exercises(s).map(exText).filter(Boolean).join(' · ');
   const sec = runSec(s);
   if (s.s !== 'run' || !s.m || !sec) return '';
   return `${(s.m / 1000).toFixed(2).replace(/\.?0+$/, '')} km · ${mmss(sec)} · ${mmss(sec / (s.m / 1000))}/km`;
@@ -186,7 +189,7 @@ export function csv() {
   const t = top(), best = bests(allSessions());
   const head = ['date', ...SPEC.sleep.map(f => f.id === 'min' ? 'sleep_min' : f.unit === 'clock' ? f.id : 'sleep_' + f.id),
     'sport', 'name', 'target', 'effort_level', 'start', 'end', 'minutes', 'hr_avg', 'hr_peak', 'hr_max_used',
-    'effort_pct', 'load', 'distance_m', 'time_sec', 'lift', 'kg', 'reps', 'form_pct', 'note'];
+    'effort_pct', 'load', 'distance_m', 'time_sec', 'lift', 'kg', 'reps', 'exercises', 'form_pct', 'note'];
   const hhmm = n => n == null ? '' : `${pad(Math.floor(n / 60))}:${pad(n % 60)}`;
   const cell = v => v === undefined || v === null ? '' : /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v);
   const r1 = v => v === undefined ? '' : Math.round(v * 10) / 10;
@@ -198,8 +201,8 @@ export function csv() {
     for (const s of ss) {
       const e = s && effort(s, t), f = s && form(s, best);
       rows.push([k, ...night, ...(s ? [s.s, s.n, s.f, s.lv, hhmm(s.t), hhmm(s.e), minutes(s), s.hr, s.pk, s.hr || s.pk ? t : '',
-        e === undefined ? '' : Math.round(e * 100), r1(loadOf(s, t)), s.m, s.s === 'run' ? runSec(s) : '', s.lift, s.kg, s.reps, f === undefined ? '' : Math.round(f * 100)]
-        : Array(18).fill('')), d.note]);
+        e === undefined ? '' : Math.round(e * 100), r1(loadOf(s, t)), s.m, s.s === 'run' ? runSec(s) : '', s.lift, s.kg, s.reps, s.s === 'lift' ? exercises(s).map(exText).join('; ') : '', f === undefined ? '' : Math.round(f * 100)]
+        : Array(19).fill('')), d.note]);
     }
   }
   return [head, ...rows].map(r => r.map(cell).join(',')).join('\r\n') + '\r\n';
