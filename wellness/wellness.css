@@ -200,7 +200,7 @@ fieldset h3 span { font-size: 13px; font-weight: 500; color: var(--ice-45); marg
 .sess { margin-top: 18px; padding: 14px 0 0; border-top: 4px solid var(--c); }
 .sess-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .sess-head b { font: 600 18px/1 var(--px); color: var(--c); }
-.sess-head button { border: 0; background: none; cursor: pointer; color: var(--ice-45); font-size: 13px; padding: 6px 0; }
+.sess-head button { flex-shrink: 0; border: 0; background: none; cursor: pointer; color: var(--ice-45); font-size: 13px; padding: 6px 0; }
 .sess-name { margin-top: 10px; }
 .sess-calc { margin: 10px 0 0; font: 500 14px/1.4 var(--px); color: var(--ice-70); min-height: 20px; }
 .adds { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
