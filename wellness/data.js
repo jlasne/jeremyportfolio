@@ -102,14 +102,34 @@ export function gymMaxes() {
   for (const s of allSessions()) if (s.s === 'lift') for (const x of exercises(s)) {
     if (!x.n || !(x.kg > 0)) continue;
     const k = x.n.toLowerCase(), b = out.get(k);
-    if (!b || x.kg > b.kg || (x.kg === b.kg && (x.reps || 0) > (b.reps || 0))) out.set(k, { n: x.n, d: s.day, kg: x.kg, ...(x.reps ? { reps: x.reps } : {}), gym: true });
+    if (!b || x.kg > b.kg || (x.kg === b.kg && (x.reps || 0) > (b.reps || 0))) out.set(k, { n: x.n, d: s.day, kg: x.kg, ...(x.reps ? { reps: x.reps } : {}), from: 'Gym' });
   }
   return [...out.values()];
 }
-/* Every max: the ones I typed, and the Gym ones. A typed max and a Gym
+/* My fastest 1, 5 and 10 km, found by themselves from the runs: a run at
+   least that long (2 % short is allowed, a watch rounds), its time scaled
+   to the distance at the run's average pace. */
+export const RUN_MAX = [1000, 5000, 10000];
+export function runMaxes() {
+  const out = [];
+  for (const D of RUN_MAX) {
+    let b = null;
+    for (const s of allSessions()) {
+      const sec = s.s === 'run' && s.m >= D * .98 ? runSec(s) : undefined;
+      if (!sec) continue;
+      const t = sec * D / s.m;
+      if (!b || t < b.sec) b = { n: `Run ${D / 1000} km`, d: s.day, sec: Math.round(t), from: 'Run', pace: t / (D / 1000) };
+    }
+    if (b) out.push(b);
+  }
+  return out;
+}
+
+/* Every max: the ones I typed, the Gym ones and the run ones. A typed max and a Gym
    one with the same name: the heavier one shows. */
 export function allMaxes() {
   const list = state.maxes.filter(x => x.n).map(x => ({ ...x }));
+  list.push(...runMaxes());
   for (const g of gymMaxes()) {
     const i = list.findIndex(x => x.n.toLowerCase() === g.n.toLowerCase());
     if (i < 0) list.push(g);
