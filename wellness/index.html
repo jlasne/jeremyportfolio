@@ -109,6 +109,7 @@
       <div class="adds" id="adds"></div>
       <datalist id="exNames"></datalist>
       <h3 style="margin-top:30px">My max <span>the most I did, any day</span></h3>
+      <p class="sess-calc" id="gymMax"></p>
       <div id="maxBox"></div>
       <div class="adds"><button class="chip" id="addMax" type="button">Add a max</button></div>
       <button class="btn ghost" id="csvB" type="button" style="margin-top:30px">Export every day as CSV</button>
@@ -124,7 +125,7 @@
 
 <script type="module">
 import { SPEC, SLEEP, SPORT, shift, daysBetween, exercises, bests, form, effort, minutes, hrTop, load as loadOf } from '/wellness/spec.js';
-import { maxText, keepMax, avg, dayLoads, top, kept, csv, measure, today, COLOR, pad, dayName, short, weekday, clock, hm, mmss, cap, esc, copy, label, fmtVal, state, entry, allKeys, monthKeys, val, sessionsOf, allSessions, sportBefore, held, keepHeld, api, load as loadData, spread, normal, verdict, tone, INDICATORS, nightScores, unitOf } from '/wellness/data.js';
+import { gymMaxes, maxText, keepMax, avg, dayLoads, top, kept, csv, measure, today, COLOR, pad, dayName, short, weekday, clock, hm, mmss, cap, esc, copy, label, fmtVal, state, entry, allKeys, monthKeys, val, sessionsOf, allSessions, sportBefore, held, keepHeld, api, load as loadData, spread, normal, verdict, tone, INDICATORS, nightScores, unitOf } from '/wellness/data.js';
 import { still, blockChart } from '/wellness/charts.js';
 
 const $ = id => document.getElementById(id);
@@ -582,6 +583,12 @@ function drawMaxes() {
       ${chips}<div class="grid">${grid}</div><p class="sess-calc" id="maxCalc${i}">${maxText(x)}</p></div>`;
   }).join('');
   $('addMax').disabled = state.maxes.length >= SPEC.maxCount;
+  drawGymMax();
+}
+/* the Gym maxes update by themselves from the sessions: shown, not typed */
+function drawGymMax() {
+  const g = gymMaxes();
+  $('gymMax').innerHTML = g.length ? `From Gym, by itself: ${g.map(x => `${esc(x.n)} ${maxText(x)}`).join(' · ')}` : 'Each Gym exercise with a weight adds its heaviest here by itself.';
 }
 $('addMax').addEventListener('click', () => {
   if (state.maxes.length >= SPEC.maxCount) return;
@@ -647,7 +654,7 @@ addEventListener('beforeunload', e => { if (dirty || maxDirty) { e.preventDefaul
 
 /* ── draw everything that reads the data ───────────────────────────── */
 function drawAll(animate) {
-  drawHero(); drawLast(); drawNights(animate); drawSport(animate); drawPairs();
+  drawHero(); drawLast(); drawNights(animate); drawSport(animate); drawPairs(); drawGymMax();
 }
 let rs = 0;
 addEventListener('resize', () => { cancelAnimationFrame(rs); rs = requestAnimationFrame(() => { drawNights(false); drawSport(false); }); });

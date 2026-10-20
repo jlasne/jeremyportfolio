@@ -95,10 +95,33 @@ export async function load(pass) {
   return days.reason?.message === 'Unknown operation' ? '' : days.reason?.message || 'Something went wrong';
 }
 
+/* My max from the Gym sessions, found by itself: for each exercise, the
+   heaviest weight lifted (more reps wins a tie), with its reps and day. */
+export function gymMaxes() {
+  const out = new Map();
+  for (const s of allSessions()) if (s.s === 'lift') for (const x of exercises(s)) {
+    if (!x.n || !(x.kg > 0)) continue;
+    const k = x.n.toLowerCase(), b = out.get(k);
+    if (!b || x.kg > b.kg || (x.kg === b.kg && (x.reps || 0) > (b.reps || 0))) out.set(k, { n: x.n, d: s.day, kg: x.kg, ...(x.reps ? { reps: x.reps } : {}), gym: true });
+  }
+  return [...out.values()];
+}
+/* Every max: the ones I typed, and the Gym ones. A typed max and a Gym
+   one with the same name: the heavier one shows. */
+export function allMaxes() {
+  const list = state.maxes.filter(x => x.n).map(x => ({ ...x }));
+  for (const g of gymMaxes()) {
+    const i = list.findIndex(x => x.n.toLowerCase() === g.n.toLowerCase());
+    if (i < 0) list.push(g);
+    else if (!(list[i].kg >= g.kg)) list[i] = g;
+  }
+  return list;
+}
+
 /* One max in words: 12 reps · 80 kg · 2000 m · 32 km/h · 3:10 */
 export function maxText(x) {
   return SPEC.maxUnits.filter(f => x[f.id] !== undefined)
-    .map(f => f.id === 'sec' ? mmss(x.sec) : `${x[f.id]} ${f.unit}`).join(' · ');
+    .map(f => f.id === 'sec' ? mmss(x.sec) : f.id === 'reps' && x.reps === 1 ? '1 rep' : `${x[f.id]} ${f.unit}`).join(' · ');
 }
 
 /* ── normal: the middle half of my nights ──────────────────────────── */
