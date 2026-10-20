@@ -25,7 +25,8 @@ export function play(draw, ms = 700) {
 const FILL = { good: COLOR.good, bad: COLOR.bad, mid: COLOR.blue };
 
 /* One column of thin blocks per day. `value(k)` is the day's number,
-   `tone(v)` its colour (or `fill(k)` a colour of its own, `empty(k)` the
+   `tone(v)` its colour (or `fill(k)` a colour of its own, `stack(k)` parts
+   [{ c, v }] stacked from the bottom in their colours, `empty(k)` the
    colour of a day with no number), `band` the normal range drawn behind, `lo` and `hi`
    a fixed scale (otherwise the data's own), `marks(k)` the sessions shown
    as small squares under the column, `read(i)` what to say about a column
@@ -59,9 +60,13 @@ export function blockChart(cv, opts) {
         const v = vals[i];
         if (v !== undefined) {
           const rows = rowsOf(v), show = Math.round(rows * Math.max(0, Math.min(1, p * 1.7 - i / n * .7)));
-          ctx.fillStyle = o.fill ? o.fill(k) : FILL[o.tone(v)];
+          ctx.fillStyle = o.fill ? o.fill(k) : o.tone ? FILL[o.tone(v)] : FILL.mid;
           const dim = pick !== null && pick !== i;
+          /* each row takes the colour of the part its middle falls in */
+          const parts = o.stack ? o.stack(k) : null, sum = parts ? parts.reduce((a, x) => a + x.v, 0) : 0;
+          const colorAt = r => { let at = (r + .5) / rows * sum; for (const x of parts) { if (at < x.v) return x.c; at -= x.v; } return parts[parts.length - 1].c; };
           for (let r = 0; r < show; r++) {
+            if (parts) ctx.fillStyle = colorAt(r);
             ctx.globalAlpha = (dim ? .35 : 1) * (r === rows - 1 ? 1 : .78);
             ctx.fillRect(x0(i), (ROWS - 1 - r) * PITCH, cw(i), BH);
           }

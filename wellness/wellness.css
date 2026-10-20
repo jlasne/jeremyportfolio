@@ -90,6 +90,7 @@ h2 .soft { color: var(--ice-45); }
 
 /* ── charts: blocks on a canvas, one column per night ── */
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+.chips-k { align-self: center; margin-right: 4px; font-size: 13px; color: var(--ice-45); }
 .chip {
   padding: 7px 12px; border: 0; border-radius: 0; cursor: pointer; background: var(--ice-08); color: var(--ice-70);
   font: 500 14px/1 var(--px); transition: background .2s, color .2s;

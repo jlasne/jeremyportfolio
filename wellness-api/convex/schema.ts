@@ -204,6 +204,9 @@ export default defineSchema({
       t: v.optional(v.float64()),
       e: v.optional(v.float64()),
       hr: v.optional(v.float64()),
+      /* peak heart rate, and the effort felt from 1 to 5 */
+      pk: v.optional(v.float64()),
+      lv: v.optional(v.float64()),
       m: v.optional(v.float64()),
       sec: v.optional(v.float64()),
       lift: v.optional(v.string()),

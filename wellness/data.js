@@ -4,7 +4,7 @@
    day this device still holds because the server could not take it yet.
    Imported by /wellness and /wellness/details. */
 
-import { SPEC, SLEEP, SPORT, dateKey, shift, fromExp0, bests, form, effort } from '/wellness/spec.js';
+import { SPEC, SLEEP, SPORT, dateKey, shift, fromExp0, bests, form, effort, hrTop, minutes, load as loadOf } from '/wellness/spec.js';
 
 export const API = 'https://fiery-eel-944.eu-west-1.convex.site/overlap';
 export const today = dateKey();
@@ -49,6 +49,9 @@ export const sportBefore = k => sessionsOf(shift(k, -1));
 const HELD = 'wellness.held';
 export const held = (() => { try { return JSON.parse(localStorage.getItem(HELD) || '{}') || {}; } catch { return {}; } })();
 export const keepHeld = () => { try { localStorage.setItem(HELD, JSON.stringify(held)); } catch {} };
+/* a target kept as "endurance" before reads as cardio */
+const cardio = d => { for (const s of d?.sessions || []) if (s.f === 'endurance') s.f = 'cardio'; return d; };
+for (const d of Object.values(held)) cardio(d);
 Object.assign(state.days, held);
 
 export function api(op, args) {
@@ -68,11 +71,11 @@ export async function load(pass) {
     for (const [k, d] of Object.entries(old.value.log)) if (k >= SPEC.start && k <= today) { const x = fromExp0(d); if (x) state.exp0[k] = x; }
   }
   if (days.status === 'fulfilled') {
-    for (const d of days.value || []) state.days[d.day] = d;
+    for (const d of days.value || []) state.days[d.day] = cardio(d);
     /* what this device held is newer than the server's copy: send it up */
     for (const [k, d] of Object.entries(held)) {
       state.days[k] = d;
-      if (pass) api('days.save', { passphrase: pass, today, day: k, entry: d }).then(() => { delete held[k]; keepHeld(); }, () => {});
+      if (pass) api('days.save', { passphrase: pass, today, day: k, entry: d }).then(out => { if (kept(d, out)) { delete held[k]; keepHeld(); } }, () => {});
     }
     return '';
   }
@@ -128,24 +131,57 @@ export function nightScores(keys = monthKeys()) {
 /* What a session measured, in words: distance, time and pace, or the top set. */
 export function measure(s) {
   if (s.s === 'lift') return s.kg && s.reps ? `${s.lift ? cap(s.lift) + ' ' : ''}${s.kg} kg × ${s.reps}` : '';
-  if (!s.m || !s.sec) return '';
-  const pace = s.s === 'run' ? `${mmss(s.sec / (s.m / 1000))}/km` : `${mmss(s.sec / (s.m / 100))}/100 m`;
-  return `${s.s === 'run' ? (s.m / 1000).toFixed(2).replace(/\.?0+$/, '') + ' km' : s.m + ' m'} · ${mmss(s.sec)} · ${pace}`;
+  if (s.s !== 'run' || !s.m || !s.sec) return '';
+  return `${(s.m / 1000).toFixed(2).replace(/\.?0+$/, '')} km · ${mmss(s.sec)} · ${mmss(s.sec / (s.m / 1000))}/km`;
 }
 export const formCls = f => f === undefined ? 'f-none' : f >= .97 ? 'f-good' : f >= .9 ? 'f-mid' : 'f-bad';
 const avg = v => (v.length ? v.reduce((a, b) => a + b, 0) / v.length : undefined);
 
-/* The sport score, the same idea as the night score: a session from 0 to
-   100 as the average of its effort (average heart rate against the
-   maximum) and its form (against my best of its kind), whichever of the
-   two it has. A day's score is the average of its sessions. */
-export const sessionScore = (s, best) => avg([effort(s), form(s, best)].filter(x => x !== undefined).map(x => Math.min(100, x * 100)));
-export function dayScores(keys = monthKeys()) {
-  const best = bests(allSessions()), out = {};
+/* My maximum heart rate so far, read off every session logged. */
+export const top = () => hrTop(allSessions());
+
+/* The load of each day: the sum of its sessions' minutes times effort,
+   kept with each sport's share so the column can stack them. */
+export function dayLoads(keys = monthKeys()) {
+  const t = top(), out = {};
   for (const k of keys) {
-    const v = avg(sessionsOf(k).map(s => sessionScore(s, best)).filter(x => x !== undefined));
-    if (v !== undefined) out[k] = v;
+    const parts = sessionsOf(k).map(s => ({ s: s.s, v: loadOf(s, t) })).filter(p => p.v !== undefined);
+    if (parts.length) out[k] = { total: parts.reduce((a, p) => a + p.v, 0), parts };
   }
   return out;
 }
 export { avg };
+
+/* Did the server keep every field it was sent? An older server drops the
+   ones it does not know yet. */
+export function kept(sent, got) {
+  const a = sent?.sessions || [], b = got?.sessions || [];
+  return a.length === b.length && a.every((s, i) => Object.keys(s).every(key => s[key] === undefined || b[i]?.[key] !== undefined));
+}
+
+/* ── every day as one CSV ──────────────────────────────────────────── */
+/* One row per session, with the night of that morning beside it; a day
+   with no session gets one row for its night. Clock times as HH:MM, a
+   bedtime after midnight past 24:00 as logged. */
+export function csv() {
+  const t = top(), best = bests(allSessions());
+  const head = ['date', ...SPEC.sleep.map(f => f.id === 'min' ? 'sleep_min' : f.unit === 'clock' ? f.id : 'sleep_' + f.id),
+    'sport', 'name', 'target', 'effort_level', 'start', 'end', 'minutes', 'hr_avg', 'hr_peak', 'hr_max_used',
+    'effort_pct', 'load', 'distance_m', 'time_sec', 'lift', 'kg', 'reps', 'form_pct', 'note'];
+  const hhmm = n => n == null ? '' : `${pad(Math.floor(n / 60))}:${pad(n % 60)}`;
+  const cell = v => v === undefined || v === null ? '' : /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v);
+  const r1 = v => v === undefined ? '' : Math.round(v * 10) / 10;
+  const rows = [];
+  for (const k of allKeys()) {
+    const d = entry(k); if (!d) continue;
+    const night = SPEC.sleep.map(f => f.unit === 'clock' ? hhmm(d.sleep?.[f.id]) : d.sleep?.[f.id]);
+    const ss = d.sessions?.length ? d.sessions : [null];
+    for (const s of ss) {
+      const e = s && effort(s, t), f = s && form(s, best);
+      rows.push([k, ...night, ...(s ? [s.s, s.n, s.f, s.lv, hhmm(s.t), hhmm(s.e), minutes(s), s.hr, s.pk, s.hr || s.pk ? t : '',
+        e === undefined ? '' : Math.round(e * 100), r1(loadOf(s, t)), s.m, s.sec, s.lift, s.kg, s.reps, f === undefined ? '' : Math.round(f * 100)]
+        : Array(18).fill('')), d.note]);
+    }
+  }
+  return [head, ...rows].map(r => r.map(cell).join(',')).join('\r\n') + '\r\n';
+}
