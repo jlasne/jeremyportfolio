@@ -62,7 +62,7 @@
     <p class="kick">Last 30 days</p>
     <h2 id="sportT">Sport <span class="soft">by day</span></h2>
     <div class="ns" id="sportNow"></div>
-    <p class="note">One load per day: how long each session lasted, in minutes, times its effort, all sports added up and stacked. Effort mixes the average and peak heart rate against my highest so far (<span id="hrMax"></span> bpm) with the level I felt out of 5. The target sets the mix: cardio leans on the average, speed on the peak, strength on the level.</p>
+    <p class="note">One load per day: how long each session lasted, in minutes, times its effort, all sports added up and stacked. Effort mixes how far the average and peak heart rate climbed from resting (<span id="hrRest"></span> bpm, my normal at night) to my highest so far (<span id="hrMax"></span> bpm) with the level I felt out of 5. The target sets the mix: cardio 50 % average, 20 % peak, 30 % level; speed 20, 50, 30; strength 20, 20, 60.</p>
     <p class="readout" id="sportRead" aria-live="polite"></p>
     <div class="chart"><canvas id="sportC" aria-label="Sport load, one column per day, stacked by sport"></canvas></div>
     <div class="axis" id="sportAxis"></div>
@@ -121,7 +121,7 @@
 
 <script type="module">
 import { SPEC, SLEEP, SPORT, shift, daysBetween, exercises, bests, form, effort, minutes, hrTop, load as loadOf } from '/wellness/spec.js';
-import { avg, dayLoads, top, kept, csv, measure, today, COLOR, pad, dayName, short, weekday, clock, hm, mmss, cap, esc, copy, label, fmtVal, state, entry, allKeys, monthKeys, val, sessionsOf, allSessions, sportBefore, held, keepHeld, api, load as loadData, spread, normal, verdict, tone, INDICATORS, nightScores, unitOf } from '/wellness/data.js';
+import { hrOf, avg, dayLoads, top, kept, csv, measure, today, COLOR, pad, dayName, short, weekday, clock, hm, mmss, cap, esc, copy, label, fmtVal, state, entry, allKeys, monthKeys, val, sessionsOf, allSessions, sportBefore, held, keepHeld, api, load as loadData, spread, normal, verdict, tone, INDICATORS, nightScores, unitOf } from '/wellness/data.js';
 import { still, blockChart } from '/wellness/charts.js';
 
 const $ = id => document.getElementById(id);
@@ -281,7 +281,7 @@ function readSport(i, dl) {
   if (i === null) { $('sportRead').textContent = got.length ? `Average load ${Math.round(avg(got))} per day of sport` : 'No session with a length and an effort yet'; return; }
   const k = keys[i], ss = sessionsOf(k);
   if (!ss.length) { $('sportRead').textContent = `${dayName(k)} · rest`; return; }
-  const t = top();
+  const t = hrOf();
   const bits = ss.map(s => {
     const e = effort(s, t), m = minutes(s), l = loadOf(s, t);
     return `${esc(label(s))}${m ? ` ${m} min` : ''}${e !== undefined ? ` at ${Math.round(e * 100)} %` : ''}${l !== undefined ? ` = ${Math.round(l)}` : ''}`;
@@ -290,6 +290,7 @@ function readSport(i, dl) {
 }
 function drawSport(animate) {
   $('hrMax').textContent = top() ?? '–';
+  $('hrRest').textContent = hrOf().rest !== undefined ? Math.round(hrOf().rest) : '–';
   sportC.draw(animate);
   const keys = monthKeys(), n = keys.length;
   $('sportAxis').innerHTML = [keys[0], keys[Math.floor((n - 1) / 2)], keys[n - 1]].map(k => `<span>${short(k)}</span>`).join('');
@@ -303,7 +304,7 @@ function drawSport(animate) {
     <p class="vs">${v === undefined ? 'Add how long, and a heart rate or a level, when logging' : `Average ${Math.round(avg(got))} over ${got.length} day${got.length === 1 ? '' : 's'} of sport`}</p>`;
 
   /* each sport over the month: load, effort, form, no list */
-  const month = new Set(keys), all = allSessions(), best = bests(all), t = top();
+  const month = new Set(keys), all = allSessions(), best = bests(all), t = hrOf();
   $('sports').innerHTML = SPEC.sports.map(sp => {
     const list = all.filter(s => s.s === sp.id && month.has(s.day));
     const loads = list.map(s => loadOf(s, t)).filter(x => x !== undefined);
@@ -431,7 +432,7 @@ $('adds').addEventListener('click', e => {
 function sessCalc(s) {
   const best = bests([...allSessions().filter(x => x.day !== sel), ...cur.sessions]);
   const bits = [measure(s)];
-  const t = hrTop([...allSessions().filter(x => x.day !== sel), ...cur.sessions]), e = effort(s, t), l = loadOf(s, t);
+  const t = hrOf([...allSessions().filter(x => x.day !== sel), ...cur.sessions]), e = effort(s, t), l = loadOf(s, t);
   if (e !== undefined) bits.push(`${Math.round(e * 100)} % effort`);
   if (l !== undefined) bits.push(`load ${Math.round(l)}`);
   const f = form(s, best);

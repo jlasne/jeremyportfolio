@@ -47,7 +47,7 @@ export const SPEC = {
   /* How much each part counts in a session's effort, by target: the
      average heart rate, the peak heart rate and the level I felt. */
   mix: {
-    cardio:   { avg: .6, peak: .2, felt: .2 },
+    cardio:   { avg: .5, peak: .2, felt: .3 },
     speed:    { avg: .2, peak: .5, felt: .3 },
     strength: { avg: .2, peak: .2, felt: .6 },
   },
@@ -239,14 +239,24 @@ export function hrTop(sessions) {
   const v = sessions.flatMap(s => [s.pk, s.hr]).filter(x => x > 0);
   return v.length ? Math.max(...v) : undefined;
 }
-/* Effort, from 0 to 1: the average heart rate and the peak against my
-   maximum, and the level I felt out of 5, mixed by the target (SPEC.mix).
-   A part not logged leaves the others to share its weight. */
-export function effort(s, top) {
+/* How far a heart rate climbed from resting to my maximum, from 0 to 1
+   (heart rate reserve, Karvonen): with a resting 55 and a maximum 187,
+   121 bpm is 50 %, where 121 / 187 would read 65 %. Without a resting
+   heart rate, it falls back to the share of the maximum. */
+export function reserve(bpm, hr) {
+  const max = typeof hr === 'number' ? hr : hr?.max, rest = typeof hr === 'number' ? 0 : hr?.rest || 0;
+  if (!(bpm > 0) || !max || max <= rest) return undefined;
+  return Math.max(0, Math.min(1, (bpm - rest) / (max - rest)));
+}
+/* Effort, from 0 to 1: the average and the peak heart rate as a share of
+   my reserve, and the level I felt out of 5, mixed by the target
+   (SPEC.mix). `hr` is my maximum and resting heart rate. A part not
+   logged leaves the others to share its weight. */
+export function effort(s, hr) {
   const mix = SPEC.mix[s.f] || { avg: 1, peak: 1, felt: 1 };
   const parts = [
-    [mix.avg, s.hr > 0 && top ? s.hr / top : undefined],
-    [mix.peak, s.pk > 0 && top ? s.pk / top : undefined],
+    [mix.avg, reserve(s.hr, hr)],
+    [mix.peak, reserve(s.pk, hr)],
     [mix.felt, s.lv > 0 ? s.lv / SPEC.levels : undefined],
   ].filter(([, v]) => v !== undefined);
   const w = parts.reduce((a, [m]) => a + m, 0);
@@ -257,8 +267,8 @@ export function effort(s, top) {
 export const minutes = s => (s.d > 0 ? s.d : s.t != null && s.e != null ? (s.e - s.t + 1440) % 1440 || undefined : undefined);
 /* Load: minutes times effort. 60 minutes at 80 % is 48. A day's load is the
    sum of its sessions, so every sport adds to the same number. */
-export function load(s, top) {
-  const m = minutes(s), e = effort(s, top);
+export function load(s, hr) {
+  const m = minutes(s), e = effort(s, hr);
   return m && e !== undefined ? m * e : undefined;
 }
 

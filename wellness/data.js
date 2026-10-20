@@ -202,13 +202,15 @@ export function measure(s) {
 export const formCls = f => f === undefined ? 'f-none' : f >= .97 ? 'f-good' : f >= .9 ? 'f-mid' : 'f-bad';
 const avg = v => (v.length ? v.reduce((a, b) => a + b, 0) / v.length : undefined);
 
-/* My maximum heart rate so far, read off every session logged. */
+/* My maximum heart rate so far, read off every session logged, and my
+   resting heart rate: the normal of my nights. Effort reads between them. */
 export const top = () => hrTop(allSessions());
+export const hrOf = (sessions = allSessions()) => ({ max: hrTop(sessions), rest: normal('rhr')?.med });
 
 /* The load of each day: the sum of its sessions' minutes times effort,
    kept with each sport's share so the column can stack them. */
 export function dayLoads(keys = monthKeys()) {
-  const t = top(), out = {};
+  const t = hrOf(), out = {};
   for (const k of keys) {
     const parts = sessionsOf(k).map(s => ({ s: s.s, v: loadOf(s, t) })).filter(p => p.v !== undefined);
     if (parts.length) out[k] = { total: parts.reduce((a, p) => a + p.v, 0), parts };
@@ -229,7 +231,7 @@ export function kept(sent, got) {
    with no session gets one row for its night. Clock times as HH:MM, a
    bedtime after midnight past 24:00 as logged. */
 export function csv() {
-  const t = top(), best = bests(allSessions());
+  const t = hrOf(), best = bests(allSessions());
   const head = ['date', ...SPEC.sleep.map(f => f.id === 'min' ? 'sleep_min' : f.unit === 'clock' ? f.id : 'sleep_' + f.id),
     'sport', 'name', 'target', 'effort_level', 'start', 'end', 'minutes', 'hr_avg', 'hr_peak', 'hr_max_used',
     'effort_pct', 'load', 'distance_m', 'time_sec', 'lift', 'kg', 'reps', 'exercises', 'form_pct', 'note'];
@@ -243,7 +245,7 @@ export function csv() {
     const ss = d.sessions?.length ? d.sessions : [null];
     for (const s of ss) {
       const e = s && effort(s, t), f = s && form(s, best);
-      rows.push([k, ...night, ...(s ? [s.s, s.n, s.f, s.lv, hhmm(s.t), hhmm(s.e), minutes(s), s.hr, s.pk, s.hr || s.pk ? t : '',
+      rows.push([k, ...night, ...(s ? [s.s, s.n, s.f, s.lv, hhmm(s.t), hhmm(s.e), minutes(s), s.hr, s.pk, s.hr || s.pk ? t.max : '',
         e === undefined ? '' : Math.round(e * 100), r1(loadOf(s, t)), s.m, s.s === 'run' ? runSec(s) : '', s.lift, s.kg, s.reps, s.s === 'lift' ? exercises(s).map(exText).join('; ') : '', f === undefined ? '' : Math.round(f * 100)]
         : Array(19).fill('')), d.note]);
     }

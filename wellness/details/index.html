@@ -60,7 +60,7 @@
   <section class="sec" id="sport" aria-labelledby="sportT">
     <p class="kick">Every session</p>
     <h2 id="sportT">Sport <span class="soft">log</span></h2>
-    <p class="note">Form compares a session with my best of its kind: 100 % is the best. Effort mixes the average and peak heart rate against my highest so far (<span id="hrMax"></span> bpm) with the level I felt out of 5. Load is minutes times effort.</p>
+    <p class="note">Form compares a session with my best of its kind: 100 % is the best. Effort mixes how far the average and peak heart rate climbed from resting (<span id="hrRest"></span> bpm) to my highest so far (<span id="hrMax"></span> bpm) with the level I felt out of 5. Load is minutes times effort.</p>
     <h3 class="max-t">My max <span>the heaviest of each Gym exercise and my fastest 1, 5 and 10 km, updated by themselves</span></h3>
     <ul class="list maxes" id="maxList"></ul>
     <div class="cal" id="cal" aria-label="Sessions by day"></div>
@@ -75,7 +75,7 @@
 
 <script type="module">
 import { SPEC, SLEEP, SPORT, bests, form, effort, minutes, load as loadOf } from '/wellness/spec.js';
-import { mmss, allMaxes, maxText, top, measure, formCls, cap, weekday, sessionsOf, allSessions, today, COLOR, dayName, short, clock, hm, esc, label, fmtVal, unitOf, allKeys, monthKeys, val, sportBefore, load, spread, normal, verdict, tone, INDICATORS, nightScores } from '/wellness/data.js';
+import { hrOf, mmss, allMaxes, maxText, top, measure, formCls, cap, weekday, sessionsOf, allSessions, today, COLOR, dayName, short, clock, hm, esc, label, fmtVal, unitOf, allKeys, monthKeys, val, sportBefore, load, spread, normal, verdict, tone, INDICATORS, nightScores } from '/wellness/data.js';
 import { blockChart } from '/wellness/charts.js';
 
 const $ = id => document.getElementById(id);
@@ -152,8 +152,9 @@ function drawBed() {
 
 /* ── every session, newest first, and a calendar of the days ───────── */
 function drawLog() {
-  const t = top();
-  $('hrMax').textContent = t ?? '–';
+  const t = hrOf();
+  $('hrMax').textContent = t.max ?? '–';
+  $('hrRest').textContent = t.rest !== undefined ? Math.round(t.rest) : '–';
   const keys = allKeys(), lead = (weekday(keys[0]) + 6) % 7;
   let html = ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(x => `<span class="dow">${x}</span>`).join('') + '<i class="off"></i>'.repeat(lead);
   for (const k of keys) {
