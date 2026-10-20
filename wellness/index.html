@@ -441,12 +441,12 @@ function sessCalc(s) {
   if (f !== undefined) bits.push(`form ${Math.round(f * 100)} %`);
   return bits.filter(Boolean).join(' · ');
 }
-/* A Gym session's exercises: any name, then sets, reps and kg */
+/* A Gym session's exercises: any name, then reps and kg, the most I did */
 function exBox(s, i) {
   const xs = exercises(s);
   const num = (j, k, label, v, step) => `<label class="field"><span>${label}</span><input class="in" type="number" inputmode="decimal" min="0" step="${step}" data-i="${i}" data-x="${j}" data-xk="${k}" value="${v ?? ''}"></label>`;
   return xs.map((x, j) => `<div class="ex"><div class="sess-head"><input class="in" data-i="${i}" data-x="${j}" data-xk="n" value="${esc(x.n ?? '')}" maxlength="${SPEC.nameMax}" list="exNames" placeholder="Exercise: bench, pull-ups, row…" aria-label="Name of the exercise"><button type="button" data-i="${i}" data-xdel="${j}">Remove</button></div>
-    <div class="grid ex-grid">${num(j, 'sets', 'Sets', x.sets, 1)}${num(j, 'reps', 'Reps', x.reps, 1)}${num(j, 'kg', 'Weight kg', x.kg, 'any')}</div></div>`).join('')
+    <div class="grid ex-grid">${num(j, 'reps', 'Reps', x.reps, 1)}${num(j, 'kg', 'Weight kg', x.kg, 'any')}</div></div>`).join('')
     + (xs.length < SPEC.exMax ? `<div class="adds"><button class="chip" type="button" data-xadd="${i}">Add an exercise</button></div>` : '');
 }
 /* the names already used, offered as I type */

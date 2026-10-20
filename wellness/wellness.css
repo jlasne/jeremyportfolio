@@ -203,7 +203,7 @@ fieldset h3 span { font-size: 13px; font-weight: 500; color: var(--ice-45); marg
 .sess-head button { flex-shrink: 0; border: 0; background: none; cursor: pointer; color: var(--ice-45); font-size: 13px; padding: 6px 0; }
 .sess-name { margin-top: 10px; }
 .ex { margin-top: 16px; padding-left: 12px; border-left: 2px solid var(--ice-08); }
-.grid.ex-grid { grid-template-columns: repeat(3, 1fr); }
+.grid.ex-grid { grid-template-columns: repeat(2, 1fr); }
 .sess-calc { margin: 10px 0 0; font: 500 14px/1.4 var(--px); color: var(--ice-70); min-height: 20px; }
 .adds { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
 .adds .chip { --c: var(--ice); }
