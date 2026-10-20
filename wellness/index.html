@@ -363,12 +363,15 @@ function toMinutes(str) {
   if (/^\d{3,4}$/.test(t) && n % 100 < 60) return Math.floor(n / 100) * 60 + (n % 100);
   return n <= 24 ? Math.round(n * 60) : Math.round(n);
 }
-/* how long: 1:15 and 1h15 are 75 minutes, 45 alone is 45 minutes */
+/* how long, in seconds: 1:15 and 1h15 are 75 minutes, 0:23:15 adds 15 seconds, 45 alone is 45 minutes */
 function toDuration(str) {
   const t = String(str).trim().toLowerCase(); let m;
-  if ((m = /^(\d{1,2})\s*[:h]\s*(\d{1,2})?$/.exec(t))) return +m[1] * 60 + Math.min(59, +(m[2] || 0));
-  return /^\d+$/.test(t) ? +t : undefined;
+  if ((m = /^(\d{1,2})\s*[:h]\s*(?:(\d{1,2})(?:\s*:\s*(\d{1,2})?)?)?$/.exec(t))) return (+m[1] * 60 + Math.min(59, +(m[2] || 0))) * 60 + Math.min(59, +(m[3] || 0));
+  return /^\d+$/.test(t) ? +t * 60 : undefined;
 }
+/* runs and swims keep the seconds */
+const TIMED = ['run', 'swim'];
+const hms = sec => `${Math.floor(sec / 3600)}:${pad(Math.floor(sec / 60) % 60)}:${pad(Math.round(sec) % 60)}`;
 const timeVal = n => n == null ? '' : clock(n);
 const fromTime = (str, night) => { const m = /^(\d{1,2}):(\d{2})$/.exec(str || ''); if (!m) return undefined; const v = +m[1] * 60 + +m[2]; return night && v < 720 ? v + 1440 : v; };
 
@@ -460,7 +463,8 @@ function drawSessions() {
     const sp = SPORT.get(s.s);
     const chips = (name, list, on) => `<div class="chips" style="margin-top:12px" role="group" aria-label="${name}">${list.map(x => `<button class="chip" type="button" data-i="${i}" data-k="${name}" data-v="${x}" aria-pressed="${on === x}">${cap(x)}</button>`).join('')}</div>`;
     const inp = (k, label, val, attrs = '') => `<label class="field"><span>${label}</span><input class="in" data-i="${i}" data-k="${k}" value="${val ?? ''}" ${attrs}></label>`;
-    let grid = inp('d', 'How long (h:mm)', minutes(s) == null ? '' : `${Math.floor(minutes(s) / 60)}:${pad(minutes(s) % 60)}`, 'type="text" inputmode="decimal" placeholder="0:45"')
+    const timed = TIMED.includes(s.s);
+    let grid = inp('d', `How long (${timed ? 'h:mm:ss' : 'h:mm'})`, timed && s.sec > 0 ? hms(s.sec) : minutes(s) == null ? '' : `${Math.floor(minutes(s) / 60)}:${pad(minutes(s) % 60)}`, `type="text" inputmode="decimal" placeholder="${timed ? '0:45:00' : '0:45'}"`)
       + inp('hr', 'Avg heart rate', s.hr, 'type="number" inputmode="numeric" placeholder="bpm"') + inp('pk', 'Peak heart rate', s.pk, 'type="number" inputmode="numeric" placeholder="bpm"');
     if (s.s === 'run') grid += inp('m', 'Distance km', s.m == null ? '' : s.m / 1000, 'type="number" inputmode="decimal" step="0.01"');
     const levels = `<div class="chips" style="margin-top:12px" role="group" aria-label="Effort level, 1 to ${SPEC.levels}"><span class="chips-k">Effort</span>${Array.from({ length: SPEC.levels }, (_, j) => j + 1).map(x => `<button class="chip" type="button" data-i="${i}" data-k="lv" data-v="${x}" aria-pressed="${s.lv === x}">${x}</button>`).join('')}</div>`;
@@ -504,7 +508,12 @@ $('sessBox').addEventListener('input', e => {
     touch(); return;
   }
   if (k === 'n') { const n = raw.trim(); if (n) s.n = n; else delete s.n; touch(); return; }
-  if (k === 'd') { v = toDuration(raw); delete s.t; delete s.e; delete s.sec; }
+  if (k === 'd') {
+    const sec = toDuration(raw);
+    delete s.t; delete s.e; delete s.sec;
+    v = sec > 0 ? Math.max(1, Math.round(sec / 60)) : undefined;
+    if (sec > 0 && TIMED.includes(s.s)) s.sec = sec;
+  }
   else if (k === 'm') v = raw === '' ? undefined : Number(raw) * (s.s === 'run' ? 1000 : 1);
   else v = raw === '' ? undefined : Number(raw);
   if (v === undefined || Number.isNaN(v)) delete s[k]; else s[k] = Math.round(v * 100) / 100;

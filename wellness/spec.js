@@ -97,7 +97,7 @@ const word = (raw, list) => (typeof raw === 'string' && list.includes(raw) ? raw
    after midnight) in sessions logged before `d`, how long it lasted in
    minutes, `f` its target, `lv` the effort I felt from 1 to 5,
    `hr` and `pk` its average and peak heart rate, `m` its distance in metres
-   and `sec` its time in seconds (run), `x` the exercises
+   and `sec` its exact time in seconds (run, swim), `x` the exercises
    (gym: a name, sets, reps and kg each; the first sessions kept one top
    set as `lift`, `kg` and `reps`), `n` the name of the activity (other). A target kept as
    "endurance" before is read as cardio. */
@@ -130,8 +130,8 @@ function cleanSession(s) {
     if (out.reps !== undefined) out.reps = Math.round(out.reps);
   } else if (sport === 'run') {
     put('m', num(s.m, 100000));
-    put('sec', num(s.sec, 86400));
   }
+  if (sport === 'run' || sport === 'swim') put('sec', num(s.sec, 86400));
   return out;
 }
 
