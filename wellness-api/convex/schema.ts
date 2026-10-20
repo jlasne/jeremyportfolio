@@ -220,6 +220,24 @@ export default defineSchema({
     updatedAt: v.number(),
   }).index("by_day", ["day"]),
 
+  /* jeremylasne.com/wellness: my max, one document (key "max") with the
+     whole list; what it may hold is decided by `cleanMaxes` in
+     wellness/spec.js. */
+  maxes: defineTable({
+    key: v.string(),
+    list: v.array(v.object({
+      n: v.string(),
+      d: v.optional(v.string()),
+      u: v.optional(v.array(v.string())),
+      reps: v.optional(v.float64()),
+      kg: v.optional(v.float64()),
+      m: v.optional(v.float64()),
+      kmh: v.optional(v.float64()),
+      sec: v.optional(v.float64()),
+    })),
+    updatedAt: v.number(),
+  }).index("by_key", ["key"]),
+
   /* Retired with x.jeremylasne.com: nothing reads or writes these four tables
      any more. They stay declared so a deploy keeps their rows valid; empty them
      in the Convex dashboard, then they can go from here too.

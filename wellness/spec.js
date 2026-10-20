@@ -50,6 +50,18 @@ export const SPEC = {
   },
   levels: 5,
   perDay: 4,
+
+  /* My max: the most I did, typed by hand. Each one has a name and any of
+     these measures, picked per max: 12 reps of pull-ups, 140 kg on the
+     squat, 2000 m swum, 32 km/h on the bike, a 3:10 plank. */
+  maxUnits: [
+    { id: 'reps', name: 'Reps',   unit: 'reps', max: 10000 },
+    { id: 'kg',   name: 'Weight', unit: 'kg',   max: 1000 },
+    { id: 'm',    name: 'Metres', unit: 'm',    max: 1000000 },
+    { id: 'kmh',  name: 'Speed',  unit: 'km/h', max: 200 },
+    { id: 'sec',  name: 'Time',   unit: 'time', max: 86400 },
+  ],
+  maxCount: 40,
 };
 
 export const SLEEP = new Map(SPEC.sleep.map(f => [f.id, f]));
@@ -134,6 +146,24 @@ export function cleanDay(day, input, today) {
   if (sessions.length) out.sessions = sessions;
   if (note) out.note = note;
   return out;
+}
+
+/* My max as the server keeps it: a name, the day it was done, the
+   measures picked (`u`) and a number for each one filled. A max with no
+   name is dropped; 40 at most. */
+export function cleanMaxes(input, today) {
+  const ids = SPEC.maxUnits.map(u => u.id);
+  return (Array.isArray(input) ? input : []).map(x => {
+    if (!x || typeof x !== 'object') return null;
+    const n = typeof x.n === 'string' ? x.n.trim().slice(0, SPEC.nameMax) : '';
+    if (!n) return null;
+    const out = { n };
+    if (isKey(x.d) && x.d <= today) out.d = x.d;
+    const u = (Array.isArray(x.u) ? x.u : []).filter((id, i, a) => ids.includes(id) && a.indexOf(id) === i);
+    if (u.length) out.u = u;
+    for (const f of SPEC.maxUnits) { const v = num(x[f.id], f.max); if (v !== undefined) out[f.id] = v; }
+    return out;
+  }).filter(Boolean).slice(0, SPEC.maxCount);
 }
 
 /* ── reading Exp 0 ──────────────────────────────────────────────────── */

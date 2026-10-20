@@ -134,6 +134,9 @@ h2 .soft { color: var(--ice-45); }
 .list .what b { font: 600 15px/1 var(--px); color: var(--c); margin-right: 8px; }
 .list .what em { font-style: normal; color: var(--ice-45); }
 .list .form { font: 700 18px/1 var(--px); text-align: right; }
+.max-t { margin: 30px 0 0; font: 600 20px/1 var(--px); }
+.max-t span { font-size: 13px; font-weight: 500; color: var(--ice-45); margin-left: 6px; }
+.list.maxes { margin: 12px 0 30px; }
 .list .form small { display: block; margin-top: 4px; font: 400 11px/1 Inter, sans-serif; color: var(--ice-45); }
 .f-good { color: var(--good); }
 .f-mid { color: var(--blue); }

@@ -31,7 +31,7 @@ export const fmtVal = (id, v) => id === 'min' ? hm(v) : id === 'bed' || id === '
 export const unitOf = id => ({ hrv: 'ms', rhr: 'bpm' })[id] ?? '';
 
 /* ── the days ──────────────────────────────────────────────────────── */
-export const state = { exp0: {}, days: {}, server: true };
+export const state = { exp0: {}, days: {}, server: true, maxes: [], maxServer: true };
 export const entry = k => state.days[k] || state.exp0[k] || null;
 export const allKeys = () => { const out = []; for (let k = SPEC.start; k <= today; k = shift(k, 1)) out.push(k); return out; };
 /* the last 30 days, today included: the window the night score is read in */
@@ -54,6 +54,13 @@ const cardio = d => { for (const s of d?.sessions || []) if (s.f === 'endurance'
 for (const d of Object.values(held)) cardio(d);
 Object.assign(state.days, held);
 
+/* My max, kept on this device while the server does not know max.save yet
+   (before its update) or cannot be reached. */
+const MAXES = 'wellness.maxes';
+export const heldMax = (() => { try { const v = JSON.parse(localStorage.getItem(MAXES) || 'null'); return Array.isArray(v) ? v : null; } catch { return null; } })();
+export const keepMax = list => { try { if (list) localStorage.setItem(MAXES, JSON.stringify(list)); else localStorage.removeItem(MAXES); } catch {} };
+if (heldMax) state.maxes = heldMax;
+
 export function api(op, args) {
   const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 9000);
   return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ op, args: args || {} }), signal: ctl.signal })
@@ -66,7 +73,12 @@ export function api(op, args) {
    any; before the server update the door does not know days.list, which
    is not an error, only a reason to keep days on the device. */
 export async function load(pass) {
-  const [old, days] = await Promise.allSettled([api('bio.get'), api('days.list')]);
+  const [old, days, maxes] = await Promise.allSettled([api('bio.get'), api('days.list'), api('max.get')]);
+  if (maxes.status === 'fulfilled') {
+    /* what this device held is newer than the server's copy: send it up */
+    if (heldMax && pass) api('max.save', { passphrase: pass, today, list: heldMax }).then(out => { state.maxes = out; keepMax(null); }, () => {});
+    else if (!heldMax) state.maxes = maxes.value || [];
+  } else state.maxServer = false;
   if (old.status === 'fulfilled' && old.value?.log) {
     for (const [k, d] of Object.entries(old.value.log)) if (k >= SPEC.start && k <= today) { const x = fromExp0(d); if (x) state.exp0[k] = x; }
   }
@@ -81,6 +93,12 @@ export async function load(pass) {
   }
   state.server = false;
   return days.reason?.message === 'Unknown operation' ? '' : days.reason?.message || 'Something went wrong';
+}
+
+/* One max in words: 12 reps · 80 kg · 2000 m · 32 km/h · 3:10 */
+export function maxText(x) {
+  return SPEC.maxUnits.filter(f => x[f.id] !== undefined)
+    .map(f => f.id === 'sec' ? mmss(x.sec) : `${x[f.id]} ${f.unit}`).join(' · ');
 }
 
 /* ── normal: the middle half of my nights ──────────────────────────── */

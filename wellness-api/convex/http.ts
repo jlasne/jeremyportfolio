@@ -80,6 +80,10 @@ async function answer(ctx: ActionCtx, request: Request): Promise<Response> {
         return ok(await ctx.runQuery(api.days.list, args));
       case "days.save":
         return ok(await ctx.runMutation(api.days.save, args));
+      case "max.get":
+        return ok(await ctx.runQuery(api.maxes.get, args));
+      case "max.save":
+        return ok(await ctx.runMutation(api.maxes.save, args));
       default:
         return bad("Unknown operation");
     }

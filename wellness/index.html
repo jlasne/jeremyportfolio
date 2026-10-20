@@ -107,6 +107,9 @@
       <h3 style="margin-top:30px">Sport <span>that day</span></h3>
       <div id="sessBox"></div>
       <div class="adds" id="adds"></div>
+      <h3 style="margin-top:30px">My max <span>the most I did, any day</span></h3>
+      <div id="maxBox"></div>
+      <div class="adds"><button class="chip" id="addMax" type="button">Add a max</button></div>
       <button class="btn ghost" id="csvB" type="button" style="margin-top:30px">Export every day as CSV</button>
     </fieldset>
     <p class="status" id="status" role="status"></p>
@@ -120,7 +123,7 @@
 
 <script type="module">
 import { SPEC, SLEEP, SPORT, shift, daysBetween, bests, form, effort, e1rm, minutes, hrTop, load as loadOf } from '/wellness/spec.js';
-import { avg, dayLoads, top, kept, csv, measure, today, COLOR, pad, dayName, short, weekday, clock, hm, mmss, cap, esc, copy, label, fmtVal, state, entry, allKeys, monthKeys, val, sessionsOf, allSessions, sportBefore, held, keepHeld, api, load as loadData, spread, normal, verdict, tone, INDICATORS, nightScores, unitOf } from '/wellness/data.js';
+import { maxText, keepMax, avg, dayLoads, top, kept, csv, measure, today, COLOR, pad, dayName, short, weekday, clock, hm, mmss, cap, esc, copy, label, fmtVal, state, entry, allKeys, monthKeys, val, sessionsOf, allSessions, sportBefore, held, keepHeld, api, load as loadData, spread, normal, verdict, tone, INDICATORS, nightScores, unitOf } from '/wellness/data.js';
 import { still, blockChart } from '/wellness/charts.js';
 
 const $ = id => document.getElementById(id);
@@ -520,6 +523,79 @@ async function push() {
     if (dirty && pass) { clearTimeout(timer); timer = setTimeout(push, failed ? 2500 : 900); }
   }
 }
+/* ── my max: the whole list, saved on its own ─────────────────────── */
+/* 3:10 is 190 seconds, 1:02:30 is 3750, 45 alone is 45 seconds */
+function toSec(str) {
+  const p = String(str).trim().split(':');
+  if (!p[0] || p.length > 3 || p.some(x => !/^\d+([.,]\d+)?$/.test(x))) return undefined;
+  return p.map(x => Number(x.replace(',', '.'))).reduce((a, x) => a * 60 + x, 0);
+}
+let maxTimer = 0, maxDirty = false;
+function drawMaxes() {
+  $('maxBox').innerHTML = state.maxes.map((x, i) => {
+    const u = x.u || SPEC.maxUnits.filter(f => x[f.id] !== undefined).map(f => f.id);
+    const chips = `<div class="chips" style="margin-top:12px" role="group" aria-label="Measures">${SPEC.maxUnits.map(f => `<button class="chip" type="button" data-mi="${i}" data-u="${f.id}" aria-pressed="${u.includes(f.id)}">${f.name}</button>`).join('')}</div>`;
+    const grid = SPEC.maxUnits.filter(f => u.includes(f.id)).map(f => f.id === 'sec'
+      ? `<label class="field"><span>Time (m:ss)</span><input class="in" data-mi="${i}" data-k="sec" type="text" inputmode="decimal" placeholder="3:10" value="${x.sec === undefined ? '' : mmss(x.sec)}"></label>`
+      : `<label class="field"><span>${f.name}${f.unit !== f.name.toLowerCase() ? ` (${f.unit})` : ''}</span><input class="in" data-mi="${i}" data-k="${f.id}" type="number" inputmode="decimal" step="any" min="0" value="${x[f.id] ?? ''}"></label>`).join('')
+      + `<label class="field"><span>Day</span><input class="in" data-mi="${i}" data-k="d" type="date" max="${today}" value="${x.d ?? ''}"></label>`;
+    return `<div class="sess" style="--c:var(--blue)"><div class="sess-head"><input class="in" data-mi="${i}" data-k="n" value="${esc(x.n ?? '')}" maxlength="${SPEC.nameMax}" placeholder="Name it: pull-ups, squat, 100 m swim…" aria-label="Name of the max"><button type="button" data-mdel="${i}">Remove</button></div>
+      ${chips}<div class="grid">${grid}</div><p class="sess-calc" id="maxCalc${i}">${maxText(x)}</p></div>`;
+  }).join('');
+  $('addMax').disabled = state.maxes.length >= SPEC.maxCount;
+}
+$('addMax').addEventListener('click', () => {
+  if (state.maxes.length >= SPEC.maxCount) return;
+  state.maxes.push({ n: '', d: today, u: ['reps', 'kg'] });
+  drawMaxes();
+  $('maxBox').querySelector(`[data-mi="${state.maxes.length - 1}"][data-k="n"]`)?.focus();
+});
+$('maxBox').addEventListener('click', e => {
+  const del = e.target.closest('[data-mdel]');
+  if (del) { state.maxes.splice(+del.dataset.mdel, 1); drawMaxes(); touchMax(); return; }
+  const c = e.target.closest('.chip[data-u]'); if (!c) return;
+  const x = state.maxes[+c.dataset.mi], id = c.dataset.u;
+  const u = x.u || SPEC.maxUnits.filter(f => x[f.id] !== undefined).map(f => f.id);
+  if (u.includes(id)) { x.u = u.filter(v => v !== id); delete x[id]; }
+  else x.u = SPEC.maxUnits.map(f => f.id).filter(v => v === id || u.includes(v));
+  drawMaxes(); touchMax();
+});
+$('maxBox').addEventListener('input', e => {
+  const k = e.target.dataset.k; if (!k || e.target.dataset.mi === undefined) return;
+  const i = +e.target.dataset.mi, x = state.maxes[i], raw = e.target.value;
+  if (k === 'n' || k === 'd') { const t = raw.trim(); if (t) x[k] = t; else delete x[k]; }
+  else {
+    const v = k === 'sec' ? toSec(raw) : raw === '' ? undefined : Number(raw);
+    if (v === undefined || Number.isNaN(v)) delete x[k]; else x[k] = Math.round(v * 100) / 100;
+  }
+  $('maxCalc' + i).textContent = maxText(x);
+  touchMax();
+});
+function touchMax() {
+  if (!canLog()) return;
+  maxDirty = true;
+  say('Saving…');
+  clearTimeout(maxTimer);
+  maxTimer = setTimeout(pushMax, 900);
+}
+async function pushMax() {
+  if (!canLog() || !maxDirty) return;
+  maxDirty = false;
+  const sent = copy({ list: state.maxes }).list;
+  const at = clock(new Date().getHours() * 60 + new Date().getMinutes());
+  if (!state.maxServer) { keepMax(sent); say(`Saved on this device ${at}`); return; }
+  try {
+    await api('max.save', { passphrase: pass, today, list: sent });
+    keepMax(null);
+    say(maxDirty ? 'Saving…' : `Saved ${at}`);
+  } catch (e) {
+    keepMax(sent);
+    if (e.message === 'Unknown operation') { state.maxServer = false; say(`Saved on this device ${at}`); return; }
+    say(`${e.message}. Kept on this device.`, true);
+    if (/Wrong passphrase/.test(e.message)) { pass = ''; try { localStorage.removeItem('bio.pass'); } catch {} drawLock(); }
+  }
+}
+
 /* every day as a CSV file, one row per session */
 $('csvB').addEventListener('click', () => {
   const a = document.createElement('a');
@@ -528,7 +604,7 @@ $('csvB').addEventListener('click', () => {
   document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 });
-addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+addEventListener('beforeunload', e => { if (dirty || maxDirty) { e.preventDefault(); e.returnValue = ''; } });
 
 /* ── draw everything that reads the data ───────────────────────────── */
 function drawAll(animate) {
@@ -546,6 +622,7 @@ $('logClose').addEventListener('click', () => dlg.close());
 dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
 dlg.addEventListener('close', () => {
   if (dirty) { clearTimeout(timer); push(); }
+  if (maxDirty) { clearTimeout(maxTimer); pushMax(); }
   if (location.hash === '#log') history.replaceState(null, '', location.pathname);
 });
 
@@ -553,8 +630,9 @@ async function load() {
   const err = await loadData(pass);
   if (err) say(err, true);
   drawAll(true); drawLock(); if (!dirty) openDay(sel);
+  if (!maxDirty) drawMaxes();
 }
-drawAll(false); drawLock(); openDay(today);
+drawAll(false); drawLock(); openDay(today); drawMaxes();
 if (location.hash === '#log') openLog();
 load();
 </script>

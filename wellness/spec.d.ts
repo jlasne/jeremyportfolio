@@ -1,5 +1,7 @@
 /* Types for spec.js, so the Convex side can import it under tsc. */
 
+/** One max: a name, the day, the measures picked and their numbers. */
+export interface Max { n: string; d?: string; u?: string[]; reps?: number; kg?: number; m?: number; kmh?: number; sec?: number }
 export interface SleepField { id: string; name: string; short: string; unit: string; max: number; better?: 'high' | 'low' }
 export interface Sport { id: 'run' | 'swim' | 'lift' | 'other'; name: string; focus: string }
 
@@ -8,6 +10,8 @@ export interface Session {
   s: 'run' | 'swim' | 'lift' | 'other'; f?: string; t?: number; e?: number; hr?: number; pk?: number; lv?: number; d?: number;
   m?: number; sec?: number; lift?: string; kg?: number; reps?: number; n?: string;
 }
+/** One max: a name, the day, the measures picked and their numbers. */
+export interface Max { n: string; d?: string; u?: string[]; reps?: number; kg?: number; m?: number; kmh?: number; sec?: number }
 export interface Sleep { score?: number; hrv?: number; rhr?: number; ready?: number; min?: number; bed?: number; wake?: number }
 /** One day as the server keeps it. */
 export interface Day { day: string; sleep?: Sleep; sessions?: Session[]; note?: string }
@@ -16,6 +20,7 @@ export const SPEC: {
   start: string; sleep: SleepField[]; sports: Sport[];
   lifts: string[]; focus: string[]; perDay: number; nameMax: number;
   mix: Record<string, { avg: number; peak: number; felt: number }>; levels: number;
+  maxUnits: { id: string; name: string; unit: string; max: number }[]; maxCount: number;
 };
 export const SLEEP: Map<string, SleepField>;
 export const SPORT: Map<string, Sport>;
@@ -25,6 +30,7 @@ export function isKey(key: unknown): key is string;
 export function shift(key: string, n: number): string;
 export function daysBetween(from: string, to: string): number;
 export function cleanDay(day: string, input: unknown, today: string): Day | null;
+export function cleanMaxes(input: unknown, today: string): Max[];
 export function fixBed(bed: number | undefined): number | undefined;
 export function fromExp0(d: unknown): Omit<Day, 'day'> | null;
 export const REF: { run: number };
