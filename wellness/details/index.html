@@ -61,7 +61,7 @@
     <p class="kick">Every session</p>
     <h2 id="sportT">Sport <span class="soft">log</span></h2>
     <p class="note">Form compares a session with my best of its kind: 100 % is the best. Effort mixes the average and peak heart rate against my highest so far (<span id="hrMax"></span> bpm) with the level I felt out of 5. Load is minutes times effort.</p>
-    <h3 class="max-t">My max <span>the most I did: the heaviest of each Gym exercise, and any I typed</span></h3>
+    <h3 class="max-t">My max <span>the heaviest of each Gym exercise, updated by itself</span></h3>
     <ul class="list maxes" id="maxList"></ul>
     <div class="cal" id="cal" aria-label="Sessions by day"></div>
     <ul class="list" id="sessList"></ul>
@@ -175,7 +175,7 @@ function drawLog() {
 function drawMaxes() {
   const list = allMaxes().sort((a, b) => (b.d || '').localeCompare(a.d || ''));
   $('maxList').innerHTML = list.map(x => `<li style="--c:var(--blue)"><span class="when">${x.d ? short(x.d) : '–'}</span><span class="what"><b>${esc(x.n)}</b>${maxText(x) || '<em>no number yet</em>'}${x.gym ? ' <em>· from Gym</em>' : ''}</span><span></span></li>`).join('')
-    || '<li><span class="what">No max yet. Log a Gym exercise or add one in the log.</span></li>';
+    || '<li><span class="what">No max yet. Log a Gym exercise with a weight.</span></li>';
 }
 
 function drawAll(animate) { drawMeasures(); drawChips(); drawNights(animate); drawBed(); drawMaxes(); drawLog(); }
