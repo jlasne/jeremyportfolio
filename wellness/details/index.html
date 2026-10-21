@@ -11,12 +11,12 @@
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="canonical" href="https://www.jeremylasne.com/wellness/details/">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=DotGothic16&display=swap">
 <link rel="stylesheet" href="/wellness/wellness.css">
 </head>
 <body>
+
+<img class="bg" src="/wellness/bg.jpg" alt="" fetchpriority="high">
+<canvas id="snow" aria-hidden="true"></canvas>
 
 <header class="page-head">
   <span style="display:flex;align-items:center;gap:18px">
@@ -29,7 +29,7 @@
 <main>
   <section class="sec reveal" style="margin-top:40px" aria-labelledby="measT">
     <p class="kick">Details</p>
-    <h1 style="font-size:clamp(44px,8vw,80px);letter-spacing:-.01em">Each <span style="color:var(--ice-45)">measure</span></h1>
+    <h1>Each <span style="color:var(--ice-45)">measure</span></h1>
     <p class="note">Last night, the average of the last 7 nights, my normal (the middle night of all), then the best and the worst of the last 30 days.</p>
     <div class="measures-wrap"><table class="measures" id="measures"></table></div>
   </section>
@@ -73,10 +73,11 @@
   <a href="/wellness/">Wellness</a>
 </footer>
 
+<script src="/snow.js" defer></script>
 <script type="module">
 import { SPEC, SLEEP, SPORT, bests, form, effort, minutes, load as loadOf } from '/wellness/spec.js';
 import { hrOf, mmss, allMaxes, maxText, top, measure, formCls, cap, weekday, sessionsOf, allSessions, today, COLOR, dayName, short, clock, hm, esc, label, fmtVal, unitOf, allKeys, monthKeys, val, sportBefore, load, spread, normal, verdict, tone, INDICATORS, nightScores } from '/wellness/data.js';
-import { blockChart } from '/wellness/charts.js';
+import { barChart } from '/wellness/charts.js';
 
 const $ = id => document.getElementById(id);
 const mean = v => v.length ? v.reduce((a, b) => a + b, 0) / v.length : undefined;
@@ -116,7 +117,7 @@ $('metricChips').addEventListener('click', e => {
   const b = e.target.closest('[data-m]'); if (!b) return;
   metric = b.dataset.m; chart.reset(); drawChips(); drawNights(true);
 });
-const chart = blockChart($('nightsC'), () => {
+const chart = barChart($('nightsC'), () => {
   const nm = normal(metric);
   return { keys: allKeys(), value: k => val(k, metric), tone: v => verdict(metric, v, nm), band: nm, marks: sportBefore, read: i => readNight(i, nm) };
 });
