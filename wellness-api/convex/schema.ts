@@ -228,6 +228,8 @@ export default defineSchema({
       /* the name of an Other session: padel, yoga, a hike */
       n: v.optional(v.string()),
     }))),
+    /* the night was spent with my girlfriend */
+    gf: v.optional(v.boolean()),
     note: v.optional(v.string()),
     updatedAt: v.number(),
   }).index("by_day", ["day"]),
