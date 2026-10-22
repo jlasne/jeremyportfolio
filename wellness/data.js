@@ -14,6 +14,8 @@ export const COLOR = { run: '#fbbf24', swim: '#38bdf8', lift: '#f472b6', other: 
 
 /* ── words and numbers ─────────────────────────────────────────────── */
 export const pad = n => String(n).padStart(2, '0');
+/* a swim time to the hundredth: 38.45 seconds is 0:38,45 */
+export const swimTime = s => { const c = Math.round(s * 100); return `${Math.floor(c / 6000)}:${pad(Math.floor(c % 6000 / 100))},${pad(c % 100)}`; };
 const ymd = k => k.split('-').map(Number);
 export const dayName = k => { const [y, m, d] = ymd(k); return `${DOW[new Date(y, m - 1, d).getDay()]} ${d} ${MON[m - 1]}`; };
 export const short = k => { const [, m, d] = ymd(k); return `${d} ${MON[m - 1]}`; };
@@ -131,7 +133,7 @@ export function swimMaxes() {
   const out = new Map();
   for (const s of allSessions()) if (s.s === 'swim') for (const t of tests(s)) {
     const v = mps(t), b = out.get(t.m);
-    if (v && (!b || v > b.mps)) out.set(t.m, { n: `${t.m} m`, d: s.day, m: t.m, sec: Math.round(t.sec), from: 'Swim', mps: v });
+    if (v && (!b || v > b.mps)) out.set(t.m, { n: `${t.m} m`, d: s.day, m: t.m, sec: t.sec, from: 'Swim', mps: v });
   }
   return [...out.values()];
 }
@@ -204,7 +206,7 @@ export function nightScores(keys = monthKeys()) {
 export const exText = e => [e.n, e.sets && e.reps ? `${e.sets} × ${e.reps}` : e.reps ? `${e.reps} reps` : e.sets ? `${e.sets} sets` : '', e.kg ? `${e.kg} kg` : ''].filter(Boolean).join(' ');
 
 /* One swim test in words: 100 m in 1:20, 1.25 m/s */
-export const testText = t => mps(t) ? `${t.m} m in ${mmss(t.sec)}, ${mps(t).toFixed(2)} m/s` : `${t.m} m`;
+export const testText = t => mps(t) ? `${t.m} m in ${swimTime(t.sec)}, ${mps(t).toFixed(2)} m/s` : `${t.m} m`;
 
 /* What a session measured, in words: distance, time and pace or speed, or the top set. */
 export function measure(s) {

@@ -76,7 +76,7 @@
 <script src="/snow.js" defer></script>
 <script type="module">
 import { SPEC, SLEEP, SPORT, bests, form, effort, minutes, load as loadOf } from '/wellness/spec.js';
-import { hrOf, mmss, allMaxes, maxText, top, measure, formCls, cap, weekday, sessionsOf, allSessions, today, COLOR, dayName, short, clock, hm, esc, label, fmtVal, unitOf, allKeys, monthKeys, val, sportBefore, load, spread, normal, verdict, tone, INDICATORS, nightScores } from '/wellness/data.js';
+import { hrOf, mmss, swimTime, allMaxes, maxText, top, measure, formCls, cap, weekday, sessionsOf, allSessions, today, COLOR, dayName, short, clock, hm, esc, label, fmtVal, unitOf, allKeys, monthKeys, val, sportBefore, load, spread, normal, verdict, tone, INDICATORS, nightScores } from '/wellness/data.js';
 import { barChart } from '/wellness/charts.js';
 
 const $ = id => document.getElementById(id);
@@ -175,7 +175,7 @@ function drawLog() {
 
 /* ── my max, one card per sport: Swim, Run, Gym, then the ones I typed ── */
 const MAX_GROUPS = [
-  { id: 'swim', name: 'Swim', from: 'Swim', main: x => `${x.mps.toFixed(2)} m/s`, sub: x => mmss(x.sec), sort: (a, b) => a.m - b.m },
+  { id: 'swim', name: 'Swim', from: 'Swim', main: x => `${x.mps.toFixed(2)} m/s`, sub: x => swimTime(x.sec), sort: (a, b) => a.m - b.m },
   { id: 'run', name: 'Run', from: 'Run', main: x => mmss(x.sec), sub: x => `${mmss(x.pace)}/km`, sort: (a, b) => a.sec / a.pace - b.sec / b.pace, label: x => x.n.replace(/^Run /, '') },
   { id: 'lift', name: 'Gym', from: 'Gym', main: x => `${x.kg} kg`, sub: x => x.reps ? `${x.reps} rep${x.reps === 1 ? '' : 's'}` : '', sort: (a, b) => b.kg - a.kg },
   { id: 'other', name: 'Other', from: undefined, main: x => maxText(x) || 'no number yet', sub: () => '', sort: (a, b) => (b.d || '').localeCompare(a.d || '') },

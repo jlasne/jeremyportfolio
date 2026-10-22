@@ -141,12 +141,13 @@ function cleanSession(s) {
   return out;
 }
 
-/* One test of a Swim session: a distance in metres and a time in seconds. */
+/* One test of a Swim session: a distance in metres and a time in seconds,
+   to the hundredth (38.45). */
 function cleanTest(t) {
   if (!t || typeof t !== 'object') return undefined;
   const m = num(t.m, 100000), sec = num(t.sec, 86400);
   if (!(m > 0)) return undefined;
-  return sec > 0 ? { m, sec: Math.round(sec) } : { m };
+  return sec > 0 ? { m, sec } : { m };
 }
 
 /* One exercise of a Gym session: a name, then sets, reps and kg. */
