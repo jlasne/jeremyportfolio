@@ -220,6 +220,11 @@ export default defineSchema({
       }))),
       kg: v.optional(v.float64()),
       reps: v.optional(v.float64()),
+      /* a Swim session's tests: a distance in metres and a time in seconds each */
+      w: v.optional(v.array(v.object({
+        m: v.float64(),
+        sec: v.optional(v.float64()),
+      }))),
       /* the name of an Other session: padel, yoga, a hike */
       n: v.optional(v.string()),
     }))),
