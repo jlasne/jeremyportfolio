@@ -162,8 +162,8 @@ function cleanExercise(e) {
   return out;
 }
 
-/* One day as the server keeps it: the night that ended that morning and
-   the day's sessions. Days before the start or after today are refused. */
+/* One day as the server keeps it: the night that ended that morning,
+   `gf` when I spent it with my girlfriend, and the day's sessions. Days before the start or after today are refused. */
 export function cleanDay(day, input, today) {
   if (!isKey(day) || day < SPEC.start || day > today) return null;
   const sleep = {};
@@ -176,6 +176,7 @@ export function cleanDay(day, input, today) {
   const note = typeof input?.note === 'string' ? input.note.trim().slice(0, 120) : '';
   const out = { day };
   if (Object.keys(sleep).length) out.sleep = sleep;
+  if (input?.gf === true) out.gf = true;
   if (sessions.length) out.sessions = sessions;
   if (note) out.note = note;
   return out;
@@ -231,6 +232,7 @@ export function fromExp0(d) {
   }).filter(Boolean);
   const out = {};
   if (Object.keys(sleep).length) out.sleep = sleep;
+  if (d.partner) out.gf = true;
   if (sessions.length) out.sessions = sessions;
   return Object.keys(out).length ? out : null;
 }
