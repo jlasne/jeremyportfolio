@@ -61,8 +61,8 @@
     <p class="kick">Every session</p>
     <h2 id="sportT">Sport <span class="soft">log</span></h2>
     <p class="note">Form compares a session with my best of its kind: 100 % is the best. Effort mixes how far the average and peak heart rate climbed from resting (<span id="hrRest"></span> bpm) to my highest so far (<span id="hrMax"></span> bpm) with the level I felt out of 5. Load is minutes times effort.</p>
-    <h3 class="max-t">My max <span>the heaviest of each Gym exercise, my fastest 1, 5 and 10 km and my fastest swim, updated by themselves</span></h3>
-    <ul class="list maxes" id="maxList"></ul>
+    <h3 class="max-t">My max <span>my fastest swim, my fastest 1, 5 and 10 km and the heaviest of each Gym exercise, updated by themselves</span></h3>
+    <div class="sports maxes" id="maxList"></div>
     <div class="cal" id="cal" aria-label="Sessions by day"></div>
     <ul class="list" id="sessList"></ul>
   </section>
@@ -173,11 +173,22 @@ function drawLog() {
   }).join('') || '<li><span class="what">No session yet.</span></li>';
 }
 
-/* ── my max, newest first ──────────────────────────────────────────── */
+/* ── my max, one card per sport: Swim, Run, Gym, then the ones I typed ── */
+const MAX_GROUPS = [
+  { id: 'swim', name: 'Swim', from: 'Swim', main: x => `${x.mps.toFixed(2)} m/s`, sub: x => `${x.m} m · ${mmss(x.sec)}`, sort: (a, b) => b.mps - a.mps, label: () => 'Fastest' },
+  { id: 'run', name: 'Run', from: 'Run', main: x => mmss(x.sec), sub: x => `${mmss(x.pace)}/km`, sort: (a, b) => a.sec / a.pace - b.sec / b.pace, label: x => x.n.replace(/^Run /, '') },
+  { id: 'lift', name: 'Gym', from: 'Gym', main: x => `${x.kg} kg`, sub: x => x.reps ? `${x.reps} rep${x.reps === 1 ? '' : 's'}` : '', sort: (a, b) => b.kg - a.kg },
+  { id: 'other', name: 'Other', from: undefined, main: x => maxText(x) || 'no number yet', sub: () => '', sort: (a, b) => (b.d || '').localeCompare(a.d || '') },
+];
 function drawMaxes() {
-  const list = allMaxes().sort((a, b) => (b.d || '').localeCompare(a.d || ''));
-  $('maxList').innerHTML = list.map(x => `<li style="--c:var(--blue)"><span class="when">${x.d ? short(x.d) : '–'}</span><span class="what"><b>${esc(x.n)}</b>${maxText(x) || '<em>no number yet</em>'}${x.pace ? ` · ${mmss(x.pace)}/km` : ''}${x.mps ? ` · ${x.mps.toFixed(2)} m/s` : ''}${x.from ? ` <em>· from ${x.from}</em>` : ''}</span><span></span></li>`).join('')
-    || '<li><span class="what">No max yet. Log a Gym exercise with a weight, or a run with a distance and how long.</span></li>';
+  const all = allMaxes();
+  const cards = MAX_GROUPS.map(g => {
+    const list = all.filter(x => x.from === g.from).sort(g.sort);
+    if (!list.length && g.id === 'other') return '';
+    const rows = list.map(x => `<dt>${esc(g.label ? g.label(x) : x.n)}<small>${x.d ? short(x.d) : '–'}</small></dt><dd>${g.main(x)}<small>${g.sub(x) || '&nbsp;'}</small></dd>`).join('');
+    return `<div class="sport" style="--c:var(--${g.id})"><h3>${g.name}<span>${list.length} max</span></h3>${rows ? `<dl>${rows}</dl>` : `<p class="empty">No max yet.</p>`}</div>`;
+  });
+  $('maxList').innerHTML = cards.join('');
 }
 
 function drawAll(animate) { drawMeasures(); drawChips(); drawNights(animate); drawBed(); drawMaxes(); drawLog(); }
