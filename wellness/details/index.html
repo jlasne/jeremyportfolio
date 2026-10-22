@@ -61,7 +61,7 @@
     <p class="kick">Every session</p>
     <h2 id="sportT">Sport <span class="soft">log</span></h2>
     <p class="note">Form compares a session with my best of its kind: 100 % is the best. Effort mixes how far the average and peak heart rate climbed from resting (<span id="hrRest"></span> bpm) to my highest so far (<span id="hrMax"></span> bpm) with the level I felt out of 5. Load is minutes times effort.</p>
-    <h3 class="max-t">My max <span>the heaviest of each Gym exercise and my fastest 1, 5 and 10 km, updated by themselves</span></h3>
+    <h3 class="max-t">My max <span>the heaviest of each Gym exercise, my fastest 1, 5 and 10 km and my fastest swim, updated by themselves</span></h3>
     <ul class="list maxes" id="maxList"></ul>
     <div class="cal" id="cal" aria-label="Sessions by day"></div>
     <ul class="list" id="sessList"></ul>
@@ -176,7 +176,7 @@ function drawLog() {
 /* ── my max, newest first ──────────────────────────────────────────── */
 function drawMaxes() {
   const list = allMaxes().sort((a, b) => (b.d || '').localeCompare(a.d || ''));
-  $('maxList').innerHTML = list.map(x => `<li style="--c:var(--blue)"><span class="when">${x.d ? short(x.d) : '–'}</span><span class="what"><b>${esc(x.n)}</b>${maxText(x) || '<em>no number yet</em>'}${x.pace ? ` · ${mmss(x.pace)}/km` : ''}${x.from ? ` <em>· from ${x.from}</em>` : ''}</span><span></span></li>`).join('')
+  $('maxList').innerHTML = list.map(x => `<li style="--c:var(--blue)"><span class="when">${x.d ? short(x.d) : '–'}</span><span class="what"><b>${esc(x.n)}</b>${maxText(x) || '<em>no number yet</em>'}${x.pace ? ` · ${mmss(x.pace)}/km` : ''}${x.mps ? ` · ${x.mps.toFixed(2)} m/s` : ''}${x.from ? ` <em>· from ${x.from}</em>` : ''}</span><span></span></li>`).join('')
     || '<li><span class="what">No max yet. Log a Gym exercise with a weight, or a run with a distance and how long.</span></li>';
 }
 

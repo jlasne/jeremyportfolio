@@ -4,7 +4,7 @@
    day this device still holds because the server could not take it yet.
    Imported by /wellness and /wellness/details. */
 
-import { SPEC, SLEEP, SPORT, dateKey, shift, fromExp0, exercises, bests, form, effort, hrTop, minutes, runSec, load as loadOf } from '/wellness/spec.js';
+import { SPEC, SLEEP, SPORT, dateKey, shift, fromExp0, exercises, bests, form, effort, hrTop, minutes, runSec, speed, load as loadOf } from '/wellness/spec.js';
 
 export const API = 'https://fiery-eel-944.eu-west-1.convex.site/overlap';
 export const today = dateKey();
@@ -125,11 +125,22 @@ export function runMaxes() {
   return out;
 }
 
-/* Every max: the ones I typed, the Gym ones and the run ones. A typed max and a Gym
+/* My fastest swim, found by itself: the best speed in m/s, with its
+   distance, time and day. */
+export function swimMaxes() {
+  let b = null;
+  for (const s of allSessions()) {
+    const v = speed(s);
+    if (v && (!b || v > b.mps)) b = { n: 'Swim speed', d: s.day, m: s.m, sec: Math.round(runSec(s)), from: 'Swim', mps: v };
+  }
+  return b ? [b] : [];
+}
+
+/* Every max: the ones I typed, the Gym, run and swim ones. A typed max and a Gym
    one with the same name: the heavier one shows. */
 export function allMaxes() {
   const list = state.maxes.filter(x => x.n).map(x => ({ ...x }));
-  list.push(...runMaxes());
+  list.push(...runMaxes(), ...swimMaxes());
   for (const g of gymMaxes()) {
     const i = list.findIndex(x => x.n.toLowerCase() === g.n.toLowerCase());
     if (i < 0) list.push(g);
@@ -192,10 +203,11 @@ export function nightScores(keys = monthKeys()) {
 /* One exercise in words: Bench 3 × 8 60 kg, or Squat 5 reps 100 kg */
 export const exText = e => [e.n, e.sets && e.reps ? `${e.sets} × ${e.reps}` : e.reps ? `${e.reps} reps` : e.sets ? `${e.sets} sets` : '', e.kg ? `${e.kg} kg` : ''].filter(Boolean).join(' ');
 
-/* What a session measured, in words: distance, time and pace, or the top set. */
+/* What a session measured, in words: distance, time and pace or speed, or the top set. */
 export function measure(s) {
   if (s.s === 'lift') return exercises(s).map(exText).filter(Boolean).join(' · ');
   const sec = runSec(s);
+  if (s.s === 'swim' && s.m && sec) return `${s.m} m · ${mmss(sec)} · ${speed(s).toFixed(2)} m/s`;
   if (s.s !== 'run' || !s.m || !sec) return '';
   return `${(s.m / 1000).toFixed(2).replace(/\.?0+$/, '')} km · ${mmss(sec)} · ${mmss(sec / (s.m / 1000))}/km`;
 }
@@ -246,7 +258,7 @@ export function csv() {
     for (const s of ss) {
       const e = s && effort(s, t), f = s && form(s, best);
       rows.push([k, ...night, ...(s ? [s.s, s.n, s.f, s.lv, hhmm(s.t), hhmm(s.e), minutes(s), s.hr, s.pk, s.hr || s.pk ? t.max : '',
-        e === undefined ? '' : Math.round(e * 100), r1(loadOf(s, t)), s.m, s.s === 'run' ? runSec(s) : '', s.lift, s.kg, s.reps, s.s === 'lift' ? exercises(s).map(exText).join('; ') : '', f === undefined ? '' : Math.round(f * 100)]
+        e === undefined ? '' : Math.round(e * 100), r1(loadOf(s, t)), s.m, s.s === 'run' || s.s === 'swim' ? runSec(s) : '', s.lift, s.kg, s.reps, s.s === 'lift' ? exercises(s).map(exText).join('; ') : '', f === undefined ? '' : Math.round(f * 100)]
         : Array(19).fill('')), d.note]);
     }
   }

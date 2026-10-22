@@ -39,6 +39,7 @@ export function fromExp0(d: unknown): Omit<Day, 'day'> | null;
 export const REF: { run: number };
 export function runSec(s: Session): number | undefined;
 export function equivalent(s: Session): number | undefined;
+export function speed(s: Session): number | undefined;
 export function exercises(s: Session): Exercise[];
 export function e1rm(s: { kg?: number; reps?: number }): number | undefined;
 export function hrTop(sessions: Session[]): number | undefined;

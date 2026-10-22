@@ -228,6 +228,7 @@ function drawSport(animate) {
       Object.entries(seen).sort((a, b) => b[1].c - a[1].c).filter(([k]) => best[`lift:${k}`]).slice(0, 3)
         .forEach(([k, x]) => rows.push([`Best ${esc(x.n)}`, `${Math.round(best[`lift:${k}`])} kg`]));
     }
+    else if (sp.id === 'swim' && best.swim) rows.push(['Best speed', `${best.swim.toFixed(2)} m/s`]);
     else if (best[sp.id]) rows.push(['Best 5 km', mmss(best[sp.id])]);
     if (sp.id === 'other') { const names = [...new Set(list.map(s => s.n).filter(Boolean))]; if (names.length) rows.push(['Activities', esc(names.slice(0, 3).join(', '))]); }
     const body = rows.length ? `<dl>${rows.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl>`
@@ -276,6 +277,12 @@ function toDuration(str) {
   const t = String(str).trim().toLowerCase(); let m;
   if ((m = /^(\d{1,2})\s*[:h]\s*(\d{1,2})?$/.exec(t))) return +m[1] * 60 + Math.min(59, +(m[2] || 0));
   return /^\d+$/.test(t) ? +t : undefined;
+}
+/* a swim time: 28:30 is 1710 seconds, 1:02:05 works too, 28 alone is 28 minutes */
+function toSeconds(str) {
+  const t = String(str).trim(); let m;
+  if ((m = /^(?:(\d{1,2}):)?(\d{1,3}):(\d{0,2})$/.exec(t))) return (+(m[1] || 0)) * 3600 + +m[2] * 60 + Math.min(59, +(m[3] || 0));
+  return /^\d+$/.test(t) ? +t * 60 : undefined;
 }
 const timeVal = n => n == null ? '' : clock(n);
 const fromTime = (str, night) => { const m = /^(\d{1,2}):(\d{2})$/.exec(str || ''); if (!m) return undefined; const v = +m[1] * 60 + +m[2]; return night && v < 720 ? v + 1440 : v; };
@@ -371,6 +378,8 @@ function drawSessions() {
     let grid = inp('d', 'How long (h:mm)', minutes(s) == null ? '' : `${Math.floor(minutes(s) / 60)}:${pad(minutes(s) % 60)}`, 'type="text" inputmode="decimal" placeholder="0:45"')
       + inp('hr', 'Avg heart rate', s.hr, 'type="number" inputmode="numeric" placeholder="bpm"') + inp('pk', 'Peak heart rate', s.pk, 'type="number" inputmode="numeric" placeholder="bpm"');
     if (s.s === 'run') grid += inp('m', 'Distance km', s.m == null ? '' : s.m / 1000, 'type="number" inputmode="decimal" step="0.01"');
+    if (s.s === 'swim') grid += inp('m', 'Distance m', s.m, 'type="number" inputmode="numeric" placeholder="1500"')
+      + inp('sec', 'Time (min:ss)', s.sec == null ? '' : mmss(s.sec), 'type="text" inputmode="decimal" placeholder="28:30"');
     const levels = `<div class="chips" style="margin-top:12px" role="group" aria-label="Effort level, 1 to ${SPEC.levels}"><span class="chips-k">Effort</span>${Array.from({ length: SPEC.levels }, (_, j) => j + 1).map(x => `<button class="chip" type="button" data-i="${i}" data-k="lv" data-v="${x}" aria-pressed="${s.lv === x}">${x}</button>`).join('')}</div>`;
     const named = s.s === 'other' ? `<input class="in sess-name" data-i="${i}" data-k="n" value="${esc(s.n ?? '')}" maxlength="${SPEC.nameMax}" placeholder="Name it: padel, yoga, hike…" aria-label="Name of the activity">` : '';
     return `<div class="sess" style="--c:var(--${s.s})"><div class="sess-head"><b>${sp.name}</b><button type="button" data-del="${i}">Remove</button></div>
@@ -412,7 +421,8 @@ $('sessBox').addEventListener('input', e => {
     touch(); return;
   }
   if (k === 'n') { const n = raw.trim(); if (n) s.n = n; else delete s.n; touch(); return; }
-  if (k === 'd') { v = toDuration(raw); delete s.t; delete s.e; delete s.sec; }
+  if (k === 'd') { v = toDuration(raw); delete s.t; delete s.e; if (s.s === 'run') delete s.sec; }
+  else if (k === 'sec') v = toSeconds(raw);
   else if (k === 'm') v = raw === '' ? undefined : Number(raw) * (s.s === 'run' ? 1000 : 1);
   else v = raw === '' ? undefined : Number(raw);
   if (v === undefined || Number.isNaN(v)) delete s[k]; else s[k] = Math.round(v * 100) / 100;
