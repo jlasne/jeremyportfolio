@@ -29,8 +29,8 @@ export const SPEC = {
   /* The sports, and what one session of each is measured by. Every
      session: a target, an effort level from 1 to 5, how long it lasted and
      its average and peak heart rate. Run: a distance on top. Gym:
-     any exercises, each named, with sets, reps and weight. Swim: a distance
-     and the time it took, read as a speed in m/s. Other: any
+     any exercises, each named, with sets, reps and weight. Swim: any tests,
+     each a distance and the time it took, read as a speed in m/s. Other: any
      other activity, named when logged (padel, yoga, a hike). */
   sports: [
     { id: 'run',   name: 'Run',   focus: 'cardio' },
@@ -98,7 +98,8 @@ const word = (raw, list) => (typeof raw === 'string' && list.includes(raw) ? raw
    after midnight) in sessions logged before `d`, how long it lasted in
    minutes, `f` its target, `lv` the effort I felt from 1 to 5,
    `hr` and `pk` its average and peak heart rate, `m` its distance in metres
-   and `sec` its time in seconds (run, swim), `x` the exercises
+   and `sec` its time in seconds (run, and the first swims), `w` the swim
+   tests (a distance in metres and a time in seconds each), `x` the exercises
    (gym: a name, sets, reps and kg each; the first sessions kept one top
    set as `lift`, `kg` and `reps`), `n` the name of the activity (other). A target kept as
    "endurance" before is read as cardio. */
@@ -132,8 +133,20 @@ function cleanSession(s) {
   } else if (sport === 'run' || sport === 'swim') {
     put('m', num(s.m, 100000));
     put('sec', num(s.sec, 86400));
+    if (sport === 'swim') {
+      const w = (Array.isArray(s.w) ? s.w : []).map(cleanTest).filter(Boolean).slice(0, SPEC.exMax);
+      if (w.length) out.w = w;
+    }
   }
   return out;
+}
+
+/* One test of a Swim session: a distance in metres and a time in seconds. */
+function cleanTest(t) {
+  if (!t || typeof t !== 'object') return undefined;
+  const m = num(t.m, 100000), sec = num(t.sec, 86400);
+  if (!(m > 0)) return undefined;
+  return sec > 0 ? { m, sec: Math.round(sec) } : { m };
 }
 
 /* One exercise of a Gym session: a name, then sets, reps and kg. */
@@ -230,8 +243,10 @@ export function fromExp0(d) {
 export const REF = { run: 5000 };
 export const runSec = s => s.sec > 0 ? s.sec : minutes(s) ? minutes(s) * 60 : undefined;
 export const equivalent = s => (REF[s.s] && s.m > 0 && runSec(s) ? runSec(s) * Math.pow(REF[s.s] / s.m, 1.06) : undefined);
-/* A swim as a speed: metres over seconds. 1500 m in 28:30 is 0.88 m/s. */
-export const speed = s => (s.s === 'swim' && s.m > 0 && runSec(s) ? s.m / runSec(s) : undefined);
+/* The tests of a Swim session; a first swim's distance and time read as one. */
+export const tests = s => s.w?.length ? s.w : s.s === 'swim' && s.m > 0 ? [{ m: s.m, ...(s.sec > 0 ? { sec: s.sec } : {}) }] : [];
+/* A swim test as a speed: metres over seconds. 1500 m in 28:30 is 0.88 m/s. */
+export const mps = t => (t.m > 0 && t.sec > 0 ? t.m / t.sec : undefined);
 /* The exercises of a Gym session; a first session's top set reads as one. */
 export const exercises = s => s.x?.length ? s.x : s.lift ? [{ n: s.lift[0].toUpperCase() + s.lift.slice(1), kg: s.kg, reps: s.reps }] : [];
 /* The most a lift could be done once, from a set of several (Epley). */
@@ -276,11 +291,12 @@ export function load(s, hr) {
 }
 
 /* The numbers of a session and the key each best is kept under: lower is
-   better for times, higher for lifts and swim speed. A Gym session has one per exercise
+   better for times, higher for lifts and swim speed. A Swim session has one per
+   distance swum, a Gym session one per exercise
    with a weight and reps, keyed by its name. */
 export function scores(s) {
   if (s.s === 'lift') return exercises(s).map(e => { const v = e1rm(e); return v ? { key: `lift:${e.n.toLowerCase()}`, v, high: true } : null; }).filter(Boolean);
-  if (s.s === 'swim') { const v = speed(s); return v ? [{ key: 'swim', v, high: true }] : []; }
+  if (s.s === 'swim') return tests(s).map(t => { const v = mps(t); return v ? { key: `swim:${t.m}`, v, high: true } : null; }).filter(Boolean);
   const v = equivalent(s);
   return v ? [{ key: s.s, v, high: false }] : [];
 }
@@ -294,7 +310,7 @@ export function bests(sessions) {
   }
   return best;
 }
-/* A Gym session's form is the average of its exercises'. */
+/* A Gym or Swim session's form is the average of its exercises' or tests'. */
 export function form(s, best) {
   const f = scores(s).filter(r => best[r.key]).map(r => r.high ? r.v / best[r.key] : best[r.key] / r.v);
   return f.length ? f.reduce((a, b) => a + b, 0) / f.length : undefined;

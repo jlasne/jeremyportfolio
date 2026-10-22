@@ -120,7 +120,7 @@
 
 <script src="/snow.js" defer></script>
 <script type="module">
-import { SPEC, SLEEP, SPORT, shift, daysBetween, exercises, bests, form, effort, minutes, hrTop, load as loadOf } from '/wellness/spec.js';
+import { SPEC, SLEEP, SPORT, shift, daysBetween, exercises, tests, bests, form, effort, minutes, hrTop, load as loadOf } from '/wellness/spec.js';
 import { hrOf, avg, dayLoads, top, kept, csv, measure, today, COLOR, pad, dayName, short, weekday, clock, hm, mmss, cap, esc, copy, label, fmtVal, state, entry, allKeys, monthKeys, val, sessionsOf, allSessions, sportBefore, held, keepHeld, api, load as loadData, spread, normal, verdict, tone, INDICATORS, nightScores, unitOf } from '/wellness/data.js';
 import { barChart } from '/wellness/charts.js';
 
@@ -221,15 +221,6 @@ function drawSport(animate) {
     if (loads.length) rows.push(['Total load', `${Math.round(loads.reduce((a, b) => a + b, 0))}`]);
     if (e !== undefined) rows.push(['Avg effort', `${Math.round(e * 100)} %`]);
     if (f !== undefined) rows.push(['Avg form', `${Math.round(f * 100)} %`]);
-    if (sp.id === 'lift') {
-      /* the best 1RM of the three exercises done most this month */
-      const seen = {};
-      for (const s of list) for (const x of exercises(s)) { const k = x.n.toLowerCase(); seen[k] ||= { n: x.n, c: 0 }; seen[k].c++; }
-      Object.entries(seen).sort((a, b) => b[1].c - a[1].c).filter(([k]) => best[`lift:${k}`]).slice(0, 3)
-        .forEach(([k, x]) => rows.push([`Best ${esc(x.n)}`, `${Math.round(best[`lift:${k}`])} kg`]));
-    }
-    else if (sp.id === 'swim' && best.swim) rows.push(['Best speed', `${best.swim.toFixed(2)} m/s`]);
-    else if (best[sp.id]) rows.push(['Best 5 km', mmss(best[sp.id])]);
     if (sp.id === 'other') { const names = [...new Set(list.map(s => s.n).filter(Boolean))]; if (names.length) rows.push(['Activities', esc(names.slice(0, 3).join(', '))]); }
     const body = rows.length ? `<dl>${rows.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl>`
       : `<p class="empty">${list.length ? 'No heart rate or level yet.' : 'No session yet.'}</p>`;
@@ -362,6 +353,13 @@ function exBox(s, i) {
     <div class="grid ex-grid">${num(j, 'reps', 'Reps', x.reps, 1)}${num(j, 'kg', 'Weight kg', x.kg, 'any')}</div></div>`).join('')
     + (xs.length < SPEC.exMax ? `<div class="adds"><button class="chip" type="button" data-xadd="${i}">Add an exercise</button></div>` : '');
 }
+/* A Swim session's tests: any distance, each with its time */
+function testBox(s, i) {
+  const ts = tests(s);
+  return ts.map((t, j) => `<div class="ex"><div class="sess-head"><span class="ex-k">Test ${j + 1}</span><button type="button" data-i="${i}" data-xdel="${j}">Remove</button></div>
+    <div class="grid ex-grid"><label class="field"><span>Distance m</span><input class="in" type="number" inputmode="numeric" min="0" data-i="${i}" data-x="${j}" data-xk="m" value="${t.m ?? ''}" placeholder="100"></label><label class="field"><span>Time (min:ss)</span><input class="in" type="text" inputmode="decimal" data-i="${i}" data-x="${j}" data-xk="sec" value="${t.sec == null ? '' : mmss(t.sec)}" placeholder="1:30"></label></div></div>`).join('')
+    + (ts.length < SPEC.exMax ? `<div class="adds"><button class="chip" type="button" data-xadd="${i}">Add a test</button></div>` : '');
+}
 /* the names already used, offered as I type */
 const exNames = () => {
   const seen = new Map();
@@ -370,6 +368,9 @@ const exNames = () => {
 };
 /* a first Gym session keeps its top set until I edit it, then it becomes exercises */
 const exOf = s => { if (!s.x) { s.x = exercises(s).map(x => ({ ...x })); delete s.lift; delete s.kg; delete s.reps; } return s.x; };
+/* a first swim keeps its distance and time until I edit it, then it becomes tests */
+const testOf = s => { if (!s.w) { s.w = tests(s).map(t => ({ ...t })); delete s.m; delete s.sec; } return s.w; };
+const partsOf = s => s.s === 'swim' ? testOf(s) : exOf(s), partsKey = s => s.s === 'swim' ? 'w' : 'x';
 function drawSessions() {
   $('sessBox').innerHTML = cur.sessions.map((s, i) => {
     const sp = SPORT.get(s.s);
@@ -378,13 +379,11 @@ function drawSessions() {
     let grid = inp('d', 'How long (h:mm)', minutes(s) == null ? '' : `${Math.floor(minutes(s) / 60)}:${pad(minutes(s) % 60)}`, 'type="text" inputmode="decimal" placeholder="0:45"')
       + inp('hr', 'Avg heart rate', s.hr, 'type="number" inputmode="numeric" placeholder="bpm"') + inp('pk', 'Peak heart rate', s.pk, 'type="number" inputmode="numeric" placeholder="bpm"');
     if (s.s === 'run') grid += inp('m', 'Distance km', s.m == null ? '' : s.m / 1000, 'type="number" inputmode="decimal" step="0.01"');
-    if (s.s === 'swim') grid += inp('m', 'Distance m', s.m, 'type="number" inputmode="numeric" placeholder="1500"')
-      + inp('sec', 'Time (min:ss)', s.sec == null ? '' : mmss(s.sec), 'type="text" inputmode="decimal" placeholder="28:30"');
     const levels = `<div class="chips" style="margin-top:12px" role="group" aria-label="Effort level, 1 to ${SPEC.levels}"><span class="chips-k">Effort</span>${Array.from({ length: SPEC.levels }, (_, j) => j + 1).map(x => `<button class="chip" type="button" data-i="${i}" data-k="lv" data-v="${x}" aria-pressed="${s.lv === x}">${x}</button>`).join('')}</div>`;
     const named = s.s === 'other' ? `<input class="in sess-name" data-i="${i}" data-k="n" value="${esc(s.n ?? '')}" maxlength="${SPEC.nameMax}" placeholder="Name it: padel, yoga, hike…" aria-label="Name of the activity">` : '';
     return `<div class="sess" style="--c:var(--${s.s})"><div class="sess-head"><b>${sp.name}</b><button type="button" data-del="${i}">Remove</button></div>
       ${named}${chips('f', SPEC.focus, s.f)}${levels}
-      <div class="grid">${grid}</div>${s.s === 'lift' ? exBox(s, i) : ''}<p class="sess-calc" id="calc${i}">${sessCalc(s)}</p></div>`;
+      <div class="grid">${grid}</div>${s.s === 'lift' ? exBox(s, i) : s.s === 'swim' ? testBox(s, i) : ''}<p class="sess-calc" id="calc${i}">${sessCalc(s)}</p></div>`;
   }).join('');
   exNames();
 }
@@ -393,14 +392,14 @@ $('sessBox').addEventListener('click', e => {
   if (del) { cur.sessions.splice(+del.dataset.del, 1); drawSessions(); touch(); return; }
   const xadd = e.target.closest('[data-xadd]');
   if (xadd) {
-    const s = cur.sessions[+xadd.dataset.xadd], xs = exOf(s);
-    if (xs.length < SPEC.exMax) xs.push({ n: '' });
+    const s = cur.sessions[+xadd.dataset.xadd], xs = partsOf(s), swim = s.s === 'swim';
+    if (xs.length < SPEC.exMax) xs.push(swim ? {} : { n: '' });
     drawSessions();
-    $('sessBox').querySelector(`[data-i="${xadd.dataset.xadd}"][data-x="${xs.length - 1}"][data-xk="n"]`)?.focus();
+    $('sessBox').querySelector(`[data-i="${xadd.dataset.xadd}"][data-x="${xs.length - 1}"][data-xk="${swim ? 'm' : 'n'}"]`)?.focus();
     return;
   }
   const xdel = e.target.closest('[data-xdel]');
-  if (xdel) { const s = cur.sessions[+xdel.dataset.i]; exOf(s).splice(+xdel.dataset.xdel, 1); if (!s.x.length) delete s.x; drawSessions(); touch(); return; }
+  if (xdel) { const s = cur.sessions[+xdel.dataset.i]; partsOf(s).splice(+xdel.dataset.xdel, 1); if (!s[partsKey(s)].length) delete s[partsKey(s)]; drawSessions(); touch(); return; }
   const c = e.target.closest('.chip[data-k]'); if (!c) return;
   const s = cur.sessions[+c.dataset.i], k = c.dataset.k, v = k === 'lv' ? +c.dataset.v : c.dataset.v;
   s[k] = s[k] === v ? undefined : v;
@@ -414,15 +413,15 @@ $('sessBox').addEventListener('input', e => {
   const i = +e.target.dataset.i, s = cur.sessions[i], raw = e.target.value;
   let v;
   if (e.target.dataset.x !== undefined) {
-    const x = exOf(s)[+e.target.dataset.x], xk = e.target.dataset.xk;
+    const x = partsOf(s)[+e.target.dataset.x], xk = e.target.dataset.xk;
     if (xk === 'n') { const n = raw.trim(); if (n) x.n = n; else delete x.n; }
+    else if (xk === 'sec') { v = toSeconds(raw); if (v === undefined) delete x.sec; else x.sec = v; }
     else { v = raw === '' ? undefined : Number(raw); if (v === undefined || Number.isNaN(v)) delete x[xk]; else x[xk] = Math.round(v * 100) / 100; }
     $('calc' + i).textContent = sessCalc(s);
     touch(); return;
   }
   if (k === 'n') { const n = raw.trim(); if (n) s.n = n; else delete s.n; touch(); return; }
-  if (k === 'd') { v = toDuration(raw); delete s.t; delete s.e; if (s.s === 'run') delete s.sec; }
-  else if (k === 'sec') v = toSeconds(raw);
+  if (k === 'd') { v = toDuration(raw); delete s.t; delete s.e; delete s.sec; }
   else if (k === 'm') v = raw === '' ? undefined : Number(raw) * (s.s === 'run' ? 1000 : 1);
   else v = raw === '' ? undefined : Number(raw);
   if (v === undefined || Number.isNaN(v)) delete s[k]; else s[k] = Math.round(v * 100) / 100;

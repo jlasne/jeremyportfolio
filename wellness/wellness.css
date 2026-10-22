@@ -222,6 +222,7 @@ fieldset h3 span { font-size: 13px; font-weight: 400; letter-spacing: 0; color: 
 .sess-name { margin-top: 10px; }
 .ex { margin-top: 16px; padding-left: 12px; border-left: 2px solid var(--ice-10); }
 .grid.ex-grid { grid-template-columns: repeat(2, 1fr); }
+.ex-k { font-size: 13px; color: var(--ice-45); }
 .sess-calc { margin: 10px 0 0; font-size: 14px; line-height: 1.4; color: var(--ice-70); min-height: 20px; font-variant-numeric: tabular-nums; }
 .adds { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
 .adds .chip { --c: var(--ice); }

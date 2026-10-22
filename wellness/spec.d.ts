@@ -3,12 +3,13 @@
 /** One max: a name, the day, the measures picked and their numbers. */
 export interface Max { n: string; d?: string; u?: string[]; reps?: number; kg?: number; m?: number; kmh?: number; sec?: number }
 export interface SleepField { id: string; name: string; short: string; unit: string; max: number; better?: 'high' | 'low' }
+export interface Test { m: number; sec?: number }
 export interface Sport { id: 'run' | 'swim' | 'lift' | 'other'; name: string; focus: string }
 
 /** One session as kept: a sport, then what was measured. */
 export interface Session {
   s: 'run' | 'swim' | 'lift' | 'other'; f?: string; t?: number; e?: number; hr?: number; pk?: number; lv?: number; d?: number;
-  m?: number; sec?: number; lift?: string; kg?: number; reps?: number; n?: string;
+  m?: number; sec?: number; w?: Test[]; lift?: string; kg?: number; reps?: number; n?: string;
   x?: Exercise[];
 }
 /** One exercise of a Gym session. */
@@ -39,7 +40,8 @@ export function fromExp0(d: unknown): Omit<Day, 'day'> | null;
 export const REF: { run: number };
 export function runSec(s: Session): number | undefined;
 export function equivalent(s: Session): number | undefined;
-export function speed(s: Session): number | undefined;
+export function tests(s: Session): Test[];
+export function mps(t: Test): number | undefined;
 export function exercises(s: Session): Exercise[];
 export function e1rm(s: { kg?: number; reps?: number }): number | undefined;
 export function hrTop(sessions: Session[]): number | undefined;
