@@ -275,6 +275,14 @@ function toDuration(str) {
   if ((m = /^(\d{1,2})\s*[:h]\s*(\d{1,2})?$/.exec(t))) return +m[1] * 60 + Math.min(59, +(m[2] || 0));
   return /^\d+$/.test(t) ? +t : undefined;
 }
+/* a run to the second: 0:23:30 is 1410 seconds, 0:23 and 23 alone are 23 minutes */
+function toRunSec(str) {
+  const t = String(str).trim().toLowerCase(); let m;
+  if ((m = /^(\d{1,2})\s*[:h]\s*(\d{1,2})\s*[:m]\s*(\d{1,2})$/.exec(t))) return +m[1] * 3600 + Math.min(59, +m[2]) * 60 + Math.min(59, +m[3]);
+  const d = toDuration(t);
+  return d === undefined ? undefined : d * 60;
+}
+const hms = n => `${Math.floor(n / 3600)}:${pad(Math.floor(n % 3600 / 60))}:${pad(Math.round(n % 60))}`;
 /* a swim time to the hundredth: 0:38,45 (or 0:38.45) is 38.45 seconds,
    38,45 alone too, 28:30 is 1710, 1:02:05 works, 28 alone is 28 minutes */
 function toSeconds(str) {
@@ -391,8 +399,10 @@ function drawSessions() {
     const sp = SPORT.get(s.s);
     const chips = (name, list, on) => `<div class="chips" style="margin-top:12px" role="group" aria-label="${name}">${list.map(x => `<button class="chip" type="button" data-i="${i}" data-k="${name}" data-v="${x}" aria-pressed="${on === x}">${cap(x)}</button>`).join('')}</div>`;
     const inp = (k, label, val, attrs = '') => `<label class="field"><span>${label}</span><input class="in" data-i="${i}" data-k="${k}" value="${val ?? ''}" ${attrs}></label>`;
-    let grid = inp('d', 'How long (h:mm)', minutes(s) == null ? '' : `${Math.floor(minutes(s) / 60)}:${pad(minutes(s) % 60)}`, 'type="text" inputmode="decimal" placeholder="0:45"')
-      + inp('hr', 'Avg heart rate', s.hr, 'type="number" inputmode="numeric" placeholder="bpm"') + inp('pk', 'Peak heart rate', s.pk, 'type="number" inputmode="numeric" placeholder="bpm"');
+    let grid = s.s === 'run'
+      ? inp('d', 'How long (h:mm:ss)', s.sec > 0 ? hms(s.sec) : minutes(s) == null ? '' : hms(minutes(s) * 60), 'type="text" inputmode="decimal" placeholder="0:45:30"')
+      : inp('d', 'How long (h:mm)', minutes(s) == null ? '' : `${Math.floor(minutes(s) / 60)}:${pad(minutes(s) % 60)}`, 'type="text" inputmode="decimal" placeholder="0:45"');
+    grid += inp('hr', 'Avg heart rate', s.hr, 'type="number" inputmode="numeric" placeholder="bpm"') + inp('pk', 'Peak heart rate', s.pk, 'type="number" inputmode="numeric" placeholder="bpm"');
     if (s.s === 'run') grid += inp('m', 'Distance km', s.m == null ? '' : s.m / 1000, 'type="number" inputmode="decimal" step="0.01"');
     const levels = `<div class="chips" style="margin-top:12px" role="group" aria-label="Effort level, 1 to ${SPEC.levels}"><span class="chips-k">Effort</span>${Array.from({ length: SPEC.levels }, (_, j) => j + 1).map(x => `<button class="chip" type="button" data-i="${i}" data-k="lv" data-v="${x}" aria-pressed="${s.lv === x}">${x}</button>`).join('')}</div>`;
     const named = s.s === 'other' ? `<input class="in sess-name" data-i="${i}" data-k="n" value="${esc(s.n ?? '')}" maxlength="${SPEC.nameMax}" placeholder="Name it: padel, yoga, hike…" aria-label="Name of the activity">` : '';
@@ -436,7 +446,11 @@ $('sessBox').addEventListener('input', e => {
     touch(); return;
   }
   if (k === 'n') { const n = raw.trim(); if (n) s.n = n; else delete s.n; touch(); return; }
-  if (k === 'd') { v = toDuration(raw); delete s.t; delete s.e; delete s.sec; }
+  if (k === 'd' && s.s === 'run') {
+    const sec = toRunSec(raw); delete s.t; delete s.e;
+    if (sec) { s.sec = sec; v = Math.max(1, Math.round(sec / 60)); } else delete s.sec;
+  }
+  else if (k === 'd') { v = toDuration(raw); delete s.t; delete s.e; delete s.sec; }
   else if (k === 'm') v = raw === '' ? undefined : Number(raw) * (s.s === 'run' ? 1000 : 1);
   else v = raw === '' ? undefined : Number(raw);
   if (v === undefined || Number.isNaN(v)) delete s[k]; else s[k] = Math.round(v * 100) / 100;
