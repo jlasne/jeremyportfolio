@@ -5,7 +5,7 @@ the whole build and run it, and we split what it earns. This repository is
 the site behind that, plus everything else I keep in public.
 
 The landing page: a portrait, a name, social icons, CreatorMatch with our
-work as a row of phones under it, then three personal projects as app icons.
+work as a row of phones under it, then four personal projects as app icons.
 Everything sits straight on the ridge, with no panels.
 
 - **Socials.** YouTube [@jeremyfounder](https://www.youtube.com/@jeremyfounder),
@@ -32,12 +32,14 @@ Everything sits straight on the ridge, with no panels.
   where the page barely moves while the scroll goes on (up to 24x), so the recording never
   seems to stop. Each video is a loop whose end melts into its start, about 0.8 to 1.2 MB, and
   loads only when its phone comes into sight
-- **Personal projects.** Three app icons, each with a halo in its own colour,
+- **Personal projects.** Four app icons, each with a halo in its own colour,
   the name, one line and the address: [Wellness](/wellness/), experiments on
   myself to feel alive (its icon is the ridge with a pulse line);
   [tasu](https://tasu.ai), my homemade AI interface;
-  [Kaught](https://kaught.app), the animal identifier, with a Live badge. One
-  under the other on phones, three across from 560px. A hover lifts the icon
+  [Kaught](https://kaught.app), the animal identifier, with a Live badge;
+  [Portfolio Construction Intelligence](https://www.claudeportfolio.com/),
+  a portfolio tested across 32 countries and 4 crises. One under the other on
+  phones, two across from 560px, four across from 800px. A hover lifts the icon
 
 ## Stack
 
