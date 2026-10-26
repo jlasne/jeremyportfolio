@@ -1,0 +1,211 @@
+/* Design tokens. The palette is DESIGN.md section 5, verbatim: one hue per asset type, status
+   colours separate. Semantic tokens (surface, text, accent...) are what components use; they are
+   redefined per theme on :root[data-theme]. */
+
+:root {
+  /* Palette: dark / mid / light per hue */
+  --plant-dark: #9c4a1e;
+  --plant-mid: #e07a2f;
+  --plant-light: #f6a95b;
+  --grid-dark: #2c5aa0;
+  --grid-mid: #4a8ad8;
+  --grid-light: #8cc0f0;
+  --dc-dark: #4d3a8c;
+  --dc-mid: #7b5fd0;
+  --dc-light: #b49cf5;
+  --town-dark: #1f7a4d;
+  --town-mid: #34b36a;
+  --town-light: #8fe0a8;
+  --power-dark: #c99a1a;
+  --power-mid: #ffd23f;
+  --power-light: #fff1a8;
+  --money-dark: #1f7f86;
+  --money-mid: #2fb8b0;
+  --money-light: #8fe6dc;
+  --grass-dark: #4f7d32;
+  --grass-mid: #6f9e3d;
+  --grass-light: #98c25a;
+  --dirt-dark: #7a5a3c;
+  --dirt-mid: #a07a52;
+  --dirt-light: #c9a273;
+  --stone-dark: #5f6680;
+  --stone-mid: #9aa1b8;
+  --stone-light: #d4d8e4;
+  --ink-dark: #1b1a24;
+  --ink-mid: #2d2f40;
+  --ink-light: #3b3f54;
+  --cream-dark: #e9e2cf;
+  --cream-mid: #f6f1e3;
+  --cream-light: #fffdf6;
+  --status-good: #3bb273;
+  --status-warn: #f2a33a;
+  --status-critical: #e5484d;
+
+  /* Company colours, in Company.color order */
+  --company-0: #e07a2f;
+  --company-1: #4a8ad8;
+  --company-2: #7b5fd0;
+  --company-3: #34b36a;
+  --company-4: #e5484d;
+  --company-5: #2fb8b0;
+
+  /* Type */
+  --font-pixel: 'Pixelify Sans', 'Silkscreen', ui-monospace, monospace;
+  --font-caps: 'Silkscreen', 'Pixelify Sans', ui-monospace, monospace;
+  /* Big numbers: Silkscreen, because Pixelify Sans draws 5 like an S. */
+  --font-num: 'Silkscreen', 'Pixelify Sans', ui-monospace, monospace;
+  --font-body: 'Nunito Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --text-sm: 14px; /* the floor: nothing is smaller */
+  --text-md: 16px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 28px;
+  --text-3xl: 40px;
+  --text-hero: clamp(44px, 9vw, 88px);
+
+  /* Space (4 px grid) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Shape */
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-xs: 6px;
+  --radius-pill: 999px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 120ms;
+  --dur: 220ms;
+  --dur-slow: 400ms;
+
+  /* Layout */
+  --topbar-h: 64px;
+  --rail-w: 84px;
+  --sheet-w: 380px;
+  --tabbar-h: 64px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --z-map: 0;
+  --z-sheet: 20;
+  --z-bar: 30;
+  --z-menu: 40;
+  --z-overlay: 60;
+  --z-toast: 80;
+}
+
+/* Light: daylight over cream panels. */
+:root,
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: var(--cream-mid);
+  --bg-deep: var(--cream-dark);
+  --surface: var(--cream-light);
+  --surface-2: var(--cream-mid);
+  --surface-3: var(--cream-dark);
+  --surface-sunken: #efe8d5;
+  --border: #ddd4bd;
+  --border-strong: #c9bfa4;
+  --text: var(--ink-dark);
+  --text-muted: #565c74;
+  --text-faint: #6b718a;
+  --text-on-accent: var(--ink-dark);
+  --accent: var(--power-mid);
+  --accent-strong: var(--power-dark);
+  --accent-soft: var(--power-light);
+  --focus: var(--grid-dark);
+  --money: var(--money-dark);
+  --money-bg: color-mix(in srgb, var(--money-mid) 16%, transparent);
+  --good: #1f7a4d;
+  --good-icon: var(--status-good);
+  --warn: #8a5300;
+  --warn-icon: #d98a1c;
+  --critical: #b3262b;
+  --critical-icon: var(--status-critical);
+  --info: var(--grid-dark);
+  --info-icon: var(--grid-mid);
+  --plant-ink: var(--plant-dark);
+  --grid-ink: var(--grid-dark);
+  --dc-ink: var(--dc-dark);
+  --town-ink: var(--town-dark);
+  --power-ink: #8a6a0e;
+  --shadow: 0 2px 0 rgba(27, 26, 36, 0.1), 0 2px 2px rgba(27, 26, 36, 0.06);
+  --shadow-raised: 0 2px 0 rgba(27, 26, 36, 0.12), 0 8px 24px rgba(27, 26, 36, 0.12);
+  --scrim: rgba(27, 26, 36, 0.42);
+  --map-ground: var(--grass-mid);
+  --map-ground-2: var(--grass-light);
+}
+
+/* Dark: the map at dusk, dark slate panels. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: var(--ink-dark);
+  --bg-deep: #14131b;
+  --surface: var(--ink-mid);
+  --surface-2: #34374a;
+  --surface-3: var(--ink-light);
+  --surface-sunken: #23242f;
+  --border: #44485f;
+  --border-strong: #565b75;
+  --text: var(--cream-light);
+  --text-muted: var(--stone-light);
+  --text-faint: var(--stone-mid);
+  --text-on-accent: var(--ink-dark);
+  --accent: var(--power-mid);
+  --accent-strong: var(--power-light);
+  --accent-soft: color-mix(in srgb, var(--power-mid) 22%, transparent);
+  --focus: var(--power-mid);
+  --money: var(--money-light);
+  --money-bg: color-mix(in srgb, var(--money-mid) 18%, transparent);
+  --good: var(--town-light);
+  --good-icon: var(--status-good);
+  --warn: #ffc77a;
+  --warn-icon: var(--status-warn);
+  --critical: #ff9a9d;
+  --critical-icon: var(--status-critical);
+  --info: var(--grid-light);
+  --info-icon: var(--grid-mid);
+  --plant-ink: var(--plant-light);
+  --grid-ink: var(--grid-light);
+  --dc-ink: var(--dc-light);
+  --town-ink: var(--town-light);
+  --power-ink: var(--power-mid);
+  --shadow: 0 2px 0 rgba(0, 0, 0, 0.35), 0 2px 2px rgba(0, 0, 0, 0.2);
+  --shadow-raised: 0 2px 0 rgba(0, 0, 0, 0.4), 0 10px 28px rgba(0, 0, 0, 0.4);
+  --scrim: rgba(10, 10, 16, 0.6);
+  --map-ground: #3e5f2a;
+  --map-ground-2: #4f7d32;
+}
+
+/* Reduced motion: every duration collapses. Set from settings by the app; the media query covers
+   the moment before the app mounts. */
+:root[data-reduced-motion='true'] {
+  --dur-fast: 0ms;
+  --dur: 0ms;
+  --dur-slow: 0ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-reduced-motion='false']) {
+    --dur-fast: 0ms;
+    --dur: 0ms;
+    --dur-slow: 0ms;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --topbar-h: 96px;
+    --tabbar-h: 64px;
+  }
+}

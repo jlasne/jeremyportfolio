@@ -1,0 +1,26 @@
+{
+  // Typechecks the edge function under Node tooling (there is no Deno here):
+  // `node app/scripts/build-edge.mjs --check`. deno-shim.d.ts declares the few Deno APIs used,
+  // and `npm:@supabase/supabase-js@2` maps to the copy installed in app/node_modules.
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "allowJs": true,
+    "checkJs": false,
+    "allowImportingTsExtensions": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": [],
+    "typeRoots": [],
+    "baseUrl": ".",
+    "paths": {
+      "npm:@supabase/supabase-js@2": ["../app/node_modules/@supabase/supabase-js"]
+    }
+  },
+  "files": ["deno-shim.d.ts", "functions/grid-tycoon/index.ts"]
+}
