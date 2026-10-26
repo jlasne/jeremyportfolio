@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Grid Tycoon</title>
+    <meta
+      name="description"
+      content="Grid Tycoon is a turn-based energy and compute business sim. Build power plants, grid links and datacenters, sell to five client pools, and finish 40 rounds with the highest share price."
+    />
+    <meta name="theme-color" content="#f6f1e3" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1b1a24" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect width='16' height='16' rx='3' fill='%232d2f40'/%3E%3Cpath fill='%23ffd23f' d='M9 2h3v1h-1v1h-1v1H9v1h4v1h-1v1h-1v1h-1v1H9v1H8v1H7v1H5v-1h1v-1h1V9h1V8H4V7h1V6h1V5h1V4h1V3h1z'/%3E%3Cpath fill='%23c99a1a' d='M5 13h2v1H5zM12 7h1v1h-1z'/%3E%3C/svg%3E"
+    />
+    <link rel="canonical" href="https://www.jeremylasne.com/games/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Jeremy Lasne" />
+    <meta property="og:title" content="Grid Tycoon" />
+    <meta
+      property="og:description"
+      content="Run an energy and compute company for 40 rounds. Build plants, links and datacenters, outgrow three rivals, top the share price."
+    />
+    <meta property="og:url" content="https://www.jeremylasne.com/games/" />
+    <meta property="og:image" content="https://www.jeremylasne.com/games/cover.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Grid Tycoon: a pixel-art company map with power plants, grid links and datacenters." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Grid Tycoon" />
+    <meta name="twitter:description" content="A turn-based energy and compute business sim. 40 rounds, highest share price wins." />
+    <meta name="twitter:image" content="https://www.jeremylasne.com/games/cover.png" />
+
+    <script>
+      // Applied before first paint so the saved theme never flashes. The app owns it after mount.
+      ;(function () {
+        var s = {}
+        try {
+          s = JSON.parse(localStorage.getItem('gt.settings.v1') || '{}') || {}
+        } catch (e) {}
+        var mq = function (q) {
+          return window.matchMedia && window.matchMedia(q).matches
+        }
+        var theme = s.theme === 'light' || s.theme === 'dark' ? s.theme : mq('(prefers-color-scheme: dark)') ? 'dark' : 'light'
+        var reduced = s.reducedMotion === 'on' ? true : s.reducedMotion === 'off' ? false : mq('(prefers-reduced-motion: reduce)')
+        document.documentElement.setAttribute('data-theme', theme)
+        document.documentElement.setAttribute('data-reduced-motion', reduced ? 'true' : 'false')
+      })()
+    </script>
+    <script type="module" crossorigin src="/games/assets/index-D7FFJ5BI.js"></script>
+    <link rel="stylesheet" crossorigin href="/games/assets/index-vw6tN5s9.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>Grid Tycoon needs JavaScript to run.</noscript>
+  </body>
+</html>
