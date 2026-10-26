@@ -62,7 +62,7 @@ The UI shows these instantly in the draft (`previewCompany`), but they only beco
    `E_t = 0.7 E_{t-1} + 0.3 g_{t-1}`, then `g_t = clamp(g_{t-1} + 0.3 (mu − g_{t-1}) + sigma eps, −10%, +20%)`, `D_t = D_{t-1} (1 + g_t)`. Start values: `g_0 = E_0 = mu`, `D_0 = startPerCompany × number of companies`. Demand is not rounded (MW), money is.
 3. **Rent.** otherDc demand this round = background `D_t` + sum of every company's `rentMw`.
 4. **Allocation** with `allocatePool` for every pool, among non-bankrupt companies. Offers: citizens = `power.town`, otherDc = `power.otherDc`, cloud/btc/ai = `compute.*`. U = `pool.lastUsed[id]` (0 if absent). After allocation `lastUsed = used`.
-   Rent matching: `rivalFill = min(totalRent, totalOtherDcUsed)`; each renter gets `fromRivals = rentMw × rivalFill / totalRent`, `fromMarket = rentMw − fromRivals`. All rented MW is delivered (the market fills the rest), so datacenter powered MW = `power.internal + rentMw`.
+   Rent matching (`matchRent`): rivals' otherDc sales fill rent first, split in proportion to each request, and a renter's own otherDc sales never fill its own rent (SPEC: "other companies"); `fromMarket = rentMw − fromRivals`. All rented MW is delivered (the market fills the rest), so datacenter powered MW = `power.internal + rentMw`.
 5. **Revenue and costs.**
    - revenue = Σ used × rate.
    - own power used = town used + otherDc used + internal consumed, where internal consumed = `clamp(computeUsed − rentMw, 0, power.internal)` (rented MW is paid anyway, so it is consumed first). Power cost = 0.4 × own power used.
@@ -171,6 +171,8 @@ interface UiStore {
 }
 ```
 
+Additions made by the shell (use them): game `goToLobby`, `setNetBridge`, `randomSeed`, `discardSoloSave`; draft `moveBuild` and an optional coalesceKey on `set`; ui `toggle`, `settingsOpen`, `forcedSaleConfirmed` / `confirmForcedSale`, `skipTutorial`, `maybeStartTutorial`, `replayTutorial`, `announce` / `liveMessage`, `resetPhase`. States returned by `resolveRound` share past history entries with the previous state: treat every state as read-only.
+
 Local storage keys (all access in try/catch): `gt.solo.v1` (full GameState + meId), `gt.settings.v1`, `gt.tutorial.v1` (done flag), `gt.net.v1` (multiplayer token per room).
 
 ## 4. Screens (src/ui)
@@ -227,10 +229,12 @@ Company colours (charts, rankings), in `color` order: #e07a2f, #4a8ad8, #7b5fd0,
 - Living map, each tied to a rule: smoke / blades / shimmer when a plant's output is used (still when idle); rack LEDs blink in proportion to used compute (dim when idle); crane with a floating countdown over anything building or upgrading (and a ghost crane while dragging a build card); houses multiply with the citizens share; coins pop over buildings at resolution (amount from `revenueByBuilding`); ground tint by season; day / dusk by theme.
 - `src/map/CompanyMap.tsx` mounts Pixi in a div and exposes `mapApi` (module singleton): `lotAt(clientX, clientY): Tile | null`, `highlightLots(tiles: Tile[] | null)`, `focusBuilding(id)`, `playResolution(before, after)`. Camera: fit the plot to the viewport at the largest integer scale (2 or 3, 1 on tiny screens), pan by drag on phones.
 - Reduced motion: no flow dots, no tweening, no smoke; LEDs static.
+- **Frames added by the art pass** (all in atlas.json; overlays share their base frame's size and anchor): `path_v_0..1`, `path_h_0..1`, `path_end_{n,s,e,w}`, `path_x` (dirt paths in the town); `lot_marks` (corner marks, drawn only on free lots); `bush_winter_0..1`; `lamp` (16 × 32) and `glow_0` (24 × 24); `tarp_small`, `tarp_big` (tintable cover over a scaffold, orange for a plant, violet for a datacenter); `lights_{house_0..5, townhall, dc_small, dc_big, plant_small, plant_big, substation, lamp}` (dusk emissives); `snow_{house_0..5, townhall, dc_small, dc_big, plant_small, plant_big, substation, rock_0}` (winter caps). Points: every building/prop has `foot`; `plant_small.hub`, blades `center`, `plant_big.chimney` / `tower`, `dc_*.leds`, `crane.hook`, `house_N.chimney`.
+- **Layering rules**: (1) season grass under `lot` and `path_*` (they have transparent edges); (2) `lot_marks` only on free lots; (3) at dusk draw `lights_*`, rack LEDs and `glow_0` after the dusk tint and untinted, in depth order with their building; (4) in winter draw `snow_<frame>` right after its building, use `bush_winter_*`, hide flowers; (5) wires are continuous 1 px ink lines with a 3 px sag; (6) weight grass variants 2–3 at about 60% and flip tiles for variety; (7) smoke frames are light: tint chimney smoke grey, leave cooling-tower steam white. The art agent's scene previews (`app/.sim/scene-*.png`, `app/scripts/sprites/preview.mjs`) are the reference composition.
 
 ## 7. Audio (src/audio)
 
-WebAudio only, synthesized (no files): `audio.unlock()` on first gesture, `audio.setSeason(0..3)` switches the soft chiptune loop (one per season, ~16 bars, square/triangle voices, low volume), `audio.cue(name)` for `lock`, `coins`, `crane`, `stockUp`, `stockDown`, `click`, `error`; `audio.setMusic(on)`, `audio.setSfx(on)`. Mute toggle in the top bar mutes both and is remembered.
+WebAudio only, synthesized (no files). Extra exports: `audio.unlockOnFirstGesture(target?)`, `audio.close()`, `CUE_NAMES`. Loops are 16–24 bars. Apply the saved music/sfx settings before the first gesture, or a muted player hears music on the first click. `audio.unlock()` on first gesture, `audio.setSeason(0..3)` switches the soft chiptune loop (one per season, ~16 bars, square/triangle voices, low volume), `audio.cue(name)` for `lock`, `coins`, `crane`, `stockUp`, `stockDown`, `click`, `error`; `audio.setMusic(on)`, `audio.setSfx(on)`. Mute toggle in the top bar mutes both and is remembered.
 
 ## 8. Multiplayer (supabase/, src/net)
 

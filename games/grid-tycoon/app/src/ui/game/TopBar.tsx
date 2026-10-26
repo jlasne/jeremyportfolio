@@ -128,6 +128,7 @@ export function TopBar() {
               size="lg"
               icon="lock"
               className="lock-btn"
+              data-tut="lock-in"
               disabled={block != null}
               aria-describedby={block ? LOCK_REASON_ID : undefined}
               aria-keyshortcuts="Control+Enter Meta+Enter"

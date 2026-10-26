@@ -70,6 +70,7 @@ export function Tabs<T extends string>({ label, items, selected, onSelect, idPre
             tabIndex={roving ? 0 : -1}
             disabled={item.disabled}
             className={`tab${isSel ? ' is-selected' : ''}`}
+            data-tut={`tab-${item.id}`}
             onClick={() => onSelect(isSel && collapsible ? null : item.id)}
             onKeyDown={(e) => onKey(e, item.id)}
           >
