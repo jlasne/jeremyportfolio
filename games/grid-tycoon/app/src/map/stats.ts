@@ -26,6 +26,8 @@ export interface BuildingStats {
   mwNow: number
   /** MW once big (for the upgrade line). */
   bigMw: number
+  /** MW it will deliver once built (for a building under construction). */
+  mwOnline: number
   /** This round, from the draft: MW assigned to it and MW left idle. */
   used: number
   idle: number
@@ -69,6 +71,7 @@ export function buildingStats(state: GameState, meId: string, decision: Decision
     name: kindName(b.kind, b.size),
     mwNow,
     bigMw: config.buildings[b.kind].big.mw,
+    mwOnline: b.mw > 0 ? b.mw : config.buildings[b.kind][b.size].mw,
     used,
     idle: Math.max(0, mwNow - used),
     last,

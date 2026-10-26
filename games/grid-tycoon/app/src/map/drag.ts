@@ -108,8 +108,12 @@ function makeGhost(o: BuildOrder): HTMLElement {
  */
 function moveGhost(el: HTMLElement | null, x: number, y: number, lot: Tile | null, blocked: boolean): void {
   if (!el) return
-  const rect = lot ? mapHandle()?.lotClientRect(lot) : null
-  if (rect) el.style.transform = `translate3d(${Math.round(rect.left + rect.width / 2)}px, ${Math.round(rect.top - 6)}px, 0) translate(-50%, -100%)`
+  const h = mapHandle()
+  const rect = lot ? h?.lotClientRect(lot) : null
+  // above the lot and above the ghost crane's countdown badge (which reaches ~16 art px over the lot)
+  const cs = h?.cssScale() ?? 2
+  const lift = (16 + (cs < 2 ? 14 : 0)) * cs + 6
+  if (rect) el.style.transform = `translate3d(${Math.round(rect.left + rect.width / 2)}px, ${Math.round(rect.top - lift)}px, 0) translate(-50%, -100%)`
   else el.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0) translate(-50%, -85%)`
   el.classList.toggle('is-over-lot', !!rect)
   el.classList.toggle('is-blocked', blocked)

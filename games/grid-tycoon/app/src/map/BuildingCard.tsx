@@ -190,7 +190,7 @@ function BuildingBody({ s, deciding, round, phone, onUpgrade, onClose }: { s: Bu
           {building ? (
             <>
               <dd>
-                <Mw value={b.mw} />
+                <Mw value={s.mwOnline} />
               </dd>
               <dd className="mcard-small">once online</dd>
             </>

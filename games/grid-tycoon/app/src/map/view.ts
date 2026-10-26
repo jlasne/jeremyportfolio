@@ -810,13 +810,17 @@ export class MapView {
     this.prop('bush_0', 752, 220)
     this.prop('rock_0', 730, 330)
     this.prop('flowers_1', 670, 226)
-    for (let y = 440; y < rows * T + 24; y += 52)
-      for (const x of [628, 690, 748]) {
+    // past the line: a loose wood, like the town's, so a tall plot has company on both sides
+    for (let y = 440; y < rows * T + 24; y += 44)
+      for (const x of [628, 670, 712, 752]) {
         const h = hash(x, y, 9)
-        if (PYLONS.some(([px, py]) => Math.abs(px - x) < 34 && y > py - 70 && y < py + 30)) continue
-        if (h % 3 === 0) this.prop(`tree_${season}`, x + (h % 11) - 5, y)
-        else if (h % 7 === 1) this.prop('rock_0', x, y)
-        else if (h % 7 === 2) this.prop('flowers_2', x, y - 8)
+        const jx = (h % 13) - 6
+        const jy = ((h >> 5) % 11) - 5
+        if (PYLONS.some(([px, py]) => Math.abs(px - (x + jx)) < 30 && y + jy > py - 66 && y + jy < py + 26)) continue
+        if (h % 9 < 4) this.prop(`tree_${season}`, x + jx, y + jy)
+        else if (h % 9 === 4) this.prop(h % 2 ? 'bush_0' : 'bush_1', x + jx, y + jy - 8)
+        else if (h % 9 === 5) this.prop('rock_0', x + jx, y + jy)
+        else if (h % 9 === 6) this.prop('flowers_2', x + jx, y + jy - 8)
       }
   }
 
@@ -1532,7 +1536,8 @@ export class MapView {
     box.position.set(x, y)
     box.visible = false
     this.hud.addChild(box)
-    this.fx.push({ s: box, anim: coin ?? undefined, frames: coin ? coinFrames : null, x, y, delay: 0.05, t: 0, life: 2.4, rise: reduced ? 0 : 6 * k, fps: 10 })
+    // the coin stays face on (a spinning coin this size reads as a bar at its edge-on frames)
+    this.fx.push({ s: box, frames: null, x, y, delay: 0.05, t: 0, life: 2.4, rise: reduced ? 0 : 6 * k, fps: 0 })
     this.wake()
   }
 
