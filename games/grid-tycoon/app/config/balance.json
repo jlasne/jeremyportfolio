@@ -1,0 +1,58 @@
+{
+  "rounds": 40,
+  "start": {
+    "treasury": 30,
+    "shares": 10,
+    "businessValue": 100,
+    "buildings": [
+      { "kind": "plant", "size": "small" },
+      { "kind": "dc", "size": "small" }
+    ],
+    "links": [{ "use": "internal", "mw": 2 }]
+  },
+  "buildings": {
+    "plant": {
+      "small": { "mw": 2, "cost": 10, "rounds": 1 },
+      "big": { "mw": 10, "cost": 40, "rounds": 3 },
+      "upgrade": { "cost": 46, "rounds": 4 }
+    },
+    "dc": {
+      "small": { "mw": 2, "cost": 12, "rounds": 1 },
+      "big": { "mw": 10, "cost": 50, "rounds": 3 },
+      "upgrade": { "cost": 58, "rounds": 4 }
+    }
+  },
+  "link": { "costPerMw": 1, "rounds": 1 },
+  "maintenanceRate": 0.02,
+  "sellBackRate": 0.3,
+  "rate": { "citizens": 1.0, "otherDc": 1.3, "cloud": 2.0, "btc": 1.6, "ai": 3.2 },
+  "cost": { "ownPower": 0.4, "rentRival": 1.3, "rentMarket": 1.6 },
+  "pool": {
+    "startPerCompany": { "citizens": 4, "otherDc": 2, "cloud": 2, "btc": 2, "ai": 2 },
+    "meanGrowth": { "citizens": 0.01, "otherDc": 0.03, "cloud": 0.03, "btc": 0.02, "ai": 0.06 },
+    "volatility": { "citizens": 0.005, "otherDc": 0.015, "cloud": 0.01, "btc": 0.06, "ai": 0.03 },
+    "meanReversion": 0.3,
+    "growthClamp": { "min": -0.1, "max": 0.2 }
+  },
+  "expectation": { "weightOld": 0.7, "weightNew": 0.3 },
+  "incumbentShare": 0.8,
+  "stock": {
+    "revenueGrowthWeight": 0.5,
+    "revenueGrowthClamp": 0.3,
+    "idleFree": 0.2,
+    "idlePenaltyPer10": 0.01,
+    "fundamentalWeight": 0.15,
+    "profitMultiple": 20,
+    "profitWindow": 4,
+    "bookWeight": 0.3
+  },
+  "debt": { "dragSteepness": 3 },
+  "loan": { "baseRate": 0.12, "stabilitySpread": 0.08, "stressAdd": 0.04, "termRounds": 8 },
+  "stability": { "citizens": 1.0, "cloud": 0.8, "otherDc": 0.6, "ai": 0.3, "btc": 0.1 },
+  "shares": { "maxChangePerRound": 0.2 },
+  "marketCap": { "floor": 0.01 },
+  "multiplayer": { "roundTimer": 180, "minPlayers": 2, "maxPlayers": 6 },
+  "solo": { "bots": 3 },
+  "bots": { "buildTreasuryMultiple": 1.5, "maxIdle": 0.25, "nimbusDebtToMarketCap": 0.5 },
+  "plot": { "lotsPerRow": 4, "startRows": 2 }
+}
