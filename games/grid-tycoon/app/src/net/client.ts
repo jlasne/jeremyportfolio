@@ -14,7 +14,7 @@ import type { Decision } from '../engine'
 import { clockOffset, noteServerTime, serverNow } from './clock'
 import { isConfigured } from './config'
 import { createSupabaseBackend } from './supabase'
-import { forgetSeat, lastSeat, saveSeat, savedSeat, type SavedSeat } from './tokens'
+import { forgetSeat, lastSeat, saveSeat, savedSeat, setSeatStorage, type SavedSeat } from './tokens'
 import type {
   Backend,
   ConnectionStatus,
@@ -36,7 +36,7 @@ import type {
   WireResponse,
 } from './types'
 
-export { clockOffset, serverNow, savedSeat, forgetSeat, lastSeat }
+export { clockOffset, serverNow, savedSeat, forgetSeat, lastSeat, setSeatStorage }
 export type { SavedSeat }
 
 /** Same alphabet as the server: no I or O. */

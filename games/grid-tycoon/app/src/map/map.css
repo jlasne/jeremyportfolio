@@ -1,0 +1,361 @@
+/* The company map: canvas host, accessible lot layer, building card, placement banner, drag ghost.
+   Uses the shell's tokens (src/styles/tokens.css) only. */
+
+.cmap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  cursor: grab;
+}
+.cmap:focus {
+  outline: none;
+}
+.cmap.is-panning {
+  cursor: grabbing;
+}
+.cmap.is-over-building {
+  cursor: pointer;
+}
+.map-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  image-rendering: pixelated;
+}
+
+/* ---------- accessible lot layer (keyboard + screen readers; the canvas takes the pointer) ---------- */
+
+.map-lots {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+}
+.map-lot {
+  position: absolute;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  pointer-events: none;
+}
+.map-lot:focus-visible {
+  /* distinct from the map's solid yellow selection frame: a light dashed ring with a dark halo */
+  outline: 2px dashed var(--cream-light);
+  outline-offset: -7px;
+  box-shadow: inset 0 0 0 5px color-mix(in srgb, var(--ink-dark) 45%, transparent);
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- building card ---------- */
+
+.mcard {
+  position: absolute;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 300px;
+  max-height: calc(100% - 16px);
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-raised);
+  animation: mcard-in var(--dur) var(--ease-out);
+  touch-action: auto;
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: auto;
+}
+@keyframes mcard-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+}
+.mcard.is-phone {
+  max-height: min(60%, 420px);
+}
+.mcard-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.mcard-badge {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--hue) 18%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--hue) 50%, var(--border));
+  color: var(--hue);
+}
+.mcard-title {
+  flex: 1;
+  min-width: 0;
+}
+.mcard-title h3 {
+  margin: 0;
+  font-size: var(--text-lg);
+  line-height: 1.15;
+}
+.mcard-sub {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+.mcard-status {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 6px var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: 1.35;
+}
+.mcard-status .icon {
+  flex: none;
+  margin-top: 2px;
+}
+.mcard-status.is-ok {
+  background: color-mix(in srgb, var(--status-good) 12%, var(--surface));
+  color: var(--good);
+}
+.mcard-status.is-ok .icon {
+  color: var(--good-icon);
+}
+.mcard-status.is-busy {
+  background: color-mix(in srgb, var(--power-mid) 18%, var(--surface));
+  color: var(--text);
+}
+.mcard-status.is-busy .icon {
+  color: var(--power-ink);
+}
+.mcard-status.is-warn {
+  background: color-mix(in srgb, var(--status-warn) 16%, var(--surface));
+  color: var(--warn);
+}
+.mcard-status.is-warn .icon {
+  color: var(--warn-icon);
+}
+.mcard-facts {
+  gap: var(--space-3) var(--space-4);
+}
+.mcard-facts dd {
+  font-size: var(--text-md);
+}
+.mcard-facts dd.mcard-small,
+.mcard-small {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+.mcard-dim {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+.mcard-foot {
+  margin: 0;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.35;
+}
+.mcard-foot .num {
+  color: var(--text);
+  font-weight: 700;
+}
+.mcard-action {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.mcard-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+/* ---------- placement banner + failure note ---------- */
+
+.cmap-banner {
+  position: absolute;
+  top: var(--space-3);
+  left: 50%;
+  z-index: 7;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: calc(100% - 24px);
+  min-height: 40px;
+  padding: 4px 6px 4px 14px;
+  border: 1px solid color-mix(in srgb, var(--power-mid) 60%, var(--border));
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-raised);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  animation: mcard-in var(--dur) var(--ease-out);
+  cursor: auto;
+}
+.cmap-banner > .icon {
+  flex: none;
+  color: var(--power-ink);
+}
+.cmap-banner > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cmap-banner:not(:has(button)) {
+  padding-right: 14px;
+}
+.cmap-failed {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-4);
+  right: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  font-size: var(--text-sm);
+}
+
+/* ---------- drag ghost (follows the pointer, never takes it) ---------- */
+
+.gt-drag-ghost {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+  opacity: 0.95;
+  filter: drop-shadow(0 6px 10px rgba(27, 26, 36, 0.28));
+  transition: opacity var(--dur-fast) var(--ease-out);
+  will-change: transform;
+}
+.gt-drag-ghost.is-over-lot .gt-drag-ghost-art {
+  opacity: 0;
+}
+.gt-drag-ghost-art {
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.gt-drag-ghost-art {
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+.gt-drag-ghost-cap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.gt-drag-ghost-blocked {
+  display: none;
+  align-items: center;
+  gap: 6px;
+}
+.gt-drag-ghost.is-blocked .gt-drag-ghost-text {
+  display: none;
+}
+.gt-drag-ghost.is-blocked .gt-drag-ghost-blocked {
+  display: inline-flex;
+}
+.gt-drag-ghost.is-blocked .gt-drag-ghost-cap {
+  border-color: color-mix(in srgb, var(--status-critical) 60%, var(--border));
+  color: var(--critical);
+}
+.gt-drag-ghost.is-blocked .gt-drag-ghost-art {
+  opacity: 0.55;
+  filter: grayscale(1);
+}
+:root.gt-dragging,
+:root.gt-dragging * {
+  cursor: grabbing !important;
+}
+:root.gt-dragging.gt-drag-blocked,
+:root.gt-dragging.gt-drag-blocked * {
+  cursor: not-allowed !important;
+}
+@media (max-width: 640px) {
+  /* Phones: the bottom sheet steps aside so the plot is reachable while placing. */
+  :root.gt-dragging .game-main .sheet,
+  :root.gt-placing .game-main .sheet {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(24px);
+    transition:
+      opacity var(--dur) var(--ease-out),
+      transform var(--dur) var(--ease-out);
+  }
+  .cmap-banner {
+    top: var(--space-2);
+  }
+}
+
+.mcard-money {
+  color: var(--money);
+  font-weight: 700;
+}
+@media (max-width: 640px) {
+  .mcard {
+    gap: var(--space-2);
+    padding: var(--space-3);
+  }
+  .mcard-badge {
+    width: 32px;
+    height: 32px;
+  }
+  .mcard-facts {
+    gap: var(--space-2) var(--space-3);
+  }
+  .mcard-facts dt {
+    font-size: var(--text-sm);
+  }
+  .mcard-facts dd {
+    font-size: var(--text-sm);
+  }
+  .mcard-facts dd:not(.mcard-small) {
+    font-size: var(--text-md);
+  }
+  .mcard-status {
+    padding: 4px var(--space-2);
+  }
+}
+.mcard-facts.is-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}

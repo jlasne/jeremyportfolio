@@ -10,6 +10,8 @@ import { useUi } from '../../store/ui'
 import { seasonOf } from '../../engine'
 import { Button, Icon, IconButton, NumberTween, SEASON_ICONS, fmtMoney, trend } from '../kit'
 import { GameMenu } from './GameMenu'
+import { unlockToEdit } from '../../net/controller'
+import { RoundClock, useWaitingText } from '../lobby/RoundClock'
 
 /** The chip that shows why Lock in is disabled (rendered by ChipsRow). */
 export const LOCK_REASON_ID = 'lock-reason'
@@ -21,7 +23,8 @@ export function useLockBlock(): string | null {
   const losing = useGame(selectLosingRound)
   const confirmed = useUi((s) => s.forcedSaleConfirmed)
   const { validation } = useDerived()
-  if (phase === 'waiting') return 'Waiting for the other players.'
+  const waiting = useWaitingText()
+  if (phase === 'waiting') return waiting ?? 'Waiting for the other players.'
   if (phase !== 'decide') return 'Round is resolving.'
   if (me?.bankrupt) return null
   if (losing && !confirmed) return 'Confirm the forced sale first.'
@@ -35,6 +38,7 @@ export function TopBar() {
   const me = useGame(selectMe)
   const phase = useGame((s) => s.phase)
   const lockIn = useGame((s) => s.lockIn)
+  const mode = useGame((s) => s.mode)
   const undo = useDraft((s) => s.undo)
   const undoCount = useDraft((s) => s.past.length)
   const music = useUi((s) => s.settings.music)
@@ -59,7 +63,9 @@ export function TopBar() {
     setSetting('sfx', muted)
   }
 
-  const lockLabel = phase === 'waiting' ? 'Waiting…' : me.bankrupt ? 'Next round' : 'Lock in'
+  // Multiplayer: after Lock in the button unlocks the draft again (re-locking replaces the decision).
+  const canUnlock = mode === 'multi' && phase === 'waiting' && !me.bankrupt
+  const lockLabel = canUnlock ? 'Unlock' : phase === 'waiting' ? 'Waiting…' : me.bankrupt ? 'Next round' : 'Lock in'
 
   return (
     <header className="topbar">
@@ -108,6 +114,7 @@ export function TopBar() {
       </div>
 
       <div className="tb-actions">
+        <RoundClock />
         {!me.bankrupt ? (
           <div className={`projection ${trend(profit) >= 0 ? 'is-up' : 'is-down'}`} title="Estimated profit next round from your current draft, using last round's demand">
             <span className="projection-label">Next round</span>
@@ -124,15 +131,16 @@ export function TopBar() {
           <GameMenu />
           <div className="lock-wrap">
             <Button
-              variant="primary"
+              variant={canUnlock ? 'secondary' : 'primary'}
               size="lg"
-              icon="lock"
+              icon={canUnlock ? 'undo' : 'lock'}
               className="lock-btn"
               data-tut="lock-in"
-              disabled={block != null}
+              disabled={block != null && !canUnlock}
               aria-describedby={block ? LOCK_REASON_ID : undefined}
-              aria-keyshortcuts="Control+Enter Meta+Enter"
-              onClick={lockIn}
+              aria-keyshortcuts={canUnlock ? undefined : 'Control+Enter Meta+Enter'}
+              title={canUnlock ? 'Unlock to edit. Your locked decision stands until you lock in again.' : undefined}
+              onClick={canUnlock ? unlockToEdit : lockIn}
             >
               {lockLabel}
             </Button>

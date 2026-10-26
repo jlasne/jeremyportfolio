@@ -22,8 +22,20 @@ interface Stored {
 }
 
 let memory: Stored = { v: 1, rooms: {}, last: null }
+let storageOverride: Storage | null | undefined
+
+/**
+ * Where seat tokens live. Default: localStorage (a seat follows the browser). The local test
+ * server (?mp=local) passes sessionStorage so each tab is its own player and still rejoins after a
+ * reload. `undefined` restores the default.
+ */
+export function setSeatStorage(store: Storage | null | undefined): void {
+  storageOverride = store
+  memory = { v: 1, rooms: {}, last: null }
+}
 
 function storage(): Storage | null {
+  if (storageOverride !== undefined) return storageOverride
   try {
     return typeof localStorage === 'undefined' ? null : localStorage
   } catch {

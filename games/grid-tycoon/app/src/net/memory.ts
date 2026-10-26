@@ -31,6 +31,19 @@ export interface MemoryStorage extends RoomStorage<GameState, Decision> {
   poke(code: string, mutate: (room: RoomRow<GameState>) => void): void
   /** Test hook: rewrite a stored player in place. */
   pokePlayer(code: string, seat: number, mutate: (p: PlayerRow) => void): void
+  /** Everything stored, as plain JSON-safe data (the local test server persists it across reloads). */
+  snapshot(): MemorySnapshot
+  /** Replaces everything stored with a snapshot. Emits no change events. */
+  restore(snapshot: MemorySnapshot): void
+}
+
+/** The full content of a memory storage. */
+export interface MemorySnapshot {
+  v: 1
+  rooms: RoomRow<GameState>[]
+  players: PlayerRow[]
+  secrets: { code: string; seat: number; tokenHash: string }[]
+  decisions: { code: string; round: number; seat: number; decision: Decision }[]
 }
 
 const clone = <T>(x: T): T => structuredClone(x)
@@ -172,6 +185,32 @@ export function createMemoryStorage(now: () => number = () => Date.now()): Memor
       const p = players.get(pk(code, seat))
       if (p) mutate(p)
     },
+    snapshot() {
+      return {
+        v: 1,
+        rooms: [...rooms.values()].map(clone),
+        players: [...players.values()].map(clone),
+        secrets: [...secrets.entries()].map(([k, tokenHash]) => {
+          const [code, seat] = k.split('/')
+          return { code, seat: Number(seat), tokenHash }
+        }),
+        decisions: [...decisions.entries()].map(([k, decision]) => {
+          const [code, round, seat] = k.split('/')
+          return { code, round: Number(round), seat: Number(seat), decision: clone(decision) }
+        }),
+      }
+    },
+    restore(snap) {
+      rooms.clear()
+      players.clear()
+      secrets.clear()
+      decisions.clear()
+      if (!snap || snap.v !== 1) return
+      for (const r of snap.rooms ?? []) rooms.set(r.code, clone(r))
+      for (const p of snap.players ?? []) players.set(pk(p.roomCode, p.seat), clone(p))
+      for (const x of snap.secrets ?? []) secrets.set(pk(x.code, x.seat), x.tokenHash)
+      for (const d of snap.decisions ?? []) decisions.set(dk(d.code, d.round, d.seat), clone(d.decision))
+    },
   }
 }
 
@@ -195,9 +234,10 @@ export interface MemoryServer {
 }
 
 /** A full offline room server and a Backend for src/net/client.ts to talk to. */
-export function createMemoryBackend(opts: { config?: Config; now?: () => number } = {}): MemoryServer {
+export function createMemoryBackend(opts: { config?: Config; now?: () => number; snapshot?: MemorySnapshot | null } = {}): MemoryServer {
   const now = opts.now ?? (() => Date.now())
   const storage = createMemoryStorage(now)
+  if (opts.snapshot) storage.restore(opts.snapshot)
   const service = createRoomService<GameState, Decision>({ storage, engine: engineForRooms(opts.config), now })
   const presence = new Map<string, Set<{ me: PresenceEntry | null; notify: (e: PresenceEntry[]) => void }>>()
 
