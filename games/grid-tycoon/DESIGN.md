@@ -4,16 +4,16 @@
 
 ## 1. Where it lives
 
-- Public URL: `https://www.jeremylasne.com/games/grid-tycoon/` (hub at `/games/`).
-- The site is a static Vercel project with no build step. The app builds with Vite into `app/dist/`, and `app/scripts/publish.mjs` copies it to `games/grid-tycoon/` (index.html + assets/ + sprites/ ...), which is committed.
-- Vite `base` is `/games/grid-tycoon/`. No client router: one page, state-driven screens. A multiplayer invite is `/games/grid-tycoon/?room=ABCDEF`.
+- Public URL: `https://www.jeremylasne.com/games/`. The game opens straight on its title screen there; there is no hub page.
+- The site is a static Vercel project with no build step. The app builds with Vite into `app/dist/`, and `app/scripts/publish.mjs` copies it to `games/` (index.html + assets/ + sprites/ + cover.png ...), which is committed. The source stays in `games/grid-tycoon/`; `vercel.json` redirects `/games/grid-tycoon/*` to `/games/` so the source folder is never a page.
+- Vite `base` is `/games/`. Load runtime files with `import.meta.env.BASE_URL + 'sprites/atlas.json'`, never a hard-coded path. No client router: one page, state-driven screens. A multiplayer invite is `/games/?room=ABCDEF`.
+- **Multiplayer ships offline for now.** There is no Supabase project yet: `src/net/config.ts` holds empty URL/key, `isOnline()` returns false, and the title screen shows multiplayer as offline (host/join disabled with a one-line reason). All the multiplayer code (schema, edge function, client, lobby, timer UI) is built and tested against an in-memory room server so it can go live by filling the two config values and deploying `supabase/`.
 
 ```
 games/
-  index.html                  the /games hub (static, hand-written, site look)
+  index.html  assets/  sprites/  cover.png     built output, committed (never edit by hand)
   grid-tycoon/
     SPEC.md  DESIGN.md  README.md
-    index.html  assets/  sprites/   built output, committed (never edit by hand)
     app/                      the source (Vite + React + TS)
       config/balance.json     every tuning number
       src/engine/             pure TS engine, no DOM, no React, no Pixi

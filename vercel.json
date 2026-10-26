@@ -4,6 +4,7 @@
     { "src": "^/bio/?$", "status": 308, "headers": { "Location": "/wellness/exp0" } },
     { "src": "^/bio/(.*)$", "status": 308, "headers": { "Location": "/wellness/exp0/$1" } },
     { "src": "^/wealth(?:/.*)?$", "status": 308, "headers": { "Location": "https://www.claudeportfolio.com/wealth" } },
+    { "src": "^/games/grid-tycoon(?:/.*)?$", "status": 308, "headers": { "Location": "/games/" } },
     { "handle": "filesystem" },
     { "src": "^/wellness/exp0/demo/?$", "dest": "/wellness/exp0/index.html" }
   ]
