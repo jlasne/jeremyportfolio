@@ -11,8 +11,8 @@
 
    Sharks come to the cursor; narwhals keep their distance. A tap on the water
    sends a ripple and scatters whoever swims near it. Text marked data-ocean
-   fades whatever passes under it, and "avoid" also steers the animals away,
-   so the words stay readable. The page sets data-theme on <html> and fires
+   fades whatever passes under it (to data-fade, 0 hides it), and "avoid"
+   also steers the animals away, so the words stay readable. The page sets data-theme on <html> and fires
    "themechange" when it flips. A visitor who asks for less motion gets one
    still frame. */
 (function () {
@@ -196,7 +196,8 @@
     for (var i = 0; i < marks.length; i++) {
       var el = marks[i], b = el.getBoundingClientRect();
       if (b.bottom < -40 || b.top > H + 40 || !b.width) continue;
-      rects.push({ l: b.left, t: b.top, r: b.right, b: b.bottom, steer: el.getAttribute("data-ocean") === "avoid" });
+      var f = parseFloat(el.getAttribute("data-fade"));
+      rects.push({ l: b.left, t: b.top, r: b.right, b: b.bottom, steer: el.getAttribute("data-ocean") === "avoid", f: isNaN(f) ? null : f });
     }
   }
 
@@ -406,12 +407,14 @@
     return out;
   }
 
+  /* how much of a cell shows at this point: 1 in open water, less under text */
   function faded(x, y) {
+    var m = 1;
     for (var i = 0; i < rects.length; i++) {
       var r = rects[i];
-      if (x > r.l - 8 && x < r.r + 8 && y > r.t - 8 && y < r.b + 8) return true;
+      if (x > r.l - 8 && x < r.r + 8 && y > r.t - 8 && y < r.b + 8) m = Math.min(m, r.f === null ? T.fade : r.f);
     }
-    return false;
+    return m;
   }
 
   function draw() {
@@ -426,7 +429,7 @@
     ctx.fillStyle = T.dust;
     for (var i = 0; i < dust.length; i++) {
       var p = dust[i], gx = Math.floor(p.x / C), gy = Math.floor(p.y / C), x = (gx + .5) * C, y = (gy + .5) * C;
-      ctx.globalAlpha = T.dustA * p.a * (faded(x, y) ? .3 : 1);
+      ctx.globalAlpha = T.dustA * p.a * Math.min(1, faded(x, y) * 3);
       ctx.fillText(p.ch, x, y);
     }
 
@@ -447,7 +450,8 @@
     fish.slice().sort(function (a, b) { return (a.kind === "narwhal" ? 0 : 1) - (b.kind === "narwhal" ? 0 : 1); }).forEach(function (a) {
       cells(a).forEach(function (c) {
         var x = c.gx * C, y = c.gy * C, cx = x + C / 2, cy = y + C / 2;
-        var alpha = T.alpha * (c.a || 1) * (faded(cx, cy) ? T.fade : 1);
+        var alpha = T.alpha * (c.a || 1) * faded(cx, cy);
+        if (!alpha) return;
         ctx.globalAlpha = alpha;
         if (c.f) { ctx.fillStyle = c.f; ctx.fillRect(x + .5, y + .5, C - 1, C - 1); }
         if (c.ch) { ctx.fillStyle = c.cc; ctx.fillText(c.ch, cx, cy + .5); }

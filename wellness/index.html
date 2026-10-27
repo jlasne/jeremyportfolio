@@ -31,36 +31,29 @@
 <header class="hero">
   <nav class="top" data-ocean="fade"><button class="logbtn" id="logOpen" type="button" aria-haspopup="dialog"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>Log</button><a href="/">Jeremy Lasne</a></nav>
   <div class="hero-text" data-ocean="avoid">
-    <p class="phase reveal">Phase 0 · Normal</p>
-    <h1 class="reveal" style="--d:60">Wellness</h1>
-    <p class="lede reveal" style="--d:110">I log my sleep and my sport, and change nothing. Once I know my normal, I test one habit at a time against it.</p>
-    <ul class="counts reveal" style="--d:160" id="counts" aria-label="So far"></ul>
+    <h1 class="reveal">Wellness</h1>
   </div>
 </header>
 
 <main>
   <section data-ocean="fade" class="sec reveal" style="--d:200" aria-labelledby="nightsT">
-    <p class="kick">Last 30 nights</p>
     <h2 id="nightsT">Night <span class="soft">by night</span></h2>
     <div class="ns" id="ns"></div>
-    <p class="note">One score per night, from 0 to 100: the average of sleep score, HRV, RHR, readiness and time asleep, each set against my last 30 days. 100 is the best of the month on every measure.</p>
     <p class="readout" id="nightRead" aria-live="polite"></p>
     <div class="chart"><canvas id="nightsC" aria-label="Night score, one column per night"></canvas></div>
     <div class="axis" id="nightsAxis"></div>
     <ul class="legend">
-      <li><i style="background:var(--good)"></i>Better than normal</li>
+      <li><i style="background:var(--good)"></i>Better</li>
       <li><i style="background:var(--blue)"></i>Normal</li>
-      <li><i style="background:var(--bad)"></i>Below normal</li>
+      <li><i style="background:var(--bad)"></i>Below</li>
       <li><i style="background:var(--run)"></i><i style="background:var(--swim);margin-left:-4px"></i><i style="background:var(--lift);margin-left:-4px"></i><i style="background:var(--other);margin-left:-4px"></i>Sport the day before</li>
     </ul>
-    <a class="more" href="/wellness/details/">Each measure, and bed to wake <span aria-hidden="true">→</span></a>
+    <a class="more" href="/wellness/details/">Details <span aria-hidden="true">→</span></a>
   </section>
 
   <section data-ocean="fade" class="sec" aria-labelledby="sportT">
-    <p class="kick">Last 30 days</p>
     <h2 id="sportT">Sport <span class="soft">by day</span></h2>
     <div class="ns" id="sportNow"></div>
-    <p class="note">One load per day: how long each session lasted, in minutes, times its effort, all sports added up and stacked. Effort mixes how far the average and peak heart rate climbed from resting (<span id="hrRest"></span> bpm, my normal at night) to my highest so far (<span id="hrMax"></span> bpm) with the level I felt out of 5. The target sets the mix: cardio 50 % average, 20 % peak, 30 % level; speed 20, 50, 30; strength 20, 20, 60.</p>
     <p class="readout" id="sportRead" aria-live="polite"></p>
     <div class="chart"><canvas id="sportC" aria-label="Sport load, one column per day, stacked by sport"></canvas></div>
     <div class="axis" id="sportAxis"></div>
@@ -69,16 +62,12 @@
       <li><i style="background:var(--swim)"></i>Swim</li>
       <li><i style="background:var(--lift)"></i>Gym</li>
       <li><i style="background:var(--other)"></i>Other</li>
-      <li><i style="background:var(--ice-20)"></i>A thin block: logged without how long, or without heart rate and level</li>
     </ul>
-    <div class="sports" id="sports"></div>
-    <a class="more" href="/wellness/details/#sport">The full sport log <span aria-hidden="true">→</span></a>
+    <a class="more" href="/wellness/details/#sport">Sport log <span aria-hidden="true">→</span></a>
   </section>
 
   <section data-ocean="fade" class="sec" aria-labelledby="pairsT">
-    <p class="kick">My nights · every night logged</p>
     <h2 id="pairsT">What changes <span class="soft">my nights</span></h2>
-    <p class="note">The average of every night logged: after a rest day, after a sport day, with my girlfriend, and cold and dark (window open all night, shutters closed). Read the night score first: it sums up the 5 measures below, each set against all my nights. A night that fits several columns counts in each. A column needs 3 nights. A hint to test later, not a proof.</p>
     <div class="vs2" id="pairs"></div>
   </section>
 </main>
@@ -114,7 +103,7 @@
 </dialog>
 
 <footer data-ocean="fade">
-  <span>Phase 0 started on 1 October 2026 with the nights of <a href="/wellness/exp0">Exp 0</a>.</span>
+  <a href="/wellness/exp0">Exp 0</a>
   <a href="/">jeremylasne.com</a>
 </footer>
 
@@ -126,13 +115,6 @@ import { barChart } from '/wellness/charts.js';
 
 const $ = id => document.getElementById(id);
 
-/* ── hero counts ───────────────────────────────────────────────────── */
-function drawHero() {
-  const keys = allKeys();
-  const nights = keys.filter(k => entry(k)?.sleep).length;
-  const sess = allSessions().length;
-  $('counts').innerHTML = `<li><b>${daysBetween(SPEC.start, today) + 1}</b>days</li><li><b>${nights}</b>nights</li><li><b>${sess}</b>sessions</li>`;
-}
 const lastNight = () => allKeys().reverse().find(k => val(k, 'score') !== undefined || val(k, 'hrv') !== undefined);
 
 /* ── last night ────────────────────────────────────────────────────── */
@@ -148,7 +130,7 @@ function drawLast() {
   const ns = nightScores(), x = k ? ns[k] : undefined, band = spread(Object.values(ns).map(n => n.score));
   const when = k ? (k === today ? 'Last night' : `Last night logged · ${dayName(k)}`) : 'No night yet';
   $('ns').innerHTML = `<p class="k">${when}</p><p class="big">${x ? Math.round(x.score) : '–'}<small>/100</small></p>
-    <p class="vs ${x ? tone(x.score, band) : ''}">${x ? `${band ? `Normal ${Math.round(band.med)} · ` : ''}100 = the best of my last 30 days` : 'Needs 3 of the 5 measures'}</p>${meter(0, 100, band, x?.score)}`;
+    <p class="vs ${x ? tone(x.score, band) : ''}">${x && band ? `Normal ${Math.round(band.med)}` : ''}</p>${meter(0, 100, band, x?.score)}`;
 }
 
 /* ── night by night: the night score of the last 30 days ────────────── */
@@ -194,8 +176,6 @@ function readSport(i, dl) {
   $('sportRead').innerHTML = `${dayName(k)} · ${dl[k] ? `load <b>${Math.round(dl[k].total)}</b> · ` : ''}${bits.join(', ')}`;
 }
 function drawSport(animate) {
-  $('hrMax').textContent = top() ?? '–';
-  $('hrRest').textContent = hrOf().rest !== undefined ? Math.round(hrOf().rest) : '–';
   sportC.draw(animate);
   const keys = monthKeys(), n = keys.length;
   $('sportAxis').innerHTML = [keys[0], keys[Math.floor((n - 1) / 2)], keys[n - 1]].map(k => `<span>${short(k)}</span>`).join('');
@@ -206,24 +186,9 @@ function drawSport(animate) {
   const v = lastDay ? dl[lastDay]?.total : undefined;
   $('sportNow').innerHTML = `<p class="k">${lastDay ? `Last session · ${dayName(lastDay)} · ${esc(sessionsOf(lastDay).map(label).join(', '))}` : 'No session yet'}</p>
     <p class="big">${v === undefined ? '–' : Math.round(v)}<small> load</small></p>
-    <p class="vs">${v === undefined ? 'Add how long, and a heart rate or a level, when logging' : `Average ${Math.round(avg(got))} over ${got.length} day${got.length === 1 ? '' : 's'} of sport`}</p>`;
-
-  /* each sport over the month: load, effort, form, no list */
-  const month = new Set(keys), all = allSessions(), best = bests(all), t = hrOf();
-  $('sports').innerHTML = SPEC.sports.map(sp => {
-    const list = all.filter(s => s.s === sp.id && month.has(s.day));
-    const loads = list.map(s => loadOf(s, t)).filter(x => x !== undefined);
-    const e = avg(list.map(s => effort(s, t)).filter(x => x !== undefined)), f = avg(list.map(s => form(s, best)).filter(x => x !== undefined));
-    const rows = [];
-    if (loads.length) rows.push(['Total load', `${Math.round(loads.reduce((a, b) => a + b, 0))}`]);
-    if (e !== undefined) rows.push(['Avg effort', `${Math.round(e * 100)} %`]);
-    if (f !== undefined) rows.push(['Avg form', `${Math.round(f * 100)} %`]);
-    if (sp.id === 'other') { const names = [...new Set(list.map(s => s.n).filter(Boolean))]; if (names.length) rows.push(['Activities', esc(names.slice(0, 3).join(', '))]); }
-    const body = rows.length ? `<dl>${rows.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl>`
-      : `<p class="empty">${list.length ? 'No heart rate or level yet.' : 'No session yet.'}</p>`;
-    return `<div class="sport" style="--c:var(--${sp.id})"><h3>${sp.name}<span>${list.length} session${list.length === 1 ? '' : 's'}</span></h3>${body}</div>`;
-  }).join('');
+    <p class="vs">${v === undefined ? '' : `Average ${Math.round(avg(got))}`}</p>`;
 }
+
 
 /* ── after sport, or not: two columns ─────────────────────────────── */
 function drawPairs() {
@@ -246,7 +211,7 @@ function drawPairs() {
     const v = cols.map(c => c.ks.length >= 3 ? avg(c.ks, r.f) : undefined), got = v.filter(x => x !== undefined);
     const top = got.length < 2 ? undefined : r.better === 'high' ? Math.max(...got) : Math.min(...got);
     const lone = top === undefined || got.filter(x => r.fmt(x) === r.fmt(top)).length > 1 ? undefined : top;
-    return `<div class="vs2-row${r.lead ? ' lead' : ''}"><span>${r.name}${r.lead ? '<small>the one to read</small>' : ''}</span>${v.map(x => `<span class="${x !== undefined && x === lone ? 'f-good' : ''}">${x === undefined ? '–' : r.fmt(x)}</span>`).join('')}</div>`;
+    return `<div class="vs2-row${r.lead ? ' lead' : ''}"><span>${r.name}</span>${v.map(x => `<span class="${x !== undefined && x === lone ? 'f-good' : ''}">${x === undefined ? '–' : r.fmt(x)}</span>`).join('')}</div>`;
   }).join('');
 }
 
@@ -518,7 +483,7 @@ addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.retur
 
 /* ── draw everything that reads the data ───────────────────────────── */
 function drawAll(animate) {
-  drawHero(); drawLast(); drawNights(animate); drawSport(animate); drawPairs();
+  drawLast(); drawNights(animate); drawSport(animate); drawPairs();
 }
 let rs = 0;
 addEventListener('resize', () => { cancelAnimationFrame(rs); rs = requestAnimationFrame(() => { drawNights(false); drawSport(false); }); });

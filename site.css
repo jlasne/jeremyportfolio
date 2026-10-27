@@ -126,6 +126,8 @@ img, video { display: block; }
   .tabs a:focus-visible { outline: 2px solid var(--blue); outline-offset: -4px; border-radius: 12px; }
 
   body { padding-bottom: var(--tabs); }
+  /* the landing scrolls nowhere: its tabs float on the water, no frosted band under the text */
+  .home .tabs { background: none; -webkit-backdrop-filter: none; backdrop-filter: none; border-top-color: transparent; }
 }
 
 main { position: relative; z-index: 2; }
@@ -296,9 +298,6 @@ body.fit footer { padding-top: 40px; }
 footer { position: relative; z-index: 2; padding: 96px 0 40px; }
 @media (max-width: 759px) { footer { padding: 64px 0 24px; } }
 .foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; padding-top: 22px; border-top: 1px solid var(--fg-12); font-size: .8em; color: var(--fg-40); }
-/* the hint fits the device: a cursor on a computer, a finger on a phone */
-.foot .touch { display: none; }
-@media (hover: none) { .foot .fine { display: none; } .foot .touch { display: inline; } }
 .foot a { text-decoration: none; transition: color .15s; }
 .foot a:hover { color: var(--fg); }
 
