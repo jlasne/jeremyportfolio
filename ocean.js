@@ -139,11 +139,38 @@
     return best;
   }
 
+  /* The animals cross from one page to the next: where each one swam is kept for the
+     tab on the way out, and the next page picks them up if the screen is the same width. */
+  var KEEP = "ocean";
+  function keep() {
+    try {
+      sessionStorage.setItem(KEEP, JSON.stringify({ w: W, t: time, fish: fish.map(function (a) {
+        return { kind: a.kind, L: a.L, ang: a.ang, om: a.om, v0: a.v0, phase: a.phase, seed: a.seed, f1: a.f1, f2: a.f2, r1: a.r1, r2: a.r2,
+          p: a.p.map(function (q) { return [Math.round(q.x), Math.round(q.y)]; }) };
+      }) }));
+    } catch (e) {}
+  }
+  function kept() {
+    try {
+      var k = JSON.parse(sessionStorage.getItem(KEEP) || "null");
+      if (!k || !k.fish || !k.fish.length || Math.abs(k.w - W) > W * .1) return false;
+      fish = k.fish.filter(function (o) { return KINDS[o.kind] && o.p && o.p.length === 25; }).map(function (o) {
+        var a = make(o.kind, o.p[0][0], o.p[0][1], o.ang);
+        ["L", "om", "v0", "phase", "seed", "f1", "f2", "r1", "r2"].forEach(function (key) { if (typeof o[key] === "number") a[key] = o[key]; });
+        a.seg = a.L / a.N; a.v = a.v0; a.maxTurn = a.v0 / (a.K.radius * a.L);
+        a.p = o.p.map(function (q) { return { x: q[0], y: q[1] }; });
+        return a;
+      });
+      time = k.t || 0;
+      return fish.length > 0;
+    } catch (e) { return false; }
+  }
+
   function populate() {
     fish = [];
     var kinds = W < 600 ? ["shark", "narwhal", "hammer"] : ["shark", "narwhal", "hammer", "narwhal"];
     measure();
-    kinds.forEach(function (k) { var p = spot(); fish.push(make(k, p.x, p.y, rnd(0, TAU))); });
+    if (!kept()) kinds.forEach(function (k) { var p = spot(); fish.push(make(k, p.x, p.y, rnd(0, TAU))); });
     dust = [];
     var n = Math.round(W * H / 30000);
     for (var i = 0; i < n; i++) dust.push({ x: rnd(0, W), y: rnd(0, H), vx: rnd(-5, 5), vy: rnd(-4, 4), ch: ".·.°"[i % 4], a: rnd(.35, 1) });
@@ -451,6 +478,7 @@
   theme();
   window.addEventListener("themechange", function () { theme(); if (still) draw(); });
   window.addEventListener("resize", resize);
+  window.addEventListener("pagehide", keep);
   if (still) window.addEventListener("scroll", draw, { passive: true });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (still) draw(); });
   resize();

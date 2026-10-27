@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mobile apps | Jeremy Lasne</title>
+<meta name="description" content="How I grow mobile apps, shared as a founder on X and YouTube. Kaught: point the camera at an animal, get the species in 1 second.">
+<link rel="canonical" href="https://www.jeremylasne.com/apps/">
+<meta name="theme-color" content="#050b16">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Jeremy Lasne">
+<meta property="og:url" content="https://www.jeremylasne.com/apps/">
+<meta property="og:title" content="Mobile apps | Jeremy Lasne">
+<meta property="og:description" content="How I grow mobile apps, shared as a founder on X and YouTube. Kaught: point the camera at an animal, get the species in 1 second.">
+<meta property="og:image" content="https://www.jeremylasne.com/og-image.png?v=6">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Jeremy Lasne. I make mobile apps with wellness content creators.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@jeremylasne">
+<meta name="twitter:creator" content="@jeremylasne">
+<meta name="twitter:title" content="Mobile apps | Jeremy Lasne">
+<meta name="twitter:description" content="How I grow mobile apps, shared as a founder on X and YouTube. Kaught: point the camera at an animal, get the species in 1 second.">
+<meta name="twitter:image" content="https://www.jeremylasne.com/og-image.png?v=6">
+<script>
+  /* the theme a visitor picked last time; the ocean at night otherwise */
+  try { if (localStorage.getItem("theme") === "light") document.documentElement.setAttribute("data-theme", "light"); } catch (e) {}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/site.css">
+</head>
+<body>
+
+<canvas id="ocean" aria-hidden="true"></canvas>
+
+<header class="nav" id="nav">
+  <nav class="links" aria-label="Main" data-ocean="fade">
+    <a href="/">home</a>
+    <a href="/creators/">wellness creators</a>
+    <a href="/apps/" aria-current="page">mobile apps</a>
+    <a href="/personal/">personal</a>
+    <button class="theme" type="button" aria-label="Switch to the light theme">
+      <svg class="sun" viewBox="0 0 256 256" aria-hidden="true"><path d="M116,36V20a12,12,0,0,1,24,0V36a12,12,0,0,1-24,0Zm80,92a68,68,0,1,1-68-68A68.07,68.07,0,0,1,196,128Zm-24,0a44,44,0,1,0-44,44A44.05,44.05,0,0,0,172,128ZM51.51,68.49a12,12,0,1,0,17-17l-12-12a12,12,0,0,0-17,17Zm0,119-12,12a12,12,0,0,0,17,17l12-12a12,12,0,1,0-17-17ZM196,72a12,12,0,0,0,8.49-3.51l12-12a12,12,0,0,0-17-17l-12,12A12,12,0,0,0,196,72Zm8.49,115.51a12,12,0,0,0-17,17l12,12a12,12,0,0,0,17-17ZM48,128a12,12,0,0,0-12-12H20a12,12,0,0,0,0,24H36A12,12,0,0,0,48,128Zm80,80a12,12,0,0,0-12,12v16a12,12,0,0,0,24,0V220A12,12,0,0,0,128,208Zm108-92H220a12,12,0,0,0,0,24h16a12,12,0,0,0,0-24Z"/></svg>
+      <svg class="moon" viewBox="0 0 256 256" aria-hidden="true"><path d="M236.37,139.4a12,12,0,0,0-12-3A84.07,84.07,0,0,1,119.6,31.59a12,12,0,0,0-15-15A108.86,108.86,0,0,0,49.69,55.07,108,108,0,0,0,136,228a107.09,107.09,0,0,0,64.93-21.69,108.86,108.86,0,0,0,38.44-54.94A12,12,0,0,0,236.37,139.4Zm-49.88,47.74A84,84,0,0,1,68.86,69.51,84.93,84.93,0,0,1,92.27,48.29Q92,52.13,92,56A108.12,108.12,0,0,0,200,164q3.87,0,7.71-.27A84.79,84.79,0,0,1,186.49,187.14Z"/></svg>
+    </button>
+  </nav>
+  <button class="pill" id="pill" type="button" aria-expanded="false" aria-controls="menu" data-ocean="fade">
+    Jeremy Lasne
+    <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="4" cy="4" r="1.5"/><circle cx="12" cy="4" r="1.5"/><circle cx="4" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/></svg>
+  </button>
+  <nav class="menu" id="menu" aria-label="Main">
+    <a href="/">home</a>
+    <a href="/creators/">wellness creators <span>01</span></a>
+    <a href="/apps/" aria-current="page">mobile apps <span>02</span></a>
+    <a href="/personal/">personal <span>03</span></a>
+    <button class="theme-row" type="button">light theme</button>
+  </nav>
+</header>
+
+<main class="page">
+  <div class="wrap">
+    <header class="page-head reveal" data-ocean="avoid">
+      <p class="kick"><b>02</b> · the founder journey</p>
+      <h1>Mobile apps</h1>
+      <p>As a founder, I share how I grow mobile apps: what I ship and what the numbers say. On <a class="u" href="https://x.com/jeremylasne" target="_blank" rel="noopener">X</a> today, on <a class="u" href="https://www.youtube.com/@jeremyfounder" target="_blank" rel="noopener">YouTube</a> next.</p>
+    </header>
+
+    <article class="proj" aria-labelledby="kaught-t">
+      <a class="shot film" href="https://kaught.app" target="_blank" rel="noopener" aria-label="Kaught, kaught.app" tabindex="-1">
+        <img src="/media/apps/kaught.webp" alt="" width="1280" height="720" decoding="async">
+        <video data-src="/media/apps/kaught.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+      </a>
+      <div class="proj-text" data-ocean="fade">
+        <div class="proj-name"><h2 id="kaught-t">Kaught</h2><span class="live">Live</span><span class="tag">my app</span></div>
+        <p>Point the camera at an animal: Kaught names the species in 1 second and adds it to your field journal. On the App Store and Google Play.</p>
+        <a class="btn go" href="https://kaught.app" target="_blank" rel="noopener">kaught.app <span aria-hidden="true">&nearr;</span></a>
+      </div>
+    </article>
+
+    <div class="soon" data-ocean="fade">
+      <h2>My stack <span class="tag">coming soon</span></h2>
+      <p>The tools I build and grow apps with, and the ones I recommend.</p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap" data-ocean="fade">
+    <a class="next" href="/personal/"><small>next · 03</small>Personal <span aria-hidden="true">&rarr;</span></a>
+    <div class="foot">
+      <span>Jeremy Lasne · the sharks follow your cursor, tap the water</span>
+      <span><a href="https://x.com/jeremylasne" target="_blank" rel="noopener">x</a> / <a href="https://www.youtube.com/@jeremyfounder" target="_blank" rel="noopener">youtube</a> / <a href="mailto:hey@jeremylasne.com" data-mail>hey@jeremylasne.com</a></span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="/ocean.js" defer></script>
+<script src="/site.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wellness creators | Jeremy Lasne</title>
+<meta name="description" content="I make mobile apps with wellness creators at CreatorMatch. 11 apps for 11 creators, for $0 and 0 hours of their time.">
+<link rel="canonical" href="https://www.jeremylasne.com/creators/">
+<meta name="theme-color" content="#050b16">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Jeremy Lasne">
+<meta property="og:url" content="https://www.jeremylasne.com/creators/">
+<meta property="og:title" content="Wellness creators | Jeremy Lasne">
+<meta property="og:description" content="I make mobile apps with wellness creators at CreatorMatch. 11 apps for 11 creators, for $0 and 0 hours of their time.">
+<meta property="og:image" content="https://www.jeremylasne.com/og-image.png?v=6">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Jeremy Lasne. I make mobile apps with wellness content creators.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@jeremylasne">
+<meta name="twitter:creator" content="@jeremylasne">
+<meta name="twitter:title" content="Wellness creators | Jeremy Lasne">
+<meta name="twitter:description" content="I make mobile apps with wellness creators at CreatorMatch. 11 apps for 11 creators, for $0 and 0 hours of their time.">
+<meta name="twitter:image" content="https://www.jeremylasne.com/og-image.png?v=6">
+<script>
+  /* the theme a visitor picked last time; the ocean at night otherwise */
+  try { if (localStorage.getItem("theme") === "light") document.documentElement.setAttribute("data-theme", "light"); } catch (e) {}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/site.css">
+</head>
+<body>
+
+<canvas id="ocean" aria-hidden="true"></canvas>
+
+<header class="nav" id="nav">
+  <nav class="links" aria-label="Main" data-ocean="fade">
+    <a href="/">home</a>
+    <a href="/creators/" aria-current="page">wellness creators</a>
+    <a href="/apps/">mobile apps</a>
+    <a href="/personal/">personal</a>
+    <button class="theme" type="button" aria-label="Switch to the light theme">
+      <svg class="sun" viewBox="0 0 256 256" aria-hidden="true"><path d="M116,36V20a12,12,0,0,1,24,0V36a12,12,0,0,1-24,0Zm80,92a68,68,0,1,1-68-68A68.07,68.07,0,0,1,196,128Zm-24,0a44,44,0,1,0-44,44A44.05,44.05,0,0,0,172,128ZM51.51,68.49a12,12,0,1,0,17-17l-12-12a12,12,0,0,0-17,17Zm0,119-12,12a12,12,0,0,0,17,17l12-12a12,12,0,1,0-17-17ZM196,72a12,12,0,0,0,8.49-3.51l12-12a12,12,0,0,0-17-17l-12,12A12,12,0,0,0,196,72Zm8.49,115.51a12,12,0,0,0-17,17l12,12a12,12,0,0,0,17-17ZM48,128a12,12,0,0,0-12-12H20a12,12,0,0,0,0,24H36A12,12,0,0,0,48,128Zm80,80a12,12,0,0,0-12,12v16a12,12,0,0,0,24,0V220A12,12,0,0,0,128,208Zm108-92H220a12,12,0,0,0,0,24h16a12,12,0,0,0,0-24Z"/></svg>
+      <svg class="moon" viewBox="0 0 256 256" aria-hidden="true"><path d="M236.37,139.4a12,12,0,0,0-12-3A84.07,84.07,0,0,1,119.6,31.59a12,12,0,0,0-15-15A108.86,108.86,0,0,0,49.69,55.07,108,108,0,0,0,136,228a107.09,107.09,0,0,0,64.93-21.69,108.86,108.86,0,0,0,38.44-54.94A12,12,0,0,0,236.37,139.4Zm-49.88,47.74A84,84,0,0,1,68.86,69.51,84.93,84.93,0,0,1,92.27,48.29Q92,52.13,92,56A108.12,108.12,0,0,0,200,164q3.87,0,7.71-.27A84.79,84.79,0,0,1,186.49,187.14Z"/></svg>
+    </button>
+  </nav>
+  <button class="pill" id="pill" type="button" aria-expanded="false" aria-controls="menu" data-ocean="fade">
+    Jeremy Lasne
+    <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="4" cy="4" r="1.5"/><circle cx="12" cy="4" r="1.5"/><circle cx="4" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/></svg>
+  </button>
+  <nav class="menu" id="menu" aria-label="Main">
+    <a href="/">home</a>
+    <a href="/creators/" aria-current="page">wellness creators <span>01</span></a>
+    <a href="/apps/">mobile apps <span>02</span></a>
+    <a href="/personal/">personal <span>03</span></a>
+    <button class="theme-row" type="button">light theme</button>
+  </nav>
+</header>
+
+<main class="page">
+  <div class="wrap">
+    <header class="page-head reveal" data-ocean="avoid">
+      <p class="kick"><b>01</b> · my main activity</p>
+      <h1>Wellness creators</h1>
+      <p>I'm the founder of <a class="u" href="https://creatormatch.app" target="_blank" rel="noopener">CreatorMatch</a>. I make mobile apps with wellness creators: coaches, athletes, nutritionists and doctors.</p>
+      <p>Their followers already trust their programs. I turn those programs into an app their followers pay for.</p>
+    </header>
+
+    <ul class="stats reveal" style="--d:100" data-ocean="fade">
+      <li><b>11</b><span>apps made with 11 creators</span></li>
+      <li><b>$0</b><span>paid by the creator</span></li>
+      <li><b>0 h</b><span>of the creator's time</span></li>
+    </ul>
+
+    <p class="sub" data-ocean="fade">How I work</p>
+    <ol class="steps" data-ocean="fade">
+      <li><b>01 · they bring</b><span>The audience and the content: programs, recipes, videos.</span></li>
+      <li><b>02 · I build</b><span>The app. I launch it, then run, maintain and grow it.</span></li>
+      <li><b>03 · we share</b><span>What it earns. We are partners, so they pay $0.</span></li>
+    </ol>
+
+    <div class="work-head" data-ocean="fade">
+      <p>What I made · 11 apps for 11 wellness creators</p>
+      <p>Each phone plays the app's page. Open one for the full demo.</p>
+    </div>
+    <ul class="apps">
+          <li class="app"><a href="https://www.creatormatch.app/hannaheden/" target="_blank" rel="noopener"><span class="phone"><span class="screen"><img src="/media/apps/hannaheden.webp" alt="" width="546" height="1182" loading="lazy" decoding="async"><video data-src="/media/apps/hannaheden.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><span class="island"></span></span></span><span class="app-text"><b>EDEN</b><span>Hannah Eden · Hybrid athlete</span><i>470K followers. 100K+ people transformed.</i></span></a></li>
+          <li class="app"><a href="https://www.creatormatch.app/fitfionaj/" target="_blank" rel="noopener"><span class="phone"><span class="screen"><img src="/media/apps/fitfionaj.webp" alt="" width="546" height="1182" loading="lazy" decoding="async"><video data-src="/media/apps/fitfionaj.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><span class="island"></span></span></span><span class="app-text"><b>REBOOT</b><span>Fiona Judd · Midlife fat loss coach</span><i>471K followers. 3K+ women helped.</i></span></a></li>
+          <li class="app"><a href="https://www.creatormatch.app/solange/" target="_blank" rel="noopener"><span class="phone"><span class="screen"><img src="/media/apps/solange.webp" alt="" width="546" height="1182" loading="lazy" decoding="async"><video data-src="/media/apps/solange.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><span class="island"></span></span></span><span class="app-text"><b>Solange Fitness</b><span>Coach Solange · Fitness coach</span><i>703K on Instagram. 26 reels past 1M views.</i></span></a></li>
+          <li class="app"><a href="https://www.creatormatch.app/grace/" target="_blank" rel="noopener"><span class="phone"><span class="screen"><img src="/media/apps/grace.webp" alt="" width="546" height="1182" loading="lazy" decoding="async"><video data-src="/media/apps/grace.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><span class="island"></span></span></span><span class="app-text"><b>Nutrition with Grace</b><span>Grace Macena · Nutritionist</span><i>380K followers. Fat loss for women 30+.</i></span></a></li>
+          <li class="app"><a href="https://www.creatormatch.app/wes/" target="_blank" rel="noopener"><span class="phone"><span class="screen"><img src="/media/apps/wes.webp" alt="" width="546" height="1182" loading="lazy" decoding="async"><video data-src="/media/apps/wes.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><span class="island"></span></span></span><span class="app-text"><b>BE SOMEBODY.</b><span>Wes Kitts · Olympic weightlifter</span><i>Two-time Olympian. 5 American records.</i></span></a></li>
+          <li class="app"><a href="https://www.creatormatch.app/imane/" target="_blank" rel="noopener"><span class="phone"><span class="screen"><img src="/media/apps/imane.webp" alt="" width="546" height="1182" loading="lazy" decoding="async"><video data-src="/media/apps/imane.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><span class="island"></span></span></span><span class="app-text"><b>Imane Lifts</b><span>Imane · Streetlifting athlete</span><i>4 French records in one meet. 12/12 lifts.</i></span></a></li>
+          <li class="app"><a href="https://www.creatormatch.app/ludo/" target="_blank" rel="noopener"><span class="phone"><span class="screen"><img src="/media/apps/ludo.webp" alt="" width="546" height="1182" loading="lazy" decoding="async"><video data-src="/media/apps/ludo.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><span class="island"></span></span></span><span class="app-text"><b>ADAMANTIUM</b><span>Ludovic Adamantium · Streetlifting athlete</span><i>57.6K on Instagram. Weighted pull-up +130 kg.</i></span></a></li>
+          <li class="app"><a href="https://www.creatormatch.app/terrence/" target="_blank" rel="noopener"><span class="phone"><span class="screen"><img src="/media/apps/terrence.webp" alt="" width="546" height="1182" loading="lazy" decoding="async"><video data-src="/media/apps/terrence.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><span class="island"></span></span></span><span class="app-text"><b>Ruff Diesel</b><span>Terrence Ruffin · IFBB Pro</span><i>Classic Physique pro. Training, nutrition, posing.</i></span></a></li>
+          <li class="app"><a href="https://www.creatormatch.app/lenny/" target="_blank" rel="noopener"><span class="phone"><span class="screen"><img src="/media/apps/lenny.webp" alt="" width="546" height="1182" loading="lazy" decoding="async"><video data-src="/media/apps/lenny.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><span class="island"></span></span></span><span class="app-text"><b>MOVE</b><span>Lenny · Calisthenics coach</span><i>One coach, 1.35 million students.</i></span></a></li>
+          <li class="app"><a href="https://www.creatormatch.app/dana/" target="_blank" rel="noopener"><span class="phone"><span class="screen"><img src="/media/apps/dana.webp" alt="" width="546" height="1182" loading="lazy" decoding="async"><video data-src="/media/apps/dana.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><span class="island"></span></span></span><span class="app-text"><b>Dr. Dana’s Health Class</b><span>Dr. Dana · Urologist</span><i>Her Reels as a 6-week program.</i></span></a></li>
+          <li class="app"><a href="https://www.creatormatch.app/kivenro/" target="_blank" rel="noopener" hreflang="fr"><span class="phone"><span class="screen"><img src="/media/apps/kivenro.webp" alt="" width="546" height="1182" loading="lazy" decoding="async"><video data-src="/media/apps/kivenro.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><span class="island"></span></span></span><span class="app-text"><b>Kivenro</b><span>Kévin · Flexibility coach</span><i>591 videos as levels 1 to 10.</i></span></a></li>
+        </ul>
+
+    <div class="cta" data-ocean="fade">
+      <p>You're a wellness creator? Let's build yours.</p>
+      <a class="btn" href="mailto:hey@jeremylasne.com" data-mail>hey@jeremylasne.com</a>
+      <a class="btn" href="https://creatormatch.app" target="_blank" rel="noopener">creatormatch.app <span aria-hidden="true">&nearr;</span></a>
+      <a class="btn" href="https://www.instagram.com/creatormatch.app/" target="_blank" rel="noopener">instagram <span aria-hidden="true">&nearr;</span></a>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap" data-ocean="fade">
+    <a class="next" href="/apps/"><small>next · 02</small>Mobile apps <span aria-hidden="true">&rarr;</span></a>
+    <div class="foot">
+      <span>Jeremy Lasne · the sharks follow your cursor, tap the water</span>
+      <span><a href="https://x.com/jeremylasne" target="_blank" rel="noopener">x</a> / <a href="https://www.youtube.com/@jeremyfounder" target="_blank" rel="noopener">youtube</a> / <a href="mailto:hey@jeremylasne.com" data-mail>hey@jeremylasne.com</a></span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="/ocean.js" defer></script>
+<script src="/site.js" defer></script>
+</body>
+</html>

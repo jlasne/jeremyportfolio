@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Personal | Jeremy Lasne</title>
+<meta name="description" content="My side projects, built in public: Wellness (experiments on myself), tasu (open source) and Portfolio Intelligence.">
+<link rel="canonical" href="https://www.jeremylasne.com/personal/">
+<meta name="theme-color" content="#050b16">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Jeremy Lasne">
+<meta property="og:url" content="https://www.jeremylasne.com/personal/">
+<meta property="og:title" content="Personal | Jeremy Lasne">
+<meta property="og:description" content="My side projects, built in public: Wellness (experiments on myself), tasu (open source) and Portfolio Intelligence.">
+<meta property="og:image" content="https://www.jeremylasne.com/og-image.png?v=6">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Jeremy Lasne. I make mobile apps with wellness content creators.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@jeremylasne">
+<meta name="twitter:creator" content="@jeremylasne">
+<meta name="twitter:title" content="Personal | Jeremy Lasne">
+<meta name="twitter:description" content="My side projects, built in public: Wellness (experiments on myself), tasu (open source) and Portfolio Intelligence.">
+<meta name="twitter:image" content="https://www.jeremylasne.com/og-image.png?v=6">
+<script>
+  /* the theme a visitor picked last time; the ocean at night otherwise */
+  try { if (localStorage.getItem("theme") === "light") document.documentElement.setAttribute("data-theme", "light"); } catch (e) {}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/site.css">
+</head>
+<body>
+
+<canvas id="ocean" aria-hidden="true"></canvas>
+
+<header class="nav" id="nav">
+  <nav class="links" aria-label="Main" data-ocean="fade">
+    <a href="/">home</a>
+    <a href="/creators/">wellness creators</a>
+    <a href="/apps/">mobile apps</a>
+    <a href="/personal/" aria-current="page">personal</a>
+    <button class="theme" type="button" aria-label="Switch to the light theme">
+      <svg class="sun" viewBox="0 0 256 256" aria-hidden="true"><path d="M116,36V20a12,12,0,0,1,24,0V36a12,12,0,0,1-24,0Zm80,92a68,68,0,1,1-68-68A68.07,68.07,0,0,1,196,128Zm-24,0a44,44,0,1,0-44,44A44.05,44.05,0,0,0,172,128ZM51.51,68.49a12,12,0,1,0,17-17l-12-12a12,12,0,0,0-17,17Zm0,119-12,12a12,12,0,0,0,17,17l12-12a12,12,0,1,0-17-17ZM196,72a12,12,0,0,0,8.49-3.51l12-12a12,12,0,0,0-17-17l-12,12A12,12,0,0,0,196,72Zm8.49,115.51a12,12,0,0,0-17,17l12,12a12,12,0,0,0,17-17ZM48,128a12,12,0,0,0-12-12H20a12,12,0,0,0,0,24H36A12,12,0,0,0,48,128Zm80,80a12,12,0,0,0-12,12v16a12,12,0,0,0,24,0V220A12,12,0,0,0,128,208Zm108-92H220a12,12,0,0,0,0,24h16a12,12,0,0,0,0-24Z"/></svg>
+      <svg class="moon" viewBox="0 0 256 256" aria-hidden="true"><path d="M236.37,139.4a12,12,0,0,0-12-3A84.07,84.07,0,0,1,119.6,31.59a12,12,0,0,0-15-15A108.86,108.86,0,0,0,49.69,55.07,108,108,0,0,0,136,228a107.09,107.09,0,0,0,64.93-21.69,108.86,108.86,0,0,0,38.44-54.94A12,12,0,0,0,236.37,139.4Zm-49.88,47.74A84,84,0,0,1,68.86,69.51,84.93,84.93,0,0,1,92.27,48.29Q92,52.13,92,56A108.12,108.12,0,0,0,200,164q3.87,0,7.71-.27A84.79,84.79,0,0,1,186.49,187.14Z"/></svg>
+    </button>
+  </nav>
+  <button class="pill" id="pill" type="button" aria-expanded="false" aria-controls="menu" data-ocean="fade">
+    Jeremy Lasne
+    <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="4" cy="4" r="1.5"/><circle cx="12" cy="4" r="1.5"/><circle cx="4" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/></svg>
+  </button>
+  <nav class="menu" id="menu" aria-label="Main">
+    <a href="/">home</a>
+    <a href="/creators/">wellness creators <span>01</span></a>
+    <a href="/apps/">mobile apps <span>02</span></a>
+    <a href="/personal/" aria-current="page">personal <span>03</span></a>
+    <button class="theme-row" type="button">light theme</button>
+  </nav>
+</header>
+
+<main class="page">
+  <div class="wrap">
+    <header class="page-head reveal" data-ocean="avoid">
+      <p class="kick"><b>03</b> · built for myself, in public</p>
+      <h1>Personal</h1>
+      <p>My sleep, my AI and my investments, each with its own project.</p>
+    </header>
+
+    <article class="proj" aria-labelledby="wellness-t">
+      <a class="shot" href="/wellness/" style="--g:radial-gradient(110% 90% at 90% 100%, #5fa8d3 0%, rgba(95,168,211,0) 60%), radial-gradient(80% 80% at 0% 0%, #1d3a55 0%, rgba(29,58,85,0) 70%), #08121f" aria-label="Wellness, /wellness" tabindex="-1">
+        <span class="brand"><span class="pulse"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12.5h4l2.5-5.5 3.5 11 3-7.5 2 2H22"/></svg></span>Wellness</span>
+        <span class="window"><img src="/media/previews/wellness.webp" alt="" width="1200" height="750" loading="lazy" decoding="async"></span>
+      </a>
+      <div class="proj-text" data-ocean="fade">
+        <div class="proj-name"><h2 id="wellness-t">Wellness</h2><span class="tag">personal</span></div>
+        <p>Experiments on myself. Every night and every session logged since 1 October 2026. Now testing cold and dark nights: window open, shutters closed.</p>
+        <a class="btn go" href="/wellness/">/wellness <span aria-hidden="true">&rarr;</span></a>
+      </div>
+    </article>
+
+    <article class="proj" aria-labelledby="tasu-t">
+      <a class="shot" href="https://tasu.ai" target="_blank" rel="noopener" style="--g:radial-gradient(110% 90% at 90% 100%, #f5a3b5 0%, rgba(245,163,181,0) 60%), radial-gradient(80% 80% at 0% 0%, #3a2430 0%, rgba(58,36,48,0) 70%), #160d12" aria-label="tasu, tasu.ai" tabindex="-1">
+        <span class="brand"><img src="/media/logos/tasu.svg" alt="" width="46" height="46" loading="lazy" style="background:#fff;padding:4px">tasu</span>
+        <span class="window"><img src="/media/previews/tasu.webp" alt="" width="1200" height="750" loading="lazy" decoding="async"></span>
+      </a>
+      <div class="proj-text" data-ocean="fade">
+        <div class="proj-name"><h2 id="tasu-t">tasu</h2><span class="tag">open source</span></div>
+        <p>The talks, essays and posts of founders and investors, compiled into folders your AI reads in one line. Works in Claude, ChatGPT and Cursor.</p>
+        <a class="btn go" href="https://tasu.ai" target="_blank" rel="noopener">tasu.ai <span aria-hidden="true">&nearr;</span></a>
+      </div>
+    </article>
+
+    <article class="proj" aria-labelledby="pci-t">
+      <a class="shot" href="https://www.claudeportfolio.com/" target="_blank" rel="noopener" style="--g:radial-gradient(110% 90% at 90% 100%, #7c5cff 0%, rgba(124,92,255,0) 60%), radial-gradient(80% 80% at 0% 0%, #2a2150 0%, rgba(42,33,80,0) 70%), #0e0b1c" aria-label="Portfolio Intelligence, claudeportfolio.com" tabindex="-1">
+        <span class="brand"><img src="/media/logos/pci.svg" alt="" width="46" height="46" loading="lazy" style="background:#f5f5f5;padding:8px">Portfolio Intelligence</span>
+        <span class="window"><img src="/media/previews/pci.webp" alt="" width="1200" height="750" loading="lazy" decoding="async"></span>
+      </a>
+      <div class="proj-text" data-ocean="fade">
+        <div class="proj-name"><h2 id="pci-t">Portfolio Intelligence</h2><span class="tag">personal</span></div>
+        <p>How I invest: map what I own in 3 layers, then test the part that grows. 105 assets, 32 countries, 12 checks.</p>
+        <a class="btn go" href="https://www.claudeportfolio.com/" target="_blank" rel="noopener">claudeportfolio.com <span aria-hidden="true">&nearr;</span></a>
+      </div>
+    </article>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap" data-ocean="fade">
+    <a class="next" href="/creators/"><small>next · 01</small>Wellness creators <span aria-hidden="true">&rarr;</span></a>
+    <div class="foot">
+      <span>Jeremy Lasne · the sharks follow your cursor, tap the water</span>
+      <span><a href="https://x.com/jeremylasne" target="_blank" rel="noopener">x</a> / <a href="https://www.youtube.com/@jeremyfounder" target="_blank" rel="noopener">youtube</a> / <a href="mailto:hey@jeremylasne.com" data-mail>hey@jeremylasne.com</a></span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="/ocean.js" defer></script>
+<script src="/site.js" defer></script>
+</body>
+</html>
