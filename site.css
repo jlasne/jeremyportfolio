@@ -317,9 +317,8 @@ footer { position: relative; z-index: 2; padding: 96px 0 40px; }
   .phone, .window, .screen video, .shot.film video, .mini-shot img, .bar { transition: none; }
 }
 
-/* ---- the credit for the design, small at the foot ---- */
-.credit { font-size: 11px; color: var(--fg-40); }
-.credit a { text-decoration: none; transition: color .15s; }
-.credit a:hover, .credit a:focus-visible { color: var(--fg); outline: none; }
+/* ---- the credit for the design: small and faint, bottom right of the landing ---- */
 .hero { position: relative; }
-.hero > .credit { position: absolute; left: 0; right: 0; bottom: 16px; text-align: center; }
+.credit { position: absolute; right: max(16px, env(safe-area-inset-right)); bottom: 12px; font-size: 10px; color: var(--fg-25); }
+.credit a { text-decoration: none; transition: color .15s; }
+.credit a:hover, .credit a:focus-visible { color: var(--fg-60); outline: none; }
