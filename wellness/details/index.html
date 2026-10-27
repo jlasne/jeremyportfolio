@@ -15,10 +15,9 @@
 </head>
 <body>
 
-<img class="bg" src="/wellness/bg.jpg" alt="" fetchpriority="high">
-<canvas id="snow" aria-hidden="true"></canvas>
+<canvas id="ocean" aria-hidden="true"></canvas>
 
-<header class="page-head">
+<header class="page-head" data-ocean="fade">
   <span style="display:flex;align-items:center;gap:18px">
     <a class="logbtn" href="/wellness/#log"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>Log</a>
     <a class="back" href="/wellness/">← Wellness</a>
@@ -27,14 +26,14 @@
 </header>
 
 <main>
-  <section class="sec reveal" style="margin-top:40px" aria-labelledby="measT">
+  <section data-ocean="fade" class="sec reveal" style="margin-top:40px" aria-labelledby="measT">
     <p class="kick">Details</p>
     <h1>Each <span style="color:var(--ice-45)">measure</span></h1>
     <p class="note">Last night, the average of the last 7 nights, my normal (the middle night of all), then the best and the worst of the last 30 days.</p>
     <div class="measures-wrap"><table class="measures" id="measures"></table></div>
   </section>
 
-  <section class="sec" aria-labelledby="nightsT">
+  <section data-ocean="fade" class="sec" aria-labelledby="nightsT">
     <p class="kick">Every night</p>
     <h2 id="nightsT">Night <span class="soft">by night</span></h2>
     <div class="chips" id="metricChips" role="group" aria-label="Measure"></div>
@@ -49,7 +48,7 @@
     </ul>
   </section>
 
-  <section class="sec" aria-labelledby="bedT">
+  <section data-ocean="fade" class="sec" aria-labelledby="bedT">
     <p class="kick">Last 30 nights</p>
     <h2 id="bedT">Bed <span class="soft">to wake</span></h2>
     <p class="readout" id="bedNormal"></p>
@@ -57,7 +56,7 @@
     <ul class="nights" id="nights"></ul>
   </section>
 
-  <section class="sec" id="sport" aria-labelledby="sportT">
+  <section data-ocean="fade" class="sec" id="sport" aria-labelledby="sportT">
     <p class="kick">Every session</p>
     <h2 id="sportT">Sport <span class="soft">log</span></h2>
     <p class="note">Form compares a session with my best of its kind: 100 % is the best. Effort mixes how far the average and peak heart rate climbed from resting (<span id="hrRest"></span> bpm) to my highest so far (<span id="hrMax"></span> bpm) with the level I felt out of 5. Load is minutes times effort.</p>
@@ -68,12 +67,12 @@
   </section>
 </main>
 
-<footer>
+<footer data-ocean="fade">
   <span>Phase 0 started on 1 October 2026 with the nights of <a href="/wellness/exp0">Exp 0</a>.</span>
   <a href="/wellness/">Wellness</a>
 </footer>
 
-<script src="/snow.js" defer></script>
+<script src="/ocean.js" defer></script>
 <script type="module">
 import { SPEC, SLEEP, SPORT, bests, form, effort, minutes, load as loadOf } from '/wellness/spec.js';
 import { hrOf, mmss, swimTime, allMaxes, maxText, top, measure, formCls, cap, weekday, sessionsOf, allSessions, today, COLOR, dayName, short, clock, hm, esc, label, fmtVal, unitOf, allKeys, monthKeys, val, sportBefore, load, spread, normal, verdict, tone, INDICATORS, nightScores } from '/wellness/data.js';

@@ -181,8 +181,9 @@
     if (!W || !H) return;
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
-    C = W < 600 ? 10 : W < 1100 ? 12 : 14;
-    scale = clamp(Math.min(W, H * 1.4) / 1100, .5, 1);
+    /* the grid and the animals grow with the screen: 10px cells on a phone, 14 at 1440px, 18 on a 2K display */
+    C = Math.round(clamp(W / 102, 10, 18));
+    scale = clamp(Math.min(W, H * 1.4) / 1260, .5, 1.5);
     /* a phone's toolbar changes the height all the time: only a new width brings new animals */
     if (!fish.length || Math.abs(W - lastW) > lastW * .2) populate();
     lastW = W;
@@ -489,7 +490,7 @@
     window.addEventListener("blur", function () { ptr = null; });
     /* a tap on the water, not on a link or a phone */
     document.addEventListener("pointerdown", function (e) {
-      if (e.button || e.target.closest("a, button, input, label, .menu")) return;
+      if (e.button || e.target.closest("a, button, input, label, .bar, .tabs")) return;
       ripples.push({ x: e.clientX, y: e.clientY, t: time });
       fish.forEach(function (a) {
         if (Math.hypot(a.p[0].x - e.clientX, a.p[0].y - e.clientY) < 300) { a.flee = { x: e.clientX, y: e.clientY, until: time + 1.3 }; a.boost = 1.7; }

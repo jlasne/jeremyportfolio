@@ -10,7 +10,6 @@
   function paint() {
     var light = root.getAttribute("data-theme") === "light";
     document.querySelectorAll(".theme").forEach(function (b) { b.setAttribute("aria-label", light ? "Switch to the dark theme" : "Switch to the light theme"); });
-    document.querySelectorAll(".theme-row").forEach(function (b) { b.textContent = light ? "dark theme" : "light theme"; });
     var meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute("content", light ? "#eef3f7" : "#050b16");
   }
@@ -21,24 +20,15 @@
     paint();
     window.dispatchEvent(new Event("themechange"));
   }
-  document.querySelectorAll(".theme, .theme-row").forEach(function (b) { b.addEventListener("click", flip); });
+  document.querySelectorAll(".theme").forEach(function (b) { b.addEventListener("click", flip); });
   paint();
 
-  /* The nav: a shade under it once the page scrolls. On phones, the pill opens the menu. */
-  var nav = document.getElementById("nav"), pill = document.getElementById("pill"), menu = document.getElementById("menu");
+  /* The nav: a shade under it once the page scrolls (on a phone, the top bar turns frosted). */
+  var nav = document.getElementById("nav");
   if (nav) {
-    var shade = function () { nav.classList.toggle("scrolled", scrollY > 40); };
+    var shade = function () { nav.classList.toggle("scrolled", scrollY > 8); };
     addEventListener("scroll", shade, { passive: true });
     shade();
-  }
-  if (pill && menu) {
-    var close = function () { menu.classList.remove("open"); pill.setAttribute("aria-expanded", "false"); };
-    pill.addEventListener("click", function () {
-      var open = !menu.classList.contains("open");
-      menu.classList.toggle("open", open); pill.setAttribute("aria-expanded", open);
-    });
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
-    document.addEventListener("click", function (e) { if (!e.target.closest("#pill, #menu")) close(); });
   }
 
   /* The videos (each phone's page, the Kaught reel) play muted and looping while they are on
