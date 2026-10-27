@@ -27,8 +27,8 @@ the projects one under the other, by category.
   asks for less motion keeps the stills. Then creatormatch.app, the email and
   Instagram [@creatormatch.app](https://www.instagram.com/creatormatch.app/)
 - **02 · Mobile apps** (the founder journey, on X now and YouTube next).
-  [Kaught](https://kaught.app), live, then a "My stack" box that holds the
-  place of the tools I use and recommend
+  [Kaught](https://kaught.app), live, then a "My stack · coming soon" box for
+  the tools I use and recommend
 - **03 · Personal.** [Wellness](/wellness/), [tasu](https://tasu.ai) (open
   source) and [Portfolio Intelligence](https://www.claudeportfolio.com/)
 - **A project** is a preview card in its own colours (its logo top left, a
