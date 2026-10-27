@@ -15,12 +15,12 @@
 <meta property="og:url" content="https://www.jeremylasne.com/wellness/">
 <meta property="og:title" content="Wellness · Phase 0, normal">
 <meta property="og:description" content="My sleep and my sport, logged every day before any habit is tested.">
-<meta property="og:image" content="https://www.jeremylasne.com/og-image.png?v=4">
+<meta property="og:image" content="https://www.jeremylasne.com/og-image.png?v=5">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Jeremy Lasne. I build mobile apps with influencers.">
+<meta property="og:image:alt" content="Jeremy Lasne. I make mobile apps with wellness content creators.">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://www.jeremylasne.com/og-image.png?v=4">
+<meta name="twitter:image" content="https://www.jeremylasne.com/og-image.png?v=5">
 <link rel="canonical" href="https://www.jeremylasne.com/wellness/">
 <link rel="stylesheet" href="/wellness/wellness.css">
 </head>
@@ -79,7 +79,7 @@
   <section class="sec" aria-labelledby="pairsT">
     <p class="kick">My nights · every night logged</p>
     <h2 id="pairsT">What changes <span class="soft">my nights</span></h2>
-    <p class="note">The average of every night logged: after a rest day, after a sport day, and with my girlfriend. Read the night score first: it sums up the 5 measures below, each set against all my nights. A night with my girlfriend after a sport day counts in both. A column needs 3 nights. A hint to test later, not a proof.</p>
+    <p class="note">The average of every night logged: after a rest day, after a sport day, with my girlfriend, and cold and dark (window open all night, shutters closed). Read the night score first: it sums up the 5 measures below, each set against all my nights. A night that fits several columns counts in each. A column needs 3 nights. A hint to test later, not a proof.</p>
     <div class="vs2" id="pairs"></div>
   </section>
 </main>
@@ -238,6 +238,7 @@ function drawPairs() {
     { name: 'Rest day', ks: nights.filter(k => !sportBefore(k).length) },
     { name: 'Sport day', ks: nights.filter(k => sportBefore(k).length) },
     { name: 'With girlfriend', ks: nights.filter(k => entry(k)?.gf) },
+    { name: 'Cold & dark', ks: nights.filter(k => entry(k)?.cold) },
   ];
   const avg = (ks, f) => { const v = ks.map(f).filter(x => x !== undefined); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : undefined; };
   const rows = [
@@ -335,7 +336,8 @@ function drawForm() {
     if (f.id === 'min') return `<label class="field"><span>${f.name} (h:mm)</span><input class="in" type="text" inputmode="decimal" data-s="min" placeholder="7:45" value="${v != null ? `${Math.floor(v / 60)}:${pad(v % 60)}` : ''}"></label>`;
     return `<label class="field"><span>${f.name}${f.unit === 'ms' || f.unit === 'bpm' ? ` (${f.unit})` : ''}</span><input class="in" type="number" inputmode="numeric" min="0" max="${f.max}" data-s="${f.id}" value="${v ?? ''}"></label>`;
   }).join('');
-  $('gfBox').innerHTML = `<button class="chip" type="button" id="gfB" aria-pressed="${!!cur.gf}">💑 Night with my girlfriend</button>`;
+  $('gfBox').innerHTML = `<button class="chip" type="button" data-flag="gf" aria-pressed="${!!cur.gf}">💑 Night with my girlfriend</button>`
+    + `<button class="chip" type="button" data-flag="cold" aria-pressed="${!!cur.cold}" title="Window open all night, shutters closed">❄️ Cold &amp; dark night</button>`;
   drawSessions();
   $('adds').innerHTML = SPEC.sports.map(s => `<button class="chip" type="button" data-add="${s.id}" style="--c:var(--${s.id})">${s.name}</button>`).join('');
 }
@@ -346,10 +348,12 @@ $('sleepGrid').addEventListener('input', e => {
   if (v === undefined || Number.isNaN(v)) delete cur.sleep[id]; else cur.sleep[id] = v;
   touch();
 });
+/* the night's toggles: with my girlfriend, cold and dark */
 $('gfBox').addEventListener('click', e => {
-  if (!e.target.closest('#gfB')) return;
-  if (cur.gf) delete cur.gf; else cur.gf = true;
-  $('gfB').setAttribute('aria-pressed', !!cur.gf);
+  const b = e.target.closest('[data-flag]'); if (!b) return;
+  const k = b.dataset.flag;
+  if (cur[k]) delete cur[k]; else cur[k] = true;
+  b.setAttribute('aria-pressed', !!cur[k]);
   touch();
 });
 $('adds').addEventListener('click', e => {

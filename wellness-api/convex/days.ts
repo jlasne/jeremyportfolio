@@ -26,6 +26,7 @@ const pub = (d: any) => {
   const out: Record<string, unknown> = { day: d.day, updatedAt: d.updatedAt };
   if (d.sleep) out.sleep = d.sleep;
   if (d.gf) out.gf = true;
+  if (d.cold) out.cold = true;
   if (d.sessions) out.sessions = d.sessions;
   if (d.note) out.note = d.note;
   return out;

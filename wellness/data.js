@@ -240,7 +240,8 @@ export { avg };
    ones it does not know yet. */
 export function kept(sent, got) {
   const a = sent?.sessions || [], b = got?.sessions || [];
-  return a.length === b.length && a.every((s, i) => Object.keys(s).every(key => s[key] === undefined || b[i]?.[key] !== undefined));
+  return ['gf', 'cold'].every(k => !sent?.[k] || got?.[k])
+    && a.length === b.length && a.every((s, i) => Object.keys(s).every(key => s[key] === undefined || b[i]?.[key] !== undefined));
 }
 
 /* ── every day as one CSV ──────────────────────────────────────────── */
@@ -251,7 +252,7 @@ export function csv() {
   const t = hrOf(), best = bests(allSessions());
   const head = ['date', ...SPEC.sleep.map(f => f.id === 'min' ? 'sleep_min' : f.unit === 'clock' ? f.id : 'sleep_' + f.id),
     'sport', 'name', 'target', 'effort_level', 'start', 'end', 'minutes', 'hr_avg', 'hr_peak', 'hr_max_used',
-    'effort_pct', 'load', 'distance_m', 'time_sec', 'lift', 'kg', 'reps', 'exercises', 'form_pct', 'note', 'girlfriend'];
+    'effort_pct', 'load', 'distance_m', 'time_sec', 'lift', 'kg', 'reps', 'exercises', 'form_pct', 'note', 'girlfriend', 'cold_dark'];
   const hhmm = n => n == null ? '' : `${pad(Math.floor(n / 60))}:${pad(n % 60)}`;
   const cell = v => v === undefined || v === null ? '' : /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v);
   const r1 = v => v === undefined ? '' : Math.round(v * 10) / 10;
@@ -264,7 +265,7 @@ export function csv() {
       const e = s && effort(s, t), f = s && form(s, best);
       rows.push([k, ...night, ...(s ? [s.s, s.n, s.f, s.lv, hhmm(s.t), hhmm(s.e), minutes(s), s.hr, s.pk, s.hr || s.pk ? t.max : '',
         e === undefined ? '' : Math.round(e * 100), r1(loadOf(s, t)), s.s === 'run' ? s.m : '', s.s === 'run' ? runSec(s) : '', s.lift, s.kg, s.reps, s.s === 'lift' ? exercises(s).map(exText).join('; ') : s.s === 'swim' ? tests(s).map(testText).join('; ') : '', f === undefined ? '' : Math.round(f * 100)]
-        : Array(19).fill('')), d.note, d.gf ? 1 : '']);
+        : Array(19).fill('')), d.note, d.gf ? 1 : '', d.cold ? 1 : '']);
     }
   }
   return [head, ...rows].map(r => r.map(cell).join(',')).join('\r\n') + '\r\n';
