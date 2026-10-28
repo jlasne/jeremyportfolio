@@ -190,7 +190,7 @@ function drawSport(animate) {
 }
 
 
-/* ── after sport, or not: two columns ─────────────────────────────── */
+/* ── after sport, or not, and the night's toggles: five columns ────── */
 function drawPairs() {
   /* every night logged, each measure set against all of them */
   const keys = allKeys(), ns = nightScores(keys);
@@ -199,7 +199,8 @@ function drawPairs() {
     { name: 'Rest day', ks: nights.filter(k => !sportBefore(k).length) },
     { name: 'Sport day', ks: nights.filter(k => sportBefore(k).length) },
     { name: 'With girlfriend', ks: nights.filter(k => entry(k)?.gf) },
-    { name: 'Cold & dark', ks: nights.filter(k => entry(k)?.cold) },
+    { name: 'Cold night', ks: nights.filter(k => entry(k)?.cold) },
+    { name: 'Dark night', ks: nights.filter(k => entry(k)?.dark) },
   ];
   const avg = (ks, f) => { const v = ks.map(f).filter(x => x !== undefined); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : undefined; };
   const rows = [
@@ -298,7 +299,8 @@ function drawForm() {
     return `<label class="field"><span>${f.name}${f.unit === 'ms' || f.unit === 'bpm' ? ` (${f.unit})` : ''}</span><input class="in" type="number" inputmode="numeric" min="0" max="${f.max}" data-s="${f.id}" value="${v ?? ''}"></label>`;
   }).join('');
   $('gfBox').innerHTML = `<button class="chip" type="button" data-flag="gf" aria-pressed="${!!cur.gf}">💑 Night with my girlfriend</button>`
-    + `<button class="chip" type="button" data-flag="cold" aria-pressed="${!!cur.cold}" title="Window open all night, shutters closed">❄️ Cold &amp; dark night</button>`;
+    + `<button class="chip" type="button" data-flag="cold" aria-pressed="${!!cur.cold}" title="Window open all night">❄️ Cold night</button>`
+    + `<button class="chip" type="button" data-flag="dark" aria-pressed="${!!cur.dark}" title="Shutters closed">🌙 Dark night</button>`;
   drawSessions();
   $('adds').innerHTML = SPEC.sports.map(s => `<button class="chip" type="button" data-add="${s.id}" style="--c:var(--${s.id})">${s.name}</button>`).join('');
 }
@@ -309,7 +311,7 @@ $('sleepGrid').addEventListener('input', e => {
   if (v === undefined || Number.isNaN(v)) delete cur.sleep[id]; else cur.sleep[id] = v;
   touch();
 });
-/* the night's toggles: with my girlfriend, cold and dark */
+/* the night's toggles: with my girlfriend, cold, dark */
 $('gfBox').addEventListener('click', e => {
   const b = e.target.closest('[data-flag]'); if (!b) return;
   const k = b.dataset.flag;

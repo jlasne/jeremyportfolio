@@ -149,8 +149,8 @@ h2 .soft { color: var(--ice-45); }
 .f-none { color: var(--ice-20); }
 
 /* ── after sport, or not: two columns ── */
-.vs2 { margin-top: 22px; max-width: 720px; }
-.vs2-row { display: grid; grid-template-columns: minmax(0, 1fr) repeat(4, 100px); gap: 12px; align-items: baseline; padding: 12px 0; border-top: 1px solid var(--ice-10); }
+.vs2 { margin-top: 22px; max-width: 820px; }
+.vs2-row { display: grid; grid-template-columns: minmax(0, 1fr) repeat(5, 100px); gap: 12px; align-items: baseline; padding: 12px 0; border-top: 1px solid var(--ice-10); }
 .vs2-row span:not(:first-child) { text-align: right; font-size: 17px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
 .vs2-row span:first-child { font-size: 14px; color: var(--ice-70); }
 .vs2-row.head { border-top: 0; padding-bottom: 6px; }
@@ -160,7 +160,7 @@ h2 .soft { color: var(--ice-45); }
 .vs2-row.lead span:not(:first-child) { font-size: 24px; }
 .vs2-row.lead + .vs2-row { border-top-color: var(--ice-45); }
 .vs2-row.head span:not(:first-child) { font-size: 14px; line-height: 1.2; color: var(--ice); }
-@media (max-width: 520px) { .vs2-row { grid-template-columns: minmax(0, 1fr) repeat(4, 58px); gap: 6px; } .vs2-row span:not(:first-child) { font-size: 15px; } .vs2-row.head span:not(:first-child) { font-size: 12px; } }
+@media (max-width: 520px) { .vs2-row { grid-template-columns: minmax(0, 1fr) repeat(5, 50px); gap: 4px; } .vs2-row span:not(:first-child) { font-size: 13px; } .vs2-row.head span:not(:first-child) { font-size: 12px; } }
 .vs2-row.head small { display: block; margin-top: 3px; font-size: 11px; font-weight: 400; color: var(--ice-45); }
 
 /* ── night score, above the four measures ── */

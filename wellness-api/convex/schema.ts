@@ -230,8 +230,10 @@ export default defineSchema({
     }))),
     /* the night was spent with my girlfriend */
     gf: v.optional(v.boolean()),
-    /* a cold and dark night: window open all night, shutters closed */
+    /* a cold night: window open all night */
     cold: v.optional(v.boolean()),
+    /* a dark night: shutters closed */
+    dark: v.optional(v.boolean()),
     note: v.optional(v.string()),
     updatedAt: v.number(),
   }).index("by_day", ["day"]),
