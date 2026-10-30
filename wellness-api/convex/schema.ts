@@ -239,6 +239,8 @@ export default defineSchema({
     cold: v.optional(v.boolean()),
     /* a dark night: shutters closed */
     dark: v.optional(v.boolean()),
+    /* a night away from home, travelling */
+    travel: v.optional(v.boolean()),
     note: v.optional(v.string()),
     updatedAt: v.number(),
   }).index("by_day", ["day"]),

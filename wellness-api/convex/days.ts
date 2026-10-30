@@ -28,6 +28,7 @@ const pub = (d: any) => {
   if (d.gf) out.gf = true;
   if (d.cold) out.cold = true;
   if (d.dark) out.dark = true;
+  if (d.travel) out.travel = true;
   if (d.sessions) out.sessions = d.sessions;
   if (d.note) out.note = d.note;
   return out;

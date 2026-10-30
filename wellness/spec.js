@@ -168,7 +168,7 @@ function cleanExercise(e) {
 /* One day as the server keeps it: the night that ended that morning,
    `gf` when I spent it with my girlfriend, `cold` when I slept cold
    (window open all night), `dark` when I slept dark (shutters closed),
-   and the day's sessions.
+   `travel` when I slept away from home, travelling, and the day's sessions.
    Days before the start or after today are refused. */
 export function cleanDay(day, input, today) {
   if (!isKey(day) || day < SPEC.start || day > today) return null;
@@ -185,6 +185,7 @@ export function cleanDay(day, input, today) {
   if (input?.gf === true) out.gf = true;
   if (input?.cold === true) out.cold = true;
   if (input?.dark === true) out.dark = true;
+  if (input?.travel === true) out.travel = true;
   if (sessions.length) out.sessions = sessions;
   if (note) out.note = note;
   return out;
