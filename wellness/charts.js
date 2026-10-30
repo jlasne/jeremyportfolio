@@ -38,9 +38,10 @@ function shape(ctx, x, y, w, h, r, all) {
    colour of a day with no number), `band` the normal range drawn behind, `lo` and `hi`
    a fixed scale (otherwise the data's own), `marks(k)` the sessions shown
    as small dots under the bar, `read(i)` what to say about a bar
-   (null: the default line). A tap pins a bar, a second tap lets go. */
-export function barChart(cv, opts) {
-  const CH = 170, MARK = 14, H = CH + MARK, R = 4;
+   (null: the default line). A tap pins a bar, a second tap lets go.
+   `ch` is the height of the bars' area in CSS pixels. */
+export function barChart(cv, opts, ch = 170) {
+  const CH = ch, MARK = 14, H = CH + MARK, R = 4;
   let geo = null, pick = null;
   function draw(animate) {
     const o = opts(), { keys, value, band, marks } = o;
@@ -116,4 +117,65 @@ export function barChart(cv, opts) {
   cv.addEventListener('pointerleave', () => { if (pick === null) draw(false); });
   cv.addEventListener('click', e => { const i = at(e); pick = pick === i ? null : i; draw(false); });
   return { draw, reset() { pick = null; } };
+}
+
+/* One column per night, a bar from bedtime (top) to wake-up (bottom), the
+   clock down the left. `bed(k)` and `wake(k)` are minutes after midnight
+   (a bedtime after midnight past 1440), `tone(k)` the bar's colour, `lines`
+   the normal bed and wake as dashed rules (wake-up past 1440 too), `read(i)` what to say about a
+   night. A tap pins a night, a second tap lets go. */
+export function spanChart(cv, opts, ch = 150) {
+  const GUT = 38, R = 3;
+  let geo = null, pick = null;
+  function draw(animate) {
+    const o = opts(), { keys, bed, wake } = o;
+    const n = keys.length, { ctx, w } = prep(cv, ch);
+    const b = keys.map(bed), e = keys.map(k => { const v = wake(k); return v === undefined ? undefined : v + 1440; });
+    const got = keys.map((_, i) => b[i] !== undefined && e[i] !== undefined);
+    const lo = Math.floor(Math.min(...b.filter((x, i) => got[i]), 1380) / 60) * 60;
+    const hi = Math.ceil(Math.max(...e.filter((x, i) => got[i]), 1920) / 60) * 60;
+    const y = m => 4 + (m - lo) / (hi - lo) * (ch - 8);
+    const colW = (w - GUT) / n, gap = colW > 12 ? 4 : colW > 6 ? 2 : 1;
+    const x0 = i => GUT + Math.floor(i * colW), cw = i => Math.max(1, Math.floor((i + 1) * colW) - Math.floor(i * colW) - gap);
+    geo = { colW, n };
+    const paint = p => {
+      ctx.clearRect(0, 0, w, ch);
+      ctx.font = '11px system-ui, sans-serif'; ctx.textBaseline = 'middle';
+      const step = hi - lo > 720 ? 180 : 120;
+      for (let m = Math.ceil(lo / step) * step; m <= hi; m += step) {
+        const yy = Math.round(y(m)) + .5;
+        ctx.fillStyle = 'rgba(234,244,251,.45)';
+        ctx.fillText(`${String(Math.floor(m / 60) % 24).padStart(2, '0')}:00`, 0, yy);
+        ctx.strokeStyle = 'rgba(234,244,251,.08)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(GUT, yy); ctx.lineTo(w, yy); ctx.stroke();
+      }
+      (o.lines || []).forEach(m => {
+        const yy = Math.round(y(m)) + .5;
+        ctx.strokeStyle = 'rgba(234,244,251,.4)'; ctx.setLineDash([3, 4]);
+        ctx.beginPath(); ctx.moveTo(GUT, yy); ctx.lineTo(w, yy); ctx.stroke(); ctx.setLineDash([]);
+      });
+      keys.forEach((k, i) => {
+        if (!got[i]) return;
+        const t = Math.max(0, Math.min(1, p * 1.7 - i / n * .7));
+        if (!t) return;
+        const top = y(b[i]), h = (y(e[i]) - top) * t;
+        ctx.globalAlpha = pick !== null && pick !== i ? .3 : .92;
+        ctx.fillStyle = FILL[o.tone(k)] || FILL.mid;
+        shape(ctx, x0(i), top, cw(i), Math.max(2, h), R, true); ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+    };
+    animate ? play(paint) : paint(1);
+    const last = got.lastIndexOf(true);
+    o.read(pick ?? (last >= 0 ? last : null));
+  }
+  const at = e => {
+    if (!geo) return null;
+    const r = cv.getBoundingClientRect();
+    return Math.max(0, Math.min(geo.n - 1, Math.floor((e.clientX - r.left - GUT) / geo.colW)));
+  };
+  cv.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') opts().read(at(e)); });
+  cv.addEventListener('pointerleave', () => { if (pick === null) draw(false); });
+  cv.addEventListener('click', e => { const i = at(e); pick = pick === i ? null : i; draw(false); });
+  return { draw };
 }

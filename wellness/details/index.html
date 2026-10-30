@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>Details | Wellness | Jeremy Lasne</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Every measure of my nights against my normal, and every night from bed to wake.">
+<meta name="description" content="An AI analysis of my last 30 days, every measure of my nights against my normal, and every night from bed to wake.">
 <meta name="theme-color" content="#050b16">
 <meta name="color-scheme" content="dark">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -26,9 +26,45 @@
 </header>
 
 <main>
-  <section data-ocean="fade" class="sec reveal" style="margin-top:40px" aria-labelledby="measT">
+  <section data-ocean="fade" class="sec reveal ai" style="margin-top:40px" id="ai" aria-labelledby="aiT">
+    <p class="kick">AI Analysis <span class="ai-run">Last run 30 Oct 2026 · 28 nights · 16 sessions</span></p>
+    <h1 id="aiT">Deadlift <span class="up">+18&nbsp;%</span>, HRV <span class="down">−27&nbsp;%</span></h1>
+    <p class="ai-lede">From 15 to 28 Oct you logged <b>11 sessions</b>, against <b>4</b> in the 2 weeks before. Your lifts climb every session. Your HRV fell from <b>103 ms</b> to <b>75 ms</b> over the same weeks.</p>
+
+    <div class="trends">
+      <div class="trend down"><p class="k">HRV</p><p class="big">75<small>ms</small></p><p class="d">−28 % since week 1</p>
+        <div class="wk" aria-label="Average per week: 104, 98, 78, 75 ms"><i style="--h:100"></i><i style="--h:94"></i><i style="--h:75"></i><i style="--h:72"></i></div></div>
+      <div class="trend down"><p class="k">RHR</p><p class="big">56<small>bpm</small></p><p class="d">+3 bpm since week 1</p>
+        <div class="wk" aria-label="Average per week: 53, 55, 57, 56 bpm"><i style="--h:93"></i><i style="--h:97"></i><i style="--h:100"></i><i style="--h:98"></i></div></div>
+      <div class="trend mid"><p class="k">Time asleep</p><p class="big">7h49</p><p class="d">−11 min since week 1</p>
+        <div class="wk" aria-label="Average per week: 8h00, 7h58, 7h59, 7h49"><i style="--h:100"></i><i style="--h:100"></i><i style="--h:100"></i><i style="--h:98"></i></div></div>
+      <div class="trend up"><p class="k">Sessions</p><p class="big">5<small>/ week</small></p><p class="d">×2.5 since week 1</p>
+        <div class="wk" aria-label="Sessions per week: 2, 2, 6, 5"><i style="--h:33"></i><i style="--h:33"></i><i style="--h:100"></i><i style="--h:83"></i></div></div>
+    </div>
+    <p class="wk-axis">Weeks 1 to 4 · 1 to 28 Oct</p>
+
+    <ul class="finds">
+      <li class="down"><b>Recovery</b><span>HRV fell 4 weeks in a row: <em>104, 98, 78, 75 ms</em>. Resting heart rate rose from <em>53 to 56 bpm</em>. The drop starts the week your sessions tripled, on 15 Oct.</span></li>
+      <li class="down"><b>Level 5 days</b><span>The 5 nights after a level 5 session average <em>73 ms HRV</em> and <em>57 bpm</em>. Your normal is 84 ms and 55 bpm.</span></li>
+      <li class="up"><b>Strength</b><span>Deadlift <em>110 → 130 kg</em> in 8 days. Bench 85 → 90 kg, dip 40 → 50 kg, weighted pull-up 30 → 32.5 kg.</span></li>
+      <li class="up"><b>Speed</b><span>50 m swim <em>25.69 → 25.51 s</em>. 200 m swim 2:22 → 2:20. Run 5.02 km in 23:10, at 4:37/km.</span></li>
+      <li class="mid"><b>Bedtime</b><span>8 nights in bed before 00:00: <em>8h09 asleep</em>, HRV 93 ms. 11 nights in bed after 00:30: <em>7h39 asleep</em>, HRV 86 ms. Your normal bedtime is 00:21.</span></li>
+      <li class="mid"><b>Watch scores</b><span>The watch sleep score stayed between <em>81 and 85</em> on 11 of the last 12 nights, while HRV fell 27 %. The night score now reads HRV, RHR, time asleep, deep and REM.</span></li>
+      <li class="mid"><b>Last night</b><span>30 Oct: HRV <em>80 ms</em>, 7 ms above 29 Oct. RHR 57 bpm, 7h45 asleep, in bed at 00:42, dark night.</span></li>
+    </ul>
+
+    <h3 class="next-t">Next 7 days</h3>
+    <ol class="next">
+      <li>Take 1 rest day after each level 5 session. Target: HRV back to your normal, <b>84 ms</b>.</li>
+      <li>Be in bed by <b>00:00</b> on 4 nights. Each one adds 30 min of sleep.</li>
+      <li>Log deep and REM each morning, and re-enter October, so the night score reads all 5 measures.</li>
+      <li>Log 2 more cold nights and 1 more dark night. The comparison opens at <b>3 nights</b> each.</li>
+    </ol>
+  </section>
+
+  <section data-ocean="fade" class="sec" aria-labelledby="measT">
     <p class="kick">Details</p>
-    <h1>Each <span style="color:var(--ice-45)">measure</span></h1>
+    <h2 id="measT">Each <span class="soft">measure</span></h2>
     <p class="note">Last night, the average of the last 7 nights, my normal (the middle night of all), then the best and the worst of the last 30 days.</p>
     <div class="measures-wrap"><table class="measures" id="measures"></table></div>
   </section>
@@ -52,8 +88,9 @@
     <p class="kick">Last 30 nights</p>
     <h2 id="bedT">Bed <span class="soft">to wake</span></h2>
     <p class="readout" id="bedNormal"></p>
-    <div class="axis bed-axis"><span>21:00</span><span>00:00</span><span>03:00</span><span>06:00</span><span>09:00</span><span>12:00</span></div>
-    <ul class="nights" id="nights"></ul>
+    <p class="readout" id="bedRead" aria-live="polite"></p>
+    <div class="chart"><canvas id="bedC" aria-label="One column per night, from bedtime at the top to wake-up at the bottom"></canvas></div>
+    <div class="axis bed-axis" id="bedAxis"></div>
   </section>
 
   <section data-ocean="fade" class="sec" id="sport" aria-labelledby="sportT">
@@ -76,7 +113,7 @@
 <script type="module">
 import { SPEC, SLEEP, SPORT, bests, form, effort, minutes, load as loadOf } from '/wellness/spec.js';
 import { hrOf, mmss, swimTime, allMaxes, maxText, top, measure, formCls, cap, weekday, sessionsOf, allSessions, today, COLOR, dayName, short, clock, hm, esc, label, fmtVal, unitOf, allKeys, monthKeys, val, sportBefore, load, spread, normal, verdict, tone, INDICATORS, nightScores } from '/wellness/data.js';
-import { barChart } from '/wellness/charts.js';
+import { barChart, spanChart } from '/wellness/charts.js';
 
 const $ = id => document.getElementById(id);
 const mean = v => v.length ? v.reduce((a, b) => a + b, 0) / v.length : undefined;
@@ -88,7 +125,7 @@ function drawMeasures() {
   const week = allKeys().filter(x => x <= (k || today)).slice(-7);
   const rows = [
     { name: 'Night score', get: x => ns[x]?.score, better: 'high', fmt: v => `${Math.round(v)}<small>/100</small>`, nm: spread(Object.values(ns).map(n => n.score)) },
-    ...['score', 'hrv', 'rhr', 'ready', 'min', 'bed', 'wake'].map(id => ({
+    ...[...INDICATORS, 'bed', 'wake'].map(id => ({
       name: SLEEP.get(id).name, get: x => val(x, id), better: SLEEP.get(id).better, id,
       fmt: v => `${fmtVal(id, v)}${unitOf(id) ? `<small>${unitOf(id)}</small>` : ''}`, nm: normal(id),
     })),
@@ -134,20 +171,28 @@ function drawNights(animate) {
   $('nightsAxis').innerHTML = [keys[0], keys[Math.floor((n - 1) / 2)], keys[n - 1]].map(k => `<span>${short(k)}</span>`).join('');
 }
 
-/* ── bed to wake, newest first ─────────────────────────────────────── */
-function drawBed() {
-  const FROM = 1260, TO = 2160, pos = m => Math.max(0, Math.min(100, (m - FROM) / (TO - FROM) * 100));
-  const ns = nightScores(), band = spread(Object.values(ns).map(n => n.score));
-  const keys = monthKeys().filter(k => val(k, 'bed') !== undefined && val(k, 'wake') !== undefined).reverse();
+/* ── bed to wake: one column per night of the last 30 ──────────────── */
+const bedC = spanChart($('bedC'), () => {
+  const ns = nightScores(), band = spread(Object.values(ns).map(n => n.score)), nb = normal('bed'), nw = normal('wake');
+  return {
+    keys: monthKeys(), bed: k => val(k, 'bed'), wake: k => val(k, 'wake'),
+    tone: k => ns[k] ? tone(ns[k].score, band) : 'mid',
+    lines: nb && nw ? [nb.med, nw.med + 1440] : [],
+    read: i => readBed(i, ns),
+  };
+});
+function readBed(i, ns) {
+  if (i === null) { $('bedRead').textContent = 'No night with both times yet'; return; }
+  const k = monthKeys()[i], bed = val(k, 'bed'), wake = val(k, 'wake'), min = val(k, 'min'), x = ns[k];
+  $('bedRead').innerHTML = bed === undefined || wake === undefined ? `${dayName(k)} · not logged`
+    : `${dayName(k)} · <b>${clock(bed)}</b> → <b>${clock(wake)}</b>${min !== undefined ? ` · ${hm(min)} asleep` : ''}${x ? ` · night score <b>${Math.round(x.score)}</b>` : ''}`;
+}
+function drawBed(animate) {
   const nb = normal('bed'), nw = normal('wake'), nmin = normal('min');
-  $('bedNormal').innerHTML = nb && nw ? `Normal: bed <b>${clock(nb.med)}</b> → wake <b>${clock(nw.med)}</b>${nmin ? ` · <b>${hm(nmin.med)}</b> asleep` : ''} · colour = night score` : 'Not enough nights yet';
-  $('nights').innerHTML = keys.map(k => {
-    const bed = val(k, 'bed'), wake = val(k, 'wake') + 1440, min = val(k, 'min'), x = ns[k];
-    const c = COLOR[{ good: 'good', bad: 'bad', mid: 'blue' }[x ? tone(x.score, band) : 'mid']];
-    const ticks = [1440, 1800].map(m => `<span class="tick" style="left:${pos(m)}%"></span>`).join('');
-    return `<li><span class="d">${short(k)}</span><span class="track">${ticks}<i style="--c:${c};left:${pos(bed)}%;width:${pos(wake) - pos(bed)}%"></i></span>
-      <span class="v"><b>${clock(bed)}</b> → <b>${clock(wake)}</b>${min !== undefined ? ` · ${hm(min)} asleep` : ''}${x ? ` · night score <b>${Math.round(x.score)}</b>` : ''}</span></li>`;
-  }).join('') || '<li><span class="v">No night with both times yet.</span></li>';
+  $('bedNormal').innerHTML = nb && nw ? `Normal: bed <b>${clock(nb.med)}</b> → wake <b>${clock(nw.med)}</b>${nmin ? ` · <b>${hm(nmin.med)}</b> asleep` : ''} · dashed lines · colour = night score` : 'Not enough nights yet';
+  bedC.draw(animate);
+  const keys = monthKeys(), n = keys.length;
+  $('bedAxis').innerHTML = [keys[0], keys[Math.floor((n - 1) / 2)], keys[n - 1]].map(k => `<span>${short(k)}</span>`).join('');
 }
 
 /* ── every session, newest first, and a calendar of the days ───────── */
@@ -163,7 +208,10 @@ function drawLog() {
   }
   $('cal').innerHTML = html;
   const all = allSessions(), best = bests(all);
-  $('sessList').innerHTML = [...all].reverse().map(s => {
+  /* the list keeps the sessions with something measured: a heart rate, a level,
+     a distance, a time, an exercise or a test */
+  const logged = s => s.hr || s.pk || s.lv || s.m || s.sec || s.x?.length || s.w?.length || s.kg;
+  $('sessList').innerHTML = [...all].filter(logged).reverse().map(s => {
     const f = form(s, best), e = effort(s, t), ld = loadOf(s, t), mz = measure(s);
     const span = minutes(s) ? `${minutes(s)} min` : '';
     const hr = [s.hr && `avg ${s.hr}`, s.pk && `peak ${s.pk}`].filter(Boolean).join(' / ');
@@ -190,9 +238,9 @@ function drawMaxes() {
   $('maxList').innerHTML = cards.join('');
 }
 
-function drawAll(animate) { drawMeasures(); drawChips(); drawNights(animate); drawBed(); drawMaxes(); drawLog(); }
+function drawAll(animate) { drawMeasures(); drawChips(); drawNights(animate); drawBed(animate); drawMaxes(); drawLog(); }
 let rs = 0;
-addEventListener('resize', () => { cancelAnimationFrame(rs); rs = requestAnimationFrame(() => drawNights(false)); });
+addEventListener('resize', () => { cancelAnimationFrame(rs); rs = requestAnimationFrame(() => { drawNights(false); bedC.draw(false); }); });
 drawAll(false);
 let pass = ''; try { pass = localStorage.getItem('bio.pass') || ''; } catch {}
 load(pass).then(() => drawAll(true));

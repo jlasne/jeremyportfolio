@@ -4,7 +4,7 @@
    day this device still holds because the server could not take it yet.
    Imported by /wellness and /wellness/details. */
 
-import { SPEC, SLEEP, SPORT, dateKey, shift, fromExp0, exercises, bests, form, effort, hrTop, minutes, runSec, tests, mps, load as loadOf } from '/wellness/spec.js';
+import { SPEC, SLEEP, SPORT, dateKey, shift, fromExp0, fixBed, exercises, bests, form, effort, hrTop, minutes, runSec, tests, mps, load as loadOf } from '/wellness/spec.js';
 
 export const API = 'https://fiery-eel-944.eu-west-1.convex.site/overlap';
 export const today = dateKey();
@@ -29,7 +29,7 @@ export const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': 
 export const copy = x => JSON.parse(JSON.stringify(x ?? {}));
 /* what a session is called: Other sessions go by the name I gave them */
 export const label = s => s.s === 'other' && s.n ? s.n : SPORT.get(s.s).name;
-export const fmtVal = (id, v) => id === 'min' ? hm(v) : id === 'bed' || id === 'wake' ? clock(v) : String(Math.round(v));
+export const fmtVal = (id, v) => SLEEP.get(id)?.unit === 'min' ? hm(v) : id === 'bed' || id === 'wake' ? clock(v) : String(Math.round(v));
 export const unitOf = id => ({ hrv: 'ms', rhr: 'bpm' })[id] ?? '';
 
 /* ── the days ──────────────────────────────────────────────────────── */
@@ -39,7 +39,8 @@ export const allKeys = () => { const out = []; for (let k = SPEC.start; k <= tod
 /* the last 30 days, today included: the window the night score is read in */
 export const MONTH = 30;
 export const monthKeys = () => allKeys().slice(-MONTH);
-export const val = (k, id) => { const v = entry(k)?.sleep?.[id]; return typeof v === 'number' ? v : undefined; };
+/* a bedtime typed as four digits (2142 for 21:42) reads as the clock time */
+export const val = (k, id) => { const v = entry(k)?.sleep?.[id]; return typeof v !== 'number' ? undefined : id === 'bed' ? fixBed(v) : v; };
 export const sessionsOf = k => entry(k)?.sessions || [];
 export const allSessions = () => allKeys().flatMap(k => sessionsOf(k).map(s => ({ ...s, day: k })));
 /* a night answers the day that led to it */
@@ -175,11 +176,12 @@ export function tone(v, nm, better = 'high') {
 export const verdict = (id, v, nm = normal(id)) => SLEEP.get(id).better ? tone(v, nm, SLEEP.get(id).better) : 'mid';
 
 /* ── the night score ───────────────────────────────────────────────── */
-/* Five measures of a night, each put on 0 to 100 against the last 30 days:
-   100 is the best of the month on that measure, 0 the worst, whichever way
-   is better (a lower night heart rate scores higher). The night score is
-   their average, kept when at least 3 of the 5 are logged. */
-export const INDICATORS = ['score', 'hrv', 'rhr', 'ready', 'min'];
+/* Five measures of a night, each put on 0 to 100 against the last 30 days
+   (a sliding window, today included): 100 is the best of the month on that
+   measure, 0 the worst, whichever way is better (a lower night heart rate
+   scores higher). The night score is their average, kept when at least 3
+   of the 5 are logged. */
+export const INDICATORS = ['hrv', 'rhr', 'min', 'deep', 'rem'];
 export function nightScores(keys = monthKeys()) {
   const range = {};
   for (const id of INDICATORS) {
@@ -237,10 +239,11 @@ export function dayLoads(keys = monthKeys()) {
 export { avg };
 
 /* Did the server keep every field it was sent? An older server drops the
-   ones it does not know yet. */
+   ones it does not know yet (deep and REM sleep, before its update). */
 export function kept(sent, got) {
   const a = sent?.sessions || [], b = got?.sessions || [];
   return ['gf', 'cold', 'dark'].every(k => !sent?.[k] || got?.[k])
+    && Object.keys(sent?.sleep || {}).every(k => got?.sleep?.[k] !== undefined)
     && a.length === b.length && a.every((s, i) => Object.keys(s).every(key => s[key] === undefined || b[i]?.[key] !== undefined));
 }
 

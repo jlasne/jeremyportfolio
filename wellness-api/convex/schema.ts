@@ -190,11 +190,16 @@ export default defineSchema({
   days: defineTable({
     day: v.string(),
     sleep: v.optional(v.object({
+      /* the watch's sleep score and readiness: kept on the first days,
+         nothing writes them now */
       score: v.optional(v.float64()),
+      ready: v.optional(v.float64()),
       hrv: v.optional(v.float64()),
       rhr: v.optional(v.float64()),
-      ready: v.optional(v.float64()),
       min: v.optional(v.float64()),
+      /* minutes of deep and REM sleep */
+      deep: v.optional(v.float64()),
+      rem: v.optional(v.float64()),
       bed: v.optional(v.float64()),
       wake: v.optional(v.float64()),
     })),

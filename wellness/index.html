@@ -36,6 +36,7 @@
 </header>
 
 <main>
+  <div class="duo">
   <section data-ocean="fade" class="sec reveal" style="--d:200" aria-labelledby="nightsT">
     <h2 id="nightsT">Night <span class="soft">by night</span></h2>
     <div class="ns" id="ns"></div>
@@ -65,6 +66,7 @@
     </ul>
     <a class="more" href="/wellness/details/#sport">Sport log <span aria-hidden="true">→</span></a>
   </section>
+  </div>
 
   <section data-ocean="fade" class="sec" aria-labelledby="pairsT">
     <h2 id="pairsT">What changes <span class="soft">my nights</span></h2>
@@ -115,7 +117,7 @@ import { barChart } from '/wellness/charts.js';
 
 const $ = id => document.getElementById(id);
 
-const lastNight = () => allKeys().reverse().find(k => val(k, 'score') !== undefined || val(k, 'hrv') !== undefined);
+const lastNight = () => allKeys().reverse().find(k => INDICATORS.some(id => val(k, id) !== undefined));
 
 /* ── last night ────────────────────────────────────────────────────── */
 /* 32 steps from lo to hi: the normal band lit, my value a bright dot */
@@ -137,7 +139,7 @@ function drawLast() {
 const nightC = barChart($('nightsC'), () => {
   const ns = nightScores(), band = spread(Object.values(ns).map(x => x.score));
   return { keys: monthKeys(), value: k => ns[k]?.score, tone: v => tone(v, band), band, lo: 0, hi: 100, marks: sportBefore, read: i => readNight(i, ns, band) };
-});
+}, 120);
 function readNight(i, ns, band) {
   if (i === null) { $('nightRead').textContent = band ? `Normal ${Math.round(band.med)}` : 'Not enough nights yet'; return; }
   const k = monthKeys()[i], x = ns[k], prev = sportBefore(k);
@@ -161,7 +163,7 @@ const sportC = barChart($('sportC'), () => {
     empty: k => sessionsOf(k)[0] && COLOR[sessionsOf(k)[0].s],
     read: i => readSport(i, dl),
   };
-});
+}, 120);
 const totals = dl => Object.values(dl).map(x => x.total);
 function readSport(i, dl) {
   const keys = monthKeys(), got = totals(dl);
@@ -291,11 +293,13 @@ $('unlockF').addEventListener('submit', async e => {
   } catch (err) { say(err.message, true); }
 });
 
+/* what a typical night reads, as the hint in each h:mm field */
+const HOLD = { min: '7:45', deep: '1:30', rem: '1:45' };
 function drawForm() {
   $('sleepGrid').innerHTML = SPEC.sleep.map(f => {
     const v = cur.sleep[f.id];
     if (f.unit === 'clock') return `<label class="field"><span>${f.name}</span><input class="in" type="time" data-s="${f.id}" value="${timeVal(v)}"></label>`;
-    if (f.id === 'min') return `<label class="field"><span>${f.name} (h:mm)</span><input class="in" type="text" inputmode="decimal" data-s="min" placeholder="7:45" value="${v != null ? `${Math.floor(v / 60)}:${pad(v % 60)}` : ''}"></label>`;
+    if (f.unit === 'min') return `<label class="field"><span>${f.name} (h:mm)</span><input class="in" type="text" inputmode="decimal" data-s="${f.id}" placeholder="${HOLD[f.id]}" value="${v != null ? `${Math.floor(v / 60)}:${pad(v % 60)}` : ''}"></label>`;
     return `<label class="field"><span>${f.name}${f.unit === 'ms' || f.unit === 'bpm' ? ` (${f.unit})` : ''}</span><input class="in" type="number" inputmode="numeric" min="0" max="${f.max}" data-s="${f.id}" value="${v ?? ''}"></label>`;
   }).join('');
   $('gfBox').innerHTML = `<button class="chip" type="button" data-flag="gf" aria-pressed="${!!cur.gf}">💑 Night with my girlfriend</button>`
@@ -307,7 +311,7 @@ function drawForm() {
 $('sleepGrid').addEventListener('input', e => {
   const id = e.target.dataset.s; if (!id) return;
   const raw = e.target.value;
-  const v = SLEEP.get(id).unit === 'clock' ? fromTime(raw, id === 'bed') : id === 'min' ? toMinutes(raw) : raw === '' ? undefined : Number(raw);
+  const v = SLEEP.get(id).unit === 'clock' ? fromTime(raw, id === 'bed') : id === 'min' ? toMinutes(raw) : SLEEP.get(id).unit === 'min' ? toDuration(raw) : raw === '' ? undefined : Number(raw);
   if (v === undefined || Number.isNaN(v)) delete cur.sleep[id]; else cur.sleep[id] = v;
   touch();
 });

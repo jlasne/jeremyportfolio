@@ -16,9 +16,9 @@ export interface Session {
 export interface Exercise { n: string; sets?: number; reps?: number; kg?: number }
 /** One max: a name, the day, the measures picked and their numbers. */
 export interface Max { n: string; d?: string; u?: string[]; reps?: number; kg?: number; m?: number; kmh?: number; sec?: number }
-export interface Sleep { score?: number; hrv?: number; rhr?: number; ready?: number; min?: number; bed?: number; wake?: number }
+export interface Sleep { hrv?: number; rhr?: number; min?: number; deep?: number; rem?: number; bed?: number; wake?: number }
 /** One day as the server keeps it. */
-export interface Day { day: string; sleep?: Sleep; gf?: boolean; cold?: boolean; sessions?: Session[]; note?: string }
+export interface Day { day: string; sleep?: Sleep; gf?: boolean; cold?: boolean; dark?: boolean; sessions?: Session[]; note?: string }
 
 export const SPEC: {
   start: string; sleep: SleepField[]; sports: Sport[];

@@ -15,13 +15,15 @@ export const SPEC = {
 
   /* The night, read off the watch each morning. `better` says which way is
      a win. Bed and wake are clock times in minutes after midnight; a
-     bedtime after midnight is kept past 24:00 (00:40 is 1480). */
+     bedtime after midnight is kept past 24:00 (00:40 is 1480). Deep and
+     REM are minutes, like time asleep. The watch's sleep score and
+     readiness are left out: both are made from these same measures. */
   sleep: [
-    { id: 'score', name: 'Sleep score', short: 'Score', unit: '/100', max: 100, better: 'high' },
     { id: 'hrv',   name: 'HRV',         short: 'HRV',   unit: 'ms',   max: 300, better: 'high' },
     { id: 'rhr',   name: 'RHR', short: 'RHR', unit: 'bpm', max: 140, better: 'low' }, /* resting heart rate, read at night */
-    { id: 'ready', name: 'Readiness',   short: 'Ready', unit: '/100', max: 100, better: 'high' },
     { id: 'min',   name: 'Time asleep', short: 'Asleep', unit: 'min', max: 960, better: 'high' },
+    { id: 'deep',  name: 'Deep sleep',  short: 'Deep',  unit: 'min', max: 600, better: 'high' },
+    { id: 'rem',   name: 'REM sleep',   short: 'REM',   unit: 'min', max: 600, better: 'high' },
     { id: 'bed',   name: 'Bedtime',     short: 'Bed',   unit: 'clock', max: 2159 },
     { id: 'wake',  name: 'Wake-up',     short: 'Wake',  unit: 'clock', max: 1439 },
   ],
@@ -173,7 +175,7 @@ export function cleanDay(day, input, today) {
   const sleep = {};
   for (const f of SPEC.sleep) {
     const v = num(input?.sleep?.[f.id], f.max);
-    if (v !== undefined) sleep[f.id] = f.unit === 'clock' || f.id === 'min' ? Math.round(v) : v;
+    if (v !== undefined) sleep[f.id] = f.unit === 'clock' || f.unit === 'min' ? Math.round(v) : v;
   }
   const sessions = (Array.isArray(input?.sessions) ? input.sessions : [])
     .map(cleanSession).filter(Boolean).slice(0, SPEC.perDay);
@@ -217,14 +219,15 @@ export function fixBed(bed) {
   return bed;
 }
 
-/* An Exp 0 day in this page's shape: the night as it is, and its sessions
+/* An Exp 0 day in this page's shape: the night as it is (its sleep score
+   and readiness left in Exp 0), and its sessions
    with Gym read as lifting and any other sport as Other under its own
    name. Intake and meals stay in Exp 0. */
 const OLD_SPORT = { Run: 'run', Swim: 'swim', Gym: 'lift' };
 export function fromExp0(d) {
   if (!d || typeof d !== 'object') return null;
   const sleep = {};
-  const map = { sleepScore: 'score', hrv: 'hrv', rhr: 'rhr', readiness: 'ready', sleepMin: 'min', bed: 'bed', wake: 'wake' };
+  const map = { hrv: 'hrv', rhr: 'rhr', sleepMin: 'min', bed: 'bed', wake: 'wake' };
   for (const [from, to] of Object.entries(map)) if (typeof d[from] === 'number') sleep[to] = d[from];
   if (sleep.bed !== undefined) sleep.bed = fixBed(sleep.bed);
   const sessions = (d.sessions || []).map(s => {
