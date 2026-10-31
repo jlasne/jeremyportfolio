@@ -93,19 +93,53 @@
     input.addEventListener("input", function () { if (note.textContent !== first && !note.classList.contains("ok")) say(first); });
   }
 
-  /* The email links copy the address too: on a machine with no mail app,
-     mailto: alone does nothing visible. The mail app still opens where one exists. */
-  var t = document.getElementById("toast"), timer;
+  /* The email links: a tap copies the address and opens a popup with it, "Copied", and a
+     handwritten "contact me" pointing at it. "Write an email" opens the mail app. A browser that
+     cannot copy still shows the address, ready to select. Esc, the cross or a tap outside closes it. */
+  var pop = null, opener = null;
+  function closePop() {
+    if (!pop || !pop.hasAttribute("data-open")) return;
+    pop.removeAttribute("data-open");
+    if (opener) opener.focus();
+  }
+  function openPop(email, copied) {
+    if (!pop) {
+      pop = document.createElement("div");
+      pop.className = "mailpop";
+      pop.setAttribute("role", "dialog");
+      pop.setAttribute("aria-modal", "true");
+      pop.setAttribute("aria-label", "My email");
+      pop.innerHTML =
+        '<div class="mailpop-card">' +
+          '<div class="mailpop-top"><span class="mailpop-state" aria-live="polite"></span>' +
+          '<button class="mailpop-x" type="button" aria-label="Close">&times;</button></div>' +
+          '<span class="mailpop-hand" aria-hidden="true">contact me' +
+            '<svg viewBox="0 0 46 36"><path d="M2 6c14-4 30 2 34 22"/><path d="M29 22l7 7 4-9"/></svg></span>' +
+          '<span class="mailpop-email"></span>' +
+          '<a class="mailpop-write" href="#">Write an email <span aria-hidden="true">&rarr;</span></a>' +
+        '</div>';
+      document.body.appendChild(pop);
+      pop.addEventListener("click", function (e) { if (e.target === pop) closePop(); });
+      pop.querySelector(".mailpop-x").addEventListener("click", closePop);
+      addEventListener("keydown", function (e) { if (e.key === "Escape") closePop(); });
+    }
+    var state = pop.querySelector(".mailpop-state");
+    state.classList.toggle("is-plain", !copied);
+    state.innerHTML = copied ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Copied' : "My email";
+    pop.querySelector(".mailpop-email").textContent = email;
+    pop.querySelector(".mailpop-write").setAttribute("href", "mailto:" + email);
+    pop.offsetWidth;
+    pop.setAttribute("data-open", "");
+    pop.querySelector(".mailpop-x").focus();
+  }
   document.querySelectorAll("[data-mail]").forEach(function (a) {
     var email = a.getAttribute("href").slice("mailto:".length);
-    a.addEventListener("click", function () {
-      if (!t || !navigator.clipboard || !navigator.clipboard.writeText) return;
-      navigator.clipboard.writeText(email).then(function () {
-        t.textContent = "Address copied: " + email;
-        t.setAttribute("data-open", "");
-        clearTimeout(timer);
-        timer = setTimeout(function () { t.removeAttribute("data-open"); }, 2600);
-      }, function () {});
+    a.addEventListener("click", function (e) {
+      e.preventDefault();
+      opener = a;
+      var done = function (ok) { openPop(email, ok); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(email).then(function () { done(true); }, function () { done(false); });
+      else done(false);
     });
   });
 })();

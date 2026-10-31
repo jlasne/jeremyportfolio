@@ -31,7 +31,7 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Figtree:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="/site.css">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","email":"mailto:hey@jeremylasne.com","jobTitle":"Founder","sameAs":["https://x.com/jeremylasne","https://www.youtube.com/@jeremyfounder"]}
@@ -54,7 +54,7 @@
   <main>
     <section class="hero hero-full" id="newsletter" data-ocean="avoid" data-fade="0">
       <h1 class="reveal"><b>Hey, I’m Jeremy.</b> I’m building a mobile app portfolio.</h1>
-      <p class="lede reveal" style="--d:80">Every Wednesday and Sunday, I share what I learn growing my apps. I design with <mark class="hl hl-blue">taste</mark> and decide with <mark class="hl hl-blue">data</mark>. Data needs volume, so I get my apps shared by creators.</p>
+      <p class="lede reveal" style="--d:80">Every Wednesday and Sunday, <mark class="hl hl-blue">I share what I learn growing my apps.</mark> I <span class="ul">design with taste</span> and <span class="ul">decide with data</span>. Data needs volume, so I get my apps <span class="ul">shared by creators</span>.</p>
 
       <!-- The newsletter. Set data-endpoint to the sign-up URL (mailcheap.ai) and site.js posts
            the email there. Empty, the button opens a mail to hey@jeremylasne.com instead. -->
@@ -83,10 +83,16 @@
         <span class="reel-tag"><img src="/media/logos/kaught.webp" alt="" width="128" height="128">Kaught<span class="live">Live</span><span class="reel-go" aria-hidden="true">&nearr;</span></span>
       </a>
 
-      <div class="row is-soon">
-        <span class="row-key">Soon</span>
-        <span class="row-main"><b>HealthClass</b><span>Coming soon.</span></span>
-        <span class="pill">Stealth</span>
+      <div class="mystery" role="group" aria-label="HealthClass, coming soon, in stealth">
+        <span class="mystery-q" aria-hidden="true">?</span>
+        <span class="mystery-q mystery-q2" aria-hidden="true">?</span>
+        <span class="mystery-q mystery-q3" aria-hidden="true">?</span>
+        <div class="mystery-text">
+          <span class="mystery-soon">Coming soon</span>
+          <h3>HealthClass<span class="mystery-mark">?</span></h3>
+          <p><span class="redact" aria-hidden="true"></span><span class="redact r2" aria-hidden="true"></span></p>
+        </div>
+        <span class="pill mystery-pill">Stealth</span>
       </div>
     </section>
 
@@ -101,7 +107,6 @@
   </footer>
 </div>
 
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="/ocean.js" defer></script>
 <script src="/site.js" defer></script>
