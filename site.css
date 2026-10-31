@@ -101,13 +101,14 @@ img, video { display: block; }
 .intro h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.12; font-weight: 800; letter-spacing: -.03em; margin-bottom: 4px; }
 .intro p:not(.socials) { max-width: 46ch; font-size: clamp(17px, 1.9vw, 19px); line-height: 1.65; color: var(--fg-80); }
 .intro .socials { margin-top: 8px; }
-/* the landing: "contact me" by hand, a little tilted, its arrow curling back to the email icon */
+/* the landing: "contact me" by hand, its arrow running from the words to the email icon */
 .intro .socials { align-items: center; }
 .hand-note {
-  display: inline-flex; align-items: flex-start; margin-left: -2px; pointer-events: none;
-  font: 700 22px/1 "Caveat", cursive; color: var(--fg-60); rotate: -6deg; translate: 0 -6px;
+  display: inline-flex; align-items: center; margin-left: -4px; pointer-events: none;
+  font: 700 23px/1 "Caveat", cursive; color: var(--fg-60);
 }
-.socials .hand-note svg { width: 52px; height: 36px; margin: -10px 2px 0 0; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.hand-note-t { display: inline-block; rotate: -6deg; translate: 0 -2px; }
+.socials .hand-note svg { width: 60px; height: 30px; margin-right: 4px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .face {
   display: inline-block; width: .9em; height: .9em; margin: 0 .22em 0 .04em; vertical-align: -.1em; border-radius: 50%; object-fit: cover;
   background: var(--fg-12); box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--fg-25);
@@ -182,10 +183,10 @@ mark.hl { font-weight: 600; }
 }
 
 .socials { display: flex; gap: 14px; margin-top: 26px; }
-.socials a { display: grid; place-items: center; width: 28px; height: 28px; margin: -6px; color: var(--fg-60); transition: color .15s; }
+.socials a { display: grid; place-items: center; width: 32px; height: 32px; margin: -6px; color: var(--fg-60); transition: color .15s; }
 .socials a + a { margin-left: 4px; }
 .socials a:hover { color: var(--fg); }
-.socials svg { width: 16px; height: 16px; fill: currentColor; }
+.socials svg { width: 20px; height: 20px; fill: currentColor; }
 @media (pointer: coarse) { .socials a { width: 44px; height: 44px; margin: -14px; } .socials a + a { margin-left: 2px; } }
 
 /* ---- a section: a label row between hairlines, then its rows ---- */
