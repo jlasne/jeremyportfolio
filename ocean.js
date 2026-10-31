@@ -30,13 +30,13 @@
       shark:   { body: "#3a5470", hi: "#48647f", rim: "#22324a", ch: "#9cb6cf", rimCh: "#5a7590", fin: "#314963", finCh: "#6f8ba7", ridge: "#2f73a3", ridgeCh: "#bfe6ff", gill: "#0b1420" },
       hammer:  { body: "#435468", hi: "#516479", rim: "#263345", ch: "#a7b7c8", rimCh: "#62778c", fin: "#38495c", finCh: "#7890a6", ridge: "#3a76a0", ridgeCh: "#c4e7fd", gill: "#0b1420" },
       narwhal: { body: "#5a6a7c", hi: "#68798c", rim: "#283443", ch: "#b9c7d4", rimCh: "#66798c", fin: "#4b5a6b", finCh: "#8798aa", spot: "#2b3848", spotCh: "#7f92a6", tusk: "#e9dcbd", tuskCh: "#8f7f60" },
-      eye: "#eaf4fb", eyeBg: "#060c17", alpha: .92, fin: .9, fade: .1, dust: "#5fa8d3", dustA: .32, ripple: "#5fa8d3"
+      eye: "#eaf4fb", eyeBg: "#060c17", alpha: .5, fin: .9, fade: .1, dust: "#5fa8d3", dustA: .32, ripple: "#5fa8d3"
     },
     light: {
       shark:   { body: "#7f95ab", hi: "#94a8bc", rim: "#b9c7d4", ch: "#25374a", rimCh: "#62778c", fin: "#9aacbe", finCh: "#4b5f74", ridge: "#4f93c2", ridgeCh: "#0b3a5a", gill: "#22364a" },
       hammer:  { body: "#8b9caf", hi: "#9fafc0", rim: "#c0ccd8", ch: "#2b3b4c", rimCh: "#687c90", fin: "#a3b2c2", finCh: "#53667a", ridge: "#5a98c3", ridgeCh: "#0e3c5b", gill: "#22364a" },
       narwhal: { body: "#b2bfcc", hi: "#c3ced9", rim: "#d6dee6", ch: "#3c4c5d", rimCh: "#8293a5", fin: "#c0cbd6", finCh: "#6b7d8f", spot: "#76889a", spotCh: "#253342", tusk: "#c9a66b", tuskCh: "#6e5126" },
-      eye: "#0b1626", eyeBg: "#f4f7fa", alpha: .9, fin: .9, fade: .12, dust: "#2a76a8", dustA: .28, ripple: "#2a76a8"
+      eye: "#0b1626", eyeBg: "#f4f7fa", alpha: .45, fin: .9, fade: .12, dust: "#2a76a8", dustA: .28, ripple: "#2a76a8"
     }
   };
   var T = THEMES.dark;
@@ -141,7 +141,7 @@
 
   /* The animals cross from one page to the next: where each one swam is kept for the
      tab on the way out, and the next page picks them up if the screen is the same width. */
-  var KEEP = "ocean";
+  var KEEP = "ocean-small";
   function keep() {
     try {
       sessionStorage.setItem(KEEP, JSON.stringify({ w: W, t: time, fish: fish.map(function (a) {
@@ -181,9 +181,10 @@
     if (!W || !H) return;
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
-    /* the grid and the animals grow with the screen: 10px cells on a phone, 14 at 1440px, 18 on a 2K display */
-    C = Math.round(clamp(W / 102, 10, 18));
-    scale = clamp(Math.min(W, H * 1.4) / 1260, .5, 1.5);
+    /* the grid and the animals grow with the screen, kept small so they stay in the background:
+       6px cells on a phone, 8 at 1440px, 11 on a 2K display, the animals at about half their old size */
+    C = Math.round(clamp(W / 180, 6, 11));
+    scale = clamp(Math.min(W, H * 1.4) / 1260, .5, 1.5) * .5;
     /* a phone's toolbar changes the height all the time: only a new width brings new animals */
     if (!fish.length || Math.abs(W - lastW) > lastW * .2) populate();
     lastW = W;

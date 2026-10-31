@@ -1,10 +1,6 @@
-/* jeremylasne.com: what every page does, the landing and its three pages. */
+/* jeremylasne.com: the theme, the nav, the Kaught reel, the newsletter and the email links. */
 (function () {
   var root = document.documentElement;
-
-  /* The landing's old anchors go to the pages that replaced them. */
-  var moved = { "#creators": "/creators/", "#apps": "/apps/", "#personal": "/personal/" };
-  if (moved[location.hash]) { location.replace(moved[location.hash]); return; }
 
   /* The theme: dark by default, light on demand, remembered. The ocean redraws in the new colours. */
   function paint() {
@@ -64,6 +60,37 @@
       v.addEventListener("playing", function () { v.classList.add("ready"); });
       io.observe(v);
     });
+  }
+
+  /* The newsletter. With data-endpoint set (the mailcheap.ai sign-up URL), the email is posted
+     there as a form field "email". Until then, the button opens a mail to hey@jeremylasne.com
+     with the address in it, so no sign-up is lost. */
+  var form = document.getElementById("join"), note = document.getElementById("join-note");
+  if (form) {
+    var input = form.querySelector("input"), button = form.querySelector("button"), first = note.textContent;
+    var say = function (text, ok) { note.textContent = text; note.classList.toggle("ok", !!ok); };
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var email = input.value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { say("Type a valid email, like you@mail.com."); input.focus(); return; }
+      var url = form.getAttribute("data-endpoint");
+      if (!url) {
+        location.href = "mailto:hey@jeremylasne.com?subject=" + encodeURIComponent("Newsletter") +
+          "&body=" + encodeURIComponent("Add me to the newsletter: " + email);
+        say("Send the mail that just opened, and you're in.", true);
+        return;
+      }
+      button.disabled = true;
+      var body = new FormData(); body.append("email", email);
+      fetch(url, { method: "POST", body: body }).then(function (r) {
+        if (!r.ok) throw new Error(r.status);
+        form.reset();
+        say("You're in. The next issue lands Wednesday or Sunday.", true);
+      }).catch(function () {
+        say("That didn't go through. Try again, or write to hey@jeremylasne.com.");
+      }).then(function () { button.disabled = false; });
+    });
+    input.addEventListener("input", function () { if (note.textContent !== first && !note.classList.contains("ok")) say(first); });
   }
 
   /* The email links copy the address too: on a machine with no mail app,
