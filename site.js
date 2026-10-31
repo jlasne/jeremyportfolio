@@ -1,4 +1,4 @@
-/* jeremylasne.com: the theme, the nav, the Kaught reel, the newsletter and the email links. */
+/* jeremylasne.com, every page: the theme, the nav, the Kaught reel (/apps), the newsletter (/apps) and the email links. */
 (function () {
   var root = document.documentElement;
 

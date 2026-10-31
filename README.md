@@ -4,31 +4,30 @@ I'm building a mobile app portfolio, and I share what I learn growing it twice
 a week. This repository is the site behind that, plus everything else I keep
 in public.
 
-The site is one page, laid out after [joncphillips.com](https://joncphillips.com/):
+The site is three pages, laid out after [joncphillips.com](https://joncphillips.com/):
 a 900px column with hairline sides over the ocean, Figtree for the words and
 Geist Mono for the small labels. Dark by default, light on a click, remembered.
+Every page has the nav: Apps, Personal, CreatorMatch (creatormatch.app) on the
+left, JEREMY·LASNE (home) on the right.
 
-1. **Nav.** Apps, Personal, Creators (creatormatch.app) on the left,
-   JEREMY·LASNE on the right. Sticky, frosted once the page scrolls
-2. **Hello and newsletter.** "Hey, I'm Jeremy. I'm building a mobile app
-   portfolio.", the subheadline (Wednesday and Sunday issues, design with
-   taste, getting the apps shared by creators), an email field "Your email",
-   the button "Get the next issue" and "Two emails a week. Leave anytime."
-   Then x, YouTube and email icons
-3. **Mobile app portfolio** (`#apps`). The Kaught reel is the card: it plays
-   muted in a loop while on screen, and a tap opens kaught.app. Under it
-   HealthClass, coming soon, stealth
-4. **For wellness creators** (`#creators`). One row linking to creatormatch.app
-5. **Personal** (`#personal`). Three cells: Wellness (`/wellness`), tasu
-   (tasu.ai) and Claude Portfolio (claudeportfolio.com, World-Investment
-   Management Intelligence)
-6. **Footer.** Site and elsewhere links, the theme switch
-
-`/apps`, `/creators` and `/personal` redirect (308) to those sections.
+- **`/` · home.** One screen, as before but cleaner: "Hey, I'm (my face)
+  Jeremy Lasne.", the mobile app portfolio and the newsletter (links to
+  `/apps/#newsletter`), CreatorMatch for wellness creators in its green, my
+  hobbies, a blinking caret, x / YouTube / email. A one-line foot with the
+  theme switch
+- **`/apps` · Mobile apps and the newsletter.** "Hey, I'm Jeremy. I'm building
+  a mobile app portfolio.", the subheadline, the email field "Your email", the
+  button "Get the next issue", "Two emails a week. Leave anytime." Then the
+  portfolio: the Kaught reel as the card (a tap opens kaught.app), and
+  HealthClass, coming soon, stealth
+- **`/personal` · Personal.** Wellness (`/wellness`), tasu (tasu.ai) and
+  Claude Portfolio (claudeportfolio.com, World-Investment Management
+  Intelligence), three cells
+- `/creators` redirects (308) to creatormatch.app
 
 ### The newsletter
 
-The form in `index.html` carries `data-endpoint=""`. Put the mailcheap.ai
+The form in `apps/index.html` carries `data-endpoint=""`. Put the mailcheap.ai
 sign-up URL there and `site.js` posts the address as the form field `email`,
 then shows "You're in." Until it is set, the button opens a mail to
 hey@jeremylasne.com with the address inside, so no sign-up is lost.
@@ -71,7 +70,9 @@ behind `/wellness` and `/wellness/details` as well.
 
 ## Stack
 
-Hand-written HTML: `index.html`, with `site.css`, `site.js` and `ocean.js`. No build step,
+Hand-written HTML, one page per folder (`index.html`, `apps/`, `personal/`),
+with `site.css`, `site.js` and `ocean.js` shared. The nav and the footer are
+written out in each page: change them in all three. No build step,
 no framework, no bundler. Open it and edit it.
 
 - Figtree (a free look-alike of Soleil, the font of joncphillips.com) and Geist
@@ -87,9 +88,11 @@ no framework, no bundler. Open it and edit it.
 
 | Path | What it is |
 | --- | --- |
-| `/` | the one page (see above). `/apps`, `/creators`, `/personal` redirect to its sections |
+| `/` | home, one screen (see above) |
+| `/apps` | Mobile apps and the newsletter |
+| `/personal` | Personal: Wellness, tasu, Claude Portfolio |
 | `/wealth` | **Moved** to [claudeportfolio.com/wealth](https://www.claudeportfolio.com/wealth). `/wealth` and every path under it redirect there (308, `vercel.json`, before the filesystem). Numbers saved in the browser here cannot cross domains: the old page and its backup tool are gone, so they stay in that browser's storage for jeremylasne.com |
-| `/wellness` | **Wellness** · the charts and as little text as possible: my sleep and my sport, logged every day since 1 October 2026 (Phase 0, normal, before any habit is tested; the Exp 0 nights of October count from day one). **Night by night**: last night's **night score** as one big number with the normal under it and a meter (0 to 100: the average of sleep score, HRV, RHR, readiness and time asleep, each set against the last 30 days, 100 being the best of the month), then the score of the last 30 nights as columns, the sport of the day before under each. **Sport by day**: the last session's load as one big number with the average under it, then the load of each day stacked by sport (each session's minutes times its effort; effort mixes the average and peak heart rate as a share of the heart rate reserve with the level felt, 1 to 5, weighted by the session's target: cardio 50/20/30, speed 20/50/30, strength 20/20/60). A line over each chart reads the column under the finger or the cursor. **What changes my nights**: the average night after a rest day, after a sport day, with my girlfriend, cold (window open all night) and dark (shutters closed), in five columns, a column needing 3 nights. Links to the details page; the footer links Exp 0. The **Log** button top left opens the log in a panel centred over the page, nearly full screen on a phone; one passphrase writes. Each night has three toggles in the log: with my girlfriend (`gf`), cold (`cold`) and dark (`dark`). A Gym session holds any exercises, each with a name, reps and weight. Once unlocked, the log exports every day as a CSV (one row per session, the night beside it). A day the server cannot take (offline) is kept on the device and sent up the next time it answers. Its look: the ocean of the landing behind everything (the animals fade under each section), the system font, round buttons and chips, and rounded bars in the charts. Rules in `wellness/spec.js`, data and the scores in `wellness/data.js`, charts in `wellness/charts.js`, styles in `wellness/wellness.css`; days in the `days` table of wellness-api. Linked from the Personal section of `/`. A new field such as `dark` needs `cd wellness-api && npx convex deploy`; until then the page keeps those days on the device and sends them up once the server knows the field |
+| `/wellness` | **Wellness** · the charts and as little text as possible: my sleep and my sport, logged every day since 1 October 2026 (Phase 0, normal, before any habit is tested; the Exp 0 nights of October count from day one). **Night by night**: last night's **night score** as one big number with the normal under it and a meter (0 to 100: the average of sleep score, HRV, RHR, readiness and time asleep, each set against the last 30 days, 100 being the best of the month), then the score of the last 30 nights as columns, the sport of the day before under each. **Sport by day**: the last session's load as one big number with the average under it, then the load of each day stacked by sport (each session's minutes times its effort; effort mixes the average and peak heart rate as a share of the heart rate reserve with the level felt, 1 to 5, weighted by the session's target: cardio 50/20/30, speed 20/50/30, strength 20/20/60). A line over each chart reads the column under the finger or the cursor. **What changes my nights**: the average night after a rest day, after a sport day, with my girlfriend, cold (window open all night) and dark (shutters closed), in five columns, a column needing 3 nights. Links to the details page; the footer links Exp 0. The **Log** button top left opens the log in a panel centred over the page, nearly full screen on a phone; one passphrase writes. Each night has three toggles in the log: with my girlfriend (`gf`), cold (`cold`) and dark (`dark`). A Gym session holds any exercises, each with a name, reps and weight. Once unlocked, the log exports every day as a CSV (one row per session, the night beside it). A day the server cannot take (offline) is kept on the device and sent up the next time it answers. Its look: the ocean of the landing behind everything (the animals fade under each section), the system font, round buttons and chips, and rounded bars in the charts. Rules in `wellness/spec.js`, data and the scores in `wellness/data.js`, charts in `wellness/charts.js`, styles in `wellness/wellness.css`; days in the `days` table of wellness-api. Linked from /personal. A new field such as `dark` needs `cd wellness-api && npx convex deploy`; until then the page keeps those days on the device and sends them up once the server knows the field |
 | `/wellness/details` | **Details** · each measure (night score, sleep score, HRV, RHR, readiness, time asleep, bedtime, wake-up): last night, the last 7 nights, normal, best and worst of 30 days. Then one measure at a time night by night, and the last 30 nights from bed to wake, each with its times, hours asleep and night score. Last, the full sport log: my max (the heaviest weight of each Gym exercise with its reps, and the fastest 1, 5 and 10 km from runs at least that long at their average pace, each with its day, found by themselves), a calendar of the days and every session with its measure, effort and form |
 | `/wellness/exp0` | **Exp 0 · Learn and get better** · October 2026, 31 days: intake, sport, sleep and the watch logged daily, then two grids of what moved recovery, sleep, weight, HRV and resting HR. `/bio` redirects here. Not linked from the landing |
 | `/games` | **Grid Tycoon** · a turn-based energy and compute business sim in pixel art: build plants, grid links and datacenters, sell to 5 client pools, and finish 40 rounds with the highest share price against 3 bots. The built game sits in `games/` (committed, no build step on the host); the source, spec and design are in `games/grid-tycoon/` (`npm run build` in `games/grid-tycoon/app` publishes to `games/`). Multiplayer code ships offline until a Supabase project is set (see `games/grid-tycoon/supabase/README.md`). `/games/grid-tycoon` redirects to `/games` |
