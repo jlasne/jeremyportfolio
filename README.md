@@ -7,22 +7,23 @@ in public.
 The site is three pages, laid out after [joncphillips.com](https://joncphillips.com/):
 a 900px column with hairline sides over the ocean, Figtree for the words and
 Geist Mono for the small labels. Dark by default, light on a click, remembered.
-Every page has the nav: Apps, Personal, CreatorMatch (creatormatch.app) on the
-left, JEREMY·LASNE (home) on the right.
+Every page has the nav: Apps, Personal, Wellness-Creators (creatormatch.app) on
+the left, JEREMY·LASNE (home) on the right, and a one-line foot with the theme
+switch.
 
 - **`/` · home.** One screen, as before but cleaner: "Hey, I'm (my face)
   Jeremy Lasne.", the mobile app portfolio and the newsletter (links to
   `/apps/#newsletter`), CreatorMatch for wellness creators in its green, my
-  hobbies, a blinking caret, x / YouTube / email. A one-line foot with the
-  theme switch
+  hobbies, a blinking caret, x / YouTube / email
 - **`/apps` · Mobile apps and the newsletter.** "Hey, I'm Jeremy. I'm building
-  a mobile app portfolio.", the subheadline, the email field "Your email", the
+  a mobile app portfolio.", the subheadline with "taste" and "data"
+  highlighted in blue, the email field "Your email", the
   button "Get the next issue", "Two emails a week. Leave anytime." Then the
   portfolio: the Kaught reel as the card (a tap opens kaught.app), and
   HealthClass, coming soon, stealth
 - **`/personal` · Personal.** Wellness (`/wellness`), tasu (tasu.ai) and
-  Claude Portfolio (claudeportfolio.com, World-Investment Management
-  Intelligence), three cells
+  Claude Portfolio (claudeportfolio.com, "World-Investment Management
+  Intelligence."), three cells
 - `/creators` redirects (308) to creatormatch.app
 
 ### The newsletter
@@ -71,7 +72,7 @@ behind `/wellness` and `/wellness/details` as well.
 ## Stack
 
 Hand-written HTML, one page per folder (`index.html`, `apps/`, `personal/`),
-with `site.css`, `site.js` and `ocean.js` shared. The nav and the footer are
+with `site.css`, `site.js` and `ocean.js` shared. The nav and the foot are
 written out in each page: change them in all three. No build step,
 no framework, no bundler. Open it and edit it.
 
