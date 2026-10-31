@@ -14,9 +14,9 @@ switch.
 - **`/` · home.** One screen, as before but cleaner: "Hey, I'm (my face)
   Jeremy Lasne.", the mobile app portfolio and the newsletter (links to
   `/apps/#newsletter`), CreatorMatch for wellness creators in its green, my
-  hobbies, a blinking caret, x / YouTube / email. A tap on the email copies it and opens a popup:
-  "Copied", the address, a handwritten "contact me" (Caveat) with an arrow to
-  it, and "Write an email" for the mail app
+  hobbies, a blinking caret, x / YouTube / email, and a handwritten "contact me" (Caveat) with an
+  arrow curling back to the email icon. A tap on the email copies it and opens
+  a popup: "Copied", the address, and "Write an email" for the mail app
 - **`/apps` · Mobile apps and the newsletter.** The hello fills the screen
   under the nav, so the portfolio waits one scroll below ("Mobile app
   portfolio ↓" at its foot). "Hey, I’m Jeremy. I’m building a mobile app

@@ -93,8 +93,7 @@
     input.addEventListener("input", function () { if (note.textContent !== first && !note.classList.contains("ok")) say(first); });
   }
 
-  /* The email links: a tap copies the address and opens a popup with it, "Copied", and a
-     handwritten "contact me" pointing at it. "Write an email" opens the mail app. A browser that
+  /* The email links: a tap copies the address and opens a popup with it and "Copied". "Write an email" opens the mail app. A browser that
      cannot copy still shows the address, ready to select. Esc, the cross or a tap outside closes it. */
   var pop = null, opener = null;
   function closePop() {
@@ -113,8 +112,6 @@
         '<div class="mailpop-card">' +
           '<div class="mailpop-top"><span class="mailpop-state" aria-live="polite"></span>' +
           '<button class="mailpop-x" type="button" aria-label="Close">&times;</button></div>' +
-          '<span class="mailpop-hand" aria-hidden="true">contact me' +
-            '<svg viewBox="0 0 46 36"><path d="M2 6c14-4 30 2 34 22"/><path d="M29 22l7 7 4-9"/></svg></span>' +
           '<span class="mailpop-email"></span>' +
           '<a class="mailpop-write" href="#">Write an email <span aria-hidden="true">&rarr;</span></a>' +
         '</div>';

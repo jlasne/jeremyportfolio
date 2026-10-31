@@ -101,6 +101,13 @@ img, video { display: block; }
 .intro h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.12; font-weight: 800; letter-spacing: -.03em; margin-bottom: 4px; }
 .intro p:not(.socials) { max-width: 46ch; font-size: clamp(17px, 1.9vw, 19px); line-height: 1.65; color: var(--fg-80); }
 .intro .socials { margin-top: 8px; }
+/* the landing: "contact me" by hand, a little tilted, its arrow curling back to the email icon */
+.intro .socials { align-items: center; }
+.hand-note {
+  display: inline-flex; align-items: flex-start; margin-left: -2px; pointer-events: none;
+  font: 700 22px/1 "Caveat", cursive; color: var(--fg-60); rotate: -6deg; translate: 0 -6px;
+}
+.socials .hand-note svg { width: 52px; height: 36px; margin: -10px 2px 0 0; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .face {
   display: inline-block; width: .9em; height: .9em; margin: 0 .22em 0 .04em; vertical-align: -.1em; border-radius: 50%; object-fit: cover;
   background: var(--fg-12); box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--fg-25);
@@ -303,7 +310,7 @@ a.row:hover .row-go { color: var(--fg); transform: translate(2px, -2px); }
 :root[data-theme="light"] .theme .sun, :root:not([data-theme="light"]) .theme .moon { display: none; }
 @media (pointer: coarse) { .theme { width: 44px; height: 44px; margin: -14px; } }
 
-/* ---- the email popup: the address, "Copied", and "contact me" by hand with an arrow to it ---- */
+/* ---- the email popup: "Copied" and the address ---- */
 .mailpop {
   position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 20px;
   background: color-mix(in srgb, var(--bg) 55%, transparent); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
@@ -322,13 +329,8 @@ a.row:hover .row-go { color: var(--fg); transform: translate(2px, -2px); }
 .mailpop-state.is-plain { background: var(--fg-06); color: var(--fg-60); }
 .mailpop-x { display: grid; place-items: center; width: 36px; height: 36px; margin: -8px -8px -8px 0; border: 0; border-radius: 50%; background: none; color: var(--fg-60); cursor: pointer; font-size: 20px; line-height: 1; }
 .mailpop-x:hover { color: var(--fg); background: var(--fg-06); }
-.mailpop-hand {
-  display: flex; align-items: flex-start; gap: 2px; width: fit-content; margin: 18px 0 0 6px;
-  font: 700 22px/1 "Caveat", cursive; color: var(--fg-60); rotate: -7deg; transform-origin: left center;
-}
-.mailpop-hand svg { width: 46px; height: 36px; margin-top: 6px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .mailpop-email {
-  display: block; margin-top: 2px; padding-left: 40px; font-size: clamp(19px, 5.4vw, 23px); font-weight: 700; letter-spacing: -.01em;
+  display: block; margin-top: 18px; font-size: clamp(19px, 5.4vw, 23px); font-weight: 700; letter-spacing: -.01em;
   word-break: break-all; -webkit-user-select: all; user-select: all;
 }
 .mailpop-write {
