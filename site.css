@@ -101,14 +101,6 @@ img, video { display: block; }
 .intro h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.12; font-weight: 800; letter-spacing: -.03em; margin-bottom: 4px; }
 .intro p:not(.socials) { max-width: 46ch; font-size: clamp(17px, 1.9vw, 19px); line-height: 1.65; color: var(--fg-80); }
 .intro .socials { margin-top: 8px; }
-/* the landing: "contact me" by hand, its arrow running from the words to the email icon */
-.intro .socials { align-items: center; }
-.hand-note {
-  display: inline-flex; align-items: center; margin-left: -4px; pointer-events: none;
-  font: 700 23px/1 "Caveat", cursive; color: var(--fg-60);
-}
-.hand-note-t { display: inline-block; rotate: -6deg; translate: 0 -2px; }
-.socials .hand-note svg { width: 60px; height: 30px; margin-right: 4px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .face {
   display: inline-block; width: .9em; height: .9em; margin: 0 .22em 0 .04em; vertical-align: -.1em; border-radius: 50%; object-fit: cover;
   background: var(--fg-12); box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--fg-25);
