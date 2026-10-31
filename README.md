@@ -15,8 +15,10 @@ switch.
   Jeremy Lasne.", the mobile app portfolio and the newsletter (links to
   `/apps/#newsletter`), CreatorMatch for wellness creators in its green, my
   hobbies, a blinking caret, x / YouTube / email
-- **`/apps` · Mobile apps and the newsletter.** "Hey, I'm Jeremy. I'm building
-  a mobile app portfolio.", the subheadline with "taste" and "data"
+- **`/apps` · Mobile apps and the newsletter.** The hello fills the screen
+  under the nav, so the portfolio waits one scroll below ("Mobile app
+  portfolio ↓" at its foot). "Hey, I’m Jeremy. I’m building a mobile app
+  portfolio." (34px on a phone, up to 54px), the subheadline with "taste" and "data"
   highlighted in blue, the email field "Your email", the
   button "Get the next issue", "Two emails a week. Leave anytime." Then the
   portfolio: the Kaught reel as the card (a tap opens kaught.app), and
