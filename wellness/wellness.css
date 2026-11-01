@@ -396,3 +396,34 @@ h2 { font-weight: 700; }
 }
 .wl-foot a { color: var(--ice-45); text-decoration: none; transition: color .15s; }
 .wl-foot a:hover { color: var(--ice); }
+
+/* ── the AI correlations, as a tl;dr table: the link, r with its bar, one line, the signal ── */
+.corr-tldr { margin-left: 6px; padding: 2px 8px; border-radius: 999px; background: var(--ice-10); font: 500 11px/1.4 var(--mono); letter-spacing: .08em; color: var(--ice-70); vertical-align: 3px; }
+.corr-wrap { margin-top: 14px; }
+.corr { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.45; }
+.corr thead th { padding: 0 12px 8px 0; text-align: left; font: 500 10px/1.4 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ice-45); border-bottom: 1px solid var(--ice-10); }
+.corr tbody tr { --c: var(--blue); border-bottom: 1px solid var(--ice-10); }
+.corr tbody tr.up { --c: var(--good); }
+.corr tbody tr.down { --c: var(--bad); }
+.corr tbody th, .corr td { padding: 12px 12px 12px 0; vertical-align: top; text-align: left; }
+.corr tbody th { font-weight: 600; color: var(--ice); white-space: nowrap; }
+.corr-r { width: 84px; }
+.corr-r b { display: block; font-size: 16px; font-weight: 700; line-height: 1.2; color: var(--c); font-variant-numeric: tabular-nums; }
+.corr-r i { display: block; width: 64px; height: 5px; margin-top: 6px; border-radius: 999px; background: linear-gradient(90deg, var(--c) calc(var(--r) * 1%), var(--ice-10) 0); }
+.corr-tl { color: var(--ice-70); }
+.corr-tl em { font-style: normal; font-weight: 700; color: var(--c); }
+.corr-n { padding-right: 0 !important; white-space: nowrap; font-size: 12px; color: var(--ice-45); }
+.corr-tag { display: inline-block; margin-right: 6px; padding: 1px 7px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--ice-20); font: 500 10px/1.5 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ice-45); }
+.corr-tag.is-strong { box-shadow: none; background: rgba(110, 231, 183, .14); color: var(--good); }
+/* a phone: each row a short card, the link and r on top, the line under it */
+@media (max-width: 640px) {
+  .corr thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .corr, .corr tbody { display: block; }
+  .corr tbody tr { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 12px 0; }
+  .corr tbody th, .corr td { padding: 0; }
+  .corr tbody th { white-space: normal; align-self: center; }
+  .corr-r { width: auto; display: flex; align-items: center; gap: 8px; }
+  .corr-r i { width: 44px; margin: 0; order: -1; }
+  .corr-tl, .corr-n { grid-column: 1 / -1; }
+  .corr-n { margin-top: 2px; }
+}

@@ -57,19 +57,24 @@
     </div>
     <p class="wk-axis">Weeks 1 to 4 · 1 to 28 Oct</p>
 
-    <h3 class="next-t">What moves your nights</h3>
-    <p class="note">r runs from −1 to +1: the longer the bar, the tighter the link. On 28 nights, 0.37 and above clears the 5 % chance line. A link shows what goes together. The cause stays to be tested.</p>
-    <ul class="links">
-      <li class="down"><span class="r"><i style="--r:68"></i><b>−0.68</b></span><span class="t"><b>Sessions in the last 7 days → HRV</b>Each extra session costs <em>6 ms HRV</em> and adds 0.8 bpm RHR. 0 to 1 session: <em>104 ms</em>. 2 to 3: 95 ms. 4 and more: <em>75 ms</em>.<small>28 nights · tighter than yesterday's session alone (r −0.42)</small></span></li>
-      <li class="up"><span class="r"><i style="--r:61"></i><b>+0.61</b></span><span class="t"><b>Wake-up time → REM</b>Each hour you sleep in adds <em>12 min of REM</em>. Awake after 08:30: <em>107 min</em> REM. Before: 97 min. REM fills the last hours of the night.<small>28 nights</small></span></li>
-      <li class="down"><span class="r"><i style="--r:45"></i><b>−0.45</b></span><span class="t"><b>Bedtime → time asleep</b>Each hour later in bed costs <em>14 min of sleep</em>. In bed before 00:00: <em>8h09</em>. In bed after 00:30: 7h39.<small>28 nights</small></span></li>
-      <li class="down"><span class="r"><i style="--r:44"></i><b>−0.44</b></span><span class="t"><b>Level 5 the day before → HRV</b>After a level 5 day: <em>73 ms HRV</em>, 72 min deep, 7h39 asleep. All other nights: 92 ms, 80 min, 7h59.<small>28 nights · 5 after level 5</small></span></li>
-      <li class="up"><span class="r"><i style="--r:43"></i><b>+0.43</b></span><span class="t"><b>Run or swim the day before → sleep</b>After cardio: <em>8h24 asleep</em> and 108 min REM. All other nights: 7h46 and 99 min. A gym day gives 74 min deep, against 80.<small>28 nights · 7 after cardio</small></span></li>
-      <li class="up"><span class="r"><i style="--r:41"></i><b>−0.41</b></span><span class="t"><b>Short night → the next one</b>After a night under 7h30, the next night runs <em>61 min longer</em>: 6h57, then 7h58. It happened 5 times in October.<small>26 pairs of nights</small></span></li>
-      <li class="down"><span class="r"><i style="--r:54"></i><b>−0.54</b></span><span class="t"><b>Last coffee time → share of REM</b>Last coffee before 10:00: <em>109 min REM</em>, 22.6 % of the night. Last coffee after 13:30: <em>92 min</em>, 19.6 %.<small>13 nights, logged in Exp 0 · early signal</small></span></li>
-      <li class="mid"><span class="r"><i style="--r:64"></i><b>−0.64</b></span><span class="t"><b>Night with your girlfriend → wake-up</b>Awake at <em>06:53</em>, against 08:21 on other nights. REM 84 min, against 103. Deep 65 min, against 81.<small>28 nights · 3 with your girlfriend · early signal</small></span></li>
-      <li class="down"><span class="r"><i style="--r:36"></i><b>−0.36</b></span><span class="t"><b>Friday and Saturday nights → REM</b>REM <em>91 min</em> on weekend nights, against 104 on weeknights. Time asleep 7h40, against 8h00.<small>28 nights · 6 weekend nights · early signal</small></span></li>
-    </ul>
+    <h3 class="next-t">What moves your nights <span class="corr-tldr">tl;dr</span></h3>
+    <p class="note">r from −1 to +1. On 28 nights, 0.37 or more beats chance. Each row shows a link. The cause still needs a test.</p>
+    <div class="corr-wrap">
+      <table class="corr">
+        <thead><tr><th scope="col">Link</th><th scope="col">r</th><th scope="col">tl;dr</th><th scope="col">Signal · nights</th></tr></thead>
+        <tbody>
+        <tr class="down"><th scope="row">Sessions in 7 days → HRV</th><td class="corr-r"><b>−0.68</b><i style="--r:68"></i></td><td class="corr-tl">+1 session = <em>−6 ms</em> HRV. 4+ sessions: 75 ms, against 104.</td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>28</td></tr>
+        <tr class="up"><th scope="row">Wake-up time → REM</th><td class="corr-r"><b>+0.61</b><i style="--r:61"></i></td><td class="corr-tl">+1 h of sleep-in = <em>+12 min</em> REM.</td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>28</td></tr>
+        <tr class="down"><th scope="row">Bedtime → time asleep</th><td class="corr-r"><b>−0.45</b><i style="--r:45"></i></td><td class="corr-tl">+1 h later to bed = <em>−14 min</em> asleep.</td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>28</td></tr>
+        <tr class="down"><th scope="row">Level 5 day → HRV</th><td class="corr-r"><b>−0.44</b><i style="--r:44"></i></td><td class="corr-tl"><em>73 ms</em> after a level 5 day, against 92.</td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>28 · 5 after level 5</td></tr>
+        <tr class="up"><th scope="row">Run or swim → sleep</th><td class="corr-r"><b>+0.43</b><i style="--r:43"></i></td><td class="corr-tl"><em>8h24</em> asleep after cardio, against 7h46.</td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>28 · 7 after cardio</td></tr>
+        <tr class="down"><th scope="row">Short night → next night</th><td class="corr-r"><b>−0.41</b><i style="--r:41"></i></td><td class="corr-tl">Under 7h30, the next night runs <em>+61 min</em>.</td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>26 pairs</td></tr>
+        <tr class="mid"><th scope="row">Girlfriend → wake-up</th><td class="corr-r"><b>−0.64</b><i style="--r:64"></i></td><td class="corr-tl">Awake <em>06:53</em>, against 08:21. REM 84 min, against 103.</td><td class="corr-n"><span class="corr-tag">Early</span>3 nights</td></tr>
+        <tr class="down"><th scope="row">Last coffee → REM</th><td class="corr-r"><b>−0.54</b><i style="--r:54"></i></td><td class="corr-tl">Coffee before 10:00: <em>109 min</em> REM, against 92.</td><td class="corr-n"><span class="corr-tag">Early</span>13 nights</td></tr>
+        <tr class="down"><th scope="row">Weekend → REM</th><td class="corr-r"><b>−0.36</b><i style="--r:36"></i></td><td class="corr-tl"><em>91 min</em> REM on Fri and Sat, against 104.</td><td class="corr-n"><span class="corr-tag">Early</span>6 nights</td></tr>
+        </tbody>
+      </table>
+    </div>
 
     <ul class="finds">
       <li class="up"><b>Strength</b><span>Deadlift <em>110 → 130 kg</em> in 8 days. Bench 85 → 90 kg, dip 40 → 50 kg, weighted pull-up 30 → 32.5 kg.</span></li>
