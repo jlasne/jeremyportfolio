@@ -75,19 +75,11 @@
     </section>
 
     <section class="sec archive" id="archive" aria-labelledby="archive-t">
-      <div class="sec-head"><h2 id="archive-t">The lessons</h2><span>6</span></div>
-      <label class="sr-only" for="lesson-q">Search the lessons</label>
-      <input class="archive-q" id="lesson-q" type="search" placeholder="Search the lessons" autocomplete="off">
-      <p class="archive-month">October 2026</p>
-      <ol class="lessons" id="lessons">
-        <li class="lesson"><span class="lesson-tag">Distribution</span><h3>Write like a friend, and creators answer</h3><p>My hand-written DMs beat my pitched ones. A thank-you and a joke from their world open the conversation.</p></li>
-        <li class="lesson"><span class="lesson-tag">Distribution</span><h3>A break-up message got a reply in 34 minutes</h3><p>“If now isn’t the time, just tell me.” A silent creator answered within the hour.</p></li>
-        <li class="lesson"><span class="lesson-tag">Distribution</span><h3>1 creator reply in 4 is a bot</h3><p>About a quarter of the replies were auto-messages. When a bot answers, I switch to the email in their bio.</p></li>
-        <li class="lesson"><span class="lesson-tag">Distribution</span><h3>A page with their own numbers makes them reply</h3><p>A page at their name, with their real stats and their own words, did more than any pitch.</p></li>
-        <li class="lesson"><span class="lesson-tag">Distribution</span><h3>Same DM from 2 accounts, trust gone</h3><p>A creator got my exact text twice and said “do better”. Each account now writes its own message.</p></li>
-        <li class="lesson"><span class="lesson-tag">Distribution</span><h3>On WhatsApp, the first reply is a salesperson</h3><p>Business numbers answer with a bot or a seller. One line fixes it: I’m not a client, this is for the creator.</p></li>
-      </ol>
-      <p class="archive-none" id="lesson-none" hidden>No lesson matches. Try another word.</p>
+      <div class="sec-head"><h2 id="archive-t">The lessons</h2></div>
+      <!-- One <li> per issue, newest first:
+           <li><a class="lesson" href="URL"><span class="lesson-meta">Nov 4, 2026 · 2 min read</span><b>Title</b></a></li> -->
+      <ol class="lessons"></ol>
+      <p class="lessons-empty">The first lesson lands here on Wednesday.</p>
     </section>
 
     <section class="sec" id="apps" aria-labelledby="apps-t">
@@ -126,18 +118,5 @@
 
 <script src="/ocean.js" defer></script>
 <script src="/site.js" defer></script>
-<script>
-  /* the archive: filter the lessons as the visitor types */
-  (function () {
-    var q = document.getElementById("lesson-q"), none = document.getElementById("lesson-none");
-    if (!q) return;
-    var items = Array.prototype.slice.call(document.querySelectorAll("#lessons .lesson"));
-    q.addEventListener("input", function () {
-      var v = q.value.trim().toLowerCase(), shown = 0;
-      items.forEach(function (li) { var hit = !v || li.textContent.toLowerCase().indexOf(v) > -1; li.hidden = !hit; if (hit) shown++; });
-      none.hidden = shown > 0;
-    });
-  })();
-</script>
 </body>
 </html>
