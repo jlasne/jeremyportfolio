@@ -5,7 +5,7 @@
 // Its URL is the canonical. Its lastmod comes from, in order:
 //   1. an article's dateModified / datePublished (JSON-LD) or article:modified_time / published_time
 //   2. the date of its last git commit, where git history exists (here, in a clone)
-//   3. the lastmod the committed sitemap.xml already gives it (on Vercel, which has no git history)
+//   3. the lastmod the committed sitemap.xml already gives it (on Vercel, whose clone is too shallow for dates)
 // The SEO check only warns: a missing tag never stops a deploy.
 import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, relative, sep } from "node:path";
@@ -42,8 +42,9 @@ function jsonld(html) {
   return out;
 }
 
+// Vercel clones only the last commits, so its git dates would all read "today": use git only off Vercel.
 let git = false;
-try { execSync("git rev-parse --is-shallow-repository", { cwd: ROOT, stdio: "pipe" }); git = true; } catch {}
+if (!process.env.VERCEL) { try { execSync("git rev-parse --git-dir", { cwd: ROOT, stdio: "pipe" }); git = true; } catch {} }
 const gitDay = file => {
   if (!git) return undefined;
   try { return day(execSync(`git log -1 --format=%cs -- "${file}"`, { cwd: ROOT, stdio: "pipe" }).toString().trim()); } catch { return undefined; }
@@ -98,7 +99,7 @@ ${urls.map(u => `  <url><loc>${u.loc}</loc>${u.lastmod ? `<lastmod>${u.lastmod}<
 </urlset>
 `;
 writeFileSync(mapFile, xml);
-console.log(`sitemap.xml: ${urls.length} pages (${urls.filter(u => u.article).length} articles)${git ? "" : ", no git history: lastmod kept from the committed sitemap"}`);
+console.log(`sitemap.xml: ${urls.length} pages (${urls.filter(u => u.article).length} articles)${git ? "" : ", on Vercel: lastmod kept from the committed sitemap"}`);
 for (const u of urls) console.log(`  ${u.lastmod || "          "}  ${u.loc}`);
 if (warnings.length) { console.log(`\nSEO check: ${warnings.length} to fix`); for (const w of warnings) console.log("  - " + w); }
 else console.log("\nSEO check: every article passes");
