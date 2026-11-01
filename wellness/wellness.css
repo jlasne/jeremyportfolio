@@ -1,4 +1,6 @@
-/* jeremylasne.com/wellness: the styles of /wellness and /wellness/details. */
+/* jeremylasne.com/wellness: the styles of /wellness and /wellness/details.
+   The shell is the landing's (site.css): a 900px column with hairline sides
+   over the ocean, the same nav and the same one-line foot, Figtree and Geist Mono. */
 
 /* ── tokens: the landing's ink, blue and ice, plus one colour per sport ── */
 :root {
@@ -17,7 +19,10 @@
   --swim: #38bdf8;
   --lift: #f472b6;
   --other: #a78bfa;
-  --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --sans: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* the landing's column and the air inside it */
+  --pad: clamp(20px, 6vw, 56px);
   --ease: cubic-bezier(.22, 1, .36, 1);
 }
 * { box-sizing: border-box; }
@@ -348,3 +353,46 @@ footer a { color: var(--ice-70); text-decoration: none; transition: color .2s; }
 .links small { display: block; margin-top: 3px; font-size: 12px; color: var(--ice-45); }
 .ai .finds { margin-top: 18px; }
 @media (max-width: 559px) { .links li { grid-template-columns: 64px 1fr; gap: 12px; } }
+
+/* ── the landing's shell: the column, the nav, the foot ── */
+.wl-col {
+  position: relative; z-index: 2; width: min(100%, 900px); min-height: 100svh; margin-inline: auto;
+  background: rgba(5, 11, 22, .72); border-inline: 1px solid var(--ice-10);
+  padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right);
+}
+@media (max-width: 899px) { .wl-col { border-inline: 0; } }
+.wl-nav {
+  position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: calc(18px + env(safe-area-inset-top)) var(--pad) 18px; transition: background .3s, box-shadow .3s;
+}
+.wl-nav.scrolled { background: rgba(5, 11, 22, .82); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 1px 0 var(--ice-10); }
+.wl-links { display: flex; gap: clamp(14px, 3vw, 22px); font-size: 14px; font-weight: 500; }
+.wl-links a { color: var(--ice-70); text-decoration: none; white-space: nowrap; transition: color .15s; }
+.wl-links a:hover, .wl-links a[aria-current] { color: var(--ice); }
+.wl-links a[aria-current] { text-decoration: underline; text-decoration-color: var(--blue); text-decoration-thickness: 2px; text-underline-offset: 7px; }
+.wl-mark { font: 500 12px/1 var(--mono); letter-spacing: .22em; text-transform: uppercase; white-space: nowrap; text-decoration: none; color: var(--ice); }
+.wl-mark i { font-style: normal; color: var(--blue); margin: 0 .1em; }
+@media (max-width: 600px) {
+  .wl-nav { flex-wrap: wrap; row-gap: 12px; padding-top: calc(16px + env(safe-area-inset-top)); padding-bottom: 14px; }
+  .wl-mark { order: -1; width: 100%; }
+  .wl-links { gap: 18px; }
+}
+@media (max-width: 360px) { .wl-links { gap: 12px; font-size: 13px; } }
+
+/* the page inside the column, at the landing's margins */
+.hero, main, .page-head, .wl-foot { max-width: none; padding-left: var(--pad); padding-right: var(--pad); }
+.hero { padding-top: clamp(20px, 5vw, 48px); }
+.hero-text { padding-top: 0; }
+.hero h1 { margin: 0; max-width: 18ch; font-size: clamp(32px, 6vw, 46px); line-height: 1.12; font-weight: 400; letter-spacing: -.02em; }
+.hero h1 b { font-weight: 800; letter-spacing: -.03em; }
+.hero .top { justify-content: flex-start; margin-top: 24px; }
+.page-head { padding-top: 12px; }
+h2 { font-weight: 700; }
+.kick, .phase { font-family: var(--mono); font-weight: 500; letter-spacing: .14em; }
+.wl-foot {
+  display: flex; justify-content: space-between; align-items: center; margin: 0; padding-top: 32px;
+  padding-bottom: calc(28px + env(safe-area-inset-bottom)); border-top: 1px solid var(--ice-10);
+  font: 500 10px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ice-45);
+}
+.wl-foot a { color: var(--ice-45); text-decoration: none; transition: color .15s; }
+.wl-foot a:hover { color: var(--ice); }

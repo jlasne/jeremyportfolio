@@ -26,6 +26,8 @@
   /* the column, and the air inside it */
   --col: 900px;
   --pad: clamp(20px, 6vw, 56px);
+  /* the nav's height: one line on a computer, two on a phone */
+  --nav-h: 58px;
   color-scheme: dark;
 }
 :root[data-theme="light"] {
@@ -84,10 +86,12 @@ img, video { display: block; }
 .links a[aria-current] { text-decoration: underline; text-decoration-color: var(--blue); text-decoration-thickness: 2px; text-underline-offset: 7px; }
 .mark { font: 500 12px/1 var(--mono); letter-spacing: .22em; text-transform: uppercase; white-space: nowrap; }
 .links a { white-space: nowrap; }
-@media (max-width: 420px) {
-  .links { gap: 14px; }
-  .links span { display: none; }
-  .mark { font-size: 11px; letter-spacing: .14em; }
+@media (max-width: 600px) { :root { --nav-h: 76px; } }
+/* a phone: my name on top, the three pages on a line under it */
+@media (max-width: 600px) {
+  .nav { flex-wrap: wrap; row-gap: 12px; padding-top: calc(16px + env(safe-area-inset-top)); padding-bottom: 14px; }
+  .mark { order: -1; width: 100%; }
+  .links { gap: 18px; font-size: 14px; }
 }
 .mark i { font-style: normal; color: var(--blue); margin: 0 .1em; }
 
@@ -128,7 +132,7 @@ mark.hl { font-weight: 600; }
 /* /apps: the hello fills the screen under the nav; the portfolio waits one scroll below */
 .hero-full {
   position: relative; display: flex; flex-direction: column; justify-content: center;
-  min-height: calc(100svh - 58px - env(safe-area-inset-top)); padding-top: 24px; padding-bottom: 88px;
+  min-height: calc(100svh - var(--nav-h) - env(safe-area-inset-top)); padding-top: 24px; padding-bottom: 88px;
 }
 .hero-full h1 { max-width: 16ch; font-size: clamp(34px, 8.8vw, 54px); line-height: 1.1; letter-spacing: -.025em; }
 .hero-full .lede { max-width: 50ch; margin-top: clamp(18px, 3vh, 26px); font-size: clamp(17px, 4.4vw, 19px); line-height: 1.65; }
@@ -340,11 +344,6 @@ a.row:hover .row-go { color: var(--fg); transform: translate(2px, -2px); }
   .reel > img, .reel video, .reel-go { transition: none; }
 }
 
-/* a narrow phone (360px): the nav still holds on one line */
-@media (max-width: 380px) {
-  .links { gap: 10px; font-size: 13px; }
-  .mark { font-size: 10px; letter-spacing: .08em; }
-}
-@media (max-width: 340px) { .mark { display: none; } }
+@media (max-width: 360px) { .links { gap: 12px; font-size: 13px; } }
 /* a jump to a section stops under the sticky nav */
-.sec { scroll-margin-top: calc(58px + env(safe-area-inset-top)); }
+.sec { scroll-margin-top: calc(var(--nav-h) + env(safe-area-inset-top)); }

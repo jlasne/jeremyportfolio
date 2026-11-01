@@ -22,17 +22,30 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://www.jeremylasne.com/og-image.png?v=7">
 <link rel="canonical" href="https://www.jeremylasne.com/wellness/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="/wellness/wellness.css">
 </head>
 <body>
 
 <canvas id="ocean" aria-hidden="true"></canvas>
 
+<div class="wl-col">
+  <header class="wl-nav" id="nav">
+    <nav class="wl-links" aria-label="Main">
+      <a href="/apps/">Mobile-Apps</a>
+      <a href="/personal/" aria-current="page">Personal</a>
+      <a href="https://creatormatch.app" target="_blank" rel="noopener">Wellness-Creators</a>
+    </nav>
+    <a class="wl-mark" href="/" aria-label="Jeremy Lasne, home">Jeremy<i>&middot;</i>Lasne</a>
+  </header>
+
 <header class="hero">
-  <nav class="top" data-ocean="fade"><button class="logbtn" id="logOpen" type="button" aria-haspopup="dialog"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>Log</button><a href="/">Jeremy Lasne</a></nav>
-  <div class="hero-text" data-ocean="avoid">
-    <h1 class="reveal">Wellness</h1>
+  <div class="hero-text" data-ocean="avoid" data-fade="0">
+    <h1 class="reveal"><b>Wellness.</b> My sleep and my sport, logged every day since 1 October 2026.</h1>
   </div>
+  <nav class="top" data-ocean="fade"><button class="logbtn" id="logOpen" type="button" aria-haspopup="dialog"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>Log</button></nav>
 </header>
 
 <main>
@@ -104,12 +117,14 @@
   </div>
 </dialog>
 
-<footer data-ocean="fade">
-  <a href="/wellness/exp0">Exp 0</a>
-  <a href="/">jeremylasne.com</a>
-</footer>
+  <footer class="wl-foot">
+    <span>&copy; 2026 Jeremy Lasne</span>
+    <a href="/wellness/exp0">Exp 0</a>
+  </footer>
+</div>
 
 <script src="/ocean.js" defer></script>
+<script src="/site.js" defer></script>
 <script type="module">
 import { SPEC, SLEEP, SPORT, shift, daysBetween, exercises, tests, bests, form, effort, minutes, hrTop, load as loadOf } from '/wellness/spec.js';
 import { hrOf, avg, dayLoads, top, kept, csv, measure, today, COLOR, pad, swimTime, dayName, short, weekday, clock, hm, mmss, cap, esc, copy, label, fmtVal, state, entry, allKeys, monthKeys, val, sessionsOf, allSessions, sportBefore, held, keepHeld, api, load as loadData, spread, normal, verdict, tone, INDICATORS, nightScores, unitOf } from '/wellness/data.js';

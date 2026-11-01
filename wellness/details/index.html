@@ -11,18 +11,28 @@
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="canonical" href="https://www.jeremylasne.com/wellness/details/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="/wellness/wellness.css">
 </head>
 <body>
 
 <canvas id="ocean" aria-hidden="true"></canvas>
 
+<div class="wl-col">
+  <header class="wl-nav" id="nav">
+    <nav class="wl-links" aria-label="Main">
+      <a href="/apps/">Mobile-Apps</a>
+      <a href="/personal/" aria-current="page">Personal</a>
+      <a href="https://creatormatch.app" target="_blank" rel="noopener">Wellness-Creators</a>
+    </nav>
+    <a class="wl-mark" href="/" aria-label="Jeremy Lasne, home">Jeremy<i>&middot;</i>Lasne</a>
+  </header>
+
 <header class="page-head" data-ocean="fade">
-  <span style="display:flex;align-items:center;gap:18px">
-    <a class="logbtn" href="/wellness/#log"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>Log</a>
-    <a class="back" href="/wellness/">← Wellness</a>
-  </span>
-  <a class="back" href="/">Jeremy Lasne</a>
+  <a class="back" href="/wellness/">&larr; Wellness</a>
+  <a class="logbtn" href="/wellness/#log"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>Log</a>
 </header>
 
 <main>
@@ -119,12 +129,14 @@
   </section>
 </main>
 
-<footer data-ocean="fade">
-  <span>Phase 0 started on 1 October 2026 with the nights of <a href="/wellness/exp0">Exp 0</a>.</span>
-  <a href="/wellness/">Wellness</a>
-</footer>
+  <footer class="wl-foot">
+    <span>&copy; 2026 Jeremy Lasne</span>
+    <a href="/wellness/exp0">Exp 0</a>
+  </footer>
+</div>
 
 <script src="/ocean.js" defer></script>
+<script src="/site.js" defer></script>
 <script type="module">
 import { SPEC, SLEEP, SPORT, bests, form, effort, minutes, load as loadOf } from '/wellness/spec.js';
 import { hrOf, mmss, swimTime, allMaxes, maxText, top, measure, formCls, cap, weekday, sessionsOf, allSessions, today, COLOR, dayName, short, clock, hm, esc, label, fmtVal, unitOf, allKeys, monthKeys, val, sportBefore, load, spread, normal, verdict, tone, INDICATORS, nightScores } from '/wellness/data.js';
