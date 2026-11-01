@@ -394,8 +394,7 @@ a.row:hover .row-go { color: var(--fg); transform: translate(2px, -2px); }
   font: 700 34px/1 "Caveat", cursive; color: var(--blue); rotate: -6deg;
 }
 .loop-lines { padding-left: 16px; border-left: 3px solid color-mix(in srgb, var(--blue) 45%, transparent); font-weight: 600; color: var(--fg); }
-.post-next { margin-top: 2.2em !important; }
-.post-end { font-weight: 700; color: var(--fg); }
+.post-end { margin-top: 2.2em !important; font-weight: 700; color: var(--fg); }
 .post-sign { margin-top: .6em !important; font: 700 34px/1 "Caveat", cursive; color: var(--fg); rotate: -4deg; transform-origin: left center; width: fit-content; }
 
 /* the schema, drawn by hand on a sheet of dotted paper; the arrows draw themselves once it is seen */
