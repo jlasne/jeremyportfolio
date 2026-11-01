@@ -1,4 +1,4 @@
-/* jeremylasne.com, every page: the theme, the nav, the Kaught reel (/apps), the newsletter (/apps) and the email links. */
+/* jeremylasne.com, every page: the theme, the nav, the Kaught reel (/apps), the newsletter (/apps and each lesson), the hand-drawn schemas of the lessons and the email links. */
 (function () {
   var root = document.documentElement;
 
@@ -91,6 +91,16 @@
       }).then(function () { button.disabled = false; });
     });
     input.addEventListener("input", function () { if (note.textContent !== first && !note.classList.contains("ok")) say(first); });
+  }
+
+  /* A hand-drawn schema in a lesson: its arrows draw themselves, one after the other, the first
+     time it comes on screen. Without the observer, or with less motion, it shows drawn. */
+  var sketches = document.querySelectorAll(".sketch");
+  if (sketches.length && "IntersectionObserver" in window && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    var draw = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("is-drawing"); e.target.classList.remove("is-waiting"); draw.unobserve(e.target); } });
+    }, { threshold: .4 });
+    sketches.forEach(function (s) { s.classList.add("is-waiting"); draw.observe(s); });
   }
 
   /* The email links: a tap copies the address and opens a popup with it and "Copied". "Write an email" opens the mail app. A browser that
