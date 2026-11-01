@@ -135,6 +135,11 @@ mark.hl { font-weight: 600; }
   min-height: calc(100svh - var(--nav-h) - env(safe-area-inset-top)); padding-top: 24px; padding-bottom: 88px;
 }
 .hero-full h1 { max-width: 16ch; font-size: clamp(34px, 8.8vw, 54px); line-height: 1.1; letter-spacing: -.025em; }
+/* a marker stroke in the accent under the key words of a headline */
+.marker {
+  background: linear-gradient(transparent 62%, color-mix(in srgb, var(--blue) 32%, transparent) 62%, color-mix(in srgb, var(--blue) 32%, transparent) 92%, transparent 92%);
+  -webkit-box-decoration-break: clone; box-decoration-break: clone; padding: 0 .04em;
+}
 .hero-full .lede { max-width: 50ch; margin-top: clamp(18px, 3vh, 26px); font-size: clamp(17px, 4.4vw, 19px); line-height: 1.65; }
 .hero-full .join { margin-top: clamp(24px, 4vh, 36px); }
 .scroll-cue {
