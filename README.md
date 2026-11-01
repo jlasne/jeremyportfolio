@@ -110,6 +110,14 @@ no framework, no bundler. Open it and edit it.
 **Exp 0** keeps its numbers in the wellness-api Convex deployment behind a
 passphrase; see [`wellness/exp0/README.md`](wellness/exp0/README.md).
 
+## Sitemap
+
+`sitemap.xml` lists the 7 public pages with their last change date, for
+Google Search Console: `/`, `/apps/`, each lesson under `/apps/lessons/`,
+`/personal/`, `/wellness/`, `/wellness/details/` and `/games/`. `robots.txt`
+points to it. Add a line for each new lesson or page, and update `lastmod`
+when a page changes. `/wellness/exp0` stays out: it has no link from the site.
+
 ## Run locally
 
 Open `index.html` in a browser, or:
