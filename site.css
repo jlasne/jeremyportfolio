@@ -1,6 +1,6 @@
 /* jeremylasne.com, after joncphillips.com. A column with hairline sides,
    Figtree for the words and Geist Mono for the small labels, the ocean of
-   sharks small and faint behind (ocean.js), dark by default and light on
+   sharks small and faint behind (ocean.js), light by default and dark on
    demand. Three pages: / (the hello, with the newsletter and CreatorMatch),
    /apps (the newsletter and the mobile app portfolio), /personal. */
 
@@ -347,3 +347,25 @@ a.row:hover .row-go { color: var(--fg); transform: translate(2px, -2px); }
 @media (max-width: 360px) { .links { gap: 12px; font-size: 13px; } }
 /* a jump to a section stops under the sticky nav */
 .sec { scroll-margin-top: calc(var(--nav-h) + env(safe-area-inset-top)); }
+
+/* the nav icons: a mail for the newsletter, the open-source mark for Personal, money for CreatorMatch */
+.links a, .wl-links a { display: inline-flex; align-items: center; gap: 6px; }
+.nav-ic { width: 15px; height: 15px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; opacity: .85; }
+.nav-ic-fill { fill: currentColor; stroke: none; }
+@media (max-width: 420px) { .links a, .wl-links a { gap: 4px; } .nav-ic { width: 13px; height: 13px; } }
+
+/* ---- /apps: the archive of lessons, between the hero and the portfolio ---- */
+.archive-q { width: 100%; margin-top: 18px; padding: 12px 16px; border: 1px solid var(--fg-12); border-radius: 999px; background: var(--fg-06); font: 15px/1.4 var(--sans); color: var(--fg); outline: none; transition: border-color .15s; }
+.archive-q::placeholder { color: var(--fg-40); }
+.archive-q:focus { border-color: var(--blue); }
+.archive-month { margin-top: 26px; font: 500 11px/1.4 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--fg-40); }
+.lessons { margin: 6px 0 0; padding: 0; list-style: none; }
+.lesson { padding: 20px 0; border-bottom: 1px solid var(--fg-12); }
+.lesson:last-child { border-bottom: 0; }
+.lesson-tag { display: inline-block; margin-bottom: 8px; padding: 2px 9px; border-radius: 999px; background: color-mix(in srgb, var(--blue) 14%, transparent); font: 500 10px/1.5 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--blue); }
+.lesson h3 { font-size: clamp(19px, 2.6vw, 22px); font-weight: 700; line-height: 1.25; letter-spacing: -.015em; color: var(--fg); }
+.lesson p { max-width: 60ch; margin-top: 6px; font-size: 15px; line-height: 1.6; color: var(--fg-60); }
+.archive-none { margin-top: 18px; font-size: 15px; color: var(--fg-60); }
+.archive-q, .archive-month, .lessons, .archive-none { margin-left: var(--pad); margin-right: var(--pad); }
+.archive-q { width: calc(100% - 2 * var(--pad)); }
+.lessons { padding-bottom: 12px; }

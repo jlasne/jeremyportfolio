@@ -2,7 +2,7 @@
 (function () {
   var root = document.documentElement;
 
-  /* The theme: dark by default, light on demand, remembered. The ocean redraws in the new colours. */
+  /* The theme: light by default, dark on demand, remembered. The ocean redraws in the new colours. */
   function paint() {
     var light = root.getAttribute("data-theme") === "light";
     document.querySelectorAll(".theme").forEach(function (b) { b.setAttribute("aria-label", light ? "Switch to the dark theme" : "Switch to the light theme"); });
