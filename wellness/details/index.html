@@ -37,59 +37,24 @@
 
 <main>
   <section data-ocean="fade" class="sec reveal ai" style="margin-top:40px" id="ai" aria-labelledby="aiT">
-    <p class="kick">AI Analysis <span class="ai-run">Last run 30 Oct 2026 · 28 nights · 16 sessions · 5 sleep measures</span></p>
-    <h1 id="aiT">Deadlift <span class="up">+18&nbsp;%</span>, HRV <span class="down">−27&nbsp;%</span></h1>
-    <p class="ai-lede">From 15 to 28 Oct you logged <b>11 sessions</b>, against <b>4</b> in the 2 weeks before. Your HRV fell from <b>104 ms</b> to <b>75 ms</b>. Deep and REM held steady: <b>79 → 83 min</b> and <b>96 → 94 min</b>.</p>
-
-    <div class="trends">
-      <div class="trend down"><p class="k">HRV</p><p class="big">75<small>ms</small></p><p class="d">−28 % since week 1</p>
-        <div class="wk" aria-label="Average per week: 104, 98, 78, 75 ms"><i style="--h:100"></i><i style="--h:94"></i><i style="--h:75"></i><i style="--h:72"></i></div></div>
-      <div class="trend down"><p class="k">RHR</p><p class="big">56<small>bpm</small></p><p class="d">+3 bpm since week 1</p>
-        <div class="wk" aria-label="Average per week: 53, 55, 57, 56 bpm"><i style="--h:93"></i><i style="--h:97"></i><i style="--h:100"></i><i style="--h:98"></i></div></div>
-      <div class="trend mid"><p class="k">Time asleep</p><p class="big">7h49</p><p class="d">−11 min since week 1</p>
-        <div class="wk" aria-label="Average per week: 8h00, 7h58, 7h59, 7h49"><i style="--h:100"></i><i style="--h:100"></i><i style="--h:100"></i><i style="--h:98"></i></div></div>
-      <div class="trend up"><p class="k">Deep</p><p class="big">83<small>min</small></p><p class="d">+5 min since week 1</p>
-        <div class="wk" aria-label="Average per week: 79, 80, 74, 83 min"><i style="--h:94"></i><i style="--h:95"></i><i style="--h:89"></i><i style="--h:100"></i></div></div>
-      <div class="trend mid"><p class="k">REM</p><p class="big">94<small>min</small></p><p class="d">−1 min since week 1</p>
-        <div class="wk" aria-label="Average per week: 96, 105, 111, 94 min"><i style="--h:86"></i><i style="--h:95"></i><i style="--h:100"></i><i style="--h:85"></i></div></div>
-      <div class="trend up"><p class="k">Sessions</p><p class="big">5<small>/ week</small></p><p class="d">×2.5 since week 1</p>
-        <div class="wk" aria-label="Sessions per week: 2, 2, 6, 5"><i style="--h:33"></i><i style="--h:33"></i><i style="--h:100"></i><i style="--h:83"></i></div></div>
-    </div>
-    <p class="wk-axis">Weeks 1 to 4 · 1 to 28 Oct</p>
-
-    <h3 class="next-t">What moves your nights <span class="corr-tldr">tl;dr</span></h3>
-    <p class="note">r from −1 to +1. On 28 nights, 0.37 or more beats chance. Each row shows a link. The cause still needs a test.</p>
+    <p class="kick">AI Analysis <span class="ai-run">Last run 30 Oct 2026 · 28 nights · 16 sessions</span></p>
+    <h1 id="aiT" class="sr-only">AI Analysis</h1>
     <div class="corr-wrap">
       <table class="corr">
-        <thead><tr><th scope="col">Link</th><th scope="col">r</th><th scope="col">tl;dr</th><th scope="col">Signal · nights</th></tr></thead>
+        <thead><tr><th scope="col">Factor</th><th scope="col">What it impacts</th><th scope="col">Change</th><th scope="col">Signal strength</th></tr></thead>
         <tbody>
-        <tr class="down"><th scope="row">Sessions in 7 days → HRV</th><td class="corr-r"><b>−0.68</b><i style="--r:68"></i></td><td class="corr-tl">+1 session = <em>−6 ms</em> HRV. 4+ sessions: 75 ms, against 104.</td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>28</td></tr>
-        <tr class="up"><th scope="row">Wake-up time → REM</th><td class="corr-r"><b>+0.61</b><i style="--r:61"></i></td><td class="corr-tl">+1 h of sleep-in = <em>+12 min</em> REM.</td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>28</td></tr>
-        <tr class="down"><th scope="row">Bedtime → time asleep</th><td class="corr-r"><b>−0.45</b><i style="--r:45"></i></td><td class="corr-tl">+1 h later to bed = <em>−14 min</em> asleep.</td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>28</td></tr>
-        <tr class="down"><th scope="row">Level 5 day → HRV</th><td class="corr-r"><b>−0.44</b><i style="--r:44"></i></td><td class="corr-tl"><em>73 ms</em> after a level 5 day, against 92.</td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>28 · 5 after level 5</td></tr>
-        <tr class="up"><th scope="row">Run or swim → sleep</th><td class="corr-r"><b>+0.43</b><i style="--r:43"></i></td><td class="corr-tl"><em>8h24</em> asleep after cardio, against 7h46.</td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>28 · 7 after cardio</td></tr>
-        <tr class="down"><th scope="row">Short night → next night</th><td class="corr-r"><b>−0.41</b><i style="--r:41"></i></td><td class="corr-tl">Under 7h30, the next night runs <em>+61 min</em>.</td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>26 pairs</td></tr>
-        <tr class="mid"><th scope="row">Girlfriend → wake-up</th><td class="corr-r"><b>−0.64</b><i style="--r:64"></i></td><td class="corr-tl">Awake <em>06:53</em>, against 08:21. REM 84 min, against 103.</td><td class="corr-n"><span class="corr-tag">Early</span>3 nights</td></tr>
-        <tr class="down"><th scope="row">Last coffee → REM</th><td class="corr-r"><b>−0.54</b><i style="--r:54"></i></td><td class="corr-tl">Coffee before 10:00: <em>109 min</em> REM, against 92.</td><td class="corr-n"><span class="corr-tag">Early</span>13 nights</td></tr>
-        <tr class="down"><th scope="row">Weekend → REM</th><td class="corr-r"><b>−0.36</b><i style="--r:36"></i></td><td class="corr-tl"><em>91 min</em> REM on Fri and Sat, against 104.</td><td class="corr-n"><span class="corr-tag">Early</span>6 nights</td></tr>
+        <tr class="down"><th scope="row">Sessions in 7 days</th><td class="corr-imp">HRV</td><td class="corr-tl">+1 session = <em>−6 ms</em></td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>28 nights</td></tr>
+        <tr class="up"><th scope="row">Wake-up time</th><td class="corr-imp">REM</td><td class="corr-tl">+1 h later = <em>+12 min</em></td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>28 nights</td></tr>
+        <tr class="down"><th scope="row">Bedtime</th><td class="corr-imp">Time asleep</td><td class="corr-tl">+1 h later = <em>−14 min</em></td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>28 nights</td></tr>
+        <tr class="down"><th scope="row">Level 5 day</th><td class="corr-imp">HRV</td><td class="corr-tl"><em>73 ms</em> next night, against 92</td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>28 nights</td></tr>
+        <tr class="up"><th scope="row">Run or swim</th><td class="corr-imp">Time asleep</td><td class="corr-tl"><em>8h24</em>, against 7h46</td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>28 nights</td></tr>
+        <tr class="down"><th scope="row">Short night (under 7h30)</th><td class="corr-imp">Next night</td><td class="corr-tl"><em>+61 min</em> asleep</td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>26 pairs</td></tr>
+        <tr class="mid"><th scope="row">Girlfriend</th><td class="corr-imp">Wake-up, REM</td><td class="corr-tl">Up <em>06:53</em>, against 08:21</td><td class="corr-n"><span class="corr-tag">Early</span>3 nights</td></tr>
+        <tr class="down"><th scope="row">Coffee after 10:00</th><td class="corr-imp">REM</td><td class="corr-tl"><em>−17 min</em></td><td class="corr-n"><span class="corr-tag">Early</span>13 nights</td></tr>
+        <tr class="down"><th scope="row">Weekend</th><td class="corr-imp">REM</td><td class="corr-tl"><em>91 min</em>, against 104</td><td class="corr-n"><span class="corr-tag">Early</span>6 nights</td></tr>
         </tbody>
       </table>
     </div>
-
-    <ul class="finds">
-      <li class="up"><b>Strength</b><span>Deadlift <em>110 → 130 kg</em> in 8 days. Bench 85 → 90 kg, dip 40 → 50 kg, weighted pull-up 30 → 32.5 kg.</span></li>
-      <li class="up"><b>Speed</b><span>50 m swim <em>25.69 → 25.51 s</em>. 200 m swim 2:22 → 2:20. Run 5.02 km in 23:10, at 4:37/km.</span></li>
-      <li class="mid"><b>Last night</b><span>30 Oct: night score <em>43</em>, normal 49. HRV <em>80 ms</em>, 7 ms above 29 Oct. REM <em>112 min</em> after a wake-up at 08:37. Deep 74 min, 7h45 asleep.</span></li>
-    </ul>
-
-    <h3 class="next-t">Next 7 days</h3>
-    <ol class="next">
-      <li>Keep <b>3 sessions</b> or fewer in any 7 days. Your 2 to 3 session weeks averaged 95 ms HRV.</li>
-      <li>Swap 1 level 5 session for level 3. Level 5 days cost <b>19 ms</b> of HRV the next night.</li>
-      <li>Be in bed by <b>00:00</b> on 4 nights. Each hour earlier adds 14 min of sleep.</li>
-      <li>Drink your last coffee before <b>10:00</b> for 7 days. It tests the 17 min REM gap.</li>
-      <li>Log 3 cold, 3 dark and 3 travelling nights. Each column opens at <b>3 nights</b>.</li>
-    </ol>
   </section>
 
   <section data-ocean="fade" class="sec" aria-labelledby="measT">
