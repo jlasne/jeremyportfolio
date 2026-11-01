@@ -444,5 +444,8 @@ h2 { font-weight: 700; }
 @media (max-width: 560px) {
   .pn { padding: 16px; }
   .pn-steps li { grid-template-columns: 64px 1fr; }
-  .pn-res b { font-size: 18px; }
+  .pn-res { gap: 8px; }
+  .pn-res div { padding: 10px; }
+  .pn-res b { font-size: 16px; white-space: nowrap; }
+  .pn-k { letter-spacing: .06em; }
 }
