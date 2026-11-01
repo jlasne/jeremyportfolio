@@ -1,4 +1,6 @@
 {
+  "buildCommand": "node scripts/sitemap.mjs",
+  "outputDirectory": ".",
   "routes": [
     { "src": "^/bio/bg\\.jpg$", "status": 308, "headers": { "Location": "/wellness/bg.jpg" } },
     { "src": "^/bio/?$", "status": 308, "headers": { "Location": "/wellness/exp0" } },

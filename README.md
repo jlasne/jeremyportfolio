@@ -110,13 +110,18 @@ no framework, no bundler. Open it and edit it.
 **Exp 0** keeps its numbers in the wellness-api Convex deployment behind a
 passphrase; see [`wellness/exp0/README.md`](wellness/exp0/README.md).
 
-## Sitemap
+## Sitemap and articles
 
-`sitemap.xml` lists the 7 public pages with their last change date, for
-Google Search Console: `/`, `/apps/`, each lesson under `/apps/lessons/`,
-`/personal/`, `/wellness/`, `/wellness/details/` and `/games/`. `robots.txt`
-points to it. Add a line for each new lesson or page, and update `lastmod`
-when a page changes. `/wellness/exp0` stays out: it has no link from the site.
+`sitemap.xml` is built by `scripts/sitemap.mjs` on every Vercel deploy (`buildCommand`
+in `vercel.json`, output `.`): every `index.html` with a canonical and no `noindex` is in,
+at its canonical URL. Articles take their date from their JSON-LD; other pages from git, or
+from the committed sitemap on Vercel. `robots.txt` points to it; submit
+`https://www.jeremylasne.com/sitemap.xml` in Google Search Console once.
+
+The same script checks the SEO of every article in `apps/lessons/` (title, description,
+canonical, Open Graph, BlogPosting and BreadcrumbList JSON-LD, one h1, alt text) and prints
+what to fix, without stopping the deploy. How to publish a newsletter issue as an article:
+`CLAUDE.md`. Run `node scripts/sitemap.mjs` before a commit to see the result.
 
 ## Run locally
 
