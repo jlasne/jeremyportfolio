@@ -230,14 +230,13 @@ export function validateDecision(state: GameState, companyId: string, raw: unkno
     if (compute > Math.min(cap.dcMw, internal + d.rentMw) + MW_EPSILON) {
       push('over_compute_capacity', 'More compute than your powered datacenters offer.', 'compute')
     }
-    // Commitment: an offer drops by at most 30% a round.
+    // Commitment: a compute offer drops by at most maxDropPerRound (50%) a round. Rent is free.
     const floors = floorsFor(company, cap, config)
     for (const p of COMPUTE_POOLS) {
       if (d.compute[p] < floors.compute[p] - MW_EPSILON) {
-        push('compute_below_commitment', `Compute to ${p} can drop to ${floors.compute[p]} MW at least this round (30% a round at most).`, `compute.${p}`)
+        push('compute_below_commitment', `Compute to ${p} can go down to ${floors.compute[p]} MW this round, not lower: an offer drops ${Math.round(config.commitment.maxDropPerRound * 100)}% a round at most.`, `compute.${p}`)
       }
     }
-    if (d.rentMw < floors.rentMw - MW_EPSILON) push('rent_below_commitment', `Rent can drop to ${floors.rentMw} MW at least this round (30% a round at most).`, 'rentMw')
   }
 
   return done()

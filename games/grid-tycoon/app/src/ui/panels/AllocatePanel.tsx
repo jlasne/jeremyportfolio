@@ -19,7 +19,7 @@ import { useUi } from '../../store/ui'
 import { Button, Chip, Icon, Money, NumberTween, POOL_META, fmtMoney, fmtMw, fmtPct, useReducedMotion } from '../kit'
 import { BudgetBar } from '../terminal/BudgetBar'
 import type { BudgetPart } from '../terminal/BudgetBar'
-import { bounds, computeTotal, fill, internalMax, needsSettle, setFlow, settle, unallocated } from '../terminal/flow'
+import { bounds, computeCap, computeTotal, fill, internalMax, needsSettle, setFlow, settle, unallocated } from '../terminal/flow'
 import type { FlowCaps, FlowKey } from '../terminal/flow'
 import { MwSlider } from '../terminal/MwSlider'
 import { Note, usePanelCtx } from './common'
@@ -133,8 +133,13 @@ export default function AllocatePanel() {
 
   // ---- bounds and reasons ----
   const iMax = internalMax(d, caps)
+  const allOffered = computeTotal(d) >= computeCap(d, caps) - 0.005 && computeCap(d, caps) > 0.005
   const computeReason =
-    caps.dcMw <= iMax + d.rentMw + 1e-6
+    allOffered && computeCap(d, caps) < Math.min(caps.dcMw, links.internal + links.import) - 0.005
+      ? 'Every powered MW is offered. Lower another pool first, sell less plant power, or rent MW.'
+      : allOffered && caps.dcMw <= iMax + d.rentMw + 1e-6 && cTotal < caps.dcMw - 0.005
+        ? 'Every powered MW is offered. Lower another pool first.'
+        : caps.dcMw <= iMax + d.rentMw + 1e-6
       ? `Your datacenters hold ${fmtMw(caps.dcMw)}: build or upgrade one in Build to sell more compute.`
       : iMax >= links.internal - 1e-6
         ? `The internal link carries ${fmtMw(links.internal)}: add internal link MW in Build, or rent MW.`
@@ -142,7 +147,7 @@ export default function AllocatePanel() {
   const townB = bounds(d, caps, 'town')
   const otherB = bounds(d, caps, 'otherDc')
   const rentB = bounds(d, caps, 'rent')
-  const plantFullReason = 'Every plant MW is in use: lower another pool first (committed compute cannot drop below its floor).'
+  const plantFullReason = 'Every plant MW is in use. Lower another pool first to free MW: nothing moves on its own.'
 
   // ---- budget bars ----
   const plantParts: BudgetPart[] = [
@@ -213,6 +218,26 @@ export default function AllocatePanel() {
         <p className="aterm-from muted">From last round's demand. Rivals also bid for open MW, so real use can be lower.</p>
       </div>
 
+      <section className="arules" aria-labelledby="arules-title">
+        <h3 id="arules-title" className="arules-title">
+          <Icon name="info" size={16} /> The rules this round
+        </h3>
+        <ol className="arules-list">
+          <li>
+            <strong>Commitment.</strong> A compute offer can drop {fmtPct(config.commitment.maxDropPerRound)} a round at most. It can grow without limit. Power sales and rent are free.
+          </li>
+          <li>
+            <strong>Unused power.</strong> Each plant MW left unallocated costs {fmtMoney(config.unallocatedPenalty * config.cost.ownPower)} a round ({config.unallocatedPenalty}× the {fmtMoney(config.cost.ownPower)} power cost). Fill puts it to work.
+          </li>
+          <li>
+            <strong>Who sells first.</strong> You keep {fmtPct(config.incumbentShare)} of last round's sales in a pool. Open demand goes first to bigger sellers and to sellers who stayed longer, up to +{fmtPct(config.allocation.tenurePerRound * config.allocation.tenureCap)} after {config.allocation.tenureCap} rounds.
+          </li>
+          <li>
+            <strong>Sliders.</strong> Each slider moves only its own pool. To move MW, lower one pool, then raise another.
+          </li>
+        </ol>
+      </section>
+
       {relevant.length > 0 || errors.length > 0 ? (
         <div className="aterm-alerts">
           {errors.map((e) => (
@@ -234,7 +259,7 @@ export default function AllocatePanel() {
 
       <p className="aterm-key" aria-hidden="true">
         <span>
-          <span className="aterm-key-floor" /> committed minimum (30% drop a round at most)
+          <span className="aterm-key-floor" /> committed minimum ({fmtPct(config.commitment.maxDropPerRound)} drop a round at most)
         </span>
         <span>
           <span className="aterm-key-demand" /> last round's demand: more is not expected to sell
@@ -354,7 +379,7 @@ export default function AllocatePanel() {
           )}
           <p className="apower">
             Powered by <span className="num strong">{fmtMw(d.power.internal)}</span> from your plants + <span className="num strong">{fmtMw(d.rentMw)}</span> rented = <span className="num strong">{fmtMw(d.power.internal + d.rentMw)}</span>
-            {d.power.internal + d.rentMw > caps.dcMw + 0.005 ? <span className="delta-down"> (more than the racks hold)</span> : null}. Raising a pool takes free MW first, then the lowest-margin pool above its floor.
+            {d.power.internal + d.rentMw > caps.dcMw + 0.005 ? <span className="delta-down"> (more than the racks hold)</span> : null}. A pool only grows into free MW: to move MW, lower one pool, then raise another.
           </p>
           <ul className="arows">
             {COMPUTE_ROWS.map((p) => {
@@ -407,11 +432,7 @@ export default function AllocatePanel() {
               scale={Math.max(links.import, caps.dcMw)}
               color="var(--power-mid)"
               maxReason={links.import <= 0 ? 'Renting needs an import link: buy one in Build (ready next round).' : `The import link carries ${fmtMw(links.import)}: add import link MW in Build.`}
-              minReason={
-                rentB.min > floors.rentMw + 0.005
-                  ? 'Your committed compute needs this power: sell less plant power first, so your plants carry it.'
-                  : `Rent is a contract: at least ${fmtMw(rentB.min)} this round (it drops ${fmtPct(config.commitment.maxDropPerRound)} a round at most).`
-              }
+              minReason="Your compute offer needs this power. Lower compute first, or sell less plant power so your plants carry it."
               valueText={`costs about ${fmtMoney(projection.costs.rent)} a round`}
               disabled={disabled || (links.import <= 0 && d.rentMw <= 0)}
               onChange={change('rent')}

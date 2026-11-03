@@ -1,6 +1,6 @@
 # Grid Tycoon: engineering design
 
-Rules update of Nov 3, 2026: see SPEC.md "Rules update". Engine: `commitment.ts` (30% floors), `allocation.ts` (`priorityWeights`, weighted water filling), `assets.ts` (land rows, `unallocatedPower`, `canUpgrade`), `config.ts` (`nextSize`, `upgradeSpec(kind, from)`, `landRowCost`). GameState version 2, solo save key `gt.solo.v2`.
+Rules update of Nov 3, 2026: see SPEC.md "Rules update". Engine: `commitment.ts` (50% floors, rent free), `allocation.ts` (`priorityWeights`, weighted water filling), `assets.ts` (land rows, `unallocatedPower`, `canUpgrade`), `config.ts` (`nextSize`, `upgradeSpec(kind, from)`, `landRowCost`). GameState version 2, solo save key `gt.solo.v2`.
 
 `SPEC.md` is the product spec. This file is the contract between the parts of the codebase: where things live, what each module exports, and how every gap in the spec is filled. When the spec and this file disagree, the spec wins on rules and this file wins on mechanics it explicitly decides.
 

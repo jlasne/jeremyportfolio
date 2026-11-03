@@ -167,7 +167,6 @@ export type ValidationCode =
   | 'over_plant_capacity'
   | 'over_compute_capacity'
   | 'compute_below_commitment'
-  | 'rent_below_commitment'
   | 'no_land'
 
 export interface ValidationResult {

@@ -197,6 +197,6 @@
     "tenureCap": 10
   },
   "commitment": {
-    "maxDropPerRound": 0.3
+    "maxDropPerRound": 0.5
   }
 }

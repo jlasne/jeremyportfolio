@@ -25,7 +25,7 @@ Playtest feedback from @Jeremy. These rules replace the older lines below where 
 
 **Priority on open demand.** The 80% incumbent reserve stays. Open MW then goes by spare MW × priority, where priority = (1 + last share of the pool) × (1 + 5% per round served in a row, up to 10 rounds). A newcomer has priority 1. A company never gets more than its spare.
 
-**Commitment.** Compute offered to each pool and rented MW can drop by 30% at most from one round to the next. They can grow freely. The floors shrink only when the company cannot meet them physically (a sold datacenter, a smaller import link).
+**Commitment.** Compute offered to each pool can drop by 50% at most from one round to the next. It can grow freely. Power sales and rent are free. The floors shrink only when the company cannot meet them with its own plants (a sold datacenter, a smaller internal link). In the Allocate terminal each slider moves only its own pool, and a rules box states every rule with its numbers.
 
 **Unused power penalty.** Plant MW routed nowhere costs 5 × the own power cost (0.4), so 2.0 per MW per round. Routed means sold to citizens, offered to other datacenters, or needed by the compute you offer.
 

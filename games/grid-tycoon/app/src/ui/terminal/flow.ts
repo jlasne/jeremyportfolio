@@ -7,9 +7,10 @@
 //
 //   internal = clamp(compute total − rent, 0, min(internal link, plant MW − citizens − other DCs))
 //
-// Compute and rent never go below the commitment floors (30% drop a round at most). Raising one
-// pool takes free MW first, then MW from the others, lowest margin first, never below a floor.
-// Every edit goes through settle(), which keeps the draft valid whenever the floors allow it.
+// Compute never goes below the commitment floors (an offer drops 50% a round at most); rent is free.
+// Every control moves only itself: raising a pool uses free MW, and when there is none the player
+// lowers another pool first. Nothing moves behind the player's back. settle() only repairs a draft
+// that came from elsewhere (last round's defaults, a capacity change).
 
 import type { ComputePool, Decision, Floors, PoolId } from '../../engine'
 
@@ -61,22 +62,22 @@ function floorInternal(d: Decision, c: FlowCaps): number {
 
 /** Bounds of one control, for the sliders: lowest and highest value it can take now. */
 export function bounds(d: Decision, c: FlowCaps, key: FlowKey): { min: number; max: number } {
-  const need = floorInternal(d, c)
+  // Plant MW the compute offered now needs (beyond rent): power sales cannot take it.
+  const need = clamp(computeTotal(d) - d.rentMw, 0, c.links.internal)
   switch (key) {
     case 'town':
       return { min: 0, max: r2(Math.max(d.power.town, Math.min(c.links.town, c.plantMw - d.power.otherDc - need))) }
     case 'otherDc':
       return { min: 0, max: r2(Math.max(d.power.otherDc, c.plantMw - d.power.town - need)) }
     case 'rent': {
-      // Lowering rent moves compute onto the plants; below this the committed compute loses power.
-      const lo = Math.max(c.floors.rentMw, floorTotal(c) - internalMax(d, c))
+      // Rent has no floor, but the compute offered must keep its power: plants first, rent for the rest.
+      const lo = computeTotal(d) - internalMax(d, c)
       return { min: r2(Math.max(0, lo)), max: r2(Math.max(d.rentMw, c.links.import)) }
     }
     default: {
-      // Free powered MW first, then what the other pools hold above their floors (settle trims them).
+      // Free powered MW only: to raise one pool when everything is in use, lower another first.
       const room = Math.max(0, computeCap(d, c) - computeTotal(d))
-      const others = COMPUTE.filter((p) => p !== key).reduce((s, p) => s + Math.max(0, d.compute[p] - c.floors.compute[p]), 0)
-      return { min: r2(c.floors.compute[key]), max: r2(Math.max(d.compute[key], d.compute[key] + room + others)) }
+      return { min: r2(c.floors.compute[key]), max: r2(Math.max(d.compute[key], d.compute[key] + room)) }
     }
   }
 }
@@ -121,7 +122,9 @@ export function settle(d: Decision, c: FlowCaps, changed: FlowKey | null = null)
 
 /** Sets one control and settles the rest. */
 export function setFlow(d: Decision, c: FlowCaps, key: FlowKey, mw: number): void {
-  const v = Math.max(0, Number.isFinite(mw) ? mw : 0)
+  // Clamped to this control's own bounds, so the edit never pushes another pool.
+  const b = bounds(d, c, key)
+  const v = clamp(Math.max(0, Number.isFinite(mw) ? mw : 0), b.min, b.max)
   if (key === 'town' || key === 'otherDc') d.power[key] = v
   else if (key === 'rent') d.rentMw = v
   else d.compute[key] = v

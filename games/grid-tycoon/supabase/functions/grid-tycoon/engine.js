@@ -301,7 +301,7 @@ var balance_default = {
     tenureCap: 10
   },
   commitment: {
-    maxDropPerRound: 0.3
+    maxDropPerRound: 0.5
   }
 };
 
@@ -561,8 +561,7 @@ function floorsFor(company, cap, config = defaultConfig) {
   if (!last) return out;
   const keep = 1 - config.commitment.maxDropPerRound;
   const f = (x) => Math.floor(Math.max(0, x) * keep * 100 + 1e-9) / 100;
-  out.rentMw = Math.min(f(last.rentMw), cap.links.import);
-  const powered = Math.min(cap.dcMw, Math.min(cap.links.internal, cap.plantMw) + out.rentMw);
+  const powered = Math.min(cap.dcMw, Math.min(cap.links.internal, cap.plantMw));
   let sum = 0;
   for (const p of COMPUTE_POOLS) {
     out.compute[p] = f(last.compute[p]);
@@ -930,10 +929,9 @@ function validateDecision(state, companyId, raw, config = defaultConfig) {
     const floors = floorsFor(company, cap, config);
     for (const p of COMPUTE_POOLS) {
       if (d.compute[p] < floors.compute[p] - MW_EPSILON) {
-        push("compute_below_commitment", `Compute to ${p} can drop to ${floors.compute[p]} MW at least this round (30% a round at most).`, `compute.${p}`);
+        push("compute_below_commitment", `Compute to ${p} can go down to ${floors.compute[p]} MW this round, not lower: an offer drops ${Math.round(config.commitment.maxDropPerRound * 100)}% a round at most.`, `compute.${p}`);
       }
     }
-    if (d.rentMw < floors.rentMw - MW_EPSILON) push("rent_below_commitment", `Rent can drop to ${floors.rentMw} MW at least this round (30% a round at most).`, "rentMw");
   }
   return done();
 }

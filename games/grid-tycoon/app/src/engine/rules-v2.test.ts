@@ -191,43 +191,45 @@ describe('level 3 by upgrade (rule 2)', () => {
 
 // ---------------------------------------------------------------- 3. commitment
 
-describe('commitment: an offer drops by at most 30% a round (rule 3)', () => {
+describe('commitment: a compute offer drops by at most 50% a round, rent is free (rule 3)', () => {
   /** Round 1 resolved with the given decision; the company then holds `extra` buildings and links. */
   function after(d: Decision, setup: (c: GameState['companies'][number]) => void = () => {}): GameState {
     const s = edit(roomy(game(['a'])), 'a', setup)
     return resolveRound(s, { a: d })
   }
 
-  it('floors are 70% of last round, floored to 0.01 MW; nothing before round 1', () => {
+  it('floors are 50% of last round, floored to 0.01 MW; nothing before round 1; rent has none', () => {
     expect(commitmentFloors(game(['a']), 'a')).toEqual({ compute: { cloud: 0, btc: 0, ai: 0 }, rentMw: 0 })
     const s = after(decision((d) => ((d.power.internal = 2), (d.compute = { cloud: 0.8, btc: 0.5, ai: 0.7 }))))
-    expect(commitmentFloors(s, 'a')).toEqual({ compute: { cloud: 0.56, btc: 0.35, ai: 0.49 }, rentMw: 0 })
+    expect(commitmentFloors(s, 'a')).toEqual({ compute: { cloud: 0.4, btc: 0.25, ai: 0.35 }, rentMw: 0 })
     const odd = after(decision((d) => ((d.power.internal = 2), (d.compute.ai = 1.33))))
-    // 1.33 x 0.7 = 0.931 -> 0.93
-    expect(commitmentFloors(odd, 'a').compute.ai).toBe(0.93)
+    // 1.33 x 0.5 = 0.665 -> 0.66
+    expect(commitmentFloors(odd, 'a').compute.ai).toBe(0.66)
   })
 
-  it('validate: compute_below_commitment per pool and rent_below_commitment; at the floor it is fine', () => {
-    const s = after(ai2((d) => (d.rentMw = 2)), (c) => (addLink(c, 'import', 2), addOnline(c, 'dc', 'small')))
-    expect(commitmentFloors(s, 'a')).toEqual({ compute: { cloud: 0, btc: 0, ai: 1.4 }, rentMw: 1.4 })
-    expect(codes(s, decision((d) => ((d.power.internal = 2), (d.compute.ai = 1.39), (d.rentMw = 1.4))))).toEqual(['compute_below_commitment'])
-    expect(codes(s, decision((d) => ((d.power.internal = 2), (d.compute.ai = 1.4), (d.rentMw = 1))))).toEqual(['rent_below_commitment'])
-    expect(codes(s, decision((d) => ((d.power.internal = 2), (d.compute.ai = 1.4), (d.rentMw = 1.4))))).toEqual([])
+  it('validate: compute_below_commitment per pool; at the floor it is fine; rent can drop to 0', () => {
+    const s = after(ai2(), (c) => addOnline(c, 'dc', 'small'))
+    expect(commitmentFloors(s, 'a')).toEqual({ compute: { cloud: 0, btc: 0, ai: 1 }, rentMw: 0 })
+    expect(codes(s, decision((d) => ((d.power.internal = 2), (d.compute.ai = 0.99))))).toEqual(['compute_below_commitment'])
+    expect(codes(s, decision((d) => ((d.power.internal = 2), (d.compute.ai = 1))))).toEqual([])
     // Growing is free, and moving MW to another pool counts as a drop in the old one.
-    expect(codes(s, decision((d) => ((d.power.internal = 2), (d.compute.ai = 4), (d.rentMw = 2))))).toEqual([])
-    expect(codes(s, decision((d) => ((d.power.internal = 2), (d.compute.cloud = 2), (d.rentMw = 1.4))))).toEqual(['compute_below_commitment'])
+    expect(codes(s, decision((d) => ((d.power.internal = 2), (d.compute.ai = 2))))).toEqual([])
+    expect(codes(s, decision((d) => ((d.power.internal = 2), (d.compute.cloud = 2))))).toEqual(['compute_below_commitment'])
+    // Rent carries no floor.
+    const rented = after(ai2((d) => (d.rentMw = 2)), (c) => (addLink(c, 'import', 2), addOnline(c, 'dc', 'small')))
+    expect(commitmentFloors(rented, 'a').rentMw).toBe(0)
+    expect(codes(rented, decision((d) => ((d.power.internal = 2), (d.compute.ai = 2))))).toEqual([])
   })
 
   it('sanitize raises offers to the floors and the result validates', () => {
-    const s = after(ai2((d) => (d.rentMw = 2)), (c) => (addLink(c, 'import', 2), addOnline(c, 'dc', 'small')))
+    const s = after(ai2(), (c) => addOnline(c, 'dc', 'small'))
     const clean = sanitizeDecision(s, 'a', decision())
-    expect(clean.compute).toEqual({ cloud: 0, btc: 0, ai: 1.4 })
-    expect(clean.rentMw).toBe(1.4)
+    expect(clean.compute).toEqual({ cloud: 0, btc: 0, ai: 1 })
+    expect(clean.power.internal).toBe(1)
     expect(validateDecision(s, 'a', clean).ok).toBe(true)
     // Resolution applies the same floor to a decision that drops everything.
     const t = resolveRound(s, { a: decision() })
-    expect(company(t, 'a').lastDecision!.compute.ai).toBe(1.4)
-    expect(last(t).rent.requested).toBe(1.4)
+    expect(company(t, 'a').lastDecision!.compute.ai).toBe(1)
   })
 
   it('sanitize takes the plant MW a committed offer needs from otherDc first, then from town', () => {
@@ -235,34 +237,31 @@ describe('commitment: an offer drops by at most 30% a round (rule 3)', () => {
     const s = after(ai2(), (c) => (addOnline(c, 'plant', 'small'), addLink(c, 'town', 2)))
     const sell = decision((d) => ((d.power.town = 2), (d.power.otherDc = 2)))
     const clean = sanitizeDecision(s, 'a', sell)
-    // 1.4 MW must reach the datacenter: otherDc gives 1.4.
-    expect(clean.power).toEqual({ internal: 1.4, town: 2, otherDc: 0.6 })
-    expect(clean.compute.ai).toBe(1.4)
+    // 1 MW must reach the datacenter: otherDc gives 1.
+    expect(clean.power).toEqual({ internal: 1, town: 2, otherDc: 1 })
+    expect(clean.compute.ai).toBe(1)
     expect(validateDecision(s, 'a', clean).ok).toBe(true)
-    // With room left on the plants nothing is cut.
-    const townOnly = sanitizeDecision(s, 'a', decision((d) => (d.power.town = 2)))
-    expect(townOnly.power).toEqual({ internal: 1.4, town: 2, otherDc: 0 })
-    // One 2 MW plant, all of it to town: town gives the 1.4 MW.
+    // One 2 MW plant, all of it to town: town gives the 1 MW.
     const tight = after(ai2(), (c) => addLink(c, 'town', 2))
     const cut = sanitizeDecision(tight, 'a', decision((d) => (d.power.town = 2)))
-    expect(cut.power).toEqual({ internal: 1.4, town: 0.6, otherDc: 0 })
+    expect(cut.power).toEqual({ internal: 1, town: 1, otherDc: 0 })
     expect(validateDecision(tight, 'a', cut).ok).toBe(true)
   })
 
-  it('floors shrink with capacity: fewer datacenters online or a smaller import link scale them down', () => {
+  it('floors shrink with capacity: they fit what the own plants and internal link can power', () => {
     let s = after(decision((d) => ((d.power.internal = 4), (d.rentMw = 4), (d.compute = { cloud: 4, btc: 0, ai: 4 }))), (c) => {
       addOnline(c, 'dc', 'big')
       addOnline(c, 'plant', 'small')
       addLink(c, 'internal', 2)
       addLink(c, 'import', 4)
     })
-    expect(commitmentFloors(s, 'a')).toEqual({ compute: { cloud: 2.8, btc: 0, ai: 2.8 }, rentMw: 2.8 })
-    // The import link drops to 1 MW: rent floor 1, compute floors fit 4 internal + 1 rented = 5 MW.
-    s = edit(s, 'a', (c) => (c.links = c.links.map((l) => (l.use === 'import' ? { ...l, mw: 1 } : l))))
+    // 50% of 4 and 4 = 2 + 2, within the 4 MW the plants can send.
+    expect(commitmentFloors(s, 'a')).toEqual({ compute: { cloud: 2, btc: 0, ai: 2 }, rentMw: 0 })
+    // The internal link drops to 2 MW: the floors scale down to fit 2 MW.
+    s = edit(s, 'a', (c) => (c.links = c.links.map((l) => (l.use === 'internal' ? { ...l, mw: 1 } : l))))
     const f = commitmentFloors(s, 'a')
-    expect(f.rentMw).toBe(1)
-    expect(f.compute.cloud + f.compute.ai).toBeLessThanOrEqual(5 + 1e-9)
-    expect(f.compute.cloud).toBeCloseTo(2.5, 2)
+    expect(f.compute.cloud + f.compute.ai).toBeLessThanOrEqual(2 + 1e-9)
+    expect(f.compute.cloud).toBeCloseTo(1, 2)
     expect(validateDecision(s, 'a', sanitizeDecision(s, 'a', decision())).ok).toBe(true)
   })
 

@@ -1,7 +1,7 @@
-// The commitment rule: compute sold to a pool and power rented are contracts. From one round to the
-// next an offer can grow freely but drop by at most commitment.maxDropPerRound (30%) of last round's.
+// The commitment rule: compute sold to a pool is a contract. From one round to the next an offer can
+// grow freely but drop by at most commitment.maxDropPerRound (50%) of last round's. Rent is free.
 // The floors shrink only when the company physically cannot meet them (fewer datacenters online,
-// a smaller import link): then they scale down together.
+// less plant or internal link MW): then they scale down together.
 
 import { capacity, findCompany } from './assets'
 import { defaultConfig } from './config'
@@ -26,8 +26,8 @@ export function floorsFor(company: Company, cap: Capacity, config: Config = defa
   const keep = 1 - config.commitment.maxDropPerRound
   // Floors are floored to 0.01 MW so a sanitized decision at the floor always validates.
   const f = (x: number): number => Math.floor(Math.max(0, x) * keep * 100 + 1e-9) / 100
-  out.rentMw = Math.min(f(last.rentMw), cap.links.import)
-  const powered = Math.min(cap.dcMw, Math.min(cap.links.internal, cap.plantMw) + out.rentMw)
+  // Rent carries no floor; the compute floors fit what the company can power with its own plants.
+  const powered = Math.min(cap.dcMw, Math.min(cap.links.internal, cap.plantMw))
   let sum = 0
   for (const p of COMPUTE_POOLS) {
     out.compute[p] = f(last.compute[p])

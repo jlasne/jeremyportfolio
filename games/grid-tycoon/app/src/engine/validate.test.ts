@@ -48,8 +48,7 @@ const cases: [ValidationCode, GameState, unknown][] = [
   ['over_import_link', base, decision((d) => (d.rentMw = 1))],
   ['over_plant_capacity', base, decision((d) => ((d.power.internal = 2), (d.power.otherDc = 1)))],
   ['over_compute_capacity', base, decision((d) => ((d.power.internal = 1), (d.compute.ai = 2)))],
-  ['compute_below_commitment', committed, decision((d) => ((d.power.internal = 2), (d.compute.ai = 1), (d.rentMw = 4)))],
-  ['rent_below_commitment', committed, decision((d) => ((d.power.internal = 2), (d.compute.ai = 2), (d.rentMw = 1)))],
+  ['compute_below_commitment', committed, decision((d) => ((d.power.internal = 2), (d.compute.ai = 0.5), (d.rentMw = 4)))],
   ['no_land', fullLand, decision((d) => d.builds.push({ kind: 'plant', size: 'small' }))],
 ]
 
@@ -73,7 +72,7 @@ describe('validateDecision', () => {
       'forced_sale_not_allowed', 'forced_sale_unknown', 'forced_sale_short', 'build_invalid', 'tile_taken',
       'tile_out_of_plot', 'upgrade_invalid', 'over_treasury', 'no_town_link', 'over_town_link', 'over_internal_link',
       'over_import_link', 'over_plant_capacity', 'over_compute_capacity', 'compute_below_commitment',
-      'rent_below_commitment', 'no_land',
+      'no_land',
     ]
     expect(new Set(cases.map((c) => c[0]))).toEqual(new Set(all))
   })
