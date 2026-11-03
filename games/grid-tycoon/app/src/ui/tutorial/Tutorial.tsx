@@ -43,7 +43,7 @@ function viewFor(step: number, panel: PanelId | null, phase: string, round: numb
         ? { anchor: 'tab-allocate', text: 'Open Allocate: it decides where your power and compute go each round.', openPanel: 'allocate', sides: TAB_SIDES }
         : {
             anchor: 'allocate-compute',
-            text: 'Put your datacenter MW on AI: it pays 3.2 per MW, the best rate. Drag a segment or use the arrow keys to change the split.',
+            text: 'Put your datacenter MW on AI: it pays 3.2 per MW, the best rate. Move the AI slider or use the arrow keys.',
             gotIt: true,
             sides: SHEET_SIDES,
           }
