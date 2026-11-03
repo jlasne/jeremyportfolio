@@ -819,8 +819,8 @@ describe('revenueByBuilding, findFreeTile, plotRows (DESIGN 2.5, 2.2.6, 6)', () 
     const r = revenueByBuilding(s, 'you')
     const plants = you.buildings.filter((b) => b.kind === 'plant')
     const total = you.history[0].revenueByPool.citizens
-    expect(r[plants[0].id]).toBeCloseTo(total / 2, 2)
-    expect(r[plants[1].id]).toBeCloseTo(total / 2, 2)
+    expect(Math.abs(r[plants[0].id] - total / 2)).toBeLessThanOrEqual(0.0051) // each half is rounded to cents
+    expect(Math.abs(r[plants[1].id] - total / 2)).toBeLessThanOrEqual(0.0051)
     expect(r[plants[2].id]).toBe(0)
   })
 

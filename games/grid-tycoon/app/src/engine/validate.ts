@@ -11,11 +11,16 @@ import type { Building, Config, GameState, ValidationCode, ValidationIssue, Vali
 
 const isNum = (x: number): boolean => Number.isFinite(x)
 
-/** Shares one action may move this round: issue up to maxChangePerRound, buy back up to maxBuybackPerRound. */
+/**
+ * Shares one action may move this round: issue up to maxChangePerRound, buy back up to
+ * maxBuybackPerRound, and always at least 1 share (a buyback keeps at least 1 share outstanding),
+ * so a company with fewer than 10 shares can still buy back whenever its treasury covers it.
+ */
 export function shareCap(mode: 'none' | 'issue' | 'buyback', shares: number, config: Config): number {
   if (mode === 'none') return 0
   const rate = mode === 'issue' ? config.shares.maxChangePerRound : config.shares.maxBuybackPerRound
-  return Math.floor(rate * shares)
+  const cap = Math.max(1, Math.floor(rate * shares))
+  return mode === 'buyback' ? Math.max(0, Math.min(cap, Math.floor(shares) - 1)) : cap
 }
 
 export function validateDecision(state: GameState, companyId: string, raw: unknown, config: Config = defaultConfig): ValidationResult {

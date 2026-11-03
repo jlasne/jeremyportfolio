@@ -143,6 +143,11 @@ export function priorityWeights(state: GameState, pool: PoolId, ids: string[], c
   return allocation.priorityWeights(state.pools[pool], ids, config)
 }
 
+/** Most shares an issue or a buyback may move this round (at least 1; a buyback keeps 1 share). */
+export function shareCap(mode: 'none' | 'issue' | 'buyback', shares: number, config: Config = defaultConfig): number {
+  return validate.shareCap(mode, shares, config)
+}
+
 /** f(c) = (e^{kc} - 1) / (e^k - 1). */
 export function debtDragFactor(c: number, k: number): number {
   return stock.debtDragFactor(c, k)

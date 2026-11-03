@@ -21,7 +21,7 @@ Grid Tycoon is a turn-based business sim in a web browser. You run one energy an
 
 Playtest feedback from @Jeremy. These rules replace the older lines below where they disagree. The goal: the whole market's offer should match demand when it is spread well, so every MW is a choice.
 
-**Market sized to the players.** Start demand per company is 1.0 MW citizens, 0.6 other datacenters, 0.8 cloud, 0.5 bitcoin, 0.7 AI. That is 2.0 MW of compute for the 2 MW datacenter every company starts with. Growth per round: citizens 3%, other datacenters 6%, cloud 5%, bitcoin 5% (volatility 8%), AI 6%. Round 1's default spreads compute over the 3 compute pools by their demand.
+**Market sized to the players.** Start demand per company is 1.0 MW citizens, 0.6 other datacenters, 0.8 cloud, 0.5 bitcoin, 0.7 AI. That is 2.0 MW of compute for the 2 MW datacenter every company starts with. Growth per round: citizens 6%, other datacenters 12%, cloud 10%, bitcoin 10% (volatility 8%), AI 12%, clamped at +30%. Supply cap: a pool's demand never grows above 130% of what all players offered it last round (it can stay flat), so there is always room to grow into but never a runaway. Round 1's default spreads compute over the 3 compute pools by their demand.
 
 **Priority on open demand.** The 80% incumbent reserve stays. Open MW then goes by spare MW × priority, where priority = (1 + last share of the pool) × (1 + 5% per round served in a row, up to 10 rounds). A newcomer has priority 1. A company never gets more than its spare.
 
@@ -33,7 +33,7 @@ Playtest feedback from @Jeremy. These rules replace the older lines below where 
 
 **Land.** Every company starts with 2 rows of 4 lots, so 8 lots. A new row costs 50, and each row after costs 10% more than the last (50, 55, 60.5...). A row bought in a decision phase is usable for that phase's builds. A build needs a free lot on owned land.
 
-**Shares.** Issue up to 20% of shares per round. Buy back up to 10% per round, paid from treasury, at any time the treasury covers it. Never both in one round.
+**Shares.** Issue up to 20% of shares per round. Buy back up to 10% per round, and always at least 1 share, paid from treasury, at any time the treasury covers it. Never both in one round.
 
 **Stock rewards stability.** A demand surprise moves the price by w × beta × (g − E). Beta: citizens 0.5, cloud 0.6, other datacenters 1.0, AI 1.0, bitcoin 2.5. A stability premium adds w × premium every round: citizens and cloud 0.6%, other datacenters and AI 0.2%, bitcoin 0.
 

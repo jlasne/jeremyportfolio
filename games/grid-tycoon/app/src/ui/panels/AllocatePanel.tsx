@@ -233,6 +233,9 @@ export default function AllocatePanel() {
             <strong>Who sells first.</strong> You keep {fmtPct(config.incumbentShare)} of last round's sales in a pool. Open demand goes first to bigger sellers and to sellers who stayed longer, up to +{fmtPct(config.allocation.tenurePerRound * config.allocation.tenureCap)} after {config.allocation.tenureCap} rounds.
           </li>
           <li>
+            <strong>Demand.</strong> Each pool grows {fmtPct(config.pool.meanGrowth.citizens)} to {fmtPct(config.pool.meanGrowth.ai)} a round, but never above {fmtPct(config.pool.supplyCap)} of what all players offered last round.
+          </li>
+          <li>
             <strong>Sliders.</strong> Each slider moves only its own pool. To move MW, lower one pool, then raise another.
           </li>
         </ol>

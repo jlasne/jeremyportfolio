@@ -5,7 +5,7 @@
 
 import { useMemo } from 'react'
 import type { ReactNode } from 'react'
-import { POOLS, riskView, sellValue } from '../../engine'
+import { POOLS, riskView, sellValue, shareCap } from '../../engine'
 import type { Decision, Loan, PoolId } from '../../engine'
 import { useDerived } from '../../store/derived'
 import { useDraft } from '../../store/draft'
@@ -94,8 +94,8 @@ export default function FinancePanel() {
   // from the treasury as it stands after loans and repayments (builds and land come after).
   const issuePct = Math.round(cfg.shares.maxChangePerRound * 100)
   const buybackPct = Math.round(cfg.shares.maxBuybackPerRound * 100)
-  const maxShares = Math.floor(cfg.shares.maxChangePerRound * me.shares)
-  const buybackCap = Math.floor(cfg.shares.maxBuybackPerRound * me.shares)
+  const maxShares = shareCap('issue', me.shares, cfg)
+  const buybackCap = shareCap('buyback', me.shares, cfg)
   const price = me.sharePrice
   const treasuryBeforeShares = cashForRepay - repaid + take
   const buybackCash = Math.max(0, Math.round(treasuryBeforeShares * 100) / 100)
@@ -265,7 +265,7 @@ export default function FinancePanel() {
         />
         {mode === 'none' ? (
           <p className="field-desc">
-            Issuing raises cash and lowers the price. Buying back costs cash and lifts it. Issue up to {maxShares} shares ({issuePct}%), buy back up to {buybackCap} ({buybackPct}%) a round.
+            Issuing raises cash and lowers the price. Buying back costs cash and lifts it. Issue up to {maxShares} shares ({issuePct}%), buy back up to {buybackCap} a round ({buybackPct}%, at least 1 share), whenever the treasury pays for it.
             {maxBuy === 0 && buybackCap > 0 && price > 0 ? ` A buyback is paid from the treasury: ${fmtMoney(treasuryBeforeShares)} buys no share at ${fmtMoney(price)}.` : ''}
           </p>
         ) : (

@@ -21,7 +21,9 @@ import {
   priorityWeights,
   projectRound,
   resolveRound,
+  round2,
   sanitizeDecision,
+  shareCap,
   stockReturn,
   upgradeSpec,
   validateDecision,
@@ -522,5 +524,24 @@ describe('start demand and the round 1 default (rule 8)', () => {
       expect(r.idle).toBeLessThan(0.1)
       expect(r.unallocatedMw).toBe(0)
     }
+  })
+})
+
+describe('buyback is always possible with enough treasury', () => {
+  it('a company with fewer than 10 shares can still buy back 1 share a round', () => {
+    const s = edit(game(['a']), 'a', (c) => {
+      c.shares = 9
+      c.sharePrice = round2(c.marketCap / 9)
+      c.treasury = 50
+    })
+    expect(shareCap('buyback', 9)).toBe(1)
+    expect(shareCap('buyback', 25)).toBe(2)
+    expect(shareCap('buyback', 1)).toBe(0)
+    const d = decision((x) => (x.shares = { mode: 'buyback', count: 1 }))
+    expect(validateDecision(s, 'a', d).ok).toBe(true)
+    expect(sanitizeDecision(s, 'a', d).shares).toEqual({ mode: 'buyback', count: 1 })
+    // Not enough treasury for one share: refused.
+    const poor = edit(s, 'a', (c) => (c.treasury = 5))
+    expect(validateDecision(poor, 'a', d).errors.map((e) => e.code)).toContain('buyback_over_cash')
   })
 })

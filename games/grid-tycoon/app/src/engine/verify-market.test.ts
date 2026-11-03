@@ -154,8 +154,11 @@ function oracle(S: GameState, T: GameState): string[] {
     const pool = S.pools[p]
     E[p] = 0.7 * pool.expectedGrowth + 0.3 * pool.growth
     const raw = pool.growth + 0.3 * (cfg.pool.meanGrowth[p] - pool.growth) + cfg.pool.volatility[p] * eps
-    g[p] = Math.min(0.2, Math.max(-0.1, raw))
+    g[p] = Math.min(cfg.pool.growthClamp.max, Math.max(-0.1, raw))
     D[p] = pool.demand * (1 + g[p])
+    // Supply cap: never above supplyCap x last round's total offer, never below last demand.
+    const lastPool = S.history.at(-1)?.pools[p]
+    if (lastPool) D[p] = Math.min(D[p], Math.max(pool.demand, cfg.pool.supplyCap * Object.values(lastPool.offered).reduce((a, b) => a + b, 0)))
     near(`${p} expectedGrowth`, T.pools[p].expectedGrowth, E[p], 1e-12)
     near(`${p} growth`, T.pools[p].growth, g[p], 1e-12)
     near(`${p} background demand`, T.pools[p].demand, D[p], 1e-9)
@@ -336,7 +339,7 @@ describe('demand growth (SPEC "Growth model", DESIGN 2.3 step 2)', () => {
       const eps = rng.normal()
       const mu = cfg.pool.meanGrowth[p]
       expect(t.pools[p].expectedGrowth).toBeCloseTo(mu, 12)
-      expect(t.pools[p].growth).toBeCloseTo(Math.min(0.2, Math.max(-0.1, mu + cfg.pool.volatility[p] * eps)), 12)
+      expect(t.pools[p].growth).toBeCloseTo(Math.min(cfg.pool.growthClamp.max, Math.max(-0.1, mu + cfg.pool.volatility[p] * eps)), 12)
       expect(t.pools[p].demand).toBeCloseTo(cfg.pool.startPerCompany[p] * 2 * (1 + t.pools[p].growth), 12)
     }
     // Exactly 2 uniforms per pool: 10 per round.
@@ -353,7 +356,7 @@ describe('demand growth (SPEC "Growth model", DESIGN 2.3 step 2)', () => {
     expect(oracle(s1, s2)).toEqual([])
   })
 
-  it('g is clamped to [-10%, +20%] and the clamped g is what the next round pulls from', () => {
+  it('g is clamped to [-10%, +30%] and the clamped g is what the next round pulls from', () => {
     // A huge volatility forces the clamp on both sides across pools and rounds.
     const wild = structuredClone(cfg)
     for (const p of POOLS) wild.pool.volatility[p] = 5
@@ -365,10 +368,14 @@ describe('demand growth (SPEC "Growth model", DESIGN 2.3 step 2)', () => {
       s = resolveRound(s, {}, wild)
       for (const p of POOLS) {
         expect(s.pools[p].growth).toBeGreaterThanOrEqual(-0.1)
-        expect(s.pools[p].growth).toBeLessThanOrEqual(0.2)
+        expect(s.pools[p].growth).toBeLessThanOrEqual(cfg.pool.growthClamp.max)
         if (s.pools[p].growth === -0.1) hitLow = true
-        if (s.pools[p].growth === 0.2) hitHigh = true
-        expect(s.pools[p].demand).toBeCloseTo(prev.pools[p].demand * (1 + s.pools[p].growth), 12)
+        if (s.pools[p].growth === cfg.pool.growthClamp.max) hitHigh = true
+        // The supply cap: never above supplyCap x last round's total offer, never below last demand.
+        const grown = prev.pools[p].demand * (1 + s.pools[p].growth)
+        const lastPool = prev.history.at(-1)?.pools[p]
+        const cap = lastPool ? Math.max(prev.pools[p].demand, cfg.pool.supplyCap * Object.values(lastPool.offered).reduce((x, y) => x + y, 0)) : Infinity
+        expect(s.pools[p].demand).toBeCloseTo(Math.min(grown, cap), 12)
       }
     }
     expect(hitLow && hitHigh).toBe(true)

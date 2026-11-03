@@ -11,6 +11,7 @@ import { round2 } from './money'
 import { currentPrice } from './phase'
 import { rivalFillShare } from './projection'
 import { sanitizeDecision } from './sanitize'
+import { shareCap as validateShareCap } from './validate'
 import type { BotStyle, BuildingKind, BuildSize, Company, Config, Decision, GameState, LinkUse, PoolId } from './types'
 
 interface Style {
@@ -196,8 +197,8 @@ export function botDecision(state: GameState, companyId: string, config: Config 
   let future: Resources = { plant: fin.plantMw, dc: fin.dcMw, links: fin.links }
   const multiple = config.bots.buildTreasuryMultiple
   const price = currentPrice(company)
-  const shareCap = Math.floor(config.shares.maxChangePerRound * company.shares)
-  const buybackCap = Math.floor(config.shares.maxBuybackPerRound * company.shares)
+  const shareCap = validateShareCap('issue', company.shares, config)
+  const buybackCap = validateShareCap('buyback', company.shares, config)
   // Land: lots left on the owned rows, and rows bought this round.
   const startRows = ownedRows(company, config)
   let lotsLeft = freeLots(company, startRows, [], config)

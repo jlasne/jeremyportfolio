@@ -42,7 +42,7 @@ describe('whole games', () => {
       for (const h of s.history) {
         for (const p of Object.values(h.pools)) {
           expect(p.growth).toBeGreaterThanOrEqual(-0.1 - 1e-12)
-          expect(p.growth).toBeLessThanOrEqual(0.2 + 1e-12)
+          expect(p.growth).toBeLessThanOrEqual(0.3 + 1e-12)
           expect(p.used).toBeLessThanOrEqual(p.demand + 1e-6)
           expect(p.demand).toBeGreaterThan(0)
         }

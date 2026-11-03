@@ -204,11 +204,11 @@ var balance_default = {
       ai: 0.7
     },
     meanGrowth: {
-      citizens: 0.03,
-      otherDc: 0.06,
-      cloud: 0.05,
-      btc: 0.05,
-      ai: 0.06
+      citizens: 0.06,
+      otherDc: 0.12,
+      cloud: 0.1,
+      btc: 0.1,
+      ai: 0.12
     },
     volatility: {
       citizens: 5e-3,
@@ -220,8 +220,9 @@ var balance_default = {
     meanReversion: 0.3,
     growthClamp: {
       min: -0.1,
-      max: 0.2
-    }
+      max: 0.3
+    },
+    supplyCap: 1.3
   },
   expectation: {
     weightOld: 0.7,
@@ -736,7 +737,8 @@ var isNum = (x) => Number.isFinite(x);
 function shareCap(mode, shares, config) {
   if (mode === "none") return 0;
   const rate = mode === "issue" ? config.shares.maxChangePerRound : config.shares.maxBuybackPerRound;
-  return Math.floor(rate * shares);
+  const cap = Math.max(1, Math.floor(rate * shares));
+  return mode === "buyback" ? Math.max(0, Math.min(cap, Math.floor(shares) - 1)) : cap;
 }
 function validateDecision(state, companyId, raw, config = defaultConfig) {
   const errors = [];
@@ -1618,8 +1620,8 @@ function botDecision(state, companyId, config = defaultConfig) {
   let future = { plant: fin.plantMw, dc: fin.dcMw, links: fin.links };
   const multiple = config.bots.buildTreasuryMultiple;
   const price = currentPrice(company);
-  const shareCap2 = Math.floor(config.shares.maxChangePerRound * company.shares);
-  const buybackCap = Math.floor(config.shares.maxBuybackPerRound * company.shares);
+  const shareCap3 = shareCap("issue", company.shares, config);
+  const buybackCap = shareCap("buyback", company.shares, config);
   const startRows = ownedRows(company, config);
   let lotsLeft = freeLots(company, startRows, [], config);
   let rowsBought = 0;
@@ -1639,7 +1641,7 @@ function botDecision(state, companyId, config = defaultConfig) {
   };
   for (let n = 0; n < HABITS.maxBuildsPerRound; n++) {
     let chosen = null;
-    const reach = treasury + loanRoom(style, company, debt, d.loans.take, config) + (style.finance === "equity" ? (shareCap2 - issued) * price : 0);
+    const reach = treasury + loanRoom(style, company, debt, d.loans.take, config) + (style.finance === "equity" ? (shareCap3 - issued) * price : 0);
     const crowded = pipelineIdle(future) > config.bots.maxIdle;
     const ups = company.buildings.filter((b) => canUpgrade(b) && !upgradedNow.has(b.id));
     for (const c of candidates(style, future, remaining, planBuild, config, reach / multiple, crowded, ups, landFor)) {
@@ -1651,7 +1653,7 @@ function botDecision(state, companyId, config = defaultConfig) {
           d.loans.take = round2(d.loans.take + raise);
           debt = round2(debt + raise);
           treasury = round2(treasury + raise);
-        } else if (equityOk && price > 0 && (shareCap2 - issued) * price >= raise) {
+        } else if (equityOk && price > 0 && (shareCap3 - issued) * price >= raise) {
           const count = Math.ceil(raise / price);
           issued += count;
           treasury = round2(treasury + count * price);
@@ -1899,6 +1901,11 @@ function growDemand(state, config) {
     out.expected[p] = config.expectation.weightOld * pool.expectedGrowth + config.expectation.weightNew * pool.growth;
     out.growth[p] = clamp(pool.growth + meanReversion * (meanGrowth[p] - pool.growth) + volatility[p] * eps, growthClamp.min, growthClamp.max);
     out.demand[p] = pool.demand * (1 + out.growth[p]);
+    const last = state.history.at(-1)?.pools[p];
+    if (last && last.offered) {
+      const offered = Object.values(last.offered).reduce((sum, x) => sum + x, 0);
+      out.demand[p] = Math.min(out.demand[p], Math.max(pool.demand, config.pool.supplyCap * offered));
+    }
   }
   state.rngState = rng.state();
   return out;
@@ -2271,6 +2278,9 @@ function allocatePool2(demand, offers, lastUsed, incumbentShare, weights) {
 function priorityWeights2(state, pool, ids, config = defaultConfig2) {
   return priorityWeights(state.pools[pool], ids, config);
 }
+function shareCap2(mode, shares, config = defaultConfig2) {
+  return shareCap(mode, shares, config);
+}
 function debtDragFactor2(c, k) {
   return debtDragFactor(c, k);
 }
@@ -2375,6 +2385,7 @@ export {
   sanitizeDecision2 as sanitizeDecision,
   seasonOf2 as seasonOf,
   sellValue2 as sellValue,
+  shareCap2 as shareCap,
   stockReturn2 as stockReturn,
   totalDebt2 as totalDebt,
   upgradeCost2 as upgradeCost,

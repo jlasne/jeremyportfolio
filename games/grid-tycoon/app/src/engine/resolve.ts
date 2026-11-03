@@ -43,6 +43,12 @@ function growDemand(state: GameState, config: Config): DemandStep {
     out.expected[p] = config.expectation.weightOld * pool.expectedGrowth + config.expectation.weightNew * pool.growth
     out.growth[p] = clamp(pool.growth + meanReversion * (meanGrowth[p] - pool.growth) + volatility[p] * eps, growthClamp.min, growthClamp.max)
     out.demand[p] = pool.demand * (1 + out.growth[p])
+    // Supply cap: demand never outgrows supplyCap × what everyone offered last round (it can stay flat).
+    const last = state.history.at(-1)?.pools[p]
+    if (last && last.offered) {
+      const offered = Object.values(last.offered).reduce((sum, x) => sum + x, 0)
+      out.demand[p] = Math.min(out.demand[p], Math.max(pool.demand, config.pool.supplyCap * offered))
+    }
   }
   state.rngState = rng.state()
   return out

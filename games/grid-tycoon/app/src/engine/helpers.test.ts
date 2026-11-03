@@ -43,7 +43,7 @@ describe('createSoloGame', () => {
     }
     // New start demand per company (citizens 1.0, AI 0.7, AI growth 8%) and pool tenure; state version 2.
     expect(s.pools.citizens.demand).toBe(4)
-    expect(s.pools.ai).toEqual({ demand: 2.8, growth: 0.06, expectedGrowth: 0.06, lastUsed: {}, tenure: {} })
+    expect(s.pools.ai).toEqual({ demand: 2.8, growth: 0.12, expectedGrowth: 0.12, lastUsed: {}, tenure: {} })
     expect(s).toMatchObject({ round: 1, rounds: 40, finished: false, version: 2, seed: 3 })
     expect(s.companies.every((c) => c.landRows === 2)).toBe(true)
   })
