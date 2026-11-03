@@ -4,7 +4,7 @@
 import type { GameState } from '../engine'
 
 export const KEYS = {
-  solo: 'gt.solo.v1',
+  solo: 'gt.solo.v2',
   settings: 'gt.settings.v1',
   tutorial: 'gt.tutorial.v1',
   net: 'gt.net.v1',
@@ -51,7 +51,7 @@ function isSoloSave(x: unknown): x is SoloSave {
     s.v === 1 &&
     typeof s.meId === 'string' &&
     !!state &&
-    state.version === 1 &&
+    state.version === 2 &&
     typeof state.round === 'number' &&
     Array.isArray(state.companies) &&
     state.companies.some((c) => c && c.id === s.meId)

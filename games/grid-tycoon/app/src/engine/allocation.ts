@@ -1,3 +1,5 @@
+import type { Config } from './types'
+
 // The per-pool allocation algorithm of SPEC.md (80% incumbent rule).
 
 export interface AllocationResult {
@@ -7,11 +9,36 @@ export interface AllocationResult {
   idle: Record<string, number>
 }
 
+export type AllocationWeights = Record<string, number>
+
+/**
+ * Priority on a pool's open MW. A company that already holds a large share of the pool, and has served
+ * it for many rounds in a row, gets its spare MW in first: weight = (1 + shareWeight × last share)
+ * × (1 + tenurePerRound × min(tenure, tenureCap)). A newcomer has weight 1.
+ */
+export function priorityWeights(
+  pool: { lastUsed: Record<string, number>; tenure?: Record<string, number> },
+  ids: string[],
+  config: Config,
+): AllocationWeights {
+  const a = config.allocation
+  let total = 0
+  for (const id of ids) total += Math.max(0, pool.lastUsed[id] ?? 0)
+  const out: AllocationWeights = {}
+  for (const id of ids) {
+    const share = total > 0 ? Math.max(0, pool.lastUsed[id] ?? 0) / total : 0
+    const tenure = Math.min(a.tenureCap, Math.max(0, pool.tenure?.[id] ?? 0))
+    out[id] = (1 + a.shareWeight * share) * (1 + a.tenurePerRound * tenure)
+  }
+  return out
+}
+
 export function allocatePool(
   demand: number,
   offers: Record<string, number>,
   lastUsed: Record<string, number>,
   incumbentShare: number,
+  weights?: AllocationWeights,
 ): AllocationResult {
   const ids = Object.keys(offers)
   const d = Math.max(0, demand)
@@ -40,12 +67,38 @@ export function allocatePool(
   }
 
   const openMw = d - reservedTotal
+  const spare: Record<string, number> = {}
   let spareTotal = 0
-  for (const id of ids) spareTotal += Math.max(0, offers[id]) - reserved[id]
-  const fits = spareTotal <= openMw
   for (const id of ids) {
-    const spare = Math.max(0, offers[id]) - reserved[id]
-    open[id] = fits ? spare : spareTotal > 0 ? (openMw * spare) / spareTotal : 0
+    spare[id] = Math.max(0, offers[id]) - reserved[id]
+    spareTotal += spare[id]
+  }
+  if (spareTotal <= openMw) {
+    for (const id of ids) open[id] = spare[id]
+  } else {
+    // Weighted water filling: open MW split by spare × weight, a company never above its spare;
+    // what a capped company cannot take goes to the others by the same rule.
+    const w = (id: string): number => Math.max(0, weights?.[id] ?? 1) * spare[id]
+    for (const id of ids) open[id] = 0
+    let left = openMw
+    let active = ids.filter((id) => spare[id] > 0)
+    for (let guard = 0; guard < ids.length + 1 && left > 1e-12 && active.length > 0; guard++) {
+      const total = active.reduce((s, id) => s + w(id), 0)
+      if (total <= 0) break
+      const capped = active.filter((id) => (left * w(id)) / total >= spare[id] - open[id])
+      if (capped.length === 0) {
+        for (const id of active) open[id] += (left * w(id)) / total
+        left = 0
+        break
+      }
+      for (const id of capped) {
+        left -= spare[id] - open[id]
+        open[id] = spare[id]
+      }
+      active = active.filter((id) => !capped.includes(id))
+    }
+  }
+  for (const id of ids) {
     used[id] = reserved[id] + open[id]
     idle[id] = Math.max(0, offers[id]) - used[id]
   }

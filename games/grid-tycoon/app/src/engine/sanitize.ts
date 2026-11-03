@@ -1,12 +1,14 @@
 // Lenient repair (DESIGN 2.4): clamp allocations, drop what cannot apply, pick forced sales.
 // The output always passes validateDecision, so resolution never throws on input.
 
-import { buildCost, capacity, findCompany, placeOrders, sellValue, takenTiles, upgradeCost, type Capacity } from './assets'
+import { buildCost, canUpgrade, capacity, findCompany, landCost, ownedRows, placeOrders, sellValue, takenTiles, upgradeCost, type Capacity } from './assets'
+import { floorsFor, zeroFloors, type Floors } from './commitment'
 import { defaultConfig } from './config'
-import { MW_EPSILON } from './constants'
+import { COMPUTE_POOLS, MW_EPSILON } from './constants'
 import { emptyDecision, readDecision } from './decision'
 import { finite, floorMw, round2 } from './money'
 import { currentPrice, forcedIssue, type ShareBook } from './phase'
+import { shareCap } from './validate'
 import type { Building, Config, Decision, GameState } from './types'
 
 const nonNeg = (x: unknown): number => Math.max(0, finite(x))
@@ -25,14 +27,44 @@ export function clampAllocations(
   power: Decision['power'],
   compute: Decision['compute'],
   rentMw: number,
+  floors: Floors = zeroFloors(),
 ): Pick<Decision, 'power' | 'compute' | 'rentMw'> {
   const internal0 = Math.min(nonNeg(power.internal), cap.links.internal)
   const town0 = cap.links.town > 0 ? Math.min(nonNeg(power.town), cap.links.town) : 0
-  const [internal, town, otherDc] = fitSum([internal0, town0, nonNeg(power.otherDc)], cap.plantMw)
-  const rent = Math.min(nonNeg(rentMw), cap.links.import)
-  const [cloud, btc, ai] = fitSum([nonNeg(compute.cloud), nonNeg(compute.btc), nonNeg(compute.ai)], Math.min(cap.dcMw, internal + rent))
+  let [internal, town, otherDc] = fitSum([internal0, town0, nonNeg(power.otherDc)], cap.plantMw)
+  const rent = Math.min(Math.max(nonNeg(rentMw), floors.rentMw), cap.links.import)
+  const raised = { cloud: 0, btc: 0, ai: 0 }
+  let need = 0
+  for (const p of COMPUTE_POOLS) {
+    raised[p] = Math.max(nonNeg(compute[p]), floors.compute[p])
+    need += raised[p]
+  }
+  // Committed compute needs power: take it from the plants, cutting power sales if it must.
+  const mustPower = Math.min(cap.dcMw, need) - rent
+  if (mustPower > internal + MW_EPSILON) {
+    internal = Math.min(mustPower, cap.links.internal, cap.plantMw)
+    let over = internal + town + otherDc - cap.plantMw
+    if (over > 0) {
+      const cut = Math.min(otherDc, over)
+      otherDc = floorMwSafe(otherDc - cut)
+      over -= cut
+    }
+    if (over > 0) town = floorMwSafe(town - over)
+    internal = Math.min(internal, cap.plantMw - town - otherDc)
+  }
+  // Floors first, then what is asked above them scaled into the room left.
+  const room = Math.min(cap.dcMw, internal + rent)
+  const base = COMPUTE_POOLS.map((p) => Math.min(floors.compute[p], raised[p]))
+  const baseFit = fitSum(base, room)
+  const extra = fitSum(
+    COMPUTE_POOLS.map((p, i) => raised[p] - base[i]),
+    Math.max(0, room - baseFit.reduce((x, y) => x + y, 0)),
+  )
+  const [cloud, btc, ai] = COMPUTE_POOLS.map((_, i) => baseFit[i] + extra[i])
   return { power: { internal, town, otherDc }, compute: { cloud, btc, ai }, rentMw: rent }
 }
+
+const floorMwSafe = (x: number): number => Math.max(0, floorMw(x))
 
 /** Forced sales for a losing round: the listed ones first, then the cheapest sell values until the treasury is back to 0. */
 function pickForcedSales(buildings: Building[], treasury: number, listed: string[], config: Config): { sold: string[]; treasury: number } {
@@ -98,15 +130,14 @@ export function sanitizeDecision(state: GameState, companyId: string, raw: unkno
   const take = round2(nonNeg(d.loans.take))
   out.loans.take = take
   treasury = round2(treasury + take)
-  const debt = round2([...principal.values()].reduce((a, b) => a + b, 0) + take)
 
   // Shares.
   if (!d.sharesConflict && d.shares.mode !== 'none') {
     const price = currentPrice(book)
-    let count = Math.min(Math.floor(nonNeg(d.shares.count)), Math.floor(config.shares.maxChangePerRound * book.shares))
+    let count = Math.min(Math.floor(nonNeg(d.shares.count)), shareCap(d.shares.mode, book.shares, config))
     if (price <= 0) count = 0
     if (d.shares.mode === 'buyback') {
-      const room = round2(treasury - debt)
+      const room = Math.max(0, treasury)
       count = Math.max(0, Math.min(count, Math.floor(room / price)))
       while (count > 0 && round2(count * price) > room) count--
     }
@@ -117,10 +148,20 @@ export function sanitizeDecision(state: GameState, companyId: string, raw: unkno
     }
   }
 
+  // Land, while the treasury allows.
+  let rows = ownedRows(company, config)
+  let buy = Math.floor(nonNeg(d.landRows))
+  while (buy > 0 && landCost(rows, buy, config) > treasury) buy--
+  if (buy > 0) {
+    out.landRows = buy
+    treasury = round2(treasury - landCost(rows, buy, config))
+    rows += buy
+  }
+
   // Upgrades, while the treasury allows.
   for (const id of d.upgrades) {
     const b = buildings.find((x) => x.id === id)
-    if (!b || out.upgrades.includes(id) || b.size !== 'small' || b.status !== 'online') continue
+    if (!b || out.upgrades.includes(id) || !canUpgrade(b)) continue
     const cost = upgradeCost(b, config)
     if (cost > treasury) continue
     out.upgrades.push(id)
@@ -149,11 +190,20 @@ export function sanitizeDecision(state: GameState, companyId: string, raw: unkno
     kept.push(placed)
     treasury = round2(treasury - cost)
   }
-  const tiles = placeOrders(takenTiles({ ...company, buildings }), kept.map((o) => o.tile), config)
-  kept.forEach((o, i) => (o.tile = tiles[i]))
+  // An order with no lot left on the owned land is dropped and refunded.
+  const tiles = placeOrders(takenTiles({ ...company, buildings }), kept.map((o) => o.tile), config, rows)
+  kept.forEach((o, i) => {
+    const t = tiles[i]
+    if (t) o.tile = t
+    else {
+      out.builds.splice(out.builds.indexOf(o), 1)
+      treasury = round2(treasury + buildCost(o, config))
+    }
+  })
 
-  // Allocations, against this round's capacity.
-  const alloc = clampAllocations(capacity({ ...company, buildings }), d.power, d.compute, d.rentMw)
+  // Allocations, against this round's capacity, with the commitment floors.
+  const cap = capacity({ ...company, buildings })
+  const alloc = clampAllocations(cap, d.power, d.compute, d.rentMw, floorsFor(company, cap, config))
   out.power = alloc.power
   out.compute = alloc.compute
   out.rentMw = alloc.rentMw

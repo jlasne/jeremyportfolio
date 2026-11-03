@@ -11,13 +11,16 @@ export type PowerPool = 'citizens' | 'otherDc'
 export type ComputePool = 'cloud' | 'btc' | 'ai'
 export type BotStyle = 'volta' | 'nimbus' | 'hashfield'
 export type BuildingKind = 'plant' | 'dc'
-export type Size = 'small' | 'big'
+/** Level 1, 2 and 3. Only small and big can be ordered; mega is reached by upgrading a big building. */
+export type Size = 'small' | 'big' | 'mega'
+/** Sizes a build order can name. */
+export type BuildSize = 'small' | 'big'
 export type LinkUse = 'internal' | 'town' | 'import'
-/** A lot on the company plot: [column, row]. 4 columns per row, rows grow down without limit. */
+/** A lot on the company plot: [column, row]. 4 columns per row, rows up to the company's owned land rows. */
 export type Tile = [number, number]
 
 export interface GameState {
-  version: 1
+  version: 2
   seed: number
   /** The round being decided, 1 to `rounds`. After the last round resolves it is `rounds + 1`. */
   round: number
@@ -42,6 +45,8 @@ export interface Pool {
   expectedGrowth: number
   /** Used MW per company id in the last resolved round. Bankrupt companies are removed. */
   lastUsed: Record<string, number>
+  /** Consecutive rounds each company has served this pool (used above 0). Gives priority on open MW. */
+  tenure: Record<string, number>
 }
 
 export interface Company {
@@ -61,6 +66,8 @@ export interface Company {
   buildings: Building[]
   links: Link[]
   loans: Loan[]
+  /** Lot rows the company owns (plot.lotsPerRow lots each). Builds only go on owned rows. */
+  landRows: number
   /** One RoundResult per resolved round, oldest first. */
   history: RoundResult[]
   /** The decision resolved last round, sanitized. Repeated (allocations only) when a player misses the timer. */
@@ -71,10 +78,10 @@ export interface Building {
   id: string
   kind: BuildingKind
   size: Size
-  /** MW it delivers now: 0 while building, 2 while a small one upgrades, then 10. */
+  /** MW it delivers now: 0 while building, the current level's MW while upgrading, then the new level's. */
   mw: number
   status: 'building' | 'online' | 'upgrading'
-  /** Rounds until it is online (building) or big (upgrading). 0 when online. */
+  /** Rounds until it is online (building) or one level up (upgrading). 0 when online. */
   roundsLeft: number
   /** Everything paid for it, upgrades included. Maintenance and sell-back are shares of this. */
   pricePaid: number
@@ -102,7 +109,7 @@ export interface Loan {
 
 export interface BuildOrder {
   kind: 'plant' | 'dc' | 'link'
-  size?: Size
+  size?: BuildSize
   use?: LinkUse
   mw?: number
   tile?: Tile
@@ -110,8 +117,10 @@ export interface BuildOrder {
 
 export interface Decision {
   builds: BuildOrder[]
-  /** Ids of small online buildings to upgrade to big. */
+  /** Ids of online buildings to upgrade one level (small to big, big to mega). */
   upgrades: string[]
+  /** Land rows to buy this round. Each one costs more than the last; usable for builds at once. */
+  landRows: number
   /** Plant MW: to own datacenters (internal link), to citizens (town link), offered to the other datacenters pool. */
   power: { internal: number; town: number; otherDc: number }
   /** Datacenter MW offered to each compute pool. */
@@ -157,6 +166,9 @@ export type ValidationCode =
   | 'over_import_link'
   | 'over_plant_capacity'
   | 'over_compute_capacity'
+  | 'compute_below_commitment'
+  | 'rent_below_commitment'
+  | 'no_land'
 
 export interface ValidationResult {
   ok: boolean
@@ -171,6 +183,7 @@ export type WarningCode =
   | 'treasury_negative'
   | 'compute_unpowered'
   | 'no_town_link'
+  | 'power_unallocated'
 
 export interface Warning {
   code: WarningCode
@@ -186,12 +199,14 @@ export interface StockBreakdown {
   priceAfter: number
   /** The return r and its parts, as fractions (0.05 = 5%). */
   r: number
-  rParts: { revenueGrowth: number; demandMiss: Record<PoolId, number>; idle: number }
+  rParts: { revenueGrowth: number; demandMiss: Record<PoolId, number>; idle: number; stability: number }
   /** The price move split into signed parts, in price units. They add up to priceAfter - priceBefore (within rounding). */
   parts: {
     revenueGrowth: number
     demandMiss: Record<PoolId, number>
     idle: number
+    /** Premium for revenue from stable clients (citizens, cloud). */
+    stability: number
     fundamentals: number
     debtDrag: number
     shares: number
@@ -207,13 +222,22 @@ export interface StockBreakdown {
   marketCap: number
 }
 
+export interface Costs {
+  power: number
+  rent: number
+  maintenance: number
+  interest: number
+  /** Penalty on plant MW left unallocated: unallocatedPenalty × own power cost per MW. */
+  unallocated: number
+}
+
 export interface RoundResult {
   round: number
   offered: Record<PoolId, number>
   used: Record<PoolId, number>
   revenueByPool: Record<PoolId, number>
   revenue: number
-  costs: { power: number; rent: number; maintenance: number; interest: number }
+  costs: Costs
   profit: number
   /** Principal paid at its due round (not refinanced). */
   principalRepaid: number
@@ -227,6 +251,10 @@ export interface RoundResult {
   dcUsed: number
   /** 1 - used / online, plants and datacenters together, 0 to 1. */
   idle: number
+  /** Plant MW not routed anywhere (not sold, not consumed by own datacenters' offers). */
+  unallocatedMw: number
+  /** Land rows owned this round. */
+  landRows: number
   /** Decision-phase cash moves, as applied. */
   finance: {
     forcedSaleCash: number
@@ -238,6 +266,8 @@ export interface RoundResult {
     sharesBought: number
     shareCash: number
     buildSpend: number
+    landSpend: number
+    landBought: number
   }
   treasury: number
   stock: StockBreakdown
@@ -261,8 +291,11 @@ export interface PoolSummary {
   expectedGrowth: number
   /** Total used MW across companies. */
   used: number
-  /** Company ids with used MW above 0, most used first. Rivals' exact MW stay hidden in the UI. */
+  /** Company ids with used MW above 0, most used first. */
   ranking: string[]
+  /** Offered and used MW per company id this round (public: the market terminal shows them). */
+  offered: Record<string, number>
+  usedBy: Record<string, number>
 }
 
 export interface RoundSummary {
@@ -289,15 +322,20 @@ export interface CompanyPreview {
   shares: number
   buildSpend: number
   financeCash: number
+  landRows: number
+  /** Price of the next land row. */
+  nextRowCost: number
+  freeLots: number
 }
 
 export interface Projection {
   revenueByPool: Record<PoolId, number>
   usedByPool: Record<PoolId, number>
   revenue: number
-  costs: { power: number; rent: number; maintenance: number; interest: number }
+  costs: Costs
   profit: number
   idle: number
+  unallocatedMw: number
   /** Margin per MW of each allocation segment on own power (for the allocate panel). */
   marginPerMw: Record<PoolId, number>
 }

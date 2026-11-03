@@ -5,7 +5,9 @@
 import * as allocation from './allocation'
 import * as assets from './assets'
 import * as bots from './bots'
+import * as cfg from './config'
 import { defaultConfig as balanceConfig } from './config'
+import * as commitment from './commitment'
 import * as create from './create'
 import * as decision from './decision'
 import * as defaults from './defaults'
@@ -31,6 +33,7 @@ import type {
   PoolId,
   Projection,
   RiskView,
+  Size,
   Tile,
   ValidationResult,
   Warning,
@@ -39,7 +42,8 @@ import type {
 export * from './types'
 export { POOLS, POWER_POOLS, COMPUTE_POOLS } from './constants'
 export type { Rng } from './rng'
-export type { AllocationResult } from './allocation'
+export type { AllocationResult, AllocationWeights } from './allocation'
+export type { Floors } from './commitment'
 export type { StockReturnInput } from './stock'
 export { BOT_NAMES } from './create'
 
@@ -123,14 +127,20 @@ export function riskView(state: GameState, companyId: string, decision: Decision
   return projection.riskView(state, companyId, decision, config)
 }
 
-/** The per-pool allocation algorithm of SPEC.md (80% incumbent rule). */
+/** The per-pool allocation algorithm of SPEC.md (80% incumbent rule), open MW weighted by share and tenure when weights are given. */
 export function allocatePool(
   demand: number,
   offers: Record<string, number>,
   lastUsed: Record<string, number>,
   incumbentShare: number,
+  weights?: Record<string, number>,
 ): allocation.AllocationResult {
-  return allocation.allocatePool(demand, offers, lastUsed, incumbentShare)
+  return allocation.allocatePool(demand, offers, lastUsed, incumbentShare, weights)
+}
+
+/** Priority weight of each company on a pool's open MW: (1 + shareWeight × last share) × (1 + tenurePerRound × tenure). */
+export function priorityWeights(state: GameState, pool: PoolId, ids: string[], config: Config = defaultConfig): Record<string, number> {
+  return allocation.priorityWeights(state.pools[pool], ids, config)
 }
 
 /** f(c) = (e^{kc} - 1) / (e^k - 1). */
@@ -138,11 +148,11 @@ export function debtDragFactor(c: number, k: number): number {
   return stock.debtDragFactor(c, k)
 }
 
-/** Step 1 of the stock price: r = 0.5 clamp(dRev) + sum w (g - E) - P_idle. */
+/** Step 1 of the stock price: r = 0.5 clamp(dRev) + sum w beta (g - E) + sum w premium - P_idle. */
 export function stockReturn(
   input: stock.StockReturnInput,
   config: Config = defaultConfig,
-): { r: number; revenueGrowth: number; demandMiss: Record<PoolId, number>; idle: number } {
+): { r: number; revenueGrowth: number; demandMiss: Record<PoolId, number>; idle: number; stability: number } {
   return stock.stockReturn(input, config)
 }
 
@@ -151,14 +161,54 @@ export function capacity(company: Company): { plantMw: number; dcMw: number; lin
   return assets.capacity(company)
 }
 
-/** First free lot, row by row, 4 per row. */
-export function findFreeTile(company: Company, taken: Tile[] = [], config: Config = defaultConfig): Tile {
-  return assets.findFreeTile(company, taken, config)
+/** First free lot on the owned land, row by row, 4 per row; null when the land is full. */
+export function findFreeTile(company: Company, taken: Tile[] = [], config: Config = defaultConfig, rows?: number): Tile | null {
+  return rows === undefined ? assets.findFreeTile(company, taken, config) : assets.firstFree(assets.takenTiles(company, taken), config, rows)
 }
 
-/** Lot rows to draw: at least plot.startRows, and always one free row under the last building. */
-export function plotRows(company: Company, extra: Tile[] = [], config: Config = defaultConfig): number {
-  return assets.plotRows(company, extra, config)
+/** Lot rows to draw: the owned rows and one locked row for sale under them. */
+export function plotRows(company: Company, extra: Tile[] = [], config: Config = defaultConfig, owned?: number): number {
+  return assets.plotRows(company, extra, config, owned ?? assets.ownedRows(company, config))
+}
+
+/** Land rows the company owns. */
+export function ownedRows(company: Company, config: Config = defaultConfig): number {
+  return assets.ownedRows(company, config)
+}
+
+/** Price of buying `count` more land rows on top of `owned` rows (each row costs rowCostGrowth more than the last). */
+export function landCost(owned: number, count: number, config: Config = defaultConfig): number {
+  return assets.landCost(owned, count, config)
+}
+
+/** Free lots on `rows` owned rows, with `extra` lots taken by draft orders. */
+export function freeLots(company: Company, rows: number, extra: Tile[] = [], config: Config = defaultConfig): number {
+  return assets.freeLots(company, rows, extra, config)
+}
+
+/** True for an online building below level 3. */
+export function canUpgrade(building: Building): boolean {
+  return assets.canUpgrade(building)
+}
+
+/** The next level of a size (small to big, big to mega), null at level 3. */
+export function nextSize(size: Size): Size | null {
+  return cfg.nextSize(size)
+}
+
+/** 1, 2 or 3. */
+export function levelOf(size: Size): 1 | 2 | 3 {
+  return cfg.levelOf(size)
+}
+
+/** Cost and build time of the next upgrade of a building of this kind and size. */
+export function upgradeSpec(kind: Building['kind'], from: Size, config: Config = defaultConfig): { cost: number; rounds: number } {
+  return cfg.upgradeSpec(config, kind, from)
+}
+
+/** Lowest compute offer per pool and rent the 30% commitment rule allows this round. */
+export function commitmentFloors(state: GameState, companyId: string, config: Config = defaultConfig): commitment.Floors {
+  return commitment.commitmentFloors(state, companyId, config)
 }
 
 export function buildCost(order: BuildOrder, config: Config = defaultConfig): number {

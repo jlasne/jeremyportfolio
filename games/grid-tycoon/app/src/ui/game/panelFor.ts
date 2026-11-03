@@ -8,7 +8,7 @@ export function panelForIssue(issue: ValidationIssue | undefined): PanelId | 'fo
   const f = issue?.field ?? ''
   if (f.startsWith('forcedSales')) return 'forced'
   if (f.startsWith('power') || f.startsWith('compute') || f.startsWith('rentMw')) return 'allocate'
-  if (f.startsWith('builds') || f.startsWith('upgrades')) return 'build'
+  if (f.startsWith('builds') || f.startsWith('upgrades') || f.startsWith('landRows')) return 'build'
   if (f.startsWith('loans') || f.startsWith('shares')) return 'finance'
   return null
 }
@@ -21,6 +21,7 @@ const WARNING_PANEL: Record<WarningCode, PanelId> = {
   compute_unpowered: 'allocate',
   loan_due_soon: 'finance',
   treasury_negative: 'build',
+  power_unallocated: 'allocate',
 }
 
 export function panelForWarning(code: WarningCode): PanelId {

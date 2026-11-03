@@ -201,6 +201,7 @@ export type RoomResponse<T> = RoomSuccess<T> | RoomFailure
 export interface WireDecision {
   builds: { kind: 'plant' | 'dc' | 'link'; size?: 'small' | 'big'; use?: 'internal' | 'town' | 'import'; mw?: number; tile?: [number, number] }[]
   upgrades: string[]
+  landRows: number
   power: { internal: number; town: number; otherDc: number }
   compute: { cloud: number; btc: number; ai: number }
   rentMw: number
@@ -325,7 +326,8 @@ export function parseDecision(raw: unknown): WireDecision | null {
   const rentMw = raw.rentMw === undefined ? 0 : num(raw.rentMw)
   const upgrades = idList(raw.upgrades)
   const forcedSales = idList(raw.forcedSales)
-  if (!power || !compute || rentMw === null || !upgrades || !forcedSales) return null
+  const landRows = raw.landRows === undefined ? 0 : num(raw.landRows)
+  if (!power || !compute || rentMw === null || !upgrades || !forcedSales || landRows === null) return null
 
   const builds: WireDecision['builds'] = []
   const rawBuilds = raw.builds === undefined ? [] : raw.builds
@@ -380,7 +382,7 @@ export function parseDecision(raw: unknown): WireDecision | null {
   const count = sharesRaw.count === undefined ? 0 : num(sharesRaw.count)
   if (!mode || count === null) return null
 
-  return { builds, upgrades, power, compute, rentMw, loans: { take, repay, refinance }, shares: { mode, count }, forcedSales }
+  return { builds, upgrades, landRows, power, compute, rentMw, loans: { take, repay, refinance }, shares: { mode, count }, forcedSales }
 }
 
 // ---------------------------------------------------------------------------------------------

@@ -59,6 +59,14 @@ export function warnings(state: GameState, companyId: string, decision: Decision
   }
 
   const projection = projectRound(state, companyId, decision, config)
+  if (projection.unallocatedMw > MW_EPSILON) {
+    out.push({
+      code: 'power_unallocated',
+      level: 'critical',
+      label: `${mw(projection.unallocatedMw)} unused`,
+      detail: `${mw(projection.unallocatedMw)} of plant power goes nowhere and costs ${round2(projection.costs.unallocated)} (${config.unallocatedPenalty}× the power cost). Sell it or power compute with it.`,
+    })
+  }
   if (projection.idle > config.stock.idleFree) {
     out.push({
       code: 'idle_high',

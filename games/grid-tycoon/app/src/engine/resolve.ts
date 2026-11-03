@@ -1,9 +1,9 @@
 // resolveRound: one pure function from (state, decisions) to the next state (DESIGN 2.3).
 
-import { allocatePool, matchRent } from './allocation'
-import { capacity, totalDebt } from './assets'
+import { allocatePool, matchRent, priorityWeights } from './allocation'
+import { capacity, ownedRows, totalDebt, unallocatedPower } from './assets'
 import { botDecision } from './bots'
-import { buildingSpec, defaultConfig } from './config'
+import { buildingSpec, defaultConfig, nextSize } from './config'
 import { COMPUTE_POOLS, MW_EPSILON, POOLS, zeroPools } from './constants'
 import { defaultDecision } from './defaults'
 import { companyLoanRate, loanInterest } from './finance'
@@ -55,7 +55,7 @@ function growDemand(state: GameState, config: Config): DemandStep {
  */
 function copyForResolution(s: GameState): GameState {
   const pools = {} as GameState['pools']
-  for (const p of POOLS) pools[p] = { ...s.pools[p], lastUsed: { ...s.pools[p].lastUsed } }
+  for (const p of POOLS) pools[p] = { ...s.pools[p], lastUsed: { ...s.pools[p].lastUsed }, tenure: { ...(s.pools[p].tenure ?? {}) } }
   return {
     ...s,
     pools,
@@ -107,7 +107,8 @@ export function resolveRound(input: GameState, decisions: Record<string, Decisio
   for (const p of POOLS) {
     const offers: Record<string, number> = {}
     for (const c of active) offers[c.id] = offerFor(decided.get(c.id)!, p)
-    used[p] = allocatePool(allocDemand[p], offers, state.pools[p].lastUsed, config.incumbentShare).used
+    const weights = priorityWeights(state.pools[p], active.map((c) => c.id), config)
+    used[p] = allocatePool(allocDemand[p], offers, state.pools[p].lastUsed, config.incumbentShare, weights).used
   }
   const rentAsked: Record<string, number> = {}
   for (const c of active) rentAsked[c.id] = decided.get(c.id)!.rentMw
@@ -134,6 +135,7 @@ export function resolveRound(input: GameState, decisions: Record<string, Decisio
     // Rented MW is paid either way, so compute consumes it before own power.
     const internalConsumed = clamp(computeUsed - d.rentMw, 0, d.power.internal)
     const ownPowerUsed = usedBy.citizens + usedBy.otherDc + internalConsumed
+    const unallocatedMw = unallocatedPower(cap.plantMw, d)
     const fromRivals = Math.min(d.rentMw, rivalFill[c.id] ?? 0)
     const fromMarket = Math.max(0, d.rentMw - fromRivals)
     const costs = {
@@ -141,10 +143,11 @@ export function resolveRound(input: GameState, decisions: Record<string, Decisio
       rent: round2(config.cost.rentRival * fromRivals + config.cost.rentMarket * fromMarket),
       maintenance: round2(config.maintenanceRate * c.buildings.reduce((s, b) => s + (b.status === 'building' ? 0 : b.pricePaid), 0)),
       interest: round2(c.loans.reduce((s, l) => s + loanInterest(l.principal, l.annualRate), 0)),
+      unallocated: round2(config.unallocatedPenalty * config.cost.ownPower * unallocatedMw),
     }
 
     // 6. Profit.
-    const profit = round2(revenue - costs.power - costs.rent - costs.maintenance - costs.interest)
+    const profit = round2(revenue - costs.power - costs.rent - costs.maintenance - costs.interest - costs.unallocated)
     c.treasury = round2(c.treasury + profit)
 
     // 7. Due loans: refinanced ones roll over, the others are paid (a negative treasury is the next losing round).
@@ -197,11 +200,12 @@ export function resolveRound(input: GameState, decisions: Record<string, Decisio
       priceBefore: prevCompany.sharePrice,
       priceAfter: sharePrice,
       r: sr.r,
-      rParts: { revenueGrowth: sr.revenueGrowth, demandMiss: sr.demandMiss, idle: -sr.idle },
+      rParts: { revenueGrowth: sr.revenueGrowth, demandMiss: sr.demandMiss, idle: -sr.idle, stability: sr.stability },
       parts: {
         revenueGrowth: per(base * sr.revenueGrowth),
         demandMiss,
         idle: per(-base * sr.idle),
+        stability: per(base * sr.stability),
         fundamentals: per(fw * (fv - bvPrev)),
         // When the floor binds, the floor keeps part of the drag off the market cap; the part shows what was taken.
         debtDrag: per((prev?.stock.debtDragMoney ?? 0) - round2(bv - marketCap)),
@@ -227,7 +231,7 @@ export function resolveRound(input: GameState, decisions: Record<string, Decisio
       if (b.roundsLeft <= 0) continue
       b.roundsLeft -= 1
       if (b.roundsLeft > 0) continue
-      if (b.status === 'upgrading') b.size = 'big'
+      if (b.status === 'upgrading') b.size = nextSize(b.size) ?? b.size
       b.status = 'online'
       b.mw = buildingSpec(config, b.kind, b.size).mw
       completed.push(b.id)
@@ -254,6 +258,8 @@ export function resolveRound(input: GameState, decisions: Record<string, Decisio
       plantUsed: ownPowerUsed,
       dcUsed: computeUsed,
       idle,
+      unallocatedMw,
+      landRows: ownedRows(c, config),
       finance: ph.finance,
       treasury: c.treasury,
       stock,
@@ -275,12 +281,21 @@ export function resolveRound(input: GameState, decisions: Record<string, Decisio
     pool.demand = step.demand[p]
     pool.growth = step.growth[p]
     pool.expectedGrowth = step.expected[p]
+    const prevTenure = pool.tenure ?? {}
     pool.lastUsed = {}
+    pool.tenure = {}
     let total = 0
+    const offeredBy: Record<string, number> = {}
+    const usedBy: Record<string, number> = {}
     for (const c of active) {
       const u = used[p][c.id] ?? 0
       total += u
-      if (!c.bankrupt) pool.lastUsed[c.id] = u
+      offeredBy[c.id] = offerFor(decided.get(c.id)!, p)
+      usedBy[c.id] = u
+      if (!c.bankrupt) {
+        pool.lastUsed[c.id] = u
+        pool.tenure[c.id] = u > MW_EPSILON ? (prevTenure[c.id] ?? 0) + 1 : 0
+      }
     }
     const ranking = active
       .map((c, i) => ({ id: c.id, u: used[p][c.id] ?? 0, i }))
@@ -294,6 +309,8 @@ export function resolveRound(input: GameState, decisions: Record<string, Decisio
       expectedGrowth: step.expected[p],
       used: total,
       ranking,
+      offered: offeredBy,
+      usedBy,
     }
   }
 

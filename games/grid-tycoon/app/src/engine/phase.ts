@@ -2,7 +2,7 @@
 // Resolution feeds sanitized decisions; the preview feeds raw drafts, so every step
 // skips what it cannot apply instead of throwing, and never clamps to the treasury.
 
-import { buildCost, isBuildingOrder, placeOrders, sellValue, takenTiles, upgradeCost } from './assets'
+import { buildCost, canUpgrade, isBuildingOrder, landCost, ownedRows, placeOrders, sellValue, takenTiles, upgradeCost } from './assets'
 import { buildingSpec, upgradeSpec } from './config'
 import { finite, round2 } from './money'
 import type { Building, Company, Config, Decision, Loan, RoundResult } from './types'
@@ -62,6 +62,8 @@ function emptyFinance(): RoundResult['finance'] {
     sharesBought: 0,
     shareCash: 0,
     buildSpend: 0,
+    landSpend: 0,
+    landBought: 0,
   }
 }
 
@@ -150,21 +152,31 @@ export function applyPhase(company: Company, decision: Decision, ctx: PhaseConte
     finance.shareCash = -cash
   }
 
-  // 6. Upgrades, then builds.
+  // 6. Land, then upgrades, then builds.
+  const rows = ownedRows(company, config)
+  const buyRows = Math.floor(Math.max(0, finite(decision.landRows)))
+  if (buyRows > 0) {
+    const cost = landCost(rows, buyRows, config)
+    company.landRows = rows + buyRows
+    company.treasury = round2(company.treasury - cost)
+    finance.landSpend = cost
+    finance.landBought = buyRows
+  } else company.landRows = rows
+
   const upgraded = new Set<string>()
   for (const id of decision.upgrades) {
     const b = company.buildings.find((x) => x.id === id)
-    if (!b || upgraded.has(id) || b.size !== 'small' || b.status !== 'online') continue
+    if (!b || upgraded.has(id) || !canUpgrade(b)) continue
     upgraded.add(id)
     const cost = upgradeCost(b, config)
     b.status = 'upgrading'
-    b.roundsLeft = upgradeSpec(config, b.kind).rounds
+    b.roundsLeft = upgradeSpec(config, b.kind, b.size).rounds
     b.pricePaid = round2(b.pricePaid + cost)
     company.treasury = round2(company.treasury - cost)
     finance.buildSpend = round2(finance.buildSpend + cost)
   }
 
-  const tiles = placeOrders(takenTiles(company), decision.builds.filter(isBuildingOrder).map((o) => o.tile), config)
+  const tiles = placeOrders(takenTiles(company), decision.builds.filter(isBuildingOrder).map((o) => o.tile), config, company.landRows)
   let nextTile = 0
   for (const order of decision.builds) {
     if (order.kind === 'link') {
@@ -178,6 +190,8 @@ export function applyPhase(company: Company, decision: Decision, ctx: PhaseConte
     }
     if (!isBuildingOrder(order)) continue
     const tile = tiles[nextTile++]
+    // No free lot on the owned land: the order cannot be placed (sanitize drops it first).
+    if (!tile) continue
     const spec = buildingSpec(config, order.kind, order.size)
     const building: Building = {
       id: ctx.nextId('b'),

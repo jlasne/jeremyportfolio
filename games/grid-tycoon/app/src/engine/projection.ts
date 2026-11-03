@@ -1,8 +1,9 @@
 // UI helpers (DESIGN 2.5): the draft applied to a copy of the company, the projection line,
 // the risk view under the loan stepper, and coins per building.
 
-import { capacity, companyById, finalCapacity, totalDebt } from './assets'
-import { buildingSpec, defaultConfig } from './config'
+import { capacity, companyById, finalCapacity, freeLots, landCost, ownedRows, totalDebt, unallocatedPower } from './assets'
+import { floorsFor } from './commitment'
+import { buildingSpec, defaultConfig, nextSize } from './config'
 import { COMPUTE_POOLS, POOLS, zeroPools } from './constants'
 import { readDecision } from './decision'
 import { companyLoanRate, loanInterest } from './finance'
@@ -49,8 +50,11 @@ export function previewCompany(state: GameState, companyId: string, decision: De
     debt: totalDebt(company),
     sharePrice: company.sharePrice,
     shares: company.shares,
-    buildSpend: f.buildSpend,
+    buildSpend: round2(f.buildSpend + f.landSpend),
     financeCash: round2(f.forcedSaleCash + outcome.forcedIssueCash + f.loanTaken - f.repaid + f.shareCash),
+    landRows: ownedRows(company, config),
+    nextRowCost: landCost(ownedRows(company, config), 1, config),
+    freeLots: freeLots(company, ownedRows(company, config), [], config),
   }
 }
 
@@ -75,7 +79,8 @@ export function rivalFillShare(state: GameState, rentMw: number, companyId?: str
 export function projectRound(state: GameState, companyId: string, decision: Decision, config: Config = defaultConfig): Projection {
   const { company, draft } = applyDraft(state, companyId, decision, config)
   const cap = capacity(company)
-  const alloc = clampAllocations(cap, draft.power, draft.compute, draft.rentMw)
+  const alloc = clampAllocations(cap, draft.power, draft.compute, draft.rentMw, floorsFor(companyById(state, companyId), cap, config))
+  const unallocatedMw = unallocatedPower(cap.plantMw, alloc)
   const offer: Record<PoolId, number> = {
     citizens: alloc.power.town,
     otherDc: alloc.power.otherDc,
@@ -102,6 +107,7 @@ export function projectRound(state: GameState, companyId: string, decision: Deci
     rent: round2(alloc.rentMw * (fill * config.cost.rentRival + (1 - fill) * config.cost.rentMarket)),
     maintenance: round2(config.maintenanceRate * company.buildings.reduce((s, b) => s + (b.status === 'building' ? 0 : b.pricePaid), 0)),
     interest: round2(company.loans.reduce((s, l) => s + loanInterest(l.principal, l.annualRate), 0)),
+    unallocated: round2(config.unallocatedPenalty * config.cost.ownPower * unallocatedMw),
   }
   const online = cap.plantMw + cap.dcMw
   return {
@@ -109,7 +115,8 @@ export function projectRound(state: GameState, companyId: string, decision: Deci
     usedByPool,
     revenue,
     costs,
-    profit: round2(revenue - costs.power - costs.rent - costs.maintenance - costs.interest),
+    unallocatedMw,
+    profit: round2(revenue - costs.power - costs.rent - costs.maintenance - costs.interest - costs.unallocated),
     idle: online > 0 ? clamp(1 - (ownPowerUsed + computeUsed) / online, 0, 1) : 0,
     marginPerMw,
   }
@@ -167,8 +174,11 @@ export function revenueByBuilding(state: GameState, companyId: string, config: C
   const delivered = (b: Building): number => {
     if (b.status === 'building') return 0
     if (!finishedNow.has(b.id)) return b.mw
-    const newOrder = b.builtRound + buildingSpec(config, b.kind, b.size).rounds - 1 === last.round
-    return newOrder ? 0 : buildingSpec(config, b.kind, 'small').mw
+    const newOrder = b.builtRound + buildingSpec(config, b.kind, b.size).rounds - 1 === last.round && b.size !== 'mega'
+    if (newOrder) return 0
+    // An upgrade that just finished ran at the level below during that round.
+    const below = b.size === 'mega' ? 'big' : 'small'
+    return nextSize(below) === b.size ? buildingSpec(config, b.kind, below).mw : b.mw
   }
   const split = (kind: Building['kind'], amount: number): void => {
     const list = company.buildings.filter((b) => b.kind === kind)

@@ -37,20 +37,27 @@ function idlePenalty(idle: number, config: Config = defaultConfig): number {
   return Math.max(0, idle - config.stock.idleFree) * config.stock.idlePenaltyPer10 * 10
 }
 
-/** Step 1 of the stock price: r = 0.5 clamp(dRev) + sum w (g - E) - P_idle. */
+/**
+ * Step 1 of the stock price: r = 0.5 clamp(dRev) + sum w beta (g - E) + sum w premium - P_idle.
+ * beta scales how hard a demand surprise moves the price (bitcoin swings hardest, citizens and cloud
+ * least); premium is a small steady return the market pays for revenue from stable clients.
+ */
 export function stockReturn(
   input: StockReturnInput,
   config: Config = defaultConfig,
-): { r: number; revenueGrowth: number; demandMiss: Record<PoolId, number>; idle: number } {
+): { r: number; revenueGrowth: number; demandMiss: Record<PoolId, number>; idle: number; stability: number } {
   const rev = config.stock.revenueGrowthWeight * revenueGrowth(input.revenue, input.prevRevenue, config)
   const demandMiss = zeroPools()
   let miss = 0
+  let stability = 0
   for (const p of POOLS) {
-    demandMiss[p] = (input.weights[p] ?? 0) * ((input.growth[p] ?? 0) - (input.expected[p] ?? 0))
+    const w = input.weights[p] ?? 0
+    demandMiss[p] = w * (config.stock.poolBeta[p] ?? 1) * ((input.growth[p] ?? 0) - (input.expected[p] ?? 0))
     miss += demandMiss[p]
+    stability += w * (config.stock.stabilityPremium[p] ?? 0)
   }
   const idle = idlePenalty(input.idle, config)
-  return { r: rev + miss - idle, revenueGrowth: rev, demandMiss, idle }
+  return { r: rev + miss + stability - idle, revenueGrowth: rev, demandMiss, idle, stability }
 }
 
 /** FV = profitMultiple × max(mean recent profit, 0) + bookWeight × building price paid. */

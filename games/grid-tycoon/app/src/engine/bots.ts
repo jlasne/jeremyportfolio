@@ -1,8 +1,8 @@
 // The three bot styles of SPEC.md. Deterministic, no RNG, public information only: the round
 // summaries, pool growth, and the bot's own company. Every output goes through sanitize.
 
-import { buildCost, capacity, finalCapacity, findCompany, totalDebt } from './assets'
-import { buildingSpec, defaultConfig } from './config'
+import { buildCost, canUpgrade, capacity, finalCapacity, findCompany, freeLots, landCost, ownedRows, totalDebt } from './assets'
+import { buildingSpec, defaultConfig, nextSize, upgradeSpec } from './config'
 import { LINK_USES, MW_EPSILON, POOLS } from './constants'
 import { emptyDecision } from './decision'
 import { defaultDecision } from './defaults'
@@ -11,7 +11,7 @@ import { round2 } from './money'
 import { currentPrice } from './phase'
 import { rivalFillShare } from './projection'
 import { sanitizeDecision } from './sanitize'
-import type { BotStyle, BuildingKind, Company, Config, Decision, GameState, LinkUse, PoolId, Size } from './types'
+import type { BotStyle, BuildingKind, BuildSize, Company, Config, Decision, GameState, LinkUse, PoolId } from './types'
 
 interface Style {
   /** The clients of SPEC.md's bot table. Builds are sized for these pools only. */
@@ -25,7 +25,7 @@ interface Style {
   kindBias: Record<BuildingKind, number>
   /** Multiplies the return of a big build: how much it prefers fewer, larger buildings. */
   bigBias: number
-  sizes: Size[]
+  sizes: BuildSize[]
   rents: boolean
   /** Rounds of demand growth it looks past a build's completion when sizing it. */
   lookahead: number
@@ -94,8 +94,15 @@ const HABITS = {
 
 interface BuildStep {
   kind: BuildingKind
-  size: Size
+  size: BuildSize
+  /** Set for an upgrade of an existing building (one level up, no lot). */
+  upgrade?: { id: string; mw: number; cost: number; rounds: number }
 }
+
+const stepMw = (s: BuildStep, config: Config): number => s.upgrade?.mw ?? buildingSpec(config, s.kind, s.size).mw
+const stepCost = (s: BuildStep, config: Config): number => s.upgrade?.cost ?? buildingSpec(config, s.kind, s.size).cost
+const stepRounds = (s: BuildStep, config: Config): number => s.upgrade?.rounds ?? buildingSpec(config, s.kind, s.size).rounds
+const stepLots = (steps: BuildStep[]): number => steps.filter((s) => !s.upgrade).length
 
 interface Candidate {
   steps: BuildStep[]
@@ -134,7 +141,7 @@ function buildWeights(style: Style): Record<PoolId, number> {
 function grow(res: Resources, steps: BuildStep[], config: Config): Resources {
   let { plant, dc } = res
   for (const s of steps) {
-    const mw = buildingSpec(config, s.kind, s.size).mw
+    const mw = stepMw(s, config)
     if (s.kind === 'plant') plant += mw
     else dc += mw
   }
@@ -190,6 +197,17 @@ export function botDecision(state: GameState, companyId: string, config: Config 
   const multiple = config.bots.buildTreasuryMultiple
   const price = currentPrice(company)
   const shareCap = Math.floor(config.shares.maxChangePerRound * company.shares)
+  const buybackCap = Math.floor(config.shares.maxBuybackPerRound * company.shares)
+  // Land: lots left on the owned rows, and rows bought this round.
+  const startRows = ownedRows(company, config)
+  let lotsLeft = freeLots(company, startRows, [], config)
+  let rowsBought = 0
+  const upgradedNow = new Set<string>()
+  const landFor = (lots: number): { rows: number; cost: number } => {
+    const short = Math.max(0, lots - lotsLeft)
+    const rows = Math.ceil(short / config.plot.lotsPerRow)
+    return { rows, cost: rows > 0 ? landCost(startRows + rowsBought, rows, config) : 0 }
+  }
   let issued = 0
   let built = 0
 
@@ -207,7 +225,8 @@ export function botDecision(state: GameState, companyId: string, config: Config 
     let chosen: Candidate | null = null
     const reach = treasury + loanRoom(style, company, debt, d.loans.take, config) + (style.finance === 'equity' ? (shareCap - issued) * price : 0)
     const crowded = pipelineIdle(future) > config.bots.maxIdle
-    for (const c of candidates(style, future, remaining, planBuild, config, reach / multiple, crowded)) {
+    const ups = company.buildings.filter((b) => canUpgrade(b) && !upgradedNow.has(b.id))
+    for (const c of candidates(style, future, remaining, planBuild, config, reach / multiple, crowded, ups, landFor)) {
       const needed = multiple * c.cost
       if (treasury < needed) {
         const raise = round2(needed - treasury)
@@ -227,14 +246,27 @@ export function botDecision(state: GameState, companyId: string, config: Config 
       break
     }
     if (!chosen) break
+    const land = landFor(stepLots(chosen.steps))
+    if (land.rows > 0) {
+      rowsBought += land.rows
+      lotsLeft += land.rows * config.plot.lotsPerRow
+      treasury = round2(treasury - land.cost)
+    }
     for (const s of chosen.steps) {
-      d.builds.push({ kind: s.kind, size: s.size })
-      treasury = round2(treasury - buildingSpec(config, s.kind, s.size).cost)
+      if (s.upgrade) {
+        d.upgrades.push(s.upgrade.id)
+        upgradedNow.add(s.upgrade.id)
+      } else {
+        d.builds.push({ kind: s.kind, size: s.size })
+        lotsLeft--
+      }
+      treasury = round2(treasury - stepCost(s, config))
     }
     future = grow(future, chosen.steps, config)
     built++
   }
   if (issued > 0) d.shares = { mode: 'issue', count: issued }
+  if (rowsBought > 0) d.landRows = rowsBought
 
   // 4. Links sized to what the plan will route through them, bought with the builds.
   const need = plan(1 + style.lookahead, { ...future, links: openLinks }, true).linkUse
@@ -260,7 +292,7 @@ export function botDecision(state: GameState, companyId: string, config: Config 
       }
     } else if (style.buysBack && price > 0) {
       const room = round2(treasury - debt - buffer)
-      const count = Math.min(shareCap, Math.floor(Math.max(0, room) / price))
+      const count = Math.min(buybackCap, Math.floor(Math.max(0, room) / price))
       if (count > 0) d.shares = { mode: 'buyback', count }
     }
   }
@@ -276,17 +308,31 @@ function candidates(
   config: Config,
   maxCost = INF,
   crowded = false,
+  upgradable: Company['buildings'] = [],
+  landFor: (lots: number) => { rows: number; cost: number } = () => ({ rows: 0, cost: 0 }),
 ): Candidate[] {
   const options: BuildStep[][] = []
   for (const size of style.sizes) {
     options.push([{ kind: 'plant', size }], [{ kind: 'dc', size }], [{ kind: 'plant', size }, { kind: 'dc', size }])
   }
+  // Upgrades: one per kind and level, the first such building (they are alike).
+  const seen = new Set<string>()
+  for (const b of upgradable) {
+    const to = nextSize(b.size)
+    const key = `${b.kind}-${b.size}`
+    if (!to || seen.has(key)) continue
+    seen.add(key)
+    const spec = upgradeSpec(config, b.kind, b.size)
+    const mw = buildingSpec(config, b.kind, to).mw - buildingSpec(config, b.kind, b.size).mw
+    options.push([{ kind: b.kind, size: 'big', upgrade: { id: b.id, mw, cost: spec.cost, rounds: spec.rounds } }])
+  }
   const bases = new Map<number, Plan>()
   const out: Candidate[] = []
   for (const steps of options) {
-    const buildPrice = steps.reduce((s, x) => s + buildingSpec(config, x.kind, x.size).cost, 0)
+    const land = landFor(stepLots(steps))
+    const buildPrice = steps.reduce((s, x) => s + stepCost(x, config), 0) + land.cost
     if (buildPrice > maxCost) continue
-    const rounds = Math.max(...steps.map((s) => buildingSpec(config, s.kind, s.size).rounds))
+    const rounds = Math.max(...steps.map((s) => stepRounds(s, config)))
     const online = remaining - rounds + 1
     if (online < HABITS.minRoundsOnline) continue
     const h = rounds + style.lookahead

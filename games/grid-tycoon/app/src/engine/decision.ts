@@ -7,6 +7,7 @@ export function emptyDecision(): Decision {
   return {
     builds: [],
     upgrades: [],
+    landRows: 0,
     power: { internal: 0, town: 0, otherDc: 0 },
     compute: { cloud: 0, btc: 0, ai: 0 },
     rentMw: 0,
@@ -56,6 +57,7 @@ export function readDecision(raw: unknown): ReadDecision {
   return {
     builds,
     upgrades: arr(d.upgrades).map(str).filter((x): x is string => x !== null),
+    landRows: num(d.landRows),
     power: { internal: num(power.internal), town: num(power.town), otherDc: num(power.otherDc) },
     compute: { cloud: num(compute.cloud), btc: num(compute.btc), ai: num(compute.ai) },
     rentMw: num(d.rentMw),

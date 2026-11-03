@@ -1,14 +1,22 @@
 // Strict validation (DESIGN 2.4): every issue, in phase order, each with a code.
 
-import { buildCost, capacity, findCompany, inPlot, isTile, markTile, sellValue, takenTiles, tileFree, upgradeCost } from './assets'
+import { buildCost, canUpgrade, capacity, findCompany, firstFree, inPlot, isTile, landCost, markTile, ownedRows, sellValue, takenTiles, tileFree, upgradeCost } from './assets'
+import { floorsFor } from './commitment'
 import { defaultConfig } from './config'
-import { MW_EPSILON } from './constants'
+import { COMPUTE_POOLS, MW_EPSILON } from './constants'
 import { readDecision } from './decision'
 import { round2 } from './money'
 import { currentPrice, forcedIssue, type ShareBook } from './phase'
 import type { Building, Config, GameState, ValidationCode, ValidationIssue, ValidationResult } from './types'
 
 const isNum = (x: number): boolean => Number.isFinite(x)
+
+/** Shares one action may move this round: issue up to maxChangePerRound, buy back up to maxBuybackPerRound. */
+export function shareCap(mode: 'none' | 'issue' | 'buyback', shares: number, config: Config): number {
+  if (mode === 'none') return 0
+  const rate = mode === 'issue' ? config.shares.maxChangePerRound : config.shares.maxBuybackPerRound
+  return Math.floor(rate * shares)
+}
 
 export function validateDecision(state: GameState, companyId: string, raw: unknown, config: Config = defaultConfig): ValidationResult {
   const errors: ValidationIssue[] = []
@@ -97,12 +105,10 @@ export function validateDecision(state: GameState, companyId: string, raw: unkno
   })
 
   // New loan.
-  let debt = round2([...principal.values()].reduce((a, b) => a + b, 0))
   if (!isNum(d.loans.take) || d.loans.take < 0) {
     push('negative', 'A loan must be a number of 0 or more.', 'loans.take')
   } else {
     treasury = round2(treasury + round2(d.loans.take))
-    debt = round2(debt + round2(d.loans.take))
   }
 
   // Shares.
@@ -113,24 +119,34 @@ export function validateDecision(state: GameState, companyId: string, raw: unkno
     const shares = book.shares
     if (!isNum(count) || count < 0) push('negative', 'Share count must be 0 or more.', 'shares.count')
     else if (!Number.isInteger(count)) push('not_integer', 'Shares come in whole numbers.', 'shares.count')
-    else if (count > Math.floor(config.shares.maxChangePerRound * shares)) {
-      push('shares_over_cap', `At most ${Math.floor(config.shares.maxChangePerRound * shares)} shares this round.`, 'shares.count')
+    else if (count > shareCap(d.shares.mode, shares, config)) {
+      const cap = shareCap(d.shares.mode, shares, config)
+      push('shares_over_cap', `At most ${cap} shares ${d.shares.mode === 'issue' ? 'issued' : 'bought back'} this round.`, 'shares.count')
     } else {
       const cash = round2(count * currentPrice(book))
       if (d.shares.mode === 'issue') treasury = round2(treasury + cash)
       else {
-        if (cash > round2(treasury - debt)) push('buyback_over_cash', 'A buyback cannot exceed treasury minus debt.', 'shares.count')
+        if (cash > treasury) push('buyback_over_cash', 'A buyback is paid from the treasury: not enough cash.', 'shares.count')
         treasury = round2(treasury - cash)
       }
     }
+  }
+
+  // Land.
+  let rows = ownedRows(company, config)
+  if (!isNum(d.landRows) || d.landRows < 0) push('negative', 'Land rows must be 0 or more.', 'landRows')
+  else if (!Number.isInteger(d.landRows)) push('not_integer', 'Land comes in whole rows.', 'landRows')
+  else if (d.landRows > 0) {
+    treasury = round2(treasury - landCost(rows, d.landRows, config))
+    rows += d.landRows
   }
 
   // Upgrades.
   const upgraded = new Set<string>()
   d.upgrades.forEach((id, i) => {
     const b = buildings.find((x) => x.id === id)
-    if (!b || upgraded.has(id) || b.size !== 'small' || b.status !== 'online') {
-      push('upgrade_invalid', 'Only an online small building can be upgraded, once.', `upgrades.${i}`)
+    if (!b || upgraded.has(id) || !canUpgrade(b)) {
+      push('upgrade_invalid', 'Only an online building below level 3 can be upgraded, once per round.', `upgrades.${i}`)
       return
     }
     upgraded.add(id)
@@ -139,6 +155,7 @@ export function validateDecision(state: GameState, companyId: string, raw: unkno
 
   // Builds.
   const taken = takenTiles(afterSales)
+  const unnamed: string[] = []
   d.builds.forEach((order, i) => {
     const field = `builds.${i}`
     if (order.kind === 'link') {
@@ -155,12 +172,12 @@ export function validateDecision(state: GameState, companyId: string, raw: unkno
       return
     }
     if ((order.kind !== 'plant' && order.kind !== 'dc') || (order.size !== 'small' && order.size !== 'big')) {
-      push('build_invalid', 'Build a small or big plant or datacenter, or a link.', field)
+      push('build_invalid', 'Build a small or big plant or datacenter, or a link. Level 3 comes only from an upgrade.', field)
       return
     }
     if (order.tile !== undefined) {
-      if (!isTile(order.tile) || !inPlot(order.tile, config)) {
-        push('tile_out_of_plot', 'That lot is outside the plot.', `${field}.tile`)
+      if (!isTile(order.tile) || !inPlot(order.tile, config, rows)) {
+        push('tile_out_of_plot', 'That lot is outside your land: buy a row first.', `${field}.tile`)
         return
       }
       if (!tileFree(taken, order.tile)) {
@@ -168,9 +185,19 @@ export function validateDecision(state: GameState, companyId: string, raw: unkno
         return
       }
       markTile(taken, order.tile)
-    }
+    } else unnamed.push(field)
     treasury = round2(treasury - buildCost(order, config))
   })
+
+  // Orders without a lot take the first free ones; there must be enough free lots for them.
+  for (const field of unnamed) {
+    const free = firstFree(taken, config, rows)
+    if (!free) {
+      push('no_land', 'No free lot left: buy a land row or upgrade a building instead.', field)
+      continue
+    }
+    markTile(taken, free)
+  }
 
   if (treasury < 0) push('over_treasury', 'Not enough treasury for these orders.', 'builds')
 
@@ -203,6 +230,14 @@ export function validateDecision(state: GameState, companyId: string, raw: unkno
     if (compute > Math.min(cap.dcMw, internal + d.rentMw) + MW_EPSILON) {
       push('over_compute_capacity', 'More compute than your powered datacenters offer.', 'compute')
     }
+    // Commitment: an offer drops by at most 30% a round.
+    const floors = floorsFor(company, cap, config)
+    for (const p of COMPUTE_POOLS) {
+      if (d.compute[p] < floors.compute[p] - MW_EPSILON) {
+        push('compute_below_commitment', `Compute to ${p} can drop to ${floors.compute[p]} MW at least this round (30% a round at most).`, `compute.${p}`)
+      }
+    }
+    if (d.rentMw < floors.rentMw - MW_EPSILON) push('rent_below_commitment', `Rent can drop to ${floors.rentMw} MW at least this round (30% a round at most).`, 'rentMw')
   }
 
   return done()

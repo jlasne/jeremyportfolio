@@ -24,7 +24,7 @@ export function createGame(opts: { seed: number; companies: CompanySeed[] }, con
       const kind = s.kind as 'plant' | 'dc'
       const size = s.size as 'small' | 'big'
       const spec = buildingSpec(config, kind, size)
-      const tile: Tile = firstFree(taken, config)
+      const tile: Tile = firstFree(taken, config) ?? [0, 0]
       taken.add(`${tile[0]},${tile[1]}`)
       return { id: id('b'), kind, size, mw: spec.mw, status: 'online' as const, roundsLeft: 0, pricePaid: spec.cost, tile, builtRound: 0 }
     })
@@ -46,6 +46,7 @@ export function createGame(opts: { seed: number; companies: CompanySeed[] }, con
       loans: [],
       history: [],
       lastDecision: null,
+      landRows: config.plot.startRows,
     }
   })
 
@@ -56,11 +57,12 @@ export function createGame(opts: { seed: number; companies: CompanySeed[] }, con
       growth: config.pool.meanGrowth[p],
       expectedGrowth: config.pool.meanGrowth[p],
       lastUsed: {},
+      tenure: {},
     }
   }
 
   return {
-    version: 1,
+    version: 2,
     seed: opts.seed,
     round: 1,
     rounds: config.rounds,

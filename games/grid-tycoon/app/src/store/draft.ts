@@ -3,7 +3,7 @@
 // phase over from defaultDecision and clears the stack.
 
 import { create } from 'zustand'
-import { companyById, defaultDecision, emptyDecision, findFreeTile } from '../engine'
+import { companyById, defaultDecision, emptyDecision, findFreeTile, ownedRows } from '../engine'
 import type { BuildOrder, ComputePool, Decision, Tile } from '../engine'
 import { useGame } from './game'
 
@@ -87,7 +87,9 @@ export const useDraft = create<DraftStore>()((set, get) => ({
       const placed: BuildOrder = { ...order }
       if (!placed.tile && state && meId) {
         const taken = d.builds.filter((b) => b.tile).map((b) => b.tile as Tile)
-        placed.tile = findFreeTile(companyById(state, meId), taken, config)
+        const me = companyById(state, meId)
+        const free = findFreeTile(me, taken, config, ownedRows(me, config) + Math.max(0, Math.floor(d.landRows || 0)))
+        if (free) placed.tile = free
       }
       d.builds.push(placed)
     })
