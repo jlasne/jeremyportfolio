@@ -1,0 +1,11 @@
+{
+  "name": "grid-tycoon-server",
+  "private": true,
+  "description": "Grid Tycoon multiplayer rooms on Convex. Same room logic and engine as the Supabase function.",
+  "scripts": {
+    "deploy": "node ../app/scripts/build-edge.mjs && convex deploy -y"
+  },
+  "dependencies": {
+    "convex": "1.49.0"
+  }
+}

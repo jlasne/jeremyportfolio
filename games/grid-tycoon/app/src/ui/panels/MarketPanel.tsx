@@ -246,13 +246,24 @@ export default function MarketPanel() {
 }
 
 function Cell({ r, p }: { r: RoundResult | undefined; p: PoolId }) {
-  if (!r) return <td className="mt-pool muted">—</td>
+  const label = POOL_META[p].short
+  if (!r)
+    return (
+      <td className="mt-pool muted" data-label={label}>
+        —
+      </td>
+    )
   const o = r.offered[p] ?? 0
   const u = r.used[p] ?? 0
-  if (o <= 0.005 && u <= 0.005) return <td className="mt-pool muted">—</td>
+  if (o <= 0.005 && u <= 0.005)
+    return (
+      <td className="mt-pool muted" data-label={label}>
+        —
+      </td>
+    )
   const idle = o - u > 0.005
   return (
-    <td className="mt-pool num">
+    <td className="mt-pool num" data-label={label}>
       <span className="mt-off">{fmtMw(o, { unit: false })}</span>
       <span className="mt-arrow" aria-label="offered, used">
         {' → '}
@@ -322,7 +333,7 @@ function CompanyTable({ state, meId, ranking, byId }: { state: GameState; meId: 
                     {c.bankrupt ? <span className="tag tag-critical">bankrupt</span> : null}
                   </span>
                 </th>
-                <td className="mt-price">
+                <td className="mt-price" data-label="Share price">
                   <span className="mt-price-in">
                     <Sparkline values={values} color={companyColor(c)} label={`${c.name} share price`} width={64} height={22} />
                     <span className="mt-price-v">
@@ -331,12 +342,16 @@ function CompanyTable({ state, meId, ranking, byId }: { state: GameState; meId: 
                     </span>
                   </span>
                 </td>
-                <td className="num">{fmtMw(r ? r.plantMw : (cap?.plantMw ?? 0), { unit: false })}</td>
-                <td className="num">{fmtMw(r ? r.dcMw : (cap?.dcMw ?? 0), { unit: false })}</td>
+                <td className="num" data-label="Plants MW">
+                  {fmtMw(r ? r.plantMw : (cap?.plantMw ?? 0), { unit: false })}
+                </td>
+                <td className="num" data-label="DCs MW">
+                  {fmtMw(r ? r.dcMw : (cap?.dcMw ?? 0), { unit: false })}
+                </td>
                 {POOLS.map((p) => (
                   <Cell key={p} r={r} p={p} />
                 ))}
-                <td className="num">
+                <td className="num" data-label="Unallocated">
                   {!r ? (
                     <span className="muted">—</span>
                   ) : r.unallocatedMw > 0.005 ? (
@@ -358,14 +373,14 @@ function CompanyTable({ state, meId, ranking, byId }: { state: GameState; meId: 
               <th scope="row" className="mt-co">
                 Pool demand
               </th>
-              <td className="mt-price muted">round {summary.round}</td>
+              <td className="mt-price muted mt-foot-round">round {summary.round}</td>
               <td />
               <td />
               {POOLS.map((p) => {
                 const s = summary.pools[p]
                 const off = sumValues(s.offered)
                 return (
-                  <td key={p} className="mt-pool num">
+                  <td key={p} className="mt-pool num" data-label={POOL_META[p].short}>
                     <strong>{fmtMw(s.demand, { unit: false })}</strong>
                     <span className={`mt-gap ${off >= s.demand - 0.005 ? 'is-ok' : 'is-short'}`}>
                       {off >= s.demand - 0.005 ? `+${fmtMw(off - s.demand, { unit: false })}` : `−${fmtMw(s.demand - off, { unit: false })}`}

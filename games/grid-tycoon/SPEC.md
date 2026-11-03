@@ -21,7 +21,7 @@ Grid Tycoon is a turn-based business sim in a web browser. You run one energy an
 
 Playtest feedback from @Jeremy. These rules replace the older lines below where they disagree. The goal: the whole market's offer should match demand when it is spread well, so every MW is a choice.
 
-**Market sized to the players.** Start demand per company is 1.0 MW citizens, 0.6 other datacenters, 0.8 cloud, 0.5 bitcoin, 0.7 AI. That is 2.0 MW of compute for the 2 MW datacenter every company starts with. Growth per round: citizens 3%, other datacenters 6%, cloud 5%, bitcoin 5% (volatility 8%), AI 8%. Round 1's default spreads compute over the 3 compute pools by their demand.
+**Market sized to the players.** Start demand per company is 1.0 MW citizens, 0.6 other datacenters, 0.8 cloud, 0.5 bitcoin, 0.7 AI. That is 2.0 MW of compute for the 2 MW datacenter every company starts with. Growth per round: citizens 3%, other datacenters 6%, cloud 5%, bitcoin 5% (volatility 8%), AI 6%. Round 1's default spreads compute over the 3 compute pools by their demand.
 
 **Priority on open demand.** The 80% incumbent reserve stays. Open MW then goes by spare MW × priority, where priority = (1 + last share of the pool) × (1 + 5% per round served in a row, up to 10 rounds). A newcomer has priority 1. A company never gets more than its spare.
 

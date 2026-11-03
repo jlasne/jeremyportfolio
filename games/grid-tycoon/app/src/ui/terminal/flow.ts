@@ -7,8 +7,9 @@
 //
 //   internal = clamp(compute total − rent, 0, min(internal link, plant MW − citizens − other DCs))
 //
-// Compute and rent never go below the commitment floors (30% drop a round at most). Every edit goes
-// through settle(), which keeps the draft valid whenever the floors allow it.
+// Compute and rent never go below the commitment floors (30% drop a round at most). Raising one
+// pool takes free MW first, then MW from the others, lowest margin first, never below a floor.
+// Every edit goes through settle(), which keeps the draft valid whenever the floors allow it.
 
 import type { ComputePool, Decision, Floors, PoolId } from '../../engine'
 
@@ -72,8 +73,10 @@ export function bounds(d: Decision, c: FlowCaps, key: FlowKey): { min: number; m
       return { min: r2(Math.max(0, lo)), max: r2(Math.max(d.rentMw, c.links.import)) }
     }
     default: {
+      // Free powered MW first, then what the other pools hold above their floors (settle trims them).
       const room = Math.max(0, computeCap(d, c) - computeTotal(d))
-      return { min: r2(c.floors.compute[key]), max: r2(Math.max(d.compute[key], d.compute[key] + room)) }
+      const others = COMPUTE.filter((p) => p !== key).reduce((s, p) => s + Math.max(0, d.compute[p] - c.floors.compute[p]), 0)
+      return { min: r2(c.floors.compute[key]), max: r2(Math.max(d.compute[key], d.compute[key] + room + others)) }
     }
   }
 }

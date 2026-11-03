@@ -25,7 +25,8 @@ import { MwSlider } from '../terminal/MwSlider'
 import { Note, usePanelCtx } from './common'
 import { panelForIssue } from '../game/panelFor'
 
-const ALLOC_WARNINGS: WarningCode[] = ['power_unallocated', 'idle_high', 'link_short', 'no_town_link', 'rent_over_import', 'compute_unpowered']
+/** power_unallocated has its own red callout under the plant budget bar. */
+const ALLOC_WARNINGS: WarningCode[] = ['idle_high', 'link_short', 'no_town_link', 'rent_over_import', 'compute_unpowered']
 const COMPUTE_ROWS: ComputePool[] = ['ai', 'cloud', 'btc']
 
 const sumValues = (r: Record<string, number> | undefined): number => (r ? Object.values(r).reduce((s, v) => s + (v > 0 ? v : 0), 0) : 0)
@@ -83,11 +84,17 @@ export default function AllocatePanel() {
     useDraft.setState({ decision: next })
   })
 
-  // Tutorial step 0 points at the compute rows: bring them into view.
+  // Tutorial step 0 points at the AI row: scroll the terminal (only the terminal) to it.
   useEffect(() => {
     if (tutorialStep !== 0) return
     const t = window.setTimeout(() => {
-      document.querySelector<HTMLElement>('[data-tut="allocate-compute"]')?.scrollIntoView({ block: 'center', behavior: reduced ? 'auto' : 'smooth' })
+      const el = document.querySelector<HTMLElement>('[data-tut="allocate-compute"]')
+      const body = el?.closest<HTMLElement>('.term-body')
+      if (!el || !body) return
+      const r = el.getBoundingClientRect()
+      const b = body.getBoundingClientRect()
+      const top = body.scrollTop + r.top - b.top - Math.max(16, (b.height - r.height) / 2)
+      body.scrollTo({ top: Math.max(0, top), behavior: reduced ? 'auto' : 'smooth' })
     }, 260)
     return () => window.clearTimeout(t)
   }, [tutorialStep, reduced])
@@ -153,8 +160,8 @@ export default function AllocatePanel() {
   ]
   const dcParts: BudgetPart[] = [
     ...COMPUTE_ROWS.map((p) => ({ key: p, label: POOL_META[p].short, value: d.compute[p], color: POOL_META[p].hue, icon: POOL_META[p].icon })),
-    { key: 'idle', label: 'Powered, not sold', value: idleDc, tone: 'idle' as const },
-    { key: 'off', label: 'No power', value: unpowered, tone: 'off' as const },
+    { key: 'idle', label: 'Rented, not sold', value: idleDc, tone: 'idle' as const },
+    { key: 'off', label: 'Not offered', value: unpowered, tone: 'off' as const },
   ]
 
   return (
@@ -200,7 +207,7 @@ export default function AllocatePanel() {
             disabled={!fillable}
             title="Puts unallocated plant MW into the best-margin pool that still has room"
           >
-            Fill {free > 0.005 ? <span className="num">{fmtMw(free)}</span> : null}
+            {free > 0.005 ? `Fill ${fmtMw(free)}` : 'Fill'}
           </Button>
         </div>
         <p className="aterm-from muted">From last round's demand. Rivals also bid for open MW, so real use can be lower.</p>
@@ -347,15 +354,16 @@ export default function AllocatePanel() {
           )}
           <p className="apower">
             Powered by <span className="num strong">{fmtMw(d.power.internal)}</span> from your plants + <span className="num strong">{fmtMw(d.rentMw)}</span> rented = <span className="num strong">{fmtMw(d.power.internal + d.rentMw)}</span>
-            {d.power.internal + d.rentMw > caps.dcMw + 0.005 ? <span className="delta-down"> (more than the racks hold)</span> : null}
+            {d.power.internal + d.rentMw > caps.dcMw + 0.005 ? <span className="delta-down"> (more than the racks hold)</span> : null}. Raising a pool takes free MW first, then the lowest-margin pool above its floor.
           </p>
-          <ul className="arows" data-tut="allocate-compute">
+          <ul className="arows">
             {COMPUTE_ROWS.map((p) => {
               const b = bounds(d, caps, p)
               const last = me.lastDecision?.compute[p] ?? 0
               return (
                 <PoolRow
                   key={p}
+                  tut={p === 'ai' ? 'allocate-compute' : undefined}
                   pool={p}
                   value={d.compute[p]}
                   min={b.min}
@@ -432,6 +440,8 @@ export default function AllocatePanel() {
 }
 
 interface PoolRowProps {
+  /** Tutorial anchor (data-tut). */
+  tut?: string
   pool: PoolId
   value: number
   min: number
@@ -451,11 +461,11 @@ interface PoolRowProps {
   onChange: (mw: number) => void
 }
 
-function PoolRow({ pool, value, min, max, scale, market, rate, margin, rentMargin, used, revenue, floor, linkNote, maxReason, minReason, disabled, onChange }: PoolRowProps) {
+function PoolRow({ tut, pool, value, min, max, scale, market, rate, margin, rentMargin, used, revenue, floor, linkNote, maxReason, minReason, disabled, onChange }: PoolRowProps) {
   const meta = POOL_META[pool]
   const over = value - market.demandAt
   return (
-    <li className={`arow pool-${pool}`}>
+    <li className={`arow pool-${pool}`} data-tut={tut}>
       <div className="arow-head">
         <span className="arow-icon" style={{ background: meta.hue }} aria-hidden="true">
           <Icon name={meta.icon} size={16} />

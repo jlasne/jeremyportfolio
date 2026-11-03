@@ -12,7 +12,8 @@
 
 import type { Decision } from '../engine'
 import { clockOffset, noteServerTime, serverNow } from './clock'
-import { isConfigured } from './config'
+import { convexConfigured, isConfigured } from './config'
+import { createConvexBackend } from './convex'
 import { createSupabaseBackend } from './supabase'
 import { forgetSeat, lastSeat, saveSeat, savedSeat, setSeatStorage, type SavedSeat } from './tokens'
 import type {
@@ -73,7 +74,7 @@ export function useBackend(backend: Backend | null): void {
 function backend(): Backend | null {
   if (override) return override
   if (!isConfigured()) return null
-  live ??= createSupabaseBackend()
+  live ??= convexConfigured() ? createConvexBackend() : createSupabaseBackend()
   return live
 }
 

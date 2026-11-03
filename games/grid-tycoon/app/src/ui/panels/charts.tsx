@@ -45,9 +45,7 @@ export function PoolChart({ name, pool, rounds, demand, mine, height = 104 }: Po
 
   const line = demand.map((v, i) => `${i === 0 ? 'M' : 'L'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join('')
   const band =
-    n > 1
-      ? `M${x(0).toFixed(1)} ${base}` + mine.map((v, i) => `L${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join('') + `L${x(n - 1).toFixed(1)} ${base}Z`
-      : ''
+    n > 1 ? `M${x(0).toFixed(1)} ${base}` + mine.map((v, i) => `L${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join('') + `L${x(n - 1).toFixed(1)} ${base}Z` : ''
   const bandTop = mine.map((v, i) => `${i === 0 ? 'M' : 'L'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join('')
   const ticks = [0, yMax / 2, yMax]
 
@@ -148,29 +146,32 @@ export function PoolChart({ name, pool, rounds, demand, mine, height = 104 }: Po
           </span>
           <span className="pchart-tip-row">
             <span className="key key-band" />
-            <strong className="num">{fmtMw(mine[h])}</strong> you{demand[h] > 0 ? <span className="num"> · {fmtPct(mine[h] / demand[h])}</span> : null}
+            <strong className="num">{fmtMw(mine[h])}</strong> you
+            {demand[h] > 0 ? <span className="num"> · {fmtPct(mine[h] / demand[h])}</span> : null}
           </span>
         </div>
       ) : null}
-      <table className="visually-hidden">
-        <caption>{name}: demand and your used MW per round</caption>
-        <thead>
-          <tr>
-            <th scope="col">Round</th>
-            <th scope="col">Demand (MW)</th>
-            <th scope="col">You (MW)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rounds.map((r, i) => (
-            <tr key={r}>
-              <th scope="row">{r === 0 ? 'Start' : r}</th>
-              <td>{fmtMw(demand[i], { unit: false })}</td>
-              <td>{fmtMw(mine[i], { unit: false })}</td>
+      <div className="visually-hidden">
+        <table>
+          <caption>{name}: demand and your used MW per round</caption>
+          <thead>
+            <tr>
+              <th scope="col">Round</th>
+              <th scope="col">Demand (MW)</th>
+              <th scope="col">You (MW)</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rounds.map((r, i) => (
+              <tr key={r}>
+                <th scope="row">{r === 0 ? 'Start' : r}</th>
+                <td>{fmtMw(demand[i], { unit: false })}</td>
+                <td>{fmtMw(mine[i], { unit: false })}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
@@ -371,35 +372,38 @@ export function OfferChart({ name, pool, rounds, demand, layers, height = 150 }:
             ) : null,
           )}
           <span className="pchart-tip-row ochart-tip-total">
-            <strong className="num">{fmtMw(totals[h])}</strong> offered · {totals[h] >= demand[h] ? `${fmtMw(totals[h] - demand[h])} above` : `${fmtMw(demand[h] - totals[h])} under`}
+            <strong className="num">{fmtMw(totals[h])}</strong> offered ·{' '}
+            {totals[h] >= demand[h] ? `${fmtMw(totals[h] - demand[h])} above` : `${fmtMw(demand[h] - totals[h])} under`}
           </span>
         </div>
       ) : null}
-      <table className="visually-hidden">
-        <caption>{name}: demand and offered MW per company, per round</caption>
-        <thead>
-          <tr>
-            <th scope="col">Round</th>
-            <th scope="col">Demand (MW)</th>
-            {layers.map((l) => (
-              <th key={l.id} scope="col">
-                {l.isMe ? 'You' : l.name} offered (MW)
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rounds.map((r, i) => (
-            <tr key={r}>
-              <th scope="row">{r}</th>
-              <td>{fmtMw(demand[i], { unit: false })}</td>
+      <div className="visually-hidden">
+        <table>
+          <caption>{name}: demand and offered MW per company, per round</caption>
+          <thead>
+            <tr>
+              <th scope="col">Round</th>
+              <th scope="col">Demand (MW)</th>
               {layers.map((l) => (
-                <td key={l.id}>{fmtMw(l.values[i] ?? 0, { unit: false })}</td>
+                <th key={l.id} scope="col">
+                  {l.isMe ? 'You' : l.name} offered (MW)
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rounds.map((r, i) => (
+              <tr key={r}>
+                <th scope="row">{r}</th>
+                <td>{fmtMw(demand[i], { unit: false })}</td>
+                {layers.map((l) => (
+                  <td key={l.id}>{fmtMw(l.values[i] ?? 0, { unit: false })}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

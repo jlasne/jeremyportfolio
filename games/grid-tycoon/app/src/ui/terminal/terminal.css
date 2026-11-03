@@ -225,7 +225,7 @@
 
 .aflow {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 60px minmax(0, 1fr);
   align-items: start;
   gap: 0;
 }
@@ -782,6 +782,12 @@
 }
 
 /* Pool cards */
+.mpool .pool-head {
+  grid-template-columns: 24px minmax(0, auto) minmax(0, 1fr) auto;
+}
+.mpool .pool-name {
+  min-width: 0;
+}
 .mpools {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(380px, 100%), 1fr));
@@ -944,8 +950,19 @@
     grid-column: 2;
     grid-row: 1;
   }
+  .aterm-profit {
+    flex-wrap: wrap;
+    gap: 0 var(--space-2);
+  }
+  .aterm-k {
+    white-space: nowrap;
+  }
   .aterm-profit-v {
     font-size: var(--text-xl);
+  }
+  .aterm-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-1) var(--space-2);
   }
   .aflow {
     grid-template-columns: minmax(0, 1fr);
@@ -981,6 +998,82 @@
   }
   .mpool-facts {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .mpool .pool-buys {
+    display: none;
+  }
+  .mpool .pool-head {
+    grid-template-columns: 24px minmax(0, 1fr) auto;
+  }
+
+  /* The company table becomes one card per company. */
+  .mt-wrap {
+    overflow: visible;
+  }
+  .mt {
+    min-width: 0;
+  }
+  .mt thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .mt,
+  .mt tbody,
+  .mt tfoot {
+    display: block;
+  }
+  .mt tr {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-2) var(--space-3);
+    padding: var(--space-3) var(--space-2);
+    border-bottom: 1px solid var(--border);
+  }
+  .mt tbody tr.is-me {
+    border-radius: var(--radius-sm);
+    background: var(--accent-soft);
+  }
+  .mt tbody tr.is-me > * {
+    background: none;
+  }
+  .mt th,
+  .mt td {
+    display: block;
+    padding: 0;
+    border: 0;
+    text-align: left;
+  }
+  .mt .mt-co {
+    position: static;
+    grid-column: 1 / -1;
+    background: none;
+    box-shadow: none;
+  }
+  .mt .mt-price {
+    grid-column: 1 / -1;
+  }
+  .mt td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+  .mt td:empty,
+  .mt .mt-foot-round,
+  .mt .mt-price::before {
+    display: none !important;
+  }
+  .mt-price-v {
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--space-2);
+  }
+  .mt-gap {
+    display: inline;
+    margin-left: 6px;
   }
   .mterm-pools .panel-head,
   .mterm-companies .panel-head {

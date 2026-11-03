@@ -34,6 +34,12 @@ import { createMemoryBackend } from './memory'
 import { playerFromRow, roomFromRow } from './rows'
 import type { Backend, PlayerView, PresenceEntry, RoomView } from './types'
 
+// These tests run without a live server: the deployed Convex URL in config.ts is switched off.
+vi.mock('./config', async (orig) => {
+  const real = await orig<typeof import('./config')>()
+  return { ...real, convexConfigured: () => false, isConfigured: () => false }
+})
+
 class MemoryLocalStorage {
   data = new Map<string, string>()
   getItem(k: string): string | null {
@@ -206,13 +212,15 @@ describe('net client: subscribeRoom', () => {
     await vi.advanceTimersByTimeAsync(170_000)
     expect(sub.room?.round).toBe(1)
     // Token hashing (WebCrypto) is real async work, so fake time drifts a little per request:
-    // step until the watcher's tick lands rather than asserting an exact second.
-    let waited = 0
-    while (sub.room?.round === 1 && waited < 60_000) {
-      await vi.advanceTimersByTimeAsync(1_000)
-      waited += 1_000
-    }
-    expect(sub.room?.round).toBe(2)
+    // step a second at a time until the watcher's tick lands, bounded by real time (a fake-time
+    // budget alone was flaky under load: the tick could still be in flight when it ran out).
+    await vi.waitFor(
+      async () => {
+        if (sub.room?.round === 1) await vi.advanceTimersByTimeAsync(1_000)
+        expect(sub.room?.round).toBe(2)
+      },
+      { timeout: 10_000, interval: 5 },
+    )
     expect(sub.room?.state?.round).toBe(2)
     expect(rooms.filter((r) => r.round === 2).length).toBeGreaterThan(0)
     sub.close()
