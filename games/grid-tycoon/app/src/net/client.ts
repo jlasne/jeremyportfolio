@@ -115,16 +115,39 @@ export function isAway(player: PlayerView): boolean {
   return !player.isBot && serverNow() - player.lastSeen > AWAY_MS
 }
 
-/** `https://www.jeremylasne.com/games/?room=ABCDEF` for the current origin and base. */
-export function inviteUrl(code: string): string {
+function appBase(): string {
   const base = typeof import.meta.env?.BASE_URL === 'string' ? import.meta.env.BASE_URL : '/'
-  const origin = typeof location === 'undefined' ? 'https://www.jeremylasne.com' : location.origin
-  return `${origin}${base}?room=${encodeURIComponent(code)}`
+  return base.endsWith('/') ? base : `${base}/`
 }
 
-/** The room code of an invite link (`?room=ABCDEF`), if any. */
-export function roomCodeFromUrl(search: string = typeof location === 'undefined' ? '' : location.search): string | null {
+/** `https://www.jeremylasne.com/games/ABCDEF` for the current origin and base. */
+export function inviteUrl(code: string): string {
+  const origin = typeof location === 'undefined' ? 'https://www.jeremylasne.com' : location.origin
+  return `${origin}${appBase()}${encodeURIComponent(code)}`
+}
+
+/** The path of a room page: `/games/ABCDEF`. */
+export function roomPath(code: string | null): string {
+  return code ? `${appBase()}${code}` : appBase()
+}
+
+/**
+ * The room code of an invite link: the path `/games/ABCDEF`, or the older `?room=ABCDEF`.
+ * Pass `search` alone (tests) or both; by default both come from the address bar.
+ */
+export function roomCodeFromUrl(
+  search: string = typeof location === 'undefined' ? '' : location.search,
+  pathname: string = typeof location === 'undefined' ? '' : location.pathname,
+): string | null {
   try {
+    const base = appBase()
+    if (pathname.startsWith(base)) {
+      const seg = pathname.slice(base.length).replace(/\/+$/, '')
+      if (seg && !seg.includes('/')) {
+        const fromPath = normalizeRoomCode(decodeURIComponent(seg))
+        if (fromPath) return fromPath
+      }
+    }
     const raw = new URLSearchParams(search).get('room')
     return raw ? normalizeRoomCode(raw) : null
   } catch {

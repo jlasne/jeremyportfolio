@@ -15,6 +15,7 @@ import {
   companyIdForSeat,
   createRoom,
   inviteUrl,
+  roomPath,
   joinRoom,
   netBridge,
   setSeatStorage,
@@ -55,13 +56,13 @@ export function localTimerFromUrl(search: string = currentSearch()): number | un
   }
 }
 
-/** Puts `?room=CODE` in the address bar while in a room (a reload then offers Rejoin), keeping other flags. */
+/** Puts `/games/CODE` in the address bar while in a room (a reload then offers Rejoin), keeping other flags. */
 function setUrlRoom(code: string | null): void {
   if (typeof location === 'undefined' || typeof history === 'undefined') return
   try {
     const url = new URL(location.href)
-    if (code) url.searchParams.set('room', code)
-    else url.searchParams.delete('room')
+    url.searchParams.delete('room')
+    url.pathname = roomPath(code)
     if (url.href !== location.href) history.replaceState(history.state, '', url)
   } catch {
     // Sandboxed frames can refuse replaceState; the room still works.
@@ -74,7 +75,7 @@ export function inviteLink(code: string): string {
   const local = useNet.getState().local
   if (!local) return url
   const timer = localTimerFromUrl()
-  return `${url}&mp=local${timer ? `&timer=${timer}` : ''}`
+  return `${url}?mp=local${timer ? `&timer=${timer}` : ''}`
 }
 
 // ---------------------------------------------------------------------------------------------

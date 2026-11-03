@@ -17,6 +17,32 @@ Grid Tycoon is a turn-based business sim in a web browser. You run one energy an
 
 **Out of scope for version 1:** player-set prices, a cash flow statement and balance sheet, random disaster events, and visiting rival companies on a world map (planned later).
 
+## Rules update, Nov 3, 2026
+
+Playtest feedback from @Jeremy. These rules replace the older lines below where they disagree. The goal: the whole market's offer should match demand when it is spread well, so every MW is a choice.
+
+**Market sized to the players.** Start demand per company is 1.0 MW citizens, 0.6 other datacenters, 0.8 cloud, 0.5 bitcoin, 0.7 AI. That is 2.0 MW of compute for the 2 MW datacenter every company starts with. Growth per round: citizens 3%, other datacenters 6%, cloud 5%, bitcoin 5% (volatility 8%), AI 8%. Round 1's default spreads compute over the 3 compute pools by their demand.
+
+**Priority on open demand.** The 80% incumbent reserve stays. Open MW then goes by spare MW × priority, where priority = (1 + last share of the pool) × (1 + 5% per round served in a row, up to 10 rounds). A newcomer has priority 1. A company never gets more than its spare.
+
+**Commitment.** Compute offered to each pool and rented MW can drop by 30% at most from one round to the next. They can grow freely. The floors shrink only when the company cannot meet them physically (a sold datacenter, a smaller import link).
+
+**Unused power penalty.** Plant MW routed nowhere costs 5 × the own power cost (0.4), so 2.0 per MW per round. Routed means sold to citizens, offered to other datacenters, or needed by the compute you offer.
+
+**Level 3 buildings.** Level 1 is small (2 MW), level 2 is big (10 MW), level 3 is 25 MW. Level 3 cannot be built: upgrade an online level 2 building. Plant upgrade 50, datacenter 62, 6 rounds each. The building keeps its 10 MW during the upgrade. Level 3 gives the most MW per lot.
+
+**Land.** Every company starts with 2 rows of 4 lots, so 8 lots. A new row costs 50, and each row after costs 10% more than the last (50, 55, 60.5...). A row bought in a decision phase is usable for that phase's builds. A build needs a free lot on owned land.
+
+**Shares.** Issue up to 20% of shares per round. Buy back up to 10% per round, paid from treasury, at any time the treasury covers it. Never both in one round.
+
+**Stock rewards stability.** A demand surprise moves the price by w × beta × (g − E). Beta: citizens 0.5, cloud 0.6, other datacenters 1.0, AI 1.0, bitcoin 2.5. A stability premium adds w × premium every round: citizens and cloud 0.6%, other datacenters and AI 0.2%, bitcoin 0.
+
+**Open market.** Every player sees every company's plant MW, datacenter MW and last round offer and use per pool. The Market terminal charts each pool's demand with every company's offer stacked under it.
+
+**Screens.** Allocate and Market open as full-screen terminals. Build and Finance stay as panels over the map. The building card shows only while a building is selected. The map draws every lot, and the next land row as a lot for sale with its price.
+
+**Online.** A room lives at `/games/ABCDEF`: open the link, type a name, join.
+
 ## Round flow
 
 One round is one quarter, and a game runs 40 rounds (10 game years). Every company decides at the same time, then the engine resolves everyone together.

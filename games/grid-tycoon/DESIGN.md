@@ -1,13 +1,15 @@
 # Grid Tycoon: engineering design
 
+Rules update of Nov 3, 2026: see SPEC.md "Rules update". Engine: `commitment.ts` (30% floors), `allocation.ts` (`priorityWeights`, weighted water filling), `assets.ts` (land rows, `unallocatedPower`, `canUpgrade`), `config.ts` (`nextSize`, `upgradeSpec(kind, from)`, `landRowCost`). GameState version 2, solo save key `gt.solo.v2`.
+
 `SPEC.md` is the product spec. This file is the contract between the parts of the codebase: where things live, what each module exports, and how every gap in the spec is filled. When the spec and this file disagree, the spec wins on rules and this file wins on mechanics it explicitly decides.
 
 ## 1. Where it lives
 
 - Public URL: `https://www.jeremylasne.com/games/`. The game opens straight on its title screen there; there is no hub page.
 - The site is a static Vercel project with no build step. The app builds with Vite into `app/dist/`, and `app/scripts/publish.mjs` copies it to `games/` (index.html + assets/ + sprites/ + cover.png ...), which is committed. The source stays in `games/grid-tycoon/`; `vercel.json` redirects `/games/grid-tycoon/*` to `/games/` so the source folder is never a page.
-- Vite `base` is `/games/`. Load runtime files with `import.meta.env.BASE_URL + 'sprites/atlas.json'`, never a hard-coded path. No client router: one page, state-driven screens. A multiplayer invite is `/games/?room=ABCDEF`.
-- **Multiplayer ships offline for now.** There is no Supabase project yet: `src/net/config.ts` holds empty URL/key, `isOnline()` returns false, and the title screen shows multiplayer as offline (host/join disabled with a one-line reason). All the multiplayer code (schema, edge function, client, lobby, timer UI) is built and tested against an in-memory room server so it can go live by filling the two config values and deploying `supabase/`.
+- Vite `base` is `/games/`. Load runtime files with `import.meta.env.BASE_URL + 'sprites/atlas.json'`, never a hard-coded path. No client router: one page, state-driven screens. A multiplayer invite is `/games/ABCDEF`: `vercel.json` rewrites a 6-letter path under `/games/` to `games/index.html`, and `roomCodeFromUrl` reads the path (the older `?room=` still works).
+- **Multiplayer ships offline for now.** There is no Supabase project yet (Nov 3, 2026: the account is at its 2 free project limit, and the CRM project is not a fit because its public key would open CRM tables): `src/net/config.ts` holds empty URL/key, `isOnline()` returns false, and the title screen shows multiplayer as offline (host/join disabled with a one-line reason). All the multiplayer code (schema, edge function, client, lobby, timer UI) is built and tested against an in-memory room server so it can go live by filling the two config values and deploying `supabase/`.
 
 ```
 games/

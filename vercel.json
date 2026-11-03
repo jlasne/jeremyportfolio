@@ -9,6 +9,7 @@
     { "src": "^/games/grid-tycoon(?:/.*)?$", "status": 308, "headers": { "Location": "/games/" } },
     { "src": "^/creators/?$", "status": 308, "headers": { "Location": "https://creatormatch.app" } },
     { "handle": "filesystem" },
-    { "src": "^/wellness/exp0/demo/?$", "dest": "/wellness/exp0/index.html" }
+    { "src": "^/wellness/exp0/demo/?$", "dest": "/wellness/exp0/index.html" },
+    { "src": "^/games/([A-HJ-NP-Za-hj-np-z]{6})/?$", "dest": "/games/index.html" }
   ]
 }
