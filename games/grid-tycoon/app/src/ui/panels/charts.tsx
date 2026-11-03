@@ -1,5 +1,5 @@
-// Small SVG charts for the Market panel, drawn at their real pixel width (crisp lines, undistorted
-// text) and themed through CSS custom properties. Each chart has a <title>/<desc>, a visually
+// Small SVG charts for the Market terminal (demand and offers per pool, price sparklines), drawn
+// at their real pixel width (crisp lines, undistorted text) and themed through CSS custom properties. Each chart has a <title>/<desc>, a visually
 // hidden data table, and a crosshair readout on hover and on keyboard focus (arrow keys).
 
 import { useId, useState } from 'react'
@@ -200,5 +200,206 @@ export function Sparkline({ values, color, label, width = 76, height = 28 }: Spa
       {n > 1 ? <path d={d} stroke={color} /> : null}
       {n > 0 ? <circle cx={x(n - 1)} cy={y(lastV)} r={3.5} fill={color} /> : null}
     </svg>
+  )
+}
+
+export interface OfferLayer {
+  id: string
+  name: string
+  /** CSS colour (a company token). */
+  color: string
+  /** Offered MW per round, aligned with `rounds`. */
+  values: number[]
+  isMe?: boolean
+}
+
+interface OfferChartProps {
+  /** Pool name for the title, e.g. "AI". */
+  name: string
+  /** CSS class suffix of the pool (citizens, otherDc...), picks the demand line colour. */
+  pool: string
+  rounds: number[]
+  demand: number[]
+  /** One stacked layer per company, bottom first. */
+  layers: OfferLayer[]
+  height?: number
+}
+
+const OPAD = { l: 34, r: 10, t: 12, b: 22 }
+
+/**
+ * Market terminal chart: what every company offered to a pool, stacked in company colours, with the
+ * pool's demand as a line over it. Above the line the pool had more offer than demand (idle MW
+ * somewhere); under it, demand went unserved. One round draws as a single stacked column.
+ */
+export function OfferChart({ name, pool, rounds, demand, layers, height = 150 }: OfferChartProps) {
+  const id = useId()
+  const [boxRef, width] = useWidth<HTMLDivElement>(320)
+  const [hover, setHover] = useState<number | null>(null)
+  const n = rounds.length
+  const plotW = Math.max(10, width - OPAD.l - OPAD.r)
+  const plotH = height - OPAD.t - OPAD.b
+  const totals = rounds.map((_, i) => layers.reduce((s, l) => s + Math.max(0, l.values[i] ?? 0), 0))
+  const yMax = niceMax(Math.max(...demand, ...totals, 0.1) * 1.08)
+  const colW = n <= 1 ? Math.min(56, plotW / 3) : 0
+  const x = (i: number) => OPAD.l + (n <= 1 ? plotW / 2 : (i / (n - 1)) * plotW)
+  const y = (v: number) => OPAD.t + plotH - (Math.max(0, v) / yMax) * plotH
+  const base = OPAD.t + plotH
+  const f = (v: number) => v.toFixed(1)
+
+  // Cumulative tops per layer.
+  const tops: number[][] = []
+  layers.forEach((l, k) => tops.push(rounds.map((_, i) => (k > 0 ? tops[k - 1][i] : 0) + Math.max(0, l.values[i] ?? 0))))
+  const areaPath = (k: number): string => {
+    const top = tops[k]
+    const bottom = k > 0 ? tops[k - 1] : rounds.map(() => 0)
+    if (n <= 1) {
+      const x0 = x(0) - colW / 2
+      return `M${f(x0)} ${f(y(bottom[0]))}H${f(x0 + colW)}V${f(y(top[0]))}H${f(x0)}Z`
+    }
+    let d = top.map((v, i) => `${i === 0 ? 'M' : 'L'}${f(x(i))} ${f(y(v))}`).join('')
+    for (let i = n - 1; i >= 0; i--) d += `L${f(x(i))} ${f(y(bottom[i]))}`
+    return d + 'Z'
+  }
+  const line =
+    n <= 1
+      ? `M${f(x(0) - colW / 2 - 8)} ${f(y(demand[0] ?? 0))}H${f(x(0) + colW / 2 + 8)}`
+      : demand.map((v, i) => `${i === 0 ? 'M' : 'L'}${f(x(i))} ${f(y(v))}`).join('')
+  const ticks = [0, yMax / 2, yMax]
+  const last = n - 1
+
+  const gap = n > 0 ? totals[last] - demand[last] : 0
+  const desc =
+    n > 0
+      ? `Round ${rounds[last]}: demand ${fmtMw(demand[last])}, all companies offered ${fmtMw(totals[last])} (${gap >= 0 ? `${fmtMw(gap)} above` : `${fmtMw(-gap)} under`} demand).`
+      : 'History appears after round 1.'
+
+  const pick = (e: ReactPointerEvent<SVGSVGElement>) => {
+    if (n === 0) return
+    const r = e.currentTarget.getBoundingClientRect()
+    const px = e.clientX - r.left
+    const i = n <= 1 ? 0 : Math.round(((px - OPAD.l) / plotW) * (n - 1))
+    setHover(Math.max(0, Math.min(n - 1, i)))
+  }
+  const onKey = (e: KeyboardEvent<SVGSVGElement>) => {
+    if (n === 0) return
+    const cur = hover ?? n - 1
+    let next: number | null = null
+    if (e.key === 'ArrowLeft') next = Math.max(0, cur - 1)
+    else if (e.key === 'ArrowRight') next = Math.min(n - 1, cur + 1)
+    else if (e.key === 'Home') next = 0
+    else if (e.key === 'End') next = n - 1
+    else if (e.key === 'Escape' && hover != null) {
+      e.stopPropagation()
+      setHover(null)
+      return
+    }
+    if (next == null) return
+    e.preventDefault()
+    setHover(next)
+  }
+
+  const h = hover
+  const tipLeft = h != null ? Math.min(Math.max(x(h), 90), width - 90) : 0
+  const firstLabel = n > 0 ? `R${rounds[0]}` : ''
+
+  return (
+    <div className={`pchart ochart pool-${pool}`} ref={boxRef}>
+      <svg
+        width={width}
+        height={height}
+        role="img"
+        aria-labelledby={`${id}-t`}
+        aria-describedby={`${id}-d`}
+        tabIndex={0}
+        onPointerMove={pick}
+        onPointerDown={pick}
+        onPointerLeave={(e) => {
+          if (e.pointerType === 'mouse') setHover(null)
+        }}
+        onFocus={() => setHover((v) => v ?? n - 1)}
+        onBlur={() => setHover(null)}
+        onKeyDown={onKey}
+      >
+        <title id={`${id}-t`}>{`${name}: demand per round and what each company offered`}</title>
+        <desc id={`${id}-d`}>{desc}</desc>
+        {ticks.map((t) => (
+          <g key={t}>
+            <line className="pchart-grid" x1={OPAD.l} x2={width - OPAD.r} y1={Math.round(y(t)) + 0.5} y2={Math.round(y(t)) + 0.5} />
+            <text className="pchart-tick" x={OPAD.l - 6} y={y(t)} dy="0.35em" textAnchor="end">
+              {compact(t)}
+            </text>
+          </g>
+        ))}
+        {n > 0 ? (
+          <>
+            <text className="pchart-tick" x={x(0)} y={height - 4} textAnchor={n > 1 ? 'start' : 'middle'}>
+              {firstLabel}
+            </text>
+            {n > 1 ? (
+              <text className="pchart-tick" x={x(last)} y={height - 4} textAnchor="end">
+                R{rounds[last]}
+              </text>
+            ) : null}
+          </>
+        ) : null}
+        {layers.map((l, k) => (
+          <path key={l.id} className={`ochart-layer${l.isMe ? ' is-me' : ''}`} d={areaPath(k)} style={{ fill: l.color }} />
+        ))}
+        {n > 0 ? <path className="pchart-line ochart-demand" d={line} /> : null}
+        {n > 0 ? <circle className="pchart-dot" cx={n > 1 ? x(last) : x(0) + colW / 2 + 8} cy={y(demand[last])} r={4} /> : null}
+        {h != null ? (
+          <g className="pchart-cross" aria-hidden="true">
+            <line x1={Math.round(x(h)) + 0.5} x2={Math.round(x(h)) + 0.5} y1={OPAD.t} y2={base} />
+            <circle className="pchart-dot" cx={x(h)} cy={y(demand[h])} r={4} />
+          </g>
+        ) : null}
+      </svg>
+      {h != null ? (
+        <div className="pchart-tip ochart-tip" style={{ left: tipLeft }} aria-hidden="true">
+          <span className="pchart-tip-head">Round {rounds[h]}</span>
+          <span className="pchart-tip-row">
+            <span className="key key-line" />
+            <strong className="num">{fmtMw(demand[h])}</strong> demand
+          </span>
+          {[...layers].reverse().map((l) =>
+            (l.values[h] ?? 0) > 0 ? (
+              <span key={l.id} className="pchart-tip-row">
+                <span className="key ochart-key" style={{ background: l.color }} />
+                <strong className="num">{fmtMw(l.values[h])}</strong> {l.isMe ? 'you' : l.name}
+              </span>
+            ) : null,
+          )}
+          <span className="pchart-tip-row ochart-tip-total">
+            <strong className="num">{fmtMw(totals[h])}</strong> offered · {totals[h] >= demand[h] ? `${fmtMw(totals[h] - demand[h])} above` : `${fmtMw(demand[h] - totals[h])} under`}
+          </span>
+        </div>
+      ) : null}
+      <table className="visually-hidden">
+        <caption>{name}: demand and offered MW per company, per round</caption>
+        <thead>
+          <tr>
+            <th scope="col">Round</th>
+            <th scope="col">Demand (MW)</th>
+            {layers.map((l) => (
+              <th key={l.id} scope="col">
+                {l.isMe ? 'You' : l.name} offered (MW)
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rounds.map((r, i) => (
+            <tr key={r}>
+              <th scope="row">{r}</th>
+              <td>{fmtMw(demand[i], { unit: false })}</td>
+              {layers.map((l) => (
+                <td key={l.id}>{fmtMw(l.values[i] ?? 0, { unit: false })}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }

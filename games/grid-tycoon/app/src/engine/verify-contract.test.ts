@@ -213,15 +213,16 @@ describe('sanitizeDecision output always validates (DESIGN 2.4 "the result alway
     expect(validateDecision(s, 'you', clean).ok).toBe(true)
   })
 
-  it('drops forced sales when not losing, upgrades of big / building / foreign / unknown ids, repayments of unknown loans', () => {
+  it('drops forced sales when not losing, upgrades of mega / building / foreign / unknown ids, repayments of unknown loans', () => {
     let s = game(['you', 'b'])
     s = edit(s, 'you', (c) => {
-      addOnline(c, 'plant', 'big')
+      // Level 3 is the top: a big building can now be upgraded (to mega), a mega one cannot.
+      addOnline(c, 'plant', 'mega')
       c.buildings.push({ id: 'wip', kind: 'dc', size: 'small', mw: 0, status: 'building', roundsLeft: 1, pricePaid: 12, tile: [3, 0], builtRound: 1 })
       c.treasury = 500
     })
     const you = company(s, 'you')
-    const big = you.buildings.find((b) => b.size === 'big')!.id
+    const big = you.buildings.find((b) => b.size === 'mega')!.id
     const foreign = company(s, 'b').buildings[0].id
     const small = you.buildings[0].id
     const clean = sanitizeDecision(
@@ -345,31 +346,36 @@ describe('validateDecision codes (DESIGN 2.4, ValidationCode)', () => {
     expect(codes(neg, decision((d) => ((d.forcedSales = sold), (d.loans.refinance = ['due']))))).toEqual(['refinance_negative_treasury'])
   })
 
-  it('shares: both, not integer, over cap, buyback over treasury - debt (SPEC Shares; DESIGN 2.2.5)', () => {
+  it('shares: both, not integer, over cap, buyback capped at 10% and paid from the treasury (SPEC Shares; DESIGN 2.2.5)', () => {
     const s = game(['you'])
     expect(codes(s, { ...emptyDecision(), shares: { mode: 'both' as never, count: 1 } })).toEqual(['issue_and_buyback'])
     expect(codes(s, decision((d) => (d.shares = { mode: 'issue', count: 1.5 })))).toEqual(['not_integer'])
     expect(codes(s, decision((d) => (d.shares = { mode: 'issue', count: 3 })))).toEqual(['shares_over_cap'])
     expect(codes(s, decision((d) => (d.shares = { mode: 'issue', count: 2 })))).toEqual([])
-    // treasury 30, price 10: buyback 2 = 20 <= 30 - 0
-    expect(codes(s, decision((d) => (d.shares = { mode: 'buyback', count: 2 })))).toEqual([])
-    // with 15 of debt: 20 > 30 - 15
+    // New rules: a buyback moves at most 10% of the shares (1 of 10) and is paid from the treasury, debt aside.
+    expect(codes(s, decision((d) => (d.shares = { mode: 'buyback', count: 2 })))).toEqual(['shares_over_cap'])
+    expect(codes(s, decision((d) => (d.shares = { mode: 'buyback', count: 1 })))).toEqual([])
+    // with 15 of debt: 10 <= 30, debt no longer counts
     const owed = edit(s, 'you', (c) => c.loans.push({ id: 'n9', principal: 15, annualRate: 0.1, dueRound: 5, takenRound: 1 }))
-    expect(codes(owed, decision((d) => (d.shares = { mode: 'buyback', count: 2 })))).toEqual(['buyback_over_cash'])
-    // a loan taken the same round does not make room: +20 treasury, +20 debt
-    expect(codes(s, decision((d) => ((d.loans.take = 20), (d.shares = { mode: 'buyback', count: 2 }))))).toEqual([])
-    expect(codes(owed, decision((d) => ((d.loans.take = 20), (d.shares = { mode: 'buyback', count: 2 }))))).toEqual(['buyback_over_cash'])
+    expect(codes(owed, decision((d) => (d.shares = { mode: 'buyback', count: 1 })))).toEqual([])
+    // treasury 5: 10 > 5
+    const poor = edit(owed, 'you', (c) => (c.treasury = 5))
+    // (the treasury then ends below 0, so over_treasury comes with it)
+    expect(codes(poor, decision((d) => (d.shares = { mode: 'buyback', count: 1 })))).toEqual(['buyback_over_cash', 'over_treasury'])
+    // cash from a loan taken the same round is in the treasury
+    expect(codes(poor, decision((d) => ((d.loans.take = 20), (d.shares = { mode: 'buyback', count: 1 }))))).toEqual([])
   })
 
-  it('upgrades: big, under construction, foreign, twice', () => {
+  it('upgrades: mega, under construction, foreign, twice', () => {
     let s = game(['you', 'b'])
     s = edit(s, 'you', (c) => {
       c.treasury = 1000
-      addOnline(c, 'plant', 'big')
+      // Level 3 is the top: a big building can now be upgraded (to mega), a mega one cannot.
+      addOnline(c, 'plant', 'mega')
       c.buildings.push({ id: 'wip', kind: 'dc', size: 'small', mw: 0, status: 'building', roundsLeft: 1, pricePaid: 12, tile: [3, 0], builtRound: 1 })
     })
     const you = company(s, 'you')
-    const big = you.buildings.find((b) => b.size === 'big')!.id
+    const big = you.buildings.find((b) => b.size === 'mega')!.id
     const foreign = company(s, 'b').buildings[0].id
     const small = you.buildings[0].id
     expect(codes(s, decision((d) => (d.upgrades = [big, 'wip', foreign, small, small])))).toEqual(['upgrade_invalid', 'upgrade_invalid', 'upgrade_invalid', 'upgrade_invalid'])
@@ -592,7 +598,12 @@ describe('bots: deterministic, no RNG, public information only, always valid', (
       for (const c of s.companies) {
         if (c.bankrupt) problems.push(`${seed}: ${c.id} bankrupt`)
         if (c.buildings.length <= 2) problems.push(`${seed}: ${c.id} never built`)
-        if (c.links.length <= 1) problems.push(`${seed}: ${c.id} never bought a link`)
+        // A bot that sells its plant power to the other datacenters pool (no link needed) and whose start
+        // internal link already powers all its datacenters needs no link (seed 4: Hashfield, 10 MW of
+        // plants, one 2 MW datacenter). Any other bot must have bought one.
+        const cap = capacity(c)
+        const needsLink = cap.links.internal < Math.min(cap.dcMw, cap.plantMw) || c.history.some((r) => r.offered.citizens > 0 || r.rent.requested > 0)
+        if (c.links.length <= 1 && needsLink) problems.push(`${seed}: ${c.id} never bought a link`)
       }
       const prices = s.companies.map((c) => c.sharePrice)
       if (new Set(prices).size < prices.length - 1) problems.push(`${seed}: identical finishing prices`)
@@ -618,11 +629,12 @@ describe('bots: deterministic, no RNG, public information only, always valid', (
 // ---------------------------------------------------------------- UI helpers (DESIGN 2.5)
 
 describe('defaultDecision (DESIGN 2.5)', () => {
-  it('round 1: internal = min(plantMw, internal link), ai = min(dcMw, internal), rest 0', () => {
+  it('round 1: internal = min(plantMw, internal link), compute = min(dcMw, internal) spread by pool demand, rest 0', () => {
+    // New rule: round 1 spreads compute over cloud / btc / AI by start demand (0.8 / 0.5 / 0.7), no longer all on AI.
     const s = game(['you'])
-    expect(defaultDecision(s, 'you')).toEqual(decision((d) => ((d.power.internal = 2), (d.compute.ai = 2))))
+    expect(defaultDecision(s, 'you')).toEqual(decision((d) => ((d.power.internal = 2), (d.compute = { cloud: 0.8, btc: 0.5, ai: 0.7 }))))
     const wide = edit(s, 'you', (c) => (addOnline(c, 'plant', 'big'), (c.links[0].mw = 5)))
-    expect(defaultDecision(wide, 'you')).toEqual(decision((d) => ((d.power.internal = 5), (d.compute.ai = 2))))
+    expect(defaultDecision(wide, 'you')).toEqual(decision((d) => ((d.power.internal = 5), (d.compute = { cloud: 0.8, btc: 0.5, ai: 0.7 }))))
   })
 
   it('later rounds repeat last power/compute/rent, no builds or finance, sanitized to capacity', () => {
@@ -682,9 +694,11 @@ describe('previewCompany (DESIGN 2.5)', () => {
 describe('projectRound (DESIGN 2.5)', () => {
   it('round 1 with 2 MW on AI projects the starting round check: 6.4 - 0.8 - 0.44 = 5.16', () => {
     const s = createSoloGame({ seed: 1, playerName: 'P' })
-    const p = projectRound(s, 'you', defaultDecision(s, 'you'))
+    // AI demand set so 2 MW fit (start AI demand is now 0.7 MW per company).
+    s.pools.ai.demand = 8
+    const p = projectRound(s, 'you', decision((d) => ((d.power.internal = 2), (d.compute.ai = 2))))
     expect(p.revenue).toBe(6.4)
-    expect(p.costs).toEqual({ power: 0.8, rent: 0, maintenance: 0.44, interest: 0 })
+    expect(p.costs).toEqual({ power: 0.8, rent: 0, maintenance: 0.44, interest: 0, unallocated: 0 })
     expect(p.profit).toBe(5.16)
     expect(p.idle).toBe(0)
     expect(p.marginPerMw).toEqual({ citizens: 0.6, otherDc: 0.9, cloud: 1.6, btc: 1.2, ai: 2.8 })
@@ -692,10 +706,13 @@ describe('projectRound (DESIGN 2.5)', () => {
 
   it('estUsed = min(offer, U_self + max(0, D_last - sum U_last)), from the last summary', () => {
     let s = game(['you', 'b'])
+    s.pools.ai.demand = 2.5 // below the 4 MW offered, so the pool is short and the formula is exercised
     s = resolveRound(s, { you: decision((d) => ((d.power.internal = 2), (d.compute.ai = 2))), b: decision((d) => ((d.power.internal = 2), (d.compute.ai = 2))) })
     const last = s.history.at(-1)!.pools.ai
+    const mine = s.pools.ai.lastUsed.you
+    expect(mine).toBeLessThan(2)
     const p = projectRound(s, 'you', decision((d) => ((d.power.internal = 2), (d.compute.ai = 2))))
-    const expected = Math.min(2, 2 + Math.max(0, last.demand - last.used))
+    const expected = Math.min(2, mine + Math.max(0, last.demand - last.used))
     expect(p.usedByPool.ai).toBeCloseTo(expected, 9)
   })
 
@@ -788,6 +805,7 @@ describe('loanRate and riskView (SPEC Loan rate, Risk view; DESIGN 2.5)', () => 
 describe('revenueByBuilding, findFreeTile, plotRows (DESIGN 2.5, 2.2.6, 6)', () => {
   it('after a 2 MW AI round the datacenter earns 6.4 and the plant 0', () => {
     let s = game(['you'])
+    s.pools.ai.demand = 3 // so the 2 MW on AI are all used
     s = resolveRound(s, { you: decision((d) => ((d.power.internal = 2), (d.compute.ai = 2))) })
     const you = company(s, 'you')
     expect(revenueByBuilding(s, 'you')).toEqual({ [you.buildings[0].id]: 0, [you.buildings[1].id]: 6.4 })
@@ -811,7 +829,8 @@ describe('revenueByBuilding, findFreeTile, plotRows (DESIGN 2.5, 2.2.6, 6)', () 
     const you = company(s, 'you')
     expect(findFreeTile(you)).toEqual([2, 0])
     expect(findFreeTile(you, [[2, 0], [3, 0]])).toEqual([0, 1])
-    expect(plotRows(you)).toBe(2)
+    // New rule: owned rows (2) plus one locked row for sale.
+    expect(plotRows(you)).toBe(3)
     expect(plotRows(you, [[0, 1]])).toBe(3)
     expect(plotRows(you, [[0, 4]])).toBe(6)
     expect(capacity(you)).toEqual({ plantMw: 2, dcMw: 2, links: { internal: 2, town: 0, import: 0 } })

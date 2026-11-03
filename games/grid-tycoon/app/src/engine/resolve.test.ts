@@ -68,6 +68,9 @@ describe('rent matching', () => {
       addOnline(c, 'dc', 'big')
       addLink(c, 'import', 10)
     })
+    // Compute demand above every offer, so rent is the only thing under test (start demand is under 1 MW per pool).
+    s.pools.cloud.demand = 20
+    s.pools.ai.demand = 20
     return resolveRound(s, {
       seller: decision((d) => ((d.power.internal = 2), (d.compute.ai = 2), (d.power.otherDc = 2))),
       renter: decision((d) => ((d.power.internal = 2), (d.rentMw = rent), (d.compute.cloud = 2 + rent))),
@@ -126,7 +129,7 @@ describe('resolution', () => {
     for (const c of s.companies) {
       for (const r of c.history) {
         const p = r.stock.parts
-        const sum = p.revenueGrowth + Object.values(p.demandMiss).reduce((a, b) => a + b, 0) + p.idle + p.fundamentals + p.debtDrag + p.shares
+        const sum = p.revenueGrowth + Object.values(p.demandMiss).reduce((a, b) => a + b, 0) + p.idle + p.stability + p.fundamentals + p.debtDrag + p.shares
         expect(Math.abs(r.stock.priceBefore + sum - r.stock.priceAfter)).toBeLessThan(0.1)
       }
     }

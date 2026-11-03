@@ -79,10 +79,14 @@ const COSTS: { key: keyof RoundResult['costs']; label: string; hue: string }[] =
   { key: 'rent', label: 'Rent', hue: 'var(--grid-dark)' },
   { key: 'maintenance', label: 'Maintenance', hue: 'var(--stone-mid)' },
   { key: 'interest', label: 'Interest', hue: 'var(--plant-dark)' },
+  { key: 'unallocated', label: 'Unused power penalty', hue: 'var(--critical)' },
 ]
 
+/** One cost line (0 for a line an older save does not have). */
+const costOf = (res: RoundResult, key: keyof RoundResult['costs']): number => res.costs[key] ?? 0
+
 export function RevenueBeat({ res, active }: { res: RoundResult; active: boolean }) {
-  const costs = res.costs.power + res.costs.rent + res.costs.maintenance + res.costs.interest
+  const costs = COSTS.reduce((s, c) => s + costOf(res, c.key), 0)
   const scale = Math.max(res.revenue, costs, 0.01)
   const pools = POOLS.filter((p) => res.revenueByPool[p] > 0.004 || res.used[p] > 0)
   let k = 0
@@ -105,12 +109,12 @@ export function RevenueBeat({ res, active }: { res: RoundResult; active: boolean
         <div className="rs-stack-row">
           <span className="rs-stack-label">Costs</span>
           <span className="rs-stack" style={{ width: `${(costs / scale) * 100}%` }}>
-            {COSTS.filter((c) => res.costs[c.key] > 0.004).map((c) => (
+            {COSTS.filter((c) => costOf(res, c.key) > 0.004).map((c) => (
               <span
                 key={c.key}
                 className="rs-seg rs-grow from-left"
-                style={{ flexGrow: res.costs[c.key], background: c.hue, '--i': k++ } as CSSProperties}
-                title={`${c.label} ${money(res.costs[c.key])}`}
+                style={{ flexGrow: costOf(res, c.key), background: c.hue, '--i': k++ } as CSSProperties}
+                title={`${c.label} ${money(costOf(res, c.key))}`}
               />
             ))}
           </span>
@@ -141,11 +145,14 @@ export function RevenueBeat({ res, active }: { res: RoundResult; active: boolean
             Costs <CountUp className="num" value={-costs} format={money} active={active} />
           </h3>
           <ul className="rs-lines">
-            {COSTS.map((c, i) => (
-              <li key={c.key} className={res.costs[c.key] > 0.004 ? undefined : 'is-zero'}>
+            {COSTS.filter((c) => c.key !== 'unallocated' || costOf(res, c.key) > 0.004).map((c, i) => (
+              <li key={c.key} className={costOf(res, c.key) > 0.004 ? undefined : 'is-zero'}>
                 <span className="rs-swatch" style={{ background: c.hue }} aria-hidden="true" />
-                <span className="rs-line-name">{c.label}</span>
-                <CountUp className="num" value={-res.costs[c.key]} format={money} active={active} delay={i * 90} />
+                <span className="rs-line-name">
+                  {c.label}
+                  {c.key === 'unallocated' ? <span className="muted num"> {fmtMw(res.unallocatedMw ?? 0)}</span> : null}
+                </span>
+                <CountUp className="num" value={-costOf(res, c.key)} format={money} active={active} delay={i * 90} />
               </li>
             ))}
           </ul>

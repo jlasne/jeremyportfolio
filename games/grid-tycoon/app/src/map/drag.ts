@@ -16,7 +16,7 @@ import { audio } from '../audio'
 import { useDraft } from '../store/draft'
 import { useGame } from '../store/game'
 import { useUi } from '../store/ui'
-import { freeTiles, mapApi, mapHandle, resetPlacement, usePlacement } from './placement'
+import { NO_LOT_TEXT, freeTiles, mapApi, mapHandle, resetPlacement, showNotice, usePlacement } from './placement'
 import type { PlacementMode } from './placement'
 import { tileKey } from './layout'
 
@@ -54,8 +54,18 @@ function freeLotAt(x: number, y: number): Tile | null {
   return freeSet(usePlacement.getState().moveIndex).has(tileKey(t)) ? t : null
 }
 
+/** "Small plant (level 1)", "Big datacenter (level 2)". */
 export function orderLabel(o: BuildOrder): string {
-  return `${o.size === 'big' ? 'Big' : 'Small'} ${o.kind === 'plant' ? 'plant' : 'datacenter'}`
+  const big = o.size === 'big'
+  return `${big ? 'Big' : 'Small'} ${o.kind === 'plant' ? 'plant' : 'datacenter'} (level ${big ? 2 : 1})`
+}
+
+/** False (with a notice on the map and for screen readers) when the land has no free lot. */
+function hasFreeLot(): boolean {
+  if (freeSet(null).size > 0) return true
+  showNotice(NO_LOT_TEXT)
+  useUi.getState().announce(NO_LOT_TEXT)
+  return false
 }
 
 function buildRounds(o: BuildOrder): number {
@@ -216,7 +226,7 @@ export function startBuildDrag(order: BuildOrder, e: PointerEvent): void {
     return
   }
   cancelPlacement()
-  if (!canPlace()) return
+  if (!canPlace() || !hasFreeLot()) return
   beginDrag('drag', { kind: order.kind, size: order.size ?? 'small' }, e, null)
 }
 
@@ -236,7 +246,7 @@ export function startBuildPlacement(order: BuildOrder): void {
     return
   }
   cancelPlacement()
-  if (!canPlace()) return
+  if (!canPlace() || !hasFreeLot()) return
   const restore = document.activeElement instanceof HTMLElement ? document.activeElement : null
   const placed: BuildOrder = { kind: order.kind, size: order.size ?? 'small' }
   usePlacement.setState({ mode: 'tap', order: placed, moveIndex: null, hover: null, pointer: null, active: true })

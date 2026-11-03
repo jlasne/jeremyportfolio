@@ -30,6 +30,10 @@ export interface DraftStore {
   /** Moves a pending plant/dc order to another lot (map drag). */
   moveBuild(index: number, tile: Tile): void
   toggleUpgrade(buildingId: string): void
+  /** Land rows to buy this round (0 or more). Orders left on a row given back move to a free lot. */
+  setLandRows(rows: number): void
+  /** Adds one land row to this round's purchase. */
+  buyLandRow(): void
   setLoanTake(amount: number): void
   setRepay(loanId: string, amount: number): void
   toggleRefinance(loanId: string): void
@@ -110,6 +114,28 @@ export const useDraft = create<DraftStore>()((set, get) => ({
     get().set((d) => {
       d.upgrades = d.upgrades.includes(id) ? d.upgrades.filter((u) => u !== id) : [...d.upgrades, id]
     }),
+
+  setLandRows: (rows) => {
+    const { state, meId, config } = useGame.getState()
+    get().set((d) => {
+      const n = Math.max(0, Math.floor(Number.isFinite(rows) ? rows : 0))
+      d.landRows = n
+      if (!state || !meId) return
+      // orders that sat on a row given back move to the first free lot of the land kept, if any
+      const me = companyById(state, meId)
+      const total = ownedRows(me, config) + n
+      const kept = d.builds.filter((b) => b.kind !== 'link' && b.tile && b.tile[1] < total).map((b) => b.tile as Tile)
+      for (const b of d.builds) {
+        if (b.kind === 'link' || !b.tile || b.tile[1] < total) continue
+        const free = findFreeTile(me, kept, config, total)
+        if (!free) continue
+        b.tile = free
+        kept.push(free)
+      }
+    })
+  },
+
+  buyLandRow: () => get().setLandRows(Math.max(0, Math.floor(get().decision.landRows || 0)) + 1),
 
   setLoanTake: (amount) => get().set((d) => void (d.loans.take = clean(amount)), 'loan.take'),
 

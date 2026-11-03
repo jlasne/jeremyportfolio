@@ -1,7 +1,9 @@
-// The card of the selected building (or pending order): what it is, its MW, used / idle this round
-// (the draft) and last round, status and countdown, maintenance, sell value, and the one action it
-// offers (Upgrade, or Cancel order). Desktop: an overlay next to the building that follows the
-// camera. Phones: a card docked at the bottom of the map (top when a sheet is open).
+// The card of the selected building (or pending order): what it is, its level and MW, used / idle
+// this round (the draft) and last round, status and countdown, maintenance, sell value, and the one
+// action it offers (Upgrade to the next level, or Cancel order). It shows only while a building is
+// selected (a tap on it); a tap on empty ground, Esc, or opening a panel closes it. Desktop: an
+// overlay next to the building that follows the camera. Phones: a card docked at the bottom of the
+// map (top when a sheet is open).
 
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
@@ -45,6 +47,15 @@ export default function BuildingCard({ view }: { view: MapView }) {
   useEffect(() => {
     if (selected && state && !open) select(null)
   }, [selected, state, open, select])
+
+  // opening a panel (or switching to another one) closes the card: one thing open at a time
+  useEffect(
+    () =>
+      useUi.subscribe((s, p) => {
+        if (s.panel && s.panel !== p.panel && s.selected) s.select(null)
+      }),
+    [],
+  )
 
   // Esc closes the card when no panel is open (the panel's Esc comes first)
   useEffect(() => {
@@ -131,14 +142,16 @@ export default function BuildingCard({ view }: { view: MapView }) {
   )
 }
 
-function Head({ icon, hue, title, sub, onClose }: { icon: IconName; hue: string; title: string; sub: string; onClose: () => void }) {
+function Head({ icon, hue, title, level, sub, onClose }: { icon: IconName; hue: string; title: string; level: 1 | 2 | 3; sub: string; onClose: () => void }) {
   return (
     <header className="mcard-head">
       <span className="mcard-badge" style={{ ['--hue' as string]: hue }}>
         <Icon name={icon} size={20} />
       </span>
       <div className="mcard-title">
-        <h3>{title}</h3>
+        <h3>
+          {title} <span className={`lvl-chip lvl-${level}`}>Level {level}</span>
+        </h3>
         <p className="mcard-sub">{sub}</p>
       </div>
       <IconButton icon="close" label="Close building card" size="sm" onClick={onClose} />
@@ -162,7 +175,14 @@ function BuildingBody({ s, deciding, round, phone, onUpgrade, onClose }: { s: Bu
   const building = b.status === 'building'
   return (
     <>
-      <Head icon={plant ? 'plant' : 'dc'} hue={hue} title={s.name} sub={b.status === 'building' ? `Under construction` : `${plant ? 'Makes' : 'Runs'} ${b.mw} MW`} onClose={onClose} />
+      <Head
+        icon={plant ? 'plant' : 'dc'}
+        hue={hue}
+        title={plant ? 'Plant' : 'Datacenter'}
+        level={s.level}
+        sub={b.status === 'building' ? `Under construction` : `${plant ? 'Makes' : 'Runs'} ${b.mw} MW`}
+        onClose={onClose}
+      />
       {s.selling ? (
         <Status icon="warn" level="warn">
           Selling in this losing round for <span className="num">{fmtMoney(s.sell)}</span>
@@ -171,13 +191,17 @@ function BuildingBody({ s, deciding, round, phone, onUpgrade, onClose }: { s: Bu
         <Status icon="crane" level="busy">
           Building · online in round <span className="num">{round + b.roundsLeft}</span> ({plural(b.roundsLeft, 'round')} left)
         </Status>
-      ) : b.status === 'upgrading' ? (
+      ) : b.status === 'upgrading' && s.next ? (
         <Status icon="crane" level="busy">
-          Upgrading · big ({s.bigMw} MW) in round <span className="num">{round + b.roundsLeft}</span> ({plural(b.roundsLeft, 'round')} left), runs at 2 MW until then
+          Upgrading to level {s.next.level} ({s.next.mw} MW) in round <span className="num">{round + b.roundsLeft}</span> ({plural(b.roundsLeft, 'round')} left). Runs at {b.mw} MW until then.
         </Status>
       ) : s.upgrade?.ordered ? (
         <Status icon="arrowUp" level="busy">
-          Upgrade ordered this round · big in <span className="num">{s.upgrade.rounds}</span> rounds
+          Upgrade ordered this round · level {s.upgrade.toLevel} in <span className="num">{s.upgrade.rounds}</span> rounds
+        </Status>
+      ) : s.level === 3 ? (
+        <Status icon="ok" level="ok">
+          Online · top level
         </Status>
       ) : (
         <Status icon="ok" level="ok">
@@ -262,17 +286,16 @@ function BuildingBody({ s, deciding, round, phone, onUpgrade, onClose }: { s: Bu
             onClick={onUpgrade}
           >
             {s.upgrade.ordered ? 'Cancel upgrade' : (
-              <span className="num">{`Upgrade to big · ${fmtMoney(s.upgrade.cost)}`}</span>
+              <span className="num">{`Upgrade to level ${s.upgrade.toLevel} · ${fmtMoney(s.upgrade.cost)}`}</span>
             )}
           </Button>
           <p id="mcard-upgrade-note" className="mcard-note">
             {!deciding
               ? 'Orders open in the next decision phase.'
-              : s.upgrade.ordered
-                ? `Big (${s.bigMw} MW) in ${s.upgrade.rounds} rounds; keeps running at 2 MW meanwhile.`
-                : s.upgrade.canAfford
-                  ? `${s.bigMw} MW after ${s.upgrade.rounds} rounds; keeps running at 2 MW meanwhile.`
-                  : `Needs ${fmtMoney(s.upgrade.short)} more in the treasury.`}
+              : !s.upgrade.ordered && !s.upgrade.canAfford
+                ? `Needs ${fmtMoney(s.upgrade.short)} more in the treasury.`
+                : `+${s.upgrade.gain} MW (${b.mw} to ${s.next?.mw ?? b.mw} MW) after ${plural(s.upgrade.rounds, 'round')}. Runs at ${b.mw} MW meanwhile, on the same lot.`}
+            {deciding && s.upgrade.toLevel === 3 ? ' Level 3 gives the most MW per lot and takes the longest build.' : null}
           </p>
         </div>
       ) : null}
@@ -284,7 +307,14 @@ function PendingBody({ s, deciding, phone, onCancel, onClose }: { s: PendingStat
   const plant = s.order.kind === 'plant'
   return (
     <>
-      <Head icon={plant ? 'plant' : 'dc'} hue={plant ? 'var(--plant-mid)' : 'var(--dc-mid)'} title={s.name} sub="Ordered this round" onClose={onClose} />
+      <Head
+        icon={plant ? 'plant' : 'dc'}
+        hue={plant ? 'var(--plant-mid)' : 'var(--dc-mid)'}
+        title={plant ? 'Plant' : 'Datacenter'}
+        level={s.order.size === 'big' ? 2 : 1}
+        sub="Ordered this round"
+        onClose={onClose}
+      />
       <Status icon="crane" level="busy">
         Starts at lock in · online in round <span className="num">{s.onlineRound}</span> ({plural(s.rounds, 'round')})
       </Status>

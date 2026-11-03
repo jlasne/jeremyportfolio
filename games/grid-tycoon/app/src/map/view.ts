@@ -10,8 +10,8 @@
 
 import { Application, Assets, Container, Graphics, Rectangle, Sprite, Texture, TextureStyle } from 'pixi.js'
 import type { Spritesheet } from 'pixi.js'
-import { capacity, companyById, plotRows, revenueByBuilding, seasonOf } from '../engine'
-import type { Building, Decision, GameState, Tile } from '../engine'
+import { canUpgrade, capacity, companyById, landCost, ownedRows, plotRows, revenueByBuilding, seasonOf, upgradeSpec } from '../engine'
+import type { Building, Decision, GameState, Size, Tile } from '../engine'
 import { audio } from '../audio'
 import { useDraft } from '../store/draft'
 import { useGame } from '../store/game'
@@ -49,13 +49,14 @@ import {
   routeLots,
   routeToSubstation,
   routeToTown,
+  spriteSize,
   tileAt,
   tileKey,
   worldRows,
 } from './layout'
 import type { Polyline, Pt, Rect, Safe } from './layout'
-import { amountTexture, badgeTexture, dotTexture, sellTagTexture } from './pixelText'
-import { freeTiles, registerMap, usePlacement } from './placement'
+import { amountTexture, badgeTexture, dotTexture, levelTagTexture, newLandTagTexture, saleSignTexture, sellTagTexture } from './pixelText'
+import { freeTiles, registerMap, showNotice, usePlacement } from './placement'
 import type { MapHandle } from './placement'
 
 TextureStyle.defaultOptions.scaleMode = 'nearest'
@@ -71,6 +72,9 @@ const TARP_PLANT = 0xff9e66
 const TARP_DC = 0xb49cf5
 const POWER = 0xffd23f
 const CREAM = 0xfffdf6
+const MONEY = 0x2fb8b0
+/** Land for sale: its pads show at this opacity over the grass. */
+const SALE_PAD_ALPHA = 0.4
 /** Average colour of each season's plain grass tile, for the canvas behind the world. */
 const GROUND = [0x98c15b, 0x6f9e3d, 0x8f9343, 0xedf3fa]
 /** Grass tiles drawn around the world, so a viewport wider than the world never shows an edge. */
@@ -90,9 +94,10 @@ type FlowKind = 'internal' | 'town' | 'import' | 'otherDc'
 
 export interface LotInfo {
   tile: Tile
-  /** 'pending:c,r' for an order, the building id, or null for a free lot. */
+  /** 'pending:c,r' for an order, the building id, or null for a free lot or land for sale. */
   id: string | null
-  kind: 'building' | 'pending' | 'free'
+  /** 'sale': a lot of the locked row under the land, for sale as a whole row. */
+  kind: 'building' | 'pending' | 'free' | 'sale'
 }
 
 interface Model {
@@ -102,10 +107,12 @@ interface Model {
   plotRows: number
   rows: number
   houses: number
-  buildings: { id: string; kind: Building['kind']; size: Building['size']; status: Building['status']; left: number; tile: Tile; sold: boolean; upg: boolean }[]
+  /** upgRounds: rounds of this building's next upgrade (the ghost crane's countdown when one is ordered). */
+  buildings: { id: string; kind: Building['kind']; size: Building['size']; status: Building['status']; left: number; tile: Tile; sold: boolean; upg: boolean; upgRounds: number }[]
   pending: { index: number; kind: 'plant' | 'dc'; size: 'small' | 'big'; tile: Tile; rounds: number }[]
   links: Record<'internal' | 'town' | 'import', LinkState>
-  upgradeRounds: number
+  /** Rows owned, rows bought in the draft, the row for sale (owned + bought) and its price. */
+  land: { owned: number; bought: number; saleRow: number; price: number }
 }
 
 interface Live {
@@ -456,7 +463,9 @@ export class MapView {
     const pending = d.builds.flatMap((b, index) =>
       b.kind !== 'link' && b.tile ? [{ index, kind: b.kind, size: b.size ?? 'small', tile: b.tile, rounds: config.buildings[b.kind][b.size ?? 'small'].rounds }] : [],
     )
-    const rows = plotRows(me, pending.map((p) => p.tile), config)
+    const owned = ownedRows(me, config)
+    const bought = Math.max(0, Math.floor(Number.isFinite(d.landRows) ? d.landRows : 0))
+    const rows = plotRows(me, pending.map((p) => p.tile), config, owned + bought)
     const last = me.history.at(-1)
     const houses = houseCount(last?.used.citizens ?? 0)
     const cap = capacity(me)
@@ -469,10 +478,20 @@ export class MapView {
       plotRows: rows,
       rows: worldRows(rows, houses),
       houses,
-      buildings: me.buildings.map((b) => ({ id: b.id, kind: b.kind, size: b.size, status: b.status, left: b.roundsLeft, tile: b.tile, sold: d.forcedSales.includes(b.id), upg: d.upgrades.includes(b.id) })),
+      buildings: me.buildings.map((b) => ({
+        id: b.id,
+        kind: b.kind,
+        size: b.size,
+        status: b.status,
+        left: b.roundsLeft,
+        tile: b.tile,
+        sold: d.forcedSales.includes(b.id),
+        upg: d.upgrades.includes(b.id),
+        upgRounds: canUpgrade(b) ? upgradeSpec(b.kind, b.size, config).rounds : 0,
+      })),
       pending,
       links: { internal: linkState('internal'), town: linkState('town'), import: linkState('import') },
-      upgradeRounds: config.buildings.plant.upgrade.rounds,
+      land: { owned, bought, saleRow: owned + bought, price: landCost(owned + bought, 1, config) },
     }
     const plantAssigned = d.power.internal + d.power.town + d.power.otherDc
     const computeAssigned = d.compute.cloud + d.compute.btc + d.compute.ai
@@ -595,7 +614,7 @@ export class MapView {
     const lastLaneRow = LANE_ROW0 + 3 * (lanes - 1)
     // The ground only changes with the season, the theme, the plot size and the town's lanes:
     // otherwise the baked texture from the last rebuild is kept as is.
-    const groundKey = `${m.season}|${m.dusk}|${rows}|${m.plotRows}|${lanes}`
+    const groundKey = `${m.season}|${m.dusk}|${rows}|${m.plotRows}|${lanes}|${m.land.saleRow}`
     const rebake = groundKey !== this.groundKey || !this.ground.children.length
     const ground = new Container()
     const g = (name: string, c: number, r: number, flip = false) => {
@@ -627,15 +646,34 @@ export class MapView {
     }
     for (let c = EAST_ROAD_COL + 1; c < WORLD_W / T + MARGIN; c++) g('road_h', c, BRANCH_ROW)
 
-    // 4. lot pads; corner marks on free lots only
+    // 4. lot pads with an outline each; corner marks and a dashed line on free lots only; the row
+    //    for sale under the land is dimmed and fenced, with a sign showing its price
     const occupied = new Set([...m.buildings.map((b) => tileKey(b.tile)), ...m.pending.map((p) => tileKey(p.tile))])
+    const grid = new Graphics()
+    this.marks.addChild(grid)
     for (let r = 0; r < m.plotRows; r++) {
+      const sale = r === m.land.saleRow
+      const fresh = r >= m.land.owned && r < m.land.saleRow
       for (let c = 0; c < 4; c++) {
         const lr = lotRect([c, r])
-        if (rebake) this.put(ground, 'lot', lr.x, lr.y, 0)
-        if (!occupied.has(`${c},${r}`)) this.lotMarks.set(`${c},${r}`, this.put(this.marks, 'lot_marks', lr.x, lr.y, 0))
+        if (rebake) this.put(ground, 'lot', lr.x, lr.y, 0, sale ? { alpha: SALE_PAD_ALPHA } : {})
+        if (sale) continue
+        const free = !occupied.has(`${c},${r}`)
+        this.lotOutline(grid, lr, free, fresh)
+        if (free) this.lotMarks.set(`${c},${r}`, this.put(this.marks, 'lot_marks', lr.x, lr.y, 0))
+      }
+      if (fresh) {
+        // a row bought this round: owned once the round locks in
+        const lr = lotRect([0, r])
+        const tag = new Sprite(newLandTagTexture())
+        tag.scale.set(this.labelScale)
+        tag.position.set(lr.x + 5, lr.y + 5)
+        this.top.addChild(tag)
       }
     }
+    grid.tint = m.dusk ? DUSK : WHITE
+    this.saleSign = null
+    if (m.land.saleRow < m.plotRows) this.drawSaleRow(m.land.saleRow, m.land.price)
     if (rebake) {
       this.clearLayer(this.ground)
       this.bakeGround(ground, rows)
@@ -868,15 +906,66 @@ export class MapView {
     g.fill({ color: INK_WIRE, alpha: dashed ? 0.7 : 1 })
   }
 
+  /**
+   * One owned lot's outline: a 1 px ink line just inside the pad's edge on every lot, so the grid
+   * reads at a glance; free lots add a dashed cream line between their corner marks (teal on a row
+   * bought this round).
+   */
+  private lotOutline(g: Graphics, r: Rect, free: boolean, fresh: boolean): void {
+    g.rect(r.x + 2, r.y + 2, r.w - 4, 1).rect(r.x + 2, r.y + r.h - 3, r.w - 4, 1).rect(r.x + 2, r.y + 3, 1, r.h - 6).rect(r.x + r.w - 3, r.y + 3, 1, r.h - 6)
+    g.fill({ color: INK_WIRE, alpha: 0.55 })
+    if (!free) return
+    // dashes 4 on, 3 off, inset 8 px, leaving the corners to the lot_marks sprite
+    const x0 = r.x + 8
+    const y0 = r.y + 8
+    const x1 = r.x + r.w - 8
+    const y1 = r.y + r.h - 8
+    for (let x = x0 + 12; x + 4 <= x1 - 12; x += 7) g.rect(x, y0, 4, 1).rect(x, y1 - 1, 4, 1)
+    for (let y = y0 + 12; y + 4 <= y1 - 12; y += 7) g.rect(x0, y, 1, 4).rect(x1 - 1, y, 1, 4)
+    g.fill({ color: fresh ? MONEY : CREAM, alpha: 0.9 })
+  }
+
+  /** The locked row under the land: dimmed pads (baked with the ground), a fence around it, and the price sign. */
+  private drawSaleRow(row: number, price: number): void {
+    const first = lotRect([0, row])
+    const y0 = first.y
+    const y1 = first.y + first.h
+    // fence rails along the top and bottom edges, posts down both sides
+    for (let x = PLOT_X0; x < PLOT_X1; x += T) {
+      this.put(this.objects, 'fence_h', x, y0 - 10, y0 + 12)
+      this.put(this.objects, 'fence_h', x, y1 - 24, y1 + 4)
+    }
+    for (let y = y0 - 4; y < y1 - 20; y += T) {
+      this.put(this.objects, 'fence_v', PLOT_X0 - 15, y, y + 26)
+      this.put(this.objects, 'fence_v', PLOT_X1 - 18, y, y + 26)
+    }
+    const sign = new Sprite(saleSignTexture(price))
+    sign.anchor.set(0.5, 1)
+    sign.scale.set(this.labelScale)
+    sign.position.set(Math.round((PLOT_X0 + PLOT_X1) / 2), y0 + 64)
+    this.top.addChild(sign)
+    this.saleSign = { s: sign, price, hot: false }
+  }
+
+  private saleSign: { s: Sprite; price: number; hot: boolean } | null = null
+  private kbFocus: Tile | null = null
+
+  /** The lot the keyboard layer has focused (only the sale row uses it, to light up as on hover). */
+  focusLot(t: Tile | null): void {
+    this.kbFocus = t
+    this.markDirty()
+  }
+
   private drawBuilding(b: Model['buildings'][number]): void {
-    const name = `${b.kind === 'plant' ? 'plant' : 'dc'}_${b.size}`
+    const size = spriteSize(b.size)
+    const name = `${b.kind === 'plant' ? 'plant' : 'dc'}_${size}`
     const lr = lotRect(b.tile)
     this.buildingRects.set(b.id, lr)
     const alpha = b.sold ? 0.35 : undefined
     if (b.status === 'building') {
       const [fx, fy] = footOnLot(b.tile, b.size)
-      const sc = this.putFoot(`scaffold_${b.size}`, fx, fy, { alpha })
-      this.put(this.objects, `tarp_${b.size}`, sc.x, sc.y, sc.zIndex + 0.01, { tint: b.kind === 'plant' ? TARP_PLANT : TARP_DC, alpha })
+      const sc = this.putFoot(`scaffold_${size}`, fx, fy, { alpha })
+      this.put(this.objects, `tarp_${size}`, sc.x, sc.y, sc.zIndex + 0.01, { tint: b.kind === 'plant' ? TARP_PLANT : TARP_DC, alpha })
       this.crane(b.tile, b.size, b.left, alpha ?? 1, b.kind)
       if (b.sold) this.sellTag(lr)
       return
@@ -892,7 +981,7 @@ export class MapView {
       const bl = this.put(this.objects, 'blades_0', s.x + hub[0] - center[0], s.y + hub[1] - center[1], s.zIndex + 0.04, { alpha })
       this.blades.push({ s: bl, phase, still: b.sold })
     }
-    if (b.kind === 'plant' && b.size === 'big' && !b.sold) {
+    if (b.kind === 'plant' && b.size !== 'small' && !b.sold) {
       const ch = this.pt('plant_big', 'chimney') ?? [17, 5]
       const tw = this.pt('plant_big', 'tower') ?? [75, 27]
       this.smokeSources.push({ x: s.x + ch[0], y: s.y + ch[1], kind: 'chimney', acc: 0.3 })
@@ -905,8 +994,17 @@ export class MapView {
       this.dcs.push(set)
     }
     if (b.status === 'upgrading') this.crane(b.tile, 'small', b.left, 1, b.kind)
-    else if (b.upg && !b.sold) this.crane(b.tile, 'small', this.model?.upgradeRounds ?? 4, 0.55, b.kind)
+    else if (b.upg && !b.sold) this.crane(b.tile, 'small', b.upgRounds || 4, 0.55, b.kind)
+    if (b.size === 'mega') this.levelTag(lr, 3)
     if (b.sold) this.sellTag(lr)
+  }
+
+  /** The "L3" plate in the top-right corner of a level 3 building's lot (it shares the big sprite). */
+  private levelTag(lr: Rect, level: number): void {
+    const tag = new Sprite(levelTagTexture(level))
+    tag.scale.set(this.labelScale)
+    tag.position.set(lr.x + lr.w - 5 - tag.width, lr.y + 5)
+    this.top.addChild(tag)
   }
 
   /** The "SELL" tag in the top-left corner of a lot marked for a forced sale (drawn at full opacity). */
@@ -930,7 +1028,7 @@ export class MapView {
   }
 
   /** A crane with its floating countdown badge (alpha < 1 for a ghost crane). */
-  private crane(tile: Tile, size: 'small' | 'big', rounds: number, alpha: number, kind: 'plant' | 'dc'): void {
+  private crane(tile: Tile, size: Size, rounds: number, alpha: number, kind: 'plant' | 'dc'): void {
     const [cx, cy] = craneFoot(tile, size)
     const c = this.putFoot('crane', cx, cy, { alpha: alpha < 1 ? alpha : undefined })
     const badge = this.badge(this.top, c, rounds, kind)
@@ -1096,6 +1194,19 @@ export class MapView {
       const rounds = config.buildings[pl.order.kind][pl.order.size ?? 'small'].rounds
       this.drawGhost(pl.hover, pl.order.kind, pl.order.size ?? 'small', rounds, 0.62, this.ghost)
     }
+    // the row for sale lights up as a whole under the pointer, and its sign turns gold
+    const onSale = (t: Tile | null) => !!t && t[1] === m.land.saleRow
+    const saleHot = (onSale(this.hover) || onSale(this.kbFocus)) && useGame.getState().phase === 'decide'
+    if (saleHot) {
+      const a = lotRect([0, m.land.saleRow])
+      const row = { x: PLOT_X0, y: a.y, w: PLOT_X1 - PLOT_X0, h: a.h }
+      fill(row, POWER, 0.12)
+      this.frame(row, POWER, 2, 1)
+    }
+    if (this.saleSign && this.saleSign.hot !== saleHot) {
+      this.saleSign.hot = saleHot
+      this.saleSign.s.texture = saleSignTexture(this.saleSign.price, saleHot)
+    }
     const sel = useUi.getState().selected
     const selRect = sel ? this.rectOfId(sel) : null
     if (selRect) this.frame(selRect, POWER, 2, 1)
@@ -1103,7 +1214,7 @@ export class MapView {
       const key = tileKey(this.hover)
       const r = lotRect(this.hover)
       if (!selRect || selRect.x !== r.x || selRect.y !== r.y)
-        if (this.lotInfo(this.hover).kind !== 'free' || ext.has(key)) {
+        if (this.lotInfo(this.hover).kind === 'building' || this.lotInfo(this.hover).kind === 'pending' || ext.has(key)) {
           // 2 px cream with a dark halo on both sides: reads on concrete, grass and snow alike
           this.frame({ x: r.x - 1, y: r.y - 1, w: r.w + 2, h: r.h + 2 }, INK_WIRE, 4, 0.55)
           this.frame(r, CREAM, 2, 1)
@@ -1142,6 +1253,7 @@ export class MapView {
     const b = m?.buildings.find((x) => tileKey(x.tile) === key)
     if (b) return { tile, id: b.id, kind: 'building' }
     if (m?.pending.some((p) => tileKey(p.tile) === key)) return { tile, id: `pending:${key}`, kind: 'pending' }
+    if (m && tile[1] === m.land.saleRow) return { tile, id: null, kind: 'sale' }
     return { tile, id: null, kind: 'free' }
   }
 
@@ -1412,6 +1524,7 @@ export class MapView {
     const info = t ? this.lotInfo(t) : null
     const placing = usePlacement.getState().mode === 'tap'
     this.host.classList.toggle('is-over-building', !!info && (info.kind !== 'free' || placing))
+    this.host.classList.toggle('is-over-sale', info?.kind === 'sale')
     if (placing && t && info?.kind === 'free') usePlacement.setState({ hover: t })
   }
 
@@ -1419,21 +1532,42 @@ export class MapView {
   tap(tile: Tile | null): void {
     const ui = useUi.getState()
     const pl = usePlacement.getState()
-    if (pl.mode === 'tap') {
-      if (tile && this.lotInfo(tile).kind === 'free') placeAt(tile)
+    const info = tile ? this.lotInfo(tile) : null
+    if (info?.kind === 'sale') {
+      // the row for sale: a tap adds it to this round's purchase (undo takes it back)
+      if (ui.selected) ui.select(null)
+      this.buySaleRow()
       return
     }
-    if (!tile) {
+    if (pl.mode === 'tap') {
+      if (tile && info?.kind === 'free') placeAt(tile)
+      return
+    }
+    if (!tile || !info) {
       if (ui.selected) ui.select(null)
       return
     }
-    const info = this.lotInfo(tile)
     if (info.kind === 'free' || !info.id) {
       if (ui.selected) ui.select(null)
       return
     }
     ui.select(ui.selected === info.id ? null : info.id)
     audio.cue('click')
+  }
+
+  /** Adds the row for sale to the draft (decision phase only), with a click and an announcement. */
+  buySaleRow(): void {
+    const g = useGame.getState()
+    const m = this.model
+    if (!m || g.phase !== 'decide' || !g.state || g.state.finished) return
+    const me = g.meId ? companyById(g.state, g.meId) : null
+    if (!me || me.bankrupt) return
+    const price = m.land.price
+    useDraft.getState().buyLandRow()
+    audio.cue('click')
+    const msg = `Land row ${m.land.saleRow + 1} bought for ${price.toFixed(2)}: 4 more free lots. Undo takes it back.`
+    useUi.getState().announce(msg)
+    showNotice(`Row ${m.land.saleRow + 1} bought for ${price.toFixed(2)}: 4 more free lots.`)
   }
 
   // ---------- resolution effects ----------
@@ -1468,7 +1602,7 @@ export class MapView {
     list.forEach((b, i) => {
       const r = lotRect(b.tile)
       // top of the building sprite: big ones fill the lot, small ones stand 24 px lower
-      const top = b.status === 'building' ? r.y + 20 : b.size === 'big' ? r.y + 2 : r.y + 24
+      const top = b.status === 'building' ? r.y + 20 : b.size !== 'small' ? r.y + 2 : r.y + 24
       const amount = amounts[b.id]
       const delay = i * 0.09
       const n = 1 + Math.min(2, Math.floor(amount / 6))

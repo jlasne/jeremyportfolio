@@ -236,7 +236,9 @@ describe('net client: subscribeRoom', () => {
     server.storage.pokePlayer(host.code, 0, (p) => (p.lastSeen = 0))
     await server.service.join({ code: host.code, name: 'Dee' })
     await vi.advanceTimersByTimeAsync(21_000)
-    expect(lost).toHaveBeenCalled()
+    // The token hash (crypto.subtle) settles on real time, not on the fake clock: wait for it instead of
+    // checking right after the advance (this check was flaky, about 1 run in 3, before the rules update too).
+    await vi.waitFor(() => expect(lost).toHaveBeenCalled(), { timeout: 5_000, interval: 50 })
     expect(savedSeat(host.code)).toBeNull()
     sub.close()
   })

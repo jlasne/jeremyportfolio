@@ -47,8 +47,13 @@ describe('SPEC acceptance tests', () => {
     const growth = { citizens: 0, otherDc: 0, cloud: 0.035, btc: 0, ai: 0.02 }
     const expected = { citizens: 0, otherDc: 0, cloud: 0.03, btc: 0, ai: 0.07 }
     const flat = { revenue: 50, prevRevenue: 50, growth, expected, idle: 0 }
-    const a = stockReturn({ ...flat, weights: { citizens: 0, otherDc: 0, cloud: 0.4, btc: 0, ai: 0.6 } })
-    const b = stockReturn({ ...flat, weights: { citizens: 0, otherDc: 0, cloud: 0.8, btc: 0, ai: 0.2 } })
+    // The SPEC example predates pool beta and the stability premium: neutral values (beta 1, premium 0) keep it.
+    const spec = tuned((c) => {
+      for (const p of Object.keys(c.stock.poolBeta) as (keyof typeof c.stock.poolBeta)[]) c.stock.poolBeta[p] = 1
+      for (const p of Object.keys(c.stock.stabilityPremium) as (keyof typeof c.stock.stabilityPremium)[]) c.stock.stabilityPremium[p] = 0
+    })
+    const a = stockReturn({ ...flat, weights: { citizens: 0, otherDc: 0, cloud: 0.4, btc: 0, ai: 0.6 } }, spec)
+    const b = stockReturn({ ...flat, weights: { citizens: 0, otherDc: 0, cloud: 0.8, btc: 0, ai: 0.2 } }, spec)
     expect(a.r).toBeCloseTo(-0.028, 12)
     expect(b.r).toBeCloseTo(-0.006, 12)
     expect(a.revenueGrowth).toBe(0)
@@ -181,8 +186,9 @@ describe('SPEC acceptance tests', () => {
   })
 
   it('round 1 with the default start gives 5.16 profit for a company putting 2 MW on AI', () => {
-    // One company, so demand cannot be the limit (AI demand starts at 2 MW and grows).
+    // AI demand is set to 3 MW so demand cannot be the limit (the default start gives 0.7 MW per company).
     let s = game(['solo'], 3)
+    s.pools.ai.demand = 3
     const d = decision((x) => ((x.power.internal = 2), (x.compute.ai = 2)))
     expect(validateDecision(s, 'solo', d).ok).toBe(true)
     s = resolveRound(s, { solo: d })
@@ -190,7 +196,7 @@ describe('SPEC acceptance tests', () => {
     expect(s.history[0].pools.ai.demand).toBeGreaterThanOrEqual(2)
     expect(r.used.ai).toBe(2)
     expect(r.revenue).toBe(6.4)
-    expect(r.costs).toEqual({ power: 0.8, rent: 0, maintenance: 0.44, interest: 0 })
+    expect(r.costs).toEqual({ power: 0.8, rent: 0, maintenance: 0.44, interest: 0, unallocated: 0 })
     expect(r.profit).toBe(5.16)
     expect(r.treasury).toBe(35.16)
   })

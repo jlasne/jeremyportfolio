@@ -1,4 +1,5 @@
-// Game-wide shortcuts: 1-4 open panels, Esc closes the open one, Tab from nowhere enters the
+// Game-wide shortcuts: 1-4 open panels (Allocate and Market as terminals), Esc closes the open one
+// and returns focus to its rail tab, Tab from nowhere enters the
 // panels, Ctrl/Cmd+Z undoes a draft change, Ctrl/Cmd+Enter locks in. Typing in a field keeps its
 // native keys.
 
@@ -48,7 +49,7 @@ export function useGameKeys(): void {
       if (!typing && !forced && e.key >= '1' && e.key <= String(PANELS.length)) {
         e.preventDefault()
         const p = PANELS[Number(e.key) - 1]
-        if (ui.panel === p) document.querySelector<HTMLElement>('.sheet-title')?.focus()
+        if (ui.panel === p) document.querySelector<HTMLElement>('.sheet-title, .term-title')?.focus()
         else {
           focusPanelOnOpen('heading')
           ui.open(p)
@@ -65,7 +66,7 @@ export function useGameKeys(): void {
       if (e.key === 'Tab' && !forced && (document.activeElement === document.body || document.activeElement == null)) {
         e.preventDefault()
         const current = ui.panel ?? (e.shiftKey ? PANELS[PANELS.length - 1] : PANELS[0])
-        if (ui.panel) document.querySelector<HTMLElement>('.sheet-title')?.focus()
+        if (ui.panel) document.querySelector<HTMLElement>('.sheet-title, .term-title')?.focus()
         else {
           focusPanelOnOpen(e.shiftKey ? 'last' : 'first')
           ui.open(current)

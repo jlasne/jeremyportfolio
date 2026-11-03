@@ -12,6 +12,15 @@ export function company(state: GameState, id: string): Company {
   return c
 }
 
+/**
+ * Sets every pool's demand to `mw` (in place) so demand never limits what is sold. The start demand is
+ * about one start kit per company, so hand-computed checks like "2 MW on AI are all used" need this.
+ */
+export function roomy(state: GameState, mw = 100): GameState {
+  for (const p of Object.values(state.pools)) p.demand = mw
+  return state
+}
+
 /** A copy of the state with one company changed. */
 export function edit(state: GameState, id: string, change: (c: Company) => void): GameState {
   const next = structuredClone(state)
@@ -33,7 +42,7 @@ export function tuned(change: (c: Config) => void): Config {
 }
 
 /** Adds an online building to a company, at the next free lot. */
-export function addOnline(c: Company, kind: 'plant' | 'dc', size: 'small' | 'big', config: Config = defaultConfig): void {
+export function addOnline(c: Company, kind: 'plant' | 'dc', size: 'small' | 'big' | 'mega', config: Config = defaultConfig): void {
   const spec = config.buildings[kind][size]
   const used = new Set(c.buildings.map((b) => `${b.tile[0]},${b.tile[1]}`))
   let i = 0

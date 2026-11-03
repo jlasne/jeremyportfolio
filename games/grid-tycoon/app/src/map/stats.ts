@@ -1,12 +1,18 @@
 // Numbers for the building card: what a building does this round (the draft's allocation spread over
 // buildings by capacity), what it did last round, what it costs, and whether it can be upgraded.
 
-import { buildCost, capacity, companyById, revenueByBuilding, sellValue, upgradeCost } from '../engine'
-import type { Building, BuildOrder, CompanyPreview, Config, Decision, GameState, Tile } from '../engine'
+import { buildCost, canUpgrade, capacity, companyById, levelOf, nextSize, revenueByBuilding, sellValue, upgradeCost, upgradeSpec } from '../engine'
+import type { Building, BuildOrder, CompanyPreview, Config, Decision, GameState, Size, Tile } from '../engine'
 import { tileKey } from './layout'
 
-export function kindName(kind: 'plant' | 'dc', size: 'small' | 'big'): string {
-  return `${size === 'big' ? 'Big' : 'Small'} ${kind === 'plant' ? 'plant' : 'datacenter'}`
+/** "Plant · Level 1", "Datacenter · Level 3". */
+export function kindName(kind: 'plant' | 'dc', size: Size): string {
+  return `${kind === 'plant' ? 'Plant' : 'Datacenter'} · Level ${levelOf(size)}`
+}
+
+/** The size a building had before its last upgrade (small for a fresh build). */
+function previousSize(size: Size): Size {
+  return size === 'mega' ? 'big' : 'small'
 }
 
 /** MW a building delivered during the last resolved round (the engine's revenueByBuilding rule). */
@@ -15,17 +21,19 @@ export function deliveredLastRound(b: Building, state: GameState, meId: string, 
   const last = me.history.at(-1)
   if (!last || b.status === 'building') return 0
   if (!last.completed.includes(b.id)) return b.mw
-  const newOrder = b.builtRound + config.buildings[b.kind][b.size].rounds - 1 === last.round
-  return newOrder ? 0 : config.buildings[b.kind].small.mw
+  // finished last round: a new build delivered nothing, an upgrade ran at the level below
+  const newOrder = b.size !== 'mega' && b.builtRound + config.buildings[b.kind][b.size].rounds - 1 === last.round
+  return newOrder ? 0 : config.buildings[b.kind][previousSize(b.size)].mw
 }
 
 export interface BuildingStats {
   building: Building
   name: string
-  /** MW it can deliver this round (0 while building, 2 while a small one upgrades). */
+  /** MW it can deliver this round (0 while building, the current level's MW while upgrading). */
   mwNow: number
-  /** MW once big (for the upgrade line). */
-  bigMw: number
+  level: 1 | 2 | 3
+  /** The level and MW it reaches with its next upgrade (or the one under way), null at level 3. */
+  next: { level: 1 | 2 | 3; mw: number } | null
   /** MW it will deliver once built (for a building under construction). */
   mwOnline: number
   /** This round, from the draft: MW assigned to it and MW left idle. */
@@ -37,7 +45,8 @@ export interface BuildingStats {
   maintenanceActive: boolean
   sell: number
   selling: boolean
-  upgrade: { cost: number; rounds: number; ordered: boolean; canAfford: boolean; short: number } | null
+  /** The next upgrade, offered while the building is online below level 3. */
+  upgrade: { cost: number; rounds: number; ordered: boolean; canAfford: boolean; short: number; toLevel: 2 | 3; gain: number } | null
 }
 
 export function buildingStats(state: GameState, meId: string, decision: Decision, preview: CompanyPreview, config: Config, id: string): BuildingStats | null {
@@ -59,18 +68,29 @@ export function buildingStats(state: GameState, meId: string, decision: Decision
     const poolUsed = plant ? lastRes.plantUsed : lastRes.dcUsed
     last = { delivered, used: pool > 0 ? (delivered * poolUsed) / pool : 0, revenue: revenueByBuilding(state, meId)[b.id] ?? 0 }
   }
+  const up = nextSize(b.size)
+  const next = up ? { level: levelOf(up), mw: config.buildings[b.kind][up].mw } : null
   let upgrade: BuildingStats['upgrade'] = null
-  if (b.size === 'small' && b.status === 'online') {
+  if (canUpgrade(b) && up && next) {
     const ordered = decision.upgrades.includes(b.id)
     const cost = upgradeCost(b, config)
     const left = preview.treasuryLeft
-    upgrade = { cost, rounds: config.buildings[b.kind].upgrade.rounds, ordered, canAfford: ordered || left >= cost - 1e-9, short: Math.max(0, cost - left) }
+    upgrade = {
+      cost,
+      rounds: upgradeSpec(b.kind, b.size, config).rounds,
+      ordered,
+      canAfford: ordered || left >= cost - 1e-9,
+      short: Math.max(0, cost - left),
+      toLevel: next.level as 2 | 3,
+      gain: next.mw - config.buildings[b.kind][b.size].mw,
+    }
   }
   return {
     building: b,
     name: kindName(b.kind, b.size),
     mwNow,
-    bigMw: config.buildings[b.kind].big.mw,
+    level: levelOf(b.size),
+    next,
     mwOnline: b.mw > 0 ? b.mw : config.buildings[b.kind][b.size].mw,
     used,
     idle: Math.max(0, mwNow - used),

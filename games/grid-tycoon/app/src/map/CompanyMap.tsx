@@ -5,12 +5,13 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { KeyboardEvent } from 'react'
-import { companyById, plotRows } from '../engine'
+import { companyById } from '../engine'
 import type { Tile } from '../engine'
 import { useDraft } from '../store/draft'
 import { useGame } from '../store/game'
+import { landView } from '../store/selectors'
 import { useUi } from '../store/ui'
-import { Button, Icon, useMediaQuery } from '../ui/kit'
+import { Button, Icon, fmtMoney, useMediaQuery } from '../ui/kit'
 import BuildingCard from './BuildingCard'
 import { cancelPlacement, orderLabel, placeAt } from './drag'
 import { lotRect, tileKey } from './layout'
@@ -75,7 +76,8 @@ export default function CompanyMap() {
 interface LotItem {
   tile: Tile
   key: string
-  kind: 'building' | 'pending' | 'free'
+  /** 'sale': the whole row for sale under the land (one button for the row). */
+  kind: 'building' | 'pending' | 'free' | 'sale'
   id: string | null
   label: string
 }
@@ -93,6 +95,7 @@ function LotLayer({ view }: { view: MapView }) {
   const selected = useUi((s) => s.selected)
   const select = useUi((s) => s.select)
   const open = useUi((s) => s.open)
+  const phase = useGame((s) => s.phase)
   const mode = usePlacement((s) => s.mode)
   const tapping = mode === 'tap'
   const [scale, setScale] = useState(view.cssScale)
@@ -114,16 +117,27 @@ function LotLayer({ view }: { view: MapView }) {
   const items = useMemo<LotItem[]>(() => {
     if (!state || !meId) return []
     const me = companyById(state, meId)
-    const pendingTiles = decision.builds.filter((b) => b.kind !== 'link' && b.tile).map((b) => b.tile as Tile)
-    const rows = plotRows(me, pendingTiles, config)
+    const land = landView(state, meId, decision, config)
+    const rows = land.plotRows
     const byTile = new Map(me.buildings.map((b) => [tileKey(b.tile), b]))
     const pend = new Map(decision.builds.flatMap((b) => (b.kind !== 'link' && b.tile ? [[tileKey(b.tile), b] as const] : [])))
     const out: LotItem[] = []
-    for (let r = 0; r < rows; r++)
+    for (let r = 0; r < rows; r++) {
+      if (r === land.saleRow) {
+        out.push({
+          tile: [0, r],
+          key: `sale:${r}`,
+          kind: 'sale',
+          id: null,
+          label: `Land for sale, row ${r + 1}: ${config.plot.lotsPerRow} lots for ${fmtMoney(land.nextRowCost)}. Press to buy this row.`,
+        })
+        continue
+      }
+      const fresh = r >= land.owned ? ', bought this round' : ''
       for (let c = 0; c < config.plot.lotsPerRow; c++) {
         const tile: Tile = [c, r]
         const key = tileKey(tile)
-        const where = `lot ${c + 1}, row ${r + 1}`
+        const where = `lot ${c + 1}, row ${r + 1}${fresh}`
         const b = byTile.get(key)
         const p = pend.get(key)
         if (b) {
@@ -137,6 +151,7 @@ function LotLayer({ view }: { view: MapView }) {
         } else if (p && p.kind !== 'link') out.push({ tile, key, kind: 'pending', id: `pending:${key}`, label: `${kindName(p.kind, p.size ?? 'small')} ordered this round, ${where}` })
         else out.push({ tile, key, kind: 'free', id: null, label: `Free ${where}` })
       }
+    }
     return out
   }, [state, meId, decision, config])
 
@@ -191,6 +206,10 @@ function LotLayer({ view }: { view: MapView }) {
   }
 
   const activate = (it: LotItem) => {
+    if (it.kind === 'sale') {
+      if (phase === 'decide') view.buySaleRow()
+      return
+    }
     if (tapping) {
       if (free?.has(it.key)) placeAt(it.tile)
       return
@@ -212,8 +231,10 @@ function LotLayer({ view }: { view: MapView }) {
       onKeyDown={onKeyDown}
     >
       {items.map((it) => {
-        const r = lotRect(it.tile)
-        const disabled = tapping && !free?.has(it.key)
+        const lr = lotRect(it.tile)
+        // the sale row's button spans the 4 lots
+        const r = it.kind === 'sale' ? { ...lr, w: lr.w * config.plot.lotsPerRow } : lr
+        const disabled = it.kind === 'sale' ? phase !== 'decide' : tapping && !free?.has(it.key)
         return (
           <button
             key={it.key}
@@ -221,7 +242,7 @@ function LotLayer({ view }: { view: MapView }) {
             data-lot={it.key}
             className={`map-lot is-${it.kind}`}
             tabIndex={it.key === current ? 0 : -1}
-            aria-pressed={it.kind === 'free' ? undefined : selected === it.id}
+            aria-pressed={it.kind === 'free' || it.kind === 'sale' ? undefined : selected === it.id}
             aria-disabled={disabled || undefined}
             aria-label={tapping && free?.has(it.key) ? `Place here: ${it.label}` : it.label}
             style={{ left: r.x * scale, top: r.y * scale, width: r.w * scale, height: r.h * scale }}
@@ -229,7 +250,9 @@ function LotLayer({ view }: { view: MapView }) {
               setActive(it.key)
               view.revealTile(it.tile)
               if (tapping) usePlacement.setState({ hover: free?.has(it.key) ? it.tile : null })
+              view.focusLot(it.kind === 'sale' ? it.tile : null)
             }}
+            onBlur={() => view.focusLot(null)}
             onClick={() => activate(it)}
           />
         )
@@ -243,9 +266,11 @@ function PlacementBanner({ view }: { view: MapView | null }) {
   const mode = usePlacement((s) => s.mode)
   const active = usePlacement((s) => s.active)
   const order = usePlacement((s) => s.order)
+  const notice = usePlacement((s) => s.notice)
   const touch = useMediaQuery('(hover: none)')
   const ref = useRef<HTMLDivElement>(null)
-  const shown = !!mode && !!order && order.kind !== 'link' && (mode === 'tap' || active)
+  const placing = !!mode && !!order && order.kind !== 'link' && (mode === 'tap' || active)
+  const shown = placing || !!notice
   // centred on the part of the map the sheet leaves visible, not on the whole map
   useLayoutEffect(() => {
     const el = ref.current
@@ -257,8 +282,15 @@ function PlacementBanner({ view }: { view: MapView | null }) {
     }
     place()
     return view.onCamera(place)
-  }, [view, shown])
-  if (!shown || !order || order.kind === 'link') return null
+  }, [view, shown, placing, notice?.id])
+  if (!shown) return null
+  if (!placing || !order || order.kind === 'link')
+    return notice ? (
+      <div ref={ref} key={notice.id} className="cmap-banner is-notice" role="status">
+        <Icon name="flag" size={16} />
+        <span>{notice.text}</span>
+      </div>
+    ) : null
   const name = orderLabel(order).toLowerCase()
   return (
     <div ref={ref} className="cmap-banner" role="status">

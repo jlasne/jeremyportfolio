@@ -3,7 +3,7 @@
 // store; drag.ts drives it. Kept free of Pixi so it costs nothing until the map is on screen.
 
 import { create } from 'zustand'
-import { companyById, plotRows } from '../engine'
+import { companyById, ownedRows } from '../engine'
 import type { BuildOrder, Config, Decision, GameState, Tile } from '../engine'
 import { tileKey } from './layout'
 
@@ -20,13 +20,34 @@ export interface PlacementState {
   pointer: { x: number; y: number } | null
   /** A drag becomes active once the pointer has moved past the threshold. */
   active: boolean
+  /** A short message the map shows for a moment (a placement refused because the land is full). */
+  notice: { text: string; id: number } | null
 }
 
-export const usePlacement = create<PlacementState>()(() => ({ mode: null, order: null, moveIndex: null, hover: null, pointer: null, active: false }))
+export const usePlacement = create<PlacementState>()(() => ({ mode: null, order: null, moveIndex: null, hover: null, pointer: null, active: false, notice: null }))
+
+/** Shown when a build has nowhere to go. */
+export const NO_LOT_TEXT = 'No free lot: buy a land row or upgrade.'
+
+let noticeTimer = 0
+/** Shows a short notice over the map for a few seconds. */
+export function showNotice(text: string): void {
+  const prev = usePlacement.getState().notice
+  usePlacement.setState({ notice: { text, id: (prev?.id ?? 0) + 1 } })
+  window.clearTimeout(noticeTimer)
+  noticeTimer = window.setTimeout(() => usePlacement.setState({ notice: null }), 4000)
+}
+
+/** Land rows builds may use this round: owned rows plus rows bought in the draft. */
+export function landRowsOf(state: GameState, meId: string, decision: Decision, config: Config): number {
+  const bought = Math.max(0, Math.floor(Number.isFinite(decision.landRows) ? decision.landRows : 0))
+  return ownedRows(companyById(state, meId), config) + bought
+}
 
 export function resetPlacement(): void {
   usePlacement.setState({ mode: null, order: null, moveIndex: null, hover: null, pointer: null, active: false })
 }
+
 
 /** Lots taken by a building or a pending order (optionally ignoring one order being moved). */
 export function takenTiles(state: GameState, meId: string, decision: Decision, skipIndex: number | null = null): Set<string> {
@@ -38,11 +59,9 @@ export function takenTiles(state: GameState, meId: string, decision: Decision, s
   return taken
 }
 
-/** Every free lot of the plot in reading order (the plot always keeps one free row at the bottom). */
+/** Every free lot on the land (owned rows and rows bought this round), in reading order. The row for sale is never free. */
 export function freeTiles(state: GameState, meId: string, decision: Decision, config: Config, skipIndex: number | null = null): Tile[] {
-  const me = companyById(state, meId)
-  const pending = decision.builds.filter((b, i) => i !== skipIndex && b.kind !== 'link' && b.tile).map((b) => b.tile as Tile)
-  const rows = plotRows(me, pending, config)
+  const rows = landRowsOf(state, meId, decision, config)
   const taken = takenTiles(state, meId, decision, skipIndex)
   const out: Tile[] = []
   for (let r = 0; r < rows; r++) for (let c = 0; c < config.plot.lotsPerRow; c++) if (!taken.has(`${c},${r}`)) out.push([c, r])

@@ -15,7 +15,13 @@ import {
   type GameState,
   type RoundResult,
 } from './index'
-import { addLink, company, decision, edit, game, tuned } from './test/helpers'
+import { addLink, company, decision, edit, game as startGame, roomy, tuned } from './test/helpers'
+
+// Hand-computed checks sell 2 MW to one pool: demand is set high so it never limits them
+// (the start demand is now about one start kit per company, 0.7 MW of AI each).
+const game = (...args: Parameters<typeof startGame>): GameState => roomy(startGame(...args))
+const beta = defaultConfig.stock.poolBeta
+const premium = defaultConfig.stock.stabilityPremium
 
 const round2 = (x: number): number => Math.round(x * 100) / 100
 const f = (c: number): number => (Math.exp(3 * c) - 1) / (Math.exp(3) - 1)
@@ -28,7 +34,7 @@ const ai2 = (change: (d: Decision) => void = () => {}): Decision =>
 const last = (s: GameState, id = 'a'): RoundResult => company(s, id).history.at(-1)!
 const partsSum = (r: RoundResult): number => {
   const p = r.stock.parts
-  return p.revenueGrowth + Object.values(p.demandMiss).reduce((a, b) => a + b, 0) + p.idle + p.fundamentals + p.debtDrag + p.shares
+  return p.revenueGrowth + Object.values(p.demandMiss).reduce((a, b) => a + b, 0) + p.idle + p.stability + p.fundamentals + p.debtDrag + p.shares
 }
 const codes = (s: GameState, d: Decision, id = 'a'): string[] => validateDecision(s, id, d).errors.map((e) => e.code)
 
@@ -84,18 +90,20 @@ describe('market return r (SPEC Stock price step 1, DESIGN 2.3.9)', () => {
 
     // Round 2: 2 MW on AI. revenue 6.4, profit 6.4 - 0.8 - 0.44 = 5.16.
     //   dRev = (6.4 - 2) / 2 = 220% -> clamped 30% -> 0.15. Weights from round 1: 100% citizens.
-    //   r = 0.15 + (g_cit - E_cit). FV = 20 x (0.76 + 5.16) / 2 + 6.6 = 65.8.
+    //   r = 0.15 + beta_cit (g_cit - E_cit) + premium_cit (new rule: beta 0.5, premium 0.6%). FV = 20 x (0.76 + 5.16) / 2 + 6.6 = 65.8.
     s = resolveRound(s, { a: ai2() })
     const r2 = last(s)
     expect(r2.used.ai).toBe(2)
     expect(r2.profit).toBe(5.16)
     const miss = s.pools.citizens.growth - s.pools.citizens.expectedGrowth
     expect(r2.stock.rParts.revenueGrowth).toBeCloseTo(0.15, 12)
-    expect(r2.stock.rParts.demandMiss.citizens).toBeCloseTo(miss, 12)
+    expect(r2.stock.rParts.demandMiss.citizens).toBeCloseTo(beta.citizens * miss, 12)
     expect(r2.stock.rParts.demandMiss.ai).toBe(0)
-    expect(r2.stock.r).toBeCloseTo(0.15 + miss, 12)
+    expect(r2.stock.rParts.stability).toBeCloseTo(premium.citizens, 12)
+    const r = 0.15 + beta.citizens * miss + premium.citizens
+    expect(r2.stock.r).toBeCloseTo(r, 12)
     expect(r2.stock.fv).toBe(65.8)
-    expect(r2.businessValue).toBe(round2(0.85 * 85.72 * (1 + 0.15 + miss) + 0.15 * 65.8))
+    expect(r2.businessValue).toBe(round2(0.85 * 85.72 * (1 + r) + 0.15 * 65.8))
   })
 })
 
@@ -121,9 +129,10 @@ describe('business value and debt drag (SPEC Stock price steps 2-3, DESIGN 2.3.9
     expect(r2.costs.interest).toBe(0.48)
     expect(r2.profit).toBe(4.68)
     expect(r2.stock.fv).toBe(105)
-    const miss = s.pools.ai.growth - s.pools.ai.expectedGrowth
-    expect(r2.stock.r).toBeCloseTo(miss, 12)
-    const bv = round2(0.85 * 101.47 * (1 + miss) + 0.15 * 105)
+    // New rule: r = beta_ai (g - E) + premium_ai, weights 100% AI from round 1.
+    const r = beta.ai * (s.pools.ai.growth - s.pools.ai.expectedGrowth) + premium.ai
+    expect(r2.stock.r).toBeCloseTo(r, 12)
+    const bv = round2(0.85 * 101.47 * (1 + r) + 0.15 * 105)
     expect(r2.businessValue).toBe(bv)
     expect(r2.stock.debt).toBe(20)
     expect(r2.stock.c).toBeCloseTo(0.075, 12)
@@ -294,11 +303,17 @@ describe('shares (SPEC Debt and shares, DESIGN 2.2.5)', () => {
     expect(codes(fourteen, decision((d) => (d.shares = { mode: 'issue', count: 3 })))).toContain('shares_over_cap')
   })
 
-  it('buyback cash cannot exceed treasury minus total debt, counted after this round loan', () => {
-    // Treasury 30 + new loan 10 = 40; debt 15 + 10 = 25; room 15. 2 shares at 10 = 20 > 15, 1 share = 10 fits.
-    const s = edit(game(['a']), 'a', (c) => c.loans.push({ id: 'L', principal: 15, annualRate: 0.08, dueRound: 6, takenRound: -1 }))
+  it('buyback cash cannot exceed the treasury, counted after this round loan, debt aside (new rule)', () => {
+    // Treasury 5 with 15 of debt. 1 share at 10 = 10 > 5. With a new loan of 10 the treasury is 15: it fits.
+    const s = edit(game(['a']), 'a', (c) => {
+      c.treasury = 5
+      c.loans.push({ id: 'L', principal: 15, annualRate: 0.08, dueRound: 6, takenRound: -1 })
+    })
+    expect(codes(s, decision((d) => (d.shares = { mode: 'buyback', count: 1 })))).toContain('buyback_over_cash')
+    expect(sanitizeDecision(s, 'a', decision((d) => (d.shares = { mode: 'buyback', count: 1 }))).shares).toEqual({ mode: 'none', count: 0 })
+    // 2 is over the 10% cap (1 of 10); sanitize keeps 1.
     const two = decision((d) => ((d.loans.take = 10), (d.shares = { mode: 'buyback', count: 2 })))
-    expect(codes(s, two)).toContain('buyback_over_cash')
+    expect(codes(s, two)).toContain('shares_over_cap')
     expect(sanitizeDecision(s, 'a', two).shares).toEqual({ mode: 'buyback', count: 1 })
     const one = decision((d) => ((d.loans.take = 10), (d.shares = { mode: 'buyback', count: 1 })))
     expect(validateDecision(s, 'a', one).ok).toBe(true)

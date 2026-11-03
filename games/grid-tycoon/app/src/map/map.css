@@ -359,3 +359,14 @@
 .mcard-facts.is-3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
+
+/* land for sale: the row's pointer, and the notice shown when a build has no lot or a row is bought */
+.cmap.is-over-sale {
+  cursor: pointer;
+}
+.map-lot.is-sale:focus-visible {
+  outline-offset: -4px;
+}
+.cmap-banner.is-notice {
+  white-space: normal;
+}

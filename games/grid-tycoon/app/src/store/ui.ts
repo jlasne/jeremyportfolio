@@ -1,4 +1,4 @@
-// UI-only state: which panel is open, the selected building, a build card being dragged,
+// UI-only state: which panel is open (Allocate and Market as terminals, the others as sheets), the selected building, a build card being dragged,
 // persisted settings, the tutorial step, and the polite live-region message.
 
 import { create } from 'zustand'
@@ -8,6 +8,9 @@ import { KEYS, readJson, writeJson } from './save'
 export type PanelId = 'finance' | 'build' | 'allocate' | 'market'
 /** Spec order: Finance, Build, Allocate, Market. Keys 1-4 follow it. */
 export const PANELS: PanelId[] = ['finance', 'build', 'allocate', 'market']
+/** Panels that open as a full-screen terminal over the map area; the others open as a side sheet. */
+export const TERMINAL_PANELS: readonly PanelId[] = ['allocate', 'market']
+export const isTerminal = (p: PanelId | null): boolean => p != null && TERMINAL_PANELS.includes(p)
 
 export interface Settings {
   theme: 'system' | 'light' | 'dark'

@@ -7,6 +7,15 @@ const plantId = company(base, 'a').buildings.find((b) => b.kind === 'plant')!.id
 const dcId = company(base, 'a').buildings.find((b) => b.kind === 'dc')!.id
 const withLoan = edit(base, 'a', (c) => c.loans.push({ id: 'n1', principal: 15, annualRate: 0.1, dueRound: 5, takenRound: 1 }))
 const losing = edit(base, 'a', (c) => (c.treasury = -20))
+// Last round put 2 MW on AI and rented 4 MW: this round AI and rent can drop to 70% (1.4 and 2.8).
+const committed = edit(base, 'a', (c) => {
+  addLink(c, 'import', 4)
+  c.lastDecision = decision((d) => ((d.power.internal = 2), (d.compute.ai = 2), (d.rentMw = 4)))
+})
+// The 2 start rows (8 lots) are full.
+const fullLand = edit(base, 'a', (c) => {
+  for (let i = 0; i < 6; i++) addOnline(c, 'plant', 'small')
+})
 
 function codes(state: GameState, d: unknown, id = 'a'): ValidationCode[] {
   return validateDecision(state, id, d as Decision).errors.map((e) => e.code)
@@ -19,7 +28,8 @@ const cases: [ValidationCode, GameState, unknown][] = [
   ['not_integer', base, decision((d) => (d.shares = { mode: 'issue', count: 1.5 }))],
   ['issue_and_buyback', base, { ...decision(), shares: { mode: 'both', count: 1 } }],
   ['shares_over_cap', base, decision((d) => (d.shares = { mode: 'issue', count: 3 }))],
-  ['buyback_over_cash', withLoan, decision((d) => (d.shares = { mode: 'buyback', count: 2 }))],
+  // New rule: the buyback is capped by the treasury (no more treasury minus debt), at most 10% of shares.
+  ['buyback_over_cash', edit(withLoan, 'a', (c) => (c.treasury = 5)), decision((d) => (d.shares = { mode: 'buyback', count: 1 }))],
   ['repay_unknown_loan', withLoan, decision((d) => (d.loans.repay = { nope: 1 }))],
   ['repay_over_principal', withLoan, decision((d) => (d.loans.repay = { n1: 16 }))],
   ['refinance_negative_treasury', edit(withLoan, 'a', (c) => ((c.treasury = -1), (c.loans[0].dueRound = 1))), decision((d) => ((d.loans.refinance = ['n1']), (d.forcedSales = [plantId])))],
@@ -38,6 +48,9 @@ const cases: [ValidationCode, GameState, unknown][] = [
   ['over_import_link', base, decision((d) => (d.rentMw = 1))],
   ['over_plant_capacity', base, decision((d) => ((d.power.internal = 2), (d.power.otherDc = 1)))],
   ['over_compute_capacity', base, decision((d) => ((d.power.internal = 1), (d.compute.ai = 2)))],
+  ['compute_below_commitment', committed, decision((d) => ((d.power.internal = 2), (d.compute.ai = 1), (d.rentMw = 4)))],
+  ['rent_below_commitment', committed, decision((d) => ((d.power.internal = 2), (d.compute.ai = 2), (d.rentMw = 1)))],
+  ['no_land', fullLand, decision((d) => d.builds.push({ kind: 'plant', size: 'small' }))],
 ]
 
 describe('validateDecision', () => {
@@ -59,7 +72,8 @@ describe('validateDecision', () => {
       'repay_unknown_loan', 'repay_over_principal', 'refinance_negative_treasury', 'refinance_not_due',
       'forced_sale_not_allowed', 'forced_sale_unknown', 'forced_sale_short', 'build_invalid', 'tile_taken',
       'tile_out_of_plot', 'upgrade_invalid', 'over_treasury', 'no_town_link', 'over_town_link', 'over_internal_link',
-      'over_import_link', 'over_plant_capacity', 'over_compute_capacity',
+      'over_import_link', 'over_plant_capacity', 'over_compute_capacity', 'compute_below_commitment',
+      'rent_below_commitment', 'no_land',
     ]
     expect(new Set(cases.map((c) => c[0]))).toEqual(new Set(all))
   })

@@ -965,6 +965,10 @@
   font-weight: 800;
   line-height: 1.2;
 }
+.fs-big.is-l3 {
+  background: var(--power-mid);
+  color: var(--ink-dark);
+}
 .fs-info {
   display: flex;
   flex-direction: column;

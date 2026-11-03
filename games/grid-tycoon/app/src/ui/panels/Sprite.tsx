@@ -55,7 +55,8 @@ interface SpriteProps {
 
 export function Sprite({ frame, scale = 1, size, fallback, className }: SpriteProps) {
   const a = useAtlas()
-  const f = a?.frames[frame]?.frame
+  // level 3 buildings share the big sprites
+  const f = a?.frames[frame.replace(/_mega$/, '_big')]?.frame
   const s = Math.max(1, Math.round(scale))
   const w = (f?.w ?? size?.w ?? 64) * s
   const h = (f?.h ?? size?.h ?? 64) * s

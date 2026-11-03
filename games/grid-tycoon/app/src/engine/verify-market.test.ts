@@ -12,13 +12,14 @@ import {
   defaultConfig,
   POOLS,
   resolveRound,
+  validateDecision,
   type BotStyle,
   type Company,
   type Decision,
   type GameState,
   type PoolId,
 } from './index'
-import { addLink, addOnline, company, decision, edit, game } from './test/helpers'
+import { addLink, addOnline, company, decision, edit, game, roomy } from './test/helpers'
 
 const cfg = defaultConfig
 const r2 = (x: number): number => Math.round(x * 100 * (1 + 4 * Number.EPSILON)) / 100
@@ -45,8 +46,12 @@ function refRng(seed: number): { next(): number; normal(): number; state(): numb
   }
 }
 
-/** SPEC "Allocation algorithm (per pool)", steps 1 to 4, written from the spec text. */
-function refAllocate(D: number, O: Record<string, number>, U: Record<string, number>, share = 0.8): Record<string, number> {
+/**
+ * SPEC "Allocation algorithm (per pool)", steps 1 to 4, written from the spec text. With weights W the
+ * open MW goes by spare x weight, nobody above its spare: open_i = min(S_i, lambda W_i S_i), with lambda
+ * found by bisection so the open MW is used up (an independent form of the engine's water filling).
+ */
+function refAllocate(D: number, O: Record<string, number>, U: Record<string, number>, share = 0.8, W?: Record<string, number>): Record<string, number> {
   const ids = Object.keys(O)
   const R: Record<string, number> = {}
   let sumR = 0
@@ -62,11 +67,37 @@ function refAllocate(D: number, O: Record<string, number>, U: Record<string, num
   const open = D - sumR
   let sumS = 0
   for (const id of ids) sumS += O[id] - R[id]
-  for (const id of ids) {
-    const S = O[id] - R[id]
-    used[id] = R[id] + (sumS <= open ? S : (open * S) / sumS)
+  if (!W || sumS <= open) {
+    for (const id of ids) {
+      const S = O[id] - R[id]
+      used[id] = R[id] + (sumS <= open ? S : (open * S) / sumS)
+    }
+    return used
   }
+  const take = (lambda: number, id: string): number => Math.min(O[id] - R[id], lambda * W[id] * (O[id] - R[id]))
+  const total = (lambda: number): number => ids.reduce((a, id) => a + take(lambda, id), 0)
+  let lo = 0
+  let hi = 1
+  while (total(hi) < open && hi < 1e12) hi *= 2
+  for (let i = 0; i < 200; i++) {
+    const mid = (lo + hi) / 2
+    if (total(mid) < open) lo = mid
+    else hi = mid
+  }
+  for (const id of ids) used[id] = R[id] + take(hi, id)
   return used
+}
+
+/** Priority weights from the rules text: (1 + shareWeight x last share) x (1 + tenurePerRound x min(tenure, cap)). */
+function refWeights(pool: GameState['pools'][PoolId], ids: string[]): Record<string, number> {
+  const a = cfg.allocation
+  const total = ids.reduce((s, id) => s + (pool.lastUsed[id] ?? 0), 0)
+  const out: Record<string, number> = {}
+  for (const id of ids) {
+    const share = total > 0 ? (pool.lastUsed[id] ?? 0) / total : 0
+    out[id] = (1 + a.shareWeight * share) * (1 + a.tenurePerRound * Math.min(a.tenureCap, pool.tenure[id] ?? 0))
+  }
+  return out
 }
 
 function offerOf(d: Decision, p: PoolId): number {
@@ -139,12 +170,12 @@ function oracle(S: GameState, T: GameState): string[] {
   for (const p of POOLS) near(`${p} summary demand`, summary.pools[p].demand, allocD[p], 1e-9)
   near('summary rentDemand', summary.pools.otherDc.rentDemand, totalRent, 1e-9)
 
-  // Allocation.
+  // Allocation: 80% reserve, then open MW by spare x priority weight (share and tenure).
   const used: Record<PoolId, Record<string, number>> = {} as never
   for (const p of POOLS) {
     const O: Record<string, number> = {}
     for (const c of active) O[c.id] = offerOf(dec.get(c.id)!, p)
-    used[p] = refAllocate(allocD[p], O, S.pools[p].lastUsed)
+    used[p] = refAllocate(allocD[p], O, S.pools[p].lastUsed, 0.8, refWeights(S.pools[p], active.map((c) => c.id)))
   }
   const rentAsked: Record<string, number> = {}
   for (const c of active) rentAsked[c.id] = dec.get(c.id)!.rentMw
@@ -160,6 +191,9 @@ function oracle(S: GameState, T: GameState): string[] {
     }
     const tag = (s: string): string => `${c.id} ${s}`
     for (const p of POOLS) near(tag(`used ${p}`), res.used[p], used[p][c.id], 1e-9)
+    // The stored (sanitized) decision passes strict validation against the state it was made in (commitment floors included).
+    const v = validateDecision(S, c.id, d)
+    if (!v.ok) bad.push(tag(`round ${S.round} decision does not validate: ${v.errors.map((e) => e.code).join(',')}`))
 
     // Buildings during this resolution: what T holds, minus what was ordered now or still under construction.
     const prevById = new Map(c.buildings.map((b) => [b.id, b]))
@@ -199,16 +233,35 @@ function oracle(S: GameState, T: GameState): string[] {
     near(tag('plantMw'), res.plantMw, plantMw, 1e-9)
     near(tag('dcMw'), res.dcMw, dcMw, 1e-9)
 
+    // Unallocated plant power: not offered to citizens or other datacenters, not needed by the compute offer after rent.
+    const unallocated = Math.max(0, plantMw - d.power.town - d.power.otherDc - Math.min(Math.max(0, computeOffer - d.rentMw), d.power.internal))
+    near(tag('unallocatedMw'), res.unallocatedMw, unallocated, 1e-9)
+    near(tag('unallocated cost'), res.costs.unallocated, r2(cfg.unallocatedPenalty * cfg.cost.ownPower * unallocated), 0.0051)
+
+    // Land: rows bought this round, row n past the start at rowCost x (1 + growth)^(n - 1).
+    near(tag('landRows'), after.landRows, c.landRows + d.landRows, 0)
+    near(tag('result landRows'), res.landRows, after.landRows, 0)
+    let landSpend = 0
+    for (let i = 1; i <= d.landRows; i++) landSpend += r2(cfg.plot.rowCost * Math.pow(1 + cfg.plot.rowCostGrowth, c.landRows - cfg.plot.startRows + i - 1))
+    near(tag('landSpend'), res.finance.landSpend, r2(landSpend), 0.0051)
+    const lots = new Set<string>()
+    for (const b of after.buildings) {
+      const key = `${b.tile[0]},${b.tile[1]}`
+      if (lots.has(key)) bad.push(tag(`round ${S.round} two buildings on ${key}`))
+      lots.add(key)
+      if (!prevById.has(b.id) && (b.tile[1] >= after.landRows || b.tile[0] < 0 || b.tile[0] >= cfg.plot.lotsPerRow)) bad.push(tag(`round ${S.round} ${b.id} off the owned land`))
+    }
+
     // Maintenance: 2% of price paid (upgrades included) for everything not under construction.
     const maint = runningNow.reduce((s, b) => s + b.pricePaid, 0)
     near(tag('maintenance'), res.costs.maintenance, r2(0.02 * maint), 0.0051)
 
     // Profit and treasury (SPEC "Treasury =").
     const k = res.costs
-    near(tag('profit'), res.profit, r2(res.revenue - k.power - k.rent - k.maintenance - k.interest), 0.0051)
+    near(tag('profit'), res.profit, r2(res.revenue - k.power - k.rent - k.maintenance - k.interest - k.unallocated), 0.0051)
     const f = res.finance
     if (f.forcedSharesIssued === 0) {
-      const want = c.treasury + f.forcedSaleCash + f.loanTaken - f.repaid + f.shareCash - f.buildSpend + res.profit - res.principalRepaid
+      const want = c.treasury + f.forcedSaleCash + f.loanTaken - f.repaid + f.shareCash - f.buildSpend - f.landSpend + res.profit - res.principalRepaid
       near(tag('treasury'), after.treasury, r2(want), 0.0151)
     }
 
@@ -221,13 +274,19 @@ function oracle(S: GameState, T: GameState): string[] {
         if ((want === 0) !== (b.status === 'online')) bad.push(tag(`round ${S.round} new ${b.id} status ${b.status}`))
         near(tag(`new ${b.id} mw`), b.mw, want === 0 ? cfg.buildings[b.kind][b.size].mw : 0, 0)
       } else if (prev.status === 'online' && b.status === 'upgrading') {
-        near(tag(`upgrade ${b.id} roundsLeft`), b.roundsLeft, cfg.buildings[b.kind].upgrade.rounds - 1, 0)
-        near(tag(`upgrade ${b.id} mw`), b.mw, 2, 0)
+        // small -> big takes upgrade.rounds, big -> mega upgradeMega.rounds; the current level's MW meanwhile.
+        if (prev.size === 'mega') bad.push(tag(`round ${S.round} ${b.id} upgrading past level 3`))
+        const spec = prev.size === 'big' ? cfg.buildings[b.kind].upgradeMega : cfg.buildings[b.kind].upgrade
+        near(tag(`upgrade ${b.id} roundsLeft`), b.roundsLeft, spec.rounds - 1, 0)
+        near(tag(`upgrade ${b.id} mw`), b.mw, cfg.buildings[b.kind][prev.size].mw, 0)
+        if (b.size !== prev.size) bad.push(tag(`round ${S.round} ${b.id} changed size before the upgrade finished`))
       } else {
         near(tag(`${b.id} roundsLeft`), b.roundsLeft, Math.max(0, prev.roundsLeft - 1), 0)
         if (prev.roundsLeft === 1) {
+          const size = prev.status === 'upgrading' ? (prev.size === 'small' ? 'big' : 'mega') : prev.size
           if (b.status !== 'online') bad.push(tag(`round ${S.round} ${b.id} should be online`))
-          near(tag(`${b.id} mw`), b.mw, cfg.buildings[b.kind][prev.status === 'upgrading' ? 'big' : prev.size].mw, 0)
+          if (b.size !== size) bad.push(tag(`round ${S.round} ${b.id} size ${b.size}, want ${size}`))
+          near(tag(`${b.id} mw`), b.mw, cfg.buildings[b.kind][size].mw, 0)
         }
       }
     }
@@ -237,14 +296,17 @@ function oracle(S: GameState, T: GameState): string[] {
     }
   }
 
-  // lastUsed: this round's used, bankrupt companies removed.
+  // lastUsed: this round's used, bankrupt companies removed. Tenure: +1 for a round served, back to 0 otherwise.
   for (const p of POOLS) {
     for (const c of active) {
       const bankrupt = T.companies.find((x) => x.id === c.id)!.bankrupt
       const lu = T.pools[p].lastUsed[c.id]
       if (bankrupt) {
         if (lu !== undefined) bad.push(`round ${S.round} ${c.id} bankrupt but keeps lastUsed in ${p}`)
-      } else near(`${c.id} lastUsed ${p}`, lu, used[p][c.id], 1e-9)
+      } else {
+        near(`${c.id} lastUsed ${p}`, lu, used[p][c.id], 1e-9)
+        near(`${c.id} tenure ${p}`, T.pools[p].tenure[c.id], used[p][c.id] > 1e-9 ? (S.pools[p].tenure[c.id] ?? 0) + 1 : 0, 0)
+      }
     }
   }
   return bad
@@ -315,7 +377,7 @@ describe('demand growth (SPEC "Growth model", DESIGN 2.3 step 2)', () => {
   it('unserved demand is lost: next D grows from D, not from D plus the shortfall, and otherDc keeps rent out of its base', () => {
     let s = edit(game(['a']), 'a', (c) => addLink(c, 'import', 3))
     s = resolveRound(s, { a: decision((d) => ((d.power.internal = 2), (d.rentMw = 3), (d.compute.ai = 2))) })
-    const bg = 2 * (1 + s.pools.otherDc.growth)
+    const bg = cfg.pool.startPerCompany.otherDc * (1 + s.pools.otherDc.growth)
     expect(s.pools.otherDc.demand).toBeCloseTo(bg, 12)
     expect(s.history[0].pools.otherDc.demand).toBeCloseTo(bg + 3, 12)
   })
@@ -389,7 +451,7 @@ describe('rent matching and power routing (SPEC "Power routing", DESIGN 2.3 step
 
   it('rivals fill first at 1.3 pro rata over every renter, the market fills the rest at 1.6', () => {
     const s = twoRenters()
-    // Seller offers 3 MW to otherDc: background 6 MW + rent 2 + 4 = 12 MW of demand, it sells all 3.
+    // Seller offers 3 MW to otherDc: background 3 x 0.6 MW + rent 2 + 4 = 7.8 MW of demand, it sells all 3.
     const t = resolveRound(s, {
       seller: decision((d) => ((d.power.internal = 1), (d.power.otherDc = 3), (d.compute.ai = 1))),
       r1: decision((d) => ((d.power.internal = 2), (d.rentMw = 2), (d.compute.ai = 4))),
@@ -404,13 +466,13 @@ describe('rent matching and power routing (SPEC "Power routing", DESIGN 2.3 step
     expect(b.rent.fromMarket).toBeCloseTo(2, 12)
     expect(a.costs.rent).toBe(2.9)
     expect(b.costs.rent).toBe(5.8)
-    expect(t.history[0].pools.otherDc.demand).toBeCloseTo(6 * (1 + t.pools.otherDc.growth) + 6, 12)
+    expect(t.history[0].pools.otherDc.demand).toBeCloseTo(3 * cfg.pool.startPerCompany.otherDc * (1 + t.pools.otherDc.growth) + 6, 12)
     expect(oracle(s, t)).toEqual([])
   })
 
   it('rented MW is consumed first: 2 own + 2 rented, 3 MW of compute used -> 1 MW of own power is paid', () => {
-    // Alone in the game the AI pool holds 2 MW: offer 3 on cloud (2 MW demand) and see the split.
-    let s = edit(game(['a']), 'a', (c) => (addOnline(c, 'dc', 'small'), addLink(c, 'import', 2)))
+    // Demand set high so all 3 MW of compute are used, and see the split.
+    let s = edit(roomy(game(['a'])), 'a', (c) => (addOnline(c, 'dc', 'small'), addLink(c, 'import', 2)))
     s = edit(s, 'a', (c) => (c.treasury = 30))
     const t = resolveRound(s, { a: decision((d) => ((d.power.internal = 2), (d.rentMw = 2), (d.compute.ai = 2), (d.compute.cloud = 1))) })
     const r = company(t, 'a').history[0]
@@ -422,18 +484,20 @@ describe('rent matching and power routing (SPEC "Power routing", DESIGN 2.3 step
   })
 
   it('own power cost applies only to MW that ends up used: MW offered to citizens but not bought costs nothing', () => {
-    // 1 company: citizens demand 4 MW. Offer 6 MW to citizens from 6 MW of plants: 4 used.
+    // 1 company: citizens demand 1 MW (start demand per company). Offer 6 MW to citizens from 6 MW of plants: 1 used.
     let s = edit(game(['a']), 'a', (c) => (addOnline(c, 'plant', 'small'), addOnline(c, 'plant', 'small'), addLink(c, 'town', 6)))
     s = edit(s, 'a', (c) => (c.links[0].mw = 0))
     const t = resolveRound(s, { a: decision((d) => (d.power.town = 6)) })
     const r = company(t, 'a').history[0]
-    expect(r.used.citizens).toBeCloseTo(4 * (1 + t.pools.citizens.growth), 12)
+    expect(r.used.citizens).toBeCloseTo(cfg.pool.startPerCompany.citizens * (1 + t.pools.citizens.growth), 12)
+    expect(r.unallocatedMw).toBe(0)
     expect(r.costs.power).toBe(r2(0.4 * r.used.citizens))
     expect(r.revenue).toBe(r2(r.used.citizens * 1.0))
   })
 
   it('selling to the other datacenters pool needs no link and is paid 1.3 per MW used', () => {
     let s = edit(game(['a']), 'a', (c) => (c.links = []))
+    s.pools.otherDc.demand = 10 // above the offer (start demand is 0.6 MW per company)
     const t = resolveRound(s, { a: decision((d) => (d.power.otherDc = 2)) })
     const r = company(t, 'a').history[0]
     expect(r.used.otherDc).toBeCloseTo(2, 12)
@@ -453,10 +517,11 @@ describe('rent matching and power routing (SPEC "Power routing", DESIGN 2.3 step
 
 describe('maintenance and timers (SPEC "Assets and building", DESIGN 2.1 and 2.3 step 5)', () => {
   it('starting round check: 2 MW on AI gives 6.4 - 0.8 - 0.44 = 5.16', () => {
-    const t = resolveRound(game(['a']), { a: decision((d) => ((d.power.internal = 2), (d.compute.ai = 2))) })
+    // Demand set high so the 2 MW on AI are all used (start AI demand is 0.7 MW per company).
+    const t = resolveRound(roomy(game(['a'])), { a: decision((d) => ((d.power.internal = 2), (d.compute.ai = 2))) })
     const r = company(t, 'a').history[0]
     expect(r.revenue).toBe(6.4)
-    expect(r.costs).toEqual({ power: 0.8, rent: 0, maintenance: 0.44, interest: 0 })
+    expect(r.costs).toEqual({ power: 0.8, rent: 0, maintenance: 0.44, interest: 0, unallocated: 0 })
     expect(r.profit).toBe(5.16)
   })
 
@@ -469,8 +534,9 @@ describe('maintenance and timers (SPEC "Assets and building", DESIGN 2.1 and 2.3
   })
 
   it('a big plant ordered in round 1 delivers from round 4 (3 rounds), maintenance starts with it', () => {
-    let s = edit(game(['a']), 'a', (c) => (c.treasury = 50))
-    s = resolveRound(s, { a: decision((d) => d.builds.push({ kind: 'plant', size: 'big' })) })
+    // The start kit keeps running (2 MW to AI), so no plant power is left unallocated and no losing round sells the small plant.
+    let s = edit(roomy(game(['a'])), 'a', (c) => (c.treasury = 50))
+    s = resolveRound(s, { a: decision((d) => ((d.power.internal = 2), (d.compute.ai = 2), d.builds.push({ kind: 'plant', size: 'big' }))) })
     s = resolveRound(s, {})
     s = resolveRound(s, {})
     const h = company(s, 'a').history
@@ -502,7 +568,9 @@ describe('maintenance and timers (SPEC "Assets and building", DESIGN 2.1 and 2.3
 describe('bankruptcy frees MW (SPEC "Losing round and bankruptcy" 4)', () => {
   it('the next round, the bankrupt company holds no reserve and the others share its old demand', () => {
     let s = game(['a', 'b'])
-    s = edit(s, 'b', (c) => (addOnline(c, 'dc', 'big'), addOnline(c, 'plant', 'big'), (c.links[0].mw = 12)))
+    s.pools.ai.demand = 4 // start AI demand is 0.7 MW per company
+    // b leaves 10 MW unallocated for 2 rounds (penalty 20 each): the treasury covers it.
+    s = edit(s, 'b', (c) => (addOnline(c, 'dc', 'big'), addOnline(c, 'plant', 'big'), (c.links[0].mw = 12), (c.treasury = 100)))
     // Round 1: both put 2 MW on AI (AI demand 4): each uses 2.
     s = resolveRound(s, {
       a: decision((d) => ((d.power.internal = 2), (d.compute.ai = 2))),
@@ -579,9 +647,11 @@ function randomDecision(c: Company, rnd: () => number): Decision {
   else if (pick < 0.3) d.builds.push({ kind: 'dc', size: rnd() < 0.5 ? 'small' : 'big' })
   else if (pick < 0.5) d.builds.push({ kind: 'link', use: (['internal', 'town', 'import'] as const)[Math.floor(rnd() * 3)], mw: 1 + Math.floor(rnd() * 6) })
   if (rnd() < 0.15) {
-    const small = c.buildings.find((b) => b.size === 'small' && b.status === 'online')
-    if (small) d.upgrades.push(small.id)
+    // Any online building below level 3: small to big, or big to mega.
+    const up = c.buildings.find((b) => b.size !== 'mega' && b.status === 'online')
+    if (up) d.upgrades.push(up.id)
   }
+  if (rnd() < 0.05) d.landRows = 1
   if (rnd() < 0.1) d.loans.take = Math.floor(rnd() * 40)
   return d
 }
@@ -610,6 +680,8 @@ describe('replay oracle with random human decisions (builds, upgrades, rent, ove
   it('3 humans and 1 bot, 40 rounds, seeds 1..15', () => {
     const problems: string[] = []
     let upgrades = 0
+    let megas = 0
+    let landBought = 0
     for (let seed = 1; seed <= 15; seed++) {
       const rnd = lcg(seed * 7919)
       let s = createGame(
@@ -630,12 +702,17 @@ describe('replay oracle with random human decisions (builds, upgrades, rent, ove
         for (const c of s.companies) if (!c.isBot && !c.bankrupt) ds[c.id] = randomDecision(c, rnd)
         const t = resolveRound(s, ds)
         for (const c of t.companies) upgrades += c.buildings.filter((b) => b.status === 'upgrading').length > 0 ? 1 : 0
+        for (const c of t.companies) landBought += c.history.at(-1)?.round === s.round ? c.history.at(-1)!.finance.landBought : 0
         problems.push(...oracle(s, t))
         s = t
       }
+      for (const c of s.companies) megas += c.buildings.filter((b) => b.size === 'mega').length
     }
     expect(problems.slice(0, 10)).toEqual([])
     expect(upgrades).toBeGreaterThan(0)
+    // The new rules are exercised too: level 3 reached by upgrade, land rows bought.
+    expect(megas).toBeGreaterThan(0)
+    expect(landBought).toBeGreaterThan(0)
   })
 })
 

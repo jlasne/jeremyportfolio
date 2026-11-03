@@ -2,8 +2,8 @@
 // store and are safe in `useGame(select...)` (they return stored references, never new objects);
 // helpers that build arrays take a GameState and belong in useMemo or useShallow.
 
-import { rankCompanies, seasonOf } from '../engine'
-import type { Company, GameState, RoundResult, RoundSummary } from '../engine'
+import { companyById, freeLots, landCost, levelOf, ownedRows, plotRows, rankCompanies, seasonOf } from '../engine'
+import type { Company, Config, Decision, GameState, RoundResult, RoundSummary, Size, Tile } from '../engine'
 import type { GameStore } from './game'
 
 export const SEASON_NAMES = ['Spring', 'Summer', 'Autumn', 'Winter'] as const
@@ -72,6 +72,56 @@ export function seasonName(round: number): SeasonName {
 
 export function companyColor(company: Company): string {
   return `var(--company-${company.color % 6})`
+}
+
+/** "Level 1", "Level 2", "Level 3". */
+export function levelLabel(size: Size): string {
+  return `Level ${levelOf(size)}`
+}
+
+// ---- land ----
+
+export interface LandView {
+  /** Rows owned before this round. */
+  owned: number
+  /** Rows bought in the draft (owned once the round locks in, usable for this round's builds). */
+  bought: number
+  /** owned + bought: the rows builds may use. */
+  rows: number
+  /** Rows the map draws: the land, then the row for sale under it. */
+  plotRows: number
+  /** Index of the row for sale: the first row past the land. */
+  saleRow: number
+  /** Price of the next row (after the draft's purchases). */
+  nextRowCost: number
+  /** What the draft's rows cost. */
+  boughtCost: number
+  /** Free lots on the land, after the draft's orders. */
+  freeLots: number
+  lotsPerRow: number
+}
+
+/** Land rows owned, bought this round and for sale, with free lots after the draft's orders. */
+export function landView(state: GameState, meId: string, decision: Decision, config: Config): LandView {
+  const me = companyById(state, meId)
+  const owned = ownedRows(me, config)
+  const bought = Math.max(0, Math.floor(Number.isFinite(decision.landRows) ? decision.landRows : 0))
+  const rows = owned + bought
+  const orders = decision.builds.filter((b) => b.kind !== 'link')
+  const placed = orders.filter((b) => b.tile && b.tile[1] < rows).map((b) => b.tile as Tile)
+  const unplaced = orders.length - placed.length
+  const drawn = plotRows(me, placed, config, rows)
+  return {
+    owned,
+    bought,
+    rows,
+    plotRows: drawn,
+    saleRow: rows,
+    nextRowCost: landCost(rows, 1, config),
+    boughtCost: landCost(owned, bought, config),
+    freeLots: Math.max(0, freeLots(me, rows, placed, config) - unplaced),
+    lotsPerRow: config.plot.lotsPerRow,
+  }
 }
 
 // ---- live-region sentences ----

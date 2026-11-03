@@ -1,23 +1,26 @@
 // Build panel (SPEC "Screens and interactions"): building cards with their pixel sprite, cost, MW,
 // build time and upkeep; drag a card onto a free lot of the map, or tap / click / Enter it to
-// place it (the map track implements both behind src/map/drag.ts). Upgrades of small online
-// buildings, the three grid links with a "+MW" order each, and this round's orders with their
-// cost, a remove button and the total. Every change goes through the draft store (undoable).
+// place it (the map track implements both behind src/map/drag.ts). The land (rows owned, free lots,
+// the next row's price and a Buy row button), upgrades to level 2 and level 3, the three grid links
+// with a "+MW" order each, and this round's orders with their cost, a remove button and the total.
+// Every change goes through the draft store (undoable).
 
 import { useEffect, useRef, useState } from 'react'
 import type { KeyboardEvent, PointerEvent as ReactPointerEvent } from 'react'
-import { buildCost, capacity, upgradeCost } from '../../engine'
-import type { BuildOrder, Building, BuildingKind, LinkUse, Size } from '../../engine'
+import { buildCost, capacity, levelOf, nextSize, upgradeCost, upgradeSpec } from '../../engine'
+import type { BuildOrder, Building, BuildingKind, BuildSize, LinkUse, Size } from '../../engine'
 import { startBuildDrag, startBuildPlacement } from '../../map/drag'
+import { NO_LOT_TEXT } from '../../map/placement'
 import { useDerived } from '../../store/derived'
 import { useDraft } from '../../store/draft'
+import { landView } from '../../store/selectors'
 import { useUi } from '../../store/ui'
-import { Icon, IconButton, KIND_META, LINK_META, Mw, NumberTween, Panel, Toggle, fmtMoney, fmtMw } from '../kit'
+import { Button, Icon, IconButton, KIND_META, LINK_META, Mw, NumberTween, Panel, Toggle, fmtMoney, fmtMw } from '../kit'
 import { Note, TreasuryStrip, rounds, usePanelCtx } from './common'
 import { PanelStepper } from './PanelStepper'
 import { Sprite } from './Sprite'
 
-const CARDS: { kind: BuildingKind; size: Size }[] = [
+const CARDS: { kind: BuildingKind; size: BuildSize }[] = [
   { kind: 'plant', size: 'small' },
   { kind: 'plant', size: 'big' },
   { kind: 'dc', size: 'small' },
@@ -29,12 +32,13 @@ const LINK_ROWS: { use: LinkUse; title: string; route: string }[] = [
   { use: 'import', title: 'Import', route: 'Rented MW → my datacenters' },
 ]
 
-const sizeWord = (s: Size) => (s === 'big' ? 'Big' : 'Small')
+const sizeWord = (s: Size) => (s === 'mega' ? 'Mega' : s === 'big' ? 'Big' : 'Small')
 const kindWord = (k: BuildingKind) => KIND_META[k].label.toLowerCase()
 
 function orderName(o: BuildOrder): string {
   if (o.kind === 'link') return `${LINK_META[o.use ?? 'internal'].label} +${o.mw ?? 0} MW`
-  return `${sizeWord(o.size ?? 'small')} ${kindWord(o.kind)}`
+  const size = o.size ?? 'small'
+  return `${sizeWord(size)} ${kindWord(o.kind)} (level ${levelOf(size)})`
 }
 
 /** "Plant 2", numbered in the order the company owns them, so a row reads the same as the map. */
@@ -47,7 +51,7 @@ function buildingName(b: Building, all: Building[]): string {
 
 interface CardProps {
   kind: BuildingKind
-  size: Size
+  size: BuildSize
   cost: number
   mw: number
   buildRounds: number
@@ -56,6 +60,8 @@ interface CardProps {
   ordered: number
   short: number
   disabled: boolean
+  /** No free lot on the land (rows bought this round included). */
+  noLot: boolean
 }
 
 const UPGRADES_SHOWN = 4
@@ -63,11 +69,11 @@ const DRAG_PX = 6
 const TOUCH_MOVE_CANCEL = 10
 const LONG_PRESS_MS = 260
 
-function BuildCard({ kind, size, cost, mw, buildRounds, onlineRound, upkeep, ordered, short, disabled }: CardProps) {
+function BuildCard({ kind, size, cost, mw, buildRounds, onlineRound, upkeep, ordered, short, disabled, noLot }: CardProps) {
   const ref = useRef<HTMLButtonElement>(null)
   const suppressClick = useRef(false)
   const cleanup = useRef<(() => void) | null>(null)
-  const blocked = disabled || short > 0
+  const blocked = disabled || noLot || short > 0
   const order: BuildOrder = { kind, size }
   const name = `${sizeWord(size)} ${kindWord(kind)}`
   const reasonId = `build-reason-${kind}-${size}`
@@ -163,7 +169,7 @@ function BuildCard({ kind, size, cost, mw, buildRounds, onlineRound, upkeep, ord
       style={{ ['--hue' as string]: KIND_META[kind].hue }}
       aria-disabled={blocked || undefined}
       aria-describedby={reasonId}
-      aria-label={`${name}: ${fmtMoney(cost)}, ${mw} MW, ready in ${rounds(buildRounds)}. ${blocked ? '' : 'Press to place it on the map, or drag it onto a free lot.'}`}
+      aria-label={`${name}, level ${levelOf(size)}: ${fmtMoney(cost)}, ${mw} MW, ready in ${rounds(buildRounds)}. ${blocked ? '' : 'Press to place it on the map, or drag it onto a free lot.'}`}
       data-tut={kind === 'plant' && size === 'small' ? 'build-card-plant-small' : undefined}
       onPointerDown={onPointerDown}
       onClick={onClick}
@@ -174,7 +180,9 @@ function BuildCard({ kind, size, cost, mw, buildRounds, onlineRound, upkeep, ord
         <Sprite frame={frame} size={size === 'big' ? { w: 96, h: 96 } : { w: 64, h: 64 }} fallback={<Icon name={KIND_META[kind].icon} size={32} />} />
         {ordered > 0 ? <span className="bcard-count num">×{ordered}</span> : null}
       </span>
-      <span className="bcard-name">{name}</span>
+      <span className="bcard-name">
+        {name} <span className={`lvl-chip lvl-${levelOf(size)}`}>Level {levelOf(size)}</span>
+      </span>
       <span className="bcard-cost pixel num">{fmtMoney(cost)}</span>
       <span className="bcard-facts">
         <span>
@@ -187,9 +195,13 @@ function BuildCard({ kind, size, cost, mw, buildRounds, onlineRound, upkeep, ord
           upkeep <span className="num">{fmtMoney(upkeep)}/round</span>
         </span>
       </span>
-      <span id={reasonId} className={`bcard-foot${short > 0 ? ' is-short' : ''}`}>
+      <span id={reasonId} className={`bcard-foot${short > 0 || noLot ? ' is-short' : ''}`}>
         {disabled ? (
           'Orders are closed'
+        ) : noLot ? (
+          <>
+            <Icon name="lock" size={16} /> {NO_LOT_TEXT}
+          </>
         ) : short > 0 ? (
           <>
             <Icon name="lock" size={16} /> short by <span className="num">{fmtMoney(short)}</span>
@@ -210,6 +222,8 @@ export default function BuildPanel() {
   const setDraft = useDraft((s) => s.set)
   const removeBuild = useDraft((s) => s.removeBuild)
   const toggleUpgrade = useDraft((s) => s.toggleUpgrade)
+  const buyLandRow = useDraft((s) => s.buyLandRow)
+  const setLandRows = useDraft((s) => s.setLandRows)
   const placing = useUi((s) => s.drag)
   const [allUpgrades, setAllUpgrades] = useState(false)
   const { preview } = useDerived()
@@ -217,6 +231,8 @@ export default function BuildPanel() {
   const { state, me, config, disabled } = ctx
   const left = preview.treasuryLeft
   const round = state.round
+  const land = landView(state, ctx.meId, d, config)
+  const noLot = land.freeLots === 0
 
   const linkOrderMw = (use: LinkUse) => d.builds.filter((b) => b.kind === 'link' && b.use === use).reduce((s, b) => s + (b.mw ?? 0), 0)
   /** Sets this round's order for one link to `mw` (one entry per use; 0 removes it). */
@@ -239,13 +255,15 @@ export default function BuildPanel() {
   const internalNeed = Math.min(preview.pendingPlantMw, preview.pendingDcMw)
   const internalGap = Math.max(0, Math.ceil(internalNeed - preview.pendingLinks.internal))
 
-  const upgradable = me.buildings.filter((b) => b.size === 'small' && (b.status === 'online' || b.status === 'upgrading'))
+  const upgradable = me.buildings.filter((b) => b.size !== 'mega' && (b.status === 'online' || b.status === 'upgrading'))
   // Ordered and upgrading ones first, then the rest; long lists fold after a few rows.
   const rank = (b: Building) => (d.upgrades.includes(b.id) ? 0 : b.status === 'upgrading' ? 1 : 2)
   const sortedUpgrades = [...upgradable].sort((a, b) => rank(a) - rank(b))
   const shownUpgrades = allUpgrades ? sortedUpgrades : sortedUpgrades.slice(0, Math.max(UPGRADES_SHOWN, upgradable.filter((b) => rank(b) < 2).length))
   const building = me.buildings.filter((b) => b.status === 'building')
-  const orderCount = d.builds.length + d.upgrades.length
+  const orderCount = d.builds.length + d.upgrades.length + (land.bought > 0 ? 1 : 0)
+  const up2 = { plant: config.buildings.plant.upgrade, dc: config.buildings.dc.upgrade }
+  const up3 = { plant: config.buildings.plant.upgradeMega, dc: config.buildings.dc.upgradeMega }
 
   return (
     <div className="panel-stack build-panel">
@@ -270,6 +288,7 @@ export default function BuildPanel() {
               ordered={d.builds.filter((b) => b.kind === kind && b.size === size).length}
               short={Math.max(0, Math.round((cost - Math.max(0, left)) * 100) / 100)}
               disabled={disabled}
+              noLot={noLot}
             />
           )
         })}
@@ -279,23 +298,31 @@ export default function BuildPanel() {
         <Note level="info" icon="crane">
           Under construction:{' '}
           {building
-            .map((b) => `${sizeWord(b.size).toLowerCase()} ${kindWord(b.kind)} (${rounds(b.roundsLeft)} left)`)
+            .map((b) => `${sizeWord(b.size).toLowerCase()} ${kindWord(b.kind)}, level ${levelOf(b.size)} (${rounds(b.roundsLeft)} left)`)
             .join(', ')}
           .
         </Note>
       ) : null}
 
-      <Panel title="Upgrades" icon="arrowUp" tone="plant" aside={<span className="muted num">small → big</span>}>
+      <LandSection land={land} left={left} disabled={disabled} pending={d.builds} growth={config.plot.rowCostGrowth} onBuy={buyLandRow} onGiveBack={() => setLandRows(land.bought - 1)} />
+
+      <Panel title="Upgrades" icon="arrowUp" tone="plant" aside={<span className="muted num">level 1 → 2 → 3</span>}>
+        <ul className="plain-list upg-levels">
+          <li>
+            <strong>Level 2</strong> <span className="num">{fmtMw(config.buildings.plant.small.mw)} → {fmtMw(config.buildings.plant.big.mw)}</span> in{' '}
+            {rounds(up2.plant.rounds)}: plant <span className="num">{fmtMoney(up2.plant.cost)}</span>, datacenter <span className="num">{fmtMoney(up2.dc.cost)}</span>.
+          </li>
+          <li>
+            <strong>Level 3</strong> <span className="num">{fmtMw(config.buildings.plant.big.mw)} → {fmtMw(config.buildings.plant.mega.mw)}</span> in{' '}
+            {rounds(up3.plant.rounds)}: plant <span className="num">{fmtMoney(up3.plant.cost)}</span>, datacenter <span className="num">{fmtMoney(up3.dc.cost)}</span>. The most MW
+            per lot, and the longest build.
+          </li>
+        </ul>
         {upgradable.length === 0 ? (
-          <p className="muted">No small building online to upgrade.</p>
+          <p className="muted">No level 1 or level 2 building online to upgrade.</p>
         ) : (
           <>
-            <p className="field-desc">
-              Plant <span className="num">{fmtMoney(config.buildings.plant.upgrade.cost)}</span>, datacenter{' '}
-              <span className="num">{fmtMoney(config.buildings.dc.upgrade.cost)}</span>. Takes {rounds(config.buildings.plant.upgrade.rounds)}; it keeps
-              running at <span className="num">{fmtMw(config.buildings.plant.small.mw)}</span> meanwhile, then makes{' '}
-              <span className="num">{fmtMw(config.buildings.plant.big.mw)}</span>.
-            </p>
+            <p className="field-desc">A building keeps its MW while it upgrades, on the same lot.</p>
             <ul className="plain-list upg-list">
               {shownUpgrades.map((b) => {
                 const on = d.upgrades.includes(b.id)
@@ -303,17 +330,27 @@ export default function BuildPanel() {
                 const cost = upgradeCost(b, config)
                 const short = !on && cost > left
                 const name = buildingName(b, me.buildings)
+                const to = nextSize(b.size) ?? b.size
+                const toLevel = levelOf(to)
+                const gain = config.buildings[b.kind][to].mw - config.buildings[b.kind][b.size].mw
+                const upRounds = upgradeSpec(b.kind, b.size, config).rounds
                 return (
                   <li key={b.id} className={`upg-row${on ? ' is-on' : ''}`}>
                     <span className="upg-icon" style={{ ['--hue' as string]: KIND_META[b.kind].hue }} aria-hidden="true">
                       <Icon name={busy ? 'crane' : KIND_META[b.kind].icon} size={16} />
                     </span>
                     <Toggle
-                      label={`Upgrade ${name.toLowerCase()}`}
+                      label={busy ? `${name} to level ${toLevel}` : `Upgrade ${name.toLowerCase()} to level ${toLevel}`}
                       checked={on || busy}
                       onChange={() => toggleUpgrade(b.id)}
                       disabled={disabled || busy || short}
-                      description={busy ? `Upgrading: big in ${rounds(b.roundsLeft)}` : short ? `${fmtMoney(cost)} · short by ${fmtMoney(cost - Math.max(0, left))}` : `${fmtMoney(cost)} · big from round ${round + config.buildings[b.kind].upgrade.rounds}`}
+                      description={
+                        busy
+                          ? `Upgrading: level ${toLevel} in ${rounds(b.roundsLeft)}, ${fmtMw(b.mw)} meanwhile`
+                          : short
+                            ? `${fmtMoney(cost)} · short by ${fmtMoney(cost - Math.max(0, left))}`
+                            : `${fmtMoney(cost)} · +${fmtMw(gain)} · ${rounds(upRounds)}, level ${toLevel} from round ${round + upRounds}`
+                      }
                     />
                   </li>
                 )
@@ -388,10 +425,18 @@ export default function BuildPanel() {
                 <IconButton icon="close" size="sm" label={`Remove ${orderName(b)}`} onClick={() => removeBuild(i)} disabled={disabled} />
               </li>
             ))}
+            {land.bought > 0 ? (
+              <li className="order-row">
+                <Icon name="flag" size={16} className="order-icon" />
+                <span className="order-name">{land.bought === 1 ? 'Land row' : `Land rows ×${land.bought}`}</span>
+                <span className="num order-cost">{fmtMoney(land.boughtCost)}</span>
+                <IconButton icon="close" size="sm" label={`Give back land row ${land.rows}`} onClick={() => setLandRows(land.bought - 1)} disabled={disabled} />
+              </li>
+            ) : null}
             {d.upgrades.map((id) => {
               const b = me.buildings.find((x) => x.id === id)
               if (!b) return null
-              const name = `Upgrade ${buildingName(b, me.buildings).toLowerCase()}`
+              const name = `Upgrade ${buildingName(b, me.buildings).toLowerCase()} to level ${levelOf(nextSize(b.size) ?? b.size)}`
               return (
                 <li key={id} className="order-row">
                   <Icon name="arrowUp" size={16} className="order-icon" />
@@ -411,6 +456,83 @@ export default function BuildPanel() {
         )}
       </Panel>
     </div>
+  )
+}
+
+// ---------- Land ----------
+
+function LandSection({
+  land,
+  left,
+  disabled,
+  pending,
+  growth,
+  onBuy,
+  onGiveBack,
+}: {
+  land: ReturnType<typeof landView>
+  left: number
+  disabled: boolean
+  pending: BuildOrder[]
+  /** Price rise of each row over the last, as a fraction. */
+  growth: number
+  onBuy: () => void
+  onGiveBack: () => void
+}) {
+  const short = Math.max(0, Math.round((land.nextRowCost - Math.max(0, left)) * 100) / 100)
+  const total = land.rows * land.lotsPerRow
+  // a row given back moves its orders to free lots elsewhere: refuse when there is no room for them
+  const lastRow = land.rows - 1
+  const onLast = pending.filter((b) => b.kind !== 'link' && b.tile && b.tile[1] === lastRow).length
+  const freeElsewhere = land.freeLots - (land.lotsPerRow - onLast)
+  const stuck = land.bought > 0 && onLast > freeElsewhere
+  return (
+    <Panel title="Land" icon="flag" className="land-panel">
+      <dl className="facts facts-3 land-facts">
+        <div>
+          <dt>Rows</dt>
+          <dd className="num">
+            {land.owned}
+            {land.bought > 0 ? <span className="land-new"> +{land.bought}</span> : null}
+          </dd>
+        </div>
+        <div>
+          <dt>Free lots</dt>
+          <dd className={`num${land.freeLots === 0 ? ' is-negative' : ''}`}>
+            {land.freeLots}
+            <span className="land-of"> of {total}</span>
+          </dd>
+        </div>
+        <div>
+          <dt>Next row</dt>
+          <dd className="num">{fmtMoney(land.nextRowCost)}</dd>
+        </div>
+      </dl>
+      <div className="land-actions">
+        <Button variant={land.freeLots === 0 ? 'primary' : 'secondary'} icon="plus" disabled={disabled || short > 0} onClick={onBuy} aria-describedby="land-note">
+          <span className="num">{`Buy row ${land.rows + 1} · ${fmtMoney(land.nextRowCost)}`}</span>
+        </Button>
+        {land.bought > 0 ? (
+          <Button variant="ghost" icon="minus" disabled={disabled || stuck} onClick={onGiveBack}>
+            Give back row {land.rows}
+          </Button>
+        ) : null}
+      </div>
+      <p id="land-note" className="field-desc">
+        {short > 0 && !disabled ? (
+          <>
+            <Icon name="lock" size={16} /> Short by <span className="num">{fmtMoney(short)}</span>.{' '}
+          </>
+        ) : null}
+        Each row adds {land.lotsPerRow} lots, usable this round. Each row costs {Math.round(growth * 100)}% more than the last. You can also tap the fenced row on the map.
+        {stuck ? ` Cancel an order on row ${land.rows} first.` : ''}
+      </p>
+      {land.freeLots === 0 ? (
+        <Note level="warn" icon="flag">
+          {NO_LOT_TEXT}
+        </Note>
+      ) : null}
+    </Panel>
   )
 }
 

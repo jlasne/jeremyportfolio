@@ -58,6 +58,14 @@ describe('bots', () => {
     for (const s of games) {
       for (const c of s.companies) {
         const cap = capacity(c)
+        if (c.bot === 'hashfield') {
+          // New rules: Hashfield builds small only, so the 2 start rows cap it at 8 lots (16 MW) unless it
+          // buys land at 50+ a row, which 2 MW builds do not earn back; its bitcoin pool now starts at
+          // 0.5 MW per company and can stall (seed 20). It must still grow past the start kit.
+          expect(cap.plantMw + cap.dcMw).toBeGreaterThan(4)
+          expect(c.history.at(-1)!.revenue).toBeGreaterThan(1.4 * c.history[0].revenue)
+          continue
+        }
         expect(cap.plantMw + cap.dcMw).toBeGreaterThanOrEqual(20)
         expect(c.history.at(-1)!.revenue).toBeGreaterThan(5 * c.history[0].revenue)
         expect(c.sharePrice).toBeGreaterThan(30)

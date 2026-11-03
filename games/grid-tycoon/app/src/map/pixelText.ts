@@ -22,6 +22,16 @@ const GLYPHS: Record<string, { w: number; rows: number[] }> = {
   S: { w: 5, rows: [0b01111, 0b10000, 0b10000, 0b01110, 0b00001, 0b00001, 0b11110] },
   E: { w: 5, rows: [0b11111, 0b10000, 0b10000, 0b11110, 0b10000, 0b10000, 0b11111] },
   L: { w: 5, rows: [0b10000, 0b10000, 0b10000, 0b10000, 0b10000, 0b10000, 0b11111] },
+  A: { w: 5, rows: [0b01110, 0b10001, 0b10001, 0b11111, 0b10001, 0b10001, 0b10001] },
+  B: { w: 5, rows: [0b11110, 0b10001, 0b10001, 0b11110, 0b10001, 0b10001, 0b11110] },
+  D: { w: 5, rows: [0b11110, 0b10001, 0b10001, 0b10001, 0b10001, 0b10001, 0b11110] },
+  F: { w: 5, rows: [0b11111, 0b10000, 0b10000, 0b11110, 0b10000, 0b10000, 0b10000] },
+  N: { w: 5, rows: [0b10001, 0b11001, 0b10101, 0b10011, 0b10001, 0b10001, 0b10001] },
+  O: { w: 5, rows: [0b01110, 0b10001, 0b10001, 0b10001, 0b10001, 0b10001, 0b01110] },
+  R: { w: 5, rows: [0b11110, 0b10001, 0b10001, 0b11110, 0b10100, 0b10010, 0b10001] },
+  U: { w: 5, rows: [0b10001, 0b10001, 0b10001, 0b10001, 0b10001, 0b10001, 0b01110] },
+  W: { w: 5, rows: [0b10001, 0b10001, 0b10001, 0b10101, 0b10101, 0b10101, 0b01010] },
+  Y: { w: 5, rows: [0b10001, 0b10001, 0b01010, 0b00100, 0b00100, 0b00100, 0b00100] },
 }
 
 // 7 x 7 clock face for the countdown badge.
@@ -40,6 +50,13 @@ const PLANT = '#ff9e66'
 const DC = '#c4b0ff'
 const RED = '#e5484d'
 const RED_EDGE = '#8f1f24'
+const GOLD = '#ffd23f'
+const GOLD_EDGE = '#9c6f12'
+const TEAL = '#2fb8b0'
+const TEAL_EDGE = '#1f5f64'
+const WOOD = '#a07a52'
+const WOOD_DARK = '#5e4229'
+const BOARD = '#f6f1e3'
 
 const cache = new Map<string, Texture>()
 
@@ -118,6 +135,60 @@ export function sellTagTexture(): Texture {
     ctx.fillStyle = RED
     ctx.fillRect(1, 1, w - 2, h - 2)
     drawText(ctx, s, 3, 2, CREAM)
+  })
+}
+
+/** A small plate with a 1 px edge and cream or ink text (the SELL tag's shape). */
+function plate(key: string, s: string, fill: string, edge: string, text: string): Texture {
+  const w = textWidth(s) + 6
+  const h = 11
+  return make(key, w, h, (ctx) => {
+    ctx.fillStyle = edge
+    ctx.fillRect(1, 0, w - 2, h)
+    ctx.fillRect(0, 1, w, h - 2)
+    ctx.fillStyle = fill
+    ctx.fillRect(1, 1, w - 2, h - 2)
+    drawText(ctx, s, 3, 2, text)
+  })
+}
+
+/** "L3" on a gold plate: marks a level 3 building (it reuses the big sprite). */
+export function levelTagTexture(level: number): Texture {
+  return plate(`lvl:${level}`, `L${level}`, GOLD, GOLD_EDGE, INK)
+}
+
+/** "NEW" on a teal plate: a land row bought this round, owned once the round locks in. */
+export function newLandTagTexture(): Texture {
+  return plate('newland', 'NEW', TEAL, TEAL_EDGE, CREAM)
+}
+
+/**
+ * The for-sale sign on the locked row: a cream board in a wood frame on a post, "FOR SALE" over
+ * the price of the row. `hot` draws it lit (hovered or focused).
+ */
+export function saleSignTexture(price: number, hot = false): Texture {
+  const top = 'FOR SALE'
+  const amount = price >= 1000 ? String(Math.round(price)) : price.toFixed(2)
+  const w = Math.max(textWidth(top), textWidth(amount)) + 10
+  const board = 7 + 3 + 7 + 8
+  const post = 9
+  const h = board + post
+  return make(`sale:${amount}:${hot ? 1 : 0}`, w, h, (ctx) => {
+    // post
+    ctx.fillStyle = WOOD_DARK
+    ctx.fillRect((w >> 1) - 2, board - 1, 4, post + 1)
+    ctx.fillStyle = WOOD
+    ctx.fillRect((w >> 1) - 1, board - 1, 2, post)
+    // frame and board
+    ctx.fillStyle = WOOD_DARK
+    ctx.fillRect(1, 0, w - 2, board)
+    ctx.fillRect(0, 1, w, board - 2)
+    ctx.fillStyle = hot ? GOLD : WOOD
+    ctx.fillRect(1, 1, w - 2, board - 2)
+    ctx.fillStyle = BOARD
+    ctx.fillRect(2, 2, w - 4, board - 4)
+    drawText(ctx, top, (w - textWidth(top)) >> 1, 4, RED)
+    drawText(ctx, amount, (w - textWidth(amount)) >> 1, 4 + 7 + 3, INK)
   })
 }
 

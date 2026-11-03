@@ -109,7 +109,7 @@ export default function ForcedSale() {
                   <input type="checkbox" className="fs-check" checked={on} onChange={() => toggle(b.id)} />
                   <span className="fs-art" aria-hidden="true">
                     <Icon name={b.status === 'building' ? 'crane' : KIND_META[b.kind].icon} size={24} />
-                    {b.size === 'big' ? <span className="fs-big">Big</span> : null}
+                    {b.size !== 'small' ? <span className={`fs-big${b.size === 'mega' ? ' is-l3' : ''}`}>{b.size === 'mega' ? 'L3' : 'L2'}</span> : null}
                   </span>
                   <span className="fs-info">
                     <span className="fs-name">{buildingName(b)}</span>

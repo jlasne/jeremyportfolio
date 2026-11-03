@@ -1,15 +1,18 @@
-// The panel dock: a tab rail (right edge on desktop, bottom bar on phones) and the sheet that
-// opens over the map. In a losing round the forced sale replaces the panels until confirmed.
+// The panel dock: a tab rail (right edge on desktop, bottom bar on phones) and what opens from it.
+// Finance and Build open as a sheet over the map; Allocate and Market open as a full-screen
+// terminal that covers the map area (the map is only on screen for building). In a losing round
+// the forced sale replaces the panels until confirmed.
 //
 // Keyboard: arrows move along the rail; Tab past the last control of a panel moves into the next
 // panel (Shift+Tab before the first goes back); keys 1-4 and Esc are handled in useGameKeys.
+// Opening a terminal moves focus to its title, except while arrowing along the rail.
 
 import { useEffect, useRef } from 'react'
 import type { ComponentType, KeyboardEvent } from 'react'
 import { useDraft } from '../../store/draft'
 import { useGame } from '../../store/game'
 import { selectLosingRound } from '../../store/selectors'
-import { PANELS, useUi } from '../../store/ui'
+import { PANELS, isTerminal, useUi } from '../../store/ui'
 import type { PanelId } from '../../store/ui'
 import { Sheet, Tabs, tabId, tabPanelId } from '../kit'
 import type { IconName, TabItem } from '../kit'
@@ -18,6 +21,7 @@ import BuildPanel from '../panels/BuildPanel'
 import FinancePanel from '../panels/FinancePanel'
 import MarketPanel from '../panels/MarketPanel'
 import ForcedSale from '../results/ForcedSale'
+import { Terminal } from '../terminal/Terminal'
 
 export const DOCK_ID = 'dock'
 
@@ -48,6 +52,22 @@ let pendingFocus: 'first' | 'last' | 'heading' | null = null
 export function focusPanelOnOpen(where: 'first' | 'last' | 'heading'): void {
   pendingFocus = where
 }
+/** Time of the last arrow key on the rail (automatic tab activation): focus then stays on the tab. */
+let railArrowAt = -Infinity
+
+const TERMINAL_SUB: Partial<Record<PanelId, string>> = {
+  allocate: 'Plant power to your datacenters, citizens and other datacenters; datacenter MW to cloud, bitcoin and AI.',
+  market: 'Every company and every pool: who offered what, who got served, and how full each pool is.',
+}
+
+/** True while a terminal covers the map (the map is then hidden and inert). */
+export function useTerminalOpen(): boolean {
+  const panel = useUi((s) => s.panel)
+  const losing = useGame(selectLosingRound)
+  const confirmed = useUi((s) => s.forcedSaleConfirmed)
+  const phase = useGame((s) => s.phase)
+  return isTerminal(panel) && !(losing && !confirmed && phase === 'decide')
+}
 
 export function PanelDock() {
   const panel = useUi((s) => s.panel)
@@ -64,11 +84,14 @@ export function PanelDock() {
   const locked = forced || phase !== 'decide'
 
   useEffect(() => {
-    const where = pendingFocus
+    let where = pendingFocus
     pendingFocus = null
+    const arrowing = performance.now() - railArrowAt < 600
+    railArrowAt = -Infinity
+    if (!where && !arrowing && !forced && isTerminal(panel)) where = 'heading'
     if (!where || !sheetRef.current) return
-    if (where === 'heading') return headingRef.current?.focus()
-    const list = tabbable(sheetRef.current.querySelector('.sheet-body'))
+    if (where === 'heading') return headingRef.current?.focus({ preventScroll: true })
+    const list = tabbable(sheetRef.current.querySelector('.sheet-body, .term-body'))
     const el = where === 'first' ? list[0] : list[list.length - 1]
     ;(el ?? headingRef.current)?.focus()
   }, [panel, forced])
@@ -101,13 +124,35 @@ export function PanelDock() {
   }
 
   const Content = panel ? CONTENT[panel] : null
+  const term = !forced && isTerminal(panel)
+  const closeAndReturn = (p: PanelId) => {
+    close()
+    document.getElementById(tabId(DOCK_ID, p))?.focus()
+  }
 
   return (
-    <div className={`dock${panel || forced ? ' has-sheet' : ''}`}>
+    <div className={`dock${(panel && !term) || forced ? ' has-sheet' : ''}${term ? ' has-term' : ''}`}>
       {forced ? (
         <Sheet ref={sheetRef} headingRef={headingRef} className="sheet-forced" title="Forced sale" icon="warn" locked onClose={() => {}} aria-label="Forced sale">
           <ForcedSale />
         </Sheet>
+      ) : panel && Content && term ? (
+        <Terminal
+          key={panel}
+          ref={sheetRef}
+          headingRef={headingRef}
+          id={tabPanelId(DOCK_ID, panel)}
+          role="tabpanel"
+          aria-labelledby={tabId(DOCK_ID, panel)}
+          title={PANEL_INFO[panel].label}
+          icon={PANEL_INFO[panel].icon}
+          sub={TERMINAL_SUB[panel]}
+          onClose={() => closeAndReturn(panel)}
+          onKeyDown={onSheetKey}
+          className={`term-${panel}${locked ? ' is-locked' : ''}`}
+        >
+          <Content />
+        </Terminal>
       ) : panel && Content ? (
         <Sheet
           key={panel}
@@ -118,17 +163,20 @@ export function PanelDock() {
           aria-labelledby={tabId(DOCK_ID, panel)}
           title={PANEL_INFO[panel].label}
           icon={PANEL_INFO[panel].icon}
-          onClose={() => {
-            close()
-            document.getElementById(tabId(DOCK_ID, panel))?.focus()
-          }}
+          onClose={() => closeAndReturn(panel)}
           onKeyDown={onSheetKey}
           className={locked ? 'is-locked' : undefined}
         >
           <Content />
         </Sheet>
       ) : null}
-      <nav className="rail" aria-label="Decision panels">
+      <nav
+        className="rail"
+        aria-label="Decision panels"
+        onKeyDownCapture={(e) => {
+          if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) railArrowAt = performance.now()
+        }}
+      >
         <Tabs label="Decision panels" idPrefix={DOCK_ID} items={items} selected={forced ? null : panel} onSelect={(id) => (id ? open(id) : close())} orientation="vertical" collapsible className="rail-tabs" />
       </nav>
     </div>

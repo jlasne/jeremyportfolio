@@ -330,7 +330,8 @@ function candidates(
   const out: Candidate[] = []
   for (const steps of options) {
     const land = landFor(stepLots(steps))
-    const buildPrice = steps.reduce((s, x) => s + stepCost(x, config), 0) + land.cost
+    const stepsPrice = steps.reduce((s, x) => s + stepCost(x, config), 0)
+    const buildPrice = stepsPrice + land.cost
     if (buildPrice > maxCost) continue
     const rounds = Math.max(...steps.map((s) => stepRounds(s, config)))
     const online = remaining - rounds + 1
@@ -345,7 +346,8 @@ function candidates(
     let linkMw = 0
     for (const use of LINK_USES) linkMw += Math.max(0, next.linkUse[use] - Math.max(base.linkUse[use], future.links[use]))
     const cost = buildPrice + linkMw * config.link.costPerMw
-    const gain = next.margin - base.margin - config.maintenanceRate * buildPrice
+    // Maintenance is paid on buildings only, never on land.
+    const gain = next.margin - base.margin - config.maintenanceRate * stepsPrice
     if (gain <= 0) continue
     // Late in the game a build has fewer rounds to earn its cost back; a style that can buy back
     // shares has a better use for that cash, one that cannot is better off building.

@@ -1,15 +1,16 @@
 // Pure helpers for the results sequence, the forced sale and the end screen: they turn engine
 // states into the rows each view draws. No React here, so they stay cheap to memoize and test.
 
-import { POOLS, rankCompanies } from '../../engine'
+import { POOLS, levelOf, rankCompanies } from '../../engine'
 import type { Building, Company, GameState, PoolId, RoundResult, RoundSummary } from '../../engine'
 import { POOL_META, fmtMoney, fmtMw, fmtPct } from '../kit'
 import type { IconName } from '../kit'
 
 export const sumParts = (r: Record<PoolId, number>): number => POOLS.reduce((s, p) => s + r[p], 0)
 
+/** "Plant · Level 2". */
 export function buildingName(b: Pick<Building, 'kind' | 'size'>): string {
-  return `${b.size === 'big' ? 'Big' : 'Small'} ${b.kind === 'plant' ? 'plant' : 'datacenter'}`
+  return `${b.kind === 'plant' ? 'Plant' : 'Datacenter'} · Level ${levelOf(b.size)}`
 }
 
 export function companyName(state: GameState, id: string, meId: string | null): string {
@@ -77,6 +78,15 @@ export function stockRows(res: RoundResult): StockRow[] {
       core: false,
     })
   rows.push({ key: 'idle', label: 'Idle penalty', value: p.idle, hint: '1% of value for every 10 points of idle capacity above 20%.', core: true })
+  // older saves have no stability part: treat it as 0
+  rows.push({
+    key: 'stable',
+    label: 'Stable clients',
+    value: p.stability ?? 0,
+    hint: 'A premium for revenue from stable clients: citizens and cloud most, bitcoin none.',
+    icon: 'town',
+    core: true,
+  })
   rows.push({ key: 'fund', label: 'Fundamentals pull', value: p.fundamentals, hint: 'Value drifts 15% toward 20 × average profit plus 30% of building cost.', core: true })
   rows.push({ key: 'debt', label: 'Debt drag', value: p.debtDrag, hint: 'Debt weighs on market cap when interest and principal due are large against revenue.', core: true })
   if (Math.round(p.shares * 100) !== 0)
@@ -188,7 +198,9 @@ export function whatHappened(before: GameState, after: GameState, meId: string):
     out.push({
       icon: b.kind === 'plant' ? 'plant' : 'dc',
       tone: 'good',
-      text: upgraded ? `${b.kind === 'plant' ? 'Plant' : 'Datacenter'} upgrade finished: ${fmtMw(b.mw)} online next round.` : `${buildingName(b)} finished: ${fmtMw(b.mw)} online next round.`,
+      text: upgraded
+        ? `${b.kind === 'plant' ? 'Plant' : 'Datacenter'} upgrade to level ${levelOf(b.size)} finished: ${fmtMw(b.mw)} online next round.`
+        : `${buildingName(b)} finished: ${fmtMw(b.mw)} online next round.`,
     })
   }
   const finishedLinks = me.links.filter((l) => done.has(l.id))
@@ -197,6 +209,14 @@ export function whatHappened(before: GameState, after: GameState, meId: string):
     for (const l of finishedLinks) byUse.set(l.use, (byUse.get(l.use) ?? 0) + l.mw)
     for (const [use, mw] of byUse) out.push({ icon: 'link', tone: 'good', text: `${use[0].toUpperCase()}${use.slice(1)} link +${fmtMw(mw)} ready.` })
   }
+
+  // land bought this round
+  if ((res.finance.landBought ?? 0) > 0) {
+    const n = res.finance.landBought
+    out.push({ icon: 'flag', tone: 'info', text: `Bought ${n} land row${n > 1 ? 's' : ''} for ${fmtMoney(res.finance.landSpend)}: ${n * 4} more lots.` })
+  }
+  if ((res.unallocatedMw ?? 0) > 0.005)
+    out.push({ icon: 'warn', tone: 'warn', text: `${fmtMw(res.unallocatedMw)} of plant power went nowhere: a ${fmtMoney(res.costs.unallocated ?? 0)} penalty.` })
 
   // forced sales applied this round
   if (res.finance.forcedSold.length) {

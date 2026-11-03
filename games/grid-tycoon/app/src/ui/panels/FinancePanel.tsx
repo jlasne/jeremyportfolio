@@ -90,11 +90,16 @@ export default function FinancePanel() {
   const loans = [...me.loans].sort((a, b) => a.dueRound - b.dueRound)
 
   // ---- Shares ----
+  // Issue up to maxChangePerRound (20%) of shares; buy back up to maxBuybackPerRound (10%), paid
+  // from the treasury as it stands after loans and repayments (builds and land come after).
+  const issuePct = Math.round(cfg.shares.maxChangePerRound * 100)
+  const buybackPct = Math.round(cfg.shares.maxBuybackPerRound * 100)
   const maxShares = Math.floor(cfg.shares.maxChangePerRound * me.shares)
+  const buybackCap = Math.floor(cfg.shares.maxBuybackPerRound * me.shares)
   const price = me.sharePrice
   const treasuryBeforeShares = cashForRepay - repaid + take
-  const buybackCash = Math.max(0, Math.round((treasuryBeforeShares - preview.debt) * 100) / 100)
-  const maxBuy = price > 0 ? Math.max(0, Math.min(maxShares, Math.floor(buybackCash / price + 1e-9), me.shares - 1)) : 0
+  const buybackCash = Math.max(0, Math.round(treasuryBeforeShares * 100) / 100)
+  const maxBuy = price > 0 ? Math.max(0, Math.min(buybackCap, Math.floor(buybackCash / price + 1e-9), me.shares - 1)) : 0
   const mode = d.shares.mode
   const countMax = mode === 'buyback' ? maxBuy : maxShares
   const shareCash = Math.round(d.shares.count * price * 100) / 100
@@ -260,8 +265,8 @@ export default function FinancePanel() {
         />
         {mode === 'none' ? (
           <p className="field-desc">
-            Issuing raises cash but lowers the price; buying back does the opposite. Up to {maxShares} shares a round.
-            {maxBuy === 0 && maxShares > 0 ? ` Buy back needs treasury above debt (now ${fmtMoney(treasuryBeforeShares - preview.debt)}).` : ''}
+            Issuing raises cash and lowers the price. Buying back costs cash and lifts it. Issue up to {maxShares} shares ({issuePct}%), buy back up to {buybackCap} ({buybackPct}%) a round.
+            {maxBuy === 0 && buybackCap > 0 && price > 0 ? ` A buyback is paid from the treasury: ${fmtMoney(treasuryBeforeShares)} buys no share at ${fmtMoney(price)}.` : ''}
           </p>
         ) : (
           <>
@@ -273,7 +278,11 @@ export default function FinancePanel() {
               max={Math.max(countMax, d.shares.count)}
               step={1}
               disabled={disabled}
-              hint={mode === 'issue' ? `0 to ${maxShares} (20% of ${me.shares}).` : `0 to ${maxBuy}: at most 20% of shares, and cash at most treasury − debt = ${fmtMoney(buybackCash)}.`}
+              hint={
+                mode === 'issue'
+                  ? `0 to ${maxShares} (${issuePct}% of ${me.shares}).`
+                  : `0 to ${maxBuy}: at most ${buybackCap} (${buybackPct}% of ${me.shares}), paid from the treasury (${fmtMoney(buybackCash)}).`
+              }
             />
             <div className="share-impact">
               <div className="share-price">
@@ -293,7 +302,7 @@ export default function FinancePanel() {
                 </span>
               </div>
             </div>
-            {mode === 'buyback' && maxBuy === 0 ? <Note level="warn">Buy back needs treasury above debt.</Note> : null}
+            {mode === 'buyback' && maxBuy === 0 ? <Note level="warn">A buyback is paid from the treasury: not enough cash for 1 share.</Note> : null}
           </>
         )}
       </Panel>

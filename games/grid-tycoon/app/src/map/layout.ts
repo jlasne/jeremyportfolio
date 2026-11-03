@@ -9,7 +9,7 @@
 //   19..23 grid: substation, branch road, pylons
 // Rows: 0 verge, 1 road, then per lot row 3 rows of lots + 1 road row, then a 2 row verge.
 
-import type { Tile } from '../engine'
+import type { Size, Tile } from '../engine'
 
 export const T = 32
 export const COLS = 24
@@ -49,16 +49,21 @@ export function lotRect(tile: Tile): Rect {
   return { x: (PLOT_COL0 + 3 * tile[0]) * T, y: (2 + 4 * tile[1]) * T, w: LOT, h: LOT }
 }
 
+/** The sprite size of a level: level 3 (mega) reuses the 96 px big sprites, with an L3 badge. */
+export function spriteSize(size: Size): 'small' | 'big' {
+  return size === 'small' ? 'small' : 'big'
+}
+
 /** Where a building sprite's foot point goes on its lot (96 px sprites sit a little lower). */
-export function footOnLot(tile: Tile, size: 'small' | 'big'): Pt {
+export function footOnLot(tile: Tile, size: Size): Pt {
   const r = lotRect(tile)
-  return size === 'big' ? [r.x + 48, r.y + 86] : [r.x + 48, r.y + 80]
+  return spriteSize(size) === 'big' ? [r.x + 48, r.y + 86] : [r.x + 48, r.y + 80]
 }
 
 /** The crane's foot on a lot: on the scaffold for a big build, left of the building for a small one. */
-export function craneFoot(tile: Tile, size: 'small' | 'big'): Pt {
+export function craneFoot(tile: Tile, size: Size): Pt {
   const r = lotRect(tile)
-  return size === 'big' ? [r.x + 22, r.y + 74] : [r.x + 12, r.y + 84]
+  return spriteSize(size) === 'big' ? [r.x + 22, r.y + 74] : [r.x + 12, r.y + 84]
 }
 
 /** Number of houses for a citizens share: a few base houses plus 1 per 0.5 MW used. */

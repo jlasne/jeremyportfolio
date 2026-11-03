@@ -1866,3 +1866,57 @@
     display: none;
   }
 }
+
+/* ---------- Building levels (cards, map card, orders) ---------- */
+
+.lvl-chip {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 4px;
+  background: var(--surface-sunken, color-mix(in srgb, var(--text) 8%, transparent));
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: 800;
+  line-height: 1.4;
+  vertical-align: 2px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.lvl-chip.lvl-3 {
+  background: var(--power-mid);
+  color: var(--ink-dark);
+}
+
+/* ---------- Build panel: land ---------- */
+
+.land-facts dd {
+  font-size: var(--text-lg);
+}
+.land-new {
+  color: var(--money);
+}
+.land-of {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+.land-facts dd.is-negative {
+  color: var(--critical);
+}
+.land-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.land-panel .field-desc .icon {
+  vertical-align: -3px;
+}
+.upg-levels {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-sm);
+}

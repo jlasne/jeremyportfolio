@@ -3,6 +3,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildCost,
+  commitmentFloors,
   createRng,
   createSoloGame,
   defaultDecision,
@@ -21,7 +22,7 @@ import {
   upgradeCost,
   warnings,
 } from './index'
-import { addLink, company, decision, edit, game } from './test/helpers'
+import { addLink, addOnline, company, decision, edit, game } from './test/helpers'
 
 describe('createSoloGame', () => {
   it('seats the player and the three bot styles with the same start kit', () => {
@@ -40,9 +41,11 @@ describe('createSoloGame', () => {
       ])
       expect(c.links).toEqual([expect.objectContaining({ use: 'internal', mw: 2, roundsLeft: 0 })])
     }
-    expect(s.pools.citizens.demand).toBe(16)
-    expect(s.pools.ai).toEqual({ demand: 8, growth: 0.06, expectedGrowth: 0.06, lastUsed: {} })
-    expect(s).toMatchObject({ round: 1, rounds: 40, finished: false, version: 1, seed: 3 })
+    // New start demand per company (citizens 1.0, AI 0.7, AI growth 8%) and pool tenure; state version 2.
+    expect(s.pools.citizens.demand).toBe(4)
+    expect(s.pools.ai).toEqual({ demand: 2.8, growth: 0.08, expectedGrowth: 0.08, lastUsed: {}, tenure: {} })
+    expect(s).toMatchObject({ round: 1, rounds: 40, finished: false, version: 2, seed: 3 })
+    expect(s.companies.every((c) => c.landRows === 2)).toBe(true)
   })
 })
 
@@ -77,9 +80,10 @@ describe('createRng', () => {
 })
 
 describe('defaultDecision', () => {
-  it('round 1: everything on the internal link, compute on AI', () => {
+  it('round 1: everything on the internal link, compute spread over cloud, bitcoin and AI by pool demand', () => {
+    // New rule: start demand 0.8 / 0.5 / 0.7 per company, so 2 MW split 0.8 / 0.5 / 0.7 (was all on AI).
     const s = game(['a'])
-    expect(defaultDecision(s, 'a')).toEqual(decision((d) => ((d.power.internal = 2), (d.compute.ai = 2))))
+    expect(defaultDecision(s, 'a')).toEqual(decision((d) => ((d.power.internal = 2), (d.compute = { cloud: 0.8, btc: 0.5, ai: 0.7 }))))
   })
 
   it('later rounds repeat last round allocations, without builds or finance', () => {
@@ -136,11 +140,23 @@ describe('previewCompany', () => {
 describe('projectRound', () => {
   it('projects the 5.16 of the starting check for 2 MW on AI', () => {
     const s = createSoloGame({ seed: 1, playerName: 'P' })
-    const p = projectRound(s, 'you', defaultDecision(s, 'you'))
+    // AI demand set so 2 MW fit (the default start gives 0.7 MW of AI per company).
+    s.pools.ai.demand = 8
+    const p = projectRound(s, 'you', decision((d) => ((d.power.internal = 2), (d.compute.ai = 2))))
     expect(p.profit).toBe(5.16)
     expect(p.usedByPool.ai).toBe(2)
     expect(p.idle).toBe(0)
+    expect(p.unallocatedMw).toBe(0)
     expect(p.marginPerMw).toEqual({ citizens: 0.6, otherDc: 0.9, cloud: 1.6, btc: 1.2, ai: 2.8 })
+  })
+
+  it('projects the round 1 default: 0.8 cloud, 0.5 bitcoin, 0.7 AI, all used, 4.64 - 0.8 - 0.44 = 3.40', () => {
+    const s = createSoloGame({ seed: 1, playerName: 'P' })
+    const p = projectRound(s, 'you', defaultDecision(s, 'you'))
+    expect(p.usedByPool).toMatchObject({ cloud: 0.8, btc: 0.5, ai: 0.7 })
+    expect(p.revenue).toBe(4.64)
+    expect(p.profit).toBe(3.4)
+    expect(p.idle).toBe(0)
   })
 
   it('uses last round demand: no more than the unserved part plus what the company used', () => {
@@ -149,7 +165,11 @@ describe('projectRound', () => {
     const last = s.history[0].pools.cloud
     const p = projectRound(s, 'you', decision((d) => ((d.power.internal = 2), (d.compute.cloud = 2))))
     const mine = s.pools.cloud.lastUsed.you ?? 0
-    expect(p.usedByPool.cloud).toBeCloseTo(Math.min(2, mine + Math.max(0, last.demand - last.used)), 10)
+    // Commitment: btc and AI keep 70% of last round's offer, so cloud gets what is left of the 2 MW.
+    const floors = commitmentFloors(s, 'you')
+    const offer = 2 - floors.compute.btc - floors.compute.ai
+    expect(offer).toBeLessThan(2)
+    expect(p.usedByPool.cloud).toBeCloseTo(Math.min(offer, mine + Math.max(0, last.demand - last.used)), 10)
   })
 
   it('counts interest on a new loan', () => {
@@ -184,6 +204,8 @@ describe('warnings', () => {
 
   it('warns about idle capacity above 20%', () => {
     const s = game(['a'])
+    // AI demand above the offer, so idle comes from the half-used capacity only (start AI demand is 0.7 MW).
+    s.pools.ai.demand = 3
     const w = warnings(s, 'a', decision((d) => ((d.power.internal = 1), (d.compute.ai = 1))))
     expect(w.find((x) => x.code === 'idle_high')?.label).toBe('Idle 50%')
   })
@@ -227,6 +249,7 @@ describe('loans', () => {
 describe('revenueByBuilding', () => {
   it('splits power revenue over plants and compute revenue over datacenters', () => {
     let s = game(['a'])
+    s.pools.ai.demand = 3 // so the 2 MW on AI are all used
     s = resolveRound(s, { a: decision((d) => ((d.power.internal = 2), (d.compute.ai = 2), d.builds.push({ kind: 'plant', size: 'small' }))) })
     const r = revenueByBuilding(s, 'a')
     const c = company(s, 'a')
@@ -248,8 +271,14 @@ describe('small helpers', () => {
     const c = company(game(['a']), 'a')
     expect(findFreeTile(c)).toEqual([2, 0])
     expect(findFreeTile(c, [[2, 0], [3, 0]])).toEqual([0, 1])
-    expect(plotRows(c)).toBe(2)
+    // plotRows: the 2 owned rows plus one locked row for sale.
+    expect(plotRows(c)).toBe(3)
     expect(plotRows(c, [[1, 3]])).toBe(5)
+    // Land full: no free lot.
+    const full = edit(game(['a']), 'a', (x) => {
+      for (let i = 0; i < 6; i++) addOnline(x, 'plant', 'small')
+    })
+    expect(findFreeTile(company(full, 'a'))).toBeNull()
   })
 
   it('build and upgrade costs come from the config', () => {

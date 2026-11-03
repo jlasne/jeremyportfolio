@@ -57,6 +57,16 @@ export function TopBar() {
   const muted = !music && !sfx
   const profit = projection.profit
   const spent = preview.treasuryLeft !== me.treasury
+  // the estimate's cost lines, for the projection's tooltip (the unused power penalty only when there is one)
+  const c = projection.costs
+  const costLines = [
+    `revenue ${fmtMoney(projection.revenue)}`,
+    `power ${fmtMoney(c.power)}`,
+    `rent ${fmtMoney(c.rent)}`,
+    `maintenance ${fmtMoney(c.maintenance)}`,
+    `interest ${fmtMoney(c.interest)}`,
+    ...((c.unallocated ?? 0) > 0.004 ? [`unused power penalty ${fmtMoney(c.unallocated)}`] : []),
+  ].join(', ')
 
   const toggleMute = () => {
     setSetting('music', muted)
@@ -116,7 +126,10 @@ export function TopBar() {
       <div className="tb-actions">
         <RoundClock />
         {!me.bankrupt ? (
-          <div className={`projection ${trend(profit) >= 0 ? 'is-up' : 'is-down'}`} title="Estimated profit next round from your current draft, using last round's demand">
+          <div
+            className={`projection ${trend(profit) >= 0 ? 'is-up' : 'is-down'}`}
+            title={`Estimated profit next round from your current draft, using last round's demand: ${costLines}.${preview.buildSpend >= 0.005 ? ` Builds and land spend ${fmtMoney(preview.buildSpend)} now.` : ''}`}
+          >
             <span className="projection-label">Next round</span>
             <span className="projection-value num">≈ {fmtMoney(profit, { sign: true })}</span>
           </div>
