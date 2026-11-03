@@ -428,3 +428,12 @@ a.row:hover .row-go { color: var(--fg); transform: translate(2px, -2px); }
 .post-join-line { font-size: clamp(19px, 2.4vw, 22px); font-weight: 700; letter-spacing: -.01em; }
 .post-join .join { margin-top: 16px; }
 
+.sk-red { stroke: #d6453b; }
+:root:not([data-theme="light"]) .sk-red { stroke: #f0776c; }
+.sk-note { font-size: 36px; font-weight: 700; }
+.sk-stop { font-size: 22px; font-weight: 700; }
+/* a short list in a lesson: a bold key, then its line */
+.days { display: grid; gap: 6px; margin: .8em 0 1em; list-style: none; }
+.days li { display: grid; grid-template-columns: 7.5em 1fr; gap: 12px; }
+.days b { color: var(--fg); font-weight: 700; }
+@media (max-width: 420px) { .days li { grid-template-columns: 6.5em 1fr; } }
