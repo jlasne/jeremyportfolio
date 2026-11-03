@@ -585,6 +585,11 @@ function currentPrice(book) {
   if (book.sharePrice > 0) return book.sharePrice;
   return book.shares > 0 ? book.marketCap / book.shares : 0;
 }
+function sharesToCover(book, treasuryAfterSales) {
+  const price = currentPrice(book);
+  if (treasuryAfterSales >= 0 || price <= 0) return 0;
+  return Math.ceil(round2(-treasuryAfterSales) / price - 1e-9);
+}
 function withShares(book, shares) {
   return { marketCap: book.marketCap, shares, sharePrice: round2(book.marketCap / shares) };
 }
@@ -760,6 +765,8 @@ function validateDecision(state, companyId, raw, config = defaultConfig) {
   let treasury = startTreasury;
   let book = company;
   let buildings = company.buildings;
+  let salesTreasury = startTreasury;
+  let issueCash = 0;
   if (d.forcedSales.length > 0 && startTreasury >= 0) {
     push("forced_sale_not_allowed", "Buildings can only be sold in a losing round.", "forcedSales");
   } else if (startTreasury < 0) {
@@ -774,9 +781,8 @@ function validateDecision(state, companyId, raw, config = defaultConfig) {
       treasury = round2(treasury + sellValue(b, config));
     });
     buildings = company.buildings.filter((b) => !sold.has(b.id));
-    if (treasury < 0 && buildings.length > 0) {
-      push("forced_sale_short", "Sell more buildings: the treasury must get back to 0.", "forcedSales");
-    } else if (treasury < 0) {
+    salesTreasury = treasury;
+    if (treasury < 0 && buildings.length === 0) {
       const issue = forcedIssue(book, treasury);
       if (issue) {
         treasury = round2(treasury + issue.cash);
@@ -828,13 +834,15 @@ function validateDecision(state, companyId, raw, config = defaultConfig) {
     const shares = book.shares;
     if (!isNum(count) || count < 0) push("negative", "Share count must be 0 or more.", "shares.count");
     else if (!Number.isInteger(count)) push("not_integer", "Shares come in whole numbers.", "shares.count");
-    else if (count > shareCap(d.shares.mode, shares, config)) {
+    else if (count > shareCap(d.shares.mode, shares, config) && !(d.shares.mode === "issue" && count <= sharesToCover(book, salesTreasury))) {
       const cap2 = shareCap(d.shares.mode, shares, config);
       push("shares_over_cap", `At most ${cap2} shares ${d.shares.mode === "issue" ? "issued" : "bought back"} this round.`, "shares.count");
     } else {
       const cash = round2(count * currentPrice(book));
-      if (d.shares.mode === "issue") treasury = round2(treasury + cash);
-      else {
+      if (d.shares.mode === "issue") {
+        treasury = round2(treasury + cash);
+        issueCash = cash;
+      } else {
         if (cash > treasury) push("buyback_over_cash", "A buyback is paid from the treasury: not enough cash.", "shares.count");
         treasury = round2(treasury - cash);
       }
@@ -846,6 +854,10 @@ function validateDecision(state, companyId, raw, config = defaultConfig) {
   else if (d.landRows > 0) {
     treasury = round2(treasury - landCost(rows, d.landRows, config));
     rows += d.landRows;
+  }
+  if (startTreasury < 0 && buildings.length > 0 && round2(salesTreasury + issueCash) < 0) {
+    const need = sharesToCover(book, salesTreasury);
+    push("forced_sale_short", `The treasury must get back to 0: issue ${need} shares, or sell buildings.`, "forcedSales");
   }
   const upgraded = /* @__PURE__ */ new Set();
   d.upgrades.forEach((id, i) => {
@@ -980,7 +992,7 @@ function clampAllocations(cap, power, compute, rentMw, floors = zeroFloors()) {
   return { power: { internal, town, otherDc }, compute: { cloud, btc, ai }, rentMw: rent };
 }
 var floorMwSafe = (x) => Math.max(0, floorMw(x));
-function pickForcedSales(buildings, treasury, listed, config) {
+function pickForcedSales(buildings, treasury, listed, config, fillUp = true) {
   const sold = [];
   let t = treasury;
   for (const id of listed) {
@@ -989,7 +1001,7 @@ function pickForcedSales(buildings, treasury, listed, config) {
     sold.push(id);
     t = round2(t + sellValue(b, config));
   }
-  const rest = buildings.filter((b) => !sold.includes(b.id)).sort((a, b) => sellValue(a, config) - sellValue(b, config));
+  const rest = fillUp ? buildings.filter((b) => !sold.includes(b.id)).sort((a, b) => sellValue(a, config) - sellValue(b, config)) : [];
   for (const b of rest) {
     if (t >= 0) break;
     sold.push(b.id);
@@ -1006,8 +1018,10 @@ function sanitizeDecision(state, companyId, raw, config = defaultConfig) {
   let treasury = startTreasury;
   let book = company;
   let buildings = company.buildings;
+  let need = 0;
   if (startTreasury < 0) {
-    const picked = pickForcedSales(company.buildings, treasury, d.forcedSales, config);
+    const canIssue = currentPrice(book) > 0;
+    const picked = pickForcedSales(company.buildings, treasury, d.forcedSales, config, !canIssue);
     out.forcedSales = picked.sold;
     treasury = picked.treasury;
     buildings = company.buildings.filter((b) => !picked.sold.includes(b.id));
@@ -1016,6 +1030,7 @@ function sanitizeDecision(state, companyId, raw, config = defaultConfig) {
       treasury = round2(treasury + issue.cash);
       book = issue.book;
     }
+    need = buildings.length > 0 ? sharesToCover(book, treasury) : 0;
   }
   const principal = new Map(company.loans.map((l) => [l.id, l.principal]));
   for (const loan of company.loans) {
@@ -1034,7 +1049,13 @@ function sanitizeDecision(state, companyId, raw, config = defaultConfig) {
   const take = round2(nonNeg(d.loans.take));
   out.loans.take = take;
   treasury = round2(treasury + take);
-  if (!d.sharesConflict && d.shares.mode !== "none") {
+  if (need > 0) {
+    const price = currentPrice(book);
+    const asked = d.shares.mode === "issue" && !d.sharesConflict ? Math.min(Math.floor(nonNeg(d.shares.count)), shareCap("issue", book.shares, config)) : 0;
+    const count = Math.max(need, asked);
+    out.shares = { mode: "issue", count };
+    treasury = round2(treasury + round2(count * price));
+  } else if (!d.sharesConflict && d.shares.mode !== "none") {
     const price = currentPrice(book);
     let count = Math.min(Math.floor(nonNeg(d.shares.count)), shareCap(d.shares.mode, book.shares, config));
     if (price <= 0) count = 0;

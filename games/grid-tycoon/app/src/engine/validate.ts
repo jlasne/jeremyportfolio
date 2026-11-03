@@ -6,7 +6,7 @@ import { defaultConfig } from './config'
 import { COMPUTE_POOLS, MW_EPSILON } from './constants'
 import { readDecision } from './decision'
 import { round2 } from './money'
-import { currentPrice, forcedIssue, type ShareBook } from './phase'
+import { currentPrice, forcedIssue, sharesToCover, type ShareBook } from './phase'
 import type { Building, Config, GameState, ValidationCode, ValidationIssue, ValidationResult } from './types'
 
 const isNum = (x: number): boolean => Number.isFinite(x)
@@ -47,6 +47,9 @@ export function validateDecision(state: GameState, companyId: string, raw: unkno
   // Forced sales. A forced share issue dilutes the book that the share action below is priced on.
   let book: ShareBook = company
   let buildings: Building[] = company.buildings
+  // Losing round: what the building sales leave; new shares may cover the rest instead of more sales.
+  let salesTreasury = startTreasury
+  let issueCash = 0
   if (d.forcedSales.length > 0 && startTreasury >= 0) {
     push('forced_sale_not_allowed', 'Buildings can only be sold in a losing round.', 'forcedSales')
   } else if (startTreasury < 0) {
@@ -61,9 +64,8 @@ export function validateDecision(state: GameState, companyId: string, raw: unkno
       treasury = round2(treasury + sellValue(b, config))
     })
     buildings = company.buildings.filter((b) => !sold.has(b.id))
-    if (treasury < 0 && buildings.length > 0) {
-      push('forced_sale_short', 'Sell more buildings: the treasury must get back to 0.', 'forcedSales')
-    } else if (treasury < 0) {
+    salesTreasury = treasury
+    if (treasury < 0 && buildings.length === 0) {
       // Everything is sold: the engine issues shares until the treasury is back to 0.
       const issue = forcedIssue(book, treasury)
       if (issue) {
@@ -124,13 +126,15 @@ export function validateDecision(state: GameState, companyId: string, raw: unkno
     const shares = book.shares
     if (!isNum(count) || count < 0) push('negative', 'Share count must be 0 or more.', 'shares.count')
     else if (!Number.isInteger(count)) push('not_integer', 'Shares come in whole numbers.', 'shares.count')
-    else if (count > shareCap(d.shares.mode, shares, config)) {
+    else if (count > shareCap(d.shares.mode, shares, config) && !(d.shares.mode === 'issue' && count <= sharesToCover(book, salesTreasury))) {
       const cap = shareCap(d.shares.mode, shares, config)
       push('shares_over_cap', `At most ${cap} shares ${d.shares.mode === 'issue' ? 'issued' : 'bought back'} this round.`, 'shares.count')
     } else {
       const cash = round2(count * currentPrice(book))
-      if (d.shares.mode === 'issue') treasury = round2(treasury + cash)
-      else {
+      if (d.shares.mode === 'issue') {
+        treasury = round2(treasury + cash)
+        issueCash = cash
+      } else {
         if (cash > treasury) push('buyback_over_cash', 'A buyback is paid from the treasury: not enough cash.', 'shares.count')
         treasury = round2(treasury - cash)
       }
@@ -144,6 +148,12 @@ export function validateDecision(state: GameState, companyId: string, raw: unkno
   else if (d.landRows > 0) {
     treasury = round2(treasury - landCost(rows, d.landRows, config))
     rows += d.landRows
+  }
+
+  // A losing round must end at 0 or above: building sales plus new shares (a loan does not count).
+  if (startTreasury < 0 && buildings.length > 0 && round2(salesTreasury + issueCash) < 0) {
+    const need = sharesToCover(book, salesTreasury)
+    push('forced_sale_short', `The treasury must get back to 0: issue ${need} shares, or sell buildings.`, 'forcedSales')
   }
 
   // Upgrades.

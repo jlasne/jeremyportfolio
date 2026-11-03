@@ -7,7 +7,7 @@ import { defaultConfig } from './config'
 import { COMPUTE_POOLS, MW_EPSILON } from './constants'
 import { emptyDecision, readDecision } from './decision'
 import { finite, floorMw, round2 } from './money'
-import { currentPrice, forcedIssue, type ShareBook } from './phase'
+import { currentPrice, forcedIssue, sharesToCover, type ShareBook } from './phase'
 import { shareCap } from './validate'
 import type { Building, Config, Decision, GameState } from './types'
 
@@ -67,7 +67,7 @@ export function clampAllocations(
 const floorMwSafe = (x: number): number => Math.max(0, floorMw(x))
 
 /** Forced sales for a losing round: the listed ones first, then the cheapest sell values until the treasury is back to 0. */
-function pickForcedSales(buildings: Building[], treasury: number, listed: string[], config: Config): { sold: string[]; treasury: number } {
+function pickForcedSales(buildings: Building[], treasury: number, listed: string[], config: Config, fillUp = true): { sold: string[]; treasury: number } {
   const sold: string[] = []
   let t = treasury
   for (const id of listed) {
@@ -76,7 +76,7 @@ function pickForcedSales(buildings: Building[], treasury: number, listed: string
     sold.push(id)
     t = round2(t + sellValue(b, config))
   }
-  const rest = buildings.filter((b) => !sold.includes(b.id)).sort((a, b) => sellValue(a, config) - sellValue(b, config))
+  const rest = fillUp ? buildings.filter((b) => !sold.includes(b.id)).sort((a, b) => sellValue(a, config) - sellValue(b, config)) : []
   for (const b of rest) {
     if (t >= 0) break
     sold.push(b.id)
@@ -96,8 +96,12 @@ export function sanitizeDecision(state: GameState, companyId: string, raw: unkno
   // Forced sales. A forced share issue dilutes the book that the share action below is priced on.
   let book: ShareBook = company
   let buildings = company.buildings
+  let need = 0
   if (startTreasury < 0) {
-    const picked = pickForcedSales(company.buildings, treasury, d.forcedSales, config)
+    // Only the buildings the player picked are sold; new shares cover the rest. With no share price
+    // to issue at, the cheapest buildings are sold as before.
+    const canIssue = currentPrice(book) > 0
+    const picked = pickForcedSales(company.buildings, treasury, d.forcedSales, config, !canIssue)
     out.forcedSales = picked.sold
     treasury = picked.treasury
     buildings = company.buildings.filter((b) => !picked.sold.includes(b.id))
@@ -106,6 +110,7 @@ export function sanitizeDecision(state: GameState, companyId: string, raw: unkno
       treasury = round2(treasury + issue.cash)
       book = issue.book
     }
+    need = buildings.length > 0 ? sharesToCover(book, treasury) : 0
   }
 
   // Early repayments, never more than the principal or the treasury.
@@ -131,8 +136,14 @@ export function sanitizeDecision(state: GameState, companyId: string, raw: unkno
   out.loans.take = take
   treasury = round2(treasury + take)
 
-  // Shares.
-  if (!d.sharesConflict && d.shares.mode !== 'none') {
+  // Shares. A losing round left short after its building sales issues what covers the rest.
+  if (need > 0) {
+    const price = currentPrice(book)
+    const asked = d.shares.mode === 'issue' && !d.sharesConflict ? Math.min(Math.floor(nonNeg(d.shares.count)), shareCap('issue', book.shares, config)) : 0
+    const count = Math.max(need, asked)
+    out.shares = { mode: 'issue', count }
+    treasury = round2(treasury + round2(count * price))
+  } else if (!d.sharesConflict && d.shares.mode !== 'none') {
     const price = currentPrice(book)
     let count = Math.min(Math.floor(nonNeg(d.shares.count)), shareCap(d.shares.mode, book.shares, config))
     if (price <= 0) count = 0

@@ -94,11 +94,16 @@ describe('sanitizeDecision', () => {
     expect(clean.compute.ai + clean.compute.cloud).toBeLessThanOrEqual(2)
   })
 
-  it('picks forced sales in a losing round, cheapest sell value first', () => {
+  it('covers a losing round with new shares, not buildings, unless the player picks sales', () => {
     const s = edit(game(['a']), 'a', (c) => (c.treasury = -2))
     const plant = company(s, 'a').buildings.find((b) => b.kind === 'plant')!
-    expect(sanitizeDecision(s, 'a', decision()).forcedSales).toEqual([plant.id])
-    expect(defaultDecision(s, 'a').forcedSales).toEqual([plant.id])
+    expect(sanitizeDecision(s, 'a', decision()).forcedSales).toEqual([])
+    expect(sanitizeDecision(s, 'a', decision()).shares).toEqual({ mode: 'issue', count: 1 })
+    expect(defaultDecision(s, 'a').forcedSales).toEqual([])
+    // A picked sale that covers the deficit needs no shares.
+    const picked = sanitizeDecision(s, 'a', decision((d) => (d.forcedSales = [plant.id])))
+    expect(picked.forcedSales).toEqual([plant.id])
+    expect(picked.shares.mode).toBe('none')
   })
 
   it('drops builds the treasury cannot pay and moves a taken lot to a free one', () => {

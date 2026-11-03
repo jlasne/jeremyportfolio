@@ -27,7 +27,7 @@ export function useLockBlock(): string | null {
   if (phase === 'waiting') return waiting ?? 'Waiting for the other players.'
   if (phase !== 'decide') return 'Round is resolving.'
   if (me?.bankrupt) return null
-  if (losing && !confirmed) return 'Confirm the forced sale first.'
+  if (losing && !confirmed) return 'Confirm how you cover the losing round first.'
   if (!validation.ok) return validation.errors[0]?.message ?? 'This decision is not valid yet.'
   return null
 }

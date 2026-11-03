@@ -34,6 +34,16 @@ export function currentPrice(book: ShareBook): number {
   return book.shares > 0 ? book.marketCap / book.shares : 0
 }
 
+/**
+ * Losing round: shares to issue so the treasury left after the chosen building sales is back to 0.
+ * 0 when nothing is short or the price is 0.
+ */
+export function sharesToCover(book: ShareBook, treasuryAfterSales: number): number {
+  const price = currentPrice(book)
+  if (treasuryAfterSales >= 0 || price <= 0) return 0
+  return Math.ceil(round2(-treasuryAfterSales) / price - 1e-9)
+}
+
 /** Shares change, market cap stays, so the price moves (DESIGN 2.2.5). */
 export function withShares(book: ShareBook, shares: number): ShareBook {
   return { marketCap: book.marketCap, shares, sharePrice: round2(book.marketCap / shares) }

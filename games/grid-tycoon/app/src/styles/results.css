@@ -1574,3 +1574,28 @@
     0 3px 0 #000,
     0 10px 28px rgba(0, 0, 0, 0.5);
 }
+
+/* Losing round: the share issue that covers the deficit by default. */
+.fs-shares {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.fs-shares.is-on {
+  border-color: var(--money-mid, var(--border-strong));
+}
+.fs-shares p {
+  margin: 0;
+}
+.fs-shares-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.fs-or {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+}

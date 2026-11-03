@@ -261,16 +261,25 @@ describe('sanitizeDecision output always validates (DESIGN 2.4 "the result alway
     expect(validateDecision(s, 'you', clean).ok).toBe(true)
   })
 
-  it('in a losing round picks the cheapest sell values first until treasury >= 0 (DESIGN 2.4)', () => {
-    // start kit: plant 10 (sells 3), dc 12 (sells 3.6); plus a big plant 40 (sells 12)
+  it('in a losing round keeps the buildings and issues the shares that cover the deficit; picked sales count first', () => {
+    // start kit: plant 10 (sells 3), dc 12 (sells 3.6); plus a big plant 40 (sells 12). Price 10.
     const s = edit(game(['you']), 'you', (c) => {
       addOnline(c, 'plant', 'big')
       c.treasury = -5
     })
     const you = company(s, 'you')
     const clean = sanitizeDecision(s, 'you', emptyDecision())
-    expect(clean.forcedSales).toEqual([you.buildings[0].id, you.buildings[1].id])
+    expect(clean.forcedSales).toEqual([])
+    expect(clean.shares).toEqual({ mode: 'issue', count: 1 })
     expect(validateDecision(s, 'you', clean).ok).toBe(true)
+    // Selling the 3.00 plant leaves -2: still 1 share.
+    const mixed = sanitizeDecision(s, 'you', decision((d) => (d.forcedSales = [you.buildings[0].id])))
+    expect(mixed.forcedSales).toEqual([you.buildings[0].id])
+    expect(mixed.shares).toEqual({ mode: 'issue', count: 1 })
+    // Selling the big plant (12) covers it all: no shares.
+    const sold = sanitizeDecision(s, 'you', decision((d) => (d.forcedSales = [you.buildings[2].id])))
+    expect(sold.shares.mode).toBe('none')
+    expect(validateDecision(s, 'you', sold).ok).toBe(true)
   })
 
   it('is idempotent: sanitizing a sanitized decision changes nothing', () => {
@@ -438,10 +447,11 @@ describe('validateDecision codes (DESIGN 2.4, ValidationCode)', () => {
     }
     expect(codes(s, raw)).toEqual([
       'forced_sale_unknown',
-      'forced_sale_short',
       'repay_unknown_loan',
       'refinance_negative_treasury',
       'shares_over_cap',
+      // Checked after the share action: new shares can cover a losing round instead of sales.
+      'forced_sale_short',
       'upgrade_invalid',
       'tile_out_of_plot',
       'over_treasury',
@@ -650,10 +660,11 @@ describe('defaultDecision (DESIGN 2.5)', () => {
     expect(validateDecision(cut, 'you', d2).ok).toBe(true)
   })
 
-  it('in a losing round it picks the forced sales', () => {
+  it('in a losing round it covers the deficit with new shares, keeping the buildings', () => {
     const s = edit(game(['you']), 'you', (c) => (c.treasury = -1))
     const d = defaultDecision(s, 'you')
-    expect(d.forcedSales).toHaveLength(1)
+    expect(d.forcedSales).toHaveLength(0)
+    expect(d.shares).toEqual({ mode: 'issue', count: 1 })
     expect(validateDecision(s, 'you', d).ok).toBe(true)
   })
 })

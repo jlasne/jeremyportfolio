@@ -133,7 +133,7 @@ export function PanelDock() {
   return (
     <div className={`dock${(panel && !term) || forced ? ' has-sheet' : ''}${term ? ' has-term' : ''}`}>
       {forced ? (
-        <Sheet ref={sheetRef} headingRef={headingRef} className="sheet-forced" title="Forced sale" icon="warn" locked onClose={() => {}} aria-label="Forced sale">
+        <Sheet ref={sheetRef} headingRef={headingRef} className="sheet-forced" title="Losing round" icon="warn" locked onClose={() => {}} aria-label="Losing round">
           <ForcedSale />
         </Sheet>
       ) : panel && Content && term ? (

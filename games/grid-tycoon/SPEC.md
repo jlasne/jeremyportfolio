@@ -41,6 +41,8 @@ Playtest feedback from @Jeremy. These rules replace the older lines below where 
 
 **Screens.** Allocate and Market open as full-screen terminals. Build and Finance stay as panels over the map. The building card shows only while a building is selected. The map draws every lot, and the next land row as a lot for sale with its price.
 
+**Losing round.** New shares at the current price cover the deficit by default, with no cap, and every building keeps running. Selling buildings for 30% of their price is optional; shares then cover only what the sales leave short. A new loan does not count toward the deficit.
+
 **Online.** A room lives at `/games/ABCDEF`: open the link, type a name, join.
 
 ## Round flow
