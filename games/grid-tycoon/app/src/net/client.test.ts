@@ -201,7 +201,8 @@ describe('net client: subscribeRoom', () => {
     const rooms: RoomView[] = []
     const sub = subscribeRoom(host.code, (r) => rooms.push(r), () => {})
     await vi.advanceTimersByTimeAsync(1_000)
-    expect(sub.room?.round).toBe(1)
+    // The first fetch settles on real time (WebCrypto), which can lag the fake clock under load.
+    await vi.waitFor(() => expect(sub.room?.round).toBe(1), { timeout: 5_000, interval: 10 })
     await vi.advanceTimersByTimeAsync(170_000)
     expect(sub.room?.round).toBe(1)
     // Token hashing (WebCrypto) is real async work, so fake time drifts a little per request:

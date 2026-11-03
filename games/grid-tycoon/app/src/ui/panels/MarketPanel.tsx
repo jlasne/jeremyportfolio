@@ -317,7 +317,7 @@ function CompanyTable({ state, meId, ranking, byId }: { state: GameState; meId: 
                     <span className="leader-dot" style={{ background: companyColor(c) }} aria-hidden="true" />
                     <span className="mt-name">
                       {c.name}
-                      {isMe ? <span className="muted"> (you)</span> : null}
+                      {isMe && c.name.toLowerCase() !== 'you' ? <span className="muted"> (you)</span> : null}
                     </span>
                     {c.bankrupt ? <span className="tag tag-critical">bankrupt</span> : null}
                   </span>

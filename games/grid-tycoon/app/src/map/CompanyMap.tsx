@@ -37,7 +37,7 @@ export default function CompanyMap() {
         if (!v) return
         if (!alive) return v.destroy()
         made = v
-        if (import.meta.env.DEV) (window as unknown as { __gtMap?: MapView }).__gtMap = v
+        if (import.meta.env.DEV) Object.assign(window, { __gtMap: v, __gtStores: { useGame, useDraft, useUi } })
         setView(v)
       })
       .catch((err: unknown) => {

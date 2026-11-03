@@ -16,7 +16,7 @@ import { audio } from '../audio'
 import { useDraft } from '../store/draft'
 import { useGame } from '../store/game'
 import { useUi } from '../store/ui'
-import { NO_LOT_TEXT, freeTiles, mapApi, mapHandle, resetPlacement, showNotice, usePlacement } from './placement'
+import { NO_LOT_TEXT, freeTiles, landRowsOf, mapApi, mapHandle, resetPlacement, showNotice, usePlacement } from './placement'
 import type { PlacementMode } from './placement'
 import { tileKey } from './layout'
 
@@ -45,6 +45,12 @@ function freeSet(skip: number | null): Set<string> {
   const { state, meId, config } = useGame.getState()
   if (!state || !meId) return new Set()
   return new Set(freeTiles(state, meId, useDraft.getState().decision, config, skip).map(tileKey))
+}
+
+/** True for a lot past the land (the row for sale). */
+function onSaleRow(t: Tile): boolean {
+  const { state, meId, config } = useGame.getState()
+  return !!state && !!meId && t[1] >= landRowsOf(state, meId, useDraft.getState().decision, config)
 }
 
 /** The free lot under a client point (null over a taken lot, a road, or off the map). */
@@ -104,7 +110,7 @@ function makeGhost(o: BuildOrder): HTMLElement {
   const blocked = document.createElement('span')
   blocked.className = 'gt-drag-ghost-blocked'
   blocked.innerHTML =
-    '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 12 12 4" stroke="currentColor" stroke-width="2"/></svg>Lot taken'
+    '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 12 12 4" stroke="currentColor" stroke-width="2"/></svg><span class="gt-drag-ghost-why">Lot taken</span>'
   cap.append(text, blocked)
   el.appendChild(cap)
   document.body.appendChild(el)
@@ -116,8 +122,10 @@ function makeGhost(o: BuildOrder): HTMLElement {
  * place) and the caption lifts to just above that lot so it never covers it. Over a taken lot the
  * ghost greys out and says so, and the cursor turns to not-allowed.
  */
-function moveGhost(el: HTMLElement | null, x: number, y: number, lot: Tile | null, blocked: boolean): void {
+function moveGhost(el: HTMLElement | null, x: number, y: number, lot: Tile | null, blocked: boolean, why = 'Lot taken'): void {
   if (!el) return
+  const reason = el.querySelector('.gt-drag-ghost-why')
+  if (reason && reason.textContent !== why) reason.textContent = why
   const h = mapHandle()
   const rect = lot ? h?.lotClientRect(lot) : null
   // above the lot and above the ghost crane's countdown badge (which reaches ~16 art px over the lot)
@@ -177,7 +185,7 @@ function beginDrag(mode: PlacementMode, order: BuildOrder, e: PointerEvent, move
     if (!(prev && hover && prev[0] === hover[0] && prev[1] === hover[1]) && (prev || hover)) usePlacement.setState({ hover })
     usePlacement.setState({ pointer: { x: ev.clientX, y: ev.clientY } })
     const under = hover ? null : mapApi.lotAt(ev.clientX, ev.clientY)
-    moveGhost(s.ghost, ev.clientX, ev.clientY, hover, !!under)
+    moveGhost(s.ghost, ev.clientX, ev.clientY, hover, !!under, under && onSaleRow(under) ? 'Land for sale: buy the row first' : 'Lot taken')
   }
   const onUp = (ev: PointerEvent) => {
     const s = session

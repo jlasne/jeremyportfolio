@@ -107,6 +107,8 @@ export function MwSlider({ label, value, min, max, scale, color, demandAt, maxRe
 
   const style = { '--mws': color } as CSSProperties
   const showDemand = demandAt != null && demandAt > EPS && demandAt < span - EPS
+  // The two labels under the track would collide: keep the floor's, the dashed tick stays.
+  const demandLabel = showDemand && !(lo > EPS && Math.abs((demandAt ?? 0) - lo) / span < 0.16)
   return (
     <div className={`mws${disabled ? ' is-disabled' : ''}`} style={style}>
       <div className="mws-main">
@@ -140,7 +142,7 @@ export function MwSlider({ label, value, min, max, scale, color, demandAt, maxRe
               min {fmtMw(lo, { unit: false })}
             </span>
           ) : null}
-          {showDemand ? (
+          {demandLabel ? (
             <span className="mws-scale-demand num" style={{ left: pct(demandAt) }}>
               demand
             </span>

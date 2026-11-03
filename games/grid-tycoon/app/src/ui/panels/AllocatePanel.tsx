@@ -225,6 +225,18 @@ export default function AllocatePanel() {
         </div>
       ) : null}
 
+      <p className="aterm-key" aria-hidden="true">
+        <span>
+          <span className="aterm-key-floor" /> committed minimum (30% drop a round at most)
+        </span>
+        <span>
+          <span className="aterm-key-demand" /> last round's demand: more is not expected to sell
+        </span>
+        <span>
+          <span className="aterm-key-block" /> out of reach now (link, racks or plant MW)
+        </span>
+      </p>
+
       <div className="aflow">
         {/* ---------------- Plants ---------------- */}
         <section className="panel panel-plant aflow-col" aria-labelledby="aflow-plants">
@@ -376,7 +388,7 @@ export default function AllocatePanel() {
                 </span>
               </span>
               <span className="arow-proj">
-                <span className="num delta-down">−{fmtMoney(projection.costs.rent)}</span>
+                {projection.costs.rent > 0.005 ? <span className="num delta-down">−{fmtMoney(projection.costs.rent)}</span> : <span className="muted">no rent</span>}
               </span>
             </div>
             <MwSlider

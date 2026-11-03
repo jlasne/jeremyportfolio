@@ -84,7 +84,6 @@ export function stockRows(res: RoundResult): StockRow[] {
     label: 'Stable clients',
     value: p.stability ?? 0,
     hint: 'A premium for revenue from stable clients: citizens and cloud most, bitcoin none.',
-    icon: 'town',
     core: true,
   })
   rows.push({ key: 'fund', label: 'Fundamentals pull', value: p.fundamentals, hint: 'Value drifts 15% toward 20 × average profit plus 30% of building cost.', core: true })
@@ -104,9 +103,9 @@ export function stockRows(res: RoundResult): StockRow[] {
 export function stockDriver(rows: StockRow[], move: number): string {
   const top = [...rows].sort((a, b) => Math.abs(b.value) - Math.abs(a.value))[0]
   if (!top || Math.round(top.value * 100) === 0) return 'Nothing moved your price this round.'
-  const dir = top.value >= 0 ? 'lifted' : 'pulled down'
+  const dir = top.value >= 0 ? 'lifted it' : 'pulled it down'
   const total = Math.round(move * 100) === 0 ? 'Your price held.' : `Your price ${move > 0 ? 'rose' : 'fell'} ${fmtMoney(Math.abs(move))}.`
-  return `${total} ${top.label} ${dir} it most (${fmtMoney(top.value, { sign: true })}).`
+  return `${total} ${top.label} ${dir} most (${fmtMoney(top.value, { sign: true })}).`
 }
 
 // ---------- beat 4: ranking ----------

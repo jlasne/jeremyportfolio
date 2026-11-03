@@ -13,6 +13,7 @@ import type { Spritesheet } from 'pixi.js'
 import { canUpgrade, capacity, companyById, landCost, ownedRows, plotRows, revenueByBuilding, seasonOf, upgradeSpec } from '../engine'
 import type { Building, Decision, GameState, Size, Tile } from '../engine'
 import { audio } from '../audio'
+import { computeDerived } from '../store/derived'
 import { useDraft } from '../store/draft'
 import { useGame } from '../store/game'
 import { useUi } from '../store/ui'
@@ -1563,6 +1564,13 @@ export class MapView {
     const me = g.meId ? companyById(g.state, g.meId) : null
     if (!me || me.bankrupt) return
     const price = m.land.price
+    const left = computeDerived(g.state, me.id, useDraft.getState().decision, g.config).preview.treasuryLeft
+    if (left < price - 1e-9) {
+      const msg = `Row ${m.land.saleRow + 1} costs ${price.toFixed(2)}: short by ${(price - Math.max(0, left)).toFixed(2)}.`
+      showNotice(msg)
+      useUi.getState().announce(msg)
+      return
+    }
     useDraft.getState().buyLandRow()
     audio.cue('click')
     const msg = `Land row ${m.land.saleRow + 1} bought for ${price.toFixed(2)}: 4 more free lots. Undo takes it back.`
