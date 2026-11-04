@@ -146,6 +146,8 @@ mark.hl { font-weight: 600; }
 .scroll-cue:hover { color: var(--fg); }
 .scroll-cue span { font-size: 14px; animation: nudge 2s ease-in-out infinite; }
 @keyframes nudge { 50% { transform: translateY(4px); } }
+/* /apps: the hello only introduces the portfolio, which follows right under it */
+.hero-full.hero-short { min-height: 0; padding-top: clamp(40px, 8vw, 88px); padding-bottom: clamp(44px, 7vw, 72px); }
 /* a short screen (landscape phone): the hello keeps its natural height */
 @media (max-height: 560px) { .hero-full { min-height: 0; padding-bottom: 80px; } }
 .lede { max-width: 54ch; margin-top: 22px; font-size: 16px; line-height: 1.7; color: var(--fg-80); }

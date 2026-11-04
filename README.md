@@ -14,20 +14,17 @@ switch.
 
 - **`/` · home.** One screen, as before but cleaner: "Hey, I'm (my face)
   Jeremy Lasne.", the mobile app portfolio and the newsletter (links to
-  `/apps/#newsletter`), CreatorMatch for wellness creators in its green, my
+  `/apps/#archive`), CreatorMatch for wellness creators in its green, my
   hobbies, a blinking caret, x / YouTube / email. A tap on the email copies it and opens
   a popup: "Copied", the address, and "Write an email" for the mail app
-- **`/apps` · Mobile apps and the newsletter.** The hello fills the screen
-  under the nav, so the portfolio waits one scroll below ("Mobile app
-  portfolio ↓" at its foot). "Hey, I’m Jeremy. I’m building a mobile app
-  portfolio." (34px on a phone, up to 54px), the subheadline ("I share what I learn growing my apps."
-  highlighted in blue; "design with taste", "decide with data" and "shared by
-  creators" underlined), the email field "Your email", the
-  button "Get the next issue", "Two emails a week. Leave anytime." Then the
-  portfolio: the Kaught reel as the card (a tap opens kaught.app), and
-  HealthClass: a big card of question marks, "HealthClass?", a redacted line,
-  coming soon, stealth. Between the two: **The lessons**, the archive of
-  the newsletter, one row per issue (date, read time, title), newest first
+- **`/apps` · Mobile apps.** The hello is about the portfolio only: "I'm building a
+  mobile apps portfolio." (bold italic), the subheadline ("taste", "data" and
+  "creators" highlighted in blue) and x / YouTube / email. Then the portfolio:
+  the Kaught reel as the card (a tap opens kaught.app), and HealthClass: a big
+  card of question marks, "HealthClass?", a redacted line, coming soon, stealth.
+  Last, **The lessons** (`#archive`), the archive of the newsletter, one row
+  per issue (date, read time, title), newest first. The sign-up form lives at
+  the foot of each lesson
 - **`/personal` · Personal.** Wellness (`/wellness`), tasu (tasu.ai) and
   Claude Portfolio (claudeportfolio.com, "World-Investment Management
   Intelligence."), three cells
