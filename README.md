@@ -20,8 +20,12 @@ switch.
 - **`/apps` · Mobile apps.** The hello is about the portfolio only: "I'm building a
   mobile apps portfolio." (bold italic), the subheadline ("taste", "data" and
   "creators" highlighted in blue) and x / YouTube / email. Then the portfolio:
-  the Kaught reel as the card (a tap opens kaught.app), and HealthClass: a big
-  card of question marks, "HealthClass?", a redacted line, coming soon, stealth.
+  the Kaught reel as the card (a tap opens kaught.app); HealthClass, coming
+  soon, in its rose and plum: the name, "Dr. Dana's pelvic floor class, as an
+  app.", a healthclass.app tag (a tap opens it) and Dr. Dana on a 6 s video
+  (`media/apps/healthclass.mp4`, `www/media/face/hero.mp4` of jlasne/healthclass);
+  and a third app, coming soon, stealth: a big card of question marks, its name
+  and line redacted.
   Last, **The lessons** (`#archive`), the archive of the newsletter, one row
   per issue (date, read time, title), newest first. The sign-up form lives at
   the foot of each lesson
