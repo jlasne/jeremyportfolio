@@ -15,3 +15,8 @@ brandmatchapp/app/dist/
 
 # assembled per-function deploy bundles
 brandmatchapp/backend/functions/.build/
+
+# screenshots from local checks
+/*.png
+!/apple-touch-icon.png
+!/og-image.png
