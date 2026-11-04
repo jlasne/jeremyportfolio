@@ -13,13 +13,13 @@ the name on top and the three pages on a line under it), and a one-line foot wit
 switch.
 
 - **`/` · home.** One screen, as before but cleaner: "Hey, I'm (my face)
-  Jeremy Lasne.", the mobile app portfolio and the newsletter (links to
-  `/apps/#archive`), CreatorMatch for wellness creators in its green, my
-  hobbies, a blinking caret, x / YouTube / email. A tap on the email copies it and opens
+  Jeremy Lasne.", "I'm building a mobile apps portfolio." (bold italic, links to
+  `/apps/`), the line of `/apps` ("taste", "data" and "creators" highlighted in
+  blue), a blinking caret, x / email. A tap on the email copies it and opens
   a popup: "Copied", the address, and "Write an email" for the mail app
 - **`/apps` · Mobile apps.** The hello is about the portfolio only: "I'm building a
   mobile apps portfolio." (bold italic), the subheadline ("taste", "data" and
-  "creators" highlighted in blue) and x / YouTube / email. Then the portfolio:
+  "creators" highlighted in blue) and x / email. Then the portfolio:
   the Kaught reel as the card (a tap opens kaught.app); HealthClass, coming
   soon, the same kind of card: the 20 s film of the healthclass.app hero
   (`media/apps/healthclass.mp4`, 1280 x 720, no sound, 0.8 MB; the still is
