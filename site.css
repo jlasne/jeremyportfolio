@@ -425,10 +425,6 @@ a.row:hover .row-go { color: var(--fg); transform: translate(2px, -2px); }
 .sketch.is-drawing .sk-arrow path { transition: stroke-dashoffset .8s cubic-bezier(.65,0,.35,1) calc(var(--i) * 380ms + 150ms); }
 @media (max-width: 600px) { .prose > .sketch { margin-inline: calc(var(--pad) * -.6); } }
 
-/* the newsletter at the foot of a lesson */
-.post-join-in { padding: 28px var(--pad) 36px; }
-.post-join-line { font-size: clamp(19px, 2.4vw, 22px); font-weight: 700; letter-spacing: -.01em; }
-.post-join .join { margin-top: 16px; }
 
 .sk-red { stroke: #d6453b; }
 :root:not([data-theme="light"]) .sk-red { stroke: #f0776c; }
