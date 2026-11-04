@@ -457,3 +457,6 @@ a.row:hover .row-go { color: var(--fg); transform: translate(2px, -2px); }
 .post-app b { color: var(--fg); font-weight: 700; transition: color .15s; }
 @media (hover: hover) { .post-app:hover img { transform: translateY(-2px); } .post-app:hover b { color: var(--blue); } }
 @media (max-width: 520px) { .prose > .post-apps { grid-template-columns: 1fr; } }
+/* the website-hub schema: small labels and the page tiles */
+.sk-tiny { font-size: 22px; font-weight: 500; fill: var(--fg-60) !important; }
+.sk-tile { font-size: 27px; font-weight: 700; fill: var(--fg); }
