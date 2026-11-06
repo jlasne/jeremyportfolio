@@ -207,7 +207,7 @@ function drawSport(animate) {
 }
 
 
-/* ── after sport, or not, and the night's toggles: six columns ─────── */
+/* ── after sport, or not, and the night's toggles: seven columns ───── */
 function drawPairs() {
   /* every night logged, each measure set against all of them */
   const keys = allKeys(), ns = nightScores(keys);
@@ -219,6 +219,7 @@ function drawPairs() {
     { name: 'Cold night', ks: nights.filter(k => entry(k)?.cold) },
     { name: 'Dark night', ks: nights.filter(k => entry(k)?.dark) },
     { name: 'Travelling', ks: nights.filter(k => entry(k)?.travel) },
+    { name: "At Maxime's", ks: nights.filter(k => entry(k)?.maxime) },
   ];
   const avg = (ks, f) => { const v = ks.map(f).filter(x => x !== undefined); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : undefined; };
   const rows = [
@@ -321,7 +322,8 @@ function drawForm() {
   $('gfBox').innerHTML = `<button class="chip" type="button" data-flag="gf" aria-pressed="${!!cur.gf}">💑 Night with my girlfriend</button>`
     + `<button class="chip" type="button" data-flag="cold" aria-pressed="${!!cur.cold}" title="Window open all night">❄️ Cold night</button>`
     + `<button class="chip" type="button" data-flag="dark" aria-pressed="${!!cur.dark}" title="Shutters closed">🌙 Dark night</button>`
-    + `<button class="chip" type="button" data-flag="travel" aria-pressed="${!!cur.travel}" title="Slept away from home">🧳 Travelling</button>`;
+    + `<button class="chip" type="button" data-flag="travel" aria-pressed="${!!cur.travel}" title="Slept away from home">🧳 Travelling</button>`
+    + `<button class="chip" type="button" data-flag="maxime" aria-pressed="${!!cur.maxime}" title="Slept at Maxime's">🛋️ At Maxime's</button>`;
   drawSessions();
   $('adds').innerHTML = SPEC.sports.map(s => `<button class="chip" type="button" data-add="${s.id}" style="--c:var(--${s.id})">${s.name}</button>`).join('');
 }
@@ -332,7 +334,7 @@ $('sleepGrid').addEventListener('input', e => {
   if (v === undefined || Number.isNaN(v)) delete cur.sleep[id]; else cur.sleep[id] = v;
   touch();
 });
-/* the night's toggles: with my girlfriend, cold, dark, travelling */
+/* the night's toggles: with my girlfriend, cold, dark, travelling, at Maxime's */
 $('gfBox').addEventListener('click', e => {
   const b = e.target.closest('[data-flag]'); if (!b) return;
   const k = b.dataset.flag;
