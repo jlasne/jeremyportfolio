@@ -8,6 +8,7 @@
     { "src": "^/wealth(?:/.*)?$", "status": 308, "headers": { "Location": "https://www.claudeportfolio.com/wealth" } },
     { "src": "^/games/grid-tycoon(?:/.*)?$", "status": 308, "headers": { "Location": "/games/" } },
     { "src": "^/creators/?$", "status": 308, "headers": { "Location": "https://creatormatch.app" } },
+    { "src": "^/x(/.*)?$", "dest": "https://x-strategist.vercel.app/x$1" },
     { "handle": "filesystem" },
     { "src": "^/wellness/exp0/demo/?$", "dest": "/wellness/exp0/index.html" },
     { "src": "^/games/([A-HJ-NP-Za-hj-np-z]{6})/?$", "dest": "/games/index.html" }
