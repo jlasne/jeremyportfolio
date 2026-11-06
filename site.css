@@ -460,3 +460,4 @@ a.row:hover .row-go { color: var(--fg); transform: translate(2px, -2px); }
 /* the website-hub schema: small labels and the page tiles */
 .sk-tiny { font-size: 22px; font-weight: 500; fill: var(--fg-60) !important; }
 .sk-tile { font-size: 27px; font-weight: 700; fill: var(--fg); }
+.sk-mini { font-size: 17px; font-weight: 500; fill: var(--fg-60) !important; }
