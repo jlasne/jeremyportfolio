@@ -461,3 +461,9 @@ a.row:hover .row-go { color: var(--fg); transform: translate(2px, -2px); }
 .sk-tiny { font-size: 22px; font-weight: 500; fill: var(--fg-60) !important; }
 .sk-tile { font-size: 27px; font-weight: 700; fill: var(--fg); }
 .sk-mini { font-size: 17px; font-weight: 500; fill: var(--fg-60) !important; }
+.sk-cut { font-size: 28px; font-weight: 700; fill: #d6453b !important; }
+:root:not([data-theme="light"]) .sk-cut { fill: #f0776c !important; }
+.sk-big { font-size: 64px; font-weight: 700; fill: var(--fg); }
+.sk-tag { font-size: 24px; font-weight: 700; fill: var(--fg); }
+.sk-step { font-size: 31px; font-weight: 700; fill: var(--fg); }
+.sk-stepsub { font-size: 24px; font-weight: 500; fill: var(--fg-60) !important; }
