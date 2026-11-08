@@ -463,7 +463,6 @@ body.editing { padding-bottom: 88px; }
     <div class="head">
       <span class="n mono">01</span>
       <h2>Today <span class="pill live" id="dayPill">Day 0 of 31</span></h2>
-      <p class="tag">Intake, sport, sleep, and what the watch observes, with the time of each coffee, each session and each night. Two goals a day (creatine, collagen), every day of October, then the page reads what moved.</p>
     </div>
     <div class="card" id="card"></div>
   </section>
@@ -472,7 +471,6 @@ body.editing { padding-bottom: 88px; }
     <div class="head">
       <span class="n mono">02</span>
       <h2>The 31 days <span class="pill" id="monthPill"></span></h2>
-      <p class="tag">Every day of the challenge. Pick one to fill it in. A red day is a hole in the data, and a hole costs a correlation.</p>
     </div>
     <div class="strip" id="strip"></div>
     <div class="legend mono">
@@ -487,27 +485,10 @@ body.editing { padding-bottom: 88px; }
     <div class="head">
       <span class="n mono">03</span>
       <h2>Correlations <span class="pill" id="mxPill"></span></h2>
-      <p class="tag">Two grids against the same six results. The first asks when: the best time for each thing I time. The second asks how much: the impact of everything else, from very bad to very good. Tap a cell for the numbers.</p>
     </div>
     <div id="mxbox"></div>
   </section>
 
-  <section id="how">
-    <div class="head">
-      <span class="n mono">04</span>
-      <h2>How to read it</h2>
-    </div>
-    <ul class="notes">
-      <li><b>The morning after</b>A day is judged by the night that follows it: a late coffee on Tuesday is scored against Wednesday's sleep and against the Observing numbers (weight, HRV, resting HR, recovery), which come from that same night. The night itself (bedtime, wake-up, hours slept, a night with my girlfriend) is scored against the morning it ends.</li>
-      <li><b>More against less, later against earlier</b>An on/off thing splits on itself. A count or a clock time splits at my own median, so "a later last coffee" means later than my usual.</li>
-      <li><b>Five steps</b>Very bad, bad, neutral, good, very good. Good means good for that result, not a bigger number: a resting heart rate going down is good. "Very" means a large gap (Cohen's d of 0.8 or more). For weight, lower is good.</li>
-      <li><b>The strength label</b>How far apart the two groups sit, measured against how much that number swings day to day anyway. A big percent on a wild metric says less than a small one on a steady metric.</li>
-      <li><b>Two grids</b>What is a time of day (first and last coffee, first and last meal, the eating window, session start and end, bedtime, wake-up) is read by window: my days split into three equal windows by when I did it. A cell names the window with the best result. All three windows are tested together first, so naming the best of three cannot turn noise into a finding.</li>
-      <li><b>First looks</b>The grids fill from the first days. A faint number is the raw move so far, with no verdict: "First look" when there are too few days to test, "Unproven" when there are enough but it is not clear of luck. With over a hundred cells, about half point the wrong way by chance, so do not act on them. A cell leaves neutral only when it clears a false-discovery check, which keeps luck to at most 1 in 10 of what is coloured. The switch above the grids hides the faint numbers.</li>
-      <li><b>Linked things move together</b>A late dinner often means a late bedtime, so "a later last meal" and "a later bedtime" can both claim the same lost sleep points. When two rows tell one story, change one of them alone for a week.</li>
-      <li><b>One month only</b>1 to 31 October 2026. Thirty-one days, one video a day, then the table stands as it is.</li>
-    </ul>
-  </section>
 </main>
 
 <footer class="mono">
@@ -552,10 +533,9 @@ const clampDay = k => k < firstDay() ? SPEC.start : k > SPEC.end ? SPEC.end : k;
 
 const state = { log: {}, updatedAt: 0 };
 let sel = clampDay(today);
-/* Raw numbers that are not proven (a first look from few days, or a link not
-   clear of luck) are shown faint and carry no verdict. This hides them. */
-let showRaw = true;
-try { showRaw = localStorage.getItem('bio.raw') !== '0'; } catch {}
+/* The grids show strong links only: proven and "very" (Cohen's d of 0.8
+   or more). First looks, leans, unproven and small gaps stay hidden. */
+const showRaw = false;
 let pass = '';
 let dirty = false, saving = false, timer = 0, loaded = false;
 
@@ -1037,6 +1017,7 @@ function levelOf({ level, very }) {
 
 /* A cell still gathering days: how many it has out of what it needs. */
 function waitingCell(td, have, need, why) {
+  if (!showRaw) return td;
   /* with first looks shown, two comparable days are enough to try; a cell
      that still shows nothing then has days but nothing to compare yet */
   const enough = showRaw ? Math.min(need, 2) : need;
@@ -1053,6 +1034,7 @@ function cellEl(factor, o, link, count) {
   const td = document.createElement('td');
   if (factor.id === o.id) { td.innerHTML = '<span class="lv self" aria-label="same measure">—</span>'; return td; }
   const imp = link ? impact(link) : null;
+  if (link && !imp.early && (imp.level === 'neutral' || !imp.very)) return td;
   if (!link || (imp.early && !showRaw))
     return waitingCell(td, Math.min(count, needPairs()), needPairs(), count >= needPairs() ? `Enough days, but fewer than ${SPEC.minPerSide} on one side` : 'Days logged, but the same value on every one so far: nothing to compare yet');
   const { cls } = levelOf(imp);
@@ -1094,6 +1076,7 @@ const DUR_NAMES = ['Short', 'Middle', 'Long'];
 function whenCell(factor, o, res, count) {
   const td = document.createElement('td');
   const imp = res ? timingImpact(res) : null;
+  if (res && !imp.early && (imp.level !== 'good' || !imp.very)) return td;
   if (!res || (imp.early && !showRaw))
     return waitingCell(td, Math.min(count, needTimed()), needTimed(), count >= needTimed() ? `Enough days, but one window has fewer than ${SPEC.minPerSide}` : 'Days logged, but at the same time every day so far: nothing to split yet');
   const w = res.windows[res.best];
@@ -1133,6 +1116,7 @@ function whenGrid() {
     SPEC.outcomes.map(o => `<th><em>${o.icon}</em>${o.name}</th>`).join('') + '</tr></thead>';
   const body = document.createElement('tbody');
   for (const r of rows) {
+    if (!r.cells.some(c => c && !timingImpact(c).early && timingImpact(c).level === 'good' && timingImpact(c).very)) continue;
     const tr = document.createElement('tr');
     tr.innerHTML = `<th class="rh" scope="row"><em>${r.factor.icon}</em>${r.factor.name}</th>`;
     SPEC.outcomes.forEach((o, i) => tr.append(whenCell(r.factor, o, r.cells[i], r.counts[i])));
@@ -1159,28 +1143,8 @@ function drawMatrix() {
 
   const legend = document.createElement('div');
   legend.className = 'mxlegend';
-  legend.innerHTML = [['vbad', 'Very bad'], ['bad', 'Bad'], ['neutral', 'Neutral'], ['good', 'Good'], ['vgood', 'Very good'],
-    ['neutral lean-bad', 'Leaning bad'], ['neutral lean-good', 'Leaning good'],
-    ['neutral raw raw-good', 'First look, good way'], ['neutral raw raw-bad', 'First look, bad way']]
+  legend.innerHTML = [['vbad', 'Very bad'], ['vgood', 'Very good']]
     .map(([cls, word]) => `<span class="lv ${cls}">${word}</span>`).join('');
-  const tog = document.createElement('button');
-  tog.type = 'button'; tog.className = 'rawtoggle mono';
-  tog.setAttribute('aria-pressed', String(showRaw));
-  tog.textContent = showRaw ? 'Unproven numbers: shown' : 'Unproven numbers: hidden';
-  tog.addEventListener('click', () => {
-    showRaw = !showRaw;
-    try { localStorage.setItem('bio.raw', showRaw ? '1' : '0'); } catch {}
-    drawMatrix();
-  });
-  legend.append(tog);
-
-  const early = document.createElement('p');
-  early.className = 'mxearly';
-  early.innerHTML = (today < SPEC.start
-      ? `<b>Starts ${pretty(SPEC.start)}.</b> The grids are empty until then. `
-      : ready < SPEC.reliableAt ? `<b>Early days: ${ready} of ${DAYS.length}.</b> ` : '') +
-    `Faint numbers are <b>first looks</b>: the raw move from the days so far, however few. "First look" means too few days to test; "Unproven" means enough days, but not clear of luck. ` +
-    `Neither is a verdict, and about half will point the wrong way by chance. Only the five coloured steps are proven. A fraction such as "1/${needPairs()}" is a cell with fewer than two comparable days; a dot, one with days but nothing to compare yet.`;
 
   const detail = document.createElement('div');
   detail.className = 'mxdetail'; detail.id = 'mxdetail';
@@ -1194,7 +1158,7 @@ function drawMatrix() {
   }).join('') + '</tr></thead>';
   const body = document.createElement('tbody');
   for (const g of SPEC.groups) {
-    const mine = rows.filter(r => r.factor.group === g.id);
+    const mine = rows.filter(r => r.factor.group === g.id && r.cells.some(l => l && !impact(l).early && impact(l).level !== 'neutral' && impact(l).very));
     if (!mine.length) continue;
     const sec = document.createElement('tr');
     sec.className = 'sec';
@@ -1216,17 +1180,12 @@ function drawMatrix() {
   hint.textContent = `Swipe the grid for all ${SPEC.outcomes.length} results →`;
   const h1 = document.createElement('div');
   h1.className = 'mxh';
-  h1.innerHTML = `<h3><em>⏰</em>When: the best time, and its impact</h3><p>For each thing done at a time of day, my days split into three equal windows: early, middle, late (short to long for the eating window). ` +
-    `<b>When</b> is the window with the best result, under the number. <b>Impact</b> is its gap against the other two windows, in the result's own unit. ` +
-    `"Best · +5 pts, 22:36–23:15" on bedtime and sleep score reads: in bed between 22:36 and 23:15, the sleep score ran 5 points above the other nights. ` +
-    `A cell is proven from ${needTimed()} days, ${SPEC.minPerSide} per window; before that it shows a first look from 2 days.</p>`;
+  h1.innerHTML = `<h3><em>⏰</em>When: the best time, and its impact</h3>`;
   const h2 = document.createElement('div');
   h2.className = 'mxh';
-  h2.innerHTML = `<h3><em>📏</em>How much: the impact of everything else</h3><p>Amounts and yes-or-no: cups, morning sun, creatine, collagen, the sport and the body's own numbers. More against less, done against not, on the five steps from very bad to very good.</p>`;
+  h2.innerHTML = `<h3><em>📏</em>How much: the impact of everything else</h3>`;
   const hint2 = hint.cloneNode(true);
-  $('mxbox').replaceChildren(sum, early, legend, detail, h1, hint, when.wrap, h2, hint2, wrap);
-  const looks = $('mxbox').querySelectorAll('.mx .lv.raw').length;
-  sum.innerHTML += looks ? ` · <b>${looks}</b> first look${looks === 1 ? '' : 's'}` : '';
+  $('mxbox').replaceChildren(sum, legend, detail, ...(when.found ? [h1, hint, when.wrap] : []), h2, hint2, wrap);
 }
 
 function draw() { drawCard(); drawStrip(); drawMatrix(); }
