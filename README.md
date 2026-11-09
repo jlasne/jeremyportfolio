@@ -34,13 +34,14 @@ switch.
 - **`/workout` · Workout.** My strength program: 3 sessions a week (push,
   pull, legs), 11 weeks of 1, 3, 5, 7, 9 reps, a light week, then 9 down to 1,
   to max the pull-up, dip, squat, deadlift and bench. It reads the Gym sessions
-  of the wellness log: every 3 sessions from 20 Oct 2026 is one program week,
-  and each session's sets per lift give its max. The goal is the total of the
+  of the wellness log by calendar week (Monday to Sunday from 19 Oct 2026), plus
+  the top sets I gave by hand in `workout/record.js`; together they give each max. The goal is the total of the
   5 estimated maxes (Epley, as maximehouel.com/myprogress: weight x (1 + reps / 30),
   pull-up and dips with my 85 kg body in the load, shown as the weight added).
   One chart per lift: the theory line for 1 to 10 reps, the actual best at each
-  rep count, and the goals of this week and the next (the next 2.5 kg above the
-  theory). The log form saves into that same day of the wellness log, with the
+  rep count, and the goals of this week and the next. A goal comes from my last
+  week: the next 2.5 kg step above its theory, or above my best set at those
+  reps if higher. The log form saves into that same day of the wellness log, with the
   passphrase of `/wellness`
 - `/creators` redirects (308) to creatormatch.app
 

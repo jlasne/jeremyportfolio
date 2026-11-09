@@ -5,14 +5,15 @@
    reps, kg). So a max logged here shows on /wellness/details too, and the
    maxes logged there show here.
 
-   Program weeks count sessions, not dates: every 3 Gym sessions from START
-   is one week. A missed week moves the plan, it never skips a step. */
+   Program weeks are calendar weeks, Monday to Sunday, from START. The top
+   sets I gave by hand live in record.js and count with the log's. */
 
 import { state, load, api, today, entry, allSessions, copy, esc, short } from '/wellness/data.js';
-import { exercises, SPEC } from '/wellness/spec.js';
+import { exercises, daysBetween, shift, SPEC } from '/wellness/spec.js';
+import { RECORD } from '/workout/record.js';
 
-/* the first session of the program: the day of the first logged maxes */
-const START = '2026-10-20';
+/* the Monday of week 1 */
+const START = '2026-10-19';
 const PER_WEEK = 3;
 const WEEKS = [1, 3, 5, 7, 9, 0, 9, 7, 5, 3, 1]; /* 0: the light week */
 
@@ -66,10 +67,18 @@ const goalKg = (l, e, reps) => (Math.floor(repMax(l, e, reps) / 2.5 + 1e-9) + 1)
 
 /* ── the program, read off the log ──────────────────────────────────── */
 
+const weekOf = day => Math.floor(daysBetween(START, day) / 7) + 1;
+
 /* every Gym session since START, in order, with its week, its type
    (read from its lifts, else the next in the push, pull, legs turn) and
-   every set of each goal lift */
+   every set of each goal lift; then the weeks of record.js, one row each */
 function program() {
+  return [...sessions(), ...Object.entries(RECORD).map(([w, lifts]) => ({
+    rec: true, week: +w, day: shift(START, w * 7 - 1), type: 'mix',
+    sets: Object.fromEntries(Object.entries(lifts).map(([id, list]) => [id, list.map(([kg, reps]) => ({ kg, reps }))])),
+  }))];
+}
+function sessions() {
   const list = allSessions().filter(s => s.s === 'lift' && s.day >= START);
   let last = null;
   return list.map((s, i) => {
@@ -83,39 +92,53 @@ function program() {
     const top = Math.max(...has);
     const type = top > 0 && has.filter(n => n === top).length === 1 ? DAYS[has.indexOf(top)].id : top > 0 ? 'mix' : next(last);
     if (type !== 'mix') last = type;
-    return { day: s.day, i, week: Math.floor(i / PER_WEEK) + 1, type, sets };
+    return { day: s.day, i, week: weekOf(s.day), type, sets };
   });
 }
 const next = last => DAYS[(DAYS.findIndex(d => d.id === last) + 1) % DAYS.length].id;
 const lastType = rows => [...rows].reverse().find(r => r.type !== 'mix')?.type || null;
 
-/* the best set of a lift over some sessions: the highest estimated max */
-function best(rows, id) {
+/* the best set of a lift over some sessions: the highest estimated max
+   (only sets of `reps` reps, when given) */
+function best(rows, id, reps) {
   const l = LIFT.get(id);
   let b = null;
   for (const r of rows) for (const t of r.sets[id] || []) {
+    if (reps && t.reps !== reps) continue;
     const e = est(l, t.kg, t.reps);
-    if (!b || e > b.est) b = { ...t, day: r.day, week: r.week, est: e };
+    if (!b || e > b.est) b = { ...t, day: r.day, week: r.week, rec: r.rec, est: e };
   }
   return b;
+}
+const when = b => b.rec ? `week ${b.week}` : short(b.day);
+/* my form: the best set of the last week before this one that has the lift.
+   The goals come from it, so each week's sets set the next week's goals. */
+/* a week's goal: the higher of the theory from my form and one 2.5 kg step
+   above my best set at that many reps, so every goal is a new best */
+function goalFor(l, reps) {
+  const f = ctx.form[l.id], b = best(ctx.rows, l.id, reps);
+  return Math.max(f ? goalKg(l, f.est, reps) : 0, b ? b.kg + 2.5 : 0);
+}
+function formOf(id) {
+  for (let w = ctx.week - 1; w >= 1; w--) { const b = best(ctx.rows.filter(r => r.week === w), id); if (b) return b; }
+  return ctx.maxes[id];
 }
 
 /* ── drawing ────────────────────────────────────────────────────────── */
 
-let ctx = { rows: [], week: 1, nextId: 'push', maxes: {} };
+let ctx = { rows: [], week: 1, nextId: 'push', maxes: {}, form: {} };
 
 function drawNow() {
-  const { rows } = ctx, done = rows.length;
-  const finished = done >= WEEKS.length * PER_WEEK;
-  const week = Math.min(WEEKS.length, Math.floor(done / PER_WEEK) + 1);
-  const slot = done % PER_WEEK;
-  const nextId = next(lastType(rows) || DAYS[DAYS.length - 1].id);
-  const d = DAY.get(nextId), reps = WEEKS[week - 1];
-  ctx.week = finished ? WEEKS.length : week; ctx.nextId = nextId;
-  $('nowCount').textContent = `${done} of ${WEEKS.length * PER_WEEK} sessions`;
+  const log = ctx.rows.filter(r => !r.rec), now = weekOf(today);
+  const finished = now > WEEKS.length;
+  const week = Math.max(1, Math.min(WEEKS.length, now));
+  const slot = Math.min(PER_WEEK - 1, log.filter(r => r.week === now).length);
+  const nextId = next(lastType(log) || DAYS[DAYS.length - 1].id);
+  const d = DAY.get(nextId), reps = finished ? 0 : WEEKS[week - 1];
+  $('nowCount').textContent = `${log.length} sessions logged`;
   if (finished) {
     $('nowWeek').textContent = 'Program done';
-    $('nowReps').textContent = '33 sessions';
+    $('nowReps').textContent = '11 weeks';
     $('nowLine').textContent = 'Week 11 set the new maxes. Start week 1 again from them.';
   } else {
     $('nowWeek').textContent = `Week ${week} of ${WEEKS.length}`;
@@ -126,8 +149,8 @@ function drawNow() {
   }
   $('nowDay').textContent = d.name;
   $('nowLifts').innerHTML = d.lifts.map(id => {
-    const l = LIFT.get(id), m = ctx.maxes[id];
-    return reps && m ? `${l.name}: goal <b>${kgText(l, goalKg(l, m.est, reps))} &times; ${reps}</b>` : `${l.name}: ${reps ? `test a set of ${reps}` : 'light'}`;
+    const l = LIFT.get(id), m = ctx.form[id];
+    return reps && m ? `${l.name}: goal <b>${kgText(l, goalFor(l, reps))} &times; ${reps}</b>` : `${l.name}: ${reps ? `test a set of ${reps}` : 'light'}`;
   }).join('<br>');
 }
 
@@ -177,8 +200,8 @@ function drawMaxes() {
     return `<li><button type="button" class="lift${l.id === pick ? ' is-on' : ''}" data-id="${l.id}" aria-pressed="${l.id === pick}">
       <span class="lift-n">${l.name}</span>
       ${b ? `<b class="lift-v">${kgText(l, half(b.est))}</b>
-      <span class="lift-s">From ${kgText(l, b.kg)} &times; ${b.reps}, ${short(b.day)}</span>
-      ${reps ? `<span class="lift-g">W${week} goal: ${kgText(l, goalKg(l, b.est, reps))} &times; ${reps}</span>` : ''}`
+      <span class="lift-s">From ${kgText(l, b.kg)} &times; ${b.reps}, ${when(b)}</span>
+      ${reps ? `<span class="lift-g">W${week} goal: ${kgText(l, goalFor(l, reps))} &times; ${reps}</span>` : ''}`
       : `<b class="lift-v lift-none">&ndash;</b><span class="lift-s">No set logged yet</span>`}
     </button></li>`;
   }).join('');
@@ -189,9 +212,9 @@ function drawMaxes() {
   const body = WEEKS.map((r, i) => {
     const w = i + 1, wr = rows.filter(x => x.week === w);
     const cells = LIFTS.map(l => {
-      const b = best(wr, l.id), m = ctx.maxes[l.id];
+      const b = (r && best(wr, l.id, r)) || best(wr, l.id), m = ctx.form[l.id];
       if (b) return `<td>${kgText(l, b.kg)} <small>&times; ${b.reps}</small></td>`;
-      if (w >= week && m && r) return `<td class="goal" data-tip="Goal: the theory weight for ${repsText(r)} from my max">${kgText(l, goalKg(l, m.est, r))} <small>goal</small></td>`;
+      if (w >= week && m && r) return `<td class="goal" data-tip="Goal: a new best at ${repsText(r)}">${kgText(l, goalFor(l, r))} <small>goal</small></td>`;
       return '<td><span class="dim">&middot;</span></td>';
     }).join('');
     return `<tr class="${w === week ? 'cur' : ''}"><th scope="row">W${w}</th><td>${r || 'Light'}</td>${cells}</tr>`;
@@ -209,9 +232,10 @@ function drawChart() {
   const R = 10, W = Math.max(300, Math.round(box.clientWidth) || 720), H = W < 520 ? 250 : 300, L = 48, Rt = 14, T = 26, B = 40;
   const theory = Array.from({ length: R }, (_, i) => ({ r: i + 1, kg: repMax(l, m.est, i + 1) }));
   const byRep = new Map();
-  for (const row of ctx.rows) for (const t of row.sets[pick] || []) if (t.reps <= R && !(byRep.get(t.reps)?.kg >= t.kg)) byRep.set(t.reps, { ...t, day: row.day });
+  for (const row of ctx.rows) for (const t of row.sets[pick] || []) if (t.reps <= R && !(byRep.get(t.reps)?.kg >= t.kg)) byRep.set(t.reps, { ...t, day: row.day, week: row.week, rec: row.rec });
   const actual = [...byRep.values()].sort((a, b) => a.reps - b.reps);
-  const goals = [ctx.week, ctx.week + 1].filter(w => w <= WEEKS.length && WEEKS[w - 1]).map(w => ({ w, r: WEEKS[w - 1], kg: goalKg(l, m.est, WEEKS[w - 1]) }));
+  const f = ctx.form[pick];
+  const goals = [ctx.week, ctx.week + 1].filter(w => w <= WEEKS.length && WEEKS[w - 1]).map(w => ({ w, r: WEEKS[w - 1], kg: goalFor(l, WEEKS[w - 1]) }));
   const ys = [...theory.map(p => p.kg), ...actual.map(p => p.kg), ...goals.map(g => g.kg)];
   const step = 10;
   let lo = Math.floor(Math.min(...ys) / step) * step, hi = Math.ceil(Math.max(...ys) / step) * step;
@@ -232,9 +256,10 @@ function drawChart() {
     ${actual.length > 1 ? `<path class="ac" d="${line(actual)}"></path>` : ''}
     ${goals.map((g, i) => `<circle class="gl${i ? ' gl-next' : ''}" cx="${x(g.r)}" cy="${y(g.kg)}" r="7" data-tip="Week ${g.w} goal: ${kgText(l, g.kg)} &times; ${g.r}"></circle>
       <text class="gl-t" x="${x(g.r)}" y="${y(g.kg) - 14}" text-anchor="middle">W${g.w}: ${kgText(l, g.kg)}</text>`).join('')}
-    ${actual.map(p => `<circle class="ac-d" cx="${x(p.reps)}" cy="${y(p.kg)}" r="5" data-tip="Actual, ${repsText(p.reps)}: ${kgText(l, p.kg)} on ${short(p.day)}"></circle>`).join('')}
+    ${actual.map(p => `<circle class="ac-d" cx="${x(p.reps)}" cy="${y(p.kg)}" r="5" data-tip="Actual, ${repsText(p.reps)}: ${kgText(l, p.kg)}, ${when(p)}"></circle>`).join('')}
   </svg>`;
-  $('chartNote').innerHTML = `Theory from ${kgText(l, m.kg)} &times; ${m.reps} on ${short(m.day)}: an estimated max of ${kgText(l, half(m.est))}${l.body ? `, at ${BW} kg bodyweight` : ''}. A set above the line raises the max and every goal after it.`;
+  $('chartNote').innerHTML = `Theory from my best set, ${kgText(l, m.kg)} &times; ${m.reps} (${when(m)}): an estimated max of ${kgText(l, half(m.est))}${l.body ? `, at ${BW} kg bodyweight` : ''}. `
+    + `The goals come from my last week, ${kgText(l, f.kg)} &times; ${f.reps} (${when(f)}): an estimated max of ${kgText(l, half(f.est))}. A goal is one 2.5 kg step above that theory, or above my best set at those reps if higher.`;
 }
 let rs = 0, lastW = 0;
 addEventListener('resize', () => { cancelAnimationFrame(rs); rs = requestAnimationFrame(() => { const w = $('chart').clientWidth; if (w !== lastW) { lastW = w; drawChart(); } }); });
@@ -264,7 +289,7 @@ function drawLog() {
     const l = LIFT.get(id), g = got[id];
     return `<div class="log-row" data-id="${id}">
       <span class="log-n">${l.name}${l.body ? '<small>kg added</small>' : ''}</span>
-      <label class="fld"><span>kg</span><input type="number" inputmode="decimal" step="0.5" min="0" max="500" name="kg" value="${g?.kg ?? ''}" placeholder="${target && ctx.maxes[id] ? goalKg(l, ctx.maxes[id].est, target) : 0}"></label>
+      <label class="fld"><span>kg</span><input type="number" inputmode="decimal" step="0.5" min="0" max="500" name="kg" value="${g?.kg ?? ''}" placeholder="${target && ctx.form[id] ? goalFor(l, target) : 0}"></label>
       <label class="fld"><span>Reps</span><input type="number" inputmode="numeric" step="1" min="1" max="30" name="reps" value="${g?.reps ?? target}" placeholder="${target || 5}"></label>
     </div>`;
   }).join('');
@@ -347,6 +372,9 @@ addEventListener('scroll', () => { tip.hidden = true; }, { passive: true });
 function drawAll() {
   ctx.rows = program();
   ctx.maxes = Object.fromEntries(LIFTS.map(l => [l.id, best(ctx.rows, l.id)]).filter(([, b]) => b));
+  ctx.week = Math.max(1, Math.min(WEEKS.length, weekOf(today)));
+  ctx.form = Object.fromEntries(LIFTS.map(l => [l.id, formOf(l.id)]).filter(([, b]) => b));
+  ctx.nextId = next(lastType(ctx.rows.filter(r => !r.rec)) || DAYS[DAYS.length - 1].id);
   drawNow();
   if (!pick) pick = DAY.get(ctx.nextId).lifts.find(id => ctx.maxes[id]) || LIFTS.find(l => ctx.maxes[l.id])?.id || LIFTS[0].id;
   drawWave();
