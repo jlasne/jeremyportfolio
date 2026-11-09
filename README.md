@@ -31,6 +31,12 @@ switch.
 - **`/personal` · Personal.** Wellness (`/wellness`), tasu (tasu.ai) and
   Claude Portfolio (claudeportfolio.com, "World-Investment Management
   Intelligence."), three cells
+- **`/workout` · Workout.** My strength program: 3 sessions a week (push,
+  pull, legs), 11 weeks of 1, 3, 5, 7, 9 reps, a light week, then 9 down to 1,
+  to max the pull-up, dip, squat, deadlift and bench. It reads the Gym sessions
+  of the wellness log: every 3 sessions from 20 Oct 2026 is one program week,
+  and each session's top set per lift is its max. The log form saves into that
+  same day of the wellness log, with the passphrase of `/wellness`
 - `/creators` redirects (308) to creatormatch.app
 
 ### The newsletter
