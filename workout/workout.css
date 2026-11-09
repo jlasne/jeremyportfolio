@@ -57,22 +57,11 @@
 /* ---- the maxes: one card per lift, then the table ---- */
 .lifts { display: grid; grid-template-columns: repeat(5, 1fr); list-style: none; border-bottom: 1px solid var(--fg-12); }
 .lift { display: grid; align-content: start; gap: 4px; min-width: 0; padding: 24px clamp(14px, 2vw, 22px) 22px; }
-.lift + .lift { border-left: 1px solid var(--fg-12); }
 .lift-n { font: 500 11px/1.4 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--fg-60); }
 .lift-v { font-size: clamp(24px, 3vw, 30px); line-height: 1.1; font-weight: 800; letter-spacing: -.02em; }
 .lift-none { color: var(--fg-25); }
 .lift-s { font-size: 12px; line-height: 1.45; color: var(--fg-60); }
-.spark { width: 100%; height: 48px; margin-top: 10px; overflow: visible; }
-.spark path { fill: none; stroke: var(--blue); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.spark circle { fill: var(--blue); stroke: var(--bg); stroke-width: 2; cursor: default; }
-@media (max-width: 799px) {
-  .lifts { grid-template-columns: repeat(2, 1fr); }
-  .lift + .lift { border-left: 0; }
-  .lift { border-top: 1px solid var(--fg-12); padding-inline: var(--pad); }
-  .lift:nth-child(-n+2) { border-top: 0; }
-  .lift:nth-child(even) { border-left: 1px solid var(--fg-12); }
-  .lift:last-child:nth-child(odd) { grid-column: 1 / -1; }
-}
+@media (max-width: 799px) { .lifts { grid-template-columns: repeat(2, 1fr); } .lifts .lift { padding-inline: var(--pad); } }
 
 .table-wrap { overflow-x: auto; border-bottom: 1px solid var(--fg-12); }
 .maxtab { width: 100%; min-width: 560px; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
@@ -130,4 +119,57 @@
 /* site.css draws a hairline between the cells of .grid: keep it off the exercise rows */
 .days-grid .ex li { border: 0 !important; }
 .log-lock .fld input { width: min(100%, 280px); }
-.spark .track { stroke: var(--fg-12); stroke-width: 1; stroke-dasharray: 2 4; }
+
+/* ---- the total ---- */
+.total { display: grid; grid-template-columns: 1.4fr 1fr; border-bottom: 1px solid var(--fg-12); }
+.total > div { display: grid; align-content: start; gap: 6px; padding: 28px var(--pad) 30px; }
+.total-side { border-left: 1px solid var(--fg-12); }
+.total-v { font-size: clamp(44px, 9vw, 72px); line-height: 1; font-weight: 800; letter-spacing: -.035em; color: var(--blue); font-variant-numeric: tabular-nums; }
+.total-s { font-size: clamp(30px, 5vw, 40px); line-height: 1.05; font-weight: 800; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+@media (max-width: 599px) { .total { grid-template-columns: 1fr; } .total-side { border-left: 0; border-top: 1px solid var(--fg-12); } }
+.now-line b { color: var(--fg); }
+
+/* ---- the lift cards pick the chart ---- */
+.lifts > li { display: flex; min-width: 0; }
+.lifts > li + li { border-left: 1px solid var(--fg-12); }
+.lifts .lift { width: 100%; border: 0 !important; background: none; text-align: left; font: inherit; color: inherit; cursor: pointer; transition: background .15s; }
+.lifts .lift:hover { background: var(--fg-06); }
+.lifts .lift.is-on { background: color-mix(in srgb, var(--blue) 9%, transparent); box-shadow: inset 0 -2px 0 var(--blue); }
+.lift-g { margin-top: 6px; font: 500 11px/1.4 var(--mono); color: var(--fg-80); }
+@media (max-width: 799px) {
+  .lifts > li + li { border-left: 0; }
+  .lifts > li { border-top: 1px solid var(--fg-12); }
+  .lifts > li:nth-child(-n+2) { border-top: 0; }
+  .lifts > li:nth-child(even) { border-left: 1px solid var(--fg-12); }
+  .lifts > li:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .lifts .lift { border-top: 0 !important; }
+}
+
+/* ---- the chart: theory (dashed), actual (solid), goals (rings) ---- */
+.chart-wrap { padding: 22px var(--pad) 20px; border-bottom: 1px solid var(--fg-12); }
+.chart-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; margin-bottom: 8px; }
+.chart-head b { font-size: 19px; font-weight: 700; }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; list-style: none; font-size: 13px; color: var(--fg-80); }
+.legend li { display: inline-flex; align-items: center; gap: 7px; }
+.legend i { display: inline-block; width: 22px; height: 0; }
+.lg-th { border-top: 2px dashed var(--fg-40); }
+.lg-ac { border-top: 2px solid var(--blue); }
+.lg-gl { width: 12px !important; height: 12px !important; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--cm); }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart .grid-l { stroke: var(--fg-12); stroke-width: 1; }
+.chart .ax { font: 500 12px var(--mono); fill: var(--fg-60); }
+.chart .ax-t { fill: var(--fg-40); font-size: 11px; }
+.chart .th { fill: none; stroke: var(--fg-40); stroke-width: 2; stroke-dasharray: 6 6; stroke-linecap: round; }
+.chart .ac { fill: none; stroke: var(--blue); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart .ac-d { fill: var(--blue); stroke: var(--bg); stroke-width: 2; }
+.chart .hit { fill: transparent; }
+.chart .gl { fill: var(--bg); stroke: var(--cm); stroke-width: 2.5; }
+.chart .gl-next { stroke-dasharray: 3 3; }
+.chart .gl-t { font: 600 12px var(--sans); fill: var(--fg); }
+.chart-empty { padding: 40px 0; font-size: 15px; color: var(--fg-60); }
+.chart-note { margin-top: 10px; max-width: 64ch; font-size: 13px; line-height: 1.6; color: var(--fg-60); }
+
+/* the table: the goals still to come, in green; this week marked */
+.maxtab td.goal { color: var(--fg-60); font-weight: 500; font-style: italic; }
+.maxtab tr.cur th, .maxtab tr.cur td { background: color-mix(in srgb, var(--blue) 7%, transparent); }
+.maxtab tr.cur th { color: var(--fg); }

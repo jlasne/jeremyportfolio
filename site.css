@@ -284,6 +284,10 @@ a.row:hover .row-go { color: var(--fg); transform: translate(2px, -2px); }
 .cell:hover b { color: var(--blue); }
 .cell-line { font-size: 14px; line-height: 1.55; color: var(--fg-80); }
 .cell-url { margin-top: auto; padding-top: 10px; font: 11px var(--mono); color: var(--fg-40); }
+/* four cells: two rows of two */
+.grid-4 { grid-template-columns: repeat(2, 1fr); }
+.grid-4 li:nth-child(odd) { border-left: 0; }
+.grid-4 li:nth-child(n+3) { border-top: 1px solid var(--fg-12); }
 @media (max-width: 719px) {
   .grid { grid-template-columns: 1fr; }
   .grid li + li { border-left: 0; border-top: 1px solid var(--fg-12); }

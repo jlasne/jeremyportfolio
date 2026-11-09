@@ -55,7 +55,7 @@
   <main>
     <section class="hero page-hero" data-ocean="avoid" data-fade="0">
       <h1 class="reveal"><b>Workout.</b> 3 sessions a week, 11 weeks, 5 lifts to max.</h1>
-      <p class="lede reveal" style="--d:80">The goal: my heaviest pull-up, dip, squat, deadlift and bench. Push, pull, legs, then again. I log the max of every session.</p>
+      <p class="lede reveal" style="--d:80">The goal: the highest total of my 5 maxes, pull-up, dips, squat, deadlift and bench. Push, pull, legs, then again. I log the top set of every session.</p>
     </section>
 
     <!-- now: the week, its reps, the next session -->
@@ -91,16 +91,45 @@
       <p class="tags-note"><span class="tag tag-max">Max</span> a goal lift: log its top set. <span class="tag">Complement</span> wrist, core, iso holds and barbell row.</p>
     </section>
 
-    <!-- the maxes: the best per lift, then week by week -->
+    <!-- the goal: the total of the five maxes -->
+    <section class="sec" id="total" aria-labelledby="total-t">
+      <div class="sec-head"><h2 id="total-t">The goal: my total</h2><span>5 lifts</span></div>
+      <div class="total">
+        <div class="total-main">
+          <span class="now-week">Estimated total</span>
+          <b class="total-v" id="totalV">&ndash;</b>
+          <span class="now-line" id="totalLine">Loading the log&hellip;</span>
+        </div>
+        <div class="total-side">
+          <span class="now-week">Lifted for 1 rep</span>
+          <b class="total-s" id="totalTested">&ndash;</b>
+          <span class="now-line">The heaviest single of each lift, added up.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- the maxes: the best per lift, its chart, then week by week -->
     <section class="sec" id="maxes" aria-labelledby="maxes-t">
       <div class="sec-head"><h2 id="maxes-t">Maxes</h2><span id="maxCount">&nbsp;</span></div>
       <ul class="lifts" id="liftCards"></ul>
+      <div class="chart-wrap">
+        <div class="chart-head">
+          <b id="chartT">&nbsp;</b>
+          <ul class="legend" aria-label="Legend">
+            <li><i class="lg-th"></i>Theory</li>
+            <li><i class="lg-ac"></i>Actual</li>
+            <li><i class="lg-gl"></i>Goal</li>
+          </ul>
+        </div>
+        <div class="chart" id="chart"></div>
+        <p class="chart-note" id="chartNote"></p>
+      </div>
       <div class="table-wrap">
         <table class="maxtab" id="maxTable">
-          <caption class="sr-only">Top set of each lift, week by week</caption>
+          <caption class="sr-only">Top set of each lift per week, and the goal of each week to come</caption>
         </table>
       </div>
-      <p class="tags-note">Pull-up and dip: the weight added to my body. Estimated 1-rep max (Epley): weight &times; (1 + reps &divide; 30).</p>
+      <p class="tags-note">The maths, after <a class="u" href="https://www.maximehouel.com/myprogress/" target="_blank" rel="noopener">maximehouel.com/myprogress</a> (Epley): max = weight &times; (1 + reps &divide; 30). Pull-up and dips count my 85 kg body in the load, then show the weight added. A goal is the next 2.5 kg step above the theory weight for that week's reps: making it sets a new max.</p>
     </section>
 
     <!-- the log: today's top sets, saved with my wellness log -->
