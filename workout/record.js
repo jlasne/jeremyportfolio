@@ -1,5 +1,5 @@
-/* jeremylasne.com/workout: the top sets I gave by hand, week by week, for the
-   weeks the wellness log holds only part of. Each set is [kg, reps]; pull-up
+/* jeremylasne.com/workout: the top sets of each week, given by hand in a
+   Claude Code chat and added here, one week per line. Each set is [kg, reps]; pull-up
    and dips count the weight added. The page adds them to the log's sets:
    the maxes, the chart and the table read both. */
 export const RECORD = {

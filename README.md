@@ -41,8 +41,8 @@ switch.
   One chart per lift: the theory line for 1 to 10 reps, the actual best at each
   rep count, and the goals of this week and the next. A goal comes from my last
   week: the next 2.5 kg step above its theory, or above my best set at those
-  reps if higher. The log form saves into that same day of the wellness log, with the
-  passphrase of `/wellness`
+  reps if higher. The page is read only: I give each week's top sets in a
+  Claude Code chat and they go into `workout/record.js`
 - `/creators` redirects (308) to creatormatch.app
 
 ### The newsletter

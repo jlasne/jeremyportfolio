@@ -1,20 +1,17 @@
 /* jeremylasne.com/workout: the program, the 11-week wave, the maxes and the log.
 
-   The maxes live in the wellness log (the same server as /wellness): each
-   session is a Gym session of that day, each max an exercise of it (a name,
-   reps, kg). So a max logged here shows on /wellness/details too, and the
-   maxes logged there show here.
+   Read only. The sets come from two places: workout/record.js, the top sets
+   of each week I give by hand, and the Gym sessions of the wellness log (the
+   same server as /wellness), each exercise a name, reps and kg.
 
-   Program weeks are calendar weeks, Monday to Sunday, from START. The top
-   sets I gave by hand live in record.js and count with the log's. */
+   Program weeks are calendar weeks, Monday to Sunday, from START. */
 
-import { state, load, api, today, entry, allSessions, copy, esc, short } from '/wellness/data.js';
-import { exercises, daysBetween, shift, SPEC } from '/wellness/spec.js';
+import { load, today, allSessions, esc, short } from '/wellness/data.js';
+import { exercises, daysBetween, shift } from '/wellness/spec.js';
 import { RECORD } from '/workout/record.js';
 
 /* the Monday of week 1 */
 const START = '2026-10-19';
-const PER_WEEK = 3;
 const WEEKS = [1, 3, 5, 7, 9, 0, 9, 7, 5, 3, 1]; /* 0: the light week */
 
 /* the five goal lifts; `body` lifts are logged as the weight added to me */
@@ -47,7 +44,6 @@ const $ = id => document.getElementById(id);
 const repsText = r => r === 0 ? 'Light' : r === 1 ? '1 rep' : `${r} reps`;
 const kgText = (l, kg) => `${l.body && kg > 0 ? '+' : ''}${kg} kg`;
 
-let pass = ''; try { pass = localStorage.getItem('bio.pass') || ''; } catch {}
 
 /* ── the maths: Epley, as maximehouel.com/myprogress estimates its maxes ──
 
@@ -69,34 +65,26 @@ const goalKg = (l, e, reps) => (Math.floor(repMax(l, e, reps) / 2.5 + 1e-9) + 1)
 
 const weekOf = day => Math.floor(daysBetween(START, day) / 7) + 1;
 
-/* every Gym session since START, in order, with its week, its type
-   (read from its lifts, else the next in the push, pull, legs turn) and
-   every set of each goal lift; then the weeks of record.js, one row each */
+/* every Gym session since START, in order, with its week and every set of
+   each goal lift; then the weeks of record.js, one row each */
 function program() {
   return [...sessions(), ...Object.entries(RECORD).map(([w, lifts]) => ({
-    rec: true, week: +w, day: shift(START, w * 7 - 1), type: 'mix',
+    rec: true, week: +w, day: shift(START, w * 7 - 1),
     sets: Object.fromEntries(Object.entries(lifts).map(([id, list]) => [id, list.map(([kg, reps]) => ({ kg, reps }))])),
   }))];
 }
 function sessions() {
   const list = allSessions().filter(s => s.s === 'lift' && s.day >= START);
-  let last = null;
-  return list.map((s, i) => {
+  return list.map(s => {
     const sets = {};
     for (const x of exercises(s)) {
       const l = liftOf(x.n);
       if (!l || !(x.kg >= 0)) continue;
       (sets[l.id] ||= []).push({ kg: x.kg, reps: x.reps || 1 });
     }
-    const has = DAYS.map(d => d.lifts.filter(id => sets[id]).length);
-    const top = Math.max(...has);
-    const type = top > 0 && has.filter(n => n === top).length === 1 ? DAYS[has.indexOf(top)].id : top > 0 ? 'mix' : next(last);
-    if (type !== 'mix') last = type;
-    return { day: s.day, i, week: weekOf(s.day), type, sets };
+    return { day: s.day, week: weekOf(s.day), sets };
   });
 }
-const next = last => DAYS[(DAYS.findIndex(d => d.id === last) + 1) % DAYS.length].id;
-const lastType = rows => [...rows].reverse().find(r => r.type !== 'mix')?.type || null;
 
 /* the best set of a lift over some sessions: the highest estimated max
    (only sets of `reps` reps, when given) */
@@ -126,16 +114,13 @@ function formOf(id) {
 
 /* ── drawing ────────────────────────────────────────────────────────── */
 
-let ctx = { rows: [], week: 1, nextId: 'push', maxes: {}, form: {} };
+let ctx = { rows: [], week: 1, maxes: {}, form: {} };
 
 function drawNow() {
-  const log = ctx.rows.filter(r => !r.rec), now = weekOf(today);
-  const finished = now > WEEKS.length;
-  const week = Math.max(1, Math.min(WEEKS.length, now));
-  const slot = Math.min(PER_WEEK - 1, log.filter(r => r.week === now).length);
-  const nextId = next(lastType(log) || DAYS[DAYS.length - 1].id);
-  const d = DAY.get(nextId), reps = finished ? 0 : WEEKS[week - 1];
-  $('nowCount').textContent = `${log.length} sessions logged`;
+  const now = weekOf(today), finished = now > WEEKS.length;
+  const week = Math.max(1, Math.min(WEEKS.length, now)), reps = finished ? 0 : WEEKS[week - 1];
+  const mon = shift(START, (week - 1) * 7);
+  $('nowCount').textContent = `${short(mon)} to ${short(shift(mon, 6))}`;
   if (finished) {
     $('nowWeek').textContent = 'Program done';
     $('nowReps').textContent = '11 weeks';
@@ -144,14 +129,11 @@ function drawNow() {
     $('nowWeek').textContent = `Week ${week} of ${WEEKS.length}`;
     $('nowReps').textContent = reps ? `${repsText(reps)} per set` : 'Light week';
     $('nowLine').textContent = reps
-      ? `Session ${slot + 1} of ${PER_WEEK} this week. Work up to the heaviest set of ${repsText(reps)}.`
-      : `Session ${slot + 1} of ${PER_WEEK} this week. About 60 % of my max, to recover before the way down.`;
+      ? `3 sessions: push, pull, legs. Work up to the heaviest set of ${repsText(reps)} on each goal lift.`
+      : '3 sessions at about 60 % of my max, to recover before the way down.';
   }
-  $('nowDay').textContent = d.name;
-  $('nowLifts').innerHTML = d.lifts.map(id => {
-    const l = LIFT.get(id), m = ctx.form[id];
-    return reps && m ? `${l.name}: goal <b>${kgText(l, goalFor(l, reps))} &times; ${reps}</b>` : `${l.name}: ${reps ? `test a set of ${reps}` : 'light'}`;
-  }).join('<br>');
+  $('nowGoals').innerHTML = LIFTS.map(l => `<li><span>${l.name}</span><b>${
+    !reps ? 'Light' : ctx.form[l.id] ? `${kgText(l, goalFor(l, reps))} &times; ${reps}` : `test ${reps} reps`}</b></li>`).join('');
 }
 
 function drawWave() {
@@ -167,8 +149,8 @@ function drawWave() {
 }
 
 function drawDays() {
-  $('dayGrid').innerHTML = DAYS.map(d => `<li><div class="cell day${d.id === ctx.nextId ? ' is-next' : ''}">
-    <span class="day-h"><b>${d.name}</b>${d.id === ctx.nextId ? '<span class="tag tag-max">Next</span>' : ''}</span>
+  $('dayGrid').innerHTML = DAYS.map(d => `<li><div class="cell day">
+    <span class="day-h"><b>${d.name}</b></span>
     <ol class="ex">${d.list.map(([n, k]) => `<li class="${k === M ? 'ex-max' : k === C ? 'ex-c' : ''}">${esc(n)}${k === M ? '<span class="tag tag-max">Max</span>' : ''}</li>`).join('')}</ol>
   </div></li>`).join('');
 }
@@ -269,93 +251,6 @@ document.addEventListener('click', e => {
   pick = b.dataset.id; drawMaxes();
 });
 
-/* ── the log ────────────────────────────────────────────────────────── */
-
-let logType = 'push';
-
-function rowsFor(day) {
-  /* what that day already holds, to start from */
-  const s = (entry(day)?.sessions || []).filter(x => x.s === 'lift').pop();
-  const got = {};
-  for (const x of s ? exercises(s) : []) { const l = liftOf(x.n); if (l && (!got[l.id] || x.kg > got[l.id].kg)) got[l.id] = x; }
-  return got;
-}
-
-function drawLog() {
-  const day = $('logDay').value || today;
-  $('logType').innerHTML = DAYS.map(d => `<button type="button" role="radio" aria-checked="${d.id === logType}" data-id="${d.id}">${d.name}</button>`).join('');
-  const got = rowsFor(day), target = WEEKS[ctx.week - 1] || '';
-  $('logRows').innerHTML = DAY.get(logType).lifts.map(id => {
-    const l = LIFT.get(id), g = got[id];
-    return `<div class="log-row" data-id="${id}">
-      <span class="log-n">${l.name}${l.body ? '<small>kg added</small>' : ''}</span>
-      <label class="fld"><span>kg</span><input type="number" inputmode="decimal" step="0.5" min="0" max="500" name="kg" value="${g?.kg ?? ''}" placeholder="${target && ctx.form[id] ? goalFor(l, target) : 0}"></label>
-      <label class="fld"><span>Reps</span><input type="number" inputmode="numeric" step="1" min="1" max="30" name="reps" value="${g?.reps ?? target}" placeholder="${target || 5}"></label>
-    </div>`;
-  }).join('');
-  $('logLock').hidden = !!pass;
-  $('logState').textContent = pass ? 'Unlocked' : 'Locked';
-}
-
-$('logType').addEventListener('click', e => {
-  const b = e.target.closest('button[data-id]');
-  if (!b) return;
-  logType = b.dataset.id; drawLog();
-});
-$('logDay').addEventListener('change', drawLog);
-
-const say = (t, ok) => { $('logMsg').textContent = t; $('logMsg').className = 'log-msg' + (ok === true ? ' ok' : ok === false ? ' bad' : ''); };
-
-$('logForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const day = $('logDay').value;
-  if (!day || day < START || day > today) return say(`Pick a day from ${short(START)} to today.`, false);
-  const sets = [...$('logRows').querySelectorAll('.log-row')].map(r => ({
-    l: LIFT.get(r.dataset.id), kg: r.querySelector('[name=kg]').value, reps: r.querySelector('[name=reps]').value,
-  })).filter(x => x.kg !== '');
-  if (!sets.length) return say('Type the kg of at least one lift.', false);
-  for (const x of sets) {
-    const kg = Number(x.kg), reps = Number(x.reps || 1);
-    if (!(kg >= 0 && kg <= 500) || !(reps >= 1 && reps <= 30)) return say(`${x.l.name}: kg from 0 to 500, reps from 1 to 30.`, false);
-    x.kg = kg; x.reps = Math.round(reps);
-  }
-
-  if (!pass) {
-    const p = $('logPass').value;
-    if (!p) { $('logPass').focus(); return say('Type the passphrase to save.', false); }
-    try { await api('bio.unlock', { passphrase: p }); } catch (err) { return say(err.message, false); }
-    pass = p; $('logPass').value = '';
-    try { localStorage.setItem('bio.pass', pass); } catch {}
-  }
-
-  /* the day as it is, with its Gym session holding the new top sets: one
-     per lift, in place of what that lift had that day */
-  const d = copy(entry(day)); d.day = day;
-  const sessions = d.sessions || [];
-  let s = [...sessions].reverse().find(x => x.s === 'lift');
-  if (!s) {
-    if (sessions.length >= SPEC.perDay) return say(`That day already holds ${SPEC.perDay} sessions.`, false);
-    s = { s: 'lift', f: 'strength' }; sessions.push(s);
-  }
-  const ids = new Set(sets.map(x => x.l.id));
-  const x = exercises(s).filter(ex => !ids.has(liftOf(ex.n)?.id));
-  x.push(...sets.map(t => ({ n: t.l.id, kg: t.kg, reps: t.reps })));
-  if (x.length > SPEC.exMax) return say(`That session already holds ${SPEC.exMax} exercises.`, false);
-  s.x = x; delete s.lift; delete s.kg; delete s.reps;
-  d.sessions = sessions;
-
-  $('logSave').disabled = true; say('Saving…');
-  try {
-    const out = await api('days.save', { passphrase: pass, today, day, entry: d });
-    state.days[day] = out;
-    say(`Saved: ${sets.map(t => `${t.l.name} ${kgText(t.l, t.kg)} × ${t.reps}`).join(', ')}.`, true);
-    drawAll();
-  } catch (err) {
-    if (/Wrong passphrase/.test(err.message)) { pass = ''; try { localStorage.removeItem('bio.pass'); } catch {} drawLog(); }
-    say(err.message, false);
-  } finally { $('logSave').disabled = false; }
-});
-
 /* ── the tooltip: hover or tap on a bar or a dot ────────────────────── */
 const tip = $('tip');
 const show = (el, ev) => {
@@ -374,24 +269,12 @@ function drawAll() {
   ctx.maxes = Object.fromEntries(LIFTS.map(l => [l.id, best(ctx.rows, l.id)]).filter(([, b]) => b));
   ctx.week = Math.max(1, Math.min(WEEKS.length, weekOf(today)));
   ctx.form = Object.fromEntries(LIFTS.map(l => [l.id, formOf(l.id)]).filter(([, b]) => b));
-  ctx.nextId = next(lastType(ctx.rows.filter(r => !r.rec)) || DAYS[DAYS.length - 1].id);
+  if (!pick) pick = LIFTS.find(l => ctx.maxes[l.id])?.id || LIFTS[0].id;
   drawNow();
-  if (!pick) pick = DAY.get(ctx.nextId).lifts.find(id => ctx.maxes[id]) || LIFTS.find(l => ctx.maxes[l.id])?.id || LIFTS[0].id;
   drawWave();
   drawDays();
   drawTotal();
   drawMaxes();
-  if (!drawAll.typed) logType = (() => {
-    /* today already logged: its type; else the next session */
-    const t = ctx.rows.find(r => r.day === ($('logDay').value || today));
-    return t && DAY.has(t.type) ? t.type : ctx.nextId;
-  })();
-  drawLog();
 }
-$('logDay').value = today; $('logDay').max = today; $('logDay').min = START;
-$('logType').addEventListener('click', () => { drawAll.typed = true; });
 drawAll();
-load(pass).then(err => {
-  drawAll();
-  if (err || !state.server) say(err || 'The server is unreachable right now. Try again in a minute.', false);
-});
+load('').then(drawAll, () => {});

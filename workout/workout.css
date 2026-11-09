@@ -1,4 +1,4 @@
-/* jeremylasne.com/workout: the week, the wave of reps, the three sessions, the maxes and the log.
+/* jeremylasne.com/workout: the week, the wave of reps, the three sessions, the total and the maxes.
    Built on site.css: the same column, hairlines, Figtree and Geist Mono. */
 
 .workout .hero h1 { max-width: 22ch; }
@@ -6,14 +6,14 @@
 /* ---- this week: the reps on the left, the next session on the right ---- */
 .now { display: grid; grid-template-columns: 1.4fr 1fr; border-bottom: 1px solid var(--fg-12); }
 .now > div { display: grid; align-content: start; gap: 6px; padding: 28px var(--pad) 30px; }
-.now-next { border-left: 1px solid var(--fg-12); }
+.now-goals { border-left: 1px solid var(--fg-12); }
 .now-week { font: 500 11px/1.4 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--fg-60); }
-.now-reps, .now-day { font-size: clamp(34px, 6vw, 48px); line-height: 1.05; font-weight: 800; letter-spacing: -.03em; }
+.now-reps { font-size: clamp(34px, 6vw, 48px); line-height: 1.05; font-weight: 800; letter-spacing: -.03em; }
 .now-reps { color: var(--blue); }
 .now-line { max-width: 40ch; font-size: 15px; line-height: 1.55; color: var(--fg-80); }
 @media (max-width: 599px) {
   .now { grid-template-columns: 1fr; }
-  .now-next { border-left: 0; border-top: 1px solid var(--fg-12); }
+  .now-goals { border-left: 0; border-top: 1px solid var(--fg-12); }
 }
 
 /* ---- the wave: one bar per week, its height the reps ---- */
@@ -38,7 +38,6 @@
 /* ---- the sessions: three cells, the goal lifts in bold ---- */
 .day { cursor: default; }
 .day:hover { background: none; }
-.day.is-next { background: color-mix(in srgb, var(--blue) 7%, transparent); }
 .day-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
 .day-h b { font: 700 15px/1.3 var(--sans); letter-spacing: .08em; text-transform: uppercase; }
 .ex { display: grid; gap: 7px; list-style: none; counter-reset: ex; }
@@ -76,40 +75,6 @@
 .maxtab tr.empty td, .maxtab tr.empty th { opacity: .7; }
 .maxtab tbody tr:last-child th, .maxtab tbody tr:last-child td { border-bottom: 0; }
 
-/* ---- the log ---- */
-.log { display: grid; gap: 18px; padding: 24px var(--pad) 30px; border-bottom: 1px solid var(--fg-12); }
-.log-top { display: flex; flex-wrap: wrap; gap: 16px 20px; align-items: end; }
-.fld { display: grid; gap: 6px; }
-.fld > span { font: 500 10px/1.4 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--fg-60); }
-.fld input {
-  height: 44px; padding: 0 12px; border: 0; border-radius: 8px; background: var(--fg-06); box-shadow: inset 0 0 0 1px var(--fg-12);
-  font: 16px var(--sans); color: var(--fg); outline: none; transition: box-shadow .15s;
-}
-.fld input:focus { box-shadow: inset 0 0 0 1px var(--blue); }
-.fld input[type="number"] { width: 96px; font-variant-numeric: tabular-nums; }
-.seg { display: inline-flex; padding: 3px; border-radius: 10px; background: var(--fg-06); box-shadow: inset 0 0 0 1px var(--fg-12); }
-.seg button {
-  height: 38px; padding: 0 16px; border: 0; border-radius: 7px; background: none; cursor: pointer;
-  font: 600 14px var(--sans); color: var(--fg-60); transition: background .15s, color .15s;
-}
-.seg button[aria-checked="true"] { background: var(--blue); color: var(--on-blue); }
-.log-rows { display: grid; gap: 12px; }
-.log-row { display: flex; flex-wrap: wrap; align-items: end; gap: 12px 16px; padding-top: 12px; border-top: 1px solid var(--fg-06); }
-.log-n { display: grid; min-width: 110px; align-self: center; font-size: 17px; font-weight: 700; }
-.log-n small { font: 500 11px/1.4 var(--mono); color: var(--fg-60); }
-.log-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; }
-.btn {
-  height: 44px; padding: 0 22px; border: 0; border-radius: 8px; cursor: pointer;
-  background: var(--blue); color: var(--on-blue); font: 600 14px var(--sans); transition: filter .15s, transform .15s;
-}
-.btn:hover { filter: brightness(1.1); }
-.btn:active { transform: scale(.97); }
-.btn:disabled { opacity: .6; cursor: default; }
-.log-msg { font-size: 13px; color: var(--fg-60); }
-.log-msg.ok { color: var(--live); }
-.log-msg.bad { color: #d6453b; }
-:root:not([data-theme="light"]) .log-msg.bad { color: #f0776c; }
-
 /* ---- the tooltip ---- */
 .tip {
   position: fixed; z-index: 40; max-width: 240px; padding: 7px 10px; border-radius: 8px; pointer-events: none;
@@ -118,7 +83,12 @@
 
 /* site.css draws a hairline between the cells of .grid: keep it off the exercise rows */
 .days-grid .ex li { border: 0 !important; }
-.log-lock .fld input { width: min(100%, 280px); }
+
+/* ---- the goals of the week: one line per lift ---- */
+.goals { display: grid; gap: 2px; margin-top: 6px; list-style: none; }
+.goals li { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--fg-06); font-size: 15px; color: var(--fg-80); }
+.goals li:last-child { border-bottom: 0; }
+.goals b { color: var(--fg); font-weight: 700; font-variant-numeric: tabular-nums; }
 
 /* ---- the total ---- */
 .total { display: grid; grid-template-columns: 1.4fr 1fr; border-bottom: 1px solid var(--fg-12); }
