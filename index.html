@@ -26,8 +26,8 @@
 <meta name="twitter:description" content="I'm operating a mobile apps portfolio. Design with taste. Decide with data. Build with creators.">
 <meta name="twitter:image" content="https://www.jeremylasne.com/og-image.png?v=8">
 <script>
-  /* the theme a visitor picked last time; light otherwise */
-  try { if (localStorage.getItem("theme") === "dark") document.documentElement.setAttribute("data-theme", "dark"); } catch (e) {}
+  /* the theme a visitor picked last time; without one, dark from 7 pm to 7 am, light otherwise */
+  (function () { var t = null, h = new Date().getHours(); try { t = localStorage.getItem("theme"); } catch (e) {} if (t === "dark" || (!t && (h >= 19 || h < 7))) document.documentElement.setAttribute("data-theme", "dark"); })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -53,7 +53,7 @@
 
   <main>
     <section class="intro">
-      <h1 class="reveal" data-ocean="avoid" data-fade="0">Hey, I'm <img class="face" src="/media/avatar.webp" alt="" width="512" height="512" fetchpriority="high">Jeremy Lasne.</h1>
+      <h1 class="hero-name" data-ocean="avoid" data-fade="0"><span class="h-hey reveal">Hey, I'm</span> <span class="h-name"><span class="h-l reveal" style="--d:40">Jeremy<img class="face" src="/media/avatar.webp" alt="" width="512" height="512" fetchpriority="high"></span> <span class="h-l reveal" style="--d:90">Lasne.</span></span></h1>
       <p class="reveal" style="--d:80" data-ocean="avoid" data-fade="0">I'm operating a <a class="u" href="#apps"><b><em>mobile apps portfolio</em></b></a>.</p>
       <p class="reveal" style="--d:140" data-type data-ocean="avoid" data-fade="0">Design with <mark class="hl hl-blue">taste</mark>. Decide with <mark class="hl hl-blue">data</mark>. Build with <mark class="hl hl-blue">creators</mark>.<span class="caret" aria-hidden="true"></span></p>
       <ul class="stats reveal" style="--d:200" aria-label="In numbers" data-ocean="avoid" data-fade="0">
@@ -88,19 +88,20 @@
     <section class="sec" id="apps" aria-labelledby="apps-t">
       <div class="sec-head"><h2 id="apps-t">Mobile app portfolio</h2><span>3 apps</span></div>
 
-      <a class="reel tilt" href="https://kaught.app" target="_blank" rel="noopener" aria-label="Kaught, open kaught.app">
+      <div class="deck">
+      <div class="deal"><a class="reel tilt" data-cursor="Open" href="https://kaught.app" target="_blank" rel="noopener" aria-label="Kaught, open kaught.app">
         <img src="/media/apps/kaught.webp" alt="" width="1280" height="720" decoding="async">
         <video data-src="/media/apps/kaught.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
         <span class="reel-tag"><img src="/media/logos/kaught.webp" alt="" width="128" height="128">Kaught<span class="live">Live</span><span class="reel-go" aria-hidden="true">&nearr;</span></span>
-      </a>
+      </a></div>
 
-      <a class="reel reel-hc tilt" href="https://www.healthclass.app" target="_blank" rel="noopener" aria-label="HealthClass, coming soon, open healthclass.app">
+      <div class="deal"><a class="reel reel-hc tilt" data-cursor="Open" href="https://www.healthclass.app" target="_blank" rel="noopener" aria-label="HealthClass, coming soon, open healthclass.app">
         <img src="/media/apps/healthclass.webp" alt="" width="1280" height="720" decoding="async" loading="lazy">
         <video data-src="/media/apps/healthclass.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
         <span class="reel-tag"><img src="/media/logos/healthclass.webp" alt="" width="128" height="128">HealthClass<span class="soon">Coming soon</span><span class="reel-go" aria-hidden="true">&nearr;</span></span>
-      </a>
+      </a></div>
 
-      <div class="mystery tilt" role="group" aria-label="A third app, coming soon, in stealth">
+      <div class="deal"><div class="mystery tilt" data-cursor="Soon" role="group" aria-label="A third app, coming soon, in stealth">
         <span class="mystery-q" aria-hidden="true">?</span>
         <span class="mystery-q mystery-q2" aria-hidden="true">?</span>
         <span class="mystery-q mystery-q3" aria-hidden="true">?</span>
@@ -110,6 +111,7 @@
           <p><span class="redact" aria-hidden="true"></span><span class="redact r2" aria-hidden="true"></span></p>
         </div>
         <span class="pill mystery-pill">Stealth</span>
+      </div></div>
       </div>
     </section>
   </main>

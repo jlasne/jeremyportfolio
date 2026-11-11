@@ -1,8 +1,8 @@
-/* jeremylasne.com, every page: the theme, the nav, the Kaught reel (home), the newsletter (each lesson), the hand-drawn schemas of the lessons, the email links, and on the home the typed subheadline, the numbers and the leaning app cards. */
+/* jeremylasne.com, every page: the theme, the nav, the Kaught reel (home), the newsletter (each lesson), the hand-drawn schemas of the lessons, the email links, and on the home the typed subheadline, the numbers, the name that becomes the mark, the deck of app cards and the cursor. */
 (function () {
   var root = document.documentElement;
 
-  /* The theme: light by default, dark on demand, remembered. The ocean redraws in the new colours. */
+  /* The theme: light by day, dark from 7 pm to 7 am (set in each page head), or the one a visitor picked, remembered. The ocean redraws in the new colours. */
   function paint() {
     var light = root.getAttribute("data-theme") === "light";
     document.querySelectorAll(".theme").forEach(function (b) { b.setAttribute("aria-label", light ? "Switch to the dark theme" : "Switch to the light theme"); });
@@ -213,5 +213,90 @@
       });
       el.addEventListener("pointerleave", function () { el.classList.remove("on"); });
     });
+  }
+  /* The name slides and shrinks into the mark at the top right as the page scrolls, then hands over to it. */
+  var big = document.querySelector(".h-name"), mark = document.querySelector(".home .mark");
+  if (big && mark && !calm) {
+    var from, to, run;
+    var place = function () {
+      big.style.transform = "";
+      var r = big.getBoundingClientRect(), range = document.createRange();
+      range.selectNodeContents(mark);
+      var m = range.getBoundingClientRect();
+      from = { x: r.left, y: r.top + scrollY, w: r.width, h: r.height };
+      to = { x: m.left, y: m.top, w: m.width, h: m.height };
+      run = Math.max(220, Math.min(innerHeight * .55, 460));
+      morph();
+    };
+    var morph = function () {
+      if (!from) return;
+      /* it shrinks faster than it travels, so it stays on screen on the way */
+      var p = Math.min(1, Math.max(0, scrollY / run)), e = p * p * (3 - 2 * p), q = 1 - Math.pow(1 - p, 3);
+      var k = 1 + (to.w / from.w - 1) * q;
+      var x = (to.x - from.x) * e, y = (to.y + to.h / 2 - from.h * k / 2 - (from.y - scrollY)) * e;
+      big.style.transform = p ? "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px) scale(" + k.toFixed(4) + ")" : "";
+      var hand = Math.min(1, Math.max(0, (p - .78) / .22));
+      big.style.opacity = 1 - hand;
+      big.style.visibility = hand === 1 ? "hidden" : "";
+      mark.style.opacity = hand;
+    };
+    var ticking = false;
+    addEventListener("scroll", function () {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () { ticking = false; morph(); });
+    }, { passive: true });
+    addEventListener("resize", place);
+    place();
+    setTimeout(place, 800);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
+  }
+
+  /* The deck: the sheet under the one sliding over it shrinks to 92% and dims, as the next covers it. */
+  var deals = Array.prototype.slice.call(document.querySelectorAll(".deal"));
+  if (deals.length > 1 && !calm) {
+    var stack = function () {
+      for (var k = 0; k < deals.length - 1; k++) {
+        var a = deals[k].getBoundingClientRect(), b = deals[k + 1].getBoundingClientRect();
+        var cover = Math.min(1, Math.max(0, (a.bottom - b.top) / a.height));
+        deals[k].style.transform = cover ? "scale(" + (1 - .08 * cover).toFixed(4) + ")" : "";
+        deals[k].style.setProperty("--dim", (cover * .55).toFixed(3));
+      }
+    };
+    var stacking = false;
+    addEventListener("scroll", function () {
+      if (stacking) return;
+      stacking = true;
+      requestAnimationFrame(function () { stacking = false; stack(); });
+    }, { passive: true });
+    addEventListener("resize", stack);
+    stack();
+  }
+
+  /* The cursor, on the home with a mouse: a ring that trails the pointer, grows on a link,
+     and says what a card does. The sharks already follow the pointer (ocean.js). */
+  if (document.body.classList.contains("home") && matchMedia("(hover: hover) and (pointer: fine)").matches && !calm) {
+    var ring = document.createElement("div"), label = document.createElement("span");
+    ring.className = "cursor off"; ring.setAttribute("aria-hidden", "true"); ring.appendChild(label);
+    document.body.appendChild(ring);
+    root.classList.add("ring");
+    var mx = -100, my = -100, rx = -100, ry = -100, moving = false;
+    var follow = function () {
+      rx += (mx - rx) * .28; ry += (my - ry) * .28;
+      ring.style.transform = "translate3d(" + rx.toFixed(1) + "px," + ry.toFixed(1) + "px,0)";
+      if (Math.abs(mx - rx) + Math.abs(my - ry) > .3) requestAnimationFrame(follow); else moving = false;
+    };
+    addEventListener("pointermove", function (e) {
+      if (e.pointerType !== "mouse") return;
+      mx = e.clientX; my = e.clientY;
+      if (ring.classList.contains("off")) { rx = mx; ry = my; ring.classList.remove("off"); }
+      var card = e.target.closest("[data-cursor]"), link = !card && e.target.closest("a, button");
+      ring.classList.toggle("card", !!card);
+      ring.classList.toggle("link", !!link);
+      label.textContent = card ? card.getAttribute("data-cursor") : "";
+      if (!moving) { moving = true; requestAnimationFrame(follow); }
+    }, { passive: true });
+    document.addEventListener("pointerleave", function () { ring.classList.add("off"); });
+    addEventListener("blur", function () { ring.classList.add("off"); });
   }
 })();

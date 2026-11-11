@@ -32,8 +32,8 @@
 <meta name="twitter:description" content="Change your app with data: get 1,000+ users per test, change one thing at a time, run 3 tests at most, ship fixes now and launch new content.">
 <meta name="twitter:image" content="https://www.jeremylasne.com/og-image.png?v=8">
 <script>
-  /* the theme a visitor picked last time; light otherwise */
-  try { if (localStorage.getItem("theme") === "dark") document.documentElement.setAttribute("data-theme", "dark"); } catch (e) {}
+  /* the theme a visitor picked last time; without one, dark from 7 pm to 7 am, light otherwise */
+  (function () { var t = null, h = new Date().getHours(); try { t = localStorage.getItem("theme"); } catch (e) {} if (t === "dark" || (!t && (h >= 19 || h < 7))) document.documentElement.setAttribute("data-theme", "dark"); })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

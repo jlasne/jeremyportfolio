@@ -13,24 +13,27 @@
    sends a ripple and scatters whoever swims near it. Text marked data-ocean
    fades whatever passes under it (to data-fade, 0 hides it), and "avoid"
    also steers the animals away, so the words stay readable. The page sets data-theme on <html> and fires
-   "themechange" when it flips. A visitor who asks for less motion gets one
-   still frame. */
+   "themechange" when it flips. At night (the dark theme) the animals are neon, glow, and leave a
+   trail of light. A visitor who asks for less motion gets one still frame. */
 (function () {
   "use strict";
   var cv = document.getElementById("ocean");
   if (!cv || !cv.getContext) return;
-  var ctx = cv.getContext("2d");
+  var ctx0 = cv.getContext("2d"), ctx = ctx0;
+  var fx = document.createElement("canvas"), fxc = fx.getContext("2d"), blur = "filter" in fxc;
   var root = document.documentElement;
   var still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var TAU = Math.PI * 2;
 
   /* ── colours, per theme ─────────────────────────────────────────────── */
   var THEMES = {
+    /* the night: neon animals that glow and leave a trail of light (draw) */
     dark: {
-      shark:   { body: "#3a5470", hi: "#48647f", rim: "#22324a", ch: "#9cb6cf", rimCh: "#5a7590", fin: "#314963", finCh: "#6f8ba7", ridge: "#2f73a3", ridgeCh: "#bfe6ff", gill: "#0b1420" },
-      hammer:  { body: "#435468", hi: "#516479", rim: "#263345", ch: "#a7b7c8", rimCh: "#62778c", fin: "#38495c", finCh: "#7890a6", ridge: "#3a76a0", ridgeCh: "#c4e7fd", gill: "#0b1420" },
-      narwhal: { body: "#5a6a7c", hi: "#68798c", rim: "#283443", ch: "#b9c7d4", rimCh: "#66798c", fin: "#4b5a6b", finCh: "#8798aa", spot: "#2b3848", spotCh: "#7f92a6", tusk: "#e9dcbd", tuskCh: "#8f7f60" },
-      eye: "#eaf4fb", eyeBg: "#060c17", alpha: .5, fin: .9, fade: .1, dust: "#5fa8d3", dustA: .32, ripple: "#5fa8d3"
+      shark:   { body: "#1d6fb0", hi: "#2b8bd6", rim: "#0f3c66", ch: "#a5e4ff", rimCh: "#3f8fcf", fin: "#185d96", finCh: "#5fb6f0", ridge: "#38bdf8", ridgeCh: "#e6f8ff", gill: "#03101f" },
+      hammer:  { body: "#14808f", hi: "#1aa0b2", rim: "#0b4650", ch: "#a3f3ff", rimCh: "#2fa9ba", fin: "#126f7c", finCh: "#55d2e2", ridge: "#22d3ee", ridgeCh: "#e3fcff", gill: "#03101f" },
+      narwhal: { body: "#4b55c4", hi: "#5f6ae0", rim: "#262d78", ch: "#cdd2ff", rimCh: "#6d76dc", fin: "#4048a8", finCh: "#8d95f0", spot: "#1e2466", spotCh: "#9aa2ff", tusk: "#f5e6c0", tuskCh: "#a08a5a" },
+      eye: "#f0fbff", eyeBg: "#030914", alpha: .55, fin: .9, fade: .1, dust: "#38bdf8", dustA: .4, ripple: "#38bdf8",
+      glow: .55, trail: .34
     },
     light: {
       shark:   { body: "#7f95ab", hi: "#94a8bc", rim: "#b9c7d4", ch: "#25374a", rimCh: "#62778c", fin: "#9aacbe", finCh: "#4b5f74", ridge: "#4f93c2", ridgeCh: "#0b3a5a", gill: "#22364a" },
@@ -181,6 +184,7 @@
     if (!W || !H) return;
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    fx.width = cv.width; fx.height = cv.height;
     /* the grid and the animals grow with the screen, kept small so they stay in the background:
        6px cells on a phone, 8 at 1440px, 11 on a 2K display, the animals at about half their old size */
     C = Math.round(clamp(W / 180, 6, 11));
@@ -421,6 +425,8 @@
   function draw() {
     if (!W) return;
     measure();
+    var night = T.glow && !still;
+    ctx = night ? fxc : ctx0;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
     ctx.font = Math.round(C * .78) + 'px "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
@@ -459,6 +465,26 @@
       });
     });
     ctx.globalAlpha = 1;
+    if (night) light();
+  }
+
+  /* the night: the last frames fade by a third, the new one glows (a blur of itself, added as light), then lands on top */
+  function light() {
+    ctx = ctx0;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.globalAlpha = T.trail; ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, cv.width, cv.height);
+    if (blur) {
+      ctx.globalCompositeOperation = "lighter";
+      ctx.globalAlpha = T.glow;
+      ctx.filter = "blur(" + Math.round(7 * dpr) + "px)";
+      ctx.drawImage(fx, 0, 0);
+      ctx.filter = "none";
+    }
+    ctx.globalCompositeOperation = "source-over";
+    ctx.globalAlpha = 1;
+    ctx.drawImage(fx, 0, 0);
   }
 
   /* ── the loop: 30 frames a second is plenty for a grid ─────────────── */
@@ -482,7 +508,7 @@
   /* ── the visitor ──────────────────────────────────────────────────── */
   marks = Array.prototype.slice.call(document.querySelectorAll("[data-ocean]"));
   theme();
-  window.addEventListener("themechange", function () { theme(); if (still) draw(); });
+  window.addEventListener("themechange", function () { theme(); ctx0.setTransform(1, 0, 0, 1, 0, 0); ctx0.clearRect(0, 0, cv.width, cv.height); draw(); });
   window.addEventListener("resize", resize);
   window.addEventListener("pagehide", keep);
   if (still) window.addEventListener("scroll", draw, { passive: true });

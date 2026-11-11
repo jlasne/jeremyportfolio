@@ -503,3 +503,43 @@ a.row:hover .row-go { color: var(--fg); transform: translate(2px, -2px); }
 .sk-stepsub { font-size: 24px; font-weight: 500; fill: var(--fg-60) !important; }
 .sk-mini2 { font-size: 21px; font-weight: 500; fill: var(--fg); }
 .sk-coin2 { font-size: 46px; font-weight: 700; fill: var(--fg); }
+
+/* ---- the home, bold ---- */
+/* the name, as big as the screen allows: "Hey, I'm" small, then Jeremy (my face) / Lasne.
+   The rise is on the lines, not the h1: an animated h1 would trap the name under the nav as it flies to the mark. */
+.intro h1.hero-name { font-size: clamp(22px, 2.6vw, 30px); line-height: 1.2; margin-bottom: 10px; }
+.h-hey { display: block; font-weight: 600; letter-spacing: -.01em; color: var(--fg-80); margin-bottom: .35em; }
+.h-name {
+  position: relative; z-index: 11; display: block; width: fit-content; transform-origin: 0 0;
+  font-size: clamp(60px, min(18vw, 19vh), 168px); line-height: .9; font-weight: 800; letter-spacing: -.055em;
+}
+.h-l { display: block; width: fit-content; white-space: nowrap; }
+.h-name .face {
+  width: .74em; height: .74em; margin: 0 0 0 .14em; vertical-align: -.04em;
+  box-shadow: 0 0 0 .04em var(--bg), 0 0 0 .055em var(--fg-25);
+}
+
+/* the app cards, a deck: each sheet fills the width of the screen, sticks under the nav,
+   and the next one slides over it; site.js shrinks and dims the one underneath */
+.deck { position: relative; }
+.deal {
+  position: sticky; top: calc(var(--nav-h) + env(safe-area-inset-top)); width: 100vw; margin-left: calc(50% - 50vw);
+  height: min(calc(100svh - var(--nav-h) - env(safe-area-inset-top)), 56.25vw); transform-origin: 50% 0;
+}
+.deal + .deal { box-shadow: 0 -28px 60px -28px rgba(5, 11, 22, .55); }
+.deal > .reel, .deal > .mystery { height: 100%; min-height: 0; aspect-ratio: auto; border-bottom: 0; }
+.deal::after {
+  content: ""; position: absolute; inset: 0; z-index: 4; pointer-events: none; background: #050b16; opacity: var(--dim, 0);
+}
+
+/* the cursor, on the home with a mouse: a ring that grows on a link and says Open on an app */
+html.ring, html.ring * { cursor: none !important; }
+.cursor {
+  position: fixed; left: 0; top: 0; z-index: 100; display: grid; place-items: center; width: 26px; height: 26px; margin: -13px 0 0 -13px;
+  border: 1.5px solid #fff; border-radius: 50%; mix-blend-mode: difference; pointer-events: none; color: transparent;
+  font: 600 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase;
+  transition: width .25s, height .25s, margin .25s, background .25s, border-color .25s, color .2s, opacity .2s;
+}
+.cursor.link { width: 46px; height: 46px; margin: -23px 0 0 -23px; background: #fff; }
+.cursor.card { width: 92px; height: 92px; margin: -46px 0 0 -46px; background: var(--blue); border-color: transparent; mix-blend-mode: normal; color: #fff; }
+.cursor.off { opacity: 0; }

@@ -12,15 +12,19 @@ Every page has the nav: Mobile-Apps, Personal, Wellness-Creators
 the name on top and the three pages on a line under it), and a one-line foot with the theme
 switch.
 
-- **`/` · home.** The hello fills the first screen: "Hey, I'm (my face)
-  Jeremy Lasne.", "I'm operating a mobile apps portfolio." (bold italic, links to
+- **`/` · home.** The hello fills the first screen: "Hey, I'm", then "Jeremy (my
+  face) / Lasne." as big as the screen allows (up to 168 px), which slides and shrinks
+  into the mark at the top right as the page scrolls. Then "I'm operating a mobile apps portfolio." (bold italic, links to
   `#apps`), "Design with taste. Decide with data. Build with creators." ("taste",
   "data" and "creators" highlighted in blue), typed out letter by letter behind a
   blinking caret, then the numbers counted up from 0 (1,000+ Kaught users, 1 app
   live, 2 apps in build, the lessons counted from the list), x / email, and
   "Lessons · Apps ↓" at the bottom. The hello has no veil, so the animals swim
   around the words. One scroll below: The lessons (`#archive`), then the mobile
-  app portfolio (`#apps`), whose cards lean toward the cursor. A visitor who asks
+  app portfolio (`#apps`) as a deck: each card fills the width of the screen, sticks
+  under the nav, and the next slides over it while the one beneath shrinks and dims;
+  the cards lean toward the cursor. With a mouse, the cursor is a ring that grows on a
+  link and says "Open" on an app. A visitor who asks
   for less motion gets the words and numbers as they are. The 1,000+ and the
   app counts are typed in `index.html`: update them by hand. A tap on the email copies it and opens
   a popup: "Copied", the address, and "Write an email" for the mail app
@@ -90,8 +94,9 @@ behind `/wellness` and `/wellness/details` as well.
 - The animals cross from one page to the next: their places are kept for the
   tab on the way out and picked up by the next page, which also crossfades in
   browsers that can
-- Dark by default, light on a click, remembered; the page fires `themechange`
-  and the ocean takes the theme's colours. Less motion: one still frame
+- Light by day, dark from 7 pm to 7 am (the script in each page head), or the theme a
+  visitor picked, remembered; the page fires `themechange` and the ocean takes the
+  theme's colours. At night the animals are neon, glow and leave a trail of light. Less motion: one still frame
 
 ## Stack
 
