@@ -21,11 +21,11 @@ To publish one:
    - `article:published_time` and `article:modified_time` (YYYY-MM-DD)
    - JSON-LD `@graph`: a `BlogPosting` (headline, description, datePublished, dateModified,
      wordCount, keywords, image, author, publisher, mainEntityOfPage, isPartOf) and a
-     `BreadcrumbList` (Home > Mobile apps > the article)
+     `BreadcrumbList` (Home > The lessons `/#archive` > the article)
    - exactly one `<h1>`, `<h2>` per section, `alt` on every image, `role="img"` and an
      `aria-label` on a drawing
-   - one link to `/apps/` (the back link)
-4. Add the article at the top of the list in `/apps/` (`ol.lessons`), with its date and read time.
+   - one link to `/#archive` (the back link)
+4. Add the article at the top of the list on the home page, `index.html` (`ol.lessons`), with its date and read time.
 5. Run `node scripts/sitemap.mjs`: it rewrites `sitemap.xml` and prints "SEO check: every
    article passes", or the list of what to fix. Fix every line, then commit `sitemap.xml` too.
 6. When an article changes, set `dateModified` and `article:modified_time` to that day.

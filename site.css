@@ -95,13 +95,13 @@ img, video { display: block; }
 }
 .mark i { font-style: normal; color: var(--blue); margin: 0 .1em; }
 
-/* ---- the home: the whole screen, a few lines, CreatorMatch in its colour ---- */
-.home .col { display: flex; flex-direction: column; }
-.home main { flex: 1; display: flex; }
+/* ---- the home: the hello fills the screen, the lessons and the apps follow one scroll below ---- */
 .intro {
   display: flex; flex-direction: column; justify-content: center; gap: 18px; width: 100%;
+  min-height: calc(100svh - var(--nav-h) - env(safe-area-inset-top));
   padding: clamp(24px, 6vh, 64px) var(--pad) clamp(40px, 8vh, 80px);
 }
+@media (max-height: 560px) { .intro { min-height: 0; } }
 .intro h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.12; font-weight: 800; letter-spacing: -.03em; margin-bottom: 4px; }
 .intro p:not(.socials) { max-width: 46ch; font-size: clamp(17px, 1.9vw, 19px); line-height: 1.65; color: var(--fg-80); }
 .intro .socials { margin-top: 8px; }

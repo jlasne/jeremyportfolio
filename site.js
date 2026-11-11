@@ -1,4 +1,4 @@
-/* jeremylasne.com, every page: the theme, the nav, the Kaught reel (/apps), the newsletter (/apps and each lesson), the hand-drawn schemas of the lessons and the email links. */
+/* jeremylasne.com, every page: the theme, the nav, the Kaught reel (home), the newsletter (each lesson), the hand-drawn schemas of the lessons and the email links. */
 (function () {
   var root = document.documentElement;
 
