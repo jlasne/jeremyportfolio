@@ -100,8 +100,8 @@ no framework, no bundler. Open it and edit it.
   `/wellness/exp0` only
 - The CreatorMatch, tasu, Kaught and Claude Portfolio logos are in `media/logos`, with my face in `media/avatar.webp`
 - `og-image.png` is generated, not hand-drawn: the home page rendered at
-  1200×630 with larger text and screenshotted. The source is not checked in,
-  so redraw it to match if the copy changes, and bump `?v=` in the meta tags
+  1200×630 with larger text and screenshotted by `scripts/og-image.cjs`. Rerun it
+  when the hello changes, and bump `?v=` in the meta tags
 
 ## Pages
 
