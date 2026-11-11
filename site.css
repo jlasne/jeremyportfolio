@@ -101,7 +101,37 @@ img, video { display: block; }
   min-height: calc(100svh - var(--nav-h) - env(safe-area-inset-top));
   padding: clamp(24px, 6vh, 64px) var(--pad) clamp(40px, 8vh, 80px);
 }
-@media (max-height: 560px) { .intro { min-height: 0; } }
+@media (max-height: 560px) { .intro { min-height: 0; } .intro .scroll-cue { display: none; } }
+.intro { position: relative; }
+/* the hello has no veil: the animals swim around the words, and fade only under them */
+.home .col { background: linear-gradient(to bottom, transparent calc(100svh - 120px), var(--panel) 100svh); }
+
+/* the hello in numbers, counted up from 0 when the page opens */
+.stats { display: flex; flex-wrap: wrap; gap: 14px clamp(22px, 4vw, 40px); margin-top: 6px; list-style: none; padding: 0; width: fit-content; }
+.stats li { display: grid; gap: 2px; }
+.stats b { font-size: clamp(26px, 3.4vw, 34px); line-height: 1.1; font-weight: 800; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.stats li:first-child b { color: var(--blue); }
+.stats span { font: 500 11px/1.4 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--fg-60); }
+@media (max-width: 600px) { .stats { display: grid; grid-template-columns: repeat(2, auto); } }
+
+/* the subheadline types itself out; a highlight shows its colour with its first letter */
+[data-type] .tc { visibility: hidden; }
+[data-type] .tc.on { visibility: visible; }
+[data-type].typing mark:not(.on) { background: transparent; }
+
+/* the app cards lift and lean toward the cursor, a light follows it */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .tilt { transition: transform .5s cubic-bezier(.22,1,.36,1), border-radius .3s, box-shadow .3s; transform-style: preserve-3d; }
+  .tilt.on {
+    transform: perspective(1100px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(.96);
+    border-radius: 14px; box-shadow: 0 24px 60px -24px rgba(5, 11, 22, .45); transition-duration: .12s, .3s, .3s;
+  }
+  .tilt::after {
+    content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0; transition: opacity .3s;
+    background: radial-gradient(420px circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, .22), transparent 60%);
+  }
+  .tilt.on::after { opacity: 1; }
+}
 .intro h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.12; font-weight: 800; letter-spacing: -.03em; margin-bottom: 4px; }
 .intro p:not(.socials) { max-width: 46ch; font-size: clamp(17px, 1.9vw, 19px); line-height: 1.65; color: var(--fg-80); }
 .intro .socials { margin-top: 8px; }

@@ -15,8 +15,14 @@ switch.
 - **`/` · home.** The hello fills the first screen: "Hey, I'm (my face)
   Jeremy Lasne.", "I'm operating a mobile apps portfolio." (bold italic, links to
   `#apps`), "Design with taste. Decide with data. Build with creators." ("taste",
-  "data" and "creators" highlighted in blue), a blinking caret, x / email. One
-  scroll below: The lessons (`#archive`), then the mobile app portfolio (`#apps`). A tap on the email copies it and opens
+  "data" and "creators" highlighted in blue), typed out letter by letter behind a
+  blinking caret, then the numbers counted up from 0 (1,000+ Kaught users, 1 app
+  live, 2 apps in build, the lessons counted from the list), x / email, and
+  "Lessons · Apps ↓" at the bottom. The hello has no veil, so the animals swim
+  around the words. One scroll below: The lessons (`#archive`), then the mobile
+  app portfolio (`#apps`), whose cards lean toward the cursor. A visitor who asks
+  for less motion gets the words and numbers as they are. The 1,000+ and the
+  app counts are typed in `index.html`: update them by hand. A tap on the email copies it and opens
   a popup: "Copied", the address, and "Write an email" for the mail app
 - **`/apps` · redirects to `/#apps`** (308, `vercel.json`). The portfolio on the home:
   the Kaught reel as the card (a tap opens kaught.app); HealthClass, coming

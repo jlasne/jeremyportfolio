@@ -1,4 +1,4 @@
-/* jeremylasne.com, every page: the theme, the nav, the Kaught reel (home), the newsletter (each lesson), the hand-drawn schemas of the lessons and the email links. */
+/* jeremylasne.com, every page: the theme, the nav, the Kaught reel (home), the newsletter (each lesson), the hand-drawn schemas of the lessons, the email links, and on the home the typed subheadline, the numbers and the leaning app cards. */
 (function () {
   var root = document.documentElement;
 
@@ -149,4 +149,69 @@
       else done(false);
     });
   });
+  /* The home. A visitor who asks for less motion gets the words and the numbers as they are. */
+  var calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* The numbers: the lessons are counted from the list, then each counts up from 0 in 1.2 s. */
+  var counts = Array.prototype.slice.call(document.querySelectorAll("[data-count]"));
+  var lessons = document.querySelectorAll("ol.lessons > li").length;
+  counts.forEach(function (b) { if (b.hasAttribute("data-lessons") && lessons) b.setAttribute("data-count", lessons); });
+  var show = function (b, n) { b.textContent = n.toLocaleString("en-US") + (b.getAttribute("data-suffix") || ""); };
+  function countUp() {
+    var t0 = performance.now();
+    (function step(t) {
+      var k = Math.min(1, (t - t0) / 1200), e = 1 - Math.pow(1 - k, 3);
+      counts.forEach(function (b) { show(b, Math.round(+b.getAttribute("data-count") * e)); });
+      if (k < 1) requestAnimationFrame(step);
+    })(t0);
+  }
+  if (counts.length) {
+    if (calm) counts.forEach(function (b) { show(b, +b.getAttribute("data-count")); });
+    /* each number keeps the width of its final value, so the row stays still while it counts */
+    else counts.forEach(function (b) { show(b, +b.getAttribute("data-count")); b.style.minWidth = b.offsetWidth + "px"; show(b, 0); });
+  }
+
+  /* The subheadline types itself, 32 ms a letter and a breath after each full stop; the caret leads.
+     The numbers start counting once the last letter is down. */
+  var typed = document.querySelector("[data-type]");
+  if (typed && !calm) {
+    var caret = typed.querySelector(".caret"), chars = [];
+    (function split(node) {
+      Array.prototype.slice.call(node.childNodes).forEach(function (n) {
+        if (n.nodeType === 3) {
+          var frag = document.createDocumentFragment();
+          n.textContent.split("").forEach(function (ch) {
+            var c = document.createElement("span"); c.className = "tc"; c.textContent = ch; frag.appendChild(c); chars.push(c);
+          });
+          node.replaceChild(frag, n);
+        } else if (n !== caret) split(n);
+      });
+    })(typed);
+    typed.classList.add("typing");
+    var i = 0;
+    var next = function () {
+      if (i >= chars.length) { typed.classList.remove("typing"); typed.appendChild(caret); countUp(); return; }
+      var c = chars[i++], m = c.parentNode;
+      c.classList.add("on");
+      if (m.tagName === "MARK") m.classList.add("on");
+      if (caret) c.parentNode.insertBefore(caret, c.nextSibling);
+      setTimeout(next, c.textContent === "." ? 380 : 32);
+    };
+    setTimeout(next, 650);
+  } else if (counts.length && !calm) setTimeout(countUp, 400);
+
+  /* The app cards lean toward the cursor, up to 4 degrees, and a light follows it. */
+  if (matchMedia("(hover: hover) and (pointer: fine)").matches && !calm) {
+    document.querySelectorAll(".tilt").forEach(function (el) {
+      el.addEventListener("pointermove", function (e) {
+        var r = el.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+        el.style.setProperty("--ry", ((x - .5) * 8).toFixed(2) + "deg");
+        el.style.setProperty("--rx", ((.5 - y) * 6).toFixed(2) + "deg");
+        el.style.setProperty("--gx", (x * 100).toFixed(1) + "%");
+        el.style.setProperty("--gy", (y * 100).toFixed(1) + "%");
+        el.classList.add("on");
+      });
+      el.addEventListener("pointerleave", function () { el.classList.remove("on"); });
+    });
+  }
 })();
