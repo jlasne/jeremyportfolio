@@ -89,6 +89,12 @@ for (const file of pages(ROOT)) {
   }
 }
 
+// Pages another Vercel project serves through vercel.json (no file here): /knowledge is tasu, from the jlasne/brain repo.
+// Its lastmod is kept from the committed sitemap, or today the first time.
+for (const loc of [SITE + "/knowledge/", SITE + "/knowledge/about"]) {
+  urls.push({ loc, lastmod: before[loc] || new Date().toISOString().slice(0, 10), article: false });
+}
+
 // home first, then the pages by URL; articles newest first under their section
 urls.sort((a, b) => (a.loc === SITE + "/" ? -1 : b.loc === SITE + "/" ? 1 :
   a.article && b.article ? (b.lastmod || "").localeCompare(a.lastmod || "") : a.loc.localeCompare(b.loc)));
