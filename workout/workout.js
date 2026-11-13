@@ -195,24 +195,36 @@ function drawTotalChart() {
   const sum = o => Object.values(o).reduce((s, v) => s + v, 0);
   for (let w = 1; w <= Math.min(ctx.week, WEEKS.length); w++) {
     const wr = ctx.rows.filter(r => r.week === w);
+    const up = [];
     for (const l of LIFTS) {
       const b = best(wr, l.id), one = best(wr, l.id, 1);
+      if (b && th[l.id] !== undefined && b.est > th[l.id] + .25) up.push({ l, by: b.est - th[l.id], b });
       if (b) th[l.id] = Math.max(th[l.id] ?? 0, b.est);
       if (one) ac[l.id] = Math.max(ac[l.id] ?? 0, one.kg);
     }
-    if (Object.keys(th).length) theory.push({ w, kg: sum(th), n: Object.keys(th).length });
+    if (Object.keys(th).length) theory.push({ w, kg: sum(th), n: Object.keys(th).length, up });
     if (Object.keys(ac).length) actual.push({ w, kg: sum(ac), n: Object.keys(ac).length });
   }
   if (!theory.length) { box.innerHTML = '<p class="chart-empty">No set yet</p>'; return; }
   const W = Math.max(300, Math.round(box.clientWidth) || 720), H = W < 520 ? 230 : 280, L = 48, Rt = 14, T = 30, B = 40;
   const ys = [...theory, ...actual].map(p => p.kg), step = 10;
-  const lo = Math.floor(Math.min(...ys) / step) * step - step, hi = Math.ceil(Math.max(...ys) / step) * step + step;
+  const room = theory.some(p => p.up.length) ? 3 : 1;
+  const lo = Math.floor(Math.min(...ys) / step) * step - step, hi = Math.ceil(Math.max(...ys) / step) * step + step * room;
   const x = w => L + (w - 1) / (WEEKS.length - 1) * (W - L - Rt);
   const y = v => T + (hi - v) / (hi - lo) * (H - T - B);
   const gap = (hi - lo) / step > 5 ? step * 2 : step;
   const ticks = []; for (let v = Math.ceil(lo / gap) * gap; v <= hi + 1e-9; v += gap) ticks.push(v);
   const line = pts => pts.map((p, i) => `${i ? 'L' : 'M'}${x(p.w).toFixed(1)},${y(p.kg).toFixed(1)}`).join('');
-  const tipOf = (p, what) => `Week ${p.w}, ${what}: ${half(p.kg)} kg (${p.n} of ${LIFTS.length} lifts)`;
+  const tipOf = (p, what) => `Week ${p.w}, ${what}: ${half(p.kg)} kg (${p.n} of ${LIFTS.length} lifts)`
+    + (p.up?.length ? `<br>${p.up.map(u => `${u.l.name} +${half(u.by)} kg, from ${kgText(u.l, u.b.kg)} &times; ${u.b.reps}`).join('<br>')}` : '');
+  /* what pushed the theory up that week: the lift, by how much, and the set */
+  /* labels of neighbouring weeks sit on two levels so they never overlap; a
+     phone shows the lift and the gain, the set stays in the tooltip */
+  const narrow = W < 520, lh = narrow ? 16 : 30;
+  const ups = theory.filter(p => p.up.length).map((p, k) => p.up.map((u, i) => {
+    const ty = y(p.kg) - 14 - (k % 2) * (lh + 4) * p.up.length - (p.up.length - 1 - i) * lh;
+    return `<text class="up-t" x="${x(p.w)}" y="${ty}" text-anchor="middle"><tspan x="${x(p.w)}">${u.l.name} +${half(u.by)} kg</tspan>${narrow ? '' : `<tspan class="up-s" x="${x(p.w)}" dy="-14">${kgText(u.l, u.b.kg)} × ${u.b.reps}</tspan>`}</text>`;
+  }).join('')).join('');
   const lastT = theory[theory.length - 1], lastA = actual[actual.length - 1];
   const tx = W - Rt;
   box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="1-rep max total week by week: theory against actual max">
@@ -223,6 +235,7 @@ function drawTotalChart() {
     <text class="ax ax-t" x="${L - 10}" y="${T - 14}" text-anchor="end">kg</text>
     ${theory.length > 1 ? `<path class="th" d="${line(theory)}"></path>` : ''}
     ${actual.length > 1 ? `<path class="ac" d="${line(actual)}"></path>` : ''}
+    ${ups}
     ${theory.map(p => `<circle class="th-d" cx="${x(p.w)}" cy="${y(p.kg)}" r="4" data-tip="${tipOf(p, 'theory')}"></circle>`).join('')}
     ${actual.map(p => `<circle class="ac-d" cx="${x(p.w)}" cy="${y(p.kg)}" r="5" data-tip="${tipOf(p, 'actual max')}"></circle>`).join('')}
     <text class="gl-t" x="${x(lastT.w) + 10}" y="${y(lastT.kg) + 4}">${half(lastT.kg)} kg</text>

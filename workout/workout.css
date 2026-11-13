@@ -182,3 +182,5 @@
 }
 .chart .th-d { fill: var(--bg); stroke: var(--fg-40); stroke-width: 2; }
 .chart .test-l { stroke: var(--fg-25); stroke-width: 1; stroke-dasharray: 2 4; }
+.chart .up-t { font: 600 12px var(--sans); fill: var(--fg); }
+.chart .up-s { font: 500 11px var(--mono); fill: var(--fg-60); }
