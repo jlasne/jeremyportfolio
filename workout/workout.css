@@ -180,3 +180,5 @@
   .wave-wrap { padding-top: 20px; padding-bottom: 18px; }
   .cell.day { padding-top: 22px; padding-bottom: 22px; }
 }
+.chart .th-d { fill: var(--bg); stroke: var(--fg-40); stroke-width: 2; }
+.chart .test-l { stroke: var(--fg-25); stroke-width: 1; stroke-dasharray: 2 4; }

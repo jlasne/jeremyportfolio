@@ -186,33 +186,47 @@ function drawTotal() {
   drawTotalChart();
 }
 
-/* the theoretical 1-rep max total week by week: solid for the weeks done,
-   dashed for the goals ahead, a ring on the test day */
+/* the 1-rep max total week by week, up to this week: the theory (each lift's
+   best estimated max so far, Epley) against the actual max (each lift's
+   heaviest single so far) */
 function drawTotalChart() {
   const box = $('totalChart');
-  const actual = ctx.path.filter(p => p.did), goal = ctx.path.filter(p => !p.did);
-  if (!actual.length) { box.innerHTML = '<p class="chart-empty">No set yet</p>'; return; }
+  const th = {}, ac = {}, theory = [], actual = [];
+  const sum = o => Object.values(o).reduce((s, v) => s + v, 0);
+  for (let w = 1; w <= Math.min(ctx.week, WEEKS.length); w++) {
+    const wr = ctx.rows.filter(r => r.week === w);
+    for (const l of LIFTS) {
+      const b = best(wr, l.id), one = best(wr, l.id, 1);
+      if (b) th[l.id] = Math.max(th[l.id] ?? 0, b.est);
+      if (one) ac[l.id] = Math.max(ac[l.id] ?? 0, one.kg);
+    }
+    if (Object.keys(th).length) theory.push({ w, kg: sum(th), n: Object.keys(th).length });
+    if (Object.keys(ac).length) actual.push({ w, kg: sum(ac), n: Object.keys(ac).length });
+  }
+  if (!theory.length) { box.innerHTML = '<p class="chart-empty">No set yet</p>'; return; }
   const W = Math.max(300, Math.round(box.clientWidth) || 720), H = W < 520 ? 230 : 280, L = 48, Rt = 14, T = 30, B = 40;
-  const ys = ctx.path.map(p => p.kg), step = 10;
-  let lo = Math.floor(Math.min(...ys) / step) * step - step, hi = Math.ceil(Math.max(...ys) / step) * step + step;
+  const ys = [...theory, ...actual].map(p => p.kg), step = 10;
+  const lo = Math.floor(Math.min(...ys) / step) * step - step, hi = Math.ceil(Math.max(...ys) / step) * step + step;
   const x = w => L + (w - 1) / (WEEKS.length - 1) * (W - L - Rt);
   const y = v => T + (hi - v) / (hi - lo) * (H - T - B);
   const gap = (hi - lo) / step > 5 ? step * 2 : step;
   const ticks = []; for (let v = Math.ceil(lo / gap) * gap; v <= hi + 1e-9; v += gap) ticks.push(v);
   const line = pts => pts.map((p, i) => `${i ? 'L' : 'M'}${x(p.w).toFixed(1)},${y(p.kg).toFixed(1)}`).join('');
-  const lastA = actual[actual.length - 1], test = goal.find(p => p.w === WEEKS.length);
   const tipOf = (p, what) => `Week ${p.w}, ${what}: ${half(p.kg)} kg (${p.n} of ${LIFTS.length} lifts)`;
-  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Theoretical 1-rep max total week by week, up to the test of week 11">
+  const lastT = theory[theory.length - 1], lastA = actual[actual.length - 1];
+  const tx = W - Rt;
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="1-rep max total week by week: theory against actual max">
     ${ticks.map(v => `<line class="grid-l" x1="${L}" x2="${W - Rt}" y1="${y(v)}" y2="${y(v)}"></line><text class="ax" x="${L - 10}" y="${y(v) + 4}" text-anchor="end">${v}</text>`).join('')}
     ${WEEKS.map((_, i) => `<text class="ax${i + 1 === ctx.week ? ' ax-cur' : ''}" x="${x(i + 1)}" y="${H - B + 22}" text-anchor="middle">${W < 520 ? i + 1 : 'W' + (i + 1)}</text>`).join('')}
+    <line class="test-l" x1="${tx}" x2="${tx}" y1="${T}" y2="${H - B}"></line>
+    <text class="ax ax-t" x="${tx - 6}" y="${T + 4}" text-anchor="end">Test day</text>
     <text class="ax ax-t" x="${L - 10}" y="${T - 14}" text-anchor="end">kg</text>
-    ${goal.length ? `<path class="th" d="${line([lastA, ...goal])}"></path>` : ''}
+    ${theory.length > 1 ? `<path class="th" d="${line(theory)}"></path>` : ''}
     ${actual.length > 1 ? `<path class="ac" d="${line(actual)}"></path>` : ''}
-    ${goal.filter(p => p !== test).map(p => `<circle class="gl gl-sm" cx="${x(p.w)}" cy="${y(p.kg)}" r="4" data-tip="${tipOf(p, 'goals')}"></circle>`).join('')}
-    ${actual.map(p => `<circle class="ac-d" cx="${x(p.w)}" cy="${y(p.kg)}" r="5" data-tip="${tipOf(p, 'theoretical 1-rep max')}"></circle>`).join('')}
-    <text class="gl-t" x="${x(lastA.w)}" y="${y(lastA.kg) + 22}" text-anchor="middle">${half(lastA.kg)} kg</text>
-    ${test ? `<circle class="gl" cx="${x(test.w)}" cy="${y(test.kg)}" r="7" data-tip="${tipOf(test, 'test day')}"></circle>
-      <text class="gl-t" x="${x(test.w) - 12}" y="${y(test.kg) - 14}" text-anchor="end">Test day: ${half(test.kg)} kg</text>` : ''}
+    ${theory.map(p => `<circle class="th-d" cx="${x(p.w)}" cy="${y(p.kg)}" r="4" data-tip="${tipOf(p, 'theory')}"></circle>`).join('')}
+    ${actual.map(p => `<circle class="ac-d" cx="${x(p.w)}" cy="${y(p.kg)}" r="5" data-tip="${tipOf(p, 'actual max')}"></circle>`).join('')}
+    <text class="gl-t" x="${x(lastT.w) + 10}" y="${y(lastT.kg) + 4}">${half(lastT.kg)} kg</text>
+    ${lastA ? `<text class="gl-t" x="${x(lastA.w) + 10}" y="${y(lastA.kg) + 4}">${half(lastA.kg)} kg</text>` : ''}
   </svg>`;
 }
 
