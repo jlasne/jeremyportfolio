@@ -11,7 +11,11 @@
     { "src": "^/creators/?$", "status": 308, "headers": { "Location": "https://creatormatch.app" } },
     { "src": "^/x(/.*)?$", "dest": "https://x-strategist.vercel.app/x$1" },
     { "src": "^/knowledge/mcp/(v0|v1)$", "dest": "https://uncommon-wolf-174.eu-west-1.convex.site/mcp/$1" },
-    { "src": "^/knowledge(/.*)?$", "dest": "https://octopus-ebon.vercel.app/knowledge$1" },
+    { "src": "^/knowledge/(octopus|squidgy)/?$", "status": 307, "headers": { "Location": "/knowledge/chat?w=$1" } },
+    { "src": "^/knowledge/(mcp|feed)/?$", "status": 308, "headers": { "Location": "/knowledge/doc" } },
+    { "src": "^/knowledge/brains/?$", "status": 307, "headers": { "Location": "/knowledge/" } },
+    { "src": "^/knowledge/?$", "dest": "/knowledge/home.html" },
+    { "src": "^/knowledge/(chat|about|doc)/?$", "dest": "/knowledge/$1.html" },
     { "handle": "filesystem" },
     { "src": "^/wellness/exp0/demo/?$", "dest": "/wellness/exp0/index.html" },
     { "src": "^/games/([A-HJ-NP-Za-hj-np-z]{6})/?$", "dest": "/games/index.html" }
