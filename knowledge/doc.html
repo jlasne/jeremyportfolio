@@ -1,0 +1,140 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Octopus, from any AI client</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="icon" href="/knowledge/brand/logo-mark.png">
+<link rel="stylesheet" href="/knowledge/octopus.css">
+
+<script>window.OCTOPUS_API = "https://uncommon-wolf-174.eu-west-1.convex.site";</script>
+
+<style>
+  /* The shell. Everything the page actually says arrives from the deployment,
+     and the styles for it arrive with it. */
+  .door{ max-width:400px; }
+  .door label{ display:block; font:500 13px/1 var(--sans); color:var(--ink); margin:14px 0 7px; }
+  .door input{
+    width:100%; border:1px solid var(--line-2); border-radius:9px; background:var(--surface);
+    padding:10px 12px; font:400 16px/1.5 var(--sans); color:var(--ink);
+  }
+  .door input:focus{ border-color:var(--accent-fill); outline:none; }
+  .door .msg{ margin-top:12px; font:400 13.5px/1.5 var(--sans); color:var(--accent); min-height:1.2em; }
+  .door .row{ margin-top:18px; }
+  #docStyle{ display:none; }
+</style>
+
+<header class="top"><div class="wrap">
+  <span class="mark"><img src="/knowledge/brand/logo-mark.png" alt="Octopus" width="48" height="48"></span>
+  <a class="wordmark" href="/knowledge/" style="color:var(--ink)">Octopus</a>
+  <nav class="links">
+    <a href="/knowledge/doc" aria-current="page">Doc</a>
+    <a href="/knowledge/chat" class="cta">Open the app</a>
+  </nav>
+</div></header>
+
+<!-- check-pages: external-ids docUrl docCopy -->
+<style id="docStyle"></style>
+<main><div class="wrap" id="shell">
+  <p class="muted">Loading</p>
+</div></main>
+
+<footer class="bot"><div class="wrap">
+  <span style="margin:0">Octopus</span>
+  <span>your client thinks, Octopus keeps</span>
+</div></footer>
+
+<script>
+  /**
+   * This page holds no words of its own.
+   *
+   * The connector setup hands out an address tied to an account, so it is
+   * served rather than published: the text lives on the deployment and an
+   * unsigned request gets a refusal instead. A script hiding a static page
+   * would have shipped the words anyway, to anyone who opened the file.
+   *
+   * The session token is per tab, so a fresh tab signs in here rather than
+   * being sent back to the app for a token it cannot carry across.
+   */
+  const TOKEN_KEY = "octopus.token.v1";
+  const shell = document.getElementById("shell");
+  const esc = s => String(s ?? "").replace(/[&<>"]/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+
+  const post = async (path, body) => {
+    const r = await fetch(window.OCTOPUS_API + path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (r.status === 401) throw new Error("locked");
+    const d = await r.json().catch(() => ({ error: "the server sent something unreadable" }));
+    if (d.error) throw new Error(d.error);
+    return d;
+  };
+
+  function paintDoc(d){
+    document.getElementById("docStyle").textContent = d.style || "";
+    shell.innerHTML = d.body || "";
+    /* The address the client copies carries this site's own domain, because
+       Vercel proxies /mcp/v0 to the deployment. */
+    const inp = document.getElementById("docUrl"), btn = document.getElementById("docCopy");
+    if (!inp || !btn) return;
+    const url = location.origin + "/knowledge/mcp/v0";
+    inp.value = url;
+    btn.onclick = async () => {
+      inp.select();
+      /* Clipboard access can be refused, so leaving it selected is the fallback. */
+      try { await navigator.clipboard.writeText(url); btn.textContent = "Copied"; }
+      catch { btn.textContent = "Press copy"; }
+      setTimeout(() => { btn.textContent = "Copy"; }, 1600);
+    };
+  }
+
+  /* The connector setup sits behind the Octopus door, the same passphrase as
+     the app. */
+  function paintDoor(note){
+    shell.innerHTML = `
+      <div class="eyebrow">Octopus</div>
+      <h1 class="hero">Enter to read this.</h1>
+      <p class="lede">The connector setup hands out an address that can feed the brains, so it sits behind
+        the same door as the app.</p>
+      <div class="door">
+        <label for="dw">Passphrase</label>
+        <input type="password" id="dw" autocomplete="current-password">
+        <div class="msg" id="dmsg" role="alert">${esc(note || "")}</div>
+        <div class="row"><button class="btn primary" id="dgo">Open</button></div>
+      </div>
+      <div class="note">Reading the brains needs no passphrase. Point any MCP client at
+        <code>${esc(location.origin)}/mcp/v0</code> and every brain answers.</div>`;
+
+    const go = document.getElementById("dgo"), msg = document.getElementById("dmsg");
+    const submit = async () => {
+      const pass = document.getElementById("dw").value;
+      if (!pass) return;
+      go.disabled = true; msg.textContent = "Checking";
+      try {
+        const r = await post("/api/unlock", { space: "octopus", pass });
+        sessionStorage.setItem(TOKEN_KEY, r.token);
+        paintDoc(await post("/api/doc", { token: r.token }));
+      } catch (e) {
+        go.disabled = false;
+        msg.textContent = e.message === "locked" ? "that did not work" : e.message;
+      }
+    };
+    go.onclick = submit;
+    document.getElementById("dw").onkeydown = e => { if (e.key === "Enter") submit(); };
+    setTimeout(() => document.getElementById("dw").focus(), 40);
+  }
+
+  (async () => {
+    let token = null;
+    try { token = sessionStorage.getItem(TOKEN_KEY); } catch {}
+    if (!token) { paintDoor(""); return; }
+    try { paintDoc(await post("/api/doc", { token })); }
+    catch (e) {
+      try { sessionStorage.removeItem(TOKEN_KEY); } catch {}
+      paintDoor(e.message === "locked" ? "" : e.message);
+    }
+  })();
+</script>
