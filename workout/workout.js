@@ -106,6 +106,8 @@ const when = b => b.rec ? `week ${b.week}` : short(b.day);
 /* a week's goal: the higher of the theory from my form and one 2.5 kg step
    above my best set at that many reps, so every goal is a new best */
 function goalFor(l, reps) {
+  /* a single: the test of week 11, one 2.5 kg step above my 1-rep max */
+  if (reps === 1 && ctx.test[l.id]) return ctx.test[l.id];
   const f = ctx.form[l.id], b = best(ctx.rows, l.id, reps);
   return Math.max(f ? goalKg(l, f.est, reps) : 0, b ? b.kg + 2.5 : 0);
 }
@@ -116,7 +118,29 @@ function formOf(id) {
 
 /* ── drawing ────────────────────────────────────────────────────────── */
 
-let ctx = { rows: [], week: 1, maxes: {}, form: {} };
+let ctx = { rows: [], week: 1, maxes: {}, form: {}, test: {}, path: [] };
+
+/* the theoretical 1-rep max total, week by week. Each lift keeps its best
+   estimated max so far: from the sets I did, then from the goals ahead. Week
+   11 is the test day: one 2.5 kg step above the max each lift reached. */
+function project() {
+  const run = {}, path = [];
+  ctx.test = {};
+  for (let w = 1; w <= WEEKS.length; w++) {
+    const wr = ctx.rows.filter(r => r.week === w), r = WEEKS[w - 1];
+    let did = false;
+    for (const l of LIFTS) {
+      const b = best(wr, l.id);
+      if (b) { did = true; run[l.id] = Math.max(run[l.id] ?? 0, b.est); continue; }
+      if (w < ctx.week || run[l.id] === undefined || !r) continue;
+      if (w === WEEKS.length) run[l.id] = ctx.test[l.id] = (Math.floor(run[l.id] / 2.5 + 1e-9) + 1) * 2.5;
+      else if (r > 1) run[l.id] = Math.max(run[l.id], est(l, goalFor(l, r), r));
+    }
+    const ids = Object.keys(run);
+    if (ids.length && (did || (w >= ctx.week && r))) path.push({ w, kg: ids.reduce((s, id) => s + run[id], 0), n: ids.length, did });
+  }
+  ctx.path = path;
+}
 
 function drawWave() {
   const top = Math.max(...WEEKS), cur = ctx.week;
@@ -162,41 +186,33 @@ function drawTotal() {
   drawTotalChart();
 }
 
-/* the total week by week: the estimated total of each week's sets (solid),
-   and the total the goals add up to, from this week to week 11 (dashed) */
+/* the theoretical 1-rep max total week by week: solid for the weeks done,
+   dashed for the goals ahead, a ring on the test day */
 function drawTotalChart() {
   const box = $('totalChart');
-  const actual = [], goal = [];
-  for (let w = 1; w <= WEEKS.length; w++) {
-    const wr = ctx.rows.filter(r => r.week === w), r = WEEKS[w - 1];
-    const got = LIFTS.map(l => best(wr, l.id, r) || best(wr, l.id)).filter(Boolean);
-    if (got.length) actual.push({ w, kg: got.reduce((s, b) => s + b.est, 0), n: got.length });
-    else if (w >= ctx.week && r) {
-      const ls = LIFTS.filter(l => ctx.form[l.id]);
-      if (ls.length) goal.push({ w, kg: ls.reduce((s, l) => s + est(l, goalFor(l, r), r), 0), n: ls.length });
-    }
-  }
+  const actual = ctx.path.filter(p => p.did), goal = ctx.path.filter(p => !p.did);
   if (!actual.length) { box.innerHTML = '<p class="chart-empty">No set yet</p>'; return; }
-  const W = Math.max(300, Math.round(box.clientWidth) || 720), H = W < 520 ? 230 : 280, L = 48, Rt = 14, T = 26, B = 40;
-  const ys = [...actual, ...goal].map(p => p.kg), step = 25;
-  let lo = Math.floor(Math.min(...ys) / step) * step, hi = Math.ceil(Math.max(...ys) / step) * step;
-  if (hi - lo < 50) lo = hi - 50;
+  const W = Math.max(300, Math.round(box.clientWidth) || 720), H = W < 520 ? 230 : 280, L = 48, Rt = 14, T = 30, B = 40;
+  const ys = ctx.path.map(p => p.kg), step = 10;
+  let lo = Math.floor(Math.min(...ys) / step) * step - step, hi = Math.ceil(Math.max(...ys) / step) * step + step;
   const x = w => L + (w - 1) / (WEEKS.length - 1) * (W - L - Rt);
   const y = v => T + (hi - v) / (hi - lo) * (H - T - B);
-  const ticks = []; for (let v = lo; v <= hi + 1e-9; v += (hi - lo) / step > 5 ? step * 2 : step) ticks.push(v);
+  const gap = (hi - lo) / step > 5 ? step * 2 : step;
+  const ticks = []; for (let v = Math.ceil(lo / gap) * gap; v <= hi + 1e-9; v += gap) ticks.push(v);
   const line = pts => pts.map((p, i) => `${i ? 'L' : 'M'}${x(p.w).toFixed(1)},${y(p.kg).toFixed(1)}`).join('');
-  const lastA = actual[actual.length - 1];
-  const dash = goal.length ? [lastA, ...goal].filter((p, i, a) => i === 0 || p.w > a[i - 1].w) : [];
+  const lastA = actual[actual.length - 1], test = goal.find(p => p.w === WEEKS.length);
   const tipOf = (p, what) => `Week ${p.w}, ${what}: ${half(p.kg)} kg (${p.n} of ${LIFTS.length} lifts)`;
-  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Estimated total week by week, with the total of the goals">
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Theoretical 1-rep max total week by week, up to the test of week 11">
     ${ticks.map(v => `<line class="grid-l" x1="${L}" x2="${W - Rt}" y1="${y(v)}" y2="${y(v)}"></line><text class="ax" x="${L - 10}" y="${y(v) + 4}" text-anchor="end">${v}</text>`).join('')}
     ${WEEKS.map((_, i) => `<text class="ax${i + 1 === ctx.week ? ' ax-cur' : ''}" x="${x(i + 1)}" y="${H - B + 22}" text-anchor="middle">${W < 520 ? i + 1 : 'W' + (i + 1)}</text>`).join('')}
-    <text class="ax ax-t" x="${L - 10}" y="${T - 12}" text-anchor="end">kg</text>
-    ${dash.length > 1 ? `<path class="th" d="${line(dash)}"></path>` : ''}
+    <text class="ax ax-t" x="${L - 10}" y="${T - 14}" text-anchor="end">kg</text>
+    ${goal.length ? `<path class="th" d="${line([lastA, ...goal])}"></path>` : ''}
     ${actual.length > 1 ? `<path class="ac" d="${line(actual)}"></path>` : ''}
-    ${goal.map(p => `<circle class="gl gl-sm" cx="${x(p.w)}" cy="${y(p.kg)}" r="5" data-tip="${tipOf(p, 'goals')}"></circle>`).join('')}
-    ${actual.map(p => `<circle class="ac-d" cx="${x(p.w)}" cy="${y(p.kg)}" r="5" data-tip="${tipOf(p, 'estimated')}"></circle>`).join('')}
+    ${goal.filter(p => p !== test).map(p => `<circle class="gl gl-sm" cx="${x(p.w)}" cy="${y(p.kg)}" r="4" data-tip="${tipOf(p, 'goals')}"></circle>`).join('')}
+    ${actual.map(p => `<circle class="ac-d" cx="${x(p.w)}" cy="${y(p.kg)}" r="5" data-tip="${tipOf(p, 'theoretical 1-rep max')}"></circle>`).join('')}
     <text class="gl-t" x="${x(lastA.w)}" y="${y(lastA.kg) + 22}" text-anchor="middle">${half(lastA.kg)} kg</text>
+    ${test ? `<circle class="gl" cx="${x(test.w)}" cy="${y(test.kg)}" r="7" data-tip="${tipOf(test, 'test day')}"></circle>
+      <text class="gl-t" x="${x(test.w) - 12}" y="${y(test.kg) - 14}" text-anchor="end">Test day: ${half(test.kg)} kg</text>` : ''}
   </svg>`;
 }
 
@@ -293,6 +309,7 @@ function drawAll() {
   ctx.maxes = Object.fromEntries(LIFTS.map(l => [l.id, best(ctx.rows, l.id)]).filter(([, b]) => b));
   ctx.week = Math.max(1, Math.min(WEEKS.length, weekOf(today)));
   ctx.form = Object.fromEntries(LIFTS.map(l => [l.id, formOf(l.id)]).filter(([, b]) => b));
+  project();
   if (!pick) pick = LIFTS.find(l => ctx.maxes[l.id])?.id || LIFTS[0].id;
   drawWave();
   drawDays();
