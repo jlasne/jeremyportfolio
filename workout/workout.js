@@ -34,7 +34,7 @@ const C = 'c', M = 'max';
 const WRIST = 'Wrist warm-up, 6 kg', CORE = 'Core (gainage), 3 × 1 min';
 const DAYS = [
   { id: 'pull', name: 'Pull', lifts: ['pull-up', 'deadlift'], list: [
-    [WRIST, C], ['Pull-up', M], ['Pull-up, iso hold', C], ['Deadlift', M], ['Barbell row', C], [CORE, C]] },
+    [WRIST, C], ['Pull-up', M], ['Pull-up, iso hold', C], ['Deadlift', M], ['Barbell row', C, 'Sets of 8, currently 50 kg'], [CORE, C]] },
   { id: 'push', name: 'Push', lifts: ['dip', 'bench'], list: [
     [WRIST, C], ['Push-ups, a few'], ['Dips', M], ['Dips, iso hold', C], ['Bench', M], ['Bench, iso hold', C], [CORE, C]] },
   { id: 'leg', name: 'Legs', lifts: ['squat', 'hip-thrust'], list: [
@@ -167,7 +167,7 @@ function drawDays() {
   const sets = setsText();
   $('dayGrid').innerHTML = DAYS.map(d => `<li><div class="cell day">
     <span class="day-h"><b>${d.name}</b></span>
-    <ol class="ex">${d.list.map(([n, k]) => `<li class="${k === M ? 'ex-max' : k === C ? 'ex-c' : ''}"><span class="ex-n">${esc(n)}${k === M ? '<span class="tag tag-max">Max</span>' : ''}</span>${k === M ? `<ul class="ex-sets"><li>${sets}</li></ul>` : ''}</li>`).join('')}</ol>
+    <ol class="ex">${d.list.map(([n, k, note]) => `<li class="${k === M ? 'ex-max' : k === C ? 'ex-c' : ''}"><span class="ex-n">${esc(n)}${k === M ? '<span class="tag tag-max">Max</span>' : ''}</span>${k === M || note ? `<ul class="ex-sets"><li>${k === M ? sets : esc(note)}</li></ul>` : ''}</li>`).join('')}</ol>
   </div></li>`).join('');
 }
 
