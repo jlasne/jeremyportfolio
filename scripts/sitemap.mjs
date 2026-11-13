@@ -89,7 +89,7 @@ for (const file of pages(ROOT)) {
   }
 }
 
-// Pages with no index.html: /knowledge is tasu (knowledge/home.html, routed in vercel.json), built in the jlasne/brain repo.
+// Pages with no index.html: /knowledge is the Knowledge app (knowledge/home.html, routed in vercel.json), built in the jlasne/brain repo.
 // Its lastmod is kept from the committed sitemap, or today the first time.
 for (const loc of [SITE + "/knowledge/", SITE + "/knowledge/about"]) {
   urls.push({ loc, lastmod: before[loc] || new Date().toISOString().slice(0, 10), article: false });
