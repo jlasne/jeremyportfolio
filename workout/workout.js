@@ -29,15 +29,16 @@ const liftOf = name => {
   return LIFTS.find(l => l.id === n || l.name.toLowerCase() === n || l.alias.includes(n));
 };
 
-/* the three sessions, in the order I wrote them */
+/* the three sessions: pull, push, legs */
 const C = 'c', M = 'max';
+const WRIST = 'Wrist warm-up, 6 kg', CORE = 'Core (gainage), 3 × 1 min';
 const DAYS = [
-  { id: 'push', name: 'Push', lifts: ['dip', 'bench'], list: [
-    ['Wrist warm-up', C], ['Push-ups, a few'], ['Dips', M], ['Dips, iso hold', C], ['Bench', M], ['Bench, iso hold', C], ['Core (gainage), optional', C]] },
   { id: 'pull', name: 'Pull', lifts: ['pull-up', 'deadlift'], list: [
-    ['Wrist warm-up', C], ['Pull-up', M], ['Pull-up, iso hold', C], ['Deadlift', M], ['Barbell row', C], ['Core (gainage)', C]] },
+    [WRIST, C], ['Pull-up', M], ['Pull-up, iso hold', C], ['Deadlift', M], ['Barbell row', C], [CORE, C]] },
+  { id: 'push', name: 'Push', lifts: ['dip', 'bench'], list: [
+    [WRIST, C], ['Push-ups, a few'], ['Dips', M], ['Dips, iso hold', C], ['Bench', M], ['Bench, iso hold', C], [CORE, C]] },
   { id: 'leg', name: 'Legs', lifts: ['squat', 'hip-thrust'], list: [
-    ['Squat', M], ['Wrist warm-up', C], ['Pull-up, iso hold', C], ['Hip thrust', M], ['Dips, iso hold', C], ['Bench, iso hold', C], ['Core (gainage)', C]] },
+    ['Squat', M], [WRIST, C], ['Pull-up, iso hold', C], ['Hip thrust', M], ['Dips, iso hold', C], ['Bench, iso hold', C], [CORE, C]] },
 ];
 const DAY = new Map(DAYS.map(d => [d.id, d]));
 
@@ -117,22 +118,6 @@ function formOf(id) {
 
 let ctx = { rows: [], week: 1, maxes: {}, form: {} };
 
-function drawNow() {
-  const now = weekOf(today), finished = now > WEEKS.length;
-  const week = Math.max(1, Math.min(WEEKS.length, now)), reps = finished ? 0 : WEEKS[week - 1];
-  const mon = shift(START, (week - 1) * 7);
-  $('nowCount').textContent = `${short(mon)} to ${short(shift(mon, 6))}`;
-  if (finished) {
-    $('nowWeek').textContent = 'Program done';
-    $('nowReps').textContent = '11 weeks';
-  } else {
-    $('nowWeek').textContent = `Week ${week} of ${WEEKS.length}`;
-    $('nowReps').textContent = reps ? `${repsText(reps)} per set` : 'Light week';
-  }
-  $('nowGoals').innerHTML = LIFTS.map(l => `<li><span>${l.name}</span><b>${
-    !reps ? 'Light' : ctx.form[l.id] ? `${kgText(l, goalFor(l, reps))} &times; ${reps}` : `test ${reps} reps`}</b></li>`).join('');
-}
-
 function drawWave() {
   const top = Math.max(...WEEKS), cur = ctx.week;
   $('waveChart').innerHTML = WEEKS.map((r, i) => {
@@ -174,6 +159,45 @@ function drawTotal() {
   const tested = singles.reduce((s, kg) => s + (kg || 0), 0);
   $('totalV').textContent = got.length ? `${total} kg` : '–';
   $('totalTested').textContent = tested ? `${tested} kg` : '–';
+  drawTotalChart();
+}
+
+/* the total week by week: the estimated total of each week's sets (solid),
+   and the total the goals add up to, from this week to week 11 (dashed) */
+function drawTotalChart() {
+  const box = $('totalChart');
+  const actual = [], goal = [];
+  for (let w = 1; w <= WEEKS.length; w++) {
+    const wr = ctx.rows.filter(r => r.week === w), r = WEEKS[w - 1];
+    const got = LIFTS.map(l => best(wr, l.id, r) || best(wr, l.id)).filter(Boolean);
+    if (got.length) actual.push({ w, kg: got.reduce((s, b) => s + b.est, 0), n: got.length });
+    else if (w >= ctx.week && r) {
+      const ls = LIFTS.filter(l => ctx.form[l.id]);
+      if (ls.length) goal.push({ w, kg: ls.reduce((s, l) => s + est(l, goalFor(l, r), r), 0), n: ls.length });
+    }
+  }
+  if (!actual.length) { box.innerHTML = '<p class="chart-empty">No set yet</p>'; return; }
+  const W = Math.max(300, Math.round(box.clientWidth) || 720), H = W < 520 ? 230 : 280, L = 48, Rt = 14, T = 26, B = 40;
+  const ys = [...actual, ...goal].map(p => p.kg), step = 25;
+  let lo = Math.floor(Math.min(...ys) / step) * step, hi = Math.ceil(Math.max(...ys) / step) * step;
+  if (hi - lo < 50) lo = hi - 50;
+  const x = w => L + (w - 1) / (WEEKS.length - 1) * (W - L - Rt);
+  const y = v => T + (hi - v) / (hi - lo) * (H - T - B);
+  const ticks = []; for (let v = lo; v <= hi + 1e-9; v += (hi - lo) / step > 5 ? step * 2 : step) ticks.push(v);
+  const line = pts => pts.map((p, i) => `${i ? 'L' : 'M'}${x(p.w).toFixed(1)},${y(p.kg).toFixed(1)}`).join('');
+  const lastA = actual[actual.length - 1];
+  const dash = goal.length ? [lastA, ...goal].filter((p, i, a) => i === 0 || p.w > a[i - 1].w) : [];
+  const tipOf = (p, what) => `Week ${p.w}, ${what}: ${half(p.kg)} kg (${p.n} of ${LIFTS.length} lifts)`;
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Estimated total week by week, with the total of the goals">
+    ${ticks.map(v => `<line class="grid-l" x1="${L}" x2="${W - Rt}" y1="${y(v)}" y2="${y(v)}"></line><text class="ax" x="${L - 10}" y="${y(v) + 4}" text-anchor="end">${v}</text>`).join('')}
+    ${WEEKS.map((_, i) => `<text class="ax${i + 1 === ctx.week ? ' ax-cur' : ''}" x="${x(i + 1)}" y="${H - B + 22}" text-anchor="middle">${W < 520 ? i + 1 : 'W' + (i + 1)}</text>`).join('')}
+    <text class="ax ax-t" x="${L - 10}" y="${T - 12}" text-anchor="end">kg</text>
+    ${dash.length > 1 ? `<path class="th" d="${line(dash)}"></path>` : ''}
+    ${actual.length > 1 ? `<path class="ac" d="${line(actual)}"></path>` : ''}
+    ${goal.map(p => `<circle class="gl gl-sm" cx="${x(p.w)}" cy="${y(p.kg)}" r="5" data-tip="${tipOf(p, 'goals')}"></circle>`).join('')}
+    ${actual.map(p => `<circle class="ac-d" cx="${x(p.w)}" cy="${y(p.kg)}" r="5" data-tip="${tipOf(p, 'estimated')}"></circle>`).join('')}
+    <text class="gl-t" x="${x(lastA.w)}" y="${y(lastA.kg) + 22}" text-anchor="middle">${half(lastA.kg)} kg</text>
+  </svg>`;
 }
 
 let pick = null;
@@ -192,7 +216,7 @@ function drawMaxes() {
   drawChart();
 
   /* the table: what I lifted, then the goal of every week still to come */
-  const head = `<thead><tr><th scope="col">Week</th><th scope="col">Reps</th>${LIFTS.map(l => `<th scope="col">${l.name}</th>`).join('')}</tr></thead>`;
+  const head = `<thead><tr><th scope="col">Week</th>${LIFTS.map(l => `<th scope="col">${l.name}</th>`).join('')}</tr></thead>`;
   const body = WEEKS.map((r, i) => {
     const w = i + 1, wr = rows.filter(x => x.week === w);
     const cells = LIFTS.map(l => {
@@ -201,7 +225,7 @@ function drawMaxes() {
       if (w >= week && m && r) return `<td class="goal" data-tip="Goal: a new best at ${repsText(r)}">${kgText(l, goalFor(l, r))} <small>goal</small></td>`;
       return '<td><span class="dim">&middot;</span></td>';
     }).join('');
-    return `<tr class="${w === week ? 'cur' : ''}"><th scope="row">W${w}</th><td>${r || 'Light'}</td>${cells}</tr>`;
+    return `<tr class="${w === week ? 'cur' : ''}"><th scope="row">W${w}<small>${r ? repsText(r) : 'Light'}</small></th>${cells}</tr>`;
   }).join('');
   $('maxTable').innerHTML = `<caption class="sr-only">Top set of each lift per week, and the goal of each week to come</caption>${head}<tbody>${body}</tbody>`;
 }
@@ -239,12 +263,12 @@ function drawChart() {
     ${theory.map(p => `<circle class="hit" cx="${x(p.r)}" cy="${y(p.kg)}" r="12" data-tip="Theory, ${repsText(p.r)}: ${kgText(l, half(p.kg))}"></circle>`).join('')}
     ${actual.length > 1 ? `<path class="ac" d="${line(actual)}"></path>` : ''}
     ${goals.map((g, i) => `<circle class="gl${i ? ' gl-next' : ''}" cx="${x(g.r)}" cy="${y(g.kg)}" r="7" data-tip="Week ${g.w} goal: ${kgText(l, g.kg)} &times; ${g.r}"></circle>
-      <text class="gl-t" x="${x(g.r)}" y="${y(g.kg) - 14}" text-anchor="middle">W${g.w}: ${kgText(l, g.kg)}</text>`).join('')}
+      <text class="gl-t" x="${x(g.r)}" y="${y(g.kg) + (i ? 24 : -14)}" text-anchor="middle">W${g.w}: ${kgText(l, g.kg)}</text>`).join('')}
     ${actual.map(p => `<circle class="ac-d" cx="${x(p.reps)}" cy="${y(p.kg)}" r="5" data-tip="Actual, ${repsText(p.reps)}: ${kgText(l, p.kg)}, ${when(p)}"></circle>`).join('')}
   </svg>`;
 }
 let rs = 0, lastW = 0;
-addEventListener('resize', () => { cancelAnimationFrame(rs); rs = requestAnimationFrame(() => { const w = $('chart').clientWidth; if (w !== lastW) { lastW = w; drawChart(); } }); });
+addEventListener('resize', () => { cancelAnimationFrame(rs); rs = requestAnimationFrame(() => { const w = $('chart').clientWidth; if (w !== lastW) { lastW = w; drawChart(); drawTotalChart(); } }); });
 document.addEventListener('click', e => {
   const b = e.target.closest('.lift[data-id]');
   if (!b) return;
@@ -270,7 +294,6 @@ function drawAll() {
   ctx.week = Math.max(1, Math.min(WEEKS.length, weekOf(today)));
   ctx.form = Object.fromEntries(LIFTS.map(l => [l.id, formOf(l.id)]).filter(([, b]) => b));
   if (!pick) pick = LIFTS.find(l => ctx.maxes[l.id])?.id || LIFTS[0].id;
-  drawNow();
   drawWave();
   drawDays();
   drawTotal();

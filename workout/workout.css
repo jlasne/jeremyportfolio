@@ -3,18 +3,8 @@
 
 .workout .hero h1 { max-width: 22ch; }
 
-/* ---- this week: the reps on the left, the next session on the right ---- */
-.now { display: grid; grid-template-columns: 1.4fr 1fr; border-bottom: 1px solid var(--fg-12); }
-.now > div { display: grid; align-content: start; gap: 6px; padding: 28px var(--pad) 30px; }
-.now-goals { border-left: 1px solid var(--fg-12); }
+/* a small label over a number */
 .now-week { font: 500 11px/1.4 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--fg-60); }
-.now-reps { font-size: clamp(34px, 6vw, 48px); line-height: 1.05; font-weight: 800; letter-spacing: -.03em; }
-.now-reps { color: var(--blue); }
-.now-line { max-width: 40ch; font-size: 15px; line-height: 1.55; color: var(--fg-80); }
-@media (max-width: 599px) {
-  .now { grid-template-columns: 1fr; }
-  .now-goals { border-left: 0; border-top: 1px solid var(--fg-12); }
-}
 
 /* ---- the wave: one bar per week, its height the reps ---- */
 .wave-wrap { padding: 28px var(--pad) 26px; border-bottom: 1px solid var(--fg-12); }
@@ -69,7 +59,6 @@
 .maxtab th:first-child, .maxtab td:first-child { padding-left: var(--pad); }
 .maxtab tbody th { font: 500 12px var(--mono); color: var(--fg-60); }
 .maxtab td { color: var(--fg); font-weight: 600; }
-.maxtab td:nth-child(2) { color: var(--fg-60); font-weight: 500; }
 .maxtab small { font-size: 12px; font-weight: 500; color: var(--fg-60); }
 .maxtab .dim { color: var(--fg-25); }
 .maxtab tr.empty td, .maxtab tr.empty th { opacity: .7; }
@@ -97,7 +86,6 @@
 .total-v { font-size: clamp(44px, 9vw, 72px); line-height: 1; font-weight: 800; letter-spacing: -.035em; color: var(--blue); font-variant-numeric: tabular-nums; }
 .total-s { font-size: clamp(30px, 5vw, 40px); line-height: 1.05; font-weight: 800; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
 @media (max-width: 599px) { .total { grid-template-columns: 1fr; } .total-side { border-left: 0; border-top: 1px solid var(--fg-12); } }
-.now-line b { color: var(--fg); }
 
 /* ---- the lift cards pick the chart ---- */
 .lifts > li { display: flex; min-width: 0; }
@@ -158,6 +146,37 @@
 .ex-n { display: inline-flex; align-items: center; gap: 8px; }
 .ex-sets { flex-basis: 100%; margin: 2px 0 2px 1.4em; padding-left: 14px; font-size: 13px; font-weight: 500; color: var(--fg-60); }
 .ex-sets li { list-style: disc; }
-.now-main { align-content: center !important; }
 .ex .ex-sets li { display: list-item; counter-increment: none; font-size: 13px; color: var(--fg-60); }
 .ex .ex-sets li::before { content: none; }
+
+.chart .gl-sm { stroke-width: 2; }
+.chart .ax-cur { fill: var(--fg); font-weight: 600; }
+.total + .chart-wrap { border-top: 0; }
+
+/* the table: the week stays in view while the lifts scroll */
+.maxtab tbody th small { display: block; font: 500 11px var(--sans); color: var(--fg-40); }
+.maxtab th:first-child { position: sticky; left: 0; z-index: 1; background: var(--bg); }
+.maxtab tr.cur th:first-child { background: color-mix(in srgb, var(--blue) 7%, var(--bg)); }
+
+@media (max-width: 599px) {
+  /* the total: both numbers side by side */
+  .total { grid-template-columns: 1fr 1fr; }
+  .total > div { padding: 22px 16px 22px var(--pad); }
+  .total-side { border-left: 1px solid var(--fg-12); border-top: 0; padding-left: 16px !important; padding-right: var(--pad) !important; }
+  .total-v { font-size: clamp(28px, 9vw, 38px); white-space: nowrap; }
+  .total-s { font-size: 28px; padding-top: 8px; }
+  .total .now-week { letter-spacing: .1em; }
+  /* tighter cells */
+  .lifts .lift { padding: 18px 16px 18px var(--pad); }
+  .lifts > li:nth-child(even) .lift { padding-left: 16px; padding-right: var(--pad); }
+  .lift-v { font-size: 24px; }
+  .lift-g { font-size: 10.5px; }
+  .chart-wrap { padding-top: 18px; }
+  .chart-head b { font-size: 17px; }
+  .legend { gap: 12px; font-size: 12px; }
+  .maxtab { min-width: 520px; font-size: 13px; }
+  .maxtab th, .maxtab td { padding: 9px 10px; }
+  .wave { height: 150px; }
+  .wave-wrap { padding-top: 20px; padding-bottom: 18px; }
+  .cell.day { padding-top: 22px; padding-bottom: 22px; }
+}
