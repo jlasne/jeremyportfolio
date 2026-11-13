@@ -21,6 +21,7 @@ const LIFTS = [
   { id: 'squat',    name: 'Squat',    body: false, alias: [] },
   { id: 'deadlift', name: 'Deadlift', body: false, alias: ['dead lift', 'soulevé de terre'] },
   { id: 'bench',    name: 'Bench',    body: false, alias: ['bench press', 'développé couché'] },
+  { id: 'hip-thrust', name: 'Hip thrust', body: false, alias: ['hip thrusts', 'hipthrust'] },
 ];
 const LIFT = new Map(LIFTS.map(l => [l.id, l]));
 const liftOf = name => {
@@ -35,8 +36,8 @@ const DAYS = [
     ['Wrist warm-up', C], ['Push-ups, a few'], ['Dips', M], ['Dips, iso hold', C], ['Bench', M], ['Bench, iso hold', C], ['Core (gainage), optional', C]] },
   { id: 'pull', name: 'Pull', lifts: ['pull-up', 'deadlift'], list: [
     ['Wrist warm-up', C], ['Pull-up', M], ['Pull-up, iso hold', C], ['Deadlift', M], ['Barbell row', C], ['Core (gainage)', C]] },
-  { id: 'leg', name: 'Legs', lifts: ['squat'], list: [
-    ['Squat', M], ['Wrist warm-up', C], ['Pull-up, iso hold', C], ['Hip thrust'], ['Dips, iso hold', C], ['Bench, iso hold', C], ['Core (gainage)', C]] },
+  { id: 'leg', name: 'Legs', lifts: ['squat', 'hip-thrust'], list: [
+    ['Squat', M], ['Wrist warm-up', C], ['Pull-up, iso hold', C], ['Hip thrust', M], ['Dips, iso hold', C], ['Bench, iso hold', C], ['Core (gainage)', C]] },
 ];
 const DAY = new Map(DAYS.map(d => [d.id, d]));
 
@@ -124,13 +125,9 @@ function drawNow() {
   if (finished) {
     $('nowWeek').textContent = 'Program done';
     $('nowReps').textContent = '11 weeks';
-    $('nowLine').textContent = 'Week 11 set the new maxes. Start week 1 again from them.';
   } else {
     $('nowWeek').textContent = `Week ${week} of ${WEEKS.length}`;
     $('nowReps').textContent = reps ? `${repsText(reps)} per set` : 'Light week';
-    $('nowLine').textContent = reps
-      ? `3 sessions: push, pull, legs. Work up to the heaviest set of ${repsText(reps)} on each goal lift.`
-      : '3 sessions at about 60 % of my max, to recover before the way down.';
   }
   $('nowGoals').innerHTML = LIFTS.map(l => `<li><span>${l.name}</span><b>${
     !reps ? 'Light' : ctx.form[l.id] ? `${kgText(l, goalFor(l, reps))} &times; ${reps}` : `test ${reps} reps`}</b></li>`).join('');
@@ -148,14 +145,24 @@ function drawWave() {
   }).join('');
 }
 
+/* the sets of a goal lift this week: a light load, then n, the reps of the
+   week before, n and n reps (n: this week's reps) */
+function setsText() {
+  const n = WEEKS[ctx.week - 1];
+  if (!n) return 'Light week: about 60 % of my max';
+  let before = n;
+  for (let w = ctx.week - 1; w >= 1; w--) if (WEEKS[w - 1]) { before = WEEKS[w - 1]; break; }
+  return `Light load, then ${n}, ${before}, ${n}, ${n} reps`;
+}
 function drawDays() {
+  const sets = setsText();
   $('dayGrid').innerHTML = DAYS.map(d => `<li><div class="cell day">
     <span class="day-h"><b>${d.name}</b></span>
-    <ol class="ex">${d.list.map(([n, k]) => `<li class="${k === M ? 'ex-max' : k === C ? 'ex-c' : ''}">${esc(n)}${k === M ? '<span class="tag tag-max">Max</span>' : ''}</li>`).join('')}</ol>
+    <ol class="ex">${d.list.map(([n, k]) => `<li class="${k === M ? 'ex-max' : k === C ? 'ex-c' : ''}"><span class="ex-n">${esc(n)}${k === M ? '<span class="tag tag-max">Max</span>' : ''}</span>${k === M ? `<ul class="ex-sets"><li>${sets}</li></ul>` : ''}</li>`).join('')}</ol>
   </div></li>`).join('');
 }
 
-/* the total: the five estimated maxes added up (pull-up and dips count the
+/* the total: the six estimated maxes added up (pull-up and dips count the
    weight added), and the total of the heaviest single reps */
 function drawTotal() {
   const got = LIFTS.filter(l => ctx.maxes[l.id]);
@@ -166,10 +173,6 @@ function drawTotal() {
   });
   const tested = singles.reduce((s, kg) => s + (kg || 0), 0);
   $('totalV').textContent = got.length ? `${total} kg` : '–';
-  $('totalLine').innerHTML = got.length
-    ? `${got.length} of ${LIFTS.length} lifts. ${got.map(l => `${l.name} ${kgText(l, half(ctx.maxes[l.id].est))}`).join(' + ')}.`
-      + (got.length < LIFTS.length ? ` ${LIFTS.filter(l => !ctx.maxes[l.id]).map(l => l.name).join(', ')}: no set logged yet.` : '')
-    : 'No set logged yet.';
   $('totalTested').textContent = tested ? `${tested} kg` : '–';
 }
 
@@ -182,9 +185,8 @@ function drawMaxes() {
     return `<li><button type="button" class="lift${l.id === pick ? ' is-on' : ''}" data-id="${l.id}" aria-pressed="${l.id === pick}">
       <span class="lift-n">${l.name}</span>
       ${b ? `<b class="lift-v">${kgText(l, half(b.est))}</b>
-      <span class="lift-s">From ${kgText(l, b.kg)} &times; ${b.reps}, ${when(b)}</span>
       ${reps ? `<span class="lift-g">W${week} goal: ${kgText(l, goalFor(l, reps))} &times; ${reps}</span>` : ''}`
-      : `<b class="lift-v lift-none">&ndash;</b><span class="lift-s">No set logged yet</span>`}
+      : `<b class="lift-v lift-none">&ndash;</b>${reps ? `<span class="lift-g">W${week} goal: test ${reps} reps</span>` : ''}`}
     </button></li>`;
   }).join('');
   drawChart();
@@ -210,7 +212,7 @@ function drawMaxes() {
 function drawChart() {
   const l = LIFT.get(pick), m = ctx.maxes[pick], box = $('chart');
   $('chartT').textContent = l.name;
-  if (!m) { box.innerHTML = `<p class="chart-empty">No ${l.name.toLowerCase()} set logged yet. Log one set and the theory line appears.</p>`; $('chartNote').textContent = ''; return; }
+  if (!m) { box.innerHTML = `<p class="chart-empty">No set yet</p>`; return; }
   const R = 10, W = Math.max(300, Math.round(box.clientWidth) || 720), H = W < 520 ? 250 : 300, L = 48, Rt = 14, T = 26, B = 40;
   const theory = Array.from({ length: R }, (_, i) => ({ r: i + 1, kg: repMax(l, m.est, i + 1) }));
   const byRep = new Map();
@@ -240,8 +242,6 @@ function drawChart() {
       <text class="gl-t" x="${x(g.r)}" y="${y(g.kg) - 14}" text-anchor="middle">W${g.w}: ${kgText(l, g.kg)}</text>`).join('')}
     ${actual.map(p => `<circle class="ac-d" cx="${x(p.reps)}" cy="${y(p.kg)}" r="5" data-tip="Actual, ${repsText(p.reps)}: ${kgText(l, p.kg)}, ${when(p)}"></circle>`).join('')}
   </svg>`;
-  $('chartNote').innerHTML = `Theory from my best set, ${kgText(l, m.kg)} &times; ${m.reps} (${when(m)}): an estimated max of ${kgText(l, half(m.est))}${l.body ? `, at ${BW} kg bodyweight` : ''}. `
-    + `The goals come from my last week, ${kgText(l, f.kg)} &times; ${f.reps} (${when(f)}): an estimated max of ${kgText(l, half(f.est))}. A goal is one 2.5 kg step above that theory, or above my best set at those reps if higher.`;
 }
 let rs = 0, lastW = 0;
 addEventListener('resize', () => { cancelAnimationFrame(rs); rs = requestAnimationFrame(() => { const w = $('chart').clientWidth; if (w !== lastW) { lastW = w; drawChart(); } }); });

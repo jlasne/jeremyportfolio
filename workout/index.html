@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Workout | Jeremy Lasne</title>
-<meta name="description" content="My strength program: 3 sessions a week, push, pull and legs, 11 weeks of 1 to 9 reps to max out 5 lifts, with every max logged.">
+<meta name="description" content="My strength program: 3 sessions a week, push, pull and legs, 11 weeks of 1 to 9 reps to max out 6 lifts, with every max logged.">
 <link rel="canonical" href="https://www.jeremylasne.com/workout/">
 <meta name="theme-color" content="#eef3f7">
 <link rel="icon" href="/favicon.ico" sizes="any">
@@ -14,7 +14,7 @@
 <meta property="og:site_name" content="Jeremy Lasne">
 <meta property="og:url" content="https://www.jeremylasne.com/workout/">
 <meta property="og:title" content="Workout | Jeremy Lasne">
-<meta property="og:description" content="My strength program: 3 sessions a week, push, pull and legs, 11 weeks of 1 to 9 reps to max out 5 lifts, with every max logged.">
+<meta property="og:description" content="My strength program: 3 sessions a week, push, pull and legs, 11 weeks of 1 to 9 reps to max out 6 lifts, with every max logged.">
 <meta property="og:image" content="https://www.jeremylasne.com/og-image.png?v=8">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -23,7 +23,7 @@
 <meta name="twitter:site" content="@jeremylasne">
 <meta name="twitter:creator" content="@jeremylasne">
 <meta name="twitter:title" content="Workout | Jeremy Lasne">
-<meta name="twitter:description" content="My strength program: 3 sessions a week, push, pull and legs, 11 weeks of 1 to 9 reps to max out 5 lifts, with every max logged.">
+<meta name="twitter:description" content="My strength program: 3 sessions a week, push, pull and legs, 11 weeks of 1 to 9 reps to max out 6 lifts, with every max logged.">
 <meta name="twitter:image" content="https://www.jeremylasne.com/og-image.png?v=8">
 <script>
   /* the theme a visitor picked last time; without one, dark from 7 pm to 7 am, light otherwise */
@@ -54,8 +54,7 @@
 
   <main>
     <section class="hero page-hero" data-ocean="avoid" data-fade="0">
-      <h1 class="reveal"><b>Workout.</b> 3 sessions a week, 11 weeks, 5 lifts to max.</h1>
-      <p class="lede reveal" style="--d:80">The goal: the highest total of my 5 maxes, pull-up, dips, squat, deadlift and bench. Push, pull, legs, then again. I record the top set of every lift, every week.</p>
+      <h1 class="reveal"><b>Workout.</b> 3 sessions a week, 11 weeks, 6 lifts to max.</h1>
     </section>
 
     <!-- now: the week, its reps, the next session -->
@@ -65,7 +64,6 @@
         <div class="now-main">
           <span class="now-week" id="nowWeek">Week 1 of 11</span>
           <b class="now-reps" id="nowReps">1 rep</b>
-          <span class="now-line" id="nowLine">Loading the log&hellip;</span>
         </div>
         <div class="now-goals">
           <span class="now-week">Goals this week</span>
@@ -79,7 +77,6 @@
       <div class="sec-head"><h2 id="wave-t">The 11 weeks</h2><span>Reps per set</span></div>
       <div class="wave-wrap">
         <ol class="wave" id="waveChart" aria-label="Target reps per week: 1, 3, 5, 7, 9, light, 9, 7, 5, 3, 1"></ol>
-        <p class="wave-note">Up from 1 rep to 9, a light week, then back down to 1. Week 11 is the test of the new max.</p>
       </div>
     </section>
 
@@ -87,22 +84,19 @@
     <section class="sec" id="sessions" aria-labelledby="sessions-t">
       <div class="sec-head"><h2 id="sessions-t">The sessions</h2><span>3</span></div>
       <ul class="grid days-grid" id="dayGrid"></ul>
-      <p class="tags-note"><span class="tag tag-max">Max</span> a goal lift: record its top set. <span class="tag">Complement</span> wrist, core, iso holds and barbell row.</p>
     </section>
 
-    <!-- the goal: the total of the five maxes -->
+    <!-- the goal: the total of the six maxes -->
     <section class="sec" id="total" aria-labelledby="total-t">
-      <div class="sec-head"><h2 id="total-t">The goal: my total</h2><span>5 lifts</span></div>
+      <div class="sec-head"><h2 id="total-t">The goal: my total</h2><span>6 lifts</span></div>
       <div class="total">
         <div class="total-main">
           <span class="now-week">Estimated total</span>
           <b class="total-v" id="totalV">&ndash;</b>
-          <span class="now-line" id="totalLine">Loading the log&hellip;</span>
         </div>
         <div class="total-side">
           <span class="now-week">Lifted for 1 rep</span>
           <b class="total-s" id="totalTested">&ndash;</b>
-          <span class="now-line">The heaviest single of each lift, added up.</span>
         </div>
       </div>
     </section>
@@ -121,7 +115,6 @@
           </ul>
         </div>
         <div class="chart" id="chart"></div>
-        <p class="chart-note" id="chartNote"></p>
       </div>
       <div class="table-wrap">
         <table class="maxtab" id="maxTable">

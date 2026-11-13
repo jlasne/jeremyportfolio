@@ -54,7 +54,7 @@
 .tags-note .tag + .tag, .tags-note .tag { margin-right: 4px; }
 
 /* ---- the maxes: one card per lift, then the table ---- */
-.lifts { display: grid; grid-template-columns: repeat(5, 1fr); list-style: none; border-bottom: 1px solid var(--fg-12); }
+.lifts { display: grid; grid-template-columns: repeat(3, 1fr); list-style: none; border-bottom: 1px solid var(--fg-12); }
 .lift { display: grid; align-content: start; gap: 4px; min-width: 0; padding: 24px clamp(14px, 2vw, 22px) 22px; }
 .lift-n { font: 500 11px/1.4 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--fg-60); }
 .lift-v { font-size: clamp(24px, 3vw, 30px); line-height: 1.1; font-weight: 800; letter-spacing: -.02em; }
@@ -143,3 +143,21 @@
 .maxtab td.goal { color: var(--fg-60); font-weight: 500; font-style: italic; }
 .maxtab tr.cur th, .maxtab tr.cur td { background: color-mix(in srgb, var(--blue) 7%, transparent); }
 .maxtab tr.cur th { color: var(--fg); }
+
+/* six lifts: two rows of three, two of two on a phone */
+.lifts > li:nth-child(3n+1) { border-left: 0; }
+.lifts > li:nth-child(n+4) { border-top: 1px solid var(--fg-12); }
+@media (max-width: 799px) {
+  .lifts > li { border-left: 0; border-top: 1px solid var(--fg-12); }
+  .lifts > li:nth-child(-n+2) { border-top: 0; }
+  .lifts > li:nth-child(even) { border-left: 1px solid var(--fg-12); }
+}
+
+/* the sets under each goal lift */
+.ex > li { flex-wrap: wrap; }
+.ex-n { display: inline-flex; align-items: center; gap: 8px; }
+.ex-sets { flex-basis: 100%; margin: 2px 0 2px 1.4em; padding-left: 14px; font-size: 13px; font-weight: 500; color: var(--fg-60); }
+.ex-sets li { list-style: disc; }
+.now-main { align-content: center !important; }
+.ex .ex-sets li { display: list-item; counter-increment: none; font-size: 13px; color: var(--fg-60); }
+.ex .ex-sets li::before { content: none; }
