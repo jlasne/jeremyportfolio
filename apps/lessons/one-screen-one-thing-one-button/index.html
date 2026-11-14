@@ -39,6 +39,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Figtree:ital,wght@0,400;0,500;0,600;0,700;0,800;1,800&family=Geist+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="/site.css">
+<link rel="stylesheet" href="/taste.css">
+<script>
+  /* the look to compare: "after" (the TASTE pass, taste.css) unless "before" was picked last time */
+  (function () { var l = null; try { l = localStorage.getItem("look"); } catch (e) {} document.documentElement.setAttribute("data-look", l === "before" ? "before" : "after"); })();
+</script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","@id":"https://www.jeremylasne.com/apps/lessons/one-screen-one-thing-one-button/#post","headline":"One screen, one thing, one button","description":"Clean your app so users stay: one object and one button per screen, space around them, every legend removed, and nothing more on the screen.","datePublished":"2026-11-06","dateModified":"2026-11-06","inLanguage":"en","wordCount":361,"keywords":["app design", "mobile UX", "clean app screens", "one call to action", "minimalist app"],"articleSection":"The lessons","url":"https://www.jeremylasne.com/apps/lessons/one-screen-one-thing-one-button/","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.jeremylasne.com/apps/lessons/one-screen-one-thing-one-button/"},"image":{"@type":"ImageObject","url":"https://www.jeremylasne.com/og-image.png?v=8","width":1200,"height":630},"author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne","https://www.youtube.com/@jeremyfounder"]},"publisher":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/"},"isPartOf":{"@type":"Blog","name":"The lessons","url":"https://www.jeremylasne.com/#archive"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.jeremylasne.com/"},{"@type":"ListItem","position":2,"name":"The lessons","item":"https://www.jeremylasne.com/#archive"},{"@type":"ListItem","position":3,"name":"One screen, one thing, one button","item":"https://www.jeremylasne.com/apps/lessons/one-screen-one-thing-one-button/"}]}]}
 </script>
@@ -50,9 +55,9 @@
 <div class="col">
   <header class="nav" id="nav">
     <nav class="links" aria-label="Main">
-      <a href="/#apps"><svg class="nav-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg>Mobile-Apps</a>
+      <a href="/#apps"><svg class="nav-ic only-before" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg><svg class="nav-ic only-after" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>Mobile-Apps</a>
       <a href="/personal/"><svg class="nav-ic nav-ic-fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.4 20.1A8.5 8.5 0 1 1 14.6 20.1L12.9 15.2A3.3 3.3 0 1 0 11.1 15.2Z"/></svg>Personal</a>
-      <a href="https://creatormatch.app" target="_blank" rel="noopener"><svg class="nav-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M14.8 9.3c-.5-.9-1.5-1.5-2.8-1.5-1.6 0-2.8.8-2.8 2 0 2.8 5.6 1.5 5.6 4.3 0 1.2-1.2 2.1-2.8 2.1-1.3 0-2.4-.6-2.9-1.6M12 6.2v1.6M12 16.2v1.6"/></svg>Wellness-Creators</a>
+      <a href="https://creatormatch.app" target="_blank" rel="noopener"><svg class="nav-ic only-before" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M14.8 9.3c-.5-.9-1.5-1.5-2.8-1.5-1.6 0-2.8.8-2.8 2 0 2.8 5.6 1.5 5.6 4.3 0 1.2-1.2 2.1-2.8 2.1-1.3 0-2.4-.6-2.9-1.6M12 6.2v1.6M12 16.2v1.6"/></svg><svg class="nav-ic only-after" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.7a3.5 3.5 0 0 1 0 6.6M18.5 14.4c1.9.8 3 2.9 3 5.6"/></svg>Wellness-Creators</a>
     </nav>
     <a class="mark" href="/" aria-label="Jeremy Lasne, home">Jeremy<i>&middot;</i>Lasne</a>
   </header>
@@ -69,10 +74,10 @@
         <p>A lost user closes your app. They open it, see 6 things at once, and leave before they find the one that matters. Users are bad at telling you how much a screen slows them down, so the fix has to come from you, screen by screen.</p>
         <p>Here is how I clean mine.</p>
 
-        <h2>1. One object per screen.</h2>
+        <h2>1. One object per screen<span class="only-before">.</span></h2>
         <p>Every screen shows one thing. One photo, one number, one question or one exercise, sitting in the middle. If a screen needs 2 objects, it needs 2 screens, and the user swipes from one to the next with their eyes on one spot.</p>
 
-        <h2>2. One button per screen.</h2>
+        <h2>2. One button per screen<span class="only-before">.</span></h2>
         <p>One screen, one call to action. Next, Start, Save or Buy: pick the one the user came for. Settings, share and the rest move to a menu or a later screen, so the main button is the only thing the thumb finds in the first second.</p>
         <p>The best apps pass the 3-second test. Someone sees the product and, within 3 seconds, thinks they need it.</p>
 
@@ -155,13 +160,13 @@
           </svg>
         </figure>
 
-        <h2>3. Give it space.</h2>
+        <h2>3. Give it space<span class="only-before">.</span></h2>
         <p>Space makes a screen easy to read. On an onboarding screen, 5 words is enough: think of a TikTok caption. If the user has to read a line twice, the text is too long or too tight, so cut words before you shrink the font.</p>
 
-        <h2>4. Remove every legend.</h2>
+        <h2>4. Remove every legend<span class="only-before">.</span></h2>
         <p>Every legend can go. Labels under icons, captions on charts, hints next to fields: each one explains something the screen should make clear on its own. If a screen needs a legend to make sense, redesign the screen.</p>
 
-        <h2>5. Nothing more.</h2>
+        <h2>5. Nothing more<span class="only-before">.</span></h2>
         <p>Then ask one question. For each thing left on the screen: does the user need it to take the next step? If the answer is no, cut it, and repeat until the screen holds one object, one button and nothing else for the eye to chase.</p>
         <p>Timeleft shows how far it goes. The dinner app seats 5 strangers at one table, with no bios, no swiping and no planning.</p>
 

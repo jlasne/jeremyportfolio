@@ -1,4 +1,4 @@
-/* jeremylasne.com, every page: the theme, the nav, the Kaught reel (home), the newsletter (each lesson), the hand-drawn schemas of the lessons, the email links, and on the home the typed subheadline, the numbers, the name that becomes the mark, the deck of app cards and the cursor. */
+/* jeremylasne.com, every page: the before/after switch (taste.css), the theme, the nav, the Kaught reel (home), the newsletter (each lesson), the hand-drawn schemas of the lessons, the email links, and on the home the typed subheadline, the numbers, the name that becomes the mark, the deck of app cards and the cursor. */
 (function () {
   var root = document.documentElement;
 
@@ -18,6 +18,31 @@
   }
   document.querySelectorAll(".theme").forEach(function (b) { b.addEventListener("click", flip); });
   paint();
+
+  /* Before / after: the TASTE pass (taste.css) against the site as it was (site.css alone).
+     The head of each page sets data-look from the last choice, "after" by default. This switch,
+     at the bottom of the page, flips it and remembers it; the name and the ocean re-measure. */
+  if (root.hasAttribute("data-look")) {
+    var look = document.createElement("div");
+    look.className = "look";
+    look.setAttribute("role", "group");
+    look.setAttribute("aria-label", "Compare the design, before and after");
+    look.innerHTML = '<button type="button" data-look="before">Before</button><button type="button" data-look="after">After</button>';
+    var pressLook = function () {
+      look.querySelectorAll("button").forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-look") === root.getAttribute("data-look") ? "true" : "false"); });
+    };
+    look.addEventListener("click", function (e) {
+      var b = e.target.closest("button");
+      if (!b) return;
+      var v = b.getAttribute("data-look");
+      root.setAttribute("data-look", v);
+      try { localStorage.setItem("look", v); } catch (err) {}
+      pressLook();
+      window.dispatchEvent(new Event("resize"));
+    });
+    pressLook();
+    document.body.appendChild(look);
+  }
 
   /* The nav: a shade under it once the page scrolls (on a phone, the top bar turns frosted). */
   var nav = document.getElementById("nav");
@@ -157,7 +182,10 @@
   var lessons = document.querySelectorAll("ol.lessons > li").length;
   counts.forEach(function (b) { if (b.hasAttribute("data-lessons") && lessons) b.setAttribute("data-count", lessons); });
   var show = function (b, n) { b.textContent = n.toLocaleString("en-US") + (b.getAttribute("data-suffix") || ""); };
+  var counted = false;
   function countUp() {
+    if (counted) return;
+    counted = true;
     var t0 = performance.now();
     (function step(t) {
       var k = Math.min(1, (t - t0) / 1200), e = 1 - Math.pow(1 - k, 3);
@@ -190,7 +218,7 @@
     typed.classList.add("typing");
     var i = 0;
     var next = function () {
-      if (i >= chars.length) { typed.classList.remove("typing"); typed.appendChild(caret); countUp(); return; }
+      if (i >= chars.length) { typed.classList.remove("typing"); if (caret) { typed.appendChild(caret); caret.classList.add("done"); } countUp(); return; }
       var c = chars[i++], m = c.parentNode;
       c.classList.add("on");
       if (m.tagName === "MARK") m.classList.add("on");
@@ -199,6 +227,8 @@
     };
     setTimeout(next, 650);
   } else if (counts.length && !calm) setTimeout(countUp, 400);
+  /* After: the numbers count right away, while the line types. */
+  if (root.getAttribute("data-look") === "after" && counts.length && !calm) setTimeout(countUp, 400);
 
   /* The app cards lean toward the cursor, up to 4 degrees, and a light follows it. */
   if (matchMedia("(hover: hover) and (pointer: fine)").matches && !calm) {
@@ -299,4 +329,24 @@
     document.addEventListener("pointerleave", function () { ring.classList.add("off"); });
     addEventListener("blur", function () { ring.classList.add("off"); });
   }
+  /* The phone of apps (after): a tap opens an app the way a phone does. A sheet in the app's
+     colour grows out of the icon to fill the screen in 320 ms, then the page goes to the app.
+     A click with a modifier key, or less motion, stays a plain link. Back finds the page clean. */
+  document.querySelectorAll("a.app").forEach(function (a) {
+    a.addEventListener("click", function (e) {
+      if (calm || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      var ic = a.querySelector(".app-ic"), sheet = document.createElement("div");
+      if (!ic || !sheet.animate) return;
+      e.preventDefault();
+      var r = ic.getBoundingClientRect(), img = ic.querySelector("img");
+      sheet.className = "app-open";
+      sheet.style.background = a.getAttribute("data-splash") || "#0b1626";
+      if (img) sheet.appendChild(img.cloneNode());
+      document.body.appendChild(sheet);
+      var from = "inset(" + r.top + "px " + (innerWidth - r.right) + "px " + (innerHeight - r.bottom) + "px " + r.left + "px round 12px)";
+      sheet.animate([{ clipPath: from }, { clipPath: "inset(0px 0px 0px 0px round 0px)" }], { duration: 320, easing: "cubic-bezier(.22,1,.36,1)", fill: "forwards" });
+      setTimeout(function () { location.href = a.href; }, 340);
+    });
+  });
+  addEventListener("pageshow", function () { document.querySelectorAll(".app-open").forEach(function (s) { s.remove(); }); });
 })();

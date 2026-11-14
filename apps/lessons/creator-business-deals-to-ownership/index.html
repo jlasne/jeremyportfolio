@@ -39,6 +39,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Figtree:ital,wght@0,400;0,500;0,600;0,700;0,800;1,800&family=Geist+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="/site.css">
+<link rel="stylesheet" href="/taste.css">
+<script>
+  /* the look to compare: "after" (the TASTE pass, taste.css) unless "before" was picked last time */
+  (function () { var l = null; try { l = localStorage.getItem("look"); } catch (e) {} document.documentElement.setAttribute("data-look", l === "before" ? "before" : "after"); })();
+</script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","@id":"https://www.jeremylasne.com/apps/lessons/creator-business-deals-to-ownership/#post","headline":"The creator business: from deals to ownership","description":"Creators earn from brand deals, agencies, coaching and commissions, but scaling comes with ownership: a blog or an app that earns without you and can be sold.","datePublished":"2026-11-08","dateModified":"2026-11-08","inLanguage":"en","wordCount":453,"keywords":["creator economy", "creator business model", "brand deals", "talent agencies", "creator apps"],"articleSection":"The lessons","url":"https://www.jeremylasne.com/apps/lessons/creator-business-deals-to-ownership/","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.jeremylasne.com/apps/lessons/creator-business-deals-to-ownership/"},"image":{"@type":"ImageObject","url":"https://www.jeremylasne.com/og-image.png?v=8","width":1200,"height":630},"author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne","https://www.youtube.com/@jeremyfounder"]},"publisher":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/"},"isPartOf":{"@type":"Blog","name":"The lessons","url":"https://www.jeremylasne.com/#archive"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.jeremylasne.com/"},{"@type":"ListItem","position":2,"name":"The lessons","item":"https://www.jeremylasne.com/#archive"},{"@type":"ListItem","position":3,"name":"The creator business: from deals to ownership","item":"https://www.jeremylasne.com/apps/lessons/creator-business-deals-to-ownership/"}]}]}
 </script>
@@ -50,9 +55,9 @@
 <div class="col">
   <header class="nav" id="nav">
     <nav class="links" aria-label="Main">
-      <a href="/#apps"><svg class="nav-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg>Mobile-Apps</a>
+      <a href="/#apps"><svg class="nav-ic only-before" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg><svg class="nav-ic only-after" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>Mobile-Apps</a>
       <a href="/personal/"><svg class="nav-ic nav-ic-fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.4 20.1A8.5 8.5 0 1 1 14.6 20.1L12.9 15.2A3.3 3.3 0 1 0 11.1 15.2Z"/></svg>Personal</a>
-      <a href="https://creatormatch.app" target="_blank" rel="noopener"><svg class="nav-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M14.8 9.3c-.5-.9-1.5-1.5-2.8-1.5-1.6 0-2.8.8-2.8 2 0 2.8 5.6 1.5 5.6 4.3 0 1.2-1.2 2.1-2.8 2.1-1.3 0-2.4-.6-2.9-1.6M12 6.2v1.6M12 16.2v1.6"/></svg>Wellness-Creators</a>
+      <a href="https://creatormatch.app" target="_blank" rel="noopener"><svg class="nav-ic only-before" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M14.8 9.3c-.5-.9-1.5-1.5-2.8-1.5-1.6 0-2.8.8-2.8 2 0 2.8 5.6 1.5 5.6 4.3 0 1.2-1.2 2.1-2.8 2.1-1.3 0-2.4-.6-2.9-1.6M12 6.2v1.6M12 16.2v1.6"/></svg><svg class="nav-ic only-after" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.7a3.5 3.5 0 0 1 0 6.6M18.5 14.4c1.9.8 3 2.9 3 5.6"/></svg>Wellness-Creators</a>
     </nav>
     <a class="mark" href="/" aria-label="Jeremy Lasne, home">Jeremy<i>&middot;</i>Lasne</a>
   </header>
@@ -68,18 +73,18 @@
       <div class="prose" data-ocean data-fade="0.3">
         <p>Brand deals pay creators once. The post goes live, the money lands, and next month starts again at zero. Here is how the creator business makes money today, from the cash you need now to the assets that keep paying and can one day be sold.</p>
 
-        <h2>Brand deals: the main income.</h2>
+        <h2>Brand deals: the main income<span class="only-before">.</span></h2>
         <p>Brand deals are the main income of creators. A brand pays for a post, a story or a video, and the deal ends the day the content goes up. Stop posting, and the income stops.</p>
 
-        <h2>Agencies: a cut for waiting.</h2>
+        <h2>Agencies: a cut for waiting<span class="only-before">.</span></h2>
         <p>Creators hand their deals to agencies. The agency finds brands, negotiates, and takes a percentage of every deal it signs. That is the theory, but in practice the agency waits for brands to come in, then takes its cut on deals the creator&rsquo;s audience brought.</p>
         <p>I tested them. I wrote to 30 agencies with a business opportunity for their creators. 3 replied, 1 booked a call, and that one never showed up, which shows how they treat any deal they have to chase.</p>
         <p>Their job is to find opportunities. They let them pass.</p>
 
-        <h2>High-ticket coaching: the best start.</h2>
+        <h2>High-ticket coaching: the best start<span class="only-before">.</span></h2>
         <p>High-ticket coaching is the best first business for a creator. The audience already trusts you. One launch ran 12 days and brought $60,000, which lifted that creator&rsquo;s month to $83,000. The limit is time: every client takes hours from your week, so the income stops growing the day your calendar is full.</p>
 
-        <h2>Programs and commissions.</h2>
+        <h2>Programs and commissions<span class="only-before">.</span></h2>
         <p>Next come programs and commissions. A creator promotes a program built by someone else, and keeps a commission on each sale. It scales better than coaching, because one video sells to the whole audience at once, but the product, the customers and the brand belong to someone else.</p>
 
         <figure class="sketch" role="img" aria-label="A staircase drawn by hand, from rented income to owned income. Step 1: brand deals, paid once, with an agency taking its cut. Step 2: coaching, paid by the hour. Step 3: programs, a cut of sales. Step 4: a blog and an app that earn without you, with a price tag for sale.">
@@ -122,11 +127,11 @@
           </svg>
         </figure>
 
-        <h2>Ownership: what scales.</h2>
+        <h2>Ownership: what scales<span class="only-before">.</span></h2>
         <p>Take the cash first. Brand deals and coaching pay the bills while you build. Scaling comes with ownership: a blog, a mobile app, a product that earns without your face on it and that a buyer would pay for.</p>
         <p>An app can be sold. A personal brand needs you every day, while an app runs with your face out of it and keeps its value when you step away. And an app with a list and a blog is <a class="u" href="/apps/lessons/3-things-around-every-app/">3 assets</a>.</p>
 
-        <h2>Why I build apps with creators.</h2>
+        <h2>Why I build apps with creators<span class="only-before">.</span></h2>
         <p>That is my bet. I build mobile apps with creators, because an app is the best leverage on the audience they spent years building. Making content is already a full-time job. So I run the app, they keep creating, and we partner for the long term.</p>
 
         <p class="post-end">Deals pay once. Ownership keeps paying.</p>

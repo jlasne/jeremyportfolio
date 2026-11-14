@@ -39,6 +39,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Figtree:ital,wght@0,400;0,500;0,600;0,700;0,800;1,800&family=Geist+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="/site.css">
+<link rel="stylesheet" href="/taste.css">
+<script>
+  /* the look to compare: "after" (the TASTE pass, taste.css) unless "before" was picked last time */
+  (function () { var l = null; try { l = localStorage.getItem("look"); } catch (e) {} document.documentElement.setAttribute("data-look", l === "before" ? "before" : "after"); })();
+</script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","@id":"https://www.jeremylasne.com/apps/lessons/apple-ads-on-a-small-budget/#post","headline":"Apple Ads on a small budget","description":"Run Apple Ads on $100 to $500: skip the US, one country per campaign, exact match, bids 30% under, a store page that matches the search, judged by revenue.","datePublished":"2026-11-11","dateModified":"2026-11-11","inLanguage":"en","wordCount":550,"keywords":["Apple Ads", "Apple Search Ads", "app marketing", "small budget", "ROAS"],"articleSection":"The lessons","url":"https://www.jeremylasne.com/apps/lessons/apple-ads-on-a-small-budget/","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.jeremylasne.com/apps/lessons/apple-ads-on-a-small-budget/"},"image":{"@type":"ImageObject","url":"https://www.jeremylasne.com/og-image.png?v=8","width":1200,"height":630},"author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne","https://www.youtube.com/@jeremyfounder"]},"publisher":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/"},"isPartOf":{"@type":"Blog","name":"The lessons","url":"https://www.jeremylasne.com/#archive"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.jeremylasne.com/"},{"@type":"ListItem","position":2,"name":"The lessons","item":"https://www.jeremylasne.com/#archive"},{"@type":"ListItem","position":3,"name":"Apple Ads on a small budget","item":"https://www.jeremylasne.com/apps/lessons/apple-ads-on-a-small-budget/"}]}]}
 </script>
@@ -50,9 +55,9 @@
 <div class="col">
   <header class="nav" id="nav">
     <nav class="links" aria-label="Main">
-      <a href="/#apps"><svg class="nav-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg>Mobile-Apps</a>
+      <a href="/#apps"><svg class="nav-ic only-before" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg><svg class="nav-ic only-after" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>Mobile-Apps</a>
       <a href="/personal/"><svg class="nav-ic nav-ic-fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.4 20.1A8.5 8.5 0 1 1 14.6 20.1L12.9 15.2A3.3 3.3 0 1 0 11.1 15.2Z"/></svg>Personal</a>
-      <a href="https://creatormatch.app" target="_blank" rel="noopener"><svg class="nav-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M14.8 9.3c-.5-.9-1.5-1.5-2.8-1.5-1.6 0-2.8.8-2.8 2 0 2.8 5.6 1.5 5.6 4.3 0 1.2-1.2 2.1-2.8 2.1-1.3 0-2.4-.6-2.9-1.6M12 6.2v1.6M12 16.2v1.6"/></svg>Wellness-Creators</a>
+      <a href="https://creatormatch.app" target="_blank" rel="noopener"><svg class="nav-ic only-before" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M14.8 9.3c-.5-.9-1.5-1.5-2.8-1.5-1.6 0-2.8.8-2.8 2 0 2.8 5.6 1.5 5.6 4.3 0 1.2-1.2 2.1-2.8 2.1-1.3 0-2.4-.6-2.9-1.6M12 6.2v1.6M12 16.2v1.6"/></svg><svg class="nav-ic only-after" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.7a3.5 3.5 0 0 1 0 6.6M18.5 14.4c1.9.8 3 2.9 3 5.6"/></svg>Wellness-Creators</a>
     </nav>
     <a class="mark" href="/" aria-label="Jeremy Lasne, home">Jeremy<i>&middot;</i>Lasne</a>
   </header>
@@ -69,14 +74,14 @@
         <p>$100 is enough to start on Apple Ads. People on the App Store already type the problem my app solves. Meta and TikTok interrupt people who were not looking, while Apple Ads catches the ones who are, which makes it my quickest path to a first paying user.</p>
         <p>Here is my playbook, in 6 steps.</p>
 
-        <h2>1. The budget.</h2>
+        <h2>1. The budget<span class="only-before">.</span></h2>
         <p>I plan $100 to $300 in a niche with low competition. In a crowded niche, I plan $200 to $500 instead. I expect to lose a little at first, because the first weeks buy data: which keywords and which countries turn into money.</p>
 
-        <h2>2. Skip the US at first.</h2>
+        <h2>2. Skip the US at first<span class="only-before">.</span></h2>
         <p>The US is the most expensive market. Everyone bids there, so each install costs the most there. I start in countries where installs cost less and people still pay for subscriptions: Germany, France, Italy, Spain or the Netherlands, then Slovakia, Slovenia or Estonia.</p>
         <p>I run one country per campaign, so I can read the data. I localize the store page before I spend a cent there. Then I never stop testing.</p>
 
-        <h2>3. Build the page around the search.</h2>
+        <h2>3. Build the page around the search<span class="only-before">.</span></h2>
         <p>Every ad lands on my store page. If I bid on &ldquo;plant identifier&rdquo;, the icon, the title and the screenshots all say plant identifier. I use the exact words people type inside my screenshots, because a page that matches the search converts more taps into installs, and that lowers what each install costs.</p>
         <p>I fix this before I spend.</p>
 
@@ -142,7 +147,7 @@
           </svg>
         </figure>
 
-        <h2>4. Set up the campaign.</h2>
+        <h2>4. Set up the campaign<span class="only-before">.</span></h2>
         <p>I pick Search results, nothing else. Then I set it up like this:</p>
         <ul class="days">
           <li><b>Name</b> <span>App name, country, &ldquo;exact&rdquo;.</span></li>
@@ -153,11 +158,11 @@
         </ul>
         <p>Long keywords cost the least, because most marketers skip them and fight over the big ones. I add a small Brand campaign on my own app name, so a copycat bidding on it never shows above me.</p>
 
-        <h2>5. Judge by money, not installs.</h2>
+        <h2>5. Judge by money, not installs<span class="only-before">.</span></h2>
         <p>Apple shows taps and installs. It never shows the money, so I connect my revenue: AdServices attribution sends each install to RevenueCat or Superwall with its campaign. I count tap installs, since the total adds people who only saw the ad. I track real spend, since a daily budget can be overspent.</p>
         <p>Then I read the return per keyword. At 0.5x, I lower the bid, and with zero sales, I pause it for good, because a loser never turns into a winner by waiting. Waiting on a loser is how budgets burn.</p>
 
-        <h2>6. Scale the winners slowly.</h2>
+        <h2>6. Scale the winners slowly<span class="only-before">.</span></h2>
         <p>A winner earns more than it costs. I raise its bid by $0.50, then wait 3 to 4 days, because Apple applies changes slowly. I watch impression share: under 50% means more room, and if the bid passes $3 with no gain, I move on to the next keyword.</p>
         <p>Conversion rate is free money. Under 80% of taps turning into installs, I fix the store page before I raise any bid. Once the budget allows, I run broad match in its own campaign, then each Monday move the winning terms into exact match and block the ones that only spent.</p>
 
