@@ -4,39 +4,24 @@ I'm building a mobile app portfolio, and I share what I learn growing it twice
 a week. This repository is the site behind that, plus everything else I keep
 in public.
 
-The site is three pages, laid out after [joncphillips.com](https://joncphillips.com/):
-a 900px column with hairline sides over the ocean, Figtree for the words and
-Geist Mono for the small labels. Dark by default, light on a click, remembered.
-Every page has the nav: Mobile-Apps, Personal, Wellness-Creators
-(creatormatch.app) on the left, JEREMY·LASNE (home) on the right (on a phone,
-the name on top and the three pages on a line under it), and a one-line foot with the theme
-switch.
+The site is laid out after [joncphillips.com](https://joncphillips.com/): a 900px column with
+hairline sides over the ocean, Figtree for the words and Geist Mono for the section heads.
+Navy ink and pale blue-grey as the two bases, electric pink as the one accent. Light by day,
+dark from 7 pm to 7 am, or the theme a visitor picked, remembered. Every page has the nav:
+Lessons and Personal on the left, Jeremy·Lasne (home) on the right, and a one-line foot
+with the theme switch. `site.css` holds the rules for every page.
 
-- **`/` · home.** The hello fills the first screen: "Hey, I'm", then "Jeremy (my
-  face) / Lasne." as big as the screen allows (up to 168 px), which slides and shrinks
-  into the mark at the top right as the page scrolls. Then "I'm operating a mobile apps portfolio." (bold italic, links to
-  `#apps`), "Design with taste. Decide with data. Build with creators." ("taste",
-  "data" and "creators" highlighted in blue), typed out letter by letter behind a
-  blinking caret, then the numbers counted up from 0 (1,000+ Kaught users, 1 app
-  live, 2 apps in build, the lessons counted from the list), x / email, and
-  "Lessons · Apps ↓" at the bottom. The hello has no veil, so the animals swim
-  around the words. One scroll below: The lessons (`#archive`), then the mobile
-  app portfolio (`#apps`) as a deck: each card fills the width of the screen, sticks
-  under the nav, and the next slides over it while the one beneath shrinks and dims;
-  the cards lean toward the cursor. With a mouse, the cursor is a ring that grows on a
-  link and says "Open" on an app. A visitor who asks
-  for less motion gets the words and numbers as they are. The 1,000+ and the
-  app counts are typed in `index.html`: update them by hand. A tap on the email copies it and opens
-  a popup: "Copied", the address, and "Write an email" for the mail app
-- **`/apps` · redirects to `/#apps`** (308, `vercel.json`). The portfolio on the home:
-  the Kaught reel as the card (a tap opens kaught.app); HealthClass, coming
-  soon, the same kind of card: the 20 s film of the healthclass.app hero
-  (`media/apps/healthclass.mp4`, 1280 x 720, no sound, 0.8 MB; the still is
-  its poster), a tap opens healthclass.app; and a third app, coming soon,
-  stealth: a big card of question marks, its name and line redacted.
-  **The lessons** (`#archive`), the archive of the newsletter, sits between
-  the hello and the portfolio: one row per issue (date, read time, title),
-  newest first
+- **`/` · home.** One screen: "Hey, I'm", then "Jeremy (my face) / Lasne" as big as the
+  screen allows (72, 120 or 168 px), "Design with taste. Decide with data. Build with
+  creators." typed out letter by letter ("taste", "data" and "creators" in pink), the 3
+  apps as phone icons (Kaught, Fogmate, HealthClass), then X, the email and CreatorMatch
+  (wellness creators). The icons land the way they do when a phone unlocks; a tap opens
+  the app from its icon, in the app's colour. A tap on the email copies it and opens a
+  popup: "Copied", the address, and "Write an email" for the mail app. The home loads
+  about 75 KB: no video, one font, a 256 px face
+- **`/lessons` · The lessons.** The archive of the newsletter: one row per issue (date,
+  read time, title), newest first. Each issue lives at `/apps/lessons/<slug>/`.
+  `/apps` redirects (308) to the home, `/apps/lessons` to `/lessons`
 - **`/personal` · Personal.** Wellness (`/wellness`), Workout (`/workout`),
   Knowledge (`/knowledge`) and Claude Portfolio (claudeportfolio.com, "World-Investment
   Management Intelligence."), four cells in two rows
@@ -61,20 +46,14 @@ sign-up URL there and `site.js` posts the address as the form field `email`,
 then shows "You're in." Until it is set, the button opens a mail to
 hey@jeremylasne.com with the address inside, so no sign-up is lost.
 
-### The Kaught reel
-
-`media/apps/kaught.mp4` (1.6 MB) is `assets/reel/reel.mp4` of
-[storinox/kaught-landing](https://github.com/storinox/kaught-landing) at 1280 x 720, 30 fps,
-no sound (`ffmpeg -i reel.mp4 -an -vf "scale=1280:-2,fps=30" -c:v libx264 -crf 28 -preset slow
--pix_fmt yuv420p -movflags +faststart kaught.mp4`); `kaught.webp` is its frame at 7.4 s.
-A visitor who asks for less motion keeps the still.
-
 ## The ocean
 
 `ocean.js`, one canvas fixed behind the page. 4 animals on a computer (2
 sharks, one a hammerhead, and 2 narwhals), 3 on a phone, seen from above and
 laid every frame on a grid of square cells that grows with the screen (6px
-on a phone, 8px at 1440px, 11px from 1980px), 30 frames a second. They stay
+on a phone, 8px at 1440px, 11px from 1980px), 25 frames a second, drawn at most at 1.5x
+the pixel density, and started once the page has loaded. The night glow is drawn 6 times
+smaller, then stretched back. They stay
 small and faint in the background: half their old size, at 50% opacity in
 the dark theme and 45% in the light one. It runs
 behind `/wellness` and `/wellness/details` as well.
@@ -122,7 +101,7 @@ no framework, no bundler. Open it and edit it.
 | `/apps` | redirects to `/#apps` |
 | `/personal` | Personal: Wellness, Knowledge, Claude Portfolio |
 | `/knowledge` | **Knowledge** · the built app from `jlasne/brain` (its `app/` folder), copied here. To update it: `npm run build` in brain, then copy `app/` (all but `README.md`) into `knowledge/`. Routes in `vercel.json`: `/knowledge` is `home.html`, `/knowledge/chat`, `/about`, `/doc` their `.html`, and the 2 MCP routes go to Convex |
-| `/apps/lessons/<slug>` | **A lesson** · one issue of the newsletter as a page, listed in The lessons on the home (`/#archive`). The page: "← The lessons", the date and read time, the title with a marker stroke, the text, my name by hand. First issue: `3-things-around-every-app` (Nov 1, 2026), with a hand-drawn schema of the loop (blog, newsletter, app, users) on dotted paper; its arrows draw themselves the first time it comes on screen. Second: `every-influencer-every-channel` (Nov 3, 2026), with a hand-drawn schema of the outreach rhythm (one DM on Instagram and TikTok, email and WhatsApp on day 0, 3, 7 and 30). Each sketch is static SVG: the strokes were drawn with Rough.js (seeded) and pasted in, the words are plain `<text>` in Caveat, editable by hand. A new lesson: copy the folder, then add its row at the top of `.lessons` in `index.html` |
+| `/apps/lessons/<slug>` | **A lesson** · one issue of the newsletter as a page, listed on `/lessons`. The page: "← The lessons", the date and read time, the title with a marker stroke, the text, my name by hand. First issue: `3-things-around-every-app` (Nov 1, 2026), with a hand-drawn schema of the loop (blog, newsletter, app, users) on dotted paper; its arrows draw themselves the first time it comes on screen. Second: `every-influencer-every-channel` (Nov 3, 2026), with a hand-drawn schema of the outreach rhythm (one DM on Instagram and TikTok, email and WhatsApp on day 0, 3, 7 and 30). Each sketch is static SVG: the strokes were drawn with Rough.js (seeded) and pasted in, the words are plain `<text>` in Caveat, editable by hand. A new lesson: copy the folder, then add its row at the top of `.lessons` in `lessons/index.html` |
 | `/wealth` | **Moved** to [claudeportfolio.com/wealth](https://www.claudeportfolio.com/wealth). `/wealth` and every path under it redirect there (308, `vercel.json`, before the filesystem). Numbers saved in the browser here cannot cross domains: the old page and its backup tool are gone, so they stay in that browser's storage for jeremylasne.com |
 | `/wellness` | **Wellness** · the charts and as little text as possible: my sleep and my sport, logged every day since 1 October 2026 (Phase 0, normal, before any habit is tested; the Exp 0 nights of October count from day one). **Night by night**: last night's **night score** as one big number with the normal under it and a meter (0 to 100: the average of sleep score, HRV, RHR, readiness and time asleep, each set against the last 30 days, 100 being the best of the month), then the score of the last 30 nights as columns, the sport of the day before under each. **Sport by day**: the last session's load as one big number with the average under it, then the load of each day stacked by sport (each session's minutes times its effort; effort mixes the average and peak heart rate as a share of the heart rate reserve with the level felt, 1 to 5, weighted by the session's target: cardio 50/20/30, speed 20/50/30, strength 20/20/60). A line over each chart reads the column under the finger or the cursor. **What changes my nights**: the average night after a rest day, after a sport day, with my girlfriend, cold (window open all night) and dark (shutters closed), in five columns, a column needing 3 nights. Links to the details page; the footer links Exp 0. The **Log** button top left opens the log in a panel centred over the page, nearly full screen on a phone; one passphrase writes. Each night has three toggles in the log: with my girlfriend (`gf`), cold (`cold`) and dark (`dark`). A Gym session holds any exercises, each with a name, reps and weight. Once unlocked, the log exports every day as a CSV (one row per session, the night beside it). A day the server cannot take (offline) is kept on the device and sent up the next time it answers. Its look: the landing's shell (the 900px column with hairline sides, the same nav and one-line foot, Figtree and Geist Mono), the headline "Wellness. My sleep and my sport, logged every day since 1 October 2026.", the ocean behind, round buttons and chips, and rounded bars in the charts. Rules in `wellness/spec.js`, data and the scores in `wellness/data.js`, charts in `wellness/charts.js`, styles in `wellness/wellness.css`; days in the `days` table of wellness-api. Linked from /personal. A new field such as `dark` needs `cd wellness-api && npx convex deploy`; until then the page keeps those days on the device and sends them up once the server knows the field |
 | `/wellness/details` | **Details** · the AI analysis as one table: factor, what it impacts, the change, and signal strength (strong or early, with the nights behind it; on a phone each row is a short card); each measure (night score, sleep score, HRV, RHR, readiness, time asleep, bedtime, wake-up): last night, the last 7 nights, normal, best and worst of 30 days. Then one measure at a time night by night, and the last 30 nights from bed to wake, each with its times, hours asleep and night score. Last, the full sport log: my max (the heaviest weight of each Gym exercise with its reps, and the fastest 1, 5 and 10 km from runs at least that long at their average pace, each with its day, found by themselves), a calendar of the days and every session with its measure, effort and form |

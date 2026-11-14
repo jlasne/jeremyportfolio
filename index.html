@@ -31,15 +31,11 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;0,700;0,800;1,800&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="/site.css">
-<link rel="stylesheet" href="/taste.css">
-<script>
-  /* the look to compare: "after" (the TASTE pass, taste.css) unless "before" was picked last time */
-  (function () { var l = null; try { l = localStorage.getItem("look"); } catch (e) {} document.documentElement.setAttribute("data-look", l === "before" ? "before" : "after"); })();
-</script>
+<link rel="preload" as="image" href="/media/avatar-256.webp" fetchpriority="high">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","email":"mailto:hey@jeremylasne.com","jobTitle":"Founder","sameAs":["https://x.com/jeremylasne","https://www.youtube.com/@jeremyfounder"]}
+{"@context":"https://schema.org","@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","email":"mailto:hey@jeremylasne.com","jobTitle":"Founder","sameAs":["https://x.com/jeremylasne","https://www.youtube.com/@jeremyfounder","https://creatormatch.app/"]}
 </script>
 </head>
 <body class="home">
@@ -49,105 +45,39 @@
 <div class="col">
   <header class="nav" id="nav">
     <nav class="links" aria-label="Main">
-      <a href="#apps"><svg class="nav-ic only-before" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg><svg class="nav-ic only-after" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>Mobile-Apps</a>
+      <a href="/lessons/"><svg class="nav-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6.5C10.3 5.2 7.8 4.5 4 4.5v14c3.8 0 6.3.7 8 2 1.7-1.3 4.2-2 8-2v-14c-3.8 0-6.3.7-8 2Zm0 0v14"/></svg>Lessons</a>
       <a href="/personal/"><svg class="nav-ic nav-ic-fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.4 20.1A8.5 8.5 0 1 1 14.6 20.1L12.9 15.2A3.3 3.3 0 1 0 11.1 15.2Z"/></svg>Personal</a>
-      <a href="https://creatormatch.app" target="_blank" rel="noopener"><svg class="nav-ic only-before" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M14.8 9.3c-.5-.9-1.5-1.5-2.8-1.5-1.6 0-2.8.8-2.8 2 0 2.8 5.6 1.5 5.6 4.3 0 1.2-1.2 2.1-2.8 2.1-1.3 0-2.4-.6-2.9-1.6M12 6.2v1.6M12 16.2v1.6"/></svg><svg class="nav-ic only-after" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.7a3.5 3.5 0 0 1 0 6.6M18.5 14.4c1.9.8 3 2.9 3 5.6"/></svg>Wellness-Creators</a>
     </nav>
-    <a class="mark" href="/" aria-label="Jeremy Lasne, home" aria-current="page">Jeremy<i>&middot;</i>Lasne</a>
   </header>
 
-  <main>
-    <section class="intro">
-      <h1 class="hero-name" data-ocean="avoid" data-fade="0"><span class="h-hey reveal">Hey, I'm</span> <span class="h-name"><span class="h-l reveal" style="--d:40">Jeremy<img class="face" src="/media/avatar.webp" alt="" width="512" height="512" fetchpriority="high"></span> <span class="h-l reveal" style="--d:90">Lasne<span class="only-before">.</span></span></span></h1>
-      <p class="reveal" style="--d:80" data-ocean="avoid" data-fade="0">I'm operating a <a class="u" href="#apps"><b><em>mobile apps portfolio</em></b></a>.</p>
-      <p class="reveal" style="--d:140" data-type data-ocean="avoid" data-fade="0">Design with <mark class="hl hl-blue">taste</mark>. Decide with <mark class="hl hl-blue">data</mark>. Build with <mark class="hl hl-blue">creators</mark>.<span class="caret" aria-hidden="true"></span></p>
-      <ul class="stats reveal" style="--d:200" aria-label="In numbers" data-ocean="avoid" data-fade="0">
-        <li><b data-count="1000" data-suffix="+">1,000+</b><span>Kaught users</span></li>
-        <li><b data-count="1">1</b><span>app live</span></li>
-        <li><b data-count="2">2</b><span>apps in build</span></li>
-        <li><b data-count="9" data-lessons>9</b><span>lessons</span></li>
-      </ul>
-      <p class="socials reveal" style="--d:260" data-ocean="avoid" data-fade="0">
-        <a href="https://x.com/jeremylasne" target="_blank" rel="noopener" aria-label="X, @jeremylasne"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.8 3h3.1l-6.8 7.8 8 10.2h-6.3l-4.9-6.4L5.3 21H2.2l7.3-8.3L1.8 3h6.4l4.4 5.9zm-1.1 16.2h1.7L7.4 4.7H5.6z"/></svg></a>
-        <a href="mailto:hey@jeremylasne.com" data-mail aria-label="Email, hey@jeremylasne.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1m1 2.4V17h16V7.4l-8 5.3zM5.9 7 12 11l6.1-4z"/></svg></a>
-      </p>
-      <a class="scroll-cue" href="#archive">Lessons &middot; Apps <span aria-hidden="true">&darr;</span></a>
-    </section>
+  <main class="stage">
+    <h1 class="hero-name" data-ocean="avoid" data-fade="0"><span class="h-hey reveal">Hey, I'm</span> <span class="h-name"><span class="h-l reveal" style="--d:60">Jeremy<img class="face" src="/media/avatar-256.webp" alt="" width="256" height="256" fetchpriority="high"></span> <span class="h-l reveal" style="--d:120">Lasne</span></span></h1>
 
-    <section class="sec archive" id="archive" aria-labelledby="archive-t">
-      <div class="sec-head"><h2 id="archive-t">The lessons</h2></div>
-      <!-- One <li> per issue, newest first:
-           <li><a class="lesson" href="URL"><span class="lesson-meta">Nov 4, 2026 · 2 min read</span><b>Title</b></a></li> -->
-      <ol class="lessons">
-        <li><a class="lesson" href="/apps/lessons/wellness-reach-women-vs-men/"><span class="lesson-meta">Nov 11, 2026 · 1 min read</span><b>Wellness creators: women 7x, men 1/3</b></a></li>
-        <li><a class="lesson" href="/apps/lessons/apple-ads-on-a-small-budget/"><span class="lesson-meta">Nov 11, 2026 · 3 min read</span><b>Apple Ads on a small budget</b></a></li>
-        <li><a class="lesson" href="/apps/lessons/no-gut-changes-lead-with-data/"><span class="lesson-meta">Nov 8, 2026 · 2 min read</span><b>Make no gut changes, lead with data</b></a></li>
-        <li><a class="lesson" href="/apps/lessons/creator-business-deals-to-ownership/"><span class="lesson-meta">Nov 8, 2026 · 2 min read</span><b>The creator business: from deals to ownership</b></a></li>
-        <li><a class="lesson" href="/apps/lessons/one-screen-one-thing-one-button/"><span class="lesson-meta">Nov 6, 2026 · 2 min read</span><b>One screen, one thing, one button</b></a></li>
-        <li><a class="lesson" href="/apps/lessons/win-the-organic-battle/"><span class="lesson-meta">Nov 4, 2026 · 3 min read</span><b>Win the organic battle for your app</b></a></li>
-        <li><a class="lesson" href="/apps/lessons/app-feel-premium-not-vibe-coded/"><span class="lesson-meta">Nov 4, 2026 · 2 min read</span><b>Make your app feel premium, not vibe coded</b></a></li>
-        <li><a class="lesson" href="/apps/lessons/every-influencer-every-channel/"><span class="lesson-meta">Nov 3, 2026 · 2 min read</span><b>I contact every influencer on every channel</b></a></li>
-        <li><a class="lesson" href="/apps/lessons/3-things-around-every-app/"><span class="lesson-meta">Nov 1, 2026 · 2 min read</span><b>I build 3 things around every app</b></a></li>
-      </ol>
-    </section>
+    <p class="tagline reveal" style="--d:200" data-type data-ocean="avoid" data-fade="0">Design with <b>taste</b>. Decide with <b>data</b>. Build with <b>creators</b>.<span class="caret" aria-hidden="true"></span></p>
 
-    <section class="sec" id="apps" aria-labelledby="apps-t">
-      <div class="sec-head"><h2 id="apps-t">Mobile app portfolio</h2><span><span class="only-before">3 apps</span><span class="only-after">4 apps</span></span></div>
+    <ul class="apps" aria-label="My apps" data-ocean="avoid" data-fade="0">
+      <li><a class="app" style="--d:320" href="https://kaught.app" data-splash="#120b06" aria-label="Kaught, open kaught.app"><span class="app-ic"><img src="/media/logos/kaught.webp" alt="" width="128" height="128"></span><span class="app-name">Kaught</span></a></li>
+      <li><a class="app" style="--d:370" href="https://www.fogmate.app" data-splash="#3a2a22" aria-label="Fogmate, open fogmate.app"><span class="app-ic"><img class="px" src="/media/logos/fogmate.svg" alt="" width="16" height="16"></span><span class="app-name">Fogmate</span></a></li>
+      <li><a class="app" style="--d:420" href="https://www.healthclass.app" data-splash="#fffbf6" aria-label="HealthClass, open healthclass.app"><span class="app-ic"><img src="/media/logos/healthclass.webp" alt="" width="128" height="128"></span><span class="app-name">HealthClass</span></a></li>
+    </ul>
 
-      <div class="deck only-before">
-      <div class="deal"><a class="reel tilt" data-cursor="Open" href="https://kaught.app" target="_blank" rel="noopener" aria-label="Kaught, open kaught.app">
-        <img src="/media/apps/kaught.webp" alt="" width="1280" height="720" decoding="async">
-        <video data-src="/media/apps/kaught.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
-        <span class="reel-tag"><img src="/media/logos/kaught.webp" alt="" width="128" height="128">Kaught<span class="live">Live</span><span class="reel-go" aria-hidden="true">&nearr;</span></span>
-      </a></div>
-
-      <div class="deal"><a class="reel reel-hc tilt" data-cursor="Open" href="https://www.healthclass.app" target="_blank" rel="noopener" aria-label="HealthClass, coming soon, open healthclass.app">
-        <img src="/media/apps/healthclass.webp" alt="" width="1280" height="720" decoding="async" loading="lazy">
-        <video data-src="/media/apps/healthclass.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
-        <span class="reel-tag"><img src="/media/logos/healthclass.webp" alt="" width="128" height="128">HealthClass<span class="soon">Coming soon</span><span class="reel-go" aria-hidden="true">&nearr;</span></span>
-      </a></div>
-
-      <div class="deal"><div class="mystery tilt" data-cursor="Soon" role="group" aria-label="A third app, coming soon, in stealth">
-        <span class="mystery-q" aria-hidden="true">?</span>
-        <span class="mystery-q mystery-q2" aria-hidden="true">?</span>
-        <span class="mystery-q mystery-q3" aria-hidden="true">?</span>
-        <div class="mystery-text">
-          <span class="mystery-soon">Coming soon</span>
-          <h3><span class="redact redact-name" aria-hidden="true"></span><span class="mystery-mark">?</span></h3>
-          <p><span class="redact" aria-hidden="true"></span><span class="redact r2" aria-hidden="true"></span></p>
-        </div>
-        <span class="pill mystery-pill">Stealth</span>
-      </div></div>
-      </div>
-
-      <!-- after: the apps as on a phone home screen; a tap opens the app (site.js) -->
-      <div class="phone-stage only-after">
-        <div class="phone" role="group" aria-label="My apps, as on a phone">
-          <div class="phone-screen">
-            <div class="phone-bar" aria-hidden="true"><span>9:41</span><svg viewBox="0 0 26 12"><rect x=".5" y=".5" width="22" height="11" rx="3" fill="none" stroke="#fff" stroke-opacity=".5"/><rect x="2" y="2" width="17" height="8" rx="1.5"/><rect x="23.5" y="4" width="1.5" height="4" rx=".75" fill-opacity=".5"/></svg></div>
-            <ul class="apps-grid">
-              <li><a class="app" href="https://kaught.app" data-splash="#120b06" aria-label="Kaught, live, open kaught.app"><span class="app-ic"><img src="/media/logos/kaught.webp" alt="" width="128" height="128"></span><span class="app-name">Kaught</span><span class="app-state is-live">Live</span></a></li>
-              <li><a class="app" href="https://www.fogmate.app" data-splash="#3a2a22" aria-label="Fogmate, in alpha, open fogmate.app"><span class="app-ic"><img class="px" src="/media/logos/fogmate.svg" alt="" width="16" height="16"></span><span class="app-name">Fogmate</span><span class="app-state">Alpha</span></a></li>
-              <li><a class="app" href="https://www.healthclass.app" data-splash="#fffbf6" aria-label="HealthClass, open healthclass.app"><span class="app-ic"><img src="/media/logos/healthclass.webp" alt="" width="128" height="128"></span><span class="app-name">HealthClass</span></a></li>
-              <li><div class="app" role="img" aria-label="A fourth app, in stealth"><span class="app-ic app-ic-q" aria-hidden="true">?</span><span class="app-name" aria-hidden="true">Stealth</span></div></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
+    <p class="socials reveal" style="--d:500" data-ocean="avoid" data-fade="0">
+      <a href="https://x.com/jeremylasne" target="_blank" rel="noopener" aria-label="X, @jeremylasne"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.8 3h3.1l-6.8 7.8 8 10.2h-6.3l-4.9-6.4L5.3 21H2.2l7.3-8.3L1.8 3h6.4l4.4 5.9zm-1.1 16.2h1.7L7.4 4.7H5.6z"/></svg></a>
+      <a href="mailto:hey@jeremylasne.com" data-mail aria-label="Email, hey@jeremylasne.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1m1 2.4V17h16V7.4l-8 5.3zM5.9 7 12 11l6.1-4z"/></svg></a>
+      <a class="cm" href="https://creatormatch.app/" target="_blank" rel="noopener" aria-label="Wellness creators, CreatorMatch"><svg viewBox="12 29 75.5 41.5" aria-hidden="true"><g transform="translate(12.5 29.73) scale(.11486)"><path d="M210.3 343.6C239.6 337.2 265.3 325.0 287.6 306.9C295.2 300.7 304.2 291.3 307.2 286.5C309.4 282.8 309.6 275.0 307.5 271.1C306.7 269.5 301.2 263.9 295.3 258.6C289.4 253.3 280.5 245.4 275.7 241.1C268.7 234.7 266.0 233.0 262.3 232.2C259.8 231.6 257.2 231.3 256.6 231.5C256.0 231.7 254.3 232.1 252.8 232.4C251.3 232.8 247.2 235.5 243.8 238.6C228.9 251.9 212.5 260.4 194.0 264.2C181.9 266.8 164.4 266.2 153.0 263.0C125.7 255.2 103.8 235.0 94.8 209.0C87.8 188.7 88.5 163.9 96.8 144.2C109.7 113.4 141.9 89.8 174.4 87.1C197.8 85.2 218.3 91.6 238.4 107.1C254.8 119.7 258.6 119.3 275.9 103.1C282.3 97.1 291.9 87.700 297.2 82.2L307.0 72.3L307.0 66.5C307.0 58.8 305.1 56.0 293.2 45.9C264.9 21.9 233.4 9.0 195.3 5.8C137.7 1.0 77.3 29.0 41.5 77.1C0.9 131.6 -6.0 200.1 23.1 258.3C29.1 270.2 34.5 278.2 44.3 289.6C67.4 316.4 98.8 334.7 135.9 343.0C150.8 346.3 158.1 346.9 179.0 346.5C195.3 346.2 200.4 345.7 210.3 343.6Z"/><path d="M615.7 340.8C629.3 336.1 640.3 324.7 645.3 310.1L647.5 303.5L647.8 191.5C648.0 118.7 647.7 76.8 647.1 71.7C640.6 23.0 588.2 -0.2 548.9 28.2C546.3 30.0 515.1 60.4 479.4 95.7L414.6 159.9L391.5 137.2C366.3 112.3 362.0 109.1 349.8 106.9C341.9 105.4 334.4 106.6 326.2 110.6C318.7 114.3 296.0 136.3 292.6 143.3C289.3 149.8 289.1 158.3 292.0 163.9C293.1 166.1 313.2 187.2 339.2 213.3C389.0 263.3 388.7 263.1 402.9 265.3C415.9 267.3 428.2 263.3 438.9 253.7C445.0 248.2 464.3 229.5 518.3 176.6C537.5 157.8 553.6 142.4 554.1 142.2C554.6 142.0 555.0 174.7 554.9 222.2L554.9 302.5L557.5 310.7C564.0 331.4 583.3 345.1 603.5 343.4C606.8 343.2 612.3 342.0 615.7 340.8Z"/></g></svg></a>
+    </p>
   </main>
 
   <footer class="foot foot-mini">
     <span>&copy; 2026 Jeremy Lasne</span>
     <button class="theme" type="button" aria-label="Switch to the dark theme">
-        <svg class="sun" viewBox="0 0 256 256" aria-hidden="true"><path d="M116,36V20a12,12,0,0,1,24,0V36a12,12,0,0,1-24,0Zm80,92a68,68,0,1,1-68-68A68.07,68.07,0,0,1,196,128Zm-24,0a44,44,0,1,0-44,44A44.05,44.05,0,0,0,172,128ZM51.51,68.49a12,12,0,1,0,17-17l-12-12a12,12,0,0,0-17,17Zm0,119-12,12a12,12,0,0,0,17,17l12-12a12,12,0,1,0-17-17ZM196,72a12,12,0,0,0,8.49-3.51l12-12a12,12,0,0,0-17-17l-12,12A12,12,0,0,0,196,72Zm8.49,115.51a12,12,0,0,0-17,17l12,12a12,12,0,0,0,17-17ZM48,128a12,12,0,0,0-12-12H20a12,12,0,0,0,0,24H36A12,12,0,0,0,48,128Zm80,80a12,12,0,0,0-12,12v16a12,12,0,0,0,24,0V220A12,12,0,0,0,128,208Zm108-92H220a12,12,0,0,0,0,24h16a12,12,0,0,0,0-24Z"/></svg>
-        <svg class="moon" viewBox="0 0 256 256" aria-hidden="true"><path d="M236.37,139.4a12,12,0,0,0-12-3A84.07,84.07,0,0,1,119.6,31.59a12,12,0,0,0-15-15A108.86,108.86,0,0,0,49.69,55.07,108,108,0,0,0,136,228a107.09,107.09,0,0,0,64.93-21.69,108.86,108.86,0,0,0,38.44-54.94A12,12,0,0,0,236.37,139.4Zm-49.88,47.74A84,84,0,0,1,68.86,69.51,84.93,84.93,0,0,1,92.27,48.29Q92,52.13,92,56A108.12,108.12,0,0,0,200,164q3.87,0,7.71-.27A84.79,84.79,0,0,1,186.49,187.14Z"/></svg>
-      </button>
+      <svg class="sun" viewBox="0 0 256 256" aria-hidden="true"><path d="M116,36V20a12,12,0,0,1,24,0V36a12,12,0,0,1-24,0Zm80,92a68,68,0,1,1-68-68A68.070,68.070,0,0,1,196,128Zm-24,0a44,44,0,1,0-44,44A44.050,44.050,0,0,0,172,128ZM51.51,68.49a12,12,0,1,0,17-17l-12-12a12,12,0,0,0-17,17Zm0,119-12,12a12,12,0,0,0,17,17l12-12a12,12,0,1,0-17-17ZM196,72a12,12,0,0,0,8.49-3.51l12-12a12,12,0,0,0-17-17l-12,12A12,12,0,0,0,196,72Zm8.49,115.51a12,12,0,0,0-17,17l12,12a12,12,0,0,0,17-17ZM48,128a12,12,0,0,0-12-12H20a12,12,0,0,0,0,24H36A12,12,0,0,0,48,128Zm80,80a12,12,0,0,0-12,12v16a12,12,0,0,0,24,0V220A12,12,0,0,0,128,208Zm108-92H220a12,12,0,0,0,0,24h16a12,12,0,0,0,0-24Z"/></svg>
+      <svg class="moon" viewBox="0 0 256 256" aria-hidden="true"><path d="M236.37,139.4a12,12,0,0,0-12-3A84.07,84.07,0,0,1,119.6,31.59a12,12,0,0,0-15-15A108.86,108.86,0,0,0,49.69,55.07,108,108,0,0,0,136,228a107.09,107.09,0,0,0,64.93-21.69,108.86,108.86,0,0,0,38.44-54.94A12,12,0,0,0,236.37,139.4Zm-49.88,47.74A84,84,0,0,1,68.86,69.510,84.93,84.93,0,0,1,92.27,48.29Q92,52.13,92,56A108.12,108.12,0,0,0,200,164q3.870,0,7.710-.27A84.79,84.79,0,0,1,186.49,187.14Z"/></svg>
+    </button>
   </footer>
 </div>
 
-
-<script src="/ocean.js" defer></script>
 <script src="/site.js" defer></script>
+<script src="/ocean.js" defer></script>
 </body>
 </html>

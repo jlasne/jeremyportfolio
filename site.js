@@ -1,6 +1,11 @@
-/* jeremylasne.com, every page: the before/after switch (taste.css), the theme, the nav, the Kaught reel (home), the newsletter (each lesson), the hand-drawn schemas of the lessons, the email links, and on the home the typed subheadline, the numbers, the name that becomes the mark, the deck of app cards and the cursor. */
+/* jeremylasne.com, every page: the theme, the nav, the hand-drawn schemas of the lessons, the email
+   links, and on the home the line that types itself and the 3 apps that open the way a phone does. */
 (function () {
   var root = document.documentElement;
+  var calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* An old link to the lessons on the home (/#archive) goes to /lessons. */
+  if (location.pathname === "/" && location.hash === "#archive") { location.replace("/lessons/"); return; }
 
   /* The theme: light by day, dark from 7 pm to 7 am (set in each page head), or the one a visitor picked, remembered. The ocean redraws in the new colours. */
   function paint() {
@@ -19,103 +24,12 @@
   document.querySelectorAll(".theme").forEach(function (b) { b.addEventListener("click", flip); });
   paint();
 
-  /* Before / after: the TASTE pass (taste.css) against the site as it was (site.css alone).
-     The head of each page sets data-look from the last choice, "after" by default. This switch,
-     at the bottom of the page, flips it and remembers it; the name and the ocean re-measure. */
-  if (root.hasAttribute("data-look")) {
-    var look = document.createElement("div");
-    look.className = "look";
-    look.setAttribute("role", "group");
-    look.setAttribute("aria-label", "Compare the design, before and after");
-    look.innerHTML = '<button type="button" data-look="before">Before</button><button type="button" data-look="after">After</button>';
-    var pressLook = function () {
-      look.querySelectorAll("button").forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-look") === root.getAttribute("data-look") ? "true" : "false"); });
-    };
-    look.addEventListener("click", function (e) {
-      var b = e.target.closest("button");
-      if (!b) return;
-      var v = b.getAttribute("data-look");
-      root.setAttribute("data-look", v);
-      try { localStorage.setItem("look", v); } catch (err) {}
-      pressLook();
-      window.dispatchEvent(new Event("resize"));
-    });
-    pressLook();
-    document.body.appendChild(look);
-  }
-
   /* The nav: a shade under it once the page scrolls (on a phone, the top bar turns frosted). */
   var nav = document.getElementById("nav");
   if (nav) {
     var shade = function () { nav.classList.toggle("scrolled", scrollY > 8); };
     addEventListener("scroll", shade, { passive: true });
     shade();
-  }
-
-  /* The videos (each phone's page, the Kaught reel) play muted and looping while they are on
-     screen, and rest once they leave; each loads only when first seen. The still shows until the
-     first frame. A visitor who asks for less motion keeps the stills. A browser that refuses
-     autoplay (low-power mode, data saver) gets one more try at the first touch, key or scroll. */
-  var vids = Array.prototype.slice.call(document.querySelectorAll("video[data-src]"));
-  if (vids.length && "IntersectionObserver" in window && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    var gestures = ["pointerdown", "touchstart", "keydown", "wheel", "scroll"], waiting = false, seen = new Set();
-    var start = function (v) {
-      if (!v.getAttribute("src")) v.src = v.dataset.src;
-      var p = v.play();
-      if (p && p.catch) p.catch(function () {
-        if (waiting) return;
-        waiting = true;
-        gestures.forEach(function (g) { addEventListener(g, retry, { once: true, passive: true }); });
-      });
-    };
-    var retry = function () {
-      waiting = false;
-      gestures.forEach(function (g) { removeEventListener(g, retry); });
-      seen.forEach(function (v) { if (v.paused) start(v); });
-    };
-    var io = new IntersectionObserver(function (es) {
-      es.forEach(function (e) {
-        var v = e.target;
-        if (e.isIntersecting) { seen.add(v); start(v); }
-        else { seen.delete(v); if (!v.paused) v.pause(); }
-      });
-    }, { threshold: .35 });
-    vids.forEach(function (v) {
-      v.muted = v.defaultMuted = true;
-      v.addEventListener("playing", function () { v.classList.add("ready"); });
-      io.observe(v);
-    });
-  }
-
-  /* The newsletter. With data-endpoint set (the mailcheap.ai sign-up URL), the email is posted
-     there as a form field "email". Until then, the button opens a mail to hey@jeremylasne.com
-     with the address in it, so no sign-up is lost. */
-  var form = document.getElementById("join"), note = document.getElementById("join-note");
-  if (form) {
-    var input = form.querySelector("input"), button = form.querySelector("button"), first = note.textContent;
-    var say = function (text, ok) { note.textContent = text; note.classList.toggle("ok", !!ok); };
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      var email = input.value.trim();
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { say("Type a valid email, like you@mail.com."); input.focus(); return; }
-      var url = form.getAttribute("data-endpoint");
-      if (!url) {
-        location.href = "mailto:hey@jeremylasne.com?subject=" + encodeURIComponent("Newsletter") +
-          "&body=" + encodeURIComponent("Add me to the newsletter: " + email);
-        say("Send the mail that just opened, and you're in.", true);
-        return;
-      }
-      button.disabled = true;
-      var body = new FormData(); body.append("email", email);
-      fetch(url, { method: "POST", body: body }).then(function (r) {
-        if (!r.ok) throw new Error(r.status);
-        form.reset();
-        say("You're in. The next issue lands Wednesday or Sunday.", true);
-      }).catch(function () {
-        say("That didn't go through. Try again, or write to hey@jeremylasne.com.");
-      }).then(function () { button.disabled = false; });
-    });
-    input.addEventListener("input", function () { if (note.textContent !== first && !note.classList.contains("ok")) say(first); });
   }
 
   /* A hand-drawn schema in a lesson: its arrows draw themselves, one after the other, the first
@@ -174,33 +88,8 @@
       else done(false);
     });
   });
-  /* The home. A visitor who asks for less motion gets the words and the numbers as they are. */
-  var calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  /* The numbers: the lessons are counted from the list, then each counts up from 0 in 1.2 s. */
-  var counts = Array.prototype.slice.call(document.querySelectorAll("[data-count]"));
-  var lessons = document.querySelectorAll("ol.lessons > li").length;
-  counts.forEach(function (b) { if (b.hasAttribute("data-lessons") && lessons) b.setAttribute("data-count", lessons); });
-  var show = function (b, n) { b.textContent = n.toLocaleString("en-US") + (b.getAttribute("data-suffix") || ""); };
-  var counted = false;
-  function countUp() {
-    if (counted) return;
-    counted = true;
-    var t0 = performance.now();
-    (function step(t) {
-      var k = Math.min(1, (t - t0) / 1200), e = 1 - Math.pow(1 - k, 3);
-      counts.forEach(function (b) { show(b, Math.round(+b.getAttribute("data-count") * e)); });
-      if (k < 1) requestAnimationFrame(step);
-    })(t0);
-  }
-  if (counts.length) {
-    if (calm) counts.forEach(function (b) { show(b, +b.getAttribute("data-count")); });
-    /* each number keeps the width of its final value, so the row stays still while it counts */
-    else counts.forEach(function (b) { show(b, +b.getAttribute("data-count")); b.style.minWidth = b.offsetWidth + "px"; show(b, 0); });
-  }
-
-  /* The subheadline types itself, 32 ms a letter and a breath after each full stop; the caret leads.
-     The numbers start counting once the last letter is down. */
+  /* The line on the home types itself, 28 ms a letter and a breath after each full stop; the caret
+     leads, then blinks twice and leaves. The letters hold their place from the start: nothing moves. */
   var typed = document.querySelector("[data-type]");
   if (typed && !calm) {
     var caret = typed.querySelector(".caret"), chars = [];
@@ -215,123 +104,23 @@
         } else if (n !== caret) split(n);
       });
     })(typed);
-    typed.classList.add("typing");
     var i = 0;
     var next = function () {
-      if (i >= chars.length) { typed.classList.remove("typing"); if (caret) { typed.appendChild(caret); caret.classList.add("done"); } countUp(); return; }
-      var c = chars[i++], m = c.parentNode;
+      if (i >= chars.length) { if (caret) { typed.appendChild(caret); caret.classList.add("done"); } return; }
+      var c = chars[i++];
       c.classList.add("on");
-      if (m.tagName === "MARK") m.classList.add("on");
       if (caret) c.parentNode.insertBefore(caret, c.nextSibling);
-      setTimeout(next, c.textContent === "." ? 380 : 32);
+      setTimeout(next, c.textContent === "." ? 260 : 28);
     };
-    setTimeout(next, 650);
-  } else if (counts.length && !calm) setTimeout(countUp, 400);
-  /* After: the numbers count right away, while the line types. */
-  if (root.getAttribute("data-look") === "after" && counts.length && !calm) setTimeout(countUp, 400);
-
-  /* The app cards lean toward the cursor, up to 4 degrees, and a light follows it. */
-  if (matchMedia("(hover: hover) and (pointer: fine)").matches && !calm) {
-    document.querySelectorAll(".tilt").forEach(function (el) {
-      el.addEventListener("pointermove", function (e) {
-        var r = el.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
-        el.style.setProperty("--ry", ((x - .5) * 8).toFixed(2) + "deg");
-        el.style.setProperty("--rx", ((.5 - y) * 6).toFixed(2) + "deg");
-        el.style.setProperty("--gx", (x * 100).toFixed(1) + "%");
-        el.style.setProperty("--gy", (y * 100).toFixed(1) + "%");
-        el.classList.add("on");
-      });
-      el.addEventListener("pointerleave", function () { el.classList.remove("on"); });
-    });
-  }
-  /* The name slides and shrinks into the mark at the top right as the page scrolls, then hands over to it. */
-  var big = document.querySelector(".h-name"), mark = document.querySelector(".home .mark");
-  if (big && mark && !calm) {
-    var from, to, run;
-    var place = function () {
-      big.style.transform = "";
-      var r = big.getBoundingClientRect(), range = document.createRange();
-      range.selectNodeContents(mark);
-      var m = range.getBoundingClientRect();
-      from = { x: r.left, y: r.top + scrollY, w: r.width, h: r.height };
-      to = { x: m.left, y: m.top, w: m.width, h: m.height };
-      run = Math.max(220, Math.min(innerHeight * .55, 460));
-      morph();
-    };
-    var morph = function () {
-      if (!from) return;
-      /* it shrinks faster than it travels, so it stays on screen on the way */
-      var p = Math.min(1, Math.max(0, scrollY / run)), e = p * p * (3 - 2 * p), q = 1 - Math.pow(1 - p, 3);
-      var k = 1 + (to.w / from.w - 1) * q;
-      var x = (to.x - from.x) * e, y = (to.y + to.h / 2 - from.h * k / 2 - (from.y - scrollY)) * e;
-      big.style.transform = p ? "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px) scale(" + k.toFixed(4) + ")" : "";
-      var hand = Math.min(1, Math.max(0, (p - .78) / .22));
-      big.style.opacity = 1 - hand;
-      big.style.visibility = hand === 1 ? "hidden" : "";
-      mark.style.opacity = hand;
-    };
-    var ticking = false;
-    addEventListener("scroll", function () {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(function () { ticking = false; morph(); });
-    }, { passive: true });
-    addEventListener("resize", place);
-    place();
-    setTimeout(place, 800);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
+    setTimeout(next, 420);
+  } else if (typed) {
+    var still = typed.querySelector(".caret");
+    if (still) still.remove();
   }
 
-  /* The deck: the sheet under the one sliding over it shrinks to 92% and dims, as the next covers it. */
-  var deals = Array.prototype.slice.call(document.querySelectorAll(".deal"));
-  if (deals.length > 1 && !calm) {
-    var stack = function () {
-      for (var k = 0; k < deals.length - 1; k++) {
-        var a = deals[k].getBoundingClientRect(), b = deals[k + 1].getBoundingClientRect();
-        var cover = Math.min(1, Math.max(0, (a.bottom - b.top) / a.height));
-        deals[k].style.transform = cover ? "scale(" + (1 - .08 * cover).toFixed(4) + ")" : "";
-        deals[k].style.setProperty("--dim", (cover * .55).toFixed(3));
-      }
-    };
-    var stacking = false;
-    addEventListener("scroll", function () {
-      if (stacking) return;
-      stacking = true;
-      requestAnimationFrame(function () { stacking = false; stack(); });
-    }, { passive: true });
-    addEventListener("resize", stack);
-    stack();
-  }
-
-  /* The cursor, on the home with a mouse: a ring that trails the pointer, grows on a link,
-     and says what a card does. The sharks already follow the pointer (ocean.js). */
-  if (document.body.classList.contains("home") && matchMedia("(hover: hover) and (pointer: fine)").matches && !calm) {
-    var ring = document.createElement("div"), label = document.createElement("span");
-    ring.className = "cursor off"; ring.setAttribute("aria-hidden", "true"); ring.appendChild(label);
-    document.body.appendChild(ring);
-    root.classList.add("ring");
-    var mx = -100, my = -100, rx = -100, ry = -100, moving = false;
-    var follow = function () {
-      rx += (mx - rx) * .28; ry += (my - ry) * .28;
-      ring.style.transform = "translate3d(" + rx.toFixed(1) + "px," + ry.toFixed(1) + "px,0)";
-      if (Math.abs(mx - rx) + Math.abs(my - ry) > .3) requestAnimationFrame(follow); else moving = false;
-    };
-    addEventListener("pointermove", function (e) {
-      if (e.pointerType !== "mouse") return;
-      mx = e.clientX; my = e.clientY;
-      if (ring.classList.contains("off")) { rx = mx; ry = my; ring.classList.remove("off"); }
-      var card = e.target.closest("[data-cursor]"), link = !card && e.target.closest("a, button");
-      ring.classList.toggle("card", !!card);
-      ring.classList.toggle("link", !!link);
-      label.textContent = card ? card.getAttribute("data-cursor") : "";
-      if (!moving) { moving = true; requestAnimationFrame(follow); }
-    }, { passive: true });
-    document.addEventListener("pointerleave", function () { ring.classList.add("off"); });
-    addEventListener("blur", function () { ring.classList.add("off"); });
-  }
-  /* The phone of apps (after): a tap opens an app the way a phone does. A sheet in the app's
-     colour grows out of the icon to fill the screen in 320 ms, then the page goes to the app.
-     A click with a modifier key, or less motion, stays a plain link. Back finds the page clean. */
+  /* The 3 apps: a tap opens an app the way a phone does. A sheet in the app's colour grows out of
+     the icon to fill the screen in 320 ms, then the page goes to the app. A click with a modifier
+     key, or less motion, stays a plain link. Back finds the page clean. */
   document.querySelectorAll("a.app").forEach(function (a) {
     a.addEventListener("click", function (e) {
       if (calm || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
@@ -343,7 +132,8 @@
       sheet.style.background = a.getAttribute("data-splash") || "#0b1626";
       if (img) sheet.appendChild(img.cloneNode());
       document.body.appendChild(sheet);
-      var from = "inset(" + r.top + "px " + (innerWidth - r.right) + "px " + (innerHeight - r.bottom) + "px " + r.left + "px round 12px)";
+      var rad = getComputedStyle(ic).borderTopLeftRadius;
+      var from = "inset(" + r.top + "px " + (innerWidth - r.right) + "px " + (innerHeight - r.bottom) + "px " + r.left + "px round " + rad + ")";
       sheet.animate([{ clipPath: from }, { clipPath: "inset(0px 0px 0px 0px round 0px)" }], { duration: 320, easing: "cubic-bezier(.22,1,.36,1)", fill: "forwards" });
       setTimeout(function () { location.href = a.href; }, 340);
     });

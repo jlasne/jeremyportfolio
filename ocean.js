@@ -21,6 +21,8 @@
   if (!cv || !cv.getContext) return;
   var ctx0 = cv.getContext("2d"), ctx = ctx0;
   var fx = document.createElement("canvas"), fxc = fx.getContext("2d"), blur = "filter" in fxc;
+  /* the glow is drawn on a canvas 6 times smaller, then stretched back: a soft light for a fraction of the cost */
+  var gl = document.createElement("canvas"), glc = gl.getContext("2d");
   var root = document.documentElement;
   var still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var TAU = Math.PI * 2;
@@ -182,9 +184,10 @@
   function resize() {
     W = cv.clientWidth; H = cv.clientHeight;
     if (!W || !H) return;
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
     fx.width = cv.width; fx.height = cv.height;
+    gl.width = Math.max(1, Math.round(cv.width / 6)); gl.height = Math.max(1, Math.round(cv.height / 6));
     /* the grid and the animals grow with the screen, kept small so they stay in the background:
        6px cells on a phone, 8 at 1440px, 11 on a 2K display, the animals at about half their old size */
     C = Math.round(clamp(W / 180, 6, 11));
@@ -475,23 +478,23 @@
     ctx.globalCompositeOperation = "destination-out";
     ctx.globalAlpha = T.trail; ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, cv.width, cv.height);
-    if (blur) {
-      ctx.globalCompositeOperation = "lighter";
-      ctx.globalAlpha = T.glow;
-      ctx.filter = "blur(" + Math.round(7 * dpr) + "px)";
-      ctx.drawImage(fx, 0, 0);
-      ctx.filter = "none";
-    }
+    glc.clearRect(0, 0, gl.width, gl.height);
+    if (blur) glc.filter = "blur(1.5px)";
+    glc.drawImage(fx, 0, 0, gl.width, gl.height);
+    ctx.globalCompositeOperation = "lighter";
+    ctx.globalAlpha = T.glow;
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(gl, 0, 0, cv.width, cv.height);
     ctx.globalCompositeOperation = "source-over";
     ctx.globalAlpha = 1;
     ctx.drawImage(fx, 0, 0);
   }
 
-  /* ── the loop: 30 frames a second is plenty for a grid ─────────────── */
+  /* ── the loop: 25 frames a second is plenty for a grid ─────────────── */
   var last = 0;
   function frame(now) {
     requestAnimationFrame(frame);
-    if (now - last < 32) return;
+    if (now - last < 40) return;
     var dt = Math.min(.1, (now - last) / 1000);
     last = now;
     time += dt;
@@ -527,6 +530,9 @@
         if (Math.hypot(a.p[0].x - e.clientX, a.p[0].y - e.clientY) < 300) { a.flee = { x: e.clientX, y: e.clientY, until: time + 1.3 }; a.boost = 1.7; }
       });
     });
-    requestAnimationFrame(function (t) { last = t; frame(t); });
-  }
+    /* the water starts once the page has loaded, so the words come first, and fades in */
+    var go = function () { cv.classList.add("on"); requestAnimationFrame(function (t) { last = t; frame(t); }); };
+    if (document.readyState === "complete") setTimeout(go, 150);
+    else window.addEventListener("load", function () { setTimeout(go, 150); }, { once: true });
+  } else cv.classList.add("on");
 })();

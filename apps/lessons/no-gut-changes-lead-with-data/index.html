@@ -37,15 +37,10 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Figtree:ital,wght@0,400;0,500;0,600;0,700;0,800;1,800&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Figtree:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="/site.css">
-<link rel="stylesheet" href="/taste.css">
-<script>
-  /* the look to compare: "after" (the TASTE pass, taste.css) unless "before" was picked last time */
-  (function () { var l = null; try { l = localStorage.getItem("look"); } catch (e) {} document.documentElement.setAttribute("data-look", l === "before" ? "before" : "after"); })();
-</script>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","@id":"https://www.jeremylasne.com/apps/lessons/no-gut-changes-lead-with-data/#post","headline":"Make no gut changes, lead with data","description":"Change your app with data: get 1,000+ users per test, change one thing at a time, run 3 tests at most, ship fixes now and launch new content.","datePublished":"2026-11-08","dateModified":"2026-11-08","inLanguage":"en","wordCount":366,"keywords":["A/B testing", "mobile app experiments", "paywall testing", "onboarding test", "PostHog"],"articleSection":"The lessons","url":"https://www.jeremylasne.com/apps/lessons/no-gut-changes-lead-with-data/","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.jeremylasne.com/apps/lessons/no-gut-changes-lead-with-data/"},"image":{"@type":"ImageObject","url":"https://www.jeremylasne.com/og-image.png?v=8","width":1200,"height":630},"author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne","https://www.youtube.com/@jeremyfounder"]},"publisher":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/"},"isPartOf":{"@type":"Blog","name":"The lessons","url":"https://www.jeremylasne.com/#archive"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.jeremylasne.com/"},{"@type":"ListItem","position":2,"name":"The lessons","item":"https://www.jeremylasne.com/#archive"},{"@type":"ListItem","position":3,"name":"Make no gut changes, lead with data","item":"https://www.jeremylasne.com/apps/lessons/no-gut-changes-lead-with-data/"}]}]}
+{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","@id":"https://www.jeremylasne.com/apps/lessons/no-gut-changes-lead-with-data/#post","headline":"Make no gut changes, lead with data","description":"Change your app with data: get 1,000+ users per test, change one thing at a time, run 3 tests at most, ship fixes now and launch new content.","datePublished":"2026-11-08","dateModified":"2026-11-08","inLanguage":"en","wordCount":366,"keywords":["A/B testing", "mobile app experiments", "paywall testing", "onboarding test", "PostHog"],"articleSection":"The lessons","url":"https://www.jeremylasne.com/apps/lessons/no-gut-changes-lead-with-data/","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.jeremylasne.com/apps/lessons/no-gut-changes-lead-with-data/"},"image":{"@type":"ImageObject","url":"https://www.jeremylasne.com/og-image.png?v=8","width":1200,"height":630},"author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne","https://www.youtube.com/@jeremyfounder"]},"publisher":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/"},"isPartOf":{"@type":"Blog","name":"The lessons","url":"https://www.jeremylasne.com/lessons/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.jeremylasne.com/"},{"@type":"ListItem","position":2,"name":"The lessons","item":"https://www.jeremylasne.com/lessons/"},{"@type":"ListItem","position":3,"name":"Make no gut changes, lead with data","item":"https://www.jeremylasne.com/apps/lessons/no-gut-changes-lead-with-data/"}]}]}
 </script>
 </head>
 <body class="lesson-page">
@@ -55,9 +50,8 @@
 <div class="col">
   <header class="nav" id="nav">
     <nav class="links" aria-label="Main">
-      <a href="/#apps"><svg class="nav-ic only-before" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg><svg class="nav-ic only-after" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>Mobile-Apps</a>
+      <a href="/lessons/" aria-current="true"><svg class="nav-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6.5C10.3 5.2 7.8 4.5 4 4.5v14c3.8 0 6.3.7 8 2 1.7-1.3 4.2-2 8-2v-14c-3.8 0-6.3.7-8 2Zm0 0v14"/></svg>Lessons</a>
       <a href="/personal/"><svg class="nav-ic nav-ic-fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.4 20.1A8.5 8.5 0 1 1 14.6 20.1L12.9 15.2A3.3 3.3 0 1 0 11.1 15.2Z"/></svg>Personal</a>
-      <a href="https://creatormatch.app" target="_blank" rel="noopener"><svg class="nav-ic only-before" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M14.8 9.3c-.5-.9-1.5-1.5-2.8-1.5-1.6 0-2.8.8-2.8 2 0 2.8 5.6 1.5 5.6 4.3 0 1.2-1.2 2.1-2.8 2.1-1.3 0-2.4-.6-2.9-1.6M12 6.2v1.6M12 16.2v1.6"/></svg><svg class="nav-ic only-after" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.7a3.5 3.5 0 0 1 0 6.6M18.5 14.4c1.9.8 3 2.9 3 5.6"/></svg>Wellness-Creators</a>
     </nav>
     <a class="mark" href="/" aria-label="Jeremy Lasne, home">Jeremy<i>&middot;</i>Lasne</a>
   </header>
@@ -65,7 +59,7 @@
   <main>
     <article class="post">
       <header class="post-head" data-ocean="avoid" data-fade="0">
-        <a class="post-back reveal" href="/#archive"><span aria-hidden="true">&larr;</span> The lessons</a>
+        <a class="post-back reveal" href="/lessons/"><span aria-hidden="true">&larr;</span> The lessons</a>
         <p class="post-meta reveal" style="--d:40"><time datetime="2026-11-08">Nov 8, 2026</time> &middot; 2 min read</p>
         <h1 class="reveal" style="--d:80">Make no gut changes, lead with <span class="marker">data</span></h1>
       </header>
@@ -74,11 +68,11 @@
         <p>I broke my own data on Kaught. I shipped too many changes in one update, and the numbers moved. A few metrics went up, others went down, and I could not tell which change caused which move, so the update taught me nothing.</p>
         <p>Here is how I change my apps now.</p>
 
-        <h2>Start simple, then get volume<span class="only-before">.</span></h2>
+        <h2>Start simple, then get volume</h2>
         <p>Ship a simple first version. Then bring users in, because a test on 200 people tells you nothing you can trust. I wait for at least 1,000 users in a test, and more when the traffic allows it, before I decide anything at all.</p>
         <p>Give it time and volume.</p>
 
-        <h2>One change at a time<span class="only-before">.</span></h2>
+        <h2>One change at a time</h2>
         <p>Change 2 things, and you learn nothing. If the number goes up, you can&rsquo;t say which change did it. If one change helped and the other hurt, they cancel out, and you throw away a good idea without ever knowing it was there.</p>
         <p>So each test changes one thing: one headline, one price, one screen.</p>
 
@@ -182,15 +176,15 @@
           </svg>
         </figure>
 
-        <h2>3 zones, one test each<span class="only-before">.</span></h2>
+        <h2>3 zones, one test each</h2>
         <p>I run 3 tests at most. One on the onboarding, one on the pricing, and one inside the app. For pricing, that means one test across all paywalls at once, because 2 paywall tests at the same time mix their users and blur both answers.</p>
         <p>I measure each one in PostHog.</p>
 
-        <h2>Everything else is an update<span class="only-before">.</span></h2>
+        <h2>Everything else is an update</h2>
         <p>Fixes skip the queue. A bug is a bug: fix it the same day, with no test. New content skips the test too, because it is a marketing moment: announce what is new to your email list, in a notification and on your socials.</p>
         <p>Every update is a launch.</p>
 
-        <h2>Read the result right<span class="only-before">.</span></h2>
+        <h2>Read the result right</h2>
         <p>A winner on day 3 can be a loser by month 3. 55% of 3-day trial cancellations happen on day 0, and refunds arrive weeks later. So I keep each test running until real payments come in, then check the winning group again at 3 and 6 months.</p>
         <p>Only then do I let the data decide which version stays in the app.</p>
 
