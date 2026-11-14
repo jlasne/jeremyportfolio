@@ -1,12 +1,11 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <title>Wellness | Jeremy Lasne</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Phase 0, normal: my sleep and my sport, logged every day before any habit is tested.">
-<meta name="theme-color" content="#050b16">
-<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#eef3f7">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -22,29 +21,32 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://www.jeremylasne.com/og-image.png?v=8">
 <link rel="canonical" href="https://www.jeremylasne.com/wellness/">
+<script>
+  /* the theme a visitor picked last time; without one, dark from 7 pm to 7 am, light otherwise */
+  (function () { var t = null, h = new Date().getHours(); try { t = localStorage.getItem("theme"); } catch (e) {} if (t === "dark" || (!t && (h >= 19 || h < 7))) document.documentElement.setAttribute("data-theme", "dark"); })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/site.css">
 <link rel="stylesheet" href="/wellness/wellness.css">
 </head>
-<body>
+<body class="wellness">
 
 <canvas id="ocean" aria-hidden="true"></canvas>
 
-<div class="wl-col">
-  <header class="wl-nav" id="nav">
-    <nav class="wl-links" aria-label="Main">
+<div class="col">
+  <header class="nav" id="nav">
+    <nav class="links" aria-label="Main">
       <a href="/lessons/"><svg class="nav-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6.5C10.3 5.2 7.8 4.5 4 4.5v14c3.8 0 6.3.7 8 2 1.7-1.3 4.2-2 8-2v-14c-3.8 0-6.3.7-8 2Zm0 0v14"/></svg>Lessons</a>
       <a href="/personal/" aria-current="page"><svg class="nav-ic nav-ic-fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.4 20.1A8.5 8.5 0 1 1 14.6 20.1L12.9 15.2A3.3 3.3 0 1 0 11.1 15.2Z"/></svg>Personal</a>
     </nav>
-    <a class="wl-mark" href="/" aria-label="Jeremy Lasne, home">Jeremy<i>&middot;</i>Lasne</a>
+    <a class="mark" href="/" aria-label="Jeremy Lasne, home">Jeremy<i>&middot;</i>Lasne</a>
   </header>
 
-<header class="hero">
-  <div class="hero-text" data-ocean="avoid" data-fade="0">
-    <h1 class="reveal"><b>Wellness.</b></h1>
-  </div>
-  <nav class="top" data-ocean="fade"><button class="logbtn" id="logOpen" type="button" aria-haspopup="dialog"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>Log</button></nav>
+<header class="hero page-hero wl-hero" data-ocean="avoid" data-fade="0">
+  <h1 class="reveal"><b>Wellness</b></h1>
+  <button class="logbtn" id="logOpen" type="button" aria-haspopup="dialog"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>Log</button>
 </header>
 
 <main>
@@ -57,7 +59,7 @@
     <div class="axis" id="nightsAxis"></div>
     <ul class="legend">
       <li><i style="background:var(--good)"></i>Better</li>
-      <li><i style="background:var(--blue)"></i>Normal</li>
+      <li><i style="background:var(--mid)"></i>Normal</li>
       <li><i style="background:var(--bad)"></i>Below</li>
       <li><i style="background:var(--run)"></i><i style="background:var(--swim);margin-left:-4px"></i><i style="background:var(--lift);margin-left:-4px"></i><i style="background:var(--other);margin-left:-4px"></i>Sport the day before</li>
     </ul>
@@ -104,7 +106,7 @@
     </div>
     <fieldset id="form" disabled>
       <h3>The night <span>that ended this morning, from the watch</span></h3>
-      <div class="grid" id="sleepGrid"></div>
+      <div class="form-grid" id="sleepGrid"></div>
       <div class="chips" id="gfBox"></div>
       <h3 style="margin-top:30px">Sport <span>that day</span></h3>
       <div id="sessBox"></div>
@@ -116,9 +118,15 @@
   </div>
 </dialog>
 
-  <footer class="wl-foot">
+  <footer class="foot foot-mini">
     <span>&copy; 2026 Jeremy Lasne</span>
-    <a href="/wellness/exp0">Exp 0</a>
+    <span class="foot-end">
+      <a href="/wellness/exp0">Exp 0</a>
+      <button class="theme" type="button" aria-label="Switch to the dark theme">
+          <svg class="sun" viewBox="0 0 256 256" aria-hidden="true"><path d="M116,36V20a12,12,0,0,1,24,0V36a12,12,0,0,1-24,0Zm80,92a68,68,0,1,1-68-68A68.07,68.07,0,0,1,196,128Zm-24,0a44,44,0,1,0-44,44A44.05,44.05,0,0,0,172,128ZM51.51,68.49a12,12,0,1,0,17-17l-12-12a12,12,0,0,0-17,17Zm0,119-12,12a12,12,0,0,0,17,17l12-12a12,12,0,1,0-17-17ZM196,72a12,12,0,0,0,8.49-3.51l12-12a12,12,0,0,0-17-17l-12,12A12,12,0,0,0,196,72Zm8.49,115.51a12,12,0,0,0-17,17l12,12a12,12,0,0,0,17-17ZM48,128a12,12,0,0,0-12-12H20a12,12,0,0,0,0,24H36A12,12,0,0,0,48,128Zm80,80a12,12,0,0,0-12,12v16a12,12,0,0,0,24,0V220A12,12,0,0,0,128,208Zm108-92H220a12,12,0,0,0,0,24h16a12,12,0,0,0,0-24Z"/></svg>
+          <svg class="moon" viewBox="0 0 256 256" aria-hidden="true"><path d="M236.37,139.4a12,12,0,0,0-12-3A84.07,84.07,0,0,1,119.6,31.59a12,12,0,0,0-15-15A108.86,108.86,0,0,0,49.69,55.07,108,108,0,0,0,136,228a107.09,107.09,0,0,0,64.93-21.69,108.86,108.86,0,0,0,38.44-54.94A12,12,0,0,0,236.37,139.4Zm-49.88,47.74A84,84,0,0,1,68.86,69.51,84.93,84.93,0,0,1,92.27,48.29Q92,52.13,92,56A108.12,108.12,0,0,0,200,164q3.87,0,7.71-.27A84.79,84.79,0,0,1,186.49,187.14Z"/></svg>
+        </button>
+    </span>
   </footer>
 </div>
 
@@ -127,7 +135,7 @@
 <script type="module">
 import { SPEC, SLEEP, SPORT, shift, daysBetween, exercises, tests, bests, form, effort, minutes, hrTop, load as loadOf } from '/wellness/spec.js';
 import { hrOf, avg, dayLoads, top, kept, csv, measure, today, COLOR, pad, swimTime, dayName, short, weekday, clock, hm, mmss, cap, esc, copy, label, fmtVal, state, entry, allKeys, monthKeys, val, sessionsOf, allSessions, sportBefore, held, keepHeld, api, load as loadData, spread, normal, verdict, tone, INDICATORS, nightScores, unitOf } from '/wellness/data.js';
-import { barChart } from '/wellness/charts.js';
+import { barChart, tint } from '/wellness/charts.js';
 
 const $ = id => document.getElementById(id);
 
@@ -173,8 +181,8 @@ const sportC = barChart($('sportC'), () => {
   const dl = dayLoads();
   return {
     keys: monthKeys(), value: k => dl[k]?.total, lo: 0,
-    stack: k => dl[k].parts.map(p => ({ c: COLOR[p.s], v: p.v })),
-    empty: k => sessionsOf(k)[0] && COLOR[sessionsOf(k)[0].s],
+    stack: k => dl[k].parts.map(p => ({ c: tint(p.s), v: p.v })),
+    empty: k => sessionsOf(k)[0] && tint(sessionsOf(k)[0].s),
     read: i => readSport(i, dl),
   };
 }, 120);
@@ -291,7 +299,7 @@ $('nextDay').addEventListener('click', () => openDay(shift(sel, 1)));
 function drawLock() {
   $('form').disabled = !canLog();
   $('unlockF').hidden = !!pass;
-  const lockB = `<button class="btn ghost" id="lockB" type="button" style="height:32px;margin-left:8px">Lock</button>`;
+  const lockB = `<button class="btn ghost" id="lockB" type="button" style="margin-left:8px">Lock</button>`;
   $('lockMsg').innerHTML = !pass ? 'Everyone can read this page. Only I can log.'
     : state.server ? `Unlocked on this device. Every change saves itself. ${lockB}`
     : `Unlocked. Each day saves on this device for now and goes to the server by itself once it is updated. ${lockB}`;
@@ -362,14 +370,14 @@ function exBox(s, i) {
   const xs = exercises(s);
   const num = (j, k, label, v, step) => `<label class="field"><span>${label}</span><input class="in" type="number" inputmode="decimal" min="0" step="${step}" data-i="${i}" data-x="${j}" data-xk="${k}" value="${v ?? ''}"></label>`;
   return xs.map((x, j) => `<div class="ex"><div class="sess-head"><input class="in" data-i="${i}" data-x="${j}" data-xk="n" value="${esc(x.n ?? '')}" maxlength="${SPEC.nameMax}" list="exNames" placeholder="Exercise: bench, pull-ups, row…" aria-label="Name of the exercise"><button type="button" data-i="${i}" data-xdel="${j}">Remove</button></div>
-    <div class="grid ex-grid">${num(j, 'reps', 'Reps', x.reps, 1)}${num(j, 'kg', 'Weight kg', x.kg, 'any')}</div></div>`).join('')
+    <div class="form-grid ex-grid">${num(j, 'reps', 'Reps', x.reps, 1)}${num(j, 'kg', 'Weight kg', x.kg, 'any')}</div></div>`).join('')
     + (xs.length < SPEC.exMax ? `<div class="adds"><button class="chip" type="button" data-xadd="${i}">Add an exercise</button></div>` : '');
 }
 /* A Swim session's tests: any distance, each with its time */
 function testBox(s, i) {
   const ts = tests(s);
   return ts.map((t, j) => `<div class="ex"><div class="sess-head"><span class="ex-k">Test ${j + 1}</span><button type="button" data-i="${i}" data-xdel="${j}">Remove</button></div>
-    <div class="grid ex-grid"><label class="field"><span>Distance m</span><input class="in" type="number" inputmode="numeric" min="0" data-i="${i}" data-x="${j}" data-xk="m" value="${t.m ?? ''}" placeholder="100"></label><label class="field"><span>Time (m:ss,cc)</span><input class="in" type="text" inputmode="decimal" data-i="${i}" data-x="${j}" data-xk="sec" value="${t.sec == null ? '' : swimTime(t.sec)}" placeholder="0:38,45"></label></div></div>`).join('')
+    <div class="form-grid ex-grid"><label class="field"><span>Distance m</span><input class="in" type="number" inputmode="numeric" min="0" data-i="${i}" data-x="${j}" data-xk="m" value="${t.m ?? ''}" placeholder="100"></label><label class="field"><span>Time (m:ss,cc)</span><input class="in" type="text" inputmode="decimal" data-i="${i}" data-x="${j}" data-xk="sec" value="${t.sec == null ? '' : swimTime(t.sec)}" placeholder="0:38,45"></label></div></div>`).join('')
     + (ts.length < SPEC.exMax ? `<div class="adds"><button class="chip" type="button" data-xadd="${i}">Add a test</button></div>` : '');
 }
 /* the names already used, offered as I type */
@@ -397,7 +405,7 @@ function drawSessions() {
     const named = s.s === 'other' ? `<input class="in sess-name" data-i="${i}" data-k="n" value="${esc(s.n ?? '')}" maxlength="${SPEC.nameMax}" placeholder="Name it: padel, yoga, hike…" aria-label="Name of the activity">` : '';
     return `<div class="sess" style="--c:var(--${s.s})"><div class="sess-head"><b>${sp.name}</b><button type="button" data-del="${i}">Remove</button></div>
       ${named}${chips('f', SPEC.focus, s.f)}${levels}
-      <div class="grid">${grid}</div>${s.s === 'lift' ? exBox(s, i) : s.s === 'swim' ? testBox(s, i) : ''}<p class="sess-calc" id="calc${i}">${sessCalc(s)}</p></div>`;
+      <div class="form-grid">${grid}</div>${s.s === 'lift' ? exBox(s, i) : s.s === 'swim' ? testBox(s, i) : ''}<p class="sess-calc" id="calc${i}">${sessCalc(s)}</p></div>`;
   }).join('');
   exNames();
 }

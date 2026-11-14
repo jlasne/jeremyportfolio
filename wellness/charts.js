@@ -22,7 +22,15 @@ export function play(draw, ms = 700) {
   requestAnimationFrame(tick);
 }
 
-const FILL = { good: COLOR.good, bad: COLOR.bad, mid: COLOR.blue };
+/* The colours come from the page's theme (site.css and wellness.css), read once per theme:
+   a switch of theme fires "themechange", the cache empties and every chart redraws. */
+let pal = {};
+addEventListener('themechange', () => { pal = {}; });
+const css = (name, or) => pal[name] ??= (getComputedStyle(document.documentElement).getPropertyValue('--' + name).trim() || or);
+/* a sport's colour (run, swim, lift, other) in the current theme */
+export const tint = s => css(s, COLOR[s]);
+const FALL = { good: COLOR.good, bad: COLOR.bad, mid: 'rgba(234,244,251,.42)' };
+const fill = t => css(FALL[t] ? t : 'mid', FALL[t] || FALL.mid);
 
 /* a rectangle with its top corners rounded, or all four */
 function shape(ctx, x, y, w, h, r, all) {
@@ -58,10 +66,10 @@ export function barChart(cv, opts, ch = 170) {
       ctx.clearRect(0, 0, w, H);
       if (band) {
         const a = CH - hOf(band.q1), b = CH - hOf(band.q3);
-        ctx.fillStyle = 'rgba(95,168,211,.1)';
+        ctx.fillStyle = css('band', 'rgba(234,244,251,.07)');
         shape(ctx, 0, b, w, Math.max(2, a - b), 6, true); ctx.fill();
         const my = Math.round(CH - hOf(band.med)) + .5;
-        ctx.strokeStyle = 'rgba(234,244,251,.4)'; ctx.lineWidth = 1; ctx.setLineDash([3, 4]);
+        ctx.strokeStyle = css('rule', 'rgba(234,244,251,.4)'); ctx.lineWidth = 1; ctx.setLineDash([3, 4]);
         ctx.beginPath(); ctx.moveTo(0, my); ctx.lineTo(w, my); ctx.stroke(); ctx.setLineDash([]);
       }
       keys.forEach((k, i) => {
@@ -85,7 +93,7 @@ export function barChart(cv, opts, ch = 170) {
               });
               ctx.restore();
             } else {
-              ctx.fillStyle = o.fill ? o.fill(k) : o.tone ? FILL[o.tone(v)] : FILL.mid;
+              ctx.fillStyle = o.fill ? o.fill(k) : o.tone ? fill(o.tone(v)) : fill('mid');
               shape(ctx, x, CH - h, bw, h, R); ctx.fill();
             }
             ctx.globalAlpha = 1;
@@ -93,14 +101,14 @@ export function barChart(cv, opts, ch = 170) {
         } else {
           /* nothing to measure: a faint stub, in the day's colour when it has one */
           const c = o.empty && o.empty(k);
-          ctx.fillStyle = c || 'rgba(234,244,251,.1)';
+          ctx.fillStyle = c || css('fg-12', 'rgba(234,244,251,.12)');
           ctx.globalAlpha = c ? .45 : 1;
           shape(ctx, x, CH - 3, bw, 3, 2, true); ctx.fill();
           ctx.globalAlpha = 1;
         }
         (marks ? marks(k) : []).slice(0, 2).forEach((s, j) => {
           const d = Math.max(2, Math.min(6, bw));
-          ctx.fillStyle = COLOR[s.s];
+          ctx.fillStyle = tint(s.s);
           ctx.beginPath(); ctx.arc(x + d / 2 + j * (d + 1), CH + 6 + d / 2, d / 2, 0, 6.29); ctx.fill();
         });
       });
@@ -116,6 +124,7 @@ export function barChart(cv, opts, ch = 170) {
   cv.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') opts().read(at(e)); });
   cv.addEventListener('pointerleave', () => { if (pick === null) draw(false); });
   cv.addEventListener('click', e => { const i = at(e); pick = pick === i ? null : i; draw(false); });
+  addEventListener('themechange', () => draw(false));
   return { draw, reset() { pick = null; } };
 }
 
@@ -144,14 +153,14 @@ export function spanChart(cv, opts, ch = 150) {
       const step = hi - lo > 720 ? 180 : 120;
       for (let m = Math.ceil(lo / step) * step; m <= hi; m += step) {
         const yy = Math.round(y(m)) + .5;
-        ctx.fillStyle = 'rgba(234,244,251,.45)';
+        ctx.fillStyle = css('fg-60', 'rgba(234,244,251,.66)');
         ctx.fillText(`${String(Math.floor(m / 60) % 24).padStart(2, '0')}:00`, 0, yy);
-        ctx.strokeStyle = 'rgba(234,244,251,.08)'; ctx.lineWidth = 1;
+        ctx.strokeStyle = css('fg-12', 'rgba(234,244,251,.12)'); ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(GUT, yy); ctx.lineTo(w, yy); ctx.stroke();
       }
       (o.lines || []).forEach(m => {
         const yy = Math.round(y(m)) + .5;
-        ctx.strokeStyle = 'rgba(234,244,251,.4)'; ctx.setLineDash([3, 4]);
+        ctx.strokeStyle = css('rule', 'rgba(234,244,251,.4)'); ctx.setLineDash([3, 4]);
         ctx.beginPath(); ctx.moveTo(GUT, yy); ctx.lineTo(w, yy); ctx.stroke(); ctx.setLineDash([]);
       });
       keys.forEach((k, i) => {
@@ -160,7 +169,7 @@ export function spanChart(cv, opts, ch = 150) {
         if (!t) return;
         const top = y(b[i]), h = (y(e[i]) - top) * t;
         ctx.globalAlpha = pick !== null && pick !== i ? .3 : .92;
-        ctx.fillStyle = FILL[o.tone(k)] || FILL.mid;
+        ctx.fillStyle = fill(o.tone(k));
         shape(ctx, x0(i), top, cw(i), Math.max(2, h), R, true); ctx.fill();
         ctx.globalAlpha = 1;
       });
@@ -177,5 +186,6 @@ export function spanChart(cv, opts, ch = 150) {
   cv.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') opts().read(at(e)); });
   cv.addEventListener('pointerleave', () => { if (pick === null) draw(false); });
   cv.addEventListener('click', e => { const i = at(e); pick = pick === i ? null : i; draw(false); });
+  addEventListener('themechange', () => draw(false));
   return { draw };
 }
