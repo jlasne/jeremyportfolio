@@ -68,7 +68,7 @@ img, video { display: block; }
 }
 .col > main { flex: 1; }
 /* the home has no veil: the animals swim across the whole screen, around the words, and fade only under them */
-.home .col { background: transparent; }
+.home .col { background: transparent; border-inline: 0; }
 @media (max-width: 899px) { .col { border-inline: 0; } }
 
 /* every entrance: ease-out, 300 ms, staggered by --d (ms) */

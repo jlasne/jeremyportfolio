@@ -26,9 +26,9 @@
   var root = document.documentElement;
   var still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var TAU = Math.PI * 2;
-  /* the home is the stage: no veil over the water, bigger animals on a chunkier grid, more of them,
-     brighter, and they swim in from the edges when the page opens */
-  var hero = document.body.classList.contains("home"), BOOST = hero ? 1.5 : 1;
+  /* the home is the stage: no veil over the water, brighter animals that swim in from the edges
+     when the page opens. On every page a pink narwhal passes now and then, the rare one */
+  var hero = document.body.classList.contains("home"), BOOST = hero ? 1.35 : 1;
 
   /* ── colours, per theme ─────────────────────────────────────────────── */
   var THEMES = {
@@ -152,11 +152,11 @@
 
   /* The animals cross from one page to the next: where each one swam is kept for the
      tab on the way out, and the next page picks them up if the screen is the same width. */
-  var KEEP = hero ? "ocean-home" : "ocean-small";
+  var KEEP = hero ? "ocean-home-2" : "ocean-small-2";
   function keep() {
     try {
       sessionStorage.setItem(KEEP, JSON.stringify({ w: W, t: time, fish: fish.map(function (a) {
-        return { kind: a.kind, tint: a.tint, L: a.L, ang: a.ang, om: a.om, v0: a.v0, phase: a.phase, seed: a.seed, f1: a.f1, f2: a.f2, r1: a.r1, r2: a.r2,
+        return { kind: a.kind, tint: a.tint, visitor: a.visitor, L: a.L, ang: a.ang, om: a.om, v0: a.v0, phase: a.phase, seed: a.seed, f1: a.f1, f2: a.f2, r1: a.r1, r2: a.r2,
           p: a.p.map(function (q) { return [Math.round(q.x), Math.round(q.y)]; }) };
       }) }));
     } catch (e) {}
@@ -170,6 +170,7 @@
         ["L", "om", "v0", "phase", "seed", "f1", "f2", "r1", "r2"].forEach(function (key) { if (typeof o[key] === "number") a[key] = o[key]; });
         a.seg = a.L / a.N; a.v = a.v0; a.maxTurn = a.v0 / (a.K.radius * a.L);
         if (o.tint) a.tint = o.tint;
+        if (o.visitor) a.visitor = true;
         a.p = o.p.map(function (q) { return { x: q[0], y: q[1] }; });
         return a;
       });
@@ -180,13 +181,10 @@
 
   function populate() {
     fish = [];
-    /* "narwhal:pink" is a narwhal in the pink of the site */
-    var kinds = hero
-      ? (W < 600 ? ["shark", "narwhal:pink", "hammer", "shark"] : ["shark", "narwhal:pink", "hammer", "shark", "narwhal", "hammer"])
-      : (W < 600 ? ["shark", "narwhal:pink", "hammer"] : ["shark", "narwhal:pink", "hammer", "narwhal"]);
+    var kinds = hero || W < 600 ? ["shark", "hammer", "narwhal"] : ["shark", "narwhal", "hammer", "narwhal"];
     measure();
     if (!kept()) kinds.forEach(function (k, i) {
-      var kind = k.split(":")[0], a;
+      var kind = k, a;
       if (hero && !still) {
         /* in from an edge, each from its own side, heading for a point inside the screen */
         var L = KINDS[kind].len * scale, side = i % 4, out = L * .35;
@@ -195,7 +193,6 @@
         a = make(kind, x, y, Math.atan2(rnd(H * .25, H * .75) - y, rnd(W * .25, W * .75) - x));
         a.boost = .9;
       } else { var p = spot(); a = make(kind, p.x, p.y, rnd(0, TAU)); }
-      if (k.indexOf(":pink") > 0) a.tint = "pink";
       fish.push(a);
     });
     dust = [];
@@ -212,8 +209,8 @@
     gl.width = Math.max(1, Math.round(cv.width / 6)); gl.height = Math.max(1, Math.round(cv.height / 6));
     /* the grid and the animals grow with the screen, kept small so they stay in the background:
        6px cells on a phone, 8 at 1440px, 11 on a 2K display, the animals at about half their old size */
-    C = hero ? Math.round(clamp(W / 140, 8, 13)) : Math.round(clamp(W / 180, 6, 11));
-    scale = clamp(Math.min(W, H * 1.4) / 1260, .5, 1.5) * (hero ? .85 : .5);
+    C = hero ? Math.round(clamp(W / 160, 7, 11)) : Math.round(clamp(W / 180, 6, 11));
+    scale = clamp(Math.min(W, H * 1.4) / 1260, .5, 1.5) * (hero ? .55 : .5);
     /* a phone's toolbar changes the height all the time: only a new width brings new animals */
     if (!fish.length || Math.abs(W - lastW) > lastW * .2) populate();
     lastW = W;
@@ -238,10 +235,12 @@
 
     /* the edges of the screen push back, a little past them more */
     var z = Math.min(W, H) * .14 + a.L * .2;
-    if (h.x < z) sx += (z - h.x) / z;
-    if (h.x > W - z) sx -= (h.x - W + z) / z;
-    if (h.y < z) sy += (z - h.y) / z;
-    if (h.y > H - z) sy -= (h.y - H + z) / z;
+    if (!a.visitor) {
+      if (h.x < z) sx += (z - h.x) / z;
+      if (h.x > W - z) sx -= (h.x - W + z) / z;
+      if (h.y < z) sy += (z - h.y) / z;
+      if (h.y > H - z) sy -= (h.y - H + z) / z;
+    }
 
     /* text: look ahead, and turn away from what is there */
     var ax = h.x + cos * a.L * .35, ay = h.y + sin * a.L * .35, pad = 20 + a.L * .12;
@@ -304,6 +303,7 @@
     /* lost far off screen: back in from the other side */
     var far = a.L * 1.6;
     if (h.x < -far || h.x > W + far || h.y < -far || h.y > H + far) {
+      if (a.visitor) { fish.splice(fish.indexOf(a), 1); nextPink = time + rnd(40, 70); return; }
       var n = make(a.kind, h.x < -far ? W + a.L * .3 : h.x > W + far ? -a.L * .3 : clamp(h.x, 0, W),
         h.y < -far ? H + a.L * .3 : h.y > H + far ? -a.L * .3 : clamp(h.y, 0, H), 0);
       n.ang = Math.atan2(H / 2 - n.p[0].y, W / 2 - n.p[0].x);
@@ -516,12 +516,25 @@
 
   /* ── the loop: 25 frames a second is plenty for a grid ─────────────── */
   var last = 0;
+  /* the rare one: a pink narwhal crosses the screen from one edge to the other, the first time
+     after 12 to 22 seconds, then every 40 to 70 seconds, and swims off */
+  var nextPink = rnd(12, 22);
+  function visit() {
+    if (time < nextPink || fish.some(function (a) { return a.visitor; })) return;
+    nextPink = Infinity;
+    var L = KINDS.narwhal.len * scale, out = L * .4, fromLeft = Math.random() < .5;
+    var x = fromLeft ? -out : W + out, y = rnd(H * .2, H * .8);
+    var a = make("narwhal", x, y, Math.atan2(rnd(H * .2, H * .8) - y, (fromLeft ? W + out : -out) - x));
+    a.tint = "pink"; a.visitor = true;
+    fish.push(a);
+  }
   function frame(now) {
     requestAnimationFrame(frame);
     if (now - last < 40) return;
     var dt = Math.min(.1, (now - last) / 1000);
     last = now;
     time += dt;
+    visit();
     measure();
     fish.slice().forEach(function (a) { swim(a, dt); });
     dust.forEach(function (p) {
@@ -555,7 +568,7 @@
       });
     });
     /* the water starts once the page has loaded, so the words come first, and fades in */
-    var go = function () { cv.classList.add("on"); requestAnimationFrame(function (t) { last = t; frame(t); }); };
+    var go = function () { nextPink = time + rnd(12, 22); cv.classList.add("on"); requestAnimationFrame(function (t) { last = t; frame(t); }); };
     if (document.readyState === "complete") setTimeout(go, 150);
     else window.addEventListener("load", function () { setTimeout(go, 150); }, { once: true });
   } else cv.classList.add("on");
