@@ -26,6 +26,9 @@
   var root = document.documentElement;
   var still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var TAU = Math.PI * 2;
+  /* the home is the stage: no veil over the water, bigger animals on a chunkier grid, more of them,
+     brighter, and they swim in from the edges when the page opens */
+  var hero = document.body.classList.contains("home"), BOOST = hero ? 1.5 : 1;
 
   /* ── colours, per theme ─────────────────────────────────────────────── */
   var THEMES = {
@@ -34,14 +37,17 @@
       shark:   { body: "#1d6fb0", hi: "#2b8bd6", rim: "#0f3c66", ch: "#a5e4ff", rimCh: "#3f8fcf", fin: "#185d96", finCh: "#5fb6f0", ridge: "#38bdf8", ridgeCh: "#e6f8ff", gill: "#03101f" },
       hammer:  { body: "#14808f", hi: "#1aa0b2", rim: "#0b4650", ch: "#a3f3ff", rimCh: "#2fa9ba", fin: "#126f7c", finCh: "#55d2e2", ridge: "#22d3ee", ridgeCh: "#e3fcff", gill: "#03101f" },
       narwhal: { body: "#4b55c4", hi: "#5f6ae0", rim: "#262d78", ch: "#cdd2ff", rimCh: "#6d76dc", fin: "#4048a8", finCh: "#8d95f0", spot: "#1e2466", spotCh: "#9aa2ff", tusk: "#f5e6c0", tuskCh: "#a08a5a" },
-      eye: "#f0fbff", eyeBg: "#030914", alpha: .55, fin: .9, fade: .1, dust: "#38bdf8", dustA: .4, ripple: "#38bdf8",
+      pink:    { body: "#c81e72", hi: "#ff3d9a", rim: "#6e0c3f", ch: "#ffd3e8", rimCh: "#ff5aa8", fin: "#a8195f", finCh: "#ff8cc4", spot: "#5c0934", spotCh: "#ff9fcd", tusk: "#fff0f6", tuskCh: "#ff7ab8" },
+      eye: "#f0fbff", eyeBg: "#030914", alpha: .55, fin: .9, fade: .1, dust: "#38bdf8", dustA: .4, ripple: "#ff3d9a",
       glow: .55, trail: .34
     },
+    /* the day: blue, teal and indigo animals, one narwhal in the pink of the site */
     light: {
-      shark:   { body: "#7f95ab", hi: "#94a8bc", rim: "#b9c7d4", ch: "#25374a", rimCh: "#62778c", fin: "#9aacbe", finCh: "#4b5f74", ridge: "#4f93c2", ridgeCh: "#0b3a5a", gill: "#22364a" },
-      hammer:  { body: "#8b9caf", hi: "#9fafc0", rim: "#c0ccd8", ch: "#2b3b4c", rimCh: "#687c90", fin: "#a3b2c2", finCh: "#53667a", ridge: "#5a98c3", ridgeCh: "#0e3c5b", gill: "#22364a" },
-      narwhal: { body: "#b2bfcc", hi: "#c3ced9", rim: "#d6dee6", ch: "#3c4c5d", rimCh: "#8293a5", fin: "#c0cbd6", finCh: "#6b7d8f", spot: "#76889a", spotCh: "#253342", tusk: "#c9a66b", tuskCh: "#6e5126" },
-      eye: "#0b1626", eyeBg: "#f4f7fa", alpha: .45, fin: .9, fade: .12, dust: "#2a76a8", dustA: .28, ripple: "#2a76a8"
+      shark:   { body: "#5d85ad", hi: "#7a9dc2", rim: "#adc4da", ch: "#0f2a47", rimCh: "#3f6890", fin: "#7596b9", finCh: "#22476d", ridge: "#1f5a8f", ridgeCh: "#eaf4fb", gill: "#0b1626" },
+      hammer:  { body: "#4f8f9c", hi: "#6aa7b3", rim: "#a6cdd4", ch: "#0c3038", rimCh: "#3a7a87", fin: "#65a0ab", finCh: "#1b4f59", ridge: "#16707f", ridgeCh: "#eaf4fb", gill: "#0b1626" },
+      narwhal: { body: "#8d9ec9", hi: "#a3b2d6", rim: "#c8d2ea", ch: "#1e2a52", rimCh: "#6274a8", fin: "#9aa9cf", finCh: "#33427a", spot: "#4a5a92", spotCh: "#eaf4fb", tusk: "#b88f4a", tuskCh: "#5e4316" },
+      pink:    { body: "#ee6aa7", hi: "#f48bbd", rim: "#f8bfd9", ch: "#6b0838", rimCh: "#d1006b", fin: "#f07fb3", finCh: "#9a0050", spot: "#d1006b", spotCh: "#fff0f6", tusk: "#c8005f", tuskCh: "#6b0838" },
+      eye: "#0b1626", eyeBg: "#f4f7fa", alpha: .6, fin: .9, fade: .12, dust: "#0b1626", dustA: .2, ripple: "#d1006b"
     }
   };
   var T = THEMES.dark;
@@ -146,11 +152,11 @@
 
   /* The animals cross from one page to the next: where each one swam is kept for the
      tab on the way out, and the next page picks them up if the screen is the same width. */
-  var KEEP = "ocean-small";
+  var KEEP = hero ? "ocean-home" : "ocean-small";
   function keep() {
     try {
       sessionStorage.setItem(KEEP, JSON.stringify({ w: W, t: time, fish: fish.map(function (a) {
-        return { kind: a.kind, L: a.L, ang: a.ang, om: a.om, v0: a.v0, phase: a.phase, seed: a.seed, f1: a.f1, f2: a.f2, r1: a.r1, r2: a.r2,
+        return { kind: a.kind, tint: a.tint, L: a.L, ang: a.ang, om: a.om, v0: a.v0, phase: a.phase, seed: a.seed, f1: a.f1, f2: a.f2, r1: a.r1, r2: a.r2,
           p: a.p.map(function (q) { return [Math.round(q.x), Math.round(q.y)]; }) };
       }) }));
     } catch (e) {}
@@ -163,6 +169,7 @@
         var a = make(o.kind, o.p[0][0], o.p[0][1], o.ang);
         ["L", "om", "v0", "phase", "seed", "f1", "f2", "r1", "r2"].forEach(function (key) { if (typeof o[key] === "number") a[key] = o[key]; });
         a.seg = a.L / a.N; a.v = a.v0; a.maxTurn = a.v0 / (a.K.radius * a.L);
+        if (o.tint) a.tint = o.tint;
         a.p = o.p.map(function (q) { return { x: q[0], y: q[1] }; });
         return a;
       });
@@ -173,9 +180,24 @@
 
   function populate() {
     fish = [];
-    var kinds = W < 600 ? ["shark", "narwhal", "hammer"] : ["shark", "narwhal", "hammer", "narwhal"];
+    /* "narwhal:pink" is a narwhal in the pink of the site */
+    var kinds = hero
+      ? (W < 600 ? ["shark", "narwhal:pink", "hammer", "shark"] : ["shark", "narwhal:pink", "hammer", "shark", "narwhal", "hammer"])
+      : (W < 600 ? ["shark", "narwhal:pink", "hammer"] : ["shark", "narwhal:pink", "hammer", "narwhal"]);
     measure();
-    if (!kept()) kinds.forEach(function (k) { var p = spot(); fish.push(make(k, p.x, p.y, rnd(0, TAU))); });
+    if (!kept()) kinds.forEach(function (k, i) {
+      var kind = k.split(":")[0], a;
+      if (hero && !still) {
+        /* in from an edge, each from its own side, heading for a point inside the screen */
+        var L = KINDS[kind].len * scale, side = i % 4, out = L * .35;
+        var x = side === 0 ? -out : side === 1 ? W + out : rnd(W * .15, W * .85);
+        var y = side === 2 ? -out : side === 3 ? H + out : rnd(H * .2, H * .8);
+        a = make(kind, x, y, Math.atan2(rnd(H * .25, H * .75) - y, rnd(W * .25, W * .75) - x));
+        a.boost = .9;
+      } else { var p = spot(); a = make(kind, p.x, p.y, rnd(0, TAU)); }
+      if (k.indexOf(":pink") > 0) a.tint = "pink";
+      fish.push(a);
+    });
     dust = [];
     var n = Math.round(W * H / 30000);
     for (var i = 0; i < n; i++) dust.push({ x: rnd(0, W), y: rnd(0, H), vx: rnd(-5, 5), vy: rnd(-4, 4), ch: ".·.°"[i % 4], a: rnd(.35, 1) });
@@ -190,8 +212,8 @@
     gl.width = Math.max(1, Math.round(cv.width / 6)); gl.height = Math.max(1, Math.round(cv.height / 6));
     /* the grid and the animals grow with the screen, kept small so they stay in the background:
        6px cells on a phone, 8 at 1440px, 11 on a 2K display, the animals at about half their old size */
-    C = Math.round(clamp(W / 180, 6, 11));
-    scale = clamp(Math.min(W, H * 1.4) / 1260, .5, 1.5) * .5;
+    C = hero ? Math.round(clamp(W / 140, 8, 13)) : Math.round(clamp(W / 180, 6, 11));
+    scale = clamp(Math.min(W, H * 1.4) / 1260, .5, 1.5) * (hero ? .85 : .5);
     /* a phone's toolbar changes the height all the time: only a new width brings new animals */
     if (!fish.length || Math.abs(W - lastW) > lastW * .2) populate();
     lastW = W;
@@ -285,7 +307,9 @@
       var n = make(a.kind, h.x < -far ? W + a.L * .3 : h.x > W + far ? -a.L * .3 : clamp(h.x, 0, W),
         h.y < -far ? H + a.L * .3 : h.y > H + far ? -a.L * .3 : clamp(h.y, 0, H), 0);
       n.ang = Math.atan2(H / 2 - n.p[0].y, W / 2 - n.p[0].x);
-      fish[fish.indexOf(a)] = make(a.kind, n.p[0].x, n.p[0].y, n.ang);
+      var back = make(a.kind, n.p[0].x, n.p[0].y, n.ang);
+      back.tint = a.tint;
+      fish[fish.indexOf(a)] = back;
     }
   }
 
@@ -330,7 +354,7 @@
      fill, its character and how much it counts against the others */
   function cells(a) {
     var K = a.K, B = body(a), N = a.N, L = a.L, out = new Map(), i;
-    var col = T[a.kind];
+    var col = T[a.tint || a.kind];
     function put(gx, gy, c) {
       var key = gx * 4096 + gy, o = out.get(key);
       if (!o || o.z <= c.z) { c.gx = gx; c.gy = gy; out.set(key, c); }
@@ -460,7 +484,7 @@
     fish.slice().sort(function (a, b) { return (a.kind === "narwhal" ? 0 : 1) - (b.kind === "narwhal" ? 0 : 1); }).forEach(function (a) {
       cells(a).forEach(function (c) {
         var x = c.gx * C, y = c.gy * C, cx = x + C / 2, cy = y + C / 2;
-        var alpha = T.alpha * (c.a || 1) * faded(cx, cy);
+        var alpha = Math.min(.9, T.alpha * BOOST) * (c.a || 1) * faded(cx, cy);
         if (!alpha) return;
         ctx.globalAlpha = alpha;
         if (c.f) { ctx.fillStyle = c.f; ctx.fillRect(x + .5, y + .5, C - 1, C - 1); }

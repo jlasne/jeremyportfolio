@@ -67,6 +67,8 @@ img, video { display: block; }
   padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right);
 }
 .col > main { flex: 1; }
+/* the home has no veil: the animals swim across the whole screen, around the words, and fade only under them */
+.home .col { background: transparent; }
 @media (max-width: 899px) { .col { border-inline: 0; } }
 
 /* every entrance: ease-out, 300 ms, staggered by --d (ms) */
@@ -94,7 +96,7 @@ img, video { display: block; }
   padding: clamp(12px, 3vh, 32px) var(--pad) clamp(24px, 5vh, 48px);
 }
 .hero-name { font-size: 22px; line-height: 1.2; font-weight: 800; }
-.h-hey { display: block; font-weight: 600; color: var(--fg-80); margin-bottom: .3em; }
+.h-hey { display: block; width: fit-content; font-weight: 600; color: var(--fg-80); margin-bottom: .3em; }
 .h-name { display: block; width: fit-content; font-size: 72px; line-height: 1.05; letter-spacing: -.02em; }
 .h-l { display: block; width: fit-content; white-space: nowrap; }
 .face {
@@ -103,7 +105,7 @@ img, video { display: block; }
   animation: face .4s var(--out) .18s both;
 }
 @keyframes face { from { opacity: 0; transform: scale(.8) rotate(-8deg); } to { opacity: 1; transform: none; } }
-.tagline { max-width: 40ch; font-size: 17px; line-height: 1.5; color: var(--fg-80); text-wrap: balance; }
+.tagline { width: fit-content; max-width: 40ch; font-size: 17px; line-height: 1.5; color: var(--fg-80); text-wrap: balance; }
 .tagline b { font-weight: 700; color: var(--pink); }
 @media (min-width: 600px) {
   .hero-name { font-size: 34px; }
@@ -121,7 +123,7 @@ img, video { display: block; }
 
 /* the 3 apps, as on a phone: the icon, the name under it. They land the way icons do when a
    phone unlocks, and a tap opens the app from its icon (site.js). */
-.apps { display: flex; gap: clamp(20px, 4vw, 32px); list-style: none; }
+.apps { display: flex; width: fit-content; gap: clamp(20px, 4vw, 32px); list-style: none; }
 .app { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 72px; animation: land .4s var(--out) both; animation-delay: calc(var(--d, 0) * 1ms); }
 @keyframes land { from { opacity: 0; transform: scale(1.15); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
 .app-ic {
@@ -148,7 +150,7 @@ img, video { display: block; }
 .app-open img { width: 96px; height: 96px; border-radius: 22px; animation: rise .3s var(--out) both; }
 
 /* the links: X, the email, CreatorMatch; 44 px to tap */
-.socials { display: flex; align-items: center; gap: 8px; margin-left: -12px; }
+.socials { display: flex; width: fit-content; align-items: center; gap: 8px; margin-left: -12px; }
 .socials a { display: grid; place-items: center; width: 44px; height: 44px; color: var(--fg-60); transition: color .15s; }
 .socials a:hover { color: var(--fg); }
 .socials svg { width: 20px; height: 20px; fill: currentColor; }
@@ -328,3 +330,18 @@ img, video { display: block; }
   .reveal, .face, .app, .caret.done, .app-open img { animation: none; }
   .mailpop, .mailpop-card, .app-ic { transition: none; }
 }
+
+/* ---- /copywriting: the rules, each number written by hand ---- */
+.rules { display: grid; gap: 22px; max-width: 62ch; margin-top: clamp(28px, 5vw, 44px); list-style: none; counter-reset: r; }
+.rules > li { position: relative; padding-left: 52px; counter-increment: r; font-size: 17px; line-height: 1.6; color: var(--fg-80); text-wrap: pretty; }
+.rules > li::before {
+  content: counter(r); position: absolute; left: 0; top: -.15em; width: 40px; text-align: center;
+  font: 700 34px/1 "Caveat", cursive; color: var(--pink); rotate: -6deg;
+}
+.rules b { font-weight: 700; color: var(--fg); }
+.rules ul { display: grid; gap: 6px; margin: 10px 0 12px; list-style: none; }
+.rules ul li { position: relative; padding-left: 18px; }
+.rules ul li::before { content: ""; position: absolute; left: 2px; top: .7em; width: 6px; height: 6px; border-radius: 50%; background: var(--pink); }
+.rules p + p { margin-top: 4px; }
+/* /personal: an odd last cell takes the whole row */
+.grid-4 li:last-child:nth-child(odd) { grid-column: 1 / -1; }
