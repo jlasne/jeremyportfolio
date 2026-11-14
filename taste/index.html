@@ -1,0 +1,813 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>tasu.ai: design apps with taste, using AI</title>
+  <meta name="description" content="tasu.ai teaches you to design apps with taste using AI: 104 rules from 35 design reels, in one file Claude Code and Cursor follow. Free.">
+  <link rel="canonical" href="https://www.jeremylasne.com/taste/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="tasu.ai">
+  <meta property="og:url" content="https://www.jeremylasne.com/taste/">
+  <meta property="og:title" content="tasu.ai: design apps with taste, using AI">
+  <meta property="og:description" content="tasu.ai teaches you to design apps with taste using AI: 104 rules from 35 design reels, in one file Claude Code and Cursor follow. Free.">
+  <meta property="og:image" content="https://www.jeremylasne.com/og-image.png?v=8">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@jeremylasne">
+  <meta name="twitter:title" content="tasu.ai: design apps with taste, using AI">
+  <meta name="twitter:description" content="tasu.ai teaches you to design apps with taste using AI: 104 rules from 35 design reels, in one file Claude Code and Cursor follow. Free.">
+  <meta name="twitter:image" content="https://www.jeremylasne.com/og-image.png?v=8">
+  <meta name="theme-color" content="#FAF8F3">
+  <link rel="icon" href="/taste/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..600&family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="/taste/tasu.css">
+  <style>
+    /* ---------- Hero ---------- */
+    .hero {
+      display: grid;
+      gap: var(--s6);
+      padding-top: var(--s6);
+      padding-bottom: var(--s7);
+    }
+    @media (min-width: 960px) {
+      .hero {
+        grid-template-columns: minmax(0, 1fr) 552px;
+        align-items: center;
+        gap: var(--s7);
+        padding-top: var(--s7);
+        padding-bottom: var(--s8);
+      }
+    }
+    .hero h1 { max-width: 11em; }
+    .hero .lead { margin-top: var(--s4); max-width: 26em; }
+    .hero .actions { margin-top: var(--s5); }
+    .hero .fine { margin-top: var(--s3); font-size: var(--t1); color: var(--n3); }
+    .word { color: inherit; }
+    .word b { color: var(--ink); font-weight: 600; }
+
+    /* ---------- Live demo ---------- */
+    .demo { display: grid; gap: var(--s4); justify-items: center; }
+    .demo__stage {
+      display: grid;
+      gap: var(--s4);
+      justify-items: center;
+      width: 100%;
+    }
+    @media (min-width: 640px) {
+      .demo__stage {
+        grid-template-columns: 280px minmax(0, 248px);
+        justify-content: center;
+        align-items: center;
+      }
+    }
+    .demo__phone-col { display: grid; gap: var(--s3); justify-items: center; width: 100%; }
+
+    /* Switch: one thumb that slides and stretches about 12% while it moves (motion rule 5) */
+    .flip {
+      position: relative;
+      display: inline-grid;
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+      padding: var(--s1);
+      background: var(--n1);
+      border-radius: var(--r-pill);
+    }
+    .flip button {
+      position: relative;
+      z-index: 1;
+      min-height: var(--tap);
+      padding: 0 var(--s3);
+      border-radius: var(--r-pill);
+      font-size: var(--t1);
+      font-weight: 600;
+      color: var(--n4);
+      white-space: nowrap;
+      transition: color var(--dur-in) var(--ease-out), transform var(--dur-out) var(--ease-out);
+    }
+    .flip button[aria-pressed="true"] { color: var(--ink); }
+    .flip button:active { transform: scale(var(--press)); }
+    .flip__thumb {
+      position: absolute;
+      top: var(--s1);
+      bottom: var(--s1);
+      left: 0;
+      width: var(--tw, 50%);
+      transform: translateX(var(--tx, 4px));
+      transition: transform var(--dur-in) var(--ease-in-out), width var(--dur-in) var(--ease-in-out);
+      pointer-events: none;
+    }
+    .flip__thumb span {
+      display: block;
+      height: 100%;
+      background: var(--bg);
+      border-radius: var(--r-pill);
+      box-shadow: 0 1px 2px rgba(11, 9, 9, .1);
+    }
+    .flip.is-moving .flip__thumb span { animation: knob-stretch var(--dur-in) var(--ease-in-out); }
+    @keyframes knob-stretch {
+      50% { transform: scaleX(1.12); }
+    }
+
+    .phone-btn { display: block; width: 100%; max-width: 280px; border-radius: var(--r-phone); text-align: left; font: inherit; color: inherit; }
+    .phone-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+    .demo .phone { max-width: 280px; }
+    .demo .phone__screen { background: var(--ink); }
+    .scr {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      font-family: var(--font-ui);
+    }
+    .scr [data-area] {
+      position: relative;
+      border-radius: 16px;
+      transition: opacity var(--dur-in) var(--ease-out), box-shadow var(--dur-in) var(--ease-out);
+    }
+    .demo[data-focus] .scr [data-area] { opacity: .35; }
+    .demo[data-focus="a1"] .scr [data-area="a1"],
+    .demo[data-focus="a2"] .scr [data-area="a2"],
+    .demo[data-focus="a3"] .scr [data-area="a3"] {
+      opacity: 1;
+      box-shadow: 0 0 0 2px var(--accent), 0 0 0 4px var(--ink);
+    }
+    .pin {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      z-index: 2;
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--ink);
+      color: var(--bg);
+      font-size: var(--t1);
+      font-weight: 600;
+      line-height: 1;
+      box-shadow: 0 0 0 2px var(--bg);
+    }
+
+    /* Mask reveal from the trigger, old and new overlap (motion rules 11, 16, 17) */
+    .scr-taste {
+      clip-path: circle(0% at var(--ox, 50%) var(--oy, 0%));
+      transition: clip-path calc(var(--dur-out) * 2) var(--ease-in-out);
+    }
+    .demo[data-state="taste"] .scr-taste {
+      clip-path: circle(150% at var(--ox, 50%) var(--oy, 0%));
+      transition: clip-path calc(var(--dur-in) * 2) var(--ease-in-out);
+    }
+    .scr-slop { transition: transform calc(var(--dur-in) * 2) var(--ease-in-out), filter calc(var(--dur-in) * 2) var(--ease-in-out); }
+    .demo[data-state="taste"] .scr-slop { transform: scale(.97); filter: brightness(.7); }
+
+    /* Slop screen: every sign drawn on purpose */
+    .scr-slop {
+      background: linear-gradient(160deg, #1E1B4B 0%, #581C87 52%, #831843 100%);
+      color: #fff;
+    }
+    .scr-slop .phone__status { color: #fff; }
+    .sl-body { padding: 4px 14px 0; display: grid; gap: 10px; }
+    .sl-banner {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px;
+      background: rgba(255, 255, 255, .12);
+      border: 1px solid rgba(255, 255, 255, .28);
+      border-radius: 14px;
+    }
+    .sl-squircle {
+      flex: none; width: 32px; height: 32px; border-radius: 10px;
+      display: grid; place-items: center;
+      background: linear-gradient(135deg, #A855F7, #EC4899);
+      box-shadow: 0 0 16px rgba(236, 72, 153, .7);
+    }
+    .sl-squircle svg { width: 18px; height: 18px; fill: #FDE68A; }
+    .sl-banner b { display: block; font-size: 13px; letter-spacing: -.03em; }
+    .sl-banner small { display: block; font-size: 10px; opacity: .7; }
+    .sl-eyebrow { font-size: 9px; font-weight: 600; letter-spacing: .22em; color: #C4B5FD; }
+    .sl-title { font-family: Georgia, serif; font-size: 25px; line-height: 1.05; letter-spacing: -.05em; font-weight: 400; margin-top: -6px; }
+    .sl-title i { background: linear-gradient(90deg, #F0ABFC, #67E8F9); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .sl-pills { display: flex; gap: 4px; flex-wrap: wrap; }
+    .sl-pills span { font-size: 8px; font-weight: 700; letter-spacing: .12em; padding: 3px 7px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .35); background: rgba(255, 255, 255, .08); }
+    .sl-pills span:first-child { background: #22D3EE; color: #0B0909; border-color: transparent; }
+    .sl-outer {
+      padding: 8px;
+      border: 1px solid rgba(255, 255, 255, .22);
+      background: rgba(255, 255, 255, .06);
+      border-radius: 20px;
+      display: grid; gap: 6px;
+    }
+    .sl-stat {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(168, 85, 247, .8);
+      background: rgba(168, 85, 247, .2);
+      box-shadow: 0 0 20px rgba(168, 85, 247, .65);
+    }
+    .sl-stat small { font-size: 8px; letter-spacing: .2em; font-weight: 700; }
+    .sl-stat b { font-family: var(--font-mono); font-size: 20px; text-shadow: 0 0 12px #F0ABFC; }
+    .sl-inner {
+      padding: 6px 8px;
+      background: rgba(255, 255, 255, .08);
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-left: 3px solid var(--c);
+      border-radius: 5px;
+      font-size: 10px;
+    }
+    .sl-inner div { display: flex; justify-content: space-between; font-family: var(--font-mono); }
+    .sl-inner i { display: block; height: 3px; margin-top: 4px; border-radius: 2px; background: rgba(255, 255, 255, .15); }
+    .sl-inner i::before { content: ""; display: block; height: 100%; width: var(--w); border-radius: 2px; background: linear-gradient(90deg, var(--c), #fff); }
+    .sl-hr { height: 1px; background: rgba(255, 255, 255, .2); }
+    .scr .sl-ctas { position: absolute; left: 14px; right: 14px; bottom: 26px; display: grid; gap: 6px; }
+    .sl-ctas span:not(.pin) { display: grid; place-items: center; height: 36px; border-radius: 10px; font-size: 12px; font-weight: 700; }
+    .sl-ctas span:first-child { background: linear-gradient(90deg, #A855F7, #EC4899); box-shadow: 0 0 18px rgba(236, 72, 153, .6); }
+    .sl-ctas span:nth-child(2) { border: 1px solid rgba(255, 255, 255, .5); border-radius: 18px; }
+
+    /* Taste screen: ivory, ink, one lime button */
+    .scr-taste { background: var(--bg); color: var(--ink); }
+    .tt-body { padding: 8px 18px 0; display: grid; gap: var(--s4); }
+    .tt-top { display: flex; justify-content: space-between; align-items: center; }
+    .tt-top p { font-size: 13px; color: var(--n3); }
+    .tt-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--n2); display: grid; place-items: center; color: var(--n4); font-size: 13px; font-weight: 600; }
+    .tt-head { padding: 4px 0; }
+    .tt-big { display: flex; align-items: baseline; gap: 6px; font-family: var(--font-display); font-weight: 500; line-height: 1; }
+    .tt-big b { font-weight: 500; font-size: 61px; letter-spacing: -.015em; }
+    .tt-big span { font-size: 25px; color: var(--n3); }
+    .tt-head p { margin-top: 6px; font-size: 13px; color: var(--n4); }
+    .tt-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 12px; }
+    .tt-bar i { height: 6px; border-radius: 3px; }
+    .tt-bar i:not(:last-child) { background: var(--accent); box-shadow: inset 0 0 0 1px var(--ink); }
+    .tt-bar i:last-child { background: var(--n2); }
+    .tt-list { background: var(--n1); border-radius: 20px; padding: 4px; }
+    .tt-row { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 12px; border-radius: 16px; }
+    .tt-row + .tt-row { box-shadow: inset 0 1px 0 var(--n2); border-radius: 0; }
+    .tt-check { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--ink); }
+    .tt-check svg { width: 14px; height: 14px; fill: none; stroke: var(--bg); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .tt-row.is-todo .tt-check { background: transparent; box-shadow: inset 0 0 0 1.5px var(--n3); }
+    .tt-row strong { flex: 1; font-size: 16px; font-weight: 500; }
+    .tt-row .v { font-family: var(--font-mono); font-size: 13px; color: var(--n3); }
+    .scr .tt-cta { position: absolute; left: 18px; right: 18px; bottom: 28px; display: grid; place-items: center; height: 48px; border-radius: 999px; background: var(--ink); color: var(--bg); font-size: 16px; font-weight: 600; }
+    .tt-cta.pin-host .pin { right: 8px; }
+
+    .demo__hint { font-size: var(--t1); color: var(--n3); text-align: center; }
+    .demo__hint .kbd { border-radius: var(--r-sm); }
+    @media (hover: none) { .kbd-hint { display: none; } }
+
+    /* Callouts: name the rules applied, crossfade with a 30 ms stagger as they settle (motion rule 6) */
+    .callouts { list-style: none; padding: 0; display: grid; gap: var(--s2); width: 100%; max-width: 360px; }
+    .callout {
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      gap: 12px;
+      padding: 12px;
+      margin-inline: -12px;
+      width: calc(100% + 24px);
+      text-align: left;
+      border-radius: var(--r-in);
+      transition: background-color var(--dur-in) var(--ease-out), transform var(--dur-out) var(--ease-out);
+    }
+    .callout:hover, .callout[aria-pressed="true"] { background: var(--n1); }
+    .callout:active { transform: scale(var(--press)); }
+    .callout .pin { position: static; box-shadow: none; margin-top: 1px; }
+    .callout__txt { display: grid; }
+    .callout__txt > span {
+      grid-area: 1 / 1;
+      transition: opacity var(--dur-out) var(--ease-in), transform var(--dur-out) var(--ease-in), visibility 0s linear var(--dur-out);
+    }
+    .callout__txt b { display: block; font-size: var(--t2); font-weight: 600; line-height: 1.35; }
+    .callout__txt small { display: block; margin-top: 2px; font-size: var(--t1); color: var(--n3); }
+    .demo[data-state="slop"] .callout .is-taste,
+    .demo[data-state="taste"] .callout .is-slop { opacity: 0; transform: translateY(4px); visibility: hidden; }
+    .demo[data-state="slop"] .callout .is-slop,
+    .demo[data-state="taste"] .callout .is-taste {
+      transition: opacity var(--dur-in) var(--ease-out), transform var(--dur-in) var(--ease-out), visibility 0s;
+      transition-delay: calc(var(--dur-out) + var(--i, 0) * var(--stagger));
+    }
+
+    /* ---------- Doors ---------- */
+    .doors-head { display: grid; gap: var(--s3); margin-bottom: var(--s5); }
+    @media (min-width: 900px) {
+      .doors-head { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: end; gap: var(--s6); }
+    }
+    .doors { list-style: none; padding: 0; display: grid; gap: var(--s1); }
+    .door {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto 24px;
+      grid-template-areas: "name meta go" "desc desc go";
+      gap: var(--s1) var(--s3);
+      align-items: center;
+      padding: var(--s4) var(--s3);
+      margin-inline: calc(var(--s3) * -1);
+      border-radius: var(--r-in);
+      text-decoration: none;
+      color: inherit;
+      transition: background-color var(--dur-in) var(--ease-out), transform var(--dur-out) var(--ease-out);
+    }
+    .door:hover { background: var(--n1); }
+    .door:active .icon { transform: translateX(3px) scale(var(--press)); }
+    .door__name { grid-area: name; font-family: var(--font-display); font-size: var(--t4); font-weight: 500; line-height: 1.2; }
+    .door__desc { grid-area: desc; color: var(--n4); max-width: 44ch; }
+    .door__meta { grid-area: meta; font-family: var(--font-ui); font-size: var(--t1); color: var(--n3); white-space: nowrap; }
+    .door .icon { grid-area: go; color: var(--n3); transition: transform var(--dur-in) var(--ease-out), color var(--dur-in) var(--ease-out); }
+    .door:hover .icon { transform: translateX(3px); color: var(--ink); }
+    @media (min-width: 760px) {
+      .door {
+        grid-template-columns: 200px minmax(0, 1fr) 128px 24px;
+        grid-template-areas: "name desc meta go";
+        gap: var(--s4);
+        padding-block: 20px;
+      }
+      .door__meta { text-align: right; }
+    }
+
+    /* ---------- Proof ---------- */
+    .proof { --d-muted: #BDB8AC; --d-line: #4A4640; }
+    .proof h2 { max-width: 14em; }
+    .proof .lead { margin-top: var(--s3); }
+    .feature-stats { display: grid; gap: var(--s6); margin-top: var(--s7); }
+    @media (min-width: 760px) { .feature-stats { grid-template-columns: 1fr 1fr; gap: var(--s5); } }
+    .stat-big { display: flex; align-items: baseline; gap: var(--s2); font-family: var(--font-display); line-height: 1; }
+    .stat-big b { font-weight: 500; font-size: var(--display); letter-spacing: -.015em; }
+    .stat-big span { font-size: var(--t3); color: var(--d-muted); }
+    .feature-stats p { margin-top: var(--s3); max-width: 34ch; }
+    .feature-stats .who { margin-top: var(--s2); font-size: var(--t1); color: var(--d-muted); }
+    .proof .btn-text { margin-top: var(--s2); margin-left: calc(var(--s1) * -1); text-decoration-color: var(--d-line); }
+    .proof .btn-text:hover { text-decoration-color: currentColor; }
+    .counts { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s4); margin-top: var(--s7); }
+    .counts b { display: block; font-family: var(--font-display); font-weight: 500; font-size: var(--t6); line-height: 1; letter-spacing: -.015em; }
+    .counts span { display: block; margin-top: var(--s2); font-size: var(--t1); color: var(--d-muted); }
+    @media (min-width: 640px) { .counts b { font-size: var(--t7); } .counts span { font-size: var(--t2); } }
+
+    /* ---------- Close ---------- */
+    .close { padding-block: var(--s7); }
+    @media (min-width: 900px) { .close { padding-block: var(--s8); } }
+    .close p { margin-top: var(--s3); color: var(--n4); max-width: 40ch; }
+    .x-link {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--s2);
+      min-height: var(--tap);
+      margin-top: var(--s4);
+      font-family: var(--font-display);
+      font-size: var(--t4);
+      font-weight: 500;
+      color: var(--ink);
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-decoration-color: var(--n2);
+      text-underline-offset: 6px;
+      transition: text-decoration-color var(--dur-in) var(--ease-out);
+    }
+    .x-link:hover { text-decoration-color: var(--ink); }
+    .x-link .icon { transition: transform var(--dur-in) var(--ease-out); }
+    .x-link:hover .icon { transform: translate(2px, -2px); }
+    @media (min-width: 640px) { .x-link { font-size: var(--t5); } }
+
+    @media (prefers-reduced-motion: reduce) {
+      .scr-taste, .demo[data-state="taste"] .scr-taste { clip-path: none; transition: opacity var(--dur-in) linear; }
+      .scr-taste { opacity: 0; }
+      .demo[data-state="taste"] .scr-taste { opacity: 1; }
+      .demo[data-state="taste"] .scr-slop { transform: none; }
+      .flip.is-moving .flip__thumb span { animation: none; }
+      .flip__thumb { transition: none; }
+      .callout__txt > span { transform: none !important; }
+      .door:hover .icon, .x-link:hover .icon { transform: none; }
+      .door:active .icon, .callout:active, .flip button:active { transform: none; }
+    }
+
+    /* Shell fixes kept page-local until tasu.css takes them */
+    .wordmark svg { border-radius: var(--r-sm); }
+    .site-footer a { min-width: var(--tap); justify-content: center; }
+    @media print { .js .reveal { opacity: 1; transform: none; } }
+  </style>
+  <script>document.documentElement.classList.add("js");setTimeout(function(){if(!window.tasu)document.documentElement.classList.remove("js")},3000)</script>
+  <script src="/taste/tasu.js" defer></script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://www.jeremylasne.com/taste/#website",
+        "name": "tasu.ai",
+        "alternateName": "taste using AI",
+        "url": "https://www.jeremylasne.com/taste/",
+        "description": "Design apps with taste, using AI: 104 rules from 35 sources, in one file your AI follows.",
+        "inLanguage": "en",
+        "publisher": { "@type": "Person", "name": "Jeremy Lasne", "url": "https://www.jeremylasne.com/", "sameAs": ["https://x.com/jeremylasne"] }
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://www.jeremylasne.com/taste/#webpage",
+        "url": "https://www.jeremylasne.com/taste/",
+        "name": "tasu.ai: design apps with taste, using AI",
+        "description": "tasu.ai teaches you to design apps with taste using AI: 104 rules from 35 design reels, in one file Claude Code and Cursor follow. Free.",
+        "isPartOf": { "@id": "https://www.jeremylasne.com/taste/#website" },
+        "image": "https://www.jeremylasne.com/og-image.png?v=8",
+        "inLanguage": "en"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "tasu.ai", "item": "https://www.jeremylasne.com/taste/" }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="wordmark" href="/taste/" aria-label="tasu.ai home">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="8" fill="#0B0909"/><path d="M10.5 4.5v11a3 3 0 0 0 3 3H16M7 9h8.5" fill="none" stroke="#FAF8F3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>tasu.ai</span>
+      </a>
+      <nav class="nav" aria-label="Main">
+        <ul>
+          <li><a href="/taste/rules/">Rules</a></li>
+          <li><a href="/taste/unslop/">Unslop</a></li>
+          <li><a href="/taste/palettes/">Palettes</a></li>
+          <li><a href="/taste/type/">Type</a></li>
+          <li><a href="/taste/motion/">Motion</a></li>
+          <li><a href="/taste/screens/">Screens</a></li>
+          <li><a href="/taste/prompts/">Prompts</a></li>
+          <li><a href="/taste/skills/">Skills</a></li>
+        </ul>
+      </nav>
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav-sheet" aria-label="Open menu">
+        <span class="menu-icons" aria-hidden="true">
+          <svg class="icon icon-open" viewBox="0 0 24 24"><path d="M4 8h16M4 16h16"/></svg>
+          <svg class="icon icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </span>
+        <span>Menu</span>
+      </button>
+    </div>
+  </header>
+  <div class="sheet-scrim" aria-hidden="true"></div>
+  <nav class="sheet" id="nav-sheet" aria-label="Main">
+    <ul>
+      <li><a href="/taste/rules/">Rules</a></li>
+      <li><a href="/taste/unslop/">Unslop</a></li>
+      <li><a href="/taste/palettes/">Palettes</a></li>
+      <li><a href="/taste/type/">Type</a></li>
+      <li><a href="/taste/motion/">Motion</a></li>
+      <li><a href="/taste/screens/">Screens</a></li>
+      <li><a href="/taste/prompts/">Prompts</a></li>
+      <li><a href="/taste/skills/">Skills</a></li>
+      <li><a href="/taste/sources/">Sources</a></li>
+    </ul>
+  </nav>
+
+  <main id="main">
+    <!-- Hero: what tasu.ai is, the one lime button, and the core idea live -->
+    <section class="container hero" aria-labelledby="hero-title">
+      <div>
+        <h1 id="hero-title">Design apps with taste, using AI</h1>
+        <p class="lead">tasu.ai is <span class="word"><b>tas</b>te <b>u</b>sing AI</span>: <span data-count="rules-n">104</span> rules from <span data-count="sources-n">35</span> sources, in one file your AI follows.</p>
+        <div class="row actions">
+          <a class="btn-accent" href="/taste/skills/">Get the skill</a>
+          <a class="btn" href="/taste/rules/">Browse the rules</a>
+        </div>
+        <p class="fine">Free. Works in Claude Code and Cursor.</p>
+      </div>
+
+      <div class="demo" id="demo" data-state="slop">
+        <div class="demo__stage">
+          <div class="demo__phone-col">
+            <div class="flip" role="group" aria-label="Screen version">
+              <span class="flip__thumb" aria-hidden="true"><span></span></span>
+              <button type="button" data-v="slop" aria-pressed="true">AI slop</button>
+              <button type="button" data-v="taste" aria-pressed="false">With taste</button>
+            </div>
+
+            <button type="button" class="phone-btn" id="demo-flip" aria-label="Flip the screen" aria-describedby="demo-desc">
+            <div class="phone" id="demo-phone" role="img" aria-label="A habit tracker screen as AI makes it: purple gradient, a Welcome back banner, nested cards and two glowing buttons">
+              <div class="phone__screen">
+                <div class="phone__island"></div>
+
+                <!-- Before: AI slop -->
+                <div class="scr scr-slop" aria-hidden="true">
+                  <div class="phone__status"><span>9:41</span><span>5G</span></div>
+                  <div class="sl-body">
+                    <div class="sl-banner" data-area="a1">
+                      <span class="sl-squircle"><svg viewBox="0 0 24 24"><path d="M12 2l2.2 6.6L21 11l-6.8 2.4L12 20l-2.2-6.6L3 11l6.8-2.4z"/></svg></span>
+                      <span><b>Welcome back, Alex!</b><small>Ready to crush your goals today?</small></span>
+                      <span class="pin">1</span>
+                    </div>
+                    <p class="sl-eyebrow">01 / YOUR DAILY HABITS</p>
+                    <p class="sl-title"><i>Transform</i> your life.</p>
+                    <div class="sl-pills"><span>NEW</span><span>AI-POWERED</span><span>BETA</span></div>
+                    <div class="sl-outer" data-area="a2">
+                      <div class="sl-stat"><small>DAY STREAK</small><b>12</b></div>
+                      <div class="sl-hr"></div>
+                      <div class="sl-inner" style="--c:#A855F7;--w:100%"><div><span>Walk</span><span>100%</span></div><i></i></div>
+                      <div class="sl-inner" style="--c:#EC4899;--w:100%"><div><span>Read</span><span>100%</span></div><i></i></div>
+                      <div class="sl-inner" style="--c:#22D3EE;--w:60%"><div><span>Water</span><span>60%</span></div><i></i></div>
+                      <span class="pin">2</span>
+                    </div>
+                  </div>
+                  <div class="sl-ctas" data-area="a3">
+                    <span>Get Started.</span>
+                    <span>Learn More</span>
+                    <span class="pin">3</span>
+                  </div>
+                  <div class="phone__home"></div>
+                </div>
+
+                <!-- After: taste -->
+                <div class="scr scr-taste" aria-hidden="true">
+                  <div class="phone__status"><span>9:41</span><span>5G</span></div>
+                  <div class="tt-body">
+                    <div class="tt-top"><p>Saturday 14 Nov</p><span class="tt-avatar">A</span></div>
+                    <div class="tt-head" data-area="a1">
+                      <div class="tt-big"><b>2</b><span>of 3</span></div>
+                      <p>habits done today, 12 days in a row</p>
+                      <div class="tt-bar"><i></i><i></i><i></i></div>
+                      <span class="pin">1</span>
+                    </div>
+                    <div class="tt-list" data-area="a2">
+                      <div class="tt-row"><span class="tt-check"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span><strong>Walk</strong><span class="v">8,412 steps</span></div>
+                      <div class="tt-row"><span class="tt-check"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span><strong>Read</strong><span class="v">10 pages</span></div>
+                      <div class="tt-row is-todo"><span class="tt-check"></span><strong>Drink water</strong><span class="v">1.2 / 2 L</span></div>
+                      <span class="pin">2</span>
+                    </div>
+                  </div>
+                  <div class="tt-cta pin-host" data-area="a3">Log water<span class="pin">3</span></div>
+                  <div class="phone__home"></div>
+                </div>
+              </div>
+            </div>
+            </button>
+            <p class="sr-only" id="demo-desc">A habit tracker screen as AI makes it: purple gradient, a Welcome back banner, nested cards and two glowing buttons</p>
+            <p class="demo__hint">Tap the screen<span class="kbd-hint"> or press <span class="kbd">T</span></span> to flip it</p>
+          </div>
+
+          <ol class="callouts" aria-label="Rules applied">
+            <li><button type="button" class="callout" data-area="a1" aria-pressed="false" style="--i:0">
+              <span class="pin" aria-hidden="true">1</span>
+              <span class="callout__txt">
+                <span class="is-slop"><b>A Welcome back banner nobody asked for</b><small>Slop sign 29, from S15</small></span>
+                <span class="is-taste" data-rule="layout-6"><b>Enlarge the main feature</b><small>Layout rule, from S2, S14, S15 and S16</small></span>
+              </span>
+            </button></li>
+            <li><button type="button" class="callout" data-area="a2" aria-pressed="false" style="--i:1">
+              <span class="pin" aria-hidden="true">2</span>
+              <span class="callout__txt">
+                <span class="is-slop"><b>Nested cards with a colored left border</b><small>Slop signs 25 and 28, from S14 and S15</small></span>
+                <span class="is-taste" data-rule="layout-2"><b>Flatten nested cards</b><small>Layout rule, from S2, S14, S15 and S16</small></span>
+              </span>
+            </button></li>
+            <li><button type="button" class="callout" data-area="a3" aria-pressed="false" style="--i:2">
+              <span class="pin" aria-hidden="true">3</span>
+              <span class="callout__txt">
+                <span class="is-slop"><b>Purple gradients and glow on 2 buttons</b><small>Slop sign 21, from S14</small></span>
+                <span class="is-taste" data-rule="color-4"><b>One accent per screen</b><small>Color rule, from 18 sources</small></span>
+              </span>
+            </button></li>
+          </ol>
+        </div>
+        <p class="sr-only" id="demo-live" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- Doors: one row per page -->
+    <section class="container section-tight" aria-labelledby="doors-title">
+      <div class="doors-head">
+        <h2 id="doors-title">8 tools, one job each</h2>
+        <p class="secondary measure">Each page does one thing with the taste file: find a rule, audit a screen, pick colors, copy a prompt.</p>
+      </div>
+      <ul class="doors" data-stagger>
+        <li><a class="door" href="/taste/rules/"><span class="door__name">Rules</span><span class="door__desc">Every rule in the taste file, by topic, searchable.</span><span class="door__meta"><span class="mono" data-count="rules">104</span> rules</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a></li>
+        <li><a class="door" href="/taste/unslop/"><span class="door__name">Unslop</span><span class="door__desc">Tick the slop signs on your screen. Get a score and a fix prompt.</span><span class="door__meta"><span class="mono" data-count="slop">29</span> signs</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a></li>
+        <li><a class="door" href="/taste/palettes/"><span class="door__name">Palettes</span><span class="door__desc">2 calm colors and 1 that pops, applied 60/30/10 on a phone screen.</span><span class="door__meta"><span class="mono" data-count="palettes">36</span> palettes</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a></li>
+        <li><a class="door" href="/taste/type/"><span class="door__name">Type</span><span class="door__desc">A font pairing and a type scale you can copy in one tap.</span><span class="door__meta"><span class="mono" data-count="fonts">11</span> pairings</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a></li>
+        <li><a class="door" href="/taste/motion/"><span class="door__name">Motion</span><span class="door__desc">Each motion rule as a live demo you can tap, with its exact value.</span><span class="door__meta"><span class="mono" data-count="motion">20</span> demos</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a></li>
+        <li><a class="door" href="/taste/screens/"><span class="door__name">Screens</span><span class="door__desc">Phone screens before and after, tagged with the rules they apply.</span><span class="door__meta"><span class="mono">9</span> screens</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a></li>
+        <li><a class="door" href="/taste/prompts/"><span class="door__name">Prompts</span><span class="door__desc">Copy a prompt that fixes one thing per pass: type, cards, hierarchy, button, motion.</span><span class="door__meta"><span class="mono">15</span> prompts</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a></li>
+        <li><a class="door" href="/taste/skills/"><span class="door__name">Skills</span><span class="door__desc">Install the taste file in Claude Code or Cursor, so every screen follows it.</span><span class="door__meta"><span class="mono">1</span> file</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a></li>
+      </ul>
+    </section>
+
+    <!-- Proof in numbers, from section 13 -->
+    <section class="section section-dark proof" aria-labelledby="proof-title">
+      <div class="container">
+        <h2 id="proof-title">7 reels behind the rules have <span data-count="views">7.5M</span> views</h2>
+        <p class="lead">Views read on Instagram on 13 and 14 November 2026. The rules come from 35 sources, and every rule keeps the id of its source.</p>
+
+        <div class="feature-stats" data-stagger>
+          <div>
+            <p class="stat-big"><b>2.6M</b><span>views</span></p>
+            <p>One unexpected accent color. Two colors do 90% of the work.</p>
+            <p class="who">S5, Diego Aranda (@diego.a.does)</p>
+            <a class="btn-text" href="https://www.instagram.com/reels/DfScZgPSqc1/" rel="noopener">Watch the reel<svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+          </div>
+          <div>
+            <p class="stat-big"><b>2.4M</b><span>views</span></p>
+            <p>The accent takes the least space and leaves the biggest impression.</p>
+            <p class="who">S7, Pierre, designer at Averlo (@pierredelcourr)</p>
+            <a class="btn-text" href="https://www.instagram.com/reels/DfZ4_dGIQ8a/" rel="noopener">Watch the reel<svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+          </div>
+        </div>
+
+        <ul class="counts" data-stagger>
+          <li><b data-count="rules-n">104</b><span>rules</span></li>
+          <li><b data-count="sources-n">35</b><span>sources</span></li>
+          <li><b data-count="slop-n">29</b><span>slop signs</span></li>
+        </ul>
+        <p><a class="btn-text" href="/taste/sources/">See every source<svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a></p>
+      </div>
+    </section>
+
+    <!-- Close -->
+    <section class="container close" aria-labelledby="close-title">
+      <h2 id="close-title">Free, and built in public</h2>
+      <p>Every rule, palette and prompt here is free. Jeremy Lasne builds tasu.ai in public on X.</p>
+      <a class="x-link" href="https://x.com/jeremylasne" rel="noopener">Follow the build on X<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <p>tasu.ai · taste using AI · by Jeremy Lasne</p>
+      <nav aria-label="Footer">
+        <a href="/taste/sources/">Sources</a>
+        <a href="https://x.com/jeremylasne" rel="noopener" aria-label="Jeremy Lasne on X">X</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="/taste/data.js"></script>
+  <script>
+  (function () {
+    "use strict";
+    var D = window.TASU_DATA || {};
+
+    /* ---------- Counts, computed from data.js ---------- */
+    function fmt(n) { return n.toLocaleString("en-US"); }
+    function viewsOf(s) {
+      var m = /([\d.,]+)\s*([KM]?)\s*views/i.exec(s.numbers || "");
+      if (!m) return 0;
+      var v = parseFloat(m[1].replace(/,/g, ""));
+      return v * (m[2] === "M" ? 1e6 : m[2] === "K" ? 1e3 : 1);
+    }
+    var counts = {};
+    if (D.rules) counts.rules = counts["rules-n"] = fmt(D.rules.length);
+    if (D.slop) counts.slop = counts["slop-n"] = String(D.slop.length);
+    if (D.palettes) counts.palettes = String(D.palettes.length);
+    if (D.fonts) counts.fonts = String(D.fonts.length);
+    if (D.motion) counts.motion = String(D.motion.filter(function (m) { return m.n <= 20; }).length);
+    if (D.sources) {
+      counts["sources-n"] = String(D.sources.length);
+      var total = D.sources.reduce(function (a, s) { return a + viewsOf(s); }, 0);
+      if (total) counts.views = (Math.floor(total / 1e5) / 10).toFixed(1) + "M";
+    }
+    document.querySelectorAll("[data-count]").forEach(function (el) {
+      var v = counts[el.getAttribute("data-count")];
+      if (v) el.textContent = v;
+    });
+
+    /* ---------- Live demo: AI slop to taste ---------- */
+    var demo = document.getElementById("demo");
+    if (!demo) return;
+    var phone = document.getElementById("demo-phone");
+    var phoneBtn = document.getElementById("demo-flip");
+    var desc = document.getElementById("demo-desc");
+    var flip = demo.querySelector(".flip");
+    var thumb = flip.querySelector(".flip__thumb");
+    var btns = Array.prototype.slice.call(flip.querySelectorAll("button"));
+    var live = document.getElementById("demo-live");
+    var callouts = Array.prototype.slice.call(demo.querySelectorAll(".callout"));
+    var touched = false;
+    var labels = {
+      slop: "A habit tracker screen as AI makes it: purple gradient, a Welcome back banner, nested cards and two glowing buttons",
+      taste: "The same habit tracker with taste: ivory and ink, 2 of 3 habits done as the biggest number, one flat list, and lime only on the progress bar"
+    };
+
+    function placeThumb() {
+      var b = flip.querySelector('[aria-pressed="true"]');
+      if (!b) return;
+      thumb.style.setProperty("--tx", b.offsetLeft + "px");
+      thumb.style.setProperty("--tw", b.offsetWidth + "px");
+    }
+
+    function setState(state, origin) {
+      if (state === demo.getAttribute("data-state")) return;
+      var screen = phone.querySelector(".phone__screen").getBoundingClientRect();
+      if (origin && screen.width) {
+        demo.style.setProperty("--ox", Math.round(((origin.x - screen.left) / screen.width) * 100) + "%");
+        demo.style.setProperty("--oy", Math.round(((origin.y - screen.top) / screen.height) * 100) + "%");
+      } else {
+        demo.style.setProperty("--ox", "50%");
+        demo.style.setProperty("--oy", "0%");
+      }
+      demo.setAttribute("data-state", state);
+      btns.forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-v") === state)); });
+      flip.classList.remove("is-moving");
+      void flip.offsetWidth;
+      flip.classList.add("is-moving");
+      placeThumb();
+      phone.setAttribute("aria-label", labels[state]);
+      desc.textContent = labels[state];
+      live.textContent = state === "taste" ? "With taste: 3 rules applied" : "AI slop: 3 slop signs shown";
+    }
+    flip.addEventListener("animationend", function () { flip.classList.remove("is-moving"); });
+
+    function toggle(origin) { setState(demo.getAttribute("data-state") === "taste" ? "slop" : "taste", origin); }
+
+    btns.forEach(function (b) {
+      b.addEventListener("click", function () {
+        touched = true;
+        var r = phone.getBoundingClientRect();
+        setState(b.getAttribute("data-v"), { x: r.left + r.width / 2, y: r.top });
+      });
+    });
+    flip.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+        e.preventDefault();
+        touched = true;
+        var next = e.key === "ArrowRight" ? "taste" : "slop";
+        setState(next);
+        flip.querySelector('[data-v="' + next + '"]').focus();
+      }
+    });
+    phoneBtn.addEventListener("click", function (e) {
+      touched = true;
+      var r = phone.getBoundingClientRect();
+      toggle(e.detail ? { x: e.clientX, y: e.clientY } : { x: r.left + r.width / 2, y: r.top });
+    });
+    document.addEventListener("keydown", function (e) {
+      if ((e.key === "t" || e.key === "T") && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        var tag = (e.target.tagName || "").toLowerCase();
+        if (tag === "input" || tag === "textarea" || e.target.isContentEditable) return;
+        touched = true;
+        toggle();
+      }
+    });
+
+    /* Brushing and linking: a callout lights up its part of the screen */
+    var pinned = null;
+    function focusArea(area) {
+      if (area) demo.setAttribute("data-focus", area);
+      else demo.removeAttribute("data-focus");
+    }
+    callouts.forEach(function (c) {
+      var area = c.getAttribute("data-area");
+      c.addEventListener("mouseenter", function () { if (!pinned) focusArea(area); });
+      c.addEventListener("mouseleave", function () { if (!pinned) focusArea(null); });
+      c.addEventListener("focus", function () { if (!pinned) focusArea(area); });
+      c.addEventListener("blur", function () { if (!pinned) focusArea(null); });
+      c.addEventListener("click", function () {
+        pinned = pinned === area ? null : area;
+        callouts.forEach(function (o) { o.setAttribute("aria-pressed", String(o.getAttribute("data-area") === pinned)); });
+        focusArea(pinned);
+      });
+    });
+
+    /* Fill the taste callouts with the exact rule text from data.js */
+    if (D.rules) {
+      demo.querySelectorAll("[data-rule]").forEach(function (el) {
+        var r = D.rules.filter(function (x) { return x.id === el.getAttribute("data-rule"); })[0];
+        if (!r) return;
+        el.setAttribute("title", r.text);
+        var ids = r.sources || [];
+        var from = ids.length > 4 ? ids.length + " sources" : ids.length > 1 ? ids.slice(0, -1).join(", ") + " and " + ids[ids.length - 1] : ids.join("");
+        var label = r.topic.charAt(0).toUpperCase() + r.topic.slice(1);
+        if (from) el.querySelector("small").textContent = label + " rule, from " + from;
+      });
+    }
+
+    placeThumb();
+    window.addEventListener("resize", placeThumb);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeThumb);
+
+    /* Flip once on its own when the demo comes into view, then wait for the visitor */
+    if ("IntersectionObserver" in window) {
+      var io = new IntersectionObserver(function (entries) {
+        if (!entries[0].isIntersecting) return;
+        io.disconnect();
+        setTimeout(function () { if (!touched) setState("taste"); }, 1200);
+      }, { rootMargin: "0px 0px -20% 0px", threshold: 0 });
+      io.observe(phone.querySelector(".phone__screen"));
+    }
+
+    /* Reveal rows a jump skipped past (anchor, find-in-page, fast fling) */
+    var pending = false;
+    function catchUp() {
+      pending = false;
+      document.querySelectorAll(".reveal:not(.is-in)").forEach(function (el) {
+        if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add("is-in");
+      });
+    }
+    window.addEventListener("scroll", function () {
+      if (!pending) { pending = true; requestAnimationFrame(catchUp); }
+    }, { passive: true });
+  })();
+  </script>
+</body>
+</html>

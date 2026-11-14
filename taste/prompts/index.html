@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- 1. Charset + viewport -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- 2. Title + description -->
+  <title>Copy a prompt that fixes one thing | tasu.ai</title>
+  <meta name="description" content="15 copy-paste prompts for Claude Code and Cursor. Each one fixes one thing on your app screen: color, type, cards, buttons, motion, states or onboarding.">
+  <!-- 3. Canonical -->
+  <link rel="canonical" href="https://www.jeremylasne.com/taste/prompts/">
+  <!-- 4. Open Graph + Twitter -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="tasu.ai">
+  <meta property="og:url" content="https://www.jeremylasne.com/taste/prompts/">
+  <meta property="og:title" content="Copy a prompt that fixes one thing | tasu.ai">
+  <meta property="og:description" content="15 copy-paste prompts for Claude Code and Cursor. Each one fixes one thing on your app screen: color, type, cards, buttons, motion, states or onboarding.">
+  <meta property="og:image" content="https://www.jeremylasne.com/og-image.png?v=8">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@jeremylasne">
+  <meta name="twitter:title" content="Copy a prompt that fixes one thing | tasu.ai">
+  <meta name="twitter:description" content="15 copy-paste prompts for Claude Code and Cursor. Each one fixes one thing on your app screen: color, type, cards, buttons, motion, states or onboarding.">
+  <meta name="twitter:image" content="https://www.jeremylasne.com/og-image.png?v=8">
+  <!-- 5. Theme color + icons -->
+  <meta name="theme-color" content="#FAF8F3">
+  <link rel="icon" href="/taste/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <!-- 6. Fonts: Fraunces (display), Inter (UI + body), Geist Mono (values only) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..600&family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap">
+  <!-- 7. Design system, then page CSS (tokens only) -->
+  <link rel="stylesheet" href="/taste/tasu.css">
+  <style>
+    /* Page tokens for the dark band (proposed for tasu.css) */
+    :root { --d-muted: #BDB8AC; --d-surface: #1C1A18; }
+
+    /* Shared-control fixes kept page-local (see notes for tasu.css) */
+    .segmented button, .segmented a { min-height: var(--tap); }
+    .kbd { border-radius: var(--r-sm); }
+    .site-footer__inner { flex-wrap: nowrap; gap: var(--s3); }
+    .site-footer p { min-width: 0; }
+    .site-footer a { min-width: var(--tap); justify-content: center; }
+
+    /* Copy buttons: idle and done labels share one layout */
+    .copy-btn .copy-idle { display: inline-flex; }
+    .copy-btn .copy-idle, .copy-btn .copy-done { align-items: center; gap: var(--s2); }
+    .feat__count .mono, .count .mono { font-size: var(--t1); }
+
+    /* ---------- Hero: the page head and the featured prompt in one dark band ---------- */
+    .feat { padding-block: var(--s5) var(--s6); }
+    @media (min-width: 960px) { .feat { padding-block: var(--s6) var(--s7); } }
+    .feat__grid { display: grid; gap: var(--s5); align-items: start; }
+    @media (min-width: 960px) { .feat__grid { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: var(--s7); } }
+    .feat h1 { max-width: 11em; }
+    .feat .lead { margin-top: var(--s3); max-width: 30em; }
+    .feat__meta { margin-top: var(--s3); font-size: var(--t1); line-height: 1.55; color: var(--d-muted); }
+    .src { white-space: nowrap; }
+    .feat__meta a, .facts a { display: inline-block; padding-block: 12px; margin-block: -12px; }
+    .feat__meta a { color: var(--bg); text-decoration-color: var(--n4); }
+    .feat__meta a:hover { text-decoration-color: currentColor; }
+    .feat .actions { margin-top: var(--s4); gap: var(--s3); }
+    .feat .actions .btn-accent { min-height: 56px; padding-inline: var(--s5); font-size: var(--t3); }
+    /* Copy and Copied share one grid cell, so the button keeps its width */
+    .feat .actions .btn-accent.copy-btn { display: inline-grid; place-items: center; }
+    .feat .actions .copy-btn .copy-idle, .feat .actions .copy-btn .copy-done { grid-area: 1 / 1; display: inline-flex; }
+    .feat .actions .copy-btn .copy-done { visibility: hidden; }
+    .feat .actions .copy-btn.is-copied .copy-idle { visibility: hidden; }
+    .feat .actions .copy-btn.is-copied .copy-done { visibility: visible; }
+    .feat .actions .note { font-size: var(--t1); color: var(--d-muted); }
+    .feat__error { margin-top: var(--s3); font-size: var(--t1); color: var(--bg); }
+    .feat__error a { color: var(--bg); }
+
+    .passes { margin-top: var(--s5); font-size: var(--t1); line-height: 1.55; color: var(--d-muted); max-width: 30em; }
+    .passes ol { display: inline; list-style: none; padding: 0; margin: 0; }
+    .passes li { display: inline; }
+    .passes li + li::before { content: ", then "; }
+    .passes button {
+      display: inline-flex;
+      align-items: center;
+      min-height: var(--tap);
+      padding-inline: var(--s1);
+      margin-inline: calc(var(--s1) * -1);
+      font-size: var(--t1);
+      font-weight: 500;
+      color: var(--bg);
+      text-decoration: underline;
+      text-decoration-color: var(--n4);
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 4px;
+      vertical-align: middle;
+      margin-block: -12px;
+      transition: text-decoration-color var(--dur-in) var(--ease-out);
+    }
+    @media (hover: hover) { .passes button:hover { text-decoration-color: currentColor; } }
+
+    .feat__doc { background: var(--d-surface); border-radius: var(--r-card); padding: var(--s4); }
+    .feat__bar { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--s3); padding-bottom: var(--s3); }
+    .feat__bar h2 { font-size: var(--t4); line-height: 1.2; }
+    .feat__count { flex: none; font-size: var(--t1); color: var(--d-muted); }
+    .feat__count .mono { color: var(--bg); }
+    .feat__text {
+      margin: 0;
+      padding: 0;
+      background: none;
+      color: var(--n2);
+      font: 400 var(--t1)/1.65 var(--font-ui);
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      max-height: calc(20 * 1.65em);       /* 20 whole lines, so no line is cut */
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: var(--n4) transparent;
+    }
+    .feat__text .ph-screen, .p-text .ph-screen { box-shadow: inset 0 -1px 0 currentColor; }
+
+    /* ---------- Library ---------- */
+    .lib-head { display: grid; gap: var(--s2); margin-bottom: var(--s4); }
+    .lib-head p { color: var(--n4); max-width: 38em; }
+    .tools { display: grid; gap: var(--s3); margin-bottom: var(--s3); }
+    @media (min-width: 640px) { .tools { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); } }
+    .search .kbd { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+    .search .input { padding-right: 48px; }
+    .search .input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; display: none; }
+    .search .q-clear { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); color: var(--n3); }
+    .search .q-clear:active { transform: translateY(-50%) scale(var(--press)); }
+    .search .q-clear .icon { position: static; transform: none; left: auto; top: auto; color: inherit; pointer-events: none; }
+    .search.has-q .kbd { display: none; }
+    @media (hover: none), (pointer: coarse) { .search .kbd { display: none; } }
+    .field-inline { position: relative; }
+    .field-inline label { position: absolute; left: 17px; top: 8px; font-size: var(--t1); line-height: 1; color: var(--n3); pointer-events: none; }
+    .field-inline .input { padding-top: 22px; padding-bottom: 6px; }
+
+    .filters-wrap { margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); overflow-x: auto; scrollbar-width: none; margin-bottom: var(--s5); }
+    .filters-wrap::-webkit-scrollbar { display: none; }
+    .filters-wrap .segmented { flex-wrap: nowrap; max-width: none; }
+    .filters-wrap .segmented button { white-space: nowrap; }
+    @media (min-width: 640px) { .filters-wrap { margin-inline: 0; padding-inline: 0; overflow: visible; } .filters-wrap .segmented { flex-wrap: wrap; } }
+
+    .lib { display: grid; gap: var(--s6); align-items: start; }
+    @media (min-width: 960px) { .lib { grid-template-columns: minmax(0, 1fr) minmax(0, 520px); gap: var(--s5); } }
+
+    .hint { display: none; margin-bottom: var(--s2); font-size: var(--t1); color: var(--n3); }
+    @media (hover: hover) and (pointer: fine) and (min-width: 960px) { .hint { display: block; } }
+
+    .plist { list-style: none; padding: 0; display: grid; gap: var(--s1); }
+    .prow {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: var(--s2);
+      padding: var(--s2);
+      border-radius: var(--r-card);
+      scroll-margin-top: calc(var(--header-h) + env(safe-area-inset-top) + var(--s2));
+      transition: background-color var(--dur-in) var(--ease-out);
+    }
+    @media (hover: hover) { .prow:hover { background: var(--n1); } }
+    .prow.is-current { background: var(--n1); }
+    .prow__btn {
+      display: grid;
+      gap: var(--s1);
+      width: 100%;
+      min-height: var(--tap);
+      padding: 12px var(--s2) 12px var(--s3);
+      border-radius: var(--r-in);           /* 24 - 8 */
+      text-align: left;
+    }
+    .prow__title { display: flex; align-items: center; gap: var(--s2); font-family: var(--font-display); font-size: var(--t3); line-height: 1.25; font-weight: 500; }
+    .prow__title .dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 1px var(--ink); transform: scale(0); transition: transform var(--dur-in) var(--ease-out); margin-left: -16px; margin-right: 0; opacity: 0; }
+    .prow.is-current .prow__title .dot { transform: none; opacity: 1; margin-left: 0; }
+    .prow__fixes { font-size: var(--t2); line-height: 1.45; color: var(--n4); }
+    .prow__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1) var(--s3); font-size: var(--t1); color: var(--n3); }
+    .prow__meta .done { display: inline-flex; align-items: center; gap: 4px; color: var(--n4); }
+    .prow__meta .done .icon { width: 16px; height: 16px; }
+    .prow .btn-sm { flex: none; }
+    .prow .copy-btn .icon { width: 18px; height: 18px; }
+    mark.hit { background: var(--n2); color: inherit; border-radius: 0; padding: 0 2px; margin: 0 -2px; }
+
+    /* Row copy: shown on hover, focus or the open row (desktop); inside the open row (phone) */
+    @media (hover: hover) and (min-width: 960px) {
+      .prow > .copy-btn { opacity: 0; transition: opacity var(--dur-in) var(--ease-out), background-color var(--dur-in) var(--ease-out), color var(--dur-in) var(--ease-out); }
+      .prow:hover > .copy-btn, .prow:focus-within > .copy-btn, .prow.is-current > .copy-btn { opacity: 1; }
+    }
+    @media (max-width: 959px) {
+      .prow { grid-template-columns: minmax(0, 1fr); }
+      .prow > .copy-btn { display: none; }
+    }
+
+    /* Inline detail on phone and tablet */
+    .prow__detail {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows var(--dur-out) var(--ease-in);
+    }
+    .prow__detail > div { overflow: hidden; min-height: 0; }
+    .prow.is-open .prow__detail { grid-template-rows: 1fr; transition: grid-template-rows var(--dur-in) var(--ease-out); }
+    .prow.no-anim .prow__detail { transition: none; }
+    @media (min-width: 960px) { .prow__detail { display: none; } }
+
+    /* Detail panel (desktop): one card, the prompt sits on it */
+    .detail-col { display: none; }
+    @media (min-width: 960px) {
+      .detail-col { display: block; position: sticky; top: calc(var(--header-h) + env(safe-area-inset-top) + var(--s3)); }
+    }
+    .panel { background: var(--n1); border-radius: var(--r-card); padding: var(--s4); }
+    .panel__head { padding-bottom: var(--s4); }
+    .panel__head h3 { font-size: var(--t5); line-height: 1.15; }
+    .panel__head .fixes { margin-top: var(--s2); color: var(--n4); }
+    .facts { margin: var(--s3) 0 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--s1) var(--s3); font-size: var(--t1); }
+    .facts dt { color: var(--n3); }
+    .facts dd { margin: 0; color: var(--n4); }
+    .facts a { color: var(--ink); text-decoration-color: var(--n3); text-decoration-thickness: 1.5px; }
+    .facts a:hover { text-decoration-color: currentColor; }
+    .p-text {
+      margin: 0;
+      padding: 0;
+      background: none;
+      border-radius: 0;
+      color: var(--n4);
+      font: 400 var(--t1)/1.65 var(--font-ui);
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: var(--n2) transparent;
+    }
+    .panel .p-text { max-height: max(240px, calc(100dvh - var(--header-h) - 400px)); }
+    .prow__detail .p-text { max-height: calc(20 * 1.65em); padding: 0 var(--s3); }
+    .prow__detail .facts { margin: 0; padding: var(--s1) var(--s3) var(--s3); }
+    .panel__foot, .detail-foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s3); }
+    .panel__foot { padding-top: var(--s4); }
+    .panel__foot .count, .detail-foot .count { margin-left: auto; font-size: var(--t1); color: var(--n3); }
+    .detail-foot { padding: var(--s3) var(--s3) var(--s1); }
+    .detail-foot .btn-text { font-size: var(--t1); }
+
+    .swap { animation: p-swap var(--dur-in) var(--ease-out) 1; }
+    @keyframes p-swap { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+    .p-empty { padding: var(--s5) var(--s3); }
+    .p-empty h3 { font-size: var(--t4); }
+    .p-empty p { margin-top: var(--s2); color: var(--n4); }
+    .p-empty .btn-text { margin-top: var(--s2); }
+
+    /* How to use: three short facts, spacing only */
+    .how { display: grid; gap: var(--s5); padding: 0; list-style: none; }
+    @media (min-width: 640px) { .how { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s4); } }
+    .how h3 { font-family: var(--font-ui); font-size: var(--t3); font-weight: 600; line-height: 1.3; }
+    .how p { margin-top: var(--s2); color: var(--n4); }
+    .how .icon { margin-bottom: var(--s3); }
+    .next { margin-top: var(--s6); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .swap { animation: p-fade var(--dur-in) linear 1; }
+      @keyframes p-fade { from { opacity: 0; } to { opacity: 1; } }
+      .prow__title .dot { transition: opacity var(--dur-in) linear; transform: none; }
+      .search .q-clear:active { transform: translateY(-50%); }
+    }
+  </style>
+  <!-- 8. JS flag before paint, then shared JS + data, deferred -->
+  <script>document.documentElement.classList.add("js");setTimeout(function(){if(!window.tasu)document.documentElement.classList.remove("js")},3000)</script>
+  <script src="/taste/tasu.js" defer></script>
+  <script src="/taste/data.js" defer></script>
+  <!-- 9. JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": "https://www.jeremylasne.com/taste/prompts/#page",
+        "url": "https://www.jeremylasne.com/taste/prompts/",
+        "name": "Copy a prompt that fixes one thing",
+        "description": "15 copy-paste prompts for Claude Code and Cursor. Each one fixes one thing on your app screen: color, type, cards, buttons, motion, states or onboarding.",
+        "inLanguage": "en",
+        "isPartOf": { "@type": "WebSite", "name": "tasu.ai", "url": "https://www.jeremylasne.com/taste/" },
+        "author": { "@type": "Person", "name": "Jeremy Lasne", "url": "https://x.com/jeremylasne" },
+        "image": "https://www.jeremylasne.com/og-image.png?v=8"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "tasu.ai", "item": "https://www.jeremylasne.com/taste/" },
+          { "@type": "ListItem", "position": 2, "name": "Prompts", "item": "https://www.jeremylasne.com/taste/prompts/" }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="wordmark" href="/taste/" aria-label="tasu.ai home">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="8" fill="#0B0909"/><path d="M10.5 4.5v11a3 3 0 0 0 3 3H16M7 9h8.5" fill="none" stroke="#FAF8F3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>tasu.ai</span>
+      </a>
+      <nav class="nav" aria-label="Main">
+        <ul>
+          <li><a href="/taste/rules/">Rules</a></li>
+          <li><a href="/taste/unslop/">Unslop</a></li>
+          <li><a href="/taste/palettes/">Palettes</a></li>
+          <li><a href="/taste/type/">Type</a></li>
+          <li><a href="/taste/motion/">Motion</a></li>
+          <li><a href="/taste/screens/">Screens</a></li>
+          <li><a href="/taste/prompts/">Prompts</a></li>
+          <li><a href="/taste/skills/">Skills</a></li>
+        </ul>
+      </nav>
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav-sheet" aria-label="Open menu">
+        <span class="menu-icons" aria-hidden="true">
+          <svg class="icon icon-open" viewBox="0 0 24 24"><path d="M4 8h16M4 16h16"/></svg>
+          <svg class="icon icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </span>
+        <span>Menu</span>
+      </button>
+    </div>
+  </header>
+  <div class="sheet-scrim" aria-hidden="true"></div>
+  <nav class="sheet" id="nav-sheet" aria-label="Main">
+    <ul>
+      <li><a href="/taste/rules/">Rules</a></li>
+      <li><a href="/taste/unslop/">Unslop</a></li>
+      <li><a href="/taste/palettes/">Palettes</a></li>
+      <li><a href="/taste/type/">Type</a></li>
+      <li><a href="/taste/motion/">Motion</a></li>
+      <li><a href="/taste/screens/">Screens</a></li>
+      <li><a href="/taste/prompts/">Prompts</a></li>
+      <li><a href="/taste/skills/">Skills</a></li>
+      <li><a href="/taste/sources/">Sources</a></li>
+    </ul>
+  </nav>
+
+  <main id="main">
+    <section class="section-dark feat" aria-labelledby="page-title">
+      <div class="container feat__grid">
+        <div>
+          <h1 id="page-title">Copy a prompt that fixes one thing</h1>
+          <p class="lead">15 prompts written from taste.md. Start with Unslop this screen: it removes the 29 AI slop signs and reports every change.</p>
+          <p class="feat__meta" id="feat-meta">From taste.md section 6. Sources: <span class="src"><a href="https://www.instagram.com/charles.unemployed/reel/DfSbDWhR2bi/" rel="noopener" target="_blank">S1 @charles.unemployed</a>,</span> <span class="src"><a href="https://www.instagram.com/reels/DfVio6bBWl1/" rel="noopener" target="_blank">S14 @nuhushaik</a>,</span> <span class="src"><a href="https://www.instagram.com/reels/DfqWmHCmU9p/" rel="noopener" target="_blank">S15 @buildwithomar</a></span></p>
+          <div class="row actions">
+            <button class="btn-accent copy-btn" type="button" id="feat-copy" data-pid="unslop" aria-label="Copy: Unslop this screen">
+              <span class="copy-idle"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V6.5a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></svg>Copy</span>
+              <span class="copy-done"><svg class="icon icon-sm icon-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Copied</span>
+            </button>
+            <span class="note">Paste it into Claude Code or Cursor</span>
+          </div>
+          <p class="feat__error" id="feat-error" role="alert" hidden>The list of slop signs did not load, so this prompt is incomplete. Reload the page, or copy the rules from <a href="/taste/taste.md">taste.md</a>.</p>
+
+          <div class="passes">Then run one pass at a time, in the order of the unslop method (S1):
+            <ol><li><button type="button" data-goto="type-scale">Type scale</button></li><li><button type="button" data-goto="card-style">Card style</button></li><li><button type="button" data-goto="bold">Bold hierarchy</button></li><li><button type="button" data-goto="main-button">Main button</button></li><li><button type="button" data-goto="motion">Motion</button></li></ol>
+          </div>
+        </div>
+
+        <div class="feat__doc">
+          <div class="feat__bar"><h2 id="feat-title">Unslop this screen</h2><span class="feat__count"><span class="mono" id="feat-words">0</span> words<span id="feat-checks-wrap"> · <span class="mono" id="feat-checks">29</span> checks</span></span></div>
+          <pre class="feat__text" id="feat-text" tabindex="0" aria-label="Unslop this screen, full prompt"></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="container section" id="library" aria-labelledby="lib-title">
+      <div class="lib-head">
+        <h2 id="lib-title">All 15 prompts</h2>
+        <p>Filter by what you want to fix. Name your screen once and every prompt uses it.</p>
+      </div>
+
+      <div class="tools">
+        <div class="search">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+          <label class="sr-only" for="q">Search prompts</label>
+          <input class="input" id="q" type="search" placeholder="Search: radius, onboarding, 0.97" autocomplete="off" spellcheck="false">
+          <span class="kbd" aria-hidden="true">/</span>
+          <button class="btn-icon q-clear" type="button" id="q-clear" aria-label="Clear the search" hidden><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg></button>
+        </div>
+        <div class="field-inline">
+          <label for="screen">Screen to fix</label>
+          <input class="input" id="screen" type="text" placeholder="this screen" autocomplete="off" spellcheck="false" maxlength="60">
+        </div>
+      </div>
+
+      <div class="filters-wrap">
+        <div class="segmented" id="filters" role="group" aria-label="Filter by goal"></div>
+      </div>
+
+      <div class="lib">
+        <div>
+          <p class="hint" id="kbd-hint"><span class="kbd">↑</span> <span class="kbd">↓</span> move, <span class="kbd">C</span> copies the open prompt, <span class="kbd">/</span> searches</p>
+          <ul class="plist" id="plist" aria-describedby="kbd-hint"></ul>
+          <div class="p-empty" id="p-empty" hidden>
+            <h3>No prompt matches <span id="p-empty-q"></span></h3>
+            <p>Try a goal like color or motion, or a value like 44.</p>
+            <button class="btn-text" type="button" id="p-clear">Clear the search</button>
+          </div>
+          <noscript><p class="p-empty">The prompt library needs JavaScript. Every rule behind these prompts is on the <a href="/taste/rules/">rules page</a>.</p></noscript>
+        </div>
+        <aside class="detail-col" aria-label="Open prompt">
+          <div class="panel" id="panel" aria-live="polite"></div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="container section-tight" aria-labelledby="how-title">
+      <h2 id="how-title" class="t-h2">How to run them</h2>
+      <ul class="how" style="margin-top:var(--s5)">
+        <li>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V6.5a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></svg>
+          <h3>One prompt per pass</h3>
+          <p>Paste one prompt, let the agent finish, look at the screen. Then paste the next one.</p>
+        </li>
+        <li>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h6"/></svg>
+          <h3>Ask for a change list</h3>
+          <p>13 of 15 prompts ask for a change list: rule, before, after. You review a short list instead of the whole diff.</p>
+        </li>
+        <li>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+          <h3>Finish with the checklist</h3>
+          <p>The last pass checks 10 lines from taste.md section 12. Fix every no.</p>
+        </li>
+      </ul>
+      <p class="next"><a class="btn-text" href="/taste/skills/">Want all the rules at once? Get the skill <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <p>tasu.ai · taste using AI · by Jeremy Lasne</p>
+      <nav aria-label="Footer">
+        <a href="/taste/sources/">Sources</a>
+        <a href="https://x.com/jeremylasne" rel="noopener" aria-label="Jeremy Lasne on X">X</a>
+      </nav>
+    </div>
+  </footer>
+  <script>
+  /* Prompts page. Every line of every prompt comes from /taste/taste.md (rules, numbers, sources). */
+  document.addEventListener("DOMContentLoaded", function () {
+    "use strict";
+    var D = window.TASU_DATA || {};
+    var doc = document;
+
+    /* ---------- Page-local data ---------- */
+    var GOALS = [
+      { id: "all", label: "All" },
+      { id: "audit", label: "Audit" },
+      { id: "color", label: "Color" },
+      { id: "type", label: "Type" },
+      { id: "layout", label: "Layout" },
+      { id: "motion", label: "Motion" },
+      { id: "states", label: "States" },
+      { id: "flows", label: "Copy and flows" }
+    ];
+    var REPORT = "\n\nReport each change as one line: rule, before, after.";
+    var slopList = (D.slop || []).map(function (s) { return "- " + s.text; }).join("\n");
+    var checkList = (D.checklist || []).map(function (c) { return "- [ ] " + c; }).join("\n");
+    var aiList = ((D.states && D.states.ai) || []).map(function (s) { return "- " + s.text; }).join("\n");
+
+    var PROMPTS = [
+      {
+        id: "unslop", goal: "audit", needs: "slop", title: "Unslop this screen", section: "6",
+        fixes: "Removes the 29 AI slop signs, one pass at a time.",
+        sources: ["S1", "S14", "S15"],
+        text: "Unslop {screen}.\n\nBefore you change anything:\n- Name 1 or 2 shipped apps whose style you will match or combine.\n- Pick 2 base colors, 1 accent, 1 type scale, 1 card style and 1 corner radius scale. Stick to them.\n\nSearch {screen} for each of these 29 signs. Remove or replace every hit:\n" + slopList + "\n\nFix one thing per pass, in this order: type scale, then card style, then hierarchy, then the main button, then motion. Stop after each pass and show me the result." + REPORT
+      },
+      {
+        id: "60-30-10", goal: "color", title: "Apply 60/30/10", section: "2",
+        fixes: "Too many colors, and an accent that shows up everywhere.",
+        sources: ["S10", "S31", "S32", "S33", "S7", "S8"],
+        text: "Apply the 60 / 30 / 10 color split to {screen}. Change color only.\n\n- 60%: the main color.\n- 30%: the second color.\n- 10%: the accent. It goes only on what people click: the primary action, the key number or one highlight.\n- One accent per screen. Remove it from every other element.\n- Replace greys with 3 to 5 tinted neutrals: greys with a hint of the main color. Remove extra shades and opacities.\n- Body text contrast at least 4.5:1. Text 24 px and larger at least 3:1.\n- Colors that must be told apart also differ in lightness." + REPORT
+      },
+      {
+        id: "accent", goal: "color", title: "Pick the accent for a reason", section: "2",
+        fixes: "An accent chosen because it looked nice on a swatch.",
+        sources: ["S23", "S5", "S28", "S30", "S31", "S32", "S33"],
+        text: "Choose the accent color for {screen} on purpose. Change the accent only.\n\n- Keep two quiet base colors. Let the loud accent do the work: it is where the eye goes first.\n- The accent must contrast with the base pair and fit the brand mood.\n- Add one unexpected accent to a calm pair.\n- Give me 3 accent options. Apply each one to {screen}, so I judge them on the real design and not on swatches.\n- Check contrast on each: 4.5:1 for body text, 3:1 for text 24 px and larger.\n\nTell me which accent you recommend and why, in 2 sentences. Wait for my pick before you apply it."
+      },
+      {
+        id: "type-scale", goal: "type", title: "Set a type scale", section: "3",
+        fixes: "Random font sizes, jumpy numbers and weak headlines.",
+        sources: ["S1", "S2", "S4", "S16"],
+        text: "Set one type scale on {screen}. Change type only.\n\n- Use 5 to 7 sizes, each about 1.2x to 1.333x the one below. Use only those sizes.\n- One font family for UI. A monospace font only for values: prices, codes, timers, hex.\n- Tabular numbers on prices, counters, stats and timers.\n- Body line length: 45 to 75 characters.\n- Leading: 1.4 to 1.6 for body, 1.05 to 1.2 for large headlines.\n- Negative letter spacing only on display sizes above 40 px, -1% to -2%.\n- ALL CAPS only for tiny labels, with +5% to +10% letter spacing.\n- No italics for style. No periods at the end of titles.\n- Balance headline lines. Leave no single word alone on the last line.\n\nList the sizes you chose in px first." + REPORT
+      },
+      {
+        id: "font-pair", goal: "type", title: "Pair two fonts", section: "3",
+        fixes: "Three or more fonts, or a pairing with no hierarchy.",
+        sources: ["S29"],
+        text: "Set one font pairing for {screen} and the whole app. Change fonts only.\n\n- Use 2 to 3 fonts at most.\n- A display font for headings, a clean font for body text.\n- Hierarchy by weight: bold for headings, medium for subheadings, regular for body.\n- Pick a body font with a tall x-height for small sizes on mobile.\n- Avoid Instrument Serif and Pacifico.\n- Starting points: Fraunces + Inter (fresh), Playfair Display + Montserrat (modern and clean), Lora + Open Sans (strong and modern), Quicksand + Nunito (soft and friendly).\n- Use the same pairing on every screen.\n\nName the pairing you chose and the weights." + REPORT
+      },
+      {
+        id: "card-style", goal: "layout", title: "One card style and radius math", section: "4",
+        fixes: "Nested cards, mixed corners and borders around everything.",
+        sources: ["S2", "S14", "S15", "S16"],
+        text: "Give {screen} one card style. Change cards, spacing and corners only.\n\n- One card style for the whole app: same radius, same padding, same shadow or border.\n- Inner radius = outer radius minus padding. Example: card radius 24, padding 8, inner button radius 16.\n- Match corner radii across elements of the same level.\n- Flatten nested cards. No card inside a card.\n- Remove colored left borders and borders around everything.\n- Group with spacing first, on a 4 or 8 pt scale. Related items sit close. Groups sit far apart.\n\nWrite the card spec first: radius, padding, shadow or border." + REPORT
+      },
+      {
+        id: "main-button", goal: "layout", title: "One main button", section: "4",
+        fixes: "Five buttons that all look equally important.",
+        sources: ["S2", "S14", "S15", "S16", "S31", "S32", "S4", "S17"],
+        text: "Give {screen} one main button. Change buttons and hierarchy only.\n\n- One screen, one job, one main button. Name the job of {screen} in one sentence first.\n- One filled primary button. Every other action becomes secondary or a text link.\n- The accent color goes on that button and nowhere else.\n- Put the main action at the top of the hierarchy, where the eye lands first.\n- Touch targets at least 44 x 44 pt, larger than the icon itself.\n- A double tap never charges twice." + REPORT
+      },
+      {
+        id: "bold", goal: "layout", title: "Make a plain screen bold", section: "10",
+        fixes: "A screen that works but looks flat and generic.",
+        sources: ["S18", "S19"],
+        text: "Make {screen} bold with one strong visual idea. Keep the structure. Change the hierarchy, scale and color.\n\nPick one idea:\n- A huge headline or name set in big type over a photo.\n- An image-led hero instead of a small thumbnail.\n- One color field behind the key content.\n\nRules:\n- Enlarge the main feature. The most important thing on the screen is the biggest thing.\n- Use real screens, real data and real photos instead of abstract shapes.\n\nTell me which idea you picked and why, in 2 sentences." + REPORT
+      },
+      {
+        id: "motion", goal: "motion", title: "Set the motion values", section: "7",
+        fixes: "Slow menus, bouncy buttons and animations that never stop.",
+        sources: ["S3", "S12", "S2", "S4", "S14"],
+        text: "Apply these motion values to every animation on {screen}. Change motion only.\n\n- Ease-out for entrances. Ease-in-out for elements that move from A to B.\n- Dropdowns and menus open in 150 to 250 ms.\n- Exits 20% shorter than entrances.\n- Stagger list rows by 30 ms.\n- Buttons scale to 0.97 on press.\n- Popovers start at scale 0.95, grow from the button that opened them and exit back to it.\n- No bounce on everyday UI.\n- Follow the finger 1:1 while the user holds or drags.\n- Pulse once to confirm success.\n- Crossfade icons with a small blur when they swap.\n- Every animation can be interrupted mid-way.\n- Loop only a loading state.\n- Reduce Motion on: swap movement for fades.\n\nList each animation with its duration and easing." + REPORT
+      },
+      {
+        id: "states", goal: "states", title: "Add the four states", section: "8",
+        fixes: "Spinners, layout jumps and lists with no empty or error state.",
+        sources: ["S4", "S17", "S24", "S3"],
+        text: "Add loading, empty, error and success states to every list and form on {screen}.\n\n- Loading: skeleton screens instead of spinners. Grey shapes hold the layout while content loads.\n- Blurred image placeholders while images load.\n- No layout shift: reserve space for images and async content.\n- Show cached data first, refresh in the background.\n- Empty: what the screen shows before there is content, plus one action to fill it.\n- Optimistic updates: the UI changes before the server answers.\n- Undo toasts instead of \"Are you sure?\" pop-ups.\n- Pulse once to confirm success.\n- Animate between states, so a change of state never jumps.\n\nList every list and form you found, with its 4 states." + REPORT
+      },
+      {
+        id: "ai-chat", goal: "states", needs: "ai", title: "Polish an AI chat screen", section: "8",
+        fixes: "An empty chat box and answers that pop in with no context.",
+        sources: ["S24", "S34"],
+        text: "Apply these AI screen techniques to {screen}. Add one at a time.\n\n" + aiList + "\n\nSkip any technique that does not fit {screen}, and tell me why." + REPORT
+      },
+      {
+        id: "copy", goal: "flows", title: "Cut the copy", section: "5",
+        fixes: "Verbose text, filler badges and vague headlines.",
+        sources: ["S2", "S4", "S14", "S15", "S27"],
+        text: "Cut the copy on {screen}. Change words only.\n\n- One sentence where AI wrote three.\n- Replace adjectives with data. \"Fast\" becomes \"Loads in 1.2 s\". \"Popular\" becomes \"1,000+ users\".\n- Make headlines specific. \"Track 3 habits in 10 seconds a day\" beats \"Transform your life\".\n- Delete filler badges (\"New\", \"AI-powered\", \"Beta\") unless they change a decision.\n- Drop labels when the value explains itself.\n- Delete the \"Welcome back, Name\" banner unless it carries data.\n- Every element earns its place. If removing it changes nothing, remove it." + REPORT
+      },
+      {
+        id: "onboarding", goal: "flows", title: "Onboarding before sign-up", section: "9",
+        fixes: "A sign-up wall before people see why the app is worth it.",
+        sources: ["S13"],
+        text: "Reorder the onboarding of my app. Change the flow only.\n\n- New order: show the value, let people personalize, then ask them to sign up.\n- If someone does not need an account to understand the value, ask for sign-up only after they have seen it.\n- One screen, one question.\n- One-time code autofill on login.\n- Ship with analytics from day one, so you know what users do.\n\nOne app saw about 40% more sign-ups (relative lift) from this one change. Show me the new screen order as a list before you build it."
+      },
+      {
+        id: "checklist", goal: "audit", needs: "checklist", title: "Run the final checklist", section: "12",
+        fixes: "Shipping a screen before every rule passes.",
+        sources: [],
+        text: "Run the final checklist on {screen}. Answer yes or no to each line:\n\n" + checkList + "\n\nFix every no, then answer the list again.\n\nThen output:\n1. What you built.\n2. A list of changes: rule, before, after.\n3. Any rule you could not apply, and why."
+      },
+      {
+        id: "report", goal: "audit", title: "Report changes as rule, before, after", section: "0",
+        fixes: "A long diff with no record of what changed or why.",
+        sources: [],
+        text: "For every change you made to {screen}, write one line in this format:\n\nrule | before | after\n\nExample:\nInner radius = outer radius minus padding | button radius 24 in a card with padding 8 | button radius 16\n\n- One line per change. Keep each line under 30 words.\n- Name the rule in the words of taste.md.\n- Then list any rule you could not apply, and why."
+      }
+    ];
+    var FEATURED = "unslop";
+    /* If data.js failed, the prompts built from it are incomplete: warn and block their copy */
+    var HAVE = { slop: !!slopList, checklist: !!checkList, ai: !!aiList };
+    function broken(p) { return !!(p && p.needs && !HAVE[p.needs]); }
+
+    /* ---------- Helpers ---------- */
+    var SRC = {};
+    (D.sources || []).forEach(function (s) { SRC[s.id] = s; });
+    var byId = {};
+    PROMPTS.forEach(function (p, i) { p.i = i; byId[p.id] = p; });
+    function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+    function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+    function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* private mode */ } }
+    function goalLabel(id) { for (var i = 0; i < GOALS.length; i++) if (GOALS[i].id === id) return GOALS[i].label; return id; }
+    function screenName() { var v = (screenInput.value || "").trim(); return v || "this screen"; }
+    function fill(p) { return p.text.replace(/\{screen\}/g, screenName()); }
+    function fillHtml(p) {
+      var name = esc(screenName());
+      return p.text.split("{screen}").map(esc).join('<span class="ph-screen">' + name + "</span>");
+    }
+    function words(t) { return (t.match(/\S+/g) || []).length; }
+    function srcLinks(ids, long) {
+      return ids.map(function (id) {
+        var s = SRC[id];
+        if (!s) return esc(id);
+        var label = long ? id + " " + (s.handle || "") : id;
+        var title = (s.handle ? s.handle + ": " : "") + (s.teaches || "");
+        return s.url
+          ? '<a href="' + esc(s.url) + '" target="_blank" rel="noopener" title="' + esc(title) + '">' + esc(label) + "</a>"
+          : '<span title="' + esc(title) + '">' + esc(label) + "</span>";
+      }).map(function (h, i, all) {
+        // Keep each credit and its comma together, so a line never starts with a comma
+        return '<span class="src">' + h + (i < all.length - 1 ? "," : "") + "</span>";
+      }).join(" ");
+    }
+    function srcFacts(p) { return p.sources.length ? "<dt>Sources</dt><dd>" + srcLinks(p.sources, true) + "</dd>" : ""; }
+    function sectionLabel(p) { return p.section === "0" ? "How to work" : "Section " + p.section; }
+    var ICON_COPY = '<svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V6.5a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></svg>';
+    var ICON_CHECK = '<svg class="icon icon-sm icon-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+    function copyBtn(p, cls, label) {
+      return '<button type="button" class="' + cls + ' copy-btn" data-pid="' + p.id + '" aria-label="' + esc(label + ": " + p.title) + '"' + (broken(p) ? " disabled" : "") + ">" +
+        '<span class="copy-idle">' + ICON_COPY + esc(label) + "</span>" +
+        '<span class="copy-done">' + ICON_CHECK + "Copied</span></button>";
+    }
+
+    /* ---------- Elements ---------- */
+    var list = doc.getElementById("plist");
+    var panel = doc.getElementById("panel");
+    var filtersEl = doc.getElementById("filters");
+    var q = doc.getElementById("q");
+    var screenInput = doc.getElementById("screen");
+    var empty = doc.getElementById("p-empty");
+    var featText = doc.getElementById("feat-text");
+    var wide = window.matchMedia("(min-width: 960px)");
+
+    var state = { goal: "all", query: "", current: "type-scale", open: null };
+    var copied = {};
+    try { copied = JSON.parse(lsGet("tasu.prompts.copied") || "{}") || {}; } catch (e) { copied = {}; }
+    screenInput.value = lsGet("tasu.prompts.screen") || "";
+
+    /* ---------- Filters ---------- */
+    filtersEl.innerHTML = GOALS.map(function (g) {
+      return '<button type="button" data-goal="' + g.id + '" aria-pressed="' + (g.id === "all") + '">' + esc(g.label) + ' <span class="count" data-gcount="' + g.id + '"></span></button>';
+    }).join("");
+
+    /* ---------- Rows ---------- */
+    list.innerHTML = PROMPTS.map(function (p) {
+      return '<li class="prow" id="p-' + p.id + '" data-pid="' + p.id + '">' +
+        '<button type="button" class="prow__btn" aria-expanded="false" aria-controls="d-' + p.id + '">' +
+          '<span class="prow__title"><span class="dot" aria-hidden="true"></span><span class="t">' + esc(p.title) + "</span></span>" +
+          '<span class="prow__fixes">' + esc(p.fixes) + "</span>" +
+          '<span class="prow__meta"><span>' + esc(goalLabel(p.goal)) + "</span>" + (p.sources.length ? "<span>" + p.sources.length + (p.sources.length === 1 ? " source" : " sources") + "</span>" : "") +
+          '<span class="done"' + (copied[p.id] ? "" : " hidden") + ">" + ICON_CHECK.replace("icon-check", "") + "Copied before</span></span>" +
+        "</button>" +
+        (p.id !== FEATURED ? copyBtn(p, "btn btn-sm", "Copy") : "") +
+        '<div class="prow__detail" id="d-' + p.id + '"><div></div></div>' +
+      "</li>";
+    }).join("");
+    var rows = Array.prototype.slice.call(list.children);
+
+    function detailInner(p) {
+      return '<dl class="facts"><dt>From</dt><dd>taste.md, ' + sectionLabel(p) + "</dd>" + srcFacts(p) + "</dl>" +
+        '<pre class="p-text" tabindex="0" aria-label="' + esc(p.title) + ', full prompt">' + fillHtml(p) + "</pre>" +
+        '<div class="detail-foot">' + copyBtn(p, "btn btn-sm", "Copy") + '<button type="button" class="btn-text" data-link="' + p.id + '">Copy link</button><span class="count"><span class="mono">' + words(fill(p)) + "</span> words</span></div>";
+    }
+    function renderPanel(animate) {
+      var p = byId[state.current];
+      if (!p) return;
+      panel.innerHTML =
+        '<div class="panel__head"><h3>' + esc(p.title) + '</h3><p class="fixes">' + esc(p.fixes) + "</p>" +
+        '<dl class="facts"><dt>Goal</dt><dd>' + esc(goalLabel(p.goal)) + "</dd><dt>From</dt><dd>taste.md, " + sectionLabel(p) + "</dd>" + srcFacts(p) + "</dl></div>" +
+        '<pre class="p-text" id="panel-text" tabindex="0" aria-label="' + esc(p.title) + ', full prompt">' + fillHtml(p) + "</pre>" +
+        '<div class="panel__foot">' + copyBtn(p, "btn", "Copy prompt") + '<button type="button" class="btn-text" data-link="' + p.id + '">Copy link</button><span class="count"><span class="mono">' + words(fill(p)) + "</span> words</span></div>";
+      if (animate) { panel.classList.remove("swap"); void panel.offsetWidth; panel.classList.add("swap"); }
+    }
+    function renderFeatured() {
+      var p = byId[FEATURED];
+      featText.innerHTML = fillHtml(p);
+      doc.getElementById("feat-words").textContent = words(fill(p));
+      doc.getElementById("feat-checks").textContent = (D.slop || []).length;
+      doc.getElementById("feat-checks-wrap").hidden = !(D.slop || []).length;
+    }
+
+    /* ---------- Selection ---------- */
+    function markRows() {
+      rows.forEach(function (li) {
+        var id = li.getAttribute("data-pid");
+        var isCur = wide.matches ? id === state.current : id === state.open;
+        li.classList.toggle("is-current", isCur);
+        li.classList.toggle("is-open", !wide.matches && id === state.open);
+        var b = li.querySelector(".prow__btn");
+        b.setAttribute("aria-expanded", String(!wide.matches && id === state.open));
+        if (wide.matches) { b.setAttribute("aria-current", id === state.current ? "true" : "false"); b.removeAttribute("aria-expanded"); }
+        else b.removeAttribute("aria-current");
+      });
+    }
+    function select(id, opts) {
+      opts = opts || {};
+      if (!byId[id]) return;
+      if (wide.matches) {
+        var changed = state.current !== id;
+        state.current = id;
+        renderPanel(changed && !opts.silent);
+      } else {
+        var li = doc.getElementById("p-" + id);
+        var prev = state.open && state.open !== id ? doc.getElementById("p-" + state.open) : null;
+        var before = li.getBoundingClientRect().top;
+        if (state.open === id && opts.toggle) { state.open = null; }
+        else {
+          state.open = id;
+          li.querySelector(".prow__detail > div").innerHTML = detailInner(byId[id]);
+        }
+        state.current = id;
+        // The row that closes collapses at once, and the page scrolls by the same amount,
+        // so the tapped row stays under the finger (no layout shift).
+        if (prev) prev.classList.add("no-anim");
+      }
+      markRows();
+      if (!wide.matches) {
+        if (prev) {
+          var delta = li.getBoundingClientRect().top - before;
+          if (Math.abs(delta) > 1) window.scrollTo({ top: window.scrollY + delta, behavior: "instant" });
+          requestAnimationFrame(function () { requestAnimationFrame(function () { prev.classList.remove("no-anim"); }); });
+        }
+      }
+      try { history.replaceState(null, "", "#" + id); } catch (e) { /* file:// */ }
+    }
+
+    /* ---------- Filter + search ---------- */
+    function hay(p) { return (p.title + " " + p.fixes + " " + goalLabel(p.goal) + " " + p.sources.join(" ") + " " + fill(p)).toLowerCase(); }
+    function matchQ(p) {
+      if (!state.query) return true;
+      var h = hay(p);
+      return state.query.toLowerCase().split(/\s+/).every(function (w) { return h.indexOf(w) !== -1; });
+    }
+    // One pass over the raw text: split on every query word, then escape each piece.
+    // The regex never sees markup or entities, so multi-word queries stay clean.
+    function highlight(text) {
+      var ws = state.query.split(/\s+/).filter(Boolean)
+        .map(function (w) { return w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); })
+        .sort(function (a, b) { return b.length - a.length; });
+      if (!ws.length) return esc(text);
+      return String(text).split(new RegExp("(" + ws.join("|") + ")", "ig")).map(function (part, i) {
+        return i % 2 ? '<mark class="hit">' + esc(part) + "</mark>" : esc(part);
+      }).join("");
+    }
+    function apply() {
+      var shown = 0, first = null;
+      rows.forEach(function (li, i) {
+        var p = byId[li.getAttribute("data-pid")];
+        var ok = matchQ(p) && (state.goal === "all" || p.goal === state.goal);
+        li.hidden = !ok;
+        li.querySelector(".prow__title .t").innerHTML = highlight(p.title);
+        li.querySelector(".prow__fixes").innerHTML = highlight(p.fixes);
+        if (ok) {
+          li.style.setProperty("--i", Math.min(shown, 12));
+          shown++;
+          if (!first) first = p.id;
+        }
+      });
+      GOALS.forEach(function (g) {
+        var n = PROMPTS.filter(function (p) { return matchQ(p) && (g.id === "all" || p.goal === g.id); }).length;
+        var el = filtersEl.querySelector('[data-gcount="' + g.id + '"]');
+        if (el) el.textContent = n;
+      });
+      empty.hidden = shown > 0;
+      panel.hidden = wide.matches && !shown;
+      if (!shown) doc.getElementById("p-empty-q").textContent = "“" + state.query + "”";
+      // Keep the open prompt visible: if it got filtered out, open the first match
+      if (wide.matches && first) {
+        var cur = doc.getElementById("p-" + state.current);
+        if (!cur || cur.hidden) select(first, { silent: false });
+      }
+    }
+
+    filtersEl.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-goal]");
+      if (!b) return;
+      state.goal = b.getAttribute("data-goal");
+      filtersEl.querySelectorAll("[data-goal]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+      apply();
+    });
+    var qTimer, qClear = doc.getElementById("q-clear"), qWrap = q.parentNode;
+    function syncClear() { var on = !!q.value; qClear.hidden = !on; qWrap.classList.toggle("has-q", on); }
+    function clearSearch() { q.value = ""; state.query = ""; syncClear(); apply(); q.focus(); }
+    qClear.addEventListener("click", clearSearch);
+    q.addEventListener("input", function () {
+      syncClear();
+      clearTimeout(qTimer);
+      qTimer = setTimeout(function () { state.query = q.value.trim(); apply(); }, 60);
+    });
+    q.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && q.value) { e.stopPropagation(); e.preventDefault(); q.value = ""; state.query = ""; syncClear(); apply(); }
+      if (e.key === "ArrowDown") { e.preventDefault(); var v = visibleRows(); if (v[0]) focusRow(v[0]); }
+    });
+    doc.getElementById("p-clear").addEventListener("click", clearSearch);
+
+    screenInput.addEventListener("input", function () {
+      lsSet("tasu.prompts.screen", screenInput.value);
+      renderFeatured();
+      if (wide.matches) renderPanel(false);
+      else if (state.open) doc.querySelector("#p-" + state.open + " .prow__detail > div").innerHTML = detailInner(byId[state.open]);
+    });
+
+    /* ---------- Rows: click + keyboard ---------- */
+    function visibleRows() { return rows.filter(function (li) { return !li.hidden; }); }
+    function focusRow(li) {
+      var b = li.querySelector(".prow__btn");
+      b.focus();
+      if (wide.matches) select(li.getAttribute("data-pid"));
+    }
+    list.addEventListener("click", function (e) {
+      var b = e.target.closest(".prow__btn");
+      if (!b) return;
+      select(b.closest(".prow").getAttribute("data-pid"), { toggle: true });
+    });
+    list.addEventListener("keydown", function (e) {
+      var b = e.target.closest(".prow__btn");
+      if (!b) return;
+      var v = visibleRows(), i = v.indexOf(b.closest(".prow"));
+      if (e.key === "ArrowDown" && i < v.length - 1) { e.preventDefault(); focusRow(v[i + 1]); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); if (i > 0) focusRow(v[i - 1]); else q.focus(); }
+      else if (e.key === "Home") { e.preventDefault(); focusRow(v[0]); }
+      else if (e.key === "End") { e.preventDefault(); focusRow(v[v.length - 1]); }
+    });
+
+    /* ---------- Copy ---------- */
+    function rememberCopy(id) {
+      copied[id] = 1;
+      lsSet("tasu.prompts.copied", JSON.stringify(copied));
+      var d = doc.querySelector("#p-" + id + " .done");
+      if (d) d.hidden = false;
+    }
+    function copyPrompt(id, btn) {
+      var p = byId[id];
+      if (!p || broken(p)) return;
+      var src = btn && btn.closest(".panel, .prow, .feat__grid");
+      var pre = src && src.querySelector("pre");
+      if (!window.tasu) {
+        // Shared script missing: select the prompt so Ctrl+C or Cmd+C copies it
+        if (pre) {
+          try { var r = doc.createRange(); r.selectNodeContents(pre); var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r); pre.focus(); } catch (e) { /* old browser */ }
+          if (btn) { btn.setAttribute("title", "Selected. Press Ctrl+C or Cmd+C to copy"); }
+        }
+        return;
+      }
+      window.tasu.copy(fill(p), btn, pre).then(function (ok) {
+        if (ok) {
+          rememberCopy(id);
+          window.tasu.toast("“" + p.title + "” copied. Paste it into Claude Code or Cursor");
+        }
+      });
+    }
+    doc.addEventListener("click", function (e) {
+      var b = e.target.closest(".copy-btn[data-pid]");
+      if (b) { e.preventDefault(); copyPrompt(b.getAttribute("data-pid"), b); return; }
+      var l = e.target.closest("[data-link]");
+      if (l && window.tasu) {
+        e.preventDefault();
+        var url = location.origin + location.pathname + "#" + l.getAttribute("data-link");
+        window.tasu.copy(url, l).then(function (ok) { if (ok) window.tasu.toast("Link copied"); });
+        return;
+      }
+      var g = e.target.closest("[data-goto]");
+      if (g) {
+        var id = g.getAttribute("data-goto");
+        // Reset filters so the target is visible
+        state.goal = "all"; state.query = ""; q.value = ""; syncClear();
+        filtersEl.querySelectorAll("[data-goal]").forEach(function (x) { x.setAttribute("aria-pressed", String(x.getAttribute("data-goal") === "all")); });
+        apply();
+        select(id);
+        var li = doc.getElementById("p-" + id);
+        li.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: wide.matches ? "center" : "start" });
+        setTimeout(function () { li.querySelector(".prow__btn").focus({ preventScroll: true }); }, 250);
+      }
+    });
+
+    /* ---------- Global keys: / searches, C copies the open prompt ---------- */
+    doc.addEventListener("keydown", function (e) {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      var t = e.target, typing = t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable);
+      if (typing) return;
+      if (e.key === "/") { e.preventDefault(); q.focus(); q.select(); }
+      else if ((e.key === "c" || e.key === "C") && (wide.matches || state.open)) {
+        var id = wide.matches ? state.current : state.open;
+        var row = doc.getElementById("p-" + id);
+        if (!row || row.hidden || (wide.matches && panel.hidden)) return;
+        var btn = wide.matches ? panel.querySelector(".copy-btn") : row.querySelector(".prow__detail .copy-btn");
+        copyPrompt(id, btn);
+      }
+    });
+
+    /* ---------- Layout switch ---------- */
+    function onWide() {
+      rows.forEach(function (li) { li.querySelector(".prow__detail > div").innerHTML = ""; });
+      if (wide.matches) { state.open = null; renderPanel(false); }
+      else if (state.open) select(state.open);
+      markRows();
+    }
+    if (wide.addEventListener) wide.addEventListener("change", onWide); else if (wide.addListener) wide.addListener(onWide);
+
+    /* ---------- Start ---------- */
+    renderFeatured();
+    if (broken(byId[FEATURED])) {
+      doc.getElementById("feat-error").hidden = false;
+      doc.getElementById("feat-copy").disabled = true;
+    }
+    syncClear();
+    var hash = (location.hash || "").slice(1);
+    apply();
+    if (byId[hash]) {
+      select(hash, { silent: true });
+      var target = doc.getElementById("p-" + hash);
+      if (target) setTimeout(function () { target.scrollIntoView({ block: "center" }); }, 0);
+    } else {
+      if (wide.matches) renderPanel(false);
+      markRows();
+    }
+    // tasu.reveal() looks for [data-stagger] inside its scope, so pass the list's parent
+    list.setAttribute("data-stagger", "");
+    if (window.tasu && window.tasu.reveal) window.tasu.reveal(list.parentNode);
+  });
+  </script>
+</body>
+</html>

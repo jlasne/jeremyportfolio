@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- 1. Charset + viewport -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- 2. Title + description -->
+  <title>Find the AI slop on your screen | tasu.ai</title>
+  <meta name="description" content="Find the AI slop on your screen in 29 checks. Tick what you see, get a score and a Claude prompt that fixes only those signs.">
+  <!-- 3. Canonical -->
+  <link rel="canonical" href="https://www.jeremylasne.com/taste/unslop/">
+  <!-- 4. Open Graph + Twitter -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="tasu.ai">
+  <meta property="og:url" content="https://www.jeremylasne.com/taste/unslop/">
+  <meta property="og:title" content="Find the AI slop on your screen | tasu.ai">
+  <meta property="og:description" content="Find the AI slop on your screen in 29 checks. Tick what you see, get a score and a Claude prompt that fixes only those signs.">
+  <meta property="og:image" content="https://www.jeremylasne.com/og-image.png?v=8">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@jeremylasne">
+  <meta name="twitter:title" content="Find the AI slop on your screen | tasu.ai">
+  <meta name="twitter:description" content="Find the AI slop on your screen in 29 checks. Tick what you see, get a score and a Claude prompt that fixes only those signs.">
+  <meta name="twitter:image" content="https://www.jeremylasne.com/og-image.png?v=8">
+  <!-- 5. Theme color + icons -->
+  <meta name="theme-color" content="#FAF8F3">
+  <link rel="icon" href="/taste/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <!-- 6. Fonts (Instrument Serif: only the 7 letters of one wrong example) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..600&family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&text=Premium&display=swap">
+  <!-- 7. Design system, then page CSS (tokens only) -->
+  <link rel="stylesheet" href="/taste/tasu.css">
+  <style>
+    .audit-head { padding-bottom: var(--s5); }
+    .audit-head h1 { max-width: 11em; }
+    .audit-head .lead { max-width: 32em; }
+
+    /* Layout: list left, sticky result right */
+    .audit { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s6); align-items: start; }
+    @media (min-width: 960px) {
+      .audit { grid-template-columns: minmax(0, 1fr) 400px; gap: var(--s7); }
+      .result { position: sticky; top: calc(var(--header-h) + env(safe-area-inset-top) + var(--s3)); }
+    }
+
+    /* Toolbar above the list */
+    .toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s2) var(--s3); margin-bottom: var(--s3); }
+    .toolbar h2 { font-size: var(--t4); line-height: 1.2; letter-spacing: 0; }
+    .hint { display: none; color: var(--n3); font-size: var(--t1); }
+    @media (hover: hover) and (pointer: fine) { .hint { display: block; } }
+
+    /* Sign rows */
+    .signs { list-style: none; padding: 0; display: grid; gap: var(--s1); }
+    @media (min-width: 640px) { .signs { margin-inline: calc(-1 * var(--s3)); } }
+    .sign {
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: var(--s3);
+      min-height: 88px;
+      padding: var(--s2) var(--s2) var(--s2) var(--s3);
+      border-radius: var(--r-in);
+      cursor: pointer;
+      transition: background-color var(--dur-in) var(--ease-out);
+    }
+    @media (hover: hover) and (pointer: fine) { .sign:hover:not(.is-on) { background: color-mix(in srgb, var(--n1) 50%, var(--bg)); } }
+    .sign.is-on { background: var(--n1); }
+    .sign input {
+      width: 24px; height: 24px; margin: 0;
+      border: 1.5px solid var(--n3);
+      border-radius: var(--r-sm);
+      background: var(--bg);
+      -webkit-appearance: none; appearance: none;
+      display: grid; place-content: center;
+      cursor: pointer;
+      transition: background-color var(--dur-in) var(--ease-out), border-color var(--dur-in) var(--ease-out), transform var(--dur-out) var(--ease-out);
+    }
+    .sign input::after {
+      content: "";
+      width: 12px; height: 7px;
+      border-left: 2px solid var(--ink);
+      border-bottom: 2px solid var(--ink);
+      transform: translateY(-2px) rotate(-45deg) scale(0);
+      transition: transform var(--dur-in) var(--ease-out);
+    }
+    .sign input:checked { background: var(--accent); border-color: var(--ink); }
+    .sign input:checked::after { transform: translateY(-2px) rotate(-45deg) scale(1); }
+    .sign input:active { transform: scale(var(--press)); }
+    .sign input:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+    .sign__text { font-size: var(--t2); line-height: 1.4; font-weight: 500; }
+    .signs-empty { padding: var(--s5) var(--s3); color: var(--n4); }
+
+    /* Wrong-example thumbnails: tiny screens drawn in HTML and CSS */
+    .ex {
+      position: relative;
+      width: 120px; height: 72px;
+      overflow: hidden;
+      border-radius: var(--r-sm);
+      background: #fff;
+      color: #1d1b19;
+      font-family: var(--font-ui);
+      font-size: 10px;
+      line-height: 1.25;
+      flex: none;
+      pointer-events: none;
+    }
+    .sign:not(.is-on) .ex { background: var(--n1); }
+    @media (max-width: 479px) { .ex { width: 88px; height: 60px; } .signs .ex .it { font-size: 10px; } .signs .ex .is { font-size: 21px; } .signs .ex .c { padding: 6px; } }
+    .ex * { box-sizing: border-box; }
+    .ex .c { position: absolute; inset: 0; padding: 8px; display: flex; flex-direction: column; justify-content: center; gap: 4px; }
+    .ex .ctr { align-items: center; text-align: center; }
+    .ex .row { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; }
+    .ex .bar { height: 4px; border-radius: 2px; background: #d9d4c8; }
+    /* 1 pills */
+    .ex .pill { padding: 1px 6px; border-radius: 999px; font-size: 8px; background: #EEF0FF; color: #3949AB; box-shadow: inset 0 0 0 1px #C5CAE9; }
+    .ex .pill:nth-child(3n+2) { background: #E8F5E9; color: #2E7D32; box-shadow: inset 0 0 0 1px #C8E6C9; }
+    .ex .pill:nth-child(3n) { background: #FFF3E0; color: #E65100; box-shadow: inset 0 0 0 1px #FFE0B2; }
+    /* 2 italics */
+    .ex .it { font-family: Georgia, serif; font-style: italic; font-size: 13px; line-height: 1.15; }
+    /* 3 Instrument Serif */
+    .ex .is { font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-size: 28px; line-height: 1; }
+    /* 4 tight kerning */
+    .ex .tight { font-size: 15px; font-weight: 700; letter-spacing: -0.09em; line-height: 1.05; }
+    .ex .tight small { display: block; font-size: 9px; font-weight: 500; letter-spacing: -0.08em; color: #555; }
+    /* 5 over-detailed */
+    .ex .busy { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; }
+    .ex .busy i { height: 7px; border-radius: 1px; background: #cfcabd; }
+    .ex .busy i:nth-child(4n) { background: #8ab4f8; }
+    .ex .busy i:nth-child(5n) { background: #f28b82; }
+    .ex .busy i:nth-child(7n) { background: #fdd663; }
+    /* 6 dividers */
+    .ex .div { display: grid; }
+    .ex .div span { height: 11px; box-shadow: 0 1px 0 #bdb8ac; display: flex; align-items: center; }
+    .ex .div span::before { content: ""; width: 60%; height: 3px; border-radius: 2px; background: #d9d4c8; }
+    /* 7 shades */
+    .ex .shades { display: flex; gap: 3px; }
+    .ex .shades i { flex: 1; height: 34px; border-radius: 3px; background: #1E88E5; }
+    /* 8 borders */
+    .ex .bx { border: 1px solid #9e9a90; border-radius: 3px; padding: 3px; }
+    .ex .bx .bx { margin-top: 3px; }
+    /* 9 diagram */
+    .ex svg { width: 100%; height: 100%; }
+    /* 11 breadcrumbs, 17 mono */
+    .ex .mono { font-family: var(--font-mono); font-size: 9px; color: #333; }
+    .ex .mono b { color: #188038; font-weight: 500; }
+    /* 12 numbering */
+    .ex .num { font-family: var(--font-mono); font-size: 18px; font-weight: 500; color: #1d1b19; line-height: 1; }
+    /* 13 eyebrow, 18 caps */
+    .ex .eyebrow { font-size: 7px; font-weight: 600; letter-spacing: .14em; color: #1E88E5; }
+    .ex .h { font-size: 13px; font-weight: 700; line-height: 1.1; }
+    .ex .caps { font-size: 8px; font-weight: 600; letter-spacing: .12em; color: #6b675e; }
+    /* 14 dithering */
+    .ex .dither { position: absolute; inset: 0; background-color: #1d1b19; background-image: radial-gradient(#e8e4da 0.9px, transparent 1.1px), radial-gradient(#e8e4da 0.6px, transparent 0.8px); background-size: 4px 4px, 3px 3px; background-position: 0 0, 1px 2px; -webkit-mask-image: linear-gradient(90deg, #000 10%, transparent 95%); mask-image: linear-gradient(90deg, #000 10%, transparent 95%); }
+    /* 15 ascii */
+    .ex pre { font-family: var(--font-mono); font-size: 10px; line-height: 1.05; margin: 0; color: #333; }
+    /* 16 squircles */
+    .ex .sq { position: absolute; border-radius: 32%; }
+    /* 19 gradient bg */
+    .ex .grad { position: absolute; inset: 0; background: linear-gradient(135deg, #ff9a8b 0%, #ff6a88 45%, #ffd36e 100%); }
+    /* 21 purple glow */
+    .ex .purple { position: absolute; inset: 0; background: radial-gradient(circle at 30% 20%, #a855f7, #4c1d95 60%, #1e1b4b); }
+    .ex .glowbtn { padding: 3px 9px; border-radius: 999px; background: #c084fc; color: #fff; font-weight: 600; font-size: 9px; box-shadow: 0 0 12px 3px rgba(192, 132, 252, .8); }
+    /* 22 glowing stat card */
+    .ex .stat { background: #0f1720; border-radius: 6px; padding: 6px 8px; box-shadow: 0 0 14px 2px rgba(45, 212, 191, .7), inset 0 0 0 1px rgba(45, 212, 191, .6); color: #5eead4; }
+    .ex .stat b { display: block; font-size: 15px; line-height: 1; color: #ccfbf1; }
+    /* 23 emoji-style icons, drawn */
+    .ex .emo { width: 13px; height: 13px; border-radius: 50%; background: #FFCC33; position: relative; flex: none; }
+    .ex .emo::before { content: ""; position: absolute; left: 3px; top: 4px; width: 2px; height: 2px; border-radius: 50%; background: #5b3a00; box-shadow: 5px 0 0 #5b3a00; }
+    .ex .emo::after { content: ""; position: absolute; left: 3.5px; top: 7px; width: 6px; height: 3px; border-radius: 0 0 6px 6px; background: #5b3a00; }
+    .ex .emo.r { background: #FF7043; }
+    .ex .emo.g { background: #9CCC65; }
+    /* 24 badges */
+    .ex .badge { padding: 1px 4px; border-radius: 3px; font-size: 7px; font-weight: 700; color: #fff; background: #E53935; }
+    .ex .badge.b { background: #1E88E5; }
+    .ex .badge.y { background: #F9A825; }
+    /* 25 nested cards */
+    .ex .card1 { background: #ece8de; border-radius: 10px; padding: 5px; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+    .ex .card1 .card1 { background: #f6f3ec; }
+    .ex .card1 .card1 .card1 { background: #fff; height: 18px; }
+    /* 26 radii */
+    .ex .rad { height: 30px; flex: 1; background: #d9d4c8; }
+    /* 27 loop: spins only while you hover the row, then stops */
+    .ex .spin { width: 26px; height: 26px; border-radius: 50%; border: 3px solid #e4e0d5; border-top-color: #1d1b19; }
+    .sign:hover .ex .spin { animation: unslop-spin 900ms linear 2; }
+    @keyframes unslop-spin { to { transform: rotate(360deg); } }
+    /* 28 left border */
+    .ex .lb { background: #f4f2ec; border-left: 4px solid #1E88E5; border-radius: 6px; padding: 5px 6px; }
+    /* 29 welcome banner */
+    .ex .wb { background: #1E88E5; color: #fff; border-radius: 6px; padding: 6px 8px; font-weight: 600; font-size: 9px; }
+    .ex .wb small { display: block; font-weight: 400; opacity: .85; font-size: 8px; }
+
+    /* Result panel */
+    .result { display: grid; gap: var(--s3); }
+    .score-card { padding: var(--s4); }
+    .score { display: flex; align-items: baseline; gap: var(--s2); flex-wrap: wrap; }
+    .score__n {
+      font-family: var(--font-display);
+      font-size: var(--display);
+      line-height: 1;
+      letter-spacing: -0.015em;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      display: inline-block;
+    }
+    .score__n.is-bump { animation: unslop-bump var(--dur-in) var(--ease-out) 1; }
+    @keyframes unslop-bump { from { opacity: .35; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .score__of { font-size: var(--t3); color: var(--n4); }
+    .verdict { margin-top: var(--s3); color: var(--n4); }
+    .ref { margin-top: var(--s4); }
+    .ref .input { background: var(--bg); border-radius: var(--r-sm); } /* a field, not a nested surface */
+    .prompt-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); }
+    .prompt-head h2 { font-size: var(--t4); line-height: 1.2; letter-spacing: 0; }
+    .prompt-meta { font-size: var(--t1); color: var(--n3); font-variant-numeric: tabular-nums; }
+    .result .code { font-family: var(--font-ui); font-size: var(--t1); line-height: 1.6; max-height: 300px; min-height: 120px; margin-top: var(--s2); }
+    @media (min-width: 960px) { .result .code { max-height: max(120px, min(300px, calc(100svh - var(--header-h) - 480px))); } }
+    .code.is-waiting { color: var(--n2); }
+    .load-error { margin-top: var(--s2); }
+    .result .actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s3); }
+    .result .btn-accent { flex: 1 1 auto; }
+    .copy-main .copy-idle, .copy-main .copy-done { align-items: center; gap: var(--s2); }
+    .copy-main .copy-idle { display: inline-flex; }
+    .reset[disabled] { opacity: .45; cursor: not-allowed; }
+
+    /* Credits */
+    .credits { margin-top: var(--s7); }
+    .credits h2 { font-size: var(--t4); line-height: 1.2; letter-spacing: 0; }
+    .credits ul { list-style: none; padding: 0; margin-top: var(--s3); display: grid; gap: var(--s3); }
+    @media (min-width: 640px) { .credits ul { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s4); } }
+    .credits li { color: var(--n4); }
+    .credits strong { display: block; color: var(--ink); font-weight: 600; }
+    .credits a { color: var(--ink); display: inline-flex; align-items: center; min-height: var(--tap); }
+
+    /* Phone: sticky score bar until the prompt is on screen */
+    .dock {
+      position: fixed;
+      left: max(var(--s2), env(safe-area-inset-left));
+      right: max(var(--s2), env(safe-area-inset-right));
+      bottom: max(var(--s2), env(safe-area-inset-bottom));
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--s3);
+      min-height: 60px;
+      padding: var(--s2) var(--s2) var(--s2) var(--s4);
+      background: var(--ink);
+      color: var(--bg);
+      border-radius: var(--r-card);
+      box-shadow: 0 16px 40px -16px rgba(11, 9, 9, .5);
+      transition: opacity var(--dur-in) var(--ease-out), transform var(--dur-in) var(--ease-out), visibility 0s;
+    }
+    .dock.is-hidden { opacity: 0; transform: translateY(12px); visibility: hidden; transition: opacity var(--dur-out) var(--ease-in), transform var(--dur-out) var(--ease-in), visibility 0s linear var(--dur-out); }
+    .dock b { font-family: var(--font-display); font-size: var(--t4); font-weight: 500; }
+    .dock span { color: var(--n2); }
+    .dock .btn { color: var(--bg); box-shadow: inset 0 0 0 1.5px var(--bg); min-height: var(--tap); }
+    .dock .btn:hover { background: var(--bg); color: var(--ink); }
+    @media (min-width: 960px) { .dock { display: none; } }
+    @media (max-width: 959px) {
+      .site-footer { padding-bottom: calc(var(--s8) + env(safe-area-inset-bottom)); }
+      /* Toasts at the top on phone: clear of the dock and the copy button */
+      .toast-region { top: calc(var(--header-h) + env(safe-area-inset-top) + var(--s2)); bottom: auto; }
+    }
+    /* 44 px targets on every pointer (shared rule gives 40 px on fine pointers) */
+    .toolbar .segmented button { min-height: var(--tap); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .sign:hover .ex .spin { animation: none; }
+      .score__n.is-bump { animation: none; }
+      .dock, .dock.is-hidden { transform: none; }
+      .sign input:active { transform: none; }
+      .sign input::after { transform: translateY(-2px) rotate(-45deg) scale(1); opacity: 0; transition: opacity var(--dur-in) linear; }
+      .sign input:checked::after { opacity: 1; }
+    }
+  </style>
+  <!-- 8. JS flag, shared JS, data -->
+  <script>document.documentElement.classList.add("js");setTimeout(function(){if(!window.tasu)document.documentElement.classList.remove("js")},3000)</script>
+  <script src="/taste/tasu.js" defer></script>
+  <script src="/taste/data.js" defer></script>
+  <!-- 9. JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": "https://www.jeremylasne.com/taste/unslop/#page",
+        "url": "https://www.jeremylasne.com/taste/unslop/",
+        "name": "Find the AI slop on your screen",
+        "description": "Find the AI slop on your screen in 29 checks. Tick what you see, get a score and a Claude prompt that fixes only those signs.",
+        "inLanguage": "en",
+        "isPartOf": { "@type": "WebSite", "name": "tasu.ai", "url": "https://www.jeremylasne.com/taste/" },
+        "author": { "@type": "Person", "name": "Jeremy Lasne", "url": "https://x.com/jeremylasne" },
+        "image": "https://www.jeremylasne.com/og-image.png?v=8"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "tasu.ai", "item": "https://www.jeremylasne.com/taste/" },
+          { "@type": "ListItem", "position": 2, "name": "Unslop", "item": "https://www.jeremylasne.com/taste/unslop/" }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="wordmark" href="/taste/" aria-label="tasu.ai home">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="8" fill="#0B0909"/><path d="M10.5 4.5v11a3 3 0 0 0 3 3H16M7 9h8.5" fill="none" stroke="#FAF8F3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>tasu.ai</span>
+      </a>
+      <nav class="nav" aria-label="Main">
+        <ul>
+          <li><a href="/taste/rules/">Rules</a></li>
+          <li><a href="/taste/unslop/">Unslop</a></li>
+          <li><a href="/taste/palettes/">Palettes</a></li>
+          <li><a href="/taste/type/">Type</a></li>
+          <li><a href="/taste/motion/">Motion</a></li>
+          <li><a href="/taste/screens/">Screens</a></li>
+          <li><a href="/taste/prompts/">Prompts</a></li>
+          <li><a href="/taste/skills/">Skills</a></li>
+        </ul>
+      </nav>
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav-sheet" aria-label="Open menu">
+        <span class="menu-icons" aria-hidden="true">
+          <svg class="icon icon-open" viewBox="0 0 24 24"><path d="M4 8h16M4 16h16"/></svg>
+          <svg class="icon icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </span>
+        <span>Menu</span>
+      </button>
+    </div>
+  </header>
+  <div class="sheet-scrim" aria-hidden="true"></div>
+  <nav class="sheet" id="nav-sheet" aria-label="Main">
+    <ul>
+      <li><a href="/taste/rules/">Rules</a></li>
+      <li><a href="/taste/unslop/">Unslop</a></li>
+      <li><a href="/taste/palettes/">Palettes</a></li>
+      <li><a href="/taste/type/">Type</a></li>
+      <li><a href="/taste/motion/">Motion</a></li>
+      <li><a href="/taste/screens/">Screens</a></li>
+      <li><a href="/taste/prompts/">Prompts</a></li>
+      <li><a href="/taste/skills/">Skills</a></li>
+      <li><a href="/taste/sources/">Sources</a></li>
+    </ul>
+  </nav>
+
+  <main id="main">
+    <section class="container page-head audit-head">
+      <h1>Find the AI slop on your screen</h1>
+      <p class="lead">Open your screen next to this list and tick every sign you see. You get a score and a prompt for Claude that fixes only those signs.</p>
+    </section>
+
+    <div class="container audit">
+      <section aria-labelledby="signs-title">
+        <div class="toolbar">
+          <h2 id="signs-title">The 29 signs</h2>
+          <div class="segmented" role="group" aria-label="Show">
+            <button type="button" data-filter="all" aria-pressed="true">All <span class="count" data-count="all">29</span></button>
+            <button type="button" data-filter="on" aria-pressed="false">Found <span class="count" data-count="on">0</span></button>
+            <button type="button" data-filter="off" aria-pressed="false">To check <span class="count" data-count="off">29</span></button>
+          </div>
+        </div>
+        <p class="hint" id="kbd-hint"><span class="kbd">↑</span> <span class="kbd">↓</span> move between signs, <span class="kbd">Space</span> ticks one</p>
+        <ul class="signs" id="signs" aria-describedby="kbd-hint"></ul>
+        <p class="signs-empty" id="signs-empty" hidden></p>
+        <noscript><p class="signs-empty">This audit needs JavaScript. The 29 signs are also listed on the <a href="/taste/rules/">rules page</a>.</p></noscript>
+      </section>
+
+      <aside class="result" id="result" aria-labelledby="prompt-title">
+        <div class="card score-card">
+          <p class="score" aria-live="polite"><span class="score__n" id="score-n">0</span><span class="score__of">of 29 found</span></p>
+          <p class="verdict" id="verdict">Your prompt checks all 29 signs. Tick the ones you see to narrow it.</p>
+          <div class="field ref">
+            <label for="ref">An app whose style you like (optional)</label>
+            <input class="input" id="ref" type="text" autocomplete="off" spellcheck="false" maxlength="80" placeholder="For example: Linear">
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn-accent copy-main copy-btn" type="button" id="copy">
+            <span class="copy-idle"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy my fix prompt</span>
+            <span class="copy-done"><svg class="icon icon-sm icon-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Copied</span>
+          </button>
+          <button class="btn-text reset" type="button" id="reset" disabled>Clear ticks</button>
+        </div>
+
+        <div>
+          <div class="prompt-head">
+            <h2 id="prompt-title">Your fix prompt</h2>
+            <span class="prompt-meta" id="prompt-meta">29 signs in the prompt</span>
+          </div>
+          <pre class="code is-waiting" id="prompt" tabindex="0" aria-label="Fix prompt text">Your prompt appears here once the list loads.</pre>
+        </div>
+
+      </aside>
+    </div>
+
+    <section class="container credits" aria-labelledby="credits-title">
+      <h2 id="credits-title">Where the signs come from</h2>
+      <ul>
+        <li><strong>Signs 1 to 20 and the method</strong><a href="https://www.instagram.com/charles.unemployed/reel/DfSbDWhR2bi/" rel="noopener">@charles.unemployed</a>, Charles Liu, co-founder of Gleam. S1, <span class="num">14.8K</span> likes.</li>
+        <li><strong>Signs 21 to 27</strong><a href="https://www.instagram.com/reels/DfVio6bBWl1/" rel="noopener">@nuhushaik</a>, 7 AI design fixes on one dashboard. S14, <span class="num">3,183</span> likes.</li>
+        <li><strong>Signs 28 and 29</strong><a href="https://www.instagram.com/reels/DfqWmHCmU9p/" rel="noopener">@buildwithomar</a>, fixing a slop dashboard one prompt at a time. S15, <span class="num">8,551</span> likes.</li>
+      </ul>
+    </section>
+  </main>
+
+  <div class="dock is-hidden" id="dock" aria-hidden="true">
+    <p><b id="dock-n">0</b> <span>of 29 found</span></p>
+    <a class="btn btn-sm" href="#result" tabindex="-1">See my prompt</a>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <p>tasu.ai · taste using AI · by Jeremy Lasne</p>
+      <nav aria-label="Footer">
+        <a href="/taste/sources/">Sources</a>
+        <a href="https://x.com/jeremylasne" rel="noopener" aria-label="Jeremy Lasne on X">X</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    "use strict";
+    var D = window.TASU_DATA;
+    if (!D || !D.slop || !D.slop.length) {
+      var emptyEl = document.getElementById("signs-empty");
+      emptyEl.hidden = false;
+      emptyEl.innerHTML = 'The 29 signs did not load. Reload the page, or read them on the <a href="/taste/rules/">rules page</a>.';
+      document.getElementById("copy").disabled = true;
+      var p = document.getElementById("prompt");
+      p.textContent = "The prompt needs the 29 signs. Reload the page to try again.";
+      return;
+    }
+    var SIGNS = D.slop;
+    var METHOD = D.unslopMethod || [];
+    var TOTAL = SIGNS.length;
+    var KEY = "tasu.unslop.v1";
+
+    /* Page-local: one tiny wrong example per sign, drawn in HTML and CSS */
+    function rep(s, n) { var o = ""; for (var i = 0; i < n; i++) o += s; return o; }
+    var EX = {
+      1: ['Pills on every item', '<div class="c"><div class="row"><span class="pill">New</span><span class="pill">AI</span><span class="pill">Fast</span><span class="pill">Pro</span><span class="pill">Beta</span><span class="pill">Hot</span></div></div>'],
+      2: ['Italic words for emphasis', '<div class="c"><span class="it">Simply <i>beautiful</i>, truly <i>effortless</i></span></div>'],
+      3: ['Instrument Serif headline', '<div class="c ctr"><span class="is">Premium</span></div>'],
+      4: ['Letters squeezed together', '<div class="c"><span class="tight">Build faster<small>Ship your next idea today</small></span></div>'],
+      5: ['Many small parts, no focus', '<div class="c"><div class="busy">' + rep("<i></i>", 30) + '</div></div>'],
+      6: ['A divider under every line', '<div class="c" style="justify-content:flex-start"><div class="div"><span></span><span></span><span></span><span></span><span></span></div></div>'],
+      7: ['One blue at six opacities', '<div class="c"><div class="shades"><i style="opacity:1"></i><i style="opacity:.8"></i><i style="opacity:.6"></i><i style="opacity:.45"></i><i style="opacity:.3"></i><i style="opacity:.15"></i></div></div>'],
+      8: ['Boxes inside bordered boxes', '<div class="c"><div class="bx"><div class="bar" style="width:60%"></div><div class="bx"><div class="bar" style="width:40%"></div></div></div></div>'],
+      9: ['A diagram with too many nodes', '<svg viewBox="0 0 120 72" aria-hidden="true" fill="none" stroke="#9e9a90" stroke-width=".8"><path d="M14 14 40 30 66 12 94 26 106 52 76 58 48 50 22 56 14 14M40 30 48 50M66 12 76 58M94 26 48 50M22 56 66 12M40 30 94 26M14 14 106 52"/><g fill="#1d1b19" stroke="none"><circle cx="14" cy="14" r="3"/><circle cx="40" cy="30" r="3"/><circle cx="66" cy="12" r="3"/><circle cx="94" cy="26" r="3"/><circle cx="106" cy="52" r="3"/><circle cx="76" cy="58" r="3"/><circle cx="48" cy="50" r="3"/><circle cx="22" cy="56" r="3"/></g></svg>'],
+      10: ['Long text that says little', '<div class="c" style="font-size:8px;line-height:1.2;color:#555;justify-content:flex-start">Unlock the power of a seamless, effortless experience</div>'],
+      11: ['Breadcrumbs written like code', '<div class="c"><span class="mono">~/app<b>/</b>settings</span><span class="mono">&gt; home &gt; edit</span></div>'],
+      12: ['01, 02, 03 above sections', '<div class="c"><span class="num">01</span><div class="bar" style="width:70%"></div><div class="bar" style="width:50%"></div></div>'],
+      13: ['A small label over the heading', '<div class="c"><span class="eyebrow">FEATURES</span><span class="h">Built for you</span></div>'],
+      14: ['Dither dot texture', '<div class="dither"></div>'],
+      15: ['ASCII art as an image', '<div class="c ctr"><pre>  /\\_/\\\n ( o.o )\n  &gt; ^ &lt;</pre></div>'],
+      16: ['Rounded squares as decoration', '<span class="sq" style="width:30px;height:30px;left:10px;top:10px;background:#E4E0D5"></span><span class="sq" style="width:22px;height:22px;left:50px;top:30px;background:#d9d4c8"></span><span class="sq" style="width:16px;height:16px;left:86px;top:12px;background:#ece8de"></span><span class="sq" style="width:26px;height:26px;left:84px;top:40px;background:#cfcabd"></span>'],
+      17: ['Monospace for every word', '<div class="c"><span class="mono">Your balance</span><span class="mono" style="font-size:12px">$4,120.00</span><span class="mono">Updated now</span></div>'],
+      18: ['ALL CAPS under the title', '<div class="c"><span class="h">Dashboard</span><span class="caps">YOUR DAILY OVERVIEW</span></div>'],
+      19: ['A gradient as background', '<div class="grad"></div><div class="c ctr" style="color:#fff;font-weight:700;font-size:12px">Get started</div>'],
+      20: ['A period after the title', '<div class="c"><span class="h" style="font-size:15px">Welcome home.</span><div class="bar" style="width:60%"></div></div>'],
+      21: ['Purple gradient and glow', '<div class="purple"></div><div class="c ctr"><span class="glowbtn">Try AI</span></div>'],
+      22: ['A stat card that glows', '<div class="c" style="background:#0b1016"><div class="stat"><b>98%</b>Uptime</div></div>'],
+      23: ['Emoji as icons', '<div class="c"><div class="row" style="gap:5px"><span class="emo"></span><div class="bar" style="width:60px"></div></div><div class="row" style="gap:5px"><span class="emo r"></span><div class="bar" style="width:48px"></div></div><div class="row" style="gap:5px"><span class="emo g"></span><div class="bar" style="width:54px"></div></div></div>'],
+      24: ['Badges that add nothing', '<div class="c"><div class="row"><span class="h" style="font-size:11px">Reports</span><span class="badge">NEW</span><span class="badge b">BETA</span><span class="badge y">PRO</span></div><div class="bar" style="width:70%"></div></div>'],
+      25: ['A card in a card in a card', '<div class="c"><div class="card1"><div class="card1"><div class="card1"></div></div></div></div>'],
+      26: ['Corners of 2, 12 and 24 px', '<div class="c"><div class="row" style="flex-wrap:nowrap;gap:5px"><span class="rad" style="border-radius:2px"></span><span class="rad" style="border-radius:12px"></span><span class="rad" style="border-radius:24px"></span></div></div>'],
+      27: ['A spinner that never stops', '<div class="c ctr"><span class="spin"></span></div>'],
+      28: ['A colored stripe on the left', '<div class="c"><div class="lb"><div class="bar" style="width:70%;background:#bdb8ac"></div><div class="bar" style="width:45%;margin-top:4px"></div></div></div>'],
+      29: ['A welcome banner on top', '<div class="c" style="justify-content:flex-start"><div class="wb">Welcome back, Alex!<small>Here is what you missed</small></div></div>']
+    };
+
+    /* State, stored only as a convenience */
+    var state = { on: {}, ref: "" };
+    try {
+      var saved = JSON.parse(localStorage.getItem(KEY) || "null");
+      if (saved && saved.on) {
+        (saved.on || []).forEach(function (n) { state.on[n] = true; });
+        state.ref = typeof saved.ref === "string" ? saved.ref : "";
+      }
+    } catch (e) { /* storage blocked: start empty */ }
+    function save() {
+      try {
+        localStorage.setItem(KEY, JSON.stringify({ on: ticked().map(function (s) { return s.n; }), ref: state.ref }));
+      } catch (e) { /* ignore */ }
+    }
+    function ticked() { return SIGNS.filter(function (s) { return state.on[s.n]; }); }
+
+    var list = document.getElementById("signs");
+    var empty = document.getElementById("signs-empty");
+    var scoreN = document.getElementById("score-n");
+    var dockN = document.getElementById("dock-n");
+    var verdict = document.getElementById("verdict");
+    var promptEl = document.getElementById("prompt");
+    var promptMeta = document.getElementById("prompt-meta");
+    var refInput = document.getElementById("ref");
+    var copyBtn = document.getElementById("copy");
+    var resetBtn = document.getElementById("reset");
+    var filter = "all";
+    var syncDock = null;
+
+    /* Render rows */
+    var frag = document.createDocumentFragment();
+    SIGNS.forEach(function (s) {
+      var li = document.createElement("li");
+      var ex = EX[s.n];
+      li.innerHTML =
+        '<label class="sign" for="s' + s.n + '">' +
+          '<input type="checkbox" id="s' + s.n + '" value="' + s.n + '">' +
+          '<span class="sign__text"></span>' +
+          (ex ? '<span class="ex" aria-hidden="true"></span>' : "") +
+        "</label>";
+      li.querySelector(".sign__text").textContent = s.text;
+      if (ex) li.querySelector(".ex").innerHTML = ex[1];
+      li.dataset.n = s.n;
+      frag.appendChild(li);
+    });
+    list.appendChild(frag);
+    var boxes = Array.prototype.slice.call(list.querySelectorAll("input"));
+
+    /* Prompt */
+    function buildPrompt() {
+      var found = ticked();
+      var lines = [];
+      var ref = state.ref.trim();
+      if (found.length) {
+        lines.push("Unslop this screen. I found " + found.length + " of the " + TOTAL + " AI slop signs on it. Remove or replace each one:");
+        found.forEach(function (s) { lines.push("- " + s.text); });
+      } else {
+        lines.push("Search this screen for each of these " + TOTAL + " AI slop signs, then remove or replace every hit:");
+        SIGNS.forEach(function (s) { lines.push("- " + s.text); });
+      }
+      lines.push("");
+      lines.push("Use this method:");
+      METHOD.forEach(function (m, i) {
+        var t = m;
+        if (i === 0 && ref) t = m + " My reference: " + ref + ".";
+        lines.push((i + 1) + ". " + t);
+      });
+      lines.push("");
+      lines.push("Keep one main button per screen. When you finish, the screen has none of the signs listed above.");
+      lines.push("Report what you changed as a short list: rule, before, after.");
+      return lines.join("\n");
+    }
+
+    var lastCount = -1;
+    function render(bump) {
+      var found = ticked();
+      var n = found.length;
+      scoreN.textContent = n;
+      dockN.textContent = n;
+      if (bump && n !== lastCount) {
+        scoreN.classList.remove("is-bump");
+        void scoreN.offsetWidth;
+        scoreN.classList.add("is-bump");
+      }
+      lastCount = n;
+      if (n === 0) verdict.textContent = "Your prompt checks all " + TOTAL + " signs. Tick the ones you see to narrow it.";
+      else if (n === 1) verdict.textContent = "1 sign to remove. The prompt fixes only that one.";
+      else verdict.textContent = n + " signs to remove. The prompt fixes only these " + n + ".";
+
+      boxes.forEach(function (b) {
+        var on = !!state.on[b.value];
+        b.checked = on;
+        var label = b.parentNode;
+        label.classList.toggle("is-on", on);
+        var li = label.parentNode;
+        li.hidden = (filter === "on" && !on) || (filter === "off" && on);
+      });
+      var visible = boxes.filter(function (b) { return !b.parentNode.parentNode.hidden; }).length;
+      if (!visible) {
+        empty.hidden = false;
+        empty.textContent = filter === "on" ? "Signs you tick show here. Start in All." : "Every sign is ticked. Your prompt lists all " + TOTAL + ".";
+      } else empty.hidden = true;
+
+      document.querySelector('[data-count="on"]').textContent = n;
+      document.querySelector('[data-count="off"]').textContent = TOTAL - n;
+
+      var text = buildPrompt();
+      promptEl.textContent = text;
+      promptEl.classList.remove("is-waiting");
+      promptMeta.textContent = (n || TOTAL) + " " + ((n || TOTAL) === 1 ? "sign" : "signs") + " in the prompt";
+      if (!resetBtn.dataset.undo) resetBtn.disabled = n === 0;
+      if (syncDock) syncDock();
+    }
+
+    /* Events */
+    list.addEventListener("change", function (e) {
+      var b = e.target;
+      if (!b.matches("input[type=checkbox]")) return;
+      // If the active filter hides this row, move focus to the next visible sign first
+      var willHide = (filter === "on" && !b.checked) || (filter === "off" && b.checked);
+      var vis = boxes.filter(function (x) { return !x.parentNode.parentNode.hidden; });
+      var idx = vis.indexOf(b);
+      var nextFocus = willHide ? (vis[idx + 1] || vis[idx - 1] || null) : null;
+      if (b.checked) state.on[b.value] = true; else delete state.on[b.value];
+      clearUndo();
+      save();
+      render(true);
+      if (willHide) {
+        if (nextFocus) nextFocus.focus();
+        else document.querySelector('[data-filter="all"]').focus();
+      }
+    });
+
+    // Arrow keys move focus between signs, Home and End jump to the ends
+    list.addEventListener("keydown", function (e) {
+      if (!e.target.matches("input[type=checkbox]")) return;
+      var vis = boxes.filter(function (b) { return !b.parentNode.parentNode.hidden; });
+      var i = vis.indexOf(e.target), next = null;
+      if (e.key === "ArrowDown" || e.key === "j") next = vis[Math.min(i + 1, vis.length - 1)];
+      else if (e.key === "ArrowUp" || e.key === "k") next = vis[Math.max(i - 1, 0)];
+      else if (e.key === "Home") next = vis[0];
+      else if (e.key === "End") next = vis[vis.length - 1];
+      else if (e.key === "Enter") { e.preventDefault(); e.target.click(); return; }
+      if (next) {
+        e.preventDefault();
+        next.focus();
+        next.parentNode.scrollIntoView({ block: "nearest" });
+      }
+    });
+
+    document.querySelectorAll("[data-filter]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        filter = btn.getAttribute("data-filter");
+        document.querySelectorAll("[data-filter]").forEach(function (b) { b.setAttribute("aria-pressed", String(b === btn)); });
+        render(false);
+      });
+    });
+
+    refInput.value = state.ref;
+    refInput.addEventListener("input", function () {
+      state.ref = refInput.value;
+      save();
+      render(false);
+    });
+
+    copyBtn.addEventListener("click", function () {
+      if (window.tasu) window.tasu.copy(buildPrompt(), copyBtn, promptEl);
+    });
+
+    // Clear ticks, with a 5 s undo
+    var undoTimer = null, undoData = null, clearedToast = null;
+    function dropClearedToast() {
+      if (clearedToast && clearedToast.parentNode) clearedToast.parentNode.removeChild(clearedToast);
+      clearedToast = null;
+    }
+    function clearUndo() {
+      if (!resetBtn.dataset.undo) return;
+      clearTimeout(undoTimer);
+      delete resetBtn.dataset.undo;
+      undoData = null;
+      resetBtn.textContent = "Clear ticks";
+    }
+    resetBtn.addEventListener("click", function () {
+      if (resetBtn.dataset.undo) {
+        state.on = undoData || {};
+        clearUndo();
+        save();
+        render(true);
+        dropClearedToast();
+        if (window.tasu) window.tasu.toast("Ticks restored");
+        return;
+      }
+      var count = ticked().length;
+      if (!count) return;
+      undoData = state.on;
+      state.on = {};
+      resetBtn.dataset.undo = "1";
+      resetBtn.disabled = false;
+      resetBtn.textContent = "Undo";
+      save();
+      render(true);
+      if (window.tasu) clearedToast = window.tasu.toast("Cleared " + count + (count === 1 ? " tick" : " ticks"), { icon: false, duration: 5000 });
+      undoTimer = setTimeout(function () { clearUndo(); render(false); }, 5000);
+    });
+
+    /* Phone dock: shows while the list is on screen and the prompt is not */
+    var dock = document.getElementById("dock");
+    var result = document.getElementById("result");
+    if ("IntersectionObserver" in window) {
+      var listIn = false, resultIn = false;
+      var sync = function () { dock.classList.toggle("is-hidden", !(listIn && !resultIn && ticked().length > 0)); };
+      syncDock = sync;
+      new IntersectionObserver(function (en) { en.forEach(function (x) { listIn = x.isIntersecting; }); sync(); }).observe(list);
+      new IntersectionObserver(function (en) { en.forEach(function (x) { resultIn = x.isIntersecting; }); sync(); }, { threshold: 0.15 }).observe(result);
+    }
+    dock.querySelector("a").addEventListener("click", function (e) {
+      e.preventDefault();
+      result.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+    });
+
+    render(false);
+    list.setAttribute("data-stagger", "");
+    if (window.tasu) window.tasu.reveal(list);
+  });
+  </script>
+</body>
+</html>

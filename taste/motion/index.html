@@ -1,0 +1,1565 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- 1. Charset + viewport -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- 2. Title + description -->
+  <title>20 motion rules with live demos | tasu.ai</title>
+  <meta name="description" content="Tap 20 live demos of the motion rules for app UI: ease-out in 200 ms, 30 ms stagger, 0.97 press, 0.95 popovers. Copy every value as CSS.">
+  <!-- 3. Canonical -->
+  <link rel="canonical" href="https://www.jeremylasne.com/taste/motion/">
+  <!-- 4. Open Graph + Twitter -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="tasu.ai">
+  <meta property="og:url" content="https://www.jeremylasne.com/taste/motion/">
+  <meta property="og:title" content="20 motion rules with live demos | tasu.ai">
+  <meta property="og:description" content="Tap 20 live demos of the motion rules for app UI: ease-out in 200 ms, 30 ms stagger, 0.97 press, 0.95 popovers. Copy every value as CSS.">
+  <meta property="og:image" content="https://www.jeremylasne.com/og-image.png?v=8">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@jeremylasne">
+  <meta name="twitter:title" content="20 motion rules with live demos | tasu.ai">
+  <meta name="twitter:description" content="Tap 20 live demos of the motion rules for app UI: ease-out in 200 ms, 30 ms stagger, 0.97 press, 0.95 popovers. Copy every value as CSS.">
+  <meta name="twitter:image" content="https://www.jeremylasne.com/og-image.png?v=8">
+  <!-- 5. Theme color + icons -->
+  <meta name="theme-color" content="#FAF8F3">
+  <link rel="icon" href="/taste/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <!-- 6. Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..600&family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap">
+  <!-- 7. Design system, then page CSS (tokens only) -->
+  <link rel="stylesheet" href="/taste/tasu.css">
+  <style>
+    /* ---------- Motion clock: every demo reads these, --k slows them down ---------- */
+    .motion-root {
+      --k: 1;
+      --din: calc(200ms * var(--k));
+      --dout: calc(160ms * var(--k));
+      --dmenu: calc(200ms * var(--k));
+      --dmenu-out: calc(160ms * var(--k));
+      --dexit: calc(160ms * var(--k));
+      --ab-ease: var(--ease-in-out);
+      --pop-from: var(--pop);
+      /* Tinted ink surface and muted text on ink: the same literals tasu.css uses for .section-dark */
+      --ink-2: #1C1A18;
+      --on-ink-mut: #BDB8AC;
+    }
+    .on-ink-mut { color: var(--on-ink-mut); }
+    .motion-root[data-mode="off"] {
+      --dmenu: calc(600ms * var(--k));
+      --dmenu-out: calc(600ms * var(--k));
+      --dexit: calc(200ms * var(--k));
+      --ab-ease: linear;
+      --pop-from: 0;
+    }
+
+    /* ---------- Head ---------- */
+    .m-head { padding-bottom: var(--s5); }
+    /* Both labels share one cell, so the button keeps its width when it says Copied */
+    #copy-motion { display: inline-grid; }
+    #copy-motion > span { grid-area: 1 / 1; display: inline-flex; align-items: center; justify-content: center; gap: var(--s2); }
+    #copy-motion .copy-done, #copy-motion.is-copied .copy-idle { visibility: hidden; }
+    #copy-motion.is-copied .copy-done { visibility: visible; }
+    .m-head h1 { max-width: 10em; }
+    .m-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s3); margin-top: var(--s5); padding: 0; list-style: none; }
+    .m-stats li { display: grid; gap: var(--s1); }
+    .m-stats strong { font-family: var(--font-mono); font-size: var(--t4); line-height: 1; font-weight: 500; letter-spacing: 0; }
+    .m-stats span { font-size: var(--t1); color: var(--n3); }
+    @media (max-width: 420px) {
+      .m-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--s4); }
+    }
+    @media (min-width: 960px) {
+      .m-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "h stats" "lead stats" "act stats"; column-gap: var(--s6); align-items: end; padding-top: var(--s7); }
+      .m-head h1 { grid-area: h; }
+      .m-head .lead { grid-area: lead; }
+      .m-head .actions { grid-area: act; }
+      .m-stats { grid-area: stats; grid-template-columns: repeat(2, auto); gap: var(--s5) var(--s6); margin: 0; padding-bottom: 4px; }
+      .m-stats strong { font-size: var(--t6); }
+    }
+
+    /* ---------- Toolbar: one switch flips every demo ---------- */
+    .m-intro { display: grid; gap: var(--s3); }
+    @media (min-width: 960px) { #rules { padding-top: var(--s6); } }
+    .m-intro p { color: var(--n4); max-width: 40em; }
+    .m-bar {
+      position: sticky;
+      top: calc(var(--header-h) + env(safe-area-inset-top));
+      z-index: 40;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--s2) var(--s3);
+      margin-top: var(--s4);
+      margin-inline: calc(var(--gutter) * -1);
+      padding: var(--s2) var(--gutter);
+      background: color-mix(in srgb, var(--bg) 90%, transparent);
+      -webkit-backdrop-filter: saturate(1.4) blur(12px);
+      backdrop-filter: saturate(1.4) blur(12px);
+    }
+    .m-bar .segmented { background: var(--n1); }
+    .m-bar .segmented button { min-height: var(--tap); }
+    .m-bar .segmented .mono { font-size: var(--t1); }
+    .m-bar__note { font-size: var(--t1); color: var(--n3); }
+    @media (max-width: 639px) {
+      .m-bar__note { display: none; }
+      .m-bar { flex-wrap: nowrap; gap: 12px; }
+      .m-bar .segmented { flex-wrap: nowrap; flex: none; }
+      .m-bar .segmented button { white-space: nowrap; padding: 0 10px; }
+      .m-long { display: none; }
+    }
+
+    /* ---------- Cards: the stage bleeds to the card edge, the text sits at padding 24 ---------- */
+    .m-grid { list-style: none; padding: 0; display: grid; gap: var(--s3); grid-template-columns: minmax(0, 1fr); margin-top: var(--s4); }
+    @media (min-width: 640px) { .m-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s4); } }
+    @media (min-width: 1000px) {
+      .m-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .m-grid > li:nth-child(19) { grid-column: span 2; }
+    }
+    .m-card { padding: 0; overflow: hidden; display: flex; flex-direction: column; height: 100%; scroll-margin-top: calc(var(--header-h) + 72px); }
+    .m-body { display: flex; flex-direction: column; gap: var(--s2); flex: 1; padding: var(--s4); }
+    .m-body h3 { font-size: var(--t3); line-height: 1.3; }
+    .m-body p { color: var(--n4); }
+    .m-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); margin-top: auto; padding-top: var(--s2); }
+    .m-val { font-family: var(--font-ui); font-size: var(--t1); font-weight: 500; font-variant-numeric: tabular-nums; color: var(--ink); transition: color var(--din) var(--ease-out); }
+    .m-val .mono { font-size: var(--t1); }
+    .motion-root[data-mode="off"] .m-val { color: var(--n3); text-decoration: line-through; text-decoration-thickness: 1px; }
+    .m-hint { font-size: var(--t1); color: var(--n3); text-align: right; }
+
+    .stage {
+      position: relative;
+      height: 208px;
+      border-radius: 0;
+      background: var(--n1);
+      overflow: hidden;
+      isolation: isolate;
+      -webkit-user-select: none;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    button.stage { display: block; width: 100%; text-align: left; cursor: pointer; }
+    button.stage:focus-visible { outline-offset: -4px; }
+    .stage .d-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: var(--s2);
+      min-height: var(--tap); padding: 0 var(--s3);
+      border-radius: var(--r-pill);
+      background: var(--ink); color: var(--bg);
+      font-size: var(--t1); font-weight: 600;
+      transition: background-color var(--din) var(--ease-out), color var(--din) var(--ease-out);
+    }
+    .stage .d-btn-ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+    .d-surface { background: var(--bg); border-radius: var(--r-sm); }
+    .d-row { display: flex; align-items: center; gap: 12px; }
+    .d-dot { width: 28px; height: 28px; border-radius: 50%; background: var(--n2); flex: none; }
+    .d-line { display: block; height: 8px; border-radius: 4px; background: var(--n2); }
+    .d-t { font-size: var(--t1); line-height: 1.35; }
+    .d-t strong { font-weight: 600; }
+    .d-mut { color: var(--n3); }
+
+    /* 1 Ease-out entrance */
+    .d-enter .d-toast { position: absolute; left: var(--s3); right: var(--s3); bottom: var(--s3); padding: 12px var(--s3); background: var(--ink); color: var(--bg); border-radius: var(--r-sm); opacity: 0; transform: translateY(24px); }
+    .d-enter .d-toast .icon { color: var(--bg); }
+    .d-enter .d-ghost { position: absolute; left: var(--s3); right: var(--s3); top: var(--s3); display: grid; gap: var(--s2); }
+
+    /* 2 Menu 200 vs 600 */
+    .d-menu { padding: var(--s3); }
+    .d-menu .menu {
+      position: absolute; top: 64px; left: var(--s3); width: 184px; padding: var(--s1);
+      background: var(--bg); border-radius: var(--r-in);
+      box-shadow: 0 0 0 1px var(--n2), 0 12px 32px -12px rgba(11, 9, 9, .22);
+      list-style: none; transform-origin: 24px -24px;
+      opacity: 0; visibility: hidden; transform: scale(var(--pop));
+      transition: opacity var(--dmenu-out) var(--ease-in), transform var(--dmenu-out) var(--ease-in), visibility 0s linear var(--dmenu-out);
+    }
+    .d-menu.open .menu { opacity: 1; visibility: visible; transform: none; transition: opacity var(--dmenu) var(--ease-out), transform var(--dmenu) var(--ease-out), visibility 0s; }
+    .d-menu .menu button { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: var(--tap); padding: 0 12px; border-radius: 12px; font-size: var(--t1); font-weight: 500; text-align: left; }
+    .d-menu .menu button:hover, .d-menu .menu button:focus-visible { background: var(--n1); }
+    .d-menu .menu .icon { width: 18px; height: 18px; opacity: 0; }
+    .d-menu .menu [aria-checked="true"] .icon { opacity: 1; }
+    .d-menu .d-trigger .icon { width: 18px; height: 18px; transition: transform var(--dmenu) var(--ease-out); }
+    .d-menu.open .d-trigger .icon { transform: rotate(180deg); }
+
+    /* 3 Stagger rows */
+    .d-list { padding: 12px var(--s3); display: grid; align-content: center; gap: 6px; }
+    .d-list .d-row { min-height: 30px; }
+    .d-list .d-dot { width: 26px; height: 26px; }
+    .d-list .amt { margin-left: auto; font-weight: 600; }
+
+    /* 4 Press */
+    .d-press { display: grid; place-items: center; align-content: center; gap: 12px; }
+    .d-press .d-btn { min-height: 52px; padding: 0 var(--s4); font-size: var(--t2); transition: transform var(--dout) var(--ease-out), background-color var(--din) var(--ease-out); }
+    .motion-root[data-mode="on"]:not(.rm) .d-press .d-btn:active { transform: scale(var(--press)); }
+    .d-press .d-mut { font-size: var(--t1); }
+
+    /* 5 Knob stretch */
+    .d-knob { display: grid; place-items: center; align-content: center; gap: 12px; }
+    .d-switch { position: relative; width: 88px; height: 48px; border-radius: var(--r-pill); background: var(--n2); transition: background-color var(--din) var(--ease-out); }
+    .d-switch[aria-checked="true"] { background: var(--ink); }
+    .d-switch .knob { position: absolute; top: 4px; left: 4px; width: 40px; height: 40px; border-radius: var(--r-pill); background: var(--bg); box-shadow: 0 1px 3px rgba(11, 9, 9, .2); }
+    .d-knob .d-mut { font-size: var(--t1); }
+
+    /* 6 Details settle */
+    .d-settle { display: grid; place-items: center; }
+    .d-settle .pc { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 12px; align-items: center; width: calc(100% - 32px); max-width: 280px; padding: 12px; background: var(--bg); border-radius: var(--r-in); }
+    .d-settle .img { width: 72px; height: 72px; border-radius: var(--r-sm); background: var(--ink); display: grid; place-items: center; color: var(--bg); }
+    .d-settle .pc > span:last-child { display: grid; gap: 2px; }
+
+    /* 7 Arc */
+    .d-arc .guide { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+    .d-arc .guide path { fill: none; stroke: var(--n2); stroke-width: 1.5; stroke-dasharray: 4 6; stroke-linecap: round; }
+    .d-arc .end, .d-arc .ball { position: absolute; top: 0; left: 0; width: 28px; height: 28px; border-radius: 50%; }
+    .d-arc .end { background: var(--bg); box-shadow: inset 0 0 0 1.5px var(--n2); }
+    .d-arc .ball { background: var(--ink); }
+
+    /* 8 Pulse once */
+    .d-pulse { display: grid; place-items: center; align-content: center; gap: 12px; }
+    .d-save { min-width: 132px; }
+    .d-save .i-done, .d-save.is-saved .i-idle { display: none; }
+    .d-save.is-saved .i-done { display: block; }
+    .d-save.is-saved { background: var(--ink); color: var(--bg); box-shadow: none; }
+    .d-save .icon { width: 20px; height: 20px; }
+    .d-save .i-done { color: var(--bg); }
+
+    /* 9 Ease-in-out A to B */
+    .d-ab { padding: var(--s3); display: grid; grid-template-rows: auto 1fr; gap: var(--s3); }
+    .d-seg { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); padding: 4px; background: var(--n2); border-radius: var(--r-in); }
+    .d-seg .ind { position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc((100% - 8px) / 3); border-radius: 12px; background: var(--ink); transform: translateX(calc(var(--i, 0) * 100%)); transition: transform var(--din) var(--ab-ease); }
+    .d-seg button { position: relative; z-index: 1; min-height: var(--tap); border-radius: 12px; font-size: var(--t1); font-weight: 500; color: var(--n4); transition: color var(--din) var(--ease-out); }
+    .d-seg button[aria-pressed="true"] { color: var(--bg); }
+    .d-bars { display: flex; align-items: flex-end; gap: 8px; height: 100%; padding: 0 4px; }
+    .d-bars span { flex: 1; height: 100%; border-radius: 4px 4px 2px 2px; background: var(--n2); transform-origin: bottom; transform: scaleY(var(--h, .5)); transition: transform var(--din) var(--ab-ease); }
+    .d-bars span:nth-child(4) { background: var(--ink); }
+
+    /* 10 Popover from .95 */
+    .d-pop { padding: var(--s3); }
+    .d-pop .fee { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); padding: 4px 4px 4px var(--s3); background: var(--bg); border-radius: var(--r-in); }
+    .d-pop .info { display: inline-flex; align-items: center; justify-content: center; width: var(--tap); height: var(--tap); border-radius: 50%; color: var(--n4); }
+    .d-pop .info:hover { color: var(--ink); }
+    .d-pop .pop {
+      position: absolute; top: 72px; right: var(--s3); width: 224px; padding: 12px var(--s3);
+      background: var(--ink); color: var(--bg); border-radius: var(--r-in);
+      transform-origin: calc(100% - 26px) -8px;
+      opacity: 0; visibility: hidden; transform: scale(var(--pop-from));
+      transition: opacity var(--dout) var(--ease-in), transform var(--dout) var(--ease-in), visibility 0s linear var(--dout);
+    }
+    .d-pop.open .pop { opacity: 1; visibility: visible; transform: none; transition: opacity var(--din) var(--ease-out), transform var(--din) var(--ease-out), visibility 0s; }
+
+    /* 11 Origin-aware */
+    .d-origin .tools { position: absolute; left: var(--s3); right: var(--s3); bottom: var(--s3); display: flex; justify-content: space-between; }
+    .d-origin .tools button { display: inline-flex; align-items: center; justify-content: center; width: var(--tap); height: var(--tap); border-radius: 50%; background: var(--bg); color: var(--ink); transition: background-color var(--din) var(--ease-out), color var(--din) var(--ease-out); }
+    .d-origin .tools button[aria-expanded="true"] { background: var(--ink); color: var(--bg); }
+    .d-origin .omenu {
+      position: absolute; bottom: 64px; left: 0; width: 168px; padding: var(--s1);
+      background: var(--bg); border-radius: var(--r-in); list-style: none;
+      box-shadow: 0 0 0 1px var(--n2), 0 12px 32px -12px rgba(11, 9, 9, .22);
+      opacity: 0; visibility: hidden; transform: scale(var(--pop));
+      transition: opacity var(--dout) var(--ease-in), transform var(--dout) var(--ease-in), visibility 0s linear var(--dout);
+    }
+    .d-origin.open .omenu { opacity: 1; visibility: visible; transform: none; transition: opacity var(--din) var(--ease-out), transform var(--din) var(--ease-out), visibility 0s; }
+    .d-origin .omenu button { display: flex; align-items: center; width: 100%; min-height: var(--tap); padding: 0 12px; border-radius: 12px; font-size: var(--t1); font-weight: 500; text-align: left; }
+    .d-origin .omenu button:hover, .d-origin .omenu button:focus-visible { background: var(--n1); }
+
+    /* 12 Exit to trigger: the panel folds back into the button */
+    .d-exit .feed { position: absolute; inset: var(--s3); display: grid; align-content: start; gap: 12px; }
+    .d-exit .panel {
+      position: absolute; right: var(--s3); bottom: var(--s3); width: 208px; height: 160px; padding: var(--s3);
+      background: var(--ink); color: var(--bg); border-radius: var(--r-in);
+      display: grid; align-content: start; gap: 4px;
+      clip-path: inset(calc(100% - 48px) 0 0 calc(100% - 48px) round 24px);
+      visibility: hidden;
+      transition: clip-path var(--dexit) var(--ease-in), opacity var(--dexit) var(--ease-in), visibility 0s linear var(--dexit);
+    }
+    .d-exit.open .panel { clip-path: inset(0 0 0 0 round 16px); visibility: visible; opacity: 1; transition: clip-path var(--din) var(--ease-out), opacity 0s, visibility 0s; }
+    .motion-root[data-mode="off"] .d-exit:not(.open) .panel { opacity: 0; transition: opacity var(--dexit) var(--ease-in), clip-path 0s linear var(--dexit), visibility 0s linear var(--dexit); }
+    .d-exit .panel span { display: flex; align-items: center; min-height: 32px; font-size: var(--t1); font-weight: 500; }
+    .d-exit .fab { position: absolute; right: var(--s3); bottom: var(--s3); z-index: 2; width: 48px; height: 48px; border-radius: 50%; background: var(--ink); color: var(--bg); display: grid; place-items: center; }
+    .d-exit .fab .icon { transition: transform var(--din) var(--ease-out); }
+    .d-exit.open .fab .icon { transform: rotate(45deg); }
+
+    /* 13 No bounce */
+    .d-bounce .banner { position: absolute; top: var(--s3); left: var(--s3); right: var(--s3); display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--ink); color: var(--bg); border-radius: var(--r-in); transform: translateY(calc(-100% - 24px)); }
+    .d-bounce .banner .d-dot { background: var(--bg); display: grid; place-items: center; color: var(--ink); }
+    .d-bounce .banner .d-dot .icon { width: 16px; height: 16px; stroke-width: 2; }
+    .d-bounce .under { position: absolute; left: var(--s3); right: var(--s3); bottom: var(--s3); display: grid; gap: var(--s2); }
+
+    /* 14 Follow the finger */
+    .d-follow { display: grid; align-content: center; gap: var(--s3); padding: 0 var(--s4); }
+    .d-follow .readout { display: flex; align-items: baseline; justify-content: space-between; }
+    .d-follow .readout .mono { font-size: var(--t4); font-weight: 500; }
+    .d-follow .track { position: relative; height: var(--tap); touch-action: none; cursor: pointer; }
+    .d-follow .rail { position: absolute; left: 0; right: 0; top: 50%; height: 8px; margin-top: -4px; border-radius: 4px; background: var(--n2); }
+    .d-follow .fill { position: absolute; left: 0; top: 50%; height: 8px; margin-top: -4px; border-radius: 4px; background: var(--ink); }
+    .d-follow .thumb { position: absolute; top: 50%; width: 28px; height: 28px; margin: -14px 0 0 -14px; border-radius: 50%; background: var(--bg); box-shadow: 0 0 0 1.5px var(--ink), 0 2px 6px rgba(11, 9, 9, .18); }
+    .motion-root[data-mode="off"] .d-follow .fill { transition: width calc(300ms * var(--k)) ease; }
+    .motion-root[data-mode="off"] .d-follow .thumb { transition: left calc(300ms * var(--k)) ease; }
+
+    /* 15 Exits 20% shorter */
+    .d-sheet { padding: var(--s3); }
+    .d-sheet .scrim { position: absolute; inset: 0; background: rgba(11, 9, 9, .16); opacity: 0; visibility: hidden; transition: opacity var(--dexit) var(--ease-in), visibility 0s linear var(--dexit); }
+    .d-sheet .sh { position: absolute; left: 8px; right: 8px; bottom: 8px; padding: 12px var(--s3) var(--s3); background: var(--bg); border-radius: var(--r-sm); box-shadow: 0 -8px 24px -12px rgba(11, 9, 9, .25); transform: translateY(calc(100% + 8px)); visibility: hidden; transition: transform var(--dexit) var(--ease-in), opacity var(--dexit) var(--ease-in), visibility 0s linear var(--dexit); }
+    .d-sheet.open .scrim { opacity: 1; visibility: visible; transition: opacity var(--din) var(--ease-out), visibility 0s; }
+    .d-sheet.open .sh { transform: none; visibility: visible; transition: transform var(--din) var(--ease-out), opacity var(--din) var(--ease-out), visibility 0s; }
+    .d-sheet .grab { width: 36px; height: 4px; margin: 0 auto 12px; border-radius: 2px; background: var(--n2); }
+    .d-sheet .people { display: flex; gap: 12px; margin-top: 12px; }
+    .d-sheet .people span { width: 40px; height: 40px; border-radius: 50%; background: var(--n2); }
+    .d-sheet .people span:first-child { background: var(--ink); }
+
+    /* 16 No blank frame */
+    .d-overlap { padding: var(--s3); display: grid; grid-template-rows: auto 1fr; gap: var(--s3); }
+    .d-overlap .tabs { display: grid; grid-template-columns: 1fr 1fr; padding: 4px; background: var(--n2); border-radius: var(--r-in); }
+    .d-overlap .tabs button { min-height: var(--tap); border-radius: 12px; font-size: var(--t1); font-weight: 500; color: var(--n4); transition: background-color var(--din) var(--ease-out), color var(--din) var(--ease-out); }
+    .d-overlap .tabs button[aria-selected="true"] { background: var(--bg); color: var(--ink); box-shadow: 0 1px 2px rgba(11, 9, 9, .08); }
+    .d-overlap .panels { display: grid; }
+    .d-overlap .panel { grid-area: 1 / 1; display: grid; align-content: start; gap: 10px; }
+    .d-overlap .panel .d-row { min-height: 28px; }
+    .d-overlap .chk { width: 20px; height: 20px; border-radius: 6px; box-shadow: inset 0 0 0 1.5px var(--n3); flex: none; }
+    .d-overlap .chk.done { background: var(--ink); box-shadow: none; }
+
+    /* 17 Mask */
+    .d-mask .layer { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: var(--s2); text-align: center; }
+    .d-mask .light { background: var(--n1); color: var(--ink); }
+    .d-mask .dark { background: var(--ink); color: var(--bg); clip-path: circle(0px at 50% 50%); }
+    .d-mask .layer strong { font-family: var(--font-display); font-size: var(--t4); font-weight: 500; }
+    .d-mask .icon { width: 32px; height: 32px; }
+
+    /* 18 Icon crossfade */
+    .d-icon { display: grid; place-items: center; align-content: center; gap: 12px; }
+    .d-play { position: relative; width: 64px; height: 64px; border-radius: 50%; background: var(--ink); color: var(--bg); }
+    .d-play .icon { position: absolute; top: 20px; left: 20px; transition: opacity var(--din) var(--ease-out), filter var(--din) var(--ease-out), transform var(--din) var(--ease-out); }
+    .d-play .i-pause, .d-play.is-on .i-play { opacity: 0; filter: blur(2px); transform: scale(.8); }
+    .d-play.is-on .i-pause { opacity: 1; filter: none; transform: none; }
+    .motion-root[data-mode="off"] .d-play .icon { transition: none; filter: none !important; transform: none !important; }
+    .d-icon .d-mut { font-size: var(--t1); }
+
+    /* 19 Rubber band */
+    .d-rubber { display: grid; grid-template-rows: 1fr auto; gap: var(--s1); padding: var(--s3) 0 0; }
+    .d-rubber .vp { overflow: hidden; touch-action: pan-y; cursor: grab; margin: 0 var(--s3); border-radius: var(--r-sm); }
+    .d-rubber .vp:active { cursor: grabbing; }
+    .d-rubber .rail { display: flex; height: 100%; will-change: transform; }
+    .d-rubber .slide { flex: 0 0 100%; height: 100%; display: grid; align-content: end; padding: var(--s3); border-radius: var(--r-sm); color: var(--bg); }
+    .d-rubber .slide strong { font-family: var(--font-display); font-size: var(--t4); font-weight: 500; line-height: 1.1; }
+    .d-rubber .slide:nth-child(1) { background: var(--ink); }
+    .d-rubber .slide:nth-child(2) { background: var(--n4); }
+    .d-rubber .slide:nth-child(3) { background: var(--n3); }
+    .d-rubber .dots { display: flex; justify-content: center; gap: 0; }
+    .d-rubber .dots button { width: var(--tap); height: var(--tap); display: grid; place-items: center; }
+    .d-rubber .dots button::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--n2); transition: background-color var(--din) var(--ease-out); }
+    .d-rubber .dots button[aria-current="true"]::after { background: var(--ink); }
+
+    /* 20 Shared element */
+    .d-shared .covers { position: absolute; inset: var(--s3); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-content: center; }
+    .d-shared .cv { display: grid; gap: var(--s2); text-align: left; border-radius: var(--r-sm); }
+    .d-shared .art { aspect-ratio: 1; border-radius: var(--r-sm); display: grid; place-items: center; color: var(--bg); }
+    .d-shared .art svg { width: 40%; height: 40%; fill: none; stroke: currentColor; stroke-width: 1.5; }
+    .d-shared .cv:nth-child(1) .art { background: var(--ink); }
+    .d-shared .cv:nth-child(2) .art { background: var(--n4); }
+    .d-shared .cv:nth-child(3) .art { background: var(--n3); }
+    .d-shared .detail { position: absolute; inset: 0; visibility: hidden; cursor: pointer; text-align: left; width: 100%; }
+    .d-shared .detail.on { visibility: visible; }
+    .d-shared .dbg { position: absolute; inset: 0; background: var(--n1); opacity: 0; }
+    .d-shared .big { position: absolute; top: var(--s3); left: var(--s3); width: 120px; height: 120px; transform-origin: 0 0; }
+    .d-shared .info { position: absolute; left: 152px; right: var(--s3); top: var(--s3); display: grid; gap: 4px; }
+    .d-shared .info strong { font-family: var(--font-display); font-size: var(--t3); font-weight: 500; line-height: 1.2; }
+    .d-shared .info > * { opacity: 0; }
+    .d-shared .tracks { position: absolute; left: var(--s3); right: var(--s3); bottom: var(--s3); display: grid; gap: 6px; }
+    .d-shared .tracks > * { opacity: 0; }
+
+    /* ---------- Four rules for every demo ---------- */
+    .m-also { display: grid; gap: var(--s5) var(--s6); margin-top: var(--s5); padding: 0; list-style: none; }
+    @media (min-width: 640px) { .m-also { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    .m-also li { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: var(--s3); align-items: start; }
+    .m-also h3 { font-family: var(--font-ui); font-size: var(--t2); font-weight: 600; line-height: 1.4; }
+    .m-also p { color: var(--n4); margin-top: var(--s1); }
+    .m-also .icon { margin-top: 2px; }
+    .rm-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; min-height: var(--tap); cursor: pointer; font-weight: 500; }
+    .rm-row .d-switch { width: 52px; height: 32px; flex: none; }
+    .rm-row .d-switch .knob { width: 24px; height: 24px; transition: transform var(--din) var(--ease-out); }
+    .rm-row .d-switch[aria-checked="true"] .knob { transform: translateX(20px); }
+
+    /* ---------- Values ---------- */
+    .m-values { display: grid; gap: var(--s5); }
+    @media (min-width: 960px) { .m-values { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--s6); align-items: start; } }
+    .m-values .code { background: var(--ink-2); max-height: none; font-size: var(--t1); white-space: pre; word-break: normal; overflow-x: auto; }
+    .m-values .code .c { color: var(--on-ink-mut); }
+    .m-values .row { margin-top: var(--s4); }
+
+    /* ---------- Reduced motion (system or the switch): fades only ---------- */
+    .motion-root.rm .d-menu .menu, .motion-root.rm .d-pop .pop, .motion-root.rm .d-origin .omenu { transform: none !important; }
+    .motion-root.rm .d-menu .d-trigger .icon { transition: none; }
+    .motion-root.rm .d-seg .ind, .motion-root.rm .d-bars span { transition: opacity var(--din) linear; }
+    .motion-root.rm .d-exit .panel { clip-path: inset(0 0 0 0 round 16px) !important; opacity: 0; transition: opacity var(--dexit) linear, visibility 0s linear var(--dexit) !important; }
+    .motion-root.rm .d-exit.open .panel { opacity: 1; transition: opacity var(--din) linear, visibility 0s !important; }
+    .motion-root.rm .d-exit .fab .icon { transition: none; }
+    .motion-root.rm .d-sheet .sh { transform: none; opacity: 0; }
+    .motion-root.rm .d-sheet.open .sh { opacity: 1; }
+    .motion-root.rm .d-play .icon { filter: none !important; transform: none !important; }
+    .motion-root.rm .rm-row .d-switch .knob { transition: none; }
+  </style>
+  <!-- 8. JS flag before paint, then shared JS and data, deferred -->
+  <script>document.documentElement.classList.add("js");setTimeout(function(){if(!window.tasu)document.documentElement.classList.remove("js")},3000)</script>
+  <script src="/taste/tasu.js" defer></script>
+  <script src="/taste/data.js" defer></script>
+  <!-- 9. JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": "https://www.jeremylasne.com/taste/motion/#page",
+        "url": "https://www.jeremylasne.com/taste/motion/",
+        "name": "20 motion rules with live demos",
+        "description": "Tap 20 live demos of the motion rules for app UI: ease-out in 200 ms, 30 ms stagger, 0.97 press, 0.95 popovers. Copy every value as CSS.",
+        "inLanguage": "en",
+        "isPartOf": { "@type": "WebSite", "name": "tasu.ai", "url": "https://www.jeremylasne.com/taste/" },
+        "author": { "@type": "Person", "name": "Jeremy Lasne", "url": "https://x.com/jeremylasne" },
+        "image": "https://www.jeremylasne.com/og-image.png?v=8"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "tasu.ai", "item": "https://www.jeremylasne.com/taste/" },
+          { "@type": "ListItem", "position": 2, "name": "Motion", "item": "https://www.jeremylasne.com/taste/motion/" }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="wordmark" href="/taste/" aria-label="tasu.ai home">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="8" fill="#0B0909"/><path d="M10.5 4.5v11a3 3 0 0 0 3 3H16M7 9h8.5" fill="none" stroke="#FAF8F3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>tasu.ai</span>
+      </a>
+      <nav class="nav" aria-label="Main">
+        <ul>
+          <li><a href="/taste/rules/">Rules</a></li>
+          <li><a href="/taste/unslop/">Unslop</a></li>
+          <li><a href="/taste/palettes/">Palettes</a></li>
+          <li><a href="/taste/type/">Type</a></li>
+          <li><a href="/taste/motion/">Motion</a></li>
+          <li><a href="/taste/screens/">Screens</a></li>
+          <li><a href="/taste/prompts/">Prompts</a></li>
+          <li><a href="/taste/skills/">Skills</a></li>
+        </ul>
+      </nav>
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav-sheet" aria-label="Open menu">
+        <span class="menu-icons" aria-hidden="true">
+          <svg class="icon icon-open" viewBox="0 0 24 24"><path d="M4 8h16M4 16h16"/></svg>
+          <svg class="icon icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </span>
+        <span>Menu</span>
+      </button>
+    </div>
+  </header>
+  <div class="sheet-scrim" aria-hidden="true"></div>
+  <nav class="sheet" id="nav-sheet" aria-label="Main">
+    <ul>
+      <li><a href="/taste/rules/">Rules</a></li>
+      <li><a href="/taste/unslop/">Unslop</a></li>
+      <li><a href="/taste/palettes/">Palettes</a></li>
+      <li><a href="/taste/type/">Type</a></li>
+      <li><a href="/taste/motion/">Motion</a></li>
+      <li><a href="/taste/screens/">Screens</a></li>
+      <li><a href="/taste/prompts/">Prompts</a></li>
+      <li><a href="/taste/skills/">Skills</a></li>
+      <li><a href="/taste/sources/">Sources</a></li>
+    </ul>
+  </nav>
+
+  <main id="main">
+    <div class="motion-root" id="motion" data-mode="on">
+
+    <section class="container page-head m-head">
+      <h1>Feel the 20 motion rules</h1>
+      <p class="lead">Each demo runs its rule from taste.md. Tap it, then switch to Without and feel what breaks.</p>
+      <div class="row actions">
+        <button class="btn-accent copy-btn" type="button" id="copy-motion">
+          <span class="copy-idle"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6.5A2.5 2.5 0 0 0 13.5 4h-7A2.5 2.5 0 0 0 4 6.5v7A2.5 2.5 0 0 0 6.5 16H8"/></svg>Copy motion values</span>
+          <span class="copy-done"><svg class="icon icon-sm icon-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Copied</span>
+        </button>
+        <a class="btn-text" href="#values">See the CSS
+          <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14m0 0-5-5m5 5 5-5"/></svg>
+        </a>
+      </div>
+      <ul class="m-stats" aria-label="Key values">
+        <li><strong>200ms</strong><span>entrances</span></li>
+        <li><strong>160ms</strong><span>exits</span></li>
+        <li><strong>30ms</strong><span>row stagger</span></li>
+        <li><strong>0.97</strong><span>button press</span></li>
+      </ul>
+    </section>
+
+    <section class="container" id="rules" aria-labelledby="rules-title">
+      <div class="m-intro">
+        <h2 id="rules-title">20 rules, one demo each</h2>
+        <p>The 20 rules come from <a href="https://www.instagram.com/charles.unemployed/reel/DfXKRDQRBS_/" rel="noopener">S3 by @charles.unemployed</a>, confirmed in French by <a href="https://www.instagram.com/reels/Dfm1bXkAM6U/" rel="noopener">S12 by @matteocourquin</a>. Demos run only when you touch them.</p>
+      </div>
+
+      <div class="m-bar" role="toolbar" aria-label="Demo settings">
+        <div class="segmented" role="group" aria-label="Rule">
+          <button type="button" data-set="mode" data-v="on" aria-pressed="true">With<span class="m-long">&nbsp;the rule</span></button>
+          <button type="button" data-set="mode" data-v="off" aria-pressed="false">Without</button>
+        </div>
+        <div class="segmented" role="group" aria-label="Speed">
+          <button type="button" data-set="k" data-v="1" aria-pressed="true">Normal</button>
+          <button type="button" data-set="k" data-v="4" aria-pressed="false">Slow<span class="mono">0.25×</span></button>
+        </div>
+        <span class="m-bar__note">Without shows the slop version of every demo</span>
+      </div>
+
+      <ol class="m-grid" role="list">
+        <!-- 1 -->
+        <li class="reveal"><article class="card m-card" id="ease-out" aria-labelledby="h-1">
+          <button class="stage d-enter" type="button" data-demo="enter" aria-pressed="false" aria-label="Play the entrance">
+            <span class="d-ghost" aria-hidden="true">
+              <span class="d-row"><span class="d-dot"></span><span class="d-line" style="width:55%"></span></span>
+              <span class="d-line" style="width:85%"></span>
+              <span class="d-line" style="width:70%"></span>
+            </span>
+            <span class="d-toast d-row" aria-hidden="true">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+              <span class="d-t"><strong>Saved to Library</strong><br><span class="on-ink-mut">12 photos</span></span>
+            </span>
+          </button>
+          <div class="m-body">
+            <h3 id="h-1">Ease-out on the way in</h3>
+            <p>Without: ease-in. The toast starts slow and stops at full speed.</p>
+            <div class="m-foot"><span class="m-val" data-on="ease-out · 200ms" data-off="ease-in · 200ms">ease-out · 200ms</span><span class="m-hint">Tap the box</span></div>
+          </div>
+        </article></li>
+
+        <!-- 2 -->
+        <li class="reveal"><article class="card m-card" id="menus" aria-labelledby="h-2">
+          <div class="stage d-menu" data-demo="menu">
+            <button class="d-btn d-btn-ghost d-trigger" type="button" aria-haspopup="true" aria-expanded="false">
+              <span>Sort: Newest</span>
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
+            </button>
+            <ul class="menu" role="menu" aria-label="Sort by">
+              <li role="none"><button type="button" role="menuitemradio" aria-checked="true">Newest<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button></li>
+              <li role="none"><button type="button" role="menuitemradio" aria-checked="false">Price<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button></li>
+              <li role="none"><button type="button" role="menuitemradio" aria-checked="false">Rating<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button></li>
+            </ul>
+          </div>
+          <div class="m-body">
+            <h3 id="h-2">Menus open in 200ms</h3>
+            <p>Without: the menu takes 600 ms, 3 times longer.</p>
+            <div class="m-foot"><span class="m-val" data-on="200ms" data-off="600ms">200ms</span><span class="m-hint">Open the menu</span></div>
+          </div>
+        </article></li>
+
+        <!-- 3 -->
+        <li class="reveal"><article class="card m-card" id="stagger" aria-labelledby="h-3">
+          <button class="stage d-list" type="button" data-demo="list" aria-label="Replay the list">
+            <span class="d-row"><span class="d-dot"></span><span class="d-t">Rent</span><span class="d-t amt">€1,240</span></span>
+            <span class="d-row"><span class="d-dot"></span><span class="d-t">Groceries</span><span class="d-t amt">€86</span></span>
+            <span class="d-row"><span class="d-dot"></span><span class="d-t">Train pass</span><span class="d-t amt">€75</span></span>
+            <span class="d-row"><span class="d-dot"></span><span class="d-t">Gym</span><span class="d-t amt">€39</span></span>
+            <span class="d-row"><span class="d-dot"></span><span class="d-t">Music</span><span class="d-t amt">€11</span></span>
+          </button>
+          <div class="m-body">
+            <h3 id="h-3">Rows enter 30ms apart</h3>
+            <p>Without: all 5 rows land in the same frame.</p>
+            <div class="m-foot"><span class="m-val" data-on="30ms" data-off="0ms">30ms</span><span class="m-hint">Tap to replay</span></div>
+          </div>
+        </article></li>
+
+        <!-- 4 -->
+        <li class="reveal"><article class="card m-card" id="press" aria-labelledby="h-4">
+          <div class="stage d-press" data-demo="press">
+            <button class="d-btn" type="button">Add to bag</button>
+            <span class="d-mut" aria-live="polite">Bag is empty</span>
+          </div>
+          <div class="m-body">
+            <h3 id="h-4">Buttons press to 0.97</h3>
+            <p>Without: the button stays at scale 1, so a press shows nothing.</p>
+            <div class="m-foot"><span class="m-val" data-on="scale 0.97" data-off="scale 1">scale 0.97</span><span class="m-hint">Press and hold</span></div>
+          </div>
+        </article></li>
+
+        <!-- 5 -->
+        <li class="reveal"><article class="card m-card" id="knob" aria-labelledby="h-5">
+          <div class="stage d-knob" data-demo="knob">
+            <button class="d-switch" type="button" role="switch" aria-checked="false" aria-label="Wi-Fi"><span class="knob"></span></button>
+            <span class="d-mut">Wi-Fi off</span>
+          </div>
+          <div class="m-body">
+            <h3 id="h-5">Knobs stretch 12% as they move</h3>
+            <p>Without: the knob keeps its 40 px width the whole way.</p>
+            <div class="m-foot"><span class="m-val" data-on="+12%" data-off="+0%">+12%</span><span class="m-hint">Flip the switch</span></div>
+          </div>
+        </article></li>
+
+        <!-- 6 -->
+        <li class="reveal"><article class="card m-card" id="settle" aria-labelledby="h-6">
+          <button class="stage d-settle" type="button" data-demo="settle" aria-label="Replay the card">
+            <span class="pc">
+              <span class="img"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 4 4 6.5 5.5 10 7 9.5V20h10V9.5l1.5.5L20 6.5 15.5 4a3.5 3.5 0 0 1-7 0Z"/></svg></span>
+              <span>
+                <span class="d-t"><strong>Linen overshirt</strong></span>
+                <span class="d-t d-mut">Sand · Size M</span>
+                <span class="d-t"><strong>€89</strong></span>
+              </span>
+            </span>
+          </button>
+          <div class="m-body">
+            <h3 id="h-6">Details settle in turn</h3>
+            <p>Without: the image and 3 lines land at once, 0 ms apart.</p>
+            <div class="m-foot"><span class="m-val" data-on="30ms" data-off="0ms">30ms</span><span class="m-hint">Tap to replay</span></div>
+          </div>
+        </article></li>
+
+        <!-- 7 -->
+        <li class="reveal"><article class="card m-card" id="arcs" aria-labelledby="h-7">
+          <button class="stage d-arc" type="button" data-demo="arc" aria-label="Send the ball to the other corner">
+            <svg class="guide" aria-hidden="true"><path d=""/></svg>
+            <span class="end" aria-hidden="true"></span>
+            <span class="end" aria-hidden="true"></span>
+            <span class="ball" aria-hidden="true"></span>
+          </button>
+          <div class="m-body">
+            <h3 id="h-7">Arcs across the screen</h3>
+            <p>Without: the ball cuts a straight diagonal in the same 400 ms.</p>
+            <div class="m-foot"><span class="m-val" data-on="arc" data-off="straight line">arc</span><span class="m-hint">Tap to send</span></div>
+          </div>
+        </article></li>
+
+        <!-- 8 -->
+        <li class="reveal"><article class="card m-card" id="pulse" aria-labelledby="h-8">
+          <div class="stage d-pulse" data-demo="pulse">
+            <button class="d-btn d-btn-ghost d-save" type="button" aria-pressed="false">
+              <svg class="icon i-idle" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v16l-5-3.5L7 20Z"/></svg>
+              <svg class="icon i-done" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+              <span>Save</span>
+            </button>
+          </div>
+          <div class="m-body">
+            <h3 id="h-8">One pulse for success</h3>
+            <p>Without: the check swaps in with 0 pulses, easy to miss.</p>
+            <div class="m-foot"><span class="m-val" data-on="1 pulse" data-off="no feedback">1 pulse</span><span class="m-hint">Tap Save</span></div>
+          </div>
+        </article></li>
+
+        <!-- 9 -->
+        <li class="reveal"><article class="card m-card" id="a-to-b" aria-labelledby="h-9">
+          <div class="stage d-ab" data-demo="ab">
+            <div class="d-seg" role="group" aria-label="Range">
+              <span class="ind" aria-hidden="true"></span>
+              <button type="button" aria-pressed="true">Day</button>
+              <button type="button" aria-pressed="false">Week</button>
+              <button type="button" aria-pressed="false">Month</button>
+            </div>
+            <div class="d-bars" role="img" aria-label="Bar chart of steps for the selected range">
+              <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+          <div class="m-body">
+            <h3 id="h-9">Ease-in-out from A to B</h3>
+            <p>Without: linear. The indicator moves at one speed and stops dead.</p>
+            <div class="m-foot"><span class="m-val" data-on="ease-in-out" data-off="linear">ease-in-out</span><span class="m-hint">Switch the range</span></div>
+          </div>
+        </article></li>
+
+        <!-- 10 -->
+        <li class="reveal"><article class="card m-card" id="popover" aria-labelledby="h-10">
+          <div class="stage d-pop" data-demo="pop">
+            <div class="fee">
+              <span class="d-t"><strong>Delivery fee</strong> <span class="d-mut">€2.90</span></span>
+              <button class="info" type="button" aria-expanded="false" aria-label="About the delivery fee">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 8h.01"/></svg>
+              </button>
+            </div>
+            <div class="pop d-t" role="tooltip">Free on orders over €40. The store sets this fee.</div>
+          </div>
+          <div class="m-body">
+            <h3 id="h-10">Popovers start at 0.95</h3>
+            <p>Without: the popover grows from scale 0, a dot that balloons.</p>
+            <div class="m-foot"><span class="m-val" data-on="scale 0.95 → 1" data-off="scale 0 → 1">scale 0.95 → 1</span><span class="m-hint">Tap the info icon</span></div>
+          </div>
+        </article></li>
+
+        <!-- 11 -->
+        <li class="reveal"><article class="card m-card" id="origin" aria-labelledby="h-11">
+          <div class="stage d-origin" data-demo="origin">
+            <ul class="omenu" role="menu" aria-label="Menu"></ul>
+            <div class="tools">
+              <button type="button" data-m="0" aria-expanded="false" aria-label="Filter"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg></button>
+              <button type="button" data-m="1" aria-expanded="false" aria-label="Sort"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14m0 0-3-3m3 3 3-3M16 19V5m0 0-3 3m3-3 3 3"/></svg></button>
+              <button type="button" data-m="2" aria-expanded="false" aria-label="Share"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4m0 0L8 8m4-4 4 4M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg></button>
+            </div>
+          </div>
+          <div class="m-body">
+            <h3 id="h-11">Menus grow from their button</h3>
+            <p>Without: all 3 menus grow from their own center, far from your thumb.</p>
+            <div class="m-foot"><span class="m-val" data-on="origin: trigger" data-off="origin: center">origin: trigger</span><span class="m-hint">Try all 3 buttons</span></div>
+          </div>
+        </article></li>
+
+        <!-- 12 -->
+        <li class="reveal"><article class="card m-card" id="exit" aria-labelledby="h-12">
+          <div class="stage d-exit" data-demo="exit">
+            <div class="feed" aria-hidden="true">
+              <div class="d-row"><span class="d-dot"></span><span class="d-line" style="width:45%"></span></div>
+              <div class="d-line" style="width:90%"></div>
+              <div class="d-line" style="width:75%"></div>
+              <div class="d-line" style="width:60%"></div>
+            </div>
+            <div class="panel" aria-hidden="true">
+              <span>New note</span><span>New list</span><span>New photo</span>
+            </div>
+            <button class="fab" type="button" aria-expanded="false" aria-label="Create">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+          </div>
+          <div class="m-body">
+            <h3 id="h-12">Exits fold back into the trigger</h3>
+            <p>Without: the panel fades out in place over 200 ms.</p>
+            <div class="m-foot"><span class="m-val" data-on="back to trigger" data-off="fade in place">back to trigger</span><span class="m-hint">Open, then close</span></div>
+          </div>
+        </article></li>
+
+        <!-- 13 -->
+        <li class="reveal"><article class="card m-card" id="no-bounce" aria-labelledby="h-13">
+          <button class="stage d-bounce" type="button" data-demo="bounce" aria-pressed="false" aria-label="Show the banner">
+            <span class="under" aria-hidden="true">
+              <span class="d-line" style="width:80%"></span>
+              <span class="d-line" style="width:60%"></span>
+              <span class="d-line" style="width:70%"></span>
+            </span>
+            <span class="banner" aria-hidden="true">
+              <span class="d-dot"><svg class="icon" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+              <span class="d-t"><strong>Payment received</strong><br><span class="on-ink-mut">€240 from Sam</span></span>
+            </span>
+          </button>
+          <div class="m-body">
+            <h3 id="h-13">No bounce on everyday UI</h3>
+            <p>Without: the banner overshoots 16 px, then settles after 700 ms.</p>
+            <div class="m-foot"><span class="m-val" data-on="0 bounce · 200ms" data-off="spring overshoot">0 bounce · 200ms</span><span class="m-hint">Tap the box</span></div>
+          </div>
+        </article></li>
+
+        <!-- 14 -->
+        <li class="reveal"><article class="card m-card" id="follow" aria-labelledby="h-14">
+          <div class="stage d-follow" data-demo="follow">
+            <div class="readout"><span class="d-t d-mut">Volume</span><span class="mono" aria-hidden="true">40%</span></div>
+            <div class="track">
+              <span class="rail"></span><span class="fill"></span>
+              <span class="thumb" role="slider" tabindex="0" aria-label="Volume" aria-valuemin="0" aria-valuemax="100" aria-valuenow="40" aria-valuetext="40%"></span>
+            </div>
+          </div>
+          <div class="m-body">
+            <h3 id="h-14">Follow the finger 1:1</h3>
+            <p>Without: the thumb trails your finger by 300 ms.</p>
+            <div class="m-foot"><span class="m-val" data-on="1:1 · 0ms" data-off="tweened · 300ms lag">1:1 · 0ms</span><span class="m-hint">Drag the slider</span></div>
+          </div>
+        </article></li>
+
+        <!-- 15 -->
+        <li class="reveal"><article class="card m-card" id="exits-shorter" aria-labelledby="h-15">
+          <div class="stage d-sheet" data-demo="sheet">
+            <button class="d-btn" type="button" aria-expanded="false">Share photo</button>
+            <div class="scrim" aria-hidden="true"></div>
+            <div class="sh" aria-hidden="true">
+              <div class="grab"></div>
+              <span class="d-t"><strong>Send to</strong></span>
+              <div class="people"><span></span><span></span><span></span><span></span></div>
+            </div>
+          </div>
+          <div class="m-body">
+            <h3 id="h-15">Exits run 20% shorter</h3>
+            <p>Without: the sheet leaves in 200 ms, as slow as it came.</p>
+            <div class="m-foot"><span class="m-val" data-on="in 200ms · out 160ms" data-off="in 200ms · out 200ms">in 200ms · out 160ms</span><span class="m-hint">Open, then close</span></div>
+          </div>
+        </article></li>
+
+        <!-- 16 -->
+        <li class="reveal"><article class="card m-card" id="overlap" aria-labelledby="h-16">
+          <div class="stage d-overlap" data-demo="overlap">
+            <div class="tabs" role="tablist" aria-label="Tasks">
+              <button type="button" role="tab" aria-selected="true">Today</button>
+              <button type="button" role="tab" aria-selected="false">Upcoming</button>
+            </div>
+            <div class="panels">
+              <div class="panel" role="tabpanel" aria-label="Today">
+                <div class="d-row"><span class="chk done"></span><span class="d-t">Book dentist</span></div>
+                <div class="d-row"><span class="chk"></span><span class="d-t">Pay the electric bill</span></div>
+                <div class="d-row"><span class="chk"></span><span class="d-t">Call Mia back</span></div>
+              </div>
+              <div class="panel" role="tabpanel" aria-label="Upcoming" style="opacity:0" aria-hidden="true">
+                <div class="d-row"><span class="chk"></span><span class="d-t">Renew passport</span><span class="d-t d-mut" style="margin-left:auto">Fri</span></div>
+                <div class="d-row"><span class="chk"></span><span class="d-t">Team offsite</span><span class="d-t d-mut" style="margin-left:auto">Tue</span></div>
+                <div class="d-row"><span class="chk"></span><span class="d-t">Car service</span><span class="d-t d-mut" style="margin-left:auto">Nov 28</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="m-body">
+            <h3 id="h-16">No blank frame between states</h3>
+            <p>Without: the list goes blank for 120 ms between tabs.</p>
+            <div class="m-foot"><span class="m-val" data-on="overlap · 0ms gap" data-off="blank frame · 120ms gap">overlap · 0ms gap</span><span class="m-hint">Switch tabs</span></div>
+          </div>
+        </article></li>
+
+        <!-- 17 -->
+        <li class="reveal"><article class="card m-card" id="masks" aria-labelledby="h-17">
+          <button class="stage d-mask" type="button" data-demo="mask" aria-pressed="false" aria-label="Switch to dark mode">
+            <span class="layer light" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></svg>
+              <strong>Light</strong>
+            </span>
+            <span class="layer dark" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5Z"/></svg>
+              <strong>Dark</strong>
+            </span>
+          </button>
+          <div class="m-body">
+            <h3 id="h-17">Masks for color changes</h3>
+            <p>Without: the whole card fades to dark over 200 ms.</p>
+            <div class="m-foot"><span class="m-val" data-on="circle mask" data-off="opacity fade">circle mask</span><span class="m-hint">Tap anywhere</span></div>
+          </div>
+        </article></li>
+
+        <!-- 18 -->
+        <li class="reveal"><article class="card m-card" id="icons" aria-labelledby="h-18">
+          <div class="stage d-icon" data-demo="icon">
+            <button class="d-play" type="button" aria-pressed="false" aria-label="Play">
+              <svg class="icon i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.5Z"/></svg>
+              <svg class="icon i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg>
+            </button>
+            <span class="d-mut">Paused</span>
+          </div>
+          <div class="m-body">
+            <h3 id="h-18">Icons crossfade with a blur</h3>
+            <p>Without: play swaps to pause in 1 frame.</p>
+            <div class="m-foot"><span class="m-val" data-on="crossfade + blur" data-off="instant swap">crossfade + blur</span><span class="m-hint">Tap play</span></div>
+          </div>
+        </article></li>
+
+        <!-- 19 -->
+        <li class="reveal"><article class="card m-card" id="rubber-band" aria-labelledby="h-19">
+          <div class="stage d-rubber" data-demo="rubber">
+            <div class="vp" tabindex="0" role="group" aria-roledescription="carousel" aria-label="Trips, use arrow keys">
+              <div class="rail">
+                <div class="slide"><span class="d-t on-ink-mut">3 nights</span><strong>Lisbon</strong></div>
+                <div class="slide"><span class="d-t" style="color:var(--n2)">2 nights</span><strong>Porto</strong></div>
+                <div class="slide"><span class="d-t" style="color:var(--n1)">4 nights</span><strong>Madeira</strong></div>
+              </div>
+            </div>
+            <div class="dots">
+              <button type="button" aria-label="Trip 1" aria-current="true"></button>
+              <button type="button" aria-label="Trip 2"></button>
+              <button type="button" aria-label="Trip 3"></button>
+            </div>
+          </div>
+          <div class="m-body">
+            <h3 id="h-19">Rubber band past the edge</h3>
+            <p>Without: the rail moves 0 px past the first and last card.</p>
+            <div class="m-foot"><span class="m-val" data-on="rubber band" data-off="hard stop">rubber band</span><span class="m-hint">Drag past the first card</span></div>
+          </div>
+        </article></li>
+
+        <!-- 20 -->
+        <li class="reveal"><article class="card m-card" id="shared-element" aria-labelledby="h-20">
+          <div class="stage d-shared" data-demo="shared">
+            <div class="covers">
+              <button class="cv" type="button" data-t="Night drive" data-a="Ana Ruiz · 9 tracks"><span class="art"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="1.5"/></svg></span><span class="d-t"><strong>Night drive</strong></span></button>
+              <button class="cv" type="button" data-t="Field notes" data-a="Leo Park · 12 tracks"><span class="art"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17c3-6 5-6 8 0s5 6 8 0"/></svg></span><span class="d-t"><strong>Field notes</strong></span></button>
+              <button class="cv" type="button" data-t="Low tide" data-a="Noa Berg · 7 tracks"><span class="art"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h16M4 15h16"/></svg></span><span class="d-t"><strong>Low tide</strong></span></button>
+            </div>
+            <button class="detail" type="button" aria-label="Close the album" tabindex="-1">
+              <span class="dbg"></span>
+              <span class="big art"></span>
+              <span class="info"><strong></strong><span class="d-t d-mut"></span></span>
+              <span class="tracks" aria-hidden="true">
+                <span class="d-line" style="width:90%"></span>
+                <span class="d-line" style="width:70%"></span>
+                <span class="d-line" style="width:80%"></span>
+              </span>
+            </button>
+          </div>
+          <div class="m-body">
+            <h3 id="h-20">One element across screens</h3>
+            <p>Without: the cover cuts to the detail view with a 200 ms fade.</p>
+            <div class="m-foot"><span class="m-val" data-on="shared element" data-off="hard cut">shared element</span><span class="m-hint">Open a cover</span></div>
+          </div>
+        </article></li>
+      </ol>
+    </section>
+
+    <section class="container section" id="also" aria-labelledby="also-title">
+      <h2 id="also-title">4 rules every demo follows</h2>
+      <p class="secondary" style="margin-top:var(--s3);max-width:40em">From <a href="https://www.instagram.com/reels/DfcnAJFhAa1/" rel="noopener">S2</a>, <a href="https://www.instagram.com/reels/Dfh24cUh4KF/" rel="noopener">S4</a> and <a href="https://www.instagram.com/reels/DfVio6bBWl1/" rel="noopener">S14</a>.</p>
+      <ul class="m-also">
+        <li>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7M4 4v4h4"/></svg>
+          <div><h3>Animations must be interruptible mid-way</h3><p>Tap any demo while it moves. It turns around from where it is.</p></div>
+        </li>
+        <li>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M9.5 9.5v5M14.5 9.5v5"/></svg>
+          <div><h3>Stop looping animations</h3><p>Loop only a loading state. Each demo on this page runs once per tap.</p></div>
+        </li>
+        <li>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+          <div><h3>Animate useful feedback</h3><p>Success, error, progress. The pulse, the banner and the sheet each answer an action.</p></div>
+        </li>
+        <li>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18Z"/><circle cx="12" cy="12" r="9"/></svg>
+          <div>
+            <h3>Respect Reduce Motion</h3>
+            <p>Swap movement for fades. This page follows your device setting. Try it here.</p>
+            <label class="rm-row">
+              <button class="d-switch" type="button" role="switch" aria-checked="false" id="rm-switch" aria-labelledby="rm-label"><span class="knob"></span></button>
+              <span id="rm-label">Reduce motion</span>
+            </label>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="section section-dark" id="values" aria-labelledby="values-title">
+      <div class="container m-values">
+        <div>
+          <h2 id="values-title">Paste the values into your app</h2>
+          <p class="lead" style="margin-top:var(--s3)">The lime button copies these CSS custom properties plus the 24 rules as a list. Paste both into your project or your prompt.</p>
+          <div class="row">
+            <button class="btn copy-btn" type="button" data-copy-target="#m-css">
+              <span class="copy-idle">Copy CSS only</span>
+              <span class="copy-done"><svg class="icon icon-sm icon-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Copied</span>
+            </button>
+          </div>
+        </div>
+        <pre class="code" id="m-css" tabindex="0" aria-label="Motion values as CSS"></pre>
+      </div>
+    </section>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <p>tasu.ai · taste using AI · by Jeremy Lasne</p>
+      <nav aria-label="Footer">
+        <a href="/taste/sources/">Sources</a>
+        <a href="https://x.com/jeremylasne" rel="noopener" aria-label="Jeremy Lasne on X">X</a>
+      </nav>
+    </div>
+  </footer>
+  <script>
+  /* Motion page: 20 demos. Each runs on a tap or a drag, never on a loop.
+     Durations read the page clock (S.k), "Without" swaps in the slop value, Reduce Motion swaps movement for fades. */
+  document.addEventListener("DOMContentLoaded", function () {
+    "use strict";
+    var root = document.getElementById("motion");
+    if (!root) return;
+    var mq = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+    var S = { on: true, k: 1, rm: !!(mq && mq.matches) };
+    var EO = "cubic-bezier(.23, 1, .32, 1)", EIO = "cubic-bezier(.77, 0, .175, 1)", EI = "cubic-bezier(.4, 0, 1, 1)";
+    var canAnimate = typeof Element !== "undefined" && "animate" in Element.prototype;
+    function D(ms) { return ms * S.k; }
+    function q(sel, el) { return (el || document).querySelector(sel); }
+    function qa(sel, el) { return Array.prototype.slice.call((el || document).querySelectorAll(sel)); }
+
+    /* ---------- Interruptible animation helpers ---------- */
+    function stop(el) {
+      if (!el._a) return;
+      try { el._a.commitStyles(); } catch (e) {}
+      el._a.cancel();
+      el._a = null;
+    }
+    function run(el, frames, dur, easing, delay, done) {
+      stop(el);
+      if (!canAnimate) { var last = frames[frames.length - 1]; for (var p in last) if (p !== "offset") el.style[p] = last[p]; if (done) done(); return null; }
+      var a = el.animate(frames, { duration: D(dur), easing: easing || EO, delay: D(delay || 0), fill: "both" });
+      el._a = a;
+      a.onfinish = function () {
+        if (el._a !== a) return;
+        try { a.commitStyles(); } catch (e) {}
+        a.cancel();
+        el._a = null;
+        if (done) done();
+      };
+      return a;
+    }
+    // Animate from wherever the element is now to `end` (implicit start frame = interruptible).
+    function to(el, end, dur, easing, delay, done) { return run(el, [end], dur, easing, delay, done); }
+    function set(el, styles) { stop(el); for (var p in styles) el.style[p] = styles[p]; }
+    // Same as to(), but under Reduce Motion movement jumps and only opacity animates.
+    function move(el, end, dur, easing, delay, done) {
+      if (!S.rm) return to(el, end, dur, easing, delay, done);
+      stop(el);
+      var rest = {}, n = 0;
+      for (var p in end) {
+        if (p === "transform" || p === "filter" || p === "clipPath") el.style[p] = end[p];
+        else { rest[p] = end[p]; n++; }
+      }
+      if (n) return to(el, rest, dur, "linear", delay, done);
+      if (done) done();
+      return null;
+    }
+
+    /* ---------- Page controls ---------- */
+    // Value labels: words in Inter, only the numbers in Geist Mono
+    function valHTML(t) {
+      var esc = String(t || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      return esc.replace(/[+]?\d[\d.:]*(?:ms|%|px)?/g, '<span class="mono">$&</span>');
+    }
+    var closers = [];
+    function apply() {
+      root.setAttribute("data-mode", S.on ? "on" : "off");
+      root.style.setProperty("--k", S.k);
+      root.classList.toggle("rm", S.rm);
+      qa(".m-val", root).forEach(function (v) { v.innerHTML = valHTML(S.on ? v.getAttribute("data-on") : v.getAttribute("data-off")); });
+      qa(".m-bar [data-set]").forEach(function (b) {
+        var v = b.getAttribute("data-v");
+        var pressed = b.getAttribute("data-set") === "mode" ? (v === "on") === S.on : Number(v) === S.k;
+        b.setAttribute("aria-pressed", pressed ? "true" : "false");
+      });
+      var sw = document.getElementById("rm-switch");
+      if (sw) sw.setAttribute("aria-checked", S.rm ? "true" : "false");
+      if (arcGuide) arcGuide();
+    }
+    qa(".m-bar [data-set]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var v = b.getAttribute("data-v");
+        if (b.getAttribute("data-set") === "mode") S.on = v === "on"; else S.k = Number(v);
+        apply();
+      });
+    });
+    var rmSwitch = document.getElementById("rm-switch");
+    if (rmSwitch) rmSwitch.addEventListener("click", function () { S.rm = !S.rm; apply(); });
+    if (mq) {
+      var onMq = function () { S.rm = mq.matches; apply(); };
+      if (mq.addEventListener) mq.addEventListener("change", onMq); else if (mq.addListener) mq.addListener(onMq);
+    }
+    document.addEventListener("pointerdown", function (e) {
+      closers.forEach(function (c) { if (c.isOpen() && !c.el.contains(e.target)) c.close(); });
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape") return;
+      closers.forEach(function (c) { if (c.isOpen()) { c.close(); if (c.focus) c.focus(); } });
+    });
+    function demo(name) { return q('[data-demo="' + name + '"]', root); }
+
+    /* 1 Ease-out entrance */
+    (function () {
+      var st = demo("enter"); if (!st) return;
+      var card = q(".d-toast", st), shown = false;
+      st.addEventListener("click", function () {
+        shown = !shown;
+        st.setAttribute("aria-pressed", shown ? "true" : "false");
+        if (shown) move(card, { opacity: 1, transform: "translateY(0px)" }, 200, S.on ? EO : EI);
+        else move(card, { opacity: 0, transform: "translateY(16px)" }, 160, EI);
+      });
+    })();
+
+    /* 2 Menu: 200 ms vs 600 ms (CSS transitions) */
+    (function () {
+      var st = demo("menu"); if (!st) return;
+      var btn = q(".d-trigger", st), label = q(".d-trigger span", st);
+      function setOpen(v) { st.classList.toggle("open", v); btn.setAttribute("aria-expanded", v ? "true" : "false"); }
+      btn.addEventListener("click", function () { setOpen(!st.classList.contains("open")); });
+      qa(".menu button", st).forEach(function (item) {
+        item.addEventListener("click", function () {
+          qa(".menu button", st).forEach(function (o) { o.setAttribute("aria-checked", o === item ? "true" : "false"); });
+          label.textContent = "Sort: " + item.textContent.trim();
+          setOpen(false);
+          btn.focus({ preventScroll: true });
+        });
+      });
+      closers.push({ el: st, isOpen: function () { return st.classList.contains("open"); }, close: function () { setOpen(false); }, focus: function () { btn.focus({ preventScroll: true }); } });
+    })();
+
+    /* 3 Stagger rows by 30 ms */
+    (function () {
+      var st = demo("list"); if (!st) return;
+      var rows = qa(".d-row", st);
+      st.addEventListener("click", function () {
+        rows.forEach(function (r) { set(r, { opacity: "0", transform: "translateY(8px)" }); });
+        rows.forEach(function (r, i) { move(r, { opacity: 1, transform: "translateY(0px)" }, 200, EO, S.on ? i * 30 : 0); });
+      });
+    })();
+
+    /* 4 Press to 0.97 (CSS :active) */
+    (function () {
+      var st = demo("press"); if (!st) return;
+      var btn = q(".d-btn", st), out = q(".d-mut", st), n = 0;
+      btn.addEventListener("click", function () { n++; out.textContent = n + (n === 1 ? " item in bag" : " items in bag"); });
+    })();
+
+    /* 5 Knob stretches 12% while it moves */
+    (function () {
+      var st = demo("knob"); if (!st) return;
+      var sw = q(".d-switch", st), knob = q(".knob", st), out = q(".d-mut", st), on = false, TRAVEL = 40;
+      sw.addEventListener("click", function () {
+        on = !on;
+        sw.setAttribute("aria-checked", on ? "true" : "false");
+        out.textContent = on ? "Wi-Fi on" : "Wi-Fi off";
+        var target = on ? TRAVEL : 0;
+        stop(knob);
+        if (S.rm || !canAnimate) { knob.style.transform = "translateX(" + target + "px)"; return; }
+        var cur = 0;
+        try { cur = new DOMMatrix(getComputedStyle(knob).transform).m41; } catch (e) { cur = on ? 0 : TRAVEL; }
+        var mid = (cur + target) / 2, s = S.on ? 1.12 : 1;
+        run(knob, [
+          { transform: "translateX(" + cur + "px) scaleX(1)" },
+          { transform: "translateX(" + mid + "px) scaleX(" + s + ")", offset: 0.5 },
+          { transform: "translateX(" + target + "px) scaleX(1)" }
+        ], 200, EIO);
+      });
+    })();
+
+    /* 6 Details settle in turn */
+    (function () {
+      var st = demo("settle"); if (!st) return;
+      var card = q(".pc", st), parts = [q(".img", st)].concat(qa(".pc > span:last-child > *", st));
+      st.addEventListener("click", function () {
+        set(card, { opacity: "0", transform: "scale(0.95)" });
+        parts.forEach(function (p) { set(p, { opacity: "0", transform: "translateY(6px)" }); });
+        move(card, { opacity: 1, transform: "scale(1)" }, 200, EO);
+        parts.forEach(function (p, i) { move(p, { opacity: 1, transform: "translateY(0px)" }, 200, EO, S.on ? (i + 1) * 30 : 0); });
+      });
+    })();
+
+    /* 7 Arc across the screen */
+    var arcGuide = null;
+    (function () {
+      var st = demo("arc"); if (!st) return;
+      var ball = q(".ball", st), ends = qa(".end", st), path = q(".guide path", st), svg = q(".guide", st);
+      var atB = false, R = 28, P = 24;
+      function pts() {
+        var w = st.clientWidth, h = st.clientHeight;
+        return { A: { x: P, y: h - P - R }, B: { x: w - P - R, y: P } };
+      }
+      function T(p) { return "translate(" + p.x.toFixed(1) + "px, " + p.y.toFixed(1) + "px)"; }
+      arcGuide = function () {
+        var p = pts(), w = st.clientWidth, h = st.clientHeight, r = R / 2;
+        svg.setAttribute("viewBox", "0 0 " + w + " " + h);
+        path.setAttribute("d", S.on
+          ? "M" + (p.A.x + r) + " " + (p.A.y + r) + " Q" + (p.A.x + r) + " " + (p.B.y + r) + " " + (p.B.x + r) + " " + (p.B.y + r)
+          : "M" + (p.A.x + r) + " " + (p.A.y + r) + " L" + (p.B.x + r) + " " + (p.B.y + r));
+        ends[0].style.transform = T(p.A);
+        ends[1].style.transform = T(p.B);
+        if (!ball._a) ball.style.transform = T(atB ? p.B : p.A);
+      };
+      arcGuide();
+      if ("ResizeObserver" in window) new ResizeObserver(function () { arcGuide(); }).observe(st);
+      function ease(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+      st.addEventListener("click", function () {
+        stop(ball);
+        var m; try { m = new DOMMatrix(getComputedStyle(ball).transform); } catch (e) { m = { m41: 0, m42: 0 }; }
+        var from = { x: m.m41, y: m.m42 };
+        atB = !atB;
+        var p = pts(), dest = atB ? p.B : p.A, c = { x: p.A.x, y: p.B.y };
+        if (S.rm) {
+          run(ball, [
+            { opacity: 1, transform: T(from) }, { opacity: 0, transform: T(from), offset: 0.5 },
+            { opacity: 0, transform: T(dest), offset: 0.5 }, { opacity: 1, transform: T(dest) }
+          ], 300, "linear");
+          return;
+        }
+        var frames = [], N = 32;
+        for (var i = 0; i <= N; i++) {
+          var t = ease(i / N), x, y;
+          if (S.on) {
+            x = (1 - t) * (1 - t) * from.x + 2 * (1 - t) * t * c.x + t * t * dest.x;
+            y = (1 - t) * (1 - t) * from.y + 2 * (1 - t) * t * c.y + t * t * dest.y;
+          } else {
+            x = from.x + (dest.x - from.x) * t;
+            y = from.y + (dest.y - from.y) * t;
+          }
+          frames.push({ transform: T({ x: x, y: y }) });
+        }
+        run(ball, frames, 400, "linear");
+      });
+    })();
+
+    /* 8 Pulse once on success */
+    (function () {
+      var st = demo("pulse"); if (!st) return;
+      var btn = q(".d-save", st), label = q("span", btn), check = q(".i-done", btn), saved = false;
+      btn.addEventListener("click", function () {
+        saved = !saved;
+        btn.classList.toggle("is-saved", saved);
+        btn.setAttribute("aria-pressed", saved ? "true" : "false");
+        label.textContent = saved ? "Saved" : "Save";
+        if (saved && S.on && !S.rm) {
+          run(check, [{ transform: "scale(0.8)" }, { transform: "scale(1.08)", offset: 0.6 }, { transform: "scale(1)" }], 200, EO);
+        }
+      });
+    })();
+
+    /* 9 Ease-in-out from A to B (CSS) */
+    (function () {
+      var st = demo("ab"); if (!st) return;
+      var seg = q(".d-seg", st), btns = qa(".d-seg button", st), bars = qa(".d-bars span", st);
+      var DATA = [[.42, .66, .3, .82, .55, .7, .46], [.7, .5, .86, .6, .92, .4, .74], [.55, .8, .64, .45, .7, .96, .6]];
+      function pick(i) {
+        seg.style.setProperty("--i", i);
+        btns.forEach(function (b, j) { b.setAttribute("aria-pressed", j === i ? "true" : "false"); });
+        bars.forEach(function (b, j) { b.style.setProperty("--h", DATA[i][j]); });
+      }
+      btns.forEach(function (b, i) { b.addEventListener("click", function () { pick(i); }); });
+      pick(0);
+    })();
+
+    /* 10 Popover from 0.95 (CSS) */
+    (function () {
+      var st = demo("pop"); if (!st) return;
+      var btn = q(".info", st);
+      function setOpen(v) { st.classList.toggle("open", v); btn.setAttribute("aria-expanded", v ? "true" : "false"); }
+      btn.addEventListener("click", function () { setOpen(!st.classList.contains("open")); });
+      closers.push({ el: st, isOpen: function () { return st.classList.contains("open"); }, close: function () { setOpen(false); }, focus: function () { btn.focus({ preventScroll: true }); } });
+    })();
+
+    /* 11 Menus grow from the button that opened them */
+    (function () {
+      var st = demo("origin"); if (!st) return;
+      var menu = q(".omenu", st), btns = qa(".tools button", st), openBy = -1, lastBy = 0;
+      var MENUS = [["All items", "In stock", "On sale"], ["Newest", "Price", "Rating"], ["Copy link", "Message", "Mail"]];
+      function close() {
+        st.classList.remove("open");
+        btns.forEach(function (b) { b.setAttribute("aria-expanded", "false"); });
+        openBy = -1;
+      }
+      function open(i) {
+        var b = btns[i];
+        if (openBy !== -1) { menu.style.transition = "none"; st.classList.remove("open"); void menu.offsetWidth; menu.style.transition = ""; }
+        menu.innerHTML = MENUS[i].map(function (t) { return '<li role="none"><button type="button" role="menuitem">' + t + "</button></li>"; }).join("");
+        var sr = st.getBoundingClientRect(), br = b.getBoundingClientRect(), W = 168, pad = 16;
+        var cx = br.left - sr.left + br.width / 2;
+        var left = Math.max(pad, Math.min(cx - W / 2, sr.width - W - pad));
+        if (i === 0) left = pad; else if (i === btns.length - 1) left = sr.width - W - pad;
+        menu.style.left = left + "px";
+        var below = (br.top - sr.top) - (sr.height - 64); // menu bottom sits 64 px above stage bottom
+        menu.style.transformOrigin = S.on ? (cx - left) + "px calc(100% + " + (below + br.height / 2) + "px)" : "50% 50%";
+        void menu.offsetWidth;
+        st.classList.add("open");
+        btns.forEach(function (o, j) { o.setAttribute("aria-expanded", j === i ? "true" : "false"); });
+        openBy = i; lastBy = i;
+      }
+      btns.forEach(function (b, i) { b.addEventListener("click", function () { openBy === i ? close() : open(i); }); });
+      // Picking an item closes the menu and hands focus back to its button
+      menu.addEventListener("click", function (e) {
+        if (!e.target.closest || !e.target.closest('[role="menuitem"]') || openBy === -1) return;
+        var b = btns[openBy];
+        close();
+        b.focus({ preventScroll: true });
+      });
+      closers.push({ el: st, isOpen: function () { return openBy !== -1; }, close: close, focus: function () { var b = btns[lastBy]; if (b) b.focus({ preventScroll: true }); } });
+    })();
+
+    /* 12 Exit back to the trigger (CSS clip-path) */
+    (function () {
+      var st = demo("exit"); if (!st) return;
+      var fab = q(".fab", st);
+      function setOpen(v) { st.classList.toggle("open", v); fab.setAttribute("aria-expanded", v ? "true" : "false"); fab.setAttribute("aria-label", v ? "Close" : "Create"); }
+      fab.addEventListener("click", function () { setOpen(!st.classList.contains("open")); });
+      closers.push({ el: st, isOpen: function () { return st.classList.contains("open"); }, close: function () { setOpen(false); }, focus: function () { fab.focus({ preventScroll: true }); } });
+    })();
+
+    /* 13 No bounce */
+    (function () {
+      var st = demo("bounce"); if (!st) return;
+      var b = q(".banner", st), shown = false, OUT = "translateY(calc(-100% - 24px))";
+      st.addEventListener("click", function () {
+        shown = !shown;
+        st.setAttribute("aria-pressed", shown ? "true" : "false");
+        if (!shown) { move(b, { opacity: S.rm ? 0 : 1, transform: OUT }, 160, EI); return; }
+        if (S.rm) { set(b, { transform: "translateY(0px)", opacity: "0" }); to(b, { opacity: 1 }, 200, "linear"); return; }
+        if (S.on) { to(b, { opacity: 1, transform: "translateY(0px)" }, 200, EO); return; }
+        run(b, [
+          { opacity: 1, transform: OUT },
+          { opacity: 1, transform: "translateY(16px)", offset: 0.45 },
+          { opacity: 1, transform: "translateY(-6px)", offset: 0.7 },
+          { opacity: 1, transform: "translateY(2px)", offset: 0.86 },
+          { opacity: 1, transform: "translateY(0px)" }
+        ], 700, "ease-out");
+      });
+    })();
+
+    /* 14 Follow the finger 1:1 */
+    (function () {
+      var st = demo("follow"); if (!st) return;
+      var track = q(".track", st), fill = q(".fill", st), thumb = q(".thumb", st), out = q(".readout .mono", st);
+      var val = 40, drag = false;
+      function render() {
+        fill.style.width = val + "%";
+        thumb.style.left = val + "%";
+        var r = Math.round(val);
+        out.textContent = r + "%";
+        thumb.setAttribute("aria-valuenow", r);
+        thumb.setAttribute("aria-valuetext", r + "%");
+      }
+      function fromX(x) { var r = track.getBoundingClientRect(); val = Math.max(0, Math.min(100, (x - r.left) / r.width * 100)); render(); }
+      track.addEventListener("pointerdown", function (e) { drag = true; try { track.setPointerCapture(e.pointerId); } catch (er) {} fromX(e.clientX); thumb.focus({ preventScroll: true }); e.preventDefault(); });
+      track.addEventListener("pointermove", function (e) { if (drag) fromX(e.clientX); });
+      ["pointerup", "pointercancel", "lostpointercapture"].forEach(function (t) { track.addEventListener(t, function () { drag = false; }); });
+      thumb.addEventListener("keydown", function (e) {
+        var step = { ArrowRight: 5, ArrowUp: 5, ArrowLeft: -5, ArrowDown: -5, PageUp: 20, PageDown: -20 }[e.key];
+        if (e.key === "Home") { val = 0; } else if (e.key === "End") { val = 100; } else if (step) { val = Math.max(0, Math.min(100, val + step)); } else return;
+        e.preventDefault(); render();
+      });
+      render();
+    })();
+
+    /* 15 Exits 20% shorter (CSS: 200 in, 160 out) */
+    (function () {
+      var st = demo("sheet"); if (!st) return;
+      var btn = q(".d-btn", st), scrim = q(".scrim", st), sh = q(".sh", st);
+      function setOpen(v) { st.classList.toggle("open", v); btn.setAttribute("aria-expanded", v ? "true" : "false"); }
+      btn.addEventListener("click", function () { setOpen(!st.classList.contains("open")); });
+      scrim.addEventListener("click", function () { setOpen(false); });
+      sh.addEventListener("click", function () { setOpen(false); });
+      closers.push({ el: st, isOpen: function () { return st.classList.contains("open"); }, close: function () { setOpen(false); }, focus: function () { btn.focus({ preventScroll: true }); } });
+    })();
+
+    /* 16 Overlap old and new states */
+    (function () {
+      var st = demo("overlap"); if (!st) return;
+      var tabs = qa('[role="tab"]', st), panels = qa('[role="tabpanel"]', st), cur = 0;
+      tabs.forEach(function (t, i) {
+        t.addEventListener("click", function () {
+          if (i === cur) return;
+          var old = panels[cur], nw = panels[i];
+          tabs.forEach(function (o, j) { o.setAttribute("aria-selected", j === i ? "true" : "false"); });
+          old.setAttribute("aria-hidden", "true"); nw.removeAttribute("aria-hidden");
+          to(old, { opacity: 0 }, 160, EI);
+          to(nw, { opacity: 1 }, 200, EO, S.on ? 0 : 280);
+          cur = i;
+        });
+      });
+    })();
+
+    /* 17 Mask for the color change, from the tap point */
+    (function () {
+      var st = demo("mask"); if (!st) return;
+      var layer = q(".dark", st), dark = false, full = false;
+      st.addEventListener("click", function (e) {
+        dark = !dark;
+        st.setAttribute("aria-pressed", dark ? "true" : "false");
+        st.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+        var r = st.getBoundingClientRect();
+        var x = e.detail ? e.clientX - r.left : r.width / 2, y = e.detail ? e.clientY - r.top : r.height / 2;
+        var R = Math.ceil(Math.max(Math.hypot(x, y), Math.hypot(r.width - x, y), Math.hypot(x, r.height - y), Math.hypot(r.width - x, r.height - y)));
+        var at = " at " + Math.round(x) + "px " + Math.round(y) + "px)";
+        stop(layer);
+        if (S.on && !S.rm) {
+          // Start from the tap point whenever the circle is hidden, so it grows from the finger
+          var cm = /circle\(([\d.]+)px/.exec(getComputedStyle(layer).clipPath || ""), r0 = cm ? parseFloat(cm[1]) : 0;
+          if (full || parseFloat(getComputedStyle(layer).opacity) < 1 || (dark && r0 < 1)) {
+            layer.style.opacity = "1";
+            layer.style.clipPath = "circle(" + (dark ? 0 : R) + "px" + at;
+            full = false;
+          }
+          to(layer, { clipPath: "circle(" + (dark ? R : 0) + "px" + at }, dark ? 300 : 240, EIO);
+        } else {
+          if (!full) { layer.style.opacity = dark ? "0" : "1"; layer.style.clipPath = "inset(0px)"; full = true; }
+          to(layer, { opacity: dark ? 1 : 0 }, 200, S.rm ? "linear" : EO);
+        }
+      });
+    })();
+
+    /* 18 Icons crossfade with a blur (CSS) */
+    (function () {
+      var st = demo("icon"); if (!st) return;
+      var btn = q(".d-play", st), out = q(".d-mut", st), on = false;
+      btn.addEventListener("click", function () {
+        on = !on;
+        btn.classList.toggle("is-on", on);
+        btn.setAttribute("aria-pressed", on ? "true" : "false");
+        btn.setAttribute("aria-label", on ? "Pause" : "Play");
+        out.textContent = on ? "Playing" : "Paused";
+      });
+    })();
+
+    /* 19 Rubber band past the edges */
+    (function () {
+      var st = demo("rubber"); if (!st) return;
+      var vp = q(".vp", st), rail = q(".rail", st), dots = qa(".dots button", st), n = 3, idx = 0;
+      var startX = 0, startY = 0, dx = 0, dragging = false, decided = false, pid = null;
+      function W() { return vp.clientWidth; }
+      function setDots() { dots.forEach(function (d, i) { if (i === idx) d.setAttribute("aria-current", "true"); else d.removeAttribute("aria-current"); }); }
+      function offsetFor(d) {
+        var w = W(), base = -idx * w, o = base + d, min = -(n - 1) * w;
+        if (o > 0 || o < min) {
+          var edge = o > 0 ? 0 : min, over = Math.abs(o - edge);
+          if (!S.on) return edge;
+          var band = (1 - 1 / (over * 0.55 / w + 1)) * w;
+          return edge + (o > 0 ? band : -band);
+        }
+        return o;
+      }
+      function settle() {
+        setDots();
+        var end = { transform: "translateX(" + (-idx * W()) + "px)" };
+        if (S.rm) { stop(rail); rail.style.transform = end.transform; return; }
+        to(rail, end, 200, EO);
+      }
+      vp.addEventListener("pointerdown", function (e) {
+        if (e.button !== undefined && e.button !== 0) return;
+        stop(rail);
+        var m; try { m = new DOMMatrix(getComputedStyle(rail).transform).m41; } catch (er) { m = -idx * W(); }
+        // Pick up from where the rail is, even mid-settle
+        startX = e.clientX - (m + idx * W()); startY = e.clientY; dx = m + idx * W();
+        dragging = true; decided = e.pointerType !== "touch"; pid = e.pointerId;
+        if (decided) { try { vp.setPointerCapture(pid); } catch (er) {} }
+      });
+      vp.addEventListener("pointermove", function (e) {
+        if (!dragging || e.pointerId !== pid) return;
+        var mx = e.clientX - startX, my = e.clientY - startY;
+        if (!decided) {
+          if (Math.abs(mx) < 6 && Math.abs(my) < 6) return;
+          if (Math.abs(my) > Math.abs(mx)) { dragging = false; return; }
+          decided = true; try { vp.setPointerCapture(pid); } catch (er) {}
+        }
+        dx = mx;
+        rail.style.transform = "translateX(" + offsetFor(dx) + "px)"; // 1:1, no tween while dragging
+      });
+      function end(e) {
+        if (!dragging || (e && e.pointerId !== pid)) return;
+        dragging = false;
+        var w = W();
+        if (dx < -w * 0.2 && idx < n - 1) idx++;
+        else if (dx > w * 0.2 && idx > 0) idx--;
+        dx = 0;
+        settle();
+      }
+      vp.addEventListener("pointerup", end);
+      vp.addEventListener("pointercancel", end);
+      vp.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowRight" && idx < n - 1) { idx++; settle(); e.preventDefault(); }
+        else if (e.key === "ArrowLeft" && idx > 0) { idx--; settle(); e.preventDefault(); }
+      });
+      dots.forEach(function (d, i) { d.addEventListener("click", function () { idx = i; settle(); }); });
+      if ("ResizeObserver" in window) new ResizeObserver(function () { if (!dragging) { stop(rail); rail.style.transform = "translateX(" + (-idx * W()) + "px)"; } }).observe(vp);
+    })();
+
+    /* 20 Shared element: the cover itself travels to the detail view */
+    (function () {
+      var st = demo("shared"); if (!st) return;
+      var tiles = qa(".cv", st), detail = q(".detail", st), bg = q(".dbg", st), big = q(".big", st);
+      var title = q(".info strong", st), meta = q(".info .d-mut", st);
+      var texts = qa(".info > *, .tracks > *", st), cur = -1, token = 0;
+      function rel(el) {
+        var s = st.getBoundingClientRect(), r = el.getBoundingClientRect();
+        return { x: r.left - s.left, y: r.top - s.top, w: r.width };
+      }
+      function fromTile(i) {
+        var t = rel(q(".art", tiles[i]));
+        return "translate(" + (t.x - big.offsetLeft) + "px, " + (t.y - big.offsetTop) + "px) scale(" + (t.w / big.offsetWidth) + ")";
+      }
+      function open(i) {
+        var my = ++token, art = q(".art", tiles[i]);
+        cur = i;
+        title.textContent = tiles[i].getAttribute("data-t");
+        meta.textContent = tiles[i].getAttribute("data-a");
+        big.style.background = getComputedStyle(art).backgroundColor;
+        big.innerHTML = art.innerHTML;
+        detail.classList.add("on");
+        detail.tabIndex = 0;
+        var shared = S.on && !S.rm;
+        if (shared) {
+          set(big, { opacity: "1" });
+          run(big, [{ transform: fromTile(i) }, { transform: "none" }], 300, EIO);
+          art.style.visibility = "hidden";
+        } else {
+          set(big, { transform: "none", opacity: "0" });
+          to(big, { opacity: 1 }, 200, EO);
+        }
+        set(bg, { opacity: "0" }); to(bg, { opacity: 1 }, 200, EO);
+        texts.forEach(function (t, j) { set(t, { opacity: "0" }); to(t, { opacity: 1 }, 200, EO, shared ? 120 + j * 30 : 0); });
+        detail.focus({ preventScroll: true });
+        return my;
+      }
+      function close() {
+        if (cur === -1) return;
+        var my = ++token, i = cur, art = q(".art", tiles[i]);
+        cur = -1;
+        detail.tabIndex = -1;
+        texts.forEach(function (t) { to(t, { opacity: 0 }, 120, EI); });
+        var fin = function () {
+          if (my !== token) return;
+          detail.classList.remove("on");
+          art.style.visibility = "";
+          set(big, { transform: "none", opacity: "1" });
+          tiles[i].focus({ preventScroll: true });
+        };
+        if (S.on && !S.rm) {
+          to(bg, { opacity: 0 }, 160, EI, 60);
+          to(big, { transform: fromTile(i) }, 240, EIO, 0, fin);
+        } else {
+          to(bg, { opacity: 0 }, 160, EI);
+          to(big, { opacity: 0 }, 160, EI, 0, fin);
+        }
+      }
+      tiles.forEach(function (t, i) { t.addEventListener("click", function () { open(i); }); });
+      detail.addEventListener("click", close);
+      detail.addEventListener("keydown", function (e) { if (e.key === "Escape") { e.stopPropagation(); close(); } });
+    })();
+
+    /* ---------- Values: CSS custom properties + the rules as a list ---------- */
+    // [declaration, comment]: every trailing comment starts at the same column
+    var DECLS = [
+      ["--ease-out: cubic-bezier(.23, 1, .32, 1);", "entrances"],
+      ["--ease-in-out: cubic-bezier(.77, 0, .175, 1);", "A to B"],
+      ["--ease-in: cubic-bezier(.4, 0, 1, 1);", "exits"],
+      ["--dur-menu: 200ms;", "menus: 150 to 250 ms, avoid 600 ms"],
+      ["--dur-in: 200ms;", "entrances"],
+      ["--dur-out: 160ms;", "exits: 20% shorter"],
+      ["--stagger: 30ms;", "list rows, details as they settle"],
+      ["--press-scale: 0.97;", "buttons on press"],
+      ["--popover-scale: 0.95;", "popovers start here, from the trigger"],
+      ["--knob-stretch: 1.12;", "toggles and sliders while they move"],
+      ["--bounce: 0;", "everyday UI"]
+    ];
+    function pad(t, n) { while (t.length < n) t += " "; return t; }
+    var CSS_TEXT = ["/* tasu.ai motion values. Rules: taste.md section 7 (S3, S12) */", ":root {"]
+      .concat(DECLS.map(function (d) { return pad("  " + d[0], 49) + "/* " + d[1] + " */"; }))
+      .concat([
+        "}",
+        "",
+        "/* Reduce Motion: swap movement for fades */",
+        "@media (prefers-reduced-motion: reduce) {",
+        "  :root {",
+        "    --press-scale: 1;",
+        "    --popover-scale: 1;",
+        "    --knob-stretch: 1;",
+        "  }",
+        "}"
+      ]).join("\n");
+    var pre = document.getElementById("m-css");
+    if (pre) {
+      pre.innerHTML = CSS_TEXT.split("\n").map(function (line) {
+        var esc = line.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+        return esc.replace(/(\/\*.*?\*\/)/g, '<span class="c">$1</span>');
+      }).join("\n");
+    }
+    function rulesList() {
+      var data = window.TASU_DATA && window.TASU_DATA.motion;
+      var lines = ["Motion rules (taste.md section 7, sources S3 and S12)"];
+      if (data && data.length) {
+        data.forEach(function (m) {
+          if (m.n === 21) lines.push("", "Also (S2, S4, S14):");
+          lines.push(m.n <= 20 ? m.n + ". " + m.rule : "- " + m.rule);
+        });
+      } else {
+        qa(".m-card .m-body > h3", root).forEach(function (h, i) { lines.push((i + 1) + ". " + h.textContent.trim()); });
+      }
+      return lines.join("\n");
+    }
+    var copyBtn = document.getElementById("copy-motion");
+    if (copyBtn) copyBtn.addEventListener("click", function () {
+      var text = CSS_TEXT + "\n\n" + rulesList() + "\n";
+      if (window.tasu && window.tasu.copy) window.tasu.copy(text, copyBtn, pre).then(function (ok) { if (ok) window.tasu.toast("Motion values copied: 11 values, 24 rules"); });
+    });
+
+    apply();
+  });
+  </script>
+</body>
+</html>

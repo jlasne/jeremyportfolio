@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- 1. Charset + viewport -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- 2. Title (headline + " | tasu.ai", 60 characters or less) + description (70 to 160 characters, the answer first) -->
+  <title>Page headline | tasu.ai</title>
+  <meta name="description" content="Template for every tasu.ai page. Copy this head, header and footer, then fill the main element with one job and one lime button.">
+  <!-- 3. Canonical goes here on a real page:
+       link rel=canonical href=https://www.jeremylasne.com/taste/PAGE/ (home: /taste/).
+       This template has none and stays noindex, so the sitemap skips it. -->
+  <meta name="robots" content="noindex">
+  <!-- 4. Open Graph + Twitter -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="tasu.ai">
+  <meta property="og:url" content="https://www.jeremylasne.com/taste/">
+  <meta property="og:title" content="Page headline | tasu.ai">
+  <meta property="og:description" content="Template for every tasu.ai page. Copy this head, header and footer, then fill the main element with one job and one lime button.">
+  <meta property="og:image" content="https://www.jeremylasne.com/og-image.png?v=8">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@jeremylasne">
+  <meta name="twitter:title" content="Page headline | tasu.ai">
+  <meta name="twitter:description" content="Template for every tasu.ai page. Copy this head, header and footer, then fill the main element with one job and one lime button.">
+  <meta name="twitter:image" content="https://www.jeremylasne.com/og-image.png?v=8">
+  <!-- 5. Theme color + icons -->
+  <meta name="theme-color" content="#FAF8F3">
+  <link rel="icon" href="/taste/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <!-- 6. Fonts: Fraunces (display), Inter (UI + body), Geist Mono (values only) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..600&family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap">
+  <!-- 7. Design system, then page CSS (tokens only) -->
+  <link rel="stylesheet" href="/taste/tasu.css">
+  <style>
+    /* Page CSS goes here. Use the tokens from tasu.css: --bg --ink --accent --n1..--n4, --t1..--t7, --s1..--s8, --r-sm --r-in --r-card. */
+  </style>
+  <!-- 8. JS flag before paint (reveal-on-scroll hides only when JS runs), then shared JS, deferred -->
+  <script>document.documentElement.classList.add("js");setTimeout(function(){if(!window.tasu)document.documentElement.classList.remove("js")},3000)</script>
+  <script src="/taste/tasu.js" defer></script>
+  <!-- 9. JSON-LD (real pages): WebPage or WebSite + BreadcrumbList (tasu.ai /taste/ > this page) -->
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="wordmark" href="/taste/" aria-label="tasu.ai home">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="8" fill="#0B0909"/><path d="M10.5 4.5v11a3 3 0 0 0 3 3H16M7 9h8.5" fill="none" stroke="#FAF8F3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>tasu.ai</span>
+      </a>
+      <nav class="nav" aria-label="Main">
+        <ul>
+          <li><a href="/taste/rules/">Rules</a></li>
+          <li><a href="/taste/unslop/">Unslop</a></li>
+          <li><a href="/taste/palettes/">Palettes</a></li>
+          <li><a href="/taste/type/">Type</a></li>
+          <li><a href="/taste/motion/">Motion</a></li>
+          <li><a href="/taste/screens/">Screens</a></li>
+          <li><a href="/taste/prompts/">Prompts</a></li>
+          <li><a href="/taste/skills/">Skills</a></li>
+        </ul>
+      </nav>
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav-sheet" aria-label="Open menu">
+        <span class="menu-icons" aria-hidden="true">
+          <svg class="icon icon-open" viewBox="0 0 24 24"><path d="M4 8h16M4 16h16"/></svg>
+          <svg class="icon icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </span>
+        <span>Menu</span>
+      </button>
+    </div>
+  </header>
+  <div class="sheet-scrim" aria-hidden="true"></div>
+  <nav class="sheet" id="nav-sheet" aria-label="Main">
+    <ul>
+      <li><a href="/taste/rules/">Rules</a></li>
+      <li><a href="/taste/unslop/">Unslop</a></li>
+      <li><a href="/taste/palettes/">Palettes</a></li>
+      <li><a href="/taste/type/">Type</a></li>
+      <li><a href="/taste/motion/">Motion</a></li>
+      <li><a href="/taste/screens/">Screens</a></li>
+      <li><a href="/taste/prompts/">Prompts</a></li>
+      <li><a href="/taste/skills/">Skills</a></li>
+      <li><a href="/taste/sources/">Sources</a></li>
+    </ul>
+  </nav>
+
+  <main id="main">
+    <!-- One job, exactly one .btn-accent. Page head pattern:
+    <section class="container page-head">
+      <h1>Specific headline, no period</h1>
+      <p class="lead">One sentence that answers the question.</p>
+      <div class="row actions"><a class="btn-accent" href="#">The one main action</a><a class="btn" href="#">Secondary</a></div>
+    </section>
+    -->
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <p>tasu.ai · taste using AI · by Jeremy Lasne</p>
+      <nav aria-label="Footer">
+        <a href="/taste/sources/">Sources</a>
+        <a href="https://x.com/jeremylasne" rel="noopener" aria-label="Jeremy Lasne on X">X</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>
