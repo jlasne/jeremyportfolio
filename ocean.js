@@ -28,7 +28,7 @@
   var TAU = Math.PI * 2;
   /* the home is the stage: no veil over the water, brighter animals that swim in from the edges
      when the page opens. On every page a pink narwhal passes now and then, the rare one */
-  var hero = document.body.classList.contains("home"), BOOST = hero ? 1.35 : 1;
+  var hero = document.body.classList.contains("home"), BOOST = 1;
 
   /* ── colours, per theme ─────────────────────────────────────────────── */
   var THEMES = {
@@ -37,9 +37,9 @@
       shark:   { body: "#1d6fb0", hi: "#2b8bd6", rim: "#0f3c66", ch: "#a5e4ff", rimCh: "#3f8fcf", fin: "#185d96", finCh: "#5fb6f0", ridge: "#38bdf8", ridgeCh: "#e6f8ff", gill: "#03101f" },
       hammer:  { body: "#14808f", hi: "#1aa0b2", rim: "#0b4650", ch: "#a3f3ff", rimCh: "#2fa9ba", fin: "#126f7c", finCh: "#55d2e2", ridge: "#22d3ee", ridgeCh: "#e3fcff", gill: "#03101f" },
       narwhal: { body: "#4b55c4", hi: "#5f6ae0", rim: "#262d78", ch: "#cdd2ff", rimCh: "#6d76dc", fin: "#4048a8", finCh: "#8d95f0", spot: "#1e2466", spotCh: "#9aa2ff", tusk: "#f5e6c0", tuskCh: "#a08a5a" },
-      pink:    { body: "#c81e72", hi: "#ff3d9a", rim: "#6e0c3f", ch: "#ffd3e8", rimCh: "#ff5aa8", fin: "#a8195f", finCh: "#ff8cc4", spot: "#5c0934", spotCh: "#ff9fcd", tusk: "#fff0f6", tuskCh: "#ff7ab8" },
-      eye: "#f0fbff", eyeBg: "#030914", alpha: .55, fin: .9, fade: .1, dust: "#38bdf8", dustA: .4, ripple: "#ff3d9a",
-      glow: .55, trail: .34
+      pink:    { body: "#a8195f", hi: "#d6287f", rim: "#5c0934", ch: "#ffc2df", rimCh: "#e0458f", fin: "#8f1650", finCh: "#f07ab3", spot: "#4d0830", spotCh: "#f591c2", tusk: "#f6dce9", tuskCh: "#d9709f" },
+      eye: "#f0fbff", eyeBg: "#030914", alpha: .45, fin: .9, fade: .1, dust: "#38bdf8", dustA: .4, ripple: "#ff3d9a",
+      glow: .22, trail: .5
     },
     /* the day: blue, teal and indigo animals, one narwhal in the pink of the site */
     light: {
@@ -47,7 +47,7 @@
       hammer:  { body: "#4f8f9c", hi: "#6aa7b3", rim: "#a6cdd4", ch: "#0c3038", rimCh: "#3a7a87", fin: "#65a0ab", finCh: "#1b4f59", ridge: "#16707f", ridgeCh: "#eaf4fb", gill: "#0b1626" },
       narwhal: { body: "#8d9ec9", hi: "#a3b2d6", rim: "#c8d2ea", ch: "#1e2a52", rimCh: "#6274a8", fin: "#9aa9cf", finCh: "#33427a", spot: "#4a5a92", spotCh: "#eaf4fb", tusk: "#b88f4a", tuskCh: "#5e4316" },
       pink:    { body: "#ee6aa7", hi: "#f48bbd", rim: "#f8bfd9", ch: "#6b0838", rimCh: "#d1006b", fin: "#f07fb3", finCh: "#9a0050", spot: "#d1006b", spotCh: "#fff0f6", tusk: "#c8005f", tuskCh: "#6b0838" },
-      eye: "#0b1626", eyeBg: "#f4f7fa", alpha: .6, fin: .9, fade: .12, dust: "#0b1626", dustA: .2, ripple: "#d1006b"
+      eye: "#0b1626", eyeBg: "#f4f7fa", alpha: .5, fin: .9, fade: .12, dust: "#0b1626", dustA: .16, ripple: "#d1006b"
     }
   };
   var T = THEMES.dark;
