@@ -33,9 +33,8 @@ with the theme switch. `site.css` holds the rules for every page.
   6 estimated maxes (Epley, as maximehouel.com/myprogress: weight x (1 + reps / 30),
   pull-up and dips with my 85 kg body in the load, shown as the weight added).
   One chart per lift: the theory line for 1 to 10 reps, the actual best at each
-  rep count, and the goals of this week and the next. A goal comes from my last
-  week: the next 2.5 kg step above its theory, or above my best set at those
-  reps if higher. The page is read only: I give each week's top sets in a
+  rep count, and the goals of this week and the next. A goal is the exact theory weight
+  for that week's reps from my max today (to 0.05 kg). The page is read only: I give each week's top sets in a
   Claude Code chat and they go into `workout/record.js`
 - `/creators` redirects (308) to creatormatch.app
 
