@@ -11,4 +11,4 @@ export const RECORD = {
 };
 
 /* the goals of the test day, week 11: one rep each. Hip thrust is a discovery. */
-export const FINAL = { bench: 100, 'pull-up': 37.5, dip: 65, deadlift: 140, squat: 110 };
+export const FINAL = { bench: 100, 'pull-up': 37.5, dip: 60, deadlift: 140, squat: 110 };
