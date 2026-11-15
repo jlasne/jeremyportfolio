@@ -8,7 +8,7 @@
 
 import { load, today, allSessions, esc, short } from '/wellness/data.js';
 import { exercises, daysBetween, shift } from '/wellness/spec.js';
-import { RECORD } from '/workout/record.js';
+import { RECORD, FINAL } from '/workout/record.js';
 
 /* the Monday of week 1 */
 const START = '2026-10-19';
@@ -177,7 +177,9 @@ function drawTotalChart() {
   }
   if (!theory.length) { box.innerHTML = '<p class="chart-empty">No set yet</p>'; return; }
   const W = Math.max(300, Math.round(box.clientWidth) || 720), H = W < 520 ? 230 : 280, L = 48, Rt = 14, T = 30, B = 40;
-  const ys = [...theory, ...actual].map(p => p.kg), step = 10;
+  /* the goal of the test day: the five final goals added up */
+  const final = { w: WEEKS.length, kg: Object.values(FINAL).reduce((s, v) => s + v, 0) };
+  const ys = [...theory, ...actual, final].map(p => p.kg), step = 10;
   const lo = Math.floor(Math.min(...ys) / step) * step - step, hi = Math.ceil(Math.max(...ys) / step) * step + step;
   const x = w => L + (w - 1) / (WEEKS.length - 1) * (W - L - Rt);
   const y = v => T + (hi - v) / (hi - lo) * (H - T - B);
@@ -194,8 +196,11 @@ function drawTotalChart() {
     <line class="test-l" x1="${tx}" x2="${tx}" y1="${T}" y2="${H - B}"></line>
     <text class="ax ax-t" x="${tx - 6}" y="${T + 4}" text-anchor="end">Test day</text>
     <text class="ax ax-t" x="${L - 10}" y="${T - 14}" text-anchor="end">kg</text>
+    <path class="tg" d="${line([theory[theory.length - 1], final])}"></path>
     ${theory.length > 1 ? `<path class="th" d="${line(theory)}"></path>` : ''}
     ${actual.length > 1 ? `<path class="ac" d="${line(actual)}"></path>` : ''}
+    <circle class="tg-d" cx="${x(final.w)}" cy="${y(final.kg)}" r="7" data-tip="Week 11 goal: ${final.kg} kg, ${LIFTS.filter(l => FINAL[l.id]).map(l => `${l.name} ${kgText(l, FINAL[l.id])}`).join(', ')}"></circle>
+    <text class="gl-t" x="${x(final.w) - 12}" y="${y(final.kg) + 4}" text-anchor="end">Goal: ${final.kg} kg</text>
     ${theory.map(p => `<circle class="th-d${p.up.length ? ' th-up' : ''}${p.w === upWeek ? ' is-on' : ''}" cx="${x(p.w)}" cy="${y(p.kg)}" r="${p.up.length ? 6 : 4}" data-w="${p.w}" data-tip="${tipOf(p, 'theory')}"></circle>`).join('')}
     ${actual.map(p => `<circle class="ac-d" cx="${x(p.w)}" cy="${y(p.kg)}" r="5" data-tip="${tipOf(p, 'actual max')}"></circle>`).join('')}
     <text class="gl-t" x="${x(lastT.w) + 10}" y="${y(lastT.kg) + 4}">${half(lastT.kg)} kg</text>
@@ -225,6 +230,8 @@ function drawMaxes() {
     const cells = LIFTS.map(l => {
       const b = (r && best(wr, l.id, r)) || best(wr, l.id), m = ctx.maxes[l.id];
       if (b) return `<td>${kgText(l, b.kg)} <small>&times; ${b.reps}</small></td>`;
+      if (w === WEEKS.length && FINAL[l.id]) return `<td class="goal goal-final" data-tip="My goal for the test day">${kgText(l, FINAL[l.id])} <small>goal</small></td>`;
+      if (w === WEEKS.length && !m) return '<td class="goal">discovery</td>';
       if (w >= week && m && r) return `<td class="goal" data-tip="Theory for ${repsText(r)} from my max today">${kgText(l, goalFor(l, r))} <small>goal</small></td>`;
       return '<td><span class="dim">&middot;</span></td>';
     }).join('');
@@ -245,8 +252,10 @@ function drawChart() {
   const byRep = new Map();
   for (const row of ctx.rows) for (const t of row.sets[pick] || []) if (t.reps <= R && !(byRep.get(t.reps)?.kg >= t.kg)) byRep.set(t.reps, { ...t, day: row.day, week: row.week, rec: row.rec });
   const actual = [...byRep.values()].sort((a, b) => a.reps - b.reps);
-  const goals = [ctx.week, ctx.week + 1].filter(w => w <= WEEKS.length && WEEKS[w - 1]).map(w => ({ w, r: WEEKS[w - 1], kg: goalFor(l, WEEKS[w - 1]) }));
-  const ys = [...theory.map(p => p.kg), ...actual.map(p => p.kg), ...goals.map(g => g.kg)];
+  const goals = [ctx.week, ctx.week + 1].filter(w => w < WEEKS.length && WEEKS[w - 1]).map(w => ({ w, r: WEEKS[w - 1], kg: goalFor(l, WEEKS[w - 1]) }));
+  /* the final goal as a 1-rep max, and the weight it means for 1 to 10 reps */
+  const fin = FINAL[pick], aim = fin ? Array.from({ length: R }, (_, i) => ({ r: i + 1, kg: repMax(l, fin, i + 1) })) : [];
+  const ys = [...theory.map(p => p.kg), ...actual.map(p => p.kg), ...goals.map(g => g.kg), ...aim.map(p => p.kg)];
   const step = 10;
   let lo = Math.floor(Math.min(...ys) / step) * step, hi = Math.ceil(Math.max(...ys) / step) * step;
   if (hi - lo < 20) hi = lo + 20;
@@ -261,6 +270,10 @@ function drawChart() {
     ${Array.from({ length: R }, (_, i) => `<text class="ax" x="${x(i + 1)}" y="${H - B + 22}" text-anchor="middle">${i + 1}</text>`).join('')}
     <text class="ax ax-t" x="${W - Rt}" y="${H - 4}" text-anchor="end">reps</text>
     <text class="ax ax-t" x="${L - 10}" y="${T - 12}" text-anchor="end">${unit}</text>
+    ${aim.length ? `<path class="tg" d="${line(aim)}"></path>
+      ${aim.map(p => `<circle class="hit" cx="${x(p.r)}" cy="${y(p.kg)}" r="10" data-tip="Final goal, ${repsText(p.r)}: ${kgText(l, exact(p.kg))}"></circle>`).join('')}
+      <circle class="tg-d" cx="${x(1)}" cy="${y(fin)}" r="7" data-tip="Week 11 goal: ${kgText(l, fin)} &times; 1"></circle>
+      <text class="gl-t" x="${x(1) + 14}" y="${y(fin) + 4}">W11 goal: ${kgText(l, fin)}</text>` : ''}
     <path class="th" d="${line(theory)}"></path>
     ${theory.map(p => `<circle class="hit" cx="${x(p.r)}" cy="${y(p.kg)}" r="12" data-tip="Theory, ${repsText(p.r)}: ${kgText(l, exact(p.kg))}"></circle>`).join('')}
     ${actual.length > 1 ? `<path class="ac" d="${line(actual)}"></path>` : ''}
