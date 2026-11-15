@@ -43,7 +43,7 @@ button, input { font: inherit; color: inherit; }
 
 /* a secondary action: words, no box */
 .more {
-  display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin-top: 8px;
+  display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin-top: 8px; padding: 0; border: 0; background: none; cursor: pointer;
   font-size: 14px; font-weight: 600; color: var(--fg-80); transition: color .15s;
 }
 @media (hover: hover) { .more:hover { color: var(--pink); } }
@@ -116,8 +116,9 @@ h2 { max-width: 34ch; font: 700 22px/1.3 var(--sans); text-wrap: balance; }
 .vs2-row.lead span:first-child { font-size: 17px; font-weight: 600; color: var(--fg); }
 .vs2-row.lead span:not(:first-child) { font-size: 22px; font-weight: 700; }
 @media (max-width: 520px) {
-  .vs2-row { grid-template-columns: minmax(84px, 1fr) repeat(var(--n), 66px); gap: 4px; min-width: calc(88px + var(--n) * 70px); }
+  .vs2-row { grid-template-columns: minmax(72px, 1fr) repeat(var(--n), 62px); gap: 4px; min-width: calc(72px + var(--n) * 66px); }
   .vs2-row span:not(:first-child) { font-size: 14px; }
+  .vs2-row.lead span:first-child { font-size: 14px; }
   .vs2-row.lead span:not(:first-child) { font-size: 17px; }
   .vs2-row.head span:not(:first-child) { font-size: 12px; }
 }
@@ -268,6 +269,7 @@ fieldset h3 span { font-size: 14px; font-weight: 400; color: var(--fg-60); margi
 .measures td { font-size: 17px; font-weight: 600; line-height: 1; white-space: nowrap; }
 .measures td small { margin-left: 3px; font-size: 12px; font-weight: 400; color: var(--fg-60); }
 .measures tr.lead th { font-weight: 600; color: var(--fg); }
+.measures td.empty-cell { padding: 12px 0; text-align: left; white-space: normal; font-size: 14px; font-weight: 400; line-height: 1.5; color: var(--fg-80); }
 @media (max-width: 559px) { .measures .wide { display: none; } }
 
 /* the measure to draw: tabs, the one on show underlined */
@@ -284,7 +286,7 @@ fieldset h3 span { font-size: 14px; font-weight: 400; color: var(--fg-60); margi
 .sports { display: grid; gap: 24px 28px; margin-top: 12px; }
 @media (min-width: 560px) { .sports { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 900px) { .sports { grid-template-columns: repeat(4, 1fr); } }
-.sport h3 { display: flex; align-items: baseline; justify-content: space-between; padding-bottom: 8px; border-bottom: 1px solid var(--fg-12); font-size: 14px; font-weight: 700; line-height: 1.3; }
+.sport h3 { display: flex; align-items: baseline; justify-content: space-between; font-size: 14px; font-weight: 700; line-height: 1.3; }
 .sport h3 span { font-size: 12px; font-weight: 500; color: var(--fg-60); }
 .sport dl { display: grid; grid-template-columns: auto 1fr; gap: 10px 14px; margin-top: 10px; font-size: 14px; }
 .sport dt { color: var(--fg-80); }

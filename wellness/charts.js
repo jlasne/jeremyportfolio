@@ -46,7 +46,8 @@ function shape(ctx, x, y, w, h, r, all) {
    colour of a day with no number), `band` the normal range drawn behind, `lo` and `hi`
    a fixed scale (otherwise the data's own), `marks(k)` the sessions shown
    as small dots under the bar, `read(i)` what to say about a bar
-   (null: the default line). A tap pins a bar, a second tap lets go.
+   (null: the default line, said whenever nothing is pinned when `quiet` is set). A tap pins a
+   bar, a second tap lets go.
    `ch` is the height of the bars' area in CSS pixels. */
 export function barChart(cv, opts, ch = 170) {
   const CH = ch, R = 4;
@@ -116,7 +117,8 @@ export function barChart(cv, opts, ch = 170) {
       });
     };
     animate ? play(paint) : paint(1);
-    o.read(pick ?? vals.map((v, i) => (v !== undefined ? i : -1)).filter(i => i >= 0).pop() ?? null);
+    /* with nothing pinned, the last bar speaks, or with `quiet` the default line */
+    o.read(pick ?? (o.quiet ? null : vals.map((v, i) => (v !== undefined ? i : -1)).filter(i => i >= 0).pop() ?? null));
   }
   const at = e => {
     if (!geo) return null;

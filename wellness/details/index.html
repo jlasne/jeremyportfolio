@@ -20,7 +20,7 @@
 <link rel="stylesheet" href="/site.css">
 <link rel="stylesheet" href="/wellness/wellness.css">
 </head>
-<body class="wellness">
+<body class="wellness is-loading">
 
 <canvas id="ocean" aria-hidden="true"></canvas>
 
@@ -39,25 +39,26 @@
 </header>
 
 <main>
-  <section data-ocean="fade" class="sec reveal ai" style="margin-top:40px" id="ai" aria-labelledby="aiT">
-    <h1 id="aiT">AI analysis</h1>
-    <p class="ai-run">Last run 8 Nov 2026 · 37 nights · 24 sessions</p>
-    <div class="corr-wrap">
-      <table class="corr">
-        <thead><tr><th scope="col">Factor</th><th scope="col">What it impacts</th><th scope="col">Change</th><th scope="col">Signal strength</th></tr></thead>
-        <tbody>
-        <tr class="down"><th scope="row">Sessions in 7 days</th><td class="corr-imp">RHR</td><td class="corr-tl">+1 session = <em>+0.6 bpm</em></td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>37 nights</td></tr>
-        <tr class="up"><th scope="row">At Maxime's</th><td class="corr-imp">Night score</td><td class="corr-tl"><em>62</em>, against 44</td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>10 of 37 nights</td></tr>
-        <tr class="up"><th scope="row">At Maxime's</th><td class="corr-imp">Deep sleep</td><td class="corr-tl"><em>1h29</em>, against 1h18</td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>10 of 37 nights</td></tr>
-        <tr class="up"><th scope="row">At Maxime's</th><td class="corr-imp">Time asleep</td><td class="corr-tl"><em>8h17</em>, against 7h46</td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>10 of 37 nights</td></tr>
-        <tr class="up"><th scope="row">Wake-up time</th><td class="corr-imp">REM</td><td class="corr-tl">+1 h later = <em>+12 min</em></td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>37 nights</td></tr>
-        <tr class="down"><th scope="row">Level 5 day</th><td class="corr-imp">HRV</td><td class="corr-tl"><em>73 ms</em> next night, against 90</td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>5 of 37 nights</td></tr>
-        <tr class="down"><th scope="row">Level 5 day</th><td class="corr-imp">Night score</td><td class="corr-tl"><em>39</em> next night, against 51</td><td class="corr-n"><span class="corr-tag is-strong">Strong</span>5 of 37 nights</td></tr>
+  <p class="load-err" id="loadErr" role="alert" hidden></p>
+
+  <!-- what the AI found: every strong link, then the night they add up to -->
+  <section class="ai reveal" id="ai" aria-labelledby="aiT" data-ocean="fade">
+    <h1 id="aiT">7 strong links in my last 37 nights</h1>
+    <p class="ai-run">AI analysis, last run 8 Nov 2026, from 37 nights and 24 sessions</p>
+    <table class="corr">
+      <thead><tr><th scope="col">Factor</th><th scope="col">What it changes</th><th scope="col">By how much</th><th scope="col">Nights</th></tr></thead>
+      <tbody>
+        <tr class="down"><th scope="row">Sessions in 7 days</th><td class="corr-imp">RHR</td><td class="corr-tl">+1 session = <em>+0.6 bpm</em></td><td class="corr-n">37 nights</td></tr>
+        <tr class="up"><th scope="row">At Maxime's</th><td class="corr-imp">Night score</td><td class="corr-tl"><em>62</em>, against 44</td><td class="corr-n">10 of 37 nights</td></tr>
+        <tr class="up"><th scope="row">At Maxime's</th><td class="corr-imp">Deep sleep</td><td class="corr-tl"><em>1h29</em>, against 1h18</td><td class="corr-n">10 of 37 nights</td></tr>
+        <tr class="up"><th scope="row">At Maxime's</th><td class="corr-imp">Time asleep</td><td class="corr-tl"><em>8h17</em>, against 7h46</td><td class="corr-n">10 of 37 nights</td></tr>
+        <tr class="up"><th scope="row">Wake-up time</th><td class="corr-imp">REM</td><td class="corr-tl">+1 h later = <em>+12 min</em></td><td class="corr-n">37 nights</td></tr>
+        <tr class="down"><th scope="row">Level 5 day</th><td class="corr-imp">HRV</td><td class="corr-tl"><em>73 ms</em> next night, against 90</td><td class="corr-n">5 of 37 nights</td></tr>
+        <tr class="down"><th scope="row">Level 5 day</th><td class="corr-imp">Night score</td><td class="corr-tl"><em>39</em> next night, against 51</td><td class="corr-n">5 of 37 nights</td></tr>
         </tbody>
-      </table>
-    </div>
+    </table>
     <div class="pn" aria-labelledby="pnT">
-      <h2 id="pnT" class="pn-h">The perfect night</h2>
+      <h2 id="pnT" class="pn-h">The perfect night: HRV 100 ms and 8h08 asleep</h2>
       <ol class="pn-steps">
         <li><span class="pn-t">The week</span><b>2 sessions in the 7 days before</b><span class="pn-w">RHR 1.2 bpm lower than at my usual 4</span></li>
         <li><span class="pn-t">The day</span><b>Level 4 at most</b><span class="pn-w">HRV 90 ms, against 73 after a level 5 day</span></li>
@@ -74,42 +75,50 @@
     </div>
   </section>
 
-  <section data-ocean="fade" class="sec" aria-labelledby="measT">
-    <h2 id="measT">Each <span class="soft">measure</span></h2>
+  <!-- each measure: last night, the week, my normal, the best and worst of 30 days -->
+  <section class="sec" data-ocean="fade" aria-labelledby="measT">
+    <h2 id="measT">Each measure</h2>
     <div class="measures-wrap"><table class="measures" id="measures"></table></div>
   </section>
 
-  <section data-ocean="fade" class="sec" aria-labelledby="nightsT">
-    <h2 id="nightsT">Night <span class="soft">by night</span></h2>
-    <p class="sub">Every night</p>
-    <div class="chips" id="metricChips" role="group" aria-label="Measure"></div>
+  <!-- every night since 1 October, one measure at a time -->
+  <section class="sec" data-ocean="fade" aria-labelledby="nightsT">
+    <h2 id="nightsT">Every night</h2>
+    <div class="tabs" id="metricChips" role="group" aria-label="Measure"></div>
     <p class="readout" id="nightRead" aria-live="polite"></p>
     <div class="chart"><canvas id="nightsC" aria-label="One column per night"></canvas></div>
     <div class="axis" id="nightsAxis"></div>
     <ul class="legend">
       <li><i style="background:var(--good)"></i>Better than normal</li>
       <li><i style="background:var(--mid)"></i>Normal</li>
-      <li><i style="background:var(--bad)"></i>Below normal</li>
-      <li><i style="background:var(--run)"></i><i style="background:var(--swim);margin-left:-4px"></i><i style="background:var(--lift);margin-left:-4px"></i><i style="background:var(--other);margin-left:-4px"></i>Sport the day before</li>
+      <li><i style="background:var(--bad)"></i>Worse than normal</li>
+      <li><i style="background:var(--fg-60);width:6px;height:6px"></i>Sport the day before</li>
     </ul>
   </section>
 
-  <section data-ocean="fade" class="sec" aria-labelledby="bedT">
-    <h2 id="bedT">Bed <span class="soft">to wake</span></h2>
-    <p class="sub">Last 30 nights</p>
-    <p class="readout" id="bedNormal"></p>
+  <!-- bed to wake, the last 30 nights -->
+  <section class="sec" data-ocean="fade" aria-labelledby="bedT">
+    <h2 id="bedT">Bed to wake, last 30 nights</h2>
+    <p class="sub" id="bedNormal"></p>
     <p class="readout" id="bedRead" aria-live="polite"></p>
     <div class="chart"><canvas id="bedC" aria-label="One column per night, from bedtime at the top to wake-up at the bottom"></canvas></div>
     <div class="axis bed-axis" id="bedAxis"></div>
+    <ul class="legend">
+      <li><i style="background:var(--good)"></i>Night score above normal</li>
+      <li><i style="background:var(--mid)"></i>Normal</li>
+      <li><i style="background:var(--bad)"></i>Below normal</li>
+    </ul>
   </section>
 
-  <section data-ocean="fade" class="sec" id="sport" aria-labelledby="sportT">
-    <h2 id="sportT">Sport <span class="soft">log</span></h2>
-    <p class="sub">Every session</p>
+  <!-- sport: my max, the days, every session -->
+  <section class="sec" data-ocean="fade" id="sport" aria-labelledby="sportT">
+    <h2 id="sportT">Sport log</h2>
     <h3 class="max-t">My max</h3>
-    <div class="sports maxes" id="maxList"></div>
+    <div class="sports" id="maxList"></div>
     <div class="cal" id="cal" aria-label="Sessions by day"></div>
+    <p class="cal-key">Filled: a day of sport</p>
     <ul class="list" id="sessList"></ul>
+    <button class="more" id="sessMore" type="button" hidden></button>
   </section>
 </main>
 
@@ -129,42 +138,59 @@
 <script src="/site.js" defer></script>
 <script type="module">
 import { SPEC, SLEEP, SPORT, bests, form, effort, minutes, load as loadOf } from '/wellness/spec.js';
-import { hrOf, mmss, swimTime, allMaxes, maxText, top, measure, formCls, cap, weekday, sessionsOf, allSessions, today, COLOR, dayName, short, clock, hm, esc, label, fmtVal, unitOf, allKeys, monthKeys, val, sportBefore, load, spread, normal, verdict, tone, INDICATORS, nightScores } from '/wellness/data.js';
+import { hrOf, mmss, swimTime, allMaxes, maxText, measure, formCls, cap, weekday, sessionsOf, allSessions, today, dayName, short, clock, hm, esc, label, fmtVal, unitOf, allKeys, monthKeys, val, sportBefore, load, spread, normal, verdict, tone, INDICATORS, nightScores } from '/wellness/data.js';
 import { barChart, spanChart } from '/wellness/charts.js';
 
 const $ = id => document.getElementById(id);
 const mean = v => v.length ? v.reduce((a, b) => a + b, 0) / v.length : undefined;
 const last = () => allKeys().reverse().find(k => INDICATORS.some(id => val(k, id) !== undefined));
+/* loading (grey shapes hold the layout), the data, or an error with a way to try again */
+let loading = true, loadErr = '';
+const skel = (w, h = '1em') => `<span class="skel" style="width:${w};height:${h}"></span>`;
+const logLink = text => `<a class="link" href="/wellness/#log">${text}</a>`;
 
 /* ── each measure ──────────────────────────────────────────────────── */
 function drawMeasures() {
   const ns = nightScores(), month = monthKeys(), k = last();
-  const week = allKeys().filter(x => x <= (k || today)).slice(-7);
+  const head = '<thead><tr><th></th><th>Last night</th><th>7 nights</th><th>Normal</th><th class="wide">Best 30 d</th><th class="wide">Worst 30 d</th></tr></thead>';
+  if (!k && loading) {
+    $('measures').innerHTML = head + '<tbody>' + Array.from({ length: 8 }, () => `<tr><th>${skel('9ch')}</th>${('<td>' + skel('4ch') + '</td>').repeat(3)}<td class="wide">${skel('4ch')}</td><td class="wide">${skel('4ch')}</td></tr>`).join('') + '</tbody>';
+    return;
+  }
+  if (!k) {
+    $('measT').textContent = 'No night logged yet';
+    $('measures').innerHTML = `<tbody><tr><td class="empty-cell">Each measure shows here against my normal once a night is logged. ${logLink('Log last night')}</td></tr></tbody>`;
+    return;
+  }
+  const week = allKeys().filter(x => x <= k).slice(-7);
   const rows = [
-    { name: 'Night score', get: x => ns[x]?.score, better: 'high', fmt: v => `${Math.round(v)}<small>/100</small>`, nm: spread(Object.values(ns).map(n => n.score)) },
+    { name: 'Night score', lead: true, get: x => ns[x]?.score, better: 'high', fmt: v => `${Math.round(v)}<small>/100</small>`, nm: spread(Object.values(ns).map(n => n.score)) },
     ...[...INDICATORS, 'bed', 'wake'].map(id => ({
       name: SLEEP.get(id).name, get: x => val(x, id), better: SLEEP.get(id).better, id,
       fmt: v => `${fmtVal(id, v)}${unitOf(id) ? `<small>${unitOf(id)}</small>` : ''}`, nm: normal(id),
     })),
   ];
-  const head = '<thead><tr><th></th><th>Last night</th><th>7 nights</th><th>Normal</th><th class="wide">Best 30 d</th><th class="wide">Worst 30 d</th></tr></thead>';
+  /* the headline: how many of last night's 5 measures beat my normal */
+  const tones = INDICATORS.filter(id => val(k, id) !== undefined).map(id => verdict(id, val(k, id)));
+  const up = tones.filter(t => t === 'good').length, down = tones.filter(t => t === 'bad').length;
+  $('measT').textContent = `${k === today ? 'Last night' : dayName(k)}: ${up} of ${tones.length} measures better than normal, ${down} worse`;
   $('measures').innerHTML = head + '<tbody>' + rows.map(r => {
-    const v = k ? r.get(k) : undefined;
+    const v = r.get(k);
     const w = mean(week.map(r.get).filter(x => x !== undefined));
     const m = month.map(r.get).filter(x => x !== undefined);
     const best = r.better && m.length ? (r.better === 'high' ? Math.max(...m) : Math.min(...m)) : undefined;
     const worst = r.better && m.length ? (r.better === 'high' ? Math.min(...m) : Math.max(...m)) : undefined;
     const t = x => (x === undefined ? '–' : r.fmt(x));
     const cls = v === undefined || !r.better ? '' : { good: 'f-good', bad: 'f-bad', mid: '' }[tone(v, r.nm, r.better)];
-    return `<tr><th scope="row">${r.name}</th><td class="${cls}">${t(v)}</td><td>${t(w)}</td><td>${t(r.nm?.med)}</td><td class="wide">${t(best)}</td><td class="wide">${t(worst)}</td></tr>`;
+    return `<tr${r.lead ? ' class="lead"' : ''}><th scope="row">${r.name}</th><td class="${cls}">${t(v)}</td><td>${t(w)}</td><td>${t(r.nm?.med)}</td><td class="wide">${t(best)}</td><td class="wide">${t(worst)}</td></tr>`;
   }).join('') + '</tbody>';
 }
 
-/* ── night by night, one measure at a time ─────────────────────────── */
+/* ── every night, one measure at a time ────────────────────────────── */
 const METRICS = INDICATORS;
 let metric = 'hrv';
 function drawChips() {
-  $('metricChips').innerHTML = METRICS.map(id => `<button class="chip" type="button" data-m="${id}" aria-pressed="${id === metric}">${SLEEP.get(id).short}</button>`).join('');
+  $('metricChips').innerHTML = METRICS.map(id => `<button class="tab" type="button" data-m="${id}" aria-pressed="${id === metric}">${SLEEP.get(id).short}</button>`).join('');
 }
 $('metricChips').addEventListener('click', e => {
   const b = e.target.closest('[data-m]'); if (!b) return;
@@ -172,17 +198,19 @@ $('metricChips').addEventListener('click', e => {
 });
 const chart = barChart($('nightsC'), () => {
   const nm = normal(metric);
-  return { keys: allKeys(), value: k => val(k, metric), tone: v => verdict(metric, v, nm), band: nm, marks: sportBefore, read: i => readNight(i, nm) };
+  return { keys: allKeys(), value: k => val(k, metric), tone: v => verdict(metric, v, nm), band: nm, marks: sportBefore, quiet: true, read: i => readNight(i, nm) };
 });
 function readNight(i, nm) {
-  const f = SLEEP.get(metric);
-  if (i === null) { $('nightRead').textContent = nm ? `Normal ${fmtVal(metric, nm.med)} ${unitOf(metric)}` : 'No nights yet'; return; }
+  const f = SLEEP.get(metric), u = unitOf(metric);
+  if (i === null) { $('nightRead').textContent = loading ? '' : nm ? `Shaded: my normal, ${fmtVal(metric, nm.q1)} to ${fmtVal(metric, nm.q3)}${u ? ' ' + u : ''}. Dashed: ${fmtVal(metric, nm.med)}. Tap a bar to read its night.` : 'Not enough nights for a normal yet'; return; }
   const k = allKeys()[i], v = val(k, metric), prev = sportBefore(k);
   const after = prev.length ? `after ${esc(prev.map(label).join(' and ').toLowerCase())}${prev[prev.length - 1].e != null ? ` ending ${clock(prev[prev.length - 1].e)}` : ''}` : 'after a rest day';
-  $('nightRead').innerHTML = v === undefined ? `${dayName(k)} · not logged`
-    : `${dayName(k)} · <b>${fmtVal(metric, v)} ${unitOf(metric)}</b> ${f.short.toLowerCase()}${nm ? ` (normal ${fmtVal(metric, nm.med)})` : ''} · ${after}`;
+  $('nightRead').innerHTML = v === undefined ? `${dayName(k)}: not logged`
+    : `${dayName(k)}: <b>${fmtVal(metric, v)}${u ? ' ' + u : ''}</b> ${f.short}${nm ? `, normal ${fmtVal(metric, nm.med)}` : ''}, ${after}`;
 }
 function drawNights(animate) {
+  const f = SLEEP.get(metric), u = unitOf(metric), k = last(), v = k && val(k, metric), nm = normal(metric);
+  $('nightsT').textContent = v !== undefined && nm ? `${f.short}: ${fmtVal(metric, v)}${u ? ' ' + u : ''} ${k === today ? 'last night' : 'on ' + dayName(k)}, ${fmtVal(metric, nm.med)} is normal` : `${f.short}, every night`;
   chart.draw(animate);
   const keys = allKeys(), n = keys.length;
   $('nightsAxis').innerHTML = [keys[0], keys[Math.floor((n - 1) / 2)], keys[n - 1]].map(k => `<span>${short(k)}</span>`).join('');
@@ -199,43 +227,57 @@ const bedC = spanChart($('bedC'), () => {
   };
 });
 function readBed(i, ns) {
-  if (i === null) { $('bedRead').textContent = 'No night with both times yet'; return; }
+  if (i === null) { $('bedRead').textContent = loading ? '' : 'No night with both times yet'; return; }
   const k = monthKeys()[i], bed = val(k, 'bed'), wake = val(k, 'wake'), min = val(k, 'min'), x = ns[k];
-  $('bedRead').innerHTML = bed === undefined || wake === undefined ? `${dayName(k)} · not logged`
-    : `${dayName(k)} · <b>${clock(bed)}</b> → <b>${clock(wake)}</b>${min !== undefined ? ` · ${hm(min)} asleep` : ''}${x ? ` · night score <b>${Math.round(x.score)}</b>` : ''}`;
+  $('bedRead').innerHTML = bed === undefined || wake === undefined ? `${dayName(k)}: not logged`
+    : `${dayName(k)}: <b>${clock(bed)}</b> to <b>${clock(wake)}</b>${min !== undefined ? `, ${hm(min)} asleep` : ''}${x ? `, night score <b>${Math.round(x.score)}</b>` : ''}`;
 }
 function drawBed(animate) {
   const nb = normal('bed'), nw = normal('wake'), nmin = normal('min');
-  $('bedNormal').innerHTML = nb && nw ? `Normal: bed <b>${clock(nb.med)}</b> → wake <b>${clock(nw.med)}</b>${nmin ? ` · <b>${hm(nmin.med)}</b> asleep` : ''} · dashed lines · colour = night score` : 'Not enough nights yet';
+  $('bedT').textContent = nb && nw ? `A normal night: bed ${clock(nb.med)}, up ${clock(nw.med)}${nmin ? `, ${hm(nmin.med)} asleep` : ''}` : 'Bed to wake, last 30 nights';
+  $('bedNormal').textContent = nb && nw ? 'The last 30 nights. Dashed lines: my normal bed and wake. Colour: the night score.' : loading ? '' : 'Not enough nights with both times yet.';
   bedC.draw(animate);
   const keys = monthKeys(), n = keys.length;
   $('bedAxis').innerHTML = [keys[0], keys[Math.floor((n - 1) / 2)], keys[n - 1]].map(k => `<span>${short(k)}</span>`).join('');
 }
 
 /* ── every session, newest first, and a calendar of the days ───────── */
+const FIRST = 8;
+let showAll = false;
 function drawLog() {
   const t = hrOf();
   const keys = allKeys(), lead = (weekday(keys[0]) + 6) % 7;
   let html = ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(x => `<span class="dow">${x}</span>`).join('') + '<i class="off"></i>'.repeat(lead);
   for (const k of keys) {
     const ss = sessionsOf(k);
-    html += `<i class="${k === today ? 'today ' : ''}${ss.length > 1 ? 'two' : ''}"${ss.length ? ` style="background:var(--${ss[0].s})"` : ''} title="${dayName(k)}${ss.length ? ' · ' + esc(ss.map(label).join(', ')) : ''}"></i>`;
+    html += `<i class="${[ss.length && 'on', k === today && 'today', ss.length > 1 && 'two'].filter(Boolean).join(' ')}" title="${dayName(k)}${ss.length ? ': ' + esc(ss.map(label).join(', ')) : ''}"></i>`;
   }
   $('cal').innerHTML = html;
   const all = allSessions(), best = bests(all);
+  $('sportT').textContent = all.length ? `${all.length} session${all.length === 1 ? '' : 's'} since ${short(SPEC.start)}` : loading ? 'Sport log' : 'No session logged yet';
   /* the list keeps the sessions with something measured: a heart rate, a level,
      a distance, a time, an exercise or a test */
   const logged = s => s.hr || s.pk || s.lv || s.m || s.sec || s.x?.length || s.w?.length || s.kg;
-  $('sessList').innerHTML = [...all].filter(logged).reverse().map(s => {
+  const list = [...all].filter(logged).reverse();
+  if (!list.length) {
+    $('sessList').innerHTML = loading ? Array.from({ length: 4 }, () => `<li><span class="when">${skel('5ch')}</span><span class="what">${skel('80%')}</span><span class="form">${skel('3ch')}</span></li>`).join('')
+      : `<li><span class="what">No session with a measure yet. ${logLink('Log a session')}</span></li>`;
+    $('sessMore').hidden = true;
+    return;
+  }
+  $('sessList').innerHTML = list.slice(0, showAll ? list.length : FIRST).map(s => {
     const f = form(s, best), e = effort(s, t), ld = loadOf(s, t), mz = measure(s);
     const span = minutes(s) ? `${minutes(s)} min` : '';
     const hr = [s.hr && `avg ${s.hr}`, s.pk && `peak ${s.pk}`].filter(Boolean).join(' / ');
     const bits = [s.f ? cap(s.f) : '', s.lv ? `level ${s.lv}/5` : '', span, mz, hr ? `${hr} bpm` : '', e !== undefined ? `${Math.round(e * 100)} % effort` : '', ld !== undefined ? `load ${Math.round(ld)}` : ''].filter(Boolean);
-    return `<li style="--c:var(--${s.s})"><span class="when">${short(s.day)}</span><span class="what"><b>${esc(label(s))}</b>${bits.join(' · ')}${mz || (s.s !== 'run' && s.s !== 'lift') ? '' : ' <em>· not measured</em>'}</span><span class="form ${formCls(f)}">${f === undefined ? '–' : Math.round(f * 100) + ' %'}<small>form</small></span></li>`;
-  }).join('') || '<li><span class="what">No session yet.</span></li>';
+    return `<li><span class="when">${short(s.day)}</span><span class="what"><b>${esc(label(s))}</b>${bits.join(' · ')}${mz || (s.s !== 'run' && s.s !== 'lift') ? '' : ' <em>· not measured</em>'}</span><span class="form ${formCls(f)}">${f === undefined ? '–' : Math.round(f * 100) + ' %'}<small>form</small></span></li>`;
+  }).join('');
+  $('sessMore').hidden = list.length <= FIRST;
+  $('sessMore').innerHTML = showAll ? 'Show the last 8 only' : `Show all ${list.length} sessions <span aria-hidden="true">&darr;</span>`;
 }
+$('sessMore').addEventListener('click', () => { showAll = !showAll; drawLog(); });
 
-/* ── my max, one card per sport: Swim, Run, Gym, then the ones I typed ── */
+/* ── my max, one block per sport: Swim, Run, Gym, then the ones I typed ── */
 const MAX_GROUPS = [
   { id: 'swim', name: 'Swim', from: 'Swim', main: x => `${x.mps.toFixed(2)} m/s`, sub: x => swimTime(x.sec), sort: (a, b) => a.m - b.m },
   { id: 'run', name: 'Run', from: 'Run', main: x => mmss(x.sec), sub: x => `${mmss(x.pace)}/km`, sort: (a, b) => a.sec / a.pace - b.sec / b.pace, label: x => x.n.replace(/^Run /, '') },
@@ -244,11 +286,12 @@ const MAX_GROUPS = [
 ];
 function drawMaxes() {
   const all = allMaxes();
+  if (!all.length && loading) { $('maxList').innerHTML = MAX_GROUPS.slice(0, 3).map(() => `<div class="skel-block" style="height:140px"></div>`).join(''); return; }
   const cards = MAX_GROUPS.map(g => {
     const list = all.filter(x => x.from === g.from).sort(g.sort);
     if (!list.length && g.id === 'other') return '';
     const rows = list.map(x => `<dt>${esc(g.label ? g.label(x) : x.n)}<small>${x.d ? short(x.d) : '–'}</small></dt><dd>${g.main(x)}<small>${g.sub(x) || '&nbsp;'}</small></dd>`).join('');
-    return `<div class="sport" style="--c:var(--${g.id})"><h3>${g.name}<span>${list.length} max</span></h3>${rows ? `<dl>${rows}</dl>` : `<p class="empty">No max yet.</p>`}</div>`;
+    return `<div class="sport"><h3>${g.name}<span>${list.length} max</span></h3>${rows ? `<dl>${rows}</dl>` : `<p class="empty">No max yet</p>`}</div>`;
   });
   $('maxList').innerHTML = cards.join('');
 }
@@ -258,7 +301,22 @@ let rs = 0;
 addEventListener('resize', () => { cancelAnimationFrame(rs); rs = requestAnimationFrame(() => { drawNights(false); bedC.draw(false); }); });
 drawAll(false);
 let pass = ''; try { pass = localStorage.getItem('bio.pass') || ''; } catch {}
-load(pass).then(() => drawAll(true));
+function drawErr() {
+  $('loadErr').hidden = !loadErr;
+  if (loadErr) $('loadErr').innerHTML = `${esc(loadErr)}. Showing the nights this device holds. <button class="link" type="button" id="retry">Try again</button>`;
+}
+async function fetchAll() {
+  const err = await load(pass);
+  loading = false; loadErr = err;
+  document.body.classList.remove('is-loading');
+  drawErr(); drawAll(true);
+}
+document.addEventListener('click', e => {
+  if (e.target.id !== 'retry') return;
+  loading = true; loadErr = ''; drawErr(); document.body.classList.add('is-loading');
+  fetchAll();
+});
+fetchAll();
 </script>
 </body>
 </html>

@@ -169,21 +169,21 @@ function drawLast() {
   }
   const v = Math.round(x.score), t = tone(x.score, band), med = band ? Math.round(band.med) : undefined;
   const gap = med === undefined ? '' : t === 'good' ? `<b class="t-good">${v - med} above</b> my normal of ${med}`
-    : t === 'bad' ? `<b class="t-bad">${med - v} below</b> my normal of ${med}` : `Within my normal, ${Math.round(band.q1)} to ${Math.round(band.q3)}`;
-  const when = k === today ? 'last night' : `last logged ${dayName(k)}`;
+    : t === 'bad' ? `<b class="t-bad">${med - v} below</b> my normal of ${med}` : `within my normal of ${Math.round(band.q1)} to ${Math.round(band.q3)}`;
+  const when = k === today ? 'Last night' : `${dayName(k)}, the last night logged`;
   const parts = INDICATORS.map(id => {
     const y = val(k, id), f = SLEEP.get(id);
     return `<div><b class="${y === undefined ? '' : toneWord[verdict(id, y)]}">${y === undefined ? '–' : fmtVal(id, y)}${y !== undefined && unitOf(id) ? `<small>${unitOf(id)}</small>` : ''}</b><span>${f.short}</span></div>`;
   }).join('');
   $('ns').innerHTML = `<p class="score-v reveal"><span>${v}</span><small>/100</small></p>
-    <p class="score-vs">${gap ? `${gap}, ${when}` : cap(when)}</p>${meter(0, 100, band, x.score)}
+    <p class="score-vs">${gap ? `${when}, ${gap}` : when}</p>${meter(0, 100, band, x.score)}
     <div class="parts">${parts}</div>`;
 }
 
 /* ── the last 30 nights: one bar each, coloured against my normal ──── */
 const nightC = barChart($('nightsC'), () => {
   const ns = nightScores(), band = spread(Object.values(ns).map(x => x.score));
-  return { keys: monthKeys(), value: k => ns[k]?.score, tone: v => tone(v, band), band, lo: 0, hi: 100, read: i => readNight(i, ns, band) };
+  return { keys: monthKeys(), value: k => ns[k]?.score, tone: v => tone(v, band), band, lo: 0, hi: 100, quiet: true, read: i => readNight(i, ns, band) };
 }, 140);
 function bandText(band) { return band ? `Shaded: my normal, ${Math.round(band.q1)} to ${Math.round(band.q3)}. Dashed: ${Math.round(band.med)}. Tap a bar to read its night.` : ''; }
 function readNight(i, ns, band) {
@@ -199,7 +199,7 @@ function drawNights(animate) {
   const scored = keys.filter(k => ns[k]), n = keys.length;
   const count = t => scored.filter(k => tone(ns[k].score, band) === t).length;
   const empty = !scored.length && !loading;
-  $('nightsT').textContent = scored.length && band ? `Last 30 nights: ${count('good')} above normal, ${count('bad')} below`
+  $('nightsT').textContent = scored.length && band ? `Last 30 nights: ${count('good')}\u00a0above normal, ${count('bad')}\u00a0below`
     : empty ? 'No night scored in the last 30 days' : 'Last 30 nights';
   $('nightsKey').hidden = empty;
   nightC.draw(animate);
@@ -211,7 +211,7 @@ function drawNights(animate) {
 const sportC = barChart($('sportC'), () => {
   const dl = dayLoads();
   return {
-    keys: monthKeys(), value: k => dl[k]?.total, lo: 0,
+    keys: monthKeys(), value: k => dl[k]?.total, lo: 0, quiet: true,
     empty: k => sessionsOf(k).length ? tint('mid') : null,
     read: i => readSport(i, dl),
   };
@@ -276,7 +276,7 @@ function drawPairs() {
   }
   /* the headline: the factor with the best average night score */
   const all = mean(nights, score), best = shown.map(c => ({ c, v: mean(c.ks, score) })).filter(x => x.v !== undefined).sort((a, b) => b.v - a.v)[0];
-  $('pairsT').textContent = best && all !== undefined ? `My best nights: ${best.c.say}, scoring ${Math.round(best.v)} against ${Math.round(all)} on average` : 'What changes my nights';
+  $('pairsT').textContent = best && all !== undefined ? `My best nights: ${best.c.say}, scoring ${Math.round(best.v)} against ${Math.round(all)}\u00a0on\u00a0average` : 'What changes my nights';
   $('pairsSub').textContent = `The average of every night logged, ${nights.length} in all. The best of each row is in colour.`;
   const rows = [
     { name: 'Night score', lead: true, f: score, better: 'high', fmt: v => `${Math.round(v)}` },
