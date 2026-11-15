@@ -51,15 +51,15 @@
       <h1 id="pageT" class="reveal">Sleep</h1>
       <button class="logbtn" id="logOpen" type="button" aria-haspopup="dialog"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>Log</button>
     </div>
-    <div class="score" id="ns" aria-live="polite"></div>
     <p class="load-err" id="loadErr" role="alert" hidden></p>
+    <div class="score" id="ns" aria-live="polite"></div>
   </section>
 
   <!-- the last 30 nights, one bar each, against my normal -->
   <section class="sec" data-ocean="fade" aria-labelledby="nightsT">
     <h2 id="nightsT">Last 30 nights</h2>
     <p class="readout" id="nightRead" aria-live="polite"></p>
-    <div class="chart"><canvas id="nightsC" aria-label="Night score, one column per night"></canvas></div>
+    <div class="chart" id="nightsBox"><canvas id="nightsC" aria-label="Night score, one column per night"></canvas></div>
     <div class="axis" id="nightsAxis"></div>
     <ul class="legend" id="nightsKey">
       <li><i style="background:var(--good)"></i>Above normal</li>
@@ -154,11 +154,11 @@ function meter(lo, hi, nm, v) {
   const a = seg(nm.q1), b = seg(nm.q3), me = v === undefined ? -1 : seg(v);
   return `<div class="meter" aria-hidden="true">${Array.from({ length: 32 }, (_, i) => `<i class="${[i >= a && i <= b && 'band', i === me && 'me'].filter(Boolean).join(' ')}"></i>`).join('')}</div>`;
 }
-function drawLast() {
+function drawLast(animate) {
   const k = lastNight();
   const ns = nightScores(), x = k ? ns[k] : undefined, band = spread(Object.values(ns).map(n => n.score));
   if (!x && loading) {
-    $('ns').innerHTML = `<p class="score-v">${skel('2.2ch', '.9em')}</p><p class="score-vs">${skel('22ch')}</p><div class="parts">${INDICATORS.map(() => `<div>${skel('3ch', '22px')}${skel('5ch', '12px')}</div>`).join('')}</div>`;
+    $('ns').innerHTML = `<p class="score-v">${skel('2.2ch', '.9em')}</p><p class="score-vs">${skel('22ch')}</p><div class="meter"></div><div class="parts">${INDICATORS.map(() => `<div>${skel('3ch', '22px')}${skel('5ch', '12px')}</div>`).join('')}</div>`;
     return;
   }
   if (!x) {
@@ -173,9 +173,9 @@ function drawLast() {
   const when = k === today ? 'Last night' : `${dayName(k)}, the last night logged`;
   const parts = INDICATORS.map(id => {
     const y = val(k, id), f = SLEEP.get(id);
-    return `<div><b class="${y === undefined ? '' : toneWord[verdict(id, y)]}">${y === undefined ? '–' : fmtVal(id, y)}${y !== undefined && unitOf(id) ? `<small>${unitOf(id)}</small>` : ''}</b><span>${f.short}</span></div>`;
+    return `<div${animate ? ` class="reveal" style="--d:${120 + INDICATORS.indexOf(id) * 30}"` : ''}><b class="${y === undefined ? '' : toneWord[verdict(id, y)]}">${y === undefined ? '–' : fmtVal(id, y)}${y !== undefined && unitOf(id) ? `<small>${unitOf(id)}</small>` : ''}</b><span>${f.short}</span></div>`;
   }).join('');
-  $('ns').innerHTML = `<p class="score-v reveal"><span>${v}</span><small>/100</small></p>
+  $('ns').innerHTML = `<p class="score-v${animate ? ' reveal' : ''}"><span>${v}</span><small>/100</small></p>
     <p class="score-vs">${gap ? `${when}, ${gap}` : when}</p>${meter(0, 100, band, x.score)}
     <div class="parts">${parts}</div>`;
 }
@@ -201,9 +201,9 @@ function drawNights(animate) {
   const empty = !scored.length && !loading;
   $('nightsT').textContent = scored.length && band ? `Last 30 nights: ${count('good')}\u00a0above normal, ${count('bad')}\u00a0below`
     : empty ? 'No night scored in the last 30 days' : 'Last 30 nights';
-  $('nightsKey').hidden = empty;
+  $('nightsKey').hidden = $('nightsBox').hidden = $('nightsAxis').hidden = empty;
+  if (empty) { $('nightRead').innerHTML = `A night needs 3 of its 5 measures to get a score. ${logLink('Log a night')}`; return; }
   nightC.draw(animate);
-  if (empty) $('nightRead').innerHTML = `A night needs 3 of its 5 measures to get a score. ${logLink('Log a night')}`;
   $('nightsAxis').innerHTML = [keys[0], keys[Math.floor((n - 1) / 2)], keys[n - 1]].map(k => `<span>${short(k)}</span>`).join('');
 }
 
@@ -569,7 +569,7 @@ addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.retur
 
 /* ── draw everything that reads the data ───────────────────────────── */
 function drawAll(animate) {
-  drawLast(); drawNights(animate); drawSport(animate); drawPairs();
+  drawLast(animate); drawNights(animate); drawSport(animate); drawPairs();
 }
 let rs = 0;
 addEventListener('resize', () => { cancelAnimationFrame(rs); rs = requestAnimationFrame(() => { drawNights(false); drawSport(false); }); });
@@ -585,9 +585,15 @@ const openLog = (from = $('logOpen')) => {
   dlg.style.transformOrigin = `${Math.round(a.left + a.width / 2 - b.left)}px ${Math.round(a.top + a.height / 2 - b.top)}px`;
 };
 $('logOpen').addEventListener('click', () => openLog());
-$('logClose').addEventListener('click', () => dlg.close());
-/* a click on the dimmed page around the panel closes it */
-dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+/* it shuts back into the button in 200 ms: the close button, a click on the dimmed page, Esc */
+const shut = () => {
+  if (!dlg.open || dlg.classList.contains('closing')) return;
+  dlg.classList.add('closing');
+  setTimeout(() => { dlg.classList.remove('closing'); dlg.close(); }, 200);
+};
+$('logClose').addEventListener('click', shut);
+dlg.addEventListener('click', e => { if (e.target === dlg) shut(); });
+dlg.addEventListener('cancel', e => { e.preventDefault(); shut(); });
 dlg.addEventListener('close', () => {
   if (dirty) { clearTimeout(timer); push(); }
   if (location.hash === '#log') history.replaceState(null, '', location.pathname);

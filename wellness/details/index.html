@@ -58,7 +58,7 @@
         </tbody>
     </table>
     <div class="pn" aria-labelledby="pnT">
-      <h2 id="pnT" class="pn-h">The perfect night: HRV 100 ms and 8h08 asleep</h2>
+      <h2 id="pnT" class="pn-h">The perfect night: HRV&nbsp;100&nbsp;ms and 8h08&nbsp;asleep</h2>
       <ol class="pn-steps">
         <li><span class="pn-t">The week</span><b>2 sessions in the 7 days before</b><span class="pn-w">RHR 1.2 bpm lower than at my usual 4</span></li>
         <li><span class="pn-t">The day</span><b>Level 4 at most</b><span class="pn-w">HRV 90 ms, against 73 after a level 5 day</span></li>
@@ -86,9 +86,9 @@
     <h2 id="nightsT">Every night</h2>
     <div class="tabs" id="metricChips" role="group" aria-label="Measure"></div>
     <p class="readout" id="nightRead" aria-live="polite"></p>
-    <div class="chart"><canvas id="nightsC" aria-label="One column per night"></canvas></div>
+    <div class="chart" id="nightsBox"><canvas id="nightsC" aria-label="One column per night"></canvas></div>
     <div class="axis" id="nightsAxis"></div>
-    <ul class="legend">
+    <ul class="legend" id="nightsKey">
       <li><i style="background:var(--good)"></i>Better than normal</li>
       <li><i style="background:var(--mid)"></i>Normal</li>
       <li><i style="background:var(--bad)"></i>Worse than normal</li>
@@ -101,9 +101,9 @@
     <h2 id="bedT">Bed to wake, last 30 nights</h2>
     <p class="sub" id="bedNormal"></p>
     <p class="readout" id="bedRead" aria-live="polite"></p>
-    <div class="chart"><canvas id="bedC" aria-label="One column per night, from bedtime at the top to wake-up at the bottom"></canvas></div>
+    <div class="chart" id="bedBox"><canvas id="bedC" aria-label="One column per night, from bedtime at the top to wake-up at the bottom"></canvas></div>
     <div class="axis bed-axis" id="bedAxis"></div>
-    <ul class="legend">
+    <ul class="legend" id="bedKey">
       <li><i style="background:var(--good)"></i>Night score above normal</li>
       <li><i style="background:var(--mid)"></i>Normal</li>
       <li><i style="background:var(--bad)"></i>Below normal</li>
@@ -116,7 +116,7 @@
     <h3 class="max-t">My max</h3>
     <div class="sports" id="maxList"></div>
     <div class="cal" id="cal" aria-label="Sessions by day"></div>
-    <p class="cal-key">Filled: a day of sport</p>
+    <p class="cal-key" id="calKey">Filled: a day of sport</p>
     <ul class="list" id="sessList"></ul>
     <button class="more" id="sessMore" type="button" hidden></button>
   </section>
@@ -210,7 +210,10 @@ function readNight(i, nm) {
 }
 function drawNights(animate) {
   const f = SLEEP.get(metric), u = unitOf(metric), k = last(), v = k && val(k, metric), nm = normal(metric);
-  $('nightsT').textContent = v !== undefined && nm ? `${f.short}: ${fmtVal(metric, v)}${u ? ' ' + u : ''} ${k === today ? 'last night' : 'on ' + dayName(k)}, ${fmtVal(metric, nm.med)} is normal` : `${f.short}, every night`;
+  const empty = !loading && !allKeys().some(x => val(x, metric) !== undefined);
+  $('nightsT').textContent = v !== undefined && nm ? `${f.short}: ${fmtVal(metric, v)}${u ? ' ' + u : ''} ${k === today ? 'last night' : 'on ' + dayName(k)}, ${fmtVal(metric, nm.med)} is normal` : empty ? `${f.short}: no night logged yet` : `${f.short}, every night`;
+  $('nightsBox').hidden = $('nightsAxis').hidden = $('nightsKey').hidden = empty;
+  if (empty) { $('nightRead').innerHTML = `Each night logged adds a bar here. ${logLink('Log last night')}`; return; }
   chart.draw(animate);
   const keys = allKeys(), n = keys.length;
   $('nightsAxis').innerHTML = [keys[0], keys[Math.floor((n - 1) / 2)], keys[n - 1]].map(k => `<span>${short(k)}</span>`).join('');
@@ -235,7 +238,10 @@ function readBed(i, ns) {
 function drawBed(animate) {
   const nb = normal('bed'), nw = normal('wake'), nmin = normal('min');
   $('bedT').textContent = nb && nw ? `A normal night: bed ${clock(nb.med)}, up ${clock(nw.med)}${nmin ? `, ${hm(nmin.med)} asleep` : ''}` : 'Bed to wake, last 30 nights';
-  $('bedNormal').textContent = nb && nw ? 'The last 30 nights. Dashed lines: my normal bed and wake. Colour: the night score.' : loading ? '' : 'Not enough nights with both times yet.';
+  const empty = !loading && !monthKeys().some(k => val(k, 'bed') !== undefined && val(k, 'wake') !== undefined);
+  $('bedNormal').innerHTML = nb && nw ? 'The last 30 nights. Dashed lines: my normal bed and wake. Colour: the night score.' : loading ? '' : empty ? `No night with both a bedtime and a wake-up yet. ${logLink('Log last night')}` : 'Not enough nights for a normal yet.';
+  $('bedBox').hidden = $('bedAxis').hidden = $('bedKey').hidden = $('bedRead').hidden = empty;
+  if (empty) return;
   bedC.draw(animate);
   const keys = monthKeys(), n = keys.length;
   $('bedAxis').innerHTML = [keys[0], keys[Math.floor((n - 1) / 2)], keys[n - 1]].map(k => `<span>${short(k)}</span>`).join('');
@@ -254,6 +260,7 @@ function drawLog() {
   }
   $('cal').innerHTML = html;
   const all = allSessions(), best = bests(all);
+  $('cal').hidden = $('calKey').hidden = !all.length && !loading;
   $('sportT').textContent = all.length ? `${all.length} session${all.length === 1 ? '' : 's'} since ${short(SPEC.start)}` : loading ? 'Sport log' : 'No session logged yet';
   /* the list keeps the sessions with something measured: a heart rate, a level,
      a distance, a time, an exercise or a test */
@@ -261,7 +268,7 @@ function drawLog() {
   const list = [...all].filter(logged).reverse();
   if (!list.length) {
     $('sessList').innerHTML = loading ? Array.from({ length: 4 }, () => `<li><span class="when">${skel('5ch')}</span><span class="what">${skel('80%')}</span><span class="form">${skel('3ch')}</span></li>`).join('')
-      : `<li><span class="what">No session with a measure yet. ${logLink('Log a session')}</span></li>`;
+      : `<li class="empty">No session with a measure yet. ${logLink('Log a session')}</li>`;
     $('sessMore').hidden = true;
     return;
   }
@@ -273,7 +280,7 @@ function drawLog() {
     return `<li><span class="when">${short(s.day)}</span><span class="what"><b>${esc(label(s))}</b>${bits.join(' · ')}${mz || (s.s !== 'run' && s.s !== 'lift') ? '' : ' <em>· not measured</em>'}</span><span class="form ${formCls(f)}">${f === undefined ? '–' : Math.round(f * 100) + ' %'}<small>form</small></span></li>`;
   }).join('');
   $('sessMore').hidden = list.length <= FIRST;
-  $('sessMore').innerHTML = showAll ? 'Show the last 8 only' : `Show all ${list.length} sessions <span aria-hidden="true">&darr;</span>`;
+  $('sessMore').innerHTML = showAll ? 'Show the last 8 only' : `Show all ${list.length} measured sessions <span aria-hidden="true">&darr;</span>`;
 }
 $('sessMore').addEventListener('click', () => { showAll = !showAll; drawLog(); });
 
@@ -287,6 +294,7 @@ const MAX_GROUPS = [
 function drawMaxes() {
   const all = allMaxes();
   if (!all.length && loading) { $('maxList').innerHTML = MAX_GROUPS.slice(0, 3).map(() => `<div class="skel-block" style="height:140px"></div>`).join(''); return; }
+  if (!all.length) { $('maxList').innerHTML = `<p class="empty">No max yet: each swim test, run or lift adds one</p>`; return; }
   const cards = MAX_GROUPS.map(g => {
     const list = all.filter(x => x.from === g.from).sort(g.sort);
     if (!list.length && g.id === 'other') return '';

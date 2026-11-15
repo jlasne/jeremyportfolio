@@ -68,10 +68,10 @@ export function barChart(cv, opts, ch = 170) {
       ctx.clearRect(0, 0, w, H);
       if (band) {
         const a = CH - hOf(band.q1), b = CH - hOf(band.q3);
-        ctx.fillStyle = css('band', 'rgba(234,244,251,.07)');
+        ctx.fillStyle = css('fg-06', 'rgba(234,244,251,.06)');
         shape(ctx, 0, b, w, Math.max(2, a - b), 4, true); ctx.fill();
         const my = Math.round(CH - hOf(band.med)) + .5;
-        ctx.strokeStyle = css('rule', 'rgba(234,244,251,.4)'); ctx.lineWidth = 1; ctx.setLineDash([3, 4]);
+        ctx.strokeStyle = css('fg-25', 'rgba(234,244,251,.25)'); ctx.lineWidth = 1; ctx.setLineDash([3, 4]);
         ctx.beginPath(); ctx.moveTo(0, my); ctx.lineTo(w, my); ctx.stroke(); ctx.setLineDash([]);
       }
       keys.forEach((k, i) => {
@@ -164,7 +164,7 @@ export function spanChart(cv, opts, ch = 150) {
       }
       (o.lines || []).forEach(m => {
         const yy = Math.round(y(m)) + .5;
-        ctx.strokeStyle = css('rule', 'rgba(234,244,251,.4)'); ctx.setLineDash([3, 4]);
+        ctx.strokeStyle = css('fg-25', 'rgba(234,244,251,.25)'); ctx.setLineDash([3, 4]);
         ctx.beginPath(); ctx.moveTo(GUT, yy); ctx.lineTo(w, yy); ctx.stroke(); ctx.setLineDash([]);
       });
       keys.forEach((k, i) => {
