@@ -375,10 +375,4 @@ img, video { display: block; }
 .md table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.45; font-variant-numeric: tabular-nums; }
 .md th { padding: 8px 14px 8px 0; border-bottom: 1px solid var(--fg-25); text-align: left; font-weight: 600; color: var(--fg); white-space: nowrap; }
 .md td { padding: 8px 14px 8px 0; border-bottom: 1px solid var(--fg-12); vertical-align: top; }
-.sources { max-width: none !important; margin-top: 2.1em; }
-.sources summary { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; list-style: none; font-size: 22px; font-weight: 700; color: var(--fg); }
-.sources summary::-webkit-details-marker { display: none; }
-.sources summary::after { content: "+"; color: var(--fg-60); font-weight: 500; }
-.sources[open] summary::after { content: "\2212"; }
-.sources h3:first-of-type { margin-top: 1em; }
 @media (prefers-reduced-motion: reduce) { .btn.done { animation: none; } }
