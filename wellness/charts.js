@@ -14,8 +14,8 @@ export function prep(cv, h) {
   return { ctx, w, h };
 }
 
-/* a drawing animated from 0 to 1 once, or drawn whole */
-export function play(draw, ms = 700) {
+/* a drawing animated from 0 to 1 once, ease-out, or drawn whole */
+export function play(draw, ms = 450) {
   if (still) return draw(1);
   const t0 = performance.now();
   const tick = t => { const p = Math.min(1, (t - t0) / ms); draw(1 - Math.pow(1 - p, 3)); if (p < 1) requestAnimationFrame(tick); };
@@ -49,10 +49,11 @@ function shape(ctx, x, y, w, h, r, all) {
    (null: the default line). A tap pins a bar, a second tap lets go.
    `ch` is the height of the bars' area in CSS pixels. */
 export function barChart(cv, opts, ch = 170) {
-  const CH = ch, MARK = 14, H = CH + MARK, R = 4;
+  const CH = ch, R = 4;
   let geo = null, pick = null;
   function draw(animate) {
     const o = opts(), { keys, value, band, marks } = o;
+    const H = CH + (marks ? 14 : 0);
     const n = keys.length, { ctx, w } = prep(cv, H);
     const vals = keys.map(value), got = vals.filter(v => v !== undefined);
     const hi = o.hi ?? (got.length ? Math.max(...got) : 1);
@@ -67,7 +68,7 @@ export function barChart(cv, opts, ch = 170) {
       if (band) {
         const a = CH - hOf(band.q1), b = CH - hOf(band.q3);
         ctx.fillStyle = css('band', 'rgba(234,244,251,.07)');
-        shape(ctx, 0, b, w, Math.max(2, a - b), 6, true); ctx.fill();
+        shape(ctx, 0, b, w, Math.max(2, a - b), 4, true); ctx.fill();
         const my = Math.round(CH - hOf(band.med)) + .5;
         ctx.strokeStyle = css('rule', 'rgba(234,244,251,.4)'); ctx.lineWidth = 1; ctx.setLineDash([3, 4]);
         ctx.beginPath(); ctx.moveTo(0, my); ctx.lineTo(w, my); ctx.stroke(); ctx.setLineDash([]);
@@ -103,14 +104,15 @@ export function barChart(cv, opts, ch = 170) {
           const c = o.empty && o.empty(k);
           ctx.fillStyle = c || css('fg-12', 'rgba(234,244,251,.12)');
           ctx.globalAlpha = c ? .45 : 1;
-          shape(ctx, x, CH - 3, bw, 3, 2, true); ctx.fill();
+          shape(ctx, x, CH - 3, bw, 3, 1.5, true); ctx.fill();
           ctx.globalAlpha = 1;
         }
-        (marks ? marks(k) : []).slice(0, 2).forEach((s, j) => {
+        /* a day with sport before the night: one small dot under its bar, in one colour */
+        if (marks && marks(k).length) {
           const d = Math.max(2, Math.min(6, bw));
-          ctx.fillStyle = tint(s.s);
-          ctx.beginPath(); ctx.arc(x + d / 2 + j * (d + 1), CH + 6 + d / 2, d / 2, 0, 6.29); ctx.fill();
-        });
+          ctx.fillStyle = css('fg-60', 'rgba(234,244,251,.66)');
+          ctx.beginPath(); ctx.arc(x + bw / 2, CH + 6 + d / 2, d / 2, 0, 6.29); ctx.fill();
+        }
       });
     };
     animate ? play(paint) : paint(1);
@@ -134,7 +136,7 @@ export function barChart(cv, opts, ch = 170) {
    the normal bed and wake as dashed rules (wake-up past 1440 too), `read(i)` what to say about a
    night. A tap pins a night, a second tap lets go. */
 export function spanChart(cv, opts, ch = 150) {
-  const GUT = 38, R = 3;
+  const GUT = 40, R = 4;
   let geo = null, pick = null;
   function draw(animate) {
     const o = opts(), { keys, bed, wake } = o;
@@ -149,7 +151,7 @@ export function spanChart(cv, opts, ch = 150) {
     geo = { colW, n };
     const paint = p => {
       ctx.clearRect(0, 0, w, ch);
-      ctx.font = '11px system-ui, sans-serif'; ctx.textBaseline = 'middle';
+      ctx.font = '500 12px Figtree, system-ui, sans-serif'; ctx.textBaseline = 'middle';
       const step = hi - lo > 720 ? 180 : 120;
       for (let m = Math.ceil(lo / step) * step; m <= hi; m += step) {
         const yy = Math.round(y(m)) + .5;

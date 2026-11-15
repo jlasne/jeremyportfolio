@@ -31,7 +31,7 @@
 <link rel="stylesheet" href="/site.css">
 <link rel="stylesheet" href="/wellness/wellness.css">
 </head>
-<body class="wellness">
+<body class="wellness is-loading">
 
 <canvas id="ocean" aria-hidden="true"></canvas>
 
@@ -44,47 +44,46 @@
     <a class="mark" href="/" aria-label="Jeremy Lasne, home">Jeremy<i>&middot;</i>Lasne</a>
   </header>
 
-<header class="hero page-hero wl-hero" data-ocean="avoid" data-fade="0">
-  <h1 class="reveal"><b>Sleep</b></h1>
-  <button class="logbtn" id="logOpen" type="button" aria-haspopup="dialog"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>Log</button>
-</header>
-
 <main>
-  <div class="duo">
-  <section data-ocean="fade" class="sec reveal" style="--d:200" aria-labelledby="nightsT">
-    <h2 id="nightsT">Night <span class="soft">by night</span></h2>
-    <div class="ns" id="ns"></div>
+  <!-- last night: the score, the biggest thing on the page, and the five measures it is made of -->
+  <section class="today" aria-labelledby="pageT" data-ocean="avoid" data-fade="0">
+    <div class="today-top">
+      <h1 id="pageT" class="reveal">Sleep</h1>
+      <button class="logbtn" id="logOpen" type="button" aria-haspopup="dialog"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>Log</button>
+    </div>
+    <div class="score" id="ns" aria-live="polite"></div>
+    <p class="load-err" id="loadErr" role="alert" hidden></p>
+  </section>
+
+  <!-- the last 30 nights, one bar each, against my normal -->
+  <section class="sec" data-ocean="fade" aria-labelledby="nightsT">
+    <h2 id="nightsT">Last 30 nights</h2>
     <p class="readout" id="nightRead" aria-live="polite"></p>
     <div class="chart"><canvas id="nightsC" aria-label="Night score, one column per night"></canvas></div>
     <div class="axis" id="nightsAxis"></div>
-    <ul class="legend">
-      <li><i style="background:var(--good)"></i>Better</li>
+    <ul class="legend" id="nightsKey">
+      <li><i style="background:var(--good)"></i>Above normal</li>
       <li><i style="background:var(--mid)"></i>Normal</li>
-      <li><i style="background:var(--bad)"></i>Below</li>
-      <li><i style="background:var(--run)"></i><i style="background:var(--swim);margin-left:-4px"></i><i style="background:var(--lift);margin-left:-4px"></i><i style="background:var(--other);margin-left:-4px"></i>Sport the day before</li>
+      <li><i style="background:var(--bad)"></i>Below normal</li>
     </ul>
-    <a class="more" href="/wellness/details/">Details <span aria-hidden="true">→</span></a>
+    <a class="more" href="/wellness/details/">Every measure, night by night <span aria-hidden="true">&rarr;</span></a>
   </section>
 
-  <section data-ocean="fade" class="sec" aria-labelledby="sportT">
-    <h2 id="sportT">Sport <span class="soft">by day</span></h2>
-    <div class="ns" id="sportNow"></div>
-    <p class="readout" id="sportRead" aria-live="polite"></p>
-    <div class="chart"><canvas id="sportC" aria-label="Sport load, one column per day, stacked by sport"></canvas></div>
-    <div class="axis" id="sportAxis"></div>
-    <ul class="legend">
-      <li><i style="background:var(--run)"></i>Run</li>
-      <li><i style="background:var(--swim)"></i>Swim</li>
-      <li><i style="background:var(--lift)"></i>Gym</li>
-      <li><i style="background:var(--other)"></i>Other</li>
-    </ul>
-    <a class="more" href="/wellness/details/#sport">Sport log <span aria-hidden="true">→</span></a>
-  </section>
-  </div>
-
-  <section data-ocean="fade" class="sec" aria-labelledby="pairsT">
-    <h2 id="pairsT">What changes <span class="soft">my nights</span></h2>
+  <!-- what changes my nights: each factor with enough nights, side by side -->
+  <section class="sec" data-ocean="fade" aria-labelledby="pairsT">
+    <h2 id="pairsT">What changes my nights</h2>
+    <p class="sub" id="pairsSub"></p>
     <div class="vs2" id="pairs"></div>
+    <p class="sub" id="pairsMore"></p>
+  </section>
+
+  <!-- sport: the load of each day of the last 30 -->
+  <section class="sec" data-ocean="fade" aria-labelledby="sportT">
+    <h2 id="sportT">Sport, last 30 days</h2>
+    <p class="readout" id="sportRead" aria-live="polite"></p>
+    <div class="chart" id="sportBox"><canvas id="sportC" aria-label="Sport load, one column per day"></canvas></div>
+    <div class="axis" id="sportAxis"></div>
+    <a class="more" href="/wellness/details/#sport">Sport log <span aria-hidden="true">&rarr;</span></a>
   </section>
 </main>
 
@@ -139,10 +138,16 @@ import { barChart, tint } from '/wellness/charts.js';
 
 const $ = id => document.getElementById(id);
 
+/* The page loads in three states: loading (grey shapes hold the layout), the data, or an error
+   with what this device already holds and a way to try again. */
+let loading = true, loadErr = '';
+const skel = (w, h = '1em') => `<span class="skel" style="width:${w};height:${h}"></span>`;
+const toneWord = { good: 't-good', bad: 't-bad', mid: '' };
+const logLink = text => `<button class="link" type="button" data-log>${text}</button>`;
 const lastNight = () => allKeys().reverse().find(k => INDICATORS.some(id => val(k, id) !== undefined));
 
 /* ── last night ────────────────────────────────────────────────────── */
-/* 32 steps from lo to hi: the normal band lit, my value a bright dot */
+/* 32 steps from lo to hi: the normal band lit, my value a dot */
 function meter(lo, hi, nm, v) {
   if (!nm) return '';
   const span = (hi - lo) || 1, seg = x => Math.max(0, Math.min(31, Math.floor((x - lo) / span * 32)));
@@ -152,95 +157,144 @@ function meter(lo, hi, nm, v) {
 function drawLast() {
   const k = lastNight();
   const ns = nightScores(), x = k ? ns[k] : undefined, band = spread(Object.values(ns).map(n => n.score));
-  const when = k ? (k === today ? 'Last night' : `Last night logged · ${dayName(k)}`) : 'No night yet';
-  $('ns').innerHTML = `<p class="k">${when}</p><p class="big">${x ? Math.round(x.score) : '–'}<small>/100</small></p>
-    <p class="vs ${x ? tone(x.score, band) : ''}">${x && band ? `Normal ${Math.round(band.med)}` : ''}</p>${meter(0, 100, band, x?.score)}`;
+  if (!x && loading) {
+    $('ns').innerHTML = `<p class="score-v">${skel('2.2ch', '.9em')}</p><p class="score-vs">${skel('22ch')}</p><div class="parts">${INDICATORS.map(() => `<div>${skel('3ch', '22px')}${skel('5ch', '12px')}</div>`).join('')}</div>`;
+    return;
+  }
+  if (!x) {
+    /* empty: no night with 3 of the 5 measures yet */
+    $('ns').innerHTML = `<p class="score-empty">No night scored yet</p>
+      <p class="score-vs">A night gets a score from 0 to 100 once 3 of its 5 measures are logged. ${logLink('Log last night')}</p>`;
+    return;
+  }
+  const v = Math.round(x.score), t = tone(x.score, band), med = band ? Math.round(band.med) : undefined;
+  const gap = med === undefined ? '' : t === 'good' ? `<b class="t-good">${v - med} above</b> my normal of ${med}`
+    : t === 'bad' ? `<b class="t-bad">${med - v} below</b> my normal of ${med}` : `Within my normal, ${Math.round(band.q1)} to ${Math.round(band.q3)}`;
+  const when = k === today ? 'last night' : `last logged ${dayName(k)}`;
+  const parts = INDICATORS.map(id => {
+    const y = val(k, id), f = SLEEP.get(id);
+    return `<div><b class="${y === undefined ? '' : toneWord[verdict(id, y)]}">${y === undefined ? '–' : fmtVal(id, y)}${y !== undefined && unitOf(id) ? `<small>${unitOf(id)}</small>` : ''}</b><span>${f.short}</span></div>`;
+  }).join('');
+  $('ns').innerHTML = `<p class="score-v reveal"><span>${v}</span><small>/100</small></p>
+    <p class="score-vs">${gap ? `${gap}, ${when}` : cap(when)}</p>${meter(0, 100, band, x.score)}
+    <div class="parts">${parts}</div>`;
 }
 
-/* ── night by night: the night score of the last 30 days ────────────── */
+/* ── the last 30 nights: one bar each, coloured against my normal ──── */
 const nightC = barChart($('nightsC'), () => {
   const ns = nightScores(), band = spread(Object.values(ns).map(x => x.score));
-  return { keys: monthKeys(), value: k => ns[k]?.score, tone: v => tone(v, band), band, lo: 0, hi: 100, marks: sportBefore, read: i => readNight(i, ns, band) };
-}, 120);
+  return { keys: monthKeys(), value: k => ns[k]?.score, tone: v => tone(v, band), band, lo: 0, hi: 100, read: i => readNight(i, ns, band) };
+}, 140);
+function bandText(band) { return band ? `Shaded: my normal, ${Math.round(band.q1)} to ${Math.round(band.q3)}. Dashed: ${Math.round(band.med)}. Tap a bar to read its night.` : ''; }
 function readNight(i, ns, band) {
-  if (i === null) { $('nightRead').textContent = band ? `Normal ${Math.round(band.med)}` : 'Not enough nights yet'; return; }
+  if (i === null) { $('nightRead').textContent = bandText(band); return; }
   const k = monthKeys()[i], x = ns[k], prev = sportBefore(k);
   const after = prev.length ? `after ${esc(prev.map(label).join(' and ').toLowerCase())}` : 'after a rest day';
-  if (!x) { $('nightRead').innerHTML = `${dayName(k)} · not enough measures · ${after}`; return; }
-  const bits = INDICATORS.filter(id => val(k, id) !== undefined).map(id => `${SLEEP.get(id).short.toLowerCase()} ${fmtVal(id, val(k, id))}`);
-  $('nightRead').innerHTML = `${dayName(k)} · <b>${Math.round(x.score)}</b>/100 · ${bits.join(', ')} · ${after}`;
+  if (!x) { $('nightRead').innerHTML = `${dayName(k)}: not enough measures, ${after}`; return; }
+  const bits = INDICATORS.filter(id => val(k, id) !== undefined).map(id => `${SLEEP.get(id).short} ${fmtVal(id, val(k, id))}`);
+  $('nightRead').innerHTML = `${dayName(k)}: <b>${Math.round(x.score)}</b>/100, ${after}. ${bits.join(', ')}`;
 }
 function drawNights(animate) {
+  const ns = nightScores(), keys = monthKeys(), band = spread(Object.values(ns).map(x => x.score));
+  const scored = keys.filter(k => ns[k]), n = keys.length;
+  const count = t => scored.filter(k => tone(ns[k].score, band) === t).length;
+  const empty = !scored.length && !loading;
+  $('nightsT').textContent = scored.length && band ? `Last 30 nights: ${count('good')} above normal, ${count('bad')} below`
+    : empty ? 'No night scored in the last 30 days' : 'Last 30 nights';
+  $('nightsKey').hidden = empty;
   nightC.draw(animate);
-  const keys = monthKeys(), n = keys.length;
+  if (empty) $('nightRead').innerHTML = `A night needs 3 of its 5 measures to get a score. ${logLink('Log a night')}`;
   $('nightsAxis').innerHTML = [keys[0], keys[Math.floor((n - 1) / 2)], keys[n - 1]].map(k => `<span>${short(k)}</span>`).join('');
 }
 
-/* ── sport by day: the load of the last 30 days, stacked by sport ──── */
+/* ── sport: the load of each day of the last 30, in one colour ─────── */
 const sportC = barChart($('sportC'), () => {
   const dl = dayLoads();
   return {
     keys: monthKeys(), value: k => dl[k]?.total, lo: 0,
-    stack: k => dl[k].parts.map(p => ({ c: tint(p.s), v: p.v })),
-    empty: k => sessionsOf(k)[0] && tint(sessionsOf(k)[0].s),
+    empty: k => sessionsOf(k).length ? tint('mid') : null,
     read: i => readSport(i, dl),
   };
-}, 120);
+}, 110);
 const totals = dl => Object.values(dl).map(x => x.total);
-function readSport(i, dl) {
+function sportLine(dl) {
   const keys = monthKeys(), got = totals(dl);
-  if (i === null) { $('sportRead').textContent = got.length ? `Average load ${Math.round(avg(got))} per day of sport` : 'No session with a length and an effort yet'; return; }
-  const k = keys[i], ss = sessionsOf(k);
-  if (!ss.length) { $('sportRead').textContent = `${dayName(k)} · rest`; return; }
+  const lastKey = [...keys].reverse().find(k => dl[k]);
+  if (!lastKey) return 'No session has a length and an effort yet, so no load to show.';
+  const ss = sessionsOf(lastKey).filter(s => dl[lastKey].parts.some(p => p.s === s.s));
+  const newest = [...keys].reverse().find(k => sessionsOf(k).length);
+  const missing = newest && newest > lastKey ? ` ${esc(sessionsOf(newest).map(label).join(', '))} on ${dayName(newest)} has no length or effort yet.` : '';
+  return `Last load: <b>${Math.round(dl[lastKey].total)}</b>, ${esc(ss.map(label).join(' and ').toLowerCase())} on ${dayName(lastKey)}. Average ${Math.round(avg(got))} a sport day.${missing}`;
+}
+function readSport(i, dl) {
+  if (i === null) { $('sportRead').innerHTML = loading ? '' : sportLine(dl); return; }
+  const k = monthKeys()[i], ss = sessionsOf(k);
+  if (!ss.length) { $('sportRead').textContent = `${dayName(k)}: rest`; return; }
   const t = hrOf();
   const bits = ss.map(s => {
     const e = effort(s, t), m = minutes(s), l = loadOf(s, t);
-    return `${esc(label(s))}${m ? ` ${m} min` : ''}${e !== undefined ? ` at ${Math.round(e * 100)} %` : ''}${l !== undefined ? ` = ${Math.round(l)}` : ''}`;
+    return `${esc(label(s))}${m ? ` ${m} min` : ''}${e !== undefined ? ` at ${Math.round(e * 100)} %` : ''}${l !== undefined ? ` = ${Math.round(l)}` : ', no length or effort yet'}`;
   });
-  $('sportRead').innerHTML = `${dayName(k)} · ${dl[k] ? `load <b>${Math.round(dl[k].total)}</b> · ` : ''}${bits.join(', ')}`;
+  $('sportRead').innerHTML = `${dayName(k)}: ${dl[k] ? `load <b>${Math.round(dl[k].total)}</b>, ` : ''}${bits.join(', ')}`;
 }
 function drawSport(animate) {
+  const keys = monthKeys(), n = keys.length, done = keys.flatMap(sessionsOf).length;
+  const empty = !done && !loading;
+  $('sportT').textContent = done ? `${done} session${done === 1 ? '' : 's'} in the last 30 days` : empty ? 'No session in the last 30 days' : 'Sport, last 30 days';
+  $('sportBox').hidden = $('sportAxis').hidden = empty;
+  if (empty) { $('sportRead').innerHTML = `Each session adds its load: minutes times effort. ${logLink('Log a session')}`; return; }
   sportC.draw(animate);
-  const keys = monthKeys(), n = keys.length;
   $('sportAxis').innerHTML = [keys[0], keys[Math.floor((n - 1) / 2)], keys[n - 1]].map(k => `<span>${short(k)}</span>`).join('');
-
-  /* the last day of sport, as one big number */
-  const dl = dayLoads(), got = totals(dl);
-  const lastDay = [...keys].reverse().find(k => sessionsOf(k).length);
-  const v = lastDay ? dl[lastDay]?.total : undefined;
-  $('sportNow').innerHTML = `<p class="k">${lastDay ? `Last session · ${dayName(lastDay)} · ${esc(sessionsOf(lastDay).map(label).join(', '))}` : 'No session yet'}</p>
-    <p class="big">${v === undefined ? '–' : Math.round(v)}<small> load</small></p>
-    <p class="vs">${v === undefined ? '' : `Average ${Math.round(avg(got))}`}</p>`;
 }
 
-
-/* ── after sport, or not, and the night's toggles: seven columns ───── */
+/* ── what changes my nights: each factor with 3 nights or more ─────── */
+const MIN_NIGHTS = 3;
 function drawPairs() {
   /* every night logged, each measure set against all of them */
   const keys = allKeys(), ns = nightScores(keys);
   const nights = keys.filter(k => entry(k)?.sleep);
   const cols = [
-    { name: 'Rest day', ks: nights.filter(k => !sportBefore(k).length) },
-    { name: 'Sport day', ks: nights.filter(k => sportBefore(k).length) },
-    { name: 'With girlfriend', ks: nights.filter(k => entry(k)?.gf) },
-    { name: 'Cold night', ks: nights.filter(k => entry(k)?.cold) },
-    { name: 'Dark night', ks: nights.filter(k => entry(k)?.dark) },
-    { name: 'Travelling', ks: nights.filter(k => entry(k)?.travel) },
-    { name: "At Maxime's", ks: nights.filter(k => entry(k)?.maxime) },
+    { name: 'Rest day', say: 'after a rest day', ks: nights.filter(k => !sportBefore(k).length) },
+    { name: 'Sport day', say: 'after a sport day', ks: nights.filter(k => sportBefore(k).length) },
+    { name: 'With girlfriend', say: 'with my girlfriend', ks: nights.filter(k => entry(k)?.gf) },
+    { name: 'Cold night', say: 'cold nights', ks: nights.filter(k => entry(k)?.cold) },
+    { name: 'Dark night', say: 'dark nights', ks: nights.filter(k => entry(k)?.dark) },
+    { name: 'Travelling', say: 'travelling', ks: nights.filter(k => entry(k)?.travel) },
+    { name: "At Maxime's", say: "at Maxime's", ks: nights.filter(k => entry(k)?.maxime) },
   ];
-  const avg = (ks, f) => { const v = ks.map(f).filter(x => x !== undefined); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : undefined; };
+  const mean = (ks, f) => { const v = ks.map(f).filter(x => x !== undefined); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : undefined; };
+  const shown = cols.filter(c => c.ks.length >= MIN_NIGHTS), few = cols.filter(c => c.ks.length < MIN_NIGHTS);
+  const score = k => ns[k]?.score;
+  if (loading && !shown.length) {
+    $('pairsSub').innerHTML = skel('30ch'); $('pairs').innerHTML = `<div class="skel-block" style="height:220px"></div>`; $('pairsMore').textContent = ''; return;
+  }
+  if (!shown.length) {
+    $('pairsT').textContent = 'Not enough nights to compare yet';
+    $('pairsSub').innerHTML = `A factor shows here once it has ${MIN_NIGHTS} nights. ${logLink('Log a night')}`;
+    $('pairs').innerHTML = ''; $('pairsMore').textContent = '';
+    return;
+  }
+  /* the headline: the factor with the best average night score */
+  const all = mean(nights, score), best = shown.map(c => ({ c, v: mean(c.ks, score) })).filter(x => x.v !== undefined).sort((a, b) => b.v - a.v)[0];
+  $('pairsT').textContent = best && all !== undefined ? `My best nights: ${best.c.say}, scoring ${Math.round(best.v)} against ${Math.round(all)} on average` : 'What changes my nights';
+  $('pairsSub').textContent = `The average of every night logged, ${nights.length} in all. The best of each row is in colour.`;
   const rows = [
-    { name: 'Night score', lead: true, f: k => ns[k]?.score, better: 'high', fmt: v => `${Math.round(v)}` },
+    { name: 'Night score', lead: true, f: score, better: 'high', fmt: v => `${Math.round(v)}` },
     ...INDICATORS.map(id => ({ name: SLEEP.get(id).name, f: k => val(k, id), better: SLEEP.get(id).better, fmt: v => `${fmtVal(id, v)}${unitOf(id) ? ' ' + unitOf(id) : ''}` })),
   ];
-  const head = `<div class="vs2-row head"><span></span>${cols.map(c => `<span>${c.name}<small>${c.ks.length} night${c.ks.length === 1 ? '' : 's'}</small></span>`).join('')}</div>`;
+  const head = `<div class="vs2-row head"><span></span>${shown.map(c => `<span>${c.name}<small>${c.ks.length} nights</small></span>`).join('')}</div>`;
+  $('pairs').style.setProperty('--n', shown.length);
   $('pairs').innerHTML = head + rows.map(r => {
-    const v = cols.map(c => c.ks.length >= 3 ? avg(c.ks, r.f) : undefined), got = v.filter(x => x !== undefined);
+    const v = shown.map(c => mean(c.ks, r.f)), got = v.filter(x => x !== undefined);
     const top = got.length < 2 ? undefined : r.better === 'high' ? Math.max(...got) : Math.min(...got);
     const lone = top === undefined || got.filter(x => r.fmt(x) === r.fmt(top)).length > 1 ? undefined : top;
     return `<div class="vs2-row${r.lead ? ' lead' : ''}"><span>${r.name}</span>${v.map(x => `<span class="${x !== undefined && x === lone ? 'f-good' : ''}">${x === undefined ? '–' : r.fmt(x)}</span>`).join('')}</div>`;
   }).join('');
+  $('pairsMore').textContent = few.length ? `Not enough nights yet: ${few.map(c => `${c.say} (${c.ks.length})`).join(', ')}` : '';
 }
+
+/* a link in an empty state opens the log */
+document.addEventListener('click', e => { const b = e.target.closest('[data-log]'); if (b) openLog(b); });
 
 /* ── the log ───────────────────────────────────────────────────────── */
 let sel = today, cur = null, pass = '', dirty = false, dirtyDay = null, saving = false, timer = 0;
@@ -326,13 +380,13 @@ function drawForm() {
     if (f.unit === 'min') return `<label class="field"><span>${f.name} (h:mm)</span><input class="in" type="text" inputmode="decimal" data-s="${f.id}" placeholder="${HOLD[f.id]}" value="${v != null ? `${Math.floor(v / 60)}:${pad(v % 60)}` : ''}"></label>`;
     return `<label class="field"><span>${f.name}${f.unit === 'ms' || f.unit === 'bpm' ? ` (${f.unit})` : ''}</span><input class="in" type="number" inputmode="numeric" min="0" max="${f.max}" data-s="${f.id}" value="${v ?? ''}"></label>`;
   }).join('');
-  $('gfBox').innerHTML = `<button class="chip" type="button" data-flag="gf" aria-pressed="${!!cur.gf}">💑 Night with my girlfriend</button>`
-    + `<button class="chip" type="button" data-flag="cold" aria-pressed="${!!cur.cold}" title="Window open all night">❄️ Cold night</button>`
-    + `<button class="chip" type="button" data-flag="dark" aria-pressed="${!!cur.dark}" title="Shutters closed">🌙 Dark night</button>`
-    + `<button class="chip" type="button" data-flag="travel" aria-pressed="${!!cur.travel}" title="Slept away from home">🧳 Travelling</button>`
-    + `<button class="chip" type="button" data-flag="maxime" aria-pressed="${!!cur.maxime}" title="Slept at Maxime's">🛋️ At Maxime's</button>`;
+  $('gfBox').innerHTML = `<button class="chip" type="button" data-flag="gf" aria-pressed="${!!cur.gf}">Night with my girlfriend</button>`
+    + `<button class="chip" type="button" data-flag="cold" aria-pressed="${!!cur.cold}" title="Window open all night">Cold night</button>`
+    + `<button class="chip" type="button" data-flag="dark" aria-pressed="${!!cur.dark}" title="Shutters closed">Dark night</button>`
+    + `<button class="chip" type="button" data-flag="travel" aria-pressed="${!!cur.travel}" title="Slept away from home">Travelling</button>`
+    + `<button class="chip" type="button" data-flag="maxime" aria-pressed="${!!cur.maxime}" title="Slept at Maxime's">At Maxime's</button>`;
   drawSessions();
-  $('adds').innerHTML = SPEC.sports.map(s => `<button class="chip" type="button" data-add="${s.id}" style="--c:var(--${s.id})">${s.name}</button>`).join('');
+  $('adds').innerHTML = SPEC.sports.map(s => `<button class="chip" type="button" data-add="${s.id}">${s.name}</button>`).join('');
 }
 $('sleepGrid').addEventListener('input', e => {
   const id = e.target.dataset.s; if (!id) return;
@@ -403,7 +457,7 @@ function drawSessions() {
     if (s.s === 'run') grid += inp('m', 'Distance km', s.m == null ? '' : s.m / 1000, 'type="number" inputmode="decimal" step="0.01"');
     const levels = `<div class="chips" style="margin-top:12px" role="group" aria-label="Effort level, 1 to ${SPEC.levels}"><span class="chips-k">Effort</span>${Array.from({ length: SPEC.levels }, (_, j) => j + 1).map(x => `<button class="chip" type="button" data-i="${i}" data-k="lv" data-v="${x}" aria-pressed="${s.lv === x}">${x}</button>`).join('')}</div>`;
     const named = s.s === 'other' ? `<input class="in sess-name" data-i="${i}" data-k="n" value="${esc(s.n ?? '')}" maxlength="${SPEC.nameMax}" placeholder="Name it: padel, yoga, hike…" aria-label="Name of the activity">` : '';
-    return `<div class="sess" style="--c:var(--${s.s})"><div class="sess-head"><b>${sp.name}</b><button type="button" data-del="${i}">Remove</button></div>
+    return `<div class="sess"><div class="sess-head"><b>${sp.name}</b><button type="button" data-del="${i}">Remove</button></div>
       ${named}${chips('f', SPEC.focus, s.f)}${levels}
       <div class="form-grid">${grid}</div>${s.s === 'lift' ? exBox(s, i) : s.s === 'swim' ? testBox(s, i) : ''}<p class="sess-calc" id="calc${i}">${sessCalc(s)}</p></div>`;
   }).join('');
@@ -522,8 +576,15 @@ addEventListener('resize', () => { cancelAnimationFrame(rs); rs = requestAnimati
 
 /* ── the log opens over the page, from the button top left ────────── */
 const dlg = $('logD');
-const openLog = () => { openDay(sel); if (!dlg.open) dlg.showModal(); };
-$('logOpen').addEventListener('click', openLog);
+/* the panel grows out of the button that opened it */
+const openLog = (from = $('logOpen')) => {
+  openDay(sel);
+  if (dlg.open) return;
+  dlg.showModal();
+  const a = from.getBoundingClientRect(), b = dlg.getBoundingClientRect();
+  dlg.style.transformOrigin = `${Math.round(a.left + a.width / 2 - b.left)}px ${Math.round(a.top + a.height / 2 - b.top)}px`;
+};
+$('logOpen').addEventListener('click', () => openLog());
 $('logClose').addEventListener('click', () => dlg.close());
 /* a click on the dimmed page around the panel closes it */
 dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
@@ -532,11 +593,24 @@ dlg.addEventListener('close', () => {
   if (location.hash === '#log') history.replaceState(null, '', location.pathname);
 });
 
+/* the error: what went wrong, what still shows, and a way to try again */
+function drawErr() {
+  $('loadErr').hidden = !loadErr;
+  if (loadErr) $('loadErr').innerHTML = `${esc(loadErr)}. Showing the nights this device holds. <button class="link" type="button" id="retry">Try again</button>`;
+}
 async function load() {
   const err = await loadData(pass);
+  loading = false; loadErr = err;
+  document.body.classList.remove('is-loading');
   if (err) say(err, true);
+  drawErr();
   drawAll(true); drawLock(); if (!dirty) openDay(sel);
 }
+document.addEventListener('click', e => {
+  if (e.target.id !== 'retry') return;
+  loading = true; loadErr = ''; drawErr(); document.body.classList.add('is-loading');
+  load();
+});
 drawAll(false); drawLock(); openDay(today);
 if (location.hash === '#log') openLog();
 load();
