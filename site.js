@@ -88,6 +88,22 @@
       else done(false);
     });
   });
+  /* A copy button (data-copy: the id of the text to copy): it reads "Copied" for 2 s and pulses once.
+     Without the clipboard, it points to the download next to it. */
+  document.querySelectorAll("[data-copy]").forEach(function (b) {
+    var label = b.querySelector("span"), first = label ? label.textContent : "";
+    var say = function (t) { if (label) label.textContent = t; };
+    b.addEventListener("click", function () {
+      var src = document.getElementById(b.getAttribute("data-copy"));
+      if (!src || !navigator.clipboard) { say("Use the download"); return; }
+      navigator.clipboard.writeText(src.textContent).then(function () {
+        say("Copied");
+        b.classList.remove("done"); void b.offsetWidth; b.classList.add("done");
+        setTimeout(function () { say(first); }, 2000);
+      }, function () { say("Use the download"); });
+    });
+  });
+
   /* The line on the home types itself, 28 ms a letter and a breath after each full stop; the caret
      leads, then blinks twice and leaves. The letters hold their place from the start: nothing moves. */
   var typed = document.querySelector("[data-type]");
