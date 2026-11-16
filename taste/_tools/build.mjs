@@ -670,7 +670,7 @@ function appRow(app) {
   const text = [...new Set(words)].join(' ');
   const screens = app.screens.map(s =>
     `<li class="screen"><img src="${s.src}" width="${s.w}" height="${s.h}" alt="${txt(s.alt)}" loading="lazy" decoding="async"></li>`).join('\n        ');
-  const colorList = app.colors.map(c => `${c.name} ${c.hex}`).join(', ').replace(/, ([^,]*)$/, ' and $1');
+  const colorList = app.colors.map(c => `${c.name} ${c.hex} ${c.role}%`).join(', ').replace(/, ([^,]*)$/, ' and $1');
   return `<li class="app-row" data-filter-item data-tags="${app.groupKey}" data-text="${esc(text)}" data-reveal>
     <a class="app-card" href="${app.page}" aria-labelledby="n-${app.slug}" aria-describedby="d-${app.slug}">
       <img class="app-icon" src="${app.iconSm}" width="64" height="64" alt="" loading="lazy" decoding="async">
@@ -678,9 +678,9 @@ function appRow(app) {
       <h3 class="app-name" id="n-${app.slug}"${headline ? ` style="${fontCSS(headline)}"` : ''}>${esc(app.name)}</h3>
       <p class="app-short" id="d-${app.slug}">${copy(app.short)}</p>
       <div class="app-design">
-        <ul class="app-palette" role="list" aria-label="${esc(`Brand colors: ${colorList}`)}">
-          ${app.colors.map(c => `<li><span class="swatch" style="--c:${c.hex}"></span><span class="hex">${c.hex}</span></li>`).join('\n          ')}
-        </ul>
+        <div class="mini-poster" role="img" aria-label="${esc(`Brand colors: ${colorList}`)}">
+          ${app.colors.map(c => `<span class="mp mp-${c.role}" style="--c:${c.hex};--ink:${inkOn(c.hex)}"><span class="mp-pct">${c.role}%</span><span class="mp-hex">${c.hex}</span></span>`).join('\n          ')}
+        </div>
         <dl class="app-fonts">
           ${fontRow('Headline', headline)}
           ${fontRow('Body', body)}

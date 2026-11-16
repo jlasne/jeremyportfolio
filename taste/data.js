@@ -164,7 +164,11 @@ window.TASU_APPS = [
    "w": 600,
    "h": 1299
   },
-  "elements": [],
+  "elements": [
+   "myfitnesspal-daily-goals",
+   "myfitnesspal-reminder-sheet",
+   "myfitnesspal-macro-chart"
+  ],
   "icon": "/taste/media/myfitnesspal/icon.png",
   "page": "/taste/myfitnesspal/",
   "appStore": "https://apps.apple.com/us/app/myfitnesspal-calorie-counter/id341232718"
@@ -203,7 +207,11 @@ window.TASU_APPS = [
    "w": 600,
    "h": 1299
   },
-  "elements": [],
+  "elements": [
+   "rise-energy-widget",
+   "rise-session-card",
+   "rise-habit-list"
+  ],
   "icon": "/taste/media/rise/icon.png",
   "page": "/taste/rise/",
   "appStore": "https://apps.apple.com/us/app/rise-sleep-tracker/id1453884781"

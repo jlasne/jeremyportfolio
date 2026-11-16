@@ -179,9 +179,23 @@
 @font-face {
   font-family: "Work Sans";
   font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("apps/work-sans-300.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Work Sans";
+  font-style: normal;
   font-weight: 400;
   font-display: swap;
   src: url("apps/work-sans-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Work Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("apps/work-sans-600.woff2") format("woff2");
 }
 @font-face {
   font-family: "Work Sans";

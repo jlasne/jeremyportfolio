@@ -697,16 +697,36 @@ html:not(.js) .js-only { display: none !important; }
 @media (max-width: 719px) {
   .app-design { padding-top: var(--sp-24); }
 }
-.app-palette { display: flex; gap: var(--sp-8); }
-.app-palette li { display: grid; justify-items: start; gap: var(--sp-4); }
-.app-palette .swatch {
-  width: 56px;
-  height: 40px;
+/* The palette as a small poster: each color covers its share of the area (60 on the left, 30 and
+   10 sharing the right 40% at 3 to 1), the same grid as the app page, with its hex printed on it
+   in black or white (--ink). */
+.mini-poster {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 60fr) minmax(0, 40fr);
+  grid-template-rows: minmax(0, 75fr) minmax(0, 25fr);
+  height: 136px;
   border-radius: var(--r-16);
-  background: var(--c);
-  box-shadow: inset 0 0 0 1px var(--hover);
+  overflow: hidden;
 }
-.app-palette .hex { font-size: var(--fs-13); line-height: 1.45; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.mini-poster::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px var(--hover); pointer-events: none; }
+.mp {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 10px 12px;
+  background: var(--c);
+  color: var(--ink);
+  font-size: var(--fs-13);
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.mp-60 { grid-column: 1; grid-row: 1 / -1; }
+.mp-30 { grid-column: 2; grid-row: 1; }
+.mp-10 { grid-column: 2; grid-row: 2; flex-direction: row-reverse; align-items: center; gap: 6px; padding: 0 10px; font-size: 12px; }
+.mp-pct { font-weight: 600; opacity: .7; }
+.mp-hex { font-weight: 500; white-space: nowrap; }
 .app-fonts { display: grid; gap: var(--sp-8); }
 /* Each font name is set in its own font; a wide one wraps under its label instead of spilling. */
 .app-fonts > div { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 var(--sp-16); }
@@ -901,8 +921,11 @@ html:not(.js) .js-only { display: none !important; }
 [data-view="grid"] .apps .app-name { grid-area: name; margin: 0; font-size: var(--fs-20); line-height: 1.2; }
 [data-view="grid"] .apps .app-rank { grid-area: rank; margin: 0; font-weight: 500; }
 [data-view="grid"] .apps .app-design { grid-area: design; padding-top: var(--sp-16); }
-[data-view="grid"] .apps .app-palette li { grid-auto-flow: column; align-items: center; }
-[data-view="grid"] .apps .app-palette .swatch { width: 24px; height: 24px; border-radius: var(--r-8); }
+[data-view="grid"] .apps .mini-poster { height: 64px; border-radius: var(--r-8); }
+[data-view="grid"] .apps .mp { padding: 6px 8px; font-size: 11px; }
+[data-view="grid"] .apps .mp-30 .mp-hex,
+[data-view="grid"] .apps .mp-10 .mp-hex,
+[data-view="grid"] .apps .mp-10 .mp-pct { display: none; }
 
 /* 14. Empty state ========================================================= */
 .empty {
@@ -1279,7 +1302,16 @@ html:not(.js) .js-only { display: none !important; }
 /* Colors: a poster. The 60 color fills the top, 30 and 10 share the row under it (2 to 1). Each
    field prints its role, name and hex in black or white, whichever reads better (--ink, set by
    the build). A click copies the hex. */
-.poster { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); grid-template-rows: 176px 120px; gap: var(--sp-8); }
+/* The areas match the shares: 60 fills the left 60%, 30 and 10 split the right 40% (3 to 1),
+   so each field covers 60%, 30% and 10% of the poster, with no gap left. */
+.poster {
+  display: grid;
+  grid-template-columns: minmax(0, 60fr) minmax(0, 40fr);
+  grid-template-rows: minmax(0, 75fr) minmax(0, 25fr);
+  height: 360px;
+  border-radius: var(--r-24);
+  overflow: hidden;
+}
 .pf {
   display: flex;
   flex-direction: column;
@@ -1288,15 +1320,18 @@ html:not(.js) .js-only { display: none !important; }
   gap: 2px;
   min-width: 0;
   padding: var(--sp-16);
-  border-radius: var(--r-24);
+  overflow: hidden;
   background: var(--c);
   color: var(--ink);
   box-shadow: inset 0 0 0 1px var(--hover);
   text-align: left;
-  transition: transform var(--t-in) var(--ease-out);
+  transition: filter var(--t-in) var(--ease-out);
 }
-.pf:active { transform: scale(.98); }
-.pf-60 { grid-column: 1 / -1; }
+.pf:hover { filter: brightness(.96); }
+.pf-60 { grid-column: 1; grid-row: 1 / -1; }
+.pf-30 { grid-column: 2; grid-row: 1; }
+.pf-10 { grid-column: 2; grid-row: 2; padding: var(--sp-8) var(--sp-16); }
+.pf-10 .pf-role { display: none; }
 .pf-role { font-size: var(--fs-13); font-weight: 500; line-height: 1.45; opacity: .78; }
 .pf-name { max-width: 100%; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
 .pf-60 .pf-name { font-size: var(--fs-25); }

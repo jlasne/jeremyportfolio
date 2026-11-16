@@ -306,8 +306,9 @@
 .x-strava-activity-stats__meta {
   position:absolute;
   left:73.6px;
-  top:26.24px;
-  font-size:11.3px;
+  top:26.85px;
+  font-size:10.6px;
+  letter-spacing:-0.02em;
   color:#E2E2E0;
 }
 .x-strava-activity-stats__more {
@@ -338,7 +339,7 @@
   display:block;
 }
 .x-strava-activity-stats__label {
-  top:4.26px;
+  top:3.76px;
   font-size:10.7px;
   line-height:10.7px;
   letter-spacing:-0.015em;
@@ -1288,6 +1289,925 @@
   font-size:13.5px;
   font-weight:400;
   color:#ADADAE;
+}
+
+/* myfitnesspal-daily-goals */
+.x-myfitnesspal-daily-goals {
+  position:relative;
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  width:362px;
+  font-family:Inter,system-ui,sans-serif;
+  font-size:14px;
+  font-weight:400;
+  line-height:17px;
+  letter-spacing:0;
+  color:#000000;
+  text-align:left;
+  white-space:nowrap;
+}
+.x-myfitnesspal-daily-goals * {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+.x-myfitnesspal-daily-goals__card {
+  position:relative;
+  padding:0 24px;
+  border-radius:15px;
+  background:#FFFFFF;
+}
+.x-myfitnesspal-daily-goals__card--cal {
+  height:113px;
+}
+.x-myfitnesspal-daily-goals__card--macros {
+  display:flex;
+  gap:16px;
+  height:105px;
+}
+.x-myfitnesspal-daily-goals__label {
+  margin-top:23.3px;
+  font-size:14.5px;
+  line-height:17px;
+}
+.x-myfitnesspal-daily-goals__row {
+  display:flex;
+  align-items:baseline;
+  margin-top:8.4px;
+  line-height:24px;
+}
+.x-myfitnesspal-daily-goals__value {
+  font-size:20px;
+  font-weight:700;
+  letter-spacing:-0.02em;
+}
+.x-myfitnesspal-daily-goals__of {
+  margin-left:4px;
+  font-size:12.5px;
+  color:#6C6C70;
+}
+.x-myfitnesspal-daily-goals__left {
+  margin-left:auto;
+  font-size:12.8px;
+  color:#6C6C70;
+}
+.x-myfitnesspal-daily-goals__track {
+  height:8px;
+  margin-top:11px;
+  border-radius:4px;
+  background:#ECEBF1;
+  overflow:hidden;
+}
+.x-myfitnesspal-daily-goals__track--cal {
+  margin-top:8.3px;
+}
+.x-myfitnesspal-daily-goals__fill {
+  height:100%;
+  border-radius:4px;
+}
+.x-myfitnesspal-daily-goals__fill--cal {
+  width:47.06%;
+  background:#2583FF;
+}
+.x-myfitnesspal-daily-goals__fill--1 {
+  width:48.08%;
+  background:#2CB9B1;
+}
+.x-myfitnesspal-daily-goals__fill--2 {
+  width:45.71%;
+  background:#6C0D8F;
+}
+.x-myfitnesspal-daily-goals__fill--3 {
+  width:45.19%;
+  background:#FEB13D;
+}
+.x-myfitnesspal-daily-goals__macro {
+  width:94px;
+}
+.x-myfitnesspal-daily-goals__mrow {
+  display:flex;
+  align-items:baseline;
+  margin-top:4.7px;
+  line-height:17px;
+}
+.x-myfitnesspal-daily-goals__mvalue {
+  font-size:14.5px;
+  font-weight:700;
+  letter-spacing:0.01em;
+}
+.x-myfitnesspal-daily-goals__swap {
+  position:absolute;
+  right:6px;
+  top:6px;
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  background:#F6F6F8;
+}
+.x-myfitnesspal-daily-goals__swapicon {
+  display:block;
+  width:24px;
+  height:24px;
+}
+
+/* myfitnesspal-reminder-sheet */
+.x-myfitnesspal-reminder-sheet {
+  position:relative;
+  box-sizing:border-box;
+  width:393px;
+  height:358px;
+  border-radius:16px;
+  background:#F6F7F9;
+  font-family:Inter,system-ui,sans-serif;
+  font-size:14px;
+  font-weight:400;
+  line-height:17px;
+  letter-spacing:0;
+  color:#1F2732;
+  text-align:center;
+  white-space:nowrap;
+}
+.x-myfitnesspal-reminder-sheet * {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+.x-myfitnesspal-reminder-sheet__close {
+  position:absolute;
+  left:17px;
+  top:17px;
+  display:block;
+  width:14px;
+  height:14px;
+}
+.x-myfitnesspal-reminder-sheet__title {
+  position:absolute;
+  left:0;
+  right:0;
+  top:64.75px;
+  font-size:24px;
+  line-height:32px;
+  color:#0C121C;
+}
+.x-myfitnesspal-reminder-sheet__line {
+  display:block;
+}
+.x-myfitnesspal-reminder-sheet__sub {
+  position:absolute;
+  left:0;
+  right:0;
+  top:138.2px;
+}
+.x-myfitnesspal-reminder-sheet__fields {
+  position:absolute;
+  left:32px;
+  top:171px;
+  display:flex;
+  gap:10px;
+}
+.x-myfitnesspal-reminder-sheet__field {
+  display:flex;
+  align-items:center;
+  width:160px;
+  height:56px;
+  padding-left:14.8px;
+  border:2px solid #BEC5CF;
+  border-radius:6px;
+  font-size:16px;
+  font-weight:600;
+  line-height:20px;
+  color:#0064EC;
+  text-align:left;
+}
+.x-myfitnesspal-reminder-sheet__help {
+  position:absolute;
+  left:0;
+  right:0;
+  top:238.6px;
+}
+.x-myfitnesspal-reminder-sheet__button {
+  position:absolute;
+  left:16px;
+  top:288px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:361px;
+  height:48px;
+  border-radius:24px;
+  background:#0066EE;
+  font-size:16px;
+  font-weight:700;
+  line-height:20px;
+  letter-spacing:0.01em;
+  color:#FFFFFF;
+}
+
+/* myfitnesspal-macro-chart */
+.x-myfitnesspal-macro-chart {
+  position:relative;
+  box-sizing:border-box;
+  width:393px;
+  height:372px;
+  border-radius:10px;
+  background:#FFFFFF;
+  font-family:Inter,system-ui,sans-serif;
+  font-size:14px;
+  font-weight:400;
+  line-height:17px;
+  letter-spacing:0;
+  color:#000000;
+  text-align:left;
+  white-space:nowrap;
+}
+.x-myfitnesspal-macro-chart * {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+.x-myfitnesspal-macro-chart__grid {
+  position:absolute;
+  left:58px;
+  width:318px;
+  height:1px;
+  background:#DBDBDD;
+}
+.x-myfitnesspal-macro-chart__base {
+  position:absolute;
+  left:58px;
+  top:143.4px;
+  width:318px;
+  height:2px;
+  background:#D9D8DD;
+}
+.x-myfitnesspal-macro-chart__ylab {
+  position:absolute;
+  left:0;
+  width:49px;
+  font-size:10px;
+  line-height:12px;
+  color:#6C6C70;
+  text-align:right;
+}
+.x-myfitnesspal-macro-chart__bar {
+  position:absolute;
+  z-index:1;
+  display:flex;
+  flex-direction:column;
+  width:24px;
+}
+.x-myfitnesspal-macro-chart__seg {
+  display:block;
+}
+.x-myfitnesspal-macro-chart__seg--carbs {
+  background:#2CB9B1;
+}
+.x-myfitnesspal-macro-chart__seg--fat {
+  background:#6C0D8F;
+}
+.x-myfitnesspal-macro-chart__seg--protein {
+  background:#FEB13D;
+}
+.x-myfitnesspal-macro-chart__day {
+  position:absolute;
+  top:150.2px;
+  display:flex;
+  flex-direction:column;
+  width:40px;
+  font-size:10px;
+  line-height:12px;
+  text-align:center;
+}
+.x-myfitnesspal-macro-chart__dd {
+  color:#6C6C70;
+}
+.x-myfitnesspal-macro-chart__day--avg {
+  color:#6C6C70;
+}
+.x-myfitnesspal-macro-chart__head {
+  position:absolute;
+  left:0;
+  top:205px;
+  width:100%;
+}
+.x-myfitnesspal-macro-chart__havg {
+  position:absolute;
+  left:282.3px;
+}
+.x-myfitnesspal-macro-chart__hgoal {
+  position:absolute;
+  left:343.3px;
+}
+.x-myfitnesspal-macro-chart__legend {
+  position:absolute;
+  left:0;
+  top:227px;
+  width:100%;
+}
+.x-myfitnesspal-macro-chart__lrow {
+  position:relative;
+  display:flex;
+  align-items:center;
+  height:48px;
+}
+.x-myfitnesspal-macro-chart__lrow + .x-myfitnesspal-macro-chart__lrow {
+  height:49px;
+  border-top:1px solid #DADADC;
+}
+.x-myfitnesspal-macro-chart__sw {
+  position:absolute;
+  left:16px;
+  width:16px;
+  height:16px;
+  border-radius:2px;
+}
+.x-myfitnesspal-macro-chart__sw--carbs {
+  background:#2CB9B1;
+}
+.x-myfitnesspal-macro-chart__sw--fat {
+  background:#6C0D8F;
+}
+.x-myfitnesspal-macro-chart__sw--protein {
+  background:#FEB13D;
+}
+.x-myfitnesspal-macro-chart__name {
+  position:absolute;
+  left:41.2px;
+}
+.x-myfitnesspal-macro-chart__grams {
+  margin-left:4px;
+  color:#6C6C70;
+}
+.x-myfitnesspal-macro-chart__avg {
+  position:absolute;
+  left:282px;
+  color:#6C6C70;
+}
+.x-myfitnesspal-macro-chart__goal {
+  position:absolute;
+  left:344.4px;
+  font-weight:700;
+  color:#0064EC;
+}
+.x-myfitnesspal-macro-chart__grid--1 {
+  top:30.9px;
+}
+.x-myfitnesspal-macro-chart__grid--2 {
+  top:59.1px;
+}
+.x-myfitnesspal-macro-chart__grid--3 {
+  top:87.3px;
+}
+.x-myfitnesspal-macro-chart__grid--4 {
+  top:115.5px;
+}
+.x-myfitnesspal-macro-chart__ylab--1 {
+  top:25.4px;
+}
+.x-myfitnesspal-macro-chart__ylab--2 {
+  top:53.6px;
+}
+.x-myfitnesspal-macro-chart__ylab--3 {
+  top:81.8px;
+}
+.x-myfitnesspal-macro-chart__ylab--4 {
+  top:110px;
+}
+.x-myfitnesspal-macro-chart__ylab--5 {
+  top:138.4px;
+}
+.x-myfitnesspal-macro-chart__bar--1 {
+  left:61.7px;
+  top:84.99px;
+}
+.x-myfitnesspal-macro-chart__bar--1 .x-myfitnesspal-macro-chart__seg--carbs {
+  height:32.34px;
+}
+.x-myfitnesspal-macro-chart__bar--1 .x-myfitnesspal-macro-chart__seg--fat {
+  height:15.04px;
+}
+.x-myfitnesspal-macro-chart__bar--1 .x-myfitnesspal-macro-chart__seg--protein {
+  height:12.03px;
+}
+.x-myfitnesspal-macro-chart__day--1 {
+  left:53.7px;
+}
+.x-myfitnesspal-macro-chart__bar--2 {
+  left:101.9px;
+  top:47.77px;
+}
+.x-myfitnesspal-macro-chart__bar--2 .x-myfitnesspal-macro-chart__seg--carbs {
+  height:45.5px;
+}
+.x-myfitnesspal-macro-chart__bar--2 .x-myfitnesspal-macro-chart__seg--fat {
+  height:30.08px;
+}
+.x-myfitnesspal-macro-chart__bar--2 .x-myfitnesspal-macro-chart__seg--protein {
+  height:21.06px;
+}
+.x-myfitnesspal-macro-chart__day--2 {
+  left:93.9px;
+}
+.x-myfitnesspal-macro-chart__bar--3 {
+  left:142.1px;
+  top:96.27px;
+}
+.x-myfitnesspal-macro-chart__bar--3 .x-myfitnesspal-macro-chart__seg--carbs {
+  height:27.07px;
+}
+.x-myfitnesspal-macro-chart__bar--3 .x-myfitnesspal-macro-chart__seg--fat {
+  height:11.28px;
+}
+.x-myfitnesspal-macro-chart__bar--3 .x-myfitnesspal-macro-chart__seg--protein {
+  height:9.78px;
+}
+.x-myfitnesspal-macro-chart__day--3 {
+  left:134.1px;
+}
+.x-myfitnesspal-macro-chart__bar--4 {
+  left:182.3px;
+  top:40.62px;
+}
+.x-myfitnesspal-macro-chart__bar--4 .x-myfitnesspal-macro-chart__seg--carbs {
+  height:52.64px;
+}
+.x-myfitnesspal-macro-chart__bar--4 .x-myfitnesspal-macro-chart__seg--fat {
+  height:29.33px;
+}
+.x-myfitnesspal-macro-chart__bar--4 .x-myfitnesspal-macro-chart__seg--protein {
+  height:21.81px;
+}
+.x-myfitnesspal-macro-chart__day--4 {
+  left:174.3px;
+}
+.x-myfitnesspal-macro-chart__bar--5 {
+  left:222.5px;
+  top:37.62px;
+}
+.x-myfitnesspal-macro-chart__bar--5 .x-myfitnesspal-macro-chart__seg--carbs {
+  height:51.51px;
+}
+.x-myfitnesspal-macro-chart__bar--5 .x-myfitnesspal-macro-chart__seg--fat {
+  height:30.46px;
+}
+.x-myfitnesspal-macro-chart__bar--5 .x-myfitnesspal-macro-chart__seg--protein {
+  height:24.82px;
+}
+.x-myfitnesspal-macro-chart__day--5 {
+  left:214.5px;
+}
+.x-myfitnesspal-macro-chart__bar--6 {
+  left:262.7px;
+  top:62.81px;
+}
+.x-myfitnesspal-macro-chart__bar--6 .x-myfitnesspal-macro-chart__seg--carbs {
+  height:38.35px;
+}
+.x-myfitnesspal-macro-chart__bar--6 .x-myfitnesspal-macro-chart__seg--fat {
+  height:24.44px;
+}
+.x-myfitnesspal-macro-chart__bar--6 .x-myfitnesspal-macro-chart__seg--protein {
+  height:18.8px;
+}
+.x-myfitnesspal-macro-chart__day--6 {
+  left:254.7px;
+}
+.x-myfitnesspal-macro-chart__bar--7 {
+  left:302.9px;
+  top:62.06px;
+}
+.x-myfitnesspal-macro-chart__bar--7 .x-myfitnesspal-macro-chart__seg--carbs {
+  height:37.22px;
+}
+.x-myfitnesspal-macro-chart__bar--7 .x-myfitnesspal-macro-chart__seg--fat {
+  height:31.58px;
+}
+.x-myfitnesspal-macro-chart__bar--7 .x-myfitnesspal-macro-chart__seg--protein {
+  height:13.54px;
+}
+.x-myfitnesspal-macro-chart__day--7 {
+  left:294.9px;
+}
+.x-myfitnesspal-macro-chart__bar--8 {
+  left:343.1px;
+  top:66.94px;
+}
+.x-myfitnesspal-macro-chart__bar--8 .x-myfitnesspal-macro-chart__seg--carbs {
+  height:29.33px;
+}
+.x-myfitnesspal-macro-chart__bar--8 .x-myfitnesspal-macro-chart__seg--fat {
+  height:29.33px;
+}
+.x-myfitnesspal-macro-chart__bar--8 .x-myfitnesspal-macro-chart__seg--protein {
+  height:18.8px;
+}
+.x-myfitnesspal-macro-chart__day--8 {
+  left:335.1px;
+}
+
+/* rise-energy-widget */
+.x-rise-energy-widget {
+  position:relative;
+  box-sizing:border-box;
+  width:344px;
+  height:162px;
+  border-radius:24px;
+  overflow:hidden;
+  background:#000000;
+  font-family:'Work Sans',system-ui,sans-serif;
+  font-size:13px;
+  font-weight:400;
+  line-height:1;
+  letter-spacing:0;
+  color:#FFFFFF;
+  text-align:left;
+  white-space:nowrap;
+}
+.x-rise-energy-widget * {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+.x-rise-energy-widget__chart {
+  position:absolute;
+  left:0;
+  top:0;
+  display:block;
+  width:344px;
+  height:162px;
+}
+.x-rise-energy-widget__t {
+  position:absolute;
+  font-size:13px;
+  letter-spacing:-0.02em;
+}
+.x-rise-energy-widget__peak {
+  left:17.2px;
+  top:16.32px;
+  font-size:17px;
+  font-weight:600;
+  letter-spacing:-0.01em;
+}
+.x-rise-energy-widget__sub {
+  color:#BCBCC0;
+}
+.x-rise-energy-widget__until {
+  left:26.8px;
+  top:37.78px;
+}
+.x-rise-energy-widget__big {
+  left:16.6px;
+  top:58.4px;
+  font-size:35px;
+  font-weight:300;
+  color:#F8980C;
+}
+.x-rise-energy-widget__wind {
+  left:17.3px;
+  top:122.48px;
+}
+.x-rise-energy-widget__window {
+  left:26.2px;
+  top:137.38px;
+}
+.x-rise-energy-widget__bar {
+  position:absolute;
+  left:17px;
+  width:4px;
+  border-radius:2px;
+}
+.x-rise-energy-widget__bar--peak {
+  top:40px;
+  height:10.5px;
+  background:#FD8008;
+}
+.x-rise-energy-widget__bar--wind {
+  top:139px;
+  height:10.5px;
+  background:linear-gradient(180deg,#653DC1,#DE867A);
+}
+.x-rise-energy-widget__bar--event {
+  left:216px;
+  top:18px;
+  width:4.2px;
+  height:27px;
+  border-radius:2.1px;
+  background:#FD8008;
+}
+.x-rise-energy-widget__ax {
+  right:180.3px;
+  font-size:10px;
+  letter-spacing:0;
+  color:#908F94;
+  text-align:right;
+}
+.x-rise-energy-widget__ax--1 {
+  top:16px;
+}
+.x-rise-energy-widget__ax--2 {
+  top:42.9px;
+}
+.x-rise-energy-widget__ax--3 {
+  top:69.6px;
+}
+.x-rise-energy-widget__ax--4 {
+  top:96.3px;
+}
+.x-rise-energy-widget__ax--5 {
+  top:123.1px;
+}
+.x-rise-energy-widget__ev--1 {
+  left:224px;
+  top:17.28px;
+}
+.x-rise-energy-widget__ev--2 {
+  left:223.2px;
+  top:32.38px;
+}
+.x-rise-energy-widget__add {
+  position:absolute;
+  left:295px;
+  top:107px;
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background:#6D1EF5;
+  border:1.5px solid #9156FC;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.x-rise-energy-widget__add svg {
+  display:block;
+  width:19px;
+  height:19px;
+}
+
+/* rise-session-card */
+.x-rise-session-card {
+  position:relative;
+  box-sizing:border-box;
+  width:368.5px;
+  height:199px;
+  border-radius:13px;
+  overflow:hidden;
+  background:#22222A;
+  font-family:'Work Sans',system-ui,sans-serif;
+  font-size:17px;
+  font-weight:400;
+  line-height:1;
+  letter-spacing:0;
+  color:#FFFFFF;
+  text-align:left;
+  white-space:nowrap;
+}
+.x-rise-session-card * {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+.x-rise-session-card__art {
+  position:absolute;
+  left:0;
+  top:0;
+  width:368.5px;
+  height:138.5px;
+  background:linear-gradient(180deg,#4B0110 0%,#590A10 10%,#62130E 17%,#7A240B 32%,#862E0A 40%,#923607 47%,#9C3F06 55%,#A94706 62%,#B45005 70%,#C15904 78%,#CC6101 85%,#D96A01 93%,#E07000 100%);
+}
+.x-rise-session-card__waves {
+  position:absolute;
+  left:0;
+  top:0;
+  display:block;
+  width:368.5px;
+  height:138.5px;
+}
+.x-rise-session-card__disc {
+  position:absolute;
+  left:167.5px;
+  top:17px;
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  background:#FEFEFF;
+}
+.x-rise-session-card__disc svg {
+  position:absolute;
+  left:13.2px;
+  top:10.5px;
+  display:block;
+  width:11px;
+  height:13px;
+}
+.x-rise-session-card__title {
+  position:absolute;
+  left:0;
+  width:368.5px;
+  top:64.42px;
+  text-align:center;
+  font-size:17px;
+}
+.x-rise-session-card__sub {
+  position:absolute;
+  left:0;
+  width:368.5px;
+  top:89.4px;
+  text-align:center;
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:-0.015em;
+}
+.x-rise-session-card__foot {
+  position:absolute;
+  left:0;
+  top:138.5px;
+  width:368.5px;
+  height:60.5px;
+  background:#22222A;
+}
+.x-rise-session-card__label {
+  position:absolute;
+  left:12.3px;
+  top:21.12px;
+  font-size:17px;
+}
+.x-rise-session-card__chev {
+  position:absolute;
+  left:345.9px;
+  top:20.9px;
+  display:block;
+  width:10.6px;
+  height:19px;
+}
+
+/* rise-habit-list */
+.x-rise-habit-list {
+  position:relative;
+  box-sizing:border-box;
+  width:399px;
+  height:427px;
+  padding:16px;
+  border-radius:24px;
+  overflow:hidden;
+  background:#16151A;
+  box-shadow:inset 0 1px 0 #333237;
+  font-family:'Work Sans',system-ui,sans-serif;
+  font-size:17px;
+  font-weight:400;
+  line-height:1;
+  letter-spacing:0;
+  color:#FFFFFF;
+  text-align:left;
+  white-space:nowrap;
+}
+.x-rise-habit-list * {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+.x-rise-habit-list__grab {
+  position:absolute;
+  left:181.5px;
+  top:8px;
+  width:36px;
+  height:5px;
+  border-radius:2.5px;
+  background:#FFFFFF;
+}
+.x-rise-habit-list__title {
+  position:absolute;
+  left:16.2px;
+  top:23.72px;
+  font-size:22px;
+}
+.x-rise-habit-list__badge {
+  position:absolute;
+  left:261px;
+  top:26.6px;
+  width:122px;
+  height:20.8px;
+  border:1px solid #333237;
+  border-radius:10.4px;
+}
+.x-rise-habit-list__bolt {
+  position:absolute;
+  left:7.8px;
+  top:3.4px;
+  display:block;
+  width:9px;
+  height:12px;
+}
+.x-rise-habit-list__great {
+  position:absolute;
+  left:21.4px;
+  top:1.98px;
+  font-size:13px;
+  letter-spacing:-0.03em;
+  color:#FCFCFC;
+}
+.x-rise-habit-list__day {
+  font-weight:700;
+  letter-spacing:-0.01em;
+  color:#8C58FC;
+}
+.x-rise-habit-list__list {
+  position:absolute;
+  left:16px;
+  top:68px;
+  width:367px;
+  height:344.5px;
+  border-radius:12px;
+  overflow:hidden;
+  background:#323335;
+}
+.x-rise-habit-list__row {
+  position:absolute;
+  left:0;
+  width:367px;
+  height:56.5px;
+  background:#22222A;
+}
+.x-rise-habit-list__row--1 {
+  top:1.0px;
+}
+.x-rise-habit-list__row--2 {
+  top:58.5px;
+}
+.x-rise-habit-list__row--3 {
+  top:116.0px;
+}
+.x-rise-habit-list__row--4 {
+  top:173.5px;
+}
+.x-rise-habit-list__row--5 {
+  top:231.0px;
+}
+.x-rise-habit-list__icon {
+  position:absolute;
+  left:12.5px;
+  top:17.75px;
+  display:block;
+  width:21px;
+  height:21px;
+}
+.x-rise-habit-list__name {
+  position:absolute;
+  left:41.6px;
+  top:18.02px;
+  font-size:17px;
+  letter-spacing:-0.01em;
+}
+.x-rise-habit-list__bell {
+  position:absolute;
+  left:315.8px;
+  top:20px;
+  display:block;
+  width:17px;
+  height:17px;
+}
+.x-rise-habit-list__chev {
+  position:absolute;
+  left:344.3px;
+  top:18.75px;
+  display:block;
+  width:10.5px;
+  height:19px;
+}
+.x-rise-habit-list__add {
+  position:absolute;
+  left:0;
+  top:288.5px;
+  width:367px;
+  height:56px;
+  background:#16151A;
+}
+.x-rise-habit-list__plus {
+  position:absolute;
+  left:12.5px;
+  top:17px;
+  display:block;
+  width:21px;
+  height:21px;
+}
+.x-rise-habit-list__addtext {
+  position:absolute;
+  left:42px;
+  top:18.56px;
+  font-size:16px;
+  font-weight:700;
+  letter-spacing:-0.035em;
+  color:#8C58FC;
+}
+.x-rise-habit-list__frame {
+  position:absolute;
+  left:0;
+  top:0;
+  width:367px;
+  height:344.5px;
+  border:1px solid #333237;
+  border-radius:12px;
 }
 
 /* huckleberry-nursing-timer */
