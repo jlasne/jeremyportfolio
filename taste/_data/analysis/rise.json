@@ -1,0 +1,266 @@
+{
+  "card": {
+    "oneLiner": "Black sleep-debt tracker; a countdown coupon sells Quarterly at 40% off",
+    "keyNumber": {
+      "value": "$69.99",
+      "label": "Top membership price"
+    }
+  },
+  "branding": {
+    "colors": [
+      {
+        "hex": "#17151A",
+        "role": "60",
+        "name": "Night black",
+        "use": "Background of the app screens and widgets"
+      },
+      {
+        "hex": "#7D05FC",
+        "role": "30",
+        "name": "Electric violet",
+        "use": "The icon, the store backdrops, tags and buttons"
+      },
+      {
+        "hex": "#C56B3D",
+        "role": "10",
+        "name": "Sunrise orange",
+        "use": "The sunrise glow and energy numbers like 77%"
+      }
+    ],
+    "typeStyle": "Wide grotesque sans, regular lines with bold key words; the web paywall switches to an Inter-like sans",
+    "font": {
+      "name": null,
+      "closeTo": "Work Sans",
+      "look": "Wide grotesque sans, regular lines with bold key words",
+      "weights": "Regular and bold in captions, bold screen titles",
+      "crop": "/taste/media/rise/font-1.jpg"
+    },
+    "visualStyle": "Black app screens where violet marks tabs and tags and orange marks energy numbers, framed by a violet-to-orange sunrise on every store screen. The web paywall switches to white, with a violet button, a green coupon card and a red countdown.",
+    "styleTraits": [
+      "Near black covers 42% of the store screens",
+      "8 of 8 store screens sit on a violet-to-orange sunrise",
+      "6 of 8 captions mix regular and bold words"
+    ]
+  },
+  "screenshots": [
+    {
+      "src": "/taste/media/rise/s1.jpg",
+      "alt": "Become a morning person: App of the Day laurels, trusted by 5 million early risers, and Recommended by ESPN, Sleep Foundation and 4 more",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/rise/s2.jpg",
+      "alt": "Track the sleep you owe your body: My sleep for October 12-26, with 6.3 hrs of sleep debt and 77% energy potential",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/rise/s3.jpg",
+      "alt": "Check your energy level and optimize your day: an energy curve with Peak and Dip tags, Great 86%, and Avoid caffeine at 12:35",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/rise/s4.jpg",
+      "alt": "Sleep better with sleeping sounds and meditation: an 11m Reduce stress session, Sleeping sounds with a sleep timer, and a 2m breathing session",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/rise/s5.jpg",
+      "alt": "Build healthy habits: a Habits list with Workout, Avoid caffeine, Dinner, Blue-light glasses, Evening routine and Melatonin window",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/rise/s6.jpg",
+      "alt": "Use the calendar integration and plan your day: Morning grogginess, Morning peak and Afternoon dip blocks in the iOS Calendar for October 27, 2021",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/rise/s7.jpg",
+      "alt": "One widget to rule them all: home screen widgets for Evening peak, 31m until 21:21, and Wind-down until 9:40p with 7.5hrs sleep debt",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/rise/s8.jpg",
+      "alt": "Learn the science behind your sleep needs: Practical Science articles such as Lower Your Sleep Debt, Increase Overall Energy",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/rise/pw1.jpg",
+      "alt": "Rise web paywall: a #february26 code for up to 40% off, a 09:52 countdown and 3 plans priced per day, Quarterly picked at $0.32",
+      "isPaywall": true
+    },
+    {
+      "src": "/taste/media/rise/pw2.jpg",
+      "alt": "Rise quiz result: an ideal bedtime ring and “Your personalized energy & sleep plan is ready” under a discount countdown",
+      "isPaywall": true
+    },
+    {
+      "src": "/taste/media/rise/pw3.jpg",
+      "alt": "Rise checkout: “Your personalized energy & sleep plan is ready”, a card field, a purple Subscribe button and the renewal terms",
+      "isPaywall": true
+    }
+  ],
+  "plans": [
+    {
+      "name": "Sleep & Energy Premium",
+      "price": "$69.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Sleep Improvement Membership",
+      "price": "$59.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Sleep Improvement Membership",
+      "price": "$35.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Sleep Improvement Membership",
+      "price": "$9.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Sleep Improvement Membership",
+      "price": "$69.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Sleep Improvement Membership",
+      "price": "$59.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "AI Expert Access",
+      "price": "$29.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Sleep Improvement Membership",
+      "price": "$35.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Sleep Improvement Membership",
+      "price": "$69.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Sleep Improvement Membership",
+      "price": "$59.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    }
+  ],
+  "paywall": {
+    "tiers": 2,
+    "yearlySavingPct": null,
+    "trial": {
+      "stated": false,
+      "evidence": null
+    },
+    "consumables": 0,
+    "family": 0
+  },
+  "ourRead": [
+    "The same 09:52 countdown shows 3 times on the plan screen. The coupon reads #february26 in November, so the limited discount looks permanent.",
+    "Quarterly, the middle plan, is preselected as MOST POPULAR at $0.32 a day. Monthly wears a LITE VERSION tag; Semiannually is BEST PRICE at $0.27 a day.",
+    "The 40% covers the first period only. Checkout charges $29.99 for the intro period, then renews at $49.99, the crossed-out price."
+  ],
+  "improvements": [
+    {
+      "title": "Keep violet as the only accent",
+      "detail": "Red, green and violet compete above the plans: a red #ED4443 banner, a green #95F3AB coupon card and the violet plan. The sticky bar already shows the timer, so drop the banner, grey the coupon and keep violet for the choice.",
+      "rule": "One accent per screen. Directing attention means one place to look.",
+      "source": "S8"
+    },
+    {
+      "title": "Show the ideal bedtime",
+      "detail": "The plan screen blurs its one personal result, the ideal bedtime, above “Your personalized energy & sleep plan is ready”. Show the time, then sell the energy schedule behind it: the peaks and dips from the App Store screens.",
+      "rule": "Onboarding before sign-up. Order: show the value, let them personalize, then ask them to sign up.",
+      "source": "S13"
+    },
+    {
+      "title": "Put the renewal price on the card",
+      "detail": "Quarterly leads with $0.32 a day, and the $49.99 renewal sits in 56 words of bullets under Subscribe. Print “$29.99 today, then $49.99 at renewal” on the Quarterly card, in one line.",
+      "rule": "Cut verbose, redundant text. One sentence where AI wrote three.",
+      "source": "S2, S4, S14, S15, S27"
+    }
+  ],
+  "stylePrompt": "Build a paywall in Rise's style. Top to bottom: a sticky countdown bar, a dial with the user's result, a 2-line headline ending in violet, then 3 plan cards. Each shows the crossed-out price, the new price and a boxed per-day price. Tag them LITE VERSION, MOST POPULAR and BEST PRICE; preselect the middle plan with a violet outline. Discount the first period and print the renewal price on the card. Type: Work Sans, bold headlines, regular body. Colors: night black #17151A (60), electric violet #7D05FC (30) for the selection and button, sunrise orange #C56B3D (10) for the per-day price. Use my brand colors in the same 60/30/10 roles.",
+  "elements": [
+    {
+      "type": "discount-badge",
+      "src": "/taste/media/rise/el-discount-badge-1.jpg",
+      "x": 16,
+      "y": 6,
+      "w": 574,
+      "h": 100,
+      "note": "Sticky bar: red stopwatch, Discount available 09:52 and a violet Get offer button"
+    },
+    {
+      "type": "hero-visual",
+      "src": "/taste/media/rise/el-hero-visual-1.jpg",
+      "x": 80,
+      "y": 129,
+      "w": 444,
+      "h": 444,
+      "note": "Bedtime dial from moon to sun, with the ideal bedtime blurred"
+    },
+    {
+      "type": "discount-badge",
+      "src": "/taste/media/rise/el-discount-badge-2.jpg",
+      "x": 14,
+      "y": 130,
+      "w": 572,
+      "h": 236,
+      "note": "Green coupon card: code #february26, an up to 40% pill and a 09:52 timer"
+    },
+    {
+      "type": "plan-picker",
+      "src": "/taste/media/rise/el-plan-picker-1.jpg",
+      "x": 14,
+      "y": 475,
+      "w": 572,
+      "h": 507,
+      "note": "3 stacked cards with per-day price boxes; Quarterly preselected as MOST POPULAR at $0.32 a day"
+    },
+    {
+      "type": "main-button",
+      "src": "/taste/media/rise/el-main-button-1.jpg",
+      "x": 23,
+      "y": 520,
+      "w": 554,
+      "h": 97,
+      "note": "Full-width violet Subscribe button under the card field at checkout"
+    },
+    {
+      "type": "legal-links",
+      "src": "/taste/media/rise/el-legal-links-1.jpg",
+      "x": 35,
+      "y": 726,
+      "w": 501,
+      "h": 275,
+      "note": "3 checkout bullets: $29.99 for the intro period, then $49.99 at renewal"
+    }
+  ]
+}

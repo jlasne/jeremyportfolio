@@ -1,0 +1,184 @@
+{
+  "id": "341232718",
+  "slug": "myfitnesspal",
+  "name": "MyFitnessPal",
+  "fullName": "MyFitnessPal: Calorie Counter",
+  "developer": "MyFitnessPal, Inc.",
+  "category": "Health & Fitness",
+  "rank": 1,
+  "chart": "Health & Fitness",
+  "rating": 4.71385,
+  "ratingCount": 2393817,
+  "url": "https://apps.apple.com/us/app/myfitnesspal-calorie-counter/id341232718",
+  "price": "Free",
+  "releaseDate": "2009-12-08",
+  "updated": "2026-11-10",
+  "subtitle": "AI Coach & Nutrition Tracker",
+  "description": "Eat better, train smarter, and hit your goals with MyFitnessPal, the calorie counter and nutrition tracker with a built-in AI Coach. Join the millions of users who've created over 100 billion food logs and counting! Calories, macros, food, workouts – track it all in one place with one of the most comprehensive health & fitness tracker apps available. Your new AI Coach gives you personalized guidance based on your goals and history. Plus GLP-1 journey support – log doses and set reminders.\n\nSet personalized fitness, nutrition, and healthy eating goals. Build better habits by tracking calories, macros, and water intake. Download the app & start your free Premium trial today. With MyFitnessPal, you get healthy food inspiration, an intermittent fasting tracker, science-backed nutrition, and powerful workout logging tools. MyFitnessPal is the #1 nutrition, macro & calorie counter app in the U.S. – as featured in the New York Times, Forbes, the Today Show & U.S. News & World Report.\n\nMore than a calorie counter & nutrition journal – MyFitnessPal is an AI-powered health & fitness tracker with an AI Coach, built to help you track macros, monitor nutrition progress & crush your fitness goals.\n\nNEW FEATURE: AI COACH\n■ Your personal AI Coach delivers nutrition insights tailored to your goals, habits, and logging history\n■ Ask the AI Coach about your nutrition, macros & workouts\n\nCALORIE, NUTRITION & GLP-1 TRACKER\n■ Log meals effortlessly from 20.5M+ foods, including restaurant dishes – calorie counting made simple\n■ Full nutrition & macro tracker breakdown – carbs, fat & protein – with custom targets for protein, sodium, fiber & more\n■ Get AI Coach tips to stay on track with your nutrition & macro goals\n■ Stay hydrated with the built-in water tracker\n■ Log how you feel on your GLP-1 medications to spot patterns in symptoms & side effects\n■ Stick to your schedule with custom medication reminders\n■ Build healthy habits that stick with simple nutrition & medication tracking\n\nFITN",
+  "icon": "/taste/media/myfitnesspal/icon.png",
+  "screenshots": [
+    {
+      "src": "/taste/media/myfitnesspal/s1.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/myfitnesspal/s2.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/myfitnesspal/s3.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/myfitnesspal/s4.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/myfitnesspal/s5.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/myfitnesspal/s6.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/myfitnesspal/s7.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/myfitnesspal/s8.jpg",
+      "w": 600,
+      "h": 1299
+    }
+  ],
+  "paywall": [
+    {
+      "src": "/taste/media/myfitnesspal/pw1.jpg",
+      "w": 600,
+      "h": 1301,
+      "source": "web",
+      "sourceUrl": "https://www.myfitnesspal.com/premium",
+      "capturedAt": "2026-11-15"
+    },
+    {
+      "src": "/taste/media/myfitnesspal/pw2.jpg",
+      "w": 600,
+      "h": 1301,
+      "source": "web",
+      "sourceUrl": "https://www.myfitnesspal.com/premium",
+      "capturedAt": "2026-11-15"
+    },
+    {
+      "src": "/taste/media/myfitnesspal/pw3.jpg",
+      "w": 600,
+      "h": 1301,
+      "source": "web",
+      "sourceUrl": "https://www.myfitnesspal.com/premium",
+      "capturedAt": "2026-11-15"
+    }
+  ],
+  "paywallShots": [],
+  "iaps": [
+    {
+      "name": "MyFitnessPal Monthly Premium",
+      "price": "$19.99"
+    },
+    {
+      "name": "MyFitnessPal Yearly Premium",
+      "price": "$79.99"
+    },
+    {
+      "name": "MyFitnessPal Monthly Premium",
+      "price": "$19.99"
+    },
+    {
+      "name": "MyFitnessPal Premium",
+      "price": "$9.99"
+    },
+    {
+      "name": "MyFitnessPal Monthly Premium",
+      "price": "$9.99"
+    },
+    {
+      "name": "MyFitnessPal Premium",
+      "price": "$49.99"
+    },
+    {
+      "name": "MyFitnessPal Yearly Premium",
+      "price": "$79.99"
+    },
+    {
+      "name": "MyFitnessPal Annual Premium",
+      "price": "$79.99"
+    },
+    {
+      "name": "MyFitnessPal Monthly Premium",
+      "price": "$19.99"
+    },
+    {
+      "name": "MyFitnessPal Yearly Premium",
+      "price": "$49.99"
+    }
+  ],
+  "palette": {
+    "icon": [
+      {
+        "hex": "#0066EE",
+        "share": 0.94
+      },
+      {
+        "hex": "#FFFFFF",
+        "share": 0.054
+      },
+      {
+        "hex": "#2079F0",
+        "share": 0.001
+      },
+      {
+        "hex": "#DCEAFD",
+        "share": 0.001
+      },
+      {
+        "hex": "#B2D1FA",
+        "share": 0.001
+      },
+      {
+        "hex": "#4E94F3",
+        "share": 0.001
+      }
+    ],
+    "screens": [
+      {
+        "hex": "#FFFFFF",
+        "share": 0.306
+      },
+      {
+        "hex": "#746A61",
+        "share": 0.215
+      },
+      {
+        "hex": "#E5E5E5",
+        "share": 0.123
+      },
+      {
+        "hex": "#CACACA",
+        "share": 0.065
+      },
+      {
+        "hex": "#8A817A",
+        "share": 0.063
+      },
+      {
+        "hex": "#A9A4A0",
+        "share": 0.04
+      }
+    ]
+  }
+}

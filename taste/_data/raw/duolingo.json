@@ -1,0 +1,168 @@
+{
+  "id": "570060128",
+  "slug": "duolingo",
+  "name": "Duolingo",
+  "fullName": "Duolingo: Learn Languages",
+  "developer": "Duolingo",
+  "category": "Education",
+  "rank": 1,
+  "chart": "Education",
+  "rating": 4.72236,
+  "ratingCount": 5592354,
+  "url": "https://apps.apple.com/us/app/duolingo-learn-languages/id570060128",
+  "price": "Free",
+  "releaseDate": "2012-11-13",
+  "updated": "2026-11-11",
+  "subtitle": "Spanish, French, Chess & Math",
+  "description": "Learn a new language, chess & more with the world's most downloaded education app! Duolingo is the fun, free app for learning 40+ languages through quick, bite-sized lessons. Practice speaking, reading, listening & writing to build your vocabulary & grammar skills.\n\nDesigned by learning experts & loved by hundreds of millions worldwide, our lessons make learning effective & fun and help you prepare for real conversations in Spanish, French, Japanese, Korean, Chinese, Italian, German, English and more.\n\n\nAnd now, you can learn CHESS on Duolingo! Whether you're a total beginner or looking to level up your game, you'll love learning chess the Duolingo way. Play matches and fun chess lessons for all levels, no matter the language - chess, ajedrez, xadrez, schach, Шахматы, الشطرنج.\n\n• Chess: Learn the moves, level up your game & play matches in our Chess course. Learn the basics, solve fun chess puzzles & improve your strategy with guided lessons. Whether you're new to chess or already play, our course is designed to help you have fun and build real skills. Checkmate!\n\n• Math: Forget lectures and math worksheets! Built by learning experts, our Math course makes math feel like a game. Boost learning and fight the summer slide with standards-aligned math lessons for elementary school, middle school, and high school students.\n\n• Music: Learn how to read music & play songs in our Music course, no instrument needed! Using an on-screen keyboard, you'll learn bit-by-bit.\n\nWhether you're learning a language for travel, school, career or your brain health, you'll love learning with Duolingo.\n\n\nWhy Duolingo?\n\n• Duolingo is fun & effective. Game-like language lessons & fun characters help you build speaking, reading, listening, & writing skills, plus enjoy fun chess & competitive online chess in one app.\n\n• Duolingo works. Designed by learning experts, Duolingo has a science-based teaching methodology proven to foster long-term knowledge retention across language lessons & chess le",
+  "icon": "/taste/media/duolingo/icon.png",
+  "screenshots": [
+    {
+      "src": "/taste/media/duolingo/s1.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/duolingo/s2.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/duolingo/s3.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/duolingo/s4.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/duolingo/s5.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/duolingo/s6.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/duolingo/s7.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/duolingo/s8.jpg",
+      "w": 600,
+      "h": 1299
+    }
+  ],
+  "paywall": [
+    {
+      "src": null,
+      "w": null,
+      "h": null,
+      "source": "drawn",
+      "sourceUrl": "https://apps.apple.com/us/app/duolingo-learn-languages/id570060128",
+      "capturedAt": "2026-11-15"
+    }
+  ],
+  "paywallShots": [],
+  "iaps": [
+    {
+      "name": "Barrel of Gems (1200)",
+      "price": "$4.99"
+    },
+    {
+      "name": "Super Duolingo",
+      "price": "$9.99"
+    },
+    {
+      "name": "Super Duolingo",
+      "price": "$83.99"
+    },
+    {
+      "name": "Cart of Gems (3000)",
+      "price": "$9.99"
+    },
+    {
+      "name": "Cart of Gems (6500)",
+      "price": "$19.99"
+    },
+    {
+      "name": "Super Duolingo",
+      "price": "$12.99"
+    },
+    {
+      "name": "Super Duolingo",
+      "price": "$119.99"
+    },
+    {
+      "name": "Super Duolingo",
+      "price": "$95.99"
+    },
+    {
+      "name": "Chest of Gems",
+      "price": "$0.99"
+    },
+    {
+      "name": "Super Duolingo",
+      "price": "$119.99"
+    }
+  ],
+  "palette": {
+    "icon": [
+      {
+        "hex": "#78C800",
+        "share": 0.479
+      },
+      {
+        "hex": "#8EE000",
+        "share": 0.271
+      },
+      {
+        "hex": "#FFFFFF",
+        "share": 0.159
+      },
+      {
+        "hex": "#4B4B4B",
+        "share": 0.052
+      },
+      {
+        "hex": "#FFC200",
+        "share": 0.017
+      },
+      {
+        "hex": "#F48000",
+        "share": 0.011
+      }
+    ],
+    "screens": [
+      {
+        "hex": "#FFFFFF",
+        "share": 0.683
+      },
+      {
+        "hex": "#1CB0F6",
+        "share": 0.037
+      },
+      {
+        "hex": "#FF800B",
+        "share": 0.034
+      },
+      {
+        "hex": "#CE82FF",
+        "share": 0.032
+      },
+      {
+        "hex": "#E5E5E5",
+        "share": 0.029
+      },
+      {
+        "hex": "#F4E6FF",
+        "share": 0.028
+      }
+    ]
+  }
+}

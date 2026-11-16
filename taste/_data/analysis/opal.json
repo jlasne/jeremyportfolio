@@ -1,0 +1,220 @@
+{
+  "card": {
+    "oneLiner": "Black glass screens. Yearly gets a 7-day trial, Monthly 3 days.",
+    "keyNumber": {
+      "value": "$99.99",
+      "label": "Yearly plan"
+    }
+  },
+  "branding": {
+    "colors": [
+      {
+        "hex": "#0E0F11",
+        "role": "60",
+        "name": "Near black",
+        "use": "background of the app screens and the paywall"
+      },
+      {
+        "hex": "#EEEEEE",
+        "role": "30",
+        "name": "Soft white",
+        "use": "text, the icon ring and the selected plan tab"
+      },
+      {
+        "hex": "#B4D4E6",
+        "role": "10",
+        "name": "Ice blue",
+        "use": "key numbers, icons and the App Store backdrops"
+      }
+    ],
+    "typeStyle": "Tight sans headlines that set key words in bold inside regular lines",
+    "font": {
+      "name": "SF Pro",
+      "closeTo": "Inter",
+      "look": "tight grotesque sans, bold words inside regular lines",
+      "weights": "regular and bold in one headline, regular body",
+      "crop": "/taste/media/opal/font-1.jpg"
+    },
+    "visualStyle": "Black screens with frosted-glass cards, ice-blue numbers and photo-real 3D stones. The web paywall keeps the black but swaps the accent for a purple-to-pink gradient.",
+    "styleTraits": [
+      "Black covers 88% of the paywall",
+      "8 of 8 store headlines mix bold and regular",
+      "Card corners about 28 pt"
+    ]
+  },
+  "screenshots": [
+    {
+      "src": "/taste/media/opal/s1.jpg",
+      "alt": "Headline \"Get back 1h23m every day.\" above a phone showing 1h 23m less screen time this week, and a 4.9 star score from 150K+ ratings",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/opal/s2.jpg",
+      "alt": "Headline \"Blocks the apps you keep opening.\" above a block screen that reads \"Instagram is Blocked by Opal\", and a 2025 Apple Design Award for Social Impact",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/opal/s3.jpg",
+      "alt": "Headline \"For better sleep, focus, and rest.\" above the home screen: a glowing opal gem, a score of 94, 2h 56m of screen time and 2 active rules",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/opal/s4.jpg",
+      "alt": "Headline \"Dive deeper into your progress.\" above an Insights card: phone down around 1 to 2 AM, with Instagram, TikTok and Facebook used most before bed",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/opal/s5.jpg",
+      "alt": "Headline \"One tap. Total focus.\" above a 29:59 focus timer set to 30 minutes, with a Start Timer button",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/opal/s6.jpg",
+      "alt": "Headline \"Runs automatically when you need it.\" above 4 blocked apps and rule cards for Sleep Time, Deep Work, Creative Burst and Commute Time",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/opal/s7.jpg",
+      "alt": "Headline \"Routines for every part of your day.\" above rule cards: 10 Unblock Daily, Sleep Time from 10 PM to 8 AM, Deep Work and Lunch Break",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/opal/s8.jpg",
+      "alt": "Headline \"Also available on Mac.\" above a MacBook on a rock, its screen reading \"Youtube was blocked by Opal.\"",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/opal/pw1.jpg",
+      "alt": "Opal PRO card on the Yearly tab: $8.29 a month, $99.99 billed annually, 5 features and a Start Free Week button",
+      "isPaywall": true
+    },
+    {
+      "src": "/taste/media/opal/pw2.jpg",
+      "alt": "Opal PRO card on the Monthly tab: $19.99 a month, $239 billed annually and a Start Free 3 Days button",
+      "isPaywall": true
+    },
+    {
+      "src": "/taste/media/opal/pw3.jpg",
+      "alt": "Opal PRO card on the Lifetime tab: $399 forever as one payment, with a Purchase button",
+      "isPaywall": true
+    }
+  ],
+  "plans": [
+    {
+      "name": "Yearly Plan",
+      "price": "$99.99",
+      "period": "year",
+      "perMonth": 8.33,
+      "perWeek": 1.92
+    },
+    {
+      "name": "Monthly Plan",
+      "price": "$19.99",
+      "period": "month",
+      "perMonth": 19.99,
+      "perWeek": 4.61
+    },
+    {
+      "name": "Weekly Plan",
+      "price": "$4.99",
+      "period": "week",
+      "perMonth": 21.62,
+      "perWeek": 4.99
+    },
+    {
+      "name": "Opal Student Weekly",
+      "price": "$9.99",
+      "period": "week",
+      "perMonth": 43.29,
+      "perWeek": 9.99
+    },
+    {
+      "name": "Weekly Plan",
+      "price": "$9.99",
+      "period": "week",
+      "perMonth": 43.29,
+      "perWeek": 9.99
+    },
+    {
+      "name": "Opal Pro Subscription",
+      "price": "$49.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    }
+  ],
+  "paywall": {
+    "tiers": 1,
+    "yearlySavingPct": 58,
+    "trial": {
+      "stated": true,
+      "evidence": "\"Start Free Week\" on the Yearly tab and \"Start Free 3 Days\" on the Monthly tab of the web pricing page"
+    },
+    "consumables": 0,
+    "family": 0
+  },
+  "ourRead": [
+    "Yearly opens preselected at $8.29 a month. Monthly shows $19.99 and \"$239 billed annually\", so $99.99 a year reads as 58% off.",
+    "The trial follows the plan: 7 days on Yearly, 3 on Monthly, and Lifetime goes straight to \"Purchase\". The default plan gets the longest trial.",
+    "Lifetime at $399, 4 times the yearly price, anchors the top of the ladder. The App Store also lists weekly plans at $4.99 and $9.99."
+  ],
+  "improvements": [
+    {
+      "title": "Put the app's ice blue on the button",
+      "detail": "The button (#C08CF4 to #EDB2B2) and the PRO badge use a purple-to-pink gradient. The app marks its numbers and icons in ice blue (#B4D4E6). Use it on the button with near-black text, at 12:1 contrast, and make the badge grey.",
+      "rule": "Pick the accent for a reason, not because you like it. It must contrast with the base pair and fit the brand mood.",
+      "source": "S23"
+    },
+    {
+      "title": "Lead with the 1h 23m",
+      "detail": "The card promises \"Level up your focus\". Screenshot 1 and the App Store text promise 1h 23m back every day. Put \"Get back 1h 23m a day\" under the Opal PRO title.",
+      "rule": "Make headlines specific. \"Track 3 habits in 10 seconds a day\" beats \"Transform your life\".",
+      "source": "S1, S2, S4, S16"
+    },
+    {
+      "title": "Say how Monthly bills",
+      "detail": "The Monthly tab reads \"$239 billed annually\", but the plan bills $19.99 a month. Write \"Billed monthly, $239.88 a year\" and add \"Save 58%\" to the Yearly tab.",
+      "rule": "Fix 3 things to stop a design from looking cheap: low contrast, a broken layout, and copy that does not convert.",
+      "source": "S27"
+    }
+  ],
+  "stylePrompt": "Build a dark paywall like Opal's. Top: an award badge and the rating. Below, one card holds the app name with a PRO badge, a one-line promise and 3 tabs: Yearly, Monthly, Lifetime. Under the tabs: one big price, the billed total in small grey text, 5 checked features and a full-width pill button. Preselect Yearly and show its price per month. Give Yearly a 7-day trial and Monthly 3 days; Lifetime is a one-time purchase. Type: SF Pro, bold price, regular body. Colors: near black #0E0F11 (60%), soft white #EEEEEE (30%), ice blue #B4D4E6 (10%) on the button. Use my brand colors in the same 60/30/10 roles.",
+  "elements": [
+    {
+      "type": "social-proof",
+      "src": "/taste/media/opal/el-social-proof-1.jpg",
+      "x": 87,
+      "y": 7,
+      "w": 450,
+      "h": 86,
+      "note": "App of the Day laurel next to 4.8 stars and 200K+ ratings, above the plan card"
+    },
+    {
+      "type": "plan-picker",
+      "src": "/taste/media/opal/el-plan-picker-1.jpg",
+      "x": 69,
+      "y": 322,
+      "w": 461,
+      "h": 239,
+      "note": "3 tabs in a pill track, Yearly preselected at $8.29 a month, with $99.99 below in grey"
+    },
+    {
+      "type": "feature-list",
+      "src": "/taste/media/opal/el-feature-list-1.jpg",
+      "x": 71,
+      "y": 593,
+      "w": 403,
+      "h": 305,
+      "note": "5 checks, led by Hard Mode: \"No way out. You can't turn Opal off.\""
+    },
+    {
+      "type": "main-button",
+      "src": "/taste/media/opal/el-main-button-1.jpg",
+      "x": 71,
+      "y": 911,
+      "w": 457,
+      "h": 85,
+      "note": "Full-width purple-to-pink pill whose label follows the plan: Start Free Week, Start Free 3 Days, Purchase"
+    }
+  ]
+}

@@ -1,0 +1,180 @@
+{
+  "id": "1502936453",
+  "slug": "ladder",
+  "name": "Ladder",
+  "fullName": "LADDER Strength Training Plans",
+  "developer": "Ladder Technologies, Inc.",
+  "category": "Health & Fitness",
+  "rank": 2,
+  "chart": "Health & Fitness",
+  "rating": 4.9504,
+  "ratingCount": 222995,
+  "url": "https://apps.apple.com/us/app/ladder-strength-training-plans/id1502936453",
+  "price": "Free",
+  "releaseDate": "2020-06-23",
+  "updated": "2026-11-13",
+  "subtitle": "Fitness Workouts at Home & Gym",
+  "description": "Try Ladder COMPLETELY FREE for 7 days. NO PAYMENT collected during trial.\n\nLADDER IS THE #1 APP FOR STRENGTH TRAINING\nApple's 2025 App of the Year Finalist\nApple's Editors Choice Award\nWomen's Health 2026 Best Overall\nCNET 2026 Best Strength Training App\n\nLadder gives you a structured, coach-built workout plan for every day — new each week, easy to follow, and designed for home or gym. No more guesswork, no more showing up not knowing what to do.\n\nA NEW WORKOUT PLAN EVERY DAY — Structured progressive overload programs created by expert coaches, matched to your goals.\nBUILT FOR STRENGTH TRAINING — In-ear coaching, video demonstrations and a built-in timer.\nTRAIN ON YOUR SCHEDULE — Workouts that fit your life and can be done from anywhere.\nTRACK YOUR PROGRESS — Use the Ladder Journal to visualize your rep and weight progress over time.\n\nWORKOUT STYLES INCLUDE:\nYoga Strength\nPilates Strength Training\nInterval Strength Training\nPush Pull Training\nKettlebell Strength Workouts\nHIIT (High Intensity Interval Training)\nBodybuilding\nBodyweight Workouts\nExplosive Power\nStrength & Conditioning\nFunctional Fitness\nEndurance Strength\n\nPROGRAMS & COACHES:\nALIGN (Sasha Hanway) — Power Vinyasa meets strength training to build balance and full-body strength.\nASCEND (Aria Vince) — Traditional bodybuilding with a focus on glutes, shoulders and back using barbells, dumbbells and machines.\nBODY & BELL (Lauren Kanski) — Functional, high-intensity kettlebell workouts.\nCREWS CONTROL (Andre Crews) — High-intensity functional fitness for strength and athleticism.\nDEFINE (Maia Henry) — The 3-2-1 method: three days strength, two days Pilates, one conditioning day with daily core work.\nELEVATE (Elise Young) — Fast-paced HIIT workouts designed to maximize your time.\nEMBODY (Allegra Paris) — Low-impact Pilates and strength training focused on full-body movement, glute development and core strength.\nENDURE (Jennifer Jacobs) — Progressive overload strength combining smart programming, intentional rec",
+  "icon": "/taste/media/ladder/icon.png",
+  "screenshots": [
+    {
+      "src": "/taste/media/ladder/s1.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/ladder/s2.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/ladder/s3.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/ladder/s4.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/ladder/s5.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/ladder/s6.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/ladder/s7.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/ladder/s8.jpg",
+      "w": 600,
+      "h": 1299
+    }
+  ],
+  "paywall": [
+    {
+      "src": "/taste/media/ladder/pw1.jpg",
+      "w": 600,
+      "h": 1006,
+      "source": "web",
+      "sourceUrl": "https://www.joinladder.com/pricing",
+      "capturedAt": "2026-11-15"
+    },
+    {
+      "src": "/taste/media/ladder/pw2.jpg",
+      "w": 600,
+      "h": 1006,
+      "source": "web",
+      "sourceUrl": "https://www.joinladder.com/pricing",
+      "capturedAt": "2026-11-15"
+    },
+    {
+      "src": "/taste/media/ladder/pw3.jpg",
+      "w": 600,
+      "h": 1006,
+      "source": "web",
+      "sourceUrl": "https://www.joinladder.com/pricing",
+      "capturedAt": "2026-11-15"
+    }
+  ],
+  "paywallShots": [],
+  "iaps": [
+    {
+      "name": "PRO",
+      "price": "$29.99"
+    },
+    {
+      "name": "PRO Annual",
+      "price": "$179.99"
+    },
+    {
+      "name": "PRO+",
+      "price": "$34.99"
+    },
+    {
+      "name": "PRO Annual",
+      "price": "$179.99"
+    },
+    {
+      "name": "ELITE",
+      "price": "$44.99"
+    },
+    {
+      "name": "ELITE+",
+      "price": "$49.99"
+    },
+    {
+      "name": "ELITE+ Annual",
+      "price": "$479.99"
+    },
+    {
+      "name": "ELITE Annual",
+      "price": "$449.99"
+    },
+    {
+      "name": "PRO+ (Annual)",
+      "price": "$329.99"
+    }
+  ],
+  "palette": {
+    "icon": [
+      {
+        "hex": "#E0FF00",
+        "share": 0.78
+      },
+      {
+        "hex": "#060606",
+        "share": 0.152
+      },
+      {
+        "hex": "#B3D400",
+        "share": 0.028
+      },
+      {
+        "hex": "#F9FF4F",
+        "share": 0.012
+      },
+      {
+        "hex": "#282828",
+        "share": 0.01
+      },
+      {
+        "hex": "#FFFF91",
+        "share": 0.007
+      }
+    ],
+    "screens": [
+      {
+        "hex": "#FFFFFF",
+        "share": 0.344
+      },
+      {
+        "hex": "#0E0E0E",
+        "share": 0.31
+      },
+      {
+        "hex": "#2B2B2D",
+        "share": 0.063
+      },
+      {
+        "hex": "#B1B1B1",
+        "share": 0.04
+      },
+      {
+        "hex": "#4B4A4F",
+        "share": 0.039
+      },
+      {
+        "hex": "#E6FF01",
+        "share": 0.029
+      }
+    ]
+  }
+}

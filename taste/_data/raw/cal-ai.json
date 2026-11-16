@@ -1,0 +1,158 @@
+{
+  "id": "6480417616",
+  "slug": "cal-ai",
+  "name": "Cal AI",
+  "fullName": "Cal AI - Calorie Tracker",
+  "developer": "Viral Development LLC",
+  "category": "Health & Fitness",
+  "rank": 11,
+  "chart": "Health & Fitness",
+  "rating": 4.80366,
+  "ratingCount": 375860,
+  "url": "https://apps.apple.com/us/app/cal-ai-calorie-tracker/id6480417616",
+  "price": "Free",
+  "releaseDate": "2024-04-08",
+  "updated": "2026-11-10",
+  "subtitle": "Food & Macro Counter",
+  "description": "HOW TO USE CAL AI:\n\n1) Answer lifestyle questions to build your plan\n\n2) Snap a photo of your meal*\n\n3) Get your nutritional breakdown*\n\nIf you want to get your dream body, Cal AI will help you get there with less time spent than anyone else.\n\nWe aren't another complicated diet app. We want to empower everyone to be confident in their bodies with minimal time spent, but you have to work hard. We will support you and give you the tools and information you need.\n\nIf you have any ideas or questions, please email us at team@calai.app.\n\nNOTE: We do not offer medical advice. Any and all recommendations should be viewed as suggestions, please consult with a professional and do your own research before trying a new calorie and nutrient plan.\n\n*FOOD SCANNING ANALYSIS RESULTS REQUIRE A SUBSCRIPTION\nTERMS: https://calai.app/tos",
+  "icon": "/taste/media/cal-ai/icon.png",
+  "screenshots": [
+    {
+      "src": "/taste/media/cal-ai/s1.jpg",
+      "w": 600,
+      "h": 1298
+    },
+    {
+      "src": "/taste/media/cal-ai/s2.jpg",
+      "w": 600,
+      "h": 1298
+    },
+    {
+      "src": "/taste/media/cal-ai/s3.jpg",
+      "w": 600,
+      "h": 1298
+    },
+    {
+      "src": "/taste/media/cal-ai/s4.jpg",
+      "w": 600,
+      "h": 1298
+    },
+    {
+      "src": "/taste/media/cal-ai/s5.jpg",
+      "w": 600,
+      "h": 1298
+    },
+    {
+      "src": "/taste/media/cal-ai/s6.jpg",
+      "w": 600,
+      "h": 1298
+    }
+  ],
+  "paywall": [
+    {
+      "src": null,
+      "w": null,
+      "h": null,
+      "source": "drawn",
+      "sourceUrl": "https://apps.apple.com/us/app/cal-ai-calorie-tracker/id6480417616",
+      "capturedAt": "2026-11-15"
+    }
+  ],
+  "paywallShots": [],
+  "iaps": [
+    {
+      "name": "Unlimited",
+      "price": "$29.99"
+    },
+    {
+      "name": "Unlimited Plan",
+      "price": "$19.99"
+    },
+    {
+      "name": "Unlimited",
+      "price": "$9.99"
+    },
+    {
+      "name": "Unlimited",
+      "price": "$19.99"
+    },
+    {
+      "name": "Streak Restore",
+      "price": "$0.99"
+    },
+    {
+      "name": "Unlimited",
+      "price": "$2.99"
+    },
+    {
+      "name": "Unlimited",
+      "price": "$29.99"
+    },
+    {
+      "name": "Unlimited",
+      "price": "$29.99"
+    },
+    {
+      "name": "Unlimited",
+      "price": "$5.99"
+    },
+    {
+      "name": "Unlimited",
+      "price": "$5.99"
+    }
+  ],
+  "palette": {
+    "icon": [
+      {
+        "hex": "#1E1A24",
+        "share": 0.816
+      },
+      {
+        "hex": "#FFFFFF",
+        "share": 0.123
+      },
+      {
+        "hex": "#7F7F80",
+        "share": 0.055
+      },
+      {
+        "hex": "#47454B",
+        "share": 0.003
+      },
+      {
+        "hex": "#343139",
+        "share": 0.001
+      },
+      {
+        "hex": "#646366",
+        "share": 0.001
+      }
+    ],
+    "screens": [
+      {
+        "hex": "#FFFFFF",
+        "share": 0.7
+      },
+      {
+        "hex": "#1E1212",
+        "share": 0.07
+      },
+      {
+        "hex": "#E6E2E1",
+        "share": 0.026
+      },
+      {
+        "hex": "#000000",
+        "share": 0.022
+      },
+      {
+        "hex": "#1D1A23",
+        "share": 0.02
+      },
+      {
+        "hex": "#242321",
+        "share": 0.013
+      }
+    ]
+  }
+}

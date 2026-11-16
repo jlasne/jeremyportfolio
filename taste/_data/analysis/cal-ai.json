@@ -1,0 +1,165 @@
+{
+  "card": {
+    "oneLiner": "Black and white calorie scanner; results need the Unlimited plan",
+    "keyNumber": {
+      "value": "$29.99",
+      "label": "Top Unlimited price"
+    }
+  },
+  "branding": {
+    "colors": [
+      {
+        "hex": "#FFFFFF",
+        "role": "60",
+        "name": "White",
+        "use": "Background of every screen"
+      },
+      {
+        "hex": "#1D1A23",
+        "role": "30",
+        "name": "Ink black",
+        "use": "Text, numbers and every main button"
+      },
+      {
+        "hex": "#7F7F80",
+        "role": "10",
+        "name": "Scan grey",
+        "use": "The scan corners on the icon"
+      }
+    ],
+    "typeStyle": "Semibold near-black headlines, bold numbers, regular grey labels",
+    "font": {
+      "name": null,
+      "closeTo": "Inter",
+      "look": "Plain iOS-style sans, semibold headlines, bold numbers",
+      "weights": "Semibold headlines and numbers, medium buttons, regular labels",
+      "crop": "/taste/media/cal-ai/font-1.jpg"
+    },
+    "visualStyle": "White screens, near-black type and floating white cards with soft shadows, built around real food photos. Color appears only on data: red, orange and blue macros and the orange streak.",
+    "styleTraits": [
+      "White fills 70% of the screenshots",
+      "Cards round at about 16 px, buttons are full pills",
+      "Color only on data: 3 macro colors and the streak"
+    ]
+  },
+  "screenshots": [
+    {
+      "src": "/taste/media/cal-ai/s1.jpg",
+      "alt": "Cal AI home screen: 1250 of 2500 calories eaten, protein, carbs and fat rings, and a 550-calorie grilled salmon",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/cal-ai/s2.jpg",
+      "alt": "Just snap a pic: the camera labels lettuce, parmesan, cherry tomatoes and croutons on a Caesar salad",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/cal-ai/s3.jpg",
+      "alt": "See the calories: a Caesar salad at 330 calories, 8 g protein, 20 g carbs and 18 g fat, with a black Done button",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/cal-ai/s4.jpg",
+      "alt": "Track progress: 132.1 lbs toward a 140 lbs goal, a 21-day streak and a 6-month weight chart",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/cal-ai/s5.jpg",
+      "alt": "Grow with friends: the Shred Squad feed with streak counts and a friend's 480-calorie chicken meal",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/cal-ai/s6.jpg",
+      "alt": "Watch the change: before and after photos at 355 lbs in Sep 2023 and 182 lbs in Jul 2025, with a Share button",
+      "isPaywall": false
+    }
+  ],
+  "plans": [
+    {
+      "name": "Unlimited",
+      "price": "$29.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Unlimited",
+      "price": "$19.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Unlimited Plan",
+      "price": "$19.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Unlimited",
+      "price": "$9.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Unlimited",
+      "price": "$5.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Unlimited",
+      "price": "$2.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Streak Restore",
+      "price": "$0.99",
+      "period": "consumable",
+      "perMonth": null,
+      "perWeek": null
+    }
+  ],
+  "paywall": {
+    "tiers": 1,
+    "yearlySavingPct": null,
+    "trial": {
+      "stated": false,
+      "evidence": null
+    },
+    "consumables": 1,
+    "family": 0
+  },
+  "ourRead": [
+    "One tier, Unlimited, sold at 5 prices from $2.99 to $29.99 across 9 listings. Every price unlocks the same plan: a spread built for offers and price tests.",
+    "Hard paywall on the core feature: the description says scan results require a subscription. The lifestyle quiz comes first, so the price lands after you build a plan.",
+    "Streak Restore, $0.99, sells a lost streak back. The flame count shows on Home, Progress and Groups, so a missed day becomes a sale."
+  ],
+  "improvements": [
+    {
+      "title": "Show 1 scan result before the price",
+      "detail": "The description says scan results require a subscription, so people subscribe before they see one result. Let the first photo return its full breakdown, then show the plans.",
+      "rule": "Onboarding before sign-up. Order: show the value, let them personalize, then ask them to sign up.",
+      "source": "S13"
+    },
+    {
+      "title": "Name each plan by its length",
+      "detail": "The App Store lists 9 items named Unlimited or Unlimited Plan, from $2.99 to $29.99. Add the length to each name, like “Unlimited, 1 year”, so each price reads before install.",
+      "rule": "Fix 3 things to stop a design from looking cheap: low contrast, a broken layout, and copy that does not convert.",
+      "source": "S27"
+    },
+    {
+      "title": "Flatten the Weight Progress card",
+      "detail": "On Progress, the chart card holds 3 boxes: a bordered goal pill, a grey range switch and a green tip box. Keep the switch and set the goal and the tip as plain text.",
+      "rule": "Flatten nested cards. Avoid a card inside a card inside a card.",
+      "source": "S14"
+    }
+  ],
+  "stylePrompt": "Build a paywall in Cal AI's style. Top to bottom: a semibold 2-line headline, a white card with one big number and 3 macro rings, the plans, one black pill button. Type: Inter, semibold headlines, bold numbers, regular grey labels. Colors: white #FFFFFF (60), ink black #1D1A23 (30) for text and the button, grey #7F7F80 (10) for small marks. Cards: 16 px corners, soft shadow. Plans: one tier, Unlimited, as rows with length and price; preselect the longest with a black outline and show its per-month price. Show a trial only if you offer one. Use my brand colors in the same 60/30/10 roles.",
+  "elements": []
+}

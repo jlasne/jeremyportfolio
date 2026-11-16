@@ -1,0 +1,168 @@
+{
+  "id": "1528595748",
+  "slug": "finch",
+  "name": "Finch",
+  "fullName": "Finch: Self-Care Pet",
+  "developer": "Finch Care Public Benefit Corporation",
+  "category": "Health & Fitness",
+  "rank": 14,
+  "chart": "Health & Fitness",
+  "rating": 4.94723,
+  "ratingCount": 776001,
+  "url": "https://apps.apple.com/us/app/finch-self-care-pet/id1528595748",
+  "price": "Free",
+  "releaseDate": "2021-05-12",
+  "updated": "2026-11-12",
+  "subtitle": "Daily Journal & Habit Tracker",
+  "description": "Meet your new self-care best friend! Finch is a self-care pet app that helps you feel prepared and positive, one day at a time. Take care of your pet by taking care of yourself! Choose from a wide variety of self-care exercises personalized for you.\n\nTHE BEST DAILY SELF-CARE APP\n\nStruggling with stress, mental health, or need motivation? Is self-care a chore? Finch makes self-care finally feel rewarding, lightweight, and fun. Complete quick self-care exercises to grow your pet, earn rewards, and improve mental health! People who struggle with mental health, goals, meditation, and journaling found it easier to be mindful with their self-care pet in the Finch app!\n\nREVIEWS\n\n- \"I’ve tried other apps for being thankful and thinking positive but never used them long. I enjoy this one because the virtual pet is really cute and it takes just a moment to be honest about I really feel.\"\n- \"As someone who struggles with anxiety and depression, I have tried many journaling apps and mood trackers. All of them felt like a chore, but not Finch! Even if I am not feeling like journaling or even facing my emotions, I can do so in order to help Finch.\"\n\nQUICK CHECK INS\n\n- Start mornings with quick mood checks and energize your pet to go exploring! Choose from a variety of quick mindful habits from goal tracking and bullet journaling to mindful breathing exercises and quizzes!\n- End days in moments of gratitude with your self-care pet where they'll be back from adventures to share stories with you! Destress, reflect, and recognize your positive moments.\n\nMINDFUL EXERCISES\n\nStrengthen your mental health by increasing resilience, productivity, and gratitude with self-care exercises! Finch helps you hit goals and sustain healthy habits with your self-care pet!\n\n- Goal Tracker: set goals and celebrate wins you've accumulated from healthy habits.\n- Bullet Journaling: guided bullet journaling prompts to clear the mind, track important moments, and practice gratitude.\n- Breathing: guided bre",
+  "icon": "/taste/media/finch/icon.png",
+  "screenshots": [
+    {
+      "src": "/taste/media/finch/s1.jpg",
+      "w": 600,
+      "h": 1303
+    },
+    {
+      "src": "/taste/media/finch/s2.jpg",
+      "w": 600,
+      "h": 1303
+    },
+    {
+      "src": "/taste/media/finch/s3.jpg",
+      "w": 600,
+      "h": 1303
+    },
+    {
+      "src": "/taste/media/finch/s4.jpg",
+      "w": 600,
+      "h": 1303
+    },
+    {
+      "src": "/taste/media/finch/s5.jpg",
+      "w": 600,
+      "h": 1303
+    },
+    {
+      "src": "/taste/media/finch/s6.jpg",
+      "w": 600,
+      "h": 1303
+    },
+    {
+      "src": "/taste/media/finch/s7.jpg",
+      "w": 600,
+      "h": 1303
+    },
+    {
+      "src": "/taste/media/finch/s8.jpg",
+      "w": 600,
+      "h": 1303
+    }
+  ],
+  "paywall": [
+    {
+      "src": null,
+      "w": null,
+      "h": null,
+      "source": "drawn",
+      "sourceUrl": "https://apps.apple.com/us/app/finch-self-care-pet/id1528595748",
+      "capturedAt": "2026-11-15"
+    }
+  ],
+  "paywallShots": [],
+  "iaps": [
+    {
+      "name": "Finch Plus",
+      "price": "$39.99"
+    },
+    {
+      "name": "Finch Plus",
+      "price": "$9.99"
+    },
+    {
+      "name": "Finch Plus",
+      "price": "$34.99"
+    },
+    {
+      "name": "Finch Plus",
+      "price": "$69.99"
+    },
+    {
+      "name": "Finch Plus",
+      "price": "$39.99"
+    },
+    {
+      "name": "Finch Plus",
+      "price": "$5.99"
+    },
+    {
+      "name": "Finch Plus",
+      "price": "$41.99"
+    },
+    {
+      "name": "Finch Plus",
+      "price": "$59.99"
+    },
+    {
+      "name": "Guardian Program",
+      "price": "$7.99"
+    },
+    {
+      "name": "Finch Plus",
+      "price": "$49.99"
+    }
+  ],
+  "palette": {
+    "icon": [
+      {
+        "hex": "#BFC2D0",
+        "share": 0.522
+      },
+      {
+        "hex": "#A9ACB5",
+        "share": 0.301
+      },
+      {
+        "hex": "#DF8040",
+        "share": 0.087
+      },
+      {
+        "hex": "#101820",
+        "share": 0.065
+      },
+      {
+        "hex": "#FBDD00",
+        "share": 0.017
+      },
+      {
+        "hex": "#867F41",
+        "share": 0.004
+      }
+    ],
+    "screens": [
+      {
+        "hex": "#9DDDFF",
+        "share": 0.325
+      },
+      {
+        "hex": "#FFFFFF",
+        "share": 0.175
+      },
+      {
+        "hex": "#C1EAFE",
+        "share": 0.111
+      },
+      {
+        "hex": "#0E9BE2",
+        "share": 0.05
+      },
+      {
+        "hex": "#7BB65C",
+        "share": 0.035
+      },
+      {
+        "hex": "#569E54",
+        "share": 0.031
+      }
+    ]
+  }
+}

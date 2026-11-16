@@ -1,0 +1,196 @@
+{
+  "card": {
+    "oneLiner": "Sky-blue scenes, a pet bird; Finch Plus spans $5.99 to $69.99",
+    "keyNumber": {
+      "value": "$69.99",
+      "label": "Top Finch Plus price"
+    }
+  },
+  "branding": {
+    "colors": [
+      {
+        "hex": "#9DDDFF",
+        "role": "60",
+        "name": "Sky blue",
+        "use": "Background of all 8 store screens"
+      },
+      {
+        "hex": "#FFFFFF",
+        "role": "30",
+        "name": "White",
+        "use": "Cards, goal rows and the pets’ speech bubbles"
+      },
+      {
+        "hex": "#0E9BE2",
+        "role": "10",
+        "name": "Bright blue",
+        "use": "The 30-day streak screen and the buddy’s check marks"
+      }
+    ],
+    "typeStyle": "Rubik Bold headlines in dark blue #1F4F9A, 3 lines each; medium and semibold Rubik in the app",
+    "font": {
+      "name": "Rubik",
+      "closeTo": "Rubik",
+      "look": "Wide grotesque with softly rounded corners, single-story g",
+      "weights": "Bold headlines and titles, semibold goal names, medium labels",
+      "crop": "/taste/media/finch/font-1.jpg"
+    },
+    "visualStyle": "Flat cartoon birds play on sky-blue skies and green grass, with white rounded cards for goals and speech bubbles. Loud fills mark big moments: pink for sending a Valentine, bright blue for the 30-day streak.",
+    "styleTraits": [
+      "Sky blue and its pale tint cover 46% of the store shots",
+      "8 of 8 headlines: 3 lines of dark blue Rubik Bold",
+      "White cards with corners about 24 px"
+    ]
+  },
+  "screenshots": [
+    {
+      "src": "/taste/media/finch/s1.jpg",
+      "alt": "Headline “Self-care is better together” in dark blue over 2 cartoon birds hugging on green grass, with a trophy and a heart in speech bubbles",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/finch/s2.jpg",
+      "alt": "Headline “Build habits with friends by your side” above 2 birds in a forest and Goal Buddies: Drink water, Stretch and Eat veggies, 2 check circles each",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/finch/s3.jpg",
+      "alt": "Headline “Send each other support and silliness” above a pink card to Bagel & Sam: a bird hugs a heart, 6 themes and a Send a Valentine! button",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/finch/s4.jpg",
+      "alt": "Headline “Grow, explore, and adventure together” above 2 birds with backpacks in a New York scene, “Adventuring, back in 7:36” and 3 goals at 5 energy each",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/finch/s5.jpg",
+      "alt": "Headline “Encourage and celebrate each other” above 2 birds cheering with pom-poms, “You & Sam are now Goal Buddies!” and a purple Send encouragement button",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/finch/s6.jpg",
+      "alt": "Headline “Easily achieve your self-care goals” above a bird watering a heart flower and My Self-Care Progress: Nutrition, Movement, Productivity and Self-kindness with small charts",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/finch/s7.jpg",
+      "alt": "Headline “Celebrate your progress, not perfection” above a bright blue streak screen: a bird on a sun badge, “30 DAY STREAK” and 3 checks this week",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/finch/s8.jpg",
+      "alt": "Headline “You’re not alone, join millions growing with you” above 6 birds in 5 round frames with a trophy, an apple, a duster, a barbell and a toothbrush",
+      "isPaywall": false
+    }
+  ],
+  "plans": [
+    {
+      "name": "Finch Plus",
+      "price": "$39.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Finch Plus",
+      "price": "$9.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Finch Plus",
+      "price": "$34.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Finch Plus",
+      "price": "$69.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Finch Plus",
+      "price": "$39.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Finch Plus",
+      "price": "$5.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Finch Plus",
+      "price": "$41.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Finch Plus",
+      "price": "$59.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Guardian Program",
+      "price": "$7.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Finch Plus",
+      "price": "$49.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    }
+  ],
+  "paywall": {
+    "tiers": 1,
+    "yearlySavingPct": null,
+    "trial": {
+      "stated": false,
+      "evidence": null
+    },
+    "consumables": 0,
+    "family": 0
+  },
+  "ourRead": [
+    "1 tier: 9 of 10 listings are Finch Plus, from $5.99 to $69.99. The 10th, Guardian Program at $7.99, is the only other name.",
+    "Prices lean high: 7 of 9 Finch Plus listings run $34.99 to $69.99. The top is 11.7x the lowest, $5.99, and all 10 end in .99.",
+    "Value comes first: a pet bird on all 8 screenshots, 6 of 8 headlines about doing it together, and Plus only in the In-App Purchases list."
+  ],
+  "improvements": [
+    {
+      "title": "Put the term in every listing name",
+      "detail": "9 listings read “Finch Plus” at 8 prices, $5.99 to $69.99, with $39.99 twice. Add the term to each, like “Finch Plus, 1 year”, and name what Guardian Program, $7.99, buys.",
+      "rule": "Fix 3 things to stop a design from looking cheap: low contrast, a broken layout, and copy that does not convert.",
+      "source": "S27"
+    },
+    {
+      "title": "Take the grass labels to 4.5:1",
+      "detail": "White “Goal Buddies”, “3 goals left today!” and “START THE DAY” sit on #7BB65C grass at 2.4:1. Set them in #101820, the icon’s eye color, for 7.4:1.",
+      "rule": "Text contrast: at least 4.5:1 for body text, 3:1 for text 24 px and larger.",
+      "source": "S27"
+    },
+    {
+      "title": "Swap “millions” for 776,001 ratings",
+      "detail": "Screenshot 8 says “join millions growing with you”. The store page shows 4.9 stars from 776,001 ratings. Write that number: “776,001 people rate Finch 4.9 stars”.",
+      "rule": "Make headlines specific. \"Track 3 habits in 10 seconds a day\" beats \"Transform your life\".",
+      "source": "S1, S2, S4, S16"
+    }
+  ],
+  "stylePrompt": "Build a paywall in Finch’s style. Top to bottom: your mascot in a sky scene with a white speech bubble, a 3-line headline, white plan cards, one full-width button. Type: Rubik, bold headline in dark blue #1F4F9A, medium labels. Colors: sky blue #9DDDFF (60) for the screen, white #FFFFFF (30) for cards and the bubble, bright blue #0E9BE2 (10) for the button and the selected card’s outline. Button text #101820. Corners about 24 px. Plans: one tier in rows with length and price; preselect the longest and show its per-month price. Show a trial only if you offer one. Use my brand colors in the same 60/30/10 roles.",
+  "elements": []
+}

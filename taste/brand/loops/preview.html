@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Tasu loops preview</title>
+<link rel="stylesheet" href="loops.css">
+<style>
+body{margin:0;background:#F3EFE7;color:#3A3936;font:15px/1.5 system-ui,sans-serif}
+main{max-width:960px;margin:0 auto;padding:32px 16px 64px}
+h1{font-size:24px;margin:0 0 4px} h2{font-size:17px;margin:32px 0 2px} p{margin:0 0 10px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pane{display:flex;flex-wrap:wrap;align-items:center;gap:24px;padding:24px;border-radius:16px;min-height:96px}
+.pane{min-width:0} .pane .tasu-loop{max-width:100%}
+.light{background:#F3EFE7;outline:1px solid rgba(58,57,54,.15)} .dark{background:#1C1B19;color:#F3EFE7}
+.hd{display:inline-flex;align-items:center;gap:7px}
+.dark .wm-l,.light .wm-d{display:none}
+.rm .tasu-loop{animation:none;background-position:0 0}
+@media (max-width:640px){.pair{grid-template-columns:1fr}.pane{padding:16px}}
+</style></head>
+<body><main>
+<h1>Tasu loops</h1>
+<p>4 loops of 6 frames, at their real sizes, on cream and on #1C1B19. Off screen, or in a hidden tab, every loop pauses.</p>
+<section><h2>taste</h2><p>Home hero, above the headline. 240 and 320 px wide, the height from aspect-ratio. One cycle, 3 s: frames 1, 2, 3, 4, 5, 6 show for 2280, 90, 90, 180, 150, 210 ms, and the cycle starts 1000 ms in.</p><div class="pair"><div class="pane light"><span class="tasu-loop tasu-loop--taste" role="img" aria-label="Tasu, the tasu.ai mascot, licks a paywall card" style="width:240px"></span><span class="tasu-loop tasu-loop--taste" role="img" aria-label="Tasu, the tasu.ai mascot, licks a paywall card" style="width:320px"></span></div><div class="pane dark"><span class="tasu-loop tasu-loop--taste" role="img" aria-label="Tasu, the tasu.ai mascot, licks a paywall card" style="width:240px"></span><span class="tasu-loop tasu-loop--taste" role="img" aria-label="Tasu, the tasu.ai mascot, licks a paywall card" style="width:320px"></span></div></div></section><section><h2>blink</h2><p>Header logo icon, next to the wordmark. 32 px tile (a 34 px box with 1 px of clear padding), alone and in the header. One cycle, 6 s: frames 1, 2, 3, 2, 1, 2, 3, 4, 5, 6 show for 3400, 60, 80, 60, 1900, 60, 80, 90, 130, 140 ms.</p><div class="pair"><div class="pane light"><span class="tasu-loop tasu-loop--blink" role="img" aria-label="Tasu, the tasu.ai mascot, blinking" style="width:34px"></span><span class="hd"><span class="tasu-loop tasu-loop--blink" role="img" aria-label="Tasu, the tasu.ai mascot, blinking" style="width:34px;margin:-1px"></span><img class="wm-l" src="wordmark.svg" width="86" height="32" alt=""><img class="wm-d" src="wordmark-dark.svg" width="86" height="32" alt=""></span></div><div class="pane dark"><span class="tasu-loop tasu-loop--blink" role="img" aria-label="Tasu, the tasu.ai mascot, blinking" style="width:34px"></span><span class="hd"><span class="tasu-loop tasu-loop--blink" role="img" aria-label="Tasu, the tasu.ai mascot, blinking" style="width:34px;margin:-1px"></span><img class="wm-l" src="wordmark.svg" width="86" height="32" alt=""><img class="wm-d" src="wordmark-dark.svg" width="86" height="32" alt=""></span></div></div></section><section><h2>look</h2><p>Empty search state. 96 x 88 px. One cycle, 3.2 s: frames 1, 2, 3, 4, 5, 6 show for 1400, 120, 620, 110, 780, 170 ms.</p><div class="pair"><div class="pane light"><span class="tasu-loop tasu-loop--look" role="img" aria-label="Tasu, the tasu.ai mascot, looking around" style="width:96px"></span></div><div class="pane dark"><span class="tasu-loop tasu-loop--look" role="img" aria-label="Tasu, the tasu.ai mascot, looking around" style="width:96px"></span></div></div></section><section><h2>happy</h2><p>Closing "Follow on X" block. 120 x 120 px. One cycle, 3.1 s: frames 1, 2, 3, 4, 5, 2, 3, 4, 5, 2, 6 show for 2200, 90, 70, 140, 60, 80, 70, 140, 60, 90, 100 ms.</p><div class="pair"><div class="pane light"><span class="tasu-loop tasu-loop--happy" role="img" aria-label="Tasu, the tasu.ai mascot, hopping with joy" style="width:120px"></span></div><div class="pane dark"><span class="tasu-loop tasu-loop--happy" role="img" aria-label="Tasu, the tasu.ai mascot, hopping with joy" style="width:120px"></span></div></div></section>
+<section class="rm"><h2>Reduced motion</h2><p>With prefers-reduced-motion: reduce, each loop shows frame 1 and stays still, as here.</p>
+<div class="pair"><div class="pane light"><span class="tasu-loop tasu-loop--taste" role="img" aria-label="Tasu, the tasu.ai mascot, licks a paywall card" style="width:300px"></span><span class="tasu-loop tasu-loop--blink" role="img" aria-label="Tasu, the tasu.ai mascot, blinking" style="width:34px"></span><span class="tasu-loop tasu-loop--look" role="img" aria-label="Tasu, the tasu.ai mascot, looking around" style="width:96px"></span><span class="tasu-loop tasu-loop--happy" role="img" aria-label="Tasu, the tasu.ai mascot, hopping with joy" style="width:120px"></span></div><div class="pane dark"><span class="tasu-loop tasu-loop--taste" role="img" aria-label="Tasu, the tasu.ai mascot, licks a paywall card" style="width:300px"></span><span class="tasu-loop tasu-loop--blink" role="img" aria-label="Tasu, the tasu.ai mascot, blinking" style="width:34px"></span><span class="tasu-loop tasu-loop--look" role="img" aria-label="Tasu, the tasu.ai mascot, looking around" style="width:96px"></span><span class="tasu-loop tasu-loop--happy" role="img" aria-label="Tasu, the tasu.ai mascot, hopping with joy" style="width:120px"></span></div></div></section>
+</main>
+<script>
+(() => {
+  const loops = document.querySelectorAll('.tasu-loop');
+  const onScreen = new WeakMap();
+  const sync = el => el.classList.toggle('is-paused', document.hidden || !onScreen.get(el));
+  const io = new IntersectionObserver(es => es.forEach(e => { onScreen.set(e.target, e.isIntersecting); sync(e.target); }));
+  loops.forEach(el => io.observe(el));
+  document.addEventListener('visibilitychange', () => loops.forEach(sync));
+})();
+</script>
+</body></html>

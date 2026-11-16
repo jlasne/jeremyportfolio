@@ -1,0 +1,152 @@
+{
+  "id": "1458862350",
+  "slug": "hevy",
+  "name": "Hevy",
+  "fullName": "Hevy - Workout Tracker Gym Log",
+  "developer": "Hevy Studios S.L.",
+  "category": "Health & Fitness",
+  "rank": 35,
+  "chart": "Health & Fitness",
+  "rating": 4.92296,
+  "ratingCount": 103763,
+  "url": "https://apps.apple.com/us/app/hevy-workout-tracker-gym-log/id1458862350",
+  "price": "Free",
+  "releaseDate": "2019-07-01",
+  "updated": "2026-11-14",
+  "subtitle": "Weight Lifting Routine Planner",
+  "description": "The workout tracker featured by Apple and trusted by 15M+ lifters. Rated 4.9 on the App Store. 112M+ workouts logged in 2025 alone.\n\nLog every set, follow any program or split, and track your lifts and volume. Learn how to do any exercise with high-quality videos and step-by-step instructions. Free, with no ads.\n\nTrain alongside millions of lifters, follow friends and family, compare your stats, and share your progress in their feed.\n\nNo program? No problem. Whether you're new and overwhelmed or a gym veteran, browse Hevy's large, free library for a full split or individual workouts.\n\nAnd now, Hevy Trainer gives you the coaching you need, available with Hevy Pro. It builds a program tailored to your experience, goal, available equipment, and preferences. Trainer tracks your progress and consistency, and guides you through each workout with tips and progressive overload. (Even if you only have dumbbells and a workout mat.)\n\nWHY HEVY?\n• Log weights, reps, duration, and RPE in seconds without breaking the flow of your sets.\n• See last session's weights and reps for every exercise, right where you need them. No guessing, no scrolling back through history.\n• Log supersets, drop sets, warm-ups, and failure sets alongside your regular sets.\n• Stay on track with automatic rest timers between sets.\n• Monitor your strength progression and PRs with graphs for every exercise.\n• Add progress photos, body weight, and measurements to see how your training is paying off.\n• Follow friends and athletes from around the world, see their workouts in your feed, and compare your lifts.\n• Stay consistent with monthly, yearly, and multi-year calendars and streak tracking.\n• Work out offline. Your data syncs across all your devices.\n• Automatically sync your workouts to Strava for hybrid training.\n\nAPPLE WATCH\n• Log sets, start rest timers, and finish your workout without touching your phone.\n• Monitor your heart rate during your workout.\n• Add Hevy complications to your watch face.\n• Workou",
+  "icon": "/taste/media/hevy/icon.png",
+  "screenshots": [
+    {
+      "src": "/taste/media/hevy/s1.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/hevy/s2.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/hevy/s3.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/hevy/s4.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/hevy/s5.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/hevy/s6.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/hevy/s7.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/hevy/s8.jpg",
+      "w": 600,
+      "h": 1299
+    }
+  ],
+  "paywall": [
+    {
+      "src": "/taste/media/hevy/pw1.jpg",
+      "w": 600,
+      "h": 1006,
+      "source": "web",
+      "sourceUrl": "https://hevy.com/pricing",
+      "capturedAt": "2026-11-15"
+    },
+    {
+      "src": "/taste/media/hevy/pw2.jpg",
+      "w": 600,
+      "h": 1006,
+      "source": "web",
+      "sourceUrl": "https://hevy.com/pricing",
+      "capturedAt": "2026-11-15"
+    }
+  ],
+  "paywallShots": [],
+  "iaps": [
+    {
+      "name": "Hevy Pro - Monthly",
+      "price": "$2.99"
+    },
+    {
+      "name": "Hevy Pro - Yearly",
+      "price": "$23.99"
+    },
+    {
+      "name": "Hevy Pro - Lifetime",
+      "price": "$74.99"
+    },
+    {
+      "name": "Hevy Pro - Monthly",
+      "price": "$3.99"
+    }
+  ],
+  "palette": {
+    "icon": [
+      {
+        "hex": "#000000",
+        "share": 0.804
+      },
+      {
+        "hex": "#FFFFFF",
+        "share": 0.186
+      },
+      {
+        "hex": "#CDCDCD",
+        "share": 0.003
+      },
+      {
+        "hex": "#3A3A3A",
+        "share": 0.002
+      },
+      {
+        "hex": "#7E7E7E",
+        "share": 0.002
+      },
+      {
+        "hex": "#ADADAD",
+        "share": 0.001
+      }
+    ],
+    "screens": [
+      {
+        "hex": "#FFFFFF",
+        "share": 0.754
+      },
+      {
+        "hex": "#267EE8",
+        "share": 0.08
+      },
+      {
+        "hex": "#000000",
+        "share": 0.062
+      },
+      {
+        "hex": "#C7FEA0",
+        "share": 0.02
+      },
+      {
+        "hex": "#848484",
+        "share": 0.014
+      },
+      {
+        "hex": "#D1DBE7",
+        "share": 0.013
+      }
+    ]
+  }
+}

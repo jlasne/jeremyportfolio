@@ -1,0 +1,200 @@
+{
+  "id": "426826309",
+  "slug": "strava",
+  "name": "Strava",
+  "fullName": "Strava: Run, Bike, Walk",
+  "developer": "Strava, Inc.",
+  "category": "Health & Fitness",
+  "rank": 4,
+  "chart": "Health & Fitness",
+  "rating": 4.81182,
+  "ratingCount": 381429,
+  "url": "https://apps.apple.com/us/app/strava-run-bike-walk/id426826309",
+  "price": "Free",
+  "releaseDate": "2011-03-24",
+  "updated": "2026-11-11",
+  "subtitle": "Track & share with friends",
+  "description": "*App Store Award Winner -Apple Watch App of the Year*\n\nStrava makes fitness tracking social. We house your entire active journey in one spot – and you get to share it with friends. Here’s how:\n\n• Record everything – runs, rides, hikes, yoga and over 50+ other sport types. Think of Strava as the homebase of your movement.\n\n• See the full story of your strength training – Lifting in the gym weekly, doing HIIT workouts, and showing up to your group weight training classes? Use your favorite device or strength app and your exercises, sets, reps, weights and a muscle map show up automatically. Or start your strength journey today and see how quickly strength workouts become a key part of your active life.\n\n• Discover anywhere – our Routes tool uses de-identified Strava data to intelligently recommend popular routes based on your preferences. You can also build your own.\n\n• Uncover popular hiking Routes in your area, including local favorites, scenic trails, and long-distance climbs\n\n• Build a support network – Strava’s about celebrating movement. Here you’ll find your community and cheer each other on.\n\n• Train smarter – get data insights to understand your progress and see how you improve. Your Training Log is the record of all your workouts.\n\n• Get more from your workout – Powered by AI, Athlete Intelligence turns workout data into into instant insights. Keeping you motivated and ready for the next workout – without the guesswork.\n\n• Move safer – share your real-time location with loved ones while outdoors for an extra layer of safety.\n\n• Sync your favorite apps and devices – Strava is compatible with thousands of them (Apple Watch, Fitbit, Garmin – you name it).\n\n• Join and create challenges – join millions in monthly challenges to chase new goals, collect digital badges and stay accountable.\n\n• Embrace the unfiltered – your feed on Strava is filled with real efforts from real people. That’s how we motivate each other.\n\n• Whether you’re a world-class athlete or a tota",
+  "icon": "/taste/media/strava/icon.png",
+  "screenshots": [
+    {
+      "src": "/taste/media/strava/s1.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/strava/s2.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/strava/s3.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/strava/s4.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/strava/s5.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/strava/s6.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/strava/s7.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/strava/s8.jpg",
+      "w": 600,
+      "h": 1299
+    }
+  ],
+  "paywall": [
+    {
+      "src": "/taste/media/strava/pw1.jpg",
+      "w": 600,
+      "h": 1006,
+      "source": "web",
+      "sourceUrl": "https://www.strava.com/subscribe",
+      "capturedAt": "2026-11-15"
+    },
+    {
+      "src": "/taste/media/strava/pw2.jpg",
+      "w": 600,
+      "h": 1006,
+      "source": "web",
+      "sourceUrl": "https://www.strava.com/subscribe",
+      "capturedAt": "2026-11-15"
+    },
+    {
+      "src": "/taste/media/strava/pw3.jpg",
+      "w": 600,
+      "h": 1006,
+      "source": "web",
+      "sourceUrl": "https://www.strava.com/subscribe",
+      "capturedAt": "2026-11-15"
+    },
+    {
+      "src": "/taste/media/strava/pw4.jpg",
+      "w": 600,
+      "h": 1006,
+      "source": "web",
+      "sourceUrl": "https://www.strava.com/subscribe",
+      "capturedAt": "2026-11-15"
+    },
+    {
+      "src": "/taste/media/strava/pw5.jpg",
+      "w": 600,
+      "h": 1006,
+      "source": "web",
+      "sourceUrl": "https://www.strava.com/subscribe",
+      "capturedAt": "2026-11-15"
+    }
+  ],
+  "paywallShots": [],
+  "iaps": [
+    {
+      "name": "Subscription",
+      "price": "$79.99"
+    },
+    {
+      "name": "Subscription",
+      "price": "$11.99"
+    },
+    {
+      "name": "Strava Subscription",
+      "price": "$11.99"
+    },
+    {
+      "name": "Strava Subscription",
+      "price": "$79.99"
+    },
+    {
+      "name": "Strava + Runna Subscription",
+      "price": "$149.99"
+    },
+    {
+      "name": "Strava + Runna Subscription",
+      "price": "$149.99"
+    },
+    {
+      "name": "1 Month",
+      "price": "$5.99"
+    },
+    {
+      "name": "Strava Family Plan Subscription",
+      "price": "$139.99"
+    },
+    {
+      "name": "1 Year",
+      "price": "$59.99"
+    },
+    {
+      "name": "Runna Standalone Subscription",
+      "price": "$19.99"
+    }
+  ],
+  "palette": {
+    "icon": [
+      {
+        "hex": "#FD5200",
+        "share": 0.476
+      },
+      {
+        "hex": "#E74B00",
+        "share": 0.322
+      },
+      {
+        "hex": "#FFFFFF",
+        "share": 0.092
+      },
+      {
+        "hex": "#FFEFE6",
+        "share": 0.036
+      },
+      {
+        "hex": "#E05615",
+        "share": 0.015
+      },
+      {
+        "hex": "#E9753E",
+        "share": 0.013
+      }
+    ],
+    "screens": [
+      {
+        "hex": "#141414",
+        "share": 0.521
+      },
+      {
+        "hex": "#180204",
+        "share": 0.072
+      },
+      {
+        "hex": "#2B0707",
+        "share": 0.049
+      },
+      {
+        "hex": "#DE6828",
+        "share": 0.03
+      },
+      {
+        "hex": "#A32202",
+        "share": 0.03
+      },
+      {
+        "hex": "#103347",
+        "share": 0.026
+      }
+    ]
+  }
+}

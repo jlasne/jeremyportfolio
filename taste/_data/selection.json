@@ -1,0 +1,67 @@
+{
+  "createdAt": "2026-11-15",
+  "source": "App Store data, US, 15 Nov 2026 (US Top Grossing category charts, iTunes lookup, App Store In-App Purchases list)",
+  "note": "Display order of the gallery, most striking first. build.mjs reads this file; copy the order here when the selection changes.",
+  "apps": [
+    {
+      "order": 1,
+      "slug": "cal-ai",
+      "niche": "Calorie tracker"
+    },
+    {
+      "order": 2,
+      "slug": "opal",
+      "niche": "Screen time"
+    },
+    {
+      "order": 3,
+      "slug": "duolingo",
+      "niche": "Language learning"
+    },
+    {
+      "order": 4,
+      "slug": "rise",
+      "niche": "Sleep"
+    },
+    {
+      "order": 5,
+      "slug": "headspace",
+      "niche": "Meditation"
+    },
+    {
+      "order": 6,
+      "slug": "strava",
+      "niche": "Running"
+    },
+    {
+      "order": 7,
+      "slug": "myfitnesspal",
+      "niche": "Calorie tracker"
+    },
+    {
+      "order": 8,
+      "slug": "ladder",
+      "niche": "Workouts"
+    },
+    {
+      "order": 9,
+      "slug": "hevy",
+      "niche": "Workouts"
+    },
+    {
+      "order": 10,
+      "slug": "huckleberry",
+      "niche": "Baby tracker"
+    },
+    {
+      "order": 11,
+      "slug": "flo",
+      "niche": "Cycle tracker"
+    },
+    {
+      "order": 12,
+      "slug": "finch",
+      "niche": "Habits and self-care"
+    }
+  ]
+}

@@ -1,0 +1,184 @@
+{
+  "id": "1453884781",
+  "slug": "rise",
+  "name": "Rise",
+  "fullName": "RISE: Sleep Tracker",
+  "developer": "Rise Science Inc",
+  "category": "Health & Fitness",
+  "rank": 61,
+  "chart": "Health & Fitness",
+  "rating": 4.72756,
+  "ratingCount": 74285,
+  "url": "https://apps.apple.com/us/app/rise-sleep-tracker/id1453884781",
+  "price": "Free",
+  "releaseDate": "2019-08-19",
+  "updated": "2026-11-13",
+  "subtitle": "Become a morning person",
+  "description": "Join over 10 million users! Become a better sleeper and morning person thanks to 100 years of sleep science with RISE, the only sleep tracker that also measures your sleep debt and energy levels.\n\nRecommended by the Sleep Foundation and trusted by teams in the NFL, MLB, and NBA, and top Fortune 500 companies, RISE makes it easy to improve your sleep and energy.\n\nBut RISE is more than a sleep and energy tracker. Users can access widgets, calendar integration, sleeping sounds, meditation guides, smart alarm clocks, habit reminders, and a sleep knowledge library.\n\nFROM THE RISE COMMUNITY\n\n***\nChase M.\n\"RISE helped me understand how vital sleep truly is. In only a few weeks, I found myself more focused, energetic, and productive at work.\"\n\n***\nBecky G.\n\"I could see where sleep debt was causing issues, like temper short, not comprehending things, moving slowly.\u2028 I had an epiphany... I'm getting 45min more sleep on average than I was before RISE.\"\n\n\nUNLOCK BETTER SLEEP\nTired of the age-old \"eight hours of shut-eye\" advice? Go beyond buying a new mattress or pillow and discover the life-changing concept of Sleep Debt.\n\nScientifically proven to be a vital factor in your well-being, a low Sleep Debt can improve your life quality and even your longevity—while high Sleep Debt can cause fatigue and harm your health.\n\nRISE calculates your Sleep Debt, helps you understand its impact on your energy, and guides you on how to lower it by improving sleeping habits. Learn about your melatonin window, when to prioritize sleep, and understand the real cost of those late nights—and how you can benefit from naps.\n\nPERSONALIZED SLEEP TRACKER\nDo you find your mind racing when your head hits the pillow? Can’t stop doom-scrolling on your phone? Feeling fatigued all day?\n\nBased on your sleep data, circadian rhythm and research, we’ll make recommendations that fit your needs and guide you toward healthier habits.\n\nRISE will get you in bed on time, guide you when you can’t sleep, reduce the time",
+  "icon": "/taste/media/rise/icon.png",
+  "screenshots": [
+    {
+      "src": "/taste/media/rise/s1.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/rise/s2.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/rise/s3.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/rise/s4.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/rise/s5.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/rise/s6.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/rise/s7.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/rise/s8.jpg",
+      "w": 600,
+      "h": 1299
+    }
+  ],
+  "paywall": [
+    {
+      "src": "/taste/media/rise/pw1.jpg",
+      "w": 600,
+      "h": 1006,
+      "source": "web",
+      "sourceUrl": "https://start.risescience.com/",
+      "capturedAt": "2026-11-15"
+    },
+    {
+      "src": "/taste/media/rise/pw2.jpg",
+      "w": 600,
+      "h": 1006,
+      "source": "web",
+      "sourceUrl": "https://start.risescience.com/",
+      "capturedAt": "2026-11-15"
+    },
+    {
+      "src": "/taste/media/rise/pw3.jpg",
+      "w": 600,
+      "h": 1006,
+      "source": "web",
+      "sourceUrl": "https://start.risescience.com/",
+      "capturedAt": "2026-11-15"
+    }
+  ],
+  "paywallShots": [],
+  "iaps": [
+    {
+      "name": "Sleep & Energy Premium",
+      "price": "$69.99"
+    },
+    {
+      "name": "Sleep Improvement Membership",
+      "price": "$59.99"
+    },
+    {
+      "name": "Sleep Improvement Membership",
+      "price": "$35.99"
+    },
+    {
+      "name": "Sleep Improvement Membership",
+      "price": "$9.99"
+    },
+    {
+      "name": "Sleep Improvement Membership",
+      "price": "$69.99"
+    },
+    {
+      "name": "Sleep Improvement Membership",
+      "price": "$59.99"
+    },
+    {
+      "name": "AI Expert Access",
+      "price": "$29.99"
+    },
+    {
+      "name": "Sleep Improvement Membership",
+      "price": "$35.99"
+    },
+    {
+      "name": "Sleep Improvement Membership",
+      "price": "$69.99"
+    },
+    {
+      "name": "Sleep Improvement Membership",
+      "price": "$59.99"
+    }
+  ],
+  "palette": {
+    "icon": [
+      {
+        "hex": "#7D05FC",
+        "share": 0.455
+      },
+      {
+        "hex": "#F91997",
+        "share": 0.105
+      },
+      {
+        "hex": "#FFF475",
+        "share": 0.103
+      },
+      {
+        "hex": "#5E55ED",
+        "share": 0.101
+      },
+      {
+        "hex": "#44A5FE",
+        "share": 0.081
+      },
+      {
+        "hex": "#29E6B7",
+        "share": 0.079
+      }
+    ],
+    "screens": [
+      {
+        "hex": "#17151A",
+        "share": 0.421
+      },
+      {
+        "hex": "#2D1659",
+        "share": 0.213
+      },
+      {
+        "hex": "#6A25C5",
+        "share": 0.142
+      },
+      {
+        "hex": "#F6F7F6",
+        "share": 0.085
+      },
+      {
+        "hex": "#C56B3D",
+        "share": 0.049
+      },
+      {
+        "hex": "#BD5284",
+        "share": 0.048
+      }
+    ]
+  }
+}

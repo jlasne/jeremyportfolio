@@ -1,0 +1,269 @@
+{
+  "card": {
+    "oneLiner": "Black screens, orange routes. 30 days free, then $79.99 a year",
+    "keyNumber": {
+      "value": "$79.99",
+      "label": "Individual plan, per year"
+    }
+  },
+  "branding": {
+    "colors": [
+      {
+        "hex": "#141414",
+        "role": "60",
+        "name": "Near black",
+        "use": "Background of the app screens and the paywall page"
+      },
+      {
+        "hex": "#FFFFFF",
+        "role": "30",
+        "name": "White",
+        "use": "Headlines, text, icons and the logo on the icon"
+      },
+      {
+        "hex": "#FD5200",
+        "role": "10",
+        "name": "Strava orange",
+        "use": "The icon, the main buttons, routes and the active tab"
+      }
+    ],
+    "typeStyle": "Wide bold grotesque headlines in white; paywall prices in regular weight at 4x the body size",
+    "font": {
+      "name": null,
+      "closeTo": "Archivo",
+      "look": "Wide bold grotesque headlines, huge regular prices, spaced capital plan names",
+      "weights": "Bold headlines, regular prices and plan names, medium buttons",
+      "crop": "/taste/media/strava/font-1.jpg"
+    },
+    "visualStyle": "Near-black screens with white type; orange marks the buttons, the routes and the active tab. Store shots frame each phone in orange over a black-to-orange gradient.",
+    "styleTraits": [
+      "Near black covers 52% of the screenshots",
+      "Orange phone frame on 8 of 8 store screenshots",
+      "1 of 4 plan cards is light: Individual"
+    ]
+  },
+  "screenshots": [
+    {
+      "src": "/taste/media/strava/s1.jpg",
+      "alt": "Headline “Apple Watch App of the Year” with Winner laurels and the Strava wordmark, above a Squad Run post and a watch reading 2s ahead",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/strava/s2.jpg",
+      "alt": "Headline “Get motivated by the community” above a Squad Run discussion: a 9.56 mi run in San Francisco, 5 kudos and 3 comments",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/strava/s3.jpg",
+      "alt": "Headline “Track your workouts” above the Run recorder: a dog-shaped route drawn in orange across San Francisco, and a sport picker with Run selected",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/strava/s4.jpg",
+      "alt": "Headline “Lift it. Log it. See your gains.” above an orange muscle map and Night Weight Training: 45:30, 4,115 lbs, 47 sets, 98 bpm",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/strava/s5.jpg",
+      "alt": "Headline “Hit the trails with hiking tools” above a Marin Headlands map of route pins and the Gerbode Valley Loop card: 5.27 mi, 880 ft, 1h 44m",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/strava/s6.jpg",
+      "alt": "Headline “Share with friends” above a Squad Run post on Home: 6.75 mi in 57m 56s, a photo of 3 runners and 12 kudos",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/strava/s7.jpg",
+      "alt": "Headline “Improve with personalized data” above a Progress chart of ride distance: 384.6 mi, up 12% on the prior 3 months",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/strava/s8.jpg",
+      "alt": "Headline “Discover new routes” above a Marin Headlands map with an orange route and a 26.71 mi Bobcat Trail card marked “Made for you”",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/strava/pw1.jpg",
+      "alt": "Strava Individual card: Save 44%, Annual tab, $6.67 a month, a 30-day trial for $0, billed at $79.99 a year, and 2 orange trial buttons",
+      "isPaywall": true
+    },
+    {
+      "src": "/taste/media/strava/pw2.jpg",
+      "alt": "Strava subscription hero: “The best of Strava. Built for your goals.” on a red gradient, then a trial timeline that starts Today",
+      "isPaywall": true
+    },
+    {
+      "src": "/taste/media/strava/pw3.jpg",
+      "alt": "Strava Family card for 4 accounts: $2.92 a month per person, billed at $139.99 a year, annual only",
+      "isPaywall": true
+    },
+    {
+      "src": "/taste/media/strava/pw4.jpg",
+      "alt": "Strava Student card: 50% off for verified students, $3.33 a month, a 30-day trial, billed at $39.99 a year",
+      "isPaywall": true
+    },
+    {
+      "src": "/taste/media/strava/pw5.jpg",
+      "alt": "Strava + Runna card: up to 60% off, $12.50 a month, billed at $149.99 a year, annual only",
+      "isPaywall": true
+    }
+  ],
+  "plans": [
+    {
+      "name": "Strava Subscription",
+      "price": "$79.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Strava Subscription",
+      "price": "$11.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Subscription",
+      "price": "$79.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Subscription",
+      "price": "$11.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Strava + Runna Subscription",
+      "price": "$149.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Strava Family Plan Subscription",
+      "price": "$139.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Runna Standalone Subscription",
+      "price": "$19.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "1 Year",
+      "price": "$59.99",
+      "period": "year",
+      "perMonth": 5.0,
+      "perWeek": 1.15
+    },
+    {
+      "name": "1 Month",
+      "price": "$5.99",
+      "period": "month",
+      "perMonth": 5.99,
+      "perWeek": 1.38
+    }
+  ],
+  "paywall": {
+    "tiers": 3,
+    "yearlySavingPct": 17,
+    "trial": {
+      "stated": true,
+      "evidence": "“30-day trial for $0” on the Individual and Student cards and “Start free 30-day trial” on the sticky button of the web pricing page"
+    },
+    "consumables": 0,
+    "family": 1
+  },
+  "ourRead": [
+    "Strava + Runna comes first at $12.50 a month, so Individual at $6.67 looks like half price. Only Individual gets a light card, an orange button and “Save 44%”.",
+    "Each card leads with a per-month price; 3 of the 4 bill yearly only. Family turns $139.99 a year into $2.92 a month per person.",
+    "The trial runs 30 days, with a reminder 2 days before it ends. Individual and Student say “Try it free”; Family and the bundle say “Choose plan”."
+  ],
+  "improvements": [
+    {
+      "title": "Keep one orange button on screen",
+      "detail": "On the Individual card, “Try it free” sits above the sticky “Start free 30-day trial”: 2 orange buttons on one screen. Make the card button an outline, like the other 3 cards.",
+      "rule": "Emphasize the CTA. One filled primary button, everything else secondary or text.",
+      "source": "S2, S14, S15, S16"
+    },
+    {
+      "title": "Name what the trial unlocks",
+      "detail": "The headline reads “The best of Strava. Built for your goals.” The timeline under it names the features: put them up top, as “Routes, segment leaderboards and training analysis, free for 30 days”.",
+      "rule": "Make headlines specific. \"Track 3 habits in 10 seconds a day\" beats \"Transform your life\".",
+      "source": "S1, S2, S4, S16"
+    },
+    {
+      "title": "Write plan names in sentence case",
+      "detail": "All 4 plan names are spaced capitals ending in “SUBSCRIPTION”, and 3 of them take 2 lines. Set them as Individual, Family, Student and Strava + Runna, and each fits on 1 line.",
+      "rule": "Use ALL CAPS only for tiny labels, with +5% to +10% letter spacing.",
+      "source": "S1, S2, S4, S16"
+    }
+  ],
+  "stylePrompt": "Build a dark paywall in Strava's style. Top to bottom: a red-to-black gradient hero with the logo and a bold 2-line headline, then a white trial timeline. Below: 4 stacked plan cards and a sticky full-width button. Type: Archivo, bold headlines, regular prices at 4x the body size. Colors: near black #141414 (60) for the page and cards, white #FFFFFF (30) for text, Strava orange #FD5200 (10) for the sticky button only. Put the priciest plan first as an anchor. Make the main plan the one light card: Annual preselected, price per month, yearly bill below, 30 days free. Use my brand colors in the same 60/30/10 roles.",
+  "elements": [
+    {
+      "type": "hero-visual",
+      "src": "/taste/media/strava/el-hero-visual-1.jpg",
+      "x": 0,
+      "y": 40,
+      "w": 600,
+      "h": 376,
+      "note": "Red-to-black gradient with the Strava Subscription wordmark, an orange shield and “The best of Strava. Built for your goals.”"
+    },
+    {
+      "type": "trial-timeline",
+      "src": "/taste/media/strava/el-trial-timeline-1.jpg",
+      "x": 22,
+      "y": 461,
+      "w": 556,
+      "h": 373,
+      "note": "White card: Today unlocks routes, segment leaderboards and training analysis; a bell marks the reminder 2 days before"
+    },
+    {
+      "type": "discount-badge",
+      "src": "/taste/media/strava/el-discount-badge-1.jpg",
+      "x": 59,
+      "y": 126,
+      "w": 130,
+      "h": 66,
+      "note": "Black “Save 44%” tab on the light Individual card, above the plan name"
+    },
+    {
+      "type": "plan-picker",
+      "src": "/taste/media/strava/el-plan-picker-1.jpg",
+      "x": 58,
+      "y": 308,
+      "w": 487,
+      "h": 302,
+      "note": "Annual and Monthly switch, Annual preselected: $6.67 a month at 4x the body size, “Billed at $79.99/year + tax” below"
+    },
+    {
+      "type": "plan-picker",
+      "src": "/taste/media/strava/el-plan-picker-2.jpg",
+      "x": 58,
+      "y": 126,
+      "w": 488,
+      "h": 484,
+      "note": "Family card for 4 accounts: $2.92 a month per person, billed at $139.99 a year, annual only"
+    },
+    {
+      "type": "main-button",
+      "src": "/taste/media/strava/el-main-button-1.jpg",
+      "x": 28,
+      "y": 877,
+      "w": 544,
+      "h": 93,
+      "note": "Sticky orange button, “Start free 30-day trial”, that stays on screen as the plans scroll"
+    }
+  ]
+}

@@ -1,813 +1,585 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>tasu.ai: design apps with taste, using AI</title>
-  <meta name="description" content="tasu.ai teaches you to design apps with taste using AI: 104 rules from 35 design reels, in one file Claude Code and Cursor follow. Free.">
-  <link rel="canonical" href="https://www.jeremylasne.com/taste/">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="tasu.ai">
-  <meta property="og:url" content="https://www.jeremylasne.com/taste/">
-  <meta property="og:title" content="tasu.ai: design apps with taste, using AI">
-  <meta property="og:description" content="tasu.ai teaches you to design apps with taste using AI: 104 rules from 35 design reels, in one file Claude Code and Cursor follow. Free.">
-  <meta property="og:image" content="https://www.jeremylasne.com/og-image.png?v=8">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:site" content="@jeremylasne">
-  <meta name="twitter:title" content="tasu.ai: design apps with taste, using AI">
-  <meta name="twitter:description" content="tasu.ai teaches you to design apps with taste using AI: 104 rules from 35 design reels, in one file Claude Code and Cursor follow. Free.">
-  <meta name="twitter:image" content="https://www.jeremylasne.com/og-image.png?v=8">
-  <meta name="theme-color" content="#FAF8F3">
-  <link rel="icon" href="/taste/favicon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..600&family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="/taste/tasu.css">
-  <style>
-    /* ---------- Hero ---------- */
-    .hero {
-      display: grid;
-      gap: var(--s6);
-      padding-top: var(--s6);
-      padding-bottom: var(--s7);
-    }
-    @media (min-width: 960px) {
-      .hero {
-        grid-template-columns: minmax(0, 1fr) 552px;
-        align-items: center;
-        gap: var(--s7);
-        padding-top: var(--s7);
-        padding-bottom: var(--s8);
-      }
-    }
-    .hero h1 { max-width: 11em; }
-    .hero .lead { margin-top: var(--s4); max-width: 26em; }
-    .hero .actions { margin-top: var(--s5); }
-    .hero .fine { margin-top: var(--s3); font-size: var(--t1); color: var(--n3); }
-    .word { color: inherit; }
-    .word b { color: var(--ink); font-weight: 600; }
-
-    /* ---------- Live demo ---------- */
-    .demo { display: grid; gap: var(--s4); justify-items: center; }
-    .demo__stage {
-      display: grid;
-      gap: var(--s4);
-      justify-items: center;
-      width: 100%;
-    }
-    @media (min-width: 640px) {
-      .demo__stage {
-        grid-template-columns: 280px minmax(0, 248px);
-        justify-content: center;
-        align-items: center;
-      }
-    }
-    .demo__phone-col { display: grid; gap: var(--s3); justify-items: center; width: 100%; }
-
-    /* Switch: one thumb that slides and stretches about 12% while it moves (motion rule 5) */
-    .flip {
-      position: relative;
-      display: inline-grid;
-      grid-auto-flow: column;
-      grid-auto-columns: 1fr;
-      padding: var(--s1);
-      background: var(--n1);
-      border-radius: var(--r-pill);
-    }
-    .flip button {
-      position: relative;
-      z-index: 1;
-      min-height: var(--tap);
-      padding: 0 var(--s3);
-      border-radius: var(--r-pill);
-      font-size: var(--t1);
-      font-weight: 600;
-      color: var(--n4);
-      white-space: nowrap;
-      transition: color var(--dur-in) var(--ease-out), transform var(--dur-out) var(--ease-out);
-    }
-    .flip button[aria-pressed="true"] { color: var(--ink); }
-    .flip button:active { transform: scale(var(--press)); }
-    .flip__thumb {
-      position: absolute;
-      top: var(--s1);
-      bottom: var(--s1);
-      left: 0;
-      width: var(--tw, 50%);
-      transform: translateX(var(--tx, 4px));
-      transition: transform var(--dur-in) var(--ease-in-out), width var(--dur-in) var(--ease-in-out);
-      pointer-events: none;
-    }
-    .flip__thumb span {
-      display: block;
-      height: 100%;
-      background: var(--bg);
-      border-radius: var(--r-pill);
-      box-shadow: 0 1px 2px rgba(11, 9, 9, .1);
-    }
-    .flip.is-moving .flip__thumb span { animation: knob-stretch var(--dur-in) var(--ease-in-out); }
-    @keyframes knob-stretch {
-      50% { transform: scaleX(1.12); }
-    }
-
-    .phone-btn { display: block; width: 100%; max-width: 280px; border-radius: var(--r-phone); text-align: left; font: inherit; color: inherit; }
-    .phone-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
-    .demo .phone { max-width: 280px; }
-    .demo .phone__screen { background: var(--ink); }
-    .scr {
-      position: absolute;
-      inset: 0;
-      overflow: hidden;
-      font-family: var(--font-ui);
-    }
-    .scr [data-area] {
-      position: relative;
-      border-radius: 16px;
-      transition: opacity var(--dur-in) var(--ease-out), box-shadow var(--dur-in) var(--ease-out);
-    }
-    .demo[data-focus] .scr [data-area] { opacity: .35; }
-    .demo[data-focus="a1"] .scr [data-area="a1"],
-    .demo[data-focus="a2"] .scr [data-area="a2"],
-    .demo[data-focus="a3"] .scr [data-area="a3"] {
-      opacity: 1;
-      box-shadow: 0 0 0 2px var(--accent), 0 0 0 4px var(--ink);
-    }
-    .pin {
-      position: absolute;
-      top: -8px;
-      right: -8px;
-      z-index: 2;
-      display: grid;
-      place-items: center;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: var(--ink);
-      color: var(--bg);
-      font-size: var(--t1);
-      font-weight: 600;
-      line-height: 1;
-      box-shadow: 0 0 0 2px var(--bg);
-    }
-
-    /* Mask reveal from the trigger, old and new overlap (motion rules 11, 16, 17) */
-    .scr-taste {
-      clip-path: circle(0% at var(--ox, 50%) var(--oy, 0%));
-      transition: clip-path calc(var(--dur-out) * 2) var(--ease-in-out);
-    }
-    .demo[data-state="taste"] .scr-taste {
-      clip-path: circle(150% at var(--ox, 50%) var(--oy, 0%));
-      transition: clip-path calc(var(--dur-in) * 2) var(--ease-in-out);
-    }
-    .scr-slop { transition: transform calc(var(--dur-in) * 2) var(--ease-in-out), filter calc(var(--dur-in) * 2) var(--ease-in-out); }
-    .demo[data-state="taste"] .scr-slop { transform: scale(.97); filter: brightness(.7); }
-
-    /* Slop screen: every sign drawn on purpose */
-    .scr-slop {
-      background: linear-gradient(160deg, #1E1B4B 0%, #581C87 52%, #831843 100%);
-      color: #fff;
-    }
-    .scr-slop .phone__status { color: #fff; }
-    .sl-body { padding: 4px 14px 0; display: grid; gap: 10px; }
-    .sl-banner {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px;
-      background: rgba(255, 255, 255, .12);
-      border: 1px solid rgba(255, 255, 255, .28);
-      border-radius: 14px;
-    }
-    .sl-squircle {
-      flex: none; width: 32px; height: 32px; border-radius: 10px;
-      display: grid; place-items: center;
-      background: linear-gradient(135deg, #A855F7, #EC4899);
-      box-shadow: 0 0 16px rgba(236, 72, 153, .7);
-    }
-    .sl-squircle svg { width: 18px; height: 18px; fill: #FDE68A; }
-    .sl-banner b { display: block; font-size: 13px; letter-spacing: -.03em; }
-    .sl-banner small { display: block; font-size: 10px; opacity: .7; }
-    .sl-eyebrow { font-size: 9px; font-weight: 600; letter-spacing: .22em; color: #C4B5FD; }
-    .sl-title { font-family: Georgia, serif; font-size: 25px; line-height: 1.05; letter-spacing: -.05em; font-weight: 400; margin-top: -6px; }
-    .sl-title i { background: linear-gradient(90deg, #F0ABFC, #67E8F9); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .sl-pills { display: flex; gap: 4px; flex-wrap: wrap; }
-    .sl-pills span { font-size: 8px; font-weight: 700; letter-spacing: .12em; padding: 3px 7px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .35); background: rgba(255, 255, 255, .08); }
-    .sl-pills span:first-child { background: #22D3EE; color: #0B0909; border-color: transparent; }
-    .sl-outer {
-      padding: 8px;
-      border: 1px solid rgba(255, 255, 255, .22);
-      background: rgba(255, 255, 255, .06);
-      border-radius: 20px;
-      display: grid; gap: 6px;
-    }
-    .sl-stat {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 8px 10px;
-      border-radius: 12px;
-      border: 1px solid rgba(168, 85, 247, .8);
-      background: rgba(168, 85, 247, .2);
-      box-shadow: 0 0 20px rgba(168, 85, 247, .65);
-    }
-    .sl-stat small { font-size: 8px; letter-spacing: .2em; font-weight: 700; }
-    .sl-stat b { font-family: var(--font-mono); font-size: 20px; text-shadow: 0 0 12px #F0ABFC; }
-    .sl-inner {
-      padding: 6px 8px;
-      background: rgba(255, 255, 255, .08);
-      border: 1px solid rgba(255, 255, 255, .14);
-      border-left: 3px solid var(--c);
-      border-radius: 5px;
-      font-size: 10px;
-    }
-    .sl-inner div { display: flex; justify-content: space-between; font-family: var(--font-mono); }
-    .sl-inner i { display: block; height: 3px; margin-top: 4px; border-radius: 2px; background: rgba(255, 255, 255, .15); }
-    .sl-inner i::before { content: ""; display: block; height: 100%; width: var(--w); border-radius: 2px; background: linear-gradient(90deg, var(--c), #fff); }
-    .sl-hr { height: 1px; background: rgba(255, 255, 255, .2); }
-    .scr .sl-ctas { position: absolute; left: 14px; right: 14px; bottom: 26px; display: grid; gap: 6px; }
-    .sl-ctas span:not(.pin) { display: grid; place-items: center; height: 36px; border-radius: 10px; font-size: 12px; font-weight: 700; }
-    .sl-ctas span:first-child { background: linear-gradient(90deg, #A855F7, #EC4899); box-shadow: 0 0 18px rgba(236, 72, 153, .6); }
-    .sl-ctas span:nth-child(2) { border: 1px solid rgba(255, 255, 255, .5); border-radius: 18px; }
-
-    /* Taste screen: ivory, ink, one lime button */
-    .scr-taste { background: var(--bg); color: var(--ink); }
-    .tt-body { padding: 8px 18px 0; display: grid; gap: var(--s4); }
-    .tt-top { display: flex; justify-content: space-between; align-items: center; }
-    .tt-top p { font-size: 13px; color: var(--n3); }
-    .tt-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--n2); display: grid; place-items: center; color: var(--n4); font-size: 13px; font-weight: 600; }
-    .tt-head { padding: 4px 0; }
-    .tt-big { display: flex; align-items: baseline; gap: 6px; font-family: var(--font-display); font-weight: 500; line-height: 1; }
-    .tt-big b { font-weight: 500; font-size: 61px; letter-spacing: -.015em; }
-    .tt-big span { font-size: 25px; color: var(--n3); }
-    .tt-head p { margin-top: 6px; font-size: 13px; color: var(--n4); }
-    .tt-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 12px; }
-    .tt-bar i { height: 6px; border-radius: 3px; }
-    .tt-bar i:not(:last-child) { background: var(--accent); box-shadow: inset 0 0 0 1px var(--ink); }
-    .tt-bar i:last-child { background: var(--n2); }
-    .tt-list { background: var(--n1); border-radius: 20px; padding: 4px; }
-    .tt-row { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 12px; border-radius: 16px; }
-    .tt-row + .tt-row { box-shadow: inset 0 1px 0 var(--n2); border-radius: 0; }
-    .tt-check { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--ink); }
-    .tt-check svg { width: 14px; height: 14px; fill: none; stroke: var(--bg); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-    .tt-row.is-todo .tt-check { background: transparent; box-shadow: inset 0 0 0 1.5px var(--n3); }
-    .tt-row strong { flex: 1; font-size: 16px; font-weight: 500; }
-    .tt-row .v { font-family: var(--font-mono); font-size: 13px; color: var(--n3); }
-    .scr .tt-cta { position: absolute; left: 18px; right: 18px; bottom: 28px; display: grid; place-items: center; height: 48px; border-radius: 999px; background: var(--ink); color: var(--bg); font-size: 16px; font-weight: 600; }
-    .tt-cta.pin-host .pin { right: 8px; }
-
-    .demo__hint { font-size: var(--t1); color: var(--n3); text-align: center; }
-    .demo__hint .kbd { border-radius: var(--r-sm); }
-    @media (hover: none) { .kbd-hint { display: none; } }
-
-    /* Callouts: name the rules applied, crossfade with a 30 ms stagger as they settle (motion rule 6) */
-    .callouts { list-style: none; padding: 0; display: grid; gap: var(--s2); width: 100%; max-width: 360px; }
-    .callout {
-      display: grid;
-      grid-template-columns: 24px 1fr;
-      gap: 12px;
-      padding: 12px;
-      margin-inline: -12px;
-      width: calc(100% + 24px);
-      text-align: left;
-      border-radius: var(--r-in);
-      transition: background-color var(--dur-in) var(--ease-out), transform var(--dur-out) var(--ease-out);
-    }
-    .callout:hover, .callout[aria-pressed="true"] { background: var(--n1); }
-    .callout:active { transform: scale(var(--press)); }
-    .callout .pin { position: static; box-shadow: none; margin-top: 1px; }
-    .callout__txt { display: grid; }
-    .callout__txt > span {
-      grid-area: 1 / 1;
-      transition: opacity var(--dur-out) var(--ease-in), transform var(--dur-out) var(--ease-in), visibility 0s linear var(--dur-out);
-    }
-    .callout__txt b { display: block; font-size: var(--t2); font-weight: 600; line-height: 1.35; }
-    .callout__txt small { display: block; margin-top: 2px; font-size: var(--t1); color: var(--n3); }
-    .demo[data-state="slop"] .callout .is-taste,
-    .demo[data-state="taste"] .callout .is-slop { opacity: 0; transform: translateY(4px); visibility: hidden; }
-    .demo[data-state="slop"] .callout .is-slop,
-    .demo[data-state="taste"] .callout .is-taste {
-      transition: opacity var(--dur-in) var(--ease-out), transform var(--dur-in) var(--ease-out), visibility 0s;
-      transition-delay: calc(var(--dur-out) + var(--i, 0) * var(--stagger));
-    }
-
-    /* ---------- Doors ---------- */
-    .doors-head { display: grid; gap: var(--s3); margin-bottom: var(--s5); }
-    @media (min-width: 900px) {
-      .doors-head { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: end; gap: var(--s6); }
-    }
-    .doors { list-style: none; padding: 0; display: grid; gap: var(--s1); }
-    .door {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto 24px;
-      grid-template-areas: "name meta go" "desc desc go";
-      gap: var(--s1) var(--s3);
-      align-items: center;
-      padding: var(--s4) var(--s3);
-      margin-inline: calc(var(--s3) * -1);
-      border-radius: var(--r-in);
-      text-decoration: none;
-      color: inherit;
-      transition: background-color var(--dur-in) var(--ease-out), transform var(--dur-out) var(--ease-out);
-    }
-    .door:hover { background: var(--n1); }
-    .door:active .icon { transform: translateX(3px) scale(var(--press)); }
-    .door__name { grid-area: name; font-family: var(--font-display); font-size: var(--t4); font-weight: 500; line-height: 1.2; }
-    .door__desc { grid-area: desc; color: var(--n4); max-width: 44ch; }
-    .door__meta { grid-area: meta; font-family: var(--font-ui); font-size: var(--t1); color: var(--n3); white-space: nowrap; }
-    .door .icon { grid-area: go; color: var(--n3); transition: transform var(--dur-in) var(--ease-out), color var(--dur-in) var(--ease-out); }
-    .door:hover .icon { transform: translateX(3px); color: var(--ink); }
-    @media (min-width: 760px) {
-      .door {
-        grid-template-columns: 200px minmax(0, 1fr) 128px 24px;
-        grid-template-areas: "name desc meta go";
-        gap: var(--s4);
-        padding-block: 20px;
-      }
-      .door__meta { text-align: right; }
-    }
-
-    /* ---------- Proof ---------- */
-    .proof { --d-muted: #BDB8AC; --d-line: #4A4640; }
-    .proof h2 { max-width: 14em; }
-    .proof .lead { margin-top: var(--s3); }
-    .feature-stats { display: grid; gap: var(--s6); margin-top: var(--s7); }
-    @media (min-width: 760px) { .feature-stats { grid-template-columns: 1fr 1fr; gap: var(--s5); } }
-    .stat-big { display: flex; align-items: baseline; gap: var(--s2); font-family: var(--font-display); line-height: 1; }
-    .stat-big b { font-weight: 500; font-size: var(--display); letter-spacing: -.015em; }
-    .stat-big span { font-size: var(--t3); color: var(--d-muted); }
-    .feature-stats p { margin-top: var(--s3); max-width: 34ch; }
-    .feature-stats .who { margin-top: var(--s2); font-size: var(--t1); color: var(--d-muted); }
-    .proof .btn-text { margin-top: var(--s2); margin-left: calc(var(--s1) * -1); text-decoration-color: var(--d-line); }
-    .proof .btn-text:hover { text-decoration-color: currentColor; }
-    .counts { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s4); margin-top: var(--s7); }
-    .counts b { display: block; font-family: var(--font-display); font-weight: 500; font-size: var(--t6); line-height: 1; letter-spacing: -.015em; }
-    .counts span { display: block; margin-top: var(--s2); font-size: var(--t1); color: var(--d-muted); }
-    @media (min-width: 640px) { .counts b { font-size: var(--t7); } .counts span { font-size: var(--t2); } }
-
-    /* ---------- Close ---------- */
-    .close { padding-block: var(--s7); }
-    @media (min-width: 900px) { .close { padding-block: var(--s8); } }
-    .close p { margin-top: var(--s3); color: var(--n4); max-width: 40ch; }
-    .x-link {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--s2);
-      min-height: var(--tap);
-      margin-top: var(--s4);
-      font-family: var(--font-display);
-      font-size: var(--t4);
-      font-weight: 500;
-      color: var(--ink);
-      text-decoration: underline;
-      text-decoration-thickness: 2px;
-      text-decoration-color: var(--n2);
-      text-underline-offset: 6px;
-      transition: text-decoration-color var(--dur-in) var(--ease-out);
-    }
-    .x-link:hover { text-decoration-color: var(--ink); }
-    .x-link .icon { transition: transform var(--dur-in) var(--ease-out); }
-    .x-link:hover .icon { transform: translate(2px, -2px); }
-    @media (min-width: 640px) { .x-link { font-size: var(--t5); } }
-
-    @media (prefers-reduced-motion: reduce) {
-      .scr-taste, .demo[data-state="taste"] .scr-taste { clip-path: none; transition: opacity var(--dur-in) linear; }
-      .scr-taste { opacity: 0; }
-      .demo[data-state="taste"] .scr-taste { opacity: 1; }
-      .demo[data-state="taste"] .scr-slop { transform: none; }
-      .flip.is-moving .flip__thumb span { animation: none; }
-      .flip__thumb { transition: none; }
-      .callout__txt > span { transform: none !important; }
-      .door:hover .icon, .x-link:hover .icon { transform: none; }
-      .door:active .icon, .callout:active, .flip button:active { transform: none; }
-    }
-
-    /* Shell fixes kept page-local until tasu.css takes them */
-    .wordmark svg { border-radius: var(--r-sm); }
-    .site-footer a { min-width: var(--tap); justify-content: center; }
-    @media print { .js .reveal { opacity: 1; transform: none; } }
-  </style>
-  <script>document.documentElement.classList.add("js");setTimeout(function(){if(!window.tasu)document.documentElement.classList.remove("js")},3000)</script>
-  <script src="/taste/tasu.js" defer></script>
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "WebSite",
-        "@id": "https://www.jeremylasne.com/taste/#website",
-        "name": "tasu.ai",
-        "alternateName": "taste using AI",
-        "url": "https://www.jeremylasne.com/taste/",
-        "description": "Design apps with taste, using AI: 104 rules from 35 sources, in one file your AI follows.",
-        "inLanguage": "en",
-        "publisher": { "@type": "Person", "name": "Jeremy Lasne", "url": "https://www.jeremylasne.com/", "sameAs": ["https://x.com/jeremylasne"] }
-      },
-      {
-        "@type": "WebPage",
-        "@id": "https://www.jeremylasne.com/taste/#webpage",
-        "url": "https://www.jeremylasne.com/taste/",
-        "name": "tasu.ai: design apps with taste, using AI",
-        "description": "tasu.ai teaches you to design apps with taste using AI: 104 rules from 35 design reels, in one file Claude Code and Cursor follow. Free.",
-        "isPartOf": { "@id": "https://www.jeremylasne.com/taste/#website" },
-        "image": "https://www.jeremylasne.com/og-image.png?v=8",
-        "inLanguage": "en"
-      },
-      {
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "tasu.ai", "item": "https://www.jeremylasne.com/taste/" }
-        ]
-      }
-    ]
-  }
-  </script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>tasu.ai: design &amp; paywalls behind top apps</title>
+<meta name="description" content="The design and paywalls of 12 top consumer apps: plans and prices, 3 brand colors, the font, the design style and 3 fixes for each.">
+<link rel="canonical" href="https://www.jeremylasne.com/taste/">
+<meta name="theme-color" content="#F3EFE7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1C1B19" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
+<script>(function(r){var t,v;try{t=localStorage.getItem('tasu-theme');v=localStorage.getItem('tasu-view')}catch(e){}r.classList.add('js');if(v==='grid')r.setAttribute('data-view','grid');if(t==='light'||t==='dark'){r.setAttribute('data-theme',t);var m=document.querySelectorAll('meta[name="theme-color"]'),c=t==='dark'?'#1C1B19':'#F3EFE7';for(var i=0;i<m.length;i++)m[i].setAttribute('content',c)}})(document.documentElement)</script>
+<link rel="preload" href="/taste/fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/taste/tasu.css">
+<script src="/taste/tasu.js" defer></script>
+<link rel="icon" href="/taste/brand/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/taste/brand/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="tasu.ai">
+<meta property="og:url" content="https://www.jeremylasne.com/taste/">
+<meta property="og:title" content="tasu.ai: design &amp; paywalls behind top apps">
+<meta property="og:description" content="The design and paywalls of 12 top consumer apps: plans and prices, 3 brand colors, the font, the design style and 3 fixes for each.">
+<meta property="og:image" content="https://www.jeremylasne.com/taste/brand/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="tasu.ai: design &amp; paywalls behind top apps">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@jeremylasne">
+<meta name="twitter:creator" content="@jeremylasne">
+<meta name="twitter:title" content="tasu.ai: design &amp; paywalls behind top apps">
+<meta name="twitter:description" content="The design and paywalls of 12 top consumer apps: plans and prices, 3 brand colors, the font, the design style and 3 fixes for each.">
+<meta name="twitter:image" content="https://www.jeremylasne.com/taste/brand/og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://www.jeremylasne.com/taste/#website","name":"tasu.ai","alternateName":"taste using AI","url":"https://www.jeremylasne.com/taste/","description":"The design and paywalls of 12 top consumer apps: plans and prices, 3 brand colors, the font, the design style and 3 fixes for each.","inLanguage":"en","author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne"]},"publisher":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne"]}},{"@type":"CollectionPage","@id":"https://www.jeremylasne.com/taste/#page","url":"https://www.jeremylasne.com/taste/","name":"tasu.ai: design & paywalls behind top apps","description":"The design and paywalls of 12 top consumer apps: plans and prices, 3 brand colors, the font, the design style and 3 fixes for each.","isPartOf":{"@id":"https://www.jeremylasne.com/taste/#website"},"inLanguage":"en","dateModified":"2026-11-15","primaryImageOfPage":"https://www.jeremylasne.com/taste/brand/og.png","mainEntity":{"@id":"https://www.jeremylasne.com/taste/#apps"}},{"@type":"ItemList","@id":"https://www.jeremylasne.com/taste/#apps","name":"12 app breakdowns","numberOfItems":12,"itemListOrder":"https://schema.org/ItemListUnordered","itemListElement":[{"@type":"ListItem","position":1,"url":"https://www.jeremylasne.com/taste/cal-ai/","name":"Cal AI: design and paywall"},{"@type":"ListItem","position":2,"url":"https://www.jeremylasne.com/taste/opal/","name":"Opal: design and paywall"},{"@type":"ListItem","position":3,"url":"https://www.jeremylasne.com/taste/duolingo/","name":"Duolingo: design and paywall"},{"@type":"ListItem","position":4,"url":"https://www.jeremylasne.com/taste/rise/","name":"Rise: design and paywall"},{"@type":"ListItem","position":5,"url":"https://www.jeremylasne.com/taste/headspace/","name":"Headspace: design and paywall"},{"@type":"ListItem","position":6,"url":"https://www.jeremylasne.com/taste/strava/","name":"Strava: design and paywall"},{"@type":"ListItem","position":7,"url":"https://www.jeremylasne.com/taste/myfitnesspal/","name":"MyFitnessPal: design and paywall"},{"@type":"ListItem","position":8,"url":"https://www.jeremylasne.com/taste/ladder/","name":"Ladder: design and paywall"},{"@type":"ListItem","position":9,"url":"https://www.jeremylasne.com/taste/hevy/","name":"Hevy: design and paywall"},{"@type":"ListItem","position":10,"url":"https://www.jeremylasne.com/taste/huckleberry/","name":"Huckleberry: design and paywall"},{"@type":"ListItem","position":11,"url":"https://www.jeremylasne.com/taste/flo/","name":"Flo: design and paywall"},{"@type":"ListItem","position":12,"url":"https://www.jeremylasne.com/taste/finch/","name":"Finch: design and paywall"}]}]}</script>
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to content</a>
+<a class="skip-link" href="#main">Skip to content</a>
 
-  <header class="site-header">
-    <div class="container site-header__inner">
-      <a class="wordmark" href="/taste/" aria-label="tasu.ai home">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="8" fill="#0B0909"/><path d="M10.5 4.5v11a3 3 0 0 0 3 3H16M7 9h8.5" fill="none" stroke="#FAF8F3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span>tasu.ai</span>
-      </a>
-      <nav class="nav" aria-label="Main">
-        <ul>
-          <li><a href="/taste/rules/">Rules</a></li>
-          <li><a href="/taste/unslop/">Unslop</a></li>
-          <li><a href="/taste/palettes/">Palettes</a></li>
-          <li><a href="/taste/type/">Type</a></li>
-          <li><a href="/taste/motion/">Motion</a></li>
-          <li><a href="/taste/screens/">Screens</a></li>
-          <li><a href="/taste/prompts/">Prompts</a></li>
-          <li><a href="/taste/skills/">Skills</a></li>
-        </ul>
-      </nav>
-      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav-sheet" aria-label="Open menu">
-        <span class="menu-icons" aria-hidden="true">
-          <svg class="icon icon-open" viewBox="0 0 24 24"><path d="M4 8h16M4 16h16"/></svg>
-          <svg class="icon icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
-        </span>
-        <span>Menu</span>
+<header class="site-header">
+  <div class="wrap header-in">
+    <a class="brand" href="/taste/" aria-label="tasu.ai home">
+      <span class="tasu-loop tasu-loop--blink" aria-hidden="true"></span>
+      <img class="brand-l" src="/taste/brand/loops/wordmark.svg" width="86" height="32" alt="">
+      <img class="brand-d" src="/taste/brand/loops/wordmark-dark.svg" width="86" height="32" alt="">
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="/taste/#apps" aria-current="page">Apps</a>
+      <a href="/taste/library/">Library</a>
+    </nav>
+    <form class="search search--header" role="search" action="/taste/" method="get">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+      <label class="sr-only" for="site-q">Search apps</label>
+      <input id="site-q" type="search" name="q" placeholder="Search apps" autocomplete="off" enterkeyhint="search" data-site-search>
+      <kbd class="kbd" aria-hidden="true">/</kbd>
+    </form>
+    <div class="header-tools">
+      <button class="icon-btn theme-toggle js-only" type="button" data-theme-toggle aria-pressed="false" aria-label="Dark theme">
+        <svg class="ico i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 3v1.5M12 19.5V21M3 12h1.5M19.5 12H21M5.64 5.64l1.06 1.06M17.3 17.3l1.06 1.06M5.64 18.36l1.06-1.06M17.3 6.7l1.06-1.06"/></svg>
+        <svg class="ico i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M19.5 14.5A7.5 7.5 0 0 1 9.5 4.5a7.5 7.5 0 1 0 10 10Z"/></svg>
       </button>
+      <a class="icon-btn" href="https://x.com/jeremylasne" aria-label="Jeremy Lasne on X">
+        <svg class="ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
     </div>
-  </header>
-  <div class="sheet-scrim" aria-hidden="true"></div>
-  <nav class="sheet" id="nav-sheet" aria-label="Main">
-    <ul>
-      <li><a href="/taste/rules/">Rules</a></li>
-      <li><a href="/taste/unslop/">Unslop</a></li>
-      <li><a href="/taste/palettes/">Palettes</a></li>
-      <li><a href="/taste/type/">Type</a></li>
-      <li><a href="/taste/motion/">Motion</a></li>
-      <li><a href="/taste/screens/">Screens</a></li>
-      <li><a href="/taste/prompts/">Prompts</a></li>
-      <li><a href="/taste/skills/">Skills</a></li>
-      <li><a href="/taste/sources/">Sources</a></li>
+  </div>
+</header>
+
+<main id="main">
+
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-scene" data-parallax aria-hidden="true">
+    <img class="float is-icon" src="/taste/media/duolingo/icon.png" width="84" height="84" alt="" decoding="async" fetchpriority="low" style="--x:7%;--y:34%;--xm:7%;--ym:29%;--w:84px;--r:-12deg;--d:1">
+    <img class="float m-hide" src="/taste/media/strava/pw1.jpg" width="72" height="121" alt="" decoding="async" fetchpriority="low" style="--x:20%;--y:27%;--w:72px;--r:10deg;--d:2">
+    <img class="float m-hide" src="/taste/media/ladder/pw1.jpg" width="104" height="174" alt="" decoding="async" fetchpriority="low" style="--x:3%;--y:62%;--w:104px;--r:8deg;--d:1">
+    <img class="float is-icon m-hide" src="/taste/media/flo/icon.png" width="56" height="56" alt="" decoding="async" fetchpriority="low" style="--x:17%;--y:48%;--w:56px;--r:-8deg;--d:3">
+    <img class="float is-icon" src="/taste/media/cal-ai/icon.png" width="80" height="80" alt="" decoding="async" fetchpriority="low" style="--x:12%;--y:80%;--xm:11%;--ym:95%;--w:80px;--r:14deg;--d:1">
+    <img class="float m-hide" src="/taste/media/hevy/pw1.jpg" width="72" height="121" alt="" decoding="async" fetchpriority="low" style="--x:26%;--y:68%;--w:72px;--r:-10deg;--d:3">
+    <img class="float is-icon m-hide" src="/taste/media/finch/icon.png" width="56" height="56" alt="" decoding="async" fetchpriority="low" style="--x:23%;--y:88%;--w:56px;--r:-16deg;--d:2">
+    <img class="float" src="/taste/media/myfitnesspal/pw1.jpg" width="100" height="217" alt="" decoding="async" fetchpriority="low" style="--x:92%;--y:34%;--xm:91%;--ym:31%;--w:100px;--r:12deg;--d:1">
+    <img class="float is-icon" src="/taste/media/headspace/icon.png" width="60" height="60" alt="" decoding="async" fetchpriority="low" style="--x:80%;--y:24%;--xm:22%;--ym:22%;--w:60px;--r:-10deg;--d:2">
+    <img class="float is-icon m-hide" src="/taste/media/strava/icon.png" width="84" height="84" alt="" decoding="async" fetchpriority="low" style="--x:97%;--y:60%;--w:84px;--r:-8deg;--d:1">
+    <img class="float is-icon m-hide" src="/taste/media/rise/icon.png" width="52" height="52" alt="" decoding="async" fetchpriority="low" style="--x:84%;--y:47%;--w:52px;--r:16deg;--d:3">
+    <img class="float m-hide" src="/taste/media/opal/pw1.jpg" width="104" height="174" alt="" decoding="async" fetchpriority="low" style="--x:87%;--y:76%;--w:104px;--r:-12deg;--d:1">
+    <img class="float m-hide" src="/taste/media/huckleberry/pw1.jpg" width="68" height="114" alt="" decoding="async" fetchpriority="low" style="--x:75%;--y:66%;--w:68px;--r:6deg;--d:3">
+    <img class="float is-icon" src="/taste/media/opal/icon.png" width="64" height="64" alt="" decoding="async" fetchpriority="low" style="--x:78%;--y:89%;--xm:86%;--ym:95%;--w:64px;--r:18deg;--d:2">
+    <img class="float is-icon m-hide" src="/taste/media/huckleberry/icon.png" width="44" height="44" alt="" decoding="async" fetchpriority="low" style="--x:38%;--y:17%;--w:44px;--r:8deg;--d:3">
+    <img class="float m-hide" src="/taste/media/rise/pw1.jpg" width="52" height="87" alt="" decoding="async" fetchpriority="low" style="--x:63%;--y:15%;--w:52px;--r:-12deg;--d:3">
+    <img class="float m-hide" src="/taste/media/headspace/pw1.jpg" width="60" height="130" alt="" decoding="async" fetchpriority="low" style="--x:36%;--y:89%;--w:60px;--r:10deg;--d:3">
+    <img class="float is-icon m-hide" src="/taste/media/myfitnesspal/icon.png" width="48" height="48" alt="" decoding="async" fetchpriority="low" style="--x:64%;--y:91%;--w:48px;--r:-14deg;--d:2">
+    <img class="float is-icon m-hide" src="/taste/media/ladder/icon.png" width="40" height="40" alt="" decoding="async" fetchpriority="low" style="--x:31%;--y:39%;--w:40px;--r:12deg;--d:3">
+    <img class="float m-hide" src="/taste/media/strava/pw3.jpg" width="48" height="80" alt="" decoding="async" fetchpriority="low" style="--x:70%;--y:37%;--w:48px;--r:-8deg;--d:3">
+    <img class="float is-icon m-hide" src="/taste/media/hevy/icon.png" width="44" height="44" alt="" decoding="async" fetchpriority="low" style="--x:47%;--y:9%;--w:44px;--r:-10deg;--d:3">
+    <img class="float m-hide" src="/taste/media/opal/pw2.jpg" width="56" height="94" alt="" decoding="async" fetchpriority="low" style="--x:97%;--y:90%;--w:56px;--r:10deg;--d:2">
+  </div>
+  <div class="wrap hero-in">
+    <span class="tasu-loop tasu-loop--taste hero-mascot" role="img" aria-label="Tasu, the tasu.ai mascot, licks a paywall card"></span>
+    <h1 class="display" id="hero-title"><span class="hl">Design &amp; paywalls</span> behind top apps</h1>
+    <p class="lead hero-sub"><span>12 consumer apps from Apple’s US Top Grossing charts.</span> <span>For each: paywall strategy, colors, font, design style, and how I’d improve it.</span></p>
+    <div class="actions">
+      <a class="btn btn-primary btn-lg" href="https://x.com/jeremylasne"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> Follow on X</a>
+      <a class="btn btn-secondary btn-lg" href="#apps">Browse the apps</a>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="apps" aria-labelledby="apps-title" data-filter data-filter-main data-filter-url data-noun-one="app" data-noun-many="apps">
+  <div class="wrap">
+    <div class="gallery-head">
+      <h2 class="title-xl" id="apps-title">12 apps, from paywall to palette</h2>
+      <div class="gallery-tools js-only">
+        <div class="search search--lg">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+          <label class="sr-only" for="apps-q">Search the apps</label>
+          <input id="apps-q" type="search" placeholder="Try “sleep” or “orange”" autocomplete="off" enterkeyhint="search" data-filter-search>
+          <kbd class="kbd" aria-hidden="true">/</kbd>
+        </div>
+        <div class="chips" role="group" aria-label="Categories">
+          <button class="chip" type="button" data-filter-chip="all" aria-pressed="true">All <span class="chip-count">12</span></button>
+          <button class="chip" type="button" data-filter-chip="health-fitness" aria-pressed="false">Health &amp; Fitness <span class="chip-count">9</span></button>
+          <button class="chip" type="button" data-filter-chip="education" aria-pressed="false">Education <span class="chip-count">1</span></button>
+          <button class="chip" type="button" data-filter-chip="medical" aria-pressed="false">Medical <span class="chip-count">1</span></button>
+          <button class="chip" type="button" data-filter-chip="productivity" aria-pressed="false">Productivity <span class="chip-count">1</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <p class="toolbar-status"><span data-filter-status aria-live="polite">12 apps</span><span class="toolbar-source">App Store data, US, 15&nbsp;Nov&nbsp;2026</span></p>
+      <div class="view-toggle js-only" role="group" aria-label="View">
+        <button type="button" data-view-set="row" aria-pressed="true" aria-label="Rows"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><rect x="3.75" y="4.75" width="16.5" height="6" rx="2"/><rect x="3.75" y="13.25" width="16.5" height="6" rx="2"/></svg></button>
+        <button type="button" data-view-set="grid" aria-pressed="false" aria-label="Grid"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><rect x="3.75" y="3.75" width="7" height="7" rx="2"/><rect x="13.25" y="3.75" width="7" height="7" rx="2"/><rect x="3.75" y="13.25" width="7" height="7" rx="2"/><rect x="13.25" y="13.25" width="7" height="7" rx="2"/></svg></button>
+      </div>
+    </div>
+  </div>
+
+  <ol class="apps" role="list">
+  <li class="app-row" data-filter-item data-tags="health-fitness" data-text="Cal AI Cal AI - Calorie Tracker Food &amp; Macro Counter Health &amp; Fitness Calorie tracker Viral Development LLC $29.99 White Ink black Scan grey Inter" data-reveal>
+    <a class="app-card" href="/taste/cal-ai/">
+      <img class="app-icon" src="/taste/media/cal-ai/icon.png" width="64" height="64" alt="" loading="lazy" decoding="async">
+      <p class="app-rank">#11&nbsp;in Health &amp; Fitness</p>
+      <h3 class="app-name">Cal AI</h3>
+      <p class="app-sub">Food &amp; Macro Counter</p>
+      <p class="key"><span class="key-num">$29.99</span><span class="key-label">Top Unlimited price</span></p>
+      <p class="app-colors" role="img" aria-label="Brand colors: White, Ink black and Scan grey"><span style="--c:#FFFFFF"></span><span style="--c:#1D1A23"></span><span style="--c:#7F7F80"></span></p>
+      <dl class="stats">
+        <div><dt>rating</dt><dd>4.8</dd></div>
+        <div><dt>ratings</dt><dd>376K</dd></div>
+        <div><dt>plans</dt><dd>6</dd></div>
+      </dl>
+    </a>
+    <div class="strip" data-strip>
+      <ol class="strip-track" role="list" tabindex="0" aria-label="Cal AI screens">
+        <li class="screen screen--drawn"><span class="mark">Paywall</span><div class="drawn" role="img" aria-label="Drawn paywall for Cal AI from App Store prices: Unlimited $29.99, Unlimited $19.99, Unlimited Plan $19.99, Unlimited $9.99">
+          <div class="drawn-head"><img src="/taste/media/cal-ai/icon.png" width="64" height="64" alt="" loading="lazy" decoding="async"><p class="drawn-title">Cal AI plans</p></div>
+          <div class="drawn-plan"><span><b>Unlimited</b></span><span><b>$29.99</b></span></div>
+          <div class="drawn-plan"><span><b>Unlimited</b></span><span><b>$19.99</b></span></div>
+          <div class="drawn-plan"><span><b>Unlimited Plan</b></span><span><b>$19.99</b></span></div>
+          <div class="drawn-plan"><span><b>Unlimited</b></span><span><b>$9.99</b></span></div>
+          <div class="drawn-cta">Continue</div>
+        </div></li>
+        <li class="screen"><img src="/taste/media/cal-ai/s1.jpg" width="600" height="1298" alt="Cal AI home screen: 1250 of 2500 calories eaten, protein, carbs and fat rings, and a 550-calorie grilled salmon" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/cal-ai/s2.jpg" width="600" height="1298" alt="Just snap a pic: the camera labels lettuce, parmesan, cherry tomatoes and croutons on a Caesar salad" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/cal-ai/s3.jpg" width="600" height="1298" alt="See the calories: a Caesar salad at 330 calories, 8 g protein, 20 g carbs and 18 g fat, with a black Done button" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/cal-ai/s4.jpg" width="600" height="1298" alt="Track progress: 132.1 lbs toward a 140 lbs goal, a 21-day streak and a 6-month weight chart" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/cal-ai/s5.jpg" width="600" height="1298" alt="Grow with friends: the Shred Squad feed with streak counts and a friend’s 480-calorie chicken meal" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/cal-ai/s6.jpg" width="600" height="1298" alt="Watch the change: before and after photos at 355 lbs in Sep 2023 and 182 lbs in Jul 2025, with a Share button" loading="lazy" decoding="async"></li>
+      </ol>
+    <button class="strip-btn" type="button" data-strip-prev aria-label="Previous screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg></button>
+    <button class="strip-btn" type="button" data-strip-next aria-label="Next screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg></button>
+    </div>
+  </li>
+  <li class="app-row" data-filter-item data-tags="productivity" data-text="Opal Opal: Screen Time Control Focus, App Blocker &amp; Timer Productivity Screen time Opal OS $99.99 Near black Soft white Ice blue SF Pro Inter" data-reveal>
+    <a class="app-card" href="/taste/opal/">
+      <img class="app-icon" src="/taste/media/opal/icon.png" width="64" height="64" alt="" loading="lazy" decoding="async">
+      <p class="app-rank">#51&nbsp;in Productivity</p>
+      <h3 class="app-name">Opal</h3>
+      <p class="app-sub">Focus, App Blocker &amp; Timer</p>
+      <p class="key"><span class="key-num">$99.99</span><span class="key-label">Yearly plan</span></p>
+      <p class="app-colors" role="img" aria-label="Brand colors: Near black, Soft white and Ice blue"><span style="--c:#0E0F11"></span><span style="--c:#EEEEEE"></span><span style="--c:#B4D4E6"></span></p>
+      <dl class="stats">
+        <div><dt>rating</dt><dd>4.7</dd></div>
+        <div><dt>ratings</dt><dd>92K</dd></div>
+        <div><dt>plans</dt><dd>6</dd></div>
+      </dl>
+    </a>
+    <div class="strip" data-strip>
+      <ol class="strip-track" role="list" tabindex="0" aria-label="Opal screens">
+        <li class="screen"><span class="mark">Paywall</span><img src="/taste/media/opal/pw1.jpg" width="600" height="1006" alt="Opal PRO card on the Yearly tab: $8.29 a month, $99.99 billed annually, 5 features and a Start Free Week button" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/opal/s1.jpg" width="600" height="1301" alt="Headline “Get back 1h23m every day.” above a phone showing 1h 23m less screen time this week, and a 4.9 star score from 150K+ ratings" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/opal/s2.jpg" width="600" height="1301" alt="Headline “Blocks the apps you keep opening.” above a block screen that reads “Instagram is Blocked by Opal”, and a 2025 Apple Design Award for Social Impact" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/opal/s3.jpg" width="600" height="1301" alt="Headline “For better sleep, focus, and rest.” above the home screen: a glowing opal gem, a score of 94, 2h 56m of screen time and 2 active rules" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/opal/s4.jpg" width="600" height="1301" alt="Headline “Dive deeper into your progress.” above an Insights card: phone down around 1 to 2 AM, with Instagram, TikTok and Facebook used most before bed" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/opal/s5.jpg" width="600" height="1301" alt="Headline “One tap. Total focus.” above a 29:59 focus timer set to 30 minutes, with a Start Timer button" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/opal/s6.jpg" width="600" height="1301" alt="Headline “Runs automatically when you need it.” above 4 blocked apps and rule cards for Sleep Time, Deep Work, Creative Burst and Commute Time" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/opal/s7.jpg" width="600" height="1301" alt="Headline “Routines for every part of your day.” above rule cards: 10 Unblock Daily, Sleep Time from 10 PM to 8 AM, Deep Work and Lunch Break" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/opal/s8.jpg" width="600" height="1301" alt="Headline “Also available on Mac.” above a MacBook on a rock, its screen reading “Youtube was blocked by Opal.”" loading="lazy" decoding="async"></li>
+      </ol>
+    <button class="strip-btn" type="button" data-strip-prev aria-label="Previous screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg></button>
+    <button class="strip-btn" type="button" data-strip-next aria-label="Next screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg></button>
+    </div>
+  </li>
+  <li class="app-row" data-filter-item data-tags="education" data-text="Duolingo Duolingo: Learn Languages Spanish, French, Chess &amp; Math Education Language learning $119.99 White Owl green Streak orange Feather Bold Fredoka" data-reveal>
+    <a class="app-card" href="/taste/duolingo/">
+      <img class="app-icon" src="/taste/media/duolingo/icon.png" width="64" height="64" alt="" loading="lazy" decoding="async">
+      <p class="app-rank">#1&nbsp;in Education</p>
+      <h3 class="app-name">Duolingo</h3>
+      <p class="app-sub">Spanish, French, Chess &amp; Math</p>
+      <p class="key"><span class="key-num">$119.99</span><span class="key-label">Top Super Duolingo price</span></p>
+      <p class="app-colors" role="img" aria-label="Brand colors: White, Owl green and Streak orange"><span style="--c:#FFFFFF"></span><span style="--c:#78C800"></span><span style="--c:#FF800B"></span></p>
+      <dl class="stats">
+        <div><dt>rating</dt><dd>4.7</dd></div>
+        <div><dt>ratings</dt><dd>5.6M</dd></div>
+        <div><dt>plans</dt><dd>5</dd></div>
+      </dl>
+    </a>
+    <div class="strip" data-strip>
+      <ol class="strip-track" role="list" tabindex="0" aria-label="Duolingo screens">
+        <li class="screen screen--drawn"><span class="mark">Paywall</span><div class="drawn" role="img" aria-label="Drawn paywall for Duolingo from App Store prices: Super Duolingo $119.99, Super Duolingo $95.99, Super Duolingo $83.99, Super Duolingo $12.99">
+          <div class="drawn-head"><img src="/taste/media/duolingo/icon.png" width="64" height="64" alt="" loading="lazy" decoding="async"><p class="drawn-title">Duolingo plans</p></div>
+          <div class="drawn-plan"><span><b>Super Duolingo</b></span><span><b>$119.99</b></span></div>
+          <div class="drawn-plan"><span><b>Super Duolingo</b></span><span><b>$95.99</b></span></div>
+          <div class="drawn-plan"><span><b>Super Duolingo</b></span><span><b>$83.99</b></span></div>
+          <div class="drawn-plan"><span><b>Super Duolingo</b></span><span><b>$12.99</b></span></div>
+          <div class="drawn-cta">Continue</div>
+        </div></li>
+        <li class="screen"><img src="/taste/media/duolingo/s1.jpg" width="600" height="1299" alt="Learn 40+ languages for free: the course list, from Spanish and French to Chess, Math, Music, Chinese and Korean" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/duolingo/s2.jpg" width="600" height="1299" alt="Fun, bite-sized lessons: pick the image for 牛乳 from tea, milk, cheese and juice, with 25 energy left" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/duolingo/s3.jpg" width="600" height="1299" alt="Solve chess puzzles: a coach says move here to checkmate, with an arrow on the board and 24 energy left" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/duolingo/s4.jpg" width="600" height="1299" alt="Build language skills: ¡Necesito más café! becomes I need more coffee! in word chips, with 23 energy left" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/duolingo/s5.jpg" width="600" height="1299" alt="Practice conversations: Eddy says Je voudrais un café, s’il te plaît ! in a café, next to a bear at the counter" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/duolingo/s6.jpg" width="600" height="1299" alt="Keep your daily streak: the owl flexes beside a flame over a 3 day streak, Sunday to Tuesday checked" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/duolingo/s7.jpg" width="600" height="1299" alt="Use math with confidence: build 36 from number tiles and × and + signs, with 22 energy left" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/duolingo/s8.jpg" width="600" height="1299" alt="Learn to play music: a piano lane marked Perfect! and a fill in the blanks quiz on a music staff" loading="lazy" decoding="async"></li>
+      </ol>
+    <button class="strip-btn" type="button" data-strip-prev aria-label="Previous screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg></button>
+    <button class="strip-btn" type="button" data-strip-next aria-label="Next screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg></button>
+    </div>
+  </li>
+  <li class="app-row" data-filter-item data-tags="health-fitness" data-text="Rise RISE: Sleep Tracker Become a morning person Health &amp; Fitness Sleep Rise Science Inc $69.99 Night black Electric violet Sunrise orange Work Sans" data-reveal>
+    <a class="app-card" href="/taste/rise/">
+      <img class="app-icon" src="/taste/media/rise/icon.png" width="64" height="64" alt="" loading="lazy" decoding="async">
+      <p class="app-rank">#61&nbsp;in Health &amp; Fitness</p>
+      <h3 class="app-name">Rise</h3>
+      <p class="app-sub">Become a morning person</p>
+      <p class="key"><span class="key-num">$69.99</span><span class="key-label">Top membership price</span></p>
+      <p class="app-colors" role="img" aria-label="Brand colors: Night black, Electric violet and Sunrise orange"><span style="--c:#17151A"></span><span style="--c:#7D05FC"></span><span style="--c:#C56B3D"></span></p>
+      <dl class="stats">
+        <div><dt>rating</dt><dd>4.7</dd></div>
+        <div><dt>ratings</dt><dd>74K</dd></div>
+        <div><dt>plans</dt><dd>6</dd></div>
+      </dl>
+    </a>
+    <div class="strip" data-strip>
+      <ol class="strip-track" role="list" tabindex="0" aria-label="Rise screens">
+        <li class="screen"><span class="mark">Paywall</span><img src="/taste/media/rise/pw1.jpg" width="600" height="1006" alt="Rise web paywall: a #february26 code for up to 40% off, a 09:52 countdown and 3 plans priced per day, Quarterly picked at $0.32" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/rise/s1.jpg" width="600" height="1299" alt="Become a morning person: App of the Day laurels, trusted by 5 million early risers, and Recommended by ESPN, Sleep Foundation and 4 more" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/rise/s2.jpg" width="600" height="1299" alt="Track the sleep you owe your body: My sleep for October 12-26, with 6.3 hrs of sleep debt and 77% energy potential" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/rise/s3.jpg" width="600" height="1299" alt="Check your energy level and optimize your day: an energy curve with Peak and Dip tags, Great 86%, and Avoid caffeine at 12:35" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/rise/s4.jpg" width="600" height="1299" alt="Sleep better with sleeping sounds and meditation: an 11m Reduce stress session, Sleeping sounds with a sleep timer, and a 2m breathing session" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/rise/s5.jpg" width="600" height="1299" alt="Build healthy habits: a Habits list with Workout, Avoid caffeine, Dinner, Blue-light glasses, Evening routine and Melatonin window" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/rise/s6.jpg" width="600" height="1299" alt="Use the calendar integration and plan your day: Morning grogginess, Morning peak and Afternoon dip blocks in the iOS Calendar for October 27, 2021" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/rise/s7.jpg" width="600" height="1299" alt="One widget to rule them all: home screen widgets for Evening peak, 31m until 21:21, and Wind-down until 9:40p with 7.5hrs sleep debt" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/rise/s8.jpg" width="600" height="1299" alt="Learn the science behind your sleep needs: Practical Science articles such as Lower Your Sleep Debt, Increase Overall Energy" loading="lazy" decoding="async"></li>
+      </ol>
+    <button class="strip-btn" type="button" data-strip-prev aria-label="Previous screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg></button>
+    <button class="strip-btn" type="button" data-strip-next aria-label="Next screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg></button>
+    </div>
+  </li>
+  <li class="app-row" data-filter-item data-tags="health-fitness" data-text="Headspace Headspace: Sleep &amp; Meditation Mental Health, Stress, Anxiety Health &amp; Fitness Meditation Headspace Inc. $69.99 White Bright orange Cobalt blue Headspace Apercu Hanken Grotesk" data-reveal>
+    <a class="app-card" href="/taste/headspace/">
+      <img class="app-icon" src="/taste/media/headspace/icon.png" width="64" height="64" alt="" loading="lazy" decoding="async">
+      <p class="app-rank">#13&nbsp;in Health &amp; Fitness</p>
+      <h3 class="app-name">Headspace</h3>
+      <p class="app-sub">Mental Health, Stress, Anxiety</p>
+      <p class="key"><span class="key-num">$69.99</span><span class="key-label">Yearly plan</span></p>
+      <p class="app-colors" role="img" aria-label="Brand colors: White, Bright orange and Cobalt blue"><span style="--c:#FFFFFF"></span><span style="--c:#FF7300"></span><span style="--c:#1A54F6"></span></p>
+      <dl class="stats">
+        <div><dt>rating</dt><dd>4.8</dd></div>
+        <div><dt>ratings</dt><dd>974K</dd></div>
+        <div><dt>plans</dt><dd>6</dd></div>
+      </dl>
+    </a>
+    <div class="strip" data-strip>
+      <ol class="strip-track" role="list" tabindex="0" aria-label="Headspace screens">
+        <li class="screen"><span class="mark">Paywall</span><img src="/taste/media/headspace/pw1.jpg" width="600" height="1301" alt="Headspace offer: “50% off a year of Headspace”, Annual $34.99 with $69.99 struck and picked, Monthly $12.99, and a blue Get this deal button" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/headspace/s1.jpg" width="600" height="1298" alt="Headline “Award Winning” under the Headspace logo and a smiling orange dot on yellow waves, above Apple Design Award and Webby Awards laurels" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/headspace/s2.jpg" width="600" height="1298" alt="Headline “Your lifelong guide to better mental health” above 6 colored tiles: Meditate, Sleep, Breathe, Focus, Move and Mental Health" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/headspace/s3.jpg" width="600" height="1298" alt="Headline “Stress less” above the course Calming an Anxious Mind, 3 to 10 min, with teacher Eve selected and a blue Play button" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/headspace/s4.jpg" width="600" height="1298" alt="Headline “Sleep soundly” on purple above Drift into Sleep (555 Hz), a 45 to 480 min soundscape, with a sheet to choose 45 or 480 min" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/headspace/s5.jpg" width="600" height="1298" alt="Headline “Learn to meditate in a few minutes a day” above Get into Focus (50 Hz), a 45 to 480 min soundscape, with a blue Play button" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/headspace/s6.jpg" width="600" height="1298" alt="Headline “Feel healthier and happier” above the dark Binaural Beats collection, led by the featured Brighten Up Your Mood (40 Hz)" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/headspace/s7.jpg" width="600" height="1298" alt="Headline “Personalized content every day” above the Today tab: Recents, Daily essentials such as Meditation and Awareness, 3 to 7 min, and Picked with you in mind" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/headspace/s8.jpg" width="600" height="1298" alt="Headline “Welcome to Headspace therapy” on blue above a screen offering therapy for as low as $0 with insurance and a Check my coverage button" loading="lazy" decoding="async"></li>
+      </ol>
+    <button class="strip-btn" type="button" data-strip-prev aria-label="Previous screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg></button>
+    <button class="strip-btn" type="button" data-strip-next aria-label="Next screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg></button>
+    </div>
+  </li>
+  <li class="app-row" data-filter-item data-tags="health-fitness" data-text="Strava Strava: Run, Bike, Walk Track &amp; share with friends Health &amp; Fitness Running Strava, Inc. $79.99 Near black White Strava orange Archivo" data-reveal>
+    <a class="app-card" href="/taste/strava/">
+      <img class="app-icon" src="/taste/media/strava/icon.png" width="64" height="64" alt="" loading="lazy" decoding="async">
+      <p class="app-rank">#4&nbsp;in Health &amp; Fitness</p>
+      <h3 class="app-name">Strava</h3>
+      <p class="app-sub">Track &amp; share with friends</p>
+      <p class="key"><span class="key-num">$79.99</span><span class="key-label">Individual plan, per year</span></p>
+      <p class="app-colors" role="img" aria-label="Brand colors: Near black, White and Strava orange"><span style="--c:#141414"></span><span style="--c:#FFFFFF"></span><span style="--c:#FD5200"></span></p>
+      <dl class="stats">
+        <div><dt>rating</dt><dd>4.8</dd></div>
+        <div><dt>ratings</dt><dd>381K</dd></div>
+        <div><dt>plans</dt><dd>9</dd></div>
+      </dl>
+    </a>
+    <div class="strip" data-strip>
+      <ol class="strip-track" role="list" tabindex="0" aria-label="Strava screens">
+        <li class="screen"><span class="mark">Paywall</span><img src="/taste/media/strava/pw1.jpg" width="600" height="1006" alt="Strava Individual card: Save 44%, Annual tab, $6.67 a month, a 30-day trial for $0, billed at $79.99 a year, and 2 orange trial buttons" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/strava/s1.jpg" width="600" height="1299" alt="Headline “Apple Watch App of the Year” with Winner laurels and the Strava wordmark, above a Squad Run post and a watch reading 2s ahead" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/strava/s2.jpg" width="600" height="1299" alt="Headline “Get motivated by the community” above a Squad Run discussion: a 9.56 mi run in San Francisco, 5 kudos and 3 comments" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/strava/s3.jpg" width="600" height="1299" alt="Headline “Track your workouts” above the Run recorder: a dog-shaped route drawn in orange across San Francisco, and a sport picker with Run selected" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/strava/s4.jpg" width="600" height="1299" alt="Headline “Lift it. Log it. See your gains.” above an orange muscle map and Night Weight Training: 45:30, 4,115 lbs, 47 sets, 98 bpm" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/strava/s5.jpg" width="600" height="1299" alt="Headline “Hit the trails with hiking tools” above a Marin Headlands map of route pins and the Gerbode Valley Loop card: 5.27 mi, 880 ft, 1h 44m" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/strava/s6.jpg" width="600" height="1299" alt="Headline “Share with friends” above a Squad Run post on Home: 6.75 mi in 57m 56s, a photo of 3 runners and 12 kudos" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/strava/s7.jpg" width="600" height="1299" alt="Headline “Improve with personalized data” above a Progress chart of ride distance: 384.6 mi, up 12% on the prior 3 months" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/strava/s8.jpg" width="600" height="1299" alt="Headline “Discover new routes” above a Marin Headlands map with an orange route and a 26.71 mi Bobcat Trail card marked “Made for you”" loading="lazy" decoding="async"></li>
+      </ol>
+    <button class="strip-btn" type="button" data-strip-prev aria-label="Previous screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg></button>
+    <button class="strip-btn" type="button" data-strip-next aria-label="Next screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg></button>
+    </div>
+  </li>
+  <li class="app-row" data-filter-item data-tags="health-fitness" data-text="MyFitnessPal MyFitnessPal: Calorie Counter AI Coach &amp; Nutrition Tracker Health &amp; Fitness Calorie tracker MyFitnessPal, Inc. $79.99 White Stone grey Bright blue Inter" data-reveal>
+    <a class="app-card" href="/taste/myfitnesspal/">
+      <img class="app-icon" src="/taste/media/myfitnesspal/icon.png" width="64" height="64" alt="" loading="lazy" decoding="async">
+      <p class="app-rank">#1&nbsp;in Health &amp; Fitness</p>
+      <h3 class="app-name">MyFitnessPal</h3>
+      <p class="app-sub">AI Coach &amp; Nutrition Tracker</p>
+      <p class="key"><span class="key-num">$79.99</span><span class="key-label">Yearly plan</span></p>
+      <p class="app-colors" role="img" aria-label="Brand colors: White, Stone grey and Bright blue"><span style="--c:#FFFFFF"></span><span style="--c:#746A61"></span><span style="--c:#0066EE"></span></p>
+      <dl class="stats">
+        <div><dt>rating</dt><dd>4.7</dd></div>
+        <div><dt>ratings</dt><dd>2.4M</dd></div>
+        <div><dt>plans</dt><dd>7</dd></div>
+      </dl>
+    </a>
+    <div class="strip" data-strip>
+      <ol class="strip-track" role="list" tabindex="0" aria-label="MyFitnessPal screens">
+        <li class="screen"><span class="mark">Paywall</span><img src="/taste/media/myfitnesspal/pw1.jpg" width="600" height="1301" alt="MyFitnessPal plans on blue: Annual Plan, most popular, $79.99 a year with 67% savings, above the Monthly Plan at $19.99" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/myfitnesspal/s1.jpg" width="600" height="1299" alt="The #1 Food &amp; Nutrition Tracking App, in white over a salad bowl on stone, tagged 9 G CARBS and 4 G PROTEIN" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/myfitnesspal/s2.jpg" width="600" height="1299" alt="Know What You’re Eating: a hand holds a salad tagged 4 G FAT next to 4 food cards, such as Cherry tomatoes at 14 cal" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/myfitnesspal/s3.jpg" width="600" height="1299" alt="Make Every Meal Count: a 7-day nutrition chart where carbs, fat and protein average 45%, 32% and 23% against goals of 50%, 30% and 20%" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/myfitnesspal/s4.jpg" width="600" height="1299" alt="Scan Your Food: a meal scan of avocado toast lists Avocado at 240 cal, Whole Grain Bread at 91 cal and Eggs at 63 cal, then Log breakfast" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/myfitnesspal/s5.jpg" width="600" height="1299" alt="Use Voice Logging: a sheet with a blue button reads “Go for it! Talk when you’re ready to log your meal.”" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/myfitnesspal/s6.jpg" width="600" height="1299" alt="Personalized Nutrition Guidance: the Coach tab asks “How can I help, Benito?” and offers prompts like “How am I doing on protein today?”" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/myfitnesspal/s7.jpg" width="600" height="1299" alt="Custom Reminders For GLP-1 Medication: a sheet sets a weekly dose reminder for Wednesdays at 12 PM, with a blue Turn on weekly reminder button" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/myfitnesspal/s8.jpg" width="600" height="1299" alt="Plan Your Meals: the Recipes tab with Sweet Potato Fries at 150 cal, Egg Tacos at 240 cal and Shawarma Chickpeas at 214 cal" loading="lazy" decoding="async"></li>
+      </ol>
+    <button class="strip-btn" type="button" data-strip-prev aria-label="Previous screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg></button>
+    <button class="strip-btn" type="button" data-strip-next aria-label="Next screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg></button>
+    </div>
+  </li>
+  <li class="app-row" data-filter-item data-tags="health-fitness" data-text="Ladder LADDER Strength Training Plans Fitness Workouts at Home &amp; Gym Health &amp; Fitness Workouts Ladder Technologies, Inc. $179.99 White Near black Lime yellow Archivo" data-reveal>
+    <a class="app-card" href="/taste/ladder/">
+      <img class="app-icon" src="/taste/media/ladder/icon.png" width="64" height="64" alt="" loading="lazy" decoding="async">
+      <p class="app-rank">#2&nbsp;in Health &amp; Fitness</p>
+      <h3 class="app-name">Ladder</h3>
+      <p class="app-sub">Fitness Workouts at Home &amp; Gym</p>
+      <p class="key"><span class="key-num">$179.99</span><span class="key-label">PRO Annual, per year</span></p>
+      <p class="app-colors" role="img" aria-label="Brand colors: White, Near black and Lime yellow"><span style="--c:#FFFFFF"></span><span style="--c:#0E0E0E"></span><span style="--c:#E6FF01"></span></p>
+      <dl class="stats">
+        <div><dt>rating</dt><dd>4.9</dd></div>
+        <div><dt>ratings</dt><dd>223K</dd></div>
+        <div><dt>plans</dt><dd>8</dd></div>
+      </dl>
+    </a>
+    <div class="strip" data-strip>
+      <ol class="strip-track" role="list" tabindex="0" aria-label="Ladder screens">
+        <li class="screen"><span class="mark">Paywall</span><img src="/taste/media/ladder/pw1.jpg" width="600" height="1006" alt="Ladder Pro Plan Annual card in black: $14.99 a month, $179.99 for the year, and 4 lime check marks" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/ladder/s1.jpg" width="600" height="1299" alt="Headline “Get stronger, with a plan.” on lime, a phone with a 60 min Strength x Pilates workout, and App of the Year 2025 Finalist laurels" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/ladder/s2.jpg" width="600" height="1299" alt="Two tilted phones with the Define plan and a 30 lbs Bicep Curl set, beside 2026 awards from Women’s Health and CNET" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/ladder/s3.jpg" width="600" height="1299" alt="Headline “A plan for every workout” above the Limitless home: 3 days checked and Peach Palace, a 60 min lower body workout with 35,860 completions" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/ladder/s4.jpg" width="600" height="1299" alt="Headline “Track macros” above a camera scan of a chicken bowl and the Nutrition screen: 520 calories and 22 g protein left, 2 breakfast items logged" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/ladder/s5.jpg" width="600" height="1299" alt="Headline “Find the perfect plan for you” above Coach Kelly’s Limitless plan, a lime Try button and a grid of 9 coach plans" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/ladder/s6.jpg" width="600" height="1299" alt="Headline “Get coached through it all” above the Python Pump workout: a coach in a Ladder shirt, barbell, dumbbell and cable tags, and a lime Start Workout button" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/ladder/s7.jpg" width="600" height="1299" alt="Headline “Learn correct form” above a Goblet Squat video: 10 reps at 25 lbs, a 0:28 timer on a lime dial, and set 2 of 3" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/ladder/s8.jpg" width="600" height="1299" alt="Headline “Track your progress” above Romanian Deadlift stats: 186 lbs estimated 1RM, up 12%, a lime bar chart and an Apple Watch at 2:30" loading="lazy" decoding="async"></li>
+      </ol>
+    <button class="strip-btn" type="button" data-strip-prev aria-label="Previous screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg></button>
+    <button class="strip-btn" type="button" data-strip-next aria-label="Next screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg></button>
+    </div>
+  </li>
+  <li class="app-row" data-filter-item data-tags="health-fitness" data-text="Hevy Hevy - Workout Tracker Gym Log Weight Lifting Routine Planner Health &amp; Fitness Workouts Hevy Studios S.L. $23.99 White Black Bright blue Figtree" data-reveal>
+    <a class="app-card" href="/taste/hevy/">
+      <img class="app-icon" src="/taste/media/hevy/icon.png" width="64" height="64" alt="" loading="lazy" decoding="async">
+      <p class="app-rank">#35&nbsp;in Health &amp; Fitness</p>
+      <h3 class="app-name">Hevy</h3>
+      <p class="app-sub">Weight Lifting Routine Planner</p>
+      <p class="key"><span class="key-num">$23.99</span><span class="key-label">Yearly plan</span></p>
+      <p class="app-colors" role="img" aria-label="Brand colors: White, Black and Bright blue"><span style="--c:#FFFFFF"></span><span style="--c:#000000"></span><span style="--c:#267EE8"></span></p>
+      <dl class="stats">
+        <div><dt>rating</dt><dd>4.9</dd></div>
+        <div><dt>ratings</dt><dd>104K</dd></div>
+        <div><dt>plans</dt><dd>4</dd></div>
+      </dl>
+    </a>
+    <div class="strip" data-strip>
+      <ol class="strip-track" role="list" tabindex="0" aria-label="Hevy screens">
+        <li class="screen"><span class="mark">Paywall</span><img src="/taste/media/hevy/pw1.jpg" width="600" height="1006" alt="Hevy plan picker: Pro Monthly $2.99, Pro Yearly $23.99 picked, Pro Lifetime $74.99, and a blue Get Started button" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/hevy/s1.jpg" width="600" height="1299" alt="Headline “Log workouts, get stronger, stay motivated” in black and blue capitals, over an Apps We Love badge with 5 stars on a blue band" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/hevy/s2.jpg" width="600" height="1299" alt="The Hevy logo over a tilted phone logging Bench Press (Barbell): 1h 15min, 6,800 kg, 18 sets, with 3 finished sets lifted out in green" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/hevy/s3.jpg" width="600" height="1299" alt="Headline “Analyze your workouts” above the Squat (Barbell) page: a 3D model with the quads in red and a Heaviest Weight chart that climbs to 80 kg" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/hevy/s4.jpg" width="600" height="1299" alt="Headline “Plan your routines” above the Workout tab: Start Empty Workout, New Routine, Explore and 2 saved routines with blue Start Routine buttons" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/hevy/s5.jpg" width="600" height="1299" alt="Headline “Join a growing community” above a feed post by strongdavid: Chest Day, 44 min, 5,340 kg, 8 likes and 3 comments" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/hevy/s6.jpg" width="600" height="1299" alt="Headline “Track measurements” above progress photos from 4 Feb 2022 and 6 Feb 2024 and a body weight chart that falls to 86 kg" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/hevy/s7.jpg" width="600" height="1299" alt="Headline “Compare your strength” above jaumeros vs strongdavid on Bench Press: jaumeros is marked Stronger, with a one rep max of 93 kg vs 80 kg" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/hevy/s8.jpg" width="600" height="1299" alt="Headline “Follow friends’ progress” above strongdavid’s profile: 56 workouts, 72 followers, 55 following, a blue Follow button and 3 hours this week" loading="lazy" decoding="async"></li>
+      </ol>
+    <button class="strip-btn" type="button" data-strip-prev aria-label="Previous screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg></button>
+    <button class="strip-btn" type="button" data-strip-next aria-label="Next screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg></button>
+    </div>
+  </li>
+  <li class="app-row" data-filter-item data-tags="medical" data-text="Huckleberry Huckleberry: Baby Tracker Baby Sleep &amp; Nap Schedule App Medical Baby tracker Huckleberry Labs Inc. $119.99 Ice white Berry cyan Leaf lime Avenir Nunito Sans" data-reveal>
+    <a class="app-card" href="/taste/huckleberry/">
+      <img class="app-icon" src="/taste/media/huckleberry/icon.png" width="64" height="64" alt="" loading="lazy" decoding="async">
+      <p class="app-rank">#1&nbsp;in Medical</p>
+      <h3 class="app-name">Huckleberry</h3>
+      <p class="app-sub">Baby Sleep &amp; Nap Schedule App</p>
+      <p class="key"><span class="key-num">$119.99</span><span class="key-label">Top Premium price</span></p>
+      <p class="app-colors" role="img" aria-label="Brand colors: Ice white, Berry cyan and Leaf lime"><span style="--c:#F3FFFF"></span><span style="--c:#31BCD3"></span><span style="--c:#CDCC04"></span></p>
+      <dl class="stats">
+        <div><dt>rating</dt><dd>4.9</dd></div>
+        <div><dt>ratings</dt><dd>79K</dd></div>
+        <div><dt>plans</dt><dd>5</dd></div>
+      </dl>
+    </a>
+    <div class="strip" data-strip>
+      <ol class="strip-track" role="list" tabindex="0" aria-label="Huckleberry screens">
+        <li class="screen"><span class="mark">Paywall</span><img src="/taste/media/huckleberry/pw1.jpg" width="600" height="1006" alt="Huckleberry pricing on the Yearly tab: Premium, best value, $9.99 a month billed yearly with $14.99 struck" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/huckleberry/s1.jpg" width="600" height="1300" alt="Headline “Your Family’s Second Brain” with a 5+ Million families badge and an Editors’ Choice laurel, above Home: a SweetSpot bedtime near 7:30 PM and cards for Sleep, Nursing, Bottle, Diaper and Pumping" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/huckleberry/s2.jpg" width="600" height="1300" alt="Headline “Get Predictability Back in Your Day” above Oscar’s week calendar, March 1 to 7: cyan sleep blocks, orange marks and “Oscar slept 11h 42m”, with a Best Apps for Parents laurel" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/huckleberry/s3.jpg" width="600" height="1300" alt="Headline “Take the Guesswork Out of Naptime” above a lock screen: a smiling baby at 10:50 and a SweetSpot alert, near 11:00am, coming up in 10 minutes" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/huckleberry/s4.jpg" width="600" height="1300" alt="Headline “Watch Your Baby’s Sleep Improve, Week by Week” above Sleep Trends for 1 year: naps 3h 7m, nights 11h 9m, a 14h 16m daily average and 7 bars" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/huckleberry/s5.jpg" width="600" height="1300" alt="Headline “Your Parenting Questions Answered” above 2 Berry AI chats: “How do I get Emma to sleep past 5AM?” and a teal “What’s on your mind?” screen, marked for paid subscribers" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/huckleberry/s6.jpg" width="600" height="1300" alt="Headline “Made For All Feeding Types” above a nursing timer with orange Left and Right buttons, and Add Solids: banana, sweet potato and carrot to try next" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/huckleberry/s7.jpg" width="600" height="1300" alt="Headline “Get Tips Shaped by Your Baby’s Routine” above an Insights tip in 4 steps: hold your baby close, walk 5 minutes, sit 8 minutes, transfer to the sleep area" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/huckleberry/s8.jpg" width="600" height="1300" alt="Headline “Know Exactly When the Last Diaper Was” above Add nappy: Poo picked at 9:41 AM, size Little, 6 color dots and a green Save button" loading="lazy" decoding="async"></li>
+      </ol>
+    <button class="strip-btn" type="button" data-strip-prev aria-label="Previous screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg></button>
+    <button class="strip-btn" type="button" data-strip-next aria-label="Next screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg></button>
+    </div>
+  </li>
+  <li class="app-row" data-filter-item data-tags="health-fitness" data-text="Flo Flo Cycle &amp; Period Tracker Ovulation &amp; Pregnancy Calendar Health &amp; Fitness Cycle tracker FLO HEALTH UK LIMITED $59.99 Lavender White Feather pink Proza Libre" data-reveal>
+    <a class="app-card" href="/taste/flo/">
+      <img class="app-icon" src="/taste/media/flo/icon.png" width="64" height="64" alt="" loading="lazy" decoding="async">
+      <p class="app-rank">#3&nbsp;in Health &amp; Fitness</p>
+      <h3 class="app-name">Flo</h3>
+      <p class="app-sub">Ovulation &amp; Pregnancy Calendar</p>
+      <p class="key"><span class="key-num">$59.99</span><span class="key-label">Top Flo Premium price</span></p>
+      <p class="app-colors" role="img" aria-label="Brand colors: Lavender, White and Feather pink"><span style="--c:#E2CBFF"></span><span style="--c:#FFFFFF"></span><span style="--c:#FF5A7D"></span></p>
+      <dl class="stats">
+        <div><dt>rating</dt><dd>4.7</dd></div>
+        <div><dt>ratings</dt><dd>2M</dd></div>
+        <div><dt>plans</dt><dd>9</dd></div>
+      </dl>
+    </a>
+    <div class="strip" data-strip>
+      <ol class="strip-track" role="list" tabindex="0" aria-label="Flo screens">
+        <li class="screen screen--drawn"><span class="mark">Paywall</span><div class="drawn" role="img" aria-label="Drawn paywall for Flo from App Store prices: Flo Premium $59.99, Flo Pregnancy Tracker $49.99, Flo Premium $47.99, Flo Birth Control Reminder $43.99">
+          <div class="drawn-head"><img src="/taste/media/flo/icon.png" width="64" height="64" alt="" loading="lazy" decoding="async"><p class="drawn-title">Flo plans</p></div>
+          <div class="drawn-plan"><span><b>Flo Premium</b></span><span><b>$59.99</b></span></div>
+          <div class="drawn-plan"><span><b>Flo Pregnancy Tracker</b></span><span><b>$49.99</b></span></div>
+          <div class="drawn-plan"><span><b>Flo Premium</b></span><span><b>$47.99</b></span></div>
+          <div class="drawn-plan"><span><b>Flo Birth Control Reminder</b></span><span><b>$43.99</b></span></div>
+          <div class="drawn-cta">Continue</div>
+        </div></li>
+        <li class="screen"><img src="/taste/media/flo/s1.jpg" width="600" height="1299" alt="Headline “Predict your next period” above a week strip with 5 predicted days, “Period in: 2 days”, a pink Log period button and a green FSA/HSA eligible sticker" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/flo/s2.jpg" width="600" height="1299" alt="Headline “Understand your fertile days” above a calendar: period on days 1 to 5, fertile days 12 to 18, ovulation predicted on day 17" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/flo/s3.jpg" width="600" height="1299" alt="Headline “Log and track symptoms” above a card of 3 logged symptoms, Cramps, Mood swings and Fatigue, over a phone held in a cartoon hand" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/flo/s4.jpg" width="600" height="1299" alt="Headline “Maximize your connection” above Flo for Partners: an illustrated couple, a Daily tip notification and 2 cards, Her day today and a Both question" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/flo/s5.jpg" width="600" height="1299" alt="Headline “Got symptoms? Get answers” above the Symptom Checker: PCOS a significant match, then endometriosis, uterine fibroids and perimenopause as low matches" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/flo/s6.jpg" width="600" height="1299" alt="Headline “Manage symptoms of perimenopause” above 3 suggested topics, a grey Go to insights button and illustrated articles such as Periods in your 30s and 40s" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/flo/s7.jpg" width="600" height="1299" alt="Headline “Discover your sleep-cycle connection” above a dark plum screen: a Good sleep score on cycle day 12, 8h 10m asleep against 7 to 9h recommended" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/flo/s8.jpg" width="600" height="1299" alt="Headline “Follow your baby’s growth” above a week strip at 7 weeks, 5 days, an embryo render and “Your baby this week”, the size of a blueberry" loading="lazy" decoding="async"></li>
+      </ol>
+    <button class="strip-btn" type="button" data-strip-prev aria-label="Previous screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg></button>
+    <button class="strip-btn" type="button" data-strip-next aria-label="Next screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg></button>
+    </div>
+  </li>
+  <li class="app-row" data-filter-item data-tags="health-fitness" data-text="Finch Finch: Self-Care Pet Daily Journal &amp; Habit Tracker Health &amp; Fitness Habits and self-care Finch Care Public Benefit Corporation $69.99 Sky blue White Bright blue Rubik" data-reveal>
+    <a class="app-card" href="/taste/finch/">
+      <img class="app-icon" src="/taste/media/finch/icon.png" width="64" height="64" alt="" loading="lazy" decoding="async">
+      <p class="app-rank">#14&nbsp;in Health &amp; Fitness</p>
+      <h3 class="app-name">Finch</h3>
+      <p class="app-sub">Daily Journal &amp; Habit Tracker</p>
+      <p class="key"><span class="key-num">$69.99</span><span class="key-label">Top Finch Plus price</span></p>
+      <p class="app-colors" role="img" aria-label="Brand colors: Sky blue, White and Bright blue"><span style="--c:#9DDDFF"></span><span style="--c:#FFFFFF"></span><span style="--c:#0E9BE2"></span></p>
+      <dl class="stats">
+        <div><dt>rating</dt><dd>4.9</dd></div>
+        <div><dt>ratings</dt><dd>776K</dd></div>
+        <div><dt>plans</dt><dd>9</dd></div>
+      </dl>
+    </a>
+    <div class="strip" data-strip>
+      <ol class="strip-track" role="list" tabindex="0" aria-label="Finch screens">
+        <li class="screen screen--drawn"><span class="mark">Paywall</span><div class="drawn" role="img" aria-label="Drawn paywall for Finch from App Store prices: Finch Plus $69.99, Finch Plus $59.99, Finch Plus $49.99, Finch Plus $41.99">
+          <div class="drawn-head"><img src="/taste/media/finch/icon.png" width="64" height="64" alt="" loading="lazy" decoding="async"><p class="drawn-title">Finch plans</p></div>
+          <div class="drawn-plan"><span><b>Finch Plus</b></span><span><b>$69.99</b></span></div>
+          <div class="drawn-plan"><span><b>Finch Plus</b></span><span><b>$59.99</b></span></div>
+          <div class="drawn-plan"><span><b>Finch Plus</b></span><span><b>$49.99</b></span></div>
+          <div class="drawn-plan"><span><b>Finch Plus</b></span><span><b>$41.99</b></span></div>
+          <div class="drawn-cta">Continue</div>
+        </div></li>
+        <li class="screen"><img src="/taste/media/finch/s1.jpg" width="600" height="1303" alt="Headline “Self-care is better together” in dark blue over 2 cartoon birds hugging on green grass, with a trophy and a heart in speech bubbles" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/finch/s2.jpg" width="600" height="1303" alt="Headline “Build habits with friends by your side” above 2 birds in a forest and Goal Buddies: Drink water, Stretch and Eat veggies, 2 check circles each" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/finch/s3.jpg" width="600" height="1303" alt="Headline “Send each other support and silliness” above a pink card to Bagel &amp; Sam: a bird hugs a heart, 6 themes and a Send a Valentine! button" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/finch/s4.jpg" width="600" height="1303" alt="Headline “Grow, explore, and adventure together” above 2 birds with backpacks in a New York scene, “Adventuring, back in 7:36” and 3 goals at 5 energy each" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/finch/s5.jpg" width="600" height="1303" alt="Headline “Encourage and celebrate each other” above 2 birds cheering with pom-poms, “You &amp; Sam are now Goal Buddies!” and a purple Send encouragement button" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/finch/s6.jpg" width="600" height="1303" alt="Headline “Easily achieve your self-care goals” above a bird watering a heart flower and My Self-Care Progress: Nutrition, Movement, Productivity and Self-kindness with small charts" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/finch/s7.jpg" width="600" height="1303" alt="Headline “Celebrate your progress, not perfection” above a bright blue streak screen: a bird on a sun badge, “30 DAY STREAK” and 3 checks this week" loading="lazy" decoding="async"></li>
+        <li class="screen"><img src="/taste/media/finch/s8.jpg" width="600" height="1303" alt="Headline “You’re not alone, join millions growing with you” above 6 birds in 5 round frames with a trophy, an apple, a duster, a barbell and a toothbrush" loading="lazy" decoding="async"></li>
+      </ol>
+    <button class="strip-btn" type="button" data-strip-prev aria-label="Previous screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg></button>
+    <button class="strip-btn" type="button" data-strip-next aria-label="Next screens"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg></button>
+    </div>
+  </li>
+  </ol>
+
+  <div class="wrap">
+    <div class="empty" data-filter-empty hidden>
+      <span class="tasu-loop tasu-loop--look" role="img" aria-label="Tasu, the tasu.ai mascot, looks around"></span>
+      <p class="title-s">No app matches this search</p>
+      <button class="btn btn-secondary" type="button" data-filter-reset>Clear the search</button>
+    </div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="lib-title" data-reveal>
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="title-xl" id="lib-title">43 UI elements from 8 real paywalls</h2>
+      <a class="link-arrow" href="/taste/library/">Open the library <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+    <ul class="tiles" role="list">
+      <li><a class="tile" href="/taste/library/?tag=plan-picker">
+        <span class="tile-img"><img src="/taste/media/hevy/el-plan-picker-1.jpg" width="1168" height="936" alt="Plan picker from Hevy: 3 radio rows: Monthly $2.99, Yearly $23.99 preselected in a blue outline, Lifetime $74.99" loading="lazy" decoding="async"></span>
+        <span class="tile-type">Plan picker</span>
+        <span class="tile-app"><img src="/taste/media/hevy/icon.png" width="20" height="20" alt="" loading="lazy" decoding="async">Hevy</span>
+      </a></li>
+      <li><a class="tile" href="/taste/library/?tag=trial-timeline">
+        <span class="tile-img"><img src="/taste/media/strava/el-trial-timeline-1.jpg" width="1112" height="746" alt="Trial timeline from Strava: White card: Today unlocks routes, segment leaderboards and training analysis; a bell marks the reminder 2 days before" loading="lazy" decoding="async"></span>
+        <span class="tile-type">Trial timeline</span>
+        <span class="tile-app"><img src="/taste/media/strava/icon.png" width="20" height="20" alt="" loading="lazy" decoding="async">Strava</span>
+      </a></li>
+      <li><a class="tile" href="/taste/library/?tag=discount-badge">
+        <span class="tile-img"><img src="/taste/media/rise/el-discount-badge-2.jpg" width="1144" height="472" alt="Discount badge from Rise: Green coupon card: code #february26, an up to 40% pill and a 09:52 timer" loading="lazy" decoding="async"></span>
+        <span class="tile-type">Discount badge</span>
+        <span class="tile-app"><img src="/taste/media/rise/icon.png" width="20" height="20" alt="" loading="lazy" decoding="async">Rise</span>
+      </a></li>
+      <li><a class="tile" href="/taste/library/?tag=social-proof">
+        <span class="tile-img"><img src="/taste/media/myfitnesspal/el-social-proof-1.jpg" width="874" height="692" alt="Social proof from MyFitnessPal: A huge 8/10 of Premium members made progress, footnoted to a user survey" loading="lazy" decoding="async"></span>
+        <span class="tile-type">Social proof</span>
+        <span class="tile-app"><img src="/taste/media/myfitnesspal/icon.png" width="20" height="20" alt="" loading="lazy" decoding="async">MyFitnessPal</span>
+      </a></li>
     </ul>
-  </nav>
+  </div>
+</section>
 
-  <main id="main">
-    <!-- Hero: what tasu.ai is, the one lime button, and the core idea live -->
-    <section class="container hero" aria-labelledby="hero-title">
-      <div>
-        <h1 id="hero-title">Design apps with taste, using AI</h1>
-        <p class="lead">tasu.ai is <span class="word"><b>tas</b>te <b>u</b>sing AI</span>: <span data-count="rules-n">104</span> rules from <span data-count="sources-n">35</span> sources, in one file your AI follows.</p>
-        <div class="row actions">
-          <a class="btn-accent" href="/taste/skills/">Get the skill</a>
-          <a class="btn" href="/taste/rules/">Browse the rules</a>
-        </div>
-        <p class="fine">Free. Works in Claude Code and Cursor.</p>
-      </div>
+<section class="section" aria-labelledby="closing-title" data-reveal>
+  <div class="wrap closing">
+    <span class="tasu-loop tasu-loop--happy" role="img" aria-label="Tasu, the tasu.ai mascot, hops with joy"></span>
+    <h2 class="title-xl" id="closing-title">A new app breakdown every day on X</h2>
+    <a class="btn btn-secondary btn-lg" href="https://x.com/jeremylasne"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> @jeremylasne</a>
+  </div>
+</section>
 
-      <div class="demo" id="demo" data-state="slop">
-        <div class="demo__stage">
-          <div class="demo__phone-col">
-            <div class="flip" role="group" aria-label="Screen version">
-              <span class="flip__thumb" aria-hidden="true"><span></span></span>
-              <button type="button" data-v="slop" aria-pressed="true">AI slop</button>
-              <button type="button" data-v="taste" aria-pressed="false">With taste</button>
-            </div>
+</main>
 
-            <button type="button" class="phone-btn" id="demo-flip" aria-label="Flip the screen" aria-describedby="demo-desc">
-            <div class="phone" id="demo-phone" role="img" aria-label="A habit tracker screen as AI makes it: purple gradient, a Welcome back banner, nested cards and two glowing buttons">
-              <div class="phone__screen">
-                <div class="phone__island"></div>
-
-                <!-- Before: AI slop -->
-                <div class="scr scr-slop" aria-hidden="true">
-                  <div class="phone__status"><span>9:41</span><span>5G</span></div>
-                  <div class="sl-body">
-                    <div class="sl-banner" data-area="a1">
-                      <span class="sl-squircle"><svg viewBox="0 0 24 24"><path d="M12 2l2.2 6.6L21 11l-6.8 2.4L12 20l-2.2-6.6L3 11l6.8-2.4z"/></svg></span>
-                      <span><b>Welcome back, Alex!</b><small>Ready to crush your goals today?</small></span>
-                      <span class="pin">1</span>
-                    </div>
-                    <p class="sl-eyebrow">01 / YOUR DAILY HABITS</p>
-                    <p class="sl-title"><i>Transform</i> your life.</p>
-                    <div class="sl-pills"><span>NEW</span><span>AI-POWERED</span><span>BETA</span></div>
-                    <div class="sl-outer" data-area="a2">
-                      <div class="sl-stat"><small>DAY STREAK</small><b>12</b></div>
-                      <div class="sl-hr"></div>
-                      <div class="sl-inner" style="--c:#A855F7;--w:100%"><div><span>Walk</span><span>100%</span></div><i></i></div>
-                      <div class="sl-inner" style="--c:#EC4899;--w:100%"><div><span>Read</span><span>100%</span></div><i></i></div>
-                      <div class="sl-inner" style="--c:#22D3EE;--w:60%"><div><span>Water</span><span>60%</span></div><i></i></div>
-                      <span class="pin">2</span>
-                    </div>
-                  </div>
-                  <div class="sl-ctas" data-area="a3">
-                    <span>Get Started.</span>
-                    <span>Learn More</span>
-                    <span class="pin">3</span>
-                  </div>
-                  <div class="phone__home"></div>
-                </div>
-
-                <!-- After: taste -->
-                <div class="scr scr-taste" aria-hidden="true">
-                  <div class="phone__status"><span>9:41</span><span>5G</span></div>
-                  <div class="tt-body">
-                    <div class="tt-top"><p>Saturday 14 Nov</p><span class="tt-avatar">A</span></div>
-                    <div class="tt-head" data-area="a1">
-                      <div class="tt-big"><b>2</b><span>of 3</span></div>
-                      <p>habits done today, 12 days in a row</p>
-                      <div class="tt-bar"><i></i><i></i><i></i></div>
-                      <span class="pin">1</span>
-                    </div>
-                    <div class="tt-list" data-area="a2">
-                      <div class="tt-row"><span class="tt-check"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span><strong>Walk</strong><span class="v">8,412 steps</span></div>
-                      <div class="tt-row"><span class="tt-check"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span><strong>Read</strong><span class="v">10 pages</span></div>
-                      <div class="tt-row is-todo"><span class="tt-check"></span><strong>Drink water</strong><span class="v">1.2 / 2 L</span></div>
-                      <span class="pin">2</span>
-                    </div>
-                  </div>
-                  <div class="tt-cta pin-host" data-area="a3">Log water<span class="pin">3</span></div>
-                  <div class="phone__home"></div>
-                </div>
-              </div>
-            </div>
-            </button>
-            <p class="sr-only" id="demo-desc">A habit tracker screen as AI makes it: purple gradient, a Welcome back banner, nested cards and two glowing buttons</p>
-            <p class="demo__hint">Tap the screen<span class="kbd-hint"> or press <span class="kbd">T</span></span> to flip it</p>
-          </div>
-
-          <ol class="callouts" aria-label="Rules applied">
-            <li><button type="button" class="callout" data-area="a1" aria-pressed="false" style="--i:0">
-              <span class="pin" aria-hidden="true">1</span>
-              <span class="callout__txt">
-                <span class="is-slop"><b>A Welcome back banner nobody asked for</b><small>Slop sign 29, from S15</small></span>
-                <span class="is-taste" data-rule="layout-6"><b>Enlarge the main feature</b><small>Layout rule, from S2, S14, S15 and S16</small></span>
-              </span>
-            </button></li>
-            <li><button type="button" class="callout" data-area="a2" aria-pressed="false" style="--i:1">
-              <span class="pin" aria-hidden="true">2</span>
-              <span class="callout__txt">
-                <span class="is-slop"><b>Nested cards with a colored left border</b><small>Slop signs 25 and 28, from S14 and S15</small></span>
-                <span class="is-taste" data-rule="layout-2"><b>Flatten nested cards</b><small>Layout rule, from S2, S14, S15 and S16</small></span>
-              </span>
-            </button></li>
-            <li><button type="button" class="callout" data-area="a3" aria-pressed="false" style="--i:2">
-              <span class="pin" aria-hidden="true">3</span>
-              <span class="callout__txt">
-                <span class="is-slop"><b>Purple gradients and glow on 2 buttons</b><small>Slop sign 21, from S14</small></span>
-                <span class="is-taste" data-rule="color-4"><b>One accent per screen</b><small>Color rule, from 18 sources</small></span>
-              </span>
-            </button></li>
-          </ol>
-        </div>
-        <p class="sr-only" id="demo-live" aria-live="polite"></p>
-      </div>
-    </section>
-
-    <!-- Doors: one row per page -->
-    <section class="container section-tight" aria-labelledby="doors-title">
-      <div class="doors-head">
-        <h2 id="doors-title">8 tools, one job each</h2>
-        <p class="secondary measure">Each page does one thing with the taste file: find a rule, audit a screen, pick colors, copy a prompt.</p>
-      </div>
-      <ul class="doors" data-stagger>
-        <li><a class="door" href="/taste/rules/"><span class="door__name">Rules</span><span class="door__desc">Every rule in the taste file, by topic, searchable.</span><span class="door__meta"><span class="mono" data-count="rules">104</span> rules</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a></li>
-        <li><a class="door" href="/taste/unslop/"><span class="door__name">Unslop</span><span class="door__desc">Tick the slop signs on your screen. Get a score and a fix prompt.</span><span class="door__meta"><span class="mono" data-count="slop">29</span> signs</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a></li>
-        <li><a class="door" href="/taste/palettes/"><span class="door__name">Palettes</span><span class="door__desc">2 calm colors and 1 that pops, applied 60/30/10 on a phone screen.</span><span class="door__meta"><span class="mono" data-count="palettes">36</span> palettes</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a></li>
-        <li><a class="door" href="/taste/type/"><span class="door__name">Type</span><span class="door__desc">A font pairing and a type scale you can copy in one tap.</span><span class="door__meta"><span class="mono" data-count="fonts">11</span> pairings</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a></li>
-        <li><a class="door" href="/taste/motion/"><span class="door__name">Motion</span><span class="door__desc">Each motion rule as a live demo you can tap, with its exact value.</span><span class="door__meta"><span class="mono" data-count="motion">20</span> demos</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a></li>
-        <li><a class="door" href="/taste/screens/"><span class="door__name">Screens</span><span class="door__desc">Phone screens before and after, tagged with the rules they apply.</span><span class="door__meta"><span class="mono">9</span> screens</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a></li>
-        <li><a class="door" href="/taste/prompts/"><span class="door__name">Prompts</span><span class="door__desc">Copy a prompt that fixes one thing per pass: type, cards, hierarchy, button, motion.</span><span class="door__meta"><span class="mono">15</span> prompts</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a></li>
-        <li><a class="door" href="/taste/skills/"><span class="door__name">Skills</span><span class="door__desc">Install the taste file in Claude Code or Cursor, so every screen follows it.</span><span class="door__meta"><span class="mono">1</span> file</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a></li>
-      </ul>
-    </section>
-
-    <!-- Proof in numbers, from section 13 -->
-    <section class="section section-dark proof" aria-labelledby="proof-title">
-      <div class="container">
-        <h2 id="proof-title">7 reels behind the rules have <span data-count="views">7.5M</span> views</h2>
-        <p class="lead">Views read on Instagram on 13 and 14 November 2026. The rules come from 35 sources, and every rule keeps the id of its source.</p>
-
-        <div class="feature-stats" data-stagger>
-          <div>
-            <p class="stat-big"><b>2.6M</b><span>views</span></p>
-            <p>One unexpected accent color. Two colors do 90% of the work.</p>
-            <p class="who">S5, Diego Aranda (@diego.a.does)</p>
-            <a class="btn-text" href="https://www.instagram.com/reels/DfScZgPSqc1/" rel="noopener">Watch the reel<svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
-          </div>
-          <div>
-            <p class="stat-big"><b>2.4M</b><span>views</span></p>
-            <p>The accent takes the least space and leaves the biggest impression.</p>
-            <p class="who">S7, Pierre, designer at Averlo (@pierredelcourr)</p>
-            <a class="btn-text" href="https://www.instagram.com/reels/DfZ4_dGIQ8a/" rel="noopener">Watch the reel<svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
-          </div>
-        </div>
-
-        <ul class="counts" data-stagger>
-          <li><b data-count="rules-n">104</b><span>rules</span></li>
-          <li><b data-count="sources-n">35</b><span>sources</span></li>
-          <li><b data-count="slop-n">29</b><span>slop signs</span></li>
-        </ul>
-        <p><a class="btn-text" href="/taste/sources/">See every source<svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a></p>
-      </div>
-    </section>
-
-    <!-- Close -->
-    <section class="container close" aria-labelledby="close-title">
-      <h2 id="close-title">Free, and built in public</h2>
-      <p>Every rule, palette and prompt here is free. Jeremy Lasne builds tasu.ai in public on X.</p>
-      <a class="x-link" href="https://x.com/jeremylasne" rel="noopener">Follow the build on X<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container site-footer__inner">
-      <p>tasu.ai · taste using AI · by Jeremy Lasne</p>
-      <nav aria-label="Footer">
-        <a href="/taste/sources/">Sources</a>
-        <a href="https://x.com/jeremylasne" rel="noopener" aria-label="Jeremy Lasne on X">X</a>
-      </nav>
-    </div>
-  </footer>
-
-  <script src="/taste/data.js"></script>
-  <script>
-  (function () {
-    "use strict";
-    var D = window.TASU_DATA || {};
-
-    /* ---------- Counts, computed from data.js ---------- */
-    function fmt(n) { return n.toLocaleString("en-US"); }
-    function viewsOf(s) {
-      var m = /([\d.,]+)\s*([KM]?)\s*views/i.exec(s.numbers || "");
-      if (!m) return 0;
-      var v = parseFloat(m[1].replace(/,/g, ""));
-      return v * (m[2] === "M" ? 1e6 : m[2] === "K" ? 1e3 : 1);
-    }
-    var counts = {};
-    if (D.rules) counts.rules = counts["rules-n"] = fmt(D.rules.length);
-    if (D.slop) counts.slop = counts["slop-n"] = String(D.slop.length);
-    if (D.palettes) counts.palettes = String(D.palettes.length);
-    if (D.fonts) counts.fonts = String(D.fonts.length);
-    if (D.motion) counts.motion = String(D.motion.filter(function (m) { return m.n <= 20; }).length);
-    if (D.sources) {
-      counts["sources-n"] = String(D.sources.length);
-      var total = D.sources.reduce(function (a, s) { return a + viewsOf(s); }, 0);
-      if (total) counts.views = (Math.floor(total / 1e5) / 10).toFixed(1) + "M";
-    }
-    document.querySelectorAll("[data-count]").forEach(function (el) {
-      var v = counts[el.getAttribute("data-count")];
-      if (v) el.textContent = v;
-    });
-
-    /* ---------- Live demo: AI slop to taste ---------- */
-    var demo = document.getElementById("demo");
-    if (!demo) return;
-    var phone = document.getElementById("demo-phone");
-    var phoneBtn = document.getElementById("demo-flip");
-    var desc = document.getElementById("demo-desc");
-    var flip = demo.querySelector(".flip");
-    var thumb = flip.querySelector(".flip__thumb");
-    var btns = Array.prototype.slice.call(flip.querySelectorAll("button"));
-    var live = document.getElementById("demo-live");
-    var callouts = Array.prototype.slice.call(demo.querySelectorAll(".callout"));
-    var touched = false;
-    var labels = {
-      slop: "A habit tracker screen as AI makes it: purple gradient, a Welcome back banner, nested cards and two glowing buttons",
-      taste: "The same habit tracker with taste: ivory and ink, 2 of 3 habits done as the biggest number, one flat list, and lime only on the progress bar"
-    };
-
-    function placeThumb() {
-      var b = flip.querySelector('[aria-pressed="true"]');
-      if (!b) return;
-      thumb.style.setProperty("--tx", b.offsetLeft + "px");
-      thumb.style.setProperty("--tw", b.offsetWidth + "px");
-    }
-
-    function setState(state, origin) {
-      if (state === demo.getAttribute("data-state")) return;
-      var screen = phone.querySelector(".phone__screen").getBoundingClientRect();
-      if (origin && screen.width) {
-        demo.style.setProperty("--ox", Math.round(((origin.x - screen.left) / screen.width) * 100) + "%");
-        demo.style.setProperty("--oy", Math.round(((origin.y - screen.top) / screen.height) * 100) + "%");
-      } else {
-        demo.style.setProperty("--ox", "50%");
-        demo.style.setProperty("--oy", "0%");
-      }
-      demo.setAttribute("data-state", state);
-      btns.forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-v") === state)); });
-      flip.classList.remove("is-moving");
-      void flip.offsetWidth;
-      flip.classList.add("is-moving");
-      placeThumb();
-      phone.setAttribute("aria-label", labels[state]);
-      desc.textContent = labels[state];
-      live.textContent = state === "taste" ? "With taste: 3 rules applied" : "AI slop: 3 slop signs shown";
-    }
-    flip.addEventListener("animationend", function () { flip.classList.remove("is-moving"); });
-
-    function toggle(origin) { setState(demo.getAttribute("data-state") === "taste" ? "slop" : "taste", origin); }
-
-    btns.forEach(function (b) {
-      b.addEventListener("click", function () {
-        touched = true;
-        var r = phone.getBoundingClientRect();
-        setState(b.getAttribute("data-v"), { x: r.left + r.width / 2, y: r.top });
-      });
-    });
-    flip.addEventListener("keydown", function (e) {
-      if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
-        e.preventDefault();
-        touched = true;
-        var next = e.key === "ArrowRight" ? "taste" : "slop";
-        setState(next);
-        flip.querySelector('[data-v="' + next + '"]').focus();
-      }
-    });
-    phoneBtn.addEventListener("click", function (e) {
-      touched = true;
-      var r = phone.getBoundingClientRect();
-      toggle(e.detail ? { x: e.clientX, y: e.clientY } : { x: r.left + r.width / 2, y: r.top });
-    });
-    document.addEventListener("keydown", function (e) {
-      if ((e.key === "t" || e.key === "T") && !e.metaKey && !e.ctrlKey && !e.altKey) {
-        var tag = (e.target.tagName || "").toLowerCase();
-        if (tag === "input" || tag === "textarea" || e.target.isContentEditable) return;
-        touched = true;
-        toggle();
-      }
-    });
-
-    /* Brushing and linking: a callout lights up its part of the screen */
-    var pinned = null;
-    function focusArea(area) {
-      if (area) demo.setAttribute("data-focus", area);
-      else demo.removeAttribute("data-focus");
-    }
-    callouts.forEach(function (c) {
-      var area = c.getAttribute("data-area");
-      c.addEventListener("mouseenter", function () { if (!pinned) focusArea(area); });
-      c.addEventListener("mouseleave", function () { if (!pinned) focusArea(null); });
-      c.addEventListener("focus", function () { if (!pinned) focusArea(area); });
-      c.addEventListener("blur", function () { if (!pinned) focusArea(null); });
-      c.addEventListener("click", function () {
-        pinned = pinned === area ? null : area;
-        callouts.forEach(function (o) { o.setAttribute("aria-pressed", String(o.getAttribute("data-area") === pinned)); });
-        focusArea(pinned);
-      });
-    });
-
-    /* Fill the taste callouts with the exact rule text from data.js */
-    if (D.rules) {
-      demo.querySelectorAll("[data-rule]").forEach(function (el) {
-        var r = D.rules.filter(function (x) { return x.id === el.getAttribute("data-rule"); })[0];
-        if (!r) return;
-        el.setAttribute("title", r.text);
-        var ids = r.sources || [];
-        var from = ids.length > 4 ? ids.length + " sources" : ids.length > 1 ? ids.slice(0, -1).join(", ") + " and " + ids[ids.length - 1] : ids.join("");
-        var label = r.topic.charAt(0).toUpperCase() + r.topic.slice(1);
-        if (from) el.querySelector("small").textContent = label + " rule, from " + from;
-      });
-    }
-
-    placeThumb();
-    window.addEventListener("resize", placeThumb);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeThumb);
-
-    /* Flip once on its own when the demo comes into view, then wait for the visitor */
-    if ("IntersectionObserver" in window) {
-      var io = new IntersectionObserver(function (entries) {
-        if (!entries[0].isIntersecting) return;
-        io.disconnect();
-        setTimeout(function () { if (!touched) setState("taste"); }, 1200);
-      }, { rootMargin: "0px 0px -20% 0px", threshold: 0 });
-      io.observe(phone.querySelector(".phone__screen"));
-    }
-
-    /* Reveal rows a jump skipped past (anchor, find-in-page, fast fling) */
-    var pending = false;
-    function catchUp() {
-      pending = false;
-      document.querySelectorAll(".reveal:not(.is-in)").forEach(function (el) {
-        if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add("is-in");
-      });
-    }
-    window.addEventListener("scroll", function () {
-      if (!pending) { pending = true; requestAnimationFrame(catchUp); }
-    }, { passive: true });
-  })();
-  </script>
+<footer class="site-footer">
+  <div class="wrap footer-in">
+    <p class="footer-brand"><img src="/taste/brand/icon.svg" width="24" height="24" alt=""><span>tasu.ai · taste using AI · by <a href="https://www.jeremylasne.com/">Jeremy Lasne</a></span></p>
+    <p>Data: Apple App Store, US, 15&nbsp;Nov&nbsp;2026</p>
+    <nav class="footer-links" aria-label="Footer">
+      <a href="/taste/#apps">Apps</a>
+      <a href="/taste/library/">Library</a>
+      <a href="https://x.com/jeremylasne"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>@jeremylasne</a>
+    </nav>
+  </div>
+</footer>
 </body>
 </html>

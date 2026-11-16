@@ -1,0 +1,243 @@
+{
+  "card": {
+    "oneLiner": "Aqua screens, navy type; Yearly cuts Premium to $9.99 a month",
+    "keyNumber": {
+      "value": "$119.99",
+      "label": "Top Premium price"
+    }
+  },
+  "branding": {
+    "colors": [
+      {
+        "hex": "#F3FFFF",
+        "role": "60",
+        "name": "Ice white",
+        "use": "Background of 3 of 8 store shots and the app screens"
+      },
+      {
+        "hex": "#31BCD3",
+        "role": "30",
+        "name": "Berry cyan",
+        "use": "The berry on the icon; a lighter twin, #36D2E9, fills buttons and sleep cards"
+      },
+      {
+        "hex": "#CDCC04",
+        "role": "10",
+        "name": "Leaf lime",
+        "use": "The icon’s 2 leaves and the Premium card’s outline"
+      }
+    ],
+    "typeStyle": "Slate navy geometric sans: heavy Avenir on the web paywall, bold and widely spaced in store headlines",
+    "font": {
+      "name": "Avenir",
+      "closeTo": "Nunito Sans",
+      "look": "Geometric sans, near-circular o, heavy slate navy headlines",
+      "weights": "Heavy headlines, plan names, prices and buttons; regular body",
+      "crop": "/taste/media/huckleberry/font-1.jpg"
+    },
+    "visualStyle": "Aqua and white store screens with slate navy headlines; inside the app, color-coded cards mark each log type: cyan sleep, orange feeds, yellow diapers, purple pumping. The web paywall switches to warm off-white #F7F6F2, with white plan cards, cyan pill buttons and a lime-to-green outline on Premium.",
+    "styleTraits": [
+      "Cyan backdrops on 4 of 8 store shots",
+      "Slate navy #44526C sets all 8 store headlines",
+      "Plan cards round at 16 px; buttons are full pills"
+    ]
+  },
+  "screenshots": [
+    {
+      "src": "/taste/media/huckleberry/s1.jpg",
+      "alt": "Headline “Your Family’s Second Brain” with a 5+ Million families badge and an Editors’ Choice laurel, above Home: a SweetSpot bedtime near 7:30 PM and cards for Sleep, Nursing, Bottle, Diaper and Pumping",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/huckleberry/s2.jpg",
+      "alt": "Headline “Get Predictability Back in Your Day” above Oscar’s week calendar, March 1 to 7: cyan sleep blocks, orange marks and “Oscar slept 11h 42m”, with a Best Apps for Parents laurel",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/huckleberry/s3.jpg",
+      "alt": "Headline “Take the Guesswork Out of Naptime” above a lock screen: a smiling baby at 10:50 and a SweetSpot alert, near 11:00am, coming up in 10 minutes",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/huckleberry/s4.jpg",
+      "alt": "Headline “Watch Your Baby’s Sleep Improve, Week by Week” above Sleep Trends for 1 year: naps 3h 7m, nights 11h 9m, a 14h 16m daily average and 7 bars",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/huckleberry/s5.jpg",
+      "alt": "Headline “Your Parenting Questions Answered” above 2 Berry AI chats: “How do I get Emma to sleep past 5AM?” and a teal “What’s on your mind?” screen, marked for paid subscribers",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/huckleberry/s6.jpg",
+      "alt": "Headline “Made For All Feeding Types” above a nursing timer with orange Left and Right buttons, and Add Solids: banana, sweet potato and carrot to try next",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/huckleberry/s7.jpg",
+      "alt": "Headline “Get Tips Shaped by Your Baby’s Routine” above an Insights tip in 4 steps: hold your baby close, walk 5 minutes, sit 8 minutes, transfer to the sleep area",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/huckleberry/s8.jpg",
+      "alt": "Headline “Know Exactly When the Last Diaper Was” above Add nappy: Poo picked at 9:41 AM, size Little, 6 color dots and a green Save button",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/huckleberry/pw1.jpg",
+      "alt": "Huckleberry pricing on the Yearly tab: Premium, best value, $9.99 a month billed yearly with $14.99 struck",
+      "isPaywall": true
+    },
+    {
+      "src": "/taste/media/huckleberry/pw2.jpg",
+      "alt": "Huckleberry Plus card: $5.74 a month billed yearly with $11.99 struck, and 3 highlights",
+      "isPaywall": true
+    },
+    {
+      "src": "/taste/media/huckleberry/pw3.jpg",
+      "alt": "Huckleberry Free card: $0 forever free, a Get the app button and 3 highlights",
+      "isPaywall": true
+    },
+    {
+      "src": "/taste/media/huckleberry/pw4.jpg",
+      "alt": "Huckleberry pricing on the Monthly tab: Premium at $14.99 a month, still marked best value",
+      "isPaywall": true
+    }
+  ],
+  "plans": [
+    {
+      "name": "Huckleberry Premium",
+      "price": "$14.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Huckleberry Premium",
+      "price": "$119.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Huckleberry Plus",
+      "price": "$11.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Huckleberry Plus",
+      "price": "$68.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Sleep Improvement Plan",
+      "price": "$49.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Expedited Service",
+      "price": "$19.99",
+      "period": "consumable",
+      "perMonth": null,
+      "perWeek": null
+    }
+  ],
+  "paywall": {
+    "tiers": 2,
+    "yearlySavingPct": 33,
+    "trial": {
+      "stated": false,
+      "evidence": null
+    },
+    "consumables": 1,
+    "family": 0
+  },
+  "ourRead": [
+    "Yearly opens first and crosses out the monthly price: $14.99 sits above $9.99 a month, billed yearly. Premium’s year reads as 33% off.",
+    "Plus is the decoy on Monthly: $11.99, $3 under Premium’s $14.99. On Yearly it turns into the bargain, $5.74 a month, 52% off against Premium’s 33%.",
+    "Free keeps every log and caregiver sync at $0. Plus sells SweetSpot nap predictions for $5.74 a month; Premium adds Berry AI chat and sleep plans for $9.99."
+  ],
+  "improvements": [
+    {
+      "title": "Set button labels in dark navy",
+      "detail": "White “Get started” reads at 2.4:1 on #02B6D1, and 1.8:1 on the lighter #36D2E9 of “Get the App”. Keep the cyan and set the labels in #2B3648, the navy of the SweetSpot alert: 5.0:1 and 6.7:1.",
+      "rule": "Text contrast: at least 4.5:1 for body text, 3:1 for text 24 px and larger.",
+      "source": "S27"
+    },
+    {
+      "title": "Keep one filled button per screen",
+      "detail": "The first screen shows 2 filled cyan pills, “Get the App” and “Get started”, and the Free card fills a third. Make “Get the App” a text link and give Free the outline of “Learn more”.",
+      "rule": "Emphasize the CTA. One filled primary button, everything else secondary or text.",
+      "source": "S2, S14, S15, S16"
+    },
+    {
+      "title": "Put SweetSpot and $5.74 in the headline",
+      "detail": "The headline reads “Support that fits your family”. Name the feature the store description calls most-loved, with the entry price: “SweetSpot nap predictions from $5.74 a month”.",
+      "rule": "Make headlines specific. \"Track 3 habits in 10 seconds a day\" beats \"Transform your life\".",
+      "source": "S1, S2, S4, S16"
+    }
+  ],
+  "stylePrompt": "Build a paywall in Huckleberry's style. Top to bottom: a centered headline and a Yearly and Monthly pill toggle. Below: stacked white plan cards with 16 px corners, priciest first, free last, each with a full-width pill button. Type: Avenir or Nunito Sans, heavy headlines and prices, regular body, in slate navy #44526C. Colors: ice white #F3FFFF (60) for the page, berry cyan #31BCD3 (30) for buttons with navy labels, leaf lime #CDCC04 (10) for the top plan's outline. Open on Yearly: cross out the monthly price above the per-month price. Show a trial only if you offer one. Use my brand colors in the same 60/30/10 roles.",
+  "elements": [
+    {
+      "type": "plan-picker",
+      "src": "/taste/media/huckleberry/el-plan-picker-1.jpg",
+      "x": 63,
+      "y": 423,
+      "w": 474,
+      "h": 91,
+      "note": "Yearly and Monthly pill toggle; Yearly opens selected in a white knob"
+    },
+    {
+      "type": "plan-picker",
+      "src": "/taste/media/huckleberry/el-plan-picker-2.jpg",
+      "x": 8,
+      "y": 532,
+      "w": 584,
+      "h": 294,
+      "note": "Premium card in a lime outline: $14.99 crossed out above $9.99 per month, billed yearly"
+    },
+    {
+      "type": "discount-badge",
+      "src": "/taste/media/huckleberry/el-discount-badge-1.jpg",
+      "x": 373,
+      "y": 534,
+      "w": 194,
+      "h": 72,
+      "note": "Pale yellow “Best value” tab with a gold sparkle, hung from the Premium card’s top edge"
+    },
+    {
+      "type": "main-button",
+      "src": "/taste/media/huckleberry/el-main-button-1.jpg",
+      "x": 45,
+      "y": 835,
+      "w": 510,
+      "h": 98,
+      "note": "Full-width cyan pill, “Get started”; white text on #02B6D1 reads at 2.4:1"
+    },
+    {
+      "type": "feature-list",
+      "src": "/taste/media/huckleberry/el-feature-list-1.jpg",
+      "x": 40,
+      "y": 564,
+      "w": 500,
+      "h": 314,
+      "note": "“Highlights of Plus membership”: 3 lines, each behind a pale green check"
+    },
+    {
+      "type": "plan-picker",
+      "src": "/taste/media/huckleberry/el-plan-picker-3.jpg",
+      "x": 8,
+      "y": 15,
+      "w": 584,
+      "h": 370,
+      "note": "Free card, last of 3: “$0 forever free” over a filled cyan “Get the app” button"
+    }
+  ]
+}

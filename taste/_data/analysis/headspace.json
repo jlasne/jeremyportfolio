@@ -1,0 +1,210 @@
+{
+  "card": {
+    "oneLiner": "Orange and yellow screens. The web deal cuts year one to $34.99",
+    "keyNumber": {
+      "value": "$69.99",
+      "label": "Yearly plan"
+    }
+  },
+  "branding": {
+    "colors": [
+      {
+        "hex": "#FFFFFF",
+        "role": "60",
+        "name": "White",
+        "use": "Background of the web paywall and the app screens"
+      },
+      {
+        "hex": "#FF7300",
+        "role": "30",
+        "name": "Bright orange",
+        "use": "The icon, the lower waves and key words in store headlines"
+      },
+      {
+        "hex": "#1A54F6",
+        "role": "10",
+        "name": "Cobalt blue",
+        "use": "Therapy screens; the buttons use the near twin #0061EE"
+      }
+    ],
+    "typeStyle": "Bold grotesque headlines in warm dark grey, with key words in orange",
+    "font": {
+      "name": "Headspace Apercu",
+      "closeTo": "Hanken Grotesk",
+      "look": "Bold geometric grotesque, round bowls, key words in orange",
+      "weights": "Bold headlines, prices and button; regular labels and body",
+      "crop": "/taste/media/headspace/font-1.jpg"
+    },
+    "visualStyle": "Yellow and orange waves frame white app screens, and a smiling orange dot is the mascot. Blue fills the Play buttons; the web paywall marks the chosen plan with a yellow card.",
+    "styleTraits": [
+      "Yellow tops 6 of 8 App Store screenshots",
+      "5 of 8 store headlines set key words in orange",
+      "Plan cards round at 12 px, buttons are full pills"
+    ]
+  },
+  "screenshots": [
+    {
+      "src": "/taste/media/headspace/s1.jpg",
+      "alt": "Headline \"Award Winning\" under the Headspace logo and a smiling orange dot on yellow waves, above Apple Design Award and Webby Awards laurels",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/headspace/s2.jpg",
+      "alt": "Headline \"Your lifelong guide to better mental health\" above 6 colored tiles: Meditate, Sleep, Breathe, Focus, Move and Mental Health",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/headspace/s3.jpg",
+      "alt": "Headline \"Stress less\" above the course Calming an Anxious Mind, 3 to 10 min, with teacher Eve selected and a blue Play button",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/headspace/s4.jpg",
+      "alt": "Headline \"Sleep soundly\" on purple above Drift into Sleep (555 Hz), a 45 to 480 min soundscape, with a sheet to choose 45 or 480 min",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/headspace/s5.jpg",
+      "alt": "Headline \"Learn to meditate in a few minutes a day\" above Get into Focus (50 Hz), a 45 to 480 min soundscape, with a blue Play button",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/headspace/s6.jpg",
+      "alt": "Headline \"Feel healthier and happier\" above the dark Binaural Beats collection, led by the featured Brighten Up Your Mood (40 Hz)",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/headspace/s7.jpg",
+      "alt": "Headline \"Personalized content every day\" above the Today tab: Recents, Daily essentials such as Meditation and Awareness, 3 to 7 min, and Picked with you in mind",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/headspace/s8.jpg",
+      "alt": "Headline \"Welcome to Headspace therapy\" on blue above a screen offering therapy for as low as $0 with insurance and a Check my coverage button",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/headspace/pw1.jpg",
+      "alt": "Headspace offer: “50% off a year of Headspace”, Annual $34.99 with $69.99 struck and picked, Monthly $12.99, and a blue Get this deal button",
+      "isPaywall": true
+    }
+  ],
+  "plans": [
+    {
+      "name": "Annual Subscription",
+      "price": "$69.99",
+      "period": "year",
+      "perMonth": 5.83,
+      "perWeek": 1.35
+    },
+    {
+      "name": "Monthly Subscription",
+      "price": "$12.99",
+      "period": "month",
+      "perMonth": 12.99,
+      "perWeek": 3.0
+    },
+    {
+      "name": "Headspace",
+      "price": "$94.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Headspace Plus",
+      "price": "$94.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Headspace",
+      "price": "$12.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Headspace Plus",
+      "price": "$12.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    }
+  ],
+  "paywall": {
+    "tiers": 1,
+    "yearlySavingPct": 55,
+    "trial": {
+      "stated": false,
+      "evidence": null
+    },
+    "consumables": 0,
+    "family": 0
+  },
+  "ourRead": [
+    "Annual opens preselected in a yellow card at $34.99, beside a struck $69.99. Monthly, $12.99, is the anchor: 12 months cost $155.88, so full-price Annual saves 55%.",
+    "A first-year discount stands in for a free trial: $34.99 is charged on day one, and year two renews at the full $69.99.",
+    "The App Store lists 10 items at 3 prices under 4 names. \"Headspace Plus\" costs $12.99 or $94.99, exactly like \"Headspace\", so it is 1 tier."
+  ],
+  "improvements": [
+    {
+      "title": "Name what the year buys",
+      "detail": "The top line reads \"Limited time offer\". Swap it for what the year buys, with numbers from the App Store text: \"500+ guided meditations, from 3 minutes\".",
+      "rule": "Make headlines specific. \"Track 3 habits in 10 seconds a day\" beats \"Transform your life\".",
+      "source": "S1, S2, S4, S16"
+    },
+    {
+      "title": "Say 50% off once",
+      "detail": "The page says \"50% off\" 3 times, in the headline, the blue badge and the fine print, beside a struck $69.99. Drop the badge: the struck price already shows the deal.",
+      "rule": "Delete filler badges (\"New\", \"AI-powered\", \"Beta\") unless they change a decision.",
+      "source": "S14"
+    },
+    {
+      "title": "Keep the bright colors to 2",
+      "detail": "Yellow, blue, orange and green share one white page. Keep the yellow card and the blue button. Set the orange links and the green check in the headline's grey #44423F: the links go from 3.3:1 to 10:1.",
+      "rule": "Two colors do 90% of the work. The third one only goes on the button you want pressed.",
+      "source": "S5"
+    }
+  ],
+  "stylePrompt": "Build a paywall in Headspace's style. Top to bottom: the logo, a bold 2-line offer headline, 2 stacked plan cards, a grey renewal line, 2 links and a full-width pill button. Type: Hanken Grotesk, close to Headspace Apercu: bold headline and prices, regular labels. Colors: white #FFFFFF (60) for the page, orange #FF7300 (30) for the logo and selected card, blue #1A54F6 (10) for the button only. Preselect Annual with its first-year price beside the struck full price. Monthly sits below, outlined. Price Annual per year and Monthly per month. Offer 50% off year one in place of a trial. Use my brand colors in the same 60/30/10 roles.",
+  "elements": [
+    {
+      "type": "plan-picker",
+      "src": "/taste/media/headspace/el-plan-picker-1.jpg",
+      "x": 19,
+      "y": 396,
+      "w": 561,
+      "h": 418,
+      "note": "Annual preselected in a yellow card, $34.99 beside a struck $69.99; Monthly outlined at $12.99"
+    },
+    {
+      "type": "discount-badge",
+      "src": "/taste/media/headspace/el-discount-badge-1.jpg",
+      "x": 57,
+      "y": 396,
+      "w": 221,
+      "h": 59,
+      "note": "Blue tab on the Annual card that repeats the headline: \"Annual plan: 50% off\""
+    },
+    {
+      "type": "legal-links",
+      "src": "/taste/media/headspace/el-legal-links-1.jpg",
+      "x": 22,
+      "y": 813,
+      "w": 555,
+      "h": 116,
+      "note": "Grey renewal line over 2 orange links at 12 px: Terms & conditions, Cancel anytime"
+    },
+    {
+      "type": "main-button",
+      "src": "/taste/media/headspace/el-main-button-1.jpg",
+      "x": 38,
+      "y": 956,
+      "w": 523,
+      "h": 113,
+      "note": "Blue pill, 58 px tall, with \"Get this deal\" in bold white"
+    }
+  ]
+}

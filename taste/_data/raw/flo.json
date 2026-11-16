@@ -1,0 +1,168 @@
+{
+  "id": "1038369065",
+  "slug": "flo",
+  "name": "Flo",
+  "fullName": "Flo Cycle & Period Tracker",
+  "developer": "FLO HEALTH UK LIMITED",
+  "category": "Health & Fitness",
+  "rank": 3,
+  "chart": "Health & Fitness",
+  "rating": 4.74113,
+  "ratingCount": 2022525,
+  "url": "https://apps.apple.com/us/app/flo-cycle-period-tracker/id1038369065",
+  "price": "Free",
+  "releaseDate": "2015-10-03",
+  "updated": "2026-11-05",
+  "subtitle": "Ovulation & Pregnancy Calendar",
+  "description": "Flo Health is a science-backed cycle, ovulation, pregnancy, and period tracker with over 570 million downloads worldwide.*\n\nTrack your period (regular or irregular), predict ovulation, learn to spot fertile signs, follow your baby’s growth with Flo Health’s pregnancy tracker, and explore common perimenopause symptoms. Flo Health is here to support your menstrual cycle and female health journey.\n\nIs my data safe with Flo Health?\nFlo Health is the first and only period tracking app with two certifications that are internationally recognized as the gold standard in data protection and security. In 2025, Flo Health was recognized as the ISO/Information Security Management System Team of the Year at the PICCASO Privacy and Security Awards for excellence and commitment to privacy-first design.\n\n- Anonymous Mode: Use the Flo Health period tracker without any personal identifiers being linked to your health data.\n\nWhy choose Flo Health for period and ovulation tracking?\nFlo Health is more than a basic calendar — it's a period tracker and ovulation tracker designed to help you notice patterns over time.\n\n- Over 70 trackable symptoms and moods to receive personalized menstrual cycle insights\n- Support for irregular periods, pre-period symptoms, and cycle changes\n- Cycle report summaries you can download and share with your doctor\n\nCan Flo Health support my trying-to-conceive (TTC) journey?\nFlo Health offers educational features to help you explore conception insights and better understand how to spot fertile signs.\n\n- Fertile window and ovulation predictions based on your logged period data\n- Log LH/ovulation test strip results and basal body temperature\n- Discharge tracking to help you recognize fertile signs\n\nHow does Flo Health support me in pregnancy?\nOnce you conceive, switch to Pregnancy Mode for checklists and expert guidance.\n\n- Pregnancy tracking with weekly updates on your baby's development\n- Daily articles explaining fetal development at each stage\n\nCan Flo Health",
+  "icon": "/taste/media/flo/icon.png",
+  "screenshots": [
+    {
+      "src": "/taste/media/flo/s1.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/flo/s2.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/flo/s3.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/flo/s4.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/flo/s5.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/flo/s6.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/flo/s7.jpg",
+      "w": 600,
+      "h": 1299
+    },
+    {
+      "src": "/taste/media/flo/s8.jpg",
+      "w": 600,
+      "h": 1299
+    }
+  ],
+  "paywall": [
+    {
+      "src": null,
+      "w": null,
+      "h": null,
+      "source": "drawn",
+      "sourceUrl": "https://apps.apple.com/us/app/flo-cycle-period-tracker/id1038369065",
+      "capturedAt": "2026-11-15"
+    }
+  ],
+  "paywallShots": [],
+  "iaps": [
+    {
+      "name": "Flo Premium",
+      "price": "$1.99"
+    },
+    {
+      "name": "Flo Premium",
+      "price": "$59.99"
+    },
+    {
+      "name": "Flo Ovulation & Health tracker",
+      "price": "$11.49"
+    },
+    {
+      "name": "Flo Premium",
+      "price": "$7.49"
+    },
+    {
+      "name": "Flo Premium",
+      "price": "$47.99"
+    },
+    {
+      "name": "Flo Premium",
+      "price": "$1.99"
+    },
+    {
+      "name": "Flo Premium",
+      "price": "$14.99"
+    },
+    {
+      "name": "Flo Ovulation & Health tracker",
+      "price": "$14.99"
+    },
+    {
+      "name": "Flo Birth Control Reminder",
+      "price": "$43.99"
+    },
+    {
+      "name": "Flo Pregnancy Tracker",
+      "price": "$49.99"
+    }
+  ],
+  "palette": {
+    "icon": [
+      {
+        "hex": "#FF5A7D",
+        "share": 0.331
+      },
+      {
+        "hex": "#FFFFFF",
+        "share": 0.249
+      },
+      {
+        "hex": "#FF88A3",
+        "share": 0.238
+      },
+      {
+        "hex": "#FF7291",
+        "share": 0.079
+      },
+      {
+        "hex": "#FFEBF0",
+        "share": 0.065
+      },
+      {
+        "hex": "#FF9CB5",
+        "share": 0.019
+      }
+    ],
+    "screens": [
+      {
+        "hex": "#E2CBFF",
+        "share": 0.367
+      },
+      {
+        "hex": "#FFFFFF",
+        "share": 0.293
+      },
+      {
+        "hex": "#FFECFF",
+        "share": 0.095
+      },
+      {
+        "hex": "#321F57",
+        "share": 0.051
+      },
+      {
+        "hex": "#DF755D",
+        "share": 0.029
+      },
+      {
+        "hex": "#E5D7D7",
+        "share": 0.013
+      }
+    ]
+  }
+}

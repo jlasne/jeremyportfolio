@@ -1,0 +1,196 @@
+{
+  "card": {
+    "oneLiner": "Lavender screens, pink accents; plans named for pregnancy, ovulation and birth control",
+    "keyNumber": {
+      "value": "$59.99",
+      "label": "Top Flo Premium price"
+    }
+  },
+  "branding": {
+    "colors": [
+      {
+        "hex": "#E2CBFF",
+        "role": "60",
+        "name": "Lavender",
+        "use": "Background of all 8 store screens"
+      },
+      {
+        "hex": "#FFFFFF",
+        "role": "30",
+        "name": "White",
+        "use": "App screens and the cards floating over them"
+      },
+      {
+        "hex": "#FF5A7D",
+        "role": "10",
+        "name": "Feather pink",
+        "use": "The icon, the Log period button and the insight card outlines"
+      }
+    ],
+    "typeStyle": "A plain medium sans line over 1 or 2 big words in a flared, high-contrast sans; bold sans for numbers in the app",
+    "font": {
+      "name": null,
+      "closeTo": "Proza Libre",
+      "look": "Flared contrast sans in a pink box, plain sans above",
+      "weights": "Regular flared display, medium sans lead line, bold UI numbers",
+      "crop": "/taste/media/flo/font-1.jpg"
+    },
+    "visualStyle": "Lavender store screens frame white app screens, flat cartoon people and illustrated symptom icons. Feather pink #FF5A7D marks period days, card outlines and the Log period pill; only the sleep screen turns dark plum.",
+    "styleTraits": [
+      "Lavender #E2CBFF fills 37% of the store screens",
+      "8 of 8 headlines set line 2 in a pale pink box",
+      "Insight cards: 16 px corners, 3 px pink outlines"
+    ]
+  },
+  "screenshots": [
+    {
+      "src": "/taste/media/flo/s1.jpg",
+      "alt": "Headline “Predict your next period” above a week strip with 5 predicted days, “Period in: 2 days”, a pink Log period button and a green FSA/HSA eligible sticker",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/flo/s2.jpg",
+      "alt": "Headline “Understand your fertile days” above a calendar: period on days 1 to 5, fertile days 12 to 18, ovulation predicted on day 17",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/flo/s3.jpg",
+      "alt": "Headline “Log and track symptoms” above a card of 3 logged symptoms, Cramps, Mood swings and Fatigue, over a phone held in a cartoon hand",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/flo/s4.jpg",
+      "alt": "Headline “Maximize your connection” above Flo for Partners: an illustrated couple, a Daily tip notification and 2 cards, Her day today and a Both question",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/flo/s5.jpg",
+      "alt": "Headline “Got symptoms? Get answers” above the Symptom Checker: PCOS a significant match, then endometriosis, uterine fibroids and perimenopause as low matches",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/flo/s6.jpg",
+      "alt": "Headline “Manage symptoms of perimenopause” above 3 suggested topics, a grey Go to insights button and illustrated articles such as Periods in your 30s and 40s",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/flo/s7.jpg",
+      "alt": "Headline “Discover your sleep-cycle connection” above a dark plum screen: a Good sleep score on cycle day 12, 8h 10m asleep against 7 to 9h recommended",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/flo/s8.jpg",
+      "alt": "Headline “Follow your baby’s growth” above a week strip at 7 weeks, 5 days, an embryo render and “Your baby this week”, the size of a blueberry",
+      "isPaywall": false
+    }
+  ],
+  "plans": [
+    {
+      "name": "Flo Premium",
+      "price": "$1.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Flo Premium",
+      "price": "$59.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Flo Ovulation & Health tracker",
+      "price": "$11.49",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Flo Premium",
+      "price": "$7.49",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Flo Premium",
+      "price": "$47.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Flo Premium",
+      "price": "$1.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Flo Premium",
+      "price": "$14.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Flo Ovulation & Health tracker",
+      "price": "$14.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Flo Birth Control Reminder",
+      "price": "$43.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Flo Pregnancy Tracker",
+      "price": "$49.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    }
+  ],
+  "paywall": {
+    "tiers": 1,
+    "yearlySavingPct": null,
+    "trial": {
+      "stated": false,
+      "evidence": null
+    },
+    "consumables": 0,
+    "family": 0
+  },
+  "ourRead": [
+    "3 goals get their own product name: Ovulation & Health tracker ($11.49, $14.99), Birth Control Reminder ($43.99), Pregnancy Tracker ($49.99). The receipt repeats why you came.",
+    "The first screenshot wears a green “FSA/HSA eligible” sticker, U.S. only. It turns Premium, up to $59.99, into a health expense paid with pre-tax money.",
+    "All 8 screenshots sell features, from period predictions to pregnancy. Prices, $1.99 to $59.99, show only in the In-App Purchases list. Value first, price later."
+  ],
+  "improvements": [
+    {
+      "title": "Add the length to all 10 names",
+      "detail": "6 listings share the name Flo Premium, from $1.99 to $59.99. Keep the goal names and add the term to each, like “Flo Premium, 1 year”.",
+      "rule": "Fix 3 things to stop a design from looking cheap: low contrast, a broken layout, and copy that does not convert.",
+      "source": "S27"
+    },
+    {
+      "title": "Darken the button pink to 4.6:1",
+      "detail": "White “Log period” on #FF5A7D reads at 3.0:1. Fill the pill with #D9345E, the same hue, for 4.6:1, and keep #FF5A7D for the icon and period days.",
+      "rule": "Text contrast: at least 4.5:1 for body text, 3:1 for text 24 px and larger.",
+      "source": "S27"
+    },
+    {
+      "title": "Keep pink for period days and the button",
+      "detail": "Screen 1 puts pink on 5 predicted days, the Log period pill and 2 card outlines. Drop the 3 px outlines from all 6 insight cards on screens 1, 2 and 4.",
+      "rule": "One accent per screen. Directing attention means one place to look.",
+      "source": "S8"
+    }
+  ],
+  "stylePrompt": "Build a paywall in Flo's style. Top to bottom: a medium sans line, then the key words large in a pale pink box with 10 px corners. Below: a white plan card and one pink pill button. Type: Inter 500 for text, Proza Libre for the boxed words. Colors: lavender #E2CBFF (60) for the screen, white #FFFFFF (30) for cards, feather pink #FF5A7D (10) for the button and the selected plan's 3 px outline. Plans: one tier in rows with length and price; preselect the longest and show its per-month price. Show a trial only if you offer one. Use my brand colors in the same 60/30/10 roles.",
+  "elements": []
+}

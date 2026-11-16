@@ -1,0 +1,192 @@
+{
+  "id": "1169136078",
+  "slug": "huckleberry",
+  "name": "Huckleberry",
+  "fullName": "Huckleberry: Baby Tracker",
+  "developer": "Huckleberry Labs Inc.",
+  "category": "Medical",
+  "rank": 1,
+  "chart": "Medical",
+  "rating": 4.92401,
+  "ratingCount": 78874,
+  "url": "https://apps.apple.com/us/app/huckleberry-baby-tracker/id1169136078",
+  "price": "Free",
+  "releaseDate": "2017-07-04",
+  "updated": "2026-11-01",
+  "subtitle": "Baby Sleep & Nap Schedule App",
+  "description": "Huckleberry is your all-in-one baby tracker and parenting partner, trusted by 5+ million families worldwide, from your first contraction to your baby's first steps. Our award-winning baby tracker app helps new parents track baby sleep, feeding, and growth with expert guidance at every stage.\n\nBacked by a team of pediatric experts, Huckleberry supports every family's journey, as a maternity app through the late stages of pregnancy, a newborn tracker in the early days, a baby sleep tracker, and solid foods log as your child grows. We turn guesswork into confidence, one stage at a time.\n\nCONTRACTION TIMER\nTime contractions with one tap. Track duration, intensity, and frequency. The first tool in your Huckleberry journey, built for expecting parents preparing for a newborn.\n\nSWEETSPOT®: YOUR SLEEP TIMING COMPANION\nA most-loved feature that predicts your baby's ideal nap and sleep times with remarkable accuracy. No more guessing about wake windows or watching for tired cues. SweetSpot® learns your child's unique rhythms to suggest optimal sleep schedules.\n\nTRACK GROWTH & DEVELOPMENT\nOur baby growth tracker helps you follow your child's development over time. From breastfeeding or bottle feeding to diapers and first foods, our baby tracker gives you peace of mind. See trends at a glance and share them easily with your pediatrician.\n\nBERRY: 24/7 PARENTING GUIDANCE\n24/7 instant parenting backup that adapts to what you need, when you need it. Using expert-vetted and contextually aware AI-powered guidance, Berry works through the messiness of parenting with you. From sleep regressions to growth questions to \"is this normal?\" You always have backup.\n\nSTARTING SOLIDS\nConfidently introduce new foods, whether it's purees, baby-led weaning, or both. Track allergens and note any sensitivities or reactions. Build a list of foods your baby's tried, what they liked (or didn't!), and get ideas for what to offer next. Get age-appropriate tips to safely serve common foods as purees or ba",
+  "icon": "/taste/media/huckleberry/icon.png",
+  "screenshots": [
+    {
+      "src": "/taste/media/huckleberry/s1.jpg",
+      "w": 600,
+      "h": 1300
+    },
+    {
+      "src": "/taste/media/huckleberry/s2.jpg",
+      "w": 600,
+      "h": 1300
+    },
+    {
+      "src": "/taste/media/huckleberry/s3.jpg",
+      "w": 600,
+      "h": 1300
+    },
+    {
+      "src": "/taste/media/huckleberry/s4.jpg",
+      "w": 600,
+      "h": 1300
+    },
+    {
+      "src": "/taste/media/huckleberry/s5.jpg",
+      "w": 600,
+      "h": 1300
+    },
+    {
+      "src": "/taste/media/huckleberry/s6.jpg",
+      "w": 600,
+      "h": 1300
+    },
+    {
+      "src": "/taste/media/huckleberry/s7.jpg",
+      "w": 600,
+      "h": 1300
+    },
+    {
+      "src": "/taste/media/huckleberry/s8.jpg",
+      "w": 600,
+      "h": 1300
+    }
+  ],
+  "paywall": [
+    {
+      "src": "/taste/media/huckleberry/pw1.jpg",
+      "w": 600,
+      "h": 1006,
+      "source": "web",
+      "sourceUrl": "https://huckleberrycare.com/pricing",
+      "capturedAt": "2026-11-15"
+    },
+    {
+      "src": "/taste/media/huckleberry/pw2.jpg",
+      "w": 600,
+      "h": 1006,
+      "source": "web",
+      "sourceUrl": "https://huckleberrycare.com/pricing",
+      "capturedAt": "2026-11-15"
+    },
+    {
+      "src": "/taste/media/huckleberry/pw3.jpg",
+      "w": 600,
+      "h": 1006,
+      "source": "web",
+      "sourceUrl": "https://huckleberrycare.com/pricing",
+      "capturedAt": "2026-11-15"
+    },
+    {
+      "src": "/taste/media/huckleberry/pw4.jpg",
+      "w": 600,
+      "h": 1006,
+      "source": "web",
+      "sourceUrl": "https://huckleberrycare.com/pricing",
+      "capturedAt": "2026-11-15"
+    }
+  ],
+  "paywallShots": [],
+  "iaps": [
+    {
+      "name": "Huckleberry Premium",
+      "price": "$14.99"
+    },
+    {
+      "name": "Huckleberry Plus",
+      "price": "$11.99"
+    },
+    {
+      "name": "Huckleberry Plus",
+      "price": "$68.99"
+    },
+    {
+      "name": "Huckleberry Premium",
+      "price": "$119.99"
+    },
+    {
+      "name": "Huckleberry Premium",
+      "price": "$119.99"
+    },
+    {
+      "name": "Expedited Service",
+      "price": "$19.99"
+    },
+    {
+      "name": "Huckleberry Plus",
+      "price": "$11.99"
+    },
+    {
+      "name": "Sleep Improvement Plan",
+      "price": "$49.99"
+    },
+    {
+      "name": "Huckleberry Premium",
+      "price": "$14.99"
+    },
+    {
+      "name": "Huckleberry Plus",
+      "price": "$68.99"
+    }
+  ],
+  "palette": {
+    "icon": [
+      {
+        "hex": "#FFFFFF",
+        "share": 0.766
+      },
+      {
+        "hex": "#31BCD3",
+        "share": 0.161
+      },
+      {
+        "hex": "#CDCC04",
+        "share": 0.069
+      },
+      {
+        "hex": "#ACE4ED",
+        "share": 0.001
+      },
+      {
+        "hex": "#F1F1B9",
+        "share": 0.001
+      },
+      {
+        "hex": "#DBDA4B",
+        "share": 0.001
+      }
+    ],
+    "screens": [
+      {
+        "hex": "#F3FFFF",
+        "share": 0.521
+      },
+      {
+        "hex": "#C6F5FB",
+        "share": 0.171
+      },
+      {
+        "hex": "#87E4F3",
+        "share": 0.136
+      },
+      {
+        "hex": "#C4C5C7",
+        "share": 0.035
+      },
+      {
+        "hex": "#44526C",
+        "share": 0.019
+      },
+      {
+        "hex": "#939393",
+        "share": 0.011
+      }
+    ]
+  }
+}

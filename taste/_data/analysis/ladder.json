@@ -1,0 +1,259 @@
+{
+  "card": {
+    "oneLiner": "Black screens, lime buttons. Annual halves the $29.99 monthly price",
+    "keyNumber": {
+      "value": "$179.99",
+      "label": "PRO Annual, per year"
+    }
+  },
+  "branding": {
+    "colors": [
+      {
+        "hex": "#FFFFFF",
+        "role": "60",
+        "name": "White",
+        "use": "Store page backgrounds, the pricing page and type on black"
+      },
+      {
+        "hex": "#0E0E0E",
+        "role": "30",
+        "name": "Near black",
+        "use": "Every app screen and the store headlines"
+      },
+      {
+        "hex": "#E6FF01",
+        "role": "10",
+        "name": "Lime yellow",
+        "use": "The icon, the main buttons, checks and chart bars"
+      }
+    ],
+    "typeStyle": "Heavy wide capitals for headlines and big numbers, plain sans labels; the pricing page switches to an Inter-like sans",
+    "font": {
+      "name": null,
+      "closeTo": "Archivo",
+      "look": "Heavy wide capitals with squarish rounds, plain sans body",
+      "weights": "Black headlines and big numbers, semibold titles, regular labels",
+      "crop": "/taste/media/ladder/font-1.jpg"
+    },
+    "visualStyle": "Near-black app screens put lime on buttons, checks and charts, with real coach photos and heavy wide capital titles. White fills 6 of 8 store page backgrounds and the pricing page, where Annual is the one dark card.",
+    "styleTraits": [
+      "White covers 34% of the store screens, near black 31%",
+      "7 of 8 store headlines in heavy wide capitals",
+      "3 of 3 main buttons are full lime pills"
+    ]
+  },
+  "screenshots": [
+    {
+      "src": "/taste/media/ladder/s1.jpg",
+      "alt": "Headline “Get stronger, with a plan.” on lime, a phone with a 60 min Strength x Pilates workout, and App of the Year 2025 Finalist laurels",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/ladder/s2.jpg",
+      "alt": "Two tilted phones with the Define plan and a 30 lbs Bicep Curl set, beside 2026 awards from Women's Health and CNET",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/ladder/s3.jpg",
+      "alt": "Headline “A plan for every workout” above the Limitless home: 3 days checked and Peach Palace, a 60 min lower body workout with 35,860 completions",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/ladder/s4.jpg",
+      "alt": "Headline “Track macros” above a camera scan of a chicken bowl and the Nutrition screen: 520 calories and 22 g protein left, 2 breakfast items logged",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/ladder/s5.jpg",
+      "alt": "Headline “Find the perfect plan for you” above Coach Kelly's Limitless plan, a lime Try button and a grid of 9 coach plans",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/ladder/s6.jpg",
+      "alt": "Headline “Get coached through it all” above the Python Pump workout: a coach in a Ladder shirt, barbell, dumbbell and cable tags, and a lime Start Workout button",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/ladder/s7.jpg",
+      "alt": "Headline “Learn correct form” above a Goblet Squat video: 10 reps at 25 lbs, a 0:28 timer on a lime dial, and set 2 of 3",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/ladder/s8.jpg",
+      "alt": "Headline “Track your progress” above Romanian Deadlift stats: 186 lbs estimated 1RM, up 12%, a lime bar chart and an Apple Watch at 2:30",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/ladder/pw1.jpg",
+      "alt": "Ladder Pro Plan Annual card in black: $14.99 a month, $179.99 for the year, and 4 lime check marks",
+      "isPaywall": true
+    },
+    {
+      "src": "/taste/media/ladder/pw2.jpg",
+      "alt": "Ladder free trial card: 7 days free, no payment info until the trial ends, and 6 included features",
+      "isPaywall": true
+    },
+    {
+      "src": "/taste/media/ladder/pw3.jpg",
+      "alt": "Ladder Pro Plan Monthly card: $29.99 a month, with 7 features from weekly plans to Team Chat",
+      "isPaywall": true
+    }
+  ],
+  "plans": [
+    {
+      "name": "PRO",
+      "price": "$29.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "PRO Annual",
+      "price": "$179.99",
+      "period": "year",
+      "perMonth": 15.0,
+      "perWeek": 3.46
+    },
+    {
+      "name": "PRO+",
+      "price": "$34.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "PRO Annual",
+      "price": "$179.99",
+      "period": "year",
+      "perMonth": 15.0,
+      "perWeek": 3.46
+    },
+    {
+      "name": "ELITE",
+      "price": "$44.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "ELITE+",
+      "price": "$49.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "ELITE+ Annual",
+      "price": "$479.99",
+      "period": "year",
+      "perMonth": 40.0,
+      "perWeek": 9.23
+    },
+    {
+      "name": "ELITE Annual",
+      "price": "$449.99",
+      "period": "year",
+      "perMonth": 37.5,
+      "perWeek": 8.65
+    },
+    {
+      "name": "PRO+ (Annual)",
+      "price": "$329.99",
+      "period": "year",
+      "perMonth": 27.5,
+      "perWeek": 6.35
+    }
+  ],
+  "paywall": {
+    "tiers": 4,
+    "yearlySavingPct": null,
+    "trial": {
+      "stated": true,
+      "evidence": "App Store description: “Try Ladder COMPLETELY FREE for 7 days. NO PAYMENT collected during trial.” Web pricing page: “FREE TRIAL 7 DAYS FREE” and “No payment info collected until AFTER your trial ends.”"
+    },
+    "consumables": 0,
+    "family": 0
+  },
+  "ourRead": [
+    "Annual leads with $14.99 a month, half of Monthly's $29.99; the $179.99 yearly bill sits below. Only Annual gets a dark card and lime checks.",
+    "Annual costs less per month and does more: every team, unlimited team changes, unlimited Save & Replay. Monthly stops at 1 team and 2 changes a month.",
+    "The 7-day trial asks for payment only after it ends. The App Store lists 4 tiers at $179.99 to $479.99 a year; the web shows only PRO."
+  ],
+  "improvements": [
+    {
+      "title": "Put Annual first",
+      "detail": "Annual, the one dark card, comes third and last, under Free Trial and Monthly. Move it to the top and print the 7 free days on it.",
+      "rule": "Put the main actions at the top of the hierarchy, where the eye lands first.",
+      "source": "S2, S14, S15, S16"
+    },
+    {
+      "title": "Say what Annual saves",
+      "detail": "Annual reads “Maximum flexibility, save monthly.” A 12-month plan is the least flexible one. Write “Half the Monthly price: save $179.89 a year”.",
+      "rule": "Fix 3 things to stop a design from looking cheap: low contrast, a broken layout, and copy that does not convert.",
+      "source": "S27"
+    },
+    {
+      "title": "Use the app's flat black",
+      "detail": "The pricing page uses 2 grey gradients: Annual runs #1B1B1B to #474747, Monthly #B6B6B6 to #FAFAFA. Fill Annual with the app's flat #0E0E0E and the other cards with white.",
+      "rule": "Avoid many shades and opacities of the same color. Pick 3 to 5 neutrals and reuse them.",
+      "source": "S1"
+    }
+  ],
+  "stylePrompt": "Build a paywall in Ladder's style: a sticky header with the logo and a lime pill button, then 2 stacked cards, Annual first. Each card: bold caps plan name, huge price, small grey “/ month”, one line of copy, checklist. Annual is the one dark card: “7 days free” on top, $14.99 a month, $179.99 a year below, lime checks. Type: Archivo at weight 900 and width 125 for headlines and prices, Inter for body. Colors: white #FFFFFF (60) page, near black #0E0E0E (30) type and Annual, lime yellow #E6FF01 (10) button and checks. Use my brand colors in the same 60/30/10 roles.",
+  "elements": [
+    {
+      "type": "main-button",
+      "src": "/taste/media/ladder/el-main-button-1.jpg",
+      "x": 307,
+      "y": 2,
+      "w": 220,
+      "h": 68,
+      "note": "Sticky lime pill, “FIND YOUR PLAN”, in the grey header above all 3 plan cards"
+    },
+    {
+      "type": "plan-picker",
+      "src": "/taste/media/ladder/el-plan-picker-1.jpg",
+      "x": 15,
+      "y": 75,
+      "w": 570,
+      "h": 330,
+      "note": "Dark Annual card: $14.99 a month in huge type, “($179.99 FOR THE YEAR)” below, then “Maximum flexibility, save monthly.”"
+    },
+    {
+      "type": "feature-list",
+      "src": "/taste/media/ladder/el-feature-list-1.jpg",
+      "x": 60,
+      "y": 415,
+      "w": 460,
+      "h": 312,
+      "note": "4 lime checks on the Annual card: everything in Monthly, all teams, unlimited team changes, unlimited Save & Replay"
+    },
+    {
+      "type": "plan-picker",
+      "src": "/taste/media/ladder/el-plan-picker-2.jpg",
+      "x": 15,
+      "y": 75,
+      "w": 570,
+      "h": 287,
+      "note": "Light grey Monthly card: $29.99 in huge type, a grey “/ MONTH” and “Gets results, without planning workouts.”"
+    },
+    {
+      "type": "feature-list",
+      "src": "/taste/media/ladder/el-feature-list-2.jpg",
+      "x": 60,
+      "y": 372,
+      "w": 480,
+      "h": 563,
+      "note": "6 black checks on the Monthly card, ending with “Join 1 Ladder team, change 2x per month”"
+    },
+    {
+      "type": "plan-picker",
+      "src": "/taste/media/ladder/el-plan-picker-3.jpg",
+      "x": 15,
+      "y": 75,
+      "w": 570,
+      "h": 323,
+      "note": "White Free Trial card: “7 DAYS” in huge type, a small grey “FREE” and “No payment info collected until AFTER your trial ends.”"
+    }
+  ]
+}

@@ -1,0 +1,184 @@
+{
+  "id": "1497465230",
+  "slug": "opal",
+  "name": "Opal",
+  "fullName": "Opal: Screen Time Control",
+  "developer": "Opal OS",
+  "category": "Productivity",
+  "rank": 51,
+  "chart": "Productivity",
+  "rating": 4.71792,
+  "ratingCount": 91558,
+  "url": "https://apps.apple.com/us/app/opal-screen-time-control/id1497465230",
+  "price": "Free",
+  "releaseDate": "2020-12-15",
+  "updated": "2026-11-09",
+  "subtitle": "Focus, App Blocker & Timer",
+  "description": "Achieve screen time control with the world’s most-loved screen time app! Opal is the fun, free Screen Time app to improve your focus and make the most out of every day.\n\n5 to 6 hours. That’s the average time you’ll spend looking at your phone today, often without realizing it. It's time to fight back. With a combination of screen time control, app limits, app blockers, real time data, leaderboards and rewards, you will focus better and accomplish your dreams, just like Opal’s members.\n\n**As of August 2026, Opal has saved humanity 500 Million hours of screen time. **\n\nMany of the world's top teams and companies trust Opal to help protect their focus. You can too.\n\n**Opal cut my screen time by 2 hours per day – Marketing at Google **\n\n**You need this app. When I first got opal my daily screen-time was about 8 1/2 hours a day. Now it's 1 hour. **\n\n**Opal has become an indispensable tool in my quest for productivity and mindful technology usage **\n\n**Get Opal! - Ali Abdaal, productivity expert**\n\nBENEFITS\n\nSave 1 hour and 23 minutes per DAY from less screen time, on average.\n\n94% of Opal members are less distracted\n\n93% are more productive thanks to the app\n\n90% report improved well-being\n\nAdded benefits:\n\n- Better screen time control\n- Better productivity at work\n- Reduce stress, be more mindful\n- Supports focus challenges, including ADHD\n- Set daily work hours, sleep, and routines\n- Block apps to unplug and detox\n- Stay in focus when you need it most\n- You're happy and in control of your screen time\n\nFEATURES\n\n- #1 Screen Time Control: the most loved app for screen time control with 4.8/5.\n- #1 App Blocker: Instantly Block apps and websites you choose at a specific time of day throughout the week to organize your time.\n- Focus Difficulty: Make it hard, or make it a bit easier. Deep Focus won't let you cancel or bypass at all.\n- App Limits: Set daily usage limits on apps and websites to automatically block them and prevent overuse.\n- Mindful Block Screens: Discover quo",
+  "icon": "/taste/media/opal/icon.png",
+  "screenshots": [
+    {
+      "src": "/taste/media/opal/s1.jpg",
+      "w": 600,
+      "h": 1301
+    },
+    {
+      "src": "/taste/media/opal/s2.jpg",
+      "w": 600,
+      "h": 1301
+    },
+    {
+      "src": "/taste/media/opal/s3.jpg",
+      "w": 600,
+      "h": 1301
+    },
+    {
+      "src": "/taste/media/opal/s4.jpg",
+      "w": 600,
+      "h": 1301
+    },
+    {
+      "src": "/taste/media/opal/s5.jpg",
+      "w": 600,
+      "h": 1301
+    },
+    {
+      "src": "/taste/media/opal/s6.jpg",
+      "w": 600,
+      "h": 1301
+    },
+    {
+      "src": "/taste/media/opal/s7.jpg",
+      "w": 600,
+      "h": 1301
+    },
+    {
+      "src": "/taste/media/opal/s8.jpg",
+      "w": 600,
+      "h": 1301
+    }
+  ],
+  "paywall": [
+    {
+      "src": "/taste/media/opal/pw1.jpg",
+      "w": 600,
+      "h": 1006,
+      "source": "web",
+      "sourceUrl": "https://opalapp.com/pricing",
+      "capturedAt": "2026-11-15"
+    },
+    {
+      "src": "/taste/media/opal/pw2.jpg",
+      "w": 600,
+      "h": 1006,
+      "source": "web",
+      "sourceUrl": "https://opalapp.com/pricing",
+      "capturedAt": "2026-11-15"
+    },
+    {
+      "src": "/taste/media/opal/pw3.jpg",
+      "w": 600,
+      "h": 1006,
+      "source": "web",
+      "sourceUrl": "https://opalapp.com/pricing",
+      "capturedAt": "2026-11-15"
+    }
+  ],
+  "paywallShots": [],
+  "iaps": [
+    {
+      "name": "Yearly Plan",
+      "price": "$99.99"
+    },
+    {
+      "name": "Weekly Plan",
+      "price": "$4.99"
+    },
+    {
+      "name": "Monthly Plan",
+      "price": "$19.99"
+    },
+    {
+      "name": "Monthly Plan",
+      "price": "$19.99"
+    },
+    {
+      "name": "Monthly Plan",
+      "price": "$19.99"
+    },
+    {
+      "name": "Opal Student Weekly",
+      "price": "$9.99"
+    },
+    {
+      "name": "Weekly Plan",
+      "price": "$9.99"
+    },
+    {
+      "name": "Yearly Plan",
+      "price": "$99.99"
+    },
+    {
+      "name": "Yearly Plan",
+      "price": "$99.99"
+    },
+    {
+      "name": "Opal Pro Subscription",
+      "price": "$49.99"
+    }
+  ],
+  "palette": {
+    "icon": [
+      {
+        "hex": "#050509",
+        "share": 0.692
+      },
+      {
+        "hex": "#69696A",
+        "share": 0.098
+      },
+      {
+        "hex": "#EEEEEE",
+        "share": 0.089
+      },
+      {
+        "hex": "#B7B7B8",
+        "share": 0.069
+      },
+      {
+        "hex": "#8C8C8E",
+        "share": 0.033
+      },
+      {
+        "hex": "#363639",
+        "share": 0.019
+      }
+    ],
+    "screens": [
+      {
+        "hex": "#0E0F11",
+        "share": 0.158
+      },
+      {
+        "hex": "#92B8CE",
+        "share": 0.152
+      },
+      {
+        "hex": "#B4D4E6",
+        "share": 0.125
+      },
+      {
+        "hex": "#272B2E",
+        "share": 0.118
+      },
+      {
+        "hex": "#404A53",
+        "share": 0.105
+      },
+      {
+        "hex": "#5F6F79",
+        "share": 0.097
+      }
+    ]
+  }
+}

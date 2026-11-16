@@ -1,0 +1,196 @@
+{
+  "card": {
+    "oneLiner": "Cartoon lessons spend energy; Super makes it unlimited, 14 days free",
+    "keyNumber": {
+      "value": "$119.99",
+      "label": "Top Super Duolingo price"
+    }
+  },
+  "branding": {
+    "colors": [
+      {
+        "hex": "#FFFFFF",
+        "role": "60",
+        "name": "White",
+        "use": "Background of 6 of 8 screens"
+      },
+      {
+        "hex": "#78C800",
+        "role": "30",
+        "name": "Owl green",
+        "use": "The icon, the owl and the progress bars"
+      },
+      {
+        "hex": "#FF800B",
+        "role": "10",
+        "name": "Streak orange",
+        "use": "The streak flame, the beak and 2 of 8 captions"
+      }
+    ],
+    "typeStyle": "Heavy rounded lowercase headlines over a rounded DIN-style UI sans in dark grey",
+    "font": {
+      "name": "Feather Bold",
+      "closeTo": "Fredoka",
+      "look": "Heavy rounded lowercase headlines with single-story a and g",
+      "weights": "Bold lowercase headlines, bold UI headings, regular body",
+      "crop": "/taste/media/duolingo/font-1.jpg"
+    },
+    "visualStyle": "White screens with dark grey type, where answer cards, word chips and number tiles stand on a thicker bottom edge, like keys. Cartoon characters appear on 5 of 8 screens, and chess, math and music each own a color: teal, blue, purple.",
+    "styleTraits": [
+      "White covers 68% of the screenshots",
+      "Answer cards: 2 px border, 6 px bottom edge",
+      "Corners about 12 px on cards, chips and tiles"
+    ]
+  },
+  "screenshots": [
+    {
+      "src": "/taste/media/duolingo/s1.jpg",
+      "alt": "Learn 40+ languages for free: the course list, from Spanish and French to Chess, Math, Music, Chinese and Korean",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/duolingo/s2.jpg",
+      "alt": "Fun, bite-sized lessons: pick the image for 牛乳 from tea, milk, cheese and juice, with 25 energy left",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/duolingo/s3.jpg",
+      "alt": "Solve chess puzzles: a coach says move here to checkmate, with an arrow on the board and 24 energy left",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/duolingo/s4.jpg",
+      "alt": "Build language skills: ¡Necesito más café! becomes I need more coffee! in word chips, with 23 energy left",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/duolingo/s5.jpg",
+      "alt": "Practice conversations: Eddy says Je voudrais un café, s’il te plaît ! in a café, next to a bear at the counter",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/duolingo/s6.jpg",
+      "alt": "Keep your daily streak: the owl flexes beside a flame over a 3 day streak, Sunday to Tuesday checked",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/duolingo/s7.jpg",
+      "alt": "Use math with confidence: build 36 from number tiles and × and + signs, with 22 energy left",
+      "isPaywall": false
+    },
+    {
+      "src": "/taste/media/duolingo/s8.jpg",
+      "alt": "Learn to play music: a piano lane marked Perfect! and a fill in the blanks quiz on a music staff",
+      "isPaywall": false
+    }
+  ],
+  "plans": [
+    {
+      "name": "Super Duolingo",
+      "price": "$119.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Super Duolingo",
+      "price": "$119.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Super Duolingo",
+      "price": "$95.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Super Duolingo",
+      "price": "$83.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Super Duolingo",
+      "price": "$12.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Super Duolingo",
+      "price": "$9.99",
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
+    },
+    {
+      "name": "Cart of Gems (6500)",
+      "price": "$19.99",
+      "period": "consumable",
+      "perMonth": null,
+      "perWeek": null
+    },
+    {
+      "name": "Cart of Gems (3000)",
+      "price": "$9.99",
+      "period": "consumable",
+      "perMonth": null,
+      "perWeek": null
+    },
+    {
+      "name": "Barrel of Gems (1200)",
+      "price": "$4.99",
+      "period": "consumable",
+      "perMonth": null,
+      "perWeek": null
+    },
+    {
+      "name": "Chest of Gems",
+      "price": "$0.99",
+      "period": "consumable",
+      "perMonth": null,
+      "perWeek": null
+    }
+  ],
+  "paywall": {
+    "tiers": 1,
+    "yearlySavingPct": null,
+    "trial": {
+      "stated": true,
+      "evidence": "If you like Duolingo, try Super Duolingo for 14 days free!"
+    },
+    "consumables": 4,
+    "family": 0
+  },
+  "ourRead": [
+    "Every course is free, and an energy meter sells Super. Lesson screens show it falling 25, 24, 23, 22; Super’s perks include Unlimited Energy.",
+    "Super starts with 14 days free. Monthly Streak Repair ties it to the streak counter, so a missed day becomes a reason to pay.",
+    "6 Super listings run from $9.99 to $119.99. Gems add a second ladder: 1,200 for $4.99 up to 6,500 for $19.99, which gives 35% more gems per dollar."
+  ],
+  "improvements": [
+    {
+      "title": "Name each Super listing by its length",
+      "detail": "The App Store shows 6 items named Super Duolingo, from $9.99 to $119.99. Add the length to each name, like “Super Duolingo, 1 year”, so shoppers can compare prices before install.",
+      "rule": "Fix 3 things to stop a design from looking cheap: low contrast, a broken layout, and copy that does not convert.",
+      "source": "S27"
+    },
+    {
+      "title": "Show energy in grey until it runs low",
+      "detail": "Lesson screens put a pink energy meter next to the progress bar, so 2 colors compete above every question. Draw energy in grey #4B4B4B and turn it pink under 5, when Unlimited Energy starts to matter.",
+      "rule": "One accent per screen. Directing attention means one place to look.",
+      "source": "S8"
+    },
+    {
+      "title": "Darken the caption fills to pass 3:1",
+      "detail": "7 of 8 captions put white text on bright fills at 2.1 to 2.5:1. Fill each with the darker shade of its bottom edge, like #CE6603 under the orange, which reads at 3.8:1.",
+      "rule": "Text contrast: at least 4.5:1 for body text, 3:1 for text 24 px and larger.",
+      "source": "S27"
+    }
+  ],
+  "stylePrompt": "Build a paywall in Duolingo’s style. Top to bottom: a mascot, a lowercase 2-line headline, 3 perks with icons, the plans, one full-width button. Type: Fredoka 600 for headlines, M PLUS Rounded 1c for body, dark grey #4B4B4B text. Colors: white #FFFFFF (60) for the screen, owl green #78C800 (30) for the mascot and perk icons, streak orange #FF800B (10) for the button. Cards and buttons: 12 px corners, 2 px border, 6 px darker bottom edge. Plans: one tier in rows with length and price; preselect yearly and show its per-month price. Put the 14-day trial on the button. Use my brand colors in the same 60/30/10 roles.",
+  "elements": []
+}
