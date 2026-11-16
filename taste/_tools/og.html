@@ -6,8 +6,8 @@
 <title>tasu.ai share card master</title>
 <!-- The 1200x630 share card of one app page, rendered by _tools/og.cjs into media/<slug>/og.jpg.
      Open it with ?slug=strava. It reads data.js, so it always matches the built pages:
-     the app icon, "<App>: design and paywall", the app's 3 brand colors, its first paywall
-     capture (or its drawn plan, marked as drawn) in a tilted phone, and the tasu.ai lockup. -->
+     the app icon, "<App>: fonts, colors and UI", its 2 fonts, its 3 brand colors, its first
+     App Store screenshot in a tilted phone, and the tasu.ai lockup. -->
 <link rel="stylesheet" href="/taste/tasu.css">
 <script src="/taste/data.js"></script>
 <style>
@@ -19,6 +19,8 @@
     position: absolute; left: 72px; top: 296px; width: 600px; margin: 0;
     font-size: 66px; font-weight: 600; line-height: 1.04; letter-spacing: -.035em; color: #3A3936;
   }
+  .fonts { position: absolute; left: 72px; bottom: 176px; width: 640px; margin: 0; font: 500 22px/1.3 "Schibsted Grotesk", sans-serif; color: rgb(58 57 54 / .76); }
+  .fonts b { color: #3A3936; font-weight: 600; }
   .sw { position: absolute; left: 72px; bottom: 64px; display: flex; gap: 16px; }
   .sw div { display: grid; gap: 8px; font: 500 16px/1 "Schibsted Grotesk", sans-serif; color: rgb(58 57 54 / .76); }
   .sw span { width: 64px; height: 64px; border-radius: 16px; background: var(--c); box-shadow: inset 0 0 0 1px rgb(58 57 54 / .14); }
@@ -32,6 +34,7 @@
 <img class="lock" src="/taste/brand/lockup.svg" alt="">
 <img class="icon" id="icon" alt="">
 <h1 id="title"></h1>
+<p class="fonts" id="fonts"></p>
 <div class="sw" id="sw"></div>
 <div class="stage"><div class="phone" id="phone"></div></div>
 <script>
@@ -42,18 +45,17 @@
   var esc = function (s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
   var small = a.icon.replace(/icon\.png$/, 'icon-256.webp');
   document.getElementById('icon').src = small;
-  document.getElementById('title').innerHTML = '<span class="hl">' + esc(a.name) + '</span>: design and paywall';
+  document.getElementById('title').innerHTML = '<span class="hl">' + esc(a.name) + '</span>: fonts, colors and UI';
+  var f = a.fonts || {};
+  document.getElementById('fonts').innerHTML = f.headline && f.body && f.headline !== f.body
+    ? 'Fonts <b>' + esc(f.headline) + '</b> and <b>' + esc(f.body) + '</b>'
+    : (f.headline || f.body) ? 'Font <b>' + esc(f.headline || f.body) + '</b>' : '';
   document.getElementById('sw').innerHTML = a.colors.map(function (c) {
     return '<div><span style="--c:' + c.hex + '"></span>' + c.hex + '</div>';
   }).join('');
   var phone = document.getElementById('phone');
-  if (a.paywall.source !== 'drawn') {
-    phone.innerHTML = '<img src="' + a.paywall.src + '" width="600" height="1298" alt="">';
-  } else {
-    var rows = a.prices.filter(function (p) { return p.period !== 'consumable'; }).slice(0, 6);
-    phone.innerHTML = '<span class="mark">Drawn plan</span><div class="drawn"><div class="drawn-head"><img src="' + small + '" width="64" height="64" alt=""><p class="drawn-title">' + esc(a.name) + ' plans</p></div>' +
-      rows.map(function (r) { return '<div class="drawn-plan"><span><b>' + esc(r.name) + '</b></span><span><b>' + esc(r.price) + '</b></span></div>'; }).join('') + '</div>';
-  }
+  if (!a.shot) { document.body.setAttribute('data-error', 'no screenshot'); return; }
+  phone.innerHTML = '<img src="' + a.shot.src + '" width="' + a.shot.w + '" height="' + a.shot.h + '" alt="">';
   document.body.setAttribute('data-ready', '1');
 })();
 </script>

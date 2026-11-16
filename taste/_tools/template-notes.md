@@ -3,14 +3,29 @@
 Every page under `/taste/` uses this markup. Pages are full static HTML. `tasu.js` only enhances them.
 
 **The pages are generated.** `node taste/_tools/build.mjs` writes `index.html`, `<slug>/index.html`,
-`library/index.html` and `data.js` from `_data/` (order in `_data/selection.json`, facts in `raw/`,
-opinions in `analysis/`). Never edit the generated pages by hand: change the data or the generator,
-then run it again. The build also copies `brand/loops/loops.css` into `tasu.css` (between the
-`loops:start` and `loops:end` marks) and ends with a check of every page it wrote.
+`elements/index.html`, `elements/elements.css`, `paywall/index.html`, `prompt/index.html` and
+`data.js` from `_data/` (order in `_data/selection.json`, facts in `raw/`, opinions in `analysis/`,
+rebuilt UI elements in `elements/`, then `paywall-tips.json` and `prompts.json`). Never edit the
+generated pages by hand: change the data or the generator, then run it again. The build also copies
+`brand/loops/loops.css` into `tasu.css` (between the `loops:start` and `loops:end` marks) and ends
+with a check of every page it wrote.
 
-**v3 (15 Nov 2026): design and paywall.** tasu.ai covers each app's design and its paywall. The
-spec (`scratchpad/tasu3-spec.md`) wins over any older wording below. The markup in sections 2, 5,
-6 and 7 is the v3 markup the generator writes.
+**v4 (16 Nov 2026): fonts, colors and UI.** The generator is the reference for the markup; where
+the sections below still describe v3 (the library, the key number, "How I'd improve it"), v4 wins:
+
+- Header: the live wordmark (`.wm`, `[data-wm]`: "tasu.ai" unfolds into "taste using ai") and 4
+  links: Apps, UI Elements, Paywall, Prompts.
+- Home cards: the app name in its headline font (`.app-name` with an inline free-font style), a
+  short line (`.app-short`), the palette (`.app-palette`) and the 2 fonts (`.app-fonts`). No price.
+  The strip shows App Store screenshots only.
+- App page order: header, screenshots with downloads (`[data-download]`, `[data-download-all]`),
+  Design (`.colors-card` poster, `.fonts-card` specimens, `.style-card` traits), Copy this style,
+  UI elements (`.el-card`), Paywall (`#paywall`), pager and closing.
+- A rebuilt element: `.el-card` > `.el-stage` (transparent checker, `role="img"`) > `.el-fit`
+  (`--w`, `--h`, zoomed by tasu.js) > the element's own markup, scoped under `.x-<id>`.
+- New inline custom properties: `--ink` (text color on a poster field), `--w` and `--h` on `.el-fit`.
+- App fonts: `fonts/apps.css` (subsets made by `_tools/fonts-apps.mjs`). Element PNGs:
+  `_tools/elements.cjs`. Share cards: `_tools/og.cjs`.
 
 - Styles: `/taste/tasu.css`. Behaviour: `/taste/tasu.js` (defer).
 - Font: `/taste/fonts/` (Schibsted Grotesk, self-hosted, built by `_tools/fonts.py`).

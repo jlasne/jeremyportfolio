@@ -67,6 +67,18 @@
     }
   ],
   "screenshotTotal": 10,
+  "appleShots": [
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/a6/6a/34/a66a34be-23c7-04d3-14b9-f37278ac89e3/1.png/1290x2796bb.jpg",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/41/75/02/4175024b-516c-40d9-5527-f662e0fc47eb/2.png/1290x2796bb.jpg",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/04/b9/d1/04b9d1fb-4e5a-c2d5-6d48-678469d46bad/3.png/1290x2796bb.jpg",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/8d/9c/a9/8d9ca98c-46ee-587f-1cef-de6298093e0e/4.png/1290x2796bb.jpg",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/97/d8/6d/97d86df2-e7b7-9e8f-b04b-e3b4a78f90f0/5.png/1290x2796bb.jpg",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/a2/ae/fc/a2aefc1f-b550-651d-054f-f45f9641b12f/6.png/1290x2796bb.jpg",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/0a/8b/71/0a8b71a8-ebc0-0239-50be-4ae8e8b4c8c8/7.png/1290x2796bb.jpg",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/36/0d/ba/360dba8e-56be-730a-c15a-a9257fb31838/8.png/1290x2796bb.jpg",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/ee/d5/a0/eed5a0b4-ba72-7b2a-6302-d874618f1bcb/9.png/1290x2796bb.jpg",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/cf/74/a7/cf74a7f5-8a7b-170e-3dcc-e68a377364a3/10.png/1290x2796bb.jpg"
+  ],
   "paywall": [
     {
       "src": "/taste/media/headspace/pw1.jpg",

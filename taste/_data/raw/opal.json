@@ -67,6 +67,16 @@
     }
   ],
   "screenshotTotal": 8,
+  "appleShots": [
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/43/21/1b/43211b86-52de-e655-a535-faa7c1aa26ab/Artboard_1.jpg/1290x2796bb.jpg",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/67/8e/c5/678ec571-16af-5b81-78b7-6c3a0fb19fb4/Artboard_2.jpg/1290x2796bb.jpg",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/4a/7c/f5/4a7cf520-2128-ce8b-5708-df417426c29a/Artboard_3.jpg/1290x2796bb.jpg",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/7d/4f/47/7d4f47d1-581b-8562-a810-0db2238c9de4/Artboard_4.jpg/1290x2796bb.jpg",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/ae/bd/fa/aebdfaf5-d7e8-48de-bc4b-503d22ba0f71/Artboard_5.jpg/1290x2796bb.jpg",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/45/f0/d8/45f0d8d6-cad1-d441-76ab-7b8e047364a8/Artboard_6.jpg/1290x2796bb.jpg",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/02/8f/a2/028fa283-188a-210a-c3af-d683fe403d06/Artboard_7.jpg/1290x2796bb.jpg",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/07/9e/fa/079efa16-6be0-1db9-b4a3-bc422f836647/Artboard_8.jpg/1290x2796bb.jpg"
+  ],
   "paywall": [
     {
       "src": "/taste/media/opal/pw1.jpg",

@@ -368,29 +368,40 @@ html:not(.js) .js-only { display: none !important; }
 }
 
 /* 7. Header =============================================================== */
-/* Phone: 2 rows (logo + nav, then search + tools). From 720px: 1 row. Never wider than the screen. */
+/* Phone: 3 rows (logo and tools, the nav, then search). From 720px: logo, nav and tools, then
+   search. From 1024px: 1 row. The free column after the logo takes the unfolded wordmark, so
+   nothing else moves (tasu.js unfolds it only when it fits). Never wider than the screen. */
 .site-header { position: relative; z-index: 10; }
 .header-in {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   grid-template-areas:
-    "brand nav"
-    "search tools";
+    "brand . tools"
+    "nav nav nav"
+    "search search search";
   align-items: center;
-  gap: var(--sp-8) var(--sp-8);
+  gap: var(--sp-4) var(--sp-8);
   padding-block: var(--sp-8);
 }
 @media (min-width: 720px) {
   .header-in {
-    grid-template-columns: auto auto minmax(0, 1fr) minmax(184px, 288px) auto;
-    grid-template-areas: "brand nav . search tools";
-    column-gap: var(--sp-16);
-    min-height: 80px;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      "brand . nav tools"
+      "search search search search";
+    gap: var(--sp-8) var(--sp-16);
     padding-block: var(--sp-16);
   }
 }
+@media (min-width: 1024px) {
+  .header-in {
+    grid-template-columns: auto minmax(0, 1fr) auto minmax(184px, 264px) auto;
+    grid-template-areas: "brand . nav search tools";
+    min-height: 80px;
+  }
+}
 /* The lockup: Tasu blinking in its 32px tile (a 34px box with 1px of clear padding, hence the -1px
-   margin) and the wordmark, 7px apart like the still lockup. The wordmark swaps with the theme. */
+   margin), then the live wordmark, 7px apart like the still lockup. */
 .brand {
   grid-area: brand;
   justify-self: start;
@@ -399,15 +410,43 @@ html:not(.js) .js-only { display: none !important; }
   gap: 7px;
   height: 44px;
   border-radius: var(--r-8);
+  color: var(--text);
   text-decoration: none;
 }
 .brand .tasu-loop--blink { width: 34px; height: 34px; margin: -1px; }
-.brand img { width: 86px; height: 32px; }
-.brand-l { display: var(--logo-light, block); }
-.brand-d { display: var(--logo-dark, none); }
+/* The wordmark: "tasu.ai" in Schibsted Grotesk 800, the size of the old 86x32 drawing. The 3 parts
+   that change ("te ", "sing ", the dot) are flex items whose max-width tasu.js animates: "taste
+   using ai" unfolds on the first visit of a session and on hover or focus, then folds back. All
+   parts share one line box, so they align without baselines. */
+.wm { display: inline-flex; align-items: center; height: 32px; font-size: 27px; font-weight: 800; line-height: 1; letter-spacing: -.035em; white-space: pre; }
+.wm > span { display: block; }
+.wm-x, .wm-dot { overflow: hidden; }
+.wm-x { max-width: 0; opacity: 0; }
+.wm-dot { max-width: var(--wd, .3em); }
+.wm.is-open .wm-x { max-width: var(--wx, 3em); opacity: 1; }
+.wm.is-open .wm-dot { max-width: 0; opacity: 0; }
+.wm.is-ready .wm-x,
+.wm.is-ready .wm-dot { transition: max-width 600ms var(--ease-in-out), opacity 400ms var(--ease-in-out); }
+@media (prefers-reduced-motion: reduce) {
+  .wm.is-ready .wm-x,
+  .wm.is-ready .wm-dot { transition: opacity 200ms linear; }
+}
 
-.nav { grid-area: nav; display: flex; gap: var(--sp-4); }
+/* 4 links. On phones the row scrolls inside itself if it must, with the text on the gutter. */
+.nav {
+  grid-area: nav;
+  display: flex;
+  gap: var(--sp-4);
+  margin-inline: calc(-1 * var(--sp-8));
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav::-webkit-scrollbar { display: none; }
+@media (min-width: 720px) {
+  .nav { margin-inline: 0; overflow: visible; }
+}
 .nav a {
+  flex: none;
   display: inline-flex;
   align-items: center;
   height: 44px;
@@ -415,14 +454,16 @@ html:not(.js) .js-only { display: none !important; }
   border-radius: var(--r-pill);
   color: var(--text-2);
   font-weight: 500;
+  white-space: nowrap;
   text-decoration: none;
   transition: color var(--t-in) var(--ease-out);
 }
-@media (min-width: 400px) {
+@media (min-width: 1280px) {
   .nav a { padding: 0 var(--sp-16); }
 }
 .nav a:hover,
 .nav a[aria-current] { color: var(--text); }
+.nav a[aria-current="page"] { background: var(--surface); }
 
 .search--header { grid-area: search; }
 .header-tools { grid-area: tools; display: flex; gap: var(--sp-4); }
@@ -571,8 +612,7 @@ html:not(.js) .js-only { display: none !important; }
 /* The source of the gallery's facts: after the count, or under it on a phone. */
 .toolbar-source { display: block; font-size: var(--fs-13); line-height: 1.45; }
 @media (min-width: 520px) {
-  .toolbar-source { display: inline; }
-  .toolbar-source::before { content: " · "; }
+  .toolbar-source { display: inline; margin-left: var(--sp-16); }
 }
 .view-toggle {
   display: inline-flex;
@@ -641,46 +681,38 @@ html:not(.js) .js-only { display: none !important; }
   box-shadow: 0 0 0 1px var(--surface);
 }
 .app-rank { margin-top: var(--sp-24); font-size: var(--fs-13); font-weight: 600; color: var(--text-2); }
-.app-name { margin-top: var(--sp-4); font-size: var(--fs-25); font-weight: 700; line-height: 1.15; text-wrap: balance; }
-.app-sub { margin-top: var(--sp-4); color: var(--text-2); }
-.key { margin-top: auto; padding-top: var(--sp-32); line-height: 1; }
-/* The one key number of a card: grey with a mint band on cream, mint text on dark. */
-.key-num {
-  font-size: var(--fs-61);
-  font-size: min(var(--fs-61), 22cqi);
+/* The name, set in the app's own headline font (its closest free match, self-hosted), large. */
+.app-name {
+  margin-top: var(--sp-8);
+  font-size: var(--fs-39);
+  font-size: min(var(--fs-39), 14cqi);
   font-weight: 700;
-  letter-spacing: -.04em;
-  color: var(--key);
-  background: linear-gradient(var(--key-band), var(--key-band)) 0 88% / 100% .28em no-repeat;
-  padding: 0 .04em;
-  margin: 0 -.04em;
-  white-space: nowrap;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
 }
-.key-label { display: block; margin-top: var(--sp-8); font-size: var(--fs-13); line-height: 1.45; color: var(--text-2); }
-/* Phone: the price steps down to 39px, so the page h1 stays the largest type. */
+.app-short { margin-top: var(--sp-8); color: var(--text-2); text-wrap: pretty; }
+/* The palette and the 2 fonts sit at the bottom of the card. Colors are content, so any hex. */
+.app-design { display: grid; gap: var(--sp-16); margin-top: auto; padding-top: var(--sp-32); }
 @media (max-width: 719px) {
-  .key { padding-top: var(--sp-24); }
-  .key-num { font-size: var(--fs-39); letter-spacing: -.03em; }
+  .app-design { padding-top: var(--sp-24); }
 }
-/* The app's 3 brand colors, top right of the card: 2 main colors, then the accent. Content, so any hex. */
-.app-colors {
-  position: absolute;
-  top: var(--sp-24);
-  right: var(--sp-24);
-  display: flex;
-  gap: var(--sp-4);
-}
-.app-colors span {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
+.app-palette { display: flex; gap: var(--sp-8); }
+.app-palette li { display: grid; justify-items: start; gap: var(--sp-4); }
+.app-palette .swatch {
+  width: 56px;
+  height: 40px;
+  border-radius: var(--r-16);
   background: var(--c);
   box-shadow: inset 0 0 0 1px var(--hover);
 }
-.stats { display: flex; flex-wrap: wrap; gap: var(--sp-8) var(--sp-24); margin-top: var(--sp-24); }
-.stats > div { display: flex; flex-direction: column-reverse; }
-.stats dt { font-size: var(--fs-13); color: var(--text-2); }
-.stats dd { font-size: var(--fs-20); font-weight: 600; line-height: 1.3; }
+.app-palette .hex { font-size: var(--fs-13); line-height: 1.45; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.app-fonts { display: grid; gap: var(--sp-8); }
+.app-fonts > div { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-16); }
+.app-fonts dt { flex: none; font-size: var(--fs-13); color: var(--text-2); }
+.app-fonts dd { min-width: 0; overflow: hidden; text-align: right; text-overflow: ellipsis; white-space: nowrap; }
+.font-sample { font-size: var(--fs-20); line-height: 1.3; }
+.font-close { font-size: var(--fs-13); color: var(--text-2); }
 
 /* The strip: phone screens in one line, scroll snap, arrow buttons on desktop.
    Screens are 320px tall on phone, 400px from 720px, 448px from 1024px (the card height). */
@@ -818,14 +850,15 @@ html:not(.js) .js-only { display: none !important; }
 }
 
 /* 13. Grid view =========================================================== */
-/* data-view="grid" on <html> (set by the toggle and the head snippet) or on any wrapper.
-   Each app becomes one tile: the paywall screen on top, then icon, name, rank and key number. */
+/* data-view="grid" on <html> (set by the toggle and the head snippet). Each app becomes one tile:
+   its first screenshot, then icon, name, rank and palette. Every rule sits under .apps, so the
+   choice never touches the strips of the app pages. */
 [data-view="grid"] .apps {
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 264px), 1fr));
   gap: var(--sp-16);
   padding-inline: var(--side);
 }
-[data-view="grid"] .app-row {
+[data-view="grid"] .apps .app-row {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -834,44 +867,41 @@ html:not(.js) .js-only { display: none !important; }
   background: var(--surface);
   transition: background-color var(--t-in) var(--ease-out);
 }
-[data-view="grid"] .app-row:hover { background: var(--hover); }
-[data-view="grid"] .app-row > .strip {
+[data-view="grid"] .apps .app-row:hover { background: var(--hover); }
+[data-view="grid"] .apps .app-row > .strip {
   order: -1;
   min-height: 0;
   margin: 0;
   padding: var(--sp-16) var(--sp-16) 0;
+  --screen-h: 360px;
 }
-[data-view="grid"] .strip-track { justify-content: center; padding: 0; overflow: visible; }
-[data-view="grid"] .strip { --screen-h: 360px; }
-[data-view="grid"] .screen:not(:first-child),
-[data-view="grid"] .strip-btn,
-[data-view="grid"] .app-sub,
-[data-view="grid"] .stats { display: none; }
-[data-view="grid"] .app-card {
+[data-view="grid"] .apps .strip-track { justify-content: center; padding: 0; overflow: visible; }
+[data-view="grid"] .apps .screen:not(:first-child),
+[data-view="grid"] .apps .strip-btn,
+[data-view="grid"] .apps .app-short,
+[data-view="grid"] .apps .app-fonts { display: none; }
+[data-view="grid"] .apps .app-card {
   container-type: normal;
   position: static;
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) auto;
+  grid-template-columns: 40px minmax(0, 1fr);
   grid-template-areas:
-    "icon name name"
-    "icon rank rank"
-    "key key colors";
+    "icon name"
+    "icon rank"
+    "design design";
   column-gap: var(--sp-16);
   padding: var(--sp-16);
   border-radius: var(--r-24);
   background: none;
 }
-[data-view="grid"] .app-card:hover { background: none; }
-[data-view="grid"] .app-card::after { content: ""; position: absolute; inset: 0; border-radius: var(--r-32); }
-[data-view="grid"] .app-icon { grid-area: icon; align-self: center; width: 40px; height: 40px; }
-/* The swatches sit on the price row, so the rank keeps the full width and fits on 1 line. */
-[data-view="grid"] .app-colors { position: static; grid-area: colors; align-self: end; margin-bottom: var(--sp-24); }
-[data-view="grid"] .app-colors span { width: 16px; height: 16px; }
-[data-view="grid"] .app-name { grid-area: name; margin: 0; font-size: var(--fs-16); font-weight: 600; line-height: 1.3; }
-[data-view="grid"] .app-rank { grid-area: rank; margin: 0; font-weight: 500; }
-[data-view="grid"] .key { grid-area: key; padding-top: var(--sp-16); }
-[data-view="grid"] .key-num { font-size: var(--fs-31); letter-spacing: 0; }
-[data-view="grid"] .key-label { margin-top: var(--sp-4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+[data-view="grid"] .apps .app-card:hover { background: none; }
+[data-view="grid"] .apps .app-card::after { content: ""; position: absolute; inset: 0; border-radius: var(--r-32); }
+[data-view="grid"] .apps .app-icon { grid-area: icon; align-self: center; width: 40px; height: 40px; }
+[data-view="grid"] .apps .app-name { grid-area: name; margin: 0; font-size: var(--fs-20); line-height: 1.2; }
+[data-view="grid"] .apps .app-rank { grid-area: rank; margin: 0; font-weight: 500; }
+[data-view="grid"] .apps .app-design { grid-area: design; padding-top: var(--sp-16); }
+[data-view="grid"] .apps .app-palette li { grid-auto-flow: column; align-items: center; }
+[data-view="grid"] .apps .app-palette .swatch { width: 24px; height: 24px; border-radius: var(--r-8); }
 
 /* 14. Empty state ========================================================= */
 .empty {
@@ -1194,39 +1224,37 @@ html:not(.js) .js-only { display: none !important; }
   .pager span { overflow-wrap: normal; }
 }
 
-/* 18. Branding: swatches and the 60/30/10 bar ============================= */
-.swatches { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-16); }
-.swatch-chip {
-  display: block;
-  aspect-ratio: 1;
-  border-radius: var(--r-24);
-  background: var(--c);
-  box-shadow: inset 0 0 0 1px var(--surface);
-}
-.swatch-role { display: block; margin-top: var(--sp-16); font-size: var(--fs-20); font-weight: 700; line-height: 1.3; }
-.swatch-name { display: block; font-weight: 500; overflow-wrap: anywhere; }
-.swatch-hex { display: block; font-size: var(--fs-13); color: var(--text-2); }
-.ratio {
-  position: relative;
-  display: flex;
-  height: var(--sp-24);
-  margin-top: var(--sp-24);
-  border-radius: var(--r-pill);
-  overflow: hidden;
-}
-.ratio span { flex: 0 0 var(--w); background: var(--c); }
-.ratio::after {
-  content: "";
+/* Screenshots: "Download all" sits next to the title; each screen has its own download button,
+   shown on hover and focus, always on touch screens. */
+.shots-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--sp-16); }
+.shots-head .source-note { margin-top: var(--sp-4); }
+.dl-btn {
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: inset 0 0 0 1px var(--surface);
+  z-index: 1;
+  right: var(--sp-8);
+  bottom: var(--sp-8);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-pill);
+  background: rgb(28 27 25 / .72);
+  color: #F3EFE7;
+  opacity: 0;
+  transition: opacity var(--t-in) var(--ease-out), transform var(--t-in) var(--ease-out);
 }
-.brand-logo { width: 160px; height: 160px; border-radius: var(--r-icon); box-shadow: 0 0 0 1px var(--surface); }
+.dl-btn:active { transform: scale(.94); }
+.screen:hover .dl-btn,
+.dl-btn:focus-visible,
+.dl-btn.is-busy { opacity: 1; }
+@media (hover: none) {
+  .dl-btn { opacity: 1; }
+}
 
-/* Colors, Font and Design style: 3 cards side by side on desktop, stacked on phone.
+/* 18. Design: the colors poster, the 2 fonts, the design style ============ */
+/* 3 cards side by side from 1100px, 2 then 1 from 720px, stacked on phone.
    One card style for the site: the surface fill, radius 32, no border. */
-.design-grid { display: grid; gap: var(--sp-16); }
+.design-grid { display: grid; gap: var(--sp-16); align-items: start; }
 @media (min-width: 720px) {
   .design-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .design-grid > :last-child { grid-column: 1 / -1; }
@@ -1244,74 +1272,86 @@ html:not(.js) .js-only { display: none !important; }
 @media (min-width: 720px) {
   .card { padding: var(--sp-32); }
 }
-.card > h2 { margin-bottom: var(--sp-24); }
+.card > h2,
+.card > h3 { margin-bottom: var(--sp-24); }
 
-/* Colors: 3 big swatches, 2 main colors then the accent, each with its hex (click to copy). */
-.colors { display: grid; gap: var(--sp-16); }
-.color { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: var(--sp-16); align-items: center; }
-.color-chip {
-  width: 72px;
-  height: 72px;
-  border-radius: var(--r-16);
+/* Colors: a poster. The 60 color fills the top, 30 and 10 share the row under it (2 to 1). Each
+   field prints its role, name and hex in black or white, whichever reads better (--ink, set by
+   the build). A click copies the hex. */
+.poster { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); grid-template-rows: 176px 120px; gap: var(--sp-8); }
+.pf {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+  padding: var(--sp-16);
+  border-radius: var(--r-24);
   background: var(--c);
+  color: var(--ink);
   box-shadow: inset 0 0 0 1px var(--hover);
+  text-align: left;
+  transition: transform var(--t-in) var(--ease-out);
 }
-.color-role { display: block; font-size: var(--fs-13); line-height: 1.45; color: var(--text-2); }
-.color-line { display: flex; flex-wrap: wrap; align-items: center; column-gap: var(--sp-8); }
-.color-name { font-weight: 600; overflow-wrap: anywhere; }
-.color-use { display: block; font-size: var(--fs-13); line-height: 1.45; color: var(--text-2); text-wrap: pretty; }
-.copy-hex {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sp-4);
-  min-height: 44px;
-  margin-block: -10px;
-  padding: 0 var(--sp-8);
-  margin-inline: calc(-1 * var(--sp-8)) 0;
-  border-radius: var(--r-pill);
-  color: var(--text-2);
+.pf:active { transform: scale(.98); }
+.pf-60 { grid-column: 1 / -1; }
+.pf-role { font-size: var(--fs-13); font-weight: 500; line-height: 1.45; opacity: .78; }
+.pf-name { max-width: 100%; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
+.pf-60 .pf-name { font-size: var(--fs-25); }
+.pf-hex { display: inline-flex; align-items: center; gap: var(--sp-4); font-size: var(--fs-13); font-weight: 500; line-height: 1.45; font-variant-numeric: tabular-nums; }
+.pf .ico-sm { opacity: .7; }
+.pf.is-copied .pf-hex { font-weight: 700; }
+html:not(.js) .pf { pointer-events: none; }
+.poster-uses { display: grid; gap: var(--sp-8); margin-top: var(--sp-24); }
+.poster-uses li {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr);
+  gap: var(--sp-8);
+  align-items: baseline;
   font-size: var(--fs-13);
-  font-weight: 500;
-  transition: background-color var(--t-in) var(--ease-out), color var(--t-in) var(--ease-out);
+  line-height: 1.45;
+  color: var(--text-2);
+  text-wrap: pretty;
 }
-.copy-hex:hover { background: var(--surface); color: var(--text); }
-.copy-hex .ico-sm { opacity: .7; }
-.copy-hex.is-copied { color: var(--text); }
-html:not(.js) .copy-hex { pointer-events: none; }
-.card .ratio { margin-top: var(--sp-32); }
+.poster-uses .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--c); box-shadow: inset 0 0 0 1px var(--hover); transform: translateY(1px); }
+.poster-uses b { color: var(--text); font-weight: 600; }
 
-/* Font: a crop of the app's own headline text is the specimen, since we have no font files. */
-.specimen {
-  width: 100%;
-  height: auto;
-  margin-bottom: var(--sp-24);
-  border-radius: var(--r-16);
-  box-shadow: 0 0 0 1px var(--surface);
-}
-.font-name { font-size: var(--fs-25); font-weight: 700; line-height: 1.2; }
-.font-free { margin-top: var(--sp-4); font-size: var(--fs-13); line-height: 1.45; color: var(--text-2); }
-.font-look { margin-top: var(--sp-16); text-wrap: pretty; }
-.card .facts { grid-template-columns: minmax(0, 1fr); gap: var(--sp-16); margin-top: var(--sp-24); }
-.card .facts dd { font-size: var(--fs-16); font-weight: 500; line-height: 1.55; }
+/* Fonts: 2 specimens. Each sets "Aa" and a line in the free match, names it, links it, and shows
+   the crop of the app's own text. */
+.sp + .sp { margin-top: var(--sp-48); }
+.sp-role { font-size: var(--fs-13); font-weight: 600; line-height: 1.45; color: var(--text-2); }
+.sp-name { margin-top: var(--sp-4); font-size: var(--fs-20); font-weight: 700; line-height: 1.25; }
+.sp-aa { margin-top: var(--sp-16); font-size: 96px; line-height: 1; letter-spacing: -.02em; }
+.sp-line { margin-top: var(--sp-8); font-size: var(--fs-25); line-height: 1.2; overflow-wrap: anywhere; }
+.sp-look { margin-top: var(--sp-16); text-wrap: pretty; }
+.sp-free { margin-top: var(--sp-8); font-size: var(--fs-13); line-height: 1.45; color: var(--text-2); }
+.sp-free a { color: var(--text); font-weight: 500; }
+.sp-crop { width: 100%; height: auto; margin-top: var(--sp-16); border-radius: var(--r-16); box-shadow: 0 0 0 1px var(--hover); }
 
-/* Design style: 1 or 2 sentences, then 3 measured traits. */
+/* Design style: a summary, then 6 labeled traits with numbers. */
 .style-text { text-wrap: pretty; }
-.card .bullets { margin-top: var(--sp-24); gap: var(--sp-8); }
+.traits { display: grid; gap: var(--sp-16); margin-top: var(--sp-24); }
+.traits > div { display: grid; gap: 2px; }
+.traits dt { font-size: var(--fs-13); font-weight: 600; line-height: 1.45; color: var(--text-2); }
+.traits dd { text-wrap: pretty; }
 
-/* Copy this style: one prompt to paste into Claude Code or Cursor. Readable type, no monospace.
-   Phone: title, prompt, button. From 1024px: title and button on the left, the prompt on the right. */
-.prompt-block { display: grid; gap: var(--sp-24); grid-template-areas: "title" "card" "actions"; }
+/* Copy this style: one prompt to paste into Claude Code or Cursor. Readable type, no monospace,
+   its line breaks kept. Phone: title, prompt, button. From 1024px: title and button on the left. */
+.prompt-block { display: grid; gap: var(--sp-24); grid-template-areas: "title" "sub" "card" "actions"; }
 .prompt-block > h2 { grid-area: title; }
+.prompt-sub { grid-area: sub; margin-top: calc(-1 * var(--sp-16)); color: var(--text-2); text-wrap: pretty; }
 .prompt-block > .prompt { grid-area: card; }
 .prompt-actions { grid-area: actions; display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-8) var(--sp-16); }
 @media (min-width: 1024px) {
   .prompt-block {
     grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-    grid-template-rows: auto 1fr;
-    grid-template-areas: "title card" "actions card";
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas: "title card" "sub card" "actions card";
     column-gap: var(--sp-64);
     align-items: start;
   }
+  .prompt-sub { margin-top: 0; }
   .prompt-actions { flex-direction: column; align-items: flex-start; }
 }
 .prompt {
@@ -1321,64 +1361,220 @@ html:not(.js) .copy-hex { pointer-events: none; }
 }
 @media (min-width: 720px) {
   .prompt { padding: var(--sp-32); }
-  .prompt-text { font-size: var(--fs-20); line-height: 1.6; }
 }
-.prompt-text { max-width: 68ch; text-wrap: pretty; }
+.prompt-text { max-width: 68ch; white-space: pre-line; text-wrap: pretty; }
 .prompt-hint { font-size: var(--fs-13); line-height: 1.45; color: var(--text-2); }
 
-/* 19. UI element tiles ==================================================== */
+/* 19. UI elements, paywall tips, prompts =================================== */
 .lib-top { padding-top: var(--sp-24); }
 @media (min-width: 720px) {
   .lib-top { padding-top: var(--sp-48); }
 }
 .lib-intro .lead { margin-top: var(--sp-16); max-width: 60ch; }
-.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-8); }
-/* The library exists to compare crops: on small phones it shows one per row, so the text reads.
-   The home teaser keeps 2 columns. */
-@media (max-width: 519px) {
-  .lib-top .tiles { grid-template-columns: minmax(0, 1fr); }
-}
+.lib-intro .source-note { margin-top: var(--sp-8); }
+
+/* An element card: the live element on its stage, then name, app, why, source and 3 actions. */
+.el-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-16); }
 @media (min-width: 720px) {
-  .tiles { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--sp-16); }
+  .el-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-.tile {
+@media (min-width: 1100px) {
+  .el-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+.el-card {
   display: flex;
   flex-direction: column;
-  padding: var(--sp-8) var(--sp-8) var(--sp-16);
+  min-width: 0;
+  border-radius: var(--r-32);
+  background: var(--surface);
+  overflow: hidden;
+}
+/* The stage is transparent: a faint checker of the text color says so. The element keeps its own
+   colors and fonts; tasu.js zooms it down when the stage is narrower than the element (--w). */
+.el-stage {
+  --check: color-mix(in srgb, var(--text) 5%, transparent);
+  display: grid;
+  place-items: center;
+  min-height: 208px;
+  padding: var(--sp-32) var(--sp-16);
+  background: repeating-conic-gradient(var(--check) 0 25%, transparent 0 50%) 0 0 / 16px 16px;
+  overflow: hidden;
+}
+.el-fit { width: calc(var(--w) * 1px); max-width: none; }
+.el-body { flex: 1; display: flex; flex-direction: column; gap: var(--sp-8); padding: var(--sp-24); }
+.el-name { font-size: var(--fs-20); font-weight: 700; line-height: 1.25; }
+.el-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--sp-16); font-size: var(--fs-13); line-height: 1.45; color: var(--text-2); }
+.el-app {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-8);
+  min-height: 44px;
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+}
+.el-app:hover { text-decoration: underline; }
+.el-app img { width: 24px; height: 24px; border-radius: var(--r-icon); }
+.el-why { text-wrap: pretty; }
+.el-src { font-size: var(--fs-13); line-height: 1.45; color: var(--text-2); }
+.el-src a { color: var(--text); }
+.el-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-8); margin-top: auto; padding-top: var(--sp-8); }
+.btn-sm { min-height: 44px; padding: 10px var(--sp-16); }
+/* On a surface card, the secondary pill takes the page color so it stays visible. */
+.el-card .btn-secondary,
+.tip .btn-secondary,
+.pr .btn-secondary { background: var(--bg); }
+.el-card .btn-secondary:hover,
+.tip .btn-secondary:hover,
+.pr .btn-secondary:hover { background: var(--hover); }
+.el-more summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-8);
+  min-height: 44px;
+  font-size: var(--fs-13);
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.el-more summary::-webkit-details-marker { display: none; }
+.el-more summary::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid;
+  border-bottom: 1.5px solid;
+  transform: rotate(-45deg);
+  transition: transform var(--t-in) var(--ease-out);
+}
+.el-more[open] summary::before { transform: rotate(45deg); }
+.el-prompt,
+.el-code {
+  padding: var(--sp-16);
+  border-radius: var(--r-16);
+  background: var(--bg);
+  font-size: var(--fs-13);
+  line-height: 1.6;
+}
+.el-prompt { white-space: pre-line; text-wrap: pretty; }
+/* Code is the one place for monospace. */
+.el-code { max-height: 320px; overflow: auto; font: 500 12px/1.6 ui-monospace, "SF Mono", Menlo, Consolas, monospace; white-space: pre; tab-size: 2; }
+
+/* Teasers on the home: 3 tips, 3 prompts. */
+.tip-teaser,
+.pr-teaser { display: grid; gap: var(--sp-16); }
+@media (min-width: 720px) {
+  .tip-teaser,
+  .pr-teaser { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+.tip-mini,
+.pr-mini {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-8);
+  height: 100%;
+  padding: var(--sp-24);
+  border-radius: var(--r-32);
+  background: var(--surface);
+  color: inherit;
+  text-decoration: none;
+  transition: background-color var(--t-in) var(--ease-out);
+}
+.tip-mini:hover,
+.pr-mini:hover { background: var(--hover); }
+.tip-stat { display: grid; gap: var(--sp-4); font-size: var(--fs-39); font-weight: 700; line-height: 1; letter-spacing: -.03em; }
+.tip-label { font-size: var(--fs-13); font-weight: 500; line-height: 1.45; letter-spacing: 0; color: var(--text-2); }
+.tip-mini .title-s { margin-top: var(--sp-8); }
+.pr-area { font-size: var(--fs-13); font-weight: 600; line-height: 1.45; color: var(--text-2); }
+.pr-when { color: var(--text-2); text-wrap: pretty; }
+
+/* Paywall tips: 1 card per tip, then the 12 paywalls. */
+.tips { display: grid; gap: var(--sp-16); margin-top: var(--sp-48); }
+@media (min-width: 720px) {
+  .tips { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.tip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-16);
+  min-width: 0;
+  padding: var(--sp-24);
+  border-radius: var(--r-32);
+  background: var(--surface);
+  scroll-margin-top: var(--sp-24);
+}
+@media (min-width: 720px) {
+  .tip { padding: var(--sp-32); }
+}
+.tip .tip-stat { font-size: var(--fs-61); }
+.tip-body { text-wrap: pretty; }
+.tip-apps { display: flex; flex-wrap: wrap; gap: var(--sp-8); }
+.tip .el-actions { margin-top: auto; }
+.app-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-8);
+  min-height: 44px;
+  padding: 0 var(--sp-16) 0 var(--sp-8);
+  border-radius: var(--r-pill);
+  background: var(--bg);
+  color: var(--text);
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color var(--t-in) var(--ease-out);
+}
+.app-chip:hover { background: var(--hover); }
+.app-chip img { width: 28px; height: 28px; border-radius: var(--r-icon); }
+.pw-apps { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 272px), 1fr)); gap: var(--sp-8); }
+.pw-app {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  grid-template-areas: "icon name" "icon price" "icon trial";
+  column-gap: var(--sp-16);
+  align-items: center;
+  padding: var(--sp-16);
   border-radius: var(--r-24);
   background: var(--surface);
   color: inherit;
   text-decoration: none;
-  transition: background-color var(--t-in) var(--ease-out), transform var(--t-in) var(--ease-out);
+  transition: background-color var(--t-in) var(--ease-out);
 }
-.tile:hover { background: var(--hover); }
-.tile:active { transform: scale(.97); }
-/* The crop fits inside a 4:3 box whatever its shape: one grid cell the size of the box. */
-.tile-img {
-  display: grid;
-  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
-  place-items: center;
-  aspect-ratio: 4 / 3;
-  padding: var(--sp-16);
-  border-radius: var(--r-16);
-  overflow: hidden;
+.pw-app:hover { background: var(--hover); }
+.pw-app img { grid-area: icon; width: 48px; height: 48px; border-radius: var(--r-icon); }
+.pw-name { grid-area: name; font-weight: 600; }
+.pw-price { grid-area: price; font-size: var(--fs-13); line-height: 1.45; color: var(--text-2); }
+.pw-price b { color: var(--text); font-size: var(--fs-16); }
+.pw-trial { grid-area: trial; font-size: var(--fs-13); line-height: 1.45; color: var(--text-2); }
+
+/* Prompts: 1 card per prompt. Without JS the whole prompt shows; with JS it opens on "Show all". */
+.prs { display: grid; gap: var(--sp-16); }
+@media (min-width: 1024px) {
+  .prs { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
 }
-.tile-img img { width: auto; max-width: 100%; height: auto; max-height: 100%; border-radius: var(--r-8); object-fit: contain; }
-.tile-type { margin-top: var(--sp-8); padding-inline: var(--sp-8); font-weight: 600; }
-.tile-app {
+.pr {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: var(--sp-8);
-  margin-top: var(--sp-4);
-  padding-inline: var(--sp-8);
-  font-size: var(--fs-13);
-  color: var(--text-2);
+  min-width: 0;
+  padding: var(--sp-24);
+  border-radius: var(--r-32);
+  background: var(--surface);
+  scroll-margin-top: var(--sp-24);
 }
-.tile-app img { width: 20px; height: 20px; border-radius: var(--r-icon); }
+@media (min-width: 720px) {
+  .pr { padding: var(--sp-32); }
+}
+.pr-box { margin-top: var(--sp-8); padding: var(--sp-16); border-radius: var(--r-16); background: var(--bg); }
+.pr-text { font-size: var(--fs-13); line-height: 1.6; white-space: pre-line; overflow-wrap: anywhere; }
+.js .pr-box:not(.is-open) .pr-text { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 8; overflow: hidden; }
+.pr-words { font-size: var(--fs-13); line-height: 1.45; color: var(--text-2); }
+.pr-words a { color: var(--text); }
+.pr-links { margin-top: var(--sp-8); }
 
 /* 20. Closing line and footer ============================================= */
 .closing { display: grid; justify-items: center; gap: var(--sp-24); text-align: center; }
 .closing .title-xl { max-width: 14em; }
+.closing-sub { max-width: 34em; margin-top: calc(-1 * var(--sp-8)); color: var(--text-2); text-wrap: balance; }
 /* Tasu hops with joy over the "Follow on X" block. */
 .closing .tasu-loop--happy { width: 120px; height: 120px; margin-bottom: calc(-1 * var(--sp-8)); }
 .pager + .closing { margin-top: var(--sp-64); }

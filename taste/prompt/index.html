@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prompts to unslop your app | tasu.ai</title>
+<meta name="description" content="14 prompts that each fix one part of an iPhone app, from the copy to the App Store screenshots. Paste one into Claude Code or Cursor.">
+<link rel="canonical" href="https://www.jeremylasne.com/taste/prompt/">
+<meta name="theme-color" content="#F3EFE7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1C1B19" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
+<script>(function(r){var t,v;try{t=localStorage.getItem('tasu-theme');v=localStorage.getItem('tasu-view')}catch(e){}r.classList.add('js');if(v==='grid')r.setAttribute('data-view','grid');if(t==='light'||t==='dark'){r.setAttribute('data-theme',t);var m=document.querySelectorAll('meta[name="theme-color"]'),c=t==='dark'?'#1C1B19':'#F3EFE7';for(var i=0;i<m.length;i++)m[i].setAttribute('content',c)}})(document.documentElement)</script>
+<link rel="preload" href="/taste/fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/taste/tasu.css">
+<script src="/taste/tasu.js" defer></script>
+<link rel="icon" href="/taste/brand/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/taste/brand/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="tasu.ai">
+<meta property="og:url" content="https://www.jeremylasne.com/taste/prompt/">
+<meta property="og:title" content="Prompts to unslop your app | tasu.ai">
+<meta property="og:description" content="14 prompts that each fix one part of an iPhone app, from the copy to the App Store screenshots. Paste one into Claude Code or Cursor.">
+<meta property="og:image" content="https://www.jeremylasne.com/taste/brand/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="tasu.ai: steal the taste of top apps">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@jeremylasne">
+<meta name="twitter:creator" content="@jeremylasne">
+<meta name="twitter:title" content="Prompts to unslop your app | tasu.ai">
+<meta name="twitter:description" content="14 prompts that each fix one part of an iPhone app, from the copy to the App Store screenshots. Paste one into Claude Code or Cursor.">
+<meta name="twitter:image" content="https://www.jeremylasne.com/taste/brand/og.png">
+<meta name="twitter:image:alt" content="tasu.ai: steal the taste of top apps">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"CollectionPage","@id":"https://www.jeremylasne.com/taste/prompt/#page","url":"https://www.jeremylasne.com/taste/prompt/","name":"Prompts to unslop your app | tasu.ai","description":"14 prompts that each fix one part of an iPhone app, from the copy to the App Store screenshots. Paste one into Claude Code or Cursor.","inLanguage":"en","dateModified":"2026-11-16","isPartOf":{"@type":"WebSite","@id":"https://www.jeremylasne.com/taste/#website","name":"tasu.ai","url":"https://www.jeremylasne.com/taste/"},"author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne"]},"mainEntity":{"@type":"ItemList","numberOfItems":14,"itemListElement":[{"@type":"ListItem","position":1,"item":{"@type":"CreativeWork","name":"Remove the AI slop visuals","url":"https://www.jeremylasne.com/taste/prompt/#unslop-visuals","author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne"]}}},{"@type":"ListItem","position":2,"item":{"@type":"CreativeWork","name":"Unslop the copy","url":"https://www.jeremylasne.com/taste/prompt/#unslop-copy","author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne"]}}},{"@type":"ListItem","position":3,"item":{"@type":"CreativeWork","name":"Apply the 60/30/10 color split","url":"https://www.jeremylasne.com/taste/prompt/#color-60-30-10","author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne"]}}},{"@type":"ListItem","position":4,"item":{"@type":"CreativeWork","name":"Set one type scale","url":"https://www.jeremylasne.com/taste/prompt/#type-scale","author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne"]}}},{"@type":"ListItem","position":5,"item":{"@type":"CreativeWork","name":"Fix spacing, cards and corners","url":"https://www.jeremylasne.com/taste/prompt/#spacing-layout","author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne"]}}},{"@type":"ListItem","position":6,"item":{"@type":"CreativeWork","name":"One main button per screen","url":"https://www.jeremylasne.com/taste/prompt/#buttons","author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne"]}}},{"@type":"ListItem","position":7,"item":{"@type":"CreativeWork","name":"Use real icons and images","url":"https://www.jeremylasne.com/taste/prompt/#icons-images","author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne"]}}},{"@type":"ListItem","position":8,"item":{"@type":"CreativeWork","name":"Fix animation timing and easing","url":"https://www.jeremylasne.com/taste/prompt/#motion","author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne"]}}},{"@type":"ListItem","position":9,"item":{"@type":"CreativeWork","name":"Design loading, empty and error states","url":"https://www.jeremylasne.com/taste/prompt/#states","author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne"]}}},{"@type":"ListItem","position":10,"item":{"@type":"CreativeWork","name":"Show value before sign-up","url":"https://www.jeremylasne.com/taste/prompt/#onboarding","author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne"]}}},{"@type":"ListItem","position":11,"item":{"@type":"CreativeWork","name":"Make the paywall clear and compliant","url":"https://www.jeremylasne.com/taste/prompt/#paywall","author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne"]}}},{"@type":"ListItem","position":12,"item":{"@type":"CreativeWork","name":"Build your App Store screenshots","url":"https://www.jeremylasne.com/taste/prompt/#app-store-screenshots","author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne"]}}},{"@type":"ListItem","position":13,"item":{"@type":"CreativeWork","name":"Build dark mode from tokens","url":"https://www.jeremylasne.com/taste/prompt/#dark-mode","author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne"]}}},{"@type":"ListItem","position":14,"item":{"@type":"CreativeWork","name":"Make every screen accessible","url":"https://www.jeremylasne.com/taste/prompt/#accessibility","author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne"]}}}]}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"tasu.ai","item":"https://www.jeremylasne.com/taste/"},{"@type":"ListItem","position":2,"name":"Prompts","item":"https://www.jeremylasne.com/taste/prompt/"}]}]}</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap header-in">
+    <a class="brand" href="/taste/" aria-label="tasu.ai, taste using AI, home" data-wm-link>
+      <span class="tasu-loop tasu-loop--blink" aria-hidden="true"></span>
+      <span class="wm" data-wm aria-hidden="true"><span class="wm-k">tas</span><span class="wm-x">te&nbsp;</span><span class="wm-k">u</span><span class="wm-x">sing&nbsp;</span><span class="wm-dot">.</span><span class="wm-k">ai</span></span>
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="/taste/#apps">Apps</a>
+      <a href="/taste/elements/">UI Elements</a>
+      <a href="/taste/paywall/">Paywall</a>
+      <a href="/taste/prompt/" aria-current="page">Prompts</a>
+    </nav>
+    <form class="search search--header" role="search" action="/taste/#apps" method="get">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+      <label class="sr-only" for="site-q">Search apps</label>
+      <input id="site-q" type="search" name="q" placeholder="Search apps" autocomplete="off" enterkeyhint="search" data-site-search>
+      <kbd class="kbd" aria-hidden="true">/</kbd>
+    </form>
+    <div class="header-tools">
+      <button class="icon-btn theme-toggle js-only" type="button" data-theme-toggle aria-pressed="false" aria-label="Dark theme">
+        <svg class="ico i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 3v1.5M12 19.5V21M3 12h1.5M19.5 12H21M5.64 5.64l1.06 1.06M17.3 17.3l1.06 1.06M5.64 18.36l1.06-1.06M17.3 6.7l1.06-1.06"/></svg>
+        <svg class="ico i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M19.5 14.5A7.5 7.5 0 0 1 9.5 4.5a7.5 7.5 0 1 0 10 10Z"/></svg>
+      </button>
+      <a class="icon-btn" href="https://x.com/jeremylasne" aria-label="Jeremy Lasne on X">
+        <svg class="ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<section class="section lib-top" aria-labelledby="pr-title" data-filter data-filter-url data-noun-one="prompt" data-noun-many="prompts">
+  <div class="wrap">
+    <div class="gallery-head">
+      <div class="lib-intro">
+        <h1 class="title-xl" id="pr-title">Prompts to <span class="hl">unslop</span> your app</h1>
+        <p class="lead">14 prompts that each fix one part of your iPhone app, from the copy to the App Store screenshots, with the numbers from taste.md. Paste one into Claude Code or Cursor, check the list of changes it reports, then paste the next.</p>
+        <p class="pr-links"><a class="link-arrow" href="/taste/taste.md">Read the full taste file <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+      </div>
+      <div class="gallery-tools js-only">
+        <div class="search search--lg">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+          <label class="sr-only" for="pr-q">Search the prompts</label>
+          <input id="pr-q" type="search" placeholder="Try “color” or “paywall”" autocomplete="off" enterkeyhint="search" data-filter-search>
+          <kbd class="kbd" aria-hidden="true">/</kbd>
+        </div>
+        <div class="chips" role="group" aria-label="Prompt groups">
+          <button class="chip" type="button" data-filter-chip="all" aria-pressed="true">All <span class="chip-count">14</span></button>
+          <button class="chip" type="button" data-filter-chip="look" aria-pressed="false">Look <span class="chip-count">6</span></button>
+          <button class="chip" type="button" data-filter-chip="feel" aria-pressed="false">Feel <span class="chip-count">4</span></button>
+          <button class="chip" type="button" data-filter-chip="screens" aria-pressed="false">Screens <span class="chip-count">4</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <p class="toolbar-status"><span data-filter-status aria-live="polite">14 prompts</span></p>
+      <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#all-prompts" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy all prompts</span></button>
+    </div>
+    <div class="prs">
+    <article class="pr" id="unslop-visuals" data-filter-item data-tags="look" data-text="Remove the AI slop visuals Unslop Your screens show purple gradients, glowing stat cards, pills on every item and labels above every heading.">
+      <p class="pr-area">Unslop</p>
+      <h2 class="title-m">Remove the AI slop visuals</h2>
+      <p class="pr-when">Use it when your screens show purple gradients, glowing stat cards, pills on every item and labels above every heading.</p>
+      <div class="pr-box" data-clamp>
+        <p class="pr-text" id="pt-unslop-visuals">Remove the decoration AI adds to this app. Change decoration only: keep features, copy and layout.
+First, name 1 or 2 shipped iPhone apps in the same category and match their amount of decoration.
+Fix every hit of these 11 signs:
+- Gradient backgrounds, purple gradients and glow: one flat color.
+- Glowing stat cards: the number on a plain surface.
+- Tags, pills and badges like “New” or “Beta”: 1 per item at most, only when it changes a decision.
+- A border around every container: remove it.
+- A colored left border on cards: replace it with a status icon or word.
+- Eyebrow labels above headings: delete them.
+- Section numbers like 01, 02, 03: delete them.
+- Code-style breadcrumbs like “Home / Settings”: a back button and a title.
+- Dithering, ASCII art and decorative squircle shapes: delete them.
+- Over-detailed charts: 1 highlighted series, 3 gridlines at most.
+- Screens with no focus: 1 job each. Delete every element whose removal changes nothing.
+Fix one sign per pass, then recheck the screen.
+
+Check:
+- Zero hits on every screen
+- Each screen’s job fits in 5 words
+- Every element left shows data or triggers an action
+
+Apply every fix, then list each as screen, rule, before, after. Name any rule you skipped.</p>
+      </div>
+      <div class="el-actions">
+        <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#pt-unslop-visuals" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+        <button class="btn btn-secondary btn-sm js-only pr-more" type="button" data-clamp-toggle aria-expanded="false" aria-controls="pt-unslop-visuals">Show all</button>
+        <span class="pr-words">203 words, sources S1, S2, S14, S15 in <a href="/taste/taste.md">taste.md</a></span>
+      </div>
+    </article>
+    <article class="pr" id="unslop-copy" data-filter-item data-tags="screens" data-text="Unslop the copy Copy Your app says “Unlock your potential” and uses 3 sentences where 1 fits.">
+      <p class="pr-area">Copy</p>
+      <h2 class="title-m">Unslop the copy</h2>
+      <p class="pr-when">Use it when your app says “Unlock your potential” and uses 3 sentences where 1 fits.</p>
+      <div class="pr-box" data-clamp>
+        <p class="pr-text" id="pt-unslop-copy">Rewrite every string in this app: screens, buttons, alerts, empty states, errors, notifications and the paywall. Change words only.
+- One sentence where AI wrote 3, each under 20 words.
+- Replace adjectives with numbers you can prove: “Fast” becomes “Loads in 1.2 s”. With no number, name the action.
+- Headlines hold a number or an action: “Track 3 habits in 10 seconds a day” beats “Transform your life”.
+- Buttons: a verb and an object, 1 to 3 words, like “Log meal”. Replace “Submit” and “Click here”.
+- Drop a label when the value explains itself: “72 kg” needs no “Weight:”.
+- Delete “Welcome back, Name” unless it carries data.
+- Errors: what happened, then what to do. “No connection. Check Wi-Fi, then tap Retry.”
+- Notifications: 1 fact and 1 action, in 2 lines or fewer.
+- Say what the app does: “Reminds you at 8:00” beats “Never miss a dose”.
+- Delete these words: “unlock”, “elevate”, “seamless”, “effortless”, “supercharge”, “journey”, “empower”, “delightful”, “revolutionize”.
+- Remove em-dashes, exclamation marks and periods that end titles.
+
+Check:
+- Zero words from the delete list
+- Every button label starts with a verb
+- Word count drops: report it before and after
+
+Apply every fix, then list each as screen, rule, before, after. Name any rule you skipped.</p>
+      </div>
+      <div class="el-actions">
+        <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#pt-unslop-copy" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+        <button class="btn btn-secondary btn-sm js-only pr-more" type="button" data-clamp-toggle aria-expanded="false" aria-controls="pt-unslop-copy">Show all</button>
+        <span class="pr-words">204 words, sources S1, S2, S4, S14, S15, S27 in <a href="/taste/taste.md">taste.md</a></span>
+      </div>
+    </article>
+    <article class="pr" id="color-60-30-10" data-filter-item data-tags="look" data-text="Apply the 60/30/10 color split Color Your app uses 6 or more colors, and the accent shows up everywhere.">
+      <p class="pr-area">Color</p>
+      <h2 class="title-m">Apply the 60/30/10 color split</h2>
+      <p class="pr-when">Use it when your app uses 6 or more colors, and the accent shows up everywhere.</p>
+      <div class="pr-box" data-clamp>
+        <p class="pr-text" id="pt-color-60-30-10">Rebuild the color system of this app with the 60/30/10 split. Change color only.
+- Replace every color value in the code with a named token.
+- Accent: keep the brand color. With none, pick 1 unexpected accent that contrasts with 2 calm base colors and fits the category. Say why in 1 sentence.
+- 60%: the main color, on backgrounds. 30%: the second color, on text and surfaces. 10%: the accent.
+- The accent goes only on the main button, the key number and the selected state.
+- Neutrals: 3 to 5 greys tinted with the main hue, at OKLCH chroma 0.005 to 0.02, like cream #F3EFE7. Delete every other shade and opacity.
+- 1 red, for errors and destructive actions only.
+- Text contrast: 4.5:1 for body text, 3:1 for text 24 pt and larger.
+- Colors that must be told apart, like chart lines, also differ in lightness: they stay distinct in grayscale.
+- Judge the palette on the app’s 3 busiest screens.
+
+Check:
+- 9 color tokens at most: 2 base, 1 accent, 3 to 5 neutrals, 1 red
+- The accent sits on 3 elements or fewer per screen
+- Every text passes its contrast ratio
+
+Apply every fix, then list each as screen, rule, before, after. Name any rule you skipped.</p>
+      </div>
+      <div class="el-actions">
+        <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#pt-color-60-30-10" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+        <button class="btn btn-secondary btn-sm js-only pr-more" type="button" data-clamp-toggle aria-expanded="false" aria-controls="pt-color-60-30-10">Show all</button>
+        <span class="pr-words">205 words, sources S1, S5, S6, S7, S8, S10, S23, S25, S28, S30, S31, S32, S33 in <a href="/taste/taste.md">taste.md</a></span>
+      </div>
+    </article>
+    <article class="pr" id="type-scale" data-filter-item data-tags="look" data-text="Set one type scale Type Your app has a different font size on every screen, and numbers jiggle as they change.">
+      <p class="pr-area">Type</p>
+      <h2 class="title-m">Set one type scale</h2>
+      <p class="pr-when">Use it when your app has a different font size on every screen, and numbers jiggle as they change.</p>
+      <div class="pr-box" data-clamp>
+        <p class="pr-text" id="pt-type-scale">Rebuild the typography of this app. Change type only.
+- Replace every font, size and weight in the code with a token.
+- 2 families at most: a display font for headings, a tall x-height body font like SF Pro or Inter. Skip Instrument Serif and Pacifico.
+- 3 weights: bold for headings, medium for subheadings, regular for body.
+- 6 sizes, each 1.2x to 1.33x the one below: 13, 17, 22, 28, 34 and 44 pt (44 for 1 hero number).
+- Scale the first 5 with the system text size: Footnote, Body, Title 2, Title 1, Large Title.
+- Tabular numbers on prices, counters, stats and timers.
+- Line height: 1.4 to 1.6 for body, 1.05 to 1.2 for headlines from 28 pt.
+- Line length: 45 to 75 characters, capped on iPad.
+- Letter spacing: -1% to -2% only above 40 pt. ALL CAPS only on 13 pt labels, at +5% to +10%.
+- Balance headlines: never 1 word alone on the last line.
+- Remove decorative italics, and monospace outside codes and hex values.
+
+Check:
+- Every text uses one of the 6 sizes
+- 2 families and 3 weights at most
+- Every changing number uses tabular digits
+
+Apply every fix, then list each as screen, rule, before, after. Name any rule you skipped.</p>
+      </div>
+      <div class="el-actions">
+        <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#pt-type-scale" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+        <button class="btn btn-secondary btn-sm js-only pr-more" type="button" data-clamp-toggle aria-expanded="false" aria-controls="pt-type-scale">Show all</button>
+        <span class="pr-words">205 words, sources S1, S2, S4, S16, S29 in <a href="/taste/taste.md">taste.md</a></span>
+      </div>
+    </article>
+    <article class="pr" id="spacing-layout" data-filter-item data-tags="look" data-text="Fix spacing, cards and corners Layout Your screens have uneven gaps, cards inside cards and 4 different corner radii.">
+      <p class="pr-area">Layout</p>
+      <h2 class="title-m">Fix spacing, cards and corners</h2>
+      <p class="pr-when">Use it when your screens have uneven gaps, cards inside cards and 4 different corner radii.</p>
+      <div class="pr-box" data-clamp>
+        <p class="pr-text" id="pt-spacing-layout">Fix the layout of every screen in this app. Change spacing, cards, corners and hierarchy only.
+- Spacing scale: 4, 8, 16, 24, 32 and 48 pt. Replace every other value.
+- Side margins: 16 or 20 pt on every screen.
+- Group with space: 8 pt inside a group, 24 to 32 pt between groups. Delete the dividers this replaces.
+- One card style: one radius, 16 pt padding, a fill one step off the background.
+- Radius scale: 8, 16 and 24 pt, continuous corners. Same-level elements share 1 radius.
+- Inner radius = outer radius minus padding: a 24 pt card with 16 pt padding holds 8 pt inner corners.
+- Flatten nested cards to 1 level.
+- Make each screen’s most important element its biggest.
+- Give each main screen 1 focal point: a 44 pt number, a full-width image or a color field.
+- Align text to 1 left edge per screen. Center only short titles and empty states.
+- Keep content inside the safe areas, clear of the Dynamic Island and home indicator.
+
+Check:
+- Every gap and padding is on the scale
+- Zero cards inside cards
+- The radius math holds on every screen
+
+Apply every fix, then list each as screen, rule, before, after. Name any rule you skipped.</p>
+      </div>
+      <div class="el-actions">
+        <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#pt-spacing-layout" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+        <button class="btn btn-secondary btn-sm js-only pr-more" type="button" data-clamp-toggle aria-expanded="false" aria-controls="pt-spacing-layout">Show all</button>
+        <span class="pr-words">203 words, sources S2, S4, S14, S15, S16, S18, S19 in <a href="/taste/taste.md">taste.md</a></span>
+      </div>
+    </article>
+    <article class="pr" id="buttons" data-filter-item data-tags="feel" data-text="One main button per screen Buttons Your screen has 5 buttons that look equally important, and a double tap submits twice.">
+      <p class="pr-area">Buttons</p>
+      <h2 class="title-m">One main button per screen</h2>
+      <p class="pr-when">Use it when your screen has 5 buttons that look equally important, and a double tap submits twice.</p>
+      <div class="pr-box" data-clamp>
+        <p class="pr-text" id="pt-buttons">Fix every button and tappable element in this app. Change buttons only.
+- 1 filled primary button per screen, in the accent color, for its one job.
+- Other actions are tinted, outlined or plain text. Show 2 at most; the rest go in a More menu.
+- Primary button: 50 to 56 pt tall and full width inside the side margins.
+- In forms and flows, pin it to the bottom, 16 pt above the home indicator.
+- Touch targets: 44 x 44 pt or more, with 8 pt between them. An icon-only button holds a 24 pt icon in a 44 pt frame.
+- While pressed, buttons scale to 0.97, then back to 1 on release.
+- 5 states for every button: default, pressed, disabled, loading and done.
+- Loading shows a spinner inside the button and keeps its width. Done shows a checkmark for 1 second.
+- Ignore taps while a request runs, so a double tap never submits or charges twice.
+- Destructive actions use red text, never the filled primary style.
+
+Check:
+- 1 filled button per screen
+- Every target is 44 x 44 pt or more
+- A second tap during loading does nothing
+
+Apply every fix, then list each as screen, rule, before, after. Name any rule you skipped.</p>
+      </div>
+      <div class="el-actions">
+        <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#pt-buttons" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+        <button class="btn btn-secondary btn-sm js-only pr-more" type="button" data-clamp-toggle aria-expanded="false" aria-controls="pt-buttons">Show all</button>
+        <span class="pr-words">204 words, sources S2, S3, S4, S7, S8, S14, S15, S16, S17, S31, S32 in <a href="/taste/taste.md">taste.md</a></span>
+      </div>
+    </article>
+    <article class="pr" id="icons-images" data-filter-item data-tags="look" data-text="Use real icons and images Icons Your app uses emoji as icons, mixes icon styles, or shows blobs instead of the product.">
+      <p class="pr-area">Icons</p>
+      <h2 class="title-m">Use real icons and images</h2>
+      <p class="pr-when">Use it when your app uses emoji as icons, mixes icon styles, or shows blobs instead of the product.</p>
+      <div class="pr-box" data-clamp>
+        <p class="pr-text" id="pt-icons-images">Fix every icon and image in this app. Change icons and imagery only.
+Icons:
+- Replace every emoji used as an icon.
+- Use 1 icon set: SF Symbols, or 1 library such as Lucide or Phosphor.
+- 1 stroke weight everywhere. Outline icons by default, filled only for the selected tab.
+- 3 sizes: 16, 20 and 24 pt.
+- Icons take the text color. Only the selected tab and the main action take the accent.
+- Shift play triangles 1 to 2 pt toward their point, so they look centered.
+Images:
+- Replace abstract shapes, blobs and stock illustrations with real screens, real data and real photos.
+- Give every image a fixed aspect ratio, like 1:1, 4:5 or 16:9, and reserve its space before it loads.
+- Show a blurred placeholder until the image arrives.
+- Ship images at 3x their point size: a 100 pt image needs 300 px.
+- One treatment for all images: the card corner radius, no border, no shadow.
+- Avatars without a photo: 2 initials on a tinted neutral.
+
+Check:
+- Zero emoji icons
+- 1 icon set, 1 stroke weight
+- Every image has a ratio and a placeholder
+
+Apply every fix, then list each as screen, rule, before, after. Name any rule you skipped.</p>
+      </div>
+      <div class="el-actions">
+        <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#pt-icons-images" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+        <button class="btn btn-secondary btn-sm js-only pr-more" type="button" data-clamp-toggle aria-expanded="false" aria-controls="pt-icons-images">Show all</button>
+        <span class="pr-words">200 words, sources S2, S4, S14, S15, S16, S17 in <a href="/taste/taste.md">taste.md</a></span>
+      </div>
+    </article>
+    <article class="pr" id="motion" data-filter-item data-tags="feel" data-text="Fix animation timing and easing Motion Your menus take 600 ms to open, cards bounce, and a loader spins forever.">
+      <p class="pr-area">Motion</p>
+      <h2 class="title-m">Fix animation timing and easing</h2>
+      <p class="pr-when">Use it when your menus take 600 ms to open, cards bounce, and a loader spins forever.</p>
+      <div class="pr-box" data-clamp>
+        <p class="pr-text" id="pt-motion">Retime every custom animation in this app with these values. Change motion only.
+- Keep the system push, sheet and swipe-back transitions. Sheets close with a swipe down.
+- Entrances: ease-out. Moves from A to B: ease-in-out, on an arc when they cross the screen.
+- Menus, popovers and dropdowns open in 150 to 250 ms. Exits run 20% shorter: 250 ms in, 200 ms out.
+- Popovers start at scale 0.95, grow from their trigger and close back into it.
+- Stagger the first 10 visible list rows by 30 ms.
+- Toggle and slider knobs stretch about 12% while they move.
+- Springs with zero bounce on everyday UI.
+- While a finger holds or drags, follow it 1:1. Rubber band past the edges.
+- Crossfade swapping icons with a 2 pt blur.
+- Pulse once to confirm success.
+- Move shared elements between screens, like a card that opens into its detail.
+- Every animation can reverse mid-way.
+- Loop only loading states. With Reduce Motion on, swap movement for fades.
+
+Check:
+- Every custom animation uses a duration and curve from this list
+- No menu takes longer than 250 ms to open
+- Nothing loops except a loader
+
+Apply every fix, then list each as screen, rule, before, after. Name any rule you skipped.</p>
+      </div>
+      <div class="el-actions">
+        <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#pt-motion" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+        <button class="btn btn-secondary btn-sm js-only pr-more" type="button" data-clamp-toggle aria-expanded="false" aria-controls="pt-motion">Show all</button>
+        <span class="pr-words">203 words, sources S2, S3, S4, S12, S14 in <a href="/taste/taste.md">taste.md</a></span>
+      </div>
+    </article>
+    <article class="pr" id="states" data-filter-item data-tags="feel" data-text="Design loading, empty and error states States Your app shows a spinner on a blank screen, and lists have no empty or error state.">
+      <p class="pr-area">States</p>
+      <h2 class="title-m">Design loading, empty and error states</h2>
+      <p class="pr-when">Use it when your app shows a spinner on a blank screen, and lists have no empty or error state.</p>
+      <div class="pr-box" data-clamp>
+        <p class="pr-text" id="pt-states">Give every list, form and network action in this app 4 states: loading, empty, error and success. Change states only.
+Loading:
+- Replace spinners with skeletons: grey shapes in the final layout.
+- Show cached data first and refresh in the background.
+- For waits over 2 seconds, like AI results or uploads, show each real step as it finishes.
+Empty:
+- 1 line on what will appear here and 1 button that fills it.
+- Where people type, offer 3 tappable examples instead of an empty box.
+Error:
+- 1 line on what happened, the user’s input kept, and a Retry button.
+- Offline: show cached data under a 1-line banner.
+Success:
+- Update the UI at once and sync in the background. If the request fails, roll back with a 1-line message.
+- Replace “Are you sure?” alerts with an Undo toast that stays 5 seconds.
+- AI edits to the user’s data: show the suggestion first and apply it only after a tap.
+Crossfade between states in 200 ms, with no blank frame and no jump.
+
+Check:
+- Every list and form has all 4 states
+- Zero spinners on blank screens
+- Zero layout shift when data arrives
+
+List each list and form with its screen and its 4 states, then build them.</p>
+      </div>
+      <div class="el-actions">
+        <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#pt-states" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+        <button class="btn btn-secondary btn-sm js-only pr-more" type="button" data-clamp-toggle aria-expanded="false" aria-controls="pt-states">Show all</button>
+        <span class="pr-words">204 words, sources S2, S4, S14, S17, S24, S34 in <a href="/taste/taste.md">taste.md</a></span>
+      </div>
+    </article>
+    <article class="pr" id="onboarding" data-filter-item data-tags="screens" data-text="Show value before sign-up Onboarding Your app asks for an account before people see what it does.">
+      <p class="pr-area">Onboarding</p>
+      <h2 class="title-m">Show value before sign-up</h2>
+      <p class="pr-when">Use it when your app asks for an account before people see what it does.</p>
+      <div class="pr-box" data-clamp>
+        <p class="pr-text" id="pt-onboarding">Rebuild this app’s onboarding in this order: show the value, let people personalize, then ask for sign-up. Change the flow only.
+- Screen 1 shows the product doing its main job, with real data and a headline with a number.
+- 1 question per screen, 3 to 6 options as rows of 56 pt or taller, and only questions that change the app.
+- Every step: a progress bar, a back button, and the main button fixed at the bottom.
+- End with a result built from the answers, like “Your plan: 3 workouts a week”.
+- Ask for sign-up after that result, or let people start without an account when the app allows it.
+- If you offer Google or another social login, also offer Sign in with Apple, which meets App Review Guideline 4.8.
+- Mark the code field as a one-time code, so iOS fills it from Messages and Mail.
+- Ask for each permission at the moment it helps, with 1 line on why. iOS shows each system prompt only once.
+- Log 1 analytics event per step to see where people drop.
+
+Check:
+- Value comes before any account request
+- 1 question per screen
+- Every answer changes something in the app
+
+List the new steps, one line per screen, then build them.</p>
+      </div>
+      <div class="el-actions">
+        <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#pt-onboarding" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+        <button class="btn btn-secondary btn-sm js-only pr-more" type="button" data-clamp-toggle aria-expanded="false" aria-controls="pt-onboarding">Show all</button>
+        <span class="pr-words">207 words, sources S4, S13, S17 in <a href="/taste/taste.md">taste.md</a></span>
+      </div>
+    </article>
+    <article class="pr" id="paywall" data-filter-item data-tags="screens" data-text="Make the paywall clear and compliant Paywall Your paywall shows the monthly price bigger than the billed price, or has no Restore link.">
+      <p class="pr-area">Paywall</p>
+      <h2 class="title-m">Make the paywall clear and compliant</h2>
+      <p class="pr-when">Use it when your paywall shows the monthly price bigger than the billed price, or has no Restore link.</p>
+      <div class="pr-box" data-clamp>
+        <p class="pr-text" id="pt-paywall">Rebuild this app’s paywall and purchase flow. Change the paywall only.
+- Show it after people see value, like at the end of onboarding.
+- Headline: the outcome people pay for, under 8 words. Below it, a real paid-feature screen and up to 3 one-line benefits.
+- 2 plans, like yearly and monthly, as tappable rows with name, length and the store’s localized price. Preselect one.
+- The billed amount is the most prominent price, like “$39.99 per year”. The monthly equivalent or saving sits below it, smaller.
+- Replace “Best value” with the computed saving, like “Save 58%”. Remove fake countdowns.
+- Free trial: state its length and the price after it, plus a timeline (today, reminder on day 5, charge on day 7). Send that reminder.
+- 1 accent element: the main button, like “Start 7-day free trial”.
+- Show Restore Purchases, Terms and Privacy links, and a 44 pt close button from the first frame.
+- After purchase, open the paid feature. On failure, keep the paywall open with Retry.
+
+Check:
+- The billed amount is the largest price
+- Restore, Terms and Privacy are visible on the paywall
+- The trial length and later price are visible
+
+Apply every fix, then list each as screen, rule, before, after. Name any rule you skipped.</p>
+      </div>
+      <div class="el-actions">
+        <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#pt-paywall" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+        <button class="btn btn-secondary btn-sm js-only pr-more" type="button" data-clamp-toggle aria-expanded="false" aria-controls="pt-paywall">Show all</button>
+        <span class="pr-words">205 words, sources S7, S8, S13, S31, S32 in <a href="/taste/taste.md">taste.md</a></span>
+      </div>
+    </article>
+    <article class="pr" id="app-store-screenshots" data-filter-item data-tags="screens" data-text="Build your App Store screenshots App Store Your App Store screenshots are raw screens or slogans like “Your best life”.">
+      <p class="pr-area">App Store</p>
+      <h2 class="title-m">Build your App Store screenshots</h2>
+      <p class="pr-when">Use it when your App Store screenshots are raw screens or slogans like “Your best life”.</p>
+      <div class="pr-box" data-clamp>
+        <p class="pr-text" id="pt-app-store-screenshots">Build this app’s App Store screenshots as code (HTML, SwiftUI or Flutter), so words stay editable. Change nothing in the app.
+- Make 8 to 10. Without an app preview, search shows the first 3: they must explain the app.
+- 1 benefit each. Screenshot 1 shows the main job and its result.
+- Headline on top: 3 to 7 words on 2 to 4 lines, with a number or verb, like “Log a meal in 3 seconds”. No period.
+- Headline font size: 120 to 180 px on the 1206 px canvas, in the display font.
+- Below it, a real screen with real data, never a login or splash screen.
+- Proof on screenshot 1, if real: an award, a rating with its count, a user count.
+- 1 layout for all, on flat brand colors or a real photo. Accent on 1 word per headline. No prices.
+- If the app has dark mode, show it on 1 screenshot.
+- Export PNG without transparency at 1206 x 2622 px, the required iPhone size, and 1320 x 2868 px for the large display.
+
+Check:
+- The first 3 explain the app alone
+- Headlines read at 25% zoom
+- Zero login screens, splash screens or prices
+
+List each screenshot with its headline and screen, then build them.</p>
+      </div>
+      <div class="el-actions">
+        <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#pt-app-store-screenshots" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+        <button class="btn btn-secondary btn-sm js-only pr-more" type="button" data-clamp-toggle aria-expanded="false" aria-controls="pt-app-store-screenshots">Show all</button>
+        <span class="pr-words">207 words, sources S1, S2, S18, S19, S27, S31 in <a href="/taste/taste.md">taste.md</a></span>
+      </div>
+    </article>
+    <article class="pr" id="dark-mode" data-filter-item data-tags="look" data-text="Build dark mode from tokens Dark mode Your dark mode has white cards on black, or grey text below 4.5:1 contrast.">
+      <p class="pr-area">Dark mode</p>
+      <h2 class="title-m">Build dark mode from tokens</h2>
+      <p class="pr-when">Use it when your dark mode has white cards on black, or grey text below 4.5:1 contrast.</p>
+      <div class="pr-box" data-clamp>
+        <p class="pr-text" id="pt-dark-mode">Build a complete dark mode for this app. Change colors and assets only.
+- Add a dark value to every color token: background, surface, raised surface, text, secondary text, separator, accent, text on accent, error.
+- Follow the system appearance by default.
+- Surfaces: 3 near-blacks tinted with your main hue, 0.05 apart in OKLCH lightness: L 0.18, 0.23 and 0.28 (#121212, #1D1D1D and #292929 before the tint).
+- Raised layers get lighter. Sheets, menus and popovers use the raised surface, L 0.28. Remove shadows.
+- Text: off-white at L 0.95, secondary at L 0.75. Both pass 6.5:1 on all 3 surfaces.
+- Accent, red and chart colors: keep each hue and raise its lightness until it reaches 3:1 on the background. The accent’s label stays at 4.5:1.
+- Icons follow the text color. Give dark logos and illustrations a light version. Never invert photos.
+- Status bar, keyboard, charts, maps and the launch screen follow the mode.
+
+Check:
+- Zero hard-coded colors in views
+- Zero white cards and zero shadows on dark screens
+- The accent passes 3:1 on the dark background
+
+Apply every fix, then list each as screen, rule, before, after. Name any rule you skipped.</p>
+      </div>
+      <div class="el-actions">
+        <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#pt-dark-mode" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+        <button class="btn btn-secondary btn-sm js-only pr-more" type="button" data-clamp-toggle aria-expanded="false" aria-controls="pt-dark-mode">Show all</button>
+        <span class="pr-words">189 words, sources S4, S7, S8, S27 in <a href="/taste/taste.md">taste.md</a></span>
+      </div>
+    </article>
+    <article class="pr" id="accessibility" data-filter-item data-tags="feel" data-text="Make every screen accessible Accessibility Your app breaks at large text sizes, and VoiceOver reads “button, button”.">
+      <p class="pr-area">Accessibility</p>
+      <h2 class="title-m">Make every screen accessible</h2>
+      <p class="pr-when">Use it when your app breaks at large text sizes, and VoiceOver reads “button, button”.</p>
+      <div class="pr-box" data-clamp>
+        <p class="pr-text" id="pt-accessibility">Make every screen work with iOS accessibility settings. Change accessibility only.
+- Dynamic Type: test at the largest accessibility size, where body text is 53 pt instead of 17. Rows stack, text wraps instead of truncating, screens scroll.
+- VoiceOver: label every control with what it does, like “Delete meal”, plus its state. Hide decorative images. Group each card into 1 sentence. Announce success and errors.
+- Use the stack’s API: accessibilityLabel in SwiftUI and React Native, Semantics in Flutter.
+- Reading order follows the layout: top to bottom, then leading to trailing.
+- Never use color as the only signal: add an icon or a word.
+- Contrast: 4.5:1 for body text, 3:1 for text 24 pt and up, icons and control edges.
+- Touch targets: 44 x 44 pt or more.
+- Reduce Motion: swap movement for fades. Reduce Transparency: replace blur with solid surfaces.
+- Bold Text: custom fonts move 1 weight heavier. Increase Contrast: text tokens get a 7:1 variant.
+
+Check:
+- Onboarding, the paywall and the main action work with VoiceOver alone
+- No text is cut off at the largest size
+- Every icon button has a label
+
+Apply every fix, then list each as screen, rule, before, after. Name any rule you skipped.</p>
+      </div>
+      <div class="el-actions">
+        <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#pt-accessibility" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+        <button class="btn btn-secondary btn-sm js-only pr-more" type="button" data-clamp-toggle aria-expanded="false" aria-controls="pt-accessibility">Show all</button>
+        <span class="pr-words">198 words, sources S2, S4, S14, S27 in <a href="/taste/taste.md">taste.md</a></span>
+      </div>
+    </article>
+    </div>
+    <div class="empty" data-filter-empty hidden>
+      <span class="tasu-loop tasu-loop--look" role="img" aria-label="Tasu, the tasu.ai mascot, looks around"></span>
+      <p class="title-s">No prompt matches this search</p>
+      <button class="btn btn-secondary" type="button" data-filter-reset>Clear the search</button>
+    </div>
+    <div hidden id="all-prompts">Remove the AI slop visuals
+
+Remove the decoration AI adds to this app. Change decoration only: keep features, copy and layout.
+First, name 1 or 2 shipped iPhone apps in the same category and match their amount of decoration.
+Fix every hit of these 11 signs:
+- Gradient backgrounds, purple gradients and glow: one flat color.
+- Glowing stat cards: the number on a plain surface.
+- Tags, pills and badges like &quot;New&quot; or &quot;Beta&quot;: 1 per item at most, only when it changes a decision.
+- A border around every container: remove it.
+- A colored left border on cards: replace it with a status icon or word.
+- Eyebrow labels above headings: delete them.
+- Section numbers like 01, 02, 03: delete them.
+- Code-style breadcrumbs like &quot;Home / Settings&quot;: a back button and a title.
+- Dithering, ASCII art and decorative squircle shapes: delete them.
+- Over-detailed charts: 1 highlighted series, 3 gridlines at most.
+- Screens with no focus: 1 job each. Delete every element whose removal changes nothing.
+Fix one sign per pass, then recheck the screen.
+
+Check:
+- Zero hits on every screen
+- Each screen's job fits in 5 words
+- Every element left shows data or triggers an action
+
+Apply every fix, then list each as screen, rule, before, after. Name any rule you skipped.
+
+---
+
+Unslop the copy
+
+Rewrite every string in this app: screens, buttons, alerts, empty states, errors, notifications and the paywall. Change words only.
+- One sentence where AI wrote 3, each under 20 words.
+- Replace adjectives with numbers you can prove: &quot;Fast&quot; becomes &quot;Loads in 1.2 s&quot;. With no number, name the action.
+- Headlines hold a number or an action: &quot;Track 3 habits in 10 seconds a day&quot; beats &quot;Transform your life&quot;.
+- Buttons: a verb and an object, 1 to 3 words, like &quot;Log meal&quot;. Replace &quot;Submit&quot; and &quot;Click here&quot;.
+- Drop a label when the value explains itself: &quot;72 kg&quot; needs no &quot;Weight:&quot;.
+- Delete &quot;Welcome back, Name&quot; unless it carries data.
+- Errors: what happened, then what to do. &quot;No connection. Check Wi-Fi, then tap Retry.&quot;
+- Notifications: 1 fact and 1 action, in 2 lines or fewer.
+- Say what the app does: &quot;Reminds you at 8:00&quot; beats &quot;Never miss a dose&quot;.
+- Delete these words: &quot;unlock&quot;, &quot;elevate&quot;, &quot;seamless&quot;, &quot;effortless&quot;, &quot;supercharge&quot;, &quot;journey&quot;, &quot;empower&quot;, &quot;delightful&quot;, &quot;revolutionize&quot;.
+- Remove em-dashes, exclamation marks and periods that end titles.
+
+Check:
+- Zero words from the delete list
+- Every button label starts with a verb
+- Word count drops: report it before and after
+
+Apply every fix, then list each as screen, rule, before, after. Name any rule you skipped.
+
+---
+
+Apply the 60/30/10 color split
+
+Rebuild the color system of this app with the 60/30/10 split. Change color only.
+- Replace every color value in the code with a named token.
+- Accent: keep the brand color. With none, pick 1 unexpected accent that contrasts with 2 calm base colors and fits the category. Say why in 1 sentence.
+- 60%: the main color, on backgrounds. 30%: the second color, on text and surfaces. 10%: the accent.
+- The accent goes only on the main button, the key number and the selected state.
+- Neutrals: 3 to 5 greys tinted with the main hue, at OKLCH chroma 0.005 to 0.02, like cream #F3EFE7. Delete every other shade and opacity.
+- 1 red, for errors and destructive actions only.
+- Text contrast: 4.5:1 for body text, 3:1 for text 24 pt and larger.
+- Colors that must be told apart, like chart lines, also differ in lightness: they stay distinct in grayscale.
+- Judge the palette on the app's 3 busiest screens.
+
+Check:
+- 9 color tokens at most: 2 base, 1 accent, 3 to 5 neutrals, 1 red
+- The accent sits on 3 elements or fewer per screen
+- Every text passes its contrast ratio
+
+Apply every fix, then list each as screen, rule, before, after. Name any rule you skipped.
+
+---
+
+Set one type scale
+
+Rebuild the typography of this app. Change type only.
+- Replace every font, size and weight in the code with a token.
+- 2 families at most: a display font for headings, a tall x-height body font like SF Pro or Inter. Skip Instrument Serif and Pacifico.
+- 3 weights: bold for headings, medium for subheadings, regular for body.
+- 6 sizes, each 1.2x to 1.33x the one below: 13, 17, 22, 28, 34 and 44 pt (44 for 1 hero number).
+- Scale the first 5 with the system text size: Footnote, Body, Title 2, Title 1, Large Title.
+- Tabular numbers on prices, counters, stats and timers.
+- Line height: 1.4 to 1.6 for body, 1.05 to 1.2 for headlines from 28 pt.
+- Line length: 45 to 75 characters, capped on iPad.
+- Letter spacing: -1% to -2% only above 40 pt. ALL CAPS only on 13 pt labels, at +5% to +10%.
+- Balance headlines: never 1 word alone on the last line.
+- Remove decorative italics, and monospace outside codes and hex values.
+
+Check:
+- Every text uses one of the 6 sizes
+- 2 families and 3 weights at most
+- Every changing number uses tabular digits
+
+Apply every fix, then list each as screen, rule, before, after. Name any rule you skipped.
+
+---
+
+Fix spacing, cards and corners
+
+Fix the layout of every screen in this app. Change spacing, cards, corners and hierarchy only.
+- Spacing scale: 4, 8, 16, 24, 32 and 48 pt. Replace every other value.
+- Side margins: 16 or 20 pt on every screen.
+- Group with space: 8 pt inside a group, 24 to 32 pt between groups. Delete the dividers this replaces.
+- One card style: one radius, 16 pt padding, a fill one step off the background.
+- Radius scale: 8, 16 and 24 pt, continuous corners. Same-level elements share 1 radius.
+- Inner radius = outer radius minus padding: a 24 pt card with 16 pt padding holds 8 pt inner corners.
+- Flatten nested cards to 1 level.
+- Make each screen's most important element its biggest.
+- Give each main screen 1 focal point: a 44 pt number, a full-width image or a color field.
+- Align text to 1 left edge per screen. Center only short titles and empty states.
+- Keep content inside the safe areas, clear of the Dynamic Island and home indicator.
+
+Check:
+- Every gap and padding is on the scale
+- Zero cards inside cards
+- The radius math holds on every screen
+
+Apply every fix, then list each as screen, rule, before, after. Name any rule you skipped.
+
+---
+
+One main button per screen
+
+Fix every button and tappable element in this app. Change buttons only.
+- 1 filled primary button per screen, in the accent color, for its one job.
+- Other actions are tinted, outlined or plain text. Show 2 at most; the rest go in a More menu.
+- Primary button: 50 to 56 pt tall and full width inside the side margins.
+- In forms and flows, pin it to the bottom, 16 pt above the home indicator.
+- Touch targets: 44 x 44 pt or more, with 8 pt between them. An icon-only button holds a 24 pt icon in a 44 pt frame.
+- While pressed, buttons scale to 0.97, then back to 1 on release.
+- 5 states for every button: default, pressed, disabled, loading and done.
+- Loading shows a spinner inside the button and keeps its width. Done shows a checkmark for 1 second.
+- Ignore taps while a request runs, so a double tap never submits or charges twice.
+- Destructive actions use red text, never the filled primary style.
+
+Check:
+- 1 filled button per screen
+- Every target is 44 x 44 pt or more
+- A second tap during loading does nothing
+
+Apply every fix, then list each as screen, rule, before, after. Name any rule you skipped.
+
+---
+
+Use real icons and images
+
+Fix every icon and image in this app. Change icons and imagery only.
+Icons:
+- Replace every emoji used as an icon.
+- Use 1 icon set: SF Symbols, or 1 library such as Lucide or Phosphor.
+- 1 stroke weight everywhere. Outline icons by default, filled only for the selected tab.
+- 3 sizes: 16, 20 and 24 pt.
+- Icons take the text color. Only the selected tab and the main action take the accent.
+- Shift play triangles 1 to 2 pt toward their point, so they look centered.
+Images:
+- Replace abstract shapes, blobs and stock illustrations with real screens, real data and real photos.
+- Give every image a fixed aspect ratio, like 1:1, 4:5 or 16:9, and reserve its space before it loads.
+- Show a blurred placeholder until the image arrives.
+- Ship images at 3x their point size: a 100 pt image needs 300 px.
+- One treatment for all images: the card corner radius, no border, no shadow.
+- Avatars without a photo: 2 initials on a tinted neutral.
+
+Check:
+- Zero emoji icons
+- 1 icon set, 1 stroke weight
+- Every image has a ratio and a placeholder
+
+Apply every fix, then list each as screen, rule, before, after. Name any rule you skipped.
+
+---
+
+Fix animation timing and easing
+
+Retime every custom animation in this app with these values. Change motion only.
+- Keep the system push, sheet and swipe-back transitions. Sheets close with a swipe down.
+- Entrances: ease-out. Moves from A to B: ease-in-out, on an arc when they cross the screen.
+- Menus, popovers and dropdowns open in 150 to 250 ms. Exits run 20% shorter: 250 ms in, 200 ms out.
+- Popovers start at scale 0.95, grow from their trigger and close back into it.
+- Stagger the first 10 visible list rows by 30 ms.
+- Toggle and slider knobs stretch about 12% while they move.
+- Springs with zero bounce on everyday UI.
+- While a finger holds or drags, follow it 1:1. Rubber band past the edges.
+- Crossfade swapping icons with a 2 pt blur.
+- Pulse once to confirm success.
+- Move shared elements between screens, like a card that opens into its detail.
+- Every animation can reverse mid-way.
+- Loop only loading states. With Reduce Motion on, swap movement for fades.
+
+Check:
+- Every custom animation uses a duration and curve from this list
+- No menu takes longer than 250 ms to open
+- Nothing loops except a loader
+
+Apply every fix, then list each as screen, rule, before, after. Name any rule you skipped.
+
+---
+
+Design loading, empty and error states
+
+Give every list, form and network action in this app 4 states: loading, empty, error and success. Change states only.
+Loading:
+- Replace spinners with skeletons: grey shapes in the final layout.
+- Show cached data first and refresh in the background.
+- For waits over 2 seconds, like AI results or uploads, show each real step as it finishes.
+Empty:
+- 1 line on what will appear here and 1 button that fills it.
+- Where people type, offer 3 tappable examples instead of an empty box.
+Error:
+- 1 line on what happened, the user's input kept, and a Retry button.
+- Offline: show cached data under a 1-line banner.
+Success:
+- Update the UI at once and sync in the background. If the request fails, roll back with a 1-line message.
+- Replace &quot;Are you sure?&quot; alerts with an Undo toast that stays 5 seconds.
+- AI edits to the user's data: show the suggestion first and apply it only after a tap.
+Crossfade between states in 200 ms, with no blank frame and no jump.
+
+Check:
+- Every list and form has all 4 states
+- Zero spinners on blank screens
+- Zero layout shift when data arrives
+
+List each list and form with its screen and its 4 states, then build them.
+
+---
+
+Show value before sign-up
+
+Rebuild this app's onboarding in this order: show the value, let people personalize, then ask for sign-up. Change the flow only.
+- Screen 1 shows the product doing its main job, with real data and a headline with a number.
+- 1 question per screen, 3 to 6 options as rows of 56 pt or taller, and only questions that change the app.
+- Every step: a progress bar, a back button, and the main button fixed at the bottom.
+- End with a result built from the answers, like &quot;Your plan: 3 workouts a week&quot;.
+- Ask for sign-up after that result, or let people start without an account when the app allows it.
+- If you offer Google or another social login, also offer Sign in with Apple, which meets App Review Guideline 4.8.
+- Mark the code field as a one-time code, so iOS fills it from Messages and Mail.
+- Ask for each permission at the moment it helps, with 1 line on why. iOS shows each system prompt only once.
+- Log 1 analytics event per step to see where people drop.
+
+Check:
+- Value comes before any account request
+- 1 question per screen
+- Every answer changes something in the app
+
+List the new steps, one line per screen, then build them.
+
+---
+
+Make the paywall clear and compliant
+
+Rebuild this app's paywall and purchase flow. Change the paywall only.
+- Show it after people see value, like at the end of onboarding.
+- Headline: the outcome people pay for, under 8 words. Below it, a real paid-feature screen and up to 3 one-line benefits.
+- 2 plans, like yearly and monthly, as tappable rows with name, length and the store's localized price. Preselect one.
+- The billed amount is the most prominent price, like &quot;$39.99 per year&quot;. The monthly equivalent or saving sits below it, smaller.
+- Replace &quot;Best value&quot; with the computed saving, like &quot;Save 58%&quot;. Remove fake countdowns.
+- Free trial: state its length and the price after it, plus a timeline (today, reminder on day 5, charge on day 7). Send that reminder.
+- 1 accent element: the main button, like &quot;Start 7-day free trial&quot;.
+- Show Restore Purchases, Terms and Privacy links, and a 44 pt close button from the first frame.
+- After purchase, open the paid feature. On failure, keep the paywall open with Retry.
+
+Check:
+- The billed amount is the largest price
+- Restore, Terms and Privacy are visible on the paywall
+- The trial length and later price are visible
+
+Apply every fix, then list each as screen, rule, before, after. Name any rule you skipped.
+
+---
+
+Build your App Store screenshots
+
+Build this app's App Store screenshots as code (HTML, SwiftUI or Flutter), so words stay editable. Change nothing in the app.
+- Make 8 to 10. Without an app preview, search shows the first 3: they must explain the app.
+- 1 benefit each. Screenshot 1 shows the main job and its result.
+- Headline on top: 3 to 7 words on 2 to 4 lines, with a number or verb, like &quot;Log a meal in 3 seconds&quot;. No period.
+- Headline font size: 120 to 180 px on the 1206 px canvas, in the display font.
+- Below it, a real screen with real data, never a login or splash screen.
+- Proof on screenshot 1, if real: an award, a rating with its count, a user count.
+- 1 layout for all, on flat brand colors or a real photo. Accent on 1 word per headline. No prices.
+- If the app has dark mode, show it on 1 screenshot.
+- Export PNG without transparency at 1206 x 2622 px, the required iPhone size, and 1320 x 2868 px for the large display.
+
+Check:
+- The first 3 explain the app alone
+- Headlines read at 25% zoom
+- Zero login screens, splash screens or prices
+
+List each screenshot with its headline and screen, then build them.
+
+---
+
+Build dark mode from tokens
+
+Build a complete dark mode for this app. Change colors and assets only.
+- Add a dark value to every color token: background, surface, raised surface, text, secondary text, separator, accent, text on accent, error.
+- Follow the system appearance by default.
+- Surfaces: 3 near-blacks tinted with your main hue, 0.05 apart in OKLCH lightness: L 0.18, 0.23 and 0.28 (#121212, #1D1D1D and #292929 before the tint).
+- Raised layers get lighter. Sheets, menus and popovers use the raised surface, L 0.28. Remove shadows.
+- Text: off-white at L 0.95, secondary at L 0.75. Both pass 6.5:1 on all 3 surfaces.
+- Accent, red and chart colors: keep each hue and raise its lightness until it reaches 3:1 on the background. The accent's label stays at 4.5:1.
+- Icons follow the text color. Give dark logos and illustrations a light version. Never invert photos.
+- Status bar, keyboard, charts, maps and the launch screen follow the mode.
+
+Check:
+- Zero hard-coded colors in views
+- Zero white cards and zero shadows on dark screens
+- The accent passes 3:1 on the dark background
+
+Apply every fix, then list each as screen, rule, before, after. Name any rule you skipped.
+
+---
+
+Make every screen accessible
+
+Make every screen work with iOS accessibility settings. Change accessibility only.
+- Dynamic Type: test at the largest accessibility size, where body text is 53 pt instead of 17. Rows stack, text wraps instead of truncating, screens scroll.
+- VoiceOver: label every control with what it does, like &quot;Delete meal&quot;, plus its state. Hide decorative images. Group each card into 1 sentence. Announce success and errors.
+- Use the stack's API: accessibilityLabel in SwiftUI and React Native, Semantics in Flutter.
+- Reading order follows the layout: top to bottom, then leading to trailing.
+- Never use color as the only signal: add an icon or a word.
+- Contrast: 4.5:1 for body text, 3:1 for text 24 pt and up, icons and control edges.
+- Touch targets: 44 x 44 pt or more.
+- Reduce Motion: swap movement for fades. Reduce Transparency: replace blur with solid surfaces.
+- Bold Text: custom fonts move 1 weight heavier. Increase Contrast: text tokens get a 7:1 variant.
+
+Check:
+- Onboarding, the paywall and the main action work with VoiceOver alone
+- No text is cut off at the largest size
+- Every icon button has a label
+
+Apply every fix, then list each as screen, rule, before, after. Name any rule you skipped.</div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="closing-title" data-reveal>
+  <div class="wrap">
+  <div class="closing">
+    <span class="tasu-loop tasu-loop--happy" role="img" aria-label="Tasu, the tasu.ai mascot, hops with joy"></span>
+    <h2 class="title-xl" id="closing-title">Follow the builder behind tasu.ai</h2>
+    <p class="lead closing-sub">I build a portfolio of mobile apps with taste. Kaught has 1,000+ users.</p>
+    <a class="btn btn-primary btn-lg" href="https://x.com/jeremylasne"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> Follow @jeremylasne</a>
+  </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-in">
+    <p class="footer-brand"><img src="/taste/brand/icon.svg" width="24" height="24" alt=""><span>tasu.ai, taste using AI, by <a href="https://www.jeremylasne.com/">Jeremy Lasne</a></span></p>
+    <p>Data: Apple App Store, US, 15&nbsp;Nov&nbsp;2026</p>
+    <nav class="footer-links" aria-label="Footer">
+      <a href="/taste/#apps">Apps</a>
+      <a href="/taste/elements/">UI Elements</a>
+      <a href="/taste/paywall/">Paywall</a>
+      <a href="/taste/prompt/">Prompts</a>
+      <a href="https://x.com/jeremylasne"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>@jeremylasne</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

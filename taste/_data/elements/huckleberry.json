@@ -1,0 +1,118 @@
+{
+ "slug": "huckleberry",
+ "elements": [
+  {
+   "id": "huckleberry-nursing-timer",
+   "name": "Nursing side buttons",
+   "type": "Buttons",
+   "order": 7,
+   "source": {
+    "shot": "s6",
+    "box": [
+     248,
+     551,
+     250,
+     128
+    ],
+    "crop": "/taste/media/elements/src/huckleberry-nursing-timer.jpg"
+   },
+   "why": "Two 138 pt buttons start a timer for each breast in 1 tap, and a Last Side badge on RIGHT marks the side used last.",
+   "html": "<div class=\"x-huckleberry-nursing-timer\"><svg class=\"x-huckleberry-nursing-timer__halos\" viewBox=\"0 0 333 163\" width=\"333\" height=\"163\" aria-hidden=\"true\"><circle cx=\"78.2\" cy=\"84.5\" r=\"77\" pathLength=\"40\" transform=\"rotate(-90 78.2 84.5)\"/><circle cx=\"254.4\" cy=\"84.5\" r=\"77\" pathLength=\"40\" transform=\"rotate(-90 254.4 84.5)\"/></svg><div class=\"x-huckleberry-nursing-timer__btn x-huckleberry-nursing-timer__btn--l\"></div><div class=\"x-huckleberry-nursing-timer__btn x-huckleberry-nursing-timer__btn--r\"></div><svg class=\"x-huckleberry-nursing-timer__play x-huckleberry-nursing-timer__play--l\" viewBox=\"0 0 19.4 23.6\" width=\"19.4\" height=\"23.6\" aria-hidden=\"true\"><path d=\"M1.5 1.5 17.9 11.8 1.5 22.1Z\" fill=\"#FFFFFF\" stroke=\"#FFFFFF\" stroke-width=\"3\" stroke-linejoin=\"round\"/></svg><svg class=\"x-huckleberry-nursing-timer__play x-huckleberry-nursing-timer__play--r\" viewBox=\"0 0 19.4 23.6\" width=\"19.4\" height=\"23.6\" aria-hidden=\"true\"><path d=\"M1.5 1.5 17.9 11.8 1.5 22.1Z\" fill=\"#FFFFFF\" stroke=\"#FFFFFF\" stroke-width=\"3\" stroke-linejoin=\"round\"/></svg><div class=\"x-huckleberry-nursing-timer__label x-huckleberry-nursing-timer__label--l\">LEFT</div><div class=\"x-huckleberry-nursing-timer__label x-huckleberry-nursing-timer__label--r\">RIGHT</div><div class=\"x-huckleberry-nursing-timer__badge\"><div class=\"x-huckleberry-nursing-timer__badgetext\"><div>Last</div><div>Side</div></div></div></div>",
+   "css": ".x-huckleberry-nursing-timer{position:relative;box-sizing:border-box;width:333px;height:163px;font-family:Oswald,sans-serif;font-size:23px;font-weight:400;line-height:1;letter-spacing:0;color:#FFFFFF;text-align:center;white-space:nowrap}.x-huckleberry-nursing-timer *{box-sizing:border-box;margin:0;padding:0}.x-huckleberry-nursing-timer__halos{position:absolute;left:0;top:0;display:block;width:333px;height:163px;overflow:visible}.x-huckleberry-nursing-timer__halos circle{fill:none;stroke:#FCD6C8;stroke-width:2.4;stroke-linecap:round;stroke-dasharray:.405 .595;stroke-dashoffset:.2025}.x-huckleberry-nursing-timer__btn{position:absolute;top:15.45px;width:138.1px;height:138.1px;border-radius:50%;background:#FD763F}.x-huckleberry-nursing-timer__btn--l{left:9.15px}.x-huckleberry-nursing-timer__btn--r{left:185.35px}.x-huckleberry-nursing-timer__play{position:absolute;top:61.30px;display:block;width:19.4px;height:23.6px}.x-huckleberry-nursing-timer__play--l{left:71.70px}.x-huckleberry-nursing-timer__play--r{left:247.90px}.x-huckleberry-nursing-timer__label{position:absolute;top:93.65px;width:100px;font-size:23px}.x-huckleberry-nursing-timer__label--l{left:28.55px}.x-huckleberry-nursing-timer__label--r{left:204.90px}.x-huckleberry-nursing-timer__badge{position:absolute;left:279.45px;top:-0.05px;width:52.3px;height:52.3px;border-radius:50%;background:#6A6A6A}.x-huckleberry-nursing-timer__badgetext{position:absolute;left:0;width:52.3px;top:14.14px;font-family:Lexend,sans-serif;font-size:11.5px;font-weight:600;line-height:12.3px;text-align:center}",
+   "fonts": [
+    {
+     "family": "Oswald",
+     "weight": 400
+    },
+    {
+     "family": "Lexend",
+     "weight": 600
+    }
+   ],
+   "size": {
+    "w": 333,
+    "h": 163
+   },
+   "backdrop": null,
+   "prompt": "Build nursing side buttons like Huckleberry's.\n- Two 138 pt circles, #FD763F, 38 pt apart (centers 176 pt apart), on a white screen.\n- Each has a dashed halo: circle r 77 pt, 2.4 pt #FED6C5 stroke, 40 dashes per turn with round caps, 7 pt clear of the button.\n- Inside: white play triangle 19.4 x 23.9 pt with 1.5 pt round corners, top 46 pt below the button top, shifted 3 pt right for optical centering.\n- Label below it: LEFT or RIGHT in Oswald Regular 23 pt, white, baseline 100 pt below the button top.\n- Badge: 52 pt #6A6A6A circle with Last / Side on 2 lines, Lexend Semibold 11.5 pt, white, 12.3 pt line height. It sits on the halo at 41 degrees, 1 o'clock.\n- States: tap starts that side's timer: pause icon, an mm:ss count, the halo turning once every 20 s, the other button at 50% opacity.\n- Data rule: the badge moves to the side that ran last.\n- Pressed: scale 0.96 for 120 ms.\nSwap in my brand colors and font; keep the sizes."
+  },
+  {
+   "id": "huckleberry-view-tabs",
+   "name": "View and log tabs",
+   "type": "Navigation",
+   "order": 18,
+   "source": {
+    "shot": "s4",
+    "box": [
+     114,
+     357,
+     378,
+     110
+    ],
+    "crop": "/taste/media/elements/src/huckleberry-view-tabs.jpg"
+   },
+   "why": "Two rows split one job: 4 segments pick the time view and 5 text tabs pick the log type, both marked in the same lime.",
+   "html": "<div class=\"x-huckleberry-view-tabs\"><div class=\"x-huckleberry-view-tabs__seg\"><span class=\"x-huckleberry-view-tabs__opt\">Day</span><span class=\"x-huckleberry-view-tabs__opt\">Week</span><span class=\"x-huckleberry-view-tabs__opt\">List</span><span class=\"x-huckleberry-view-tabs__opt x-huckleberry-view-tabs__opt--on\">Summary</span></div><svg class=\"x-huckleberry-view-tabs__filter\" viewBox=\"0 0 16.4 17\" width=\"16.4\" height=\"17\" aria-hidden=\"true\"><g fill=\"none\" stroke=\"#738497\" stroke-width=\"1.1\" stroke-linecap=\"round\"><path d=\"M.55 3.9H1.95M9.85 3.9H15.85M.55 12.9H5.65M14.25 12.9H15.85\"/><circle cx=\"5.9\" cy=\"3.9\" r=\"3.3\"/><circle cx=\"10.3\" cy=\"12.9\" r=\"3.3\"/></g></svg><span class=\"x-huckleberry-view-tabs__tab x-huckleberry-view-tabs__tab--1\">Sleep</span><span class=\"x-huckleberry-view-tabs__tab x-huckleberry-view-tabs__tab--2\">Feed</span><span class=\"x-huckleberry-view-tabs__tab x-huckleberry-view-tabs__tab--3\">Solids</span><span class=\"x-huckleberry-view-tabs__tab x-huckleberry-view-tabs__tab--4\">Diaper/Potty</span><span class=\"x-huckleberry-view-tabs__tab x-huckleberry-view-tabs__tab--5\">Pump</span><div class=\"x-huckleberry-view-tabs__line\"></div><div class=\"x-huckleberry-view-tabs__shadow\"></div></div>",
+   "css": ".x-huckleberry-view-tabs{position:relative;box-sizing:border-box;width:393px;height:143px;padding:16px;border-radius:24px;overflow:hidden;background:#FFFFFF;font-family:Lexend,sans-serif;font-size:16px;font-weight:300;line-height:1;letter-spacing:0;color:#4B505F;text-align:left;white-space:nowrap}.x-huckleberry-view-tabs *{box-sizing:border-box;margin:0;padding:0}.x-huckleberry-view-tabs__seg{position:absolute;left:15px;top:16px;width:311.3px;height:33.4px;display:flex;border:1px solid #E5E4E9;border-radius:4.2px}.x-huckleberry-view-tabs__opt{flex:1 1 0;display:flex;align-items:center;justify-content:center;padding-top:1.6px;font-size:10.5px;letter-spacing:-0.03em;color:#4B505F;border-left:1px solid #E5E4E9}.x-huckleberry-view-tabs__opt:first-child{border-left:0}.x-huckleberry-view-tabs__opt--on{margin:-1px -1px -1px 0;border-left:0;border-radius:0 4.2px 4.2px 0;background:#8FD33D;color:#FFFFFF}.x-huckleberry-view-tabs__filter{position:absolute;left:349.3px;top:24px;display:block;width:16.4px;height:17px}.x-huckleberry-view-tabs__tab{position:absolute;top:76.28px;font-size:16px;letter-spacing:-0.01em;color:#C7CBD1}.x-huckleberry-view-tabs__tab--1{color:#4A5265}.x-huckleberry-view-tabs__tab--1{left:15.50px}.x-huckleberry-view-tabs__tab--2{left:84.10px}.x-huckleberry-view-tabs__tab--3{left:145.60px}.x-huckleberry-view-tabs__tab--4{left:217.40px}.x-huckleberry-view-tabs__tab--5{left:341.40px}.x-huckleberry-view-tabs__line{position:absolute;left:15.6px;top:104.8px;width:42.4px;height:2.2px;border-radius:1.1px;background:#8FD33D}.x-huckleberry-view-tabs__shadow{position:absolute;left:0;top:116.5px;width:393px;height:10px;background:linear-gradient(180deg,#DCDCDC 0%,#EFEFEF 45%,#FFFFFF 100%)}",
+   "fonts": [
+    {
+     "family": "Lexend",
+     "weight": 300
+    }
+   ],
+   "size": {
+    "w": 393,
+    "h": 143
+   },
+   "backdrop": "#FFFFFF",
+   "prompt": "Build view and log type tabs like Huckleberry's.\n- Full width white header, 111 pt tall, 15 pt side margins.\n- Row 1: segmented control 311 x 34 pt, 1 pt #E5E4E9 border and dividers, 4.2 pt corners. 4 equal segments: Day, Week, List, Summary.\n- Labels: Lexend Light 10.5 pt, -0.03em, #4B505F. Selected segment: #8FD33D fill, white label, the control's corners on its outer side.\n- Filter icon 16.4 pt, 23 pt right of the control: 2 lines (1.1 pt, #738497), each with a 6.6 pt open circle, left on top and right below.\n- Row 2, baseline 74 pt below the control top: Sleep, Feed, Solids, Diaper/Potty, Pump in Lexend Light 16 pt, 27.7 pt apart. Active #4A5265, others #C7CBD1.\n- Underline: 2.2 pt lime bar (#8FD33D, round ends) as wide as the active label, 15 pt below its baseline.\n- Header shadow: 10 pt gradient #DEDEDE to #FFFFFF under the header.\n- States: a segment tap switches the time view; a tab tap slides the underline to that tab and takes its width in 250 ms. The tab row scrolls sideways.\nSwap in my brand colors and font; keep the sizes."
+  },
+  {
+   "id": "huckleberry-sleep-trends",
+   "name": "Sleep trends donut",
+   "type": "Charts",
+   "order": 30,
+   "source": {
+    "shot": "s4",
+    "box": [
+     119,
+     484,
+     353,
+     314
+    ],
+    "crop": "/taste/media/elements/src/huckleberry-sleep-trends.jpg"
+   },
+   "why": "The donut splits 14h 16m of daily sleep into nap (3h 7m) and night (11h 9m), and 1 grey line states the trend: 1h more than last week.",
+   "html": "<div class=\"x-huckleberry-sleep-trends\"><div class=\"x-huckleberry-sleep-trends__title\">Sleep Trends</div><div class=\"x-huckleberry-sleep-trends__pick\"></div><span class=\"x-huckleberry-sleep-trends__range x-huckleberry-sleep-trends__range--1\">7D</span><span class=\"x-huckleberry-sleep-trends__range x-huckleberry-sleep-trends__range--2\">14D</span><span class=\"x-huckleberry-sleep-trends__range x-huckleberry-sleep-trends__range--3\">30D</span><span class=\"x-huckleberry-sleep-trends__range x-huckleberry-sleep-trends__range--4\">90D</span><span class=\"x-huckleberry-sleep-trends__range x-huckleberry-sleep-trends__range--5\">1Y</span><span class=\"x-huckleberry-sleep-trends__dot x-huckleberry-sleep-trends__dot--nap\"></span><span class=\"x-huckleberry-sleep-trends__key x-huckleberry-sleep-trends__key--nap\">Nap total avg</span><span class=\"x-huckleberry-sleep-trends__val x-huckleberry-sleep-trends__val--nap\">3h 7m</span><span class=\"x-huckleberry-sleep-trends__dot x-huckleberry-sleep-trends__dot--night\"></span><span class=\"x-huckleberry-sleep-trends__key x-huckleberry-sleep-trends__key--night\">Night total avg</span><span class=\"x-huckleberry-sleep-trends__val x-huckleberry-sleep-trends__val--night\">11h 9m</span><svg class=\"x-huckleberry-sleep-trends__donut\" viewBox=\"0 0 376 337\" width=\"376\" height=\"337\" aria-hidden=\"true\"><circle cx=\"275.65\" cy=\"208.05\" r=\"73.25\" pathLength=\"360\" transform=\"rotate(-90 275.65 208.05)\" stroke=\"#AFEDF8\" stroke-dasharray=\"78.64 281.36\"/><circle cx=\"275.65\" cy=\"208.05\" r=\"73.25\" pathLength=\"360\" transform=\"rotate(-90 275.65 208.05)\" stroke=\"#5EDBEF\" stroke-dasharray=\"281.36 78.64\" stroke-dashoffset=\"-78.64\"/><path d=\"M275.65 146.55L275.65 123.05M335.95 195.94L358.98 191.31\" stroke=\"#FFFFFF\" stroke-width=\"2\"/><path d=\"M28.65 320.2V309.6M24.15 314.1L28.65 309.6L33.15 314.1\" stroke=\"#C1C0C1\" stroke-width=\"1.3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg><span class=\"x-huckleberry-sleep-trends__clabel\">Daily total avg</span><span class=\"x-huckleberry-sleep-trends__cval\">14h 16m</span><div class=\"x-huckleberry-sleep-trends__trend\"><span class=\"x-huckleberry-sleep-trends__bold\">1h</span> more sleep than last week</div></div>",
+   "css": ".x-huckleberry-sleep-trends{position:relative;box-sizing:border-box;width:376px;height:337px;padding:16px;border-radius:24px;background:#FFFFFF;font-family:Lexend,sans-serif;font-size:14.5px;font-weight:400;line-height:1;letter-spacing:0;color:#888888;text-align:left;white-space:nowrap}.x-huckleberry-sleep-trends *{box-sizing:border-box;margin:0;padding:0}.x-huckleberry-sleep-trends__title{position:absolute;left:14.7px;top:13.96px;font-size:22.8px;font-weight:500;color:#45526A}.x-huckleberry-sleep-trends__pick{position:absolute;left:307.15px;top:56.849999999999994px;width:45.5px;height:45.5px;border-radius:50%;background:#36D2E9}.x-huckleberry-sleep-trends__range{position:absolute;top:70.35px;width:60px;text-align:center;font-size:15.8px;font-weight:600;color:#39D0E7}.x-huckleberry-sleep-trends__range--5{color:#FFFFFF}.x-huckleberry-sleep-trends__range--1{left:23.10px}.x-huckleberry-sleep-trends__range--2{left:92.80px}.x-huckleberry-sleep-trends__range--3{left:162.30px}.x-huckleberry-sleep-trends__range--4{left:230.40px}.x-huckleberry-sleep-trends__range--5{left:299.70px}.x-huckleberry-sleep-trends__dot{position:absolute;left:32px;width:11.7px;height:11.7px;border-radius:50%}.x-huckleberry-sleep-trends__dot--nap{top:141.4px;background:#AFEDF8}.x-huckleberry-sleep-trends__dot--night{top:220.5px;background:#5EDBEF}.x-huckleberry-sleep-trends__key{position:absolute;left:47.4px}.x-huckleberry-sleep-trends__key--nap{top:140.48px}.x-huckleberry-sleep-trends__key--night{top:219.38px}.x-huckleberry-sleep-trends__val{position:absolute;left:30.8px;font-size:20.4px;font-weight:600;color:#45526A}.x-huckleberry-sleep-trends__val--nap{top:167.25px}.x-huckleberry-sleep-trends__val--night{top:246.65px}.x-huckleberry-sleep-trends__donut{position:absolute;left:0;top:0;display:block;width:376px;height:337px}.x-huckleberry-sleep-trends__donut circle{fill:none;stroke-width:20.7}.x-huckleberry-sleep-trends__clabel{position:absolute;left:205.64999999999998px;width:140px;text-align:center;top:183.69px}.x-huckleberry-sleep-trends__cval{position:absolute;left:205.64999999999998px;width:140px;text-align:center;top:207.55px;font-size:22.7px;font-weight:600;letter-spacing:-0.03em;color:#45526A}.x-huckleberry-sleep-trends__trend{position:absolute;left:47.4px;top:305.7px;font-family:Nunito,sans-serif;font-size:14.1px;font-weight:500;color:#888888;word-spacing:1px}.x-huckleberry-sleep-trends__bold{font-weight:700}",
+   "fonts": [
+    {
+     "family": "Lexend",
+     "weight": 400
+    },
+    {
+     "family": "Lexend",
+     "weight": 500
+    },
+    {
+     "family": "Lexend",
+     "weight": 600
+    },
+    {
+     "family": "Nunito",
+     "weight": 500
+    },
+    {
+     "family": "Nunito",
+     "weight": 700
+    }
+   ],
+   "size": {
+    "w": 376,
+    "h": 337
+   },
+   "backdrop": "#FFFFFF",
+   "prompt": "Build a sleep trends donut card like Huckleberry's.\n- Block 347 x 305 pt on white. Title: Sleep Trends, Lexend Medium 22.8 pt, #45526A.\n- Range row 50 pt below: 7D, 14D, 30D, 90D, 1Y in 5 equal cells (69 pt pitch), Lexend Semibold 15.8 pt #39D0E7. Selected: 45.5 pt #36D2E9 circle, white label.\n- Legend at left: 12 pt dots (nap #AFEDF8, night #5EDBEF), labels in Lexend Regular 14.5 pt #888888. Values 3h 7m and 11h 9m in Lexend Semibold 20.4 pt #45526A.\n- Donut at right: 167 pt across, 20.7 pt ring, flat ends, 2 pt white gaps. Center: Daily total avg (14.5 pt #888888) over 14h 16m (Lexend Semibold 22.7 pt, -0.03em, #45526A).\n- Trend line: thin up arrow (1.3 pt #C1C0C1), then 1h in Nunito Bold and more sleep than last week in Nunito Medium, 14.1 pt #888888.\n- Data rule: arc share = part over total. Nap 3h 7m of 14h 16m = 22% (79 degrees) from 12 o'clock, night fills the rest.\n- States: tapping a range slides the circle (250 ms spring) and redraws the donut; arcs sweep clockwise in 600 ms.\nSwap in my brand colors and font; keep the sizes."
+  }
+ ]
+}

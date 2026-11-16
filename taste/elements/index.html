@@ -1,0 +1,1357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>UI elements from top iPhone apps | tasu.ai</title>
+<meta name="description" content="9 UI elements from 3 top-grossing iPhone apps, rebuilt in HTML and CSS: 3 inputs, 2 progress and 2 headers. Copy the prompt or the code.">
+<link rel="canonical" href="https://www.jeremylasne.com/taste/elements/">
+<meta name="theme-color" content="#F3EFE7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1C1B19" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
+<script>(function(r){var t,v;try{t=localStorage.getItem('tasu-theme');v=localStorage.getItem('tasu-view')}catch(e){}r.classList.add('js');if(v==='grid')r.setAttribute('data-view','grid');if(t==='light'||t==='dark'){r.setAttribute('data-theme',t);var m=document.querySelectorAll('meta[name="theme-color"]'),c=t==='dark'?'#1C1B19':'#F3EFE7';for(var i=0;i<m.length;i++)m[i].setAttribute('content',c)}})(document.documentElement)</script>
+<link rel="preload" href="/taste/fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/taste/tasu.css">
+<link rel="stylesheet" href="/taste/elements/elements.css">
+<script src="/taste/tasu.js" defer></script>
+<link rel="icon" href="/taste/brand/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/taste/brand/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="tasu.ai">
+<meta property="og:url" content="https://www.jeremylasne.com/taste/elements/">
+<meta property="og:title" content="UI elements from top iPhone apps | tasu.ai">
+<meta property="og:description" content="9 UI elements from 3 top-grossing iPhone apps, rebuilt in HTML and CSS: 3 inputs, 2 progress and 2 headers. Copy the prompt or the code.">
+<meta property="og:image" content="https://www.jeremylasne.com/taste/brand/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="tasu.ai: steal the taste of top apps">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@jeremylasne">
+<meta name="twitter:creator" content="@jeremylasne">
+<meta name="twitter:title" content="UI elements from top iPhone apps | tasu.ai">
+<meta name="twitter:description" content="9 UI elements from 3 top-grossing iPhone apps, rebuilt in HTML and CSS: 3 inputs, 2 progress and 2 headers. Copy the prompt or the code.">
+<meta name="twitter:image" content="https://www.jeremylasne.com/taste/brand/og.png">
+<meta name="twitter:image:alt" content="tasu.ai: steal the taste of top apps">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"CollectionPage","@id":"https://www.jeremylasne.com/taste/elements/#page","url":"https://www.jeremylasne.com/taste/elements/","name":"UI elements from top iPhone apps | tasu.ai","description":"9 UI elements from 3 top-grossing iPhone apps, rebuilt in HTML and CSS: 3 inputs, 2 progress and 2 headers. Copy the prompt or the code.","inLanguage":"en","dateModified":"2026-11-16","isPartOf":{"@type":"WebSite","@id":"https://www.jeremylasne.com/taste/#website","name":"tasu.ai","url":"https://www.jeremylasne.com/taste/"},"author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne"]},"mainEntity":{"@type":"ItemList","numberOfItems":9,"itemListElement":[{"@type":"ListItem","position":1,"name":"Streak week, from Duolingo","url":"https://www.jeremylasne.com/taste/duolingo/#el-title"},{"@type":"ListItem","position":2,"name":"Word bank tiles, from Duolingo","url":"https://www.jeremylasne.com/taste/duolingo/#el-title"},{"@type":"ListItem","position":3,"name":"Screen time ring, from Opal","url":"https://www.jeremylasne.com/taste/opal/#el-title"},{"@type":"ListItem","position":4,"name":"Cycle countdown header, from Flo","url":"https://www.jeremylasne.com/taste/flo/#el-title"},{"@type":"ListItem","position":5,"name":"Severity gauge badge, from Flo","url":"https://www.jeremylasne.com/taste/flo/#el-title"},{"@type":"ListItem","position":6,"name":"Lesson progress header, from Duolingo","url":"https://www.jeremylasne.com/taste/duolingo/#el-title"},{"@type":"ListItem","position":7,"name":"Unblock limit card, from Opal","url":"https://www.jeremylasne.com/taste/opal/#el-title"},{"@type":"ListItem","position":8,"name":"Cycle month calendar, from Flo","url":"https://www.jeremylasne.com/taste/flo/#el-title"},{"@type":"ListItem","position":9,"name":"Focus timer controls, from Opal","url":"https://www.jeremylasne.com/taste/opal/#el-title"}]}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"tasu.ai","item":"https://www.jeremylasne.com/taste/"},{"@type":"ListItem","position":2,"name":"UI Elements","item":"https://www.jeremylasne.com/taste/elements/"}]}]}</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap header-in">
+    <a class="brand" href="/taste/" aria-label="tasu.ai, taste using AI, home" data-wm-link>
+      <span class="tasu-loop tasu-loop--blink" aria-hidden="true"></span>
+      <span class="wm" data-wm aria-hidden="true"><span class="wm-k">tas</span><span class="wm-x">te&nbsp;</span><span class="wm-k">u</span><span class="wm-x">sing&nbsp;</span><span class="wm-dot">.</span><span class="wm-k">ai</span></span>
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="/taste/#apps">Apps</a>
+      <a href="/taste/elements/" aria-current="page">UI Elements</a>
+      <a href="/taste/paywall/">Paywall</a>
+      <a href="/taste/prompt/">Prompts</a>
+    </nav>
+    <form class="search search--header" role="search" action="/taste/#apps" method="get">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+      <label class="sr-only" for="site-q">Search apps</label>
+      <input id="site-q" type="search" name="q" placeholder="Search apps" autocomplete="off" enterkeyhint="search" data-site-search>
+      <kbd class="kbd" aria-hidden="true">/</kbd>
+    </form>
+    <div class="header-tools">
+      <button class="icon-btn theme-toggle js-only" type="button" data-theme-toggle aria-pressed="false" aria-label="Dark theme">
+        <svg class="ico i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 3v1.5M12 19.5V21M3 12h1.5M19.5 12H21M5.64 5.64l1.06 1.06M17.3 17.3l1.06 1.06M5.64 18.36l1.06-1.06M17.3 6.7l1.06-1.06"/></svg>
+        <svg class="ico i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M19.5 14.5A7.5 7.5 0 0 1 9.5 4.5a7.5 7.5 0 1 0 10 10Z"/></svg>
+      </button>
+      <a class="icon-btn" href="https://x.com/jeremylasne" aria-label="Jeremy Lasne on X">
+        <svg class="ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<section class="section lib-top" aria-labelledby="lib-title" data-filter data-filter-url data-noun-one="element" data-noun-many="elements">
+  <div class="wrap">
+    <div class="gallery-head">
+      <div class="lib-intro">
+        <h1 class="title-xl" id="lib-title">UI elements, <span class="hl">rebuilt</span> in code</h1>
+        <p class="lead">9 elements from 3 top-grossing iPhone apps, rebuilt in HTML and CSS from their App Store screenshots. Copy the prompt or the code, or download a transparent PNG.</p>
+      </div>
+      <div class="gallery-tools js-only">
+        <div class="search search--lg">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+          <label class="sr-only" for="el-q">Search the elements</label>
+          <input id="el-q" type="search" placeholder="Try “chart” or “Strava”" autocomplete="off" enterkeyhint="search" data-filter-search>
+          <kbd class="kbd" aria-hidden="true">/</kbd>
+        </div>
+        <div class="chips" role="group" aria-label="Element types">
+          <button class="chip" type="button" data-filter-chip="all" aria-pressed="true">All <span class="chip-count">9</span></button>
+          <button class="chip" type="button" data-filter-chip="cards" aria-pressed="false">Cards <span class="chip-count">1</span></button>
+          <button class="chip" type="button" data-filter-chip="progress" aria-pressed="false">Progress <span class="chip-count">2</span></button>
+          <button class="chip" type="button" data-filter-chip="inputs" aria-pressed="false">Inputs <span class="chip-count">3</span></button>
+          <button class="chip" type="button" data-filter-chip="badges" aria-pressed="false">Badges <span class="chip-count">1</span></button>
+          <button class="chip" type="button" data-filter-chip="headers" aria-pressed="false">Headers <span class="chip-count">2</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <p class="toolbar-status"><span data-filter-status aria-live="polite">9 elements</span><span class="toolbar-source">App Store data, US, 15&nbsp;Nov&nbsp;2026</span></p>
+    </div>
+    <div class="el-grid el-grid--all">
+    <article class="el-card" data-filter-item data-tags="progress" data-text="Streak week Progress Duolingo Habits and learning A 124 pt number sits over 7 day circles, so a 3 day streak reads in 1 glance: 3 orange checks done, 4 gray days to go.">
+      <div class="el-stage" role="img" aria-label="Streak week, rebuilt from Duolingo">
+        <div class="el-fit" style="--w:337;--h:295" data-el-fit><div class="x-duolingo-streak-week"><div class="x-duolingo-streak-week__num">3</div><div class="x-duolingo-streak-week__label">day streak</div><div class="x-duolingo-streak-week__card"><div class="x-duolingo-streak-week__day"><span class="x-duolingo-streak-week__name">Su</span><span class="x-duolingo-streak-week__dot x-duolingo-streak-week__dot--done"><svg class="x-duolingo-streak-week__check" viewBox="0 0 33.5 33.5" aria-hidden="true"><polyline points="11.7,16.1 15.8,20.3 23.7,12.7" fill="none" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><div class="x-duolingo-streak-week__day"><span class="x-duolingo-streak-week__name">Mo</span><span class="x-duolingo-streak-week__dot x-duolingo-streak-week__dot--done"><svg class="x-duolingo-streak-week__check" viewBox="0 0 33.5 33.5" aria-hidden="true"><polyline points="11.7,16.1 15.8,20.3 23.7,12.7" fill="none" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><div class="x-duolingo-streak-week__day"><span class="x-duolingo-streak-week__name x-duolingo-streak-week__name--today">Tu</span><span class="x-duolingo-streak-week__dot x-duolingo-streak-week__dot--done"><svg class="x-duolingo-streak-week__check" viewBox="0 0 33.5 33.5" aria-hidden="true"><polyline points="11.7,16.1 15.8,20.3 23.7,12.7" fill="none" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><div class="x-duolingo-streak-week__day"><span class="x-duolingo-streak-week__name">We</span><span class="x-duolingo-streak-week__dot"></span></div><div class="x-duolingo-streak-week__day"><span class="x-duolingo-streak-week__name">Th</span><span class="x-duolingo-streak-week__dot"></span></div><div class="x-duolingo-streak-week__day"><span class="x-duolingo-streak-week__name">Fr</span><span class="x-duolingo-streak-week__dot"></span></div><div class="x-duolingo-streak-week__day"><span class="x-duolingo-streak-week__name">Sa</span><span class="x-duolingo-streak-week__dot"></span></div></div></div></div>
+      </div>
+      <div class="el-body">
+        <h2 class="el-name">Streak week</h2>
+        <p class="el-meta"><a class="el-app" href="/taste/duolingo/"><img src="/taste/media/duolingo/icon-256.webp" width="24" height="24" alt="" loading="lazy" decoding="async">Duolingo</a><span class="el-type">Progress</span></p>
+        <p class="el-why">A 124&nbsp;pt number sits over 7&nbsp;day circles, so a 3&nbsp;day streak reads in 1 glance: 3 orange checks done, 4 gray days to go.</p>
+        <p class="el-src">Rebuilt from App Store screenshot 6. <a href="/taste/media/elements/src/duolingo-streak-week.jpg">See the source</a></p>
+        <div class="el-actions">
+          <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ep-duolingo-streak-week" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+          <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ec-duolingo-streak-week" data-copy-raw data-copy-what="Code"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 7.25-4.75 4.75L9 16.75M15 7.25l4.75 4.75L15 16.75"/></svg><span data-copy-label>Copy code</span></button>
+        </div>
+        <details class="el-more"><summary>Prompt</summary><p class="el-prompt" id="ep-duolingo-streak-week">Build a streak week card like Duolingo’s.
+- Centered stack, 337 x 295 pt: number, label, week card.
+- Number: Nunito 800, 169 pt, glyph 124 x 75 pt, vertical gradient #FFB725 to #FFA10D.
+- Label “day streak”: Nunito 800, 34 pt, letter-spacing -0.01em, #FF9600, baseline 46 pt under the number.
+- Week card: 337 x 94 pt, 27 pt under the label, #FFFFFF fill, 1.9 pt #E5E5E5 border, 13.3 pt radius.
+- 7 columns at a 45.2 pt pitch. Day initials: Nunito 800, 16 pt, #AFAFAF; today’s initial turns #FF9600.
+- 10.5 pt under each initial, a 33.4 pt circle. Done: #FF9600 with a white 3.6 pt check, round caps. Upcoming: #E5E5E5.
+- Data rule: the number equals the run of days done. Fill 1 circle per day done, left to right.
+- When a day completes: pop its circle (scale 0.6 to 1.1 to 1, 300 ms), draw the check, then count the number up.
+Swap in my brand colors and font; keep the sizes.</p></details>
+        <details class="el-more"><summary>Code</summary><pre class="el-code" tabindex="0"><code id="ec-duolingo-streak-week">&lt;style&gt;
+.x-duolingo-streak-week {
+  position:relative;
+  width:337px;
+  height:295px;
+  font-family:&quot;Nunito&quot;,system-ui,sans-serif;
+  font-size:16px;
+  font-weight:800;
+  line-height:1;
+  letter-spacing:0;
+  color:#AFAFAF;
+  text-align:center;
+  white-space:nowrap;
+}
+.x-duolingo-streak-week * {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+.x-duolingo-streak-week__num {
+  position:absolute;
+  left:0;
+  top:0.5px;
+  width:100%;
+  height:132px;
+  padding-left:2px;
+  font-size:169px;
+  font-weight:800;
+  line-height:132px;
+  transform:scaleX(0.875);
+  background:linear-gradient(180deg,#FFB725 0,#FFA10D 124px);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+.x-duolingo-streak-week__label {
+  position:absolute;
+  left:0;
+  top:132px;
+  width:100%;
+  font-size:34px;
+  font-weight:800;
+  line-height:48px;
+  letter-spacing:-0.01em;
+  color:#FF9600;
+}
+.x-duolingo-streak-week__card {
+  position:absolute;
+  left:0;
+  top:200.6px;
+  width:337px;
+  height:94.3px;
+  display:flex;
+  justify-content:center;
+  padding-top:15.9px;
+  background:#FFFFFF;
+  border:1.9px solid #E5E5E5;
+  border-radius:13.3px;
+}
+.x-duolingo-streak-week__day {
+  width:45.2px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.x-duolingo-streak-week__name {
+  display:block;
+  height:16px;
+  font-size:16px;
+  font-weight:800;
+  line-height:16px;
+}
+.x-duolingo-streak-week__name--today {
+  color:#FF9600;
+}
+.x-duolingo-streak-week__dot {
+  display:block;
+  width:33.4px;
+  height:33.4px;
+  margin-top:10.5px;
+  border-radius:50%;
+  background:#E5E5E5;
+}
+.x-duolingo-streak-week__dot--done {
+  background:#FF9600;
+}
+.x-duolingo-streak-week__check {
+  display:block;
+  width:33.4px;
+  height:33.4px;
+}
+&lt;/style&gt;
+
+&lt;div class=&quot;x-duolingo-streak-week&quot;&gt;&lt;div class=&quot;x-duolingo-streak-week__num&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;x-duolingo-streak-week__label&quot;&gt;day streak&lt;/div&gt;&lt;div class=&quot;x-duolingo-streak-week__card&quot;&gt;&lt;div class=&quot;x-duolingo-streak-week__day&quot;&gt;&lt;span class=&quot;x-duolingo-streak-week__name&quot;&gt;Su&lt;/span&gt;&lt;span class=&quot;x-duolingo-streak-week__dot x-duolingo-streak-week__dot--done&quot;&gt;&lt;svg class=&quot;x-duolingo-streak-week__check&quot; viewBox=&quot;0 0 33.5 33.5&quot; aria-hidden=&quot;true&quot;&gt;&lt;polyline points=&quot;11.7,16.1 15.8,20.3 23.7,12.7&quot; fill=&quot;none&quot; stroke=&quot;#FFFFFF&quot; stroke-width=&quot;3.6&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;/&gt;&lt;/svg&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;x-duolingo-streak-week__day&quot;&gt;&lt;span class=&quot;x-duolingo-streak-week__name&quot;&gt;Mo&lt;/span&gt;&lt;span class=&quot;x-duolingo-streak-week__dot x-duolingo-streak-week__dot--done&quot;&gt;&lt;svg class=&quot;x-duolingo-streak-week__check&quot; viewBox=&quot;0 0 33.5 33.5&quot; aria-hidden=&quot;true&quot;&gt;&lt;polyline points=&quot;11.7,16.1 15.8,20.3 23.7,12.7&quot; fill=&quot;none&quot; stroke=&quot;#FFFFFF&quot; stroke-width=&quot;3.6&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;/&gt;&lt;/svg&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;x-duolingo-streak-week__day&quot;&gt;&lt;span class=&quot;x-duolingo-streak-week__name x-duolingo-streak-week__name--today&quot;&gt;Tu&lt;/span&gt;&lt;span class=&quot;x-duolingo-streak-week__dot x-duolingo-streak-week__dot--done&quot;&gt;&lt;svg class=&quot;x-duolingo-streak-week__check&quot; viewBox=&quot;0 0 33.5 33.5&quot; aria-hidden=&quot;true&quot;&gt;&lt;polyline points=&quot;11.7,16.1 15.8,20.3 23.7,12.7&quot; fill=&quot;none&quot; stroke=&quot;#FFFFFF&quot; stroke-width=&quot;3.6&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;/&gt;&lt;/svg&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;x-duolingo-streak-week__day&quot;&gt;&lt;span class=&quot;x-duolingo-streak-week__name&quot;&gt;We&lt;/span&gt;&lt;span class=&quot;x-duolingo-streak-week__dot&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;x-duolingo-streak-week__day&quot;&gt;&lt;span class=&quot;x-duolingo-streak-week__name&quot;&gt;Th&lt;/span&gt;&lt;span class=&quot;x-duolingo-streak-week__dot&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;x-duolingo-streak-week__day&quot;&gt;&lt;span class=&quot;x-duolingo-streak-week__name&quot;&gt;Fr&lt;/span&gt;&lt;span class=&quot;x-duolingo-streak-week__dot&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;x-duolingo-streak-week__day&quot;&gt;&lt;span class=&quot;x-duolingo-streak-week__name&quot;&gt;Sa&lt;/span&gt;&lt;span class=&quot;x-duolingo-streak-week__dot&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</code></pre></details>
+      </div>
+    </article>
+    <article class="el-card" data-filter-item data-tags="inputs" data-text="Word bank tiles Inputs Duolingo Habits and learning Each tapped word jumps to the answer line and leaves a gray slot of its size, so the 8 bank spots hold their place while the sentence builds.">
+      <div class="el-stage" role="img" aria-label="Word bank tiles, rebuilt from Duolingo">
+        <div class="el-fit" style="--w:362;--h:280" data-el-fit><div class="x-duolingo-word-bank"><span class="x-duolingo-word-bank__rule"></span><span class="x-duolingo-word-bank__rule x-duolingo-word-bank__rule--2"></span><span class="x-duolingo-word-bank__rule x-duolingo-word-bank__rule--3"></span><div class="x-duolingo-word-bank__answer"><span class="x-duolingo-word-bank__tile x-duolingo-word-bank__tile--ok x-duolingo-word-bank__w-i">I</span><span class="x-duolingo-word-bank__tile x-duolingo-word-bank__tile--ok x-duolingo-word-bank__w-need">need</span><span class="x-duolingo-word-bank__tile x-duolingo-word-bank__tile--ok x-duolingo-word-bank__w-more">more</span><span class="x-duolingo-word-bank__tile x-duolingo-word-bank__tile--ok x-duolingo-word-bank__w-coffee">coffee!</span></div><div class="x-duolingo-word-bank__row"><span class="x-duolingo-word-bank__slot x-duolingo-word-bank__w-s1"></span><span class="x-duolingo-word-bank__tile x-duolingo-word-bank__w-intelligent">intelligent</span><span class="x-duolingo-word-bank__tile x-duolingo-word-bank__w-lot">lot</span><span class="x-duolingo-word-bank__slot x-duolingo-word-bank__w-s2"></span></div><div class="x-duolingo-word-bank__row x-duolingo-word-bank__row--2"><span class="x-duolingo-word-bank__tile x-duolingo-word-bank__w-wants">wants</span><span class="x-duolingo-word-bank__slot x-duolingo-word-bank__w-s3"></span><span class="x-duolingo-word-bank__slot x-duolingo-word-bank__w-s4"></span><span class="x-duolingo-word-bank__tile x-duolingo-word-bank__w-car">car</span></div></div></div>
+      </div>
+      <div class="el-body">
+        <h2 class="el-name">Word bank tiles</h2>
+        <p class="el-meta"><a class="el-app" href="/taste/duolingo/"><img src="/taste/media/duolingo/icon-256.webp" width="24" height="24" alt="" loading="lazy" decoding="async">Duolingo</a><span class="el-type">Inputs</span></p>
+        <p class="el-why">Each tapped word jumps to the answer line and leaves a gray slot of its size, so the 8 bank spots hold their place while the sentence builds.</p>
+        <p class="el-src">Rebuilt from App Store screenshot 4. <a href="/taste/media/elements/src/duolingo-word-bank.jpg">See the source</a></p>
+        <div class="el-actions">
+          <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ep-duolingo-word-bank" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+          <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ec-duolingo-word-bank" data-copy-raw data-copy-what="Code"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 7.25-4.75 4.75L9 16.75M15 7.25l4.75 4.75L15 16.75"/></svg><span data-copy-label>Copy code</span></button>
+        </div>
+        <details class="el-more"><summary>Prompt</summary><p class="el-prompt" id="ep-duolingo-word-bank">Build a word bank with answer lines like Duolingo’s.
+- 362 x 280 pt. 1.9 pt #E5E5E5 rules at y 0, 57 and 114 pt.
+- Bank: 2 centered rows of 4 spots, top at 176 pt, 53 pt row pitch, 5 pt gaps.
+- Tile: 48 pt tall, 16 pt side padding, 10 pt radius, #FFFFFF fill, 2.4 pt #E5E5E5 border and a 4.6 pt bottom edge, like a key.
+- Word: Nunito 400, 20.5 pt, #4B4B4B, centered.
+- Used spot: a flat #E5E5E5 slot of the tile’s width, 2 pt lower.
+- Answer tiles sit on rule 1 from the left, 10.6 pt apart.
+- Correct: answer tiles turn #D7FEB7, border #A6EC70, words #58A601.
+- Pressed: move the tile down 2.2 pt; bottom edge 2.4 pt.
+- Data rule: tap a bank tile to append it to the answer; tap an answer tile to return it. Animate moves with a 200 ms FLIP.
+Swap in my brand colors and font; keep the sizes.</p></details>
+        <details class="el-more"><summary>Code</summary><pre class="el-code" tabindex="0"><code id="ec-duolingo-word-bank">&lt;style&gt;
+.x-duolingo-word-bank {
+  position:relative;
+  width:362px;
+  height:280px;
+  font-family:&quot;Nunito&quot;,system-ui,sans-serif;
+  font-size:20.5px;
+  font-weight:400;
+  line-height:1;
+  letter-spacing:-0.01em;
+  color:#4B4B4B;
+  text-align:center;
+  white-space:nowrap;
+}
+.x-duolingo-word-bank * {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+.x-duolingo-word-bank__rule {
+  position:absolute;
+  left:0;
+  top:0;
+  display:block;
+  width:100%;
+  height:1.9px;
+  background:#E5E5E5;
+}
+.x-duolingo-word-bank__rule--2 {
+  top:56.6px;
+}
+.x-duolingo-word-bank__rule--3 {
+  top:113.9px;
+}
+.x-duolingo-word-bank__answer {
+  position:absolute;
+  left:0.8px;
+  top:5.4px;
+  display:flex;
+  gap:10.6px;
+}
+.x-duolingo-word-bank__row {
+  position:absolute;
+  left:0;
+  top:175.9px;
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  gap:5.1px;
+}
+.x-duolingo-word-bank__row--2 {
+  top:229.1px;
+}
+.x-duolingo-word-bank__tile {
+  display:block;
+  height:48.3px;
+  padding-bottom:0.6px;
+  line-height:40.7px;
+  background:#FFFFFF;
+  border:2.4px solid #E5E5E5;
+  border-bottom-width:4.6px;
+  border-radius:10px;
+}
+.x-duolingo-word-bank__tile--ok {
+  height:46.8px;
+  padding-bottom:0.4px;
+  line-height:39.7px;
+  color:#58A601;
+  background:#D7FEB7;
+  border-color:#A6EC70;
+  border-bottom-width:4.3px;
+}
+.x-duolingo-word-bank__slot {
+  display:block;
+  height:48.4px;
+  margin-top:2.1px;
+  background:#E5E5E5;
+  border-radius:10px;
+}
+.x-duolingo-word-bank__w-i {
+  width:39.3px;
+}
+.x-duolingo-word-bank__w-need {
+  width:75.8px;
+}
+.x-duolingo-word-bank__w-more {
+  width:79.1px;
+}
+.x-duolingo-word-bank__w-coffee {
+  width:92.4px;
+}
+.x-duolingo-word-bank__w-intelligent {
+  width:124.6px;
+}
+.x-duolingo-word-bank__w-lot {
+  width:57px;
+}
+.x-duolingo-word-bank__w-wants {
+  width:88px;
+}
+.x-duolingo-word-bank__w-car {
+  width:62.3px;
+}
+.x-duolingo-word-bank__w-s1 {
+  width:56.6px;
+}
+.x-duolingo-word-bank__w-s2 {
+  width:75.4px;
+}
+.x-duolingo-word-bank__w-s3 {
+  width:119.9px;
+}
+.x-duolingo-word-bank__w-s4 {
+  width:71.8px;
+}
+&lt;/style&gt;
+
+&lt;div class=&quot;x-duolingo-word-bank&quot;&gt;&lt;span class=&quot;x-duolingo-word-bank__rule&quot;&gt;&lt;/span&gt;&lt;span class=&quot;x-duolingo-word-bank__rule x-duolingo-word-bank__rule--2&quot;&gt;&lt;/span&gt;&lt;span class=&quot;x-duolingo-word-bank__rule x-duolingo-word-bank__rule--3&quot;&gt;&lt;/span&gt;&lt;div class=&quot;x-duolingo-word-bank__answer&quot;&gt;&lt;span class=&quot;x-duolingo-word-bank__tile x-duolingo-word-bank__tile--ok x-duolingo-word-bank__w-i&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;x-duolingo-word-bank__tile x-duolingo-word-bank__tile--ok x-duolingo-word-bank__w-need&quot;&gt;need&lt;/span&gt;&lt;span class=&quot;x-duolingo-word-bank__tile x-duolingo-word-bank__tile--ok x-duolingo-word-bank__w-more&quot;&gt;more&lt;/span&gt;&lt;span class=&quot;x-duolingo-word-bank__tile x-duolingo-word-bank__tile--ok x-duolingo-word-bank__w-coffee&quot;&gt;coffee!&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;x-duolingo-word-bank__row&quot;&gt;&lt;span class=&quot;x-duolingo-word-bank__slot x-duolingo-word-bank__w-s1&quot;&gt;&lt;/span&gt;&lt;span class=&quot;x-duolingo-word-bank__tile x-duolingo-word-bank__w-intelligent&quot;&gt;intelligent&lt;/span&gt;&lt;span class=&quot;x-duolingo-word-bank__tile x-duolingo-word-bank__w-lot&quot;&gt;lot&lt;/span&gt;&lt;span class=&quot;x-duolingo-word-bank__slot x-duolingo-word-bank__w-s2&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;x-duolingo-word-bank__row x-duolingo-word-bank__row--2&quot;&gt;&lt;span class=&quot;x-duolingo-word-bank__tile x-duolingo-word-bank__w-wants&quot;&gt;wants&lt;/span&gt;&lt;span class=&quot;x-duolingo-word-bank__slot x-duolingo-word-bank__w-s3&quot;&gt;&lt;/span&gt;&lt;span class=&quot;x-duolingo-word-bank__slot x-duolingo-word-bank__w-s4&quot;&gt;&lt;/span&gt;&lt;span class=&quot;x-duolingo-word-bank__tile x-duolingo-word-bank__w-car&quot;&gt;car&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;</code></pre></details>
+      </div>
+    </article>
+    <article class="el-card" data-filter-item data-tags="progress" data-text="Screen time ring Progress Opal Habits and learning The ring states the win, 1h 23m less than usual, and 2 rows prove it: 4h 04m a day usually, 2h 41m this week.">
+      <div class="el-stage" role="img" aria-label="Screen time ring, rebuilt from Opal">
+        <div class="el-fit" style="--w:366;--h:456" data-el-fit><div class="x-opal-screen-time-ring"><div class="x-opal-screen-time-ring__streak x-opal-screen-time-ring__s1"></div><div class="x-opal-screen-time-ring__streak x-opal-screen-time-ring__s2"></div><div class="x-opal-screen-time-ring__streak x-opal-screen-time-ring__s3"></div><div class="x-opal-screen-time-ring__streak x-opal-screen-time-ring__s4"></div><div class="x-opal-screen-time-ring__streak x-opal-screen-time-ring__s5"></div><div class="x-opal-screen-time-ring__streak x-opal-screen-time-ring__s6"></div><div class="x-opal-screen-time-ring__streak x-opal-screen-time-ring__s7"></div><div class="x-opal-screen-time-ring__streak x-opal-screen-time-ring__s8"></div><div class="x-opal-screen-time-ring__streak x-opal-screen-time-ring__s9"></div><div class="x-opal-screen-time-ring__track"></div><div class="x-opal-screen-time-ring__glow"><div class="x-opal-screen-time-ring__glowfill"></div></div><div class="x-opal-screen-time-ring__disk"></div><div class="x-opal-screen-time-ring__hair"></div><div class="x-opal-screen-time-ring__arc"></div><div class="x-opal-screen-time-ring__cap"></div><div class="x-opal-screen-time-ring__beam"></div><div class="x-opal-screen-time-ring__value">1h 23m</div><div class="x-opal-screen-time-ring__label">LESS THAN USUAL</div><div class="x-opal-screen-time-ring__row"><span>Usually</span><span class="x-opal-screen-time-ring__v1">4h 04m a day</span></div><div class="x-opal-screen-time-ring__row x-opal-screen-time-ring__row--now"><span>This week</span><span class="x-opal-screen-time-ring__v2">2h 41m a day</span></div></div></div>
+      </div>
+      <div class="el-body">
+        <h2 class="el-name">Screen time ring</h2>
+        <p class="el-meta"><a class="el-app" href="/taste/opal/"><img src="/taste/media/opal/icon-256.webp" width="24" height="24" alt="" loading="lazy" decoding="async">Opal</a><span class="el-type">Progress</span></p>
+        <p class="el-why">The ring states the win, 1h 23m less than usual, and 2 rows prove it: 4h 04m a day usually, 2h 41m this week.</p>
+        <p class="el-src">Rebuilt from App Store screenshot 1. <a href="/taste/media/elements/src/opal-screen-time-ring.jpg">See the source</a></p>
+        <div class="el-actions">
+          <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ep-opal-screen-time-ring" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+          <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ec-opal-screen-time-ring" data-copy-raw data-copy-what="Code"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 7.25-4.75 4.75L9 16.75M15 7.25l4.75 4.75L15 16.75"/></svg><span data-copy-label>Copy code</span></button>
+        </div>
+        <details class="el-more"><summary>Prompt</summary><p class="el-prompt" id="ep-opal-screen-time-ring">Build a screen time ring card like Opal’s.
+- Card 366 x 456 pt, 16 pt padding, 24 pt corners, gradient #232528 to #050506, with a soft grey light band from the left.
+- Ring 294.6 pt wide: 29.3 pt band, track #19191B, inner disk #09090B, 1 pt #303033 hairline at r 109 pt.
+- Arc: conic gradient clockwise from 12 o’clock, fading in to #819DC4, then #A4D3FF, #9FF8FE and #8ED6E2 at a round cap.
+- Center: 1h 23m in Inter Medium 53.5 pt #FFFFFF; LESS THAN USUAL in Inter Medium 14 pt, 0.05em tracking, #8F8F8F.
+- 9 thin streaks (1.5 pt) radiate outside the ring.
+- Rows 41 pt apart: Usually, 4h 04m a day (Inter Semibold 24 pt, #AEB1B5, #C6C9CE); This week, 2h 41m a day (Inter Bold, #B0B6BE, #9EE5F6).
+- Data rule: center = usual minus this week.
+- On load, sweep the arc for 1.2 s while the number counts up.
+Swap in my brand colors and font; keep the sizes.</p></details>
+        <details class="el-more"><summary>Code</summary><pre class="el-code" tabindex="0"><code id="ec-opal-screen-time-ring">&lt;style&gt;
+.x-opal-screen-time-ring {
+  position:relative;
+  box-sizing:border-box;
+  width:366px;
+  height:456px;
+  padding:16px;
+  border-radius:24px;
+  overflow:hidden;
+  background:radial-gradient(ellipse 200px 160px at 0 0,rgba(78,80,84,.2),rgba(78,80,84,0) 100%), linear-gradient(180deg,#232528 0%,#1C1D1F 10%,#151617 22%,#0F0F10 34%,#09090A 46%,#050506 60%,#030304 70%,#08090B 76%,#0E1013 86%,#161A1F 94%,#1B2027 100%);
+  font-family:Inter,system-ui,sans-serif;
+  font-size:16px;
+  font-weight:500;
+  line-height:1;
+  letter-spacing:0;
+  color:#FFFFFF;
+  text-align:left;
+  white-space:nowrap;
+}
+.x-opal-screen-time-ring * {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+.x-opal-screen-time-ring__streak {
+  position:absolute;
+  left:183px;
+  top:173.95px;
+  height:1.5px;
+  transform-origin:0 50%;
+  border-radius:1px;
+  filter:blur(.5px);
+}
+.x-opal-screen-time-ring__s1 {
+  width:20px;
+  transform:rotate(232deg) translateX(149px);
+  background:linear-gradient(90deg,rgba(200,220,235,0),rgba(200,220,235,0.23) 45%,rgba(200,220,235,0.5) 80%,rgba(200,220,235,0));
+}
+.x-opal-screen-time-ring__s2 {
+  width:37px;
+  transform:rotate(-59deg) translateX(154px);
+  background:linear-gradient(90deg,rgba(200,220,235,0),rgba(200,220,235,0.38) 45%,rgba(200,220,235,0.85) 80%,rgba(200,220,235,0));
+}
+.x-opal-screen-time-ring__s3 {
+  width:61px;
+  transform:rotate(-45deg) translateX(185px);
+  background:linear-gradient(90deg,rgba(200,220,235,0),rgba(200,220,235,0.23) 45%,rgba(200,220,235,0.5) 80%,rgba(200,220,235,0));
+}
+.x-opal-screen-time-ring__s4 {
+  width:30px;
+  transform:rotate(180deg) translateX(170px);
+  background:linear-gradient(90deg,rgba(200,220,235,0),rgba(200,220,235,0.16) 45%,rgba(200,220,235,0.35) 80%,rgba(200,220,235,0));
+}
+.x-opal-screen-time-ring__s5 {
+  width:17px;
+  transform:rotate(156deg) translateX(148px);
+  background:linear-gradient(90deg,rgba(200,220,235,0),rgba(200,220,235,0.25) 45%,rgba(200,220,235,0.55) 80%,rgba(200,220,235,0));
+}
+.x-opal-screen-time-ring__s6 {
+  width:44px;
+  transform:rotate(138deg) translateX(170px);
+  background:linear-gradient(90deg,rgba(200,220,235,0),rgba(200,220,235,0.18) 45%,rgba(200,220,235,0.4) 80%,rgba(200,220,235,0));
+}
+.x-opal-screen-time-ring__s7 {
+  width:23px;
+  transform:rotate(24deg) translateX(148px);
+  background:linear-gradient(90deg,rgba(200,220,235,0),rgba(200,220,235,0.29) 45%,rgba(200,220,235,0.65) 80%,rgba(200,220,235,0));
+}
+.x-opal-screen-time-ring__s8 {
+  width:45px;
+  transform:rotate(43deg) translateX(207px);
+  background:linear-gradient(90deg,rgba(200,220,235,0),rgba(200,220,235,0.06) 45%,rgba(200,220,235,0.14) 80%,rgba(200,220,235,0));
+}
+.x-opal-screen-time-ring__s9 {
+  width:30px;
+  transform:rotate(49deg) translateX(212px);
+  background:linear-gradient(90deg,rgba(200,220,235,0),rgba(200,220,235,0.08) 45%,rgba(200,220,235,0.18) 80%,rgba(200,220,235,0));
+}
+.x-opal-screen-time-ring__track {
+  position:absolute;
+  left:35.70px;
+  top:27.40px;
+  width:294.60px;
+  height:294.60px;
+  border-radius:50%;
+  background:#19191B;
+}
+.x-opal-screen-time-ring__disk {
+  position:absolute;
+  left:65.00px;
+  top:56.70px;
+  width:236.00px;
+  height:236.00px;
+  border-radius:50%;
+  background:#09090B;
+}
+.x-opal-screen-time-ring__hair {
+  position:absolute;
+  left:73.50px;
+  top:65.20px;
+  width:219.00px;
+  height:219.00px;
+  border-radius:50%;
+  border:1px solid #303033;
+}
+.x-opal-screen-time-ring__glow {
+  position:absolute;
+  left:35.70px;
+  top:27.40px;
+  width:294.60px;
+  height:294.60px;
+  filter:blur(6px);
+  opacity:.3;
+}
+.x-opal-screen-time-ring__glowfill {
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  background:conic-gradient(rgba(129,157,196,0) 0deg,rgba(129,157,196,.35) 90deg,#9FD8FF 150deg,#9FF8FE 185deg,#8ED6E2 204deg,rgba(142,214,226,0) 214deg);
+  -webkit-mask:radial-gradient(circle closest-side,transparent 114px,#000 118px);
+  mask:radial-gradient(circle closest-side,transparent 114px,#000 118px);
+}
+.x-opal-screen-time-ring__arc {
+  position:absolute;
+  left:35.70px;
+  top:27.40px;
+  width:294.60px;
+  height:294.60px;
+  border-radius:50%;
+  background:conic-gradient(from -20deg,rgba(129,157,196,0) 0deg,rgba(129,157,196,.17) 20deg,rgba(129,157,196,.49) 50deg,rgba(129,157,196,.75) 80deg,#819DC4 110deg,#97B9E9 125deg,#A2C5FB 140deg,#A4D3FF 155deg,#A1E0FF 170deg,#A1ECFF 185deg,#9FF8FE 200deg,#95E3EF 215deg,#8ED6E2 224deg,rgba(142,214,226,0) 224deg);
+  -webkit-mask:radial-gradient(circle closest-side,transparent 117.5px,#000 118px);
+  mask:radial-gradient(circle closest-side,transparent 117.5px,#000 118px);
+}
+.x-opal-screen-time-ring__cap {
+  position:absolute;
+  left:114.4px;
+  top:281.23px;
+  width:29.30000000000001px;
+  height:29.30000000000001px;
+  border-radius:50%;
+  background:#8ED6E2;
+}
+.x-opal-screen-time-ring__beam {
+  position:absolute;
+  left:0;
+  top:0;
+  width:366px;
+  height:456px;
+  background:radial-gradient(ellipse 420px 120px at -60px 198px,rgba(82,86,90,.8) 0%,rgba(82,86,90,.45) 41%,rgba(82,86,90,.32) 55%,rgba(82,86,90,.16) 72%,rgba(82,86,90,0) 100%);
+}
+.x-opal-screen-time-ring__value {
+  position:absolute;
+  left:0;
+  width:366px;
+  top:132.79px;
+  text-align:center;
+  font-size:53.5px;
+  font-weight:500;
+  letter-spacing:-0.01em;
+  color:#FFFFFF;
+}
+.x-opal-screen-time-ring__label {
+  position:absolute;
+  left:0;
+  width:366px;
+  top:201.91px;
+  text-align:center;
+  font-size:14px;
+  font-weight:500;
+  letter-spacing:.05em;
+  word-spacing:2px;
+  color:#8F8F8F;
+}
+.x-opal-screen-time-ring__row {
+  position:absolute;
+  left:18px;
+  right:17.5px;
+  top:374.27px;
+  display:flex;
+  justify-content:space-between;
+  font-size:24px;
+  font-weight:600;
+  letter-spacing:-0.02em;
+  color:#AEB1B5;
+}
+.x-opal-screen-time-ring__v1 {
+  color:#C6C9CE;
+}
+.x-opal-screen-time-ring__row--now {
+  top:415.27px;
+  font-weight:700;
+  letter-spacing:0;
+  color:#B0B6BE;
+}
+.x-opal-screen-time-ring__v2 {
+  color:#9EE5F6;
+}
+&lt;/style&gt;
+
+&lt;div class=&quot;x-opal-screen-time-ring&quot;&gt;&lt;div class=&quot;x-opal-screen-time-ring__streak x-opal-screen-time-ring__s1&quot;&gt;&lt;/div&gt;&lt;div class=&quot;x-opal-screen-time-ring__streak x-opal-screen-time-ring__s2&quot;&gt;&lt;/div&gt;&lt;div class=&quot;x-opal-screen-time-ring__streak x-opal-screen-time-ring__s3&quot;&gt;&lt;/div&gt;&lt;div class=&quot;x-opal-screen-time-ring__streak x-opal-screen-time-ring__s4&quot;&gt;&lt;/div&gt;&lt;div class=&quot;x-opal-screen-time-ring__streak x-opal-screen-time-ring__s5&quot;&gt;&lt;/div&gt;&lt;div class=&quot;x-opal-screen-time-ring__streak x-opal-screen-time-ring__s6&quot;&gt;&lt;/div&gt;&lt;div class=&quot;x-opal-screen-time-ring__streak x-opal-screen-time-ring__s7&quot;&gt;&lt;/div&gt;&lt;div class=&quot;x-opal-screen-time-ring__streak x-opal-screen-time-ring__s8&quot;&gt;&lt;/div&gt;&lt;div class=&quot;x-opal-screen-time-ring__streak x-opal-screen-time-ring__s9&quot;&gt;&lt;/div&gt;&lt;div class=&quot;x-opal-screen-time-ring__track&quot;&gt;&lt;/div&gt;&lt;div class=&quot;x-opal-screen-time-ring__glow&quot;&gt;&lt;div class=&quot;x-opal-screen-time-ring__glowfill&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;x-opal-screen-time-ring__disk&quot;&gt;&lt;/div&gt;&lt;div class=&quot;x-opal-screen-time-ring__hair&quot;&gt;&lt;/div&gt;&lt;div class=&quot;x-opal-screen-time-ring__arc&quot;&gt;&lt;/div&gt;&lt;div class=&quot;x-opal-screen-time-ring__cap&quot;&gt;&lt;/div&gt;&lt;div class=&quot;x-opal-screen-time-ring__beam&quot;&gt;&lt;/div&gt;&lt;div class=&quot;x-opal-screen-time-ring__value&quot;&gt;1h 23m&lt;/div&gt;&lt;div class=&quot;x-opal-screen-time-ring__label&quot;&gt;LESS THAN USUAL&lt;/div&gt;&lt;div class=&quot;x-opal-screen-time-ring__row&quot;&gt;&lt;span&gt;Usually&lt;/span&gt;&lt;span class=&quot;x-opal-screen-time-ring__v1&quot;&gt;4h 04m a day&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;x-opal-screen-time-ring__row x-opal-screen-time-ring__row--now&quot;&gt;&lt;span&gt;This week&lt;/span&gt;&lt;span class=&quot;x-opal-screen-time-ring__v2&quot;&gt;2h 41m a day&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;</code></pre></details>
+      </div>
+    </article>
+    <article class="el-card" data-filter-item data-tags="headers" data-text="Cycle countdown header Headers Flo Health trackers Five dotted pink rings mark the predicted days on a 7-day strip, so the 2 days countdown and 1 pink button read as one forecast.">
+      <div class="el-stage" role="img" aria-label="Cycle countdown header, rebuilt from Flo">
+        <div class="el-fit" style="--w:393;--h:349" data-el-fit><div class="x-flo-cycle-countdown"><div class="x-flo-cycle-countdown__week"><div class="x-flo-cycle-countdown__day"><span class="x-flo-cycle-countdown__dow x-flo-cycle-countdown__dow--today">TODAY</span><span class="x-flo-cycle-countdown__date x-flo-cycle-countdown__date--today">3</span></div><div class="x-flo-cycle-countdown__day"><span class="x-flo-cycle-countdown__dow">T</span><span class="x-flo-cycle-countdown__date">4</span></div><div class="x-flo-cycle-countdown__day"><span class="x-flo-cycle-countdown__dow">W</span><span class="x-flo-cycle-countdown__date x-flo-cycle-countdown__date--period"><svg class="x-flo-cycle-countdown__ring" viewBox="0 0 50 50" aria-hidden="true"><circle cx="25" cy="25" r="15.85" fill="none" stroke="#E23B61" stroke-width="2" stroke-linecap="round" stroke-dasharray="0 4.15"/></svg>5</span></div><div class="x-flo-cycle-countdown__day"><span class="x-flo-cycle-countdown__dow">T</span><span class="x-flo-cycle-countdown__date x-flo-cycle-countdown__date--period"><svg class="x-flo-cycle-countdown__ring" viewBox="0 0 50 50" aria-hidden="true"><circle cx="25" cy="25" r="15.85" fill="none" stroke="#E23B61" stroke-width="2" stroke-linecap="round" stroke-dasharray="0 4.15"/></svg>6</span></div><div class="x-flo-cycle-countdown__day"><span class="x-flo-cycle-countdown__dow">F</span><span class="x-flo-cycle-countdown__date x-flo-cycle-countdown__date--period"><svg class="x-flo-cycle-countdown__ring" viewBox="0 0 50 50" aria-hidden="true"><circle cx="25" cy="25" r="15.85" fill="none" stroke="#E23B61" stroke-width="2" stroke-linecap="round" stroke-dasharray="0 4.15"/></svg>7</span></div><div class="x-flo-cycle-countdown__day"><span class="x-flo-cycle-countdown__dow">S</span><span class="x-flo-cycle-countdown__date x-flo-cycle-countdown__date--period"><svg class="x-flo-cycle-countdown__ring" viewBox="0 0 50 50" aria-hidden="true"><circle cx="25" cy="25" r="15.85" fill="none" stroke="#E23B61" stroke-width="2" stroke-linecap="round" stroke-dasharray="0 4.15"/></svg>8</span></div><div class="x-flo-cycle-countdown__day"><span class="x-flo-cycle-countdown__dow">S</span><span class="x-flo-cycle-countdown__date x-flo-cycle-countdown__date--period"><svg class="x-flo-cycle-countdown__ring" viewBox="0 0 50 50" aria-hidden="true"><circle cx="25" cy="25" r="15.85" fill="none" stroke="#E23B61" stroke-width="2" stroke-linecap="round" stroke-dasharray="0 4.15"/></svg>9</span></div></div><div class="x-flo-cycle-countdown__label">Period in:</div><div class="x-flo-cycle-countdown__count">2 days</div><div class="x-flo-cycle-countdown__button">Log period</div></div></div>
+      </div>
+      <div class="el-body">
+        <h2 class="el-name">Cycle countdown header</h2>
+        <p class="el-meta"><a class="el-app" href="/taste/flo/"><img src="/taste/media/flo/icon-256.webp" width="24" height="24" alt="" loading="lazy" decoding="async">Flo</a><span class="el-type">Headers</span></p>
+        <p class="el-why">Five dotted pink rings mark the predicted days on a 7-day strip, so the 2&nbsp;days countdown and 1 pink button read as one forecast.</p>
+        <p class="el-src">Rebuilt from App Store screenshot 1. <a href="/taste/media/elements/src/flo-cycle-countdown.jpg">See the source</a></p>
+        <div class="el-actions">
+          <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ep-flo-cycle-countdown" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+          <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ec-flo-cycle-countdown" data-copy-raw data-copy-what="Code"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 7.25-4.75 4.75L9 16.75M15 7.25l4.75 4.75L15 16.75"/></svg><span data-copy-label>Copy code</span></button>
+        </div>
+        <details class="el-more"><summary>Prompt</summary><p class="el-prompt" id="ep-flo-cycle-countdown">Build a cycle countdown header like Flo’s.
+- Layout: 393 x 317 pt on a vertical gradient from #F8F0EE to #FDFBFA, content centered.
+- Week strip: 7 columns on a 52 pt pitch. Weekday letters Inter 500, 10.6 pt, #7C7472. Today reads TODAY in Inter 700, 10.4 pt, #000000.
+- Day cells: 50 pt circles, 12 pt under the letters. Today: #FFFFFF circle, Inter 700, 18.6 pt digit. Plain day: Inter 400, 18 pt, #000000.
+- Predicted period day: #E23B61 digit inside a 33 pt dotted ring of 24 round 2 pt dots.
+- Countdown: Period in: in Inter 500, 25.7 pt, -0.03em, then 2 days in Inter 700, 49.3 pt, baselines 58 pt apart.
+- Button: 139 x 39 pt pill, #FE597D, Log period in Inter 600, 18.4 pt, #FFFFFF, 36 pt under the count. Pressed: #E84E6F, scale 0.97.
+- Data rule: ring each predicted day and count the days left to the first one. Roll the number up over 250 ms when it changes.
+Swap in my brand colors and font; keep the sizes.</p></details>
+        <details class="el-more"><summary>Code</summary><pre class="el-code" tabindex="0"><code id="ec-flo-cycle-countdown">&lt;style&gt;
+.x-flo-cycle-countdown {
+  position:relative;
+  box-sizing:border-box;
+  width:393px;
+  padding:16px 0;
+  border-radius:24px;
+  background:radial-gradient(circle at 328px 18px,rgba(196,150,140,0) 0,rgba(196,150,140,0.04) 200px,rgba(196,150,140,0.12) 290px,rgba(196,150,140,0) 305px),linear-gradient(180deg,#F8F0EE 0%,#FDFBFA 100%);
+  font-family:Inter,system-ui,sans-serif;
+  font-size:16px;
+  font-weight:400;
+  line-height:1.2;
+  letter-spacing:0;
+  color:#000000;
+  text-align:center;
+  white-space:nowrap;
+}
+.x-flo-cycle-countdown * {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+.x-flo-cycle-countdown__week {
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  margin:0 13px 0 15.3px;
+}
+.x-flo-cycle-countdown__day {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.x-flo-cycle-countdown__dow {
+  height:8px;
+  font-size:11px;
+  font-weight:500;
+  line-height:8px;
+  color:#7C7472;
+}
+.x-flo-cycle-countdown__dow--today {
+  font-weight:700;
+  letter-spacing:-0.03em;
+  color:#000000;
+}
+.x-flo-cycle-countdown__date {
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:50px;
+  height:50px;
+  margin-top:12.7px;
+  border-radius:50%;
+  font-size:18px;
+  line-height:1;
+}
+.x-flo-cycle-countdown__date--today {
+  background:#FFFFFF;
+  font-size:18.6px;
+  font-weight:700;
+}
+.x-flo-cycle-countdown__date--period {
+  color:#E23B61;
+}
+.x-flo-cycle-countdown__ring {
+  position:absolute;
+  left:0;
+  top:0;
+  display:block;
+  width:50px;
+  height:50px;
+}
+.x-flo-cycle-countdown__label {
+  margin-top:81.8px;
+  font-size:25.7px;
+  font-weight:500;
+  line-height:31px;
+  letter-spacing:-0.03em;
+}
+.x-flo-cycle-countdown__count {
+  margin-top:8.1px;
+  font-size:49.8px;
+  font-weight:700;
+  line-height:50px;
+}
+.x-flo-cycle-countdown__button {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:139px;
+  height:38.6px;
+  margin:36.7px auto 0;
+  border-radius:19.3px;
+  background:#FE597D;
+  color:#FFFFFF;
+  font-size:18.4px;
+  font-weight:600;
+  line-height:1;
+  letter-spacing:-0.01em;
+}
+&lt;/style&gt;
+
+&lt;div class=&quot;x-flo-cycle-countdown&quot;&gt;&lt;div class=&quot;x-flo-cycle-countdown__week&quot;&gt;&lt;div class=&quot;x-flo-cycle-countdown__day&quot;&gt;&lt;span class=&quot;x-flo-cycle-countdown__dow x-flo-cycle-countdown__dow--today&quot;&gt;TODAY&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-countdown__date x-flo-cycle-countdown__date--today&quot;&gt;3&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;x-flo-cycle-countdown__day&quot;&gt;&lt;span class=&quot;x-flo-cycle-countdown__dow&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-countdown__date&quot;&gt;4&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;x-flo-cycle-countdown__day&quot;&gt;&lt;span class=&quot;x-flo-cycle-countdown__dow&quot;&gt;W&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-countdown__date x-flo-cycle-countdown__date--period&quot;&gt;&lt;svg class=&quot;x-flo-cycle-countdown__ring&quot; viewBox=&quot;0 0 50 50&quot; aria-hidden=&quot;true&quot;&gt;&lt;circle cx=&quot;25&quot; cy=&quot;25&quot; r=&quot;15.85&quot; fill=&quot;none&quot; stroke=&quot;#E23B61&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-dasharray=&quot;0 4.15&quot;/&gt;&lt;/svg&gt;5&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;x-flo-cycle-countdown__day&quot;&gt;&lt;span class=&quot;x-flo-cycle-countdown__dow&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-countdown__date x-flo-cycle-countdown__date--period&quot;&gt;&lt;svg class=&quot;x-flo-cycle-countdown__ring&quot; viewBox=&quot;0 0 50 50&quot; aria-hidden=&quot;true&quot;&gt;&lt;circle cx=&quot;25&quot; cy=&quot;25&quot; r=&quot;15.85&quot; fill=&quot;none&quot; stroke=&quot;#E23B61&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-dasharray=&quot;0 4.15&quot;/&gt;&lt;/svg&gt;6&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;x-flo-cycle-countdown__day&quot;&gt;&lt;span class=&quot;x-flo-cycle-countdown__dow&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-countdown__date x-flo-cycle-countdown__date--period&quot;&gt;&lt;svg class=&quot;x-flo-cycle-countdown__ring&quot; viewBox=&quot;0 0 50 50&quot; aria-hidden=&quot;true&quot;&gt;&lt;circle cx=&quot;25&quot; cy=&quot;25&quot; r=&quot;15.85&quot; fill=&quot;none&quot; stroke=&quot;#E23B61&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-dasharray=&quot;0 4.15&quot;/&gt;&lt;/svg&gt;7&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;x-flo-cycle-countdown__day&quot;&gt;&lt;span class=&quot;x-flo-cycle-countdown__dow&quot;&gt;S&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-countdown__date x-flo-cycle-countdown__date--period&quot;&gt;&lt;svg class=&quot;x-flo-cycle-countdown__ring&quot; viewBox=&quot;0 0 50 50&quot; aria-hidden=&quot;true&quot;&gt;&lt;circle cx=&quot;25&quot; cy=&quot;25&quot; r=&quot;15.85&quot; fill=&quot;none&quot; stroke=&quot;#E23B61&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-dasharray=&quot;0 4.15&quot;/&gt;&lt;/svg&gt;8&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;x-flo-cycle-countdown__day&quot;&gt;&lt;span class=&quot;x-flo-cycle-countdown__dow&quot;&gt;S&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-countdown__date x-flo-cycle-countdown__date--period&quot;&gt;&lt;svg class=&quot;x-flo-cycle-countdown__ring&quot; viewBox=&quot;0 0 50 50&quot; aria-hidden=&quot;true&quot;&gt;&lt;circle cx=&quot;25&quot; cy=&quot;25&quot; r=&quot;15.85&quot; fill=&quot;none&quot; stroke=&quot;#E23B61&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-dasharray=&quot;0 4.15&quot;/&gt;&lt;/svg&gt;9&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;x-flo-cycle-countdown__label&quot;&gt;Period in:&lt;/div&gt;&lt;div class=&quot;x-flo-cycle-countdown__count&quot;&gt;2 days&lt;/div&gt;&lt;div class=&quot;x-flo-cycle-countdown__button&quot;&gt;Log period&lt;/div&gt;&lt;/div&gt;</code></pre></details>
+      </div>
+    </article>
+    <article class="el-card" data-filter-item data-tags="badges" data-text="Severity gauge badge Badges Flo Health trackers Two of 3 arcs light up, green then orange, and an orange warning sign grades the result before the 2 words under it are read.">
+      <div class="el-stage" role="img" aria-label="Severity gauge badge, rebuilt from Flo">
+        <div class="el-fit" style="--w:112;--h:138" data-el-fit><div class="x-flo-pay-attention"><svg class="x-flo-pay-attention__gauge" viewBox="0 0 112.4 137.6" aria-hidden="true"><defs><linearGradient id="x-flo-pay-attention-g1" gradientUnits="userSpaceOnUse" x1="15.86" y1="70.09" x2="24.46" y2="26.25"><stop offset="0" stop-color="#65C16A"/><stop offset="0.5" stop-color="#99B947"/><stop offset="1" stop-color="#C7B128"/></linearGradient><linearGradient id="x-flo-pay-attention-g2" gradientUnits="userSpaceOnUse" x1="29.01" y1="0" x2="80.44" y2="0"><stop offset="0" stop-color="#E8AB12"/><stop offset="0.3" stop-color="#FEA100"/><stop offset="0.53" stop-color="#FE8A01"/><stop offset="1" stop-color="#FD7B01"/></linearGradient></defs><g fill="none" stroke-width="8" stroke-linecap="round"><path d="M15.86 66.09A41.3 41.3 0 0 1 24.46 30.25" stroke="url(#x-flo-pay-attention-g1)"/><path d="M33.01 22.56A41.3 41.3 0 0 1 76.44 20.85" stroke="url(#x-flo-pay-attention-g2)"/><path d="M85.56 27.85A41.3 41.3 0 0 1 96.42 65.74" stroke="#E6E6E6"/></g><circle cx="56.1" cy="55.9" r="17" fill="#FFF6E7"/><path d="M56.2 48.1L62.6 60.9H49.8Z" fill="#FFA900" stroke="#FFA900" stroke-width="4" stroke-linejoin="round"/><path d="M56.2 52.3V55" fill="none" stroke="#FFFFFF" stroke-width="2.3" stroke-linecap="round"/><circle cx="56.2" cy="58.6" r="1.2" fill="#FFFFFF"/></svg><div class="x-flo-pay-attention__text"><span class="x-flo-pay-attention__line">Pay</span><span class="x-flo-pay-attention__line">attention</span></div></div></div>
+      </div>
+      <div class="el-body">
+        <h2 class="el-name">Severity gauge badge</h2>
+        <p class="el-meta"><a class="el-app" href="/taste/flo/"><img src="/taste/media/flo/icon-256.webp" width="24" height="24" alt="" loading="lazy" decoding="async">Flo</a><span class="el-type">Badges</span></p>
+        <p class="el-why">Two of 3 arcs light up, green then orange, and an orange warning sign grades the result before the 2 words under it are read.</p>
+        <p class="el-src">Rebuilt from App Store screenshot 5. <a href="/taste/media/elements/src/flo-pay-attention.jpg">See the source</a></p>
+        <div class="el-actions">
+          <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ep-flo-pay-attention" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+          <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ec-flo-pay-attention" data-copy-raw data-copy-what="Code"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 7.25-4.75 4.75L9 16.75M15 7.25l4.75 4.75L15 16.75"/></svg><span data-copy-label>Copy code</span></button>
+        </div>
+        <details class="el-more"><summary>Prompt</summary><p class="el-prompt" id="ep-flo-pay-attention">Build a severity gauge badge like Flo’s.
+- Card: 112 x 138 pt, #FFFFFF, 17.7 pt corners.
+- Gauge: 3 arcs on one circle, radius 41.3 pt, centered 56 pt from the top, stroke 8 pt, round caps, 5 degree gaps between arcs.
+- Arc angles, clockwise from 12 o clock: left 257 to 310, top 326 to 29.5, right 45.5 to 102.5 degrees.
+- Colors: left arc #65C16A to #C7B128 from bottom to top; top arc #E8AB12 to #FD7B01 from left to right; unlit arc #E6E6E6.
+- Center: 34 pt #FFF6E7 disc holding a 17 pt #FFA900 rounded triangle with a #FFFFFF exclamation mark.
+- Label: Pay attention in Inter 700, 16.5 pt, #000000, 2 centered lines, 20.4 pt line height, baselines at 100 and 120 pt.
+- States: light the arcs left to right by level, 1 to 3. Level 3 adds #F2453D. Sweep each arc in 300 ms, then pop the triangle from 0.8 to 1.
+Swap in my brand colors and font; keep the sizes.</p></details>
+        <details class="el-more"><summary>Code</summary><pre class="el-code" tabindex="0"><code id="ec-flo-pay-attention">&lt;style&gt;
+.x-flo-pay-attention {
+  position:relative;
+  box-sizing:border-box;
+  width:112.4px;
+  height:137.6px;
+  border-radius:17.7px;
+  background:#FFFFFF;
+  font-family:Inter,system-ui,sans-serif;
+  font-size:16.5px;
+  font-weight:700;
+  line-height:20.4px;
+  letter-spacing:0;
+  color:#000000;
+  text-align:center;
+  white-space:nowrap;
+}
+.x-flo-pay-attention * {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+.x-flo-pay-attention__gauge {
+  position:absolute;
+  left:0;
+  top:0;
+  display:block;
+  width:112.4px;
+  height:137.6px;
+}
+.x-flo-pay-attention__text {
+  position:absolute;
+  left:0;
+  right:0;
+  top:83.6px;
+}
+.x-flo-pay-attention__line {
+  display:block;
+}
+&lt;/style&gt;
+
+&lt;div class=&quot;x-flo-pay-attention&quot;&gt;&lt;svg class=&quot;x-flo-pay-attention__gauge&quot; viewBox=&quot;0 0 112.4 137.6&quot; aria-hidden=&quot;true&quot;&gt;&lt;defs&gt;&lt;linearGradient id=&quot;x-flo-pay-attention-g1&quot; gradientUnits=&quot;userSpaceOnUse&quot; x1=&quot;15.86&quot; y1=&quot;70.09&quot; x2=&quot;24.46&quot; y2=&quot;26.25&quot;&gt;&lt;stop offset=&quot;0&quot; stop-color=&quot;#65C16A&quot;/&gt;&lt;stop offset=&quot;0.5&quot; stop-color=&quot;#99B947&quot;/&gt;&lt;stop offset=&quot;1&quot; stop-color=&quot;#C7B128&quot;/&gt;&lt;/linearGradient&gt;&lt;linearGradient id=&quot;x-flo-pay-attention-g2&quot; gradientUnits=&quot;userSpaceOnUse&quot; x1=&quot;29.01&quot; y1=&quot;0&quot; x2=&quot;80.44&quot; y2=&quot;0&quot;&gt;&lt;stop offset=&quot;0&quot; stop-color=&quot;#E8AB12&quot;/&gt;&lt;stop offset=&quot;0.3&quot; stop-color=&quot;#FEA100&quot;/&gt;&lt;stop offset=&quot;0.53&quot; stop-color=&quot;#FE8A01&quot;/&gt;&lt;stop offset=&quot;1&quot; stop-color=&quot;#FD7B01&quot;/&gt;&lt;/linearGradient&gt;&lt;/defs&gt;&lt;g fill=&quot;none&quot; stroke-width=&quot;8&quot; stroke-linecap=&quot;round&quot;&gt;&lt;path d=&quot;M15.86 66.09A41.3 41.3 0 0 1 24.46 30.25&quot; stroke=&quot;url(#x-flo-pay-attention-g1)&quot;/&gt;&lt;path d=&quot;M33.01 22.56A41.3 41.3 0 0 1 76.44 20.85&quot; stroke=&quot;url(#x-flo-pay-attention-g2)&quot;/&gt;&lt;path d=&quot;M85.56 27.85A41.3 41.3 0 0 1 96.42 65.74&quot; stroke=&quot;#E6E6E6&quot;/&gt;&lt;/g&gt;&lt;circle cx=&quot;56.1&quot; cy=&quot;55.9&quot; r=&quot;17&quot; fill=&quot;#FFF6E7&quot;/&gt;&lt;path d=&quot;M56.2 48.1L62.6 60.9H49.8Z&quot; fill=&quot;#FFA900&quot; stroke=&quot;#FFA900&quot; stroke-width=&quot;4&quot; stroke-linejoin=&quot;round&quot;/&gt;&lt;path d=&quot;M56.2 52.3V55&quot; fill=&quot;none&quot; stroke=&quot;#FFFFFF&quot; stroke-width=&quot;2.3&quot; stroke-linecap=&quot;round&quot;/&gt;&lt;circle cx=&quot;56.2&quot; cy=&quot;58.6&quot; r=&quot;1.2&quot; fill=&quot;#FFFFFF&quot;/&gt;&lt;/svg&gt;&lt;div class=&quot;x-flo-pay-attention__text&quot;&gt;&lt;span class=&quot;x-flo-pay-attention__line&quot;&gt;Pay&lt;/span&gt;&lt;span class=&quot;x-flo-pay-attention__line&quot;&gt;attention&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;</code></pre></details>
+      </div>
+    </article>
+    <article class="el-card" data-filter-item data-tags="headers" data-text="Lesson progress header Headers Duolingo Habits and learning One 22 pt row holds the exit, a bar at 44% and an energy count that drops from 25 to 22, so progress and cost read together.">
+      <div class="el-stage" role="img" aria-label="Lesson progress header, rebuilt from Duolingo">
+        <div class="el-fit" style="--w:355;--h:22" data-el-fit><div class="x-duolingo-lesson-header"><svg class="x-duolingo-lesson-header__close" viewBox="0 0 20 20" aria-hidden="true"><path d="M1.3 1.3L18.7 18.7M18.7 1.3L1.3 18.7" fill="none" stroke="#B7B7B7" stroke-width="1.9" stroke-linecap="round"/></svg><span class="x-duolingo-lesson-header__track"><span class="x-duolingo-lesson-header__fill"><span class="x-duolingo-lesson-header__shine"></span></span></span><svg class="x-duolingo-lesson-header__energy" viewBox="0 0 28.2 22.1" aria-hidden="true"><rect width="28.2" height="22.1" rx="4.6" fill="#FF86CD"/><path d="M1.9 3.6Q1.9 1.9 3.6 1.9L7.4 1.9Q9.2 1.9 8.6 3.6L4.3 17.6Q3.8 19.1 2.9 19.1Q1.9 19.1 1.9 17.9Z" fill="#FEAADC"/><path d="M14.6 3.4L10 12.5L13.1 12.5L13.2 18.3L18.5 9.6L15.1 9.6Z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.3" stroke-linejoin="round"/></svg><span class="x-duolingo-lesson-header__nub"></span><span class="x-duolingo-lesson-header__count">25</span></div></div>
+      </div>
+      <div class="el-body">
+        <h2 class="el-name">Lesson progress header</h2>
+        <p class="el-meta"><a class="el-app" href="/taste/duolingo/"><img src="/taste/media/duolingo/icon-256.webp" width="24" height="24" alt="" loading="lazy" decoding="async">Duolingo</a><span class="el-type">Headers</span></p>
+        <p class="el-why">One 22&nbsp;pt row holds the exit, a bar at 44% and an energy count that drops from 25 to 22, so progress and cost read together.</p>
+        <p class="el-src">Rebuilt from App Store screenshot 2. <a href="/taste/media/elements/src/duolingo-lesson-header.jpg">See the source</a></p>
+        <div class="el-actions">
+          <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ep-duolingo-lesson-header" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+          <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ec-duolingo-lesson-header" data-copy-raw data-copy-what="Code"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 7.25-4.75 4.75L9 16.75M15 7.25l4.75 4.75L15 16.75"/></svg><span data-copy-label>Copy code</span></button>
+        </div>
+        <details class="el-more"><summary>Prompt</summary><p class="el-prompt" id="ep-duolingo-lesson-header">Build a lesson progress header like Duolingo’s.
+- One 355 x 22 pt row, items on one center line, 21 pt screen margins.
+- Close X: 20 pt, 1.9 pt #B7B7B7 crossing strokes, round caps. Pressed: 60% opacity.
+- Track: 12 pt after the X, free width (249 pt), 16.8 pt #E5E5E5 pill.
+- Fill: #58CC02 pill, width = lesson progress; 2.7 pt #7BD636 highlight 3.8 pt below its top, inset 4 pt.
+- Energy icon: 12 pt after the track, 28 x 22 pt #FF86CD tile, 4.6 pt radius, #FEAADC slanted sheen top left, white bolt.
+- A 3.2 x 7.2 pt #FF86CD battery tip, 1 pt to its right.
+- Count: Nunito 800, 17.4 pt, letter-spacing 0.08em, #FF86CE, 8 pt after the tip.
+- Data rule: grow the fill over 300 ms ease-out per answer; drop the count by 1 per lesson.
+- Combo state: after a run of right answers, fill #FF9600, highlight #FEAA31.
+Swap in my brand colors and font; keep the sizes.</p></details>
+        <details class="el-more"><summary>Code</summary><pre class="el-code" tabindex="0"><code id="ec-duolingo-lesson-header">&lt;style&gt;
+.x-duolingo-lesson-header {
+  display:flex;
+  align-items:center;
+  width:355px;
+  height:22.4px;
+  font-family:&quot;Nunito&quot;,system-ui,sans-serif;
+  font-size:17px;
+  font-weight:800;
+  line-height:1;
+  letter-spacing:0.05em;
+  color:#FF86CE;
+  text-align:left;
+  white-space:nowrap;
+}
+.x-duolingo-lesson-header * {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+.x-duolingo-lesson-header__close {
+  display:block;
+  flex:none;
+  width:20px;
+  height:20px;
+  margin-left:0.1px;
+}
+.x-duolingo-lesson-header__track {
+  position:relative;
+  display:block;
+  flex:none;
+  width:248.6px;
+  height:16.8px;
+  margin-left:11.8px;
+  border-radius:8.4px;
+  background:#E5E5E5;
+}
+.x-duolingo-lesson-header__fill {
+  position:absolute;
+  left:0;
+  top:0;
+  display:block;
+  width:43.6%;
+  height:100%;
+  border-radius:8.4px;
+  background:#58CC02;
+}
+.x-duolingo-lesson-header__shine {
+  position:absolute;
+  left:4.1px;
+  right:3.8px;
+  top:3.8px;
+  display:block;
+  height:2.7px;
+  border-radius:1.4px;
+  background:#7BD636;
+}
+.x-duolingo-lesson-header__energy {
+  display:block;
+  flex:none;
+  width:28.2px;
+  height:22.1px;
+  margin-left:12.2px;
+}
+.x-duolingo-lesson-header__nub {
+  display:block;
+  flex:none;
+  width:3.2px;
+  height:7.2px;
+  margin-left:0.9px;
+  border-radius:1.6px;
+  background:#FF86CD;
+}
+.x-duolingo-lesson-header__count {
+  position:relative;
+  top:-0.3px;
+  display:block;
+  flex:none;
+  margin-left:8px;
+  padding-top:1.8px;
+  font-size:17.4px;
+  line-height:20.6px;
+  letter-spacing:0.08em;
+}
+&lt;/style&gt;
+
+&lt;div class=&quot;x-duolingo-lesson-header&quot;&gt;&lt;svg class=&quot;x-duolingo-lesson-header__close&quot; viewBox=&quot;0 0 20 20&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;M1.3 1.3L18.7 18.7M18.7 1.3L1.3 18.7&quot; fill=&quot;none&quot; stroke=&quot;#B7B7B7&quot; stroke-width=&quot;1.9&quot; stroke-linecap=&quot;round&quot;/&gt;&lt;/svg&gt;&lt;span class=&quot;x-duolingo-lesson-header__track&quot;&gt;&lt;span class=&quot;x-duolingo-lesson-header__fill&quot;&gt;&lt;span class=&quot;x-duolingo-lesson-header__shine&quot;&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;svg class=&quot;x-duolingo-lesson-header__energy&quot; viewBox=&quot;0 0 28.2 22.1&quot; aria-hidden=&quot;true&quot;&gt;&lt;rect width=&quot;28.2&quot; height=&quot;22.1&quot; rx=&quot;4.6&quot; fill=&quot;#FF86CD&quot;/&gt;&lt;path d=&quot;M1.9 3.6Q1.9 1.9 3.6 1.9L7.4 1.9Q9.2 1.9 8.6 3.6L4.3 17.6Q3.8 19.1 2.9 19.1Q1.9 19.1 1.9 17.9Z&quot; fill=&quot;#FEAADC&quot;/&gt;&lt;path d=&quot;M14.6 3.4L10 12.5L13.1 12.5L13.2 18.3L18.5 9.6L15.1 9.6Z&quot; fill=&quot;#FFFFFF&quot; stroke=&quot;#FFFFFF&quot; stroke-width=&quot;1.3&quot; stroke-linejoin=&quot;round&quot;/&gt;&lt;/svg&gt;&lt;span class=&quot;x-duolingo-lesson-header__nub&quot;&gt;&lt;/span&gt;&lt;span class=&quot;x-duolingo-lesson-header__count&quot;&gt;25&lt;/span&gt;&lt;/div&gt;</code></pre></details>
+      </div>
+    </article>
+    <article class="el-card" data-filter-item data-tags="cards" data-text="Unblock limit card Cards Opal Habits and learning The card reads as a rule, lock to shield, 10 Unblock Daily, and the pill shows 7 left before the first tap.">
+      <div class="el-stage" role="img" aria-label="Unblock limit card, rebuilt from Opal">
+        <div class="el-fit" style="--w:198;--h:220" data-el-fit><div class="x-opal-unblock-card"><div class="x-opal-unblock-card__card"><svg class="x-opal-unblock-card__icons" viewBox="0 0 110 52" width="110" height="52" aria-hidden="true"><defs><linearGradient id="x-opal-unblock-card-g" gradientUnits="userSpaceOnUse" x1="0" y1="20.7" x2="0" y2="48"><stop offset="0" stop-color="#A6CBFF"/><stop offset="1" stop-color="#A0F0FE"/></linearGradient></defs><path d="M24.9 32.6V26.9a4.6 4.6 0 0 1 9.2 0V32.6" fill="none" stroke="url(#x-opal-unblock-card-g)" stroke-width="2.6"/><rect x="20.7" y="31.6" width="17.6" height="14.7" rx="3.3" fill="url(#x-opal-unblock-card-g)"/><path d="M51.7 34H66.6M60.7 28.1 66.6 34 60.7 39.9" fill="none" stroke="url(#x-opal-unblock-card-g)" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M91.65 20.7C95.2 21.5 98.6 21.9 101.4 22.1C102.5 22.2 103 22.8 103 23.9V32.6C103 40.4 97.6 45.1 92.5 47.8C91.95 48.07 91.35 48.07 90.8 47.8C85.7 45.1 80.3 40.4 80.3 32.6V23.9C80.3 22.8 80.8 22.2 81.9 22.1C84.7 21.9 88.1 21.5 91.65 20.7Z" fill="url(#x-opal-unblock-card-g)"/></svg><div class="x-opal-unblock-card__pill"><span class="x-opal-unblock-card__used"></span><span class="x-opal-unblock-card__count">7 left</span></div><div class="x-opal-unblock-card__title">10 Unblock Daily</div><div class="x-opal-unblock-card__for">For</div><div class="x-opal-unblock-card__tile x-opal-unblock-card__t1">A</div><div class="x-opal-unblock-card__tile x-opal-unblock-card__t2">B</div><div class="x-opal-unblock-card__tile x-opal-unblock-card__t3">C</div></div></div></div>
+      </div>
+      <div class="el-body">
+        <h2 class="el-name">Unblock limit card</h2>
+        <p class="el-meta"><a class="el-app" href="/taste/opal/"><img src="/taste/media/opal/icon-256.webp" width="24" height="24" alt="" loading="lazy" decoding="async">Opal</a><span class="el-type">Cards</span></p>
+        <p class="el-why">The card reads as a rule, lock to shield, 10 Unblock Daily, and the pill shows 7 left before the first tap.</p>
+        <p class="el-src">Rebuilt from App Store screenshot 7. <a href="/taste/media/elements/src/opal-unblock-card.jpg">See the source</a></p>
+        <div class="el-actions">
+          <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ep-opal-unblock-card" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+          <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ec-opal-unblock-card" data-copy-raw data-copy-what="Code"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 7.25-4.75 4.75L9 16.75M15 7.25l4.75 4.75L15 16.75"/></svg><span data-copy-label>Copy code</span></button>
+        </div>
+        <details class="el-more"><summary>Prompt</summary><p class="el-prompt" id="ep-opal-unblock-card">Build an unblock limit card like Opal’s.
+- Card 166 x 188 pt, 33 pt continuous corners, on a #9EC2D2 screen.
+- Glass: gradient #8AB9CD to #728F9D to #697A8A, darker at the right (#627A88), 1 pt rim of white at 18%.
+- Icons at 20 pt padding, 12 pt apart: lock 18 x 25 pt, arrow 18 x 15 pt (2.8 pt stroke), shield 23 x 28 pt. Gradient #A6CBFF to #A0F0FE.
+- Pill at y 92 pt: 44 x 24 pt capsule, 1 pt rim #8499AA, lighter 17 pt left segment (#8296A8) behind the count. Text: Inter Semibold 12 pt #FFFFFF.
+- Title: 10 Unblock Daily, Inter Semibold 15 pt, #FFFFFF, baseline 144 pt.
+- Last row: For (Inter Regular 12 pt, #C3CEDA) and three overlapping 15.3 pt tiles, 3.5 pt corners: white at 30%, white initials.
+- Data rule: 7 left = limit 10 minus 3 used.
+- Pressed: scale the card to 0.97.
+Swap in my brand colors and font; keep the sizes.</p></details>
+        <details class="el-more"><summary>Code</summary><pre class="el-code" tabindex="0"><code id="ec-opal-unblock-card">&lt;style&gt;
+.x-opal-unblock-card {
+  position:relative;
+  box-sizing:border-box;
+  width:198px;
+  height:220px;
+  padding:16px;
+  border-radius:24px;
+  background:linear-gradient(160deg,#A3C7D6 0%,#9EC2D2 45%,#94B8CB 100%);
+  font-family:Inter,system-ui,sans-serif;
+  font-size:16px;
+  font-weight:600;
+  line-height:1;
+  letter-spacing:0;
+  color:#FFFFFF;
+  text-align:left;
+  white-space:nowrap;
+}
+.x-opal-unblock-card * {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+.x-opal-unblock-card__card {
+  position:relative;
+  width:166px;
+  height:188px;
+  border-radius:35px;
+  overflow:hidden;
+  background:linear-gradient(90deg,rgba(98,122,136,0) 55%,rgba(98,122,136,.55) 100%), linear-gradient(180deg,#8AB9CD 0%,#82AEC0 18%,#7A9EAD 38%,#728F9D 55%,#6C8392 75%,#697A8A 100%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);
+}
+.x-opal-unblock-card__icons {
+  position:absolute;
+  left:0;
+  top:0;
+  display:block;
+  width:110px;
+  height:52px;
+}
+.x-opal-unblock-card__pill {
+  position:absolute;
+  left:14.3px;
+  top:92px;
+  width:43.7px;
+  height:24.4px;
+  border-radius:12.2px;
+  border:1px solid #8499AA;
+  overflow:hidden;
+  background:rgba(98,121,138,.25);
+}
+.x-opal-unblock-card__used {
+  position:absolute;
+  left:0;
+  top:0;
+  width:16.5px;
+  height:100%;
+  background:rgba(130,150,168,.5);
+  border-right:1px solid rgba(140,160,178,.7);
+}
+.x-opal-unblock-card__count {
+  position:absolute;
+  left:6.9px;
+  letter-spacing:-0.02em;
+  top:5.34px;
+  font-size:12px;
+  font-weight:600;
+}
+.x-opal-unblock-card__title {
+  position:absolute;
+  left:19.2px;
+  top:131.44px;
+  font-size:15px;
+  font-weight:600;
+}
+.x-opal-unblock-card__for {
+  position:absolute;
+  left:19.3px;
+  top:155.34px;
+  font-size:12px;
+  font-weight:400;
+  color:#C3CEDA;
+}
+.x-opal-unblock-card__tile {
+  position:absolute;
+  top:153.3px;
+  width:15.3px;
+  height:15.3px;
+  border-radius:3.5px;
+  background:#98A8B4;
+  box-shadow:0 0 0 1.2px #6B7E8D;
+  font-size:8.5px;
+  font-weight:700;
+  line-height:15.3px;
+  text-align:center;
+  color:#FFFFFF;
+}
+.x-opal-unblock-card__t1 {
+  left:40px;
+}
+.x-opal-unblock-card__t2 {
+  left:51px;
+}
+.x-opal-unblock-card__t3 {
+  left:62px;
+}
+&lt;/style&gt;
+
+&lt;div class=&quot;x-opal-unblock-card&quot;&gt;&lt;div class=&quot;x-opal-unblock-card__card&quot;&gt;&lt;svg class=&quot;x-opal-unblock-card__icons&quot; viewBox=&quot;0 0 110 52&quot; width=&quot;110&quot; height=&quot;52&quot; aria-hidden=&quot;true&quot;&gt;&lt;defs&gt;&lt;linearGradient id=&quot;x-opal-unblock-card-g&quot; gradientUnits=&quot;userSpaceOnUse&quot; x1=&quot;0&quot; y1=&quot;20.7&quot; x2=&quot;0&quot; y2=&quot;48&quot;&gt;&lt;stop offset=&quot;0&quot; stop-color=&quot;#A6CBFF&quot;/&gt;&lt;stop offset=&quot;1&quot; stop-color=&quot;#A0F0FE&quot;/&gt;&lt;/linearGradient&gt;&lt;/defs&gt;&lt;path d=&quot;M24.9 32.6V26.9a4.6 4.6 0 0 1 9.2 0V32.6&quot; fill=&quot;none&quot; stroke=&quot;url(#x-opal-unblock-card-g)&quot; stroke-width=&quot;2.6&quot;/&gt;&lt;rect x=&quot;20.7&quot; y=&quot;31.6&quot; width=&quot;17.6&quot; height=&quot;14.7&quot; rx=&quot;3.3&quot; fill=&quot;url(#x-opal-unblock-card-g)&quot;/&gt;&lt;path d=&quot;M51.7 34H66.6M60.7 28.1 66.6 34 60.7 39.9&quot; fill=&quot;none&quot; stroke=&quot;url(#x-opal-unblock-card-g)&quot; stroke-width=&quot;2.8&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;/&gt;&lt;path d=&quot;M91.65 20.7C95.2 21.5 98.6 21.9 101.4 22.1C102.5 22.2 103 22.8 103 23.9V32.6C103 40.4 97.6 45.1 92.5 47.8C91.95 48.07 91.35 48.07 90.8 47.8C85.7 45.1 80.3 40.4 80.3 32.6V23.9C80.3 22.8 80.8 22.2 81.9 22.1C84.7 21.9 88.1 21.5 91.65 20.7Z&quot; fill=&quot;url(#x-opal-unblock-card-g)&quot;/&gt;&lt;/svg&gt;&lt;div class=&quot;x-opal-unblock-card__pill&quot;&gt;&lt;span class=&quot;x-opal-unblock-card__used&quot;&gt;&lt;/span&gt;&lt;span class=&quot;x-opal-unblock-card__count&quot;&gt;7 left&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;x-opal-unblock-card__title&quot;&gt;10 Unblock Daily&lt;/div&gt;&lt;div class=&quot;x-opal-unblock-card__for&quot;&gt;For&lt;/div&gt;&lt;div class=&quot;x-opal-unblock-card__tile x-opal-unblock-card__t1&quot;&gt;A&lt;/div&gt;&lt;div class=&quot;x-opal-unblock-card__tile x-opal-unblock-card__t2&quot;&gt;B&lt;/div&gt;&lt;div class=&quot;x-opal-unblock-card__tile x-opal-unblock-card__t3&quot;&gt;C&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</code></pre></details>
+      </div>
+    </article>
+    <article class="el-card" data-filter-item data-tags="inputs" data-text="Cycle month calendar Inputs Flo Health trackers Two tints split the month, pink for the 5 period days and teal for the 7 fertile days, and one solid circle marks day 17.">
+      <div class="el-stage" role="img" aria-label="Cycle month calendar, rebuilt from Flo">
+        <div class="el-fit" style="--w:393;--h:415" data-el-fit><div class="x-flo-cycle-calendar"><div class="x-flo-cycle-calendar__dows"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div><div class="x-flo-cycle-calendar__month"><div class="x-flo-cycle-calendar__band x-flo-cycle-calendar__band--period"></div><div class="x-flo-cycle-calendar__band x-flo-cycle-calendar__band--fertile1"></div><div class="x-flo-cycle-calendar__band x-flo-cycle-calendar__band--fertile2"></div><span class="x-flo-cycle-calendar__d">1</span><span class="x-flo-cycle-calendar__d">2</span><span class="x-flo-cycle-calendar__d">3</span><span class="x-flo-cycle-calendar__d">4</span><span class="x-flo-cycle-calendar__d">5</span><span class="x-flo-cycle-calendar__d">6</span><span class="x-flo-cycle-calendar__d">7</span><span class="x-flo-cycle-calendar__d">8</span><span class="x-flo-cycle-calendar__d">9</span><span class="x-flo-cycle-calendar__d">10</span><span class="x-flo-cycle-calendar__d">11</span><span class="x-flo-cycle-calendar__d">12</span><span class="x-flo-cycle-calendar__d">13</span><span class="x-flo-cycle-calendar__d">14</span><span class="x-flo-cycle-calendar__d">15</span><span class="x-flo-cycle-calendar__d">16</span><span class="x-flo-cycle-calendar__d"><span class="x-flo-cycle-calendar__ovu">17</span></span><span class="x-flo-cycle-calendar__d">18</span><span class="x-flo-cycle-calendar__d">19</span><span class="x-flo-cycle-calendar__d">20</span><span class="x-flo-cycle-calendar__d">21</span><span class="x-flo-cycle-calendar__d">22</span><span class="x-flo-cycle-calendar__d">23</span><span class="x-flo-cycle-calendar__d">24</span><span class="x-flo-cycle-calendar__d">25</span><span class="x-flo-cycle-calendar__d">26</span><span class="x-flo-cycle-calendar__d">27</span><span class="x-flo-cycle-calendar__d">28</span><span class="x-flo-cycle-calendar__d">29</span><span class="x-flo-cycle-calendar__d">30</span><div class="x-flo-cycle-calendar__stem"></div><div class="x-flo-cycle-calendar__callout"><span class="x-flo-cycle-calendar__pre">Prediction: Day of</span><span class="x-flo-cycle-calendar__big">ovulation</span></div></div></div></div>
+      </div>
+      <div class="el-body">
+        <h2 class="el-name">Cycle month calendar</h2>
+        <p class="el-meta"><a class="el-app" href="/taste/flo/"><img src="/taste/media/flo/icon-256.webp" width="24" height="24" alt="" loading="lazy" decoding="async">Flo</a><span class="el-type">Inputs</span></p>
+        <p class="el-why">Two tints split the month, pink for the 5 period days and teal for the 7 fertile days, and one solid circle marks day 17.</p>
+        <p class="el-src">Rebuilt from App Store screenshot 2. <a href="/taste/media/elements/src/flo-cycle-calendar.jpg">See the source</a></p>
+        <div class="el-actions">
+          <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ep-flo-cycle-calendar" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+          <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ec-flo-cycle-calendar" data-copy-raw data-copy-what="Code"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 7.25-4.75 4.75L9 16.75M15 7.25l4.75 4.75L15 16.75"/></svg><span data-copy-label>Copy code</span></button>
+        </div>
+        <details class="el-more"><summary>Prompt</summary><p class="el-prompt" id="ep-flo-cycle-calendar">Build a cycle month calendar like Flo’s.
+- Layout: 393 pt wide on #FFFFFF. 7 columns of 50.9 pt and 5 rows of 54.3 pt; the month starts on a Monday.
+- Header: M T W T F S S in Inter 500, 11 pt, #E66483, 39 pt above the first row.
+- Days: Inter 400, 16.5 pt, #231318, centered in each cell.
+- Period days 1 to 5: one #FFBFCD band, 41 pt tall, 8.3 pt corners, running 20 pt past the first and last day centers.
+- Fertile days 12 to 18: the same band in #B3E4E8, split at the row break.
+- Ovulation day 17: a solid 51.5 pt #1DA4A7 circle with an Inter 700, 19.6 pt #FFFFFF number.
+- Prediction: a 120 pt #1DA4A7 circle in the empty cells, tied to day 17 by a 4.2 pt stem. Text: Prediction: Day of (Inter 600, 9 pt) over ovulation (20 pt).
+- Motion: a tapped day scales its circle from 0.8 to 1 over 200 ms; bands fade in row by row, 150 ms each.
+Swap in my brand colors and font; keep the sizes.</p></details>
+        <details class="el-more"><summary>Code</summary><pre class="el-code" tabindex="0"><code id="ec-flo-cycle-calendar">&lt;style&gt;
+.x-flo-cycle-calendar {
+  position:relative;
+  box-sizing:border-box;
+  width:393px;
+  padding:13.5px 20.25px 16px 16.45px;
+  border-radius:24px;
+  background:#FFFFFF;
+  font-family:Inter,system-ui,sans-serif;
+  font-size:16.5px;
+  font-weight:400;
+  line-height:1;
+  letter-spacing:0;
+  color:#231318;
+  text-align:center;
+  white-space:nowrap;
+}
+.x-flo-cycle-calendar * {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+.x-flo-cycle-calendar__dows {
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  font-size:11px;
+  font-weight:500;
+  line-height:13px;
+  color:#E66483;
+}
+.x-flo-cycle-calendar__month {
+  position:relative;
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  grid-template-rows:repeat(5,54.3px);
+  align-content:start;
+  height:333.55px;
+  margin-top:39.25px;
+}
+.x-flo-cycle-calendar__d {
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.x-flo-cycle-calendar__band {
+  position:absolute;
+  height:41px;
+  border-radius:8.3px;
+}
+.x-flo-cycle-calendar__band--period {
+  left:5.45px;
+  top:6.65px;
+  width:243.6px;
+  background:#FFBFCD;
+}
+.x-flo-cycle-calendar__band--fertile1 {
+  left:209.05px;
+  top:60.95px;
+  width:141.8px;
+  background:#B3E4E8;
+}
+.x-flo-cycle-calendar__band--fertile2 {
+  left:5.45px;
+  top:115.25px;
+  width:192.7px;
+  background:#B3E4E8;
+}
+.x-flo-cycle-calendar__ovu {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:none;
+  width:51.5px;
+  height:51.5px;
+  border-radius:50%;
+  background:#1DA4A7;
+  color:#FFFFFF;
+  font-size:19.6px;
+  font-weight:700;
+}
+.x-flo-cycle-calendar__stem {
+  position:absolute;
+  left:137.72px;
+  top:157.18px;
+  width:65.07px;
+  height:4.2px;
+  background:#1DA4A7;
+  transform-origin:0 50%;
+  transform:rotate(66.02deg);
+}
+.x-flo-cycle-calendar__callout {
+  position:absolute;
+  left:128.55px;
+  top:213.55px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  background:#1DA4A7;
+  color:#FFFFFF;
+  font-weight:600;
+}
+.x-flo-cycle-calendar__pre {
+  font-size:9px;
+  line-height:12px;
+}
+.x-flo-cycle-calendar__big {
+  font-size:20px;
+  line-height:22px;
+  letter-spacing:-0.01em;
+}
+&lt;/style&gt;
+
+&lt;div class=&quot;x-flo-cycle-calendar&quot;&gt;&lt;div class=&quot;x-flo-cycle-calendar__dows&quot;&gt;&lt;span&gt;M&lt;/span&gt;&lt;span&gt;T&lt;/span&gt;&lt;span&gt;W&lt;/span&gt;&lt;span&gt;T&lt;/span&gt;&lt;span&gt;F&lt;/span&gt;&lt;span&gt;S&lt;/span&gt;&lt;span&gt;S&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;x-flo-cycle-calendar__month&quot;&gt;&lt;div class=&quot;x-flo-cycle-calendar__band x-flo-cycle-calendar__band--period&quot;&gt;&lt;/div&gt;&lt;div class=&quot;x-flo-cycle-calendar__band x-flo-cycle-calendar__band--fertile1&quot;&gt;&lt;/div&gt;&lt;div class=&quot;x-flo-cycle-calendar__band x-flo-cycle-calendar__band--fertile2&quot;&gt;&lt;/div&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;9&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;12&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;13&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;14&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;15&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;16&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;&lt;span class=&quot;x-flo-cycle-calendar__ovu&quot;&gt;17&lt;/span&gt;&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;18&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;19&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;20&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;21&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;22&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;23&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;24&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;25&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;26&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;27&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;28&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;29&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__d&quot;&gt;30&lt;/span&gt;&lt;div class=&quot;x-flo-cycle-calendar__stem&quot;&gt;&lt;/div&gt;&lt;div class=&quot;x-flo-cycle-calendar__callout&quot;&gt;&lt;span class=&quot;x-flo-cycle-calendar__pre&quot;&gt;Prediction: Day of&lt;/span&gt;&lt;span class=&quot;x-flo-cycle-calendar__big&quot;&gt;ovulation&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</code></pre></details>
+      </div>
+    </article>
+    <article class="el-card" data-filter-item data-tags="inputs" data-text="Focus timer controls Inputs Opal Habits and learning Duration, start and app blocking stack in 3 centered rows, so a 30m focus session starts with 1 tap on a 302 pt button.">
+      <div class="el-stage" role="img" aria-label="Focus timer controls, rebuilt from Opal">
+        <div class="el-fit" style="--w:334;--h:183" data-el-fit><div class="x-opal-timer-controls"><div class="x-opal-timer-controls__circle x-opal-timer-controls__minus"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M1.15 8H14.85" stroke="#D0D0D0" stroke-width="2" stroke-linecap="round"/></svg></div><div class="x-opal-timer-controls__value">30m</div><div class="x-opal-timer-controls__circle x-opal-timer-controls__plus"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M1 8H15M8 1V15" stroke="#D0D0D0" stroke-width="2" stroke-linecap="round"/></svg></div><div class="x-opal-timer-controls__start"><svg class="x-opal-timer-controls__play" viewBox="0 0 9 10" width="8.7" height="9.7" aria-hidden="true"><path d="M1.2 .4C.6 0 0 .35 0 1V9C0 9.65.6 10 1.2 9.6L8.4 5.6C8.9 5.3 8.9 4.7 8.4 4.4Z" fill="#FFFFFF"/></svg><span class="x-opal-timer-controls__label">Start Timer</span></div><div class="x-opal-timer-controls__chip"><svg class="x-opal-timer-controls__shield" viewBox="0 0 9 10.7" width="9" height="10.7" aria-hidden="true"><defs><linearGradient id="x-opal-timer-controls-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B7D4FF"/><stop offset="1" stop-color="#A0E4FC"/></linearGradient></defs><path d="M4.5 0C5.9.7 7.3 1.05 8.55 1.15C8.83 1.17 9 1.38 9 1.66V5C9 7.6 6.9 9.5 4.85 10.6C4.63 10.72 4.37 10.72 4.15 10.6C2.1 9.5 0 7.6 0 5V1.66C0 1.38.17 1.17.45 1.15C1.7 1.05 3.1.7 4.5 0Z" fill="url(#x-opal-timer-controls-g)"/><path d="M3.3 4.9V3.9a1.2 1.2 0 0 1 2.4 0V4.9" fill="none" stroke="#2A2C2D" stroke-width=".9"/><rect x="2.45" y="4.7" width="4.1" height="3.45" rx=".65" fill="#2A2C2D"/></svg><span class="x-opal-timer-controls__chiplabel">Block Apps</span><span class="x-opal-timer-controls__no">No</span></div></div></div>
+      </div>
+      <div class="el-body">
+        <h2 class="el-name">Focus timer controls</h2>
+        <p class="el-meta"><a class="el-app" href="/taste/opal/"><img src="/taste/media/opal/icon-256.webp" width="24" height="24" alt="" loading="lazy" decoding="async">Opal</a><span class="el-type">Inputs</span></p>
+        <p class="el-why">Duration, start and app blocking stack in 3 centered rows, so a 30m focus session starts with 1 tap on a 302&nbsp;pt button.</p>
+        <p class="el-src">Rebuilt from App Store screenshot 5. <a href="/taste/media/elements/src/opal-timer-controls.jpg">See the source</a></p>
+        <div class="el-actions">
+          <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ep-opal-timer-controls" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+          <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ec-opal-timer-controls" data-copy-raw data-copy-what="Code"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 7.25-4.75 4.75L9 16.75M15 7.25l4.75 4.75L15 16.75"/></svg><span data-copy-label>Copy code</span></button>
+        </div>
+        <details class="el-more"><summary>Prompt</summary><p class="el-prompt" id="ep-opal-timer-controls">Build focus timer controls like Opal’s.
+- 302 x 151 pt: 3 centered rows 14 pt apart on a dark scene (#121214).
+- Stepper: 37.3 pt circles beside a 140 x 51 pt value capsule, 10.7 pt gaps; glass #0F1012, 1 pt rims #454545.
+- 30m: Inter Semibold 22.5 pt #FFFFFF. Minus and plus: 14 pt, 2 pt round strokes, #D0D0D0.
+- Start Timer capsule 302 x 42.3 pt: gradient #2C3034 to #4C5864 to #8AA8C4, glow #80A4BE at the bottom center, rim #797A7C to #CDEFF8.
+- White play triangle 8.7 x 10 pt, 9 pt gap, label Inter Semibold 13.5 pt.
+- Chip 130 x 30 pt, #2A2C2D, rim #58595C: #A5E1FD shield-lock 9 x 10.7 pt, Block Apps (Inter Semibold 13.5 pt), No (Inter Regular #ADADAE).
+- Blur the scene 20 pt behind each glass control.
+- States: minus disables at the minimum; pressed Start Timer scales to 0.98 and glows brighter; a chip tap toggles No to Yes.
+Swap in my brand colors and font; keep the sizes.</p></details>
+        <details class="el-more"><summary>Code</summary><pre class="el-code" tabindex="0"><code id="ec-opal-timer-controls">&lt;style&gt;
+.x-opal-timer-controls {
+  position:relative;
+  box-sizing:border-box;
+  width:334px;
+  height:183px;
+  padding:16px;
+  border-radius:24px;
+  background:radial-gradient(ellipse 200px 120px at 100% 70%,rgba(40,42,46,.6),rgba(40,42,46,0)),linear-gradient(180deg,#151517 0%,#121214 50%,#141517 100%);
+  font-family:Inter,system-ui,sans-serif;
+  font-size:16px;
+  font-weight:600;
+  line-height:1;
+  letter-spacing:0;
+  color:#FFFFFF;
+  text-align:left;
+  white-space:nowrap;
+}
+.x-opal-timer-controls * {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+.x-opal-timer-controls__circle {
+  position:absolute;
+  top:22.85px;
+  width:37.3px;
+  height:37.3px;
+  border-radius:50%;
+  background:#0F1012;
+  border:1px solid #454545;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.x-opal-timer-controls__circle svg {
+  display:block;
+  width:16px;
+  height:16px;
+}
+.x-opal-timer-controls__minus {
+  left:49.3px;
+}
+.x-opal-timer-controls__plus {
+  left:247.3px;
+}
+.x-opal-timer-controls__value {
+  position:absolute;
+  left:97px;
+  top:16px;
+  width:140px;
+  height:51px;
+  border-radius:25.5px;
+  background:linear-gradient(90deg,#111113 55%,#1E1E20 100%);
+  border:1px solid #3F3F41;
+  font-size:22.5px;
+  font-weight:600;
+  text-align:center;
+  padding-top:13.87px;
+}
+.x-opal-timer-controls__start {
+  position:absolute;
+  left:16px;
+  top:81px;
+  width:302px;
+  height:42.3px;
+  border-radius:21.15px;
+  border:1px solid transparent;
+  background:radial-gradient(ellipse 150px 24px at 46% 100%,rgba(160,196,222,.45),rgba(160,196,222,0)) padding-box, linear-gradient(90deg,rgba(18,22,28,.3) 0%,rgba(18,22,28,0) 12%,rgba(18,22,28,0) 52%,rgba(14,22,26,.28) 76%,rgba(30,70,72,.3) 100%) padding-box, linear-gradient(180deg,#2C3034 0%,#32373C 22%,#46515B 46%,#5E7082 63%,#7890A8 81%,#8AA8C4 100%) padding-box, linear-gradient(180deg,#797A7C 0%,#8A9298 50%,#CDEFF8 100%) border-box;
+}
+.x-opal-timer-controls__play {
+  position:absolute;
+  left:109.7px;
+  top:15.3px;
+  display:block;
+  width:8.7px;
+  height:9.7px;
+}
+.x-opal-timer-controls__label {
+  position:absolute;
+  left:127.2px;
+  top:13.64px;
+  font-size:13.5px;
+  font-weight:600;
+  letter-spacing:-0.02em;
+}
+.x-opal-timer-controls__chip {
+  position:absolute;
+  left:102px;
+  top:137.3px;
+  width:129.7px;
+  height:30px;
+  border-radius:15px;
+  background:linear-gradient(90deg,#27292C 0%,#2B2C2F 50%,#37383A 100%);
+  border:1px solid;
+  border-color:#67686B #58595C #48494B;
+}
+.x-opal-timer-controls__shield {
+  position:absolute;
+  left:13.3px;
+  top:8.8px;
+  display:block;
+  width:9px;
+  height:10.7px;
+}
+.x-opal-timer-controls__chiplabel {
+  position:absolute;
+  left:29.8px;
+  top:7.44px;
+  font-size:13.5px;
+  font-weight:600;
+  letter-spacing:-0.035em;
+}
+.x-opal-timer-controls__no {
+  position:absolute;
+  left:102px;
+  top:7.44px;
+  font-size:13.5px;
+  font-weight:400;
+  color:#ADADAE;
+}
+&lt;/style&gt;
+
+&lt;div class=&quot;x-opal-timer-controls&quot;&gt;&lt;div class=&quot;x-opal-timer-controls__circle x-opal-timer-controls__minus&quot;&gt;&lt;svg viewBox=&quot;0 0 16 16&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;M1.15 8H14.85&quot; stroke=&quot;#D0D0D0&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot;/&gt;&lt;/svg&gt;&lt;/div&gt;&lt;div class=&quot;x-opal-timer-controls__value&quot;&gt;30m&lt;/div&gt;&lt;div class=&quot;x-opal-timer-controls__circle x-opal-timer-controls__plus&quot;&gt;&lt;svg viewBox=&quot;0 0 16 16&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;M1 8H15M8 1V15&quot; stroke=&quot;#D0D0D0&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot;/&gt;&lt;/svg&gt;&lt;/div&gt;&lt;div class=&quot;x-opal-timer-controls__start&quot;&gt;&lt;svg class=&quot;x-opal-timer-controls__play&quot; viewBox=&quot;0 0 9 10&quot; width=&quot;8.7&quot; height=&quot;9.7&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;M1.2 .4C.6 0 0 .35 0 1V9C0 9.65.6 10 1.2 9.6L8.4 5.6C8.9 5.3 8.9 4.7 8.4 4.4Z&quot; fill=&quot;#FFFFFF&quot;/&gt;&lt;/svg&gt;&lt;span class=&quot;x-opal-timer-controls__label&quot;&gt;Start Timer&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;x-opal-timer-controls__chip&quot;&gt;&lt;svg class=&quot;x-opal-timer-controls__shield&quot; viewBox=&quot;0 0 9 10.7&quot; width=&quot;9&quot; height=&quot;10.7&quot; aria-hidden=&quot;true&quot;&gt;&lt;defs&gt;&lt;linearGradient id=&quot;x-opal-timer-controls-g&quot; x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;1&quot;&gt;&lt;stop offset=&quot;0&quot; stop-color=&quot;#B7D4FF&quot;/&gt;&lt;stop offset=&quot;1&quot; stop-color=&quot;#A0E4FC&quot;/&gt;&lt;/linearGradient&gt;&lt;/defs&gt;&lt;path d=&quot;M4.5 0C5.9.7 7.3 1.05 8.55 1.15C8.83 1.17 9 1.38 9 1.66V5C9 7.6 6.9 9.5 4.85 10.6C4.63 10.72 4.37 10.72 4.15 10.6C2.1 9.5 0 7.6 0 5V1.66C0 1.38.17 1.17.45 1.15C1.7 1.05 3.1.7 4.5 0Z&quot; fill=&quot;url(#x-opal-timer-controls-g)&quot;/&gt;&lt;path d=&quot;M3.3 4.9V3.9a1.2 1.2 0 0 1 2.4 0V4.9&quot; fill=&quot;none&quot; stroke=&quot;#2A2C2D&quot; stroke-width=&quot;.9&quot;/&gt;&lt;rect x=&quot;2.45&quot; y=&quot;4.7&quot; width=&quot;4.1&quot; height=&quot;3.45&quot; rx=&quot;.65&quot; fill=&quot;#2A2C2D&quot;/&gt;&lt;/svg&gt;&lt;span class=&quot;x-opal-timer-controls__chiplabel&quot;&gt;Block Apps&lt;/span&gt;&lt;span class=&quot;x-opal-timer-controls__no&quot;&gt;No&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;</code></pre></details>
+      </div>
+    </article>
+    </div>
+    <div class="empty" data-filter-empty hidden>
+      <span class="tasu-loop tasu-loop--look" role="img" aria-label="Tasu, the tasu.ai mascot, looks around"></span>
+      <p class="title-s">No element matches this search</p>
+      <button class="btn btn-secondary" type="button" data-filter-reset>Clear the search</button>
+    </div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="closing-title" data-reveal>
+  <div class="wrap">
+  <div class="closing">
+    <span class="tasu-loop tasu-loop--happy" role="img" aria-label="Tasu, the tasu.ai mascot, hops with joy"></span>
+    <h2 class="title-xl" id="closing-title">Follow the builder behind tasu.ai</h2>
+    <p class="lead closing-sub">I build a portfolio of mobile apps with taste. Kaught has 1,000+ users.</p>
+    <a class="btn btn-primary btn-lg" href="https://x.com/jeremylasne"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> Follow @jeremylasne</a>
+  </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-in">
+    <p class="footer-brand"><img src="/taste/brand/icon.svg" width="24" height="24" alt=""><span>tasu.ai, taste using AI, by <a href="https://www.jeremylasne.com/">Jeremy Lasne</a></span></p>
+    <p>Data: Apple App Store, US, 15&nbsp;Nov&nbsp;2026</p>
+    <nav class="footer-links" aria-label="Footer">
+      <a href="/taste/#apps">Apps</a>
+      <a href="/taste/elements/">UI Elements</a>
+      <a href="/taste/paywall/">Paywall</a>
+      <a href="/taste/prompt/">Prompts</a>
+      <a href="https://x.com/jeremylasne"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>@jeremylasne</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

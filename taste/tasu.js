@@ -1,7 +1,9 @@
 /* tasu.js: progressive enhancement for tasu.ai. Load it with <script src="/taste/tasu.js" defer>.
    Every page is complete HTML without it. It adds the theme toggle, "/" to search, the row/grid
    toggle, strip arrows, hero parallax, reveal on scroll, instant filtering, the mascot loops'
-   pause rule, copy buttons (hex values, the style prompt) and the paywall captures' arrows.
+   pause rule, copy buttons (hex values, prompts, code), the paywall captures' arrows, the
+   wordmark's fold, the fit of the rebuilt UI elements, the prompts' "Show all" and the
+   screenshot downloads (one file, or all of them in a ZIP).
    Markup contract: _tools/template-notes.md. No dependencies. */
 (function () {
   'use strict';
@@ -456,14 +458,18 @@
     if (!b) return;
     var src = b.getAttribute('data-copy-target');
     var node = src ? d.querySelector(src) : null;
-    var text = node ? node.textContent.replace(/\s+/g, ' ').trim() : b.getAttribute('data-copy');
+    // data-copy-raw keeps the line breaks (prompts and code); no-break spaces become spaces.
+    var raw = node ? node.textContent.replace(/\u00a0/g, ' ') : '';
+    var text = node
+      ? (b.hasAttribute('data-copy-raw') ? raw.replace(/[ \t]+\n/g, '\n').trim() : raw.replace(/\s+/g, ' ').trim())
+      : b.getAttribute('data-copy');
     if (!text) return;
     var label = b.querySelector('[data-copy-label]') || b;
     copyText(text).then(function () {
       if (!b.hasAttribute('data-label')) b.setAttribute('data-label', label.textContent);
       label.textContent = 'Copied';
       b.classList.add('is-copied');
-      live.textContent = src ? 'Prompt copied' : text + ' copied';
+      live.textContent = src ? (b.getAttribute('data-copy-what') || 'Prompt') + ' copied' : text + ' copied';
       clearTimeout(b._copyTimer);
       b._copyTimer = setTimeout(function () {
         label.textContent = b.getAttribute('data-label');
@@ -515,6 +521,217 @@
       if (!queued) { queued = true; requestAnimationFrame(update); }
     }, { passive: true });
     update();
+  });
+
+
+  /* 11. The wordmark: "tasu.ai" unfolds into "taste using ai". On the first page of a visit it
+         shows unfolded, holds 900ms, then folds in 600ms. Hover or keyboard focus on the logo
+         unfolds it, leaving folds it. It unfolds only into free space, so nothing else moves.
+         Reduced motion: a 200ms fade, no width change in sight. ----------------------------- */
+  all('[data-wm]').forEach(function (wm) {
+    var link = closest(wm, '[data-wm-link]') || wm;
+    var parts = all('.wm-x, .wm-dot', wm);
+    var extra = 0;
+    function measure() {
+      extra = 0;
+      parts.forEach(function (el) {
+        var prev = el.style.maxWidth;
+        el.style.maxWidth = 'none';
+        var w = el.scrollWidth;
+        el.style.maxWidth = prev;
+        el.style.setProperty(el.classList.contains('wm-dot') ? '--wd' : '--wx', w + 'px');
+        if (el.classList.contains('wm-x')) extra += w;
+      });
+    }
+    // Room after the logo: up to the next item of the header row, minus 16px of air.
+    function fits() {
+      var r = link.getBoundingClientRect();
+      var right = window.innerWidth;
+      all('.site-header .nav, .site-header .header-tools, .site-header .search--header').forEach(function (el) {
+        var b = el.getBoundingClientRect();
+        if (b.width && b.top < r.bottom && b.bottom > r.top && b.left >= r.right - 1) right = Math.min(right, b.left);
+      });
+      var open = wm.classList.contains('is-open');
+      return right - r.right - 16 >= (open ? 0 : extra);
+    }
+    function set(open) {
+      if (open && !fits()) open = false;
+      wm.classList.toggle('is-open', open);
+    }
+    var ready = d.fonts && d.fonts.ready ? d.fonts.ready : Promise.resolve();
+    ready.then(function () {
+      measure();
+      var first = true; // the first page of this visit (session storage off: every page)
+      try { first = !sessionStorage.getItem('tasu-wm'); sessionStorage.setItem('tasu-wm', '1'); } catch (e) { /* private mode */ }
+      if (first && !reduce.matches) {
+        set(true); // unfolded at once, before the transitions switch on
+        requestAnimationFrame(function () {
+          wm.classList.add('is-ready');
+          setTimeout(function () { if (!link.matches(':hover') && d.activeElement !== link) set(false); }, 900);
+        });
+      } else {
+        requestAnimationFrame(function () { wm.classList.add('is-ready'); });
+      }
+      link.addEventListener('mouseenter', function () { set(true); });
+      link.addEventListener('mouseleave', function () { if (d.activeElement !== link) set(false); });
+      link.addEventListener('focus', function () { set(true); });
+      link.addEventListener('blur', function () { set(false); });
+      window.addEventListener('resize', function () { if (wm.classList.contains('is-open') && !fits()) set(false); });
+    });
+  });
+
+  /* 12. Rebuilt UI elements: each keeps its own size (--w, CSS px) and zooms down to fit a
+         narrower stage. Without JS a wide element is cut at the stage edge. ----------------- */
+  var fitEls = all('[data-el-fit]');
+  if (fitEls.length) {
+    var fitOne = function (el) {
+      var stage = el.parentNode;
+      var cs = getComputedStyle(stage);
+      var room = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      var w = parseFloat(getComputedStyle(el).getPropertyValue('--w')) || el.offsetWidth;
+      var z = Math.min(1, room / w);
+      el.style.zoom = z < 0.999 ? z.toFixed(3) : '';
+    };
+    fitEls.forEach(fitOne);
+    if ('ResizeObserver' in window) {
+      var ro = new ResizeObserver(function (entries) {
+        entries.forEach(function (en) {
+          var el = en.target.querySelector('[data-el-fit]');
+          if (el) fitOne(el);
+        });
+      });
+      fitEls.forEach(function (el) { ro.observe(el.parentNode); });
+    } else {
+      window.addEventListener('resize', function () { fitEls.forEach(fitOne); });
+    }
+  }
+
+  /* 13. Prompts: "Show all" opens a clamped prompt, "Show less" closes it. ---------------- */
+  d.addEventListener('click', function (e) {
+    var b = closest(e.target, '[data-clamp-toggle]');
+    if (!b) return;
+    var card = closest(b, '.pr');
+    var box = card && card.querySelector('[data-clamp]');
+    if (!box) return;
+    var open = !box.classList.contains('is-open');
+    box.classList.toggle('is-open', open);
+    b.setAttribute('aria-expanded', String(open));
+    b.textContent = open ? 'Show less' : 'Show all';
+  });
+  // A prompt short enough to show whole needs no button.
+  all('[data-clamp]').forEach(function (box) {
+    var text = box.firstElementChild;
+    var b = closest(box, '.pr') && closest(box, '.pr').querySelector('[data-clamp-toggle]');
+    if (text && b && text.scrollHeight <= text.clientHeight + 1) b.hidden = true;
+  });
+
+  /* 14. Screenshot downloads. One button saves one screenshot, full size from Apple's CDN (it
+         sends Access-Control-Allow-Origin: *), else the copy hosted here. "Download all" builds
+         one ZIP in the browser: stored files, CRC-32, no library. ---------------------------- */
+  function getFile(src, fallback) {
+    return fetch(src, { mode: 'cors', credentials: 'omit' }).then(function (r) {
+      if (!r.ok) throw new Error(r.status);
+      return r.blob();
+    }).catch(function () {
+      if (!fallback) throw new Error('no fallback');
+      return fetch(fallback).then(function (r) {
+        if (!r.ok) throw new Error(r.status);
+        return r.blob();
+      });
+    });
+  }
+  function save(blob, name) {
+    var url = URL.createObjectURL(blob);
+    var a = d.createElement('a');
+    a.href = url;
+    a.download = name;
+    d.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+  }
+  var CRC = null;
+  function crc32(bytes) {
+    if (!CRC) {
+      CRC = new Uint32Array(256);
+      for (var n = 0; n < 256; n++) {
+        var c = n;
+        for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
+        CRC[n] = c >>> 0;
+      }
+    }
+    var x = 0xFFFFFFFF;
+    for (var i = 0; i < bytes.length; i++) x = CRC[(x ^ bytes[i]) & 0xFF] ^ (x >>> 8);
+    return (x ^ 0xFFFFFFFF) >>> 0;
+  }
+  // files: [{ name, bytes: Uint8Array }]. A ZIP with stored (uncompressed) entries: JPEGs are
+  // already compressed. Fixed date 1 Jan 2026, so the same files give the same ZIP.
+  function zip(files) {
+    var enc = new TextEncoder();
+    var chunks = [];
+    var central = [];
+    var offset = 0;
+    var DOS_TIME = 0, DOS_DATE = ((2026 - 1980) << 9) | (1 << 5) | 1;
+    function u16(v) { return [v & 255, (v >>> 8) & 255]; }
+    function u32(v) { return [v & 255, (v >>> 8) & 255, (v >>> 16) & 255, (v >>> 24) & 255]; }
+    files.forEach(function (f) {
+      var name = enc.encode(f.name);
+      var crc = crc32(f.bytes);
+      var size = f.bytes.length;
+      var local = [].concat([0x50, 0x4b, 0x03, 0x04], u16(20), u16(0x0800), u16(0), u16(DOS_TIME), u16(DOS_DATE), u32(crc), u32(size), u32(size), u16(name.length), u16(0));
+      chunks.push(new Uint8Array(local), name, f.bytes);
+      central.push({ name: name, crc: crc, size: size, offset: offset });
+      offset += local.length + name.length + size;
+    });
+    var start = offset;
+    var cdSize = 0;
+    central.forEach(function (c) {
+      var rec = [].concat([0x50, 0x4b, 0x01, 0x02], u16(20), u16(20), u16(0x0800), u16(0), u16(DOS_TIME), u16(DOS_DATE), u32(c.crc), u32(c.size), u32(c.size), u16(c.name.length), u16(0), u16(0), u16(0), u16(0), u32(0), u32(c.offset));
+      chunks.push(new Uint8Array(rec), c.name);
+      cdSize += rec.length + c.name.length;
+    });
+    chunks.push(new Uint8Array([].concat([0x50, 0x4b, 0x05, 0x06], u16(0), u16(0), u16(central.length), u16(central.length), u32(cdSize), u32(start), u16(0))));
+    return new Blob(chunks, { type: 'application/zip' });
+  }
+  d.addEventListener('click', function (e) {
+    var one = closest(e.target, '[data-download]');
+    if (one) {
+      if (one.classList.contains('is-busy')) return;
+      one.classList.add('is-busy');
+      getFile(one.getAttribute('data-download'), one.getAttribute('data-fallback'))
+        .then(function (blob) {
+          save(blob, one.getAttribute('data-name') || 'screenshot.jpg');
+          live.textContent = 'Screenshot downloaded';
+        }, function () { live.textContent = 'Download failed. Try again.'; })
+        .then(function () { one.classList.remove('is-busy'); });
+      return;
+    }
+    var allBtn = closest(e.target, '[data-download-all]');
+    if (!allBtn || allBtn.classList.contains('is-busy')) return;
+    var list;
+    try { list = JSON.parse(allBtn.getAttribute('data-download-all')); } catch (err) { return; }
+    var label = allBtn.querySelector('[data-dl-label]') || allBtn;
+    var before = label.textContent;
+    var done = 0;
+    allBtn.classList.add('is-busy');
+    label.textContent = '0 of ' + list.length;
+    Promise.all(list.map(function (f) {
+      return getFile(f.src, f.fallback).then(function (blob) { return blob.arrayBuffer(); }).then(function (buf) {
+        done++;
+        label.textContent = done + ' of ' + list.length;
+        return { name: f.name, bytes: new Uint8Array(buf) };
+      }, function () { return null; });
+    })).then(function (files) {
+      files = files.filter(Boolean);
+      if (!files.length) throw new Error('none');
+      save(zip(files), allBtn.getAttribute('data-zip') || 'screenshots.zip');
+      live.textContent = files.length + ' screenshots downloaded';
+    }).catch(function () {
+      live.textContent = 'Download failed. Try again.';
+    }).then(function () {
+      label.textContent = before;
+      allBtn.classList.remove('is-busy');
+    });
   });
 
   window.tasu = { theme: theme, setTheme: setTheme, setView: setView, filters: filters };

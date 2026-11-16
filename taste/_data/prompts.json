@@ -1,0 +1,230 @@
+{
+  "intro": "14 prompts that each fix one part of your iPhone app, from the copy to the App Store screenshots, with the numbers from taste.md. Paste one into Claude Code or Cursor, check the list of changes it reports, then paste the next.",
+  "prompts": [
+    {
+      "id": "unslop-visuals",
+      "title": "Remove the AI slop visuals",
+      "area": "Unslop",
+      "when": "Your screens show purple gradients, glowing stat cards, pills on every item and labels above every heading.",
+      "prompt": "Remove the decoration AI adds to this app. Change decoration only: keep features, copy and layout.\nFirst, name 1 or 2 shipped iPhone apps in the same category and match their amount of decoration.\nFix every hit of these 11 signs:\n- Gradient backgrounds, purple gradients and glow: one flat color.\n- Glowing stat cards: the number on a plain surface.\n- Tags, pills and badges like \"New\" or \"Beta\": 1 per item at most, only when it changes a decision.\n- A border around every container: remove it.\n- A colored left border on cards: replace it with a status icon or word.\n- Eyebrow labels above headings: delete them.\n- Section numbers like 01, 02, 03: delete them.\n- Code-style breadcrumbs like \"Home / Settings\": a back button and a title.\n- Dithering, ASCII art and decorative squircle shapes: delete them.\n- Over-detailed charts: 1 highlighted series, 3 gridlines at most.\n- Screens with no focus: 1 job each. Delete every element whose removal changes nothing.\nFix one sign per pass, then recheck the screen.\n\nCheck:\n- Zero hits on every screen\n- Each screen's job fits in 5 words\n- Every element left shows data or triggers an action\n\nApply every fix, then list each as screen, rule, before, after. Name any rule you skipped.",
+      "words": 203,
+      "sources": [
+        "S1",
+        "S2",
+        "S14",
+        "S15"
+      ]
+    },
+    {
+      "id": "unslop-copy",
+      "title": "Unslop the copy",
+      "area": "Copy",
+      "when": "Your app says “Unlock your potential” and uses 3 sentences where 1 fits.",
+      "prompt": "Rewrite every string in this app: screens, buttons, alerts, empty states, errors, notifications and the paywall. Change words only.\n- One sentence where AI wrote 3, each under 20 words.\n- Replace adjectives with numbers you can prove: \"Fast\" becomes \"Loads in 1.2 s\". With no number, name the action.\n- Headlines hold a number or an action: \"Track 3 habits in 10 seconds a day\" beats \"Transform your life\".\n- Buttons: a verb and an object, 1 to 3 words, like \"Log meal\". Replace \"Submit\" and \"Click here\".\n- Drop a label when the value explains itself: \"72 kg\" needs no \"Weight:\".\n- Delete \"Welcome back, Name\" unless it carries data.\n- Errors: what happened, then what to do. \"No connection. Check Wi-Fi, then tap Retry.\"\n- Notifications: 1 fact and 1 action, in 2 lines or fewer.\n- Say what the app does: \"Reminds you at 8:00\" beats \"Never miss a dose\".\n- Delete these words: \"unlock\", \"elevate\", \"seamless\", \"effortless\", \"supercharge\", \"journey\", \"empower\", \"delightful\", \"revolutionize\".\n- Remove em-dashes, exclamation marks and periods that end titles.\n\nCheck:\n- Zero words from the delete list\n- Every button label starts with a verb\n- Word count drops: report it before and after\n\nApply every fix, then list each as screen, rule, before, after. Name any rule you skipped.",
+      "words": 204,
+      "sources": [
+        "S1",
+        "S2",
+        "S4",
+        "S14",
+        "S15",
+        "S27"
+      ]
+    },
+    {
+      "id": "color-60-30-10",
+      "title": "Apply the 60/30/10 color split",
+      "area": "Color",
+      "when": "Your app uses 6 or more colors, and the accent shows up everywhere.",
+      "prompt": "Rebuild the color system of this app with the 60/30/10 split. Change color only.\n- Replace every color value in the code with a named token.\n- Accent: keep the brand color. With none, pick 1 unexpected accent that contrasts with 2 calm base colors and fits the category. Say why in 1 sentence.\n- 60%: the main color, on backgrounds. 30%: the second color, on text and surfaces. 10%: the accent.\n- The accent goes only on the main button, the key number and the selected state.\n- Neutrals: 3 to 5 greys tinted with the main hue, at OKLCH chroma 0.005 to 0.02, like cream #F3EFE7. Delete every other shade and opacity.\n- 1 red, for errors and destructive actions only.\n- Text contrast: 4.5:1 for body text, 3:1 for text 24 pt and larger.\n- Colors that must be told apart, like chart lines, also differ in lightness: they stay distinct in grayscale.\n- Judge the palette on the app's 3 busiest screens.\n\nCheck:\n- 9 color tokens at most: 2 base, 1 accent, 3 to 5 neutrals, 1 red\n- The accent sits on 3 elements or fewer per screen\n- Every text passes its contrast ratio\n\nApply every fix, then list each as screen, rule, before, after. Name any rule you skipped.",
+      "words": 205,
+      "sources": [
+        "S1",
+        "S5",
+        "S6",
+        "S7",
+        "S8",
+        "S10",
+        "S23",
+        "S25",
+        "S28",
+        "S30",
+        "S31",
+        "S32",
+        "S33"
+      ]
+    },
+    {
+      "id": "type-scale",
+      "title": "Set one type scale",
+      "area": "Type",
+      "when": "Your app has a different font size on every screen, and numbers jiggle as they change.",
+      "prompt": "Rebuild the typography of this app. Change type only.\n- Replace every font, size and weight in the code with a token.\n- 2 families at most: a display font for headings, a tall x-height body font like SF Pro or Inter. Skip Instrument Serif and Pacifico.\n- 3 weights: bold for headings, medium for subheadings, regular for body.\n- 6 sizes, each 1.2x to 1.33x the one below: 13, 17, 22, 28, 34 and 44 pt (44 for 1 hero number).\n- Scale the first 5 with the system text size: Footnote, Body, Title 2, Title 1, Large Title.\n- Tabular numbers on prices, counters, stats and timers.\n- Line height: 1.4 to 1.6 for body, 1.05 to 1.2 for headlines from 28 pt.\n- Line length: 45 to 75 characters, capped on iPad.\n- Letter spacing: -1% to -2% only above 40 pt. ALL CAPS only on 13 pt labels, at +5% to +10%.\n- Balance headlines: never 1 word alone on the last line.\n- Remove decorative italics, and monospace outside codes and hex values.\n\nCheck:\n- Every text uses one of the 6 sizes\n- 2 families and 3 weights at most\n- Every changing number uses tabular digits\n\nApply every fix, then list each as screen, rule, before, after. Name any rule you skipped.",
+      "words": 205,
+      "sources": [
+        "S1",
+        "S2",
+        "S4",
+        "S16",
+        "S29"
+      ]
+    },
+    {
+      "id": "spacing-layout",
+      "title": "Fix spacing, cards and corners",
+      "area": "Layout",
+      "when": "Your screens have uneven gaps, cards inside cards and 4 different corner radii.",
+      "prompt": "Fix the layout of every screen in this app. Change spacing, cards, corners and hierarchy only.\n- Spacing scale: 4, 8, 16, 24, 32 and 48 pt. Replace every other value.\n- Side margins: 16 or 20 pt on every screen.\n- Group with space: 8 pt inside a group, 24 to 32 pt between groups. Delete the dividers this replaces.\n- One card style: one radius, 16 pt padding, a fill one step off the background.\n- Radius scale: 8, 16 and 24 pt, continuous corners. Same-level elements share 1 radius.\n- Inner radius = outer radius minus padding: a 24 pt card with 16 pt padding holds 8 pt inner corners.\n- Flatten nested cards to 1 level.\n- Make each screen's most important element its biggest.\n- Give each main screen 1 focal point: a 44 pt number, a full-width image or a color field.\n- Align text to 1 left edge per screen. Center only short titles and empty states.\n- Keep content inside the safe areas, clear of the Dynamic Island and home indicator.\n\nCheck:\n- Every gap and padding is on the scale\n- Zero cards inside cards\n- The radius math holds on every screen\n\nApply every fix, then list each as screen, rule, before, after. Name any rule you skipped.",
+      "words": 203,
+      "sources": [
+        "S2",
+        "S4",
+        "S14",
+        "S15",
+        "S16",
+        "S18",
+        "S19"
+      ]
+    },
+    {
+      "id": "buttons",
+      "title": "One main button per screen",
+      "area": "Buttons",
+      "when": "Your screen has 5 buttons that look equally important, and a double tap submits twice.",
+      "prompt": "Fix every button and tappable element in this app. Change buttons only.\n- 1 filled primary button per screen, in the accent color, for its one job.\n- Other actions are tinted, outlined or plain text. Show 2 at most; the rest go in a More menu.\n- Primary button: 50 to 56 pt tall and full width inside the side margins.\n- In forms and flows, pin it to the bottom, 16 pt above the home indicator.\n- Touch targets: 44 x 44 pt or more, with 8 pt between them. An icon-only button holds a 24 pt icon in a 44 pt frame.\n- While pressed, buttons scale to 0.97, then back to 1 on release.\n- 5 states for every button: default, pressed, disabled, loading and done.\n- Loading shows a spinner inside the button and keeps its width. Done shows a checkmark for 1 second.\n- Ignore taps while a request runs, so a double tap never submits or charges twice.\n- Destructive actions use red text, never the filled primary style.\n\nCheck:\n- 1 filled button per screen\n- Every target is 44 x 44 pt or more\n- A second tap during loading does nothing\n\nApply every fix, then list each as screen, rule, before, after. Name any rule you skipped.",
+      "words": 204,
+      "sources": [
+        "S2",
+        "S3",
+        "S4",
+        "S7",
+        "S8",
+        "S14",
+        "S15",
+        "S16",
+        "S17",
+        "S31",
+        "S32"
+      ]
+    },
+    {
+      "id": "icons-images",
+      "title": "Use real icons and images",
+      "area": "Icons",
+      "when": "Your app uses emoji as icons, mixes icon styles, or shows blobs instead of the product.",
+      "prompt": "Fix every icon and image in this app. Change icons and imagery only.\nIcons:\n- Replace every emoji used as an icon.\n- Use 1 icon set: SF Symbols, or 1 library such as Lucide or Phosphor.\n- 1 stroke weight everywhere. Outline icons by default, filled only for the selected tab.\n- 3 sizes: 16, 20 and 24 pt.\n- Icons take the text color. Only the selected tab and the main action take the accent.\n- Shift play triangles 1 to 2 pt toward their point, so they look centered.\nImages:\n- Replace abstract shapes, blobs and stock illustrations with real screens, real data and real photos.\n- Give every image a fixed aspect ratio, like 1:1, 4:5 or 16:9, and reserve its space before it loads.\n- Show a blurred placeholder until the image arrives.\n- Ship images at 3x their point size: a 100 pt image needs 300 px.\n- One treatment for all images: the card corner radius, no border, no shadow.\n- Avatars without a photo: 2 initials on a tinted neutral.\n\nCheck:\n- Zero emoji icons\n- 1 icon set, 1 stroke weight\n- Every image has a ratio and a placeholder\n\nApply every fix, then list each as screen, rule, before, after. Name any rule you skipped.",
+      "words": 200,
+      "sources": [
+        "S2",
+        "S4",
+        "S14",
+        "S15",
+        "S16",
+        "S17"
+      ]
+    },
+    {
+      "id": "motion",
+      "title": "Fix animation timing and easing",
+      "area": "Motion",
+      "when": "Your menus take 600 ms to open, cards bounce, and a loader spins forever.",
+      "prompt": "Retime every custom animation in this app with these values. Change motion only.\n- Keep the system push, sheet and swipe-back transitions. Sheets close with a swipe down.\n- Entrances: ease-out. Moves from A to B: ease-in-out, on an arc when they cross the screen.\n- Menus, popovers and dropdowns open in 150 to 250 ms. Exits run 20% shorter: 250 ms in, 200 ms out.\n- Popovers start at scale 0.95, grow from their trigger and close back into it.\n- Stagger the first 10 visible list rows by 30 ms.\n- Toggle and slider knobs stretch about 12% while they move.\n- Springs with zero bounce on everyday UI.\n- While a finger holds or drags, follow it 1:1. Rubber band past the edges.\n- Crossfade swapping icons with a 2 pt blur.\n- Pulse once to confirm success.\n- Move shared elements between screens, like a card that opens into its detail.\n- Every animation can reverse mid-way.\n- Loop only loading states. With Reduce Motion on, swap movement for fades.\n\nCheck:\n- Every custom animation uses a duration and curve from this list\n- No menu takes longer than 250 ms to open\n- Nothing loops except a loader\n\nApply every fix, then list each as screen, rule, before, after. Name any rule you skipped.",
+      "words": 203,
+      "sources": [
+        "S2",
+        "S3",
+        "S4",
+        "S12",
+        "S14"
+      ]
+    },
+    {
+      "id": "states",
+      "title": "Design loading, empty and error states",
+      "area": "States",
+      "when": "Your app shows a spinner on a blank screen, and lists have no empty or error state.",
+      "prompt": "Give every list, form and network action in this app 4 states: loading, empty, error and success. Change states only.\nLoading:\n- Replace spinners with skeletons: grey shapes in the final layout.\n- Show cached data first and refresh in the background.\n- For waits over 2 seconds, like AI results or uploads, show each real step as it finishes.\nEmpty:\n- 1 line on what will appear here and 1 button that fills it.\n- Where people type, offer 3 tappable examples instead of an empty box.\nError:\n- 1 line on what happened, the user's input kept, and a Retry button.\n- Offline: show cached data under a 1-line banner.\nSuccess:\n- Update the UI at once and sync in the background. If the request fails, roll back with a 1-line message.\n- Replace \"Are you sure?\" alerts with an Undo toast that stays 5 seconds.\n- AI edits to the user's data: show the suggestion first and apply it only after a tap.\nCrossfade between states in 200 ms, with no blank frame and no jump.\n\nCheck:\n- Every list and form has all 4 states\n- Zero spinners on blank screens\n- Zero layout shift when data arrives\n\nList each list and form with its screen and its 4 states, then build them.",
+      "words": 204,
+      "sources": [
+        "S2",
+        "S4",
+        "S14",
+        "S17",
+        "S24",
+        "S34"
+      ]
+    },
+    {
+      "id": "onboarding",
+      "title": "Show value before sign-up",
+      "area": "Onboarding",
+      "when": "Your app asks for an account before people see what it does.",
+      "prompt": "Rebuild this app's onboarding in this order: show the value, let people personalize, then ask for sign-up. Change the flow only.\n- Screen 1 shows the product doing its main job, with real data and a headline with a number.\n- 1 question per screen, 3 to 6 options as rows of 56 pt or taller, and only questions that change the app.\n- Every step: a progress bar, a back button, and the main button fixed at the bottom.\n- End with a result built from the answers, like \"Your plan: 3 workouts a week\".\n- Ask for sign-up after that result, or let people start without an account when the app allows it.\n- If you offer Google or another social login, also offer Sign in with Apple, which meets App Review Guideline 4.8.\n- Mark the code field as a one-time code, so iOS fills it from Messages and Mail.\n- Ask for each permission at the moment it helps, with 1 line on why. iOS shows each system prompt only once.\n- Log 1 analytics event per step to see where people drop.\n\nCheck:\n- Value comes before any account request\n- 1 question per screen\n- Every answer changes something in the app\n\nList the new steps, one line per screen, then build them.",
+      "words": 207,
+      "sources": [
+        "S4",
+        "S13",
+        "S17"
+      ]
+    },
+    {
+      "id": "paywall",
+      "title": "Make the paywall clear and compliant",
+      "area": "Paywall",
+      "when": "Your paywall shows the monthly price bigger than the billed price, or has no Restore link.",
+      "prompt": "Rebuild this app's paywall and purchase flow. Change the paywall only.\n- Show it after people see value, like at the end of onboarding.\n- Headline: the outcome people pay for, under 8 words. Below it, a real paid-feature screen and up to 3 one-line benefits.\n- 2 plans, like yearly and monthly, as tappable rows with name, length and the store's localized price. Preselect one.\n- The billed amount is the most prominent price, like \"$39.99 per year\". The monthly equivalent or saving sits below it, smaller.\n- Replace \"Best value\" with the computed saving, like \"Save 58%\". Remove fake countdowns.\n- Free trial: state its length and the price after it, plus a timeline (today, reminder on day 5, charge on day 7). Send that reminder.\n- 1 accent element: the main button, like \"Start 7-day free trial\".\n- Show Restore Purchases, Terms and Privacy links, and a 44 pt close button from the first frame.\n- After purchase, open the paid feature. On failure, keep the paywall open with Retry.\n\nCheck:\n- The billed amount is the largest price\n- Restore, Terms and Privacy are visible on the paywall\n- The trial length and later price are visible\n\nApply every fix, then list each as screen, rule, before, after. Name any rule you skipped.",
+      "words": 205,
+      "sources": [
+        "S7",
+        "S8",
+        "S13",
+        "S31",
+        "S32"
+      ]
+    },
+    {
+      "id": "app-store-screenshots",
+      "title": "Build your App Store screenshots",
+      "area": "App Store",
+      "when": "Your App Store screenshots are raw screens or slogans like “Your best life”.",
+      "prompt": "Build this app's App Store screenshots as code (HTML, SwiftUI or Flutter), so words stay editable. Change nothing in the app.\n- Make 8 to 10. Without an app preview, search shows the first 3: they must explain the app.\n- 1 benefit each. Screenshot 1 shows the main job and its result.\n- Headline on top: 3 to 7 words on 2 to 4 lines, with a number or verb, like \"Log a meal in 3 seconds\". No period.\n- Headline font size: 120 to 180 px on the 1206 px canvas, in the display font.\n- Below it, a real screen with real data, never a login or splash screen.\n- Proof on screenshot 1, if real: an award, a rating with its count, a user count.\n- 1 layout for all, on flat brand colors or a real photo. Accent on 1 word per headline. No prices.\n- If the app has dark mode, show it on 1 screenshot.\n- Export PNG without transparency at 1206 x 2622 px, the required iPhone size, and 1320 x 2868 px for the large display.\n\nCheck:\n- The first 3 explain the app alone\n- Headlines read at 25% zoom\n- Zero login screens, splash screens or prices\n\nList each screenshot with its headline and screen, then build them.",
+      "words": 207,
+      "sources": [
+        "S1",
+        "S2",
+        "S18",
+        "S19",
+        "S27",
+        "S31"
+      ]
+    },
+    {
+      "id": "dark-mode",
+      "title": "Build dark mode from tokens",
+      "area": "Dark mode",
+      "when": "Your dark mode has white cards on black, or grey text below 4.5:1 contrast.",
+      "prompt": "Build a complete dark mode for this app. Change colors and assets only.\n- Add a dark value to every color token: background, surface, raised surface, text, secondary text, separator, accent, text on accent, error.\n- Follow the system appearance by default.\n- Surfaces: 3 near-blacks tinted with your main hue, 0.05 apart in OKLCH lightness: L 0.18, 0.23 and 0.28 (#121212, #1D1D1D and #292929 before the tint).\n- Raised layers get lighter. Sheets, menus and popovers use the raised surface, L 0.28. Remove shadows.\n- Text: off-white at L 0.95, secondary at L 0.75. Both pass 6.5:1 on all 3 surfaces.\n- Accent, red and chart colors: keep each hue and raise its lightness until it reaches 3:1 on the background. The accent's label stays at 4.5:1.\n- Icons follow the text color. Give dark logos and illustrations a light version. Never invert photos.\n- Status bar, keyboard, charts, maps and the launch screen follow the mode.\n\nCheck:\n- Zero hard-coded colors in views\n- Zero white cards and zero shadows on dark screens\n- The accent passes 3:1 on the dark background\n\nApply every fix, then list each as screen, rule, before, after. Name any rule you skipped.",
+      "words": 189,
+      "sources": [
+        "S4",
+        "S7",
+        "S8",
+        "S27"
+      ]
+    },
+    {
+      "id": "accessibility",
+      "title": "Make every screen accessible",
+      "area": "Accessibility",
+      "when": "Your app breaks at large text sizes, and VoiceOver reads “button, button”.",
+      "prompt": "Make every screen work with iOS accessibility settings. Change accessibility only.\n- Dynamic Type: test at the largest accessibility size, where body text is 53 pt instead of 17. Rows stack, text wraps instead of truncating, screens scroll.\n- VoiceOver: label every control with what it does, like \"Delete meal\", plus its state. Hide decorative images. Group each card into 1 sentence. Announce success and errors.\n- Use the stack's API: accessibilityLabel in SwiftUI and React Native, Semantics in Flutter.\n- Reading order follows the layout: top to bottom, then leading to trailing.\n- Never use color as the only signal: add an icon or a word.\n- Contrast: 4.5:1 for body text, 3:1 for text 24 pt and up, icons and control edges.\n- Touch targets: 44 x 44 pt or more.\n- Reduce Motion: swap movement for fades. Reduce Transparency: replace blur with solid surfaces.\n- Bold Text: custom fonts move 1 weight heavier. Increase Contrast: text tokens get a 7:1 variant.\n\nCheck:\n- Onboarding, the paywall and the main action work with VoiceOver alone\n- No text is cut off at the largest size\n- Every icon button has a label\n\nApply every fix, then list each as screen, rule, before, after. Name any rule you skipped.",
+      "words": 198,
+      "sources": [
+        "S2",
+        "S4",
+        "S14",
+        "S27"
+      ]
+    }
+  ]
+}

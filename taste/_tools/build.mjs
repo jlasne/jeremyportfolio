@@ -1,22 +1,33 @@
 #!/usr/bin/env node
 /* tasu.ai generator. Run it from anywhere: node taste/_tools/build.mjs
    No dependencies. Reads the data, writes the static site into taste/:
-     data.js              window.TASU_APPS, a summary of every app
-     index.html           home: hero, gallery, library teaser, closing line
-     <slug>/index.html    one page per app: design and paywall
-     library/index.html   every UI element cut from the paywalls, filterable by type
+     data.js              window.TASU_APPS, what the share cards (_tools/og.html) read
+     index.html           home: hero, gallery, UI elements and prompts teasers, closing line
+     <slug>/index.html    one page per app: screenshots, design, style prompt, UI elements, paywall
+     elements/index.html  the UI elements rebuilt in HTML and CSS, filterable by type
+     elements/elements.css every element's scoped CSS, linked from the pages that show elements
+     paywall/index.html   paywall tips computed from the App Store data of the 12 apps
+     prompt/index.html    mini prompts that fix one part of an app each
    Inputs:
-     _data/selection.json       display order (captures first), each app's niche and chip group
+     _data/selection.json       display order, each app's niche and chip group
      _data/raw/<slug>.json      facts from Apple's public App Store data
      _data/analysis/<slug>.json opinions and derived values (optional, field by field)
-     media/<slug>/...           icons, screenshots, paywall captures, font crops, element crops
+     _data/elements/<slug>.json the app's UI elements, rebuilt from its App Store screenshots
+     _data/paywall-tips.json    the tips of the Paywall page (numbers checked against the data)
+     _data/prompts.json         the Prompts page
+     media/<slug>/...           icons, screenshots, paywall captures, font crops
+     media/elements/...         each element's transparent PNG and its source crop
+     fonts/apps.css             the free fonts the apps' names, specimens and elements use
+                                (self-hosted subsets, made by _tools/fonts-apps.mjs)
    It also copies the rules of brand/loops/loops.css into tasu.css, between the loops:start and
    loops:end marks, so the mascot loops never drift from the brand kit.
    Full run after a media or data change:
-     python3 taste/_tools/media.py   small WebP icons and hero thumbnails (used when present)
-     node taste/_tools/build.mjs     this file
-     node taste/_tools/og.cjs        the 1200x630 share card of each app page, from data.js
-     node taste/_tools/build.mjs     again, so the pages point to the new cards
+     python3 taste/_tools/media.py      small WebP icons and hero thumbnails (used when present)
+     node taste/_tools/fonts-apps.mjs   the font subsets, after a change to names, fonts or elements
+     node taste/_tools/build.mjs        this file
+     node taste/_tools/elements.cjs     each element's transparent PNG, from the built elements.css
+     node taste/_tools/og.cjs           the 1200x630 share card of each app page, from data.js
+     node taste/_tools/build.mjs        again, so the pages point to the new PNGs and cards
    Markup contract: _tools/template-notes.md. Every page is complete HTML; tasu.js only enhances.
    A missing analysis file or field never stops the build: the page falls back to the facts and
    the log says what is missing. The build ends with a check of every page it wrote. */
@@ -42,17 +53,25 @@ const dayOf = iso => {
 };
 const X_URL = 'https://x.com/jeremylasne';
 const AUTHOR = { '@type': 'Person', name: 'Jeremy Lasne', url: 'https://www.jeremylasne.com/', sameAs: [X_URL] };
-const OG = { src: '/taste/brand/og.png', w: 1200, h: 630, alt: 'tasu.ai: design & paywalls behind top apps' };
+const OG = { src: '/taste/brand/og.png', w: 1200, h: 630, alt: 'tasu.ai: steal the taste of top apps' };
+// Every page links the X account with the same 2 lines (spec v4, picked by a judge panel).
+const CLOSING = {
+  title: 'Follow the builder behind tasu.ai',
+  sub: 'I build a portfolio of mobile apps with taste. Kaught has 1,000+ users.',
+};
+const APPS_CSS = '/taste/fonts/apps.css'; // the free fonts of the apps, from _tools/fonts-apps.mjs
+const ELEMENTS_CSS = '/taste/elements/elements.css'; // written by this build
 
 /* ---------------------------------------------------------------- log */
 const notes = [];
 const log = msg => notes.push(msg);
 
 /* ---------------------------------------------------------------- helpers */
+// A missing file falls back; a broken one stops the build and names the file.
 const readJSON = (file, fallback) => {
+  if (!existsSync(file)) return fallback;
   try { return JSON.parse(readFileSync(file, 'utf8')); } catch (e) {
-    if (fallback !== undefined) return fallback;
-    throw e;
+    throw new Error(`${file}: ${e.message}`);
   }
 };
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -128,22 +147,15 @@ const I = {
   sun: '<svg class="ico i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 3v1.5M12 19.5V21M3 12h1.5M19.5 12H21M5.64 5.64l1.06 1.06M17.3 17.3l1.06 1.06M5.64 18.36l1.06-1.06M17.3 6.7l1.06-1.06"/></svg>',
   moon: '<svg class="ico i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M19.5 14.5A7.5 7.5 0 0 1 9.5 4.5a7.5 7.5 0 1 0 10 10Z"/></svg>',
   x: '<svg class="ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>',
+  download: stroke('<path d="M12 4.25v10.5M7.25 10 12 14.75 16.75 10M5 19.25h14"/>'),
+  image: stroke('<rect x="3.75" y="4.75" width="16.5" height="14.5" rx="2.5"/><circle cx="9" cy="10" r="1.5"/><path d="m4.5 17.5 4.75-4.5 3 2.75 2.75-2.5 4.5 4.25"/>'),
+  code: stroke('<path d="m9 7.25-4.75 4.75L9 16.75M15 7.25l4.75 4.75L15 16.75"/>'),
 };
 
 /* ---------------------------------------------------------------- vocabulary */
-const TYPES = [
-  ['plan-picker', 'Plan picker', 'plan pickers'],
-  ['trial-toggle', 'Trial toggle', 'trial toggles'],
-  ['main-button', 'Main button', 'main buttons'],
-  ['close-button', 'Close button', 'close buttons'],
-  ['feature-list', 'Feature list', 'feature lists'],
-  ['social-proof', 'Social proof', 'social proof blocks'],
-  ['trial-timeline', 'Trial timeline', 'trial timelines'],
-  ['discount-badge', 'Discount badge', 'discount badges'],
-  ['hero-visual', 'Hero visual', 'hero visuals'],
-  ['legal-links', 'Legal links', 'legal link blocks'],
-];
-const TYPE = Object.fromEntries(TYPES.map(([k, one, many], i) => [k, { one, many, i }]));
+// The 9 types of the rebuilt UI elements, in chip order. Keys go in data-tags and ?tag=.
+const ELTYPES = ['Buttons', 'Cards', 'Progress', 'Navigation', 'Lists', 'Charts', 'Inputs', 'Badges', 'Headers'];
+const ELTYPE = Object.fromEntries(ELTYPES.map((t, i) => [t, { key: slugify(t), i }]));
 const PERIOD = { year: 'Yearly', month: 'Monthly', week: 'Weekly', lifetime: 'Lifetime', consumable: 'One-time purchase' };
 // A plan named "Annual Subscription" or "1 Month" needs no "Yearly" or "Monthly" under it.
 const SAYS_PERIOD = /\b(year|yearly|annual|annually|month|monthly|week|weekly|lifetime|forever)\b/i;
@@ -202,6 +214,8 @@ function loadApp(slug) {
     iapCount: (raw.iaps || []).length,
     // The App Store page can hold more screenshots than the pages show.
     screenTotal: raw.screenshotTotal || (raw.screenshots || []).length,
+    // Every screenshot full size on Apple's CDN (it allows cross-origin reads): the downloads.
+    appleShots: (raw.appleShots || []).filter(u => /^https:\/\/[a-z0-9-]+\.mzstatic\.com\//.test(u)),
   };
   app.groupKey = slugify(app.group);
   // A 256px WebP for every icon shown at 128 CSS px or less; icon.png stays for JSON-LD and og cards.
@@ -312,62 +326,59 @@ function loadApp(slug) {
   }
   app.colors = colors.slice(0, 3).sort((x, y) => num(y.role) - num(x.role))
     .map(c => ({ hex: c.hex.toUpperCase(), role: String(c.role), name: c.name || c.hex, use: c.use || '' }));
-  app.typeStyle = b.typeStyle || '';
-  app.font = b.font || null;
-  if (!app.font) missing('branding.font');
-  if (app.font?.crop) {
-    const s = imageSize(app.font.crop);
-    app.fontCrop = s ? { src: app.font.crop, ...s } : null;
-  }
-  app.visualStyle = b.visualStyle || '';
-  if (!app.visualStyle) missing('branding.visualStyle');
-  app.traits = (b.styleTraits || []).filter(Boolean);
-  if (!app.traits.length) missing('branding.styleTraits');
 
+  // 2 fonts, headline and body: the real name when known, and the closest free Google Font,
+  // which the pages self-host (fonts/apps.css). Older data holds 1 font (branding.font).
+  const fonts = b.fonts || {};
+  if (!b.fonts) missing('branding.fonts');
+  const fontOf = role => {
+    const old = b.font ? { name: b.font.name || null, closeTo: b.font.closeTo, weight: role === 'headline' ? 700 : 400, look: b.font.look, crop: role === 'headline' ? b.font.crop : null } : null;
+    const f = fonts[role] || old;
+    if (!f?.closeTo) return null;
+    const s = f.crop ? imageSize(f.crop) : null;
+    return { name: f.name || null, closeTo: f.closeTo, weight: Number(f.weight) || (role === 'headline' ? 700 : 400), look: f.look || '', crop: s ? { src: f.crop, ...s } : null };
+  };
+  app.fonts = { headline: fontOf('headline'), body: fontOf('body') };
+  // The design style: a summary and 6 labeled traits (Layout, Shapes, Color, Type, Imagery, Components).
+  const st = b.style || {};
+  if (!b.style) missing('branding.style');
+  app.styleSummary = st.summary || b.visualStyle || '';
+  app.traits = (st.traits || []).filter(t => t?.text).map(t => ({ label: t.label || '', text: t.text }));
+  if (!app.traits.length) app.traits = (b.styleTraits || []).filter(Boolean).map(t => ({ label: '', text: t }));
+
+  app.short = card.short || app.subtitle;
+  if (!card.short) missing('card.short');
   app.read = (an.ourRead || []).filter(Boolean);
   if (!app.read.length) missing('ourRead');
-  app.fixes = (an.improvements || []).filter(f => f && f.title);
-  if (!app.fixes.length) missing('improvements');
   app.prompt = an.stylePrompt || '';
-  if (!app.prompt) { missing('stylePrompt'); app.prompt = composePrompt(app); }
+  if (!app.prompt) missing('stylePrompt');
 
-  app.elements = (an.elements || []).flatMap(e => {
-    if (!TYPE[e.type]) { log(`${slug}: unknown element type ${e.type}, skipped`); return []; }
-    const s = imageSize(e.src);
-    if (!s) return [];
-    return [{ type: e.type, src: e.src, w: s.w, h: s.h, note: e.note || '' }];
-  });
+  // UI elements rebuilt in HTML and CSS from the App Store screenshots.
+  const els = readJSON(join(DATA, 'elements', `${slug}.json`), null);
+  if (!els) log(`${slug}: no _data/elements/${slug}.json`);
+  app.elements = (els?.elements || []).flatMap(e => {
+    if (!e?.id || !e.html || !e.css) { log(`${slug}: an element without id, html or css, skipped`); return []; }
+    if (!ELTYPE[e.type]) { log(`${slug}: element ${e.id} has an unknown type ${e.type}, skipped`); return []; }
+    return [{ ...e, slug, size: e.size || { w: 360, h: 120 } }];
+  }).sort((x, y) => (x.order ?? 99) - (y.order ?? 99));
   return app;
-}
-
-// A style prompt from the colors, the font and the plans, for an app whose analysis has none.
-function composePrompt(app) {
-  const [c60, c30, c10] = app.colors;
-  const font = app.font?.name || app.font?.closeTo;
-  const yearly = app.listed.find(r => r.period === 'year');
-  const monthly = app.listed.find(r => r.period === 'month');
-  const parts = [
-    `Build a paywall in ${app.name}'s style.`,
-    'Top to bottom: a bold 2-line headline, the plans as stacked rows, then one full-width main button.',
-    font ? `Type: ${font}${app.font?.weights ? `, ${app.font.weights.toLowerCase()}` : ''}.` : (app.typeStyle ? `Type: ${app.typeStyle}.` : ''),
-    `Colors: ${c60.name} ${c60.hex} (60) for the background, ${c30.name} ${c30.hex} (30) for text and cards, ${c10.name} ${c10.hex} (10) for the main button only.`,
-    yearly && monthly ? `Plans: preselect Yearly at ${yearly.price} and show its price per month next to Monthly at ${monthly.price}.`
-      : 'Plans: preselect the longest plan and show its price per month.',
-    app.trial ? 'Name the free trial on the main button.' : 'Show a trial only if you offer one.',
-    'Use my brand colors in the same 60/30/10 roles.',
-  ];
-  return parts.filter(Boolean).join(' ');
 }
 
 const apps = order.map(loadApp).filter(Boolean);
 if (!apps.length) { console.error('No apps to build.'); process.exit(1); }
+const PAYWALL_TIPS = readJSON(join(DATA, 'paywall-tips.json'), { tips: [] });
+const PROMPTS = readJSON(join(DATA, 'prompts.json'), { prompts: [] });
+if (!PAYWALL_TIPS.tips?.length) log('no _data/paywall-tips.json: the Paywall page has no tips');
+if (!PROMPTS.prompts?.length) log('no _data/prompts.json: the Prompts page is empty');
 
 /* ---------------------------------------------------------------- numbers across the 12 apps */
 // The yearly price of each app: its key number when that is a yearly price, else its first yearly row.
 for (const app of apps) {
   const kl = app.key.label || '';
-  const yearRow = app.subs.find(r => r.period === 'year');
-  const monthRow = app.subs.find(r => r.period === 'month');
+  // Without a key number: the first yearly and monthly plans in the analysis order (its main plans
+  // come first), the same prices the paywall tips use.
+  const yearRow = app.listed.find(r => r.period === 'year');
+  const monthRow = app.listed.find(r => r.period === 'month');
   if (/\b(year|yearly|annual)\b/i.test(kl) && num(app.key.value) !== null) app.yearly = num(app.key.value);
   else if (yearRow) app.yearly = yearRow.n;
   if (/\b(month|monthly)\b/i.test(kl) && num(app.key.value) !== null) app.monthly = num(app.key.value);
@@ -395,9 +406,11 @@ function compareLine(app) {
 /* ---------------------------------------------------------------- page shell */
 const SNIPPET = "(function(r){var t,v;try{t=localStorage.getItem('tasu-theme');v=localStorage.getItem('tasu-view')}catch(e){}r.classList.add('js');if(v==='grid')r.setAttribute('data-view','grid');if(t==='light'||t==='dark'){r.setAttribute('data-theme',t);var m=document.querySelectorAll('meta[name=\"theme-color\"]'),c=t==='dark'?'#1C1B19':'#F3EFE7';for(var i=0;i<m.length;i++)m[i].setAttribute('content',c)}})(document.documentElement)";
 
-function head({ title, description, path, type = 'website', image = OG, jsonld, preload = '' }) {
+// css: extra stylesheets after tasu.css (the app fonts, the elements' CSS), only where used.
+function head({ title, description, path, type = 'website', image = OG, jsonld, preload = '', css = [] }) {
   const url = ABS + path;
   const img = SITE + image.src;
+  const extra = css.filter(href => existsSync(fileOf(href)) || href === ELEMENTS_CSS).map(href => `<link rel="stylesheet" href="${href}">\n`).join('');
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -412,7 +425,7 @@ function head({ title, description, path, type = 'website', image = OG, jsonld, 
 <script>${SNIPPET}</script>
 <link rel="preload" href="/taste/fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
 ${preload}<link rel="stylesheet" href="/taste/tasu.css">
-<script src="/taste/tasu.js" defer></script>
+${extra}<script src="/taste/tasu.js" defer></script>
 <link rel="icon" href="/taste/brand/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/taste/brand/apple-touch-icon.png">
 <meta property="og:type" content="${type}">
@@ -437,7 +450,17 @@ ${type === 'article' ? `<meta property="article:published_time" content="${DATE}
 </head>`;
 }
 
-// current: 'apps' (home), 'library', or 'app' (an app page: "Apps" is its section, not the page).
+// current: 'apps' (home), 'app' (an app page: "Apps" is its section, not the page), 'elements',
+// 'paywall' or 'prompt'.
+const NAV = [
+  ['apps', '/taste/#apps', 'Apps'],
+  ['elements', '/taste/elements/', 'UI Elements'],
+  ['paywall', '/taste/paywall/', 'Paywall'],
+  ['prompt', '/taste/prompt/', 'Prompts'],
+];
+// The wordmark is live text: "tasu.ai" unfolds into "taste using ai" (tasu.js animates the 3
+// parts that change). Without JS it reads "tasu.ai".
+const WORDMARK = '<span class="wm" data-wm aria-hidden="true"><span class="wm-k">tas</span><span class="wm-x">te&nbsp;</span><span class="wm-k">u</span><span class="wm-x">sing&nbsp;</span><span class="wm-dot">.</span><span class="wm-k">ai</span></span>';
 function header(current) {
   const cur = k => (k === current ? ' aria-current="page"' : k === 'apps' && current === 'app' ? ' aria-current="true"' : '');
   return `<body>
@@ -445,14 +468,12 @@ function header(current) {
 
 <header class="site-header">
   <div class="wrap header-in">
-    <a class="brand" href="/taste/" aria-label="tasu.ai home">
+    <a class="brand" href="/taste/" aria-label="tasu.ai, taste using AI, home" data-wm-link>
       <span class="tasu-loop tasu-loop--blink" aria-hidden="true"></span>
-      <img class="brand-l" src="/taste/brand/loops/wordmark.svg" width="86" height="32" alt="">
-      <img class="brand-d" src="/taste/brand/loops/wordmark-dark.svg" width="86" height="32" alt="">
+      ${WORDMARK}
     </a>
     <nav class="nav" aria-label="Main">
-      <a href="/taste/#apps"${cur('apps')}>Apps</a>
-      <a href="/taste/library/"${cur('library')}>Library</a>
+      ${NAV.map(([k, href, label]) => `<a href="${href}"${cur(k)}>${label}</a>`).join('\n      ')}
     </nav>
     <form class="search search--header" role="search" action="/taste/#apps" method="get">
       ${I.search}
@@ -477,11 +498,10 @@ function header(current) {
 const footer = () => `
 <footer class="site-footer">
   <div class="wrap footer-in">
-    <p class="footer-brand"><img src="/taste/brand/icon.svg" width="24" height="24" alt=""><span>tasu.ai · taste using AI · by <a href="https://www.jeremylasne.com/">Jeremy Lasne</a></span></p>
+    <p class="footer-brand"><img src="/taste/brand/icon.svg" width="24" height="24" alt=""><span>tasu.ai, taste using AI, by <a href="https://www.jeremylasne.com/">Jeremy Lasne</a></span></p>
     <p>Data: Apple App Store, US, ${DAY}</p>
     <nav class="footer-links" aria-label="Footer">
-      <a href="/taste/#apps">Apps</a>
-      <a href="/taste/library/">Library</a>
+      ${NAV.map(([, href, label]) => `<a href="${href}">${label}</a>`).join('\n      ')}
       <a href="${X_URL}">${I.x}@jeremylasne</a>
     </nav>
   </div>
@@ -521,14 +541,68 @@ function drawn(app, max) {
         </div>`;
 }
 
-function tile(el, app, href) {
-  const t = TYPE[el.type];
-  const alt = `${t.one} from ${app.name}${el.note ? `: ${smart(el.note)}` : ''}`;
-  return `<a class="tile" href="${href}">
-        <span class="tile-img"><img src="${el.src}" width="${el.w}" height="${el.h}" alt="${esc(alt)}" loading="lazy" decoding="async"></span>
-        <span class="tile-type">${t.one}</span>
-        <span class="tile-app"><img src="${app.iconSm}" width="20" height="20" alt="" loading="lazy" decoding="async">${esc(app.name)}</span>
-      </a>`;
+// The closing block of every page: Tasu hops, the 2 lines, the X button (mint where the page
+// has no other mint button).
+const closing = primary => `<div class="closing">
+    ${happy()}
+    <h2 class="title-xl" id="closing-title">${txt(CLOSING.title)}</h2>
+    <p class="lead closing-sub">${copy(CLOSING.sub)}</p>
+    ${xButton('Follow @jeremylasne', primary)}
+  </div>`;
+
+// A free font in a style attribute: the family the pages self-host, its weight, a UI fallback.
+const fontCSS = f => (f ? `font-family:'${f.closeTo}',var(--font);font-weight:${f.weight}` : '');
+// The font's name for people: the real one when known, else the free match it is close to.
+const fontName = f => (f ? f.name || f.closeTo : '');
+// Black or white text on a color, whichever has the higher contrast (WCAG relative luminance).
+function inkOn(hex) {
+  const lin = v => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+  const [r, g, b] = [1, 3, 5].map(i => lin(parseInt(hex.slice(i, i + 2), 16) / 255));
+  const L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return (L + 0.05) / 0.05 >= 1.05 / (L + 0.05) ? '#1C1B19' : '#FFFFFF';
+}
+
+// An element's code as visitors copy it: the CSS, one declaration per line, then the HTML.
+function prettyCSS(css) {
+  let out = '', buf = '', depth = 0;
+  const line = s => { out += '  '.repeat(depth) + s + '\n'; };
+  for (const ch of String(css).replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ')) {
+    if (ch === '{') { line(buf.trim() + ' {'); buf = ''; depth++; }
+    else if (ch === ';') { if (buf.trim()) line(buf.trim() + ';'); buf = ''; }
+    else if (ch === '}') { if (buf.trim()) line(buf.trim() + ';'); buf = ''; depth = Math.max(0, depth - 1); line('}'); }
+    else buf += ch;
+  }
+  return (out + buf).trim();
+}
+const codeOf = el => `<style>\n${prettyCSS(el.css)}\n</style>\n\n${el.html}`;
+
+// One rebuilt element: the live element on a transparent stage, then its name, app, why, source
+// and the 3 ways to take it (prompt, code, PNG). The stage is a picture: nothing in it takes focus.
+function elementCard(el, app, { level = 3, filter = false } = {}) {
+  const shot = Number(String(el.source?.shot || '').replace(/\D/g, '')) || null;
+  const png = `/taste/media/elements/${el.id}.png`;
+  const crop = el.source?.crop && existsSync(fileOf(el.source.crop)) ? el.source.crop : null;
+  const attrs = filter
+    ? ` data-filter-item data-tags="${ELTYPE[el.type].key}" data-text="${esc([el.name, el.type, app.name, app.group, el.why].join(' '))}"`
+    : '';
+  return `<article class="el-card"${attrs}>
+      <div class="el-stage" role="img" aria-label="${esc(`${el.name}, rebuilt from ${app.name}`)}">
+        <div class="el-fit" style="--w:${el.size.w};--h:${el.size.h}" data-el-fit>${el.html}</div>
+      </div>
+      <div class="el-body">
+        <h${level} class="el-name">${txt(el.name)}</h${level}>
+        <p class="el-meta"><a class="el-app" href="${app.page}"><img src="${app.iconSm}" width="24" height="24" alt="" loading="lazy" decoding="async">${esc(app.name)}</a><span class="el-type">${el.type}</span></p>
+        <p class="el-why">${copy(el.why)}</p>
+        <p class="el-src">${shot ? `Rebuilt from App Store screenshot ${shot}` : 'Rebuilt from an App Store screenshot'}${crop ? `. <a href="${crop}">See the source</a>` : ''}</p>
+        <div class="el-actions">
+          <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ep-${el.id}" data-copy-raw>${I.copySm}<span data-copy-label>Copy prompt</span></button>
+          <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ec-${el.id}" data-copy-raw data-copy-what="Code">${I.code}<span data-copy-label>Copy code</span></button>${existsSync(fileOf(png)) ? `
+          <a class="btn btn-secondary btn-sm" href="${png}" download="${el.id}.png">${I.image}<span>PNG</span></a>` : ''}
+        </div>
+        <details class="el-more"><summary>Prompt</summary><p class="el-prompt" id="ep-${el.id}">${txt(el.prompt)}</p></details>
+        <details class="el-more"><summary>Code</summary><pre class="el-code" tabindex="0"><code id="ec-${el.id}">${esc(codeOf(el))}</code></pre></details>
+      </div>
+    </article>`;
 }
 
 /* ---------------------------------------------------------------- home */
@@ -583,35 +657,38 @@ function floats() {
   }).join('\n    ');
 }
 
+function fontRow(role, f) {
+  if (!f) return '';
+  const close = f.name ? '' : '<span class="font-close">close to </span>';
+  return `<div><dt>${role}</dt><dd>${close}<span class="font-sample" style="${fontCSS(f)}">${esc(fontName(f))}</span></dd></div>`;
+}
+
 function appRow(app) {
-  const words = [app.name, app.fullName, app.subtitle, app.category, app.group, app.niche, app.developer, app.key.value,
-    ...app.colors.map(c => c.name), app.font?.name, app.font?.closeTo].filter(Boolean);
+  const { headline, body } = app.fonts;
+  const words = [app.name, app.fullName, app.subtitle, app.short, app.category, app.group, app.niche, app.developer,
+    ...app.colors.flatMap(c => [c.name, c.hex]), headline?.name, headline?.closeTo, body?.name, body?.closeTo].filter(Boolean);
   const text = [...new Set(words)].join(' ');
-  const pw = app.paywalls[0];
-  // A drawn plan is a dark island on both themes, so it reads as a phone screen, never as a
-  // second card; its mark and note say it is drawn from prices.
-  const firstScreen = app.drawn
-    ? `<li class="screen screen--drawn" data-theme="dark"><span class="mark">Drawn plan</span>${drawn(app, 4)}<p class="drawn-note">Drawn from App Store prices, not a screenshot</p></li>`
-    : `<li class="screen"><span class="mark">Paywall</span><img src="${pw.src}" width="${pw.w}" height="${pw.h}" alt="${txt(pw.alt)}" loading="lazy" decoding="async"></li>`;
   const screens = app.screens.map(s =>
     `<li class="screen"><img src="${s.src}" width="${s.w}" height="${s.h}" alt="${txt(s.alt)}" loading="lazy" decoding="async"></li>`).join('\n        ');
-  const colorNames = app.colors.map(c => c.name).join(', ').replace(/, ([^,]*)$/, ' and $1');
+  const colorList = app.colors.map(c => `${c.name} ${c.hex}`).join(', ').replace(/, ([^,]*)$/, ' and $1');
   return `<li class="app-row" data-filter-item data-tags="${app.groupKey}" data-text="${esc(text)}" data-reveal>
-    <a class="app-card" href="${app.page}" aria-labelledby="n-${app.slug}" aria-describedby="k-${app.slug}">
+    <a class="app-card" href="${app.page}" aria-labelledby="n-${app.slug}" aria-describedby="d-${app.slug}">
       <img class="app-icon" src="${app.iconSm}" width="64" height="64" alt="" loading="lazy" decoding="async">
       <p class="app-rank">${rankShort(app)}</p>
-      <h3 class="app-name" id="n-${app.slug}">${esc(app.name)}</h3>
-      <p class="app-sub">${esc(app.subtitle)}</p>
-      <p class="key" id="k-${app.slug}"><span class="key-num">${esc(app.key.value)}</span><span class="key-label">${txt(app.key.label)}</span></p>
-      <p class="app-colors" role="img" aria-label="${esc(`Brand colors: ${colorNames}`)}">${app.colors.map(c => `<span style="--c:${c.hex}"></span>`).join('')}</p>
-      <dl class="stats">
-        <div><dt>${compact(app.ratingCount)} ratings</dt><dd>${app.rating1}</dd></div>
-        <div><dt>listed prices</dt><dd>${app.priceCount}</dd></div>
-      </dl>
+      <h3 class="app-name" id="n-${app.slug}"${headline ? ` style="${fontCSS(headline)}"` : ''}>${esc(app.name)}</h3>
+      <p class="app-short" id="d-${app.slug}">${copy(app.short)}</p>
+      <div class="app-design">
+        <ul class="app-palette" role="list" aria-label="${esc(`Brand colors: ${colorList}`)}">
+          ${app.colors.map(c => `<li><span class="swatch" style="--c:${c.hex}"></span><span class="hex">${c.hex}</span></li>`).join('\n          ')}
+        </ul>
+        <dl class="app-fonts">
+          ${fontRow('Headline', headline)}
+          ${fontRow('Body', body)}
+        </dl>
+      </div>
     </a>
     <div class="strip" data-strip>
-      <ol class="strip-track" role="list" tabindex="0" aria-label="${esc(app.name)} screens">
-        ${firstScreen}
+      <ol class="strip-track" role="list" tabindex="0" aria-label="${esc(app.name)} App Store screenshots">
         ${screens}
       </ol>${stripButtons('screens')}
     </div>
@@ -628,32 +705,35 @@ function homePage() {
     groups.set(a.groupKey, g);
   });
   const chips = [...groups.entries()].sort((x, y) => y[1].count - x[1].count || x[1].first - y[1].first);
-  const elements = apps.flatMap(a => a.elements.map(e => ({ ...e, app: a })));
-  const elApps = new Set(elements.map(e => e.app.slug)).size;
-  // The 4 crops that show their type best; any missing one is replaced by the next type in line.
-  const teaserPicks = ['hevy/el-plan-picker-1', 'strava/el-trial-timeline-1', 'rise/el-discount-badge-2', 'myfitnesspal/el-social-proof-1'];
-  let teaser = teaserPicks.map(k => elements.find(e => e.src === `/taste/media/${k}.jpg`)).filter(Boolean);
-  for (const e of elements) {
-    if (teaser.length >= 4) break;
-    if (!teaser.some(x => x.type === e.type)) teaser.push(e);
+  // The UI elements teaser: the first 6 of the curated order, 1 per app, short enough for a row.
+  const elements = apps.flatMap(a => a.elements.map(el => ({ el, app: a })))
+    .sort((x, y) => (x.el.order ?? 99) - (y.el.order ?? 99));
+  const teaser = [];
+  for (const it of elements) {
+    if (teaser.length === 6) break;
+    if (!teaser.some(t => t.app === it.app) && it.el.size.h <= 300) teaser.push(it);
   }
-  teaser = teaser.slice(0, 4);
+  const perApp = Math.min(...apps.map(a => a.elements.length || 0)) || 0;
+  // The 2 names most readers know open the subtitle (judge panel pick), else the first 2 apps.
+  let named = ['duolingo', 'strava'].map(s => apps.find(a => a.slug === s)).filter(Boolean);
+  if (named.length < 2) named = apps.slice(0, 2);
+  const tips = PAYWALL_TIPS.tips || [];
 
-  const title = 'tasu.ai: design & paywalls behind top apps';
-  const description = `The design and paywalls of ${n} top consumer apps: plans and prices, 3 brand colors, the font, the design style and 3 fixes for each.`;
+  const title = 'tasu.ai: steal the taste of top apps';
+  const description = `The 3 colors, 2 fonts and rebuilt UI elements of ${n} top-grossing iPhone apps, plus paywall tips and prompts for Claude Code or Cursor.`;
   const jsonld = {
     '@context': 'https://schema.org',
     '@graph': [
       { '@type': 'WebSite', '@id': `${ABS}#website`, name: 'tasu.ai', alternateName: 'taste using AI', url: ABS, description, inLanguage: 'en', author: AUTHOR, publisher: AUTHOR },
       { '@type': 'CollectionPage', '@id': `${ABS}#page`, url: ABS, name: title, description, isPartOf: { '@id': `${ABS}#website` }, inLanguage: 'en', dateModified: MODIFIED, primaryImageOfPage: SITE + OG.src, mainEntity: { '@id': `${ABS}#apps` } },
       { '@type': 'ItemList', '@id': `${ABS}#apps`, name: `${n} app breakdowns`, numberOfItems: n, itemListOrder: 'https://schema.org/ItemListUnordered',
-        itemListElement: apps.map((a, i) => ({ '@type': 'ListItem', position: i + 1, url: a.url, name: `${a.name}: design and paywall` })) },
+        itemListElement: apps.map((a, i) => ({ '@type': 'ListItem', position: i + 1, url: a.url, name: `${a.name}: fonts, colors and UI` })) },
     ],
   };
 
   // The hero loop is the largest paint of the first screen: fetch its sprite with the stylesheet.
   const preload = '<link rel="preload" href="/taste/brand/loops/taste.svg" as="image" fetchpriority="high">\n';
-  const html = `${head({ title, description, path: '', jsonld, preload })}
+  const html = `${head({ title, description, path: '', jsonld, preload, css: [APPS_CSS, ...(teaser.length ? [ELEMENTS_CSS] : [])] })}
 ${header('apps')}
 <main id="main">
 
@@ -663,8 +743,8 @@ ${header('apps')}
   </div>
   <div class="wrap hero-in">
     <span class="tasu-loop tasu-loop--taste hero-mascot" role="img" aria-label="Tasu, the tasu.ai mascot, licks a paywall card"></span>
-    <h1 class="display" id="hero-title"><span class="hl">Design &amp; paywalls</span> behind top apps</h1>
-    <p class="lead hero-sub"><span>${n} consumer apps from Apple’s US Top Grossing charts.</span> <span>For each: paywall strategy, colors, font, design style, and how I’d improve it.</span></p>
+    <h1 class="display" id="hero-title">Steal the <span class="hl">taste</span> of top apps</h1>
+    <p class="lead hero-sub"><span>${named.map(a => esc(a.name)).join(', ')} and ${n - named.length} more: 3 colors, 2 fonts and ${perApp || 3} UI elements each, rebuilt in code.</span> <span>Paste the prompts into Claude Code or Cursor.</span></p>
     <div class="actions">
       ${xButton('Follow on X', true)}
       <a class="btn btn-secondary btn-lg" href="#apps">Browse the apps</a>
@@ -675,7 +755,7 @@ ${header('apps')}
 <section class="section" id="apps" aria-labelledby="apps-title" data-filter data-filter-main data-filter-url data-noun-one="app" data-noun-many="apps">
   <div class="wrap">
     <div class="gallery-head">
-      <h2 class="title-xl" id="apps-title">${n} apps, from paywall to palette</h2>
+      <h2 class="title-xl" id="apps-title">${n} apps: their colors, fonts and UI</h2>
       <div class="gallery-tools js-only">
         <div class="search search--lg">
           ${I.search}
@@ -711,23 +791,45 @@ ${header('apps')}
   </div>
 </section>
 ${teaser.length ? `
-<section class="section" aria-labelledby="lib-title" data-reveal>
+<section class="section" aria-labelledby="el-title" data-reveal>
   <div class="wrap">
     <div class="section-head">
-      <h2 class="title-xl" id="lib-title">${elements.length} UI elements from ${elApps} web paywalls</h2>
-      <a class="link-arrow" href="/taste/library/">Open the library ${I.arrow}</a>
+      <h2 class="title-xl" id="el-title">${elements.length} UI elements, rebuilt in code</h2>
+      <a class="link-arrow" href="/taste/elements/">See all UI elements ${I.arrow}</a>
     </div>
-    <ul class="tiles" role="list">
-      ${teaser.map(e => `<li>${tile(e, e.app, `/taste/library/?tag=${e.type}`)}</li>`).join('\n      ')}
+    <div class="el-grid">
+    ${teaser.map(t => elementCard(t.el, t.app)).join('\n    ')}
+    </div>
+  </div>
+</section>
+` : ''}${tips.length ? `
+<section class="section" aria-labelledby="tips-title" data-reveal>
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="title-xl" id="tips-title">${tips.length} paywall tips from ${n} top apps</h2>
+      <a class="link-arrow" href="/taste/paywall/">See the paywall tips ${I.arrow}</a>
+    </div>
+    <ul class="tip-teaser" role="list">
+      ${tips.slice(0, 3).map(t => `<li><a class="tip-mini" href="/taste/paywall/#${t.id}"><span class="tip-stat">${esc(t.stat.value)}</span><span class="tip-label">${copy(t.stat.label)}</span><span class="title-s">${txt(t.title)}</span></a></li>`).join('\n      ')}
+    </ul>
+  </div>
+</section>
+` : ''}${PROMPTS.prompts?.length ? `
+<section class="section" aria-labelledby="pr-title" data-reveal>
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="title-xl" id="pr-title">${PROMPTS.prompts.length} prompts to unslop your app</h2>
+      <a class="link-arrow" href="/taste/prompt/">See all prompts ${I.arrow}</a>
+    </div>
+    <ul class="pr-teaser" role="list">
+      ${PROMPTS.prompts.slice(0, 3).map(p => `<li><a class="pr-mini" href="/taste/prompt/#${p.id}"><span class="pr-area">${esc(p.area)}</span><span class="title-s">${txt(p.title)}</span><span class="pr-when">${copy(p.when)}</span></a></li>`).join('\n      ')}
     </ul>
   </div>
 </section>
 ` : ''}
 <section class="section" aria-labelledby="closing-title" data-reveal>
-  <div class="wrap closing">
-    ${happy()}
-    <h2 class="title-xl" id="closing-title">A new app breakdown every day on X</h2>
-    ${xButton('@jeremylasne', false)}
+  <div class="wrap">
+  ${closing(false)}
   </div>
 </section>
 
@@ -821,86 +923,110 @@ function factsBlock(app) {
           </div>`;
 }
 
+// Colors as a poster: 3 fields sized by role (60 on top, then 30 and 10), each printed with its
+// name, role and hex in black or white. A click copies the hex. One "use" line per color under it.
 function colorsCard(app) {
-  const label = app.colors.map(c => `${c.name} ${c.role}%`).join(', ');
-  return `<div class="card">
-          <h2 class="title-m" id="colors-title">Colors</h2>
-          <ul class="colors" role="list">
-            ${app.colors.map(c => `<li class="color"><span class="color-chip" style="--c:${c.hex}"></span><span><span class="color-role">${ROLE[c.role] || 'Main'}</span><span class="color-line"><span class="color-name">${txt(c.name)}</span><button class="copy-hex" type="button" data-copy="${c.hex}" aria-label="Copy ${esc(c.name)}, ${c.hex}"><span data-copy-label>${c.hex}</span>${I.copySm}</button></span>${c.use ? `<span class="color-use">${copy(c.use.charAt(0).toUpperCase() + c.use.slice(1))}</span>` : ''}</span></li>`).join('\n            ')}
+  const field = c => `<button class="pf pf-${c.role}" type="button" style="--c:${c.hex};--ink:${inkOn(c.hex)}" data-copy="${c.hex}" aria-label="Copy ${esc(c.name)}, ${c.hex}">
+              <span class="pf-role">${ROLE[c.role] || 'Main'}, ${c.role}%</span>
+              <span class="pf-name">${txt(c.name)}</span>
+              <span class="pf-hex"><span data-copy-label>${c.hex}</span>${I.copySm}</span>
+            </button>`;
+  return `<div class="card colors-card">
+          <h3 class="title-m" id="colors-title">Colors</h3>
+          <div class="poster">
+            ${app.colors.map(field).join('\n            ')}
+          </div>
+          <ul class="poster-uses" role="list">
+            ${app.colors.filter(c => c.use).map(c => `<li><span class="dot" style="--c:${c.hex}"></span><span><b>${txt(c.name)}</b> ${copy(c.use.charAt(0).toLowerCase() + c.use.slice(1))}</span></li>`).join('\n            ')}
           </ul>
-          <div class="ratio" role="img" aria-label="${esc(`60/30/10 split: ${label}`)}">${app.colors.map(c => `<span style="--c:${c.hex};--w:${c.role}%"></span>`).join('')}</div>
         </div>`;
 }
 
-function fontCard(app) {
-  const f = app.font;
-  let nameLine, free = '';
-  if (f?.name) {
-    nameLine = esc(f.name);
-    if (f.closeTo && f.closeTo !== f.name) free = `Closest free font: ${esc(f.closeTo)}`;
-    else if (f.closeTo) free = 'A free Google Font';
-  } else if (f?.closeTo) {
-    nameLine = `Close to ${esc(f.closeTo)}`;
-    free = 'The closest free Google Font to the app’s type';
-  }
-  if (!f) log(`${app.slug}: font card shows typeStyle only`);
-  // A font seen only on the web pricing page says so: the app itself may use another one.
-  if (f?.scope) free = `On the ${esc(f.scope)}${free ? `. ${free}` : ''}`;
-  const from = f?.scope ? `${app.name}’s ${f.scope}` : `${/^[aeiou]/i.test(app.name) ? 'an' : 'a'} ${app.name} App Store screenshot`;
-  const crop = app.fontCrop
-    ? `<img class="specimen" src="${app.fontCrop.src}" width="${app.fontCrop.w}" height="${app.fontCrop.h}" alt="${esc(`Headline text cut from ${from}`)}" loading="lazy" decoding="async">`
+// The 2 fonts: role, name, a big "Aa" and a sample line in the free match, a link to it, and the
+// crop of the app's own text.
+function specimen(app, role, f) {
+  if (!f) return '';
+  const name = f.name ? esc(f.name) : `Close to ${esc(f.closeTo)}`;
+  const free = `https://fonts.google.com/specimen/${f.closeTo.replace(/ /g, '+')}`;
+  const crop = f.crop
+    ? `<img class="sp-crop" src="${f.crop.src}" width="${f.crop.w}" height="${f.crop.h}" alt="${esc(`${role} text cut from ${/^[aeiou]/i.test(app.name) ? 'an' : 'a'} ${app.name} App Store screenshot`)}" loading="lazy" decoding="async">`
     : '';
-  const facts = [];
-  if (f?.look) facts.push(['Look', txt(f.look.charAt(0).toUpperCase() + f.look.slice(1))]);
-  if (f?.weights) facts.push(['Weights', txt(f.weights.charAt(0).toUpperCase() + f.weights.slice(1))]);
-  if (!f && app.typeStyle) facts.push(['Type', txt(app.typeStyle)]);
-  return `<div class="card">
-          <h2 class="title-m" id="font-title">Font</h2>
-          ${crop}${nameLine ? `
-          <p class="font-name">${nameLine}</p>` : ''}${free ? `
-          <p class="font-free">${free}</p>` : ''}
-          <dl class="facts">
-            ${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('\n            ')}
-          </dl>
+  return `<div class="sp">
+            <p class="sp-role">${role}</p>
+            <p class="sp-name">${name}</p>
+            <p class="sp-aa" style="${fontCSS(f)}" aria-hidden="true">Aa</p>
+            <p class="sp-line" style="${fontCSS(f)}">${esc(app.name)} 0123456789</p>
+            ${f.look ? `<p class="sp-look">${copy(f.look.charAt(0).toUpperCase() + f.look.slice(1))}</p>` : ''}
+            <p class="sp-free">${f.name && f.name === f.closeTo ? 'A free Google Font' : 'Free match'}: <a href="${free}">${esc(f.closeTo)} ${f.weight}</a></p>
+            ${crop}
+          </div>`;
+}
+function fontsCard(app) {
+  const { headline, body } = app.fonts;
+  if (!headline && !body) return '';
+  return `<div class="card fonts-card">
+          <h3 class="title-m" id="font-title">Fonts</h3>
+          ${specimen(app, 'Headline', headline)}
+          ${specimen(app, 'Body', body)}
         </div>`;
 }
 
 function styleCard(app) {
-  return `<div class="card">
-          <h2 class="title-m" id="style-title">Design style</h2>
-          ${app.visualStyle ? `<p class="style-text">${copy(app.visualStyle)}</p>` : app.typeStyle ? `<p class="style-text">${txt(app.typeStyle)}</p>` : ''}${app.traits.length ? `
-          <ul class="bullets" role="list">
-            ${app.traits.map(t => `<li>${copy(t)}</li>`).join('\n            ')}
-          </ul>` : ''}
+  if (!app.styleSummary && !app.traits.length) return '';
+  return `<div class="card style-card">
+          <h3 class="title-m" id="style-title">Design style</h3>
+          ${app.styleSummary ? `<p class="style-text">${copy(app.styleSummary)}</p>` : ''}${app.traits.length ? `
+          <dl class="traits">
+            ${app.traits.map(t => `<div>${t.label ? `<dt>${esc(t.label)}</dt>` : ''}<dd>${copy(t.text)}</dd></div>`).join('\n            ')}
+          </dl>` : ''}
         </div>`;
 }
 
-function fixesBlock(app) {
-  const rule = r => esc(String(r).replace(/"([^"]*)"/g, '‘$1’').replace(/(\w)'(\w)/g, '$1’$2'));
-  return app.fixes.map(f => `<li class="fix">
-          <h3 class="title-s">${txt(f.title)}</h3>
-          <p>${copy(f.detail)}</p>
-          ${f.rule ? `<p class="fix-rule">“${rule(f.rule)}” <cite>taste.md, ${esc(f.source || '')}</cite></p>` : ''}
-        </li>`).join('\n        ');
+// The screenshots, each with a download button, and "Download all" (a ZIP built in the browser).
+// Files come full size from Apple's CDN; the copy hosted here is the fallback.
+function screenshotsBlock(app) {
+  if (!app.screens.length) return '';
+  const all = app.appleShots.length ? app.appleShots : app.screens.map(s => s.apple).filter(Boolean);
+  const pad = i => String(i + 1).padStart(2, '0');
+  const files = all.map((u, i) => ({ src: u, fallback: app.screens[i]?.src || '', name: `${app.slug}-app-store-${pad(i)}.jpg` }));
+  return `<section class="section" aria-labelledby="shots-title">
+  <div class="wrap">
+    <div class="section-head shots-head">
+      <div>
+        <h2 class="title-l" id="shots-title">App Store screenshots</h2>
+        <p class="source-note">${app.screenTotal > app.screens.length ? `First ${app.screens.length} of ${app.screenTotal}` : app.screens.length} screenshots, ${SOURCE}</p>
+      </div>${files.length ? `
+      <button class="btn btn-secondary js-only" type="button" data-download-all="${esc(JSON.stringify(files))}" data-zip="${app.slug}-app-store-screenshots.zip">${I.download}<span data-dl-label>Download all ${files.length}</span></button>` : ''}
+    </div>
+    <div class="strip strip--page" data-strip>
+      <ol class="strip-track" role="list" tabindex="0" aria-label="${esc(app.name)} App Store screenshots">
+        ${app.screens.map((s, i) => `<li class="screen"><img src="${s.src}" width="${s.w}" height="${s.h}" alt="${txt(s.alt)}" loading="lazy" decoding="async">${s.apple ? `<button class="dl-btn js-only" type="button" data-download="${esc(s.apple)}" data-fallback="${s.src}" data-name="${app.slug}-app-store-${pad(i)}.jpg" aria-label="Download screenshot ${i + 1}, full size">${I.download}</button>` : ''}</li>`).join('\n        ')}
+      </ol>${stripButtons('screenshots')}
+    </div>
+  </div>
+</section>`;
 }
 
 function appPage(app, i) {
   const prev = apps[(i - 1 + apps.length) % apps.length];
   const next = apps[(i + 1) % apps.length];
-  const subs = app.subs.map(r => r.n);
-  const fontPhrase = app.font?.name ? (app.font.scope ? `a ${app.font.scope} set in ${app.font.name}` : `set in ${app.font.name}`)
-    : app.font?.closeTo ? `a font close to ${app.font.closeTo}` : '';
+  const { headline, body } = app.fonts;
   const hexes = app.colors.map(c => c.hex);
-  let description = `${app.name}’s design and paywall: ${app.priceCount} listed prices from ${money(Math.min(...subs))} to ${money(Math.max(...subs))}, colors ${hexes[0]}, ${hexes[1]} and ${hexes[2]}${fontPhrase ? `, ${fontPhrase}` : ''}, and 3 fixes.`;
-  if (!subs.length) description = `${app.name}’s design and paywall: colors ${hexes.join(', ')}${fontPhrase ? `, ${fontPhrase}` : ''}, and 3 fixes from the taste rules.`;
-  if (description.length > 160) description = description.replace(/, (a [a-z ]+ set in|set in|a font close to) [^,]+,/, ',');
-  let title = `${app.name} design and paywall | tasu.ai`;
-  if (title.length > 60) title = `${app.name} paywall | tasu.ai`;
-  const pw = app.paywalls[0];
-  // The share card: 1200x630, made by _tools/og.cjs (app icon, name, brand colors, paywall).
+  const nEl = app.elements.length;
+  // "<App>'s design: fonts A and B, colors x, y and z, 3 UI elements to copy, and its paywall."
+  const describe = (h, b, tail) => {
+    const fontPart = h && b ? (h === b ? `font ${h}` : `fonts ${h} and ${b}`) : h || b ? `font ${h || b}` : '';
+    return `${app.name}’s design: ${fontPart ? `${fontPart}, ` : ''}colors ${hexes[0]}, ${hexes[1]} and ${hexes[2]}${nEl ? `, ${nEl} UI elements to copy` : ''}${tail}.`;
+  };
+  let description = describe(fontName(headline), fontName(body), ', and its paywall');
+  if (description.length > 160) description = describe(headline?.closeTo, body?.closeTo, ', and its paywall');
+  if (description.length > 160) description = describe(headline?.closeTo, body?.closeTo, '');
+  let title = `${app.name} fonts, colors and UI | tasu.ai`;
+  if (title.length > 60) title = `${app.name} design | tasu.ai`;
+  // The share card: 1200x630, made by _tools/og.cjs (app icon, name, colors, first screenshot).
   const card = `/taste/media/${app.slug}/og.jpg`;
   const image = existsSync(fileOf(card))
-    ? { src: card, w: 1200, h: 630, alt: `${app.name}: design and paywall, by tasu.ai` }
+    ? { src: card, w: 1200, h: 630, alt: `${app.name}: fonts, colors and UI, by tasu.ai` }
     : (log(`${app.slug}: no media/${app.slug}/og.jpg, the page shares og.png (run _tools/og.cjs)`), OG);
   const offers = app.rows.map(r => ({ '@type': 'Offer', name: r.name, price: r.n.toFixed(2), priceCurrency: 'USD' }));
   const prices = app.rows.map(r => r.n);
@@ -910,9 +1036,9 @@ function appPage(app, i) {
       {
         '@type': 'Article',
         '@id': `${app.url}#article`,
-        headline: `${app.name}: design and paywall`,
+        headline: `${app.name}: fonts, colors and UI`,
         description,
-        image: [SITE + image.src, ...(pw ? [SITE + pw.src] : [])],
+        image: [SITE + image.src, ...(app.screens[0] ? [SITE + app.screens[0].src] : [])],
         datePublished: DATE,
         dateModified: MODIFIED,
         author: AUTHOR,
@@ -959,7 +1085,8 @@ function appPage(app, i) {
   // A drawn phone already shows the first plans: the table keeps the rest (consumables, extra plans).
   const shown = app.drawn ? new Set(app.subs.slice(0, DRAWN_ROWS)) : null;
   const tableRows = shown ? app.rows.filter(r => !shown.has(r)) : app.rows;
-  const html = `${head({ title, description, path: `${app.slug}/`, type: 'article', image, jsonld })}
+  const design = [colorsCard(app), fontsCard(app), styleCard(app)].filter(Boolean);
+  const html = `${head({ title, description, path: `${app.slug}/`, type: 'article', image, jsonld, css: [APPS_CSS, ...(nEl ? [ELEMENTS_CSS] : [])] })}
 ${header('app')}
 <main id="main" class="page-app">
 
@@ -968,7 +1095,7 @@ ${header('app')}
     <div class="app-head">
       <img class="app-head-icon" src="${app.iconSm}" width="128" height="128" alt="${esc(app.name)} app icon" fetchpriority="high">
       <div>
-        <h1 class="title-xl" id="app-title">${esc(app.name)}<span class="h1-rest">: design and paywall</span></h1>
+        <h1 class="title-xl" id="app-title">${esc(app.name)}<span class="h1-rest">: fonts, colors and UI</span></h1>
         <p class="lead">${copy(app.oneLiner)}</p>
         <ul class="meta" role="list">
           ${metaItems.map(m => `<li>${m}</li>`).join('\n          ')}
@@ -980,9 +1107,46 @@ ${header('app')}
   </div>
 </section>
 
-<section class="section" aria-labelledby="paywall-title">
+${screenshotsBlock(app)}
+${design.length ? `
+<section class="section" aria-labelledby="design-title" data-reveal>
   <div class="wrap">
-    <div class="section-head"><h2 class="title-l" id="paywall-title">Paywall strategy</h2></div>
+    <div class="section-head"><h2 class="title-l" id="design-title">Design</h2></div>
+    <div class="design-grid">
+        ${design.join('\n        ')}
+    </div>
+  </div>
+</section>
+` : ''}${app.prompt ? `
+<section class="section" aria-labelledby="prompt-title" data-reveal>
+  <div class="wrap prompt-block">
+    <h2 class="title-l" id="prompt-title">Copy this style</h2>
+    <p class="prompt-sub">A prompt for ${esc(app.name)}’s overall look: colors, type, shapes, layout and its signature components.</p>
+    <div class="prompt">
+      <p class="prompt-text" id="style-prompt">${txt(app.prompt)}</p>
+    </div>
+    <div class="prompt-actions">
+      <button class="btn btn-secondary js-only" type="button" data-copy-target="#style-prompt" data-copy-raw>${I.copy}<span data-copy-label>Copy prompt</span></button>
+      <p class="prompt-hint">Paste it into Claude Code or Cursor.</p>
+    </div>
+  </div>
+</section>
+` : ''}${nEl ? `
+<section class="section" aria-labelledby="el-title" data-reveal>
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="title-l" id="el-title">UI elements from ${esc(app.name)}</h2>
+      <a class="link-arrow" href="/taste/elements/">See all UI elements ${I.arrow}</a>
+    </div>
+    <div class="el-grid">
+    ${app.elements.map(e => elementCard(e, app)).join('\n    ')}
+    </div>
+  </div>
+</section>
+` : ''}
+<section class="section" id="paywall" aria-labelledby="paywall-title" data-reveal>
+  <div class="wrap">
+    <div class="section-head"><h2 class="title-l" id="paywall-title">Paywall</h2></div>
     <div class="split">
       ${phoneBlock(app)}
       <div class="stack-32">
@@ -999,73 +1163,14 @@ ${header('app')}
     </div>
   </div>
 </section>
-${app.screens.length ? `
-<section class="section" aria-labelledby="shots-title" data-reveal>
+
+<section class="section" aria-labelledby="closing-title" data-reveal>
   <div class="wrap">
-    <div class="section-head"><h2 class="title-l" id="shots-title">App Store screenshots</h2><p class="source-note">${app.screenTotal > app.screens.length ? `First ${app.screens.length} of ${app.screenTotal}` : app.screens.length} screenshots, ${SOURCE}</p></div>
-    <div class="strip strip--page" data-strip>
-      <ol class="strip-track" role="list" tabindex="0" aria-label="${esc(app.name)} App Store screenshots">
-        ${app.screens.map(s => `<li class="screen"><img src="${s.src}" width="${s.w}" height="${s.h}" alt="${txt(s.alt)}" loading="lazy" decoding="async"></li>`).join('\n        ')}
-      </ol>${stripButtons('screenshots')}
-    </div>
-  </div>
-</section>
-` : ''}
-<section class="section" aria-label="Colors, font and design style" data-reveal>
-  <div class="wrap">
-    <div class="design-grid">
-        ${colorsCard(app)}
-        ${fontCard(app)}
-        ${styleCard(app)}
-    </div>
-  </div>
-</section>
-${app.fixes.length ? `
-<section class="section" aria-labelledby="fix-title" data-reveal>
-  <div class="wrap">
-    <div class="section-head"><h2 class="title-l" id="fix-title">How I’d improve it</h2></div>
-    <ol class="fixes" role="list">
-        ${fixesBlock(app)}
-    </ol>
-  </div>
-</section>
-` : ''}
-<section class="section" aria-labelledby="prompt-title" data-reveal>
-  <div class="wrap prompt-block">
-    <h2 class="title-l" id="prompt-title">Copy this style</h2>
-    <div class="prompt">
-      <p class="prompt-text" id="style-prompt">${copy(app.prompt)}</p>
-    </div>
-    <div class="prompt-actions">
-      <button class="btn btn-secondary js-only" type="button" data-copy-target="#style-prompt">${I.copy}<span data-copy-label>Copy prompt</span></button>
-      <p class="prompt-hint">Paste it into Claude Code or Cursor.</p>
-    </div>
-  </div>
-</section>
-${app.elements.length ? `
-<section class="section" aria-labelledby="el-title" data-reveal>
-  <div class="wrap">
-    <div class="section-head">
-      <h2 class="title-l" id="el-title">UI elements in this paywall</h2>
-      <a class="link-arrow" href="/taste/library/">Open the library ${I.arrow}</a>
-    </div>
-    <ul class="tiles" role="list">
-      ${app.elements.map(e => `<li>${tile(e, app, `/taste/library/?tag=${e.type}`)}</li>`).join('\n      ')}
-    </ul>
-  </div>
-</section>
-` : ''}
-<section class="section" aria-labelledby="next-title" data-reveal>
-  <div class="wrap">
-    <h2 class="sr-only" id="next-title">Next breakdown</h2>
     <nav class="pager" aria-label="More apps">
       <a href="${prev.page}" rel="prev"><img src="${prev.iconSm}" width="48" height="48" alt="" loading="lazy" decoding="async"><span><small>Previous</small>${esc(prev.name)}</span></a>
       <a href="${next.page}" rel="next"><img src="${next.iconSm}" width="48" height="48" alt="" loading="lazy" decoding="async"><span><small>Next</small>${esc(next.name)}</span></a>
     </nav>
-    <div class="closing">
-      ${happy()}
-      ${xButton('Follow on X for the next breakdown', true)}
-    </div>
+    ${closing(true)}
   </div>
 </section>
 
@@ -1074,68 +1179,252 @@ ${footer()}`;
   return { html, title, description };
 }
 
-/* ---------------------------------------------------------------- library */
-function libraryPage() {
-  const items = apps.flatMap(a => a.elements.map(e => ({ ...e, app: a })))
-    .sort((x, y) => TYPE[x.type].i - TYPE[y.type].i || apps.indexOf(x.app) - apps.indexOf(y.app));
+/* ---------------------------------------------------------------- UI elements */
+function elementsPage() {
+  const items = apps.flatMap(a => a.elements.map(el => ({ el, app: a })))
+    .sort((x, y) => (x.el.order ?? 99) - (y.el.order ?? 99));
   const n = items.length;
   const nApps = new Set(items.map(e => e.app.slug)).size;
   const counts = new Map();
-  for (const e of items) counts.set(e.type, (counts.get(e.type) || 0) + 1);
-  const byCount = [...counts.entries()].sort((x, y) => y[1] - x[1] || TYPE[x[0]].i - TYPE[y[0]].i);
-  const chips = TYPES.filter(([k]) => counts.has(k));
-  const top3 = byCount.slice(0, 3).map(([k, c]) => `${c} ${TYPE[k].many}`);
-  const title = 'Paywall UI elements from top apps | tasu.ai';
-  const description = `${n} UI elements cut from the web pricing pages of ${nApps} top apps: ${top3[0]}, ${top3[1]} and ${top3[2]}. Filter by type to compare them.`;
-  const url = `${ABS}library/`;
+  for (const { el } of items) counts.set(el.type, (counts.get(el.type) || 0) + 1);
+  const chips = ELTYPES.filter(t => counts.has(t));
+  const top = [...counts.entries()].sort((x, y) => y[1] - x[1] || ELTYPE[x[0]].i - ELTYPE[y[0]].i).slice(0, 3)
+    .map(([t, c]) => `${c} ${t.toLowerCase()}`);
+  const title = 'UI elements from top iPhone apps | tasu.ai';
+  const description = `${n} UI elements from ${nApps} top-grossing iPhone apps, rebuilt in HTML and CSS: ${top.join(', ').replace(/, ([^,]*)$/, ' and $1')}. Copy the prompt or the code.`;
+  const url = `${ABS}elements/`;
   const jsonld = {
     '@context': 'https://schema.org',
     '@graph': [
       { '@type': 'CollectionPage', '@id': `${url}#page`, url, name: title, description, inLanguage: 'en', dateModified: MODIFIED,
         isPartOf: { '@type': 'WebSite', '@id': `${ABS}#website`, name: 'tasu.ai', url: ABS }, author: AUTHOR,
-        mainEntity: { '@type': 'ItemList', numberOfItems: n, itemListElement: items.map((e, i) => ({ '@type': 'ListItem', position: i + 1, name: `${TYPE[e.type].one} from ${e.app.name}`, url: e.app.url, image: SITE + e.src })) } },
+        mainEntity: { '@type': 'ItemList', numberOfItems: n, itemListElement: items.map(({ el, app }, i) => ({ '@type': 'ListItem', position: i + 1, name: `${el.name}, from ${app.name}`, url: `${app.url}#el-title` })) } },
       { '@type': 'BreadcrumbList', itemListElement: [
         { '@type': 'ListItem', position: 1, name: 'tasu.ai', item: ABS },
-        { '@type': 'ListItem', position: 2, name: 'Library', item: url },
+        { '@type': 'ListItem', position: 2, name: 'UI Elements', item: url },
       ] },
     ],
   };
-  const html = `${head({ title, description, path: 'library/', jsonld })}
-${header('library')}
+  const html = `${head({ title, description, path: 'elements/', jsonld, css: [APPS_CSS, ELEMENTS_CSS] })}
+${header('elements')}
 <main id="main">
 
 <section class="section lib-top" aria-labelledby="lib-title" data-filter data-filter-url data-noun-one="element" data-noun-many="elements">
   <div class="wrap">
     <div class="gallery-head">
       <div class="lib-intro">
-        <h1 class="title-xl" id="lib-title">${n} paywall UI elements, sorted by type</h1>
-        <p class="lead">Cut from the web pricing pages of ${nApps} apps on Apple’s US Top Grossing charts. Pick a type to compare them.</p>
+        <h1 class="title-xl" id="lib-title">UI elements, <span class="hl">rebuilt</span> in code</h1>
+        <p class="lead">${n} elements from ${nApps} top-grossing iPhone apps, rebuilt in HTML and CSS from their App Store screenshots. Copy the prompt or the code, or download a transparent PNG.</p>
       </div>
-      <div class="chips js-only" role="group" aria-label="Element types">
-        <button class="chip" type="button" data-filter-chip="all" aria-pressed="true">All <span class="chip-count">${n}</span></button>
-        ${chips.map(([k, one]) => `<button class="chip" type="button" data-filter-chip="${k}" aria-pressed="false">${one} <span class="chip-count">${counts.get(k)}</span></button>`).join('\n        ')}
+      <div class="gallery-tools js-only">
+        <div class="search search--lg">
+          ${I.search}
+          <label class="sr-only" for="el-q">Search the elements</label>
+          <input id="el-q" type="search" placeholder="Try “chart” or “Strava”" autocomplete="off" enterkeyhint="search" data-filter-search>
+          <kbd class="kbd" aria-hidden="true">/</kbd>
+        </div>
+        <div class="chips" role="group" aria-label="Element types">
+          <button class="chip" type="button" data-filter-chip="all" aria-pressed="true">All <span class="chip-count">${n}</span></button>
+          ${chips.map(t => `<button class="chip" type="button" data-filter-chip="${ELTYPE[t].key}" aria-pressed="false">${t} <span class="chip-count">${counts.get(t)}</span></button>`).join('\n          ')}
+        </div>
       </div>
     </div>
     <div class="toolbar">
-      <p class="toolbar-status" data-filter-status aria-live="polite">${n} elements</p>
+      <p class="toolbar-status"><span data-filter-status aria-live="polite">${n} elements</span><span class="toolbar-source">${SOURCE}</span></p>
     </div>
-    <ul class="tiles" role="list">
-      ${items.map(e => `<li data-filter-item data-tags="${e.type}" data-text="${esc(`${TYPE[e.type].one} ${e.app.name}`)}">${tile(e, e.app, e.app.page)}</li>`).join('\n      ')}
-    </ul>
+    <div class="el-grid el-grid--all">
+    ${items.map(({ el, app }) => elementCard(el, app, { level: 2, filter: true })).join('\n    ')}
+    </div>
+    <div class="empty" data-filter-empty hidden>
+      <span class="tasu-loop tasu-loop--look" role="img" aria-label="Tasu, the tasu.ai mascot, looks around"></span>
+      <p class="title-s">No element matches this search</p>
+      <button class="btn btn-secondary" type="button" data-filter-reset>Clear the search</button>
+    </div>
   </div>
 </section>
 
 <section class="section" aria-labelledby="closing-title" data-reveal>
-  <div class="wrap closing">
-    ${happy()}
-    <h2 class="title-xl" id="closing-title">A new app breakdown every day on X</h2>
-    ${xButton('Follow on X', true)}
+  <div class="wrap">
+  ${closing(true)}
   </div>
 </section>
 
 </main>
 ${footer()}`;
   return { html, title, description };
+}
+
+/* ---------------------------------------------------------------- paywall tips */
+function paywallPage() {
+  const tips = PAYWALL_TIPS.tips || [];
+  const bySlug = new Map(apps.map(a => [a.slug, a]));
+  const n = apps.length;
+  const title = `Paywall tips from ${n} top apps | tasu.ai`;
+  const description = `${tips.length} paywall tips from the App Store prices of ${n} top-grossing iPhone apps: trials, yearly plans, tiers and prices, each with a prompt.`;
+  const url = `${ABS}paywall/`;
+  const jsonld = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      { '@type': 'CollectionPage', '@id': `${url}#page`, url, name: title, description, inLanguage: 'en', dateModified: MODIFIED,
+        isPartOf: { '@type': 'WebSite', '@id': `${ABS}#website`, name: 'tasu.ai', url: ABS }, author: AUTHOR,
+        mainEntity: { '@type': 'ItemList', numberOfItems: tips.length, itemListElement: tips.map((t, i) => ({ '@type': 'ListItem', position: i + 1, name: t.title, url: `${url}#${t.id}` })) } },
+      { '@type': 'BreadcrumbList', itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'tasu.ai', item: ABS },
+        { '@type': 'ListItem', position: 2, name: 'Paywall tips', item: url },
+      ] },
+    ],
+  };
+  const chip = slug => {
+    const a = bySlug.get(slug);
+    return a ? `<a class="app-chip" href="${a.page}#paywall"><img src="${a.iconSm}" width="24" height="24" alt="" loading="lazy" decoding="async">${esc(a.name)}</a>` : '';
+  };
+  const tipCard = t => `<article class="tip" id="${esc(t.id)}">
+      <p class="tip-stat">${esc(t.stat?.value || '')}<span class="tip-label">${copy(t.stat?.label || '')}</span></p>
+      <h2 class="title-m">${txt(t.title)}</h2>
+      <p class="tip-body">${copy(t.body)}</p>
+      ${(t.apps || []).length ? `<p class="tip-apps">${t.apps.map(chip).join('')}</p>` : ''}
+      ${t.prompt ? `<div class="el-actions"><button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#tp-${esc(t.id)}" data-copy-raw>${I.copySm}<span data-copy-label>Copy prompt</span></button></div>
+      <details class="el-more"><summary>Prompt</summary><p class="el-prompt" id="tp-${esc(t.id)}">${txt(t.prompt)}</p></details>` : ''}
+    </article>`;
+  const yearOrTop = a => a.yearly != null ? { v: money(a.yearly), k: 'a year' } : a.topPrice != null ? { v: money(a.topPrice), k: 'highest listed' } : null;
+  const html = `${head({ title, description, path: 'paywall/', jsonld })}
+${header('paywall')}
+<main id="main">
+
+<section class="section lib-top" aria-labelledby="pw-title">
+  <div class="wrap">
+    <div class="lib-intro">
+      <h1 class="title-xl" id="pw-title">Paywall <span class="hl">tips</span> from ${n} top apps</h1>
+      <p class="lead">${copy(PAYWALL_TIPS.intro || `What the App Store prices of ${n} top-grossing iPhone apps show.`)}</p>
+      <p class="source-note">${SOURCE}</p>
+    </div>
+    <div class="tips">
+    ${tips.map(tipCard).join('\n    ')}
+    </div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="pw-apps-title" data-reveal>
+  <div class="wrap">
+    <div class="section-head"><h2 class="title-l" id="pw-apps-title">The ${n} paywalls</h2></div>
+    <ul class="pw-apps" role="list">
+      ${apps.map(a => {
+        const p = yearOrTop(a);
+        return `<li><a class="pw-app" href="${a.page}#paywall"><img src="${a.iconSm}" width="48" height="48" alt="" loading="lazy" decoding="async"><span class="pw-name">${esc(a.name)}</span><span class="pw-price">${p ? `<b>${p.v}</b> ${p.k}` : ''}</span><span class="pw-trial">${a.trial ? `Free trial: ${trialDays(a.trial)}` : 'No trial stated'}</span></a></li>`;
+      }).join('\n      ')}
+    </ul>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="closing-title" data-reveal>
+  <div class="wrap">
+  ${closing(true)}
+  </div>
+</section>
+
+</main>
+${footer()}`;
+  return { html, title, description };
+}
+
+/* ---------------------------------------------------------------- prompts */
+// 14 areas in 3 groups, so each chip holds several prompts.
+const PROMPT_GROUP = {
+  Unslop: 'Look', Color: 'Look', Type: 'Look', Layout: 'Look', Icons: 'Look', 'Dark mode': 'Look',
+  Buttons: 'Feel', States: 'Feel', Motion: 'Feel', Accessibility: 'Feel',
+  Copy: 'Screens', Onboarding: 'Screens', Paywall: 'Screens', 'App Store': 'Screens',
+};
+function promptsPage() {
+  const list = PROMPTS.prompts || [];
+  const n = list.length;
+  const groups = ['Look', 'Feel', 'Screens'].map(g => [g, list.filter(p => (PROMPT_GROUP[p.area] || 'Look') === g).length]).filter(([, c]) => c);
+  const title = 'Prompts to unslop your app | tasu.ai';
+  const description = `${n} prompts that each fix one part of an iPhone app, from the copy to the App Store screenshots. Paste one into Claude Code or Cursor.`;
+  const url = `${ABS}prompt/`;
+  const jsonld = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      { '@type': 'CollectionPage', '@id': `${url}#page`, url, name: title, description, inLanguage: 'en', dateModified: MODIFIED,
+        isPartOf: { '@type': 'WebSite', '@id': `${ABS}#website`, name: 'tasu.ai', url: ABS }, author: AUTHOR,
+        mainEntity: { '@type': 'ItemList', numberOfItems: n, itemListElement: list.map((p, i) => ({ '@type': 'ListItem', position: i + 1, item: { '@type': 'CreativeWork', name: p.title, url: `${url}#${p.id}`, author: AUTHOR } })) } },
+      { '@type': 'BreadcrumbList', itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'tasu.ai', item: ABS },
+        { '@type': 'ListItem', position: 2, name: 'Prompts', item: url },
+      ] },
+    ],
+  };
+  const card = p => `<article class="pr" id="${esc(p.id)}" data-filter-item data-tags="${slugify(PROMPT_GROUP[p.area] || 'Look')}" data-text="${esc([p.title, p.area, p.when].join(' '))}">
+      <p class="pr-area">${esc(p.area)}</p>
+      <h2 class="title-m">${txt(p.title)}</h2>
+      <p class="pr-when">Use it when ${copy(p.when.charAt(0).toLowerCase() + p.when.slice(1))}</p>
+      <div class="pr-box" data-clamp>
+        <p class="pr-text" id="pt-${esc(p.id)}">${txt(p.prompt)}</p>
+      </div>
+      <div class="el-actions">
+        <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#pt-${esc(p.id)}" data-copy-raw>${I.copySm}<span data-copy-label>Copy prompt</span></button>
+        <button class="btn btn-secondary btn-sm js-only pr-more" type="button" data-clamp-toggle aria-expanded="false" aria-controls="pt-${esc(p.id)}">Show all</button>
+        <span class="pr-words">${p.words || p.prompt.split(/\s+/).length} words${(p.sources || []).length ? `, sources ${p.sources.map(esc).join(', ')} in <a href="/taste/taste.md">taste.md</a>` : ''}</span>
+      </div>
+    </article>`;
+  const html = `${head({ title, description, path: 'prompt/', jsonld })}
+${header('prompt')}
+<main id="main">
+
+<section class="section lib-top" aria-labelledby="pr-title" data-filter data-filter-url data-noun-one="prompt" data-noun-many="prompts">
+  <div class="wrap">
+    <div class="gallery-head">
+      <div class="lib-intro">
+        <h1 class="title-xl" id="pr-title">Prompts to <span class="hl">unslop</span> your app</h1>
+        <p class="lead">${copy(PROMPTS.intro || '')}</p>
+        <p class="pr-links"><a class="link-arrow" href="/taste/taste.md">Read the full taste file ${I.arrow}</a></p>
+      </div>
+      <div class="gallery-tools js-only">
+        <div class="search search--lg">
+          ${I.search}
+          <label class="sr-only" for="pr-q">Search the prompts</label>
+          <input id="pr-q" type="search" placeholder="Try “color” or “paywall”" autocomplete="off" enterkeyhint="search" data-filter-search>
+          <kbd class="kbd" aria-hidden="true">/</kbd>
+        </div>
+        <div class="chips" role="group" aria-label="Prompt groups">
+          <button class="chip" type="button" data-filter-chip="all" aria-pressed="true">All <span class="chip-count">${n}</span></button>
+          ${groups.map(([g, c]) => `<button class="chip" type="button" data-filter-chip="${slugify(g)}" aria-pressed="false">${g} <span class="chip-count">${c}</span></button>`).join('\n          ')}
+        </div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <p class="toolbar-status"><span data-filter-status aria-live="polite">${n} prompts</span></p>
+      <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#all-prompts" data-copy-raw>${I.copySm}<span data-copy-label>Copy all prompts</span></button>
+    </div>
+    <div class="prs">
+    ${list.map(card).join('\n    ')}
+    </div>
+    <div class="empty" data-filter-empty hidden>
+      <span class="tasu-loop tasu-loop--look" role="img" aria-label="Tasu, the tasu.ai mascot, looks around"></span>
+      <p class="title-s">No prompt matches this search</p>
+      <button class="btn btn-secondary" type="button" data-filter-reset>Clear the search</button>
+    </div>
+    <div hidden id="all-prompts">${list.map(p => `${esc(p.title)}\n\n${esc(p.prompt)}`).join('\n\n---\n\n')}</div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="closing-title" data-reveal>
+  <div class="wrap">
+  ${closing(true)}
+  </div>
+</section>
+
+</main>
+${footer()}`;
+  return { html, title, description };
+}
+
+// Every element's scoped CSS, in one file. The free fonts it names come from fonts/apps.css.
+function elementsCSS() {
+  const list = apps.flatMap(a => a.elements);
+  return `/* tasu.ai UI elements. Generated by _tools/build.mjs from _data/elements/: do not edit by hand.
+   Each block is scoped to its element's root class (.x-<id>). */
+${list.map(el => `/* ${el.id} */\n${prettyCSS(el.css)}`).join('\n\n')}
+`;
 }
 
 /* ---------------------------------------------------------------- data.js */
@@ -1143,34 +1432,18 @@ function dataJS() {
   const list = apps.map(a => ({
     slug: a.slug,
     name: a.name,
-    fullName: a.fullName,
-    developer: a.developer,
-    category: a.category,
-    rank: a.rank,
-    chart: a.chart,
+    short: smart(a.short),
     rankLabel: `#${a.rank} in ${a.chart}`,
-    rating: Number(a.rating.toFixed(2)),
-    ratingCount: a.ratingCount,
-    subtitle: a.subtitle,
-    niche: a.niche,
-    group: a.group,
-    oneLiner: smart(a.oneLiner),
-    keyNumber: { value: a.key.value, label: smart(a.key.label) },
-    plans: a.subs.length,
-    priceCount: a.priceCount,
-    iapCount: a.iapCount,
-    prices: a.rows.map(r => ({ name: r.name, price: r.price, period: r.period })),
-    yearly: a.yearly ?? null,
     colors: a.colors,
-    font: a.font ? { name: a.font.name || null, closeTo: a.font.closeTo || null } : null,
-    paywall: a.drawn ? { source: 'drawn', label: a.paywallLabel } : { source: a.paywalls[0].source, src: a.paywalls[0].src, label: a.paywallLabel.replace(/&nbsp;/g, ' '), captures: a.paywalls.length },
-    elements: a.elements.map(e => e.type),
+    fonts: { headline: a.fonts.headline ? fontName(a.fonts.headline) : null, body: a.fonts.body ? fontName(a.fonts.body) : null },
+    shot: a.screens[0] ? { src: a.screens[0].src, w: a.screens[0].w, h: a.screens[0].h } : null,
+    elements: a.elements.map(e => e.id),
     icon: a.icon,
     page: a.page,
     appStore: a.appStore,
   }));
   return `/* tasu.ai apps. Generated by _tools/build.mjs from _data/: do not edit by hand.
-   App Store data, US, 15 Nov 2026. Analysis is Jeremy Lasne's opinion. */
+   App Store data, US, 15 Nov 2026. Read by _tools/og.html (the share cards). */
 window.TASU_APPS = ${JSON.stringify(list, null, 1)};
 `;
 }
@@ -1223,16 +1496,20 @@ function check(rel, page) {
 
 syncLoops();
 const pages = [];
-const home = homePage();
-pages.push(['index.html', home]);
+pages.push(['index.html', homePage()]);
 apps.forEach((a, i) => pages.push([`${a.slug}/index.html`, appPage(a, i)]));
-pages.push(['library/index.html', libraryPage()]);
+pages.push(['elements/index.html', elementsPage()]);
+pages.push(['paywall/index.html', paywallPage()]);
+pages.push(['prompt/index.html', promptsPage()]);
 write('data.js', dataJS());
+write('elements/elements.css', elementsCSS());
 for (const [rel, p] of pages) write(rel, p.html);
 for (const [rel, p] of pages) check(rel, p);
+// A page this build no longer writes (the old library) must not stay on disk and in the sitemap.
+for (const old of ['library/index.html']) if (existsSync(join(TASTE, old))) log(`${old} is not built any more: delete it`);
 
 const elementsTotal = apps.reduce((s, a) => s + a.elements.length, 0);
-console.log(`tasu.ai: ${apps.length} apps, ${pages.length} pages, ${elementsTotal} UI elements`);
+console.log(`tasu.ai: ${apps.length} apps, ${pages.length} pages, ${elementsTotal} UI elements, ${(PAYWALL_TIPS.tips || []).length} paywall tips, ${(PROMPTS.prompts || []).length} prompts`);
 console.log(`Medians: yearly ${medians.year ? money(medians.year) : 'n/a'} over ${withYear.length} apps, top listed price ${medians.top ? money(medians.top) : 'n/a'} over ${withTop.length} apps`);
 console.log(`Wrote ${written.join(', ')}`);
 if (notes.length) console.log(`\nNotes (${notes.length}):\n- ${notes.join('\n- ')}`);
