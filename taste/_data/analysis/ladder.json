@@ -103,9 +103,9 @@
     {
       "name": "PRO",
       "price": "$29.99",
-      "period": "unknown",
-      "perMonth": "unknown",
-      "perWeek": "unknown"
+      "period": "month",
+      "perMonth": 29.99,
+      "perWeek": 6.92
     },
     {
       "name": "PRO Annual",
@@ -166,7 +166,7 @@
   ],
   "paywall": {
     "tiers": 4,
-    "yearlySavingPct": null,
+    "yearlySavingPct": 50,
     "trial": {
       "stated": true,
       "evidence": "App Store description: “Try Ladder COMPLETELY FREE for 7 days. NO PAYMENT collected during trial.” Web pricing page: “FREE TRIAL 7 DAYS FREE” and “No payment info collected until AFTER your trial ends.”"
@@ -175,7 +175,7 @@
     "family": 0
   },
   "ourRead": [
-    "Annual leads with $14.99 a month, half of Monthly's $29.99; the $179.99 yearly bill sits below. Only Annual gets a dark card and lime checks.",
+    "Annual leads with $14.99 a month, half of Monthly's $29.99, though $179.99 / 12 is $15.00. Only Annual gets a dark card and lime checks.",
     "Annual costs less per month and does more: every team, unlimited team changes, unlimited Save & Replay. Monthly stops at 1 team and 2 changes a month.",
     "The 7-day trial asks for payment only after it ends. The App Store lists 4 tiers at $179.99 to $479.99 a year; the web shows only PRO."
   ],
@@ -195,7 +195,7 @@
     {
       "title": "Use the app's flat black",
       "detail": "The pricing page uses 2 grey gradients: Annual runs #1B1B1B to #474747, Monthly #B6B6B6 to #FAFAFA. Fill Annual with the app's flat #0E0E0E and the other cards with white.",
-      "rule": "Avoid many shades and opacities of the same color. Pick 3 to 5 neutrals and reuse them.",
+      "rule": "Slop Check 7: Many shades and opacities of one color",
       "source": "S1"
     }
   ],

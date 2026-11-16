@@ -62,42 +62,47 @@
     {
       "src": "/taste/media/strava/pw1.jpg",
       "w": 600,
-      "h": 1006,
+      "h": 1298,
       "source": "web",
       "sourceUrl": "https://www.strava.com/subscribe",
-      "capturedAt": "2026-11-15"
+      "capturedAt": "2026-11-16",
+      "captureNote": "Recaptured at a 390x844 viewport (DPR 2) with the reCAPTCHA badge hidden; prices match the 15 Nov capture."
     },
     {
       "src": "/taste/media/strava/pw2.jpg",
       "w": 600,
-      "h": 1006,
+      "h": 1298,
       "source": "web",
       "sourceUrl": "https://www.strava.com/subscribe",
-      "capturedAt": "2026-11-15"
+      "capturedAt": "2026-11-16",
+      "captureNote": "Recaptured at a 390x844 viewport (DPR 2) with the reCAPTCHA badge hidden; prices match the 15 Nov capture."
     },
     {
       "src": "/taste/media/strava/pw3.jpg",
       "w": 600,
-      "h": 1006,
+      "h": 1298,
       "source": "web",
       "sourceUrl": "https://www.strava.com/subscribe",
-      "capturedAt": "2026-11-15"
+      "capturedAt": "2026-11-16",
+      "captureNote": "Recaptured at a 390x844 viewport (DPR 2) with the reCAPTCHA badge hidden; prices match the 15 Nov capture."
     },
     {
       "src": "/taste/media/strava/pw4.jpg",
       "w": 600,
-      "h": 1006,
+      "h": 1298,
       "source": "web",
       "sourceUrl": "https://www.strava.com/subscribe",
-      "capturedAt": "2026-11-15"
+      "capturedAt": "2026-11-16",
+      "captureNote": "Recaptured at a 390x844 viewport (DPR 2) with the reCAPTCHA badge hidden; prices match the 15 Nov capture."
     },
     {
       "src": "/taste/media/strava/pw5.jpg",
       "w": 600,
-      "h": 1006,
+      "h": 1298,
       "source": "web",
       "sourceUrl": "https://www.strava.com/subscribe",
-      "capturedAt": "2026-11-15"
+      "capturedAt": "2026-11-16",
+      "captureNote": "Recaptured at a 390x844 viewport (DPR 2) with the reCAPTCHA badge hidden; prices match the 15 Nov capture."
     }
   ],
   "paywallShots": [],

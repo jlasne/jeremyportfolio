@@ -6,12 +6,17 @@
      <slug>/index.html    one page per app: design and paywall
      library/index.html   every UI element cut from the paywalls, filterable by type
    Inputs:
-     _data/selection.json       display order (most striking first) and each app's niche
+     _data/selection.json       display order (captures first), each app's niche and chip group
      _data/raw/<slug>.json      facts from Apple's public App Store data
      _data/analysis/<slug>.json opinions and derived values (optional, field by field)
      media/<slug>/...           icons, screenshots, paywall captures, font crops, element crops
    It also copies the rules of brand/loops/loops.css into tasu.css, between the loops:start and
    loops:end marks, so the mascot loops never drift from the brand kit.
+   Full run after a media or data change:
+     python3 taste/_tools/media.py   small WebP icons and hero thumbnails (used when present)
+     node taste/_tools/build.mjs     this file
+     node taste/_tools/og.cjs        the 1200x630 share card of each app page, from data.js
+     node taste/_tools/build.mjs     again, so the pages point to the new cards
    Markup contract: _tools/template-notes.md. Every page is complete HTML; tasu.js only enhances.
    A missing analysis file or field never stops the build: the page falls back to the facts and
    the log says what is missing. The build ends with a check of every page it wrote. */
@@ -27,6 +32,12 @@ const ABS = SITE + BASE;
 const DATE = '2026-11-15';
 const DAY = '15&nbsp;Nov&nbsp;2026';
 const SOURCE = `App Store data, US, ${DAY}`;
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+// "2026-11-16" reads "16 Nov 2026", with no-break spaces like DAY.
+const dayOf = iso => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || '');
+  return m ? `${Number(m[3])}&nbsp;${MONTHS[Number(m[2]) - 1]}&nbsp;${m[1]}` : DAY;
+};
 const X_URL = 'https://x.com/jeremylasne';
 const AUTHOR = { '@type': 'Person', name: 'Jeremy Lasne', url: 'https://www.jeremylasne.com/', sameAs: [X_URL] };
 const OG = { src: '/taste/brand/og.png', w: 1200, h: 630, alt: 'tasu.ai: design & paywalls behind top apps' };
@@ -174,16 +185,25 @@ function loadApp(slug) {
     rank: raw.rank,
     chart: raw.chart || raw.category,
     rating: raw.rating,
-    // One decimal, cut rather than rounded: 4.95 reads 4.9, never a perfect 5.0.
-    rating1: (Math.floor(raw.rating * 10 + 1e-9) / 10).toFixed(1),
+    // One decimal, rounded like Apple's App Store page: Ladder's 4.9504 reads 5.0 there and here.
+    rating1: (Math.round(raw.rating * 10) / 10).toFixed(1),
     ratingCount: raw.ratingCount,
     appStore: raw.url,
     subtitle: raw.subtitle || '',
     niche: sel.niche || '',
+    // The gallery chip: a group of niches from selection.json, else the App Store category.
+    group: sel.group || raw.category,
     icon: raw.icon || `/taste/media/${slug}/icon.png`,
     page: `${BASE}${slug}/`,
     url: `${ABS}${slug}/`,
+    // The App Store page lists 10 In-App Purchases at most, so a count of 0 proves nothing.
+    iapCount: (raw.iaps || []).length,
   };
+  app.groupKey = slugify(app.group);
+  // A 256px WebP for every icon shown at 128 CSS px or less; icon.png stays for JSON-LD and og cards.
+  const smallIcon = `/taste/media/${slug}/icon-256.webp`;
+  app.iconSm = existsSync(fileOf(smallIcon)) ? smallIcon : app.icon;
+  if (app.iconSm === app.icon) log(`${slug}: no icon-256.webp, pages use icon.png (run _tools/media.py)`);
 
   // Screens, paywall captures and their alt text (analysis.screenshots carries both).
   const alts = new Map((an.screenshots || []).map(s => [s.src, s.alt]));
@@ -205,7 +225,7 @@ function loadApp(slug) {
     ? 'Drawn from App Store prices, not a screenshot'
     : first.source === 'appstore' ? 'From the App Store'
     : first.source === 'phone' ? 'In-app paywall, screenshot from an iPhone'
-    : `Web pricing page, captured at iPhone size on ${DAY}`);
+    : `Web pricing page, captured at iPhone size on ${dayOf(first.capturedAt)}`);
 
   // Plans: one row per distinct name, price and period. Known lengths first, then by price.
   let plans = an.plans;
@@ -234,6 +254,8 @@ function loadApp(slug) {
   rows.sort((a, b) => PERIOD_ORDER[a.period] - PERIOD_ORDER[b.period] || b.n - a.n);
   app.rows = rows;
   app.subs = rows.filter(r => r.period !== 'consumable');
+  // Distinct prices: one price listed under 2 names counts once.
+  app.priceCount = new Set(app.subs.map(r => r.n)).size;
 
   const pw = an.paywall || {};
   if (!an.paywall) missing('paywall');
@@ -244,12 +266,13 @@ function loadApp(slug) {
   app.savingPct = pw.yearlySavingPct ?? null;
   app.savingInFacts = false;
   if (app.savingPct !== null) {
-    // Put the saving on the yearly row it was computed from, or in the facts.
+    // Put the saving on every yearly row it was computed from (one price can sit under 2 names),
+    // or in the facts.
     const months = rows.filter(r => r.period === 'month').map(r => r.n);
-    const row = rows.filter(r => r.period === 'year')
-      .find(r => months.some(m => Math.abs(Math.round((1 - r.n / 12 / m) * 100) - app.savingPct) <= 1));
-    if (row) row.saving = app.savingPct;
-    else app.savingInFacts = true;
+    const hits = rows.filter(r => r.period === 'year')
+      .filter(r => months.some(m => Math.abs(Math.round((1 - r.n / 12 / m) * 100) - app.savingPct) <= 1));
+    hits.forEach(r => { r.saving = app.savingPct; });
+    if (!hits.length) app.savingInFacts = true;
   }
 
   // Card: one line and one key number.
@@ -260,9 +283,14 @@ function loadApp(slug) {
   const top = [...app.subs].sort((a, b) => b.n - a.n)[0];
   app.key = card.keyNumber?.value ? card.keyNumber
     : year ? { value: year.price, label: 'Yearly plan' }
-    : top ? { value: top.price, label: 'Top listed price' }
+    : top ? { value: top.price, label: 'Highest listed price' }
     : { value: app.rating1, label: 'App Store rating' };
   if (!card.keyNumber?.value) missing('card.keyNumber');
+  // One metric, 2 labels across the gallery, so the big numbers compare: a yearly price, or the
+  // highest listed price when the listings give no length.
+  if (/year|annual/i.test(app.key.label || '')) app.key = { ...app.key, label: 'Yearly plan' };
+  else if (top && num(app.key.value) === top.n) app.key = { ...app.key, label: 'Highest listed price' };
+  else log(`${slug}: key number ${app.key.value} is neither a yearly price nor the highest listed price, label kept`);
 
   // Branding: 3 colors (60/30/10), the font, the style.
   const b = an.branding || {};
@@ -349,14 +377,15 @@ function compareLine(app) {
   const over = (k, what) => k === n ? `the ${n} apps` : `${k} apps with ${what}`;
   if (app.yearly != null) return `Yearly <b>${money(app.yearly)}</b>. Median of ${over(withYear.length, 'a yearly plan')}: <b>${money(medians.year)}</b>.`;
   if (app.monthly != null) return `Monthly <b>${money(app.monthly)}</b>. Median of ${over(withMonth.length, 'a monthly plan')}: <b>${money(medians.month)}</b>.`;
-  if (app.topPrice != null) return `Top listed price <b>${money(app.topPrice)}</b>. Median of ${over(withTop.length, 'a listed price')}: <b>${money(medians.top)}</b>.`;
+  // No listing gives a length: compare the highest listed price, and say so on both sides.
+  if (app.topPrice != null) return `Highest listed price <b>${money(app.topPrice)}</b>. Median highest listed price of ${over(withTop.length, 'a listed price')}: <b>${money(medians.top)}</b>.`;
   return '';
 }
 
 /* ---------------------------------------------------------------- page shell */
 const SNIPPET = "(function(r){var t,v;try{t=localStorage.getItem('tasu-theme');v=localStorage.getItem('tasu-view')}catch(e){}r.classList.add('js');if(v==='grid')r.setAttribute('data-view','grid');if(t==='light'||t==='dark'){r.setAttribute('data-theme',t);var m=document.querySelectorAll('meta[name=\"theme-color\"]'),c=t==='dark'?'#1C1B19':'#F3EFE7';for(var i=0;i<m.length;i++)m[i].setAttribute('content',c)}})(document.documentElement)";
 
-function head({ title, description, path, type = 'website', image = OG, jsonld }) {
+function head({ title, description, path, type = 'website', image = OG, jsonld, preload = '' }) {
   const url = ABS + path;
   const img = SITE + image.src;
   return `<!doctype html>
@@ -372,7 +401,7 @@ function head({ title, description, path, type = 'website', image = OG, jsonld }
 <meta name="color-scheme" content="light dark">
 <script>${SNIPPET}</script>
 <link rel="preload" href="/taste/fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/taste/tasu.css">
+${preload}<link rel="stylesheet" href="/taste/tasu.css">
 <script src="/taste/tasu.js" defer></script>
 <link rel="icon" href="/taste/brand/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/taste/brand/apple-touch-icon.png">
@@ -393,12 +422,14 @@ ${type === 'article' ? `<meta property="article:published_time" content="${DATE}
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(description)}">
 <meta name="twitter:image" content="${img}">
+<meta name="twitter:image:alt" content="${esc(image.alt)}">
 <script type="application/ld+json">${ld(jsonld)}</script>
 </head>`;
 }
 
+// current: 'apps' (home), 'library', or 'app' (an app page: "Apps" is its section, not the page).
 function header(current) {
-  const cur = k => (k === current ? ' aria-current="page"' : '');
+  const cur = k => (k === current ? ' aria-current="page"' : k === 'apps' && current === 'app' ? ' aria-current="true"' : '');
   return `<body>
 <a class="skip-link" href="#main">Skip to content</a>
 
@@ -413,7 +444,7 @@ function header(current) {
       <a href="/taste/#apps"${cur('apps')}>Apps</a>
       <a href="/taste/library/"${cur('library')}>Library</a>
     </nav>
-    <form class="search search--header" role="search" action="/taste/" method="get">
+    <form class="search search--header" role="search" action="/taste/#apps" method="get">
       ${I.search}
       <label class="sr-only" for="site-q">Search apps</label>
       <input id="site-q" type="search" name="q" placeholder="Search apps" autocomplete="off" enterkeyhint="search" data-site-search>
@@ -459,19 +490,20 @@ const stripButtons = what => `
     <button class="strip-btn" type="button" data-strip-prev aria-label="Previous ${what}">${I.left}</button>
     <button class="strip-btn" type="button" data-strip-next aria-label="Next ${what}">${I.right}</button>`;
 
-// A drawn paywall: the real In-App Purchase prices as plan rows, for apps with no capture.
+// A drawn plan: the real In-App Purchase names and prices as plan rows, for apps with no capture.
+// It holds nothing else (no button): no source shows this app's paywall.
 function drawn(app, max) {
   const rows = app.subs.slice(0, max);
-  const label = rows.map(r => `${r.name} ${r.price}`).join(', ');
+  const ns = rows.map(r => r.n);
+  const label = `${rows.length} listings from ${money(Math.min(...ns))} to ${money(Math.max(...ns))}`;
   const plan = r => {
     const left = periodLabel(r) ? `<b>${esc(r.name)}</b>${periodLabel(r)}` : `<b>${esc(r.name)}</b>`;
     const right = r.period === 'year' && r.perMonth ? `<b>${esc(r.price)}</b>${money(r.perMonth)} a month` : `<b>${esc(r.price)}</b>`;
     return `<div class="drawn-plan"><span>${left}</span><span>${right}</span></div>`;
   };
-  return `<div class="drawn" role="img" aria-label="${esc(`Drawn paywall for ${app.name} from App Store prices: ${label}`)}">
-          <div class="drawn-head"><img src="${app.icon}" width="64" height="64" alt="" loading="lazy" decoding="async"><p class="drawn-title">${esc(app.name)} plans</p></div>
+  return `<div class="drawn" role="img" aria-label="${esc(`Drawn plan for ${app.name} from App Store prices: ${label}`)}">
+          <div class="drawn-head"><img src="${app.iconSm}" width="64" height="64" alt="" loading="lazy" decoding="async"><p class="drawn-title">${esc(app.name)} plans</p></div>
           ${rows.map(plan).join('\n          ')}
-          <div class="drawn-cta">Continue</div>
         </div>`;
 }
 
@@ -481,27 +513,29 @@ function tile(el, app, href) {
   return `<a class="tile" href="${href}">
         <span class="tile-img"><img src="${el.src}" width="${el.w}" height="${el.h}" alt="${esc(alt)}" loading="lazy" decoding="async"></span>
         <span class="tile-type">${t.one}</span>
-        <span class="tile-app"><img src="${app.icon}" width="20" height="20" alt="" loading="lazy" decoding="async">${esc(app.name)}</span>
+        <span class="tile-app"><img src="${app.iconSm}" width="20" height="20" alt="" loading="lazy" decoding="async">${esc(app.name)}</span>
       </a>`;
 }
 
 /* ---------------------------------------------------------------- home */
 // Floating hero cards: [slug, image, width, x%, y%, tilt, depth, phone x%, phone y%].
 // "icon" is the app icon, "pw1".. a paywall capture. Near cards (depth 1) sit at the edges and the
-// centre column stays clear from the mascot to the buttons. 5 cards show on phone.
+// centre column stays clear from the mascot to the buttons. Up to 1023px only the 5 cards with a
+// phone place show, at that place. The near layer stays calm (Cal AI's black and white icon, no
+// green owl next to the mint), so the mint band is the loudest color of the hero.
 const FLOATS = [
-  ['duolingo', 'icon', 84, 7, 34, -12, 1, 7, 29],
+  ['cal-ai', 'icon', 84, 7, 34, -12, 1, 7, 29],
   ['strava', 'pw1', 72, 20, 27, 10, 2],
-  ['ladder', 'pw1', 104, 3, 62, 8, 1],
+  ['ladder', 'pw3', 104, 3, 62, 8, 1],
   ['flo', 'icon', 56, 17, 48, -8, 3],
-  ['cal-ai', 'icon', 80, 12, 80, 14, 1, 11, 95],
+  ['duolingo', 'icon', 80, 12, 80, 14, 2, 11, 95],
   ['hevy', 'pw1', 72, 26, 68, -10, 3],
   ['finch', 'icon', 56, 23, 88, -16, 2],
-  ['myfitnesspal', 'pw1', 100, 92, 34, 12, 1, 91, 31],
+  ['myfitnesspal', 'pw1', 100, 92, 34, 12, 1, 96, 31],
   ['headspace', 'icon', 60, 80, 24, -10, 2, 22, 22],
-  ['strava', 'icon', 84, 97, 60, -8, 1],
+  ['strava', 'icon', 84, 97, 60, -8, 2],
   ['rise', 'icon', 52, 84, 47, 16, 3],
-  ['opal', 'pw1', 104, 87, 76, -12, 1],
+  ['opal', 'pw1', 104, 89, 76, -12, 1],
   ['huckleberry', 'pw1', 68, 75, 66, 6, 3],
   ['opal', 'icon', 64, 78, 89, 18, 2, 86, 95],
   ['huckleberry', 'icon', 44, 38, 17, 8, 3],
@@ -518,43 +552,47 @@ function floats() {
   return FLOATS.flatMap(([slug, kind, w, x, y, r, dpt, xm, ym]) => {
     const app = bySlug.get(slug);
     if (!app) return [];
-    let src = app.icon, h = w, cls = 'float is-icon';
+    let src = app.iconSm, h = w, cls = 'float is-icon';
     if (kind !== 'icon') {
       const shot = app.paywalls[Number(kind.slice(2)) - 1];
       if (!shot) return [];
-      src = shot.src;
+      // A small WebP of the capture (_tools/media.py): the cards render 40 to 104px wide.
+      const small = shot.src.replace(/\/([^/]+)\.jpg$/, '/thumb-$1.webp');
+      src = small !== shot.src && existsSync(fileOf(small)) ? small : shot.src;
       h = Math.round(w * shot.h / shot.w);
       cls = 'float';
     }
     const phone = xm !== undefined ? `--xm:${xm}%;--ym:${ym}%;` : '';
     if (!phone) cls += ' m-hide';
-    return [`<img class="${cls}" src="${src}" width="${w}" height="${h}" alt="" decoding="async" fetchpriority="low" style="--x:${x}%;--y:${y}%;${phone}--w:${w}px;--r:${r}deg;--d:${dpt}">`];
+    // Cards hidden on phones load lazily, so they never load there; desktop loads them after layout.
+    return [`<img class="${cls}" src="${src}" width="${w}" height="${h}" alt=""${phone ? '' : ' loading="lazy"'} decoding="async" fetchpriority="low" style="--x:${x}%;--y:${y}%;${phone}--w:${w}px;--r:${r}deg;--d:${dpt}">`];
   }).join('\n    ');
 }
 
 function appRow(app) {
-  const words = [app.name, app.fullName, app.subtitle, app.category, app.niche, app.developer, app.key.value,
+  const words = [app.name, app.fullName, app.subtitle, app.category, app.group, app.niche, app.developer, app.key.value,
     ...app.colors.map(c => c.name), app.font?.name, app.font?.closeTo].filter(Boolean);
   const text = [...new Set(words)].join(' ');
   const pw = app.paywalls[0];
+  // A drawn plan is a dark island on both themes, so it reads as a phone screen, never as a
+  // second card; its mark and note say it is drawn from prices.
   const firstScreen = app.drawn
-    ? `<li class="screen screen--drawn"><span class="mark">Paywall</span>${drawn(app, 4)}</li>`
+    ? `<li class="screen screen--drawn" data-theme="dark"><span class="mark">Drawn plan</span>${drawn(app, 4)}<p class="drawn-note">Drawn from App Store prices, not a screenshot</p></li>`
     : `<li class="screen"><span class="mark">Paywall</span><img src="${pw.src}" width="${pw.w}" height="${pw.h}" alt="${txt(pw.alt)}" loading="lazy" decoding="async"></li>`;
   const screens = app.screens.map(s =>
     `<li class="screen"><img src="${s.src}" width="${s.w}" height="${s.h}" alt="${txt(s.alt)}" loading="lazy" decoding="async"></li>`).join('\n        ');
   const colorNames = app.colors.map(c => c.name).join(', ').replace(/, ([^,]*)$/, ' and $1');
-  return `<li class="app-row" data-filter-item data-tags="${app.cat}" data-text="${esc(text)}" data-reveal>
-    <a class="app-card" href="${app.page}">
-      <img class="app-icon" src="${app.icon}" width="64" height="64" alt="" loading="lazy" decoding="async">
+  return `<li class="app-row" data-filter-item data-tags="${app.groupKey}" data-text="${esc(text)}" data-reveal>
+    <a class="app-card" href="${app.page}" aria-labelledby="n-${app.slug}" aria-describedby="k-${app.slug}">
+      <img class="app-icon" src="${app.iconSm}" width="64" height="64" alt="" loading="lazy" decoding="async">
       <p class="app-rank">${rankShort(app)}</p>
-      <h3 class="app-name">${esc(app.name)}</h3>
+      <h3 class="app-name" id="n-${app.slug}">${esc(app.name)}</h3>
       <p class="app-sub">${esc(app.subtitle)}</p>
-      <p class="key"><span class="key-num">${esc(app.key.value)}</span><span class="key-label">${txt(app.key.label)}</span></p>
+      <p class="key" id="k-${app.slug}"><span class="key-num">${esc(app.key.value)}</span><span class="key-label">${txt(app.key.label)}</span></p>
       <p class="app-colors" role="img" aria-label="${esc(`Brand colors: ${colorNames}`)}">${app.colors.map(c => `<span style="--c:${c.hex}"></span>`).join('')}</p>
       <dl class="stats">
-        <div><dt>rating</dt><dd>${app.rating1}</dd></div>
-        <div><dt>ratings</dt><dd>${compact(app.ratingCount)}</dd></div>
-        <div><dt>plans</dt><dd>${app.subs.length}</dd></div>
+        <div><dt>${compact(app.ratingCount)} ratings</dt><dd>${app.rating1}</dd></div>
+        <div><dt>prices</dt><dd>${app.priceCount}</dd></div>
       </dl>
     </a>
     <div class="strip" data-strip>
@@ -568,9 +606,14 @@ function appRow(app) {
 
 function homePage() {
   const n = apps.length;
-  const cats = new Map();
-  for (const a of apps) cats.set(a.cat, { name: a.category, count: (cats.get(a.cat)?.count || 0) + 1 });
-  const chips = [...cats.entries()].sort((x, y) => y[1].count - x[1].count || x[1].name.localeCompare(y[1].name));
+  // Chips: the niche groups of selection.json, biggest first, then in gallery order.
+  const groups = new Map();
+  apps.forEach((a, i) => {
+    const g = groups.get(a.groupKey) || { name: a.group, count: 0, first: i };
+    g.count++;
+    groups.set(a.groupKey, g);
+  });
+  const chips = [...groups.entries()].sort((x, y) => y[1].count - x[1].count || x[1].first - y[1].first);
   const elements = apps.flatMap(a => a.elements.map(e => ({ ...e, app: a })));
   const elApps = new Set(elements.map(e => e.app.slug)).size;
   // The 4 crops that show their type best; any missing one is replaced by the next type in line.
@@ -594,7 +637,9 @@ function homePage() {
     ],
   };
 
-  const html = `${head({ title, description, path: '', jsonld })}
+  // The hero loop is the largest paint of the first screen: fetch its sprite with the stylesheet.
+  const preload = '<link rel="preload" href="/taste/brand/loops/taste.svg" as="image" fetchpriority="high">\n';
+  const html = `${head({ title, description, path: '', jsonld, preload })}
 ${header('apps')}
 <main id="main">
 
@@ -655,7 +700,7 @@ ${teaser.length ? `
 <section class="section" aria-labelledby="lib-title" data-reveal>
   <div class="wrap">
     <div class="section-head">
-      <h2 class="title-xl" id="lib-title">${elements.length} UI elements from ${elApps} real paywalls</h2>
+      <h2 class="title-xl" id="lib-title">${elements.length} UI elements from ${elApps} web paywalls</h2>
       <a class="link-arrow" href="/taste/library/">Open the library ${I.arrow}</a>
     </div>
     <ul class="tiles" role="list">
@@ -678,11 +723,13 @@ ${footer()}`;
 }
 
 /* ---------------------------------------------------------------- app page */
+// The drawn phone shows the first 6 plans; the table under it lists only what the phone does not.
+const DRAWN_ROWS = 6;
 function phoneBlock(app) {
   if (app.drawn) {
     return `<figure>
-          <div class="phone">${drawn(app, 6)}</div>
-          <figcaption class="source">${app.paywallLabel}</figcaption>
+          <div class="phone">${drawn(app, DRAWN_ROWS)}</div>
+          <figcaption class="source">${app.paywallLabel}. In-App Purchases, US, ${DAY}</figcaption>
         </figure>`;
   }
   const imgs = app.paywalls;
@@ -701,21 +748,23 @@ function phoneBlock(app) {
           </div>
           <div class="phone-nav js-only" data-phone-nav>
             <button class="icon-btn" type="button" data-phone-prev aria-label="Previous capture">${I.left}</button>
-            <span class="phone-count" data-phone-count>1 of ${imgs.length}</span>
+            <span class="phone-count" data-phone-count aria-live="polite" aria-atomic="true">1 of ${imgs.length}</span>
             <button class="icon-btn" type="button" data-phone-next aria-label="Next capture">${I.right}</button>
           </div>
           <figcaption class="source">${app.paywallLabel}</figcaption>
         </figure>`;
 }
 
-function plansTable(app) {
-  if (!app.rows.length) return '';
+// rows: the plans to list (the drawn apps pass only the rows their drawn phone does not show).
+// On phones each row becomes a card; data-label names the computed values there.
+function plansTable(app, rows = app.rows) {
+  if (!rows.length) return '';
   // A column shows only when one row at least has a value in it.
-  const hasMonth = app.rows.some(r => r.perMonth !== null);
-  const hasWeek = app.rows.some(r => r.perWeek !== null);
-  const hasSaving = app.rows.some(r => r.saving !== null);
-  const cell = v => (v === null || v === undefined ? '<td></td>' : `<td>${v}</td>`);
-  const body = app.rows.map(r => `<tr><th scope="row">${esc(r.name)}${periodLabel(r) ? `<span class="plan-period">${periodLabel(r)}</span>` : ''}</th>${cell(esc(r.price))}${hasMonth ? cell(r.perMonth !== null ? money(r.perMonth) : null) : ''}${hasWeek ? cell(r.perWeek !== null ? money(r.perWeek) : null) : ''}${hasSaving ? cell(r.saving !== null ? `${r.saving}%` : null) : ''}</tr>`).join('\n                ');
+  const hasMonth = rows.some(r => r.perMonth !== null);
+  const hasWeek = rows.some(r => r.perWeek !== null);
+  const hasSaving = rows.some(r => r.saving !== null);
+  const cell = (v, label) => (v == null ? '<td></td>' : `<td${label ? ` data-label="${label}"` : ''}>${v}</td>`);
+  const body = rows.map(r => `<tr><th scope="row">${esc(r.name)}${periodLabel(r) ? `<span class="plan-period">${periodLabel(r)}</span>` : ''}</th>${cell(esc(r.price))}${hasMonth ? cell(r.perMonth !== null ? money(r.perMonth) : null, 'Per month') : ''}${hasWeek ? cell(r.perWeek !== null ? money(r.perWeek) : null, 'Per week') : ''}${hasSaving ? cell(r.saving !== null ? `${r.saving}%` : null, 'Saving') : ''}</tr>`).join('\n                ');
   return `<div>
             <div class="plans" role="region" aria-label="${esc(app.name)} plans" tabindex="0">
               <table${hasMonth || hasWeek || hasSaving ? '' : ' class="is-short"'}>
@@ -725,7 +774,7 @@ function plansTable(app) {
                 </tbody>
               </table>
             </div>
-            <p class="source-note plans-note">In-App Purchases on the App Store, US, ${DAY}</p>
+            <p class="source-note plans-note">${app.iapCount} In-App Purchases listed on the App Store, US, ${DAY}</p>
           </div>`;
 }
 
@@ -737,13 +786,19 @@ function trialDays(evidence) {
   return list.length ? `${list.join(' or ')}&nbsp;days` : 'Yes';
 }
 
+// Only what the app sells: the App Store lists 10 In-App Purchases at most, so a 0 proves nothing.
 function factsBlock(app) {
   const items = [];
   if (app.tiers !== null) items.push(['Tiers', String(app.tiers)]);
   if (app.trial) items.push(['Free trial', trialDays(app.trial)]);
-  items.push(['Consumables', String(app.consumables)]);
-  if (app.family !== null) items.push(['Family plan', app.family ? String(app.family) : '0']);
+  if (app.consumables > 0) items.push(['One-time purchases', String(app.consumables)]);
+  if (app.family) {
+    const fam = app.rows.find(r => /family/i.test(r.name));
+    const per = fam && (fam.period === 'year' || fam.period === 'month') ? `&nbsp;a&nbsp;${fam.period}` : '';
+    items.push(['Family plan', fam ? `${esc(fam.price)}${per}` : 'Yes']);
+  }
   if (app.savingInFacts) items.push(['Yearly saving', `${app.savingPct}%`]);
+  if (!items.length && !app.trial) return '';
   return `<div>
             <dl class="facts">
               ${items.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('\n              ')}
@@ -775,8 +830,11 @@ function fontCard(app) {
     free = 'The closest free Google Font to the app’s type';
   }
   if (!f) log(`${app.slug}: font card shows typeStyle only`);
+  // A font seen only on the web pricing page says so: the app itself may use another one.
+  if (f?.scope) free = `On the ${esc(f.scope)}${free ? `. ${free}` : ''}`;
+  const from = f?.scope ? `${app.name}’s ${f.scope}` : `${/^[aeiou]/i.test(app.name) ? 'an' : 'a'} ${app.name} App Store screenshot`;
   const crop = app.fontCrop
-    ? `<img class="specimen" src="${app.fontCrop.src}" width="${app.fontCrop.w}" height="${app.fontCrop.h}" alt="${esc(`Headline text cut from a ${app.name} screenshot, set in its own font`)}" loading="lazy" decoding="async">`
+    ? `<img class="specimen" src="${app.fontCrop.src}" width="${app.fontCrop.w}" height="${app.fontCrop.h}" alt="${esc(`Headline text cut from ${from}`)}" loading="lazy" decoding="async">`
     : '';
   const facts = [];
   if (f?.look) facts.push(['Look', txt(f.look.charAt(0).toUpperCase() + f.look.slice(1))]);
@@ -816,15 +874,20 @@ function appPage(app, i) {
   const prev = apps[(i - 1 + apps.length) % apps.length];
   const next = apps[(i + 1) % apps.length];
   const subs = app.subs.map(r => r.n);
-  const fontPhrase = app.font?.name ? `set in ${app.font.name}` : app.font?.closeTo ? `a font close to ${app.font.closeTo}` : '';
+  const fontPhrase = app.font?.name ? (app.font.scope ? `a ${app.font.scope} set in ${app.font.name}` : `set in ${app.font.name}`)
+    : app.font?.closeTo ? `a font close to ${app.font.closeTo}` : '';
   const hexes = app.colors.map(c => c.hex);
-  let description = `${app.name}’s design and paywall: ${subs.length} plans from ${money(Math.min(...subs))} to ${money(Math.max(...subs))}, colors ${hexes[0]}, ${hexes[1]} and ${hexes[2]}${fontPhrase ? `, ${fontPhrase}` : ''}, and 3 fixes.`;
+  let description = `${app.name}’s design and paywall: ${app.priceCount} prices from ${money(Math.min(...subs))} to ${money(Math.max(...subs))}, colors ${hexes[0]}, ${hexes[1]} and ${hexes[2]}${fontPhrase ? `, ${fontPhrase}` : ''}, and 3 fixes.`;
   if (!subs.length) description = `${app.name}’s design and paywall: colors ${hexes.join(', ')}${fontPhrase ? `, ${fontPhrase}` : ''}, and 3 fixes from the taste rules.`;
-  if (description.length > 160) description = description.replace(/, (set in|a font close to) [^,]+,/, ',');
+  if (description.length > 160) description = description.replace(/, (a [a-z ]+ set in|set in|a font close to) [^,]+,/, ',');
   let title = `${app.name} design and paywall | tasu.ai`;
   if (title.length > 60) title = `${app.name} paywall | tasu.ai`;
   const pw = app.paywalls[0];
-  const image = pw ? { src: pw.src, w: pw.w, h: pw.h, alt: smart(pw.alt) } : OG;
+  // The share card: 1200x630, made by _tools/og.cjs (app icon, name, brand colors, paywall).
+  const card = `/taste/media/${app.slug}/og.jpg`;
+  const image = existsSync(fileOf(card))
+    ? { src: card, w: 1200, h: 630, alt: `${app.name}: design and paywall, by tasu.ai` }
+    : (log(`${app.slug}: no media/${app.slug}/og.jpg, the page shares og.png (run _tools/og.cjs)`), OG);
   const offers = app.rows.map(r => ({ '@type': 'Offer', name: r.name, price: r.n.toFixed(2), priceCurrency: 'USD' }));
   const prices = app.rows.map(r => r.n);
   const jsonld = {
@@ -835,7 +898,7 @@ function appPage(app, i) {
         '@id': `${app.url}#article`,
         headline: `${app.name}: design and paywall`,
         description,
-        image: SITE + image.src,
+        image: [SITE + image.src, ...(pw ? [SITE + pw.src] : [])],
         datePublished: DATE,
         dateModified: DATE,
         author: AUTHOR,
@@ -855,15 +918,20 @@ function appPage(app, i) {
         url: app.appStore,
         image: SITE + app.icon,
         author: { '@type': 'Organization', name: app.developer },
-        aggregateRating: { '@type': 'AggregateRating', ratingValue: Number(app.rating.toFixed(2)), ratingCount: app.ratingCount, bestRating: 5, worstRating: 1 },
-        ...(prices.length ? { offers: { '@type': 'AggregateOffer', priceCurrency: 'USD', lowPrice: Math.min(...prices).toFixed(2), highPrice: Math.max(...prices).toFixed(2), offerCount: offers.length, offers } } : {}),
+        // No aggregateRating: Google's review snippet rules forbid ratings copied from another site.
+        // The App Store rating shows in the page with its source line. The download is free (price 0);
+        // the In-App Purchases sit in a second offer.
+        offers: [
+          { '@type': 'Offer', name: 'Free download', price: '0', priceCurrency: 'USD' },
+          ...(prices.length ? [{ '@type': 'AggregateOffer', name: 'In-app purchases', priceCurrency: 'USD', lowPrice: Math.min(...prices).toFixed(2), highPrice: Math.max(...prices).toFixed(2), offerCount: offers.length, offers }] : []),
+        ],
       },
       {
+        // Home, then the page: "Apps" (/taste/#apps) is the same document as the home.
         '@type': 'BreadcrumbList',
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: 'tasu.ai', item: ABS },
-          { '@type': 'ListItem', position: 2, name: 'Apps', item: `${ABS}#apps` },
-          { '@type': 'ListItem', position: 3, name: app.name, item: app.url },
+          { '@type': 'ListItem', position: 2, name: app.name, item: app.url },
         ],
       },
     ],
@@ -874,14 +942,17 @@ function appPage(app, i) {
   metaItems.push(`${app.rating1} from ${thousands(app.ratingCount)} ratings`);
   const compare = compareLine(app);
 
+  // A drawn phone already shows the first plans: the table keeps the rest (consumables, extra plans).
+  const shown = app.drawn ? new Set(app.subs.slice(0, DRAWN_ROWS)) : null;
+  const tableRows = shown ? app.rows.filter(r => !shown.has(r)) : app.rows;
   const html = `${head({ title, description, path: `${app.slug}/`, type: 'article', image, jsonld })}
-${header('apps')}
+${header('app')}
 <main id="main" class="page-app">
 
 <section class="section app-top" aria-labelledby="app-title">
   <div class="wrap">
     <div class="app-head">
-      <img class="app-head-icon" src="${app.icon}" width="128" height="128" alt="${esc(app.name)} app icon" fetchpriority="high">
+      <img class="app-head-icon" src="${app.iconSm}" width="128" height="128" alt="${esc(app.name)} app icon" fetchpriority="high">
       <div>
         <h1 class="title-xl" id="app-title">${esc(app.name)}<span class="h1-rest">: design and paywall</span></h1>
         <p class="lead">${copy(app.oneLiner)}</p>
@@ -901,7 +972,7 @@ ${header('apps')}
     <div class="split">
       ${phoneBlock(app)}
       <div class="stack-32">
-          ${plansTable(app)}
+          ${plansTable(app, tableRows)}
           ${factsBlock(app)}${compare ? `
           <p class="compare">${compare}</p>` : ''}${app.read.length ? `
           <div>
@@ -970,11 +1041,12 @@ ${app.elements.length ? `
   </div>
 </section>
 ` : ''}
-<section class="section" aria-label="Next breakdown" data-reveal>
+<section class="section" aria-labelledby="next-title" data-reveal>
   <div class="wrap">
+    <h2 class="sr-only" id="next-title">Next breakdown</h2>
     <nav class="pager" aria-label="More apps">
-      <a href="${prev.page}" rel="prev"><img src="${prev.icon}" width="48" height="48" alt="" loading="lazy" decoding="async"><span><small>Previous</small>${esc(prev.name)}</span></a>
-      <a href="${next.page}" rel="next"><img src="${next.icon}" width="48" height="48" alt="" loading="lazy" decoding="async"><span><small>Next</small>${esc(next.name)}</span></a>
+      <a href="${prev.page}" rel="prev"><img src="${prev.iconSm}" width="48" height="48" alt="" loading="lazy" decoding="async"><span><small>Previous</small>${esc(prev.name)}</span></a>
+      <a href="${next.page}" rel="next"><img src="${next.iconSm}" width="48" height="48" alt="" loading="lazy" decoding="async"><span><small>Next</small>${esc(next.name)}</span></a>
     </nav>
     <div class="closing">
       ${happy()}
@@ -1000,7 +1072,7 @@ function libraryPage() {
   const chips = TYPES.filter(([k]) => counts.has(k));
   const top3 = byCount.slice(0, 3).map(([k, c]) => `${c} ${TYPE[k].many}`);
   const title = 'Paywall UI elements from top apps | tasu.ai';
-  const description = `${n} UI elements cut from the paywalls of ${nApps} top apps: ${top3[0]}, ${top3[1]} and ${top3[2]}. Filter by type to compare them.`;
+  const description = `${n} UI elements cut from the web pricing pages of ${nApps} top apps: ${top3[0]}, ${top3[1]} and ${top3[2]}. Filter by type to compare them.`;
   const url = `${ABS}library/`;
   const jsonld = {
     '@context': 'https://schema.org',
@@ -1023,7 +1095,7 @@ ${header('library')}
     <div class="gallery-head">
       <div class="lib-intro">
         <h1 class="title-xl" id="lib-title">${n} paywall UI elements, sorted by type</h1>
-        <p class="lead">Cut from the real paywalls of ${nApps} apps on Apple’s US Top Grossing charts. Pick a type to compare them.</p>
+        <p class="lead">Cut from the web pricing pages of ${nApps} apps on Apple’s US Top Grossing charts. Pick a type to compare them.</p>
       </div>
       <div class="chips js-only" role="group" aria-label="Element types">
         <button class="chip" type="button" data-filter-chip="all" aria-pressed="true">All <span class="chip-count">${n}</span></button>
@@ -1067,9 +1139,12 @@ function dataJS() {
     ratingCount: a.ratingCount,
     subtitle: a.subtitle,
     niche: a.niche,
+    group: a.group,
     oneLiner: smart(a.oneLiner),
     keyNumber: { value: a.key.value, label: smart(a.key.label) },
     plans: a.subs.length,
+    priceCount: a.priceCount,
+    iapCount: a.iapCount,
     prices: a.rows.map(r => ({ name: r.name, price: r.price, period: r.period })),
     yearly: a.yearly ?? null,
     colors: a.colors,

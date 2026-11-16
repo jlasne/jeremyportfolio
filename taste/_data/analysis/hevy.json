@@ -33,7 +33,8 @@
       "closeTo": "Figtree",
       "look": "Round geometric sans: semibold headline, regular prices and labels",
       "weights": "Semibold headline and plan names, medium button, regular prices and body",
-      "crop": "/taste/media/hevy/font-1.jpg"
+      "crop": "/taste/media/hevy/font-1.jpg",
+      "scope": "web pricing page"
     },
     "visualStyle": "White screens, near-black text and one blue, #267EE8, on buttons, links, charts and the band under each store shot. The web paywall swaps in a brighter blue, #008CFF, and adds a yellow PRO label, #F7D000.",
     "styleTraits": [

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<title>tasu.ai share card master</title>
+<!-- The 1200x630 share card of one app page, rendered by _tools/og.cjs into media/<slug>/og.jpg.
+     Open it with ?slug=strava. It reads data.js, so it always matches the built pages:
+     the app icon, "<App>: design and paywall", the app's 3 brand colors, its first paywall
+     capture (or its drawn plan, marked as drawn) in a tilted phone, and the tasu.ai lockup. -->
+<link rel="stylesheet" href="/taste/tasu.css">
+<script src="/taste/data.js"></script>
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #F3EFE7; }
+  body { position: relative; min-height: 0; }
+  .lock { position: absolute; left: 72px; top: 60px; height: 44px; width: auto; }
+  .icon { position: absolute; left: 72px; top: 156px; width: 112px; height: 112px; border-radius: 22.37%; box-shadow: 0 0 0 1px rgb(58 57 54 / .08); }
+  h1 {
+    position: absolute; left: 72px; top: 296px; width: 600px; margin: 0;
+    font-size: 66px; font-weight: 600; line-height: 1.04; letter-spacing: -.035em; color: #3A3936;
+  }
+  .sw { position: absolute; left: 72px; bottom: 64px; display: flex; gap: 16px; }
+  .sw div { display: grid; gap: 8px; font: 500 16px/1 "Schibsted Grotesk", sans-serif; color: rgb(58 57 54 / .76); }
+  .sw span { width: 64px; height: 64px; border-radius: 16px; background: var(--c); box-shadow: inset 0 0 0 1px rgb(58 57 54 / .14); }
+  .stage { position: absolute; left: 800px; top: 44px; width: 300px; transform: rotate(-6deg); transform-origin: 50% 0; }
+  .stage .phone { width: 300px; }
+  .stage .drawn { aspect-ratio: 600 / 1298; }
+  .stage .mark { top: 28px; left: 28px; height: 28px; padding: 0 12px; font-size: 15px; }
+</style>
+</head>
+<body>
+<img class="lock" src="/taste/brand/lockup.svg" alt="">
+<img class="icon" id="icon" alt="">
+<h1 id="title"></h1>
+<div class="sw" id="sw"></div>
+<div class="stage"><div class="phone" id="phone"></div></div>
+<script>
+(function () {
+  var slug = new URLSearchParams(location.search).get('slug');
+  var a = (window.TASU_APPS || []).filter(function (x) { return x.slug === slug; })[0];
+  if (!a) { document.body.setAttribute('data-error', 'no app ' + slug); return; }
+  var esc = function (s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
+  var small = a.icon.replace(/icon\.png$/, 'icon-256.webp');
+  document.getElementById('icon').src = small;
+  document.getElementById('title').innerHTML = '<span class="hl">' + esc(a.name) + '</span>: design and paywall';
+  document.getElementById('sw').innerHTML = a.colors.map(function (c) {
+    return '<div><span style="--c:' + c.hex + '"></span>' + c.hex + '</div>';
+  }).join('');
+  var phone = document.getElementById('phone');
+  if (a.paywall.source !== 'drawn') {
+    phone.innerHTML = '<img src="' + a.paywall.src + '" width="600" height="1298" alt="">';
+  } else {
+    var rows = a.prices.filter(function (p) { return p.period !== 'consumable'; }).slice(0, 6);
+    phone.innerHTML = '<span class="mark">Drawn plan</span><div class="drawn"><div class="drawn-head"><img src="' + small + '" width="64" height="64" alt=""><p class="drawn-title">' + esc(a.name) + ' plans</p></div>' +
+      rows.map(function (r) { return '<div class="drawn-plan"><span><b>' + esc(r.name) + '</b></span><span><b>' + esc(r.price) + '</b></span></div>'; }).join('') + '</div>';
+  }
+  document.body.setAttribute('data-ready', '1');
+})();
+</script>
+</body>
+</html>

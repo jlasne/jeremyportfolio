@@ -46,7 +46,8 @@
 
   --font: "Schibsted Grotesk", "Schibsted Fallback", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
 
-  /* Type scale, ratio 1.25. The display size clamps from 40px on a 360px phone to 88px. */
+  /* Type scale, ratio 1.25. The display size runs from 38.8px on a 360px phone to 88px from 820px,
+     sized so "Design & paywalls" always fits its column on one line (2 lines, 1 band). */
   --fs-13: 13px;
   --fs-16: 16px;
   --fs-20: 20px;
@@ -54,7 +55,7 @@
   --fs-31: 31px;
   --fs-39: 39px;
   --fs-61: 61px;
-  --fs-88: clamp(40px, 11.2vw, 88px);
+  --fs-88: clamp(36px, 11.9vw - 4px, 88px);
 
   /* Spacing, 8-point */
   --sp-4: 4px;
@@ -81,14 +82,18 @@
   --t-out: 160ms;
   --stagger: 30ms;
 
-  /* Layout: 1280px max, 16px gutters on phone, 32px from 720px.
+  /* Layout: 1280px max, 16px gutters on phone, 32px from 720px, wider where the notch or the
+     rounded corners need it (iPhone in landscape; the pages set viewport-fit=cover).
      --side is the space from the viewport edge to the content column (use it on full-width blocks). */
   --max: 1280px;
-  --gutter: 16px;
+  --gutter: max(16px, env(safe-area-inset-left), env(safe-area-inset-right));
   --side: max(var(--gutter), (100% - var(--max)) / 2);
 }
 @media (min-width: 720px) {
-  :root { --gutter: 32px; }
+  :root {
+    --gutter: max(32px, env(safe-area-inset-left), env(safe-area-inset-right));
+    --fs-88: clamp(36px, 11.9vw - 8px, 88px);
+  }
 }
 
 /* Theme values. Light is the default. Dark follows the OS unless data-theme="light", and
@@ -246,6 +251,8 @@ html:not(.js) .js-only { display: none !important; }
 @media (min-width: 720px) {
   .section { padding-block: var(--sp-96); }
 }
+/* Paddings never stack to 192px: a section that follows another opens with 64px. */
+.section + .section { padding-top: var(--sp-64); }
 .section-head {
   display: flex;
   flex-wrap: wrap;
@@ -256,17 +263,18 @@ html:not(.js) .js-only { display: none !important; }
 }
 
 /* 5. Type ================================================================= */
-/* Display sizes (39px and up) use -3% to -4% tracking. Smaller sizes keep 0. */
+/* Display sizes (39px and up) use -3% to -4% tracking. Smaller sizes keep 0. The 2 largest sizes
+   take weight 600: at 700 and -3.5% the letters of "paywalls" touch. */
 .display {
   font-size: var(--fs-88);
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.02;
   letter-spacing: -.035em;
   text-wrap: balance;
 }
 .title-xl {
   font-size: var(--fs-39);
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.08;
   letter-spacing: -.03em;
   text-wrap: balance;
@@ -297,6 +305,12 @@ html:not(.js) .js-only { display: none !important; }
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }
+/* Dark: cream letters on mint read at 1.47:1, so the band thins to .18em and starts at the
+   baseline. Only the descenders of g, p and y cross it. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .hl { background-position: 0 94%; background-size: 100% .18em; }
+}
+[data-theme="dark"] .hl { background-position: 0 94%; background-size: 100% .18em; }
 
 /* 6. Icons and small controls ============================================= */
 /* One set: 24-unit grid, 1.5px strokes, round caps. */
@@ -343,7 +357,7 @@ html:not(.js) .js-only { display: none !important; }
   padding: 0 var(--sp-8);
   border-radius: var(--r-8);
   background: var(--surface);
-  color: var(--text-2);
+  color: var(--text);
   font: 500 var(--fs-13)/1 var(--font);
   pointer-events: none;
   transition: opacity var(--t-out) var(--ease-out);
@@ -408,7 +422,7 @@ html:not(.js) .js-only { display: none !important; }
   .nav a { padding: 0 var(--sp-16); }
 }
 .nav a:hover,
-.nav a[aria-current="page"] { color: var(--text); }
+.nav a[aria-current] { color: var(--text); }
 
 .search--header { grid-area: search; }
 .header-tools { grid-area: tools; display: flex; gap: var(--sp-4); }
@@ -525,7 +539,7 @@ html:not(.js) .js-only { display: none !important; }
   display: inline-flex;
   align-items: center;
   gap: var(--sp-8);
-  height: 40px;
+  height: 44px;
   padding: 0 var(--sp-16);
   border-radius: var(--r-pill);
   background: var(--surface);
@@ -534,9 +548,6 @@ html:not(.js) .js-only { display: none !important; }
   white-space: nowrap;
   text-decoration: none;
   transition: background-color var(--t-in) var(--ease-out), color var(--t-in) var(--ease-out), transform var(--t-in) var(--ease-out);
-}
-@media (pointer: coarse) {
-  .chip { height: 44px; }
 }
 .chip:hover { background: var(--hover); }
 .chip:active { transform: scale(.97); }
@@ -573,14 +584,11 @@ html:not(.js) .js-only { display: none !important; }
 .view-toggle button {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--r-pill);
   color: var(--text-2);
   transition: background-color var(--t-in) var(--ease-out), color var(--t-in) var(--ease-out);
-}
-@media (pointer: coarse) {
-  .view-toggle button { width: 44px; height: 44px; }
 }
 .view-toggle button:hover { color: var(--text); }
 .view-toggle button[aria-pressed="true"] { background: var(--bg); color: var(--text); }
@@ -622,6 +630,10 @@ html:not(.js) .js-only { display: none !important; }
   transition: background-color var(--t-in) var(--ease-out);
 }
 .app-card:hover { background: var(--hover); }
+/* From 720px the card stands next to the screens: it takes their 24px corners. */
+@media (min-width: 720px) {
+  .app-card { border-radius: var(--r-24); }
+}
 .app-icon {
   width: 64px;
   height: 64px;
@@ -645,6 +657,11 @@ html:not(.js) .js-only { display: none !important; }
   white-space: nowrap;
 }
 .key-label { display: block; margin-top: var(--sp-8); font-size: var(--fs-13); line-height: 1.45; color: var(--text-2); }
+/* Phone: the price steps down to 39px, so the page h1 stays the largest type. */
+@media (max-width: 719px) {
+  .key { padding-top: var(--sp-24); }
+  .key-num { font-size: var(--fs-39); letter-spacing: -.03em; }
+}
 /* The app's 3 brand colors, top right of the card: 2 main colors, then the accent. Content, so any hex. */
 .app-colors {
   position: absolute;
@@ -756,15 +773,18 @@ html:not(.js) .js-only { display: none !important; }
 }
 .strip-btn:disabled { opacity: 0 !important; pointer-events: none; }
 
-/* A drawn paywall as the first screen of a strip, for apps whose plans show in no screenshot.
+/* A drawn plan as the first screen of a strip, for apps whose plans show in no screenshot.
    It keeps the screenshots' ratio, and its type follows the screen width (cqi), so it reads the
-   same at every screen height. Rows are the page color on the screen's surface fill. */
+   same at every screen height. The markup makes it a dark island (data-theme="dark") on both
+   themes, so it reads as a phone screen next to the card: night rows on a lifted night fill.
+   Its note says where the prices come from. */
 .screen--drawn { container-type: inline-size; aspect-ratio: 600 / 1298; }
+.screen--drawn[data-theme] { background: linear-gradient(var(--surface), var(--surface)), var(--bg); }
 .screen--drawn .drawn {
   height: 100%;
   aspect-ratio: auto;
   gap: 3cqi;
-  padding: 20cqi 6cqi 7cqi;
+  padding: 20cqi 6cqi 30cqi;
   border-radius: 0;
   background: none;
 }
@@ -779,7 +799,15 @@ html:not(.js) .js-only { display: none !important; }
   font-size: 4.6cqi;
 }
 .screen--drawn .drawn-plan b { font-size: 5.6cqi; }
-.screen--drawn .drawn-cta { height: 15cqi; margin-top: 3cqi; font-size: 5.6cqi; }
+.drawn-note {
+  position: absolute;
+  inset: auto 6cqi 6cqi;
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--text-2);
+  text-align: center;
+  text-wrap: balance;
+}
 
 /* The strip on its own inside .wrap (app page screenshots): fixed screen height, edge to edge on
    phone. From 720px it starts at the content column and runs to the right edge of the screen. */
@@ -825,9 +853,9 @@ html:not(.js) .js-only { display: none !important; }
   display: grid;
   grid-template-columns: 40px minmax(0, 1fr) auto;
   grid-template-areas:
-    "icon name colors"
-    "icon rank colors"
-    "key key key";
+    "icon name name"
+    "icon rank rank"
+    "key key colors";
   column-gap: var(--sp-16);
   padding: var(--sp-16);
   border-radius: var(--r-24);
@@ -836,7 +864,8 @@ html:not(.js) .js-only { display: none !important; }
 [data-view="grid"] .app-card:hover { background: none; }
 [data-view="grid"] .app-card::after { content: ""; position: absolute; inset: 0; border-radius: var(--r-32); }
 [data-view="grid"] .app-icon { grid-area: icon; align-self: center; width: 40px; height: 40px; }
-[data-view="grid"] .app-colors { position: static; grid-area: colors; align-self: center; }
+/* The swatches sit on the price row, so the rank keeps the full width and fits on 1 line. */
+[data-view="grid"] .app-colors { position: static; grid-area: colors; align-self: end; margin-bottom: var(--sp-24); }
 [data-view="grid"] .app-colors span { width: 16px; height: 16px; }
 [data-view="grid"] .app-name { grid-area: name; margin: 0; font-size: var(--fs-16); font-weight: 600; line-height: 1.3; }
 [data-view="grid"] .app-rank { grid-area: rank; margin: 0; font-weight: 500; }
@@ -867,9 +896,12 @@ html:not(.js) .js-only { display: none !important; }
   .hero { padding-block: var(--sp-64) 128px; }
 }
 .hero-in { display: flex; flex-direction: column; align-items: center; }
-/* Tasu tasting a paywall card: the `taste` loop, 240px wide on phone up to 264px (15:14). */
-.hero-mascot { width: clamp(240px, 4vw + 200px, 264px); height: auto; margin-bottom: var(--sp-16); }
+/* Tasu tasting a paywall card: the `taste` loop, 168px wide on a small phone up to 216px (15:14).
+   The headline stays the loudest shape of the hero. */
+.hero-mascot { width: clamp(168px, 8vw + 120px, 216px); height: auto; margin-bottom: var(--sp-16); }
 .hero .display { max-width: 10em; }   /* 2 balanced lines on desktop */
+/* The highlighted phrase never breaks: "Design & paywalls" on line 1, one band, at every width. */
+.hero .hl { white-space: nowrap; }
 .hero-sub { max-width: 40ch; margin-top: var(--sp-24); text-wrap: balance; }
 /* From 720px each sentence of the subline takes its own line. */
 @media (min-width: 720px) {
@@ -919,10 +951,21 @@ html:not(.js) .js-only { display: none !important; }
   will-change: transform;
 }
 .float.is-icon { border-radius: var(--r-icon); }
-/* Phone: cards shrink to 72%, can take their own --xm and --ym, and .m-hide drops a card. */
-@media (max-width: 719px) {
-  .float { top: var(--ym, var(--y)); left: var(--xm, var(--x)); width: calc(var(--w) * .72); }
+/* Up to 1023px the text column is too wide for 22 cards: only the cards with a phone place
+   (--xm, --ym) show, at that place, and .m-hide drops the rest. Phone cards shrink to 72%.
+   From 1024 to 1199px the cards spread 20% further out from the centre, away from the text. */
+@media (max-width: 1023px) {
+  .float { top: var(--ym, var(--y)); left: var(--xm, var(--x)); }
   .float.m-hide { display: none; }
+}
+@media (max-width: 719px) {
+  .float { width: calc(var(--w) * .72); }
+}
+@media (min-width: 720px) and (max-width: 1023px) {
+  .float { width: calc(var(--w) * .8); }   /* keeps the near cards clear of the 78-88px headline */
+}
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .float { left: calc(50% + (var(--x) - 50%) * 1.2); }
 }
 
 /* 16. Phone frame ========================================================= */
@@ -996,18 +1039,8 @@ html:not(.js) .js-only { display: none !important; }
 }
 .drawn-plan b { display: block; font-size: var(--fs-16); }
 .drawn-plan span:last-child { text-align: right; }
-/* Like a paywall: the app on top, the plans and the button at the bottom. */
+/* The app on top, the plans at the bottom. No button: only names and prices from the App Store. */
 .drawn-head + .drawn-plan { margin-top: auto; }
-.drawn-cta {
-  display: grid;
-  place-items: center;
-  height: 48px;
-  margin-top: var(--sp-8);
-  border-radius: var(--r-pill);
-  background: var(--text);
-  color: var(--bg);
-  font-weight: 600;
-}
 
 /* 17. App page ============================================================ */
 /* 8 sections in a row, so the rhythm is tighter than on the home. */
@@ -1018,8 +1051,10 @@ html:not(.js) .js-only { display: none !important; }
   .page-app .app-top { padding-block: var(--sp-48) var(--sp-16); }
 }
 .app-head { display: grid; gap: var(--sp-24); align-items: center; }
+/* From 720px the icon hangs from the h1's first line instead of floating mid-block. */
 @media (min-width: 720px) {
-  .app-head { grid-template-columns: auto minmax(0, 1fr); gap: var(--sp-32); }
+  .app-head { grid-template-columns: auto minmax(0, 1fr); gap: var(--sp-32); align-items: start; }
+  .app-head-icon { margin-top: var(--sp-8); }
 }
 .app-head-icon { width: 96px; height: 96px; border-radius: var(--r-icon); box-shadow: 0 0 0 1px var(--surface); }
 @media (min-width: 720px) {
@@ -1051,6 +1086,8 @@ html:not(.js) .js-only { display: none !important; }
 @media (min-width: 1024px) {
   .split { grid-template-columns: 336px minmax(0, 1fr); gap: var(--sp-64); }
 }
+/* One right edge for the table, the facts, the compare line and the bullets. */
+.split > .stack-32 { max-width: 720px; }
 .stack-32 > * + * { margin-top: var(--sp-32); }
 
 /* Plans table: rows are surface pills, no lines. */
@@ -1068,18 +1105,32 @@ html:not(.js) .js-only { display: none !important; }
 .plans-note { margin-top: var(--sp-8); }
 .read-title { margin-bottom: var(--sp-16); }
 .plans tbody td:last-child { border-radius: 0 var(--r-16) var(--r-16) 0; }
+/* Phone: each plan becomes one card. Name and period left, price right, then the computed values
+   on a 13px second line, each named by its data-label. Nothing scrolls, nothing is cut. */
 @media (max-width: 719px) {
-  .plans th,
-  .plans td { padding-inline: var(--sp-8); }
-  .plans tbody th { padding-left: var(--sp-16); }
-  .plans tbody td:last-child { padding-right: var(--sp-16); }
-  .plans thead th { white-space: normal; vertical-align: bottom; }
-}
-@media (max-width: 399px) {
-  .plans th,
-  .plans td { padding-inline: var(--sp-4); }
-  .plans th:first-child { padding-left: 12px; }
-  .plans tr > :last-child { padding-right: 12px; }
+  .plans { overflow: visible; margin-inline: 0; padding-inline: 0; }
+  .plans table,
+  .plans tbody { display: block; }
+  .plans thead { display: none; }
+  .plans tbody tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: var(--sp-16);
+    margin-top: var(--sp-4);
+    padding: var(--sp-16);
+    border-radius: var(--r-16);
+    background: var(--surface);
+  }
+  .plans tbody tr::before { content: ""; order: 3; flex-basis: 100%; }
+  .plans tbody th,
+  .plans tbody td,
+  .plans tbody td:last-child { padding: 0; background: none; border-radius: 0; text-align: left; white-space: normal; }
+  .plans tbody th { order: 1; flex: 1 1 0; min-width: 0; }
+  .plans tbody td:nth-child(2) { order: 2; font-weight: 600; }
+  .plans tbody td:nth-child(n+3) { order: 4; font-size: var(--fs-13); color: var(--text-2); }
+  .plans tbody td:nth-child(n+3):empty { display: none; }
+  .plans tbody td[data-label]::before { content: attr(data-label) " "; }
 }
 
 .facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-24); }
@@ -1135,6 +1186,13 @@ html:not(.js) .js-only { display: none !important; }
 .pager img { width: 48px; height: 48px; flex: none; border-radius: var(--r-icon); }
 .pager span { min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
 .pager small { display: block; font-size: var(--fs-13); font-weight: 500; color: var(--text-2); }
+/* Small phones: the icon goes on top, so each name keeps the full width and never breaks mid-word. */
+@media (max-width: 519px) {
+  .pager a,
+  .pager a[rel="next"] { flex-direction: column; align-items: flex-start; gap: var(--sp-8); }
+  .pager a[rel="next"] { align-items: flex-end; }
+  .pager span { overflow-wrap: normal; }
+}
 
 /* 18. Branding: swatches and the 60/30/10 bar ============================= */
 .swatches { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-16); }
@@ -1275,6 +1333,11 @@ html:not(.js) .copy-hex { pointer-events: none; }
 }
 .lib-intro .lead { margin-top: var(--sp-16); max-width: 60ch; }
 .tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-8); }
+/* The library exists to compare crops: on small phones it shows one per row, so the text reads.
+   The home teaser keeps 2 columns. */
+@media (max-width: 519px) {
+  .lib-top .tiles { grid-template-columns: minmax(0, 1fr); }
+}
 @media (min-width: 720px) {
   .tiles { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--sp-16); }
 }
@@ -1319,9 +1382,16 @@ html:not(.js) .copy-hex { pointer-events: none; }
 /* Tasu hops with joy over the "Follow on X" block. */
 .closing .tasu-loop--happy { width: 120px; height: 120px; margin-bottom: calc(-1 * var(--sp-8)); }
 .pager + .closing { margin-top: var(--sp-64); }
+/* "Follow on X for the next breakdown" stays on 1 line: 16px sides on phones, no icon under 375px. */
+@media (max-width: 479px) {
+  .closing .btn-lg { padding-inline: var(--sp-16); }
+}
+@media (max-width: 374px) {
+  .closing .btn-lg .ico { display: none; }
+}
 
 .site-footer {
-  margin-top: var(--sp-64);
+  margin-top: 0;
   padding-block: var(--sp-48) calc(var(--sp-48) + env(safe-area-inset-bottom));
   font-size: var(--fs-13);
   line-height: 1.45;
@@ -1336,14 +1406,19 @@ html:not(.js) .copy-hex { pointer-events: none; }
 }
 .footer-brand { display: flex; align-items: center; gap: var(--sp-8); color: var(--text); font-weight: 500; }
 .footer-brand img { width: 24px; height: 24px; }
-.footer-brand a { text-decoration: none; }
+.footer-brand a { display: inline-flex; align-items: center; min-height: 44px; text-decoration: none; }
 .footer-brand a:hover { text-decoration: underline; }
 .footer-links { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--sp-24); }
+/* Each link is a 44px target or more; the negative margin keeps the visible spacing. */
 .footer-links a {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--sp-8);
+  min-width: 44px;
   min-height: 44px;
+  padding-inline: var(--sp-8);
+  margin-inline: calc(-1 * var(--sp-8));
   color: var(--text);
   font-weight: 500;
   text-decoration: none;
@@ -1361,6 +1436,7 @@ html:not(.js) .copy-hex { pointer-events: none; }
 .tasu-loop {
   display: inline-block;
   vertical-align: middle;
+  align-self: center;
   background-repeat: no-repeat;
   background-size: 600% 100%;
   background-position: 0 0;

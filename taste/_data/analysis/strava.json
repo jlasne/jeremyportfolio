@@ -105,7 +105,7 @@
     },
     {
       "src": "/taste/media/strava/pw5.jpg",
-      "alt": "Strava + Runna card: up to 60% off, $12.50 a month, billed at $149.99 a year, annual only",
+      "alt": "Strava + Runna card under “Train smarter and save up to 60%”: $12.50 a month, billed at $149.99 a year, annual only",
       "isPaywall": true
     }
   ],
@@ -113,44 +113,44 @@
     {
       "name": "Strava Subscription",
       "price": "$79.99",
-      "period": "unknown",
-      "perMonth": "unknown",
-      "perWeek": "unknown"
+      "period": "year",
+      "perMonth": 6.67,
+      "perWeek": 1.54
     },
     {
       "name": "Strava Subscription",
       "price": "$11.99",
-      "period": "unknown",
-      "perMonth": "unknown",
-      "perWeek": "unknown"
+      "period": "month",
+      "perMonth": 11.99,
+      "perWeek": 2.77
     },
     {
       "name": "Subscription",
       "price": "$79.99",
-      "period": "unknown",
-      "perMonth": "unknown",
-      "perWeek": "unknown"
+      "period": "year",
+      "perMonth": 6.67,
+      "perWeek": 1.54
     },
     {
       "name": "Subscription",
       "price": "$11.99",
-      "period": "unknown",
-      "perMonth": "unknown",
-      "perWeek": "unknown"
+      "period": "month",
+      "perMonth": 11.99,
+      "perWeek": 2.77
     },
     {
       "name": "Strava + Runna Subscription",
       "price": "$149.99",
-      "period": "unknown",
-      "perMonth": "unknown",
-      "perWeek": "unknown"
+      "period": "year",
+      "perMonth": 12.5,
+      "perWeek": 2.88
     },
     {
       "name": "Strava Family Plan Subscription",
       "price": "$139.99",
-      "period": "unknown",
-      "perMonth": "unknown",
-      "perWeek": "unknown"
+      "period": "year",
+      "perMonth": 11.67,
+      "perWeek": 2.69
     },
     {
       "name": "Runna Standalone Subscription",
@@ -176,7 +176,7 @@
   ],
   "paywall": {
     "tiers": 3,
-    "yearlySavingPct": 17,
+    "yearlySavingPct": 44,
     "trial": {
       "stated": true,
       "evidence": "“30-day trial for $0” on the Individual and Student cards and “Start free 30-day trial” on the sticky button of the web pricing page"

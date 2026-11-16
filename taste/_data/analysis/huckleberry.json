@@ -3,7 +3,7 @@
     "oneLiner": "Aqua screens, navy type; Yearly cuts Premium to $9.99 a month",
     "keyNumber": {
       "value": "$119.99",
-      "label": "Top Premium price"
+      "label": "Yearly plan"
     }
   },
   "branding": {
@@ -33,7 +33,8 @@
       "closeTo": "Nunito Sans",
       "look": "Geometric sans, near-circular o, heavy slate navy headlines",
       "weights": "Heavy headlines, plan names, prices and buttons; regular body",
-      "crop": "/taste/media/huckleberry/font-1.jpg"
+      "crop": "/taste/media/huckleberry/font-1.jpg",
+      "scope": "web pricing page"
     },
     "visualStyle": "Aqua and white store screens with slate navy headlines; inside the app, color-coded cards mark each log type: cyan sleep, orange feeds, yellow diapers, purple pumping. The web paywall switches to warm off-white #F7F6F2, with white plan cards, cyan pill buttons and a lime-to-green outline on Premium.",
     "styleTraits": [
@@ -45,12 +46,12 @@
   "screenshots": [
     {
       "src": "/taste/media/huckleberry/s1.jpg",
-      "alt": "Headline “Your Family’s Second Brain” with a 5+ Million families badge and an Editors’ Choice laurel, above Home: a SweetSpot bedtime near 7:30 PM and cards for Sleep, Nursing, Bottle, Diaper and Pumping",
+      "alt": "Headline “Your Family’s Second Brain” above Home: a SweetSpot bedtime near 7:30 PM and cards for Sleep, Nursing, Bottle, Diaper and Pumping",
       "isPaywall": false
     },
     {
       "src": "/taste/media/huckleberry/s2.jpg",
-      "alt": "Headline “Get Predictability Back in Your Day” above Oscar’s week calendar, March 1 to 7: cyan sleep blocks, orange marks and “Oscar slept 11h 42m”, with a Best Apps for Parents laurel",
+      "alt": "Headline “Get Predictability Back in Your Day” above Oscar’s week calendar: cyan sleep blocks, orange marks and “Oscar slept 11h 42m”",
       "isPaywall": false
     },
     {
@@ -65,7 +66,7 @@
     },
     {
       "src": "/taste/media/huckleberry/s5.jpg",
-      "alt": "Headline “Your Parenting Questions Answered” above 2 Berry AI chats: “How do I get Emma to sleep past 5AM?” and a teal “What’s on your mind?” screen, marked for paid subscribers",
+      "alt": "Headline “Your Parenting Questions Answered” above 2 Berry AI chats: “How do I get Emma to sleep past 5AM?” and a teal “What’s on your mind?” screen",
       "isPaywall": false
     },
     {
@@ -75,7 +76,7 @@
     },
     {
       "src": "/taste/media/huckleberry/s7.jpg",
-      "alt": "Headline “Get Tips Shaped by Your Baby’s Routine” above an Insights tip in 4 steps: hold your baby close, walk 5 minutes, sit 8 minutes, transfer to the sleep area",
+      "alt": "Headline “Get Tips Shaped by Your Baby’s Routine” above a 4-step Insights tip: hold your baby close, walk 5 minutes, sit 8 minutes, transfer to the sleep area",
       "isPaywall": false
     },
     {
@@ -108,30 +109,30 @@
     {
       "name": "Huckleberry Premium",
       "price": "$14.99",
-      "period": "unknown",
-      "perMonth": "unknown",
-      "perWeek": "unknown"
+      "period": "month",
+      "perMonth": 14.99,
+      "perWeek": 3.46
     },
     {
       "name": "Huckleberry Premium",
       "price": "$119.99",
-      "period": "unknown",
-      "perMonth": "unknown",
-      "perWeek": "unknown"
+      "period": "year",
+      "perMonth": 10.0,
+      "perWeek": 2.31
     },
     {
       "name": "Huckleberry Plus",
       "price": "$11.99",
-      "period": "unknown",
-      "perMonth": "unknown",
-      "perWeek": "unknown"
+      "period": "month",
+      "perMonth": 11.99,
+      "perWeek": 2.77
     },
     {
       "name": "Huckleberry Plus",
       "price": "$68.99",
-      "period": "unknown",
-      "perMonth": "unknown",
-      "perWeek": "unknown"
+      "period": "year",
+      "perMonth": 5.75,
+      "perWeek": 1.33
     },
     {
       "name": "Sleep Improvement Plan",
@@ -159,9 +160,9 @@
     "family": 0
   },
   "ourRead": [
-    "Yearly opens first and crosses out the monthly price: $14.99 sits above $9.99 a month, billed yearly. Premium’s year reads as 33% off.",
+    "Yearly opens first and crosses out the monthly price: $14.99 sits above $9.99 a month, billed yearly, though $119.99 / 12 is $10.00. Premium’s year reads as 33% off.",
     "Plus is the decoy on Monthly: $11.99, $3 under Premium’s $14.99. On Yearly it turns into the bargain, $5.74 a month, 52% off against Premium’s 33%.",
-    "Free keeps every log and caregiver sync at $0. Plus sells SweetSpot nap predictions for $5.74 a month; Premium adds Berry AI chat and sleep plans for $9.99."
+    "Free keeps every log and caregiver sync at $0. Plus sells SweetSpot nap predictions for $5.74 a month; Premium adds Berry AI chat and sleep plans for $9.99 a month."
   ],
   "improvements": [
     {

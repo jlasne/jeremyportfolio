@@ -29,7 +29,7 @@
     ],
     "typeStyle": "Tight sans headlines that set key words in bold inside regular lines",
     "font": {
-      "name": "SF Pro",
+      "name": null,
       "closeTo": "Inter",
       "look": "tight grotesque sans, bold words inside regular lines",
       "weights": "regular and bold in one headline, regular body",
@@ -85,7 +85,7 @@
     },
     {
       "src": "/taste/media/opal/pw1.jpg",
-      "alt": "Opal PRO card on the Yearly tab: $8.29 a month, $99.99 billed annually, 5 features and a Start Free Week button",
+      "alt": "Opal pricing page with a 4.8 rating above the PRO card on the Yearly tab: $8.29 a month, $99.99 billed annually and a Start Free Week button",
       "isPaywall": true
     },
     {
@@ -154,7 +154,7 @@
     "family": 0
   },
   "ourRead": [
-    "Yearly opens preselected at $8.29 a month. Monthly shows $19.99 and \"$239 billed annually\", so $99.99 a year reads as 58% off.",
+    "Yearly opens preselected at $8.29 a month, though $99.99 / 12 is $8.33. Monthly shows $19.99 and \"$239 billed annually\", so $99.99 a year reads as 58% off.",
     "The trial follows the plan: 7 days on Yearly, 3 on Monthly, and Lifetime goes straight to \"Purchase\". The default plan gets the longest trial.",
     "Lifetime at $399, 4 times the yearly price, anchors the top of the ladder. The App Store also lists weekly plans at $4.99 and $9.99."
   ],
@@ -178,7 +178,7 @@
       "source": "S27"
     }
   ],
-  "stylePrompt": "Build a dark paywall like Opal's. Top: an award badge and the rating. Below, one card holds the app name with a PRO badge, a one-line promise and 3 tabs: Yearly, Monthly, Lifetime. Under the tabs: one big price, the billed total in small grey text, 5 checked features and a full-width pill button. Preselect Yearly and show its price per month. Give Yearly a 7-day trial and Monthly 3 days; Lifetime is a one-time purchase. Type: SF Pro, bold price, regular body. Colors: near black #0E0F11 (60%), soft white #EEEEEE (30%), ice blue #B4D4E6 (10%) on the button. Use my brand colors in the same 60/30/10 roles.",
+  "stylePrompt": "Build a dark paywall like Opal's. Top: an award badge and the rating. Below, one card holds the app name with a PRO badge, a one-line promise and 3 tabs: Yearly, Monthly, Lifetime. Under the tabs: one big price, the billed total in small grey text, 5 checked features and a full-width pill button. Preselect Yearly and show its price per month. Give Yearly a 7-day trial and Monthly 3 days; Lifetime is a one-time purchase. Type: Inter, bold price, regular body. Colors: near black #0E0F11 (60%), soft white #EEEEEE (30%), ice blue #B4D4E6 (10%) on the button. Use my brand colors in the same 60/30/10 roles.",
   "elements": [
     {
       "type": "social-proof",

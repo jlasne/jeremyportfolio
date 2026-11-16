@@ -55,13 +55,15 @@ Replace the `{...}` values. Keep the order: charset, viewport, title, descriptio
 <meta name="twitter:title" content="{TITLE}">
 <meta name="twitter:description" content="{DESCRIPTION}">
 <meta name="twitter:image" content="https://www.jeremylasne.com/taste/brand/og.png">
+<meta name="twitter:image:alt" content="tasu.ai: design &amp; paywalls behind top apps">
 <script type="application/ld+json">{JSON_LD}</script>
 </head>
 ```
 
 - `{PATH}`: empty for the home (`https://www.jeremylasne.com/taste/`), `{slug}/` for an app, `library/` for the library. Always end with a slash.
-- App pages: `og:type` is `article`. Add `<meta property="article:published_time" content="2026-11-15">` and `<meta property="article:modified_time" content="2026-11-15">` right after `og:type`. `og:image` and `twitter:image` point to the app's paywall image (absolute URL), with its real `og:image:width`, `og:image:height` and an `og:image:alt` that describes it.
-- `_tools/preview.html` is the one exception: `<meta name="robots" content="noindex, nofollow">` and no canonical, so the sitemap skips it.
+- App pages: `og:type` is `article`. Add `<meta property="article:published_time" content="2026-11-15">` and `<meta property="article:modified_time" content="2026-11-15">` right after `og:type`. `og:image` and `twitter:image` point to the app's 1200x630 share card, `media/{slug}/og.jpg` (made by `_tools/og.cjs`: icon, "{App}: design and paywall", the 3 brand colors, the first paywall capture or the drawn plan in a tilted phone, the lockup), with `og:image:alt` and `twitter:image:alt` "{App}: design and paywall, by tasu.ai". The Article's `image` lists the card, then the paywall capture. The SoftwareApplication has no `aggregateRating` (Google forbids ratings copied from another site; the page shows the App Store rating with its source) and 2 offers: "Free download" at price 0 and an AggregateOffer of the In-App Purchases. The BreadcrumbList is tasu.ai > {App}.
+- The home also preloads the hero sprite: `<link rel="preload" href="/taste/brand/loops/taste.svg" as="image" fetchpriority="high">` before the stylesheet.
+- `_tools/preview.html` and `_tools/og.html` are the exceptions: `<meta name="robots" content="noindex, nofollow">` and no canonical, so the sitemap skips them (`brand/src/og.html` carries `noindex` too).
 
 ### What the snippet does
 
@@ -84,7 +86,7 @@ It runs before the first paint. It adds the `js` class to `<html>` (CSS hides th
       <a href="/taste/#apps" aria-current="page">Apps</a>
       <a href="/taste/library/">Library</a>
     </nav>
-    <form class="search search--header" role="search" action="/taste/" method="get">
+    <form class="search search--header" role="search" action="/taste/#apps" method="get">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
       <label class="sr-only" for="site-q">Search apps</label>
       <input id="site-q" type="search" name="q" placeholder="Search apps" autocomplete="off" enterkeyhint="search" data-site-search>
@@ -121,8 +123,8 @@ It runs before the first paint. It adds the `js` class to `<html>` (CSS hides th
 </html>
 ```
 
-- `aria-current="page"` goes on **Apps** for the home and every app page, and on **Library** for the library.
-- The header search sends `/taste/?q=...`. On the home, `tasu.js` filters the gallery in place instead, and reads `?q=` on load.
+- `aria-current="page"` goes on **Apps** for the home and on **Library** for the library. On an app page, **Apps** takes `aria-current="true"`: it is the section, not the page.
+- The header search sends `/taste/?q=...#apps`, which opens on the gallery. On the home, `tasu.js` filters the gallery in place instead, reads `?q=` on load (into both fields), and scrolls the gallery up while you type in the header field.
 - Phone (under 720px): the header has 2 rows, logo and nav, then search and tools. From 720px it is 1 row. It never scrolls sideways.
 
 ## 3. Rules every page follows
@@ -241,18 +243,17 @@ The list `ol.apps` sits **outside** `.wrap`: rows place themselves on the page g
 One app row:
 
 ```html
-<li class="app-row" data-filter-item data-tags="health-fitness" data-text="{name} {full name} {subtitle} {category} {developer} {key price}" data-reveal>
-  <a class="app-card" href="/taste/{slug}/">
-    <img class="app-icon" src="/taste/media/{slug}/icon.png" width="64" height="64" alt="">
+<li class="app-row" data-filter-item data-tags="{group slug}" data-text="{name} {full name} {subtitle} {category} {group} {developer} {key price}" data-reveal>
+  <a class="app-card" href="/taste/{slug}/" aria-labelledby="n-{slug}" aria-describedby="k-{slug}">
+    <img class="app-icon" src="/taste/media/{slug}/icon-256.webp" width="64" height="64" alt="">
     <p class="app-rank">#11&nbsp;in Health &amp; Fitness</p>
-    <h3 class="app-name">{name}</h3>
+    <h3 class="app-name" id="n-{slug}">{name}</h3>
     <p class="app-sub">{subtitle}</p>
-    <p class="key"><span class="key-num">$29.99</span><span class="key-label">{key number label}</span></p>
+    <p class="key" id="k-{slug}"><span class="key-num">$29.99</span><span class="key-label">Yearly plan | Highest listed price</span></p>
     <p class="app-colors" role="img" aria-label="Brand colors: {60 name}, {30 name} and {10 name}"><span style="--c:#FFFFFF"></span><span style="--c:#1D1A23"></span><span style="--c:#7F7F80"></span></p>
     <dl class="stats">
-      <div><dt>rating</dt><dd>4.8</dd></div>
-      <div><dt>ratings</dt><dd>312K</dd></div>
-      <div><dt>plans</dt><dd>4</dd></div>
+      <div><dt>376K ratings</dt><dd>4.8</dd></div>
+      <div><dt>prices</dt><dd>5</dd></div>
     </dl>
   </a>
   <div class="strip" data-strip>
@@ -269,10 +270,11 @@ One app row:
 
 - The paywall screen comes first and carries `<span class="mark">Paywall</span>`. Use `paywallShots` first when they exist.
 - `.app-colors` sits top right of the card: the app's 3 brand colors, 2 main then the accent (content, so any hex).
-- An app with no paywall capture gets a drawn screen first: `<li class="screen screen--drawn"><span class="mark">Paywall</span><div class="drawn" role="img" aria-label="...">...</div></li>` with up to 4 plans. Its type follows the screen width (`cqi`).
-- `data-tags`: category slugs separated by spaces. They match the chips' `data-filter-chip`.
+- An app with no paywall capture gets a drawn screen first, a dark island on both themes: `<li class="screen screen--drawn" data-theme="dark"><span class="mark">Drawn plan</span><div class="drawn" role="img" aria-label="Drawn plan for {App} from App Store prices: 4 listings from $X to $Y">...</div><p class="drawn-note">Drawn from App Store prices, not a screenshot</p></li>` with up to 4 plans and no button. Its type follows the screen width (`cqi`).
+- The key number has 2 labels only, so the cards compare: "Yearly plan", or "Highest listed price" when no listing gives a length. The generator enforces them.
+- `data-tags`: the app's chip group (`group` in `_data/selection.json`: Workouts and running, Food, Sleep and mind, Health trackers, Habits and learning). They match the chips' `data-filter-chip`. The App Store chart stays in the rank line.
 - `data-text`: the words search matches. Each typed word must start a word of this text.
-- Stats labels are lowercase. Keep the 3 stats: rating, ratings count, number of plans.
+- Stats labels are lowercase. 2 stats: the rating over its ratings count, and the number of distinct prices (one price under 2 names counts once).
 - Screens are 320px tall on phone, 400px from 720px, 448px from 1024px. Width follows each image's ratio, so set the real `width` and `height`.
 - Grid view: the toggle sets `data-view="grid"` on `<html>`. Each row becomes a tile with the paywall screen on top. No extra markup.
 
@@ -298,7 +300,7 @@ One app row:
 </section>
 ```
 
-Library teaser headline: "{N} UI elements from {M} real paywalls". Its tiles link to `/taste/library/?tag={type}`.
+Library teaser headline: "{N} UI elements from {M} web paywalls" (every crop comes from a web pricing page). Its tiles link to `/taste/library/?tag={type}`.
 
 One element tile (home teaser, app page, library):
 
@@ -319,19 +321,19 @@ The `data-filter-item` attributes are for the library page only. Tiles show 2 pe
 `<main id="main" class="page-app">` (a tighter section rhythm). Each section is a `<section class="section">` with a `.wrap` inside and an `<h2 class="title-l">` in a `.section-head`, in this order:
 
 1. **App header** (`section.app-top`, holds the h1, no h2): `.app-head` with the icon (128px), `<h1 class="title-xl">{App}<span class="h1-rest">: design and paywall</span></h1>`, the one-liner as `.lead`, `.meta` (developer, `#11&nbsp;in Health &amp; Fitness, US Top Grossing`, `4.8 from 375,860 ratings`), `.source-note` "App Store data, US, 15&nbsp;Nov&nbsp;2026" and the App Store link (`.btn-secondary`).
-2. **Paywall strategy**: `.split` with the phone figure, then `.stack-32`: the plans table (`.plans`, a `.plans-note` source under it), the `.facts` (Tiers, Free trial with its `.facts-note` evidence, Consumables, Family plan), the `.compare` line and "My read" (`<h3 class="title-s read-title">` + `.bullets`).
+2. **Paywall strategy**: `.split` with the phone figure, then `.stack-32`: the plans table (`.plans`, a `.plans-note` source under it), the `.facts` (Tiers, Free trial with its `.facts-note` evidence, One-time purchases and Family plan with its price, each only when above 0: the App Store lists 10 In-App Purchases at most, so a 0 proves nothing), the `.compare` line and "My read" (`<h3 class="title-s read-title">` + `.bullets`).
 3. **App Store screenshots**: `.strip.strip--page` (runs to the right edge of the screen from 720px).
 4. **Colors**, **Font** and **Design style**: `<section aria-label="Colors, font and design style">` holding `.design-grid` with 3 `.card`s, one `<h2 class="title-m">` each.
 5. **How I’d improve it**: `.fixes`.
 6. **Copy this style**: `.prompt-block` (title, the `.prompt` card, `.prompt-actions` with the secondary "Copy prompt" button and "Paste it into Claude Code or Cursor.").
 7. **UI elements in this paywall** (only when the analysis has elements): `.tiles`, each tile linking to `/taste/library/?tag={type}`.
-8. `.pager` (previous and next app), then `.closing` with the `happy` loop and the one mint button "Follow on X for the next breakdown".
+8. `<section aria-labelledby="next-title">` with `<h2 class="sr-only" id="next-title">Next breakdown</h2>`, the `.pager` (previous and next app), then `.closing` with the `happy` loop and the one mint button "Follow on X for the next breakdown".
 
 ```html
 <!-- 2. The phone: one capture, several captures, or a drawing -->
 <figure>
-  <div class="phone"><img src="/taste/media/{slug}/pw1.jpg" width="600" height="1006" alt="{what the paywall shows}" decoding="async" fetchpriority="high"></div>
-  <figcaption class="source">Web pricing page, captured at iPhone size on 15&nbsp;Nov&nbsp;2026</figcaption>
+  <div class="phone"><img src="/taste/media/{slug}/pw1.jpg" width="600" height="1298" alt="{what the paywall shows}" decoding="async" fetchpriority="high"></div>
+  <figcaption class="source">Web pricing page, captured at iPhone size on {capturedAt of pw1}</figcaption>
 </figure>
 
 <figure>
@@ -343,21 +345,21 @@ The `data-filter-item` attributes are for the library page only. Tiles show 2 pe
   </div>
   <div class="phone-nav js-only" data-phone-nav>
     <button class="icon-btn" type="button" data-phone-prev aria-label="Previous capture">{CHEVRON LEFT}</button>
-    <span class="phone-count" data-phone-count>1 of 3</span>
+    <span class="phone-count" data-phone-count aria-live="polite" aria-atomic="true">1 of 3</span>
     <button class="icon-btn" type="button" data-phone-next aria-label="Next capture">{CHEVRON RIGHT}</button>
   </div>
   <figcaption class="source">...</figcaption>
 </figure>
 
-<!-- No capture: the drawn paywall from the In-App Purchase prices, up to 6 plans -->
+<!-- No capture: the drawn plan from the In-App Purchase prices, up to 6 plans, no button.
+     The plans table under it lists only the rows the phone does not show. -->
 <div class="phone">
-  <div class="drawn" role="img" aria-label="Drawn paywall for {App} from App Store prices: {plan} {price}, ...">
-    <div class="drawn-head"><img src="/taste/media/{slug}/icon.png" width="64" height="64" alt=""><p class="drawn-title">{App} plans</p></div>
+  <div class="drawn" role="img" aria-label="Drawn plan for {App} from App Store prices: 6 listings from $X to $Y">
+    <div class="drawn-head"><img src="/taste/media/{slug}/icon-256.webp" width="64" height="64" alt=""><p class="drawn-title">{App} plans</p></div>
     <div class="drawn-plan"><span><b>Unlimited</b></span><span><b>$29.99</b></span></div>
-    <div class="drawn-cta">Continue</div>
   </div>
 </div>
-<figcaption class="source">Drawn from App Store prices, not a screenshot</figcaption>
+<figcaption class="source">Drawn from App Store prices, not a screenshot. In-App Purchases, US, 15&nbsp;Nov&nbsp;2026</figcaption>
 
 <!-- Plans: one row per distinct name, price and length. A column shows only when a row has a value. -->
 <tr><th scope="row">Streak Restore<span class="plan-period">One-time purchase</span></th><td>$0.99</td></tr>

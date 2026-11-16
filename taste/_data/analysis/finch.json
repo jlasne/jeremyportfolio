@@ -186,7 +186,7 @@
     },
     {
       "title": "Swap “millions” for 776,001 ratings",
-      "detail": "Screenshot 8 says “join millions growing with you”. The store page shows 4.9 stars from 776,001 ratings. Write that number: “776,001 people rate Finch 4.9 stars”.",
+      "detail": "Screenshot 8 says “join millions growing with you”. The store page shows 4.9 stars from 776,001 ratings. Write that number: “Rated 4.9 from 776,001 ratings”.",
       "rule": "Make headlines specific. \"Track 3 habits in 10 seconds a day\" beats \"Transform your life\".",
       "source": "S1, S2, S4, S16"
     }

@@ -33,7 +33,8 @@
       "closeTo": "Inter",
       "look": "Bold grotesque headlines tracked about -2%, regular body",
       "weights": "Bold headlines and buttons, semibold plans and features, regular body",
-      "crop": "/taste/media/myfitnesspal/font-1.jpg"
+      "crop": "/taste/media/myfitnesspal/font-1.jpg",
+      "scope": "web pricing page"
     },
     "visualStyle": "Store screens put white app UI on a warm stone photo under bold white headlines, and blue #0066EE fills the icon and the buttons. The web paywall flips it: blue fills the page, and yellow #FDDA1C marks the tags, checks and buttons.",
     "styleTraits": [
@@ -181,7 +182,7 @@
     {
       "title": "Fill the plan sections with flat blue",
       "detail": "The plan sections fade from the icon blue, #0066EE, to lavender #8A81FA at the bottom left. Fill them with flat #0066EE, so yellow stays the one bright color.",
-      "rule": "Gradient backgrounds",
+      "rule": "Slop Check 19: Gradient backgrounds",
       "source": "S1"
     }
   ],

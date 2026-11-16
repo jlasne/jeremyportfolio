@@ -2,6 +2,797 @@
    App Store data, US, 15 Nov 2026. Analysis is Jeremy Lasne's opinion. */
 window.TASU_APPS = [
  {
+  "slug": "strava",
+  "name": "Strava",
+  "fullName": "Strava: Run, Bike, Walk",
+  "developer": "Strava, Inc.",
+  "category": "Health & Fitness",
+  "rank": 4,
+  "chart": "Health & Fitness",
+  "rankLabel": "#4 in Health & Fitness",
+  "rating": 4.81,
+  "ratingCount": 381429,
+  "subtitle": "Track & share with friends",
+  "niche": "Running",
+  "group": "Workouts and running",
+  "oneLiner": "Black screens, orange routes. 30 days free, then $79.99 a year",
+  "keyNumber": {
+   "value": "$79.99",
+   "label": "Yearly plan"
+  },
+  "plans": 9,
+  "priceCount": 7,
+  "iapCount": 10,
+  "prices": [
+   {
+    "name": "Strava + Runna Subscription",
+    "price": "$149.99",
+    "period": "year"
+   },
+   {
+    "name": "Strava Family Plan Subscription",
+    "price": "$139.99",
+    "period": "year"
+   },
+   {
+    "name": "Strava Subscription",
+    "price": "$79.99",
+    "period": "year"
+   },
+   {
+    "name": "Subscription",
+    "price": "$79.99",
+    "period": "year"
+   },
+   {
+    "name": "1 Year",
+    "price": "$59.99",
+    "period": "year"
+   },
+   {
+    "name": "Strava Subscription",
+    "price": "$11.99",
+    "period": "month"
+   },
+   {
+    "name": "Subscription",
+    "price": "$11.99",
+    "period": "month"
+   },
+   {
+    "name": "1 Month",
+    "price": "$5.99",
+    "period": "month"
+   },
+   {
+    "name": "Runna Standalone Subscription",
+    "price": "$19.99",
+    "period": "unknown"
+   }
+  ],
+  "yearly": 79.99,
+  "colors": [
+   {
+    "hex": "#141414",
+    "role": "60",
+    "name": "Near black",
+    "use": "Background of the app screens and the paywall page"
+   },
+   {
+    "hex": "#FFFFFF",
+    "role": "30",
+    "name": "White",
+    "use": "Headlines, text, icons and the logo on the icon"
+   },
+   {
+    "hex": "#FD5200",
+    "role": "10",
+    "name": "Strava orange",
+    "use": "The icon, the main buttons, routes and the active tab"
+   }
+  ],
+  "font": {
+   "name": null,
+   "closeTo": "Archivo"
+  },
+  "paywall": {
+   "source": "web",
+   "src": "/taste/media/strava/pw1.jpg",
+   "label": "Web pricing page, captured at iPhone size on 16 Nov 2026",
+   "captures": 5
+  },
+  "elements": [
+   "hero-visual",
+   "trial-timeline",
+   "discount-badge",
+   "plan-picker",
+   "plan-picker",
+   "main-button"
+  ],
+  "icon": "/taste/media/strava/icon.png",
+  "page": "/taste/strava/",
+  "appStore": "https://apps.apple.com/us/app/strava-run-bike-walk/id426826309"
+ },
+ {
+  "slug": "ladder",
+  "name": "Ladder",
+  "fullName": "LADDER Strength Training Plans",
+  "developer": "Ladder Technologies, Inc.",
+  "category": "Health & Fitness",
+  "rank": 2,
+  "chart": "Health & Fitness",
+  "rankLabel": "#2 in Health & Fitness",
+  "rating": 4.95,
+  "ratingCount": 222995,
+  "subtitle": "Fitness Workouts at Home & Gym",
+  "niche": "Workouts",
+  "group": "Workouts and running",
+  "oneLiner": "Black screens, lime buttons. Annual halves the $29.99 monthly price",
+  "keyNumber": {
+   "value": "$179.99",
+   "label": "Yearly plan"
+  },
+  "plans": 8,
+  "priceCount": 8,
+  "iapCount": 9,
+  "prices": [
+   {
+    "name": "ELITE+ Annual",
+    "price": "$479.99",
+    "period": "year"
+   },
+   {
+    "name": "ELITE Annual",
+    "price": "$449.99",
+    "period": "year"
+   },
+   {
+    "name": "PRO+ (Annual)",
+    "price": "$329.99",
+    "period": "year"
+   },
+   {
+    "name": "PRO Annual",
+    "price": "$179.99",
+    "period": "year"
+   },
+   {
+    "name": "PRO",
+    "price": "$29.99",
+    "period": "month"
+   },
+   {
+    "name": "ELITE+",
+    "price": "$49.99",
+    "period": "unknown"
+   },
+   {
+    "name": "ELITE",
+    "price": "$44.99",
+    "period": "unknown"
+   },
+   {
+    "name": "PRO+",
+    "price": "$34.99",
+    "period": "unknown"
+   }
+  ],
+  "yearly": 179.99,
+  "colors": [
+   {
+    "hex": "#FFFFFF",
+    "role": "60",
+    "name": "White",
+    "use": "Store page backgrounds, the pricing page and type on black"
+   },
+   {
+    "hex": "#0E0E0E",
+    "role": "30",
+    "name": "Near black",
+    "use": "Every app screen and the store headlines"
+   },
+   {
+    "hex": "#E6FF01",
+    "role": "10",
+    "name": "Lime yellow",
+    "use": "The icon, the main buttons, checks and chart bars"
+   }
+  ],
+  "font": {
+   "name": null,
+   "closeTo": "Archivo"
+  },
+  "paywall": {
+   "source": "web",
+   "src": "/taste/media/ladder/pw1.jpg",
+   "label": "Web pricing page, captured at iPhone size on 16 Nov 2026",
+   "captures": 3
+  },
+  "elements": [
+   "main-button",
+   "plan-picker",
+   "feature-list",
+   "plan-picker",
+   "feature-list",
+   "plan-picker"
+  ],
+  "icon": "/taste/media/ladder/icon.png",
+  "page": "/taste/ladder/",
+  "appStore": "https://apps.apple.com/us/app/ladder-strength-training-plans/id1502936453"
+ },
+ {
+  "slug": "opal",
+  "name": "Opal",
+  "fullName": "Opal: Screen Time Control",
+  "developer": "Opal OS",
+  "category": "Productivity",
+  "rank": 51,
+  "chart": "Productivity",
+  "rankLabel": "#51 in Productivity",
+  "rating": 4.72,
+  "ratingCount": 91558,
+  "subtitle": "Focus, App Blocker & Timer",
+  "niche": "Screen time",
+  "group": "Habits and learning",
+  "oneLiner": "Black glass screens. Yearly gets a 7-day trial, Monthly 3 days.",
+  "keyNumber": {
+   "value": "$99.99",
+   "label": "Yearly plan"
+  },
+  "plans": 6,
+  "priceCount": 5,
+  "iapCount": 10,
+  "prices": [
+   {
+    "name": "Yearly Plan",
+    "price": "$99.99",
+    "period": "year"
+   },
+   {
+    "name": "Monthly Plan",
+    "price": "$19.99",
+    "period": "month"
+   },
+   {
+    "name": "Opal Student Weekly",
+    "price": "$9.99",
+    "period": "week"
+   },
+   {
+    "name": "Weekly Plan",
+    "price": "$9.99",
+    "period": "week"
+   },
+   {
+    "name": "Weekly Plan",
+    "price": "$4.99",
+    "period": "week"
+   },
+   {
+    "name": "Opal Pro Subscription",
+    "price": "$49.99",
+    "period": "unknown"
+   }
+  ],
+  "yearly": 99.99,
+  "colors": [
+   {
+    "hex": "#0E0F11",
+    "role": "60",
+    "name": "Near black",
+    "use": "background of the app screens and the paywall"
+   },
+   {
+    "hex": "#EEEEEE",
+    "role": "30",
+    "name": "Soft white",
+    "use": "text, the icon ring and the selected plan tab"
+   },
+   {
+    "hex": "#B4D4E6",
+    "role": "10",
+    "name": "Ice blue",
+    "use": "key numbers, icons and the App Store backdrops"
+   }
+  ],
+  "font": {
+   "name": null,
+   "closeTo": "Inter"
+  },
+  "paywall": {
+   "source": "web",
+   "src": "/taste/media/opal/pw1.jpg",
+   "label": "Web pricing page, captured at iPhone size on 16 Nov 2026",
+   "captures": 3
+  },
+  "elements": [
+   "social-proof",
+   "plan-picker",
+   "feature-list",
+   "main-button"
+  ],
+  "icon": "/taste/media/opal/icon.png",
+  "page": "/taste/opal/",
+  "appStore": "https://apps.apple.com/us/app/opal-screen-time-control/id1497465230"
+ },
+ {
+  "slug": "myfitnesspal",
+  "name": "MyFitnessPal",
+  "fullName": "MyFitnessPal: Calorie Counter",
+  "developer": "MyFitnessPal, Inc.",
+  "category": "Health & Fitness",
+  "rank": 1,
+  "chart": "Health & Fitness",
+  "rankLabel": "#1 in Health & Fitness",
+  "rating": 4.71,
+  "ratingCount": 2393817,
+  "subtitle": "AI Coach & Nutrition Tracker",
+  "niche": "Calorie tracker",
+  "group": "Food",
+  "oneLiner": "Stone-photo store screens; the blue paywall routes free trials to Annual",
+  "keyNumber": {
+   "value": "$79.99",
+   "label": "Yearly plan"
+  },
+  "plans": 7,
+  "priceCount": 4,
+  "iapCount": 10,
+  "prices": [
+   {
+    "name": "MyFitnessPal Yearly Premium",
+    "price": "$79.99",
+    "period": "year"
+   },
+   {
+    "name": "MyFitnessPal Annual Premium",
+    "price": "$79.99",
+    "period": "year"
+   },
+   {
+    "name": "MyFitnessPal Yearly Premium",
+    "price": "$49.99",
+    "period": "year"
+   },
+   {
+    "name": "MyFitnessPal Monthly Premium",
+    "price": "$19.99",
+    "period": "month"
+   },
+   {
+    "name": "MyFitnessPal Monthly Premium",
+    "price": "$9.99",
+    "period": "month"
+   },
+   {
+    "name": "MyFitnessPal Premium",
+    "price": "$49.99",
+    "period": "unknown"
+   },
+   {
+    "name": "MyFitnessPal Premium",
+    "price": "$9.99",
+    "period": "unknown"
+   }
+  ],
+  "yearly": 79.99,
+  "colors": [
+   {
+    "hex": "#FFFFFF",
+    "role": "60",
+    "name": "White",
+    "use": "App screens, cards and the store headlines"
+   },
+   {
+    "hex": "#746A61",
+    "role": "30",
+    "name": "Stone grey",
+    "use": "The stone photo behind all 8 store screens"
+   },
+   {
+    "hex": "#0066EE",
+    "role": "10",
+    "name": "Bright blue",
+    "use": "The icon, the app's main buttons and the web paywall page"
+   }
+  ],
+  "font": {
+   "name": "Inter",
+   "closeTo": "Inter"
+  },
+  "paywall": {
+   "source": "web",
+   "src": "/taste/media/myfitnesspal/pw1.jpg",
+   "label": "Web pricing page, captured at iPhone size on 16 Nov 2026",
+   "captures": 3
+  },
+  "elements": [
+   "plan-picker",
+   "main-button",
+   "discount-badge",
+   "feature-list",
+   "social-proof",
+   "discount-badge",
+   "hero-visual"
+  ],
+  "icon": "/taste/media/myfitnesspal/icon.png",
+  "page": "/taste/myfitnesspal/",
+  "appStore": "https://apps.apple.com/us/app/myfitnesspal-calorie-counter/id341232718"
+ },
+ {
+  "slug": "rise",
+  "name": "Rise",
+  "fullName": "RISE: Sleep Tracker",
+  "developer": "Rise Science Inc",
+  "category": "Health & Fitness",
+  "rank": 61,
+  "chart": "Health & Fitness",
+  "rankLabel": "#61 in Health & Fitness",
+  "rating": 4.73,
+  "ratingCount": 74285,
+  "subtitle": "Become a morning person",
+  "niche": "Sleep",
+  "group": "Sleep and mind",
+  "oneLiner": "Black sleep-debt tracker; a countdown coupon sells Quarterly at 40% off",
+  "keyNumber": {
+   "value": "$69.99",
+   "label": "Highest listed price"
+  },
+  "plans": 6,
+  "priceCount": 5,
+  "iapCount": 10,
+  "prices": [
+   {
+    "name": "Sleep & Energy Premium",
+    "price": "$69.99",
+    "period": "unknown"
+   },
+   {
+    "name": "Sleep Improvement Membership",
+    "price": "$69.99",
+    "period": "unknown"
+   },
+   {
+    "name": "Sleep Improvement Membership",
+    "price": "$59.99",
+    "period": "unknown"
+   },
+   {
+    "name": "Sleep Improvement Membership",
+    "price": "$35.99",
+    "period": "unknown"
+   },
+   {
+    "name": "AI Expert Access",
+    "price": "$29.99",
+    "period": "unknown"
+   },
+   {
+    "name": "Sleep Improvement Membership",
+    "price": "$9.99",
+    "period": "unknown"
+   }
+  ],
+  "yearly": null,
+  "colors": [
+   {
+    "hex": "#17151A",
+    "role": "60",
+    "name": "Night black",
+    "use": "Background of the app screens and widgets"
+   },
+   {
+    "hex": "#7D05FC",
+    "role": "30",
+    "name": "Electric violet",
+    "use": "The icon, the store backdrops, tags and buttons"
+   },
+   {
+    "hex": "#C56B3D",
+    "role": "10",
+    "name": "Sunrise orange",
+    "use": "The sunrise glow and energy numbers like 77%"
+   }
+  ],
+  "font": {
+   "name": null,
+   "closeTo": "Work Sans"
+  },
+  "paywall": {
+   "source": "web",
+   "src": "/taste/media/rise/pw1.jpg",
+   "label": "Web pricing page, captured at iPhone size on 16 Nov 2026",
+   "captures": 3
+  },
+  "elements": [
+   "discount-badge",
+   "hero-visual",
+   "discount-badge",
+   "plan-picker",
+   "main-button",
+   "legal-links"
+  ],
+  "icon": "/taste/media/rise/icon.png",
+  "page": "/taste/rise/",
+  "appStore": "https://apps.apple.com/us/app/rise-sleep-tracker/id1453884781"
+ },
+ {
+  "slug": "headspace",
+  "name": "Headspace",
+  "fullName": "Headspace: Sleep & Meditation",
+  "developer": "Headspace Inc.",
+  "category": "Health & Fitness",
+  "rank": 13,
+  "chart": "Health & Fitness",
+  "rankLabel": "#13 in Health & Fitness",
+  "rating": 4.84,
+  "ratingCount": 973750,
+  "subtitle": "Mental Health, Stress, Anxiety",
+  "niche": "Meditation",
+  "group": "Sleep and mind",
+  "oneLiner": "Orange and yellow screens. The web deal cuts year one to $34.99",
+  "keyNumber": {
+   "value": "$69.99",
+   "label": "Yearly plan"
+  },
+  "plans": 6,
+  "priceCount": 3,
+  "iapCount": 10,
+  "prices": [
+   {
+    "name": "Annual Subscription",
+    "price": "$69.99",
+    "period": "year"
+   },
+   {
+    "name": "Monthly Subscription",
+    "price": "$12.99",
+    "period": "month"
+   },
+   {
+    "name": "Headspace",
+    "price": "$94.99",
+    "period": "unknown"
+   },
+   {
+    "name": "Headspace Plus",
+    "price": "$94.99",
+    "period": "unknown"
+   },
+   {
+    "name": "Headspace",
+    "price": "$12.99",
+    "period": "unknown"
+   },
+   {
+    "name": "Headspace Plus",
+    "price": "$12.99",
+    "period": "unknown"
+   }
+  ],
+  "yearly": 69.99,
+  "colors": [
+   {
+    "hex": "#FFFFFF",
+    "role": "60",
+    "name": "White",
+    "use": "Background of the web paywall and the app screens"
+   },
+   {
+    "hex": "#FF7300",
+    "role": "30",
+    "name": "Bright orange",
+    "use": "The icon, the lower waves and key words in store headlines"
+   },
+   {
+    "hex": "#1A54F6",
+    "role": "10",
+    "name": "Cobalt blue",
+    "use": "Therapy screens; the buttons use the near twin #0061EE"
+   }
+  ],
+  "font": {
+   "name": "Headspace Apercu",
+   "closeTo": "Hanken Grotesk"
+  },
+  "paywall": {
+   "source": "web",
+   "src": "/taste/media/headspace/pw1.jpg",
+   "label": "Web pricing page, captured at iPhone size on 16 Nov 2026",
+   "captures": 1
+  },
+  "elements": [
+   "plan-picker",
+   "discount-badge",
+   "legal-links",
+   "main-button"
+  ],
+  "icon": "/taste/media/headspace/icon.png",
+  "page": "/taste/headspace/",
+  "appStore": "https://apps.apple.com/us/app/headspace-sleep-meditation/id493145008"
+ },
+ {
+  "slug": "hevy",
+  "name": "Hevy",
+  "fullName": "Hevy - Workout Tracker Gym Log",
+  "developer": "Hevy Studios S.L.",
+  "category": "Health & Fitness",
+  "rank": 35,
+  "chart": "Health & Fitness",
+  "rankLabel": "#35 in Health & Fitness",
+  "rating": 4.92,
+  "ratingCount": 103763,
+  "subtitle": "Weight Lifting Routine Planner",
+  "niche": "Workouts",
+  "group": "Workouts and running",
+  "oneLiner": "White screens, blue buttons; the paywall preselects Yearly at $23.99",
+  "keyNumber": {
+   "value": "$23.99",
+   "label": "Yearly plan"
+  },
+  "plans": 4,
+  "priceCount": 4,
+  "iapCount": 4,
+  "prices": [
+   {
+    "name": "Hevy Pro - Yearly",
+    "price": "$23.99",
+    "period": "year"
+   },
+   {
+    "name": "Hevy Pro - Monthly",
+    "price": "$3.99",
+    "period": "month"
+   },
+   {
+    "name": "Hevy Pro - Monthly",
+    "price": "$2.99",
+    "period": "month"
+   },
+   {
+    "name": "Hevy Pro - Lifetime",
+    "price": "$74.99",
+    "period": "lifetime"
+   }
+  ],
+  "yearly": 23.99,
+  "colors": [
+   {
+    "hex": "#FFFFFF",
+    "role": "60",
+    "name": "White",
+    "use": "Background of the app screens and the store shots"
+   },
+   {
+    "hex": "#000000",
+    "role": "30",
+    "name": "Black",
+    "use": "The icon, the store headlines and the app's text"
+   },
+   {
+    "hex": "#267EE8",
+    "role": "10",
+    "name": "Bright blue",
+    "use": "Buttons, links, charts and the band under each store shot"
+   }
+  ],
+  "font": {
+   "name": "Figtree",
+   "closeTo": "Figtree"
+  },
+  "paywall": {
+   "source": "web",
+   "src": "/taste/media/hevy/pw1.jpg",
+   "label": "Web pricing page, captured at iPhone size on 16 Nov 2026",
+   "captures": 2
+  },
+  "elements": [
+   "plan-picker",
+   "main-button",
+   "feature-list",
+   "legal-links"
+  ],
+  "icon": "/taste/media/hevy/icon.png",
+  "page": "/taste/hevy/",
+  "appStore": "https://apps.apple.com/us/app/hevy-workout-tracker-gym-log/id1458862350"
+ },
+ {
+  "slug": "huckleberry",
+  "name": "Huckleberry",
+  "fullName": "Huckleberry: Baby Tracker",
+  "developer": "Huckleberry Labs Inc.",
+  "category": "Medical",
+  "rank": 1,
+  "chart": "Medical",
+  "rankLabel": "#1 in Medical",
+  "rating": 4.92,
+  "ratingCount": 78874,
+  "subtitle": "Baby Sleep & Nap Schedule App",
+  "niche": "Baby tracker",
+  "group": "Health trackers",
+  "oneLiner": "Aqua screens, navy type; Yearly cuts Premium to $9.99 a month",
+  "keyNumber": {
+   "value": "$119.99",
+   "label": "Yearly plan"
+  },
+  "plans": 5,
+  "priceCount": 5,
+  "iapCount": 10,
+  "prices": [
+   {
+    "name": "Huckleberry Premium",
+    "price": "$119.99",
+    "period": "year"
+   },
+   {
+    "name": "Huckleberry Plus",
+    "price": "$68.99",
+    "period": "year"
+   },
+   {
+    "name": "Huckleberry Premium",
+    "price": "$14.99",
+    "period": "month"
+   },
+   {
+    "name": "Huckleberry Plus",
+    "price": "$11.99",
+    "period": "month"
+   },
+   {
+    "name": "Sleep Improvement Plan",
+    "price": "$49.99",
+    "period": "unknown"
+   },
+   {
+    "name": "Expedited Service",
+    "price": "$19.99",
+    "period": "consumable"
+   }
+  ],
+  "yearly": 119.99,
+  "colors": [
+   {
+    "hex": "#F3FFFF",
+    "role": "60",
+    "name": "Ice white",
+    "use": "Background of 3 of 8 store shots and the app screens"
+   },
+   {
+    "hex": "#31BCD3",
+    "role": "30",
+    "name": "Berry cyan",
+    "use": "The berry on the icon; a lighter twin, #36D2E9, fills buttons and sleep cards"
+   },
+   {
+    "hex": "#CDCC04",
+    "role": "10",
+    "name": "Leaf lime",
+    "use": "The icon’s 2 leaves and the Premium card’s outline"
+   }
+  ],
+  "font": {
+   "name": "Avenir",
+   "closeTo": "Nunito Sans"
+  },
+  "paywall": {
+   "source": "web",
+   "src": "/taste/media/huckleberry/pw1.jpg",
+   "label": "Web pricing page, captured at iPhone size on 16 Nov 2026",
+   "captures": 4
+  },
+  "elements": [
+   "plan-picker",
+   "plan-picker",
+   "discount-badge",
+   "main-button",
+   "feature-list",
+   "plan-picker"
+  ],
+  "icon": "/taste/media/huckleberry/icon.png",
+  "page": "/taste/huckleberry/",
+  "appStore": "https://apps.apple.com/us/app/huckleberry-baby-tracker/id1169136078"
+ },
+ {
   "slug": "cal-ai",
   "name": "Cal AI",
   "fullName": "Cal AI - Calorie Tracker",
@@ -14,12 +805,15 @@ window.TASU_APPS = [
   "ratingCount": 375860,
   "subtitle": "Food & Macro Counter",
   "niche": "Calorie tracker",
+  "group": "Food",
   "oneLiner": "Black and white calorie scanner; results need the Unlimited plan",
   "keyNumber": {
    "value": "$29.99",
-   "label": "Top Unlimited price"
+   "label": "Highest listed price"
   },
   "plans": 6,
+  "priceCount": 5,
+  "iapCount": 10,
   "prices": [
    {
     "name": "Unlimited",
@@ -92,98 +886,6 @@ window.TASU_APPS = [
   "appStore": "https://apps.apple.com/us/app/cal-ai-calorie-tracker/id6480417616"
  },
  {
-  "slug": "opal",
-  "name": "Opal",
-  "fullName": "Opal: Screen Time Control",
-  "developer": "Opal OS",
-  "category": "Productivity",
-  "rank": 51,
-  "chart": "Productivity",
-  "rankLabel": "#51 in Productivity",
-  "rating": 4.72,
-  "ratingCount": 91558,
-  "subtitle": "Focus, App Blocker & Timer",
-  "niche": "Screen time",
-  "oneLiner": "Black glass screens. Yearly gets a 7-day trial, Monthly 3 days.",
-  "keyNumber": {
-   "value": "$99.99",
-   "label": "Yearly plan"
-  },
-  "plans": 6,
-  "prices": [
-   {
-    "name": "Yearly Plan",
-    "price": "$99.99",
-    "period": "year"
-   },
-   {
-    "name": "Monthly Plan",
-    "price": "$19.99",
-    "period": "month"
-   },
-   {
-    "name": "Opal Student Weekly",
-    "price": "$9.99",
-    "period": "week"
-   },
-   {
-    "name": "Weekly Plan",
-    "price": "$9.99",
-    "period": "week"
-   },
-   {
-    "name": "Weekly Plan",
-    "price": "$4.99",
-    "period": "week"
-   },
-   {
-    "name": "Opal Pro Subscription",
-    "price": "$49.99",
-    "period": "unknown"
-   }
-  ],
-  "yearly": 99.99,
-  "colors": [
-   {
-    "hex": "#0E0F11",
-    "role": "60",
-    "name": "Near black",
-    "use": "background of the app screens and the paywall"
-   },
-   {
-    "hex": "#EEEEEE",
-    "role": "30",
-    "name": "Soft white",
-    "use": "text, the icon ring and the selected plan tab"
-   },
-   {
-    "hex": "#B4D4E6",
-    "role": "10",
-    "name": "Ice blue",
-    "use": "key numbers, icons and the App Store backdrops"
-   }
-  ],
-  "font": {
-   "name": "SF Pro",
-   "closeTo": "Inter"
-  },
-  "paywall": {
-   "source": "web",
-   "src": "/taste/media/opal/pw1.jpg",
-   "label": "Web pricing page, captured at iPhone size on 15 Nov 2026",
-   "captures": 3
-  },
-  "elements": [
-   "social-proof",
-   "plan-picker",
-   "feature-list",
-   "main-button"
-  ],
-  "icon": "/taste/media/opal/icon.png",
-  "page": "/taste/opal/",
-  "appStore": "https://apps.apple.com/us/app/opal-screen-time-control/id1497465230"
- },
- {
   "slug": "duolingo",
   "name": "Duolingo",
   "fullName": "Duolingo: Learn Languages",
@@ -196,12 +898,15 @@ window.TASU_APPS = [
   "ratingCount": 5592354,
   "subtitle": "Spanish, French, Chess & Math",
   "niche": "Language learning",
+  "group": "Habits and learning",
   "oneLiner": "Cartoon lessons spend energy; Super makes it unlimited, 14 days free",
   "keyNumber": {
    "value": "$119.99",
-   "label": "Top Super Duolingo price"
+   "label": "Highest listed price"
   },
   "plans": 5,
+  "priceCount": 5,
+  "iapCount": 10,
   "prices": [
    {
     "name": "Super Duolingo",
@@ -284,681 +989,6 @@ window.TASU_APPS = [
   "appStore": "https://apps.apple.com/us/app/duolingo-learn-languages/id570060128"
  },
  {
-  "slug": "rise",
-  "name": "Rise",
-  "fullName": "RISE: Sleep Tracker",
-  "developer": "Rise Science Inc",
-  "category": "Health & Fitness",
-  "rank": 61,
-  "chart": "Health & Fitness",
-  "rankLabel": "#61 in Health & Fitness",
-  "rating": 4.73,
-  "ratingCount": 74285,
-  "subtitle": "Become a morning person",
-  "niche": "Sleep",
-  "oneLiner": "Black sleep-debt tracker; a countdown coupon sells Quarterly at 40% off",
-  "keyNumber": {
-   "value": "$69.99",
-   "label": "Top membership price"
-  },
-  "plans": 6,
-  "prices": [
-   {
-    "name": "Sleep & Energy Premium",
-    "price": "$69.99",
-    "period": "unknown"
-   },
-   {
-    "name": "Sleep Improvement Membership",
-    "price": "$69.99",
-    "period": "unknown"
-   },
-   {
-    "name": "Sleep Improvement Membership",
-    "price": "$59.99",
-    "period": "unknown"
-   },
-   {
-    "name": "Sleep Improvement Membership",
-    "price": "$35.99",
-    "period": "unknown"
-   },
-   {
-    "name": "AI Expert Access",
-    "price": "$29.99",
-    "period": "unknown"
-   },
-   {
-    "name": "Sleep Improvement Membership",
-    "price": "$9.99",
-    "period": "unknown"
-   }
-  ],
-  "yearly": null,
-  "colors": [
-   {
-    "hex": "#17151A",
-    "role": "60",
-    "name": "Night black",
-    "use": "Background of the app screens and widgets"
-   },
-   {
-    "hex": "#7D05FC",
-    "role": "30",
-    "name": "Electric violet",
-    "use": "The icon, the store backdrops, tags and buttons"
-   },
-   {
-    "hex": "#C56B3D",
-    "role": "10",
-    "name": "Sunrise orange",
-    "use": "The sunrise glow and energy numbers like 77%"
-   }
-  ],
-  "font": {
-   "name": null,
-   "closeTo": "Work Sans"
-  },
-  "paywall": {
-   "source": "web",
-   "src": "/taste/media/rise/pw1.jpg",
-   "label": "Web pricing page, captured at iPhone size on 15 Nov 2026",
-   "captures": 3
-  },
-  "elements": [
-   "discount-badge",
-   "hero-visual",
-   "discount-badge",
-   "plan-picker",
-   "main-button",
-   "legal-links"
-  ],
-  "icon": "/taste/media/rise/icon.png",
-  "page": "/taste/rise/",
-  "appStore": "https://apps.apple.com/us/app/rise-sleep-tracker/id1453884781"
- },
- {
-  "slug": "headspace",
-  "name": "Headspace",
-  "fullName": "Headspace: Sleep & Meditation",
-  "developer": "Headspace Inc.",
-  "category": "Health & Fitness",
-  "rank": 13,
-  "chart": "Health & Fitness",
-  "rankLabel": "#13 in Health & Fitness",
-  "rating": 4.84,
-  "ratingCount": 973750,
-  "subtitle": "Mental Health, Stress, Anxiety",
-  "niche": "Meditation",
-  "oneLiner": "Orange and yellow screens. The web deal cuts year one to $34.99",
-  "keyNumber": {
-   "value": "$69.99",
-   "label": "Yearly plan"
-  },
-  "plans": 6,
-  "prices": [
-   {
-    "name": "Annual Subscription",
-    "price": "$69.99",
-    "period": "year"
-   },
-   {
-    "name": "Monthly Subscription",
-    "price": "$12.99",
-    "period": "month"
-   },
-   {
-    "name": "Headspace",
-    "price": "$94.99",
-    "period": "unknown"
-   },
-   {
-    "name": "Headspace Plus",
-    "price": "$94.99",
-    "period": "unknown"
-   },
-   {
-    "name": "Headspace",
-    "price": "$12.99",
-    "period": "unknown"
-   },
-   {
-    "name": "Headspace Plus",
-    "price": "$12.99",
-    "period": "unknown"
-   }
-  ],
-  "yearly": 69.99,
-  "colors": [
-   {
-    "hex": "#FFFFFF",
-    "role": "60",
-    "name": "White",
-    "use": "Background of the web paywall and the app screens"
-   },
-   {
-    "hex": "#FF7300",
-    "role": "30",
-    "name": "Bright orange",
-    "use": "The icon, the lower waves and key words in store headlines"
-   },
-   {
-    "hex": "#1A54F6",
-    "role": "10",
-    "name": "Cobalt blue",
-    "use": "Therapy screens; the buttons use the near twin #0061EE"
-   }
-  ],
-  "font": {
-   "name": "Headspace Apercu",
-   "closeTo": "Hanken Grotesk"
-  },
-  "paywall": {
-   "source": "web",
-   "src": "/taste/media/headspace/pw1.jpg",
-   "label": "Web pricing page, captured at iPhone size on 15 Nov 2026",
-   "captures": 1
-  },
-  "elements": [
-   "plan-picker",
-   "discount-badge",
-   "legal-links",
-   "main-button"
-  ],
-  "icon": "/taste/media/headspace/icon.png",
-  "page": "/taste/headspace/",
-  "appStore": "https://apps.apple.com/us/app/headspace-sleep-meditation/id493145008"
- },
- {
-  "slug": "strava",
-  "name": "Strava",
-  "fullName": "Strava: Run, Bike, Walk",
-  "developer": "Strava, Inc.",
-  "category": "Health & Fitness",
-  "rank": 4,
-  "chart": "Health & Fitness",
-  "rankLabel": "#4 in Health & Fitness",
-  "rating": 4.81,
-  "ratingCount": 381429,
-  "subtitle": "Track & share with friends",
-  "niche": "Running",
-  "oneLiner": "Black screens, orange routes. 30 days free, then $79.99 a year",
-  "keyNumber": {
-   "value": "$79.99",
-   "label": "Individual plan, per year"
-  },
-  "plans": 9,
-  "prices": [
-   {
-    "name": "1 Year",
-    "price": "$59.99",
-    "period": "year"
-   },
-   {
-    "name": "1 Month",
-    "price": "$5.99",
-    "period": "month"
-   },
-   {
-    "name": "Strava + Runna Subscription",
-    "price": "$149.99",
-    "period": "unknown"
-   },
-   {
-    "name": "Strava Family Plan Subscription",
-    "price": "$139.99",
-    "period": "unknown"
-   },
-   {
-    "name": "Strava Subscription",
-    "price": "$79.99",
-    "period": "unknown"
-   },
-   {
-    "name": "Subscription",
-    "price": "$79.99",
-    "period": "unknown"
-   },
-   {
-    "name": "Runna Standalone Subscription",
-    "price": "$19.99",
-    "period": "unknown"
-   },
-   {
-    "name": "Strava Subscription",
-    "price": "$11.99",
-    "period": "unknown"
-   },
-   {
-    "name": "Subscription",
-    "price": "$11.99",
-    "period": "unknown"
-   }
-  ],
-  "yearly": 79.99,
-  "colors": [
-   {
-    "hex": "#141414",
-    "role": "60",
-    "name": "Near black",
-    "use": "Background of the app screens and the paywall page"
-   },
-   {
-    "hex": "#FFFFFF",
-    "role": "30",
-    "name": "White",
-    "use": "Headlines, text, icons and the logo on the icon"
-   },
-   {
-    "hex": "#FD5200",
-    "role": "10",
-    "name": "Strava orange",
-    "use": "The icon, the main buttons, routes and the active tab"
-   }
-  ],
-  "font": {
-   "name": null,
-   "closeTo": "Archivo"
-  },
-  "paywall": {
-   "source": "web",
-   "src": "/taste/media/strava/pw1.jpg",
-   "label": "Web pricing page, captured at iPhone size on 15 Nov 2026",
-   "captures": 5
-  },
-  "elements": [
-   "hero-visual",
-   "trial-timeline",
-   "discount-badge",
-   "plan-picker",
-   "plan-picker",
-   "main-button"
-  ],
-  "icon": "/taste/media/strava/icon.png",
-  "page": "/taste/strava/",
-  "appStore": "https://apps.apple.com/us/app/strava-run-bike-walk/id426826309"
- },
- {
-  "slug": "myfitnesspal",
-  "name": "MyFitnessPal",
-  "fullName": "MyFitnessPal: Calorie Counter",
-  "developer": "MyFitnessPal, Inc.",
-  "category": "Health & Fitness",
-  "rank": 1,
-  "chart": "Health & Fitness",
-  "rankLabel": "#1 in Health & Fitness",
-  "rating": 4.71,
-  "ratingCount": 2393817,
-  "subtitle": "AI Coach & Nutrition Tracker",
-  "niche": "Calorie tracker",
-  "oneLiner": "Stone-photo store screens; the blue paywall routes free trials to Annual",
-  "keyNumber": {
-   "value": "$79.99",
-   "label": "Yearly plan"
-  },
-  "plans": 7,
-  "prices": [
-   {
-    "name": "MyFitnessPal Yearly Premium",
-    "price": "$79.99",
-    "period": "year"
-   },
-   {
-    "name": "MyFitnessPal Annual Premium",
-    "price": "$79.99",
-    "period": "year"
-   },
-   {
-    "name": "MyFitnessPal Yearly Premium",
-    "price": "$49.99",
-    "period": "year"
-   },
-   {
-    "name": "MyFitnessPal Monthly Premium",
-    "price": "$19.99",
-    "period": "month"
-   },
-   {
-    "name": "MyFitnessPal Monthly Premium",
-    "price": "$9.99",
-    "period": "month"
-   },
-   {
-    "name": "MyFitnessPal Premium",
-    "price": "$49.99",
-    "period": "unknown"
-   },
-   {
-    "name": "MyFitnessPal Premium",
-    "price": "$9.99",
-    "period": "unknown"
-   }
-  ],
-  "yearly": 79.99,
-  "colors": [
-   {
-    "hex": "#FFFFFF",
-    "role": "60",
-    "name": "White",
-    "use": "App screens, cards and the store headlines"
-   },
-   {
-    "hex": "#746A61",
-    "role": "30",
-    "name": "Stone grey",
-    "use": "The stone photo behind all 8 store screens"
-   },
-   {
-    "hex": "#0066EE",
-    "role": "10",
-    "name": "Bright blue",
-    "use": "The icon, the app's main buttons and the web paywall page"
-   }
-  ],
-  "font": {
-   "name": "Inter",
-   "closeTo": "Inter"
-  },
-  "paywall": {
-   "source": "web",
-   "src": "/taste/media/myfitnesspal/pw1.jpg",
-   "label": "Web pricing page, captured at iPhone size on 15 Nov 2026",
-   "captures": 3
-  },
-  "elements": [
-   "plan-picker",
-   "main-button",
-   "discount-badge",
-   "feature-list",
-   "social-proof",
-   "discount-badge",
-   "hero-visual"
-  ],
-  "icon": "/taste/media/myfitnesspal/icon.png",
-  "page": "/taste/myfitnesspal/",
-  "appStore": "https://apps.apple.com/us/app/myfitnesspal-calorie-counter/id341232718"
- },
- {
-  "slug": "ladder",
-  "name": "Ladder",
-  "fullName": "LADDER Strength Training Plans",
-  "developer": "Ladder Technologies, Inc.",
-  "category": "Health & Fitness",
-  "rank": 2,
-  "chart": "Health & Fitness",
-  "rankLabel": "#2 in Health & Fitness",
-  "rating": 4.95,
-  "ratingCount": 222995,
-  "subtitle": "Fitness Workouts at Home & Gym",
-  "niche": "Workouts",
-  "oneLiner": "Black screens, lime buttons. Annual halves the $29.99 monthly price",
-  "keyNumber": {
-   "value": "$179.99",
-   "label": "PRO Annual, per year"
-  },
-  "plans": 8,
-  "prices": [
-   {
-    "name": "ELITE+ Annual",
-    "price": "$479.99",
-    "period": "year"
-   },
-   {
-    "name": "ELITE Annual",
-    "price": "$449.99",
-    "period": "year"
-   },
-   {
-    "name": "PRO+ (Annual)",
-    "price": "$329.99",
-    "period": "year"
-   },
-   {
-    "name": "PRO Annual",
-    "price": "$179.99",
-    "period": "year"
-   },
-   {
-    "name": "ELITE+",
-    "price": "$49.99",
-    "period": "unknown"
-   },
-   {
-    "name": "ELITE",
-    "price": "$44.99",
-    "period": "unknown"
-   },
-   {
-    "name": "PRO+",
-    "price": "$34.99",
-    "period": "unknown"
-   },
-   {
-    "name": "PRO",
-    "price": "$29.99",
-    "period": "unknown"
-   }
-  ],
-  "yearly": 179.99,
-  "colors": [
-   {
-    "hex": "#FFFFFF",
-    "role": "60",
-    "name": "White",
-    "use": "Store page backgrounds, the pricing page and type on black"
-   },
-   {
-    "hex": "#0E0E0E",
-    "role": "30",
-    "name": "Near black",
-    "use": "Every app screen and the store headlines"
-   },
-   {
-    "hex": "#E6FF01",
-    "role": "10",
-    "name": "Lime yellow",
-    "use": "The icon, the main buttons, checks and chart bars"
-   }
-  ],
-  "font": {
-   "name": null,
-   "closeTo": "Archivo"
-  },
-  "paywall": {
-   "source": "web",
-   "src": "/taste/media/ladder/pw1.jpg",
-   "label": "Web pricing page, captured at iPhone size on 15 Nov 2026",
-   "captures": 3
-  },
-  "elements": [
-   "main-button",
-   "plan-picker",
-   "feature-list",
-   "plan-picker",
-   "feature-list",
-   "plan-picker"
-  ],
-  "icon": "/taste/media/ladder/icon.png",
-  "page": "/taste/ladder/",
-  "appStore": "https://apps.apple.com/us/app/ladder-strength-training-plans/id1502936453"
- },
- {
-  "slug": "hevy",
-  "name": "Hevy",
-  "fullName": "Hevy - Workout Tracker Gym Log",
-  "developer": "Hevy Studios S.L.",
-  "category": "Health & Fitness",
-  "rank": 35,
-  "chart": "Health & Fitness",
-  "rankLabel": "#35 in Health & Fitness",
-  "rating": 4.92,
-  "ratingCount": 103763,
-  "subtitle": "Weight Lifting Routine Planner",
-  "niche": "Workouts",
-  "oneLiner": "White screens, blue buttons; the paywall preselects Yearly at $23.99",
-  "keyNumber": {
-   "value": "$23.99",
-   "label": "Yearly plan"
-  },
-  "plans": 4,
-  "prices": [
-   {
-    "name": "Hevy Pro - Yearly",
-    "price": "$23.99",
-    "period": "year"
-   },
-   {
-    "name": "Hevy Pro - Monthly",
-    "price": "$3.99",
-    "period": "month"
-   },
-   {
-    "name": "Hevy Pro - Monthly",
-    "price": "$2.99",
-    "period": "month"
-   },
-   {
-    "name": "Hevy Pro - Lifetime",
-    "price": "$74.99",
-    "period": "lifetime"
-   }
-  ],
-  "yearly": 23.99,
-  "colors": [
-   {
-    "hex": "#FFFFFF",
-    "role": "60",
-    "name": "White",
-    "use": "Background of the app screens and the store shots"
-   },
-   {
-    "hex": "#000000",
-    "role": "30",
-    "name": "Black",
-    "use": "The icon, the store headlines and the app's text"
-   },
-   {
-    "hex": "#267EE8",
-    "role": "10",
-    "name": "Bright blue",
-    "use": "Buttons, links, charts and the band under each store shot"
-   }
-  ],
-  "font": {
-   "name": "Figtree",
-   "closeTo": "Figtree"
-  },
-  "paywall": {
-   "source": "web",
-   "src": "/taste/media/hevy/pw1.jpg",
-   "label": "Web pricing page, captured at iPhone size on 15 Nov 2026",
-   "captures": 2
-  },
-  "elements": [
-   "plan-picker",
-   "main-button",
-   "feature-list",
-   "legal-links"
-  ],
-  "icon": "/taste/media/hevy/icon.png",
-  "page": "/taste/hevy/",
-  "appStore": "https://apps.apple.com/us/app/hevy-workout-tracker-gym-log/id1458862350"
- },
- {
-  "slug": "huckleberry",
-  "name": "Huckleberry",
-  "fullName": "Huckleberry: Baby Tracker",
-  "developer": "Huckleberry Labs Inc.",
-  "category": "Medical",
-  "rank": 1,
-  "chart": "Medical",
-  "rankLabel": "#1 in Medical",
-  "rating": 4.92,
-  "ratingCount": 78874,
-  "subtitle": "Baby Sleep & Nap Schedule App",
-  "niche": "Baby tracker",
-  "oneLiner": "Aqua screens, navy type; Yearly cuts Premium to $9.99 a month",
-  "keyNumber": {
-   "value": "$119.99",
-   "label": "Top Premium price"
-  },
-  "plans": 5,
-  "prices": [
-   {
-    "name": "Huckleberry Premium",
-    "price": "$119.99",
-    "period": "unknown"
-   },
-   {
-    "name": "Huckleberry Plus",
-    "price": "$68.99",
-    "period": "unknown"
-   },
-   {
-    "name": "Sleep Improvement Plan",
-    "price": "$49.99",
-    "period": "unknown"
-   },
-   {
-    "name": "Huckleberry Premium",
-    "price": "$14.99",
-    "period": "unknown"
-   },
-   {
-    "name": "Huckleberry Plus",
-    "price": "$11.99",
-    "period": "unknown"
-   },
-   {
-    "name": "Expedited Service",
-    "price": "$19.99",
-    "period": "consumable"
-   }
-  ],
-  "yearly": null,
-  "colors": [
-   {
-    "hex": "#F3FFFF",
-    "role": "60",
-    "name": "Ice white",
-    "use": "Background of 3 of 8 store shots and the app screens"
-   },
-   {
-    "hex": "#31BCD3",
-    "role": "30",
-    "name": "Berry cyan",
-    "use": "The berry on the icon; a lighter twin, #36D2E9, fills buttons and sleep cards"
-   },
-   {
-    "hex": "#CDCC04",
-    "role": "10",
-    "name": "Leaf lime",
-    "use": "The icon’s 2 leaves and the Premium card’s outline"
-   }
-  ],
-  "font": {
-   "name": "Avenir",
-   "closeTo": "Nunito Sans"
-  },
-  "paywall": {
-   "source": "web",
-   "src": "/taste/media/huckleberry/pw1.jpg",
-   "label": "Web pricing page, captured at iPhone size on 15 Nov 2026",
-   "captures": 4
-  },
-  "elements": [
-   "plan-picker",
-   "plan-picker",
-   "discount-badge",
-   "main-button",
-   "feature-list",
-   "plan-picker"
-  ],
-  "icon": "/taste/media/huckleberry/icon.png",
-  "page": "/taste/huckleberry/",
-  "appStore": "https://apps.apple.com/us/app/huckleberry-baby-tracker/id1169136078"
- },
- {
   "slug": "flo",
   "name": "Flo",
   "fullName": "Flo Cycle & Period Tracker",
@@ -971,12 +1001,15 @@ window.TASU_APPS = [
   "ratingCount": 2022525,
   "subtitle": "Ovulation & Pregnancy Calendar",
   "niche": "Cycle tracker",
+  "group": "Health trackers",
   "oneLiner": "Lavender screens, pink accents; plans named for pregnancy, ovulation and birth control",
   "keyNumber": {
    "value": "$59.99",
-   "label": "Top Flo Premium price"
+   "label": "Highest listed price"
   },
   "plans": 9,
+  "priceCount": 8,
+  "iapCount": 10,
   "prices": [
    {
     "name": "Flo Premium",
@@ -1071,12 +1104,15 @@ window.TASU_APPS = [
   "ratingCount": 776001,
   "subtitle": "Daily Journal & Habit Tracker",
   "niche": "Habits and self-care",
+  "group": "Habits and learning",
   "oneLiner": "Sky-blue scenes, a pet bird; Finch Plus spans $5.99 to $69.99",
   "keyNumber": {
    "value": "$69.99",
-   "label": "Top Finch Plus price"
+   "label": "Highest listed price"
   },
   "plans": 9,
+  "priceCount": 9,
+  "iapCount": 10,
   "prices": [
    {
     "name": "Finch Plus",

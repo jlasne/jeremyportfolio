@@ -1,67 +1,79 @@
 {
   "createdAt": "2026-11-15",
   "source": "App Store data, US, 15 Nov 2026 (US Top Grossing category charts, iTunes lookup, App Store In-App Purchases list)",
-  "note": "Display order of the gallery, most striking first. build.mjs reads this file; copy the order here when the selection changes.",
+  "note": "Display order of the gallery: apps with a real paywall capture first, drawn plans last. build.mjs reads this file; copy the order here when the selection changes. \"group\" names the gallery chip of each app; the App Store chart stays in the rank line.",
   "apps": [
     {
       "order": 1,
-      "slug": "cal-ai",
-      "niche": "Calorie tracker"
+      "slug": "strava",
+      "niche": "Running",
+      "group": "Workouts and running"
     },
     {
       "order": 2,
-      "slug": "opal",
-      "niche": "Screen time"
+      "slug": "ladder",
+      "niche": "Workouts",
+      "group": "Workouts and running"
     },
     {
       "order": 3,
-      "slug": "duolingo",
-      "niche": "Language learning"
+      "slug": "opal",
+      "niche": "Screen time",
+      "group": "Habits and learning"
     },
     {
       "order": 4,
-      "slug": "rise",
-      "niche": "Sleep"
+      "slug": "myfitnesspal",
+      "niche": "Calorie tracker",
+      "group": "Food"
     },
     {
       "order": 5,
-      "slug": "headspace",
-      "niche": "Meditation"
+      "slug": "rise",
+      "niche": "Sleep",
+      "group": "Sleep and mind"
     },
     {
       "order": 6,
-      "slug": "strava",
-      "niche": "Running"
+      "slug": "headspace",
+      "niche": "Meditation",
+      "group": "Sleep and mind"
     },
     {
       "order": 7,
-      "slug": "myfitnesspal",
-      "niche": "Calorie tracker"
+      "slug": "hevy",
+      "niche": "Workouts",
+      "group": "Workouts and running"
     },
     {
       "order": 8,
-      "slug": "ladder",
-      "niche": "Workouts"
+      "slug": "huckleberry",
+      "niche": "Baby tracker",
+      "group": "Health trackers"
     },
     {
       "order": 9,
-      "slug": "hevy",
-      "niche": "Workouts"
+      "slug": "cal-ai",
+      "niche": "Calorie tracker",
+      "group": "Food"
     },
     {
       "order": 10,
-      "slug": "huckleberry",
-      "niche": "Baby tracker"
+      "slug": "duolingo",
+      "niche": "Language learning",
+      "group": "Habits and learning"
     },
     {
       "order": 11,
       "slug": "flo",
-      "niche": "Cycle tracker"
+      "niche": "Cycle tracker",
+      "group": "Health trackers"
     },
     {
       "order": 12,
       "slug": "finch",
-      "niche": "Habits and self-care"
+      "niche": "Habits and self-care",
+      "group": "Habits and learning"
     }
   ]
 }

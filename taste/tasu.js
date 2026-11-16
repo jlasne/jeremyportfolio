@@ -89,8 +89,10 @@
     if (e.key === '/' && !e.metaKey && !e.ctrlKey && !e.altKey && !e.defaultPrevented && !isTyping(e.target)) {
       var fields = all(SEARCH).filter(visible);
       if (!fields.length) return;
+      // On the home, "/" goes to the gallery field (focus scrolls it into view), so results show
+      // as you type. Elsewhere it takes the field in view.
       var main = d.querySelector('[data-filter-main] [data-filter-search]');
-      var field = fields.filter(inView)[0] || (main && visible(main) ? main : fields[0]);
+      var field = main && visible(main) ? main : (fields.filter(inView)[0] || fields[0]);
       e.preventDefault();
       field.focus();
       field.select();
@@ -139,8 +141,13 @@
     function update() {
       queued = false;
       var max = track.scrollWidth - track.clientWidth;
-      if (prev) prev.disabled = track.scrollLeft <= 1;
-      if (next) next.disabled = track.scrollLeft >= max - 1;
+      var atStart = track.scrollLeft <= 1;
+      var atEnd = track.scrollLeft >= max - 1;
+      // A focused button that turns disabled drops focus to <body>. Hand it to the track first:
+      // it is focusable and scrolls with the arrow keys, so keyboard users stay in the strip.
+      if ((atEnd && d.activeElement === next) || (atStart && d.activeElement === prev)) track.focus({ preventScroll: true });
+      if (prev) prev.disabled = atStart;
+      if (next) next.disabled = atEnd;
     }
     function queue() {
       if (!queued) { queued = true; requestAnimationFrame(update); }
@@ -162,7 +169,7 @@
   /* 5. Hero parallax: pointer and scroll, mouse only, off for reduced motion. ------------- */
   var scene = d.querySelector('[data-parallax]');
   if (scene && finePointer.matches && !reduce.matches) {
-    var tx = 0, ty = 0, px = 0, py = 0, sy = window.scrollY || 0, raf = 0, live = true;
+    var tx = 0, ty = 0, px = 0, py = 0, sy = window.scrollY || 0, raf = 0, live = true, off = false;
     var frame = function () {
       raf = 0;
       px += (tx - px) * 0.1;
@@ -189,11 +196,22 @@
       kick();
     }, { passive: true });
     if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function (es) { live = es[0].isIntersecting; }).observe(scene);
+      // Scroll events that land while the scene is off screen are skipped. After a jump back to
+      // the top (Home key, a script), read the scroll again, or the cards keep the old offset.
+      new IntersectionObserver(function (es) {
+        live = !off && es[es.length - 1].isIntersecting; // the newest entry, if several queued up
+        if (live) {
+          sy = window.scrollY;
+          kick();
+        }
+      }).observe(scene);
     }
+    // Reduce Motion turned on mid-visit: the cards go back to rest and stay there.
     onChange(reduce, function () {
       if (!reduce.matches) return;
+      off = true;
       live = false;
+      if (raf) { cancelAnimationFrame(raf); raf = 0; }
       ['--px', '--py', '--sy'].forEach(function (p) { scene.style.removeProperty(p); });
     });
   }
@@ -308,7 +326,12 @@
 
     if (input) input.addEventListener('input', function () { query = input.value; update(); });
     chips.forEach(function (c, i) {
-      c.addEventListener('click', function () { tag = c.getAttribute('data-filter-chip'); update(); });
+      // Chips are toggle buttons: pressing the pressed chip again goes back to All.
+      c.addEventListener('click', function () {
+        var k = c.getAttribute('data-filter-chip');
+        tag = k === tag && k !== 'all' ? 'all' : k;
+        update();
+      });
       c.addEventListener('keydown', function (e) {
         var dir = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
         if (!dir) return;
@@ -326,7 +349,12 @@
     });
     if (useURL) {
       var p = new URLSearchParams(window.location.search);
-      if (p.get('q')) { query = p.get('q'); if (input) input.value = query; }
+      if (p.get('q')) {
+        query = p.get('q');
+        if (input) input.value = query;
+        // A search sent from another page's header shows in the header field too.
+        if (scope.hasAttribute('data-filter-main')) all('[data-site-search]').forEach(function (f) { f.value = query; });
+      }
       var t = p.get('tag');
       if (t && chips.some(function (c) { return c.getAttribute('data-filter-chip') === t; })) tag = t;
     }
@@ -346,10 +374,30 @@
   var filters = all('[data-filter]').map(initFilter);
   var main = filters.filter(function (f) { return f.scope.hasAttribute('data-filter-main'); })[0];
 
-  /* The header search filters the main list in place. Without one, the form goes to /taste/?q=. */
+  /* The header search filters the main list in place. Without one, the form goes to
+     /taste/?q=…#apps, which opens on the gallery. */
   if (main) {
     all('[data-site-search]').forEach(function (field) {
-      field.addEventListener('input', function () { main.setQuery(field.value); });
+      field.addEventListener('input', function () {
+        main.setQuery(field.value);
+        // The gallery sits below the fold: bring it up so the results show, and keep typing in
+        // its field (it already holds the same text, with the caret at the end). This waits for
+        // the keystroke to finish: the browser's own caret scroll would cut a smooth scroll short.
+        if (main.scope.getBoundingClientRect().top > window.innerHeight / 2) {
+          setTimeout(function () {
+            if (main.input) {
+              main.input.focus({ preventScroll: true });
+              var end = main.input.value.length;
+              try { main.input.setSelectionRange(end, end); } catch (err) { /* not a text field */ }
+            }
+            main.scope.scrollIntoView({ behavior: reduce.matches ? 'auto' : 'smooth', block: 'start' });
+          }, 0);
+        }
+      });
+      // The header field mirrors the gallery field, so both always show the same search.
+      var mirror = function () { if (d.activeElement !== field && main.input) field.value = main.input.value; };
+      if (main.input) main.input.addEventListener('input', mirror);
+      all('[data-filter-reset]', main.scope).forEach(function (b) { b.addEventListener('click', mirror); });
       if (field.form) {
         field.form.addEventListener('submit', function (e) {
           e.preventDefault();
@@ -442,9 +490,14 @@
     function update() {
       queued = false;
       var i = Math.min(n - 1, Math.max(0, index()));
-      if (count) count.textContent = (i + 1) + ' of ' + n;
-      if (prev) prev.disabled = i <= 0;
-      if (next) next.disabled = i >= n - 1;
+      var first = i <= 0;
+      var last = i >= n - 1;
+      var label = (i + 1) + ' of ' + n;
+      if (count && count.textContent !== label) count.textContent = label; // a live region: speak changes only
+      // Keep focus in the widget when the focused arrow turns disabled (see the strips).
+      if ((last && d.activeElement === next) || (first && d.activeElement === prev)) track.focus({ preventScroll: true });
+      if (prev) prev.disabled = first;
+      if (next) next.disabled = last;
     }
     function go(dir) {
       var i = Math.min(n - 1, Math.max(0, index() + dir));
