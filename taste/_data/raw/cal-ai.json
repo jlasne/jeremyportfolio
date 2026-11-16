@@ -20,32 +20,38 @@
     {
       "src": "/taste/media/cal-ai/s1.jpg",
       "w": 600,
-      "h": 1298
+      "h": 1298,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/12/f9/10/12f91008-6760-b4a7-788a-c15aa265442e/1.png/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/cal-ai/s2.jpg",
       "w": 600,
-      "h": 1298
+      "h": 1298,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/c4/72/0f/c4720f24-f97a-020a-e8fc-6c3401e3676a/2.png/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/cal-ai/s3.jpg",
       "w": 600,
-      "h": 1298
+      "h": 1298,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/eb/8b/82/eb8b8206-c03e-ee88-c2fe-53569d5ab679/3.png/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/cal-ai/s4.jpg",
       "w": 600,
-      "h": 1298
+      "h": 1298,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/52/23/bd/5223bd8d-9110-cc36-5c76-a588cc65a10a/4.png/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/cal-ai/s5.jpg",
       "w": 600,
-      "h": 1298
+      "h": 1298,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/cc/dc/a2/ccdca2f1-a33d-1862-7284-f9a8cc6d1067/5.png/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/cal-ai/s6.jpg",
       "w": 600,
-      "h": 1298
+      "h": 1298,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/d6/3c/5c/d63c5cb9-6e57-43ec-96e5-de178c9d3bf8/6.png/1290x2796bb.jpg"
     }
   ],
   "screenshotTotal": 6,

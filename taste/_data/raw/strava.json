@@ -20,42 +20,50 @@
     {
       "src": "/taste/media/strava/s1.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/d8/5d/38/d85d3879-493c-5ba6-36cd-1ca6e44e8f07/AppStore-TodayTab-6.5-en-US.jpg/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/strava/s2.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/74/eb/e5/74ebe5ae-be65-fe71-86ff-3429f6778d5d/ASO-6.5-Community-en-US-CopyA0805.jpg/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/strava/s3.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/91/4d/82/914d8235-d689-dd03-ff95-b1100dbdfaa9/ASO-6.5-TrackWorkouts-en-US1201.jpg/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/strava/s4.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/35/34/27/35342763-a02b-a58a-5d86-1ab868464a4e/ASO-6.5-TrackWorkouts-en-US1201.jpg/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/strava/s5.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/9b/15/5d/9b155d63-6743-392c-3a35-c90e1f3634e0/12-ASO-6.5-Hiking.jpg/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/strava/s6.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/e7/64/16/e76416a1-038c-7b13-43ad-3dcd7a732267/ASO-6.5-ShareWithFriends-en-US1102.jpg/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/strava/s7.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/c4/f0/84/c4f084dd-c332-6759-ac6f-0ed394a0ba8a/ASO-6.5-ProgressComparison-en-US0112.jpg/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/strava/s8.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/e4/67/de/e467de4e-8e6f-928d-dec0-f5fad20443a3/ASO-6.5-Routes-en-US1003.jpg/1290x2796bb.jpg"
     }
   ],
   "screenshotTotal": 9,

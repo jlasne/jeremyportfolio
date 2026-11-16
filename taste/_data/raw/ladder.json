@@ -20,42 +20,50 @@
     {
       "src": "/taste/media/ladder/s1.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/18/84/1a/18841a05-d51e-ffbc-acbf-f077cf57215c/1st__1242_x_2688px.jpg/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/ladder/s2.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/e7/1e/77/e71e7787-b987-009b-f17c-95f684f2e54a/2nd__1242_x_2688px.jpg/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/ladder/s3.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/45/9c/6c/459c6c21-cef2-184e-2099-a11302e7bf70/3rd__1242_x_2688px.jpg/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/ladder/s4.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/e6/27/15/e627157a-7705-fc45-3daa-6296b80f93b5/4th__1242_x_2688px.jpg/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/ladder/s5.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/65/72/23/6572230e-e6e8-ec71-71e5-c381a3e45975/5th__1242_x_2688px.jpg/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/ladder/s6.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/80/75/61/807561ca-6726-4e17-3ff0-99d5429670e8/6th__1242_x_2688px.jpg/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/ladder/s7.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/7b/31/d5/7b31d5d5-296e-e5ee-cdc7-3897b65d9d11/7th__1242_x_2688px.jpg/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/ladder/s8.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/49/83/6e/49836e47-405b-1d35-ebe5-b7c7d23d24dc/8th__1242_x_2688px.jpg/1290x2796bb.jpg"
     }
   ],
   "screenshotTotal": 10,

@@ -20,42 +20,50 @@
     {
       "src": "/taste/media/flo/s1.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/88/b7/34/88b7345d-5521-5ba0-a3bf-bc96ba564333/EN_2-25_PP_9g_68-V17_1_1242x2688.jpg/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/flo/s2.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/70/40/be/7040befc-9807-98e6-889e-4306dcfdf00d/fdffebca-cc1f-448e-a4c3-944a3ab4ab17_EN_9-24_PP_9g_68-V5_1_1242x2688.jpg/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/flo/s3.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/3a/e7/13/3ae71389-4f27-f3f7-a826-06ffbc6b62a2/6bceba94-add1-450b-90b5-b2d37249a851_EN_9-24_PP_9g_68-V6_1_1242x2688.jpg/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/flo/s4.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/c7/7e/09/c77e097e-0ca6-28b8-7e02-3f213bf6776d/8ecbe270-b208-44c4-aa62-3648dc16a046_EN_9-24_PP_9g_68-V3_1_1242x2688.jpg/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/flo/s5.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/6a/3d/e3/6a3de3fe-b062-975c-fe53-1da65f81aa0f/ec2b7e2f-0f42-4e41-b36d-64aa0498c7dd_EN_9-24_PP_9g_68-V4_1_1242x2688.jpg/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/flo/s6.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/8f/23/e3/8f23e380-af66-ff8d-4333-17deb7c9a60a/EN_9-24_PP_9g_68-V11_1_1242x2688.jpg/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/flo/s7.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/6e/93/db/6e93dbe2-767e-0964-f8e4-263d17ce7f59/EN_3-25_PP_9g_68-V13_3_1242x2688.jpg/1290x2796bb.jpg"
     },
     {
       "src": "/taste/media/flo/s8.jpg",
       "w": 600,
-      "h": 1299
+      "h": 1299,
+      "apple": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/80/1c/04/801c0464-b2fe-aa76-f4fa-f7cbfbd5611c/759f22e1-91ff-415b-a106-09cce4af0307_EN_9-24_PP_9g_68-V9_1_1242x2688.jpg/1290x2796bb.jpg"
     }
   ],
   "screenshotTotal": 10,
