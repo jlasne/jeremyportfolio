@@ -38,7 +38,7 @@
     "visualStyle": "Near-black app screens put lime on buttons, checks and charts, with real coach photos and heavy wide capital titles. White fills 6 of 8 store page backgrounds and the pricing page, where Annual is the one dark card.",
     "styleTraits": [
       "White covers 34% of the store screens, near black 31%",
-      "7 of 8 store headlines in heavy wide capitals",
+      "Heavy wide capital headlines on 7 of 8 store shots",
       "3 of 3 main buttons are full lime pills"
     ]
   },
@@ -90,12 +90,12 @@
     },
     {
       "src": "/taste/media/ladder/pw2.jpg",
-      "alt": "Ladder free trial card: 7 days free, no payment info until the trial ends, and 6 included features",
+      "alt": "Ladder free trial card: 7 days free, no payment info until the trial ends, and 5 included features",
       "isPaywall": true
     },
     {
       "src": "/taste/media/ladder/pw3.jpg",
-      "alt": "Ladder Pro Plan Monthly card: $29.99 a month, with 7 features from weekly plans to Team Chat",
+      "alt": "Ladder Pro Plan Monthly card: $29.99 a month, with 6 features, from a weekly plan to 1 Ladder team",
       "isPaywall": true
     }
   ],

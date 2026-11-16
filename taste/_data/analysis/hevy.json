@@ -12,7 +12,7 @@
         "hex": "#FFFFFF",
         "role": "60",
         "name": "White",
-        "use": "Background of the app screens and the store shots"
+        "use": "Background of the app screens and the first 8 store shots"
       },
       {
         "hex": "#000000",
@@ -24,7 +24,7 @@
         "hex": "#267EE8",
         "role": "10",
         "name": "Bright blue",
-        "use": "Buttons, links, charts and the band under each store shot"
+        "use": "Buttons, links, charts and the band under the first 8 store shots"
       }
     ],
     "typeStyle": "Heavy all-caps store headlines, plain grotesque app text, and Figtree on the web paywall",
@@ -36,10 +36,10 @@
       "crop": "/taste/media/hevy/font-1.jpg",
       "scope": "web pricing page"
     },
-    "visualStyle": "White screens, near-black text and one blue, #267EE8, on buttons, links, charts and the band under each store shot. The web paywall swaps in a brighter blue, #008CFF, and adds a yellow PRO label, #F7D000.",
+    "visualStyle": "White screens, near-black text and one blue, #267EE8, on buttons, links, charts and the band under the first 8 store shots. The web paywall swaps in a brighter blue, #008CFF, and adds a yellow PRO label, #F7D000.",
     "styleTraits": [
       "Near-white covers 75% of the screens",
-      "A blue band fills the bottom 23% of all 8 store shots",
+      "A blue band fills the bottom 23% of the first 8 store shots",
       "Corners about 8 px on the paywall card and button"
     ]
   },

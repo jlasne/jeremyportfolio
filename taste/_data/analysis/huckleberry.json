@@ -12,7 +12,7 @@
         "hex": "#F3FFFF",
         "role": "60",
         "name": "Ice white",
-        "use": "Background of 3 of 8 store shots and the app screens"
+        "use": "Background of 3 of the first 8 store shots and the app screens"
       },
       {
         "hex": "#31BCD3",
@@ -38,8 +38,8 @@
     },
     "visualStyle": "Aqua and white store screens with slate navy headlines; inside the app, color-coded cards mark each log type: cyan sleep, orange feeds, yellow diapers, purple pumping. The web paywall switches to warm off-white #F7F6F2, with white plan cards, cyan pill buttons and a lime-to-green outline on Premium.",
     "styleTraits": [
-      "Cyan backdrops on 4 of 8 store shots",
-      "Slate navy #44526C sets all 8 store headlines",
+      "Cyan backdrops on 4 of the first 8 store shots",
+      "Slate navy #44526C sets the first 8 store headlines",
       "Plan cards round at 16 px; buttons are full pills"
     ]
   },
@@ -132,7 +132,8 @@
       "price": "$68.99",
       "period": "year",
       "perMonth": 5.75,
-      "perWeek": 1.33
+      "perWeek": 1.33,
+      "saving": 52
     },
     {
       "name": "Sleep Improvement Plan",
@@ -144,9 +145,9 @@
     {
       "name": "Expedited Service",
       "price": "$19.99",
-      "period": "consumable",
-      "perMonth": null,
-      "perWeek": null
+      "period": "unknown",
+      "perMonth": "unknown",
+      "perWeek": "unknown"
     }
   ],
   "paywall": {
@@ -156,7 +157,7 @@
       "stated": false,
       "evidence": null
     },
-    "consumables": 1,
+    "consumables": 0,
     "family": 0
   },
   "ourRead": [
@@ -167,7 +168,7 @@
   "improvements": [
     {
       "title": "Set button labels in dark navy",
-      "detail": "White “Get started” reads at 2.4:1 on #02B6D1, and 1.8:1 on the lighter #36D2E9 of “Get the App”. Keep the cyan and set the labels in #2B3648, the navy of the SweetSpot alert: 5.0:1 and 6.7:1.",
+      "detail": "White “Get started” and “Get the App” read at 1.8:1 on the #36D2E9 cyan. Keep the cyan and set the labels in #2B3648, the navy of the SweetSpot alert: 6.7:1.",
       "rule": "Text contrast: at least 4.5:1 for body text, 3:1 for text 24 px and larger.",
       "source": "S27"
     },
@@ -216,11 +217,11 @@
     {
       "type": "main-button",
       "src": "/taste/media/huckleberry/el-main-button-1.jpg",
-      "x": 45,
-      "y": 835,
-      "w": 510,
-      "h": 98,
-      "note": "Full-width cyan pill, “Get started”; white text on #02B6D1 reads at 2.4:1"
+      "x": 33,
+      "y": 829,
+      "w": 533,
+      "h": 123,
+      "note": "Full-width cyan pill, “Get started”; white text on #36D2E9 reads at 1.8:1"
     },
     {
       "type": "feature-list",

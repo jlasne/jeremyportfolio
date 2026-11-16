@@ -15,16 +15,16 @@
         "use": "Background of 6 of 8 screens"
       },
       {
-        "hex": "#78C800",
+        "hex": "#57CC02",
         "role": "30",
         "name": "Owl green",
-        "use": "The icon, the owl and the progress bars"
+        "use": "The owl and the progress bars"
       },
       {
-        "hex": "#FF800B",
+        "hex": "#FF9600",
         "role": "10",
         "name": "Streak orange",
-        "use": "The streak flame, the beak and 2 of 8 captions"
+        "use": "The streak flame"
       }
     ],
     "typeStyle": "Heavy rounded lowercase headlines over a rounded DIN-style UI sans in dark grey",
@@ -191,6 +191,6 @@
       "source": "S27"
     }
   ],
-  "stylePrompt": "Build a paywall in Duolingo’s style. Top to bottom: a mascot, a lowercase 2-line headline, 3 perks with icons, the plans, one full-width button. Type: Fredoka 600 for headlines, M PLUS Rounded 1c for body, dark grey #4B4B4B text. Colors: white #FFFFFF (60) for the screen, owl green #78C800 (30) for the mascot and perk icons, streak orange #FF800B (10) for the button. Cards and buttons: 12 px corners, 2 px border, 6 px darker bottom edge. Plans: one tier in rows with length and price; preselect yearly and show its per-month price. Put the 14-day trial on the button. Use my brand colors in the same 60/30/10 roles.",
+  "stylePrompt": "Build a paywall in Duolingo’s style. Top to bottom: a mascot, a lowercase 2-line headline, 3 perks with icons, the plans, one full-width button. Type: Fredoka 600 for headlines, M PLUS Rounded 1c for body, dark grey #4B4B4B text. Colors: white #FFFFFF (60) for the screen, owl green #57CC02 (30) for the mascot and perk icons, streak orange #FF9600 (10) for the button. Cards and buttons: 12 px corners, 2 px border, 6 px darker bottom edge. Plans: one tier in rows with length and price; preselect yearly and show its per-month price. Put the 14-day trial on the button. Use my brand colors in the same 60/30/10 roles.",
   "elements": []
 }

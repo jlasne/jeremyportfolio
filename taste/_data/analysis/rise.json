@@ -172,11 +172,11 @@
     }
   ],
   "paywall": {
-    "tiers": 2,
+    "tiers": null,
     "yearlySavingPct": null,
     "trial": {
-      "stated": false,
-      "evidence": null
+      "stated": true,
+      "evidence": "App Store description: “There’s also a limited-time free trial of 7 days to explore the premium features for free.”"
     },
     "consumables": 0,
     "family": 0

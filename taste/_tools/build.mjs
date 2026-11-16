@@ -30,6 +30,8 @@ const SITE = 'https://www.jeremylasne.com';
 const BASE = '/taste/';
 const ABS = SITE + BASE;
 const DATE = '2026-11-15';
+// The day the pages last changed. The data stays the 15 Nov snapshot (DATE, DAY).
+const MODIFIED = '2026-11-16';
 const DAY = '15&nbsp;Nov&nbsp;2026';
 const SOURCE = `App Store data, US, ${DAY}`;
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -198,6 +200,8 @@ function loadApp(slug) {
     url: `${ABS}${slug}/`,
     // The App Store page lists 10 In-App Purchases at most, so a count of 0 proves nothing.
     iapCount: (raw.iaps || []).length,
+    // The App Store page can hold more screenshots than the pages show.
+    screenTotal: raw.screenshotTotal || (raw.screenshots || []).length,
   };
   app.groupKey = slugify(app.group);
   // A 256px WebP for every icon shown at 128 CSS px or less; icon.png stays for JSON-LD and og cards.
@@ -233,6 +237,9 @@ function loadApp(slug) {
     missing('plans');
     plans = (raw.iaps || []).map(p => ({ name: p.name, price: p.price, period: 'unknown' }));
   }
+  // How many times the App Store lists each name and price: exact repeats show as one row.
+  const listedTimes = new Map();
+  for (const p of raw.iaps || []) listedTimes.set(`${p.name}|${p.price}`, (listedTimes.get(`${p.name}|${p.price}`) || 0) + 1);
   const seen = new Set();
   const rows = [];
   for (const p of plans) {
@@ -247,10 +254,13 @@ function loadApp(slug) {
       period,
       perMonth: typeof p.perMonth === 'number' ? p.perMonth : null,
       perWeek: typeof p.perWeek === 'number' ? p.perWeek : null,
-      saving: null,
+      // A plan can carry its own saving (against the monthly plan of the same name).
+      saving: typeof p.saving === 'number' ? p.saving : null,
+      listed: listedTimes.get(`${p.name}|${p.price}`) || 1,
     });
   }
   app.listed = [...rows]; // the analysis order: its main plans come first
+  app.repeats = rows.reduce((n, r) => n + r.listed - 1, 0);
   rows.sort((a, b) => PERIOD_ORDER[a.period] - PERIOD_ORDER[b.period] || b.n - a.n);
   app.rows = rows;
   app.subs = rows.filter(r => r.period !== 'consumable');
@@ -271,7 +281,7 @@ function loadApp(slug) {
     const months = rows.filter(r => r.period === 'month').map(r => r.n);
     const hits = rows.filter(r => r.period === 'year')
       .filter(r => months.some(m => Math.abs(Math.round((1 - r.n / 12 / m) * 100) - app.savingPct) <= 1));
-    hits.forEach(r => { r.saving = app.savingPct; });
+    hits.forEach(r => { if (r.saving === null) r.saving = app.savingPct; });
     if (!hits.length) app.savingInFacts = true;
   }
 
@@ -407,7 +417,7 @@ ${preload}<link rel="stylesheet" href="/taste/tasu.css">
 <link rel="apple-touch-icon" href="/taste/brand/apple-touch-icon.png">
 <meta property="og:type" content="${type}">
 ${type === 'article' ? `<meta property="article:published_time" content="${DATE}">
-<meta property="article:modified_time" content="${DATE}">
+<meta property="article:modified_time" content="${MODIFIED}">
 ` : ''}<meta property="og:site_name" content="tasu.ai">
 <meta property="og:url" content="${url}">
 <meta property="og:title" content="${esc(title)}">
@@ -495,7 +505,11 @@ const stripButtons = what => `
 function drawn(app, max) {
   const rows = app.subs.slice(0, max);
   const ns = rows.map(r => r.n);
-  const label = `${rows.length} listings from ${money(Math.min(...ns))} to ${money(Math.max(...ns))}`;
+  // Count App Store listings, exact repeats included, as the reads and the table note do.
+  const listed = rs => rs.reduce((n, r) => n + r.listed, 0);
+  const range = `${money(Math.min(...ns))} to ${money(Math.max(...ns))}`;
+  const label = rows.length === app.subs.length ? `${listed(rows)} listings from ${range}`
+    : `${listed(rows)} of ${listed(app.subs)} listings, from ${range}`;
   const plan = r => {
     const left = periodLabel(r) ? `<b>${esc(r.name)}</b>${periodLabel(r)}` : `<b>${esc(r.name)}</b>`;
     const right = r.period === 'year' && r.perMonth ? `<b>${esc(r.price)}</b>${money(r.perMonth)} a month` : `<b>${esc(r.price)}</b>`;
@@ -592,7 +606,7 @@ function appRow(app) {
       <p class="app-colors" role="img" aria-label="${esc(`Brand colors: ${colorNames}`)}">${app.colors.map(c => `<span style="--c:${c.hex}"></span>`).join('')}</p>
       <dl class="stats">
         <div><dt>${compact(app.ratingCount)} ratings</dt><dd>${app.rating1}</dd></div>
-        <div><dt>prices</dt><dd>${app.priceCount}</dd></div>
+        <div><dt>listed prices</dt><dd>${app.priceCount}</dd></div>
       </dl>
     </a>
     <div class="strip" data-strip>
@@ -631,7 +645,7 @@ function homePage() {
     '@context': 'https://schema.org',
     '@graph': [
       { '@type': 'WebSite', '@id': `${ABS}#website`, name: 'tasu.ai', alternateName: 'taste using AI', url: ABS, description, inLanguage: 'en', author: AUTHOR, publisher: AUTHOR },
-      { '@type': 'CollectionPage', '@id': `${ABS}#page`, url: ABS, name: title, description, isPartOf: { '@id': `${ABS}#website` }, inLanguage: 'en', dateModified: DATE, primaryImageOfPage: SITE + OG.src, mainEntity: { '@id': `${ABS}#apps` } },
+      { '@type': 'CollectionPage', '@id': `${ABS}#page`, url: ABS, name: title, description, isPartOf: { '@id': `${ABS}#website` }, inLanguage: 'en', dateModified: MODIFIED, primaryImageOfPage: SITE + OG.src, mainEntity: { '@id': `${ABS}#apps` } },
       { '@type': 'ItemList', '@id': `${ABS}#apps`, name: `${n} app breakdowns`, numberOfItems: n, itemListOrder: 'https://schema.org/ItemListUnordered',
         itemListElement: apps.map((a, i) => ({ '@type': 'ListItem', position: i + 1, url: a.url, name: `${a.name}: design and paywall` })) },
     ],
@@ -774,7 +788,7 @@ function plansTable(app, rows = app.rows) {
                 </tbody>
               </table>
             </div>
-            <p class="source-note plans-note">${app.iapCount} In-App Purchases listed on the App Store, US, ${DAY}</p>
+            <p class="source-note plans-note">${app.iapCount} In-App Purchases listed on the App Store, US, ${DAY}${app.repeats ? '; repeats show once' : ''}</p>
           </div>`;
 }
 
@@ -877,7 +891,7 @@ function appPage(app, i) {
   const fontPhrase = app.font?.name ? (app.font.scope ? `a ${app.font.scope} set in ${app.font.name}` : `set in ${app.font.name}`)
     : app.font?.closeTo ? `a font close to ${app.font.closeTo}` : '';
   const hexes = app.colors.map(c => c.hex);
-  let description = `${app.name}’s design and paywall: ${app.priceCount} prices from ${money(Math.min(...subs))} to ${money(Math.max(...subs))}, colors ${hexes[0]}, ${hexes[1]} and ${hexes[2]}${fontPhrase ? `, ${fontPhrase}` : ''}, and 3 fixes.`;
+  let description = `${app.name}’s design and paywall: ${app.priceCount} listed prices from ${money(Math.min(...subs))} to ${money(Math.max(...subs))}, colors ${hexes[0]}, ${hexes[1]} and ${hexes[2]}${fontPhrase ? `, ${fontPhrase}` : ''}, and 3 fixes.`;
   if (!subs.length) description = `${app.name}’s design and paywall: colors ${hexes.join(', ')}${fontPhrase ? `, ${fontPhrase}` : ''}, and 3 fixes from the taste rules.`;
   if (description.length > 160) description = description.replace(/, (a [a-z ]+ set in|set in|a font close to) [^,]+,/, ',');
   let title = `${app.name} design and paywall | tasu.ai`;
@@ -900,7 +914,7 @@ function appPage(app, i) {
         description,
         image: [SITE + image.src, ...(pw ? [SITE + pw.src] : [])],
         datePublished: DATE,
-        dateModified: DATE,
+        dateModified: MODIFIED,
         author: AUTHOR,
         publisher: { '@type': 'Organization', name: 'tasu.ai', url: ABS, logo: { '@type': 'ImageObject', url: `${SITE}/taste/brand/apple-touch-icon.png`, width: 180, height: 180 } },
         mainEntityOfPage: app.url,
@@ -988,7 +1002,7 @@ ${header('app')}
 ${app.screens.length ? `
 <section class="section" aria-labelledby="shots-title" data-reveal>
   <div class="wrap">
-    <div class="section-head"><h2 class="title-l" id="shots-title">App Store screenshots</h2><p class="source-note">${app.screens.length} screenshots, ${SOURCE}</p></div>
+    <div class="section-head"><h2 class="title-l" id="shots-title">App Store screenshots</h2><p class="source-note">${app.screenTotal > app.screens.length ? `First ${app.screens.length} of ${app.screenTotal}` : app.screens.length} screenshots, ${SOURCE}</p></div>
     <div class="strip strip--page" data-strip>
       <ol class="strip-track" role="list" tabindex="0" aria-label="${esc(app.name)} App Store screenshots">
         ${app.screens.map(s => `<li class="screen"><img src="${s.src}" width="${s.w}" height="${s.h}" alt="${txt(s.alt)}" loading="lazy" decoding="async"></li>`).join('\n        ')}
@@ -1077,7 +1091,7 @@ function libraryPage() {
   const jsonld = {
     '@context': 'https://schema.org',
     '@graph': [
-      { '@type': 'CollectionPage', '@id': `${url}#page`, url, name: title, description, inLanguage: 'en', dateModified: DATE,
+      { '@type': 'CollectionPage', '@id': `${url}#page`, url, name: title, description, inLanguage: 'en', dateModified: MODIFIED,
         isPartOf: { '@type': 'WebSite', '@id': `${ABS}#website`, name: 'tasu.ai', url: ABS }, author: AUTHOR,
         mainEntity: { '@type': 'ItemList', numberOfItems: n, itemListElement: items.map((e, i) => ({ '@type': 'ListItem', position: i + 1, name: `${TYPE[e.type].one} from ${e.app.name}`, url: e.app.url, image: SITE + e.src })) } },
       { '@type': 'BreadcrumbList', itemListElement: [

@@ -37,7 +37,7 @@
     },
     "visualStyle": "Flat cartoon birds play on sky-blue skies and green grass, with white rounded cards for goals and speech bubbles. Loud fills mark big moments: pink for sending a Valentine, bright blue for the 30-day streak.",
     "styleTraits": [
-      "Sky blue and its pale tint cover 46% of the store shots",
+      "Sky blue and its pale tint cover 44% of the store shots",
       "8 of 8 headlines: 3 lines of dark blue Rubik Bold",
       "White cards with corners about 24 px"
     ]
@@ -186,7 +186,7 @@
     },
     {
       "title": "Swap “millions” for 776,001 ratings",
-      "detail": "Screenshot 8 says “join millions growing with you”. The store page shows 4.9 stars from 776,001 ratings. Write that number: “Rated 4.9 from 776,001 ratings”.",
+      "detail": "Screenshot 8 says “join millions growing with you”. Apple’s data showed 4.9 stars from 776,001 ratings on 15 Nov 2026. Write that number: “Rated 4.9 from 776,001 ratings”.",
       "rule": "Make headlines specific. \"Track 3 habits in 10 seconds a day\" beats \"Transform your life\".",
       "source": "S1, S2, S4, S16"
     }

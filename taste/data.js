@@ -660,7 +660,7 @@ window.TASU_APPS = [
     "hex": "#FFFFFF",
     "role": "60",
     "name": "White",
-    "use": "Background of the app screens and the store shots"
+    "use": "Background of the app screens and the first 8 store shots"
    },
    {
     "hex": "#000000",
@@ -672,7 +672,7 @@ window.TASU_APPS = [
     "hex": "#267EE8",
     "role": "10",
     "name": "Bright blue",
-    "use": "Buttons, links, charts and the band under each store shot"
+    "use": "Buttons, links, charts and the band under the first 8 store shots"
    }
   ],
   "font": {
@@ -714,8 +714,8 @@ window.TASU_APPS = [
    "value": "$119.99",
    "label": "Yearly plan"
   },
-  "plans": 5,
-  "priceCount": 5,
+  "plans": 6,
+  "priceCount": 6,
   "iapCount": 10,
   "prices": [
    {
@@ -746,7 +746,7 @@ window.TASU_APPS = [
    {
     "name": "Expedited Service",
     "price": "$19.99",
-    "period": "consumable"
+    "period": "unknown"
    }
   ],
   "yearly": 119.99,
@@ -755,7 +755,7 @@ window.TASU_APPS = [
     "hex": "#F3FFFF",
     "role": "60",
     "name": "Ice white",
-    "use": "Background of 3 of 8 store shots and the app screens"
+    "use": "Background of 3 of the first 8 store shots and the app screens"
    },
    {
     "hex": "#31BCD3",
@@ -963,16 +963,16 @@ window.TASU_APPS = [
     "use": "Background of 6 of 8 screens"
    },
    {
-    "hex": "#78C800",
+    "hex": "#57CC02",
     "role": "30",
     "name": "Owl green",
-    "use": "The icon, the owl and the progress bars"
+    "use": "The owl and the progress bars"
    },
    {
-    "hex": "#FF800B",
+    "hex": "#FF9600",
     "role": "10",
     "name": "Streak orange",
-    "use": "The streak flame, the beak and 2 of 8 captions"
+    "use": "The streak flame"
    }
   ],
   "font": {

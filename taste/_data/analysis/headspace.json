@@ -137,15 +137,15 @@
     "tiers": 1,
     "yearlySavingPct": 55,
     "trial": {
-      "stated": false,
-      "evidence": null
+      "stated": true,
+      "evidence": "App Store description: “Start your free trial and experience the benefits of meditation, mindfulness and expert mental health therapy & coaching.”"
     },
     "consumables": 0,
     "family": 0
   },
   "ourRead": [
     "Annual opens preselected in a yellow card at $34.99, beside a struck $69.99. Monthly, $12.99, is the anchor: 12 months cost $155.88, so full-price Annual saves 55%.",
-    "A first-year discount stands in for a free trial: $34.99 bills for year one, then the plan renews at the full $69.99.",
+    "The App Store offers a free trial. This web offer swaps it for 50% off year one: $34.99, then $69.99 a year.",
     "The App Store lists 10 items at 3 prices under 4 names. \"Headspace Plus\" costs $12.99 or $94.99, exactly like \"Headspace\", so it is 1 tier."
   ],
   "improvements": [
@@ -157,7 +157,7 @@
     },
     {
       "title": "Say 50% off once",
-      "detail": "The page says \"50% off\" 3 times, in the headline, the blue badge and the fine print, beside a struck $69.99. Drop the badge: the struck price already shows the deal.",
+      "detail": "The first screen says \"50% off\" 3 times: in the headline, the blue badge and the fine print, beside a struck $69.99. Drop the badge: the struck price already shows the deal.",
       "rule": "Delete filler badges (\"New\", \"AI-powered\", \"Beta\") unless they change a decision.",
       "source": "S14"
     },
@@ -168,7 +168,7 @@
       "source": "S5"
     }
   ],
-  "stylePrompt": "Build a paywall in Headspace's style. Top to bottom: the logo, a bold 2-line offer headline, 2 stacked plan cards, a grey renewal line, 2 links and a full-width pill button. Type: Hanken Grotesk, close to Headspace Apercu: bold headline and prices, regular labels. Colors: white #FFFFFF (60) for the page, orange #FF7300 (30) for the logo and selected card, blue #1A54F6 (10) for the button only. Preselect Annual with its first-year price beside the struck full price. Monthly sits below, outlined. Price Annual per year and Monthly per month. Offer 50% off year one in place of a trial. Use my brand colors in the same 60/30/10 roles.",
+  "stylePrompt": "Build a paywall in Headspace's style. Top to bottom: the logo, a bold 2-line offer headline, 2 stacked plan cards, a grey renewal line, 2 links and a full-width pill button. Type: Hanken Grotesk, close to Headspace Apercu: bold headline and prices, regular labels. Colors: white #FFFFFF (60) for the page, orange #FF7300 (30) for the logo and selected card, blue #1A54F6 (10) for the button only. Preselect Annual with its first-year price beside the struck full price. Monthly sits below, outlined. Price Annual per year and Monthly per month. Offer 50% off year one, then the full yearly price. Use my brand colors in the same 60/30/10 roles.",
   "elements": [
     {
       "type": "plan-picker",

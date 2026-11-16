@@ -152,7 +152,7 @@
     }
   ],
   "paywall": {
-    "tiers": 1,
+    "tiers": 2,
     "yearlySavingPct": 67,
     "trial": {
       "stated": true,
@@ -164,7 +164,7 @@
   "ourRead": [
     "Monthly, $19.99, anchors Annual: 12 months cost $239.88, so $79.99 saves 67%. A year also costs \"about the same as 1 hour with a nutrition expert\".",
     "All 5 buttons say START FREE TRIAL, and 4 open the Annual checkout, as does \"Claim offer\". Monthly gets one outlined button.",
-    "One tier, 4 prices: the web sells $79.99 a year and $19.99 a month; the App Store adds $49.99 a year and $9.99 a month."
+    "The App Store text names 2 tiers, Premium and Premium Plus, but all 10 listed items are Premium. The web sells $79.99 a year and $19.99 a month; the App Store adds $49.99 a year and $9.99 a month."
   ],
   "improvements": [
     {
@@ -186,7 +186,7 @@
       "source": "S1"
     }
   ],
-  "stylePrompt": "Build a paywall in MyFitnessPal's style. Top to bottom: a bold headline, then a rounded card per plan, Annual first. Each card holds the plan name, 3 checked features, a big yearly or monthly price, a billing line and a full-width pill button. Tag and outline Annual, and add \"67% savings over the Monthly Plan\". Monthly gets an outlined button. Every button starts a 7-day free trial. Type: Inter, bold headlines at -2% tracking, regular body. Colors: white #FFFFFF (60) for cards, stone grey #746A61 (30) for the page, bright blue #0066EE (10) for the tag, outline and buttons. Use my brand colors in the same 60/30/10 roles.",
+  "stylePrompt": "Build a paywall in MyFitnessPal's style. Top to bottom: a bold headline, then a rounded card per plan, Annual first. Each card holds the plan name, a big yearly or monthly price, a billing line and a full-width pill button. Annual adds 3 checked features. Tag and outline Annual, and add \"67% savings over the Monthly Plan\". Monthly gets an outlined button. Every button starts a 7-day free trial. Type: Inter, bold headlines at -2% tracking, regular body. Colors: white #FFFFFF (60) for cards, stone grey #746A61 (30) for the page, bright blue #0066EE (10) for the tag, outline and buttons. Use my brand colors in the same 60/30/10 roles.",
   "elements": [
     {
       "type": "plan-picker",
