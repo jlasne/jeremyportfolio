@@ -1,6 +1,7 @@
 {
   "card": {
     "oneLiner": "Sky-blue scenes, a pet bird; Finch Plus spans $5.99 to $69.99",
+    "short": "Self-care pet that grows as you meet goals",
     "keyNumber": {
       "value": "$69.99",
       "label": "Top Finch Plus price"
@@ -27,6 +28,51 @@
         "use": "The 30-day streak screen and the buddy’s check marks"
       }
     ],
+    "fonts": {
+      "headline": {
+        "name": "Rubik",
+        "closeTo": "Rubik",
+        "weight": 700,
+        "look": "Grotesque with softly rounded corners, Bold on 3-line store headlines and titles",
+        "crop": "/taste/media/finch/font-headline.jpg"
+      },
+      "body": {
+        "name": "Rubik",
+        "closeTo": "Rubik",
+        "weight": 500,
+        "look": "Same rounded grotesque in Medium, on speech bubbles, section titles and rows",
+        "crop": "/taste/media/finch/font-body.jpg"
+      }
+    },
+    "style": {
+      "summary": "Finch builds cozy scenes: cartoon birds on sky-blue #9DDDFF skies and green grass, above white cards with 20 to 24 pt corners. Goals sit in 78 pt rows with an emoji tile, a bolt reward and a raised check button. Full-screen fills mark big moments: pink for a Valentine, bright blue #0E9BE2 for a 30-day streak.",
+      "traits": [
+        {
+          "label": "Layout",
+          "text": "16.5 pt side margins; a cartoon scene fills the top of the screen, and white cards stack below, 6.5 to 8 pt apart."
+        },
+        {
+          "label": "Shapes",
+          "text": "Cards round at 20 to 24 pt, icon tiles are 54 pt squircles, and check buttons round at 13 pt with a raised edge."
+        },
+        {
+          "label": "Color",
+          "text": "Sky blue #9DDDFF backdrops, white #FFFFFF cards and bubbles, dark text #2E2E2E; bright blue #0E9BE2 fills the streak screen."
+        },
+        {
+          "label": "Type",
+          "text": "Rubik sets every word: Bold 700 for 3-line headlines and 21 pt titles, Medium 500 for 17 pt rows and speech bubbles."
+        },
+        {
+          "label": "Imagery",
+          "text": "Flat cartoon birds appear on all 8 shots, with props like hearts, trophies and dumbbells."
+        },
+        {
+          "label": "Components",
+          "text": "Goal rows with a raised check button, 7-dot habit sparklines at a 14.7 pt pitch, and a streak week of check coins."
+        }
+      ]
+    },
     "typeStyle": "Rubik Bold headlines in dark blue #1F4F9A, 3 lines each; medium and semibold Rubik in the app",
     "font": {
       "name": "Rubik",
@@ -191,6 +237,6 @@
       "source": "S1, S2, S4, S16"
     }
   ],
-  "stylePrompt": "Build a paywall in Finch’s style. Top to bottom: your mascot in a sky scene with a white speech bubble, a 3-line headline, white plan cards, one full-width button. Type: Rubik, bold headline in dark blue #1F4F9A, medium labels. Colors: sky blue #9DDDFF (60) for the screen, white #FFFFFF (30) for cards and the bubble, bright blue #0E9BE2 (10) for the button and the selected card’s outline. Button text #101820. Corners about 24 px. Plans: one tier in rows with length and price; preselect the longest and show its per-month price. Show a trial only if you offer one. Use my brand colors in the same 60/30/10 roles.",
+  "stylePrompt": "Restyle my app in Finch's style. Keep my features, data and copy.\nColors:\n- 60% sky blue #9DDDFF: skies and hero backdrops.\n- 30% white #FFFFFF: cards, speech bubbles and sheets; text #2E2E2E.\n- 10% bright blue #0E9BE2: streaks, selected checks and big moments.\n- Rewards: orange bolts #FEAC31; done checks green #52B74E.\nType:\n- Headlines: Rubik 700, 21 pt titles; 3-line heroes in dark blue #1F4F9A.\n- Body: Rubik 500, 17 pt rows and bubbles; section labels in Rubik 600 caps, 12 pt, tracking 9%.\nShapes:\n- Cards 20 to 24 pt corners; icon tiles 54 pt squircles.\n- Check buttons: 13 pt corners, #F0F0F0 face, a 4 pt #D7D7D7 bottom edge.\nLayout:\n- 16.5 pt side margins; a cartoon scene on top, white cards below, 8 pt apart.\nComponents:\n- Goal row: 78 pt white card, emoji tile, Rubik 600 name, bolt reward, check button.\n- Habit sparkline: 7 columns, 14.7 pt pitch, bars and dots in the row's color.\n- Speech bubble: white, fully rounded, tail toward the mascot.\nIcons and imagery:\n- A flat cartoon mascot in every hero; emoji-style icons in rows.\nCheck:\n- Every card is white with 20 to 24 pt corners.\n- The mascot appears on each main screen.\n- Bright blue appears only on streaks and selections.",
   "elements": []
 }

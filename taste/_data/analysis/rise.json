@@ -1,6 +1,7 @@
 {
   "card": {
     "oneLiner": "Black sleep-debt tracker; a countdown coupon sells Quarterly at 40% off",
+    "short": "Sleep debt and energy tracker for better mornings",
     "keyNumber": {
       "value": "$69.99",
       "label": "Top membership price"
@@ -27,6 +28,51 @@
         "use": "The sunrise glow and energy numbers like 77%"
       }
     ],
+    "fonts": {
+      "headline": {
+        "name": "Work Sans",
+        "closeTo": "Work Sans",
+        "weight": 700,
+        "look": "Wide grotesque, two-story g with an ear, on headlines and screen titles",
+        "crop": "/taste/media/rise/font-headline.jpg"
+      },
+      "body": {
+        "name": "Work Sans",
+        "closeTo": "Work Sans",
+        "weight": 400,
+        "look": "Same wide grotesque, Regular on grey paragraphs and big numbers like 6.3",
+        "crop": "/taste/media/rise/font-body.jpg"
+      }
+    },
+    "style": {
+      "summary": "Rise sets Work Sans on night-black #17151A screens, with grouped #22222A rows rounded at 12 pt. Electric violet #7D05FC marks tabs, tags and add buttons, while orange marks energy numbers and the high end of the energy curve. Store shots frame each phone in a violet-to-orange sunrise over purple hills.",
+      "traits": [
+        {
+          "label": "Layout",
+          "text": "Grouped lists inset 13 pt from the edges, with 56 pt rows, 1 pt separators and a 21 pt icon circle per row."
+        },
+        {
+          "label": "Shapes",
+          "text": "Lists round at 12 pt, session cards at 13 pt and sheet tops at 28 pt; badges are full pills."
+        },
+        {
+          "label": "Color",
+          "text": "Night black #17151A screens with #22222A rows; violet #7D05FC on tabs, tags and add buttons; orange #C56B3D on energy numbers."
+        },
+        {
+          "label": "Type",
+          "text": "One family, Work Sans: Bold 700 headers, Medium 500 rows at 17 pt, Regular 400 big numbers like 6.3 hrs."
+        },
+        {
+          "label": "Imagery",
+          "text": "All 8 store shots sit on a violet-to-orange sunrise; guided sessions use orange gradient art with 2 wave lines."
+        },
+        {
+          "label": "Components",
+          "text": "An energy curve from violet #6F1DFE to orange #FC800C, violet Peak and Dip arrow tags, and a tab bar with violet active icons."
+        }
+      ]
+    },
     "typeStyle": "Wide grotesque sans, regular lines with bold key words; the web paywall switches to an Inter-like sans",
     "font": {
       "name": null,
@@ -206,7 +252,7 @@
       "source": "S2, S4, S14, S15, S27"
     }
   ],
-  "stylePrompt": "Build a paywall in Rise's style. Top to bottom: a sticky countdown bar, a dial with the user's result, a 2-line headline ending in violet, then 3 plan cards. Each shows the crossed-out price, the new price and a boxed per-day price. Tag them LITE VERSION, MOST POPULAR and BEST PRICE; preselect the middle plan with a violet outline. Discount the first period and print the renewal price on the card. Type: Work Sans, bold headlines, regular body. Colors: night black #17151A (60), electric violet #7D05FC (30) for the selection and button, sunrise orange #C56B3D (10) for the per-day price. Use my brand colors in the same 60/30/10 roles.",
+  "stylePrompt": "Restyle my app in Rise's style. Keep my features, data and copy.\nColors:\n- 60% night black #17151A: screens and sheets; rows and cards on #22222A.\n- 30% electric violet #7D05FC: active tabs, tags and add buttons; violet text #8C58FC.\n- 10% sunrise orange #C56B3D: energy numbers, peaks and session art.\nType:\n- Headlines: Work Sans 700, about 21 pt, white over a grey Bold subline.\n- Body: Work Sans 400, 13 to 17 pt; Work Sans 500 for row labels; secondary text #BCBCC0.\nShapes:\n- Grouped lists 12 pt corners, cards 13 pt, sheet tops 28 pt; badges are full pills.\nLayout:\n- Lists inset 13 pt, 56 pt rows with 1 pt #323335 separators, 21 pt icon circles.\nComponents:\n- Energy chart: a curve that fades from violet #6F1DFE (low) to orange #FC800C (high), with a white now line.\n- Habit row: colored icon circle, label, bell and chevron on #22222A.\n- Session card: 13 pt corners, orange gradient art #4C0210 to #DF7001, a white play disc, a #22222A footer row.\nIcons and imagery:\n- White line icons; violet-to-orange sunrise gradients behind heroes and onboarding.\nCheck:\n- Every screen background is #17151A or #000000.\n- Orange appears only on energy data and session art.\n- Lists use 12 pt corners and 56 pt rows.",
   "elements": [
     {
       "type": "discount-badge",

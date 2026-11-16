@@ -1,6 +1,7 @@
 {
   "card": {
     "oneLiner": "Stone-photo store screens; the blue paywall routes free trials to Annual",
+    "short": "Calorie and macro tracker with an AI coach",
     "keyNumber": {
       "value": "$79.99",
       "label": "Yearly plan"
@@ -27,6 +28,51 @@
         "use": "The icon, the app's main buttons and the web paywall page"
       }
     ],
+    "fonts": {
+      "headline": {
+        "name": "Inter",
+        "closeTo": "Inter",
+        "weight": 700,
+        "look": "Bold grotesque tracked 3% tight, on the white store headlines",
+        "crop": "/taste/media/myfitnesspal/font-headline.jpg"
+      },
+      "body": {
+        "name": null,
+        "closeTo": "Inter",
+        "weight": 400,
+        "look": "Neutral grotesque, on food rows, macro labels and grey values",
+        "crop": "/taste/media/myfitnesspal/font-body.jpg"
+      }
+    },
+    "style": {
+      "summary": "MyFitnessPal stacks white cards with 15 pt corners and 24 pt padding on light screens under a pale blue-grey header tint. Bright blue #0066EE fills every main button as a full pill, while teal, purple and orange code carbs, fat and protein. Store shots set the app on a warm stone photo under bold white headlines.",
+      "traits": [
+        {
+          "label": "Layout",
+          "text": "16 pt screen margins; 361 pt cards with 24 pt padding and 12 pt gaps; macros sit in 3 columns of 94 pt."
+        },
+        {
+          "label": "Shapes",
+          "text": "Cards round at 15 pt and fields at 6 pt with 2 pt borders; buttons are 48 pt pills, progress bars 8 pt."
+        },
+        {
+          "label": "Color",
+          "text": "White cards on #F6F7F9 sheets; blue #0066EE on buttons and goals; macros in teal #2CB9B1, purple #6C0D8F and orange #FEB13D."
+        },
+        {
+          "label": "Type",
+          "text": "Inter Bold headlines tracked 3% tight; in-app values like 598 cal set 20 pt Bold over 14 pt Regular labels."
+        },
+        {
+          "label": "Imagery",
+          "text": "All 8 store shots sit on a warm stone photo; food photos appear on 4 of 8, from salads to recipe cards."
+        },
+        {
+          "label": "Components",
+          "text": "A 7-day check row, a calorie card with a 314 pt blue bar, stacked macro bars, and white food rows with green checks."
+        }
+      ]
+    },
     "typeStyle": "Bold grotesque headlines in white or near black, semibold plan names, regular body",
     "font": {
       "name": "Inter",
@@ -186,7 +232,7 @@
       "source": "S1"
     }
   ],
-  "stylePrompt": "Build a paywall in MyFitnessPal's style. Top to bottom: a bold headline, then a rounded card per plan, Annual first. Each card holds the plan name, a big yearly or monthly price, a billing line and a full-width pill button. Annual adds 3 checked features. Tag and outline Annual, and add \"67% savings over the Monthly Plan\". Monthly gets an outlined button. Every button starts a 7-day free trial. Type: Inter, bold headlines at -2% tracking, regular body. Colors: white #FFFFFF (60) for cards, stone grey #746A61 (30) for the page, bright blue #0066EE (10) for the tag, outline and buttons. Use my brand colors in the same 60/30/10 roles.",
+  "stylePrompt": "Restyle my app in MyFitnessPal's style. Keep my features, data and copy.\nColors:\n- 60% white #FFFFFF: cards, sheets and screens below the header.\n- 30% stone grey #746A61: hero and onboarding backdrops, as in the store shots.\n- 10% bright blue #0066EE: main buttons, links, goal values and the calorie bar.\n- Macros: carbs #2CB9B1, fat #6C0D8F, protein #FEB13D. Secondary text #6C6C70.\nType:\n- Headlines: Inter 700, about 28 to 46 pt, tracking -3%.\n- Body: Inter 400, 14 pt; values Inter 700, 20 pt, units 12 pt grey.\nShapes:\n- Cards 15 pt corners; fields 6 pt with a 2 pt #BEC5CF border; buttons 48 pt pills; bars 8 pt pills.\nLayout:\n- 16 pt margins, 24 pt card padding, 12 pt gaps; a #CDD9E2 tint behind the header.\nComponents:\n- Week row: 7 circles; done days fill black with a white check.\n- Calorie card: label, 20 pt value, \"/ goal\" in grey, full-width 8 pt blue bar.\n- Food row: name, green check, \"kcal, portion\" in grey, red trash icon at right.\nIcons and imagery:\n- Thin line icons; real food photos with 12 pt corners.\nCheck:\n- Every main button is a #0066EE pill.\n- Macro colors match on every screen.\n- Cards sit 12 pt apart with 24 pt padding.",
   "elements": [
     {
       "type": "plan-picker",

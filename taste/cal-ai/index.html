@@ -12,6 +12,7 @@
 <script>(function(r){var t,v;try{t=localStorage.getItem('tasu-theme');v=localStorage.getItem('tasu-view')}catch(e){}r.classList.add('js');if(v==='grid')r.setAttribute('data-view','grid');if(t==='light'||t==='dark'){r.setAttribute('data-theme',t);var m=document.querySelectorAll('meta[name="theme-color"]'),c=t==='dark'?'#1C1B19':'#F3EFE7';for(var i=0;i<m.length;i++)m[i].setAttribute('content',c)}})(document.documentElement)</script>
 <link rel="preload" href="/taste/fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/taste/tasu.css">
+<link rel="stylesheet" href="/taste/fonts/apps.css">
 <script src="/taste/tasu.js" defer></script>
 <link rel="icon" href="/taste/brand/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/taste/brand/apple-touch-icon.png">
@@ -147,29 +148,32 @@
           <div class="sp">
             <p class="sp-role">Headline</p>
             <p class="sp-name">Close to Inter</p>
-            <p class="sp-aa" style="font-family:'Inter',var(--font);font-weight:700" aria-hidden="true">Aa</p>
-            <p class="sp-line" style="font-family:'Inter',var(--font);font-weight:700">Cal AI 0123456789</p>
-            <p class="sp-look">Plain iOS-style sans, semibold headlines, bold numbers</p>
-            <p class="sp-free">Free match: <a href="https://fonts.google.com/specimen/Inter">Inter 700</a></p>
-            <img class="sp-crop" src="/taste/media/cal-ai/font-1.jpg" width="792" height="162" alt="Headline text cut from a Cal AI App Store screenshot" loading="lazy" decoding="async">
+            <p class="sp-aa" style="font-family:'Inter',var(--font);font-weight:600" aria-hidden="true">Aa</p>
+            <p class="sp-line" style="font-family:'Inter',var(--font);font-weight:600">Cal AI 0123456789</p>
+            <p class="sp-look">Neutral grotesque in Semibold, on store headlines, the wordmark and big numbers</p>
+            <p class="sp-free">Free match: <a href="https://fonts.google.com/specimen/Inter">Inter 600</a></p>
+            <img class="sp-crop" src="/taste/media/cal-ai/font-headline.jpg" width="800" height="309" alt="Headline text cut from a Cal AI App Store screenshot" loading="lazy" decoding="async">
           </div>
           <div class="sp">
             <p class="sp-role">Body</p>
             <p class="sp-name">Close to Inter</p>
             <p class="sp-aa" style="font-family:'Inter',var(--font);font-weight:400" aria-hidden="true">Aa</p>
             <p class="sp-line" style="font-family:'Inter',var(--font);font-weight:400">Cal AI 0123456789</p>
-            <p class="sp-look">Plain iOS-style sans, semibold headlines, bold numbers</p>
+            <p class="sp-look">Neutral grotesque, Medium card titles and Regular grey labels like Calories eaten</p>
             <p class="sp-free">Free match: <a href="https://fonts.google.com/specimen/Inter">Inter 400</a></p>
-            
+            <img class="sp-crop" src="/taste/media/cal-ai/font-body.jpg" width="800" height="331" alt="Body text cut from a Cal AI App Store screenshot" loading="lazy" decoding="async">
           </div>
         </div>
         <div class="card style-card">
           <h3 class="title-m" id="style-title">Design style</h3>
-          <p class="style-text">White screens, near-black type and floating white cards with soft shadows, built around real food photos. Color marks data and feedback: red, orange and blue macros, the orange streak, green progress.</p>
+          <p class="style-text">Cal AI keeps white screens and ink-black #1D1A23 type, with floating white cards on soft grey shadows. Ink black also fills every main button, the progress rings and the add button, so color appears only in food photos and data: macros, streak and progress. A floating 62&nbsp;pt capsule tab bar and big Semibold numbers like 1250 define the home screen.</p>
           <dl class="traits">
-            <div><dd>White fills 70% of the screenshots</dd></div>
-            <div><dd>Cards round at about 16&nbsp;px, buttons are full pills</dd></div>
-            <div><dd>Color marks data and feedback: macros, streak, progress</dd></div>
+            <div><dt>Layout</dt><dd>24&nbsp;pt side margins; the home screen stacks a week row, a 345&nbsp;pt calorie card, 3 macro cards and recent meals.</dd></div>
+            <div><dt>Shapes</dt><dd>Cards round at about 16 to 20&nbsp;pt over soft grey shadows; buttons and the tab bar are capsules 48 to 62&nbsp;pt tall.</dd></div>
+            <div><dt>Color</dt><dd>White #FFFFFF screens; ink black #1D1A23 for text, rings and main buttons; grey #7F7F80 for labels and inactive tabs.</dd></div>
+            <div><dt>Type</dt><dd>A neutral sans close to Inter: Semibold 600 for 38&nbsp;pt numbers like 1250, Regular for 11 to 15&nbsp;pt grey labels.</dd></div>
+            <div><dt>Imagery</dt><dd>Real food photos appear on 4 of 6 shots; 1 shot compares before and after body photos.</dd></div>
+            <div><dt>Components</dt><dd>A 62&nbsp;pt floating capsule tab bar plus a black add button, 90&nbsp;pt calorie rings, and paired 48&nbsp;pt pills.</dd></div>
           </dl>
         </div>
     </div>
@@ -181,7 +185,29 @@
     <h2 class="title-l" id="prompt-title">Copy this style</h2>
     <p class="prompt-sub">A prompt for Cal AI’s overall look: colors, type, shapes, layout and its signature components.</p>
     <div class="prompt">
-      <p class="prompt-text" id="style-prompt">Build a paywall in Cal AI’s style. Top to bottom: a semibold 2-line headline, a white card with one big number and 3 macro rings, the plans, one black pill button. Type: Inter, semibold headlines, bold numbers, regular grey labels. Colors: white #FFFFFF (60), ink black #1D1A23 (30) for text and the button, grey #7F7F80 (10) for small marks. Cards: 16 px corners, soft shadow. Plans: one tier, Unlimited, as rows with length and price; preselect the longest with a black outline and show its per-month price. Show a trial only if you offer one. Use my brand colors in the same 60/30/10 roles.</p>
+      <p class="prompt-text" id="style-prompt">Restyle my app in Cal AI’s style. Keep my features, data and copy.
+Colors:
+- 60% white #FFFFFF: screens and cards; a #F9F8FE wash behind the header.
+- 30% ink black #1D1A23: text, numbers, progress rings and every main button.
+- 10% scan grey #7F7F80: labels, units and inactive tabs; ring tracks #EAE9EF.
+- Data colors: protein red, carbs orange, fat blue, streak orange.
+Type:
+- Headlines: Inter 600, about 32 pt titles and 38 pt numbers.
+- Body: Inter 400, 11 to 15 pt grey labels; Inter 500 for 16 pt titles and buttons.
+Shapes:
+- Cards: 20 pt corners, a soft #DEDEE0 shadow 2 pt below. Buttons and tab bar: full capsules.
+Layout:
+- 24 pt side margins; one column of floating cards.
+Components:
+- Calorie card: 38 pt number, 15 pt grey goal, 90 pt ring, 6.8 pt black arc.
+- Tab bar: 62 pt white capsule, 4 tabs, selected on #EDEDED; a black 62 pt add button.
+- Button pair: two 48 pt pills 10 pt apart, one outlined in 1 pt #D6D5DB, one black.
+Icons and imagery:
+- Grey line icons; real food photos with rounded corners.
+Check:
+- Every main button is ink black #1D1A23.
+- Color appears only in data and photos.
+- Cards have 20 pt corners and soft shadows.</p>
     </div>
     <div class="prompt-actions">
       <button class="btn btn-secondary js-only" type="button" data-copy-target="#style-prompt" data-copy-raw><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>

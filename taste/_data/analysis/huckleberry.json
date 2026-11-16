@@ -1,6 +1,7 @@
 {
   "card": {
     "oneLiner": "Aqua screens, navy type; Yearly cuts Premium to $9.99 a month",
+    "short": "Baby sleep and feeding tracker with nap predictions",
     "keyNumber": {
       "value": "$119.99",
       "label": "Yearly plan"
@@ -27,6 +28,51 @@
         "use": "The icon’s 2 leaves and the Premium card’s outline"
       }
     ],
+    "fonts": {
+      "headline": {
+        "name": null,
+        "closeTo": "Lexend",
+        "weight": 500,
+        "look": "Geometric sans with a single-story a and pointed W, on titles and headlines",
+        "crop": "/taste/media/huckleberry/font-headline.jpg"
+      },
+      "body": {
+        "name": null,
+        "closeTo": "Lexend",
+        "weight": 400,
+        "look": "Same unnamed sans, Light to Regular, on feed text, stats and labels",
+        "crop": "/taste/media/huckleberry/font-body.jpg"
+      }
+    },
+    "style": {
+      "summary": "Huckleberry sets slate navy #45526A text on white screens, with color-coded logs: cyan sleep, orange feeds, yellow diapers and purple pumping. Controls are circles, pills and 34 pt segmented bars, and green #8FD33D marks the selected segment and the Save button. Store shots float white phones over ice-white #F3FFFF and aqua backdrops.",
+      "traits": [
+        {
+          "label": "Layout",
+          "text": "15 to 19 pt side margins; forms stack labeled sections split by thin rules, with a full-width Save pill at the bottom."
+        },
+        {
+          "label": "Shapes",
+          "text": "Segmented controls round at 4.2 pt, choice buttons are about 80 pt circles, and Save is a full-width pill."
+        },
+        {
+          "label": "Color",
+          "text": "Slate navy #45526A text on white; cyan #36D2E9 sleep cards and charts; orange #FD763F feeds; green #8FD33D selections and Save."
+        },
+        {
+          "label": "Type",
+          "text": "One unnamed geometric sans with a single-story a, close to Lexend: 23 pt Medium titles, 16 pt Light tabs."
+        },
+        {
+          "label": "Imagery",
+          "text": "White phones sit on aqua backdrops with 4-point sparkles; tip cards use flat figure drawings, food logs use cut-out photos."
+        },
+        {
+          "label": "Components",
+          "text": "Color-coded log cards, a 167 pt cyan sleep donut with 2 pt gaps, and 138 pt orange LEFT and RIGHT nursing timer buttons."
+        }
+      ]
+    },
     "typeStyle": "Slate navy geometric sans: heavy Avenir on the web paywall, bold and widely spaced in store headlines",
     "font": {
       "name": "Avenir",
@@ -185,7 +231,7 @@
       "source": "S1, S2, S4, S16"
     }
   ],
-  "stylePrompt": "Build a paywall in Huckleberry's style. Top to bottom: a centered headline and a Yearly and Monthly pill toggle. Below: stacked white plan cards with 16 px corners, priciest first, free last, each with a full-width pill button. Type: Avenir or Nunito Sans, heavy headlines and prices, regular body, in slate navy #44526C. Colors: ice white #F3FFFF (60) for the page, berry cyan #31BCD3 (30) for buttons with navy labels, leaf lime #CDCC04 (10) for the top plan's outline. Open on Yearly: cross out the monthly price above the per-month price. Show a trial only if you offer one. Use my brand colors in the same 60/30/10 roles.",
+  "stylePrompt": "Restyle my app in Huckleberry's style. Keep my features, data and copy.\nColors:\n- 60% ice white #F3FFFF: backdrops and onboarding; screens and cards stay white.\n- 30% berry cyan #31BCD3: sleep data, charts and selected ranges; cards use its twin #36D2E9.\n- 10% leaf lime #CDCC04: brand accents; selected segments and Save use green #8FD33D.\n- Text slate navy #45526A, labels #888888; feeds orange #FD763F.\nType:\n- Headlines: Lexend 500, about 23 pt.\n- Body: Lexend 400, 14 to 16 pt; Lexend 300 for tabs and stat labels.\nShapes:\n- Segmented controls 34 pt tall, 4 pt corners, 1 pt #E5E4E9 borders.\n- Choice buttons: about 80 pt circles. Main action: a full-width pill.\nLayout:\n- 15 to 19 pt side margins; form sections split by thin rules.\nComponents:\n- Log cards: one color per type, with icon, title and time since.\n- Donut: 167 pt, a 21 pt ring with 2 pt white gaps, the total centered.\n- Range picker: 7D to 1Y, the selected label in a 45 pt cyan circle.\nIcons and imagery:\n- Rounded navy line icons; flat tip drawings; 4-point sparkles on backdrops.\nCheck:\n- Titles and body text are slate navy #45526A.\n- Each log type keeps one color on every screen.\n- Selected states are cyan or green fills.",
   "elements": [
     {
       "type": "plan-picker",

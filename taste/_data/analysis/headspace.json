@@ -1,6 +1,7 @@
 {
   "card": {
     "oneLiner": "Orange and yellow screens. The web deal cuts year one to $34.99",
+    "short": "Guided meditation, sleep sounds and mental health support",
     "keyNumber": {
       "value": "$69.99",
       "label": "Yearly plan"
@@ -27,6 +28,51 @@
         "use": "Therapy screens; the buttons use the near twin #0061EE"
       }
     ],
+    "fonts": {
+      "headline": {
+        "name": "Headspace Apercu",
+        "closeTo": "Hanken Grotesk",
+        "weight": 700,
+        "look": "Bold geometric grotesque, two-story g, tailed l, on titles and store headlines",
+        "crop": "/taste/media/headspace/font-headline.jpg"
+      },
+      "body": {
+        "name": "Headspace Apercu",
+        "closeTo": "Hanken Grotesk",
+        "weight": 400,
+        "look": "Same family in Regular, on paragraphs, chat text and meta lines",
+        "crop": "/taste/media/headspace/font-body.jpg"
+      }
+    },
+    "style": {
+      "summary": "Headspace pairs white screens and warm grey #2B2A28 text with rounded vector art: smiling suns, soft circles and stripes in orange, yellow, pink and blue. Controls are full pills, from the 52 pt blue #0061EE Play button to the #F8F4F1 teacher row. Sleep content flips to navy #101340, and store shots frame the app in yellow and orange waves.",
+      "traits": [
+        {
+          "label": "Layout",
+          "text": "24 pt side margins; content pages open on a full-width art header, then an about 30 pt title, a meta line and a paragraph."
+        },
+        {
+          "label": "Shapes",
+          "text": "Buttons and choice rows are full pills, 50 to 52 pt tall; category tiles and cards round at about 12 pt."
+        },
+        {
+          "label": "Color",
+          "text": "White #FFFFFF screens, warm grey #2B2A28 text, blue #0061EE Play buttons; sleep screens turn navy #101340; orange #FF7300 leads the art."
+        },
+        {
+          "label": "Type",
+          "text": "Headspace Apercu Bold, tracked 3% tight, sets titles; Medium 500 sets 16 to 20 pt labels; Regular sets 19 pt chat text."
+        },
+        {
+          "label": "Imagery",
+          "text": "Vector art of smiling suns, circles and stripes fills 7 of 8 shots; 1 shot shows a therapist photo."
+        },
+        {
+          "label": "Components",
+          "text": "2-column category tiles 167 pt wide, a teacher pick row with a blue radio, and a 52 pt blue Play pill."
+        }
+      ]
+    },
     "typeStyle": "Bold grotesque headlines in warm dark grey, with key words in orange",
     "font": {
       "name": "Headspace Apercu",
@@ -168,7 +214,7 @@
       "source": "S5"
     }
   ],
-  "stylePrompt": "Build a paywall in Headspace's style. Top to bottom: the logo, a bold 2-line offer headline, 2 stacked plan cards, a grey renewal line, 2 links and a full-width pill button. Type: Hanken Grotesk, close to Headspace Apercu: bold headline and prices, regular labels. Colors: white #FFFFFF (60) for the page, orange #FF7300 (30) for the logo and selected card, blue #1A54F6 (10) for the button only. Preselect Annual with its first-year price beside the struck full price. Monthly sits below, outlined. Price Annual per year and Monthly per month. Offer 50% off year one, then the full yearly price. Use my brand colors in the same 60/30/10 roles.",
+  "stylePrompt": "Restyle my app in Headspace's style. Keep my features, data and copy.\nColors:\n- 60% white #FFFFFF: screens and cards; text #2B2A28; soft fills #F8F4F1.\n- 30% bright orange #FF7300: illustrations and key words in headlines.\n- 10% cobalt blue #1A54F6: therapy screens; main buttons use its twin #0061EE.\n- Sleep screens: navy #101340 with white text.\nType:\n- Headlines: Hanken Grotesk 700, close to Headspace Apercu, about 30 pt, tracking -3%.\n- Body: Hanken Grotesk 400, close to Headspace Apercu, 16 pt; labels at 500, 16 to 20 pt.\nShapes:\n- Buttons and choice rows: full pills, 50 to 52 pt tall. Cards and tiles: 12 pt corners.\n- Secondary buttons: white, 2 pt #E2DEDB border, 2 pt bottom lip #D2D1CF.\nLayout:\n- 24 pt side margins; full-width art header, then title, meta, paragraph, actions.\nComponents:\n- Play button: #0061EE pill, white triangle and label.\n- Choice row: #F8F4F1 pill, 38 pt avatar, label, 24 pt blue radio at right.\n- Category tiles: 2 columns, saturated bases, clipped circles, centered white labels.\nIcons and imagery:\n- Vector art of circles, suns and stripes; white round icon buttons over art.\nCheck:\n- Every primary action is a blue pill.\n- Text is #2B2A28 on white or white on navy.\n- Cards and tiles round at 12 pt.",
   "elements": [
     {
       "type": "plan-picker",

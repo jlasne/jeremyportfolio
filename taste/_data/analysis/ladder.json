@@ -1,6 +1,7 @@
 {
   "card": {
     "oneLiner": "Black screens, lime buttons. Annual halves the $29.99 monthly price",
+    "short": "Coach-built strength workout plans for home or gym",
     "keyNumber": {
       "value": "$179.99",
       "label": "PRO Annual, per year"
@@ -27,6 +28,51 @@
         "use": "The icon, the main buttons, checks and chart bars"
       }
     ],
+    "fonts": {
+      "headline": {
+        "name": "EK Modena Extended",
+        "closeTo": "Unbounded",
+        "weight": 800,
+        "look": "Wide heavy caps, tracked open 4%, on headlines, workout names and stats",
+        "crop": "/taste/media/ladder/font-headline.jpg"
+      },
+      "body": {
+        "name": "SF Pro",
+        "closeTo": "Inter",
+        "weight": 400,
+        "look": "Neutral system grotesque, on screen titles, chips, onboarding lines and chat",
+        "crop": "/taste/media/ladder/font-body.jpg"
+      }
+    },
+    "style": {
+      "summary": "Ladder's app runs on near-black #0E0E0E screens, with lime #E6FF01 on buttons, done checks, progress rings and chart bars. Workout cards are full-bleed coach photos with about 18 pt corners, titled in heavy extended caps. Controls are capsules: 34 pt chips with a grey rim and a 50 pt lime pill for the main action.",
+      "traits": [
+        {
+          "label": "Layout",
+          "text": "16 to 19 pt side margins; a 7-day week row at a 54 pt pitch tops a swipeable 337 pt workout card."
+        },
+        {
+          "label": "Shapes",
+          "text": "Chips are 34 pt capsules, the main button a 50 pt pill, day marks 27 pt circles; photo cards round at about 18 pt."
+        },
+        {
+          "label": "Color",
+          "text": "Near black #0E0E0E sits behind white text; lime #E6FF01 fills the main button, done days, progress rings and chart bars."
+        },
+        {
+          "label": "Type",
+          "text": "EK Modena Extended Heavy caps, tracked about 4%, set headlines and stats like 186 lbs; SF Pro sets 13 to 15 pt UI text."
+        },
+        {
+          "label": "Imagery",
+          "text": "Real coach photos appear on 6 of 8 shots, darkened at the bottom under white caps titles."
+        },
+        {
+          "label": "Components",
+          "text": "A 31-tick lime rep gauge, about 62 pt avatar circles in lime progress rings, and a floating glass tab bar with 4 tabs."
+        }
+      ]
+    },
     "typeStyle": "Heavy wide capitals for headlines and big numbers, plain sans labels; the pricing page switches to an Inter-like sans",
     "font": {
       "name": null,
@@ -199,7 +245,7 @@
       "source": "S1"
     }
   ],
-  "stylePrompt": "Build a paywall in Ladder's style: a sticky header with the logo and a lime pill button, then 2 stacked cards, Annual first. Each card: bold caps plan name, huge price, small grey “/ month”, one line of copy, checklist. Annual is the one dark card: “7 days free” on top, $14.99 a month, $179.99 a year below, lime checks. Type: Archivo at weight 900 and width 125 for headlines and prices, Inter for body. Colors: white #FFFFFF (60) page, near black #0E0E0E (30) type and Annual, lime yellow #E6FF01 (10) button and checks. Use my brand colors in the same 60/30/10 roles.",
+  "stylePrompt": "Restyle my app in Ladder's style. Keep my features, data and copy.\nColors:\n- 60% white #FFFFFF: text and icons, plus onboarding and pricing pages.\n- 30% near black #0E0E0E: in-app screens; #1C1C1E for cards and charts.\n- 10% lime yellow #E6FF01: the main button, done checks, progress rings and chart bars.\nType:\n- Headlines: Unbounded 800, close to EK Modena Extended, caps, +4% tracking, 26 to 32 pt.\n- Body: Inter 400, close to SF Pro, 13 to 15 pt; Inter 700 for screen titles.\nShapes:\n- 34 pt capsule chips with a #7D7D7D rim, a 50 pt pill main button, 27 pt day circles.\n- Photo cards: 18 pt corners, a black gradient on the bottom third.\nLayout:\n- 16 pt side margins, 8 pt chip gaps, one workout card per view.\nComponents:\n- Week row: 7 day circles, 54 pt pitch; done days fill lime with a black check.\n- Avatar row: 62 pt photos in lime progress rings.\n- Main button: full-width lime pill, black bold caps label.\nIcons and imagery:\n- White icons about 20 pt, filled in the tab bar. Real coach photos under white caps titles.\nCheck:\n- In-app backgrounds are #0E0E0E or #1C1C1E.\n- Lime marks only actions, progress and done states.\n- Titles and big stats are in caps.",
   "elements": [
     {
       "type": "main-button",

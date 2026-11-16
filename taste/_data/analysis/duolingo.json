@@ -1,6 +1,7 @@
 {
   "card": {
     "oneLiner": "Cartoon lessons spend energy; Super makes it unlimited, 14 days free",
+    "short": "Bite-size language lessons with a daily streak",
     "keyNumber": {
       "value": "$119.99",
       "label": "Top Super Duolingo price"
@@ -27,6 +28,51 @@
         "use": "The streak flame"
       }
     ],
+    "fonts": {
+      "headline": {
+        "name": "Feather Bold",
+        "closeTo": "Livvic",
+        "weight": 700,
+        "look": "Heavy rounded lowercase with a single-story a and looped g, on store captions",
+        "crop": "/taste/media/duolingo/font-headline.jpg"
+      },
+      "body": {
+        "name": "DIN Next Rounded",
+        "closeTo": "Barlow",
+        "weight": 700,
+        "look": "Rounded DIN sans: Bold prompts and numbers, Regular chips and speech bubbles",
+        "crop": "/taste/media/duolingo/font-body.jpg"
+      }
+    },
+    "style": {
+      "summary": "Duolingo sets dark grey #4B4B4B text on white screens, where answer cards, word chips and number tiles stand on a 4 to 6 pt bottom edge, like keys. Owl green #57CC02 fills progress bars and correct answers, streak orange #FF9600 marks the streak, and each subject owns a caption color. Cartoon characters appear on 5 of 8 shots, and every store caption sits in a lowercase colored bar.",
+      "traits": [
+        {
+          "label": "Layout",
+          "text": "16 to 28 pt side margins; lesson screens put a 17 pt progress bar on top and a 2-column grid of answer cards below."
+        },
+        {
+          "label": "Shapes",
+          "text": "Cards, chips and tiles: 10 to 13 pt corners, 2 pt #E5E5E5 borders, a 4 to 6 pt bottom edge; bars are full pills."
+        },
+        {
+          "label": "Color",
+          "text": "White #FFFFFF screens and #4B4B4B text; owl green #57CC02 for progress and correct answers; streak orange #FF9600 for the streak."
+        },
+        {
+          "label": "Type",
+          "text": "Feather Bold sets lowercase store captions; DIN Next Rounded Bold sets prompts and big numbers like 36; Regular sets 20 pt chips."
+        },
+        {
+          "label": "Imagery",
+          "text": "Flat cartoon characters appear on 5 of 8 shots; answer art is flat objects, like a teacup and a milk carton."
+        },
+        {
+          "label": "Components",
+          "text": "A 7-day streak card with 33.5 pt check circles, a word bank of 45 pt tiles, and a 17 pt green progress bar."
+        }
+      ]
+    },
     "typeStyle": "Heavy rounded lowercase headlines over a rounded DIN-style UI sans in dark grey",
     "font": {
       "name": "Feather Bold",
@@ -191,6 +237,6 @@
       "source": "S27"
     }
   ],
-  "stylePrompt": "Build a paywall in Duolingo’s style. Top to bottom: a mascot, a lowercase 2-line headline, 3 perks with icons, the plans, one full-width button. Type: Fredoka 600 for headlines, M PLUS Rounded 1c for body, dark grey #4B4B4B text. Colors: white #FFFFFF (60) for the screen, owl green #57CC02 (30) for the mascot and perk icons, streak orange #FF9600 (10) for the button. Cards and buttons: 12 px corners, 2 px border, 6 px darker bottom edge. Plans: one tier in rows with length and price; preselect yearly and show its per-month price. Put the 14-day trial on the button. Use my brand colors in the same 60/30/10 roles.",
+  "stylePrompt": "Restyle my app in Duolingo's style. Keep my features, data and copy.\nColors:\n- 60% white #FFFFFF: every screen and card; text #4B4B4B; borders #E5E5E5.\n- 30% owl green #57CC02: progress bars, correct answers and success states.\n- 10% streak orange #FF9600: the streak count and done days.\n- One bright color per section header bar.\nType:\n- Headlines: Livvic 700, close to Feather Bold, lowercase, about 36 pt.\n- Body: Barlow 700, close to DIN Next Rounded, 16 to 20 pt prompts; Barlow 500 for 20 pt chips.\nShapes:\n- Cards, chips and buttons: 10 to 13 pt corners, 2 pt #E5E5E5 border, 4 to 6 pt darker bottom edge.\n- Progress bars: 17 pt pills.\nLayout:\n- 16 pt side margins; one question per screen; answers in a 2-column grid or chip bank.\nComponents:\n- Answer card: white, grey key edge; selected turns light blue with a blue border.\n- Word chip: 45 pt tall, 16 pt side padding; correct: #D7FEB7 fill, #A6EC70 border.\n- Streak week: 7 circles, 33.5 pt; done days orange with white checks.\nIcons and imagery:\n- Flat cartoon characters and flat object art; bold rounded icons.\nCheck:\n- Every tappable card has a 4 to 6 pt bottom edge.\n- Headlines are lowercase.\n- Green marks only progress and correct answers.",
   "elements": []
 }

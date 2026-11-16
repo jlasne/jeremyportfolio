@@ -1,6 +1,7 @@
 {
   "card": {
     "oneLiner": "Black and white calorie scanner; results need the Unlimited plan",
+    "short": "Calorie counter that reads meals from a photo",
     "keyNumber": {
       "value": "$29.99",
       "label": "Top Unlimited price"
@@ -27,6 +28,51 @@
         "use": "The scan corners on the icon"
       }
     ],
+    "fonts": {
+      "headline": {
+        "name": null,
+        "closeTo": "Inter",
+        "weight": 600,
+        "look": "Neutral grotesque in Semibold, on store headlines, the wordmark and big numbers",
+        "crop": "/taste/media/cal-ai/font-headline.jpg"
+      },
+      "body": {
+        "name": null,
+        "closeTo": "Inter",
+        "weight": 400,
+        "look": "Neutral grotesque, Medium card titles and Regular grey labels like Calories eaten",
+        "crop": "/taste/media/cal-ai/font-body.jpg"
+      }
+    },
+    "style": {
+      "summary": "Cal AI keeps white screens and ink-black #1D1A23 type, with floating white cards on soft grey shadows. Ink black also fills every main button, the progress rings and the add button, so color appears only in food photos and data: macros, streak and progress. A floating 62 pt capsule tab bar and big Semibold numbers like 1250 define the home screen.",
+      "traits": [
+        {
+          "label": "Layout",
+          "text": "24 pt side margins; the home screen stacks a week row, a 345 pt calorie card, 3 macro cards and recent meals."
+        },
+        {
+          "label": "Shapes",
+          "text": "Cards round at about 16 to 20 pt over soft grey shadows; buttons and the tab bar are capsules 48 to 62 pt tall."
+        },
+        {
+          "label": "Color",
+          "text": "White #FFFFFF screens; ink black #1D1A23 for text, rings and main buttons; grey #7F7F80 for labels and inactive tabs."
+        },
+        {
+          "label": "Type",
+          "text": "A neutral sans close to Inter: Semibold 600 for 38 pt numbers like 1250, Regular for 11 to 15 pt grey labels."
+        },
+        {
+          "label": "Imagery",
+          "text": "Real food photos appear on 4 of 6 shots; 1 shot compares before and after body photos."
+        },
+        {
+          "label": "Components",
+          "text": "A 62 pt floating capsule tab bar plus a black add button, 90 pt calorie rings, and paired 48 pt pills."
+        }
+      ]
+    },
     "typeStyle": "Semibold near-black headlines, bold numbers, regular grey labels",
     "font": {
       "name": null,
@@ -160,6 +206,6 @@
       "source": "S14"
     }
   ],
-  "stylePrompt": "Build a paywall in Cal AI's style. Top to bottom: a semibold 2-line headline, a white card with one big number and 3 macro rings, the plans, one black pill button. Type: Inter, semibold headlines, bold numbers, regular grey labels. Colors: white #FFFFFF (60), ink black #1D1A23 (30) for text and the button, grey #7F7F80 (10) for small marks. Cards: 16 px corners, soft shadow. Plans: one tier, Unlimited, as rows with length and price; preselect the longest with a black outline and show its per-month price. Show a trial only if you offer one. Use my brand colors in the same 60/30/10 roles.",
+  "stylePrompt": "Restyle my app in Cal AI's style. Keep my features, data and copy.\nColors:\n- 60% white #FFFFFF: screens and cards; a #F9F8FE wash behind the header.\n- 30% ink black #1D1A23: text, numbers, progress rings and every main button.\n- 10% scan grey #7F7F80: labels, units and inactive tabs; ring tracks #EAE9EF.\n- Data colors: protein red, carbs orange, fat blue, streak orange.\nType:\n- Headlines: Inter 600, about 32 pt titles and 38 pt numbers.\n- Body: Inter 400, 11 to 15 pt grey labels; Inter 500 for 16 pt titles and buttons.\nShapes:\n- Cards: 20 pt corners, a soft #DEDEE0 shadow 2 pt below. Buttons and tab bar: full capsules.\nLayout:\n- 24 pt side margins; one column of floating cards.\nComponents:\n- Calorie card: 38 pt number, 15 pt grey goal, 90 pt ring, 6.8 pt black arc.\n- Tab bar: 62 pt white capsule, 4 tabs, selected on #EDEDED; a black 62 pt add button.\n- Button pair: two 48 pt pills 10 pt apart, one outlined in 1 pt #D6D5DB, one black.\nIcons and imagery:\n- Grey line icons; real food photos with rounded corners.\nCheck:\n- Every main button is ink black #1D1A23.\n- Color appears only in data and photos.\n- Cards have 20 pt corners and soft shadows.",
   "elements": []
 }

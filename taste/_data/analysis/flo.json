@@ -1,6 +1,7 @@
 {
   "card": {
     "oneLiner": "Lavender screens, pink accents; plans named for pregnancy, ovulation and birth control",
+    "short": "Period, ovulation and pregnancy tracker with cycle predictions",
     "keyNumber": {
       "value": "$59.99",
       "label": "Top Flo Premium price"
@@ -27,6 +28,51 @@
         "use": "The icon, the Log period button and the insight card outlines"
       }
     ],
+    "fonts": {
+      "headline": {
+        "name": null,
+        "closeTo": "Philosopher",
+        "weight": 400,
+        "look": "Flared high-contrast sans in a pale pink box, on store key words",
+        "crop": "/taste/media/flo/font-headline.jpg"
+      },
+      "body": {
+        "name": "SF Pro",
+        "closeTo": "Inter",
+        "weight": 600,
+        "look": "System grotesque: Semibold titles and rows, Bold numbers, Regular grey details",
+        "crop": "/taste/media/flo/font-body.jpg"
+      }
+    },
+    "style": {
+      "summary": "Flo floats white cards on a blush #F7EFED home and lavender #E2CBFF store backdrops, with feather pink #FF5A7D for period data and the Log period pill. Insight cards pair a lavender or pink top with a white bottom inside a 3 pt pink outline. Flat illustrations and round symptom icons carry the imagery, and only the sleep screen turns dark plum.",
+      "traits": [
+        {
+          "label": "Layout",
+          "text": "About 22 pt side margins; a 7-day strip at a 51 pt pitch and a centered countdown top the home, then 2-column cards."
+        },
+        {
+          "label": "Shapes",
+          "text": "Insight cards: about 15 pt corners, 3 pt pink outlines; calendar bands: 8.3 pt corners; Log period: a 39 pt pill."
+        },
+        {
+          "label": "Color",
+          "text": "Lavender #E2CBFF backdrops, white #FFFFFF cards, feather pink #FF5A7D for period days, outlines and the pill; teal #1DA4A7 marks ovulation."
+        },
+        {
+          "label": "Type",
+          "text": "A flared high-contrast face sets store key words; SF Pro sets the app, Bold 49 pt for the countdown, Semibold for titles."
+        },
+        {
+          "label": "Imagery",
+          "text": "Flat illustrated people and hands appear on 3 of 8 shots; symptoms use round emoji-style icons in colored rings."
+        },
+        {
+          "label": "Components",
+          "text": "A 7-day cycle strip with a 50 pt today circle, 2-color insight cards, and a month calendar with 41 pt period bands."
+        }
+      ]
+    },
     "typeStyle": "A plain medium sans line over 1 or 2 big words in a flared, high-contrast sans; bold sans for numbers in the app",
     "font": {
       "name": null,
@@ -191,6 +237,6 @@
       "source": "S8"
     }
   ],
-  "stylePrompt": "Build a paywall in Flo's style. Top to bottom: a medium sans line, then the key words large in a pale pink box with 10 px corners. Below: a white plan card and one pink pill button. Type: Inter 500 for text, Proza Libre for the boxed words. Colors: lavender #E2CBFF (60) for the screen, white #FFFFFF (30) for cards, feather pink #FF5A7D (10) for the button and the selected plan's 3 px outline. Plans: one tier in rows with length and price; preselect the longest and show its per-month price. Show a trial only if you offer one. Use my brand colors in the same 60/30/10 roles.",
+  "stylePrompt": "Restyle my app in Flo's style. Keep my features, data and copy.\nColors:\n- 60% lavender #E2CBFF: onboarding and hero backdrops; home screens fade blush #F7EFED to #FDFCFA.\n- 30% white #FFFFFF: cards, lists and sheets.\n- 10% feather pink #FF5A7D: period days, card outlines and the main pill; teal #1DA4A7 marks ovulation.\nType:\n- Headlines: Philosopher 400 for key words in a pale pink box, 10 pt corners, under a Medium sans line.\n- Body: Inter 600, close to SF Pro, 17 to 20 pt titles; Inter 400 for grey details, 700 for big numbers.\nShapes:\n- Cards 15 pt corners; buttons are full pills.\nLayout:\n- About 22 pt side margins; week strip and countdown on top, cards in 2 columns.\nComponents:\n- Week strip: 7 columns, 51 pt pitch; today in a 50 pt white circle, predicted days in dotted pink rings.\n- Insight card: lavender or pink top half, white bottom with icon and value, 3 pt pink outline.\n- Log button: 39 pt pink pill, white Inter 600 label.\nIcons and imagery:\n- Flat illustrated people; round symptom icons in colored rings.\nCheck:\n- Pink marks only period data and the main action.\n- Cards are white on lavender or blush.\n- Headline key words sit in a pale pink box.",
   "elements": []
 }

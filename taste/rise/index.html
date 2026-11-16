@@ -12,6 +12,7 @@
 <script>(function(r){var t,v;try{t=localStorage.getItem('tasu-theme');v=localStorage.getItem('tasu-view')}catch(e){}r.classList.add('js');if(v==='grid')r.setAttribute('data-view','grid');if(t==='light'||t==='dark'){r.setAttribute('data-theme',t);var m=document.querySelectorAll('meta[name="theme-color"]'),c=t==='dark'?'#1C1B19':'#F3EFE7';for(var i=0;i<m.length;i++)m[i].setAttribute('content',c)}})(document.documentElement)</script>
 <link rel="preload" href="/taste/fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/taste/tasu.css">
+<link rel="stylesheet" href="/taste/fonts/apps.css">
 <script src="/taste/tasu.js" defer></script>
 <link rel="icon" href="/taste/brand/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/taste/brand/apple-touch-icon.png">
@@ -148,30 +149,33 @@
           <h3 class="title-m" id="font-title">Fonts</h3>
           <div class="sp">
             <p class="sp-role">Headline</p>
-            <p class="sp-name">Close to Work Sans</p>
+            <p class="sp-name">Work Sans</p>
             <p class="sp-aa" style="font-family:'Work Sans',var(--font);font-weight:700" aria-hidden="true">Aa</p>
             <p class="sp-line" style="font-family:'Work Sans',var(--font);font-weight:700">Rise 0123456789</p>
-            <p class="sp-look">Wide grotesque sans, regular lines with bold key words</p>
-            <p class="sp-free">Free match: <a href="https://fonts.google.com/specimen/Work+Sans">Work Sans 700</a></p>
-            <img class="sp-crop" src="/taste/media/rise/font-1.jpg" width="958" height="258" alt="Headline text cut from a Rise App Store screenshot" loading="lazy" decoding="async">
+            <p class="sp-look">Wide grotesque, two-story g with an ear, on headlines and screen titles</p>
+            <p class="sp-free">A free Google Font: <a href="https://fonts.google.com/specimen/Work+Sans">Work Sans 700</a></p>
+            <img class="sp-crop" src="/taste/media/rise/font-headline.jpg" width="600" height="140" alt="Headline text cut from a Rise App Store screenshot" loading="lazy" decoding="async">
           </div>
           <div class="sp">
             <p class="sp-role">Body</p>
-            <p class="sp-name">Close to Work Sans</p>
+            <p class="sp-name">Work Sans</p>
             <p class="sp-aa" style="font-family:'Work Sans',var(--font);font-weight:400" aria-hidden="true">Aa</p>
             <p class="sp-line" style="font-family:'Work Sans',var(--font);font-weight:400">Rise 0123456789</p>
-            <p class="sp-look">Wide grotesque sans, regular lines with bold key words</p>
-            <p class="sp-free">Free match: <a href="https://fonts.google.com/specimen/Work+Sans">Work Sans 400</a></p>
-            
+            <p class="sp-look">Same wide grotesque, Regular on grey paragraphs and big numbers like 6.3</p>
+            <p class="sp-free">A free Google Font: <a href="https://fonts.google.com/specimen/Work+Sans">Work Sans 400</a></p>
+            <img class="sp-crop" src="/taste/media/rise/font-body.jpg" width="530" height="122" alt="Body text cut from a Rise App Store screenshot" loading="lazy" decoding="async">
           </div>
         </div>
         <div class="card style-card">
           <h3 class="title-m" id="style-title">Design style</h3>
-          <p class="style-text">Black app screens where violet marks tabs and tags and orange marks energy numbers, framed by a violet-to-orange sunrise on every store screen. The web paywall switches to white, with a violet button, a green coupon card and a red countdown.</p>
+          <p class="style-text">Rise sets Work Sans on night-black #17151A screens, with grouped #22222A rows rounded at 12&nbsp;pt. Electric violet #7D05FC marks tabs, tags and add buttons, while orange marks energy numbers and the high end of the energy curve. Store shots frame each phone in a violet-to-orange sunrise over purple hills.</p>
           <dl class="traits">
-            <div><dd>Near black covers 42% of the store screens</dd></div>
-            <div><dd>8 of 8 store screens sit on a violet-to-orange sunrise</dd></div>
-            <div><dd>6 of 8&nbsp;captions mix regular and bold words</dd></div>
+            <div><dt>Layout</dt><dd>Grouped lists inset 13&nbsp;pt from the edges, with 56&nbsp;pt rows, 1&nbsp;pt separators and a 21&nbsp;pt icon circle per row.</dd></div>
+            <div><dt>Shapes</dt><dd>Lists round at 12&nbsp;pt, session cards at 13&nbsp;pt and sheet tops at 28&nbsp;pt; badges are full pills.</dd></div>
+            <div><dt>Color</dt><dd>Night black #17151A screens with #22222A rows; violet #7D05FC on tabs, tags and add buttons; orange #C56B3D on energy numbers.</dd></div>
+            <div><dt>Type</dt><dd>One family, Work Sans: Bold 700 headers, Medium 500 rows at 17&nbsp;pt, Regular 400 big numbers like 6.3 hrs.</dd></div>
+            <div><dt>Imagery</dt><dd>All 8 store shots sit on a violet-to-orange sunrise; guided sessions use orange gradient art with 2 wave lines.</dd></div>
+            <div><dt>Components</dt><dd>An energy curve from violet #6F1DFE to orange #FC800C, violet Peak and Dip arrow tags, and a tab bar with violet active icons.</dd></div>
           </dl>
         </div>
     </div>
@@ -183,7 +187,28 @@
     <h2 class="title-l" id="prompt-title">Copy this style</h2>
     <p class="prompt-sub">A prompt for Rise’s overall look: colors, type, shapes, layout and its signature components.</p>
     <div class="prompt">
-      <p class="prompt-text" id="style-prompt">Build a paywall in Rise’s style. Top to bottom: a sticky countdown bar, a dial with the user’s result, a 2-line headline ending in violet, then 3 plan cards. Each shows the crossed-out price, the new price and a boxed per-day price. Tag them LITE VERSION, MOST POPULAR and BEST PRICE; preselect the middle plan with a violet outline. Discount the first period and print the renewal price on the card. Type: Work Sans, bold headlines, regular body. Colors: night black #17151A (60), electric violet #7D05FC (30) for the selection and button, sunrise orange #C56B3D (10) for the per-day price. Use my brand colors in the same 60/30/10 roles.</p>
+      <p class="prompt-text" id="style-prompt">Restyle my app in Rise’s style. Keep my features, data and copy.
+Colors:
+- 60% night black #17151A: screens and sheets; rows and cards on #22222A.
+- 30% electric violet #7D05FC: active tabs, tags and add buttons; violet text #8C58FC.
+- 10% sunrise orange #C56B3D: energy numbers, peaks and session art.
+Type:
+- Headlines: Work Sans 700, about 21 pt, white over a grey Bold subline.
+- Body: Work Sans 400, 13 to 17 pt; Work Sans 500 for row labels; secondary text #BCBCC0.
+Shapes:
+- Grouped lists 12 pt corners, cards 13 pt, sheet tops 28 pt; badges are full pills.
+Layout:
+- Lists inset 13 pt, 56 pt rows with 1 pt #323335 separators, 21 pt icon circles.
+Components:
+- Energy chart: a curve that fades from violet #6F1DFE (low) to orange #FC800C (high), with a white now line.
+- Habit row: colored icon circle, label, bell and chevron on #22222A.
+- Session card: 13 pt corners, orange gradient art #4C0210 to #DF7001, a white play disc, a #22222A footer row.
+Icons and imagery:
+- White line icons; violet-to-orange sunrise gradients behind heroes and onboarding.
+Check:
+- Every screen background is #17151A or #000000.
+- Orange appears only on energy data and session art.
+- Lists use 12 pt corners and 56 pt rows.</p>
     </div>
     <div class="prompt-actions">
       <button class="btn btn-secondary js-only" type="button" data-copy-target="#style-prompt" data-copy-raw><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>

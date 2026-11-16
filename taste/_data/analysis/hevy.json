@@ -1,6 +1,7 @@
 {
   "card": {
     "oneLiner": "White screens, blue buttons; the paywall preselects Yearly at $23.99",
+    "short": "Workout log for sets, routines and strength progress",
     "keyNumber": {
       "value": "$23.99",
       "label": "Yearly plan"
@@ -27,6 +28,51 @@
         "use": "Buttons, links, charts and the band under the first 8 store shots"
       }
     ],
+    "fonts": {
+      "headline": {
+        "name": "Inter",
+        "closeTo": "Inter",
+        "weight": 800,
+        "look": "Tall x-height grotesque: ExtraBold caps on store headlines, SemiBold on app titles",
+        "crop": "/taste/media/hevy/font-headline.jpg"
+      },
+      "body": {
+        "name": "Inter",
+        "closeTo": "Inter",
+        "weight": 400,
+        "look": "Regular on list rows and grey sublines; 2 buttons use SF Pro instead",
+        "crop": "/taste/media/hevy/font-body.jpg"
+      }
+    },
+    "style": {
+      "summary": "Hevy is a white, list-first tracker: near-black text, grey #F3F4F8 secondary buttons and white cards with 1 pt #EDEDED borders. One blue, #267EE8, covers main buttons, links, selected chips and every chart. Done sets turn light green #C7FEA0, and store shots stack heavy all-caps headlines over a blue band.",
+      "traits": [
+        {
+          "label": "Layout",
+          "text": "17 pt side margins; routine cards hold a title, a 2-line grey summary and a full-width blue button."
+        },
+        {
+          "label": "Shapes",
+          "text": "Buttons are about 40 pt tall with 10 pt corners; cards round at about 8 pt; chips and bars are full pills."
+        },
+        {
+          "label": "Color",
+          "text": "White #FFFFFF screens, black #000000 text, blue #267EE8 for main buttons, links and charts; done sets fill #C7FEA0 with a #56BD23 check."
+        },
+        {
+          "label": "Type",
+          "text": "Inter ExtraBold 800 caps set store headlines; SemiBold 600 sets titles; Regular 400 sets 16 pt rows and grey sublines."
+        },
+        {
+          "label": "Imagery",
+          "text": "Exercise rows show grey 3D figures with red target muscles on 4 of 8 shots; avatars are round photos, 88 pt on profiles."
+        },
+        {
+          "label": "Components",
+          "text": "Set rows with previous, kg, reps and a 25 pt check box; blue line and bar charts; 12.5 pt round-ended comparison bars."
+        }
+      ]
+    },
     "typeStyle": "Heavy all-caps store headlines, plain grotesque app text, and Figtree on the web paywall",
     "font": {
       "name": "Figtree",
@@ -160,7 +206,7 @@
       "source": "S1, S2, S4, S16"
     }
   ],
-  "stylePrompt": "Build a paywall in Hevy's style. Top to bottom: a logo bar, a semibold headline, a one-line subline, then 3 radio rows: Monthly, Yearly, Lifetime. Preselect Yearly with a 2 px blue outline and a filled radio. Each row: plan name in blue, full price below, billing line at right. Then a full-width blue button and a Free vs Pro table with blue checks. Type: Figtree, semibold headline, regular prices. Colors: white #FFFFFF (60) for the page, black #000000 (30) for text, bright blue #267EE8 (10) for the outline, button and checks. Show full prices only and skip the trial. Use my brand colors in the same 60/30/10 roles.",
+  "stylePrompt": "Restyle my app in Hevy's style. Keep my features, data and copy.\nColors:\n- 60% white #FFFFFF: every screen and card; secondary buttons #F3F4F8; borders #EDEDED.\n- 30% black #000000: titles, values and icons; secondary text #86898E.\n- 10% bright blue #267EE8: main buttons, links, selected chips, the active tab, charts.\n- Done states: row #C7FEA0, check box #56BD23.\nType:\n- Headlines: Inter 800 caps for heroes; Inter 600 at about 18 pt for titles.\n- Body: Inter 400, 16 pt rows, 13 pt grey sublines; tabular numbers.\nShapes:\n- Buttons 40 pt tall with 10 pt corners; cards 8 pt corners with a 1 pt #EDEDED border; chips and bars are full pills.\nLayout:\n- 17 pt side margins; lists sit in bordered white cards.\nComponents:\n- Routine card: title, a 3-dot menu, 2-line grey summary, full-width blue button.\n- Set row: previous, kg, reps and a 25 pt check box; a done row turns #C7FEA0.\n- Charts: thin blue line with dot markers, or blue bars on light grid lines.\nIcons and imagery:\n- Outline icons in black; grey 3D muscle figures with red target muscles.\nCheck:\n- Blue marks every main button, link and chart.\n- Every screen background is white.\n- Buttons are 40 pt tall with 10 pt corners.",
   "elements": [
     {
       "type": "plan-picker",

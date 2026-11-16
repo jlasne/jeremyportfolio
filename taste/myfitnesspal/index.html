@@ -12,6 +12,7 @@
 <script>(function(r){var t,v;try{t=localStorage.getItem('tasu-theme');v=localStorage.getItem('tasu-view')}catch(e){}r.classList.add('js');if(v==='grid')r.setAttribute('data-view','grid');if(t==='light'||t==='dark'){r.setAttribute('data-theme',t);var m=document.querySelectorAll('meta[name="theme-color"]'),c=t==='dark'?'#1C1B19':'#F3EFE7';for(var i=0;i<m.length;i++)m[i].setAttribute('content',c)}})(document.documentElement)</script>
 <link rel="preload" href="/taste/fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/taste/tasu.css">
+<link rel="stylesheet" href="/taste/fonts/apps.css">
 <script src="/taste/tasu.js" defer></script>
 <link rel="icon" href="/taste/brand/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/taste/brand/apple-touch-icon.png">
@@ -151,27 +152,30 @@
             <p class="sp-name">Inter</p>
             <p class="sp-aa" style="font-family:'Inter',var(--font);font-weight:700" aria-hidden="true">Aa</p>
             <p class="sp-line" style="font-family:'Inter',var(--font);font-weight:700">MyFitnessPal 0123456789</p>
-            <p class="sp-look">Bold grotesque headlines tracked about -2%, regular body</p>
+            <p class="sp-look">Bold grotesque tracked 3% tight, on the white store headlines</p>
             <p class="sp-free">A free Google Font: <a href="https://fonts.google.com/specimen/Inter">Inter 700</a></p>
-            <img class="sp-crop" src="/taste/media/myfitnesspal/font-1.jpg" width="940" height="430" alt="Headline text cut from a MyFitnessPal App Store screenshot" loading="lazy" decoding="async">
+            <img class="sp-crop" src="/taste/media/myfitnesspal/font-headline.jpg" width="1025" height="394" alt="Headline text cut from a MyFitnessPal App Store screenshot" loading="lazy" decoding="async">
           </div>
           <div class="sp">
             <p class="sp-role">Body</p>
-            <p class="sp-name">Inter</p>
+            <p class="sp-name">Close to Inter</p>
             <p class="sp-aa" style="font-family:'Inter',var(--font);font-weight:400" aria-hidden="true">Aa</p>
             <p class="sp-line" style="font-family:'Inter',var(--font);font-weight:400">MyFitnessPal 0123456789</p>
-            <p class="sp-look">Bold grotesque headlines tracked about -2%, regular body</p>
-            <p class="sp-free">A free Google Font: <a href="https://fonts.google.com/specimen/Inter">Inter 400</a></p>
-            
+            <p class="sp-look">Neutral grotesque, on food rows, macro labels and grey values</p>
+            <p class="sp-free">Free match: <a href="https://fonts.google.com/specimen/Inter">Inter 400</a></p>
+            <img class="sp-crop" src="/taste/media/myfitnesspal/font-body.jpg" width="984" height="450" alt="Body text cut from a MyFitnessPal App Store screenshot" loading="lazy" decoding="async">
           </div>
         </div>
         <div class="card style-card">
           <h3 class="title-m" id="style-title">Design style</h3>
-          <p class="style-text">Store screens put white app UI on a warm stone photo under bold white headlines, and blue #0066EE fills the icon and the buttons. The web paywall flips it: blue fills the page, and yellow #FDDA1C marks the tags, checks and buttons.</p>
+          <p class="style-text">MyFitnessPal stacks white cards with 15&nbsp;pt corners and 24&nbsp;pt padding on light screens under a pale blue-grey header tint. Bright blue #0066EE fills every main button as a full pill, while teal, purple and orange code carbs, fat and protein. Store shots set the app on a warm stone photo under bold white headlines.</p>
           <dl class="traits">
-            <div><dd>8 of 8 store screens sit on warm stone photos</dd></div>
-            <div><dd>Plan cards round at about 35&nbsp;px; buttons are 44&nbsp;px pills</dd></div>
-            <div><dd>1 yellow, #FDDA1C, on the paywall tags, checks and buttons</dd></div>
+            <div><dt>Layout</dt><dd>16&nbsp;pt screen margins; 361&nbsp;pt cards with 24&nbsp;pt padding and 12&nbsp;pt gaps; macros sit in 3 columns of 94&nbsp;pt.</dd></div>
+            <div><dt>Shapes</dt><dd>Cards round at 15&nbsp;pt and fields at 6&nbsp;pt with 2&nbsp;pt borders; buttons are 48&nbsp;pt pills, progress bars 8&nbsp;pt.</dd></div>
+            <div><dt>Color</dt><dd>White cards on #F6F7F9 sheets; blue #0066EE on buttons and goals; macros in teal #2CB9B1, purple #6C0D8F and orange #FEB13D.</dd></div>
+            <div><dt>Type</dt><dd>Inter Bold headlines tracked 3% tight; in-app values like 598 cal set 20&nbsp;pt Bold over 14&nbsp;pt Regular labels.</dd></div>
+            <div><dt>Imagery</dt><dd>All 8 store shots sit on a warm stone photo; food photos appear on 4 of 8, from salads to recipe cards.</dd></div>
+            <div><dt>Components</dt><dd>A 7-day check row, a calorie card with a 314&nbsp;pt blue bar, stacked macro bars, and white food rows with green checks.</dd></div>
           </dl>
         </div>
     </div>
@@ -183,7 +187,29 @@
     <h2 class="title-l" id="prompt-title">Copy this style</h2>
     <p class="prompt-sub">A prompt for MyFitnessPal’s overall look: colors, type, shapes, layout and its signature components.</p>
     <div class="prompt">
-      <p class="prompt-text" id="style-prompt">Build a paywall in MyFitnessPal’s style. Top to bottom: a bold headline, then a rounded card per plan, Annual first. Each card holds the plan name, a big yearly or monthly price, a billing line and a full-width pill button. Annual adds 3 checked features. Tag and outline Annual, and add “67% savings over the Monthly Plan”. Monthly gets an outlined button. Every button starts a 7-day free trial. Type: Inter, bold headlines at -2% tracking, regular body. Colors: white #FFFFFF (60) for cards, stone grey #746A61 (30) for the page, bright blue #0066EE (10) for the tag, outline and buttons. Use my brand colors in the same 60/30/10 roles.</p>
+      <p class="prompt-text" id="style-prompt">Restyle my app in MyFitnessPal’s style. Keep my features, data and copy.
+Colors:
+- 60% white #FFFFFF: cards, sheets and screens below the header.
+- 30% stone grey #746A61: hero and onboarding backdrops, as in the store shots.
+- 10% bright blue #0066EE: main buttons, links, goal values and the calorie bar.
+- Macros: carbs #2CB9B1, fat #6C0D8F, protein #FEB13D. Secondary text #6C6C70.
+Type:
+- Headlines: Inter 700, about 28 to 46 pt, tracking -3%.
+- Body: Inter 400, 14 pt; values Inter 700, 20 pt, units 12 pt grey.
+Shapes:
+- Cards 15 pt corners; fields 6 pt with a 2 pt #BEC5CF border; buttons 48 pt pills; bars 8 pt pills.
+Layout:
+- 16 pt margins, 24 pt card padding, 12 pt gaps; a #CDD9E2 tint behind the header.
+Components:
+- Week row: 7 circles; done days fill black with a white check.
+- Calorie card: label, 20 pt value, “/ goal” in grey, full-width 8 pt blue bar.
+- Food row: name, green check, “kcal, portion” in grey, red trash icon at right.
+Icons and imagery:
+- Thin line icons; real food photos with 12 pt corners.
+Check:
+- Every main button is a #0066EE pill.
+- Macro colors match on every screen.
+- Cards sit 12 pt apart with 24 pt padding.</p>
     </div>
     <div class="prompt-actions">
       <button class="btn btn-secondary js-only" type="button" data-copy-target="#style-prompt" data-copy-raw><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>

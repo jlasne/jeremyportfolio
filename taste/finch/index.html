@@ -12,6 +12,7 @@
 <script>(function(r){var t,v;try{t=localStorage.getItem('tasu-theme');v=localStorage.getItem('tasu-view')}catch(e){}r.classList.add('js');if(v==='grid')r.setAttribute('data-view','grid');if(t==='light'||t==='dark'){r.setAttribute('data-theme',t);var m=document.querySelectorAll('meta[name="theme-color"]'),c=t==='dark'?'#1C1B19':'#F3EFE7';for(var i=0;i<m.length;i++)m[i].setAttribute('content',c)}})(document.documentElement)</script>
 <link rel="preload" href="/taste/fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/taste/tasu.css">
+<link rel="stylesheet" href="/taste/fonts/apps.css">
 <script src="/taste/tasu.js" defer></script>
 <link rel="icon" href="/taste/brand/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/taste/brand/apple-touch-icon.png">
@@ -151,27 +152,30 @@
             <p class="sp-name">Rubik</p>
             <p class="sp-aa" style="font-family:'Rubik',var(--font);font-weight:700" aria-hidden="true">Aa</p>
             <p class="sp-line" style="font-family:'Rubik',var(--font);font-weight:700">Finch 0123456789</p>
-            <p class="sp-look">Wide grotesque with softly rounded corners, single-story g</p>
+            <p class="sp-look">Grotesque with softly rounded corners, Bold on 3-line store headlines and titles</p>
             <p class="sp-free">A free Google Font: <a href="https://fonts.google.com/specimen/Rubik">Rubik 700</a></p>
-            <img class="sp-crop" src="/taste/media/finch/font-1.jpg" width="872" height="600" alt="Headline text cut from a Finch App Store screenshot" loading="lazy" decoding="async">
+            <img class="sp-crop" src="/taste/media/finch/font-headline.jpg" width="800" height="530" alt="Headline text cut from a Finch App Store screenshot" loading="lazy" decoding="async">
           </div>
           <div class="sp">
             <p class="sp-role">Body</p>
             <p class="sp-name">Rubik</p>
-            <p class="sp-aa" style="font-family:'Rubik',var(--font);font-weight:400" aria-hidden="true">Aa</p>
-            <p class="sp-line" style="font-family:'Rubik',var(--font);font-weight:400">Finch 0123456789</p>
-            <p class="sp-look">Wide grotesque with softly rounded corners, single-story g</p>
-            <p class="sp-free">A free Google Font: <a href="https://fonts.google.com/specimen/Rubik">Rubik 400</a></p>
-            
+            <p class="sp-aa" style="font-family:'Rubik',var(--font);font-weight:500" aria-hidden="true">Aa</p>
+            <p class="sp-line" style="font-family:'Rubik',var(--font);font-weight:500">Finch 0123456789</p>
+            <p class="sp-look">Same rounded grotesque in Medium, on speech bubbles, section titles and rows</p>
+            <p class="sp-free">A free Google Font: <a href="https://fonts.google.com/specimen/Rubik">Rubik 500</a></p>
+            <img class="sp-crop" src="/taste/media/finch/font-body.jpg" width="800" height="634" alt="Body text cut from a Finch App Store screenshot" loading="lazy" decoding="async">
           </div>
         </div>
         <div class="card style-card">
           <h3 class="title-m" id="style-title">Design style</h3>
-          <p class="style-text">Flat cartoon birds play on sky-blue skies and green grass, with white rounded cards for goals and speech bubbles. Loud fills mark big moments: pink for sending a Valentine, bright blue for the 30-day streak.</p>
+          <p class="style-text">Finch builds cozy scenes: cartoon birds on sky-blue #9DDDFF skies and green grass, above white cards with 20 to 24&nbsp;pt corners. Goals sit in 78&nbsp;pt rows with an emoji tile, a bolt reward and a raised check button. Full-screen fills mark big moments: pink for a Valentine, bright blue #0E9BE2 for a 30-day streak.</p>
           <dl class="traits">
-            <div><dd>Sky blue and its pale tint cover 44% of the store shots</dd></div>
-            <div><dd>8 of 8 headlines: 3&nbsp;lines of dark blue Rubik Bold</dd></div>
-            <div><dd>White cards with corners about 24&nbsp;px</dd></div>
+            <div><dt>Layout</dt><dd>16.5&nbsp;pt side margins; a cartoon scene fills the top of the screen, and white cards stack below, 6.5 to 8&nbsp;pt apart.</dd></div>
+            <div><dt>Shapes</dt><dd>Cards round at 20 to 24&nbsp;pt, icon tiles are 54&nbsp;pt squircles, and check buttons round at 13&nbsp;pt with a raised edge.</dd></div>
+            <div><dt>Color</dt><dd>Sky blue #9DDDFF backdrops, white #FFFFFF cards and bubbles, dark text #2E2E2E; bright blue #0E9BE2 fills the streak screen.</dd></div>
+            <div><dt>Type</dt><dd>Rubik sets every word: Bold 700 for 3-line headlines and 21&nbsp;pt titles, Medium 500 for 17&nbsp;pt rows and speech bubbles.</dd></div>
+            <div><dt>Imagery</dt><dd>Flat cartoon birds appear on all 8 shots, with props like hearts, trophies and dumbbells.</dd></div>
+            <div><dt>Components</dt><dd>Goal rows with a raised check button, 7-dot habit sparklines at a 14.7&nbsp;pt pitch, and a streak week of check coins.</dd></div>
           </dl>
         </div>
     </div>
@@ -183,7 +187,30 @@
     <h2 class="title-l" id="prompt-title">Copy this style</h2>
     <p class="prompt-sub">A prompt for Finch’s overall look: colors, type, shapes, layout and its signature components.</p>
     <div class="prompt">
-      <p class="prompt-text" id="style-prompt">Build a paywall in Finch’s style. Top to bottom: your mascot in a sky scene with a white speech bubble, a 3-line headline, white plan cards, one full-width button. Type: Rubik, bold headline in dark blue #1F4F9A, medium labels. Colors: sky blue #9DDDFF (60) for the screen, white #FFFFFF (30) for cards and the bubble, bright blue #0E9BE2 (10) for the button and the selected card’s outline. Button text #101820. Corners about 24 px. Plans: one tier in rows with length and price; preselect the longest and show its per-month price. Show a trial only if you offer one. Use my brand colors in the same 60/30/10 roles.</p>
+      <p class="prompt-text" id="style-prompt">Restyle my app in Finch’s style. Keep my features, data and copy.
+Colors:
+- 60% sky blue #9DDDFF: skies and hero backdrops.
+- 30% white #FFFFFF: cards, speech bubbles and sheets; text #2E2E2E.
+- 10% bright blue #0E9BE2: streaks, selected checks and big moments.
+- Rewards: orange bolts #FEAC31; done checks green #52B74E.
+Type:
+- Headlines: Rubik 700, 21 pt titles; 3-line heroes in dark blue #1F4F9A.
+- Body: Rubik 500, 17 pt rows and bubbles; section labels in Rubik 600 caps, 12 pt, tracking 9%.
+Shapes:
+- Cards 20 to 24 pt corners; icon tiles 54 pt squircles.
+- Check buttons: 13 pt corners, #F0F0F0 face, a 4 pt #D7D7D7 bottom edge.
+Layout:
+- 16.5 pt side margins; a cartoon scene on top, white cards below, 8 pt apart.
+Components:
+- Goal row: 78 pt white card, emoji tile, Rubik 600 name, bolt reward, check button.
+- Habit sparkline: 7 columns, 14.7 pt pitch, bars and dots in the row’s color.
+- Speech bubble: white, fully rounded, tail toward the mascot.
+Icons and imagery:
+- A flat cartoon mascot in every hero; emoji-style icons in rows.
+Check:
+- Every card is white with 20 to 24 pt corners.
+- The mascot appears on each main screen.
+- Bright blue appears only on streaks and selections.</p>
     </div>
     <div class="prompt-actions">
       <button class="btn btn-secondary js-only" type="button" data-copy-target="#style-prompt" data-copy-raw><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>

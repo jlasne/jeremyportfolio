@@ -1,6 +1,7 @@
 {
   "card": {
     "oneLiner": "Black screens, orange routes. 30 days free, then $79.99 a year",
+    "short": "Track and share runs, rides and hikes",
     "keyNumber": {
       "value": "$79.99",
       "label": "Individual plan, per year"
@@ -27,6 +28,51 @@
         "use": "The icon, the main buttons, routes and the active tab"
       }
     ],
+    "fonts": {
+      "headline": {
+        "name": "Boathouse Extended",
+        "closeTo": "Montserrat",
+        "weight": 700,
+        "look": "Wide bold grotesque with round bowls, on the store headlines",
+        "crop": "/taste/media/strava/font-headline.jpg"
+      },
+      "body": {
+        "name": "Boathouse",
+        "closeTo": "Inter",
+        "weight": 400,
+        "look": "Plain grotesque with a footed 1, on rows, labels and paragraphs",
+        "crop": "/taste/media/strava/font-body.jpg"
+      }
+    },
+    "style": {
+      "summary": "Near-black #141414 screens carry white text, with #21211F for the tab bar, nav bar and sheets. Orange #FD5200 marks only the active state: the current tab, selected chips, routes and chart lines. Screens pack data tight: 4 stats per row, 34 pt outlined chips, photos at full content width and dark maps.",
+      "traits": [
+        {
+          "label": "Layout",
+          "text": "24 pt side margins; activity stats sit in 4 columns, an 11 pt label over a 17 pt value."
+        },
+        {
+          "label": "Shapes",
+          "text": "Chips: 34 pt tall, 1 pt #434240 outline, 6 pt corners, full pills over maps; photos round at about 8 pt."
+        },
+        {
+          "label": "Color",
+          "text": "#141414 screens and #21211F bars carry white text; orange #FD5200 marks only the active tab, selected chips, routes and the Save button."
+        },
+        {
+          "label": "Type",
+          "text": "Boathouse Extended Bold sets store headlines; Boathouse Bold sets 24 pt stats like 384.6 mi; Regular sets 11 to 14 pt labels."
+        },
+        {
+          "label": "Imagery",
+          "text": "Dark maps appear on 4 of 8 shots, 3 with orange route lines; real activity photos run the full 344 pt width."
+        },
+        {
+          "label": "Components",
+          "text": "A 5-tab bar on #21211F with the active icon filled orange; 4-column stat rows; charts draw a 2.5 pt orange line."
+        }
+      ]
+    },
     "typeStyle": "Wide bold grotesque headlines in white; paywall prices in regular weight at 4x the body size",
     "font": {
       "name": null,
@@ -209,7 +255,7 @@
       "source": "S1, S2, S4, S16"
     }
   ],
-  "stylePrompt": "Build a dark paywall in Strava's style. Top to bottom: a red-to-black gradient hero with the logo and a bold 2-line headline, then a white trial timeline. Below: 4 stacked plan cards and a sticky full-width button. Type: Archivo, bold headlines, regular prices at 4x the body size. Colors: near black #141414 (60) for the page and cards, white #FFFFFF (30) for text, Strava orange #FD5200 (10) for the sticky button only. Put the priciest plan first as an anchor. Make the main plan the one light card: Annual preselected, price per month, yearly bill below, 30 days free. Use my brand colors in the same 60/30/10 roles.",
+  "stylePrompt": "Restyle my app in Strava's style. Keep my features, data and copy.\nColors:\n- 60% near black #141414: screen backgrounds; #21211F for bars and sheets.\n- 30% white #FFFFFF: text and icons; secondary text 75% white.\n- 10% Strava orange #FD5200: only the active tab, selected chips, main buttons, routes and chart lines.\nType:\n- Headlines: Montserrat 700, close to Boathouse Extended, about 28 to 32 pt.\n- Body: Inter 400, close to Boathouse, 13 to 14 pt; Inter 700 for 17 pt titles and 24 pt stats.\nShapes:\n- Chips 34 pt tall, 6 pt corners, 1 pt #434240 outline; selected chips get an orange outline and label.\n- Photos 8 pt corners. Flat surfaces with 1 pt #3A3A38 dividers.\nLayout:\n- 24 pt side margins, 16 pt between blocks, dense data rows.\nComponents:\n- Tab bar: 5 outlined white icons; the active one fills orange.\n- Stat row: 4 columns, 11 pt label over 17 pt value.\n- Charts: 2.5 pt orange line, 26% orange fill, 20% white gridlines.\nIcons and imagery:\n- 2 pt line icons, round caps; dark maps with orange routes; real photos at full width.\nCheck:\n- Every screen background is #141414.\n- Orange appears only on active or selected items.\n- Stats read label over value, 4 per row.",
   "elements": [
     {
       "type": "hero-visual",

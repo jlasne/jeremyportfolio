@@ -4,7 +4,7 @@ window.TASU_APPS = [
  {
   "slug": "strava",
   "name": "Strava",
-  "short": "Track & share with friends",
+  "short": "Track and share runs, rides and hikes",
   "rankLabel": "#4 in Health & Fitness",
   "colors": [
    {
@@ -27,15 +27,19 @@ window.TASU_APPS = [
    }
   ],
   "fonts": {
-   "headline": "Archivo",
-   "body": "Archivo"
+   "headline": "Boathouse Extended",
+   "body": "Boathouse"
   },
   "shot": {
    "src": "/taste/media/strava/s1.jpg",
    "w": 600,
    "h": 1299
   },
-  "elements": [],
+  "elements": [
+   "strava-progress-chart",
+   "strava-sport-picker",
+   "strava-activity-stats"
+  ],
   "icon": "/taste/media/strava/icon.png",
   "page": "/taste/strava/",
   "appStore": "https://apps.apple.com/us/app/strava-run-bike-walk/id426826309"
@@ -43,7 +47,7 @@ window.TASU_APPS = [
  {
   "slug": "ladder",
   "name": "Ladder",
-  "short": "Fitness Workouts at Home & Gym",
+  "short": "Coach-built strength workout plans for home or gym",
   "rankLabel": "#2 in Health & Fitness",
   "colors": [
    {
@@ -66,15 +70,19 @@ window.TASU_APPS = [
    }
   ],
   "fonts": {
-   "headline": "Archivo",
-   "body": "Archivo"
+   "headline": "EK Modena Extended",
+   "body": "SF Pro"
   },
   "shot": {
    "src": "/taste/media/ladder/s1.jpg",
    "w": 600,
    "h": 1299
   },
-  "elements": [],
+  "elements": [
+   "ladder-strength-chart",
+   "ladder-rep-timer",
+   "ladder-home-header"
+  ],
   "icon": "/taste/media/ladder/icon.png",
   "page": "/taste/ladder/",
   "appStore": "https://apps.apple.com/us/app/ladder-strength-training-plans/id1502936453"
@@ -82,7 +90,7 @@ window.TASU_APPS = [
  {
   "slug": "opal",
   "name": "Opal",
-  "short": "Focus, App Blocker & Timer",
+  "short": "App blocker and focus timer for screen time",
   "rankLabel": "#51 in Productivity",
   "colors": [
    {
@@ -105,8 +113,8 @@ window.TASU_APPS = [
    }
   ],
   "fonts": {
-   "headline": "Inter",
-   "body": "Inter"
+   "headline": "SF Pro",
+   "body": "SF Pro"
   },
   "shot": {
    "src": "/taste/media/opal/s1.jpg",
@@ -125,7 +133,7 @@ window.TASU_APPS = [
  {
   "slug": "myfitnesspal",
   "name": "MyFitnessPal",
-  "short": "AI Coach & Nutrition Tracker",
+  "short": "Calorie and macro tracker with an AI coach",
   "rankLabel": "#1 in Health & Fitness",
   "colors": [
    {
@@ -164,7 +172,7 @@ window.TASU_APPS = [
  {
   "slug": "rise",
   "name": "Rise",
-  "short": "Become a morning person",
+  "short": "Sleep debt and energy tracker for better mornings",
   "rankLabel": "#61 in Health & Fitness",
   "colors": [
    {
@@ -203,7 +211,7 @@ window.TASU_APPS = [
  {
   "slug": "headspace",
   "name": "Headspace",
-  "short": "Mental Health, Stress, Anxiety",
+  "short": "Guided meditation, sleep sounds and mental health support",
   "rankLabel": "#13 in Health & Fitness",
   "colors": [
    {
@@ -242,7 +250,7 @@ window.TASU_APPS = [
  {
   "slug": "hevy",
   "name": "Hevy",
-  "short": "Weight Lifting Routine Planner",
+  "short": "Workout log for sets, routines and strength progress",
   "rankLabel": "#35 in Health & Fitness",
   "colors": [
    {
@@ -265,8 +273,8 @@ window.TASU_APPS = [
    }
   ],
   "fonts": {
-   "headline": "Figtree",
-   "body": "Figtree"
+   "headline": "Inter",
+   "body": "Inter"
   },
   "shot": {
    "src": "/taste/media/hevy/s1.jpg",
@@ -281,7 +289,7 @@ window.TASU_APPS = [
  {
   "slug": "huckleberry",
   "name": "Huckleberry",
-  "short": "Baby Sleep & Nap Schedule App",
+  "short": "Baby sleep and feeding tracker with nap predictions",
   "rankLabel": "#1 in Medical",
   "colors": [
    {
@@ -304,15 +312,19 @@ window.TASU_APPS = [
    }
   ],
   "fonts": {
-   "headline": "Avenir",
-   "body": "Avenir"
+   "headline": "Lexend",
+   "body": "Lexend"
   },
   "shot": {
    "src": "/taste/media/huckleberry/s1.jpg",
    "w": 600,
    "h": 1300
   },
-  "elements": [],
+  "elements": [
+   "huckleberry-nursing-timer",
+   "huckleberry-view-tabs",
+   "huckleberry-sleep-trends"
+  ],
   "icon": "/taste/media/huckleberry/icon.png",
   "page": "/taste/huckleberry/",
   "appStore": "https://apps.apple.com/us/app/huckleberry-baby-tracker/id1169136078"
@@ -320,7 +332,7 @@ window.TASU_APPS = [
  {
   "slug": "cal-ai",
   "name": "Cal AI",
-  "short": "Food & Macro Counter",
+  "short": "Calorie counter that reads meals from a photo",
   "rankLabel": "#11 in Health & Fitness",
   "colors": [
    {
@@ -359,7 +371,7 @@ window.TASU_APPS = [
  {
   "slug": "duolingo",
   "name": "Duolingo",
-  "short": "Spanish, French, Chess & Math",
+  "short": "Bite-size language lessons with a daily streak",
   "rankLabel": "#1 in Education",
   "colors": [
    {
@@ -383,7 +395,7 @@ window.TASU_APPS = [
   ],
   "fonts": {
    "headline": "Feather Bold",
-   "body": "Feather Bold"
+   "body": "DIN Next Rounded"
   },
   "shot": {
    "src": "/taste/media/duolingo/s1.jpg",
@@ -402,7 +414,7 @@ window.TASU_APPS = [
  {
   "slug": "flo",
   "name": "Flo",
-  "short": "Ovulation & Pregnancy Calendar",
+  "short": "Period, ovulation and pregnancy tracker with cycle predictions",
   "rankLabel": "#3 in Health & Fitness",
   "colors": [
    {
@@ -425,8 +437,8 @@ window.TASU_APPS = [
    }
   ],
   "fonts": {
-   "headline": "Proza Libre",
-   "body": "Proza Libre"
+   "headline": "Philosopher",
+   "body": "SF Pro"
   },
   "shot": {
    "src": "/taste/media/flo/s1.jpg",
@@ -445,7 +457,7 @@ window.TASU_APPS = [
  {
   "slug": "finch",
   "name": "Finch",
-  "short": "Daily Journal & Habit Tracker",
+  "short": "Self-care pet that grows as you meet goals",
   "rankLabel": "#14 in Health & Fitness",
   "colors": [
    {

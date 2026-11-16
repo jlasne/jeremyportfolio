@@ -1,6 +1,7 @@
 {
   "card": {
     "oneLiner": "Black glass screens. Yearly gets a 7-day trial, Monthly 3 days.",
+    "short": "App blocker and focus timer for screen time",
     "keyNumber": {
       "value": "$99.99",
       "label": "Yearly plan"
@@ -27,6 +28,51 @@
         "use": "key numbers, icons and the App Store backdrops"
       }
     ],
+    "fonts": {
+      "headline": {
+        "name": "SF Pro",
+        "closeTo": "Inter",
+        "weight": 700,
+        "look": "Tight grotesque, Bold key words inside Medium lines, on headlines and ring numbers",
+        "crop": "/taste/media/opal/font-headline.jpg"
+      },
+      "body": {
+        "name": "SF Pro",
+        "closeTo": "Inter",
+        "weight": 500,
+        "look": "Plain grotesque in grey #BCBBC0, on body copy, rows and spaced caps",
+        "crop": "/taste/media/opal/font-body.jpg"
+      }
+    },
+    "style": {
+      "summary": "Opal sets frosted-glass cards on near-black #0E0F11 screens, lit by ice-blue #B4D4E6 numbers, rings and glows. Cards round at 33 pt continuous corners with a faint white rim, and every button is a glass capsule 42 to 51 pt tall. Photo-real 3D stones and gems crown the hero screens and float in the store art.",
+      "traits": [
+        {
+          "label": "Layout",
+          "text": "Screens center one hero, a 293 pt ring or a 3D gem, above glass cards with 20 pt inner padding."
+        },
+        {
+          "label": "Shapes",
+          "text": "Glass cards: 33 pt continuous corners, a white rim at 18%; buttons and value pills: full capsules 42 to 51 pt tall."
+        },
+        {
+          "label": "Color",
+          "text": "Near black #0E0F11 behind #EEEEEE titles and #BCBBC0 body text; ice blue #B4D4E6 and a #819DC4 to #9FF8FE gradient mark numbers and rings."
+        },
+        {
+          "label": "Type",
+          "text": "SF Pro mixes Medium and Bold words in one headline at 4% tight tracking; 12 to 14 pt spaced caps label the stats."
+        },
+        {
+          "label": "Imagery",
+          "text": "Photo-real 3D stones, gems and rock arches appear on 6 of 8 shots, over misty ice-blue backdrops."
+        },
+        {
+          "label": "Components",
+          "text": "A 293 pt screen-time ring with a 22.5 pt ice-blue arc, glass app tiles, and a capsule stepper with 37 pt round buttons."
+        }
+      ]
+    },
     "typeStyle": "Tight sans headlines that set key words in bold inside regular lines",
     "font": {
       "name": null,
@@ -178,7 +224,7 @@
       "source": "S27"
     }
   ],
-  "stylePrompt": "Build a dark paywall like Opal's. Top: an award badge and the rating. Below, one card holds the app name with a PRO badge, a one-line promise and 3 tabs: Yearly, Monthly, Lifetime. Under the tabs: one big price, the billed total in small grey text, 5 checked features and a full-width pill button. Preselect Yearly and show its price per month. Give Yearly a 7-day trial and Monthly 3 days; Lifetime is a one-time purchase. Type: Inter, bold price, regular body. Colors: near black #0E0F11 (60%), soft white #EEEEEE (30%), ice blue #B4D4E6 (10%) on the button. Use my brand colors in the same 60/30/10 roles.",
+  "stylePrompt": "Restyle my app in Opal's style. Keep my features, data and copy.\nColors:\n- 60% near black #0E0F11: screen backgrounds, with a #495C6B glow at the top.\n- 30% soft white #EEEEEE: titles and icons; body text #BCBBC0.\n- 10% ice blue #B4D4E6: key numbers, rings, active icons; arcs fade #819DC4 to #9FF8FE.\nType:\n- Headlines: Inter 700, close to SF Pro, 28 pt, tracking -4%, key words Bold inside Inter 500 lines.\n- Body: Inter 500, close to SF Pro, 13 to 15 pt; stat labels about 12 pt caps, tracking 5%.\nShapes:\n- Glass cards: background blur, white rim at 18%, 33 pt continuous corners.\n- Buttons and steppers: capsules 42 to 51 pt tall.\nLayout:\n- 32 pt side margins, one centered hero per screen, 20 pt card padding.\nComponents:\n- Ring: 293 pt, 22.5 pt round-capped arc on a #151515 track, 55 pt value centered.\n- Stat row: 3 columns, caps label over an ice-blue number of about 28 pt.\n- Glass button: 42 pt capsule, white label, ice-blue glow on the bottom rim.\nIcons and imagery:\n- White rounded line icons; one photo-real 3D stone or gem per hero.\nCheck:\n- Every background is #0E0F11 or its top glow.\n- Cards show the background through frosted glass.\n- Headlines mix 2 weights.",
   "elements": [
     {
       "type": "social-proof",
