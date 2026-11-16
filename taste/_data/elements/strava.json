@@ -38,11 +38,11 @@
     }
    ],
    "size": {
-    "w": 0,
-    "h": 0
+    "w": 376,
+    "h": 458
    },
    "backdrop": "#141414",
-   "prompt": "Build a period comparison chart like Strava's.\n- Card 344 x 426 pt on #141414, Inter, white text.\n- Header: \"Total Distance\" 15.8 pt Bold. Totals 23.5 pt Bold, the prior one right-aligned. The change in 15.3 pt Semibold #E5F4D8 follows a #72CD29 up triangle.\n- Legend: 7.8 pt dots, #FD5200 now and #46C6CB prior; dates 12.5 pt #BEBDBB.\n- Plot 309 x 210 pt: 4 gridlines 70 pt apart, white at 20%; y labels 11.5 pt on the lines; month caps below.\n- Current: 2.5 pt #F75405 line over #FC5200 at 26%. Prior: 2.2 pt #46C6CB line. Hollow markers, r 3.2 pt.\n- Chip: 36 pt tall, 1 pt #434240 border, 6 pt radius: teal dash, \"Prior 3 months\" 13.3 pt Medium, close icon.\n- States: close hides the prior line. Draw the lines in 600 ms, then fade the area in.\n- Data rule: 1 point per week; change = (current - prior) / prior; even y steps.\nSwap in my brand colors and font; keep the sizes."
+   "prompt": "Build a period comparison chart like Strava's.\n- Card 344 x 426 pt on #141414, Inter, white text.\n- Header: \"Total Distance\" 15.8 pt Bold. Totals 23.5 pt Bold, prior right-aligned; the change 15.3 pt Semibold #E5F4D8 after a #72CD29 triangle.\n- Legend: 7.8 pt dots, #FD5200 now and #46C6CB prior; dates 12.5 pt #BEBDBB.\n- Plot 309 x 210 pt: 4 gridlines 70 pt apart, white at 20%; y labels 11.5 pt on the lines; month caps below.\n- Current: 2.5 pt #F75405 line over #FC5200 at 26%. Prior: 2.2 pt #46C6CB line. Hollow markers, r 3.2 pt.\n- Chip: 36 pt tall, 1 pt #434240 border, 6 pt radius: teal dash, \"Prior 3 months\" 13.3 pt Medium, close icon.\n- States: close hides the prior line. Draw the lines in 600 ms, then fade the area in.\n- Data rule: 1 point per week; change = (current - prior) / prior; even y steps.\nSwap in my brand colors and font; keep the sizes."
   },
   {
    "id": "strava-sport-picker",
@@ -73,8 +73,8 @@
     }
    ],
    "size": {
-    "w": 0,
-    "h": 0
+    "w": 400,
+    "h": 170
    },
    "backdrop": "#21211F",
    "prompt": "Build a sport picker row like Strava's.\n- Sheet #21211F. Title \"Your Top Sports\" in Inter Medium 16.5 pt #FFFFFF, 26 pt from the left edge.\n- Row: 63 pt circles, 84 pt pitch, the first 30 pt from the edge. It scrolls sideways; the 5th item is cut by the screen edge.\n- Circle #43423E with a 26 pt white line icon, 2 pt stroke, round caps: shoe, road bike, zigzag lines, rolled mat, boot.\n- Label 10 pt under each circle: Inter Regular 12.7 pt #FFFFFF, centered.\n- Selected: circle #582E16 (#FC5200 at 25%), icon and label #FC5200. A 16.4 pt #FC5200 badge with a #21211F check sits on the circle edge, 45 degrees up-right.\n- States: single select. Pressed scales the circle to 0.94, then springs back. The badge pops in from scale 0 over 200 ms.\n- Data rule: order the sports by use, most used first.\nSwap in my brand colors and font; keep the sizes."
@@ -116,11 +116,11 @@
     }
    ],
    "size": {
-    "w": 0,
-    "h": 0
+    "w": 376,
+    "h": 172
    },
    "backdrop": "#141414",
-   "prompt": "Build an activity stats header like Strava's.\n- Card 344 pt wide on #141414, Inter, white text.\n- Avatar: 37 x 40 pt shield (3 pt top corners, V bottom), 2.8 pt border, gradient #F18147 to #F1631C to #9E3208; initials 15 pt Bold on #2A2A2A.\n- Name 12.5 pt Bold, 14 pt right of the avatar. Below it, a 16 pt shoe icon and the time and place in 10.6 pt #E2E2E0.\n- More icon top right: 3 outlined 4.8 pt circles, 1 pt #C3C2BF.\n- Title 19.4 pt Medium, 29 pt under the avatar.\n- Stats: labels 10.7 pt #F1F1F0, values 16.6 pt Medium, 17 pt cap to cap. Columns at 0, 77 and 166 pt; Achievements right-aligned.\n- Achievements: 14 x 16 pt #F0AE0D medals and a #8D979A trophy, 3 pt apart, then the count.\n- States: avatar and name open the profile; the more icon opens actions; the card opens the activity.\n- Data rule: long names end with an ellipsis; the count equals the badges shown.\nSwap in my brand colors and font; keep the sizes."
+   "prompt": "Build an activity stats header like Strava's.\n- Card 344 pt wide on #141414, Inter, white text.\n- Avatar: 37 x 40 pt shield (3 pt top corners, V bottom), 2.8 pt border, gradient #F18147 to #F1631C to #9E3208; initials 15 pt Bold on #2A2A2A.\n- Name 12.5 pt Bold, 14 pt right of the avatar; below, a 16 pt shoe icon, time and place in 10.6 pt #E2E2E0.\n- More icon top right: 3 outlined 4.8 pt #C3C2BF circles.\n- Title 19.4 pt Medium, 29 pt under the avatar.\n- Stats: labels 10.7 pt #F1F1F0 over values 16.6 pt Medium. Columns at 0, 77 and 166 pt; Achievements right-aligned.\n- Achievements: 14 x 16 pt #F0AE0D medals and a #8D979A trophy, 3 pt apart, then the count.\n- States: avatar and name open the profile; the card opens the activity.\n- Data rule: long names end with an ellipsis; the count equals the badges shown.\nSwap in my brand colors and font; keep the sizes."
   }
  ]
 }

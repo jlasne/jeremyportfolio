@@ -1,0 +1,106 @@
+{
+ "slug": "cal-ai",
+ "elements": [
+  {
+   "id": "cal-ai-tab-bar",
+   "name": "Floating tab bar",
+   "type": "Navigation",
+   "order": 3,
+   "source": {
+    "shot": "s1",
+    "box": [
+     99,
+     1099,
+     403,
+     74
+    ],
+    "crop": "/taste/media/elements/src/cal-ai-tab-bar.jpg"
+   },
+   "why": "4 tabs float in a 62 pt capsule and the add action gets its own 62 pt black circle beside it, 1 thumb tap away.",
+   "html": "<div class=\"x-cal-ai-tab-bar\"><div class=\"x-cal-ai-tab-bar__bar\"><span class=\"x-cal-ai-tab-bar__pill\"></span><div class=\"x-cal-ai-tab-bar__tab x-cal-ai-tab-bar__tab--home\"><svg class=\"x-cal-ai-tab-bar__icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3.3 10.8L12 3.6L20.8 10.8\" fill=\"none\" stroke=\"#1D1A22\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M17.1 4.4H19.1V9.3L17.1 7.6Z\" fill=\"#1D1A22\"/><path d=\"M12 6.1L19 11.8V18.7C19 19.3 18.6 19.7 18 19.7H6.1C5.5 19.7 5.1 19.3 5.1 18.7V11.8Z\" fill=\"#1D1A22\"/><rect x=\"9.9\" y=\"13.6\" width=\"4.4\" height=\"5.3\" fill=\"#FFFFFF\"/></svg><span class=\"x-cal-ai-tab-bar__label\">Home</span></div><div class=\"x-cal-ai-tab-bar__tab x-cal-ai-tab-bar__tab--progress\"><svg class=\"x-cal-ai-tab-bar__icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><g fill=\"none\" stroke=\"#7F7F80\" stroke-width=\"1.5\"><rect x=\"3.6\" y=\"10.3\" width=\"3.5\" height=\"7.8\" rx=\"1.3\"/><rect x=\"10.6\" y=\"8\" width=\"3.5\" height=\"10.1\" rx=\"1.3\"/><rect x=\"17.7\" y=\"5.8\" width=\"3.5\" height=\"12.3\" rx=\"1.3\"/></g></svg><span class=\"x-cal-ai-tab-bar__label\">Progress</span></div><div class=\"x-cal-ai-tab-bar__tab x-cal-ai-tab-bar__tab--groups\"><svg class=\"x-cal-ai-tab-bar__icon x-cal-ai-tab-bar__icon--wide\" viewBox=\"0 0 32 16\" aria-hidden=\"true\"><g fill=\"none\" stroke=\"#7F7F80\" stroke-width=\"1.5\" stroke-linejoin=\"round\"><circle cx=\"24.9\" cy=\"3.95\" r=\"2.3\"/><path d=\"M19.549999999999997 14.2C19.549999999999997 11.6 22 9.9 24.9 9.9C27.799999999999997 9.9 30.25 11.6 30.25 14.2Z\"/><path d=\"M10.55 14.2C10.55 11.6 13 9.9 15.9 9.9C18.8 9.9 21.25 11.6 21.25 14.2Z\" fill=\"#FFFFFF\" stroke=\"#FFFFFF\" stroke-width=\"4.2\"/><circle cx=\"15.9\" cy=\"3.95\" r=\"2.3\"/><path d=\"M10.55 14.2C10.55 11.6 13 9.9 15.9 9.9C18.8 9.9 21.25 11.6 21.25 14.2Z\"/><path d=\"M1.5500000000000007 14.2C1.5500000000000007 11.6 4 9.9 6.9 9.9C9.8 9.9 12.25 11.6 12.25 14.2Z\" fill=\"#FFFFFF\" stroke=\"#FFFFFF\" stroke-width=\"4.2\"/><circle cx=\"6.9\" cy=\"3.95\" r=\"2.3\"/><path d=\"M1.5500000000000007 14.2C1.5500000000000007 11.6 4 9.9 6.9 9.9C9.8 9.9 12.25 11.6 12.25 14.2Z\"/></g></svg><span class=\"x-cal-ai-tab-bar__label\">Groups</span></div><div class=\"x-cal-ai-tab-bar__tab x-cal-ai-tab-bar__tab--profile\"><span class=\"x-cal-ai-tab-bar__avatar\">JD</span><span class=\"x-cal-ai-tab-bar__label\">Profile</span></div></div><div class=\"x-cal-ai-tab-bar__add\"><svg class=\"x-cal-ai-tab-bar__plus\" viewBox=\"0 0 20 20\" aria-hidden=\"true\"><path d=\"M10 1.45V18.55M1.45 10H18.55\" stroke=\"#FFFFFF\" stroke-width=\"2.9\" stroke-linecap=\"round\"/></svg></div></div>",
+   "css": ".x-cal-ai-tab-bar{box-sizing:border-box;display:flex;align-items:flex-start;gap:12.5px;width:384px;padding:16px;background:#F9F8FE;border-radius:24px;font-family:\"Inter\",system-ui,sans-serif;font-size:9.6px;font-weight:500;line-height:1;letter-spacing:0;color:#7F7F80;text-align:center;white-space:nowrap}.x-cal-ai-tab-bar *{box-sizing:border-box;margin:0;padding:0}.x-cal-ai-tab-bar__bar{position:relative;flex:none;width:277.1px;height:62.3px;border-radius:31.15px;background:#FFFFFF;box-shadow:0 4px 16px rgba(29,26,35,0.08)}.x-cal-ai-tab-bar__pill{position:absolute;left:4.2px;top:4.4px;display:block;width:70.4px;height:52.3px;border-radius:26.15px;background:#EDEDED}.x-cal-ai-tab-bar__tab{position:absolute;top:0;display:flex;flex-direction:column;align-items:center;width:66px;padding-top:10.2px}.x-cal-ai-tab-bar__tab--home{left:6.4px;padding-top:11.2px;color:#1D1A22;font-weight:700}.x-cal-ai-tab-bar__tab--home .x-cal-ai-tab-bar__label{margin-top:3.41px}.x-cal-ai-tab-bar__tab--progress{left:72.4px}.x-cal-ai-tab-bar__tab--groups{left:138.5px}.x-cal-ai-tab-bar__tab--profile{left:204.6px;padding-top:11.6px}.x-cal-ai-tab-bar__icon{display:block;width:24px;height:24px}.x-cal-ai-tab-bar__icon--wide{width:32px;height:16px;margin:4px 0}.x-cal-ai-tab-bar__label{display:block;margin-top:4.41px;font-size:9.6px;line-height:9.6px}.x-cal-ai-tab-bar__avatar{display:block;width:25px;height:25px;border-radius:50%;background:linear-gradient(180deg,#0187AE 0%,#4FB0D0 55%,#86C9E1 100%);color:#FFFFFF;font-size:12px;font-weight:700;line-height:25px}.x-cal-ai-tab-bar__tab--profile .x-cal-ai-tab-bar__label{margin-top:2.91px}.x-cal-ai-tab-bar__add{display:flex;flex:none;align-items:center;justify-content:center;width:62.1px;height:62.1px;border-radius:50%;background:#1D1A23;box-shadow:0 6px 16px rgba(29,26,35,0.25)}.x-cal-ai-tab-bar__plus{position:relative;top:0.8px;display:block;width:20px;height:20px}",
+   "fonts": [
+    {
+     "family": "Inter",
+     "weight": 500
+    },
+    {
+     "family": "Inter",
+     "weight": 700
+    }
+   ],
+   "size": {
+    "w": 384,
+    "h": 94
+   },
+   "backdrop": "#F9F8FE",
+   "prompt": "Build a floating tab bar like Cal AI's.\n- Row 352 x 62 pt over #F9F8FE: a 277 pt capsule, a 12.5 pt gap, a 62 pt add button.\n- Capsule #FFFFFF, full radius, shadow 0 4 16 at 8% #1D1A23, 4 slots of 66 pt.\n- Tab: 24 pt icon centered 22 pt below the top; label Inter 9.6 pt, baseline 47 pt.\n- Selected: a 70 x 52 pt #EDEDED pill, filled icon and Bold label in #1D1A22. Others: 1.5 pt outline icons, Medium labels, #7F7F80.\n- Profile: a 25 pt circle, gradient #0187AE to #86C9E1, white initials in Inter Bold 12 pt.\n- Add button: #1D1A23 circle, 20 pt white plus with 2.9 pt round strokes, shadow 0 6 16 at 25%.\n- States: slide the pill to the new tab with a 300 ms spring and fill its icon. Add pressed: scale 0.94.\n- Data rule: the selected tab follows the current screen.\nSwap in my brand colors and font; keep the sizes."
+  },
+  {
+   "id": "cal-ai-calorie-card",
+   "name": "Calorie ring card",
+   "type": "Progress",
+   "order": 19,
+   "source": {
+    "shot": "s1",
+    "box": [
+     31,
+     464,
+     537,
+     180
+    ],
+    "crop": "/taste/media/elements/src/cal-ai-calorie-card.jpg"
+   },
+   "why": "A 37 pt count (1250 of 2500) and a ring closed halfway show the day's calorie budget in 1 glance.",
+   "html": "<div class=\"x-cal-ai-calorie-card\"><div class=\"x-cal-ai-calorie-card__card\"><div class=\"x-cal-ai-calorie-card__count\"><span class=\"x-cal-ai-calorie-card__eaten\">1250</span><span class=\"x-cal-ai-calorie-card__goal\">/2500</span></div><span class=\"x-cal-ai-calorie-card__label\">Calories eaten</span><svg class=\"x-cal-ai-calorie-card__ring\" viewBox=\"0 0 90.4 90.4\" aria-hidden=\"true\"><circle cx=\"45.2\" cy=\"45.2\" r=\"41.8\" fill=\"none\" stroke=\"#EAE9EF\" stroke-width=\"6.8\"/><circle cx=\"45.2\" cy=\"45.2\" r=\"41.8\" fill=\"none\" stroke=\"#1D1A23\" stroke-width=\"6.8\" stroke-linecap=\"round\" stroke-dasharray=\"131.32 999\" transform=\"rotate(-90 45.2 45.2)\"/></svg><svg class=\"x-cal-ai-calorie-card__flame\" viewBox=\"0 0 16 20\" aria-hidden=\"true\"><path d=\"M2.4 0.1C6.8 0.8 11.6 3.8 14.6 8.2C16.3 10.8 16.2 15 14 17.4C12.3 19.2 10.2 20 8 20C5.6 20 3.2 19 1.6 17.2C-0.2 15 -0.1 11.5 1.4 8.6C1.6 7.4 1.6 6.6 1.5 5.6C2.3 6.3 3.4 7.4 4.2 8.2C4.4 5.4 3.8 2.6 2.4 0.1Z\" fill=\"#1D1A23\"/><path d=\"M7.2 8.4C7.8 10 10.4 11.6 10.6 14.6C10.8 16.3 9.6 17.5 7.9 17.5C6.1 17.5 4.9 16.2 5 14.6C5.1 13.4 5.8 12.6 6.5 11.8C7.1 11 7.3 9.8 7.2 8.4Z\" fill=\"#FFFFFF\"/></svg></div></div>",
+   "css": ".x-cal-ai-calorie-card{box-sizing:border-box;width:377px;padding:16px;font-family:\"Inter\",system-ui,sans-serif;font-size:15px;font-weight:400;line-height:1;letter-spacing:0;color:#1D1A23;text-align:left;white-space:nowrap}.x-cal-ai-calorie-card *{box-sizing:border-box;margin:0;padding:0}.x-cal-ai-calorie-card__card{position:relative;width:344.8px;height:116.9px;border-radius:20px;background:#FFFFFF;box-shadow:0 2px 10px rgba(29,26,35,0.08),0 0 0 1px rgba(29,26,35,0.03)}.x-cal-ai-calorie-card__count{position:absolute;left:21.7px;top:33.63px;display:flex;align-items:baseline}.x-cal-ai-calorie-card__eaten{display:block;font-size:36.8px;font-weight:600;line-height:36.8px;letter-spacing:0.012em}.x-cal-ai-calorie-card__goal{display:block;margin-left:1.2px;font-size:15px;line-height:15px;color:#7F7F7F}.x-cal-ai-calorie-card__label{position:absolute;left:22px;top:76.34px;display:block;font-size:11.3px;line-height:11.3px;color:#808081}.x-cal-ai-calorie-card__ring{position:absolute;left:227.3px;top:13.1px;display:block;width:90.4px;height:90.4px}.x-cal-ai-calorie-card__flame{position:absolute;left:265px;top:48.6px;display:block;width:16px;height:20px}",
+   "fonts": [
+    {
+     "family": "Inter",
+     "weight": 400
+    },
+    {
+     "family": "Inter",
+     "weight": 600
+    }
+   ],
+   "size": {
+    "w": 377,
+    "h": 149
+   },
+   "backdrop": null,
+   "prompt": "Build a calorie ring card like Cal AI's.\n- Card 345 x 117 pt, #FFFFFF, 20 pt radius, shadow 0 2 10 at 8% #1D1A23 plus a 1 pt ring at 3%.\n- Count: eaten in Inter SemiBold 37 pt #1D1A23 at x 22 pt, baseline 65 pt, then \"/goal\" in Inter Regular 15 pt #7F7F7F on the same baseline.\n- Label \"Calories eaten\": Inter Regular 11.3 pt #808081, baseline 85 pt.\n- Ring: 90 pt wide, 6.8 pt stroke, #EAE9EF track, #1D1A23 arc with round caps from 12 o'clock clockwise. It sits 27 pt from the right edge, centered vertically.\n- Center: a 15.5 x 20 pt filled flame in #1D1A23 with a white inner flame.\n- Data rule: arc length = eaten / goal (50% here), capped at 100%.\n- States: on load, sweep the arc from 0 over 600 ms ease-out and count the number up.\nSwap in my brand colors and font; keep the sizes."
+  },
+  {
+   "id": "cal-ai-fix-results",
+   "name": "Scan result buttons",
+   "type": "Buttons",
+   "order": 28,
+   "source": {
+    "shot": "s3",
+    "box": [
+     104,
+     1087,
+     392,
+     63
+    ],
+    "crop": "/taste/media/elements/src/cal-ai-fix-results.jpg"
+   },
+   "why": "Done saves the AI's food guess in 1 tap; Fix Results sits beside it at the same 165 pt width, 1 tap from a correction.",
+   "html": "<div class=\"x-cal-ai-fix-results\"><div class=\"x-cal-ai-fix-results__btn x-cal-ai-fix-results__btn--fix\"><svg class=\"x-cal-ai-fix-results__spark\" viewBox=\"0 0 15 15\" aria-hidden=\"true\"><path d=\"M6.9 0.7Q7.5 -0.4 8.1 0.7C8.4 4.6 10.4 6.6 14.3 6.9Q15.4 7.5 14.3 8.1C10.4 8.4 8.4 10.4 8.1 14.3Q7.5 15.4 6.9 14.3C6.6 10.4 4.6 8.4 0.7 8.1Q-0.4 7.5 0.7 6.9C4.6 6.6 6.6 4.6 6.9 0.7Z\" fill=\"#1D1B21\"/></svg><span class=\"x-cal-ai-fix-results__text\">Fix Results</span></div><div class=\"x-cal-ai-fix-results__btn x-cal-ai-fix-results__btn--done\"><span class=\"x-cal-ai-fix-results__text\">Done</span></div></div>",
+   "css": ".x-cal-ai-fix-results{box-sizing:border-box;display:flex;gap:10px;width:372.5px;padding:16px;background:#FFFFFF;border-radius:24px;font-family:\"Inter\",system-ui,sans-serif;font-size:16px;font-weight:500;line-height:1;letter-spacing:0;color:#1D1B21;text-align:center;white-space:nowrap}.x-cal-ai-fix-results *{box-sizing:border-box;margin:0;padding:0}.x-cal-ai-fix-results__btn{display:flex;flex:none;align-items:center;justify-content:center;width:165.3px;height:48.2px;border-radius:24.1px}.x-cal-ai-fix-results__btn--fix{gap:11.6px;padding-right:0.8px;background:#FFFFFF;border:1px solid #D6D5DB}.x-cal-ai-fix-results__btn--done{background:#1D1A23;color:#FFFFFF}.x-cal-ai-fix-results__spark{display:block;width:15px;height:15px}.x-cal-ai-fix-results__text{display:block;font-size:16px;line-height:16px}",
+   "fonts": [
+    {
+     "family": "Inter",
+     "weight": 500
+    }
+   ],
+   "size": {
+    "w": 373,
+    "h": 80
+   },
+   "backdrop": "#FFFFFF",
+   "prompt": "Build a pair of result buttons like Cal AI's.\n- Row 341 x 48 pt, 26 pt from each screen edge, on #FFFFFF: two 165 x 48 pt capsules, 10 pt apart.\n- Secondary (left): #FFFFFF fill, 1 pt #D6D5DB border, a 15 pt 4-point sparkle in #1D1B21, an 11.6 pt gap, then \"Fix Results\". The group is centered.\n- Primary (right): #1D1A23 fill, \"Done\" in #FFFFFF, centered.\n- Labels: Inter Medium 16 pt, on the pill's center line.\n- States: pressed scales to 0.97 over 120 ms. Done pressed: #000000. Fix Results pressed: fill #F4F4F6.\n- Data rule: Done saves the scanned meal; Fix Results opens the editor with the AI's values filled in.\n- Both are 48 pt tall, above the 44 pt tap minimum.\nSwap in my brand colors and font; keep the sizes."
+  }
+ ]
+}

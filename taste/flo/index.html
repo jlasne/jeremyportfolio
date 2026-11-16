@@ -239,13 +239,13 @@ Check:
           <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ec-flo-cycle-countdown" data-copy-raw data-copy-what="Code"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 7.25-4.75 4.75L9 16.75M15 7.25l4.75 4.75L15 16.75"/></svg><span data-copy-label>Copy code</span></button>
         </div>
         <details class="el-more"><summary>Prompt</summary><p class="el-prompt" id="ep-flo-cycle-countdown">Build a cycle countdown header like Flo’s.
-- Layout: 393 x 317 pt on a vertical gradient from #F8F0EE to #FDFBFA, content centered.
-- Week strip: 7 columns on a 52 pt pitch. Weekday letters Inter 500, 10.6 pt, #7C7472. Today reads TODAY in Inter 700, 10.4 pt, #000000.
-- Day cells: 50 pt circles, 12 pt under the letters. Today: #FFFFFF circle, Inter 700, 18.6 pt digit. Plain day: Inter 400, 18 pt, #000000.
-- Predicted period day: #E23B61 digit inside a 33 pt dotted ring of 24 round 2 pt dots.
-- Countdown: Period in: in Inter 500, 25.7 pt, -0.03em, then 2 days in Inter 700, 49.3 pt, baselines 58 pt apart.
-- Button: 139 x 39 pt pill, #FE597D, Log period in Inter 600, 18.4 pt, #FFFFFF, 36 pt under the count. Pressed: #E84E6F, scale 0.97.
-- Data rule: ring each predicted day and count the days left to the first one. Roll the number up over 250 ms when it changes.
+- Layout: 393 x 317 pt, vertical gradient #F8F0EE to #FDFBFA.
+- Week strip: 7 columns on a 52 pt pitch. Weekday letters Inter 500, 11 pt, #7C7472; TODAY in Inter 700, #000000.
+- Day cells: 50 pt circles, 12.7 pt under the letters. Today: #FFFFFF circle, Inter 700, 18.6 pt. Plain day: Inter 400, 18 pt, #000000.
+- Predicted period day: #E23B61 digit in a 33 pt ring of 24 round 2 pt dots.
+- Countdown: Period in: in Inter 500, 25.7 pt, -0.03em, then 2 days in Inter 700, 49.8 pt, baselines 57 pt apart.
+- Button: 139 x 39 pt #FE597D pill, Log period in Inter 600, 18.4 pt, #FFFFFF, top 44 pt under the count baseline. Pressed: #E84E6F, scale 0.97.
+- Data rule: ring each predicted day and count the days to the first one. Roll the number up over 250 ms when it changes.
 Swap in my brand colors and font; keep the sizes.</p></details>
         <details class="el-more"><summary>Code</summary><pre class="el-code" tabindex="0"><code id="ec-flo-cycle-countdown">&lt;style&gt;
 .x-flo-cycle-countdown {
@@ -367,11 +367,11 @@ Swap in my brand colors and font; keep the sizes.</p></details>
         </div>
         <details class="el-more"><summary>Prompt</summary><p class="el-prompt" id="ep-flo-pay-attention">Build a severity gauge badge like Flo’s.
 - Card: 112 x 138 pt, #FFFFFF, 17.7 pt corners.
-- Gauge: 3 arcs on one circle, radius 41.3 pt, centered 56 pt from the top, stroke 8 pt, round caps, 5 degree gaps between arcs.
+- Gauge: 3 arcs on one circle, radius 41.3 pt, center 57 pt from the top, 8 pt stroke, round caps, 5 degree gaps.
 - Arc angles, clockwise from 12 o clock: left 257 to 310, top 326 to 29.5, right 45.5 to 102.5 degrees.
 - Colors: left arc #65C16A to #C7B128 from bottom to top; top arc #E8AB12 to #FD7B01 from left to right; unlit arc #E6E6E6.
 - Center: 34 pt #FFF6E7 disc holding a 17 pt #FFA900 rounded triangle with a #FFFFFF exclamation mark.
-- Label: Pay attention in Inter 700, 16.5 pt, #000000, 2 centered lines, 20.4 pt line height, baselines at 100 and 120 pt.
+- Label: Pay attention, Inter 700, 16.5 pt, #000000, 2 centered lines on 20.4 pt, baselines 100 and 120 pt.
 - States: light the arcs left to right by level, 1 to 3. Level 3 adds #F2453D. Sweep each arc in 300 ms, then pop the triangle from 0.8 to 1.
 Swap in my brand colors and font; keep the sizes.</p></details>
         <details class="el-more"><summary>Code</summary><pre class="el-code" tabindex="0"><code id="ec-flo-pay-attention">&lt;style&gt;
@@ -432,14 +432,14 @@ Swap in my brand colors and font; keep the sizes.</p></details>
           <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ec-flo-cycle-calendar" data-copy-raw data-copy-what="Code"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 7.25-4.75 4.75L9 16.75M15 7.25l4.75 4.75L15 16.75"/></svg><span data-copy-label>Copy code</span></button>
         </div>
         <details class="el-more"><summary>Prompt</summary><p class="el-prompt" id="ep-flo-cycle-calendar">Build a cycle month calendar like Flo’s.
-- Layout: 393 pt wide on #FFFFFF. 7 columns of 50.9 pt and 5 rows of 54.3 pt; the month starts on a Monday.
-- Header: M T W T F S S in Inter 500, 11 pt, #E66483, 39 pt above the first row.
-- Days: Inter 400, 16.5 pt, #231318, centered in each cell.
-- Period days 1 to 5: one #FFBFCD band, 41 pt tall, 8.3 pt corners, running 20 pt past the first and last day centers.
+- Grid: 393 pt wide on #FFFFFF, 7 columns of 50.9 pt, 5 rows of 54.3 pt, starting on a Monday.
+- Header: M T W T F S S, Inter 500, 11 pt, #E66483, 39 pt above row 1.
+- Days: Inter 400, 16.5 pt, #231318.
+- Period days 1 to 5: one #FFBFCD band, 41 pt tall, 8.3 pt corners, 20 pt past the end day centers.
 - Fertile days 12 to 18: the same band in #B3E4E8, split at the row break.
-- Ovulation day 17: a solid 51.5 pt #1DA4A7 circle with an Inter 700, 19.6 pt #FFFFFF number.
-- Prediction: a 120 pt #1DA4A7 circle in the empty cells, tied to day 17 by a 4.2 pt stem. Text: Prediction: Day of (Inter 600, 9 pt) over ovulation (20 pt).
-- Motion: a tapped day scales its circle from 0.8 to 1 over 200 ms; bands fade in row by row, 150 ms each.
+- Ovulation day 17: solid 51.5 pt #1DA4A7 circle, Inter 700, 19.6 pt, #FFFFFF.
+- Prediction: a 120 pt #1DA4A7 circle in the empty cells, tied to day 17 by a 4.2 pt stem, with Prediction: Day of (9 pt) over ovulation (20 pt).
+- Motion: a tapped day scales from 0.8 to 1 in 200 ms; bands fade in by row, 150 ms each.
 Swap in my brand colors and font; keep the sizes.</p></details>
         <details class="el-more"><summary>Code</summary><pre class="el-code" tabindex="0"><code id="ec-flo-cycle-calendar">&lt;style&gt;
 .x-flo-cycle-calendar {

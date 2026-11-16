@@ -239,7 +239,16 @@ Check:
           <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ep-ladder-strength-chart" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
           <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ec-ladder-strength-chart" data-copy-raw data-copy-what="Code"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 7.25-4.75 4.75L9 16.75M15 7.25l4.75 4.75L15 16.75"/></svg><span data-copy-label>Copy code</span></button>
         </div>
-        <details class="el-more"><summary>Prompt</summary><p class="el-prompt" id="ep-ladder-strength-chart">x</p></details>
+        <details class="el-more"><summary>Prompt</summary><p class="el-prompt" id="ep-ladder-strength-chart">Build a strength progress chart like Ladder’s.
+- Panel: 361 pt wide, #1C1C1E, 16 pt margins.
+- Chips: 34 pt capsules, 15 pt padding, 8 pt gaps, Inter 400, 11.5 pt. Off: #333335, text #C4C4C6. On: #30321C, text #E1F72C, 38 pt tall.
+- Header: 186 in Unbounded 800, 33.5 pt, #FFFFFF, lbs 12 pt; at right a 3 pt up arrow and 12% at 27 pt.
+- Captions: Inter 400, 12 pt, #BCBCBE, plus a 12 pt #C6C6C6 info dot.
+- Bars: 7 bars, 30.4 pt wide, 50 pt pitch, 3.5 pt corners, #E6FF01 to #AFFF00 downward.
+- Grid: 5 dashed 1 pt #48484A lines, dash 2.2, gap 2. Y labels Inter 9.8 pt, #C0C0C2; dates 9.4 pt under the bars.
+- Data rule: one linear scale from 0 at the bar base, even steps from 0 to 180.
+- States: chips filter by equipment; bars grow from the base in 500 ms, 40 ms stagger.
+Swap in my brand colors and font; keep the sizes.</p></details>
         <details class="el-more"><summary>Code</summary><pre class="el-code" tabindex="0"><code id="ec-ladder-strength-chart">&lt;style&gt;
 .x-ladder-strength-chart {
   position:relative;
@@ -483,7 +492,16 @@ Check:
           <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ep-ladder-rep-timer" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
           <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ec-ladder-rep-timer" data-copy-raw data-copy-what="Code"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 7.25-4.75 4.75L9 16.75M15 7.25l4.75 4.75L15 16.75"/></svg><span data-copy-label>Copy code</span></button>
         </div>
-        <details class="el-more"><summary>Prompt</summary><p class="el-prompt" id="ep-ladder-rep-timer">x</p></details>
+        <details class="el-more"><summary>Prompt</summary><p class="el-prompt" id="ep-ladder-rep-timer">Build a rep timer gauge like Ladder’s.
+- Panel: 359 x 101 pt on #1C1C1E or a dark photo.
+- Gauge: 31 ticks, 6 degrees apart, from 9 o clock over the top to 3 o clock, centered 176 pt from the left.
+- Ticks: 4.3 x 15.7 pt, square ends, radius 82.8 to 98.5 pt. Lit #E5FF00, the rest #535456.
+- Center: 0:28 in Barlow Condensed 800, 48 pt, #FFFFFF, baseline 11 pt above the gauge base.
+- Sides: 10 at left, 25 lbs at right, Barlow Condensed 700, 37 pt, lbs 15 pt.
+- Labels: reps and weight in Inter 400, 13 pt, #B9B9BB and #C9CACC, each with a 7 x 10.6 pt up-down chevron.
+- Data rule: lit ticks = 31 x time left / set time; one tick turns grey per 1/31 of the set.
+- States: tap a value or its chevron to step it; the last 3 lit ticks can pulse.
+Swap in my brand colors and font; keep the sizes.</p></details>
         <details class="el-more"><summary>Code</summary><pre class="el-code" tabindex="0"><code id="ec-ladder-rep-timer">&lt;style&gt;
 .x-ladder-rep-timer {
   position:relative;
@@ -580,13 +598,21 @@ Check:
       <div class="el-body">
         <h3 class="el-name">Program header with week</h3>
         <p class="el-meta"><a class="el-app" href="/taste/ladder/"><img src="/taste/media/ladder/icon-256.webp" width="24" height="24" alt="" loading="lazy" decoding="async">Ladder</a><span class="el-type">Headers</span></p>
-        <p class="el-why">The plan name, a 36-day streak, 4 shortcuts and the week share one header, so 3 checked days show before any scroll.</p>
+        <p class="el-why">The plan name, a 36 bolt streak, 4 shortcuts and the week share one header, so 3 checked days show before any scroll.</p>
         <p class="el-src">Rebuilt from App Store screenshot 3. <a href="/taste/media/elements/src/ladder-home-header.jpg">See the source</a></p>
         <div class="el-actions">
           <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ep-ladder-home-header" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
           <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ec-ladder-home-header" data-copy-raw data-copy-what="Code"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 7.25-4.75 4.75L9 16.75M15 7.25l4.75 4.75L15 16.75"/></svg><span data-copy-label>Copy code</span></button>
         </div>
-        <details class="el-more"><summary>Prompt</summary><p class="el-prompt" id="ep-ladder-home-header">x</p></details>
+        <details class="el-more"><summary>Prompt</summary><p class="el-prompt" id="ep-ladder-home-header">Build a program header with a week row like Ladder’s.
+- Panel: 367 x 158 pt, #0E0E0E.
+- Title row, 33.5 pt: 23 pt app glyph, program name in Inter 800 caps, 25.5 pt, -0.02em, #FFFFFF, 9 x 5 pt chevron.
+- At right: count in Barlow Condensed 800, 17.5 pt, 7.6 x 12 pt #E5FF00 bolt, 33.5 pt initials avatar on #2A2A2A.
+- Chips: 4 capsules, 33.5 pt tall, 7.8 pt gaps, fill #141412 to #22231E, 1 pt rim #8E8E8C to #2F2F2D.
+- Chip content: 10 x 13 pt white icon, Inter 500, 11.5 pt label.
+- Week: 7 columns, 54.2 pt pitch. Names Inter 400, 11.8 pt, #AFAFAF; today bold #FFFFFF. Dates sit in 26.7 pt rings: 3 arcs of 100 degrees, 1.3 pt stroke.
+- States: done, a 19 pt #E5FF00 disc, #0A0C00 check, 3 #74F28A arcs. Today, one #74F28A arc per goal met, #1B341F for the rest. Future, grey date only.
+Swap in my brand colors and font; keep the sizes.</p></details>
         <details class="el-more"><summary>Code</summary><pre class="el-code" tabindex="0"><code id="ec-ladder-home-header">&lt;style&gt;
 .x-ladder-home-header {
   position:relative;

@@ -289,7 +289,11 @@ window.TASU_APPS = [
    "w": 600,
    "h": 1299
   },
-  "elements": [],
+  "elements": [
+   "hevy-set-rows",
+   "hevy-strength-compare",
+   "hevy-profile-header"
+  ],
   "icon": "/taste/media/hevy/icon.png",
   "page": "/taste/hevy/",
   "appStore": "https://apps.apple.com/us/app/hevy-workout-tracker-gym-log/id1458862350"
@@ -371,7 +375,11 @@ window.TASU_APPS = [
    "w": 600,
    "h": 1298
   },
-  "elements": [],
+  "elements": [
+   "cal-ai-tab-bar",
+   "cal-ai-calorie-card",
+   "cal-ai-fix-results"
+  ],
   "icon": "/taste/media/cal-ai/icon.png",
   "page": "/taste/cal-ai/",
   "appStore": "https://apps.apple.com/us/app/cal-ai-calorie-tracker/id6480417616"
@@ -496,7 +504,11 @@ window.TASU_APPS = [
    "w": 600,
    "h": 1303
   },
-  "elements": [],
+  "elements": [
+   "finch-goal-checklist",
+   "finch-habit-sparks",
+   "finch-adventure-timer"
+  ],
   "icon": "/taste/media/finch/icon.png",
   "page": "/taste/finch/",
   "appStore": "https://apps.apple.com/us/app/finch-self-care-pet/id1528595748"

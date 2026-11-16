@@ -158,9 +158,23 @@
 @font-face {
   font-family: "Rubik";
   font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("apps/rubik-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Rubik";
+  font-style: normal;
   font-weight: 500;
   font-display: swap;
   src: url("apps/rubik-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Rubik";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("apps/rubik-600.woff2") format("woff2");
 }
 @font-face {
   font-family: "Rubik";
@@ -193,9 +207,9 @@
 @font-face {
   font-family: "Work Sans";
   font-style: normal;
-  font-weight: 600;
+  font-weight: 500;
   font-display: swap;
-  src: url("apps/work-sans-600.woff2") format("woff2");
+  src: url("apps/work-sans-500.woff2") format("woff2");
 }
 @font-face {
   font-family: "Work Sans";
