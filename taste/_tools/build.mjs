@@ -321,12 +321,11 @@ function loadApp(slug) {
     .map(c => ({ hex: c.hex.toUpperCase(), role: String(c.role), name: c.name || c.hex, use: c.use || '' }));
 
   // 2 fonts, headline and body: the real name when known, and the closest free Google Font,
-  // which the pages self-host (fonts/apps.css). Older data holds 1 font (branding.font).
+  // which the pages self-host (fonts/apps.css).
   const fonts = b.fonts || {};
   if (!b.fonts) missing('branding.fonts');
   const fontOf = role => {
-    const old = b.font ? { name: b.font.name || null, closeTo: b.font.closeTo, weight: role === 'headline' ? 700 : 400, look: b.font.look, crop: role === 'headline' ? b.font.crop : null } : null;
-    const f = fonts[role] || old;
+    const f = fonts[role];
     if (!f?.closeTo) return null;
     const s = f.crop ? imageSize(f.crop) : null;
     return { name: f.name || null, closeTo: f.closeTo, weight: Number(f.weight) || (role === 'headline' ? 700 : 400), look: f.look || '', crop: s ? { src: f.crop, ...s } : null };
@@ -335,9 +334,8 @@ function loadApp(slug) {
   // The design style: a summary and 6 labeled traits (Layout, Shapes, Color, Type, Imagery, Components).
   const st = b.style || {};
   if (!b.style) missing('branding.style');
-  app.styleSummary = st.summary || b.visualStyle || '';
+  app.styleSummary = st.summary || '';
   app.traits = (st.traits || []).filter(t => t?.text).map(t => ({ label: t.label || '', text: t.text }));
-  if (!app.traits.length) app.traits = (b.styleTraits || []).filter(Boolean).map(t => ({ label: '', text: t }));
 
   app.short = card.short || app.subtitle;
   if (!card.short) missing('card.short');

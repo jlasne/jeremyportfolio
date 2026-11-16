@@ -72,21 +72,7 @@
           "text": "A 7-day cycle strip with a 50 pt today circle, 2-color insight cards, and a month calendar with 41 pt period bands."
         }
       ]
-    },
-    "typeStyle": "A plain medium sans line over 1 or 2 big words in a flared, high-contrast sans; bold sans for numbers in the app",
-    "font": {
-      "name": null,
-      "closeTo": "Proza Libre",
-      "look": "Flared contrast sans in a pink box, plain sans above",
-      "weights": "Regular flared display, medium sans lead line, bold UI numbers",
-      "crop": "/taste/media/flo/font-1.jpg"
-    },
-    "visualStyle": "Lavender store screens frame white app screens, flat cartoon people and illustrated symptom icons. Feather pink #FF5A7D marks period days, card outlines and the Log period pill; only the sleep screen turns dark plum.",
-    "styleTraits": [
-      "Lavender #E2CBFF fills 37% of the store screens",
-      "8 of 8 headlines set line 2 in a pale pink box",
-      "Insight cards: 16 px corners, 3 px pink outlines"
-    ]
+    }
   },
   "screenshots": [
     {
@@ -217,26 +203,5 @@
     "The first screenshot wears a green “FSA/HSA eligible” sticker, U.S. only. It turns Premium, up to $59.99, into a health expense paid with pre-tax money.",
     "All 8 screenshots sell features, from period predictions to pregnancy. Prices, $1.99 to $59.99, show only in the In-App Purchases list. Value first, price later."
   ],
-  "improvements": [
-    {
-      "title": "Add the length to all 10 names",
-      "detail": "6 listings share the name Flo Premium, from $1.99 to $59.99. Keep the goal names and add the term to each, like “Flo Premium, 1 year”.",
-      "rule": "Fix 3 things to stop a design from looking cheap: low contrast, a broken layout, and copy that does not convert.",
-      "source": "S27"
-    },
-    {
-      "title": "Darken the button pink to 4.6:1",
-      "detail": "White “Log period” on #FF5A7D reads at 3.0:1. Fill the pill with #D9345E, the same hue, for 4.6:1, and keep #FF5A7D for the icon and period days.",
-      "rule": "Text contrast: at least 4.5:1 for body text, 3:1 for text 24 px and larger.",
-      "source": "S27"
-    },
-    {
-      "title": "Keep pink for period days and the button",
-      "detail": "Screen 1 puts pink on 5 predicted days, the Log period pill and 2 card outlines. Drop the 3 px outlines from all 6 insight cards on screens 1, 2 and 4.",
-      "rule": "One accent per screen. Directing attention means one place to look.",
-      "source": "S8"
-    }
-  ],
-  "stylePrompt": "Restyle my app in Flo's style. Keep my features, data and copy.\nColors:\n- 60% lavender #E2CBFF: onboarding and hero backdrops; home screens fade blush #F7EFED to #FDFCFA.\n- 30% white #FFFFFF: cards, lists and sheets.\n- 10% feather pink #FF5A7D: period days, card outlines and the main pill; teal #1DA4A7 marks ovulation.\nType:\n- Headlines: Philosopher 400 for key words in a pale pink box, 10 pt corners, under a Medium sans line.\n- Body: Inter 600, close to SF Pro, 17 to 20 pt titles; Inter 400 for grey details, 700 for big numbers.\nShapes:\n- Cards 15 pt corners; buttons are full pills.\nLayout:\n- About 22 pt side margins; week strip and countdown on top, cards in 2 columns.\nComponents:\n- Week strip: 7 columns, 51 pt pitch; today in a 50 pt white circle, predicted days in dotted pink rings.\n- Insight card: lavender or pink top half, white bottom with icon and value, 3 pt pink outline.\n- Log button: 39 pt pink pill, white Inter 600 label.\nIcons and imagery:\n- Flat illustrated people; round symptom icons in colored rings.\nCheck:\n- Pink marks only period data and the main action.\n- Cards are white on lavender or blush.\n- Headline key words sit in a pale pink box.",
-  "elements": []
+  "stylePrompt": "Restyle my app in Flo's style. Keep my features, data and copy.\nColors:\n- 60% lavender #E2CBFF: onboarding and hero backdrops; home screens fade blush #F7EFED to #FDFCFA.\n- 30% white #FFFFFF: cards, lists and sheets.\n- 10% feather pink #FF5A7D: period days, card outlines and the main pill; teal #1DA4A7 marks ovulation.\nType:\n- Headlines: Philosopher 400 for key words in a pale pink box, 10 pt corners, under a Medium sans line.\n- Body: Inter 600, close to SF Pro, 17 to 20 pt titles; Inter 400 for grey details, 700 for big numbers.\nShapes:\n- Cards 15 pt corners; buttons are full pills.\nLayout:\n- About 22 pt side margins; week strip and countdown on top, cards in 2 columns.\nComponents:\n- Week strip: 7 columns, 51 pt pitch; today in a 50 pt white circle, predicted days in dotted pink rings.\n- Insight card: lavender or pink top half, white bottom with icon and value, 3 pt pink outline.\n- Log button: 39 pt pink pill, white Inter 600 label.\nIcons and imagery:\n- Flat illustrated people; round symptom icons in colored rings.\nCheck:\n- Pink marks only period data and the main action.\n- Cards are white on lavender or blush.\n- Headline key words sit in a pale pink box."
 }

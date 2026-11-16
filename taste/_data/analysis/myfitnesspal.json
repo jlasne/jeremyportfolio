@@ -72,22 +72,7 @@
           "text": "A 7-day check row, a calorie card with a 314 pt blue bar, stacked macro bars, and white food rows with green checks."
         }
       ]
-    },
-    "typeStyle": "Bold grotesque headlines in white or near black, semibold plan names, regular body",
-    "font": {
-      "name": "Inter",
-      "closeTo": "Inter",
-      "look": "Bold grotesque headlines tracked about -2%, regular body",
-      "weights": "Bold headlines and buttons, semibold plans and features, regular body",
-      "crop": "/taste/media/myfitnesspal/font-1.jpg",
-      "scope": "web pricing page"
-    },
-    "visualStyle": "Store screens put white app UI on a warm stone photo under bold white headlines, and blue #0066EE fills the icon and the buttons. The web paywall flips it: blue fills the page, and yellow #FDDA1C marks the tags, checks and buttons.",
-    "styleTraits": [
-      "8 of 8 store screens sit on warm stone photos",
-      "Plan cards round at about 35 px; buttons are 44 px pills",
-      "1 yellow, #FDDA1C, on the paywall tags, checks and buttons"
-    ]
+    }
   },
   "screenshots": [
     {
@@ -212,90 +197,5 @@
     "All 5 buttons say START FREE TRIAL, and 4 open the Annual checkout, as does \"Claim offer\". Monthly gets one outlined button.",
     "The App Store text names 2 tiers, Premium and Premium Plus, but all 10 listed items are Premium. The web sells $79.99 a year and $19.99 a month; the App Store adds $49.99 a year and $9.99 a month."
   ],
-  "improvements": [
-    {
-      "title": "Put the 7 days on the button",
-      "detail": "All 5 buttons say \"START FREE TRIAL\"; the 7 days sit in the top banner and in a closed FAQ answer. Print \"Start 7 days free\" on the Annual button and \"Then $79.99 a year\" under it.",
-      "rule": "Fix 3 things to stop a design from looking cheap: low contrast, a broken layout, and copy that does not convert.",
-      "source": "S27"
-    },
-    {
-      "title": "Trade both badges for $6.67 a month",
-      "detail": "The same Annual card says \"Best value!\" under the 8/10, then \"Most popular!\" in the plan picker. Swap both tags for its monthly cost, $6.67, next to Monthly's $19.99.",
-      "rule": "Delete filler badges (\"New\", \"AI-powered\", \"Beta\") unless they change a decision.",
-      "source": "S14"
-    },
-    {
-      "title": "Fill the plan sections with flat blue",
-      "detail": "The plan sections fade from the icon blue, #0066EE, to lavender #8A81FA at the bottom left. Fill them with flat #0066EE, so yellow stays the one bright color.",
-      "rule": "Slop Check 19: Gradient backgrounds",
-      "source": "S1"
-    }
-  ],
-  "stylePrompt": "Restyle my app in MyFitnessPal's style. Keep my features, data and copy.\nColors:\n- 60% white #FFFFFF: cards, sheets and screens below the header.\n- 30% stone grey #746A61: hero and onboarding backdrops, as in the store shots.\n- 10% bright blue #0066EE: main buttons, links, goal values and the calorie bar.\n- Macros: carbs #2CB9B1, fat #6C0D8F, protein #FEB13D. Secondary text #6C6C70.\nType:\n- Headlines: Inter 700, about 28 to 46 pt, tracking -3%.\n- Body: Inter 400, 14 pt; values Inter 700, 20 pt, units 12 pt grey.\nShapes:\n- Cards 15 pt corners; fields 6 pt with a 2 pt #BEC5CF border; buttons 48 pt pills; bars 8 pt pills.\nLayout:\n- 16 pt margins, 24 pt card padding, 12 pt gaps; a #CDD9E2 tint behind the header.\nComponents:\n- Week row: 7 circles; done days fill black with a white check.\n- Calorie card: label, 20 pt value, \"/ goal\" in grey, full-width 8 pt blue bar.\n- Food row: name, green check, \"kcal, portion\" in grey, red trash icon at right.\nIcons and imagery:\n- Thin line icons; real food photos with 12 pt corners.\nCheck:\n- Every main button is a #0066EE pill.\n- Macro colors match on every screen.\n- Cards sit 12 pt apart with 24 pt padding.",
-  "elements": [
-    {
-      "type": "plan-picker",
-      "src": "/taste/media/myfitnesspal/el-plan-picker-1.jpg",
-      "x": 45,
-      "y": 85,
-      "w": 510,
-      "h": 1216,
-      "note": "2 stacked cards: Annual tagged Most popular! with a yellow button, Monthly with an outlined one"
-    },
-    {
-      "type": "main-button",
-      "src": "/taste/media/myfitnesspal/el-main-button-1.jpg",
-      "x": 83,
-      "y": 636,
-      "w": 435,
-      "h": 88,
-      "note": "Yellow #FDDA1C pill, 44 px tall, with START FREE TRIAL in bold caps and a chevron"
-    },
-    {
-      "type": "discount-badge",
-      "src": "/taste/media/myfitnesspal/el-discount-badge-1.jpg",
-      "x": 102,
-      "y": 465,
-      "w": 396,
-      "h": 145,
-      "note": "$79.99 a year over a bold line: 67% savings over the Monthly Plan"
-    },
-    {
-      "type": "feature-list",
-      "src": "/taste/media/myfitnesspal/el-feature-list-1.jpg",
-      "x": 101,
-      "y": 640,
-      "w": 363,
-      "h": 178,
-      "note": "3 yellow checks: Barcode & Voice Log, Custom Macro Tracking, Ad-Free Experience"
-    },
-    {
-      "type": "social-proof",
-      "src": "/taste/media/myfitnesspal/el-social-proof-1.jpg",
-      "x": 82,
-      "y": 59,
-      "w": 437,
-      "h": 346,
-      "note": "A huge 8/10 of Premium members made progress, footnoted to a user survey"
-    },
-    {
-      "type": "discount-badge",
-      "src": "/taste/media/myfitnesspal/el-discount-badge-2.jpg",
-      "x": 0,
-      "y": 86,
-      "w": 600,
-      "h": 122,
-      "note": "Navy offer bar: a free Premium pass for 7 days, with a Claim offer link to the Annual checkout"
-    },
-    {
-      "type": "hero-visual",
-      "src": "/taste/media/myfitnesspal/el-hero-visual-1.jpg",
-      "x": 60,
-      "y": 733,
-      "w": 480,
-      "h": 568,
-      "note": "Phone on a blue arc showing Today: 976 of 2,074 calories, macros and the diary"
-    }
-  ]
+  "stylePrompt": "Restyle my app in MyFitnessPal's style. Keep my features, data and copy.\nColors:\n- 60% white #FFFFFF: cards, sheets and screens below the header.\n- 30% stone grey #746A61: hero and onboarding backdrops, as in the store shots.\n- 10% bright blue #0066EE: main buttons, links, goal values and the calorie bar.\n- Macros: carbs #2CB9B1, fat #6C0D8F, protein #FEB13D. Secondary text #6C6C70.\nType:\n- Headlines: Inter 700, about 28 to 46 pt, tracking -3%.\n- Body: Inter 400, 14 pt; values Inter 700, 20 pt, units 12 pt grey.\nShapes:\n- Cards 15 pt corners; fields 6 pt with a 2 pt #BEC5CF border; buttons 48 pt pills; bars 8 pt pills.\nLayout:\n- 16 pt margins, 24 pt card padding, 12 pt gaps; a #CDD9E2 tint behind the header.\nComponents:\n- Week row: 7 circles; done days fill black with a white check.\n- Calorie card: label, 20 pt value, \"/ goal\" in grey, full-width 8 pt blue bar.\n- Food row: name, green check, \"kcal, portion\" in grey, red trash icon at right.\nIcons and imagery:\n- Thin line icons; real food photos with 12 pt corners.\nCheck:\n- Every main button is a #0066EE pill.\n- Macro colors match on every screen.\n- Cards sit 12 pt apart with 24 pt padding."
 }

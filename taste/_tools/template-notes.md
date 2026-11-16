@@ -30,7 +30,7 @@ the sections below still describe v3 (the library, the key number, "How I'd impr
 - Styles: `/taste/tasu.css`. Behaviour: `/taste/tasu.js` (defer).
 - Font: `/taste/fonts/` (Schibsted Grotesk, self-hosted, built by `_tools/fonts.py`).
 - Brand: `/taste/brand/` (see its README).
-- Live sheet of every component, both themes: `/taste/_tools/preview.html`.
+- Live sheet of every component: any app page, with the theme toggle.
 - Never write page-level `<style>` or inline colors. Use the classes below. The only inline styles are the custom properties listed here (`--x`, `--c`, `--w`).
 
 ## 1. Head, in this exact order
@@ -78,7 +78,7 @@ Replace the `{...}` values. Keep the order: charset, viewport, title, descriptio
 - `{PATH}`: empty for the home (`https://www.jeremylasne.com/taste/`), `{slug}/` for an app, `library/` for the library. Always end with a slash.
 - App pages: `og:type` is `article`. Add `<meta property="article:published_time" content="2026-11-15">` and `<meta property="article:modified_time" content="2026-11-15">` right after `og:type`. `og:image` and `twitter:image` point to the app's 1200x630 share card, `media/{slug}/og.jpg` (made by `_tools/og.cjs`: icon, "{App}: design and paywall", the 3 brand colors, the first paywall capture or the drawn plan in a tilted phone, the lockup), with `og:image:alt` and `twitter:image:alt` "{App}: design and paywall, by tasu.ai". The Article's `image` lists the card, then the paywall capture. The SoftwareApplication has no `aggregateRating` (Google forbids ratings copied from another site; the page shows the App Store rating with its source) and 2 offers: "Free download" at price 0 and an AggregateOffer of the In-App Purchases. The BreadcrumbList is tasu.ai > {App}.
 - The home also preloads the hero sprite: `<link rel="preload" href="/taste/brand/loops/taste.svg" as="image" fetchpriority="high">` before the stylesheet.
-- `_tools/preview.html` and `_tools/og.html` are the exceptions: `<meta name="robots" content="noindex, nofollow">` and no canonical, so the sitemap skips them (`brand/src/og.html` carries `noindex` too).
+- `_tools/og.html` is the exception: `<meta name="robots" content="noindex, nofollow">` and no canonical, so the sitemap skips them (`brand/src/og.html` carries `noindex` too).
 
 ### What the snippet does
 
@@ -395,7 +395,7 @@ The `data-filter-item` attributes are for the library page only. Tiles show 2 pe
 <!-- 4. Font card: the crop of real headline text is the specimen -->
 <div class="card">
   <h2 class="title-m" id="font-title">Font</h2>
-  <img class="specimen" src="/taste/media/{slug}/font-1.jpg" width="{w}" height="{h}" alt="Headline text cut from a {App} screenshot, set in its own font" loading="lazy" decoding="async">
+  <img class="specimen" src="/taste/media/{slug}/font-headline.jpg" width="{w}" height="{h}" alt="Headline text cut from a {App} screenshot, set in its own font" loading="lazy" decoding="async">
   <p class="font-name">Close to Inter</p>
   <p class="font-free">The closest free Google Font to the app’s type</p>
   <dl class="facts"><div><dt>Look</dt><dd>...</dd></div><div><dt>Weights</dt><dd>...</dd></div></dl>

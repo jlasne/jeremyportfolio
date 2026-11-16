@@ -72,22 +72,7 @@
           "text": "Set rows with previous, kg, reps and a 25 pt check box; blue line and bar charts; 12.5 pt round-ended comparison bars."
         }
       ]
-    },
-    "typeStyle": "Heavy all-caps store headlines, plain grotesque app text, and Figtree on the web paywall",
-    "font": {
-      "name": "Figtree",
-      "closeTo": "Figtree",
-      "look": "Round geometric sans: semibold headline, regular prices and labels",
-      "weights": "Semibold headline and plan names, medium button, regular prices and body",
-      "crop": "/taste/media/hevy/font-1.jpg",
-      "scope": "web pricing page"
-    },
-    "visualStyle": "White screens, near-black text and one blue, #267EE8, on buttons, links, charts and the band under the first 8 store shots. The web paywall swaps in a brighter blue, #008CFF, and adds a yellow PRO label, #F7D000.",
-    "styleTraits": [
-      "Near-white covers 75% of the screens",
-      "A blue band fills the bottom 23% of the first 8 store shots",
-      "Corners about 8 px on the paywall card and button"
-    ]
+    }
   },
   "screenshots": [
     {
@@ -186,63 +171,5 @@
     "Lifetime, $74.99, costs as much as 3.1 years of Yearly. It sits right under the selected plan and makes $23.99 look small.",
     "Free logs unlimited workouts but stops at 4 routines, 7 custom exercises and 3 months of graphs. Pro lifts those caps and adds Hevy Trainer."
   ],
-  "improvements": [
-    {
-      "title": "Print $2.00 a month on Yearly",
-      "detail": "Monthly and Yearly each repeat the period: “Billed monthly”, “Billed yearly”. On the preselected Yearly row, swap “Billed yearly” for “$2.00 a month, save 33%”.",
-      "rule": "Drop redundant labels. If the value explains itself, remove the label.",
-      "source": "S2, S4, S14, S15"
-    },
-    {
-      "title": "Take the paywall text to 4.5:1",
-      "detail": "Yellow PRO, #F7D000 on the #F7F9FB page, measures 1.4:1, and white on the #008CFF button 3.4:1. Cut PRO from the 3 rows, since all are Pro, and darken the blue to #0072D6 for 4.8:1.",
-      "rule": "Text contrast: at least 4.5:1 for body text, 3:1 for text 24 px and larger.",
-      "source": "S27"
-    },
-    {
-      "title": "Name what Pro unlocks",
-      "detail": "“Take your training to the next level” heads the Free vs PRO table. Write what the table shows: “Unlock Hevy Trainer, unlimited routines and your full graph history”.",
-      "rule": "Make headlines specific. \"Track 3 habits in 10 seconds a day\" beats \"Transform your life\".",
-      "source": "S1, S2, S4, S16"
-    }
-  ],
-  "stylePrompt": "Restyle my app in Hevy's style. Keep my features, data and copy.\nColors:\n- 60% white #FFFFFF: every screen and card; secondary buttons #F3F4F8; borders #EDEDED.\n- 30% black #000000: titles, values and icons; secondary text #86898E.\n- 10% bright blue #267EE8: main buttons, links, selected chips, the active tab, charts.\n- Done states: row #C7FEA0, check box #56BD23.\nType:\n- Headlines: Inter 800 caps for heroes; Inter 600 at about 18 pt for titles.\n- Body: Inter 400, 16 pt rows, 13 pt grey sublines; tabular numbers.\nShapes:\n- Buttons 40 pt tall with 10 pt corners; cards 8 pt corners with a 1 pt #EDEDED border; chips and bars are full pills.\nLayout:\n- 17 pt side margins; lists sit in bordered white cards.\nComponents:\n- Routine card: title, a 3-dot menu, 2-line grey summary, full-width blue button.\n- Set row: previous, kg, reps and a 25 pt check box; a done row turns #C7FEA0.\n- Charts: thin blue line with dot markers, or blue bars on light grid lines.\nIcons and imagery:\n- Outline icons in black; grey 3D muscle figures with red target muscles.\nCheck:\n- Blue marks every main button, link and chart.\n- Every screen background is white.\n- Buttons are 40 pt tall with 10 pt corners.",
-  "elements": [
-    {
-      "type": "plan-picker",
-      "src": "/taste/media/hevy/el-plan-picker-1.jpg",
-      "x": 10,
-      "y": 336,
-      "w": 584,
-      "h": 468,
-      "note": "3 radio rows: Monthly $2.99, Yearly $23.99 preselected in a blue outline, Lifetime $74.99"
-    },
-    {
-      "type": "main-button",
-      "src": "/taste/media/hevy/el-main-button-1.jpg",
-      "x": 11,
-      "y": 840,
-      "w": 574,
-      "h": 96,
-      "note": "Full-width #008CFF button, “Get Started” in white at 3.4:1 contrast"
-    },
-    {
-      "type": "feature-list",
-      "src": "/taste/media/hevy/el-feature-list-1.jpg",
-      "x": 40,
-      "y": 209,
-      "w": 520,
-      "h": 462,
-      "note": "Free vs PRO table, 6 rows: Free stops at 4 routines, 7 custom exercises and 3 months of graphs"
-    },
-    {
-      "type": "legal-links",
-      "src": "/taste/media/hevy/el-legal-links-1.jpg",
-      "x": 17,
-      "y": 737,
-      "w": 566,
-      "h": 147,
-      "note": "Auto-renew terms in 5 grey lines; they point to iTunes account settings to cancel"
-    }
-  ]
+  "stylePrompt": "Restyle my app in Hevy's style. Keep my features, data and copy.\nColors:\n- 60% white #FFFFFF: every screen and card; secondary buttons #F3F4F8; borders #EDEDED.\n- 30% black #000000: titles, values and icons; secondary text #86898E.\n- 10% bright blue #267EE8: main buttons, links, selected chips, the active tab, charts.\n- Done states: row #C7FEA0, check box #56BD23.\nType:\n- Headlines: Inter 800 caps for heroes; Inter 600 at about 18 pt for titles.\n- Body: Inter 400, 16 pt rows, 13 pt grey sublines; tabular numbers.\nShapes:\n- Buttons 40 pt tall with 10 pt corners; cards 8 pt corners with a 1 pt #EDEDED border; chips and bars are full pills.\nLayout:\n- 17 pt side margins; lists sit in bordered white cards.\nComponents:\n- Routine card: title, a 3-dot menu, 2-line grey summary, full-width blue button.\n- Set row: previous, kg, reps and a 25 pt check box; a done row turns #C7FEA0.\n- Charts: thin blue line with dot markers, or blue bars on light grid lines.\nIcons and imagery:\n- Outline icons in black; grey 3D muscle figures with red target muscles.\nCheck:\n- Blue marks every main button, link and chart.\n- Every screen background is white.\n- Buttons are 40 pt tall with 10 pt corners."
 }

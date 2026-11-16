@@ -72,21 +72,7 @@
           "text": "An energy curve from violet #6F1DFE to orange #FC800C, violet Peak and Dip arrow tags, and a tab bar with violet active icons."
         }
       ]
-    },
-    "typeStyle": "Wide grotesque sans, regular lines with bold key words; the web paywall switches to an Inter-like sans",
-    "font": {
-      "name": null,
-      "closeTo": "Work Sans",
-      "look": "Wide grotesque sans, regular lines with bold key words",
-      "weights": "Regular and bold in captions, bold screen titles",
-      "crop": "/taste/media/rise/font-1.jpg"
-    },
-    "visualStyle": "Black app screens where violet marks tabs and tags and orange marks energy numbers, framed by a violet-to-orange sunrise on every store screen. The web paywall switches to white, with a violet button, a green coupon card and a red countdown.",
-    "styleTraits": [
-      "Near black covers 42% of the store screens",
-      "8 of 8 store screens sit on a violet-to-orange sunrise",
-      "6 of 8 captions mix regular and bold words"
-    ]
+    }
   },
   "screenshots": [
     {
@@ -232,81 +218,5 @@
     "Quarterly, the middle plan, is preselected as MOST POPULAR at $0.32 a day. Monthly wears a LITE VERSION tag; Semiannually is BEST PRICE at $0.27 a day.",
     "The 40% covers the first period only. Checkout charges $29.99 for the intro period, then renews at $49.99, the crossed-out price."
   ],
-  "improvements": [
-    {
-      "title": "Keep violet as the only accent",
-      "detail": "Red, green and violet compete above the plans: a red #ED4443 banner, a green #95F3AB coupon card and the violet plan. The sticky bar already shows the timer, so drop the banner, grey the coupon and keep violet for the choice.",
-      "rule": "One accent per screen. Directing attention means one place to look.",
-      "source": "S8"
-    },
-    {
-      "title": "Show the ideal bedtime",
-      "detail": "The plan screen blurs its one personal result, the ideal bedtime, above “Your personalized energy & sleep plan is ready”. Show the time, then sell the energy schedule behind it: the peaks and dips from the App Store screens.",
-      "rule": "Onboarding before sign-up. Order: show the value, let them personalize, then ask them to sign up.",
-      "source": "S13"
-    },
-    {
-      "title": "Put the renewal price on the card",
-      "detail": "Quarterly leads with $0.32 a day, and the $49.99 renewal sits in 56 words of bullets under Subscribe. Print “$29.99 today, then $49.99 at renewal” on the Quarterly card, in one line.",
-      "rule": "Cut verbose, redundant text. One sentence where AI wrote three.",
-      "source": "S2, S4, S14, S15, S27"
-    }
-  ],
-  "stylePrompt": "Restyle my app in Rise's style. Keep my features, data and copy.\nColors:\n- 60% night black #17151A: screens and sheets; rows and cards on #22222A.\n- 30% electric violet #7D05FC: active tabs, tags and add buttons; violet text #8C58FC.\n- 10% sunrise orange #C56B3D: energy numbers, peaks and session art.\nType:\n- Headlines: Work Sans 700, about 21 pt, white over a grey Bold subline.\n- Body: Work Sans 400, 13 to 17 pt; Work Sans 500 for row labels; secondary text #BCBCC0.\nShapes:\n- Grouped lists 12 pt corners, cards 13 pt, sheet tops 28 pt; badges are full pills.\nLayout:\n- Lists inset 13 pt, 56 pt rows with 1 pt #323335 separators, 21 pt icon circles.\nComponents:\n- Energy chart: a curve that fades from violet #6F1DFE (low) to orange #FC800C (high), with a white now line.\n- Habit row: colored icon circle, label, bell and chevron on #22222A.\n- Session card: 13 pt corners, orange gradient art #4C0210 to #DF7001, a white play disc, a #22222A footer row.\nIcons and imagery:\n- White line icons; violet-to-orange sunrise gradients behind heroes and onboarding.\nCheck:\n- Every screen background is #17151A or #000000.\n- Orange appears only on energy data and session art.\n- Lists use 12 pt corners and 56 pt rows.",
-  "elements": [
-    {
-      "type": "discount-badge",
-      "src": "/taste/media/rise/el-discount-badge-1.jpg",
-      "x": 16,
-      "y": 6,
-      "w": 574,
-      "h": 100,
-      "note": "Sticky bar: red stopwatch, Discount available 09:52 and a violet Get offer button"
-    },
-    {
-      "type": "hero-visual",
-      "src": "/taste/media/rise/el-hero-visual-1.jpg",
-      "x": 80,
-      "y": 129,
-      "w": 444,
-      "h": 444,
-      "note": "Bedtime dial from moon to sun, with the ideal bedtime blurred"
-    },
-    {
-      "type": "discount-badge",
-      "src": "/taste/media/rise/el-discount-badge-2.jpg",
-      "x": 14,
-      "y": 130,
-      "w": 572,
-      "h": 236,
-      "note": "Green coupon card: code #february26, an up to 40% pill and a 09:52 timer"
-    },
-    {
-      "type": "plan-picker",
-      "src": "/taste/media/rise/el-plan-picker-1.jpg",
-      "x": 14,
-      "y": 475,
-      "w": 572,
-      "h": 507,
-      "note": "3 stacked cards with per-day price boxes; Quarterly preselected as MOST POPULAR at $0.32 a day"
-    },
-    {
-      "type": "main-button",
-      "src": "/taste/media/rise/el-main-button-1.jpg",
-      "x": 23,
-      "y": 520,
-      "w": 554,
-      "h": 97,
-      "note": "Full-width violet Subscribe button under the card field at checkout"
-    },
-    {
-      "type": "legal-links",
-      "src": "/taste/media/rise/el-legal-links-1.jpg",
-      "x": 35,
-      "y": 726,
-      "w": 501,
-      "h": 275,
-      "note": "3 checkout bullets: $29.99 for the intro period, then $49.99 at renewal"
-    }
-  ]
+  "stylePrompt": "Restyle my app in Rise's style. Keep my features, data and copy.\nColors:\n- 60% night black #17151A: screens and sheets; rows and cards on #22222A.\n- 30% electric violet #7D05FC: active tabs, tags and add buttons; violet text #8C58FC.\n- 10% sunrise orange #C56B3D: energy numbers, peaks and session art.\nType:\n- Headlines: Work Sans 700, about 21 pt, white over a grey Bold subline.\n- Body: Work Sans 400, 13 to 17 pt; Work Sans 500 for row labels; secondary text #BCBCC0.\nShapes:\n- Grouped lists 12 pt corners, cards 13 pt, sheet tops 28 pt; badges are full pills.\nLayout:\n- Lists inset 13 pt, 56 pt rows with 1 pt #323335 separators, 21 pt icon circles.\nComponents:\n- Energy chart: a curve that fades from violet #6F1DFE (low) to orange #FC800C (high), with a white now line.\n- Habit row: colored icon circle, label, bell and chevron on #22222A.\n- Session card: 13 pt corners, orange gradient art #4C0210 to #DF7001, a white play disc, a #22222A footer row.\nIcons and imagery:\n- White line icons; violet-to-orange sunrise gradients behind heroes and onboarding.\nCheck:\n- Every screen background is #17151A or #000000.\n- Orange appears only on energy data and session art.\n- Lists use 12 pt corners and 56 pt rows."
 }

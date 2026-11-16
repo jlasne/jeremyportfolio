@@ -72,21 +72,7 @@
           "text": "A 5-tab bar on #21211F with the active icon filled orange; 4-column stat rows; charts draw a 2.5 pt orange line."
         }
       ]
-    },
-    "typeStyle": "Wide bold grotesque headlines in white; paywall prices in regular weight at 4x the body size",
-    "font": {
-      "name": null,
-      "closeTo": "Archivo",
-      "look": "Wide bold grotesque headlines, huge regular prices, spaced capital plan names",
-      "weights": "Bold headlines, regular prices and plan names, medium buttons",
-      "crop": "/taste/media/strava/font-1.jpg"
-    },
-    "visualStyle": "Near-black screens with white type; orange marks the buttons, the routes and the active tab. Store shots frame each phone in orange over a black-to-orange gradient.",
-    "styleTraits": [
-      "Near black covers 52% of the screenshots",
-      "Orange phone frame on 8 of 8 store screenshots",
-      "1 of 4 plan cards is light: Individual"
-    ]
+    }
   },
   "screenshots": [
     {
@@ -235,81 +221,5 @@
     "Each card leads with a per-month price; 3 of the 4 bill yearly only. Family turns $139.99 a year into $2.92 a month per person.",
     "The trial runs 30 days, with a reminder 2 days before it ends. Individual and Student say “Try it free”; Family and the bundle say “Choose plan”."
   ],
-  "improvements": [
-    {
-      "title": "Keep one orange button on screen",
-      "detail": "On the Individual card, “Try it free” sits above the sticky “Start free 30-day trial”: 2 orange buttons on one screen. Make the card button an outline, like the other 3 cards.",
-      "rule": "Emphasize the CTA. One filled primary button, everything else secondary or text.",
-      "source": "S2, S14, S15, S16"
-    },
-    {
-      "title": "Name what the trial unlocks",
-      "detail": "The headline reads “The best of Strava. Built for your goals.” The timeline under it names the features: put them up top, as “Routes, segment leaderboards and training analysis, free for 30 days”.",
-      "rule": "Make headlines specific. \"Track 3 habits in 10 seconds a day\" beats \"Transform your life\".",
-      "source": "S1, S2, S4, S16"
-    },
-    {
-      "title": "Write plan names in sentence case",
-      "detail": "All 4 plan names are spaced capitals ending in “SUBSCRIPTION”, and 3 of them take 2 lines. Set them as Individual, Family, Student and Strava + Runna, and each fits on 1 line.",
-      "rule": "Use ALL CAPS only for tiny labels, with +5% to +10% letter spacing.",
-      "source": "S1, S2, S4, S16"
-    }
-  ],
-  "stylePrompt": "Restyle my app in Strava's style. Keep my features, data and copy.\nColors:\n- 60% near black #141414: screen backgrounds; #21211F for bars and sheets.\n- 30% white #FFFFFF: text and icons; secondary text 75% white.\n- 10% Strava orange #FD5200: only the active tab, selected chips, main buttons, routes and chart lines.\nType:\n- Headlines: Montserrat 700, close to Boathouse Extended, about 28 to 32 pt.\n- Body: Inter 400, close to Boathouse, 13 to 14 pt; Inter 700 for 17 pt titles and 24 pt stats.\nShapes:\n- Chips 34 pt tall, 6 pt corners, 1 pt #434240 outline; selected chips get an orange outline and label.\n- Photos 8 pt corners. Flat surfaces with 1 pt #3A3A38 dividers.\nLayout:\n- 24 pt side margins, 16 pt between blocks, dense data rows.\nComponents:\n- Tab bar: 5 outlined white icons; the active one fills orange.\n- Stat row: 4 columns, 11 pt label over 17 pt value.\n- Charts: 2.5 pt orange line, 26% orange fill, 20% white gridlines.\nIcons and imagery:\n- 2 pt line icons, round caps; dark maps with orange routes; real photos at full width.\nCheck:\n- Every screen background is #141414.\n- Orange appears only on active or selected items.\n- Stats read label over value, 4 per row.",
-  "elements": [
-    {
-      "type": "hero-visual",
-      "src": "/taste/media/strava/el-hero-visual-1.jpg",
-      "x": 0,
-      "y": 40,
-      "w": 600,
-      "h": 376,
-      "note": "Red-to-black gradient with the Strava Subscription wordmark, an orange shield and “The best of Strava. Built for your goals.”"
-    },
-    {
-      "type": "trial-timeline",
-      "src": "/taste/media/strava/el-trial-timeline-1.jpg",
-      "x": 22,
-      "y": 461,
-      "w": 556,
-      "h": 373,
-      "note": "White card: Today unlocks routes, segment leaderboards and training analysis; a bell marks the reminder 2 days before"
-    },
-    {
-      "type": "discount-badge",
-      "src": "/taste/media/strava/el-discount-badge-1.jpg",
-      "x": 59,
-      "y": 126,
-      "w": 130,
-      "h": 66,
-      "note": "Black “Save 44%” tab on the light Individual card, above the plan name"
-    },
-    {
-      "type": "plan-picker",
-      "src": "/taste/media/strava/el-plan-picker-1.jpg",
-      "x": 58,
-      "y": 308,
-      "w": 487,
-      "h": 302,
-      "note": "Annual and Monthly switch, Annual preselected: $6.67 a month at 4x the body size, “Billed at $79.99/year + tax” below"
-    },
-    {
-      "type": "plan-picker",
-      "src": "/taste/media/strava/el-plan-picker-2.jpg",
-      "x": 58,
-      "y": 126,
-      "w": 488,
-      "h": 484,
-      "note": "Family card for 4 accounts: $2.92 a month per person, billed at $139.99 a year, annual only"
-    },
-    {
-      "type": "main-button",
-      "src": "/taste/media/strava/el-main-button-1.jpg",
-      "x": 28,
-      "y": 877,
-      "w": 544,
-      "h": 93,
-      "note": "Sticky orange button, “Start free 30-day trial”, that stays on screen as the plans scroll"
-    }
-  ]
+  "stylePrompt": "Restyle my app in Strava's style. Keep my features, data and copy.\nColors:\n- 60% near black #141414: screen backgrounds; #21211F for bars and sheets.\n- 30% white #FFFFFF: text and icons; secondary text 75% white.\n- 10% Strava orange #FD5200: only the active tab, selected chips, main buttons, routes and chart lines.\nType:\n- Headlines: Montserrat 700, close to Boathouse Extended, about 28 to 32 pt.\n- Body: Inter 400, close to Boathouse, 13 to 14 pt; Inter 700 for 17 pt titles and 24 pt stats.\nShapes:\n- Chips 34 pt tall, 6 pt corners, 1 pt #434240 outline; selected chips get an orange outline and label.\n- Photos 8 pt corners. Flat surfaces with 1 pt #3A3A38 dividers.\nLayout:\n- 24 pt side margins, 16 pt between blocks, dense data rows.\nComponents:\n- Tab bar: 5 outlined white icons; the active one fills orange.\n- Stat row: 4 columns, 11 pt label over 17 pt value.\n- Charts: 2.5 pt orange line, 26% orange fill, 20% white gridlines.\nIcons and imagery:\n- 2 pt line icons, round caps; dark maps with orange routes; real photos at full width.\nCheck:\n- Every screen background is #141414.\n- Orange appears only on active or selected items.\n- Stats read label over value, 4 per row."
 }

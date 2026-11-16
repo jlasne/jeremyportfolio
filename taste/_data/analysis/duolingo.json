@@ -72,21 +72,7 @@
           "text": "A 7-day streak card with 33.5 pt check circles, a word bank of 45 pt tiles, and a 17 pt green progress bar."
         }
       ]
-    },
-    "typeStyle": "Heavy rounded lowercase headlines over a rounded DIN-style UI sans in dark grey",
-    "font": {
-      "name": "Feather Bold",
-      "closeTo": "Fredoka",
-      "look": "Heavy rounded lowercase headlines with single-story a and g",
-      "weights": "Bold lowercase headlines, bold UI headings, regular body",
-      "crop": "/taste/media/duolingo/font-1.jpg"
-    },
-    "visualStyle": "White screens with dark grey type, where answer cards, word chips and number tiles stand on a thicker bottom edge, like keys. Cartoon characters appear on 5 of 8 screens, and chess, math and music each own a color: teal, blue, purple.",
-    "styleTraits": [
-      "White covers 68% of the screenshots",
-      "Answer cards: 2 px border, 6 px bottom edge",
-      "Corners about 12 px on cards, chips and tiles"
-    ]
+    }
   },
   "screenshots": [
     {
@@ -217,26 +203,5 @@
     "Super starts with 14 days free. Monthly Streak Repair ties it to the streak counter, so a missed day becomes a reason to pay.",
     "6 Super listings run from $9.99 to $119.99. Gems add a second ladder: 1,200 for $4.99 up to 6,500 for $19.99, which gives 35% more gems per dollar."
   ],
-  "improvements": [
-    {
-      "title": "Name each Super listing by its length",
-      "detail": "The App Store shows 6 items named Super Duolingo, from $9.99 to $119.99. Add the length to each name, like “Super Duolingo, 1 year”, so shoppers can compare prices before install.",
-      "rule": "Fix 3 things to stop a design from looking cheap: low contrast, a broken layout, and copy that does not convert.",
-      "source": "S27"
-    },
-    {
-      "title": "Show energy in grey until it runs low",
-      "detail": "Lesson screens put a pink energy meter next to the progress bar, so 2 colors compete above every question. Draw energy in grey #4B4B4B and turn it pink under 5, when Unlimited Energy starts to matter.",
-      "rule": "One accent per screen. Directing attention means one place to look.",
-      "source": "S8"
-    },
-    {
-      "title": "Darken the caption fills to pass 3:1",
-      "detail": "7 of 8 captions put white text on bright fills at 2.1 to 2.5:1. Fill each with the darker shade of its bottom edge, like #CE6603 under the orange, which reads at 3.8:1.",
-      "rule": "Text contrast: at least 4.5:1 for body text, 3:1 for text 24 px and larger.",
-      "source": "S27"
-    }
-  ],
-  "stylePrompt": "Restyle my app in Duolingo's style. Keep my features, data and copy.\nColors:\n- 60% white #FFFFFF: every screen and card; text #4B4B4B; borders #E5E5E5.\n- 30% owl green #57CC02: progress bars, correct answers and success states.\n- 10% streak orange #FF9600: the streak count and done days.\n- One bright color per section header bar.\nType:\n- Headlines: Livvic 700, close to Feather Bold, lowercase, about 36 pt.\n- Body: Barlow 700, close to DIN Next Rounded, 16 to 20 pt prompts; Barlow 500 for 20 pt chips.\nShapes:\n- Cards, chips and buttons: 10 to 13 pt corners, 2 pt #E5E5E5 border, 4 to 6 pt darker bottom edge.\n- Progress bars: 17 pt pills.\nLayout:\n- 16 pt side margins; one question per screen; answers in a 2-column grid or chip bank.\nComponents:\n- Answer card: white, grey key edge; selected turns light blue with a blue border.\n- Word chip: 45 pt tall, 16 pt side padding; correct: #D7FEB7 fill, #A6EC70 border.\n- Streak week: 7 circles, 33.5 pt; done days orange with white checks.\nIcons and imagery:\n- Flat cartoon characters and flat object art; bold rounded icons.\nCheck:\n- Every tappable card has a 4 to 6 pt bottom edge.\n- Headlines are lowercase.\n- Green marks only progress and correct answers.",
-  "elements": []
+  "stylePrompt": "Restyle my app in Duolingo's style. Keep my features, data and copy.\nColors:\n- 60% white #FFFFFF: every screen and card; text #4B4B4B; borders #E5E5E5.\n- 30% owl green #57CC02: progress bars, correct answers and success states.\n- 10% streak orange #FF9600: the streak count and done days.\n- One bright color per section header bar.\nType:\n- Headlines: Livvic 700, close to Feather Bold, lowercase, about 36 pt.\n- Body: Barlow 700, close to DIN Next Rounded, 16 to 20 pt prompts; Barlow 500 for 20 pt chips.\nShapes:\n- Cards, chips and buttons: 10 to 13 pt corners, 2 pt #E5E5E5 border, 4 to 6 pt darker bottom edge.\n- Progress bars: 17 pt pills.\nLayout:\n- 16 pt side margins; one question per screen; answers in a 2-column grid or chip bank.\nComponents:\n- Answer card: white, grey key edge; selected turns light blue with a blue border.\n- Word chip: 45 pt tall, 16 pt side padding; correct: #D7FEB7 fill, #A6EC70 border.\n- Streak week: 7 circles, 33.5 pt; done days orange with white checks.\nIcons and imagery:\n- Flat cartoon characters and flat object art; bold rounded icons.\nCheck:\n- Every tappable card has a 4 to 6 pt bottom edge.\n- Headlines are lowercase.\n- Green marks only progress and correct answers."
 }

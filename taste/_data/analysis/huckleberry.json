@@ -72,22 +72,7 @@
           "text": "Color-coded log cards, a 167 pt cyan sleep donut with 2 pt gaps, and 138 pt orange LEFT and RIGHT nursing timer buttons."
         }
       ]
-    },
-    "typeStyle": "Slate navy geometric sans: heavy Avenir on the web paywall, bold and widely spaced in store headlines",
-    "font": {
-      "name": "Avenir",
-      "closeTo": "Nunito Sans",
-      "look": "Geometric sans, near-circular o, heavy slate navy headlines",
-      "weights": "Heavy headlines, plan names, prices and buttons; regular body",
-      "crop": "/taste/media/huckleberry/font-1.jpg",
-      "scope": "web pricing page"
-    },
-    "visualStyle": "Aqua and white store screens with slate navy headlines; inside the app, color-coded cards mark each log type: cyan sleep, orange feeds, yellow diapers, purple pumping. The web paywall switches to warm off-white #F7F6F2, with white plan cards, cyan pill buttons and a lime-to-green outline on Premium.",
-    "styleTraits": [
-      "Cyan backdrops on 4 of the first 8 store shots",
-      "Slate navy #44526C sets the first 8 store headlines",
-      "Plan cards round at 16 px; buttons are full pills"
-    ]
+    }
   },
   "screenshots": [
     {
@@ -211,81 +196,5 @@
     "Plus is the decoy on Monthly: $11.99, $3 under Premium’s $14.99. On Yearly it turns into the bargain, $5.74 a month, 52% off against Premium’s 33%.",
     "Free keeps every log and caregiver sync at $0. Plus sells SweetSpot nap predictions for $5.74 a month; Premium adds Berry AI chat and sleep plans for $9.99 a month."
   ],
-  "improvements": [
-    {
-      "title": "Set button labels in dark navy",
-      "detail": "White “Get started” and “Get the App” read at 1.8:1 on the #36D2E9 cyan. Keep the cyan and set the labels in #2B3648, the navy of the SweetSpot alert: 6.7:1.",
-      "rule": "Text contrast: at least 4.5:1 for body text, 3:1 for text 24 px and larger.",
-      "source": "S27"
-    },
-    {
-      "title": "Keep one filled button per screen",
-      "detail": "The first screen shows 2 filled cyan pills, “Get the App” and “Get started”, and the Free card fills a third. Make “Get the App” a text link and give Free the outline of “Learn more”.",
-      "rule": "Emphasize the CTA. One filled primary button, everything else secondary or text.",
-      "source": "S2, S14, S15, S16"
-    },
-    {
-      "title": "Put SweetSpot and $5.74 in the headline",
-      "detail": "The headline reads “Support that fits your family”. Name the feature the store description calls most-loved, with the entry price: “SweetSpot nap predictions from $5.74 a month”.",
-      "rule": "Make headlines specific. \"Track 3 habits in 10 seconds a day\" beats \"Transform your life\".",
-      "source": "S1, S2, S4, S16"
-    }
-  ],
-  "stylePrompt": "Restyle my app in Huckleberry's style. Keep my features, data and copy.\nColors:\n- 60% ice white #F3FFFF: backdrops and onboarding; screens and cards stay white.\n- 30% berry cyan #31BCD3: sleep data, charts and selected ranges; cards use its twin #36D2E9.\n- 10% leaf lime #CDCC04: brand accents; selected segments and Save use green #8FD33D.\n- Text slate navy #45526A, labels #888888; feeds orange #FD763F.\nType:\n- Headlines: Lexend 500, about 23 pt.\n- Body: Lexend 400, 14 to 16 pt; Lexend 300 for tabs and stat labels.\nShapes:\n- Segmented controls 34 pt tall, 4 pt corners, 1 pt #E5E4E9 borders.\n- Choice buttons: about 80 pt circles. Main action: a full-width pill.\nLayout:\n- 15 to 19 pt side margins; form sections split by thin rules.\nComponents:\n- Log cards: one color per type, with icon, title and time since.\n- Donut: 167 pt, a 21 pt ring with 2 pt white gaps, the total centered.\n- Range picker: 7D to 1Y, the selected label in a 45 pt cyan circle.\nIcons and imagery:\n- Rounded navy line icons; flat tip drawings; 4-point sparkles on backdrops.\nCheck:\n- Titles and body text are slate navy #45526A.\n- Each log type keeps one color on every screen.\n- Selected states are cyan or green fills.",
-  "elements": [
-    {
-      "type": "plan-picker",
-      "src": "/taste/media/huckleberry/el-plan-picker-1.jpg",
-      "x": 63,
-      "y": 423,
-      "w": 474,
-      "h": 91,
-      "note": "Yearly and Monthly pill toggle; Yearly opens selected in a white knob"
-    },
-    {
-      "type": "plan-picker",
-      "src": "/taste/media/huckleberry/el-plan-picker-2.jpg",
-      "x": 8,
-      "y": 532,
-      "w": 584,
-      "h": 294,
-      "note": "Premium card in a lime outline: $14.99 crossed out above $9.99 per month, billed yearly"
-    },
-    {
-      "type": "discount-badge",
-      "src": "/taste/media/huckleberry/el-discount-badge-1.jpg",
-      "x": 373,
-      "y": 534,
-      "w": 194,
-      "h": 72,
-      "note": "Pale yellow “Best value” tab with a gold sparkle, hung from the Premium card’s top edge"
-    },
-    {
-      "type": "main-button",
-      "src": "/taste/media/huckleberry/el-main-button-1.jpg",
-      "x": 33,
-      "y": 829,
-      "w": 533,
-      "h": 123,
-      "note": "Full-width cyan pill, “Get started”; white text on #36D2E9 reads at 1.8:1"
-    },
-    {
-      "type": "feature-list",
-      "src": "/taste/media/huckleberry/el-feature-list-1.jpg",
-      "x": 40,
-      "y": 564,
-      "w": 500,
-      "h": 314,
-      "note": "“Highlights of Plus membership”: 3 lines, each behind a pale green check"
-    },
-    {
-      "type": "plan-picker",
-      "src": "/taste/media/huckleberry/el-plan-picker-3.jpg",
-      "x": 8,
-      "y": 15,
-      "w": 584,
-      "h": 370,
-      "note": "Free card, last of 3: “$0 forever free” over a filled cyan “Get the app” button"
-    }
-  ]
+  "stylePrompt": "Restyle my app in Huckleberry's style. Keep my features, data and copy.\nColors:\n- 60% ice white #F3FFFF: backdrops and onboarding; screens and cards stay white.\n- 30% berry cyan #31BCD3: sleep data, charts and selected ranges; cards use its twin #36D2E9.\n- 10% leaf lime #CDCC04: brand accents; selected segments and Save use green #8FD33D.\n- Text slate navy #45526A, labels #888888; feeds orange #FD763F.\nType:\n- Headlines: Lexend 500, about 23 pt.\n- Body: Lexend 400, 14 to 16 pt; Lexend 300 for tabs and stat labels.\nShapes:\n- Segmented controls 34 pt tall, 4 pt corners, 1 pt #E5E4E9 borders.\n- Choice buttons: about 80 pt circles. Main action: a full-width pill.\nLayout:\n- 15 to 19 pt side margins; form sections split by thin rules.\nComponents:\n- Log cards: one color per type, with icon, title and time since.\n- Donut: 167 pt, a 21 pt ring with 2 pt white gaps, the total centered.\n- Range picker: 7D to 1Y, the selected label in a 45 pt cyan circle.\nIcons and imagery:\n- Rounded navy line icons; flat tip drawings; 4-point sparkles on backdrops.\nCheck:\n- Titles and body text are slate navy #45526A.\n- Each log type keeps one color on every screen.\n- Selected states are cyan or green fills."
 }

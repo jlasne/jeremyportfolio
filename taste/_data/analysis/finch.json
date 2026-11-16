@@ -72,21 +72,7 @@
           "text": "Goal rows with a raised check button, 7-dot habit sparklines at a 14.7 pt pitch, and a streak week of check coins."
         }
       ]
-    },
-    "typeStyle": "Rubik Bold headlines in dark blue #1F4F9A, 3 lines each; medium and semibold Rubik in the app",
-    "font": {
-      "name": "Rubik",
-      "closeTo": "Rubik",
-      "look": "Wide grotesque with softly rounded corners, single-story g",
-      "weights": "Bold headlines and titles, semibold goal names, medium labels",
-      "crop": "/taste/media/finch/font-1.jpg"
-    },
-    "visualStyle": "Flat cartoon birds play on sky-blue skies and green grass, with white rounded cards for goals and speech bubbles. Loud fills mark big moments: pink for sending a Valentine, bright blue for the 30-day streak.",
-    "styleTraits": [
-      "Sky blue and its pale tint cover 44% of the store shots",
-      "8 of 8 headlines: 3 lines of dark blue Rubik Bold",
-      "White cards with corners about 24 px"
-    ]
+    }
   },
   "screenshots": [
     {
@@ -217,26 +203,5 @@
     "Prices lean high: 7 of 9 Finch Plus listings run $34.99 to $69.99. The top is 11.7x the lowest, $5.99, and all 10 end in .99.",
     "Value comes first: a pet bird on all 8 screenshots, 6 of 8 headlines about doing it together, and Plus only in the In-App Purchases list."
   ],
-  "improvements": [
-    {
-      "title": "Put the term in every listing name",
-      "detail": "9 listings read “Finch Plus” at 8 prices, $5.99 to $69.99, with $39.99 twice. Add the term to each, like “Finch Plus, 1 year”, and name what Guardian Program, $7.99, buys.",
-      "rule": "Fix 3 things to stop a design from looking cheap: low contrast, a broken layout, and copy that does not convert.",
-      "source": "S27"
-    },
-    {
-      "title": "Take the grass labels to 4.5:1",
-      "detail": "White “Goal Buddies”, “3 goals left today!” and “START THE DAY” sit on #7BB65C grass at 2.4:1. Set them in #101820, the icon’s eye color, for 7.4:1.",
-      "rule": "Text contrast: at least 4.5:1 for body text, 3:1 for text 24 px and larger.",
-      "source": "S27"
-    },
-    {
-      "title": "Swap “millions” for 776,001 ratings",
-      "detail": "Screenshot 8 says “join millions growing with you”. Apple’s data showed 4.9 stars from 776,001 ratings on 15 Nov 2026. Write that number: “Rated 4.9 from 776,001 ratings”.",
-      "rule": "Make headlines specific. \"Track 3 habits in 10 seconds a day\" beats \"Transform your life\".",
-      "source": "S1, S2, S4, S16"
-    }
-  ],
-  "stylePrompt": "Restyle my app in Finch's style. Keep my features, data and copy.\nColors:\n- 60% sky blue #9DDDFF: skies and hero backdrops.\n- 30% white #FFFFFF: cards, speech bubbles and sheets; text #2E2E2E.\n- 10% bright blue #0E9BE2: streaks, selected checks and big moments.\n- Rewards: orange bolts #FEAC31; done checks green #52B74E.\nType:\n- Headlines: Rubik 700, 21 pt titles; 3-line heroes in dark blue #1F4F9A.\n- Body: Rubik 500, 17 pt rows and bubbles; section labels in Rubik 600 caps, 12 pt, tracking 9%.\nShapes:\n- Cards 20 to 24 pt corners; icon tiles 54 pt squircles.\n- Check buttons: 13 pt corners, #F0F0F0 face, a 4 pt #D7D7D7 bottom edge.\nLayout:\n- 16.5 pt side margins; a cartoon scene on top, white cards below, 8 pt apart.\nComponents:\n- Goal row: 78 pt white card, emoji tile, Rubik 600 name, bolt reward, check button.\n- Habit sparkline: 7 columns, 14.7 pt pitch, bars and dots in the row's color.\n- Speech bubble: white, fully rounded, tail toward the mascot.\nIcons and imagery:\n- A flat cartoon mascot in every hero; emoji-style icons in rows.\nCheck:\n- Every card is white with 20 to 24 pt corners.\n- The mascot appears on each main screen.\n- Bright blue appears only on streaks and selections.",
-  "elements": []
+  "stylePrompt": "Restyle my app in Finch's style. Keep my features, data and copy.\nColors:\n- 60% sky blue #9DDDFF: skies and hero backdrops.\n- 30% white #FFFFFF: cards, speech bubbles and sheets; text #2E2E2E.\n- 10% bright blue #0E9BE2: streaks, selected checks and big moments.\n- Rewards: orange bolts #FEAC31; done checks green #52B74E.\nType:\n- Headlines: Rubik 700, 21 pt titles; 3-line heroes in dark blue #1F4F9A.\n- Body: Rubik 500, 17 pt rows and bubbles; section labels in Rubik 600 caps, 12 pt, tracking 9%.\nShapes:\n- Cards 20 to 24 pt corners; icon tiles 54 pt squircles.\n- Check buttons: 13 pt corners, #F0F0F0 face, a 4 pt #D7D7D7 bottom edge.\nLayout:\n- 16.5 pt side margins; a cartoon scene on top, white cards below, 8 pt apart.\nComponents:\n- Goal row: 78 pt white card, emoji tile, Rubik 600 name, bolt reward, check button.\n- Habit sparkline: 7 columns, 14.7 pt pitch, bars and dots in the row's color.\n- Speech bubble: white, fully rounded, tail toward the mascot.\nIcons and imagery:\n- A flat cartoon mascot in every hero; emoji-style icons in rows.\nCheck:\n- Every card is white with 20 to 24 pt corners.\n- The mascot appears on each main screen.\n- Bright blue appears only on streaks and selections."
 }

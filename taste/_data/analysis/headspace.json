@@ -72,21 +72,7 @@
           "text": "2-column category tiles 167 pt wide, a teacher pick row with a blue radio, and a 52 pt blue Play pill."
         }
       ]
-    },
-    "typeStyle": "Bold grotesque headlines in warm dark grey, with key words in orange",
-    "font": {
-      "name": "Headspace Apercu",
-      "closeTo": "Hanken Grotesk",
-      "look": "Bold geometric grotesque, round bowls, key words in orange",
-      "weights": "Bold headlines, prices and button; regular labels and body",
-      "crop": "/taste/media/headspace/font-1.jpg"
-    },
-    "visualStyle": "Yellow and orange waves frame white app screens, and a smiling orange dot is the mascot. Blue fills the Play buttons; the web paywall marks the chosen plan with a yellow card.",
-    "styleTraits": [
-      "Yellow tops 6 of 8 App Store screenshots",
-      "5 of 8 store headlines set key words in orange",
-      "Plan cards round at 12 px, buttons are full pills"
-    ]
+    }
   },
   "screenshots": [
     {
@@ -194,63 +180,5 @@
     "The App Store offers a free trial. This web offer swaps it for 50% off year one: $34.99, then $69.99 a year.",
     "The App Store lists 10 items at 3 prices under 4 names. \"Headspace Plus\" costs $12.99 or $94.99, exactly like \"Headspace\", so it is 1 tier."
   ],
-  "improvements": [
-    {
-      "title": "Name what the year buys",
-      "detail": "The top line reads \"Limited time offer\". Swap it for what the year buys, with numbers from the App Store text: \"500+ guided meditations, from 3 minutes\".",
-      "rule": "Make headlines specific. \"Track 3 habits in 10 seconds a day\" beats \"Transform your life\".",
-      "source": "S1, S2, S4, S16"
-    },
-    {
-      "title": "Say 50% off once",
-      "detail": "The first screen says \"50% off\" 3 times: in the headline, the blue badge and the fine print, beside a struck $69.99. Drop the badge: the struck price already shows the deal.",
-      "rule": "Delete filler badges (\"New\", \"AI-powered\", \"Beta\") unless they change a decision.",
-      "source": "S14"
-    },
-    {
-      "title": "Keep the bright colors to 2",
-      "detail": "Yellow, blue, orange and green share one white page. Keep the yellow card and the blue button. Set the orange links and the green check in the headline's grey #44423F: the links go from 3.3:1 to 10:1.",
-      "rule": "Two colors do 90% of the work. The third one only goes on the button you want pressed.",
-      "source": "S5"
-    }
-  ],
-  "stylePrompt": "Restyle my app in Headspace's style. Keep my features, data and copy.\nColors:\n- 60% white #FFFFFF: screens and cards; text #2B2A28; soft fills #F8F4F1.\n- 30% bright orange #FF7300: illustrations and key words in headlines.\n- 10% cobalt blue #1A54F6: therapy screens; main buttons use its twin #0061EE.\n- Sleep screens: navy #101340 with white text.\nType:\n- Headlines: Hanken Grotesk 700, close to Headspace Apercu, about 30 pt, tracking -3%.\n- Body: Hanken Grotesk 400, close to Headspace Apercu, 16 pt; labels at 500, 16 to 20 pt.\nShapes:\n- Buttons and choice rows: full pills, 50 to 52 pt tall. Cards and tiles: 12 pt corners.\n- Secondary buttons: white, 2 pt #E2DEDB border, 2 pt bottom lip #D2D1CF.\nLayout:\n- 24 pt side margins; full-width art header, then title, meta, paragraph, actions.\nComponents:\n- Play button: #0061EE pill, white triangle and label.\n- Choice row: #F8F4F1 pill, 38 pt avatar, label, 24 pt blue radio at right.\n- Category tiles: 2 columns, saturated bases, clipped circles, centered white labels.\nIcons and imagery:\n- Vector art of circles, suns and stripes; white round icon buttons over art.\nCheck:\n- Every primary action is a blue pill.\n- Text is #2B2A28 on white or white on navy.\n- Cards and tiles round at 12 pt.",
-  "elements": [
-    {
-      "type": "plan-picker",
-      "src": "/taste/media/headspace/el-plan-picker-1.jpg",
-      "x": 19,
-      "y": 396,
-      "w": 561,
-      "h": 418,
-      "note": "Annual preselected in a yellow card, $34.99 beside a struck $69.99; Monthly outlined at $12.99"
-    },
-    {
-      "type": "discount-badge",
-      "src": "/taste/media/headspace/el-discount-badge-1.jpg",
-      "x": 57,
-      "y": 396,
-      "w": 221,
-      "h": 59,
-      "note": "Blue tab on the Annual card that repeats the headline: \"Annual plan: 50% off\""
-    },
-    {
-      "type": "legal-links",
-      "src": "/taste/media/headspace/el-legal-links-1.jpg",
-      "x": 22,
-      "y": 813,
-      "w": 555,
-      "h": 116,
-      "note": "Grey renewal line over 2 orange links at 12 px: Terms & conditions, Cancel anytime"
-    },
-    {
-      "type": "main-button",
-      "src": "/taste/media/headspace/el-main-button-1.jpg",
-      "x": 38,
-      "y": 956,
-      "w": 523,
-      "h": 113,
-      "note": "Blue pill, 58 px tall, with \"Get this deal\" in bold white"
-    }
-  ]
+  "stylePrompt": "Restyle my app in Headspace's style. Keep my features, data and copy.\nColors:\n- 60% white #FFFFFF: screens and cards; text #2B2A28; soft fills #F8F4F1.\n- 30% bright orange #FF7300: illustrations and key words in headlines.\n- 10% cobalt blue #1A54F6: therapy screens; main buttons use its twin #0061EE.\n- Sleep screens: navy #101340 with white text.\nType:\n- Headlines: Hanken Grotesk 700, close to Headspace Apercu, about 30 pt, tracking -3%.\n- Body: Hanken Grotesk 400, close to Headspace Apercu, 16 pt; labels at 500, 16 to 20 pt.\nShapes:\n- Buttons and choice rows: full pills, 50 to 52 pt tall. Cards and tiles: 12 pt corners.\n- Secondary buttons: white, 2 pt #E2DEDB border, 2 pt bottom lip #D2D1CF.\nLayout:\n- 24 pt side margins; full-width art header, then title, meta, paragraph, actions.\nComponents:\n- Play button: #0061EE pill, white triangle and label.\n- Choice row: #F8F4F1 pill, 38 pt avatar, label, 24 pt blue radio at right.\n- Category tiles: 2 columns, saturated bases, clipped circles, centered white labels.\nIcons and imagery:\n- Vector art of circles, suns and stripes; white round icon buttons over art.\nCheck:\n- Every primary action is a blue pill.\n- Text is #2B2A28 on white or white on navy.\n- Cards and tiles round at 12 pt."
 }

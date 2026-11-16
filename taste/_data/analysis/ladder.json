@@ -72,21 +72,7 @@
           "text": "A 31-tick lime rep gauge, about 62 pt avatar circles in lime progress rings, and a floating glass tab bar with 4 tabs."
         }
       ]
-    },
-    "typeStyle": "Heavy wide capitals for headlines and big numbers, plain sans labels; the pricing page switches to an Inter-like sans",
-    "font": {
-      "name": null,
-      "closeTo": "Archivo",
-      "look": "Heavy wide capitals with squarish rounds, plain sans body",
-      "weights": "Black headlines and big numbers, semibold titles, regular labels",
-      "crop": "/taste/media/ladder/font-1.jpg"
-    },
-    "visualStyle": "Near-black app screens put lime on buttons, checks and charts, with real coach photos and heavy wide capital titles. White fills 6 of 8 store page backgrounds and the pricing page, where Annual is the one dark card.",
-    "styleTraits": [
-      "White covers 34% of the store screens, near black 31%",
-      "Heavy wide capital headlines on 7 of 8 store shots",
-      "3 of 3 main buttons are full lime pills"
-    ]
+    }
   },
   "screenshots": [
     {
@@ -225,81 +211,5 @@
     "Annual costs less per month and does more: every team, unlimited team changes, unlimited Save & Replay. Monthly stops at 1 team and 2 changes a month.",
     "The 7-day trial asks for payment only after it ends. The App Store lists 4 tiers at $179.99 to $479.99 a year; the web shows only PRO."
   ],
-  "improvements": [
-    {
-      "title": "Put Annual first",
-      "detail": "Annual, the one dark card, comes third and last, under Free Trial and Monthly. Move it to the top and print the 7 free days on it.",
-      "rule": "Put the main actions at the top of the hierarchy, where the eye lands first.",
-      "source": "S2, S14, S15, S16"
-    },
-    {
-      "title": "Say what Annual saves",
-      "detail": "Annual reads “Maximum flexibility, save monthly.” A 12-month plan is the least flexible one. Write “Half the Monthly price: save $179.89 a year”.",
-      "rule": "Fix 3 things to stop a design from looking cheap: low contrast, a broken layout, and copy that does not convert.",
-      "source": "S27"
-    },
-    {
-      "title": "Use the app's flat black",
-      "detail": "The pricing page uses 2 grey gradients: Annual runs #1B1B1B to #474747, Monthly #B6B6B6 to #FAFAFA. Fill Annual with the app's flat #0E0E0E and the other cards with white.",
-      "rule": "Slop Check 7: Many shades and opacities of one color",
-      "source": "S1"
-    }
-  ],
-  "stylePrompt": "Restyle my app in Ladder's style. Keep my features, data and copy.\nColors:\n- 60% white #FFFFFF: text and icons, plus onboarding and pricing pages.\n- 30% near black #0E0E0E: in-app screens; #1C1C1E for cards and charts.\n- 10% lime yellow #E6FF01: the main button, done checks, progress rings and chart bars.\nType:\n- Headlines: Unbounded 800, close to EK Modena Extended, caps, +4% tracking, 26 to 32 pt.\n- Body: Inter 400, close to SF Pro, 13 to 15 pt; Inter 700 for screen titles.\nShapes:\n- 34 pt capsule chips with a #7D7D7D rim, a 50 pt pill main button, 27 pt day circles.\n- Photo cards: 18 pt corners, a black gradient on the bottom third.\nLayout:\n- 16 pt side margins, 8 pt chip gaps, one workout card per view.\nComponents:\n- Week row: 7 day circles, 54 pt pitch; done days fill lime with a black check.\n- Avatar row: 62 pt photos in lime progress rings.\n- Main button: full-width lime pill, black bold caps label.\nIcons and imagery:\n- White icons about 20 pt, filled in the tab bar. Real coach photos under white caps titles.\nCheck:\n- In-app backgrounds are #0E0E0E or #1C1C1E.\n- Lime marks only actions, progress and done states.\n- Titles and big stats are in caps.",
-  "elements": [
-    {
-      "type": "main-button",
-      "src": "/taste/media/ladder/el-main-button-1.jpg",
-      "x": 307,
-      "y": 2,
-      "w": 220,
-      "h": 68,
-      "note": "Sticky lime pill, “FIND YOUR PLAN”, in the grey header above all 3 plan cards"
-    },
-    {
-      "type": "plan-picker",
-      "src": "/taste/media/ladder/el-plan-picker-1.jpg",
-      "x": 15,
-      "y": 75,
-      "w": 570,
-      "h": 330,
-      "note": "Dark Annual card: $14.99 a month in huge type, “($179.99 FOR THE YEAR)” below, then “Maximum flexibility, save monthly.”"
-    },
-    {
-      "type": "feature-list",
-      "src": "/taste/media/ladder/el-feature-list-1.jpg",
-      "x": 60,
-      "y": 415,
-      "w": 460,
-      "h": 312,
-      "note": "4 lime checks on the Annual card: everything in Monthly, all teams, unlimited team changes, unlimited Save & Replay"
-    },
-    {
-      "type": "plan-picker",
-      "src": "/taste/media/ladder/el-plan-picker-2.jpg",
-      "x": 15,
-      "y": 75,
-      "w": 570,
-      "h": 287,
-      "note": "Light grey Monthly card: $29.99 in huge type, a grey “/ MONTH” and “Gets results, without planning workouts.”"
-    },
-    {
-      "type": "feature-list",
-      "src": "/taste/media/ladder/el-feature-list-2.jpg",
-      "x": 60,
-      "y": 372,
-      "w": 480,
-      "h": 563,
-      "note": "6 black checks on the Monthly card, ending with “Join 1 Ladder team, change 2x per month”"
-    },
-    {
-      "type": "plan-picker",
-      "src": "/taste/media/ladder/el-plan-picker-3.jpg",
-      "x": 15,
-      "y": 75,
-      "w": 570,
-      "h": 323,
-      "note": "White Free Trial card: “7 DAYS” in huge type, a small grey “FREE” and “No payment info collected until AFTER your trial ends.”"
-    }
-  ]
+  "stylePrompt": "Restyle my app in Ladder's style. Keep my features, data and copy.\nColors:\n- 60% white #FFFFFF: text and icons, plus onboarding and pricing pages.\n- 30% near black #0E0E0E: in-app screens; #1C1C1E for cards and charts.\n- 10% lime yellow #E6FF01: the main button, done checks, progress rings and chart bars.\nType:\n- Headlines: Unbounded 800, close to EK Modena Extended, caps, +4% tracking, 26 to 32 pt.\n- Body: Inter 400, close to SF Pro, 13 to 15 pt; Inter 700 for screen titles.\nShapes:\n- 34 pt capsule chips with a #7D7D7D rim, a 50 pt pill main button, 27 pt day circles.\n- Photo cards: 18 pt corners, a black gradient on the bottom third.\nLayout:\n- 16 pt side margins, 8 pt chip gaps, one workout card per view.\nComponents:\n- Week row: 7 day circles, 54 pt pitch; done days fill lime with a black check.\n- Avatar row: 62 pt photos in lime progress rings.\n- Main button: full-width lime pill, black bold caps label.\nIcons and imagery:\n- White icons about 20 pt, filled in the tab bar. Real coach photos under white caps titles.\nCheck:\n- In-app backgrounds are #0E0E0E or #1C1C1E.\n- Lime marks only actions, progress and done states.\n- Titles and big stats are in caps."
 }

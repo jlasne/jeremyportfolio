@@ -72,21 +72,7 @@
           "text": "A 293 pt screen-time ring with a 22.5 pt ice-blue arc, glass app tiles, and a capsule stepper with 37 pt round buttons."
         }
       ]
-    },
-    "typeStyle": "Tight sans headlines that set key words in bold inside regular lines",
-    "font": {
-      "name": null,
-      "closeTo": "Inter",
-      "look": "tight grotesque sans, bold words inside regular lines",
-      "weights": "regular and bold in one headline, regular body",
-      "crop": "/taste/media/opal/font-1.jpg"
-    },
-    "visualStyle": "Black screens with frosted-glass cards, ice-blue numbers and photo-real 3D stones. The web paywall keeps the black but swaps the accent for a purple-to-pink gradient.",
-    "styleTraits": [
-      "Black covers 88% of the paywall",
-      "8 of 8 store headlines mix bold and regular",
-      "Card corners about 28 pt"
-    ]
+    }
   },
   "screenshots": [
     {
@@ -204,63 +190,5 @@
     "The trial follows the plan: 7 days on Yearly, 3 on Monthly, and Lifetime goes straight to \"Purchase\". The default plan gets the longest trial.",
     "Lifetime at $399, 4 times the yearly price, anchors the top of the ladder. The App Store also lists weekly plans at $4.99 and $9.99."
   ],
-  "improvements": [
-    {
-      "title": "Put the app's ice blue on the button",
-      "detail": "The button (#C08CF4 to #EDB2B2) and the PRO badge use a purple-to-pink gradient. The app marks its numbers and icons in ice blue (#B4D4E6). Use it on the button with near-black text, at 12:1 contrast, and make the badge grey.",
-      "rule": "Pick the accent for a reason, not because you like it. It must contrast with the base pair and fit the brand mood.",
-      "source": "S23"
-    },
-    {
-      "title": "Lead with the 1h 23m",
-      "detail": "The card promises \"Level up your focus\". Screenshot 1 and the App Store text promise 1h 23m back every day. Put \"Get back 1h 23m a day\" under the Opal PRO title.",
-      "rule": "Make headlines specific. \"Track 3 habits in 10 seconds a day\" beats \"Transform your life\".",
-      "source": "S1, S2, S4, S16"
-    },
-    {
-      "title": "Say how Monthly bills",
-      "detail": "The Monthly tab reads \"$239 billed annually\", but the plan bills $19.99 a month. Write \"Billed monthly, $239.88 a year\" and add \"Save 58%\" to the Yearly tab.",
-      "rule": "Fix 3 things to stop a design from looking cheap: low contrast, a broken layout, and copy that does not convert.",
-      "source": "S27"
-    }
-  ],
-  "stylePrompt": "Restyle my app in Opal's style. Keep my features, data and copy.\nColors:\n- 60% near black #0E0F11: screen backgrounds, with a #495C6B glow at the top.\n- 30% soft white #EEEEEE: titles and icons; body text #BCBBC0.\n- 10% ice blue #B4D4E6: key numbers, rings, active icons; arcs fade #819DC4 to #9FF8FE.\nType:\n- Headlines: Inter 700, close to SF Pro, 28 pt, tracking -4%, key words Bold inside Inter 500 lines.\n- Body: Inter 500, close to SF Pro, 13 to 15 pt; stat labels about 12 pt caps, tracking 5%.\nShapes:\n- Glass cards: background blur, white rim at 18%, 33 pt continuous corners.\n- Buttons and steppers: capsules 42 to 51 pt tall.\nLayout:\n- 32 pt side margins, one centered hero per screen, 20 pt card padding.\nComponents:\n- Ring: 293 pt, 22.5 pt round-capped arc on a #151515 track, 55 pt value centered.\n- Stat row: 3 columns, caps label over an ice-blue number of about 28 pt.\n- Glass button: 42 pt capsule, white label, ice-blue glow on the bottom rim.\nIcons and imagery:\n- White rounded line icons; one photo-real 3D stone or gem per hero.\nCheck:\n- Every background is #0E0F11 or its top glow.\n- Cards show the background through frosted glass.\n- Headlines mix 2 weights.",
-  "elements": [
-    {
-      "type": "social-proof",
-      "src": "/taste/media/opal/el-social-proof-1.jpg",
-      "x": 87,
-      "y": 7,
-      "w": 450,
-      "h": 86,
-      "note": "App of the Day laurel next to 4.8 stars and 200K+ ratings, above the plan card"
-    },
-    {
-      "type": "plan-picker",
-      "src": "/taste/media/opal/el-plan-picker-1.jpg",
-      "x": 69,
-      "y": 322,
-      "w": 461,
-      "h": 239,
-      "note": "3 tabs in a pill track, Yearly preselected at $8.29 a month, with $99.99 below in grey"
-    },
-    {
-      "type": "feature-list",
-      "src": "/taste/media/opal/el-feature-list-1.jpg",
-      "x": 71,
-      "y": 593,
-      "w": 403,
-      "h": 305,
-      "note": "5 checks, led by Hard Mode: \"No way out. You can't turn Opal off.\""
-    },
-    {
-      "type": "main-button",
-      "src": "/taste/media/opal/el-main-button-1.jpg",
-      "x": 71,
-      "y": 911,
-      "w": 457,
-      "h": 85,
-      "note": "Full-width purple-to-pink pill whose label follows the plan: Start Free Week, Start Free 3 Days, Purchase"
-    }
-  ]
+  "stylePrompt": "Restyle my app in Opal's style. Keep my features, data and copy.\nColors:\n- 60% near black #0E0F11: screen backgrounds, with a #495C6B glow at the top.\n- 30% soft white #EEEEEE: titles and icons; body text #BCBBC0.\n- 10% ice blue #B4D4E6: key numbers, rings, active icons; arcs fade #819DC4 to #9FF8FE.\nType:\n- Headlines: Inter 700, close to SF Pro, 28 pt, tracking -4%, key words Bold inside Inter 500 lines.\n- Body: Inter 500, close to SF Pro, 13 to 15 pt; stat labels about 12 pt caps, tracking 5%.\nShapes:\n- Glass cards: background blur, white rim at 18%, 33 pt continuous corners.\n- Buttons and steppers: capsules 42 to 51 pt tall.\nLayout:\n- 32 pt side margins, one centered hero per screen, 20 pt card padding.\nComponents:\n- Ring: 293 pt, 22.5 pt round-capped arc on a #151515 track, 55 pt value centered.\n- Stat row: 3 columns, caps label over an ice-blue number of about 28 pt.\n- Glass button: 42 pt capsule, white label, ice-blue glow on the bottom rim.\nIcons and imagery:\n- White rounded line icons; one photo-real 3D stone or gem per hero.\nCheck:\n- Every background is #0E0F11 or its top glow.\n- Cards show the background through frosted glass.\n- Headlines mix 2 weights."
 }

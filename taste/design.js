@@ -180,8 +180,8 @@
     var m = state.main.hex, s = state.second.hex, a = state.accent.hex;
     var t2 = contrast(s, m), ta = contrast(a, m);
     el('[data-contrast]').innerHTML =
-      '<span class="' + (t2 >= 4.5 ? 'ok' : 'no') + '">Text ' + ratio(t2) + (t2 >= 4.5 ? ', passes' : ', under 4.5:1') + '</span>' +
-      '<span class="' + (ta >= 3 ? 'ok' : 'no') + '">Accent ' + ratio(ta) + (ta >= 3 ? ', passes' : ', under 3:1') + '</span>';
+      '<span class="' + (t2 >= 4.5 ? 'ok' : 'no') + '">Text ' + ratio(t2) + (t2 >= 4.5 ? ', passes' : ', under 4.5:1') + '.</span> ' +
+      '<span class="' + (ta >= 3 ? 'ok' : 'no') + '">Accent ' + ratio(ta) + (ta >= 3 ? ', passes' : ', under 3:1') + '.</span>';
     var h = fonts.headline[state.headline], b = fonts.body[state.body];
     var pv = el('[data-preview]');
     pv.style.setProperty('--m', m);
