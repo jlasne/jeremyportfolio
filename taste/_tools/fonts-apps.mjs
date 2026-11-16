@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /* tasu.ai app fonts. Run it from anywhere: node taste/_tools/fonts-apps.mjs
-   The pages set each app's name, its 2 font specimens and its rebuilt UI elements in the closest
-   free Google Font. This tool self-hosts those fonts: for each family it asks Google Fonts for
-   exactly the glyphs the pages use (css2?family=...&text=...), saves the woff2 files under
-   fonts/apps/ and writes fonts/apps.css (@font-face, font-display: swap). The pages never call a
-   third party at runtime. Run it again after a change to an app name, a font or an element's
-   text, then run build.mjs.
+   The pages set each app's name and its 2 font specimens in the closest free Google Font, and the
+   Design page's builder previews any of those fonts. This tool self-hosts them: for each family
+   it asks Google Fonts for the glyphs the pages use, plus basic Latin for the builder
+   (css2?family=...&text=...), saves the woff2 files under fonts/apps/ and writes fonts/apps.css
+   (@font-face, font-display: swap). The pages never call a third party at runtime. Run it again
+   after a change to an app name or a font, then run build.mjs.
    Inputs: _data/selection.json, _data/raw/<slug>.json (name), _data/analysis/<slug>.json
-   (branding.fonts), _data/elements/<slug>.json (fonts and text of each element). */
+   (branding.fonts). */
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -30,8 +30,6 @@ const add = (family, weight, text) => {
   for (const ch of String(text)) f.text.add(ch);
   need.set(family, f);
 };
-const decode = s => s.replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-  .replace(/&quot;/g, '"').replace(/&#(\d+);/g, (m, n) => String.fromCodePoint(Number(n))).replace(/&#x([0-9a-f]+);/gi, (m, n) => String.fromCodePoint(parseInt(n, 16)));
 
 const sel = read(join(DATA, 'selection.json'));
 const slugs = sel?.apps?.map(a => a.slug) || readdirSync(join(DATA, 'raw')).map(f => f.replace(/\.json$/, ''));
@@ -46,11 +44,6 @@ for (const slug of slugs) {
     // The card shows the font's name in the font; the specimen shows "Aa" and "<App> 0123456789".
     add(f.closeTo, f.weight, `${f.name || f.closeTo} Aa ${raw.name} 0123456789`);
     if (role === 'headline') add(f.closeTo, f.weight, raw.name); // the card's big name
-  }
-  const els = read(join(DATA, 'elements', `${slug}.json`));
-  for (const el of els?.elements || []) {
-    const text = decode(String(el.html || '').replace(/<[^>]+>/g, ' '));
-    for (const f of el.fonts || []) add(f.family, f.weight, text);
   }
 }
 

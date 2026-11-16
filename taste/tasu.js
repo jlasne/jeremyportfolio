@@ -2,8 +2,8 @@
    Every page is complete HTML without it. It adds the theme toggle, "/" to search, the row/grid
    toggle, strip arrows, hero parallax, reveal on scroll, instant filtering, the mascot loops'
    pause rule, copy buttons (hex values, prompts, code), the paywall captures' arrows, the
-   wordmark's fold, the fit of the rebuilt UI elements, the prompts' "Show all" and the
-   screenshot downloads (one file, or all of them in a ZIP).
+   wordmark's fold, the prompts' "Show all" and the screenshot downloads (one file, or all of
+   them in a ZIP). The Design page's builder lives in design.js.
    Markup contract: _tools/template-notes.md. No dependencies. */
 (function () {
   'use strict';
@@ -579,32 +579,6 @@
       window.addEventListener('resize', function () { if (wm.classList.contains('is-open') && !fits()) set(false); });
     });
   });
-
-  /* 12. Rebuilt UI elements: each keeps its own size (--w, CSS px) and zooms down to fit a
-         narrower stage. Without JS a wide element is cut at the stage edge. ----------------- */
-  var fitEls = all('[data-el-fit]');
-  if (fitEls.length) {
-    var fitOne = function (el) {
-      var stage = el.parentNode;
-      var cs = getComputedStyle(stage);
-      var room = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-      var w = parseFloat(getComputedStyle(el).getPropertyValue('--w')) || el.offsetWidth;
-      var z = Math.min(1, room / w);
-      el.style.zoom = z < 0.999 ? z.toFixed(3) : '';
-    };
-    fitEls.forEach(fitOne);
-    if ('ResizeObserver' in window) {
-      var ro = new ResizeObserver(function (entries) {
-        entries.forEach(function (en) {
-          var el = en.target.querySelector('[data-el-fit]');
-          if (el) fitOne(el);
-        });
-      });
-      fitEls.forEach(function (el) { ro.observe(el.parentNode); });
-    } else {
-      window.addEventListener('resize', function () { fitEls.forEach(fitOne); });
-    }
-  }
 
   /* 13. Prompts: "Show all" opens a clamped prompt, "Show less" closes it. ---------------- */
   d.addEventListener('click', function (e) {

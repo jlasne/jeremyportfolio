@@ -35,11 +35,6 @@ window.TASU_APPS = [
    "w": 600,
    "h": 1299
   },
-  "elements": [
-   "strava-progress-chart",
-   "strava-sport-picker",
-   "strava-activity-stats"
-  ],
   "icon": "/taste/media/strava/icon.png",
   "page": "/taste/strava/",
   "appStore": "https://apps.apple.com/us/app/strava-run-bike-walk/id426826309"
@@ -78,11 +73,6 @@ window.TASU_APPS = [
    "w": 600,
    "h": 1299
   },
-  "elements": [
-   "ladder-strength-chart",
-   "ladder-rep-timer",
-   "ladder-home-header"
-  ],
   "icon": "/taste/media/ladder/icon.png",
   "page": "/taste/ladder/",
   "appStore": "https://apps.apple.com/us/app/ladder-strength-training-plans/id1502936453"
@@ -121,11 +111,6 @@ window.TASU_APPS = [
    "w": 600,
    "h": 1301
   },
-  "elements": [
-   "opal-screen-time-ring",
-   "opal-unblock-card",
-   "opal-timer-controls"
-  ],
   "icon": "/taste/media/opal/icon.png",
   "page": "/taste/opal/",
   "appStore": "https://apps.apple.com/us/app/opal-screen-time-control/id1497465230"
@@ -164,11 +149,6 @@ window.TASU_APPS = [
    "w": 600,
    "h": 1299
   },
-  "elements": [
-   "myfitnesspal-daily-goals",
-   "myfitnesspal-reminder-sheet",
-   "myfitnesspal-macro-chart"
-  ],
   "icon": "/taste/media/myfitnesspal/icon.png",
   "page": "/taste/myfitnesspal/",
   "appStore": "https://apps.apple.com/us/app/myfitnesspal-calorie-counter/id341232718"
@@ -207,11 +187,6 @@ window.TASU_APPS = [
    "w": 600,
    "h": 1299
   },
-  "elements": [
-   "rise-energy-widget",
-   "rise-session-card",
-   "rise-habit-list"
-  ],
   "icon": "/taste/media/rise/icon.png",
   "page": "/taste/rise/",
   "appStore": "https://apps.apple.com/us/app/rise-sleep-tracker/id1453884781"
@@ -250,7 +225,6 @@ window.TASU_APPS = [
    "w": 600,
    "h": 1298
   },
-  "elements": [],
   "icon": "/taste/media/headspace/icon.png",
   "page": "/taste/headspace/",
   "appStore": "https://apps.apple.com/us/app/headspace-sleep-meditation/id493145008"
@@ -289,11 +263,6 @@ window.TASU_APPS = [
    "w": 600,
    "h": 1299
   },
-  "elements": [
-   "hevy-set-rows",
-   "hevy-strength-compare",
-   "hevy-profile-header"
-  ],
   "icon": "/taste/media/hevy/icon.png",
   "page": "/taste/hevy/",
   "appStore": "https://apps.apple.com/us/app/hevy-workout-tracker-gym-log/id1458862350"
@@ -332,11 +301,6 @@ window.TASU_APPS = [
    "w": 600,
    "h": 1300
   },
-  "elements": [
-   "huckleberry-nursing-timer",
-   "huckleberry-view-tabs",
-   "huckleberry-sleep-trends"
-  ],
   "icon": "/taste/media/huckleberry/icon.png",
   "page": "/taste/huckleberry/",
   "appStore": "https://apps.apple.com/us/app/huckleberry-baby-tracker/id1169136078"
@@ -375,11 +339,6 @@ window.TASU_APPS = [
    "w": 600,
    "h": 1298
   },
-  "elements": [
-   "cal-ai-tab-bar",
-   "cal-ai-calorie-card",
-   "cal-ai-fix-results"
-  ],
   "icon": "/taste/media/cal-ai/icon.png",
   "page": "/taste/cal-ai/",
   "appStore": "https://apps.apple.com/us/app/cal-ai-calorie-tracker/id6480417616"
@@ -418,11 +377,6 @@ window.TASU_APPS = [
    "w": 600,
    "h": 1299
   },
-  "elements": [
-   "duolingo-streak-week",
-   "duolingo-word-bank",
-   "duolingo-lesson-header"
-  ],
   "icon": "/taste/media/duolingo/icon.png",
   "page": "/taste/duolingo/",
   "appStore": "https://apps.apple.com/us/app/duolingo-learn-languages/id570060128"
@@ -461,11 +415,6 @@ window.TASU_APPS = [
    "w": 600,
    "h": 1299
   },
-  "elements": [
-   "flo-cycle-countdown",
-   "flo-pay-attention",
-   "flo-cycle-calendar"
-  ],
   "icon": "/taste/media/flo/icon.png",
   "page": "/taste/flo/",
   "appStore": "https://apps.apple.com/us/app/flo-cycle-period-tracker/id1038369065"
@@ -504,11 +453,6 @@ window.TASU_APPS = [
    "w": 600,
    "h": 1303
   },
-  "elements": [
-   "finch-goal-checklist",
-   "finch-habit-sparks",
-   "finch-adventure-timer"
-  ],
   "icon": "/taste/media/finch/icon.png",
   "page": "/taste/finch/",
   "appStore": "https://apps.apple.com/us/app/finch-self-care-pet/id1528595748"

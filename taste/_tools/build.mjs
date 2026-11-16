@@ -2,32 +2,28 @@
 /* tasu.ai generator. Run it from anywhere: node taste/_tools/build.mjs
    No dependencies. Reads the data, writes the static site into taste/:
      data.js              window.TASU_APPS, what the share cards (_tools/og.html) read
-     index.html           home: hero, gallery, UI elements and prompts teasers, closing line
-     <slug>/index.html    one page per app: screenshots, design, style prompt, UI elements, paywall
-     elements/index.html  the UI elements rebuilt in HTML and CSS, filterable by type
-     elements/elements.css every element's scoped CSS, linked from the pages that show elements
+     index.html           home: hero, gallery, design, paywall and prompts teasers, closing line
+     <slug>/index.html    one page per app: screenshots, design, style prompt, paywall
+     design/index.html    how to build a style guide, a color and font builder, big prompts
      paywall/index.html   paywall tips computed from the App Store data of the 12 apps
      prompt/index.html    mini prompts that fix one part of an app each
    Inputs:
      _data/selection.json       display order, each app's niche and chip group
      _data/raw/<slug>.json      facts from Apple's public App Store data
      _data/analysis/<slug>.json opinions and derived values (optional, field by field)
-     _data/elements/<slug>.json the app's UI elements, rebuilt from its App Store screenshots
      _data/paywall-tips.json    the tips of the Paywall page (numbers checked against the data)
      _data/prompts.json         the Prompts page
      media/<slug>/...           icons, screenshots, paywall captures, font crops
-     media/elements/...         each element's transparent PNG and its source crop
-     fonts/apps.css             the free fonts the apps' names, specimens and elements use
+     fonts/apps.css             the free fonts of the apps' names, specimens and the builder
                                 (self-hosted subsets, made by _tools/fonts-apps.mjs)
    It also copies the rules of brand/loops/loops.css into tasu.css, between the loops:start and
    loops:end marks, so the mascot loops never drift from the brand kit.
    Full run after a media or data change:
      python3 taste/_tools/media.py      small WebP icons and hero thumbnails (used when present)
-     node taste/_tools/fonts-apps.mjs   the font subsets, after a change to names, fonts or elements
+     node taste/_tools/fonts-apps.mjs   the font subsets, after a change to names or fonts
      node taste/_tools/build.mjs        this file
-     node taste/_tools/elements.cjs     each element's transparent PNG, from the built elements.css
      node taste/_tools/og.cjs           the 1200x630 share card of each app page, from data.js
-     node taste/_tools/build.mjs        again, so the pages point to the new PNGs and cards
+     node taste/_tools/build.mjs        again, so the pages point to the new cards
    Markup contract: _tools/template-notes.md. Every page is complete HTML; tasu.js only enhances.
    A missing analysis file or field never stops the build: the page falls back to the facts and
    the log says what is missing. The build ends with a check of every page it wrote. */
@@ -60,7 +56,7 @@ const CLOSING = {
   sub: 'I build a portfolio of mobile apps with taste. Kaught has 1,000+ users.',
 };
 const APPS_CSS = '/taste/fonts/apps.css'; // the free fonts of the apps, from _tools/fonts-apps.mjs
-const ELEMENTS_CSS = '/taste/elements/elements.css'; // written by this build
+const DESIGN_JS = '/taste/design.js'; // the Design page's builder
 
 /* ---------------------------------------------------------------- log */
 const notes = [];
@@ -153,9 +149,6 @@ const I = {
 };
 
 /* ---------------------------------------------------------------- vocabulary */
-// The 9 types of the rebuilt UI elements, in chip order. Keys go in data-tags and ?tag=.
-const ELTYPES = ['Buttons', 'Cards', 'Progress', 'Navigation', 'Lists', 'Charts', 'Inputs', 'Badges', 'Headers'];
-const ELTYPE = Object.fromEntries(ELTYPES.map((t, i) => [t, { key: slugify(t), i }]));
 const PERIOD = { year: 'Yearly', month: 'Monthly', week: 'Weekly', lifetime: 'Lifetime', consumable: 'One-time purchase' };
 // A plan named "Annual Subscription" or "1 Month" needs no "Yearly" or "Monthly" under it.
 const SAYS_PERIOD = /\b(year|yearly|annual|annually|month|monthly|week|weekly|lifetime|forever)\b/i;
@@ -353,14 +346,6 @@ function loadApp(slug) {
   app.prompt = an.stylePrompt || '';
   if (!app.prompt) missing('stylePrompt');
 
-  // UI elements rebuilt in HTML and CSS from the App Store screenshots.
-  const els = readJSON(join(DATA, 'elements', `${slug}.json`), null);
-  if (!els) log(`${slug}: no _data/elements/${slug}.json`);
-  app.elements = (els?.elements || []).flatMap(e => {
-    if (!e?.id || !e.html || !e.css) { log(`${slug}: an element without id, html or css, skipped`); return []; }
-    if (!ELTYPE[e.type]) { log(`${slug}: element ${e.id} has an unknown type ${e.type}, skipped`); return []; }
-    return [{ ...e, slug, size: e.size || { w: 360, h: 120 } }];
-  }).sort((x, y) => (x.order ?? 99) - (y.order ?? 99));
   return app;
 }
 
@@ -406,11 +391,12 @@ function compareLine(app) {
 /* ---------------------------------------------------------------- page shell */
 const SNIPPET = "(function(r){var t,v;try{t=localStorage.getItem('tasu-theme');v=localStorage.getItem('tasu-view')}catch(e){}r.classList.add('js');if(v==='grid')r.setAttribute('data-view','grid');if(t==='light'||t==='dark'){r.setAttribute('data-theme',t);var m=document.querySelectorAll('meta[name=\"theme-color\"]'),c=t==='dark'?'#1C1B19':'#F3EFE7';for(var i=0;i<m.length;i++)m[i].setAttribute('content',c)}})(document.documentElement)";
 
-// css: extra stylesheets after tasu.css (the app fonts, the elements' CSS), only where used.
-function head({ title, description, path, type = 'website', image = OG, jsonld, preload = '', css = [] }) {
+// css: extra stylesheets after tasu.css (the app fonts), js: extra deferred scripts, only where used.
+function head({ title, description, path, type = 'website', image = OG, jsonld, preload = '', css = [], js = [] }) {
   const url = ABS + path;
   const img = SITE + image.src;
-  const extra = css.filter(href => existsSync(fileOf(href)) || href === ELEMENTS_CSS).map(href => `<link rel="stylesheet" href="${href}">\n`).join('');
+  const extra = css.filter(href => existsSync(fileOf(href))).map(href => `<link rel="stylesheet" href="${href}">\n`).join('')
+    + js.map(src => `<script src="${src}" defer></script>\n`).join('');
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -450,11 +436,11 @@ ${type === 'article' ? `<meta property="article:published_time" content="${DATE}
 </head>`;
 }
 
-// current: 'apps' (home), 'app' (an app page: "Apps" is its section, not the page), 'elements',
+// current: 'apps' (home), 'app' (an app page: "Apps" is its section, not the page), 'design',
 // 'paywall' or 'prompt'.
 const NAV = [
   ['apps', '/taste/#apps', 'Apps'],
-  ['elements', '/taste/elements/', 'UI Elements'],
+  ['design', '/taste/design/', 'Design'],
   ['paywall', '/taste/paywall/', 'Paywall'],
   ['prompt', '/taste/prompt/', 'Prompts'],
 ];
@@ -562,49 +548,6 @@ function inkOn(hex) {
   return (L + 0.05) / 0.05 >= 1.05 / (L + 0.05) ? '#1C1B19' : '#FFFFFF';
 }
 
-// An element's code as visitors copy it: the CSS, one declaration per line, then the HTML.
-function prettyCSS(css) {
-  let out = '', buf = '', depth = 0;
-  const line = s => { out += '  '.repeat(depth) + s + '\n'; };
-  for (const ch of String(css).replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ')) {
-    if (ch === '{') { line(buf.trim() + ' {'); buf = ''; depth++; }
-    else if (ch === ';') { if (buf.trim()) line(buf.trim() + ';'); buf = ''; }
-    else if (ch === '}') { if (buf.trim()) line(buf.trim() + ';'); buf = ''; depth = Math.max(0, depth - 1); line('}'); }
-    else buf += ch;
-  }
-  return (out + buf).trim();
-}
-const codeOf = el => `<style>\n${prettyCSS(el.css)}\n</style>\n\n${el.html}`;
-
-// One rebuilt element: the live element on a transparent stage, then its name, app, why, source
-// and the 3 ways to take it (prompt, code, PNG). The stage is a picture: nothing in it takes focus.
-function elementCard(el, app, { level = 3, filter = false } = {}) {
-  const shot = Number(String(el.source?.shot || '').replace(/\D/g, '')) || null;
-  const png = `/taste/media/elements/${el.id}.png`;
-  const crop = el.source?.crop && existsSync(fileOf(el.source.crop)) ? el.source.crop : null;
-  const attrs = filter
-    ? ` data-filter-item data-tags="${ELTYPE[el.type].key}" data-text="${esc([el.name, el.type, app.name, app.group, el.why].join(' '))}"`
-    : '';
-  return `<article class="el-card"${attrs}>
-      <div class="el-stage" role="img" aria-label="${esc(`${el.name}, rebuilt from ${app.name}`)}">
-        <div class="el-fit" style="--w:${el.size.w};--h:${el.size.h}" data-el-fit>${el.html}</div>
-      </div>
-      <div class="el-body">
-        <h${level} class="el-name">${txt(el.name)}</h${level}>
-        <p class="el-meta"><a class="el-app" href="${app.page}"><img src="${app.iconSm}" width="24" height="24" alt="" loading="lazy" decoding="async">${esc(app.name)}</a><span class="el-type">${el.type}</span></p>
-        <p class="el-why">${copy(el.why)}</p>
-        <p class="el-src">${shot ? `Rebuilt from App Store screenshot ${shot}` : 'Rebuilt from an App Store screenshot'}${crop ? `. <a href="${crop}">See the source</a>` : ''}</p>
-        <div class="el-actions">
-          <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ep-${el.id}" data-copy-raw>${I.copySm}<span data-copy-label>Copy prompt</span></button>
-          <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#ec-${el.id}" data-copy-raw data-copy-what="Code">${I.code}<span data-copy-label>Copy code</span></button>${existsSync(fileOf(png)) ? `
-          <a class="btn btn-secondary btn-sm" href="${png}" download="${el.id}.png">${I.image}<span>PNG</span></a>` : ''}
-        </div>
-        <details class="el-more"><summary>Prompt</summary><p class="el-prompt" id="ep-${el.id}">${txt(el.prompt)}</p></details>
-        <details class="el-more"><summary>Code</summary><pre class="el-code" tabindex="0"><code id="ec-${el.id}">${esc(codeOf(el))}</code></pre></details>
-      </div>
-    </article>`;
-}
-
 /* ---------------------------------------------------------------- home */
 // Floating hero cards: [slug, image, width, x%, y%, tilt, depth, phone x%, phone y%].
 // "icon" is the app icon, "pw1".. a paywall capture. Near cards (depth 1) sit at the edges and the
@@ -705,22 +648,13 @@ function homePage() {
     groups.set(a.groupKey, g);
   });
   const chips = [...groups.entries()].sort((x, y) => y[1].count - x[1].count || x[1].first - y[1].first);
-  // The UI elements teaser: the first 6 of the curated order, 1 per app, short enough for a row.
-  const elements = apps.flatMap(a => a.elements.map(el => ({ el, app: a })))
-    .sort((x, y) => (x.el.order ?? 99) - (y.el.order ?? 99));
-  const teaser = [];
-  for (const it of elements) {
-    if (teaser.length === 6) break;
-    if (!teaser.some(t => t.app === it.app) && it.el.size.h <= 300) teaser.push(it);
-  }
-  const perApp = Math.min(...apps.map(a => a.elements.length || 0)) || 0;
   // The 2 names most readers know open the subtitle (judge panel pick), else the first 2 apps.
   let named = ['duolingo', 'strava'].map(s => apps.find(a => a.slug === s)).filter(Boolean);
   if (named.length < 2) named = apps.slice(0, 2);
   const tips = PAYWALL_TIPS.tips || [];
 
   const title = 'tasu.ai: steal the taste of top apps';
-  const description = `The 3 colors, 2 fonts and rebuilt UI elements of ${n} top-grossing iPhone apps, plus paywall tips and prompts for Claude Code or Cursor.`;
+  const description = `The 3 colors, 2 fonts and design rules of ${n} top-grossing iPhone apps, a style guide builder, paywall tips and prompts for your AI.`;
   const jsonld = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -733,7 +667,7 @@ function homePage() {
 
   // The hero loop is the largest paint of the first screen: fetch its sprite with the stylesheet.
   const preload = '<link rel="preload" href="/taste/brand/loops/taste.svg" as="image" fetchpriority="high">\n';
-  const html = `${head({ title, description, path: '', jsonld, preload, css: [APPS_CSS, ...(teaser.length ? [ELEMENTS_CSS] : [])] })}
+  const html = `${head({ title, description, path: '', jsonld, preload, css: [APPS_CSS] })}
 ${header('apps')}
 <main id="main">
 
@@ -744,7 +678,7 @@ ${header('apps')}
   <div class="wrap hero-in">
     <span class="tasu-loop tasu-loop--taste hero-mascot" role="img" aria-label="Tasu, the tasu.ai mascot, licks a paywall card"></span>
     <h1 class="display" id="hero-title">Steal the <span class="hl">taste</span> of top apps</h1>
-    <p class="lead hero-sub"><span>${named.map(a => esc(a.name)).join(', ')} and ${n - named.length} more: 3 colors, 2 fonts and ${perApp || 3} UI elements each, rebuilt in code.</span> <span>Paste the prompts into Claude Code or Cursor.</span></p>
+    <p class="lead hero-sub"><span>${named.map(a => esc(a.name)).join(', ')} and ${n - named.length} more: 3 colors, 2 fonts and the design rules of each.</span> <span>Paste the prompts into Claude Code or Cursor.</span></p>
     <div class="actions">
       ${xButton('Follow on X', true)}
       <a class="btn btn-secondary btn-lg" href="#apps">Browse the apps</a>
@@ -790,19 +724,19 @@ ${header('apps')}
     </div>
   </div>
 </section>
-${teaser.length ? `
-<section class="section" aria-labelledby="el-title" data-reveal>
+
+<section class="section" aria-labelledby="dz-title" data-reveal>
   <div class="wrap">
     <div class="section-head">
-      <h2 class="title-xl" id="el-title">${elements.length} UI elements, rebuilt in code</h2>
-      <a class="link-arrow" href="/taste/elements/">See all UI elements ${I.arrow}</a>
+      <h2 class="title-xl" id="dz-title">Build your app’s style guide</h2>
+      <a class="link-arrow" href="/taste/design/">Open the builder ${I.arrow}</a>
     </div>
-    <div class="el-grid">
-    ${teaser.map(t => elementCard(t.el, t.app)).join('\n    ')}
-    </div>
+    <ol class="principles principles--teaser" role="list">
+      ${PRINCIPLES.slice(0, 3).map((p, i) => `<li class="pp"><span class="pp-num" aria-hidden="true">${i + 1}</span><h3 class="title-s">${txt(p.title)}</h3><p class="pp-text">${copy(p.text)}</p></li>`).join('\n      ')}
+    </ol>
   </div>
 </section>
-` : ''}${tips.length ? `
+${tips.length ? `
 <section class="section" aria-labelledby="tips-title" data-reveal>
   <div class="wrap">
     <div class="section-head">
@@ -1012,11 +946,10 @@ function appPage(app, i) {
   const next = apps[(i + 1) % apps.length];
   const { headline, body } = app.fonts;
   const hexes = app.colors.map(c => c.hex);
-  const nEl = app.elements.length;
-  // "<App>'s design: fonts A and B, colors x, y and z, 3 UI elements to copy, and its paywall."
+  // "<App>'s design: fonts A and B, colors x, y and z, a style prompt, and its paywall."
   const describe = (h, b, tail) => {
     const fontPart = h && b ? (h === b ? `font ${h}` : `fonts ${h} and ${b}`) : h || b ? `font ${h || b}` : '';
-    return `${app.name}’s design: ${fontPart ? `${fontPart}, ` : ''}colors ${hexes[0]}, ${hexes[1]} and ${hexes[2]}${nEl ? `, ${nEl} UI elements to copy` : ''}${tail}.`;
+    return `${app.name}’s design: ${fontPart ? `${fontPart}, ` : ''}colors ${hexes[0]}, ${hexes[1]} and ${hexes[2]}, a style prompt${tail}.`;
   };
   let description = describe(fontName(headline), fontName(body), ', and its paywall');
   if (description.length > 160) description = describe(headline?.closeTo, body?.closeTo, ', and its paywall');
@@ -1086,7 +1019,7 @@ function appPage(app, i) {
   const shown = app.drawn ? new Set(app.subs.slice(0, DRAWN_ROWS)) : null;
   const tableRows = shown ? app.rows.filter(r => !shown.has(r)) : app.rows;
   const design = [colorsCard(app), fontsCard(app), styleCard(app)].filter(Boolean);
-  const html = `${head({ title, description, path: `${app.slug}/`, type: 'article', image, jsonld, css: [APPS_CSS, ...(nEl ? [ELEMENTS_CSS] : [])] })}
+  const html = `${head({ title, description, path: `${app.slug}/`, type: 'article', image, jsonld, css: [APPS_CSS] })}
 ${header('app')}
 <main id="main" class="page-app">
 
@@ -1128,18 +1061,7 @@ ${design.length ? `
     <div class="prompt-actions">
       <button class="btn btn-secondary js-only" type="button" data-copy-target="#style-prompt" data-copy-raw>${I.copy}<span data-copy-label>Copy prompt</span></button>
       <p class="prompt-hint">Paste it into Claude Code or Cursor.</p>
-    </div>
-  </div>
-</section>
-` : ''}${nEl ? `
-<section class="section" aria-labelledby="el-title" data-reveal>
-  <div class="wrap">
-    <div class="section-head">
-      <h2 class="title-l" id="el-title">UI elements from ${esc(app.name)}</h2>
-      <a class="link-arrow" href="/taste/elements/">See all UI elements ${I.arrow}</a>
-    </div>
-    <div class="el-grid">
-    ${app.elements.map(e => elementCard(e, app)).join('\n    ')}
+      <a class="link-arrow" href="/taste/design/">Build your own style guide ${I.arrow}</a>
     </div>
   </div>
 </section>
@@ -1179,73 +1101,264 @@ ${footer()}`;
   return { html, title, description };
 }
 
-/* ---------------------------------------------------------------- UI elements */
-function elementsPage() {
-  const items = apps.flatMap(a => a.elements.map(el => ({ el, app: a })))
-    .sort((x, y) => (x.el.order ?? 99) - (y.el.order ?? 99));
-  const n = items.length;
-  const nApps = new Set(items.map(e => e.app.slug)).size;
-  const counts = new Map();
-  for (const { el } of items) counts.set(el.type, (counts.get(el.type) || 0) + 1);
-  const chips = ELTYPES.filter(t => counts.has(t));
-  const top = [...counts.entries()].sort((x, y) => y[1] - x[1] || ELTYPE[x[0]].i - ELTYPE[y[0]].i).slice(0, 3)
-    .map(([t, c]) => `${c} ${t.toLowerCase()}`);
-  const title = 'UI elements from top iPhone apps | tasu.ai';
-  const description = `${n} UI elements from ${nApps} top-grossing iPhone apps, rebuilt in HTML and CSS: ${top.join(', ').replace(/, ([^,]*)$/, ' and $1')}. Copy the prompt or the code.`;
-  const url = `${ABS}elements/`;
+/* ---------------------------------------------------------------- design */
+// The 6 principles of a brand style guide (Emilie Rouchy's method), adapted to apps. Each example
+// quotes an app's measured design data (its analysis file), so every claim can be checked.
+const PRINCIPLES = [
+  { title: 'A number in every rule', text: '“2 fonts at most” can be checked. “Keep it clean” cannot.', app: 'duolingo',
+    example: 'Duolingo’s cards keep 2 pt borders and a 4 to 6 pt bottom edge.' },
+  { title: 'A role for every element', text: 'Each color and each font has 1 job, written next to it.', app: 'strava',
+    example: 'Strava’s orange #FD5200 marks only the active tab, selected chips, routes and the Save button.' },
+  { title: 'A closed set', text: 'Few elements, always the same ones. People recognize what repeats.', app: 'rise',
+    example: 'Rise sets every word in 1 family, Work Sans, at 3 weights.' },
+  { title: 'A don’t for every rule', text: 'Next to each rule, write what never happens. It stops the drift between screens.', app: null,
+    example: 'Rule: orange marks the main button only. Don’t: an orange headline.' },
+  { title: 'A version for every context', text: 'Plan light and dark screens, and the icon in color and in 1 color.', app: 'headspace',
+    example: 'Headspace turns its sleep screens navy #101340.' },
+  { title: 'One screen that shows it all', text: 'A sample screen applies every rule at once. It tests the guide.', app: 'ladder',
+    example: 'Ladder’s lime #E6FF01 fills the main button, done days and rings, next to white text on #0E0E0E.' },
+];
+const STEPS = [
+  ['Colors', 'Pick 1 main color, a dark base, a light base and 1 or 2 accents. Write each HEX and RGB, its share (60, 30, 10) and the pairs that work. Text needs a 4.5:1 contrast.'],
+  ['Type', '2 fonts at most: a bold one for titles, a readable one for text, and the system font as backup. Set 4 levels, title, subtitle, body and caption, each with a size and a weight.'],
+  ['Icon', 'Make 4 versions: full color, 1 color, on light and on dark. Check it at home screen size and at search result size.'],
+  ['Components', 'Buttons, cards, inputs and tabs: 1 corner scale, 1 spacing scale and 3 states each, default, pressed and disabled.'],
+  ['Composition', 'Build 1 sample screen with 5 rules: 1 hero, 3 colors, 1 main button, equal margins, the title and the tabs always in the same place.'],
+];
+// 3 prompts that work without the builder: write the guide, apply it, check it.
+const BIG_PROMPTS = [
+  { id: 'write-guide', title: 'Write my app’s style guide', when: 'your app has no written design rules, or its screens drifted apart.',
+    prompt: `Read my app's code and screens, then write DESIGN.md, my style guide. Change no code yet.
+
+Follow 6 principles:
+1. A number in every rule: "2 fonts", "3 colors per screen", "1 main button".
+2. A role for every element: each color and font has 1 job, written next to it.
+3. A closed set: keep the fewest colors, fonts, sizes and corners that cover every screen.
+4. A don't for every rule: write what never happens.
+5. A version for every context: light and dark, the icon in color and in 1 color.
+6. One sample screen that shows every rule at once.
+
+Write 5 sections, in this order:
+1. Colors: list every color in the code and where it appears. Keep 1 main, 2 bases (dark and light) and 1 or 2 accents. Give HEX, RGB, the share (60, 30, 10) and the pairs that pass 4.5:1 for text.
+2. Type: 2 fonts at most, plus the system font as backup. Define title, subtitle, body and caption with size, weight and line height.
+3. Icon: 4 versions: full color, 1 color, on light, on dark.
+4. Components: buttons, cards, inputs and tabs with sizes, corners, spacing and 3 states.
+5. Composition: 1 sample screen with 5 rules: 1 hero, 3 colors, 1 main button, equal margins, fixed spots for the title and the tabs.
+Under each section, write 3 don'ts.
+
+End with a table: each value in the code today, and the token that replaces it.
+
+Check:
+- Every rule holds a number.
+- 3 colors and 2 fonts at most, plus neutrals.
+- Someone who never saw the app can build a new screen from DESIGN.md alone.` },
+  { id: 'apply-guide', title: 'Apply my style guide to every screen', when: 'DESIGN.md exists, and the screens do not follow it yet.',
+    prompt: `Apply DESIGN.md to every screen of my app. Keep features, data and copy.
+
+1. Turn every color, font, size, corner and spacing of DESIGN.md into a named token, in 1 file.
+2. Replace every hard-coded value in the code with its token. For a value with no token, use the closest one and list it.
+3. Go screen by screen, in this order: onboarding, home, the main action, settings, the paywall.
+4. On each screen, apply the 5 composition rules: 1 hero, 3 colors at most, 1 main button, equal margins, the title and the tabs in their fixed spots.
+5. Add the dark version of every token that DESIGN.md defines.
+6. Fix every don't you find, and name the rule it broke.
+
+Report per screen: rule, before, after.
+
+Check:
+- Zero hard-coded colors and font sizes in views.
+- 1 main button per screen.
+- Text passes 4.5:1 on its background, in light and dark.` },
+  { id: 'check-guide', title: 'Check my screens against my style guide', when: 'before a release, to catch what drifted.',
+    prompt: `Audit my app against DESIGN.md. Change no code.
+
+For each screen:
+- Colors: list every color used. Flag values outside the tokens, and an accent that covers more than 10% of the screen.
+- Type: flag a 3rd font, a size outside the scale and a heading that breaks the hierarchy.
+- Components: flag a corner, padding or height outside the scales, and a missing state (pressed, disabled, empty, error).
+- Composition: count the heroes and the main buttons, and flag more than 1 of each. Flag uneven margins, and a title or tab bar out of place.
+- Contrast: flag text under 4.5:1 and large text under 3:1, in light and dark.
+- Don'ts: flag every don't of DESIGN.md that the screen shows.
+
+Then:
+1. Rank the screens by number of issues.
+2. Give the 5 fixes that remove the most issues.
+3. Propose rules for DESIGN.md where the screens agree but the guide says nothing.
+
+Report as a table: screen, rule, what breaks it, the fix.` },
+];
+
+function designPage() {
+  const bySlug = new Map(apps.map(a => [a.slug, a]));
+  const n = apps.length;
+  const title = 'Build your app’s style guide | tasu.ai';
+  const description = `The 6 rules of a style guide, adapted to apps, a builder that matches colors and fonts from ${n} top apps, and prompts that make your AI apply them.`;
+  const url = `${ABS}design/`;
   const jsonld = {
     '@context': 'https://schema.org',
     '@graph': [
-      { '@type': 'CollectionPage', '@id': `${url}#page`, url, name: title, description, inLanguage: 'en', dateModified: MODIFIED,
-        isPartOf: { '@type': 'WebSite', '@id': `${ABS}#website`, name: 'tasu.ai', url: ABS }, author: AUTHOR,
-        mainEntity: { '@type': 'ItemList', numberOfItems: n, itemListElement: items.map(({ el, app }, i) => ({ '@type': 'ListItem', position: i + 1, name: `${el.name}, from ${app.name}`, url: `${app.url}#el-title` })) } },
+      { '@type': 'WebPage', '@id': `${url}#page`, url, name: title, description, inLanguage: 'en', dateModified: MODIFIED,
+        isPartOf: { '@type': 'WebSite', '@id': `${ABS}#website`, name: 'tasu.ai', url: ABS }, author: AUTHOR },
+      { '@type': 'HowTo', name: 'Build your app’s style guide', description,
+        step: STEPS.map(([name, text], i) => ({ '@type': 'HowToStep', position: i + 1, name, text })) },
       { '@type': 'BreadcrumbList', itemListElement: [
         { '@type': 'ListItem', position: 1, name: 'tasu.ai', item: ABS },
-        { '@type': 'ListItem', position: 2, name: 'UI Elements', item: url },
+        { '@type': 'ListItem', position: 2, name: 'Design', item: url },
       ] },
     ],
   };
-  const html = `${head({ title, description, path: 'elements/', jsonld, css: [APPS_CSS, ELEMENTS_CSS] })}
-${header('elements')}
+  // What the builder reads: each app's 3 colors with their roles, and its 2 free fonts.
+  const font = f => (f ? { family: f.closeTo, weight: f.weight, real: f.name || null } : null);
+  const data = apps.map(a => ({
+    slug: a.slug, name: a.name, icon: a.iconSm, page: a.page,
+    colors: a.colors.map(c => ({ hex: c.hex, name: c.name, role: c.role })),
+    headline: font(a.fonts.headline), body: font(a.fonts.body),
+  }));
+  const example = p => {
+    const a = p.app && bySlug.get(p.app);
+    return a ? `<a class="pp-example" href="${a.page}"><img src="${a.iconSm}" width="24" height="24" alt="" loading="lazy" decoding="async"><span>${copy(p.example)}</span></a>`
+      : `<p class="pp-example"><span>${copy(p.example)}</span></p>`;
+  };
+  const bigPrompt = p => `<article class="pr" id="${p.id}">
+      <h3 class="title-m">${txt(p.title)}</h3>
+      <p class="pr-when">Use it when ${copy(p.when)}</p>
+      <div class="pr-box" data-clamp>
+        <p class="pr-text" id="bp-${p.id}">${txt(p.prompt)}</p>
+      </div>
+      <div class="card-actions">
+        <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#bp-${p.id}" data-copy-raw>${I.copySm}<span data-copy-label>Copy prompt</span></button>
+        <button class="btn btn-secondary btn-sm js-only pr-more" type="button" data-clamp-toggle aria-expanded="false" aria-controls="bp-${p.id}">Show all</button>
+        <span class="pr-words">${p.prompt.split(/\s+/).length} words</span>
+      </div>
+    </article>`;
+  const html = `${head({ title, description, path: 'design/', jsonld, css: [APPS_CSS], js: [DESIGN_JS] })}
+${header('design')}
 <main id="main">
 
-<section class="section lib-top" aria-labelledby="lib-title" data-filter data-filter-url data-noun-one="element" data-noun-many="elements">
+<section class="section lib-top" aria-labelledby="dz-title">
   <div class="wrap">
-    <div class="gallery-head">
-      <div class="lib-intro">
-        <h1 class="title-xl" id="lib-title">UI elements, <span class="hl">rebuilt</span> in code</h1>
-        <p class="lead">${n} elements from ${nApps} top-grossing iPhone apps, rebuilt in HTML and CSS from their App Store screenshots. Copy the prompt or the code, or download a transparent PNG.</p>
-      </div>
-      <div class="gallery-tools js-only">
-        <div class="search search--lg">
-          ${I.search}
-          <label class="sr-only" for="el-q">Search the elements</label>
-          <input id="el-q" type="search" placeholder="Try “chart” or “Strava”" autocomplete="off" enterkeyhint="search" data-filter-search>
-          <kbd class="kbd" aria-hidden="true">/</kbd>
+    <div class="lib-intro">
+      <h1 class="title-xl" id="dz-title">Build your app’s <span class="hl">style</span> guide</h1>
+      <p class="lead">The 6 rules brand designers use, adapted to apps. Then match colors and fonts from ${n} top apps, and copy the prompt that makes your AI apply them.</p>
+      <p class="source-note">Method adapted from the brand style guide of Emilie Rouchy, art director, <a href="https://www.instagram.com/reel/Dfy_DI7sdHH/">shared on Instagram</a>.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="pp-title" data-reveal>
+  <div class="wrap">
+    <div class="section-head"><h2 class="title-l" id="pp-title">6 principles</h2></div>
+    <ol class="principles" role="list">
+      ${PRINCIPLES.map((p, i) => `<li class="pp">
+        <span class="pp-num" aria-hidden="true">${i + 1}</span>
+        <h3 class="title-s">${txt(p.title)}</h3>
+        <p class="pp-text">${copy(p.text)}</p>
+        ${example(p)}
+      </li>`).join('\n      ')}
+    </ol>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="st-title" data-reveal>
+  <div class="wrap">
+    <div class="section-head"><h2 class="title-l" id="st-title">5 steps, in this order</h2></div>
+    <ol class="steps" role="list">
+      ${STEPS.map(([name, text], i) => `<li class="step"><span class="step-num" aria-hidden="true">${i + 1}</span><div><h3 class="title-s">${name}</h3><p>${copy(text)}</p></div></li>`).join('\n      ')}
+    </ol>
+    <div class="steps-notes">
+      <p class="card">Under every step, add 3 don’ts, like a 4th color, a 3rd font or 2 main buttons on 1 screen. Colors, type, icon and composition make an app consistent; the rest adds personality.</p>
+      <p class="card test-card"><b>The test.</b> Give the guide to Claude Code and ask for a new screen. If the screen is right on the first try, the guide works.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="bd-title" data-reveal>
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="title-l" id="bd-title">Build yours</h2>
+      <p class="source-note">Colors and fonts of the ${n} apps, ${SOURCE}</p>
+    </div>
+    <p class="bd-nojs">The builder needs JavaScript. The 3 big prompts below work without it.</p>
+    <div class="builder js-only" data-builder>
+      <div class="bd-controls">
+        <div class="bd-group">
+          <h3 class="title-s" id="bd-start">1. Start from an app</h3>
+          <div class="bd-palettes" role="group" aria-labelledby="bd-start" data-palettes></div>
         </div>
-        <div class="chips" role="group" aria-label="Element types">
-          <button class="chip" type="button" data-filter-chip="all" aria-pressed="true">All <span class="chip-count">${n}</span></button>
-          ${chips.map(t => `<button class="chip" type="button" data-filter-chip="${ELTYPE[t].key}" aria-pressed="false">${t} <span class="chip-count">${counts.get(t)}</span></button>`).join('\n          ')}
+        <div class="bd-group">
+          <h3 class="title-s" id="bd-colors">2. Set the 3 colors</h3>
+          <p class="bd-hint">Pick a slot, then a color from the library. Or set the main color and press Match.</p>
+          <div class="bd-slots" role="group" aria-labelledby="bd-colors" data-slots></div>
+          <div class="bd-row">
+            <button class="btn btn-secondary btn-sm" type="button" data-match>Match the other 2</button>
+            <span class="bd-contrast" data-contrast aria-live="polite"></span>
+          </div>
+          <details class="disclose bd-library-wrap" open>
+            <summary>Color library, ${n * 3} colors</summary>
+            <div class="bd-library" data-library></div>
+          </details>
+        </div>
+        <div class="bd-group">
+          <h3 class="title-s">3. Pick 2 fonts</h3>
+          <div class="bd-fonts">
+            <label class="bd-select"><span>Headline</span><select data-font="headline"></select></label>
+            <label class="bd-select"><span>Body</span><select data-font="body"></select></label>
+          </div>
+        </div>
+        <div class="bd-group">
+          <h3 class="title-s" id="bd-corners">4. Set the corners</h3>
+          <div class="bd-corners" role="radiogroup" aria-labelledby="bd-corners" data-corners>
+            <label><input type="radio" name="bd-r" value="8"><span>8 pt</span></label>
+            <label><input type="radio" name="bd-r" value="16" checked><span>16 pt</span></label>
+            <label><input type="radio" name="bd-r" value="24"><span>24 pt</span></label>
+          </div>
+        </div>
+      </div>
+      <div class="bd-output">
+        <div class="bd-preview" data-preview aria-label="Preview of a screen in your style" role="img">
+          <div class="bp-phone">
+            <div class="bp-status"><span>9:41</span><span class="bp-dots"></span></div>
+            <p class="bp-over">Today</p>
+            <p class="bp-title">Good morning</p>
+            <div class="bp-card">
+              <p class="bp-card-title">Weekly goal</p>
+              <p class="bp-card-num">3 of 5</p>
+              <div class="bp-bar"><span></span></div>
+            </div>
+            <div class="bp-list">
+              <p><span>Morning run</span><span>32 min</span></p>
+              <p><span>Stretch</span><span>10 min</span></p>
+            </div>
+            <span class="bp-button">Start</span>
+            <div class="bp-tabs"><span class="is-on">Home</span><span>Stats</span><span>Profile</span></div>
+          </div>
+          <div class="bp-poster mini-poster" data-poster></div>
+        </div>
+        <div class="bd-prompt">
+          <div class="bd-prompt-head">
+            <h3 class="title-s">Your prompt</h3>
+            <button class="btn btn-primary js-only" type="button" data-copy-target="#bd-prompt-text" data-copy-raw>${I.copy}<span data-copy-label>Copy prompt</span></button>
+          </div>
+          <div class="pr-box"><p class="pr-text" id="bd-prompt-text" data-prompt></p></div>
+          <p class="prompt-hint">Paste it into Claude Code or Cursor. It writes DESIGN.md, then applies it.</p>
         </div>
       </div>
     </div>
-    <div class="toolbar">
-      <p class="toolbar-status"><span data-filter-status aria-live="polite">${n} elements</span><span class="toolbar-source">${SOURCE}</span></p>
-    </div>
-    <div class="el-grid el-grid--all">
-    ${items.map(({ el, app }) => elementCard(el, app, { level: 2, filter: true })).join('\n    ')}
-    </div>
-    <div class="empty" data-filter-empty hidden>
-      <span class="tasu-loop tasu-loop--look" role="img" aria-label="Tasu, the tasu.ai mascot, looks around"></span>
-      <p class="title-s">No element matches this search</p>
-      <button class="btn btn-secondary" type="button" data-filter-reset>Clear the search</button>
+    <script type="application/json" id="design-data">${ld(data)}</script>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="bp-title" data-reveal>
+  <div class="wrap">
+    <div class="section-head"><h2 class="title-l" id="bp-title">3 big prompts</h2></div>
+    <div class="prs">
+    ${BIG_PROMPTS.map(bigPrompt).join('\n    ')}
     </div>
   </div>
 </section>
 
 <section class="section" aria-labelledby="closing-title" data-reveal>
   <div class="wrap">
-  ${closing(true)}
+  ${closing(false)}
   </div>
 </section>
 
@@ -1283,8 +1396,8 @@ function paywallPage() {
       <h2 class="title-m">${txt(t.title)}</h2>
       <p class="tip-body">${copy(t.body)}</p>
       ${(t.apps || []).length ? `<p class="tip-apps">${t.apps.map(chip).join('')}</p>` : ''}
-      ${t.prompt ? `<div class="el-actions"><button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#tp-${esc(t.id)}" data-copy-raw>${I.copySm}<span data-copy-label>Copy prompt</span></button></div>
-      <details class="el-more"><summary>Prompt</summary><p class="el-prompt" id="tp-${esc(t.id)}">${txt(t.prompt)}</p></details>` : ''}
+      ${t.prompt ? `<div class="card-actions"><button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#tp-${esc(t.id)}" data-copy-raw>${I.copySm}<span data-copy-label>Copy prompt</span></button></div>
+      <details class="disclose"><summary>Prompt</summary><p class="disclose-text" id="tp-${esc(t.id)}">${txt(t.prompt)}</p></details>` : ''}
     </article>`;
   const yearOrTop = a => a.yearly != null ? { v: money(a.yearly), k: 'a year' } : a.topPrice != null ? { v: money(a.topPrice), k: 'highest listed' } : null;
   const html = `${head({ title, description, path: 'paywall/', jsonld })}
@@ -1360,7 +1473,7 @@ function promptsPage() {
       <div class="pr-box" data-clamp>
         <p class="pr-text" id="pt-${esc(p.id)}">${txt(p.prompt)}</p>
       </div>
-      <div class="el-actions">
+      <div class="card-actions">
         <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#pt-${esc(p.id)}" data-copy-raw>${I.copySm}<span data-copy-label>Copy prompt</span></button>
         <button class="btn btn-secondary btn-sm js-only pr-more" type="button" data-clamp-toggle aria-expanded="false" aria-controls="pt-${esc(p.id)}">Show all</button>
         <span class="pr-words">${p.words || p.prompt.split(/\s+/).length} words${(p.sources || []).length ? `, sources ${p.sources.map(esc).join(', ')} in <a href="/taste/taste.md">taste.md</a>` : ''}</span>
@@ -1418,15 +1531,6 @@ ${footer()}`;
   return { html, title, description };
 }
 
-// Every element's scoped CSS, in one file. The free fonts it names come from fonts/apps.css.
-function elementsCSS() {
-  const list = apps.flatMap(a => a.elements);
-  return `/* tasu.ai UI elements. Generated by _tools/build.mjs from _data/elements/: do not edit by hand.
-   Each block is scoped to its element's root class (.x-<id>). */
-${list.map(el => `/* ${el.id} */\n${prettyCSS(el.css)}`).join('\n\n')}
-`;
-}
-
 /* ---------------------------------------------------------------- data.js */
 function dataJS() {
   const list = apps.map(a => ({
@@ -1437,7 +1541,6 @@ function dataJS() {
     colors: a.colors,
     fonts: { headline: a.fonts.headline ? fontName(a.fonts.headline) : null, body: a.fonts.body ? fontName(a.fonts.body) : null },
     shot: a.screens[0] ? { src: a.screens[0].src, w: a.screens[0].w, h: a.screens[0].h } : null,
-    elements: a.elements.map(e => e.id),
     icon: a.icon,
     page: a.page,
     appStore: a.appStore,
@@ -1498,18 +1601,16 @@ syncLoops();
 const pages = [];
 pages.push(['index.html', homePage()]);
 apps.forEach((a, i) => pages.push([`${a.slug}/index.html`, appPage(a, i)]));
-pages.push(['elements/index.html', elementsPage()]);
+pages.push(['design/index.html', designPage()]);
 pages.push(['paywall/index.html', paywallPage()]);
 pages.push(['prompt/index.html', promptsPage()]);
 write('data.js', dataJS());
-write('elements/elements.css', elementsCSS());
 for (const [rel, p] of pages) write(rel, p.html);
 for (const [rel, p] of pages) check(rel, p);
 // A page this build no longer writes (the old library) must not stay on disk and in the sitemap.
-for (const old of ['library/index.html']) if (existsSync(join(TASTE, old))) log(`${old} is not built any more: delete it`);
+for (const old of ['library/index.html', 'elements/index.html']) if (existsSync(join(TASTE, old))) log(`${old} is not built any more: delete it`);
 
-const elementsTotal = apps.reduce((s, a) => s + a.elements.length, 0);
-console.log(`tasu.ai: ${apps.length} apps, ${pages.length} pages, ${elementsTotal} UI elements, ${(PAYWALL_TIPS.tips || []).length} paywall tips, ${(PROMPTS.prompts || []).length} prompts`);
+console.log(`tasu.ai: ${apps.length} apps, ${pages.length} pages, ${(PAYWALL_TIPS.tips || []).length} paywall tips, ${(PROMPTS.prompts || []).length} prompts`);
 console.log(`Medians: yearly ${medians.year ? money(medians.year) : 'n/a'} over ${withYear.length} apps, top listed price ${medians.top ? money(medians.top) : 'n/a'} over ${withTop.length} apps`);
 console.log(`Wrote ${written.join(', ')}`);
 if (notes.length) console.log(`\nNotes (${notes.length}):\n- ${notes.join('\n- ')}`);
