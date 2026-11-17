@@ -9,6 +9,13 @@
   src: url("apps/barlow-700.woff2") format("woff2");
 }
 @font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("apps/fraunces-400.woff2") format("woff2");
+}
+@font-face {
   font-family: "Hanken Grotesk";
   font-style: normal;
   font-weight: 400;
@@ -21,6 +28,13 @@
   font-weight: 700;
   font-display: swap;
   src: url("apps/hanken-grotesk-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("apps/instrument-sans-400.woff2") format("woff2");
 }
 @font-face {
   font-family: "Inter";

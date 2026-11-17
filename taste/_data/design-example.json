@@ -1,0 +1,73 @@
+{
+  "app": "HealthClass",
+  "about": "my women's health app, a 6-week pelvic floor class, coming soon",
+  "source": "HealthClass's design language (docs/design-language.md) and its color tokens (www/css/look.css, app.css), read 17 Nov 2026",
+  "split": [
+    { "role": "60", "name": "Paper", "hex": "#FFFBF6", "use": "Every background" },
+    { "role": "30", "name": "Plum", "hex": "#7C2D4B", "use": "Structure: icons, eyebrows, chosen marks, links back" },
+    { "role": "10", "name": "Rose", "hex": "#D9566F", "use": "The next action: 1 rose element per screen" }
+  ],
+  "groups": [
+    {
+      "name": "Rose, the pop",
+      "colors": [
+        { "name": "Rose", "token": "--hc-rose", "hex": "#D9566F", "use": "The logo, the hammock line and large text" },
+        { "name": "Rose ink", "token": "--hc-rose-ink", "hex": "#B93D57", "use": "Every button, with white text" },
+        { "name": "Rose dark", "token": "--hc-rose-dk", "hex": "#9F3049", "use": "A button that is off, on the rose tint" },
+        { "name": "Blush", "token": "--hc-blush", "hex": "#F7C6CE", "use": "Done days" },
+        { "name": "Rose tint", "token": "--hc-rose-tint", "hex": "#F9D5DB", "use": "Warm cards" },
+        { "name": "Rose soft", "token": "--hc-rose-soft", "hex": "#FCEBEE", "use": "The paper's glow" }
+      ]
+    },
+    {
+      "name": "Plum, the structure",
+      "colors": [
+        { "name": "Plum", "token": "--hc-plum", "hex": "#7C2D4B", "use": "Icons, eyebrows, links back, done and chosen marks" },
+        { "name": "Plum deep", "token": "--hc-plum-deep", "hex": "#4A2433", "use": "Plum's darkest step" },
+        { "name": "Plum tint", "token": "--hc-plum-tint", "hex": "#EADBE2", "use": "Cards, pills and chosen chips" },
+        { "name": "Plum mist", "token": "--hc-plum-mist", "hex": "#F4EAEE", "use": "Quiet cards, like the week's lesson box" }
+      ]
+    },
+    {
+      "name": "Sky, the balance",
+      "colors": [
+        { "name": "Sky", "token": "--hc-sky", "hex": "#C5DDF1", "use": "1 calm shape per screen" },
+        { "name": "Sky 2", "token": "--hc-sky-2", "hex": "#9CC3E6", "use": "Water and the bladder in drawings" },
+        { "name": "Sky soft", "token": "--hc-sky-soft", "hex": "#DCEAF6", "use": "Sky's middle tint" },
+        { "name": "Sky mist", "token": "--hc-sky-mist", "hex": "#EAF2F9", "use": "The low glow of the background" }
+      ]
+    },
+    {
+      "name": "Neutrals",
+      "colors": [
+        { "name": "Paper", "token": "--hc-bg", "hex": "#FFFBF6", "use": "Every background" },
+        { "name": "Well", "token": "--hc-well", "hex": "#F5EFE7", "use": "Quiet fills and a weak pill" },
+        { "name": "Ink", "token": "--hc-ink", "hex": "#2A2421", "use": "Text" },
+        { "name": "Ink 2", "token": "--hc-ink-2", "hex": "#4A3F39", "use": "Body text" },
+        { "name": "Muted dark", "token": "--hc-muted-dk", "hex": "#6B5F57", "use": "Gray text on a tint" },
+        { "name": "Muted", "token": "--hc-muted", "hex": "#7A6E66", "use": "Gray text on the paper" },
+        { "name": "Faint", "token": "--hc-faint", "hex": "#A3978F", "use": "Chevrons, dots and icons, never text" }
+      ]
+    }
+  ],
+  "pairs": [
+    { "fg": "#2A2421", "bg": "#FFFBF6", "label": "Ink on paper", "rule": "text" },
+    { "fg": "#FFFFFF", "bg": "#B93D57", "label": "White on rose ink", "rule": "text" },
+    { "fg": "#FFFFFF", "bg": "#D9566F", "label": "White on rose", "rule": "large" },
+    { "fg": "#7C2D4B", "bg": "#EADBE2", "label": "Plum on plum tint", "rule": "text" },
+    { "fg": "#7C2D4B", "bg": "#C5DDF1", "label": "Plum on sky", "rule": "text" },
+    { "fg": "#9F3049", "bg": "#F9D5DB", "label": "Rose dark on rose tint", "rule": "text" },
+    { "fg": "#7A6E66", "bg": "#FFFBF6", "label": "Muted on paper", "rule": "text" },
+    { "fg": "#A3978F", "bg": "#FFFBF6", "label": "Faint on paper", "rule": "never" }
+  ],
+  "rules": [
+    "1 rose element per screen: the next action. A second action is a plain text link.",
+    "Sky makes 1 calm shape per screen, to balance rose and plum.",
+    "Never yellow, lavender, green, peach or tan, drawings included.",
+    "Gray text is Muted or darker. Faint never carries words."
+  ],
+  "fonts": [
+    { "role": "Titles and numbers", "family": "Fraunces", "weight": 400, "sizes": "34, 30, 26, 22 and 19 px" },
+    { "role": "Everything else", "family": "Instrument Sans", "weight": 400, "sizes": "17, 15 and 13 px" }
+  ]
+}

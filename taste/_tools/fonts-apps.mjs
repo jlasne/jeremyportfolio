@@ -7,7 +7,7 @@
    (@font-face, font-display: swap). The pages never call a third party at runtime. Run it again
    after a change to an app name or a font, then run build.mjs.
    Inputs: _data/selection.json, _data/raw/<slug>.json (name), _data/analysis/<slug>.json
-   (branding.fonts). */
+   (branding.fonts), _data/design-example.json (the Design page's example fonts). */
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -46,6 +46,10 @@ for (const slug of slugs) {
     if (role === 'headline') add(f.closeTo, f.weight, raw.name); // the card's big name
   }
 }
+
+// The Design page's worked example (HealthClass) shows its 2 fonts.
+const example = read(join(DATA, 'design-example.json'));
+for (const f of example?.fonts || []) add(f.family, f.weight, `${f.family} ${example.app} Aa`);
 
 mkdirSync(OUT, { recursive: true });
 for (const f of readdirSync(OUT)) if (f.endsWith('.woff2')) rmSync(join(OUT, f));

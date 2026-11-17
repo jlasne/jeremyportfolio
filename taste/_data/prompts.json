@@ -1,5 +1,5 @@
 {
-  "intro": "14 prompts that each fix one part of your iPhone app, from the copy to the App Store screenshots, with the numbers from taste.md. Paste one into Claude Code or Cursor, check the list of changes it reports, then paste the next.",
+  "intro": "Fix what makes your app look AI-made, 1 part at a time. Each prompt applies a design rule with numbers, so your AI can check its own work. Paste one into Claude Code or Cursor, check the changes it lists, then paste the next.",
   "prompts": [
     {
       "id": "unslop-visuals",

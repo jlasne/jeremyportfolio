@@ -580,6 +580,37 @@
     });
   });
 
+  /* 11b. The hero headline: "taste using ai" folds into "tasu.ai" and back every 2 seconds, while
+          it is on screen and the tab is visible. Reduced motion: it stays unfolded. ----------- */
+  all('[data-wm-loop]').forEach(function (wm) {
+    if (reduce.matches) return;
+    var parts = all('.wm-x, .wm-dot', wm);
+    var timer = 0;
+    var seen = true;
+    function measure() {
+      parts.forEach(function (el) {
+        var prev = el.style.maxWidth;
+        el.style.maxWidth = 'none';
+        var w = el.scrollWidth;
+        el.style.maxWidth = prev;
+        el.style.setProperty(el.classList.contains('wm-dot') ? '--wd' : '--wx', w + 'px');
+      });
+    }
+    function run() {
+      clearInterval(timer);
+      timer = seen && !d.hidden ? setInterval(function () { wm.classList.toggle('is-open'); }, 2000) : 0;
+    }
+    (d.fonts && d.fonts.ready ? d.fonts.ready : Promise.resolve()).then(function () {
+      measure();
+      requestAnimationFrame(function () { wm.classList.add('is-ready'); run(); });
+      window.addEventListener('resize', measure); // the headline's size follows the screen
+      d.addEventListener('visibilitychange', run);
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (es) { seen = es[es.length - 1].isIntersecting; run(); }).observe(wm);
+      }
+    });
+  });
+
   /* 13. Prompts: "Show all" opens a clamped prompt, "Show less" closes it. ---------------- */
   d.addEventListener('click', function (e) {
     var b = closest(e.target, '[data-clamp-toggle]');

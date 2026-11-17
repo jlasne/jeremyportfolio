@@ -6,7 +6,7 @@
      <slug>/index.html    one page per app: screenshots, design, style prompt, paywall
      design/index.html    how to build a style guide, a color and font builder, big prompts
      paywall/index.html   paywall tips computed from the App Store data of the 12 apps
-     prompt/index.html    mini prompts that fix one part of an app each
+     unslop/index.html    prompts that fix one part of an app each, with a rule and its numbers
    Inputs:
      _data/selection.json       display order, each app's niche and chip group
      _data/raw/<slug>.json      facts from Apple's public App Store data
@@ -38,7 +38,7 @@ const BASE = '/taste/';
 const ABS = SITE + BASE;
 const DATE = '2026-11-15';
 // The day the pages last changed. The data stays the 15 Nov snapshot (DATE, DAY).
-const MODIFIED = '2026-11-16';
+const MODIFIED = '2026-11-17';
 const DAY = '15&nbsp;Nov&nbsp;2026';
 const SOURCE = `App Store data, US, ${DAY}`;
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -56,7 +56,6 @@ const CLOSING = {
   sub: 'I build a portfolio of mobile apps with taste. Kaught has 1,000+ users.',
 };
 const APPS_CSS = '/taste/fonts/apps.css'; // the free fonts of the apps, from _tools/fonts-apps.mjs
-const DESIGN_JS = '/taste/design.js'; // the Design page's builder
 
 /* ---------------------------------------------------------------- log */
 const notes = [];
@@ -435,16 +434,19 @@ ${type === 'article' ? `<meta property="article:published_time" content="${DATE}
 }
 
 // current: 'apps' (home), 'app' (an app page: "Apps" is its section, not the page), 'design',
-// 'paywall' or 'prompt'.
+// 'paywall' or 'unslop'.
 const NAV = [
   ['apps', '/taste/#apps', 'Apps'],
   ['design', '/taste/design/', 'Design'],
   ['paywall', '/taste/paywall/', 'Paywall'],
-  ['prompt', '/taste/prompt/', 'Prompts'],
+  ['unslop', '/taste/unslop/', 'Unslop'],
 ];
 // The wordmark is live text: "tasu.ai" unfolds into "taste using ai" (tasu.js animates the 3
 // parts that change). Without JS it reads "tasu.ai".
 const WORDMARK = '<span class="wm" data-wm aria-hidden="true"><span class="wm-k">tas</span><span class="wm-x">te&nbsp;</span><span class="wm-k">u</span><span class="wm-x">sing&nbsp;</span><span class="wm-dot">.</span><span class="wm-k">ai</span></span>';
+// The hero's version folds and unfolds every 2 seconds (tasu.js); it starts unfolded, so without
+// JS the headline reads "Design apps with taste using ai".
+const HERO_WM = WORDMARK.replace('class="wm" data-wm', 'class="wm wm--hero is-open" data-wm-loop');
 function header(current) {
   const cur = k => (k === current ? ' aria-current="page"' : k === 'apps' && current === 'app' ? ' aria-current="true"' : '');
   return `<body>
@@ -675,8 +677,8 @@ ${header('apps')}
   </div>
   <div class="wrap hero-in">
     <span class="tasu-loop tasu-loop--taste hero-mascot" role="img" aria-label="Tasu, the tasu.ai mascot, licks a paywall card"></span>
-    <h1 class="display" id="hero-title">Steal the <span class="hl">taste</span> of top apps</h1>
-    <p class="lead hero-sub"><span>${named.map(a => esc(a.name)).join(', ')} and ${n - named.length} more: 3 colors, 2 fonts and the design rules of each.</span> <span>Paste the prompts into Claude Code or Cursor.</span></p>
+    <h1 class="display hero-title" id="hero-title"><span class="hero-l1">Design apps with</span> <span class="hero-l2"><span class="hl hero-hl"><span class="sr-only">taste using AI</span>${HERO_WM}</span></span></h1>
+    <p class="lead hero-sub">Design is what people judge an app by first, so give yours the taste and the wow of the top-grossing apps.</p>
     <div class="actions">
       ${xButton('Follow on X', true)}
       <a class="btn btn-secondary btn-lg" href="#apps">Browse the apps</a>
@@ -687,7 +689,7 @@ ${header('apps')}
 <section class="section" id="apps" aria-labelledby="apps-title" data-filter data-filter-main data-filter-url data-noun-one="app" data-noun-many="apps">
   <div class="wrap">
     <div class="gallery-head">
-      <h2 class="title-xl" id="apps-title">${n} apps: their colors, fonts and UI</h2>
+      <h2 class="title-xl" id="apps-title">Find the taste your app needs</h2>
       <div class="gallery-tools js-only">
         <div class="search search--lg">
           ${I.search}
@@ -726,11 +728,11 @@ ${header('apps')}
 <section class="section" aria-labelledby="dz-title" data-reveal>
   <div class="wrap">
     <div class="section-head">
-      <h2 class="title-xl" id="dz-title">Build your app’s style guide</h2>
-      <a class="link-arrow" href="/taste/design/">Open the builder ${I.arrow}</a>
+      <h2 class="title-xl" id="dz-title">Keep 1 style in every update</h2>
+      <a class="link-arrow" href="/taste/design/">Set your style guide ${I.arrow}</a>
     </div>
-    <ol class="principles principles--teaser" role="list">
-      ${PRINCIPLES.slice(0, 3).map((p, i) => `<li class="pp"><span class="pp-num" aria-hidden="true">${i + 1}</span><h3 class="title-s">${txt(p.title)}</h3><p class="pp-text">${copy(p.text)}</p></li>`).join('\n      ')}
+    <ol class="steps steps--teaser" role="list">
+      ${STEPS.slice(0, 3).map(([name, text], i) => `<li class="step"><span class="step-num" aria-hidden="true">${i + 1}</span><div><h3 class="title-s">${name}</h3><p>${copy(text)}</p></div></li>`).join('\n      ')}
     </ol>
   </div>
 </section>
@@ -738,7 +740,7 @@ ${tips.length ? `
 <section class="section" aria-labelledby="tips-title" data-reveal>
   <div class="wrap">
     <div class="section-head">
-      <h2 class="title-xl" id="tips-title">${tips.length} paywall tips from ${n} top apps</h2>
+      <h2 class="title-xl" id="tips-title">Price your app like the top earners</h2>
       <a class="link-arrow" href="/taste/paywall/">See the paywall tips ${I.arrow}</a>
     </div>
     <ul class="tip-teaser" role="list">
@@ -750,11 +752,11 @@ ${tips.length ? `
 <section class="section" aria-labelledby="pr-title" data-reveal>
   <div class="wrap">
     <div class="section-head">
-      <h2 class="title-xl" id="pr-title">${PROMPTS.prompts.length} prompts to unslop your app</h2>
-      <a class="link-arrow" href="/taste/prompt/">See all prompts ${I.arrow}</a>
+      <h2 class="title-xl" id="pr-title">Unslop your app with principles</h2>
+      <a class="link-arrow" href="/taste/unslop/">See all ${PROMPTS.prompts.length} prompts ${I.arrow}</a>
     </div>
     <ul class="pr-teaser" role="list">
-      ${PROMPTS.prompts.slice(0, 3).map(p => `<li><a class="pr-mini" href="/taste/prompt/#${p.id}"><span class="pr-area">${esc(p.area)}</span><span class="title-s">${txt(p.title)}</span><span class="pr-when">${copy(p.when)}</span></a></li>`).join('\n      ')}
+      ${PROMPTS.prompts.slice(0, 3).map(p => `<li><a class="pr-mini" href="/taste/unslop/#${p.id}"><span class="pr-area">${esc(p.area)}</span><span class="title-s">${txt(p.title)}</span><span class="pr-when">${copy(p.when)}</span></a></li>`).join('\n      ')}
     </ul>
   </div>
 </section>
@@ -1026,8 +1028,8 @@ ${header('app')}
     <div class="app-head">
       <img class="app-head-icon" src="${app.iconSm}" width="128" height="128" alt="${esc(app.name)} app icon" fetchpriority="high">
       <div>
-        <h1 class="title-xl" id="app-title">${esc(app.name)}<span class="h1-rest">: fonts, colors and UI</span></h1>
-        <p class="lead">${copy(app.oneLiner)}</p>
+        <h1 class="title-xl" id="app-title"><span class="h1-rest">Design like </span>${esc(app.name)}</h1>
+        <p class="lead">Take its 3 colors, 2 fonts and design rules into your app, with 1 prompt for your AI.</p>
         <ul class="meta" role="list">
           ${metaItems.map(m => `<li>${m}</li>`).join('\n          ')}
         </ul>
@@ -1066,7 +1068,7 @@ ${design.length ? `
 ` : ''}
 <section class="section" id="paywall" aria-labelledby="paywall-title" data-reveal>
   <div class="wrap">
-    <div class="section-head"><h2 class="title-l" id="paywall-title">Paywall</h2></div>
+    <div class="section-head"><h2 class="title-l" id="paywall-title">Paywall</h2><p class="paywall-lead">${copy(app.oneLiner)}</p></div>
     <div class="split">
       ${phoneBlock(app)}
       <div class="stack-32">
@@ -1100,56 +1102,97 @@ ${footer()}`;
 }
 
 /* ---------------------------------------------------------------- design */
-// The 6 principles of a brand style guide (Emilie Rouchy's method), adapted to apps. Each example
-// quotes an app's measured design data (its analysis file), so every claim can be checked.
-const PRINCIPLES = [
-  { title: 'A number in every rule', text: '“2 fonts at most” can be checked. “Keep it clean” cannot.', app: 'duolingo',
-    example: 'Duolingo’s cards keep 2 pt borders and a 4 to 6 pt bottom edge.' },
-  { title: 'A role for every element', text: 'Each color and each font has 1 job, written next to it.', app: 'strava',
-    example: 'Strava’s orange #FD5200 marks only the active tab, selected chips, routes and the Save button.' },
-  { title: 'A closed set', text: 'Few elements, always the same ones. People recognize what repeats.', app: 'rise',
-    example: 'Rise sets every word in 1 family, Work Sans, at 3 weights.' },
-  { title: 'A don’t for every rule', text: 'Next to each rule, write what never happens. It stops the drift between screens.', app: null,
-    example: 'Rule: orange marks the main button only. Don’t: an orange headline.' },
-  { title: 'A version for every context', text: 'Plan light and dark screens, and the icon in color and in 1 color.', app: 'headspace',
-    example: 'Headspace turns its sleep screens navy #101340.' },
-  { title: 'One screen that shows it all', text: 'A sample screen applies every rule at once. It tests the guide.', app: 'ladder',
-    example: 'Ladder’s lime #E6FF01 fills the main button, done days and rings, next to white text on #0E0E0E.' },
-];
+// The worked example of the Design page: a real app's full palette, from its own code.
+const EXAMPLE = readJSON(join(DATA, 'design-example.json'), null);
 const STEPS = [
-  ['Colors', 'Pick 1 main color, a dark base, a light base and 1 or 2 accents. Write each HEX and RGB, its share (60, 30, 10) and the pairs that work. Text needs a 4.5:1 contrast.'],
+  ['Colors', 'Pick 1 color for the next action, 1 for structure, 1 to balance, and neutrals. Write each HEX and RGB, its role and the pairs that work. Text needs a 4.5:1 contrast.'],
   ['Type', '2 fonts at most: a bold one for titles, a readable one for text, and the system font as backup. Set 4 levels, title, subtitle, body and caption, each with a size and a weight.'],
   ['Icon', 'Make 4 versions: full color, 1 color, on light and on dark. Check it at home screen size and at search result size.'],
   ['Components', 'Buttons, cards, inputs and tabs: 1 corner scale, 1 spacing scale and 3 states each, default, pressed and disabled.'],
   ['Composition', 'Build 1 sample screen with 5 rules: 1 hero, 3 colors, 1 main button, equal margins, the title and the tabs always in the same place.'],
 ];
-// 3 prompts that work without the builder: write the guide, apply it, check it.
-const BIG_PROMPTS = [
-  { id: 'write-guide', title: 'Write my app’s style guide', when: 'your app has no written design rules, or its screens drifted apart.',
-    prompt: `Read my app's code and screens, then write DESIGN.md, my style guide. Change no code yet.
+// The first prompt of the page: the palette, after a short interview.
+const PALETTE_PROMPT = `Create the color palette of my app. Ask me what you need first, then write it.
 
-Follow 6 principles:
+Ask me, 1 question at a time:
+1. What does the app do, and for whom?
+2. Which color do I already own: a logo, a brand, a favorite?
+3. Which 3 words should people feel when they open it?
+4. Which 2 or 3 apps do I like the look of?
+5. Light, dark or both?
+
+Then give me:
+- 1 pop color for the next action, used once per screen.
+- 1 structure color for icons, links and chosen states.
+- 1 balance color, for 1 calm shape per screen.
+- Neutrals: a background, a quiet fill, 3 text grays and 1 gray for icons only.
+- 3 tints of each color, for cards, chips and done states.
+For each color: name, HEX, RGB, role and where it never goes.
+
+Then:
+- The pairs that work, with their contrast. Text needs 4.5:1, large text and icons 3:1.
+- The colors I must never use.
+- The tokens as code for my stack.
+
+Check: every text pair passes, and each screen holds 1 pop element.`;
+// Prompts that write the whole guide, then apply and check it. Each one carries the 6 principles.
+const BIG_PROMPTS = [
+  { id: 'from-scratch', title: 'Start from scratch', when: 'you have no app yet, or you want a new look. Your AI interviews you first.',
+    prompt: `Help me create my app's style guide from scratch. Interview me first, then write DESIGN.md.
+
+Ask me 8 questions, 1 at a time, and wait for each answer:
+1. What does the app do, for whom, in 1 sentence?
+2. Which 3 words should people feel when they open it?
+3. Which color, logo or brand do I already have?
+4. Which 2 or 3 apps do I like the look of, and why?
+5. Light, dark or both?
+6. Calm and spacious, or dense and fast?
+7. Rounded and soft, or sharp and precise?
+8. Which screen matters most: the first one, the main action or the paywall?
+
+Then propose 2 directions in 5 lines each: palette, fonts, corners, density and 1 signature element. Let me pick 1 or mix them.
+
+Write DESIGN.md with 6 principles:
 1. A number in every rule: "2 fonts", "3 colors per screen", "1 main button".
 2. A role for every element: each color and font has 1 job, written next to it.
-3. A closed set: keep the fewest colors, fonts, sizes and corners that cover every screen.
+3. A closed set: 3 colors plus neutrals, 2 fonts, 1 corner scale.
 4. A don't for every rule: write what never happens.
 5. A version for every context: light and dark, the icon in color and in 1 color.
 6. One sample screen that shows every rule at once.
 
-Write 5 sections, in this order:
-1. Colors: list every color in the code and where it appears. Keep 1 main, 2 bases (dark and light) and 1 or 2 accents. Give HEX, RGB, the share (60, 30, 10) and the pairs that pass 4.5:1 for text.
-2. Type: 2 fonts at most, plus the system font as backup. Define title, subtitle, body and caption with size, weight and line height.
-3. Icon: 4 versions: full color, 1 color, on light, on dark.
-4. Components: buttons, cards, inputs and tabs with sizes, corners, spacing and 3 states.
-5. Composition: 1 sample screen with 5 rules: 1 hero, 3 colors, 1 main button, equal margins, fixed spots for the title and the tabs.
-Under each section, write 3 don'ts.
+Sections, in this order:
+- Colors: HEX, RGB, role, the pairs and their contrast.
+- Type: 2 fonts, 4 levels with size and weight.
+- Icon: full color, 1 color, on light, on dark.
+- Components: sizes, corners, spacing and states.
+- Composition: 5 rules for 1 sample screen.
+Add 3 don'ts per section.
+
+Check: someone who never saw the app can build a new screen from DESIGN.md alone.` },
+  { id: 'from-my-app', title: 'Start from my app', when: 'your app exists. Your AI reads it, finds the style it is trying to have, and asks only what the code cannot tell.',
+    prompt: `Write my app's style guide from what it already is. Read the code and the screens first, then write DESIGN.md. Change no code yet.
+
+1. List every color, font, size, corner and spacing value in the code, with where each appears and how often.
+2. Find the style the app is trying to have: the color of the main action, the fonts, the corner and the spacing it uses most.
+3. List the values that break it, screen by screen.
+4. Ask me 3 questions at most, only about what the code cannot tell you.
+
+Then write DESIGN.md with 6 principles:
+- A number in every rule.
+- A role for every element.
+- A closed set: 3 colors plus neutrals, 2 fonts, 1 corner scale.
+- A don't for every rule.
+- Light and dark versions.
+- 1 sample screen that shows every rule.
+
+Sections, in this order: Colors, Type, Icon, Components, Composition. Add 3 don'ts per section.
 
 End with a table: each value in the code today, and the token that replaces it.
 
 Check:
 - Every rule holds a number.
-- 3 colors and 2 fonts at most, plus neutrals.
-- Someone who never saw the app can build a new screen from DESIGN.md alone.` },
+- The guide keeps what already works in the app.
+- A new screen built from DESIGN.md alone matches the app.` },
   { id: 'apply-guide', title: 'Apply my style guide to every screen', when: 'DESIGN.md exists, and the screens do not follow it yet.',
     prompt: `Apply DESIGN.md to every screen of my app. Keep features, data and copy.
 
@@ -1185,39 +1228,21 @@ Then:
 Report as a table: screen, rule, what breaks it, the fix.` },
 ];
 
-function designPage() {
-  const bySlug = new Map(apps.map(a => [a.slug, a]));
-  const n = apps.length;
-  const title = 'Build your app’s style guide | tasu.ai';
-  const description = `The 6 rules of a style guide, adapted to apps, a builder that matches colors and fonts from ${n} top apps, and prompts that make your AI apply them.`;
-  const url = `${ABS}design/`;
-  const jsonld = {
-    '@context': 'https://schema.org',
-    '@graph': [
-      { '@type': 'WebPage', '@id': `${url}#page`, url, name: title, description, inLanguage: 'en', dateModified: MODIFIED,
-        isPartOf: { '@type': 'WebSite', '@id': `${ABS}#website`, name: 'tasu.ai', url: ABS }, author: AUTHOR },
-      { '@type': 'HowTo', name: 'Build your app’s style guide', description,
-        step: STEPS.map(([name, text], i) => ({ '@type': 'HowToStep', position: i + 1, name, text })) },
-      { '@type': 'BreadcrumbList', itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'tasu.ai', item: ABS },
-        { '@type': 'ListItem', position: 2, name: 'Design', item: url },
-      ] },
-    ],
+// WCAG contrast of 2 hex colors, for the example's pairs.
+function contrastOf(a, b) {
+  const lum = hex => {
+    const lin = v => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+    const [r, g, bl] = [1, 3, 5].map(i => lin(parseInt(hex.slice(i, i + 2), 16) / 255));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * bl;
   };
-  // What the builder reads: each app's 3 colors with their roles, and its 2 free fonts.
-  const font = f => (f ? { family: f.closeTo, weight: f.weight, real: f.name || null } : null);
-  const data = apps.map(a => ({
-    slug: a.slug, name: a.name, icon: a.iconSm, page: a.page,
-    colors: a.colors.map(c => ({ hex: c.hex, name: c.name, role: c.role })),
-    headline: font(a.fonts.headline), body: font(a.fonts.body),
-  }));
-  const example = p => {
-    const a = p.app && bySlug.get(p.app);
-    return a ? `<a class="pp-example" href="${a.page}"><img src="${a.iconSm}" width="24" height="24" alt="" loading="lazy" decoding="async"><span>${copy(p.example)}</span></a>`
-      : `<p class="pp-example"><span>${copy(p.example)}</span></p>`;
-  };
-  const bigPrompt = p => `<article class="pr" id="${p.id}">
-      <h3 class="title-m">${txt(p.title)}</h3>
+  const [x, y] = [lum(a), lum(b)].sort((m, k) => k - m);
+  return (x + 0.05) / (y + 0.05);
+}
+const rgbOf = hex => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)).join(', ');
+
+function promptCard(p, level = 3) {
+  return `<article class="pr" id="${p.id}">
+      <h${level} class="title-m">${txt(p.title)}</h${level}>
       <p class="pr-when">Use it when ${copy(p.when)}</p>
       <div class="pr-box" data-clamp>
         <p class="pr-text" id="bp-${p.id}">${txt(p.prompt)}</p>
@@ -1228,135 +1253,145 @@ function designPage() {
         <span class="pr-words">${p.prompt.split(/\s+/).length} words</span>
       </div>
     </article>`;
-  const html = `${head({ title, description, path: 'design/', jsonld, css: [APPS_CSS], js: [DESIGN_JS] })}
+}
+
+// The example: the 60/30/10 split as a poster, every color by group with HEX, RGB and use,
+// the pairs with their computed contrast, the rules and the 2 fonts.
+function exampleBlock() {
+  const ex = EXAMPLE;
+  if (!ex) return '';
+  const verdict = (r, c) => (r === 'never' ? 'never for words'
+    : r === 'large' ? (c >= 3 ? 'large text only' : 'fails')
+    : c >= 4.5 ? 'passes for text' : c >= 3 ? 'large text only' : 'fails');
+  return `<div class="ex">
+      <div class="ex-top">
+        <div class="mini-poster ex-poster" role="img" aria-label="${esc(`${ex.app} split: ${ex.split.map(c => `${c.name} ${c.hex} ${c.role}%`).join(', ')}`)}">
+          ${ex.split.map(c => `<span class="mp mp-${c.role}" style="--c:${c.hex};--ink:${inkOn(c.hex)}"><span class="mp-pct">${c.role}% ${esc(c.name)}</span><span class="mp-hex">${c.hex}</span></span>`).join('\n          ')}
+        </div>
+        <div class="ex-split">
+          ${ex.split.map(c => `<p><b>${esc(c.name)}, ${c.role}%.</b> ${copy(c.use)}.</p>`).join('\n          ')}
+        </div>
+      </div>
+      <div class="ex-groups">
+        ${ex.groups.map(g => `<div class="ex-group">
+          <h3 class="title-s">${esc(g.name)}</h3>
+          <ul class="ex-colors" role="list">
+            ${g.colors.map(c => `<li><button class="ex-sw" type="button" style="--c:${c.hex}" data-copy="${c.hex}" aria-label="Copy ${esc(c.name)}, ${c.hex}"></button><span class="ex-name">${esc(c.name)}</span><span class="ex-code"><span data-copy-label>${c.hex}</span>, RGB ${rgbOf(c.hex)}</span><span class="ex-use">${copy(c.use)}</span></li>`).join('\n            ')}
+          </ul>
+        </div>`).join('\n        ')}
+      </div>
+      <div class="ex-cols">
+        <div class="card">
+          <h3 class="title-s">The pairs, with their contrast</h3>
+          <ul class="ex-pairs" role="list">
+            ${ex.pairs.map(p => { const c = contrastOf(p.fg, p.bg); return `<li><span class="ex-chip" style="--fg:${p.fg};--pbg:${p.bg}" aria-hidden="true">Aa</span><span>${esc(p.label)}</span><span class="ex-ratio">${c.toFixed(1)}:1, ${verdict(p.rule, c)}</span></li>`; }).join('\n            ')}
+          </ul>
+        </div>
+        <div class="card">
+          <h3 class="title-s">The rules</h3>
+          <ul class="bullets" role="list">
+            ${ex.rules.map(r => `<li>${copy(r)}</li>`).join('\n            ')}
+          </ul>
+          <h3 class="title-s ex-type-title">The 2 fonts</h3>
+          ${ex.fonts.map(f => `<p class="ex-font"><span class="ex-font-name" style="font-family:'${f.family}',var(--font);font-weight:${f.weight}">${esc(f.family)}</span><span>${esc(f.role)}: ${copy(f.sizes)}</span></p>`).join('\n          ')}
+        </div>
+      </div>
+      <p class="source-note">Source: ${esc(ex.source)}.</p>
+    </div>`;
+}
+
+function designPage() {
+  const n = apps.length;
+  const title = 'Set your app’s style guide first | tasu.ai';
+  const description = 'Set your palette, fonts and rules before the next screen, so every update looks like the same app. Prompts and a full example palette.';
+  const url = `${ABS}design/`;
+  const jsonld = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      { '@type': 'WebPage', '@id': `${url}#page`, url, name: title, description, inLanguage: 'en', dateModified: MODIFIED,
+        isPartOf: { '@type': 'WebSite', '@id': `${ABS}#website`, name: 'tasu.ai', url: ABS }, author: AUTHOR },
+      { '@type': 'HowTo', name: 'Set your app’s style guide', description,
+        step: STEPS.map(([name, text], i) => ({ '@type': 'HowToStep', position: i + 1, name, text })) },
+      { '@type': 'BreadcrumbList', itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'tasu.ai', item: ABS },
+        { '@type': 'ListItem', position: 2, name: 'Design', item: url },
+      ] },
+    ],
+  };
+  const palette = { id: 'palette', title: 'Create my palette', when: 'you start your style guide. Your AI asks 5 questions, then writes every color with its role.', prompt: PALETTE_PROMPT };
+  const html = `${head({ title, description, path: 'design/', jsonld, css: [APPS_CSS] })}
 ${header('design')}
 <main id="main">
 
 <section class="section lib-top" aria-labelledby="dz-title">
   <div class="wrap">
     <div class="lib-intro">
-      <h1 class="title-xl" id="dz-title">Build your app’s <span class="hl">style</span> guide</h1>
-      <p class="lead">The 6 rules brand designers use, adapted to apps. Then match colors and fonts from ${n} top apps, and copy the prompt that makes your AI apply them.</p>
-      <p class="source-note">Method adapted from the brand style guide of Emilie Rouchy, art director, <a href="https://www.instagram.com/reel/Dfy_DI7sdHH/">shared on Instagram</a>.</p>
+      <h1 class="title-xl" id="dz-title">1 <span class="hl">style</span> for your app, in every update</h1>
+      <p class="lead">Set your palette, fonts and rules first. Then every new screen, update and web page your AI builds looks like the same app.</p>
     </div>
   </div>
 </section>
 
-<section class="section" aria-labelledby="pp-title" data-reveal>
+<section class="section" aria-labelledby="need-title" data-reveal>
   <div class="wrap">
-    <div class="section-head"><h2 class="title-l" id="pp-title">6 principles</h2></div>
-    <ol class="principles" role="list">
-      ${PRINCIPLES.map((p, i) => `<li class="pp">
-        <span class="pp-num" aria-hidden="true">${i + 1}</span>
-        <h3 class="title-s">${txt(p.title)}</h3>
-        <p class="pp-text">${copy(p.text)}</p>
-        ${example(p)}
-      </li>`).join('\n      ')}
-    </ol>
+    <div class="need">
+      <div>
+        <h2 class="title-l" id="need-title">Start with your palette</h2>
+        <p class="need-lead">Your style guide is the rulebook your AI follows. The palette comes first: it decides what people notice on every screen. Have these ready:</p>
+        <ul class="bullets" role="list">
+          <li>Your app’s job and its audience, in 1 sentence.</li>
+          <li>1 color you already own, a logo or a brand, or 3 words for the feeling you want.</li>
+          <li>2 or 3 apps you like the look of. The ${n} on <a href="/taste/#apps">tasu.ai</a> are a start.</li>
+          <li>Light, dark or both.</li>
+        </ul>
+      </div>
+      ${promptCard(palette)}
+    </div>
+  </div>
+</section>
+${EXAMPLE ? `
+<section class="section" aria-labelledby="ex-title" data-reveal>
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="title-l" id="ex-title">A full palette: ${esc(EXAMPLE.app)}</h2>
+      <p class="ex-about">${copy(EXAMPLE.app)} is ${copy(EXAMPLE.about)}. This is what the palette prompt gives you.</p>
+    </div>
+    ${exampleBlock()}
+  </div>
+</section>
+` : ''}
+<section class="section" aria-labelledby="first-title" data-reveal>
+  <div class="wrap">
+    <div class="first card">
+      <h2 class="title-l" id="first-title">Set this first, then build</h2>
+      <p>Write the guide before the next feature. Each update then reuses the same palette, fonts and rules. The app and its website stay 1 product, release after release.</p>
+      <p class="first-test"><b>The test.</b> Give the guide to Claude Code and ask for a new screen. If the screen is right on the first try, the guide works.</p>
+    </div>
   </div>
 </section>
 
 <section class="section" aria-labelledby="st-title" data-reveal>
   <div class="wrap">
-    <div class="section-head"><h2 class="title-l" id="st-title">5 steps, in this order</h2></div>
+    <div class="section-head"><h2 class="title-l" id="st-title">5 steps to a full style guide</h2></div>
     <ol class="steps" role="list">
       ${STEPS.map(([name, text], i) => `<li class="step"><span class="step-num" aria-hidden="true">${i + 1}</span><div><h3 class="title-s">${name}</h3><p>${copy(text)}</p></div></li>`).join('\n      ')}
     </ol>
-    <div class="steps-notes">
-      <p class="card">Under every step, add 3 don’ts, like a 4th color, a 3rd font or 2 main buttons on 1 screen. Colors, type, icon and composition make an app consistent; the rest adds personality.</p>
-      <p class="card test-card"><b>The test.</b> Give the guide to Claude Code and ask for a new screen. If the screen is right on the first try, the guide works.</p>
-    </div>
-  </div>
-</section>
-
-<section class="section" aria-labelledby="bd-title" data-reveal>
-  <div class="wrap">
-    <div class="section-head">
-      <h2 class="title-l" id="bd-title">Build yours</h2>
-      <p class="source-note">Colors and fonts of the ${n} apps, ${SOURCE}</p>
-    </div>
-    <p class="bd-nojs">The builder needs JavaScript. The 3 big prompts below work without it.</p>
-    <div class="builder js-only" data-builder>
-      <div class="bd-controls">
-        <div class="bd-group">
-          <h3 class="title-s" id="bd-start">1. Start from an app</h3>
-          <div class="bd-palettes" role="group" aria-labelledby="bd-start" data-palettes></div>
-        </div>
-        <div class="bd-group">
-          <h3 class="title-s" id="bd-colors">2. Set the 3 colors</h3>
-          <p class="bd-hint">Pick a slot, then a color from the library. Or set the main color and press Match.</p>
-          <div class="bd-slots" role="group" aria-labelledby="bd-colors" data-slots></div>
-          <div class="bd-row">
-            <button class="btn btn-secondary btn-sm" type="button" data-match>Match the other 2</button>
-            <span class="bd-contrast" data-contrast aria-live="polite"></span>
-          </div>
-          <details class="disclose bd-library-wrap" open>
-            <summary>Color library, ${n * 3} colors</summary>
-            <div class="bd-library" data-library></div>
-          </details>
-        </div>
-        <div class="bd-group">
-          <h3 class="title-s">3. Pick 2 fonts</h3>
-          <div class="bd-fonts">
-            <label class="bd-select"><span>Headline</span><select data-font="headline"></select></label>
-            <label class="bd-select"><span>Body</span><select data-font="body"></select></label>
-          </div>
-        </div>
-        <div class="bd-group">
-          <h3 class="title-s" id="bd-corners">4. Set the corners</h3>
-          <div class="bd-corners" role="radiogroup" aria-labelledby="bd-corners" data-corners>
-            <label><input type="radio" name="bd-r" value="8"><span>8 pt</span></label>
-            <label><input type="radio" name="bd-r" value="16" checked><span>16 pt</span></label>
-            <label><input type="radio" name="bd-r" value="24"><span>24 pt</span></label>
-          </div>
-        </div>
-      </div>
-      <div class="bd-output">
-        <div class="bd-preview" data-preview aria-label="Preview of a screen in your style" role="img">
-          <div class="bp-phone">
-            <div class="bp-status"><span>9:41</span><span class="bp-dots"></span></div>
-            <p class="bp-over">Today</p>
-            <p class="bp-title">Good morning</p>
-            <div class="bp-card">
-              <p class="bp-card-title">Weekly goal</p>
-              <p class="bp-card-num">3 of 5</p>
-              <div class="bp-bar"><span></span></div>
-            </div>
-            <div class="bp-list">
-              <p><span>Morning run</span><span>32 min</span></p>
-              <p><span>Stretch</span><span>10 min</span></p>
-            </div>
-            <span class="bp-button">Start</span>
-            <div class="bp-tabs"><span class="is-on">Home</span><span>Stats</span><span>Profile</span></div>
-          </div>
-          <div class="bp-poster mini-poster" data-poster></div>
-        </div>
-        <div class="bd-prompt">
-          <div class="bd-prompt-head">
-            <h3 class="title-s">Your prompt</h3>
-            <button class="btn btn-primary js-only" type="button" data-copy-target="#bd-prompt-text" data-copy-raw>${I.copy}<span data-copy-label>Copy prompt</span></button>
-          </div>
-          <div class="pr-box"><p class="pr-text" id="bd-prompt-text" data-prompt></p></div>
-          <p class="prompt-hint">Paste it into Claude Code or Cursor. It writes DESIGN.md, then applies it.</p>
-        </div>
-      </div>
-    </div>
-    <script type="application/json" id="design-data">${ld(data)}</script>
+    <p class="steps-note">Under every step, add 3 don’ts, like a 4th color, a 3rd font or 2 main buttons on 1 screen.</p>
   </div>
 </section>
 
 <section class="section" aria-labelledby="bp-title" data-reveal>
   <div class="wrap">
-    <div class="section-head"><h2 class="title-l" id="bp-title">3 big prompts</h2></div>
+    <div class="section-head"><h2 class="title-l" id="bp-title">Let your AI write the rest</h2></div>
     <div class="prs">
-    ${BIG_PROMPTS.map(bigPrompt).join('\n    ')}
+    ${BIG_PROMPTS.map(p => promptCard(p)).join('\n    ')}
     </div>
   </div>
 </section>
 
 <section class="section" aria-labelledby="closing-title" data-reveal>
   <div class="wrap">
-  ${closing(false)}
+  ${closing(true)}
   </div>
 </section>
 
@@ -1405,7 +1440,7 @@ ${header('paywall')}
 <section class="section lib-top" aria-labelledby="pw-title">
   <div class="wrap">
     <div class="lib-intro">
-      <h1 class="title-xl" id="pw-title">Paywall <span class="hl">tips</span> from ${n} top apps</h1>
+      <h1 class="title-xl" id="pw-title">Price your app like the top <span class="hl">earners</span></h1>
       <p class="lead">${copy(PAYWALL_TIPS.intro || `What the App Store prices of ${n} top-grossing iPhone apps show.`)}</p>
       <p class="source-note">${SOURCE}</p>
     </div>
@@ -1449,9 +1484,9 @@ function promptsPage() {
   const list = PROMPTS.prompts || [];
   const n = list.length;
   const groups = ['Look', 'Feel', 'Screens'].map(g => [g, list.filter(p => (PROMPT_GROUP[p.area] || 'Look') === g).length]).filter(([, c]) => c);
-  const title = 'Prompts to unslop your app | tasu.ai';
-  const description = `${n} prompts that each fix one part of an iPhone app, from the copy to the App Store screenshots. Paste one into Claude Code or Cursor.`;
-  const url = `${ABS}prompt/`;
+  const title = 'Unslop your app with principles | tasu.ai';
+  const description = `Fix what makes your app look AI-made, 1 part at a time, with rules from top apps your AI can check. ${n} prompts for Claude Code or Cursor.`;
+  const url = `${ABS}unslop/`;
   const jsonld = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -1460,7 +1495,7 @@ function promptsPage() {
         mainEntity: { '@type': 'ItemList', numberOfItems: n, itemListElement: list.map((p, i) => ({ '@type': 'ListItem', position: i + 1, item: { '@type': 'CreativeWork', name: p.title, url: `${url}#${p.id}`, author: AUTHOR } })) } },
       { '@type': 'BreadcrumbList', itemListElement: [
         { '@type': 'ListItem', position: 1, name: 'tasu.ai', item: ABS },
-        { '@type': 'ListItem', position: 2, name: 'Prompts', item: url },
+        { '@type': 'ListItem', position: 2, name: 'Unslop', item: url },
       ] },
     ],
   };
@@ -1477,15 +1512,15 @@ function promptsPage() {
         <span class="pr-words">${p.words || p.prompt.split(/\s+/).length} words${(p.sources || []).length ? `, sources ${p.sources.map(esc).join(', ')} in <a href="/taste/taste.md">taste.md</a>` : ''}</span>
       </div>
     </article>`;
-  const html = `${head({ title, description, path: 'prompt/', jsonld })}
-${header('prompt')}
+  const html = `${head({ title, description, path: 'unslop/', jsonld })}
+${header('unslop')}
 <main id="main">
 
 <section class="section lib-top" aria-labelledby="pr-title" data-filter data-filter-url data-noun-one="prompt" data-noun-many="prompts">
   <div class="wrap">
     <div class="gallery-head">
       <div class="lib-intro">
-        <h1 class="title-xl" id="pr-title">Prompts to <span class="hl">unslop</span> your app</h1>
+        <h1 class="title-xl" id="pr-title">Unslop your app with <span class="hl">principles</span></h1>
         <p class="lead">${copy(PROMPTS.intro || '')}</p>
         <p class="pr-links"><a class="link-arrow" href="/taste/taste.md">Read the full taste file ${I.arrow}</a></p>
       </div>
@@ -1601,12 +1636,12 @@ pages.push(['index.html', homePage()]);
 apps.forEach((a, i) => pages.push([`${a.slug}/index.html`, appPage(a, i)]));
 pages.push(['design/index.html', designPage()]);
 pages.push(['paywall/index.html', paywallPage()]);
-pages.push(['prompt/index.html', promptsPage()]);
+pages.push(['unslop/index.html', promptsPage()]);
 write('data.js', dataJS());
 for (const [rel, p] of pages) write(rel, p.html);
 for (const [rel, p] of pages) check(rel, p);
 // A page this build no longer writes (the old library) must not stay on disk and in the sitemap.
-for (const old of ['library/index.html', 'elements/index.html']) if (existsSync(join(TASTE, old))) log(`${old} is not built any more: delete it`);
+for (const old of ['library/index.html', 'elements/index.html', 'prompt/index.html']) if (existsSync(join(TASTE, old))) log(`${old} is not built any more: delete it`);
 
 console.log(`tasu.ai: ${apps.length} apps, ${pages.length} pages, ${(PAYWALL_TIPS.tips || []).length} paywall tips, ${(PROMPTS.prompts || []).length} prompts`);
 console.log(`Medians: yearly ${medians.year ? money(medians.year) : 'n/a'} over ${withYear.length} apps, top listed price ${medians.top ? money(medians.top) : 'n/a'} over ${withTop.length} apps`);
