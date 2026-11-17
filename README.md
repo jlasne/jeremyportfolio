@@ -8,7 +8,7 @@ The site is laid out after [joncphillips.com](https://joncphillips.com/): a 900p
 hairline sides over the ocean, Figtree for the words and Geist Mono for the section heads.
 Navy ink and pale blue-grey as the two bases, electric pink as the one accent. Light by day,
 dark from 7 pm to 7 am, or the theme a visitor picked, remembered. Every page has the nav:
-Lessons and Personal on the left, Jeremy·Lasne (home) on the right, and a one-line foot
+Personal on the left, Jeremy·Lasne (home) on the right, and a one-line foot
 with the theme switch. `site.css` holds the rules for every page.
 
 - **`/` · home.** One screen: "Hey, I'm", then "Jeremy (my face) / Lasne" as big as the
@@ -21,7 +21,8 @@ with the theme switch. `site.css` holds the rules for every page.
   about 75 KB: no video, one font, a 256 px face
 - **`/lessons` · The lessons.** The archive of the newsletter: one row per issue (date,
   read time, title), newest first. Each issue lives at `/apps/lessons/<slug>/`.
-  `/apps` redirects (308) to the home, `/apps/lessons` to `/lessons`
+  `/apps` redirects (308) to the home, `/apps/lessons` to `/lessons`.
+  Hidden: no menu links to it; the articles' back link and its address reach it
 - **`/personal` · Personal.** Wellness (`/wellness`), Workout (`/workout`),
   Knowledge (`/knowledge`) and Claude Portfolio (claudeportfolio.com, "World-Investment
   Management Intelligence."), four cells in two rows
