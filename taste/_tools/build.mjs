@@ -49,7 +49,14 @@ const dayOf = iso => {
 };
 const X_URL = 'https://x.com/jeremylasne';
 const AUTHOR = { '@type': 'Person', name: 'Jeremy Lasne', url: 'https://www.jeremylasne.com/', sameAs: [X_URL] };
-const OG = { src: '/taste/brand/og.png', w: 1200, h: 630, alt: 'tasu.ai: steal the taste of top apps' };
+const OG = { src: '/taste/brand/og-home.jpg', w: 1200, h: 630, alt: 'tasu.ai: design apps with taste using ai' };
+// The share card of each main page, made by _tools/og.cjs from _tools/og-main.html.
+const PAGE_OG = {
+  home: OG,
+  design: { src: '/taste/brand/og-design.jpg', w: 1200, h: 630, alt: 'tasu.ai: 1 style for your app, in every update' },
+  paywall: { src: '/taste/brand/og-paywall.jpg', w: 1200, h: 630, alt: 'tasu.ai: price your app like the top earners' },
+  unslop: { src: '/taste/brand/og-unslop.jpg', w: 1200, h: 630, alt: 'tasu.ai: unslop your app with principles' },
+};
 // Every page links the X account with the same 2 lines (spec v4, picked by a judge panel).
 const CLOSING = {
   title: 'Follow the builder behind tasu.ai',
@@ -443,10 +450,10 @@ const NAV = [
 ];
 // The wordmark is live text: "tasu.ai" unfolds into "taste using ai" (tasu.js animates the 3
 // parts that change). Without JS it reads "tasu.ai".
-const WORDMARK = '<span class="wm" data-wm aria-hidden="true"><span class="wm-k">tas</span><span class="wm-x">te&nbsp;</span><span class="wm-k">u</span><span class="wm-x">sing&nbsp;</span><span class="wm-dot">.</span><span class="wm-k">ai</span></span>';
+const WORDMARK = '<span class="wm" data-wm aria-hidden="true"><span class="wm-k">tas</span><span class="wm-x">te&nbsp;</span><span class="wm-k">u</span><span class="wm-x">sing&nbsp;</span><span class="wm-dot" aria-hidden="true"></span><span class="wm-k">ai</span></span>';
 // The hero's version folds and unfolds every 2 seconds (tasu.js); it starts unfolded, so without
 // JS the headline reads "Design apps with taste using ai".
-const HERO_WM = WORDMARK.replace('class="wm" data-wm', 'class="wm wm--hero is-open" data-wm-loop');
+const HERO_WM = WORDMARK.replace('class="wm" data-wm aria-hidden="true"', 'class="wm wm--hero is-open" data-wm-loop');
 function header(current) {
   const cur = k => (k === current ? ' aria-current="page"' : k === 'apps' && current === 'app' ? ' aria-current="true"' : '');
   return `<body>
@@ -677,7 +684,7 @@ ${header('apps')}
   </div>
   <div class="wrap hero-in">
     <span class="tasu-loop tasu-loop--taste hero-mascot" role="img" aria-label="Tasu, the tasu.ai mascot, licks a paywall card"></span>
-    <h1 class="display hero-title" id="hero-title"><span class="hero-l1">Design apps with</span> <span class="hero-l2"><span class="hl hero-hl"><span class="sr-only">taste using AI</span>${HERO_WM}</span></span></h1>
+    <h1 class="display hero-title" id="hero-title"><span class="hero-l1">Design apps with</span> <span class="hero-l2"><span class="hl hero-hl">${HERO_WM}</span></span></h1>
     <p class="lead hero-sub">Design is what people judge an app by first, so give yours the taste and the wow of the top-grossing apps.</p>
     <div class="actions">
       ${xButton('Follow on X', true)}
@@ -1402,7 +1409,7 @@ function designPage() {
     ],
   };
   const palette = { id: 'palette', title: 'Create my palette', when: 'you start your style guide. Your AI asks 5 questions, then writes every color with its role.', prompt: PALETTE_PROMPT };
-  const html = `${head({ title, description, path: 'design/', jsonld, css: [APPS_CSS] })}
+  const html = `${head({ title, description, path: 'design/', jsonld, image: PAGE_OG.design, css: [APPS_CSS] })}
 ${header('design')}
 <main id="main">
 
@@ -1411,6 +1418,7 @@ ${header('design')}
     <div class="lib-intro">
       <h1 class="title-xl" id="dz-title">1 <span class="hl">style</span> for your app, in every update</h1>
       <p class="lead">Set your palette, fonts and rules first. Then every new screen, update and web page your AI builds looks like the same app.</p>
+      <p class="source-note">The 6 principles in the prompts adapt the brand style guide method of Emilie Rouchy, art director, <a href="https://www.instagram.com/reel/Dfy_DI7sdHH/">shared on Instagram</a>.</p>
     </div>
   </div>
 </section>
@@ -1528,7 +1536,7 @@ function paywallPage() {
       <details class="disclose"><summary>Prompt</summary><p class="disclose-text" id="tp-${esc(t.id)}">${txt(t.prompt)}</p></details>` : ''}
     </article>`;
   const yearOrTop = a => a.yearly != null ? { v: money(a.yearly), k: 'a year' } : a.topPrice != null ? { v: money(a.topPrice), k: 'highest listed' } : null;
-  const html = `${head({ title, description, path: 'paywall/', jsonld })}
+  const html = `${head({ title, description, path: 'paywall/', jsonld, image: PAGE_OG.paywall })}
 ${header('paywall')}
 <main id="main">
 
@@ -1607,7 +1615,7 @@ function promptsPage() {
         <span class="pr-words">${p.words || p.prompt.split(/\s+/).length} words${(p.sources || []).length ? `, sources ${p.sources.map(esc).join(', ')} in <a href="/taste/taste.md">taste.md</a>` : ''}</span>
       </div>
     </article>`;
-  const html = `${head({ title, description, path: 'unslop/', jsonld })}
+  const html = `${head({ title, description, path: 'unslop/', jsonld, image: PAGE_OG.unslop })}
 ${header('unslop')}
 <main id="main">
 

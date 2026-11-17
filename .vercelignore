@@ -1,0 +1,14 @@
+# tasu.ai sources and tools: inputs of taste/_tools/build.mjs and the brand generators, never linked by a page.
+# The Vercel build only runs scripts/sitemap.mjs, which reads index.html files. taste.md stays public.
+/taste/_data
+/taste/_tools
+/taste/brand/src
+/taste/brand/README.md
+/taste/brand/.gitignore
+/taste/brand/loops/preview.html
+/taste/brand/loops/loops.css
+/taste/brand/loops/*-1.svg
+/taste/brand/lockup.svg
+/taste/brand/lockup-dark.svg
+/taste/brand/hero.svg
+/taste/data.js

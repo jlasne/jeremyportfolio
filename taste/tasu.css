@@ -104,7 +104,7 @@
   --bg: #F3EFE7;
   --ink: 58 57 54;          /* text, #3A3936 */
   --paper: 243 239 231;     /* background, #F3EFE7 */
-  --a-text-2: .76;          /* 62% gives 3.5:1 on cream, under the 4.5:1 floor. 76% gives 5.1:1, 4.7:1 on a card. */
+  --a-text-2: .80;          /* 62% gives 3.5:1 on cream, under the 4.5:1 floor. 80% gives 5.7:1, 4.9:1 on a hovered card. */
   --a-surface: .08;
   --a-hover: .14;
   --shade: 58 57 54;
@@ -424,6 +424,7 @@ html:not(.js) .js-only { display: none !important; }
 .wm-x, .wm-dot { overflow: hidden; padding-bottom: .22em; margin-bottom: -.22em; }
 .wm-x { max-width: 0; opacity: 0; }
 .wm-dot { max-width: var(--wd, .3em); }
+.wm-dot::before { content: "."; }
 .wm.is-open .wm-x { max-width: var(--wx, 3em); opacity: 1; }
 .wm.is-open .wm-dot { max-width: 0; opacity: 0; }
 .wm.is-ready .wm-x,
@@ -726,7 +727,7 @@ html:not(.js) .js-only { display: none !important; }
 .mp-60 { grid-column: 1; grid-row: 1 / -1; }
 .mp-30 { grid-column: 2; grid-row: 1; }
 .mp-10 { grid-column: 2; grid-row: 2; flex-direction: row-reverse; align-items: center; gap: 6px; padding: 0 10px; font-size: 12px; }
-.mp-pct { font-weight: 600; opacity: .7; }
+.mp-pct { font-weight: 600; }
 .mp-hex { font-weight: 500; white-space: nowrap; }
 .app-fonts { display: grid; gap: var(--sp-8); }
 /* Each font name is set in its own font; a wide one wraps under its label instead of spilling. */
@@ -1909,4 +1910,31 @@ html.theme-fade *::after {
   .phone { box-shadow: none; }
   .reveal-pending { opacity: 1 !important; transform: none !important; }
   a[href^="http"]:not(.btn):not(.icon-btn)::after { content: " (" attr(href) ")"; font-size: var(--fs-13); }
+}
+
+/* Copy toast: after a prompt is copied, one line asks for the follow. Bottom of the screen, 6 s. */
+.toast {
+  position: fixed;
+  z-index: 40;
+  left: 50%;
+  bottom: max(var(--sp-16), env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  gap: var(--sp-8);
+  max-width: min(92vw, 440px);
+  padding: 12px var(--sp-24);
+  border-radius: var(--r-pill);
+  background: var(--text);
+  color: var(--bg);
+  font-weight: 500;
+  line-height: 1.35;
+  transform: translate(-50%, 16px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 260ms var(--ease-out), opacity 200ms linear;
+}
+.toast.is-on { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+.toast a { flex: none; display: inline-flex; align-items: center; min-height: 44px; margin-block: -10px; color: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: .18em; }
+@media (prefers-reduced-motion: reduce) {
+  .toast { transition: opacity 120ms linear; transform: translate(-50%, 0); }
 }

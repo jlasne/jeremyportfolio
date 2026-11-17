@@ -1,5 +1,5 @@
 // tasu.ai share cards. Run it from anywhere after a build: node taste/_tools/og.cjs [slug ...]
-// Renders _tools/og.html for each app (all of them by default) with Playwright (Chromium) into
+// Renders _tools/og.html for each app (all of them by default), and _tools/og-main.html for the 4 main pages with Playwright (Chromium) into
 // media/<slug>/og.jpg: 1200x630, JPEG quality 82. Offline: every request is served from the repo.
 // build.mjs uses the card as og:image and twitter:image when the file exists, so run the build
 // again after this script.
@@ -36,6 +36,18 @@ const ORIGIN = 'http://og.local';
     await page.evaluate(() => Promise.all([...document.images].map(i => i.complete ? 0 : new Promise(r => { i.onload = i.onerror = r; }))));
     const out = path.join(TASTE, 'media', app.slug, 'og.jpg');
     await page.screenshot({ path: out, type: 'jpeg', quality: 82 });
+    console.log(`${path.relative(ROOT, out)} ${Math.round(fs.statSync(out).size / 1024)} KB`);
+  }
+  // The main pages: brand/og-<page>.jpg
+  for (const key of ['home', 'design', 'paywall', 'unslop']) {
+    if (only.length && !only.includes(key)) continue;
+    await page.goto(`${ORIGIN}/taste/_tools/og-main.html?page=${key}`, { waitUntil: 'networkidle' });
+    await page.evaluate(() => document.fonts.ready);
+    const ok = await page.evaluate(() => document.body.getAttribute('data-ready') === '1' && document.fonts.check('600 84px "Schibsted Grotesk"'));
+    if (!ok) throw new Error(`${key}: the card did not render`);
+    await page.evaluate(() => Promise.all([...document.images].map(i => i.complete ? 0 : new Promise(r => { i.onload = i.onerror = r; }))));
+    const out = path.join(TASTE, 'brand', `og-${key}.jpg`);
+    await page.screenshot({ path: out, type: 'jpeg', quality: 84 });
     console.log(`${path.relative(ROOT, out)} ${Math.round(fs.statSync(out).size / 1024)} KB`);
   }
   await browser.close();

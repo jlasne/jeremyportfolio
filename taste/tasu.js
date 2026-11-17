@@ -453,6 +453,20 @@
       d.body.removeChild(t);
     });
   }
+  // After a prompt is copied: one line that asks for the follow, for 6 seconds.
+  var toast = null, toastTimer = 0;
+  function showToast() {
+    if (!toast) {
+      toast = d.createElement('div');
+      toast.className = 'toast';
+      toast.setAttribute('role', 'status');
+      toast.innerHTML = '<span>Copied. 2 new prompts a week:</span><a href="https://x.com/jeremylasne">@jeremylasne</a>';
+      d.body.appendChild(toast);
+    }
+    clearTimeout(toastTimer);
+    requestAnimationFrame(function () { toast.classList.add('is-on'); });
+    toastTimer = setTimeout(function () { toast.classList.remove('is-on'); }, 6000);
+  }
   d.addEventListener('click', function (e) {
     var b = closest(e.target, '[data-copy], [data-copy-target]');
     if (!b) return;
@@ -470,6 +484,7 @@
       label.textContent = 'Copied';
       b.classList.add('is-copied');
       live.textContent = src ? (b.getAttribute('data-copy-what') || 'Prompt') + ' copied' : text + ' copied';
+      if (src) showToast();
       clearTimeout(b._copyTimer);
       b._copyTimer = setTimeout(function () {
         label.textContent = b.getAttribute('data-label');
@@ -580,13 +595,16 @@
     });
   });
 
-  /* 11b. The hero headline: "taste using ai" folds into "tasu.ai" and back every 2 seconds, while
-          it is on screen and the tab is visible. Reduced motion: it stays unfolded. ----------- */
+  /* 11b. The hero headline: "taste using ai" folds into "tasu.ai" and back every 2 seconds, for
+          3 cycles, then rests unfolded. It pauses on hover and focus, while it is off screen and
+          while the tab is hidden. Reduced motion: it stays unfolded. ------------------------- */
   all('[data-wm-loop]').forEach(function (wm) {
     if (reduce.matches) return;
     var parts = all('.wm-x, .wm-dot', wm);
     var timer = 0;
     var seen = true;
+    var held = false;  // hover or focus on the headline
+    var ticks = 0;     // 2 per cycle (fold, unfold)
     function measure() {
       parts.forEach(function (el) {
         var prev = el.style.maxWidth;
@@ -598,13 +616,19 @@
     }
     function run() {
       clearInterval(timer);
-      timer = seen && !d.hidden ? setInterval(function () { wm.classList.toggle('is-open'); }, 2000) : 0;
+      timer = seen && !held && !d.hidden && ticks < 6 ? setInterval(function () {
+        wm.classList.toggle('is-open');
+        if (++ticks >= 6) { clearInterval(timer); timer = 0; }
+      }, 2000) : 0;
     }
     (d.fonts && d.fonts.ready ? d.fonts.ready : Promise.resolve()).then(function () {
       measure();
       requestAnimationFrame(function () { wm.classList.add('is-ready'); run(); });
       window.addEventListener('resize', measure); // the headline's size follows the screen
       d.addEventListener('visibilitychange', run);
+      var h1 = closest(wm, 'h1') || wm;
+      ['mouseenter', 'focusin'].forEach(function (ev) { h1.addEventListener(ev, function () { held = true; run(); }); });
+      ['mouseleave', 'focusout'].forEach(function (ev) { h1.addEventListener(ev, function () { held = false; run(); }); });
       if ('IntersectionObserver' in window) {
         new IntersectionObserver(function (es) { seen = es[es.length - 1].isIntersecting; run(); }).observe(wm);
       }

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<title>tasu.ai share card master, main pages</title>
+<!-- The 1200x630 share cards of the home, Design, Paywall and Unslop pages, rendered by
+     _tools/og.cjs into brand/og-<page>.jpg. Open it with ?page=home. The headline is the page's
+     own h1, with one banded word, so a share says what the page is for. -->
+<link rel="stylesheet" href="/taste/tasu.css">
+<link rel="stylesheet" href="/taste/fonts/apps.css">
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #F3EFE7; }
+  body { position: relative; min-height: 0; }
+  .lock { position: absolute; left: 72px; top: 60px; height: 44px; width: auto; }
+  h1 { position: absolute; left: 72px; top: 168px; width: 700px; margin: 0; font-size: 84px; font-weight: 600; line-height: 1.04; letter-spacing: -.035em; color: #3A3936; }
+  .sub { position: absolute; left: 72px; bottom: 64px; width: 640px; margin: 0; font: 500 26px/1.35 "Schibsted Grotesk", sans-serif; color: rgb(58 57 54 / .8); }
+  .mascot { position: absolute; right: 56px; top: 150px; width: 330px; height: auto; }
+</style>
+</head>
+<body>
+<img class="lock" src="/taste/brand/lockup.svg" alt="">
+<h1 id="title"></h1>
+<p class="sub" id="sub"></p>
+<img class="mascot" src="/taste/brand/hero.svg" alt="">
+<script>
+(function () {
+  var pages = {
+    home: ['Design apps with ', 'taste using ai', '', '12 top apps: their colors, fonts and design rules, as prompts for your AI.'],
+    design: ['', '1 style', ' for your app, in every update', 'Set your palette, fonts and rules first. Every update then looks like 1 app.'],
+    paywall: ['Price your app like the top ', 'earners', '', 'What 12 top-grossing apps charge, and the 7 choices they share.'],
+    unslop: ['Unslop your app with ', 'principles', '', '14 prompts that fix what makes an app look AI-made, 1 part at a time.']
+  };
+  var p = pages[new URLSearchParams(location.search).get('page')];
+  if (!p) { document.body.setAttribute('data-error', 'no page'); return; }
+  document.getElementById('title').innerHTML = p[0] + '<span class="hl">' + p[1] + '</span>' + p[2];
+  document.getElementById('sub').textContent = p[3];
+  document.body.setAttribute('data-ready', '1');
+})();
+</script>
+</body>
+</html>

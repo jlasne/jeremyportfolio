@@ -60,7 +60,7 @@ Replace the `{...}` values. Keep the order: charset, viewport, title, descriptio
 <meta property="og:url" content="https://www.jeremylasne.com/taste/{PATH}">
 <meta property="og:title" content="{TITLE}">
 <meta property="og:description" content="{DESCRIPTION}">
-<meta property="og:image" content="https://www.jeremylasne.com/taste/brand/og.png">
+<meta property="og:image" content="https://www.jeremylasne.com/taste/brand/og-home.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="tasu.ai: design &amp; paywalls behind top apps">
@@ -69,7 +69,7 @@ Replace the `{...}` values. Keep the order: charset, viewport, title, descriptio
 <meta name="twitter:creator" content="@jeremylasne">
 <meta name="twitter:title" content="{TITLE}">
 <meta name="twitter:description" content="{DESCRIPTION}">
-<meta name="twitter:image" content="https://www.jeremylasne.com/taste/brand/og.png">
+<meta name="twitter:image" content="https://www.jeremylasne.com/taste/brand/og-home.jpg">
 <meta name="twitter:image:alt" content="tasu.ai: design &amp; paywalls behind top apps">
 <script type="application/ld+json">{JSON_LD}</script>
 </head>

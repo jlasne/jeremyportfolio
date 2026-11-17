@@ -104,11 +104,11 @@ The tongue grows out of the smile, and the two read as one shape.
 ```html
 <link rel="icon" href="/taste/brand/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/taste/brand/apple-touch-icon.png">
-<meta property="og:image" content="https://www.jeremylasne.com/taste/brand/og.png">
+<meta property="og:image" content="https://www.jeremylasne.com/taste/brand/og-home.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="tasu.ai: design &amp; paywalls behind top apps">
-<meta name="twitter:image" content="https://www.jeremylasne.com/taste/brand/og.png">
+<meta name="twitter:image" content="https://www.jeremylasne.com/taste/brand/og-home.jpg">
 ```
 
 Header lockup. The theme toggle sets `data-theme` on `<html>`, so pick the file with CSS. A `<picture>` media query follows the OS and ignores the toggle.
