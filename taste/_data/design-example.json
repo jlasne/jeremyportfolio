@@ -1,64 +1,38 @@
 {
   "app": "HealthClass",
   "about": "my women's health app, a 6-week pelvic floor class, coming soon",
-  "source": "HealthClass's design language (docs/design-language.md) and its color tokens (www/css/look.css, app.css), read 17 Nov 2026",
-  "split": [
-    { "role": "60", "name": "Paper", "hex": "#FFFBF6", "use": "Every background" },
-    { "role": "30", "name": "Plum", "hex": "#7C2D4B", "use": "Structure: icons, eyebrows, chosen marks, links back" },
-    { "role": "10", "name": "Rose", "hex": "#D9566F", "use": "The next action: 1 rose element per screen" }
-  ],
-  "groups": [
-    {
-      "name": "Rose, the pop",
-      "colors": [
-        { "name": "Rose", "token": "--hc-rose", "hex": "#D9566F", "use": "The logo, the hammock line and large text" },
-        { "name": "Rose ink", "token": "--hc-rose-ink", "hex": "#B93D57", "use": "Every button, with white text" },
-        { "name": "Rose dark", "token": "--hc-rose-dk", "hex": "#9F3049", "use": "A button that is off, on the rose tint" },
-        { "name": "Blush", "token": "--hc-blush", "hex": "#F7C6CE", "use": "Done days" },
-        { "name": "Rose tint", "token": "--hc-rose-tint", "hex": "#F9D5DB", "use": "Warm cards" },
-        { "name": "Rose soft", "token": "--hc-rose-soft", "hex": "#FCEBEE", "use": "The paper's glow" }
-      ]
-    },
-    {
-      "name": "Plum, the structure",
-      "colors": [
-        { "name": "Plum", "token": "--hc-plum", "hex": "#7C2D4B", "use": "Icons, eyebrows, links back, done and chosen marks" },
-        { "name": "Plum deep", "token": "--hc-plum-deep", "hex": "#4A2433", "use": "Plum's darkest step" },
-        { "name": "Plum tint", "token": "--hc-plum-tint", "hex": "#EADBE2", "use": "Cards, pills and chosen chips" },
-        { "name": "Plum mist", "token": "--hc-plum-mist", "hex": "#F4EAEE", "use": "Quiet cards, like the week's lesson box" }
-      ]
-    },
-    {
-      "name": "Sky, the balance",
-      "colors": [
-        { "name": "Sky", "token": "--hc-sky", "hex": "#C5DDF1", "use": "1 calm shape per screen" },
-        { "name": "Sky 2", "token": "--hc-sky-2", "hex": "#9CC3E6", "use": "Water and the bladder in drawings" },
-        { "name": "Sky soft", "token": "--hc-sky-soft", "hex": "#DCEAF6", "use": "Sky's middle tint" },
-        { "name": "Sky mist", "token": "--hc-sky-mist", "hex": "#EAF2F9", "use": "The low glow of the background" }
-      ]
-    },
-    {
-      "name": "Neutrals",
-      "colors": [
-        { "name": "Paper", "token": "--hc-bg", "hex": "#FFFBF6", "use": "Every background" },
-        { "name": "Well", "token": "--hc-well", "hex": "#F5EFE7", "use": "Quiet fills and a weak pill" },
-        { "name": "Ink", "token": "--hc-ink", "hex": "#2A2421", "use": "Text" },
-        { "name": "Ink 2", "token": "--hc-ink-2", "hex": "#4A3F39", "use": "Body text" },
-        { "name": "Muted dark", "token": "--hc-muted-dk", "hex": "#6B5F57", "use": "Gray text on a tint" },
-        { "name": "Muted", "token": "--hc-muted", "hex": "#7A6E66", "use": "Gray text on the paper" },
-        { "name": "Faint", "token": "--hc-faint", "hex": "#A3978F", "use": "Chevrons, dots and icons, never text" }
-      ]
-    }
-  ],
+  "source": "HealthClass's design language (docs/design-language.md), its color tokens (www/css/look.css, app.css) and its logo drawing (www/js/ink.js), read 17 Nov 2026",
   "pairs": [
-    { "fg": "#2A2421", "bg": "#FFFBF6", "label": "Ink on paper", "rule": "text" },
-    { "fg": "#FFFFFF", "bg": "#B93D57", "label": "White on rose ink", "rule": "text" },
-    { "fg": "#FFFFFF", "bg": "#D9566F", "label": "White on rose", "rule": "large" },
-    { "fg": "#7C2D4B", "bg": "#EADBE2", "label": "Plum on plum tint", "rule": "text" },
-    { "fg": "#7C2D4B", "bg": "#C5DDF1", "label": "Plum on sky", "rule": "text" },
-    { "fg": "#9F3049", "bg": "#F9D5DB", "label": "Rose dark on rose tint", "rule": "text" },
-    { "fg": "#7A6E66", "bg": "#FFFBF6", "label": "Muted on paper", "rule": "text" },
-    { "fg": "#A3978F", "bg": "#FFFBF6", "label": "Faint on paper", "rule": "never" }
+    {
+      "fg": "#2A2421",
+      "bg": "#FFFBF6",
+      "label": "Ink on paper",
+      "rule": "text"
+    },
+    {
+      "fg": "#FFFFFF",
+      "bg": "#B93D57",
+      "label": "White on rose ink",
+      "rule": "text"
+    },
+    {
+      "fg": "#FFFFFF",
+      "bg": "#D9566F",
+      "label": "White on rose",
+      "rule": "large"
+    },
+    {
+      "fg": "#7C2D4B",
+      "bg": "#EADBE2",
+      "label": "Plum on plum tint",
+      "rule": "text"
+    },
+    {
+      "fg": "#A3978F",
+      "bg": "#FFFBF6",
+      "label": "Faint on paper",
+      "rule": "never"
+    }
   ],
   "rules": [
     "1 rose element per screen: the next action. A second action is a plain text link.",
@@ -67,7 +41,147 @@
     "Gray text is Muted or darker. Faint never carries words."
   ],
   "fonts": [
-    { "role": "Titles and numbers", "family": "Fraunces", "weight": 400, "sizes": "34, 30, 26, 22 and 19 px" },
-    { "role": "Everything else", "family": "Instrument Sans", "weight": 400, "sizes": "17, 15 and 13 px" }
-  ]
+    {
+      "role": "Titles and numbers",
+      "family": "Fraunces",
+      "weight": 400,
+      "sizes": "34, 30, 26, 22 and 19 px",
+      "weights": [
+        400
+      ]
+    },
+    {
+      "role": "Everything else",
+      "family": "Instrument Sans",
+      "weight": 400,
+      "sizes": "17, 15 and 13 px",
+      "weights": [
+        400,
+        600
+      ]
+    }
+  ],
+  "core": [
+    {
+      "name": "Paper",
+      "hex": "#FFFBF6",
+      "share": "60",
+      "role": "Every background",
+      "tints": [
+        {
+          "name": "Well",
+          "hex": "#F5EFE7",
+          "use": "quiet fills"
+        }
+      ]
+    },
+    {
+      "name": "Plum",
+      "hex": "#7C2D4B",
+      "share": "30",
+      "role": "Structure: icons, links back, chosen marks",
+      "tints": [
+        {
+          "name": "Plum deep",
+          "hex": "#4A2433",
+          "use": "darkest step"
+        },
+        {
+          "name": "Plum tint",
+          "hex": "#EADBE2",
+          "use": "cards and pills"
+        },
+        {
+          "name": "Plum mist",
+          "hex": "#F4EAEE",
+          "use": "quiet cards"
+        }
+      ]
+    },
+    {
+      "name": "Rose",
+      "hex": "#D9566F",
+      "share": "10",
+      "role": "The pop: the logo and the next action",
+      "tints": [
+        {
+          "name": "Rose ink",
+          "hex": "#B93D57",
+          "use": "every button"
+        },
+        {
+          "name": "Blush",
+          "hex": "#F7C6CE",
+          "use": "done days"
+        },
+        {
+          "name": "Rose tint",
+          "hex": "#F9D5DB",
+          "use": "warm cards"
+        }
+      ]
+    },
+    {
+      "name": "Sky",
+      "hex": "#C5DDF1",
+      "share": null,
+      "role": "The balance: 1 calm shape per screen",
+      "tints": [
+        {
+          "name": "Sky 2",
+          "hex": "#9CC3E6",
+          "use": "water in drawings"
+        },
+        {
+          "name": "Sky mist",
+          "hex": "#EAF2F9",
+          "use": "the low glow"
+        }
+      ]
+    },
+    {
+      "name": "Ink",
+      "hex": "#2A2421",
+      "share": null,
+      "role": "Text",
+      "tints": [
+        {
+          "name": "Ink 2",
+          "hex": "#4A3F39",
+          "use": "body text"
+        },
+        {
+          "name": "Muted",
+          "hex": "#7A6E66",
+          "use": "gray text"
+        },
+        {
+          "name": "Faint",
+          "hex": "#A3978F",
+          "use": "icons, never text"
+        }
+      ]
+    }
+  ],
+  "logo": {
+    "viewBox": "20 27 60 52",
+    "hc": "M28.09 44.13H44.72V45.42H28.09ZM31.2 55.71Q31.2 56.06 31.43 56.27Q31.66 56.48 32.09 56.58L33.47 56.84Q34.03 56.99 34.03 57.45Q34.03 57.7 33.86 57.85Q33.68 58 33.3 58H23.33Q22.95 58 22.77 57.85Q22.59 57.7 22.59 57.45Q22.59 56.99 23.16 56.84L24.53 56.58Q24.98 56.48 25.2 56.27Q25.43 56.06 25.43 55.71V32.29Q25.43 31.94 25.2 31.73Q24.98 31.52 24.53 31.42L23.16 31.16Q22.59 31.01 22.59 30.55Q22.59 30.29 22.77 30.15Q22.95 30 23.33 30H33.3Q33.68 30 33.86 30.15Q34.03 30.29 34.03 30.55Q34.03 31.01 33.47 31.16L32.09 31.42Q31.66 31.52 31.43 31.73Q31.2 31.94 31.2 32.29ZM48.33 55.71Q48.33 56.06 48.55 56.27Q48.78 56.48 49.22 56.58L50.6 56.84Q51.16 56.99 51.16 57.45Q51.16 57.7 50.98 57.85Q50.81 58 50.43 58H40.45Q40.08 58 39.9 57.85Q39.72 57.7 39.72 57.45Q39.72 56.99 40.28 56.84L41.66 56.58Q42.11 56.48 42.33 56.27Q42.55 56.06 42.55 55.71V32.29Q42.55 31.94 42.33 31.73Q42.11 31.52 41.66 31.42L40.28 31.16Q39.72 31.01 39.72 30.55Q39.72 30.29 39.9 30.15Q40.08 30 40.45 30H50.43Q50.81 30 50.98 30.15Q51.16 30.29 51.16 30.55Q51.16 31.01 50.6 31.16L49.22 31.42Q48.78 31.52 48.55 31.73Q48.33 31.94 48.33 32.29ZM77.41 50.27Q77.31 51.89 76.5 53.4Q75.7 54.9 74.27 56.1Q72.84 57.29 70.87 57.98Q68.9 58.68 66.47 58.68Q62.3 58.68 59.27 56.85Q56.23 55.02 54.59 51.77Q52.95 48.53 52.95 44.27Q52.95 41.02 53.94 38.3Q54.92 35.58 56.72 33.58Q58.52 31.58 60.97 30.48Q63.42 29.38 66.34 29.38Q68.31 29.38 69.59 29.79Q70.87 30.21 71.58 30.62Q72.3 31.04 72.59 31.04Q72.97 31.04 73.31 30.65Q73.66 30.27 73.99 29.89Q74.33 29.5 74.65 29.5Q74.88 29.5 75.03 29.65Q75.19 29.8 75.29 30.17L77.34 37.49Q77.44 37.81 77.3 38.05Q77.17 38.28 76.86 38.35Q76.55 38.41 76.31 38.27Q76.06 38.14 75.91 37.8Q74.83 35.23 73.5 33.69Q72.16 32.15 70.61 31.47Q69.06 30.79 67.29 30.79Q65.48 30.79 63.95 31.6Q62.43 32.42 61.3 33.96Q60.17 35.51 59.56 37.71Q58.94 39.92 58.94 42.71Q58.94 47.01 60.19 49.94Q61.44 52.88 63.63 54.38Q65.82 55.88 68.65 55.88Q71.49 55.88 73.49 54.39Q75.49 52.89 76.37 50.21Q76.52 49.92 76.67 49.81Q76.83 49.7 77.04 49.74Q77.23 49.76 77.32 49.9Q77.41 50.05 77.41 50.27Z",
+    "bar": "M27 68C38 77 62 77 73 68",
+    "versions": [
+      {
+        "label": "App icon: white on rose",
+        "bg": "#D9566F",
+        "fg": "#FFFFFF",
+        "stroke": "#FFFFFF",
+        "icon": true
+      },
+      {
+        "label": "In the app: rose on paper",
+        "bg": "#FFFBF6",
+        "fg": "#B93D57",
+        "stroke": "#D9566F",
+        "icon": false
+      }
+    ]
+  }
 }

@@ -1255,40 +1255,68 @@ function promptCard(p, level = 3) {
     </article>`;
 }
 
-// The example: the 60/30/10 split as a poster, every color by group with HEX, RGB and use,
-// the pairs with their computed contrast, the rules and the 2 fonts.
+// The example: the logo in its 2 versions, the 60/30/10 split, the 5 core colors with their tints,
+// the colors at work in a few of the app's own elements, then the pairs, rules and 2 fonts.
 function exampleBlock() {
   const ex = EXAMPLE;
-  if (!ex) return '';
+  if (!ex?.core) return '';
+  const hex = name => ex.core.flatMap(c => [c, ...c.tints]).find(c => c.name === name)?.hex;
+  const P = { paper: hex('Paper'), ink: hex('Ink'), ink2: hex('Ink 2'), muted: hex('Muted'), well: hex('Well'), rose: hex('Rose'), roseInk: hex('Rose ink'), plum: hex('Plum'), plumTint: hex('Plum tint'), sky: hex('Sky') };
+  const logo = v => `<svg viewBox="${ex.logo.viewBox}" width="72" height="62" aria-hidden="true"><path d="${ex.logo.hc}" fill="${v.fg}"/><path d="${ex.logo.bar}" fill="none" stroke="${v.stroke}" stroke-width="4.6" stroke-linecap="round"/></svg>`;
   const verdict = (r, c) => (r === 'never' ? 'never for words'
     : r === 'large' ? (c >= 3 ? 'large text only' : 'fails')
     : c >= 4.5 ? 'passes for text' : c >= 3 ? 'large text only' : 'fails');
+  const shares = ex.core.filter(c => c.share);
+  const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+  const days = [['M', 'done'], ['T', 'done'], ['W', 'today'], ['T', 'next'], ['F', 'next']];
+  const head = ex.fonts[0], body = ex.fonts[1];
   return `<div class="ex">
-      <div class="ex-top">
-        <div class="mini-poster ex-poster" role="img" aria-label="${esc(`${ex.app} split: ${ex.split.map(c => `${c.name} ${c.hex} ${c.role}%`).join(', ')}`)}">
-          ${ex.split.map(c => `<span class="mp mp-${c.role}" style="--c:${c.hex};--ink:${inkOn(c.hex)}"><span class="mp-pct">${c.role}% ${esc(c.name)}</span><span class="mp-hex">${c.hex}</span></span>`).join('\n          ')}
+      <div class="ex-row">
+        <div class="card ex-logo">
+          <h3 class="title-s">The logo</h3>
+          <div class="ex-logos">
+            ${ex.logo.versions.map(v => `<figure><div class="ex-logo-box${v.icon ? ' is-icon' : ''}" style="--lb:${v.bg}" role="img" aria-label="${esc(`${ex.app} logo, ${v.label}`)}">${logo(v)}</div><figcaption>${esc(v.label)}</figcaption></figure>`).join('\n            ')}
+          </div>
         </div>
-        <div class="ex-split">
-          ${ex.split.map(c => `<p><b>${esc(c.name)}, ${c.role}%.</b> ${copy(c.use)}.</p>`).join('\n          ')}
+        <div class="mini-poster ex-poster" role="img" aria-label="${esc(`${ex.app} split: ${shares.map(c => `${c.name} ${c.hex} ${c.share}%`).join(', ')}`)}">
+          ${shares.map(c => `<span class="mp mp-${c.share}" style="--c:${c.hex};--ink:${inkOn(c.hex)}"><span class="mp-pct">${c.share}% ${esc(c.name)}</span><span class="mp-hex">${c.hex}</span></span>`).join('\n          ')}
         </div>
       </div>
-      <div class="ex-groups">
-        ${ex.groups.map(g => `<div class="ex-group">
-          <h3 class="title-s">${esc(g.name)}</h3>
-          <ul class="ex-colors" role="list">
-            ${g.colors.map(c => `<li><button class="ex-sw" type="button" style="--c:${c.hex}" data-copy="${c.hex}" aria-label="Copy ${esc(c.name)}, ${c.hex}"></button><span class="ex-name">${esc(c.name)}</span><span class="ex-code"><span data-copy-label>${c.hex}</span>, RGB ${rgbOf(c.hex)}</span><span class="ex-use">${copy(c.use)}</span></li>`).join('\n            ')}
+      <ul class="ex-core" role="list">
+        ${ex.core.map(c => `<li class="ex-c">
+          <button class="ex-c-sw" type="button" style="--c:${c.hex}" data-copy="${c.hex}" aria-label="Copy ${esc(c.name)}, ${c.hex}"></button>
+          <p class="ex-c-name">${esc(c.name)}${c.share ? `<span>${c.share}%</span>` : ''}</p>
+          <p class="ex-c-role">${copy(c.role)}</p>
+          <p class="ex-code">${c.hex}, RGB ${rgbOf(c.hex)}</p>
+          <ul class="ex-tints" role="list">
+            ${c.tints.map(t => `<li><span class="ex-dot" style="--c:${t.hex}" aria-hidden="true"></span><span><b>${esc(t.name)}</b> ${t.hex}, ${esc(t.use)}</span></li>`).join('\n            ')}
           </ul>
-        </div>`).join('\n        ')}
-      </div>
-      <div class="ex-cols">
+        </li>`).join('\n        ')}
+      </ul>
+      <div class="ex-row">
+        <div class="card">
+          <h3 class="title-s">At work in the app</h3>
+          <div class="ex-screen" style="--p:${P.paper};--i:${P.ink};--i2:${P.ink2};--mu:${P.muted};--we:${P.well};--ro:${P.rose};--ri:${P.roseInk};--pl:${P.plum};--pt:${P.plumTint};--sk:${P.sky};--hf:'${head.family}';--bf:'${body.family}'" role="img" aria-label="${esc(`${ex.app} elements: a plum eyebrow, a title in ink, the week's days in rose, a sky tile, a rose button and a plum link, on paper`)}">
+            <p class="exs-k">Week 1</p>
+            <p class="exs-h">Pelvic Floor 101</p>
+            <div class="exs-days">${days.map(([l, s]) => `<span class="exs-day is-${s}"><b>${l}</b><i>${s === 'done' ? check : ''}</i></span>`).join('')}</div>
+            <div class="exs-row"><span class="exs-tile">Why train</span><span class="exs-chip">Week 1</span></div>
+            <span class="exs-btn">Start now</span>
+            <span class="exs-link">Start with the lessons</span>
+          </div>
+          <ul class="ex-keys" role="list">
+            <li><span class="ex-dot" style="--c:${P.roseInk}"></span>Rose ink: the button, the 1 next action</li>
+            <li><span class="ex-dot" style="--c:${P.rose}"></span>Rose: done days and today’s ring</li>
+            <li><span class="ex-dot" style="--c:${P.plum}"></span>Plum: the eyebrow and the second action</li>
+            <li><span class="ex-dot" style="--c:${P.sky}"></span>Sky: the 1 calm shape</li>
+          </ul>
+        </div>
         <div class="card">
           <h3 class="title-s">The pairs, with their contrast</h3>
           <ul class="ex-pairs" role="list">
             ${ex.pairs.map(p => { const c = contrastOf(p.fg, p.bg); return `<li><span class="ex-chip" style="--fg:${p.fg};--pbg:${p.bg}" aria-hidden="true">Aa</span><span>${esc(p.label)}</span><span class="ex-ratio">${c.toFixed(1)}:1, ${verdict(p.rule, c)}</span></li>`; }).join('\n            ')}
           </ul>
-        </div>
-        <div class="card">
-          <h3 class="title-s">The rules</h3>
+          <h3 class="title-s ex-type-title">The rules</h3>
           <ul class="bullets" role="list">
             ${ex.rules.map(r => `<li>${copy(r)}</li>`).join('\n            ')}
           </ul>

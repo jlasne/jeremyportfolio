@@ -49,7 +49,7 @@ for (const slug of slugs) {
 
 // The Design page's worked example (HealthClass) shows its 2 fonts.
 const example = read(join(DATA, 'design-example.json'));
-for (const f of example?.fonts || []) add(f.family, f.weight, `${f.family} ${example.app} Aa`);
+for (const f of example?.fonts || []) for (const w of f.weights || [f.weight]) add(f.family, w, `${f.family} ${example.app} Aa`);
 
 mkdirSync(OUT, { recursive: true });
 for (const f of readdirSync(OUT)) if (f.endsWith('.woff2')) rmSync(join(OUT, f));
