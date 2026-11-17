@@ -731,8 +731,8 @@ ${header('apps')}
       <h2 class="title-xl" id="dz-title">Keep 1 style in every update</h2>
       <a class="link-arrow" href="/taste/design/">Set your style guide ${I.arrow}</a>
     </div>
-    <ol class="steps steps--teaser" role="list">
-      ${STEPS.slice(0, 3).map(([name, text], i) => `<li class="step"><span class="step-num" aria-hidden="true">${i + 1}</span><div><h3 class="title-s">${name}</h3><p>${copy(text)}</p></div></li>`).join('\n      ')}
+    <ol class="el-rules el-rules--teaser" role="list">
+      ${ELEMENT_RULES.slice(0, 3).map((r, i) => `<li class="el-rule"><span class="el-num" aria-hidden="true">${i + 1}</span><h3 class="title-s">${txt(r.title)}</h3><p class="el-text">${copy(r.text)}</p></li>`).join('\n      ')}
     </ol>
   </div>
 </section>
@@ -1104,13 +1104,46 @@ ${footer()}`;
 /* ---------------------------------------------------------------- design */
 // The worked example of the Design page: a real app's full palette, from its own code.
 const EXAMPLE = readJSON(join(DATA, 'design-example.json'), null);
-const STEPS = [
-  ['Colors', 'Pick 1 color for the next action, 1 for structure, 1 to balance, and neutrals. Write each HEX and RGB, its role and the pairs that work. Text needs a 4.5:1 contrast.'],
-  ['Type', '2 fonts at most: a bold one for titles, a readable one for text, and the system font as backup. Set 4 levels, title, subtitle, body and caption, each with a size and a weight.'],
-  ['Icon', 'Make 4 versions: full color, 1 color, on light and on dark. Check it at home screen size and at search result size.'],
-  ['Components', 'Buttons, cards, inputs and tabs: 1 corner scale, 1 spacing scale and 3 states each, default, pressed and disabled.'],
-  ['Composition', 'Build 1 sample screen with 5 rules: 1 hero, 3 colors, 1 main button, equal margins, the title and the tabs always in the same place.'],
+// Rules that keep every element consistent. Each example is a HealthClass value, from its CSS and
+// its design language.
+const ELEMENT_RULES = [
+  { title: 'Build from the tokens only', text: 'Every element takes its colors, fonts, spacing and corners from the style guide. A new hex or a new size starts a second style.',
+    example: 'Every HealthClass pill rounds at half its height: 54 and 27 pt, 40 and 20, 30 and 15, 22 and 11.' },
+  { title: '1 job, 1 look', text: 'Each job gets 1 element, and each element 1 style. 2 looks for 1 job read as 2 apps.',
+    example: 'The next action is always the rose button. A second action is always a plum text link.' },
+  { title: 'A short size ladder', text: 'Pick 4 heights and reuse them. Keep every touch area at 44 pt or more.',
+    example: '54 pt for the button, 40 for the small button, 30 for a chip, 22 for a pill.' },
+  { title: 'Every state, written down', text: 'Give each element its colors for default, pressed, disabled, selected and loading, and check each pair for contrast.',
+    example: 'A button that is off turns rose tint with rose dark text, at 5.2:1.' },
+  { title: '1 press for every element', text: 'Use the same scale, speed and spring everywhere, so the whole app feels like 1 material.',
+    example: 'Every button sinks to 96% in 90 ms and springs back in 420 ms.' },
+  { title: '1 icon family', text: 'The same grid, stroke and line ends for every icon, in 2 or 3 sizes.',
+    example: 'A 24 grid, a 1.75 px line and round ends: plum by default, rose when active.' },
+  { title: 'Shapes only where the eye must go', text: 'A filled shape says “look here”. Give it to 3 or 4 things, and set the rest on the background.',
+    example: '4 things get a shape: the rose button, the day circle, a chosen answer and the insight tiles. Lists are rows on the paper.' },
+  { title: 'Reuse before you add', text: 'A new element needs a job no other element does, and its spec in the style guide before any code.', example: '' },
 ];
+// The spec every new element gets, line by line.
+const ELEMENT_SPEC = ['Its 1 job, and where it appears', 'Size: height and sides from the size ladder, a touch area of 44 pt or more', 'Corner, from the corner rule', 'Colors for each state, from the palette roles', 'Type: 1 of the 4 levels', 'Icon: from the family, at 1 of its sizes', 'Press: the same as every other element', '2 don’ts'];
+const ELEMENT_PROMPT = `Create a new element for my app that fits DESIGN.md. Read DESIGN.md and the components I already have first.
+
+1. Tell me the element's 1 job. If an existing element already does it, reuse that one and stop.
+2. Write its spec in DESIGN.md:
+- Its job and where it appears.
+- Size: height and sides from the size ladder, a touch area of 44 pt or more.
+- Corner, from the corner rule.
+- Colors for each state, from the palette roles: default, pressed, disabled, selected, loading.
+- Type: 1 of the 4 levels.
+- Icon: from the icon family, at 1 of its sizes.
+- Press: the same as every other element.
+- 2 don'ts.
+3. Build it once, as a reusable component, with tokens only.
+4. Show it next to 2 existing elements, on the same screen.
+
+Check:
+- Zero values outside the tokens.
+- Every state's text passes 4.5:1.
+- It looks like it was always part of the app.`;
 // The first prompt of the page: the palette, after a short interview.
 const PALETTE_PROMPT = `Create the color palette of my app. Ask me what you need first, then write it.
 
@@ -1328,6 +1361,30 @@ function exampleBlock() {
     </div>`;
 }
 
+// 3 of the example's elements, drawn with its tokens, each with its spec lines.
+function elementSpecs() {
+  const ex = EXAMPLE;
+  if (!ex?.elements?.length) return '';
+  const hex = name => ex.core.flatMap(c => [c, ...c.tints]).find(c => c.name === name)?.hex;
+  const vars = `--p:${hex('Paper')};--i:${hex('Ink')};--i2:${hex('Ink 2')};--mu:${hex('Muted')};--we:${hex('Well')};--ro:${hex('Rose')};--ri:${hex('Rose ink')};--pl:${hex('Plum')};--sk:${hex('Sky')};--bf:'${ex.fonts[1].family}';--hf:'${ex.fonts[0].family}'`;
+  const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+  const draw = {
+    button: '<span class="exs-btn">Start now</span>',
+    chip: '<span class="exs-chip">Week 1</span>',
+    days: `<div class="exs-days">${[['M', 'done'], ['T', 'done'], ['W', 'today'], ['T', 'next']].map(([l, s]) => `<span class="exs-day is-${s}"><b>${l}</b><i>${s === 'done' ? check : ''}</i></span>`).join('')}</div>`,
+  };
+  return `<div class="el-specs">
+      ${ex.elements.map(e => `<div class="el-spec">
+        <div class="ex-screen el-spec-stage" style="${vars}" role="img" aria-label="${esc(`${ex.app} ${e.name.toLowerCase()}`)}">${draw[e.render] || ''}</div>
+        <h3 class="title-s">${esc(e.name)}</h3>
+        <p class="el-job">${copy(e.job)}</p>
+        <ul class="el-lines" role="list">
+          ${e.lines.map(l => `<li>${copy(l)}</li>`).join('\n          ')}
+        </ul>
+      </div>`).join('\n      ')}
+    </div>`;
+}
+
 function designPage() {
   const n = apps.length;
   const title = 'Set your app’s style guide first | tasu.ai';
@@ -1338,8 +1395,6 @@ function designPage() {
     '@graph': [
       { '@type': 'WebPage', '@id': `${url}#page`, url, name: title, description, inLanguage: 'en', dateModified: MODIFIED,
         isPartOf: { '@type': 'WebSite', '@id': `${ABS}#website`, name: 'tasu.ai', url: ABS }, author: AUTHOR },
-      { '@type': 'HowTo', name: 'Set your app’s style guide', description,
-        step: STEPS.map(([name, text], i) => ({ '@type': 'HowToStep', position: i + 1, name, text })) },
       { '@type': 'BreadcrumbList', itemListElement: [
         { '@type': 'ListItem', position: 1, name: 'tasu.ai', item: ABS },
         { '@type': 'ListItem', position: 2, name: 'Design', item: url },
@@ -1398,13 +1453,25 @@ ${EXAMPLE ? `
   </div>
 </section>
 
-<section class="section" aria-labelledby="st-title" data-reveal>
+<section class="section" aria-labelledby="el-title" data-reveal>
   <div class="wrap">
-    <div class="section-head"><h2 class="title-l" id="st-title">5 steps to a full style guide</h2></div>
-    <ol class="steps" role="list">
-      ${STEPS.map(([name, text], i) => `<li class="step"><span class="step-num" aria-hidden="true">${i + 1}</span><div><h3 class="title-s">${name}</h3><p>${copy(text)}</p></div></li>`).join('\n      ')}
+    <div class="section-head">
+      <h2 class="title-l" id="el-title">Make every element look like 1 app</h2>
+      <p class="ex-about">8 rules for each button, chip or card you add. The examples are ${esc(EXAMPLE?.app || 'HealthClass')}’s own values.</p>
+    </div>
+    <ol class="el-rules" role="list">
+      ${ELEMENT_RULES.map((r, i) => `<li class="el-rule"><span class="el-num" aria-hidden="true">${i + 1}</span><h3 class="title-s">${txt(r.title)}</h3><p class="el-text">${copy(r.text)}</p>${r.example ? `<p class="el-ex">${copy(r.example)}</p>` : ''}</li>`).join('\n      ')}
     </ol>
-    <p class="steps-note">Under every step, add 3 don’ts, like a 4th color, a 3rd font or 2 main buttons on 1 screen.</p>
+    ${elementSpecs()}
+    <div class="el-make">
+      <div class="card">
+        <h3 class="title-s">The spec of a new element</h3>
+        <ol class="el-spec-list" role="list">
+          ${ELEMENT_SPEC.map(s => `<li>${copy(s)}</li>`).join('\n          ')}
+        </ol>
+      </div>
+      ${promptCard({ id: 'new-element', title: 'Create a new element', when: 'you need a button, card or chip your app does not have yet.', prompt: ELEMENT_PROMPT })}
+    </div>
   </div>
 </section>
 

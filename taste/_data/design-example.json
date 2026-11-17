@@ -1,7 +1,7 @@
 {
   "app": "HealthClass",
   "about": "my women's health app, a 6-week pelvic floor class, coming soon",
-  "source": "HealthClass's design language (docs/design-language.md), its color tokens (www/css/look.css, app.css) and its logo drawing (www/js/ink.js), read 17 Nov 2026",
+  "source": "HealthClass's design language (docs/design-language.md), its color tokens and element styles (www/css/look.css, app.css) and its logo drawing (www/js/ink.js), read 17 Nov 2026",
   "pairs": [
     {
       "fg": "#2A2421",
@@ -183,5 +183,37 @@
         "icon": false
       }
     ]
-  }
+  },
+  "elements": [
+    {
+      "name": "Button",
+      "job": "The next action, 1 per screen",
+      "render": "button",
+      "lines": [
+        "54 pt tall, full width, 22 pt sides, 27 pt corners",
+        "Rose ink #B93D57 with white text in Instrument Sans 600 at 16.5 pt, 5.4:1",
+        "Pressed: a Rose dark layer fades in. Off: Rose tint with Rose dark text"
+      ]
+    },
+    {
+      "name": "Chip",
+      "job": "A tag, like the week",
+      "render": "chip",
+      "lines": [
+        "30 pt tall, 11 pt sides, 15 pt corners",
+        "Well #F5EFE7 with Ink 2 text in Instrument Sans 600 at 12.5 pt",
+        "An icon at 15 pt, 5 pt from the word"
+      ]
+    },
+    {
+      "name": "Day circle",
+      "job": "A day of the week's plan",
+      "render": "days",
+      "lines": [
+        "A 32 pt circle in a 34 pt column, its letter above in Muted at 11 pt",
+        "Done: Rose fill and a white check. Today: a 2 pt Rose ring and a 7 pt dot",
+        "To come: white with a 1 pt ring"
+      ]
+    }
+  ]
 }

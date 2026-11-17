@@ -32,7 +32,7 @@
 <meta name="twitter:description" content="Set your palette, fonts and rules before the next screen, so every update looks like the same app. Prompts and a full example palette.">
 <meta name="twitter:image" content="https://www.jeremylasne.com/taste/brand/og.png">
 <meta name="twitter:image:alt" content="tasu.ai: steal the taste of top apps">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://www.jeremylasne.com/taste/design/#page","url":"https://www.jeremylasne.com/taste/design/","name":"Set your app’s style guide first | tasu.ai","description":"Set your palette, fonts and rules before the next screen, so every update looks like the same app. Prompts and a full example palette.","inLanguage":"en","dateModified":"2026-11-17","isPartOf":{"@type":"WebSite","@id":"https://www.jeremylasne.com/taste/#website","name":"tasu.ai","url":"https://www.jeremylasne.com/taste/"},"author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne"]}},{"@type":"HowTo","name":"Set your app’s style guide","description":"Set your palette, fonts and rules before the next screen, so every update looks like the same app. Prompts and a full example palette.","step":[{"@type":"HowToStep","position":1,"name":"Colors","text":"Pick 1 color for the next action, 1 for structure, 1 to balance, and neutrals. Write each HEX and RGB, its role and the pairs that work. Text needs a 4.5:1 contrast."},{"@type":"HowToStep","position":2,"name":"Type","text":"2 fonts at most: a bold one for titles, a readable one for text, and the system font as backup. Set 4 levels, title, subtitle, body and caption, each with a size and a weight."},{"@type":"HowToStep","position":3,"name":"Icon","text":"Make 4 versions: full color, 1 color, on light and on dark. Check it at home screen size and at search result size."},{"@type":"HowToStep","position":4,"name":"Components","text":"Buttons, cards, inputs and tabs: 1 corner scale, 1 spacing scale and 3 states each, default, pressed and disabled."},{"@type":"HowToStep","position":5,"name":"Composition","text":"Build 1 sample screen with 5 rules: 1 hero, 3 colors, 1 main button, equal margins, the title and the tabs always in the same place."}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"tasu.ai","item":"https://www.jeremylasne.com/taste/"},{"@type":"ListItem","position":2,"name":"Design","item":"https://www.jeremylasne.com/taste/design/"}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://www.jeremylasne.com/taste/design/#page","url":"https://www.jeremylasne.com/taste/design/","name":"Set your app’s style guide first | tasu.ai","description":"Set your palette, fonts and rules before the next screen, so every update looks like the same app. Prompts and a full example palette.","inLanguage":"en","dateModified":"2026-11-17","isPartOf":{"@type":"WebSite","@id":"https://www.jeremylasne.com/taste/#website","name":"tasu.ai","url":"https://www.jeremylasne.com/taste/"},"author":{"@type":"Person","name":"Jeremy Lasne","url":"https://www.jeremylasne.com/","sameAs":["https://x.com/jeremylasne"]}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"tasu.ai","item":"https://www.jeremylasne.com/taste/"},{"@type":"ListItem","position":2,"name":"Design","item":"https://www.jeremylasne.com/taste/design/"}]}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -243,7 +243,7 @@ Check: every text pair passes, and each screen holds 1 pop element.</p>
           <p class="ex-font"><span class="ex-font-name" style="font-family:'Instrument Sans',var(--font);font-weight:400">Instrument Sans</span><span>Everything else: 17, 15 and 13&nbsp;px</span></p>
         </div>
       </div>
-      <p class="source-note">Source: HealthClass's design language (docs/design-language.md), its color tokens (www/css/look.css, app.css) and its logo drawing (www/js/ink.js), read 17 Nov 2026.</p>
+      <p class="source-note">Source: HealthClass's design language (docs/design-language.md), its color tokens and element styles (www/css/look.css, app.css) and its logo drawing (www/js/ink.js), read 17 Nov 2026.</p>
     </div>
   </div>
 </section>
@@ -258,17 +258,99 @@ Check: every text pair passes, and each screen holds 1 pop element.</p>
   </div>
 </section>
 
-<section class="section" aria-labelledby="st-title" data-reveal>
+<section class="section" aria-labelledby="el-title" data-reveal>
   <div class="wrap">
-    <div class="section-head"><h2 class="title-l" id="st-title">5 steps to a full style guide</h2></div>
-    <ol class="steps" role="list">
-      <li class="step"><span class="step-num" aria-hidden="true">1</span><div><h3 class="title-s">Colors</h3><p>Pick 1 color for the next action, 1 for structure, 1 to balance, and neutrals. Write each HEX and RGB, its role and the pairs that work. Text needs a 4.5:1 contrast.</p></div></li>
-      <li class="step"><span class="step-num" aria-hidden="true">2</span><div><h3 class="title-s">Type</h3><p>2 fonts at most: a bold one for titles, a readable one for text, and the system font as backup. Set 4 levels, title, subtitle, body and caption, each with a size and a weight.</p></div></li>
-      <li class="step"><span class="step-num" aria-hidden="true">3</span><div><h3 class="title-s">Icon</h3><p>Make 4 versions: full color, 1 color, on light and on dark. Check it at home screen size and at search result size.</p></div></li>
-      <li class="step"><span class="step-num" aria-hidden="true">4</span><div><h3 class="title-s">Components</h3><p>Buttons, cards, inputs and tabs: 1 corner scale, 1 spacing scale and 3 states each, default, pressed and disabled.</p></div></li>
-      <li class="step"><span class="step-num" aria-hidden="true">5</span><div><h3 class="title-s">Composition</h3><p>Build 1 sample screen with 5 rules: 1 hero, 3 colors, 1 main button, equal margins, the title and the tabs always in the same place.</p></div></li>
+    <div class="section-head">
+      <h2 class="title-l" id="el-title">Make every element look like 1 app</h2>
+      <p class="ex-about">8 rules for each button, chip or card you add. The examples are HealthClass’s own values.</p>
+    </div>
+    <ol class="el-rules" role="list">
+      <li class="el-rule"><span class="el-num" aria-hidden="true">1</span><h3 class="title-s">Build from the tokens only</h3><p class="el-text">Every element takes its colors, fonts, spacing and corners from the style guide. A new hex or a new size starts a second style.</p><p class="el-ex">Every HealthClass pill rounds at half its height: 54 and 27&nbsp;pt, 40 and 20, 30 and 15, 22 and 11.</p></li>
+      <li class="el-rule"><span class="el-num" aria-hidden="true">2</span><h3 class="title-s">1 job, 1 look</h3><p class="el-text">Each job gets 1 element, and each element 1 style. 2 looks for 1 job read as 2&nbsp;apps.</p><p class="el-ex">The next action is always the rose button. A second action is always a plum text link.</p></li>
+      <li class="el-rule"><span class="el-num" aria-hidden="true">3</span><h3 class="title-s">A short size ladder</h3><p class="el-text">Pick 4 heights and reuse them. Keep every touch area at 44&nbsp;pt or more.</p><p class="el-ex">54&nbsp;pt for the button, 40 for the small button, 30 for a chip, 22 for a pill.</p></li>
+      <li class="el-rule"><span class="el-num" aria-hidden="true">4</span><h3 class="title-s">Every state, written down</h3><p class="el-text">Give each element its colors for default, pressed, disabled, selected and loading, and check each pair for contrast.</p><p class="el-ex">A button that is off turns rose tint with rose dark text, at 5.2:1.</p></li>
+      <li class="el-rule"><span class="el-num" aria-hidden="true">5</span><h3 class="title-s">1 press for every element</h3><p class="el-text">Use the same scale, speed and spring everywhere, so the whole app feels like 1 material.</p><p class="el-ex">Every button sinks to 96% in 90 ms and springs back in 420 ms.</p></li>
+      <li class="el-rule"><span class="el-num" aria-hidden="true">6</span><h3 class="title-s">1 icon family</h3><p class="el-text">The same grid, stroke and line ends for every icon, in 2 or 3 sizes.</p><p class="el-ex">A 24 grid, a 1.75&nbsp;px line and round ends: plum by default, rose when active.</p></li>
+      <li class="el-rule"><span class="el-num" aria-hidden="true">7</span><h3 class="title-s">Shapes only where the eye must go</h3><p class="el-text">A filled shape says “look here”. Give it to 3 or 4 things, and set the rest on the background.</p><p class="el-ex">4 things get a shape: the rose button, the day circle, a chosen answer and the insight tiles. Lists are rows on the paper.</p></li>
+      <li class="el-rule"><span class="el-num" aria-hidden="true">8</span><h3 class="title-s">Reuse before you add</h3><p class="el-text">A new element needs a job no other element does, and its spec in the style guide before any code.</p></li>
     </ol>
-    <p class="steps-note">Under every step, add 3 don’ts, like a 4th color, a 3rd font or 2 main buttons on 1 screen.</p>
+    <div class="el-specs">
+      <div class="el-spec">
+        <div class="ex-screen el-spec-stage" style="--p:#FFFBF6;--i:#2A2421;--i2:#4A3F39;--mu:#7A6E66;--we:#F5EFE7;--ro:#D9566F;--ri:#B93D57;--pl:#7C2D4B;--sk:#C5DDF1;--bf:'Instrument Sans';--hf:'Fraunces'" role="img" aria-label="HealthClass button"><span class="exs-btn">Start now</span></div>
+        <h3 class="title-s">Button</h3>
+        <p class="el-job">The next action, 1 per screen</p>
+        <ul class="el-lines" role="list">
+          <li>54&nbsp;pt tall, full width, 22&nbsp;pt sides, 27&nbsp;pt corners</li>
+          <li>Rose ink #B93D57 with white text in Instrument Sans 600 at 16.5&nbsp;pt, 5.4:1</li>
+          <li>Pressed: a Rose dark layer fades in. Off: Rose tint with Rose dark text</li>
+        </ul>
+      </div>
+      <div class="el-spec">
+        <div class="ex-screen el-spec-stage" style="--p:#FFFBF6;--i:#2A2421;--i2:#4A3F39;--mu:#7A6E66;--we:#F5EFE7;--ro:#D9566F;--ri:#B93D57;--pl:#7C2D4B;--sk:#C5DDF1;--bf:'Instrument Sans';--hf:'Fraunces'" role="img" aria-label="HealthClass chip"><span class="exs-chip">Week 1</span></div>
+        <h3 class="title-s">Chip</h3>
+        <p class="el-job">A tag, like the week</p>
+        <ul class="el-lines" role="list">
+          <li>30&nbsp;pt tall, 11&nbsp;pt sides, 15&nbsp;pt corners</li>
+          <li>Well #F5EFE7 with Ink 2 text in Instrument Sans 600 at 12.5&nbsp;pt</li>
+          <li>An icon at 15&nbsp;pt, 5&nbsp;pt from the word</li>
+        </ul>
+      </div>
+      <div class="el-spec">
+        <div class="ex-screen el-spec-stage" style="--p:#FFFBF6;--i:#2A2421;--i2:#4A3F39;--mu:#7A6E66;--we:#F5EFE7;--ro:#D9566F;--ri:#B93D57;--pl:#7C2D4B;--sk:#C5DDF1;--bf:'Instrument Sans';--hf:'Fraunces'" role="img" aria-label="HealthClass day circle"><div class="exs-days"><span class="exs-day is-done"><b>M</b><i><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></i></span><span class="exs-day is-done"><b>T</b><i><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></i></span><span class="exs-day is-today"><b>W</b><i></i></span><span class="exs-day is-next"><b>T</b><i></i></span></div></div>
+        <h3 class="title-s">Day circle</h3>
+        <p class="el-job">A day of the week’s plan</p>
+        <ul class="el-lines" role="list">
+          <li>A 32&nbsp;pt circle in a 34&nbsp;pt column, its letter above in Muted at 11&nbsp;pt</li>
+          <li>Done: Rose fill and a white check. Today: a 2&nbsp;pt Rose ring and a 7&nbsp;pt dot</li>
+          <li>To come: white with a 1&nbsp;pt ring</li>
+        </ul>
+      </div>
+    </div>
+    <div class="el-make">
+      <div class="card">
+        <h3 class="title-s">The spec of a new element</h3>
+        <ol class="el-spec-list" role="list">
+          <li>Its 1 job, and where it appears</li>
+          <li>Size: height and sides from the size ladder, a touch area of 44&nbsp;pt or more</li>
+          <li>Corner, from the corner rule</li>
+          <li>Colors for each state, from the palette roles</li>
+          <li>Type: 1 of the 4 levels</li>
+          <li>Icon: from the family, at 1 of its sizes</li>
+          <li>Press: the same as every other element</li>
+          <li>2 don’ts</li>
+        </ol>
+      </div>
+      <article class="pr" id="new-element">
+      <h3 class="title-m">Create a new element</h3>
+      <p class="pr-when">Use it when you need a button, card or chip your app does not have yet.</p>
+      <div class="pr-box" data-clamp>
+        <p class="pr-text" id="bp-new-element">Create a new element for my app that fits DESIGN.md. Read DESIGN.md and the components I already have first.
+
+1. Tell me the element’s 1 job. If an existing element already does it, reuse that one and stop.
+2. Write its spec in DESIGN.md:
+- Its job and where it appears.
+- Size: height and sides from the size ladder, a touch area of 44 pt or more.
+- Corner, from the corner rule.
+- Colors for each state, from the palette roles: default, pressed, disabled, selected, loading.
+- Type: 1 of the 4 levels.
+- Icon: from the icon family, at 1 of its sizes.
+- Press: the same as every other element.
+- 2 don’ts.
+3. Build it once, as a reusable component, with tokens only.
+4. Show it next to 2 existing elements, on the same screen.
+
+Check:
+- Zero values outside the tokens.
+- Every state’s text passes 4.5:1.
+- It looks like it was always part of the app.</p>
+      </div>
+      <div class="card-actions">
+        <button class="btn btn-secondary btn-sm js-only" type="button" data-copy-target="#bp-new-element" data-copy-raw><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.75" y="8.75" width="11.5" height="11.5" rx="2.5"/><path d="M15.25 8.75v-2a2.5 2.5 0 0 0-2.5-2.5h-6.5a2.5 2.5 0 0 0-2.5 2.5v6.5a2.5 2.5 0 0 0 2.5 2.5h2"/></svg><span data-copy-label>Copy prompt</span></button>
+        <button class="btn btn-secondary btn-sm js-only pr-more" type="button" data-clamp-toggle aria-expanded="false" aria-controls="bp-new-element">Show all</button>
+        <span class="pr-words">164 words</span>
+      </div>
+    </article>
+    </div>
   </div>
 </section>
 

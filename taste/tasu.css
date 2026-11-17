@@ -1547,31 +1547,42 @@ html:not(.js) .ex-c-sw { pointer-events: none; }
 .first .first-test { font-size: var(--fs-16); color: var(--text-2); }
 .first-test b { color: var(--text); }
 
-.steps { display: grid; gap: var(--sp-8); }
-.step {
-  display: grid;
-  grid-template-columns: 48px minmax(0, 1fr);
-  gap: var(--sp-16);
-  align-items: start;
-  padding: var(--sp-24);
-  border-radius: var(--r-24);
-  background: var(--surface);
+/* Element rules: 8 cards, each a rule and a HealthClass value; 3 element specs; the spec of a new
+   element next to its prompt. */
+.el-rules { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-16); }
+@media (min-width: 720px) {
+  .el-rules { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-.step-num {
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--bg);
-  font-size: var(--fs-20);
-  font-weight: 700;
+@media (min-width: 1100px) {
+  .el-rules { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .el-rules--teaser { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
-.step p { margin-top: var(--sp-4); color: var(--text-2); text-wrap: pretty; }
-.steps-note { margin-top: var(--sp-16); color: var(--text-2); text-wrap: pretty; }
-@media (min-width: 1024px) {
-  .steps--teaser { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.el-rule { display: flex; flex-direction: column; gap: var(--sp-8); min-width: 0; padding: var(--sp-24); border-radius: var(--r-24); background: var(--surface); }
+.el-num { font-size: var(--fs-31); font-weight: 700; line-height: 1; letter-spacing: -.03em; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.el-text { color: var(--text-2); text-wrap: pretty; }
+.el-ex { margin-top: auto; padding: var(--sp-16); border-radius: var(--r-16); background: var(--bg); font-size: var(--fs-13); line-height: 1.45; text-wrap: pretty; }
+.el-specs { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-16); margin-top: var(--sp-16); }
+@media (min-width: 900px) {
+  .el-specs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
+.el-spec { display: flex; flex-direction: column; gap: var(--sp-8); padding: var(--sp-16) var(--sp-16) var(--sp-24); border-radius: var(--r-24); background: var(--surface); }
+.el-spec .title-s { margin-top: var(--sp-8); padding-inline: var(--sp-8); }
+.el-spec-stage { place-items: center; justify-items: center; min-height: 136px; margin: 0; }
+.el-spec-stage .exs-btn { max-width: 260px; margin: 0; }
+.el-job,
+.el-lines { padding-inline: var(--sp-8); }
+.el-job { color: var(--text-2); }
+.el-lines { display: grid; gap: var(--sp-4); font-size: var(--fs-13); line-height: 1.45; }
+.el-lines li { position: relative; padding-left: 14px; text-wrap: pretty; }
+.el-lines li::before { content: ""; position: absolute; left: 0; top: .6em; width: 6px; height: 6px; border-radius: 50%; background: var(--text-2); opacity: .5; }
+.el-make { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-16); margin-top: var(--sp-16); align-items: start; }
+@media (min-width: 900px) {
+  .el-make { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); }
+}
+.el-make .card { border-radius: var(--r-24); }
+.el-spec-list { display: grid; gap: var(--sp-8); margin-top: var(--sp-16); counter-reset: spec; }
+.el-spec-list li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: var(--sp-8); align-items: baseline; counter-increment: spec; text-wrap: pretty; }
+.el-spec-list li::before { content: counter(spec); display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--bg); font-size: var(--fs-13); font-weight: 700; }
 .paywall-lead { max-width: 60ch; margin-top: var(--sp-8); color: var(--text-2); text-wrap: pretty; }
 
 /* Teasers on the home: 3 tips, 3 prompts. */
