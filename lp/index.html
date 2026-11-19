@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jeremy Lasne</title>
+<meta name="robots" content="noindex">
+<meta name="description" content="Jeremy Lasne builds mobile apps and runs a private wealth practice in France.">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script>
+  (function () { var t = null, h = new Date().getHours(); try { t = localStorage.getItem("theme"); } catch (e) {} if (t === "dark" || (!t && (h >= 19 || h < 7))) document.documentElement.setAttribute("data-theme", "dark"); })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+  :root {
+    --bg: #fbfbfa; --fg: #16181d; --muted: #6b7079; --line: #e6e6e3; --tile: #f0f0ee; --link: #16181d;
+    --sans: "Figtree", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1013; --fg: #ecedef; --muted: #9a9ea6; --line: #26282d; --tile: #1c1e22; --link: #ecedef;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 400 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
+  a { color: var(--link); text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; text-decoration-thickness: 1.5px; transition: text-decoration-color .15s; }
+  a:hover { text-decoration-color: currentColor; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 0; }
+  .top .me { font-weight: 700; text-decoration: none; }
+  .top nav { display: flex; align-items: center; gap: 20px; font-size: 15px; }
+  .top nav a { text-decoration: none; color: var(--muted); }
+  .top nav a:hover { color: var(--fg); }
+  .theme { border: 0; background: none; color: var(--muted); cursor: pointer; padding: 4px; display: grid; place-items: center; }
+  .theme:hover { color: var(--fg); }
+  .theme svg { width: 18px; height: 18px; fill: currentColor; }
+  :root:not([data-theme="dark"]) .theme .sun, :root[data-theme="dark"] .theme .moon { display: none; }
+
+  header.intro { padding: 48px 0 8px; }
+  .face { width: 72px; height: 72px; border-radius: 50%; display: block; margin-bottom: 20px; }
+  h1 { font-size: clamp(36px, 8vw, 48px); line-height: 1.05; letter-spacing: -.02em; font-weight: 800; margin: 0 0 8px; }
+  .updated { color: var(--muted); font-size: 14px; margin: 0 0 24px; }
+  .bio { font-size: 18px; margin: 0 0 20px; }
+  .socials { display: flex; gap: 20px; margin: 0; padding: 0; list-style: none; font-size: 15px; }
+
+  section { border-top: 1px solid var(--line); margin-top: 40px; padding-top: 32px; }
+  h2 { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 20px; }
+  h3 { font-size: 16px; font-weight: 700; margin: 28px 0 12px; display: flex; justify-content: space-between; gap: 12px; }
+  h3:first-of-type { margin-top: 0; }
+  h3 span { font-weight: 400; color: var(--muted); font-size: 14px; white-space: nowrap; }
+
+  ul.rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+  .row { display: grid; grid-template-columns: 28px 1fr auto; gap: 14px; align-items: start; }
+  .ic { width: 28px; height: 28px; border-radius: 7px; background: var(--tile); display: grid; place-items: center; overflow: hidden; font-size: 12px; font-weight: 700; color: var(--muted); }
+  .ic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ic img.px { image-rendering: pixelated; }
+  .row b { font-weight: 600; }
+  .row p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.5; }
+  .row .yr { color: var(--muted); font-size: 14px; white-space: nowrap; padding-top: 1px; }
+
+  ul.steps { list-style: none; margin: 0; padding: 0 0 0 13px; border-left: 1.5px solid var(--line); display: grid; gap: 12px; }
+  ul.steps li { position: relative; padding-left: 20px; display: flex; justify-content: space-between; gap: 12px; }
+  ul.steps li::before { content: ""; position: absolute; left: -5px; top: 9px; width: 8px; height: 8px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--muted); }
+  ul.steps li:first-child::before { background: var(--fg); border-color: var(--fg); }
+  ul.steps .at { color: var(--muted); }
+  ul.steps .yr { color: var(--muted); font-size: 14px; white-space: nowrap; padding-top: 2px; }
+
+  .cta { margin: 24px 0 0; padding: 16px 18px; border: 1px solid var(--line); border-radius: 12px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .cta b { font-weight: 600; }
+
+  footer { border-top: 1px solid var(--line); margin-top: 48px; padding: 24px 0 40px; color: var(--muted); font-size: 14px; }
+
+  @media (max-width: 480px) {
+    ul.steps li { flex-direction: column; gap: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="me" href="/">Jeremy Lasne</a>
+    <nav aria-label="Main">
+      <a href="/personal/">Personal</a>
+      <a href="/lessons/">Lessons</a>
+      <button class="theme" type="button" aria-label="Switch theme">
+        <svg class="sun" viewBox="0 0 256 256" aria-hidden="true"><path d="M116,36V20a12,12,0,0,1,24,0V36a12,12,0,0,1-24,0Zm80,92a68,68,0,1,1-68-68A68.07,68.07,0,0,1,196,128Zm-24,0a44,44,0,1,0-44,44A44.05,44.05,0,0,0,172,128ZM51.51,68.49a12,12,0,1,0,17-17l-12-12a12,12,0,0,0-17,17Zm0,119-12,12a12,12,0,0,0,17,17l12-12a12,12,0,1,0-17-17ZM196,72a12,12,0,0,0,8.49-3.51l12-12a12,12,0,0,0-17-17l-12,12A12,12,0,0,0,196,72Zm8.49,115.51a12,12,0,0,0-17,17l12,12a12,12,0,0,0,17-17ZM48,128a12,12,0,0,0-12-12H20a12,12,0,0,0,0,24H36A12,12,0,0,0,48,128Zm80,80a12,12,0,0,0-12,12v16a12,12,0,0,0,24,0V220A12,12,0,0,0,128,208Zm108-92H220a12,12,0,0,0,0,24h16a12,12,0,0,0,0-24Z"/></svg>
+        <svg class="moon" viewBox="0 0 256 256" aria-hidden="true"><path d="M236.37,139.4a12,12,0,0,0-12-3A84.07,84.07,0,0,1,119.6,31.59a12,12,0,0,0-15-15A108.86,108.86,0,0,0,49.69,55.07,108,108,0,0,0,136,228a107.09,107.09,0,0,0,64.93-21.69,108.86,108.86,0,0,0,38.44-54.94A12,12,0,0,0,236.37,139.4Zm-49.88,47.74A84,84,0,0,1,68.86,69.51,84.93,84.93,0,0,1,92.27,48.29Q92,52.13,92,56A108.12,108.12,0,0,0,200,164q3.87,0,7.71-.27A84.79,84.79,0,0,1,186.49,187.14Z"/></svg>
+      </button>
+    </nav>
+  </div>
+
+  <header class="intro">
+    <img class="face" src="/media/avatar-256.webp" alt="Jeremy Lasne" width="72" height="72">
+    <h1>Jeremy Lasne</h1>
+    <p class="updated">Last updated Nov 2026</p>
+    <p class="bio">I build mobile apps and help people invest their money. I run 3 live apps and a private wealth practice in France. I trained as an engineer and started in banking.</p>
+    <ul class="socials">
+      <li><a href="https://x.com/jeremylasne" target="_blank" rel="noopener">X</a></li>
+      <li><a href="mailto:hey@jeremylasne.com">Email</a></li>
+      <li><a href="https://www.youtube.com/@jeremyfounder" target="_blank" rel="noopener">YouTube</a></li>
+    </ul>
+  </header>
+
+  <section aria-labelledby="h-projects">
+    <h2 id="h-projects">Live projects</h2>
+    <ul class="rows">
+      <li class="row"><span class="ic"><img src="/media/logos/kaught.webp" alt="" width="28" height="28"></span><div><a href="https://kaught.app"><b>Kaught</b></a><p>Snap any animal, know the species.</p></div></li>
+      <li class="row"><span class="ic"><img class="px" src="/media/logos/fogmate.svg" alt="" width="28" height="28"></span><div><a href="https://www.fogmate.app"><b>Fogmate</b></a><p>A turn-based strategy game in the fog of war, inspired by chess.</p></div></li>
+      <li class="row"><span class="ic"><img src="/media/logos/healthclass.webp" alt="" width="28" height="28"></span><div><a href="https://www.healthclass.app"><b>HealthClass</b></a><p>A pelvic floor class for women, made with a urologist.</p></div></li>
+    </ul>
+    <div class="cta"><b>Are you a creator? Let's build your app together.</b><a href="mailto:hey@jeremylasne.com?subject=Let's%20build%20my%20app">Email me</a></div>
+  </section>
+
+  <section aria-labelledby="h-invest">
+    <h2 id="h-invest">Investing</h2>
+    <ul class="rows">
+      <li class="row"><span class="ic">DC</span><div><b>Datacenters</b></div><span class="yr">2026</span></li>
+      <li class="row"><span class="ic">SP</span><div><b>US space logistics</b></div><span class="yr">2024</span></li>
+      <li class="row"><span class="ic">HS</span><div><b>US health SaaS</b></div><span class="yr">2023</span></li>
+      <li class="row"><span class="ic">DF</span><div><b>Solana DeFi protocol</b></div><span class="yr">2023</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="h-exp">
+    <h2 id="h-exp">Experience</h2>
+    <h3>Finance <span>2023 to now</span></h3>
+    <ul class="steps">
+      <li><div><b>Private wealth manager</b> <span class="at">· Independent</span></div><span class="yr">2025 to now</span></li>
+      <li><div><b>Wealth advisor (CIF)</b> <span class="at">· Groupe Euodia</span></div><span class="yr">2024 to 2025</span></li>
+      <li><div><b>Assistant project manager</b> <span class="at">· Societe Generale Securities Services</span></div><span class="yr">2023 to 2024</span></li>
+      <li><div><b>Customer support</b> <span class="at">· Crédit Agricole</span></div><span class="yr">2023</span></li>
+    </ul>
+    <h3>Engineering and consulting <span>2022 to 2023</span></h3>
+    <ul class="steps">
+      <li><div><b>Consultant</b> <span class="at">· EPF Projets</span></div><span class="yr">2023</span></li>
+      <li><div><b>Business excellence intern</b> <span class="at">· Siemens</span></div><span class="yr">2022</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="h-study">
+    <h2 id="h-study">Study</h2>
+    <ul class="rows">
+      <li class="row"><span class="ic">EPF</span><div><b>EPF, École Polytechnique Féminine</b><p>Engineering degree</p></div><span class="yr">2024</span></li>
+    </ul>
+  </section>
+
+  <footer>&copy; 2026 Jeremy Lasne</footer>
+</div>
+<script>
+  document.querySelector(".theme").addEventListener("click", function () {
+    var d = document.documentElement, next = d.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    d.setAttribute("data-theme", next);
+    try { localStorage.setItem("theme", next); } catch (e) {}
+  });
+</script>
+</body>
+</html>
