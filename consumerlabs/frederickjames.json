@@ -1,0 +1,227 @@
+{
+ "name": "Frederick James",
+ "handle": "frederickjames",
+ "asof": "2026-11-20",
+ "asof_h": "20 Nov 2026",
+ "one": "Indie iOS maker. Ships consumer apps alone and co-builds Reception.sh, a SaaS for other app makers.",
+ "total": "$11K",
+ "total_note": "a month, estimated",
+ "stats": [
+  [
+   "14",
+   "app ideas in 3 years"
+  ],
+  [
+   "$10K",
+   "MRR on his habit tracker"
+  ],
+  [
+   "34",
+   "days to $1.5K MRR"
+  ]
+ ],
+ "apps": [
+  [
+   "Habit tracker",
+   "Productivity",
+   "live",
+   "Crossed $10K MRR",
+   "6 Nov 2026",
+   "https://x.com/frederickjames/status/2118656154133803200"
+  ],
+  [
+   "His 75.",
+   "Social challenge",
+   "live",
+   "Not shared yet",
+   "",
+   ""
+  ],
+  [
+   "Looksmaxxing app",
+   "Lifestyle",
+   "closed",
+   "Flopped",
+   "",
+   "https://x.com/frederickjames/status/2068589917878304920"
+  ]
+ ],
+ "products": [
+  [
+   "Reception.sh",
+   "SaaS, co-built",
+   "live",
+   "$900 MRR",
+   "20 Nov 2026",
+   "https://x.com/frederickjames/status/2123804760121979268"
+  ]
+ ],
+ "climb": [
+  [
+   "12 days",
+   "$406/mo"
+  ],
+  [
+   "21 days",
+   "$769/mo"
+  ],
+  [
+   "34 days",
+   "$1.5K MRR"
+  ],
+  [
+   "Nov 2026",
+   "$10K MRR"
+  ]
+ ],
+ "start": [
+  "Native Swift, RevenueCat and a hard paywall. Apple Search Ads from day one on competitor keywords, $20 to $50 a day after $100 of free credits.",
+  [
+   "https://x.com/frederickjames/status/2065002508825550860",
+   "https://x.com/frederickjames/status/2068346460563743050",
+   "https://x.com/frederickjames/status/2072627105460875496"
+  ]
+ ],
+ "now": [
+  "TikTok ads first, then organic: X content, TikTok and Instagram videos, automated slideshows. Localized pricing and screenshots, plus a lifetime plan.",
+  [
+   "https://x.com/frederickjames/status/2091503229146194334",
+   "https://x.com/frederickjames/status/2121630458240962794",
+   "https://x.com/frederickjames/status/2123394913731833871"
+  ]
+ ],
+ "lessons": [
+  [
+   "Paywall & pricing",
+   [
+    [
+     "Use a hard paywall with weekly, monthly and yearly plans. Adding a monthly plan raised his conversion.",
+     "Pricing: 7.99/w & 49.99/y. Adding 14.99/m boosted conversion. Hard paywall in RevenueCat.",
+     "20 Jun 2026",
+     "https://x.com/frederickjames/status/2068346460563743050"
+    ],
+    [
+     "Show a tasteful exit offer, like a lifetime plan, when people abandon checkout.",
+     "I've made $2,700 from transaction abandon.",
+     "28 Sep 2026",
+     "https://x.com/frederickjames/status/2104522475761455536"
+    ],
+    [
+     "Localize pricing, screenshots and store info, then add a lifetime plan.",
+     "After I swapped to organic, this combo increased my revenue by about 30%.",
+     "14 Nov 2026",
+     "https://x.com/frederickjames/status/2121630458240962794"
+    ],
+    [
+     "Set a US base price, then scale it by each country's spending power.",
+     "6.99/w 14.99/m 49.99/yr 49.99/lifetime 29.99/yr exit offer",
+     "14 Nov 2026",
+     "https://x.com/frederickjames/status/2121640550311022929"
+    ]
+   ]
+  ],
+  [
+   "Onboarding",
+   [
+    [
+     "Build a 12 to 13 step onboarding that sells the outcome, and iterate until 85% of users finish it.",
+     "13 step onboarding. Measured onboarding with PostHog. Iterated till 85%+ onboarding.",
+     "20 Jun 2026",
+     "https://x.com/frederickjames/status/2068346460563743050"
+    ],
+    [
+     "Test the app without notifications.",
+     "No notifications: this 2x'd my retention.",
+     "20 Jun 2026",
+     "https://x.com/frederickjames/status/2068346460563743050"
+    ],
+    [
+     "Ask for a rating during onboarding and keep the paywall minimal.",
+     "Ratings during onboarding (patched). Tweaked paywall till 3-4% conversion.",
+     "20 Jun 2026",
+     "https://x.com/frederickjames/status/2068346460563743050"
+    ]
+   ]
+  ],
+  [
+   "App Store page",
+   [
+    [
+     "Rank your store page work in this order: screenshots, reviews, name and subtitle, icon.",
+     "1. App Screenshots. 2. Reviews. 3. Name & Subtitle. 4. App Icon.",
+     "12 Jul 2026",
+     "https://x.com/_frederickjames/status/2076351086043033841"
+    ],
+    [
+     "Translate your store page into 40+ languages with Claude and the App Store Connect CLI.",
+     "do it with claude & CLI very easy and quick",
+     "16 Nov 2026",
+     "https://x.com/frederickjames/status/2122145624439308762"
+    ]
+   ]
+  ],
+  [
+   "Ads",
+   [
+    [
+     "Run Apple Search Ads from day one on competitor names.",
+     "Apple ads will carry you to at least 1k/mo",
+     "16 Oct 2026",
+     "https://x.com/frederickjames/status/2111137088871555182"
+    ],
+    [
+     "Give each TikTok creative $50. Scale the ones where CPA is under LTV, stop the rest.",
+     "Give each creative $50 of spend. After $50, if CPA < LTV then scale it.",
+     "24 Jul 2026",
+     "https://x.com/frederickjames/status/2080603050327097694"
+    ],
+    [
+     "Aim for profit on the first transaction early on.",
+     "Better for me: Aimed for profit on first transaction.",
+     "14 Jul 2026",
+     "https://x.com/frederickjames/status/2076981359751352623"
+    ]
+   ]
+  ],
+  [
+   "Content",
+   [
+    [
+     "Share the build on X with videos.",
+     "Videos have been a big part of my growth. 400 to 5k+ followers in 2 months!",
+     "19 Jul 2026",
+     "https://x.com/_frederickjames/status/2078814528326803900"
+    ],
+    [
+     "Automate slideshows for TikTok and Instagram once you have a base.",
+     "Automate slideshows instead. Create passive income.",
+     "19 Nov 2026",
+     "https://x.com/frederickjames/status/2123394913731833871"
+    ]
+   ]
+  ],
+  [
+   "Building",
+   [
+    [
+     "Sell to a deep human need, read competitor reviews, and obsess over design.",
+     "Sell to a deep human need. Obsessed over design, feel & ui. Read reviews to see pain points.",
+     "20 Jun 2026",
+     "https://x.com/frederickjames/status/2068346460563743050"
+    ],
+    [
+     "Keep shipping ideas until one works.",
+     "Failed for 3 years, and 13 different ideas. Winning is simply losing on a long enough timeline.",
+     "20 Jun 2026",
+     "https://x.com/frederickjames/status/2068346460563743050"
+    ],
+    [
+     "Ignore early churn and fix the top of the funnel first.",
+     "Ignored churn. Noisy signal in b2c. Top of funnel more important at first.",
+     "2 Jul 2026",
+     "https://x.com/frederickjames/status/2072627105460875496"
+    ]
+   ]
+  ]
+ ]
+}
