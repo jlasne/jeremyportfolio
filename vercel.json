@@ -7,6 +7,7 @@
     { "src": "^/bio/(.*)$", "status": 308, "headers": { "Location": "/wellness/exp0/$1" } },
     { "src": "^/wealth(?:/.*)?$", "status": 308, "headers": { "Location": "https://www.claudeportfolio.com/wealth" } },
     { "src": "^/games/grid-tycoon(?:/.*)?$", "status": 308, "headers": { "Location": "/games/" } },
+    { "src": "^/lp/?$", "status": 308, "headers": { "Location": "/about/" } },
     { "src": "^/apps/?$", "status": 308, "headers": { "Location": "/" } },
     { "src": "^/apps/lessons/?$", "status": 308, "headers": { "Location": "/lessons/" } },
     { "src": "^/creators/?$", "status": 308, "headers": { "Location": "https://creatormatch.app" } },

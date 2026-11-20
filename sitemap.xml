@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Built by scripts/sitemap.mjs on every deploy: do not edit by hand. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://www.jeremylasne.com/</loc><lastmod>2026-11-14</lastmod></url>
+  <url><loc>https://www.jeremylasne.com/</loc><lastmod>2026-11-17</lastmod></url>
+  <url><loc>https://www.jeremylasne.com/about/</loc></url>
   <url><loc>https://www.jeremylasne.com/apps/lessons/apple-ads-on-a-small-budget/</loc><lastmod>2026-11-11</lastmod></url>
   <url><loc>https://www.jeremylasne.com/apps/lessons/wellness-reach-women-vs-men/</loc><lastmod>2026-11-11</lastmod></url>
   <url><loc>https://www.jeremylasne.com/apps/lessons/creator-business-deals-to-ownership/</loc><lastmod>2026-11-08</lastmod></url>
@@ -11,14 +12,14 @@
   <url><loc>https://www.jeremylasne.com/apps/lessons/3-things-around-every-app/</loc><lastmod>2026-11-04</lastmod></url>
   <url><loc>https://www.jeremylasne.com/apps/lessons/app-feel-premium-not-vibe-coded/</loc><lastmod>2026-11-04</lastmod></url>
   <url><loc>https://www.jeremylasne.com/apps/lessons/every-influencer-every-channel/</loc><lastmod>2026-11-04</lastmod></url>
-  <url><loc>https://www.jeremylasne.com/copywriting/</loc><lastmod>2026-11-15</lastmod></url>
-  <url><loc>https://www.jeremylasne.com/games/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://www.jeremylasne.com/copywriting/</loc><lastmod>2026-11-17</lastmod></url>
+  <url><loc>https://www.jeremylasne.com/games/</loc><lastmod>2026-11-08</lastmod></url>
   <url><loc>https://www.jeremylasne.com/knowledge/</loc><lastmod>2026-11-13</lastmod></url>
   <url><loc>https://www.jeremylasne.com/knowledge/about</loc><lastmod>2026-11-13</lastmod></url>
-  <url><loc>https://www.jeremylasne.com/lessons/</loc><lastmod>2026-11-14</lastmod></url>
-  <url><loc>https://www.jeremylasne.com/personal/</loc><lastmod>2026-11-15</lastmod></url>
-  <url><loc>https://www.jeremylasne.com/taste/</loc><lastmod>2026-11-15</lastmod></url>
-  <url><loc>https://www.jeremylasne.com/wellness/</loc><lastmod>2026-11-15</lastmod></url>
-  <url><loc>https://www.jeremylasne.com/wellness/details/</loc><lastmod>2026-11-15</lastmod></url>
-  <url><loc>https://www.jeremylasne.com/workout/</loc><lastmod>2026-11-15</lastmod></url>
+  <url><loc>https://www.jeremylasne.com/lessons/</loc><lastmod>2026-11-17</lastmod></url>
+  <url><loc>https://www.jeremylasne.com/personal/</loc><lastmod>2026-11-17</lastmod></url>
+  <url><loc>https://www.jeremylasne.com/taste/</loc><lastmod>2026-11-17</lastmod></url>
+  <url><loc>https://www.jeremylasne.com/wellness/</loc><lastmod>2026-11-17</lastmod></url>
+  <url><loc>https://www.jeremylasne.com/wellness/details/</loc><lastmod>2026-11-17</lastmod></url>
+  <url><loc>https://www.jeremylasne.com/workout/</loc><lastmod>2026-11-17</lastmod></url>
 </urlset>
