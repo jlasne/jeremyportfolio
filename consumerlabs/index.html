@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>consumer.labs | Jeremy Lasne</title>
+<meta name="description" content="What mobile app makers earn and how they grew it, from their own public posts. One maker, one copyable lesson.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#f7f7f5">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root { --bg: #f7f7f5; --ink: #1a1a1a; --ink-2: #444; --muted: #8d8d8d; --line: #e4e4e0; --dot: #c9c9c9; --mark: #ffe14d; --card: #ffffff; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #111110; --ink: #f2f2f0; --ink-2: #c9c9c6; --muted: #8a8a86; --line: #2a2a28; --dot: #444; --mark: #e8c62e; --card: #191918; }
+    mark { color: #111; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: Inter, -apple-system, system-ui, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 20px; }
+  header.top { display: flex; justify-content: space-between; align-items: center; padding: 22px 0; font-size: 14px; }
+  header.top a { text-decoration: none; color: var(--muted); }
+  .brand { font-weight: 700; letter-spacing: -0.01em; color: var(--ink) !important; }
+  .hero { padding: 56px 0 40px; }
+  .lab { font-size: 15px; color: var(--muted); padding-bottom: 10px; border-bottom: 2px dotted var(--dot); margin-bottom: 22px; }
+  h1 { font-size: clamp(34px, 6vw, 56px); line-height: 1.08; letter-spacing: -0.03em; margin: 0 0 18px; font-weight: 700; }
+  .lead { font-size: 19px; line-height: 1.5; color: var(--ink-2); max-width: 620px; margin: 0; }
+  mark { background: var(--mark); color: inherit; padding: 0 .2em; border-radius: .15em; }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 18px; }
+  .filters button { font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--ink-2); cursor: pointer; }
+  .filters button.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .grid { display: grid; gap: 14px; padding-bottom: 40px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
+  .card .head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .card h2 { font-size: 22px; letter-spacing: -0.02em; margin: 0; }
+  .card .handle { color: var(--muted); font-size: 14px; text-decoration: none; }
+  .rev { font-size: 15px; color: var(--ink-2); margin-top: 6px; }
+  .rev b { font-size: 20px; color: var(--ink); }
+  .sect { margin-top: 18px; }
+  .sect .lab { font-size: 13px; margin-bottom: 10px; padding-bottom: 6px; }
+  .rows { display: grid; gap: 6px; }
+  .row { display: flex; justify-content: space-between; gap: 12px; font-size: 15px; }
+  .row span:last-child { color: var(--ink-2); text-align: right; white-space: nowrap; }
+  .tag { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--bg); color: var(--muted); margin-left: 6px; }
+  .grow { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 600px) { .grow { grid-template-columns: 1fr; } }
+  .grow p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--ink-2); }
+  .lesson { margin-top: 18px; font-size: 18px; font-weight: 600; line-height: 1.45; }
+  .foot { margin-top: 16px; font-size: 12.5px; color: var(--muted); display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .foot a { color: var(--muted); }
+  .pending { color: var(--muted); font-size: 15px; margin: 10px 0 0; }
+  .news { border-top: 2px dotted var(--dot); padding: 36px 0 60px; }
+  .news h3 { font-size: 24px; letter-spacing: -0.02em; margin: 0 0 8px; }
+  .news p { margin: 0 0 16px; color: var(--ink-2); }
+  .news a.btn { display: inline-block; text-decoration: none; background: var(--ink); color: var(--bg); padding: 11px 18px; border-radius: 12px; font-weight: 600; font-size: 15px; }
+  .note { font-size: 13px; color: var(--muted); line-height: 1.5; padding-bottom: 40px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/consumerlabs/">consumer.labs</a>
+    <a href="/">by Jeremy Lasne</a>
+  </header>
+
+  <section class="hero">
+    <div class="lab">mobile app makers, in their own words</div>
+    <h1>What app makers earn, and <mark>how they got there</mark>.</h1>
+    <p class="lead">Each card comes from a maker's public posts: their apps, their products for other app makers, how they grew at the start and now, and one lesson you can copy today.</p>
+  </section>
+
+  <div class="filters" role="group" aria-label="Filter">
+    <button class="on" data-f="all">All makers</button>
+    <button data-f="apps">Mobile apps</button>
+    <button data-f="products">Products for app makers</button>
+  </div>
+
+  <main class="grid" id="grid"></main>
+
+  <section class="news">
+    <h3>1 maker, 1 lesson, every week.</h3>
+    <p>The breakdowns land on X first, then here.</p>
+    <a class="btn" href="https://x.com/jeremylasne" rel="noopener">Follow on X</a>
+  </section>
+
+  <p class="note">Revenue figures are estimates built from each maker's public posts, with the source linked on every card. A maker can correct their numbers at any time: write to hey@jeremylasne.com.</p>
+</div>
+
+<script>
+/* Each maker: their own mobile apps, and their products sold to app makers (SaaS, courses, templates), kept apart. */
+const MAKERS = [
+  {
+    name: "Frederick James",
+    handle: "frederickjames",
+    status: "pending",       /* "pending" until the research is in, then "published" */
+    checked: "",
+    apps: [],                /* { name, category, mrr: "$X/mo", note } */
+    products: [],            /* { name, kind: "SaaS" | "course" | "template", mrr, note } */
+    start: "",
+    now: "",
+    lesson: "",
+    sources: [],             /* post URLs */
+  },
+];
+
+const grid = document.getElementById("grid");
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const rows = (list, tag) => list.map((x) => `<div class="row"><span>${esc(x.name)}<span class="tag">${esc(x[tag] || "")}</span></span><span>${esc(x.mrr || "n/a")}</span></div>`).join("");
+
+function card(m) {
+  const link = `<a class="handle" href="https://x.com/${esc(m.handle)}" rel="noopener">@${esc(m.handle)}</a>`;
+  if (m.status !== "published") {
+    return `<article class="card"><div class="head"><h2>${esc(m.name)}</h2>${link}</div><p class="pending">Breakdown in progress.</p></article>`;
+  }
+  return `<article class="card" data-apps="${m.apps.length}" data-products="${m.products.length}">
+    <div class="head"><h2>${esc(m.name)}</h2>${link}</div>
+    ${m.total ? `<div class="rev">Estimated <b>${esc(m.total)}</b> across everything</div>` : ""}
+    ${m.apps.length ? `<div class="sect"><div class="lab">mobile apps</div><div class="rows">${rows(m.apps, "category")}</div></div>` : ""}
+    ${m.products.length ? `<div class="sect"><div class="lab">products for app makers</div><div class="rows">${rows(m.products, "kind")}</div></div>` : ""}
+    <div class="sect grow">
+      <div><div class="lab">at the start</div><p>${esc(m.start)}</p></div>
+      <div><div class="lab">now</div><p>${esc(m.now)}</p></div>
+    </div>
+    ${m.lesson ? `<div class="lesson">→ <mark>${esc(m.lesson)}</mark></div>` : ""}
+    <div class="foot"><span>Checked ${esc(m.checked)} · estimates from public posts</span><span>${m.sources.map((u, i) => `<a href="${esc(u)}" rel="noopener">source ${i + 1}</a>`).join(" · ")}</span></div>
+  </article>`;
+}
+
+function render(f) {
+  const list = MAKERS.filter((m) => f === "all" || m.status !== "published" || (f === "apps" ? m.apps.length : m.products.length));
+  grid.innerHTML = list.map(card).join("");
+}
+document.querySelectorAll(".filters button").forEach((b) => b.addEventListener("click", () => {
+  document.querySelectorAll(".filters button").forEach((x) => x.classList.toggle("on", x === b));
+  render(b.dataset.f);
+}));
+render("all");
+</script>
+</body>
+</html>
