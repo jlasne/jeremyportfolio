@@ -1,10 +1,10 @@
 {
  "name": "Frederick James",
  "handle": "frederickjames",
- "asof": "2026-11-20",
- "asof_h": "20 Nov 2026",
+ "asof": "2026-11-21",
+ "asof_h": "21 Nov 2026",
  "one": "Indie iOS maker. Ships consumer apps alone and co-builds Reception.sh, a SaaS for other app makers.",
- "total": "$11K",
+ "total": "$11K+",
  "total_note": "a month, estimated",
  "stats": [
   [
@@ -13,21 +13,29 @@
   ],
   [
    "$10K",
-   "MRR on his habit tracker"
+   "MRR on a stealth app"
   ],
   [
    "34",
-   "days to $1.5K MRR"
+   "days to $1.5K MRR, habit tracker"
   ]
  ],
  "apps": [
   [
-   "Habit tracker",
-   "Productivity",
+   "Stealth app",
+   "Name kept private",
    "live",
    "Crossed $10K MRR",
    "6 Nov 2026",
    "https://x.com/frederickjames/status/2118656154133803200"
+  ],
+  [
+   "Habit tracker",
+   "Productivity",
+   "live",
+   "$1.5K MRR in 34 days",
+   "2 Jul 2026",
+   "https://x.com/frederickjames/status/2072627105460875496"
   ],
   [
    "His 75.",
@@ -58,6 +66,10 @@
  ],
  "climb": [
   [
+   "day 1",
+   "launch"
+  ],
+  [
    "12 days",
    "$406/mo"
   ],
@@ -68,10 +80,6 @@
   [
    "34 days",
    "$1.5K MRR"
-  ],
-  [
-   "Nov 2026",
-   "$10K MRR"
   ]
  ],
  "start": [
@@ -223,5 +231,7 @@
     ]
    ]
   ]
- ]
+ ],
+ "climb_title": "the climb, habit tracker",
+ "teaser": "14 ideas in 3 years. Now a stealth app past $10K MRR and a SaaS for app makers."
 }
