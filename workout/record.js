@@ -14,3 +14,7 @@ export const RECORD = {
 
 /* the goals of the test day, week 11: one rep each. Hip thrust is a discovery. */
 export const FINAL = { bench: 100, 'pull-up': 37.5, dip: 60, deadlift: 140, squat: 110 };
+
+/* the week I am in. I move it by hand when I start the next one, so a week
+   lasts until I say so, not until Sunday. */
+export const WEEK = 5;

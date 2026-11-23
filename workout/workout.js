@@ -8,7 +8,7 @@
 
 import { load, today, allSessions, esc, short } from '/wellness/data.js';
 import { exercises, daysBetween, shift } from '/wellness/spec.js';
-import { RECORD, FINAL } from '/workout/record.js';
+import { RECORD, FINAL, WEEK } from '/workout/record.js';
 
 /* the Monday of week 1 */
 const START = '2026-10-19';
@@ -319,7 +319,7 @@ addEventListener('scroll', () => { tip.hidden = true; }, { passive: true });
 function drawAll() {
   ctx.rows = program();
   ctx.maxes = Object.fromEntries(LIFTS.map(l => [l.id, best(ctx.rows, l.id)]).filter(([, b]) => b));
-  ctx.week = Math.max(1, Math.min(WEEKS.length, weekOf(today)));
+  ctx.week = Math.max(1, Math.min(WEEKS.length, WEEK));
   if (!pick) pick = LIFTS.find(l => ctx.maxes[l.id])?.id || LIFTS[0].id;
   drawWave();
   drawDays();
