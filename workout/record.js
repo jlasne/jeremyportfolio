@@ -9,7 +9,7 @@ export const RECORD = {
   4: { 'pull-up': [[15, 5], [11.25, 7]], deadlift: [[100, 5], [90, 7]], /* pull, 13 Nov */
        dip: [[25, 7], [30, 5]], bench: [[75, 7], [80, 5]], /* push */
        squat: [[90, 7], [95, 5]] }, /* legs; hip thrust: first loading, no top set yet */
-  5: { 'pull-up': [[7.5, 9], [12.5, 7]], deadlift: [[80, 9]], dip: [[22.5, 9]], bench: [[75, 9]] }, /* pull, 20 Nov */
+  5: { 'pull-up': [[7.5, 9], [12.5, 7]], deadlift: [[80, 9]], dip: [[22.5, 9]], bench: [[72.5, 9]] }, /* pull, 20 Nov */
 };
 
 /* the goals of the test day, week 11: one rep each. Hip thrust is a discovery. */
