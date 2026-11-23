@@ -36,7 +36,7 @@ const DAYS = [
   { id: 'pull', name: 'Pull', lifts: ['pull-up', 'deadlift'], list: [
     [WRIST, C], ['Pull-up', M], ['Pull-up, iso hold', C], ['Deadlift', M], ['Barbell row', C, 'Sets of 8, currently 50 kg'], [CORE, C]] },
   { id: 'push', name: 'Push', lifts: ['dip', 'bench'], list: [
-    [WRIST, C], ['Push-ups, a few'], ['Dips', M], ['Dips, iso hold', C], ['Bench', M], ['Bench, iso hold', C], [CORE, C]] },
+    [WRIST, C], ['Push-ups, a few', C, 'Last: 9 reps at 22.5 kg, week 5'], ['Dips', M], ['Dips, iso hold', C], ['Bench', M], ['Bench, iso hold', C], [CORE, C]] },
   { id: 'leg', name: 'Legs', lifts: ['squat', 'hip-thrust'], list: [
     ['Squat', M], [WRIST, C], ['Pull-up, iso hold', C], ['Hip thrust', M], ['Dips, iso hold', C], ['Bench, iso hold', C], [CORE, C]] },
 ];
