@@ -343,6 +343,9 @@ img, video { display: block; }
 .rules ul li { position: relative; padding-left: 18px; }
 .rules ul li::before { content: ""; position: absolute; left: 2px; top: .7em; width: 6px; height: 6px; border-radius: 50%; background: var(--pink); }
 .rules p + p { margin-top: 4px; }
+.rules-sec { margin-top: clamp(44px, 7vw, 64px); }
+.rules-head { font-size: 22px; line-height: 1.3; font-weight: 700; color: var(--fg); }
+.rules-head + .rules { margin-top: 22px; }
 /* /personal: an odd last cell takes the whole row */
 .grid-4 li:last-child:nth-child(odd) { grid-column: 1 / -1; }
 
