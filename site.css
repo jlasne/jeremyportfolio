@@ -346,6 +346,12 @@ img, video { display: block; }
 .rules-sec { margin-top: clamp(44px, 7vw, 64px); }
 .rules-head { font-size: 22px; line-height: 1.3; font-weight: 700; color: var(--fg); }
 .rules-head + .rules { margin-top: 22px; }
+.rules-lede { margin-top: 10px; max-width: 62ch; font-size: 17px; line-height: 1.6; color: var(--fg-80); }
+.rules-lede + .rules { margin-top: 22px; }
+/* /copywriting: the banned words, struck through as chips */
+.rules ul.ban { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
+.rules ul.ban li { padding: 4px 12px; border-radius: 999px; background: var(--fg-06); border: 1px solid var(--fg-12); font-size: 15px; line-height: 1.4; color: var(--fg-60); text-decoration: line-through; text-decoration-color: var(--pink); text-decoration-thickness: 2px; }
+.rules ul.ban li::before { content: none; }
 /* /personal: an odd last cell takes the whole row */
 .grid-4 li:last-child:nth-child(odd) { grid-column: 1 / -1; }
 
